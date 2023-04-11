@@ -65,7 +65,7 @@ void  onnx_to_engine(const wchar_t* onnx_file_path_wchar, const wchar_t* engine_
 // @param engine_filename_wchar engine本地模型地址
 // @param num_ionode 显存缓冲区数量
 // @return NvinferStruct结构体指针
-void* nvinfer_init(const wchar_t* engine_filename_wchar, int num_ionode) {
+void* nvinfer_init(const wchar_t* engine_filename_wchar) {
 	// 读取本地模型文件
 	std::string engine_filename = wchar_to_string(engine_filename_wchar);
 	// 以二进制方式读取问价
@@ -91,6 +91,7 @@ void* nvinfer_init(const wchar_t* engine_filename_wchar, int num_ionode) {
 	p->engine = p->runtime->deserializeCudaEngine(model_stream, size);
 	// 创建上下文
 	p->context = p->engine->createExecutionContext();
+	int num_ionode = p->engine->getNbBindings();
 	// 创建gpu数据缓冲区
 	p->data_buffer = new void* [num_ionode];
 	delete[] model_stream;
@@ -102,15 +103,16 @@ void* nvinfer_init(const wchar_t* engine_filename_wchar, int num_ionode) {
 // @para node_name_wchar 网络节点名称
 // @param data_length 缓冲区数据长度
 // @return NvinferStruct结构体指针
-void* creat_gpu_buffer(void* nvinfer_ptr,
-	const wchar_t* node_name_wchar, size_t data_length) {
+void* creat_gpu_buffer(void* nvinfer_ptr) {
 	// 重构NvinferStruct
 	NvinferStruct* p = (NvinferStruct*)nvinfer_ptr;
-	const char* node_name = wchar_to_char(node_name_wchar);
-	// 获取节点序号
-	int node_index = p->engine->getBindingIndex(node_name);
-	// 创建指定节点GPU显存缓冲区
-	cudaMalloc(&(p->data_buffer[node_index]), data_length * sizeof(float));
+	int num_ionode = p->engine->getNbBindings();
+	for (int i = 0; i < num_ionode; i++) {
+		nvinfer1::Dims shape_d = p->engine->getBindingDimensions(i);
+		std::vector<int> shape(shape_d.d, shape_d.d + shape_d.nbDims);
+		size_t size = std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<int>());
+		cudaMalloc(&(p->data_buffer[i]), size * sizeof(float));
+	}
 	return (void*)p;
 }
 
@@ -196,7 +198,7 @@ extern "C"  __declspec(dllexport) void* __stdcall infer(void* nvinfer_ptr) {
 // @para node_name_wchar 网络节点名称
 // @param output_result 输出数据指针
 extern "C"  __declspec(dllexport) void __stdcall read_infer_result(void* nvinfer_ptr,
-	const wchar_t* node_name_wchar, float* output_result, size_t node_data_length) {
+	const wchar_t* node_name_wchar, float* output_result) {
 	// 重构NvinferStruct
 	NvinferStruct* p = (NvinferStruct*)nvinfer_ptr;
 
@@ -204,15 +206,19 @@ extern "C"  __declspec(dllexport) void __stdcall read_infer_result(void* nvinfer
 	const char* node_name = wchar_to_char(node_name_wchar);
 	int node_index = p->engine->getBindingIndex(node_name);
 	// 读取输出数据
+	nvinfer1::Dims shape_d = p->engine->getBindingDimensions(node_index);
+	std::vector<int> shape(shape_d.d, shape_d.d + shape_d.nbDims);
+	size_t size = std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<int>());
 	// 创建输出数据
-	std::vector<float> output_data(node_data_length * 3);
+	std::vector<float> output_data(size);
 	// 将输出数据由GPU显存到内存
-	cudaMemcpyAsync(output_data.data(), p->data_buffer[node_index], node_data_length * sizeof(float), cudaMemcpyDeviceToHost, p->stream);
+	cudaMemcpyAsync(output_data.data(), p->data_buffer[node_index], size * sizeof(float), cudaMemcpyDeviceToHost, p->stream);
 
-	for (int i = 0; i < node_data_length; i++) {
+	for (int i = 0; i < size; i++) {
 		*output_result = output_data[i];
 		output_result++;
 	}
+	// 清空数据
 	std::vector<float>().swap(output_data);
 }
 

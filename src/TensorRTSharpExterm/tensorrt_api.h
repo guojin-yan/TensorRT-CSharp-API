@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <numeric>
 #include "NvInfer.h"
 #include "NvOnnxParser.h"
 #include <opencv2/opencv.hpp>
@@ -19,7 +20,7 @@ class Logger : public nvinfer1::ILogger {
 	}
 } gLogger;
 
-// @brief 
+// @brief 推理核心结构体
 typedef struct tensorRT_nvinfer {
 	Logger logger;
 	// 反序列化引擎
@@ -42,11 +43,9 @@ typedef struct tensorRT_nvinfer {
 EXTERN_C __MIDL_DECLSPEC_DLLEXPORT void STDMETHODCALLTYPE  onnx_to_engine(const wchar_t* onnx_file_path_wchar,
 	const wchar_t* engine_file_path_wchar, int type);
 // @brief 读取本地engine模型，并初始化NvinferStruct
-EXTERN_C __MIDL_DECLSPEC_DLLEXPORT void* STDMETHODCALLTYPE nvinfer_init(const wchar_t* engine_filename_wchar, 
-	int num_ionode);
+EXTERN_C __MIDL_DECLSPEC_DLLEXPORT void* STDMETHODCALLTYPE nvinfer_init(const wchar_t* engine_filename_wchar);
 // @brief 创建GPU显存输入/输出缓冲区
-EXTERN_C __MIDL_DECLSPEC_DLLEXPORT void* STDMETHODCALLTYPE creat_gpu_buffer(void* nvinfer_ptr, 
-	const wchar_t* node_name_wchar, size_t data_length);
+EXTERN_C __MIDL_DECLSPEC_DLLEXPORT void* STDMETHODCALLTYPE creat_gpu_buffer(void* nvinfer_ptr);
 // @brief 加载图片输入数据到缓冲区
 EXTERN_C __MIDL_DECLSPEC_DLLEXPORT void* STDMETHODCALLTYPE load_image_data(void* nvinfer_ptr,
 	const wchar_t* node_name_wchar, uchar * image_data, size_t image_size, int BN_means);
@@ -54,6 +53,6 @@ EXTERN_C __MIDL_DECLSPEC_DLLEXPORT void* STDMETHODCALLTYPE load_image_data(void*
 EXTERN_C __MIDL_DECLSPEC_DLLEXPORT void* STDMETHODCALLTYPE infer(void* nvinfer_ptr);
 // @brief 读取推理数据
 EXTERN_C __MIDL_DECLSPEC_DLLEXPORT void STDMETHODCALLTYPE  read_infer_result(void* nvinfer_ptr,
-	const wchar_t* node_name_wchar, float* output_result, size_t node_data_length);
+	const wchar_t* node_name_wchar, float* output_result);
 // @brief 删除内存地址
 EXTERN_C __MIDL_DECLSPEC_DLLEXPORT void STDMETHODCALLTYPE nvinfer_delete(void* nvinfer_ptr);
