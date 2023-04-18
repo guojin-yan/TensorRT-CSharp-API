@@ -1,4 +1,4 @@
-![TensorRTSharp](https://socialify.git.ci/guojin-yan/TensorRTSharp/image?description=1&descriptionEditable=💞TensorRT%20wrapper%20for%20.NET💞&forks=1&issues=1&logo=https%3A%2F%2Fs2.loli.net%2F2023%2F04%2F11%2FOtsq6zAaZnwxP1U.png&name=1&owner=1&pattern=Circuit Board&pulls=1&stargazers=1&theme=Light)
+![TensorRTSharp](https://socialify.git.ci/guojin-yan/TensorRTSharp/image?description=1&descriptionEditable=💞TensorRT%20wrapper%20for%20.NET💞&forks=1&issues=1&logo=https%3A%2F%2Fs2.loli.net%2F2023%2F04%2F11%2FOtsq6zAaZnwxP1U.png&name=1&owner=1&pattern=Circuit%20Board&pulls=1&stargazers=1&theme=Light)
 
 ##  <img title="更新日志" src="https://s2.loli.net/2023/01/26/Zs1VFUT4BGQgfE9.png" alt="" width="40">简介
 
@@ -139,4 +139,3 @@ using TensorRTSharp;
         <td>删除内存地址</td>
         <td rowspan="1"></td>
 	</tr>
-
