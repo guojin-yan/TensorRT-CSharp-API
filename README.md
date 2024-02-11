@@ -14,7 +14,7 @@
 
 ### TensorRT安装
 
-TensorRT依赖于CUDA加速，因此需要同时安装CUDA与TensorRT才可以使用，且CUDA与TensorRT版本之间需要对应，否者使用会出现较多问题，因此此处并未提供Nuget包，组要根据自己电脑配置悬着合适的版本安装后重新编译本项目源码，下面是TensorRT安装教程：[【TensorRT】NVIDIA TensorRT 安装 (Windows C++)_椒颜皮皮虾྅的博客-CSDN博客](https://blog.csdn.net/Grape_yan/article/details/127320959)
+TensorRT依赖于CUDA加速，因此需要同时安装CUDA与TensorRT才可以使用，且CUDA与TensorRT版本之间需要对应，否者使用会出现较多问题，因此此处并未提供Nuget包，组要根据自己电脑配置选择合适的版本安装后重新编译本项目源码，下面是TensorRT安装教程：[【TensorRT】NVIDIA TensorRT 安装 (Windows C++)_椒颜皮皮虾྅的博客-CSDN博客](https://blog.csdn.net/Grape_yan/article/details/127320959)
 
 
 
