@@ -7,7 +7,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TensorRtExtern", "src\Tenso
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{3D443E90-E396-408D-ACAE-748864A3E50E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TensorRtSharp", "src\TensorRtSharp\TensorRtSharp.csproj", "{B4B09784-2013-4E4B-BBF5-E4364FC8186F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TensorRtSharp", "src\TensorRtSharp\TensorRtSharp.csproj", "{B4B09784-2013-4E4B-BBF5-E4364FC8186F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{A1E00337-213E-46D5-AFA2-CFAC17CEC71C}"
 EndProject
