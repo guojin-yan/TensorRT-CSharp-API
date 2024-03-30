@@ -13,18 +13,51 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="源文件\custom_method">
+      <UniqueIdentifier>{7eee40ab-739e-44b8-8558-68193938eed6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\custom_method">
+      <UniqueIdentifier>{9b2a0ce0-d965-4777-a467-62357aefee91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\common">
+      <UniqueIdentifier>{c287266f-1c73-4ead-a5c4-bfdb1d64c9f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\common">
+      <UniqueIdentifier>{4ab43af6-8190-4b96-86f4-577fdf02c512}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tensorrt_extern.h">
-      <Filter>头文件</Filter>
+      <Filter>头文件\custom_method</Filter>
+    </ClInclude>
+    <ClInclude Include="logger.h">
+      <Filter>头文件\common</Filter>
+    </ClInclude>
+    <ClInclude Include="logging.h">
+      <Filter>头文件\common</Filter>
+    </ClInclude>
+    <ClInclude Include="common.h">
+      <Filter>头文件\common</Filter>
+    </ClInclude>
+    <ClInclude Include="ErrorRecorder.h">
+      <Filter>头文件\common</Filter>
+    </ClInclude>
+    <ClInclude Include="exception_status.h">
+      <Filter>头文件\common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="tensorrt_extern.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="tensorrt_extern.cpp">
+      <Filter>源文件\custom_method</Filter>
+    </ClCompile>
+    <ClCompile Include="logger.cpp">
+      <Filter>源文件\common</Filter>
+    </ClCompile>
+    <ClCompile Include="common.cpp">
+      <Filter>源文件\common</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

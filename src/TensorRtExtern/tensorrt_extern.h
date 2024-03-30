@@ -11,21 +11,17 @@
 #include "NvInfer.h"
 #include "NvOnnxParser.h"
 
+#include "common.h"
+#include "exception_status.h"
+#include "logging.h"
+#include "logger.h"
 
-// @brief 用于创建IBuilder、IRuntime或IRefitter实例的记录器用于通过该接口创建的所有对象。
-// 在释放所有创建的对象之前，记录器应一直有效。
-// 主要是实例化ILogger类下的log()方法。
-class Logger : public nvinfer1::ILogger {
-	void log(Severity severity, const char* message)  noexcept {
-		// suppress info-level messages
-		if (severity != Severity::kINFO)
-			std::cout << message << std::endl;
-	}
-};
+
+
+
 
 // @brief 推理核心结构体
 typedef struct tensorRT_nvinfer {
-	Logger logger;
 	// 反序列化引擎
 	nvinfer1::IRuntime* runtime;
 	// 推理引擎
@@ -37,24 +33,40 @@ typedef struct tensorRT_nvinfer {
 	// 由engine创建，可创建多个对象，进行多推理任务
 	nvinfer1::IExecutionContext* context;
 	// GPU显存输入/输出缓冲
-	void** data_buffer;
+	void** dataBuffer;
 } NvinferStruct;
 
 
 // @brief 将本地onnx模型转为tensorrt中的engine格式，并保存到本地
-extern "C" __declspec(dllexport) void __stdcall onnx_to_engine(const char* onnx_file);
+TRTAPI(ExceptionStatus) onnxToEngine(const char* onnxFile);
 
-// @brief 读取本地engine模型，并初始化NvinferStruct
-extern "C" __declspec(dllexport) void __stdcall nvinfer_init(const char* engine_file, NvinferStruct**nvinfer_ptr);
+// @brief 读取本地engine模型，并初始化NvinferStruct，分配缓存空间
+TRTAPI(ExceptionStatus) nvinferInit(const char* engineFile, NvinferStruct **ptr);
 
+// @brief 通过指定节点名称，将内存上的数据拷贝到设备上
+TRTAPI(ExceptionStatus) copyFloatHostToDeviceByName(NvinferStruct *ptr, const char* nodeName, float* data);
 
-extern "C" __declspec(dllexport) void __stdcall copy_float_host_to_device_byname(NvinferStruct * nvinfer_ptr, const char* node_name, float* data);
+// @brief 通过指定节点编号，将内存上的数据拷贝到设备上
+TRTAPI(ExceptionStatus) copyFloatHostToDeviceByIndex(NvinferStruct *ptr, int nodeIndex, float* data);
 
-extern "C" __declspec(dllexport) void __stdcall tensorRT_infer(NvinferStruct * nvinfer_ptr);
+// @brief 推理设备上的数据
+TRTAPI(ExceptionStatus) tensorRtInfer(NvinferStruct * ptr);
 
-extern "C" __declspec(dllexport) void __stdcall copy_float_device_to_host_byname(NvinferStruct * nvinfer_ptr, const char* node_name, float* data);
+// @brief 通过指定节点名称，将设备上的数据拷贝到内存上
+TRTAPI(ExceptionStatus) copyFloatDeviceToHostByName(NvinferStruct *ptr, const char* nodeName, float* data);
 
-extern "C" __declspec(dllexport) void __stdcall nvinfer_delete(NvinferStruct* p)
+// @brief 通过指定节点编号，将设备上的数据拷贝到内存上
+TRTAPI(ExceptionStatus) copyFloatDeviceToHostByIndex(NvinferStruct *ptr, int nodeIndex, float* data);
+
+// @brief 删除分配的内存
+TRTAPI(ExceptionStatus) nvinferDelete(NvinferStruct *ptr);
+
+// @brief 通过节点名称获取绑定节点的形状信息
+TRTAPI(ExceptionStatus) getBindingDimensionsByName(NvinferStruct* ptr, const char* nodeName, int* dimLength, int* dims);
+
+// @brief 通过节点编号获取绑定节点的形状信息
+TRTAPI(ExceptionStatus) getBindingDimensionsByIndex(NvinferStruct* ptr, int nodeIndex, int* dimLength, int* dims);
+
 
 #endif // !TENSORRT_EXTERN_H
 
