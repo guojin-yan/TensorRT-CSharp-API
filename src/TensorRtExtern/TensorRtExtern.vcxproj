@@ -147,7 +147,6 @@
   <ItemGroup>
     <ClCompile Include="common.cpp" />
     <ClCompile Include="logger.cpp" />
-    <ClCompile Include="main.cpp" />
     <ClCompile Include="tensorrt_extern.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

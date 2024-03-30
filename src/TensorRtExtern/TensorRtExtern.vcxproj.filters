@@ -47,9 +47,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="tensorrt_extern.cpp">
       <Filter>源文件\custom_method</Filter>
     </ClCompile>
