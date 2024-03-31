@@ -16,11 +16,11 @@ namespace TensorRtSharp
         /// <summary>
         /// The rank (number of dimensions).
         /// </summary>
-        int nbDims;
+        public int nbDims;
         /// <summary>
         /// The extent of each dimension.
         /// </summary>
-        List<int> d = new List<int>();
+        public List<int> d = new List<int>();
 
         public Dims(int leng, int[] data) 
         {
