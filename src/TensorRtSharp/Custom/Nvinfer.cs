@@ -11,10 +11,10 @@ namespace TensorRtSharp.Custom
     public class Nvinfer : DisposableTrtObject
     {
 
-        public static void OnnxToEngine(string modelPath) 
+        public static void OnnxToEngine(string modelPath, int memorySize) 
         {
             sbyte[] modelPathSbyte = (sbyte[])((Array)System.Text.Encoding.Default.GetBytes(modelPath));
-            HandleException.Handler(NativeMethods.onnxToEngine(ref modelPathSbyte[0]));
+            HandleException.Handler(NativeMethods.onnxToEngine(ref modelPathSbyte[0], memorySize));
         }
 
         public Nvinfer() { }
