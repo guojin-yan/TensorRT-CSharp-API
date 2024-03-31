@@ -5,7 +5,7 @@ namespace TensorRtSharp.Internal
     public static partial class NativeMethods
     {
         [DllImport(tensorrt_dll_path, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-        public extern static ExceptionStatus onnxToEngine(ref sbyte onnxFile);
+        public extern static ExceptionStatus onnxToEngine(ref sbyte onnxFile, int memorySize);
         [DllImport(tensorrt_dll_path, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
         public extern static ExceptionStatus nvinferInit(ref sbyte engineFile, out IntPtr returnNvinferPtr);
         [DllImport(tensorrt_dll_path, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
