@@ -9,7 +9,7 @@
 // @param onnx_file_path_wchar onnx模型本地地址
 // @param engine_file_path_wchar engine模型本地地址
 // @param type 输出模型精度，
-ExceptionStatus onnxToEngine(const char* onnxFile) {
+ExceptionStatus onnxToEngine(const char* onnxFile, int memorySize) {
 	BEGIN_WRAP_TRTAPI
 	// 将路径作为参数传递给函数
 	std::string path(onnxFile);
@@ -45,7 +45,7 @@ ExceptionStatus onnxToEngine(const char* onnxFile) {
 	// 创建生成器配置对象。
 	nvinfer1::IBuilderConfig* config = builder->createBuilderConfig();
 	// 设置最大工作空间大小。
-	config->setMaxWorkspaceSize(16 * (1 << 20));
+	config->setMaxWorkspaceSize(1024 * 1024 * memorySize);
 	// 设置模型输出精度
 	config->setFlag(nvinfer1::BuilderFlag::kFP16);
 	// 创建推理引擎
@@ -77,6 +77,8 @@ ExceptionStatus nvinferInit(const char* engineFile, NvinferStruct** ptr){
 	std::ifstream filePtr(engineFile, std::ios::binary);
 	if (!filePtr.good()) {
 		std::cerr << "文件无法打开，请确定文件是否可用！" << std::endl;
+		dup_last_err_msg("Model file reading error, please confirm if the file exists or if the format is correct.");
+		return ExceptionStatus::Occurred;
 	}
 
 	size_t size = 0;
@@ -134,7 +136,7 @@ ExceptionStatus copyFloatHostToDeviceByIndex(NvinferStruct* ptr, int nodeIndex, 
 	CHECKCUDA(cudaMemcpy(ptr->dataBuffer[nodeIndex], data, size * sizeof(float), cudaMemcpyHostToDevice));
 	END_WRAP_TRTAPI
 }
-ExceptionStatus tensorRTInfer(NvinferStruct* ptr)
+ExceptionStatus tensorRtInfer(NvinferStruct* ptr)
 {
 	BEGIN_WRAP_TRTAPI
 	CHECKTRT(ptr->context->executeV2((void**)ptr->dataBuffer));

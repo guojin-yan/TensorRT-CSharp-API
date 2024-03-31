@@ -38,7 +38,7 @@ typedef struct tensorRT_nvinfer {
 
 
 // @brief 将本地onnx模型转为tensorrt中的engine格式，并保存到本地
-TRTAPI(ExceptionStatus) onnxToEngine(const char* onnxFile);
+TRTAPI(ExceptionStatus) onnxToEngine(const char* onnxFile, int memorySize);
 
 // @brief 读取本地engine模型，并初始化NvinferStruct，分配缓存空间
 TRTAPI(ExceptionStatus) nvinferInit(const char* engineFile, NvinferStruct **ptr);
