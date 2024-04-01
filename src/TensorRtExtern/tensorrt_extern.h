@@ -40,17 +40,24 @@ typedef struct tensorRT_nvinfer {
 // @brief 将本地onnx模型转为tensorrt中的engine格式，并保存到本地
 TRTAPI(ExceptionStatus) onnxToEngine(const char* onnxFile, int memorySize);
 
+TRTAPI(ExceptionStatus) onnxToEngineDynamicShape(const char* onnxFile, int memorySize, const char* nodeName, 
+	int* minShapes, int* optShapes, int* maxShapes);
+
 // @brief 读取本地engine模型，并初始化NvinferStruct，分配缓存空间
 TRTAPI(ExceptionStatus) nvinferInit(const char* engineFile, NvinferStruct **ptr);
-
+TRTAPI(ExceptionStatus) nvinferInitDynamicShape(const char* engineFile, int maxBatahSize, NvinferStruct** ptr);
 // @brief 通过指定节点名称，将内存上的数据拷贝到设备上
 TRTAPI(ExceptionStatus) copyFloatHostToDeviceByName(NvinferStruct *ptr, const char* nodeName, float* data);
 
 // @brief 通过指定节点编号，将内存上的数据拷贝到设备上
 TRTAPI(ExceptionStatus) copyFloatHostToDeviceByIndex(NvinferStruct *ptr, int nodeIndex, float* data);
 
+TRTAPI(ExceptionStatus) setBindingDimensionsByName(NvinferStruct* ptr, const char* nodeName, int nbDims, int* dims);
+TRTAPI(ExceptionStatus) setBindingDimensionsByIndex(NvinferStruct* ptr, int nodeIndex, int nbDims, int* dims);
+
 // @brief 推理设备上的数据
 TRTAPI(ExceptionStatus) tensorRtInfer(NvinferStruct * ptr);
+
 
 // @brief 通过指定节点名称，将设备上的数据拷贝到内存上
 TRTAPI(ExceptionStatus) copyFloatDeviceToHostByName(NvinferStruct *ptr, const char* nodeName, float* data);
