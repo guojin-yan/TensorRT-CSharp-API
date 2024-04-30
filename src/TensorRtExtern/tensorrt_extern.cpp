@@ -343,7 +343,14 @@ ExceptionStatus copyFloatDeviceToHostByIndex(NvinferStruct* ptr, int nodeIndex, 
 ExceptionStatus nvinferDelete(NvinferStruct* ptr)
 {
 	BEGIN_WRAP_TRTAPI
+	CHECKTRT(int numNode = ptr->engine->getNbBindings());
+	for (int i = 0; i < numNode; ++i) 
+	{
+		CHECKCUDA(cudaFree(ptr->dataBuffer[i]);)
+		ptr->dataBuffer[i] = nullptr;
+	}
 	delete ptr->dataBuffer;
+	ptr->dataBuffer = nullptr;
 	CHECKTRT(ptr->context->destroy();)
 	CHECKTRT(ptr->engine->destroy();)
 	CHECKTRT(ptr->runtime->destroy();)
