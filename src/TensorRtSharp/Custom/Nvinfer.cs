@@ -126,7 +126,7 @@ namespace TensorRtSharp.Custom
         protected override void DisposeUnmanaged()
         {
             if (ptr != IntPtr.Zero && IsEnabledDispose)
-                HandleException.Handler(NativeMethods.nvinferDelete(TrtPtr));
+                HandleException.Handler(NativeMethods.nvinferDelete(ptr));
             base.DisposeUnmanaged();
         }
     }
