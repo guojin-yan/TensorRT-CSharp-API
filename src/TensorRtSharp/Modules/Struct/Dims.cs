@@ -20,10 +20,11 @@ namespace TensorRtSharp
         /// <summary>
         /// The extent of each dimension.
         /// </summary>
-        public List<int> d = new List<int>();
+        public List<int> d;
 
         public Dims(int leng, int[] data) 
         {
+            d = new List<int>();
             nbDims = leng;
             for (int i = 0; i < nbDims; i++)
             {
@@ -32,6 +33,7 @@ namespace TensorRtSharp
         }
         public Dims(params int[] data) 
         {
+            d = new List<int>();
             nbDims = data.Length;
             for (int i = 0; i < nbDims; i++) 
             {
