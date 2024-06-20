@@ -173,6 +173,7 @@ ExceptionStatus nvinferInit(const char* engineFile, NvinferStruct** ptr){
 	CHECKTRT(p->engine = p->runtime->deserializeCudaEngine(modelStream, size));
 	// 创建上下文
 	CHECKTRT(p->context = p->engine->createExecutionContext());
+	CHECKCUDA(cudaStreamCreate(&(p->stream)));
 	CHECKTRT(int numNode = p->engine->getNbBindings());
 	// 创建gpu数据缓冲区
 	p->dataBuffer = new void* [numNode];
@@ -226,6 +227,7 @@ ExceptionStatus nvinferInitDynamicShape(const char* engineFile, int maxBatahSize
 	CHECKTRT(p->engine = p->runtime->deserializeCudaEngine(modelStream, size));
 	// 创建上下文
 	CHECKTRT(p->context = p->engine->createExecutionContext());
+	CHECKCUDA(cudaStreamCreate(&(p->stream)));
 	CHECKTRT(int numNode = p->engine->getNbBindings());
 	// 创建gpu数据缓冲区
 	p->dataBuffer = new void* [numNode];
@@ -258,7 +260,7 @@ ExceptionStatus copyFloatHostToDeviceByName(NvinferStruct* ptr, const char* node
 	CHECKTRT(nvinfer1::Dims dims = ptr->context->getBindingDimensions(nodeIndex));
 	std::vector<int> shape(dims.d, dims.d + dims.nbDims);
 	size_t size = std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<int>());
-	CHECKCUDA(cudaMemcpy(ptr->dataBuffer[nodeIndex], data, size * sizeof(float), cudaMemcpyHostToDevice));
+	CHECKCUDA(cudaMemcpyAsync(ptr->dataBuffer[nodeIndex], data, size * sizeof(float), cudaMemcpyHostToDevice, ptr->stream));
 	END_WRAP_TRTAPI
 }
 
@@ -269,7 +271,7 @@ ExceptionStatus copyFloatHostToDeviceByIndex(NvinferStruct* ptr, int nodeIndex, 
 	CHECKTRT(nvinfer1::Dims dims = ptr->context->getBindingDimensions(nodeIndex));
 	std::vector<int> shape(dims.d, dims.d + dims.nbDims);
 	size_t size = std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<int>());
-	CHECKCUDA(cudaMemcpy(ptr->dataBuffer[nodeIndex], data, size * sizeof(float), cudaMemcpyHostToDevice));
+	CHECKCUDA(cudaMemcpyAsync(ptr->dataBuffer[nodeIndex], data, size * sizeof(float), cudaMemcpyHostToDevice, ptr->stream));
 	END_WRAP_TRTAPI
 }
 ExceptionStatus setBindingDimensionsByName(NvinferStruct* ptr, const char* nodeName, int nbDims, int* dims)
@@ -323,7 +325,7 @@ ExceptionStatus copyFloatDeviceToHostByName(NvinferStruct* ptr, const char* node
 	CHECKTRT(nvinfer1::Dims dims = ptr->context->getBindingDimensions(nodeIndex));
 	std::vector<int> shape(dims.d, dims.d + dims.nbDims);
 	size_t size = std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<int>());
-	CHECKCUDA(cudaMemcpy(data, ptr->dataBuffer[nodeIndex], size * sizeof(float), cudaMemcpyDeviceToHost));
+	CHECKCUDA(cudaMemcpyAsync(data, ptr->dataBuffer[nodeIndex], size * sizeof(float), cudaMemcpyDeviceToHost, ptr->stream));
 	END_WRAP_TRTAPI
 }
 
@@ -336,7 +338,7 @@ ExceptionStatus copyFloatDeviceToHostByIndex(NvinferStruct* ptr, int nodeIndex, 
 	CHECKTRT(nvinfer1::Dims dims = ptr->context->getBindingDimensions(nodeIndex));
 	std::vector<int> shape(dims.d, dims.d + dims.nbDims);
 	size_t size = std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<int>());
-	CHECKCUDA(cudaMemcpy(data, ptr->dataBuffer[nodeIndex], size * sizeof(float), cudaMemcpyDeviceToHost));
+	CHECKCUDA(cudaMemcpyAsync(data, ptr->dataBuffer[nodeIndex], size * sizeof(float), cudaMemcpyDeviceToHost, ptr->stream));
 	END_WRAP_TRTAPI
 }
 

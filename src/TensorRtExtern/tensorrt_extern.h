@@ -34,6 +34,7 @@ typedef struct tensorRT_nvinfer {
 	nvinfer1::IExecutionContext* context;
 	// GPUœ‘¥Ê ‰»Î/ ‰≥ˆª∫≥Â
 	void** dataBuffer;
+	cudaStream_t stream;
 } NvinferStruct;
 
 
