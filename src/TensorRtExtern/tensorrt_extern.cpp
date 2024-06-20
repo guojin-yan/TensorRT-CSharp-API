@@ -313,7 +313,7 @@ ExceptionStatus setBindingDimensionsByIndex(NvinferStruct* ptr, int nodeIndex, i
 ExceptionStatus tensorRtInfer(NvinferStruct* ptr)
 {
 	BEGIN_WRAP_TRTAPI
-	CHECKTRT(ptr->context->executeV2((void**)ptr->dataBuffer));
+	CHECKTRT(ptr->context->enqueueV2((void**)ptr->dataBuffer, ptr->stream, nullptr));
 	END_WRAP_TRTAPI
 }
 
@@ -326,6 +326,7 @@ ExceptionStatus copyFloatDeviceToHostByName(NvinferStruct* ptr, const char* node
 	std::vector<int> shape(dims.d, dims.d + dims.nbDims);
 	size_t size = std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<int>());
 	CHECKCUDA(cudaMemcpyAsync(data, ptr->dataBuffer[nodeIndex], size * sizeof(float), cudaMemcpyDeviceToHost, ptr->stream));
+	CHECKCUDA(cudaStreamSynchronize(ptr->stream));
 	END_WRAP_TRTAPI
 }
 
@@ -339,6 +340,7 @@ ExceptionStatus copyFloatDeviceToHostByIndex(NvinferStruct* ptr, int nodeIndex, 
 	std::vector<int> shape(dims.d, dims.d + dims.nbDims);
 	size_t size = std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<int>());
 	CHECKCUDA(cudaMemcpyAsync(data, ptr->dataBuffer[nodeIndex], size * sizeof(float), cudaMemcpyDeviceToHost, ptr->stream));
+	CHECKCUDA(cudaStreamSynchronize(ptr->stream));
 	END_WRAP_TRTAPI
 }
 
@@ -356,6 +358,7 @@ ExceptionStatus nvinferDelete(NvinferStruct* ptr)
 	CHECKTRT(ptr->context->destroy();)
 	CHECKTRT(ptr->engine->destroy();)
 	CHECKTRT(ptr->runtime->destroy();)
+	CHECKCUDA(cudaStreamDestroy(ptr->stream));
 	delete ptr;
 	END_WRAP_TRTAPI
 }

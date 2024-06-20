@@ -41,7 +41,7 @@
 
 #define CHECKTRT(op) op; if (!gRecorder.empty()){ dup_last_err_msg(gRecorder.getErrorDesc(0)); return ExceptionStatus::OccurredTRT;}
 
-#define CHECKCUDA(op) cudaError_t code = op; if ( code != cudaSuccess) {dup_last_err_msg(cudaGetErrorString(code)); return ExceptionStatus::OccurredCuda;}
+#define CHECKCUDA(op) {cudaError_t code = op; if ( code != cudaSuccess) {dup_last_err_msg(cudaGetErrorString(code)); return ExceptionStatus::OccurredCuda;}}
 
 char* str_to_char_array(const std::string& str);
 
