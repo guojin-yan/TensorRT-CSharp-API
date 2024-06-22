@@ -40,25 +40,39 @@ https://github.com/guojin-yan/TensorRT-CSharp-API-Samples.git
   - **模型转换接口：**可以调用封装的TensorRT中的ONNX 解释器，对ONNX模型进行转换，并根据本机设备信息，编译本地模型，将模型转换为TensorRT 支持的engine格式。
   - **string modelPath：** 本地ONNX模型地址，只支持ONNX格式，且ONNX模型必须为确定的输入输出，暂不支持动态输入。
   - **int memorySize:** 模型转换时分配的内存大小
+- **public static void OnnxToEngine(string modelPath, int memorySize, string nodeName, Dims minShapes, Dims optShapes, Dims maxShapes)**
+  - **模型转换接口：**可以调用封装的TensorRT中的ONNX 解释器，对ONNX模型进行转换，并根据本机设备信息，编译本地模型，将模型转换为TensorRT 支持的engine格式，该接口支持动态输入模型。
+  - **string modelPath：** 本地ONNX模型地址，只支持ONNX格式，且ONNX模型必须为确定的输入输出，暂不支持动态输入。
+  - **int memorySize:** 模型转换时分配的内存大小。
+  - **string nodeName:** 模型输入节点名称，该节点维度确定但是形状是动态的，一般为: [-1, 3 640, 640]，某一维度或其中几个维度大小为“-1”。
+  - **Dims minShapes:** 动态尺寸的最小允许值
+  - **Dims optShapes:** 优化（内核选择）中使用的值、动态尺寸的最优值
+  - **Dims maxShapes:** 动态尺寸等的最大允许值
 - **public Nvinfer(string modelPath) **
   - **Nvinfer 初始化接口:** 初始化Nvinfer类，主要初始化封装的推理引擎，该推理引擎中封装了比较重要的一些类和指针。
   - **string modelPath:** engine模型路径。
-
+- **public Nvinfer(string modelPath, int maxBatahSize)**
+  - **Nvinfer 初始化接口:** 初始化Nvinfer类，主要初始化封装的推理引擎，该推理引擎中封装了比较重要的一些类和指针。
+  
+  - **string modelPath:** engine模型路径。
+  - **int maxBatahSize:**  推理推理支持的最大的Bath。
 - **public Dims GetBindingDimensions(int index)/GetBindingDimensions(string nodeName) **
   - **获取节点维度接口:** 通过端口编号或者端口名称，获取绑定的端口的形状信息.
   - **int index:** 绑定端口的编号
   - **string nodeName:** 绑定端口的名称
   - **return Dims:** 接口返回一个**Dims**结构体，该结构体包含了节点的维度大小以及每个维度的具体大小。
-
+- **public void SetBindingDimensions(int index, Dims dims)/SetBindingDimensions(string nodeName, Dims dims)**
+  - **设置节点维度接口:** 通过端口编号或者端口名称，获取绑定的端口的形状信息。
+  - **int index:** 绑定端口的编号。
+  - **string nodeName:** 绑定端口的名称。
+  - **Dims dims:** 需要设置绑定端口的维度。
 - **public void LoadInferenceData(string nodeName, float[] data)/LoadInferenceData(int nodeIndex, float[] data)**
   - **加载待推理数据接口:** 通过端口编号或者端口名称，将处理好的带推理数据加载到推理通道上。
   - **string nodeName:** 待加载推理数据端口的名称。
   - **int nodeIndex: **待加载推理数据端口的编号。
   - **float[] data:** 处理好的待推理数据，由于目前使用的推理数据多为float类型，因此此处目前只做了该类型接口。
-
 - **public void infer()**
   - **模型推理接口:** 调用推理接口，对加载到推理通道的数据进行推理。
-
 - **public float[] GetInferenceResult(string nodeName)/GetInferenceResult(int nodeIndex)**
   - **获取推理结果:** 通过端口编号或者端口名称，读取推理好的结果数据。
   - **string nodeName:** 推理结果数据端口的名称。
@@ -82,27 +96,41 @@ https://github.com/guojin-yan/TensorRT-CSharp-API-Samples.git
 
 &emsp;    对于CUDA以及Cudnn的安装此处不再作过多演示，大家可以自行安装。
 
-### 3.1 TensorRT安装
+&emsp;    项目中主要是需要开发者安装CUDA、CUDNN以及TensorRT，其中CUDA、CUDNN是我们开发者常用的库，相信大家也都已经安装过，如果没有安装过CUDA、CUDNN，可以自行百度教程进行安装，CUDA、CUDNN安装完成后，会在系统中增加相应的环境变量，如下图所示：
 
-&emsp;    首先确定安装的CUDA版本，在命令提示符中输入``nvcc -V``指令，便可以获取安装的CUDA版本。
+<div align=center><img src="https://s2.loli.net/2024/06/21/zX1YTDb2taqrFGl.png" width=600></div>
 
-<div align=center><img src="https://s2.loli.net/2024/03/31/8i6CgLtGTUdZzAm.png" width=400></div>
+&emsp;    因此为了方便后续的项目配置，我们在安装TensorRT时，也需要将TensorRT相应的文件放在该目录下。
 
-&emsp;    接下来访问[TensorRT Download | NVIDIA Developer](https://developer.nvidia.com/tensorrt/download)下载安装包，此处安装8.x系列，安装最新的版本8.6，如下图所示，通过下载Zip文件进行安装，大家可以根据自己的CUDN版本进行下载。
+### 3.1 TensorRT下载
 
-<div align=center><img src="https://s2.loli.net/2024/03/31/lt3DBki6ISeYg5X.png" width=600></div>
-
-&emsp;    由于下载的是编译好的文件，因此在下载完成后，大家可以将其解压到常用的安装目录，然后将路径添加到环境变量即可，下面路径为本机安装的TensorRT路径，将其添加到本机的``Path``环境变量中。
+&emsp;    下面我们下载对应版本的TensorRT，首先查看本电脑的CUDA版本，如上图中，``CUDA_PATH_V12_2``说明我们安装的CUDA版本版本是12.2，接下来访问下面链接进行下载
 
 ```
-D:\Program Files\TensorRT\TensorRT-8.6.1.6\lib
+https://developer.nvidia.com/tensorrt/download
 ```
 
+&emsp;    进入到下载页面后，选择8.x系列，目前只支持8.x系列及以下系列，暂时不支持10.x系列。然后根据自己的CUDN版本选择对应的包进行下载，如下图所示：
 
+<div align=center><img src="https://s2.loli.net/2024/06/21/UqWG4YRVohEnbcy.png" width=800></div>
 
-### 3.2 下载项目源码
+### 3.2 配置TensorRT库
 
-&emsp;    由于CUDA以及TensorRT程序集文件较大，无法打包成NuGet Package，因此需要用户自己进行编译。
+&emsp;    下载完成后解压到本地，如下图所示：
+
+<div align=center><img src="https://s2.loli.net/2024/06/21/IOVcujDReCxdXbi.png" width=600></div>
+
+&emsp;    接下来将下载好的TensorRT部分内容复制到CUNDN目录下，主要是复制TensorRT目录下的``include``、``lib``两个文件夹到``C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.2``目录下，具体目录根据自己的CUDA安装位置有关，如下图所示：
+
+<div align=center><img src="https://s2.loli.net/2024/06/21/GHlgNTjJSfL15Zd.png" width=600></div>
+
+&emsp;    最后将lib目录下中的TensorRT的dll文件，全部复制到上级目录下的bin文件夹下，如下图所示：
+
+<div align=center><img src="https://s2.loli.net/2024/06/21/HT8tiE27QyKsXDL.png" width=600></div>
+
+&emsp;    到此为止，我们已经完全配置好了TensorRT，下面演示如何使用最新的项目生成本机运行的项目。
+
+### 3.3 编译C++项目
 
 &emsp;    首先第一步下载项目源码，使用Git命令将源码下载到本地，如下图所示
 
@@ -120,155 +148,27 @@ git clone https://github.com/guojin-yan/TensorRT-CSharp-API.git
 
 &emsp;    该解决方案中包含两个项目，一个是C++项目，该项目是封装的TensorRT接口，将接口封装到动态链接库中；另一个是C#项目，该项目是读取动态链接库中的C++接口，然后重新封装该接口。
 
-### 3.3 配置C++项目
-
-&emsp;    接下来配置C++项目，主要分为以下几步：
-
-#### 第一步：设置项目输出类型
-
-&emsp;    C++项目主要用于生成动态链接库文件，因此将配置类型改为``动态库(.dll)``。
-
-<div align=center><img src="https://s2.loli.net/2024/03/31/a3khKngJUf91Wvy.png" width=600></div>
-
-
-
-#### 第二部：设置包含目录
-
-&emsp;    当前C++项目主要使用两个依赖库，主要是CUDA(CUDNN)以及TensorRT，因此此处主要配置这两个依赖项，用户根据自己的安装情况进行配置即可。
-
-<div align=center><img src="https://s2.loli.net/2024/03/31/HQZ6SUX35hJEByP.jpg" width=1100></div>
-
-&emsp;    以下是本设备CUDA(CUDNN)以及TensorRT的包含目录位置，用户在使用时这需要根据自己本机安装情况进行设置即可。
-
-```
-C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.2\include
-D:\Program Files\TensorRT\TensorRT-8.6.1.6\include
-```
-
-
-
-#### 第三步：设置库目录
-
-&emsp;    下面设置安装的CUDA(CUDNN)以及TensorRT的库目录情况，如下图所示。
-
-<div align=center><img src="https://s2.loli.net/2024/03/31/CQz5optfeE2JBqx.jpg" width=1100></div>
-
-&emsp;    以下是本设备CUDA(CUDNN)以及TensorRT的库目录位置，用户在使用时这需要根据自己本机安装情况进行设置即可。
-
-```
-C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.2\lib\x64
-D:\Program Files\TensorRT\TensorRT-8.6.1.6\lib
-```
-
-
-
-#### 第四步：设置附加依赖项
-
-&emsp;    下面设置附加依赖项，附加依赖项文件在上一步设置的库目录路径中，此处主要添加``.lib``文件。
-
-<div align=center><img src="https://s2.loli.net/2024/03/31/67QPjDu9hOzRZpH.jpg" width=1100></div>
-
-&emsp;    以下是CUDA(CUDNN)以及TensorRT的附加依赖项目录，但不同版本可能会不一致，因此用户在使用时需要根据自己的安装情况进行设置。
-
-```
-cublas.lib
-cublasLt.lib
-cuda.lib
-cudadevrt.lib
-cudart.lib
-cudart_static.lib
-cudnn.lib
-cudnn64_8.lib
-cudnn_adv_infer.lib
-cudnn_adv_infer64_8.lib
-cudnn_adv_train.lib
-cudnn_adv_train64_8.lib
-cudnn_cnn_infer.lib
-cudnn_cnn_infer64_8.lib
-cudnn_cnn_train.lib
-cudnn_cnn_train64_8.lib
-cudnn_ops_infer.lib
-cudnn_ops_infer64_8.lib
-cudnn_ops_train.lib
-cudnn_ops_train64_8.lib
-cufft.lib
-cufftw.lib
-cufilt.lib
-curand.lib
-cusolver.lib
-cusolverMg.lib
-cusparse.lib
-nppc.lib
-nppial.lib
-nppicc.lib
-nppidei.lib
-nppif.lib
-nppig.lib
-nppim.lib
-nppist.lib
-nppisu.lib
-nppitc.lib
-npps.lib
-nvblas.lib
-nvJitLink.lib
-nvJitLink_static.lib
-nvjpeg.lib
-nvml.lib
-nvptxcompiler_static.lib
-nvrtc-builtins_static.lib
-nvrtc.lib
-nvrtc_static.lib
-OpenCL.lib
-nvinfer.lib
-nvinfer_dispatch.lib
-nvinfer_lean.lib
-nvinfer_plugin.lib
-nvinfer_vc_plugin.lib
-nvonnxparser.lib
-nvparsers.lib
-```
-
-
-
-#### 第五步：设置预处理器
-
-&emsp;    由于项目中应用了一些不安全方法，所以需要在宏定义中添加以下定义，如下图所示：
-
-<div align=center><img src="https://s2.loli.net/2024/03/31/gBN6mnkYCDjpw49.jpg" width=1100></div>
-
-```
-_CRT_SECURE_NO_WARNINGS
-```
-
-
-
-#### 第六步：编译项目源码
-
-&emsp;    接下来生成C++项目，此处选择``生成``，不要选择运行，如下图所示：
+&emsp;    最新的项目中我们将动态链接库、包含目录内知道项目中，开发者无需再进行重新配置，只要保证上文中CUDA、CUDNN以及TensorRT正确安装即可。所以下载完代码后，直接生成C++项目，此处选择``生成``，不要选择运行，如下图所示：
 
 <div align=center><img src="https://s2.loli.net/2024/03/31/JkpXBqewQYtHK5E.png" width=900></div>
 
-&emsp;    最终可以看出生成的动态链接库文件名称以及文件路径，这个路径在下一步中十分重要。
+&emsp;    最终可以看出生成的动态链接库文件名称以及文件路径。
 
-
+&emsp;    下面有一点后面我们需要注意，在后面使用时，我们需要将此处生成的dll文件复制到程序运行目录下。
 
 ### 3.4 编译C#项目
 
-&emsp;    接下来编译C#项目，C#项目只需要修改一下位置即可，修改``NativeMethods.cs``文件中的dll文件路径，该路径及上一步中C++项目生成的动态链接库文件，如下图所示：
+&emsp;    接下来编译C#项目，C#项目此处也无须再修改，我们此处添加的是dll文件的绝对路径，因此在使用时，需要将上文生成的dll文件复制到运行目录下。如鼓励开发者觉得比较麻烦，依旧可以跟之前一样，只需要修改一下位置即可，修改``NativeMethods.cs``文件中的dll文件路径，该路径及上一步中C++项目生成的动态链接库文件，如下图所示：
 
-```
-E:\GitSpace\TensorRT-CSharp-API\x64\Release\TensorRtExtern.dll
-```
-
-<div align=center><img src="https://s2.loli.net/2024/03/31/hdzoMi6VaNyc3AG.png" width=800></div>
+<div align=center><img src="https://s2.loli.net/2024/06/21/dXTu1lASfWkaRDs.png" width=800></div>
 
 &emsp;    接下来就可以运行C#项目，生成类库文件，如下图所示：
 
-<div align=center><img src="https://s2.loli.net/2024/03/31/fvLV7m9NKqBFOwS.png" width=600></div>
+<div align=center><img src="https://s2.loli.net/2024/06/21/zaUwybNFW6QVYe5.png" width=800></div>
 
+&emsp;    此处我们同时生成了.NET FrameWork 4.6、.NET FrameWork 4..72、.NET FrameWork 4.8、.NET 8.0、.NET 6.0、.NET 5.0、.NET 3.1，用户在后续使用时，根据生成版本进行选择即可。
 
-
-
+&emsp;    编译好该项目后，开发者后续便可以进行使用，使用方式与之前版本一致，此处不再进行赘述。
 
 ## 4. 接口调用
 
