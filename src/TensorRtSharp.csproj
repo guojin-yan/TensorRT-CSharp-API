@@ -7,15 +7,15 @@
     <RootNamespace>JYPPX.TensorRtSharp</RootNamespace>
     
     <!--Set NuGet Message-->
-    <PackageId>JYPPX.TensorRtSharp</PackageId>
+    <PackageId>JYPPX.TensorRT.CSharp.API </PackageId>
     <Title>TensorRtSharp</Title>
     <Version>0.0.1</Version>
     <Authors>Guojin Yan</Authors>
     <Company>Guojin Yan</Company>
-    <Product>TensorRtSharp</Product>
+    <Product>JYPPX.TensorRT.CSharp.API </Product>
     <Description></Description>
-    <PackageProjectUrl>https://github.com/guojin-yan/DeploySharp.git</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/guojin-yan/DeploySharp.git</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/guojin-yan/TensorRT-CSharp-API.git</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/guojin-yan/TensorRT-CSharp-API.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageOutputPath>./../nuget</PackageOutputPath>
     <NeutralLanguage>zh</NeutralLanguage>
