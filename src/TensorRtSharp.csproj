@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net9.0;net8.0;net7.0;net6.0;net5.0;netcoreapp3.1;net48;</TargetFrameworks>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <LangVersion>10</LangVersion>
+    <RootNamespace>JYPPX.TensorRtSharp</RootNamespace>
+    
+    <!--Set NuGet Message-->
+    <PackageId>JYPPX.TensorRtSharp</PackageId>
+    <Title>TensorRtSharp</Title>
+    <Version>0.0.1</Version>
+    <Authors>Guojin Yan</Authors>
+    <Company>Guojin Yan</Company>
+    <Product>TensorRtSharp</Product>
+    <Description></Description>
+    <PackageProjectUrl>https://github.com/guojin-yan/DeploySharp.git</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/guojin-yan/DeploySharp.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageOutputPath>./../nuget</PackageOutputPath>
+    <NeutralLanguage>zh</NeutralLanguage>
+    <PackageReleaseNotes></PackageReleaseNotes>
+    <RootNamespace>TensorRtSharp</RootNamespace>
+    <AssemblyName>TensorRtSharp</AssemblyName>
+    <PackageTags>TensorRtSharp;TensorRT;CSharp;C#-API;ONNX</PackageTags>
+    <Copyright>Copyright © 2025 Yan Guojin. All Rights Reserved.</Copyright>
+    <PackAsTool>False</PackAsTool>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+
+  </PropertyGroup>
+
+</Project>
