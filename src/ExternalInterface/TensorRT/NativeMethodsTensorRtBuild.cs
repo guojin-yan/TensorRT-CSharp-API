@@ -89,6 +89,21 @@ namespace JYPPX.TensorRtSharp.ExternalInterface
         public extern static TrtExceptionStatus trtBuild_isNetworkSupported(IntPtr build,
             IntPtr network, IntPtr config, out int flag);
 
+        [Pure, DllImport(dllExtern, EntryPoint = "trtBuild_setMaxThreads",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static TrtExceptionStatus trtBuild_setMaxThreads(IntPtr build,
+            int maxThreads, out int flag);
+
+        [Pure, DllImport(dllExtern, EntryPoint = "trtBuild_getMaxThreads",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static TrtExceptionStatus trtBuild_getMaxThreads(IntPtr build,
+            out int maxThreads);
+
+
+        [Pure, DllImport(dllExtern, EntryPoint = "trtBuild_getPluginRegistry",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static TrtExceptionStatus trtBuild_getPluginRegistry(IntPtr build,
+            out IntPtr pluginRegistry);
 
     }
 }

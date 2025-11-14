@@ -1,4 +1,5 @@
 ﻿using JYPPX.TensorRtSharp.Exceptions;
+using JYPPX.TensorRtSharp.Nvinfer;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
@@ -89,5 +90,44 @@ namespace JYPPX.TensorRtSharp.ExternalInterface
         public extern static TrtExceptionStatus trtRuntime_getTemporaryDirectory(
             IntPtr runtime,
             out IntPtr path);
+
+        [Pure, DllImport(dllExtern, EntryPoint = "trtRuntime_setTempfileControlFlags",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static TrtExceptionStatus trtRuntime_setTempfileControlFlags(
+            IntPtr runtime,
+            TrtTempfileControlFlag tempfileControlFlag);
+
+        [Pure, DllImport(dllExtern, EntryPoint = "trtRuntime_getTempfileControlFlags",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static TrtExceptionStatus trtRuntime_getTempfileControlFlags(
+            IntPtr runtime,
+            out TrtTempfileControlFlag tempfileControlFlag);
+
+
+        [Pure, DllImport(dllExtern, EntryPoint = "trtRuntime_getPluginRegistry",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static TrtExceptionStatus trtRuntime_getPluginRegistry(
+            IntPtr runtime,
+            out IntPtr pluginRegistry);
+
+        [Pure, DllImport(dllExtern, EntryPoint = "trtRuntime_loadRuntime",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static TrtExceptionStatus trtRuntime_loadRuntime(
+            IntPtr runtime,
+            [MarshalAs(StringUnmanagedTypeNotWindows)] string path,
+            out IntPtr re_runtime);
+
+        [Pure, DllImport(dllExtern, EntryPoint = "trtRuntime_setEngineHostCodeAllowed",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static TrtExceptionStatus trtRuntime_setEngineHostCodeAllowed(
+            IntPtr runtime,
+            int allowed);
+
+
+        [Pure, DllImport(dllExtern, EntryPoint = "trtRuntime_getEngineHostCodeAllowed",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static TrtExceptionStatus trtRuntime_getEngineHostCodeAllowed(
+            IntPtr runtime,
+            out int allowed);
     }
 }

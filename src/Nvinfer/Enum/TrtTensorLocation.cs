@@ -6,14 +6,23 @@ using System.Threading.Tasks;
 
 namespace JYPPX.TensorRtSharp.Nvinfer
 {
-    //!
-    //! \enum TensorLocation
-    //!
-    //! \brief The location for tensor data storage, device or host.
-    //!
+    /// <summary>
+    /// 张量位置枚举，定义了张量数据存储的位置（设备或主机）
+    /// The location for tensor data storage, device or host
+    /// </summary>
     public enum TrtTensorLocation : int
     {
-        kDEVICE = 0, //!< Data stored on device.
-        kHOST = 1,   //!< Data stored on host.
+        /// <summary>
+        /// 张量数据存储在设备上（如GPU）
+        /// Data stored on device (e.g. GPU)
+        /// </summary>
+        kDEVICE = 0,
+
+        /// <summary>
+        /// 张量数据存储在主机上
+        /// Data stored on host
+        /// </summary>
+        kHOST = 1,
     };
+
 }

@@ -8,25 +8,24 @@ using System.Threading.Tasks;
 
 namespace JYPPX.TensorRtSharp.Nvinfer
 {
-    public class GpuAllocator : DisposableTrtObject
+    public class Profiler : DisposableTrtObject
     {
 
 
         /// <summary>
-        /// Creates empty GpuAllocator
+        /// Creates empty Profiler
         /// </summary>
-        public GpuAllocator()
+        public Profiler()
         {
             //InitHandleException.handler(
             //    NativeMethods.trtBuild_createInferBuilder(out ptr));
         }
 
-
         /// <summary>
         /// Creates from native  pointer
         /// </summary>
         /// <param name="ptr"></param>
-        internal GpuAllocator(IntPtr ptr)
+        internal Profiler(IntPtr ptr)
         {
             if (ptr == IntPtr.Zero)
                 throw new TrtException("Native object address is NULL");

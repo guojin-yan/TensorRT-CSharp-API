@@ -1,24 +1,24 @@
 ﻿using JYPPX.TensorRtSharp.Exceptions;
+using JYPPX.TensorRtSharp.ExternalInterface;
 using JYPPX.TensorRtSharp.Internal.Fundamentals;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace JYPPX.TensorRtSharp.Nvinfer
+namespace JYPPX.TensorRtSharp.Cuda
 {
-    public class GpuAllocator : DisposableTrtObject
+    public class CudaEvent : DisposableTrtObject
     {
-
-
         /// <summary>
-        /// Creates empty GpuAllocator
+        /// Creates Build
         /// </summary>
-        public GpuAllocator()
+        public CudaEvent()
         {
-            //InitHandleException.handler(
-            //    NativeMethods.trtBuild_createInferBuilder(out ptr));
+            //CudaHandleException.handler(
+            //    NativeMethods.cudaRuntime_cudaStreamCreate(out ptr));
         }
 
 
@@ -26,10 +26,10 @@ namespace JYPPX.TensorRtSharp.Nvinfer
         /// Creates from native  pointer
         /// </summary>
         /// <param name="ptr"></param>
-        internal GpuAllocator(IntPtr ptr)
+        internal CudaEvent(IntPtr ptr)
         {
             if (ptr == IntPtr.Zero)
-                throw new TrtException("Native object address is NULL");
+                throw new CudaException("Native object address is NULL");
             this.ptr = ptr;
         }
         /// <summary>
@@ -47,8 +47,13 @@ namespace JYPPX.TensorRtSharp.Nvinfer
         protected override void DisposeUnmanaged()
         {
             //if (ptr != IntPtr.Zero && IsEnabledDispose)
-            //    NativeMethods.trtBuild_free(ptr);
+            //    CudaHandleException.handler(
+            //    NativeMethods.cudaRuntime_cudaStreamDestroy(ptr));
             //base.DisposeUnmanaged();
         }
+
+
+
     }
 }
+
