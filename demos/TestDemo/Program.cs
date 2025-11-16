@@ -79,7 +79,7 @@ namespace TestDemo
 
         public static void buildModel() 
         {
-            Build build = new Build();
+            Builder build = new Builder();
             Console.WriteLine($"platformHasFastFp16: {build.platformHasFastFp16()}");
             Console.WriteLine($"platformHasFastInt8: {build.platformHasFastInt8()}");
             Console.WriteLine($"maxDLABatchSize: {build.maxDLABatchSize()}");

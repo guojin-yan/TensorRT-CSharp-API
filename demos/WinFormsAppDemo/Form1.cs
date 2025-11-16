@@ -52,7 +52,7 @@ namespace WinFormsAppDemo
                 {
                     this.Enabled = false;
                 });
-                using Build build = new Build();
+                using Builder build = new Builder();
                 Console.WriteLine($"platformHasFastFp16: {build.platformHasFastFp16()}");
                 Console.WriteLine($"platformHasFastInt8: {build.platformHasFastInt8()}");
                 Console.WriteLine($"maxDLABatchSize: {build.maxDLABatchSize()}");
@@ -248,27 +248,30 @@ namespace WinFormsAppDemo
             Mat img = Cv2.ImRead(textBox3.Text.Trim());
             float[] inputHost = preProcess(img, out float scales);
 
-            //input.copyFromHostAsync(inputHost, cudaStream2);
-            //executionContext.executeV3(cudaStream);
-            //output.copyToHostAsync(outputHost, cudaStream1);
+            input.copyFromHostAsync(inputHost, cudaStream2);
+            executionContext.executeV3(cudaStream);
+            output.copyToHostAsync(outputHost, cudaStream1);
 
 
             Stopwatch sw = new Stopwatch();
             sw.Start();
             input.copyFromHostAsync(inputHost, cudaStream2);
-            //sw.Stop();
-            //Logger.Instance.INFO($" copyFromHostAsync time: {sw.ElapsedMilliseconds} ms");
-            //sw.Restart();
+            cudaStream2.Synchronize();
+            sw.Stop();
+            Logger.Instance.INFO($" copyFromHostAsync time: {sw.ElapsedMilliseconds} ms");
+            sw.Restart();
             executionContext.executeV3(cudaStream);
-            //sw.Stop();
-            //Logger.Instance.INFO($"inference time: {sw.ElapsedMilliseconds} ms");
-            //sw.Restart();
+            cudaStream.Synchronize();
+            sw.Stop();
+            Logger.Instance.INFO($"inference time: {sw.ElapsedMilliseconds} ms");
+            sw.Restart();
             output.copyToHostAsync(outputHost, cudaStream1);
-            //sw.Stop();
-            //Logger.Instance.INFO($" copyToHostAsync time: {sw.ElapsedMilliseconds} ms");
+            cudaStream1.Synchronize();
+            sw.Stop();
+            Logger.Instance.INFO($" copyToHostAsync time: {sw.ElapsedMilliseconds} ms");
             sw.Stop();
 
-            Logger.Instance.INFO($"The inference time: {sw.ElapsedMilliseconds} ms");
+            //Logger.Instance.INFO($"The inference time: {sw.ElapsedMilliseconds} ms");
 
             List<ObbData> result = postprocess(outputHost, scales);
             Mat re = drawObbResult(result, img);
@@ -321,8 +324,11 @@ namespace WinFormsAppDemo
             for (int i = 0; i < count; ++i)
             {
                 input.copyFromHostAsync(inputHost, cudaStream2);
+                cudaStream2.Synchronize();
                 executionContext.executeV3(cudaStream);
+                cudaStream.Synchronize();
                 output.copyToHostAsync(outputHost, cudaStream1);
+                cudaStream1.Synchronize();
             }
 
             sw.Stop();
