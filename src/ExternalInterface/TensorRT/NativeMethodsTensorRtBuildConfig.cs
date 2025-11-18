@@ -42,17 +42,6 @@ namespace JYPPX.TensorRtSharp.ExternalInterface
             IntPtr builderConfig,
             out TrtEngineCapability capability);
 
-        [Pure, DllImport(dllExtern, EntryPoint = "trtBuilderConfig_setInt8Calibrator",
-            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public extern static TrtExceptionStatus trtBuilderConfig_setInt8Calibrator(
-            IntPtr builderConfig,
-            IntPtr int8Calibrator);
-
-        [Pure, DllImport(dllExtern, EntryPoint = "trtBuilderConfig_getInt8Calibrator",
-            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public extern static TrtExceptionStatus trtBuilderConfig_getInt8Calibrator(
-            IntPtr builderConfig,
-            out IntPtr int8Calibrator);
 
         [Pure, DllImport(dllExtern, EntryPoint = "trtBuilderConfig_setFlags",
             CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]

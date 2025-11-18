@@ -16,7 +16,7 @@ namespace JYPPX.TensorRtSharp.Nvinfer
     /// 表示一个张量（Tensor）对象，是TensorRT网络中的基本数据单元。继承自DisposableTrtObject。
     /// Represents a Tensor object, which is the fundamental data unit in a TensorRT network. Inherits from DisposableTrtObject.
     /// </summary>
-    internal class Tensor : DisposableTrtObject
+    public class Tensor : DisposableTrtObject
     {
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace JYPPX.TensorRtSharp.Nvinfer
         /// Initializes a Tensor instance from a native pointer. Primarily used for internal wrapping.
         /// </summary>
         /// <param name="ptr">指向原生对象的非托管指针。/ The unmanaged pointer to the native object.</param>
-        internal Tensor(IntPtr ptr)
+        public Tensor(IntPtr ptr)
         {
             if (ptr == IntPtr.Zero)
                 throw new TrtException("Native object address is NULL");

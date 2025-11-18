@@ -29,7 +29,7 @@ namespace JYPPX.TensorRtSharp.ExternalInterface
             IntPtr refitter,
             [MarshalAs(StringUnmanagedTypeNotWindows)] string layerName,
             TrtWeightsRole role,
-            IntPtr weights,
+            TrtWeights weights,
             out int success);
         [Pure, DllImport(dllExtern, EntryPoint = "trtRefitter_refitCudaEngine",
             CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -98,14 +98,14 @@ namespace JYPPX.TensorRtSharp.ExternalInterface
         public extern static TrtExceptionStatus trtRefitter_setNamedWeights(
             IntPtr refitter,
             [MarshalAs(StringUnmanagedTypeNotWindows)] string name,
-            IntPtr weights,
+            TrtWeights weights,
             out int success);
         [Pure, DllImport(dllExtern, EntryPoint = "trtRefitter_setNamedWeightsWithLocation",
             CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public extern static TrtExceptionStatus trtRefitter_setNamedWeightsWithLocation(
             IntPtr refitter,
             [MarshalAs(StringUnmanagedTypeNotWindows)] string name,
-            IntPtr weights,
+            TrtWeights weights,
             TrtTensorLocation location,
             out int success);
         [Pure, DllImport(dllExtern, EntryPoint = "trtRefitter_getMissingWeights",
@@ -145,7 +145,7 @@ namespace JYPPX.TensorRtSharp.ExternalInterface
         public extern static TrtExceptionStatus trtRefitter_getNamedWeights(
             IntPtr refitter,
             [MarshalAs(StringUnmanagedTypeNotWindows)] string weightsName,
-            out IntPtr weights);
+            out TrtWeights weights);
         [Pure, DllImport(dllExtern, EntryPoint = "trtRefitter_getWeightsLocation",
             CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public extern static TrtExceptionStatus trtRefitter_getWeightsLocation(
@@ -181,6 +181,6 @@ namespace JYPPX.TensorRtSharp.ExternalInterface
         public extern static TrtExceptionStatus trtRefitter_getWeightsPrototype(
             IntPtr refitter,
             [MarshalAs(StringUnmanagedTypeNotWindows)] string weightsName,
-            out IntPtr weights);
+            out TrtWeights weights);
     }
 }

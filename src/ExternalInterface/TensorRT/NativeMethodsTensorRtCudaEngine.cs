@@ -27,7 +27,7 @@ namespace JYPPX.TensorRtSharp.ExternalInterface
 
 
         [Pure, DllImport(dllExtern, EntryPoint = "trtCudaEngine_free",
-     CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public extern static InitExceptionStatus trtCudaEngine_free(IntPtr engine);
         // --- Tensor Properties ---
         [Pure, DllImport(dllExtern, EntryPoint = "trtCudaEngine_getTensorShape",

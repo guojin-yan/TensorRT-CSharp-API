@@ -19,13 +19,13 @@ namespace JYPPX.TensorRtSharp.Nvinfer
     /// 继承自DisposableTrtObject，实现了IDisposable接口，可以安全地释放资源
     /// Inherits from DisposableTrtObject and implements IDisposable interface for safe resource disposal
     /// </remarks>
-    public class Build : DisposableTrtObject
+    public class Builder : DisposableTrtObject
     {
         /// <summary>
         /// 创建构建器实例
         /// Creates Build
         /// </summary>
-        public Build()
+        public Builder()
         {
             InitHandleException.handler(
                 NativeMethods.trtBuild_createInferBuilder(out ptr));
@@ -47,8 +47,8 @@ namespace JYPPX.TensorRtSharp.Nvinfer
         /// <inheritdoc />
         protected override void DisposeUnmanaged()
         {
-            if (ptr != IntPtr.Zero && IsEnabledDispose)
-                NativeMethods.trtBuild_free(ptr);
+            //if (ptr != IntPtr.Zero && IsEnabledDispose)
+            //    NativeMethods.trtBuild_free(ptr);
             base.DisposeUnmanaged();
         }
 

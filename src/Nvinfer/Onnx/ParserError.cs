@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 
 namespace JYPPX.TensorRtSharp.Nvinfer
 {
-    public class Int8Calibrator : DisposableTrtObject
+    public class ParserError : DisposableTrtObject
     {
 
 
         /// <summary>
-        /// Creates empty Int8Calibrator
+        /// Creates empty ParserError
         /// </summary>
-        public Int8Calibrator()
+        public ParserError()
         {
             //InitHandleException.handler(
             //    NativeMethods.trtBuild_createInferBuilder(out ptr));
@@ -25,7 +25,7 @@ namespace JYPPX.TensorRtSharp.Nvinfer
         /// Creates from native  pointer
         /// </summary>
         /// <param name="ptr"></param>
-        internal Int8Calibrator(IntPtr ptr)
+        public ParserError(IntPtr ptr)
         {
             if (ptr == IntPtr.Zero)
                 throw new TrtException("Native object address is NULL");

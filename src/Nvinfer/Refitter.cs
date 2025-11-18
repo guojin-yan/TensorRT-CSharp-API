@@ -59,8 +59,8 @@ namespace JYPPX.TensorRtSharp.Nvinfer
         /// </summary>
         protected override void DisposeUnmanaged()
         {
-            if (ptr != IntPtr.Zero && IsEnabledDispose)
-                NativeMethods.trtRefitter_free(ptr);
+            //if (ptr != IntPtr.Zero && IsEnabledDispose)
+            //    NativeMethods.trtRefitter_free(ptr);
             base.DisposeUnmanaged();
         }
 
@@ -76,7 +76,7 @@ namespace JYPPX.TensorRtSharp.Nvinfer
         {
             int success;
             TrtHandleException.handler(NativeMethods.trtRefitter_setWeights(
-                ptr, layerName, role, weights.TrtPtr, out success));
+                ptr, layerName, role, weights.NativeWeights, out success));
             if (success == 0)
                 throw new TrtException($"Failed to set weights for layer '{layerName}' with role '{role}'");
         }
@@ -189,7 +189,7 @@ namespace JYPPX.TensorRtSharp.Nvinfer
         {
             int success;
             TrtHandleException.handler(NativeMethods.trtRefitter_setNamedWeights(
-                ptr, name, weights.TrtPtr, out success));
+                ptr, name, weights.NativeWeights, out success));
             return success != 0;
         }
 
@@ -205,7 +205,7 @@ namespace JYPPX.TensorRtSharp.Nvinfer
         {
             int success;
             TrtHandleException.handler(NativeMethods.trtRefitter_setNamedWeightsWithLocation(
-                ptr, name, weights.TrtPtr, location, out success));
+                ptr, name, weights.NativeWeights, location, out success));
             return success != 0;
         }
 
@@ -272,7 +272,7 @@ namespace JYPPX.TensorRtSharp.Nvinfer
         public Weights getNamedWeights(string name)
         {
             TrtHandleException.handler(NativeMethods.trtRefitter_getNamedWeights(
-                ptr, name, out IntPtr weightsPtr));
+                ptr, name, out TrtWeights weightsPtr));
             return new Weights(weightsPtr);
         }
 
@@ -349,7 +349,7 @@ namespace JYPPX.TensorRtSharp.Nvinfer
         public Weights getWeightsPrototype(string weightsName)
         {
             TrtHandleException.handler(NativeMethods.trtRefitter_getWeightsPrototype(
-                ptr, weightsName, out IntPtr weightsPtr));
+                ptr, weightsName, out TrtWeights weightsPtr));
             return new Weights(weightsPtr);
         }
     }

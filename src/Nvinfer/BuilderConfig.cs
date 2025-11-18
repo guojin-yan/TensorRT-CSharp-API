@@ -109,26 +109,6 @@ namespace JYPPX.TensorRtSharp.Nvinfer
             return capability;
         }
 
-        /// <summary>
-        /// 设置INT8校准器
-        /// Sets the INT8 calibrator
-        /// </summary>
-        /// <param name="int8Calibrator">INT8校准器实例，INT8 calibrator instance</param>
-        public void setInt8Calibrator(Int8Calibrator int8Calibrator)
-        {
-            TrtHandleException.handler(NativeMethods.trtBuilderConfig_setInt8Calibrator(ptr, int8Calibrator.TrtPtr));
-        }
-
-        /// <summary>
-        /// 获取INT8校准器
-        /// Gets the INT8 calibrator
-        /// </summary>
-        /// <returns>INT8校准器实例，INT8 calibrator instance</returns>
-        public Int8Calibrator getInt8Calibrator()
-        {
-            TrtHandleException.handler(NativeMethods.trtBuilderConfig_getInt8Calibrator(ptr, out IntPtr calibratorPtr));
-            return new Int8Calibrator(calibratorPtr);
-        }
 
         /// <summary>
         /// 设置构建标志

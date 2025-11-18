@@ -59,8 +59,8 @@ namespace JYPPX.TensorRtSharp.Nvinfer
         /// </summary>
         protected override void DisposeUnmanaged()
         {
-            if (ptr != IntPtr.Zero && IsEnabledDispose)
-                NativeMethods.trtRuntime_free(ptr);
+            //if (ptr != IntPtr.Zero && IsEnabledDispose)
+            //    NativeMethods.trtRuntime_free(ptr);
             base.DisposeUnmanaged();
         }
 
