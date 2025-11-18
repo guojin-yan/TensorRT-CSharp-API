@@ -6,26 +6,139 @@ using System.Threading.Tasks;
 
 namespace JYPPX.TensorRtSharp.Nvinfer
 {
-    //!
-    //! \enum ActivationType
-    //!
-    //! \brief Enumerates the types of activation to perform in an activation layer.
-    //!
+    /// <summary>
+    /// 定义了在激活层中可以执行的激活函数类型。<br/>
+    /// Enumerates the types of activation functions that can be performed in an activation layer.
+    /// </summary>
     public enum TrtActivationType : int
     {
-        kRELU = 0,              //!< Rectified linear activation.
-        kSIGMOID = 1,           //!< Sigmoid activation.
-        kTANH = 2,              //!< TanH activation.
-        kLEAKY_RELU = 3,        //!< LeakyRelu activation: x>=0 ? x : alpha * x.
-        kELU = 4,               //!< Elu activation: x>=0 ? x : alpha * (exp(x) - 1).
-        kSELU = 5,              //!< Selu activation: x>0 ? beta * x : beta * (alpha*exp(x) - alpha)
-        kSOFTSIGN = 6,          //!< Softsign activation: x / (1+|x|)
-        kSOFTPLUS = 7,          //!< Parametric softplus activation: alpha*log(exp(beta*x)+1)
-        kCLIP = 8,              //!< Clip activation: max(alpha, min(beta, x))
-        kHARD_SIGMOID = 9,      //!< Hard sigmoid activation: max(0, min(1, alpha*x+beta))
-        kSCALED_TANH = 10,      //!< Scaled tanh activation: alpha*tanh(beta*x)
-        kTHRESHOLDED_RELU = 11, //!< Thresholded ReLU activation: x>alpha ? x : 0
-        kGELU_ERF = 12,         //!< GELU erf activation: 0.5 * x * (1 + erf(sqrt(0.5) * x))
-        kGELU_TANH = 13         //!< GELU tanh activation: 0.5 * x * (1 + tanh(sqrt(2/pi) * (0.044715F * pow(x, 3) + x)))
+        /// <summary>
+        /// 整流线性单元。<br/>
+        /// Rectified Linear Unit.
+        /// </summary>
+        kRELU = 0,
+
+        /// <summary>
+        /// Sigmoid 激活函数。<br/>
+        /// Sigmoid activation function.
+        /// </summary>
+        kSIGMOID = 1,
+
+        /// <summary>
+        /// TanH 激活函数。<br/>
+        /// TanH activation function.
+        /// </summary>
+        kTANH = 2,
+
+        /// <summary>
+        /// Leaky ReLU 激活函数。<br/>
+        /// LeakyReLU activation function.
+        /// <remarks>
+        /// 公式为: <c>x>=0 ? x : alpha * x</c><br/>
+        /// Formula: <c>x>=0 ? x : alpha * x</c>
+        /// </remarks>
+        /// </summary>
+        kLEAKY_RELU = 3,
+
+        /// <summary>
+        /// ELU (Exponential Linear Unit) 激活函数。<br/>
+        /// ELU (Exponential Linear Unit) activation function.
+        /// <remarks>
+        /// 公式为: <c>x>=0 ? x : alpha * (exp(x) - 1)</c><br/>
+        /// Formula: <c>x>=0 ? x : alpha * (exp(x) - 1)</c>
+        /// </remarks>
+        /// </summary>
+        kELU = 4,
+
+        /// <summary>
+        /// SELU (Scaled Exponential Linear Unit) 激活函数。<br/>
+        /// SELU (Scaled Exponential Linear Unit) activation function.
+        /// <remarks>
+        /// 公式为: <c>x>0 ? beta * x : beta * (alpha*exp(x) - alpha)</c><br/>
+        /// Formula: <c>x>0 ? beta * x : beta * (alpha*exp(x) - alpha)</c>
+        /// </remarks>
+        /// </summary>
+        kSELU = 5,
+
+        /// <summary>
+        /// Softsign 激活函数。<br/>
+        /// Softsign activation function.
+        /// <remarks>
+        /// 公式为: <c>x / (1+|x|)</c><br/>
+        /// Formula: <c>x / (1+|x|)</c>
+        /// </remarks>
+        /// </summary>
+        kSOFTSIGN = 6,
+
+        /// <summary>
+        /// 参数化 Softplus 激活函数。<br/>
+        /// Parametric softplus activation function.
+        /// <remarks>
+        /// 公式为: <c>alpha*log(exp(beta*x)+1)</c><br/>
+        /// Formula: <c>alpha*log(exp(beta*x)+1)</c>
+        /// </remarks>
+        /// </summary>
+        kSOFTPLUS = 7,
+
+        /// <summary>
+        /// 裁剪激活函数。<br/>
+        /// Clip activation function.
+        /// <remarks>
+        /// 公式为: <c>max(alpha, min(beta, x))</c><br/>
+        /// Formula: <c>max(alpha, min(beta, x))</c>
+        /// </remarks>
+        /// </summary>
+        kCLIP = 8,
+
+        /// <summary>
+        /// Hard Sigmoid 激活函数。<br/>
+        /// Hard sigmoid activation function.
+        /// <remarks>
+        /// 公式为: <c>max(0, min(1, alpha*x+beta))</c><br/>
+        /// Formula: <c>max(0, min(1, alpha*x+beta))</c>
+        /// </remarks>
+        /// </summary>
+        kHARD_SIGMOID = 9,
+
+        /// <summary>
+        /// 缩放的 TanH 激活函数。<br/>
+        /// Scaled tanh activation function.
+        /// <remarks>
+        /// 公式为: <c>alpha*tanh(beta*x)</c><br/>
+        /// Formula: <c>alpha*tanh(beta*x)</c>
+        /// </remarks>
+        /// </summary>
+        kSCALED_TANH = 10,
+
+        /// <summary>
+        /// 带阈值的 ReLU 激活函数。<br/>
+        /// Thresholded ReLU activation function.
+        /// <remarks>
+        /// 公式为: <c>x>alpha ? x : 0</c><br/>
+        /// Formula: <c>x>alpha ? x : 0</c>
+        /// </remarks>
+        /// </summary>
+        kTHRESHOLDED_RELU = 11,
+
+        /// <summary>
+        /// GELU (Gaussian Error Linear Unit) 激活函数，使用误差函数 计算。<br/>
+        /// GELU (Gaussian Error Linear Unit) activation function, computed using the error function (erf).
+        /// <remarks>
+        /// 公式为: <c>0.5 * x * (1 + erf(sqrt(0.5) * x))</c><br/>
+        /// Formula: <c>0.5 * x * (1 + erf(sqrt(0.5) * x))</c>
+        /// </remarks>
+        /// </summary>
+        kGELU_ERF = 12,
+
+        /// <summary>
+        /// GELU (Gaussian Error Linear Unit) 激活函数，使用 TanH 的近似计算。<br/>
+        /// GELU (Gaussian Error Linear Unit) activation function, computed using a TanH approximation.
+        /// <remarks>
+        /// 公式为: <c>0.5 * x * (1 + tanh(sqrt(2/pi) * (0.044715F * pow(x, 3) + x)))</c><br/>
+        /// Formula: <c>0.5 * x * (1 + tanh(sqrt(2/pi) * (0.044715F * pow(x, 3) + x)))</c>
+        /// </remarks>
+        /// </summary>
+        kGELU_TANH = 13
     };
+
 }
