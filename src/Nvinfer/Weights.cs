@@ -12,29 +12,64 @@ using System.Threading.Tasks;
 namespace JYPPX.TensorRtSharp.Nvinfer
 {
 
+    /// <summary>
+    /// 表示 TensorRT 权重的非托管布局结构。<br/>
+    /// Represents the unmanaged layout structure for TensorRT weights.
+    /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     public struct TrtWeights
     {
-        public TrtDataType type;     // 直接对应 C++ 的 TrtDataType
-                                  // C++ 的 "void const*" 对应 C# 的 IntPtr
-                                  // "const" 在这里只是一个承诺，P/Invoke 不关心它
-        public IntPtr values;     // 指向数据块的内存地址
-        public long count;        // C++ 的 int64_t 对应 C# 的 long (64位整数)
+        /// <summary>
+        /// 权重数据的数据类型。<br/>
+        /// The data type of the weights.
+        /// </summary>
+        public TrtDataType type;
+
+        /// <summary>
+        /// 指向权重数据块的内存地址。<br/>
+        /// Pointer to the memory address of the weights data block.
+        /// </summary>
+        public IntPtr values;
+
+        /// <summary>
+        /// 权重元素的数量。<br/>
+        /// The count of weight elements.
+        /// </summary>
+        public long count;
     }
+
     /// <summary>
-    /// 一个用于安全管理和访问 Weights 结构体及其非托管内存的包装类。
+    /// 一个用于安全管理和访问 <see cref="TrtWeights"/> 结构体及其非托管内存的包装类。<br/>
+    /// A wrapper class for safely managing and accessing the <see cref="TrtWeights"/> struct and its unmanaged memory.
     /// </summary>
     public sealed class Weights : IDisposable
     {
-        // C++ Weights 结构体的 C# 副本，可以直接传递给 P/Invoke
-        public TrtWeights NativeWeights { get; private set; }
-        // 跟踪非托管内存的所有权，用于防止重复释放
-        private bool isDisposed = false;
-        // 指向我们自己分配的非托管内存块，用于后续释放
-        private IntPtr ownedMemory = IntPtr.Zero;
         /// <summary>
-        /// 获取每个元素的字节大小。
+        /// 获取底层的、可直接用于互操作的原生 <see cref="TrtWeights"/> 结构体。<br/>
+        /// Gets the underlying native <see cref="TrtWeights"/> struct, which can be used directly for interop.
         /// </summary>
+        public TrtWeights NativeWeights { get; private set; }
+
+        /// <summary>
+        /// 跟踪非托管内存的所有权，用于防止重复释放。<br/>
+        /// Tracks the ownership of the unmanaged memory to prevent double-freeing.
+        /// </summary>
+        private bool isDisposed = false;
+
+        /// <summary>
+        /// 指向我们自己分配的非托管内存块，用于后续释放。<br/>
+        /// Pointer to the unmanaged memory block we allocated, used for later disposal.
+        /// </summary>
+        private IntPtr ownedMemory = IntPtr.Zero;
+
+        /// <summary>
+        /// 获取每个元素的字节大小。<br/>
+        /// Gets the size of each element in bytes.
+        /// </summary>
+        /// <exception cref="NotSupportedException">
+        /// 如果权重数据类型不受支持，则抛出此异常。<br/>
+        /// Thrown if the weight data type is not supported.
+        /// </exception>
         public int ElementSize
         {
             get
@@ -42,7 +77,7 @@ namespace JYPPX.TensorRtSharp.Nvinfer
                 return NativeWeights.type switch
                 {
                     TrtDataType.kFLOAT => sizeof(float),
-                    TrtDataType.kHALF => 2, // half 是 16 位
+                    TrtDataType.kHALF => 2, // half is 16-bit
                     TrtDataType.kINT8 => sizeof(sbyte),
                     TrtDataType.kINT32 => sizeof(int),
                     TrtDataType.kBOOL => sizeof(bool),
@@ -50,20 +85,24 @@ namespace JYPPX.TensorRtSharp.Nvinfer
                 };
             }
         }
+
         #region 构造函数
         /// <summary>
-        /// 从现有的 Weights 结构体创建一个只读包装器。该包装器不管理内存。
+        /// 从现有的 <see cref="TrtWeights"/> 结构体创建一个只读包装器。该包装器不管理内存。<br/>
+        /// Creates a read-only wrapper from an existing <see cref="TrtWeights"/> struct. This wrapper does not own the memory.
         /// </summary>
-        /// <param name="weights">一个已存在的 Weights 结构体。</param>
+        /// <param name="weights">一个已存在的 <see cref="TrtWeights"/> 结构体。<br/>An existing <see cref="TrtWeights"/> struct.</param>
         public Weights(TrtWeights weights)
         {
             NativeWeights = weights;
-            // ownedMemory 保持为 IntPtr.Zero，表示我们不拥有这块内存
+            // ownedMemory remains IntPtr.Zero, indicating we do not own this memory.
         }
+
         /// <summary>
-        /// 从 C# float 数组创建一个新的 Weights。该包装器会分配并管理非托管内存。
+        /// 从 C# <c>float</c> 数组创建一个新的 <see cref="Weights"/>。该包装器会分配并管理非托管内存。<br/>
+        /// Creates a new <see cref="Weights"/> from a C# <c>float</c> array. The wrapper allocates and manages the unmanaged memory.
         /// </summary>
-        /// <param name="data">要封装的浮点数据数组。</param>
+        /// <param name="data">要封装的浮点数据数组。<br/>The array of float data to wrap.</param>
         public Weights(float[] data)
         {
             if (data == null || data.Length == 0)
@@ -76,9 +115,10 @@ namespace JYPPX.TensorRtSharp.Nvinfer
         }
 
         /// <summary>
-        /// 从 C# int 数组创建一个新的 Weights。
+        /// 从 C# <c>int</c> 数组创建一个新的 <see cref="Weights"/>。<br/>
+        /// Creates a new <see cref="Weights"/> from a C# <c>int</c> array.
         /// </summary>
-        /// <param name="data">要封装的整数数据数组。</param>
+        /// <param name="data">要封装的整数数据数组。<br/>The array of integer data to wrap.</param>
         public Weights(int[] data)
         {
             if (data == null || data.Length == 0)
@@ -91,10 +131,16 @@ namespace JYPPX.TensorRtSharp.Nvinfer
 
         //可以继续添加为其他数据类型（如sbyte[]）提供的构造函数...
         #endregion
+
         #region 私有辅助方法
         /// <summary>
-        /// 分配非托管内存并从 C# 数组中复制数据。
+        /// 分配非托管内存并从 C# 数组中复制数据。<br/>
+        /// Allocates unmanaged memory and copies data from a C# array.
         /// </summary>
+        /// <typeparam name="T">数组元素的类型。<br/>The type of the array elements.</typeparam>
+        /// <param name="data">源数据数组。<br/>The source data array.</param>
+        /// <param name="dataType">对应的 TensorRT 数据类型。<br/>The corresponding TensorRT data type.</param>
+        /// <exception cref="NotSupportedException">如果指定的类型 <typeparamref name="T"/> 不受支持，则抛出此异常。<br/>Thrown if the specified type <typeparamref name="T"/> is not supported.</exception>
         private void AllocateMemoryAndCopy<T>(T[] data, TrtDataType dataType) where T : struct
         {
             ownedMemory = Marshal.AllocHGlobal(data.Length * Marshal.SizeOf<T>());
@@ -126,18 +172,20 @@ namespace JYPPX.TensorRtSharp.Nvinfer
             }
             catch
             {
-                // 如果复制失败，确保释放已分配的内存
+                // If copying fails, ensure the allocated memory is released.
                 Marshal.FreeHGlobal(ownedMemory);
                 ownedMemory = IntPtr.Zero;
                 throw;
             }
         }
         #endregion
+
         #region 数据访问方法
         /// <summary>
-        /// 将非托管数据读取为 float 数组。
+        /// 将非托管数据读取为 <c>float</c> 数组。<br/>
+        /// Reads the unmanaged data as a <c>float</c> array.
         /// </summary>
-        /// <returns>包含数据副本的 float 数组。</returns>
+        /// <returns>包含数据副本的 <c>float</c> 数组。<br/>A <c>float</c> array containing a copy of the data.</returns>
         public float[] ReadAsFloats()
         {
             if (NativeWeights.type != TrtDataType.kFLOAT || NativeWeights.values == IntPtr.Zero || NativeWeights.count <= 0)
@@ -146,10 +194,12 @@ namespace JYPPX.TensorRtSharp.Nvinfer
             Marshal.Copy(NativeWeights.values, result, 0, result.Length);
             return result;
         }
+
         /// <summary>
-        /// 将非托管数据读取为 int32 数组。
+        /// 将非托管数据读取为 <c>int32</c> 数组。<br/>
+        /// Reads the unmanaged data as a <c>int32</c> array.
         /// </summary>
-        /// <returns>包含数据副本的 int 数组。</returns>
+        /// <returns>包含数据副本的 <c>int</c> 数组。<br/>An <c>int</c> array containing a copy of the data.</returns>
         public int[] ReadAsInt32s()
         {
             if (NativeWeights.type != TrtDataType.kINT32 || NativeWeights.values == IntPtr.Zero || NativeWeights.count <= 0)
@@ -161,19 +211,26 @@ namespace JYPPX.TensorRtSharp.Nvinfer
 
         //可以继续添加其他类型的 Read 方法...
         #endregion
+
         #region IDisposable 实现
         /// <summary>
-        /// 释放由 Weights 占用的所有非托管资源。
+        /// 释放由 <see cref="Weights"/> 占用的所有非托管资源。<br/>
+        /// Releases all unmanaged resources used by the <see cref="Weights"/>.
         /// </summary>
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(this); // 防止终结器被调用
+            GC.SuppressFinalize(this); // Prevent the finalizer from being called.
         }
+
         /// <summary>
-        /// 释放资源的实际实现。
+        /// 释放资源的实际实现。<br/>
+        /// The actual implementation for releasing resources.
         /// </summary>
-        /// <param name="disposing">如果由 Dispose() 调用，则为 true；如果由终结器调用，则为 false。</param>
+        /// <param name="disposing">
+        /// 如果由 <see cref="Dispose()"/> 调用，则为 true；如果由终结器调用，则为 false。<br/>
+        /// <c>true</c> if called from <see cref="Dispose()"/>; <c>false</c> if called from a finalizer.
+        /// </param>
         private void Dispose(bool disposing)
         {
             if (!isDisposed)
@@ -182,14 +239,16 @@ namespace JYPPX.TensorRtSharp.Nvinfer
                 {
                     Marshal.FreeHGlobal(ownedMemory);
                     ownedMemory = IntPtr.Zero;
-                    // 可选：将结构体中的指针清零，以防止悬空指针
+                    // Optional: Zero out the pointer in the struct to prevent dangling pointers.
                     NativeWeights = new TrtWeights { type = NativeWeights.type, values = IntPtr.Zero, count = 0 };
                 }
                 isDisposed = true;
             }
         }
+
         /// <summary>
-        /// 析构函数 (Finalizer)，作为安全网，以防忘记调用 Dispose()。
+        /// 析构函数 (Finalizer)，作为安全网，以防忘记调用 <see cref="Dispose()"/>。<br/>
+        /// Finalizer, acting as a safety net in case <see cref="Dispose()"/> is not called.
         /// </summary>
         ~Weights()
         {
@@ -197,5 +256,6 @@ namespace JYPPX.TensorRtSharp.Nvinfer
         }
         #endregion
     }
+
 
 }
