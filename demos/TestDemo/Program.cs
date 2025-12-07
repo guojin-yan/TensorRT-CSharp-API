@@ -1,5 +1,5 @@
 ﻿using JYPPX.TensorRtSharp.Cuda;
-using JYPPX.TensorRtSharp.Cuda.Memory;
+using JYPPX.TensorRtSharp.Cuda;
 using JYPPX.TensorRtSharp.ExternalInterface;
 using JYPPX.TensorRtSharp.Nvinfer;
 using OpenCvSharp;

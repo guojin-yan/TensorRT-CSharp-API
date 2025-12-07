@@ -1,5 +1,4 @@
 using JYPPX.TensorRtSharp.Cuda;
-using JYPPX.TensorRtSharp.Cuda.Memory;
 using JYPPX.TensorRtSharp.Nvinfer;
 using OpenCvSharp;
 using OpenCvSharp.Dnn;

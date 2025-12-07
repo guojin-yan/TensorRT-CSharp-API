@@ -10,7 +10,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace JYPPX.TensorRtSharp.Cuda.Memory
+namespace JYPPX.TensorRtSharp.Cuda
 {
 
     /// <summary>
@@ -20,7 +20,48 @@ namespace JYPPX.TensorRtSharp.Cuda.Memory
     /// <typeparam name="T">内存中元素的类型，必须是一个结构体。/ The type of elements in the memory, must be a struct.</typeparam>
     public class Cuda1DMemory<T> : DisposableTrtObject where T : struct
     {
-        ulong length = 0;
+        // 私有字段，类型保持为 long 以便进行大的算术运算，然后转换为 ulong 调用 API
+        private ulong length = 0;
+        /// <summary>
+        /// 获取内存中的元素数量。
+        /// Gets the number of elements in the memory.
+        /// </summary>
+        public ulong SizeElements => (ulong)length;
+
+        /// <summary>
+        /// 获取内存的总大小（以字节为单位）。
+        /// Gets the total size of the memory in bytes.
+        /// </summary>
+        public ulong SizeBytes => length * (ulong)Marshal.SizeOf(typeof(T));
+        /// <summary>
+        /// 获取指向设备内存的原始指针。
+        /// Gets the raw pointer to the device memory.
+        /// </summary>
+        public IntPtr DevicePointer => ptr;
+
+        // --- 访问器 ---
+
+        /// <summary>
+        /// 获取指向设备内存的原始指针。
+        /// Gets the raw pointer to the device memory.
+        /// </summary>
+        /// <returns>设备内存的指针。/ The pointer to the device memory.</returns>
+        public IntPtr get() { return ptr; }
+
+        /// <summary>
+        /// 获取内存中的元素数量。
+        /// Gets the number of elements in the memory.
+        /// </summary>
+        /// <returns>元素的数量。/ The number of elements.</returns>
+        public ulong size() { return length; }
+
+        /// <summary>
+        /// 获取内存的总大小（以字节为单位）。
+        /// Gets the total size of the memory in bytes.
+        /// </summary>
+        /// <returns>内存的字节大小。/ The size of the memory in bytes.</returns>
+        public ulong sizeBytes() { return length * (ulong)Marshal.SizeOf(typeof(T)); }
+
 
         /// <summary>
         /// 初始化一个空的 Cuda1DMemory 实例。
@@ -71,10 +112,18 @@ namespace JYPPX.TensorRtSharp.Cuda.Memory
         /// <param name="host_ptr">源主机内存数组。/ The source host memory array.</param>
         public void copyFromHost(T[] host_ptr)
         {
+            // 边界检查：确保主机数组不会超出设备内存范围
+            if ((ulong)host_ptr.Length > SizeElements)
+            {
+                throw new CudaException($"Source host array length ({host_ptr.Length}) exceeds allocated device memory capacity ({SizeElements}).");
+            }
+
             CudaHandleException.handler(
-            NativeMethods.cudaRuntime_cudaMemcpy(ptr,
-            Marshal.UnsafeAddrOfPinnedArrayElement(host_ptr, 0),
-            length * (ulong)Marshal.SizeOf(typeof(T)), CudaMemcpyKind.HostToDevice));
+                NativeMethods.cudaRuntime_cudaMemcpy(ptr,
+                Marshal.UnsafeAddrOfPinnedArrayElement(host_ptr, 0),
+                (ulong)host_ptr.Length * (ulong)Marshal.SizeOf(typeof(T)), CudaMemcpyKind.HostToDevice));
+
+
         }
 
         /// <summary>
@@ -88,7 +137,7 @@ namespace JYPPX.TensorRtSharp.Cuda.Memory
             NativeMethods.cudaRuntime_cudaMemcpy(
                 Marshal.UnsafeAddrOfPinnedArrayElement(host_ptr, 0),
                 ptr,
-                length * (ulong)Marshal.SizeOf(typeof(T)),
+                (length < (ulong)host_ptr.Length ? length : (ulong)host_ptr.Length) * (ulong)Marshal.SizeOf(typeof(T)),
                 CudaMemcpyKind.DeviceToHost));
         }
 
@@ -100,13 +149,21 @@ namespace JYPPX.TensorRtSharp.Cuda.Memory
         /// <param name="stream">用于执行复制操作的CUDA流。/ The CUDA stream to perform the copy operation.</param>
         public void copyFromHostAsync(T[] host_ptr, CudaStream stream)
         {
+            // 边界检查：确保主机数组不会超出设备内存范围
+            if ((ulong)host_ptr.Length > SizeElements)
+            {
+                throw new CudaException($"Source host array length ({host_ptr.Length}) exceeds allocated device memory capacity ({SizeElements}).");
+            }
+
             CudaHandleException.handler(
-            NativeMethods.cudaRuntime_cudaMemcpyAsync(
-                ptr,
-                Marshal.UnsafeAddrOfPinnedArrayElement(host_ptr, 0),
-                length * (ulong)Marshal.SizeOf(typeof(T)),
-                CudaMemcpyKind.HostToDevice,
-                stream.TrtPtr));
+                NativeMethods.cudaRuntime_cudaMemcpyAsync(
+                    ptr,
+                    Marshal.UnsafeAddrOfPinnedArrayElement(host_ptr, 0),
+                        (ulong)host_ptr.Length * (ulong)Marshal.SizeOf(typeof(T)),
+                    CudaMemcpyKind.HostToDevice,
+                    stream.TrtPtr));
+
+
         }
 
         /// <summary>
@@ -121,7 +178,7 @@ namespace JYPPX.TensorRtSharp.Cuda.Memory
             NativeMethods.cudaRuntime_cudaMemcpyAsync(
                 Marshal.UnsafeAddrOfPinnedArrayElement(host_ptr, 0),
                 ptr,
-                length * (ulong)Marshal.SizeOf(typeof(T)),
+                (length < (ulong)host_ptr.Length ? length : (ulong)host_ptr.Length) * (ulong)Marshal.SizeOf(typeof(T)),
                 CudaMemcpyKind.DeviceToHost,
             stream.TrtPtr));
         }
@@ -187,28 +244,7 @@ namespace JYPPX.TensorRtSharp.Cuda.Memory
                     advice, 0));
         }
 
-        // --- 访问器 ---
 
-        /// <summary>
-        /// 获取指向设备内存的原始指针。
-        /// Gets the raw pointer to the device memory.
-        /// </summary>
-        /// <returns>设备内存的指针。/ The pointer to the device memory.</returns>
-        public IntPtr get() { return ptr; }
-
-        /// <summary>
-        /// 获取内存中的元素数量。
-        /// Gets the number of elements in the memory.
-        /// </summary>
-        /// <returns>元素的数量。/ The number of elements.</returns>
-        public ulong size() { return length; }
-
-        /// <summary>
-        /// 获取内存的总大小（以字节为单位）。
-        /// Gets the total size of the memory in bytes.
-        /// </summary>
-        /// <returns>内存的字节大小。/ The size of the memory in bytes.</returns>
-        public ulong sizeBytes() { return length * (ulong)Marshal.SizeOf(typeof(T)); }
 
         /// <summary>
         /// 从另一个GPU设备（对等设备）异步复制数据到此内存。
@@ -219,6 +255,12 @@ namespace JYPPX.TensorRtSharp.Cuda.Memory
         /// <param name="stream">用于执行复制操作的CUDA流。/ The CUDA stream to perform the copy operation.</param>
         public void copyFromPeerAsync(Cuda1DMemory<T> src, int src_device_id, CudaStream stream)
         {
+            // 检查源和目标大小是否匹配
+            if (src.SizeBytes != SizeBytes)
+            {
+                throw new CudaException($"Source memory size ({src.SizeBytes} bytes) does not match destination memory size ({SizeBytes} bytes).");
+            }
+
             CudaHandleException.handler(
                 NativeMethods.cudaRuntime_cudaGetDevice(out int device));
             CudaHandleException.handler(
@@ -235,6 +277,10 @@ namespace JYPPX.TensorRtSharp.Cuda.Memory
         /// <param name="stream">用于执行复制操作的CUDA流。/ The CUDA stream to perform the copy operation.</param>
         public void copyToPeerAsync(Cuda1DMemory<T> dst, int dst_device_id, CudaStream stream)
         {
+            if (dst.SizeBytes != SizeBytes)
+            {
+                throw new CudaException($"Destination memory size ({dst.SizeBytes} bytes) does not match source memory size ({SizeBytes} bytes).");
+            }
             CudaHandleException.handler(
                 NativeMethods.cudaRuntime_cudaGetDevice(out int device));
             CudaHandleException.handler(

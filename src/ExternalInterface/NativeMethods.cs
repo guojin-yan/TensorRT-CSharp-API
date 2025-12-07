@@ -5,7 +5,6 @@ using System.Runtime.InteropServices;
 using System.Linq;
 using JYPPX.TensorRtSharp.Exceptions;
 using JYPPX.TensorRtSharp.Internal.PInvoke;
-using JYPPX.TensorRtSharpv.Internal.PInvoke;
 
 
 

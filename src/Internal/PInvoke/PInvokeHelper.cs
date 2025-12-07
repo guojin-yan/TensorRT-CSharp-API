@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace JYPPX.TensorRtSharpv.Internal.PInvoke
+namespace JYPPX.TensorRtSharp.Internal.PInvoke
 {
 
     public static class PInvokeHelper
