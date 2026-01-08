@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+	
+    <ItemGroup>
+        <PackageReference Include="OpenCvSharp4.Windows" Version="4.11.0.20250507" />
+		<PackageReference Include="JYPPX.TensorRT.CSharp.API.runtime.win-x64.cuda11" Version="0.0.4" />
+    </ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\TensorRtSharp.csproj" />
+	</ItemGroup>
+</Project>
