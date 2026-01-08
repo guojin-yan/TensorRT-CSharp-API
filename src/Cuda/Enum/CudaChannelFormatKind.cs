@@ -11,10 +11,10 @@ namespace JYPPX.TensorRtSharp.Cuda
      */
     public enum CudaChannelFormatKind
     {
-        cudaChannelFormatKindSigned = 0,      /**< Signed channel format */
-        cudaChannelFormatKindUnsigned = 1,      /**< Unsigned channel format */
-        cudaChannelFormatKindFloat = 2,      /**< Float channel format */
-        cudaChannelFormatKindNone = 3,      /**< No channel format */
-        cudaChannelFormatKindNV12 = 4
+        Signed = 0,      /**< Signed channel format */
+        Unsigned = 1,      /**< Unsigned channel format */
+        Float = 2,      /**< Float channel format */
+        None = 3,      /**< No channel format */
+        NV12 = 4
     };
 }

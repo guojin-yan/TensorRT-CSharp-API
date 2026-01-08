@@ -23,6 +23,7 @@ namespace JYPPX.TensorRtSharp.Nvinfer
         /// </summary>
         public GpuAllocator()
         {
+            this.ptr = IntPtr.Zero;
         }
 
         /// <summary>

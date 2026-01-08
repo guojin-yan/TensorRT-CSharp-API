@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net9.0;net8.0;net7.0;net6.0;net5.0;netcoreapp3.1;net471;net472;net48;net481</TargetFrameworks>
+    <TargetFrameworks>net10.0;net9.0;net8.0;net7.0;net6.0;net5.0;netcoreapp3.1;net471;net472;net48;net481</TargetFrameworks>
     <ImplicitUsings>disable</ImplicitUsings>
     <LangVersion>10</LangVersion>
     <RootNamespace>JYPPX.TensorRtSharp</RootNamespace>
@@ -9,7 +9,7 @@
     <!--Set NuGet Message-->
     <PackageId>JYPPX.TensorRT.CSharp.API </PackageId>
     <Title>TensorRtSharp</Title>
-    <Version>0.0.3</Version>
+    <Version>0.0.4</Version>
     <Authors>Guojin Yan</Authors>
     <Company>Guojin Yan</Company>
     <Product>JYPPX.TensorRT.CSharp.API </Product>
@@ -20,7 +20,7 @@
     <PackageOutputPath>./../nuget</PackageOutputPath>
     <NeutralLanguage>zh</NeutralLanguage>
     <PackageReleaseNotes></PackageReleaseNotes>
-    <RootNamespace>TensorRtSharp</RootNamespace>
+    <RootNamespace>JYPPX.TensorRtSharp</RootNamespace>
     <AssemblyName>TensorRtSharp</AssemblyName>
     <PackageTags>TensorRtSharp;TensorRT;CSharp;C#-API;ONNX</PackageTags>
     <Copyright>Copyright © 2025 Yan Guojin. All Rights Reserved.</Copyright>

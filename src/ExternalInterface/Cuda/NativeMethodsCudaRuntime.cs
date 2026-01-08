@@ -16,9 +16,6 @@ namespace JYPPX.TensorRtSharp.ExternalInterface
 {
     public static partial class NativeMethods
     {
-
-   
-
         [Pure, DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaDeviceReset",
             CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public extern static CudaExceptionStatus cudaRuntime_cudaDeviceReset();
@@ -90,26 +87,26 @@ namespace JYPPX.TensorRtSharp.ExternalInterface
         [Pure, DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaIpcGetEventHandle",
             CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public extern static CudaExceptionStatus cudaRuntime_cudaIpcGetEventHandle(
-            out CudaIpcEventHandle_t handle,
+            out CudaIpcEventHandle handle,
             IntPtr cudaEvent);
 
         [Pure, DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaIpcOpenEventHandle",
             CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public extern static CudaExceptionStatus cudaRuntime_cudaIpcOpenEventHandle(
             out IntPtr cudaEvent,
-            CudaIpcEventHandle_t handle);
+            CudaIpcEventHandle handle);
 
         [Pure, DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaIpcGetMemHandle",
             CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public extern static CudaExceptionStatus cudaRuntime_cudaIpcGetMemHandle(
-            out CudaIpcMemHandle_t handle,
+            out CudaIpcMemHandle handle,
             IntPtr devPtr);
 
         [Pure, DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaIpcOpenMemHandle",
             CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public extern static CudaExceptionStatus cudaRuntime_cudaIpcOpenMemHandle(
             out IntPtr devPtr,
-            CudaIpcMemHandle_t handle,
+            CudaIpcMemHandle handle,
             uint flags);
 
         [Pure, DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaIpcCloseMemHandle",
@@ -156,17 +153,17 @@ namespace JYPPX.TensorRtSharp.ExternalInterface
         /// <returns>CUDA 成功状态码。</returns>
         [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaDeviceGetDefaultMemPool",
             CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public extern static CudaExceptionStatus cudaRuntime_cudaDeviceGetDefaultMemPool(out CudaMemPool_t memPool, int device);
+        public extern static CudaExceptionStatus cudaRuntime_cudaDeviceGetDefaultMemPool(out CudaMemPoolStr memPool, int device);
 
 
         [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaDeviceSetMemPool",
             CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public extern static CudaExceptionStatus cudaRuntime_cudaDeviceSetMemPool(int device, CudaMemPool_t memPool);
+        public extern static CudaExceptionStatus cudaRuntime_cudaDeviceSetMemPool(int device, CudaMemPoolStr memPool);
 
 
         [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaDeviceGetMemPool",
             CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public extern static CudaExceptionStatus cudaRuntime_cudaDeviceGetMemPool(out CudaMemPool_t memPool, int device);
+        public extern static CudaExceptionStatus cudaRuntime_cudaDeviceGetMemPool(out CudaMemPoolStr memPool, int device);
 
 
         [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaDeviceGetP2PAttribute",
@@ -346,189 +343,189 @@ namespace JYPPX.TensorRtSharp.ExternalInterface
             uint flags);
 
 
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaEventCreate",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaEventCreate(out IntPtr cudaEvent);
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaEventCreate",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaEventCreate(out IntPtr cudaEvent);
 
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaEventCreateWithFlags",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaEventCreateWithFlags(out IntPtr cudaEvent, uint flags);
-
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaEventRecord",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaEventRecord(IntPtr cudaEvent, IntPtr stream);
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaEventCreateWithFlags",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaEventCreateWithFlags(out IntPtr cudaEvent, uint flags);
 
 
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaEventRecordWithFlags",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaEventRecordWithFlags(IntPtr cudaEvent, IntPtr stream, uint flags);
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaEventRecord",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaEventRecord(IntPtr cudaEvent, IntPtr stream);
 
 
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaEventQuery",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaEventQuery(IntPtr cudaEvent);
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaEventRecordWithFlags",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaEventRecordWithFlags(IntPtr cudaEvent, IntPtr stream, uint flags);
 
 
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaEventSynchronize",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaEventSynchronize(IntPtr cudaEvent);
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaEventQuery",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaEventQuery(IntPtr cudaEvent);
 
 
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaEventDestroy",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaEventDestroy(IntPtr cudaEvent);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaEventElapsedTime",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaEventElapsedTime(out float ms, IntPtr start, IntPtr end);
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaEventSynchronize",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaEventSynchronize(IntPtr cudaEvent);
 
 
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaImportExternalMemory",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaImportExternalMemory(
-        //    out CudaExternalMemory_t extMem_out,
-        //    ref CudaExternalMemoryHandleDesc memHandleDesc);
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaEventDestroy",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaEventDestroy(IntPtr cudaEvent);
 
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaExternalMemoryGetMappedBuffer",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaExternalMemoryGetMappedBuffer(
-        //    out IntPtr devPtr,
-        //    CudaExternalMemory_t extMem,
-        //    ref CudaExternalMemoryBufferDesc bufferDesc);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaExternalMemoryGetMappedMipmappedArray",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaExternalMemoryGetMappedMipmappedArray(
-        //    out CudaMipmappedArray_t mipmap,
-        //    CudaExternalMemory_t extMem,
-        //    ref CudaExternalMemoryMipmappedArrayDesc mipmapDesc);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaDestroyExternalMemory",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaDestroyExternalMemory(CudaExternalMemory_t extMem);
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaEventElapsedTime",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaEventElapsedTime(out float ms, IntPtr start, IntPtr end);
 
 
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaImportExternalSemaphore",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaImportExternalSemaphore(
-        //    out CudaExternalSemaphore_t extSem_out,
-        //    ref CudaExternalSemaphoreHandleDesc semHandleDesc);
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaImportExternalMemory",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaImportExternalMemory(
+            out CudaExternalMemory_t extMem_out,
+            ref CudaExternalMemoryHandleDesc memHandleDesc);
 
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaSignalExternalSemaphoresAsync",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaSignalExternalSemaphoresAsync(
-        //    CudaExternalSemaphore_t[] extSemArray, // 在 C# 中使用数组封送 C 数组
-        //    CudaExternalSemaphoreSignalParams[] paramsArray,
-        //    uint numExtSems,
-        //    IntPtr stream);
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaExternalMemoryGetMappedBuffer",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaExternalMemoryGetMappedBuffer(
+            out IntPtr devPtr,
+            CudaExternalMemory_t extMem,
+            ref CudaExternalMemoryBufferDesc bufferDesc);
 
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaWaitExternalSemaphoresAsync",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaWaitExternalSemaphoresAsync(
-        //    CudaExternalSemaphore_t[] extSemArray,
-        //    CudaExternalSemaphoreWaitParams[] paramsArray,
-        //    uint numExtSems,
-        //    IntPtr stream);
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaExternalMemoryGetMappedMipmappedArray",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaExternalMemoryGetMappedMipmappedArray(
+            out CudaMipmappedArray_t mipmap,
+            CudaExternalMemory_t extMem,
+            ref CudaExternalMemoryMipmappedArrayDesc mipmapDesc);
 
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaDestroyExternalSemaphore",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaDestroyExternalSemaphore(CudaExternalSemaphore_t extSem);
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaDestroyExternalMemory",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaDestroyExternalMemory(CudaExternalMemory_t extMem);
 
 
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaLaunchKernel",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaLaunchKernel(
-        //    IntPtr func, 
-        //    dim3 gridDim,
-        //    dim3 blockDim,
-        //    IntPtr[] args, 
-        //    uint sharedMem, 
-        //    IntPtr stream);
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaImportExternalSemaphore",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaImportExternalSemaphore(
+            out CudaExternalSemaphore_t extSem_out,
+            ref CudaExternalSemaphoreHandleDesc semHandleDesc);
 
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaLaunchCooperativeKernel",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaLaunchCooperativeKernel(
-        //    IntPtr func,
-        //    dim3 gridDim,
-        //    dim3 blockDim,
-        //    IntPtr[] args,
-        //    uint sharedMem,
-        //    IntPtr stream);
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaSignalExternalSemaphoresAsync",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaSignalExternalSemaphoresAsync(
+            CudaExternalSemaphore_t[] extSemArray, // 在 C# 中使用数组封送 C 数组
+            CudaExternalSemaphoreSignalParams[] paramsArray,
+            uint numExtSems,
+            IntPtr stream);
 
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaWaitExternalSemaphoresAsync",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaWaitExternalSemaphoresAsync(
+            CudaExternalSemaphore_t[] extSemArray,
+            CudaExternalSemaphoreWaitParams[] paramsArray,
+            uint numExtSems,
+            IntPtr stream);
 
-        //// ===================================================================
-        //// Function Configuration APIs
-        //// ===================================================================
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaFuncSetCacheConfig",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaFuncSetCacheConfig(
-        //    IntPtr func,
-        //    CudaFuncCache cacheConfig);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaFuncSetSharedMemConfig",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaFuncSetSharedMemConfig(
-        //    IntPtr func,
-        //    CudaSharedMemConfig config);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaFuncGetAttributes",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaFuncGetAttributes(
-        //    ref CudaFuncAttributes attr,
-        //    IntPtr func);
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaDestroyExternalSemaphore",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaDestroyExternalSemaphore(CudaExternalSemaphore_t extSem);
 
 
-        //// ===================================================================
-        //// Function Attribute Management
-        //// ===================================================================
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaLaunchKernel",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaLaunchKernel(
+            IntPtr func,
+            dim3 gridDim,
+            dim3 blockDim,
+            IntPtr[] args,
+            uint sharedMem,
+            IntPtr stream);
 
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaFuncSetAttribute",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaFuncSetAttribute(
-        //    IntPtr func,
-        //    CudaFuncAttribute attr,
-        //    int value);
-
-
-        //// ===================================================================
-        //// Host Function APIs
-        //// ===================================================================
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaLaunchHostFunc",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaLaunchHostFunc(
-        //    IntPtr stream,
-        //    CudaHostFn fn,
-        //    IntPtr userData);
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaLaunchCooperativeKernel",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaLaunchCooperativeKernel(
+            IntPtr func,
+            dim3 gridDim,
+            dim3 blockDim,
+            IntPtr[] args,
+            uint sharedMem,
+            IntPtr stream);
 
 
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaOccupancyMaxActiveBlocksPerMultiprocessor",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaOccupancyMaxActiveBlocksPerMultiprocessor(
-        //    out int numBlocks,
-        //    IntPtr func,
-        //    int blockSize,
-        //    ulong dynamicSMemSize // ulong -> UIntPtr
-        //);
+        // ===================================================================
+        // Function Configuration APIs
+        // ===================================================================
 
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaOccupancyAvailableDynamicSMemPerBlock",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaOccupancyAvailableDynamicSMemPerBlock(
-        //    out ulong dynamicSmemSize, // ulong -> UIntPtr
-        //    IntPtr func,
-        //    int numBlocks,
-        //    int blockSize);
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaFuncSetCacheConfig",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaFuncSetCacheConfig(
+            IntPtr func,
+            CudaFuncCache cacheConfig);
 
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(
-        //    out int numBlocks,
-        //    IntPtr func,
-        //    int blockSize,
-        //    ulong dynamicSMemSize, // ulong -> UIntPtr
-        //    uint flags);
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaFuncSetSharedMemConfig",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaFuncSetSharedMemConfig(
+            IntPtr func,
+            CudaSharedMemConfig config);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaFuncGetAttributes",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaFuncGetAttributes(
+            ref CudaFuncAttributes attr,
+            IntPtr func);
+
+
+        // ===================================================================
+        // Function Attribute Management
+        // ===================================================================
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaFuncSetAttribute",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaFuncSetAttribute(
+            IntPtr func,
+            CudaFuncAttribute attr,
+            int value);
+
+
+        // ===================================================================
+        // Host Function APIs
+        // ===================================================================
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaLaunchHostFunc",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaLaunchHostFunc(
+            IntPtr stream,
+            CudaHostFn fn,
+            IntPtr userData);
+
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaOccupancyMaxActiveBlocksPerMultiprocessor",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaOccupancyMaxActiveBlocksPerMultiprocessor(
+            out int numBlocks,
+            IntPtr func,
+            int blockSize,
+            ulong dynamicSMemSize // ulong -> UIntPtr
+        );
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaOccupancyAvailableDynamicSMemPerBlock",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaOccupancyAvailableDynamicSMemPerBlock(
+            out ulong dynamicSmemSize, // ulong -> UIntPtr
+            IntPtr func,
+            int numBlocks,
+            int blockSize);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(
+            out int numBlocks,
+            IntPtr func,
+            int blockSize,
+            ulong dynamicSMemSize, // ulong -> UIntPtr
+            uint flags);
 
 
 
@@ -1015,45 +1012,45 @@ namespace JYPPX.TensorRtSharp.ExternalInterface
         [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaMemPoolCreate",
             CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public extern static CudaExceptionStatus cudaRuntime_cudaMemPoolCreate(
-            out CudaMemPool_t memPool,
+            out IntPtr memPool,
             ref CudaMemPoolProps poolProps);
 
         [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaMemPoolDestroy",
             CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public extern static CudaExceptionStatus cudaRuntime_cudaMemPoolDestroy(CudaMemPool_t memPool);
+        public extern static CudaExceptionStatus cudaRuntime_cudaMemPoolDestroy(IntPtr memPool);
 
         [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaMemPoolGetAttribute",
             CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public extern static CudaExceptionStatus cudaRuntime_cudaMemPoolGetAttribute(
-            CudaMemPool_t memPool,
+            IntPtr memPool,
             CudaMemPoolAttr attr,
             IntPtr value); // C: void* -> 将取出的值封送到此IntPtr指向的内存
 
         [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaMemPoolSetAttribute",
             CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public extern static CudaExceptionStatus cudaRuntime_cudaMemPoolSetAttribute(
-            CudaMemPool_t memPool,
+            IntPtr memPool,
             CudaMemPoolAttr attr,
             IntPtr value); // C: void* -> 从此IntPtr指向的内存读取值
 
         [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaMemPoolTrimTo",
             CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public extern static CudaExceptionStatus cudaRuntime_cudaMemPoolTrimTo(
-            CudaMemPool_t memPool,
+            IntPtr memPool,
             ulong minBytesToKeep);
 
         [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaMemPoolSetAccess",
             CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public extern static CudaExceptionStatus cudaRuntime_cudaMemPoolSetAccess(
-            CudaMemPool_t memPool,
-            IntPtr descList, // C: const struct cudaMemAccessDesc* -> 使用结构体数组/缓冲区
+            IntPtr memPool,
+            ref CudaMemAccessDesc descList, // C: const struct cudaMemAccessDesc* -> 使用结构体数组/缓冲区
             ulong count);
 
         [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaMemPoolGetAccess",
             CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public extern static CudaExceptionStatus cudaRuntime_cudaMemPoolGetAccess(
             out CudaMemAccessFlags flags,
-            CudaMemPool_t memPool,
+            IntPtr memPool,
             ref CudaMemLocation location);
 
         [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaMallocAsync",
@@ -1074,21 +1071,21 @@ namespace JYPPX.TensorRtSharp.ExternalInterface
         public extern static CudaExceptionStatus cudaRuntime_cudaMallocFromPoolAsync(
             out IntPtr ptr,
             ulong size,
-            CudaMemPool_t memPool,
+            IntPtr memPool,
             IntPtr stream);
 
         [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaMemPoolExportToShareableHandle",
             CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public extern static CudaExceptionStatus cudaRuntime_cudaMemPoolExportToShareableHandle(
             IntPtr shareableHandle, // C: void* -> 调用者负责分配并传入指向缓冲区的指针
-            CudaMemPool_t memPool,
+            IntPtr memPool,
             CudaMemAllocationHandleType handleType,
             uint flags);
 
         [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaMemPoolImportFromShareableHandle",
             CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public extern static CudaExceptionStatus cudaRuntime_cudaMemPoolImportFromShareableHandle(
-            out CudaMemPool_t memPool,
+            out IntPtr memPool,
             IntPtr shareableHandle,
             CudaMemAllocationHandleType handleType,
             uint flags);
@@ -1096,15 +1093,15 @@ namespace JYPPX.TensorRtSharp.ExternalInterface
         [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaMemPoolExportPointer",
             CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public extern static CudaExceptionStatus cudaRuntime_cudaMemPoolExportPointer(
-            IntPtr exportData, // C: struct cudaMemPoolPtrExportData* -> 传入指向结构体的指针
+            out CudaMemPoolPtrExportData exportData, // C: struct cudaMemPoolPtrExportData* -> 传入指向结构体的指针
             IntPtr ptr);
 
         [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaMemPoolImportPointer",
             CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public extern static CudaExceptionStatus cudaRuntime_cudaMemPoolImportPointer(
             out IntPtr ptr,
-            CudaMemPool_t memPool,
-            IntPtr exportData); // C: struct cudaMemPoolPtrExportData*
+            IntPtr memPool,
+            ref CudaMemPoolPtrExportData exportData); // C: struct cudaMemPoolPtrExportData*
 
 
         // ===================================================================
@@ -1258,642 +1255,642 @@ namespace JYPPX.TensorRtSharp.ExternalInterface
         public extern static CudaExceptionStatus cudaRuntime_cudaRuntimeGetVersion(out int runtimeVersion);
 
 
-        //// ===================================================================
-        //// Cuda Graph API (Initial Set)
-        //// ===================================================================
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphCreate",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphCreate(
-        //    out CudaGraph_t pGraph,
-        //    uint flags);
-
-        //// 注意: cudaGraphAddKernelNode 和 Get/Set/Params 方法中的指针数组在 C# 中
-        //// 需要特殊处理。最稳健的方式是传入一个 IntPtr，指向一个预分配的非托管数组。
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphAddKernelNode",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphAddKernelNode(
-        //    out CudaGraphNode_t pGraphNode,
-        //    CudaGraph_t graph,
-        //    IntPtr pDependencies,  // C: const cudaGraphNode_t*
-        //    ulong numDependencies, // C: size_t
-        //    ref cudaKernelNodeParams pNodeParams);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphKernelNodeGetParams",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphKernelNodeGetParams(
-        //    CudaGraphNode_t node,
-        //    out cudaKernelNodeParams pNodeParams);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphKernelNodeSetParams",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphKernelNodeSetParams(
-        //    CudaGraphNode_t node,
-        //    ref cudaKernelNodeParams pNodeParams);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphKernelNodeCopyAttributes",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphKernelNodeCopyAttributes(
-        //    CudaGraphNode_t hSrc,
-        //    CudaGraphNode_t hDst);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphKernelNodeGetAttribute",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphKernelNodeGetAttribute(
-        //    CudaGraphNode_t hNode,
-        //    cudaKernelNodeAttrID attr,
-        //    ref cudaKernelNodeAttrValue value_out); // union 需要作为 ref struct
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphKernelNodeSetAttribute",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphKernelNodeSetAttribute(
-        //    CudaGraphNode_t hNode,
-        //    cudaKernelNodeAttrID attr,
-        //    ref cudaKernelNodeAttrValue value);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphAddMemcpyNode",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphAddMemcpyNode(
-        //    out CudaGraphNode_t pGraphNode,
-        //    CudaGraph_t graph,
-        //    IntPtr pDependencies,
-        //    ulong numDependencies,
-        //    ref cudaMemcpy3DParms pCopyParams);
-
-
-
-        //// ===================================================================
-        //// Conditional Compilation Block for CUDA API Version >= 11010
-        //// ===================================================================
-
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphAddMemcpyNodeToSymbol",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphAddMemcpyNodeToSymbol(
-        //    out CudaGraphNode_t pGraphNode,
-        //    CudaGraph_t graph,
-        //    IntPtr pDependencies,
-        //    ulong numDependencies,
-        //    IntPtr symbol,
-        //    IntPtr src,
-        //    ulong count,
-        //    ulong offset,
-        //    CudaMemcpyKind kind);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphAddMemcpyNodeFromSymbol",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphAddMemcpyNodeFromSymbol(
-        //    out CudaGraphNode_t pGraphNode,
-        //    CudaGraph_t graph,
-        //    IntPtr pDependencies,
-        //    ulong numDependencies,
-        //    IntPtr dst,
-        //    IntPtr symbol,
-        //    ulong count,
-        //    ulong offset,
-        //    CudaMemcpyKind kind);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphAddMemcpyNode1D",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphAddMemcpyNode1D(
-        //    out CudaGraphNode_t pGraphNode,
-        //    CudaGraph_t graph,
-        //    IntPtr pDependencies,
-        //    ulong numDependencies,
-        //    IntPtr dst,
-        //    IntPtr src,
-        //    ulong count,
-        //    CudaMemcpyKind kind);
-
-        //// 注意: 这里的 Get/Set Params 方法因为函数签名变化，其行为也变了。
-        //// 它们不再操作 cudaMemcpy3DParms 结构体。
-        //// 为了防止与无版本标识的同名方法冲突，可以重命名或放在不同的部分。
-        //// 这里我们保持原名，因为 C++ 的重载在 C 中是通过不同的 EntryPoint 名称解决的。
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphMemcpyNodeSetParamsToSymbol",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphMemcpyNodeSetParamsToSymbol(
-        //    CudaGraphNode_t node,
-        //    IntPtr symbol,
-        //    IntPtr src,
-        //    ulong count,
-        //    ulong offset,
-        //    CudaMemcpyKind kind);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphMemcpyNodeSetParamsFromSymbol",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphMemcpyNodeSetParamsFromSymbol(
-        //    CudaGraphNode_t node,
-        //    IntPtr dst,
-        //    IntPtr symbol,
-        //    ulong count,
-        //    ulong offset,
-        //    CudaMemcpyKind kind);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphMemcpyNodeSetParams1D",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphMemcpyNodeSetParams1D(
-        //    CudaGraphNode_t node,
-        //    IntPtr dst,
-        //    IntPtr src,
-        //    ulong count,
-        //    CudaMemcpyKind kind);
-
-
-        //// ===================================================================
-        //// Core CUDA Graph API Nodes (No Version Condition)
-        //// ===================================================================
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphMemcpyNodeGetParams",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphMemcpyNodeGetParams(
-        //    CudaGraphNode_t node,
-        //    out cudaMemcpy3DParms pNodeParams);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphMemcpyNodeSetParams",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphMemcpyNodeSetParams(
-        //    CudaGraphNode_t node,
-        //    ref cudaMemcpy3DParms pNodeParams);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphAddMemsetNode",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphAddMemsetNode(
-        //    out CudaGraphNode_t pGraphNode,
-        //    CudaGraph_t graph,
-        //    IntPtr pDependencies,
-        //    ulong numDependencies,
-        //    ref cudaMemsetParams pMemsetParams);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphMemsetNodeGetParams",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphMemsetNodeGetParams(
-        //    CudaGraphNode_t node,
-        //    out cudaMemsetParams pNodeParams);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphMemsetNodeSetParams",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphMemsetNodeSetParams(
-        //    CudaGraphNode_t node,
-        //    ref cudaMemsetParams pNodeParams);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphAddHostNode",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphAddHostNode(
-        //    out CudaGraphNode_t pGraphNode,
-        //    CudaGraph_t graph,
-        //    IntPtr pDependencies,
-        //    ulong numDependencies,
-        //    ref cudaHostNodeParams pNodeParams);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphHostNodeGetParams",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphHostNodeGetParams(
-        //    CudaGraphNode_t node,
-        //    out cudaHostNodeParams pNodeParams);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphHostNodeSetParams",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphHostNodeSetParams(
-        //    CudaGraphNode_t node,
-        //    ref cudaHostNodeParams pNodeParams);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphAddChildGraphNode",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphAddChildGraphNode(
-        //    out CudaGraphNode_t pGraphNode,
-        //    CudaGraph_t graph,
-        //    IntPtr pDependencies,
-        //    ulong numDependencies,
-        //    CudaGraph_t childGraph);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphChildGraphNodeGetGraph",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphChildGraphNodeGetGraph(
-        //    CudaGraphNode_t node,
-        //    out CudaGraph_t pGraph);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphAddEmptyNode",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphAddEmptyNode(
-        //    out CudaGraphNode_t pGraphNode,
-        //    CudaGraph_t graph,
-        //    IntPtr pDependencies,
-        //    ulong numDependencies);
-
-        //// ===================================================================
-        //// Conditional Compilation Block for CUDA API Version >= 11020
-        //// ===================================================================
-
-
-        //// 使用 IntPtr 代表复杂的信号量参数结构体
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphAddExternalSemaphoresSignalNode",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphAddExternalSemaphoresSignalNode(
-        //    out CudaGraphNode_t pGraphNode,
-        //    CudaGraph_t graph,
-        //    IntPtr pDependencies,
-        //    ulong numDependencies,
-        //    IntPtr nodeParams); // const cudaExternalSemaphoreSignalNodeParams*
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExternalSemaphoresSignalNodeGetParams",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphExternalSemaphoresSignalNodeGetParams(
-        //    CudaGraphNode_t hNode,
-        //    IntPtr params_out); // cudaExternalSemaphoreSignalNodeParams*
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExternalSemaphoresSignalNodeSetParams",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphExternalSemaphoresSignalNodeSetParams(
-        //    CudaGraphNode_t hNode,
-        //    IntPtr nodeParams); // const cudaExternalSemaphoreSignalNodeParams*
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphAddExternalSemaphoresWaitNode",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphAddExternalSemaphoresWaitNode(
-        //    out CudaGraphNode_t pGraphNode,
-        //    CudaGraph_t graph,
-        //    IntPtr pDependencies,
-        //    ulong numDependencies,
-        //    IntPtr nodeParams); // const cudaExternalSemaphoreWaitNodeParams*
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExternalSemaphoresWaitNodeGetParams",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphExternalSemaphoresWaitNodeGetParams(
-        //    CudaGraphNode_t hNode,
-        //    IntPtr params_out); // cudaExternalSemaphoreWaitNodeParams*
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExternalSemaphoresWaitNodeSetParams",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphExternalSemaphoresWaitNodeSetParams(
-        //    CudaGraphNode_t hNode,
-        //    IntPtr nodeParams); // const cudaExternalSemaphoreWaitNodeParams*
-
-
-        //// ===================================================================
-        //// Conditional Compilation Block for CUDA API Version >= 11040
-        //// ===================================================================
-
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphAddMemAllocNode",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphAddMemAllocNode(
-        //    out CudaGraphNode_t pGraphNode,
-        //    CudaGraph_t graph,
-        //    IntPtr pDependencies,
-        //    ulong numDependencies,
-        //    ref cudaMemAllocNodeParams nodeParams);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphMemAllocNodeGetParams",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphMemAllocNodeGetParams(
-        //    CudaGraphNode_t node,
-        //    out cudaMemAllocNodeParams params_out);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphAddMemFreeNode",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphAddMemFreeNode(
-        //    out CudaGraphNode_t pGraphNode,
-        //    CudaGraph_t graph,
-        //    IntPtr pDependencies,
-        //    ulong numDependencies,
-        //    IntPtr dptr); // void*
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphMemFreeNodeGetParams",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphMemFreeNodeGetParams(
-        //    CudaGraphNode_t node,
-        //    out IntPtr dptr_out);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaDeviceGraphMemTrim",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaDeviceGraphMemTrim(int device);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaDeviceGetGraphMemAttribute",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaDeviceGetGraphMemAttribute(
-        //    int device,
-        //    cudaGraphMemAttributeType attr,
-        //    out IntPtr value); // void*, 属性值可能是一个整数或指针
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaDeviceSetGraphMemAttribute",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaDeviceSetGraphMemAttribute(
-        //    int device,
-        //    cudaGraphMemAttributeType attr,
-        //    IntPtr value); // void*, 同上
-
-
-
-        //// ===================================================================
-        //// Cuda Graph API (Cloning, Querying, Instantiation, Execution)
-        //// ===================================================================
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphClone",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphClone(
-        //    out CudaGraph_t pGraphClone,
-        //    CudaGraph_t originalGraph);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphNodeFindInClone",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphNodeFindInClone(
-        //    out CudaGraphNode_t pNode,
-        //    CudaGraphNode_t originalNode,
-        //    CudaGraph_t clonedGraph);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphNodeGetType",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphNodeGetType(
-        //    CudaGraphNode_t node,
-        //    out cudaGraphNodeType pType);
-
-        //// -- Array pointer handling: nodes, numNodes --
-        //// 为了处理返回的数组，通常需要先调用一次函数（传入 nodes=null, numNodes=非零）
-        //// 来获取节点数量，然后分配一个足够大的数组，再次调用函数来填充数据。
-        //// P/Invoke 声明可以这样写：
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphGetNodes",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphGetNodes(
-        //    CudaGraph_t graph,
-        //    IntPtr nodes,       // cudaGraphNode_t*
-        //    out ulong numNodes); // size_t*
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphGetRootNodes",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphGetRootNodes(
-        //    CudaGraph_t graph,
-        //    IntPtr pRootNodes,  // cudaGraphNode_t*
-        //    out ulong pNumRootNodes);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphGetEdges",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphGetEdges(
-        //    CudaGraph_t graph,
-        //    IntPtr from,        // cudaGraphNode_t*
-        //    IntPtr to,          // cudaGraphNode_t*
-        //    out ulong numEdges); // size_t*
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphNodeGetDependencies",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphNodeGetDependencies(
-        //    CudaGraphNode_t node,
-        //    IntPtr pDependencies, // cudaGraphNode_t*
-        //    out ulong pNumDependencies);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphNodeGetDependentNodes",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphNodeGetDependentNodes(
-        //    CudaGraphNode_t node,
-        //    IntPtr pDependentNodes, // cudaGraphNode_t*
-        //    out ulong pNumDependentNodes);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphAddDependencies",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphAddDependencies(
-        //    CudaGraph_t graph,
-        //    IntPtr from, // const cudaGraphNode_t*
-        //    IntPtr to,   // const cudaGraphNode_t*
-        //    ulong numDependencies);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphRemoveDependencies",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphRemoveDependencies(
-        //    CudaGraph_t graph,
-        //    IntPtr from, // const cudaGraphNode_t*
-        //    IntPtr to,   // const cudaGraphNode_t*
-        //    ulong numDependencies);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphDestroyNode",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphDestroyNode(CudaGraphNode_t node);
-
-        //// -- Conditional Compilation for cudaGraphInstantiateWithFlags --
-
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphInstantiateWithFlags",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphInstantiateWithFlags(
-        //    out IntPtr pGraphExec,
-        //    CudaGraph_t graph,
-        //    ulong flags); // unsigned long long
-
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphInstantiate",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphInstantiate(
-        //    out IntPtr pGraphExec,
-        //    CudaGraph_t graph,
-        //    out CudaGraphNode_t pErrorNode,
-        //    IntPtr pLogBuffer, // char*
-        //    ulong bufferSize);
-
-        //// -- Graph Execution: Setting Params (Runtime) --
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExecKernelNodeSetParams",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphExecKernelNodeSetParams(
-        //    IntPtr hGraphExec,
-        //    CudaGraphNode_t node,
-        //    ref cudaKernelNodeParams pNodeParams);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExecMemcpyNodeSetParams",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphExecMemcpyNodeSetParams(
-        //    IntPtr hGraphExec,
-        //    CudaGraphNode_t node,
-        //    ref cudaMemcpy3DParms pNodeParams);
-
-        //// Conditional Block for CUDA >= 11010
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExecMemcpyNodeSetParamsToSymbol",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphExecMemcpyNodeSetParamsToSymbol(
-        //    IntPtr hGraphExec,
-        //    CudaGraphNode_t node,
-        //    IntPtr symbol,
-        //    IntPtr src,
-        //    ulong count,
-        //    ulong offset,
-        //    CudaMemcpyKind kind);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExecMemcpyNodeSetParamsFromSymbol",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphExecMemcpyNodeSetParamsFromSymbol(
-        //    IntPtr hGraphExec,
-        //    CudaGraphNode_t node,
-        //    IntPtr dst,
-        //    IntPtr symbol,
-        //    ulong count,
-        //    ulong offset,
-        //    CudaMemcpyKind kind);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExecMemcpyNodeSetParams1D",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphExecMemcpyNodeSetParams1D(
-        //    IntPtr hGraphExec,
-        //    CudaGraphNode_t node,
-        //    IntPtr dst,
-        //    IntPtr src,
-        //    ulong count,
-        //    CudaMemcpyKind kind);
-
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExecMemsetNodeSetParams",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphExecMemsetNodeSetParams(
-        //    IntPtr hGraphExec,
-        //    CudaGraphNode_t node,
-        //    ref cudaMemsetParams pNodeParams);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExecHostNodeSetParams",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphExecHostNodeSetParams(
-        //    IntPtr hGraphExec,
-        //    CudaGraphNode_t node,
-        //    ref cudaHostNodeParams pNodeParams);
-
-        //// Conditional Block for CUDA >= 11010
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExecChildGraphNodeSetParams",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphExecChildGraphNodeSetParams(
-        //    IntPtr hGraphExec,
-        //    CudaGraphNode_t node,
-        //    CudaGraph_t childGraph);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExecEventRecordNodeSetEvent",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphExecEventRecordNodeSetEvent(
-        //    IntPtr hGraphExec,
-        //    CudaGraphNode_t hNode,
-        //    IntPtr cudaEvent);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExecEventWaitNodeSetEvent",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphExecEventWaitNodeSetEvent(
-        //    IntPtr hGraphExec,
-        //    CudaGraphNode_t hNode,
-        //    IntPtr cudaEvent);
-
-
-        //// Conditional Block for CUDA >= 11020
-
-        //// 使用 IntPtr 代表复杂的信号量参数结构体
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExecExternalSemaphoresSignalNodeSetParams",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphExecExternalSemaphoresSignalNodeSetParams(
-        //    IntPtr hGraphExec,
-        //    CudaGraphNode_t hNode,
-        //    IntPtr nodeParams); // const cudaExternalSemaphoreSignalNodeParams*
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExecExternalSemaphoresWaitNodeSetParams",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphExecExternalSemaphoresWaitNodeSetParams(
-        //    IntPtr hGraphExec,
-        //    CudaGraphNode_t hNode,
-        //    IntPtr nodeParams); // const cudaExternalSemaphoreWaitNodeParams*
-
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExecUpdate",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphExecUpdate(
-        //    IntPtr hGraphExec,
-        //    CudaGraph_t hGraph,
-        //    out CudaGraphNode_t hErrorNode_out,
-        //    out cudaGraphExecUpdateResult updateResult_out);
-
-        //// Conditional Block for CUDA >= 11010
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphUpload",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphUpload(
-        //    IntPtr graphExec,
-        //    IntPtr stream);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphLaunch",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphLaunch(
-        //    IntPtr graphExec,
-        //    IntPtr stream);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExecDestroy",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphExecDestroy(IntPtr graphExec);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphDestroy",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphDestroy(CudaGraph_t graph);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphDebugDotPrint",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphDebugDotPrint(
-        //    CudaGraph_t graph,
-        //    string path,
-        //    uint flags);
-
-        //// ===================================================================
-        //// User Object API
-        //// ===================================================================
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaUserObjectCreate",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaUserObjectCreate(
-        //    out IntPtr object_out,
-        //    IntPtr ptr,
-        //    cudaHostFn_t destroy,
-        //    uint initialRefcount,
-        //    uint flags);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaUserObjectRetain",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaUserObjectRetain(
-        //    IntPtr userObject,
-        //    uint count);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaUserObjectRelease",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaUserObjectRelease(
-        //    IntPtr userObject,
-        //    uint count);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphRetainUserObject",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphRetainUserObject(
-        //    CudaGraph_t graph,
-        //    IntPtr userObject,
-        //    uint count,
-        //    uint flags);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphReleaseUserObject",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGraphReleaseUserObject(
-        //    CudaGraph_t graph,
-        //    IntPtr userObject,
-        //    uint count);
-
-        //// ===================================================================
-        //// Driver API (Interoperability)
-        //// ===================================================================
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGetDriverEntryPoint",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGetDriverEntryPoint(
-        //    string symbol,
-        //    out IntPtr funcPtr, // void**
-        //    ulong flags);      // unsigned long long
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGetExportTable",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGetExportTable(
-        //    out IntPtr ppExportTable, // const void**
-        //    ref cudaUUID_t pExportTableId);
-
-        //[DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGetFuncBySymbol",
-        //    CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        //public extern static CudaExceptionStatus cudaRuntime_cudaGetFuncBySymbol(
-        //    out IntPtr functionPtr,
-        //    IntPtr symbolPtr); // const void*
+        // ===================================================================
+        // Cuda Graph API (Initial Set)
+        // ===================================================================
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphCreate",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphCreate(
+            out CudaGraph_t pGraph,
+            uint flags);
+
+        // 注意: cudaGraphAddKernelNode 和 Get/Set/Params 方法中的指针数组在 C# 中
+        // 需要特殊处理。最稳健的方式是传入一个 IntPtr，指向一个预分配的非托管数组。
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphAddKernelNode",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphAddKernelNode(
+            out CudaGraphNode_t pGraphNode,
+            CudaGraph_t graph,
+            IntPtr pDependencies,  // C: const cudaGraphNode_t*
+            ulong numDependencies, // C: size_t
+            ref cudaKernelNodeParams pNodeParams);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphKernelNodeGetParams",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphKernelNodeGetParams(
+            CudaGraphNode_t node,
+            out cudaKernelNodeParams pNodeParams);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphKernelNodeSetParams",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphKernelNodeSetParams(
+            CudaGraphNode_t node,
+            ref cudaKernelNodeParams pNodeParams);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphKernelNodeCopyAttributes",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphKernelNodeCopyAttributes(
+            CudaGraphNode_t hSrc,
+            CudaGraphNode_t hDst);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphKernelNodeGetAttribute",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphKernelNodeGetAttribute(
+            CudaGraphNode_t hNode,
+            cudaKernelNodeAttrID attr,
+            ref cudaKernelNodeAttrValue value_out); // union 需要作为 ref struct
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphKernelNodeSetAttribute",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphKernelNodeSetAttribute(
+            CudaGraphNode_t hNode,
+            cudaKernelNodeAttrID attr,
+            ref cudaKernelNodeAttrValue value);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphAddMemcpyNode",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphAddMemcpyNode(
+            out CudaGraphNode_t pGraphNode,
+            CudaGraph_t graph,
+            IntPtr pDependencies,
+            ulong numDependencies,
+            ref cudaMemcpy3DParms pCopyParams);
+
+
+
+        // ===================================================================
+        // Conditional Compilation Block for CUDA API Version >= 11010
+        // ===================================================================
+
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphAddMemcpyNodeToSymbol",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphAddMemcpyNodeToSymbol(
+            out CudaGraphNode_t pGraphNode,
+            CudaGraph_t graph,
+            IntPtr pDependencies,
+            ulong numDependencies,
+            IntPtr symbol,
+            IntPtr src,
+            ulong count,
+            ulong offset,
+            CudaMemcpyKind kind);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphAddMemcpyNodeFromSymbol",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphAddMemcpyNodeFromSymbol(
+            out CudaGraphNode_t pGraphNode,
+            CudaGraph_t graph,
+            IntPtr pDependencies,
+            ulong numDependencies,
+            IntPtr dst,
+            IntPtr symbol,
+            ulong count,
+            ulong offset,
+            CudaMemcpyKind kind);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphAddMemcpyNode1D",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphAddMemcpyNode1D(
+            out CudaGraphNode_t pGraphNode,
+            CudaGraph_t graph,
+            IntPtr pDependencies,
+            ulong numDependencies,
+            IntPtr dst,
+            IntPtr src,
+            ulong count,
+            CudaMemcpyKind kind);
+
+        // 注意: 这里的 Get/Set Params 方法因为函数签名变化，其行为也变了。
+        // 它们不再操作 cudaMemcpy3DParms 结构体。
+        // 为了防止与无版本标识的同名方法冲突，可以重命名或放在不同的部分。
+        // 这里我们保持原名，因为 C++ 的重载在 C 中是通过不同的 EntryPoint 名称解决的。
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphMemcpyNodeSetParamsToSymbol",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphMemcpyNodeSetParamsToSymbol(
+            CudaGraphNode_t node,
+            IntPtr symbol,
+            IntPtr src,
+            ulong count,
+            ulong offset,
+            CudaMemcpyKind kind);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphMemcpyNodeSetParamsFromSymbol",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphMemcpyNodeSetParamsFromSymbol(
+            CudaGraphNode_t node,
+            IntPtr dst,
+            IntPtr symbol,
+            ulong count,
+            ulong offset,
+            CudaMemcpyKind kind);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphMemcpyNodeSetParams1D",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphMemcpyNodeSetParams1D(
+            CudaGraphNode_t node,
+            IntPtr dst,
+            IntPtr src,
+            ulong count,
+            CudaMemcpyKind kind);
+
+
+        // ===================================================================
+        // Core CUDA Graph API Nodes (No Version Condition)
+        // ===================================================================
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphMemcpyNodeGetParams",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphMemcpyNodeGetParams(
+            CudaGraphNode_t node,
+            out cudaMemcpy3DParms pNodeParams);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphMemcpyNodeSetParams",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphMemcpyNodeSetParams(
+            CudaGraphNode_t node,
+            ref cudaMemcpy3DParms pNodeParams);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphAddMemsetNode",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphAddMemsetNode(
+            out CudaGraphNode_t pGraphNode,
+            CudaGraph_t graph,
+            IntPtr pDependencies,
+            ulong numDependencies,
+            ref cudaMemsetParams pMemsetParams);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphMemsetNodeGetParams",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphMemsetNodeGetParams(
+            CudaGraphNode_t node,
+            out cudaMemsetParams pNodeParams);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphMemsetNodeSetParams",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphMemsetNodeSetParams(
+            CudaGraphNode_t node,
+            ref cudaMemsetParams pNodeParams);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphAddHostNode",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphAddHostNode(
+            out CudaGraphNode_t pGraphNode,
+            CudaGraph_t graph,
+            IntPtr pDependencies,
+            ulong numDependencies,
+            ref cudaHostNodeParams pNodeParams);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphHostNodeGetParams",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphHostNodeGetParams(
+            CudaGraphNode_t node,
+            out cudaHostNodeParams pNodeParams);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphHostNodeSetParams",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphHostNodeSetParams(
+            CudaGraphNode_t node,
+            ref cudaHostNodeParams pNodeParams);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphAddChildGraphNode",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphAddChildGraphNode(
+            out CudaGraphNode_t pGraphNode,
+            CudaGraph_t graph,
+            IntPtr pDependencies,
+            ulong numDependencies,
+            CudaGraph_t childGraph);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphChildGraphNodeGetGraph",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphChildGraphNodeGetGraph(
+            CudaGraphNode_t node,
+            out CudaGraph_t pGraph);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphAddEmptyNode",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphAddEmptyNode(
+            out CudaGraphNode_t pGraphNode,
+            CudaGraph_t graph,
+            IntPtr pDependencies,
+            ulong numDependencies);
+
+        // ===================================================================
+        // Conditional Compilation Block for CUDA API Version >= 11020
+        // ===================================================================
+
+
+        // 使用 IntPtr 代表复杂的信号量参数结构体
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphAddExternalSemaphoresSignalNode",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphAddExternalSemaphoresSignalNode(
+            out CudaGraphNode_t pGraphNode,
+            CudaGraph_t graph,
+            IntPtr pDependencies,
+            ulong numDependencies,
+            IntPtr nodeParams); // const cudaExternalSemaphoreSignalNodeParams*
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExternalSemaphoresSignalNodeGetParams",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphExternalSemaphoresSignalNodeGetParams(
+            CudaGraphNode_t hNode,
+            IntPtr params_out); // cudaExternalSemaphoreSignalNodeParams*
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExternalSemaphoresSignalNodeSetParams",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphExternalSemaphoresSignalNodeSetParams(
+            CudaGraphNode_t hNode,
+            IntPtr nodeParams); // const cudaExternalSemaphoreSignalNodeParams*
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphAddExternalSemaphoresWaitNode",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphAddExternalSemaphoresWaitNode(
+            out CudaGraphNode_t pGraphNode,
+            CudaGraph_t graph,
+            IntPtr pDependencies,
+            ulong numDependencies,
+            IntPtr nodeParams); // const cudaExternalSemaphoreWaitNodeParams*
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExternalSemaphoresWaitNodeGetParams",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphExternalSemaphoresWaitNodeGetParams(
+            CudaGraphNode_t hNode,
+            IntPtr params_out); // cudaExternalSemaphoreWaitNodeParams*
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExternalSemaphoresWaitNodeSetParams",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphExternalSemaphoresWaitNodeSetParams(
+            CudaGraphNode_t hNode,
+            IntPtr nodeParams); // const cudaExternalSemaphoreWaitNodeParams*
+
+
+        // ===================================================================
+        // Conditional Compilation Block for CUDA API Version >= 11040
+        // ===================================================================
+
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphAddMemAllocNode",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphAddMemAllocNode(
+            out CudaGraphNode_t pGraphNode,
+            CudaGraph_t graph,
+            IntPtr pDependencies,
+            ulong numDependencies,
+            ref cudaMemAllocNodeParams nodeParams);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphMemAllocNodeGetParams",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphMemAllocNodeGetParams(
+            CudaGraphNode_t node,
+            out cudaMemAllocNodeParams params_out);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphAddMemFreeNode",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphAddMemFreeNode(
+            out CudaGraphNode_t pGraphNode,
+            CudaGraph_t graph,
+            IntPtr pDependencies,
+            ulong numDependencies,
+            IntPtr dptr); // void*
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphMemFreeNodeGetParams",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphMemFreeNodeGetParams(
+            CudaGraphNode_t node,
+            out IntPtr dptr_out);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaDeviceGraphMemTrim",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaDeviceGraphMemTrim(int device);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaDeviceGetGraphMemAttribute",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaDeviceGetGraphMemAttribute(
+            int device,
+            cudaGraphMemAttributeType attr,
+            out IntPtr value); // void*, 属性值可能是一个整数或指针
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaDeviceSetGraphMemAttribute",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaDeviceSetGraphMemAttribute(
+            int device,
+            cudaGraphMemAttributeType attr,
+            IntPtr value); // void*, 同上
+
+
+
+        // ===================================================================
+        // Cuda Graph API (Cloning, Querying, Instantiation, Execution)
+        // ===================================================================
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphClone",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphClone(
+            out CudaGraph_t pGraphClone,
+            CudaGraph_t originalGraph);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphNodeFindInClone",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphNodeFindInClone(
+            out CudaGraphNode_t pNode,
+            CudaGraphNode_t originalNode,
+            CudaGraph_t clonedGraph);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphNodeGetType",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphNodeGetType(
+            CudaGraphNode_t node,
+            out cudaGraphNodeType pType);
+
+        // -- Array pointer handling: nodes, numNodes --
+        // 为了处理返回的数组，通常需要先调用一次函数（传入 nodes=null, numNodes=非零）
+        // 来获取节点数量，然后分配一个足够大的数组，再次调用函数来填充数据。
+        // P/Invoke 声明可以这样写：
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphGetNodes",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphGetNodes(
+            CudaGraph_t graph,
+            IntPtr nodes,       // cudaGraphNode_t*
+            out ulong numNodes); // size_t*
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphGetRootNodes",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphGetRootNodes(
+            CudaGraph_t graph,
+            IntPtr pRootNodes,  // cudaGraphNode_t*
+            out ulong pNumRootNodes);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphGetEdges",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphGetEdges(
+            CudaGraph_t graph,
+            IntPtr from,        // cudaGraphNode_t*
+            IntPtr to,          // cudaGraphNode_t*
+            out ulong numEdges); // size_t*
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphNodeGetDependencies",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphNodeGetDependencies(
+            CudaGraphNode_t node,
+            IntPtr pDependencies, // cudaGraphNode_t*
+            out ulong pNumDependencies);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphNodeGetDependentNodes",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphNodeGetDependentNodes(
+            CudaGraphNode_t node,
+            IntPtr pDependentNodes, // cudaGraphNode_t*
+            out ulong pNumDependentNodes);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphAddDependencies",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphAddDependencies(
+            CudaGraph_t graph,
+            IntPtr from, // const cudaGraphNode_t*
+            IntPtr to,   // const cudaGraphNode_t*
+            ulong numDependencies);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphRemoveDependencies",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphRemoveDependencies(
+            CudaGraph_t graph,
+            IntPtr from, // const cudaGraphNode_t*
+            IntPtr to,   // const cudaGraphNode_t*
+            ulong numDependencies);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphDestroyNode",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphDestroyNode(CudaGraphNode_t node);
+
+        // -- Conditional Compilation for cudaGraphInstantiateWithFlags --
+
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphInstantiateWithFlags",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphInstantiateWithFlags(
+            out IntPtr pGraphExec,
+            CudaGraph_t graph,
+            ulong flags); // unsigned long long
+
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphInstantiate",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphInstantiate(
+            out IntPtr pGraphExec,
+            CudaGraph_t graph,
+            out CudaGraphNode_t pErrorNode,
+            IntPtr pLogBuffer, // char*
+            ulong bufferSize);
+
+        // -- Graph Execution: Setting Params (Runtime) --
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExecKernelNodeSetParams",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphExecKernelNodeSetParams(
+            IntPtr hGraphExec,
+            CudaGraphNode_t node,
+            ref cudaKernelNodeParams pNodeParams);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExecMemcpyNodeSetParams",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphExecMemcpyNodeSetParams(
+            IntPtr hGraphExec,
+            CudaGraphNode_t node,
+            ref cudaMemcpy3DParms pNodeParams);
+
+        // Conditional Block for CUDA >= 11010
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExecMemcpyNodeSetParamsToSymbol",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphExecMemcpyNodeSetParamsToSymbol(
+            IntPtr hGraphExec,
+            CudaGraphNode_t node,
+            IntPtr symbol,
+            IntPtr src,
+            ulong count,
+            ulong offset,
+            CudaMemcpyKind kind);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExecMemcpyNodeSetParamsFromSymbol",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphExecMemcpyNodeSetParamsFromSymbol(
+            IntPtr hGraphExec,
+            CudaGraphNode_t node,
+            IntPtr dst,
+            IntPtr symbol,
+            ulong count,
+            ulong offset,
+            CudaMemcpyKind kind);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExecMemcpyNodeSetParams1D",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphExecMemcpyNodeSetParams1D(
+            IntPtr hGraphExec,
+            CudaGraphNode_t node,
+            IntPtr dst,
+            IntPtr src,
+            ulong count,
+            CudaMemcpyKind kind);
+
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExecMemsetNodeSetParams",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphExecMemsetNodeSetParams(
+            IntPtr hGraphExec,
+            CudaGraphNode_t node,
+            ref cudaMemsetParams pNodeParams);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExecHostNodeSetParams",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphExecHostNodeSetParams(
+            IntPtr hGraphExec,
+            CudaGraphNode_t node,
+            ref cudaHostNodeParams pNodeParams);
+
+        // Conditional Block for CUDA >= 11010
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExecChildGraphNodeSetParams",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphExecChildGraphNodeSetParams(
+            IntPtr hGraphExec,
+            CudaGraphNode_t node,
+            CudaGraph_t childGraph);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExecEventRecordNodeSetEvent",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphExecEventRecordNodeSetEvent(
+            IntPtr hGraphExec,
+            CudaGraphNode_t hNode,
+            IntPtr cudaEvent);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExecEventWaitNodeSetEvent",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphExecEventWaitNodeSetEvent(
+            IntPtr hGraphExec,
+            CudaGraphNode_t hNode,
+            IntPtr cudaEvent);
+
+
+        // Conditional Block for CUDA >= 11020
+
+        // 使用 IntPtr 代表复杂的信号量参数结构体
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExecExternalSemaphoresSignalNodeSetParams",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphExecExternalSemaphoresSignalNodeSetParams(
+            IntPtr hGraphExec,
+            CudaGraphNode_t hNode,
+            IntPtr nodeParams); // const cudaExternalSemaphoreSignalNodeParams*
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExecExternalSemaphoresWaitNodeSetParams",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphExecExternalSemaphoresWaitNodeSetParams(
+            IntPtr hGraphExec,
+            CudaGraphNode_t hNode,
+            IntPtr nodeParams); // const cudaExternalSemaphoreWaitNodeParams*
+
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExecUpdate",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphExecUpdate(
+            IntPtr hGraphExec,
+            CudaGraph_t hGraph,
+            out CudaGraphNode_t hErrorNode_out,
+            out cudaGraphExecUpdateResult updateResult_out);
+
+        // Conditional Block for CUDA >= 11010
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphUpload",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphUpload(
+            IntPtr graphExec,
+            IntPtr stream);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphLaunch",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphLaunch(
+            IntPtr graphExec,
+            IntPtr stream);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphExecDestroy",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphExecDestroy(IntPtr graphExec);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphDestroy",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphDestroy(CudaGraph_t graph);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphDebugDotPrint",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphDebugDotPrint(
+            CudaGraph_t graph,
+            string path,
+            uint flags);
+
+        // ===================================================================
+        // User Object API
+        // ===================================================================
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaUserObjectCreate",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaUserObjectCreate(
+            out IntPtr object_out,
+            IntPtr ptr,
+            cudaHostFn_t destroy,
+            uint initialRefcount,
+            uint flags);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaUserObjectRetain",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaUserObjectRetain(
+            IntPtr userObject,
+            uint count);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaUserObjectRelease",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaUserObjectRelease(
+            IntPtr userObject,
+            uint count);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphRetainUserObject",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphRetainUserObject(
+            CudaGraph_t graph,
+            IntPtr userObject,
+            uint count,
+            uint flags);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGraphReleaseUserObject",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGraphReleaseUserObject(
+            CudaGraph_t graph,
+            IntPtr userObject,
+            uint count);
+
+        // ===================================================================
+        // Driver API (Interoperability)
+        // ===================================================================
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGetDriverEntryPoint",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGetDriverEntryPoint(
+            string symbol,
+            out IntPtr funcPtr, // void**
+            ulong flags);      // unsigned long long
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGetExportTable",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGetExportTable(
+            out IntPtr ppExportTable, // const void**
+            ref CudaUUID pExportTableId);
+
+        [DllImport(dllExtern, EntryPoint = "cudaRuntime_cudaGetFuncBySymbol",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static CudaExceptionStatus cudaRuntime_cudaGetFuncBySymbol(
+            out IntPtr functionPtr,
+            IntPtr symbolPtr); // const void*
 
 
     }

@@ -14,7 +14,6 @@ namespace JYPPX.TensorRtSharp.Cuda
     public class CudaManagedMemory : DisposableTrtObject
     {
 
-
         public CudaManagedMemory(ulong size, CudaMemAttach flags)
         {
             this.size = size;

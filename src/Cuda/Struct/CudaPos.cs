@@ -24,14 +24,6 @@ namespace JYPPX.TensorRtSharp.Cuda
 
 
 
-
-
-    // 空结构体定义 - 实际应根据CUDA文档填充
-    [StructLayout(LayoutKind.Sequential)]
-    public struct CudaIpcEventHandle_t { }
-    [StructLayout(LayoutKind.Sequential)]
-    public struct CudaIpcMemHandle_t { }
-
     // 假设cudaEvent_t是IntPtr类型（通常用于句柄）
     public delegate void CudaEvent_t(IntPtr handle);
 
@@ -53,66 +45,15 @@ namespace JYPPX.TensorRtSharp.Cuda
     // 新增的空结构体定义
     // 实际使用时，应根据 CUDA Toolkit 文档填充具体的字段和布局。
     // ===================================================================
-    /// <summary>
-    /// 描述 CUDA 设备的属性
-    /// </summary>
-    [StructLayout(LayoutKind.Sequential)]
-    public struct CudaDeviceProp { }
+
     // ===================================================================
     // 新增的类型别名或句柄定义
     // ===================================================================
-    /// <summary>
-    /// 表示 CUDA 内存池的句柄。
-    /// </summary>
-    public readonly struct CudaMemPool_t
-    {
-        // 实际实现中，这里通常是一个 IntPtr 或一个包装了 IntPtr 的类
-        // 为了符合“未知类型当作指针处理”的简单规则，我们使用 IntPtr
-        public readonly IntPtr Handle;
-
-        public CudaMemPool_t(IntPtr handle)
-        {
-            Handle = handle;
-        }
-    }
 
 
 
-    /// <summary>
-    /// Stream 创建标志
-    /// </summary>
-    public enum CudaStreamFlags { }
-    /// <summary>
-    /// Stream 捕获模式
-    /// </summary>
-    public enum CudaStreamCaptureMode { }
-    /// <summary>
-    /// Stream 捕获状态
-    /// </summary>
-    public enum CudaStreamCaptureStatus { }
-    /// <summary>
-    /// Stream 属性 ID
-    /// </summary>
-    public enum CudaStreamAttrID { }
-    // ===================================================================
-    // 新增的空结构体定义
-    // ===================================================================
-    /// <summary>
-    /// 用于设置和获取 Stream 属性的值
-    /// </summary>
-    [StructLayout(LayoutKind.Sequential)]
-    public struct CudaStreamAttrValue { }
-    // ===================================================================
-    // 新增的类型别名或句柄定义
-    // ===================================================================
-    /// <summary>
-    /// 表示 CUDA Stream 的句柄。通常是一个不透明的指针。
-    /// </summary>
-    public readonly struct CudaStream_t
-    {
-        public readonly IntPtr Handle;
-        public CudaStream_t(IntPtr handle) { Handle = handle; }
-    }
+
+
     /// <summary>
     /// 表示 CUDA Graph 的句柄。
     /// </summary>
@@ -129,13 +70,7 @@ namespace JYPPX.TensorRtSharp.Cuda
         public readonly IntPtr Handle;
         public CudaGraphNode_t(IntPtr handle) { Handle = handle; }
     }
-    /// <summary>
-    /// 定义 Stream 回调函数的委托，以匹配 C 语言中的函数指针。
-    /// </summary>
-    /// <param name="stream">触发回调的 Stream。</param>
-    /// <param name="status">操作完成的状态（成功或错误）。</param>
-    /// <param name="userData">用户通过 `userData` 参数传递的数据。</param>
-    public delegate void CudaStreamCallback(CudaStream_t stream, CudaExceptionStatus status, IntPtr userData);
+
 
 
 
@@ -319,51 +254,8 @@ public struct CudaArraySparseProperties
 
 
 
-    /// <summary>
-    /// 表示要导出的指针数据。
-    /// </summary>
-    [StructLayout(LayoutKind.Sequential)]
-    public struct CudaMemPoolPtrExportData
-    {
-        // 成员类型和布局需与CUDA C定义匹配
-        // 例如:
-        public ulong Reserved; // 占位，实际看C定义
-                               // 其他字段...
-    }
-    // --- 新增的结构体 ---
-    /// <summary>
-    /// 内存池属性描述
-    /// </summary>
-    [StructLayout(LayoutKind.Sequential)]
-    public struct CudaMemPoolProps
-    {
-        // 成员类型和布局需与CUDA C定义匹配
-        // 通常包含一个表示分配器类型的枚举和关联的值
-        public CudaMemAllocatorType allocType;
-        // 例如，如果是 Default allocator，可能有如下联合体成员
-        public IntPtr defaultPoolProps; // 指向另一个结构体的指针，或为联合体成员
-    }
-    // 假设 CudaMemAllocatorType 是一个枚举
-    public enum CudaMemAllocatorType { Default }
-    /// <summary>
-    /// 内存访问描述符
-    /// </summary>
-    [StructLayout(LayoutKind.Sequential)]
-    public struct CudaMemAccessDesc
-    {
-        public CudaMemLocation location;
-        public CudaMemAccessFlags flags;
-    }
-    /// <summary>
-    /// 内存位置描述
-    /// </summary>
-    [StructLayout(LayoutKind.Sequential)]
-    public struct CudaMemLocation
-    {
-        public CudaMemType type;
-        public int id; // 设备ID 或 NUMA节点ID
-    }
-    public enum CudaMemType { Device, }
+
+
 /// <summary>
 /// 指针属性
 /// </summary>
@@ -377,36 +269,8 @@ public struct CudaPointerAttributes
     public enum CudaMemoryType { Unregistered, Host, Device, Managed }
 // --- 新增的枚举 ---
 
-/// <summary>
-/// 内存池属性
-/// </summary>
-public enum CudaMemPoolAttr
-    {
-        ReleaseThreshold = 0,
-        ReservedMemCurrent = 1,
-        ReservedMemHigh = 2
-    }
-/// <summary>
-/// 内存访问标志
-/// </summary>
-[Flags]
-public enum CudaMemAccessFlags
-    {
-        ProtNone = 0,
-        ProtRead = (1 << 0),
-        ProtWrite = (1 << 1),
-        ProtReadWrite = ProtRead | ProtWrite
-    }
-/// <summary>
-/// 内存分配句柄类型
-/// </summary>
-public enum CudaMemAllocationHandleType
-    {
-        PosixFileDescriptor = 1,
-        Win32Handle = 2,
-        Win32Mapping = 3,
-        // ... 其他类型
-    }
+
+
 
 
     /// <summary>
@@ -573,12 +437,6 @@ public enum cudaGraphExecUpdateResult { Success, Failure, AlreadyInUse, }
 public enum cu_function_attribute
     {
         MaxThreadsPerBlock, SharedMemorySize
-    }
-                                              // 用于cudaGetDriverEntryPoint 和cudaGetExportTable 的UUID结构体
-     [StructLayout(LayoutKind.Sequential)]
-    public struct cudaUUID_t
-    {
-
     }
 
 
