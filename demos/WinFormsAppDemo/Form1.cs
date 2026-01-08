@@ -5,14 +5,8 @@ using OpenCvSharp.Dnn;
 using OpenCvSharp.Extensions;
 using System;
 using System.Diagnostics;
-using System.Drawing;
-using System.IO;
 using System.Runtime.InteropServices;
-using System.Threading;
-using System.Windows.Forms;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+
 
 namespace WinFormsAppDemo
 {
@@ -128,6 +122,33 @@ namespace WinFormsAppDemo
             comboBox1.Items.Add("Yolov11-Det");
             comboBox1.Items.Add("Yolov11-Obb");
             comboBox1.SelectedIndex = 0;
+
+            int deviceCount = CudaDevice.GetDeviceCount();
+            if (deviceCount <= 0)
+            {
+
+                Logger.Instance.ERROR("Cannot find any available devices (GPUs)!");
+            }
+            else 
+            {
+                Logger.Instance.INFO("Available Devices: " + deviceCount.ToString());
+
+
+                for (int deviceIdx = 0; deviceIdx < deviceCount; ++deviceIdx)
+                {
+                    CudaDeviceProp tempProperties = CudaDevice.GetDeviceProperties(deviceIdx);
+
+
+                    // clang-format off
+                    Logger.Instance.INFO("  Device " + deviceIdx + ": \"" +tempProperties.Name );
+                    // clang-format on
+
+                }
+
+            }
+            Logger.Instance.INFO("The latest version of CUDA supported by the driver: " + CudaRuntime.DriverGetVersion());
+            Logger.Instance.INFO("The CUDA Runtime version:  " + CudaRuntime.RuntimeGetVersion());
+
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -192,24 +213,26 @@ namespace WinFormsAppDemo
         CudaStream cudaStream23 = new CudaStream();
         float[] outputHost3 = new float[1];
 
-
-
-
-
         private void button4_Click(object sender, EventArgs e)
         {
             string filePath = textBox2.Text.Trim();
-            FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-            byte[] data = new byte[fileStream.Length];
+            //FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            //byte[] data = new byte[fileStream.Length];
 
-            BinaryReader binaryReader = new BinaryReader(fileStream);
+            //BinaryReader binaryReader = new BinaryReader(fileStream);
 
-            data = binaryReader.ReadBytes((int)fileStream.Length); // 读取整个文件到byte数组
+            //data = binaryReader.ReadBytes((int)fileStream.Length); // 读取整个文件到byte数组
+            //cudaEngine = runtime.deserializeCudaEngineByBlob(data, (ulong)fileStream.Length);
+
+            //byte[] data = File.ReadAllBytes(filePath);
+            //cudaEngine = runtime.deserializeCudaEngineByBlob(data, (ulong)data.Length);
+
+
+            using var reader = new FileStreamReader();
+            reader.open(filePath);
+            cudaEngine = runtime.deserializeCudaEngineByFileStreamReader(reader);
 
             runtime.setMaxThreads(10);
-
-            cudaEngine = runtime.deserializeCudaEngineByBlob(data, (ulong)fileStream.Length);
-
             executionContext = cudaEngine.createExecutionContext(TrtExecutionContextAllocationStrategy.kSTATIC);
 
             int count = cudaEngine.getNbIOTensors();
@@ -237,14 +260,13 @@ namespace WinFormsAppDemo
             executionContext.setInputTensorAddress(inputName, input.get());
             executionContext.setOutputTensorAddress(outputName, output.get());
 
-
-
-
         }
 
         private void button5_Click(object sender, EventArgs e)
         {
             Mat img = Cv2.ImRead(textBox3.Text.Trim());
+            Stopwatch sw1 = new Stopwatch();
+            sw1.Start();
             float[] inputHost = preProcess(img, out float scales);
 
             input.copyFromHostAsync(inputHost, cudaStream2);
@@ -270,9 +292,12 @@ namespace WinFormsAppDemo
             Logger.Instance.INFO($" copyToHostAsync time: {sw.ElapsedMilliseconds} ms");
             sw.Stop();
 
-            //Logger.Instance.INFO($"The inference time: {sw.ElapsedMilliseconds} ms");
+           
 
             List<ObbData> result = postprocess(outputHost, scales);
+            sw1.Stop();
+
+            Logger.Instance.INFO($"The sum inference time: {sw1.ElapsedMilliseconds} ms");
             Mat re = drawObbResult(result, img);
 
             using (var memoryStream = new MemoryStream())
