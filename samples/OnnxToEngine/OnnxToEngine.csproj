@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="JYPPX.TensorRT.CSharp.API.runtime.win-x64.cuda11" Version="0.0.4" />
+		<PackageReference Include="JYPPX.TensorRT.CSharp.API.runtime.win-x64.cuda12" Version="0.0.4" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\..\src\TensorRtSharp.csproj" />

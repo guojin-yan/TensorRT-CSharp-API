@@ -100,6 +100,8 @@ namespace SetCudaDeviceInfo
             // 即驱动程序报告的默认或锁定频率，不一定代表 GPU 当前因负载变化的实际运行频率（Boost 频率）。
             Logger.Instance.INFO("Note: The application clock rates do not reflect the actual clock rates that the GPU is "
                                                                                  + "currently running at.");
+
+            Logger.Instance.INFO("TensorRT version: " + TrtVersion.Version);
         }
         /// <summary>
         /// 辅助方法：将 CudaUUID 结构体转换为格式化的 GPU UUID 字符串。

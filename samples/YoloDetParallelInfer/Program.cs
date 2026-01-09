@@ -73,7 +73,7 @@ namespace YoloDetParallelInfer
                 // ================= 2. 初始化推理上下文与显存 =================
                 Stopwatch totalSw = new Stopwatch();
                 totalSw.Start();
-                Parallel.For(0, 30, b =>
+                Parallel.For(0, 24, b =>
                 {           
                     
                     // 创建执行上下文
@@ -146,7 +146,7 @@ namespace YoloDetParallelInfer
                 });
 
                 totalSw.Stop();
-                Logger.Instance.INFO($"Total time for 30 inferences: {totalSw.ElapsedMilliseconds} ms");
+                Logger.Instance.INFO($"Total time for 8 inferences: {totalSw.ElapsedMilliseconds} ms");
 
 
             }

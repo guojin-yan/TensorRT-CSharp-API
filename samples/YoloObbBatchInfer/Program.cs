@@ -26,7 +26,7 @@ namespace YoloObbBatchInfer
         // NMS IOU 阈值
         private const float NmsThreshold = 0.3f;
 
-        private const int MaxBatchSize = 4;
+        private const int MaxBatchSize = 24;
 
         static void Main(string[] args)
         {
@@ -47,7 +47,8 @@ namespace YoloObbBatchInfer
             Logger.Instance.SetThreshold(LoggerSeverity.kINFO);
 
             string enginePath = "yolov8s-obb_b.engine";
-            string[] imagePaths = { "P0006.png", "P0016.png", "P0456.png", "P0813.png" ,};
+            string[] imagePaths = { 
+                "P0006.png" , "P0016.png", "P0456.png", "P0813.png"};
 
 
             // ================= 1. 加载 TensorRT Engine =================
@@ -109,13 +110,27 @@ namespace YoloObbBatchInfer
                             }
                             images.Add(img);
                         }
-        
 
+                        (float[] inputData1, float[] scales1, int[] xOffsets1, int[] yOffsets1) = PreProcessBatch(images);
                         sw.Start();
                         (float[] inputData, float[] scales, int[] xOffsets, int[] yOffsets) = PreProcessBatch(images);
                         sw.Stop();
                         Logger.Instance.INFO($"Pre-processing time: {sw.ElapsedMilliseconds} ms");
                         // ================= 4. 推理 =================
+
+                        // 准备主机内存接收结果
+                        float[] outputData1 = new float[imagePaths.Count() * outputChannels * OutputSize];
+                        // 将数据从主机 拷贝到设备
+                        inputGpuMemory.copyFromHostAsync(inputData, cudaStream);
+
+                        // 执行推理 (enqueueV3 是异步的)
+                        executionContext.executeV3(cudaStream);
+                        // 等待推理完成
+                        cudaStream.Synchronize();
+                        // 将结果从设备 拷贝回主机
+                        // 这里的拷贝是同步的，会等待 GPU 计算完成
+                        outputGpuMemory.copyToHostAsync(outputData1, cudaStream);
+
                         sw.Restart();
                         // 准备主机内存接收结果
                         float[] outputData = new float[imagePaths.Count() * outputChannels * OutputSize];
@@ -133,7 +148,7 @@ namespace YoloObbBatchInfer
                         sw.Stop();
                         Logger.Instance.INFO($"Inference time: {sw.ElapsedMilliseconds} ms");
                         // ================= 5. 后处理 =================
-
+                        List<List<ObbData>> results1 = PostProcessBatch(outputData, scales, xOffsets, yOffsets);
                         sw.Restart();
                         List<List<ObbData>> results = PostProcessBatch(outputData, scales, xOffsets, yOffsets);
                         sw.Stop();

@@ -9,7 +9,7 @@
     <!--Set NuGet Message-->
     <PackageId>JYPPX.TensorRT.CSharp.API </PackageId>
     <Title>TensorRtSharp</Title>
-    <Version>0.0.4</Version>
+    <Version>0.0.5</Version>
     <Authors>Guojin Yan</Authors>
     <Company>Guojin Yan</Company>
     <Product>JYPPX.TensorRT.CSharp.API </Product>
@@ -23,10 +23,23 @@
     <RootNamespace>JYPPX.TensorRtSharp</RootNamespace>
     <AssemblyName>TensorRtSharp</AssemblyName>
     <PackageTags>TensorRtSharp;TensorRT;CSharp;C#-API;ONNX</PackageTags>
-    <Copyright>Copyright © 2025 Yan Guojin. All Rights Reserved.</Copyright>
+    <Copyright>Copyright © 2026 Yan Guojin. All Rights Reserved.</Copyright>
     <PackAsTool>False</PackAsTool>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageIcon>logo.jpg</PackageIcon>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE.txt">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\nuget\logo.jpg">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
 </Project>
