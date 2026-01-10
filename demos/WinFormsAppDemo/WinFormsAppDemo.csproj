@@ -9,13 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="JYPPX.TensorRT.CSharp.API.runtime.win-x64.cuda12" Version="0.0.5" />
+
     <PackageReference Include="OpenCvSharp4.Extensions" Version="4.11.0.20250507" />
     <PackageReference Include="OpenCvSharp4.Windows" Version="4.11.0.20250507" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\TensorRtSharp.csproj" />
-  </ItemGroup>
+	<PackageReference Include="JYPPX.TensorRT.CSharp.API" Version="0.0.5" />
+	<PackageReference Include="OpenCvSharp4.Windows" Version="4.11.0.20250507" />
+	<PackageReference Include="JYPPX.TensorRT.CSharp.API.runtime.win-x64.cuda11" Version="0.0.5" />
+</ItemGroup>
 
 </Project>

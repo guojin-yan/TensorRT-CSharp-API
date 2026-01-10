@@ -216,17 +216,6 @@ namespace WinFormsAppDemo
         private void button4_Click(object sender, EventArgs e)
         {
             string filePath = textBox2.Text.Trim();
-            //FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-            //byte[] data = new byte[fileStream.Length];
-
-            //BinaryReader binaryReader = new BinaryReader(fileStream);
-
-            //data = binaryReader.ReadBytes((int)fileStream.Length); // 读取整个文件到byte数组
-            //cudaEngine = runtime.deserializeCudaEngineByBlob(data, (ulong)fileStream.Length);
-
-            //byte[] data = File.ReadAllBytes(filePath);
-            //cudaEngine = runtime.deserializeCudaEngineByBlob(data, (ulong)data.Length);
-
 
             using var reader = new FileStreamReader();
             reader.open(filePath);
