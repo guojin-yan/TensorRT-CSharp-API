@@ -260,6 +260,17 @@ namespace JYPPX.TensorRtSharp.Nvinfer
                 ptr, out int allowed));
             return allowed != 0;
         }
+
+        /// <summary>
+        /// 获取与此运行时关联的 Logger
+        /// Gets the logger associated with this runtime
+        /// </summary>
+        /// <returns>Logger 实例 / Logger instance</returns>
+        public Logger getLogger()
+        {
+            // Runtime 使用全局 Logger 实例，返回单例
+            return Logger.Instance;
+        }
     }
 
 }

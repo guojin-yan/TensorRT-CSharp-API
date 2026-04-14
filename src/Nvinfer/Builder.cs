@@ -248,6 +248,17 @@ namespace JYPPX.TensorRtSharp.Nvinfer
             TrtHandleException.handler(NativeMethods.trtBuild_getPluginRegistry(ptr, out pluginRegistryPtr));
             return new PluginRegistry(pluginRegistryPtr);
         }
+
+        /// <summary>
+        /// 获取与此构建器关联的 Logger
+        /// Gets the logger associated with this builder
+        /// </summary>
+        /// <returns>Logger 实例 / Logger instance</returns>
+        public Logger getLogger()
+        {
+            // Builder 使用全局 Logger 实例，返回单例
+            return Logger.Instance;
+        }
     }
 
 }

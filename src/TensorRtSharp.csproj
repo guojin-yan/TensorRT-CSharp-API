@@ -9,7 +9,7 @@
     <!--Set NuGet Message-->
     <PackageId>JYPPX.TensorRT.CSharp.API </PackageId>
     <Title>TensorRtSharp</Title>
-    <Version>0.0.5</Version>
+    <Version>0.0.5.2</Version>
     <Authors>Guojin Yan</Authors>
     <Company>Guojin Yan</Company>
     <Product>JYPPX.TensorRT.CSharp.API </Product>
@@ -28,6 +28,7 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageIcon>logo.jpg</PackageIcon>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 
   </PropertyGroup>
 

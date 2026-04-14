@@ -105,5 +105,14 @@ namespace JYPPX.TensorRtSharp.ExternalInterface
         public extern static TrtExceptionStatus trtBuild_getPluginRegistry(IntPtr build,
             out IntPtr pluginRegistry);
 
+        /// <summary>
+        /// ��ȡ Builder ���� Logger
+        /// Gets the logger associated with the builder
+        /// </summary>
+        [Pure, DllImport(dllExtern, EntryPoint = "trtBuild_getLogger",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static TrtExceptionStatus trtBuild_getLogger(IntPtr build,
+            out IntPtr logger);
+
     }
 }

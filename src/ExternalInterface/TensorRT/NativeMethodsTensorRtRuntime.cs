@@ -129,5 +129,15 @@ namespace JYPPX.TensorRtSharp.ExternalInterface
         public extern static TrtExceptionStatus trtRuntime_getEngineHostCodeAllowed(
             IntPtr runtime,
             out int allowed);
+
+        /// <summary>
+        /// ��ȡ Runtime ���� Logger
+        /// Gets the logger associated with the runtime
+        /// </summary>
+        [Pure, DllImport(dllExtern, EntryPoint = "trtRuntime_getLogger",
+            CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public extern static TrtExceptionStatus trtRuntime_getLogger(
+            IntPtr runtime,
+            out IntPtr logger);
     }
 }

@@ -48,12 +48,12 @@ namespace YoloDetParallelInfer
             string enginePath = "yolov8s.engine";
             string imagePath = "bus.jpg";
 
-                           Mat img = Cv2.ImRead(imagePath);
-                            if (img.Empty())
-                            {
-                                Logger.Instance.INFO("Image not found!");
-                                return;
-                            }
+            Mat img = Cv2.ImRead(imagePath);
+            if (img.Empty())
+            {
+                Logger.Instance.INFO("Image not found!");
+                return;
+            }
             // ================= 1. 加载 TensorRT Engine =================
             // 使用 using 语句确保文件流正确关闭
             byte[] engineData;

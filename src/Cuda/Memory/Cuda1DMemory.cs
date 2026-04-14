@@ -126,6 +126,23 @@ namespace JYPPX.TensorRtSharp.Cuda
 
         }
 
+
+        public void copyFromHost(CudaPinnedMemory<T> memory)
+        {
+            // 边界检查：确保主机数组不会超出设备内存范围
+            if ((ulong)memory.Length > SizeElements)
+            {
+                throw new CudaException($"Source host array length ({memory.Length}) exceeds allocated device memory capacity ({SizeElements}).");
+            }
+
+            CudaHandleException.handler(
+                NativeMethods.cudaRuntime_cudaMemcpy(ptr,
+                memory.TrtPtr,
+                (ulong)memory.SizeInBytes, CudaMemcpyKind.HostToDevice));
+
+
+        }
+
         /// <summary>
         ///从此设备内存复制数据到主机内存。这是一个同步操作。
         /// Copies data from this device memory to host memory. This is a synchronous operation.
@@ -138,6 +155,16 @@ namespace JYPPX.TensorRtSharp.Cuda
                 Marshal.UnsafeAddrOfPinnedArrayElement(host_ptr, 0),
                 ptr,
                 (length < (ulong)host_ptr.Length ? length : (ulong)host_ptr.Length) * (ulong)Marshal.SizeOf(typeof(T)),
+                CudaMemcpyKind.DeviceToHost));
+        }
+
+        public void copyToHost(CudaPinnedMemory<T> memory)
+        {
+            CudaHandleException.handler(
+            NativeMethods.cudaRuntime_cudaMemcpy(
+                memory.TrtPtr,
+                ptr,
+                (length < (ulong)memory.Length ? length : (ulong)memory.Length) * (ulong)Marshal.SizeOf(typeof(T)),
                 CudaMemcpyKind.DeviceToHost));
         }
 
@@ -166,6 +193,24 @@ namespace JYPPX.TensorRtSharp.Cuda
 
         }
 
+
+        public void copyFromHostAsync(CudaPinnedMemory<T> memory, CudaStream stream)
+        {
+            // 边界检查：确保主机数组不会超出设备内存范围
+            if ((ulong)memory.Length > SizeElements)
+            {
+                throw new CudaException($"Source host array length ({memory.Length}) exceeds allocated device memory capacity ({SizeElements}).");
+            }
+
+            CudaHandleException.handler(
+                NativeMethods.cudaRuntime_cudaMemcpyAsync(
+                    ptr,
+                    memory.TrtPtr,
+                        (ulong)memory.SizeInBytes,
+                    CudaMemcpyKind.HostToDevice,
+                    stream.TrtPtr));
+        }
+
         /// <summary>
         ///从此设备内存异步复制数据到主机内存。
         /// Asynchronously copies data from this device memory to host memory.
@@ -179,6 +224,17 @@ namespace JYPPX.TensorRtSharp.Cuda
                 Marshal.UnsafeAddrOfPinnedArrayElement(host_ptr, 0),
                 ptr,
                 (length < (ulong)host_ptr.Length ? length : (ulong)host_ptr.Length) * (ulong)Marshal.SizeOf(typeof(T)),
+                CudaMemcpyKind.DeviceToHost,
+            stream.TrtPtr));
+        }
+
+        public void copyToHostAsync(CudaPinnedMemory<T> memory, CudaStream stream)
+        {
+            CudaHandleException.handler(
+            NativeMethods.cudaRuntime_cudaMemcpyAsync(
+                memory.TrtPtr,
+                ptr,
+                (length < (ulong)memory.Length ? length : (ulong)memory.Length) * (ulong)Marshal.SizeOf(typeof(T)),
                 CudaMemcpyKind.DeviceToHost,
             stream.TrtPtr));
         }

@@ -133,7 +133,7 @@ dotnet add package JYPPX.TensorRT.CSharp.API.runtime.win-x64.cuda11
 
 | 要求 | 说明 |
 |------|------|
-| **操作系统** | Windows 10+、Linux（Ubuntu 18.04+）、macOS 10.15+ |
+| **操作系统** | Windows 10+、Linux（Ubuntu 18.04+） |
 | **.NET 版本** | .NET 5.0-10.0、.NET Core 3.1、.NET Framework 4.7.1+ |
 | **GPU** | NVIDIA GPU（支持 CUDA 11.x 或 12.x） |
 | **依赖** | NVIDIA TensorRT 10.x、CUDA Runtime |
@@ -548,6 +548,7 @@ namespace TestDemo
 
             // 打印所有可用设备的列表
             Logger.Instance.INFO("Available Devices: ");
+            CudaDeviceProp properties = new CudaDeviceProp();
 
             // 遍历系统中的每一个 GPU
             for (int deviceIdx = 0; deviceIdx < nbDevices; ++deviceIdx)
