@@ -1,0 +1,498 @@
+{
+    "schemaVersion":  2,
+    "packages":  [
+                     {
+                         "key":  "win-x64-trt8.6-cuda11.8-cudnn8.9",
+                         "packageId":  "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt8.6.cuda11.8.cudnn8.9",
+                         "rid":  "win-x64",
+                         "platform":  "windows",
+                         "tensorRtLine":  "8",
+                         "tensorRtVersion":  "8.6.1.6",
+                         "cudaLine":  "11",
+                         "cudaVersion":  "11.8",
+                         "cudnnMajor":  "8",
+                         "cudnnVersion":  "8.9.7.29",
+                         "tensorRtPackageName":  "TensorRT-8.6.1.6-cuda 11.8",
+                         "cudnnPackageName":  "cudnn-windows-x86_64-8.9.7.29_cuda11-archive",
+                         "distributionTier":  "public-sample",
+                         "validationState":  "local-validated",
+                         "distributionNotes":  "First Windows public validation sample in the exact dependency matrix.",
+                         "buildPreset":  "win-x64-trt8-cuda11-release",
+                         "bridgeConfiguration":  "Release",
+                         "bridgeFile":  "jyppxtrtbridge.dll",
+                         "tensorRtFiles":  [
+                                               "lib\\nvinfer.dll",
+                                               "lib\\nvinfer_builder_resource.dll",
+                                               "lib\\nvinfer_dispatch.dll",
+                                               "lib\\nvinfer_lean.dll",
+                                               "lib\\nvinfer_plugin.dll",
+                                               "lib\\nvinfer_vc_plugin.dll",
+                                               "lib\\nvonnxparser.dll",
+                                               "lib\\nvparsers.dll"
+                                           ],
+                         "cudaFiles":  [
+                                           "bin\\cudart64_110.dll",
+                                           "bin\\cublas64_11.dll",
+                                           "bin\\cublasLt64_11.dll"
+                                       ],
+                         "cudnnFiles":  [
+                                            "bin\\cudnn64_8.dll",
+                                            "bin\\cudnn_adv_infer64_8.dll",
+                                            "bin\\cudnn_adv_train64_8.dll",
+                                            "bin\\cudnn_cnn_infer64_8.dll",
+                                            "bin\\cudnn_cnn_train64_8.dll",
+                                            "bin\\cudnn_ops_infer64_8.dll",
+                                            "bin\\cudnn_ops_train64_8.dll"
+                                        ]
+                     },
+                     {
+                         "key":  "win-x64-trt8.6-cuda12.1-cudnn8.9",
+                         "packageId":  "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt8.6.cuda12.1.cudnn8.9",
+                         "rid":  "win-x64",
+                         "platform":  "windows",
+                         "tensorRtLine":  "8",
+                         "tensorRtVersion":  "8.6.1.6",
+                         "cudaLine":  "12",
+                         "cudaVersion":  "12.1",
+                         "cudnnMajor":  "8",
+                         "cudnnVersion":  "8.9.7.29",
+                         "tensorRtPackageName":  "TensorRT-8.6.1.6-cuda 12.1",
+                         "cudnnPackageName":  "cudnn-windows-x86_64-8.9.7.29_cuda12-archive",
+                         "distributionTier":  "public-sample",
+                         "validationState":  "local-validated",
+                         "distributionNotes":  "Second Windows public validation sample in the exact dependency matrix.",
+                         "buildPreset":  "win-x64-trt8-cuda12-release",
+                         "bridgeConfiguration":  "Release",
+                         "bridgeFile":  "jyppxtrtbridge.dll",
+                         "tensorRtFiles":  [
+                                               "lib\\nvinfer.dll",
+                                               "lib\\nvinfer_builder_resource.dll",
+                                               "lib\\nvinfer_dispatch.dll",
+                                               "lib\\nvinfer_lean.dll",
+                                               "lib\\nvinfer_plugin.dll",
+                                               "lib\\nvinfer_vc_plugin.dll",
+                                               "lib\\nvonnxparser.dll",
+                                               "lib\\nvparsers.dll"
+                                           ],
+                         "cudaFiles":  [
+                                           "bin\\cudart64_12.dll",
+                                           "bin\\cublas64_12.dll",
+                                           "bin\\cublasLt64_12.dll"
+                                       ],
+                         "cudnnFiles":  [
+                                            "bin\\cudnn64_8.dll",
+                                            "bin\\cudnn_adv_infer64_8.dll",
+                                            "bin\\cudnn_adv_train64_8.dll",
+                                            "bin\\cudnn_cnn_infer64_8.dll",
+                                            "bin\\cudnn_cnn_train64_8.dll",
+                                            "bin\\cudnn_ops_infer64_8.dll",
+                                            "bin\\cudnn_ops_train64_8.dll"
+                                        ]
+                     },
+                     {
+                         "key":  "win-x64-trt10.11-cuda11.8-cudnn8.9",
+                         "packageId":  "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda11.8.cudnn8.9",
+                         "rid":  "win-x64",
+                         "platform":  "windows",
+                         "tensorRtLine":  "10",
+                         "tensorRtVersion":  "10.11.0.33",
+                         "cudaLine":  "11",
+                         "cudaVersion":  "11.8",
+                         "cudnnMajor":  "8",
+                         "cudnnVersion":  "8.9.7.29",
+                         "tensorRtPackageName":  "TensorRT-10.11.0.33-cuda 11.8",
+                         "cudnnPackageName":  "cudnn-windows-x86_64-8.9.7.29_cuda11-archive",
+                         "distributionTier":  "split-delivery-candidate",
+                         "validationState":  "local-validated",
+                         "distributionNotes":  "Validated Windows TensorRT 10 CUDA 11.8 package. 2026-06-12 package consumer smoke passed with 16/16 native assets copied; still better suited to private feed or split delivery because of size.",
+                         "buildPreset":  "win-x64-trt10-cuda11-release",
+                         "bridgeConfiguration":  "Release",
+                         "bridgeFile":  "jyppxtrtbridge.dll",
+                         "tensorRtFiles":  [
+                                               "lib\\nvinfer_10.dll",
+                                               "lib\\nvinfer_builder_resource_10.dll",
+                                               "lib\\nvinfer_dispatch_10.dll",
+                                               "lib\\nvinfer_lean_10.dll",
+                                               "lib\\nvinfer_plugin_10.dll",
+                                               "lib\\nvinfer_vc_plugin_10.dll",
+                                               "lib\\nvonnxparser_10.dll"
+                                           ],
+                         "cudaFiles":  [
+                                           "bin\\cudart64_110.dll"
+                                       ],
+                         "cudnnFiles":  [
+                                            "bin\\cudnn64_8.dll",
+                                            "bin\\cudnn_adv_infer64_8.dll",
+                                            "bin\\cudnn_adv_train64_8.dll",
+                                            "bin\\cudnn_cnn_infer64_8.dll",
+                                            "bin\\cudnn_cnn_train64_8.dll",
+                                            "bin\\cudnn_ops_infer64_8.dll",
+                                            "bin\\cudnn_ops_train64_8.dll"
+                                        ]
+                     },
+                     {
+                         "key":  "win-x64-trt10.11-cuda12.9-cudnn9.22",
+                         "packageId":  "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22",
+                         "rid":  "win-x64",
+                         "platform":  "windows",
+                         "tensorRtLine":  "10",
+                         "tensorRtVersion":  "10.11.0.33",
+                         "cudaLine":  "12",
+                         "cudaVersion":  "12.9",
+                         "localBuildCudaVersion":  "12.9",
+                         "cudnnMajor":  "9",
+                         "cudnnVersion":  "9.22.0",
+                         "tensorRtPackageName":  "TensorRT-10.11.0.33-cuda 12.9",
+                         "cudnnPackageName":  "cudnn_windows_x86_64_9.22.0_cuda12",
+                         "distributionTier":  "split-delivery-candidate",
+                         "validationState":  "local-validated",
+                         "distributionNotes":  "Validated locally with CUDA 12.9 through native build, runtime asset collection, runtime pack, package consumer validation, and package consumer smoke. 2026-06-12 consumer evidence: 19/19 native asset patterns copied; keep as split-delivery candidate because of package size.",
+                         "buildPreset":  "win-x64-trt10-cuda12-release",
+                         "bridgeConfiguration":  "Release",
+                         "bridgeFile":  "jyppxtrtbridge.dll",
+                         "tensorRtFiles":  [
+                                               "lib\\nvinfer_10.dll",
+                                               "lib\\nvinfer_builder_resource_10.dll",
+                                               "lib\\nvinfer_dispatch_10.dll",
+                                               "lib\\nvinfer_lean_10.dll",
+                                               "lib\\nvinfer_plugin_10.dll",
+                                               "lib\\nvinfer_vc_plugin_10.dll",
+                                               "lib\\nvonnxparser_10.dll"
+                                           ],
+                         "cudaFiles":  [
+                                           "bin\\cudart64_12.dll"
+                                       ],
+                         "cudnnFiles":  [
+                                            "bin\\cudnn64_9.dll",
+                                            "bin\\cudnn_adv64_9.dll",
+                                            "bin\\cudnn_cnn64_9.dll",
+                                            "bin\\cudnn_engines_precompiled64_9.dll",
+                                            "bin\\cudnn_engines_runtime_compiled64_9.dll",
+                                            "bin\\cudnn_engines_tensor_ir64_9.dll",
+                                            "bin\\cudnn_ext64_9.dll",
+                                            "bin\\cudnn_graph64_9.dll",
+                                            "bin\\cudnn_heuristic64_9.dll",
+                                            "bin\\cudnn_ops64_9.dll"
+                                        ]
+                     },
+                     {
+                         "key":  "win-x64-trt11.0-cuda12.9-cudnn9.22",
+                         "packageId":  "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22",
+                         "rid":  "win-x64",
+                         "platform":  "windows",
+                         "tensorRtLine":  "11",
+                         "tensorRtVersion":  "11.0.0.114",
+                         "cudaLine":  "12",
+                         "cudaVersion":  "12.9",
+                         "localBuildCudaVersion":  "12.9",
+                         "cudnnMajor":  "9",
+                         "cudnnVersion":  "9.22.0",
+                         "tensorRtPackageName":  "TensorRT-11.0.0.114-cuda 12.9",
+                         "cudnnPackageName":  "cudnn_windows_x86_64_9.22.0_cuda12",
+                         "distributionTier":  "private-feed",
+                         "validationState":  "local-validated",
+                         "distributionNotes":  "TensorRT 11 + CUDA 12.9 native adapter compiles, passes minimal TensorRT smoke, and passes runtime package collection, runtime pack, package consumer validation, and package consumer smoke locally. 2026-06-12 consumer evidence: 19/19 native asset patterns copied. Keep as private-feed candidate until redistribution and larger API coverage mature.",
+                         "buildPreset":  "win-x64-trt11-cuda12-release",
+                         "bridgeConfiguration":  "Release",
+                         "bridgeFile":  "jyppxtrtbridge.dll",
+                         "tensorRtFiles":  [
+                                               "bin\\nvinfer_11.dll",
+                                               "bin\\nvinfer_builder_resource_*_11.dll",
+                                               "bin\\nvinfer_dispatch_11.dll",
+                                               "bin\\nvinfer_lean_11.dll",
+                                               "bin\\nvinfer_plugin_11.dll",
+                                               "bin\\nvinfer_vc_plugin_11.dll",
+                                               "bin\\nvonnxparser_11.dll"
+                                           ],
+                         "cudaFiles":  [
+                                           "bin\\cudart64_12.dll"
+                                       ],
+                         "cudnnFiles":  [
+                                            "bin\\cudnn64_9.dll",
+                                            "bin\\cudnn_adv64_9.dll",
+                                            "bin\\cudnn_cnn64_9.dll",
+                                            "bin\\cudnn_engines_precompiled64_9.dll",
+                                            "bin\\cudnn_engines_runtime_compiled64_9.dll",
+                                            "bin\\cudnn_engines_tensor_ir64_9.dll",
+                                            "bin\\cudnn_ext64_9.dll",
+                                            "bin\\cudnn_graph64_9.dll",
+                                            "bin\\cudnn_heuristic64_9.dll",
+                                            "bin\\cudnn_ops64_9.dll"
+                                        ]
+                     },
+                     {
+                         "key":  "win-x64-trt11.0-cuda13.2-cudnn9.22",
+                         "packageId":  "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda13.2.cudnn9.22",
+                         "rid":  "win-x64",
+                         "platform":  "windows",
+                         "tensorRtLine":  "11",
+                         "tensorRtVersion":  "11.0.0.114",
+                         "cudaLine":  "13",
+                         "cudaVersion":  "13.2",
+                         "cudnnMajor":  "9",
+                         "cudnnVersion":  "9.22.0",
+                         "tensorRtPackageName":  "TensorRT-11.0.0.114-cuda 13.2",
+                         "cudnnPackageName":  "cudnn_windows_x86_64_9.22.0_cuda13",
+                         "distributionTier":  "private-feed",
+                         "validationState":  "pending-local-validation",
+                         "distributionNotes":  "TensorRT 11 + CUDA 13.2 native bridge compiles locally and 2026-06-12 package consumer restore/build/native-copy validation passed with 19/19 native asset patterns copied. Runtime smoke remains pending because the current NVIDIA driver/runtime stack is not CUDA 13-capable; keep pending until CUDA 13 runtime/builder validation is available.",
+                         "buildPreset":  "win-x64-trt11-cuda13-release",
+                         "bridgeConfiguration":  "Release",
+                         "bridgeFile":  "jyppxtrtbridge.dll",
+                         "tensorRtFiles":  [
+                                               "bin\\nvinfer_11.dll",
+                                               "bin\\nvinfer_builder_resource_*_11.dll",
+                                               "bin\\nvinfer_dispatch_11.dll",
+                                               "bin\\nvinfer_lean_11.dll",
+                                               "bin\\nvinfer_plugin_11.dll",
+                                               "bin\\nvinfer_vc_plugin_11.dll",
+                                               "bin\\nvonnxparser_11.dll"
+                                           ],
+                         "cudaFiles":  [
+                                           "bin\\x64\\cudart64_13.dll"
+                                       ],
+                         "cudnnFiles":  [
+                                            "bin\\cudnn64_9.dll",
+                                            "bin\\cudnn_adv64_9.dll",
+                                            "bin\\cudnn_cnn64_9.dll",
+                                            "bin\\cudnn_engines_precompiled64_9.dll",
+                                            "bin\\cudnn_engines_runtime_compiled64_9.dll",
+                                            "bin\\cudnn_engines_tensor_ir64_9.dll",
+                                            "bin\\cudnn_ext64_9.dll",
+                                            "bin\\cudnn_graph64_9.dll",
+                                            "bin\\cudnn_heuristic64_9.dll",
+                                            "bin\\cudnn_ops64_9.dll"
+                                        ]
+                     },
+                     {
+                         "key":  "linux-x64-trt8.6-cuda11.8-cudnn8.9",
+                         "packageId":  "JYPPX.TensorRT.CSharp.API.Runtime.linux-x64.trt8.6.cuda11.8.cudnn8.9",
+                         "rid":  "linux-x64",
+                         "platform":  "linux",
+                         "tensorRtLine":  "8",
+                         "tensorRtVersion":  "8.6.1.6",
+                         "cudaLine":  "11",
+                         "cudaVersion":  "11.8",
+                         "cudnnMajor":  "8",
+                         "cudnnVersion":  "8.9.7.29",
+                         "distributionTier":  "private-feed",
+                         "validationState":  "dry-run-only",
+                         "distributionNotes":  "Linux target mirrors the Windows exact major/minor matrix but remains dry-run-only until a real runner is available.",
+                         "buildPreset":  "linux-x64-trt8-cuda11-release",
+                         "bridgeConfiguration":  "Release",
+                         "defaultTensorRtRoot":  "/opt/tensorrt/trt8-cuda11.8",
+                         "defaultCudaRoot":  "/usr/local/cuda-11.8",
+                         "defaultCudnnRoot":  "/opt/cudnn/cuda11",
+                         "bridgeFile":  "libjyppxtrtbridge.so",
+                         "tensorRtFiles":  [
+                                               "lib/libnvinfer.so*",
+                                               "lib/libnvinfer_plugin.so*",
+                                               "lib/libnvonnxparser.so*",
+                                               "lib/libnvparsers.so*",
+                                               "lib/libnvinfer_builder_resource.so*",
+                                               "lib/libnvinfer_dispatch.so*",
+                                               "lib/libnvinfer_lean.so*"
+                                           ],
+                         "cudaFiles":  [
+                                           "targets/x86_64-linux/lib/libcudart.so*",
+                                           "lib64/libcudart.so*"
+                                       ],
+                         "cudnnFiles":  [
+                                            "lib/libcudnn*.so*"
+                                        ],
+                         "tensorRtPackageName":  "TensorRT-8.6.x Linux package line",
+                         "cudnnPackageName":  "cuDNN 8.9.x Linux package line"
+                     },
+                     {
+                         "key":  "linux-x64-trt8.6-cuda12.1-cudnn8.9",
+                         "packageId":  "JYPPX.TensorRT.CSharp.API.Runtime.linux-x64.trt8.6.cuda12.1.cudnn8.9",
+                         "rid":  "linux-x64",
+                         "platform":  "linux",
+                         "tensorRtLine":  "8",
+                         "tensorRtVersion":  "8.6.1.6",
+                         "cudaLine":  "12",
+                         "cudaVersion":  "12.1",
+                         "cudnnMajor":  "8",
+                         "cudnnVersion":  "8.9.7.29",
+                         "distributionTier":  "private-feed",
+                         "validationState":  "dry-run-only",
+                         "distributionNotes":  "Linux target mirrors the Windows exact major/minor matrix but remains dry-run-only until a real runner is available.",
+                         "buildPreset":  "linux-x64-trt8-cuda12-release",
+                         "bridgeConfiguration":  "Release",
+                         "defaultTensorRtRoot":  "/opt/tensorrt/trt8-cuda12.1",
+                         "defaultCudaRoot":  "/usr/local/cuda-12.1",
+                         "defaultCudnnRoot":  "/opt/cudnn/cuda12",
+                         "bridgeFile":  "libjyppxtrtbridge.so",
+                         "tensorRtFiles":  [
+                                               "lib/libnvinfer.so*",
+                                               "lib/libnvinfer_plugin.so*",
+                                               "lib/libnvonnxparser.so*",
+                                               "lib/libnvparsers.so*",
+                                               "lib/libnvinfer_builder_resource.so*",
+                                               "lib/libnvinfer_dispatch.so*",
+                                               "lib/libnvinfer_lean.so*"
+                                           ],
+                         "cudaFiles":  [
+                                           "targets/x86_64-linux/lib/libcudart.so*",
+                                           "lib64/libcudart.so*"
+                                       ],
+                         "cudnnFiles":  [
+                                            "lib/libcudnn*.so*"
+                                        ],
+                         "tensorRtPackageName":  "TensorRT-8.6.x Linux package line",
+                         "cudnnPackageName":  "cuDNN 8.9.x Linux package line"
+                     },
+                     {
+                         "key":  "linux-x64-trt10.11-cuda11.8-cudnn8.9",
+                         "packageId":  "JYPPX.TensorRT.CSharp.API.Runtime.linux-x64.trt10.11.cuda11.8.cudnn8.9",
+                         "rid":  "linux-x64",
+                         "platform":  "linux",
+                         "tensorRtLine":  "10",
+                         "tensorRtVersion":  "10.11.0.33",
+                         "cudaLine":  "11",
+                         "cudaVersion":  "11.8",
+                         "cudnnMajor":  "8",
+                         "cudnnVersion":  "8.9.7.29",
+                         "distributionTier":  "private-feed",
+                         "validationState":  "dry-run-only",
+                         "distributionNotes":  "Linux target mirrors the Windows exact major/minor matrix but remains dry-run-only until a real runner is available.",
+                         "buildPreset":  "linux-x64-trt10-cuda11-release",
+                         "bridgeConfiguration":  "Release",
+                         "defaultTensorRtRoot":  "/opt/tensorrt/trt10-cuda11.8",
+                         "defaultCudaRoot":  "/usr/local/cuda-11.8",
+                         "defaultCudnnRoot":  "/opt/cudnn/cuda11",
+                         "bridgeFile":  "libjyppxtrtbridge.so",
+                         "tensorRtFiles":  [
+                                               "lib/libnvinfer.so*",
+                                               "lib/libnvinfer_plugin.so*",
+                                               "lib/libnvonnxparser.so*",
+                                               "lib/libnvinfer_builder_resource.so*",
+                                               "lib/libnvinfer_dispatch.so*",
+                                               "lib/libnvinfer_lean.so*"
+                                           ],
+                         "cudaFiles":  [
+                                           "targets/x86_64-linux/lib/libcudart.so*",
+                                           "lib64/libcudart.so*"
+                                       ],
+                         "cudnnFiles":  [
+                                            "lib/libcudnn*.so*"
+                                        ],
+                         "tensorRtPackageName":  "TensorRT-10.11.x Linux package line",
+                         "cudnnPackageName":  "cuDNN 8.9.x Linux package line"
+                     },
+                     {
+                         "key":  "linux-x64-trt10.11-cuda12.9-cudnn9.22",
+                         "packageId":  "JYPPX.TensorRT.CSharp.API.Runtime.linux-x64.trt10.11.cuda12.9.cudnn9.22",
+                         "rid":  "linux-x64",
+                         "platform":  "linux",
+                         "tensorRtLine":  "10",
+                         "tensorRtVersion":  "10.11.0.33",
+                         "cudaLine":  "12",
+                         "cudaVersion":  "12.9",
+                         "cudnnMajor":  "9",
+                         "cudnnVersion":  "9.22.0",
+                         "distributionTier":  "private-feed",
+                         "validationState":  "dry-run-only",
+                         "distributionNotes":  "Linux target mirrors the Windows exact major/minor matrix but remains dry-run-only until a real runner is available.",
+                         "buildPreset":  "linux-x64-trt10-cuda12-release",
+                         "bridgeConfiguration":  "Release",
+                         "defaultTensorRtRoot":  "/opt/tensorrt/trt10-cuda12.9",
+                         "defaultCudaRoot":  "/usr/local/cuda-12.9",
+                         "defaultCudnnRoot":  "/opt/cudnn/cuda12",
+                         "bridgeFile":  "libjyppxtrtbridge.so",
+                         "tensorRtFiles":  [
+                                               "lib/libnvinfer.so*",
+                                               "lib/libnvinfer_plugin.so*",
+                                               "lib/libnvonnxparser.so*",
+                                               "lib/libnvinfer_builder_resource.so*",
+                                               "lib/libnvinfer_dispatch.so*",
+                                               "lib/libnvinfer_lean.so*"
+                                           ],
+                         "cudaFiles":  [
+                                           "targets/x86_64-linux/lib/libcudart.so*",
+                                           "lib64/libcudart.so*"
+                                       ],
+                         "cudnnFiles":  [
+                                            "lib/libcudnn*.so*"
+                                        ],
+                         "tensorRtPackageName":  "TensorRT-10.11.x Linux package line",
+                         "cudnnPackageName":  "cuDNN 9.22.x Linux package line"
+                     },
+                     {
+                         "key":  "linux-x64-trt11.0-cuda12.9-cudnn9.22",
+                         "packageId":  "JYPPX.TensorRT.CSharp.API.Runtime.linux-x64.trt11.0.cuda12.9.cudnn9.22",
+                         "rid":  "linux-x64",
+                         "platform":  "linux",
+                         "tensorRtLine":  "11",
+                         "tensorRtVersion":  "11.0.0.114",
+                         "cudaLine":  "12",
+                         "cudaVersion":  "12.9",
+                         "cudnnMajor":  "9",
+                         "cudnnVersion":  "9.22.0",
+                         "distributionTier":  "private-feed",
+                         "validationState":  "dry-run-only",
+                         "distributionNotes":  "Linux target mirrors the Windows exact major/minor matrix but remains dry-run-only until a real runner is available.",
+                         "buildPreset":  "linux-x64-trt11-cuda12-release",
+                         "bridgeConfiguration":  "Release",
+                         "defaultTensorRtRoot":  "/opt/tensorrt/trt11-cuda12.9",
+                         "defaultCudaRoot":  "/usr/local/cuda-12.9",
+                         "defaultCudnnRoot":  "/opt/cudnn/cuda12",
+                         "bridgeFile":  "libjyppxtrtbridge.so",
+                         "tensorRtFiles":  [
+                                               "lib/libnvinfer.so*",
+                                               "lib/libnvinfer_plugin.so*",
+                                               "lib/libnvonnxparser.so*",
+                                               "lib/libnvinfer_builder_resource*.so*",
+                                               "lib/libnvinfer_dispatch.so*",
+                                               "lib/libnvinfer_lean.so*"
+                                           ],
+                         "cudaFiles":  [
+                                           "targets/x86_64-linux/lib/libcudart.so*",
+                                           "lib64/libcudart.so*"
+                                       ],
+                         "cudnnFiles":  [
+                                            "lib/libcudnn*.so*"
+                                        ],
+                         "tensorRtPackageName":  "TensorRT-11.0.x Linux package line",
+                         "cudnnPackageName":  "cuDNN 9.22.x Linux package line"
+                     },
+                     {
+                         "key":  "linux-x64-trt11.0-cuda13.2-cudnn9.22",
+                         "packageId":  "JYPPX.TensorRT.CSharp.API.Runtime.linux-x64.trt11.0.cuda13.2.cudnn9.22",
+                         "rid":  "linux-x64",
+                         "platform":  "linux",
+                         "tensorRtLine":  "11",
+                         "tensorRtVersion":  "11.0.0.114",
+                         "cudaLine":  "13",
+                         "cudaVersion":  "13.2",
+                         "cudnnMajor":  "9",
+                         "cudnnVersion":  "9.22.0",
+                         "distributionTier":  "private-feed",
+                         "validationState":  "dry-run-only",
+                         "distributionNotes":  "Linux target mirrors the Windows exact major/minor matrix but remains dry-run-only until a real runner is available.",
+                         "buildPreset":  "linux-x64-trt11-cuda13-release",
+                         "bridgeConfiguration":  "Release",
+                         "defaultTensorRtRoot":  "/opt/tensorrt/trt11-cuda13.2",
+                         "defaultCudaRoot":  "/usr/local/cuda-13.2",
+                         "defaultCudnnRoot":  "/opt/cudnn/cuda13",
+                         "bridgeFile":  "libjyppxtrtbridge.so",
+                         "tensorRtFiles":  [
+                                               "lib/libnvinfer.so*",
+                                               "lib/libnvinfer_plugin.so*",
+                                               "lib/libnvonnxparser.so*",
+                                               "lib/libnvinfer_builder_resource*.so*",
+                                               "lib/libnvinfer_dispatch.so*",
+                                               "lib/libnvinfer_lean.so*"
+                                           ],
+                         "cudaFiles":  [
+                                           "targets/x86_64-linux/lib/libcudart.so*",
+                                           "lib64/libcudart.so*"
+                                       ],
+                         "cudnnFiles":  [
+                                            "lib/libcudnn*.so*"
+                                        ],
+                         "tensorRtPackageName":  "TensorRT-11.0.x Linux package line",
+                         "cudnnPackageName":  "cuDNN 9.22.x Linux package line"
+                     }
+                 ]
+}

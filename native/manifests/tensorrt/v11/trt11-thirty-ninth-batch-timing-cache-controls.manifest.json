@@ -1,0 +1,91 @@
+{
+  "$schema": "../../bridge-api.schema.json",
+  "module": "tensorrt",
+  "versionLine": "11",
+  "apis": [
+    {
+      "id": "jyppx-trt11-timing-cache-combine",
+      "entryPoint": "jyppx_trt11_timing_cache_combine",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "cache", "type": "JYPPX_TensorRtTimingCache*", "direction": "in" },
+        { "name": "input_cache", "type": "JYPPX_TensorRtTimingCache*", "direction": "in" },
+        { "name": "ignore_mismatch", "type": "JYPPX_Boolean", "direction": "in" },
+        { "name": "out_combined", "type": "JYPPX_Boolean*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "jyppx-trt11-timing-cache-reset",
+      "entryPoint": "jyppx_trt11_timing_cache_reset",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "cache", "type": "JYPPX_TensorRtTimingCache*", "direction": "in" },
+        { "name": "out_reset", "type": "JYPPX_Boolean*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "jyppx-trt11-timing-cache-query-key-count",
+      "entryPoint": "jyppx_trt11_timing_cache_query_key_count",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "cache", "type": "JYPPX_TensorRtTimingCache*", "direction": "in" },
+        { "name": "out_key_count", "type": "int64_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "jyppx-trt11-timing-cache-copy-keys",
+      "entryPoint": "jyppx_trt11_timing_cache_copy_keys",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "cache", "type": "JYPPX_TensorRtTimingCache*", "direction": "in" },
+        { "name": "output_keys", "type": "uint8_t*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "key_capacity", "type": "int64_t", "direction": "in" },
+        { "name": "out_key_count", "type": "int64_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "jyppx-trt11-timing-cache-query",
+      "entryPoint": "jyppx_trt11_timing_cache_query",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "cache", "type": "JYPPX_TensorRtTimingCache*", "direction": "in" },
+        { "name": "key_data", "type": "const uint8_t*", "direction": "in", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "key_size", "type": "int32_t", "direction": "in" },
+        { "name": "out_tactic_hash", "type": "uint64_t*", "direction": "out", "managedType": "out ulong", "moduleManagedType": "out ulong" },
+        { "name": "out_timing_msec", "type": "float*", "direction": "out", "managedType": "out float", "moduleManagedType": "out float" },
+        { "name": "out_found", "type": "JYPPX_Boolean*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "jyppx-trt11-timing-cache-update",
+      "entryPoint": "jyppx_trt11_timing_cache_update",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "cache", "type": "JYPPX_TensorRtTimingCache*", "direction": "in" },
+        { "name": "key_data", "type": "const uint8_t*", "direction": "in", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "key_size", "type": "int32_t", "direction": "in" },
+        { "name": "tactic_hash", "type": "uint64_t", "direction": "in", "managedType": "ulong", "moduleManagedType": "ulong" },
+        { "name": "timing_msec", "type": "float", "direction": "in" },
+        { "name": "out_updated", "type": "JYPPX_Boolean*", "direction": "out" }
+      ]
+    }
+  ]
+}

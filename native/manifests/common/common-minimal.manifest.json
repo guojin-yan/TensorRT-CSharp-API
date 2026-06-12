@@ -1,0 +1,162 @@
+{
+  "$schema": "../bridge-api.schema.json",
+  "module": "common",
+  "versionLine": "common",
+  "apis": [
+    {
+      "id": "common-get-abi-version",
+      "entryPoint": "jyppx_common_get_abi_version",
+      "returnType": "int",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "",
+      "parameters": []
+    },
+    {
+      "id": "common-get-bridge-name",
+      "entryPoint": "jyppx_common_get_bridge_name",
+      "returnType": "IntPtr",
+      "ownership": "library-owned",
+      "manualOverride": false,
+      "versionGuard": "",
+      "parameters": []
+    },
+    {
+      "id": "common-get-bridge-banner",
+      "entryPoint": "jyppx_common_get_bridge_banner",
+      "returnType": "IntPtr",
+      "ownership": "library-owned",
+      "manualOverride": false,
+      "versionGuard": "",
+      "parameters": []
+    },
+    {
+      "id": "common-get-build-info",
+      "entryPoint": "jyppx_common_get_build_info",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "",
+      "parameters": [
+        {
+          "name": "out_info",
+          "type": "JYPPX_BuildInfo*",
+          "direction": "out",
+          "managedType": "out IntPtr",
+          "moduleManagedType": "out NativeBuildInfo"
+        }
+      ]
+    },
+    {
+      "id": "common-query-runtime-info",
+      "entryPoint": "jyppx_common_query_runtime_info",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "",
+      "parameters": [
+        {
+          "name": "out_info",
+          "type": "JYPPX_RuntimeInfo*",
+          "direction": "out",
+          "managedType": "out IntPtr",
+          "moduleManagedType": "out NativeRuntimeInfo"
+        }
+      ]
+    },
+    {
+      "id": "common-query-capability-info",
+      "entryPoint": "jyppx_common_query_capability_info",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "",
+      "parameters": [
+        {
+          "name": "out_info",
+          "type": "JYPPX_CapabilityInfo*",
+          "direction": "out",
+          "managedType": "out IntPtr",
+          "moduleManagedType": "out NativeCapabilityInfo"
+        }
+      ]
+    },
+    {
+      "id": "common-get-last-error-message",
+      "entryPoint": "jyppx_common_get_last_error_message",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "",
+      "parameters": [
+        {
+          "name": "buffer",
+          "type": "char*",
+          "direction": "in",
+          "managedType": "byte[]",
+          "moduleManagedType": "byte[]"
+        },
+        {
+          "name": "buffer_size",
+          "type": "size_t",
+          "direction": "in"
+        },
+        {
+          "name": "out_required_size",
+          "type": "size_t*",
+          "direction": "out",
+          "managedType": "out UIntPtr",
+          "moduleManagedType": "out UIntPtr"
+        }
+      ]
+    },
+    {
+      "id": "common-get-last-error-category",
+      "entryPoint": "jyppx_common_get_last_error_category",
+      "returnType": "BridgeErrorCategory",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "",
+      "parameters": []
+    },
+    {
+      "id": "common-clear-last-error",
+      "entryPoint": "jyppx_common_clear_last_error",
+      "returnType": "void",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "",
+      "parameters": []
+    },
+    {
+      "id": "common-status-code-to-string",
+      "entryPoint": "jyppx_common_status_code_to_string",
+      "returnType": "IntPtr",
+      "ownership": "library-owned",
+      "manualOverride": false,
+      "versionGuard": "",
+      "parameters": [
+        {
+          "name": "status_code",
+          "type": "JYPPX_StatusCode",
+          "direction": "in"
+        }
+      ]
+    },
+    {
+      "id": "common-error-category-to-string",
+      "entryPoint": "jyppx_common_error_category_to_string",
+      "returnType": "IntPtr",
+      "ownership": "library-owned",
+      "manualOverride": false,
+      "versionGuard": "",
+      "parameters": [
+        {
+          "name": "category",
+          "type": "JYPPX_ErrorCategory",
+          "direction": "in"
+        }
+      ]
+    }
+  ]
+}

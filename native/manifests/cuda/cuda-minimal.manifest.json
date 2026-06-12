@@ -1,0 +1,2718 @@
+﻿{
+    "$schema":  "../bridge-api.schema.json",
+    "module":  "cuda",
+    "versionLine":  "common",
+    "apis":  [
+                 {
+                     "id":  "cuda-query-runtime-info",
+                     "entryPoint":  "jyppx_cuda_query_runtime_info",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "out_info",
+                                            "type":  "JYPPX_CudaRuntimeInfo*",
+                                            "direction":  "out",
+                                            "managedType":  "out IntPtr",
+                                            "moduleManagedType":  "out NativeCudaRuntimeInfo"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-get-runtime-version",
+                     "entryPoint":  "jyppx_cuda_get_runtime_version",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "out_version",
+                                            "type":  "int32_t*",
+                                            "direction":  "out",
+                                            "managedType":  "out int",
+                                            "moduleManagedType":  "out int"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-get-driver-version",
+                     "entryPoint":  "jyppx_cuda_get_driver_version",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "out_version",
+                                            "type":  "int32_t*",
+                                            "direction":  "out",
+                                            "managedType":  "out int",
+                                            "moduleManagedType":  "out int"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-get-device-count",
+                     "entryPoint":  "jyppx_cuda_get_device_count",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "out_device_count",
+                                            "type":  "int32_t*",
+                                            "direction":  "out",
+                                            "managedType":  "out int",
+                                            "moduleManagedType":  "out int"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-get-device-info",
+                     "entryPoint":  "jyppx_cuda_get_device_info",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "ordinal",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        },
+                                        {
+                                            "name":  "out_info",
+                                            "type":  "JYPPX_CudaDeviceInfo*",
+                                            "direction":  "out",
+                                            "managedType":  "out IntPtr",
+                                            "moduleManagedType":  "out NativeCudaDeviceInfo"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-get-current-device",
+                     "entryPoint":  "jyppx_cuda_get_current_device",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "out_device",
+                                            "type":  "int32_t*",
+                                            "direction":  "out",
+                                            "managedType":  "out int",
+                                            "moduleManagedType":  "out int"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-set-device",
+                     "entryPoint":  "jyppx_cuda_set_device",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "device",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-get-memory-info",
+                     "entryPoint":  "jyppx_cuda_get_memory_info",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "out_info",
+                                            "type":  "JYPPX_CudaMemoryInfo*",
+                                            "direction":  "out",
+                                            "managedType":  "out IntPtr",
+                                            "moduleManagedType":  "out NativeCudaMemoryInfo"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-stream-create",
+                     "entryPoint":  "jyppx_cuda_stream_create",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-destroys",
+                     "manualOverride":  true,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "flags",
+                                            "type":  "uint32_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_stream",
+                                            "type":  "JYPPX_CudaStream**",
+                                            "direction":  "out",
+                                            "ownership":  "caller-destroys"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-stream-get-priority-range",
+                     "entryPoint":  "jyppx_cuda_stream_get_priority_range",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "out_least_priority",
+                                            "type":  "int32_t*",
+                                            "direction":  "out",
+                                            "managedType":  "out int",
+                                            "moduleManagedType":  "out int"
+                                        },
+                                        {
+                                            "name":  "out_greatest_priority",
+                                            "type":  "int32_t*",
+                                            "direction":  "out",
+                                            "managedType":  "out int",
+                                            "moduleManagedType":  "out int"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-stream-create-with-priority",
+                     "entryPoint":  "jyppx_cuda_stream_create_with_priority",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-destroys",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "flags",
+                                            "type":  "uint32_t",
+                                            "direction":  "in",
+                                            "managedType":  "uint",
+                                            "moduleManagedType":  "uint"
+                                        },
+                                        {
+                                            "name":  "priority",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        },
+                                        {
+                                            "name":  "out_stream",
+                                            "type":  "JYPPX_CudaStream**",
+                                            "direction":  "out",
+                                            "ownership":  "caller-destroys"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-stream-query",
+                     "entryPoint":  "jyppx_cuda_stream_query",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "stream",
+                                            "type":  "JYPPX_CudaStream*",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-stream-wait-event",
+                     "entryPoint":  "jyppx_cuda_stream_wait_event",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "stream",
+                                            "type":  "JYPPX_CudaStream*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "event_handle",
+                                            "type":  "JYPPX_CudaEvent*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "flags",
+                                            "type":  "uint32_t",
+                                            "direction":  "in",
+                                            "managedType":  "uint",
+                                            "moduleManagedType":  "uint"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-stream-synchronize",
+                     "entryPoint":  "jyppx_cuda_stream_synchronize",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "stream",
+                                            "type":  "JYPPX_CudaStream*",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-stream-get-priority",
+                     "entryPoint":  "jyppx_cuda_stream_get_priority",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "stream",
+                                            "type":  "JYPPX_CudaStream*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_priority",
+                                            "type":  "int32_t*",
+                                            "direction":  "out",
+                                            "managedType":  "out int",
+                                            "moduleManagedType":  "out int"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-stream-is-capturing",
+                     "entryPoint":  "jyppx_cuda_stream_is_capturing",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "stream",
+                                            "type":  "JYPPX_CudaStream*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_capture_status",
+                                            "type":  "int32_t*",
+                                            "direction":  "out",
+                                            "managedType":  "out int",
+                                            "moduleManagedType":  "out int"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-stream-get-capture-info",
+                     "entryPoint":  "jyppx_cuda_stream_get_capture_info",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "stream",
+                                            "type":  "JYPPX_CudaStream*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_capture_status",
+                                            "type":  "int32_t*",
+                                            "direction":  "out",
+                                            "managedType":  "out int",
+                                            "moduleManagedType":  "out int"
+                                        },
+                                        {
+                                            "name":  "out_capture_id",
+                                            "type":  "uint64_t*",
+                                            "direction":  "out",
+                                            "managedType":  "out ulong",
+                                            "moduleManagedType":  "out ulong"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-stream-destroy",
+                     "entryPoint":  "jyppx_cuda_stream_destroy",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "stream",
+                                            "type":  "JYPPX_CudaStream*",
+                                            "direction":  "in",
+                                            "managedType":  "IntPtr",
+                                            "moduleManagedType":  "IntPtr"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-stream-begin-capture",
+                     "entryPoint":  "jyppx_cuda_stream_begin_capture",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "stream",
+                                            "type":  "JYPPX_CudaStream*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "mode",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-stream-end-capture",
+                     "entryPoint":  "jyppx_cuda_stream_end_capture",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-destroys",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "stream",
+                                            "type":  "JYPPX_CudaStream*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_graph",
+                                            "type":  "JYPPX_CudaGraph**",
+                                            "direction":  "out",
+                                            "ownership":  "caller-destroys"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-graph-instantiate",
+                     "entryPoint":  "jyppx_cuda_graph_instantiate",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-destroys",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "graph",
+                                            "type":  "JYPPX_CudaGraph*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "flags",
+                                            "type":  "uint64_t",
+                                            "direction":  "in",
+                                            "managedType":  "ulong",
+                                            "moduleManagedType":  "ulong"
+                                        },
+                                        {
+                                            "name":  "out_graph_exec",
+                                            "type":  "JYPPX_CudaGraphExec**",
+                                            "direction":  "out",
+                                            "ownership":  "caller-destroys"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-graph-exec-launch",
+                     "entryPoint":  "jyppx_cuda_graph_exec_launch",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "graph_exec",
+                                            "type":  "JYPPX_CudaGraphExec*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "stream",
+                                            "type":  "JYPPX_CudaStream*",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-graph-exec-destroy",
+                     "entryPoint":  "jyppx_cuda_graph_exec_destroy",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "graph_exec",
+                                            "type":  "JYPPX_CudaGraphExec*",
+                                            "direction":  "in",
+                                            "managedType":  "IntPtr",
+                                            "moduleManagedType":  "IntPtr"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-graph-destroy",
+                     "entryPoint":  "jyppx_cuda_graph_destroy",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "graph",
+                                            "type":  "JYPPX_CudaGraph*",
+                                            "direction":  "in",
+                                            "managedType":  "IntPtr",
+                                            "moduleManagedType":  "IntPtr"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-event-create",
+                     "entryPoint":  "jyppx_cuda_event_create",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-destroys",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "flags",
+                                            "type":  "uint32_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_event",
+                                            "type":  "JYPPX_CudaEvent**",
+                                            "direction":  "out",
+                                            "ownership":  "caller-destroys"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-event-record",
+                     "entryPoint":  "jyppx_cuda_event_record",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "event_handle",
+                                            "type":  "JYPPX_CudaEvent*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "stream",
+                                            "type":  "JYPPX_CudaStream*",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-event-synchronize",
+                     "entryPoint":  "jyppx_cuda_event_synchronize",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "event_handle",
+                                            "type":  "JYPPX_CudaEvent*",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-event-elapsed-time",
+                     "entryPoint":  "jyppx_cuda_event_elapsed_time",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "start_event",
+                                            "type":  "JYPPX_CudaEvent*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "end_event",
+                                            "type":  "JYPPX_CudaEvent*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_milliseconds",
+                                            "type":  "float*",
+                                            "direction":  "out",
+                                            "managedType":  "out float",
+                                            "moduleManagedType":  "out float"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-event-destroy",
+                     "entryPoint":  "jyppx_cuda_event_destroy",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "event_handle",
+                                            "type":  "JYPPX_CudaEvent*",
+                                            "direction":  "in",
+                                            "managedType":  "IntPtr",
+                                            "moduleManagedType":  "IntPtr"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-memory-alloc",
+                     "entryPoint":  "jyppx_cuda_memory_alloc",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-destroys",
+                     "manualOverride":  true,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "size",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_memory",
+                                            "type":  "JYPPX_CudaMemory**",
+                                            "direction":  "out",
+                                            "ownership":  "caller-destroys"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-memory-alloc-managed",
+                     "entryPoint":  "jyppx_cuda_memory_alloc_managed",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-destroys",
+                     "manualOverride":  true,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "size",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "flags",
+                                            "type":  "uint32_t",
+                                            "direction":  "in",
+                                            "managedType":  "uint",
+                                            "moduleManagedType":  "uint"
+                                        },
+                                        {
+                                            "name":  "out_memory",
+                                            "type":  "JYPPX_CudaMemory**",
+                                            "direction":  "out",
+                                            "ownership":  "caller-destroys"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-memory-alloc-async",
+                     "entryPoint":  "jyppx_cuda_memory_alloc_async",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-destroys",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "size",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "stream",
+                                            "type":  "JYPPX_CudaStream*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_memory",
+                                            "type":  "JYPPX_CudaMemory**",
+                                            "direction":  "out",
+                                            "ownership":  "caller-destroys"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-memory-alloc-from-pool-async",
+                     "entryPoint":  "jyppx_cuda_memory_alloc_from_pool_async",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-destroys",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "size",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "pool_handle",
+                                            "type":  "uint64_t",
+                                            "direction":  "in",
+                                            "managedType":  "ulong",
+                                            "moduleManagedType":  "ulong"
+                                        },
+                                        {
+                                            "name":  "stream",
+                                            "type":  "JYPPX_CudaStream*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_memory",
+                                            "type":  "JYPPX_CudaMemory**",
+                                            "direction":  "out",
+                                            "ownership":  "caller-destroys"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-memory-get-size",
+                     "entryPoint":  "jyppx_cuda_memory_get_size",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "memory",
+                                            "type":  "JYPPX_CudaMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_size",
+                                            "type":  "size_t*",
+                                            "direction":  "out",
+                                            "managedType":  "out UIntPtr",
+                                            "moduleManagedType":  "out UIntPtr"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-memory-get-device-pointer",
+                     "entryPoint":  "jyppx_cuda_memory_get_device_pointer",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "memory",
+                                            "type":  "JYPPX_CudaMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_pointer",
+                                            "type":  "void**",
+                                            "direction":  "out",
+                                            "managedType":  "out IntPtr",
+                                            "moduleManagedType":  "out IntPtr"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-memory-get-pointer-attributes",
+                     "entryPoint":  "jyppx_cuda_memory_get_pointer_attributes",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "memory",
+                                            "type":  "JYPPX_CudaMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_attributes",
+                                            "type":  "JYPPX_CudaPointerAttributes*",
+                                            "direction":  "out",
+                                            "managedType":  "out NativeCudaPointerAttributes",
+                                            "moduleManagedType":  "out NativeCudaPointerAttributes"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-memory-copy-from-host",
+                     "entryPoint":  "jyppx_cuda_memory_copy_from_host",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "wrapperKind":  "pinned-byte-array-copy-from-host",
+                     "parameters":  [
+                                        {
+                                            "name":  "memory",
+                                            "type":  "JYPPX_CudaMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "source",
+                                            "type":  "const void*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "size",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-memory-copy-to-host",
+                     "entryPoint":  "jyppx_cuda_memory_copy_to_host",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "wrapperKind":  "pinned-byte-array-copy-to-host",
+                     "parameters":  [
+                                        {
+                                            "name":  "memory",
+                                            "type":  "JYPPX_CudaMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "destination",
+                                            "type":  "void*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "size",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-memory-copy-from-host-async",
+                     "entryPoint":  "jyppx_cuda_memory_copy_from_host_async",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "wrapperKind":  "pinned-memory-copy-from-host-async",
+                     "parameters":  [
+                                        {
+                                            "name":  "memory",
+                                            "type":  "JYPPX_CudaMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "source",
+                                            "type":  "const void*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "size",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "stream",
+                                            "type":  "JYPPX_CudaStream*",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-memory-copy-to-host-async",
+                     "entryPoint":  "jyppx_cuda_memory_copy_to_host_async",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "wrapperKind":  "pinned-memory-copy-to-host-async",
+                     "parameters":  [
+                                        {
+                                            "name":  "memory",
+                                            "type":  "JYPPX_CudaMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "destination",
+                                            "type":  "void*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "size",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "stream",
+                                            "type":  "JYPPX_CudaStream*",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-memory-copy-device-to-device",
+                     "entryPoint":  "jyppx_cuda_memory_copy_device_to_device",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "destination",
+                                            "type":  "JYPPX_CudaMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "source",
+                                            "type":  "JYPPX_CudaMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "size",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-memory-copy-device-to-device-async",
+                     "entryPoint":  "jyppx_cuda_memory_copy_device_to_device_async",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "destination",
+                                            "type":  "JYPPX_CudaMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "source",
+                                            "type":  "JYPPX_CudaMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "size",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "stream",
+                                            "type":  "JYPPX_CudaStream*",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-memory-copy-default",
+                     "entryPoint":  "jyppx_cuda_memory_copy_default",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "destination",
+                                            "type":  "JYPPX_CudaMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "source",
+                                            "type":  "JYPPX_CudaMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "size",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-memory-copy-default-async",
+                     "entryPoint":  "jyppx_cuda_memory_copy_default_async",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "destination",
+                                            "type":  "JYPPX_CudaMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "source",
+                                            "type":  "JYPPX_CudaMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "size",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "stream",
+                                            "type":  "JYPPX_CudaStream*",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-memory-copy-peer",
+                     "entryPoint":  "jyppx_cuda_memory_copy_peer",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "destination",
+                                            "type":  "JYPPX_CudaMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "destination_device",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        },
+                                        {
+                                            "name":  "source",
+                                            "type":  "JYPPX_CudaMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "source_device",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        },
+                                        {
+                                            "name":  "size",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-memory-copy-peer-async",
+                     "entryPoint":  "jyppx_cuda_memory_copy_peer_async",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "destination",
+                                            "type":  "JYPPX_CudaMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "destination_device",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        },
+                                        {
+                                            "name":  "source",
+                                            "type":  "JYPPX_CudaMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "source_device",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        },
+                                        {
+                                            "name":  "size",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "stream",
+                                            "type":  "JYPPX_CudaStream*",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-memory-memset",
+                     "entryPoint":  "jyppx_cuda_memory_memset",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "memory",
+                                            "type":  "JYPPX_CudaMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "value",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        },
+                                        {
+                                            "name":  "size",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-memory-memset-async",
+                     "entryPoint":  "jyppx_cuda_memory_memset_async",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "memory",
+                                            "type":  "JYPPX_CudaMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "value",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        },
+                                        {
+                                            "name":  "size",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "stream",
+                                            "type":  "JYPPX_CudaStream*",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-memory-free",
+                     "entryPoint":  "jyppx_cuda_memory_free",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "memory",
+                                            "type":  "JYPPX_CudaMemory*",
+                                            "direction":  "in",
+                                            "managedType":  "IntPtr",
+                                            "moduleManagedType":  "IntPtr"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-memory-free-async",
+                     "entryPoint":  "jyppx_cuda_memory_free_async",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "memory",
+                                            "type":  "JYPPX_CudaMemory*",
+                                            "direction":  "in",
+                                            "managedType":  "IntPtr",
+                                            "moduleManagedType":  "IntPtr"
+                                        },
+                                        {
+                                            "name":  "stream",
+                                            "type":  "JYPPX_CudaStream*",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-memory-pool-create",
+                     "entryPoint":  "jyppx_cuda_memory_pool_create",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-destroys",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "device",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        },
+                                        {
+                                            "name":  "out_pool_handle",
+                                            "type":  "uint64_t*",
+                                            "direction":  "out",
+                                            "managedType":  "out ulong",
+                                            "moduleManagedType":  "out ulong"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-memory-pool-destroy",
+                     "entryPoint":  "jyppx_cuda_memory_pool_destroy",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "pool_handle",
+                                            "type":  "uint64_t",
+                                            "direction":  "in",
+                                            "managedType":  "ulong",
+                                            "moduleManagedType":  "ulong"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-device-get-default-memory-pool",
+                     "entryPoint":  "jyppx_cuda_device_get_default_memory_pool",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "device",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        },
+                                        {
+                                            "name":  "out_pool_handle",
+                                            "type":  "uint64_t*",
+                                            "direction":  "out",
+                                            "managedType":  "out ulong",
+                                            "moduleManagedType":  "out ulong"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-device-get-current-memory-pool",
+                     "entryPoint":  "jyppx_cuda_device_get_current_memory_pool",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "device",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        },
+                                        {
+                                            "name":  "out_pool_handle",
+                                            "type":  "uint64_t*",
+                                            "direction":  "out",
+                                            "managedType":  "out ulong",
+                                            "moduleManagedType":  "out ulong"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-device-set-current-memory-pool",
+                     "entryPoint":  "jyppx_cuda_device_set_current_memory_pool",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "device",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        },
+                                        {
+                                            "name":  "pool_handle",
+                                            "type":  "uint64_t",
+                                            "direction":  "in",
+                                            "managedType":  "ulong",
+                                            "moduleManagedType":  "ulong"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-memory-pool-get-attribute",
+                     "entryPoint":  "jyppx_cuda_memory_pool_get_attribute",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "pool_handle",
+                                            "type":  "uint64_t",
+                                            "direction":  "in",
+                                            "managedType":  "ulong",
+                                            "moduleManagedType":  "ulong"
+                                        },
+                                        {
+                                            "name":  "attribute",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        },
+                                        {
+                                            "name":  "out_value",
+                                            "type":  "int64_t*",
+                                            "direction":  "out",
+                                            "managedType":  "out long",
+                                            "moduleManagedType":  "out long"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-memory-pool-set-attribute",
+                     "entryPoint":  "jyppx_cuda_memory_pool_set_attribute",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "pool_handle",
+                                            "type":  "uint64_t",
+                                            "direction":  "in",
+                                            "managedType":  "ulong",
+                                            "moduleManagedType":  "ulong"
+                                        },
+                                        {
+                                            "name":  "attribute",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        },
+                                        {
+                                            "name":  "value",
+                                            "type":  "int64_t",
+                                            "direction":  "in",
+                                            "managedType":  "long",
+                                            "moduleManagedType":  "long"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-memory-pool-trim-to",
+                     "entryPoint":  "jyppx_cuda_memory_pool_trim_to",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "pool_handle",
+                                            "type":  "uint64_t",
+                                            "direction":  "in",
+                                            "managedType":  "ulong",
+                                            "moduleManagedType":  "ulong"
+                                        },
+                                        {
+                                            "name":  "min_bytes_to_keep",
+                                            "type":  "size_t",
+                                            "direction":  "in",
+                                            "managedType":  "UIntPtr",
+                                            "moduleManagedType":  "UIntPtr"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-memory-pool-set-access",
+                     "entryPoint":  "jyppx_cuda_memory_pool_set_access",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "pool_handle",
+                                            "type":  "uint64_t",
+                                            "direction":  "in",
+                                            "managedType":  "ulong",
+                                            "moduleManagedType":  "ulong"
+                                        },
+                                        {
+                                            "name":  "device",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        },
+                                        {
+                                            "name":  "flags",
+                                            "type":  "uint32_t",
+                                            "direction":  "in",
+                                            "managedType":  "uint",
+                                            "moduleManagedType":  "uint"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-memory-pool-get-access",
+                     "entryPoint":  "jyppx_cuda_memory_pool_get_access",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "pool_handle",
+                                            "type":  "uint64_t",
+                                            "direction":  "in",
+                                            "managedType":  "ulong",
+                                            "moduleManagedType":  "ulong"
+                                        },
+                                        {
+                                            "name":  "device",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        },
+                                        {
+                                            "name":  "out_flags",
+                                            "type":  "uint32_t*",
+                                            "direction":  "out",
+                                            "managedType":  "out uint",
+                                            "moduleManagedType":  "out uint"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-pinned-memory-alloc",
+                     "entryPoint":  "jyppx_cuda_pinned_memory_alloc",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-destroys",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "size",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_memory",
+                                            "type":  "JYPPX_CudaPinnedMemory**",
+                                            "direction":  "out",
+                                            "ownership":  "caller-destroys"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-pinned-memory-get-size",
+                     "entryPoint":  "jyppx_cuda_pinned_memory_get_size",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "memory",
+                                            "type":  "JYPPX_CudaPinnedMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_size",
+                                            "type":  "size_t*",
+                                            "direction":  "out",
+                                            "managedType":  "out UIntPtr",
+                                            "moduleManagedType":  "out UIntPtr"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-pinned-memory-get-host-pointer",
+                     "entryPoint":  "jyppx_cuda_pinned_memory_get_host_pointer",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "memory",
+                                            "type":  "JYPPX_CudaPinnedMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_pointer",
+                                            "type":  "void**",
+                                            "direction":  "out",
+                                            "managedType":  "out IntPtr",
+                                            "moduleManagedType":  "out IntPtr"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-pinned-memory-free",
+                     "entryPoint":  "jyppx_cuda_pinned_memory_free",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "memory",
+                                            "type":  "JYPPX_CudaPinnedMemory*",
+                                            "direction":  "in",
+                                            "managedType":  "IntPtr",
+                                            "moduleManagedType":  "IntPtr"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-get-last-error",
+                     "entryPoint":  "jyppx_cuda_get_last_error",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "out_error_code",
+                                            "type":  "int32_t*",
+                                            "direction":  "out",
+                                            "managedType":  "out int",
+                                            "moduleManagedType":  "out int"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-peek-at-last-error",
+                     "entryPoint":  "jyppx_cuda_peek_at_last_error",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "out_error_code",
+                                            "type":  "int32_t*",
+                                            "direction":  "out",
+                                            "managedType":  "out int",
+                                            "moduleManagedType":  "out int"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-get-error-name",
+                     "entryPoint":  "jyppx_cuda_get_error_name",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "error_code",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        },
+                                        {
+                                            "name":  "output_buffer",
+                                            "type":  "char*",
+                                            "direction":  "out",
+                                            "managedType":  "byte[]",
+                                            "moduleManagedType":  "byte[]"
+                                        },
+                                        {
+                                            "name":  "output_buffer_size",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_required_size",
+                                            "type":  "size_t*",
+                                            "direction":  "out",
+                                            "managedType":  "out UIntPtr",
+                                            "moduleManagedType":  "out UIntPtr"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-get-error-string",
+                     "entryPoint":  "jyppx_cuda_get_error_string",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "error_code",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        },
+                                        {
+                                            "name":  "output_buffer",
+                                            "type":  "char*",
+                                            "direction":  "out",
+                                            "managedType":  "byte[]",
+                                            "moduleManagedType":  "byte[]"
+                                        },
+                                        {
+                                            "name":  "output_buffer_size",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_required_size",
+                                            "type":  "size_t*",
+                                            "direction":  "out",
+                                            "managedType":  "out UIntPtr",
+                                            "moduleManagedType":  "out UIntPtr"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-stream-get-flags",
+                     "entryPoint":  "jyppx_cuda_stream_get_flags",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "stream",
+                                            "type":  "JYPPX_CudaStream*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_flags",
+                                            "type":  "uint32_t*",
+                                            "direction":  "out",
+                                            "managedType":  "out uint",
+                                            "moduleManagedType":  "out uint"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-event-get-flags",
+                     "entryPoint":  "jyppx_cuda_event_get_flags",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "event_handle",
+                                            "type":  "JYPPX_CudaEvent*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_flags",
+                                            "type":  "uint32_t*",
+                                            "direction":  "out",
+                                            "managedType":  "out uint",
+                                            "moduleManagedType":  "out uint"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-event-query",
+                     "entryPoint":  "jyppx_cuda_event_query",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "event_handle",
+                                            "type":  "JYPPX_CudaEvent*",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-pinned-memory-alloc-with-flags",
+                     "entryPoint":  "jyppx_cuda_pinned_memory_alloc_with_flags",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-destroys",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "size",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "flags",
+                                            "type":  "uint32_t",
+                                            "direction":  "in",
+                                            "managedType":  "uint",
+                                            "moduleManagedType":  "uint"
+                                        },
+                                        {
+                                            "name":  "out_memory",
+                                            "type":  "JYPPX_CudaPinnedMemory**",
+                                            "direction":  "out",
+                                            "ownership":  "caller-destroys"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-pinned-memory-register",
+                     "entryPoint":  "jyppx_cuda_pinned_memory_register",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-destroys",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "pointer",
+                                            "type":  "void*",
+                                            "direction":  "in",
+                                            "managedType":  "IntPtr",
+                                            "moduleManagedType":  "IntPtr"
+                                        },
+                                        {
+                                            "name":  "size",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "flags",
+                                            "type":  "uint32_t",
+                                            "direction":  "in",
+                                            "managedType":  "uint",
+                                            "moduleManagedType":  "uint"
+                                        },
+                                        {
+                                            "name":  "out_memory",
+                                            "type":  "JYPPX_CudaPinnedMemory**",
+                                            "direction":  "out",
+                                            "ownership":  "caller-destroys"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-pinned-memory-get-flags",
+                     "entryPoint":  "jyppx_cuda_pinned_memory_get_flags",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "memory",
+                                            "type":  "JYPPX_CudaPinnedMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_flags",
+                                            "type":  "uint32_t*",
+                                            "direction":  "out",
+                                            "managedType":  "out uint",
+                                            "moduleManagedType":  "out uint"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-device-synchronize",
+                     "entryPoint":  "jyppx_cuda_device_synchronize",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-device-reset",
+                     "entryPoint":  "jyppx_cuda_device_reset",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-device-get-attribute",
+                     "entryPoint":  "jyppx_cuda_device_get_attribute",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "device",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        },
+                                        {
+                                            "name":  "attribute",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        },
+                                        {
+                                            "name":  "out_value",
+                                            "type":  "int32_t*",
+                                            "direction":  "out",
+                                            "managedType":  "out int",
+                                            "moduleManagedType":  "out int"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-device-get-limit",
+                     "entryPoint":  "jyppx_cuda_device_get_limit",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "limit",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        },
+                                        {
+                                            "name":  "out_value",
+                                            "type":  "size_t*",
+                                            "direction":  "out",
+                                            "managedType":  "out UIntPtr",
+                                            "moduleManagedType":  "out UIntPtr"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-device-set-limit",
+                     "entryPoint":  "jyppx_cuda_device_set_limit",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "limit",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        },
+                                        {
+                                            "name":  "value",
+                                            "type":  "size_t",
+                                            "direction":  "in",
+                                            "managedType":  "UIntPtr",
+                                            "moduleManagedType":  "UIntPtr"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-device-can-access-peer",
+                     "entryPoint":  "jyppx_cuda_device_can_access_peer",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "device",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        },
+                                        {
+                                            "name":  "peer_device",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        },
+                                        {
+                                            "name":  "out_can_access",
+                                            "type":  "JYPPX_Boolean*",
+                                            "direction":  "out",
+                                            "managedType":  "out int",
+                                            "moduleManagedType":  "out int"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-device-enable-peer-access",
+                     "entryPoint":  "jyppx_cuda_device_enable_peer_access",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "peer_device",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        },
+                                        {
+                                            "name":  "flags",
+                                            "type":  "uint32_t",
+                                            "direction":  "in",
+                                            "managedType":  "uint",
+                                            "moduleManagedType":  "uint"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-device-disable-peer-access",
+                     "entryPoint":  "jyppx_cuda_device_disable_peer_access",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "peer_device",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-memory-prefetch-async",
+                     "entryPoint":  "jyppx_cuda_memory_prefetch_async",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "memory",
+                                            "type":  "JYPPX_CudaMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "size",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "destination_device",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        },
+                                        {
+                                            "name":  "stream",
+                                            "type":  "JYPPX_CudaStream*",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-memory-advise",
+                     "entryPoint":  "jyppx_cuda_memory_advise",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "memory",
+                                            "type":  "JYPPX_CudaMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "size",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "advice",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        },
+                                        {
+                                            "name":  "device",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-pinned-memory-get-mapped-device-pointer",
+                     "entryPoint":  "jyppx_cuda_pinned_memory_get_mapped_device_pointer",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "memory",
+                                            "type":  "JYPPX_CudaPinnedMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_pointer",
+                                            "type":  "void**",
+                                            "direction":  "out",
+                                            "managedType":  "out IntPtr",
+                                            "moduleManagedType":  "out IntPtr"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-pitched-memory-alloc",
+                     "entryPoint":  "jyppx_cuda_pitched_memory_alloc",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "callee-allocates-caller-releases",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "width_bytes",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "height",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_memory",
+                                            "type":  "JYPPX_CudaPitchedMemory**",
+                                            "direction":  "out"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-pitched-memory-get-info",
+                     "entryPoint":  "jyppx_cuda_pitched_memory_get_info",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "memory",
+                                            "type":  "JYPPX_CudaPitchedMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_info",
+                                            "type":  "JYPPX_CudaPitchedMemoryInfo*",
+                                            "direction":  "out",
+                                            "managedType":  "out NativeCudaPitchedMemoryInfo",
+                                            "moduleManagedType":  "out NativeCudaPitchedMemoryInfo"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-pitched-memory-copy-from-host-2d",
+                     "entryPoint":  "jyppx_cuda_pitched_memory_copy_from_host_2d",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "memory",
+                                            "type":  "JYPPX_CudaPitchedMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "source",
+                                            "type":  "const void*",
+                                            "direction":  "in",
+                                            "managedType":  "IntPtr",
+                                            "moduleManagedType":  "IntPtr"
+                                        },
+                                        {
+                                            "name":  "source_pitch",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "width_bytes",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "height",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-pitched-memory-copy-to-host-2d",
+                     "entryPoint":  "jyppx_cuda_pitched_memory_copy_to_host_2d",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "memory",
+                                            "type":  "JYPPX_CudaPitchedMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "destination",
+                                            "type":  "void*",
+                                            "direction":  "out",
+                                            "managedType":  "IntPtr",
+                                            "moduleManagedType":  "IntPtr"
+                                        },
+                                        {
+                                            "name":  "destination_pitch",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "width_bytes",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "height",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-pitched-memory-copy-device-to-device-2d",
+                     "entryPoint":  "jyppx_cuda_pitched_memory_copy_device_to_device_2d",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "destination",
+                                            "type":  "JYPPX_CudaPitchedMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "source",
+                                            "type":  "JYPPX_CudaPitchedMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "width_bytes",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "height",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-pitched-memory-copy-from-host-2d-async",
+                     "entryPoint":  "jyppx_cuda_pitched_memory_copy_from_host_2d_async",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "memory",
+                                            "type":  "JYPPX_CudaPitchedMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "source",
+                                            "type":  "const void*",
+                                            "direction":  "in",
+                                            "managedType":  "IntPtr",
+                                            "moduleManagedType":  "IntPtr"
+                                        },
+                                        {
+                                            "name":  "source_pitch",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "width_bytes",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "height",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "stream",
+                                            "type":  "JYPPX_CudaStream*",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-pitched-memory-copy-to-host-2d-async",
+                     "entryPoint":  "jyppx_cuda_pitched_memory_copy_to_host_2d_async",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "memory",
+                                            "type":  "JYPPX_CudaPitchedMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "destination",
+                                            "type":  "void*",
+                                            "direction":  "out",
+                                            "managedType":  "IntPtr",
+                                            "moduleManagedType":  "IntPtr"
+                                        },
+                                        {
+                                            "name":  "destination_pitch",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "width_bytes",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "height",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "stream",
+                                            "type":  "JYPPX_CudaStream*",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-pitched-memory-copy-device-to-device-2d-async",
+                     "entryPoint":  "jyppx_cuda_pitched_memory_copy_device_to_device_2d_async",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "destination",
+                                            "type":  "JYPPX_CudaPitchedMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "source",
+                                            "type":  "JYPPX_CudaPitchedMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "width_bytes",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "height",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "stream",
+                                            "type":  "JYPPX_CudaStream*",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-pitched-memory-copy-from-host-3d",
+                     "entryPoint":  "jyppx_cuda_pitched_memory_copy_from_host_3d",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "memory",
+                                            "type":  "JYPPX_CudaPitchedMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "source",
+                                            "type":  "const void*",
+                                            "direction":  "in",
+                                            "managedType":  "IntPtr",
+                                            "moduleManagedType":  "IntPtr"
+                                        },
+                                        {
+                                            "name":  "source_pitch",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "width_bytes",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "height",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "depth",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-pitched-memory-copy-to-host-3d",
+                     "entryPoint":  "jyppx_cuda_pitched_memory_copy_to_host_3d",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "memory",
+                                            "type":  "JYPPX_CudaPitchedMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "destination",
+                                            "type":  "void*",
+                                            "direction":  "out",
+                                            "managedType":  "IntPtr",
+                                            "moduleManagedType":  "IntPtr"
+                                        },
+                                        {
+                                            "name":  "destination_pitch",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "width_bytes",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "height",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "depth",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-pitched-memory-copy-device-to-device-3d",
+                     "entryPoint":  "jyppx_cuda_pitched_memory_copy_device_to_device_3d",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "destination",
+                                            "type":  "JYPPX_CudaPitchedMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "source",
+                                            "type":  "JYPPX_CudaPitchedMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "width_bytes",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "height",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "depth",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-pitched-memory-copy-from-host-3d-async",
+                     "entryPoint":  "jyppx_cuda_pitched_memory_copy_from_host_3d_async",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "memory",
+                                            "type":  "JYPPX_CudaPitchedMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "source",
+                                            "type":  "const void*",
+                                            "direction":  "in",
+                                            "managedType":  "IntPtr",
+                                            "moduleManagedType":  "IntPtr"
+                                        },
+                                        {
+                                            "name":  "source_pitch",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "width_bytes",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "height",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "depth",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "stream",
+                                            "type":  "JYPPX_CudaStream*",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-pitched-memory-copy-to-host-3d-async",
+                     "entryPoint":  "jyppx_cuda_pitched_memory_copy_to_host_3d_async",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "memory",
+                                            "type":  "JYPPX_CudaPitchedMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "destination",
+                                            "type":  "void*",
+                                            "direction":  "out",
+                                            "managedType":  "IntPtr",
+                                            "moduleManagedType":  "IntPtr"
+                                        },
+                                        {
+                                            "name":  "destination_pitch",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "width_bytes",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "height",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "depth",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "stream",
+                                            "type":  "JYPPX_CudaStream*",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-pitched-memory-copy-device-to-device-3d-async",
+                     "entryPoint":  "jyppx_cuda_pitched_memory_copy_device_to_device_3d_async",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "destination",
+                                            "type":  "JYPPX_CudaPitchedMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "source",
+                                            "type":  "JYPPX_CudaPitchedMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "width_bytes",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "height",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "depth",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "stream",
+                                            "type":  "JYPPX_CudaStream*",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-pitched-memory-memset-2d",
+                     "entryPoint":  "jyppx_cuda_pitched_memory_memset_2d",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "memory",
+                                            "type":  "JYPPX_CudaPitchedMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "value",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        },
+                                        {
+                                            "name":  "width_bytes",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "height",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-pitched-memory-memset-2d-async",
+                     "entryPoint":  "jyppx_cuda_pitched_memory_memset_2d_async",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "memory",
+                                            "type":  "JYPPX_CudaPitchedMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "value",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        },
+                                        {
+                                            "name":  "width_bytes",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "height",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "stream",
+                                            "type":  "JYPPX_CudaStream*",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-pitched-memory-memset-3d",
+                     "entryPoint":  "jyppx_cuda_pitched_memory_memset_3d",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "memory",
+                                            "type":  "JYPPX_CudaPitchedMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "value",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        },
+                                        {
+                                            "name":  "width_bytes",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "height",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "depth",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-pitched-memory-memset-3d-async",
+                     "entryPoint":  "jyppx_cuda_pitched_memory_memset_3d_async",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "memory",
+                                            "type":  "JYPPX_CudaPitchedMemory*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "value",
+                                            "type":  "int32_t",
+                                            "direction":  "in",
+                                            "managedType":  "int",
+                                            "moduleManagedType":  "int"
+                                        },
+                                        {
+                                            "name":  "width_bytes",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "height",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "depth",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "stream",
+                                            "type":  "JYPPX_CudaStream*",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "cuda-pitched-memory-free",
+                     "entryPoint":  "jyppx_cuda_pitched_memory_free",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-releases",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_HAS_CUDA_TOOLKIT",
+                     "parameters":  [
+                                        {
+                                            "name":  "memory",
+                                            "type":  "JYPPX_CudaPitchedMemory*",
+                                            "direction":  "in",
+                                            "managedType":  "IntPtr",
+                                            "moduleManagedType":  "IntPtr"
+                                        }
+                                    ]
+                 }
+             ]
+}

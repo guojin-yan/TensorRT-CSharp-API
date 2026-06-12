@@ -1,0 +1,5 @@
+<Project>
+  <ItemGroup Condition="'$(JYPPXRuntimeAssetsDir)' != '' and Exists('$(JYPPXRuntimeAssetsDir)')">
+    <Content Include="$(JYPPXRuntimeAssetsDir)\**\*.*" Pack="true" PackagePath="%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+</Project>

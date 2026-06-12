@@ -1,0 +1,24 @@
+{
+  "$schema": "../../bridge-api.schema.json",
+  "module": "tensorrt",
+  "versionLine": "common",
+  "apis": [
+    {
+      "id": "trt-object-destroy",
+      "entryPoint": "jyppx_trt_object_destroy",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "",
+      "parameters": [
+        {
+          "name": "object",
+          "type": "JYPPX_TensorRtObjectBase*",
+          "direction": "in",
+          "managedType": "IntPtr",
+          "moduleManagedType": "IntPtr"
+        }
+      ]
+    }
+  ]
+}

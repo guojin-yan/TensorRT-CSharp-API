@@ -1,0 +1,10 @@
+<Project>
+  <PropertyGroup>
+    <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+
+  <Target Name="JYPPXShowBuildContext" BeforeTargets="BeforeBuild" Condition="'$(JYPPXShowBuildContext)' == 'true'">
+    <Message Importance="High" Text="Building $(MSBuildProjectName) for $(TargetFramework) on $(RuntimeIdentifier)" />
+  </Target>
+</Project>
+

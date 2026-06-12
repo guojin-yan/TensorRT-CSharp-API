@@ -1,0 +1,20 @@
+#define JYPPX_TRT10_ONNX_GLOBAL_DEFERRED_STUB(function_name, interface_name) \
+    JYPPX_StatusCode function_name(void) \
+    { \
+        return jyppx::tensorrt::report_not_implemented(kLine, interface_name " deferred: advanced ONNX parser, refitter, model-buffer, or process-wide plugin initialization boundary requires a dedicated safe managed bridge"); \
+    }
+
+JYPPX_TRT10_ONNX_GLOBAL_DEFERRED_STUB(jyppx_trt10_onnx_config_create_deferred, "createONNXConfig")
+JYPPX_TRT10_ONNX_GLOBAL_DEFERRED_STUB(jyppx_trt10_onnx_config_get_verbosity_level_deferred, "IOnnxConfig::getVerbosityLevel")
+JYPPX_TRT10_ONNX_GLOBAL_DEFERRED_STUB(jyppx_trt10_onnx_config_reduce_verbosity_deferred, "IOnnxConfig::reduceVerbosity")
+JYPPX_TRT10_ONNX_GLOBAL_DEFERRED_STUB(jyppx_trt10_onnx_config_set_verbosity_level_deferred, "IOnnxConfig::setVerbosityLevel")
+JYPPX_TRT10_ONNX_GLOBAL_DEFERRED_STUB(jyppx_trt10_parser_parse_with_weight_descriptors_deferred, "IParser::parseWithWeightDescriptors")
+JYPPX_TRT10_ONNX_GLOBAL_DEFERRED_STUB(jyppx_trt10_parser_refitter_create_deferred, "createNvOnnxParserRefitter_INTERNAL")
+JYPPX_TRT10_ONNX_GLOBAL_DEFERRED_STUB(jyppx_trt10_parser_refitter_clear_errors_deferred, "IParserRefitter::clearErrors")
+JYPPX_TRT10_ONNX_GLOBAL_DEFERRED_STUB(jyppx_trt10_parser_refitter_get_error_deferred, "IParserRefitter::getError")
+JYPPX_TRT10_ONNX_GLOBAL_DEFERRED_STUB(jyppx_trt10_parser_refitter_get_nb_errors_deferred, "IParserRefitter::getNbErrors")
+JYPPX_TRT10_ONNX_GLOBAL_DEFERRED_STUB(jyppx_trt10_parser_refitter_refit_from_bytes_deferred, "IParserRefitter::refitFromBytes")
+JYPPX_TRT10_ONNX_GLOBAL_DEFERRED_STUB(jyppx_trt10_parser_refitter_refit_from_file_deferred, "IParserRefitter::refitFromFile")
+JYPPX_TRT10_ONNX_GLOBAL_DEFERRED_STUB(jyppx_trt10_global_init_lib_nvinfer_plugins_deferred, "initLibNvInferPlugins")
+
+#undef JYPPX_TRT10_ONNX_GLOBAL_DEFERRED_STUB

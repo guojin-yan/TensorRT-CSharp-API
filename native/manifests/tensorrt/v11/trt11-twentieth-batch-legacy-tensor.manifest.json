@@ -1,0 +1,30 @@
+{
+  "module": "tensorrt",
+  "versionLine": "11",
+  "apis": [
+    {
+      "id": "trt11-tensor-get-broadcast-across-batch",
+      "entryPoint": "jyppx_trt11_tensor_get_broadcast_across_batch",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "tensor", "type": "JYPPX_TensorRtTensor*", "direction": "in" },
+        { "name": "out_broadcast_across_batch", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-tensor-set-broadcast-across-batch",
+      "entryPoint": "jyppx_trt11_tensor_set_broadcast_across_batch",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "tensor", "type": "JYPPX_TensorRtTensor*", "direction": "in" },
+        { "name": "broadcast_across_batch", "type": "JYPPX_Boolean", "direction": "in", "managedType": "int", "moduleManagedType": "int" }
+      ]
+    }
+  ]
+}

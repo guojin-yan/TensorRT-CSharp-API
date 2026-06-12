@@ -1,0 +1,421 @@
+{
+  "$schema": "../../bridge-api.schema.json",
+  "module": "tensorrt",
+  "versionLine": "11",
+  "apis": [
+    {
+      "id": "trt11-network-add-attention-v2",
+      "entryPoint": "jyppx_trt11_network_add_attention_v2",
+      "returnType": "BridgeStatusCode",
+      "ownership": "network-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "network", "type": "JYPPX_TensorRtNetworkDefinition*", "direction": "in" },
+        { "name": "query_tensor", "type": "JYPPX_TensorRtTensor*", "direction": "in" },
+        { "name": "key_tensor", "type": "JYPPX_TensorRtTensor*", "direction": "in" },
+        { "name": "value_tensor", "type": "JYPPX_TensorRtTensor*", "direction": "in" },
+        { "name": "normalization_operation", "type": "int32_t", "direction": "in" },
+        { "name": "causal_kind", "type": "int32_t", "direction": "in" },
+        { "name": "out_attention", "type": "JYPPX_TensorRtAttention**", "direction": "out", "ownership": "network-owned" }
+      ]
+    },
+    {
+      "id": "trt11-attention-set-normalization-operation",
+      "entryPoint": "jyppx_trt11_attention_set_normalization_operation",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "attention", "type": "JYPPX_TensorRtAttention*", "direction": "in" },
+        { "name": "operation", "type": "int32_t", "direction": "in" },
+        { "name": "out_success", "type": "JYPPX_Boolean*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-attention-get-normalization-operation",
+      "entryPoint": "jyppx_trt11_attention_get_normalization_operation",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "attention", "type": "JYPPX_TensorRtAttention*", "direction": "in" },
+        { "name": "out_operation", "type": "int32_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-attention-set-mask",
+      "entryPoint": "jyppx_trt11_attention_set_mask",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "attention", "type": "JYPPX_TensorRtAttention*", "direction": "in" },
+        { "name": "mask_tensor", "type": "JYPPX_TensorRtTensor*", "direction": "in" },
+        { "name": "out_success", "type": "JYPPX_Boolean*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-attention-get-mask",
+      "entryPoint": "jyppx_trt11_attention_get_mask",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "attention", "type": "JYPPX_TensorRtAttention*", "direction": "in" },
+        { "name": "out_tensor", "type": "JYPPX_TensorRtTensor**", "direction": "out", "ownership": "network-owned" },
+        { "name": "out_has_tensor", "type": "JYPPX_Boolean*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-attention-set-causal-kind",
+      "entryPoint": "jyppx_trt11_attention_set_causal_kind",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "attention", "type": "JYPPX_TensorRtAttention*", "direction": "in" },
+        { "name": "causal_kind", "type": "int32_t", "direction": "in" },
+        { "name": "out_success", "type": "JYPPX_Boolean*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-attention-get-causal-kind",
+      "entryPoint": "jyppx_trt11_attention_get_causal_kind",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "attention", "type": "JYPPX_TensorRtAttention*", "direction": "in" },
+        { "name": "out_causal_kind", "type": "int32_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-attention-set-decomposable",
+      "entryPoint": "jyppx_trt11_attention_set_decomposable",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "attention", "type": "JYPPX_TensorRtAttention*", "direction": "in" },
+        { "name": "decomposable", "type": "JYPPX_Boolean", "direction": "in", "managedType": "int", "moduleManagedType": "int" },
+        { "name": "out_success", "type": "JYPPX_Boolean*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-attention-get-decomposable",
+      "entryPoint": "jyppx_trt11_attention_get_decomposable",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "attention", "type": "JYPPX_TensorRtAttention*", "direction": "in" },
+        { "name": "out_decomposable", "type": "JYPPX_Boolean*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-attention-set-input",
+      "entryPoint": "jyppx_trt11_attention_set_input",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "attention", "type": "JYPPX_TensorRtAttention*", "direction": "in" },
+        { "name": "index", "type": "int32_t", "direction": "in" },
+        { "name": "input_tensor", "type": "JYPPX_TensorRtTensor*", "direction": "in" },
+        { "name": "out_success", "type": "JYPPX_Boolean*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-attention-get-input-count",
+      "entryPoint": "jyppx_trt11_attention_get_input_count",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "attention", "type": "JYPPX_TensorRtAttention*", "direction": "in" },
+        { "name": "out_count", "type": "int32_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-attention-get-input",
+      "entryPoint": "jyppx_trt11_attention_get_input",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "attention", "type": "JYPPX_TensorRtAttention*", "direction": "in" },
+        { "name": "index", "type": "int32_t", "direction": "in" },
+        { "name": "out_tensor", "type": "JYPPX_TensorRtTensor**", "direction": "out", "ownership": "network-owned" }
+      ]
+    },
+    {
+      "id": "trt11-attention-get-output-count",
+      "entryPoint": "jyppx_trt11_attention_get_output_count",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "attention", "type": "JYPPX_TensorRtAttention*", "direction": "in" },
+        { "name": "out_count", "type": "int32_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-attention-get-output",
+      "entryPoint": "jyppx_trt11_attention_get_output",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "attention", "type": "JYPPX_TensorRtAttention*", "direction": "in" },
+        { "name": "index", "type": "int32_t", "direction": "in" },
+        { "name": "out_tensor", "type": "JYPPX_TensorRtTensor**", "direction": "out", "ownership": "network-owned" }
+      ]
+    },
+    {
+      "id": "trt11-attention-set-name",
+      "entryPoint": "jyppx_trt11_attention_set_name",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "attention", "type": "JYPPX_TensorRtAttention*", "direction": "in" },
+        { "name": "name", "type": "const char*", "direction": "in" },
+        { "name": "out_success", "type": "JYPPX_Boolean*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-attention-get-name",
+      "entryPoint": "jyppx_trt11_attention_get_name",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "attention", "type": "JYPPX_TensorRtAttention*", "direction": "in" },
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-attention-set-normalization-quantize-scale",
+      "entryPoint": "jyppx_trt11_attention_set_normalization_quantize_scale",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "attention", "type": "JYPPX_TensorRtAttention*", "direction": "in" },
+        { "name": "scale_tensor", "type": "JYPPX_TensorRtTensor*", "direction": "in" },
+        { "name": "out_success", "type": "JYPPX_Boolean*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-attention-get-normalization-quantize-scale",
+      "entryPoint": "jyppx_trt11_attention_get_normalization_quantize_scale",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "attention", "type": "JYPPX_TensorRtAttention*", "direction": "in" },
+        { "name": "out_tensor", "type": "JYPPX_TensorRtTensor**", "direction": "out", "ownership": "network-owned" },
+        { "name": "out_has_tensor", "type": "JYPPX_Boolean*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-attention-set-normalization-quantize-to-type",
+      "entryPoint": "jyppx_trt11_attention_set_normalization_quantize_to_type",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "attention", "type": "JYPPX_TensorRtAttention*", "direction": "in" },
+        { "name": "data_type", "type": "int32_t", "direction": "in" },
+        { "name": "out_success", "type": "JYPPX_Boolean*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-attention-get-normalization-quantize-to-type",
+      "entryPoint": "jyppx_trt11_attention_get_normalization_quantize_to_type",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "attention", "type": "JYPPX_TensorRtAttention*", "direction": "in" },
+        { "name": "out_data_type", "type": "int32_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-attention-set-metadata",
+      "entryPoint": "jyppx_trt11_attention_set_metadata",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "attention", "type": "JYPPX_TensorRtAttention*", "direction": "in" },
+        { "name": "metadata", "type": "const char*", "direction": "in" },
+        { "name": "out_success", "type": "JYPPX_Boolean*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-attention-get-metadata",
+      "entryPoint": "jyppx_trt11_attention_get_metadata",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "attention", "type": "JYPPX_TensorRtAttention*", "direction": "in" },
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-attention-set-nb-ranks",
+      "entryPoint": "jyppx_trt11_attention_set_nb_ranks",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "attention", "type": "JYPPX_TensorRtAttention*", "direction": "in" },
+        { "name": "rank_count", "type": "int32_t", "direction": "in" },
+        { "name": "out_success", "type": "JYPPX_Boolean*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-attention-get-nb-ranks",
+      "entryPoint": "jyppx_trt11_attention_get_nb_ranks",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "attention", "type": "JYPPX_TensorRtAttention*", "direction": "in" },
+        { "name": "out_rank_count", "type": "int32_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-attention-set-query-form",
+      "entryPoint": "jyppx_trt11_attention_set_query_form",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "attention", "type": "JYPPX_TensorRtAttention*", "direction": "in" },
+        { "name": "form", "type": "int32_t", "direction": "in" },
+        { "name": "out_success", "type": "JYPPX_Boolean*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-attention-get-query-form",
+      "entryPoint": "jyppx_trt11_attention_get_query_form",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "attention", "type": "JYPPX_TensorRtAttention*", "direction": "in" },
+        { "name": "out_form", "type": "int32_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-attention-set-key-value-form",
+      "entryPoint": "jyppx_trt11_attention_set_key_value_form",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "attention", "type": "JYPPX_TensorRtAttention*", "direction": "in" },
+        { "name": "form", "type": "int32_t", "direction": "in" },
+        { "name": "out_success", "type": "JYPPX_Boolean*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-attention-get-key-value-form",
+      "entryPoint": "jyppx_trt11_attention_get_key_value_form",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "attention", "type": "JYPPX_TensorRtAttention*", "direction": "in" },
+        { "name": "out_form", "type": "int32_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-attention-set-query-lengths",
+      "entryPoint": "jyppx_trt11_attention_set_query_lengths",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "attention", "type": "JYPPX_TensorRtAttention*", "direction": "in" },
+        { "name": "lengths_tensor", "type": "JYPPX_TensorRtTensor*", "direction": "in" },
+        { "name": "out_success", "type": "JYPPX_Boolean*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-attention-get-query-lengths",
+      "entryPoint": "jyppx_trt11_attention_get_query_lengths",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "attention", "type": "JYPPX_TensorRtAttention*", "direction": "in" },
+        { "name": "out_tensor", "type": "JYPPX_TensorRtTensor**", "direction": "out", "ownership": "network-owned" },
+        { "name": "out_has_tensor", "type": "JYPPX_Boolean*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-attention-set-key-value-lengths",
+      "entryPoint": "jyppx_trt11_attention_set_key_value_lengths",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "attention", "type": "JYPPX_TensorRtAttention*", "direction": "in" },
+        { "name": "lengths_tensor", "type": "JYPPX_TensorRtTensor*", "direction": "in" },
+        { "name": "out_success", "type": "JYPPX_Boolean*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-attention-get-key-value-lengths",
+      "entryPoint": "jyppx_trt11_attention_get_key_value_lengths",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "attention", "type": "JYPPX_TensorRtAttention*", "direction": "in" },
+        { "name": "out_tensor", "type": "JYPPX_TensorRtTensor**", "direction": "out", "ownership": "network-owned" },
+        { "name": "out_has_tensor", "type": "JYPPX_Boolean*", "direction": "out" }
+      ]
+    }
+  ]
+}

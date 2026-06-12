@@ -1,0 +1,547 @@
+{
+  "$schema": "../bridge-api.schema.json",
+  "module": "cuda",
+  "versionLine": "common",
+  "apis": [
+    {
+      "id": "cuda-cuda-graph-add-child-graph-node-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_add_child_graph_node_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-add-dependencies-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_add_dependencies_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-add-dependencies-v2-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_add_dependencies_v2_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-add-empty-node-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_add_empty_node_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-add-event-record-node-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_add_event_record_node_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-add-event-wait-node-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_add_event_wait_node_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-add-external-semaphores-signal-node-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_add_external_semaphores_signal_node_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-add-external-semaphores-wait-node-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_add_external_semaphores_wait_node_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-add-host-node-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_add_host_node_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-add-kernel-node-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_add_kernel_node_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-add-mem-alloc-node-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_add_mem_alloc_node_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-add-memcpy-node-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_add_memcpy_node_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-add-memcpy-node1-d-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_add_memcpy_node1_d_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-add-memcpy-node-from-symbol-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_add_memcpy_node_from_symbol_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-add-memcpy-node-to-symbol-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_add_memcpy_node_to_symbol_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-add-mem-free-node-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_add_mem_free_node_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-add-memset-node-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_add_memset_node_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-add-node-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_add_node_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-add-node-v2-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_add_node_v2_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-child-graph-node-get-graph-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_child_graph_node_get_graph_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-conditional-handle-create-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_conditional_handle_create_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-conditional-handle-create-v2-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_conditional_handle_create_v2_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-debug-dot-print-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_debug_dot_print_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-destroy-node-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_destroy_node_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-event-record-node-get-event-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_event_record_node_get_event_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-event-record-node-set-event-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_event_record_node_set_event_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-event-wait-node-get-event-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_event_wait_node_get_event_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-event-wait-node-set-event-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_event_wait_node_set_event_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-exec-child-graph-node-set-params-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_exec_child_graph_node_set_params_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-exec-event-record-node-set-event-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_exec_event_record_node_set_event_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-exec-event-wait-node-set-event-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_exec_event_wait_node_set_event_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-exec-external-semaphores-signal-node-set-params-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_exec_external_semaphores_signal_node_set_params_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-exec-external-semaphores-wait-node-set-params-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_exec_external_semaphores_wait_node_set_params_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-exec-get-id-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_exec_get_id_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-exec-host-node-set-params-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_exec_host_node_set_params_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-exec-kernel-node-set-params-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_exec_kernel_node_set_params_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-exec-memcpy-node-set-params-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_exec_memcpy_node_set_params_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-exec-memcpy-node-set-params1-d-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_exec_memcpy_node_set_params1_d_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-exec-memcpy-node-set-params-from-symbol-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_exec_memcpy_node_set_params_from_symbol_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-exec-memcpy-node-set-params-to-symbol-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_exec_memcpy_node_set_params_to_symbol_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-exec-memset-node-set-params-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_exec_memset_node_set_params_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-exec-node-set-params-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_exec_node_set_params_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-exec-update-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_exec_update_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-external-semaphores-signal-node-get-params-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_external_semaphores_signal_node_get_params_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-external-semaphores-signal-node-set-params-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_external_semaphores_signal_node_set_params_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-external-semaphores-wait-node-get-params-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_external_semaphores_wait_node_get_params_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-external-semaphores-wait-node-set-params-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_external_semaphores_wait_node_set_params_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-get-edges-v2-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_get_edges_v2_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-get-id-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_get_id_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-host-node-get-params-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_host_node_get_params_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-host-node-set-params-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_host_node_set_params_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graphics-map-resources-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graphics_map_resources_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graphics-resource-get-mapped-mipmapped-array-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graphics_resource_get_mapped_mipmapped_array_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graphics-resource-get-mapped-pointer-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graphics_resource_get_mapped_pointer_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graphics-resource-set-map-flags-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graphics_resource_set_map_flags_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graphics-sub-resource-get-mapped-array-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graphics_sub_resource_get_mapped_array_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graphics-unmap-resources-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graphics_unmap_resources_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graphics-unregister-resource-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graphics_unregister_resource_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-instantiate-with-params-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_instantiate_with_params_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    },
+    {
+      "id": "cuda-cuda-graph-kernel-node-copy-attributes-deferred",
+      "entryPoint": "jyppx_cuda_cuda_graph_kernel_node_copy_attributes_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": []
+    }
+  ]
+}

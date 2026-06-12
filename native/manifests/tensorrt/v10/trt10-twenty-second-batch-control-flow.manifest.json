@@ -1,0 +1,580 @@
+﻿{
+    "module":  "tensorrt",
+    "versionLine":  "10",
+    "apis":  [
+                 {
+                     "id":  "trt10-network-add-loop",
+                     "entryPoint":  "jyppx_trt10_network_add_loop",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-destroys",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+                     "parameters":  [
+                                        {
+                                            "name":  "network",
+                                            "type":  "JYPPX_TensorRtNetworkDefinition*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_loop",
+                                            "type":  "JYPPX_TensorRtLoop**",
+                                            "direction":  "out",
+                                            "ownership":  "caller-destroys"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt10-network-add-if-conditional",
+                     "entryPoint":  "jyppx_trt10_network_add_if_conditional",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-destroys",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+                     "parameters":  [
+                                        {
+                                            "name":  "network",
+                                            "type":  "JYPPX_TensorRtNetworkDefinition*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_conditional",
+                                            "type":  "JYPPX_TensorRtIfConditional**",
+                                            "direction":  "out",
+                                            "ownership":  "caller-destroys"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt10-loop-set-name",
+                     "entryPoint":  "jyppx_trt10_loop_set_name",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  true,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+                     "parameters":  [
+                                        {
+                                            "name":  "loop",
+                                            "type":  "JYPPX_TensorRtLoop*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "name",
+                                            "type":  "const char*",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt10-loop-get-name",
+                     "entryPoint":  "jyppx_trt10_loop_get_name",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  true,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+                     "parameters":  [
+                                        {
+                                            "name":  "loop",
+                                            "type":  "JYPPX_TensorRtLoop*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "output_buffer",
+                                            "type":  "char*",
+                                            "direction":  "out"
+                                        },
+                                        {
+                                            "name":  "output_buffer_size",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_required_size",
+                                            "type":  "size_t*",
+                                            "direction":  "out"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt10-loop-add-recurrence",
+                     "entryPoint":  "jyppx_trt10_loop_add_recurrence",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-destroys",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+                     "parameters":  [
+                                        {
+                                            "name":  "loop",
+                                            "type":  "JYPPX_TensorRtLoop*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "initial_value",
+                                            "type":  "JYPPX_TensorRtTensor*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_layer",
+                                            "type":  "JYPPX_TensorRtLayer**",
+                                            "direction":  "out",
+                                            "ownership":  "caller-destroys"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt10-loop-add-trip-limit",
+                     "entryPoint":  "jyppx_trt10_loop_add_trip_limit",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-destroys",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+                     "parameters":  [
+                                        {
+                                            "name":  "loop",
+                                            "type":  "JYPPX_TensorRtLoop*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "tensor",
+                                            "type":  "JYPPX_TensorRtTensor*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "limit",
+                                            "type":  "int32_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_layer",
+                                            "type":  "JYPPX_TensorRtLayer**",
+                                            "direction":  "out",
+                                            "ownership":  "caller-destroys"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt10-loop-add-iterator",
+                     "entryPoint":  "jyppx_trt10_loop_add_iterator",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-destroys",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+                     "parameters":  [
+                                        {
+                                            "name":  "loop",
+                                            "type":  "JYPPX_TensorRtLoop*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "tensor",
+                                            "type":  "JYPPX_TensorRtTensor*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "axis",
+                                            "type":  "int32_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "reverse",
+                                            "type":  "JYPPX_Boolean",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_layer",
+                                            "type":  "JYPPX_TensorRtLayer**",
+                                            "direction":  "out",
+                                            "ownership":  "caller-destroys"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt10-loop-add-output",
+                     "entryPoint":  "jyppx_trt10_loop_add_output",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-destroys",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+                     "parameters":  [
+                                        {
+                                            "name":  "loop",
+                                            "type":  "JYPPX_TensorRtLoop*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "tensor",
+                                            "type":  "JYPPX_TensorRtTensor*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "output_kind",
+                                            "type":  "int32_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "axis",
+                                            "type":  "int32_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_layer",
+                                            "type":  "JYPPX_TensorRtLayer**",
+                                            "direction":  "out",
+                                            "ownership":  "caller-destroys"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt10-if-conditional-set-name",
+                     "entryPoint":  "jyppx_trt10_if_conditional_set_name",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  true,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+                     "parameters":  [
+                                        {
+                                            "name":  "conditional",
+                                            "type":  "JYPPX_TensorRtIfConditional*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "name",
+                                            "type":  "const char*",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt10-if-conditional-get-name",
+                     "entryPoint":  "jyppx_trt10_if_conditional_get_name",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  true,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+                     "parameters":  [
+                                        {
+                                            "name":  "conditional",
+                                            "type":  "JYPPX_TensorRtIfConditional*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "output_buffer",
+                                            "type":  "char*",
+                                            "direction":  "out"
+                                        },
+                                        {
+                                            "name":  "output_buffer_size",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_required_size",
+                                            "type":  "size_t*",
+                                            "direction":  "out"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt10-if-conditional-set-condition",
+                     "entryPoint":  "jyppx_trt10_if_conditional_set_condition",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-destroys",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+                     "parameters":  [
+                                        {
+                                            "name":  "conditional",
+                                            "type":  "JYPPX_TensorRtIfConditional*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "condition",
+                                            "type":  "JYPPX_TensorRtTensor*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_layer",
+                                            "type":  "JYPPX_TensorRtLayer**",
+                                            "direction":  "out",
+                                            "ownership":  "caller-destroys"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt10-if-conditional-add-input",
+                     "entryPoint":  "jyppx_trt10_if_conditional_add_input",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-destroys",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+                     "parameters":  [
+                                        {
+                                            "name":  "conditional",
+                                            "type":  "JYPPX_TensorRtIfConditional*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "input",
+                                            "type":  "JYPPX_TensorRtTensor*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_layer",
+                                            "type":  "JYPPX_TensorRtLayer**",
+                                            "direction":  "out",
+                                            "ownership":  "caller-destroys"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt10-if-conditional-add-output",
+                     "entryPoint":  "jyppx_trt10_if_conditional_add_output",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-destroys",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+                     "parameters":  [
+                                        {
+                                            "name":  "conditional",
+                                            "type":  "JYPPX_TensorRtIfConditional*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "true_output",
+                                            "type":  "JYPPX_TensorRtTensor*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "false_output",
+                                            "type":  "JYPPX_TensorRtTensor*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_layer",
+                                            "type":  "JYPPX_TensorRtLayer**",
+                                            "direction":  "out",
+                                            "ownership":  "caller-destroys"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt10-loop-boundary-layer-get-loop-name",
+                     "entryPoint":  "jyppx_trt10_loop_boundary_layer_get_loop_name",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  true,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+                     "parameters":  [
+                                        {
+                                            "name":  "layer",
+                                            "type":  "JYPPX_TensorRtLayer*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "output_buffer",
+                                            "type":  "char*",
+                                            "direction":  "out"
+                                        },
+                                        {
+                                            "name":  "output_buffer_size",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_required_size",
+                                            "type":  "size_t*",
+                                            "direction":  "out"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt10-if-conditional-boundary-layer-get-conditional-name",
+                     "entryPoint":  "jyppx_trt10_if_conditional_boundary_layer_get_conditional_name",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  true,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+                     "parameters":  [
+                                        {
+                                            "name":  "layer",
+                                            "type":  "JYPPX_TensorRtLayer*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "output_buffer",
+                                            "type":  "char*",
+                                            "direction":  "out"
+                                        },
+                                        {
+                                            "name":  "output_buffer_size",
+                                            "type":  "size_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_required_size",
+                                            "type":  "size_t*",
+                                            "direction":  "out"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt10-loop-output-layer-get-kind",
+                     "entryPoint":  "jyppx_trt10_loop_output_layer_get_kind",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+                     "parameters":  [
+                                        {
+                                            "name":  "layer",
+                                            "type":  "JYPPX_TensorRtLayer*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_kind",
+                                            "type":  "int32_t*",
+                                            "direction":  "out"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt10-loop-output-layer-get-axis",
+                     "entryPoint":  "jyppx_trt10_loop_output_layer_get_axis",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+                     "parameters":  [
+                                        {
+                                            "name":  "layer",
+                                            "type":  "JYPPX_TensorRtLayer*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_axis",
+                                            "type":  "int32_t*",
+                                            "direction":  "out"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt10-trip-limit-layer-get-kind",
+                     "entryPoint":  "jyppx_trt10_trip_limit_layer_get_kind",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+                     "parameters":  [
+                                        {
+                                            "name":  "layer",
+                                            "type":  "JYPPX_TensorRtLayer*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_kind",
+                                            "type":  "int32_t*",
+                                            "direction":  "out"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt10-iterator-layer-get-axis",
+                     "entryPoint":  "jyppx_trt10_iterator_layer_get_axis",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+                     "parameters":  [
+                                        {
+                                            "name":  "layer",
+                                            "type":  "JYPPX_TensorRtLayer*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_axis",
+                                            "type":  "int32_t*",
+                                            "direction":  "out"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt10-loop-output-layer-set-axis",
+                     "entryPoint":  "jyppx_trt10_loop_output_layer_set_axis",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+                     "parameters":  [
+                                        {
+                                            "name":  "layer",
+                                            "type":  "JYPPX_TensorRtLayer*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "axis",
+                                            "type":  "int32_t",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt10-iterator-layer-set-axis",
+                     "entryPoint":  "jyppx_trt10_iterator_layer_set_axis",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+                     "parameters":  [
+                                        {
+                                            "name":  "layer",
+                                            "type":  "JYPPX_TensorRtLayer*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "axis",
+                                            "type":  "int32_t",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt10-iterator-layer-set-reverse",
+                     "entryPoint":  "jyppx_trt10_iterator_layer_set_reverse",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+                     "parameters":  [
+                                        {
+                                            "name":  "layer",
+                                            "type":  "JYPPX_TensorRtLayer*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "reverse",
+                                            "type":  "JYPPX_Boolean",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt10-iterator-layer-get-reverse",
+                     "entryPoint":  "jyppx_trt10_iterator_layer_get_reverse",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+                     "parameters":  [
+                                        {
+                                            "name":  "layer",
+                                            "type":  "JYPPX_TensorRtLayer*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_reverse",
+                                            "type":  "JYPPX_Boolean*",
+                                            "direction":  "out"
+                                        }
+                                    ]
+                 }
+             ]
+}

@@ -1,0 +1,352 @@
+{
+  "$schema": "../../bridge-api.schema.json",
+  "module": "tensorrt",
+  "versionLine": "11",
+  "apis": [
+    {
+      "id": "trt11-query-adapter-info",
+      "entryPoint": "jyppx_trt11_query_adapter_info",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "bindingRole": "query-adapter-info",
+      "parameters": [
+        {
+          "name": "out_info",
+          "type": "JYPPX_TensorRtAdapterInfo*",
+          "direction": "out",
+          "managedType": "out IntPtr",
+          "moduleManagedType": "out NativeTensorRtAdapterInfo"
+        }
+      ]
+    },
+    {
+      "id": "trt11-logger-create",
+      "entryPoint": "jyppx_trt11_logger_create",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "bindingRole": "logger-create",
+      "parameters": [
+        {
+          "name": "out_logger",
+          "type": "JYPPX_TensorRtLogger**",
+          "direction": "out",
+          "ownership": "caller-destroys"
+        }
+      ]
+    },
+    {
+      "id": "trt11-runtime-create",
+      "entryPoint": "jyppx_trt11_runtime_create",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "bindingRole": "runtime-create",
+      "parameters": [
+        {
+          "name": "logger",
+          "type": "JYPPX_TensorRtLogger*",
+          "direction": "in"
+        },
+        {
+          "name": "out_runtime",
+          "type": "JYPPX_TensorRtRuntime**",
+          "direction": "out",
+          "ownership": "caller-destroys"
+        }
+      ]
+    },
+    {
+      "id": "trt11-builder-create",
+      "entryPoint": "jyppx_trt11_builder_create",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "bindingRole": "builder-create",
+      "parameters": [
+        {
+          "name": "logger",
+          "type": "JYPPX_TensorRtLogger*",
+          "direction": "in"
+        },
+        {
+          "name": "out_builder",
+          "type": "JYPPX_TensorRtBuilder**",
+          "direction": "out",
+          "ownership": "caller-destroys"
+        }
+      ]
+    },
+    {
+      "id": "trt11-builder-create-config",
+      "entryPoint": "jyppx_trt11_builder_create_config",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "bindingRole": "builder-config-create",
+      "parameters": [
+        {
+          "name": "builder",
+          "type": "JYPPX_TensorRtBuilder*",
+          "direction": "in"
+        },
+        {
+          "name": "out_config",
+          "type": "JYPPX_TensorRtBuilderConfig**",
+          "direction": "out",
+          "ownership": "caller-destroys"
+        }
+      ]
+    },
+    {
+      "id": "trt11-builder-create-network",
+      "entryPoint": "jyppx_trt11_builder_create_network",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "bindingRole": "network-create",
+      "parameters": [
+        {
+          "name": "builder",
+          "type": "JYPPX_TensorRtBuilder*",
+          "direction": "in"
+        },
+        {
+          "name": "creation_flags",
+          "type": "uint32_t",
+          "direction": "in"
+        },
+        {
+          "name": "out_network",
+          "type": "JYPPX_TensorRtNetworkDefinition**",
+          "direction": "out",
+          "ownership": "caller-destroys"
+        }
+      ]
+    },
+    {
+      "id": "trt11-builder-build-serialized-network",
+      "entryPoint": "jyppx_trt11_builder_build_serialized_network",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "bindingRole": "serialized-build",
+      "parameters": [
+        {
+          "name": "builder",
+          "type": "JYPPX_TensorRtBuilder*",
+          "direction": "in"
+        },
+        {
+          "name": "network",
+          "type": "JYPPX_TensorRtNetworkDefinition*",
+          "direction": "in"
+        },
+        {
+          "name": "config",
+          "type": "JYPPX_TensorRtBuilderConfig*",
+          "direction": "in"
+        },
+        {
+          "name": "out_host_memory",
+          "type": "JYPPX_TensorRtHostMemory**",
+          "direction": "out",
+          "ownership": "caller-destroys"
+        }
+      ]
+    },
+    {
+      "id": "trt11-runtime-deserialize-engine",
+      "entryPoint": "jyppx_trt11_runtime_deserialize_engine",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-destroys",
+      "manualOverride": true,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        {
+          "name": "runtime",
+          "type": "JYPPX_TensorRtRuntime*",
+          "direction": "in"
+        },
+        {
+          "name": "engine_data",
+          "type": "const void*",
+          "direction": "in"
+        },
+        {
+          "name": "engine_size",
+          "type": "size_t",
+          "direction": "in"
+        },
+        {
+          "name": "out_engine",
+          "type": "JYPPX_TensorRtCudaEngine**",
+          "direction": "out",
+          "ownership": "caller-destroys"
+        }
+      ]
+    },
+    {
+      "id": "trt11-runtime-deserialize-host-memory",
+      "entryPoint": "jyppx_trt11_runtime_deserialize_host_memory",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "bindingRole": "deserialize-host-memory",
+      "parameters": [
+        {
+          "name": "runtime",
+          "type": "JYPPX_TensorRtRuntime*",
+          "direction": "in"
+        },
+        {
+          "name": "host_memory",
+          "type": "JYPPX_TensorRtHostMemory*",
+          "direction": "in"
+        },
+        {
+          "name": "out_engine",
+          "type": "JYPPX_TensorRtCudaEngine**",
+          "direction": "out",
+          "ownership": "caller-destroys"
+        }
+      ]
+    },
+    {
+      "id": "trt11-host-memory-get-size",
+      "entryPoint": "jyppx_trt11_host_memory_get_size",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        {
+          "name": "host_memory",
+          "type": "JYPPX_TensorRtHostMemory*",
+          "direction": "in"
+        },
+        {
+          "name": "out_size",
+          "type": "size_t*",
+          "direction": "out",
+          "managedType": "out UIntPtr",
+          "moduleManagedType": "out UIntPtr"
+        }
+      ]
+    },
+    {
+      "id": "trt11-host-memory-copy-to-buffer",
+      "entryPoint": "jyppx_trt11_host_memory_copy_to_buffer",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": true,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        {
+          "name": "host_memory",
+          "type": "JYPPX_TensorRtHostMemory*",
+          "direction": "in"
+        },
+        {
+          "name": "destination",
+          "type": "void*",
+          "direction": "out",
+          "managedType": "byte[]",
+          "moduleManagedType": "byte[]"
+        },
+        {
+          "name": "destination_size",
+          "type": "size_t",
+          "direction": "in"
+        },
+        {
+          "name": "out_bytes_written",
+          "type": "size_t*",
+          "direction": "out",
+          "managedType": "out UIntPtr",
+          "moduleManagedType": "out UIntPtr"
+        }
+      ]
+    },
+    {
+      "id": "trt11-engine-get-io-tensor-count",
+      "entryPoint": "jyppx_trt11_engine_get_io_tensor_count",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "JYPPX_TensorRtCudaEngine*",
+          "direction": "in"
+        },
+        {
+          "name": "out_count",
+          "type": "int32_t*",
+          "direction": "out",
+          "managedType": "out int",
+          "moduleManagedType": "out int"
+        }
+      ]
+    },
+    {
+      "id": "trt11-engine-get-io-tensor-info",
+      "entryPoint": "jyppx_trt11_engine_get_io_tensor_info",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "JYPPX_TensorRtCudaEngine*",
+          "direction": "in"
+        },
+        {
+          "name": "index",
+          "type": "int32_t",
+          "direction": "in"
+        },
+        {
+          "name": "out_info",
+          "type": "JYPPX_TensorRtTensorInfo*",
+          "direction": "out",
+          "managedType": "out IntPtr",
+          "moduleManagedType": "out NativeTensorRtTensorInfo"
+        }
+      ]
+    },
+    {
+      "id": "trt11-engine-create-execution-context",
+      "entryPoint": "jyppx_trt11_engine_create_execution_context",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "bindingRole": "execution-context-create",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "JYPPX_TensorRtCudaEngine*",
+          "direction": "in"
+        },
+        {
+          "name": "out_context",
+          "type": "JYPPX_TensorRtExecutionContext**",
+          "direction": "out",
+          "ownership": "caller-destroys"
+        }
+      ]
+    }
+  ]
+}

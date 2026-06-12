@@ -1,0 +1,146 @@
+{
+  "module": "tensorrt",
+  "versionLine": "11",
+  "apis": [
+    {
+      "id": "trt11-tensor-is-shape-tensor",
+      "entryPoint": "jyppx_trt11_tensor_is_shape_tensor",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        {
+          "name": "tensor",
+          "type": "JYPPX_TensorRtTensor*",
+          "direction": "in"
+        },
+        {
+          "name": "out_is_shape_tensor",
+          "type": "JYPPX_Boolean*",
+          "direction": "out",
+          "managedType": "out int",
+          "moduleManagedType": "out int"
+        }
+      ]
+    },
+    {
+      "id": "trt11-tensor-is-execution-tensor",
+      "entryPoint": "jyppx_trt11_tensor_is_execution_tensor",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        {
+          "name": "tensor",
+          "type": "JYPPX_TensorRtTensor*",
+          "direction": "in"
+        },
+        {
+          "name": "out_is_execution_tensor",
+          "type": "JYPPX_Boolean*",
+          "direction": "out",
+          "managedType": "out int",
+          "moduleManagedType": "out int"
+        }
+      ]
+    },
+    {
+      "id": "trt11-tensor-get-dimension-name",
+      "entryPoint": "jyppx_trt11_tensor_get_dimension_name",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": true,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "manualReason": "UTF-8 buffer marshaling",
+      "parameters": [
+        {
+          "name": "tensor",
+          "type": "JYPPX_TensorRtTensor*",
+          "direction": "in"
+        },
+        {
+          "name": "dimension_index",
+          "type": "int32_t",
+          "direction": "in",
+          "managedType": "int",
+          "moduleManagedType": "int"
+        },
+        {
+          "name": "output_buffer",
+          "type": "char*",
+          "direction": "out",
+          "managedType": "byte[]",
+          "moduleManagedType": "byte[]"
+        },
+        {
+          "name": "output_buffer_size",
+          "type": "size_t",
+          "direction": "in",
+          "managedType": "UIntPtr",
+          "moduleManagedType": "UIntPtr"
+        },
+        {
+          "name": "out_required_size",
+          "type": "size_t*",
+          "direction": "out",
+          "managedType": "out UIntPtr",
+          "moduleManagedType": "out UIntPtr"
+        }
+      ]
+    },
+    {
+      "id": "trt11-tensor-set-dimension-name",
+      "entryPoint": "jyppx_trt11_tensor_set_dimension_name",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": true,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "manualReason": "UTF-8 string marshaling",
+      "parameters": [
+        {
+          "name": "tensor",
+          "type": "JYPPX_TensorRtTensor*",
+          "direction": "in"
+        },
+        {
+          "name": "dimension_index",
+          "type": "int32_t",
+          "direction": "in",
+          "managedType": "int",
+          "moduleManagedType": "int"
+        },
+        {
+          "name": "name",
+          "type": "const char*",
+          "direction": "in",
+          "managedType": "IntPtr",
+          "moduleManagedType": "IntPtr"
+        }
+      ]
+    },
+    {
+      "id": "trt11-tensor-clear-dimension-name",
+      "entryPoint": "jyppx_trt11_tensor_clear_dimension_name",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        {
+          "name": "tensor",
+          "type": "JYPPX_TensorRtTensor*",
+          "direction": "in"
+        },
+        {
+          "name": "dimension_index",
+          "type": "int32_t",
+          "direction": "in",
+          "managedType": "int",
+          "moduleManagedType": "int"
+        }
+      ]
+    }
+  ]
+}

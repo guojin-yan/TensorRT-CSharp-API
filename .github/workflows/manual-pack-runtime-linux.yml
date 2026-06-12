@@ -1,0 +1,132 @@
+name: manual-pack-runtime-linux
+
+on:
+  workflow_dispatch:
+    inputs:
+      runtime_key:
+        description: Runtime package key
+        required: true
+        default: linux-x64-trt8.6-cuda11.8-cudnn8.9
+      configure_preset:
+        description: CMake configure preset
+        required: true
+        default: linux-x64-trt8-cuda11-release
+      build_preset:
+        description: CMake build preset
+        required: true
+        default: linux-x64-trt8-cuda11-release
+      tensorrt_root:
+        description: TensorRT root on the Linux runner
+        required: true
+      cuda_root:
+        description: CUDA root on the Linux runner
+        required: true
+
+jobs:
+  pack-runtime-linux:
+    runs-on:
+    - self-hosted
+    - linux
+    - x64
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Restore
+      run: dotnet restore TensorRtSharp.sln
+
+    - name: Validate runtime manifest
+      run: pwsh -File ./eng/Validate-RuntimeManifest.ps1
+
+    - name: Export explicit dependency roots
+      shell: bash
+      run: |
+        echo "JYPPX_TENSORRT_ROOT=${{ github.event.inputs.tensorrt_root }}" >> "$GITHUB_ENV"
+        echo "JYPPX_CUDA_ROOT=${{ github.event.inputs.cuda_root }}" >> "$GITHUB_ENV"
+
+    - name: Validate Linux runtime inputs
+      run: pwsh -File ./eng/Validate-LinuxRuntimeInputs.ps1 -RuntimePackageKey "${{ github.event.inputs.runtime_key }}" -TensorRtRoot "${{ github.event.inputs.tensorrt_root }}" -CudaRoot "${{ github.event.inputs.cuda_root }}"
+
+    - name: Configure native
+      run: cmake --preset "${{ github.event.inputs.configure_preset }}"
+
+    - name: Build native
+      run: cmake --build --preset "${{ github.event.inputs.build_preset }}"
+
+    - name: Linux runtime dry run summary
+      run: pwsh -File ./eng/Invoke-LinuxRuntimeDryRun.ps1 -RuntimePackageKey "${{ github.event.inputs.runtime_key }}" -TensorRtRoot "${{ github.event.inputs.tensorrt_root }}" -CudaRoot "${{ github.event.inputs.cuda_root }}"
+
+    - name: Validate Linux dry run artifacts
+      run: pwsh -File ./eng/Validate-LinuxDryRunArtifacts.ps1 -RuntimePackageKey "${{ github.event.inputs.runtime_key }}"
+
+    - name: Validate Linux workflow contract
+      run: pwsh -File ./eng/Test-LinuxRuntimeWorkflowContract.ps1 -RuntimePackageKey "${{ github.event.inputs.runtime_key }}" -ConfigurePreset "${{ github.event.inputs.configure_preset }}" -BuildPreset "${{ github.event.inputs.build_preset }}"
+
+    - name: Export Linux preflight summary
+      run: pwsh -File ./eng/Export-LinuxPreflightSummary.ps1 -RuntimePackageKey "${{ github.event.inputs.runtime_key }}"
+
+    - name: Export Linux package consumer plan
+      run: pwsh -File ./eng/Export-LinuxPackageConsumerPlan.ps1 -RuntimePackageKey "${{ github.event.inputs.runtime_key }}"
+
+    - name: Export Linux runner execution status
+      run: pwsh -File ./eng/Export-LinuxRunnerExecutionStatus.ps1 -RuntimePackageKey "${{ github.event.inputs.runtime_key }}"
+
+    - name: Export Linux handoff index
+      run: pwsh -File ./eng/Export-LinuxHandoffIndex.ps1 -RuntimePackageKey "${{ github.event.inputs.runtime_key }}"
+
+    - name: Collect runtime assets
+      run: pwsh -File ./eng/Collect-RuntimeAssets.ps1 -RuntimePackageKey "${{ github.event.inputs.runtime_key }}" -TensorRtRoot "${{ github.event.inputs.tensorrt_root }}" -CudaRoot "${{ github.event.inputs.cuda_root }}"
+
+    - name: Pack managed package
+      run: dotnet pack ./pack/JYPPX.TensorRT.CSharp.API/JYPPX.TensorRT.CSharp.API.csproj -c Release -o ./artifacts/managed
+
+    - name: Resolve runtime project path
+      shell: pwsh
+      run: |
+        $manifest = Get-Content ./pack/runtime/runtime-packages.manifest.json -Raw | ConvertFrom-Json
+        $package = $manifest.packages | Where-Object { $_.key -eq '${{ github.event.inputs.runtime_key }}' } | Select-Object -First 1
+        if (-not $package) { throw "Runtime key not found." }
+        $projectPath = "./pack/runtime/${{ github.event.inputs.runtime_key }}/$($package.packageId).csproj"
+        "RUNTIME_PROJECT_PATH=$projectPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+    - name: Pack runtime package
+      run: dotnet pack "${{ env.RUNTIME_PROJECT_PATH }}" -c Release -o ./artifacts/runtime-nupkg
+
+    - name: Test Linux package consumer
+      run: pwsh -File ./eng/Test-PackageConsumer.ps1 -RuntimePackageKey "${{ github.event.inputs.runtime_key }}"
+
+    - name: Resolve publish readiness mode
+      shell: pwsh
+      run: |
+        $manifest = Get-Content ./pack/runtime/runtime-packages.manifest.json -Raw | ConvertFrom-Json
+        $package = $manifest.packages | Where-Object { $_.key -eq '${{ github.event.inputs.runtime_key }}' } | Select-Object -First 1
+        if (-not $package) { throw "Runtime key not found." }
+        $mode = switch ($package.distributionTier) {
+          'public-sample' { 'public-preview' }
+          'private-feed' { 'private-feed' }
+          default { 'split-delivery' }
+        }
+        "RUNTIME_PUBLISH_MODE=$mode" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+    - name: Test publish readiness
+      run: pwsh -File ./eng/Test-RuntimePublishReadiness.ps1 -TargetMode "${{ env.RUNTIME_PUBLISH_MODE }}" -RuntimePackageKey "${{ github.event.inputs.runtime_key }}"
+
+    - name: Export release gate summary
+      run: pwsh -File ./eng/Export-ReleaseGateSummary.ps1
+
+    - name: Upload runtime artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: runtime-linux-${{ github.event.inputs.runtime_key }}
+        path: |
+          artifacts/linux-dry-run/**
+          artifacts/runtime/**
+          artifacts/runtime-nupkg/**
+          artifacts/managed/**
+          artifacts/package-consumer/**
+          artifacts/runtime-distribution/**

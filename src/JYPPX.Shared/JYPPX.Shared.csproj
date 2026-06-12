@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>$(JYPPXManagedTargetFrameworks)</TargetFrameworks>
+    <AssemblyName>JYPPX.Shared</AssemblyName>
+    <RootNamespace>JYPPX.Shared</RootNamespace>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+  </PropertyGroup>
+</Project>

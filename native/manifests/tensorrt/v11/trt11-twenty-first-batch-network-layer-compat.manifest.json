@@ -1,0 +1,115 @@
+{
+    "module":  "tensorrt",
+    "versionLine":  "11",
+    "apis":  [
+                 {
+                     "id":  "trt11-constant-layer-set-dimensions",
+                     "entryPoint":  "jyppx_trt11_constant_layer_set_dimensions",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+                     "parameters":  [
+                                        {
+                                            "name":  "layer",
+                                            "type":  "JYPPX_TensorRtLayer*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "dimensions",
+                                            "type":  "const JYPPX_TensorRtDims*",
+                                            "direction":  "in",
+                                            "managedType":  "IntPtr",
+                                            "moduleManagedType":  "ref NativeTensorRtDims"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt11-constant-layer-get-dimensions",
+                     "entryPoint":  "jyppx_trt11_constant_layer_get_dimensions",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+                     "parameters":  [
+                                        {
+                                            "name":  "layer",
+                                            "type":  "JYPPX_TensorRtLayer*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_dimensions",
+                                            "type":  "JYPPX_TensorRtDims*",
+                                            "direction":  "out",
+                                            "managedType":  "out NativeTensorRtDims",
+                                            "moduleManagedType":  "out NativeTensorRtDims"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt11-einsum-layer-set-equation",
+                     "entryPoint":  "jyppx_trt11_einsum_layer_set_equation",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  true,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+                     "parameters":  [
+                                        {
+                                            "name":  "layer",
+                                            "type":  "JYPPX_TensorRtLayer*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "equation",
+                                            "type":  "const char*",
+                                            "direction":  "in",
+                                            "managedType":  "IntPtr",
+                                            "moduleManagedType":  "IntPtr"
+                                        },
+                                        {
+                                            "name":  "out_success",
+                                            "type":  "JYPPX_Boolean*",
+                                            "direction":  "out",
+                                            "managedType":  "out int",
+                                            "moduleManagedType":  "out int"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt11-einsum-layer-get-equation",
+                     "entryPoint":  "jyppx_trt11_einsum_layer_get_equation",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  true,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+                     "parameters":  [
+                                        {
+                                            "name":  "layer",
+                                            "type":  "JYPPX_TensorRtLayer*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "output_buffer",
+                                            "type":  "char*",
+                                            "direction":  "out",
+                                            "managedType":  "byte[]",
+                                            "moduleManagedType":  "byte[]"
+                                        },
+                                        {
+                                            "name":  "output_buffer_size",
+                                            "type":  "size_t",
+                                            "direction":  "in",
+                                            "managedType":  "UIntPtr",
+                                            "moduleManagedType":  "UIntPtr"
+                                        },
+                                        {
+                                            "name":  "out_required_size",
+                                            "type":  "size_t*",
+                                            "direction":  "out",
+                                            "managedType":  "out UIntPtr",
+                                            "moduleManagedType":  "out UIntPtr"
+                                        }
+                                    ]
+                 }
+             ]
+}

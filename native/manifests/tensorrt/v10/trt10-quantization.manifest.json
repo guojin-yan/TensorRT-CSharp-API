@@ -1,0 +1,152 @@
+{
+  "module": "tensorrt",
+  "versionLine": "10",
+  "apis": [
+    {
+      "id": "trt10-network-add-quantize",
+      "entryPoint": "jyppx_trt10_network_add_quantize",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        {
+          "name": "network",
+          "type": "JYPPX_TensorRtNetworkDefinition*",
+          "direction": "in"
+        },
+        {
+          "name": "input_tensor",
+          "type": "JYPPX_TensorRtTensor*",
+          "direction": "in"
+        },
+        {
+          "name": "scale_tensor",
+          "type": "JYPPX_TensorRtTensor*",
+          "direction": "in"
+        },
+        {
+          "name": "out_layer",
+          "type": "JYPPX_TensorRtLayer**",
+          "direction": "out",
+          "ownership": "caller-destroys"
+        }
+      ]
+    },
+    {
+      "id": "trt10-network-add-dequantize",
+      "entryPoint": "jyppx_trt10_network_add_dequantize",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        {
+          "name": "network",
+          "type": "JYPPX_TensorRtNetworkDefinition*",
+          "direction": "in"
+        },
+        {
+          "name": "input_tensor",
+          "type": "JYPPX_TensorRtTensor*",
+          "direction": "in"
+        },
+        {
+          "name": "scale_tensor",
+          "type": "JYPPX_TensorRtTensor*",
+          "direction": "in"
+        },
+        {
+          "name": "out_layer",
+          "type": "JYPPX_TensorRtLayer**",
+          "direction": "out",
+          "ownership": "caller-destroys"
+        }
+      ]
+    },
+    {
+      "id": "trt10-quantize-layer-get-axis",
+      "entryPoint": "jyppx_trt10_quantize_layer_get_axis",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        {
+          "name": "layer",
+          "type": "JYPPX_TensorRtLayer*",
+          "direction": "in"
+        },
+        {
+          "name": "out_axis",
+          "type": "int32_t*",
+          "direction": "out",
+          "managedType": "out int",
+          "moduleManagedType": "out int"
+        }
+      ]
+    },
+    {
+      "id": "trt10-quantize-layer-set-axis",
+      "entryPoint": "jyppx_trt10_quantize_layer_set_axis",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        {
+          "name": "layer",
+          "type": "JYPPX_TensorRtLayer*",
+          "direction": "in"
+        },
+        {
+          "name": "axis",
+          "type": "int32_t",
+          "direction": "in"
+        }
+      ]
+    },
+    {
+      "id": "trt10-dequantize-layer-get-axis",
+      "entryPoint": "jyppx_trt10_dequantize_layer_get_axis",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        {
+          "name": "layer",
+          "type": "JYPPX_TensorRtLayer*",
+          "direction": "in"
+        },
+        {
+          "name": "out_axis",
+          "type": "int32_t*",
+          "direction": "out",
+          "managedType": "out int",
+          "moduleManagedType": "out int"
+        }
+      ]
+    },
+    {
+      "id": "trt10-dequantize-layer-set-axis",
+      "entryPoint": "jyppx_trt10_dequantize_layer_set_axis",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        {
+          "name": "layer",
+          "type": "JYPPX_TensorRtLayer*",
+          "direction": "in"
+        },
+        {
+          "name": "axis",
+          "type": "int32_t",
+          "direction": "in"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\JYPPX.CudaSharp\JYPPX.CudaSharp.csproj" />
+    <ProjectReference Include="..\..\src\JYPPX.TensorRtSharp\JYPPX.TensorRtSharp.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,458 @@
+{
+  "$schema": "../../bridge-api.schema.json",
+  "module": "tensorrt",
+  "versionLine": "11",
+  "apis": [
+    {
+      "id": "trt11-network-add-rotary-embedding",
+      "entryPoint": "jyppx_trt11_network_add_rotary_embedding",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "network", "type": "JYPPX_TensorRtNetworkDefinition*", "direction": "in" },
+        { "name": "input_tensor", "type": "JYPPX_TensorRtTensor*", "direction": "in" },
+        { "name": "cos_cache_tensor", "type": "JYPPX_TensorRtTensor*", "direction": "in" },
+        { "name": "sin_cache_tensor", "type": "JYPPX_TensorRtTensor*", "direction": "in" },
+        { "name": "interleaved", "type": "JYPPX_Boolean", "direction": "in", "managedType": "int", "moduleManagedType": "int" },
+        { "name": "rotary_embedding_dim", "type": "int32_t", "direction": "in" },
+        { "name": "out_layer", "type": "JYPPX_TensorRtLayer**", "direction": "out", "ownership": "caller-destroys" }
+      ]
+    },
+    {
+      "id": "trt11-rotary-embedding-layer-set-interleaved",
+      "entryPoint": "jyppx_trt11_rotary_embedding_layer_set_interleaved",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "interleaved", "type": "JYPPX_Boolean", "direction": "in", "managedType": "int", "moduleManagedType": "int" }
+      ]
+    },
+    {
+      "id": "trt11-rotary-embedding-layer-get-interleaved",
+      "entryPoint": "jyppx_trt11_rotary_embedding_layer_get_interleaved",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "out_interleaved", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-rotary-embedding-layer-set-rotary-embedding-dim",
+      "entryPoint": "jyppx_trt11_rotary_embedding_layer_set_rotary_embedding_dim",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "rotary_embedding_dim", "type": "int32_t", "direction": "in" },
+        { "name": "out_success", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-rotary-embedding-layer-get-rotary-embedding-dim",
+      "entryPoint": "jyppx_trt11_rotary_embedding_layer_get_rotary_embedding_dim",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "out_rotary_embedding_dim", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-network-add-kv-cache-update",
+      "entryPoint": "jyppx_trt11_network_add_kv_cache_update",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "network", "type": "JYPPX_TensorRtNetworkDefinition*", "direction": "in" },
+        { "name": "cache_tensor", "type": "JYPPX_TensorRtTensor*", "direction": "in" },
+        { "name": "update_tensor", "type": "JYPPX_TensorRtTensor*", "direction": "in" },
+        { "name": "write_indices_tensor", "type": "JYPPX_TensorRtTensor*", "direction": "in" },
+        { "name": "cache_mode", "type": "int32_t", "direction": "in" },
+        { "name": "out_layer", "type": "JYPPX_TensorRtLayer**", "direction": "out", "ownership": "caller-destroys" }
+      ]
+    },
+    {
+      "id": "trt11-kv-cache-update-layer-set-cache-mode",
+      "entryPoint": "jyppx_trt11_kv_cache_update_layer_set_cache_mode",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "cache_mode", "type": "int32_t", "direction": "in" },
+        { "name": "out_success", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-kv-cache-update-layer-get-cache-mode",
+      "entryPoint": "jyppx_trt11_kv_cache_update_layer_get_cache_mode",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "out_cache_mode", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-kv-cache-update-layer-set-update-form",
+      "entryPoint": "jyppx_trt11_kv_cache_update_layer_set_update_form",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "update_form", "type": "int32_t", "direction": "in" },
+        { "name": "out_success", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-kv-cache-update-layer-get-update-form",
+      "entryPoint": "jyppx_trt11_kv_cache_update_layer_get_update_form",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "out_update_form", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-kv-cache-update-layer-set-update-lengths",
+      "entryPoint": "jyppx_trt11_kv_cache_update_layer_set_update_lengths",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "lengths_tensor", "type": "JYPPX_TensorRtTensor*", "direction": "in" },
+        { "name": "out_success", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-kv-cache-update-layer-get-update-lengths",
+      "entryPoint": "jyppx_trt11_kv_cache_update_layer_get_update_lengths",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "out_tensor", "type": "JYPPX_TensorRtTensor**", "direction": "out", "ownership": "caller-destroys" },
+        { "name": "out_has_tensor", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-dequantize-layer-set-to-type",
+      "entryPoint": "jyppx_trt11_dequantize_layer_set_to_type",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "data_type", "type": "int32_t", "direction": "in" }
+      ]
+    },
+    {
+      "id": "trt11-dequantize-layer-get-to-type",
+      "entryPoint": "jyppx_trt11_dequantize_layer_get_to_type",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "out_data_type", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-fill-layer-set-to-type",
+      "entryPoint": "jyppx_trt11_fill_layer_set_to_type",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "data_type", "type": "int32_t", "direction": "in" }
+      ]
+    },
+    {
+      "id": "trt11-fill-layer-get-to-type",
+      "entryPoint": "jyppx_trt11_fill_layer_get_to_type",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "out_data_type", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-dynamic-quantize-layer-set-axis",
+      "entryPoint": "jyppx_trt11_dynamic_quantize_layer_set_axis",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "axis", "type": "int32_t", "direction": "in" }
+      ]
+    },
+    {
+      "id": "trt11-dynamic-quantize-layer-get-axis",
+      "entryPoint": "jyppx_trt11_dynamic_quantize_layer_get_axis",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "out_axis", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-dynamic-quantize-layer-set-block-size",
+      "entryPoint": "jyppx_trt11_dynamic_quantize_layer_set_block_size",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "block_size", "type": "int32_t", "direction": "in" }
+      ]
+    },
+    {
+      "id": "trt11-dynamic-quantize-layer-get-block-size",
+      "entryPoint": "jyppx_trt11_dynamic_quantize_layer_get_block_size",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "out_block_size", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-network-add-moe",
+      "entryPoint": "jyppx_trt11_network_add_moe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "network", "type": "JYPPX_TensorRtNetworkDefinition*", "direction": "in" },
+        { "name": "hidden_states_tensor", "type": "JYPPX_TensorRtTensor*", "direction": "in" },
+        { "name": "selected_experts_tensor", "type": "JYPPX_TensorRtTensor*", "direction": "in" },
+        { "name": "scores_tensor", "type": "JYPPX_TensorRtTensor*", "direction": "in" },
+        { "name": "out_layer", "type": "JYPPX_TensorRtLayer**", "direction": "out", "ownership": "caller-destroys" }
+      ]
+    },
+    {
+      "id": "trt11-moe-layer-set-activation-type",
+      "entryPoint": "jyppx_trt11_moe_layer_set_activation_type",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "activation_type", "type": "int32_t", "direction": "in" }
+      ]
+    },
+    {
+      "id": "trt11-moe-layer-get-activation-type",
+      "entryPoint": "jyppx_trt11_moe_layer_get_activation_type",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "out_activation_type", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-moe-layer-set-quantization-to-type",
+      "entryPoint": "jyppx_trt11_moe_layer_set_quantization_to_type",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "data_type", "type": "int32_t", "direction": "in" }
+      ]
+    },
+    {
+      "id": "trt11-moe-layer-get-quantization-to-type",
+      "entryPoint": "jyppx_trt11_moe_layer_get_quantization_to_type",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "out_data_type", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-moe-layer-set-quantization-block-shape",
+      "entryPoint": "jyppx_trt11_moe_layer_set_quantization_block_shape",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "block_shape", "type": "const JYPPX_TensorRtDims*", "direction": "in", "moduleManagedType": "ref NativeTensorRtDims" }
+      ]
+    },
+    {
+      "id": "trt11-moe-layer-get-quantization-block-shape",
+      "entryPoint": "jyppx_trt11_moe_layer_get_quantization_block_shape",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "out_block_shape", "type": "JYPPX_TensorRtDims*", "direction": "out", "moduleManagedType": "out NativeTensorRtDims" }
+      ]
+    },
+    {
+      "id": "trt11-moe-layer-set-dyn-q-output-scale-type",
+      "entryPoint": "jyppx_trt11_moe_layer_set_dyn_q_output_scale_type",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "data_type", "type": "int32_t", "direction": "in" }
+      ]
+    },
+    {
+      "id": "trt11-moe-layer-get-dyn-q-output-scale-type",
+      "entryPoint": "jyppx_trt11_moe_layer_get_dyn_q_output_scale_type",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "out_data_type", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-moe-layer-set-swiglu-params",
+      "entryPoint": "jyppx_trt11_moe_layer_set_swiglu_params",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "limit", "type": "float", "direction": "in", "managedType": "float", "moduleManagedType": "float" },
+        { "name": "alpha", "type": "float", "direction": "in", "managedType": "float", "moduleManagedType": "float" },
+        { "name": "beta", "type": "float", "direction": "in", "managedType": "float", "moduleManagedType": "float" }
+      ]
+    },
+    {
+      "id": "trt11-moe-layer-set-swiglu-param-limit",
+      "entryPoint": "jyppx_trt11_moe_layer_set_swiglu_param_limit",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "limit", "type": "float", "direction": "in", "managedType": "float", "moduleManagedType": "float" }
+      ]
+    },
+    {
+      "id": "trt11-moe-layer-get-swiglu-param-limit",
+      "entryPoint": "jyppx_trt11_moe_layer_get_swiglu_param_limit",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "out_limit", "type": "float*", "direction": "out", "managedType": "out float", "moduleManagedType": "out float" }
+      ]
+    },
+    {
+      "id": "trt11-moe-layer-set-swiglu-param-alpha",
+      "entryPoint": "jyppx_trt11_moe_layer_set_swiglu_param_alpha",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "alpha", "type": "float", "direction": "in", "managedType": "float", "moduleManagedType": "float" }
+      ]
+    },
+    {
+      "id": "trt11-moe-layer-get-swiglu-param-alpha",
+      "entryPoint": "jyppx_trt11_moe_layer_get_swiglu_param_alpha",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "out_alpha", "type": "float*", "direction": "out", "managedType": "out float", "moduleManagedType": "out float" }
+      ]
+    },
+    {
+      "id": "trt11-moe-layer-set-swiglu-param-beta",
+      "entryPoint": "jyppx_trt11_moe_layer_set_swiglu_param_beta",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "beta", "type": "float", "direction": "in", "managedType": "float", "moduleManagedType": "float" }
+      ]
+    },
+    {
+      "id": "trt11-moe-layer-get-swiglu-param-beta",
+      "entryPoint": "jyppx_trt11_moe_layer_get_swiglu_param_beta",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "out_beta", "type": "float*", "direction": "out", "managedType": "out float", "moduleManagedType": "out float" }
+      ]
+    }
+  ]
+}

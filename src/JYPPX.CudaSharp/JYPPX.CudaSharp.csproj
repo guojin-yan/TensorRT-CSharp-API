@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>$(JYPPXManagedTargetFrameworks)</TargetFrameworks>
+    <AssemblyName>JYPPX.CudaSharp</AssemblyName>
+    <RootNamespace>JYPPX.CudaSharp</RootNamespace>
+    <Description>Managed CUDA deployment helpers for TensorRtSharp4.0.</Description>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\\JYPPX.Shared\\JYPPX.Shared.csproj" />
+  </ItemGroup>
+</Project>
+

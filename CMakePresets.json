@@ -1,0 +1,279 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 27,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/build-out/${presetName}",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "JYPPX_TARGET_ARCH": "x64"
+      }
+    },
+    {
+      "name": "win-x64-dev",
+      "inherits": "base",
+      "generator": "Visual Studio 17 2022",
+      "architecture": {
+        "value": "x64"
+      },
+      "cacheVariables": {
+        "JYPPX_ENABLE_TENSORRT_BINDINGS": "OFF",
+        "JYPPX_ENABLE_CUDA_BINDINGS": "OFF"
+      }
+    },
+    {
+      "name": "win-x64-trt8-cuda11-release",
+      "inherits": "base",
+      "generator": "Visual Studio 17 2022",
+      "architecture": {
+        "value": "x64"
+      },
+      "cacheVariables": {
+        "JYPPX_ENABLE_TENSORRT_BINDINGS": "ON",
+        "JYPPX_ENABLE_CUDA_BINDINGS": "ON",
+        "JYPPX_TENSORRT_LINE": "8",
+        "JYPPX_CUDA_LINE": "11",
+        "JYPPX_CUDA_VERSION": "11.8",
+        "JYPPX_CUDNN_MAJOR": "8"
+      }
+    },
+    {
+      "name": "win-x64-trt8-cuda12-release",
+      "inherits": "base",
+      "generator": "Visual Studio 17 2022",
+      "architecture": {
+        "value": "x64"
+      },
+      "cacheVariables": {
+        "JYPPX_ENABLE_TENSORRT_BINDINGS": "ON",
+        "JYPPX_ENABLE_CUDA_BINDINGS": "ON",
+        "JYPPX_TENSORRT_LINE": "8",
+        "JYPPX_CUDA_LINE": "12",
+        "JYPPX_CUDA_VERSION": "12.1",
+        "JYPPX_CUDNN_MAJOR": "8"
+      }
+    },
+    {
+      "name": "win-x64-trt10-cuda11-release",
+      "inherits": "base",
+      "generator": "Visual Studio 17 2022",
+      "architecture": {
+        "value": "x64"
+      },
+      "cacheVariables": {
+        "JYPPX_ENABLE_TENSORRT_BINDINGS": "ON",
+        "JYPPX_ENABLE_CUDA_BINDINGS": "ON",
+        "JYPPX_TENSORRT_LINE": "10",
+        "JYPPX_CUDA_LINE": "11",
+        "JYPPX_CUDA_VERSION": "11.8",
+        "JYPPX_CUDNN_MAJOR": "8"
+      }
+    },
+    {
+      "name": "win-x64-trt10-cuda12-release",
+      "inherits": "base",
+      "generator": "Visual Studio 17 2022",
+      "architecture": {
+        "value": "x64"
+      },
+      "cacheVariables": {
+        "JYPPX_ENABLE_TENSORRT_BINDINGS": "ON",
+        "JYPPX_ENABLE_CUDA_BINDINGS": "ON",
+        "JYPPX_TENSORRT_LINE": "10",
+        "JYPPX_CUDA_LINE": "12",
+        "JYPPX_CUDA_VERSION": "12.9",
+        "JYPPX_TENSORRT_CUDA_VERSION": "12.9",
+        "JYPPX_CUDNN_MAJOR": "9"
+      }
+    },
+    {
+      "name": "win-x64-trt11-cuda12-release",
+      "inherits": "base",
+      "generator": "Visual Studio 17 2022",
+      "architecture": {
+        "value": "x64"
+      },
+      "cacheVariables": {
+        "JYPPX_ENABLE_TENSORRT_BINDINGS": "ON",
+        "JYPPX_ENABLE_CUDA_BINDINGS": "ON",
+        "JYPPX_TENSORRT_LINE": "11",
+        "JYPPX_CUDA_LINE": "12",
+        "JYPPX_CUDA_VERSION": "12.9",
+        "JYPPX_TENSORRT_CUDA_VERSION": "12.9",
+        "JYPPX_CUDNN_MAJOR": "9"
+      }
+    },
+    {
+      "name": "win-x64-trt11-cuda13-release",
+      "inherits": "base",
+      "generator": "Visual Studio 17 2022",
+      "architecture": {
+        "value": "x64"
+      },
+      "cacheVariables": {
+        "JYPPX_ENABLE_TENSORRT_BINDINGS": "ON",
+        "JYPPX_ENABLE_CUDA_BINDINGS": "ON",
+        "JYPPX_TENSORRT_LINE": "11",
+        "JYPPX_CUDA_LINE": "13",
+        "JYPPX_CUDA_VERSION": "13.2",
+        "JYPPX_CUDNN_MAJOR": "9"
+      }
+    },
+    {
+      "name": "linux-x64-trt8-cuda11-release",
+      "inherits": "base",
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "JYPPX_ENABLE_TENSORRT_BINDINGS": "ON",
+        "JYPPX_ENABLE_CUDA_BINDINGS": "ON",
+        "JYPPX_TENSORRT_LINE": "8",
+        "JYPPX_CUDA_LINE": "11",
+        "JYPPX_CUDA_VERSION": "11.8",
+        "JYPPX_CUDNN_MAJOR": "8"
+      }
+    },
+    {
+      "name": "linux-x64-trt8-cuda12-release",
+      "inherits": "base",
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "JYPPX_ENABLE_TENSORRT_BINDINGS": "ON",
+        "JYPPX_ENABLE_CUDA_BINDINGS": "ON",
+        "JYPPX_TENSORRT_LINE": "8",
+        "JYPPX_CUDA_LINE": "12",
+        "JYPPX_CUDA_VERSION": "12.1",
+        "JYPPX_CUDNN_MAJOR": "8"
+      }
+    },
+    {
+      "name": "linux-x64-trt10-cuda11-release",
+      "inherits": "base",
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "JYPPX_ENABLE_TENSORRT_BINDINGS": "ON",
+        "JYPPX_ENABLE_CUDA_BINDINGS": "ON",
+        "JYPPX_TENSORRT_LINE": "10",
+        "JYPPX_CUDA_LINE": "11",
+        "JYPPX_CUDA_VERSION": "11.8",
+        "JYPPX_CUDNN_MAJOR": "8"
+      }
+    },
+    {
+      "name": "linux-x64-trt10-cuda12-release",
+      "inherits": "base",
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "JYPPX_ENABLE_TENSORRT_BINDINGS": "ON",
+        "JYPPX_ENABLE_CUDA_BINDINGS": "ON",
+        "JYPPX_TENSORRT_LINE": "10",
+        "JYPPX_CUDA_LINE": "12",
+        "JYPPX_CUDA_VERSION": "12.9",
+        "JYPPX_CUDNN_MAJOR": "9"
+      }
+    },
+    {
+      "name": "linux-x64-trt11-cuda12-release",
+      "inherits": "base",
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "JYPPX_ENABLE_TENSORRT_BINDINGS": "ON",
+        "JYPPX_ENABLE_CUDA_BINDINGS": "ON",
+        "JYPPX_TENSORRT_LINE": "11",
+        "JYPPX_CUDA_LINE": "12",
+        "JYPPX_CUDA_VERSION": "12.9",
+        "JYPPX_CUDNN_MAJOR": "9"
+      }
+    },
+    {
+      "name": "linux-x64-trt11-cuda13-release",
+      "inherits": "base",
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "JYPPX_ENABLE_TENSORRT_BINDINGS": "ON",
+        "JYPPX_ENABLE_CUDA_BINDINGS": "ON",
+        "JYPPX_TENSORRT_LINE": "11",
+        "JYPPX_CUDA_LINE": "13",
+        "JYPPX_CUDA_VERSION": "13.2",
+        "JYPPX_CUDNN_MAJOR": "9"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "win-x64-dev-debug",
+      "configurePreset": "win-x64-dev",
+      "configuration": "Debug"
+    },
+    {
+      "name": "win-x64-dev-release",
+      "configurePreset": "win-x64-dev",
+      "configuration": "Release"
+    },
+    {
+      "name": "win-x64-trt8-cuda11-release",
+      "configurePreset": "win-x64-trt8-cuda11-release",
+      "configuration": "Release"
+    },
+    {
+      "name": "win-x64-trt8-cuda12-release",
+      "configurePreset": "win-x64-trt8-cuda12-release",
+      "configuration": "Release"
+    },
+    {
+      "name": "win-x64-trt10-cuda11-release",
+      "configurePreset": "win-x64-trt10-cuda11-release",
+      "configuration": "Release"
+    },
+    {
+      "name": "win-x64-trt10-cuda12-release",
+      "configurePreset": "win-x64-trt10-cuda12-release",
+      "configuration": "Release"
+    },
+    {
+      "name": "win-x64-trt11-cuda12-release",
+      "configurePreset": "win-x64-trt11-cuda12-release",
+      "configuration": "Release"
+    },
+    {
+      "name": "win-x64-trt11-cuda13-release",
+      "configurePreset": "win-x64-trt11-cuda13-release",
+      "configuration": "Release"
+    },
+    {
+      "name": "linux-x64-trt8-cuda11-release",
+      "configurePreset": "linux-x64-trt8-cuda11-release"
+    },
+    {
+      "name": "linux-x64-trt8-cuda12-release",
+      "configurePreset": "linux-x64-trt8-cuda12-release"
+    },
+    {
+      "name": "linux-x64-trt10-cuda11-release",
+      "configurePreset": "linux-x64-trt10-cuda11-release"
+    },
+    {
+      "name": "linux-x64-trt10-cuda12-release",
+      "configurePreset": "linux-x64-trt10-cuda12-release"
+    },
+    {
+      "name": "linux-x64-trt11-cuda12-release",
+      "configurePreset": "linux-x64-trt11-cuda12-release"
+    },
+    {
+      "name": "linux-x64-trt11-cuda13-release",
+      "configurePreset": "linux-x64-trt11-cuda13-release"
+    }
+  ]
+}

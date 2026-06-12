@@ -1,0 +1,94 @@
+name: manual-pack-runtime-split
+
+on:
+  workflow_dispatch:
+    inputs:
+      split_package_key:
+        description: Split runtime package key
+        required: true
+        default: win-x64-trt10.11-cuda11.8-cudnn8.9-core
+      source_runtime_key:
+        description: Source full runtime package key
+        required: true
+        default: win-x64-trt10.11-cuda11.8-cudnn8.9
+      configure_preset:
+        description: CMake configure preset for the source runtime
+        required: true
+        default: win-x64-trt10-cuda11-release
+      build_preset:
+        description: CMake build preset for the source runtime
+        required: true
+        default: win-x64-trt10-cuda11-release
+      tensorrt_root:
+        description: TensorRT root on the Windows runner
+        required: true
+      cuda_root:
+        description: CUDA Toolkit root on the Windows runner
+        required: true
+      cudnn_root:
+        description: cuDNN root on the Windows runner
+        required: true
+
+jobs:
+  pack-runtime-split:
+    runs-on:
+    - self-hosted
+    - windows
+    - x64
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Setup CMake
+      uses: lukka/get-cmake@latest
+
+    - name: Restore
+      run: dotnet restore TensorRtSharp.sln
+
+    - name: Validate split delivery prototype
+      run: pwsh -File .\eng\Validate-SplitDeliveryPrototype.ps1
+
+    - name: Validate Windows runtime inputs
+      run: powershell -ExecutionPolicy Bypass -File .\eng\Validate-WindowsRuntimeInputs.ps1 -RuntimePackageKey "${{ github.event.inputs.source_runtime_key }}" -TensorRtRoot "${{ github.event.inputs.tensorrt_root }}" -CudaRoot "${{ github.event.inputs.cuda_root }}" -CudnnRoot "${{ github.event.inputs.cudnn_root }}"
+
+    - name: Configure native
+      run: cmake --preset "${{ github.event.inputs.configure_preset }}" -DJYPPX_TENSORRT_ROOT="${{ github.event.inputs.tensorrt_root }}" -DCUDAToolkit_ROOT="${{ github.event.inputs.cuda_root }}" -DJYPPX_CUDA_ROOT="${{ github.event.inputs.cuda_root }}" -DJYPPX_CUDNN_ROOT="${{ github.event.inputs.cudnn_root }}"
+
+    - name: Build native
+      run: cmake --build --preset "${{ github.event.inputs.build_preset }}"
+
+    - name: Collect source runtime assets
+      run: powershell -ExecutionPolicy Bypass -File .\eng\Collect-RuntimeAssets.ps1 -RuntimePackageKey "${{ github.event.inputs.source_runtime_key }}" -TensorRtRoot "${{ github.event.inputs.tensorrt_root }}" -CudaRoot "${{ github.event.inputs.cuda_root }}" -CudnnRoot "${{ github.event.inputs.cudnn_root }}"
+
+    - name: Collect split runtime assets
+      run: pwsh -File .\eng\Collect-SplitRuntimeAssets.ps1 -SplitPackageKey "${{ github.event.inputs.split_package_key }}"
+
+    - name: Resolve split runtime project path
+      shell: pwsh
+      run: |
+        $manifest = Get-Content .\pack\runtime-split\split-runtime-packages.manifest.json -Raw | ConvertFrom-Json
+        $package = $manifest.packages | Where-Object { $_.key -eq '${{ github.event.inputs.split_package_key }}' } | Select-Object -First 1
+        if (-not $package) { throw "Split runtime key not found." }
+        $projectPath = ".\pack\runtime-split\${{ github.event.inputs.split_package_key }}\$($package.packageId).csproj"
+        "SPLIT_RUNTIME_PROJECT_PATH=$projectPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+    - name: Pack split runtime package
+      run: dotnet pack "${{ env.SPLIT_RUNTIME_PROJECT_PATH }}" -c Release -o .\artifacts\runtime-split-nupkg
+
+    - name: Export runtime delivery strategy
+      run: pwsh -File .\eng\Export-RuntimeDeliveryStrategy.ps1
+
+    - name: Upload split runtime artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: runtime-split-${{ github.event.inputs.split_package_key }}
+        path: |
+          artifacts/runtime/**
+          artifacts/runtime-split/**
+          artifacts/runtime-split-nupkg/**
+          artifacts/runtime-distribution/**

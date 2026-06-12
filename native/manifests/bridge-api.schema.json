@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jyppx.local/schemas/bridge-api.schema.json",
+  "title": "JYPPX Bridge API Manifest",
+  "type": "object",
+  "required": [
+    "module",
+    "versionLine",
+    "apis"
+  ],
+  "properties": {
+    "module": {
+      "type": "string"
+    },
+    "versionLine": {
+      "type": "string"
+    },
+    "apis": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "entryPoint",
+          "returnType",
+          "ownership",
+          "manualOverride",
+          "parameters"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "entryPoint": {
+            "type": "string"
+          },
+          "returnType": {
+            "type": "string"
+          },
+          "ownership": {
+            "type": "string"
+          },
+          "manualOverride": {
+            "type": "boolean"
+          },
+          "versionGuard": {
+            "type": "string"
+          },
+          "wrapperKind": {
+            "type": "string"
+          },
+          "bindingRole": {
+            "type": "string"
+          },
+          "parameters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "type",
+                "direction"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "direction": {
+                  "type": "string"
+                },
+                "ownership": {
+                  "type": "string"
+                },
+                "managedType": {
+                  "type": "string"
+                },
+                "moduleManagedType": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

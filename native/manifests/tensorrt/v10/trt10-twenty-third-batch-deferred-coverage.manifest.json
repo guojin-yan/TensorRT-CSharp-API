@@ -1,0 +1,637 @@
+{
+  "$schema": "../bridge-api.schema.json",
+  "module": "tensorrt",
+  "versionLine": "10",
+  "apis": [
+    {
+      "id": "trt10-cuda-engine-get-error-recorder-deferred",
+      "entryPoint": "jyppx_trt10_cuda_engine_get_error_recorder_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-cuda-engine-get-minimum-weight-streaming-budget-deferred",
+      "entryPoint": "jyppx_trt10_cuda_engine_get_minimum_weight_streaming_budget_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-cuda-engine-get-profile-tensor-values-deferred",
+      "entryPoint": "jyppx_trt10_cuda_engine_get_profile_tensor_values_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-cuda-engine-get-profile-tensor-values-v2-deferred",
+      "entryPoint": "jyppx_trt10_cuda_engine_get_profile_tensor_values_v2_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-cuda-engine-has-implicit-batch-dimension-deferred",
+      "entryPoint": "jyppx_trt10_cuda_engine_has_implicit_batch_dimension_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-cuda-engine-set-error-recorder-deferred",
+      "entryPoint": "jyppx_trt10_cuda_engine_set_error_recorder_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-engine-inspector-get-error-recorder-deferred",
+      "entryPoint": "jyppx_trt10_engine_inspector_get_error_recorder_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-engine-inspector-set-error-recorder-deferred",
+      "entryPoint": "jyppx_trt10_engine_inspector_set_error_recorder_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-execution-context-execute-v2-deferred",
+      "entryPoint": "jyppx_trt10_execution_context_execute_v2_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-execution-context-get-debug-listener-deferred",
+      "entryPoint": "jyppx_trt10_execution_context_get_debug_listener_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-execution-context-get-error-recorder-deferred",
+      "entryPoint": "jyppx_trt10_execution_context_get_error_recorder_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-execution-context-get-nvtx-verbosity-deferred",
+      "entryPoint": "jyppx_trt10_execution_context_get_nvtx_verbosity_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-execution-context-get-output-allocator-deferred",
+      "entryPoint": "jyppx_trt10_execution_context_get_output_allocator_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-execution-context-get-temporary-storage-allocator-deferred",
+      "entryPoint": "jyppx_trt10_execution_context_get_temporary_storage_allocator_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-execution-context-no-copy-deferred",
+      "entryPoint": "jyppx_trt10_execution_context_no_copy_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-execution-context-set-aux-streams-deferred",
+      "entryPoint": "jyppx_trt10_execution_context_set_aux_streams_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-execution-context-set-debug-listener-deferred",
+      "entryPoint": "jyppx_trt10_execution_context_set_debug_listener_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-execution-context-set-device-memory-v2-deferred",
+      "entryPoint": "jyppx_trt10_execution_context_set_device_memory_v2_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-execution-context-set-error-recorder-deferred",
+      "entryPoint": "jyppx_trt10_execution_context_set_error_recorder_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-execution-context-set-nvtx-verbosity-deferred",
+      "entryPoint": "jyppx_trt10_execution_context_set_nvtx_verbosity_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-execution-context-set-output-allocator-deferred",
+      "entryPoint": "jyppx_trt10_execution_context_set_output_allocator_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-execution-context-set-temporary-storage-allocator-deferred",
+      "entryPoint": "jyppx_trt10_execution_context_set_temporary_storage_allocator_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-build-engine-with-config-deferred",
+      "entryPoint": "jyppx_trt10_builder_build_engine_with_config_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-config-can-run-on-dla-deferred",
+      "entryPoint": "jyppx_trt10_builder_config_can_run_on_dla_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-config-clear-quantization-flag-deferred",
+      "entryPoint": "jyppx_trt10_builder_config_clear_quantization_flag_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-config-get-algorithm-selector-deferred",
+      "entryPoint": "jyppx_trt10_builder_config_get_algorithm_selector_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-config-get-avg-timing-iterations-deferred",
+      "entryPoint": "jyppx_trt10_builder_config_get_avg_timing_iterations_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-config-get-builder-optimization-level-deferred",
+      "entryPoint": "jyppx_trt10_builder_config_get_builder_optimization_level_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-config-get-default-device-type-deferred",
+      "entryPoint": "jyppx_trt10_builder_config_get_default_device_type_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-config-get-dla-core-deferred",
+      "entryPoint": "jyppx_trt10_builder_config_get_dla_core_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-config-get-int8-calibrator-deferred",
+      "entryPoint": "jyppx_trt10_builder_config_get_int8_calibrator_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-config-get-l2-limit-for-tiling-deferred",
+      "entryPoint": "jyppx_trt10_builder_config_get_l2_limit_for_tiling_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-config-get-max-nb-tactics-deferred",
+      "entryPoint": "jyppx_trt10_builder_config_get_max_nb_tactics_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-config-get-nb-plugins-to-serialize-deferred",
+      "entryPoint": "jyppx_trt10_builder_config_get_nb_plugins_to_serialize_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-config-get-plugin-to-serialize-deferred",
+      "entryPoint": "jyppx_trt10_builder_config_get_plugin_to_serialize_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-config-get-progress-monitor-deferred",
+      "entryPoint": "jyppx_trt10_builder_config_get_progress_monitor_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-config-get-quantization-flag-deferred",
+      "entryPoint": "jyppx_trt10_builder_config_get_quantization_flag_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-config-get-quantization-flags-deferred",
+      "entryPoint": "jyppx_trt10_builder_config_get_quantization_flags_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-config-get-tiling-optimization-level-deferred",
+      "entryPoint": "jyppx_trt10_builder_config_get_tiling_optimization_level_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-config-set-algorithm-selector-deferred",
+      "entryPoint": "jyppx_trt10_builder_config_set_algorithm_selector_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-config-set-avg-timing-iterations-deferred",
+      "entryPoint": "jyppx_trt10_builder_config_set_avg_timing_iterations_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-config-set-builder-optimization-level-deferred",
+      "entryPoint": "jyppx_trt10_builder_config_set_builder_optimization_level_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-config-set-default-device-type-deferred",
+      "entryPoint": "jyppx_trt10_builder_config_set_default_device_type_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-config-set-dla-core-deferred",
+      "entryPoint": "jyppx_trt10_builder_config_set_dla_core_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-config-set-int8-calibrator-deferred",
+      "entryPoint": "jyppx_trt10_builder_config_set_int8_calibrator_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-config-set-l2-limit-for-tiling-deferred",
+      "entryPoint": "jyppx_trt10_builder_config_set_l2_limit_for_tiling_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-config-set-max-nb-tactics-deferred",
+      "entryPoint": "jyppx_trt10_builder_config_set_max_nb_tactics_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-config-set-plugins-to-serialize-deferred",
+      "entryPoint": "jyppx_trt10_builder_config_set_plugins_to_serialize_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-config-set-progress-monitor-deferred",
+      "entryPoint": "jyppx_trt10_builder_config_set_progress_monitor_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-config-set-quantization-flag-deferred",
+      "entryPoint": "jyppx_trt10_builder_config_set_quantization_flag_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-config-set-quantization-flags-deferred",
+      "entryPoint": "jyppx_trt10_builder_config_set_quantization_flags_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-config-set-tiling-optimization-level-deferred",
+      "entryPoint": "jyppx_trt10_builder_config_set_tiling_optimization_level_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-get-error-recorder-deferred",
+      "entryPoint": "jyppx_trt10_builder_get_error_recorder_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-get-logger-deferred",
+      "entryPoint": "jyppx_trt10_builder_get_logger_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-get-max-dla-batch-size-deferred",
+      "entryPoint": "jyppx_trt10_builder_get_max_dla_batch_size_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-get-max-threads-deferred",
+      "entryPoint": "jyppx_trt10_builder_get_max_threads_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-get-plugin-registry-deferred",
+      "entryPoint": "jyppx_trt10_builder_get_plugin_registry_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-is-network-supported-deferred",
+      "entryPoint": "jyppx_trt10_builder_is_network_supported_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-set-error-recorder-deferred",
+      "entryPoint": "jyppx_trt10_builder_set_error_recorder_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-set-gpu-allocator-deferred",
+      "entryPoint": "jyppx_trt10_builder_set_gpu_allocator_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-builder-set-max-threads-deferred",
+      "entryPoint": "jyppx_trt10_builder_set_max_threads_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-expr-builder-constant-deferred",
+      "entryPoint": "jyppx_trt10_expr_builder_constant_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-expr-builder-declare-size-tensor-deferred",
+      "entryPoint": "jyppx_trt10_expr_builder_declare_size_tensor_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-expr-builder-operation-deferred",
+      "entryPoint": "jyppx_trt10_expr_builder_operation_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-onnx-config-add-verbosity-deferred",
+      "entryPoint": "jyppx_trt10_onnx_config_add_verbosity_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-onnx-config-get-full-text-file-name-deferred",
+      "entryPoint": "jyppx_trt10_onnx_config_get_full_text_file_name_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-onnx-config-get-model-dtype-deferred",
+      "entryPoint": "jyppx_trt10_onnx_config_get_model_dtype_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-onnx-config-get-model-file-name-deferred",
+      "entryPoint": "jyppx_trt10_onnx_config_get_model_file_name_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-onnx-config-get-print-layer-info-deferred",
+      "entryPoint": "jyppx_trt10_onnx_config_get_print_layer_info_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    },
+    {
+      "id": "trt10-onnx-config-get-text-file-name-deferred",
+      "entryPoint": "jyppx_trt10_onnx_config_get_text_file_name_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": []
+    }
+  ]
+}

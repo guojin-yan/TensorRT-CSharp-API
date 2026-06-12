@@ -1,0 +1,22 @@
+{
+  "$schema": "../../bridge-api.schema.json",
+  "module": "tensorrt",
+  "versionLine": "8",
+  "apis": [
+    { "id": "trt8-onnx-config-destroy-deferred", "entryPoint": "jyppx_trt8_onnx_config_destroy_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8", "parameters": [] },
+    { "id": "trt8-onnx-config-get-full-text-file-name-deferred", "entryPoint": "jyppx_trt8_onnx_config_get_full_text_file_name_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8", "parameters": [] },
+    { "id": "trt8-onnx-config-get-model-dtype-deferred", "entryPoint": "jyppx_trt8_onnx_config_get_model_dtype_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8", "parameters": [] },
+    { "id": "trt8-onnx-config-get-model-file-name-deferred", "entryPoint": "jyppx_trt8_onnx_config_get_model_file_name_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8", "parameters": [] },
+    { "id": "trt8-onnx-config-get-print-layer-info-deferred", "entryPoint": "jyppx_trt8_onnx_config_get_print_layer_info_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8", "parameters": [] },
+    { "id": "trt8-onnx-config-get-text-file-name-deferred", "entryPoint": "jyppx_trt8_onnx_config_get_text_file_name_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8", "parameters": [] },
+    { "id": "trt8-onnx-config-get-verbosity-level-deferred", "entryPoint": "jyppx_trt8_onnx_config_get_verbosity_level_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8", "parameters": [] },
+    { "id": "trt8-onnx-config-reduce-verbosity-deferred", "entryPoint": "jyppx_trt8_onnx_config_reduce_verbosity_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8", "parameters": [] },
+    { "id": "trt8-onnx-config-set-full-text-file-name-deferred", "entryPoint": "jyppx_trt8_onnx_config_set_full_text_file_name_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8", "parameters": [] },
+    { "id": "trt8-onnx-config-set-model-dtype-deferred", "entryPoint": "jyppx_trt8_onnx_config_set_model_dtype_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8", "parameters": [] },
+    { "id": "trt8-onnx-config-set-model-file-name-deferred", "entryPoint": "jyppx_trt8_onnx_config_set_model_file_name_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8", "parameters": [] },
+    { "id": "trt8-onnx-config-set-print-layer-info-deferred", "entryPoint": "jyppx_trt8_onnx_config_set_print_layer_info_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8", "parameters": [] },
+    { "id": "trt8-onnx-config-set-text-file-name-deferred", "entryPoint": "jyppx_trt8_onnx_config_set_text_file_name_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8", "parameters": [] },
+    { "id": "trt8-onnx-config-set-verbosity-level-deferred", "entryPoint": "jyppx_trt8_onnx_config_set_verbosity_level_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8", "parameters": [] },
+    { "id": "trt8-parser-parse-with-weight-descriptors-deferred", "entryPoint": "jyppx_trt8_parser_parse_with_weight_descriptors_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8", "parameters": [] }
+  ]
+}

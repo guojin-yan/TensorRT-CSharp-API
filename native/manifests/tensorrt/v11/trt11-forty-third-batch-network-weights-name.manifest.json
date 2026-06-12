@@ -1,0 +1,21 @@
+{
+  "module": "tensorrt",
+  "versionLine": "11",
+  "apis": [
+    {
+      "id": "trt11-network-set-weights-name",
+      "entryPoint": "jyppx_trt11_network_set_weights_name",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": true,
+      "manualReason": "Layer-bound TensorRT weights lookup and UTF-8 string marshaling",
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "network", "type": "JYPPX_TensorRtNetworkDefinition*", "direction": "in" },
+        { "name": "constant_layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "weights_name", "type": "const char*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "out_set", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    }
+  ]
+}

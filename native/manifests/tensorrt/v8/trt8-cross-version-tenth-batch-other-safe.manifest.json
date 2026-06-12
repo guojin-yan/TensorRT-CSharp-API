@@ -1,0 +1,45 @@
+{
+  "$schema": "../../bridge-api.schema.json",
+  "module": "tensorrt",
+  "versionLine": "8",
+  "apis": [
+    {
+      "id": "trt8-timing-cache-combine",
+      "entryPoint": "jyppx_trt8_timing_cache_combine",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "cache", "type": "JYPPX_TensorRtTimingCache*", "direction": "in" },
+        { "name": "input_cache", "type": "JYPPX_TensorRtTimingCache*", "direction": "in" },
+        { "name": "ignore_mismatch", "type": "JYPPX_Boolean", "direction": "in", "managedType": "int", "moduleManagedType": "int" },
+        { "name": "out_combined", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt8-timing-cache-reset",
+      "entryPoint": "jyppx_trt8_timing_cache_reset",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "cache", "type": "JYPPX_TensorRtTimingCache*", "direction": "in" },
+        { "name": "out_reset", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt8-host-memory-get-type",
+      "entryPoint": "jyppx_trt8_host_memory_get_type",
+      "returnType": "BridgeStatusCode",
+      "ownership": "host-memory-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "host_memory", "type": "JYPPX_TensorRtHostMemory*", "direction": "in" },
+        { "name": "out_data_type", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    }
+  ]
+}

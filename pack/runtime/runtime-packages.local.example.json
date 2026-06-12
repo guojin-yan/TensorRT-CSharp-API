@@ -1,0 +1,40 @@
+{
+  "packages": [
+    {
+      "key": "win-x64-trt8.6-cuda11.8-cudnn8.9",
+      "defaultTensorRtRoot": "E:\\TensorRtSharp\\TensorRtSharp4.0\\third_party\\nvidia\\TensorRT-8.6.1.6-cuda 11.8",
+      "defaultCudaRoot": "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v11.8",
+      "defaultCudnnRoot": "E:\\TensorRtSharp\\TensorRtSharp4.0\\third_party\\nvidia\\cudnn-windows-x86_64-8.9.7.29_cuda11-archive"
+    },
+    {
+      "key": "win-x64-trt8.6-cuda12.1-cudnn8.9",
+      "defaultTensorRtRoot": "E:\\TensorRtSharp\\TensorRtSharp4.0\\third_party\\nvidia\\TensorRT-8.6.1.6-cuda 12.1",
+      "defaultCudaRoot": "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.1",
+      "defaultCudnnRoot": "E:\\TensorRtSharp\\TensorRtSharp4.0\\third_party\\nvidia\\cudnn-windows-x86_64-8.9.7.29_cuda12-archive"
+    },
+    {
+      "key": "win-x64-trt10.11-cuda11.8-cudnn8.9",
+      "defaultTensorRtRoot": "E:\\TensorRtSharp\\TensorRtSharp4.0\\third_party\\nvidia\\TensorRT-10.11.0.33-cuda 11.8",
+      "defaultCudaRoot": "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v11.8",
+      "defaultCudnnRoot": "E:\\TensorRtSharp\\TensorRtSharp4.0\\third_party\\nvidia\\cudnn-windows-x86_64-8.9.7.29_cuda11-archive"
+    },
+    {
+      "key": "win-x64-trt10.11-cuda12.9-cudnn9.22",
+      "defaultTensorRtRoot": "E:\\TensorRtSharp\\TensorRtSharp4.0\\third_party\\nvidia\\TensorRT-10.11.0.33-cuda 12.9",
+      "defaultCudaRoot": "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.9",
+      "defaultCudnnRoot": "E:\\TensorRtSharp\\TensorRtSharp4.0\\third_party\\nvidia\\cudnn_windows_x86_64_9.22.0_cuda12\\v9.22"
+    },
+    {
+      "key": "win-x64-trt11.0-cuda12.9-cudnn9.22",
+      "defaultTensorRtRoot": "E:\\TensorRtSharp\\TensorRtSharp4.0\\third_party\\nvidia\\TensorRT-11.0.0.114-cuda 12.9",
+      "defaultCudaRoot": "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.9",
+      "defaultCudnnRoot": "E:\\TensorRtSharp\\TensorRtSharp4.0\\third_party\\nvidia\\cudnn_windows_x86_64_9.22.0_cuda12\\v9.22"
+    },
+    {
+      "key": "win-x64-trt11.0-cuda13.2-cudnn9.22",
+      "defaultTensorRtRoot": "E:\\TensorRtSharp\\TensorRtSharp4.0\\third_party\\nvidia\\TensorRT-11.0.0.114-cuda 13.2",
+      "defaultCudaRoot": "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v13.2",
+      "defaultCudnnRoot": "E:\\TensorRtSharp\\TensorRtSharp4.0\\third_party\\nvidia\\cudnn_windows_x86_64_9.22.0_cuda13"
+    }
+  ]
+}

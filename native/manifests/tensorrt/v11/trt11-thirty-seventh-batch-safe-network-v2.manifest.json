@@ -1,0 +1,96 @@
+{
+  "$schema": "../../bridge-api.schema.json",
+  "module": "tensorrt",
+  "versionLine": "11",
+  "apis": [
+    {
+      "id": "trt11-network-add-gather-v2",
+      "entryPoint": "jyppx_trt11_network_add_gather_v2",
+      "returnType": "BridgeStatusCode",
+      "ownership": "network-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "network", "type": "JYPPX_TensorRtNetworkDefinition*", "direction": "in" },
+        { "name": "data_tensor", "type": "JYPPX_TensorRtTensor*", "direction": "in" },
+        { "name": "indices_tensor", "type": "JYPPX_TensorRtTensor*", "direction": "in" },
+        { "name": "mode", "type": "int32_t", "direction": "in" },
+        { "name": "out_layer", "type": "JYPPX_TensorRtLayer**", "direction": "out", "ownership": "network-owned" }
+      ]
+    },
+    {
+      "id": "trt11-network-add-fill-v2",
+      "entryPoint": "jyppx_trt11_network_add_fill_v2",
+      "returnType": "BridgeStatusCode",
+      "ownership": "network-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "network", "type": "JYPPX_TensorRtNetworkDefinition*", "direction": "in" },
+        { "name": "dimensions", "type": "const JYPPX_TensorRtDims*", "direction": "in" },
+        { "name": "operation", "type": "int32_t", "direction": "in" },
+        { "name": "output_type", "type": "int32_t", "direction": "in" },
+        { "name": "out_layer", "type": "JYPPX_TensorRtLayer**", "direction": "out", "ownership": "network-owned" }
+      ]
+    },
+    {
+      "id": "trt11-network-add-parametric-relu",
+      "entryPoint": "jyppx_trt11_network_add_parametric_relu",
+      "returnType": "BridgeStatusCode",
+      "ownership": "network-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "network", "type": "JYPPX_TensorRtNetworkDefinition*", "direction": "in" },
+        { "name": "input_tensor", "type": "JYPPX_TensorRtTensor*", "direction": "in" },
+        { "name": "slope_tensor", "type": "JYPPX_TensorRtTensor*", "direction": "in" },
+        { "name": "out_layer", "type": "JYPPX_TensorRtLayer**", "direction": "out", "ownership": "network-owned" }
+      ]
+    },
+    {
+      "id": "trt11-network-add-dequantize-v2",
+      "entryPoint": "jyppx_trt11_network_add_dequantize_v2",
+      "returnType": "BridgeStatusCode",
+      "ownership": "network-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "network", "type": "JYPPX_TensorRtNetworkDefinition*", "direction": "in" },
+        { "name": "input_tensor", "type": "JYPPX_TensorRtTensor*", "direction": "in" },
+        { "name": "scale_tensor", "type": "JYPPX_TensorRtTensor*", "direction": "in" },
+        { "name": "output_type", "type": "int32_t", "direction": "in" },
+        { "name": "out_layer", "type": "JYPPX_TensorRtLayer**", "direction": "out", "ownership": "network-owned" }
+      ]
+    },
+    {
+      "id": "trt11-network-add-dist-collective",
+      "entryPoint": "jyppx_trt11_network_add_dist_collective",
+      "returnType": "BridgeStatusCode",
+      "ownership": "network-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "network", "type": "JYPPX_TensorRtNetworkDefinition*", "direction": "in" },
+        { "name": "input_tensor", "type": "JYPPX_TensorRtTensor*", "direction": "in" },
+        { "name": "collective_operation", "type": "int32_t", "direction": "in" },
+        { "name": "reduce_operation", "type": "int32_t", "direction": "in" },
+        { "name": "root", "type": "int64_t", "direction": "in", "managedType": "long", "moduleManagedType": "long" },
+        { "name": "groups", "type": "const int64_t*", "direction": "in", "managedType": "long[]", "moduleManagedType": "long[]" },
+        { "name": "group_count", "type": "int32_t", "direction": "in" },
+        { "name": "out_layer", "type": "JYPPX_TensorRtLayer**", "direction": "out", "ownership": "network-owned" }
+      ]
+    },
+    {
+      "id": "trt11-attention-boundary-layer-get-attention",
+      "entryPoint": "jyppx_trt11_attention_boundary_layer_get_attention",
+      "returnType": "BridgeStatusCode",
+      "ownership": "network-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "out_attention", "type": "JYPPX_TensorRtAttention**", "direction": "out", "ownership": "network-owned" }
+      ]
+    }
+  ]
+}

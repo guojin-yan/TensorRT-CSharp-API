@@ -1,0 +1,325 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using JYPPX.Shared.Interop;
+using JYPPX.TensorRtSharp.Internal;
+using JYPPX.TensorRtSharp.Internal.Handles;
+using JYPPX.TensorRtSharp.Internal.Interop;
+
+namespace JYPPX.TensorRtSharp;
+
+/// <summary>
+/// Parses ONNX models into a TensorRT network definition.
+/// 将 ONNX 模型解析到 TensorRT network definition。
+/// </summary>
+public sealed partial class TensorRtOnnxParser : IDisposable
+{
+    private readonly SafeTensorRtObjectHandle _handle;
+
+    /// <summary>
+    /// Creates an ONNX parser for the specified TensorRT logger and network.
+    /// 使用指定的 TensorRT logger 和 network 创建 ONNX parser。
+    /// </summary>
+    /// <param name="logger">The TensorRT logger used by the parser. Parser 使用的 TensorRT logger。</param>
+    /// <param name="network">The target TensorRT network definition. 目标 TensorRT network definition。</param>
+    public TensorRtOnnxParser(TensorRtLogger logger, TensorRtNetworkDefinition network)
+    {
+        if (logger == null)
+        {
+            throw new ArgumentNullException(nameof(logger));
+        }
+
+        if (network == null)
+        {
+            throw new ArgumentNullException(nameof(network));
+        }
+
+        if (logger.Line != network.Line)
+        {
+            throw new ArgumentException("Logger and network must belong to the same TensorRT API line.");
+        }
+
+        Line = logger.Line;
+        _handle = NativeBridgeApi.CreateOnnxParser(Line, logger.Handle, network.Handle);
+    }
+
+    internal TensorRtOnnxParser(TensorRtApiLine line, SafeTensorRtObjectHandle handle)
+    {
+        Line = line;
+        _handle = handle;
+    }
+
+    internal SafeTensorRtObjectHandle Handle => _handle;
+
+    /// <summary>
+    /// Gets the TensorRT API line used by this parser.
+    /// 获取当前 parser 使用的 TensorRT API 版本线。
+    /// </summary>
+    public TensorRtApiLine Line { get; }
+
+    /// <summary>
+    /// Gets the number of parser errors currently reported by TensorRT.
+    /// 获取 TensorRT 当前报告的 parser 错误数量。
+    /// </summary>
+    public int ErrorCount => NativeBridgeApi.GetOnnxParserErrorCount(Line, _handle);
+
+    /// <summary>
+    /// Gets or sets the ONNX parser flag bitmask.
+    /// 获取或设置 ONNX parser 标志位掩码。
+    /// </summary>
+    public TensorRtOnnxParserFlags Flags
+    {
+        get => (TensorRtOnnxParserFlags)NativeBridgeApi.GetOnnxParserFlags(Line, _handle);
+        set
+        {
+            ValidateParserFlags(value);
+            NativeBridgeApi.SetOnnxParserFlags(Line, _handle, (uint)value);
+        }
+    }
+
+    /// <summary>
+    /// Parses an ONNX model from a file path into the target network.
+    /// 从文件路径解析 ONNX 模型到目标 network。
+    /// </summary>
+    /// <param name="filePath">The ONNX model path. ONNX 模型路径。</param>
+    /// <param name="verbosity">TensorRT parser verbosity level. TensorRT parser 日志详细级别。</param>
+    /// <returns><c>true</c> when parsing succeeds. 解析成功时返回 <c>true</c>。</returns>
+    public bool ParseFromFile(string filePath, int verbosity = 1)
+    {
+        if (!File.Exists(filePath))
+        {
+            throw new FileNotFoundException("ONNX model file was not found.", filePath);
+        }
+
+        return NativeBridgeApi.ParseOnnxFromFile(Line, _handle, filePath, verbosity);
+    }
+
+    /// <summary>
+    /// Parses ONNX model bytes into the target network.
+    /// 将 ONNX 模型字节解析到目标 network。
+    /// </summary>
+    /// <param name="modelData">Serialized ONNX model bytes. 已序列化的 ONNX 模型字节。</param>
+    /// <param name="modelPath">Optional model path used by TensorRT diagnostics. TensorRT 诊断信息使用的可选模型路径。</param>
+    /// <returns><c>true</c> when parsing succeeds. 解析成功时返回 <c>true</c>。</returns>
+    public bool Parse(byte[] modelData, string? modelPath = null)
+    {
+        return NativeBridgeApi.ParseOnnxFromMemory(Line, _handle, modelData, modelPath);
+    }
+
+    /// <summary>
+    /// Gets one parser error by index.
+    /// 按索引获取一个 parser 错误。
+    /// </summary>
+    /// <param name="index">Zero-based parser error index. 从零开始的 parser 错误索引。</param>
+    /// <returns>The parser error information. Parser 错误信息。</returns>
+    public TensorRtParserErrorInfo GetError(int index)
+    {
+        return NativeBridgeApi.GetOnnxParserError(Line, _handle, index);
+    }
+
+    /// <summary>
+    /// Gets one detailed parser diagnostic by index.
+    /// 按索引获取一条详细解析器诊断信息。
+    /// </summary>
+    /// <param name="index">Zero-based parser error index. 从零开始的解析器错误索引。</param>
+    /// <returns>The detailed parser diagnostic. 详细解析器诊断信息。</returns>
+    /// <remarks>
+    /// This path reads variable-length strings from the native bridge and avoids truncating long parser messages.
+    /// 该路径从原生桥接读取可变长度字符串，可避免长解析错误消息被固定结构体截断。
+    /// </remarks>
+    public TensorRtOnnxParserDiagnostic GetDiagnostic(int index)
+    {
+        return NativeBridgeApi.GetOnnxParserDiagnostic(Line, _handle, index);
+    }
+
+    /// <summary>
+    /// Clears parser errors stored by TensorRT.
+    /// 清理 TensorRT 保存的 parser 错误。
+    /// </summary>
+    public void ClearErrors()
+    {
+        NativeBridgeApi.ClearOnnxParserErrors(Line, _handle);
+    }
+
+    /// <summary>
+    /// Returns whether the selected TensorRT parser reports support for an ONNX operator.
+    /// 返回当前 TensorRT parser 是否报告支持指定 ONNX operator。
+    /// </summary>
+    /// <param name="operatorName">The ONNX operator name, for example <c>Identity</c>. ONNX operator 名称，例如 <c>Identity</c>。</param>
+    /// <returns><c>true</c> when TensorRT reports support for the operator. TensorRT 报告支持该 operator 时返回 <c>true</c>。</returns>
+    public bool SupportsOperator(string operatorName)
+    {
+        return NativeBridgeApi.OnnxParserSupportsOperator(Line, _handle, operatorName);
+    }
+
+    /// <summary>
+    /// Gets a single ONNX parser flag.
+    /// 获取单个 ONNX parser 标志。
+    /// </summary>
+    /// <param name="flag">The parser flag to query. 要查询的 parser 标志。</param>
+    /// <returns><c>true</c> when the flag is enabled. 标志启用时返回 <c>true</c>。</returns>
+    public bool GetFlag(TensorRtOnnxParserFlag flag)
+    {
+        ValidateParserFlag(flag);
+        return NativeBridgeApi.GetOnnxParserFlag(Line, _handle, flag);
+    }
+
+    /// <summary>
+    /// Enables a single ONNX parser flag.
+    /// 启用单个 ONNX parser 标志。
+    /// </summary>
+    /// <param name="flag">The parser flag to enable. 要启用的 parser 标志。</param>
+    public void SetFlag(TensorRtOnnxParserFlag flag)
+    {
+        ValidateParserFlag(flag);
+        NativeBridgeApi.SetOnnxParserFlag(Line, _handle, flag);
+    }
+
+    /// <summary>
+    /// Clears a single ONNX parser flag.
+    /// 清除单个 ONNX parser 标志。
+    /// </summary>
+    /// <param name="flag">The parser flag to clear. 要清除的 parser 标志。</param>
+    public void ClearFlag(TensorRtOnnxParserFlag flag)
+    {
+        ValidateParserFlag(flag);
+        NativeBridgeApi.ClearOnnxParserFlag(Line, _handle, flag);
+    }
+
+    /// <summary>
+    /// Gets all parser errors currently reported by TensorRT.
+    /// 获取 TensorRT 当前报告的全部 parser 错误。
+    /// </summary>
+    /// <returns>The parser error list. Parser 错误列表。</returns>
+    public IReadOnlyList<TensorRtParserErrorInfo> GetErrors()
+    {
+        int count = ErrorCount;
+        List<TensorRtParserErrorInfo> errors = new List<TensorRtParserErrorInfo>(count);
+        for (int index = 0; index < count; index++)
+        {
+            errors.Add(GetError(index));
+        }
+
+        return errors;
+    }
+
+    /// <summary>
+    /// Gets all detailed parser diagnostics currently reported by TensorRT.
+    /// 获取 TensorRT 当前报告的全部详细解析器诊断信息。
+    /// </summary>
+    /// <returns>The detailed parser diagnostics. 详细解析器诊断信息列表。</returns>
+    public IReadOnlyList<TensorRtOnnxParserDiagnostic> GetDiagnostics()
+    {
+        int count = ErrorCount;
+        List<TensorRtOnnxParserDiagnostic> diagnostics = new List<TensorRtOnnxParserDiagnostic>(count);
+        for (int index = 0; index < count; index++)
+        {
+            diagnostics.Add(GetDiagnostic(index));
+        }
+
+        return diagnostics;
+    }
+
+    /// <summary>
+    /// Builds a readable parser error summary for logs and diagnostics.
+    /// 为日志和诊断生成可读的 parser 错误摘要。
+    /// </summary>
+    /// <returns>A parser error summary string. Parser 错误摘要字符串。</returns>
+    public string GetErrorSummary()
+    {
+        return GetDiagnosticSummary();
+    }
+
+    /// <summary>
+    /// Builds a readable parser diagnostic summary for logs and deployment troubleshooting.
+    /// 为日志和部署排障生成可读的解析器诊断摘要。
+    /// </summary>
+    /// <returns>A parser diagnostic summary string. 解析器诊断摘要字符串。</returns>
+    public string GetDiagnosticSummary()
+    {
+        IReadOnlyList<TensorRtOnnxParserDiagnostic> diagnostics = GetDiagnostics();
+        if (diagnostics.Count == 0)
+        {
+            return "ONNX parser reported no errors.";
+        }
+
+        StringBuilder builder = new StringBuilder();
+        builder.Append("ONNX parser errors: ");
+        builder.Append(diagnostics.Count);
+
+        for (int index = 0; index < diagnostics.Count; index++)
+        {
+            TensorRtOnnxParserDiagnostic error = diagnostics[index];
+            builder.AppendLine();
+            builder.Append('#');
+            builder.Append(error.Index);
+            builder.Append(" code=");
+            builder.Append(error.Code);
+            if (error.Line >= 0)
+            {
+                builder.Append(" line=");
+                builder.Append(error.Line);
+            }
+
+            if (!string.IsNullOrWhiteSpace(error.File))
+            {
+                builder.Append(" file=");
+                builder.Append(error.File);
+            }
+
+            if (!string.IsNullOrWhiteSpace(error.NodeName))
+            {
+                builder.Append(" node=");
+                builder.Append(error.NodeName);
+            }
+
+            if (!string.IsNullOrWhiteSpace(error.NodeOperator))
+            {
+                builder.Append(" op=");
+                builder.Append(error.NodeOperator);
+            }
+
+            if (error.LocalFunctionStack.Count > 0)
+            {
+                builder.Append(" stack=");
+                builder.Append(string.Join(">", error.LocalFunctionStack));
+            }
+
+            if (!string.IsNullOrWhiteSpace(error.Description))
+            {
+                builder.Append(": ");
+                builder.Append(error.Description);
+            }
+        }
+
+        return builder.ToString();
+    }
+
+    /// <summary>
+    /// Releases the native ONNX parser handle.
+    /// 释放原生 ONNX parser 句柄。
+    /// </summary>
+    public void Dispose()
+    {
+        _handle.Dispose();
+        GC.SuppressFinalize(this);
+    }
+
+    private void ValidateParserFlags(TensorRtOnnxParserFlags flags)
+    {
+        if (Line == TensorRtApiLine.TensorRt8 &&
+            (flags & TensorRtOnnxParserFlags.EnableUInt8AndAsymmetricQuantizationDla) != 0)
+        {
+            throw new NotSupportedException("TensorRT 8 ONNX parser does not expose EnableUInt8AndAsymmetricQuantizationDla.");
+        }
+    }
+
+    private void ValidateParserFlag(TensorRtOnnxParserFlag flag)
+    {
+        if (Line == TensorRtApiLine.TensorRt8 && flag == TensorRtOnnxParserFlag.EnableUInt8AndAsymmetricQuantizationDla)
+        {
+            throw new NotSupportedException("TensorRT 8 ONNX parser does not expose EnableUInt8AndAsymmetricQuantizationDla.");
+        }
+    }
+}

@@ -1,0 +1,21 @@
+<Project>
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <IsPackable>true</IsPackable>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
+    <RepositoryUrl>$(RepositoryUrl)</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <Description>Prototype split-delivery runtime package for a specific TensorRT and CUDA combination.</Description>
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <JYPPXRuntimeAssetsDir Condition="'$(JYPPXRuntimeAssetsDir)' == ''">$(MSBuildProjectDirectory)\assets</JYPPXRuntimeAssetsDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md" Link="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+</Project>
+

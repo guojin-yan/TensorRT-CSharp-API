@@ -1,0 +1,48 @@
+name: manual-pack-managed
+
+on:
+  workflow_dispatch:
+    inputs:
+      configuration:
+        description: Build configuration
+        required: true
+        default: Release
+
+jobs:
+  pack-managed:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Restore
+      run: dotnet restore TensorRtSharp.sln
+
+    - name: Validate runtime manifest
+      run: powershell -ExecutionPolicy Bypass -File .\eng\Validate-RuntimeManifest.ps1
+
+    - name: Validate binding generator outputs
+      run: powershell -ExecutionPolicy Bypass -File .\eng\Test-BindingGeneratorOutputs.ps1
+
+    - name: Build
+      run: dotnet build TensorRtSharp.sln -c "${{ github.event.inputs.configuration }}" --no-restore
+
+    - name: Test project quality
+      run: dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c "${{ github.event.inputs.configuration }}" --no-build
+
+    - name: Pack managed package
+      run: dotnet pack .\pack\JYPPX.TensorRT.CSharp.API\JYPPX.TensorRT.CSharp.API.csproj -c "${{ github.event.inputs.configuration }}" -o .\artifacts\managed
+
+    - name: Test managed package content
+      run: powershell -ExecutionPolicy Bypass -File .\eng\Test-ManagedPackageContent.ps1
+
+    - name: Upload managed artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: managed-packages
+        path: artifacts/managed/**

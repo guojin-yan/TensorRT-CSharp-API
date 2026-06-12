@@ -1,0 +1,79 @@
+{
+  "$schema": "../../bridge-api.schema.json",
+  "module": "tensorrt",
+  "versionLine": "11",
+  "apis": [
+    {
+      "id": "trt11-network-has-implicit-batch-dimension",
+      "entryPoint": "jyppx_trt11_network_has_implicit_batch_dimension",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "network", "type": "JYPPX_TensorRtNetworkDefinition*", "direction": "in" },
+        { "name": "out_has_implicit_batch_dimension", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-shuffle-layer-set-first-transpose",
+      "entryPoint": "jyppx_trt11_shuffle_layer_set_first_transpose",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "permutation", "type": "const JYPPX_TensorRtDims*", "direction": "in", "managedType": "ref NativeTensorRtDims", "moduleManagedType": "ref NativeTensorRtDims" }
+      ]
+    },
+    {
+      "id": "trt11-shuffle-layer-get-first-transpose",
+      "entryPoint": "jyppx_trt11_shuffle_layer_get_first_transpose",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "out_permutation", "type": "JYPPX_TensorRtDims*", "direction": "out", "managedType": "out NativeTensorRtDims", "moduleManagedType": "out NativeTensorRtDims" }
+      ]
+    },
+    {
+      "id": "trt11-shuffle-layer-set-second-transpose",
+      "entryPoint": "jyppx_trt11_shuffle_layer_set_second_transpose",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "permutation", "type": "const JYPPX_TensorRtDims*", "direction": "in", "managedType": "ref NativeTensorRtDims", "moduleManagedType": "ref NativeTensorRtDims" }
+      ]
+    },
+    {
+      "id": "trt11-shuffle-layer-get-second-transpose",
+      "entryPoint": "jyppx_trt11_shuffle_layer_get_second_transpose",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "out_permutation", "type": "JYPPX_TensorRtDims*", "direction": "out", "managedType": "out NativeTensorRtDims", "moduleManagedType": "out NativeTensorRtDims" }
+      ]
+    },
+    {
+      "id": "trt11-tensor-get-dimensions",
+      "entryPoint": "jyppx_trt11_tensor_get_dimensions",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "tensor", "type": "JYPPX_TensorRtTensor*", "direction": "in" },
+        { "name": "out_dims", "type": "JYPPX_TensorRtDims*", "direction": "out", "managedType": "out NativeTensorRtDims", "moduleManagedType": "out NativeTensorRtDims" }
+      ]
+    }
+  ]
+}

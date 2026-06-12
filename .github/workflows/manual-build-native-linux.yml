@@ -1,0 +1,85 @@
+name: manual-build-native-linux
+
+on:
+  workflow_dispatch:
+    inputs:
+      runtime_key:
+        description: Runtime package key
+        required: true
+        default: linux-x64-trt8.6-cuda11.8-cudnn8.9
+      configure_preset:
+        description: CMake configure preset name
+        required: true
+        default: linux-x64-trt8-cuda11-release
+      build_preset:
+        description: CMake build preset name
+        required: true
+        default: linux-x64-trt8-cuda11-release
+      tensorrt_root:
+        description: TensorRT root on the Linux runner
+        required: true
+      cuda_root:
+        description: CUDA root on the Linux runner
+        required: true
+
+jobs:
+  build-native-linux:
+    runs-on:
+    - self-hosted
+    - linux
+    - x64
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Export explicit dependency roots
+      shell: bash
+      run: |
+        echo "JYPPX_TENSORRT_ROOT=${{ github.event.inputs.tensorrt_root }}" >> "$GITHUB_ENV"
+        echo "JYPPX_CUDA_ROOT=${{ github.event.inputs.cuda_root }}" >> "$GITHUB_ENV"
+
+    - name: Validate runtime manifest
+      run: pwsh -File ./eng/Validate-RuntimeManifest.ps1
+
+    - name: Validate Linux runtime inputs
+      run: pwsh -File ./eng/Validate-LinuxRuntimeInputs.ps1 -RuntimePackageKey "${{ github.event.inputs.runtime_key }}" -TensorRtRoot "${{ github.event.inputs.tensorrt_root }}" -CudaRoot "${{ github.event.inputs.cuda_root }}"
+
+    - name: Linux runtime dry run summary
+      run: pwsh -File ./eng/Invoke-LinuxRuntimeDryRun.ps1 -RuntimePackageKey "${{ github.event.inputs.runtime_key }}" -TensorRtRoot "${{ github.event.inputs.tensorrt_root }}" -CudaRoot "${{ github.event.inputs.cuda_root }}"
+
+    - name: Validate Linux dry run artifacts
+      run: pwsh -File ./eng/Validate-LinuxDryRunArtifacts.ps1 -RuntimePackageKey "${{ github.event.inputs.runtime_key }}"
+
+    - name: Validate Linux workflow contract
+      run: pwsh -File ./eng/Test-LinuxRuntimeWorkflowContract.ps1 -RuntimePackageKey "${{ github.event.inputs.runtime_key }}" -ConfigurePreset "${{ github.event.inputs.configure_preset }}" -BuildPreset "${{ github.event.inputs.build_preset }}"
+
+    - name: Export Linux preflight summary
+      run: pwsh -File ./eng/Export-LinuxPreflightSummary.ps1 -RuntimePackageKey "${{ github.event.inputs.runtime_key }}"
+
+    - name: Export Linux package consumer plan
+      run: pwsh -File ./eng/Export-LinuxPackageConsumerPlan.ps1 -RuntimePackageKey "${{ github.event.inputs.runtime_key }}"
+
+    - name: Export Linux runner execution status
+      run: pwsh -File ./eng/Export-LinuxRunnerExecutionStatus.ps1 -RuntimePackageKey "${{ github.event.inputs.runtime_key }}"
+
+    - name: Export Linux handoff index
+      run: pwsh -File ./eng/Export-LinuxHandoffIndex.ps1 -RuntimePackageKey "${{ github.event.inputs.runtime_key }}"
+
+    - name: Configure
+      run: cmake --preset "${{ github.event.inputs.configure_preset }}"
+
+    - name: Build
+      run: cmake --build --preset "${{ github.event.inputs.build_preset }}"
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: native-linux-${{ github.event.inputs.build_preset }}
+        path: |
+          build-out/**
+          artifacts/linux-dry-run/**

@@ -1,0 +1,153 @@
+{
+  "$schema": "../../bridge-api.schema.json",
+  "module": "tensorrt",
+  "versionLine": "8",
+  "apis": [
+    {
+      "id": "trt8-network-has-implicit-batch-dimension",
+      "entryPoint": "jyppx_trt8_network_has_implicit_batch_dimension",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "network", "type": "JYPPX_TensorRtNetworkDefinition*", "direction": "in" },
+        { "name": "out_has_implicit_batch_dimension", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt8-shuffle-layer-set-first-transpose",
+      "entryPoint": "jyppx_trt8_shuffle_layer_set_first_transpose",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "permutation", "type": "const JYPPX_TensorRtDims*", "direction": "in", "managedType": "ref NativeTensorRtDims", "moduleManagedType": "ref NativeTensorRtDims" }
+      ]
+    },
+    {
+      "id": "trt8-shuffle-layer-get-first-transpose",
+      "entryPoint": "jyppx_trt8_shuffle_layer_get_first_transpose",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "out_permutation", "type": "JYPPX_TensorRtDims*", "direction": "out", "managedType": "out NativeTensorRtDims", "moduleManagedType": "out NativeTensorRtDims" }
+      ]
+    },
+    {
+      "id": "trt8-shuffle-layer-set-second-transpose",
+      "entryPoint": "jyppx_trt8_shuffle_layer_set_second_transpose",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "permutation", "type": "const JYPPX_TensorRtDims*", "direction": "in", "managedType": "ref NativeTensorRtDims", "moduleManagedType": "ref NativeTensorRtDims" }
+      ]
+    },
+    {
+      "id": "trt8-shuffle-layer-get-second-transpose",
+      "entryPoint": "jyppx_trt8_shuffle_layer_get_second_transpose",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "out_permutation", "type": "JYPPX_TensorRtDims*", "direction": "out", "managedType": "out NativeTensorRtDims", "moduleManagedType": "out NativeTensorRtDims" }
+      ]
+    },
+    {
+      "id": "trt8-network-add-reverse-sequence",
+      "entryPoint": "jyppx_trt8_network_add_reverse_sequence",
+      "returnType": "BridgeStatusCode",
+      "ownership": "network-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "network", "type": "JYPPX_TensorRtNetworkDefinition*", "direction": "in" },
+        { "name": "input_tensor", "type": "JYPPX_TensorRtTensor*", "direction": "in" },
+        { "name": "sequence_lengths_tensor", "type": "JYPPX_TensorRtTensor*", "direction": "in" },
+        { "name": "out_layer", "type": "JYPPX_TensorRtLayer**", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt8-reverse-sequence-layer-set-batch-axis",
+      "entryPoint": "jyppx_trt8_reverse_sequence_layer_set_batch_axis",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "axis", "type": "int32_t", "direction": "in", "managedType": "int", "moduleManagedType": "int" }
+      ]
+    },
+    {
+      "id": "trt8-reverse-sequence-layer-get-batch-axis",
+      "entryPoint": "jyppx_trt8_reverse_sequence_layer_get_batch_axis",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "out_axis", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt8-reverse-sequence-layer-set-sequence-axis",
+      "entryPoint": "jyppx_trt8_reverse_sequence_layer_set_sequence_axis",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "axis", "type": "int32_t", "direction": "in", "managedType": "int", "moduleManagedType": "int" }
+      ]
+    },
+    {
+      "id": "trt8-reverse-sequence-layer-get-sequence-axis",
+      "entryPoint": "jyppx_trt8_reverse_sequence_layer_get_sequence_axis",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "out_axis", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt8-tensor-get-dimensions",
+      "entryPoint": "jyppx_trt8_tensor_get_dimensions",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "tensor", "type": "JYPPX_TensorRtTensor*", "direction": "in" },
+        { "name": "out_dims", "type": "JYPPX_TensorRtDims*", "direction": "out", "managedType": "out NativeTensorRtDims", "moduleManagedType": "out NativeTensorRtDims" }
+      ]
+    },
+    {
+      "id": "trt8-tensor-set-dimensions",
+      "entryPoint": "jyppx_trt8_tensor_set_dimensions",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "tensor", "type": "JYPPX_TensorRtTensor*", "direction": "in" },
+        { "name": "dims", "type": "const JYPPX_TensorRtDims*", "direction": "in", "managedType": "ref NativeTensorRtDims", "moduleManagedType": "ref NativeTensorRtDims" }
+      ]
+    }
+  ]
+}

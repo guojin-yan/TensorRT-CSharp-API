@@ -1,0 +1,15 @@
+root = true
+
+[*.{cs,csproj,props,targets,sln,md,json,yml,yaml,ps1,sh,cmake,txt,h,hpp,c,cpp}]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+indent_style = space
+indent_size = 2
+
+[*.cs]
+indent_size = 4
+
+[*.{ps1,sh}]
+indent_size = 2
+

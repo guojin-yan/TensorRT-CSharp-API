@@ -1,0 +1,52 @@
+{
+  "$schema": "../../bridge-api.schema.json",
+  "module": "tensorrt",
+  "versionLine": "10",
+  "apis": [
+    {
+      "id": "jyppx-trt10-optimization-profile-set-shape-values-v2",
+      "entryPoint": "jyppx_trt10_optimization_profile_set_shape_values_v2",
+      "returnType": "BridgeStatusCode",
+      "ownership": "profile-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "profile", "type": "JYPPX_TensorRtOptimizationProfile*", "direction": "in" },
+        { "name": "input_name", "type": "const char*", "direction": "in" },
+        { "name": "selector", "type": "int32_t", "direction": "in" },
+        { "name": "values", "type": "const int64_t*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "value_count", "type": "int32_t", "direction": "in" },
+        { "name": "out_set", "type": "JYPPX_Boolean*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "jyppx-trt10-optimization-profile-get-shape-value-count-v2",
+      "entryPoint": "jyppx_trt10_optimization_profile_get_shape_value_count_v2",
+      "returnType": "BridgeStatusCode",
+      "ownership": "profile-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "profile", "type": "JYPPX_TensorRtOptimizationProfile*", "direction": "in" },
+        { "name": "input_name", "type": "const char*", "direction": "in" },
+        { "name": "out_count", "type": "int32_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "jyppx-trt10-optimization-profile-get-shape-values-v2",
+      "entryPoint": "jyppx_trt10_optimization_profile_get_shape_values_v2",
+      "returnType": "BridgeStatusCode",
+      "ownership": "profile-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "profile", "type": "JYPPX_TensorRtOptimizationProfile*", "direction": "in" },
+        { "name": "input_name", "type": "const char*", "direction": "in" },
+        { "name": "selector", "type": "int32_t", "direction": "in" },
+        { "name": "output_values", "type": "int64_t*", "direction": "out", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "output_count", "type": "int32_t", "direction": "in" },
+        { "name": "out_count", "type": "int32_t*", "direction": "out" }
+      ]
+    }
+  ]
+}

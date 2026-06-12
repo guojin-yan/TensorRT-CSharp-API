@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>$(JYPPXManagedTargetFrameworks)</TargetFrameworks>
+    <AssemblyName>JYPPX.TensorRtSharp</AssemblyName>
+    <RootNamespace>JYPPX.TensorRtSharp</RootNamespace>
+    <PackageId>JYPPX.TensorRT.CSharp.API</PackageId>
+    <Description>Managed TensorRT API surface for TensorRtSharp4.0.</Description>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\\JYPPX.CudaSharp\\JYPPX.CudaSharp.csproj" />
+    <ProjectReference Include="..\\JYPPX.Shared\\JYPPX.Shared.csproj" />
+  </ItemGroup>
+</Project>

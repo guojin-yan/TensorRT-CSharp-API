@@ -1,0 +1,166 @@
+﻿{
+    "module":  "tensorrt",
+    "versionLine":  "8",
+    "apis":  [
+                 {
+                     "id":  "trt8-constant-layer-get-weights-info",
+                     "entryPoint":  "jyppx_trt8_constant_layer_get_weights_info",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+                     "parameters":  [
+                                        {
+                                            "name":  "layer",
+                                            "type":  "JYPPX_TensorRtLayer*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_info",
+                                            "type":  "JYPPX_TensorRtWeightsInfo*",
+                                            "direction":  "out"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt8-convolution-layer-get-kernel-weights-info",
+                     "entryPoint":  "jyppx_trt8_convolution_layer_get_kernel_weights_info",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+                     "parameters":  [
+                                        {
+                                            "name":  "layer",
+                                            "type":  "JYPPX_TensorRtLayer*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_info",
+                                            "type":  "JYPPX_TensorRtWeightsInfo*",
+                                            "direction":  "out"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt8-convolution-layer-get-bias-weights-info",
+                     "entryPoint":  "jyppx_trt8_convolution_layer_get_bias_weights_info",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+                     "parameters":  [
+                                        {
+                                            "name":  "layer",
+                                            "type":  "JYPPX_TensorRtLayer*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_info",
+                                            "type":  "JYPPX_TensorRtWeightsInfo*",
+                                            "direction":  "out"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt8-deconvolution-layer-get-kernel-weights-info",
+                     "entryPoint":  "jyppx_trt8_deconvolution_layer_get_kernel_weights_info",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+                     "parameters":  [
+                                        {
+                                            "name":  "layer",
+                                            "type":  "JYPPX_TensorRtLayer*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_info",
+                                            "type":  "JYPPX_TensorRtWeightsInfo*",
+                                            "direction":  "out"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt8-deconvolution-layer-get-bias-weights-info",
+                     "entryPoint":  "jyppx_trt8_deconvolution_layer_get_bias_weights_info",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+                     "parameters":  [
+                                        {
+                                            "name":  "layer",
+                                            "type":  "JYPPX_TensorRtLayer*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_info",
+                                            "type":  "JYPPX_TensorRtWeightsInfo*",
+                                            "direction":  "out"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt8-scale-layer-get-shift-weights-info",
+                     "entryPoint":  "jyppx_trt8_scale_layer_get_shift_weights_info",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+                     "parameters":  [
+                                        {
+                                            "name":  "layer",
+                                            "type":  "JYPPX_TensorRtLayer*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_info",
+                                            "type":  "JYPPX_TensorRtWeightsInfo*",
+                                            "direction":  "out"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt8-scale-layer-get-scale-weights-info",
+                     "entryPoint":  "jyppx_trt8_scale_layer_get_scale_weights_info",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+                     "parameters":  [
+                                        {
+                                            "name":  "layer",
+                                            "type":  "JYPPX_TensorRtLayer*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_info",
+                                            "type":  "JYPPX_TensorRtWeightsInfo*",
+                                            "direction":  "out"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt8-scale-layer-get-power-weights-info",
+                     "entryPoint":  "jyppx_trt8_scale_layer_get_power_weights_info",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+                     "parameters":  [
+                                        {
+                                            "name":  "layer",
+                                            "type":  "JYPPX_TensorRtLayer*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_info",
+                                            "type":  "JYPPX_TensorRtWeightsInfo*",
+                                            "direction":  "out"
+                                        }
+                                    ]
+                 }
+             ]
+}

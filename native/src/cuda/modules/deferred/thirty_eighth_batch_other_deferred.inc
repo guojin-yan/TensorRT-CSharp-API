@@ -1,0 +1,86 @@
+#define JYPPX_CUDA_OTHER_DEFERRED(function_name, cuda_name, reason) \
+JYPPX_StatusCode function_name(void) \
+{ \
+    jyppx::cuda::set_cuda_error(cuda_name, 0, "deferred-interface-boundary", reason); \
+    return JYPPX_STATUS_NOT_IMPLEMENTED; \
+}
+
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_create_surface_object_deferred, "cudaCreateSurfaceObject", "cudaCreateSurfaceObject deferred: CUDA surface resource descriptors need a dedicated resource bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_create_texture_object_deferred, "cudaCreateTextureObject", "cudaCreateTextureObject deferred: CUDA texture resource descriptors need a dedicated resource bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_create_texture_object_v2_deferred, "cudaCreateTextureObject_v2", "cudaCreateTextureObject_v2 deferred: CUDA texture v2 descriptors need a dedicated resource bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_destroy_surface_object_deferred, "cudaDestroySurfaceObject", "cudaDestroySurfaceObject deferred: surface object ownership is not safely modeled by the current bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_destroy_texture_object_deferred, "cudaDestroyTextureObject", "cudaDestroyTextureObject deferred: texture object ownership is not safely modeled by the current bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_get_surface_object_resource_desc_deferred, "cudaGetSurfaceObjectResourceDesc", "cudaGetSurfaceObjectResourceDesc deferred: CUDA surface resource descriptors need a dedicated resource bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_get_texture_object_resource_desc_deferred, "cudaGetTextureObjectResourceDesc", "cudaGetTextureObjectResourceDesc deferred: CUDA texture resource descriptors need a dedicated resource bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_get_texture_object_resource_view_desc_deferred, "cudaGetTextureObjectResourceViewDesc", "cudaGetTextureObjectResourceViewDesc deferred: CUDA texture view descriptors need a dedicated resource bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_get_texture_object_texture_desc_deferred, "cudaGetTextureObjectTextureDesc", "cudaGetTextureObjectTextureDesc deferred: CUDA texture descriptors need a dedicated resource bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_get_texture_object_texture_desc_v2_deferred, "cudaGetTextureObjectTextureDesc_v2", "cudaGetTextureObjectTextureDesc_v2 deferred: CUDA texture v2 descriptors need a dedicated resource bridge")
+
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_destroy_external_memory_deferred, "cudaDestroyExternalMemory", "cudaDestroyExternalMemory deferred: external memory handle ownership is not safely modeled by the current bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_destroy_external_semaphore_deferred, "cudaDestroyExternalSemaphore", "cudaDestroyExternalSemaphore deferred: external semaphore handle ownership is not safely modeled by the current bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_external_memory_get_mapped_buffer_deferred, "cudaExternalMemoryGetMappedBuffer", "cudaExternalMemoryGetMappedBuffer deferred: external memory buffer descriptors need a dedicated bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_external_memory_get_mapped_mipmapped_array_deferred, "cudaExternalMemoryGetMappedMipmappedArray", "cudaExternalMemoryGetMappedMipmappedArray deferred: external memory mipmapped array descriptors need a dedicated bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_import_external_memory_deferred, "cudaImportExternalMemory", "cudaImportExternalMemory deferred: external memory handle descriptors need a dedicated bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_import_external_semaphore_deferred, "cudaImportExternalSemaphore", "cudaImportExternalSemaphore deferred: external semaphore handle descriptors need a dedicated bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_signal_external_semaphores_async_deferred, "cudaSignalExternalSemaphoresAsync", "cudaSignalExternalSemaphoresAsync deferred: external semaphore signal parameter arrays need a dedicated bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_signal_external_semaphores_async_ptsz_deferred, "cudaSignalExternalSemaphoresAsync_ptsz", "cudaSignalExternalSemaphoresAsync_ptsz deferred: external semaphore signal parameter arrays need a dedicated bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_signal_external_semaphores_async_v2_deferred, "cudaSignalExternalSemaphoresAsync_v2", "cudaSignalExternalSemaphoresAsync_v2 deferred: external semaphore signal parameter arrays need a dedicated bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_wait_external_semaphores_async_deferred, "cudaWaitExternalSemaphoresAsync", "cudaWaitExternalSemaphoresAsync deferred: external semaphore wait parameter arrays need a dedicated bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_wait_external_semaphores_async_ptsz_deferred, "cudaWaitExternalSemaphoresAsync_ptsz", "cudaWaitExternalSemaphoresAsync_ptsz deferred: external semaphore wait parameter arrays need a dedicated bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_wait_external_semaphores_async_v2_deferred, "cudaWaitExternalSemaphoresAsync_v2", "cudaWaitExternalSemaphoresAsync_v2 deferred: external semaphore wait parameter arrays need a dedicated bridge")
+
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_ipc_close_mem_handle_deferred, "cudaIpcCloseMemHandle", "cudaIpcCloseMemHandle deferred: CUDA IPC memory ownership needs an explicit bridge policy")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_ipc_get_event_handle_deferred, "cudaIpcGetEventHandle", "cudaIpcGetEventHandle deferred: CUDA IPC event handles need a dedicated bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_ipc_get_mem_handle_deferred, "cudaIpcGetMemHandle", "cudaIpcGetMemHandle deferred: CUDA IPC memory handles need a dedicated bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_ipc_open_event_handle_deferred, "cudaIpcOpenEventHandle", "cudaIpcOpenEventHandle deferred: CUDA IPC event ownership needs an explicit bridge policy")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_ipc_open_mem_handle_deferred, "cudaIpcOpenMemHandle", "cudaIpcOpenMemHandle deferred: CUDA IPC memory ownership needs an explicit bridge policy")
+
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_get_driver_entry_point_deferred, "cudaGetDriverEntryPoint", "cudaGetDriverEntryPoint deferred: returning raw driver entrypoint pointers needs a dedicated unsafe interop policy")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_get_driver_entry_point_by_version_deferred, "cudaGetDriverEntryPointByVersion", "cudaGetDriverEntryPointByVersion deferred: returning raw driver entrypoint pointers needs a dedicated unsafe interop policy")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_get_export_table_deferred, "cudaGetExportTable", "cudaGetExportTable deferred: export-table pointers need a dedicated unsafe interop policy")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_get_func_by_symbol_deferred, "cudaGetFuncBySymbol", "cudaGetFuncBySymbol deferred: symbol-to-function lookup needs a dedicated symbol bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_get_kernel_deferred, "cudaGetKernel", "cudaGetKernel deferred: kernel handles need an explicit bridge lifetime model")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_get_symbol_address_deferred, "cudaGetSymbolAddress", "cudaGetSymbolAddress deferred: raw CUDA symbol addresses need a dedicated symbol bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_get_symbol_size_deferred, "cudaGetSymbolSize", "cudaGetSymbolSize deferred: raw CUDA symbol metadata needs a dedicated symbol bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_kernel_set_attribute_for_device_deferred, "cudaKernelSetAttributeForDevice", "cudaKernelSetAttributeForDevice deferred: kernel handles need an explicit bridge lifetime model")
+
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_library_enumerate_kernels_deferred, "cudaLibraryEnumerateKernels", "cudaLibraryEnumerateKernels deferred: CUDA library kernel handles need an explicit bridge lifetime model")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_library_get_global_deferred, "cudaLibraryGetGlobal", "cudaLibraryGetGlobal deferred: CUDA library globals need a dedicated symbol bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_library_get_kernel_deferred, "cudaLibraryGetKernel", "cudaLibraryGetKernel deferred: CUDA library kernel handles need an explicit bridge lifetime model")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_library_get_kernel_count_deferred, "cudaLibraryGetKernelCount", "cudaLibraryGetKernelCount deferred: CUDA library handles need an explicit bridge lifetime model")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_library_get_managed_deferred, "cudaLibraryGetManaged", "cudaLibraryGetManaged deferred: CUDA library managed globals need a dedicated symbol bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_library_get_unified_function_deferred, "cudaLibraryGetUnifiedFunction", "cudaLibraryGetUnifiedFunction deferred: CUDA library unified function handles need an explicit bridge lifetime model")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_library_load_data_deferred, "cudaLibraryLoadData", "cudaLibraryLoadData deferred: CUDA library load options and JIT data arrays need a dedicated bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_library_load_from_file_deferred, "cudaLibraryLoadFromFile", "cudaLibraryLoadFromFile deferred: CUDA library load options and JIT data arrays need a dedicated bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_library_unload_deferred, "cudaLibraryUnload", "cudaLibraryUnload deferred: CUDA library handle ownership is not safely modeled by the current bridge")
+
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_dev_resource_generate_desc_deferred, "cudaDevResourceGenerateDesc", "cudaDevResourceGenerateDesc deferred: CUDA device resource descriptors need a dedicated bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_dev_sm_resource_split_deferred, "cudaDevSmResourceSplit", "cudaDevSmResourceSplit deferred: CUDA SM resource handles need a dedicated bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_dev_sm_resource_split_by_count_deferred, "cudaDevSmResourceSplitByCount", "cudaDevSmResourceSplitByCount deferred: CUDA SM resource handles need a dedicated bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_execution_ctx_destroy_deferred, "cudaExecutionCtxDestroy", "cudaExecutionCtxDestroy deferred: execution context ownership is not safely modeled by the current bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_execution_ctx_get_device_deferred, "cudaExecutionCtxGetDevice", "cudaExecutionCtxGetDevice deferred: execution context handles need a dedicated bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_execution_ctx_get_dev_resource_deferred, "cudaExecutionCtxGetDevResource", "cudaExecutionCtxGetDevResource deferred: execution context resource handles need a dedicated bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_execution_ctx_get_id_deferred, "cudaExecutionCtxGetId", "cudaExecutionCtxGetId deferred: execution context handles need a dedicated bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_execution_ctx_record_event_deferred, "cudaExecutionCtxRecordEvent", "cudaExecutionCtxRecordEvent deferred: execution context event operations need a dedicated bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_execution_ctx_stream_create_deferred, "cudaExecutionCtxStreamCreate", "cudaExecutionCtxStreamCreate deferred: execution context stream ownership needs an explicit bridge policy")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_execution_ctx_synchronize_deferred, "cudaExecutionCtxSynchronize", "cudaExecutionCtxSynchronize deferred: execution context handles need a dedicated bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_execution_ctx_wait_event_deferred, "cudaExecutionCtxWaitEvent", "cudaExecutionCtxWaitEvent deferred: execution context event operations need a dedicated bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_green_ctx_create_deferred, "cudaGreenCtxCreate", "cudaGreenCtxCreate deferred: green context resource descriptors need a dedicated bridge")
+
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_logs_current_deferred, "cudaLogsCurrent", "cudaLogsCurrent deferred: CUDA log iterators need a dedicated bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_logs_dump_to_file_deferred, "cudaLogsDumpToFile", "cudaLogsDumpToFile deferred: CUDA logs file dumping needs a dedicated IO policy")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_logs_dump_to_memory_deferred, "cudaLogsDumpToMemory", "cudaLogsDumpToMemory deferred: CUDA log iterators and buffers need a dedicated bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_logs_register_callback_deferred, "cudaLogsRegisterCallback", "cudaLogsRegisterCallback deferred: CUDA log callbacks need a managed callback lifetime policy")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_logs_unregister_callback_deferred, "cudaLogsUnregisterCallback", "cudaLogsUnregisterCallback deferred: CUDA log callbacks need a managed callback lifetime policy")
+
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_init_device_deferred, "cudaInitDevice", "cudaInitDevice deferred: device initialization flags need an explicit runtime policy")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_set_valid_devices_deferred, "cudaSetValidDevices", "cudaSetValidDevices deferred: device ordinal arrays need a dedicated validation bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_mem_advise_v2_deferred, "cudaMemAdvise_v2", "cudaMemAdvise_v2 deferred: cudaMemLocation needs a dedicated location-aware memory advisory bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_mem_discard_and_prefetch_batch_async_deferred, "cudaMemDiscardAndPrefetchBatchAsync", "cudaMemDiscardAndPrefetchBatchAsync deferred: batch memory range arrays need a dedicated bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_mem_discard_batch_async_deferred, "cudaMemDiscardBatchAsync", "cudaMemDiscardBatchAsync deferred: batch memory range arrays need a dedicated bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_mem_prefetch_async_v2_deferred, "cudaMemPrefetchAsync_v2", "cudaMemPrefetchAsync_v2 deferred: cudaMemLocation needs a dedicated location-aware prefetch bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_mem_prefetch_batch_async_deferred, "cudaMemPrefetchBatchAsync", "cudaMemPrefetchBatchAsync deferred: batch memory range arrays need a dedicated bridge")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_mem_range_get_attribute_deferred, "cudaMemRangeGetAttribute", "cudaMemRangeGetAttribute deferred: memory range attributes need typed output buffers")
+JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_mem_range_get_attributes_deferred, "cudaMemRangeGetAttributes", "cudaMemRangeGetAttributes deferred: memory range attribute arrays need typed output buffers")
+
+#undef JYPPX_CUDA_OTHER_DEFERRED

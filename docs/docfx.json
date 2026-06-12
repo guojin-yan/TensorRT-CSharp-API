@@ -1,0 +1,78 @@
+{
+  "metadata": [
+    {
+      "src": [
+        {
+          "files": [
+            "src/JYPPX.Shared/**/*.csproj"
+          ],
+          "src": ".."
+        }
+      ],
+      "dest": "api",
+      "properties": {
+        "TargetFramework": "net8.0"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "src/JYPPX.TensorRtSharp/**/*.csproj"
+          ],
+          "src": ".."
+        }
+      ],
+      "dest": "api",
+      "properties": {
+        "TargetFramework": "net8.0"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "src/JYPPX.CudaSharp/**/*.csproj"
+          ],
+          "src": ".."
+        }
+      ],
+      "dest": "api",
+      "properties": {
+        "TargetFramework": "net8.0"
+      }
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "files": [
+          "index.md",
+          "toc.yml",
+          "articles/**/*.md"
+        ]
+      },
+      {
+        "files": [
+          "api/**.yml"
+        ]
+      }
+    ],
+    "resource": [
+      {
+        "files": [
+          "images/**"
+        ]
+      }
+    ],
+    "output": "_site",
+    "template": [
+      "default",
+      "modern"
+    ],
+    "globalMetadata": {
+      "_appTitle": "TensorRtSharp4.0",
+      "_enableSearch": true
+    }
+  }
+}

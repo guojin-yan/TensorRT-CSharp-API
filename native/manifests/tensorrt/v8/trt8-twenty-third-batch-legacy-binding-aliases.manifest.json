@@ -1,0 +1,427 @@
+{
+  "$schema": "../bridge-api.schema.json",
+  "module": "tensorrt",
+  "versionLine": "8",
+  "apis": [
+    {
+      "id": "trt8-cuda-engine-get-nb-bindings-legacy-alias",
+      "entryPoint": "jyppx_trt8_cuda_engine_get_nb_bindings",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "JYPPX_TensorRtCudaEngine*",
+          "direction": "in"
+        },
+        {
+          "name": "out_count",
+          "type": "int32_t*",
+          "direction": "out",
+          "managedType": "out int",
+          "moduleManagedType": "out int"
+        }
+      ]
+    },
+    {
+      "id": "trt8-cuda-engine-get-binding-name-legacy-alias",
+      "entryPoint": "jyppx_trt8_cuda_engine_get_binding_name",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": true,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "JYPPX_TensorRtCudaEngine*",
+          "direction": "in"
+        },
+        {
+          "name": "binding_index",
+          "type": "int32_t",
+          "direction": "in",
+          "managedType": "int",
+          "moduleManagedType": "int"
+        },
+        {
+          "name": "output_buffer",
+          "type": "char*",
+          "direction": "out",
+          "managedType": "byte[]",
+          "moduleManagedType": "byte[]"
+        },
+        {
+          "name": "output_buffer_size",
+          "type": "size_t",
+          "direction": "in",
+          "managedType": "UIntPtr",
+          "moduleManagedType": "UIntPtr"
+        },
+        {
+          "name": "out_required_size",
+          "type": "size_t*",
+          "direction": "out",
+          "managedType": "out UIntPtr",
+          "moduleManagedType": "out UIntPtr"
+        }
+      ]
+    },
+    {
+      "id": "trt8-cuda-engine-get-binding-index-legacy-alias",
+      "entryPoint": "jyppx_trt8_cuda_engine_get_binding_index",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": true,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "JYPPX_TensorRtCudaEngine*",
+          "direction": "in"
+        },
+        {
+          "name": "binding_name",
+          "type": "const char*",
+          "direction": "in",
+          "managedType": "IntPtr",
+          "moduleManagedType": "IntPtr"
+        },
+        {
+          "name": "out_index",
+          "type": "int32_t*",
+          "direction": "out",
+          "managedType": "out int",
+          "moduleManagedType": "out int"
+        }
+      ]
+    },
+    {
+      "id": "trt8-cuda-engine-binding-is-input-legacy-alias",
+      "entryPoint": "jyppx_trt8_cuda_engine_binding_is_input",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "JYPPX_TensorRtCudaEngine*",
+          "direction": "in"
+        },
+        {
+          "name": "binding_index",
+          "type": "int32_t",
+          "direction": "in",
+          "managedType": "int",
+          "moduleManagedType": "int"
+        },
+        {
+          "name": "out_is_input",
+          "type": "JYPPX_Boolean*",
+          "direction": "out",
+          "managedType": "out int",
+          "moduleManagedType": "out int"
+        }
+      ]
+    },
+    {
+      "id": "trt8-cuda-engine-get-binding-data-type-legacy-alias",
+      "entryPoint": "jyppx_trt8_cuda_engine_get_binding_data_type",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "JYPPX_TensorRtCudaEngine*",
+          "direction": "in"
+        },
+        {
+          "name": "binding_index",
+          "type": "int32_t",
+          "direction": "in",
+          "managedType": "int",
+          "moduleManagedType": "int"
+        },
+        {
+          "name": "out_data_type",
+          "type": "int32_t*",
+          "direction": "out",
+          "managedType": "out int",
+          "moduleManagedType": "out int"
+        }
+      ]
+    },
+    {
+      "id": "trt8-cuda-engine-get-binding-dimensions-legacy-alias",
+      "entryPoint": "jyppx_trt8_cuda_engine_get_binding_dimensions",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "JYPPX_TensorRtCudaEngine*",
+          "direction": "in"
+        },
+        {
+          "name": "binding_index",
+          "type": "int32_t",
+          "direction": "in",
+          "managedType": "int",
+          "moduleManagedType": "int"
+        },
+        {
+          "name": "out_dimensions",
+          "type": "JYPPX_TensorRtDims*",
+          "direction": "out",
+          "managedType": "out NativeTensorRtDims",
+          "moduleManagedType": "out NativeTensorRtDims"
+        }
+      ]
+    },
+    {
+      "id": "trt8-cuda-engine-get-binding-bytes-per-component-legacy-alias",
+      "entryPoint": "jyppx_trt8_cuda_engine_get_binding_bytes_per_component",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "JYPPX_TensorRtCudaEngine*",
+          "direction": "in"
+        },
+        {
+          "name": "binding_index",
+          "type": "int32_t",
+          "direction": "in",
+          "managedType": "int",
+          "moduleManagedType": "int"
+        },
+        {
+          "name": "out_bytes",
+          "type": "int32_t*",
+          "direction": "out",
+          "managedType": "out int",
+          "moduleManagedType": "out int"
+        }
+      ]
+    },
+    {
+      "id": "trt8-cuda-engine-get-binding-components-per-element-legacy-alias",
+      "entryPoint": "jyppx_trt8_cuda_engine_get_binding_components_per_element",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "JYPPX_TensorRtCudaEngine*",
+          "direction": "in"
+        },
+        {
+          "name": "binding_index",
+          "type": "int32_t",
+          "direction": "in",
+          "managedType": "int",
+          "moduleManagedType": "int"
+        },
+        {
+          "name": "out_components",
+          "type": "int32_t*",
+          "direction": "out",
+          "managedType": "out int",
+          "moduleManagedType": "out int"
+        }
+      ]
+    },
+    {
+      "id": "trt8-cuda-engine-get-binding-format-legacy-alias",
+      "entryPoint": "jyppx_trt8_cuda_engine_get_binding_format",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "JYPPX_TensorRtCudaEngine*",
+          "direction": "in"
+        },
+        {
+          "name": "binding_index",
+          "type": "int32_t",
+          "direction": "in",
+          "managedType": "int",
+          "moduleManagedType": "int"
+        },
+        {
+          "name": "out_format",
+          "type": "int32_t*",
+          "direction": "out",
+          "managedType": "out int",
+          "moduleManagedType": "out int"
+        }
+      ]
+    },
+    {
+      "id": "trt8-cuda-engine-get-binding-format-desc-legacy-alias",
+      "entryPoint": "jyppx_trt8_cuda_engine_get_binding_format_desc",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": true,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "JYPPX_TensorRtCudaEngine*",
+          "direction": "in"
+        },
+        {
+          "name": "binding_index",
+          "type": "int32_t",
+          "direction": "in",
+          "managedType": "int",
+          "moduleManagedType": "int"
+        },
+        {
+          "name": "output_buffer",
+          "type": "char*",
+          "direction": "out",
+          "managedType": "byte[]",
+          "moduleManagedType": "byte[]"
+        },
+        {
+          "name": "output_buffer_size",
+          "type": "size_t",
+          "direction": "in",
+          "managedType": "UIntPtr",
+          "moduleManagedType": "UIntPtr"
+        },
+        {
+          "name": "out_required_size",
+          "type": "size_t*",
+          "direction": "out",
+          "managedType": "out UIntPtr",
+          "moduleManagedType": "out UIntPtr"
+        }
+      ]
+    },
+    {
+      "id": "trt8-cuda-engine-get-binding-vectorized-dim-legacy-alias",
+      "entryPoint": "jyppx_trt8_cuda_engine_get_binding_vectorized_dim",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "JYPPX_TensorRtCudaEngine*",
+          "direction": "in"
+        },
+        {
+          "name": "binding_index",
+          "type": "int32_t",
+          "direction": "in",
+          "managedType": "int",
+          "moduleManagedType": "int"
+        },
+        {
+          "name": "out_dim",
+          "type": "int32_t*",
+          "direction": "out",
+          "managedType": "out int",
+          "moduleManagedType": "out int"
+        }
+      ]
+    },
+    {
+      "id": "trt8-cuda-engine-is-execution-binding-legacy-alias",
+      "entryPoint": "jyppx_trt8_cuda_engine_is_execution_binding",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "JYPPX_TensorRtCudaEngine*",
+          "direction": "in"
+        },
+        {
+          "name": "binding_index",
+          "type": "int32_t",
+          "direction": "in",
+          "managedType": "int",
+          "moduleManagedType": "int"
+        },
+        {
+          "name": "out_is_execution_binding",
+          "type": "JYPPX_Boolean*",
+          "direction": "out",
+          "managedType": "out int",
+          "moduleManagedType": "out int"
+        }
+      ]
+    },
+    {
+      "id": "trt8-cuda-engine-is-shape-binding-legacy-alias",
+      "entryPoint": "jyppx_trt8_cuda_engine_is_shape_binding",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "JYPPX_TensorRtCudaEngine*",
+          "direction": "in"
+        },
+        {
+          "name": "binding_index",
+          "type": "int32_t",
+          "direction": "in",
+          "managedType": "int",
+          "moduleManagedType": "int"
+        },
+        {
+          "name": "out_is_shape_binding",
+          "type": "JYPPX_Boolean*",
+          "direction": "out",
+          "managedType": "out int",
+          "moduleManagedType": "out int"
+        }
+      ]
+    },
+    {
+      "id": "trt8-cuda-engine-has-implicit-batch-dimension-legacy-alias",
+      "entryPoint": "jyppx_trt8_cuda_engine_has_implicit_batch_dimension",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "JYPPX_TensorRtCudaEngine*",
+          "direction": "in"
+        },
+        {
+          "name": "out_has_implicit_batch",
+          "type": "JYPPX_Boolean*",
+          "direction": "out",
+          "managedType": "out int",
+          "moduleManagedType": "out int"
+        }
+      ]
+    }
+  ]
+}

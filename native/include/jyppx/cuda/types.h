@@ -1,0 +1,231 @@
+#pragma once
+
+#include <stddef.h>
+#include <stdint.h>
+
+#include "jyppx/common/bridge_exports.h"
+#include "jyppx/common/status.h"
+
+typedef struct JYPPX_CudaStream JYPPX_CudaStream;
+typedef struct JYPPX_CudaEvent JYPPX_CudaEvent;
+typedef struct JYPPX_CudaMemory JYPPX_CudaMemory;
+typedef struct JYPPX_CudaPinnedMemory JYPPX_CudaPinnedMemory;
+typedef struct JYPPX_CudaPitchedMemory JYPPX_CudaPitchedMemory;
+typedef struct JYPPX_CudaGraph JYPPX_CudaGraph;
+typedef struct JYPPX_CudaGraphExec JYPPX_CudaGraphExec;
+typedef struct JYPPX_CudaArray JYPPX_CudaArray;
+typedef struct JYPPX_CudaMipmappedArray JYPPX_CudaMipmappedArray;
+
+typedef enum JYPPX_CudaMemcpyKind
+{
+    JYPPX_CUDA_MEMCPY_HOST_TO_DEVICE = 1,
+    JYPPX_CUDA_MEMCPY_DEVICE_TO_HOST = 2,
+    JYPPX_CUDA_MEMCPY_DEVICE_TO_DEVICE = 3
+} JYPPX_CudaMemcpyKind;
+
+typedef struct JYPPX_CudaRuntimeInfo
+{
+    JYPPX_Boolean vendor_dependency_available;
+    JYPPX_Boolean supports_streams;
+    JYPPX_Boolean supports_events;
+    JYPPX_Boolean supports_memory;
+    int32_t runtime_version;
+    int32_t driver_version;
+    int32_t device_count;
+    const char* status_message;
+} JYPPX_CudaRuntimeInfo;
+
+typedef struct JYPPX_CudaDeviceInfo
+{
+    int32_t ordinal;
+    char name[256];
+    int32_t major;
+    int32_t minor;
+    int32_t multi_processor_count;
+    int32_t warp_size;
+    int32_t max_threads_per_block;
+    int32_t can_map_host_memory;
+    int32_t integrated;
+    uint64_t total_global_memory;
+} JYPPX_CudaDeviceInfo;
+
+typedef struct JYPPX_CudaMemoryInfo
+{
+    uint64_t free_bytes;
+    uint64_t total_bytes;
+} JYPPX_CudaMemoryInfo;
+
+typedef struct JYPPX_CudaPointerAttributes
+{
+    int32_t memory_type;
+    int32_t device;
+    uint64_t device_pointer;
+    uint64_t host_pointer;
+} JYPPX_CudaPointerAttributes;
+
+typedef struct JYPPX_CudaPitchedMemoryInfo
+{
+    uint64_t pitch_bytes;
+    uint64_t width_bytes;
+    uint64_t height;
+} JYPPX_CudaPitchedMemoryInfo;
+
+typedef struct JYPPX_CudaChannelFormatDesc
+{
+    int32_t x;
+    int32_t y;
+    int32_t z;
+    int32_t w;
+    int32_t format_kind;
+} JYPPX_CudaChannelFormatDesc;
+
+typedef struct JYPPX_CudaArrayExtent
+{
+    uint64_t width;
+    uint64_t height;
+    uint64_t depth;
+} JYPPX_CudaArrayExtent;
+
+typedef struct JYPPX_CudaArrayInfo
+{
+    JYPPX_CudaChannelFormatDesc channel;
+    JYPPX_CudaArrayExtent extent;
+    uint32_t flags;
+} JYPPX_CudaArrayInfo;
+
+typedef struct JYPPX_CudaArrayMemoryRequirements
+{
+    uint64_t size;
+    uint64_t alignment;
+} JYPPX_CudaArrayMemoryRequirements;
+
+typedef struct JYPPX_CudaArraySparseProperties
+{
+    uint32_t tile_width;
+    uint32_t tile_height;
+    uint32_t tile_depth;
+    uint32_t mip_tail_first_level;
+    uint64_t mip_tail_size;
+    uint32_t flags;
+} JYPPX_CudaArraySparseProperties;
+
+typedef struct JYPPX_CudaMemLocation
+{
+    int32_t type;
+    int32_t id;
+} JYPPX_CudaMemLocation;
+
+typedef struct JYPPX_CudaMemcpyAttributes
+{
+    int32_t src_access_order;
+    JYPPX_CudaMemLocation src_location_hint;
+    JYPPX_CudaMemLocation dst_location_hint;
+    uint32_t flags;
+} JYPPX_CudaMemcpyAttributes;
+
+typedef struct JYPPX_CudaPitchedPtr
+{
+    void* pointer;
+    size_t pitch;
+    size_t x_size;
+    size_t y_size;
+} JYPPX_CudaPitchedPtr;
+
+typedef struct JYPPX_CudaPos
+{
+    size_t x;
+    size_t y;
+    size_t z;
+} JYPPX_CudaPos;
+
+typedef struct JYPPX_CudaMemcpy3DPeerParams
+{
+    JYPPX_CudaArray* src_array;
+    JYPPX_CudaPos src_pos;
+    JYPPX_CudaPitchedPtr src_ptr;
+    int32_t src_device;
+    JYPPX_CudaArray* dst_array;
+    JYPPX_CudaPos dst_pos;
+    JYPPX_CudaPitchedPtr dst_ptr;
+    int32_t dst_device;
+    JYPPX_CudaArrayExtent extent;
+} JYPPX_CudaMemcpy3DPeerParams;
+
+typedef struct JYPPX_CudaOffset3D
+{
+    size_t x;
+    size_t y;
+    size_t z;
+} JYPPX_CudaOffset3D;
+
+typedef struct JYPPX_CudaMemcpy3DOperandPointer
+{
+    void* pointer;
+    size_t row_length;
+    size_t layer_height;
+    JYPPX_CudaMemLocation location_hint;
+} JYPPX_CudaMemcpy3DOperandPointer;
+
+typedef struct JYPPX_CudaMemcpy3DOperandArray
+{
+    JYPPX_CudaArray* array;
+    JYPPX_CudaOffset3D offset;
+} JYPPX_CudaMemcpy3DOperandArray;
+
+typedef struct JYPPX_CudaMemcpy3DOperand
+{
+    int32_t type;
+    JYPPX_CudaMemcpy3DOperandPointer pointer;
+    JYPPX_CudaMemcpy3DOperandArray array;
+} JYPPX_CudaMemcpy3DOperand;
+
+typedef struct JYPPX_CudaMemcpy3DBatchOp
+{
+    JYPPX_CudaMemcpy3DOperand source;
+    JYPPX_CudaMemcpy3DOperand destination;
+    JYPPX_CudaArrayExtent extent;
+    int32_t source_access_order;
+    uint32_t flags;
+} JYPPX_CudaMemcpy3DBatchOp;
+
+typedef struct JYPPX_CudaMemPoolPtrExportData
+{
+    uint8_t reserved[64];
+} JYPPX_CudaMemPoolPtrExportData;
+
+typedef struct JYPPX_CudaDim3
+{
+    uint32_t x;
+    uint32_t y;
+    uint32_t z;
+} JYPPX_CudaDim3;
+
+typedef struct JYPPX_CudaFuncAttributes
+{
+    size_t shared_size_bytes;
+    size_t const_size_bytes;
+    size_t local_size_bytes;
+    int32_t max_threads_per_block;
+    int32_t num_registers;
+    int32_t ptx_version;
+    int32_t binary_version;
+    int32_t cache_mode_ca;
+    int32_t max_dynamic_shared_size_bytes;
+    int32_t preferred_shared_memory_carveout;
+    int32_t cluster_dim_must_be_set;
+    int32_t required_cluster_width;
+    int32_t required_cluster_height;
+    int32_t required_cluster_depth;
+    int32_t cluster_scheduling_policy_preference;
+    int32_t non_portable_cluster_size_allowed;
+} JYPPX_CudaFuncAttributes;
+
+typedef struct JYPPX_CudaLaunchConfig
+{
+    JYPPX_CudaDim3 grid_dim;
+    JYPPX_CudaDim3 block_dim;
+    size_t dynamic_shared_memory_bytes;
+    JYPPX_CudaStream* stream;
+    void* attributes;
+    uint32_t attribute_count;
+} JYPPX_CudaLaunchConfig;

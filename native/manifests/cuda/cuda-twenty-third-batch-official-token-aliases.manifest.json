@@ -1,0 +1,264 @@
+{
+  "$schema": "../bridge-api.schema.json",
+  "module": "cuda",
+  "versionLine": "common",
+  "apis": [
+    {
+      "id": "cuda-device-get-p2-p-attribute-official-token-alias",
+      "entryPoint": "jyppx_cuda_device_get_p2_p_attribute",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        {
+          "name": "attribute",
+          "type": "int32_t",
+          "direction": "in",
+          "managedType": "int",
+          "moduleManagedType": "int"
+        },
+        {
+          "name": "source_device",
+          "type": "int32_t",
+          "direction": "in",
+          "managedType": "int",
+          "moduleManagedType": "int"
+        },
+        {
+          "name": "destination_device",
+          "type": "int32_t",
+          "direction": "in",
+          "managedType": "int",
+          "moduleManagedType": "int"
+        },
+        {
+          "name": "out_value",
+          "type": "int32_t*",
+          "direction": "out",
+          "managedType": "out int",
+          "moduleManagedType": "out int"
+        }
+      ]
+    },
+    {
+      "id": "cuda-device-get-shared-mem-config-official-token-alias",
+      "entryPoint": "jyppx_cuda_device_get_shared_mem_config",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        {
+          "name": "out_config",
+          "type": "int32_t*",
+          "direction": "out",
+          "managedType": "out int",
+          "moduleManagedType": "out int"
+        }
+      ]
+    },
+    {
+      "id": "cuda-device-set-shared-mem-config-official-token-alias",
+      "entryPoint": "jyppx_cuda_device_set_shared_mem_config",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        {
+          "name": "config",
+          "type": "int32_t",
+          "direction": "in",
+          "managedType": "int",
+          "moduleManagedType": "int"
+        }
+      ]
+    },
+    {
+      "id": "cuda-device-get-stream-priority-range-official-token-alias",
+      "entryPoint": "jyppx_cuda_device_get_stream_priority_range",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        {
+          "name": "out_least_priority",
+          "type": "int32_t*",
+          "direction": "out",
+          "managedType": "out int",
+          "moduleManagedType": "out int"
+        },
+        {
+          "name": "out_greatest_priority",
+          "type": "int32_t*",
+          "direction": "out",
+          "managedType": "out int",
+          "moduleManagedType": "out int"
+        }
+      ]
+    },
+    {
+      "id": "cuda-event-elapsed-time-v2-official-token-alias",
+      "entryPoint": "jyppx_cuda_event_elapsed_time_v2",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        {
+          "name": "start_event",
+          "type": "JYPPX_CudaEvent*",
+          "direction": "in"
+        },
+        {
+          "name": "end_event",
+          "type": "JYPPX_CudaEvent*",
+          "direction": "in"
+        },
+        {
+          "name": "out_milliseconds",
+          "type": "float*",
+          "direction": "out",
+          "managedType": "out float",
+          "moduleManagedType": "out float"
+        }
+      ]
+    },
+    {
+      "id": "cuda-graph-get-nodes-official-token-alias",
+      "entryPoint": "jyppx_cuda_graph_get_nodes",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        {
+          "name": "graph",
+          "type": "JYPPX_CudaGraph*",
+          "direction": "in"
+        },
+        {
+          "name": "out_count",
+          "type": "size_t*",
+          "direction": "out",
+          "managedType": "out UIntPtr",
+          "moduleManagedType": "out UIntPtr"
+        }
+      ]
+    },
+    {
+      "id": "cuda-graph-get-root-nodes-official-token-alias",
+      "entryPoint": "jyppx_cuda_graph_get_root_nodes",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        {
+          "name": "graph",
+          "type": "JYPPX_CudaGraph*",
+          "direction": "in"
+        },
+        {
+          "name": "out_count",
+          "type": "size_t*",
+          "direction": "out",
+          "managedType": "out UIntPtr",
+          "moduleManagedType": "out UIntPtr"
+        }
+      ]
+    },
+    {
+      "id": "cuda-graph-get-edges-official-token-alias",
+      "entryPoint": "jyppx_cuda_graph_get_edges",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        {
+          "name": "graph",
+          "type": "JYPPX_CudaGraph*",
+          "direction": "in"
+        },
+        {
+          "name": "out_count",
+          "type": "size_t*",
+          "direction": "out",
+          "managedType": "out UIntPtr",
+          "moduleManagedType": "out UIntPtr"
+        }
+      ]
+    },
+    {
+      "id": "cuda-graph-instantiate-with-flags-official-token-alias",
+      "entryPoint": "jyppx_cuda_graph_instantiate_with_flags",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        {
+          "name": "graph",
+          "type": "JYPPX_CudaGraph*",
+          "direction": "in"
+        },
+        {
+          "name": "flags",
+          "type": "uint64_t",
+          "direction": "in",
+          "managedType": "ulong",
+          "moduleManagedType": "ulong"
+        },
+        {
+          "name": "out_graph_exec",
+          "type": "JYPPX_CudaGraphExec**",
+          "direction": "out",
+          "ownership": "caller-destroys"
+        }
+      ]
+    },
+    {
+      "id": "cuda-graph-launch-official-token-alias",
+      "entryPoint": "jyppx_cuda_graph_launch",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        {
+          "name": "graph_exec",
+          "type": "JYPPX_CudaGraphExec*",
+          "direction": "in"
+        },
+        {
+          "name": "stream",
+          "type": "JYPPX_CudaStream*",
+          "direction": "in"
+        }
+      ]
+    },
+    {
+      "id": "cuda-graph-upload-official-token-alias",
+      "entryPoint": "jyppx_cuda_graph_upload",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        {
+          "name": "graph_exec",
+          "type": "JYPPX_CudaGraphExec*",
+          "direction": "in"
+        },
+        {
+          "name": "stream",
+          "type": "JYPPX_CudaStream*",
+          "direction": "in"
+        }
+      ]
+    }
+  ]
+}

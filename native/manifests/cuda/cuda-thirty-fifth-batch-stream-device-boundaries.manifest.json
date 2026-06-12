@@ -1,0 +1,90 @@
+{
+  "$schema": "../bridge-api.schema.json",
+  "module": "cuda",
+  "versionLine": "common",
+  "apis": [
+    {
+      "id": "cuda-stream-attach-mem-async",
+      "entryPoint": "jyppx_cuda_stream_attach_mem_async",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "stream", "type": "JYPPX_CudaStream*", "direction": "in" },
+        { "name": "pointer", "type": "void*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "length", "type": "size_t", "direction": "in" },
+        { "name": "flags", "type": "uint32_t", "direction": "in", "managedType": "uint", "moduleManagedType": "uint" }
+      ]
+    },
+    {
+      "id": "cuda-stream-get-attribute",
+      "entryPoint": "jyppx_cuda_stream_get_attribute",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "stream", "type": "JYPPX_CudaStream*", "direction": "in" },
+        { "name": "attribute", "type": "int32_t", "direction": "in", "managedType": "int", "moduleManagedType": "int" },
+        { "name": "value", "type": "void*", "direction": "out", "managedType": "IntPtr", "moduleManagedType": "IntPtr" }
+      ]
+    },
+    {
+      "id": "cuda-stream-set-attribute",
+      "entryPoint": "jyppx_cuda_stream_set_attribute",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "stream", "type": "JYPPX_CudaStream*", "direction": "in" },
+        { "name": "attribute", "type": "int32_t", "direction": "in", "managedType": "int", "moduleManagedType": "int" },
+        { "name": "value", "type": "const void*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" }
+      ]
+    },
+    {
+      "id": "cuda-device-get-host-atomic-capabilities",
+      "entryPoint": "jyppx_cuda_device_get_host_atomic_capabilities",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "capabilities", "type": "uint32_t*", "direction": "out", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "operations", "type": "const int32_t*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "count", "type": "uint32_t", "direction": "in", "managedType": "uint", "moduleManagedType": "uint" },
+        { "name": "device", "type": "int32_t", "direction": "in", "managedType": "int", "moduleManagedType": "int" }
+      ]
+    },
+    {
+      "id": "cuda-device-get-p2p-atomic-capabilities",
+      "entryPoint": "jyppx_cuda_device_get_p2p_atomic_capabilities",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "capabilities", "type": "uint32_t*", "direction": "out", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "operations", "type": "const int32_t*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "count", "type": "uint32_t", "direction": "in", "managedType": "uint", "moduleManagedType": "uint" },
+        { "name": "source_device", "type": "int32_t", "direction": "in", "managedType": "int", "moduleManagedType": "int" },
+        { "name": "destination_device", "type": "int32_t", "direction": "in", "managedType": "int", "moduleManagedType": "int" }
+      ]
+    },
+    { "id": "cuda-choose-device-deferred", "entryPoint": "jyppx_cuda_choose_device_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT", "parameters": [] },
+    { "id": "cuda-device-get-dev-resource-deferred", "entryPoint": "jyppx_cuda_device_get_dev_resource_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT", "parameters": [] },
+    { "id": "cuda-device-get-execution-ctx-deferred", "entryPoint": "jyppx_cuda_device_get_execution_ctx_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT", "parameters": [] },
+    { "id": "cuda-device-get-nv-sci-sync-attributes-deferred", "entryPoint": "jyppx_cuda_device_get_nv_sci_sync_attributes_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT", "parameters": [] },
+    { "id": "cuda-device-register-async-notification-deferred", "entryPoint": "jyppx_cuda_device_register_async_notification_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT", "parameters": [] },
+    { "id": "cuda-device-unregister-async-notification-deferred", "entryPoint": "jyppx_cuda_device_unregister_async_notification_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT", "parameters": [] },
+    { "id": "cuda-stream-add-callback-deferred", "entryPoint": "jyppx_cuda_stream_add_callback_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT", "parameters": [] },
+    { "id": "cuda-stream-begin-capture-to-graph-deferred", "entryPoint": "jyppx_cuda_stream_begin_capture_to_graph_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT", "parameters": [] },
+    { "id": "cuda-stream-get-capture-info-ptsz-deferred", "entryPoint": "jyppx_cuda_stream_get_capture_info_ptsz_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT", "parameters": [] },
+    { "id": "cuda-stream-get-capture-info-v3-deferred", "entryPoint": "jyppx_cuda_stream_get_capture_info_v3_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT", "parameters": [] },
+    { "id": "cuda-stream-get-dev-resource-deferred", "entryPoint": "jyppx_cuda_stream_get_dev_resource_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT", "parameters": [] },
+    { "id": "cuda-stream-update-capture-dependencies-deferred", "entryPoint": "jyppx_cuda_stream_update_capture_dependencies_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT", "parameters": [] },
+    { "id": "cuda-stream-update-capture-dependencies-ptsz-deferred", "entryPoint": "jyppx_cuda_stream_update_capture_dependencies_ptsz_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT", "parameters": [] },
+    { "id": "cuda-stream-update-capture-dependencies-v2-deferred", "entryPoint": "jyppx_cuda_stream_update_capture_dependencies_v2_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT", "parameters": [] }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "module": "tensorrt",
+  "versionLine": "11",
+  "apis": [
+    {
+      "id": "trt11-parser-refitter-create-deferred",
+      "entryPoint": "jyppx_trt11_parser_refitter_create_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": []
+    },
+    {
+      "id": "trt11-onnx-config-create-deferred",
+      "entryPoint": "jyppx_trt11_onnx_config_create_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": []
+    },
+    {
+      "id": "trt11-global-init-lib-nvinfer-plugins-deferred",
+      "entryPoint": "jyppx_trt11_global_init_lib_nvinfer_plugins_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": []
+    },
+    {
+      "id": "trt11-global-set-internal-library-path-deferred",
+      "entryPoint": "jyppx_trt11_global_set_internal_library_path_deferred",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": []
+    }
+  ]
+}

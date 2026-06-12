@@ -1,0 +1,187 @@
+{
+  "$schema": "../../bridge-api.schema.json",
+  "module": "tensorrt",
+  "versionLine": "8",
+  "apis": [
+    {
+      "id": "jyppx-trt8-runtime-set-dla-core",
+      "entryPoint": "jyppx_trt8_runtime_set_dla_core",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "dla_core", "type": "int32_t", "direction": "in" }
+      ]
+    },
+    {
+      "id": "jyppx-trt8-runtime-get-dla-core",
+      "entryPoint": "jyppx_trt8_runtime_get_dla_core",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "out_dla_core", "type": "int32_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "jyppx-trt8-runtime-get-dla-core-count",
+      "entryPoint": "jyppx_trt8_runtime_get_dla_core_count",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "out_count", "type": "int32_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "jyppx-trt8-runtime-set-max-threads",
+      "entryPoint": "jyppx_trt8_runtime_set_max_threads",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "max_threads", "type": "int32_t", "direction": "in" },
+        { "name": "out_set", "type": "JYPPX_Boolean*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "jyppx-trt8-runtime-get-max-threads",
+      "entryPoint": "jyppx_trt8_runtime_get_max_threads",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "out_max_threads", "type": "int32_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "jyppx-trt8-runtime-set-temporary-directory",
+      "entryPoint": "jyppx_trt8_runtime_set_temporary_directory",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "directory_path", "type": "const char*", "direction": "in" }
+      ]
+    },
+    {
+      "id": "jyppx-trt8-runtime-get-temporary-directory",
+      "entryPoint": "jyppx_trt8_runtime_get_temporary_directory",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "jyppx-trt8-runtime-clear-temporary-directory",
+      "entryPoint": "jyppx_trt8_runtime_clear_temporary_directory",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" }
+      ]
+    },
+    {
+      "id": "jyppx-trt8-runtime-set-tempfile-control-flags",
+      "entryPoint": "jyppx_trt8_runtime_set_tempfile_control_flags",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "flags", "type": "uint32_t", "direction": "in" }
+      ]
+    },
+    {
+      "id": "jyppx-trt8-runtime-get-tempfile-control-flags",
+      "entryPoint": "jyppx_trt8_runtime_get_tempfile_control_flags",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "out_flags", "type": "uint32_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "jyppx-trt8-runtime-set-engine-host-code-allowed",
+      "entryPoint": "jyppx_trt8_runtime_set_engine_host_code_allowed",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "allowed", "type": "JYPPX_Boolean", "direction": "in" }
+      ]
+    },
+    {
+      "id": "jyppx-trt8-runtime-get-engine-host-code-allowed",
+      "entryPoint": "jyppx_trt8_runtime_get_engine_host_code_allowed",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "out_allowed", "type": "JYPPX_Boolean*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "jyppx-trt8-runtime-has-error-recorder",
+      "entryPoint": "jyppx_trt8_runtime_has_error_recorder",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "out_has_recorder", "type": "JYPPX_Boolean*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "jyppx-trt8-runtime-clear-error-recorder",
+      "entryPoint": "jyppx_trt8_runtime_clear_error_recorder",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" }
+      ]
+    },
+    {
+      "id": "jyppx-trt8-runtime-clear-gpu-allocator",
+      "entryPoint": "jyppx_trt8_runtime_clear_gpu_allocator",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": true,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" }
+      ]
+    }
+  ]
+}

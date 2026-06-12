@@ -1,0 +1,52 @@
+- name: Home
+  href: index.md
+- name: Latest Windows API Status
+  href: articles/zh-cn/windows-api-completion-latest.md
+- name: English
+  items:
+  - name: Getting Started
+    href: articles/en/getting-started.md
+  - name: Installation Layout
+    href: articles/en/installation-layout.md
+  - name: Windows API Completion
+    href: articles/en/windows-api-completion.md
+  - name: API Coverage and Deferred Boundaries
+    href: articles/en/api-coverage-and-deferred-boundaries.md
+  - name: Source Organization
+    href: articles/en/source-organization.md
+  - name: Linux Runner Setup
+    href: articles/en/linux-runner-setup.md
+  - name: Runtime Packages
+    href: articles/en/runtime-packages.md
+  - name: Runtime Distribution Strategy
+    href: articles/en/runtime-distribution-strategy.md
+  - name: TRT10 Split Prototype
+    href: articles/en/runtime-distribution-strategy.md
+  - name: Package Consumer Validation
+    href: articles/en/package-consumer-validation.md
+  - name: Release Candidate Gate
+    href: articles/en/release-candidate-gate.md
+  - name: Sample Runners
+    href: articles/en/sample-runners.md
+- name: Chinese
+  items:
+  - name: Getting Started
+    href: articles/zh-cn/getting-started.md
+  - name: Installation Layout
+    href: articles/zh-cn/installation-layout.md
+  - name: Windows API Completion
+    href: articles/zh-cn/windows-api-completion.md
+  - name: Source Organization
+    href: articles/zh-cn/source-organization.md
+  - name: Linux Runner Setup
+    href: articles/zh-cn/linux-runner-setup.md
+  - name: Runtime Packages
+    href: articles/zh-cn/runtime-packages.md
+  - name: Runtime Distribution Strategy
+    href: articles/zh-cn/runtime-distribution-strategy.md
+  - name: Package Consumer Validation
+    href: articles/zh-cn/package-consumer-validation.md
+  - name: Release Candidate Gate
+    href: articles/zh-cn/release-candidate-gate.md
+  - name: Sample Runners
+    href: articles/zh-cn/sample-runners.md

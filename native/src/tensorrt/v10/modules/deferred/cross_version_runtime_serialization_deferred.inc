@@ -1,0 +1,18 @@
+#define JYPPX_TRT10_RUNTIME_SERIALIZATION_DEFERRED_STUB(function_name, interface_name) \
+    JYPPX_StatusCode function_name(void) \
+    { \
+        return jyppx::tensorrt::report_not_implemented(kLine, interface_name " deferred: runtime serialization, plugin-host-code, borrowed object, or stream/lifetime boundary requires a dedicated safe managed bridge"); \
+    }
+
+JYPPX_TRT10_RUNTIME_SERIALIZATION_DEFERRED_STUB(jyppx_trt10_plugin_v3_one_runtime_attach_to_context_deferred, "IPluginV3OneRuntime::attachToContext")
+JYPPX_TRT10_RUNTIME_SERIALIZATION_DEFERRED_STUB(jyppx_trt10_plugin_v3_one_runtime_enqueue_deferred, "IPluginV3OneRuntime::enqueue")
+JYPPX_TRT10_RUNTIME_SERIALIZATION_DEFERRED_STUB(jyppx_trt10_plugin_v3_one_runtime_get_fields_to_serialize_deferred, "IPluginV3OneRuntime::getFieldsToSerialize")
+JYPPX_TRT10_RUNTIME_SERIALIZATION_DEFERRED_STUB(jyppx_trt10_plugin_v3_one_runtime_get_interface_info_deferred, "IPluginV3OneRuntime::getInterfaceInfo")
+JYPPX_TRT10_RUNTIME_SERIALIZATION_DEFERRED_STUB(jyppx_trt10_plugin_v3_one_runtime_on_shape_change_deferred, "IPluginV3OneRuntime::onShapeChange")
+JYPPX_TRT10_RUNTIME_SERIALIZATION_DEFERRED_STUB(jyppx_trt10_plugin_v3_one_runtime_set_tactic_deferred, "IPluginV3OneRuntime::setTactic")
+JYPPX_TRT10_RUNTIME_SERIALIZATION_DEFERRED_STUB(jyppx_trt10_runtime_deserialize_cuda_engine_v2_deferred, "IRuntime::deserializeCudaEngineV2")
+JYPPX_TRT10_RUNTIME_SERIALIZATION_DEFERRED_STUB(jyppx_trt10_runtime_get_logger_deferred, "IRuntime::getLogger")
+JYPPX_TRT10_RUNTIME_SERIALIZATION_DEFERRED_STUB(jyppx_trt10_runtime_get_plugin_registry_deferred, "IRuntime::getPluginRegistry")
+JYPPX_TRT10_RUNTIME_SERIALIZATION_DEFERRED_STUB(jyppx_trt10_runtime_load_runtime_deferred, "IRuntime::loadRuntime")
+
+#undef JYPPX_TRT10_RUNTIME_SERIALIZATION_DEFERRED_STUB

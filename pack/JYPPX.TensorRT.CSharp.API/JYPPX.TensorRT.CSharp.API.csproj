@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <IsPackable>true</IsPackable>
+    <PackageId>JYPPX.TensorRT.CSharp.API</PackageId>
+    <Title>JYPPX.TensorRT.CSharp.API</Title>
+    <Description>Managed TensorRT and CUDA bridge assemblies for TensorRtSharp4.0.</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
+    <RepositoryUrl>$(RepositoryUrl)</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+    <ProjectReference Include="..\\..\\src\\JYPPX.TensorRtSharp\\JYPPX.TensorRtSharp.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\\..\\src\\JYPPX.CudaSharp\\JYPPX.CudaSharp.csproj" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <Target Name="BuildManagedAssembliesForPackage" BeforeTargets="_GetPackageFiles">
+    <MSBuild
+      Projects="..\\..\\src\\JYPPX.Shared\\JYPPX.Shared.csproj;..\\..\\src\\JYPPX.TensorRtSharp\\JYPPX.TensorRtSharp.csproj;..\\..\\src\\JYPPX.CudaSharp\\JYPPX.CudaSharp.csproj"
+      Targets="Build"
+      Properties="Configuration=$(Configuration)" />
+
+    <ItemGroup>
+      <_ManagedPackageAsset Include="..\\..\\src\\JYPPX.Shared\\bin\\$(Configuration)\\**\\JYPPX.Shared.dll" />
+      <_ManagedPackageAsset Include="..\\..\\src\\JYPPX.Shared\\bin\\$(Configuration)\\**\\JYPPX.Shared.xml" />
+      <_ManagedPackageAsset Include="..\\..\\src\\JYPPX.TensorRtSharp\\bin\\$(Configuration)\\**\\JYPPX.TensorRtSharp.dll" />
+      <_ManagedPackageAsset Include="..\\..\\src\\JYPPX.TensorRtSharp\\bin\\$(Configuration)\\**\\JYPPX.TensorRtSharp.xml" />
+      <_ManagedPackageAsset Include="..\\..\\src\\JYPPX.CudaSharp\\bin\\$(Configuration)\\**\\JYPPX.CudaSharp.dll" />
+      <_ManagedPackageAsset Include="..\\..\\src\\JYPPX.CudaSharp\\bin\\$(Configuration)\\**\\JYPPX.CudaSharp.xml" />
+      <None Include="@(_ManagedPackageAsset)" Pack="true" PackagePath="lib" Visible="false" />
+    </ItemGroup>
+  </Target>
+</Project>
