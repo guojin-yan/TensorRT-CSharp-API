@@ -35,14 +35,16 @@ Latest local evidence, generated on 2026-06-12:
 
 Consumer validation is a release gate after interface coverage reaches zero missing rows. A package that restores and copies native assets correctly is not sufficient by itself: at least one intended release runtime key should also have smoke evidence on a compatible machine before it is treated as release-candidate usable.
 
-On Windows machines with WDAC / application-control policies, unsigned freshly built consumer outputs can be blocked with `0x800711C7` even when package restore and native asset copy are correct. Pass `-SignConsumerOutput` to sign the generated consumer app, managed assemblies, and bridge DLL with the local development code-signing certificate before running smoke:
+On Windows machines with WDAC / application-control policies, unsigned freshly built consumer outputs can be blocked with `0x800711C7` even when package restore and native asset copy are correct. Pass `-SignConsumerOutput` to sign the generated consumer app, managed assemblies, and bridge DLL with the local development code-signing certificate before running smoke. If the local policy also requires the certificate to be trusted for the current user, add `-TrustSigningCertificate` and `-TrustSigningCertificateRoot`:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\eng\Test-PackageConsumer.ps1 `
   -RuntimePackageKey win-x64-trt11.0-cuda12.9-cudnn9.22 `
   -RunSmoke `
   -SmokeRuntimePackageKey win-x64-trt11.0-cuda12.9-cudnn9.22 `
-  -SignConsumerOutput
+  -SignConsumerOutput `
+  -TrustSigningCertificate `
+  -TrustSigningCertificateRoot
 ```
 
 CUDA `12.9` target packages must be validated with the installed CUDA `12.9` toolkit and matching TensorRT/cuDNN assets. The earlier CUDA `12.3` interim fallback is retired.

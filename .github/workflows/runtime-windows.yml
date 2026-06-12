@@ -28,6 +28,11 @@ on:
         required: false
         default: true
         type: boolean
+      sign_consumer_output:
+        description: Sign consumer output before smoke on the self-hosted runner
+        required: false
+        default: true
+        type: boolean
       publish_to_github_packages:
         description: Publish packages to GitHub Packages
         required: false
@@ -62,6 +67,11 @@ on:
         type: string
       run_smoke:
         description: Run package consumer smoke after packing
+        required: false
+        default: true
+        type: boolean
+      sign_consumer_output:
+        description: Sign consumer output before smoke on the self-hosted runner
         required: false
         default: true
         type: boolean
@@ -112,6 +122,11 @@ jobs:
           )
           if ('${{ inputs.run_smoke }}' -eq 'true') {
             $arguments += '-RunSmoke'
+            if ('${{ inputs.sign_consumer_output }}' -eq 'true') {
+              $arguments += '-SignConsumerOutput'
+              $arguments += '-TrustConsumerSigningCertificate'
+              $arguments += '-TrustConsumerSigningCertificateRoot'
+            }
           }
           powershell @arguments
 
@@ -138,6 +153,11 @@ jobs:
             )
             if ('${{ inputs.run_smoke }}' -eq 'true') {
               $arguments += '-RunSmoke'
+              if ('${{ inputs.sign_consumer_output }}' -eq 'true') {
+                $arguments += '-SignConsumerOutput'
+                $arguments += '-TrustConsumerSigningCertificate'
+                $arguments += '-TrustConsumerSigningCertificateRoot'
+              }
             }
             powershell @arguments
           }

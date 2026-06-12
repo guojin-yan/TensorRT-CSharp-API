@@ -83,13 +83,11 @@ $workflowContracts = @(
     requirements = @(
       New-Requirement -Needle "workflow_call" -Description "reusable workflow entrypoint"
       New-Requirement -Needle "workflow_dispatch" -Description "manual trigger"
-      New-Requirement -Needle "Resolve-RuntimeMatrix.ps1" -Description "runtime matrix generation"
-      New-Requirement -Needle "Resolve-RuntimeRoots.ps1" -Description "runtime root resolution"
       New-Requirement -Needle "self-hosted" -Description "self-hosted runner"
       New-Requirement -Needle "windows" -Description "windows runner label"
-      New-Requirement -Needle "Validate-WindowsRuntimeInputs.ps1" -Description "Windows input validation"
-      New-Requirement -Needle "Collect-RuntimeAssets.ps1" -Description "runtime asset collection"
-      New-Requirement -Needle "Test-PackageConsumer.ps1" -Description "package consumer validation"
+      New-Requirement -Needle "Invoke-LocalRuntimePackage.ps1" -Description "full runtime packaging entrypoint"
+      New-Requirement -Needle "Invoke-LocalSplitRuntimePackage.ps1" -Description "split runtime packaging entrypoint"
+      New-Requirement -Needle "sign_consumer_output" -Description "consumer signing toggle"
       New-Requirement -Needle "dotnet nuget push" -Description "package publication"
     )
   }

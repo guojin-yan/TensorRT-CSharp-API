@@ -103,6 +103,49 @@ See:
 - `docs/articles/en/package-consumer-validation.md`
 - `docs/articles/en/release-candidate-gate.md`
 
+## Release Automation
+
+GitHub Actions does not need a GitHub-hosted machine for every job. In this repository:
+
+- `docs-release.yml` and the hosted part of `package-managed.yml` run on GitHub-hosted runners.
+- `runtime-windows.yml` runs on the local self-hosted Windows runner when dispatched from GitHub.
+- `release-bundle.yml` fans out to managed package, Windows runtime, and Linux runtime modules.
+
+That means there are two supported execution modes:
+
+1. Dispatch the workflow through GitHub with `gh`, then let the self-hosted runner on this machine execute the Windows runtime job.
+2. Run the local scripts directly when you want a true workstation-only validation loop without creating a GitHub Actions run record.
+
+Remote dispatch example:
+
+```powershell
+gh workflow run release-bundle.yml `
+  --ref TensorRtSharp4.0 `
+  -f version=4.0.0 `
+  -f windows_runtime_keys=win-x64-trt11.0-cuda12.9-cudnn9.22 `
+  -f windows_runtime_delivery_mode=full `
+  -f run_windows_smoke=true `
+  -f sign_windows_consumer_output=true `
+  -f publish_managed_to_nuget=false `
+  -f publish_to_github_packages=false `
+  -f attach_runtime_to_github_release=false
+```
+
+Local bundle example:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalReleaseBundle.ps1 `
+  -Version 4.0.0 `
+  -WindowsRuntimeKeys win-x64-trt11.0-cuda12.9-cudnn9.22 `
+  -WindowsRuntimeDeliveryMode full `
+  -RunWindowsSmoke `
+  -SignWindowsConsumerOutput `
+  -TrustWindowsConsumerSigningCertificate `
+  -TrustWindowsConsumerSigningCertificateRoot
+```
+
+On WDAC / application-control machines, the local and self-hosted Windows runtime validation path can sign the generated consumer output before smoke. This helps when `PackageConsumerSmoke.exe` would otherwise be blocked even though package restore, native asset copy, and build succeeded.
+
 ## Repository Layout
 
 ```text

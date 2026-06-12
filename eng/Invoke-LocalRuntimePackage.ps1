@@ -7,6 +7,12 @@ param(
   [switch]$SkipNativeBuild,
   [switch]$SkipConsumerValidation,
   [switch]$RunSmoke,
+  [switch]$SignConsumerOutput,
+  [switch]$TrustConsumerSigningCertificate,
+  [switch]$TrustConsumerSigningCertificateRoot,
+  [string]$CertificateThumbprint,
+  [string]$CertificateSubject = "CN=JYPPX TensorRtSharp Local Dev Code Signing",
+  [string]$SigntoolPath,
   [string]$RepositoryRoot
 )
 
@@ -272,6 +278,30 @@ foreach ($key in $runtimeKeys) {
 
     if ($RunSmoke.IsPresent) {
       $consumerArguments += "-RunSmoke"
+    }
+
+    if ($SignConsumerOutput.IsPresent) {
+      $consumerArguments += "-SignConsumerOutput"
+    }
+
+    if ($TrustConsumerSigningCertificate.IsPresent -or $TrustConsumerSigningCertificateRoot.IsPresent) {
+      $consumerArguments += "-TrustSigningCertificate"
+    }
+
+    if ($TrustConsumerSigningCertificateRoot.IsPresent) {
+      $consumerArguments += "-TrustSigningCertificateRoot"
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($CertificateThumbprint)) {
+      $consumerArguments += @("-CertificateThumbprint", $CertificateThumbprint)
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($CertificateSubject)) {
+      $consumerArguments += @("-CertificateSubject", $CertificateSubject)
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($SigntoolPath)) {
+      $consumerArguments += @("-SigntoolPath", $SigntoolPath)
     }
 
     Invoke-CheckedCommand -FilePath "powershell" -ArgumentList $consumerArguments

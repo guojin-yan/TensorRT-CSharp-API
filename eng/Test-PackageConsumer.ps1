@@ -9,6 +9,8 @@ param(
   [switch]$RunSmoke,
   [string[]]$SmokeRuntimePackageKey = @(),
   [switch]$SignConsumerOutput,
+  [switch]$TrustSigningCertificate,
+  [switch]$TrustSigningCertificateRoot,
   [string]$CertificateThumbprint,
   [string]$CertificateSubject = "CN=JYPPX TensorRtSharp Local Dev Code Signing",
   [string]$SigntoolPath,
@@ -270,6 +272,52 @@ function Get-OrCreate-CodeSigningCertificate {
     -NotAfter (Get-Date).AddYears(5)
 }
 
+function Add-CertificateToStore {
+  param(
+    [Parameter(Mandatory = $true)]
+    [System.Security.Cryptography.X509Certificates.X509Certificate2]$Certificate,
+    [Parameter(Mandatory = $true)]
+    [System.Security.Cryptography.X509Certificates.StoreName]$StoreName
+  )
+
+  $store = [System.Security.Cryptography.X509Certificates.X509Store]::new(
+    $StoreName,
+    [System.Security.Cryptography.X509Certificates.StoreLocation]::CurrentUser)
+  try {
+    $store.Open([System.Security.Cryptography.X509Certificates.OpenFlags]::ReadWrite)
+    $existing = $store.Certificates |
+      Where-Object { $_.Thumbprint -eq $Certificate.Thumbprint } |
+      Select-Object -First 1
+    if ($existing) {
+      return "already-present"
+    }
+
+    $store.Add($Certificate)
+    return "added"
+  }
+  finally {
+    $store.Close()
+  }
+}
+
+function Ensure-ConsumerSigningCertificateTrust {
+  param(
+    [Parameter(Mandatory = $true)]
+    [System.Security.Cryptography.X509Certificates.X509Certificate2]$Certificate
+  )
+
+  $publisherStatus = Add-CertificateToStore -Certificate $Certificate -StoreName ([System.Security.Cryptography.X509Certificates.StoreName]::TrustedPublisher)
+  $rootStatus = "not-requested"
+  if ($TrustSigningCertificateRoot.IsPresent) {
+    $rootStatus = Add-CertificateToStore -Certificate $Certificate -StoreName ([System.Security.Cryptography.X509Certificates.StoreName]::Root)
+  }
+
+  return [pscustomobject]@{
+    currentUserTrustedPublisher = $publisherStatus
+    currentUserRoot = $rootStatus
+  }
+}
+
 function Sign-ConsumerOutput {
   param(
     [string]$OutputDirectory
@@ -277,6 +325,13 @@ function Sign-ConsumerOutput {
 
   $resolvedSigntoolPath = Find-Signtool -PreferredPath $SigntoolPath
   $certificate = Get-OrCreate-CodeSigningCertificate -Thumbprint $CertificateThumbprint -Subject $CertificateSubject
+  $trustStatus = [pscustomobject]@{
+    currentUserTrustedPublisher = "not-requested"
+    currentUserRoot = "not-requested"
+  }
+  if ($TrustSigningCertificate.IsPresent) {
+    $trustStatus = Ensure-ConsumerSigningCertificateTrust -Certificate $certificate
+  }
   $candidates = @(Get-ChildItem -LiteralPath $OutputDirectory -File -ErrorAction SilentlyContinue |
     Where-Object {
       $_.Name -like "JYPPX*.dll" -or
@@ -301,7 +356,12 @@ function Sign-ConsumerOutput {
     }
   }
 
-  return [int]$candidates.Count
+  return [pscustomobject]@{
+    count = [int]$candidates.Count
+    certificateThumbprint = $certificate.Thumbprint
+    currentUserTrustedPublisher = $trustStatus.currentUserTrustedPublisher
+    currentUserRoot = $trustStatus.currentUserRoot
+  }
 }
 
 function Unblock-ConsumerRuntimeAssets {
@@ -551,8 +611,15 @@ Console.WriteLine("CudaDevices=" + cuda.CudaRuntimeInfo.DeviceCount + " Vendor="
 
   Unblock-ConsumerRuntimeAssets -OutputDirectory $outputDirectory -FileNames $expectedNativeFiles
   $signedConsumerOutputCount = 0
+  $consumerSigningThumbprint = $null
+  $consumerSigningTrustedPublisher = "not-requested"
+  $consumerSigningRoot = "not-requested"
   if ($SignConsumerOutput.IsPresent) {
-    $signedConsumerOutputCount = Sign-ConsumerOutput -OutputDirectory $outputDirectory
+    $consumerSigningResult = Sign-ConsumerOutput -OutputDirectory $outputDirectory
+    $signedConsumerOutputCount = $consumerSigningResult.count
+    $consumerSigningThumbprint = $consumerSigningResult.certificateThumbprint
+    $consumerSigningTrustedPublisher = $consumerSigningResult.currentUserTrustedPublisher
+    $consumerSigningRoot = $consumerSigningResult.currentUserRoot
   }
   Unblock-ConsumerRuntimeAssets -OutputDirectory $outputDirectory -FileNames @(
     $expectedNativeFiles +
@@ -575,6 +642,8 @@ Console.WriteLine("CudaDevices=" + cuda.CudaRuntimeInfo.DeviceCount + " Vendor="
   Write-Host "  Native assets: $foundNativeFileCount/$($expectedNativeFiles.Count)"
   Write-Host "  Smoke: $smokeResult"
   Write-Host "  Signed consumer output: $signedConsumerOutputCount"
+  Write-Host "  Consumer signing certificate: $consumerSigningThumbprint"
+  Write-Host "  Consumer signing trust: publisher=$consumerSigningTrustedPublisher root=$consumerSigningRoot"
   Write-Host "  Elapsed: ${elapsedSeconds}s"
   Write-Host "  Consumer output: $outputDirectory"
 
@@ -595,6 +664,9 @@ Console.WriteLine("CudaDevices=" + cuda.CudaRuntimeInfo.DeviceCount + " Vendor="
     SmokeResult = $smokeResult
     ConsumerOutputSigned = $SignConsumerOutput.IsPresent
     ConsumerOutputSignedFileCount = $signedConsumerOutputCount
+    ConsumerOutputSigningCertificateThumbprint = $consumerSigningThumbprint
+    ConsumerOutputSigningTrustedPublisher = $consumerSigningTrustedPublisher
+    ConsumerOutputSigningRoot = $consumerSigningRoot
     ElapsedSeconds = $elapsedSeconds
     ConsumerOutput = $outputDirectory
   }
