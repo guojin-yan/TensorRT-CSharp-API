@@ -62,10 +62,29 @@ switch ($SortMode) {
   }
 }
 
+function Test-IsAsciiText {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$Value
+  )
+
+  foreach ($character in $Value.ToCharArray()) {
+    if ([int][char]$character -gt 127) {
+      return $false
+    }
+  }
+
+  return $true
+}
+
 foreach ($package in $packages) {
   $attempt = 1
   $pushed = $false
   $hasApiKey = -not [string]::IsNullOrWhiteSpace($ApiKey)
+
+  if ($hasApiKey -and -not (Test-IsAsciiText -Value $ApiKey)) {
+    throw "ApiKey contains non-ASCII characters. Provide the plain-text package API key instead of an encrypted credential blob or other formatted secret."
+  }
 
   while (-not $pushed -and $attempt -le $MaxAttempts) {
     Write-Host ("Pushing package attempt {0}/{1}: {2} ({3} MB) ApiKey={4}" -f $attempt, $MaxAttempts, $package.FullName, [Math]::Round($package.Length / 1MB, 2), $hasApiKey)
