@@ -18,11 +18,24 @@ function Get-ExpectedFullRuntimeAssetNames {
   )
 
   $files = @($Package.bridgeFile)
-  foreach ($relativePath in @($Package.tensorRtFiles + $Package.cudaFiles)) {
+  foreach ($relativePath in @($Package.tensorRtFiles + $Package.cudaFiles + $Package.cudnnFiles)) {
     $files += [System.IO.Path]::GetFileName($relativePath)
   }
 
   return @($files | Sort-Object -Unique)
+}
+
+function Test-AssetMatchesPattern {
+  param(
+    [string]$Asset,
+    [string]$Pattern
+  )
+
+  if ([string]::IsNullOrWhiteSpace($Asset) -or [string]::IsNullOrWhiteSpace($Pattern)) {
+    return $false
+  }
+
+  return $Asset -like $Pattern
 }
 
 $runtimeManifestPath = Join-Path $RepositoryRoot "pack\runtime\runtime-packages.manifest.json"
@@ -44,12 +57,12 @@ foreach ($splitPackage in @($splitManifest.packages)) {
     }
   }
 
-  if ($splitPackage.role -notin @("core", "extensions")) {
-    $errors.Add("Split package '$($splitPackage.key)' has unsupported role '$($splitPackage.role)'.")
+  if ($splitPackage.role -in @($null, "")) {
+    $errors.Add("Split package '$($splitPackage.key)' must define a non-empty role.")
   }
 
-  if ($splitPackage.prototypeState -ne "design-only") {
-    $errors.Add("Split package '$($splitPackage.key)' must remain design-only until separately validated.")
+  if ($splitPackage.prototypeState -notin @("design-only", "local-validated")) {
+    $errors.Add("Split package '$($splitPackage.key)' has unsupported prototypeState '$($splitPackage.prototypeState)'.")
   }
 
   $sourcePackage = $runtimeManifest.packages | Where-Object { $_.key -eq $splitPackage.sourceRuntimeKey } | Select-Object -First 1
@@ -58,12 +71,8 @@ foreach ($splitPackage in @($splitManifest.packages)) {
     continue
   }
 
-  if ($sourcePackage.tensorRtLine -ne "10") {
-    $errors.Add("Split package '$($splitPackage.key)' must reference a TensorRT 10 source package.")
-  }
-
-  if ($sourcePackage.distributionTier -ne "split-delivery-candidate") {
-    $errors.Add("Split package '$($splitPackage.key)' source runtime '$($sourcePackage.key)' is not a split-delivery candidate.")
+  if ($sourcePackage.distributionTier -notin @("split-delivery-candidate", "private-feed")) {
+    $errors.Add("Split package '$($splitPackage.key)' source runtime '$($sourcePackage.key)' must be a split-delivery or private-feed candidate.")
   }
 
   if ($sourcePackage.rid -ne $splitPackage.rid) {
@@ -94,13 +103,6 @@ foreach ($group in @($splitManifest.packages | Group-Object sourceRuntimeKey)) {
     continue
   }
 
-  $roles = @($group.Group | Select-Object -ExpandProperty role -Unique)
-  foreach ($requiredRole in @("core", "extensions")) {
-    if ($roles -notcontains $requiredRole) {
-      $errors.Add("Source runtime '$($group.Name)' is missing split role '$requiredRole'.")
-    }
-  }
-
   $fullAssets = @(Get-ExpectedFullRuntimeAssetNames -Package $sourcePackage)
   $splitAssets = @($group.Group | ForEach-Object { $_.assets } | Sort-Object -Unique)
   $duplicateAssets = @($group.Group | ForEach-Object { $_.assets } | Group-Object | Where-Object { $_.Count -gt 1 } | Select-Object -ExpandProperty Name)
@@ -109,13 +111,13 @@ foreach ($group in @($splitManifest.packages | Group-Object sourceRuntimeKey)) {
   }
 
   foreach ($asset in $fullAssets) {
-    if ($splitAssets -notcontains $asset) {
+    if (-not ($splitAssets | Where-Object { Test-AssetMatchesPattern -Asset $_ -Pattern $asset })) {
       $errors.Add("Source runtime '$($group.Name)' full asset '$asset' is not assigned to any split package.")
     }
   }
 
   foreach ($asset in $splitAssets) {
-    if ($fullAssets -notcontains $asset) {
+    if (-not ($fullAssets | Where-Object { Test-AssetMatchesPattern -Asset $asset -Pattern $_ })) {
       $errors.Add("Source runtime '$($group.Name)' split asset '$asset' is not present in the full runtime asset set.")
     }
   }
@@ -166,4 +168,3 @@ if ($errors.Count -gt 0) {
   }
   exit 1
 }
-

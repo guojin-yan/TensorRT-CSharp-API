@@ -18,6 +18,11 @@ on:
         required: false
         default: ""
         type: string
+      windows_runtime_delivery_mode:
+        description: Windows runtime package layout to produce
+        required: false
+        default: full
+        type: string
       linux_runtime_keys:
         description: Optional comma-separated Linux runtime keys
         required: false
@@ -70,6 +75,7 @@ jobs:
       version: ${{ inputs.version }}
       configuration: ${{ inputs.configuration }}
       runtime_keys: ${{ inputs.windows_runtime_keys }}
+      runtime_delivery_mode: ${{ inputs.windows_runtime_delivery_mode }}
       run_smoke: ${{ inputs.run_windows_smoke }}
       publish_to_github_packages: ${{ inputs.publish_to_github_packages }}
       attach_to_github_release: ${{ inputs.attach_runtime_to_github_release }}
