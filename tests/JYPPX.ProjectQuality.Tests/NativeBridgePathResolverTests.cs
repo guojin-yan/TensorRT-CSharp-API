@@ -14,6 +14,7 @@ public sealed class NativeBridgePathResolverTests
 
         try
         {
+            Directory.CreateDirectory(bridgeDirectory);
             Environment.SetEnvironmentVariable("JYPPX_NATIVE_BRIDGE_PATH", bridgeDirectory);
             string[] directories = NativeBridgePathResolver.EnumerateDependencyDirectories(Assembly.GetExecutingAssembly()).ToArray();
 
