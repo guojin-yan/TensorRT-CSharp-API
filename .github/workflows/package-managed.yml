@@ -122,8 +122,21 @@ jobs:
             --api-key "${{ github.token }}" `
             --skip-duplicate
 
+  publish-nuget:
+    if: ${{ inputs.publish_to_nuget }}
+    needs: pack
+    runs-on:
+      - self-hosted
+      - windows
+      - x64
+    steps:
+      - name: Download managed package artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifact_name }}
+          path: artifacts/managed
+
       - name: Publish managed package to nuget.org
-        if: ${{ inputs.publish_to_nuget }}
         shell: pwsh
         run: |
           $packages = Get-ChildItem -LiteralPath .\artifacts\managed -Filter *.nupkg | Select-Object -ExpandProperty FullName
@@ -132,10 +145,5 @@ jobs:
           }
 
           foreach ($package in $packages) {
-            if ([string]::IsNullOrWhiteSpace('${{ secrets.NUGET_API_KEY }}')) {
-              dotnet nuget push $package --source https://api.nuget.org/v3/index.json --skip-duplicate
-            }
-            else {
-              dotnet nuget push $package --source https://api.nuget.org/v3/index.json --api-key "${{ secrets.NUGET_API_KEY }}" --skip-duplicate
-            }
+            dotnet nuget push $package --source https://api.nuget.org/v3/index.json --skip-duplicate
           }
