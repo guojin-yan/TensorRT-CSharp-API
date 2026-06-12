@@ -42,10 +42,26 @@ function Resolve-ExistingPath {
 }
 
 $overrides = $null
-$localManifestPath = Join-Path $RepositoryRoot "pack\runtime\runtime-packages.local.json"
-if (Test-Path -LiteralPath $localManifestPath -PathType Leaf) {
+$localManifestCandidates = @(
+  (Join-Path $RepositoryRoot "pack\runtime\runtime-packages.local.json"),
+  $env:JYPPX_RUNTIME_PACKAGE_ROOTS_FILE,
+  (Join-Path $env:USERPROFILE ".jyppx\runtime-packages.local.json")
+)
+
+foreach ($localManifestPath in $localManifestCandidates) {
+  if ([string]::IsNullOrWhiteSpace($localManifestPath)) {
+    continue
+  }
+
+  if (-not (Test-Path -LiteralPath $localManifestPath -PathType Leaf)) {
+    continue
+  }
+
   $localManifest = Get-Content -LiteralPath $localManifestPath -Raw -Encoding utf8 | ConvertFrom-Json
   $overrides = $localManifest.packages | Where-Object { $_.key -eq $RuntimePackageKey } | Select-Object -First 1
+  if ($overrides) {
+    break
+  }
 }
 
 $cudnnMinorVersion = $null
