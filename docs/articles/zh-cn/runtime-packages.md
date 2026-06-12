@@ -32,7 +32,7 @@ runtime package key 和 NuGet package ID 必须包含依赖的 `major.minor` 版
 
 稳定的 TensorRT 10 / CUDA 11.8 路径已有当前消费端证据。2026-06-12，`win-x64-trt10.11-cuda11.8-cudnn8.9` 已从本地包源还原、构建消费端项目、复制 `16/16` 个 native assets，并通过 smoke；探针输出 TensorRT `10.11.0`、CUDA `11.8`、CUDA 设备数 `1`。
 
-当前本机已安装 CUDA `12.9`。目标为 CUDA `12.9` 的包现在使用 CUDA `12.9` 作为本地编译工具链；`win-x64-trt10.11-cuda12.9-cudnn9.22` 与 `win-x64-trt11.0-cuda12.9-cudnn9.22` 已完成本地 runtime 资产收集、runtime pack、消费端验证和消费端 smoke。
+当前维护环境已安装 CUDA `12.9`。目标为 CUDA `12.9` 的包现在使用 CUDA `12.9` 作为本地编译工具链；`win-x64-trt10.11-cuda12.9-cudnn9.22` 与 `win-x64-trt11.0-cuda12.9-cudnn9.22` 已完成本地 runtime 资产收集、runtime pack、消费端验证和消费端 smoke。
 
 TensorRT 11 已纳入矩阵并开始真实适配。Windows `trt11.0-cuda12.9-cudnn9.22` 已完成最小原生 smoke 和消费端 smoke：logger、runtime、builder、config、network、serialized engine、deserialize 和 execution context。`trt11.0-cuda13.2-cudnn9.22` 当前可编译、可收集资产、可打包，并通过 package consumer restore/build/native-copy；但受当前驱动 CUDA 能力限制，runtime smoke 保持 pending。
 

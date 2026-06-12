@@ -1,12 +1,12 @@
 # Installation Layout
 
-## Current local Windows layout
+## Recommended local Windows layout
 
 CUDA root:
 
 - standard NVIDIA Toolkit install under `%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA`
 
-Observed CUDA folders:
+Example CUDA folders validated in this repository:
 
 - `v11.6`
 - `v11.8`
@@ -18,7 +18,7 @@ TensorRT root:
 
 - `<repo-root>\third_party\nvidia`
 
-Observed TensorRT package folders:
+Example TensorRT package folders:
 
 - `TensorRT-10.11.0.33-cuda 11.8`
 - `TensorRT-10.11.0.33-cuda 12.9`
@@ -51,13 +51,13 @@ Managed runtime loading is production-first:
 
 CMake presets now refresh selected CUDA toolkit cache variables when a CUDA root is resolved, so stale `CUDAToolkit_NVCC_EXECUTABLE` values from another CUDA line should not survive reconfiguration.
 
-## Current validated combination
+## Validated combinations
 
 - TensorRT package: `TensorRT-10.11.0.33-cuda 11.8`
 - CUDA root: `%CUDA_PATH_V11_8%`
 - CMake preset: `win-x64-trt10-cuda11-release`
 
-Additional Windows combinations have also been validated locally:
+Additional Windows combinations validated in this repository:
 
 - `TensorRT-10.11.0.33-cuda 12.9` + `CUDA v12.9`
 - `TensorRT-8.6.1.6-cuda 11.8` + `CUDA v11.8`
@@ -70,4 +70,4 @@ TensorRT 11 is now part of the Windows build and runtime matrix. The `trt11.0-cu
 
 ## Linux expectation
 
-The current repository now assumes Linux runtime packaging will be driven from explicit roots on self-hosted Linux x64 runners rather than auto-discovery from this Windows machine.
+The repository assumes Linux runtime packaging will be driven from explicit roots on self-hosted Linux x64 runners rather than auto-discovery from a Windows development machine.

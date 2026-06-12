@@ -32,7 +32,7 @@ Current Windows runtime targets:
 
 The stable TensorRT 10 / CUDA 11.8 path has current package-consumer evidence. On 2026-06-12, `win-x64-trt10.11-cuda11.8-cudnn8.9` restored from local packages, built a consumer app, copied `16/16` native assets, and passed smoke with TensorRT `10.11.0`, CUDA `11.8`, and one CUDA device.
 
-CUDA `12.9` is installed on the current workstation and is now used by the CUDA `12.9` target presets. The `win-x64-trt10.11-cuda12.9-cudnn9.22` and `win-x64-trt11.0-cuda12.9-cudnn9.22` packages have completed local runtime asset collection, runtime packing, package consumer validation, and package consumer smoke.
+The validated Windows maintainer environment uses CUDA `12.9` for the CUDA `12.9` target presets. The `win-x64-trt10.11-cuda12.9-cudnn9.22` and `win-x64-trt11.0-cuda12.9-cudnn9.22` packages have completed local runtime asset collection, runtime packing, package consumer validation, and package consumer smoke.
 
 TensorRT 11 packages are active in the matrix. The Windows `trt11.0-cuda12.9-cudnn9.22` path now has native minimal adapter smoke validation and package consumer smoke validation for logger/runtime/builder/config/network/serialized-engine/deserialize/context. The `trt11.0-cuda13.2-cudnn9.22` bridge compiles, collects assets, packs, and passes package consumer restore/build/native-copy validation locally, but runtime smoke remains pending until a CUDA 13-capable driver/runtime stack is available.
 
@@ -47,7 +47,7 @@ Current package consumer validation:
 
 Windows local roots are intentionally not stored in the public manifest. Use `pack/runtime/runtime-packages.local.json` for machine-specific root overrides; that file is ignored by Git. Start from `pack/runtime/runtime-packages.local.example.json`.
 
-To sync the current workstation's repository-relative TensorRT/cuDNN roots into the user profile override file used by self-hosted runs, use:
+To sync repository-relative TensorRT/cuDNN roots from the active workstation into the user profile override file used by self-hosted runs, use:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\eng\Sync-LocalRuntimeRoots.ps1
