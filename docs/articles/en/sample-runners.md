@@ -1,5 +1,13 @@
-# Sample Runners
+﻿# Sample Runners
+## Shared Local Setup
 
+Run sample commands from the repository root and let the existing C# `NativeBridgePathResolver` discover `build-out`, `third_party/nvidia`, and standard CUDA install locations:
+
+```powershell
+$env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "1"
+```
+
+Only set `JYPPX_NATIVE_BRIDGE_PATH`, `JYPPX_TENSORRT_ROOT`, `JYPPX_CUDA_ROOT`, or `JYPPX_CUDNN_ROOT` when you intentionally want to override the default resolver behavior.
 ## CudaSmokeRunner
 
 Purpose:
@@ -15,9 +23,6 @@ Purpose:
 Run:
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt10-cuda11-release\bin\Release"
-$env:JYPPX_TENSORRT_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-10.11.0.33-cuda 11.8"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
 dotnet .\samples\CudaSmokeRunner\bin\Debug\net8.0\CudaSmokeRunner.dll
 ```
 
@@ -72,9 +77,6 @@ Purpose:
 Run:
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt10-cuda11-release\bin\Release"
-$env:JYPPX_TENSORRT_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-10.11.0.33-cuda 11.8"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
 dotnet .\samples\TensorRtSmokeRunner\bin\Debug\net8.0\TensorRtSmokeRunner.dll
 ```
 
@@ -109,8 +111,6 @@ Purpose:
 Run:
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt11-cuda13-release\bin\Release"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.2"
 dotnet .\samples\MultiStream\bin\Debug\net8.0\MultiStream.dll
 ```
 
@@ -133,9 +133,6 @@ Purpose:
 Run:
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt10-cuda11-release\bin\Release"
-$env:JYPPX_TENSORRT_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-10.11.0.33-cuda 11.8"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
 dotnet .\samples\DynamicShape\bin\Debug\net8.0\DynamicShape.dll --tensor-rt-line 10 --batch 3
 ```
 
@@ -161,9 +158,6 @@ Purpose:
 Run against TensorRT 10:
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt10-cuda11-release\bin\Release"
-$env:JYPPX_TENSORRT_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-10.11.0.33-cuda 11.8"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
 dotnet .\samples\RefitWeightsSmokeRunner\bin\Debug\net8.0\RefitWeightsSmokeRunner.dll --tensor-rt-line 10
 ```
 
@@ -223,19 +217,12 @@ Purpose:
 Run against TensorRT 10:
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt10-cuda11-release\bin\Release"
-$env:JYPPX_TENSORRT_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-10.11.0.33-cuda 11.8"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
 dotnet .\samples\OnnxToEngineSmokeRunner\bin\Debug\net8.0\OnnxToEngineSmokeRunner.dll --tensor-rt-line 10
 ```
 
 Run against TensorRT 8:
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt8-cuda11-release\bin\Release"
-$env:JYPPX_TENSORRT_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-8.6.1.6-cuda 11.8"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
-$env:JYPPX_CUDNN_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\cudnn-windows-x86_64-8.9.7.29_cuda11-archive"
 dotnet .\samples\OnnxToEngineSmokeRunner\bin\Debug\net8.0\OnnxToEngineSmokeRunner.dll --tensor-rt-line 8
 ```
 
@@ -278,18 +265,12 @@ Purpose:
 Run against TensorRT 10:
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt10-cuda11-release\bin\Release"
-$env:JYPPX_TENSORRT_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-10.11.0.33-cuda 11.8"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
 dotnet .\samples\NetworkBuilderSmokeRunner\bin\Debug\net8.0\NetworkBuilderSmokeRunner.dll --tensor-rt-line 10
 ```
 
 Run against TensorRT 8:
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt8-cuda11-release\bin\Release"
-$env:JYPPX_TENSORRT_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-8.6.1.6-cuda 11.8"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
 dotnet .\samples\NetworkBuilderSmokeRunner\bin\Debug\net8.0\NetworkBuilderSmokeRunner.dll --tensor-rt-line 8
 ```
 
@@ -316,19 +297,12 @@ Purpose:
 Run against TensorRT 10:
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt10-cuda11-release\bin\Release"
-$env:JYPPX_TENSORRT_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-10.11.0.33-cuda 11.8"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
 dotnet .\samples\NetworkLayersSmokeRunner\bin\Debug\net8.0\NetworkLayersSmokeRunner.dll --tensor-rt-line 10
 ```
 
 Run against TensorRT 8:
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt8-cuda11-release\bin\Release"
-$env:JYPPX_TENSORRT_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-8.6.1.6-cuda 11.8"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
-$env:JYPPX_CUDNN_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\cudnn-windows-x86_64-8.9.7.29_cuda11-archive"
 dotnet .\samples\NetworkLayersSmokeRunner\bin\Debug\net8.0\NetworkLayersSmokeRunner.dll --tensor-rt-line 8
 ```
 
@@ -353,19 +327,12 @@ Purpose:
 Run against TensorRT 10:
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt10-cuda11-release\bin\Release"
-$env:JYPPX_TENSORRT_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-10.11.0.33-cuda 11.8"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
 dotnet .\samples\NetworkShapeOpsSmokeRunner\bin\Debug\net8.0\NetworkShapeOpsSmokeRunner.dll --tensor-rt-line 10
 ```
 
 Run against TensorRT 8:
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt8-cuda11-release\bin\Release"
-$env:JYPPX_TENSORRT_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-8.6.1.6-cuda 11.8"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
-$env:JYPPX_CUDNN_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\cudnn-windows-x86_64-8.9.7.29_cuda11-archive"
 dotnet .\samples\NetworkShapeOpsSmokeRunner\bin\Debug\net8.0\NetworkShapeOpsSmokeRunner.dll --tensor-rt-line 8
 ```
 
@@ -388,19 +355,12 @@ Purpose:
 Run against TensorRT 10:
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt10-cuda11-release\bin\Release"
-$env:JYPPX_TENSORRT_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-10.11.0.33-cuda 11.8"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
 dotnet .\samples\NetworkConcatSliceSmokeRunner\bin\Debug\net8.0\NetworkConcatSliceSmokeRunner.dll --tensor-rt-line 10
 ```
 
 Run against TensorRT 8:
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt8-cuda11-release\bin\Release"
-$env:JYPPX_TENSORRT_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-8.6.1.6-cuda 11.8"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
-$env:JYPPX_CUDNN_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\cudnn-windows-x86_64-8.9.7.29_cuda11-archive"
 dotnet .\samples\NetworkConcatSliceSmokeRunner\bin\Debug\net8.0\NetworkConcatSliceSmokeRunner.dll --tensor-rt-line 8
 ```
 
@@ -425,19 +385,12 @@ Purpose:
 Run against TensorRT 10:
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt10-cuda11-release\bin\Release"
-$env:JYPPX_TENSORRT_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-10.11.0.33-cuda 11.8"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
 dotnet .\samples\NetworkSoftmaxTopKSmokeRunner\bin\Debug\net8.0\NetworkSoftmaxTopKSmokeRunner.dll --tensor-rt-line 10
 ```
 
 Run against TensorRT 8:
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt8-cuda11-release\bin\Release"
-$env:JYPPX_TENSORRT_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-8.6.1.6-cuda 11.8"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
-$env:JYPPX_CUDNN_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\cudnn-windows-x86_64-8.9.7.29_cuda11-archive"
 dotnet .\samples\NetworkSoftmaxTopKSmokeRunner\bin\Debug\net8.0\NetworkSoftmaxTopKSmokeRunner.dll --tensor-rt-line 8
 ```
 
@@ -461,19 +414,12 @@ Purpose:
 Run against TensorRT 10:
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt10-cuda11-release\bin\Release"
-$env:JYPPX_TENSORRT_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-10.11.0.33-cuda 11.8"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
 dotnet .\samples\NetworkActivationPoolingResizeSmokeRunner\bin\Debug\net8.0\NetworkActivationPoolingResizeSmokeRunner.dll --tensor-rt-line 10
 ```
 
 Run against TensorRT 8:
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt8-cuda11-release\bin\Release"
-$env:JYPPX_TENSORRT_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-8.6.1.6-cuda 11.8"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
-$env:JYPPX_CUDNN_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\cudnn-windows-x86_64-8.9.7.29_cuda11-archive"
 dotnet .\samples\NetworkActivationPoolingResizeSmokeRunner\bin\Debug\net8.0\NetworkActivationPoolingResizeSmokeRunner.dll --tensor-rt-line 8
 ```
 
@@ -496,19 +442,12 @@ Purpose:
 Run against TensorRT 10:
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt10-cuda11-release\bin\Release"
-$env:JYPPX_TENSORRT_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-10.11.0.33-cuda 11.8"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
 dotnet .\samples\NetworkMatrixFillSelectSmokeRunner\bin\Debug\net8.0\NetworkMatrixFillSelectSmokeRunner.dll --tensor-rt-line 10
 ```
 
 Run against TensorRT 8:
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt8-cuda11-release\bin\Release"
-$env:JYPPX_TENSORRT_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-8.6.1.6-cuda 11.8"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
-$env:JYPPX_CUDNN_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\cudnn-windows-x86_64-8.9.7.29_cuda11-archive"
 dotnet .\samples\NetworkMatrixFillSelectSmokeRunner\bin\Debug\net8.0\NetworkMatrixFillSelectSmokeRunner.dll --tensor-rt-line 8
 ```
 
@@ -534,19 +473,12 @@ Purpose:
 Run against TensorRT 10:
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt10-cuda11-release\bin\Release"
-$env:JYPPX_TENSORRT_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-10.11.0.33-cuda 11.8"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
 dotnet .\samples\NetworkConvolutionScaleSmokeRunner\bin\Debug\net8.0\NetworkConvolutionScaleSmokeRunner.dll --tensor-rt-line 10
 ```
 
 Run against TensorRT 8:
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt8-cuda11-release\bin\Release"
-$env:JYPPX_TENSORRT_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-8.6.1.6-cuda 11.8"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
-$env:JYPPX_CUDNN_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\cudnn-windows-x86_64-8.9.7.29_cuda11-archive"
 dotnet .\samples\NetworkConvolutionScaleSmokeRunner\bin\Debug\net8.0\NetworkConvolutionScaleSmokeRunner.dll --tensor-rt-line 8
 ```
 
@@ -574,19 +506,12 @@ Purpose:
 Run against TensorRT 10:
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt10-cuda11-release\bin\Release"
-$env:JYPPX_TENSORRT_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-10.11.0.33-cuda 11.8"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
 dotnet .\samples\NetworkDeconvolutionSmokeRunner\bin\Debug\net8.0\NetworkDeconvolutionSmokeRunner.dll --tensor-rt-line 10
 ```
 
 Run against TensorRT 8:
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt8-cuda11-release\bin\Release"
-$env:JYPPX_TENSORRT_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-8.6.1.6-cuda 11.8"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
-$env:JYPPX_CUDNN_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\cudnn-windows-x86_64-8.9.7.29_cuda11-archive"
 dotnet .\samples\NetworkDeconvolutionSmokeRunner\bin\Debug\net8.0\NetworkDeconvolutionSmokeRunner.dll --tensor-rt-line 8
 ```
 
@@ -610,19 +535,12 @@ Purpose:
 Run against TensorRT 10:
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt10-cuda11-release\bin\Release"
-$env:JYPPX_TENSORRT_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-10.11.0.33-cuda 11.8"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
 dotnet .\samples\NetworkQuantizeDequantizeSmokeRunner\bin\Release\net8.0\NetworkQuantizeDequantizeSmokeRunner.dll --tensor-rt-line 10
 ```
 
 Run against TensorRT 8:
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt8-cuda11-release\bin\Release"
-$env:JYPPX_TENSORRT_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-8.6.1.6-cuda 11.8"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
-$env:JYPPX_CUDNN_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\cudnn-windows-x86_64-8.9.7.29_cuda11-archive"
 dotnet .\samples\NetworkQuantizeDequantizeSmokeRunner\bin\Release\net8.0\NetworkQuantizeDequantizeSmokeRunner.dll --tensor-rt-line 8
 ```
 
@@ -633,3 +551,5 @@ Expected signals:
 - `Layers=3`
 
 If Debug sample assemblies are blocked by Windows application control with `0x800711C7`, run the Release runner and record the Debug path as environment-blocked rather than failed.
+
+

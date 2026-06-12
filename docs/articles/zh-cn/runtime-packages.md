@@ -1,4 +1,4 @@
-# Runtime 包说明
+﻿# Runtime 包说明
 
 runtime 包用于承载某一个明确 TensorRT / CUDA / cuDNN 组合的原生部署资产：
 
@@ -50,11 +50,14 @@ Windows 本机真实 root 不写入公开 manifest。请用 `pack/runtime/runtim
 Windows runtime 打包前应先验证显式输入：
 
 ```powershell
+$roots = powershell -ExecutionPolicy Bypass -File .\eng\Resolve-RuntimeRoots.ps1 `
+  -RuntimePackageKey win-x64-trt8.6-cuda11.8-cudnn8.9 | ConvertFrom-Json
+
 powershell -ExecutionPolicy Bypass -File .\eng\Validate-WindowsRuntimeInputs.ps1 `
   -RuntimePackageKey win-x64-trt8.6-cuda11.8-cudnn8.9 `
-  -TensorRtRoot "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-8.6.1.6-cuda 11.8" `
-  -CudaRoot "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8" `
-  -CudnnRoot "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\cudnn-windows-x86_64-8.9.7.29_cuda11-archive"
+  -TensorRtRoot $roots.tensorRtRoot `
+  -CudaRoot $roots.cudaRoot `
+  -CudnnRoot $roots.cudnnRoot
 ```
 
 ## 资产收集
@@ -114,3 +117,4 @@ runtime 包可能非常大，因为会包含 TensorRT builder resources、plugin
 - NuGet.org 包体积限制
 - GitHub artifact / release 托管策略
 - TensorRT 10 / TensorRT 11 大包是否需要私有源或拆分交付策略
+

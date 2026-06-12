@@ -4,7 +4,7 @@
 
 CUDA root:
 
-- `C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA`
+- standard NVIDIA Toolkit install under `%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA`
 
 Observed CUDA folders:
 
@@ -16,7 +16,7 @@ Observed CUDA folders:
 
 TensorRT root:
 
-- `E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia`
+- `<repo-root>\third_party\nvidia`
 
 Observed TensorRT package folders:
 
@@ -40,7 +40,7 @@ Machine-specific Windows roots should be stored in:
 
 - `pack/runtime/runtime-packages.local.json`
 
-This file is ignored by Git. Use `pack/runtime/runtime-packages.local.example.json` as the starting point. The public `runtime-packages.manifest.json` must not contain local `E:\...` or `C:\...` roots.
+This file is ignored by Git. Use `pack/runtime/runtime-packages.local.example.json` as the starting point. The public `runtime-packages.manifest.json` must not contain machine-specific local drive roots.
 
 Managed runtime loading is production-first:
 
@@ -54,7 +54,7 @@ CMake presets now refresh selected CUDA toolkit cache variables when a CUDA root
 ## Current validated combination
 
 - TensorRT package: `TensorRT-10.11.0.33-cuda 11.8`
-- CUDA root: `C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8`
+- CUDA root: `%CUDA_PATH_V11_8%`
 - CMake preset: `win-x64-trt10-cuda11-release`
 
 Additional Windows combinations have also been validated locally:

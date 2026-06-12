@@ -1,70 +1,114 @@
 # Samples
 
-This directory contains Windows-first smoke runners and deployment-oriented samples for the managed TensorRT/CUDA API.
+This directory is organized into three groups so the project reads like a publishable library instead of an internal scratchpad:
 
-## Recommended Validation Order
+- Runnable examples: user-facing, deployment-oriented samples that are reasonable first stops for adopters.
+- Smoke runners: focused validation tools that print stable evidence lines for release gates and regression triage.
+- Roadmap-only directories: documented topics that still depend on redistributable models, assets, or future wrappers.
 
-Use this order when checking whether a local machine is ready for deployment work:
+## Quick Start
 
-1. `CudaSmokeRunner`: validates CUDA bridge loading, device discovery, memory transfer, streams, events, memory pools, graphs-adjacent prerequisites, and diagnostics.
-2. `MultiStream`: validates two non-blocking CUDA streams plus event-based cross-stream ordering.
-3. `TensorRtSmokeRunner`: validates TensorRT environment discovery and representative high-level object chains across TensorRT 8/10/11 when the selected native bridge supports them.
-4. `LifecycleSmokeRunner`: repeats CUDA and TensorRT lifecycle operations to catch disposal and native-loader regressions.
-5. `OnnxToEngineSmokeRunner`: validates the ONNX parse -> build -> serialize -> deserialize -> bind -> enqueue flow.
-6. `DynamicShape`: validates dynamic batch profiles, runtime input shape selection, inference bindings, enqueue, and output validation.
-7. `NetworkBuilderSmokeRunner`: validates direct TensorRT network construction without ONNX.
-8. Layer-specific network runners: validate the broader deployment layer surface after the core path is healthy.
+Use this order when validating a local machine:
 
-Most samples are smoke runners rather than polished product demos. That is intentional: each runner prints compact evidence lines that are stable enough for release validation, issue triage, and CI logs.
+1. `CudaSmokeRunner`
+2. `MultiStream`
+3. `TensorRtSmokeRunner`
+4. `LifecycleSmokeRunner`
+5. `OnnxToEngineSmokeRunner`
+6. `DynamicShape`
+7. `NetworkBuilderSmokeRunner`
+8. Layer-specific network runners
+
+Most projects here are intentionally smoke runners rather than polished demos. They exist to prove packaging, native loading, inference, and deployment behavior with compact, CI-friendly output.
 
 ## Environment
 
-Set these variables when running a sample directly from a build tree:
+Run samples from the repository root and let the existing C# path resolver probe `build-out`, `third_party/nvidia`, and standard CUDA install locations:
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt11-cuda13-release\bin\Release"
-$env:JYPPX_TENSORRT_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-11.0.0.114-cuda 13.2"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.2"
+$env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "1"
 ```
 
-Use a matching preset/root combination for TensorRT 8, TensorRT 10, CUDA 11, or CUDA 12. If Windows application control blocks freshly built Debug binaries with `0x800711C7`, build Release and run the helper scripts that sign local development outputs before smoke validation.
+Only set `JYPPX_NATIVE_BRIDGE_PATH`, `JYPPX_TENSORRT_ROOT`, `JYPPX_CUDA_ROOT`, or `JYPPX_CUDNN_ROOT` when you intentionally want to override the default probing behavior. If Windows application control blocks freshly built Debug binaries with `0x800711C7`, build Release and sign local development outputs before smoke validation.
 
-## Current Coverage Context
+## Runnable Examples
 
-As of 2026-06-12 the interface coverage matrix reports no missing TensorRT or CUDA rows for the scanned local headers. Some uncommon or risky CUDA APIs remain as explicit deferred boundaries in the native manifest because they require raw descriptors, callbacks, external handles, IPC ownership, driver entrypoint pointers, or other unsafe lifetime policy. Samples should prefer deployment-safe wrappers and should not depend on those deferred APIs unless the sample is explicitly documenting a boundary.
+| Directory | Purpose | Status |
+| --- | --- | --- |
+| `MultiStream` | CUDA multi-stream/event ordering example | runnable |
+| `DynamicShape` | TensorRT dynamic-shape/profile/binding example | runnable |
+| `OnnxToEngineSmokeRunner` | ONNX parse/build/serialize/deserialize path | runnable |
 
-## Current Smoke Runners
+## Smoke Runners
 
-- `CudaSmokeRunner`: CUDA device, stream/event flags, CUDA error mapping, event timing, pinned memory flags, async copy, async device-memory allocation/free, selected-pool async allocation, owned/default/current memory-pool checks, memory-pool access descriptor query/update, memory-pool high-water reset/query, `cudaMemcpyDefault`, pointer attributes, pitched 2D fill, pitched 3D sync/async/device-to-device copy, optional peer copy, device-to-device copy, and memory info checks.
-- `CudaGraphSmokeRunner`: CUDA stream capture, graph instantiate, graph launch, and pinned host/device memory round-trip validation.
-- `MultiStream`: deployment-oriented CUDA multi-stream sample that submits independent async fill/copy work to two non-blocking streams and demonstrates event-based cross-stream ordering.
-- `TensorRtSmokeRunner`: representative TensorRT object chain checks, including execution-context max-output-size query, tensor debug-state boundary handling, refitter entry enumeration when the generated engine is refittable, and TensorRT 11 builder-config / network debug / engine inspector / execution-context runtime-control diagnostics. The TensorRT 11 path also validates deployment boundary controls such as builder max-thread/reset/error-recorder APIs, `isNetworkSupported`, network `removeTensor`, TopK V2 indices-type creation, engine aliased-input query, engine/context/network error-recorder clear/query APIs, direct engine build, plugin serialization list setting, host-memory data type, optimization-profile shape-values V2 boundary, execution-context address clearing, input-consumed event clearing, device-memory clearing, and aux-stream clearing. The `buildSerializedNetwork(..., kernelText)` path is wired but currently records a vendor/API boundary on the local TensorRT 11.0 + CUDA 12.9 stack because TensorRT returns a null object.
-- `RefitWeightsSmokeRunner`: TensorRT 10 refit smoke that builds a refittable scale network, enumerates refit entries, sets new scale weights, runs `RefitCudaEngine`, and verifies changed output. TensorRT 8 remains explicit and reports a skip when the built engine is not refittable.
-- `LifecycleSmokeRunner`: repeated TensorRT object lifecycle and enqueue checks.
-- `OnnxToEngineSmokeRunner`: dynamic ONNX identity model parse, profile setup, max-output-size query, tensor debug-state boundary handling, engine build, deserialize, enqueue, and output validation.
-- `DynamicShape`: direct TensorRT identity network with an explicit dynamic batch dimension, optimization profile, runtime shape selection, managed inference bindings, enqueue, and output validation.
+### CUDA foundation
 
-## Asset-Dependent And Roadmap Directories
+| Directory | Purpose |
+| --- | --- |
+| `CudaSmokeRunner` | CUDA bridge/device/memory/stream/event/pool coverage |
+| `CudaGraphSmokeRunner` | CUDA stream capture and graph launch validation |
+| `InferenceBindingsSmokeRunner` | Managed inference-binding validation |
 
-These directories are intentionally documented rather than shipped as empty placeholder projects:
+### TensorRT core path
 
-- `Classification`: reserved for an image-classification walkthrough that requires a redistributable ONNX classifier, labels, image assets, and preprocessing metadata.
-- `OnnxToEngine`: user-facing topic directory that redirects to the runnable `OnnxToEngineSmokeRunner`, which generates a minimal ONNX model in process.
-- `YoloDet`: reserved for an object-detection walkthrough that requires a detector ONNX model, labels, images, decoding metadata, and often plugin/NMS diagnostics.
-- `CustomKernelPreprocess`: roadmap directory blocked on safe public CUDA module/kernel wrappers; current CUDA samples cover the memory, stream, and graph primitives that future GPU preprocessing will use.
+| Directory | Purpose |
+| --- | --- |
+| `TensorRtSmokeRunner` | High-level TensorRT object-chain and deployment diagnostics |
+| `LifecycleSmokeRunner` | Repeated create/use/dispose regression checks |
+| `RefitWeightsSmokeRunner` | Refittable engine workflow validation |
 
-Validation note:
+### Direct network construction
 
-- `eng/Invoke-WindowsLifecycleSmoke.ps1` accepts `-Configuration Debug|Release`. Use `-Configuration Release` when Windows application control blocks freshly built Debug sample assemblies with `0x800711C7`.
-- `NetworkBuilderSmokeRunner`: direct C# network build with identity layer.
-- `NetworkLayersSmokeRunner`: constant and elementwise layer validation.
-- `NetworkShapeOpsSmokeRunner`: shuffle reshape, shuffle zero-placeholder, reduce, and shape layer validation.
-- `NetworkConcatSliceSmokeRunner`: slice and concatenation layer validation.
-- `NetworkSoftmaxTopKSmokeRunner`: softmax, top-k, unary, and gather layer validation.
-- `NetworkActivationPoolingResizeSmokeRunner`: activation, pooling, resize, editable layer metadata, engine metadata, and execution-context metadata validation.
-- `NetworkTrt11ModernLayersSmokeRunner`: TensorRT 11 + CUDA 12.9 modern-layer execution validation with squeeze/unsqueeze, tensor dimension names, shape/execution tensor metadata, serialized engine build, deserialize, tensor binding, enqueue, and output round trip.
-- `NetworkTrt11ModernLayerMetadataRunner`: TensorRT 11 modern-layer metadata probe for scatter, one-hot, cumulative, assertion, grid-sample, normalizationV2, and dynamic-quantizeV2. The cumulative probe now uses a 0D build-time constant shape tensor for the axis argument, validates shape-output marking/unmarking, and validates 7/7 modern-layer metadata probes on TensorRT 11.0 + CUDA 12.9.
-- `NetworkTrt11AdvancedLayersSmokeRunner`: TensorRT 11 advanced deployment-layer metadata probe for cast, non-zero, ragged softmax, NMS, reverse sequence, einsum, loop control-flow, if-conditional, and fill Int64 metadata. Current design creates 9/9 probes; if a signed Debug build is still blocked with `0x800711C7`, record it as a local WDAC/application-control policy blocker and rerun on a policy-compatible machine.
-- `NetworkMatrixFillSelectSmokeRunner`: matrix multiply, fill, select, and engine tensor metadata validation.
-- `NetworkDeconvolutionSmokeRunner`: deconvolution layer and metadata validation with serialized engine build, tensor binding, enqueue, and output round trip.
-- `NetworkLrnSmokeRunner`: LRN layer validation with metadata checks, serialized engine build, tensor binding, enqueue, and output round trip.
+| Directory | Purpose |
+| --- | --- |
+| `NetworkBuilderSmokeRunner` | Identity-network creation without ONNX |
+| `NetworkLayersSmokeRunner` | Constant and elementwise layer validation |
+| `NetworkShapeOpsSmokeRunner` | Shuffle/reduce/shape-layer validation |
+| `NetworkConcatSliceSmokeRunner` | Slice and concatenation validation |
+| `NetworkSoftmaxTopKSmokeRunner` | Softmax/top-k/unary/gather validation |
+| `NetworkActivationPoolingResizeSmokeRunner` | Activation/pooling/resize plus metadata validation |
+| `NetworkMatrixFillSelectSmokeRunner` | Matrix multiply/fill/select validation |
+| `NetworkConvolutionScaleSmokeRunner` | Convolution/scale validation |
+| `NetworkDeconvolutionSmokeRunner` | Deconvolution validation |
+| `NetworkLrnSmokeRunner` | LRN validation |
+| `NetworkQuantizeDequantizeSmokeRunner` | Quantize/dequantize validation |
+| `NetworkCompatLayerMetadataSmokeRunner` | Cross-version compatibility metadata checks |
+
+### TensorRT 11 focused runners
+
+| Directory | Purpose |
+| --- | --- |
+| `NetworkTrt11ModernLayersSmokeRunner` | TRT11 modern-layer execution path |
+| `NetworkTrt11ModernLayerMetadataRunner` | TRT11 modern-layer metadata probes |
+| `NetworkTrt11AdvancedLayersSmokeRunner` | TRT11 advanced deployment-layer metadata probes |
+
+## Roadmap-Only Directories
+
+These directories are intentionally documented rather than shipped as empty projects:
+
+| Directory | Purpose | Current state |
+| --- | --- | --- |
+| `Classification` | Image classification walkthrough | waiting on redistributable model/assets |
+| `OnnxToEngine` | User-facing topic directory | redirects conceptually to `OnnxToEngineSmokeRunner` |
+| `YoloDet` | Object detection walkthrough | waiting on redistributable model/assets |
+| `CustomKernelPreprocess` | CUDA preprocessing walkthrough | blocked on safe public module/kernel wrappers |
+
+## Local Packaging Gate
+
+Before treating any sample evidence as release-ready, run the local package path first:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\eng\Invoke-LocalRuntimePackage.ps1 `
+  -RuntimePackageKey win-x64-trt11.0-cuda12.9-cudnn9.22 `
+  -Version 4.0.0 `
+  -Configuration Release `
+  -RunSmoke
+```
+
+This validates managed packing, native bridge build, runtime asset collection, runtime nupkg creation, and package-consumer validation on the local machine.
+
+## Validation Notes
+
+- `eng/Invoke-WindowsLifecycleSmoke.ps1` accepts `-Configuration Debug|Release`. Use `-Configuration Release` when WDAC or other Windows application control policies block Debug sample assemblies with `0x800711C7`.
+- Current TensorRT 11 `buildSerializedNetwork(..., kernelText)` wiring is kept as a documented vendor/API boundary when the local TensorRT stack returns a null object.
+- Samples should prefer deployment-safe wrappers and should not depend on deferred unsafe native boundaries unless they are explicitly documenting one.

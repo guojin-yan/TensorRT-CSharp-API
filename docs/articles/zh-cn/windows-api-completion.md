@@ -1,4 +1,4 @@
-# Windows API 完整化路线
+﻿# Windows API 完整化路线
 
 当前项目节奏已切换为 Windows API 完整化优先。Linux 构建、打包和 handoff 结构继续保留，但不再作为当前主要推进目标。
 
@@ -66,7 +66,7 @@ TensorRT 11 已进入 Windows 构建和 runtime 包矩阵。`trt11.0-cuda12.9-cu
 
 CUDA `12.9` 已安装在：
 
-- `C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.9`
+- `%CUDA_PATH_V12_9%`
 
 目标为 `cuda12.9` 的组合必须使用 CUDA `12.9`。之前 CUDA `12.3` 的临时 fallback 已废弃。
 
@@ -122,3 +122,4 @@ C# 高层新增 `TensorRtLayerTensorMetadata`，并提供 `TensorRtLayer.GetInpu
 `cudaStreamGetDevice` 在当前 Windows CUDA 12.9 头文件中可见，但本机 cudart import library 不提供可链接符号，因此桥接层保留入口并返回明确的 `NotSupported`，不伪造成已支持。
 
 C# 高层已同步扩展 `CudaDevice`、`CudaStream`、`CudaEvent`、`CudaGraph`、`CudaGraphExec`，普通用户仍不需要直接接触裸 `IntPtr`。`CudaSmokeRunner` 和 `CudaGraphSmokeRunner` 已输出新增 API 的运行证据。
+

@@ -50,11 +50,14 @@ Windows local roots are intentionally not stored in the public manifest. Use `pa
 Before packaging a Windows runtime package, validate all explicit inputs:
 
 ```powershell
+$roots = powershell -ExecutionPolicy Bypass -File .\eng\Resolve-RuntimeRoots.ps1 `
+  -RuntimePackageKey win-x64-trt8.6-cuda11.8-cudnn8.9 | ConvertFrom-Json
+
 powershell -ExecutionPolicy Bypass -File .\eng\Validate-WindowsRuntimeInputs.ps1 `
   -RuntimePackageKey win-x64-trt8.6-cuda11.8-cudnn8.9 `
-  -TensorRtRoot "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-8.6.1.6-cuda 11.8" `
-  -CudaRoot "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8" `
-  -CudnnRoot "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\cudnn-windows-x86_64-8.9.7.29_cuda11-archive"
+  -TensorRtRoot $roots.tensorRtRoot `
+  -CudaRoot $roots.cudaRoot `
+  -CudnnRoot $roots.cudnnRoot
 ```
 
 ## Asset Collection

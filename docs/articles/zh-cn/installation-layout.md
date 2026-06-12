@@ -1,10 +1,10 @@
-# 安装布局说明
+﻿# 安装布局说明
 
 ## 当前本机 Windows 布局
 
 CUDA 根目录：
 
-- `C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA`
+- `%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA`
 
 当前已确认存在的 CUDA 目录：
 
@@ -16,7 +16,7 @@ CUDA 根目录：
 
 TensorRT / cuDNN 本地依赖目录：
 
-- `E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia`
+- `<repo-root>\third_party\nvidia`
 
 当前重点组合：
 
@@ -39,7 +39,7 @@ TensorRT / cuDNN 本地依赖目录：
 
 - `pack/runtime/runtime-packages.local.json`
 
-该文件不纳入 Git。建议从 `pack/runtime/runtime-packages.local.example.json` 复制后修改。公开的 `runtime-packages.manifest.json` 不应包含本机 `E:\...` 或 `C:\...` 路径。
+该文件不纳入 Git。建议从 `pack/runtime/runtime-packages.local.example.json` 复制后修改。公开的 `runtime-packages.manifest.json` 不应包含机器专属盘符路径。
 
 ## 当前验证结论
 
@@ -52,3 +52,4 @@ TensorRT / cuDNN 本地依赖目录：
 - `trt11.0-cuda12.9-cudnn9.22`
 
 Linux 结构继续保留，但当前开发节奏以 Windows API 完整化为优先。Linux 真机打包和验证等待后续 GitHub/self-hosted runner 环境。
+

@@ -1,7 +1,15 @@
-# 样例运行说明
+﻿# 样例运行说明
 
 当前样例优先面向 Windows x64，用于验证 TensorRT / CUDA 托管高层对象、原生 bridge 加载、内存传输、stream/event、模型构建、tensor binding 和 enqueue 关键链路。
+## 统一本地启动方式
 
+请在仓库根目录执行样例命令，并让现有 C# `NativeBridgePathResolver` 自动探测 `build-out`、`third_party/nvidia` 和标准 CUDA 安装目录：
+
+```powershell
+$env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "1"
+```
+
+只有在你明确要覆盖默认解析行为时，才需要设置 `JYPPX_NATIVE_BRIDGE_PATH`、`JYPPX_TENSORRT_ROOT`、`JYPPX_CUDA_ROOT` 或 `JYPPX_CUDNN_ROOT`。
 ## 推荐顺序
 
 1. `CudaSmokeRunner`
@@ -24,9 +32,6 @@
 运行示例：
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt10-cuda11-release\bin\Release"
-$env:JYPPX_TENSORRT_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-10.11.0.33-cuda 11.8"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
 dotnet .\samples\CudaSmokeRunner\bin\Debug\net8.0\CudaSmokeRunner.dll
 ```
 
@@ -50,8 +55,6 @@ dotnet .\samples\CudaSmokeRunner\bin\Debug\net8.0\CudaSmokeRunner.dll
 运行示例：
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt10-cuda11-release\bin\Release"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
 dotnet .\samples\MultiStream\bin\Debug\net8.0\MultiStream.dll
 ```
 
@@ -72,9 +75,6 @@ dotnet .\samples\MultiStream\bin\Debug\net8.0\MultiStream.dll
 运行 TensorRT 10：
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt10-cuda11-release\bin\Release"
-$env:JYPPX_TENSORRT_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-10.11.0.33-cuda 11.8"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
 dotnet .\samples\TensorRtSmokeRunner\bin\Debug\net8.0\TensorRtSmokeRunner.dll --tensor-rt-line 10
 ```
 
@@ -115,9 +115,6 @@ powershell -ExecutionPolicy Bypass -File .\eng\Invoke-WindowsLifecycleSmoke.ps1 
 运行示例：
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt10-cuda11-release\bin\Release"
-$env:JYPPX_TENSORRT_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-10.11.0.33-cuda 11.8"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
 dotnet .\samples\OnnxToEngineSmokeRunner\bin\Debug\net8.0\OnnxToEngineSmokeRunner.dll --tensor-rt-line 10
 ```
 
@@ -140,9 +137,6 @@ dotnet .\samples\OnnxToEngineSmokeRunner\bin\Debug\net8.0\OnnxToEngineSmokeRunne
 运行示例：
 
 ```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\TensorRtSharp\TensorRtSharp4.0\build-out\win-x64-trt10-cuda11-release\bin\Release"
-$env:JYPPX_TENSORRT_ROOT = "E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia\TensorRT-10.11.0.33-cuda 11.8"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
 dotnet .\samples\DynamicShape\bin\Debug\net8.0\DynamicShape.dll --tensor-rt-line 10 --batch 3
 ```
 
@@ -183,3 +177,5 @@ dotnet .\samples\DynamicShape\bin\Debug\net8.0\DynamicShape.dll --tensor-rt-line
 - `YoloDet`：需要 detector ONNX、labels、输入图片、decode/NMS metadata，部分模型还需要 plugin 诊断。
 
 这些目录不是发布阻塞项，只要 README 说明清楚资产要求、当前替代 runner 和 roadmap。
+
+

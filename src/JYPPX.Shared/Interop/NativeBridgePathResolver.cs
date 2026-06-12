@@ -162,9 +162,14 @@ public static class NativeBridgePathResolver
                     yield return Path.Combine(candidate, "bin");
                 }
 
-                foreach (string candidate in Directory.GetDirectories(localTensorRtBase, "cudnn-*"))
+                foreach (string candidate in Directory.GetDirectories(localTensorRtBase, "cudnn*"))
                 {
                     yield return Path.Combine(candidate, "bin");
+
+                    foreach (string nestedCandidate in Directory.GetDirectories(candidate, "v*"))
+                    {
+                        yield return Path.Combine(nestedCandidate, "bin");
+                    }
                 }
             }
 

@@ -13,8 +13,8 @@ TensorRtSharp4.0 currently has two verified local baselines:
 
 Windows local development currently assumes:
 
-- CUDA is installed under `C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA`
-- TensorRT Windows C++ packages are unpacked under `E:\TensorRtSharp\TensorRtSharp4.0\third_party\nvidia`
+- CUDA is installed in a standard NVIDIA Toolkit location and is discoverable through `CUDA_PATH*` or `%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA`
+- TensorRT Windows C++ packages are unpacked under `<repo-root>\third_party\nvidia`
 
 ## First commands
 
@@ -22,6 +22,7 @@ Windows local development currently assumes:
 dotnet restore
 dotnet build TensorRtSharp.sln -c Debug
 powershell -ExecutionPolicy Bypass -File .\eng\Get-Dependencies.ps1
+$env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "1"
 ```
 
 ## Verified sample commands

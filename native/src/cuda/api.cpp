@@ -166,7 +166,25 @@ JYPPX_StatusCode validate_pitched_copy_region_3d(
         return status;
     }
 
-    if (width_bytes > memory->width_bytes || height > memory->height || depth > memory->depth)
+    bool exceedsExtent = false;
+    if (memory->depth <= 1)
+    {
+        if (height != 0 && depth > (std::numeric_limits<size_t>::max() / height))
+        {
+            exceedsExtent = true;
+        }
+        else
+        {
+            const size_t flattened_height = height * depth;
+            exceedsExtent = width_bytes > memory->width_bytes || flattened_height > memory->height;
+        }
+    }
+    else
+    {
+        exceedsExtent = width_bytes > memory->width_bytes || height > memory->height || depth > memory->depth;
+    }
+
+    if (exceedsExtent)
     {
         std::string message = std::string(role) + " 3D copy region exceeds allocated pitched memory extent.";
         jyppx::cuda::set_cuda_error(operation, 0, "3d-region-out-of-range", message.c_str());
