@@ -65,12 +65,7 @@ permissions:
 
 jobs:
   pack:
-    runs-on:
-      - self-hosted
-      - windows
-      - x64
-    env:
-      DOTNET_INSTALL_DIR: ${{ github.workspace }}\.dotnet
+    runs-on: windows-latest
     outputs:
       package_version: ${{ steps.version.outputs.package_version }}
     steps:
