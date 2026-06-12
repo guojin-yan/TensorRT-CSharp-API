@@ -113,6 +113,8 @@ jobs:
       - self-hosted
       - linux
       - x64
+    env:
+      DOTNET_INSTALL_DIR: ${{ github.workspace }}/.dotnet
     strategy:
       fail-fast: false
       matrix:

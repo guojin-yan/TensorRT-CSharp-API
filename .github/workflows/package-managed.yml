@@ -69,6 +69,8 @@ jobs:
       - self-hosted
       - windows
       - x64
+    env:
+      DOTNET_INSTALL_DIR: ${{ github.workspace }}\.dotnet
     outputs:
       package_version: ${{ steps.version.outputs.package_version }}
     steps:
