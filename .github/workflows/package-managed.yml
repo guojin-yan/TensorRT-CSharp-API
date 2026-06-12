@@ -133,6 +133,16 @@ jobs:
       - windows
       - x64
     steps:
+      - name: Validate nuget.org publish prerequisites
+        shell: pwsh
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          pwsh -NoProfile -File .\eng\Test-PublishPrerequisites.ps1 `
+            -Target nuget.org `
+            -ApiKey $env:NUGET_API_KEY `
+            -AllowMissingApiKey
+
       - name: Download managed package artifact
         uses: actions/download-artifact@v4
         with:

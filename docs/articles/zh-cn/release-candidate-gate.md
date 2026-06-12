@@ -77,3 +77,11 @@ cmake --build --preset win-x64-trt11-cuda13-release --parallel
 CUDA `12.9` 和 TensorRT 11 Windows 组合必须使用精确 CUDA/TensorRT/cuDNN 依赖链证据。`trt11.0-cuda13.2-cudnn9.22` 可以构建，但当前机器 runtime/builder 创建仍依赖 CUDA 13-capable driver/runtime 环境。
 
 Linux 包当前保持 dry-run / structure-ready 状态，不能作为真实 Linux 发布证据，直到 self-hosted Linux x64 runner 完成 build、asset collection、pack、consumer validation 和可选 GPU smoke。
+
+## 远端发布前置条件
+
+在启用远端发布链前，请先确认：
+
+- `package-managed.yml` 在 `publish_to_nuget=true` 时要求仓库 secret `NUGET_API_KEY` 是纯文本 ASCII 的 nuget.org API key。不要填加密后的本机凭据或其它机器导出的 token 片段。
+- `runtime-windows.yml` 要求 Windows self-hosted runner 在线，并带有 `self-hosted`、`windows`、`x64` 标签。
+- `runtime-linux.yml` 需要独立的 Linux x64 self-hosted runner。如果暂时没有 Linux runner，请在 `release-bundle.yml` 中保持 `linux_runtime_keys` 为空，让 Linux 模块自动 no-op。
