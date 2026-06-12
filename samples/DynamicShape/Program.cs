@@ -4,8 +4,8 @@ using JYPPX.CudaSharp;
 using JYPPX.Shared.Interop;
 using JYPPX.TensorRtSharp;
 
-TensorRtApiLine line = ResolveLine(GetStringArgument(args, "--tensor-rt-line", "10"));
-int batch = GetIntArgument(args, "--batch", 3);
+TensorRtApiLine line = ResolveLine(JYPPX.SampleSupport.SampleCommandLine.GetStringArgument(args, "--tensor-rt-line", "10"));
+int batch = JYPPX.SampleSupport.SampleCommandLine.GetIntArgument(args, "--batch", 3);
 if (batch < 1 || batch > 4)
 {
     throw new ArgumentOutOfRangeException(nameof(batch), "Batch must be in the optimization profile range [1, 4].");
@@ -143,24 +143,6 @@ static TensorRtAdapterInfo SelectAdapter(TensorRtEnvironmentSnapshot snapshot, T
     };
 }
 
-static int GetIntArgument(string[] args, string name, int defaultValue)
-{
-    string value = GetStringArgument(args, name, defaultValue.ToString());
-    return int.TryParse(value, out int parsed) ? parsed : defaultValue;
-}
-
-static string GetStringArgument(string[] args, string name, string defaultValue)
-{
-    for (int index = 0; index < args.Length - 1; index++)
-    {
-        if (string.Equals(args[index], name, StringComparison.OrdinalIgnoreCase))
-        {
-            return args[index + 1];
-        }
-    }
-
-    return defaultValue;
-}
 
 static bool IsDeploymentException(Exception exception)
 {

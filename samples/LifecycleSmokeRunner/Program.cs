@@ -5,8 +5,8 @@ using JYPPX.CudaSharp;
 using JYPPX.Shared.Interop;
 using JYPPX.TensorRtSharp;
 
-int iterations = GetIntArgument(args, "--iterations", 5);
-string tensorRtLine = GetStringArgument(args, "--tensor-rt-line", "auto");
+int iterations = JYPPX.SampleSupport.SampleCommandLine.GetPositiveIntArgument(args, "--iterations", 5);
+string tensorRtLine = JYPPX.SampleSupport.SampleCommandLine.GetStringArgument(args, "--tensor-rt-line", "auto");
 bool skipCuda = HasFlag(args, "--skip-cuda");
 bool skipTensorRt = HasFlag(args, "--skip-tensorrt");
 
@@ -276,24 +276,6 @@ static TensorRtApiLine? ResolveTensorRtLine(TensorRtEnvironmentSnapshot snapshot
     return null;
 }
 
-static int GetIntArgument(string[] args, string name, int defaultValue)
-{
-    string value = GetStringArgument(args, name, defaultValue.ToString());
-    return int.TryParse(value, out int parsed) && parsed > 0 ? parsed : defaultValue;
-}
-
-static string GetStringArgument(string[] args, string name, string defaultValue)
-{
-    for (int i = 0; i < args.Length - 1; i++)
-    {
-        if (string.Equals(args[i], name, StringComparison.OrdinalIgnoreCase))
-        {
-            return args[i + 1];
-        }
-    }
-
-    return defaultValue;
-}
 
 static bool HasFlag(string[] args, string name)
 {

@@ -5,8 +5,8 @@ using JYPPX.CudaSharp;
 using JYPPX.Shared.Interop;
 using JYPPX.TensorRtSharp;
 
-TensorRtApiLine line = ResolveLine(GetStringArgument(args, "--tensor-rt-line", "10"));
-int batch = GetIntArgument(args, "--batch", 2);
+TensorRtApiLine line = ResolveLine(JYPPX.SampleSupport.SampleCommandLine.GetStringArgument(args, "--tensor-rt-line", "10"));
+int batch = JYPPX.SampleSupport.SampleCommandLine.GetIntArgument(args, "--batch", 2);
 const int width = 4;
 if (batch < 1 || batch > 4)
 {
@@ -127,23 +127,4 @@ static TensorRtApiLine ResolveLine(string value)
     }
 
     throw new ArgumentException("TensorRT line must be 8, 10, or 11.", nameof(value));
-}
-
-static int GetIntArgument(string[] args, string name, int defaultValue)
-{
-    string value = GetStringArgument(args, name, defaultValue.ToString());
-    return int.TryParse(value, out int parsed) ? parsed : defaultValue;
-}
-
-static string GetStringArgument(string[] args, string name, string defaultValue)
-{
-    for (int index = 0; index < args.Length - 1; index++)
-    {
-        if (string.Equals(args[index], name, StringComparison.OrdinalIgnoreCase))
-        {
-            return args[index + 1];
-        }
-    }
-
-    return defaultValue;
 }

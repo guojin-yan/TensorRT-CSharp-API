@@ -6,9 +6,9 @@ using JYPPX.CudaSharp;
 using JYPPX.Shared.Interop;
 using JYPPX.TensorRtSharp;
 
-TensorRtApiLine line = ResolveLine(GetStringArgument(args, "--tensor-rt-line", "10"));
-int batch = GetIntArgument(args, "--batch", 2);
-bool dependencyProbeOnly = HasSwitch(args, "--dependency-probe-only");
+TensorRtApiLine line = ResolveLine(JYPPX.SampleSupport.SampleCommandLine.GetStringArgument(args, "--tensor-rt-line", "10"));
+int batch = JYPPX.SampleSupport.SampleCommandLine.GetIntArgument(args, "--batch", 2);
+bool dependencyProbeOnly = JYPPX.SampleSupport.SampleCommandLine.HasSwitch(args, "--dependency-probe-only");
 if (batch < 1 || batch > 4)
 {
     throw new ArgumentOutOfRangeException(nameof(batch), "Batch must be in the optimization profile range [1, 4].");
@@ -343,29 +343,6 @@ static string FormatDependencyEntry(TensorRtNativeDependencyInfo? entry)
     return $"{entry.Name}@{directory}#{(string.IsNullOrWhiteSpace(version) ? "n/a" : version)}";
 }
 
-static int GetIntArgument(string[] args, string name, int defaultValue)
-{
-    string value = GetStringArgument(args, name, defaultValue.ToString());
-    return int.TryParse(value, out int parsed) ? parsed : defaultValue;
-}
-
-static string GetStringArgument(string[] args, string name, string defaultValue)
-{
-    for (int index = 0; index < args.Length - 1; index++)
-    {
-        if (string.Equals(args[index], name, StringComparison.OrdinalIgnoreCase))
-        {
-            return args[index + 1];
-        }
-    }
-
-    return defaultValue;
-}
-
-static bool HasSwitch(string[] args, string name)
-{
-    return args.Any(argument => string.Equals(argument, name, StringComparison.OrdinalIgnoreCase));
-}
 
 static void AssertDims(TensorRtDims actual, params int[] expected)
 {

@@ -4,7 +4,7 @@ using JYPPX.CudaSharp;
 using JYPPX.Shared.Interop;
 using JYPPX.TensorRtSharp;
 
-TensorRtApiLine line = ResolveLine(GetStringArgument(args, "--tensor-rt-line", "11"));
+TensorRtApiLine line = ResolveLine(JYPPX.SampleSupport.SampleCommandLine.GetStringArgument(args, "--tensor-rt-line", "11"));
 if (line != TensorRtApiLine.TensorRt11)
 {
     Console.WriteLine($"Skipped=True Message=NetworkTrt11ModernLayersSmokeRunner is a TensorRT 11 focused smoke. RequestedLine={(int)line}");
@@ -110,17 +110,4 @@ static TensorRtApiLine ResolveLine(string value)
     }
 
     throw new ArgumentException("TensorRT line must be 8, 10, or 11.", nameof(value));
-}
-
-static string GetStringArgument(string[] args, string name, string defaultValue)
-{
-    for (int index = 0; index < args.Length - 1; index++)
-    {
-        if (string.Equals(args[index], name, StringComparison.OrdinalIgnoreCase))
-        {
-            return args[index + 1];
-        }
-    }
-
-    return defaultValue;
 }

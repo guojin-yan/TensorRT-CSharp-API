@@ -98,14 +98,17 @@ These directories are intentionally documented rather than shipped as empty proj
 Before treating any sample evidence as release-ready, run the local package path first:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\eng\Invoke-LocalRuntimePackage.ps1 `
-  -RuntimePackageKey win-x64-trt11.0-cuda12.9-cudnn9.22 `
+powershell -NoProfile -ExecutionPolicy Bypass -File .\eng\Invoke-LocalReleaseBundle.ps1 `
   -Version 4.0.0 `
-  -Configuration Release `
-  -RunSmoke
+  -WindowsRuntimeKeys win-x64-trt11.0-cuda12.9-cudnn9.22 `
+  -WindowsRuntimeDeliveryMode split `
+  -RunWindowsSmoke `
+  -SignWindowsConsumerOutput `
+  -TrustWindowsConsumerSigningCertificate `
+  -TrustWindowsConsumerSigningCertificateRoot
 ```
 
-This validates managed packing, native bridge build, runtime asset collection, runtime nupkg creation, and package-consumer validation on the local machine.
+This validates documentation, managed packing, native bridge build, runtime asset collection, runtime nupkg creation, and package-consumer validation on the local machine. If you only want the lower-level runtime lane, `eng\Invoke-LocalRuntimePackage.ps1` and `eng\Invoke-LocalSplitRuntimePackage.ps1` remain available.
 
 ## Validation Notes
 
