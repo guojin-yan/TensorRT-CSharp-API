@@ -213,8 +213,7 @@ jobs:
           name: runtime-linux-${{ matrix.key }}
           path: |
             artifacts/runtime-nupkg/*.nupkg
-            artifacts/runtime/${{ matrix.key }}/**
-            artifacts/package-consumer/**
+            artifacts/package-consumer/package-consumer-validation-summary.*
             artifacts/linux-dry-run/${{ matrix.key }}/**
 
       - name: Publish Linux runtime package to GitHub Packages

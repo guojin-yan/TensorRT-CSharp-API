@@ -170,9 +170,9 @@ jobs:
           path: |
             artifacts/managed/*.nupkg
             artifacts/runtime-nupkg/*.nupkg
-            artifacts/runtime/**
-            artifacts/package-consumer/**
-            artifacts/local-runtime-validation/**
+            artifacts/package-consumer/package-consumer-validation-summary.*
+            artifacts/local-runtime-validation/*.json
+            artifacts/local-runtime-validation/*.md
 
       - name: Upload Windows split runtime artifacts
         if: ${{ inputs.attach_to_github_release && inputs.runtime_delivery_mode == 'split' }}
@@ -182,9 +182,9 @@ jobs:
           path: |
             artifacts/managed/*.nupkg
             artifacts/runtime-split-nupkg/**/*.nupkg
-            artifacts/runtime-split/**
-            artifacts/package-consumer/**
-            artifacts/local-runtime-validation/**
+            artifacts/package-consumer/package-consumer-validation-summary.*
+            artifacts/local-runtime-validation/*.json
+            artifacts/local-runtime-validation/*.md
 
       - name: Publish Windows runtime package to GitHub Packages
         if: ${{ inputs.publish_to_github_packages && inputs.runtime_delivery_mode != 'split' }}
