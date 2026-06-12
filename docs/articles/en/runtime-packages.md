@@ -47,6 +47,12 @@ Current package consumer validation:
 
 Windows local roots are intentionally not stored in the public manifest. Use `pack/runtime/runtime-packages.local.json` for machine-specific root overrides; that file is ignored by Git. Start from `pack/runtime/runtime-packages.local.example.json`.
 
+To sync the current workstation's repository-relative TensorRT/cuDNN roots into the user profile override file used by self-hosted runs, use:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\eng\Sync-LocalRuntimeRoots.ps1
+```
+
 Before packaging a Windows runtime package, validate all explicit inputs:
 
 ```powershell
