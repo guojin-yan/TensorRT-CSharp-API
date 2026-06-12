@@ -123,7 +123,7 @@ gh workflow run release-bundle.yml `
   --ref TensorRtSharp4.0 `
   -f version=4.0.0 `
   -f windows_runtime_keys=win-x64-trt11.0-cuda12.9-cudnn9.22 `
-  -f windows_runtime_delivery_mode=full `
+  -f windows_runtime_delivery_mode=split `
   -f run_windows_smoke=true `
   -f sign_windows_consumer_output=true `
   -f publish_managed_to_nuget=false `
@@ -137,7 +137,7 @@ Local bundle example:
 powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalReleaseBundle.ps1 `
   -Version 4.0.0 `
   -WindowsRuntimeKeys win-x64-trt11.0-cuda12.9-cudnn9.22 `
-  -WindowsRuntimeDeliveryMode full `
+  -WindowsRuntimeDeliveryMode split `
   -RunWindowsSmoke `
   -SignWindowsConsumerOutput `
   -TrustWindowsConsumerSigningCertificate `
@@ -145,6 +145,10 @@ powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalReleaseBundle.ps1 `
 ```
 
 On WDAC / application-control machines, the local and self-hosted Windows runtime validation path can sign the generated consumer output before smoke. This helps when `PackageConsumerSmoke.exe` would otherwise be blocked even though package restore, native asset copy, and build succeeded.
+
+`release-bundle.yml` now treats an empty `linux_runtime_keys` input as a no-op Linux module, which keeps the bundle usable on repositories that do not yet have a Linux self-hosted runner.
+
+For `nuget.org` publication, store a plain-text ASCII NuGet API key in the repository secret `NUGET_API_KEY`. Do not reuse an encrypted local credential blob or other machine-generated token format.
 
 ## Repository Layout
 

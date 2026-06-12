@@ -16,12 +16,12 @@ on:
       windows_runtime_keys:
         description: Optional comma-separated Windows runtime keys
         required: false
-        default: ""
+        default: "win-x64-trt11.0-cuda12.9-cudnn9.22"
         type: string
       windows_runtime_delivery_mode:
         description: Windows runtime package layout to produce
         required: false
-        default: full
+        default: split
         type: string
       linux_runtime_keys:
         description: Optional comma-separated Linux runtime keys

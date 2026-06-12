@@ -76,6 +76,7 @@ jobs:
     outputs:
       package_version: ${{ steps.version.outputs.package_version }}
       matrix: ${{ steps.matrix.outputs.value }}
+      has_entries: ${{ steps.matrix.outputs.has_entries }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -91,11 +92,21 @@ jobs:
         id: matrix
         shell: pwsh
         run: |
-          $value = pwsh -NoProfile -File .\eng\Resolve-RuntimeMatrix.ps1 -Platform linux -RuntimeKey "${{ inputs.runtime_keys }}"
+          $requestedKeys = "${{ inputs.runtime_keys }}"
+          if ([string]::IsNullOrWhiteSpace($requestedKeys)) {
+            "value={""include"":[]}" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+            "has_entries=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+            Write-Host "No Linux runtime keys were requested. The Linux runtime module will no-op."
+            exit 0
+          }
+
+          $value = pwsh -NoProfile -File .\eng\Resolve-RuntimeMatrix.ps1 -Platform linux -RuntimeKey $requestedKeys
           "value={""include"":$value}" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          "has_entries=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
   managed:
     needs: prepare
+    if: ${{ needs.prepare.outputs.has_entries == 'true' }}
     uses: ./.github/workflows/package-managed.yml
     with:
       version: ${{ needs.prepare.outputs.package_version }}
@@ -109,6 +120,7 @@ jobs:
     needs:
       - prepare
       - managed
+    if: ${{ needs.prepare.outputs.has_entries == 'true' }}
     runs-on:
       - self-hosted
       - linux
