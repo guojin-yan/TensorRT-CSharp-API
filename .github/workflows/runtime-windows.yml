@@ -81,42 +81,11 @@ permissions:
   packages: write
 
 jobs:
-  prepare:
-    runs-on: windows-latest
-    outputs:
-      package_version: ${{ steps.version.outputs.package_version }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Resolve package version
-        id: version
-        shell: pwsh
-        run: |
-          $value = pwsh -NoProfile -File .\eng\Resolve-PackageVersion.ps1 -RequestedVersion "${{ inputs.version }}"
-          "package_version=$value" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
-
-  managed:
-    needs: prepare
-    uses: ./.github/workflows/package-managed.yml
-    with:
-      version: ${{ needs.prepare.outputs.package_version }}
-      configuration: ${{ inputs.configuration }}
-      publish_to_nuget: false
-      publish_to_github_packages: false
-      artifact_name: managed-packages-runtime-windows
-    secrets: inherit
-
   pack-runtime:
-    needs:
-      - prepare
-      - managed
     runs-on:
       - self-hosted
       - windows
       - x64
-    env:
-      DOTNET_INSTALL_DIR: ${{ github.workspace }}\.dotnet
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -129,12 +98,6 @@ jobs:
         shell: pwsh
         run: cmake --version
 
-      - name: Download managed package artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: managed-packages-runtime-windows
-          path: artifacts/managed
-
       - name: Build full runtime packages
         if: ${{ inputs.runtime_delivery_mode != 'split' }}
         shell: pwsh
@@ -144,9 +107,8 @@ jobs:
             '-ExecutionPolicy', 'Bypass',
             '-File', '.\eng\Invoke-LocalRuntimePackage.ps1',
             '-RuntimePackageKey', '${{ inputs.runtime_keys }}',
-            '-Version', '${{ needs.prepare.outputs.package_version }}',
-            '-Configuration', '${{ inputs.configuration }}',
-            '-SkipManagedPack'
+            '-Version', '${{ inputs.version }}',
+            '-Configuration', '${{ inputs.configuration }}'
           )
           if ('${{ inputs.run_smoke }}' -eq 'true') {
             $arguments += '-RunSmoke'
@@ -171,9 +133,8 @@ jobs:
               '-ExecutionPolicy', 'Bypass',
               '-File', '.\eng\Invoke-LocalSplitRuntimePackage.ps1',
               '-SourceRuntimeKey', $key,
-              '-Version', '${{ needs.prepare.outputs.package_version }}',
-              '-Configuration', '${{ inputs.configuration }}',
-              '-SkipManagedPack'
+              '-Version', '${{ inputs.version }}',
+              '-Configuration', '${{ inputs.configuration }}'
             )
             if ('${{ inputs.run_smoke }}' -eq 'true') {
               $arguments += '-RunSmoke'
@@ -187,6 +148,7 @@ jobs:
         with:
           name: runtime-windows-full
           path: |
+            artifacts/managed/*.nupkg
             artifacts/runtime-nupkg/*.nupkg
             artifacts/runtime/**
             artifacts/package-consumer/**
@@ -198,6 +160,7 @@ jobs:
         with:
           name: runtime-windows-split
           path: |
+            artifacts/managed/*.nupkg
             artifacts/runtime-split-nupkg/**/*.nupkg
             artifacts/runtime-split/**
             artifacts/package-consumer/**
