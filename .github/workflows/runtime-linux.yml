@@ -92,7 +92,7 @@ jobs:
         shell: pwsh
         run: |
           $value = pwsh -NoProfile -File .\eng\Resolve-RuntimeMatrix.ps1 -Platform linux -RuntimeKey "${{ inputs.runtime_keys }}"
-          "value=$value" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          "value={""include"":$value}" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
   managed:
     needs: prepare
@@ -117,8 +117,7 @@ jobs:
       DOTNET_INSTALL_DIR: ${{ github.workspace }}/.dotnet
     strategy:
       fail-fast: false
-      matrix:
-        package: ${{ fromJson(needs.prepare.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -146,7 +145,7 @@ jobs:
         id: roots
         shell: pwsh
         run: |
-          $resolved = pwsh -NoProfile -File .\eng\Resolve-RuntimeRoots.ps1 -RuntimePackageKey "${{ matrix.package.key }}" | ConvertFrom-Json
+          $resolved = pwsh -NoProfile -File .\eng\Resolve-RuntimeRoots.ps1 -RuntimePackageKey "${{ matrix.key }}" | ConvertFrom-Json
           if ([string]::IsNullOrWhiteSpace($resolved.tensorRtRoot)) { throw "TensorRT root is not configured for $($resolved.runtimeKey)." }
           if ([string]::IsNullOrWhiteSpace($resolved.cudaRoot)) { throw "CUDA root is not configured for $($resolved.runtimeKey)." }
           "tensor_rt_root=$($resolved.tensorRtRoot)" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
@@ -154,59 +153,59 @@ jobs:
           "cudnn_root=$($resolved.cudnnRoot)" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
       - name: Validate Linux runtime inputs
-        run: pwsh -NoProfile -File ./eng/Validate-LinuxRuntimeInputs.ps1 -RuntimePackageKey "${{ matrix.package.key }}" -TensorRtRoot "${{ steps.roots.outputs.tensor_rt_root }}" -CudaRoot "${{ steps.roots.outputs.cuda_root }}"
+        run: pwsh -NoProfile -File ./eng/Validate-LinuxRuntimeInputs.ps1 -RuntimePackageKey "${{ matrix.key }}" -TensorRtRoot "${{ steps.roots.outputs.tensor_rt_root }}" -CudaRoot "${{ steps.roots.outputs.cuda_root }}"
 
       - name: Configure native bridge
-        run: cmake --preset "${{ matrix.package.buildPreset }}" -DJYPPX_TENSORRT_ROOT="${{ steps.roots.outputs.tensor_rt_root }}" -DCUDAToolkit_ROOT="${{ steps.roots.outputs.cuda_root }}" -DJYPPX_CUDA_ROOT="${{ steps.roots.outputs.cuda_root }}" -DJYPPX_CUDNN_ROOT="${{ steps.roots.outputs.cudnn_root }}"
+        run: cmake --preset "${{ matrix.buildPreset }}" -DJYPPX_TENSORRT_ROOT="${{ steps.roots.outputs.tensor_rt_root }}" -DCUDAToolkit_ROOT="${{ steps.roots.outputs.cuda_root }}" -DJYPPX_CUDA_ROOT="${{ steps.roots.outputs.cuda_root }}" -DJYPPX_CUDNN_ROOT="${{ steps.roots.outputs.cudnn_root }}"
 
       - name: Build native bridge
-        run: cmake --build --preset "${{ matrix.package.buildPreset }}"
+        run: cmake --build --preset "${{ matrix.buildPreset }}"
 
       - name: Create Linux dry-run summary
-        run: pwsh -NoProfile -File ./eng/Invoke-LinuxRuntimeDryRun.ps1 -RuntimePackageKey "${{ matrix.package.key }}" -TensorRtRoot "${{ steps.roots.outputs.tensor_rt_root }}" -CudaRoot "${{ steps.roots.outputs.cuda_root }}"
+        run: pwsh -NoProfile -File ./eng/Invoke-LinuxRuntimeDryRun.ps1 -RuntimePackageKey "${{ matrix.key }}" -TensorRtRoot "${{ steps.roots.outputs.tensor_rt_root }}" -CudaRoot "${{ steps.roots.outputs.cuda_root }}"
 
       - name: Validate Linux dry-run artifacts
-        run: pwsh -NoProfile -File ./eng/Validate-LinuxDryRunArtifacts.ps1 -RuntimePackageKey "${{ matrix.package.key }}"
+        run: pwsh -NoProfile -File ./eng/Validate-LinuxDryRunArtifacts.ps1 -RuntimePackageKey "${{ matrix.key }}"
 
       - name: Validate Linux workflow contract
-        run: pwsh -NoProfile -File ./eng/Test-LinuxRuntimeWorkflowContract.ps1 -RuntimePackageKey "${{ matrix.package.key }}" -ConfigurePreset "${{ matrix.package.buildPreset }}" -BuildPreset "${{ matrix.package.buildPreset }}"
+        run: pwsh -NoProfile -File ./eng/Test-LinuxRuntimeWorkflowContract.ps1 -RuntimePackageKey "${{ matrix.key }}" -ConfigurePreset "${{ matrix.buildPreset }}" -BuildPreset "${{ matrix.buildPreset }}"
 
       - name: Export Linux preflight summary
-        run: pwsh -NoProfile -File ./eng/Export-LinuxPreflightSummary.ps1 -RuntimePackageKey "${{ matrix.package.key }}"
+        run: pwsh -NoProfile -File ./eng/Export-LinuxPreflightSummary.ps1 -RuntimePackageKey "${{ matrix.key }}"
 
       - name: Export Linux package consumer plan
-        run: pwsh -NoProfile -File ./eng/Export-LinuxPackageConsumerPlan.ps1 -RuntimePackageKey "${{ matrix.package.key }}"
+        run: pwsh -NoProfile -File ./eng/Export-LinuxPackageConsumerPlan.ps1 -RuntimePackageKey "${{ matrix.key }}"
 
       - name: Export Linux runner execution status
-        run: pwsh -NoProfile -File ./eng/Export-LinuxRunnerExecutionStatus.ps1 -RuntimePackageKey "${{ matrix.package.key }}"
+        run: pwsh -NoProfile -File ./eng/Export-LinuxRunnerExecutionStatus.ps1 -RuntimePackageKey "${{ matrix.key }}"
 
       - name: Export Linux handoff index
-        run: pwsh -NoProfile -File ./eng/Export-LinuxHandoffIndex.ps1 -RuntimePackageKey "${{ matrix.package.key }}"
+        run: pwsh -NoProfile -File ./eng/Export-LinuxHandoffIndex.ps1 -RuntimePackageKey "${{ matrix.key }}"
 
       - name: Collect runtime assets
-        run: pwsh -NoProfile -File ./eng/Collect-RuntimeAssets.ps1 -RuntimePackageKey "${{ matrix.package.key }}" -TensorRtRoot "${{ steps.roots.outputs.tensor_rt_root }}" -CudaRoot "${{ steps.roots.outputs.cuda_root }}" -CudnnRoot "${{ steps.roots.outputs.cudnn_root }}"
+        run: pwsh -NoProfile -File ./eng/Collect-RuntimeAssets.ps1 -RuntimePackageKey "${{ matrix.key }}" -TensorRtRoot "${{ steps.roots.outputs.tensor_rt_root }}" -CudaRoot "${{ steps.roots.outputs.cuda_root }}" -CudnnRoot "${{ steps.roots.outputs.cudnn_root }}"
 
       - name: Pack runtime package
-        run: dotnet pack "./pack/runtime/${{ matrix.package.key }}/${{ matrix.package.packageId }}.csproj" -c "${{ inputs.configuration }}" -o ./artifacts/runtime-nupkg -p:JYPPXPackageVersion=${{ needs.prepare.outputs.package_version }}
+        run: dotnet pack "./pack/runtime/${{ matrix.key }}/${{ matrix.packageId }}.csproj" -c "${{ inputs.configuration }}" -o ./artifacts/runtime-nupkg -p:JYPPXPackageVersion=${{ needs.prepare.outputs.package_version }}
 
       - name: Validate runtime package consumer
         if: ${{ !inputs.run_smoke }}
-        run: pwsh -NoProfile -File ./eng/Test-PackageConsumer.ps1 -RuntimePackageKey "${{ matrix.package.key }}" -ManagedPackageDirectory "./artifacts/managed" -RuntimePackageDirectory "./artifacts/runtime-nupkg"
+        run: pwsh -NoProfile -File ./eng/Test-PackageConsumer.ps1 -RuntimePackageKey "${{ matrix.key }}" -ManagedPackageDirectory "./artifacts/managed" -RuntimePackageDirectory "./artifacts/runtime-nupkg"
 
       - name: Validate runtime package consumer with smoke
         if: ${{ inputs.run_smoke }}
-        run: pwsh -NoProfile -File ./eng/Test-PackageConsumer.ps1 -RuntimePackageKey "${{ matrix.package.key }}" -ManagedPackageDirectory "./artifacts/managed" -RuntimePackageDirectory "./artifacts/runtime-nupkg" -RunSmoke
+        run: pwsh -NoProfile -File ./eng/Test-PackageConsumer.ps1 -RuntimePackageKey "${{ matrix.key }}" -ManagedPackageDirectory "./artifacts/managed" -RuntimePackageDirectory "./artifacts/runtime-nupkg" -RunSmoke
 
       - name: Upload Linux runtime artifacts
         if: ${{ inputs.attach_to_github_release }}
         uses: actions/upload-artifact@v4
         with:
-          name: runtime-linux-${{ matrix.package.key }}
+          name: runtime-linux-${{ matrix.key }}
           path: |
             artifacts/runtime-nupkg/*.nupkg
-            artifacts/runtime/${{ matrix.package.key }}/**
+            artifacts/runtime/${{ matrix.key }}/**
             artifacts/package-consumer/**
-            artifacts/linux-dry-run/${{ matrix.package.key }}/**
+            artifacts/linux-dry-run/${{ matrix.key }}/**
 
       - name: Publish Linux runtime package to GitHub Packages
         if: ${{ inputs.publish_to_github_packages }}
