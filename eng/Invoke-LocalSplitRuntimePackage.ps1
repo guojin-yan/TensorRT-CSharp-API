@@ -72,6 +72,7 @@ if (-not $SkipBaseRuntimeBuild.IsPresent) {
     $resolvedVersion,
     "-Configuration",
     $Configuration,
+    "-SkipRuntimePack",
     "-SkipConsumerValidation"
   )
 

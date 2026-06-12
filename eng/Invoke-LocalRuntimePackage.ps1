@@ -5,6 +5,7 @@ param(
   [string]$Configuration = "Release",
   [switch]$SkipManagedPack,
   [switch]$SkipNativeBuild,
+  [switch]$SkipRuntimePack,
   [switch]$SkipConsumerValidation,
   [switch]$RunSmoke,
   [switch]$SignConsumerOutput,
@@ -93,6 +94,10 @@ if ($runtimeKeys.Count -eq 0) {
 
 $summaryRoot = Join-Path $RepositoryRoot "artifacts\local-runtime-validation"
 New-Item -ItemType Directory -Path $summaryRoot -Force | Out-Null
+
+if ($SkipRuntimePack.IsPresent -and -not $SkipConsumerValidation.IsPresent) {
+  throw "SkipRuntimePack requires SkipConsumerValidation because no runtime nupkg will be produced."
+}
 
 if (-not $SkipManagedPack.IsPresent) {
   Invoke-CheckedCommand -FilePath "dotnet" -ArgumentList @(
@@ -251,15 +256,17 @@ foreach ($key in $runtimeKeys) {
     throw "Unsupported runtime platform '$($package.platform)' for package '$key'."
   }
 
-  Invoke-CheckedCommand -FilePath "dotnet" -ArgumentList @(
-    "pack",
-    $runtimeProjectPath,
-    "-c",
-    $Configuration,
-    "-o",
-    $runtimePackageDirectory,
-    "-p:JYPPXPackageVersion=$resolvedVersion"
-  )
+  if (-not $SkipRuntimePack.IsPresent) {
+    Invoke-CheckedCommand -FilePath "dotnet" -ArgumentList @(
+      "pack",
+      $runtimeProjectPath,
+      "-c",
+      $Configuration,
+      "-o",
+      $runtimePackageDirectory,
+      "-p:JYPPXPackageVersion=$resolvedVersion"
+    )
+  }
 
   if (-not $SkipConsumerValidation.IsPresent) {
     $consumerArguments = @(
@@ -307,11 +314,14 @@ foreach ($key in $runtimeKeys) {
     Invoke-CheckedCommand -FilePath "powershell" -ArgumentList $consumerArguments
   }
 
-  $runtimePackageFile = Get-ChildItem -LiteralPath $runtimePackageDirectory -Filter "$($package.packageId).$resolvedVersion.nupkg" |
-    Sort-Object LastWriteTime -Descending |
-    Select-Object -First 1
-  if (-not $runtimePackageFile) {
-    throw "The packed runtime nupkg was not found for '$key'."
+  $runtimePackageFile = $null
+  if (-not $SkipRuntimePack.IsPresent) {
+    $runtimePackageFile = Get-ChildItem -LiteralPath $runtimePackageDirectory -Filter "$($package.packageId).$resolvedVersion.nupkg" |
+      Sort-Object LastWriteTime -Descending |
+      Select-Object -First 1
+    if (-not $runtimePackageFile) {
+      throw "The packed runtime nupkg was not found for '$key'."
+    }
   }
 
   $result = [pscustomobject]@{
@@ -321,10 +331,11 @@ foreach ($key in $runtimeKeys) {
     platform = $package.platform
     buildPreset = $package.buildPreset
     runtimeOutputRoot = $runtimeOutputRoot
-    runtimePackagePath = $runtimePackageFile.FullName
-    runtimePackageSizeMb = [Math]::Round($runtimePackageFile.Length / 1MB, 2)
-    fitsGithubNugetRegistry = ($runtimePackageFile.Length -lt 2147000000)
-    fitsGithubReleaseAsset = ($runtimePackageFile.Length -lt 2GB)
+    runtimePackagePath = if ($runtimePackageFile) { $runtimePackageFile.FullName } else { $null }
+    runtimePackageSizeMb = if ($runtimePackageFile) { [Math]::Round($runtimePackageFile.Length / 1MB, 2) } else { $null }
+    fitsGithubNugetRegistry = if ($runtimePackageFile) { ($runtimePackageFile.Length -lt 2147000000) } else { $null }
+    fitsGithubReleaseAsset = if ($runtimePackageFile) { ($runtimePackageFile.Length -lt 2GB) } else { $null }
+    skippedRuntimePack = $SkipRuntimePack.IsPresent
     ranSmoke = $RunSmoke.IsPresent
     tensorRtRoot = $resolvedRoots.tensorRtRoot
     cudaRoot = $resolvedRoots.cudaRoot
@@ -346,13 +357,16 @@ $lines.Add("| Runtime key | Package | Size (MB) | GitHub NuGet | GitHub Release 
 $lines.Add("| --- | --- | ---: | --- | --- | --- |")
 foreach ($result in $results) {
   $packageLabel = '`' + $result.packageId + ' ' + $result.version + '`'
+  $sizeLabel = if ($null -eq $result.runtimePackageSizeMb) { "skipped" } else { [string]$result.runtimePackageSizeMb }
+  $nugetLabel = if ($null -eq $result.fitsGithubNugetRegistry) { "skipped" } else { [string]$result.fitsGithubNugetRegistry }
+  $releaseLabel = if ($null -eq $result.fitsGithubReleaseAsset) { "skipped" } else { [string]$result.fitsGithubReleaseAsset }
   $lines.Add([string]::Format(
       "| {0} | {1} | {2} | {3} | {4} | {5} |",
       $result.runtimeKey,
       $packageLabel,
-      $result.runtimePackageSizeMb,
-      $result.fitsGithubNugetRegistry,
-      $result.fitsGithubReleaseAsset,
+      $sizeLabel,
+      $nugetLabel,
+      $releaseLabel,
       $result.ranSmoke))
 }
 $lines.Add("")
