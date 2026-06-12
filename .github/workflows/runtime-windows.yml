@@ -85,7 +85,6 @@ jobs:
     runs-on: windows-latest
     outputs:
       package_version: ${{ steps.version.outputs.package_version }}
-      matrix: ${{ steps.matrix.outputs.value }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -96,13 +95,6 @@ jobs:
         run: |
           $value = pwsh -NoProfile -File .\eng\Resolve-PackageVersion.ps1 -RequestedVersion "${{ inputs.version }}"
           "package_version=$value" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
-
-      - name: Resolve Windows runtime matrix
-        id: matrix
-        shell: pwsh
-        run: |
-          $value = pwsh -NoProfile -File .\eng\Resolve-RuntimeMatrix.ps1 -Platform windows -RuntimeKey "${{ inputs.runtime_keys }}"
-          "value={""include"":$value}" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
   managed:
     needs: prepare
@@ -125,9 +117,6 @@ jobs:
       - x64
     env:
       DOTNET_INSTALL_DIR: ${{ github.workspace }}\.dotnet
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -148,59 +137,15 @@ jobs:
           name: managed-packages-runtime-windows
           path: artifacts/managed
 
-      - name: Restore solution
+      - name: Build full runtime packages
         if: ${{ inputs.runtime_delivery_mode != 'split' }}
-        run: dotnet restore TensorRtSharp.sln
-
-      - name: Resolve runtime roots
-        if: ${{ inputs.runtime_delivery_mode != 'split' }}
-        id: roots
         shell: pwsh
-        run: |
-          $resolved = pwsh -NoProfile -File .\eng\Resolve-RuntimeRoots.ps1 -RuntimePackageKey "${{ matrix.key }}" | ConvertFrom-Json
-          if ([string]::IsNullOrWhiteSpace($resolved.tensorRtRoot)) { throw "TensorRT root is not configured for $($resolved.runtimeKey)." }
-          if ([string]::IsNullOrWhiteSpace($resolved.cudaRoot)) { throw "CUDA root is not configured for $($resolved.runtimeKey)." }
-          if ([string]::IsNullOrWhiteSpace($resolved.cudnnRoot)) { throw "cuDNN root is not configured for $($resolved.runtimeKey)." }
-          "tensor_rt_root=$($resolved.tensorRtRoot)" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
-          "cuda_root=$($resolved.cudaRoot)" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
-          "cudnn_root=$($resolved.cudnnRoot)" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
-
-      - name: Validate Windows runtime inputs
-        if: ${{ inputs.runtime_delivery_mode != 'split' }}
-        run: pwsh -NoProfile -File .\eng\Validate-WindowsRuntimeInputs.ps1 -RuntimePackageKey "${{ matrix.key }}" -TensorRtRoot "${{ steps.roots.outputs.tensor_rt_root }}" -CudaRoot "${{ steps.roots.outputs.cuda_root }}" -CudnnRoot "${{ steps.roots.outputs.cudnn_root }}"
-
-      - name: Configure native bridge
-        if: ${{ inputs.runtime_delivery_mode != 'split' }}
-        run: cmake --preset "${{ matrix.buildPreset }}" -DJYPPX_TENSORRT_ROOT="${{ steps.roots.outputs.tensor_rt_root }}" -DCUDAToolkit_ROOT="${{ steps.roots.outputs.cuda_root }}" -DJYPPX_CUDA_ROOT="${{ steps.roots.outputs.cuda_root }}" -DJYPPX_CUDNN_ROOT="${{ steps.roots.outputs.cudnn_root }}"
-
-      - name: Build native bridge
-        if: ${{ inputs.runtime_delivery_mode != 'split' }}
-        run: cmake --build --preset "${{ matrix.buildPreset }}"
-
-      - name: Collect runtime assets
-        if: ${{ inputs.runtime_delivery_mode != 'split' }}
-        run: pwsh -NoProfile -File .\eng\Collect-RuntimeAssets.ps1 -RuntimePackageKey "${{ matrix.key }}" -TensorRtRoot "${{ steps.roots.outputs.tensor_rt_root }}" -CudaRoot "${{ steps.roots.outputs.cuda_root }}" -CudnnRoot "${{ steps.roots.outputs.cudnn_root }}"
-
-      - name: Pack runtime package
-        if: ${{ inputs.runtime_delivery_mode != 'split' }}
-        run: dotnet pack ".\pack\runtime\${{ matrix.key }}\${{ matrix.packageId }}.csproj" -c "${{ inputs.configuration }}" -o .\artifacts\runtime-nupkg -p:JYPPXPackageVersion=${{ needs.prepare.outputs.package_version }}
-
-      - name: Validate runtime package consumer
-        if: ${{ inputs.runtime_delivery_mode != 'split' && !inputs.run_smoke }}
-        run: pwsh -NoProfile -File .\eng\Test-PackageConsumer.ps1 -RuntimePackageKey "${{ matrix.key }}" -ManagedPackageDirectory ".\artifacts\managed" -RuntimePackageDirectory ".\artifacts\runtime-nupkg"
-
-      - name: Validate runtime package consumer with smoke
-        if: ${{ inputs.runtime_delivery_mode != 'split' && inputs.run_smoke }}
-        run: pwsh -NoProfile -File .\eng\Test-PackageConsumer.ps1 -RuntimePackageKey "${{ matrix.key }}" -ManagedPackageDirectory ".\artifacts\managed" -RuntimePackageDirectory ".\artifacts\runtime-nupkg" -RunSmoke
-
-      - name: Build split runtime packages
-        if: ${{ inputs.runtime_delivery_mode == 'split' }}
         run: |
           $arguments = @(
             '-NoProfile',
             '-ExecutionPolicy', 'Bypass',
-            '-File', '.\eng\Invoke-LocalSplitRuntimePackage.ps1',
-            '-SourceRuntimeKey', '${{ matrix.key }}',
+            '-File', '.\eng\Invoke-LocalRuntimePackage.ps1',
+            '-RuntimePackageKey', '${{ inputs.runtime_keys }}',
             '-Version', '${{ needs.prepare.outputs.package_version }}',
             '-Configuration', '${{ inputs.configuration }}',
             '-SkipManagedPack'
@@ -210,26 +155,55 @@ jobs:
           }
           powershell @arguments
 
+      - name: Build split runtime packages
+        if: ${{ inputs.runtime_delivery_mode == 'split' }}
+        shell: pwsh
+        run: |
+          $keys = @()
+          foreach ($part in '${{ inputs.runtime_keys }}' -split '[,;]') {
+            $trimmed = $part.Trim()
+            if (-not [string]::IsNullOrWhiteSpace($trimmed)) {
+              $keys += $trimmed
+            }
+          }
+
+          foreach ($key in ($keys | Select-Object -Unique)) {
+            $arguments = @(
+              '-NoProfile',
+              '-ExecutionPolicy', 'Bypass',
+              '-File', '.\eng\Invoke-LocalSplitRuntimePackage.ps1',
+              '-SourceRuntimeKey', $key,
+              '-Version', '${{ needs.prepare.outputs.package_version }}',
+              '-Configuration', '${{ inputs.configuration }}',
+              '-SkipManagedPack'
+            )
+            if ('${{ inputs.run_smoke }}' -eq 'true') {
+              $arguments += '-RunSmoke'
+            }
+            powershell @arguments
+          }
+
       - name: Upload Windows runtime artifacts
         if: ${{ inputs.attach_to_github_release && inputs.runtime_delivery_mode != 'split' }}
         uses: actions/upload-artifact@v4
         with:
-          name: runtime-windows-${{ matrix.key }}
+          name: runtime-windows-full
           path: |
             artifacts/runtime-nupkg/*.nupkg
-            artifacts/runtime/${{ matrix.key }}/**
+            artifacts/runtime/**
             artifacts/package-consumer/**
+            artifacts/local-runtime-validation/**
 
       - name: Upload Windows split runtime artifacts
         if: ${{ inputs.attach_to_github_release && inputs.runtime_delivery_mode == 'split' }}
         uses: actions/upload-artifact@v4
         with:
-          name: runtime-windows-${{ matrix.key }}
+          name: runtime-windows-split
           path: |
-            artifacts/runtime-split-nupkg/${{ matrix.key }}/*.nupkg
-            artifacts/runtime/${{ matrix.key }}/**
+            artifacts/runtime-split-nupkg/**/*.nupkg
             artifacts/runtime-split/**
             artifacts/package-consumer/**
+            artifacts/local-runtime-validation/**
 
       - name: Publish Windows runtime package to GitHub Packages
         if: ${{ inputs.publish_to_github_packages && inputs.runtime_delivery_mode != 'split' }}
@@ -253,7 +227,9 @@ jobs:
         if: ${{ inputs.publish_to_github_packages && inputs.runtime_delivery_mode == 'split' }}
         shell: pwsh
         run: |
-          dotnet nuget push ".\artifacts\runtime-split-nupkg\${{ matrix.key }}\*.nupkg" `
-            --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" `
-            --api-key "${{ github.token }}" `
-            --skip-duplicate
+          Get-ChildItem -Path .\artifacts\runtime-split-nupkg -Filter *.nupkg -Recurse | ForEach-Object {
+            dotnet nuget push $_.FullName `
+              --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" `
+              --api-key "${{ github.token }}" `
+              --skip-duplicate
+          }
