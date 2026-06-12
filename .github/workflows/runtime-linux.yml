@@ -67,6 +67,7 @@ on:
         type: boolean
 
 permissions:
+  actions: read
   contents: read
   packages: write
 
@@ -103,6 +104,29 @@ jobs:
           $value = pwsh -NoProfile -File .\eng\Resolve-RuntimeMatrix.ps1 -Platform linux -RuntimeKey $requestedKeys
           "value={""include"":$value}" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
           "has_entries=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+      - name: Check Linux self-hosted runner availability
+        if: ${{ steps.matrix.outputs.has_entries == 'true' }}
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          $response = gh api "repos/$env:GH_REPO/actions/runners?per_page=100" | ConvertFrom-Json
+          $matching = @($response.runners | Where-Object {
+            $_.status -eq "online" -and
+            (@($_.labels.name) -contains "self-hosted") -and
+            (@($_.labels.name) -contains "linux") -and
+            (@($_.labels.name) -contains "x64")
+          })
+
+          if ($matching.Count -eq 0) {
+            throw "No online Linux x64 self-hosted runner with labels self-hosted, linux, and x64 is registered for this repository."
+          }
+
+          $matching | ForEach-Object {
+            Write-Host ("Linux self-hosted runner available: {0} ({1})" -f $_.name, $_.status)
+          }
 
   managed:
     needs: prepare

@@ -86,6 +86,17 @@ jobs:
           $value = pwsh -NoProfile -File .\eng\Resolve-PackageVersion.ps1 -RequestedVersion "${{ inputs.version }}"
           "package_version=$value" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
+      - name: Validate nuget.org publish prerequisites
+        if: ${{ inputs.publish_to_nuget }}
+        shell: pwsh
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          pwsh -NoProfile -File .\eng\Test-PublishPrerequisites.ps1 `
+            -Target nuget.org `
+            -ApiKey $env:NUGET_API_KEY `
+            -AllowMissingApiKey
+
       - name: Restore solution
         run: dotnet restore TensorRtSharp.sln
 
