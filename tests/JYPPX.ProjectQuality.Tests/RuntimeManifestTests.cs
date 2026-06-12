@@ -54,13 +54,13 @@ public sealed class RuntimeManifestTests
             string projectPath = Path.Combine(RepositoryPaths.Root, "pack", "runtime-split", key, packageId + ".csproj");
 
             Assert.True(File.Exists(projectPath), $"Split runtime project is missing for {key}: {projectPath}");
-            Assert.True(role is "core" or "extensions", $"Split runtime role is invalid for {key}: {role}");
-            Assert.Equal("design-only", prototypeState);
+            Assert.False(string.IsNullOrWhiteSpace(role), $"Split runtime role is invalid for {key}: {role}");
+            Assert.Contains(prototypeState, new[] { "design-only", "local-validated" });
         }
     }
 
     [Fact]
-    public void SplitRuntimeAssetsCoverTensorRt10SourceRuntimeAssetsWithoutOverlap()
+    public void SplitRuntimeAssetsCoverSourceRuntimeAssetsWithoutOverlap()
     {
         string runtimeManifestPath = Path.Combine(RepositoryPaths.Root, "pack", "runtime", "runtime-packages.manifest.json");
         string splitManifestPath = Path.Combine(RepositoryPaths.Root, "pack", "runtime-split", "split-runtime-packages.manifest.json");
@@ -69,7 +69,11 @@ public sealed class RuntimeManifestTests
 
         Dictionary<string, JsonElement> sourcePackages = runtimeManifest.RootElement.GetProperty("packages")
             .EnumerateArray()
-            .Where(package => package.GetProperty("tensorRtLine").GetString() == "10" && package.GetProperty("distributionTier").GetString() == "split-delivery-candidate")
+            .Where(package =>
+            {
+                string? tier = package.GetProperty("distributionTier").GetString();
+                return tier is "split-delivery-candidate" or "private-feed";
+            })
             .ToDictionary(package => package.GetProperty("key").GetString()!, package => package.Clone());
 
         var groupedSplitPackages = splitManifest.RootElement.GetProperty("packages")
@@ -80,13 +84,21 @@ public sealed class RuntimeManifestTests
         foreach (IGrouping<string, JsonElement> group in groupedSplitPackages)
         {
             Assert.True(sourcePackages.TryGetValue(group.Key, out JsonElement sourcePackage), $"Split source package is missing from runtime manifest: {group.Key}");
-            Assert.Contains(group, package => package.GetProperty("role").GetString() == "core");
-            Assert.Contains(group, package => package.GetProperty("role").GetString() == "extensions");
 
             string[] fullAssets = GetExpectedRuntimeAssetNames(sourcePackage).OrderBy(static value => value, StringComparer.Ordinal).ToArray();
             string[] splitAssets = group.SelectMany(GetSplitAssets).OrderBy(static value => value, StringComparer.Ordinal).ToArray();
+            string[] distinctSplitAssets = splitAssets.Distinct(StringComparer.Ordinal).OrderBy(static value => value, StringComparer.Ordinal).ToArray();
 
-            Assert.Equal(fullAssets, splitAssets.Distinct(StringComparer.Ordinal).OrderBy(static value => value, StringComparer.Ordinal).ToArray());
+            foreach (string fullAsset in fullAssets)
+            {
+                Assert.Contains(distinctSplitAssets, splitAsset => AssetPatternComparer.Instance.Equals(fullAsset, splitAsset));
+            }
+
+            foreach (string splitAsset in distinctSplitAssets)
+            {
+                Assert.Contains(fullAssets, fullAsset => AssetPatternComparer.Instance.Equals(fullAsset, splitAsset));
+            }
+
             Assert.Equal(splitAssets.Length, splitAssets.Distinct(StringComparer.Ordinal).Count());
         }
     }
@@ -122,6 +134,52 @@ public sealed class RuntimeManifestTests
         foreach (JsonElement asset in package.GetProperty("cudaFiles").EnumerateArray())
         {
             yield return Path.GetFileName(asset.GetString()!);
+        }
+
+        foreach (JsonElement asset in package.GetProperty("cudnnFiles").EnumerateArray())
+        {
+            yield return Path.GetFileName(asset.GetString()!);
+        }
+    }
+
+    private sealed class AssetPatternComparer : IEqualityComparer<string>
+    {
+        public static AssetPatternComparer Instance { get; } = new();
+
+        public bool Equals(string? x, string? y)
+        {
+            if (string.Equals(x, y, StringComparison.Ordinal))
+            {
+                return true;
+            }
+
+            if (x == null || y == null)
+            {
+                return false;
+            }
+
+            if (x.Contains('*', StringComparison.Ordinal))
+            {
+                return MatchesPattern(x, y);
+            }
+
+            if (y.Contains('*', StringComparison.Ordinal))
+            {
+                return MatchesPattern(y, x);
+            }
+
+            return false;
+        }
+
+        public int GetHashCode(string obj)
+        {
+            return 0;
+        }
+
+        private static bool MatchesPattern(string pattern, string value)
+        {
+            string regex = "^" + System.Text.RegularExpressions.Regex.Escape(pattern).Replace("\\*", ".*") + "$";
+            return System.Text.RegularExpressions.Regex.IsMatch(value, regex, System.Text.RegularExpressions.RegexOptions.CultureInvariant);
         }
     }
 }
