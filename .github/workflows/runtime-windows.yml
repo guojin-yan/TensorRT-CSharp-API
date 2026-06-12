@@ -128,8 +128,9 @@ jobs:
             8.0.x
             10.0.x
 
-      - name: Setup CMake
-        uses: lukka/get-cmake@latest
+      - name: Verify local CMake
+        shell: pwsh
+        run: cmake --version
 
       - name: Download managed package artifact
         uses: actions/download-artifact@v4
