@@ -14,7 +14,7 @@
 - 对应版本的 CUDA Toolkit
 - 对应版本的 TensorRT 解压目录
 
-## `manual-pack-runtime-linux.yml` 需要的输入
+## `runtime-linux.yml` 需要的输入
 
 - `runtime_key`
 - `configure_preset`

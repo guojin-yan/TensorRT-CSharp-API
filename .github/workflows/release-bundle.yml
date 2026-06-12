@@ -1,0 +1,129 @@
+name: release-bundle
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release version (must start with 4.0.x)
+        required: false
+        default: 4.0.0
+        type: string
+      configuration:
+        description: Build configuration
+        required: false
+        default: Release
+        type: string
+      windows_runtime_keys:
+        description: Optional comma-separated Windows runtime keys
+        required: false
+        default: ""
+        type: string
+      linux_runtime_keys:
+        description: Optional comma-separated Linux runtime keys
+        required: false
+        default: ""
+        type: string
+      run_windows_smoke:
+        description: Run Windows runtime package consumer smoke
+        required: false
+        default: true
+        type: boolean
+      run_linux_smoke:
+        description: Run Linux runtime package consumer smoke
+        required: false
+        default: false
+        type: boolean
+      publish_managed_to_nuget:
+        description: Publish the managed package to nuget.org
+        required: false
+        default: false
+        type: boolean
+      publish_to_github_packages:
+        description: Publish packages to GitHub Packages
+        required: false
+        default: true
+        type: boolean
+      attach_runtime_to_github_release:
+        description: Upload runtime packages as GitHub Release assets
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  managed:
+    uses: ./.github/workflows/package-managed.yml
+    with:
+      version: ${{ inputs.version }}
+      configuration: ${{ inputs.configuration }}
+      publish_to_nuget: ${{ inputs.publish_managed_to_nuget }}
+      publish_to_github_packages: ${{ inputs.publish_to_github_packages }}
+      artifact_name: managed-packages
+    secrets: inherit
+
+  runtime-windows:
+    uses: ./.github/workflows/runtime-windows.yml
+    with:
+      version: ${{ inputs.version }}
+      configuration: ${{ inputs.configuration }}
+      runtime_keys: ${{ inputs.windows_runtime_keys }}
+      run_smoke: ${{ inputs.run_windows_smoke }}
+      publish_to_github_packages: ${{ inputs.publish_to_github_packages }}
+      attach_to_github_release: ${{ inputs.attach_runtime_to_github_release }}
+    secrets: inherit
+
+  runtime-linux:
+    uses: ./.github/workflows/runtime-linux.yml
+    with:
+      version: ${{ inputs.version }}
+      configuration: ${{ inputs.configuration }}
+      runtime_keys: ${{ inputs.linux_runtime_keys }}
+      run_smoke: ${{ inputs.run_linux_smoke }}
+      publish_to_github_packages: ${{ inputs.publish_to_github_packages }}
+      attach_to_github_release: ${{ inputs.attach_runtime_to_github_release }}
+    secrets: inherit
+
+  release:
+    needs:
+      - managed
+      - runtime-windows
+      - runtime-linux
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download release artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+
+      - name: Create or update GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="v${{ inputs.version }}"
+          title="$tag"
+          notes="Automated release for $tag"
+          mapfile -t files < <(find release-artifacts -type f -name '*.nupkg' | sort)
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "No nupkg artifacts were found."
+            exit 1
+          fi
+
+          limit=$((2 * 1024 * 1024 * 1024))
+          for file in "${files[@]}"; do
+            size=$(stat -c %s "$file")
+            if [ "$size" -ge "$limit" ]; then
+              echo "Release asset '$file' is too large for GitHub Releases (must be under 2 GiB)." >&2
+              exit 1
+            fi
+          done
+
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" "${files[@]}" --clobber
+          else
+            gh release create "$tag" "${files[@]}" --title "$title" --notes "$notes"
+          fi

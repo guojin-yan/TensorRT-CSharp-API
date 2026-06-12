@@ -97,10 +97,10 @@ split 包在完成 split consumer validation、包体积策略和 NVIDIA 再分�
 
 Linux runtime 包条目镜像相同的 TensorRT / CUDA / cuDNN major.minor 矩阵，并保留 `.so` 通配资产规则。当前 Linux 仅做结构准备，尚未在真实 Linux runner 上验证。
 
-当前 Linux workflow：
+当前 Linux workflow 模块：
 
-- `manual-build-native-linux.yml`
-- `manual-pack-runtime-linux.yml`
+- `runtime-linux.yml`
+- `release-bundle.yml`
 
 Linux 包必须保持 `dry-run-only`，直到真实 Linux runner 完成 build、资产收集、package restore、`.so` 复制和可选 GPU smoke。
 

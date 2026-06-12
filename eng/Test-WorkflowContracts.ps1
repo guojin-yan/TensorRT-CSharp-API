@@ -59,99 +59,64 @@ function Test-Workflow {
 
 $workflowContracts = @(
   [pscustomobject]@{
-    path = ".github\workflows\manual-quality-gate.yml"
-    requirements = @(
-      New-Requirement -Needle "workflow_dispatch" -Description "manual trigger"
-      New-Requirement -Needle "Validate-RuntimeManifest.ps1" -Description "runtime manifest validation"
-      New-Requirement -Needle "Test-BindingGeneratorOutputs.ps1" -Description "binding generator determinism"
-      New-Requirement -Needle "dotnet docfx" -Description "DocFX build"
-      New-Requirement -Needle "Test-ManagedPackageContent.ps1" -Description "managed package content validation"
-      New-Requirement -Needle "Validate-SplitDeliveryPrototype.ps1" -Description "split delivery prototype validation"
-      New-Requirement -Needle "run_runtime_package_checks" -Description "hosted/runtime gate split input"
-      New-Requirement -Needle "Test-PackageConsumer.ps1" -Description "optional package consumer validation"
-      New-Requirement -Needle "Test-RuntimePublishReadiness.ps1" -Description "runtime publish readiness"
-      New-Requirement -Needle "Export-RuntimeDeliveryStrategy.ps1" -Description "runtime delivery strategy export"
-      New-Requirement -Needle "Export-ReleaseCandidateChecklist.ps1" -Description "release candidate checklist"
-    )
-  }
-  [pscustomobject]@{
-    path = ".github\workflows\manual-pack-runtime.yml"
-    requirements = @(
-      New-Requirement -Needle "workflow_dispatch" -Description "manual trigger"
-      New-Requirement -Needle "self-hosted" -Description "self-hosted runner"
-      New-Requirement -Needle "windows" -Description "windows runner label"
-      New-Requirement -Needle "cudnn_root" -Description "explicit cuDNN root input"
-      New-Requirement -Needle "Validate-WindowsRuntimeInputs.ps1" -Description "Windows input validation"
-      New-Requirement -Needle "-CudnnRoot" -Description "cuDNN root is passed through validation and asset collection"
-      New-Requirement -Needle "Collect-RuntimeAssets.ps1" -Description "runtime asset collection"
-      New-Requirement -Needle "Test-PackageConsumer.ps1" -Description "package consumer validation"
-      New-Requirement -Needle "Test-RuntimePublishReadiness.ps1" -Description "runtime publish readiness"
-      New-Requirement -Needle "Validate-SplitDeliveryPrototype.ps1" -Description "split delivery prototype validation"
-      New-Requirement -Needle "Export-RuntimeDeliveryStrategy.ps1" -Description "runtime delivery strategy export"
-    )
-  }
-  [pscustomobject]@{
-    path = ".github\workflows\manual-pack-runtime-split.yml"
-    requirements = @(
-      New-Requirement -Needle "workflow_dispatch" -Description "manual trigger"
-      New-Requirement -Needle "self-hosted" -Description "self-hosted runner"
-      New-Requirement -Needle "windows" -Description "windows runner label"
-      New-Requirement -Needle "cudnn_root" -Description "explicit cuDNN root input"
-      New-Requirement -Needle "Validate-SplitDeliveryPrototype.ps1" -Description "split delivery prototype validation"
-      New-Requirement -Needle "Validate-WindowsRuntimeInputs.ps1" -Description "source runtime input validation"
-      New-Requirement -Needle "-CudnnRoot" -Description "cuDNN root is passed through validation and asset collection"
-      New-Requirement -Needle "Collect-RuntimeAssets.ps1" -Description "source runtime asset collection"
-      New-Requirement -Needle "Collect-SplitRuntimeAssets.ps1" -Description "split runtime asset collection"
-      New-Requirement -Needle "dotnet pack" -Description "split runtime pack"
-      New-Requirement -Needle "Export-RuntimeDeliveryStrategy.ps1" -Description "runtime delivery strategy export"
-    )
-  }
-  [pscustomobject]@{
-    path = ".github\workflows\manual-pack-runtime-linux.yml"
-    requirements = @(
-      New-Requirement -Needle "workflow_dispatch" -Description "manual trigger"
-      New-Requirement -Needle "self-hosted" -Description "self-hosted runner"
-      New-Requirement -Needle "linux" -Description "linux runner label"
-      New-Requirement -Needle "x64" -Description "x64 runner label"
-      New-Requirement -Needle "Validate-LinuxRuntimeInputs.ps1" -Description "Linux input validation"
-      New-Requirement -Needle "Invoke-LinuxRuntimeDryRun.ps1" -Description "Linux dry-run"
-      New-Requirement -Needle "Test-LinuxRuntimeWorkflowContract.ps1" -Description "Linux workflow contract check"
-      New-Requirement -Needle "Export-LinuxPackageConsumerPlan.ps1" -Description "Linux package consumer handoff plan"
-      New-Requirement -Needle "Export-LinuxRunnerExecutionStatus.ps1" -Description "Linux runner execution status"
-      New-Requirement -Needle "Collect-RuntimeAssets.ps1" -Description "runtime asset collection"
-      New-Requirement -Needle "Test-PackageConsumer.ps1" -Description "Linux package consumer validation"
-      New-Requirement -Needle "Test-RuntimePublishReadiness.ps1" -Description "publish readiness"
-    )
-  }
-  [pscustomobject]@{
-    path = ".github\workflows\manual-build-native-linux.yml"
-    requirements = @(
-      New-Requirement -Needle "workflow_dispatch" -Description "manual trigger"
-      New-Requirement -Needle "self-hosted" -Description "self-hosted runner"
-      New-Requirement -Needle "Validate-LinuxRuntimeInputs.ps1" -Description "Linux input validation"
-      New-Requirement -Needle "Invoke-LinuxRuntimeDryRun.ps1" -Description "Linux dry-run"
-      New-Requirement -Needle "Export-LinuxPreflightSummary.ps1" -Description "Linux preflight summary"
-      New-Requirement -Needle "Export-LinuxPackageConsumerPlan.ps1" -Description "Linux package consumer handoff plan"
-      New-Requirement -Needle "Export-LinuxRunnerExecutionStatus.ps1" -Description "Linux runner execution status"
-      New-Requirement -Needle "cmake --preset" -Description "CMake configure"
-      New-Requirement -Needle "cmake --build --preset" -Description "CMake build"
-    )
-  }
-  [pscustomobject]@{
-    path = ".github\workflows\manual-build-docs.yml"
-    requirements = @(
-      New-Requirement -Needle "workflow_dispatch" -Description "manual trigger"
-      New-Requirement -Needle "dotnet tool restore" -Description "restore local tools"
-      New-Requirement -Needle "dotnet docfx" -Description "DocFX build"
-    )
-  }
-  [pscustomobject]@{
-    path = ".github\workflows\manual-deploy-docs.yml"
+    path = ".github\workflows\docs-release.yml"
     requirements = @(
       New-Requirement -Needle "workflow_dispatch" -Description "manual trigger"
       New-Requirement -Needle "dotnet tool restore" -Description "restore local tools"
       New-Requirement -Needle "dotnet docfx" -Description "DocFX build"
       New-Requirement -Needle "actions/deploy-pages" -Description "GitHub Pages deploy"
+    )
+  }
+  [pscustomobject]@{
+    path = ".github\workflows\package-managed.yml"
+    requirements = @(
+      New-Requirement -Needle "workflow_call" -Description "reusable workflow entrypoint"
+      New-Requirement -Needle "workflow_dispatch" -Description "manual trigger"
+      New-Requirement -Needle "Resolve-PackageVersion.ps1" -Description "version normalization"
+      New-Requirement -Needle "Test-BindingGeneratorOutputs.ps1" -Description "binding generator determinism"
+      New-Requirement -Needle "Test-ManagedPackageContent.ps1" -Description "managed package content validation"
+      New-Requirement -Needle "dotnet nuget push" -Description "package publication"
+    )
+  }
+  [pscustomobject]@{
+    path = ".github\workflows\runtime-windows.yml"
+    requirements = @(
+      New-Requirement -Needle "workflow_call" -Description "reusable workflow entrypoint"
+      New-Requirement -Needle "workflow_dispatch" -Description "manual trigger"
+      New-Requirement -Needle "Resolve-RuntimeMatrix.ps1" -Description "runtime matrix generation"
+      New-Requirement -Needle "Resolve-RuntimeRoots.ps1" -Description "runtime root resolution"
+      New-Requirement -Needle "self-hosted" -Description "self-hosted runner"
+      New-Requirement -Needle "windows" -Description "windows runner label"
+      New-Requirement -Needle "Validate-WindowsRuntimeInputs.ps1" -Description "Windows input validation"
+      New-Requirement -Needle "Collect-RuntimeAssets.ps1" -Description "runtime asset collection"
+      New-Requirement -Needle "Test-PackageConsumer.ps1" -Description "package consumer validation"
+      New-Requirement -Needle "dotnet nuget push" -Description "package publication"
+    )
+  }
+  [pscustomobject]@{
+    path = ".github\workflows\runtime-linux.yml"
+    requirements = @(
+      New-Requirement -Needle "workflow_call" -Description "reusable workflow entrypoint"
+      New-Requirement -Needle "workflow_dispatch" -Description "manual trigger"
+      New-Requirement -Needle "Resolve-RuntimeMatrix.ps1" -Description "runtime matrix generation"
+      New-Requirement -Needle "Resolve-RuntimeRoots.ps1" -Description "runtime root resolution"
+      New-Requirement -Needle "self-hosted" -Description "self-hosted runner"
+      New-Requirement -Needle "linux" -Description "linux runner label"
+      New-Requirement -Needle "Validate-LinuxRuntimeInputs.ps1" -Description "Linux input validation"
+      New-Requirement -Needle "Invoke-LinuxRuntimeDryRun.ps1" -Description "Linux dry-run"
+      New-Requirement -Needle "Collect-RuntimeAssets.ps1" -Description "runtime asset collection"
+      New-Requirement -Needle "Test-PackageConsumer.ps1" -Description "package consumer validation"
+    )
+  }
+  [pscustomobject]@{
+    path = ".github\workflows\release-bundle.yml"
+    requirements = @(
+      New-Requirement -Needle "workflow_dispatch" -Description "manual trigger"
+      New-Requirement -Needle ".github/workflows/package-managed.yml" -Description "managed package module"
+      New-Requirement -Needle ".github/workflows/runtime-windows.yml" -Description "Windows runtime module"
+      New-Requirement -Needle ".github/workflows/runtime-linux.yml" -Description "Linux runtime module"
+      New-Requirement -Needle "gh release create" -Description "release creation"
+      New-Requirement -Needle "gh release upload" -Description "release asset upload"
     )
   }
 )

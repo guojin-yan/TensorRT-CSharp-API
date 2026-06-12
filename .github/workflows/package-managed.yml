@@ -1,0 +1,142 @@
+name: package-managed
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Package version (must start with 4.0.x)
+        required: false
+        default: 4.0.0
+        type: string
+      configuration:
+        description: Build configuration
+        required: false
+        default: Release
+        type: string
+      publish_to_nuget:
+        description: Publish package to nuget.org
+        required: false
+        default: false
+        type: boolean
+      publish_to_github_packages:
+        description: Publish package to GitHub Packages
+        required: false
+        default: false
+        type: boolean
+      artifact_name:
+        description: Uploaded artifact name
+        required: false
+        default: managed-packages
+        type: string
+  workflow_call:
+    inputs:
+      version:
+        description: Package version (must start with 4.0.x)
+        required: false
+        default: 4.0.0
+        type: string
+      configuration:
+        description: Build configuration
+        required: false
+        default: Release
+        type: string
+      publish_to_nuget:
+        description: Publish package to nuget.org
+        required: false
+        default: false
+        type: boolean
+      publish_to_github_packages:
+        description: Publish package to GitHub Packages
+        required: false
+        default: false
+        type: boolean
+      artifact_name:
+        description: Uploaded artifact name
+        required: false
+        default: managed-packages
+        type: string
+    secrets:
+      NUGET_API_KEY:
+        required: false
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  pack:
+    runs-on:
+      - self-hosted
+      - windows
+      - x64
+    outputs:
+      package_version: ${{ steps.version.outputs.package_version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Resolve package version
+        id: version
+        shell: pwsh
+        run: |
+          $value = pwsh -NoProfile -File .\eng\Resolve-PackageVersion.ps1 -RequestedVersion "${{ inputs.version }}"
+          "package_version=$value" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+      - name: Restore solution
+        run: dotnet restore TensorRtSharp.sln
+
+      - name: Validate runtime manifest
+        run: pwsh -NoProfile -File .\eng\Validate-RuntimeManifest.ps1
+
+      - name: Validate binding generator outputs
+        run: pwsh -NoProfile -File .\eng\Test-BindingGeneratorOutputs.ps1
+
+      - name: Build solution
+        run: dotnet build TensorRtSharp.sln -c "${{ inputs.configuration }}" --no-restore
+
+      - name: Test project quality
+        run: dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c "${{ inputs.configuration }}" --no-build
+
+      - name: Pack managed package
+        run: dotnet pack .\pack\JYPPX.TensorRT.CSharp.API\JYPPX.TensorRT.CSharp.API.csproj -c "${{ inputs.configuration }}" -o .\artifacts\managed -p:JYPPXPackageVersion=${{ steps.version.outputs.package_version }}
+
+      - name: Validate managed package content
+        run: pwsh -NoProfile -File .\eng\Test-ManagedPackageContent.ps1
+
+      - name: Upload managed artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact_name }}
+          path: artifacts/managed/*.nupkg
+
+      - name: Publish managed package to GitHub Packages
+        if: ${{ inputs.publish_to_github_packages }}
+        shell: pwsh
+        run: |
+          dotnet nuget push .\artifacts\managed\*.nupkg `
+            --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" `
+            --api-key "${{ github.token }}" `
+            --skip-duplicate
+
+      - name: Publish managed package to nuget.org
+        if: ${{ inputs.publish_to_nuget }}
+        shell: pwsh
+        run: |
+          $packages = Get-ChildItem -LiteralPath .\artifacts\managed -Filter *.nupkg | Select-Object -ExpandProperty FullName
+          if ($packages.Count -eq 0) {
+            throw "No managed nupkg files were produced."
+          }
+
+          foreach ($package in $packages) {
+            if ([string]::IsNullOrWhiteSpace('${{ secrets.NUGET_API_KEY }}')) {
+              dotnet nuget push $package --source https://api.nuget.org/v3/index.json --skip-duplicate
+            }
+            else {
+              dotnet nuget push $package --source https://api.nuget.org/v3/index.json --api-key "${{ secrets.NUGET_API_KEY }}" --skip-duplicate
+            }
+          }

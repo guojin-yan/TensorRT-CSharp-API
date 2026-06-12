@@ -23,17 +23,29 @@ if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
 if ([string]::IsNullOrWhiteSpace($ManagedPackageDirectory)) {
   $ManagedPackageDirectory = Join-Path $RepositoryRoot "artifacts\managed"
 }
+elseif (-not [System.IO.Path]::IsPathRooted($ManagedPackageDirectory)) {
+  $ManagedPackageDirectory = [System.IO.Path]::GetFullPath((Join-Path $RepositoryRoot $ManagedPackageDirectory))
+}
 
 if ([string]::IsNullOrWhiteSpace($RuntimePackageDirectory)) {
   $RuntimePackageDirectory = Join-Path $RepositoryRoot "artifacts\runtime-nupkg"
+}
+elseif (-not [System.IO.Path]::IsPathRooted($RuntimePackageDirectory)) {
+  $RuntimePackageDirectory = [System.IO.Path]::GetFullPath((Join-Path $RepositoryRoot $RuntimePackageDirectory))
 }
 
 if ([string]::IsNullOrWhiteSpace($OutputRoot)) {
   $OutputRoot = Join-Path $RepositoryRoot "build-out\package-consumer"
 }
+elseif (-not [System.IO.Path]::IsPathRooted($OutputRoot)) {
+  $OutputRoot = [System.IO.Path]::GetFullPath((Join-Path $RepositoryRoot $OutputRoot))
+}
 
 if ([string]::IsNullOrWhiteSpace($ReportDirectory)) {
   $ReportDirectory = Join-Path $RepositoryRoot "artifacts\package-consumer"
+}
+elseif (-not [System.IO.Path]::IsPathRooted($ReportDirectory)) {
+  $ReportDirectory = [System.IO.Path]::GetFullPath((Join-Path $RepositoryRoot $ReportDirectory))
 }
 
 $utf8 = [System.Text.UTF8Encoding]::new($false)
@@ -80,6 +92,29 @@ function Join-PathMany {
   }
 
   return $path
+}
+
+function Get-RestorePackagesPath {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$RuntimeKey
+  )
+
+  $safeKey = ($RuntimeKey -replace '[^A-Za-z0-9\.-]', '-')
+  $isWindowsHost = $false
+  try {
+    $isWindowsHost = [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([System.Runtime.InteropServices.OSPlatform]::Windows)
+  }
+  catch {
+    $isWindowsHost = $env:OS -eq "Windows_NT"
+  }
+
+  if ($isWindowsHost) {
+    $root = Join-Path $env:SystemDrive "jyppx-pkgcache"
+    return Join-Path $root $safeKey
+  }
+
+  return Join-Path ([System.IO.Path]::GetTempPath()) ("jyppx-pkgcache/" + $safeKey)
 }
 
 function Get-NupkgMetadata {
@@ -474,6 +509,10 @@ Console.WriteLine("CudaDevices=" + cuda.CudaRuntimeInfo.DeviceCount + " Vendor="
 "@
 
   Set-Content -LiteralPath (Join-Path $resolvedConsumerRoot "NuGet.config") -Value $nugetConfig -Encoding utf8
+  $restorePackagesPath = Get-RestorePackagesPath -RuntimeKey $Key
+  New-Item -ItemType Directory -Path $restorePackagesPath -Force | Out-Null
+
+  $project = $project.Replace('$(MSBuildProjectDirectory)\.nuget\packages', $restorePackagesPath)
   Set-Content -LiteralPath (Join-Path $resolvedConsumerRoot "PackageConsumerSmoke.csproj") -Value $project -Encoding utf8
   Set-Content -LiteralPath (Join-Path $resolvedConsumerRoot "Program.cs") -Value $program -Encoding utf8
 

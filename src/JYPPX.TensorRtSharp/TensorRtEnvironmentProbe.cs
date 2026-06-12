@@ -396,8 +396,13 @@ public static class TensorRtEnvironmentProbe
         try
         {
             using Process process = Process.GetCurrentProcess();
-            foreach (ProcessModule module in process.Modules)
+            foreach (ProcessModule? module in process.Modules)
             {
+                if (module is null)
+                {
+                    continue;
+                }
+
                 string moduleName = SafeGetModuleName(module, diagnostics);
                 if (!IsInterestingDependencyName(moduleName))
                 {

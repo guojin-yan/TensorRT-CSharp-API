@@ -29,7 +29,23 @@ try {
     "JYPPX.CudaSharp.dll"
   )
 
-  $requiredFrameworks = @("net47", "net481", "netstandard2.0", "netstandard2.1", "net8.0", "net10.0")
+  $requiredFrameworks = @(
+    "net46",
+    "net461",
+    "net462",
+    "net47",
+    "net471",
+    "net472",
+    "net48",
+    "net481",
+    "netcoreapp3.1",
+    "net5.0",
+    "net6.0",
+    "net7.0",
+    "net8.0",
+    "net9.0",
+    "net10.0"
+  )
   $errors = New-Object System.Collections.Generic.List[string]
 
   foreach ($framework in $requiredFrameworks) {

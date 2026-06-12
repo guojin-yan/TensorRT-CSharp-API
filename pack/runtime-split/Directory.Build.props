@@ -1,4 +1,6 @@
 <Project>
+  <Import Project="$(MSBuildThisFileDirectory)..\..\Directory.Build.props" />
+
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <IncludeBuildOutput>false</IncludeBuildOutput>
@@ -18,4 +20,3 @@
     <None Include="..\README.md" Link="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 </Project>
-

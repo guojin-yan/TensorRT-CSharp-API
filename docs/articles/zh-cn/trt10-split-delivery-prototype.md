@@ -10,7 +10,7 @@ TensorRT 10 Windows runtime 包体积较大，不适合默认作为公开 NuGet.
 - package project：`pack/runtime-split/<split-key>/<packageId>.csproj`
 - 校验脚本：`eng/Validate-SplitDeliveryPrototype.ps1`
 - 资产收集脚本：`eng/Collect-SplitRuntimeAssets.ps1`
-- 手动 workflow：`.github/workflows/manual-pack-runtime-split.yml`
+- 当前发布链已并入 `.github/workflows/runtime-windows.yml` 与 `.github/workflows/release-bundle.yml`
 
 ## 包命名规则
 

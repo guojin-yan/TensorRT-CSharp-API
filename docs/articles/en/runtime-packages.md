@@ -97,10 +97,10 @@ Split packages are design-only until split consumer validation, package-size pol
 
 Linux runtime package entries mirror the same TensorRT / CUDA / cuDNN major.minor matrix and include wildcard `.so` asset patterns. Linux packaging remains structurally prepared but not validated on this Windows workstation.
 
-Current Linux workflows target future self-hosted Linux x64 runners:
+Current Linux workflow modules target future self-hosted Linux x64 runners:
 
-- `manual-build-native-linux.yml`
-- `manual-pack-runtime-linux.yml`
+- `runtime-linux.yml`
+- `release-bundle.yml`
 
 Linux packages must remain `dry-run-only` until a real Linux runner validates build, asset collection, package restore, native `.so` copy, and optional GPU smoke.
 

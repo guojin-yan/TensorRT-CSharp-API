@@ -16,7 +16,7 @@ Linux runtime packaging is currently prepared structurally, but it is expected t
 
 ## Expected workflow inputs
 
-For `manual-pack-runtime-linux.yml`, provide:
+For `runtime-linux.yml`, provide:
 
 - `runtime_key`
 - `configure_preset`

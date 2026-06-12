@@ -1,4 +1,6 @@
 <Project>
+  <Import Project="$(MSBuildThisFileDirectory)..\..\Directory.Build.props" />
+
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <IncludeBuildOutput>false</IncludeBuildOutput>
