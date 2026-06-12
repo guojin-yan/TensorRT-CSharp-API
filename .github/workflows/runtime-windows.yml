@@ -191,7 +191,6 @@ jobs:
         shell: pwsh
         run: |
           $maxBytes = 2147000000
-          $pushTimeoutSeconds = 3600
           $packages = Get-ChildItem -LiteralPath .\artifacts\runtime-nupkg -Filter *.nupkg
           foreach ($package in $packages) {
             if ($package.Length -ge $maxBytes) {
@@ -200,21 +199,25 @@ jobs:
             }
           }
 
-          dotnet nuget push .\artifacts\runtime-nupkg\*.nupkg `
-            --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" `
-            --api-key "${{ github.token }}" `
-            --timeout $pushTimeoutSeconds `
-            --skip-duplicate
+          pwsh -NoProfile -File .\eng\Push-NuGetPackages.ps1 `
+            -PackageRoot .\artifacts\runtime-nupkg `
+            -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" `
+            -ApiKey "${{ github.token }}" `
+            -TimeoutSeconds 3600 `
+            -MaxAttempts 3 `
+            -RetryDelaySeconds 30 `
+            -SortMode size-ascending
 
       - name: Publish Windows split runtime packages to GitHub Packages
         if: ${{ inputs.publish_to_github_packages && inputs.runtime_delivery_mode == 'split' }}
         shell: pwsh
         run: |
-          $pushTimeoutSeconds = 3600
-          Get-ChildItem -Path .\artifacts\runtime-split-nupkg -Filter *.nupkg -Recurse | ForEach-Object {
-            dotnet nuget push $_.FullName `
-              --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" `
-              --api-key "${{ github.token }}" `
-              --timeout $pushTimeoutSeconds `
-              --skip-duplicate
-          }
+          pwsh -NoProfile -File .\eng\Push-NuGetPackages.ps1 `
+            -PackageRoot .\artifacts\runtime-split-nupkg `
+            -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" `
+            -ApiKey "${{ github.token }}" `
+            -TimeoutSeconds 3600 `
+            -MaxAttempts 3 `
+            -RetryDelaySeconds 30 `
+            -Recurse `
+            -SortMode size-ascending

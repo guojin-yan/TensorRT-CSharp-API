@@ -88,7 +88,7 @@ $workflowContracts = @(
       New-Requirement -Needle "Invoke-LocalRuntimePackage.ps1" -Description "full runtime packaging entrypoint"
       New-Requirement -Needle "Invoke-LocalSplitRuntimePackage.ps1" -Description "split runtime packaging entrypoint"
       New-Requirement -Needle "sign_consumer_output" -Description "consumer signing toggle"
-      New-Requirement -Needle "dotnet nuget push" -Description "package publication"
+      New-Requirement -Needle "Push-NuGetPackages.ps1" -Description "package publication"
     )
   }
   [pscustomobject]@{
@@ -104,6 +104,7 @@ $workflowContracts = @(
       New-Requirement -Needle "Invoke-LinuxRuntimeDryRun.ps1" -Description "Linux dry-run"
       New-Requirement -Needle "Collect-RuntimeAssets.ps1" -Description "runtime asset collection"
       New-Requirement -Needle "Test-PackageConsumer.ps1" -Description "package consumer validation"
+      New-Requirement -Needle "Push-NuGetPackages.ps1" -Description "package publication"
     )
   }
   [pscustomobject]@{

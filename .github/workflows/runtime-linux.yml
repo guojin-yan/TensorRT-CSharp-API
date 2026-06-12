@@ -210,7 +210,6 @@ jobs:
         shell: pwsh
         run: |
           $maxBytes = 2147000000
-          $pushTimeoutSeconds = 3600
           $packages = Get-ChildItem -LiteralPath ./artifacts/runtime-nupkg -Filter *.nupkg
           foreach ($package in $packages) {
             if ($package.Length -ge $maxBytes) {
@@ -219,8 +218,11 @@ jobs:
             }
           }
 
-          dotnet nuget push ./artifacts/runtime-nupkg/*.nupkg `
-            --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" `
-            --api-key "${{ github.token }}" `
-            --timeout $pushTimeoutSeconds `
-            --skip-duplicate
+          pwsh -NoProfile -File ./eng/Push-NuGetPackages.ps1 `
+            -PackageRoot ./artifacts/runtime-nupkg `
+            -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" `
+            -ApiKey "${{ github.token }}" `
+            -TimeoutSeconds 3600 `
+            -MaxAttempts 3 `
+            -RetryDelaySeconds 30 `
+            -SortMode size-ascending
