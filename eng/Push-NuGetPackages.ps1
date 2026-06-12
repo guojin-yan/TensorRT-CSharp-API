@@ -24,10 +24,6 @@ if ([string]::IsNullOrWhiteSpace($Source)) {
   throw "Source is required."
 }
 
-if ([string]::IsNullOrWhiteSpace($ApiKey)) {
-  throw "ApiKey is required."
-}
-
 if ($TimeoutSeconds -lt 1) {
   throw "TimeoutSeconds must be greater than zero."
 }
@@ -69,9 +65,10 @@ switch ($SortMode) {
 foreach ($package in $packages) {
   $attempt = 1
   $pushed = $false
+  $hasApiKey = -not [string]::IsNullOrWhiteSpace($ApiKey)
 
   while (-not $pushed -and $attempt -le $MaxAttempts) {
-    Write-Host ("Pushing package attempt {0}/{1}: {2} ({3} MB)" -f $attempt, $MaxAttempts, $package.FullName, [Math]::Round($package.Length / 1MB, 2))
+    Write-Host ("Pushing package attempt {0}/{1}: {2} ({3} MB) ApiKey={4}" -f $attempt, $MaxAttempts, $package.FullName, [Math]::Round($package.Length / 1MB, 2), $hasApiKey)
 
     $arguments = @(
       "nuget",
@@ -79,12 +76,13 @@ foreach ($package in $packages) {
       $package.FullName,
       "--source",
       $Source,
-      "--api-key",
-      $ApiKey,
       "--timeout",
       $TimeoutSeconds,
       "--skip-duplicate"
     )
+    if ($hasApiKey) {
+      $arguments += @("--api-key", $ApiKey)
+    }
 
     $output = & dotnet @arguments 2>&1
     foreach ($line in @($output)) {

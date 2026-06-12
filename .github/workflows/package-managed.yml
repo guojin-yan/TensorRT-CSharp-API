@@ -117,10 +117,13 @@ jobs:
         if: ${{ inputs.publish_to_github_packages }}
         shell: pwsh
         run: |
-          dotnet nuget push .\artifacts\managed\*.nupkg `
-            --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" `
-            --api-key "${{ github.token }}" `
-            --skip-duplicate
+          pwsh -NoProfile -File .\eng\Push-NuGetPackages.ps1 `
+            -PackageRoot .\artifacts\managed `
+            -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" `
+            -ApiKey "${{ github.token }}" `
+            -TimeoutSeconds 1800 `
+            -MaxAttempts 3 `
+            -RetryDelaySeconds 15
 
   publish-nuget:
     if: ${{ inputs.publish_to_nuget }}
@@ -138,12 +141,21 @@ jobs:
 
       - name: Publish managed package to nuget.org
         shell: pwsh
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: |
-          $packages = Get-ChildItem -LiteralPath .\artifacts\managed -Filter *.nupkg | Select-Object -ExpandProperty FullName
-          if ($packages.Count -eq 0) {
-            throw "No managed nupkg files were produced."
+          $apiKey = $env:NUGET_API_KEY
+          if ([string]::IsNullOrWhiteSpace($apiKey)) {
+            Write-Host "NUGET_API_KEY secret is empty; falling back to the self-hosted runner's local NuGet configuration."
+          }
+          else {
+            Write-Host "Using NUGET_API_KEY secret for nuget.org publication."
           }
 
-          foreach ($package in $packages) {
-            dotnet nuget push $package --source https://api.nuget.org/v3/index.json --skip-duplicate
-          }
+          pwsh -NoProfile -File .\eng\Push-NuGetPackages.ps1 `
+            -PackageRoot .\artifacts\managed `
+            -Source https://api.nuget.org/v3/index.json `
+            -ApiKey $apiKey `
+            -TimeoutSeconds 1800 `
+            -MaxAttempts 2 `
+            -RetryDelaySeconds 15

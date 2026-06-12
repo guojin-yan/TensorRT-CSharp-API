@@ -75,7 +75,7 @@ $workflowContracts = @(
       New-Requirement -Needle "Resolve-PackageVersion.ps1" -Description "version normalization"
       New-Requirement -Needle "Test-BindingGeneratorOutputs.ps1" -Description "binding generator determinism"
       New-Requirement -Needle "Test-ManagedPackageContent.ps1" -Description "managed package content validation"
-      New-Requirement -Needle "dotnet nuget push" -Description "package publication"
+      New-Requirement -Needle "Push-NuGetPackages.ps1" -Description "package publication"
     )
   }
   [pscustomobject]@{
