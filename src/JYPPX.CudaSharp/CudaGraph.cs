@@ -6,6 +6,7 @@ namespace JYPPX.CudaSharp;
 
 /// <summary>
 /// Managed wrapper around a captured CUDA graph.
+/// 已捕获 CUDA graph 的托管封装。
 /// </summary>
 public sealed class CudaGraph : IDisposable
 {
@@ -241,11 +242,21 @@ public sealed class CudaGraph : IDisposable
         return NativeCudaApi.GetGraphNodeDependent(node, index);
     }
 
+    /// <summary>
+    /// Instantiates this graph as an executable CUDA graph.
+    /// 将当前 graph 实例化为可执行 CUDA graph。
+    /// </summary>
+    /// <param name="flags">The CUDA graph-instantiation flags. CUDA graph 实例化标志。</param>
+    /// <returns>A managed executable graph wrapper. 可执行 graph 的托管封装。</returns>
     public CudaGraphExec Instantiate(ulong flags = 0)
     {
         return new CudaGraphExec(NativeCudaApi.InstantiateGraph(_handle, flags));
     }
 
+    /// <summary>
+    /// Releases the captured CUDA graph handle.
+    /// 释放已捕获的 CUDA graph 句柄。
+    /// </summary>
     public void Dispose()
     {
         _handle.Dispose();

@@ -87,20 +87,19 @@ TensorRT 8 Windows runtime packages collect additional parser/plugin dependencie
 
 TensorRT 11 Windows packages use a different runtime layout from older TensorRT packages: DLLs are under `bin`, while import libraries are under `lib`. The runtime manifest collects the DLLs.
 
-## Split-Delivery Prototype
+## Split Runtime Components
 
-TensorRT 10 packages are modeled with a design-only split-delivery prototype under `pack/runtime-split`.
+Windows runtime packages are modeled as split component packages under `pack/runtime-split`.
 
-Prototype package IDs:
+Component roles:
 
-- `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda11.8.cudnn8.9.Core`
-- `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda11.8.cudnn8.9.Extensions`
-- `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Core`
-- `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Extensions`
+- `Bridge`: carries only the local C ABI bridge.
+- `CudaCudnn`: carries CUDA runtime and cuDNN assets.
+- `TensorRtRuntime`: carries the core TensorRT runtime assets.
+- `TensorRtExtensions` or TensorRT builder-resource packages: carry parser, plugin, builder-resource, or architecture-specific TensorRT assets.
+- The original runtime package ID remains a lightweight collection package that pins a tested component-version combination.
 
-The `Core` role carries the bridge, CUDA runtime, and core TensorRT runtime libraries. The `Extensions` role carries builder resources, plugin libraries, parser libraries, and related optional assets.
-
-Split packages are design-only until split consumer validation, package-size policy, and NVIDIA redistribution review are complete.
+CUDA/cuDNN/TensorRT component package versions do not need to match the managed package version. Republish them only when the NVIDIA dependency set changes. Republish `Bridge` and the collection package when the local native bridge changes, while pinning the existing vendor component versions.
 
 ## Linux Status
 
@@ -117,9 +116,12 @@ Linux packages must remain `dry-run-only` until a real Linux runner validates bu
 
 Runtime packages can become very large because they may include TensorRT builder resources, plugins, parser libraries, CUDA runtime assets, cuBLAS, and cuDNN.
 
-Before public distribution:
+Current publication strategy:
 
-- NVIDIA TensorRT / CUDA / cuDNN redistribution terms must be reviewed.
-- NuGet.org package-size constraints must be evaluated.
-- GitHub artifact / release hosting strategy must be decided.
-- Large TensorRT 10 and TensorRT 11 packages may need private-feed or split-delivery strategies.
+- Publish `JYPPX.TensorRT.CSharp.API` to nuget.org and GitHub Packages.
+- Keep large CUDA/cuDNN/TensorRT component packages on GitHub Packages when they fit the GitHub NuGet registry, or on GitHub Releases as release assets.
+- Treat runtime package versions independently from the managed package version.
+- Rebuild full CUDA/cuDNN/TensorRT component packages only when the NVIDIA dependency set changes.
+- Rebuild `bridge,collection` split packages when the local C ABI bridge changes, and pass the existing vendor component package version so CUDA/cuDNN/TensorRT packages are not republished.
+
+Before public distribution, NVIDIA TensorRT / CUDA / cuDNN redistribution terms must still be reviewed for the exact binaries being shipped.

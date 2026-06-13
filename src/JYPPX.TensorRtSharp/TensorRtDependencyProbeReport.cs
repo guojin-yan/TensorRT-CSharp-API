@@ -6,27 +6,32 @@ namespace JYPPX.TensorRtSharp;
 
 /// <summary>
 /// Identifies how a native dependency path was discovered by <see cref="TensorRtEnvironmentProbe.ProbeNativeDependencies"/>.
+/// 标识 <see cref="TensorRtEnvironmentProbe.ProbeNativeDependencies"/> 发现 native 依赖路径的方式。
 /// </summary>
 public enum TensorRtNativeDependencySource
 {
     /// <summary>
     /// The entry is a candidate path produced by the native bridge resolver.
+    /// 条目来自 native bridge resolver 生成的候选路径。
     /// </summary>
     NativeBridgeCandidate = 0,
 
     /// <summary>
     /// The entry is a module already loaded in the current process.
+    /// 条目是当前进程中已经加载的模块。
     /// </summary>
     LoadedProcessModule = 1,
 
     /// <summary>
     /// The entry is a matching DLL found on the process search path.
+    /// 条目是在进程搜索路径上找到的匹配 DLL。
     /// </summary>
     SearchPathCandidate = 2
 }
 
 /// <summary>
 /// Describes a native bridge, TensorRT, CUDA, cuDNN, or parser DLL discovered by a dependency probe.
+/// 描述依赖探针发现的 native bridge、TensorRT、CUDA、cuDNN 或 parser DLL。
 /// </summary>
 public sealed class TensorRtNativeDependencyInfo
 {
@@ -83,6 +88,10 @@ public sealed class TensorRtNativeDependencyInfo
     /// </summary>
     public string Diagnostic { get; }
 
+    /// <summary>
+    /// Formats the dependency entry for diagnostics.
+    /// 将依赖条目格式化为便于诊断的字符串。
+    /// </summary>
     public override string ToString()
     {
         string version = !string.IsNullOrWhiteSpace(FileVersion) ? FileVersion : ProductVersion;
@@ -92,6 +101,7 @@ public sealed class TensorRtNativeDependencyInfo
 
 /// <summary>
 /// Non-throwing diagnostic report for native bridge, TensorRT, parser, CUDA, and cuDNN dependency resolution.
+/// 用于 native bridge、TensorRT、parser、CUDA 与 cuDNN 依赖解析的非抛异常诊断报告。
 /// </summary>
 public sealed class TensorRtDependencyProbeReport
 {
@@ -158,6 +168,10 @@ public sealed class TensorRtDependencyProbeReport
     /// </summary>
     public int SearchPathCandidateCount => SearchPathCandidates.Count;
 
+    /// <summary>
+    /// Formats the dependency probe report for diagnostics.
+    /// 将依赖探针报告格式化为便于诊断的字符串。
+    /// </summary>
     public override string ToString()
     {
         return $"{Line}:bridge={BridgeInitialized}:loaded={LoadedModuleCount}:pathCandidates={SearchPathCandidateCount}:diagnostics={Diagnostics.Count}";

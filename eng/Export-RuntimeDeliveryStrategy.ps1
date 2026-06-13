@@ -43,7 +43,7 @@ function Get-DeliveryRecommendation {
       return "Prefer controlled internal feed until validation evidence, size policy, and redistribution terms are finalized."
     }
     "split-delivery-design" {
-      return "Keep out of broad public NuGet publication until bridge/core/builder-resource split delivery is designed and tested."
+      return "Keep out of broad public NuGet publication until bridge, CUDA/cuDNN, TensorRT component packages, and the collection package are validated."
     }
     "hold-linux-validation" {
       return "Do not publish. Keep as dry-run-only until a real Linux x64 self-hosted runner validates build, pack, and package consumer restore."
@@ -128,7 +128,7 @@ $lines.Add("## Delivery lanes")
 $lines.Add("")
 $lines.Add("- public-preview: small enough and locally validated enough to use as a public validation sample after license review.")
 $lines.Add("- private-feed: suitable for controlled internal feeds while validation, size, or license constraints remain unresolved.")
-$lines.Add("- split-delivery-design: too large or broad for a single default public package; split bridge/core/builder-resource delivery first.")
+$lines.Add("- split-delivery-design: too large or broad for a single default public package; split into bridge, CUDA/cuDNN, TensorRT, and collection packages first.")
 $lines.Add("- hold-linux-validation: Linux dry-run-only packages; do not publish before real Linux runner validation.")
 $lines.Add("")
 $lines.Add("| Key | Tier | Validation | Delivery lane | Recommendation |")
@@ -161,7 +161,7 @@ foreach ($result in @($results | Where-Object { $_.deliveryLane -eq "split-deliv
 }
 
 if ($splitPackages.Count -gt 0) {
-  $lines.Add("## Split-delivery prototype packages")
+  $lines.Add("## Split runtime component packages")
   $lines.Add("")
   $lines.Add("| Split key | Source runtime | Role | Package ID | Assets | State |")
   $lines.Add("| --- | --- | --- | --- | ---: | --- |")
@@ -169,11 +169,12 @@ if ($splitPackages.Count -gt 0) {
     $lines.Add("| $($splitPackage.key) | $($splitPackage.sourceRuntimeKey) | $($splitPackage.role) | $($splitPackage.packageId) | $(@($splitPackage.assets).Count) | $($splitPackage.prototypeState) |")
   }
   $lines.Add("")
-  $lines.Add("Prototype package naming rule:")
+  $lines.Add("Component package naming rule:")
   $lines.Add("")
-  $lines.Add("- `<full-runtime-package-id>.Core` carries bridge, CUDA runtime, and core TensorRT runtime libraries.")
-  $lines.Add("- `<full-runtime-package-id>.Extensions` carries builder resources, plugins, parser libraries, and related optional assets.")
-  $lines.Add("- These packages remain `design-only` until split package consumer validation is implemented and NVIDIA redistribution terms are reviewed.")
+  $lines.Add("- `<full-runtime-package-id>.Bridge` carries only the local C ABI bridge and may be republished when wrapper native code changes.")
+  $lines.Add("- `<full-runtime-package-id>.CudaCudnn` carries CUDA runtime and cuDNN assets and should be republished only when the NVIDIA dependency set changes.")
+  $lines.Add("- `<full-runtime-package-id>.TensorRt*` carries TensorRT runtime, parser, plugin, or builder-resource assets and should be republished only when the TensorRT dependency set changes.")
+  $lines.Add("- The original `<full-runtime-package-id>` remains a lightweight collection package that pins a tested component-version combination.")
   $lines.Add("")
 }
 
@@ -181,7 +182,7 @@ $lines.Add("## Release blockers")
 $lines.Add("")
 $lines.Add("- NVIDIA TensorRT/CUDA redistribution terms are still a blocker before public release.")
 $lines.Add("- Linux packages remain dry-run-only until build, pack, package consumer validation, and optional smoke run on a real Linux x64 runner.")
-$lines.Add("- TensorRT 10 Windows packages should stay private-feed or split-delivery candidates until package size and asset split policy are finalized.")
+$lines.Add("- Large Windows runtime component packages should stay on GitHub Packages or GitHub Releases unless their package size fits nuget.org and NVIDIA redistribution terms are cleared.")
 
 $markdownPath = Join-Path $outputRoot "runtime-delivery-strategy.md"
 $lines | Set-Content -LiteralPath $markdownPath -Encoding utf8

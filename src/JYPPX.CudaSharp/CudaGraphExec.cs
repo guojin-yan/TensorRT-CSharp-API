@@ -6,6 +6,7 @@ namespace JYPPX.CudaSharp;
 
 /// <summary>
 /// Managed wrapper around an executable CUDA graph.
+/// 可执行 CUDA graph 的托管封装。
 /// </summary>
 public sealed class CudaGraphExec : IDisposable
 {
@@ -67,6 +68,11 @@ public sealed class CudaGraphExec : IDisposable
         NativeCudaApi.UploadGraphExec(_handle, stream.Handle);
     }
 
+    /// <summary>
+    /// Launches the executable graph on a CUDA stream.
+    /// 在 CUDA stream 上启动当前可执行 graph。
+    /// </summary>
+    /// <param name="stream">The stream used for graph launch. 用于 graph 启动的 stream。</param>
     public void Launch(CudaStream stream)
     {
         if (stream == null)
@@ -77,6 +83,10 @@ public sealed class CudaGraphExec : IDisposable
         NativeCudaApi.LaunchGraphExec(_handle, stream.Handle);
     }
 
+    /// <summary>
+    /// Releases the executable graph handle.
+    /// 释放可执行 graph 句柄。
+    /// </summary>
     public void Dispose()
     {
         _handle.Dispose();

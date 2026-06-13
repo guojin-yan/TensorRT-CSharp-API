@@ -4,6 +4,9 @@ param(
   [string]$TargetFramework = "net8.0",
   [string]$ManagedPackageDirectory,
   [string]$RuntimePackageDirectory,
+  [string[]]$AdditionalPackageSource = @(),
+  [string]$AdditionalPackageSourceUsername,
+  [string]$AdditionalPackageSourcePassword,
   [string]$OutputRoot,
   [string]$ReportDirectory,
   [switch]$RunSmoke,
@@ -94,6 +97,63 @@ function Join-PathMany {
   }
 
   return $path
+}
+
+function ConvertTo-XmlAttributeValue {
+  param(
+    [string]$Value
+  )
+
+  return [System.Security.SecurityElement]::Escape($Value)
+}
+
+function New-NuGetConfigContent {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$ManagedSource,
+    [Parameter(Mandatory = $true)]
+    [string]$RuntimeSource
+  )
+
+  $packageSources = New-Object System.Collections.Generic.List[string]
+  $packageSources.Add('    <clear />')
+  $packageSources.Add('    <add key="jyppx-managed" value="' + (ConvertTo-XmlAttributeValue -Value $ManagedSource) + '" />')
+  $packageSources.Add('    <add key="jyppx-runtime" value="' + (ConvertTo-XmlAttributeValue -Value $RuntimeSource) + '" />')
+
+  $sourceIndex = 1
+  foreach ($source in @(Expand-KeyList -Values $AdditionalPackageSource)) {
+    $packageSources.Add('    <add key="additional-' + $sourceIndex + '" value="' + (ConvertTo-XmlAttributeValue -Value $source) + '" />')
+    $sourceIndex++
+  }
+
+  $packageSourceCredentials = New-Object System.Collections.Generic.List[string]
+  if (-not [string]::IsNullOrWhiteSpace($AdditionalPackageSourcePassword)) {
+    $credentialUserName = if ([string]::IsNullOrWhiteSpace($AdditionalPackageSourceUsername)) { "github" } else { $AdditionalPackageSourceUsername }
+    $additionalSourceCount = $sourceIndex - 1
+    for ($credentialIndex = 1; $credentialIndex -le $additionalSourceCount; $credentialIndex++) {
+      $packageSourceCredentials.Add('    <additional-' + $credentialIndex + '>')
+      $packageSourceCredentials.Add('      <add key="Username" value="' + (ConvertTo-XmlAttributeValue -Value $credentialUserName) + '" />')
+      $packageSourceCredentials.Add('      <add key="ClearTextPassword" value="' + (ConvertTo-XmlAttributeValue -Value $AdditionalPackageSourcePassword) + '" />')
+      $packageSourceCredentials.Add('    </additional-' + $credentialIndex + '>')
+    }
+  }
+
+  $packageSourceCredentialBlock = if ($packageSourceCredentials.Count -gt 0) {
+    "  <packageSourceCredentials>`r`n$($packageSourceCredentials -join "`r`n")`r`n  </packageSourceCredentials>"
+  }
+  else {
+    ""
+  }
+
+  return @"
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <packageSources>
+$($packageSources -join "`r`n")
+  </packageSources>
+$packageSourceCredentialBlock
+</configuration>
+"@
 }
 
 function Get-RestorePackagesPath {
@@ -525,16 +585,7 @@ function Invoke-PackageConsumerValidation {
 
   New-Item -ItemType Directory -Path $resolvedConsumerRoot -Force | Out-Null
 
-  $nugetConfig = @"
-<?xml version="1.0" encoding="utf-8"?>
-<configuration>
-  <packageSources>
-    <clear />
-    <add key="jyppx-managed" value="$ManagedPackageDirectory" />
-    <add key="jyppx-runtime" value="$RuntimePackageDirectory" />
-  </packageSources>
-</configuration>
-"@
+  $nugetConfig = New-NuGetConfigContent -ManagedSource $ManagedPackageDirectory -RuntimeSource $RuntimePackageDirectory
 
   $project = @"
 <Project Sdk="Microsoft.NET.Sdk">

@@ -35,6 +35,24 @@ foreach ($package in $packages) {
 
   $nupkgPattern = "$($package.packageId).*" + ".nupkg"
   $hasLocalNupkg = @(Get-ChildItem -Path (Join-Path $RepositoryRoot "artifacts\runtime-nupkg") -Filter $nupkgPattern -ErrorAction SilentlyContinue).Count -gt 0
+  $splitManifestPath = Join-Path $RepositoryRoot "pack\runtime-split\split-runtime-packages.manifest.json"
+  $splitPackages = @()
+  $hasLocalSplitNupkgSet = $false
+  if (Test-Path -LiteralPath $splitManifestPath -PathType Leaf) {
+    $splitManifest = Get-Content -LiteralPath $splitManifestPath -Raw -Encoding utf8 | ConvertFrom-Json
+    $splitPackages = @($splitManifest.packages | Where-Object { $_.sourceRuntimeKey -eq $package.key })
+    if ($splitPackages.Count -gt 0) {
+      $splitNupkgRoot = Join-Path $RepositoryRoot "artifacts\runtime-split-nupkg\$($package.key)"
+      $missingSplitNupkgs = @(
+        $splitPackages |
+          Where-Object {
+            $pattern = "$($_.packageId).*" + ".nupkg"
+            @(Get-ChildItem -Path $splitNupkgRoot -Filter $pattern -ErrorAction SilentlyContinue).Count -eq 0
+          }
+      )
+      $hasLocalSplitNupkgSet = $missingSplitNupkgs.Count -eq 0
+    }
+  }
 
   switch ($TargetMode) {
     "public-preview" {
@@ -60,26 +78,26 @@ foreach ($package in $packages) {
       if ($package.validationState -ne "local-validated") {
         $blockers.Add("validationState '$($package.validationState)' is not sufficient for split-delivery publication.")
       }
-      if (-not $hasLocalNupkg) {
-        $blockers.Add("local runtime nupkg was not found under artifacts/runtime-nupkg.")
-      }
       if ($package.distributionTier -notin @("split-delivery-candidate", "private-feed")) {
         $warnings.Add("package is not marked as a split-delivery candidate, review whether split delivery is actually needed.")
       }
 
       if ($package.distributionTier -eq "split-delivery-candidate") {
-        $splitManifestPath = Join-Path $RepositoryRoot "pack\runtime-split\split-runtime-packages.manifest.json"
         if (-not (Test-Path -LiteralPath $splitManifestPath -PathType Leaf)) {
-          $blockers.Add("split-delivery prototype manifest was not found under pack/runtime-split.")
+          $blockers.Add("split runtime package manifest was not found under pack/runtime-split.")
         }
         else {
-          $splitManifest = Get-Content -LiteralPath $splitManifestPath -Raw -Encoding utf8 | ConvertFrom-Json
-          $splitPackages = @($splitManifest.packages | Where-Object { $_.sourceRuntimeKey -eq $package.key })
-          if (($splitPackages | Where-Object { $_.role -eq "core" }).Count -eq 0) {
-            $blockers.Add("split-delivery prototype for '$($package.key)' is missing a core package.")
+          if (($splitPackages | Where-Object { $_.role -eq "bridge" }).Count -eq 0) {
+            $blockers.Add("split runtime package set for '$($package.key)' is missing a bridge package.")
           }
-          if (($splitPackages | Where-Object { $_.role -eq "extensions" }).Count -eq 0) {
-            $blockers.Add("split-delivery prototype for '$($package.key)' is missing an extensions package.")
+          if (($splitPackages | Where-Object { $_.role -eq "cuda-cudnn" }).Count -eq 0) {
+            $blockers.Add("split runtime package set for '$($package.key)' is missing a CUDA/cuDNN package.")
+          }
+          if (($splitPackages | Where-Object { ([string]$_.role).StartsWith("tensorrt-", [System.StringComparison]::Ordinal) }).Count -eq 0) {
+            $blockers.Add("split runtime package set for '$($package.key)' is missing TensorRT package components.")
+          }
+          if (-not $hasLocalSplitNupkgSet) {
+            $warnings.Add("complete local split runtime nupkg set was not detected under artifacts/runtime-split-nupkg/$($package.key).")
           }
         }
       }

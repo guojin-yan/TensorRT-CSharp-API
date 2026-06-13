@@ -3,24 +3,44 @@ using JYPPX.TensorRtSharp.Internal.Interop;
 
 namespace JYPPX.TensorRtSharp;
 
+/// <summary>
+/// Represents a managed TensorRT Tensor Rt Layer wrapper.
+/// 表示托管 TensorRT Tensor Rt Layer 包装器。
+/// </summary>
 public sealed partial class TensorRtLayer
 {
+    /// <summary>
+    /// Gets the Quantize Axis value.
+    /// 获取 Quantize Axis 值。
+    /// </summary>
     public int GetQuantizeAxis()
     {
         return NativeBridgeApi.GetQuantizeAxis(Line, _handle);
     }
 
+    /// <summary>
+    /// Sets the Quantize Axis value.
+    /// 设置 Quantize Axis 值。
+    /// </summary>
     public void SetQuantizeAxis(int axis)
     {
         ValidateQuantizationAxis(axis, nameof(axis));
         NativeBridgeApi.SetQuantizeAxis(Line, _handle, axis);
     }
 
+    /// <summary>
+    /// Gets the Dequantize Axis value.
+    /// 获取 Dequantize Axis 值。
+    /// </summary>
     public int GetDequantizeAxis()
     {
         return NativeBridgeApi.GetDequantizeAxis(Line, _handle);
     }
 
+    /// <summary>
+    /// Sets the Dequantize Axis value.
+    /// 设置 Dequantize Axis 值。
+    /// </summary>
     public void SetDequantizeAxis(int axis)
     {
         ValidateQuantizationAxis(axis, nameof(axis));

@@ -126,11 +126,11 @@ foreach ($group in @($splitManifest.packages | Group-Object sourceRuntimeKey)) {
 $outputRoot = Join-Path $RepositoryRoot "artifacts\runtime-distribution"
 New-Item -ItemType Directory -Path $outputRoot -Force | Out-Null
 
-$jsonPath = Join-Path $outputRoot "split-delivery-prototype-report.json"
+$jsonPath = Join-Path $outputRoot "split-runtime-packages-report.json"
 $rows | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $jsonPath -Encoding utf8
 
 $lines = New-Object System.Collections.Generic.List[string]
-$lines.Add("# Split Delivery Prototype Report")
+$lines.Add("# Split Runtime Packages Report")
 $lines.Add("")
 $lines.Add("Generated on: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')")
 $lines.Add("")
@@ -157,11 +157,11 @@ $lines.Add("")
 $lines.Add("- These packages must not be published before license review, package-size review, and split consumer validation.")
 $lines.Add("- Packages that remain `design-only` or `pending-local-validation` are not release-ready.")
 
-$markdownPath = Join-Path $outputRoot "split-delivery-prototype-report.md"
+$markdownPath = Join-Path $outputRoot "split-runtime-packages-report.md"
 $lines | Set-Content -LiteralPath $markdownPath -Encoding utf8
 
-Write-Host "Split delivery prototype report written to $jsonPath"
-Write-Host "Split delivery prototype report written to $markdownPath"
+Write-Host "Split runtime packages report written to $jsonPath"
+Write-Host "Split runtime packages report written to $markdownPath"
 
 if ($errors.Count -gt 0) {
   foreach ($errorMessage in $errors) {

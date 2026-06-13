@@ -4,16 +4,32 @@ using JYPPX.TensorRtSharp.Internal.Interop;
 
 namespace JYPPX.TensorRtSharp;
 
+/// <summary>
+/// Represents a managed TensorRT Tensor Rt Execution Context wrapper.
+/// 表示托管 TensorRT Tensor Rt Execution Context 包装器。
+/// </summary>
 public sealed partial class TensorRtExecutionContext
 {
+    /// <summary>
+    /// Gets or sets the Optimization Profile Index value.
+    /// 获取或设置 Optimization Profile Index 值。
+    /// </summary>
     public int OptimizationProfileIndex => NativeBridgeApi.GetExecutionContextOptimizationProfile(Line, _handle);
 
+    /// <summary>
+    /// Gets or sets the Enqueue Emits Profile value.
+    /// 获取或设置 Enqueue Emits Profile 值。
+    /// </summary>
     public bool EnqueueEmitsProfile
     {
         get => NativeBridgeApi.GetExecutionContextEnqueueEmitsProfile(Line, _handle);
         set => NativeBridgeApi.SetExecutionContextEnqueueEmitsProfile(Line, _handle, value);
     }
 
+    /// <summary>
+    /// Sets the Optimization Profile Async value.
+    /// 设置 Optimization Profile Async 值。
+    /// </summary>
     public void SetOptimizationProfileAsync(int profileIndex, CudaStream stream)
     {
         if (stream == null)

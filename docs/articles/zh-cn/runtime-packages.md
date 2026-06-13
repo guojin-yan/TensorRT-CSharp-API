@@ -81,20 +81,19 @@ TensorRT 8 Windows runtime 包会额外收集 parser/plugin 依赖：
 
 TensorRT 11 Windows 包布局与旧版本不同：DLL 位于 `bin`，导入库位于 `lib`。runtime manifest 收集的是 DLL。
 
-## 拆分交付原型
+## Runtime 组件拆分
 
-TensorRT 10 包保留 design-only 的 split-delivery 原型，位于 `pack/runtime-split`。
+Windows runtime 包在 `pack/runtime-split` 下拆成组件包。
 
-原型 package ID：
+组件角色：
 
-- `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda11.8.cudnn8.9.Core`
-- `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda11.8.cudnn8.9.Extensions`
-- `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Core`
-- `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Extensions`
+- `Bridge`：只承载本地 C ABI bridge。
+- `CudaCudnn`：承载 CUDA runtime 和 cuDNN 资产。
+- `TensorRtRuntime`：承载核心 TensorRT runtime 资产。
+- `TensorRtExtensions` 或 TensorRT builder-resource 包：承载 parser、plugin、builder resource 或特定架构 TensorRT 资产。
+- 原始 runtime package ID 保留为轻量 collection 包，用来固定一组已验证的组件版本组合。
 
-`Core` 角色承载 bridge、CUDA runtime 和核心 TensorRT runtime 库。`Extensions` 角色承载 builder resources、plugin libraries、parser libraries 等可选资产。
-
-split 包在完成 split consumer validation、包体积策略和 NVIDIA 再分发许可复核前，不应公开发布。
+CUDA/cuDNN/TensorRT 组件包版本不需要和 managed 包版本一致。只有 NVIDIA 依赖集合变化时才重发这些组件；本地 native bridge 变化时重发 `Bridge` 和 collection 包，同时固定已有 vendor 组件版本。
 
 ## Linux 状态
 
@@ -111,10 +110,13 @@ Linux 包必须保持 `dry-run-only`，直到真实 Linux runner 完成 build、
 
 runtime 包可能非常大，因为会包含 TensorRT builder resources、plugin、parser、CUDA runtime、cuBLAS 和 cuDNN。
 
-公开发布前必须确认：
+当前发布策略：
 
-- NVIDIA TensorRT / CUDA / cuDNN 再分发许可
-- NuGet.org 包体积限制
-- GitHub artifact / release 托管策略
-- TensorRT 10 / TensorRT 11 大包是否需要私有源或拆分交付策略
+- `JYPPX.TensorRT.CSharp.API` 发布到 nuget.org 和 GitHub Packages。
+- 大体积 CUDA/cuDNN/TensorRT 组件包优先发布到 GitHub Packages；如果不适合 NuGet feed，则作为 GitHub Release asset 发布。
+- runtime 包版本和 managed 包版本独立维护。
+- 只有 NVIDIA 依赖集合变化时，才重发完整 CUDA/cuDNN/TensorRT 组件包。
+- 本地 C ABI bridge 变化时，重发 `bridge,collection` split 包，并显式传入已有 vendor 组件包版本，避免重复发布 CUDA/cuDNN/TensorRT 包。
+
+公开发布前仍需针对实际发布的 NVIDIA TensorRT / CUDA / cuDNN 二进制文件复核再分发许可。
 

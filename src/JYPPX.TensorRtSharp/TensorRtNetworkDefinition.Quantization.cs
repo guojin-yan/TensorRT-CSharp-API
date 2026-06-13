@@ -2,8 +2,16 @@ using JYPPX.TensorRtSharp.Internal.Interop;
 
 namespace JYPPX.TensorRtSharp;
 
+/// <summary>
+/// Represents a managed TensorRT Tensor Rt Network Definition wrapper.
+/// 表示托管 TensorRT Tensor Rt Network Definition 包装器。
+/// </summary>
 public sealed partial class TensorRtNetworkDefinition
 {
+    /// <summary>
+    /// Adds a Quantize layer or object.
+    /// 添加 Quantize 层或对象。
+    /// </summary>
     public TensorRtLayer AddQuantize(TensorRtTensor input, TensorRtTensor scale)
     {
         ValidateInputTensor(input, nameof(input));
@@ -11,6 +19,10 @@ public sealed partial class TensorRtNetworkDefinition
         return new TensorRtLayer(Line, NativeBridgeApi.AddQuantizeLayer(Line, _handle, input.Handle, scale.Handle));
     }
 
+    /// <summary>
+    /// Adds a Dequantize layer or object.
+    /// 添加 Dequantize 层或对象。
+    /// </summary>
     public TensorRtLayer AddDequantize(TensorRtTensor input, TensorRtTensor scale)
     {
         ValidateInputTensor(input, nameof(input));

@@ -17,13 +17,13 @@ Install one matching runtime package for native assets. Runtime package names in
 
 The package metadata keeps the full vendor versions, such as TensorRT `10.11.0.33` and cuDNN `8.9.7.29`. CUDA `12.9` is installed locally and must be used for `cuda12.9` runtime packages; the earlier CUDA `12.3` fallback is retired and must not be used for locally validated packages.
 
-TensorRT 10 and TensorRT 11 runtime packages are large and are currently treated as private-feed or split-delivery candidates until NVIDIA redistribution and package-size review are complete.
+TensorRT, CUDA, and cuDNN runtime packages are versioned independently from this managed package. Publish the NVIDIA component packages only when the vendor dependency set changes. Publish the bridge component package when the local C ABI bridge changes. The original runtime package ID is kept as a lightweight collection package that pins one tested component-version combination.
 
-Prototype split-delivery package names are reserved for TensorRT 10:
+Split runtime package names follow the component role:
 
-- `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda11.8.cudnn8.9.Core`
-- `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda11.8.cudnn8.9.Extensions`
-- `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Core`
-- `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Extensions`
+- `<runtime-package-id>.Bridge`
+- `<runtime-package-id>.CudaCudnn`
+- `<runtime-package-id>.TensorRtRuntime`
+- `<runtime-package-id>.TensorRtExtensions` or TensorRT builder-resource packages when the selected TensorRT line needs them
 
-The `Core` package is intended to carry the bridge, CUDA runtime, and core TensorRT runtime libraries. The `Extensions` package is intended to carry builder resources, plugin libraries, and parser libraries. These split packages are design-only prototypes until split consumer validation and NVIDIA redistribution review are complete.
+Large CUDA/cuDNN/TensorRT component packages may stay on GitHub Packages or GitHub Releases when they exceed nuget.org package-size limits. NVIDIA redistribution terms must be reviewed for the exact binaries being shipped.

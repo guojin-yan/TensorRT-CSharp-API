@@ -79,6 +79,10 @@ public sealed class TensorRtGlobalRuntimeVersion
     /// </summary>
     public bool HasGlobalLogger { get; }
 
+    /// <summary>
+    /// Formats the global runtime version snapshot for diagnostics.
+    /// 将全局 runtime 版本快照格式化为便于诊断的字符串。
+    /// </summary>
     public override string ToString() => $"{Line}:{Major}.{Minor}.{Patch}.{Build}:packed={InferLibVersion}:onnx={OnnxParserVersion}:globalLogger={HasGlobalLogger}";
 }
 
@@ -113,6 +117,10 @@ public sealed class TensorRtRuntimeProbeStage
     /// </summary>
     public string Message { get; }
 
+    /// <summary>
+    /// Formats the probe stage for diagnostics.
+    /// 将探针阶段格式化为便于诊断的字符串。
+    /// </summary>
     public override string ToString() => $"{Name}={Succeeded}:{Message}";
 }
 
@@ -170,6 +178,10 @@ public sealed class TensorRtRuntimeProbeReport
     /// </summary>
     public TensorRtRuntimeProbeStage? FirstFailure => Stages.FirstOrDefault(stage => !stage.Succeeded);
 
+    /// <summary>
+    /// Formats the runtime probe report for diagnostics.
+    /// 将 runtime 探针报告格式化为便于诊断的字符串。
+    /// </summary>
     public override string ToString()
     {
         string version = GlobalVersion?.ToString() ?? "version=n/a";

@@ -3,8 +3,16 @@ using JYPPX.TensorRtSharp.Internal.Interop;
 
 namespace JYPPX.TensorRtSharp;
 
+/// <summary>
+/// Represents a managed TensorRT Tensor Rt Network Definition wrapper.
+/// 表示托管 TensorRT Tensor Rt Network Definition 包装器。
+/// </summary>
 public sealed partial class TensorRtNetworkDefinition
 {
+    /// <summary>
+    /// Adds a Lrn layer or object.
+    /// 添加 Lrn 层或对象。
+    /// </summary>
     public TensorRtLayer AddLrn(TensorRtTensor input, int windowSize, float alpha, float beta, float k)
     {
         if (input == null)

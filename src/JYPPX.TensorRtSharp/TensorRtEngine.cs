@@ -7,6 +7,10 @@ using JYPPX.TensorRtSharp.Internal.Interop;
 
 namespace JYPPX.TensorRtSharp;
 
+/// <summary>
+/// Managed wrapper around a TensorRT engine.
+/// TensorRT engine 的托管封装。
+/// </summary>
 public sealed partial class TensorRtEngine : IDisposable
 {
     private readonly SafeTensorRtObjectHandle _handle;
@@ -19,12 +23,28 @@ public sealed partial class TensorRtEngine : IDisposable
 
     internal SafeTensorRtObjectHandle Handle => _handle;
 
+    /// <summary>
+    /// Gets the TensorRT API line used by this engine.
+    /// 获取当前 engine 使用的 TensorRT API line。
+    /// </summary>
     public TensorRtApiLine Line { get; }
 
+    /// <summary>
+    /// Gets the number of engine I/O tensors.
+    /// 获取 engine I/O tensor 数量。
+    /// </summary>
     public int IOTensorCount => NativeBridgeApi.GetEngineIOTensorCount(Line, _handle);
 
+    /// <summary>
+    /// Gets the engine name reported by TensorRT.
+    /// 获取 TensorRT 报告的 engine 名称。
+    /// </summary>
     public string Name => NativeBridgeApi.GetEngineName(Line, _handle);
 
+    /// <summary>
+    /// Gets the number of layers in the engine.
+    /// 获取 engine 中的 layer 数量。
+    /// </summary>
     public int LayerCount => NativeBridgeApi.GetEngineLayerCount(Line, _handle);
 
     /// <summary>
@@ -33,6 +53,10 @@ public sealed partial class TensorRtEngine : IDisposable
     /// </summary>
     public bool IsRefittable => NativeBridgeApi.IsEngineRefittable(Line, _handle);
 
+    /// <summary>
+    /// Gets the engine device-memory requirement in bytes.
+    /// 获取 engine 的设备内存需求，单位为字节。
+    /// </summary>
     public ulong DeviceMemorySizeInBytes => NativeBridgeApi.GetEngineDeviceMemorySize(Line, _handle);
 
     /// <summary>
@@ -47,21 +71,53 @@ public sealed partial class TensorRtEngine : IDisposable
     /// </summary>
     public int AuxiliaryStreamCount => NativeBridgeApi.GetEngineAuxiliaryStreamCount(Line, _handle);
 
+    /// <summary>
+    /// Gets the number of optimization profiles in the engine.
+    /// 获取 engine 中的 optimization profile 数量。
+    /// </summary>
     public int OptimizationProfileCount => NativeBridgeApi.GetEngineOptimizationProfileCount(Line, _handle);
 
+    /// <summary>
+    /// Gets the engine capability reported by TensorRT.
+    /// 获取 TensorRT 报告的 engine capability。
+    /// </summary>
     public TensorRtEngineCapability Capability => NativeBridgeApi.GetEngineCapability(Line, _handle);
 
+    /// <summary>
+    /// Gets the tactic-source mask used by the engine.
+    /// 获取 engine 使用的 tactic source 掩码。
+    /// </summary>
     public TensorRtTacticSources TacticSources => NativeBridgeApi.GetEngineTacticSources(Line, _handle);
 
+    /// <summary>
+    /// Gets the engine profiling verbosity.
+    /// 获取 engine 的 profiling verbosity。
+    /// </summary>
     public TensorRtProfilingVerbosity ProfilingVerbosity => NativeBridgeApi.GetEngineProfilingVerbosity(Line, _handle);
 
+    /// <summary>
+    /// Gets the TensorRT 8 compatibility max-batch-size value.
+    /// 获取 TensorRT 8 兼容路径中的 max batch size 值。
+    /// </summary>
     public int MaxBatchSizeCompatibility => NativeBridgeApi.GetEngineMaxBatchSizeCompatibility(Line, _handle);
 
+    /// <summary>
+    /// Gets high-level metadata for one engine I/O tensor.
+    /// 获取一个 engine I/O tensor 的高层元数据。
+    /// </summary>
+    /// <param name="index">The zero-based tensor index. 从零开始的 tensor 索引。</param>
+    /// <returns>The tensor metadata. tensor 元数据。</returns>
     public TensorRtTensorInfo GetIOTensorInfo(int index)
     {
         return BridgeInfoMapper.ToManaged(NativeBridgeApi.GetEngineIOTensorInfo(Line, _handle, index));
     }
 
+    /// <summary>
+    /// Gets the name of one engine I/O tensor.
+    /// 获取一个 engine I/O tensor 的名称。
+    /// </summary>
+    /// <param name="index">The zero-based tensor index. 从零开始的 tensor 索引。</param>
+    /// <returns>The TensorRT tensor name. TensorRT tensor 名称。</returns>
     public string GetIOTensorName(int index)
     {
         if (Line == TensorRtApiLine.TensorRt11)
@@ -72,6 +128,12 @@ public sealed partial class TensorRtEngine : IDisposable
         return NativeBridgeApi.GetEngineIOTensorName(Line, _handle, index);
     }
 
+    /// <summary>
+    /// Gets the zero-based index for one named engine tensor.
+    /// 获取一个已命名 engine tensor 的从零开始索引。
+    /// </summary>
+    /// <param name="tensorName">The engine tensor name. engine tensor 名称。</param>
+    /// <returns>The zero-based tensor index. 从零开始的 tensor 索引。</returns>
     public int GetTensorIndex(string tensorName)
     {
         if (Line == TensorRtApiLine.TensorRt11)
@@ -96,11 +158,23 @@ public sealed partial class TensorRtEngine : IDisposable
         return NativeBridgeApi.GetEngineTensorIndex(Line, _handle, tensorName);
     }
 
+    /// <summary>
+    /// Gets the TensorRT data type for one engine tensor.
+    /// 获取一个 engine tensor 的 TensorRT 数据类型。
+    /// </summary>
+    /// <param name="tensorName">The engine tensor name. engine tensor 名称。</param>
+    /// <returns>The TensorRT tensor data type. TensorRT tensor 数据类型。</returns>
     public TensorRtDataType GetTensorDataType(string tensorName)
     {
         return NativeBridgeApi.GetEngineTensorDataType(Line, _handle, tensorName);
     }
 
+    /// <summary>
+    /// Gets the shape of one engine tensor.
+    /// 获取一个 engine tensor 的形状。
+    /// </summary>
+    /// <param name="tensorName">The engine tensor name. engine tensor 名称。</param>
+    /// <returns>The tensor shape. tensor 形状。</returns>
     public TensorRtDims GetTensorShape(string tensorName)
     {
         return NativeBridgeApi.GetEngineTensorShape(Line, _handle, tensorName);
@@ -129,46 +203,103 @@ public sealed partial class TensorRtEngine : IDisposable
         return NativeBridgeApi.GetEngineTensorDimensionExtent64(Line, _handle, tensorName, dimensionIndex);
     }
 
+    /// <summary>
+    /// Gets whether one engine tensor is an input or output tensor.
+    /// 获取一个 engine tensor 是输入还是输出。
+    /// </summary>
+    /// <param name="tensorName">The engine tensor name. engine tensor 名称。</param>
+    /// <returns>The TensorRT I/O mode. TensorRT I/O 模式。</returns>
     public TensorRtIOMode GetTensorIOMode(string tensorName)
     {
         return NativeBridgeApi.GetEngineTensorIOMode(Line, _handle, tensorName);
     }
 
+    /// <summary>
+    /// Gets the TensorRT tensor location for one engine tensor.
+    /// 获取一个 engine tensor 的 TensorRT tensor location。
+    /// </summary>
+    /// <param name="tensorName">The engine tensor name. engine tensor 名称。</param>
+    /// <returns>The TensorRT tensor location. TensorRT tensor location。</returns>
     public TensorRtTensorLocation GetTensorLocation(string tensorName)
     {
         return NativeBridgeApi.GetEngineTensorLocation(Line, _handle, tensorName);
     }
 
+    /// <summary>
+    /// Returns whether one engine tensor participates in shape inference.
+    /// 返回一个 engine tensor 是否参与 shape inference。
+    /// </summary>
+    /// <param name="tensorName">The engine tensor name. engine tensor 名称。</param>
+    /// <returns><see langword="true"/> when the tensor is shape-inference I/O. 当该 tensor 是 shape inference I/O 时返回 <see langword="true"/>。</returns>
     public bool IsShapeInferenceIO(string tensorName)
     {
         return NativeBridgeApi.IsEngineShapeInferenceIO(Line, _handle, tensorName);
     }
 
+    /// <summary>
+    /// Gets the bytes-per-component value for one engine tensor.
+    /// 获取一个 engine tensor 的每分量字节数。
+    /// </summary>
+    /// <param name="tensorName">The engine tensor name. engine tensor 名称。</param>
+    /// <returns>The bytes-per-component value. 每分量字节数。</returns>
     public int GetTensorBytesPerComponent(string tensorName)
     {
         return NativeBridgeApi.GetEngineTensorBytesPerComponent(Line, _handle, tensorName);
     }
 
+    /// <summary>
+    /// Gets the profile-specific bytes-per-component value for one engine tensor.
+    /// 获取一个 engine tensor 在指定 profile 下的每分量字节数。
+    /// </summary>
+    /// <param name="tensorName">The engine tensor name. engine tensor 名称。</param>
+    /// <param name="profileIndex">The optimization profile index. optimization profile 索引。</param>
+    /// <returns>The bytes-per-component value. 每分量字节数。</returns>
     public int GetTensorBytesPerComponent(string tensorName, int profileIndex)
     {
         return NativeBridgeApi.GetEngineTensorBytesPerComponent(Line, _handle, tensorName, profileIndex);
     }
 
+    /// <summary>
+    /// Gets the components-per-element value for one engine tensor.
+    /// 获取一个 engine tensor 的每元素分量数。
+    /// </summary>
+    /// <param name="tensorName">The engine tensor name. engine tensor 名称。</param>
+    /// <returns>The components-per-element value. 每元素分量数。</returns>
     public int GetTensorComponentsPerElement(string tensorName)
     {
         return NativeBridgeApi.GetEngineTensorComponentsPerElement(Line, _handle, tensorName);
     }
 
+    /// <summary>
+    /// Gets the profile-specific components-per-element value for one engine tensor.
+    /// 获取一个 engine tensor 在指定 profile 下的每元素分量数。
+    /// </summary>
+    /// <param name="tensorName">The engine tensor name. engine tensor 名称。</param>
+    /// <param name="profileIndex">The optimization profile index. optimization profile 索引。</param>
+    /// <returns>The components-per-element value. 每元素分量数。</returns>
     public int GetTensorComponentsPerElement(string tensorName, int profileIndex)
     {
         return NativeBridgeApi.GetEngineTensorComponentsPerElement(Line, _handle, tensorName, profileIndex);
     }
 
+    /// <summary>
+    /// Gets the TensorRT tensor format for one engine tensor.
+    /// 获取一个 engine tensor 的 TensorRT tensor format。
+    /// </summary>
+    /// <param name="tensorName">The engine tensor name. engine tensor 名称。</param>
+    /// <returns>The TensorRT tensor format. TensorRT tensor format。</returns>
     public TensorRtTensorFormat GetTensorFormat(string tensorName)
     {
         return NativeBridgeApi.GetEngineTensorFormat(Line, _handle, tensorName);
     }
 
+    /// <summary>
+    /// Gets the profile-specific TensorRT tensor format for one engine tensor.
+    /// 获取一个 engine tensor 在指定 profile 下的 TensorRT tensor format。
+    /// </summary>
+    /// <param name="tensorName">The engine tensor name. engine tensor 名称。</param>
+    /// <param name="profileIndex">The optimization profile index. optimization profile 索引。</param>
+    /// <returns>The TensorRT tensor format. TensorRT tensor format。</returns>
     public TensorRtTensorFormat GetTensorFormat(string tensorName, int profileIndex)
     {
         return NativeBridgeApi.GetEngineTensorFormat(Line, _handle, tensorName, profileIndex);
@@ -197,16 +328,37 @@ public sealed partial class TensorRtEngine : IDisposable
         return NativeBridgeApi.GetEngineTensorFormatDescription(Line, _handle, tensorName, profileIndex);
     }
 
+    /// <summary>
+    /// Gets the vectorized dimension index for one engine tensor.
+    /// 获取一个 engine tensor 的向量化维度索引。
+    /// </summary>
+    /// <param name="tensorName">The engine tensor name. engine tensor 名称。</param>
+    /// <returns>The vectorized dimension index, or TensorRT's sentinel value. 向量化维度索引，或 TensorRT 的哨兵值。</returns>
     public int GetTensorVectorizedDimension(string tensorName)
     {
         return NativeBridgeApi.GetEngineTensorVectorizedDimension(Line, _handle, tensorName);
     }
 
+    /// <summary>
+    /// Gets the profile-specific vectorized dimension index for one engine tensor.
+    /// 获取一个 engine tensor 在指定 profile 下的向量化维度索引。
+    /// </summary>
+    /// <param name="tensorName">The engine tensor name. engine tensor 名称。</param>
+    /// <param name="profileIndex">The optimization profile index. optimization profile 索引。</param>
+    /// <returns>The vectorized dimension index, or TensorRT's sentinel value. 向量化维度索引，或 TensorRT 的哨兵值。</returns>
     public int GetTensorVectorizedDimension(string tensorName, int profileIndex)
     {
         return NativeBridgeApi.GetEngineTensorVectorizedDimension(Line, _handle, tensorName, profileIndex);
     }
 
+    /// <summary>
+    /// Gets one optimization-profile shape for one engine tensor.
+    /// 获取一个 engine tensor 在某个 optimization profile 中的形状。
+    /// </summary>
+    /// <param name="tensorName">The engine tensor name. engine tensor 名称。</param>
+    /// <param name="profileIndex">The optimization profile index. optimization profile 索引。</param>
+    /// <param name="selector">The min/opt/max selector. min/opt/max selector。</param>
+    /// <returns>The profile shape. profile 形状。</returns>
     public TensorRtDims GetProfileShape(string tensorName, int profileIndex, TensorRtOptimizationProfileSelector selector)
     {
         return NativeBridgeApi.GetEngineProfileShape(Line, _handle, tensorName, profileIndex, selector);
@@ -272,6 +424,11 @@ public sealed partial class TensorRtEngine : IDisposable
         return NativeBridgeApi.IsEngineDebugTensor(Line, _handle, tensorName);
     }
 
+    /// <summary>
+    /// Returns metadata for every engine I/O tensor.
+    /// 返回所有 engine I/O tensor 的元数据。
+    /// </summary>
+    /// <returns>A read-only list of tensor metadata. 只读 tensor 元数据列表。</returns>
     public IReadOnlyList<TensorRtTensorInfo> GetIOTensors()
     {
         int count = IOTensorCount;
@@ -370,6 +527,11 @@ public sealed partial class TensorRtEngine : IDisposable
         return CreateBindingReport(profileIndex, context, runShapeInference);
     }
 
+    /// <summary>
+    /// Creates a TensorRT execution context with engine-managed device memory.
+    /// 创建一个由 engine 管理设备内存的 TensorRT execution context。
+    /// </summary>
+    /// <returns>A managed execution-context wrapper. 托管 execution context 封装。</returns>
     public TensorRtExecutionContext CreateExecutionContext()
     {
         return new TensorRtExecutionContext(Line, NativeBridgeApi.CreateExecutionContext(Line, _handle));
@@ -406,11 +568,20 @@ public sealed partial class TensorRtEngine : IDisposable
         return new TensorRtRefitter(Line, NativeBridgeApi.CreateRefitter(Line, _handle, logger.Handle));
     }
 
+    /// <summary>
+    /// Creates a TensorRT engine inspector for this engine.
+    /// 为当前 engine 创建一个 TensorRT engine inspector。
+    /// </summary>
+    /// <returns>A managed engine-inspector wrapper. 托管 engine inspector 封装。</returns>
     public TensorRtEngineInspector CreateInspector()
     {
         return new TensorRtEngineInspector(Line, NativeBridgeApi.CreateEngineInspector(Line, _handle));
     }
 
+    /// <summary>
+    /// Releases the TensorRT engine handle.
+    /// 释放 TensorRT engine 句柄。
+    /// </summary>
     public void Dispose()
     {
         _handle.Dispose();

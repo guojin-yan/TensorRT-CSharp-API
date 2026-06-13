@@ -21,8 +21,48 @@ on:
       runtime_delivery_mode:
         description: Runtime package layout to produce
         required: false
-        default: full
+        default: split
         type: string
+      split_package_roles:
+        description: Optional comma-separated split package roles or keys to build
+        required: false
+        default: all
+        type: string
+      meta_package_version:
+        description: Optional split meta package version override
+        required: false
+        default: ""
+        type: string
+      bridge_package_version:
+        description: Optional bridge split package version override
+        required: false
+        default: ""
+        type: string
+      vendor_package_version:
+        description: Optional default version for CUDA/cuDNN/TensorRT split packages
+        required: false
+        default: ""
+        type: string
+      cuda_cudnn_package_version:
+        description: Optional CUDA/cuDNN split package version override
+        required: false
+        default: ""
+        type: string
+      tensorrt_package_version:
+        description: Optional TensorRT split package version override
+        required: false
+        default: ""
+        type: string
+      include_meta_package:
+        description: Build the split meta package even when only a subset of roles is selected
+        required: false
+        default: false
+        type: boolean
+      skip_consumer_validation:
+        description: Skip split runtime package consumer validation
+        required: false
+        default: false
+        type: boolean
       run_smoke:
         description: Run package consumer smoke after packing
         required: false
@@ -73,8 +113,48 @@ on:
       runtime_delivery_mode:
         description: Runtime package layout to produce
         required: false
-        default: full
+        default: split
         type: string
+      split_package_roles:
+        description: Optional comma-separated split package roles or keys to build
+        required: false
+        default: all
+        type: string
+      meta_package_version:
+        description: Optional split meta package version override
+        required: false
+        default: ""
+        type: string
+      bridge_package_version:
+        description: Optional bridge split package version override
+        required: false
+        default: ""
+        type: string
+      vendor_package_version:
+        description: Optional default version for CUDA/cuDNN/TensorRT split packages
+        required: false
+        default: ""
+        type: string
+      cuda_cudnn_package_version:
+        description: Optional CUDA/cuDNN split package version override
+        required: false
+        default: ""
+        type: string
+      tensorrt_package_version:
+        description: Optional TensorRT split package version override
+        required: false
+        default: ""
+        type: string
+      include_meta_package:
+        description: Build the split meta package even when only a subset of roles is selected
+        required: false
+        default: false
+        type: boolean
+      skip_consumer_validation:
+        description: Skip split runtime package consumer validation
+        required: false
+        default: false
+        type: boolean
       run_smoke:
         description: Run package consumer smoke after packing
         required: false
@@ -171,6 +251,20 @@ jobs:
               $smokeKeys += $trimmed
             }
           }
+          $roleText = '${{ inputs.split_package_roles }}'
+          $roleTokens = @()
+          foreach ($part in $roleText -split '[,;]') {
+            $trimmed = $part.Trim().ToLowerInvariant()
+            if (-not [string]::IsNullOrWhiteSpace($trimmed)) {
+              $roleTokens += $trimmed
+            }
+          }
+          $shouldResolvePublishedPackages = (
+            '${{ inputs.include_meta_package }}' -eq 'true' -or
+            $roleTokens -contains 'all' -or
+            $roleTokens -contains 'meta' -or
+            $roleTokens -contains 'collection'
+          )
 
           foreach ($key in ($keys | Select-Object -Unique)) {
             $arguments = @(
@@ -179,8 +273,40 @@ jobs:
               '-File', '.\eng\Invoke-LocalSplitRuntimePackage.ps1',
               '-SourceRuntimeKey', $key,
               '-Version', '${{ inputs.version }}',
+              '-SplitPackageRole', '${{ inputs.split_package_roles }}',
               '-Configuration', '${{ inputs.configuration }}'
             )
+            if (-not [string]::IsNullOrWhiteSpace('${{ inputs.meta_package_version }}')) {
+              $arguments += @('-MetaPackageVersion', '${{ inputs.meta_package_version }}')
+            }
+            if (-not [string]::IsNullOrWhiteSpace('${{ inputs.bridge_package_version }}')) {
+              $arguments += @('-BridgePackageVersion', '${{ inputs.bridge_package_version }}')
+            }
+            if (-not [string]::IsNullOrWhiteSpace('${{ inputs.vendor_package_version }}')) {
+              $arguments += @('-VendorPackageVersion', '${{ inputs.vendor_package_version }}')
+            }
+            if (-not [string]::IsNullOrWhiteSpace('${{ inputs.cuda_cudnn_package_version }}')) {
+              $arguments += @('-CudaCudnnPackageVersion', '${{ inputs.cuda_cudnn_package_version }}')
+            }
+            if (-not [string]::IsNullOrWhiteSpace('${{ inputs.tensorrt_package_version }}')) {
+              $arguments += @('-TensorRtPackageVersion', '${{ inputs.tensorrt_package_version }}')
+            }
+            if ('${{ inputs.include_meta_package }}' -eq 'true') {
+              $arguments += '-IncludeMetaPackage'
+            }
+            if ('${{ inputs.skip_consumer_validation }}' -eq 'true') {
+              $arguments += '-SkipConsumerValidation'
+            }
+            if ($shouldResolvePublishedPackages) {
+              $arguments += @(
+                '-AdditionalPackageSource',
+                'https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json',
+                '-AdditionalPackageSourceUsername',
+                '${{ github.actor }}',
+                '-AdditionalPackageSourcePassword',
+                '${{ github.token }}'
+              )
+            }
             $shouldRunSmoke = ('${{ inputs.run_smoke }}' -eq 'true') -and ($smokeKeys.Count -eq 0 -or $smokeKeys -contains $key)
             if ($shouldRunSmoke) {
               $arguments += '-RunSmoke'

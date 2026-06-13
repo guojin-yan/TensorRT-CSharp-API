@@ -10,19 +10,75 @@ namespace JYPPX.TensorRtSharp;
 /// </summary>
 public enum TensorRtPluginFieldType
 {
+    /// <summary>
+    /// Represents the Float16 value of TensorRtPluginFieldType.
+    /// 表示 TensorRtPluginFieldType 的 Float16 取值。
+    /// </summary>
     Float16 = 0,
+    /// <summary>
+    /// Represents the Float32 value of TensorRtPluginFieldType.
+    /// 表示 TensorRtPluginFieldType 的 Float32 取值。
+    /// </summary>
     Float32 = 1,
+    /// <summary>
+    /// Represents the Float64 value of TensorRtPluginFieldType.
+    /// 表示 TensorRtPluginFieldType 的 Float64 取值。
+    /// </summary>
     Float64 = 2,
+    /// <summary>
+    /// Represents the Int8 value of TensorRtPluginFieldType.
+    /// 表示 TensorRtPluginFieldType 的 Int8 取值。
+    /// </summary>
     Int8 = 3,
+    /// <summary>
+    /// Represents the Int16 value of TensorRtPluginFieldType.
+    /// 表示 TensorRtPluginFieldType 的 Int16 取值。
+    /// </summary>
     Int16 = 4,
+    /// <summary>
+    /// Represents the Int32 value of TensorRtPluginFieldType.
+    /// 表示 TensorRtPluginFieldType 的 Int32 取值。
+    /// </summary>
     Int32 = 5,
+    /// <summary>
+    /// Represents the Char value of TensorRtPluginFieldType.
+    /// 表示 TensorRtPluginFieldType 的 Char 取值。
+    /// </summary>
     Char = 6,
+    /// <summary>
+    /// Represents the Dims value of TensorRtPluginFieldType.
+    /// 表示 TensorRtPluginFieldType 的 Dims 取值。
+    /// </summary>
     Dims = 7,
+    /// <summary>
+    /// Represents the Unknown value of TensorRtPluginFieldType.
+    /// 表示 TensorRtPluginFieldType 的 Unknown 取值。
+    /// </summary>
     Unknown = 8,
+    /// <summary>
+    /// Represents the BFloat16 value of TensorRtPluginFieldType.
+    /// 表示 TensorRtPluginFieldType 的 BFloat16 取值。
+    /// </summary>
     BFloat16 = 9,
+    /// <summary>
+    /// Represents the Int64 value of TensorRtPluginFieldType.
+    /// 表示 TensorRtPluginFieldType 的 Int64 取值。
+    /// </summary>
     Int64 = 10,
+    /// <summary>
+    /// Represents the Float8 value of TensorRtPluginFieldType.
+    /// 表示 TensorRtPluginFieldType 的 Float8 取值。
+    /// </summary>
     Float8 = 11,
+    /// <summary>
+    /// Represents the Int4 value of TensorRtPluginFieldType.
+    /// 表示 TensorRtPluginFieldType 的 Int4 取值。
+    /// </summary>
     Int4 = 12,
+    /// <summary>
+    /// Represents the Float4 value of TensorRtPluginFieldType.
+    /// 表示 TensorRtPluginFieldType 的 Float4 取值。
+    /// </summary>
     Float4 = 13
 }
 
@@ -88,6 +144,11 @@ public sealed class TensorRtPluginFieldInfo
     /// </summary>
     public bool HasData { get; }
 
+    /// <summary>
+    /// Returns a compact display string for the plugin field.
+    /// 返回该 plugin 字段的简短显示字符串。
+    /// </summary>
+    /// <returns>A display string containing the field name, type, and length.</returns>
     public override string ToString() => $"{Name}:{FieldType}[{Length}]";
 }
 
@@ -165,6 +226,11 @@ public sealed class TensorRtPluginCreatorInfo
     /// </summary>
     public IReadOnlyList<TensorRtPluginFieldInfo> Fields { get; }
 
+    /// <summary>
+    /// Returns a compact display string for the plugin creator.
+    /// 返回该 plugin creator 的简短显示字符串。
+    /// </summary>
+    /// <returns>A display string containing creator identity and field count.</returns>
     public override string ToString() => $"{Index}:{Name}:{Version}:{Namespace}:{InterfaceKind}:{Fields.Count}";
 }
 
@@ -232,5 +298,10 @@ public sealed class TensorRtPluginRegistryInventory
     /// </summary>
     public int? RecursiveCreatorCount { get; }
 
+    /// <summary>
+    /// Returns a compact display string for the registry inventory.
+    /// 返回该 registry inventory 的简短显示字符串。
+    /// </summary>
+    /// <returns>A display string containing source, creator counts, and registry options.</returns>
     public override string ToString() => $"{Line}:{Source}:creators={CreatorCount}:recursive={RecursiveCreatorCount?.ToString() ?? "n/a"}:parentSearch={ParentSearchEnabled}:errorRecorder={HasErrorRecorder}";
 }

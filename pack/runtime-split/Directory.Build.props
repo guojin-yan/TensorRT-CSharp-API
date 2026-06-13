@@ -10,10 +10,13 @@
     <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
     <RepositoryUrl>$(RepositoryUrl)</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Description>Prototype split-delivery runtime package for a specific TensorRT and CUDA combination.</Description>
+    <Description>Split runtime component package for a specific TensorRT, CUDA, and cuDNN combination.</Description>
     <NoWarn>$(NoWarn);NU5128</NoWarn>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <JYPPXRuntimeAssetsDir Condition="'$(JYPPXRuntimeAssetsDir)' == ''">$(MSBuildProjectDirectory)\assets</JYPPXRuntimeAssetsDir>
+    <JYPPXBridgePackageVersion Condition="'$(JYPPXBridgePackageVersion)' == ''">$(Version)</JYPPXBridgePackageVersion>
+    <JYPPXCudaCudnnPackageVersion Condition="'$(JYPPXCudaCudnnPackageVersion)' == ''">$(Version)</JYPPXCudaCudnnPackageVersion>
+    <JYPPXTensorRtPackageVersion Condition="'$(JYPPXTensorRtPackageVersion)' == ''">$(Version)</JYPPXTensorRtPackageVersion>
   </PropertyGroup>
 
   <ItemGroup>

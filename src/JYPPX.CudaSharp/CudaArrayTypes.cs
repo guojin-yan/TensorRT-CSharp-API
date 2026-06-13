@@ -71,6 +71,10 @@ public readonly struct CudaChannelFormatDescriptor
             (CudaChannelFormatKind)descriptor.FormatKind);
     }
 
+    /// <summary>
+    /// Formats the channel descriptor for diagnostics.
+    /// 将通道描述符格式化为便于诊断的字符串。
+    /// </summary>
     public override string ToString()
     {
         return $"{FormatKind}[{X},{Y},{Z},{W}]";
@@ -120,6 +124,10 @@ public readonly struct CudaArrayExtent
         return new CudaArrayExtent(extent.Width, extent.Height, extent.Depth);
     }
 
+    /// <summary>
+    /// Formats the extent as width x height x depth text.
+    /// 将范围格式化为 width x height x depth 文本。
+    /// </summary>
     public override string ToString()
     {
         return $"{Width}x{Height}x{Depth}";
@@ -159,6 +167,10 @@ public readonly struct CudaArrayInfo
             (CudaArrayCreationFlags)info.Flags);
     }
 
+    /// <summary>
+    /// Formats array metadata for diagnostics.
+    /// 将 array 元数据格式化为便于诊断的字符串。
+    /// </summary>
     public override string ToString()
     {
         return $"{Extent} {Channel} Flags={Flags}";
@@ -190,6 +202,10 @@ public readonly struct CudaArrayMemoryRequirements
         return new CudaArrayMemoryRequirements(requirements.Size, requirements.Alignment);
     }
 
+    /// <summary>
+    /// Formats memory requirements for diagnostics.
+    /// 将内存需求格式化为便于诊断的字符串。
+    /// </summary>
     public override string ToString()
     {
         return $"Size={SizeBytes}, Alignment={AlignmentBytes}";
@@ -247,6 +263,10 @@ public readonly struct CudaArraySparseProperties
             (CudaArraySparseFlags)properties.Flags);
     }
 
+    /// <summary>
+    /// Formats sparse-array properties for diagnostics.
+    /// 将稀疏 array 属性格式化为便于诊断的字符串。
+    /// </summary>
     public override string ToString()
     {
         return $"Tile={TileWidth}x{TileHeight}x{TileDepth}, MipTailFirstLevel={MipTailFirstLevel}, MipTailSize={MipTailSizeBytes}, Flags={Flags}";

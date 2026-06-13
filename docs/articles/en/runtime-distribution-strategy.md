@@ -90,16 +90,16 @@ Supporting scripts:
 - `eng/Test-RuntimePublishReadiness.ps1`
 - `eng/Export-ReleaseCandidateChecklist.ps1`
 
-## Split-delivery prototype
+## Split Runtime Components
 
-The current split-delivery prototype is scoped to TensorRT 10 Windows packages:
+The split runtime model applies to Windows runtime combinations that are too large or too stable to republish with every managed-code release:
 
-- `win-x64-trt10.11-cuda11.8-cudnn8.9-core`
-- `win-x64-trt10.11-cuda11.8-cudnn8.9-extensions`
-- `win-x64-trt10.11-cuda12.9-cudnn9.22-core`
-- `win-x64-trt10.11-cuda12.9-cudnn9.22-extensions`
+- `Bridge`: local C ABI bridge, republished when native wrapper code changes.
+- `CudaCudnn`: CUDA runtime and cuDNN assets, republished only when the CUDA/cuDNN dependency set changes.
+- `TensorRtRuntime` / `TensorRtExtensions` / builder-resource packages: TensorRT assets, republished only when the TensorRT dependency set changes.
+- collection package: the original runtime package ID, republished when a new tested component-version combination should be advertised.
 
-The prototype remains `design-only`. It must not be published before split consumer validation and redistribution review.
+The managed package can release independently from these runtime component packages. This keeps routine C# API changes small while preserving reproducible runtime combinations.
 
 ## Release boundary
 
@@ -107,6 +107,6 @@ Formal public distribution is blocked until these issues are resolved:
 
 - NVIDIA CUDA / cuDNN / TensorRT redistribution terms are reviewed.
 - NuGet.org package-size practicality is reviewed.
-- Runtime package keys, package IDs, and manifest metadata are aligned.
+- Runtime package keys, package IDs, component package versions, and manifest metadata are aligned.
 - Package consumer validation covers the intended release packages.
 - TensorRT 11 packages pass real adapter-backed runtime/package smoke on the intended CUDA driver/runtime stack.

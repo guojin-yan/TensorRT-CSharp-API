@@ -6,6 +6,10 @@ using JYPPX.TensorRtSharp.Internal.Interop;
 
 namespace JYPPX.TensorRtSharp;
 
+/// <summary>
+/// Represents a managed TensorRT Tensor Rt Execution Context wrapper.
+/// 表示托管 TensorRT Tensor Rt Execution Context 包装器。
+/// </summary>
 public sealed partial class TensorRtExecutionContext : IDisposable
 {
     private readonly SafeTensorRtObjectHandle _handle;
@@ -16,44 +20,84 @@ public sealed partial class TensorRtExecutionContext : IDisposable
         _handle = handle;
     }
 
+    /// <summary>
+    /// Gets or sets the Line value.
+    /// 获取或设置 Line 值。
+    /// </summary>
     public TensorRtApiLine Line { get; }
 
     internal SafeTensorRtObjectHandle Handle => _handle;
 
+    /// <summary>
+    /// Gets or sets the Name value.
+    /// 获取或设置 Name 值。
+    /// </summary>
     public string Name
     {
         get => NativeBridgeApi.GetExecutionContextName(Line, _handle);
         set => NativeBridgeApi.SetExecutionContextName(Line, _handle, value);
     }
 
+    /// <summary>
+    /// Gets or sets the Debug Sync value.
+    /// 获取或设置 Debug Sync 值。
+    /// </summary>
     public bool DebugSync
     {
         get => NativeBridgeApi.GetExecutionContextDebugSync(Line, _handle);
         set => NativeBridgeApi.SetExecutionContextDebugSync(Line, _handle, value);
     }
 
+    /// <summary>
+    /// Gets the All Input Dimensions Specified value.
+    /// 获取 All Input Dimensions Specified 值。
+    /// </summary>
     public bool AllInputDimensionsSpecified => NativeBridgeApi.AllInputDimensionsSpecified(Line, _handle);
 
+    /// <summary>
+    /// Gets or sets the All Input Shapes Specified value.
+    /// 获取或设置 All Input Shapes Specified 值。
+    /// </summary>
     public bool AllInputShapesSpecified => NativeBridgeApi.AllInputShapesSpecified(Line, _handle);
 
+    /// <summary>
+    /// Gets or sets the Device Memory Size In Bytes value.
+    /// 获取或设置 Device Memory Size In Bytes 值。
+    /// </summary>
     public ulong DeviceMemorySizeInBytes => NativeBridgeApi.GetExecutionContextDeviceMemorySize(Line, _handle);
 
+    /// <summary>
+    /// Gets or sets the Persistent Cache Limit In Bytes value.
+    /// 获取或设置 Persistent Cache Limit In Bytes 值。
+    /// </summary>
     public ulong PersistentCacheLimitInBytes
     {
         get => NativeBridgeApi.GetExecutionContextPersistentCacheLimit(Line, _handle);
         set => NativeBridgeApi.SetExecutionContextPersistentCacheLimit(Line, _handle, value);
     }
 
+    /// <summary>
+    /// Sets the Input Shape value.
+    /// 设置 Input Shape 值。
+    /// </summary>
     public void SetInputShape(string tensorName, TensorRtDims dims)
     {
         NativeBridgeApi.SetInputShape(Line, _handle, tensorName, dims);
     }
 
+    /// <summary>
+    /// Sets the Binding Dimensions value.
+    /// 设置 Binding Dimensions 值。
+    /// </summary>
     public void SetBindingDimensions(int bindingIndex, TensorRtDims dims)
     {
         NativeBridgeApi.SetBindingDimensions(Line, _handle, bindingIndex, dims);
     }
 
+    /// <summary>
+    /// Sets the Tensor Address value.
+    /// 设置 Tensor Address 值。
+    /// </summary>
     public void SetTensorAddress(string tensorName, CudaMemory memory)
     {
         if (memory == null)
@@ -96,6 +140,10 @@ public sealed partial class TensorRtExecutionContext : IDisposable
         NativeBridgeApi.SetOutputTensorAddress(Line, _handle, tensorName, memory.Handle);
     }
 
+    /// <summary>
+    /// Sets the Device Memory value.
+    /// 设置 Device Memory 值。
+    /// </summary>
     public void SetDeviceMemory(CudaMemory memory)
     {
         if (memory == null)
@@ -106,6 +154,10 @@ public sealed partial class TensorRtExecutionContext : IDisposable
         NativeBridgeApi.SetExecutionContextDeviceMemory(Line, _handle, memory.Handle);
     }
 
+    /// <summary>
+    /// Updates the Device Memory Size For Shapes value.
+    /// 更新 Device Memory Size For Shapes 值。
+    /// </summary>
     public ulong UpdateDeviceMemorySizeForShapes()
     {
         return NativeBridgeApi.UpdateExecutionContextDeviceMemorySizeForShapes(Line, _handle);
@@ -124,6 +176,10 @@ public sealed partial class TensorRtExecutionContext : IDisposable
         return NativeBridgeApi.InferExecutionContextShapes(Line, _handle);
     }
 
+    /// <summary>
+    /// Sets the Input Consumed Event value.
+    /// 设置 Input Consumed Event 值。
+    /// </summary>
     public void SetInputConsumedEvent(CudaEvent cudaEvent)
     {
         if (cudaEvent == null)
@@ -134,6 +190,10 @@ public sealed partial class TensorRtExecutionContext : IDisposable
         NativeBridgeApi.SetExecutionContextInputConsumedEvent(Line, _handle, cudaEvent.Handle);
     }
 
+    /// <summary>
+    /// Gets the Tensor Shape value.
+    /// 获取 Tensor Shape 值。
+    /// </summary>
     public TensorRtDims GetTensorShape(string tensorName)
     {
         return NativeBridgeApi.GetExecutionContextTensorShape(Line, _handle, tensorName);
@@ -162,6 +222,10 @@ public sealed partial class TensorRtExecutionContext : IDisposable
         return NativeBridgeApi.GetExecutionContextTensorShapeDimensionExtent64(Line, _handle, tensorName, dimensionIndex);
     }
 
+    /// <summary>
+    /// Gets the Tensor Strides value.
+    /// 获取 Tensor Strides 值。
+    /// </summary>
     public TensorRtDims GetTensorStrides(string tensorName)
     {
         return NativeBridgeApi.GetExecutionContextTensorStrides(Line, _handle, tensorName);
@@ -190,11 +254,19 @@ public sealed partial class TensorRtExecutionContext : IDisposable
         return NativeBridgeApi.GetExecutionContextTensorStrideDimensionExtent64(Line, _handle, tensorName, dimensionIndex);
     }
 
+    /// <summary>
+    /// Checks whether Tensor Address Bound is true.
+    /// 检查 Tensor Address Bound 是否为 true。
+    /// </summary>
     public bool IsTensorAddressBound(string tensorName)
     {
         return NativeBridgeApi.IsExecutionContextTensorAddressBound(Line, _handle, tensorName);
     }
 
+    /// <summary>
+    /// Enqueues the TensorRT execution work.
+    /// 将 TensorRT execution work 加入队列。
+    /// </summary>
     public void EnqueueAsync(CudaStream stream)
     {
         if (stream == null)
@@ -205,6 +277,10 @@ public sealed partial class TensorRtExecutionContext : IDisposable
         NativeBridgeApi.EnqueueAsync(Line, _handle, stream.Handle);
     }
 
+    /// <summary>
+    /// Releases the native TensorRT resources held by this object.
+    /// 释放此对象持有的 native TensorRT 资源。
+    /// </summary>
     public void Dispose()
     {
         _handle.Dispose();

@@ -83,8 +83,9 @@ cmake --build --preset win-x64-trt8-cuda12-release --parallel
 
 - `MultiStream` 是真实 CUDA multi-stream/event ordering 示例，并已纳入 solution。
 - `DynamicShape` 是真实 TensorRT dynamic-shape/profile/binding 示例，并已纳入 solution。
-- `Classification`、`CustomKernelPreprocess`、`OnnxToEngine`、`YoloDet` 是 README/roadmap 目录，不是空 `.gitkeep` 占位目录。
-- `OnnxToEngine` 指向可运行的 `OnnxToEngineSmokeRunner`。
+- `InferenceBindings` 是真实 TensorRT inference-binding 示例，并已纳入 solution。
+- `OnnxToEngine` 现在是可运行的常用 ONNX-to-engine 示例，并已纳入 solution。
+- `Classification`、`CustomKernelPreprocess`、`YoloDet` 仍是 README/roadmap 目录，不是空 `.gitkeep` 占位目录。
 
 ## Runtime Packages
 
@@ -110,6 +111,84 @@ runtime 包为一个明确 TensorRT / CUDA / cuDNN 组合承载原生部署资�
 - `docs/articles/zh-cn/runtime-distribution-strategy.md`
 - `docs/articles/zh-cn/package-consumer-validation.md`
 - `docs/articles/zh-cn/release-candidate-gate.md`
+- `docs/articles/zh-cn/api-reference.md`
+
+## 发布自动化
+
+这个仓库支持两种发布执行方式：
+
+1. 用 `gh` 从 GitHub 远端触发工作流，再由本机的 self-hosted Windows runner 执行 Windows runtime 打包。
+2. 直接运行本地脚本，做纯工作站上的验证闭环，不在 GitHub Actions 中留下运行记录。
+
+runtime 包现在和 managed 包独立版本。日常维护优先只发布 `JYPPX.TensorRT.CSharp.API` 到 nuget.org 和 GitHub Packages；CUDA/cuDNN/TensorRT 这类大组件保持在 GitHub Packages 或 GitHub Releases。每个 NVIDIA 依赖版本只发布一次 vendor 组件包；后续本地 C ABI bridge 变化时，只重发 `bridge,collection`。
+
+远端 managed-only 发布示例：
+
+```powershell
+gh workflow run release-bundle.yml `
+  --ref TensorRtSharp4.0 `
+  -f version=4.0.1 `
+  -f publish_managed_to_nuget=true `
+  -f publish_managed_to_github_packages=true `
+  -f attach_runtime_to_github_release=true
+```
+
+远端首次发布或升级 CUDA/cuDNN/TensorRT 时刷新 vendor 组件示例：
+
+```powershell
+gh workflow run release-bundle.yml `
+  --ref TensorRtSharp4.0 `
+  -f version=4.0.0 `
+  -f runtime_version=4.0.0 `
+  -f run_windows_runtime_packaging=true `
+  -f windows_runtime_keys=win-x64-trt11.0-cuda12.9-cudnn9.22 `
+  -f windows_runtime_delivery_mode=split `
+  -f windows_split_package_roles=vendor `
+  -f publish_runtime_to_github_packages=true `
+  -f attach_runtime_to_github_release=true
+```
+
+远端本地封装代码变化后刷新 bridge 和 collection 示例：
+
+```powershell
+gh workflow run release-bundle.yml `
+  --ref TensorRtSharp4.0 `
+  -f version=4.0.1 `
+  -f runtime_version=4.0.1 `
+  -f run_windows_runtime_packaging=true `
+  -f windows_runtime_keys=win-x64-trt11.0-cuda12.9-cudnn9.22 `
+  -f windows_runtime_delivery_mode=split `
+  -f windows_split_package_roles=bridge,collection `
+  -f windows_vendor_package_version=4.0.0 `
+  -f publish_managed_to_github_packages=true `
+  -f publish_runtime_to_github_packages=true `
+  -f attach_runtime_to_github_release=true
+```
+
+本地 managed-only 示例：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalReleaseBundle.ps1 `
+  -Version 4.0.1 `
+  -SkipWindowsRuntime
+```
+
+本地刷新 bridge 和 collection 示例：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalReleaseBundle.ps1 `
+  -Version 4.0.1 `
+  -RuntimeVersion 4.0.1 `
+  -WindowsRuntimeKeys win-x64-trt11.0-cuda12.9-cudnn9.22 `
+  -WindowsRuntimeDeliveryMode split `
+  -WindowsSplitPackageRoles bridge,collection `
+  -WindowsVendorPackageVersion 4.0.0 `
+  -WindowsAdditionalPackageSource https://nuget.pkg.github.com/<owner>/index.json `
+  -WindowsAdditionalPackageSourceUsername <owner-or-actor> `
+  -WindowsAdditionalPackageSourcePassword <token>
+```
+
+`release-bundle.yml` 默认不再触发 runtime 打包。需要 runtime 时显式设置 `run_windows_runtime_packaging=true` 或 `run_linux_runtime_packaging=true`；如果启用 Linux runtime 但 `linux_runtime_keys` 为空，Linux 模块会干净 no-op。
 
 ## 仓库布局
 
@@ -119,7 +198,8 @@ docs/       DocFX site and conceptual documentation
 eng/        automation and dependency discovery scripts
 native/     C ABI bridge and TensorRT/CUDA adapters
 pack/       NuGet packaging projects
-samples/    smoke runners, runnable samples, and documented sample roadmaps
+samples/    user-facing common examples and documented sample roadmaps
+smoke/      validation runners for release gates, packaging, and regression checks
 src/        managed libraries
 tests/      managed integration and unit tests
 third_party/local dependency drop folder (not committed)

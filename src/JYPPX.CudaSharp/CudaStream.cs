@@ -6,22 +6,38 @@ namespace JYPPX.CudaSharp;
 
 /// <summary>
 /// Managed wrapper around a CUDA stream handle.
+/// CUDA stream 句柄的托管封装。
 /// </summary>
 public sealed class CudaStream : IDisposable
 {
     private readonly SafeCudaStreamHandle _handle;
 
+    /// <summary>
+    /// Creates a CUDA stream with default flags.
+    /// 使用默认标志创建一个 CUDA stream。
+    /// </summary>
     public CudaStream()
         : this(CudaStreamCreationFlags.Default)
     {
     }
 
+    /// <summary>
+    /// Creates a CUDA stream with explicit creation flags.
+    /// 使用显式创建标志创建一个 CUDA stream。
+    /// </summary>
+    /// <param name="flags">The stream-creation flags. stream 创建标志。</param>
     public CudaStream(CudaStreamCreationFlags flags)
     {
         NativeBridgeLoader.EnsureInitialized();
         _handle = flags == CudaStreamCreationFlags.Default ? NativeCudaApi.CreateStream() : NativeCudaApi.CreateStream(flags);
     }
 
+    /// <summary>
+    /// Creates a CUDA stream with explicit flags and priority.
+    /// 使用显式标志和优先级创建一个 CUDA stream。
+    /// </summary>
+    /// <param name="flags">The stream-creation flags. stream 创建标志。</param>
+    /// <param name="priority">The CUDA stream priority. CUDA stream 优先级。</param>
     public CudaStream(CudaStreamCreationFlags flags, int priority)
     {
         NativeBridgeLoader.EnsureInitialized();
@@ -30,8 +46,16 @@ public sealed class CudaStream : IDisposable
 
     internal SafeCudaStreamHandle Handle => _handle;
 
+    /// <summary>
+    /// Gets the CUDA flags associated with this stream.
+    /// 获取当前 stream 关联的 CUDA 标志。
+    /// </summary>
     public CudaStreamCreationFlags Flags => NativeCudaApi.GetStreamFlags(_handle);
 
+    /// <summary>
+    /// Gets the CUDA priority associated with this stream.
+    /// 获取当前 stream 关联的 CUDA 优先级。
+    /// </summary>
     public int Priority => NativeCudaApi.GetStreamPriority(_handle);
 
     /// <summary>
@@ -52,6 +76,11 @@ public sealed class CudaStream : IDisposable
     /// </summary>
     public CudaStreamCaptureStatus CaptureStatus => NativeCudaApi.GetStreamCaptureStatus(_handle);
 
+    /// <summary>
+    /// Gets the supported CUDA stream-priority range for the current device.
+    /// 获取当前设备支持的 CUDA stream 优先级范围。
+    /// </summary>
+    /// <returns>The stream-priority range. stream 优先级范围。</returns>
     public static CudaStreamPriorityRange GetPriorityRange()
     {
         NativeBridgeLoader.EnsureInitialized();
@@ -71,6 +100,11 @@ public sealed class CudaStream : IDisposable
         return NativeCudaApi.ExchangeThreadStreamCaptureMode(mode);
     }
 
+    /// <summary>
+    /// Returns whether all queued work on this stream has completed.
+    /// 返回当前 stream 上排队的工作是否已全部完成。
+    /// </summary>
+    /// <returns><see langword="true"/> when the stream is ready. 当 stream 已就绪时返回 <see langword="true"/>。</returns>
     public bool IsReady()
     {
         return NativeCudaApi.QueryStream(_handle);
@@ -109,6 +143,11 @@ public sealed class CudaStream : IDisposable
         }
     }
 
+    /// <summary>
+    /// Inserts a wait on a CUDA event into this stream.
+    /// 在当前 stream 中插入对 CUDA event 的等待。
+    /// </summary>
+    /// <param name="cudaEvent">The event to wait on. 要等待的 event。</param>
     public void WaitFor(CudaEvent cudaEvent)
     {
         if (cudaEvent == null)
@@ -134,6 +173,10 @@ public sealed class CudaStream : IDisposable
         NativeCudaApi.CopyStreamAttributes(_handle, source.Handle);
     }
 
+    /// <summary>
+    /// Blocks the calling thread until this stream completes.
+    /// 阻塞调用线程，直到当前 stream 完成。
+    /// </summary>
     public void Synchronize()
     {
         NativeCudaApi.SynchronizeStream(_handle);
@@ -161,16 +204,30 @@ public sealed class CudaStream : IDisposable
         return stop.ElapsedTimeSince(start);
     }
 
+    /// <summary>
+    /// Begins CUDA graph capture on this stream.
+    /// 在当前 stream 上开始 CUDA graph capture。
+    /// </summary>
+    /// <param name="mode">The capture-validation mode. capture 校验模式。</param>
     public void BeginCapture(CudaStreamCaptureMode mode = CudaStreamCaptureMode.Global)
     {
         NativeCudaApi.BeginStreamCapture(_handle, mode);
     }
 
+    /// <summary>
+    /// Ends CUDA graph capture and returns the captured graph.
+    /// 结束 CUDA graph capture 并返回捕获得到的 graph。
+    /// </summary>
+    /// <returns>The captured CUDA graph. 捕获得到的 CUDA graph。</returns>
     public CudaGraph EndCapture()
     {
         return new CudaGraph(NativeCudaApi.EndStreamCapture(_handle));
     }
 
+    /// <summary>
+    /// Releases the CUDA stream handle.
+    /// 释放 CUDA stream 句柄。
+    /// </summary>
     public void Dispose()
     {
         _handle.Dispose();

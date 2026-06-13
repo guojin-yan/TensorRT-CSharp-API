@@ -118,44 +118,84 @@ GitHub Actions does not need a GitHub-hosted machine for every job. In this repo
 
 - `docs-release.yml` and the hosted part of `package-managed.yml` run on GitHub-hosted runners.
 - `runtime-windows.yml` runs on the local self-hosted Windows runner when dispatched from GitHub.
-- `release-bundle.yml` fans out to managed package, Windows runtime, and Linux runtime modules.
+- `release-bundle.yml` always drives the managed package and can optionally dispatch Windows or Linux runtime modules.
 
 That means there are two supported execution modes:
 
 1. Dispatch the workflow through GitHub with `gh`, then let the self-hosted runner on this machine execute the Windows runtime job.
 2. Run the local scripts directly when you want a true workstation-only validation loop without creating a GitHub Actions run record.
 
-Remote dispatch example:
+Runtime packages are versioned independently from the managed package. The normal maintenance path is to publish `JYPPX.TensorRT.CSharp.API` to nuget.org and GitHub Packages, while keeping large CUDA/cuDNN/TensorRT component packages on GitHub Packages or GitHub Releases. Publish vendor component packages once per CUDA/cuDNN/TensorRT dependency version, then publish only `bridge,collection` when the local C ABI bridge changes.
+
+Managed-only remote release:
+
+```powershell
+gh workflow run release-bundle.yml `
+  --ref TensorRtSharp4.0 `
+  -f version=4.0.1 `
+  -f publish_managed_to_nuget=true `
+  -f publish_managed_to_github_packages=true `
+  -f attach_runtime_to_github_release=true
+```
+
+Windows vendor component refresh for the first publish or a CUDA/cuDNN/TensorRT upgrade:
 
 ```powershell
 gh workflow run release-bundle.yml `
   --ref TensorRtSharp4.0 `
   -f version=4.0.0 `
+  -f runtime_version=4.0.0 `
+  -f run_windows_runtime_packaging=true `
   -f windows_runtime_keys=win-x64-trt11.0-cuda12.9-cudnn9.22 `
   -f windows_runtime_delivery_mode=split `
-  -f run_windows_smoke=true `
-  -f publish_managed_to_nuget=false `
-  -f publish_managed_to_github_packages=true `
-  -f publish_runtime_to_github_packages=false `
+  -f windows_split_package_roles=vendor `
+  -f publish_runtime_to_github_packages=true `
   -f attach_runtime_to_github_release=true
 ```
 
-Local bundle example:
+Windows bridge and collection refresh after local native-wrapper changes:
+
+```powershell
+gh workflow run release-bundle.yml `
+  --ref TensorRtSharp4.0 `
+  -f version=4.0.1 `
+  -f runtime_version=4.0.1 `
+  -f run_windows_runtime_packaging=true `
+  -f windows_runtime_keys=win-x64-trt11.0-cuda12.9-cudnn9.22 `
+  -f windows_runtime_delivery_mode=split `
+  -f windows_split_package_roles=bridge,collection `
+  -f windows_vendor_package_version=4.0.0 `
+  -f publish_managed_to_github_packages=true `
+  -f publish_runtime_to_github_packages=true `
+  -f attach_runtime_to_github_release=true
+```
+
+Managed-only local example:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalReleaseBundle.ps1 `
-  -Version 4.0.0 `
+  -Version 4.0.1 `
+  -SkipWindowsRuntime
+```
+
+Local bridge and collection runtime example:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalReleaseBundle.ps1 `
+  -Version 4.0.1 `
+  -RuntimeVersion 4.0.1 `
   -WindowsRuntimeKeys win-x64-trt11.0-cuda12.9-cudnn9.22 `
   -WindowsRuntimeDeliveryMode split `
-  -RunWindowsSmoke `
-  -SignWindowsConsumerOutput `
-  -TrustWindowsConsumerSigningCertificate `
-  -TrustWindowsConsumerSigningCertificateRoot
+  -WindowsSplitPackageRoles bridge,collection `
+  -WindowsVendorPackageVersion 4.0.0 `
+  -WindowsAdditionalPackageSource https://nuget.pkg.github.com/<owner>/index.json `
+  -WindowsAdditionalPackageSourceUsername <owner-or-actor> `
+  -WindowsAdditionalPackageSourcePassword <token>
 ```
 
 On WDAC / application-control machines, the local and self-hosted Windows runtime validation path can sign the generated consumer output before smoke. This helps when `PackageConsumerSmoke.exe` would otherwise be blocked even though package restore, native asset copy, and build succeeded.
 
-`release-bundle.yml` now treats an empty `linux_runtime_keys` input as a no-op Linux module, which keeps the bundle usable on repositories that do not yet have a Linux self-hosted runner.
+`release-bundle.yml` treats runtime packaging as opt-in. Set `run_windows_runtime_packaging=true` or `run_linux_runtime_packaging=true` only for runtime releases. If Linux runtime packaging is enabled with an empty `linux_runtime_keys` input, the Linux module cleanly no-ops.
 
 For `nuget.org` publication, store a plain-text ASCII NuGet API key in the repository secret `NUGET_API_KEY`. Do not reuse an encrypted local credential blob or other machine-generated token format.
 

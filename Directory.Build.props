@@ -16,7 +16,6 @@
     <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <JYPPXSuppressMissingXmlDocs Condition="'$(JYPPXSuppressMissingXmlDocs)' == ''">true</JYPPXSuppressMissingXmlDocs>
-    <NoWarn>$(NoWarn)$(JYPPXMissingXmlDocNoWarnSuffix)</NoWarn>
     <SupportedArchitecture>x64</SupportedArchitecture>
     <JYPPXBridgeLibraryName>jyppxtrtbridge</JYPPXBridgeLibraryName>
     <JYPPXManagedTargetFrameworks>net46;net461;net462;net47;net471;net472;net48;net481;netcoreapp3.1;net5.0;net6.0;net7.0;net8.0;net9.0;net10.0</JYPPXManagedTargetFrameworks>
@@ -25,6 +24,7 @@
   <PropertyGroup>
     <JYPPXMissingXmlDocNoWarnSuffix Condition="'$(JYPPXSuppressMissingXmlDocs)' == 'true'">;1591</JYPPXMissingXmlDocNoWarnSuffix>
     <JYPPXMissingXmlDocNoWarnSuffix Condition="'$(JYPPXSuppressMissingXmlDocs)' != 'true'"></JYPPXMissingXmlDocNoWarnSuffix>
+    <NoWarn>$(NoWarn)$(JYPPXMissingXmlDocNoWarnSuffix)</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' != '' and $([System.String]::Copy('$(TargetFramework)').StartsWith('net4'))">

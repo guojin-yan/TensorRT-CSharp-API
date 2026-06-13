@@ -18,6 +18,16 @@ on:
         required: false
         default: true
         type: boolean
+      runtime_version:
+        description: Optional runtime package version; defaults to release version when runtime packaging is enabled
+        required: false
+        default: ""
+        type: string
+      run_windows_runtime_packaging:
+        description: Build and publish Windows runtime packages
+        required: false
+        default: false
+        type: boolean
       windows_runtime_keys:
         description: Optional comma-separated Windows runtime keys
         required: false
@@ -28,6 +38,51 @@ on:
         required: false
         default: split
         type: string
+      windows_split_package_roles:
+        description: Split Windows runtime roles or keys to build
+        required: false
+        default: "bridge,collection"
+        type: string
+      windows_meta_package_version:
+        description: Optional Windows split meta package version override
+        required: false
+        default: ""
+        type: string
+      windows_bridge_package_version:
+        description: Optional Windows bridge split package version override
+        required: false
+        default: ""
+        type: string
+      windows_vendor_package_version:
+        description: Optional default version for Windows CUDA/cuDNN/TensorRT split packages
+        required: false
+        default: "4.0.0"
+        type: string
+      windows_cuda_cudnn_package_version:
+        description: Optional Windows CUDA/cuDNN split package version override
+        required: false
+        default: ""
+        type: string
+      windows_tensorrt_package_version:
+        description: Optional Windows TensorRT split package version override
+        required: false
+        default: ""
+        type: string
+      windows_include_meta_package:
+        description: Build Windows split meta package when selected roles are incomplete
+        required: false
+        default: false
+        type: boolean
+      windows_skip_consumer_validation:
+        description: Skip Windows split runtime consumer validation
+        required: false
+        default: false
+        type: boolean
+      run_linux_runtime_packaging:
+        description: Build and publish Linux runtime packages
+        required: false
+        default: false
+        type: boolean
       linux_runtime_keys:
         description: Optional comma-separated Linux runtime keys
         required: false
@@ -64,7 +119,7 @@ on:
         default: false
         type: boolean
       attach_runtime_to_github_release:
-        description: Upload runtime packages as GitHub Release assets
+        description: Upload package artifacts as GitHub Release assets
         required: false
         default: true
         type: boolean
@@ -85,8 +140,19 @@ jobs:
       RELEASE_VERSION: ${{ inputs.version }}
       RELEASE_CONFIGURATION: ${{ inputs.configuration }}
       RUN_DOCS_RELEASE: ${{ inputs.run_docs_release }}
+      RUNTIME_VERSION: ${{ inputs.runtime_version }}
+      RUN_WINDOWS_RUNTIME_PACKAGING: ${{ inputs.run_windows_runtime_packaging }}
       WINDOWS_RUNTIME_KEYS: ${{ inputs.windows_runtime_keys }}
       WINDOWS_RUNTIME_DELIVERY_MODE: ${{ inputs.windows_runtime_delivery_mode }}
+      WINDOWS_SPLIT_PACKAGE_ROLES: ${{ inputs.windows_split_package_roles }}
+      WINDOWS_META_PACKAGE_VERSION: ${{ inputs.windows_meta_package_version }}
+      WINDOWS_BRIDGE_PACKAGE_VERSION: ${{ inputs.windows_bridge_package_version }}
+      WINDOWS_VENDOR_PACKAGE_VERSION: ${{ inputs.windows_vendor_package_version }}
+      WINDOWS_CUDA_CUDNN_PACKAGE_VERSION: ${{ inputs.windows_cuda_cudnn_package_version }}
+      WINDOWS_TENSORRT_PACKAGE_VERSION: ${{ inputs.windows_tensorrt_package_version }}
+      WINDOWS_INCLUDE_META_PACKAGE: ${{ inputs.windows_include_meta_package }}
+      WINDOWS_SKIP_CONSUMER_VALIDATION: ${{ inputs.windows_skip_consumer_validation }}
+      RUN_LINUX_RUNTIME_PACKAGING: ${{ inputs.run_linux_runtime_packaging }}
       LINUX_RUNTIME_KEYS: ${{ inputs.linux_runtime_keys }}
       RUN_WINDOWS_SMOKE: ${{ inputs.run_windows_smoke }}
       SIGN_WINDOWS_CONSUMER_OUTPUT: ${{ inputs.sign_windows_consumer_output }}
@@ -124,6 +190,10 @@ jobs:
           mkdir -p "$state_dir"
           runs_json="$state_dir/child-runs.json"
           printf '[]\n' > "$runs_json"
+          runtime_version="$RUNTIME_VERSION"
+          if [ -z "$runtime_version" ]; then
+            runtime_version="$RELEASE_VERSION"
+          fi
 
           dispatch_workflow() {
             local workflow_name="$1"
@@ -180,25 +250,37 @@ jobs:
             -f "publish_to_nuget=$PUBLISH_MANAGED_TO_NUGET" \
             -f "publish_to_github_packages=$PUBLISH_MANAGED_TO_GITHUB_PACKAGES"
 
-          dispatch_workflow "runtime-windows" \
-            -f "version=$RELEASE_VERSION" \
-            -f "configuration=$RELEASE_CONFIGURATION" \
-            -f "runtime_keys=$WINDOWS_RUNTIME_KEYS" \
-            -f "runtime_delivery_mode=$WINDOWS_RUNTIME_DELIVERY_MODE" \
-            -f "run_smoke=$RUN_WINDOWS_SMOKE" \
-            -f "sign_consumer_output=$SIGN_WINDOWS_CONSUMER_OUTPUT" \
-            -f "publish_to_github_packages=$PUBLISH_RUNTIME_TO_GITHUB_PACKAGES" \
-            -f "release_tag=$RELEASE_TAG" \
-            -f "attach_to_github_release=$ATTACH_RUNTIME_TO_GITHUB_RELEASE"
+          if [ "$RUN_WINDOWS_RUNTIME_PACKAGING" = "true" ]; then
+            dispatch_workflow "runtime-windows" \
+              -f "version=$runtime_version" \
+              -f "configuration=$RELEASE_CONFIGURATION" \
+              -f "runtime_keys=$WINDOWS_RUNTIME_KEYS" \
+              -f "runtime_delivery_mode=$WINDOWS_RUNTIME_DELIVERY_MODE" \
+              -f "split_package_roles=$WINDOWS_SPLIT_PACKAGE_ROLES" \
+              -f "meta_package_version=$WINDOWS_META_PACKAGE_VERSION" \
+              -f "bridge_package_version=$WINDOWS_BRIDGE_PACKAGE_VERSION" \
+              -f "vendor_package_version=$WINDOWS_VENDOR_PACKAGE_VERSION" \
+              -f "cuda_cudnn_package_version=$WINDOWS_CUDA_CUDNN_PACKAGE_VERSION" \
+              -f "tensorrt_package_version=$WINDOWS_TENSORRT_PACKAGE_VERSION" \
+              -f "include_meta_package=$WINDOWS_INCLUDE_META_PACKAGE" \
+              -f "skip_consumer_validation=$WINDOWS_SKIP_CONSUMER_VALIDATION" \
+              -f "run_smoke=$RUN_WINDOWS_SMOKE" \
+              -f "sign_consumer_output=$SIGN_WINDOWS_CONSUMER_OUTPUT" \
+              -f "publish_to_github_packages=$PUBLISH_RUNTIME_TO_GITHUB_PACKAGES" \
+              -f "release_tag=$RELEASE_TAG" \
+              -f "attach_to_github_release=$ATTACH_RUNTIME_TO_GITHUB_RELEASE"
+          fi
 
-          dispatch_workflow "runtime-linux" \
-            -f "version=$RELEASE_VERSION" \
-            -f "configuration=$RELEASE_CONFIGURATION" \
-            -f "runtime_keys=$LINUX_RUNTIME_KEYS" \
-            -f "run_smoke=$RUN_LINUX_SMOKE" \
-            -f "publish_to_github_packages=$PUBLISH_RUNTIME_TO_GITHUB_PACKAGES" \
-            -f "release_tag=$RELEASE_TAG" \
-            -f "attach_to_github_release=$ATTACH_RUNTIME_TO_GITHUB_RELEASE"
+          if [ "$RUN_LINUX_RUNTIME_PACKAGING" = "true" ]; then
+            dispatch_workflow "runtime-linux" \
+              -f "version=$runtime_version" \
+              -f "configuration=$RELEASE_CONFIGURATION" \
+              -f "runtime_keys=$LINUX_RUNTIME_KEYS" \
+              -f "run_smoke=$RUN_LINUX_SMOKE" \
+              -f "publish_to_github_packages=$PUBLISH_RUNTIME_TO_GITHUB_PACKAGES" \
+              -f "release_tag=$RELEASE_TAG" \
+              -f "attach_to_github_release=$ATTACH_RUNTIME_TO_GITHUB_RELEASE"
+          fi
 
           {
             echo "runs_json<<EOF"

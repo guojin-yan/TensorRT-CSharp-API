@@ -144,6 +144,9 @@ jobs:
       - windows
       - x64
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Validate nuget.org publish prerequisites
         shell: pwsh
         env:

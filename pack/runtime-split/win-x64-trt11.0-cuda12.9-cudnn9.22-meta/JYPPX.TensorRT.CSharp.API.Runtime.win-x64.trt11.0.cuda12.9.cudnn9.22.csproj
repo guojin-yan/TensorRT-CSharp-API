@@ -2,18 +2,18 @@
   <PropertyGroup>
     <PackageId>JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22</PackageId>
     <Title>JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22</Title>
-    <Description>Split-delivery meta package for TensorRT 11.0 + CUDA 12.9 + cuDNN 9.22 on Windows x64.</Description>
+    <Description>Split runtime collection package for TensorRT 11.0 + CUDA 12.9 + cuDNN 9.22 on Windows x64.</Description>
     <JYPPXRuntimeKey>win-x64-trt11.0-cuda12.9-cudnn9.22-meta</JYPPXRuntimeKey>
     <SuppressDependenciesWhenPacking>false</SuppressDependenciesWhenPacking>
-    <PackageTags>TensorRT;CUDA;runtime;split-delivery;meta</PackageTags>
+    <PackageTags>TensorRT;CUDA;runtime;split-delivery;collection;meta</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.Bridge" Version="$(Version)" />
-    <PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.CudaCudnn" Version="$(Version)" />
-    <PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.TensorRtRuntime" Version="$(Version)" />
-    <PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.TensorRtBuilder.Sm75Sm86" Version="$(Version)" />
-    <PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.TensorRtBuilder.Sm89Sm90" Version="$(Version)" />
-    <PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.TensorRtBuilder.Sm100Sm120Ptx" Version="$(Version)" />
+    <PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.Bridge" Version="$(JYPPXBridgePackageVersion)" />
+    <PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.CudaCudnn" Version="$(JYPPXCudaCudnnPackageVersion)" />
+    <PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.TensorRtRuntime" Version="$(JYPPXTensorRtPackageVersion)" />
+    <PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.TensorRtBuilder.Sm75Sm86" Version="$(JYPPXTensorRtPackageVersion)" />
+    <PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.TensorRtBuilder.Sm89Sm90" Version="$(JYPPXTensorRtPackageVersion)" />
+    <PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.TensorRtBuilder.Sm100Sm120Ptx" Version="$(JYPPXTensorRtPackageVersion)" />
   </ItemGroup>
 </Project>

@@ -42,6 +42,8 @@ Only set `JYPPX_NATIVE_BRIDGE_PATH`, `JYPPX_TENSORRT_ROOT`, `JYPPX_CUDA_ROOT`, o
 
 Before treating example evidence as release-ready, validate the package path first:
 
+This is a focused single-key example. Omit `-WindowsRuntimeKeys` when you want the full Windows runtime matrix from `eng/Invoke-LocalReleaseBundle.ps1`.
+
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\eng\Invoke-LocalReleaseBundle.ps1 `
   -Version 4.0.0 `

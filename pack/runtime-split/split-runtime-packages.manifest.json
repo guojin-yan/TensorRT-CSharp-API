@@ -123,17 +123,31 @@
       "notes": "TensorRT runtime, builder resource, plugins, and parser split package for the Windows TensorRT 8.6 + CUDA 12.1 line."
     },
     {
-      "key": "win-x64-trt10.11-cuda11.8-cudnn8.9-core",
+      "key": "win-x64-trt10.11-cuda11.8-cudnn8.9-bridge",
       "sourceRuntimeKey": "win-x64-trt10.11-cuda11.8-cudnn8.9",
-      "packageId": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda11.8.cudnn8.9.Core",
+      "packageId": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda11.8.cudnn8.9.Bridge",
       "rid": "win-x64",
       "platform": "windows",
       "tensorRtLine": "10",
       "cudaLine": "11",
-      "role": "core",
-      "prototypeState": "design-only",
+      "role": "bridge",
+      "prototypeState": "local-validated",
       "assets": [
-        "jyppxtrtbridge.dll",
+        "jyppxtrtbridge.dll"
+      ],
+      "notes": "Bridge-only split package for the Windows TensorRT 10.11 + CUDA 11.8 line."
+    },
+    {
+      "key": "win-x64-trt10.11-cuda11.8-cudnn8.9-cuda-cudnn",
+      "sourceRuntimeKey": "win-x64-trt10.11-cuda11.8-cudnn8.9",
+      "packageId": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda11.8.cudnn8.9.CudaCudnn",
+      "rid": "win-x64",
+      "platform": "windows",
+      "tensorRtLine": "10",
+      "cudaLine": "11",
+      "role": "cuda-cudnn",
+      "prototypeState": "local-validated",
+      "assets": [
         "cudart64_110.dll",
         "cudnn64_8.dll",
         "cudnn_adv_infer64_8.dll",
@@ -141,43 +155,71 @@
         "cudnn_cnn_infer64_8.dll",
         "cudnn_cnn_train64_8.dll",
         "cudnn_ops_infer64_8.dll",
-        "cudnn_ops_train64_8.dll",
-        "nvinfer_10.dll",
-        "nvinfer_dispatch_10.dll",
-        "nvinfer_lean_10.dll"
+        "cudnn_ops_train64_8.dll"
       ],
-      "notes": "Core package candidate for TensorRT 10.11 + CUDA 11.8: bridge, CUDA runtime, and TensorRT runtime libraries needed by lightweight deployment paths."
+      "notes": "CUDA runtime plus cuDNN split package for the Windows TensorRT 10.11 + CUDA 11.8 line."
     },
     {
-      "key": "win-x64-trt10.11-cuda11.8-cudnn8.9-extensions",
+      "key": "win-x64-trt10.11-cuda11.8-cudnn8.9-tensorrt-runtime",
       "sourceRuntimeKey": "win-x64-trt10.11-cuda11.8-cudnn8.9",
-      "packageId": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda11.8.cudnn8.9.Extensions",
+      "packageId": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda11.8.cudnn8.9.TensorRtRuntime",
       "rid": "win-x64",
       "platform": "windows",
       "tensorRtLine": "10",
       "cudaLine": "11",
-      "role": "extensions",
-      "prototypeState": "design-only",
+      "role": "tensorrt-runtime",
+      "prototypeState": "local-validated",
+      "assets": [
+        "nvinfer_10.dll",
+        "nvinfer_dispatch_10.dll",
+        "nvinfer_lean_10.dll"
+      ],
+      "notes": "Core TensorRT runtime split package for the Windows TensorRT 10.11 + CUDA 11.8 line."
+    },
+    {
+      "key": "win-x64-trt10.11-cuda11.8-cudnn8.9-tensorrt-extensions",
+      "sourceRuntimeKey": "win-x64-trt10.11-cuda11.8-cudnn8.9",
+      "packageId": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda11.8.cudnn8.9.TensorRtExtensions",
+      "rid": "win-x64",
+      "platform": "windows",
+      "tensorRtLine": "10",
+      "cudaLine": "11",
+      "role": "tensorrt-extensions",
+      "prototypeState": "local-validated",
       "assets": [
         "nvinfer_builder_resource_10.dll",
         "nvinfer_plugin_10.dll",
         "nvinfer_vc_plugin_10.dll",
         "nvonnxparser_10.dll"
       ],
-      "notes": "Extensions package candidate for TensorRT 10.11 + CUDA 11.8: builder resources, plugins, and parser assets for build/conversion scenarios."
+      "notes": "TensorRT builder, parser, and plugin extension split package for the Windows TensorRT 10.11 + CUDA 11.8 line."
     },
     {
-      "key": "win-x64-trt10.11-cuda12.9-cudnn9.22-core",
+      "key": "win-x64-trt10.11-cuda12.9-cudnn9.22-bridge",
       "sourceRuntimeKey": "win-x64-trt10.11-cuda12.9-cudnn9.22",
-      "packageId": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Core",
+      "packageId": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge",
       "rid": "win-x64",
       "platform": "windows",
       "tensorRtLine": "10",
       "cudaLine": "12",
-      "role": "core",
-      "prototypeState": "design-only",
+      "role": "bridge",
+      "prototypeState": "local-validated",
       "assets": [
-        "jyppxtrtbridge.dll",
+        "jyppxtrtbridge.dll"
+      ],
+      "notes": "Bridge-only split package for the Windows TensorRT 10.11 + CUDA 12.9 line."
+    },
+    {
+      "key": "win-x64-trt10.11-cuda12.9-cudnn9.22-cuda-cudnn",
+      "sourceRuntimeKey": "win-x64-trt10.11-cuda12.9-cudnn9.22",
+      "packageId": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.CudaCudnn",
+      "rid": "win-x64",
+      "platform": "windows",
+      "tensorRtLine": "10",
+      "cudaLine": "12",
+      "role": "cuda-cudnn",
+      "prototypeState": "local-validated",
+      "assets": [
         "cudart64_12.dll",
         "cudnn64_9.dll",
         "cudnn_adv64_9.dll",
@@ -188,30 +230,44 @@
         "cudnn_ext64_9.dll",
         "cudnn_graph64_9.dll",
         "cudnn_heuristic64_9.dll",
-        "cudnn_ops64_9.dll",
-        "nvinfer_10.dll",
-        "nvinfer_dispatch_10.dll",
-        "nvinfer_lean_10.dll"
+        "cudnn_ops64_9.dll"
       ],
-      "notes": "Design-only candidate for TensorRT 10.11 + CUDA 12.9. CUDA 12.9 is now installed locally, but this split package still requires split consumer validation and NVIDIA redistribution/package-size review before publication."
+      "notes": "CUDA runtime plus cuDNN split package for the Windows TensorRT 10.11 + CUDA 12.9 line."
     },
     {
-      "key": "win-x64-trt10.11-cuda12.9-cudnn9.22-extensions",
+      "key": "win-x64-trt10.11-cuda12.9-cudnn9.22-tensorrt-runtime",
       "sourceRuntimeKey": "win-x64-trt10.11-cuda12.9-cudnn9.22",
-      "packageId": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Extensions",
+      "packageId": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.TensorRtRuntime",
       "rid": "win-x64",
       "platform": "windows",
       "tensorRtLine": "10",
       "cudaLine": "12",
-      "role": "extensions",
-      "prototypeState": "design-only",
+      "role": "tensorrt-runtime",
+      "prototypeState": "local-validated",
+      "assets": [
+        "nvinfer_10.dll",
+        "nvinfer_dispatch_10.dll",
+        "nvinfer_lean_10.dll"
+      ],
+      "notes": "Core TensorRT runtime split package for the Windows TensorRT 10.11 + CUDA 12.9 line."
+    },
+    {
+      "key": "win-x64-trt10.11-cuda12.9-cudnn9.22-tensorrt-extensions",
+      "sourceRuntimeKey": "win-x64-trt10.11-cuda12.9-cudnn9.22",
+      "packageId": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.TensorRtExtensions",
+      "rid": "win-x64",
+      "platform": "windows",
+      "tensorRtLine": "10",
+      "cudaLine": "12",
+      "role": "tensorrt-extensions",
+      "prototypeState": "local-validated",
       "assets": [
         "nvinfer_builder_resource_10.dll",
         "nvinfer_plugin_10.dll",
         "nvinfer_vc_plugin_10.dll",
         "nvonnxparser_10.dll"
       ],
-      "notes": "Design-only extensions candidate for TensorRT 10.11 + CUDA 12.9. CUDA 12.9 is now installed locally, but keep this split package blocked until split consumer validation and NVIDIA redistribution/package-size review are complete."
+      "notes": "TensorRT builder, parser, and plugin extension split package for the Windows TensorRT 10.11 + CUDA 12.9 line."
     },
     {
       "key": "win-x64-trt11.0-cuda12.9-cudnn9.22-bridge",

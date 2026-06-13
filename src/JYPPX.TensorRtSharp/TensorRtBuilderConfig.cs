@@ -6,6 +6,10 @@ using JYPPX.TensorRtSharp.Internal.Interop;
 
 namespace JYPPX.TensorRtSharp;
 
+/// <summary>
+/// Managed wrapper around a TensorRT builder configuration.
+/// TensorRT builder 配置的托管封装。
+/// </summary>
 public sealed partial class TensorRtBuilderConfig : IDisposable
 {
     private readonly SafeTensorRtObjectHandle _handle;
@@ -18,8 +22,18 @@ public sealed partial class TensorRtBuilderConfig : IDisposable
 
     internal SafeTensorRtObjectHandle Handle => _handle;
 
+    /// <summary>
+    /// Gets the TensorRT API line used by this builder configuration.
+    /// 获取当前 builder 配置使用的 TensorRT API line。
+    /// </summary>
     public TensorRtApiLine Line { get; }
 
+    /// <summary>
+    /// Adds an optimization profile to this builder configuration.
+    /// 向当前 builder 配置添加一个 optimization profile。
+    /// </summary>
+    /// <param name="profile">The optimization profile to attach. 要附加的 optimization profile。</param>
+    /// <returns>The zero-based profile index assigned by TensorRT. TensorRT 分配的从零开始的 profile 索引。</returns>
     public int AddOptimizationProfile(TensorRtOptimizationProfile profile)
     {
         if (profile == null)
@@ -96,11 +110,22 @@ public sealed partial class TensorRtBuilderConfig : IDisposable
     /// </summary>
     public bool HasCalibrationProfile => NativeBridgeApi.HasBuilderConfigCalibrationProfile(Line, _handle);
 
+    /// <summary>
+    /// Enables or disables one TensorRT builder flag.
+    /// 启用或禁用一个 TensorRT builder 标志。
+    /// </summary>
+    /// <param name="flag">The builder flag to change. 要修改的 builder 标志。</param>
+    /// <param name="enabled">Whether the flag should be enabled. 是否启用该标志。</param>
     public void SetFlag(TensorRtBuilderFlag flag, bool enabled = true)
     {
         NativeBridgeApi.SetBuilderConfigFlag(Line, _handle, flag, enabled);
     }
 
+    /// <summary>
+    /// Clears one TensorRT builder flag.
+    /// 清除一个 TensorRT builder 标志。
+    /// </summary>
+    /// <param name="flag">The builder flag to clear. 要清除的 builder 标志。</param>
     public void ClearFlag(TensorRtBuilderFlag flag)
     {
         if (Line == TensorRtApiLine.TensorRt11)
@@ -112,6 +137,12 @@ public sealed partial class TensorRtBuilderConfig : IDisposable
         SetFlag(flag, false);
     }
 
+    /// <summary>
+    /// Returns whether one TensorRT builder flag is currently enabled.
+    /// 返回某个 TensorRT builder 标志当前是否启用。
+    /// </summary>
+    /// <param name="flag">The builder flag to query. 要查询的 builder 标志。</param>
+    /// <returns><see langword="true"/> when the flag is enabled. 当该标志已启用时返回 <see langword="true"/>。</returns>
     public bool GetFlag(TensorRtBuilderFlag flag)
     {
         return NativeBridgeApi.GetBuilderConfigFlag(Line, _handle, flag);
@@ -207,95 +238,192 @@ public sealed partial class TensorRtBuilderConfig : IDisposable
         return NativeBridgeApi.GetBuilderConfigRuntimePlatform(Line, _handle);
     }
 
+    /// <summary>
+    /// Pins one layer to a specific TensorRT device type.
+    /// 将一个 layer 固定到指定的 TensorRT device type。
+    /// </summary>
+    /// <param name="layer">The target layer. 目标 layer。</param>
+    /// <param name="deviceType">The TensorRT device type. TensorRT device type。</param>
     public void SetLayerDeviceType(TensorRtLayer layer, TensorRtDeviceType deviceType)
     {
         ValidateLayer(layer);
         NativeBridgeApi.SetLayerDeviceType(Line, _handle, layer.Handle, deviceType);
     }
 
+    /// <summary>
+    /// Gets the TensorRT device type assigned to one layer.
+    /// 获取一个 layer 当前分配到的 TensorRT device type。
+    /// </summary>
+    /// <param name="layer">The target layer. 目标 layer。</param>
+    /// <returns>The configured TensorRT device type. 已配置的 TensorRT device type。</returns>
     public TensorRtDeviceType GetLayerDeviceType(TensorRtLayer layer)
     {
         ValidateLayer(layer);
         return NativeBridgeApi.GetLayerDeviceType(Line, _handle, layer.Handle);
     }
 
+    /// <summary>
+    /// Returns whether one layer has an explicit TensorRT device type.
+    /// 返回一个 layer 是否具有显式 TensorRT device type。
+    /// </summary>
+    /// <param name="layer">The target layer. 目标 layer。</param>
+    /// <returns><see langword="true"/> when the layer has an explicit assignment. 当该 layer 具有显式分配时返回 <see langword="true"/>。</returns>
     public bool IsLayerDeviceTypeSet(TensorRtLayer layer)
     {
         ValidateLayer(layer);
         return NativeBridgeApi.IsLayerDeviceTypeSet(Line, _handle, layer.Handle);
     }
 
+    /// <summary>
+    /// Removes the explicit TensorRT device-type assignment for one layer.
+    /// 移除一个 layer 的显式 TensorRT device type 分配。
+    /// </summary>
+    /// <param name="layer">The target layer. 目标 layer。</param>
     public void ResetLayerDeviceType(TensorRtLayer layer)
     {
         ValidateLayer(layer);
         NativeBridgeApi.ResetLayerDeviceType(Line, _handle, layer.Handle);
     }
 
+    /// <summary>
+    /// Sets a TensorRT memory-pool size limit.
+    /// 设置一个 TensorRT memory pool 大小上限。
+    /// </summary>
+    /// <param name="pool">The TensorRT memory pool. TensorRT memory pool。</param>
+    /// <param name="bytes">The size limit in bytes. 大小上限，单位为字节。</param>
     public void SetMemoryPoolLimit(TensorRtMemoryPoolType pool, ulong bytes)
     {
         NativeBridgeApi.SetMemoryPoolLimit(Line, _handle, pool, bytes);
     }
 
+    /// <summary>
+    /// Gets a TensorRT memory-pool size limit.
+    /// 获取一个 TensorRT memory pool 大小上限。
+    /// </summary>
+    /// <param name="pool">The TensorRT memory pool. TensorRT memory pool。</param>
+    /// <returns>The size limit in bytes. 大小上限，单位为字节。</returns>
     public ulong GetMemoryPoolLimit(TensorRtMemoryPoolType pool)
     {
         return NativeBridgeApi.GetMemoryPoolLimit(Line, _handle, pool);
     }
 
+    /// <summary>
+    /// Sets the TensorRT builder optimization level.
+    /// 设置 TensorRT builder 优化级别。
+    /// </summary>
+    /// <param name="level">The optimization level. 优化级别。</param>
     public void SetOptimizationLevel(int level)
     {
         NativeBridgeApi.SetBuilderOptimizationLevel(Line, _handle, level);
     }
 
+    /// <summary>
+    /// Gets the TensorRT builder optimization level.
+    /// 获取 TensorRT builder 优化级别。
+    /// </summary>
+    /// <returns>The current optimization level. 当前优化级别。</returns>
     public int GetOptimizationLevel()
     {
         return NativeBridgeApi.GetBuilderOptimizationLevel(Line, _handle);
     }
 
+    /// <summary>
+    /// Sets TensorRT profiling verbosity for build diagnostics.
+    /// 设置构建诊断使用的 TensorRT profiling verbosity。
+    /// </summary>
+    /// <param name="verbosity">The profiling verbosity. profiling verbosity。</param>
     public void SetProfilingVerbosity(TensorRtProfilingVerbosity verbosity)
     {
         NativeBridgeApi.SetProfilingVerbosity(Line, _handle, verbosity);
     }
 
+    /// <summary>
+    /// Gets TensorRT profiling verbosity for this builder configuration.
+    /// 获取当前 builder 配置的 TensorRT profiling verbosity。
+    /// </summary>
+    /// <returns>The configured profiling verbosity. 已配置的 profiling verbosity。</returns>
     public TensorRtProfilingVerbosity GetProfilingVerbosity()
     {
         return NativeBridgeApi.GetProfilingVerbosity(Line, _handle);
     }
 
+    /// <summary>
+    /// Sets the maximum auxiliary CUDA stream count TensorRT may use.
+    /// 设置 TensorRT 可使用的最大辅助 CUDA stream 数量。
+    /// </summary>
+    /// <param name="maxStreams">The maximum auxiliary stream count. 最大辅助 stream 数量。</param>
     public void SetMaxAuxStreams(int maxStreams)
     {
         NativeBridgeApi.SetMaxAuxStreams(Line, _handle, maxStreams);
     }
 
+    /// <summary>
+    /// Gets the maximum auxiliary CUDA stream count TensorRT may use.
+    /// 获取 TensorRT 可使用的最大辅助 CUDA stream 数量。
+    /// </summary>
+    /// <returns>The maximum auxiliary stream count. 最大辅助 stream 数量。</returns>
     public int GetMaxAuxStreams()
     {
         return NativeBridgeApi.GetMaxAuxStreams(Line, _handle);
     }
 
+    /// <summary>
+    /// Sets the average timing-iteration count used by TensorRT tactic benchmarking.
+    /// 设置 TensorRT tactic 基准测试使用的平均 timing 迭代次数。
+    /// </summary>
+    /// <param name="iterations">The average timing-iteration count. 平均 timing 迭代次数。</param>
     public void SetAverageTimingIterations(int iterations)
     {
         NativeBridgeApi.SetAverageTimingIterations(Line, _handle, iterations);
     }
 
+    /// <summary>
+    /// Gets the average timing-iteration count used by TensorRT tactic benchmarking.
+    /// 获取 TensorRT tactic 基准测试使用的平均 timing 迭代次数。
+    /// </summary>
+    /// <returns>The average timing-iteration count. 平均 timing 迭代次数。</returns>
     public int GetAverageTimingIterations()
     {
         return NativeBridgeApi.GetAverageTimingIterations(Line, _handle);
     }
 
+    /// <summary>
+    /// Sets the TensorRT tactic-source mask.
+    /// 设置 TensorRT tactic source 掩码。
+    /// </summary>
+    /// <param name="sources">The enabled tactic sources. 已启用的 tactic sources。</param>
     public void SetTacticSources(TensorRtTacticSources sources)
     {
         NativeBridgeApi.SetTacticSources(Line, _handle, sources);
     }
 
+    /// <summary>
+    /// Gets the TensorRT tactic-source mask.
+    /// 获取 TensorRT tactic source 掩码。
+    /// </summary>
+    /// <returns>The enabled tactic sources. 已启用的 tactic sources。</returns>
     public TensorRtTacticSources GetTacticSources()
     {
         return NativeBridgeApi.GetTacticSources(Line, _handle);
     }
 
+    /// <summary>
+    /// Creates a TensorRT timing cache from optional serialized bytes.
+    /// 使用可选的序列化字节创建一个 TensorRT timing cache。
+    /// </summary>
+    /// <param name="serializedCache">Optional serialized timing-cache payload. 可选的序列化 timing cache 负载。</param>
+    /// <returns>A TensorRT timing-cache wrapper. TensorRT timing cache 封装。</returns>
     public TensorRtTimingCache CreateTimingCache(byte[]? serializedCache = null)
     {
         return new TensorRtTimingCache(Line, NativeBridgeApi.CreateTimingCache(Line, _handle, serializedCache));
     }
 
+    /// <summary>
+    /// Attaches a TensorRT timing cache to this builder configuration.
+    /// 将一个 TensorRT timing cache 附加到当前 builder 配置。
+    /// </summary>
+    /// <param name="cache">The timing cache to attach. 要附加的 timing cache。</param>
+    /// <param name="ignoreMismatch">Whether TensorRT should ignore cache mismatches. TensorRT 是否忽略 cache 不匹配。</param>
     public void SetTimingCache(TensorRtTimingCache cache, bool ignoreMismatch = false)
     {
         if (cache == null)
@@ -311,6 +439,10 @@ public sealed partial class TensorRtBuilderConfig : IDisposable
         NativeBridgeApi.SetTimingCache(Line, _handle, cache.Handle, ignoreMismatch);
     }
 
+    /// <summary>
+    /// Releases the TensorRT builder-configuration handle.
+    /// 释放 TensorRT builder 配置句柄。
+    /// </summary>
     public void Dispose()
     {
         _handle.Dispose();

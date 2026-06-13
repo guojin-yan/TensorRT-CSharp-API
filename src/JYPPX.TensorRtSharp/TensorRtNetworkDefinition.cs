@@ -5,6 +5,10 @@ using JYPPX.TensorRtSharp.Internal.Interop;
 
 namespace JYPPX.TensorRtSharp;
 
+/// <summary>
+/// Represents a managed TensorRT Tensor Rt Network Definition wrapper.
+/// 表示托管 TensorRT Tensor Rt Network Definition 包装器。
+/// </summary>
 public sealed partial class TensorRtNetworkDefinition : IDisposable
 {
     private readonly SafeTensorRtObjectHandle _handle;
@@ -17,20 +21,44 @@ public sealed partial class TensorRtNetworkDefinition : IDisposable
 
     internal SafeTensorRtObjectHandle Handle => _handle;
 
+    /// <summary>
+    /// Gets or sets the Line value.
+    /// 获取或设置 Line 值。
+    /// </summary>
     public TensorRtApiLine Line { get; }
 
+    /// <summary>
+    /// Gets or sets the Name value.
+    /// 获取或设置 Name 值。
+    /// </summary>
     public string Name
     {
         get => NativeBridgeApi.GetNetworkName(Line, _handle);
         set => NativeBridgeApi.SetNetworkName(Line, _handle, value);
     }
 
+    /// <summary>
+    /// Gets the Input Count value.
+    /// 获取 Input Count 值。
+    /// </summary>
     public int InputCount => NativeBridgeApi.GetNetworkInputCount(Line, _handle);
 
+    /// <summary>
+    /// Gets the Output Count value.
+    /// 获取 Output Count 值。
+    /// </summary>
     public int OutputCount => NativeBridgeApi.GetNetworkOutputCount(Line, _handle);
 
+    /// <summary>
+    /// Gets the Layer Count value.
+    /// 获取 Layer Count 值。
+    /// </summary>
     public int LayerCount => NativeBridgeApi.GetNetworkLayerCount(Line, _handle);
 
+    /// <summary>
+    /// Gets the Flags value.
+    /// 获取 Flags 值。
+    /// </summary>
     public TensorRtNetworkDefinitionCreationFlags Flags => NativeBridgeApi.GetNetworkFlags(Line, _handle);
 
     /// <summary>
@@ -39,16 +67,28 @@ public sealed partial class TensorRtNetworkDefinition : IDisposable
     /// </summary>
     public bool HasImplicitBatchDimension => NativeBridgeApi.HasImplicitBatchDimension(Line, _handle);
 
+    /// <summary>
+    /// Gets the Flag value.
+    /// 获取 Flag 值。
+    /// </summary>
     public bool GetFlag(TensorRtNetworkDefinitionCreationFlags flag)
     {
         return NativeBridgeApi.GetNetworkFlag(Line, _handle, flag);
     }
 
+    /// <summary>
+    /// Adds a Input layer or object.
+    /// 添加 Input 层或对象。
+    /// </summary>
     public TensorRtTensor AddInput(string name, TensorRtDataType dataType, TensorRtDims shape)
     {
         return new TensorRtTensor(Line, NativeBridgeApi.AddNetworkInput(Line, _handle, name, dataType, shape));
     }
 
+    /// <summary>
+    /// Gets the Input value.
+    /// 获取 Input 值。
+    /// </summary>
     public TensorRtTensor GetInput(int index)
     {
         return new TensorRtTensor(Line, NativeBridgeApi.GetNetworkInput(Line, _handle, index));
@@ -77,6 +117,10 @@ public sealed partial class TensorRtNetworkDefinition : IDisposable
         return NativeBridgeApi.GetNetworkInputTensorDimensionExtent64(Line, _handle, index, dimensionIndex);
     }
 
+    /// <summary>
+    /// Gets the Output value.
+    /// 获取 Output 值。
+    /// </summary>
     public TensorRtTensor GetOutput(int index)
     {
         return new TensorRtTensor(Line, NativeBridgeApi.GetNetworkOutput(Line, _handle, index));
@@ -105,11 +149,19 @@ public sealed partial class TensorRtNetworkDefinition : IDisposable
         return NativeBridgeApi.GetNetworkOutputTensorDimensionExtent64(Line, _handle, index, dimensionIndex);
     }
 
+    /// <summary>
+    /// Gets the Layer value.
+    /// 获取 Layer 值。
+    /// </summary>
     public TensorRtLayer GetLayer(int index)
     {
         return new TensorRtLayer(Line, NativeBridgeApi.GetNetworkLayer(Line, _handle, index));
     }
 
+    /// <summary>
+    /// Adds a Identity layer or object.
+    /// 添加 Identity 层或对象。
+    /// </summary>
     public TensorRtLayer AddIdentity(TensorRtTensor input)
     {
         if (input == null)
@@ -125,6 +177,10 @@ public sealed partial class TensorRtNetworkDefinition : IDisposable
         return new TensorRtLayer(Line, NativeBridgeApi.AddIdentityLayer(Line, _handle, input.Handle));
     }
 
+    /// <summary>
+    /// Adds a Constant layer or object.
+    /// 添加 Constant 层或对象。
+    /// </summary>
     public TensorRtLayer AddConstant(TensorRtDims shape, TensorRtWeights weights)
     {
         if (shape == null)
@@ -140,6 +196,10 @@ public sealed partial class TensorRtNetworkDefinition : IDisposable
         return new TensorRtLayer(Line, NativeBridgeApi.AddConstantLayer(Line, _handle, shape, weights));
     }
 
+    /// <summary>
+    /// Adds a Convolution layer or object.
+    /// 添加 Convolution 层或对象。
+    /// </summary>
     public TensorRtLayer AddConvolution(TensorRtTensor input, int outputMaps, TensorRtDims kernelSize, TensorRtWeights kernelWeights, TensorRtWeights? biasWeights = null)
     {
         ValidateInputTensor(input, nameof(input));
@@ -156,6 +216,10 @@ public sealed partial class TensorRtNetworkDefinition : IDisposable
         return new TensorRtLayer(Line, NativeBridgeApi.AddConvolutionLayer(Line, _handle, input.Handle, outputMaps, kernelSize, kernelWeights, biasWeights));
     }
 
+    /// <summary>
+    /// Adds a Scale layer or object.
+    /// 添加 Scale 层或对象。
+    /// </summary>
     public TensorRtLayer AddScale(
         TensorRtTensor input,
         TensorRtScaleMode mode,
@@ -168,6 +232,10 @@ public sealed partial class TensorRtNetworkDefinition : IDisposable
         return new TensorRtLayer(Line, NativeBridgeApi.AddScaleLayer(Line, _handle, input.Handle, mode, shift, scale, power, channelAxis));
     }
 
+    /// <summary>
+    /// Adds a Padding layer or object.
+    /// 添加 Padding 层或对象。
+    /// </summary>
     public TensorRtLayer AddPadding(TensorRtTensor input, TensorRtDims prePadding, TensorRtDims postPadding)
     {
         ValidateInputTensor(input, nameof(input));
@@ -184,6 +252,10 @@ public sealed partial class TensorRtNetworkDefinition : IDisposable
         return new TensorRtLayer(Line, NativeBridgeApi.AddPaddingLayer(Line, _handle, input.Handle, prePadding, postPadding));
     }
 
+    /// <summary>
+    /// Adds a Element Wise layer or object.
+    /// 添加 Element Wise 层或对象。
+    /// </summary>
     public TensorRtLayer AddElementWise(TensorRtTensor left, TensorRtTensor right, TensorRtElementWiseOperation operation)
     {
         if (left == null)
@@ -204,6 +276,10 @@ public sealed partial class TensorRtNetworkDefinition : IDisposable
         return new TensorRtLayer(Line, NativeBridgeApi.AddElementWiseLayer(Line, _handle, left.Handle, right.Handle, operation));
     }
 
+    /// <summary>
+    /// Adds a Matrix Multiply layer or object.
+    /// 添加 Matrix Multiply 层或对象。
+    /// </summary>
     public TensorRtLayer AddMatrixMultiply(
         TensorRtTensor left,
         TensorRtMatrixOperation leftOperation,
@@ -228,6 +304,10 @@ public sealed partial class TensorRtNetworkDefinition : IDisposable
         return new TensorRtLayer(Line, NativeBridgeApi.AddMatrixMultiplyLayer(Line, _handle, left.Handle, leftOperation, right.Handle, rightOperation));
     }
 
+    /// <summary>
+    /// Adds a Shuffle layer or object.
+    /// 添加 Shuffle 层或对象。
+    /// </summary>
     public TensorRtLayer AddShuffle(TensorRtTensor input, TensorRtDims reshapeDimensions)
     {
         if (input == null)
@@ -258,6 +338,10 @@ public sealed partial class TensorRtNetworkDefinition : IDisposable
         }
     }
 
+    /// <summary>
+    /// Adds a Reduce layer or object.
+    /// 添加 Reduce 层或对象。
+    /// </summary>
     public TensorRtLayer AddReduce(TensorRtTensor input, TensorRtReduceOperation operation, uint axes, bool keepDimensions)
     {
         if (input == null)
@@ -278,6 +362,10 @@ public sealed partial class TensorRtNetworkDefinition : IDisposable
         return new TensorRtLayer(Line, NativeBridgeApi.AddReduceLayer(Line, _handle, input.Handle, operation, axes, keepDimensions));
     }
 
+    /// <summary>
+    /// Adds a Soft Max layer or object.
+    /// 添加 Soft Max 层或对象。
+    /// </summary>
     public TensorRtLayer AddSoftMax(TensorRtTensor input, uint axes)
     {
         if (input == null)
@@ -308,6 +396,10 @@ public sealed partial class TensorRtNetworkDefinition : IDisposable
         }
     }
 
+    /// <summary>
+    /// Adds a Unary layer or object.
+    /// 添加 Unary 层或对象。
+    /// </summary>
     public TensorRtLayer AddUnary(TensorRtTensor input, TensorRtUnaryOperation operation)
     {
         if (input == null)
@@ -323,6 +415,10 @@ public sealed partial class TensorRtNetworkDefinition : IDisposable
         return new TensorRtLayer(Line, NativeBridgeApi.AddUnaryLayer(Line, _handle, input.Handle, operation));
     }
 
+    /// <summary>
+    /// Adds a Top K layer or object.
+    /// 添加 Top K 层或对象。
+    /// </summary>
     public TensorRtLayer AddTopK(TensorRtTensor input, TensorRtTopKOperation operation, int k, uint axes)
     {
         if (input == null)
@@ -348,6 +444,10 @@ public sealed partial class TensorRtNetworkDefinition : IDisposable
         return new TensorRtLayer(Line, NativeBridgeApi.AddTopKLayer(Line, _handle, input.Handle, operation, k, axes));
     }
 
+    /// <summary>
+    /// Adds a Gather layer or object.
+    /// 添加 Gather 层或对象。
+    /// </summary>
     public TensorRtLayer AddGather(TensorRtTensor data, TensorRtTensor indices, int axis)
     {
         if (data == null)
@@ -373,6 +473,10 @@ public sealed partial class TensorRtNetworkDefinition : IDisposable
         return new TensorRtLayer(Line, NativeBridgeApi.AddGatherLayer(Line, _handle, data.Handle, indices.Handle, axis));
     }
 
+    /// <summary>
+    /// Adds a Activation layer or object.
+    /// 添加 Activation 层或对象。
+    /// </summary>
     public TensorRtLayer AddActivation(TensorRtTensor input, TensorRtActivationType activationType)
     {
         if (input == null)
@@ -388,6 +492,10 @@ public sealed partial class TensorRtNetworkDefinition : IDisposable
         return new TensorRtLayer(Line, NativeBridgeApi.AddActivationLayer(Line, _handle, input.Handle, activationType));
     }
 
+    /// <summary>
+    /// Adds a Pooling layer or object.
+    /// 添加 Pooling 层或对象。
+    /// </summary>
     public TensorRtLayer AddPooling(TensorRtTensor input, TensorRtPoolingType poolingType, TensorRtDims windowSize)
     {
         if (input == null)
@@ -408,6 +516,10 @@ public sealed partial class TensorRtNetworkDefinition : IDisposable
         return new TensorRtLayer(Line, NativeBridgeApi.AddPoolingLayer(Line, _handle, input.Handle, poolingType, windowSize));
     }
 
+    /// <summary>
+    /// Adds a Resize layer or object.
+    /// 添加 Resize 层或对象。
+    /// </summary>
     public TensorRtLayer AddResize(TensorRtTensor input, TensorRtDims outputDimensions, TensorRtResizeMode resizeMode = TensorRtResizeMode.Nearest)
     {
         if (input == null)
@@ -439,6 +551,10 @@ public sealed partial class TensorRtNetworkDefinition : IDisposable
         }
     }
 
+    /// <summary>
+    /// Adds a Concatenation layer or object.
+    /// 添加 Concatenation 层或对象。
+    /// </summary>
     public TensorRtLayer AddConcatenation(params TensorRtTensor[] inputs)
     {
         if (inputs == null)
@@ -470,6 +586,10 @@ public sealed partial class TensorRtNetworkDefinition : IDisposable
         return new TensorRtLayer(Line, NativeBridgeApi.AddConcatenationLayer(Line, _handle, inputHandles));
     }
 
+    /// <summary>
+    /// Adds a Slice layer or object.
+    /// 添加 Slice 层或对象。
+    /// </summary>
     public TensorRtLayer AddSlice(TensorRtTensor input, TensorRtDims start, TensorRtDims size, TensorRtDims stride)
     {
         if (input == null)
@@ -500,6 +620,10 @@ public sealed partial class TensorRtNetworkDefinition : IDisposable
         return new TensorRtLayer(Line, NativeBridgeApi.AddSliceLayer(Line, _handle, input.Handle, start, size, stride));
     }
 
+    /// <summary>
+    /// Adds a Shape layer or object.
+    /// 添加 Shape 层或对象。
+    /// </summary>
     public TensorRtLayer AddShape(TensorRtTensor input)
     {
         if (input == null)
@@ -515,6 +639,10 @@ public sealed partial class TensorRtNetworkDefinition : IDisposable
         return new TensorRtLayer(Line, NativeBridgeApi.AddShapeLayer(Line, _handle, input.Handle));
     }
 
+    /// <summary>
+    /// Adds a Select layer or object.
+    /// 添加 Select 层或对象。
+    /// </summary>
     public TensorRtLayer AddSelect(TensorRtTensor condition, TensorRtTensor thenInput, TensorRtTensor elseInput)
     {
         if (condition == null)
@@ -540,6 +668,10 @@ public sealed partial class TensorRtNetworkDefinition : IDisposable
         return new TensorRtLayer(Line, NativeBridgeApi.AddSelectLayer(Line, _handle, condition.Handle, thenInput.Handle, elseInput.Handle));
     }
 
+    /// <summary>
+    /// Adds a Fill layer or object.
+    /// 添加 Fill 层或对象。
+    /// </summary>
     public TensorRtLayer AddFill(TensorRtDims dimensions, TensorRtFillOperation operation)
     {
         if (dimensions == null)
@@ -550,6 +682,10 @@ public sealed partial class TensorRtNetworkDefinition : IDisposable
         return new TensorRtLayer(Line, NativeBridgeApi.AddFillLayer(Line, _handle, dimensions, operation));
     }
 
+    /// <summary>
+    /// Marks the Output value.
+    /// 标记 Output 值。
+    /// </summary>
     public void MarkOutput(TensorRtTensor tensor)
     {
         if (tensor == null)
@@ -565,6 +701,10 @@ public sealed partial class TensorRtNetworkDefinition : IDisposable
         NativeBridgeApi.MarkNetworkOutput(Line, _handle, tensor.Handle);
     }
 
+    /// <summary>
+    /// Unmarks the Output value.
+    /// 取消标记 Output 值。
+    /// </summary>
     public void UnmarkOutput(TensorRtTensor tensor)
     {
         if (tensor == null)
@@ -580,6 +720,10 @@ public sealed partial class TensorRtNetworkDefinition : IDisposable
         NativeBridgeApi.UnmarkNetworkOutput(Line, _handle, tensor.Handle);
     }
 
+    /// <summary>
+    /// Releases the native TensorRT resources held by this object.
+    /// 释放此对象持有的 native TensorRT 资源。
+    /// </summary>
     public void Dispose()
     {
         _handle.Dispose();

@@ -1,10 +1,29 @@
 [CmdletBinding()]
 param(
   [string]$Version = "4.0.0",
+  [string]$RuntimeVersion,
   [string]$Configuration = "Release",
-  [string[]]$WindowsRuntimeKeys = @("win-x64-trt11.0-cuda12.9-cudnn9.22"),
+  [string[]]$WindowsRuntimeKeys = @(
+    "win-x64-trt8.6-cuda11.8-cudnn8.9",
+    "win-x64-trt8.6-cuda12.1-cudnn8.9",
+    "win-x64-trt10.11-cuda11.8-cudnn8.9",
+    "win-x64-trt10.11-cuda12.9-cudnn9.22",
+    "win-x64-trt11.0-cuda12.9-cudnn9.22",
+    "win-x64-trt11.0-cuda13.2-cudnn9.22"
+  ),
   [ValidateSet("full", "split")]
-  [string]$WindowsRuntimeDeliveryMode = "full",
+  [string]$WindowsRuntimeDeliveryMode = "split",
+  [string[]]$WindowsSplitPackageRoles = @("all"),
+  [string]$WindowsMetaPackageVersion,
+  [string]$WindowsBridgePackageVersion,
+  [string]$WindowsVendorPackageVersion,
+  [string]$WindowsCudaCudnnPackageVersion,
+  [string]$WindowsTensorRtPackageVersion,
+  [string[]]$WindowsAdditionalPackageSource = @(),
+  [string]$WindowsAdditionalPackageSourceUsername,
+  [string]$WindowsAdditionalPackageSourcePassword,
+  [switch]$IncludeWindowsSplitMetaPackage,
+  [switch]$SkipWindowsRuntimeConsumerValidation,
   [switch]$SkipDocs,
   [switch]$SkipManagedPack,
   [switch]$SkipWindowsRuntime,
@@ -66,10 +85,27 @@ function Invoke-CheckedCommand {
 }
 
 $resolvedVersion = & (Join-Path $RepositoryRoot "eng\Resolve-PackageVersion.ps1") -RequestedVersion $Version
+$resolvedRuntimeVersion = if ([string]::IsNullOrWhiteSpace($RuntimeVersion)) {
+  $resolvedVersion
+}
+else {
+  & (Join-Path $RepositoryRoot "eng\Resolve-PackageVersion.ps1") -RequestedVersion $RuntimeVersion
+}
 $windowsKeys = @(Expand-KeyList -Values $WindowsRuntimeKeys)
+$windowsSplitPackageRoles = @(Expand-KeyList -Values $WindowsSplitPackageRoles)
+if ($windowsSplitPackageRoles.Count -eq 0) {
+  $windowsSplitPackageRoles = @("all")
+}
 $windowsSmokeKeys = @(Expand-KeyList -Values $WindowsSmokeRuntimeKeys)
 if ($windowsKeys.Count -eq 0) {
-  $windowsKeys = @("win-x64-trt11.0-cuda12.9-cudnn9.22")
+  $windowsKeys = @(
+    "win-x64-trt8.6-cuda11.8-cudnn8.9",
+    "win-x64-trt8.6-cuda12.1-cudnn8.9",
+    "win-x64-trt10.11-cuda11.8-cudnn8.9",
+    "win-x64-trt10.11-cuda12.9-cudnn9.22",
+    "win-x64-trt11.0-cuda12.9-cudnn9.22",
+    "win-x64-trt11.0-cuda13.2-cudnn9.22"
+  )
 }
 
 if (-not $SkipDocs.IsPresent) {
@@ -137,10 +173,52 @@ if (-not $SkipWindowsRuntime.IsPresent) {
         "-SourceRuntimeKey",
         $key,
         "-Version",
-        $resolvedVersion,
+        $resolvedRuntimeVersion,
+        "-SplitPackageRole",
+        ($windowsSplitPackageRoles -join ","),
         "-Configuration",
         $Configuration
       )
+
+      if (-not [string]::IsNullOrWhiteSpace($WindowsMetaPackageVersion)) {
+        $arguments += @("-MetaPackageVersion", $WindowsMetaPackageVersion)
+      }
+
+      if (-not [string]::IsNullOrWhiteSpace($WindowsBridgePackageVersion)) {
+        $arguments += @("-BridgePackageVersion", $WindowsBridgePackageVersion)
+      }
+
+      if (-not [string]::IsNullOrWhiteSpace($WindowsVendorPackageVersion)) {
+        $arguments += @("-VendorPackageVersion", $WindowsVendorPackageVersion)
+      }
+
+      if (-not [string]::IsNullOrWhiteSpace($WindowsCudaCudnnPackageVersion)) {
+        $arguments += @("-CudaCudnnPackageVersion", $WindowsCudaCudnnPackageVersion)
+      }
+
+      if (-not [string]::IsNullOrWhiteSpace($WindowsTensorRtPackageVersion)) {
+        $arguments += @("-TensorRtPackageVersion", $WindowsTensorRtPackageVersion)
+      }
+
+      if ($IncludeWindowsSplitMetaPackage.IsPresent) {
+        $arguments += "-IncludeMetaPackage"
+      }
+
+      if ($SkipWindowsRuntimeConsumerValidation.IsPresent) {
+        $arguments += "-SkipConsumerValidation"
+      }
+
+      foreach ($source in @(Expand-KeyList -Values $WindowsAdditionalPackageSource)) {
+        $arguments += @("-AdditionalPackageSource", $source)
+      }
+
+      if (-not [string]::IsNullOrWhiteSpace($WindowsAdditionalPackageSourceUsername)) {
+        $arguments += @("-AdditionalPackageSourceUsername", $WindowsAdditionalPackageSourceUsername)
+      }
+
+      if (-not [string]::IsNullOrWhiteSpace($WindowsAdditionalPackageSourcePassword)) {
+        $arguments += @("-AdditionalPackageSourcePassword", $WindowsAdditionalPackageSourcePassword)
+      }
 
       if (-not $SkipManagedPack.IsPresent) {
         $arguments += "-SkipManagedPack"
@@ -190,7 +268,7 @@ if (-not $SkipWindowsRuntime.IsPresent) {
       "-RuntimePackageKey",
       ($windowsKeys -join ","),
       "-Version",
-      $resolvedVersion,
+      $resolvedRuntimeVersion,
       "-Configuration",
       $Configuration
     )
@@ -236,10 +314,12 @@ if (-not $SkipWindowsRuntime.IsPresent) {
 
 Write-Host "Local release bundle finished."
 Write-Host "  Version: $resolvedVersion"
+Write-Host "  RuntimeVersion: $resolvedRuntimeVersion"
 Write-Host "  Configuration: $Configuration"
 Write-Host "  RunDocs: $(-not $SkipDocs.IsPresent)"
 Write-Host "  RunManagedPack: $(-not $SkipManagedPack.IsPresent)"
 Write-Host "  RunWindowsRuntime: $(-not $SkipWindowsRuntime.IsPresent)"
 Write-Host "  RunWindowsSmoke: $($RunWindowsSmoke.IsPresent)"
 Write-Host "  WindowsRuntimeDeliveryMode: $WindowsRuntimeDeliveryMode"
+Write-Host "  WindowsSplitPackageRoles: $($windowsSplitPackageRoles -join ', ')"
 Write-Host "  WindowsRuntimeKeys: $($windowsKeys -join ', ')"

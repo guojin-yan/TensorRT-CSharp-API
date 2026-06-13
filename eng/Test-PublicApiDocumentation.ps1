@@ -18,7 +18,7 @@ function Invoke-DocAuditBuild {
     [string]$ProjectPath
   )
 
-  $rawOutput = & dotnet build $ProjectPath -c Release -p:TargetFramework=net8.0 -p:JYPPXSuppressMissingXmlDocs=false 2>&1
+  $rawOutput = & dotnet build $ProjectPath -c Release -t:Rebuild -p:TargetFramework=net8.0 -p:JYPPXSuppressMissingXmlDocs=false 2>&1
   $normalizedOutput = New-Object System.Collections.Generic.List[string]
   foreach ($line in @($rawOutput)) {
     $lineText = [string]$line
