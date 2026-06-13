@@ -8,12 +8,18 @@ namespace JYPPX.Shared.Interop;
 
 /// <summary>
 /// Shared native bridge loader used by managed assemblies that P/Invoke the bridge.
+/// 供托管程序集调用的共享原生 bridge 加载器。
 /// </summary>
 public static class NativeBridgeLibraryLoader
 {
     private static readonly object SyncRoot = new object();
     private static readonly HashSet<Assembly> InitializedAssemblies = new HashSet<Assembly>();
 
+    /// <summary>
+    /// Ensures that the native bridge loader and resolver are initialized for an assembly.
+    /// 确保为指定程序集初始化原生 bridge 加载器与解析器。
+    /// </summary>
+    /// <param name="assembly">The assembly that issues bridge P/Invoke calls. 发起 bridge P/Invoke 调用的程序集。</param>
     public static void EnsureInitialized(Assembly assembly)
     {
         if (assembly == null)

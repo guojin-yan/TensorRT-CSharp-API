@@ -18,13 +18,16 @@ function Invoke-DocAuditBuild {
     [string]$ProjectPath
   )
 
-  $output = & dotnet build $ProjectPath -c Release -p:TargetFramework=net8.0 -p:NoWarn= 2>&1
-  $warnings = @($output | Where-Object { $_ -match 'warning CS1591:' })
-
-  foreach ($line in @($output)) {
-    Write-Host $line
+  $rawOutput = & dotnet build $ProjectPath -c Release -p:TargetFramework=net8.0 -p:JYPPXSuppressMissingXmlDocs=false 2>&1
+  $normalizedOutput = New-Object System.Collections.Generic.List[string]
+  foreach ($line in @($rawOutput)) {
+    $lineText = [string]$line
+    $lineText = [System.Text.RegularExpressions.Regex]::Replace($lineText, '\x1B\[[0-9;]*[A-Za-z]', '')
+    $normalizedOutput.Add($lineText)
+    Write-Host $lineText
   }
 
+  $warnings = @($normalizedOutput | Where-Object { $_ -match 'warning CS1591:' })
   return $warnings
 }
 
@@ -36,7 +39,7 @@ function Parse-WarningLine {
     [string]$RepositoryRootPath
   )
 
-  if ($Line -notmatch '^(?<file>[A-Za-z]:\\[^()]+)\((?<line>\d+),(?<column>\d+)\): warning CS1591: (?<message>.+)$') {
+  if ($Line -notmatch '^\s*(?<file>[A-Za-z]:\\[^()]+)\((?<line>\d+),(?<column>\d+)\): warning CS1591: (?<message>.+)$') {
     return $null
   }
 
@@ -52,6 +55,27 @@ function Parse-WarningLine {
     column = [int]$Matches.column
     message = $Matches.message
   }
+}
+
+function Resolve-ProjectNameFromFile {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$RelativeFile
+  )
+
+  if ($RelativeFile.StartsWith("src\JYPPX.Shared\", [System.StringComparison]::OrdinalIgnoreCase)) {
+    return "JYPPX.Shared"
+  }
+
+  if ($RelativeFile.StartsWith("src\JYPPX.CudaSharp\", [System.StringComparison]::OrdinalIgnoreCase)) {
+    return "JYPPX.CudaSharp"
+  }
+
+  if ($RelativeFile.StartsWith("src\JYPPX.TensorRtSharp\", [System.StringComparison]::OrdinalIgnoreCase)) {
+    return "JYPPX.TensorRtSharp"
+  }
+
+  return "Unknown"
 }
 
 $projects = @(
@@ -70,28 +94,37 @@ $projects = @(
 )
 
 $rows = New-Object System.Collections.Generic.List[object]
-$projectSummaries = New-Object System.Collections.Generic.List[object]
+$uniqueWarnings = [System.Collections.Generic.Dictionary[string, object]]::new([System.StringComparer]::OrdinalIgnoreCase)
 foreach ($project in $projects) {
   $warnings = @(Invoke-DocAuditBuild -ProjectPath $project.path)
   $parsed = @($warnings | ForEach-Object { Parse-WarningLine -Line $_ -RepositoryRootPath $RepositoryRoot } | Where-Object { $_ -ne $null })
 
-  $projectSummaries.Add([pscustomobject]@{
-    project = $project.name
-    warningCount = $parsed.Count
-  })
-
   foreach ($item in $parsed) {
-    $rows.Add([pscustomobject]@{
-      project = $project.name
+    $key = "$($item.file)|$($item.line)|$($item.column)|$($item.message)"
+    if ($uniqueWarnings.ContainsKey($key)) {
+      continue
+    }
+
+    $row = [pscustomobject]@{
+      project = Resolve-ProjectNameFromFile -RelativeFile $item.file
       file = $item.file
       line = $item.line
       column = $item.column
       message = $item.message
-    })
+    }
+
+    $uniqueWarnings[$key] = $row
+    $rows.Add($row)
   }
 }
 
 $grouped = @($rows | Group-Object file | Sort-Object Count -Descending)
+$projectSummaries = @($rows | Group-Object project | Sort-Object Name | ForEach-Object {
+    [pscustomobject]@{
+      project = $_.Name
+      warningCount = $_.Count
+    }
+  })
 
 $outputRoot = Join-Path $RepositoryRoot "artifacts\api-doc-audit"
 New-Item -ItemType Directory -Path $outputRoot -Force | Out-Null

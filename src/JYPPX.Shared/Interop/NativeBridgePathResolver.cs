@@ -9,9 +9,15 @@ namespace JYPPX.Shared.Interop;
 
 /// <summary>
 /// Resolves candidate paths for the native bridge library.
+/// 解析原生 bridge 库的候选路径。
 /// </summary>
 public static class NativeBridgePathResolver
 {
+    /// <summary>
+    /// Prepends preferred dependency directories to the current process search path.
+    /// 把优先依赖目录插入到当前进程搜索路径前部。
+    /// </summary>
+    /// <param name="assembly">The managed assembly requesting bridge resolution. 请求 bridge 解析的托管程序集。</param>
     public static void EnsureProcessSearchPath(Assembly assembly)
     {
         List<string> preferredEntries = EnumerateDependencyDirectories(assembly)
@@ -44,6 +50,12 @@ public static class NativeBridgePathResolver
         Environment.SetEnvironmentVariable("PATH", updatedPath);
     }
 
+    /// <summary>
+    /// Enumerates candidate file paths for the native bridge library.
+    /// 枚举原生 bridge 库的候选文件路径。
+    /// </summary>
+    /// <param name="assembly">The managed assembly requesting bridge resolution. 请求 bridge 解析的托管程序集。</param>
+    /// <returns>Candidate full paths for the native bridge file. 原生 bridge 文件的候选完整路径。</returns>
     public static IEnumerable<string> EnumerateCandidatePaths(Assembly assembly)
     {
         string fileName = GetBridgeFileName();
@@ -86,6 +98,12 @@ public static class NativeBridgePathResolver
         yield return Path.Combine(assemblyDirectory, "runtimes", GetRuntimeIdentifier(), "native", fileName);
     }
 
+    /// <summary>
+    /// Enumerates directories that may contain bridge dependencies.
+    /// 枚举可能包含 bridge 依赖项的目录。
+    /// </summary>
+    /// <param name="assembly">The managed assembly requesting bridge resolution. 请求 bridge 解析的托管程序集。</param>
+    /// <returns>Candidate dependency directories. 候选依赖目录集合。</returns>
     public static IEnumerable<string> EnumerateDependencyDirectories(Assembly assembly)
     {
         string? explicitBridgePath = Environment.GetEnvironmentVariable("JYPPX_NATIVE_BRIDGE_PATH");
@@ -185,6 +203,11 @@ public static class NativeBridgePathResolver
         }
     }
 
+    /// <summary>
+    /// Gets the expected native bridge file name for the current platform.
+    /// 获取当前平台期望的原生 bridge 文件名。
+    /// </summary>
+    /// <returns>The platform-specific bridge file name. 平台相关的 bridge 文件名。</returns>
     public static string GetBridgeFileName()
     {
 #if JYPPX_NETFRAMEWORK
