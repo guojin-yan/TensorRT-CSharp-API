@@ -1,6 +1,6 @@
 # Getting Started
 
-TensorRtSharp4.0 currently has two verified local baselines:
+TensorRtSharp4.0 currently has two verified local validation baselines:
 
 - CUDA smoke path through `CudaSmokeRunner`
 - TensorRT vendor-backed minimum path through `TensorRtSmokeRunner`
@@ -25,18 +25,38 @@ powershell -ExecutionPolicy Bypass -File .\eng\Get-Dependencies.ps1
 $env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "1"
 ```
 
-## Verified sample commands
+## Verified common examples
+
+MultiStream:
+
+```powershell
+dotnet .\samples\MultiStream\bin\Debug\net8.0\MultiStream.dll
+```
+
+DynamicShape:
+
+```powershell
+dotnet .\samples\DynamicShape\bin\Debug\net8.0\DynamicShape.dll --tensor-rt-line 10
+```
+
+OnnxToEngine:
+
+```powershell
+dotnet .\samples\OnnxToEngine\bin\Debug\net8.0\OnnxToEngine.dll --tensor-rt-line 10
+```
+
+## Verified smoke commands
 
 CUDA smoke:
 
 ```powershell
-dotnet .\samples\CudaSmokeRunner\bin\Debug\net8.0\CudaSmokeRunner.dll
+dotnet .\smoke\CudaSmokeRunner\bin\Debug\net8.0\CudaSmokeRunner.dll
 ```
 
 TensorRT minimum smoke:
 
 ```powershell
-dotnet .\samples\TensorRtSmokeRunner\bin\Debug\net8.0\TensorRtSmokeRunner.dll
+dotnet .\smoke\TensorRtSmokeRunner\bin\Debug\net8.0\TensorRtSmokeRunner.dll
 ```
 
 ## Read next

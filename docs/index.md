@@ -41,17 +41,21 @@ Chinese articles:
 - [Release Candidate Gate](articles/zh-cn/release-candidate-gate.md)
 - [Sample Runners](articles/zh-cn/sample-runners.md)
 
-## Deployment Smoke Path
+## Example And Smoke Path
 
-Recommended first-run order:
+Recommended common-example order:
+
+1. `MultiStream`
+2. `DynamicShape`
+3. `OnnxToEngine`
+
+Recommended smoke order:
 
 1. `CudaSmokeRunner`
-2. `MultiStream`
-3. `TensorRtSmokeRunner`
-4. `LifecycleSmokeRunner`
-5. `OnnxToEngineSmokeRunner`
-6. `DynamicShape`
-7. `NetworkBuilderSmokeRunner`
-8. Layer-specific network runners
+2. `TensorRtSmokeRunner`
+3. `LifecycleSmokeRunner`
+4. `OnnxToEngineSmokeRunner`
+5. `NetworkBuilderSmokeRunner`
+6. Layer-specific network runners
 
-See [Sample Runners](articles/en/sample-runners.md) and `samples/README.md` for commands and expected evidence lines.
+See [Sample Runners](articles/en/sample-runners.md), `samples/README.md`, and `smoke/README.md` for commands and expected evidence lines.

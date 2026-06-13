@@ -1,4 +1,6 @@
-﻿# 样例运行说明
+# 样例运行说明
+
+本文描述的 validation runner 现在位于 `smoke/`，而面向普通用户的常用案例位于 `samples/`。
 
 当前样例优先面向 Windows x64，用于验证 TensorRT / CUDA 托管高层对象、原生 bridge 加载、内存传输、stream/event、模型构建、tensor binding 和 enqueue 关键链路。
 ## 统一本地启动方式
@@ -32,7 +34,7 @@ $env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "1"
 运行示例：
 
 ```powershell
-dotnet .\samples\CudaSmokeRunner\bin\Debug\net8.0\CudaSmokeRunner.dll
+dotnet .\smoke\CudaSmokeRunner\bin\Debug\net8.0\CudaSmokeRunner.dll
 ```
 
 关键输出：
@@ -75,7 +77,7 @@ dotnet .\samples\MultiStream\bin\Debug\net8.0\MultiStream.dll
 运行 TensorRT 10：
 
 ```powershell
-dotnet .\samples\TensorRtSmokeRunner\bin\Debug\net8.0\TensorRtSmokeRunner.dll --tensor-rt-line 10
+dotnet .\smoke\TensorRtSmokeRunner\bin\Debug\net8.0\TensorRtSmokeRunner.dll --tensor-rt-line 10
 ```
 
 关键输出：
@@ -115,7 +117,7 @@ powershell -ExecutionPolicy Bypass -File .\eng\Invoke-WindowsLifecycleSmoke.ps1 
 运行示例：
 
 ```powershell
-dotnet .\samples\OnnxToEngineSmokeRunner\bin\Debug\net8.0\OnnxToEngineSmokeRunner.dll --tensor-rt-line 10
+dotnet .\smoke\OnnxToEngineSmokeRunner\bin\Debug\net8.0\OnnxToEngineSmokeRunner.dll --tensor-rt-line 10
 ```
 
 关键输出：
@@ -173,9 +175,8 @@ dotnet .\samples\DynamicShape\bin\Debug\net8.0\DynamicShape.dll --tensor-rt-line
 
 - `Classification`：需要可再分发分类模型、labels、输入图片和 preprocessing metadata。
 - `CustomKernelPreprocess`：等待安全 public CUDA module/kernel wrapper，不直接暴露 raw kernel launch。
-- `OnnxToEngine`：重定向到可运行的 `OnnxToEngineSmokeRunner`。
+- `OnnxToEngine`：现在提供用户侧常用的 ONNX 转 engine 示例。
 - `YoloDet`：需要 detector ONNX、labels、输入图片、decode/NMS metadata，部分模型还需要 plugin 诊断。
 
 这些目录不是发布阻塞项，只要 README 说明清楚资产要求、当前替代 runner 和 roadmap。
-
 

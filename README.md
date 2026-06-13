@@ -56,27 +56,35 @@ cmake --preset win-x64-trt11-cuda13-release
 cmake --build --preset win-x64-trt11-cuda13-release --parallel
 ```
 
-Then run representative samples from `samples/README.md`. Recommended order:
+Then run the common examples from `samples/README.md` and the validation runners from `smoke/README.md`.
+
+Recommended common-example order:
+
+1. `MultiStream`
+2. `DynamicShape`
+3. `OnnxToEngine`
+
+Recommended smoke order:
 
 1. `CudaSmokeRunner`
-2. `MultiStream`
-3. `TensorRtSmokeRunner`
-4. `LifecycleSmokeRunner`
-5. `OnnxToEngineSmokeRunner`
-6. `DynamicShape`
-7. `NetworkBuilderSmokeRunner`
-8. Layer-specific network runners
+2. `TensorRtSmokeRunner`
+3. `LifecycleSmokeRunner`
+4. `OnnxToEngineSmokeRunner`
+5. `NetworkBuilderSmokeRunner`
+6. Layer-specific network runners
 
 ## Samples
 
-Runnable deployment samples are under `samples/` and are listed in `samples/README.md`.
+Runnable deployment samples are under `samples/`. Validation-oriented smoke runners are under `smoke/`.
 
 Recent sample maturity updates:
 
 - `MultiStream` is a real CUDA multi-stream/event ordering sample and is included in the solution.
 - `DynamicShape` is a real TensorRT dynamic-shape/profile/binding sample and is included in the solution.
-- `Classification`, `CustomKernelPreprocess`, `OnnxToEngine`, and `YoloDet` are documented README/roadmap directories rather than empty `.gitkeep` placeholders.
-- `OnnxToEngine` redirects to the runnable `OnnxToEngineSmokeRunner`.
+- `MultiStream` is a real CUDA multi-stream/event ordering sample and is included in the solution.
+- `DynamicShape` is a real TensorRT dynamic-shape/profile/binding sample and is included in the solution.
+- `OnnxToEngine` is now a runnable common ONNX-to-engine example and is included in the solution.
+- `Classification`, `CustomKernelPreprocess`, and `YoloDet` remain documented README/roadmap directories rather than empty `.gitkeep` placeholders.
 
 ## Runtime Packages
 
@@ -160,7 +168,8 @@ docs/       DocFX site and conceptual documentation
 eng/        automation and dependency discovery scripts
 native/     C ABI bridge and TensorRT/CUDA adapters
 pack/       NuGet packaging projects
-samples/    smoke runners, runnable samples, and documented sample roadmaps
+samples/    user-facing common examples and documented sample roadmaps
+smoke/      validation runners for release gates, packaging, and regression checks
 src/        managed libraries
 tests/      managed integration and unit tests
 third_party/local dependency drop folder (not committed)

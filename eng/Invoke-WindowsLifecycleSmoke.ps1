@@ -50,7 +50,7 @@ if ($UseRuntimeAssets -and (Test-Path -LiteralPath (Join-Path $runtimeNativeRoot
   $nativeSearchRoot = $runtimeNativeRoot
 }
 
-$runnerPath = Join-Path $RepositoryRoot "samples\LifecycleSmokeRunner\bin\$Configuration\net8.0\LifecycleSmokeRunner.dll"
+$runnerPath = Join-Path $RepositoryRoot "smoke\LifecycleSmokeRunner\bin\$Configuration\net8.0\LifecycleSmokeRunner.dll"
 if (-not (Test-Path -LiteralPath $runnerPath -PathType Leaf)) {
   throw "LifecycleSmokeRunner was not built: $runnerPath"
 }

@@ -9,7 +9,7 @@ Raw CUDA launch entry points are present only as generated/internal native bound
 Use these runnable samples first:
 
 ```powershell
-dotnet .\samples\CudaSmokeRunner\bin\Debug\net8.0\CudaSmokeRunner.dll
+dotnet .\smoke\CudaSmokeRunner\bin\Debug\net8.0\CudaSmokeRunner.dll
 dotnet .\samples\MultiStream\bin\Debug\net8.0\MultiStream.dll
 ```
 

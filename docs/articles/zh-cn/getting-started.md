@@ -34,18 +34,22 @@ cmake --preset win-x64-trt11-cuda13-release
 cmake --build --preset win-x64-trt11-cuda13-release --parallel
 ```
 
-## 推荐样例顺序
+## 推荐常用案例顺序
+
+1. `MultiStream`
+2. `DynamicShape`
+3. `OnnxToEngine`
+
+推荐 smoke 顺序：
 
 1. `CudaSmokeRunner`
-2. `MultiStream`
-3. `TensorRtSmokeRunner`
-4. `LifecycleSmokeRunner`
-5. `OnnxToEngineSmokeRunner`
-6. `DynamicShape`
-7. `NetworkBuilderSmokeRunner`
-8. 各类 layer-specific network runners
+2. `TensorRtSmokeRunner`
+3. `LifecycleSmokeRunner`
+4. `OnnxToEngineSmokeRunner`
+5. `NetworkBuilderSmokeRunner`
+6. 各类 layer-specific network runners
 
-`MultiStream` 和 `DynamicShape` 已经是真实可运行样例并加入解决方案。`Classification`、`CustomKernelPreprocess`、`OnnxToEngine`、`YoloDet` 是 README/roadmap 状态，不再是空壳目录。
+`MultiStream`、`DynamicShape` 和 `OnnxToEngine` 现在都是真实可运行案例并加入解决方案。`Classification`、`CustomKernelPreprocess`、`YoloDet` 仍是 README/roadmap 目录，不再是空壳目录。
 
 ## 继续阅读
 

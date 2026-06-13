@@ -63,7 +63,7 @@ Expected local gate result:
 
 ## Recommended Smoke Order
 
-After the local quality gate, run representative samples from `samples/README.md` in this order:
+After the local quality gate, run validation-oriented smoke runners from `smoke/README.md` in this order:
 
 1. `CudaSmokeRunner`
 2. `MultiStream`

@@ -174,24 +174,24 @@ powershell -ExecutionPolicy Bypass -File .\eng\Export-TensorRtApiInventory.ps1
 Smoke runners:
 
 ```powershell
-dotnet .\samples\CudaSmokeRunner\bin\Debug\net8.0\CudaSmokeRunner.dll
-dotnet .\samples\TensorRtSmokeRunner\bin\Debug\net8.0\TensorRtSmokeRunner.dll
-dotnet .\samples\OnnxToEngineSmokeRunner\bin\Debug\net8.0\OnnxToEngineSmokeRunner.dll --tensor-rt-line 10
-dotnet .\samples\NetworkBuilderSmokeRunner\bin\Debug\net8.0\NetworkBuilderSmokeRunner.dll --tensor-rt-line 10
-dotnet .\samples\NetworkLayersSmokeRunner\bin\Debug\net8.0\NetworkLayersSmokeRunner.dll --tensor-rt-line 10
-dotnet .\samples\NetworkShapeOpsSmokeRunner\bin\Debug\net8.0\NetworkShapeOpsSmokeRunner.dll --tensor-rt-line 10
-dotnet .\samples\NetworkConcatSliceSmokeRunner\bin\Debug\net8.0\NetworkConcatSliceSmokeRunner.dll --tensor-rt-line 10
-dotnet .\samples\NetworkSoftmaxTopKSmokeRunner\bin\Debug\net8.0\NetworkSoftmaxTopKSmokeRunner.dll --tensor-rt-line 10
-dotnet .\samples\NetworkActivationPoolingResizeSmokeRunner\bin\Debug\net8.0\NetworkActivationPoolingResizeSmokeRunner.dll --tensor-rt-line 10
-dotnet .\samples\NetworkMatrixFillSelectSmokeRunner\bin\Debug\net8.0\NetworkMatrixFillSelectSmokeRunner.dll --tensor-rt-line 10
-dotnet .\samples\NetworkConvolutionScaleSmokeRunner\bin\Debug\net8.0\NetworkConvolutionScaleSmokeRunner.dll --tensor-rt-line 10
-dotnet .\samples\NetworkDeconvolutionSmokeRunner\bin\Debug\net8.0\NetworkDeconvolutionSmokeRunner.dll --tensor-rt-line 10
-dotnet .\samples\NetworkLrnSmokeRunner\bin\Debug\net8.0\NetworkLrnSmokeRunner.dll --tensor-rt-line 10
-dotnet .\samples\NetworkQuantizeDequantizeSmokeRunner\bin\Release\net8.0\NetworkQuantizeDequantizeSmokeRunner.dll --tensor-rt-line 10
-dotnet .\samples\NetworkTrt11ModernLayerMetadataRunner\bin\Debug\net8.0\NetworkTrt11ModernLayerMetadataRunner.dll --tensor-rt-line 11
-dotnet .\samples\NetworkTrt11AdvancedLayersSmokeRunner\bin\Debug\net8.0\NetworkTrt11AdvancedLayersSmokeRunner.dll --tensor-rt-line 11
-dotnet .\samples\CudaGraphSmokeRunner\bin\Debug\net8.0\CudaGraphSmokeRunner.dll
-dotnet .\samples\RefitWeightsSmokeRunner\bin\Debug\net8.0\RefitWeightsSmokeRunner.dll --tensor-rt-line 10
+dotnet .\smoke\CudaSmokeRunner\bin\Debug\net8.0\CudaSmokeRunner.dll
+dotnet .\smoke\TensorRtSmokeRunner\bin\Debug\net8.0\TensorRtSmokeRunner.dll
+dotnet .\smoke\OnnxToEngineSmokeRunner\bin\Debug\net8.0\OnnxToEngineSmokeRunner.dll --tensor-rt-line 10
+dotnet .\smoke\NetworkBuilderSmokeRunner\bin\Debug\net8.0\NetworkBuilderSmokeRunner.dll --tensor-rt-line 10
+dotnet .\smoke\NetworkLayersSmokeRunner\bin\Debug\net8.0\NetworkLayersSmokeRunner.dll --tensor-rt-line 10
+dotnet .\smoke\NetworkShapeOpsSmokeRunner\bin\Debug\net8.0\NetworkShapeOpsSmokeRunner.dll --tensor-rt-line 10
+dotnet .\smoke\NetworkConcatSliceSmokeRunner\bin\Debug\net8.0\NetworkConcatSliceSmokeRunner.dll --tensor-rt-line 10
+dotnet .\smoke\NetworkSoftmaxTopKSmokeRunner\bin\Debug\net8.0\NetworkSoftmaxTopKSmokeRunner.dll --tensor-rt-line 10
+dotnet .\smoke\NetworkActivationPoolingResizeSmokeRunner\bin\Debug\net8.0\NetworkActivationPoolingResizeSmokeRunner.dll --tensor-rt-line 10
+dotnet .\smoke\NetworkMatrixFillSelectSmokeRunner\bin\Debug\net8.0\NetworkMatrixFillSelectSmokeRunner.dll --tensor-rt-line 10
+dotnet .\smoke\NetworkConvolutionScaleSmokeRunner\bin\Debug\net8.0\NetworkConvolutionScaleSmokeRunner.dll --tensor-rt-line 10
+dotnet .\smoke\NetworkDeconvolutionSmokeRunner\bin\Debug\net8.0\NetworkDeconvolutionSmokeRunner.dll --tensor-rt-line 10
+dotnet .\smoke\NetworkLrnSmokeRunner\bin\Debug\net8.0\NetworkLrnSmokeRunner.dll --tensor-rt-line 10
+dotnet .\smoke\NetworkQuantizeDequantizeSmokeRunner\bin\Release\net8.0\NetworkQuantizeDequantizeSmokeRunner.dll --tensor-rt-line 10
+dotnet .\smoke\NetworkTrt11ModernLayerMetadataRunner\bin\Debug\net8.0\NetworkTrt11ModernLayerMetadataRunner.dll --tensor-rt-line 11
+dotnet .\smoke\NetworkTrt11AdvancedLayersSmokeRunner\bin\Debug\net8.0\NetworkTrt11AdvancedLayersSmokeRunner.dll --tensor-rt-line 11
+dotnet .\smoke\CudaGraphSmokeRunner\bin\Debug\net8.0\CudaGraphSmokeRunner.dll
+dotnet .\smoke\RefitWeightsSmokeRunner\bin\Debug\net8.0\RefitWeightsSmokeRunner.dll --tensor-rt-line 10
 ```
 
 Expected CUDA signals include `CudaVersions Runtime=... Driver=...`, `StreamPriorityRange`, `PriorityStream Flags=NonBlocking Priority=...`, `EventReady=True`, `PriorityStreamReady=True`, `CudaPeekLastError=0:cudaSuccess`, `StreamFlags=NonBlocking`, `StreamCapture InitialStatus=None Info=None:0`, `PinnedFlags`, `FloatRoundTrip=True`, `PinnedAsyncRoundTrip=True`, `RegisteredHostMemoryAsyncRoundTrip=True` when the selected device supports `cudaHostRegister`, `DeviceToDevice=True`, `MemcpyDefault Sync=True Async=True`, optional `PeerCopy` on multi-GPU systems, `DeviceSynchronize=True`, `OwnedMemoryPool Device=... PoolAsyncAllocation=True ... ResetHigh=True`, `DefaultMemoryPool ... CurrentPoolDevice=... Trim=True ResetHigh=True`, `MemoryPoolAccess Self=... Peer=...`, `DeviceLimit StackSize=...`, `PointerAttributes Type=Device Device=...`, `AsyncMemoryPoolAllocation=True` when the selected CUDA runtime supports async allocation, `ManagedMemoryRoundTrip` when the selected device supports managed memory, `DeviceAttribute ManagedMemory=...`, optional `PeerAccess`, optional `MappedPinned`, `PitchedMemory SyncRoundTrip=True`, `PitchedMemory ... Fill2D=True`, `PitchedMemoryAsync RoundTrip=True`, `PitchedMemoryAsync ... Fill2DAsync=True`, `PitchedMemory3D SyncRoundTrip=True DeviceToDevice=True AsyncRoundTrip=True Fill3D=True AsyncRoundTrip=True Fill3DAsync=True`, `StreamReadyAfterSync=True`, `StreamWaitEvent=True`, `CudaGraphCaptureRoundTrip=True`, `Capture=None->Active->None`, `EventElapsedMilliseconds=...`, and `CudaGetLastError=0:cudaSuccess`.

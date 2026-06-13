@@ -135,7 +135,7 @@ jobs:
           done
 
           if gh release view "$tag" >/dev/null 2>&1; then
-            gh release upload "$tag" "${files[@]}" --clobber
+            gh release upload "$tag" "${files[@]}" --clobber --repo "${{ github.repository }}"
           else
-            gh release create "$tag" "${files[@]}" --title "$title" --notes "$notes"
+            gh release create "$tag" "${files[@]}" --title "$title" --notes "$notes" --repo "${{ github.repository }}"
           fi

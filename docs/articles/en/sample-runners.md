@@ -1,4 +1,6 @@
-﻿# Sample Runners
+# Sample Runners
+
+The validation-oriented runner projects described in this article now live under `smoke/`, while user-facing common examples live under `samples/`.
 ## Shared Local Setup
 
 Run sample commands from the repository root and let the existing C# `NativeBridgePathResolver` discover `build-out`, `third_party/nvidia`, and standard CUDA install locations:
@@ -23,7 +25,7 @@ Purpose:
 Run:
 
 ```powershell
-dotnet .\samples\CudaSmokeRunner\bin\Debug\net8.0\CudaSmokeRunner.dll
+dotnet .\smoke\CudaSmokeRunner\bin\Debug\net8.0\CudaSmokeRunner.dll
 ```
 
 Expected signals:
@@ -77,7 +79,7 @@ Purpose:
 Run:
 
 ```powershell
-dotnet .\samples\TensorRtSmokeRunner\bin\Debug\net8.0\TensorRtSmokeRunner.dll
+dotnet .\smoke\TensorRtSmokeRunner\bin\Debug\net8.0\TensorRtSmokeRunner.dll
 ```
 
 Expected signals:
@@ -158,7 +160,7 @@ Purpose:
 Run against TensorRT 10:
 
 ```powershell
-dotnet .\samples\RefitWeightsSmokeRunner\bin\Debug\net8.0\RefitWeightsSmokeRunner.dll --tensor-rt-line 10
+dotnet .\smoke\RefitWeightsSmokeRunner\bin\Debug\net8.0\RefitWeightsSmokeRunner.dll --tensor-rt-line 10
 ```
 
 Expected TensorRT 10 signals:
@@ -217,13 +219,13 @@ Purpose:
 Run against TensorRT 10:
 
 ```powershell
-dotnet .\samples\OnnxToEngineSmokeRunner\bin\Debug\net8.0\OnnxToEngineSmokeRunner.dll --tensor-rt-line 10
+dotnet .\smoke\OnnxToEngineSmokeRunner\bin\Debug\net8.0\OnnxToEngineSmokeRunner.dll --tensor-rt-line 10
 ```
 
 Run against TensorRT 8:
 
 ```powershell
-dotnet .\samples\OnnxToEngineSmokeRunner\bin\Debug\net8.0\OnnxToEngineSmokeRunner.dll --tensor-rt-line 8
+dotnet .\smoke\OnnxToEngineSmokeRunner\bin\Debug\net8.0\OnnxToEngineSmokeRunner.dll --tensor-rt-line 8
 ```
 
 Expected signals:
@@ -249,7 +251,7 @@ Expected signals:
 The repository also keeps a few user-facing sample topic directories that are documented instead of executable today:
 
 - `samples/Classification`: requires a redistributable classifier ONNX model, labels, input image, and preprocessing metadata. Use `DynamicShape` and `OnnxToEngineSmokeRunner` to validate the deployment foundation first.
-- `samples/OnnxToEngine`: redirects to `OnnxToEngineSmokeRunner`, which is the current executable no-asset ONNX conversion path.
+- `samples/OnnxToEngine`: now provides the user-facing common ONNX-to-engine example.
 - `samples/YoloDet`: requires a redistributable detector ONNX model, labels, input image, postprocessing metadata, and possibly TensorRT plugin diagnostics.
 - `samples/CustomKernelPreprocess`: blocked on safe public CUDA module/kernel wrappers; use `CudaSmokeRunner` and `MultiStream` for the current memory/stream preprocessing primitives.
 
@@ -265,13 +267,13 @@ Purpose:
 Run against TensorRT 10:
 
 ```powershell
-dotnet .\samples\NetworkBuilderSmokeRunner\bin\Debug\net8.0\NetworkBuilderSmokeRunner.dll --tensor-rt-line 10
+dotnet .\smoke\NetworkBuilderSmokeRunner\bin\Debug\net8.0\NetworkBuilderSmokeRunner.dll --tensor-rt-line 10
 ```
 
 Run against TensorRT 8:
 
 ```powershell
-dotnet .\samples\NetworkBuilderSmokeRunner\bin\Debug\net8.0\NetworkBuilderSmokeRunner.dll --tensor-rt-line 8
+dotnet .\smoke\NetworkBuilderSmokeRunner\bin\Debug\net8.0\NetworkBuilderSmokeRunner.dll --tensor-rt-line 8
 ```
 
 Expected signals:
@@ -297,13 +299,13 @@ Purpose:
 Run against TensorRT 10:
 
 ```powershell
-dotnet .\samples\NetworkLayersSmokeRunner\bin\Debug\net8.0\NetworkLayersSmokeRunner.dll --tensor-rt-line 10
+dotnet .\smoke\NetworkLayersSmokeRunner\bin\Debug\net8.0\NetworkLayersSmokeRunner.dll --tensor-rt-line 10
 ```
 
 Run against TensorRT 8:
 
 ```powershell
-dotnet .\samples\NetworkLayersSmokeRunner\bin\Debug\net8.0\NetworkLayersSmokeRunner.dll --tensor-rt-line 8
+dotnet .\smoke\NetworkLayersSmokeRunner\bin\Debug\net8.0\NetworkLayersSmokeRunner.dll --tensor-rt-line 8
 ```
 
 The explicit cuDNN root is only required when running directly from the build output for TensorRT 8 parser/plugin dependencies. Refreshed TensorRT 8 runtime packages collect the full `cudnn*_8.dll` split runtime set as part of their native assets.
@@ -327,13 +329,13 @@ Purpose:
 Run against TensorRT 10:
 
 ```powershell
-dotnet .\samples\NetworkShapeOpsSmokeRunner\bin\Debug\net8.0\NetworkShapeOpsSmokeRunner.dll --tensor-rt-line 10
+dotnet .\smoke\NetworkShapeOpsSmokeRunner\bin\Debug\net8.0\NetworkShapeOpsSmokeRunner.dll --tensor-rt-line 10
 ```
 
 Run against TensorRT 8:
 
 ```powershell
-dotnet .\samples\NetworkShapeOpsSmokeRunner\bin\Debug\net8.0\NetworkShapeOpsSmokeRunner.dll --tensor-rt-line 8
+dotnet .\smoke\NetworkShapeOpsSmokeRunner\bin\Debug\net8.0\NetworkShapeOpsSmokeRunner.dll --tensor-rt-line 8
 ```
 
 Expected signals:
@@ -355,13 +357,13 @@ Purpose:
 Run against TensorRT 10:
 
 ```powershell
-dotnet .\samples\NetworkConcatSliceSmokeRunner\bin\Debug\net8.0\NetworkConcatSliceSmokeRunner.dll --tensor-rt-line 10
+dotnet .\smoke\NetworkConcatSliceSmokeRunner\bin\Debug\net8.0\NetworkConcatSliceSmokeRunner.dll --tensor-rt-line 10
 ```
 
 Run against TensorRT 8:
 
 ```powershell
-dotnet .\samples\NetworkConcatSliceSmokeRunner\bin\Debug\net8.0\NetworkConcatSliceSmokeRunner.dll --tensor-rt-line 8
+dotnet .\smoke\NetworkConcatSliceSmokeRunner\bin\Debug\net8.0\NetworkConcatSliceSmokeRunner.dll --tensor-rt-line 8
 ```
 
 Expected signals:
@@ -385,13 +387,13 @@ Purpose:
 Run against TensorRT 10:
 
 ```powershell
-dotnet .\samples\NetworkSoftmaxTopKSmokeRunner\bin\Debug\net8.0\NetworkSoftmaxTopKSmokeRunner.dll --tensor-rt-line 10
+dotnet .\smoke\NetworkSoftmaxTopKSmokeRunner\bin\Debug\net8.0\NetworkSoftmaxTopKSmokeRunner.dll --tensor-rt-line 10
 ```
 
 Run against TensorRT 8:
 
 ```powershell
-dotnet .\samples\NetworkSoftmaxTopKSmokeRunner\bin\Debug\net8.0\NetworkSoftmaxTopKSmokeRunner.dll --tensor-rt-line 8
+dotnet .\smoke\NetworkSoftmaxTopKSmokeRunner\bin\Debug\net8.0\NetworkSoftmaxTopKSmokeRunner.dll --tensor-rt-line 8
 ```
 
 Expected signals:
@@ -414,13 +416,13 @@ Purpose:
 Run against TensorRT 10:
 
 ```powershell
-dotnet .\samples\NetworkActivationPoolingResizeSmokeRunner\bin\Debug\net8.0\NetworkActivationPoolingResizeSmokeRunner.dll --tensor-rt-line 10
+dotnet .\smoke\NetworkActivationPoolingResizeSmokeRunner\bin\Debug\net8.0\NetworkActivationPoolingResizeSmokeRunner.dll --tensor-rt-line 10
 ```
 
 Run against TensorRT 8:
 
 ```powershell
-dotnet .\samples\NetworkActivationPoolingResizeSmokeRunner\bin\Debug\net8.0\NetworkActivationPoolingResizeSmokeRunner.dll --tensor-rt-line 8
+dotnet .\smoke\NetworkActivationPoolingResizeSmokeRunner\bin\Debug\net8.0\NetworkActivationPoolingResizeSmokeRunner.dll --tensor-rt-line 8
 ```
 
 Expected signals:
@@ -442,13 +444,13 @@ Purpose:
 Run against TensorRT 10:
 
 ```powershell
-dotnet .\samples\NetworkMatrixFillSelectSmokeRunner\bin\Debug\net8.0\NetworkMatrixFillSelectSmokeRunner.dll --tensor-rt-line 10
+dotnet .\smoke\NetworkMatrixFillSelectSmokeRunner\bin\Debug\net8.0\NetworkMatrixFillSelectSmokeRunner.dll --tensor-rt-line 10
 ```
 
 Run against TensorRT 8:
 
 ```powershell
-dotnet .\samples\NetworkMatrixFillSelectSmokeRunner\bin\Debug\net8.0\NetworkMatrixFillSelectSmokeRunner.dll --tensor-rt-line 8
+dotnet .\smoke\NetworkMatrixFillSelectSmokeRunner\bin\Debug\net8.0\NetworkMatrixFillSelectSmokeRunner.dll --tensor-rt-line 8
 ```
 
 Expected signals:
@@ -473,13 +475,13 @@ Purpose:
 Run against TensorRT 10:
 
 ```powershell
-dotnet .\samples\NetworkConvolutionScaleSmokeRunner\bin\Debug\net8.0\NetworkConvolutionScaleSmokeRunner.dll --tensor-rt-line 10
+dotnet .\smoke\NetworkConvolutionScaleSmokeRunner\bin\Debug\net8.0\NetworkConvolutionScaleSmokeRunner.dll --tensor-rt-line 10
 ```
 
 Run against TensorRT 8:
 
 ```powershell
-dotnet .\samples\NetworkConvolutionScaleSmokeRunner\bin\Debug\net8.0\NetworkConvolutionScaleSmokeRunner.dll --tensor-rt-line 8
+dotnet .\smoke\NetworkConvolutionScaleSmokeRunner\bin\Debug\net8.0\NetworkConvolutionScaleSmokeRunner.dll --tensor-rt-line 8
 ```
 
 Expected signals:
@@ -506,13 +508,13 @@ Purpose:
 Run against TensorRT 10:
 
 ```powershell
-dotnet .\samples\NetworkDeconvolutionSmokeRunner\bin\Debug\net8.0\NetworkDeconvolutionSmokeRunner.dll --tensor-rt-line 10
+dotnet .\smoke\NetworkDeconvolutionSmokeRunner\bin\Debug\net8.0\NetworkDeconvolutionSmokeRunner.dll --tensor-rt-line 10
 ```
 
 Run against TensorRT 8:
 
 ```powershell
-dotnet .\samples\NetworkDeconvolutionSmokeRunner\bin\Debug\net8.0\NetworkDeconvolutionSmokeRunner.dll --tensor-rt-line 8
+dotnet .\smoke\NetworkDeconvolutionSmokeRunner\bin\Debug\net8.0\NetworkDeconvolutionSmokeRunner.dll --tensor-rt-line 8
 ```
 
 Expected signals:
@@ -535,13 +537,13 @@ Purpose:
 Run against TensorRT 10:
 
 ```powershell
-dotnet .\samples\NetworkQuantizeDequantizeSmokeRunner\bin\Release\net8.0\NetworkQuantizeDequantizeSmokeRunner.dll --tensor-rt-line 10
+dotnet .\smoke\NetworkQuantizeDequantizeSmokeRunner\bin\Release\net8.0\NetworkQuantizeDequantizeSmokeRunner.dll --tensor-rt-line 10
 ```
 
 Run against TensorRT 8:
 
 ```powershell
-dotnet .\samples\NetworkQuantizeDequantizeSmokeRunner\bin\Release\net8.0\NetworkQuantizeDequantizeSmokeRunner.dll --tensor-rt-line 8
+dotnet .\smoke\NetworkQuantizeDequantizeSmokeRunner\bin\Release\net8.0\NetworkQuantizeDequantizeSmokeRunner.dll --tensor-rt-line 8
 ```
 
 Expected signals:
@@ -551,5 +553,4 @@ Expected signals:
 - `Layers=3`
 
 If Debug sample assemblies are blocked by Windows application control with `0x800711C7`, run the Release runner and record the Debug path as environment-blocked rather than failed.
-
 
