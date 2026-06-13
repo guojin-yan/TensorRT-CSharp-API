@@ -111,9 +111,10 @@ $workflowContracts = @(
     path = ".github\workflows\release-bundle.yml"
     requirements = @(
       New-Requirement -Needle "workflow_dispatch" -Description "manual trigger"
-      New-Requirement -Needle ".github/workflows/package-managed.yml" -Description "managed package module"
-      New-Requirement -Needle ".github/workflows/runtime-windows.yml" -Description "Windows runtime module"
-      New-Requirement -Needle ".github/workflows/runtime-linux.yml" -Description "Linux runtime module"
+      New-Requirement -Needle "gh workflow run" -Description "child workflow dispatch"
+      New-Requirement -Needle "package-managed" -Description "managed package child workflow"
+      New-Requirement -Needle "runtime-windows" -Description "Windows runtime child workflow"
+      New-Requirement -Needle "runtime-linux" -Description "Linux runtime child workflow"
       New-Requirement -Needle "gh release create" -Description "release creation"
       New-Requirement -Needle "gh release upload" -Description "release asset upload"
     )
