@@ -16,7 +16,7 @@ on:
       windows_runtime_keys:
         description: Optional comma-separated Windows runtime keys
         required: false
-        default: "win-x64-trt11.0-cuda12.9-cudnn9.22"
+        default: "win-x64-trt8.6-cuda11.8-cudnn8.9,win-x64-trt8.6-cuda12.1-cudnn8.9,win-x64-trt10.11-cuda11.8-cudnn8.9,win-x64-trt10.11-cuda12.9-cudnn9.22,win-x64-trt11.0-cuda12.9-cudnn9.22,win-x64-trt11.0-cuda13.2-cudnn9.22"
         type: string
       windows_runtime_delivery_mode:
         description: Windows runtime package layout to produce
@@ -33,6 +33,11 @@ on:
         required: false
         default: true
         type: boolean
+      windows_smoke_runtime_keys:
+        description: Optional comma-separated Windows runtime keys that should run smoke
+        required: false
+        default: "win-x64-trt8.6-cuda11.8-cudnn8.9,win-x64-trt8.6-cuda12.1-cudnn8.9,win-x64-trt10.11-cuda11.8-cudnn8.9,win-x64-trt10.11-cuda12.9-cudnn9.22,win-x64-trt11.0-cuda12.9-cudnn9.22"
+        type: string
       sign_windows_consumer_output:
         description: Sign Windows package-consumer output before smoke
         required: false
@@ -82,6 +87,7 @@ jobs:
       runtime_keys: ${{ inputs.windows_runtime_keys }}
       runtime_delivery_mode: ${{ inputs.windows_runtime_delivery_mode }}
       run_smoke: ${{ inputs.run_windows_smoke }}
+      smoke_runtime_keys: ${{ inputs.windows_smoke_runtime_keys }}
       sign_consumer_output: ${{ inputs.sign_windows_consumer_output }}
       publish_to_github_packages: ${{ inputs.publish_to_github_packages }}
       attach_to_github_release: ${{ inputs.attach_runtime_to_github_release }}

@@ -9,6 +9,7 @@ param(
   [switch]$SkipManagedPack,
   [switch]$SkipWindowsRuntime,
   [switch]$RunWindowsSmoke,
+  [string[]]$WindowsSmokeRuntimeKeys = @(),
   [switch]$SignWindowsConsumerOutput,
   [switch]$TrustWindowsConsumerSigningCertificate,
   [switch]$TrustWindowsConsumerSigningCertificateRoot,
@@ -66,6 +67,7 @@ function Invoke-CheckedCommand {
 
 $resolvedVersion = & (Join-Path $RepositoryRoot "eng\Resolve-PackageVersion.ps1") -RequestedVersion $Version
 $windowsKeys = @(Expand-KeyList -Values $WindowsRuntimeKeys)
+$windowsSmokeKeys = @(Expand-KeyList -Values $WindowsSmokeRuntimeKeys)
 if ($windowsKeys.Count -eq 0) {
   $windowsKeys = @("win-x64-trt11.0-cuda12.9-cudnn9.22")
 }
@@ -146,6 +148,9 @@ if (-not $SkipWindowsRuntime.IsPresent) {
 
       if ($RunWindowsSmoke.IsPresent) {
         $arguments += "-RunSmoke"
+        if ($windowsSmokeKeys.Count -gt 0) {
+          $arguments += @("-SmokeRuntimePackageKey", ($windowsSmokeKeys -join ","))
+        }
       }
 
       if ($RunWindowsSmoke.IsPresent -and $SignWindowsConsumerOutput.IsPresent) {
@@ -196,6 +201,9 @@ if (-not $SkipWindowsRuntime.IsPresent) {
 
     if ($RunWindowsSmoke.IsPresent) {
       $arguments += "-RunSmoke"
+      if ($windowsSmokeKeys.Count -gt 0) {
+        $arguments += @("-SmokeRuntimePackageKey", ($windowsSmokeKeys -join ","))
+      }
     }
 
     if ($RunWindowsSmoke.IsPresent -and $SignWindowsConsumerOutput.IsPresent) {

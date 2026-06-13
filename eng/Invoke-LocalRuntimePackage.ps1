@@ -8,6 +8,7 @@ param(
   [switch]$SkipRuntimePack,
   [switch]$SkipConsumerValidation,
   [switch]$RunSmoke,
+  [string[]]$SmokeRuntimePackageKey = @(),
   [switch]$SignConsumerOutput,
   [switch]$TrustConsumerSigningCertificate,
   [switch]$TrustConsumerSigningCertificateRoot,
@@ -88,6 +89,7 @@ $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding utf8 | Convert
 $resolvedVersion = & (Join-Path $RepositoryRoot "eng\Resolve-PackageVersion.ps1") -RequestedVersion $Version
 $hostPlatform = Get-PlatformName
 $runtimeKeys = @(Expand-KeyList -Values $RuntimePackageKey)
+$smokeRuntimeKeys = @(Expand-KeyList -Values $SmokeRuntimePackageKey)
 if ($runtimeKeys.Count -eq 0) {
   throw "At least one runtime package key is required."
 }
@@ -285,6 +287,10 @@ foreach ($key in $runtimeKeys) {
 
     if ($RunSmoke.IsPresent) {
       $consumerArguments += "-RunSmoke"
+
+      if ($smokeRuntimeKeys.Count -gt 0) {
+        $consumerArguments += @("-SmokeRuntimePackageKey", ($smokeRuntimeKeys -join ","))
+      }
     }
 
     if ($SignConsumerOutput.IsPresent) {

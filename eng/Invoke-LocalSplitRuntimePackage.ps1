@@ -6,6 +6,7 @@ param(
   [switch]$SkipManagedPack,
   [switch]$SkipBaseRuntimeBuild,
   [switch]$RunSmoke,
+  [string[]]$SmokeRuntimePackageKey = @(),
   [switch]$SignConsumerOutput,
   [switch]$TrustConsumerSigningCertificate,
   [switch]$TrustConsumerSigningCertificateRoot,
@@ -23,6 +24,28 @@ if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
 $utf8 = [System.Text.UTF8Encoding]::new($false)
 [Console]::OutputEncoding = $utf8
 $OutputEncoding = $utf8
+
+function Expand-KeyList {
+  param(
+    [string[]]$Values
+  )
+
+  $keys = New-Object System.Collections.Generic.List[string]
+  foreach ($value in @($Values)) {
+    if ([string]::IsNullOrWhiteSpace($value)) {
+      continue
+    }
+
+    foreach ($part in ($value -split "[,;]")) {
+      $trimmed = $part.Trim()
+      if (-not [string]::IsNullOrWhiteSpace($trimmed)) {
+        $keys.Add($trimmed)
+      }
+    }
+  }
+
+  return @($keys | Select-Object -Unique)
+}
 
 function Invoke-CheckedCommand {
   param(
@@ -49,6 +72,7 @@ if (-not $sourcePackage) {
 }
 
 $resolvedVersion = & (Join-Path $RepositoryRoot "eng\Resolve-PackageVersion.ps1") -RequestedVersion $Version
+$smokeRuntimeKeys = @(Expand-KeyList -Values $SmokeRuntimePackageKey)
 $splitPackages = @($splitManifest.packages | Where-Object { $_.sourceRuntimeKey -eq $SourceRuntimeKey })
 if ($splitPackages.Count -eq 0) {
   throw "No split runtime packages were defined for source runtime '$SourceRuntimeKey'."
@@ -166,7 +190,7 @@ $consumerArguments = @(
   $splitOutputDirectory
 )
 
-if ($RunSmoke.IsPresent) {
+if ($RunSmoke.IsPresent -and ($smokeRuntimeKeys.Count -eq 0 -or $smokeRuntimeKeys -contains $SourceRuntimeKey)) {
   $consumerArguments += "-RunSmoke"
 }
 

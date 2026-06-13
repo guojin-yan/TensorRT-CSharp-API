@@ -28,6 +28,11 @@ on:
         required: false
         default: true
         type: boolean
+      smoke_runtime_keys:
+        description: Optional comma-separated runtime keys that should run smoke
+        required: false
+        default: ""
+        type: string
       sign_consumer_output:
         description: Sign consumer output before smoke on the self-hosted runner
         required: false
@@ -70,6 +75,11 @@ on:
         required: false
         default: true
         type: boolean
+      smoke_runtime_keys:
+        description: Optional comma-separated runtime keys that should run smoke
+        required: false
+        default: ""
+        type: string
       sign_consumer_output:
         description: Sign consumer output before smoke on the self-hosted runner
         required: false
@@ -122,6 +132,9 @@ jobs:
           )
           if ('${{ inputs.run_smoke }}' -eq 'true') {
             $arguments += '-RunSmoke'
+            if (-not [string]::IsNullOrWhiteSpace('${{ inputs.smoke_runtime_keys }}')) {
+              $arguments += @('-SmokeRuntimePackageKey', '${{ inputs.smoke_runtime_keys }}')
+            }
             if ('${{ inputs.sign_consumer_output }}' -eq 'true') {
               $arguments += '-SignConsumerOutput'
               $arguments += '-TrustConsumerSigningCertificate'
@@ -141,6 +154,13 @@ jobs:
               $keys += $trimmed
             }
           }
+          $smokeKeys = @()
+          foreach ($part in '${{ inputs.smoke_runtime_keys }}' -split '[,;]') {
+            $trimmed = $part.Trim()
+            if (-not [string]::IsNullOrWhiteSpace($trimmed)) {
+              $smokeKeys += $trimmed
+            }
+          }
 
           foreach ($key in ($keys | Select-Object -Unique)) {
             $arguments = @(
@@ -151,7 +171,8 @@ jobs:
               '-Version', '${{ inputs.version }}',
               '-Configuration', '${{ inputs.configuration }}'
             )
-            if ('${{ inputs.run_smoke }}' -eq 'true') {
+            $shouldRunSmoke = ('${{ inputs.run_smoke }}' -eq 'true') -and ($smokeKeys.Count -eq 0 -or $smokeKeys -contains $key)
+            if ($shouldRunSmoke) {
               $arguments += '-RunSmoke'
               if ('${{ inputs.sign_consumer_output }}' -eq 'true') {
                 $arguments += '-SignConsumerOutput'
