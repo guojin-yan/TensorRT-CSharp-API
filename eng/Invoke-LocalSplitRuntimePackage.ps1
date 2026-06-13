@@ -62,6 +62,25 @@ function Invoke-CheckedCommand {
   }
 }
 
+function Remove-OptionalPath {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$LiteralPath
+  )
+
+  if (-not (Test-Path -LiteralPath $LiteralPath)) {
+    return
+  }
+
+  try {
+    Remove-Item -LiteralPath $LiteralPath -Recurse -Force -ErrorAction Stop
+    Write-Host "Removed temporary path: $LiteralPath"
+  }
+  catch {
+    Write-Warning "Failed to remove temporary path '$LiteralPath': $($_.Exception.Message)"
+  }
+}
+
 $splitManifestPath = Join-Path $RepositoryRoot "pack\runtime-split\split-runtime-packages.manifest.json"
 $splitManifest = Get-Content -LiteralPath $splitManifestPath -Raw -Encoding utf8 | ConvertFrom-Json
 $runtimeManifestPath = Join-Path $RepositoryRoot "pack\runtime\runtime-packages.manifest.json"
@@ -260,3 +279,20 @@ $lines | Set-Content -LiteralPath $markdownPath -Encoding utf8
 
 Write-Host "Local split runtime validation summary written to $jsonPath"
 Write-Host "Local split runtime validation summary written to $markdownPath"
+
+foreach ($splitPackage in $splitPackages) {
+  Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "artifacts\runtime-split\$($splitPackage.key)")
+  Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "pack\runtime-split\$($splitPackage.key)\assets")
+  Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "pack\runtime-split\$($splitPackage.key)\bin")
+  Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "pack\runtime-split\$($splitPackage.key)\obj")
+}
+
+Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "pack\runtime-split\$SourceRuntimeKey-meta\bin")
+Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "pack\runtime-split\$SourceRuntimeKey-meta\obj")
+Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "build-out\package-consumer\$SourceRuntimeKey")
+
+if (-not $SkipBaseRuntimeBuild.IsPresent) {
+  Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "artifacts\runtime\$SourceRuntimeKey")
+  Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "pack\runtime\$SourceRuntimeKey\assets")
+  Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "artifacts\runtime-nupkg\$($sourcePackage.packageId).$resolvedVersion.nupkg")
+}
