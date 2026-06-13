@@ -39,6 +39,12 @@ DynamicShape:
 dotnet .\samples\DynamicShape\bin\Debug\net8.0\DynamicShape.dll --tensor-rt-line 10
 ```
 
+InferenceBindings:
+
+```powershell
+dotnet .\samples\InferenceBindings\bin\Debug\net8.0\InferenceBindings.dll --tensor-rt-line 10 --batch 2
+```
+
 OnnxToEngine:
 
 ```powershell

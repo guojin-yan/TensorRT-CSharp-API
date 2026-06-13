@@ -147,6 +147,28 @@ Expected signals:
 - `OutputMatch=True`
 - `DynamicShape Passed=True`
 
+## InferenceBindings
+
+Purpose:
+
+- build a minimal explicit-batch TensorRT identity network directly in C#
+- configure a min/opt/max optimization profile
+- use `TensorRtInferenceBindings` for host copy, output allocation, tensor bind, enqueue, and readback
+- validate that inference output matches the input values
+
+Run:
+
+```powershell
+dotnet .\samples\InferenceBindings\bin\Debug\net8.0\InferenceBindings.dll --tensor-rt-line 10 --batch 2
+```
+
+Expected signals:
+
+- `BindingReport Ready=True Inputs=1 Outputs=1`
+- `Readiness Ready=True Bound=True`
+- `Execution ... OutputMatch=True`
+- `InferenceBindings Passed=True`
+
 ## RefitWeightsSmokeRunner
 
 Purpose:
@@ -251,6 +273,7 @@ Expected signals:
 The repository also keeps a few user-facing sample topic directories that are documented instead of executable today:
 
 - `samples/Classification`: requires a redistributable classifier ONNX model, labels, input image, and preprocessing metadata. Use `DynamicShape` and `OnnxToEngineSmokeRunner` to validate the deployment foundation first.
+- `samples/InferenceBindings`: now provides the user-facing common tensor-binding workflow example.
 - `samples/OnnxToEngine`: now provides the user-facing common ONNX-to-engine example.
 - `samples/YoloDet`: requires a redistributable detector ONNX model, labels, input image, postprocessing metadata, and possibly TensorRT plugin diagnostics.
 - `samples/CustomKernelPreprocess`: blocked on safe public CUDA module/kernel wrappers; use `CudaSmokeRunner` and `MultiStream` for the current memory/stream preprocessing primitives.

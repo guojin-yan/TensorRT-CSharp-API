@@ -17,6 +17,7 @@ That split keeps:
 | --- | --- | --- |
 | `MultiStream` | CUDA multi-stream and cross-stream wait example | runnable |
 | `DynamicShape` | TensorRT dynamic-shape/profile/binding example | runnable |
+| `InferenceBindings` | TensorRtInferenceBindings host/device workflow example | runnable |
 | `OnnxToEngine` | user-facing ONNX to engine walkthrough | runnable |
 
 ## Roadmap Directories

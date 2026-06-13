@@ -20,8 +20,9 @@ $env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "1"
 4. `LifecycleSmokeRunner`
 5. `OnnxToEngineSmokeRunner`
 6. `DynamicShape`
-7. `NetworkBuilderSmokeRunner`
-8. 各类 layer-specific network runners
+7. `InferenceBindings`
+8. `NetworkBuilderSmokeRunner`
+9. 各类 layer-specific network runners
 
 ## CudaSmokeRunner
 
@@ -150,6 +151,28 @@ dotnet .\samples\DynamicShape\bin\Debug\net8.0\DynamicShape.dll --tensor-rt-line
 - `OutputMatch=True`
 - `DynamicShape Passed=True`
 
+## InferenceBindings
+
+用途：
+
+- 直接用 C# 构建最小 explicit-batch identity network。
+- 配置 min/opt/max optimization profile。
+- 使用 `TensorRtInferenceBindings` 完成输入复制、输出分配、tensor bind、enqueue 和输出读取。
+- 验证输出是否与输入完全一致。
+
+运行示例：
+
+```powershell
+dotnet .\samples\InferenceBindings\bin\Debug\net8.0\InferenceBindings.dll --tensor-rt-line 10 --batch 2
+```
+
+关键输出：
+
+- `BindingReport Ready=True Inputs=1 Outputs=1`
+- `Readiness Ready=True Bound=True`
+- `Execution ... OutputMatch=True`
+- `InferenceBindings Passed=True`
+
 ## 直接网络样例
 
 直接网络样例不依赖 ONNX parser，直接用 C# 构建 TensorRT network：
@@ -175,6 +198,7 @@ dotnet .\samples\DynamicShape\bin\Debug\net8.0\DynamicShape.dll --tensor-rt-line
 
 - `Classification`：需要可再分发分类模型、labels、输入图片和 preprocessing metadata。
 - `CustomKernelPreprocess`：等待安全 public CUDA module/kernel wrapper，不直接暴露 raw kernel launch。
+- `InferenceBindings`：现在提供用户侧常用的 tensor binding / enqueue 示例。
 - `OnnxToEngine`：现在提供用户侧常用的 ONNX 转 engine 示例。
 - `YoloDet`：需要 detector ONNX、labels、输入图片、decode/NMS metadata，部分模型还需要 plugin 诊断。
 

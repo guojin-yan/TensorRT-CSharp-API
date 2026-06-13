@@ -38,7 +38,8 @@ cmake --build --preset win-x64-trt11-cuda13-release --parallel
 
 1. `MultiStream`
 2. `DynamicShape`
-3. `OnnxToEngine`
+3. `InferenceBindings`
+4. `OnnxToEngine`
 
 推荐 smoke 顺序：
 
@@ -49,7 +50,7 @@ cmake --build --preset win-x64-trt11-cuda13-release --parallel
 5. `NetworkBuilderSmokeRunner`
 6. 各类 layer-specific network runners
 
-`MultiStream`、`DynamicShape` 和 `OnnxToEngine` 现在都是真实可运行案例并加入解决方案。`Classification`、`CustomKernelPreprocess`、`YoloDet` 仍是 README/roadmap 目录，不再是空壳目录。
+`MultiStream`、`DynamicShape`、`InferenceBindings` 和 `OnnxToEngine` 现在都是真实可运行案例并加入解决方案。`Classification`、`CustomKernelPreprocess`、`YoloDet` 仍是 README/roadmap 目录，不再是空壳目录。
 
 ## 继续阅读
 

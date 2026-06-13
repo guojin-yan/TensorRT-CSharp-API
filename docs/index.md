@@ -47,7 +47,8 @@ Recommended common-example order:
 
 1. `MultiStream`
 2. `DynamicShape`
-3. `OnnxToEngine`
+3. `InferenceBindings`
+4. `OnnxToEngine`
 
 Recommended smoke order:
 

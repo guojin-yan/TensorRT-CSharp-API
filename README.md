@@ -62,7 +62,8 @@ Recommended common-example order:
 
 1. `MultiStream`
 2. `DynamicShape`
-3. `OnnxToEngine`
+3. `InferenceBindings`
+4. `OnnxToEngine`
 
 Recommended smoke order:
 
@@ -81,8 +82,7 @@ Recent sample maturity updates:
 
 - `MultiStream` is a real CUDA multi-stream/event ordering sample and is included in the solution.
 - `DynamicShape` is a real TensorRT dynamic-shape/profile/binding sample and is included in the solution.
-- `MultiStream` is a real CUDA multi-stream/event ordering sample and is included in the solution.
-- `DynamicShape` is a real TensorRT dynamic-shape/profile/binding sample and is included in the solution.
+- `InferenceBindings` is a real TensorRT inference-binding sample and is included in the solution.
 - `OnnxToEngine` is now a runnable common ONNX-to-engine example and is included in the solution.
 - `Classification`, `CustomKernelPreprocess`, and `YoloDet` remain documented README/roadmap directories rather than empty `.gitkeep` placeholders.
 
