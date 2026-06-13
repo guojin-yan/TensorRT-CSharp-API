@@ -28,6 +28,11 @@ on:
         required: false
         default: true
         type: boolean
+      release_tag:
+        description: Optional GitHub Release tag for direct asset upload
+        required: false
+        default: ""
+        type: string
       attach_to_github_release:
         description: Upload runtime packages as GitHub Release assets
         required: false
@@ -60,6 +65,11 @@ on:
         required: false
         default: true
         type: boolean
+      release_tag:
+        description: Optional GitHub Release tag for direct asset upload
+        required: false
+        default: ""
+        type: string
       attach_to_github_release:
         description: Upload runtime packages as GitHub Release assets
         required: false
@@ -68,7 +78,7 @@ on:
 
 permissions:
   actions: read
-  contents: read
+  contents: write
   packages: write
 
 jobs:
@@ -231,7 +241,7 @@ jobs:
         run: pwsh -NoProfile -File ./eng/Test-PackageConsumer.ps1 -RuntimePackageKey "${{ matrix.key }}" -ManagedPackageDirectory "./artifacts/managed" -RuntimePackageDirectory "./artifacts/runtime-nupkg" -RunSmoke
 
       - name: Upload Linux runtime artifacts
-        if: ${{ inputs.attach_to_github_release }}
+        if: ${{ inputs.attach_to_github_release && inputs.release_tag == '' }}
         uses: actions/upload-artifact@v4
         with:
           compression-level: 0
@@ -240,6 +250,23 @@ jobs:
             artifacts/runtime-nupkg/*.nupkg
             artifacts/package-consumer/package-consumer-validation-summary.*
             artifacts/linux-dry-run/${{ matrix.key }}/**
+
+      - name: Upload Linux runtime packages to GitHub Release
+        if: ${{ inputs.attach_to_github_release && inputs.release_tag != '' }}
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          $packages = @(Get-ChildItem -LiteralPath .\artifacts\runtime-nupkg -Filter *.nupkg | Sort-Object Name)
+          if ($packages.Count -eq 0) {
+            throw "No Linux runtime packages were found for direct release upload."
+          }
+
+          foreach ($package in $packages) {
+            Write-Host "Uploading release asset: $($package.FullName)"
+            gh release upload "${{ inputs.release_tag }}" $package.FullName --clobber --repo "$env:GH_REPO"
+          }
 
       - name: Publish Linux runtime package to GitHub Packages
         if: ${{ inputs.publish_to_github_packages }}
