@@ -71,14 +71,14 @@ After the local quality gate, run validation-oriented smoke runners from `smoke/
 4. `LifecycleSmokeRunner`
 5. `OnnxToEngineSmokeRunner`
 6. `DynamicShape`
-7. `NetworkBuilderSmokeRunner`
-8. Layer-specific network runners
+7. `InferenceBindings`
+8. `NetworkBuilderSmokeRunner`
+9. Layer-specific network runners
 
 Sample directories that are currently README/roadmap topics rather than executable projects:
 
 - `Classification`
 - `CustomKernelPreprocess`
-- `OnnxToEngine`
 - `YoloDet`
 
 Those directories are not release blockers by themselves as long as their README files describe required external assets, current runnable substitutes, and roadmap status.

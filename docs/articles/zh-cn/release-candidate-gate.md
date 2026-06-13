@@ -53,14 +53,14 @@ cmake --build --preset win-x64-trt11-cuda13-release --parallel
 4. `LifecycleSmokeRunner`
 5. `OnnxToEngineSmokeRunner`
 6. `DynamicShape`
-7. `NetworkBuilderSmokeRunner`
-8. 各类 layer-specific network runners
+7. `InferenceBindings`
+8. `NetworkBuilderSmokeRunner`
+9. 各类 layer-specific network runners
 
 以下目录当前是 README/roadmap 状态，不是可执行项目，也不是空壳遗漏：
 
 - `Classification`
 - `CustomKernelPreprocess`
-- `OnnxToEngine`
 - `YoloDet`
 
 ## Runtime package 门禁
