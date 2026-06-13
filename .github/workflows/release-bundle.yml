@@ -33,11 +33,6 @@ on:
         required: false
         default: true
         type: boolean
-      windows_smoke_runtime_keys:
-        description: Optional comma-separated Windows runtime keys that should run smoke
-        required: false
-        default: "win-x64-trt11.0-cuda12.9-cudnn9.22"
-        type: string
       publish_managed_to_nuget:
         description: Publish the managed package to nuget.org
         required: false
@@ -77,7 +72,6 @@ jobs:
       runtime_keys: ${{ inputs.windows_runtime_keys }}
       runtime_delivery_mode: ${{ inputs.windows_runtime_delivery_mode }}
       run_smoke: ${{ inputs.run_windows_smoke }}
-      smoke_runtime_keys: ${{ inputs.windows_smoke_runtime_keys }}
       sign_consumer_output: ${{ true }}
       publish_to_github_packages: ${{ inputs.publish_to_github_packages }}
       attach_to_github_release: ${{ inputs.attach_runtime_to_github_release }}
