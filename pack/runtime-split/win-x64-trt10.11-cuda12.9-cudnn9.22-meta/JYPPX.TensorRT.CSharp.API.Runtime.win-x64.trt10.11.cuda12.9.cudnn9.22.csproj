@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22</PackageId>
+    <Title>JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22</Title>
+    <Description>Split-delivery meta package for TensorRT 10.11 + CUDA 12.9 + cuDNN 9.22 on Windows x64.</Description>
+    <JYPPXRuntimeKey>win-x64-trt10.11-cuda12.9-cudnn9.22-meta</JYPPXRuntimeKey>
+    <SuppressDependenciesWhenPacking>false</SuppressDependenciesWhenPacking>
+    <PackageTags>TensorRT;CUDA;runtime;split-delivery;meta</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Core" Version="$(Version)" />
+    <PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Extensions" Version="$(Version)" />
+  </ItemGroup>
+</Project>

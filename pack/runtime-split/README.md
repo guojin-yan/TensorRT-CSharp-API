@@ -10,7 +10,8 @@ Current goals:
 
 Current split strategies:
 
-- TensorRT 10: historical two-part prototype (`Core` + `Extensions`)
+- TensorRT 8: three-part split (`Bridge` + `CudaCudnn` + `TensorRtRuntime`) for both Windows public sample lines
+- TensorRT 10: historical two-part prototype (`Core` + `Extensions`) with a matching meta package per runtime line
 - TensorRT 11: publish-oriented component split for `win-x64-trt11.0-cuda12.9-cudnn9.22`
   - `Bridge`
   - `CudaCudnn`
@@ -18,6 +19,9 @@ Current split strategies:
   - `TensorRtBuilder.Sm75Sm86`
   - `TensorRtBuilder.Sm89Sm90`
   - `TensorRtBuilder.Sm100Sm120Ptx`
+- TensorRT 11: mirrored component split for `win-x64-trt11.0-cuda13.2-cudnn9.22`
+  - keeps the same package layout as the CUDA 12.9 line
+  - remains blocked on CUDA 13-capable runtime smoke before public-ready validation
 
 These packages still require:
 

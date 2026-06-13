@@ -16,7 +16,7 @@ on:
       runtime_keys:
         description: Optional comma-separated Windows runtime keys
         required: false
-        default: ""
+        default: "win-x64-trt8.6-cuda11.8-cudnn8.9,win-x64-trt8.6-cuda12.1-cudnn8.9,win-x64-trt10.11-cuda11.8-cudnn8.9,win-x64-trt10.11-cuda12.9-cudnn9.22,win-x64-trt11.0-cuda12.9-cudnn9.22,win-x64-trt11.0-cuda13.2-cudnn9.22"
         type: string
       runtime_delivery_mode:
         description: Runtime package layout to produce
@@ -31,7 +31,7 @@ on:
       smoke_runtime_keys:
         description: Optional comma-separated runtime keys that should run smoke
         required: false
-        default: ""
+        default: "win-x64-trt8.6-cuda11.8-cudnn8.9,win-x64-trt8.6-cuda12.1-cudnn8.9,win-x64-trt11.0-cuda12.9-cudnn9.22"
         type: string
       sign_consumer_output:
         description: Sign consumer output before smoke on the self-hosted runner

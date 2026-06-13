@@ -61,7 +61,7 @@ foreach ($splitPackage in @($splitManifest.packages)) {
     $errors.Add("Split package '$($splitPackage.key)' must define a non-empty role.")
   }
 
-  if ($splitPackage.prototypeState -notin @("design-only", "local-validated")) {
+  if ($splitPackage.prototypeState -notin @("design-only", "local-validated", "pending-local-validation")) {
     $errors.Add("Split package '$($splitPackage.key)' has unsupported prototypeState '$($splitPackage.prototypeState)'.")
   }
 
@@ -71,8 +71,8 @@ foreach ($splitPackage in @($splitManifest.packages)) {
     continue
   }
 
-  if ($sourcePackage.distributionTier -notin @("split-delivery-candidate", "private-feed")) {
-    $errors.Add("Split package '$($splitPackage.key)' source runtime '$($sourcePackage.key)' must be a split-delivery or private-feed candidate.")
+  if ($sourcePackage.distributionTier -notin @("public-sample", "split-delivery-candidate", "private-feed")) {
+    $errors.Add("Split package '$($splitPackage.key)' source runtime '$($sourcePackage.key)' must be a public-sample, split-delivery, or private-feed candidate.")
   }
 
   if ($sourcePackage.rid -ne $splitPackage.rid) {
@@ -154,7 +154,8 @@ else {
 $lines.Add("")
 $lines.Add("## Publication rule")
 $lines.Add("")
-$lines.Add("- These packages are design-only prototypes and must not be published before license review, package-size review, and split consumer validation.")
+$lines.Add("- These packages must not be published before license review, package-size review, and split consumer validation.")
+$lines.Add("- Packages that remain `design-only` or `pending-local-validation` are not release-ready.")
 
 $markdownPath = Join-Path $outputRoot "split-delivery-prototype-report.md"
 $lines | Set-Content -LiteralPath $markdownPath -Encoding utf8

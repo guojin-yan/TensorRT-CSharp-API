@@ -55,7 +55,7 @@ public sealed class RuntimeManifestTests
 
             Assert.True(File.Exists(projectPath), $"Split runtime project is missing for {key}: {projectPath}");
             Assert.False(string.IsNullOrWhiteSpace(role), $"Split runtime role is invalid for {key}: {role}");
-            Assert.Contains(prototypeState, new[] { "design-only", "local-validated" });
+            Assert.Contains(prototypeState, new[] { "design-only", "local-validated", "pending-local-validation" });
         }
     }
 
@@ -69,11 +69,6 @@ public sealed class RuntimeManifestTests
 
         Dictionary<string, JsonElement> sourcePackages = runtimeManifest.RootElement.GetProperty("packages")
             .EnumerateArray()
-            .Where(package =>
-            {
-                string? tier = package.GetProperty("distributionTier").GetString();
-                return tier is "split-delivery-candidate" or "private-feed";
-            })
             .ToDictionary(package => package.GetProperty("key").GetString()!, package => package.Clone());
 
         var groupedSplitPackages = splitManifest.RootElement.GetProperty("packages")

@@ -1,6 +1,128 @@
 {
   "packages": [
     {
+      "key": "win-x64-trt8.6-cuda11.8-cudnn8.9-bridge",
+      "sourceRuntimeKey": "win-x64-trt8.6-cuda11.8-cudnn8.9",
+      "packageId": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt8.6.cuda11.8.cudnn8.9.Bridge",
+      "rid": "win-x64",
+      "platform": "windows",
+      "tensorRtLine": "8",
+      "cudaLine": "11",
+      "role": "bridge",
+      "prototypeState": "local-validated",
+      "assets": [
+        "jyppxtrtbridge.dll"
+      ],
+      "notes": "Bridge-only split package for the Windows TensorRT 8.6 + CUDA 11.8 line."
+    },
+    {
+      "key": "win-x64-trt8.6-cuda11.8-cudnn8.9-cuda-cudnn",
+      "sourceRuntimeKey": "win-x64-trt8.6-cuda11.8-cudnn8.9",
+      "packageId": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt8.6.cuda11.8.cudnn8.9.CudaCudnn",
+      "rid": "win-x64",
+      "platform": "windows",
+      "tensorRtLine": "8",
+      "cudaLine": "11",
+      "role": "cuda-cudnn",
+      "prototypeState": "local-validated",
+      "assets": [
+        "cudart64_110.dll",
+        "cublas64_11.dll",
+        "cublasLt64_11.dll",
+        "cudnn64_8.dll",
+        "cudnn_adv_infer64_8.dll",
+        "cudnn_adv_train64_8.dll",
+        "cudnn_cnn_infer64_8.dll",
+        "cudnn_cnn_train64_8.dll",
+        "cudnn_ops_infer64_8.dll",
+        "cudnn_ops_train64_8.dll"
+      ],
+      "notes": "CUDA runtime, cuBLAS, and cuDNN split package for the Windows TensorRT 8.6 + CUDA 11.8 line."
+    },
+    {
+      "key": "win-x64-trt8.6-cuda11.8-cudnn8.9-tensorrt-runtime",
+      "sourceRuntimeKey": "win-x64-trt8.6-cuda11.8-cudnn8.9",
+      "packageId": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt8.6.cuda11.8.cudnn8.9.TensorRtRuntime",
+      "rid": "win-x64",
+      "platform": "windows",
+      "tensorRtLine": "8",
+      "cudaLine": "11",
+      "role": "tensorrt-runtime",
+      "prototypeState": "local-validated",
+      "assets": [
+        "nvinfer.dll",
+        "nvinfer_builder_resource.dll",
+        "nvinfer_dispatch.dll",
+        "nvinfer_lean.dll",
+        "nvinfer_plugin.dll",
+        "nvinfer_vc_plugin.dll",
+        "nvonnxparser.dll",
+        "nvparsers.dll"
+      ],
+      "notes": "TensorRT runtime, builder resource, plugins, and parser split package for the Windows TensorRT 8.6 + CUDA 11.8 line."
+    },
+    {
+      "key": "win-x64-trt8.6-cuda12.1-cudnn8.9-bridge",
+      "sourceRuntimeKey": "win-x64-trt8.6-cuda12.1-cudnn8.9",
+      "packageId": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt8.6.cuda12.1.cudnn8.9.Bridge",
+      "rid": "win-x64",
+      "platform": "windows",
+      "tensorRtLine": "8",
+      "cudaLine": "12",
+      "role": "bridge",
+      "prototypeState": "local-validated",
+      "assets": [
+        "jyppxtrtbridge.dll"
+      ],
+      "notes": "Bridge-only split package for the Windows TensorRT 8.6 + CUDA 12.1 line."
+    },
+    {
+      "key": "win-x64-trt8.6-cuda12.1-cudnn8.9-cuda-cudnn",
+      "sourceRuntimeKey": "win-x64-trt8.6-cuda12.1-cudnn8.9",
+      "packageId": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt8.6.cuda12.1.cudnn8.9.CudaCudnn",
+      "rid": "win-x64",
+      "platform": "windows",
+      "tensorRtLine": "8",
+      "cudaLine": "12",
+      "role": "cuda-cudnn",
+      "prototypeState": "local-validated",
+      "assets": [
+        "cudart64_12.dll",
+        "cublas64_12.dll",
+        "cublasLt64_12.dll",
+        "cudnn64_8.dll",
+        "cudnn_adv_infer64_8.dll",
+        "cudnn_adv_train64_8.dll",
+        "cudnn_cnn_infer64_8.dll",
+        "cudnn_cnn_train64_8.dll",
+        "cudnn_ops_infer64_8.dll",
+        "cudnn_ops_train64_8.dll"
+      ],
+      "notes": "CUDA runtime, cuBLAS, and cuDNN split package for the Windows TensorRT 8.6 + CUDA 12.1 line."
+    },
+    {
+      "key": "win-x64-trt8.6-cuda12.1-cudnn8.9-tensorrt-runtime",
+      "sourceRuntimeKey": "win-x64-trt8.6-cuda12.1-cudnn8.9",
+      "packageId": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt8.6.cuda12.1.cudnn8.9.TensorRtRuntime",
+      "rid": "win-x64",
+      "platform": "windows",
+      "tensorRtLine": "8",
+      "cudaLine": "12",
+      "role": "tensorrt-runtime",
+      "prototypeState": "local-validated",
+      "assets": [
+        "nvinfer.dll",
+        "nvinfer_builder_resource.dll",
+        "nvinfer_dispatch.dll",
+        "nvinfer_lean.dll",
+        "nvinfer_plugin.dll",
+        "nvinfer_vc_plugin.dll",
+        "nvonnxparser.dll",
+        "nvparsers.dll"
+      ],
+      "notes": "TensorRT runtime, builder resource, plugins, and parser split package for the Windows TensorRT 8.6 + CUDA 12.1 line."
+    },
+    {
       "key": "win-x64-trt10.11-cuda11.8-cudnn8.9-core",
       "sourceRuntimeKey": "win-x64-trt10.11-cuda11.8-cudnn8.9",
       "packageId": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda11.8.cudnn8.9.Core",
@@ -200,6 +322,116 @@
         "nvinfer_builder_resource_ptx_11.dll"
       ],
       "notes": "TensorRT 11 builder resources for sm100/sm120/PTX."
+    },
+    {
+      "key": "win-x64-trt11.0-cuda13.2-cudnn9.22-bridge",
+      "sourceRuntimeKey": "win-x64-trt11.0-cuda13.2-cudnn9.22",
+      "packageId": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda13.2.cudnn9.22.Bridge",
+      "rid": "win-x64",
+      "platform": "windows",
+      "tensorRtLine": "11",
+      "cudaLine": "13",
+      "role": "bridge",
+      "prototypeState": "pending-local-validation",
+      "assets": [
+        "jyppxtrtbridge.dll"
+      ],
+      "notes": "Bridge-only split package for the Windows TensorRT 11.0 + CUDA 13.2 line. Packaging is ready, but CUDA 13 runtime smoke still depends on a CUDA 13-capable driver stack."
+    },
+    {
+      "key": "win-x64-trt11.0-cuda13.2-cudnn9.22-cuda-cudnn",
+      "sourceRuntimeKey": "win-x64-trt11.0-cuda13.2-cudnn9.22",
+      "packageId": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda13.2.cudnn9.22.CudaCudnn",
+      "rid": "win-x64",
+      "platform": "windows",
+      "tensorRtLine": "11",
+      "cudaLine": "13",
+      "role": "cuda-cudnn",
+      "prototypeState": "pending-local-validation",
+      "assets": [
+        "cudart64_13.dll",
+        "cudnn64_9.dll",
+        "cudnn_adv64_9.dll",
+        "cudnn_cnn64_9.dll",
+        "cudnn_engines_precompiled64_9.dll",
+        "cudnn_engines_runtime_compiled64_9.dll",
+        "cudnn_engines_tensor_ir64_9.dll",
+        "cudnn_ext64_9.dll",
+        "cudnn_graph64_9.dll",
+        "cudnn_heuristic64_9.dll",
+        "cudnn_ops64_9.dll"
+      ],
+      "notes": "CUDA runtime plus cuDNN split package for the Windows TensorRT 11.0 + CUDA 13.2 line."
+    },
+    {
+      "key": "win-x64-trt11.0-cuda13.2-cudnn9.22-tensorrt-runtime",
+      "sourceRuntimeKey": "win-x64-trt11.0-cuda13.2-cudnn9.22",
+      "packageId": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda13.2.cudnn9.22.TensorRtRuntime",
+      "rid": "win-x64",
+      "platform": "windows",
+      "tensorRtLine": "11",
+      "cudaLine": "13",
+      "role": "tensorrt-runtime",
+      "prototypeState": "pending-local-validation",
+      "assets": [
+        "nvinfer_11.dll",
+        "nvinfer_dispatch_11.dll",
+        "nvinfer_lean_11.dll",
+        "nvinfer_plugin_11.dll",
+        "nvinfer_vc_plugin_11.dll",
+        "nvonnxparser_11.dll"
+      ],
+      "notes": "Core TensorRT runtime and parser/plugin split package for the Windows TensorRT 11.0 + CUDA 13.2 line."
+    },
+    {
+      "key": "win-x64-trt11.0-cuda13.2-cudnn9.22-tensorrt-builder-sm75-sm86",
+      "sourceRuntimeKey": "win-x64-trt11.0-cuda13.2-cudnn9.22",
+      "packageId": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda13.2.cudnn9.22.TensorRtBuilder.Sm75Sm86",
+      "rid": "win-x64",
+      "platform": "windows",
+      "tensorRtLine": "11",
+      "cudaLine": "13",
+      "role": "tensorrt-builder-sm75-sm86",
+      "prototypeState": "pending-local-validation",
+      "assets": [
+        "nvinfer_builder_resource_sm75_11.dll",
+        "nvinfer_builder_resource_sm80_11.dll",
+        "nvinfer_builder_resource_sm86_11.dll"
+      ],
+      "notes": "TensorRT 11 builder resources for sm75/sm80/sm86 on the CUDA 13.2 line."
+    },
+    {
+      "key": "win-x64-trt11.0-cuda13.2-cudnn9.22-tensorrt-builder-sm89-sm90",
+      "sourceRuntimeKey": "win-x64-trt11.0-cuda13.2-cudnn9.22",
+      "packageId": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda13.2.cudnn9.22.TensorRtBuilder.Sm89Sm90",
+      "rid": "win-x64",
+      "platform": "windows",
+      "tensorRtLine": "11",
+      "cudaLine": "13",
+      "role": "tensorrt-builder-sm89-sm90",
+      "prototypeState": "pending-local-validation",
+      "assets": [
+        "nvinfer_builder_resource_sm89_11.dll",
+        "nvinfer_builder_resource_sm90_11.dll"
+      ],
+      "notes": "TensorRT 11 builder resources for sm89/sm90 on the CUDA 13.2 line."
+    },
+    {
+      "key": "win-x64-trt11.0-cuda13.2-cudnn9.22-tensorrt-builder-sm100-sm120-ptx",
+      "sourceRuntimeKey": "win-x64-trt11.0-cuda13.2-cudnn9.22",
+      "packageId": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda13.2.cudnn9.22.TensorRtBuilder.Sm100Sm120Ptx",
+      "rid": "win-x64",
+      "platform": "windows",
+      "tensorRtLine": "11",
+      "cudaLine": "13",
+      "role": "tensorrt-builder-sm100-sm120-ptx",
+      "prototypeState": "pending-local-validation",
+      "assets": [
+        "nvinfer_builder_resource_sm100_11.dll",
+        "nvinfer_builder_resource_sm120_11.dll",
+        "nvinfer_builder_resource_ptx_11.dll"
+      ],
+      "notes": "TensorRT 11 builder resources for sm100/sm120/PTX on the CUDA 13.2 line."
     }
   ]
 }

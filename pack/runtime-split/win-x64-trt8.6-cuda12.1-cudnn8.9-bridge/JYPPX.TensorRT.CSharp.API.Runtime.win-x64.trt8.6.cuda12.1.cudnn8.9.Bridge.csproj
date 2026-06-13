@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt8.6.cuda12.1.cudnn8.9.Bridge</PackageId>
+    <Title>JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt8.6.cuda12.1.cudnn8.9.Bridge</Title>
+    <JYPPXRuntimeKey>win-x64-trt8.6-cuda12.1-cudnn8.9-bridge</JYPPXRuntimeKey>
+    <PackageTags>TensorRT;CUDA;runtime;split-delivery;bridge</PackageTags>
+  </PropertyGroup>
+</Project>
