@@ -134,8 +134,9 @@ gh workflow run release-bundle.yml `
   -f windows_runtime_delivery_mode=split `
   -f run_windows_smoke=true `
   -f publish_managed_to_nuget=false `
-  -f publish_to_github_packages=false `
-  -f attach_runtime_to_github_release=false
+  -f publish_managed_to_github_packages=true `
+  -f publish_runtime_to_github_packages=false `
+  -f attach_runtime_to_github_release=true
 ```
 
 Local bundle example:
