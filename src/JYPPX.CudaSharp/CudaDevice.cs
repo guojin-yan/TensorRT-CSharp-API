@@ -8,6 +8,10 @@ namespace JYPPX.CudaSharp;
 /// </summary>
 public static class CudaDevice
 {
+    /// <summary>
+    /// Gets the CUDA runtime version reported by the bridge.
+    /// 获取桥接层报告的 CUDA runtime 版本。
+    /// </summary>
     public static int RuntimeVersion
     {
         get
@@ -17,6 +21,10 @@ public static class CudaDevice
         }
     }
 
+    /// <summary>
+    /// Gets the CUDA driver version reported by the bridge.
+    /// 获取桥接层报告的 CUDA driver 版本。
+    /// </summary>
     public static int DriverVersion
     {
         get
@@ -26,6 +34,10 @@ public static class CudaDevice
         }
     }
 
+    /// <summary>
+    /// Gets the number of CUDA devices visible to the current process.
+    /// 获取当前进程可见的 CUDA 设备数量。
+    /// </summary>
     public static int Count
     {
         get
@@ -35,6 +47,10 @@ public static class CudaDevice
         }
     }
 
+    /// <summary>
+    /// Gets the current CUDA device ordinal for the process.
+    /// 获取当前进程的 CUDA 当前设备序号。
+    /// </summary>
     public static int Current
     {
         get
@@ -44,17 +60,34 @@ public static class CudaDevice
         }
     }
 
+    /// <summary>
+    /// Sets the current CUDA device for the process.
+    /// 为当前进程设置 CUDA 当前设备。
+    /// </summary>
+    /// <param name="ordinal">The CUDA device ordinal. CUDA 设备序号。</param>
     public static void SetCurrent(int ordinal)
     {
         NativeBridgeLoader.EnsureInitialized();
         NativeCudaApi.SetDevice(ordinal);
     }
 
+    /// <summary>
+    /// Temporarily switches the current CUDA device and restores the previous device on dispose.
+    /// 临时切换当前 CUDA 设备，并在释放时恢复之前的设备。
+    /// </summary>
+    /// <param name="ordinal">The CUDA device ordinal to activate. 要激活的 CUDA 设备序号。</param>
+    /// <returns>A disposable scope that restores the previous device. 可恢复之前设备的可释放作用域。</returns>
     public static CudaDeviceScope Use(int ordinal)
     {
         return new CudaDeviceScope(ordinal);
     }
 
+    /// <summary>
+    /// Gets a basic CUDA device information snapshot.
+    /// 获取基础 CUDA 设备信息快照。
+    /// </summary>
+    /// <param name="ordinal">The CUDA device ordinal. CUDA 设备序号。</param>
+    /// <returns>The mapped CUDA device information. 已映射的 CUDA 设备信息。</returns>
     public static CudaDeviceInfo GetInfo(int ordinal)
     {
         NativeBridgeLoader.EnsureInitialized();
@@ -171,6 +204,13 @@ public static class CudaDevice
         NativeCudaApi.ResetDeviceGraphMemoryHighWatermarks(ordinal);
     }
 
+    /// <summary>
+    /// Gets a raw CUDA device attribute value.
+    /// 获取原始 CUDA 设备属性值。
+    /// </summary>
+    /// <param name="ordinal">The CUDA device ordinal. CUDA 设备序号。</param>
+    /// <param name="attribute">The device attribute to query. 要查询的设备属性。</param>
+    /// <returns>The raw CUDA attribute value. 原始 CUDA 属性值。</returns>
     public static int GetAttribute(int ordinal, CudaDeviceAttribute attribute)
     {
         NativeBridgeLoader.EnsureInitialized();
@@ -286,6 +326,13 @@ public static class CudaDevice
         return NativeCudaApi.GetDeviceByPciBusId(pciBusId);
     }
 
+    /// <summary>
+    /// Gets a CUDA device attribute as a boolean capability.
+    /// 将 CUDA 设备属性读取为布尔能力值。
+    /// </summary>
+    /// <param name="ordinal">The CUDA device ordinal. CUDA 设备序号。</param>
+    /// <param name="attribute">The device attribute to query. 要查询的设备属性。</param>
+    /// <returns><see langword="true"/> when the attribute is non-zero. 属性非零时返回 <see langword="true"/>。</returns>
     public static bool GetBooleanAttribute(int ordinal, CudaDeviceAttribute attribute)
     {
         return GetAttribute(ordinal, attribute) != 0;
@@ -317,6 +364,13 @@ public static class CudaDevice
         return value.HasValue ? value.Value != 0 : (bool?)null;
     }
 
+    /// <summary>
+    /// Gets whether one CUDA device can access another through peer access.
+    /// 获取一个 CUDA 设备是否可以通过 peer access 访问另一个设备。
+    /// </summary>
+    /// <param name="ordinal">The source CUDA device ordinal. 源 CUDA 设备序号。</param>
+    /// <param name="peerOrdinal">The peer CUDA device ordinal. 对端 CUDA 设备序号。</param>
+    /// <returns><see langword="true"/> when peer access is available. 可以进行 peer access 时返回 <see langword="true"/>。</returns>
     public static bool CanAccessPeer(int ordinal, int peerOrdinal)
     {
         NativeBridgeLoader.EnsureInitialized();
@@ -337,18 +391,33 @@ public static class CudaDevice
         return NativeCudaApi.GetDeviceP2PAttribute((int)attribute, sourceOrdinal, destinationOrdinal);
     }
 
+    /// <summary>
+    /// Enables peer access from the current device to the specified peer device.
+    /// 启用当前设备到指定 peer 设备的 peer access。
+    /// </summary>
+    /// <param name="peerOrdinal">The peer CUDA device ordinal. 对端 CUDA 设备序号。</param>
     public static void EnablePeerAccess(int peerOrdinal)
     {
         NativeBridgeLoader.EnsureInitialized();
         NativeCudaApi.EnablePeerAccess(peerOrdinal, 0);
     }
 
+    /// <summary>
+    /// Disables peer access from the current device to the specified peer device.
+    /// 关闭当前设备到指定 peer 设备的 peer access。
+    /// </summary>
+    /// <param name="peerOrdinal">The peer CUDA device ordinal. 对端 CUDA 设备序号。</param>
     public static void DisablePeerAccess(int peerOrdinal)
     {
         NativeBridgeLoader.EnsureInitialized();
         NativeCudaApi.DisablePeerAccess(peerOrdinal);
     }
 
+    /// <summary>
+    /// Gets free and total memory information for the current CUDA device.
+    /// 获取当前 CUDA 设备的空闲与总显存信息。
+    /// </summary>
+    /// <returns>The current CUDA memory information snapshot. 当前 CUDA 显存信息快照。</returns>
     public static CudaMemoryInfo GetMemoryInfo()
     {
         NativeBridgeLoader.EnsureInitialized();
@@ -390,6 +459,12 @@ public static class CudaDevice
         return new CudaMemoryPressureSnapshot(ordinal, GetMemoryInfo(), GetProperties(ordinal));
     }
 
+    /// <summary>
+    /// Gets the default CUDA memory pool for a device.
+    /// 获取指定设备的默认 CUDA memory pool。
+    /// </summary>
+    /// <param name="ordinal">The CUDA device ordinal. CUDA 设备序号。</param>
+    /// <returns>The default memory pool wrapper. 默认 memory pool 封装。</returns>
     public static CudaMemoryPool GetDefaultMemoryPool(int ordinal)
     {
         return CudaMemoryPool.GetDefault(ordinal);
@@ -417,54 +492,101 @@ public static class CudaDevice
         NativeCudaApi.SetCurrentMemoryPoolHandle(memoryPool.DeviceOrdinal, memoryPool.Handle);
     }
 
+    /// <summary>
+    /// Gets the maximum linear texture width supported for the specified descriptor.
+    /// 获取指定通道描述符支持的最大 linear texture 宽度。
+    /// </summary>
+    /// <param name="descriptor">The CUDA channel descriptor. CUDA 通道描述符。</param>
+    /// <param name="ordinal">The CUDA device ordinal. CUDA 设备序号。</param>
+    /// <returns>The maximum width in bytes or CUDA-defined units. 以字节或 CUDA 定义单位表示的最大宽度。</returns>
     public static ulong GetTexture1DLinearMaxWidth(CudaChannelFormatDescriptor descriptor, int ordinal)
     {
         NativeBridgeLoader.EnsureInitialized();
         return NativeCudaApi.GetTexture1DLinearMaxWidth(descriptor, ordinal);
     }
 
+    /// <summary>
+    /// Resets the persisting L2 cache state for the current device.
+    /// 重置当前设备的 persisting L2 cache 状态。
+    /// </summary>
     public static void ResetPersistingL2Cache()
     {
         NativeBridgeLoader.EnsureInitialized();
         NativeCudaApi.ResetPersistingL2Cache();
     }
 
+    /// <summary>
+    /// Flushes GPU Direct RDMA writes for the selected target and scope.
+    /// 为指定目标与范围刷新 GPU Direct RDMA 写入。
+    /// </summary>
+    /// <param name="target">The RDMA target to flush. 要刷新的 RDMA 目标。</param>
+    /// <param name="scope">The RDMA visibility scope. RDMA 可见性范围。</param>
     public static void FlushGpuDirectRdmaWrites(CudaGpuDirectRdmaWritesTarget target, CudaGpuDirectRdmaWritesScope scope)
     {
         NativeBridgeLoader.EnsureInitialized();
         NativeCudaApi.FlushGpuDirectRdmaWrites(target, scope);
     }
 
+    /// <summary>
+    /// Synchronizes the current CUDA device.
+    /// 同步当前 CUDA 设备。
+    /// </summary>
     public static void Synchronize()
     {
         NativeBridgeLoader.EnsureInitialized();
         NativeCudaApi.SynchronizeDevice();
     }
 
+    /// <summary>
+    /// Resets the current CUDA device.
+    /// 重置当前 CUDA 设备。
+    /// </summary>
     public static void Reset()
     {
         NativeBridgeLoader.EnsureInitialized();
         NativeCudaApi.ResetDevice();
     }
 
+    /// <summary>
+    /// Gets and clears the last CUDA error code.
+    /// 获取并清除最近一次 CUDA 错误码。
+    /// </summary>
+    /// <returns>The last CUDA error code. 最近一次 CUDA 错误码。</returns>
     public static int GetLastErrorCode()
     {
         NativeBridgeLoader.EnsureInitialized();
         return NativeCudaApi.GetLastErrorCode();
     }
 
+    /// <summary>
+    /// Gets the last CUDA error code without clearing it.
+    /// 获取最近一次 CUDA 错误码，但不清除。
+    /// </summary>
+    /// <returns>The last CUDA error code. 最近一次 CUDA 错误码。</returns>
     public static int PeekAtLastErrorCode()
     {
         NativeBridgeLoader.EnsureInitialized();
         return NativeCudaApi.PeekAtLastErrorCode();
     }
 
+    /// <summary>
+    /// Gets the symbolic CUDA error name for an error code.
+    /// 获取某个错误码对应的 CUDA 符号名。
+    /// </summary>
+    /// <param name="errorCode">The CUDA error code. CUDA 错误码。</param>
+    /// <returns>The CUDA symbolic error name. CUDA 符号错误名。</returns>
     public static string GetErrorName(int errorCode)
     {
         NativeBridgeLoader.EnsureInitialized();
         return NativeCudaApi.GetErrorName(errorCode);
     }
 
+    /// <summary>
+    /// Gets the human-readable CUDA error string for an error code.
+    /// 获取某个错误码对应的 CUDA 可读错误描述。
+    /// </summary>
+    /// <param name="errorCode">The CUDA error code. CUDA 错误码。</param>
+    /// <returns>The CUDA error description. CUDA 错误描述。</returns>
     public static string GetErrorString(int errorCode)
     {
         NativeBridgeLoader.EnsureInitialized();

@@ -3,8 +3,12 @@ namespace JYPPX.Shared.Generated;
 /// <summary>
 /// Describes one generated API manifest entry.
 /// </summary>
-public sealed class GeneratedApiDefinition
+internal sealed class GeneratedApiDefinition
 {
+    /// <summary>
+    /// Creates one generated API manifest entry description.
+    /// 创建单个生成 API manifest 条目描述。
+    /// </summary>
     public GeneratedApiDefinition(
         string id,
         string module,
@@ -34,4 +38,3 @@ public sealed class GeneratedApiDefinition
     public string VersionGuard { get; }
     public string ParameterSummary { get; }
 }
-
