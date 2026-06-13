@@ -187,6 +187,7 @@ jobs:
         if: ${{ inputs.attach_to_github_release && inputs.runtime_delivery_mode != 'split' }}
         uses: actions/upload-artifact@v4
         with:
+          compression-level: 0
           name: runtime-windows-full
           path: |
             artifacts/managed/*.nupkg
@@ -199,6 +200,7 @@ jobs:
         if: ${{ inputs.attach_to_github_release && inputs.runtime_delivery_mode == 'split' }}
         uses: actions/upload-artifact@v4
         with:
+          compression-level: 0
           name: runtime-windows-split
           path: |
             artifacts/managed/*.nupkg
