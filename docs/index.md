@@ -21,6 +21,7 @@ English:
 
 - [Getting Started](articles/en/getting-started.md)
 - [Installation Layout](articles/en/installation-layout.md)
+- [API Reference](articles/en/api-reference.md)
 - [Windows API Completion](articles/en/windows-api-completion.md)
 - [API Coverage and Deferred Boundaries](articles/en/api-coverage-and-deferred-boundaries.md)
 - [Sample Runners](articles/en/sample-runners.md)
@@ -33,6 +34,7 @@ Chinese articles:
 
 - [Getting Started](articles/zh-cn/getting-started.md)
 - [Installation Layout](articles/zh-cn/installation-layout.md)
+- [API Reference](articles/zh-cn/api-reference.md)
 - [Windows API Completion](articles/zh-cn/windows-api-completion.md)
 - [Latest Windows API Status](articles/zh-cn/windows-api-completion-latest.md)
 - [Runtime Packages](articles/zh-cn/runtime-packages.md)

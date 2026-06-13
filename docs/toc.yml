@@ -8,6 +8,8 @@
     href: articles/en/getting-started.md
   - name: Installation Layout
     href: articles/en/installation-layout.md
+  - name: API Reference
+    href: articles/en/api-reference.md
   - name: Windows API Completion
     href: articles/en/windows-api-completion.md
   - name: API Coverage and Deferred Boundaries
@@ -34,6 +36,8 @@
     href: articles/zh-cn/getting-started.md
   - name: Installation Layout
     href: articles/zh-cn/installation-layout.md
+  - name: API Reference
+    href: articles/zh-cn/api-reference.md
   - name: Windows API Completion
     href: articles/zh-cn/windows-api-completion.md
   - name: Source Organization

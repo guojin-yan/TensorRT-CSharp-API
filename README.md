@@ -110,6 +110,7 @@ See:
 - `docs/articles/en/runtime-distribution-strategy.md`
 - `docs/articles/en/package-consumer-validation.md`
 - `docs/articles/en/release-candidate-gate.md`
+- `docs/articles/en/api-reference.md`
 
 ## Release Automation
 
