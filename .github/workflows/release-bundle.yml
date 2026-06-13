@@ -38,16 +38,6 @@ on:
         required: false
         default: "win-x64-trt11.0-cuda12.9-cudnn9.22"
         type: string
-      sign_windows_consumer_output:
-        description: Sign Windows package-consumer output before smoke
-        required: false
-        default: true
-        type: boolean
-      run_linux_smoke:
-        description: Run Linux runtime package consumer smoke
-        required: false
-        default: false
-        type: boolean
       publish_managed_to_nuget:
         description: Publish the managed package to nuget.org
         required: false
@@ -88,7 +78,7 @@ jobs:
       runtime_delivery_mode: ${{ inputs.windows_runtime_delivery_mode }}
       run_smoke: ${{ inputs.run_windows_smoke }}
       smoke_runtime_keys: ${{ inputs.windows_smoke_runtime_keys }}
-      sign_consumer_output: ${{ inputs.sign_windows_consumer_output }}
+      sign_consumer_output: true
       publish_to_github_packages: ${{ inputs.publish_to_github_packages }}
       attach_to_github_release: ${{ inputs.attach_runtime_to_github_release }}
     secrets: inherit
@@ -99,7 +89,7 @@ jobs:
       version: ${{ inputs.version }}
       configuration: ${{ inputs.configuration }}
       runtime_keys: ${{ inputs.linux_runtime_keys }}
-      run_smoke: ${{ inputs.run_linux_smoke }}
+      run_smoke: false
       publish_to_github_packages: ${{ inputs.publish_to_github_packages }}
       attach_to_github_release: ${{ inputs.attach_runtime_to_github_release }}
     secrets: inherit

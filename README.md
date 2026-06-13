@@ -131,9 +131,9 @@ gh workflow run release-bundle.yml `
   --ref TensorRtSharp4.0 `
   -f version=4.0.0 `
   -f windows_runtime_keys=win-x64-trt11.0-cuda12.9-cudnn9.22 `
+  -f windows_smoke_runtime_keys=win-x64-trt11.0-cuda12.9-cudnn9.22 `
   -f windows_runtime_delivery_mode=split `
   -f run_windows_smoke=true `
-  -f sign_windows_consumer_output=true `
   -f publish_managed_to_nuget=false `
   -f publish_to_github_packages=false `
   -f attach_runtime_to_github_release=false
