@@ -434,6 +434,8 @@ jobs:
       - name: Publish Windows runtime package to GitHub Packages
         if: ${{ inputs.publish_to_github_packages && inputs.runtime_delivery_mode != 'split' }}
         shell: pwsh
+        env:
+          GITHUB_PACKAGES_TOKEN: ${{ github.token }}
         run: |
           $maxBytes = 2147000000
           $packages = Get-ChildItem -LiteralPath .\artifacts\runtime-nupkg -Filter *.nupkg
@@ -447,7 +449,9 @@ jobs:
           pwsh -NoProfile -File .\eng\Push-NuGetPackages.ps1 `
             -PackageRoot .\artifacts\runtime-nupkg `
             -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" `
-            -ApiKey "${{ github.token }}" `
+            -SourceName github `
+            -SourceUserName "${{ github.repository_owner }}" `
+            -SourcePasswordEnvironmentVariable GITHUB_PACKAGES_TOKEN `
             -TimeoutSeconds 3600 `
             -MaxAttempts 3 `
             -RetryDelaySeconds 30 `
@@ -456,11 +460,15 @@ jobs:
       - name: Publish Windows split runtime packages to GitHub Packages
         if: ${{ inputs.publish_to_github_packages && inputs.runtime_delivery_mode == 'split' }}
         shell: pwsh
+        env:
+          GITHUB_PACKAGES_TOKEN: ${{ github.token }}
         run: |
           pwsh -NoProfile -File .\eng\Push-NuGetPackages.ps1 `
             -PackageRoot .\artifacts\runtime-split-nupkg `
             -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" `
-            -ApiKey "${{ github.token }}" `
+            -SourceName github `
+            -SourceUserName "${{ github.repository_owner }}" `
+            -SourcePasswordEnvironmentVariable GITHUB_PACKAGES_TOKEN `
             -TimeoutSeconds 3600 `
             -MaxAttempts 3 `
             -RetryDelaySeconds 30 `

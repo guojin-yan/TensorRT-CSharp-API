@@ -127,11 +127,15 @@ jobs:
       - name: Publish managed package to GitHub Packages
         if: ${{ inputs.publish_to_github_packages }}
         shell: pwsh
+        env:
+          GITHUB_PACKAGES_TOKEN: ${{ github.token }}
         run: |
           pwsh -NoProfile -File .\eng\Push-NuGetPackages.ps1 `
             -PackageRoot .\artifacts\managed `
             -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" `
-            -ApiKey "${{ github.token }}" `
+            -SourceName github `
+            -SourceUserName "${{ github.repository_owner }}" `
+            -SourcePasswordEnvironmentVariable GITHUB_PACKAGES_TOKEN `
             -TimeoutSeconds 1800 `
             -MaxAttempts 3 `
             -RetryDelaySeconds 15
