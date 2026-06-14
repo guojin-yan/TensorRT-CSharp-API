@@ -52,7 +52,7 @@ cmake --build --preset win-x64-trt11-cuda13-release --parallel
 5. `NetworkBuilderSmokeRunner`
 6. 各类 layer-specific network runners
 
-`MultiStream`、`DynamicShape`、`InferenceBindings` 和 `OnnxToEngine` 都是真实可运行案例并加入解决方案。`Classification` 和 `YoloDet` 也是可执行项目，但需要你提供可再分发的 ONNX model / labels / 输入尺寸等资产。`CustomKernelPreprocess` 仍是 roadmap 目录，等待安全 public CUDA module/kernel wrapper。
+`MultiStream`、`DynamicShape`、`InferenceBindings` 和 `OnnxToEngine` 都是真实可运行案例并加入解决方案。`Classification` 和 `YoloDet` 也是可执行项目，但需要你提供可再分发的 ONNX model / labels / 输入尺寸等资产。CUDA custom-kernel preprocessing 先保留为文档路线图，等待安全 public CUDA module/kernel wrapper 后再加入可运行 sample。
 
 分类模型示例：
 

@@ -276,7 +276,8 @@ The repository keeps real user-facing sample projects for common model workflows
 - `samples/YoloDet`: executable YOLO-family ONNX detector pipeline. Provide `--model`, optional `--labels`, and `--input-shape`; the sample decodes common `[1, 84, 8400]` and `[1, 8400, 84]` output layouts.
 - `samples/InferenceBindings`: user-facing tensor-binding workflow example.
 - `samples/OnnxToEngine`: user-facing ONNX-to-engine example with an embedded tiny identity ONNX graph.
-- `samples/CustomKernelPreprocess`: roadmap only until safe public CUDA module/kernel wrappers are available. Use `MultiStream` for the current memory/stream preprocessing primitives.
+
+CUDA custom-kernel preprocessing remains a documentation roadmap item until safe public CUDA module/kernel wrappers are available. Use `samples/MultiStream` for the current memory/stream preprocessing primitives.
 
 Classification:
 

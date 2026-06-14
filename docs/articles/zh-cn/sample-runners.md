@@ -200,7 +200,8 @@ dotnet .\samples\InferenceBindings\bin\Debug\net8.0\InferenceBindings.dll --tens
 - `YoloDet`：可执行 YOLO-family ONNX 检测 pipeline。提供 `--model`、可选 `--labels` 和 `--input-shape` 后，会解码常见 `[1, 84, 8400]` 与 `[1, 8400, 84]` 输出布局。
 - `InferenceBindings`：用户侧常用 tensor binding / enqueue 示例。
 - `OnnxToEngine`：用户侧常用 ONNX 转 engine 示例，内置一个极小 identity ONNX 图。
-- `CustomKernelPreprocess`：仍是 roadmap，等待安全 public CUDA module/kernel wrapper；当前可先参考 `MultiStream` 的 memory/stream primitives。
+
+CUDA custom-kernel preprocessing 先保留为文档路线图，等待安全 public CUDA module/kernel wrapper 后再加入可运行 sample；当前可先参考 `MultiStream` 的 memory/stream primitives。
 
 分类模型示例：
 

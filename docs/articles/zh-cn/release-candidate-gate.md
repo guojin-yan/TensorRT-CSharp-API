@@ -59,11 +59,12 @@ cmake --build --preset win-x64-trt11-cuda13-release --parallel
 8. `NetworkBuilderSmokeRunner`
 9. 各类 layer-specific network runners
 
-以下目录当前是 README/roadmap 状态，不是可执行项目，也不是空壳遗漏：
+以下 asset-dependent sample project 是可执行项目，但需要用户提供模型与 metadata：
 
 - `Classification`
-- `CustomKernelPreprocess`
 - `YoloDet`
+
+这些项目只要 README 明确说明所需外部资产和可运行替代路径，就不单独作为 release blocker。CUDA custom-kernel preprocessing 先保留为文档路线图，等待安全 public `CudaModule` / `CudaKernel` wrapper 后再加入可运行 sample。
 
 ## Runtime package 门禁
 

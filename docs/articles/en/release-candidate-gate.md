@@ -77,13 +77,12 @@ After the local quality gate, run validation-oriented smoke runners from `smoke/
 8. `NetworkBuilderSmokeRunner`
 9. Layer-specific network runners
 
-Sample directories that are currently README/roadmap topics rather than executable projects:
+Asset-dependent sample projects are executable but require user-provided model metadata:
 
 - `Classification`
-- `CustomKernelPreprocess`
 - `YoloDet`
 
-Those directories are not release blockers by themselves as long as their README files describe required external assets, current runnable substitutes, and roadmap status.
+Those projects are not release blockers by themselves as long as their README files describe required external assets and runnable substitutes. CUDA custom-kernel preprocessing remains a documentation roadmap item until safe public `CudaModule` / `CudaKernel` wrappers are available.
 
 ## Runtime Package Gate
 

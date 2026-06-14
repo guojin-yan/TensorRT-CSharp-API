@@ -84,7 +84,8 @@ Recent sample maturity updates:
 - `DynamicShape` is a real TensorRT dynamic-shape/profile/binding sample and is included in the solution.
 - `InferenceBindings` is a real TensorRT inference-binding sample and is included in the solution.
 - `OnnxToEngine` is now a runnable common ONNX-to-engine example and is included in the solution.
-- `Classification`, `CustomKernelPreprocess`, and `YoloDet` remain documented README/roadmap directories rather than empty `.gitkeep` placeholders.
+- `Classification` and `YoloDet` are runnable asset-dependent ONNX examples; users provide their own model, labels, and input-shape metadata.
+- CUDA custom-kernel preprocessing is documented as a roadmap item until safe public `CudaModule` / `CudaKernel` wrappers are available.
 
 ## Runtime Packages
 

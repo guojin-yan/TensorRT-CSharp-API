@@ -16,6 +16,8 @@
     href: articles/en/api-coverage-and-deferred-boundaries.md
   - name: Source Organization
     href: articles/en/source-organization.md
+  - name: CUDA Kernel Roadmap
+    href: articles/en/cuda-kernel-roadmap.md
   - name: Linux Runner Setup
     href: articles/en/linux-runner-setup.md
   - name: Runtime Packages
@@ -42,6 +44,8 @@
     href: articles/zh-cn/windows-api-completion.md
   - name: Source Organization
     href: articles/zh-cn/source-organization.md
+  - name: CUDA Kernel Roadmap
+    href: articles/zh-cn/cuda-kernel-roadmap.md
   - name: Linux Runner Setup
     href: articles/zh-cn/linux-runner-setup.md
   - name: Runtime Packages

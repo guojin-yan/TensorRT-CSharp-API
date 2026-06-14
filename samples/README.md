@@ -22,11 +22,7 @@ That split keeps:
 | `Classification` | External ONNX classifier inference and Top-K output walkthrough | runnable with user-provided ONNX assets |
 | `YoloDet` | External YOLO-family ONNX detector pipeline and output decoding walkthrough | runnable with user-provided ONNX assets |
 
-## Roadmap Directory
-
-| Directory | Purpose | Current state |
-| --- | --- | --- |
-| `CustomKernelPreprocess` | CUDA preprocessing walkthrough | blocked on safe public module/kernel wrappers |
+CUDA custom-kernel preprocessing is tracked as documentation rather than a placeholder sample until safe public `CudaModule` / `CudaKernel` wrappers exist. See [CUDA Kernel Wrapper Roadmap](../docs/articles/en/cuda-kernel-roadmap.md).
 
 ## Environment
 
