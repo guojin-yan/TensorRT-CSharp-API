@@ -16,7 +16,7 @@
 - `win-x64-trt10.11-cuda11.8-cudnn8.9`：restore/build/native-copy/smoke 通过，native assets 为 `16/16`，探针输出 TensorRT `10.11.0`、CUDA `11.8`。
 - `win-x64-trt10.11-cuda12.9-cudnn9.22`：restore/build/native-copy/smoke 通过，native asset patterns 为 `19/19`，探针输出 TensorRT `10.11.0`、CUDA `12.9`。
 - `win-x64-trt11.0-cuda12.9-cudnn9.22`：restore/build/native-copy/smoke 通过，native asset patterns 为 `19/19`，探针输出 TensorRT `11.0.0`、CUDA `12.9`。
-- `win-x64-trt11.0-cuda13.2-cudnn9.22`：restore/build/native-copy 通过，native asset patterns 为 `19/19`；但 package consumer smoke 仍 pending，CUDA 13 runtime/builder 验证完成前 publish readiness 必须 blocked。
+- `win-x64-trt11.0-cuda13.2-cudnn9.22`：2026-06-14 已完成完整 split 组件包与 collection 包本地打包，restore/build/native-copy 通过，native asset patterns 为 `19/19`；但 package consumer smoke 仍 pending，CUDA 13 runtime/builder 验证完成前 publish readiness 必须 blocked。
 
 ## 本地质量门
 

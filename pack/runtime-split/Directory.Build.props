@@ -11,7 +11,8 @@
     <RepositoryUrl>$(RepositoryUrl)</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <Description>Split runtime component package for a specific TensorRT, CUDA, and cuDNN combination.</Description>
-    <NoWarn>$(NoWarn);NU5128</NoWarn>
+    <!-- Split runtime package IDs intentionally encode the dependency matrix and preserve published package identity. -->
+    <NoWarn>$(NoWarn);NU5123;NU5128</NoWarn>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <JYPPXRuntimeAssetsDir Condition="'$(JYPPXRuntimeAssetsDir)' == ''">$(MSBuildProjectDirectory)\assets</JYPPXRuntimeAssetsDir>
     <JYPPXBridgePackageVersion Condition="'$(JYPPXBridgePackageVersion)' == ''">$(Version)</JYPPXBridgePackageVersion>

@@ -30,7 +30,7 @@ Current package-consumer evidence on 2026-06-12:
 - `win-x64-trt10.11-cuda11.8-cudnn8.9`: restore/build/native-copy/smoke passed with `16/16` native assets; probe output TensorRT `10.11.0`, CUDA `11.8`.
 - `win-x64-trt10.11-cuda12.9-cudnn9.22`: restore/build/native-copy/smoke passed with `19/19` native asset patterns; probe output TensorRT `10.11.0`, CUDA `12.9`.
 - `win-x64-trt11.0-cuda12.9-cudnn9.22`: restore/build/native-copy/smoke passed with `19/19` native asset patterns; probe output TensorRT `11.0.0`, CUDA `12.9`.
-- `win-x64-trt11.0-cuda13.2-cudnn9.22`: restore/build/native-copy passed with `19/19` native asset patterns, but package consumer smoke remains pending and publish readiness is blocked until CUDA 13 runtime/builder validation is available.
+- `win-x64-trt11.0-cuda13.2-cudnn9.22`: 2026-06-14 full split package set and collection package packed locally; restore/build/native-copy passed with `19/19` native asset patterns, but package consumer smoke remains pending and publish readiness is blocked until CUDA 13 runtime/builder validation is available.
 
 ## Required Local Quality Gate
 

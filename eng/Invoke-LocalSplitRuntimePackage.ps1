@@ -205,6 +205,37 @@ function Remove-OptionalPath {
     Write-Host "Removed temporary path: $LiteralPath"
   }
   catch {
+    if ($env:OS -eq "Windows_NT") {
+      try {
+        $fullPath = [System.IO.Path]::GetFullPath($LiteralPath)
+        $extendedPath = if ($fullPath.StartsWith("\\?\", [System.StringComparison]::Ordinal)) {
+          $fullPath
+        }
+        elseif ($fullPath.StartsWith("\\", [System.StringComparison]::Ordinal)) {
+          "\\?\UNC\" + $fullPath.Substring(2)
+        }
+        else {
+          "\\?\" + $fullPath
+        }
+
+        if ([System.IO.Directory]::Exists($extendedPath)) {
+          [System.IO.Directory]::Delete($extendedPath, $true)
+          Write-Host "Removed temporary path: $LiteralPath"
+          return
+        }
+
+        if ([System.IO.File]::Exists($extendedPath)) {
+          [System.IO.File]::Delete($extendedPath)
+          Write-Host "Removed temporary path: $LiteralPath"
+          return
+        }
+      }
+      catch {
+        Write-Warning "Failed to remove temporary path '$LiteralPath' with extended path fallback: $($_.Exception.Message)"
+        return
+      }
+    }
+
     Write-Warning "Failed to remove temporary path '$LiteralPath': $($_.Exception.Message)"
   }
 }

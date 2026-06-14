@@ -235,7 +235,7 @@
                          "cudnnPackageName":  "cudnn_windows_x86_64_9.22.0_cuda13",
                          "distributionTier":  "private-feed",
                          "validationState":  "pending-local-validation",
-                         "distributionNotes":  "TensorRT 11 + CUDA 13.2 native bridge compiles locally and 2026-06-12 package consumer restore/build/native-copy validation passed with 19/19 native asset patterns copied. Runtime smoke remains pending because the current NVIDIA driver/runtime stack is not CUDA 13-capable; keep pending until CUDA 13 runtime/builder validation is available.",
+                         "distributionNotes":  "TensorRT 11 + CUDA 13.2 native bridge compiles locally. 2026-06-14 local split-package evidence: full component set plus collection package packed with package consumer restore/build/native-copy validation; 19/19 native asset patterns copied. Runtime smoke remains pending because the current NVIDIA driver reports CUDA 12.9 rather than a CUDA 13-capable runtime stack; keep pending until CUDA 13 runtime/builder validation is available.",
                          "buildPreset":  "win-x64-trt11-cuda13-release",
                          "bridgeConfiguration":  "Release",
                          "bridgeFile":  "jyppxtrtbridge.dll",

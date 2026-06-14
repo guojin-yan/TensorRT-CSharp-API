@@ -53,4 +53,4 @@ Current local package-consumer expectations:
 
 - `win-x64-trt10.11-cuda11.8-cudnn8.9` is the current stable real vendor-backed smoke path and has 2026-06-12 package-consumer smoke evidence.
 - `win-x64-trt10.11-cuda12.9-cudnn9.22` and `win-x64-trt11.0-cuda12.9-cudnn9.22` have current CUDA `12.9` package-consumer smoke evidence.
-- `win-x64-trt11.0-cuda13.2-cudnn9.22` can restore/build/copy native assets, but readiness remains blocked until CUDA 13 runtime/builder smoke is validated on a compatible driver/runtime stack.
+- `win-x64-trt11.0-cuda13.2-cudnn9.22` packed the full split package set and passed restore/build/native-copy validation on 2026-06-14 with `19/19` native asset patterns copied, but readiness remains blocked until CUDA 13 runtime/builder smoke is validated on a compatible driver/runtime stack.

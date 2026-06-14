@@ -36,7 +36,7 @@ CUDA `12.9` 当前已安装。所有目标为 `cuda12.9` 的 runtime 包现在�
 - `win-x64-trt10.11-cuda11.8-cudnn8.9`：package consumer smoke 通过。
 - `win-x64-trt10.11-cuda12.9-cudnn9.22`：package consumer smoke 通过。
 - `win-x64-trt11.0-cuda12.9-cudnn9.22`：package consumer smoke 通过。
-- `win-x64-trt11.0-cuda13.2-cudnn9.22`：restore/build/native-copy 通过，但 CUDA 13 runtime/builder smoke 可用前 readiness 保持 blocked。
+- `win-x64-trt11.0-cuda13.2-cudnn9.22`：2026-06-14 已完成完整 split 组件包与 collection 包本地打包，restore/build/native-copy 通过，native asset patterns 为 `19/19`；但 CUDA 13 runtime/builder smoke 可用前 readiness 保持 blocked。
 
 ## Linux runtime 矩阵
 

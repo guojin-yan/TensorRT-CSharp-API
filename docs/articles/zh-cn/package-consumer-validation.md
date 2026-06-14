@@ -42,6 +42,6 @@ powershell -ExecutionPolicy Bypass -File .\eng\Test-PackageConsumer.ps1 -Runtime
 - 缺失 native 资产列表
 - 可选 smoke 结果
 
-`win-x64-trt11.0-cuda13.2-cudnn9.22` 不能仅凭 restore/build/native-copy 通过就视为发布可用；在 CUDA 13-capable driver/runtime 上通过 runtime/builder smoke 前，readiness 必须保持 blocked。
+`win-x64-trt11.0-cuda13.2-cudnn9.22` 已在 2026-06-14 完成完整 split 包打包，并通过 restore/build/native-copy 验证，native asset patterns 为 `19/19`；但不能仅凭这些证据视为发布可用。在 CUDA 13-capable driver/runtime 上通过 runtime/builder smoke 前，readiness 必须保持 blocked。
 
 正式发布前仍需完成 NVIDIA CUDA / cuDNN / TensorRT 再分发许可复核。

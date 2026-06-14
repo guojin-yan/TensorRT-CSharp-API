@@ -34,14 +34,14 @@ The stable TensorRT 10 / CUDA 11.8 path has current package-consumer evidence. O
 
 The validated Windows maintainer environment uses CUDA `12.9` for the CUDA `12.9` target presets. The `win-x64-trt10.11-cuda12.9-cudnn9.22` and `win-x64-trt11.0-cuda12.9-cudnn9.22` packages have completed local runtime asset collection, runtime packing, package consumer validation, and package consumer smoke.
 
-TensorRT 11 packages are active in the matrix. The Windows `trt11.0-cuda12.9-cudnn9.22` path now has native minimal adapter smoke validation and package consumer smoke validation for logger/runtime/builder/config/network/serialized-engine/deserialize/context. The `trt11.0-cuda13.2-cudnn9.22` bridge compiles, collects assets, packs, and passes package consumer restore/build/native-copy validation locally, but runtime smoke remains pending until a CUDA 13-capable driver/runtime stack is available.
+TensorRT 11 packages are active in the matrix. The Windows `trt11.0-cuda12.9-cudnn9.22` path now has native minimal adapter smoke validation and package consumer smoke validation for logger/runtime/builder/config/network/serialized-engine/deserialize/context. On 2026-06-14, the `trt11.0-cuda13.2-cudnn9.22` line built the native bridge, packed the full split component set plus collection package, and passed package consumer restore/build/native-copy validation locally. Runtime smoke remains pending until a CUDA 13-capable driver/runtime stack is available.
 
 Current package consumer validation:
 
 - `win-x64-trt10.11-cuda11.8-cudnn8.9`: `16/16` native assets copied, package consumer smoke passed.
 - `win-x64-trt10.11-cuda12.9-cudnn9.22`: `19/19` native asset patterns copied, package consumer smoke passed.
 - `win-x64-trt11.0-cuda12.9-cudnn9.22`: `19/19` native asset patterns copied, package consumer smoke passed.
-- `win-x64-trt11.0-cuda13.2-cudnn9.22`: `19/19` native asset patterns copied, package consumer restore/build passed, package consumer smoke not requested because CUDA 13 runtime validation is pending.
+- `win-x64-trt11.0-cuda13.2-cudnn9.22`: 2026-06-14 full split package set packed; `19/19` native asset patterns copied, package consumer restore/build passed, package consumer smoke not requested because the current driver reports CUDA `12.9` rather than a CUDA 13-capable runtime stack.
 
 ## Local Roots
 

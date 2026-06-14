@@ -22,6 +22,7 @@ Current split strategies:
   - `TensorRtBuilder.Sm100Sm120Ptx`
 - TensorRT 11: mirrored component split for `win-x64-trt11.0-cuda13.2-cudnn9.22`
   - keeps the same package layout as the CUDA 12.9 line
+  - 2026-06-14 local full split-package validation passed with `19/19` native asset patterns copied
   - remains blocked on CUDA 13-capable runtime smoke before public-ready validation
 
 These packages still require:

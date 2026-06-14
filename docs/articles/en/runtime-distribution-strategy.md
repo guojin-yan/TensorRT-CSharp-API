@@ -36,7 +36,7 @@ Current Windows package-consumer readiness:
 - `win-x64-trt10.11-cuda11.8-cudnn8.9`: package consumer smoke passed.
 - `win-x64-trt10.11-cuda12.9-cudnn9.22`: package consumer smoke passed.
 - `win-x64-trt11.0-cuda12.9-cudnn9.22`: package consumer smoke passed.
-- `win-x64-trt11.0-cuda13.2-cudnn9.22`: restore/build/native-copy passed, but readiness remains blocked until CUDA 13 runtime/builder smoke is available.
+- `win-x64-trt11.0-cuda13.2-cudnn9.22`: 2026-06-14 full split package set and collection package packed locally, restore/build/native-copy passed with `19/19` native asset patterns, but readiness remains blocked until CUDA 13 runtime/builder smoke is available.
 
 ## Linux runtime matrix
 

@@ -31,12 +31,12 @@ Validate a consumer project from the local packages:
 powershell -ExecutionPolicy Bypass -File .\eng\Test-PackageConsumer.ps1 -RuntimePackageKey win-x64-trt10.11-cuda11.8-cudnn8.9 -RunSmoke -SmokeRuntimePackageKey win-x64-trt10.11-cuda11.8-cudnn8.9
 ```
 
-Latest local evidence on 2026-06-12:
+Latest local evidence:
 
-- `win-x64-trt10.11-cuda11.8-cudnn8.9`: restored, built, copied `16/16` native assets, and passed smoke with TensorRT `10.11.0`, CUDA `11.8`, and one CUDA device.
-- `win-x64-trt10.11-cuda12.9-cudnn9.22`: restored, built, copied `19/19` native asset patterns, and passed smoke with TensorRT `10.11.0`, CUDA `12.9`, and one CUDA device.
-- `win-x64-trt11.0-cuda12.9-cudnn9.22`: restored, built, copied `19/19` native asset patterns, and passed smoke with TensorRT `11.0.0`, CUDA `12.9`, and one CUDA device.
-- `win-x64-trt11.0-cuda13.2-cudnn9.22`: restored, built, and copied `19/19` native asset patterns; smoke remains pending until a CUDA 13-capable driver/runtime stack is available.
+- `win-x64-trt10.11-cuda11.8-cudnn8.9`: 2026-06-12 restored, built, copied `16/16` native assets, and passed smoke with TensorRT `10.11.0`, CUDA `11.8`, and one CUDA device.
+- `win-x64-trt10.11-cuda12.9-cudnn9.22`: 2026-06-12 restored, built, copied `19/19` native asset patterns, and passed smoke with TensorRT `10.11.0`, CUDA `12.9`, and one CUDA device.
+- `win-x64-trt11.0-cuda12.9-cudnn9.22`: 2026-06-12 restored, built, copied `19/19` native asset patterns, and passed smoke with TensorRT `11.0.0`, CUDA `12.9`, and one CUDA device.
+- `win-x64-trt11.0-cuda13.2-cudnn9.22`: 2026-06-14 full split package set and collection package packed locally; package consumer restore/build/native-copy validation passed with `19/19` native asset patterns. Smoke remains pending because the current driver reports CUDA `12.9`, not a CUDA 13-capable runtime stack.
 
 Machine-specific roots belong in `runtime-packages.local.json`, which is ignored by Git. Public package metadata belongs in `runtime-packages.manifest.json`.
 

@@ -392,7 +392,7 @@
       "assets": [
         "jyppxtrtbridge.dll"
       ],
-      "notes": "Bridge-only split package for the Windows TensorRT 11.0 + CUDA 13.2 line. Packaging is ready, but CUDA 13 runtime smoke still depends on a CUDA 13-capable driver stack."
+      "notes": "Bridge-only split package for the Windows TensorRT 11.0 + CUDA 13.2 line. 2026-06-14 local split-package validation passed for the full component set and collection package; CUDA 13 runtime smoke still depends on a CUDA 13-capable driver stack."
     },
     {
       "key": "win-x64-trt11.0-cuda13.2-cudnn9.22-cuda-cudnn",
@@ -417,7 +417,7 @@
         "cudnn_heuristic64_9.dll",
         "cudnn_ops64_9.dll"
       ],
-      "notes": "CUDA runtime plus cuDNN split package for the Windows TensorRT 11.0 + CUDA 13.2 line."
+      "notes": "CUDA runtime plus cuDNN split package for the Windows TensorRT 11.0 + CUDA 13.2 line. 2026-06-14 local split-package validation passed; runtime smoke remains pending until a CUDA 13-capable driver stack is available."
     },
     {
       "key": "win-x64-trt11.0-cuda13.2-cudnn9.22-tensorrt-runtime",
@@ -437,7 +437,7 @@
         "nvinfer_vc_plugin_11.dll",
         "nvonnxparser_11.dll"
       ],
-      "notes": "Core TensorRT runtime and parser/plugin split package for the Windows TensorRT 11.0 + CUDA 13.2 line."
+      "notes": "Core TensorRT runtime and parser/plugin split package for the Windows TensorRT 11.0 + CUDA 13.2 line. 2026-06-14 local split-package validation passed; runtime smoke remains pending until a CUDA 13-capable driver stack is available."
     },
     {
       "key": "win-x64-trt11.0-cuda13.2-cudnn9.22-tensorrt-builder-sm75-sm86",
@@ -454,7 +454,7 @@
         "nvinfer_builder_resource_sm80_11.dll",
         "nvinfer_builder_resource_sm86_11.dll"
       ],
-      "notes": "TensorRT 11 builder resources for sm75/sm80/sm86 on the CUDA 13.2 line."
+      "notes": "TensorRT 11 builder resources for sm75/sm80/sm86 on the CUDA 13.2 line. 2026-06-14 local split-package validation passed; runtime smoke remains pending until a CUDA 13-capable driver stack is available."
     },
     {
       "key": "win-x64-trt11.0-cuda13.2-cudnn9.22-tensorrt-builder-sm89-sm90",
@@ -470,7 +470,7 @@
         "nvinfer_builder_resource_sm89_11.dll",
         "nvinfer_builder_resource_sm90_11.dll"
       ],
-      "notes": "TensorRT 11 builder resources for sm89/sm90 on the CUDA 13.2 line."
+      "notes": "TensorRT 11 builder resources for sm89/sm90 on the CUDA 13.2 line. 2026-06-14 local split-package validation passed; runtime smoke remains pending until a CUDA 13-capable driver stack is available."
     },
     {
       "key": "win-x64-trt11.0-cuda13.2-cudnn9.22-tensorrt-builder-sm100-sm120-ptx",
@@ -487,7 +487,7 @@
         "nvinfer_builder_resource_sm120_11.dll",
         "nvinfer_builder_resource_ptx_11.dll"
       ],
-      "notes": "TensorRT 11 builder resources for sm100/sm120/PTX on the CUDA 13.2 line."
+      "notes": "TensorRT 11 builder resources for sm100/sm120/PTX on the CUDA 13.2 line. 2026-06-14 local split-package validation passed; runtime smoke remains pending until a CUDA 13-capable driver stack is available."
     }
   ]
 }
