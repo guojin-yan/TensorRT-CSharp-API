@@ -63,8 +63,8 @@ foreach ($asset in @($splitPackage.assets)) {
 
   $artifactDestination = Join-Path $artifactNativeOutput $asset
   $packageDestination = Join-Path $packageNativeOutput $asset
-  Copy-Item -LiteralPath $sourcePath -Destination $artifactDestination -Force
-  Copy-Item -LiteralPath $sourcePath -Destination $packageDestination -Force
+  Copy-Item -LiteralPath $sourcePath -Destination $artifactDestination -Force -ErrorAction Stop
+  Copy-Item -LiteralPath $sourcePath -Destination $packageDestination -Force -ErrorAction Stop
   $copiedFiles.Add($artifactDestination)
 }
 
@@ -85,4 +85,3 @@ $artifactManifest | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $artifact
 
 Write-Host "Collected split runtime assets for $($splitPackage.packageId)"
 Write-Host "Output: $OutputRoot"
-

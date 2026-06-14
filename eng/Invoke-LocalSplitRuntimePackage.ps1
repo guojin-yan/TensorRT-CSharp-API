@@ -182,6 +182,23 @@ function Remove-OptionalPath {
   }
 }
 
+function Remove-BaseRuntimeIntermediatePaths {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$RuntimeKey,
+    [object]$RuntimePackage
+  )
+
+  Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "artifacts\runtime\$RuntimeKey")
+  Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "pack\runtime\$RuntimeKey\assets")
+  Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "pack\runtime\$RuntimeKey\bin")
+  Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "pack\runtime\$RuntimeKey\obj")
+
+  if ($RuntimePackage -and -not [string]::IsNullOrWhiteSpace([string]$RuntimePackage.buildPreset)) {
+    Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "build-out\$($RuntimePackage.buildPreset)")
+  }
+}
+
 $splitManifestPath = Join-Path $RepositoryRoot "pack\runtime-split\split-runtime-packages.manifest.json"
 $splitManifest = Get-Content -LiteralPath $splitManifestPath -Raw -Encoding utf8 | ConvertFrom-Json
 $runtimeManifestPath = Join-Path $RepositoryRoot "pack\runtime\runtime-packages.manifest.json"
@@ -495,6 +512,7 @@ foreach ($splitPackage in $splitPackages) {
   Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "pack\runtime-split\$($splitPackage.key)\obj")
 }
 
+Remove-BaseRuntimeIntermediatePaths -RuntimeKey $SourceRuntimeKey -RuntimePackage $sourcePackage
 Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "pack\runtime-split\$SourceRuntimeKey-meta\bin")
 Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "pack\runtime-split\$SourceRuntimeKey-meta\obj")
 Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "build-out\package-consumer\$SourceRuntimeKey")

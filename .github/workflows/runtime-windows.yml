@@ -197,6 +197,14 @@ jobs:
       - windows
       - x64
     steps:
+      - name: Prepare Windows runner
+        shell: pwsh
+        run: |
+          git config --global core.longpaths true
+          Get-PSDrive -PSProvider FileSystem |
+            Select-Object Name,Root,@{Name='FreeGB';Expression={[math]::Round($_.Free/1GB,2)}} |
+            Format-Table -AutoSize
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -232,6 +240,9 @@ jobs:
             }
           }
           powershell @arguments
+          if ($LASTEXITCODE -ne 0) {
+            throw "Invoke-LocalRuntimePackage.ps1 failed with exit code $LASTEXITCODE."
+          }
 
       - name: Build split runtime packages
         if: ${{ inputs.runtime_delivery_mode == 'split' }}
@@ -317,7 +328,47 @@ jobs:
               }
             }
             powershell @arguments
+            if ($LASTEXITCODE -ne 0) {
+              throw "Invoke-LocalSplitRuntimePackage.ps1 failed for runtime key '$key' with exit code $LASTEXITCODE."
+            }
           }
+
+      - name: Prune Windows runtime intermediates
+        if: ${{ always() }}
+        shell: pwsh
+        run: |
+          $paths = @(
+            '.\artifacts\runtime',
+            '.\artifacts\runtime-split',
+            '.\build-out'
+          )
+
+          foreach ($path in $paths) {
+            if (Test-Path -LiteralPath $path) {
+              Remove-Item -LiteralPath $path -Recurse -Force -ErrorAction SilentlyContinue
+              Write-Host "Pruned $path"
+            }
+          }
+
+          foreach ($root in @('.\pack\runtime', '.\pack\runtime-split')) {
+            if (-not (Test-Path -LiteralPath $root)) {
+              continue
+            }
+
+            foreach ($directory in Get-ChildItem -LiteralPath $root -Directory) {
+              foreach ($child in @('assets', 'bin', 'obj')) {
+                $candidate = Join-Path $directory.FullName $child
+                if (Test-Path -LiteralPath $candidate) {
+                  Remove-Item -LiteralPath $candidate -Recurse -Force -ErrorAction SilentlyContinue
+                  Write-Host "Pruned $candidate"
+                }
+              }
+            }
+          }
+
+          Get-PSDrive -PSProvider FileSystem |
+            Select-Object Name,Root,@{Name='FreeGB';Expression={[math]::Round($_.Free/1GB,2)}} |
+            Format-Table -AutoSize
 
       - name: Upload Windows runtime artifacts
         if: ${{ inputs.attach_to_github_release && inputs.release_tag == '' && inputs.runtime_delivery_mode != 'split' }}

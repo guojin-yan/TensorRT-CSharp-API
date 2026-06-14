@@ -171,8 +171,8 @@ function Copy-RelativeFiles {
     foreach ($resolvedSourcePath in $matchingFiles) {
       $destinationPath = Join-Path $nativeOutput ([System.IO.Path]::GetFileName($resolvedSourcePath))
       $packageDestinationPath = Join-Path $PackageOutput ([System.IO.Path]::GetFileName($resolvedSourcePath))
-      Copy-Item -LiteralPath $resolvedSourcePath -Destination $destinationPath -Force
-      Copy-Item -LiteralPath $resolvedSourcePath -Destination $packageDestinationPath -Force
+      Copy-Item -LiteralPath $resolvedSourcePath -Destination $destinationPath -Force -ErrorAction Stop
+      Copy-Item -LiteralPath $resolvedSourcePath -Destination $packageDestinationPath -Force -ErrorAction Stop
       Unblock-CopiedRuntimeAsset -Path $destinationPath
       Unblock-CopiedRuntimeAsset -Path $packageDestinationPath
       $copiedFiles.Add($destinationPath)
