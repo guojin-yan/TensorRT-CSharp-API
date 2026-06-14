@@ -1,17 +1,22 @@
 # YoloDet
 
-Status: documented asset-dependent sample.
+This sample runs a user-provided single-input float YOLO-family ONNX model through TensorRT, then decodes common output layouts:
 
-This directory is reserved for a YOLO-style object-detection demo. A complete detector sample needs a redistributable ONNX model, class labels, input images, preprocessing rules, and postprocessing rules. Some exported YOLO graphs also depend on TensorRT plugins such as NMS variants, so a fake bundled demo would be misleading.
+- `[1, 84, 8400]` style channel-first output
+- `[1, 8400, 84]` style box-first output
 
-Use these runnable samples first:
+The repository does not bundle detector models, label files, or images because those assets have separate licensing and size constraints. The sample uses a synthetic input tensor by default, so detections are useful as pipeline evidence rather than as image-quality evidence.
 
 ```powershell
-dotnet .\smoke\OnnxToEngineSmokeRunner\bin\Debug\net8.0\OnnxToEngineSmokeRunner.dll --tensor-rt-line 10
-dotnet .\samples\DynamicShape\bin\Debug\net8.0\DynamicShape.dll --tensor-rt-line 10 --batch 1
+dotnet run --project .\samples\YoloDet -- `
+  --model .\models\yolo.onnx `
+  --labels .\models\coco.names `
+  --input-shape 1x3x640x640 `
+  --tensor-rt-line 10 `
+  --layout auto `
+  --has-objectness auto `
+  --confidence 0.25
 ```
-
-They validate ONNX parsing, dynamic-shape profile setup, tensor binding, enqueue, and output readback without requiring a third-party detector asset.
 
 ## Required Assets For A Full Demo
 
@@ -20,9 +25,9 @@ They validate ONNX parsing, dynamic-shape profile setup, tensor binding, enqueue
 - `input.*`: one or more redistributable test images.
 - Postprocessing metadata: confidence threshold, IoU threshold, output decoding format, and NMS/plugin requirements.
 
-## Roadmap
+## Evidence Lines
 
-- Add asset preflight that reports missing model, labels, or image files without crashing.
-- Add CPU preprocessing and postprocessing first.
-- Add optional TensorRT plugin diagnostics when the selected model requires plugin layers.
-- Print stable evidence lines such as `Detections=...`, `TopDetection=...`, and `YoloDet Passed=True`.
+- `YoloDet TensorRtLine=...`
+- `Input=... Output=...`
+- `Detection Class=... Score=... BoxCxCyWh=...` or `Detections=0 ...`
+- `YoloDet Passed=True`

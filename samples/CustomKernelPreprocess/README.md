@@ -6,14 +6,13 @@ The current managed CUDA surface is deployment-safe for device memory, pinned me
 
 Raw CUDA launch entry points are present only as generated/internal native boundaries. They should not be used directly from a sample because argument packing, module ownership, stream ordering, and version-specific launch configuration need a higher-level C# API.
 
-Use these runnable samples first:
+Use this runnable sample first:
 
 ```powershell
-dotnet .\smoke\CudaSmokeRunner\bin\Debug\net8.0\CudaSmokeRunner.dll
-dotnet .\samples\MultiStream\bin\Debug\net8.0\MultiStream.dll
+dotnet run --project .\samples\MultiStream
 ```
 
-They validate the CUDA memory and stream primitives that a future GPU preprocessing demo will build on.
+It validates the CUDA memory and stream primitives that a future GPU preprocessing demo will build on.
 
 ## Roadmap
 

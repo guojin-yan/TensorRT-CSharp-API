@@ -51,6 +51,8 @@ Recommended common-example order:
 2. `DynamicShape`
 3. `InferenceBindings`
 4. `OnnxToEngine`
+5. `Classification` with your own classifier ONNX assets
+6. `YoloDet` with your own YOLO-family ONNX assets
 
 Recommended smoke order:
 

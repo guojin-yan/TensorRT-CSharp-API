@@ -51,6 +51,18 @@ OnnxToEngine:
 dotnet .\samples\OnnxToEngine\bin\Debug\net8.0\OnnxToEngine.dll --tensor-rt-line 10
 ```
 
+Classification with your own ONNX classifier assets:
+
+```powershell
+dotnet run --project .\samples\Classification -- --model .\models\classifier.onnx --labels .\models\labels.txt --input-shape 1x3x224x224 --tensor-rt-line 10
+```
+
+YOLO-family detection with your own ONNX detector assets:
+
+```powershell
+dotnet run --project .\samples\YoloDet -- --model .\models\yolo.onnx --labels .\models\coco.names --input-shape 1x3x640x640 --tensor-rt-line 10
+```
+
 ## Verified smoke commands
 
 CUDA smoke:

@@ -19,13 +19,13 @@ That split keeps:
 | `DynamicShape` | TensorRT dynamic-shape/profile/binding example | runnable |
 | `InferenceBindings` | TensorRtInferenceBindings host/device workflow example | runnable |
 | `OnnxToEngine` | user-facing ONNX to engine walkthrough | runnable |
+| `Classification` | External ONNX classifier inference and Top-K output walkthrough | runnable with user-provided ONNX assets |
+| `YoloDet` | External YOLO-family ONNX detector pipeline and output decoding walkthrough | runnable with user-provided ONNX assets |
 
-## Roadmap Directories
+## Roadmap Directory
 
 | Directory | Purpose | Current state |
 | --- | --- | --- |
-| `Classification` | Image classification walkthrough | waiting on redistributable model/assets |
-| `YoloDet` | Object detection walkthrough | waiting on redistributable model/assets |
 | `CustomKernelPreprocess` | CUDA preprocessing walkthrough | blocked on safe public module/kernel wrappers |
 
 ## Environment

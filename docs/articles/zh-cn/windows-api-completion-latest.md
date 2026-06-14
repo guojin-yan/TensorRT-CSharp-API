@@ -18,8 +18,8 @@
 
 - `MultiStream`：真实 CUDA multi-stream / event-ordering 样例，已加入解决方案。
 - `DynamicShape`：真实 TensorRT dynamic-shape / optimization profile / inference binding 样例，已加入解决方案。
-- `Classification`、`CustomKernelPreprocess`、`OnnxToEngine`、`YoloDet`：已 README/roadmap 化，不再是 `.gitkeep` 空壳。
-- `OnnxToEngine` 现在已经是用户侧常用的 ONNX 转 engine 示例，validation runner 仍保留在 `smoke/OnnxToEngineSmokeRunner`。
+- `Classification`、`OnnxToEngine`、`YoloDet`：现在都是用户侧常用的可执行 sample；其中 Classification/YoloDet 需要用户提供可再分发 ONNX 资产。
+- `CustomKernelPreprocess`：保持 roadmap 状态，等待安全 public CUDA module/kernel wrapper。
 
 ## 当前发布门
 

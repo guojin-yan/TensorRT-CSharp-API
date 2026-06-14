@@ -2,5 +2,8 @@
   <ItemGroup Condition="'$(MSBuildProjectExtension)' == '.csproj'">
     <Compile Include="$(MSBuildThisFileDirectory)JYPPX.SampleSupport\SampleCommandLine.cs"
              Link="JYPPX.SampleSupport\SampleCommandLine.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)JYPPX.SampleSupport\TensorRtOnnxSample.cs"
+             Link="JYPPX.SampleSupport\TensorRtOnnxSample.cs"
+             Condition="'$(JYPPXIncludeTensorRtOnnxSampleSupport)' == 'true'" />
   </ItemGroup>
 </Project>

@@ -192,15 +192,25 @@ dotnet .\samples\InferenceBindings\bin\Debug\net8.0\InferenceBindings.dll --tens
 - `NetworkTrt11ModernLayerMetadataRunner`
 - `NetworkTrt11AdvancedLayersSmokeRunner`
 
-## 资产依赖和 roadmap 目录
+## 资产依赖用户示例
 
-以下目录当前是 README/roadmap 状态，而不是可执行项目：
+仓库保留真实可执行的用户侧常用模型示例。模型、labels 和图片资产不随仓库分发，因为它们有独立的授权和体积约束。
 
-- `Classification`：需要可再分发分类模型、labels、输入图片和 preprocessing metadata。
-- `CustomKernelPreprocess`：等待安全 public CUDA module/kernel wrapper，不直接暴露 raw kernel launch。
-- `InferenceBindings`：现在提供用户侧常用的 tensor binding / enqueue 示例。
-- `OnnxToEngine`：现在提供用户侧常用的 ONNX 转 engine 示例。
-- `YoloDet`：需要 detector ONNX、labels、输入图片、decode/NMS metadata，部分模型还需要 plugin 诊断。
+- `Classification`：可执行 ONNX 分类 pipeline。提供 `--model`、可选 `--labels` 和 `--input-shape` 后，会构建 TensorRT engine、运行合成 float 输入并打印 Top-K。
+- `YoloDet`：可执行 YOLO-family ONNX 检测 pipeline。提供 `--model`、可选 `--labels` 和 `--input-shape` 后，会解码常见 `[1, 84, 8400]` 与 `[1, 8400, 84]` 输出布局。
+- `InferenceBindings`：用户侧常用 tensor binding / enqueue 示例。
+- `OnnxToEngine`：用户侧常用 ONNX 转 engine 示例，内置一个极小 identity ONNX 图。
+- `CustomKernelPreprocess`：仍是 roadmap，等待安全 public CUDA module/kernel wrapper；当前可先参考 `MultiStream` 的 memory/stream primitives。
 
-这些目录不是发布阻塞项，只要 README 说明清楚资产要求、当前替代 runner 和 roadmap。
+分类模型示例：
+
+```powershell
+dotnet run --project .\samples\Classification -- --model .\models\classifier.onnx --labels .\models\labels.txt --input-shape 1x3x224x224 --tensor-rt-line 10
+```
+
+YOLO 检测模型示例：
+
+```powershell
+dotnet run --project .\samples\YoloDet -- --model .\models\yolo.onnx --labels .\models\coco.names --input-shape 1x3x640x640 --tensor-rt-line 10
+```
 

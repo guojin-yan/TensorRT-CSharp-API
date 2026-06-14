@@ -40,6 +40,8 @@ cmake --build --preset win-x64-trt11-cuda13-release --parallel
 2. `DynamicShape`
 3. `InferenceBindings`
 4. `OnnxToEngine`
+5. `Classification`，使用你自己的分类 ONNX 资产
+6. `YoloDet`，使用你自己的 YOLO-family ONNX 资产
 
 推荐 smoke 顺序：
 
@@ -50,7 +52,19 @@ cmake --build --preset win-x64-trt11-cuda13-release --parallel
 5. `NetworkBuilderSmokeRunner`
 6. 各类 layer-specific network runners
 
-`MultiStream`、`DynamicShape`、`InferenceBindings` 和 `OnnxToEngine` 现在都是真实可运行案例并加入解决方案。`Classification`、`CustomKernelPreprocess`、`YoloDet` 仍是 README/roadmap 目录，不再是空壳目录。
+`MultiStream`、`DynamicShape`、`InferenceBindings` 和 `OnnxToEngine` 都是真实可运行案例并加入解决方案。`Classification` 和 `YoloDet` 也是可执行项目，但需要你提供可再分发的 ONNX model / labels / 输入尺寸等资产。`CustomKernelPreprocess` 仍是 roadmap 目录，等待安全 public CUDA module/kernel wrapper。
+
+分类模型示例：
+
+```powershell
+dotnet run --project .\samples\Classification -- --model .\models\classifier.onnx --labels .\models\labels.txt --input-shape 1x3x224x224 --tensor-rt-line 10
+```
+
+YOLO 检测模型示例：
+
+```powershell
+dotnet run --project .\samples\YoloDet -- --model .\models\yolo.onnx --labels .\models\coco.names --input-shape 1x3x640x640 --tensor-rt-line 10
+```
 
 ## 继续阅读
 

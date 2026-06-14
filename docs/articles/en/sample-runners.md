@@ -268,15 +268,27 @@ Expected signals:
 - `BindingReport Ready=True Profile=0 Tensors=2`
 - `OutputMatch=True`
 
-## Asset-Dependent Sample Directories
+## Asset-Dependent User Samples
 
-The repository also keeps a few user-facing sample topic directories that are documented instead of executable today:
+The repository keeps real user-facing sample projects for common model workflows. Model and image assets are not bundled, because those files have licensing and size constraints that are separate from API validation.
 
-- `samples/Classification`: requires a redistributable classifier ONNX model, labels, input image, and preprocessing metadata. Use `DynamicShape` and `OnnxToEngineSmokeRunner` to validate the deployment foundation first.
-- `samples/InferenceBindings`: now provides the user-facing common tensor-binding workflow example.
-- `samples/OnnxToEngine`: now provides the user-facing common ONNX-to-engine example.
-- `samples/YoloDet`: requires a redistributable detector ONNX model, labels, input image, postprocessing metadata, and possibly TensorRT plugin diagnostics.
-- `samples/CustomKernelPreprocess`: blocked on safe public CUDA module/kernel wrappers; use `CudaSmokeRunner` and `MultiStream` for the current memory/stream preprocessing primitives.
+- `samples/Classification`: executable ONNX classifier pipeline. Provide `--model`, optional `--labels`, and `--input-shape`; the sample builds a TensorRT engine, runs synthetic float input, and prints Top-K scores.
+- `samples/YoloDet`: executable YOLO-family ONNX detector pipeline. Provide `--model`, optional `--labels`, and `--input-shape`; the sample decodes common `[1, 84, 8400]` and `[1, 8400, 84]` output layouts.
+- `samples/InferenceBindings`: user-facing tensor-binding workflow example.
+- `samples/OnnxToEngine`: user-facing ONNX-to-engine example with an embedded tiny identity ONNX graph.
+- `samples/CustomKernelPreprocess`: roadmap only until safe public CUDA module/kernel wrappers are available. Use `MultiStream` for the current memory/stream preprocessing primitives.
+
+Classification:
+
+```powershell
+dotnet run --project .\samples\Classification -- --model .\models\classifier.onnx --labels .\models\labels.txt --input-shape 1x3x224x224 --tensor-rt-line 10
+```
+
+YOLO detection:
+
+```powershell
+dotnet run --project .\samples\YoloDet -- --model .\models\yolo.onnx --labels .\models\coco.names --input-shape 1x3x640x640 --tensor-rt-line 10
+```
 
 ## NetworkBuilderSmokeRunner
 
