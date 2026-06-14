@@ -148,6 +148,32 @@ function ConvertTo-XmlAttributeValue {
   return [System.Security.SecurityElement]::Escape($Value)
 }
 
+function Format-CommandForLog {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$FilePath,
+    [Parameter(Mandatory = $true)]
+    [string[]]$ArgumentList
+  )
+
+  $safeArguments = New-Object System.Collections.Generic.List[string]
+  $redactNext = $false
+  foreach ($argument in $ArgumentList) {
+    if ($redactNext) {
+      $safeArguments.Add("***")
+      $redactNext = $false
+      continue
+    }
+
+    $safeArguments.Add($argument)
+    if ($argument -eq "-AdditionalPackageSourcePassword") {
+      $redactNext = $true
+    }
+  }
+
+  return "$FilePath $($safeArguments -join ' ')"
+}
+
 function Invoke-CheckedCommand {
   param(
     [Parameter(Mandatory = $true)]
@@ -156,10 +182,11 @@ function Invoke-CheckedCommand {
     [string[]]$ArgumentList
   )
 
-  Write-Host "> $FilePath $($ArgumentList -join ' ')"
+  $safeCommand = Format-CommandForLog -FilePath $FilePath -ArgumentList $ArgumentList
+  Write-Host "> $safeCommand"
   & $FilePath @ArgumentList
   if ($LASTEXITCODE -ne 0) {
-    throw "Command failed with exit code ${LASTEXITCODE}: $FilePath $($ArgumentList -join ' ')"
+    throw "Command failed with exit code ${LASTEXITCODE}: $safeCommand"
   }
 }
 

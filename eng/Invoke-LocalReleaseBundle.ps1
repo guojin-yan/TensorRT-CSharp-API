@@ -77,10 +77,26 @@ function Invoke-CheckedCommand {
     [string[]]$ArgumentList
   )
 
-  Write-Host "> $FilePath $($ArgumentList -join ' ')"
+  $safeArguments = New-Object System.Collections.Generic.List[string]
+  $redactNext = $false
+  foreach ($argument in $ArgumentList) {
+    if ($redactNext) {
+      $safeArguments.Add("***")
+      $redactNext = $false
+      continue
+    }
+
+    $safeArguments.Add($argument)
+    if ($argument -eq "-AdditionalPackageSourcePassword") {
+      $redactNext = $true
+    }
+  }
+
+  $safeCommand = "$FilePath $($safeArguments -join ' ')"
+  Write-Host "> $safeCommand"
   & $FilePath @ArgumentList
   if ($LASTEXITCODE -ne 0) {
-    throw "Command failed with exit code ${LASTEXITCODE}: $FilePath $($ArgumentList -join ' ')"
+    throw "Command failed with exit code ${LASTEXITCODE}: $safeCommand"
   }
 }
 

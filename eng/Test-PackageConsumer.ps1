@@ -245,7 +245,7 @@ function Find-Package {
   return @($matches | Sort-Object Version -Descending)[0]
 }
 
-function Invoke-CheckedDotNet {
+function Invoke-DotNetCommand {
   param(
     [string[]]$Arguments
   )
@@ -255,9 +255,34 @@ function Invoke-CheckedDotNet {
     Write-Host $line
   }
 
-  if ($LASTEXITCODE -ne 0) {
-    throw "dotnet $($Arguments -join ' ') failed with exit code $LASTEXITCODE."
+  return [pscustomobject]@{
+    ExitCode = $LASTEXITCODE
+    OutputLines = @($dotnetOutput)
   }
+}
+
+function Invoke-CheckedDotNet {
+  param(
+    [string[]]$Arguments
+  )
+
+  $result = Invoke-DotNetCommand -Arguments $Arguments
+  if ($result.ExitCode -ne 0) {
+    throw "dotnet $($Arguments -join ' ') failed with exit code $($result.ExitCode)."
+  }
+}
+
+function Test-ApplicationControlPolicyBlock {
+  param(
+    [string[]]$OutputLines
+  )
+
+  $text = ($OutputLines -join "`n")
+  return (
+    $text -match '0x800711C7' -or
+    $text -match 'application control policy' -or
+    $text -match '应用程序控制策略'
+  )
 }
 
 function Find-Signtool {
@@ -680,8 +705,18 @@ Console.WriteLine("CudaDevices=" + cuda.CudaRuntimeInfo.DeviceCount + " Vendor="
 
   $smokeResult = "not-requested"
   if ($ShouldRunSmoke) {
-    Invoke-CheckedDotNet -Arguments @("run", "--project", (Join-Path $resolvedConsumerRoot "PackageConsumerSmoke.csproj"), "-c", "Release", "--no-build")
-    $smokeResult = "passed"
+    $smokeArguments = @("run", "--project", (Join-Path $resolvedConsumerRoot "PackageConsumerSmoke.csproj"), "-c", "Release", "--no-build")
+    $smokeRun = Invoke-DotNetCommand -Arguments $smokeArguments
+    if ($smokeRun.ExitCode -eq 0) {
+      $smokeResult = "passed"
+    }
+    elseif (Test-ApplicationControlPolicyBlock -OutputLines $smokeRun.OutputLines) {
+      $smokeResult = "blocked-by-application-control"
+      Write-Warning "Package consumer smoke was blocked by the Windows application control policy on this runner (0x800711C7). Restore/build/native asset validation passed, so packaging will continue."
+    }
+    else {
+      throw "dotnet $($smokeArguments -join ' ') failed with exit code $($smokeRun.ExitCode)."
+    }
   }
 
   $timer.Stop()
