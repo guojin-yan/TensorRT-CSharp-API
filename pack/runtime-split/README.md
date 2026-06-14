@@ -60,7 +60,7 @@ powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalSplitRuntimePackage.p
   -SourceRuntimeKey win-x64-trt11.0-cuda12.9-cudnn9.22 `
   -Version 4.0.1 `
   -SplitPackageRole bridge,collection `
-  -VendorPackageVersion 4.0.0 `
+  -VendorPackageVersion 4.0.6142 `
   -AdditionalPackageSource https://nuget.pkg.github.com/<owner>/index.json `
   -AdditionalPackageSourceUsername <owner-or-actor> `
   -AdditionalPackageSourcePassword <token>

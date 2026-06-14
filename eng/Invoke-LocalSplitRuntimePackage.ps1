@@ -317,7 +317,7 @@ if ($shouldPackMetaPackage) {
     if ([string]::IsNullOrWhiteSpace($VendorPackageVersion) -and
         [string]::IsNullOrWhiteSpace($CudaCudnnPackageVersion) -and
         [string]::IsNullOrWhiteSpace($TensorRtPackageVersion)) {
-      Write-Warning "The split meta package will reference non-built vendor components at version '$resolvedVendorPackageVersion'. Pass -VendorPackageVersion, -CudaCudnnPackageVersion, or -TensorRtPackageVersion to pin already-published NVIDIA component packages explicitly."
+      throw "The split meta package would reference non-built vendor components at version '$resolvedVendorPackageVersion'. Pass -VendorPackageVersion, -CudaCudnnPackageVersion, or -TensorRtPackageVersion to pin already-published NVIDIA component packages explicitly, or build with -SplitPackageRole all/vendor first."
     }
 
     if ((Expand-KeyList -Values $AdditionalPackageSource).Count -eq 0) {

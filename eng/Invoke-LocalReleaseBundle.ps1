@@ -124,6 +124,21 @@ if ($windowsKeys.Count -eq 0) {
   )
 }
 
+if (-not $SkipWindowsRuntime.IsPresent -and $WindowsRuntimeDeliveryMode -eq "split") {
+  $lowerSplitRoles = @($windowsSplitPackageRoles | ForEach-Object { $_.ToLowerInvariant() })
+  $requiresPinnedVendorVersion =
+    $lowerSplitRoles -contains "collection" -or
+    $lowerSplitRoles -contains "meta" -or
+    $IncludeWindowsSplitMetaPackage.IsPresent
+
+  if ($requiresPinnedVendorVersion -and
+      [string]::IsNullOrWhiteSpace($WindowsVendorPackageVersion) -and
+      [string]::IsNullOrWhiteSpace($WindowsCudaCudnnPackageVersion) -and
+      [string]::IsNullOrWhiteSpace($WindowsTensorRtPackageVersion)) {
+    throw "Windows split collection/meta packaging requires -WindowsVendorPackageVersion, -WindowsCudaCudnnPackageVersion, or -WindowsTensorRtPackageVersion so already-published NVIDIA component packages are pinned explicitly."
+  }
+}
+
 if (-not $SkipDocs.IsPresent) {
   Invoke-CheckedCommand -FilePath "dotnet" -ArgumentList @("tool", "restore")
   Invoke-CheckedCommand -FilePath "dotnet" -ArgumentList @("docfx", (Join-Path $RepositoryRoot "docs\docfx.json"))

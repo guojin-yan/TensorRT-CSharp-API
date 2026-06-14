@@ -117,6 +117,7 @@ $workflowContracts = @(
       New-Requirement -Needle "runtime-linux" -Description "Linux runtime child workflow"
       New-Requirement -Needle "gh release create" -Description "release creation"
       New-Requirement -Needle "gh release upload" -Description "release asset upload"
+      New-Requirement -Needle "windows_split_package_roles includes collection/meta but no vendor component version was provided" -Description "split collection vendor-version guard"
     )
   }
 )
