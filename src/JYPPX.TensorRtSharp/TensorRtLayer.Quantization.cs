@@ -51,7 +51,7 @@ public sealed partial class TensorRtLayer
     /// Gets the TensorRT 11 quantization block shape configured on a dequantize layer.
     /// 获取 TensorRT 11 dequantize 层配置的量化 block shape。
     /// </summary>
-    /// <returns>The current block shape, or an empty dimensions value when TensorRT uses the default.</returns>
+    /// <returns>The current block shape, or an empty dimensions value when TensorRT uses the default. 当前 block shape；当 TensorRT 使用默认值时返回空维度值。</returns>
     public TensorRtDims GetDequantizeBlockShape()
     {
         return NativeBridgeApi.GetDequantizeBlockShape(Line, _handle);
@@ -61,8 +61,8 @@ public sealed partial class TensorRtLayer
     /// Sets the TensorRT 11 quantization block shape on a dequantize layer.
     /// 设置 TensorRT 11 dequantize 层的量化 block shape。
     /// </summary>
-    /// <param name="blockShape">The block shape dimensions to request.</param>
-    /// <returns><c>true</c> when TensorRT accepts the block shape; otherwise <c>false</c>.</returns>
+    /// <param name="blockShape">The block shape dimensions to request. 请求设置的 block shape 维度。</param>
+    /// <returns><c>true</c> when TensorRT accepts the block shape; otherwise <c>false</c>. TensorRT 接受该 block shape 时返回 <c>true</c>，否则返回 <c>false</c>。</returns>
     public bool SetDequantizeBlockShape(TensorRtDims blockShape)
     {
         ValidateDims(blockShape, nameof(blockShape));

@@ -55,36 +55,43 @@ public sealed class TensorRtNativeDependencyInfo
 
     /// <summary>
     /// Gets how this dependency path was discovered.
+    /// 获取该依赖路径的发现方式。
     /// </summary>
     public TensorRtNativeDependencySource Source { get; }
 
     /// <summary>
     /// Gets the module or file name.
+    /// 获取模块名或文件名。
     /// </summary>
     public string Name { get; }
 
     /// <summary>
     /// Gets the full path when it is available.
+    /// 获取可用时的完整路径。
     /// </summary>
     public string Path { get; }
 
     /// <summary>
     /// Gets whether the path exists at probe time.
+    /// 获取探测时该路径是否存在。
     /// </summary>
     public bool Exists { get; }
 
     /// <summary>
     /// Gets the file version reported by Windows file-version metadata when available.
+    /// 获取可用时 Windows 文件版本元数据报告的文件版本。
     /// </summary>
     public string FileVersion { get; }
 
     /// <summary>
     /// Gets the product version reported by Windows file-version metadata when available.
+    /// 获取可用时 Windows 文件版本元数据报告的产品版本。
     /// </summary>
     public string ProductVersion { get; }
 
     /// <summary>
     /// Gets a non-throwing diagnostic collected while reading this entry.
+    /// 获取读取该条目时收集的非抛异常诊断信息。
     /// </summary>
     public string Diagnostic { get; }
 
@@ -125,46 +132,55 @@ public sealed class TensorRtDependencyProbeReport
 
     /// <summary>
     /// Gets the TensorRT API line used to choose expected TensorRT DLL names.
+    /// 获取用于选择预期 TensorRT DLL 名称的 TensorRT API line。
     /// </summary>
     public TensorRtApiLine Line { get; }
 
     /// <summary>
     /// Gets whether the managed native bridge loader initialized successfully.
+    /// 获取托管 native bridge loader 是否已成功初始化。
     /// </summary>
     public bool BridgeInitialized { get; }
 
     /// <summary>
     /// Gets the bridge loader diagnostic message.
+    /// 获取 bridge loader 的诊断消息。
     /// </summary>
     public string BridgeDiagnostic { get; }
 
     /// <summary>
     /// Gets native bridge candidate paths produced by the same resolver used for DllImport loading.
+    /// 获取由 DllImport 加载使用的同一 resolver 生成的 native bridge 候选路径。
     /// </summary>
     public IReadOnlyList<TensorRtNativeDependencyInfo> NativeBridgeCandidates { get; }
 
     /// <summary>
     /// Gets matching modules that are already loaded in the current process.
+    /// 获取当前进程中已经加载的匹配模块。
     /// </summary>
     public IReadOnlyList<TensorRtNativeDependencyInfo> LoadedModules { get; }
 
     /// <summary>
     /// Gets matching dependency DLLs found on the current process search path.
+    /// 获取在当前进程搜索路径上找到的匹配依赖 DLL。
     /// </summary>
     public IReadOnlyList<TensorRtNativeDependencyInfo> SearchPathCandidates { get; }
 
     /// <summary>
     /// Gets non-fatal diagnostics collected while probing modules and directories.
+    /// 获取探测模块和目录时收集的非致命诊断信息。
     /// </summary>
     public IReadOnlyList<string> Diagnostics { get; }
 
     /// <summary>
     /// Gets the number of matching loaded modules.
+    /// 获取匹配的已加载模块数量。
     /// </summary>
     public int LoadedModuleCount => LoadedModules.Count;
 
     /// <summary>
     /// Gets the number of matching search-path candidates.
+    /// 获取匹配的搜索路径候选项数量。
     /// </summary>
     public int SearchPathCandidateCount => SearchPathCandidates.Count;
 

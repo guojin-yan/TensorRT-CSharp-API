@@ -2,6 +2,7 @@ namespace JYPPX.Shared.Generated;
 
 /// <summary>
 /// Describes one generated API manifest entry.
+/// 描述一个生成的 API manifest 条目。
 /// </summary>
 internal sealed class GeneratedApiDefinition
 {

@@ -40,6 +40,7 @@ Run this gate before considering any release-candidate tag:
 powershell -ExecutionPolicy Bypass -File .\eng\Export-InterfaceCoverageMatrix.ps1
 dotnet restore .\TensorRtSharp.sln
 dotnet build .\TensorRtSharp.sln -c Debug --no-restore
+powershell -ExecutionPolicy Bypass -File .\eng\Test-PublicApiBilingualDocumentation.ps1
 dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --no-build
 dotnet docfx .\docs\docfx.json
 ```
@@ -58,6 +59,7 @@ Expected local gate result:
 - TensorRT missing rows remain `0`.
 - CUDA runtime missing rows remain `0`.
 - `dotnet build` reports `0` warnings and `0` errors.
+- Public API XML comments contain both English and Chinese text.
 - `JYPPX.ProjectQuality.Tests` passes.
 - DocFX reports `0` warnings and `0` errors.
 

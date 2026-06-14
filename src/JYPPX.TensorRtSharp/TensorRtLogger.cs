@@ -17,7 +17,7 @@ public sealed class TensorRtLogger : IDisposable
     /// Creates a TensorRT logger for one TensorRT API line.
     /// 为一个 TensorRT API line 创建 TensorRT logger。
     /// </summary>
-    /// <param name="line">The TensorRT API line. TensorRT API line。</param>
+    /// <param name="line">The TensorRT API line. TensorRT API 版本线。</param>
     public TensorRtLogger(TensorRtApiLine line)
     {
         NativeBridgeLoader.EnsureInitialized();

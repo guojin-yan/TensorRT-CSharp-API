@@ -24,6 +24,7 @@
 powershell -ExecutionPolicy Bypass -File .\eng\Export-InterfaceCoverageMatrix.ps1
 dotnet restore .\TensorRtSharp.sln
 dotnet build .\TensorRtSharp.sln -c Debug --no-restore
+powershell -ExecutionPolicy Bypass -File .\eng\Test-PublicApiBilingualDocumentation.ps1
 dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --no-build
 dotnet docfx .\docs\docfx.json
 ```
@@ -42,6 +43,7 @@ cmake --build --preset win-x64-trt11-cuda13-release --parallel
 - TensorRT missing rows 保持 `0`。
 - CUDA runtime missing rows 保持 `0`。
 - `dotnet build` 为 `0` warning、`0` error。
+- 公开 API XML 注释同时包含英文和中文。
 - `JYPPX.ProjectQuality.Tests` 通过。
 - DocFX 为 `0` warning、`0` error。
 

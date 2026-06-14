@@ -7,6 +7,7 @@ namespace JYPPX.CudaSharp;
 
 /// <summary>
 /// Probes the current CUDA bridge state and available devices.
+/// 探测当前 CUDA bridge 状态和可用设备。
 /// </summary>
 public static class CudaEnvironmentProbe
 {

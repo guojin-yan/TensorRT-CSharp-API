@@ -187,7 +187,7 @@ public partial class CudaMemory : IDisposable
     /// 对分配的一部分应用 CUDA memory advice。
     /// </summary>
     /// <param name="count">The number of bytes covered by the advice. advice 覆盖的字节数。</param>
-    /// <param name="advice">The CUDA memory advice. CUDA memory advice。</param>
+    /// <param name="advice">The CUDA memory advice. CUDA 内存建议。</param>
     /// <param name="device">The device ordinal associated with the advice. 与 advice 关联的设备序号。</param>
     public void Advise(int count, CudaMemoryAdvice advice, int device)
     {
@@ -199,7 +199,7 @@ public partial class CudaMemory : IDisposable
     /// Applies a CUDA memory advice to the entire allocation.
     /// 对整个分配应用 CUDA memory advice。
     /// </summary>
-    /// <param name="advice">The CUDA memory advice. CUDA memory advice。</param>
+    /// <param name="advice">The CUDA memory advice. CUDA 内存建议。</param>
     /// <param name="device">The device ordinal associated with the advice. 与 advice 关联的设备序号。</param>
     public void Advise(CudaMemoryAdvice advice, int device)
     {

@@ -109,6 +109,9 @@ jobs:
       - name: Build solution
         run: dotnet build TensorRtSharp.sln -c "${{ inputs.configuration }}" --no-restore
 
+      - name: Validate public API bilingual documentation
+        run: pwsh -NoProfile -File .\eng\Test-PublicApiBilingualDocumentation.ps1
+
       - name: Test project quality
         run: dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c "${{ inputs.configuration }}" --no-build
 

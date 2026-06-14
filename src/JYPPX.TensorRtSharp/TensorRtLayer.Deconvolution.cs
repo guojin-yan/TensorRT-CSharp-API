@@ -86,7 +86,7 @@ public sealed partial class TensorRtLayer
     /// Gets the explicit N-D padding of a deconvolution layer.
     /// 获取 deconvolution 层的显式 N-D padding。
     /// </summary>
-    /// <returns>The current deconvolution padding dimensions.</returns>
+    /// <returns>The current deconvolution padding dimensions. 当前 deconvolution padding 维度。</returns>
     public TensorRtDims GetDeconvolutionPadding()
     {
         return NativeBridgeApi.GetDeconvolutionPadding(Line, _handle);
@@ -96,7 +96,7 @@ public sealed partial class TensorRtLayer
     /// Sets the explicit N-D padding of a deconvolution layer.
     /// 设置 deconvolution 层的显式 N-D padding。
     /// </summary>
-    /// <param name="padding">The padding dimensions to apply.</param>
+    /// <param name="padding">The padding dimensions to apply. 要应用的 padding 维度。</param>
     public void SetDeconvolutionPadding(TensorRtDims padding)
     {
         ValidateDims(padding, nameof(padding));

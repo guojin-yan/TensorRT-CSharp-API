@@ -166,7 +166,7 @@ public sealed partial class TensorRtRefitter
     /// 获取指定 refit weights 的 TensorRT 内存位置。适用于 TensorRT 10/11。
     /// </summary>
     /// <param name="weightsName">The refittable weights name. 可 refit 权重名称。</param>
-    /// <returns>The TensorRT tensor location. TensorRT tensor location。</returns>
+    /// <returns>The TensorRT tensor location. TensorRT tensor 的内存位置。</returns>
     public TensorRtTensorLocation GetWeightsLocation(string weightsName)
     {
         return NativeBridgeApi.GetRefitterWeightsLocation(Line, _handle, weightsName);

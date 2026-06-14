@@ -156,7 +156,7 @@ public sealed class CudaGraph : IDisposable
     /// Returns whether CUDA reports that a node belongs to this graph.
     /// 返回 CUDA 是否报告指定 node 属于当前 graph。
     /// </summary>
-    /// <param name="node">The graph node token. Graph node token。</param>
+    /// <param name="node">The graph node token. graph node 的 token。</param>
     /// <returns><see langword="true"/> when the node's containing graph is this graph. 当 node 的 containing graph 是当前 graph 时返回 <see langword="true"/>。</returns>
     public bool ContainsNode(CudaGraphNode node)
     {
@@ -178,8 +178,8 @@ public sealed class CudaGraph : IDisposable
     /// Gets the CUDA runtime local id for a graph node when supported by the loaded runtime.
     /// 在当前 CUDA runtime 支持时获取 graph node 的 local id。
     /// </summary>
-    /// <param name="node">The graph node token. Graph node token。</param>
-    /// <returns>The CUDA graph node local id. CUDA graph node local id。</returns>
+    /// <param name="node">The graph node token. graph node 的 token。</param>
+    /// <returns>The CUDA graph node local id. CUDA graph node 的 local id。</returns>
     public static uint GetNodeLocalId(CudaGraphNode node)
     {
         return NativeCudaApi.GetGraphNodeLocalId(node);
@@ -189,8 +189,8 @@ public sealed class CudaGraph : IDisposable
     /// Gets the CUDA tools id for a graph node when supported by the loaded runtime.
     /// 在当前 CUDA runtime 支持时获取 graph node 的 tools id。
     /// </summary>
-    /// <param name="node">The graph node token. Graph node token。</param>
-    /// <returns>The CUDA graph node tools id. CUDA graph node tools id。</returns>
+    /// <param name="node">The graph node token. graph node 的 token。</param>
+    /// <returns>The CUDA graph node tools id. CUDA graph node 的 tools id。</returns>
     public static ulong GetNodeToolsId(CudaGraphNode node)
     {
         return NativeCudaApi.GetGraphNodeToolsId(node);

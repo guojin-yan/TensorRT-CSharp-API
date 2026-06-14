@@ -8,6 +8,8 @@ on:
     paths:
       - ".github/workflows/docs-release.yml"
       - "docs/**"
+      - "eng/Test-PublicApiDocumentation.ps1"
+      - "eng/Test-PublicApiBilingualDocumentation.ps1"
       - "src/**"
       - "README.md"
       - "README.zh-CN.md"
@@ -34,6 +36,9 @@ jobs:
 
       - name: Restore solution
         run: dotnet restore TensorRtSharp.sln
+
+      - name: Validate public API bilingual documentation
+        run: pwsh -NoProfile -File .\eng\Test-PublicApiBilingualDocumentation.ps1
 
       - name: Build docs
         run: dotnet docfx .\docs\docfx.json

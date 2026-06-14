@@ -38,7 +38,11 @@ public sealed class TensorRtOptimizationProfileShapeRange
     /// </summary>
     public TensorRtDims Max { get; }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Formats the min/opt/max shape range for diagnostics.
+    /// 将 min/opt/max shape 范围格式化为便于诊断的字符串。
+    /// </summary>
+    /// <returns>A display string containing minimum, optimal, and maximum shapes. 包含最小、最优和最大形状的显示字符串。</returns>
     public override string ToString()
     {
         return $"Min={Min}, Opt={Opt}, Max={Max}";

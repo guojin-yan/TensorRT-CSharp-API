@@ -39,10 +39,11 @@ public sealed partial class TensorRtNetworkDefinition
 
     /// <summary>
     /// Assigns a TensorRT name to a weights object before engine build.
+    /// 在 engine 构建前为 weights 对象分配 TensorRT 名称。
     /// </summary>
-    /// <param name="constantLayer">A constant layer created by this network.</param>
-    /// <param name="weightsName">TensorRT weights name.</param>
-    /// <returns>True if TensorRT accepted the name assignment; otherwise false.</returns>
+    /// <param name="constantLayer">A constant layer created by this network. 由当前 network 创建的 constant layer。</param>
+    /// <param name="weightsName">TensorRT weights name. TensorRT 权重名称。</param>
+    /// <returns>True if TensorRT accepted the name assignment; otherwise false. 如果 TensorRT 接受名称分配则返回 true，否则返回 false。</returns>
     public bool SetWeightsName(TensorRtLayer constantLayer, string weightsName)
     {
         if (constantLayer == null)

@@ -20,11 +20,13 @@ public readonly struct CudaStreamPriorityRange
 
     /// <summary>
     /// Priority value for the lowest-priority stream.
+    /// 最低优先级 stream 的优先级值。
     /// </summary>
     public int LeastPriority { get; }
 
     /// <summary>
     /// Priority value for the highest-priority stream.
+    /// 最高优先级 stream 的优先级值。
     /// </summary>
     public int GreatestPriority { get; }
 

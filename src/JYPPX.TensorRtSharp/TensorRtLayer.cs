@@ -425,7 +425,7 @@ public sealed partial class TensorRtLayer : IDisposable
     /// Gets the index output data type configured on a TensorRT 11 TopK layer.
     /// 获取 TensorRT 11 TopK 层索引输出的数据类型。
     /// </summary>
-    /// <returns>The configured TopK indices data type.</returns>
+    /// <returns>The configured TopK indices data type. 已配置的 TopK indices 数据类型。</returns>
     public TensorRtDataType GetTopKIndicesType()
     {
         return NativeBridgeApi.GetTopKIndicesType(Line, _handle);
@@ -435,8 +435,8 @@ public sealed partial class TensorRtLayer : IDisposable
     /// Sets the index output data type on a TensorRT 11 TopK layer.
     /// 设置 TensorRT 11 TopK 层索引输出的数据类型。
     /// </summary>
-    /// <param name="dataType">The requested indices data type.</param>
-    /// <returns><c>true</c> when TensorRT accepts the value; otherwise <c>false</c>.</returns>
+    /// <param name="dataType">The requested indices data type. 请求设置的 indices 数据类型。</param>
+    /// <returns><c>true</c> when TensorRT accepts the value; otherwise <c>false</c>. TensorRT 接受该值时返回 <c>true</c>，否则返回 <c>false</c>。</returns>
     public bool SetTopKIndicesType(TensorRtDataType dataType)
     {
         return NativeBridgeApi.SetTopKIndicesType(Line, _handle, dataType);
@@ -778,7 +778,7 @@ public sealed partial class TensorRtLayer : IDisposable
     /// Gets the explicit N-D padding of a convolution layer.
     /// 获取 convolution 层的显式 N-D padding。
     /// </summary>
-    /// <returns>The current convolution padding dimensions.</returns>
+    /// <returns>The current convolution padding dimensions. 当前 convolution padding 维度。</returns>
     public TensorRtDims GetConvolutionPadding()
     {
         return NativeBridgeApi.GetConvolutionPadding(Line, _handle);
@@ -788,7 +788,7 @@ public sealed partial class TensorRtLayer : IDisposable
     /// Sets the explicit N-D padding of a convolution layer.
     /// 设置 convolution 层的显式 N-D padding。
     /// </summary>
-    /// <param name="padding">The padding dimensions to apply.</param>
+    /// <param name="padding">The padding dimensions to apply. 要应用的 padding 维度。</param>
     public void SetConvolutionPadding(TensorRtDims padding)
     {
         ValidateDims(padding, nameof(padding));
@@ -989,7 +989,7 @@ public sealed partial class TensorRtLayer : IDisposable
     /// Gets the TensorRT 8 resize align-corners flag.
     /// 获取 TensorRT 8 resize 层的 align-corners 标志。
     /// </summary>
-    /// <returns><c>true</c> when corner alignment is enabled.</returns>
+    /// <returns><c>true</c> when corner alignment is enabled. 启用 corner alignment 时返回 <c>true</c>。</returns>
     public bool GetResizeAlignCorners()
     {
         return NativeBridgeApi.GetResizeAlignCorners(Line, _handle);
@@ -999,7 +999,7 @@ public sealed partial class TensorRtLayer : IDisposable
     /// Sets the TensorRT 8 resize align-corners flag.
     /// 设置 TensorRT 8 resize 层的 align-corners 标志。
     /// </summary>
-    /// <param name="alignCorners">Whether resize should align the corner pixels.</param>
+    /// <param name="alignCorners">Whether resize should align the corner pixels. resize 是否应对齐角点像素。</param>
     public void SetResizeAlignCorners(bool alignCorners)
     {
         NativeBridgeApi.SetResizeAlignCorners(Line, _handle, alignCorners);
@@ -1204,7 +1204,7 @@ public sealed partial class TensorRtLayer : IDisposable
     /// Sets the axes vector used by a TensorRT 10 or TensorRT 11 slice layer.
     /// 设置 TensorRT 10 或 TensorRT 11 slice 层使用的 axes 向量。
     /// </summary>
-    /// <param name="axes">The axes dimensions to apply.</param>
+    /// <param name="axes">The axes dimensions to apply. 要应用的 axes 维度。</param>
     public void SetSliceAxes(TensorRtDims axes)
     {
         if (axes == null)
@@ -1219,7 +1219,7 @@ public sealed partial class TensorRtLayer : IDisposable
     /// Gets the axes vector used by a TensorRT 10 or TensorRT 11 slice layer.
     /// 获取 TensorRT 10 或 TensorRT 11 slice 层使用的 axes 向量。
     /// </summary>
-    /// <returns>The current slice axes dimensions.</returns>
+    /// <returns>The current slice axes dimensions. 当前 slice axes 维度。</returns>
     public TensorRtDims GetSliceAxes()
     {
         return NativeBridgeApi.GetSliceAxes(Line, _handle);

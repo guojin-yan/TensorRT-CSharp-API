@@ -214,7 +214,7 @@ public sealed partial class TensorRtBuilderConfig : IDisposable
     /// Sets the TensorRT 10.x runtime platform for cross-platform engine generation.
     /// 设置 TensorRT 10.x 用于跨平台 engine 生成的 runtime platform。
     /// </summary>
-    /// <param name="platform">The TensorRT runtime platform. TensorRT runtime platform。</param>
+    /// <param name="platform">The TensorRT runtime platform. TensorRT 运行时平台。</param>
     /// <remarks>
     /// TensorRT 8.x does not expose this option and the native bridge returns NotSupported.
     /// TensorRT 8.x 不暴露该选项，原生桥接会返回 NotSupported。
@@ -243,7 +243,7 @@ public sealed partial class TensorRtBuilderConfig : IDisposable
     /// 将一个 layer 固定到指定的 TensorRT device type。
     /// </summary>
     /// <param name="layer">The target layer. 目标 layer。</param>
-    /// <param name="deviceType">The TensorRT device type. TensorRT device type。</param>
+    /// <param name="deviceType">The TensorRT device type. TensorRT 设备类型。</param>
     public void SetLayerDeviceType(TensorRtLayer layer, TensorRtDeviceType deviceType)
     {
         ValidateLayer(layer);
@@ -289,7 +289,7 @@ public sealed partial class TensorRtBuilderConfig : IDisposable
     /// Sets a TensorRT memory-pool size limit.
     /// 设置一个 TensorRT memory pool 大小上限。
     /// </summary>
-    /// <param name="pool">The TensorRT memory pool. TensorRT memory pool。</param>
+    /// <param name="pool">The TensorRT memory pool. TensorRT 内存池。</param>
     /// <param name="bytes">The size limit in bytes. 大小上限，单位为字节。</param>
     public void SetMemoryPoolLimit(TensorRtMemoryPoolType pool, ulong bytes)
     {
@@ -300,7 +300,7 @@ public sealed partial class TensorRtBuilderConfig : IDisposable
     /// Gets a TensorRT memory-pool size limit.
     /// 获取一个 TensorRT memory pool 大小上限。
     /// </summary>
-    /// <param name="pool">The TensorRT memory pool. TensorRT memory pool。</param>
+    /// <param name="pool">The TensorRT memory pool. TensorRT 内存池。</param>
     /// <returns>The size limit in bytes. 大小上限，单位为字节。</returns>
     public ulong GetMemoryPoolLimit(TensorRtMemoryPoolType pool)
     {
@@ -331,7 +331,7 @@ public sealed partial class TensorRtBuilderConfig : IDisposable
     /// Sets TensorRT profiling verbosity for build diagnostics.
     /// 设置构建诊断使用的 TensorRT profiling verbosity。
     /// </summary>
-    /// <param name="verbosity">The profiling verbosity. profiling verbosity。</param>
+    /// <param name="verbosity">The profiling verbosity. profiling 详细程度。</param>
     public void SetProfilingVerbosity(TensorRtProfilingVerbosity verbosity)
     {
         NativeBridgeApi.SetProfilingVerbosity(Line, _handle, verbosity);

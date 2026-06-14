@@ -5,6 +5,7 @@ namespace JYPPX.CudaSharp;
 
 /// <summary>
 /// High-level environment snapshot for CUDA bridge diagnostics.
+/// 用于 CUDA bridge 诊断的高层环境快照。
 /// </summary>
 public sealed class CudaEnvironmentSnapshot
 {

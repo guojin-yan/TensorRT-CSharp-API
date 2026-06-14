@@ -58,7 +58,7 @@ public sealed class TensorRtRefitWeightsBuffer : IDisposable
     /// 从单精度浮点权重创建 pinned refit buffer。
     /// </summary>
     /// <param name="values">The weight values. 权重值。</param>
-    /// <returns>A pinned refit buffer. pinned refit buffer。</returns>
+    /// <returns>A pinned refit buffer. pinned refit 缓冲区。</returns>
     public static TensorRtRefitWeightsBuffer FromSingleArray(float[] values)
     {
         return new TensorRtRefitWeightsBuffer(TensorRtWeights.FromSingleArray(values));
@@ -69,7 +69,7 @@ public sealed class TensorRtRefitWeightsBuffer : IDisposable
     /// 从 32 位整数权重创建 pinned refit buffer。
     /// </summary>
     /// <param name="values">The weight values. 权重值。</param>
-    /// <returns>A pinned refit buffer. pinned refit buffer。</returns>
+    /// <returns>A pinned refit buffer. pinned refit 缓冲区。</returns>
     public static TensorRtRefitWeightsBuffer FromInt32Array(int[] values)
     {
         return new TensorRtRefitWeightsBuffer(TensorRtWeights.FromInt32Array(values));
@@ -81,7 +81,7 @@ public sealed class TensorRtRefitWeightsBuffer : IDisposable
     /// </summary>
     /// <param name="values">The weight values. 权重值。</param>
     /// <param name="dataType">The TensorRT byte-backed data type. TensorRT byte 承载数据类型。</param>
-    /// <returns>A pinned refit buffer. pinned refit buffer。</returns>
+    /// <returns>A pinned refit buffer. pinned refit 缓冲区。</returns>
     public static TensorRtRefitWeightsBuffer FromByteArray(byte[] values, TensorRtDataType dataType = TensorRtDataType.Int8)
     {
         return new TensorRtRefitWeightsBuffer(TensorRtWeights.FromByteArray(values, dataType));

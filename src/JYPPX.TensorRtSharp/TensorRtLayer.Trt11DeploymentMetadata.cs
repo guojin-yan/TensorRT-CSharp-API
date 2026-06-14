@@ -271,7 +271,7 @@ public sealed partial class TensorRtLayer
     /// Gets the compute precision used by a TensorRT 8 or TensorRT 10 normalization layer.
     /// 获取 TensorRT 8 或 TensorRT 10 normalization 层使用的计算精度。
     /// </summary>
-    /// <returns>The normalization compute precision data type.</returns>
+    /// <returns>The normalization compute precision data type. normalization 计算精度的数据类型。</returns>
     public TensorRtDataType GetNormalizationComputePrecision()
     {
         return NativeBridgeApi.GetNormalizationComputePrecision(Line, _handle);
@@ -281,7 +281,7 @@ public sealed partial class TensorRtLayer
     /// Sets the compute precision used by a TensorRT 8 or TensorRT 10 normalization layer.
     /// 设置 TensorRT 8 或 TensorRT 10 normalization 层使用的计算精度。
     /// </summary>
-    /// <param name="dataType">The compute precision data type.</param>
+    /// <param name="dataType">The compute precision data type. 计算精度的数据类型。</param>
     public void SetNormalizationComputePrecision(TensorRtDataType dataType)
     {
         NativeBridgeApi.SetNormalizationComputePrecision(Line, _handle, dataType);

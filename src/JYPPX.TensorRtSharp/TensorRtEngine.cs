@@ -219,7 +219,7 @@ public sealed partial class TensorRtEngine : IDisposable
     /// 获取一个 engine tensor 的 TensorRT tensor location。
     /// </summary>
     /// <param name="tensorName">The engine tensor name. engine tensor 名称。</param>
-    /// <returns>The TensorRT tensor location. TensorRT tensor location。</returns>
+    /// <returns>The TensorRT tensor location. TensorRT tensor 的内存位置。</returns>
     public TensorRtTensorLocation GetTensorLocation(string tensorName)
     {
         return NativeBridgeApi.GetEngineTensorLocation(Line, _handle, tensorName);
@@ -287,7 +287,7 @@ public sealed partial class TensorRtEngine : IDisposable
     /// 获取一个 engine tensor 的 TensorRT tensor format。
     /// </summary>
     /// <param name="tensorName">The engine tensor name. engine tensor 名称。</param>
-    /// <returns>The TensorRT tensor format. TensorRT tensor format。</returns>
+    /// <returns>The TensorRT tensor format. TensorRT tensor 格式。</returns>
     public TensorRtTensorFormat GetTensorFormat(string tensorName)
     {
         return NativeBridgeApi.GetEngineTensorFormat(Line, _handle, tensorName);
@@ -299,7 +299,7 @@ public sealed partial class TensorRtEngine : IDisposable
     /// </summary>
     /// <param name="tensorName">The engine tensor name. engine tensor 名称。</param>
     /// <param name="profileIndex">The optimization profile index. optimization profile 索引。</param>
-    /// <returns>The TensorRT tensor format. TensorRT tensor format。</returns>
+    /// <returns>The TensorRT tensor format. TensorRT tensor 格式。</returns>
     public TensorRtTensorFormat GetTensorFormat(string tensorName, int profileIndex)
     {
         return NativeBridgeApi.GetEngineTensorFormat(Line, _handle, tensorName, profileIndex);
@@ -357,7 +357,7 @@ public sealed partial class TensorRtEngine : IDisposable
     /// </summary>
     /// <param name="tensorName">The engine tensor name. engine tensor 名称。</param>
     /// <param name="profileIndex">The optimization profile index. optimization profile 索引。</param>
-    /// <param name="selector">The min/opt/max selector. min/opt/max selector。</param>
+    /// <param name="selector">The min/opt/max selector. min/opt/max 选择器。</param>
     /// <returns>The profile shape. profile 形状。</returns>
     public TensorRtDims GetProfileShape(string tensorName, int profileIndex, TensorRtOptimizationProfileSelector selector)
     {
@@ -370,7 +370,7 @@ public sealed partial class TensorRtEngine : IDisposable
     /// </summary>
     /// <param name="tensorName">The engine tensor name. 引擎张量名称。</param>
     /// <param name="profileIndex">The optimization profile index. 优化 profile 索引。</param>
-    /// <param name="selector">The min/opt/max profile selector. min/opt/max profile selector。</param>
+    /// <param name="selector">The min/opt/max profile selector. min/opt/max profile 选择器。</param>
     /// <returns>The profile shape reported by TensorRT. TensorRT 报告的 profile 形状。</returns>
     public TensorRtDims64 GetProfileShape64(string tensorName, int profileIndex, TensorRtOptimizationProfileSelector selector)
     {
@@ -383,7 +383,7 @@ public sealed partial class TensorRtEngine : IDisposable
     /// </summary>
     /// <param name="tensorName">The engine tensor name. 引擎张量名称。</param>
     /// <param name="profileIndex">The optimization profile index. 优化 profile 索引。</param>
-    /// <param name="selector">The min/opt/max profile selector. min/opt/max profile selector。</param>
+    /// <param name="selector">The min/opt/max profile selector. min/opt/max profile 选择器。</param>
     /// <param name="dimensionIndex">The zero-based dimension index. 从零开始的维度索引。</param>
     /// <returns>The profile dimension extent reported by TensorRT. TensorRT 报告的 profile 维度 extent。</returns>
     public long GetProfileShapeDimensionExtent64(string tensorName, int profileIndex, TensorRtOptimizationProfileSelector selector, int dimensionIndex)

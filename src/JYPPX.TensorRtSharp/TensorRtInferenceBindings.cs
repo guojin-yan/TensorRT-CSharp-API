@@ -26,7 +26,7 @@ public sealed class TensorRtInferenceBindings : IDisposable
     /// Creates a binding set for one engine, execution context, and optimization profile.
     /// 为一个 engine、execution context 和 optimization profile 创建绑定集。
     /// </summary>
-    /// <param name="engine">The TensorRT engine. TensorRT engine。</param>
+    /// <param name="engine">The TensorRT engine. TensorRT 引擎。</param>
     /// <param name="context">The execution context used for enqueue. 用于 enqueue 的 execution context。</param>
     /// <param name="profileIndex">The optimization profile index. Optimization profile 索引。</param>
     public TensorRtInferenceBindings(TensorRtEngine engine, TensorRtExecutionContext context, int profileIndex = 0)

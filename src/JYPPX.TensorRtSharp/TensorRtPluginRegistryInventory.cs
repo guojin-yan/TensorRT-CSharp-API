@@ -102,6 +102,7 @@ public enum TensorRtPluginRegistrySource
 
     /// <summary>
     /// The inventory was collected from TensorRT's builder capability registry.
+    /// inventory 来自 TensorRT builder capability registry。
     /// </summary>
     BuilderCapability = 2
 }
@@ -148,7 +149,7 @@ public sealed class TensorRtPluginFieldInfo
     /// Returns a compact display string for the plugin field.
     /// 返回该 plugin 字段的简短显示字符串。
     /// </summary>
-    /// <returns>A display string containing the field name, type, and length.</returns>
+    /// <returns>A display string containing the field name, type, and length. 包含字段名、类型和长度的显示字符串。</returns>
     public override string ToString() => $"{Name}:{FieldType}[{Length}]";
 }
 
@@ -230,7 +231,7 @@ public sealed class TensorRtPluginCreatorInfo
     /// Returns a compact display string for the plugin creator.
     /// 返回该 plugin creator 的简短显示字符串。
     /// </summary>
-    /// <returns>A display string containing creator identity and field count.</returns>
+    /// <returns>A display string containing creator identity and field count. 包含 creator 标识和字段数量的显示字符串。</returns>
     public override string ToString() => $"{Index}:{Name}:{Version}:{Namespace}:{InterfaceKind}:{Fields.Count}";
 }
 
@@ -302,6 +303,6 @@ public sealed class TensorRtPluginRegistryInventory
     /// Returns a compact display string for the registry inventory.
     /// 返回该 registry inventory 的简短显示字符串。
     /// </summary>
-    /// <returns>A display string containing source, creator counts, and registry options.</returns>
+    /// <returns>A display string containing source, creator counts, and registry options. 包含来源、creator 数量和 registry 选项的显示字符串。</returns>
     public override string ToString() => $"{Line}:{Source}:creators={CreatorCount}:recursive={RecursiveCreatorCount?.ToString() ?? "n/a"}:parentSearch={ParentSearchEnabled}:errorRecorder={HasErrorRecorder}";
 }

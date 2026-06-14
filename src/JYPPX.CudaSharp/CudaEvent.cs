@@ -6,6 +6,7 @@ namespace JYPPX.CudaSharp;
 
 /// <summary>
 /// Managed wrapper around a CUDA event handle.
+/// CUDA event 句柄的托管封装。
 /// </summary>
 public sealed class CudaEvent : IDisposable
 {
