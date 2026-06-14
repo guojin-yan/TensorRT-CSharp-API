@@ -60,6 +60,15 @@ Linux package key 与 Windows 保持同一 major.minor 矩阵：
 - `TRT11` Windows CUDA `12.9` 当前作为私有源候选，已有 package-consumer smoke 证据；Windows CUDA `13.2` 在 driver/runtime-compatible smoke 可用前保持 blocked。
 - Linux 包保持 dry-run 候选，等待真实 runner 验证。
 
+## nuget.org 大小边界
+
+nuget.org 单个包大小限制约为 `250 MB`。`v4.0.6142` Windows split runtime Release assets 当前共有 `32` 个 `.nupkg`，其中 `17` 个超过 `250 MB`，最大包约 `1225.88 MB`。因此：
+
+- `JYPPX.TensorRT.CSharp.API` managed 包可以发布到 nuget.org。
+- 体积较小的 `Bridge` 和 collection 包可以在需要时发布到 nuget.org 或 GitHub Packages。
+- CUDA/cuDNN/TensorRT vendor 组件包多数不适合 nuget.org，应优先保留为 GitHub Release assets。
+- 后续如果只修改本地 C ABI bridge 或 C# wrapper，重发 `Bridge`、collection 和 managed 包即可，不需要重发 CUDA/cuDNN/TensorRT vendor 包。
+
 ## 工程规则
 
 `pack/runtime/runtime-packages.manifest.json` 中每个 runtime 包必须记录：

@@ -11,23 +11,37 @@ Linux runtime packaging is currently prepared structurally, but it is expected t
 - .NET 10 SDK
 - `pwsh`
 - CMake
-- matching CUDA Toolkit installation
-- matching TensorRT unpacked root
+- matching CUDA Toolkit installed from an official NVIDIA distribution
+- matching TensorRT Linux package downloaded from NVIDIA and unpacked
+- matching cuDNN Linux package downloaded from NVIDIA and installed or unpacked
+
+Do not commit CUDA, cuDNN, or TensorRT binaries to Git. The current workflow does not log in to NVIDIA or download vendor packages during CI. It reads the official package roots that were already prepared on the self-hosted runner.
 
 ## Expected workflow inputs
 
 For `runtime-linux.yml`, provide:
 
-- `runtime_key`
-- `configure_preset`
-- `build_preset`
-- `tensorrt_root`
-- `cuda_root`
+- `version`
+- `runtime_keys`: comma-separated Linux runtime keys
+- `run_smoke`: enable only when the runner has a compatible NVIDIA GPU, driver, and runtime stack
+- `publish_to_github_packages`: defaults to false because large Linux runtime packages should normally stay as GitHub Release assets
+- `release_tag`
+- `attach_to_github_release`
 
 ## Expected root examples
 
-- `tensorrt_root=/opt/tensorrt/trt10-cuda11`
-- `cuda_root=/usr/local/cuda-11.8`
+- TensorRT: `/opt/tensorrt/trt10-cuda12.9`
+- CUDA: `/usr/local/cuda-12.9`
+- cuDNN: `/opt/cudnn/cuda12`
+
+Root resolution order:
+
+1. `pack/runtime/runtime-packages.local.json`
+2. the JSON file pointed to by `JYPPX_RUNTIME_PACKAGE_ROOTS_FILE`
+3. `~/.jyppx/runtime-packages.local.json`
+4. the default Linux roots in `pack/runtime/runtime-packages.manifest.json`
+
+Start from `pack/runtime/runtime-packages.local.example.json` and adjust it for the runner. The example now includes both Windows and Linux matrices. `Resolve-RuntimeRoots.ps1` expands `<repo-root>`, environment variables, and `~`.
 
 ## Dry-run validation idea
 

@@ -35,6 +35,42 @@
       "defaultTensorRtRoot": "<repo-root>\\third_party\\nvidia\\TensorRT-11.0.0.114-cuda 13.2",
       "defaultCudaRoot": "%CUDA_PATH_V13_2%",
       "defaultCudnnRoot": "<repo-root>\\third_party\\nvidia\\cudnn_windows_x86_64_9.22.0_cuda13"
+    },
+    {
+      "key": "linux-x64-trt8.6-cuda11.8-cudnn8.9",
+      "defaultTensorRtRoot": "/opt/tensorrt/trt8-cuda11.8",
+      "defaultCudaRoot": "/usr/local/cuda-11.8",
+      "defaultCudnnRoot": "/opt/cudnn/cuda11"
+    },
+    {
+      "key": "linux-x64-trt8.6-cuda12.1-cudnn8.9",
+      "defaultTensorRtRoot": "/opt/tensorrt/trt8-cuda12.1",
+      "defaultCudaRoot": "/usr/local/cuda-12.1",
+      "defaultCudnnRoot": "/opt/cudnn/cuda12"
+    },
+    {
+      "key": "linux-x64-trt10.11-cuda11.8-cudnn8.9",
+      "defaultTensorRtRoot": "/opt/tensorrt/trt10-cuda11.8",
+      "defaultCudaRoot": "/usr/local/cuda-11.8",
+      "defaultCudnnRoot": "/opt/cudnn/cuda11"
+    },
+    {
+      "key": "linux-x64-trt10.11-cuda12.9-cudnn9.22",
+      "defaultTensorRtRoot": "/opt/tensorrt/trt10-cuda12.9",
+      "defaultCudaRoot": "/usr/local/cuda-12.9",
+      "defaultCudnnRoot": "/opt/cudnn/cuda12"
+    },
+    {
+      "key": "linux-x64-trt11.0-cuda12.9-cudnn9.22",
+      "defaultTensorRtRoot": "/opt/tensorrt/trt11-cuda12.9",
+      "defaultCudaRoot": "/usr/local/cuda-12.9",
+      "defaultCudnnRoot": "/opt/cudnn/cuda12"
+    },
+    {
+      "key": "linux-x64-trt11.0-cuda13.2-cudnn9.22",
+      "defaultTensorRtRoot": "/opt/tensorrt/trt11-cuda13.2",
+      "defaultCudaRoot": "/usr/local/cuda-13.2",
+      "defaultCudnnRoot": "/opt/cudnn/cuda13"
     }
   ]
 }

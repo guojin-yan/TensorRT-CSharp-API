@@ -60,6 +60,15 @@ Current lane guidance:
 - `TRT11` Windows CUDA `12.9` is a private-feed candidate with package-consumer smoke evidence. Windows CUDA `13.2` remains blocked until driver/runtime-compatible smoke is available.
 - Linux packages stay dry-run candidates until a real Linux runner validates them.
 
+## nuget.org size boundary
+
+nuget.org has an approximately `250 MB` per-package size limit. The `v4.0.6142` Windows split runtime Release assets currently contain `32` `.nupkg` files; `17` of them exceed `250 MB`, and the largest package is about `1225.88 MB`. Therefore:
+
+- The `JYPPX.TensorRT.CSharp.API` managed package can be published to nuget.org.
+- Small `Bridge` and collection packages can be published to nuget.org or GitHub Packages when needed.
+- Most CUDA/cuDNN/TensorRT vendor component packages are not suitable for nuget.org and should normally stay as GitHub Release assets.
+- If only the local C ABI bridge or C# wrapper changes later, republish the `Bridge`, collection, and managed packages. Do not republish CUDA/cuDNN/TensorRT vendor packages unless the NVIDIA dependency set changes.
+
 ## Engineering rules
 
 Each runtime package entry in `pack/runtime/runtime-packages.manifest.json` records:

@@ -39,3 +39,5 @@ Latest local evidence on 2026-06-12:
 - `win-x64-trt11.0-cuda13.2-cudnn9.22`: restored, built, and copied `19/19` native asset patterns; smoke remains pending until a CUDA 13-capable driver/runtime stack is available.
 
 Machine-specific roots belong in `runtime-packages.local.json`, which is ignored by Git. Public package metadata belongs in `runtime-packages.manifest.json`.
+
+Start from `runtime-packages.local.example.json` for Windows or Linux runners. CUDA, cuDNN, and TensorRT binaries must be downloaded from official NVIDIA distributions and installed or unpacked on the self-hosted runner; the workflows resolve those roots and do not commit or fetch vendor binaries from Git.

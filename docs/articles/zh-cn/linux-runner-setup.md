@@ -11,21 +11,35 @@
 - .NET 10 SDK
 - `pwsh`
 - CMake
-- 对应版本的 CUDA Toolkit
-- 对应版本的 TensorRT 解压目录
+- 从 NVIDIA 官方渠道下载并安装/解压的对应版本 CUDA Toolkit
+- 从 NVIDIA 官方渠道下载并解压的对应版本 TensorRT Linux 包
+- 从 NVIDIA 官方渠道下载并安装/解压的对应版本 cuDNN Linux 包
+
+不要把 CUDA / cuDNN / TensorRT 二进制提交到 Git。当前 workflow 不在 CI 中自动登录 NVIDIA 或自动下载安装包，而是读取 self-hosted runner 上已经准备好的官方库目录。
 
 ## `runtime-linux.yml` 需要的输入
 
-- `runtime_key`
-- `configure_preset`
-- `build_preset`
-- `tensorrt_root`
-- `cuda_root`
+- `version`
+- `runtime_keys`：逗号分隔的 Linux runtime key
+- `run_smoke`：只有 runner 有可用 NVIDIA GPU、驱动和匹配 runtime 时才打开
+- `publish_to_github_packages`：默认关闭，Linux runtime 大包通常保留为 GitHub Release assets
+- `release_tag`
+- `attach_to_github_release`
 
 ## 根目录示例
 
-- `tensorrt_root=/opt/tensorrt/trt10-cuda11`
-- `cuda_root=/usr/local/cuda-11.8`
+- TensorRT：`/opt/tensorrt/trt10-cuda12.9`
+- CUDA：`/usr/local/cuda-12.9`
+- cuDNN：`/opt/cudnn/cuda12`
+
+root 解析顺序：
+
+1. `pack/runtime/runtime-packages.local.json`
+2. `JYPPX_RUNTIME_PACKAGE_ROOTS_FILE` 指向的 JSON 文件
+3. `~/.jyppx/runtime-packages.local.json`
+4. `pack/runtime/runtime-packages.manifest.json` 中的默认 Linux root
+
+建议从 `pack/runtime/runtime-packages.local.example.json` 复制后修改。该示例已经包含 Windows 和 Linux 全矩阵。`Resolve-RuntimeRoots.ps1` 会展开 `<repo-root>`、系统环境变量和 `~`。
 
 ## 建议的 dry-run 路径
 
