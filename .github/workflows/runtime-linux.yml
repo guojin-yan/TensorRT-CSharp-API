@@ -24,9 +24,9 @@ on:
         default: false
         type: boolean
       publish_to_github_packages:
-        description: Publish packages to GitHub Packages
+        description: Publish packages to GitHub Packages (large Linux runtime packages should normally stay as GitHub Release assets)
         required: false
-        default: true
+        default: false
         type: boolean
       release_tag:
         description: Optional GitHub Release tag for direct asset upload
@@ -61,9 +61,9 @@ on:
         default: false
         type: boolean
       publish_to_github_packages:
-        description: Publish packages to GitHub Packages
+        description: Publish packages to GitHub Packages (large Linux runtime packages should normally stay as GitHub Release assets)
         required: false
-        default: true
+        default: false
         type: boolean
       release_tag:
         description: Optional GitHub Release tag for direct asset upload
