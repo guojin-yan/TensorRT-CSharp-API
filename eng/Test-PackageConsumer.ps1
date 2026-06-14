@@ -733,6 +733,9 @@ Console.WriteLine("CudaDevices=" + cuda.CudaRuntimeInfo.DeviceCount + " Vendor="
   Write-Host "  Elapsed: ${elapsedSeconds}s"
   Write-Host "  Consumer output: $outputDirectory"
 
+  Remove-ConsumerDirectory -Path $restorePackagesPath
+  Write-Host "  Removed restore package cache: $restorePackagesPath"
+
   return [pscustomobject]@{
     RuntimePackageKey = $Key
     RuntimePackageId = $RuntimeNupkg.Id

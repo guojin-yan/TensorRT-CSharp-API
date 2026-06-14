@@ -340,7 +340,8 @@ jobs:
           $paths = @(
             '.\artifacts\runtime',
             '.\artifacts\runtime-split',
-            '.\build-out'
+            '.\build-out',
+            (Join-Path $env:SystemDrive 'jyppx-pkgcache')
           )
 
           foreach ($path in $paths) {
