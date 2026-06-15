@@ -129,8 +129,21 @@ jobs:
           name: ${{ inputs.artifact_name }}
           path: artifacts/managed/*.nupkg
 
+  publish-github-packages:
+    if: ${{ inputs.publish_to_github_packages }}
+    needs: pack
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Download managed package artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ inputs.artifact_name }}
+          path: artifacts/managed
+
       - name: Publish managed package to GitHub Packages
-        if: ${{ inputs.publish_to_github_packages }}
         shell: pwsh
         env:
           GITHUB_PACKAGES_TOKEN: ${{ github.token }}
