@@ -5,6 +5,8 @@ namespace JYPPX.ProjectQuality.Tests;
 
 public sealed class RuntimeManifestTests
 {
+    private static readonly string[] SplitRuntimeRoles = ["bridge", "cuda-cudnn", "tensorrt"];
+
     [Fact]
     public void PublicRuntimeManifestDoesNotContainLocalWindowsRoots()
     {
@@ -54,7 +56,7 @@ public sealed class RuntimeManifestTests
             string projectPath = Path.Combine(RepositoryPaths.Root, "pack", "runtime-split", key, packageId + ".csproj");
 
             Assert.True(File.Exists(projectPath), $"Split runtime project is missing for {key}: {projectPath}");
-            Assert.False(string.IsNullOrWhiteSpace(role), $"Split runtime role is invalid for {key}: {role}");
+            Assert.Contains(role, SplitRuntimeRoles);
             Assert.Contains(prototypeState, new[] { "design-only", "local-validated", "pending-local-validation" });
         }
     }

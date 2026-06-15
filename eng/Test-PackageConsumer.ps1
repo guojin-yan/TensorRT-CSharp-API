@@ -11,6 +11,7 @@ param(
   [string]$ReportDirectory,
   [switch]$RunSmoke,
   [string[]]$SmokeRuntimePackageKey = @(),
+  [switch]$KeepConsumerOutput,
   [switch]$SignConsumerOutput,
   [switch]$TrustSigningCertificate,
   [switch]$TrustSigningCertificateRoot,
@@ -604,6 +605,8 @@ function Invoke-PackageConsumerValidation {
     throw "Refusing to clean consumer path outside output root: $resolvedConsumerRoot"
   }
 
+  $restorePackagesPath = $null
+  try {
   if (Test-Path -LiteralPath $resolvedConsumerRoot) {
     Remove-ConsumerDirectory -Path $resolvedConsumerRoot
   }
@@ -733,9 +736,6 @@ Console.WriteLine("CudaDevices=" + cuda.CudaRuntimeInfo.DeviceCount + " Vendor="
   Write-Host "  Elapsed: ${elapsedSeconds}s"
   Write-Host "  Consumer output: $outputDirectory"
 
-  Remove-ConsumerDirectory -Path $restorePackagesPath
-  Write-Host "  Removed restore package cache: $restorePackagesPath"
-
   return [pscustomobject]@{
     RuntimePackageKey = $Key
     RuntimePackageId = $RuntimeNupkg.Id
@@ -758,6 +758,29 @@ Console.WriteLine("CudaDevices=" + cuda.CudaRuntimeInfo.DeviceCount + " Vendor="
     ConsumerOutputSigningRoot = $consumerSigningRoot
     ElapsedSeconds = $elapsedSeconds
     ConsumerOutput = $outputDirectory
+    ConsumerOutputPreserved = $KeepConsumerOutput.IsPresent
+  }
+  }
+  finally {
+    if (-not [string]::IsNullOrWhiteSpace($restorePackagesPath) -and (Test-Path -LiteralPath $restorePackagesPath)) {
+      try {
+        Remove-ConsumerDirectory -Path $restorePackagesPath
+        Write-Host "  Removed restore package cache: $restorePackagesPath"
+      }
+      catch {
+        Write-Warning "Unable to remove restore package cache '$restorePackagesPath': $($_.Exception.Message)"
+      }
+    }
+
+    if (-not $KeepConsumerOutput.IsPresent -and (Test-Path -LiteralPath $resolvedConsumerRoot)) {
+      try {
+        Remove-ConsumerDirectory -Path $resolvedConsumerRoot
+        Write-Host "  Removed consumer output: $resolvedConsumerRoot"
+      }
+      catch {
+        Write-Warning "Unable to remove consumer output '$resolvedConsumerRoot': $($_.Exception.Message)"
+      }
+    }
   }
 }
 

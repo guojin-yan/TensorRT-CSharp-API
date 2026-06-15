@@ -24,6 +24,8 @@ powershell -ExecutionPolicy Bypass -File .\eng\Test-PackageConsumer.ps1 `
 
 The script reports package ID/version, expected native asset count, found native asset count, missing assets, elapsed time, and optional smoke result.
 
+By default, the generated consumer project and the short-lived NuGet restore cache are deleted after each runtime key. This keeps self-hosted runners from accumulating several TensorRT/CUDA/cuDNN copies during matrix packaging. When investigating a local restore or native-copy issue, pass `-KeepConsumerOutput` to preserve `build-out/package-consumer/<runtime-key>`.
+
 Latest local evidence, generated on 2026-06-12:
 
 - `win-x64-trt10.11-cuda11.8-cudnn8.9`: `16/16` native assets, smoke `passed`, probe output TensorRT `10.11.0`, CUDA `11.8`.

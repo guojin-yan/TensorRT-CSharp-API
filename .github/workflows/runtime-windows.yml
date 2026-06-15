@@ -211,6 +211,21 @@ jobs:
         shell: pwsh
         run: |
           git config --global core.longpaths true
+          $workspace = if ([string]::IsNullOrWhiteSpace($env:GITHUB_WORKSPACE)) { (Get-Location).Path } else { $env:GITHUB_WORKSPACE }
+          $stalePaths = @(
+            (Join-Path $workspace 'artifacts\runtime'),
+            (Join-Path $workspace 'artifacts\runtime-split'),
+            (Join-Path $workspace 'build-out'),
+            (Join-Path $env:SystemDrive 'jyppx-pkgcache')
+          )
+
+          foreach ($path in $stalePaths) {
+            if (Test-Path -LiteralPath $path) {
+              Remove-Item -LiteralPath $path -Recurse -Force -ErrorAction SilentlyContinue
+              Write-Host "Removed stale runtime workspace path: $path"
+            }
+          }
+
           Get-PSDrive -PSProvider FileSystem |
             Select-Object Name,Root,@{Name='FreeGB';Expression={[math]::Round($_.Free/1GB,2)}} |
             Format-Table -AutoSize
@@ -403,6 +418,24 @@ jobs:
             if ($LASTEXITCODE -ne 0) {
               throw "Invoke-LocalSplitRuntimePackage.ps1 failed for runtime key '$key' with exit code $LASTEXITCODE."
             }
+
+            if ('${{ inputs.attach_to_github_release }}' -eq 'true' -and -not [string]::IsNullOrWhiteSpace('${{ inputs.release_tag }}')) {
+              $splitPackageRoot = Join-Path '.\artifacts\runtime-split-nupkg' $key
+              $packages = @(Get-ChildItem -LiteralPath $splitPackageRoot -Filter *.nupkg -Recurse | Sort-Object FullName)
+              if ($packages.Count -eq 0) {
+                throw "No Windows split runtime packages were found for runtime key '$key' under '$splitPackageRoot'."
+              }
+
+              foreach ($package in $packages) {
+                Write-Host "Uploading release asset for ${key}: $($package.FullName)"
+                gh release upload "${{ inputs.release_tag }}" $package.FullName --clobber --repo "$env:GH_REPO"
+              }
+
+              if ('${{ inputs.publish_to_github_packages }}' -ne 'true') {
+                Remove-Item -LiteralPath $splitPackageRoot -Recurse -Force -ErrorAction SilentlyContinue
+                Write-Host "Pruned uploaded split runtime package directory: $splitPackageRoot"
+              }
+            }
           }
 
       - name: Prune Windows runtime intermediates
@@ -493,9 +526,14 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
+          Write-Host "Windows split runtime packages are uploaded immediately after each runtime key is packaged."
+          Write-Host "Skipping the final bulk upload to avoid duplicate large release asset transfers."
+          return
+
           $packages = @(Get-ChildItem -LiteralPath .\artifacts\runtime-split-nupkg -Filter *.nupkg -Recurse | Sort-Object FullName)
           if ($packages.Count -eq 0) {
-            throw "No Windows split runtime packages were found for direct release upload."
+            Write-Host "No remaining Windows split runtime packages were found; direct split release assets may have already been uploaded after each runtime key."
+            return
           }
 
           foreach ($package in $packages) {

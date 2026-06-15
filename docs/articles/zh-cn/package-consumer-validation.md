@@ -19,6 +19,8 @@ CUDA `12.9` 已安装。目标为 CUDA `12.9` 的包必须使用 CUDA `12.9` 以
 powershell -ExecutionPolicy Bypass -File .\eng\Test-PackageConsumer.ps1 -RuntimePackageKey win-x64-trt10.11-cuda11.8-cudnn8.9 -RunSmoke -SmokeRuntimePackageKey win-x64-trt10.11-cuda11.8-cudnn8.9
 ```
 
+脚本默认会在每个 runtime key 验证结束后删除生成的消费端项目和临时 NuGet restore 缓存，避免自托管 runner 在矩阵打包时反复堆积 TensorRT/CUDA/cuDNN 大文件。本地排查 restore 或 native-copy 问题时，可以传入 `-KeepConsumerOutput` 保留 `build-out/package-consumer/<runtime-key>`。
+
 2026-06-12 本机最新证据：
 
 - `win-x64-trt10.11-cuda11.8-cudnn8.9`：`16/16` native assets，smoke `passed`，探针输出 TensorRT `10.11.0`、CUDA `11.8`。
