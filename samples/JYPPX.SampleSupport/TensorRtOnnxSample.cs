@@ -67,7 +67,7 @@ internal sealed class OnnxSampleOptions
             throw new FileNotFoundException("ONNX model file was not found.", fullModelPath);
         }
 
-        TensorRtApiLine line = TensorRtOnnxSample.ResolveLine(SampleCommandLine.GetStringArgument(args, "--tensor-rt-line", "10"));
+        TensorRtApiLine line = TensorRtSampleSupport.ResolveLine(SampleCommandLine.GetStringArgument(args, "--tensor-rt-line", "10"));
         TensorRtDims inputShape = TensorRtOnnxSample.ParseShape(SampleCommandLine.GetStringArgument(args, "--input-shape", defaultInputShape), "--input-shape");
         string minShapeText = SampleCommandLine.GetStringArgument(args, "--min-shape", string.Empty);
         string optShapeText = SampleCommandLine.GetStringArgument(args, "--opt-shape", string.Empty);
@@ -155,29 +155,6 @@ internal sealed class SampleSkippedException : Exception
 
 internal static class TensorRtOnnxSample
 {
-    public static TensorRtApiLine ResolveLine(string value)
-    {
-        if (string.Equals(value, "8", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(value, "trt8", StringComparison.OrdinalIgnoreCase))
-        {
-            return TensorRtApiLine.TensorRt8;
-        }
-
-        if (string.Equals(value, "10", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(value, "trt10", StringComparison.OrdinalIgnoreCase))
-        {
-            return TensorRtApiLine.TensorRt10;
-        }
-
-        if (string.Equals(value, "11", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(value, "trt11", StringComparison.OrdinalIgnoreCase))
-        {
-            return TensorRtApiLine.TensorRt11;
-        }
-
-        throw new ArgumentException("TensorRT line must be 8, 10, or 11.", nameof(value));
-    }
-
     public static TensorRtDims ParseShape(string value, string argumentName)
     {
         if (string.IsNullOrWhiteSpace(value))
@@ -208,7 +185,7 @@ internal static class TensorRtOnnxSample
     public static OnnxSampleResult RunSingleFloatInputOutput(OnnxSampleOptions options)
     {
         TensorRtEnvironmentSnapshot snapshot = TensorRtEnvironmentProbe.GetCurrent();
-        TensorRtAdapterInfo adapter = SelectAdapter(snapshot, options.Line);
+        TensorRtAdapterInfo adapter = TensorRtSampleSupport.SelectAdapter(snapshot, options.Line);
         if (!adapter.RuntimeCreationSupported || !adapter.BuilderCreationSupported)
         {
             throw new SampleSkippedException(adapter.StatusMessage);
@@ -297,14 +274,6 @@ internal static class TensorRtOnnxSample
             engine.DeviceMemorySizeInBytes);
     }
 
-    public static bool IsDeploymentException(Exception exception)
-    {
-        return exception is TensorRtException ||
-               exception is CudaException ||
-               exception is DllNotFoundException ||
-               exception is BadImageFormatException;
-    }
-
     public static int CountElements(TensorRtDims shape)
     {
         if (shape == null)
@@ -347,17 +316,6 @@ internal static class TensorRtOnnxSample
         return index >= 0 && index < labels.Count && !string.IsNullOrWhiteSpace(labels[index])
             ? labels[index]
             : index.ToString();
-    }
-
-    private static TensorRtAdapterInfo SelectAdapter(TensorRtEnvironmentSnapshot snapshot, TensorRtApiLine line)
-    {
-        return line switch
-        {
-            TensorRtApiLine.TensorRt8 => snapshot.TensorRt8,
-            TensorRtApiLine.TensorRt10 => snapshot.TensorRt10,
-            TensorRtApiLine.TensorRt11 => snapshot.TensorRt11,
-            _ => snapshot.TensorRt10
-        };
     }
 
     private static TensorRtTensor ResolveNetworkInput(TensorRtNetworkDefinition network, string requestedName)

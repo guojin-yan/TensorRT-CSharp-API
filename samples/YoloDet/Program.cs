@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using JYPPX.SampleSupport;
 
@@ -53,12 +54,18 @@ internal static class Program
             Console.WriteLine($"YoloDet=Skipped Reason={exception.Message}");
             return 0;
         }
-        catch (Exception exception) when (TensorRtOnnxSample.IsDeploymentException(exception))
+        catch (Exception exception) when (TensorRtSampleSupport.IsDeploymentException(exception))
         {
             Console.WriteLine($"YoloDet=Skipped Reason={exception.Message}");
             return 0;
         }
         catch (ArgumentException exception)
+        {
+            Console.WriteLine($"YoloDet=InvalidArguments Reason={exception.Message}");
+            PrintUsage();
+            return 2;
+        }
+        catch (FileNotFoundException exception)
         {
             Console.WriteLine($"YoloDet=InvalidArguments Reason={exception.Message}");
             PrintUsage();

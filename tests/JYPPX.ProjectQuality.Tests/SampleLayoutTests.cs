@@ -12,23 +12,51 @@ public sealed class SampleLayoutTests
     [Fact]
     public void SamplesDirectoryContainsUserFacingProjectsOnly()
     {
-        string samplesRoot = Path.Combine(RepositoryPaths.Root, "samples");
-        string[] sampleDirectories = Directory.GetDirectories(samplesRoot)
-            .Select(Path.GetFileName)
-            .Where(name => !string.IsNullOrWhiteSpace(name))
-            .Select(name => name!)
-            .Where(name => !string.Equals(name, "JYPPX.SampleSupport", StringComparison.Ordinal))
-            .OrderBy(static name => name, StringComparer.Ordinal)
-            .ToArray();
+        string[] sampleDirectories = GetSampleProjectDirectories();
 
         Assert.DoesNotContain(sampleDirectories, name => name.Contains("SmokeRunner", StringComparison.OrdinalIgnoreCase));
 
+        string samplesRoot = Path.Combine(RepositoryPaths.Root, "samples");
         foreach (string sampleDirectory in sampleDirectories)
         {
             string directory = Path.Combine(samplesRoot, sampleDirectory);
             string[] projects = Directory.GetFiles(directory, "*.csproj", SearchOption.TopDirectoryOnly);
 
             Assert.Single(projects);
+        }
+    }
+
+    [Fact]
+    public void SamplesReadmeListsEveryUserFacingProject()
+    {
+        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "README.md"));
+        string[] sampleDirectories = GetSampleProjectDirectories();
+
+        Assert.NotEmpty(sampleDirectories);
+        foreach (string sampleDirectory in sampleDirectories)
+        {
+            Assert.Contains($"`{sampleDirectory}`", readme, StringComparison.Ordinal);
+        }
+
+        Assert.DoesNotContain("SmokeRunner", readme, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void SmokeReadmeListsEveryValidationProject()
+    {
+        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "smoke", "README.md"));
+        string[] smokeDirectories = Directory.GetDirectories(Path.Combine(RepositoryPaths.Root, "smoke"))
+            .Where(directory => Directory.GetFiles(directory, "*.csproj", SearchOption.TopDirectoryOnly).Length == 1)
+            .Select(Path.GetFileName)
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .Select(name => name!)
+            .OrderBy(static name => name, StringComparer.Ordinal)
+            .ToArray();
+
+        Assert.NotEmpty(smokeDirectories);
+        foreach (string smokeDirectory in smokeDirectories)
+        {
+            Assert.Contains($"`{smokeDirectory}`", readme, StringComparison.Ordinal);
         }
     }
 
@@ -72,5 +100,17 @@ public sealed class SampleLayoutTests
         }
 
         return string.Empty;
+    }
+
+    private static string[] GetSampleProjectDirectories()
+    {
+        return Directory.GetDirectories(Path.Combine(RepositoryPaths.Root, "samples"))
+            .Where(directory => Directory.GetFiles(directory, "*.csproj", SearchOption.TopDirectoryOnly).Length == 1)
+            .Select(Path.GetFileName)
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .Select(name => name!)
+            .Where(name => !string.Equals(name, "JYPPX.SampleSupport", StringComparison.Ordinal))
+            .OrderBy(static name => name, StringComparer.Ordinal)
+            .ToArray();
     }
 }

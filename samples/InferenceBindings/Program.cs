@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using JYPPX.CudaSharp;
+using JYPPX.SampleSupport;
 using JYPPX.Shared.Interop;
 using JYPPX.TensorRtSharp;
 
@@ -10,15 +11,34 @@ internal static class Program
 {
     public static int Main(string[] args)
     {
-        TensorRtApiLine line = ResolveLine(JYPPX.SampleSupport.SampleCommandLine.GetStringArgument(args, "--tensor-rt-line", "10"));
-        int batch = JYPPX.SampleSupport.SampleCommandLine.GetIntArgument(args, "--batch", 2);
+        try
+        {
+            return Run(args);
+        }
+        catch (Exception exception) when (TensorRtSampleSupport.IsDeploymentException(exception))
+        {
+            Console.WriteLine($"InferenceBindings=Skipped Reason={exception.Message}");
+            return 0;
+        }
+        catch (ArgumentException exception)
+        {
+            Console.WriteLine($"InferenceBindings=InvalidArguments Reason={exception.Message}");
+            PrintUsage();
+            return 2;
+        }
+    }
+
+    private static int Run(string[] args)
+    {
+        TensorRtApiLine line = TensorRtSampleSupport.ResolveLine(SampleCommandLine.GetStringArgument(args, "--tensor-rt-line", "10"));
+        int batch = SampleCommandLine.GetIntArgument(args, "--batch", 2);
         if (batch < 1 || batch > 4)
         {
             throw new ArgumentOutOfRangeException(nameof(batch), "Batch must be in the optimization profile range [1, 4].");
         }
 
         TensorRtEnvironmentSnapshot snapshot = TensorRtEnvironmentProbe.GetCurrent();
-        TensorRtAdapterInfo adapter = SelectAdapter(snapshot, line);
+        TensorRtAdapterInfo adapter = TensorRtSampleSupport.SelectAdapter(snapshot, line);
         Console.WriteLine($"InferenceBindings TensorRtLine={(int)line} TRT={snapshot.BuildInfo.TensorRtVersion} CUDA={snapshot.BuildInfo.CudaToolkitVersion} Batch={batch}");
         if (!adapter.RuntimeCreationSupported || !adapter.BuilderCreationSupported)
         {
@@ -92,37 +112,13 @@ internal static class Program
         return 0;
     }
 
-    private static TensorRtApiLine ResolveLine(string value)
+    private static void PrintUsage()
     {
-        if (string.Equals(value, "8", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(value, "trt8", StringComparison.OrdinalIgnoreCase))
-        {
-            return TensorRtApiLine.TensorRt8;
-        }
-
-        if (string.Equals(value, "10", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(value, "trt10", StringComparison.OrdinalIgnoreCase))
-        {
-            return TensorRtApiLine.TensorRt10;
-        }
-
-        if (string.Equals(value, "11", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(value, "trt11", StringComparison.OrdinalIgnoreCase))
-        {
-            return TensorRtApiLine.TensorRt11;
-        }
-
-        throw new ArgumentException("TensorRT line must be 8, 10, or 11.", nameof(value));
-    }
-
-    private static TensorRtAdapterInfo SelectAdapter(TensorRtEnvironmentSnapshot snapshot, TensorRtApiLine line)
-    {
-        return line switch
-        {
-            TensorRtApiLine.TensorRt8 => snapshot.TensorRt8,
-            TensorRtApiLine.TensorRt10 => snapshot.TensorRt10,
-            TensorRtApiLine.TensorRt11 => snapshot.TensorRt11,
-            _ => snapshot.TensorRt10
-        };
+        Console.WriteLine("InferenceBindings sample");
+        Console.WriteLine("Usage:");
+        Console.WriteLine("  dotnet run --project samples/InferenceBindings -- --tensor-rt-line 10 --batch 2");
+        Console.WriteLine("Options:");
+        Console.WriteLine("  --tensor-rt-line <8|10|11>  TensorRT adapter line. Default: 10.");
+        Console.WriteLine("  --batch <1..4>              Runtime batch inside the optimization profile. Default: 2.");
     }
 }

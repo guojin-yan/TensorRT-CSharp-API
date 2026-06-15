@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using JYPPX.CudaSharp;
+using JYPPX.SampleSupport;
 using JYPPX.Shared.Interop;
 using JYPPX.TensorRtSharp;
 
@@ -11,8 +12,27 @@ internal static class Program
 {
     public static int Main(string[] args)
     {
-        TensorRtApiLine line = ResolveLine(JYPPX.SampleSupport.SampleCommandLine.GetStringArgument(args, "--tensor-rt-line", "10"));
-        int batch = JYPPX.SampleSupport.SampleCommandLine.GetIntArgument(args, "--batch", 2);
+        try
+        {
+            return Run(args);
+        }
+        catch (Exception exception) when (TensorRtSampleSupport.IsDeploymentException(exception))
+        {
+            Console.WriteLine($"OnnxToEngine=Skipped Reason={exception.Message}");
+            return 0;
+        }
+        catch (ArgumentException exception)
+        {
+            Console.WriteLine($"OnnxToEngine=InvalidArguments Reason={exception.Message}");
+            PrintUsage();
+            return 2;
+        }
+    }
+
+    private static int Run(string[] args)
+    {
+        TensorRtApiLine line = TensorRtSampleSupport.ResolveLine(SampleCommandLine.GetStringArgument(args, "--tensor-rt-line", "10"));
+        int batch = SampleCommandLine.GetIntArgument(args, "--batch", 2);
         if (batch < 1 || batch > 4)
         {
             throw new ArgumentOutOfRangeException(nameof(batch), "Batch must be in the optimization profile range [1, 4].");
@@ -22,12 +42,12 @@ internal static class Program
         Console.WriteLine($"OnnxToEngine TensorRtLine={(int)line} ModelBytes={model.Length} Batch={batch}");
 
         TensorRtEnvironmentSnapshot snapshot = TensorRtEnvironmentProbe.GetCurrent();
-        TensorRtAdapterInfo adapter = GetAdapterInfo(snapshot, line);
+        TensorRtAdapterInfo adapter = TensorRtSampleSupport.SelectAdapter(snapshot, line);
         Console.WriteLine($"Preflight TRT={snapshot.BuildInfo.TensorRtVersion} CUDA={snapshot.BuildInfo.CudaToolkitVersion} Runtime={adapter.RuntimeCreationSupported} Builder={adapter.BuilderCreationSupported}");
         if (!adapter.RuntimeCreationSupported || !adapter.BuilderCreationSupported)
         {
-          Console.WriteLine($"OnnxToEngine=Skipped Reason={adapter.StatusMessage}");
-          return 0;
+            Console.WriteLine($"OnnxToEngine=Skipped Reason={adapter.StatusMessage}");
+            return 0;
         }
 
         using TensorRtLogger logger = new TensorRtLogger(line);
@@ -56,73 +76,57 @@ internal static class Program
             new TensorRtDims(new[] { 4, 4 }));
         int profileIndex = config.AddOptimizationProfile(profile);
 
-        using TensorRtHostMemory hostMemory = builder.BuildSerializedNetwork(network, config);
         string enginePath = Path.Combine(Path.GetTempPath(), $"jyppx-onnx-to-engine-{Guid.NewGuid():N}.plan");
-        hostMemory.SaveToFile(enginePath);
-        using TensorRtEngine engine = runtime.DeserializeFromFile(enginePath);
-        using TensorRtExecutionContext context = engine.CreateExecutionContext();
-
-        TensorRtDims runtimeShape = new TensorRtDims(new[] { batch, 4 });
-        float[] inputValues = Enumerable.Range(0, batch * 4).Select(index => index + 0.5f).ToArray();
-        using TensorRtInferenceBindings bindings = new TensorRtInferenceBindings(engine, context, profileIndex);
-        bindings.SetInputShape("input", runtimeShape)
-                .CopyInputFromHost("input", inputValues, runtimeShape);
-        bindings.AllocateDeviceBuffer("output", runtimeShape, checked(inputValues.Length * sizeof(float)));
-        bindings.BindAll();
-
-        TensorRtInferenceExecutionSummary executionSummary = null!;
-        float elapsedMilliseconds = stream.MeasureElapsedTime(cudaStream =>
+        try
         {
-            executionSummary = bindings.EnqueueAsync(cudaStream, synchronize: false, runShapeInference: false);
-        });
+            using TensorRtHostMemory hostMemory = builder.BuildSerializedNetwork(network, config);
+            hostMemory.SaveToFile(enginePath);
+            using TensorRtEngine engine = runtime.DeserializeFromFile(enginePath);
+            using TensorRtExecutionContext context = engine.CreateExecutionContext();
 
-        float[] outputValues = bindings.ReadOutputSingles("output", inputValues.Length);
-        if (!inputValues.SequenceEqual(outputValues))
-        {
-            throw new InvalidOperationException($"Output mismatch. Input=[{string.Join(", ", inputValues)}] Output=[{string.Join(", ", outputValues)}]");
+            TensorRtDims runtimeShape = new TensorRtDims(new[] { batch, 4 });
+            float[] inputValues = Enumerable.Range(0, batch * 4).Select(index => index + 0.5f).ToArray();
+            using TensorRtInferenceBindings bindings = new TensorRtInferenceBindings(engine, context, profileIndex);
+            bindings.SetInputShape("input", runtimeShape)
+                    .CopyInputFromHost("input", inputValues, runtimeShape);
+            bindings.AllocateDeviceBuffer("output", runtimeShape, checked(inputValues.Length * sizeof(float)));
+            bindings.BindAll();
+
+            TensorRtInferenceExecutionSummary executionSummary = null!;
+            float elapsedMilliseconds = stream.MeasureElapsedTime(cudaStream =>
+            {
+                executionSummary = bindings.EnqueueAsync(cudaStream, synchronize: false, runShapeInference: false);
+            });
+
+            float[] outputValues = bindings.ReadOutputSingles("output", inputValues.Length);
+            if (!inputValues.SequenceEqual(outputValues))
+            {
+                throw new InvalidOperationException($"Output mismatch. Input=[{string.Join(", ", inputValues)}] Output=[{string.Join(", ", outputValues)}]");
+            }
+
+            Console.WriteLine($"Parsed=True ProfileIndex={profileIndex} EngineFileRoundTrip=True");
+            Console.WriteLine($"BindingReport Ready={bindings.Report.IsReadyForEnqueue} Inputs={bindings.Report.GetInputs().Count} Outputs={bindings.Report.GetOutputs().Count}");
+            Console.WriteLine($"Execution {executionSummary} ElapsedMs={elapsedMilliseconds:0.###} OutputMatch=True");
+            Console.WriteLine("OnnxToEngine Passed=True");
+            return 0;
         }
-
-        File.Delete(enginePath);
-
-        Console.WriteLine($"Parsed=True ProfileIndex={profileIndex} EngineFileRoundTrip=True");
-        Console.WriteLine($"BindingReport Ready={bindings.Report.IsReadyForEnqueue} Inputs={bindings.Report.GetInputs().Count} Outputs={bindings.Report.GetOutputs().Count}");
-        Console.WriteLine($"Execution {executionSummary} ElapsedMs={elapsedMilliseconds:0.###} OutputMatch=True");
-        Console.WriteLine("OnnxToEngine Passed=True");
-        return 0;
+        finally
+        {
+            if (File.Exists(enginePath))
+            {
+                File.Delete(enginePath);
+            }
+        }
     }
 
-    private static TensorRtApiLine ResolveLine(string value)
+    private static void PrintUsage()
     {
-        if (string.Equals(value, "8", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(value, "trt8", StringComparison.OrdinalIgnoreCase))
-        {
-            return TensorRtApiLine.TensorRt8;
-        }
-
-        if (string.Equals(value, "10", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(value, "trt10", StringComparison.OrdinalIgnoreCase))
-        {
-            return TensorRtApiLine.TensorRt10;
-        }
-
-        if (string.Equals(value, "11", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(value, "trt11", StringComparison.OrdinalIgnoreCase))
-        {
-            return TensorRtApiLine.TensorRt11;
-        }
-
-        throw new ArgumentException("TensorRT line must be 8, 10, or 11.", nameof(value));
-    }
-
-    private static TensorRtAdapterInfo GetAdapterInfo(TensorRtEnvironmentSnapshot snapshot, TensorRtApiLine line)
-    {
-        return line switch
-        {
-            TensorRtApiLine.TensorRt8 => snapshot.TensorRt8,
-            TensorRtApiLine.TensorRt10 => snapshot.TensorRt10,
-            TensorRtApiLine.TensorRt11 => snapshot.TensorRt11,
-            _ => throw new ArgumentException("Unsupported TensorRT API line.", nameof(line))
-        };
+        Console.WriteLine("OnnxToEngine sample");
+        Console.WriteLine("Usage:");
+        Console.WriteLine("  dotnet run --project samples/OnnxToEngine -- --tensor-rt-line 10 --batch 2");
+        Console.WriteLine("Options:");
+        Console.WriteLine("  --tensor-rt-line <8|10|11>  TensorRT adapter line. Default: 10.");
+        Console.WriteLine("  --batch <1..4>              Runtime batch inside the optimization profile. Default: 2.");
     }
 }
 
