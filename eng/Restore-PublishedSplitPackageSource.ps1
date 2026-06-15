@@ -11,7 +11,7 @@ param(
   [string]$Repository,
   [string]$OutputRoot,
   [string]$OutputPathFile,
-  [string]$RepositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+  [string]$RepositoryRoot
 )
 
 Set-StrictMode -Version Latest
@@ -138,6 +138,20 @@ function Write-ResolvedPackageSource {
   Set-Content -LiteralPath $OutputPathFile -Value $SourceDirectory -Encoding utf8
 }
 
+$requestedRoles = @(Expand-KeyList -Values $SplitPackageRole | ForEach-Object { $_.ToLowerInvariant() })
+if ($requestedRoles.Count -eq 0) {
+  $requestedRoles = @("all")
+}
+
+if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
+  $scriptRoot = $PSScriptRoot
+  if ([string]::IsNullOrWhiteSpace($scriptRoot)) {
+    $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
+  }
+
+  $RepositoryRoot = (Resolve-Path (Join-Path $scriptRoot "..")).Path
+}
+
 if ([string]::IsNullOrWhiteSpace($Version)) {
   $Version = & (Join-Path $RepositoryRoot "eng\Resolve-PackageVersion.ps1")
 }
@@ -153,11 +167,6 @@ if ([string]::IsNullOrWhiteSpace($OutputRoot)) {
   else {
     $OutputRoot = Join-Path $env:RUNNER_TEMP "jyppx-release-package-source"
   }
-}
-
-$requestedRoles = @(Expand-KeyList -Values $SplitPackageRole | ForEach-Object { $_.ToLowerInvariant() })
-if ($requestedRoles.Count -eq 0) {
-  $requestedRoles = @("all")
 }
 
 $resolvedVendorPackageVersion = Resolve-RolePackageVersion -Value $VendorPackageVersion -Fallback $Version
