@@ -94,12 +94,10 @@ Windows runtime packages are modeled as split component packages under `pack/run
 Component roles:
 
 - `Bridge`: carries only the local C ABI bridge.
-- `CudaCudnn`: carries CUDA runtime and cuDNN assets.
-- `TensorRtRuntime`: carries the core TensorRT runtime assets.
-- `TensorRtExtensions` or TensorRT builder-resource packages: carry parser, plugin, builder-resource, or architecture-specific TensorRT assets.
+- `Vendor`: carries CUDA runtime, cuDNN, TensorRT runtime, parser, plugin, and builder-resource assets for one NVIDIA dependency set.
 - The original runtime package ID remains a lightweight collection package that pins a tested component-version combination.
 
-CUDA/cuDNN/TensorRT component package versions do not need to match the managed package version. Republish them only when the NVIDIA dependency set changes. Republish `Bridge` and the collection package when the local native bridge changes, while pinning the existing vendor component versions.
+Vendor package versions do not need to match the managed package version. Republish Vendor only when the NVIDIA dependency set changes. Republish `Bridge` and the collection package when the local native bridge changes, while pinning the existing Vendor package version.
 
 ## Linux Status
 
@@ -122,7 +120,7 @@ Current publication strategy:
 - Keep large CUDA/cuDNN/TensorRT component packages on GitHub Packages when they fit the GitHub NuGet registry, or on GitHub Releases as release assets.
 - Treat GitHub Release assets as downloadable package files, not as a NuGet feed. When vendor packages are kept only on a Release, the release workflow downloads them into a temporary local package source before validating `bridge,collection`.
 - Treat runtime package versions independently from the managed package version.
-- Rebuild full CUDA/cuDNN/TensorRT component packages only when the NVIDIA dependency set changes.
-- Rebuild `bridge,collection` split packages when the local C ABI bridge changes, and pass the existing vendor component package version so CUDA/cuDNN/TensorRT packages are not republished.
+- Rebuild full Vendor packages only when the NVIDIA dependency set changes.
+- Rebuild `bridge,collection` split packages when the local C ABI bridge changes, and pass the existing Vendor package version so CUDA/cuDNN/TensorRT packages are not republished.
 
 Before public distribution, NVIDIA TensorRT / CUDA / cuDNN redistribution terms must still be reviewed for the exact binaries being shipped.

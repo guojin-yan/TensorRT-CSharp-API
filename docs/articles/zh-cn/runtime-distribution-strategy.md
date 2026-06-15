@@ -105,8 +105,7 @@ nuget.org 单个包大小限制约为 `250 MB`。`v4.0.6142` Windows split runti
 split runtime 模型适用于体积较大、或者不应跟随 managed 代码频繁重发的 Windows runtime 组合：
 
 - `Bridge`：本地 C ABI bridge。只有 native wrapper 代码变化时重发。
-- `CudaCudnn`：CUDA runtime 和 cuDNN 资产。只有 CUDA/cuDNN 依赖集合变化时重发。
-- `TensorRtRuntime` / `TensorRtExtensions` / builder-resource 包：TensorRT 资产。只有 TensorRT 依赖集合变化时重发。
+- `Vendor`：CUDA runtime、cuDNN、TensorRT runtime、parser、plugin 和 builder-resource 资产。只有 NVIDIA 依赖集合变化时重发。
 - collection 包：保留原始 runtime package ID，用来声明一组已验证的组件版本组合。
 
-managed 包可以和这些 runtime 组件包独立发版。这样 C# API 的日常改动保持小包发布，同时 runtime 组合仍然可复现。
+managed 包可以和这些 runtime 组件包独立发版。日常 C# 或 bridge 改动只需要发布 managed 包、`Bridge` 和 collection 包，并固定已有 `Vendor` 包版本。

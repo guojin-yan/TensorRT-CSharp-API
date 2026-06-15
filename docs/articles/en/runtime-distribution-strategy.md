@@ -105,11 +105,10 @@ Supporting scripts:
 The split runtime model applies to Windows runtime combinations that are too large or too stable to republish with every managed-code release:
 
 - `Bridge`: local C ABI bridge, republished when native wrapper code changes.
-- `CudaCudnn`: CUDA runtime and cuDNN assets, republished only when the CUDA/cuDNN dependency set changes.
-- `TensorRtRuntime` / `TensorRtExtensions` / builder-resource packages: TensorRT assets, republished only when the TensorRT dependency set changes.
+- `Vendor`: CUDA runtime, cuDNN, TensorRT runtime, parser, plugin, and builder-resource assets, republished only when the NVIDIA dependency set changes.
 - collection package: the original runtime package ID, republished when a new tested component-version combination should be advertised.
 
-The managed package can release independently from these runtime component packages. This keeps routine C# API changes small while preserving reproducible runtime combinations.
+The managed package can release independently from these runtime component packages. Routine C# or bridge changes should publish only the managed package, `Bridge`, and collection package while pinning the existing `Vendor` package version.
 
 ## Release boundary
 

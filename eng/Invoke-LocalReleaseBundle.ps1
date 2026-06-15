@@ -17,8 +17,6 @@ param(
   [string]$WindowsMetaPackageVersion,
   [string]$WindowsBridgePackageVersion,
   [string]$WindowsVendorPackageVersion,
-  [string]$WindowsCudaCudnnPackageVersion,
-  [string]$WindowsTensorRtPackageVersion,
   [string[]]$WindowsAdditionalPackageSource = @(),
   [string]$WindowsAdditionalPackageSourceUsername,
   [string]$WindowsAdditionalPackageSourcePassword,
@@ -127,15 +125,15 @@ if ($windowsKeys.Count -eq 0) {
 if (-not $SkipWindowsRuntime.IsPresent -and $WindowsRuntimeDeliveryMode -eq "split") {
   $lowerSplitRoles = @($windowsSplitPackageRoles | ForEach-Object { $_.ToLowerInvariant() })
   $requiresPinnedVendorVersion =
-    $lowerSplitRoles -contains "collection" -or
-    $lowerSplitRoles -contains "meta" -or
-    $IncludeWindowsSplitMetaPackage.IsPresent
+    ($lowerSplitRoles -contains "collection" -or
+      $lowerSplitRoles -contains "meta" -or
+      $IncludeWindowsSplitMetaPackage.IsPresent) -and
+    -not ($lowerSplitRoles -contains "vendor") -and
+    -not ($lowerSplitRoles -contains "all")
 
   if ($requiresPinnedVendorVersion -and
-      [string]::IsNullOrWhiteSpace($WindowsVendorPackageVersion) -and
-      [string]::IsNullOrWhiteSpace($WindowsCudaCudnnPackageVersion) -and
-      [string]::IsNullOrWhiteSpace($WindowsTensorRtPackageVersion)) {
-    throw "Windows split collection/meta packaging requires -WindowsVendorPackageVersion, -WindowsCudaCudnnPackageVersion, or -WindowsTensorRtPackageVersion so already-published NVIDIA component packages are pinned explicitly."
+      [string]::IsNullOrWhiteSpace($WindowsVendorPackageVersion)) {
+    throw "Windows split collection/meta packaging requires -WindowsVendorPackageVersion so already-published NVIDIA vendor packages are pinned explicitly, or include vendor/all in -WindowsSplitPackageRoles for a dependency refresh."
   }
 }
 
@@ -221,14 +219,6 @@ if (-not $SkipWindowsRuntime.IsPresent) {
 
       if (-not [string]::IsNullOrWhiteSpace($WindowsVendorPackageVersion)) {
         $arguments += @("-VendorPackageVersion", $WindowsVendorPackageVersion)
-      }
-
-      if (-not [string]::IsNullOrWhiteSpace($WindowsCudaCudnnPackageVersion)) {
-        $arguments += @("-CudaCudnnPackageVersion", $WindowsCudaCudnnPackageVersion)
-      }
-
-      if (-not [string]::IsNullOrWhiteSpace($WindowsTensorRtPackageVersion)) {
-        $arguments += @("-TensorRtPackageVersion", $WindowsTensorRtPackageVersion)
       }
 
       if ($IncludeWindowsSplitMetaPackage.IsPresent) {

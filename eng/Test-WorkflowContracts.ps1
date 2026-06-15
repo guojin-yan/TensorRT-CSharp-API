@@ -121,6 +121,7 @@ $workflowContracts = @(
       New-Requirement -Needle "gh release create" -Description "release creation"
       New-Requirement -Needle "gh release upload" -Description "release asset upload"
       New-Requirement -Needle "windows_split_package_roles includes collection/meta but no vendor component version was provided" -Description "split collection vendor-version guard"
+      New-Requirement -Needle "include vendor/all in windows_split_package_roles" -Description "split collection same-run vendor refresh guidance"
       New-Requirement -Needle "windows_vendor_package_release_tag" -Description "split collection vendor release tag override"
     )
   }

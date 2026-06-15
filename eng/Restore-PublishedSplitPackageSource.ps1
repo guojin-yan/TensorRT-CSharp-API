@@ -5,8 +5,6 @@ param(
   [string]$Version,
   [string]$BridgePackageVersion,
   [string]$VendorPackageVersion,
-  [string]$CudaCudnnPackageVersion,
-  [string]$TensorRtPackageVersion,
   [string]$VendorPackageReleaseTag,
   [string]$Repository,
   [string]$OutputRoot,
@@ -62,11 +60,8 @@ function Resolve-ReleaseTag {
   param(
     [string]$ExplicitTag,
     [string]$ExplicitVendorVersion,
-    [string]$ExplicitCudaCudnnVersion,
-    [string]$ExplicitTensorRtVersion,
     [string]$VendorVersion,
-    [string]$CudaCudnnVersion,
-    [string]$TensorRtVersion
+    [string]$BridgeVersion
   )
 
   if (-not [string]::IsNullOrWhiteSpace($ExplicitTag)) {
@@ -75,16 +70,6 @@ function Resolve-ReleaseTag {
 
   if (-not [string]::IsNullOrWhiteSpace($ExplicitVendorVersion)) {
     return "v$VendorVersion"
-  }
-
-  if (-not [string]::IsNullOrWhiteSpace($ExplicitCudaCudnnVersion) -and
-      ([string]::IsNullOrWhiteSpace($ExplicitTensorRtVersion) -or $CudaCudnnVersion -eq $TensorRtVersion)) {
-    return "v$CudaCudnnVersion"
-  }
-
-  if (-not [string]::IsNullOrWhiteSpace($ExplicitTensorRtVersion) -and
-      [string]::IsNullOrWhiteSpace($ExplicitCudaCudnnVersion)) {
-    return "v$TensorRtVersion"
   }
 
   return ""
@@ -114,15 +99,12 @@ function Get-SplitPackageVersion {
     [Parameter(Mandatory = $true)]
     [string]$BridgeVersion,
     [Parameter(Mandatory = $true)]
-    [string]$CudaCudnnVersion,
-    [Parameter(Mandatory = $true)]
-    [string]$TensorRtVersion
+    [string]$VendorVersion
   )
 
   switch ([string]$SplitPackage.role) {
     "bridge" { return $BridgeVersion }
-    "cuda-cudnn" { return $CudaCudnnVersion }
-    default { return $TensorRtVersion }
+    default { return $VendorVersion }
   }
 }
 
@@ -347,16 +329,11 @@ if ([string]::IsNullOrWhiteSpace($OutputRoot)) {
 
 $resolvedVendorPackageVersion = Resolve-RolePackageVersion -Value $VendorPackageVersion -Fallback $Version
 $resolvedBridgePackageVersion = Resolve-RolePackageVersion -Value $BridgePackageVersion -Fallback $Version
-$resolvedCudaCudnnPackageVersion = Resolve-RolePackageVersion -Value $CudaCudnnPackageVersion -Fallback $resolvedVendorPackageVersion
-$resolvedTensorRtPackageVersion = Resolve-RolePackageVersion -Value $TensorRtPackageVersion -Fallback $resolvedVendorPackageVersion
 $resolvedReleaseTag = Resolve-ReleaseTag `
   -ExplicitTag $VendorPackageReleaseTag `
   -ExplicitVendorVersion $VendorPackageVersion `
-  -ExplicitCudaCudnnVersion $CudaCudnnPackageVersion `
-  -ExplicitTensorRtVersion $TensorRtPackageVersion `
   -VendorVersion $resolvedVendorPackageVersion `
-  -CudaCudnnVersion $resolvedCudaCudnnPackageVersion `
-  -TensorRtVersion $resolvedTensorRtPackageVersion
+  -BridgeVersion $resolvedBridgePackageVersion
 
 $splitManifestPath = Join-Path $RepositoryRoot "pack\runtime-split\split-runtime-packages.manifest.json"
 $splitManifest = Get-Content -LiteralPath $splitManifestPath -Raw -Encoding utf8 | ConvertFrom-Json
@@ -400,8 +377,7 @@ foreach ($package in $missingPackages) {
   $packageVersion = Get-SplitPackageVersion `
     -SplitPackage $package `
     -BridgeVersion $resolvedBridgePackageVersion `
-    -CudaCudnnVersion $resolvedCudaCudnnPackageVersion `
-    -TensorRtVersion $resolvedTensorRtPackageVersion
+    -VendorVersion $resolvedVendorPackageVersion
   $packageFileName = "$($package.packageId).$packageVersion.nupkg"
   $targetPath = Join-Path $sourceDirectory $packageFileName
   if (Test-NuGetPackageFile -Path $targetPath) {

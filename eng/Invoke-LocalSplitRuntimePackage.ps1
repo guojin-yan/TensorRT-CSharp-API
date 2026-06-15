@@ -6,8 +6,6 @@ param(
   [string]$MetaPackageVersion,
   [string]$BridgePackageVersion,
   [string]$VendorPackageVersion,
-  [string]$CudaCudnnPackageVersion,
-  [string]$TensorRtPackageVersion,
   [string]$Configuration = "Release",
   [switch]$SkipManagedPack,
   [switch]$SkipBaseRuntimeBuild,
@@ -80,8 +78,7 @@ function Get-SplitPackageVersion {
 
   switch -Regex ([string]$SplitPackage.role) {
     '^bridge$' { return $resolvedBridgePackageVersion }
-    '^cuda-cudnn$' { return $resolvedCudaCudnnPackageVersion }
-    '^tensorrt-' { return $resolvedTensorRtPackageVersion }
+    '^vendor$' { return $resolvedVendorPackageVersion }
     default { return $resolvedVersion }
   }
 }
@@ -101,17 +98,7 @@ function Test-SplitPackageRequested {
     switch ($requestedRole) {
       "all" { return $true }
       "vendor" {
-        if ($role -ne "bridge") {
-          return $true
-        }
-      }
-      "tensorrt" {
-        if ($role.StartsWith("tensorrt-")) {
-          return $true
-        }
-      }
-      "builder" {
-        if ($role.StartsWith("tensorrt-builder-")) {
+        if ($role -eq "vendor") {
           return $true
         }
       }
@@ -135,8 +122,7 @@ function New-PackageVersionProperties {
   return @(
     "-p:JYPPXPackageVersion=$PackageVersion",
     "-p:JYPPXBridgePackageVersion=$resolvedBridgePackageVersion",
-    "-p:JYPPXCudaCudnnPackageVersion=$resolvedCudaCudnnPackageVersion",
-    "-p:JYPPXTensorRtPackageVersion=$resolvedTensorRtPackageVersion"
+    "-p:JYPPXVendorPackageVersion=$resolvedVendorPackageVersion"
   )
 }
 
@@ -270,8 +256,6 @@ $resolvedVersion = & (Join-Path $RepositoryRoot "eng\Resolve-PackageVersion.ps1"
 $resolvedVendorPackageVersion = Resolve-RolePackageVersion -Value $VendorPackageVersion -Fallback $resolvedVersion
 $resolvedMetaPackageVersion = Resolve-RolePackageVersion -Value $MetaPackageVersion -Fallback $resolvedVersion
 $resolvedBridgePackageVersion = Resolve-RolePackageVersion -Value $BridgePackageVersion -Fallback $resolvedVersion
-$resolvedCudaCudnnPackageVersion = Resolve-RolePackageVersion -Value $CudaCudnnPackageVersion -Fallback $resolvedVendorPackageVersion
-$resolvedTensorRtPackageVersion = Resolve-RolePackageVersion -Value $TensorRtPackageVersion -Fallback $resolvedVendorPackageVersion
 $smokeRuntimeKeys = @(Expand-KeyList -Values $SmokeRuntimePackageKey)
 $requestedSplitRoles = @(Expand-KeyList -Values $SplitPackageRole | ForEach-Object { $_.ToLowerInvariant() })
 if ($requestedSplitRoles.Count -eq 0) {
@@ -314,14 +298,12 @@ if ($shouldPackMetaPackage) {
     })
 
   if ($missingComponentPackages.Count -gt 0) {
-    if ([string]::IsNullOrWhiteSpace($VendorPackageVersion) -and
-        [string]::IsNullOrWhiteSpace($CudaCudnnPackageVersion) -and
-        [string]::IsNullOrWhiteSpace($TensorRtPackageVersion)) {
-      throw "The split meta package would reference non-built vendor components at version '$resolvedVendorPackageVersion'. Pass -VendorPackageVersion, -CudaCudnnPackageVersion, or -TensorRtPackageVersion to pin already-published NVIDIA component packages explicitly, or build with -SplitPackageRole all/vendor first."
+    if ([string]::IsNullOrWhiteSpace($VendorPackageVersion)) {
+      throw "The split meta package would reference a non-built vendor package at version '$resolvedVendorPackageVersion'. Pass -VendorPackageVersion to pin an already-published NVIDIA vendor package explicitly, or build with -SplitPackageRole all/vendor first."
     }
 
     if ((Expand-KeyList -Values $AdditionalPackageSource).Count -eq 0) {
-      Write-Warning "The split meta package depends on component packages that are not being built in this run. Add -AdditionalPackageSource for the feed that already contains those packages, or build with -SplitPackageRole all/vendor first."
+      Write-Warning "The split meta package depends on vendor packages that are not being built in this run. Add -AdditionalPackageSource for the feed that already contains those packages, or build with -SplitPackageRole all/vendor first."
     }
   }
 }

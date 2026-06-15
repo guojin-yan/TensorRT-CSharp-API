@@ -2,15 +2,14 @@
   <PropertyGroup>
     <PackageId>JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt8.6.cuda12.1.cudnn8.9</PackageId>
     <Title>JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt8.6.cuda12.1.cudnn8.9</Title>
-    <Description>Split runtime collection package for TensorRT 8.6 + CUDA 12.1 + cuDNN 8.9 on Windows x64.</Description>
+    <Description>Split runtime collection package for TensorRT 8.6.1.6 + CUDA 12.1 + cuDNN 8.9.7.29 on win-x64.</Description>
     <JYPPXRuntimeKey>win-x64-trt8.6-cuda12.1-cudnn8.9-meta</JYPPXRuntimeKey>
     <SuppressDependenciesWhenPacking>false</SuppressDependenciesWhenPacking>
-    <PackageTags>TensorRT;CUDA;runtime;split-delivery;collection;meta</PackageTags>
+    <PackageTags>TensorRT;CUDA;cuDNN;runtime;split-delivery;collection;meta</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt8.6.cuda12.1.cudnn8.9.Bridge" Version="$(JYPPXBridgePackageVersion)" />
-    <PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt8.6.cuda12.1.cudnn8.9.CudaCudnn" Version="$(JYPPXCudaCudnnPackageVersion)" />
-    <PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt8.6.cuda12.1.cudnn8.9.TensorRtRuntime" Version="$(JYPPXTensorRtPackageVersion)" />
+    <PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt8.6.cuda12.1.cudnn8.9.Vendor" Version="$(JYPPXVendorPackageVersion)" />
   </ItemGroup>
 </Project>

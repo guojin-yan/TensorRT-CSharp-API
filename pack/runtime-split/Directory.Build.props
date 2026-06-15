@@ -16,8 +16,7 @@
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <JYPPXRuntimeAssetsDir Condition="'$(JYPPXRuntimeAssetsDir)' == ''">$(MSBuildProjectDirectory)\assets</JYPPXRuntimeAssetsDir>
     <JYPPXBridgePackageVersion Condition="'$(JYPPXBridgePackageVersion)' == ''">$(Version)</JYPPXBridgePackageVersion>
-    <JYPPXCudaCudnnPackageVersion Condition="'$(JYPPXCudaCudnnPackageVersion)' == ''">$(Version)</JYPPXCudaCudnnPackageVersion>
-    <JYPPXTensorRtPackageVersion Condition="'$(JYPPXTensorRtPackageVersion)' == ''">$(Version)</JYPPXTensorRtPackageVersion>
+    <JYPPXVendorPackageVersion Condition="'$(JYPPXVendorPackageVersion)' == ''">$(Version)</JYPPXVendorPackageVersion>
   </PropertyGroup>
 
   <ItemGroup>

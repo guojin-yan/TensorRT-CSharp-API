@@ -22,8 +22,6 @@ TensorRT, CUDA, and cuDNN runtime packages are versioned independently from this
 Split runtime package names follow the component role:
 
 - `<runtime-package-id>.Bridge`
-- `<runtime-package-id>.CudaCudnn`
-- `<runtime-package-id>.TensorRtRuntime`
-- `<runtime-package-id>.TensorRtExtensions` or TensorRT builder-resource packages when the selected TensorRT line needs them
+- `<runtime-package-id>.Vendor`
 
-Large CUDA/cuDNN/TensorRT component packages may stay on GitHub Packages or GitHub Releases when they exceed nuget.org package-size limits. NVIDIA redistribution terms must be reviewed for the exact binaries being shipped.
+Large Vendor component packages may stay on GitHub Packages or GitHub Releases when they exceed nuget.org package-size limits. NVIDIA redistribution terms must be reviewed for the exact binaries being shipped.

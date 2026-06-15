@@ -11,19 +11,11 @@ Current goals:
 
 Current split strategies:
 
-- TensorRT 8: three-part split (`Bridge` + `CudaCudnn` + `TensorRtRuntime`) for both Windows public sample lines
-- TensorRT 10: component split (`Bridge` + `CudaCudnn` + `TensorRtRuntime` + `TensorRtExtensions`) with a matching collection package per runtime line
-- TensorRT 11: publish-oriented component split for `win-x64-trt11.0-cuda12.9-cudnn9.22`
-  - `Bridge`
-  - `CudaCudnn`
-  - `TensorRtRuntime`
-  - `TensorRtBuilder.Sm75Sm86`
-  - `TensorRtBuilder.Sm89Sm90`
-  - `TensorRtBuilder.Sm100Sm120Ptx`
-- TensorRT 11: mirrored component split for `win-x64-trt11.0-cuda13.2-cudnn9.22`
-  - keeps the same package layout as the CUDA 12.9 line
-  - 2026-06-14 local full split-package validation passed with `19/19` native asset patterns copied
-  - remains blocked on CUDA 13-capable runtime smoke before public-ready validation
+- every Windows runtime line uses the same two-component split:
+- `Bridge`: the local `jyppxtrtbridge.dll` C ABI wrapper, republished when local native wrapper code changes
+- `Vendor`: CUDA runtime, cuDNN, TensorRT runtime, parser, plugin, and builder-resource binaries, republished only when the NVIDIA dependency set changes
+- the original runtime package ID remains a lightweight collection package that references one `Bridge` package version and one `Vendor` package version
+- `win-x64-trt11.0-cuda13.2-cudnn9.22` remains blocked on CUDA 13-capable runtime smoke before public-ready validation
 
 These packages still require:
 
@@ -37,7 +29,7 @@ Publication guidance:
 - GitHub Packages can host the split component packages as a NuGet feed when the package stays under its registry limit.
 - GitHub Releases are the fallback for large runtime assets and public release attachment. Release assets are not a NuGet feed, so consumers or validation scripts must first download the `.nupkg` files into a local package source.
 - Use the same runtime package version for a full NVIDIA dependency refresh, for example `4.0.0`.
-- Use a newer bridge and collection package version when the local C ABI bridge changes, for example `4.0.1`, while pinning `CudaCudnn` and `TensorRtRuntime` to the previously published vendor version.
+- Use a newer bridge and collection package version when the local C ABI bridge changes, for example `4.0.1`, while pinning `Vendor` to the previously published NVIDIA dependency version.
 
 Examples:
 
@@ -57,7 +49,7 @@ powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalSplitRuntimePackage.p
 
 # Native bridge refresh that publishes a new collection package but reuses vendor packages.
 gh release download v4.0.6142 `
-  --pattern "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.*.4.0.6142.nupkg" `
+  --pattern "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.Vendor.4.0.6142.nupkg" `
   --dir .\artifacts\vendor-package-source\win-x64-trt11.0-cuda12.9-cudnn9.22 `
   --repo guojin-yan/TensorRT-CSharp-API
 

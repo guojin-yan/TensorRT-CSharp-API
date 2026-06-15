@@ -54,17 +54,7 @@ on:
         default: ""
         type: string
       windows_vendor_package_version:
-        description: Optional default version for Windows CUDA/cuDNN/TensorRT split packages
-        required: false
-        default: ""
-        type: string
-      windows_cuda_cudnn_package_version:
-        description: Optional Windows CUDA/cuDNN split package version override
-        required: false
-        default: ""
-        type: string
-      windows_tensorrt_package_version:
-        description: Optional Windows TensorRT split package version override
+        description: Optional version for already-published Windows CUDA/cuDNN/TensorRT vendor split packages
         required: false
         default: ""
         type: string
@@ -153,8 +143,6 @@ jobs:
       WINDOWS_META_PACKAGE_VERSION: ${{ inputs.windows_meta_package_version }}
       WINDOWS_BRIDGE_PACKAGE_VERSION: ${{ inputs.windows_bridge_package_version }}
       WINDOWS_VENDOR_PACKAGE_VERSION: ${{ inputs.windows_vendor_package_version }}
-      WINDOWS_CUDA_CUDNN_PACKAGE_VERSION: ${{ inputs.windows_cuda_cudnn_package_version }}
-      WINDOWS_TENSORRT_PACKAGE_VERSION: ${{ inputs.windows_tensorrt_package_version }}
       WINDOWS_VENDOR_PACKAGE_RELEASE_TAG: ${{ inputs.windows_vendor_package_release_tag }}
       WINDOWS_INCLUDE_META_PACKAGE: ${{ inputs.windows_include_meta_package }}
       WINDOWS_SKIP_CONSUMER_VALIDATION: ${{ inputs.windows_skip_consumer_validation }}
@@ -205,11 +193,11 @@ jobs:
           if [ "$RUN_WINDOWS_RUNTIME_PACKAGING" = "true" ] &&
              [ "$WINDOWS_RUNTIME_DELIVERY_MODE" = "split" ] &&
              { [[ ",$role_text," == *",collection,"* ]] || [[ ",$role_text," == *",meta,"* ]] || [[ "$WINDOWS_INCLUDE_META_PACKAGE" = "true" ]]; } &&
-             [ -z "$WINDOWS_VENDOR_PACKAGE_VERSION" ] &&
-             [ -z "$WINDOWS_CUDA_CUDNN_PACKAGE_VERSION" ] &&
-             [ -z "$WINDOWS_TENSORRT_PACKAGE_VERSION" ]; then
+             [[ ",$role_text," != *",vendor,"* ]] &&
+             [[ ",$role_text," != *",all,"* ]] &&
+             [ -z "$WINDOWS_VENDOR_PACKAGE_VERSION" ]; then
             echo "windows_split_package_roles includes collection/meta but no vendor component version was provided." >&2
-            echo "Pass windows_vendor_package_version, windows_cuda_cudnn_package_version, or windows_tensorrt_package_version to pin already-published vendor packages." >&2
+            echo "Pass windows_vendor_package_version to pin already-published vendor packages, or include vendor/all in windows_split_package_roles for a dependency refresh." >&2
             exit 1
           fi
 
@@ -278,8 +266,6 @@ jobs:
               -f "meta_package_version=$WINDOWS_META_PACKAGE_VERSION" \
               -f "bridge_package_version=$WINDOWS_BRIDGE_PACKAGE_VERSION" \
               -f "vendor_package_version=$WINDOWS_VENDOR_PACKAGE_VERSION" \
-              -f "cuda_cudnn_package_version=$WINDOWS_CUDA_CUDNN_PACKAGE_VERSION" \
-              -f "tensorrt_package_version=$WINDOWS_TENSORRT_PACKAGE_VERSION" \
               -f "vendor_package_release_tag=$WINDOWS_VENDOR_PACKAGE_RELEASE_TAG" \
               -f "include_meta_package=$WINDOWS_INCLUDE_META_PACKAGE" \
               -f "skip_consumer_validation=$WINDOWS_SKIP_CONSUMER_VALIDATION" \

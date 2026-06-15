@@ -1,8 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <PackageId>JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda13.2.cudnn9.22.TensorRtBuilder.Sm75Sm86</PackageId>
-    <Title>JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda13.2.cudnn9.22.TensorRtBuilder.Sm75Sm86</Title>
-    <JYPPXRuntimeKey>win-x64-trt11.0-cuda13.2-cudnn9.22-tensorrt-builder-sm75-sm86</JYPPXRuntimeKey>
-    <PackageTags>TensorRT;CUDA;runtime;split-delivery;tensorrt;builder</PackageTags>
-  </PropertyGroup>
-</Project>
