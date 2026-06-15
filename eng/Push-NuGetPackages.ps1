@@ -116,6 +116,194 @@ function Format-SafeOutputLine {
   $result
 }
 
+function Get-UniqueStringList {
+  param(
+    [string[]]$Values
+  )
+
+  $set = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+  $result = [System.Collections.Generic.List[string]]::new()
+  foreach ($value in @($Values)) {
+    if ([string]::IsNullOrWhiteSpace($value)) {
+      continue
+    }
+
+    $trimmed = $value.Trim()
+    if ($set.Add($trimmed)) {
+      $result.Add($trimmed)
+    }
+
+    $withoutTrailingSlash = $trimmed.TrimEnd("/")
+    if ($set.Add($withoutTrailingSlash)) {
+      $result.Add($withoutTrailingSlash)
+    }
+  }
+
+  @($result)
+}
+
+function Get-NuGetApiKeyAliases {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$Source
+  )
+
+  $aliases = @($Source)
+  if ($Source -match "nuget\.org") {
+    $aliases += @(
+      "nuget.org",
+      "https://www.nuget.org",
+      "https://www.nuget.org/",
+      "https://api.nuget.org/v3/index.json",
+      "https://api.nuget.org/v3/index.json/",
+      "https://www.nuget.org/api/v2/package",
+      "https://www.nuget.org/api/v2/package/",
+      "https://nuget.org/api/v2/package",
+      "https://nuget.org/api/v2/package/"
+    )
+  }
+
+  Get-UniqueStringList -Values $aliases
+}
+
+function Get-LocalNuGetConfigPath {
+  if ([string]::IsNullOrWhiteSpace($env:APPDATA)) {
+    return $null
+  }
+
+  Join-Path $env:APPDATA "NuGet\NuGet.Config"
+}
+
+function Get-LocalNuGetApiKeyEntries {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$Source
+  )
+
+  $configPath = Get-LocalNuGetConfigPath
+  if ([string]::IsNullOrWhiteSpace($configPath) -or -not (Test-Path -LiteralPath $configPath -PathType Leaf)) {
+    return @()
+  }
+
+  [xml]$xml = Get-Content -LiteralPath $configPath -Raw
+  $nodes = @($xml.SelectNodes("//*[translate(local-name(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz') = 'apikeys']/*[translate(local-name(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz') = 'add']"))
+  if ($nodes.Count -eq 0) {
+    return @()
+  }
+
+  $aliases = @(Get-NuGetApiKeyAliases -Source $Source)
+  $matchingValues = [System.Collections.Generic.List[string]]::new()
+  foreach ($node in $nodes) {
+    $key = [string]$node.GetAttribute("key")
+    $value = [string]$node.GetAttribute("value")
+    if ([string]::IsNullOrWhiteSpace($key) -or [string]::IsNullOrWhiteSpace($value)) {
+      continue
+    }
+
+    $isMatch = $false
+    foreach ($alias in $aliases) {
+      if ([StringComparer]::OrdinalIgnoreCase.Equals($key.TrimEnd("/"), $alias.TrimEnd("/"))) {
+        $isMatch = $true
+        break
+      }
+    }
+
+    if (-not $isMatch -and $Source -match "nuget\.org" -and $key -match "nuget\.org") {
+      $isMatch = $true
+    }
+
+    if ($isMatch -and -not $matchingValues.Contains($value)) {
+      $matchingValues.Add($value)
+    }
+  }
+
+  if ($matchingValues.Count -eq 0) {
+    return @()
+  }
+
+  $entries = [System.Collections.Generic.List[object]]::new()
+  foreach ($value in @($matchingValues)) {
+    if (-not (Test-IsAsciiText -Value $value)) {
+      throw "A local NuGet API key entry for '$Source' contains non-ASCII characters. Recreate the local key with NuGet tooling or provide NUGET_API_KEY as a plain-text secret."
+    }
+
+    foreach ($alias in $aliases) {
+      $entries.Add([pscustomobject]@{
+          Key   = $alias
+          Value = $value
+        })
+    }
+  }
+
+  @($entries)
+}
+
+function New-TemporaryNuGetConfig {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$Path,
+    [Parameter(Mandatory = $true)]
+    [string]$PackageSourceName,
+    [Parameter(Mandatory = $true)]
+    [string]$PackageSource,
+    [object[]]$ApiKeyEntries,
+    [string]$SourceUserName,
+    [string]$SourcePassword
+  )
+
+  $settings = [System.Xml.XmlWriterSettings]::new()
+  $settings.Encoding = [System.Text.UTF8Encoding]::new($false)
+  $settings.Indent = $true
+  $writer = [System.Xml.XmlWriter]::Create($Path, $settings)
+  try {
+    $writer.WriteStartDocument()
+    $writer.WriteStartElement("configuration")
+
+    $writer.WriteStartElement("packageSources")
+    $writer.WriteStartElement("clear")
+    $writer.WriteEndElement()
+    $writer.WriteStartElement("add")
+    $writer.WriteAttributeString("key", $PackageSourceName)
+    $writer.WriteAttributeString("value", $PackageSource)
+    $writer.WriteAttributeString("protocolVersion", "3")
+    $writer.WriteEndElement()
+    $writer.WriteEndElement()
+
+    if (-not [string]::IsNullOrWhiteSpace($SourceUserName) -and -not [string]::IsNullOrWhiteSpace($SourcePassword)) {
+      $writer.WriteStartElement("packageSourceCredentials")
+      $writer.WriteStartElement($PackageSourceName)
+      $writer.WriteStartElement("add")
+      $writer.WriteAttributeString("key", "Username")
+      $writer.WriteAttributeString("value", $SourceUserName)
+      $writer.WriteEndElement()
+      $writer.WriteStartElement("add")
+      $writer.WriteAttributeString("key", "ClearTextPassword")
+      $writer.WriteAttributeString("value", $SourcePassword)
+      $writer.WriteEndElement()
+      $writer.WriteEndElement()
+      $writer.WriteEndElement()
+    }
+
+    if ($ApiKeyEntries.Count -gt 0) {
+      $writer.WriteStartElement("apikeys")
+      foreach ($entry in @($ApiKeyEntries)) {
+        $writer.WriteStartElement("add")
+        $writer.WriteAttributeString("key", [string]$entry.Key)
+        $writer.WriteAttributeString("value", [string]$entry.Value)
+        $writer.WriteEndElement()
+      }
+
+      $writer.WriteEndElement()
+    }
+
+    $writer.WriteEndElement()
+    $writer.WriteEndDocument()
+  }
+  finally {
+    $writer.Dispose()
+  }
+}
+
 $ApiKey = if ([string]::IsNullOrWhiteSpace($ApiKey)) { Get-SecretFromEnvironment -Name $ApiKeyEnvironmentVariable } else { $ApiKey }
 $sourcePassword = Get-SecretFromEnvironment -Name $SourcePasswordEnvironmentVariable
 $hasApiKey = -not [string]::IsNullOrWhiteSpace($ApiKey)
@@ -133,44 +321,28 @@ if ($hasSourceCredentials -and -not (Test-IsAsciiText -Value $sourcePassword)) {
 
 $nugetConfigPath = $null
 try {
+  $pushSource = $Source
+  $usingLocalApiKeyFallback = $false
+  $localApiKeySecrets = @()
+
   if ($hasSourceCredentials) {
     $nugetConfigPath = Join-Path ([IO.Path]::GetTempPath()) ("jyppx-nuget-{0}.config" -f [Guid]::NewGuid().ToString("N"))
-    $settings = [System.Xml.XmlWriterSettings]::new()
-    $settings.Encoding = [System.Text.UTF8Encoding]::new($false)
-    $settings.Indent = $true
-    $writer = [System.Xml.XmlWriter]::Create($nugetConfigPath, $settings)
-    try {
-      $writer.WriteStartDocument()
-      $writer.WriteStartElement("configuration")
-      $writer.WriteStartElement("packageSources")
-      $writer.WriteStartElement("clear")
-      $writer.WriteEndElement()
-      $writer.WriteStartElement("add")
-      $writer.WriteAttributeString("key", $SourceName)
-      $writer.WriteAttributeString("value", $Source)
-      $writer.WriteAttributeString("protocolVersion", "3")
-      $writer.WriteEndElement()
-      $writer.WriteEndElement()
-      $writer.WriteStartElement("packageSourceCredentials")
-      $writer.WriteStartElement($SourceName)
-      $writer.WriteStartElement("add")
-      $writer.WriteAttributeString("key", "Username")
-      $writer.WriteAttributeString("value", $SourceUserName)
-      $writer.WriteEndElement()
-      $writer.WriteStartElement("add")
-      $writer.WriteAttributeString("key", "ClearTextPassword")
-      $writer.WriteAttributeString("value", $sourcePassword)
-      $writer.WriteEndElement()
-      $writer.WriteEndElement()
-      $writer.WriteEndElement()
-      $writer.WriteEndElement()
-      $writer.WriteEndDocument()
-    }
-    finally {
-      $writer.Dispose()
-    }
-
+    New-TemporaryNuGetConfig -Path $nugetConfigPath -PackageSourceName $SourceName -PackageSource $Source -SourceUserName $SourceUserName -SourcePassword $sourcePassword
+    $pushSource = $SourceName
     Write-Host "Using temporary NuGet.config source credentials for '$SourceName'."
+  }
+  elseif (-not $hasApiKey) {
+    $localApiKeyEntries = @(Get-LocalNuGetApiKeyEntries -Source $Source)
+    if ($localApiKeyEntries.Count -gt 0) {
+      $nugetConfigPath = Join-Path ([IO.Path]::GetTempPath()) ("jyppx-nuget-{0}.config" -f [Guid]::NewGuid().ToString("N"))
+      $localSourceName = if ($Source -match "nuget\.org") { "nuget.org" } else { "local-push" }
+      $localSource = if ($Source -match "nuget\.org") { "https://api.nuget.org/v3/index.json" } else { $Source }
+      New-TemporaryNuGetConfig -Path $nugetConfigPath -PackageSourceName $localSourceName -PackageSource $localSource -ApiKeyEntries $localApiKeyEntries
+      $pushSource = $localSourceName
+      $usingLocalApiKeyFallback = $true
+      $localApiKeySecrets = @($localApiKeyEntries | ForEach-Object { [string]$_.Value } | Select-Object -Unique)
+      Write-Host "Using temporary NuGet.config with local API key entries for '$localSourceName'."
+    }
   }
 
   foreach ($package in $packages) {
@@ -180,9 +352,8 @@ try {
     while (-not $pushed -and $attempt -le $MaxAttempts) {
       $packageSizeMb = [Math]::Round($package.Length / 1MB, 2)
       $disableBuffering = $DisableBufferingAboveMB -gt 0 -and $package.Length -ge ($DisableBufferingAboveMB * 1MB)
-      Write-Host ("Pushing package attempt {0}/{1}: {2} ({3} MB) ApiKey={4} SourceCredentials={5} DisableBuffering={6}" -f $attempt, $MaxAttempts, $package.FullName, $packageSizeMb, ($hasApiKey -or $hasSourceCredentials), $hasSourceCredentials, $disableBuffering)
+      Write-Host ("Pushing package attempt {0}/{1}: {2} ({3} MB) ApiKey={4} SourceCredentials={5} LocalConfigApiKey={6} DisableBuffering={7}" -f $attempt, $MaxAttempts, $package.FullName, $packageSizeMb, $hasApiKey, $hasSourceCredentials, $usingLocalApiKeyFallback, $disableBuffering)
 
-      $pushSource = if ($hasSourceCredentials) { $SourceName } else { $Source }
       $effectiveApiKey = if ($hasSourceCredentials) { $PushApiKey } else { $ApiKey }
       $arguments = @(
         "nuget",
@@ -200,12 +371,12 @@ try {
       if (-not [string]::IsNullOrWhiteSpace($effectiveApiKey)) {
         $arguments += @("--api-key", $effectiveApiKey)
       }
-      if ($hasSourceCredentials) {
+      if ($hasSourceCredentials -or $usingLocalApiKeyFallback) {
         $arguments += @("--configfile", $nugetConfigPath)
       }
 
       $output = & dotnet @arguments 2>&1
-      $secrets = @($ApiKey, $sourcePassword)
+      $secrets = @($ApiKey, $sourcePassword) + @($localApiKeySecrets)
       foreach ($line in @($output)) {
         Write-Host (Format-SafeOutputLine -Line ([string]$line) -Secrets $secrets)
       }
