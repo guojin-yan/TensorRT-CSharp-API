@@ -328,7 +328,7 @@ jobs:
               -not ($roleTokens -contains 'stable-dependencies') -and
               -not ($roleTokens -contains 'nvidia-dependencies') -and
               [string]::IsNullOrWhiteSpace('${{ inputs.tensorrt_package_version }}')) {
-            throw "split_package_roles includes collection/meta but no TensorRT package version was provided. Pass tensorrt_package_version to reuse published TensorRt packages, or include tensorrt/all in split_package_roles for a dependency refresh."
+            throw "split_package_roles includes collection/meta but no TensorRT package version was provided. Pass tensorrt_package_version to reuse published TensorRT component packages, or include tensorrt/all in split_package_roles for a dependency refresh."
           }
 
           foreach ($key in ($keys | Select-Object -Unique)) {
@@ -439,6 +439,9 @@ jobs:
               foreach ($package in $packages) {
                 Write-Host "Uploading release asset for ${key}: $($package.FullName)"
                 gh release upload "${{ inputs.release_tag }}" $package.FullName --clobber --repo "$env:GH_REPO"
+                if ($LASTEXITCODE -ne 0) {
+                  throw "gh release upload failed for '$($package.FullName)' with exit code $LASTEXITCODE."
+                }
               }
 
               if ('${{ inputs.publish_to_github_packages }}' -ne 'true') {
@@ -528,6 +531,9 @@ jobs:
           foreach ($package in $packages) {
             Write-Host "Uploading release asset: $($package.FullName)"
             gh release upload "${{ inputs.release_tag }}" $package.FullName --clobber --repo "$env:GH_REPO"
+            if ($LASTEXITCODE -ne 0) {
+              throw "gh release upload failed for '$($package.FullName)' with exit code $LASTEXITCODE."
+            }
           }
 
       - name: Upload Windows split runtime packages to GitHub Release
@@ -550,6 +556,9 @@ jobs:
           foreach ($package in $packages) {
             Write-Host "Uploading release asset: $($package.FullName)"
             gh release upload "${{ inputs.release_tag }}" $package.FullName --clobber --repo "$env:GH_REPO"
+            if ($LASTEXITCODE -ne 0) {
+              throw "gh release upload failed for '$($package.FullName)' with exit code $LASTEXITCODE."
+            }
           }
 
       - name: Publish Windows runtime package to GitHub Packages

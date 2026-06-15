@@ -160,9 +160,9 @@
       "notes": "CUDA runtime and cuDNN runtime libraries for win-x64-trt11.0-cuda12.9-cudnn9.22. Publish only when the CUDA/cuDNN dependency set changes."
     },
     {
-      "key": "win-x64-trt11.0-cuda12.9-cudnn9.22-tensorrt",
+      "key": "win-x64-trt11.0-cuda12.9-cudnn9.22-tensorrt-runtime",
       "sourceRuntimeKey": "win-x64-trt11.0-cuda12.9-cudnn9.22",
-      "packageId": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.TensorRt",
+      "packageId": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.TensorRtRuntime",
       "rid": "win-x64",
       "platform": "windows",
       "tensorRtLine": "11",
@@ -171,21 +171,63 @@
       "prototypeState": "local-validated",
       "assets": [
         "nvinfer_11.dll",
-        "nvinfer_builder_resource_ptx_11.dll",
-        "nvinfer_builder_resource_sm100_11.dll",
-        "nvinfer_builder_resource_sm120_11.dll",
-        "nvinfer_builder_resource_sm75_11.dll",
-        "nvinfer_builder_resource_sm80_11.dll",
-        "nvinfer_builder_resource_sm86_11.dll",
-        "nvinfer_builder_resource_sm89_11.dll",
-        "nvinfer_builder_resource_sm90_11.dll",
         "nvinfer_dispatch_11.dll",
         "nvinfer_lean_11.dll",
         "nvinfer_plugin_11.dll",
         "nvinfer_vc_plugin_11.dll",
         "nvonnxparser_11.dll"
       ],
-      "notes": "TensorRT runtime, parser, plugin, and builder-resource libraries for win-x64-trt11.0-cuda12.9-cudnn9.22. Publish only when the TensorRT dependency set changes."
+      "notes": "TensorRT runtime, parser, plugin, and lean/dispatch libraries for win-x64-trt11.0-cuda12.9-cudnn9.22. Publish only when the TensorRT dependency set changes."
+    },
+    {
+      "key": "win-x64-trt11.0-cuda12.9-cudnn9.22-tensorrt-builder-sm75-sm86",
+      "sourceRuntimeKey": "win-x64-trt11.0-cuda12.9-cudnn9.22",
+      "packageId": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.TensorRtBuilder.Sm75Sm86",
+      "rid": "win-x64",
+      "platform": "windows",
+      "tensorRtLine": "11",
+      "cudaLine": "12",
+      "role": "tensorrt",
+      "prototypeState": "local-validated",
+      "assets": [
+        "nvinfer_builder_resource_sm75_11.dll",
+        "nvinfer_builder_resource_sm80_11.dll",
+        "nvinfer_builder_resource_sm86_11.dll"
+      ],
+      "notes": "TensorRT 11 builder-resource libraries for SM75, SM80, and SM86 on win-x64-trt11.0-cuda12.9-cudnn9.22."
+    },
+    {
+      "key": "win-x64-trt11.0-cuda12.9-cudnn9.22-tensorrt-builder-sm89-sm90",
+      "sourceRuntimeKey": "win-x64-trt11.0-cuda12.9-cudnn9.22",
+      "packageId": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.TensorRtBuilder.Sm89Sm90",
+      "rid": "win-x64",
+      "platform": "windows",
+      "tensorRtLine": "11",
+      "cudaLine": "12",
+      "role": "tensorrt",
+      "prototypeState": "local-validated",
+      "assets": [
+        "nvinfer_builder_resource_sm89_11.dll",
+        "nvinfer_builder_resource_sm90_11.dll"
+      ],
+      "notes": "TensorRT 11 builder-resource libraries for SM89 and SM90 on win-x64-trt11.0-cuda12.9-cudnn9.22."
+    },
+    {
+      "key": "win-x64-trt11.0-cuda12.9-cudnn9.22-tensorrt-builder-sm100-sm120-ptx",
+      "sourceRuntimeKey": "win-x64-trt11.0-cuda12.9-cudnn9.22",
+      "packageId": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.TensorRtBuilder.Sm100Sm120Ptx",
+      "rid": "win-x64",
+      "platform": "windows",
+      "tensorRtLine": "11",
+      "cudaLine": "12",
+      "role": "tensorrt",
+      "prototypeState": "local-validated",
+      "assets": [
+        "nvinfer_builder_resource_ptx_11.dll",
+        "nvinfer_builder_resource_sm100_11.dll",
+        "nvinfer_builder_resource_sm120_11.dll"
+      ],
+      "notes": "TensorRT 11 builder-resource libraries for SM100, SM120, and PTX fallback on win-x64-trt11.0-cuda12.9-cudnn9.22."
     },
     {
       "key": "win-x64-trt11.0-cuda13.2-cudnn9.22-bridge",

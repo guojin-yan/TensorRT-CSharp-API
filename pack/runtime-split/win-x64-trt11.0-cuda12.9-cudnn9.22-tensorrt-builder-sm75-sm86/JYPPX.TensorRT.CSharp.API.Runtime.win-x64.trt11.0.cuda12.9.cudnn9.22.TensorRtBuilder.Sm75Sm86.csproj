@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.TensorRtBuilder.Sm75Sm86</PackageId>
+    <Title>JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.TensorRtBuilder.Sm75Sm86</Title>
+    <Description>TensorRT 11 builder-resource libraries for SM75, SM80, and SM86 with CUDA 12.9 and cuDNN 9.22.0 on win-x64.</Description>
+    <JYPPXRuntimeKey>win-x64-trt11.0-cuda12.9-cudnn9.22-tensorrt-builder-sm75-sm86</JYPPXRuntimeKey>
+    <PackageTags>TensorRT;CUDA;cuDNN;runtime;split-delivery;tensorrt;builder-resource</PackageTags>
+  </PropertyGroup>
+</Project>

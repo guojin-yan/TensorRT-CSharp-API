@@ -10,6 +10,9 @@
   <ItemGroup>
     <PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.Bridge" Version="$(JYPPXBridgePackageVersion)" />
     <PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.CudaCudnn" Version="$(JYPPXCudaCudnnPackageVersion)" />
-    <PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.TensorRt" Version="$(JYPPXTensorRtPackageVersion)" />
+    <PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.TensorRtRuntime" Version="$(JYPPXTensorRtPackageVersion)" />
+    <PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.TensorRtBuilder.Sm75Sm86" Version="$(JYPPXTensorRtPackageVersion)" />
+    <PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.TensorRtBuilder.Sm89Sm90" Version="$(JYPPXTensorRtPackageVersion)" />
+    <PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.TensorRtBuilder.Sm100Sm120Ptx" Version="$(JYPPXTensorRtPackageVersion)" />
   </ItemGroup>
 </Project>

@@ -377,7 +377,7 @@ if ($shouldPackMetaPackage) {
     }
 
     if ($missingTensorRt.Count -gt 0 -and [string]::IsNullOrWhiteSpace($TensorRtPackageVersion)) {
-      throw "The split meta package would reference a non-built TensorRt package at version '$resolvedTensorRtPackageVersion'. Pass -TensorRtPackageVersion to pin an already-published TensorRT package explicitly, or build with -SplitPackageRole all/tensorrt first."
+      throw "The split meta package would reference non-built TensorRT component package(s) at version '$resolvedTensorRtPackageVersion'. Pass -TensorRtPackageVersion to pin already-published TensorRT packages explicitly, or build with -SplitPackageRole all/tensorrt first."
     }
 
     if ((Expand-KeyList -Values $AdditionalPackageSource).Count -eq 0) {

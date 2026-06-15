@@ -11,11 +11,12 @@ Current goals:
 
 Current split strategy:
 
-- every Windows runtime line uses the same three-component split:
+- most Windows runtime lines use the same three-component split:
 - `Bridge`: the local `jyppxtrtbridge.dll` C ABI wrapper, republished when local native wrapper code changes
 - `CudaCudnn`: CUDA runtime, cuDNN, and cuBLAS assets needed by older TensorRT lines, republished only when the CUDA/cuDNN dependency set changes
 - `TensorRt`: TensorRT runtime, parser, plugin, and builder-resource binaries, republished only when the TensorRT dependency set changes
-- the original runtime package ID remains a lightweight collection package that references one `Bridge`, one `CudaCudnn`, and one `TensorRt` package version
+- TensorRT 11 packages may split TensorRT further into `TensorRtRuntime` plus builder-resource packages such as `TensorRtBuilder.Sm75Sm86`, `TensorRtBuilder.Sm89Sm90`, and `TensorRtBuilder.Sm100Sm120Ptx` when a single TensorRT component would exceed release host limits
+- the original runtime package ID remains a lightweight collection package that references one `Bridge`, one `CudaCudnn`, and all required TensorRT component packages
 - `win-x64-trt11.0-cuda13.2-cudnn9.22` remains blocked on CUDA 13-capable runtime smoke before public-ready validation
 
 These packages still require:
