@@ -108,6 +108,23 @@ function ConvertTo-XmlAttributeValue {
   return [System.Security.SecurityElement]::Escape($Value)
 }
 
+function Resolve-PackageSourceValue {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$Source
+  )
+
+  if ($Source -match '^[a-zA-Z][a-zA-Z0-9+.-]*://') {
+    return $Source
+  }
+
+  if ([System.IO.Path]::IsPathRooted($Source)) {
+    return [System.IO.Path]::GetFullPath($Source)
+  }
+
+  return [System.IO.Path]::GetFullPath((Join-Path $RepositoryRoot $Source))
+}
+
 function New-NuGetConfigContent {
   param(
     [Parameter(Mandatory = $true)]
@@ -123,7 +140,8 @@ function New-NuGetConfigContent {
 
   $sourceIndex = 1
   foreach ($source in @(Expand-KeyList -Values $AdditionalPackageSource)) {
-    $packageSources.Add('    <add key="additional-' + $sourceIndex + '" value="' + (ConvertTo-XmlAttributeValue -Value $source) + '" />')
+    $resolvedSource = Resolve-PackageSourceValue -Source $source
+    $packageSources.Add('    <add key="additional-' + $sourceIndex + '" value="' + (ConvertTo-XmlAttributeValue -Value $resolvedSource) + '" />')
     $sourceIndex++
   }
 
