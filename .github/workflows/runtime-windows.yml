@@ -251,6 +251,26 @@ jobs:
         shell: pwsh
         run: cmake --version
 
+      - name: Ensure GitHub Release exists
+        if: ${{ inputs.attach_to_github_release && inputs.release_tag != '' }}
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          $tag = '${{ inputs.release_tag }}'
+          gh release view $tag --repo "$env:GH_REPO" *> $null
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host "Release $tag already exists."
+            return
+          }
+
+          Write-Host "Creating release $tag before runtime asset upload."
+          gh release create $tag --title $tag --notes "Automated runtime release for $tag" --repo "$env:GH_REPO"
+          if ($LASTEXITCODE -ne 0) {
+            throw "Failed to create GitHub Release '$tag' with exit code $LASTEXITCODE."
+          }
+
       - name: Build full runtime packages
         if: ${{ inputs.runtime_delivery_mode != 'split' }}
         shell: pwsh
