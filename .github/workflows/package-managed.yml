@@ -187,7 +187,7 @@ jobs:
 
           pwsh -NoProfile -File .\eng\Push-NuGetPackages.ps1 `
             -PackageRoot .\artifacts\managed `
-            -Source https://api.nuget.org/v3/index.json `
+            -Source https://www.nuget.org `
             -ApiKey $apiKey `
             -TimeoutSeconds 1800 `
             -MaxAttempts 2 `
