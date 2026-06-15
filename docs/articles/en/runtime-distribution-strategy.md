@@ -66,7 +66,8 @@ nuget.org has an approximately `250 MB` per-package size limit. The `v4.0.6142` 
 
 - The `JYPPX.TensorRT.CSharp.API` managed package can be published to nuget.org.
 - Small `Bridge` and collection packages can be published to nuget.org or GitHub Packages when needed.
-- Most CUDA/cuDNN/TensorRT vendor component packages are not suitable for nuget.org and should normally stay as GitHub Release assets.
+- Most CUDA/cuDNN/TensorRT vendor component packages are not suitable for nuget.org and should normally stay on GitHub Packages when a NuGet feed is required, or as GitHub Release assets when direct `.nupkg` download is acceptable.
+- GitHub Release assets are not queried by NuGet restore. If the vendor packages stay only on a Release, validation and consumers must download the matching `.nupkg` files into a local package source first.
 - If only the local C ABI bridge or C# wrapper changes later, republish the `Bridge`, collection, and managed packages. Do not republish CUDA/cuDNN/TensorRT vendor packages unless the NVIDIA dependency set changes.
 
 ## Engineering rules

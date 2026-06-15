@@ -35,7 +35,7 @@ Publication guidance:
 
 - nuget.org is suitable for the managed package and tiny bridge/collection packages only. Most CUDA/cuDNN/TensorRT component packages are larger than nuget.org's package-size limit.
 - GitHub Packages can host the split component packages as a NuGet feed when the package stays under its registry limit.
-- GitHub Releases are the fallback for large runtime assets and public release attachment.
+- GitHub Releases are the fallback for large runtime assets and public release attachment. Release assets are not a NuGet feed, so consumers or validation scripts must first download the `.nupkg` files into a local package source.
 - Use the same runtime package version for a full NVIDIA dependency refresh, for example `4.0.0`.
 - Use a newer bridge and collection package version when the local C ABI bridge changes, for example `4.0.1`, while pinning `CudaCudnn` and `TensorRtRuntime` to the previously published vendor version.
 
@@ -56,14 +56,17 @@ powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalSplitRuntimePackage.p
   -SplitPackageRole vendor
 
 # Native bridge refresh that publishes a new collection package but reuses vendor packages.
+gh release download v4.0.6142 `
+  --pattern "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.*.4.0.6142.nupkg" `
+  --dir .\artifacts\vendor-package-source\win-x64-trt11.0-cuda12.9-cudnn9.22 `
+  --repo guojin-yan/TensorRT-CSharp-API
+
 powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalSplitRuntimePackage.ps1 `
   -SourceRuntimeKey win-x64-trt11.0-cuda12.9-cudnn9.22 `
   -Version 4.0.1 `
   -SplitPackageRole bridge,collection `
   -VendorPackageVersion 4.0.6142 `
-  -AdditionalPackageSource https://nuget.pkg.github.com/<owner>/index.json `
-  -AdditionalPackageSourceUsername <owner-or-actor> `
-  -AdditionalPackageSourcePassword <token>
+  -AdditionalPackageSource .\artifacts\vendor-package-source\win-x64-trt11.0-cuda12.9-cudnn9.22
 ```
 
 Supporting scripts:

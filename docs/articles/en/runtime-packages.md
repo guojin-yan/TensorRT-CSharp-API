@@ -120,6 +120,7 @@ Current publication strategy:
 
 - Publish `JYPPX.TensorRT.CSharp.API` to nuget.org and GitHub Packages.
 - Keep large CUDA/cuDNN/TensorRT component packages on GitHub Packages when they fit the GitHub NuGet registry, or on GitHub Releases as release assets.
+- Treat GitHub Release assets as downloadable package files, not as a NuGet feed. When vendor packages are kept only on a Release, the release workflow downloads them into a temporary local package source before validating `bridge,collection`.
 - Treat runtime package versions independently from the managed package version.
 - Rebuild full CUDA/cuDNN/TensorRT component packages only when the NVIDIA dependency set changes.
 - Rebuild `bridge,collection` split packages when the local C ABI bridge changes, and pass the existing vendor component package version so CUDA/cuDNN/TensorRT packages are not republished.

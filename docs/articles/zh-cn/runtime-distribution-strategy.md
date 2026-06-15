@@ -66,7 +66,8 @@ nuget.org 单个包大小限制约为 `250 MB`。`v4.0.6142` Windows split runti
 
 - `JYPPX.TensorRT.CSharp.API` managed 包可以发布到 nuget.org。
 - 体积较小的 `Bridge` 和 collection 包可以在需要时发布到 nuget.org 或 GitHub Packages。
-- CUDA/cuDNN/TensorRT vendor 组件包多数不适合 nuget.org，应优先保留为 GitHub Release assets。
+- CUDA/cuDNN/TensorRT vendor 组件包多数不适合 nuget.org；如果需要 NuGet feed 自动 restore，应优先放 GitHub Packages；如果可以直接下载 `.nupkg` 文件，则可以保留为 GitHub Release assets。
+- GitHub Release assets 不会被 NuGet restore 自动查询。vendor 包只放 Release 时，验证和用户消费前都需要先把匹配 `.nupkg` 下载到本地 package source。
 - 后续如果只修改本地 C ABI bridge 或 C# wrapper，重发 `Bridge`、collection 和 managed 包即可，不需要重发 CUDA/cuDNN/TensorRT vendor 包。
 
 ## 工程规则

@@ -53,6 +53,11 @@ on:
         required: false
         default: ""
         type: string
+      vendor_package_release_tag:
+        description: Optional GitHub Release tag that contains previously published vendor split packages; defaults to v<vendor package version>
+        required: false
+        default: ""
+        type: string
       include_meta_package:
         description: Build the split meta package even when only a subset of roles is selected
         required: false
@@ -142,6 +147,11 @@ on:
         type: string
       tensorrt_package_version:
         description: Optional TensorRT split package version override
+        required: false
+        default: ""
+        type: string
+      vendor_package_release_tag:
+        description: Optional GitHub Release tag that contains previously published vendor split packages; defaults to v<vendor package version>
         required: false
         default: ""
         type: string
@@ -247,6 +257,9 @@ jobs:
       - name: Build split runtime packages
         if: ${{ inputs.runtime_delivery_mode == 'split' }}
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
           $keys = @()
           foreach ($part in '${{ inputs.runtime_keys }}' -split '[,;]') {
@@ -309,6 +322,50 @@ jobs:
               $arguments += '-SkipConsumerValidation'
             }
             if ($shouldResolvePublishedPackages) {
+              $safeKey = $key -replace '[^A-Za-z0-9._-]', '-'
+              $publishedPackageSourceFile = Join-Path $env:RUNNER_TEMP "jyppx-published-package-source-$safeKey.txt"
+              $restoreArguments = @(
+                '-NoProfile',
+                '-ExecutionPolicy', 'Bypass',
+                '-File', '.\eng\Restore-PublishedSplitPackageSource.ps1',
+                '-SourceRuntimeKey', $key,
+                '-SplitPackageRole', '${{ inputs.split_package_roles }}',
+                '-Version', '${{ inputs.version }}',
+                '-Repository', "$env:GH_REPO",
+                '-OutputPathFile', $publishedPackageSourceFile
+              )
+              if (-not [string]::IsNullOrWhiteSpace('${{ inputs.bridge_package_version }}')) {
+                $restoreArguments += @('-BridgePackageVersion', '${{ inputs.bridge_package_version }}')
+              }
+              if (-not [string]::IsNullOrWhiteSpace('${{ inputs.vendor_package_version }}')) {
+                $restoreArguments += @('-VendorPackageVersion', '${{ inputs.vendor_package_version }}')
+              }
+              if (-not [string]::IsNullOrWhiteSpace('${{ inputs.cuda_cudnn_package_version }}')) {
+                $restoreArguments += @('-CudaCudnnPackageVersion', '${{ inputs.cuda_cudnn_package_version }}')
+              }
+              if (-not [string]::IsNullOrWhiteSpace('${{ inputs.tensorrt_package_version }}')) {
+                $restoreArguments += @('-TensorRtPackageVersion', '${{ inputs.tensorrt_package_version }}')
+              }
+              if (-not [string]::IsNullOrWhiteSpace('${{ inputs.vendor_package_release_tag }}')) {
+                $restoreArguments += @('-VendorPackageReleaseTag', '${{ inputs.vendor_package_release_tag }}')
+              }
+
+              powershell @restoreArguments
+              if ($LASTEXITCODE -ne 0) {
+                throw "Restore-PublishedSplitPackageSource.ps1 failed for runtime key '$key' with exit code $LASTEXITCODE."
+              }
+
+              $publishedPackageSource = if (Test-Path -LiteralPath $publishedPackageSourceFile -PathType Leaf) {
+                (Get-Content -LiteralPath $publishedPackageSourceFile -Raw).Trim()
+              }
+              else {
+                ""
+              }
+
+              if (-not [string]::IsNullOrWhiteSpace($publishedPackageSource)) {
+                $arguments += @('-AdditionalPackageSource', $publishedPackageSource)
+              }
+
               $arguments += @(
                 '-AdditionalPackageSource',
                 'https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json',

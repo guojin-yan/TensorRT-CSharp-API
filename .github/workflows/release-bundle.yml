@@ -68,6 +68,11 @@ on:
         required: false
         default: ""
         type: string
+      windows_vendor_package_release_tag:
+        description: Optional GitHub Release tag that contains previously published Windows vendor split packages; defaults to v<windows_vendor_package_version>
+        required: false
+        default: ""
+        type: string
       windows_include_meta_package:
         description: Build Windows split meta package when selected roles are incomplete
         required: false
@@ -150,6 +155,7 @@ jobs:
       WINDOWS_VENDOR_PACKAGE_VERSION: ${{ inputs.windows_vendor_package_version }}
       WINDOWS_CUDA_CUDNN_PACKAGE_VERSION: ${{ inputs.windows_cuda_cudnn_package_version }}
       WINDOWS_TENSORRT_PACKAGE_VERSION: ${{ inputs.windows_tensorrt_package_version }}
+      WINDOWS_VENDOR_PACKAGE_RELEASE_TAG: ${{ inputs.windows_vendor_package_release_tag }}
       WINDOWS_INCLUDE_META_PACKAGE: ${{ inputs.windows_include_meta_package }}
       WINDOWS_SKIP_CONSUMER_VALIDATION: ${{ inputs.windows_skip_consumer_validation }}
       RUN_LINUX_RUNTIME_PACKAGING: ${{ inputs.run_linux_runtime_packaging }}
@@ -274,6 +280,7 @@ jobs:
               -f "vendor_package_version=$WINDOWS_VENDOR_PACKAGE_VERSION" \
               -f "cuda_cudnn_package_version=$WINDOWS_CUDA_CUDNN_PACKAGE_VERSION" \
               -f "tensorrt_package_version=$WINDOWS_TENSORRT_PACKAGE_VERSION" \
+              -f "vendor_package_release_tag=$WINDOWS_VENDOR_PACKAGE_RELEASE_TAG" \
               -f "include_meta_package=$WINDOWS_INCLUDE_META_PACKAGE" \
               -f "skip_consumer_validation=$WINDOWS_SKIP_CONSUMER_VALIDATION" \
               -f "run_smoke=$RUN_WINDOWS_SMOKE" \

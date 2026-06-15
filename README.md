@@ -128,6 +128,8 @@ That means there are two supported execution modes:
 
 Runtime packages are versioned independently from the managed package. The normal maintenance path is to publish `JYPPX.TensorRT.CSharp.API` to nuget.org and GitHub Packages, while keeping large CUDA/cuDNN/TensorRT component packages on GitHub Packages or GitHub Releases. Publish vendor component packages once per CUDA/cuDNN/TensorRT dependency version, then publish only `bridge,collection` when the local C ABI bridge changes.
 
+GitHub Release assets are useful for large public `.nupkg` files, but they are not a NuGet feed. If vendor packages live only on a Release, the remote Windows workflow downloads those Release assets into a temporary local package source for validation. Publish `bridge,collection` to GitHub Packages only when the referenced vendor component packages are also available from a NuGet feed; otherwise attach the whole `.nupkg` set to a GitHub Release and consume it as a downloaded local package source.
+
 Managed-only remote release:
 
 ```powershell
@@ -166,8 +168,9 @@ gh workflow run release-bundle.yml `
   -f windows_runtime_delivery_mode=split `
   -f windows_split_package_roles=bridge,collection `
   -f windows_vendor_package_version=4.0.6142 `
+  -f windows_vendor_package_release_tag=v4.0.6142 `
   -f publish_managed_to_github_packages=true `
-  -f publish_runtime_to_github_packages=true `
+  -f publish_runtime_to_github_packages=false `
   -f attach_runtime_to_github_release=true
 ```
 
@@ -182,6 +185,11 @@ powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalReleaseBundle.ps1 `
 Local bridge and collection runtime example:
 
 ```powershell
+gh release download v4.0.6142 `
+  --pattern "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.*.4.0.6142.nupkg" `
+  --dir .\artifacts\vendor-package-source\win-x64-trt11.0-cuda12.9-cudnn9.22 `
+  --repo guojin-yan/TensorRT-CSharp-API
+
 powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalReleaseBundle.ps1 `
   -Version 4.0.1 `
   -RuntimeVersion 4.0.1 `
@@ -189,9 +197,7 @@ powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalReleaseBundle.ps1 `
   -WindowsRuntimeDeliveryMode split `
   -WindowsSplitPackageRoles bridge,collection `
   -WindowsVendorPackageVersion 4.0.6142 `
-  -WindowsAdditionalPackageSource https://nuget.pkg.github.com/<owner>/index.json `
-  -WindowsAdditionalPackageSourceUsername <owner-or-actor> `
-  -WindowsAdditionalPackageSourcePassword <token>
+  -WindowsAdditionalPackageSource .\artifacts\vendor-package-source\win-x64-trt11.0-cuda12.9-cudnn9.22
 ```
 
 On WDAC / application-control machines, the local and self-hosted Windows runtime validation path can sign the generated consumer output before smoke. This helps when `PackageConsumerSmoke.exe` would otherwise be blocked even though package restore, native asset copy, and build succeeded.

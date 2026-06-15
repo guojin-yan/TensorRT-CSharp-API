@@ -87,6 +87,7 @@ $workflowContracts = @(
       New-Requirement -Needle "windows" -Description "windows runner label"
       New-Requirement -Needle "Invoke-LocalRuntimePackage.ps1" -Description "full runtime packaging entrypoint"
       New-Requirement -Needle "Invoke-LocalSplitRuntimePackage.ps1" -Description "split runtime packaging entrypoint"
+      New-Requirement -Needle "Restore-PublishedSplitPackageSource.ps1" -Description "published vendor release asset package source"
       New-Requirement -Needle "sign_consumer_output" -Description "consumer signing toggle"
       New-Requirement -Needle "Push-NuGetPackages.ps1" -Description "package publication"
     )
@@ -118,6 +119,7 @@ $workflowContracts = @(
       New-Requirement -Needle "gh release create" -Description "release creation"
       New-Requirement -Needle "gh release upload" -Description "release asset upload"
       New-Requirement -Needle "windows_split_package_roles includes collection/meta but no vendor component version was provided" -Description "split collection vendor-version guard"
+      New-Requirement -Needle "windows_vendor_package_release_tag" -Description "split collection vendor release tag override"
     )
   }
 )

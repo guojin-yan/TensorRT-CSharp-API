@@ -114,6 +114,7 @@ runtime 包可能非常大，因为会包含 TensorRT builder resources、plugin
 
 - `JYPPX.TensorRT.CSharp.API` 发布到 nuget.org 和 GitHub Packages。
 - 大体积 CUDA/cuDNN/TensorRT 组件包优先发布到 GitHub Packages；如果不适合 NuGet feed，则作为 GitHub Release asset 发布。
+- GitHub Release assets 只是可下载的 `.nupkg` 文件，不是 NuGet feed。vendor 包只保留在 Release 时，发布 workflow 会先下载这些文件到临时本地包源，再验证 `bridge,collection`。
 - runtime 包版本和 managed 包版本独立维护。
 - 只有 NVIDIA 依赖集合变化时，才重发完整 CUDA/cuDNN/TensorRT 组件包。
 - 本地 C ABI bridge 变化时，重发 `bridge,collection` split 包，并显式传入已有 vendor 组件包版本，避免重复发布 CUDA/cuDNN/TensorRT 包。
