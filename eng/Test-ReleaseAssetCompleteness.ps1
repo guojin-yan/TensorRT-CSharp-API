@@ -6,8 +6,16 @@ param(
   [string[]]$WindowsRuntimeKey = @(),
   [ValidateSet("full", "split")]
   [string]$WindowsRuntimeDeliveryMode = "split",
+  [string[]]$WindowsSplitPackageRoles = @("all"),
+  [string]$WindowsVendorPackageVersion,
+  [string]$WindowsVendorPackageReleaseTag,
+  [string]$WindowsCudaCudnnPackageVersion,
+  [string]$WindowsCudaCudnnPackageReleaseTag,
+  [string]$WindowsTensorRtPackageVersion,
+  [string]$WindowsTensorRtPackageReleaseTag,
   [string[]]$LinuxRuntimeKey = @(),
   [switch]$IncludeManagedPackage,
+  [switch]$ReportUnexpectedAssets,
   [string]$Repository = "guojin-yan/TensorRT-CSharp-API",
   [string]$RepositoryRoot
 )
@@ -43,17 +51,184 @@ function Expand-KeyList {
   return @($keys | Select-Object -Unique)
 }
 
+function Resolve-RolePackageVersion {
+  param(
+    [string]$Value,
+    [Parameter(Mandatory = $true)]
+    [string]$Fallback
+  )
+
+  if ([string]::IsNullOrWhiteSpace($Value)) {
+    return $Fallback
+  }
+
+  return & (Join-Path $RepositoryRoot "eng\Resolve-PackageVersion.ps1") -RequestedVersion $Value
+}
+
+function Resolve-PackageReleaseTag {
+  param(
+    [string]$ExplicitTag,
+    [Parameter(Mandatory = $true)]
+    [string]$PackageVersion,
+    [Parameter(Mandatory = $true)]
+    [string]$DefaultVersion,
+    [Parameter(Mandatory = $true)]
+    [string]$DefaultTag
+  )
+
+  if (-not [string]::IsNullOrWhiteSpace($ExplicitTag)) {
+    return $ExplicitTag
+  }
+
+  if ($PackageVersion -eq $DefaultVersion) {
+    return $DefaultTag
+  }
+
+  return "v$PackageVersion"
+}
+
+function Test-SplitPackageRequested {
+  param(
+    [Parameter(Mandatory = $true)]
+    [object]$SplitPackage,
+    [Parameter(Mandatory = $true)]
+    [string[]]$RequestedRoles
+  )
+
+  $role = ([string]$SplitPackage.role).ToLowerInvariant()
+  $key = ([string]$SplitPackage.key).ToLowerInvariant()
+
+  foreach ($requestedRole in $RequestedRoles) {
+    switch ($requestedRole) {
+      "all" { return $true }
+      "vendor" {
+        if ($role -ne "bridge") {
+          return $true
+        }
+      }
+      "tensorrt" {
+        if ($role.StartsWith("tensorrt-")) {
+          return $true
+        }
+      }
+      "builder" {
+        if ($role.StartsWith("tensorrt-builder-")) {
+          return $true
+        }
+      }
+      default {
+        if ($role -eq $requestedRole -or $key -eq $requestedRole) {
+          return $true
+        }
+      }
+    }
+  }
+
+  return $false
+}
+
+function Test-CollectionRequested {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string[]]$RequestedRoles
+  )
+
+  return (
+    $RequestedRoles -contains "all" -or
+    $RequestedRoles -contains "collection" -or
+    $RequestedRoles -contains "meta"
+  )
+}
+
+function Get-SplitPackageTarget {
+  param(
+    [Parameter(Mandatory = $true)]
+    [object]$SplitPackage
+  )
+
+  switch -Regex ([string]$SplitPackage.role) {
+    '^bridge$' {
+      return [pscustomobject]@{
+        version = $resolvedVersion
+        releaseTag = $ReleaseTag
+      }
+    }
+    '^cuda-cudnn$' {
+      return [pscustomobject]@{
+        version = $resolvedCudaCudnnPackageVersion
+        releaseTag = $resolvedCudaCudnnPackageReleaseTag
+      }
+    }
+    '^tensorrt-' {
+      return [pscustomobject]@{
+        version = $resolvedTensorRtPackageVersion
+        releaseTag = $resolvedTensorRtPackageReleaseTag
+      }
+    }
+    default {
+      return [pscustomobject]@{
+        version = $resolvedVersion
+        releaseTag = $ReleaseTag
+      }
+    }
+  }
+}
+
 function Add-ExpectedPackage {
   param(
+    [Parameter(Mandatory = $true)]
+    $Rows,
     [Parameter(Mandatory = $true)]
     $Set,
     [Parameter(Mandatory = $true)]
     [string]$PackageId,
     [Parameter(Mandatory = $true)]
-    [string]$ResolvedVersion
+    [string]$ResolvedVersion,
+    [Parameter(Mandatory = $true)]
+    [string]$ExpectedReleaseTag,
+    [string]$SourceRuntimeKey,
+    [string]$Role
   )
 
-  $null = $Set.Add("$PackageId.$ResolvedVersion.nupkg")
+  $packageName = "$PackageId.$ResolvedVersion.nupkg"
+  $identity = "$ExpectedReleaseTag|$packageName"
+  if (-not $Set.Add($identity)) {
+    return
+  }
+
+  $Rows.Add([pscustomobject]@{
+    package = $packageName
+    releaseTag = $ExpectedReleaseTag
+    sourceRuntimeKey = $SourceRuntimeKey
+    role = $Role
+    present = $false
+  })
+}
+
+function Get-Release {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$Tag
+  )
+
+  if ($releaseCache.ContainsKey($Tag)) {
+    return $releaseCache[$Tag]
+  }
+
+  $release = gh release view $Tag --repo $Repository --json assets,name,tagName,url | ConvertFrom-Json
+  $assets = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+  foreach ($asset in @($release.assets)) {
+    $null = $assets.Add($asset.name)
+  }
+
+  $entry = [pscustomobject]@{
+    tagName = $release.tagName
+    url = $release.url
+    assets = $assets
+    assetCount = $assets.Count
+  }
+  $releaseCache[$Tag] = $entry
+  return $entry
 }
 
 $resolvedVersion = if ([string]::IsNullOrWhiteSpace($Version)) {
@@ -63,34 +238,119 @@ else {
   & (Join-Path $RepositoryRoot "eng\Resolve-PackageVersion.ps1") -RequestedVersion $Version
 }
 
+$resolvedVendorPackageVersion = Resolve-RolePackageVersion -Value $WindowsVendorPackageVersion -Fallback $resolvedVersion
+$resolvedVendorPackageReleaseTag = Resolve-PackageReleaseTag `
+  -ExplicitTag $WindowsVendorPackageReleaseTag `
+  -PackageVersion $resolvedVendorPackageVersion `
+  -DefaultVersion $resolvedVersion `
+  -DefaultTag $ReleaseTag
+
+$resolvedCudaCudnnPackageVersion = Resolve-RolePackageVersion -Value $WindowsCudaCudnnPackageVersion -Fallback $resolvedVendorPackageVersion
+$resolvedCudaCudnnPackageReleaseTag = Resolve-PackageReleaseTag `
+  -ExplicitTag $WindowsCudaCudnnPackageReleaseTag `
+  -PackageVersion $resolvedCudaCudnnPackageVersion `
+  -DefaultVersion $resolvedVendorPackageVersion `
+  -DefaultTag $resolvedVendorPackageReleaseTag
+
+$resolvedTensorRtPackageVersion = Resolve-RolePackageVersion -Value $WindowsTensorRtPackageVersion -Fallback $resolvedVendorPackageVersion
+$resolvedTensorRtPackageReleaseTag = Resolve-PackageReleaseTag `
+  -ExplicitTag $WindowsTensorRtPackageReleaseTag `
+  -PackageVersion $resolvedTensorRtPackageVersion `
+  -DefaultVersion $resolvedVendorPackageVersion `
+  -DefaultTag $resolvedVendorPackageReleaseTag
+
 $runtimeManifestPath = Join-Path $RepositoryRoot "pack\runtime\runtime-packages.manifest.json"
 $runtimeManifest = Get-Content -LiteralPath $runtimeManifestPath -Raw -Encoding utf8 | ConvertFrom-Json
 $splitManifestPath = Join-Path $RepositoryRoot "pack\runtime-split\split-runtime-packages.manifest.json"
 $splitManifest = Get-Content -LiteralPath $splitManifestPath -Raw -Encoding utf8 | ConvertFrom-Json
 
-$expected = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+$expectedSet = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+$rows = New-Object System.Collections.Generic.List[object]
+$releaseCache = @{}
 
 if ($IncludeManagedPackage.IsPresent) {
-  Add-ExpectedPackage -Set $expected -PackageId "JYPPX.TensorRT.CSharp.API" -ResolvedVersion $resolvedVersion
+  Add-ExpectedPackage `
+    -Rows $rows `
+    -Set $expectedSet `
+    -PackageId "JYPPX.TensorRT.CSharp.API" `
+    -ResolvedVersion $resolvedVersion `
+    -ExpectedReleaseTag $ReleaseTag `
+    -Role "managed"
 }
 
 $windowsKeys = @(Expand-KeyList -Values $WindowsRuntimeKey)
+$requestedSplitRoles = @(Expand-KeyList -Values $WindowsSplitPackageRoles | ForEach-Object { $_.ToLowerInvariant() })
+if ($requestedSplitRoles.Count -eq 0) {
+  $requestedSplitRoles = @("all")
+}
+
 foreach ($key in $windowsKeys) {
   $runtimePackage = $runtimeManifest.packages | Where-Object { $_.key -eq $key } | Select-Object -First 1
   if (-not $runtimePackage) {
     throw "Windows runtime key '$key' was not found."
   }
 
-  Add-ExpectedPackage -Set $expected -PackageId $runtimePackage.packageId -ResolvedVersion $resolvedVersion
+  if ($WindowsRuntimeDeliveryMode -eq "full") {
+    Add-ExpectedPackage `
+      -Rows $rows `
+      -Set $expectedSet `
+      -PackageId $runtimePackage.packageId `
+      -ResolvedVersion $resolvedVersion `
+      -ExpectedReleaseTag $ReleaseTag `
+      -SourceRuntimeKey $key `
+      -Role "full"
+    continue
+  }
 
-  if ($WindowsRuntimeDeliveryMode -eq "split") {
-    $splitPackages = @($splitManifest.packages | Where-Object { $_.sourceRuntimeKey -eq $key })
-    if ($splitPackages.Count -eq 0) {
-      throw "No split runtime packages were defined for source runtime '$key'."
+  $allSplitPackages = @($splitManifest.packages | Where-Object { $_.sourceRuntimeKey -eq $key })
+  if ($allSplitPackages.Count -eq 0) {
+    throw "No split runtime packages were defined for source runtime '$key'."
+  }
+
+  if (Test-CollectionRequested -RequestedRoles $requestedSplitRoles) {
+    Add-ExpectedPackage `
+      -Rows $rows `
+      -Set $expectedSet `
+      -PackageId $runtimePackage.packageId `
+      -ResolvedVersion $resolvedVersion `
+      -ExpectedReleaseTag $ReleaseTag `
+      -SourceRuntimeKey $key `
+      -Role "collection"
+  }
+
+  $selectedSplitPackages = @($allSplitPackages | Where-Object { Test-SplitPackageRequested -SplitPackage $_ -RequestedRoles $requestedSplitRoles })
+  foreach ($splitPackage in $selectedSplitPackages) {
+    $target = Get-SplitPackageTarget -SplitPackage $splitPackage
+    Add-ExpectedPackage `
+      -Rows $rows `
+      -Set $expectedSet `
+      -PackageId $splitPackage.packageId `
+      -ResolvedVersion $target.version `
+      -ExpectedReleaseTag $target.releaseTag `
+      -SourceRuntimeKey $key `
+      -Role $splitPackage.role
+  }
+
+  if (Test-CollectionRequested -RequestedRoles $requestedSplitRoles) {
+    $selectedKeys = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+    foreach ($splitPackage in $selectedSplitPackages) {
+      $null = $selectedKeys.Add([string]$splitPackage.key)
     }
 
-    foreach ($splitPackage in $splitPackages) {
-      Add-ExpectedPackage -Set $expected -PackageId $splitPackage.packageId -ResolvedVersion $resolvedVersion
+    $dependencySplitPackages = @($allSplitPackages | Where-Object {
+        -not $selectedKeys.Contains([string]$_.key)
+      })
+
+    foreach ($splitPackage in $dependencySplitPackages) {
+      $target = Get-SplitPackageTarget -SplitPackage $splitPackage
+      Add-ExpectedPackage `
+        -Rows $rows `
+        -Set $expectedSet `
+        -PackageId $splitPackage.packageId `
+        -ResolvedVersion $target.version `
+        -ExpectedReleaseTag $target.releaseTag `
+        -SourceRuntimeKey $key `
+        -Role "$($splitPackage.role)-dependency"
     }
   }
 }
@@ -102,23 +362,57 @@ foreach ($key in $linuxKeys) {
     throw "Linux runtime key '$key' was not found."
   }
 
-  Add-ExpectedPackage -Set $expected -PackageId $runtimePackage.packageId -ResolvedVersion $resolvedVersion
+  Add-ExpectedPackage `
+    -Rows $rows `
+    -Set $expectedSet `
+    -PackageId $runtimePackage.packageId `
+    -ResolvedVersion $resolvedVersion `
+    -ExpectedReleaseTag $ReleaseTag `
+    -SourceRuntimeKey $key `
+    -Role "linux"
 }
 
-$release = gh release view $ReleaseTag --repo $Repository --json assets,name,tagName,url | ConvertFrom-Json
-$actual = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
-foreach ($asset in @($release.assets)) {
-  $null = $actual.Add($asset.name)
+foreach ($row in $rows) {
+  $release = Get-Release -Tag $row.releaseTag
+  $row.present = $release.assets.Contains($row.package)
 }
 
-$missing = @($expected | Where-Object { -not $actual.Contains($_) } | Sort-Object)
-$unexpected = @($actual | Where-Object { -not $expected.Contains($_) } | Sort-Object)
+$expectedByRelease = @{}
+foreach ($row in $rows) {
+  if (-not $expectedByRelease.ContainsKey($row.releaseTag)) {
+    $expectedByRelease[$row.releaseTag] = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+  }
 
-$rows = New-Object System.Collections.Generic.List[object]
-foreach ($name in ($expected | Sort-Object)) {
-  $rows.Add([pscustomobject]@{
-    package = $name
-    present = $actual.Contains($name)
+  $null = $expectedByRelease[$row.releaseTag].Add($row.package)
+}
+
+$missing = @($rows | Where-Object { -not $_.present } | Sort-Object releaseTag, package)
+$unexpected = New-Object System.Collections.Generic.List[object]
+if ($ReportUnexpectedAssets.IsPresent) {
+  foreach ($tag in ($expectedByRelease.Keys | Sort-Object)) {
+    $release = Get-Release -Tag $tag
+    foreach ($assetName in ($release.assets | Sort-Object)) {
+      if (-not $expectedByRelease[$tag].Contains($assetName)) {
+        $unexpected.Add([pscustomobject]@{
+          releaseTag = $tag
+          package = $assetName
+        })
+      }
+    }
+  }
+}
+
+$releaseSummaries = New-Object System.Collections.Generic.List[object]
+foreach ($tag in ($expectedByRelease.Keys | Sort-Object)) {
+  $release = Get-Release -Tag $tag
+  $expectedForRelease = @($rows | Where-Object { $_.releaseTag -eq $tag })
+  $missingForRelease = @($missing | Where-Object { $_.releaseTag -eq $tag })
+  $releaseSummaries.Add([pscustomobject]@{
+    releaseTag = $tag
+    releaseUrl = $release.url
+    expectedCount = $expectedForRelease.Count
+    actualAssetCount = $release.assetCount
+    missingCount = $missingForRelease.Count
   })
 }
 
@@ -131,14 +425,23 @@ $markdownPath = Join-Path $outputRoot "release-asset-audit-$safeTag.md"
 
 [pscustomobject]@{
   releaseTag = $ReleaseTag
-  releaseUrl = $release.url
   version = $resolvedVersion
   includeManagedPackage = $IncludeManagedPackage.IsPresent
   windowsRuntimeDeliveryMode = $WindowsRuntimeDeliveryMode
+  windowsSplitPackageRoles = $requestedSplitRoles
+  windowsVendorPackageVersion = $resolvedVendorPackageVersion
+  windowsVendorPackageReleaseTag = $resolvedVendorPackageReleaseTag
+  windowsCudaCudnnPackageVersion = $resolvedCudaCudnnPackageVersion
+  windowsCudaCudnnPackageReleaseTag = $resolvedCudaCudnnPackageReleaseTag
+  windowsTensorRtPackageVersion = $resolvedTensorRtPackageVersion
+  windowsTensorRtPackageReleaseTag = $resolvedTensorRtPackageReleaseTag
   windowsRuntimeKeys = $windowsKeys
   linuxRuntimeKeys = $linuxKeys
-  expectedCount = $expected.Count
-  actualCount = $actual.Count
+  reportUnexpectedAssets = $ReportUnexpectedAssets.IsPresent
+  expectedCount = $rows.Count
+  missingCount = $missing.Count
+  unexpectedCount = $unexpected.Count
+  releases = $releaseSummaries
   missing = $missing
   unexpected = $unexpected
   rows = $rows
@@ -148,19 +451,25 @@ $lines = New-Object System.Collections.Generic.List[string]
 $codeQuote = [string][char]96
 $lines.Add("# Release Asset Audit")
 $lines.Add("")
-$lines.Add("Release: [$($release.tagName)]($($release.url))")
+$lines.Add("Primary release: " + $codeQuote + $ReleaseTag + $codeQuote)
 $lines.Add("")
-$lines.Add("| Package | Present |")
-$lines.Add("| --- | --- |")
-foreach ($row in $rows) {
-  $lines.Add("| " + $codeQuote + $row.package + $codeQuote + " | " + $row.present + " |")
+$lines.Add("| Release | Expected | Actual assets | Missing |")
+$lines.Add("| --- | ---: | ---: | ---: |")
+foreach ($summary in $releaseSummaries) {
+  $lines.Add("| " + $codeQuote + $summary.releaseTag + $codeQuote + " | $($summary.expectedCount) | $($summary.actualAssetCount) | $($summary.missingCount) |")
+}
+
+$lines.Add("")
+$lines.Add("| Release | Package | Role | Present |")
+$lines.Add("| --- | --- | --- | --- |")
+foreach ($row in ($rows | Sort-Object releaseTag, package)) {
+  $lines.Add("| " + $codeQuote + $row.releaseTag + $codeQuote + " | " + $codeQuote + $row.package + $codeQuote + " | " + $codeQuote + $row.role + $codeQuote + " | " + $row.present + " |")
 }
 
 $lines.Add("")
 $lines.Add("## Summary")
 $lines.Add("")
-$lines.Add("- Expected packages: $($expected.Count)")
-$lines.Add("- Release assets: $($actual.Count)")
+$lines.Add("- Expected packages: $($rows.Count)")
 $lines.Add("- Missing packages: $($missing.Count)")
 $lines.Add("- Unexpected assets: $($unexpected.Count)")
 
@@ -168,8 +477,8 @@ if ($missing.Count -gt 0) {
   $lines.Add("")
   $lines.Add("## Missing")
   $lines.Add("")
-  foreach ($name in $missing) {
-    $lines.Add("- " + $codeQuote + $name + $codeQuote)
+  foreach ($row in $missing) {
+    $lines.Add("- " + $codeQuote + $row.releaseTag + $codeQuote + " / " + $codeQuote + $row.package + $codeQuote)
   }
 }
 
@@ -177,8 +486,8 @@ if ($unexpected.Count -gt 0) {
   $lines.Add("")
   $lines.Add("## Unexpected")
   $lines.Add("")
-  foreach ($name in $unexpected) {
-    $lines.Add("- " + $codeQuote + $name + $codeQuote)
+  foreach ($row in $unexpected) {
+    $lines.Add("- " + $codeQuote + $row.releaseTag + $codeQuote + " / " + $codeQuote + $row.package + $codeQuote)
   }
 }
 
@@ -188,6 +497,6 @@ Write-Host "Release asset audit written to $jsonPath"
 Write-Host "Release asset audit written to $markdownPath"
 
 if ($missing.Count -gt 0) {
-  Write-Warning "Release '$ReleaseTag' is still missing $($missing.Count) expected package asset(s)."
+  Write-Warning "Release asset audit is still missing $($missing.Count) expected package asset(s)."
   exit 1
 }
