@@ -166,6 +166,34 @@ jobs:
             -ApiKey $env:NUGET_API_KEY `
             -AllowMissingApiKey
 
+      - name: Inspect local NuGet publish configuration
+        if: ${{ secrets.NUGET_API_KEY == '' }}
+        shell: pwsh
+        run: |
+          $configPath = Join-Path $env:APPDATA 'NuGet\NuGet.Config'
+          Write-Host "RunnerUser=$env:USERNAME"
+          Write-Host "AppData=$env:APPDATA"
+          Write-Host "UserProfile=$env:USERPROFILE"
+          Write-Host "NuGetConfigExists=$(Test-Path -LiteralPath $configPath -PathType Leaf)"
+          if (Test-Path -LiteralPath $configPath -PathType Leaf) {
+            [xml]$xml = Get-Content -LiteralPath $configPath -Raw
+            $apiKeys = @($xml.configuration.apikeys.add)
+            Write-Host "NuGetApiKeyCount=$($apiKeys.Count)"
+            foreach ($entry in $apiKeys) {
+              $source = [string]$entry.key
+              $value = [string]$entry.value
+              $hasValue = -not [string]::IsNullOrWhiteSpace($value)
+              $isAscii = $true
+              foreach ($character in $value.ToCharArray()) {
+                if ([int][char]$character -gt 127) {
+                  $isAscii = $false
+                  break
+                }
+              }
+              Write-Host ("NuGetApiKeySource={0};HasValue={1};Length={2};IsAscii={3}" -f $source, $hasValue, $value.Length, $isAscii)
+            }
+          }
+
       - name: Download managed package artifact
         uses: actions/download-artifact@v8
         with:
