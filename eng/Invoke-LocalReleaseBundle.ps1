@@ -16,7 +16,8 @@ param(
   [string[]]$WindowsSplitPackageRoles = @("all"),
   [string]$WindowsMetaPackageVersion,
   [string]$WindowsBridgePackageVersion,
-  [string]$WindowsVendorPackageVersion,
+  [string]$WindowsCudaCudnnPackageVersion,
+  [string]$WindowsTensorRtPackageVersion,
   [string[]]$WindowsAdditionalPackageSource = @(),
   [string]$WindowsAdditionalPackageSourceUsername,
   [string]$WindowsAdditionalPackageSourcePassword,
@@ -124,16 +125,32 @@ if ($windowsKeys.Count -eq 0) {
 
 if (-not $SkipWindowsRuntime.IsPresent -and $WindowsRuntimeDeliveryMode -eq "split") {
   $lowerSplitRoles = @($windowsSplitPackageRoles | ForEach-Object { $_.ToLowerInvariant() })
-  $requiresPinnedVendorVersion =
+  $requiresPinnedCudaCudnnVersion =
     ($lowerSplitRoles -contains "collection" -or
       $lowerSplitRoles -contains "meta" -or
       $IncludeWindowsSplitMetaPackage.IsPresent) -and
-    -not ($lowerSplitRoles -contains "vendor") -and
+    -not ($lowerSplitRoles -contains "cuda-cudnn") -and
+    -not ($lowerSplitRoles -contains "stable-dependencies") -and
+    -not ($lowerSplitRoles -contains "nvidia-dependencies") -and
     -not ($lowerSplitRoles -contains "all")
 
-  if ($requiresPinnedVendorVersion -and
-      [string]::IsNullOrWhiteSpace($WindowsVendorPackageVersion)) {
-    throw "Windows split collection/meta packaging requires -WindowsVendorPackageVersion so already-published NVIDIA vendor packages are pinned explicitly, or include vendor/all in -WindowsSplitPackageRoles for a dependency refresh."
+  $requiresPinnedTensorRtVersion =
+    ($lowerSplitRoles -contains "collection" -or
+      $lowerSplitRoles -contains "meta" -or
+      $IncludeWindowsSplitMetaPackage.IsPresent) -and
+    -not ($lowerSplitRoles -contains "tensorrt") -and
+    -not ($lowerSplitRoles -contains "stable-dependencies") -and
+    -not ($lowerSplitRoles -contains "nvidia-dependencies") -and
+    -not ($lowerSplitRoles -contains "all")
+
+  if ($requiresPinnedCudaCudnnVersion -and
+      [string]::IsNullOrWhiteSpace($WindowsCudaCudnnPackageVersion)) {
+    throw "Windows split collection/meta packaging requires -WindowsCudaCudnnPackageVersion so already-published CUDA/cuDNN packages are pinned explicitly, or include cuda-cudnn/all in -WindowsSplitPackageRoles for a dependency refresh."
+  }
+
+  if ($requiresPinnedTensorRtVersion -and
+      [string]::IsNullOrWhiteSpace($WindowsTensorRtPackageVersion)) {
+    throw "Windows split collection/meta packaging requires -WindowsTensorRtPackageVersion so already-published TensorRT packages are pinned explicitly, or include tensorrt/all in -WindowsSplitPackageRoles for a dependency refresh."
   }
 }
 
@@ -209,6 +226,10 @@ if (-not $SkipWindowsRuntime.IsPresent) {
         $Configuration
       )
 
+      if (-not $SkipManagedPack.IsPresent) {
+        $arguments += "-SkipManagedPack"
+      }
+
       if (-not [string]::IsNullOrWhiteSpace($WindowsMetaPackageVersion)) {
         $arguments += @("-MetaPackageVersion", $WindowsMetaPackageVersion)
       }
@@ -217,8 +238,12 @@ if (-not $SkipWindowsRuntime.IsPresent) {
         $arguments += @("-BridgePackageVersion", $WindowsBridgePackageVersion)
       }
 
-      if (-not [string]::IsNullOrWhiteSpace($WindowsVendorPackageVersion)) {
-        $arguments += @("-VendorPackageVersion", $WindowsVendorPackageVersion)
+      if (-not [string]::IsNullOrWhiteSpace($WindowsCudaCudnnPackageVersion)) {
+        $arguments += @("-CudaCudnnPackageVersion", $WindowsCudaCudnnPackageVersion)
+      }
+
+      if (-not [string]::IsNullOrWhiteSpace($WindowsTensorRtPackageVersion)) {
+        $arguments += @("-TensorRtPackageVersion", $WindowsTensorRtPackageVersion)
       }
 
       if ($IncludeWindowsSplitMetaPackage.IsPresent) {
@@ -240,10 +265,6 @@ if (-not $SkipWindowsRuntime.IsPresent) {
 
       if (-not [string]::IsNullOrWhiteSpace($WindowsAdditionalPackageSourcePassword)) {
         $arguments += @("-AdditionalPackageSourcePassword", $WindowsAdditionalPackageSourcePassword)
-      }
-
-      if (-not $SkipManagedPack.IsPresent) {
-        $arguments += "-SkipManagedPack"
       }
 
       if ($RunWindowsSmoke.IsPresent) {

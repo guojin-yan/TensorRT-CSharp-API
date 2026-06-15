@@ -1,9 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <PackageId>JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt8.6.cuda12.1.cudnn8.9.Vendor</PackageId>
-    <Title>JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt8.6.cuda12.1.cudnn8.9.Vendor</Title>
-    <Description>Vendor NVIDIA runtime libraries for TensorRT 8.6.1.6, CUDA 12.1, and cuDNN 8.9.7.29 on win-x64.</Description>
-    <JYPPXRuntimeKey>win-x64-trt8.6-cuda12.1-cudnn8.9-vendor</JYPPXRuntimeKey>
-    <PackageTags>TensorRT;CUDA;cuDNN;runtime;split-delivery;vendor</PackageTags>
-  </PropertyGroup>
-</Project>

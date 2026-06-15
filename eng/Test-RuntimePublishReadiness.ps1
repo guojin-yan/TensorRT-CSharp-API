@@ -90,8 +90,11 @@ foreach ($package in $packages) {
           if (($splitPackages | Where-Object { $_.role -eq "bridge" }).Count -eq 0) {
             $blockers.Add("split runtime package set for '$($package.key)' is missing a bridge package.")
           }
-          if (($splitPackages | Where-Object { $_.role -eq "vendor" }).Count -eq 0) {
-            $blockers.Add("split runtime package set for '$($package.key)' is missing a vendor package.")
+          if (($splitPackages | Where-Object { $_.role -eq "cuda-cudnn" }).Count -eq 0) {
+            $blockers.Add("split runtime package set for '$($package.key)' is missing a CudaCudnn package.")
+          }
+          if (($splitPackages | Where-Object { $_.role -eq "tensorrt" }).Count -eq 0) {
+            $blockers.Add("split runtime package set for '$($package.key)' is missing a TensorRt package.")
           }
           if (-not $hasLocalSplitNupkgSet) {
             $warnings.Add("complete local split runtime nupkg set was not detected under artifacts/runtime-split-nupkg/$($package.key).")

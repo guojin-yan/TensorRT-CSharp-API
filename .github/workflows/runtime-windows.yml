@@ -38,13 +38,23 @@ on:
         required: false
         default: ""
         type: string
-      vendor_package_version:
-        description: Optional version for already-published CUDA/cuDNN/TensorRT vendor split packages
+      cuda_cudnn_package_version:
+        description: Optional version for already-published CUDA/cuDNN split packages
         required: false
         default: ""
         type: string
-      vendor_package_release_tag:
-        description: Optional GitHub Release tag that contains previously published vendor split packages; defaults to v<vendor package version>
+      cuda_cudnn_package_release_tag:
+        description: Optional GitHub Release tag that contains previously published CUDA/cuDNN split packages; defaults to v<cuda_cudnn package version>
+        required: false
+        default: ""
+        type: string
+      tensorrt_package_version:
+        description: Optional version for already-published TensorRT split packages
+        required: false
+        default: ""
+        type: string
+      tensorrt_package_release_tag:
+        description: Optional GitHub Release tag that contains previously published TensorRT split packages; defaults to v<tensorrt package version>
         required: false
         default: ""
         type: string
@@ -74,7 +84,7 @@ on:
         default: true
         type: boolean
       publish_to_github_packages:
-        description: Publish packages to GitHub Packages; large vendor packages should normally stay on GitHub Release assets
+        description: Publish packages to GitHub Packages; large stable dependency packages may stay on GitHub Release assets
         required: false
         default: false
         type: boolean
@@ -125,13 +135,23 @@ on:
         required: false
         default: ""
         type: string
-      vendor_package_version:
-        description: Optional version for already-published CUDA/cuDNN/TensorRT vendor split packages
+      cuda_cudnn_package_version:
+        description: Optional version for already-published CUDA/cuDNN split packages
         required: false
         default: ""
         type: string
-      vendor_package_release_tag:
-        description: Optional GitHub Release tag that contains previously published vendor split packages; defaults to v<vendor package version>
+      cuda_cudnn_package_release_tag:
+        description: Optional GitHub Release tag that contains previously published CUDA/cuDNN split packages; defaults to v<cuda_cudnn package version>
+        required: false
+        default: ""
+        type: string
+      tensorrt_package_version:
+        description: Optional version for already-published TensorRT split packages
+        required: false
+        default: ""
+        type: string
+      tensorrt_package_release_tag:
+        description: Optional GitHub Release tag that contains previously published TensorRT split packages; defaults to v<tensorrt package version>
         required: false
         default: ""
         type: string
@@ -161,7 +181,7 @@ on:
         default: true
         type: boolean
       publish_to_github_packages:
-        description: Publish packages to GitHub Packages; large vendor packages should normally stay on GitHub Release assets
+        description: Publish packages to GitHub Packages; large stable dependency packages may stay on GitHub Release assets
         required: false
         default: false
         type: boolean
@@ -271,9 +291,19 @@ jobs:
           )
           if ($shouldResolvePublishedPackages -and
               -not ($roleTokens -contains 'all') -and
-              -not ($roleTokens -contains 'vendor') -and
-              [string]::IsNullOrWhiteSpace('${{ inputs.vendor_package_version }}')) {
-            throw "split_package_roles includes collection/meta but no vendor package version was provided. Pass vendor_package_version to reuse published Vendor packages, or include vendor/all in split_package_roles for a dependency refresh."
+              -not ($roleTokens -contains 'cuda-cudnn') -and
+              -not ($roleTokens -contains 'stable-dependencies') -and
+              -not ($roleTokens -contains 'nvidia-dependencies') -and
+              [string]::IsNullOrWhiteSpace('${{ inputs.cuda_cudnn_package_version }}')) {
+            throw "split_package_roles includes collection/meta but no CUDA/cuDNN package version was provided. Pass cuda_cudnn_package_version to reuse published CudaCudnn packages, or include cuda-cudnn/all in split_package_roles for a dependency refresh."
+          }
+          if ($shouldResolvePublishedPackages -and
+              -not ($roleTokens -contains 'all') -and
+              -not ($roleTokens -contains 'tensorrt') -and
+              -not ($roleTokens -contains 'stable-dependencies') -and
+              -not ($roleTokens -contains 'nvidia-dependencies') -and
+              [string]::IsNullOrWhiteSpace('${{ inputs.tensorrt_package_version }}')) {
+            throw "split_package_roles includes collection/meta but no TensorRT package version was provided. Pass tensorrt_package_version to reuse published TensorRt packages, or include tensorrt/all in split_package_roles for a dependency refresh."
           }
 
           foreach ($key in ($keys | Select-Object -Unique)) {
@@ -292,8 +322,11 @@ jobs:
             if (-not [string]::IsNullOrWhiteSpace('${{ inputs.bridge_package_version }}')) {
               $arguments += @('-BridgePackageVersion', '${{ inputs.bridge_package_version }}')
             }
-            if (-not [string]::IsNullOrWhiteSpace('${{ inputs.vendor_package_version }}')) {
-              $arguments += @('-VendorPackageVersion', '${{ inputs.vendor_package_version }}')
+            if (-not [string]::IsNullOrWhiteSpace('${{ inputs.cuda_cudnn_package_version }}')) {
+              $arguments += @('-CudaCudnnPackageVersion', '${{ inputs.cuda_cudnn_package_version }}')
+            }
+            if (-not [string]::IsNullOrWhiteSpace('${{ inputs.tensorrt_package_version }}')) {
+              $arguments += @('-TensorRtPackageVersion', '${{ inputs.tensorrt_package_version }}')
             }
             if ('${{ inputs.include_meta_package }}' -eq 'true') {
               $arguments += '-IncludeMetaPackage'
@@ -318,11 +351,17 @@ jobs:
               if (-not [string]::IsNullOrWhiteSpace('${{ inputs.bridge_package_version }}')) {
                 $restoreArguments += @('-BridgePackageVersion', '${{ inputs.bridge_package_version }}')
               }
-              if (-not [string]::IsNullOrWhiteSpace('${{ inputs.vendor_package_version }}')) {
-                $restoreArguments += @('-VendorPackageVersion', '${{ inputs.vendor_package_version }}')
+              if (-not [string]::IsNullOrWhiteSpace('${{ inputs.cuda_cudnn_package_version }}')) {
+                $restoreArguments += @('-CudaCudnnPackageVersion', '${{ inputs.cuda_cudnn_package_version }}')
               }
-              if (-not [string]::IsNullOrWhiteSpace('${{ inputs.vendor_package_release_tag }}')) {
-                $restoreArguments += @('-VendorPackageReleaseTag', '${{ inputs.vendor_package_release_tag }}')
+              if (-not [string]::IsNullOrWhiteSpace('${{ inputs.cuda_cudnn_package_release_tag }}')) {
+                $restoreArguments += @('-CudaCudnnPackageReleaseTag', '${{ inputs.cuda_cudnn_package_release_tag }}')
+              }
+              if (-not [string]::IsNullOrWhiteSpace('${{ inputs.tensorrt_package_version }}')) {
+                $restoreArguments += @('-TensorRtPackageVersion', '${{ inputs.tensorrt_package_version }}')
+              }
+              if (-not [string]::IsNullOrWhiteSpace('${{ inputs.tensorrt_package_release_tag }}')) {
+                $restoreArguments += @('-TensorRtPackageReleaseTag', '${{ inputs.tensorrt_package_release_tag }}')
               }
 
               powershell @restoreArguments

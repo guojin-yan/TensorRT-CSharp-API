@@ -62,13 +62,13 @@ Current lane guidance:
 
 ## nuget.org size boundary
 
-nuget.org has an approximately `250 MB` per-package size limit. The `v4.0.6142` Windows split runtime Release assets currently contain `32` `.nupkg` files; `17` of them exceed `250 MB`, and the largest package is about `1225.88 MB`. Therefore:
+nuget.org has an approximately `250 MB` per-package size limit. Windows split runtime packages should be audited per release because CUDA/cuDNN and TensorRT packages can still exceed that size. Therefore:
 
 - The `JYPPX.TensorRT.CSharp.API` managed package can be published to nuget.org.
 - Small `Bridge` and collection packages can be published to nuget.org or GitHub Packages when needed.
-- Most CUDA/cuDNN/TensorRT vendor component packages are not suitable for nuget.org and should normally stay on GitHub Packages when a NuGet feed is required, or as GitHub Release assets when direct `.nupkg` download is acceptable.
-- GitHub Release assets are not queried by NuGet restore. If the vendor packages stay only on a Release, validation and consumers must download the matching `.nupkg` files into a local package source first.
-- If only the local C ABI bridge or C# wrapper changes later, republish the `Bridge`, collection, and managed packages. Do not republish CUDA/cuDNN/TensorRT vendor packages unless the NVIDIA dependency set changes.
+- Most CUDA/cuDNN and TensorRT dependency component packages are not suitable for nuget.org and should normally stay on GitHub Packages when a NuGet feed is required, or as GitHub Release assets when direct `.nupkg` download is acceptable.
+- GitHub Release assets are not queried by NuGet restore. If stable dependency packages stay only on a Release, validation and consumers must download the matching `.nupkg` files into a local package source first.
+- If only the local C ABI bridge or C# wrapper changes later, republish the `Bridge`, collection, and managed packages. Do not republish `CudaCudnn` or `TensorRt` packages unless the corresponding NVIDIA dependency set changes.
 
 ## Engineering rules
 
@@ -105,10 +105,11 @@ Supporting scripts:
 The split runtime model applies to Windows runtime combinations that are too large or too stable to republish with every managed-code release:
 
 - `Bridge`: local C ABI bridge, republished when native wrapper code changes.
-- `Vendor`: CUDA runtime, cuDNN, TensorRT runtime, parser, plugin, and builder-resource assets, republished only when the NVIDIA dependency set changes.
+- `CudaCudnn`: CUDA runtime, cuDNN, and related shared assets, republished only when the CUDA/cuDNN dependency set changes.
+- `TensorRt`: TensorRT runtime, parser, plugin, and builder-resource assets, republished only when the TensorRT dependency set changes.
 - collection package: the original runtime package ID, republished when a new tested component-version combination should be advertised.
 
-The managed package can release independently from these runtime component packages. Routine C# or bridge changes should publish only the managed package, `Bridge`, and collection package while pinning the existing `Vendor` package version.
+The managed package can release independently from these runtime component packages. Routine C# or bridge changes should publish only the managed package, `Bridge`, and collection package while pinning the existing `CudaCudnn` and `TensorRt` package versions.
 
 ## Release boundary
 

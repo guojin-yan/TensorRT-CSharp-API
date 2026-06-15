@@ -87,7 +87,11 @@ $workflowContracts = @(
       New-Requirement -Needle "windows" -Description "windows runner label"
       New-Requirement -Needle "Invoke-LocalRuntimePackage.ps1" -Description "full runtime packaging entrypoint"
       New-Requirement -Needle "Invoke-LocalSplitRuntimePackage.ps1" -Description "split runtime packaging entrypoint"
-      New-Requirement -Needle "Restore-PublishedSplitPackageSource.ps1" -Description "published vendor release asset package source"
+      New-Requirement -Needle "Restore-PublishedSplitPackageSource.ps1" -Description "published stable dependency release asset package source"
+      New-Requirement -Needle "cuda_cudnn_package_version" -Description "CUDA/cuDNN split version input"
+      New-Requirement -Needle "tensorrt_package_version" -Description "TensorRT split version input"
+      New-Requirement -Needle "cuda_cudnn_package_release_tag" -Description "CUDA/cuDNN split release tag input"
+      New-Requirement -Needle "tensorrt_package_release_tag" -Description "TensorRT split release tag input"
       New-Requirement -Needle "sign_consumer_output" -Description "consumer signing toggle"
       New-Requirement -Needle "Push-NuGetPackages.ps1" -Description "package publication"
     )
@@ -120,9 +124,12 @@ $workflowContracts = @(
       New-Requirement -Needle "runtime-linux" -Description "Linux runtime child workflow"
       New-Requirement -Needle "gh release create" -Description "release creation"
       New-Requirement -Needle "gh release upload" -Description "release asset upload"
-      New-Requirement -Needle "windows_split_package_roles includes collection/meta but no vendor component version was provided" -Description "split collection vendor-version guard"
-      New-Requirement -Needle "include vendor/all in windows_split_package_roles" -Description "split collection same-run vendor refresh guidance"
-      New-Requirement -Needle "windows_vendor_package_release_tag" -Description "split collection vendor release tag override"
+      New-Requirement -Needle "windows_split_package_roles includes collection/meta but no CUDA/cuDNN package version was provided" -Description "split collection CUDA/cuDNN version guard"
+      New-Requirement -Needle "windows_split_package_roles includes collection/meta but no TensorRT package version was provided" -Description "split collection TensorRT version guard"
+      New-Requirement -Needle "include cuda-cudnn/all in windows_split_package_roles" -Description "split collection same-run CUDA/cuDNN refresh guidance"
+      New-Requirement -Needle "include tensorrt/all in windows_split_package_roles" -Description "split collection same-run TensorRT refresh guidance"
+      New-Requirement -Needle "windows_cuda_cudnn_package_release_tag" -Description "split collection CUDA/cuDNN release tag override"
+      New-Requirement -Needle "windows_tensorrt_package_release_tag" -Description "split collection TensorRT release tag override"
     )
   }
 )

@@ -62,13 +62,13 @@ Linux package key 与 Windows 保持同一 major.minor 矩阵：
 
 ## nuget.org 大小边界
 
-nuget.org 单个包大小限制约为 `250 MB`。`v4.0.6142` Windows split runtime Release assets 当前共有 `32` 个 `.nupkg`，其中 `17` 个超过 `250 MB`，最大包约 `1225.88 MB`。因此：
+nuget.org 单个包大小限制约为 `250 MB`。Windows split runtime 包需要每次发布前重新审计大小，因为 CUDA/cuDNN 和 TensorRT 组件包仍可能超过该限制。因此：
 
 - `JYPPX.TensorRT.CSharp.API` managed 包可以发布到 nuget.org。
 - 体积较小的 `Bridge` 和 collection 包可以在需要时发布到 nuget.org 或 GitHub Packages。
-- CUDA/cuDNN/TensorRT vendor 组件包多数不适合 nuget.org；如果需要 NuGet feed 自动 restore，应优先放 GitHub Packages；如果可以直接下载 `.nupkg` 文件，则可以保留为 GitHub Release assets。
-- GitHub Release assets 不会被 NuGet restore 自动查询。vendor 包只放 Release 时，验证和用户消费前都需要先把匹配 `.nupkg` 下载到本地 package source。
-- 后续如果只修改本地 C ABI bridge 或 C# wrapper，重发 `Bridge`、collection 和 managed 包即可，不需要重发 CUDA/cuDNN/TensorRT vendor 包。
+- CUDA/cuDNN 和 TensorRT 稳定依赖组件包多数不适合 nuget.org；如果需要 NuGet feed 自动 restore，应优先放 GitHub Packages；如果可以直接下载 `.nupkg` 文件，则可以保留为 GitHub Release assets。
+- GitHub Release assets 不会被 NuGet restore 自动查询。稳定依赖包只放 Release 时，验证和用户消费前都需要先把匹配 `.nupkg` 下载到本地 package source。
+- 后续如果只修改本地 C ABI bridge 或 C# wrapper，重发 `Bridge`、collection 和 managed 包即可，不需要重发 `CudaCudnn` 或 `TensorRt` 包，除非对应 NVIDIA 依赖集合变化。
 
 ## 工程规则
 
@@ -105,7 +105,8 @@ nuget.org 单个包大小限制约为 `250 MB`。`v4.0.6142` Windows split runti
 split runtime 模型适用于体积较大、或者不应跟随 managed 代码频繁重发的 Windows runtime 组合：
 
 - `Bridge`：本地 C ABI bridge。只有 native wrapper 代码变化时重发。
-- `Vendor`：CUDA runtime、cuDNN、TensorRT runtime、parser、plugin 和 builder-resource 资产。只有 NVIDIA 依赖集合变化时重发。
+- `CudaCudnn`：CUDA runtime、cuDNN 和相关共享资产。只有 CUDA/cuDNN 依赖集合变化时重发。
+- `TensorRt`：TensorRT runtime、parser、plugin 和 builder-resource 资产。只有 TensorRT 依赖集合变化时重发。
 - collection 包：保留原始 runtime package ID，用来声明一组已验证的组件版本组合。
 
-managed 包可以和这些 runtime 组件包独立发版。日常 C# 或 bridge 改动只需要发布 managed 包、`Bridge` 和 collection 包，并固定已有 `Vendor` 包版本。
+managed 包可以和这些 runtime 组件包独立发版。日常 C# 或 bridge 改动只需要发布 managed 包、`Bridge` 和 collection 包，并固定已有 `CudaCudnn` 和 `TensorRt` 包版本。

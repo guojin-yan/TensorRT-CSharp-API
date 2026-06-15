@@ -53,13 +53,23 @@ on:
         required: false
         default: ""
         type: string
-      windows_vendor_package_version:
-        description: Optional version for already-published Windows CUDA/cuDNN/TensorRT vendor split packages
+      windows_cuda_cudnn_package_version:
+        description: Optional version for already-published Windows CUDA/cuDNN split packages
         required: false
         default: ""
         type: string
-      windows_vendor_package_release_tag:
-        description: Optional GitHub Release tag that contains previously published Windows vendor split packages; defaults to v<windows_vendor_package_version>
+      windows_cuda_cudnn_package_release_tag:
+        description: Optional GitHub Release tag that contains previously published Windows CUDA/cuDNN split packages; defaults to v<windows_cuda_cudnn_package_version>
+        required: false
+        default: ""
+        type: string
+      windows_tensorrt_package_version:
+        description: Optional version for already-published Windows TensorRT split packages
+        required: false
+        default: ""
+        type: string
+      windows_tensorrt_package_release_tag:
+        description: Optional GitHub Release tag that contains previously published Windows TensorRT split packages; defaults to v<windows_tensorrt_package_version>
         required: false
         default: ""
         type: string
@@ -142,8 +152,10 @@ jobs:
       WINDOWS_SPLIT_PACKAGE_ROLES: ${{ inputs.windows_split_package_roles }}
       WINDOWS_META_PACKAGE_VERSION: ${{ inputs.windows_meta_package_version }}
       WINDOWS_BRIDGE_PACKAGE_VERSION: ${{ inputs.windows_bridge_package_version }}
-      WINDOWS_VENDOR_PACKAGE_VERSION: ${{ inputs.windows_vendor_package_version }}
-      WINDOWS_VENDOR_PACKAGE_RELEASE_TAG: ${{ inputs.windows_vendor_package_release_tag }}
+      WINDOWS_CUDA_CUDNN_PACKAGE_VERSION: ${{ inputs.windows_cuda_cudnn_package_version }}
+      WINDOWS_CUDA_CUDNN_PACKAGE_RELEASE_TAG: ${{ inputs.windows_cuda_cudnn_package_release_tag }}
+      WINDOWS_TENSORRT_PACKAGE_VERSION: ${{ inputs.windows_tensorrt_package_version }}
+      WINDOWS_TENSORRT_PACKAGE_RELEASE_TAG: ${{ inputs.windows_tensorrt_package_release_tag }}
       WINDOWS_INCLUDE_META_PACKAGE: ${{ inputs.windows_include_meta_package }}
       WINDOWS_SKIP_CONSUMER_VALIDATION: ${{ inputs.windows_skip_consumer_validation }}
       RUN_LINUX_RUNTIME_PACKAGING: ${{ inputs.run_linux_runtime_packaging }}
@@ -193,11 +205,26 @@ jobs:
           if [ "$RUN_WINDOWS_RUNTIME_PACKAGING" = "true" ] &&
              [ "$WINDOWS_RUNTIME_DELIVERY_MODE" = "split" ] &&
              { [[ ",$role_text," == *",collection,"* ]] || [[ ",$role_text," == *",meta,"* ]] || [[ "$WINDOWS_INCLUDE_META_PACKAGE" = "true" ]]; } &&
-             [[ ",$role_text," != *",vendor,"* ]] &&
+             [[ ",$role_text," != *",cuda-cudnn,"* ]] &&
+             [[ ",$role_text," != *",stable-dependencies,"* ]] &&
+             [[ ",$role_text," != *",nvidia-dependencies,"* ]] &&
              [[ ",$role_text," != *",all,"* ]] &&
-             [ -z "$WINDOWS_VENDOR_PACKAGE_VERSION" ]; then
-            echo "windows_split_package_roles includes collection/meta but no vendor component version was provided." >&2
-            echo "Pass windows_vendor_package_version to pin already-published vendor packages, or include vendor/all in windows_split_package_roles for a dependency refresh." >&2
+             [ -z "$WINDOWS_CUDA_CUDNN_PACKAGE_VERSION" ]; then
+            echo "windows_split_package_roles includes collection/meta but no CUDA/cuDNN package version was provided." >&2
+            echo "Pass windows_cuda_cudnn_package_version to pin already-published CUDA/cuDNN packages, or include cuda-cudnn/all in windows_split_package_roles for a dependency refresh." >&2
+            exit 1
+          fi
+
+          if [ "$RUN_WINDOWS_RUNTIME_PACKAGING" = "true" ] &&
+             [ "$WINDOWS_RUNTIME_DELIVERY_MODE" = "split" ] &&
+             { [[ ",$role_text," == *",collection,"* ]] || [[ ",$role_text," == *",meta,"* ]] || [[ "$WINDOWS_INCLUDE_META_PACKAGE" = "true" ]]; } &&
+             [[ ",$role_text," != *",tensorrt,"* ]] &&
+             [[ ",$role_text," != *",stable-dependencies,"* ]] &&
+             [[ ",$role_text," != *",nvidia-dependencies,"* ]] &&
+             [[ ",$role_text," != *",all,"* ]] &&
+             [ -z "$WINDOWS_TENSORRT_PACKAGE_VERSION" ]; then
+            echo "windows_split_package_roles includes collection/meta but no TensorRT package version was provided." >&2
+            echo "Pass windows_tensorrt_package_version to pin already-published TensorRT packages, or include tensorrt/all in windows_split_package_roles for a dependency refresh." >&2
             exit 1
           fi
 
@@ -265,8 +292,10 @@ jobs:
               -f "split_package_roles=$WINDOWS_SPLIT_PACKAGE_ROLES" \
               -f "meta_package_version=$WINDOWS_META_PACKAGE_VERSION" \
               -f "bridge_package_version=$WINDOWS_BRIDGE_PACKAGE_VERSION" \
-              -f "vendor_package_version=$WINDOWS_VENDOR_PACKAGE_VERSION" \
-              -f "vendor_package_release_tag=$WINDOWS_VENDOR_PACKAGE_RELEASE_TAG" \
+              -f "cuda_cudnn_package_version=$WINDOWS_CUDA_CUDNN_PACKAGE_VERSION" \
+              -f "cuda_cudnn_package_release_tag=$WINDOWS_CUDA_CUDNN_PACKAGE_RELEASE_TAG" \
+              -f "tensorrt_package_version=$WINDOWS_TENSORRT_PACKAGE_VERSION" \
+              -f "tensorrt_package_release_tag=$WINDOWS_TENSORRT_PACKAGE_RELEASE_TAG" \
               -f "include_meta_package=$WINDOWS_INCLUDE_META_PACKAGE" \
               -f "skip_consumer_validation=$WINDOWS_SKIP_CONSUMER_VALIDATION" \
               -f "run_smoke=$RUN_WINDOWS_SMOKE" \

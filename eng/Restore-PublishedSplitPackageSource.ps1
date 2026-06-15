@@ -4,8 +4,10 @@ param(
   [string[]]$SplitPackageRole = @("all"),
   [string]$Version,
   [string]$BridgePackageVersion,
-  [string]$VendorPackageVersion,
-  [string]$VendorPackageReleaseTag,
+  [string]$CudaCudnnPackageVersion,
+  [string]$CudaCudnnPackageReleaseTag,
+  [string]$TensorRtPackageVersion,
+  [string]$TensorRtPackageReleaseTag,
   [string]$Repository,
   [string]$OutputRoot,
   [string]$OutputPathFile,
@@ -59,17 +61,16 @@ function Resolve-RolePackageVersion {
 function Resolve-ReleaseTag {
   param(
     [string]$ExplicitTag,
-    [string]$ExplicitVendorVersion,
-    [string]$VendorVersion,
-    [string]$BridgeVersion
+    [string]$ExplicitPackageVersion,
+    [string]$PackageVersion
   )
 
   if (-not [string]::IsNullOrWhiteSpace($ExplicitTag)) {
     return $ExplicitTag
   }
 
-  if (-not [string]::IsNullOrWhiteSpace($ExplicitVendorVersion)) {
-    return "v$VendorVersion"
+  if (-not [string]::IsNullOrWhiteSpace($ExplicitPackageVersion)) {
+    return "v$PackageVersion"
   }
 
   return ""
@@ -89,7 +90,12 @@ function Test-SplitPackageRequested {
 
   $role = ([string]$SplitPackage.role).ToLowerInvariant()
   $key = ([string]$SplitPackage.key).ToLowerInvariant()
-  return ($RequestedRoles -contains $role) -or ($RequestedRoles -contains $key)
+  return (
+    ($RequestedRoles -contains $role) -or
+    ($RequestedRoles -contains $key) -or
+    (($RequestedRoles -contains "stable-dependencies" -or $RequestedRoles -contains "nvidia-dependencies") -and
+      ($role -eq "cuda-cudnn" -or $role -eq "tensorrt"))
+  )
 }
 
 function Get-SplitPackageVersion {
@@ -99,12 +105,31 @@ function Get-SplitPackageVersion {
     [Parameter(Mandatory = $true)]
     [string]$BridgeVersion,
     [Parameter(Mandatory = $true)]
-    [string]$VendorVersion
+    [string]$CudaCudnnVersion,
+    [Parameter(Mandatory = $true)]
+    [string]$TensorRtVersion
   )
 
   switch ([string]$SplitPackage.role) {
     "bridge" { return $BridgeVersion }
-    default { return $VendorVersion }
+    "cuda-cudnn" { return $CudaCudnnVersion }
+    "tensorrt" { return $TensorRtVersion }
+    default { return $Version }
+  }
+}
+
+function Get-SplitPackageReleaseTag {
+  param(
+    [Parameter(Mandatory = $true)]
+    [psobject]$SplitPackage,
+    [string]$CudaCudnnReleaseTag,
+    [string]$TensorRtReleaseTag
+  )
+
+  switch ([string]$SplitPackage.role) {
+    "cuda-cudnn" { return $CudaCudnnReleaseTag }
+    "tensorrt" { return $TensorRtReleaseTag }
+    default { return "" }
   }
 }
 
@@ -320,20 +345,24 @@ if ([string]::IsNullOrWhiteSpace($Repository)) {
 
 if ([string]::IsNullOrWhiteSpace($OutputRoot)) {
   if ([string]::IsNullOrWhiteSpace($env:RUNNER_TEMP)) {
-    $OutputRoot = Join-Path $RepositoryRoot "artifacts\vendor-package-source"
+    $OutputRoot = Join-Path $RepositoryRoot "artifacts\stable-runtime-package-source"
   }
   else {
     $OutputRoot = Join-Path $env:RUNNER_TEMP "jyppx-release-package-source"
   }
 }
 
-$resolvedVendorPackageVersion = Resolve-RolePackageVersion -Value $VendorPackageVersion -Fallback $Version
+$resolvedCudaCudnnPackageVersion = Resolve-RolePackageVersion -Value $CudaCudnnPackageVersion -Fallback $Version
+$resolvedTensorRtPackageVersion = Resolve-RolePackageVersion -Value $TensorRtPackageVersion -Fallback $Version
 $resolvedBridgePackageVersion = Resolve-RolePackageVersion -Value $BridgePackageVersion -Fallback $Version
-$resolvedReleaseTag = Resolve-ReleaseTag `
-  -ExplicitTag $VendorPackageReleaseTag `
-  -ExplicitVendorVersion $VendorPackageVersion `
-  -VendorVersion $resolvedVendorPackageVersion `
-  -BridgeVersion $resolvedBridgePackageVersion
+$resolvedCudaCudnnPackageReleaseTag = Resolve-ReleaseTag `
+  -ExplicitTag $CudaCudnnPackageReleaseTag `
+  -ExplicitPackageVersion $CudaCudnnPackageVersion `
+  -PackageVersion $resolvedCudaCudnnPackageVersion
+$resolvedTensorRtPackageReleaseTag = Resolve-ReleaseTag `
+  -ExplicitTag $TensorRtPackageReleaseTag `
+  -ExplicitPackageVersion $TensorRtPackageVersion `
+  -PackageVersion $resolvedTensorRtPackageVersion
 
 $splitManifestPath = Join-Path $RepositoryRoot "pack\runtime-split\split-runtime-packages.manifest.json"
 $splitManifest = Get-Content -LiteralPath $splitManifestPath -Raw -Encoding utf8 | ConvertFrom-Json
@@ -354,13 +383,20 @@ $missingPackages = @(
 )
 
 if ($missingPackages.Count -eq 0) {
-  Write-Host "All split component packages for '$SourceRuntimeKey' are built in this run; no published vendor package source is needed."
+  Write-Host "All split component packages for '$SourceRuntimeKey' are built in this run; no published stable dependency package source is needed."
   Write-ResolvedPackageSource -SourceDirectory ""
   return
 }
 
-if ([string]::IsNullOrWhiteSpace($resolvedReleaseTag)) {
-  Write-Host "No vendor package release tag was resolved; relying on configured NuGet feeds for previously published split packages."
+$downloadPackages = @($missingPackages | Where-Object {
+    -not [string]::IsNullOrWhiteSpace((Get-SplitPackageReleaseTag `
+          -SplitPackage $_ `
+          -CudaCudnnReleaseTag $resolvedCudaCudnnPackageReleaseTag `
+          -TensorRtReleaseTag $resolvedTensorRtPackageReleaseTag))
+  })
+
+if ($downloadPackages.Count -eq 0) {
+  Write-Host "No stable dependency package release tag was resolved; relying on configured NuGet feeds for previously published split packages."
   Write-ResolvedPackageSource -SourceDirectory ""
   return
 }
@@ -377,7 +413,8 @@ foreach ($package in $missingPackages) {
   $packageVersion = Get-SplitPackageVersion `
     -SplitPackage $package `
     -BridgeVersion $resolvedBridgePackageVersion `
-    -VendorVersion $resolvedVendorPackageVersion
+    -CudaCudnnVersion $resolvedCudaCudnnPackageVersion `
+    -TensorRtVersion $resolvedTensorRtPackageVersion
   $packageFileName = "$($package.packageId).$packageVersion.nupkg"
   $targetPath = Join-Path $sourceDirectory $packageFileName
   if (Test-NuGetPackageFile -Path $targetPath) {
@@ -397,13 +434,22 @@ foreach ($package in $missingPackages) {
     continue
   }
 
+  $releaseTag = Get-SplitPackageReleaseTag `
+    -SplitPackage $package `
+    -CudaCudnnReleaseTag $resolvedCudaCudnnPackageReleaseTag `
+    -TensorRtReleaseTag $resolvedTensorRtPackageReleaseTag
+  if ([string]::IsNullOrWhiteSpace($releaseTag)) {
+    Write-Host "No release tag was provided for '$($package.packageId)'; relying on configured NuGet feeds."
+    continue
+  }
+
   Invoke-GhReleaseDownloadWithRetry `
-    -ReleaseTag $resolvedReleaseTag `
+    -ReleaseTag $releaseTag `
     -Repository $Repository `
     -PackageFileName $packageFileName `
     -SourceDirectory $sourceDirectory `
     -TargetPath $targetPath
 }
 
-Write-Host "Published vendor package source: $sourceDirectory"
+Write-Host "Published stable dependency package source: $sourceDirectory"
 Write-ResolvedPackageSource -SourceDirectory $sourceDirectory

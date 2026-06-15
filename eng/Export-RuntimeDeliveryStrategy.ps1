@@ -43,7 +43,7 @@ function Get-DeliveryRecommendation {
       return "Prefer controlled internal feed until validation evidence, size policy, and redistribution terms are finalized."
     }
     "split-delivery-design" {
-      return "Keep out of broad public NuGet publication until bridge, Vendor, and collection packages are validated."
+      return "Keep out of broad public NuGet publication until bridge, CudaCudnn, TensorRt, and collection packages are validated."
     }
     "hold-linux-validation" {
       return "Do not publish. Keep as dry-run-only until a real Linux x64 self-hosted runner validates build, pack, and package consumer restore."
@@ -128,7 +128,7 @@ $lines.Add("## Delivery lanes")
 $lines.Add("")
 $lines.Add("- public-preview: small enough and locally validated enough to use as a public validation sample after license review.")
 $lines.Add("- private-feed: suitable for controlled internal feeds while validation, size, or license constraints remain unresolved.")
-$lines.Add("- split-delivery-design: too large or broad for a single default public package; split into bridge, Vendor, and collection packages first.")
+$lines.Add("- split-delivery-design: too large or broad for a single default public package; split into bridge, CudaCudnn, TensorRt, and collection packages first.")
 $lines.Add("- hold-linux-validation: Linux dry-run-only packages; do not publish before real Linux runner validation.")
 $lines.Add("")
 $lines.Add("| Key | Tier | Validation | Delivery lane | Recommendation |")
@@ -172,7 +172,8 @@ if ($splitPackages.Count -gt 0) {
   $lines.Add("Component package naming rule:")
   $lines.Add("")
   $lines.Add("- `<full-runtime-package-id>.Bridge` carries only the local C ABI bridge and may be republished when wrapper native code changes.")
-  $lines.Add("- `<full-runtime-package-id>.Vendor` carries CUDA runtime, cuDNN, TensorRT runtime, parser, plugin, and builder-resource assets and should be republished only when the NVIDIA dependency set changes.")
+  $lines.Add("- `<full-runtime-package-id>.CudaCudnn` carries CUDA runtime, cuDNN, and related shared assets and should be republished only when the CUDA/cuDNN dependency set changes.")
+  $lines.Add("- `<full-runtime-package-id>.TensorRt` carries TensorRT runtime, parser, plugin, and builder-resource assets and should be republished only when the TensorRT dependency set changes.")
   $lines.Add("- The original `<full-runtime-package-id>` remains a lightweight collection package that pins a tested component-version combination.")
   $lines.Add("")
 }

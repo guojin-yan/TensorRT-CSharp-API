@@ -7,8 +7,10 @@ param(
   [ValidateSet("full", "split")]
   [string]$WindowsRuntimeDeliveryMode = "split",
   [string[]]$WindowsSplitPackageRoles = @("all"),
-  [string]$WindowsVendorPackageVersion,
-  [string]$WindowsVendorPackageReleaseTag,
+  [string]$WindowsCudaCudnnPackageVersion,
+  [string]$WindowsCudaCudnnPackageReleaseTag,
+  [string]$WindowsTensorRtPackageVersion,
+  [string]$WindowsTensorRtPackageReleaseTag,
   [string[]]$LinuxRuntimeKey = @(),
   [switch]$IncludeManagedPackage,
   [switch]$ReportUnexpectedAssets,
@@ -97,8 +99,13 @@ function Test-SplitPackageRequested {
   foreach ($requestedRole in $RequestedRoles) {
     switch ($requestedRole) {
       "all" { return $true }
-      "vendor" {
-        if ($role -eq "vendor") {
+      "stable-dependencies" {
+        if ($role -eq "cuda-cudnn" -or $role -eq "tensorrt") {
+          return $true
+        }
+      }
+      "nvidia-dependencies" {
+        if ($role -eq "cuda-cudnn" -or $role -eq "tensorrt") {
           return $true
         }
       }
@@ -139,10 +146,16 @@ function Get-SplitPackageTarget {
         releaseTag = $ReleaseTag
       }
     }
-    '^vendor$' {
+    '^cuda-cudnn$' {
       return [pscustomobject]@{
-        version = $resolvedVendorPackageVersion
-        releaseTag = $resolvedVendorPackageReleaseTag
+        version = $resolvedCudaCudnnPackageVersion
+        releaseTag = $resolvedCudaCudnnPackageReleaseTag
+      }
+    }
+    '^tensorrt$' {
+      return [pscustomobject]@{
+        version = $resolvedTensorRtPackageVersion
+        releaseTag = $resolvedTensorRtPackageReleaseTag
       }
     }
     default {
@@ -218,10 +231,16 @@ else {
   & (Join-Path $RepositoryRoot "eng\Resolve-PackageVersion.ps1") -RequestedVersion $Version
 }
 
-$resolvedVendorPackageVersion = Resolve-RolePackageVersion -Value $WindowsVendorPackageVersion -Fallback $resolvedVersion
-$resolvedVendorPackageReleaseTag = Resolve-PackageReleaseTag `
-  -ExplicitTag $WindowsVendorPackageReleaseTag `
-  -PackageVersion $resolvedVendorPackageVersion `
+$resolvedCudaCudnnPackageVersion = Resolve-RolePackageVersion -Value $WindowsCudaCudnnPackageVersion -Fallback $resolvedVersion
+$resolvedCudaCudnnPackageReleaseTag = Resolve-PackageReleaseTag `
+  -ExplicitTag $WindowsCudaCudnnPackageReleaseTag `
+  -PackageVersion $resolvedCudaCudnnPackageVersion `
+  -DefaultVersion $resolvedVersion `
+  -DefaultTag $ReleaseTag
+$resolvedTensorRtPackageVersion = Resolve-RolePackageVersion -Value $WindowsTensorRtPackageVersion -Fallback $resolvedVersion
+$resolvedTensorRtPackageReleaseTag = Resolve-PackageReleaseTag `
+  -ExplicitTag $WindowsTensorRtPackageReleaseTag `
+  -PackageVersion $resolvedTensorRtPackageVersion `
   -DefaultVersion $resolvedVersion `
   -DefaultTag $ReleaseTag
 
@@ -395,8 +414,10 @@ $markdownPath = Join-Path $outputRoot "release-asset-audit-$safeTag.md"
   includeManagedPackage = $IncludeManagedPackage.IsPresent
   windowsRuntimeDeliveryMode = $WindowsRuntimeDeliveryMode
   windowsSplitPackageRoles = $requestedSplitRoles
-  windowsVendorPackageVersion = $resolvedVendorPackageVersion
-  windowsVendorPackageReleaseTag = $resolvedVendorPackageReleaseTag
+  windowsCudaCudnnPackageVersion = $resolvedCudaCudnnPackageVersion
+  windowsCudaCudnnPackageReleaseTag = $resolvedCudaCudnnPackageReleaseTag
+  windowsTensorRtPackageVersion = $resolvedTensorRtPackageVersion
+  windowsTensorRtPackageReleaseTag = $resolvedTensorRtPackageReleaseTag
   windowsRuntimeKeys = $windowsKeys
   linuxRuntimeKeys = $linuxKeys
   reportUnexpectedAssets = $ReportUnexpectedAssets.IsPresent

@@ -88,10 +88,11 @@ Windows runtime 包在 `pack/runtime-split` 下拆成组件包。
 组件角色：
 
 - `Bridge`：只承载本地 C ABI bridge。
-- `Vendor`：承载某一组 NVIDIA 依赖对应的 CUDA runtime、cuDNN、TensorRT runtime、parser、plugin 和 builder resource 资产。
+- `CudaCudnn`：承载某一组 NVIDIA CUDA/cuDNN 依赖对应的 CUDA runtime、cuDNN 和相关共享资产。
+- `TensorRt`：承载某一组 NVIDIA TensorRT 依赖对应的 TensorRT runtime、parser、plugin 和 builder resource 资产。
 - 原始 runtime package ID 保留为轻量 collection 包，用来固定一组已验证的组件版本组合。
 
-Vendor 包版本不需要和 managed 包版本一致。只有 NVIDIA 依赖集合变化时才重发 Vendor；本地 native bridge 变化时重发 `Bridge` 和 collection 包，同时固定已有 Vendor 包版本。
+`CudaCudnn` 和 `TensorRt` 包版本不需要和 managed 包版本一致。只有对应的 NVIDIA 依赖集合变化时才重发；本地 native bridge 变化时重发 `Bridge` 和 collection 包，同时固定已有 `CudaCudnn` 和 `TensorRt` 包版本。
 
 ## Linux 状态
 
@@ -112,10 +113,10 @@ runtime 包可能非常大，因为会包含 TensorRT builder resources、plugin
 
 - `JYPPX.TensorRT.CSharp.API` 发布到 nuget.org 和 GitHub Packages。
 - 大体积 CUDA/cuDNN/TensorRT 组件包优先发布到 GitHub Packages；如果不适合 NuGet feed，则作为 GitHub Release asset 发布。
-- GitHub Release assets 只是可下载的 `.nupkg` 文件，不是 NuGet feed。vendor 包只保留在 Release 时，发布 workflow 会先下载这些文件到临时本地包源，再验证 `bridge,collection`。
+- GitHub Release assets 只是可下载的 `.nupkg` 文件，不是 NuGet feed。稳定依赖包只保留在 Release 时，发布 workflow 会先下载这些文件到临时本地包源，再验证 `bridge,collection`。
 - runtime 包版本和 managed 包版本独立维护。
-- 只有 NVIDIA 依赖集合变化时，才重发完整 Vendor 包。
-- 本地 C ABI bridge 变化时，重发 `bridge,collection` split 包，并显式传入已有 Vendor 包版本，避免重复发布 CUDA/cuDNN/TensorRT 包。
+- 只有对应的 NVIDIA 依赖集合变化时，才重发 `CudaCudnn` 或 `TensorRt` 包。
+- 本地 C ABI bridge 变化时，重发 `bridge,collection` split 包，并显式传入已有 `CudaCudnn` 和 `TensorRt` 包版本，避免重复发布稳定依赖包。
 
 公开发布前仍需针对实际发布的 NVIDIA TensorRT / CUDA / cuDNN 二进制文件复核再分发许可。
 
