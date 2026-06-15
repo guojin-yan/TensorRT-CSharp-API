@@ -25,27 +25,27 @@ if ($package.platform -ne "linux") {
   throw "Runtime package key '$RuntimePackageKey' is not a Linux package."
 }
 
-$isLinux = [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([System.Runtime.InteropServices.OSPlatform]::Linux)
-$isX64 = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture -eq [System.Runtime.InteropServices.Architecture]::X64
-$isGitHubActions = [string]::Equals($env:GITHUB_ACTIONS, "true", [System.StringComparison]::OrdinalIgnoreCase)
+$hostIsLinux = [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([System.Runtime.InteropServices.OSPlatform]::Linux)
+$hostIsX64 = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture -eq [System.Runtime.InteropServices.Architecture]::X64
+$runningInGitHubActions = [string]::Equals($env:GITHUB_ACTIONS, "true", [System.StringComparison]::OrdinalIgnoreCase)
 $runnerOs = $env:RUNNER_OS
 $runnerName = $env:RUNNER_NAME
 $runnerArch = $env:RUNNER_ARCH
 
 $blockers = New-Object System.Collections.Generic.List[string]
-if (-not $isLinux) {
+if (-not $hostIsLinux) {
   $blockers.Add("Current host is not Linux. Real validation requires a Linux x64 self-hosted runner.")
 }
 
-if (-not $isX64) {
+if (-not $hostIsX64) {
   $blockers.Add("Current host architecture is not x64.")
 }
 
-if ($isGitHubActions -and -not [string]::Equals($runnerOs, "Linux", [System.StringComparison]::OrdinalIgnoreCase)) {
+if ($runningInGitHubActions -and -not [string]::Equals($runnerOs, "Linux", [System.StringComparison]::OrdinalIgnoreCase)) {
   $blockers.Add("GitHub Actions runner is not a Linux runner.")
 }
 
-if (-not $isGitHubActions) {
+if (-not $runningInGitHubActions) {
   $blockers.Add("Current session is not a GitHub Actions self-hosted runner session.")
 }
 
@@ -59,9 +59,9 @@ $status = [ordered]@{
   osDescription = [System.Runtime.InteropServices.RuntimeInformation]::OSDescription
   osArchitecture = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()
   processArchitecture = [System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture.ToString()
-  isLinux = $isLinux
-  isX64 = $isX64
-  githubActions = $isGitHubActions
+  isLinux = $hostIsLinux
+  isX64 = $hostIsX64
+  githubActions = $runningInGitHubActions
   runnerOs = $runnerOs
   runnerName = $runnerName
   runnerArch = $runnerArch
