@@ -70,10 +70,10 @@ jobs:
       package_version: ${{ steps.version.outputs.package_version }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: |
             8.0.x
@@ -122,7 +122,7 @@ jobs:
         run: pwsh -NoProfile -File .\eng\Test-ManagedPackageContent.ps1
 
       - name: Upload managed artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ inputs.artifact_name }}
           path: artifacts/managed/*.nupkg
@@ -152,7 +152,7 @@ jobs:
       - x64
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Validate nuget.org publish prerequisites
         shell: pwsh
@@ -165,7 +165,7 @@ jobs:
             -AllowMissingApiKey
 
       - name: Download managed package artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: ${{ inputs.artifact_name }}
           path: artifacts/managed

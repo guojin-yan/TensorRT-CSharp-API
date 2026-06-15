@@ -94,7 +94,7 @@ jobs:
       has_entries: ${{ steps.matrix.outputs.has_entries }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Resolve package version
         id: version
@@ -185,7 +185,7 @@ jobs:
       matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Verify local .NET
         shell: pwsh
@@ -196,7 +196,7 @@ jobs:
         run: cmake --version
 
       - name: Download managed package artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: managed-packages-runtime-linux
           path: artifacts/managed
@@ -261,7 +261,7 @@ jobs:
 
       - name: Upload Linux runtime artifacts
         if: ${{ inputs.attach_to_github_release && inputs.release_tag == '' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           compression-level: 0
           name: runtime-linux-${{ matrix.key }}

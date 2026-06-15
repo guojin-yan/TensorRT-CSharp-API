@@ -170,7 +170,7 @@ jobs:
       RELEASE_TAG: v${{ inputs.version }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Ensure GitHub Release Exists
         if: ${{ inputs.attach_runtime_to_github_release }}

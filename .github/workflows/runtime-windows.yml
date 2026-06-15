@@ -216,7 +216,7 @@ jobs:
             Format-Table -AutoSize
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Verify local .NET
         shell: pwsh
@@ -432,7 +432,7 @@ jobs:
 
       - name: Upload Windows runtime artifacts
         if: ${{ inputs.attach_to_github_release && inputs.release_tag == '' && inputs.runtime_delivery_mode != 'split' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           compression-level: 0
           name: runtime-windows-full
@@ -445,7 +445,7 @@ jobs:
 
       - name: Upload Windows split runtime artifacts
         if: ${{ inputs.attach_to_github_release && inputs.release_tag == '' && inputs.runtime_delivery_mode == 'split' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           compression-level: 0
           name: runtime-windows-split
