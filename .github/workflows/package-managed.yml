@@ -167,7 +167,7 @@ jobs:
             -AllowMissingApiKey
 
       - name: Inspect local NuGet publish configuration
-        if: ${{ secrets.NUGET_API_KEY == '' }}
+        if: ${{ env.HAS_NUGET_API_KEY == 'false' }}
         shell: pwsh
         run: |
           $configPath = Join-Path $env:APPDATA 'NuGet\NuGet.Config'
