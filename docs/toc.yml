@@ -20,6 +20,8 @@
     href: articles/en/cuda-kernel-roadmap.md
   - name: Linux Runner Setup
     href: articles/en/linux-runner-setup.md
+  - name: Local GitHub Actions Checks
+    href: articles/en/local-actions.md
   - name: Runtime Packages
     href: articles/en/runtime-packages.md
   - name: Runtime Distribution Strategy
@@ -48,6 +50,8 @@
     href: articles/zh-cn/cuda-kernel-roadmap.md
   - name: Linux Runner Setup
     href: articles/zh-cn/linux-runner-setup.md
+  - name: Local GitHub Actions Checks
+    href: articles/zh-cn/local-actions.md
   - name: Runtime Packages
     href: articles/zh-cn/runtime-packages.md
   - name: Runtime Distribution Strategy

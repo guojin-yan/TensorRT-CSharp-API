@@ -126,6 +126,8 @@ That means there are two supported execution modes:
 1. Dispatch the workflow through GitHub with `gh`, then let the self-hosted runner on this machine execute the Windows runtime job.
 2. Run the local scripts directly when you want a true workstation-only validation loop without creating a GitHub Actions run record.
 
+You can also use `act` for local workflow dry-runs, such as parsing `release-bundle.yml` or the `runtime-linux.yml` `prepare` job. Treat this as a lightweight workflow check only, not as release evidence. See `docs/articles/en/local-actions.md`.
+
 Runtime packages are versioned independently from the managed package. The normal maintenance path is to publish `JYPPX.TensorRT.CSharp.API` to nuget.org and GitHub Packages, while keeping large CUDA/cuDNN/TensorRT component packages on GitHub Packages or GitHub Releases. Publish vendor component packages once per CUDA/cuDNN/TensorRT dependency version, then publish only `bridge,collection` when the local C ABI bridge changes.
 
 GitHub Release assets are useful for large public `.nupkg` files, but they are not a NuGet feed. If vendor packages live only on a Release, the remote Windows workflow downloads those Release assets into a temporary local package source for validation. Publish `bridge,collection` to GitHub Packages only when the referenced vendor component packages are also available from a NuGet feed; otherwise attach the whole `.nupkg` set to a GitHub Release and consume it as a downloaded local package source.

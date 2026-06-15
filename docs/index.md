@@ -27,6 +27,7 @@ English:
 - [Sample Runners](articles/en/sample-runners.md)
 - [Runtime Package Strategy](articles/en/runtime-packages.md)
 - [Runtime Distribution Strategy](articles/en/runtime-distribution-strategy.md)
+- [Local GitHub Actions Checks](articles/en/local-actions.md)
 - [Package Consumer Validation](articles/en/package-consumer-validation.md)
 - [Release Candidate Gate](articles/en/release-candidate-gate.md)
 
@@ -39,6 +40,7 @@ Chinese articles:
 - [Latest Windows API Status](articles/zh-cn/windows-api-completion-latest.md)
 - [Runtime Packages](articles/zh-cn/runtime-packages.md)
 - [Runtime Distribution Strategy](articles/zh-cn/runtime-distribution-strategy.md)
+- [Local GitHub Actions Checks](articles/zh-cn/local-actions.md)
 - [Package Consumer Validation](articles/zh-cn/package-consumer-validation.md)
 - [Release Candidate Gate](articles/zh-cn/release-candidate-gate.md)
 - [Sample Runners](articles/zh-cn/sample-runners.md)
