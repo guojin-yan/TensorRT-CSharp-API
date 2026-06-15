@@ -305,9 +305,7 @@ jobs:
           pwsh -NoProfile -File ./eng/Push-NuGetPackages.ps1 `
             -PackageRoot ./artifacts/runtime-nupkg `
             -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" `
-            -SourceName github `
-            -SourceUserName "${{ github.repository_owner }}" `
-            -SourcePasswordEnvironmentVariable GITHUB_PACKAGES_TOKEN `
+            -ApiKeyEnvironmentVariable GITHUB_PACKAGES_TOKEN `
             -TimeoutSeconds 3600 `
             -MaxAttempts 3 `
             -RetryDelaySeconds 30 `

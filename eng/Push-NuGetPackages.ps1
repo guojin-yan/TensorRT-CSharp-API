@@ -304,6 +304,46 @@ function New-TemporaryNuGetConfig {
   }
 }
 
+function Resolve-NuGetExePath {
+  $command = Get-Command nuget.exe -ErrorAction SilentlyContinue
+  if ($null -ne $command -and -not [string]::IsNullOrWhiteSpace($command.Source)) {
+    return $command.Source
+  }
+
+  $candidatePaths = @()
+  if (-not [string]::IsNullOrWhiteSpace($env:USERPROFILE)) {
+    $candidatePaths += (Join-Path $env:USERPROFILE "bin\nuget.exe")
+  }
+
+  if (-not [string]::IsNullOrWhiteSpace($env:RUNNER_TEMP)) {
+    $candidatePaths += (Join-Path $env:RUNNER_TEMP "nuget.exe")
+  }
+
+  $candidatePaths += (Join-Path ([IO.Path]::GetTempPath()) "nuget.exe")
+
+  foreach ($candidatePath in $candidatePaths) {
+    if (Test-Path -LiteralPath $candidatePath -PathType Leaf) {
+      return $candidatePath
+    }
+  }
+
+  $downloadRoot = if (-not [string]::IsNullOrWhiteSpace($env:RUNNER_TEMP)) {
+    $env:RUNNER_TEMP
+  }
+  else {
+    [IO.Path]::GetTempPath()
+  }
+
+  if (-not (Test-Path -LiteralPath $downloadRoot -PathType Container)) {
+    New-Item -ItemType Directory -Path $downloadRoot -Force | Out-Null
+  }
+
+  $downloadPath = Join-Path $downloadRoot "nuget.exe"
+  Write-Host "Downloading nuget.exe for local NuGet.config API key fallback."
+  Invoke-WebRequest -Uri "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe" -OutFile $downloadPath
+  $downloadPath
+}
+
 $ApiKey = if ([string]::IsNullOrWhiteSpace($ApiKey)) { Get-SecretFromEnvironment -Name $ApiKeyEnvironmentVariable } else { $ApiKey }
 $sourcePassword = Get-SecretFromEnvironment -Name $SourcePasswordEnvironmentVariable
 $hasApiKey = -not [string]::IsNullOrWhiteSpace($ApiKey)
@@ -349,30 +389,59 @@ try {
     while (-not $pushed -and $attempt -le $MaxAttempts) {
       $packageSizeMb = [Math]::Round($package.Length / 1MB, 2)
       $disableBuffering = $DisableBufferingAboveMB -gt 0 -and $package.Length -ge ($DisableBufferingAboveMB * 1MB)
-      Write-Host ("Pushing package attempt {0}/{1}: {2} ({3} MB) ApiKey={4} SourceCredentials={5} LocalConfigApiKey={6} DisableBuffering={7}" -f $attempt, $MaxAttempts, $package.FullName, $packageSizeMb, $hasApiKey, $hasSourceCredentials, $usingLocalApiKeyFallback, $disableBuffering)
+      $useNuGetExe = $usingLocalApiKeyFallback -and
+        -not $hasApiKey -and
+        -not $hasSourceCredentials -and
+        $Source -match "nuget\.org"
+      $clientName = if ($useNuGetExe) { "nuget.exe" } else { "dotnet" }
+      Write-Host ("Pushing package attempt {0}/{1}: {2} ({3} MB) Client={4} ApiKey={5} SourceCredentials={6} LocalConfigApiKey={7} DisableBuffering={8}" -f $attempt, $MaxAttempts, $package.FullName, $packageSizeMb, $clientName, $hasApiKey, $hasSourceCredentials, $usingLocalApiKeyFallback, $disableBuffering)
 
       $effectiveApiKey = if ($hasSourceCredentials) { $PushApiKey } else { $ApiKey }
-      $arguments = @(
-        "nuget",
-        "push",
-        $package.FullName,
-        "--source",
-        $pushSource,
-        "--timeout",
-        $TimeoutSeconds,
-        "--skip-duplicate"
-      )
-      if ($disableBuffering) {
-        $arguments += "--disable-buffering"
+      if ($useNuGetExe) {
+        $nugetExePath = Resolve-NuGetExePath
+        $arguments = @(
+          "push",
+          $package.FullName,
+          "-Source",
+          $pushSource,
+          "-Timeout",
+          $TimeoutSeconds,
+          "-SkipDuplicate",
+          "-NonInteractive"
+        )
+        if ($disableBuffering) {
+          $arguments += "-DisableBuffering"
+        }
+        if (-not [string]::IsNullOrWhiteSpace($effectiveApiKey)) {
+          $arguments += @("-ApiKey", $effectiveApiKey)
+        }
+
+        $output = & $nugetExePath @arguments 2>&1
       }
-      if (-not [string]::IsNullOrWhiteSpace($effectiveApiKey)) {
-        $arguments += @("--api-key", $effectiveApiKey)
-      }
-      if ($hasSourceCredentials) {
-        $arguments += @("--configfile", $nugetConfigPath)
+      else {
+        $arguments = @(
+          "nuget",
+          "push",
+          $package.FullName,
+          "--source",
+          $pushSource,
+          "--timeout",
+          $TimeoutSeconds,
+          "--skip-duplicate"
+        )
+        if ($disableBuffering) {
+          $arguments += "--disable-buffering"
+        }
+        if (-not [string]::IsNullOrWhiteSpace($effectiveApiKey)) {
+          $arguments += @("--api-key", $effectiveApiKey)
+        }
+        if ($hasSourceCredentials) {
+          $arguments += @("--configfile", $nugetConfigPath)
+        }
+
+        $output = & dotnet @arguments 2>&1
       }
 
-      $output = & dotnet @arguments 2>&1
       $secrets = @($ApiKey, $sourcePassword)
       foreach ($line in @($output)) {
         Write-Host (Format-SafeOutputLine -Line ([string]$line) -Secrets $secrets)

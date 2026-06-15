@@ -206,7 +206,7 @@ On WDAC / application-control machines, the local and self-hosted Windows runtim
 
 `release-bundle.yml` treats runtime packaging as opt-in. Set `run_windows_runtime_packaging=true` or `run_linux_runtime_packaging=true` only for runtime releases. If Linux runtime packaging is enabled with an empty `linux_runtime_keys` input, the Linux module cleanly no-ops.
 
-For `nuget.org` publication, store a plain-text ASCII NuGet API key in the repository secret `NUGET_API_KEY`, or leave the secret unset and rely on the self-hosted Windows runner's current-user NuGet configuration. The local fallback verifies common nuget.org aliases such as `nuget.org`, `https://api.nuget.org/v3/index.json`, and `https://www.nuget.org`, then lets NuGet read the original user config directly. Do not store an encrypted local credential blob or other machine-generated token format in `NUGET_API_KEY`.
+For `nuget.org` publication, store a plain-text ASCII NuGet API key in the repository secret `NUGET_API_KEY`, or leave the secret unset and rely on the self-hosted Windows runner's current-user NuGet configuration. The local fallback verifies common nuget.org aliases such as `nuget.org`, `https://api.nuget.org/v3/index.json`, and `https://www.nuget.org`, then lets NuGet or `nuget.exe` read the original user config directly. Do not store an encrypted local credential blob or other machine-generated token format in `NUGET_API_KEY`.
 
 When `NUGET_API_KEY` is present, the managed-package workflow validates that it is plain ASCII text before publishing. If the secret contains non-ASCII characters or embedded whitespace, the job fails immediately with a configuration error instead of spending time on a doomed publish attempt.
 
