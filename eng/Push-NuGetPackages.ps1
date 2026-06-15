@@ -323,7 +323,6 @@ $nugetConfigPath = $null
 try {
   $pushSource = $Source
   $usingLocalApiKeyFallback = $false
-  $localApiKeySecrets = @()
 
   if ($hasSourceCredentials) {
     $nugetConfigPath = Join-Path ([IO.Path]::GetTempPath()) ("jyppx-nuget-{0}.config" -f [Guid]::NewGuid().ToString("N"))
@@ -334,14 +333,12 @@ try {
   elseif (-not $hasApiKey) {
     $localApiKeyEntries = @(Get-LocalNuGetApiKeyEntries -Source $Source)
     if ($localApiKeyEntries.Count -gt 0) {
-      $nugetConfigPath = Join-Path ([IO.Path]::GetTempPath()) ("jyppx-nuget-{0}.config" -f [Guid]::NewGuid().ToString("N"))
-      $localSourceName = if ($Source -match "nuget\.org") { "nuget.org" } else { "local-push" }
-      $localSource = if ($Source -match "nuget\.org") { "https://api.nuget.org/v3/index.json" } else { $Source }
-      New-TemporaryNuGetConfig -Path $nugetConfigPath -PackageSourceName $localSourceName -PackageSource $localSource -ApiKeyEntries $localApiKeyEntries
-      $pushSource = $localSourceName
+      if ($Source -match "nuget\.org") {
+        $pushSource = "nuget.org"
+      }
+
       $usingLocalApiKeyFallback = $true
-      $localApiKeySecrets = @($localApiKeyEntries | ForEach-Object { [string]$_.Value } | Select-Object -Unique)
-      Write-Host "Using temporary NuGet.config with local API key entries for '$localSourceName'."
+      Write-Host "Using the current user's NuGet.config local API key entries for '$pushSource'."
     }
   }
 
@@ -371,12 +368,12 @@ try {
       if (-not [string]::IsNullOrWhiteSpace($effectiveApiKey)) {
         $arguments += @("--api-key", $effectiveApiKey)
       }
-      if ($hasSourceCredentials -or $usingLocalApiKeyFallback) {
+      if ($hasSourceCredentials) {
         $arguments += @("--configfile", $nugetConfigPath)
       }
 
       $output = & dotnet @arguments 2>&1
-      $secrets = @($ApiKey, $sourcePassword) + @($localApiKeySecrets)
+      $secrets = @($ApiKey, $sourcePassword)
       foreach ($line in @($output)) {
         Write-Host (Format-SafeOutputLine -Line ([string]$line) -Secrets $secrets)
       }

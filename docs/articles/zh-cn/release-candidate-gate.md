@@ -85,6 +85,6 @@ Linux 包当前保持 dry-run / structure-ready 状态，不能作为真实 Linu
 
 在启用远端发布链前，请先确认：
 
-- `package-managed.yml` 在 `publish_to_nuget=true` 时，如果仓库 secret `NUGET_API_KEY` 存在，就会使用该值，并要求它是纯文本 ASCII 的 nuget.org API key。也可以不设置该 secret，让 self-hosted Windows runner 使用本机 NuGet 配置兜底；兜底逻辑会识别 `nuget.org`、`https://api.nuget.org/v3/index.json`、`https://www.nuget.org` 等常见 nuget.org alias。不要填加密后的本机凭据或其它机器导出的 token 片段。
+- `package-managed.yml` 在 `publish_to_nuget=true` 时，如果仓库 secret `NUGET_API_KEY` 存在，就会使用该值，并要求它是纯文本 ASCII 的 nuget.org API key。也可以不设置该 secret，让 self-hosted Windows runner 使用当前用户的 NuGet 配置兜底；兜底逻辑会校验 `nuget.org`、`https://api.nuget.org/v3/index.json`、`https://www.nuget.org` 等常见 nuget.org alias，然后让 NuGet 直接读取原始用户配置。不要填加密后的本机凭据或其它机器导出的 token 片段。
 - `runtime-windows.yml` 要求 Windows self-hosted runner 在线，并带有 `self-hosted`、`windows`、`x64` 标签。
 - `runtime-linux.yml` 需要独立的 Linux x64 self-hosted runner。如果暂时没有 Linux runner，请在 `release-bundle.yml` 中保持 `linux_runtime_keys` 为空，让 Linux 模块自动 no-op。
