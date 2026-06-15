@@ -15,6 +15,7 @@ param(
   [int]$DownloadTimeoutSeconds = 1800,
   [int]$DownloadStallSeconds = 180,
   [int]$DownloadProgressPollSeconds = 10,
+  [switch]$SkipGlobalPackageCache,
   [string]$RepositoryRoot
 )
 
@@ -186,6 +187,38 @@ function Test-NuGetPackageFile {
 
   Write-Warning "Package file '$Path' does not contain a .nuspec entry."
   return $false
+}
+
+function Get-GlobalPackageCacheFile {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$PackageId,
+    [Parameter(Mandatory = $true)]
+    [string]$PackageVersion
+  )
+
+  if ($SkipGlobalPackageCache.IsPresent) {
+    return $null
+  }
+
+  $globalPackagesRoot = $env:NUGET_PACKAGES
+  if ([string]::IsNullOrWhiteSpace($globalPackagesRoot)) {
+    $userProfile = $env:USERPROFILE
+    if ([string]::IsNullOrWhiteSpace($userProfile)) {
+      return $null
+    }
+
+    $globalPackagesRoot = Join-Path $userProfile ".nuget\packages"
+  }
+
+  $packageIdLower = $PackageId.ToLowerInvariant()
+  $packageVersionLower = $PackageVersion.ToLowerInvariant()
+  $candidate = Join-Path $globalPackagesRoot (Join-Path $packageIdLower (Join-Path $packageVersionLower "$packageIdLower.$packageVersionLower.nupkg"))
+  if (Test-NuGetPackageFile -Path $candidate) {
+    return $candidate
+  }
+
+  return $null
 }
 
 function Invoke-GhReleaseDownloadWithRetry {
@@ -379,6 +412,13 @@ foreach ($package in $missingPackages) {
   if (Test-Path -LiteralPath $targetPath -PathType Leaf) {
     Write-Warning "Removing incomplete cached package file: $targetPath"
     Remove-Item -LiteralPath $targetPath -Force
+  }
+
+  $globalPackageFile = Get-GlobalPackageCacheFile -PackageId $package.packageId -PackageVersion $packageVersion
+  if (-not [string]::IsNullOrWhiteSpace($globalPackageFile)) {
+    Write-Host "Copying published split package from NuGet global cache: $globalPackageFile"
+    Copy-Item -LiteralPath $globalPackageFile -Destination $targetPath -Force
+    continue
   }
 
   Invoke-GhReleaseDownloadWithRetry `
