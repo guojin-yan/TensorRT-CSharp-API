@@ -11,6 +11,10 @@ param(
   [string]$Repository,
   [string]$OutputRoot,
   [string]$OutputPathFile,
+  [int]$DownloadMaxAttempts = 3,
+  [int]$DownloadTimeoutSeconds = 1800,
+  [int]$DownloadStallSeconds = 180,
+  [int]$DownloadProgressPollSeconds = 10,
   [string]$RepositoryRoot
 )
 
@@ -138,6 +142,145 @@ function Write-ResolvedPackageSource {
   Set-Content -LiteralPath $OutputPathFile -Value $SourceDirectory -Encoding utf8
 }
 
+function ConvertTo-CommandLineArgument {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$Value
+  )
+
+  if ($Value -notmatch '[\s"]') {
+    return $Value
+  }
+
+  return '"' + ($Value -replace '"', '\"') + '"'
+}
+
+function Test-NuGetPackageFile {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$Path
+  )
+
+  if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+    return $false
+  }
+
+  try {
+    Add-Type -AssemblyName System.IO.Compression.FileSystem -ErrorAction SilentlyContinue
+    $archive = [System.IO.Compression.ZipFile]::OpenRead($Path)
+    try {
+      foreach ($entry in $archive.Entries) {
+        if ($entry.FullName.EndsWith(".nuspec", [System.StringComparison]::OrdinalIgnoreCase)) {
+          return $true
+        }
+      }
+    }
+    finally {
+      $archive.Dispose()
+    }
+  }
+  catch {
+    Write-Warning "Package file '$Path' is not a complete NuGet package yet: $($_.Exception.Message)"
+    return $false
+  }
+
+  Write-Warning "Package file '$Path' does not contain a .nuspec entry."
+  return $false
+}
+
+function Invoke-GhReleaseDownloadWithRetry {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$ReleaseTag,
+    [Parameter(Mandatory = $true)]
+    [string]$Repository,
+    [Parameter(Mandatory = $true)]
+    [string]$PackageFileName,
+    [Parameter(Mandatory = $true)]
+    [string]$SourceDirectory,
+    [Parameter(Mandatory = $true)]
+    [string]$TargetPath
+  )
+
+  for ($attempt = 1; $attempt -le $DownloadMaxAttempts; $attempt++) {
+    if (Test-Path -LiteralPath $TargetPath -PathType Leaf) {
+      Remove-Item -LiteralPath $TargetPath -Force
+    }
+
+    Write-Host "Downloading published split package '$PackageFileName' from GitHub Release '$ReleaseTag' (attempt $attempt/$DownloadMaxAttempts)."
+    $processInfo = New-Object System.Diagnostics.ProcessStartInfo
+    $processInfo.FileName = "gh"
+    $processInfo.UseShellExecute = $false
+    $processInfo.Arguments = (@(
+        "release",
+        "download",
+        $ReleaseTag,
+        "--repo",
+        $Repository,
+        "--pattern",
+        $PackageFileName,
+        "--dir",
+        $SourceDirectory,
+        "--clobber"
+      ) | ForEach-Object { ConvertTo-CommandLineArgument -Value $_ }) -join " "
+
+    $process = [System.Diagnostics.Process]::Start($processInfo)
+    $startedAt = Get-Date
+    $lastSize = -1
+    $lastProgressAt = Get-Date
+    $timedOut = $false
+    $stalled = $false
+
+    while (-not $process.WaitForExit($DownloadProgressPollSeconds * 1000)) {
+      $elapsedSeconds = ((Get-Date) - $startedAt).TotalSeconds
+      if ($elapsedSeconds -gt $DownloadTimeoutSeconds) {
+        $timedOut = $true
+        break
+      }
+
+      if (Test-Path -LiteralPath $TargetPath -PathType Leaf) {
+        $currentSize = (Get-Item -LiteralPath $TargetPath).Length
+        if ($currentSize -ne $lastSize) {
+          $lastSize = $currentSize
+          $lastProgressAt = Get-Date
+          Write-Host ("Download progress for {0}: {1} MB" -f $PackageFileName, [Math]::Round($currentSize / 1MB, 2))
+        }
+        elseif ($currentSize -gt 0 -and ((Get-Date) - $lastProgressAt).TotalSeconds -gt $DownloadStallSeconds) {
+          $stalled = $true
+          break
+        }
+      }
+    }
+
+    if ($timedOut -or $stalled) {
+      try {
+        $process.Kill()
+      }
+      catch {
+      }
+
+      $reason = if ($timedOut) { "timed out" } else { "stalled" }
+      Write-Warning "Download $reason for '$PackageFileName'."
+    }
+    elseif ($process.ExitCode -eq 0 -and (Test-NuGetPackageFile -Path $TargetPath)) {
+      return
+    }
+    else {
+      Write-Warning "gh release download failed for '$PackageFileName' with exit code $($process.ExitCode)."
+    }
+
+    if (Test-Path -LiteralPath $TargetPath -PathType Leaf) {
+      Remove-Item -LiteralPath $TargetPath -Force -ErrorAction SilentlyContinue
+    }
+
+    if ($attempt -lt $DownloadMaxAttempts) {
+      Start-Sleep -Seconds 30
+    }
+  }
+
+  throw "Failed to download a complete NuGet package '$PackageFileName' from release '$ReleaseTag' after $DownloadMaxAttempts attempt(s)."
+}
+
 $requestedRoles = @(Expand-KeyList -Values $SplitPackageRole | ForEach-Object { $_.ToLowerInvariant() })
 if ($requestedRoles.Count -eq 0) {
   $requestedRoles = @("all")
@@ -228,20 +371,22 @@ foreach ($package in $missingPackages) {
     -TensorRtVersion $resolvedTensorRtPackageVersion
   $packageFileName = "$($package.packageId).$packageVersion.nupkg"
   $targetPath = Join-Path $sourceDirectory $packageFileName
-  if (Test-Path -LiteralPath $targetPath -PathType Leaf) {
+  if (Test-NuGetPackageFile -Path $targetPath) {
     Write-Host "Using cached release asset package: $packageFileName"
     continue
   }
 
-  Write-Host "Downloading published split package '$packageFileName' from GitHub Release '$resolvedReleaseTag'."
-  gh release download $resolvedReleaseTag --repo $Repository --pattern $packageFileName --dir $sourceDirectory --clobber
-  if ($LASTEXITCODE -ne 0) {
-    throw "Failed to download published split package '$packageFileName' from release '$resolvedReleaseTag'."
+  if (Test-Path -LiteralPath $targetPath -PathType Leaf) {
+    Write-Warning "Removing incomplete cached package file: $targetPath"
+    Remove-Item -LiteralPath $targetPath -Force
   }
 
-  if (-not (Test-Path -LiteralPath $targetPath -PathType Leaf)) {
-    throw "Published split package '$packageFileName' was not found in release '$resolvedReleaseTag'."
-  }
+  Invoke-GhReleaseDownloadWithRetry `
+    -ReleaseTag $resolvedReleaseTag `
+    -Repository $Repository `
+    -PackageFileName $packageFileName `
+    -SourceDirectory $sourceDirectory `
+    -TargetPath $targetPath
 }
 
 Write-Host "Published vendor package source: $sourceDirectory"
