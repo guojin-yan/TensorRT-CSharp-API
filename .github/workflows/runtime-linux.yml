@@ -75,6 +75,10 @@ on:
         required: false
         default: true
         type: boolean
+    secrets:
+      LINUX_RUNNER_STATUS_TOKEN:
+        description: Optional token with Actions runner read access for the prepare-stage Linux self-hosted runner availability check.
+        required: false
 
 permissions:
   actions: read
@@ -119,10 +123,25 @@ jobs:
         if: ${{ steps.matrix.outputs.has_entries == 'true' }}
         shell: pwsh
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.LINUX_RUNNER_STATUS_TOKEN || github.token }}
           GH_REPO: ${{ github.repository }}
+          HAS_RUNNER_STATUS_TOKEN: ${{ secrets.LINUX_RUNNER_STATUS_TOKEN != '' }}
         run: |
-          $response = gh api "repos/$env:GH_REPO/actions/runners?per_page=100" | ConvertFrom-Json
+          $rawResponse = gh api "repos/$env:GH_REPO/actions/runners?per_page=100" 2>&1
+          if ($LASTEXITCODE -ne 0) {
+            $message = ($rawResponse | Out-String).Trim()
+            if ($message -match 'HTTP 403|Resource not accessible by integration') {
+              if ($env:HAS_RUNNER_STATUS_TOKEN -ne 'true') {
+                throw "Linux runner availability check requires repository secret LINUX_RUNNER_STATUS_TOKEN with Actions runner read access. The default GITHUB_TOKEN could not read repository runners: $message"
+              }
+
+              throw "LINUX_RUNNER_STATUS_TOKEN could not read repository runners. Verify the token has Actions runner read access: $message"
+            }
+
+            throw "Failed to query repository runners: $message"
+          }
+
+          $response = $rawResponse | ConvertFrom-Json
           $matching = @($response.runners | Where-Object {
             $_.status -eq "online" -and
             (@($_.labels.name) -contains "self-hosted") -and

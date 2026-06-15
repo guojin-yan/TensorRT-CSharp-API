@@ -99,6 +99,8 @@ $workflowContracts = @(
       New-Requirement -Needle "workflow_dispatch" -Description "manual trigger"
       New-Requirement -Needle "Resolve-RuntimeMatrix.ps1" -Description "runtime matrix generation"
       New-Requirement -Needle "Resolve-RuntimeRoots.ps1" -Description "runtime root resolution"
+      New-Requirement -Needle "LINUX_RUNNER_STATUS_TOKEN" -Description "Linux runner availability token override"
+      New-Requirement -Needle "Actions runner read access" -Description "Linux runner token permission guidance"
       New-Requirement -Needle "self-hosted" -Description "self-hosted runner"
       New-Requirement -Needle "linux" -Description "linux runner label"
       New-Requirement -Needle "Validate-LinuxRuntimeInputs.ps1" -Description "Linux input validation"

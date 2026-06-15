@@ -17,6 +17,12 @@ Linux runtime packaging is currently prepared structurally, but it is expected t
 
 Do not commit CUDA, cuDNN, or TensorRT binaries to Git. The current workflow does not log in to NVIDIA or download vendor packages during CI. It reads the official package roots that were already prepared on the self-hosted runner.
 
+## Runner availability token
+
+`runtime-linux.yml` checks whether an online Linux x64 self-hosted runner exists before dispatching the expensive build jobs. GitHub's default `GITHUB_TOKEN` may not be allowed to call the repository runner-list API in every repository configuration. If the prepare job fails with `Resource not accessible by integration`, create a repository secret named `LINUX_RUNNER_STATUS_TOKEN` with Actions runner read access.
+
+This token is only used by the prepare-stage availability check. It does not download NVIDIA files and does not replace the self-hosted Linux runner requirement.
+
 ## Expected workflow inputs
 
 For `runtime-linux.yml`, provide:
@@ -27,6 +33,10 @@ For `runtime-linux.yml`, provide:
 - `publish_to_github_packages`: defaults to false because large Linux runtime packages should normally stay as GitHub Release assets
 - `release_tag`
 - `attach_to_github_release`
+
+Optional secret:
+
+- `LINUX_RUNNER_STATUS_TOKEN`: token with Actions runner read access for the Linux runner availability check
 
 ## Expected root examples
 

@@ -17,6 +17,12 @@
 
 不要把 CUDA / cuDNN / TensorRT 二进制提交到 Git。当前 workflow 不在 CI 中自动登录 NVIDIA 或自动下载安装包，而是读取 self-hosted runner 上已经准备好的官方库目录。
 
+## Runner 可用性检查 token
+
+`runtime-linux.yml` 会在执行昂贵的 build job 前，先检查仓库里是否存在在线的 Linux x64 self-hosted runner。某些仓库配置下，默认 `GITHUB_TOKEN` 不能调用 repository runner-list API。如果 prepare job 报 `Resource not accessible by integration`，请创建仓库 secret：`LINUX_RUNNER_STATUS_TOKEN`，并授予 Actions runner read access。
+
+这个 token 只用于 prepare 阶段的 runner 可用性检查，不会下载 NVIDIA 文件，也不会替代 self-hosted Linux runner 要求。
+
 ## `runtime-linux.yml` 需要的输入
 
 - `version`
@@ -25,6 +31,10 @@
 - `publish_to_github_packages`：默认关闭，Linux runtime 大包通常保留为 GitHub Release assets
 - `release_tag`
 - `attach_to_github_release`
+
+可选 secret：
+
+- `LINUX_RUNNER_STATUS_TOKEN`：用于 Linux runner 可用性检查的 Actions runner read access token
 
 ## 根目录示例
 
