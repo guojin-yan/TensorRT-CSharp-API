@@ -322,6 +322,7 @@ jobs:
               $arguments += '-SkipConsumerValidation'
             }
             if ($shouldResolvePublishedPackages) {
+              $additionalPackageSources = New-Object System.Collections.Generic.List[string]
               $safeKey = $key -replace '[^A-Za-z0-9._-]', '-'
               $publishedPackageSourceFile = Join-Path $env:RUNNER_TEMP "jyppx-published-package-source-$safeKey.txt"
               $restoreArguments = @(
@@ -363,12 +364,13 @@ jobs:
               }
 
               if (-not [string]::IsNullOrWhiteSpace($publishedPackageSource)) {
-                $arguments += @('-AdditionalPackageSource', $publishedPackageSource)
+                $additionalPackageSources.Add($publishedPackageSource)
               }
+              $additionalPackageSources.Add('https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json')
 
               $arguments += @(
                 '-AdditionalPackageSource',
-                'https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json',
+                ($additionalPackageSources -join ','),
                 '-AdditionalPackageSourceUsername',
                 '${{ github.actor }}',
                 '-AdditionalPackageSourcePassword',
