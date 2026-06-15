@@ -216,7 +216,8 @@ jobs:
             (Join-Path $workspace 'artifacts\runtime'),
             (Join-Path $workspace 'artifacts\runtime-split'),
             (Join-Path $workspace 'build-out'),
-            (Join-Path $env:SystemDrive 'jyppx-pkgcache')
+            (Join-Path $env:SystemDrive 'jyppx-pkgcache'),
+            (Join-Path $env:RUNNER_TEMP 'jyppx-split-packages')
           )
 
           foreach ($path in $stalePaths) {
@@ -224,6 +225,15 @@ jobs:
               Remove-Item -LiteralPath $path -Recurse -Force -ErrorAction SilentlyContinue
               Write-Host "Removed stale runtime workspace path: $path"
             }
+          }
+
+          $globalPackages = dotnet nuget locals global-packages --list |
+            ForEach-Object { ($_ -split ':', 2)[1].Trim() } |
+            Select-Object -First 1
+          if (-not [string]::IsNullOrWhiteSpace($globalPackages) -and (Test-Path -LiteralPath $globalPackages)) {
+            Get-ChildItem -LiteralPath $globalPackages -Directory -Filter 'jyppx.tensorrt.csharp.api.runtime*' -ErrorAction SilentlyContinue |
+              Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+            Write-Host "Pruned JYPPX runtime packages from global NuGet cache: $globalPackages"
           }
 
           Get-PSDrive -PSProvider FileSystem |
@@ -446,7 +456,8 @@ jobs:
             '.\artifacts\runtime',
             '.\artifacts\runtime-split',
             '.\build-out',
-            (Join-Path $env:SystemDrive 'jyppx-pkgcache')
+            (Join-Path $env:SystemDrive 'jyppx-pkgcache'),
+            (Join-Path $env:RUNNER_TEMP 'jyppx-split-packages')
           )
 
           foreach ($path in $paths) {

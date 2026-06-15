@@ -268,6 +268,52 @@ function Remove-BaseRuntimeIntermediatePaths {
   }
 }
 
+function Get-SafePathName {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$Value
+  )
+
+  return ($Value -replace '[^A-Za-z0-9._-]', '-')
+}
+
+function Get-LocalPackageCachePath {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$RuntimeKey
+  )
+
+  $safeKey = Get-SafePathName -Value $RuntimeKey
+  if ($env:RUNNER_TEMP) {
+    return Join-Path $env:RUNNER_TEMP "jyppx-split-packages\$safeKey"
+  }
+
+  return Join-Path ([System.IO.Path]::GetTempPath()) "jyppx-split-packages\$safeKey"
+}
+
+function Remove-SplitPackageIntermediatePaths {
+  param(
+    [Parameter(Mandatory = $true)]
+    [object]$SplitPackage
+  )
+
+  Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "artifacts\runtime-split\$($SplitPackage.key)")
+  Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "pack\runtime-split\$($SplitPackage.key)\assets")
+  Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "pack\runtime-split\$($SplitPackage.key)\bin")
+  Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "pack\runtime-split\$($SplitPackage.key)\obj")
+}
+
+function Write-DiskSpaceSummary {
+  param(
+    [string]$Label
+  )
+
+  Write-Host $Label
+  Get-PSDrive -PSProvider FileSystem |
+    Select-Object Name,Root,@{Name='FreeGB';Expression={[math]::Round($_.Free/1GB,2)}} |
+    Format-Table -AutoSize
+}
+
 $splitManifestPath = Join-Path $RepositoryRoot "pack\runtime-split\split-runtime-packages.manifest.json"
 $splitManifest = Get-Content -LiteralPath $splitManifestPath -Raw -Encoding utf8 | ConvertFrom-Json
 $runtimeManifestPath = Join-Path $RepositoryRoot "pack\runtime\runtime-packages.manifest.json"
@@ -373,8 +419,14 @@ if (Test-Path -LiteralPath $splitOutputDirectory) {
   Remove-Item -LiteralPath $splitOutputDirectory -Recurse -Force
 }
 New-Item -ItemType Directory -Path $splitOutputDirectory -Force | Out-Null
+$localPackageCachePath = Get-LocalPackageCachePath -RuntimeKey $SourceRuntimeKey
+Remove-OptionalPath -LiteralPath $localPackageCachePath
+New-Item -ItemType Directory -Path $localPackageCachePath -Force | Out-Null
+$lastSplitPackageIndex = $splitPackages.Count - 1
 
-foreach ($splitPackage in $splitPackages) {
+for ($splitPackageIndex = 0; $splitPackageIndex -lt $splitPackages.Count; $splitPackageIndex++) {
+  $splitPackage = $splitPackages[$splitPackageIndex]
+  Write-DiskSpaceSummary -Label "Disk space before packing split role '$($splitPackage.role)' for $SourceRuntimeKey"
   Invoke-CheckedCommand -FilePath "powershell" -ArgumentList @(
     "-NoProfile",
     "-ExecutionPolicy",
@@ -386,6 +438,11 @@ foreach ($splitPackage in $splitPackages) {
     "-RepositoryRoot",
     $RepositoryRoot
   )
+
+  if ($splitPackageIndex -eq $lastSplitPackageIndex) {
+    Remove-BaseRuntimeIntermediatePaths -RuntimeKey $SourceRuntimeKey -RuntimePackage $sourcePackage
+    Write-DiskSpaceSummary -Label "Disk space after pruning base runtime intermediates for $SourceRuntimeKey"
+  }
 
   $projectPath = Join-Path $RepositoryRoot "pack\runtime-split\$($splitPackage.key)\$($splitPackage.packageId).csproj"
   $splitPackageVersion = Get-SplitPackageVersion -SplitPackage $splitPackage
@@ -405,6 +462,9 @@ foreach ($splitPackage in $splitPackages) {
     "-p:NoBuild=true",
     "--no-restore"
   )
+
+  Remove-SplitPackageIntermediatePaths -SplitPackage $splitPackage
+  Write-DiskSpaceSummary -Label "Disk space after packing split role '$($splitPackage.role)' for $SourceRuntimeKey"
 }
 
 $nugetConfigPath = Join-Path $splitOutputDirectory "NuGet.config"
@@ -456,6 +516,7 @@ if ($shouldPackMetaPackage) {
     "--configfile",
     $nugetConfigPath
   ) + (New-PackageVersionProperties -PackageVersion $resolvedMetaPackageVersion)
+  $metaRestoreArguments += @("-p:RestorePackagesPath=$localPackageCachePath")
   Invoke-CheckedCommand -FilePath "dotnet" -ArgumentList $metaRestoreArguments
 
   $metaPackArguments = @(
@@ -466,9 +527,13 @@ if ($shouldPackMetaPackage) {
     "-o",
     $splitOutputDirectory
   ) + (New-PackageVersionProperties -PackageVersion $resolvedMetaPackageVersion) + @(
+    "-p:RestorePackagesPath=$localPackageCachePath",
     "--no-restore"
   )
   Invoke-CheckedCommand -FilePath "dotnet" -ArgumentList $metaPackArguments
+
+  Remove-OptionalPath -LiteralPath $localPackageCachePath
+  Write-DiskSpaceSummary -Label "Disk space after packing split meta package for $SourceRuntimeKey"
 }
 
 if (-not $SkipConsumerValidation.IsPresent -and $shouldPackMetaPackage) {
@@ -579,14 +644,10 @@ $lines | Set-Content -LiteralPath $markdownPath -Encoding utf8
 Write-Host "Local split runtime validation summary written to $jsonPath"
 Write-Host "Local split runtime validation summary written to $markdownPath"
 
+Remove-OptionalPath -LiteralPath $localPackageCachePath
 foreach ($splitPackage in $splitPackages) {
-  Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "artifacts\runtime-split\$($splitPackage.key)")
-  Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "pack\runtime-split\$($splitPackage.key)\assets")
-  Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "pack\runtime-split\$($splitPackage.key)\bin")
-  Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "pack\runtime-split\$($splitPackage.key)\obj")
+  Remove-SplitPackageIntermediatePaths -SplitPackage $splitPackage
 }
-
-Remove-BaseRuntimeIntermediatePaths -RuntimeKey $SourceRuntimeKey -RuntimePackage $sourcePackage
 Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "pack\runtime-split\$SourceRuntimeKey-meta\bin")
 Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "pack\runtime-split\$SourceRuntimeKey-meta\obj")
 Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "build-out\package-consumer\$SourceRuntimeKey")
