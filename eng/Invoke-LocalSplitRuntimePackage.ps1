@@ -499,8 +499,9 @@ if (-not $SkipConsumerValidation.IsPresent -and $shouldPackMetaPackage) {
     $consumerArguments += @("-SigntoolPath", $SigntoolPath)
   }
 
-  foreach ($source in @(Expand-KeyList -Values $AdditionalPackageSource)) {
-    $consumerArguments += @("-AdditionalPackageSource", $source)
+  $consumerAdditionalPackageSources = @(Expand-KeyList -Values $AdditionalPackageSource)
+  if ($consumerAdditionalPackageSources.Count -gt 0) {
+    $consumerArguments += @("-AdditionalPackageSource", ($consumerAdditionalPackageSources -join ","))
   }
 
   if (-not [string]::IsNullOrWhiteSpace($AdditionalPackageSourceUsername)) {

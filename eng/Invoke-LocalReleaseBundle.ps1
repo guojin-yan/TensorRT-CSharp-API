@@ -239,8 +239,9 @@ if (-not $SkipWindowsRuntime.IsPresent) {
         $arguments += "-SkipConsumerValidation"
       }
 
-      foreach ($source in @(Expand-KeyList -Values $WindowsAdditionalPackageSource)) {
-        $arguments += @("-AdditionalPackageSource", $source)
+      $windowsAdditionalPackageSources = @(Expand-KeyList -Values $WindowsAdditionalPackageSource)
+      if ($windowsAdditionalPackageSources.Count -gt 0) {
+        $arguments += @("-AdditionalPackageSource", ($windowsAdditionalPackageSources -join ","))
       }
 
       if (-not [string]::IsNullOrWhiteSpace($WindowsAdditionalPackageSourceUsername)) {
