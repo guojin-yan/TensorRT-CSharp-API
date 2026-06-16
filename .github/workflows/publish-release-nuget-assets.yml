@@ -1,0 +1,61 @@
+name: publish-release-nuget-assets
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: GitHub Release tag containing .nupkg assets
+        required: true
+        type: string
+      asset_patterns:
+        description: Comma/newline separated release asset patterns
+        required: false
+        default: "*.nupkg"
+        type: string
+      package_source:
+        description: Optional NuGet package source; defaults to this owner's GitHub Packages feed
+        required: false
+        default: ""
+        type: string
+      max_package_bytes:
+        description: Maximum package size accepted for GitHub Packages
+        required: false
+        default: "2147000000"
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Publish release NuGet assets to GitHub Packages
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_PACKAGES_TOKEN: ${{ github.token }}
+        run: |
+          $arguments = @(
+            '-NoProfile',
+            '-File', './eng/Publish-ReleaseNuGetAssetsToGitHubPackages.ps1',
+            '-ReleaseTag', '${{ inputs.release_tag }}',
+            '-Repository', '${{ github.repository }}',
+            '-AssetPattern', '${{ inputs.asset_patterns }}',
+            '-MaxPackageBytes', '${{ inputs.max_package_bytes }}'
+          )
+
+          if (-not [string]::IsNullOrWhiteSpace('${{ inputs.package_source }}')) {
+            $arguments += @('-PackageSource', '${{ inputs.package_source }}')
+          }
+
+          pwsh @arguments

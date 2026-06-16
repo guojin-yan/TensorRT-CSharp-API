@@ -16,7 +16,12 @@ on:
       runtime_keys:
         description: Optional comma-separated Linux runtime keys
         required: false
-        default: "linux-x64-ubuntu22.04-trt8.6-cuda11.8-cudnn8.9,linux-x64-ubuntu22.04-trt8.6-cuda12.1-cudnn8.9,linux-x64-ubuntu22.04-trt10.11-cuda11.8-cudnn8.9,linux-x64-ubuntu22.04-trt10.11-cuda12.9-cudnn9.22,linux-x64-ubuntu22.04-trt11.0-cuda12.9-cudnn9.22,linux-x64-ubuntu22.04-trt11.0-cuda13.2-cudnn9.22"
+        default: ""
+        type: string
+      runtime_key_set:
+        description: Linux runtime key set when runtime_keys is empty
+        required: false
+        default: auto
         type: string
       runner_mode:
         description: Linux runner mode
@@ -109,6 +114,11 @@ on:
         description: Optional comma-separated Linux runtime keys
         required: false
         default: ""
+        type: string
+      runtime_key_set:
+        description: Linux runtime key set when runtime_keys is empty
+        required: false
+        default: auto
         type: string
       runner_mode:
         description: Linux runner mode
@@ -211,7 +221,7 @@ jobs:
         id: matrix
         shell: pwsh
         run: |
-          $requestedKeys = "${{ inputs.runtime_keys }}"
+          $requestedKeys = pwsh -NoProfile -File .\eng\Resolve-RuntimeKeySet.ps1 -Platform linux -RuntimeKey "${{ inputs.runtime_keys }}" -RuntimeKeySet "${{ inputs.runtime_key_set }}" -RunnerMode "${{ inputs.runner_mode }}"
           if ([string]::IsNullOrWhiteSpace($requestedKeys)) {
             "value={""include"":[]}" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
             "has_entries=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append

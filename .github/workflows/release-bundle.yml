@@ -91,7 +91,12 @@ on:
       linux_runtime_keys:
         description: Optional comma-separated Linux runtime keys
         required: false
-        default: "linux-x64-ubuntu22.04-trt8.6-cuda11.8-cudnn8.9,linux-x64-ubuntu22.04-trt8.6-cuda12.1-cudnn8.9,linux-x64-ubuntu22.04-trt10.11-cuda11.8-cudnn8.9,linux-x64-ubuntu22.04-trt10.11-cuda12.9-cudnn9.22,linux-x64-ubuntu22.04-trt11.0-cuda12.9-cudnn9.22,linux-x64-ubuntu22.04-trt11.0-cuda13.2-cudnn9.22"
+        default: ""
+        type: string
+      linux_runtime_key_set:
+        description: Linux runtime key set when linux_runtime_keys is empty
+        required: false
+        default: auto
         type: string
       linux_runner_mode:
         description: Linux runtime runner mode
@@ -160,6 +165,7 @@ jobs:
       WINDOWS_SKIP_CONSUMER_VALIDATION: ${{ inputs.windows_skip_consumer_validation }}
       RUN_LINUX_RUNTIME_PACKAGING: ${{ inputs.run_linux_runtime_packaging }}
       LINUX_RUNTIME_KEYS: ${{ inputs.linux_runtime_keys }}
+      LINUX_RUNTIME_KEY_SET: ${{ inputs.linux_runtime_key_set }}
       LINUX_RUNNER_MODE: ${{ inputs.linux_runner_mode }}
       RUN_WINDOWS_SMOKE: ${{ inputs.run_windows_smoke }}
       SIGN_WINDOWS_CONSUMER_OUTPUT: true
@@ -311,6 +317,7 @@ jobs:
               -f "version=$runtime_version" \
               -f "configuration=$RELEASE_CONFIGURATION" \
               -f "runtime_keys=$LINUX_RUNTIME_KEYS" \
+              -f "runtime_key_set=$LINUX_RUNTIME_KEY_SET" \
               -f "runner_mode=$LINUX_RUNNER_MODE" \
               -f "runtime_delivery_mode=split" \
               -f "run_smoke=$RUN_LINUX_SMOKE" \
@@ -453,3 +460,16 @@ jobs:
           notes="Automated release for $tag"
 
           gh release upload "$tag" "${files[@]}" --clobber --repo "$GH_REPO"
+
+      - name: Backfill release nupkg assets to GitHub Packages
+        if: ${{ inputs.attach_runtime_to_github_release && inputs.publish_runtime_to_github_packages }}
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_PACKAGES_TOKEN: ${{ github.token }}
+        run: |
+          pwsh -NoProfile -File .\eng\Publish-ReleaseNuGetAssetsToGitHubPackages.ps1 `
+            -ReleaseTag "v$env:RELEASE_VERSION" `
+            -Repository "$env:GH_REPO" `
+            -AssetPattern "*.nupkg" `
+            -PackageTokenEnvironmentVariable GITHUB_PACKAGES_TOKEN

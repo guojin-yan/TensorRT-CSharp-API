@@ -102,6 +102,8 @@ $workflowContracts = @(
       New-Requirement -Needle "workflow_call" -Description "reusable workflow entrypoint"
       New-Requirement -Needle "workflow_dispatch" -Description "manual trigger"
       New-Requirement -Needle "Resolve-RuntimeMatrix.ps1" -Description "runtime matrix generation"
+      New-Requirement -Needle "Resolve-RuntimeKeySet.ps1" -Description "runtime key set generation"
+      New-Requirement -Needle "runtime_key_set" -Description "Linux runtime key set input"
       New-Requirement -Needle "Resolve-RuntimeRoots.ps1" -Description "runtime root resolution"
       New-Requirement -Needle "Pack managed package" -Description "Linux runtime managed package artifact build"
       New-Requirement -Needle "managed-packages-runtime-linux" -Description "Linux runtime managed package artifact"
@@ -111,8 +113,6 @@ $workflowContracts = @(
       New-Requirement -Needle "Restore-PublishedSplitPackageSource.ps1" -Description "published stable dependency release asset package source"
       New-Requirement -Needle "cuda_cudnn_package_release_tag" -Description "Linux split CUDA/cuDNN release tag input"
       New-Requirement -Needle "tensorrt_package_release_tag" -Description "Linux split TensorRT release tag input"
-      New-Requirement -Needle "linux-x64-ubuntu22.04-trt8.6-cuda11.8-cudnn8.9" -Description "default Linux matrix includes Ubuntu 22.04 TRT8 CUDA 11.8"
-      New-Requirement -Needle "linux-x64-ubuntu22.04-trt11.0-cuda13.2-cudnn9.22" -Description "default Linux matrix includes Ubuntu 22.04 TRT11 CUDA 13.2"
       New-Requirement -Needle "linux" -Description "linux runner label"
       New-Requirement -Needle "Validate-LinuxRuntimeInputs.ps1" -Description "Linux input validation"
       New-Requirement -Needle "CudnnRoot" -Description "Linux cuDNN input validation"
@@ -133,6 +133,8 @@ $workflowContracts = @(
       New-Requirement -Needle "gh release create" -Description "release creation"
       New-Requirement -Needle "gh release upload" -Description "release asset upload"
       New-Requirement -Needle "linux_runner_mode" -Description "Linux runner mode input"
+      New-Requirement -Needle "linux_runtime_key_set" -Description "Linux runtime key set input"
+      New-Requirement -Needle "runtime_key_set=$LINUX_RUNTIME_KEY_SET" -Description "Linux runtime key set dispatch"
       New-Requirement -Needle "runner_mode=$LINUX_RUNNER_MODE" -Description "Linux runner mode dispatch"
       New-Requirement -Needle "windows_split_package_roles includes collection/meta but no CUDA/cuDNN package version was provided" -Description "split collection CUDA/cuDNN version guard"
       New-Requirement -Needle "windows_split_package_roles includes collection/meta but no TensorRT package version was provided" -Description "split collection TensorRT version guard"
@@ -140,6 +142,24 @@ $workflowContracts = @(
       New-Requirement -Needle "include tensorrt/all in windows_split_package_roles" -Description "split collection same-run TensorRT refresh guidance"
       New-Requirement -Needle "windows_cuda_cudnn_package_release_tag" -Description "split collection CUDA/cuDNN release tag override"
       New-Requirement -Needle "windows_tensorrt_package_release_tag" -Description "split collection TensorRT release tag override"
+    )
+  }
+  [pscustomobject]@{
+    path = "eng\Resolve-RuntimeKeySet.ps1"
+    requirements = @(
+      New-Requirement -Needle "auto" -Description "auto key set selection"
+      New-Requirement -Needle "hosted-all" -Description "hosted Linux all key set"
+      New-Requirement -Needle "ubuntu24-hosted" -Description "Ubuntu 24.04 hosted key set"
+      New-Requirement -Needle "self-hosted-ubuntu20" -Description "Ubuntu 20.04 self-hosted key set"
+    )
+  }
+  [pscustomobject]@{
+    path = ".github\workflows\publish-release-nuget-assets.yml"
+    requirements = @(
+      New-Requirement -Needle "workflow_dispatch" -Description "manual trigger"
+      New-Requirement -Needle "Publish-ReleaseNuGetAssetsToGitHubPackages.ps1" -Description "release asset publication script"
+      New-Requirement -Needle "packages: write" -Description "GitHub Packages write permission"
+      New-Requirement -Needle "asset_patterns" -Description "release asset pattern input"
     )
   }
 )
@@ -157,6 +177,38 @@ $results.Add([pscustomobject]@{
     requirement = "single runtime key emits a JSON array"
     status = if ($singleLinuxMatrixJson.StartsWith("[")) { "passed" } else { "failed" }
     detail = "linux-x64-ubuntu22.04-trt11.0-cuda12.9-cudnn9.22"
+  })
+
+$ubuntu22KeySet = @((pwsh -NoProfile -File (Join-Path $RepositoryRoot "eng\Resolve-RuntimeKeySet.ps1") -Platform linux -RuntimeKeySet auto -RunnerMode hosted -OutputFormat json | Out-String).Trim() | ConvertFrom-Json)
+$results.Add([pscustomobject]@{
+    workflow = "eng\Resolve-RuntimeKeySet.ps1"
+    requirement = "Auto hosted Linux key set resolves all six Ubuntu 22.04 dependency combinations"
+    status = if ($ubuntu22KeySet.Count -eq 6 -and $ubuntu22KeySet -contains "linux-x64-ubuntu22.04-trt8.6-cuda11.8-cudnn8.9" -and $ubuntu22KeySet -contains "linux-x64-ubuntu22.04-trt11.0-cuda13.2-cudnn9.22") { "passed" } else { "failed" }
+    detail = $ubuntu22KeySet -join ", "
+  })
+
+$hostedAllKeySet = @((pwsh -NoProfile -File (Join-Path $RepositoryRoot "eng\Resolve-RuntimeKeySet.ps1") -Platform linux -RuntimeKeySet hosted-all -RunnerMode hosted -OutputFormat json | Out-String).Trim() | ConvertFrom-Json)
+$results.Add([pscustomobject]@{
+    workflow = "eng\Resolve-RuntimeKeySet.ps1"
+    requirement = "Hosted-all Linux key set includes Ubuntu 22.04 and Ubuntu 24.04 package lines"
+    status = if ($hostedAllKeySet.Count -eq 9 -and $hostedAllKeySet -contains "linux-x64-ubuntu22.04-trt8.6-cuda11.8-cudnn8.9" -and $hostedAllKeySet -contains "linux-x64-ubuntu24.04-trt11.0-cuda13.2-cudnn9.22") { "passed" } else { "failed" }
+    detail = $hostedAllKeySet -join ", "
+  })
+
+$ubuntu24KeySet = @((pwsh -NoProfile -File (Join-Path $RepositoryRoot "eng\Resolve-RuntimeKeySet.ps1") -Platform linux -RuntimeKeySet ubuntu24-hosted -RunnerMode hosted -OutputFormat json | Out-String).Trim() | ConvertFrom-Json)
+$results.Add([pscustomobject]@{
+    workflow = "eng\Resolve-RuntimeKeySet.ps1"
+    requirement = "Ubuntu 24.04 hosted key set resolves the modern hosted package line"
+    status = if ($ubuntu24KeySet.Count -eq 3 -and $ubuntu24KeySet -contains "linux-x64-ubuntu24.04-trt10.11-cuda12.9-cudnn9.22" -and $ubuntu24KeySet -contains "linux-x64-ubuntu24.04-trt11.0-cuda13.2-cudnn9.22") { "passed" } else { "failed" }
+    detail = $ubuntu24KeySet -join ", "
+  })
+
+$ubuntu20SelfHostedKeySet = @((pwsh -NoProfile -File (Join-Path $RepositoryRoot "eng\Resolve-RuntimeKeySet.ps1") -Platform linux -RuntimeKeySet self-hosted-ubuntu20 -RunnerMode self-hosted -OutputFormat json | Out-String).Trim() | ConvertFrom-Json)
+$results.Add([pscustomobject]@{
+    workflow = "eng\Resolve-RuntimeKeySet.ps1"
+    requirement = "Ubuntu 20.04 self-hosted key set resolves the modeled self-hosted package line"
+    status = if ($ubuntu20SelfHostedKeySet.Count -eq 3 -and $ubuntu20SelfHostedKeySet -contains "linux-x64-ubuntu20.04-trt8.6-cuda11.8-cudnn8.9") { "passed" } else { "failed" }
+    detail = $ubuntu20SelfHostedKeySet -join ", "
   })
 
 $singleLinuxMatrix = $singleLinuxMatrixJson | ConvertFrom-Json

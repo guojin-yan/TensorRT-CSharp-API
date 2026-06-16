@@ -51,6 +51,16 @@ Linux package keys must include the distribution version and architecture. The d
 
 Ubuntu 24.04 x64 is modeled only for the modern combinations that exist in NVIDIA's Ubuntu 24.04 repo. Ubuntu 20.04 x64 is self-hosted only. arm64/SBSA, Jetson/L4T, and non-Ubuntu distributions must be added as separate package lines after the matching NVIDIA repository and runner strategy are modeled.
 
+The `runtime-linux` workflow can resolve package lines through `runtime_key_set`:
+
+- `ubuntu22-hosted`: the default hosted publication line with all six Ubuntu 22.04 x64 combinations.
+- `hosted-all`: every hosted Linux line, currently the six Ubuntu 22.04 x64 combinations plus the three modern Ubuntu 24.04 x64 combinations.
+- `ubuntu24-hosted`: only the modern Ubuntu 24.04 x64 combinations.
+- `self-hosted-ubuntu20`: only the modeled Ubuntu 20.04 x64 self-hosted combinations; dispatch with `runner_mode=self-hosted`.
+- `custom`: requires explicit `runtime_keys`.
+
+Explicit `runtime_keys` always win. When `runtime_keys` is empty, `runtime_key_set` selects the package line. This keeps the normal release path on Ubuntu 22.04 hosted while still making hosted-all and Ubuntu 20.04 self-hosted publication explicit and repeatable.
+
 Linux packages stay `dry-run-only` until a matching Linux runner validates build, asset collection, pack, and package consumer restore/build.
 
 ## Distribution lanes

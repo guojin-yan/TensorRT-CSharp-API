@@ -51,6 +51,16 @@ Linux package key 必须包含发行版版本和架构。默认 hosted Linux 发
 
 Ubuntu 24.04 x64 只建模 NVIDIA Ubuntu 24.04 仓库中存在的现代组合。Ubuntu 20.04 x64 只走 self-hosted。arm64/SBSA、Jetson/L4T、非 Ubuntu 发行版都必须作为独立包线加入，不能混用 x64 Ubuntu 包名。
 
+`runtime-linux` workflow 支持用 `runtime_key_set` 选择发行线：
+
+- `ubuntu22-hosted`：默认 hosted 发布线，包含 Ubuntu 22.04 x64 的 6 个组合。
+- `hosted-all`：所有 hosted Linux 线，当前为 Ubuntu 22.04 x64 的 6 个组合加 Ubuntu 24.04 x64 的 3 个现代组合。
+- `ubuntu24-hosted`：只发布 Ubuntu 24.04 x64 的现代组合。
+- `self-hosted-ubuntu20`：只发布 Ubuntu 20.04 x64 的 self-hosted 组合，必须配合 `runner_mode=self-hosted`。
+- `custom`：必须显式填写 `runtime_keys`。
+
+如果 `runtime_keys` 非空，则以显式 key 为准；如果为空，则使用 `runtime_key_set`。这样日常发布可以保持 Ubuntu 22.04 hosted 主线，完整 hosted 发布可以切到 `hosted-all`，Ubuntu 20.04 则单独走 self-hosted。
+
 Linux 组合保持 `dry-run-only`，等待匹配的真实 Linux runner 验证。
 
 ## 分发策略
