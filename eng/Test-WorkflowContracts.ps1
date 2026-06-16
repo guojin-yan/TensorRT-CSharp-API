@@ -196,6 +196,12 @@ $results.Add([pscustomobject]@{
     status = if ($legacyCudaDependencyPlan.aptPackages -notcontains "cuda-crt-11-8") { "passed" } else { "failed" }
     detail = "cuda-crt-11-8"
   })
+$results.Add([pscustomobject]@{
+    workflow = "eng\Prepare-LinuxNvidiaDependencies.ps1"
+    requirement = "TensorRT 8.6 dependency plan pins vc plugin to CUDA 11.8"
+    status = if ($legacyCudaDependencyPlan.aptPackages -contains "libnvinfer-vc-plugin8=8.6.1.6-1+cuda11.8*") { "passed" } else { "failed" }
+    detail = "libnvinfer-vc-plugin8=8.6.1.6-1+cuda11.8*"
+  })
 
 $cuda121DependencyPlanJson = (pwsh -NoProfile -File (Join-Path $RepositoryRoot "eng\Prepare-LinuxNvidiaDependencies.ps1") -RuntimePackageKey "linux-x64-ubuntu22.04-trt8.6-cuda12.1-cudnn8.9" -DescribeDependencyPlan | Out-String).Trim()
 $cuda121DependencyPlan = $cuda121DependencyPlanJson | ConvertFrom-Json

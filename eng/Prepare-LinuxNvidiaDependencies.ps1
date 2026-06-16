@@ -166,12 +166,12 @@ function Get-LinuxDependencyPlan {
     $devTensorRtPackages = @("libnvinfer-safe-headers-dev") + $devTensorRtPackages
   }
 
+  $runtimeTensorRtPackages += "libnvinfer-vc-plugin$tensorRtLine"
   if ($tensorRtLine -eq "8") {
     $runtimeTensorRtPackages += "libnvparsers$tensorRtLine"
     $devTensorRtPackages += "libnvparsers-dev"
   }
   else {
-    $runtimeTensorRtPackages += "libnvinfer-vc-plugin$tensorRtLine"
     $devTensorRtPackages += "libnvinfer-vc-plugin-dev"
   }
 
