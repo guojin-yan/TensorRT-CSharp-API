@@ -227,7 +227,7 @@ function Get-LocalNuGetApiKeyEntries {
       throw "A local NuGet API key entry for '$Source' contains non-ASCII characters. Recreate the local key with NuGet tooling or provide NUGET_API_KEY as a plain-text secret."
     }
 
-    $originalKeys = @(
+    $originalKeys = @(@(
       foreach ($node in $nodes) {
         $key = [string]$node.GetAttribute("key")
         $nodeValue = [string]$node.GetAttribute("value")
@@ -235,7 +235,7 @@ function Get-LocalNuGetApiKeyEntries {
           $key
         }
       }
-    ) | Select-Object -Unique
+    ) | Select-Object -Unique)
     $originalKey = if ($originalKeys.Count -gt 0) { [string]$originalKeys[0] } else { $Source }
 
     foreach ($alias in $aliases) {
