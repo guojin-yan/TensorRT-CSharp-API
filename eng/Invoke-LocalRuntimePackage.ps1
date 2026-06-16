@@ -26,6 +26,7 @@ if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
 $utf8 = [System.Text.UTF8Encoding]::new($false)
 [Console]::OutputEncoding = $utf8
 $OutputEncoding = $utf8
+$powerShellCommand = if ($PSVersionTable.PSEdition -eq "Core") { "pwsh" } else { "powershell" }
 
 function Expand-KeyList {
   param(
@@ -112,7 +113,7 @@ if (-not $SkipManagedPack.IsPresent) {
     "-p:JYPPXPackageVersion=$resolvedVersion"
   )
 
-  Invoke-CheckedCommand -FilePath "powershell" -ArgumentList @(
+  Invoke-CheckedCommand -FilePath $powerShellCommand -ArgumentList @(
     "-NoProfile",
     "-ExecutionPolicy",
     "Bypass",
@@ -139,7 +140,7 @@ foreach ($key in $runtimeKeys) {
   $runtimePackageDirectory = Join-Path $RepositoryRoot "artifacts\runtime-nupkg"
 
   if ($package.platform -eq "windows") {
-    Invoke-CheckedCommand -FilePath "powershell" -ArgumentList @(
+    Invoke-CheckedCommand -FilePath $powerShellCommand -ArgumentList @(
       "-NoProfile",
       "-ExecutionPolicy",
       "Bypass",
@@ -172,7 +173,7 @@ foreach ($key in $runtimeKeys) {
       )
     }
 
-    Invoke-CheckedCommand -FilePath "powershell" -ArgumentList @(
+    Invoke-CheckedCommand -FilePath $powerShellCommand -ArgumentList @(
       "-NoProfile",
       "-ExecutionPolicy",
       "Bypass",
@@ -191,7 +192,7 @@ foreach ($key in $runtimeKeys) {
     )
   }
   elseif ($package.platform -eq "linux") {
-    Invoke-CheckedCommand -FilePath "powershell" -ArgumentList @(
+    Invoke-CheckedCommand -FilePath $powerShellCommand -ArgumentList @(
       "-NoProfile",
       "-ExecutionPolicy",
       "Bypass",
@@ -222,7 +223,7 @@ foreach ($key in $runtimeKeys) {
       )
     }
 
-    Invoke-CheckedCommand -FilePath "powershell" -ArgumentList @(
+    Invoke-CheckedCommand -FilePath $powerShellCommand -ArgumentList @(
       "-NoProfile",
       "-ExecutionPolicy",
       "Bypass",
@@ -236,7 +237,7 @@ foreach ($key in $runtimeKeys) {
       $resolvedRoots.cudaRoot
     )
 
-    Invoke-CheckedCommand -FilePath "powershell" -ArgumentList @(
+    Invoke-CheckedCommand -FilePath $powerShellCommand -ArgumentList @(
       "-NoProfile",
       "-ExecutionPolicy",
       "Bypass",
@@ -317,7 +318,7 @@ foreach ($key in $runtimeKeys) {
       $consumerArguments += @("-SigntoolPath", $SigntoolPath)
     }
 
-    Invoke-CheckedCommand -FilePath "powershell" -ArgumentList $consumerArguments
+    Invoke-CheckedCommand -FilePath $powerShellCommand -ArgumentList $consumerArguments
   }
 
   $runtimePackageFile = $null

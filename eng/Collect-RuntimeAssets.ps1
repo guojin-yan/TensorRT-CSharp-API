@@ -18,6 +18,7 @@ if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
 $utf8 = [System.Text.UTF8Encoding]::new($false)
 [Console]::OutputEncoding = $utf8
 $OutputEncoding = $utf8
+$isWindowsHost = $env:OS -eq "Windows_NT"
 
 $manifestPath = Join-Path $RepositoryRoot "pack\runtime\runtime-packages.manifest.json"
 $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
@@ -109,7 +110,7 @@ function Unblock-CopiedRuntimeAsset {
     [string]$Path
   )
 
-  if (-not $IsWindows -and $PSVersionTable.PSEdition -eq "Core") {
+  if (-not $isWindowsHost -and $PSVersionTable.PSEdition -eq "Core") {
     return
   }
 
@@ -171,7 +172,7 @@ function Copy-RelativeFiles {
       throw "Expected $Label asset was not found: $sourcePath"
     }
 
-    if (-not $IsWindows) {
+    if (-not $isWindowsHost) {
       $matchingFiles = @(
         $matchingFiles |
           Sort-Object `
@@ -190,7 +191,7 @@ function Copy-RelativeFiles {
     foreach ($resolvedSourcePath in $matchingFiles) {
       $copySourcePath = $resolvedSourcePath
       $destinationFileName = [System.IO.Path]::GetFileName($resolvedSourcePath)
-      if (-not $IsWindows) {
+      if (-not $isWindowsHost) {
         try {
           $fileInfo = Get-Item -LiteralPath $resolvedSourcePath -Force -ErrorAction Stop
           if ($fileInfo.LinkType -eq "SymbolicLink" -and $fileInfo.Target) {

@@ -34,6 +34,7 @@ if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
 $utf8 = [System.Text.UTF8Encoding]::new($false)
 [Console]::OutputEncoding = $utf8
 $OutputEncoding = $utf8
+$powerShellCommand = if ($PSVersionTable.PSEdition -eq "Core") { "pwsh" } else { "powershell" }
 
 function Expand-KeyList {
   param(
@@ -297,10 +298,209 @@ function Remove-SplitPackageIntermediatePaths {
     [object]$SplitPackage
   )
 
+  $projectDirectory = Join-Path $RepositoryRoot "pack\runtime-split\$($SplitPackage.key)"
   Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "artifacts\runtime-split\$($SplitPackage.key)")
-  Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "pack\runtime-split\$($SplitPackage.key)\assets")
-  Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "pack\runtime-split\$($SplitPackage.key)\bin")
-  Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "pack\runtime-split\$($SplitPackage.key)\obj")
+  Remove-OptionalPath -LiteralPath (Join-Path $projectDirectory "assets")
+  Remove-OptionalPath -LiteralPath (Join-Path $projectDirectory "bin")
+  Remove-OptionalPath -LiteralPath (Join-Path $projectDirectory "obj")
+
+  if ($SplitPackage.PSObject.Properties.Name.Contains("generated") -and [bool]$SplitPackage.generated) {
+    Remove-OptionalPath -LiteralPath $projectDirectory
+  }
+}
+
+function New-LinuxDynamicSplitPackage {
+  param(
+    [Parameter(Mandatory = $true)]
+    [object]$SourcePackage,
+    [Parameter(Mandatory = $true)]
+    [string]$Role,
+    [Parameter(Mandatory = $true)]
+    [string[]]$Assets,
+    [string]$Suffix,
+    [string]$PackageSuffix
+  )
+
+  $effectiveSuffix = if ([string]::IsNullOrWhiteSpace($Suffix)) { $Role } else { $Suffix }
+  $effectivePackageSuffix = if (-not [string]::IsNullOrWhiteSpace($PackageSuffix)) {
+    $PackageSuffix
+  }
+  else {
+    switch ($Role) {
+      "bridge" { "Bridge" }
+      "cuda-cudnn" { "CudaCudnn" }
+      "tensorrt" { "TensorRt" }
+      default { $effectiveSuffix }
+    }
+  }
+
+  return [pscustomobject]@{
+    key = "$($SourcePackage.key)-$effectiveSuffix"
+    sourceRuntimeKey = $SourcePackage.key
+    packageId = "$($SourcePackage.packageId).$effectivePackageSuffix"
+    rid = $SourcePackage.rid
+    platform = $SourcePackage.platform
+    tensorRtLine = $SourcePackage.tensorRtLine
+    cudaLine = $SourcePackage.cudaLine
+    role = $Role
+    prototypeState = $SourcePackage.validationState
+    assets = @($Assets | Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_) } | Sort-Object -Unique)
+    notes = "Dynamically generated Linux split package for $($SourcePackage.key)."
+    generated = $true
+  }
+}
+
+function Get-ExpectedNativeFileNames {
+  param(
+    [object[]]$RelativeFiles
+  )
+
+  $fileNames = New-Object System.Collections.Generic.List[string]
+  foreach ($relativePath in @($RelativeFiles)) {
+    if ([string]::IsNullOrWhiteSpace([string]$relativePath)) {
+      continue
+    }
+
+    $fileNames.Add([System.IO.Path]::GetFileName([string]$relativePath))
+  }
+
+  return @($fileNames | Sort-Object -Unique)
+}
+
+function New-DynamicSplitPackagesForRuntime {
+  param(
+    [Parameter(Mandatory = $true)]
+    [object]$SourcePackage
+  )
+
+  if ($SourcePackage.platform -ne "linux") {
+    return @()
+  }
+
+  $packages = New-Object System.Collections.Generic.List[object]
+  $packages.Add((New-LinuxDynamicSplitPackage -SourcePackage $SourcePackage -Role "bridge" -Suffix "bridge" -Assets @($SourcePackage.bridgeFile)))
+  $packages.Add((New-LinuxDynamicSplitPackage -SourcePackage $SourcePackage -Role "cuda-cudnn" -Suffix "cuda-cudnn" -Assets @(
+        (Get-ExpectedNativeFileNames -RelativeFiles @($SourcePackage.cudaFiles + $SourcePackage.cudnnFiles))
+      )))
+
+  $tensorRtAssets = @(Get-ExpectedNativeFileNames -RelativeFiles @($SourcePackage.tensorRtFiles))
+  $tensorRtBuilderAssets = @($tensorRtAssets | Where-Object { [string]$_ -like "*builder_resource*" })
+  $tensorRtRuntimeAssets = @($tensorRtAssets | Where-Object { [string]$_ -notlike "*builder_resource*" })
+  if ($tensorRtBuilderAssets.Count -gt 0) {
+    $packages.Add((New-LinuxDynamicSplitPackage -SourcePackage $SourcePackage -Role "tensorrt" -Suffix "tensorrt-runtime" -PackageSuffix "TensorRtRuntime" -Assets $tensorRtRuntimeAssets))
+    $packages.Add((New-LinuxDynamicSplitPackage -SourcePackage $SourcePackage -Role "tensorrt" -Suffix "tensorrt-builder" -PackageSuffix "TensorRtBuilder" -Assets $tensorRtBuilderAssets))
+  }
+  else {
+    $packages.Add((New-LinuxDynamicSplitPackage -SourcePackage $SourcePackage -Role "tensorrt" -Suffix "tensorrt" -PackageSuffix "TensorRt" -Assets $tensorRtAssets))
+  }
+
+  return @($packages.ToArray())
+}
+
+function New-SplitPackageDescription {
+  param(
+    [Parameter(Mandatory = $true)]
+    [object]$SourcePackage,
+    [Parameter(Mandatory = $true)]
+    [object]$SplitPackage
+  )
+
+  switch ([string]$SplitPackage.role) {
+    "bridge" {
+      return "Native bridge library for $($SourcePackage.tensorRtVersion) + CUDA $($SourcePackage.cudaVersion) + cuDNN $($SourcePackage.cudnnVersion) on $($SourcePackage.rid) $($SourcePackage.linuxDistro)$($SourcePackage.linuxDistroVersion)."
+    }
+    "cuda-cudnn" {
+      return "CUDA runtime and cuDNN runtime libraries for $($SourcePackage.tensorRtVersion) + CUDA $($SourcePackage.cudaVersion) + cuDNN $($SourcePackage.cudnnVersion) on $($SourcePackage.rid) $($SourcePackage.linuxDistro)$($SourcePackage.linuxDistroVersion). Publish only when CUDA or cuDNN changes."
+    }
+    "tensorrt" {
+      if ([string]$SplitPackage.key -like "*tensorrt-builder*") {
+        return "TensorRT builder-resource libraries for $($SourcePackage.tensorRtVersion) + CUDA $($SourcePackage.cudaVersion) + cuDNN $($SourcePackage.cudnnVersion) on $($SourcePackage.rid) $($SourcePackage.linuxDistro)$($SourcePackage.linuxDistroVersion). Publish only when TensorRT changes."
+      }
+
+      return "TensorRT runtime, parser, plugin, lean, and dispatch libraries for $($SourcePackage.tensorRtVersion) + CUDA $($SourcePackage.cudaVersion) + cuDNN $($SourcePackage.cudnnVersion) on $($SourcePackage.rid) $($SourcePackage.linuxDistro)$($SourcePackage.linuxDistroVersion). Publish only when TensorRT changes."
+    }
+    default {
+      return "Split runtime component for $($SourcePackage.key)."
+    }
+  }
+}
+
+function Ensure-SplitPackageProject {
+  param(
+    [Parameter(Mandatory = $true)]
+    [object]$SourcePackage,
+    [Parameter(Mandatory = $true)]
+    [object]$SplitPackage
+  )
+
+  $projectDirectory = Join-Path $RepositoryRoot "pack\runtime-split\$($SplitPackage.key)"
+  $projectPath = Join-Path $projectDirectory "$($SplitPackage.packageId).csproj"
+  if ((Test-Path -LiteralPath $projectPath -PathType Leaf) -and -not $SplitPackage.PSObject.Properties.Name.Contains("generated")) {
+    return $projectPath
+  }
+
+  New-Item -ItemType Directory -Path $projectDirectory -Force | Out-Null
+  $description = New-SplitPackageDescription -SourcePackage $SourcePackage -SplitPackage $SplitPackage
+  $packageTags = "TensorRT;CUDA;cuDNN;runtime;split-delivery;$($SplitPackage.role);linux"
+  $project = @"
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>$($SplitPackage.packageId)</PackageId>
+    <Title>$($SplitPackage.packageId)</Title>
+    <Description>$description</Description>
+    <JYPPXRuntimeKey>$($SplitPackage.key)</JYPPXRuntimeKey>
+    <PackageTags>$packageTags</PackageTags>
+  </PropertyGroup>
+</Project>
+"@
+  Set-Content -LiteralPath $projectPath -Value $project -Encoding utf8
+  return $projectPath
+}
+
+function Ensure-SplitMetaPackageProject {
+  param(
+    [Parameter(Mandatory = $true)]
+    [object]$SourcePackage,
+    [Parameter(Mandatory = $true)]
+    [object[]]$SplitPackages
+  )
+
+  $projectDirectory = Join-Path $RepositoryRoot "pack\runtime-split\$($SourcePackage.key)-meta"
+  $projectPath = Join-Path $projectDirectory "$($SourcePackage.packageId).csproj"
+  if ((Test-Path -LiteralPath $projectPath -PathType Leaf) -and $SourcePackage.platform -ne "linux") {
+    return $projectPath
+  }
+
+  New-Item -ItemType Directory -Path $projectDirectory -Force | Out-Null
+  $packageReferences = New-Object System.Collections.Generic.List[string]
+  foreach ($splitPackage in @($SplitPackages | Sort-Object role, packageId)) {
+    $versionProperty = switch ([string]$splitPackage.role) {
+      "bridge" { '$(JYPPXBridgePackageVersion)' }
+      "cuda-cudnn" { '$(JYPPXCudaCudnnPackageVersion)' }
+      "tensorrt" { '$(JYPPXTensorRtPackageVersion)' }
+      default { '$(JYPPXPackageVersion)' }
+    }
+    $packageReferences.Add("    <PackageReference Include=""$($splitPackage.packageId)"" Version=""$versionProperty"" />")
+  }
+
+  $description = "Split runtime collection package for TensorRT $($SourcePackage.tensorRtVersion) + CUDA $($SourcePackage.cudaVersion) + cuDNN $($SourcePackage.cudnnVersion) on $($SourcePackage.rid) $($SourcePackage.linuxDistro)$($SourcePackage.linuxDistroVersion)."
+  $project = @"
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>$($SourcePackage.packageId)</PackageId>
+    <Title>$($SourcePackage.packageId)</Title>
+    <Description>$description</Description>
+    <JYPPXRuntimeKey>$($SourcePackage.key)-meta</JYPPXRuntimeKey>
+    <SuppressDependenciesWhenPacking>false</SuppressDependenciesWhenPacking>
+    <PackageTags>TensorRT;CUDA;cuDNN;runtime;split-delivery;collection;meta;linux</PackageTags>
+  </PropertyGroup>
+  <ItemGroup>
+$($packageReferences -join "`r`n")
+  </ItemGroup>
+</Project>
+"@
+  Set-Content -LiteralPath $projectPath -Value $project -Encoding utf8
+  return $projectPath
 }
 
 function Write-DiskSpaceSummary {
@@ -313,7 +513,6 @@ function Write-DiskSpaceSummary {
     Select-Object Name,Root,@{Name='FreeGB';Expression={[math]::Round($_.Free/1GB,2)}} |
     Format-Table -AutoSize
 }
-
 $splitManifestPath = Join-Path $RepositoryRoot "pack\runtime-split\split-runtime-packages.manifest.json"
 $splitManifest = Get-Content -LiteralPath $splitManifestPath -Raw -Encoding utf8 | ConvertFrom-Json
 $runtimeManifestPath = Join-Path $RepositoryRoot "pack\runtime\runtime-packages.manifest.json"
@@ -335,6 +534,9 @@ if ($requestedSplitRoles.Count -eq 0) {
 }
 
 $allSplitPackages = @($splitManifest.packages | Where-Object { $_.sourceRuntimeKey -eq $SourceRuntimeKey })
+if ($allSplitPackages.Count -eq 0 -and $sourcePackage.platform -eq "linux") {
+  $allSplitPackages = @(New-DynamicSplitPackagesForRuntime -SourcePackage $sourcePackage)
+}
 if ($allSplitPackages.Count -eq 0) {
   throw "No split runtime packages were defined for source runtime '$SourceRuntimeKey'."
 }
@@ -359,10 +561,7 @@ if ($splitPackages.Count -ne $allSplitPackages.Count -and $RunSmoke.IsPresent) {
 $shouldRunSmokeForSplitSet = $RunSmoke.IsPresent -and ($splitPackages.Count -eq $allSplitPackages.Count)
 
 if ($shouldPackMetaPackage) {
-  $metaProjectPath = Join-Path $RepositoryRoot "pack\runtime-split\$SourceRuntimeKey-meta\$($sourcePackage.packageId).csproj"
-  if (-not (Test-Path -LiteralPath $metaProjectPath -PathType Leaf)) {
-    throw "Split meta package project was not found: $metaProjectPath"
-  }
+  $metaProjectPath = Ensure-SplitMetaPackageProject -SourcePackage $sourcePackage -SplitPackages $allSplitPackages
 
   $missingComponentPackages = @($allSplitPackages | Where-Object {
       $candidateKey = [string]$_.key
@@ -408,7 +607,7 @@ if ($shouldRunBaseRuntimeBuild) {
     $baseArguments += "-SkipManagedPack"
   }
 
-  Invoke-CheckedCommand -FilePath "powershell" -ArgumentList $baseArguments
+  Invoke-CheckedCommand -FilePath $powerShellCommand -ArgumentList $baseArguments
 }
 elseif (-not $SkipBaseRuntimeBuild.IsPresent) {
   Write-Host "Skipping base runtime build because only the split meta package is being produced."
@@ -427,7 +626,7 @@ $lastSplitPackageIndex = $splitPackages.Count - 1
 for ($splitPackageIndex = 0; $splitPackageIndex -lt $splitPackages.Count; $splitPackageIndex++) {
   $splitPackage = $splitPackages[$splitPackageIndex]
   Write-DiskSpaceSummary -Label "Disk space before packing split role '$($splitPackage.role)' for $SourceRuntimeKey"
-  Invoke-CheckedCommand -FilePath "powershell" -ArgumentList @(
+  Invoke-CheckedCommand -FilePath $powerShellCommand -ArgumentList @(
     "-NoProfile",
     "-ExecutionPolicy",
     "Bypass",
@@ -444,7 +643,7 @@ for ($splitPackageIndex = 0; $splitPackageIndex -lt $splitPackages.Count; $split
     Write-DiskSpaceSummary -Label "Disk space after pruning base runtime intermediates for $SourceRuntimeKey"
   }
 
-  $projectPath = Join-Path $RepositoryRoot "pack\runtime-split\$($splitPackage.key)\$($splitPackage.packageId).csproj"
+  $projectPath = Ensure-SplitPackageProject -SourcePackage $sourcePackage -SplitPackage $splitPackage
   $splitPackageVersion = Get-SplitPackageVersion -SplitPackage $splitPackage
   Invoke-CheckedCommand -FilePath "dotnet" -ArgumentList @(
     "restore",
@@ -592,7 +791,7 @@ if (-not $SkipConsumerValidation.IsPresent -and $shouldPackMetaPackage) {
     $consumerArguments += @("-AdditionalPackageSourcePassword", $AdditionalPackageSourcePassword)
   }
 
-  Invoke-CheckedCommand -FilePath "powershell" -ArgumentList $consumerArguments
+  Invoke-CheckedCommand -FilePath $powerShellCommand -ArgumentList $consumerArguments
 }
 elseif (-not $shouldPackMetaPackage) {
   Write-Host "Skipping package consumer validation because no split meta package was produced."
@@ -650,6 +849,9 @@ foreach ($splitPackage in $splitPackages) {
 }
 Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "pack\runtime-split\$SourceRuntimeKey-meta\bin")
 Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "pack\runtime-split\$SourceRuntimeKey-meta\obj")
+if ($sourcePackage.platform -eq "linux") {
+  Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "pack\runtime-split\$SourceRuntimeKey-meta")
+}
 Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "build-out\package-consumer\$SourceRuntimeKey")
 
 if ($shouldRunBaseRuntimeBuild) {

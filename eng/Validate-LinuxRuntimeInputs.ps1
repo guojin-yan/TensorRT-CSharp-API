@@ -59,25 +59,39 @@ function Test-GlobMatches {
   }
 }
 
+function Find-CudaHostDefinesHeader {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$Root
+  )
+
+  $includeCandidates = @(
+    (Join-Path $Root "include"),
+    (Join-Path $Root "targets\x86_64-linux\include"),
+    (Join-Path $Root "targets\aarch64-linux\include")
+  )
+
+  foreach ($includeRoot in $includeCandidates) {
+    foreach ($relativePath in @("crt\host_defines.h", "host_defines.h")) {
+      $candidate = Join-Path $includeRoot $relativePath
+      if (Test-Path -LiteralPath $candidate -PathType Leaf) {
+        return (Resolve-Path -LiteralPath $candidate).Path
+      }
+    }
+  }
+
+  return $null
+}
+
 Test-GlobMatches -BaseRoot $TensorRtRoot -Patterns $package.tensorRtFiles -Label "TensorRT"
 Test-GlobMatches -BaseRoot $CudaRoot -Patterns $package.cudaFiles -Label "CUDA"
 if (-not [string]::IsNullOrWhiteSpace($CudnnRoot)) {
   Test-GlobMatches -BaseRoot $CudnnRoot -Patterns $package.cudnnFiles -Label "cuDNN"
 }
 
-if ($package.cudaVersion -like "11.*") {
-  $cudaIncludeCandidates = @(
-    (Join-Path $CudaRoot "include"),
-    (Join-Path $CudaRoot "targets\x86_64-linux\include"),
-    (Join-Path $CudaRoot "targets\aarch64-linux\include")
-  )
-
-  $cudaIncludeRoot = $cudaIncludeCandidates |
-    Where-Object { Test-Path -LiteralPath (Join-Path $_ "crt\host_defines.h") -PathType Leaf } |
-    Select-Object -First 1
-  if (-not $cudaIncludeRoot) {
-    throw "CUDA CRT headers were not found for '$RuntimePackageKey'. Expected crt/host_defines.h under '$CudaRoot'."
-  }
+$cudaHostDefinesHeader = Find-CudaHostDefinesHeader -Root $CudaRoot
+if (-not $cudaHostDefinesHeader) {
+  throw "CUDA host compiler headers were not found for '$RuntimePackageKey'. Expected host_defines.h or crt/host_defines.h under '$CudaRoot'."
 }
 
 Write-Host "Linux runtime input validation passed for $RuntimePackageKey"

@@ -512,6 +512,58 @@ function Get-ExpectedNativeFileNames {
   return @($expectedNativeFiles | Sort-Object -Unique)
 }
 
+function New-RuntimePackageReferenceItems {
+  param(
+    [object]$RuntimeNupkg
+  )
+
+  $items = New-Object System.Collections.Generic.List[string]
+  $items.Add("    <PackageReference Include=""$($RuntimeNupkg.Id)"" Version=""$($RuntimeNupkg.Version)"" />")
+
+  if ([string]::IsNullOrWhiteSpace([string]$RuntimeNupkg.Path) -or -not (Test-Path -LiteralPath $RuntimeNupkg.Path -PathType Leaf)) {
+    return @($items.ToArray())
+  }
+
+  $zip = [System.IO.Compression.ZipFile]::OpenRead($RuntimeNupkg.Path)
+  try {
+    $nuspec = $zip.Entries | Where-Object { $_.FullName.EndsWith(".nuspec", [System.StringComparison]::OrdinalIgnoreCase) } | Select-Object -First 1
+    if (-not $nuspec) {
+      return @($items.ToArray())
+    }
+
+    $stream = $nuspec.Open()
+    try {
+      $reader = [System.IO.StreamReader]::new($stream, [System.Text.Encoding]::UTF8)
+      try {
+        [xml]$xml = $reader.ReadToEnd()
+      }
+      finally {
+        $reader.Dispose()
+      }
+    }
+    finally {
+      $stream.Dispose()
+    }
+
+    $namespaceManager = [System.Xml.XmlNamespaceManager]::new($xml.NameTable)
+    $namespaceManager.AddNamespace("n", $xml.package.NamespaceURI)
+    foreach ($dependency in @($xml.SelectNodes("//n:metadata/n:dependencies//n:dependency", $namespaceManager))) {
+      $id = [string]$dependency.id
+      $version = [string]$dependency.version
+      if ([string]::IsNullOrWhiteSpace($id) -or [string]::IsNullOrWhiteSpace($version)) {
+        continue
+      }
+
+      $items.Add("    <PackageReference Include=""$id"" Version=""$version"" />")
+    }
+  }
+  finally {
+    $zip.Dispose()
+  }
+
+  return @($items.ToArray())
+}
+
 function Write-ValidationReports {
   param(
     [object[]]$Results,
@@ -633,6 +685,7 @@ function Invoke-PackageConsumerValidation {
 
   $nugetConfig = New-NuGetConfigContent -ManagedSource $ManagedPackageDirectory -RuntimeSource $RuntimePackageDirectory
 
+  $runtimePackageReferences = New-RuntimePackageReferenceItems -RuntimeNupkg $RuntimeNupkg
   $project = @"
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
@@ -646,7 +699,7 @@ function Invoke-PackageConsumerValidation {
 
   <ItemGroup>
     <PackageReference Include="$($ManagedPackage.Id)" Version="$($ManagedPackage.Version)" />
-    <PackageReference Include="$($RuntimeNupkg.Id)" Version="$($RuntimeNupkg.Version)" />
+$($runtimePackageReferences -join "`r`n")
   </ItemGroup>
 </Project>
 "@

@@ -133,6 +133,93 @@ function Get-SplitPackageReleaseTag {
   }
 }
 
+function Get-ExpectedNativeFileNames {
+  param(
+    [object[]]$RelativeFiles
+  )
+
+  $fileNames = New-Object System.Collections.Generic.List[string]
+  foreach ($relativePath in @($RelativeFiles)) {
+    if ([string]::IsNullOrWhiteSpace([string]$relativePath)) {
+      continue
+    }
+
+    $fileNames.Add([System.IO.Path]::GetFileName([string]$relativePath))
+  }
+
+  return @($fileNames | Sort-Object -Unique)
+}
+
+function New-LinuxDynamicSplitPackage {
+  param(
+    [Parameter(Mandatory = $true)]
+    [object]$SourcePackage,
+    [Parameter(Mandatory = $true)]
+    [string]$Role,
+    [Parameter(Mandatory = $true)]
+    [string[]]$Assets,
+    [string]$Suffix,
+    [string]$PackageSuffix
+  )
+
+  $effectiveSuffix = if ([string]::IsNullOrWhiteSpace($Suffix)) { $Role } else { $Suffix }
+  $effectivePackageSuffix = if (-not [string]::IsNullOrWhiteSpace($PackageSuffix)) {
+    $PackageSuffix
+  }
+  else {
+    switch ($Role) {
+      "bridge" { "Bridge" }
+      "cuda-cudnn" { "CudaCudnn" }
+      "tensorrt" { "TensorRt" }
+      default { $effectiveSuffix }
+    }
+  }
+
+  return [pscustomobject]@{
+    key = "$($SourcePackage.key)-$effectiveSuffix"
+    sourceRuntimeKey = $SourcePackage.key
+    packageId = "$($SourcePackage.packageId).$effectivePackageSuffix"
+    rid = $SourcePackage.rid
+    platform = $SourcePackage.platform
+    tensorRtLine = $SourcePackage.tensorRtLine
+    cudaLine = $SourcePackage.cudaLine
+    role = $Role
+    prototypeState = $SourcePackage.validationState
+    assets = @($Assets | Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_) } | Sort-Object -Unique)
+    generated = $true
+  }
+}
+
+function New-DynamicSplitPackagesForRuntime {
+  param(
+    [Parameter(Mandatory = $true)]
+    [object]$SourcePackage
+  )
+
+  if ($SourcePackage.platform -ne "linux") {
+    return @()
+  }
+
+  $packages = New-Object System.Collections.Generic.List[object]
+  $packages.Add((New-LinuxDynamicSplitPackage -SourcePackage $SourcePackage -Role "bridge" -Suffix "bridge" -Assets @($SourcePackage.bridgeFile)))
+  $packages.Add((New-LinuxDynamicSplitPackage -SourcePackage $SourcePackage -Role "cuda-cudnn" -Suffix "cuda-cudnn" -Assets @(
+        (Get-ExpectedNativeFileNames -RelativeFiles @($SourcePackage.cudaFiles + $SourcePackage.cudnnFiles))
+      )))
+
+  $tensorRtAssets = @(Get-ExpectedNativeFileNames -RelativeFiles @($SourcePackage.tensorRtFiles))
+  $tensorRtBuilderAssets = @($tensorRtAssets | Where-Object { [string]$_ -like "*builder_resource*" })
+  $tensorRtRuntimeAssets = @($tensorRtAssets | Where-Object { [string]$_ -notlike "*builder_resource*" })
+  if ($tensorRtBuilderAssets.Count -gt 0) {
+    $packages.Add((New-LinuxDynamicSplitPackage -SourcePackage $SourcePackage -Role "tensorrt" -Suffix "tensorrt-runtime" -PackageSuffix "TensorRtRuntime" -Assets $tensorRtRuntimeAssets))
+    $packages.Add((New-LinuxDynamicSplitPackage -SourcePackage $SourcePackage -Role "tensorrt" -Suffix "tensorrt-builder" -PackageSuffix "TensorRtBuilder" -Assets $tensorRtBuilderAssets))
+  }
+  else {
+    $packages.Add((New-LinuxDynamicSplitPackage -SourcePackage $SourcePackage -Role "tensorrt" -Suffix "tensorrt" -PackageSuffix "TensorRt" -Assets $tensorRtAssets))
+  }
+
+  return @($packages.ToArray())
+}
+
 function Write-ResolvedPackageSource {
   param(
     [string]$SourceDirectory
@@ -364,9 +451,19 @@ $resolvedTensorRtPackageReleaseTag = Resolve-ReleaseTag `
   -ExplicitPackageVersion $TensorRtPackageVersion `
   -PackageVersion $resolvedTensorRtPackageVersion
 
+$runtimeManifestPath = Join-Path $RepositoryRoot "pack\runtime\runtime-packages.manifest.json"
+$runtimeManifest = Get-Content -LiteralPath $runtimeManifestPath -Raw -Encoding utf8 | ConvertFrom-Json
+$sourcePackage = $runtimeManifest.packages | Where-Object { [string]$_.key -eq $SourceRuntimeKey } | Select-Object -First 1
+if (-not $sourcePackage) {
+  throw "Runtime package key '$SourceRuntimeKey' was not found."
+}
+
 $splitManifestPath = Join-Path $RepositoryRoot "pack\runtime-split\split-runtime-packages.manifest.json"
 $splitManifest = Get-Content -LiteralPath $splitManifestPath -Raw -Encoding utf8 | ConvertFrom-Json
 $allSplitPackages = @($splitManifest.packages | Where-Object { [string]$_.sourceRuntimeKey -eq $SourceRuntimeKey })
+if ($allSplitPackages.Count -eq 0 -and $sourcePackage.platform -eq "linux") {
+  $allSplitPackages = @(New-DynamicSplitPackagesForRuntime -SourcePackage $sourcePackage)
+}
 if ($allSplitPackages.Count -eq 0) {
   throw "No split runtime packages were defined for source runtime '$SourceRuntimeKey'."
 }

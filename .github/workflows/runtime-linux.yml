@@ -23,6 +23,56 @@ on:
         required: false
         default: hosted
         type: string
+      runtime_delivery_mode:
+        description: Runtime package layout to produce
+        required: false
+        default: split
+        type: string
+      split_package_roles:
+        description: Optional comma-separated split package roles or keys to build
+        required: false
+        default: all
+        type: string
+      meta_package_version:
+        description: Optional split meta package version override
+        required: false
+        default: ""
+        type: string
+      bridge_package_version:
+        description: Optional bridge split package version override
+        required: false
+        default: ""
+        type: string
+      cuda_cudnn_package_version:
+        description: Optional version for already-published CUDA/cuDNN split packages
+        required: false
+        default: ""
+        type: string
+      cuda_cudnn_package_release_tag:
+        description: Optional GitHub Release tag that contains previously published CUDA/cuDNN split packages; defaults to v<cuda_cudnn package version>
+        required: false
+        default: ""
+        type: string
+      tensorrt_package_version:
+        description: Optional version for already-published TensorRT split packages
+        required: false
+        default: ""
+        type: string
+      tensorrt_package_release_tag:
+        description: Optional GitHub Release tag that contains previously published TensorRT split packages; defaults to v<tensorrt package version>
+        required: false
+        default: ""
+        type: string
+      include_meta_package:
+        description: Build the split meta package even when only a subset of roles is selected
+        required: false
+        default: false
+        type: boolean
+      skip_consumer_validation:
+        description: Skip split runtime package consumer validation
+        required: false
+        default: false
+        type: boolean
       run_smoke:
         description: Run package consumer smoke after packing
         required: false
@@ -65,6 +115,56 @@ on:
         required: false
         default: hosted
         type: string
+      runtime_delivery_mode:
+        description: Runtime package layout to produce
+        required: false
+        default: split
+        type: string
+      split_package_roles:
+        description: Optional comma-separated split package roles or keys to build
+        required: false
+        default: all
+        type: string
+      meta_package_version:
+        description: Optional split meta package version override
+        required: false
+        default: ""
+        type: string
+      bridge_package_version:
+        description: Optional bridge split package version override
+        required: false
+        default: ""
+        type: string
+      cuda_cudnn_package_version:
+        description: Optional version for already-published CUDA/cuDNN split packages
+        required: false
+        default: ""
+        type: string
+      cuda_cudnn_package_release_tag:
+        description: Optional GitHub Release tag that contains previously published CUDA/cuDNN split packages; defaults to v<cuda_cudnn package version>
+        required: false
+        default: ""
+        type: string
+      tensorrt_package_version:
+        description: Optional version for already-published TensorRT split packages
+        required: false
+        default: ""
+        type: string
+      tensorrt_package_release_tag:
+        description: Optional GitHub Release tag that contains previously published TensorRT split packages; defaults to v<tensorrt package version>
+        required: false
+        default: ""
+        type: string
+      include_meta_package:
+        description: Build the split meta package even when only a subset of roles is selected
+        required: false
+        default: false
+        type: boolean
+      skip_consumer_validation:
+        description: Skip split runtime package consumer validation
+        required: false
+        default: false
+        type: boolean
       run_smoke:
         description: Run package consumer smoke after packing
         required: false
@@ -294,18 +394,153 @@ jobs:
         run: pwsh -NoProfile -File ./eng/Collect-RuntimeAssets.ps1 -RuntimePackageKey "${{ matrix.key }}" -TensorRtRoot "${{ steps.roots.outputs.tensor_rt_root }}" -CudaRoot "${{ steps.roots.outputs.cuda_root }}" -CudnnRoot "${{ steps.roots.outputs.cudnn_root }}"
 
       - name: Pack runtime package
+        if: ${{ inputs.runtime_delivery_mode != 'split' }}
         run: dotnet pack "./pack/runtime/${{ matrix.key }}/${{ matrix.packageId }}.csproj" -c "${{ inputs.configuration }}" -o ./artifacts/runtime-nupkg -p:JYPPXPackageVersion=${{ needs.prepare.outputs.package_version }}
 
       - name: Validate runtime package consumer
-        if: ${{ !inputs.run_smoke }}
+        if: ${{ inputs.runtime_delivery_mode != 'split' && !inputs.run_smoke }}
         run: pwsh -NoProfile -File ./eng/Test-PackageConsumer.ps1 -RuntimePackageKey "${{ matrix.key }}" -ManagedPackageDirectory "./artifacts/managed" -RuntimePackageDirectory "./artifacts/runtime-nupkg"
 
       - name: Validate runtime package consumer with smoke
-        if: ${{ inputs.run_smoke }}
+        if: ${{ inputs.runtime_delivery_mode != 'split' && inputs.run_smoke }}
         run: pwsh -NoProfile -File ./eng/Test-PackageConsumer.ps1 -RuntimePackageKey "${{ matrix.key }}" -ManagedPackageDirectory "./artifacts/managed" -RuntimePackageDirectory "./artifacts/runtime-nupkg" -RunSmoke
 
+      - name: Pack split runtime packages
+        if: ${{ inputs.runtime_delivery_mode == 'split' }}
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          $roleText = '${{ inputs.split_package_roles }}'
+          $roleTokens = @()
+          foreach ($part in $roleText -split '[,;]') {
+            $trimmed = $part.Trim().ToLowerInvariant()
+            if (-not [string]::IsNullOrWhiteSpace($trimmed)) {
+              $roleTokens += $trimmed
+            }
+          }
+
+          $shouldResolvePublishedPackages = (
+            '${{ inputs.include_meta_package }}' -eq 'true' -or
+            $roleTokens -contains 'all' -or
+            $roleTokens -contains 'meta' -or
+            $roleTokens -contains 'collection'
+          )
+          if ($shouldResolvePublishedPackages -and
+              -not ($roleTokens -contains 'all') -and
+              -not ($roleTokens -contains 'cuda-cudnn') -and
+              -not ($roleTokens -contains 'stable-dependencies') -and
+              -not ($roleTokens -contains 'nvidia-dependencies') -and
+              [string]::IsNullOrWhiteSpace('${{ inputs.cuda_cudnn_package_version }}')) {
+            throw "split_package_roles includes collection/meta but no CUDA/cuDNN package version was provided. Pass cuda_cudnn_package_version to reuse published CudaCudnn packages, or include cuda-cudnn/all in split_package_roles for a dependency refresh."
+          }
+          if ($shouldResolvePublishedPackages -and
+              -not ($roleTokens -contains 'all') -and
+              -not ($roleTokens -contains 'tensorrt') -and
+              -not ($roleTokens -contains 'stable-dependencies') -and
+              -not ($roleTokens -contains 'nvidia-dependencies') -and
+              [string]::IsNullOrWhiteSpace('${{ inputs.tensorrt_package_version }}')) {
+            throw "split_package_roles includes collection/meta but no TensorRT package version was provided. Pass tensorrt_package_version to reuse published TensorRT component packages, or include tensorrt/all in split_package_roles for a dependency refresh."
+          }
+
+          $arguments = @(
+            '-NoProfile',
+            '-ExecutionPolicy', 'Bypass',
+            '-File', './eng/Invoke-LocalSplitRuntimePackage.ps1',
+            '-SourceRuntimeKey', '${{ matrix.key }}',
+            '-Version', '${{ needs.prepare.outputs.package_version }}',
+            '-SplitPackageRole', '${{ inputs.split_package_roles }}',
+            '-Configuration', '${{ inputs.configuration }}',
+            '-SkipManagedPack',
+            '-SkipBaseRuntimeBuild'
+          )
+
+          if (-not [string]::IsNullOrWhiteSpace('${{ inputs.meta_package_version }}')) {
+            $arguments += @('-MetaPackageVersion', '${{ inputs.meta_package_version }}')
+          }
+          if (-not [string]::IsNullOrWhiteSpace('${{ inputs.bridge_package_version }}')) {
+            $arguments += @('-BridgePackageVersion', '${{ inputs.bridge_package_version }}')
+          }
+          if (-not [string]::IsNullOrWhiteSpace('${{ inputs.cuda_cudnn_package_version }}')) {
+            $arguments += @('-CudaCudnnPackageVersion', '${{ inputs.cuda_cudnn_package_version }}')
+          }
+          if (-not [string]::IsNullOrWhiteSpace('${{ inputs.tensorrt_package_version }}')) {
+            $arguments += @('-TensorRtPackageVersion', '${{ inputs.tensorrt_package_version }}')
+          }
+          if ('${{ inputs.include_meta_package }}' -eq 'true') {
+            $arguments += '-IncludeMetaPackage'
+          }
+          if ('${{ inputs.skip_consumer_validation }}' -eq 'true') {
+            $arguments += '-SkipConsumerValidation'
+          }
+          if ('${{ inputs.run_smoke }}' -eq 'true') {
+            $arguments += '-RunSmoke'
+          }
+          if ($shouldResolvePublishedPackages) {
+            $additionalPackageSources = New-Object System.Collections.Generic.List[string]
+            $safeKey = '${{ matrix.key }}' -replace '[^A-Za-z0-9._-]', '-'
+            $publishedPackageSourceFile = Join-Path $env:RUNNER_TEMP "jyppx-published-package-source-$safeKey.txt"
+            $restoreArguments = @(
+              '-NoProfile',
+              '-ExecutionPolicy', 'Bypass',
+              '-File', './eng/Restore-PublishedSplitPackageSource.ps1',
+              '-SourceRuntimeKey', '${{ matrix.key }}',
+              '-SplitPackageRole', '${{ inputs.split_package_roles }}',
+              '-Version', '${{ needs.prepare.outputs.package_version }}',
+              '-Repository', "$env:GH_REPO",
+              '-OutputPathFile', $publishedPackageSourceFile
+            )
+            if (-not [string]::IsNullOrWhiteSpace('${{ inputs.bridge_package_version }}')) {
+              $restoreArguments += @('-BridgePackageVersion', '${{ inputs.bridge_package_version }}')
+            }
+            if (-not [string]::IsNullOrWhiteSpace('${{ inputs.cuda_cudnn_package_version }}')) {
+              $restoreArguments += @('-CudaCudnnPackageVersion', '${{ inputs.cuda_cudnn_package_version }}')
+            }
+            if (-not [string]::IsNullOrWhiteSpace('${{ inputs.cuda_cudnn_package_release_tag }}')) {
+              $restoreArguments += @('-CudaCudnnPackageReleaseTag', '${{ inputs.cuda_cudnn_package_release_tag }}')
+            }
+            if (-not [string]::IsNullOrWhiteSpace('${{ inputs.tensorrt_package_version }}')) {
+              $restoreArguments += @('-TensorRtPackageVersion', '${{ inputs.tensorrt_package_version }}')
+            }
+            if (-not [string]::IsNullOrWhiteSpace('${{ inputs.tensorrt_package_release_tag }}')) {
+              $restoreArguments += @('-TensorRtPackageReleaseTag', '${{ inputs.tensorrt_package_release_tag }}')
+            }
+
+            pwsh @restoreArguments
+            if ($LASTEXITCODE -ne 0) {
+              throw "Restore-PublishedSplitPackageSource.ps1 failed for '${{ matrix.key }}' with exit code $LASTEXITCODE."
+            }
+
+            $publishedPackageSource = if (Test-Path -LiteralPath $publishedPackageSourceFile -PathType Leaf) {
+              (Get-Content -LiteralPath $publishedPackageSourceFile -Raw).Trim()
+            }
+            else {
+              ""
+            }
+
+            if (-not [string]::IsNullOrWhiteSpace($publishedPackageSource)) {
+              $additionalPackageSources.Add($publishedPackageSource)
+            }
+            $additionalPackageSources.Add('https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json')
+
+            $arguments += @(
+              '-AdditionalPackageSource',
+              ($additionalPackageSources -join ','),
+              '-AdditionalPackageSourceUsername',
+              '${{ github.actor }}',
+              '-AdditionalPackageSourcePassword',
+              '${{ github.token }}'
+            )
+          }
+
+          pwsh @arguments
+          if ($LASTEXITCODE -ne 0) {
+            throw "Invoke-LocalSplitRuntimePackage.ps1 failed for '${{ matrix.key }}' with exit code $LASTEXITCODE."
+          }
+
       - name: Upload Linux runtime artifacts
-        if: ${{ inputs.attach_to_github_release && inputs.release_tag == '' }}
+        if: ${{ inputs.attach_to_github_release && inputs.release_tag == '' && inputs.runtime_delivery_mode != 'split' }}
         uses: actions/upload-artifact@v7
         with:
           compression-level: 0
@@ -315,8 +550,19 @@ jobs:
             artifacts/package-consumer/package-consumer-validation-summary.*
             artifacts/linux-dry-run/${{ matrix.key }}/**
 
+      - name: Upload Linux split runtime artifacts
+        if: ${{ inputs.attach_to_github_release && inputs.release_tag == '' && inputs.runtime_delivery_mode == 'split' }}
+        uses: actions/upload-artifact@v7
+        with:
+          compression-level: 0
+          name: runtime-linux-split-${{ matrix.key }}
+          path: |
+            artifacts/runtime-split-nupkg/${{ matrix.key }}/*.nupkg
+            artifacts/package-consumer/package-consumer-validation-summary.*
+            artifacts/linux-dry-run/${{ matrix.key }}/**
+
       - name: Upload Linux runtime packages to GitHub Release
-        if: ${{ inputs.attach_to_github_release && inputs.release_tag != '' }}
+        if: ${{ inputs.attach_to_github_release && inputs.release_tag != '' && inputs.runtime_delivery_mode != 'split' }}
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
@@ -333,8 +579,36 @@ jobs:
             gh release upload $releaseTag $package.FullName --clobber --repo "$env:GH_REPO"
           }
 
+      - name: Upload Linux split runtime packages to GitHub Release
+        if: ${{ inputs.attach_to_github_release && inputs.release_tag != '' && inputs.runtime_delivery_mode == 'split' }}
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          $splitPackageRoot = Join-Path './artifacts/runtime-split-nupkg' '${{ matrix.key }}'
+          $packages = @(Get-ChildItem -LiteralPath $splitPackageRoot -Filter *.nupkg -Recurse | Sort-Object FullName)
+          if ($packages.Count -eq 0) {
+            throw "No Linux split runtime packages were found for runtime key '${{ matrix.key }}' under '$splitPackageRoot'."
+          }
+
+          $releaseTag = "${{ inputs.release_tag }}"
+          foreach ($package in $packages) {
+            $maxReleaseBytes = 2147483648
+            if ($package.Length -ge $maxReleaseBytes) {
+              $actualMb = [Math]::Round($package.Length / 1MB, 2)
+              throw "Release asset '$($package.Name)' is ${actualMb} MB and exceeds the GitHub Release asset limit. Split the component package further before publishing."
+            }
+
+            Write-Host "Uploading release asset: $($package.FullName)"
+            gh release upload $releaseTag $package.FullName --clobber --repo "$env:GH_REPO"
+            if ($LASTEXITCODE -ne 0) {
+              throw "gh release upload failed for '$($package.FullName)' with exit code $LASTEXITCODE."
+            }
+          }
+
       - name: Publish Linux runtime package to GitHub Packages
-        if: ${{ inputs.publish_to_github_packages }}
+        if: ${{ inputs.publish_to_github_packages && inputs.runtime_delivery_mode != 'split' }}
         shell: pwsh
         env:
           GITHUB_PACKAGES_TOKEN: ${{ github.token }}
@@ -355,4 +629,29 @@ jobs:
             -TimeoutSeconds 3600 `
             -MaxAttempts 3 `
             -RetryDelaySeconds 30 `
+            -SortMode size-ascending
+
+      - name: Publish Linux split runtime packages to GitHub Packages
+        if: ${{ inputs.publish_to_github_packages && inputs.runtime_delivery_mode == 'split' }}
+        shell: pwsh
+        env:
+          GITHUB_PACKAGES_TOKEN: ${{ github.token }}
+        run: |
+          $maxBytes = 2147000000
+          $packages = Get-ChildItem -LiteralPath ./artifacts/runtime-split-nupkg -Filter *.nupkg -Recurse
+          foreach ($package in $packages) {
+            if ($package.Length -ge $maxBytes) {
+              $actualMb = [Math]::Round($package.Length / 1MB, 2)
+              throw "Runtime split package '$($package.Name)' is ${actualMb} MB and exceeds the GitHub NuGet registry limit (< 2.147 GB). Split this component further before publishing."
+            }
+          }
+
+          pwsh -NoProfile -File ./eng/Push-NuGetPackages.ps1 `
+            -PackageRoot ./artifacts/runtime-split-nupkg `
+            -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" `
+            -ApiKeyEnvironmentVariable GITHUB_PACKAGES_TOKEN `
+            -TimeoutSeconds 3600 `
+            -MaxAttempts 3 `
+            -RetryDelaySeconds 30 `
+            -Recurse `
             -SortMode size-ascending

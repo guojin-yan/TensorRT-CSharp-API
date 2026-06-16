@@ -270,6 +270,49 @@ function Invoke-ReadLink {
   return [string]$resolved
 }
 
+function Ensure-CudaCrtCompatibility {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$CudaRoot
+  )
+
+  $includeCandidates = @(
+    (Join-Path $CudaRoot "include"),
+    (Join-Path $CudaRoot "targets/x86_64-linux/include"),
+    (Join-Path $CudaRoot "targets/aarch64-linux/include")
+  )
+
+  $sourceHeader = $null
+  foreach ($includeRoot in $includeCandidates) {
+    foreach ($relativePath in @("crt/host_defines.h", "host_defines.h")) {
+      $candidate = Join-Path $includeRoot $relativePath
+      if (Test-Path -LiteralPath $candidate -PathType Leaf) {
+        $sourceHeader = (Resolve-Path -LiteralPath $candidate).Path
+        break
+      }
+    }
+
+    if ($sourceHeader) {
+      break
+    }
+  }
+
+  if (-not $sourceHeader) {
+    Write-Warning "CUDA host compiler header host_defines.h was not found under '$CudaRoot'."
+    return $null
+  }
+
+  $compatDirectory = Join-Path $CudaRoot "include/crt"
+  $compatHeader = Join-Path $compatDirectory "host_defines.h"
+  if (-not (Test-Path -LiteralPath $compatHeader -PathType Leaf)) {
+    Invoke-CheckedNativeCommand -FilePath "sudo" -ArgumentList @("mkdir", "-p", $compatDirectory)
+    Invoke-CheckedNativeCommand -FilePath "sudo" -ArgumentList @("ln", "-sf", $sourceHeader, $compatHeader)
+    Write-Host "Created CUDA CRT compatibility header link: $compatHeader -> $sourceHeader"
+  }
+
+  return $sourceHeader
+}
+
 function Reset-Directory {
   param(
     [Parameter(Mandatory = $true)]
@@ -400,6 +443,8 @@ if (-not $systemCudnnRoot) {
   throw "cuDNN root was not found after preparing Linux NVIDIA dependencies."
 }
 
+$cudaCrtCompatibilityHeader = Ensure-CudaCrtCompatibility -CudaRoot $cudaRoot
+
 $stagingRoot = Join-Path $RepositoryRoot "artifacts/linux-nvidia-root/$RuntimePackageKey"
 $tensorRtRoot = Join-Path $stagingRoot "tensorrt"
 $cudnnRoot = Join-Path $stagingRoot "cudnn"
@@ -470,6 +515,7 @@ $summaryPath = Join-Path $summaryRoot "linux-nvidia-dependencies.json"
   aptPackages = $dependencyPlan.aptPackages
   tensorRtRoot = $tensorRtRoot
   cudaRoot = $cudaRoot
+  cudaCrtCompatibilityHeader = $cudaCrtCompatibilityHeader
   cudnnRoot = $cudnnRoot
   systemTensorRtRoot = $systemTensorRtRoot
   systemCudnnRoot = $systemCudnnRoot

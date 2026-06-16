@@ -312,6 +312,7 @@ jobs:
               -f "configuration=$RELEASE_CONFIGURATION" \
               -f "runtime_keys=$LINUX_RUNTIME_KEYS" \
               -f "runner_mode=$LINUX_RUNNER_MODE" \
+              -f "runtime_delivery_mode=split" \
               -f "run_smoke=$RUN_LINUX_SMOKE" \
               -f "publish_to_github_packages=$PUBLISH_RUNTIME_TO_GITHUB_PACKAGES" \
               -f "release_tag=$RELEASE_TAG" \
