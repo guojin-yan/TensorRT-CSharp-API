@@ -363,6 +363,7 @@ $nugetConfigPath = $null
 try {
   $pushSource = $Source
   $usingLocalApiKeyFallback = $false
+  $localApiKey = $null
 
   if ($hasSourceCredentials) {
     $nugetConfigPath = Join-Path ([IO.Path]::GetTempPath()) ("jyppx-nuget-{0}.config" -f [Guid]::NewGuid().ToString("N"))
@@ -373,6 +374,7 @@ try {
   elseif (-not $hasApiKey) {
     $localApiKeyEntries = @(Get-LocalNuGetApiKeyEntries -Source $Source)
     if ($localApiKeyEntries.Count -gt 0) {
+      $localApiKey = [string]$localApiKeyEntries[0].Value
       if ($Source -match "nuget\.org") {
         $pushSource = "nuget.org"
       }
@@ -396,7 +398,7 @@ try {
       $clientName = if ($useNuGetExe) { "nuget.exe" } else { "dotnet" }
       Write-Host ("Pushing package attempt {0}/{1}: {2} ({3} MB) Client={4} ApiKey={5} SourceCredentials={6} LocalConfigApiKey={7} DisableBuffering={8}" -f $attempt, $MaxAttempts, $package.FullName, $packageSizeMb, $clientName, $hasApiKey, $hasSourceCredentials, $usingLocalApiKeyFallback, $disableBuffering)
 
-      $effectiveApiKey = if ($hasSourceCredentials) { $PushApiKey } else { $ApiKey }
+      $effectiveApiKey = if ($hasSourceCredentials) { $PushApiKey } elseif ($usingLocalApiKeyFallback) { $localApiKey } else { $ApiKey }
       if ($useNuGetExe) {
         $nugetExePath = Resolve-NuGetExePath
         $arguments = @(
