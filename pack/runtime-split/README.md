@@ -50,8 +50,8 @@ powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalSplitRuntimePackage.p
   -SplitPackageRole cuda-cudnn,tensorrt
 
 # Native bridge refresh that publishes a new collection package but reuses stable dependency packages.
-gh release download v4.0.6142 `
-  --pattern "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.*.4.0.6142.nupkg" `
+gh release download v4.0.6156 `
+  --pattern "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.*.4.0.6156.nupkg" `
   --dir .\artifacts\stable-runtime-package-source\win-x64-trt11.0-cuda12.9-cudnn9.22 `
   --repo guojin-yan/TensorRT-CSharp-API
 
@@ -59,8 +59,8 @@ powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalSplitRuntimePackage.p
   -SourceRuntimeKey win-x64-trt11.0-cuda12.9-cudnn9.22 `
   -Version 4.0.1 `
   -SplitPackageRole bridge,collection `
-  -CudaCudnnPackageVersion 4.0.6142 `
-  -TensorRtPackageVersion 4.0.6142 `
+  -CudaCudnnPackageVersion 4.0.6156 `
+  -TensorRtPackageVersion 4.0.6156 `
   -AdditionalPackageSource .\artifacts\stable-runtime-package-source\win-x64-trt11.0-cuda12.9-cudnn9.22
 ```
 

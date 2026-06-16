@@ -169,10 +169,10 @@ gh workflow run release-bundle.yml `
   -f windows_runtime_keys=win-x64-trt11.0-cuda12.9-cudnn9.22 `
   -f windows_runtime_delivery_mode=split `
   -f windows_split_package_roles=bridge,collection `
-  -f windows_cuda_cudnn_package_version=4.0.6142 `
-  -f windows_cuda_cudnn_package_release_tag=v4.0.6142 `
-  -f windows_tensorrt_package_version=4.0.6142 `
-  -f windows_tensorrt_package_release_tag=v4.0.6142 `
+  -f windows_cuda_cudnn_package_version=4.0.6156 `
+  -f windows_cuda_cudnn_package_release_tag=v4.0.6156 `
+  -f windows_tensorrt_package_version=4.0.6156 `
+  -f windows_tensorrt_package_release_tag=v4.0.6156 `
   -f publish_managed_to_github_packages=true `
   -f publish_runtime_to_github_packages=false `
   -f attach_runtime_to_github_release=true
@@ -189,8 +189,8 @@ powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalReleaseBundle.ps1 `
 Local bridge and collection runtime example:
 
 ```powershell
-gh release download v4.0.6142 `
-  --pattern "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.*.4.0.6142.nupkg" `
+gh release download v4.0.6156 `
+  --pattern "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.*.4.0.6156.nupkg" `
   --dir .\artifacts\stable-runtime-package-source\win-x64-trt11.0-cuda12.9-cudnn9.22 `
   --repo guojin-yan/TensorRT-CSharp-API
 
@@ -200,8 +200,8 @@ powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalReleaseBundle.ps1 `
   -WindowsRuntimeKeys win-x64-trt11.0-cuda12.9-cudnn9.22 `
   -WindowsRuntimeDeliveryMode split `
   -WindowsSplitPackageRoles bridge,collection `
-  -WindowsCudaCudnnPackageVersion 4.0.6142 `
-  -WindowsTensorRtPackageVersion 4.0.6142 `
+  -WindowsCudaCudnnPackageVersion 4.0.6156 `
+  -WindowsTensorRtPackageVersion 4.0.6156 `
   -WindowsAdditionalPackageSource .\artifacts\stable-runtime-package-source\win-x64-trt11.0-cuda12.9-cudnn9.22
 ```
 

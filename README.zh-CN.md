@@ -145,7 +145,7 @@ gh workflow run release-bundle.yml `
   -f run_windows_runtime_packaging=true `
   -f windows_runtime_keys=win-x64-trt11.0-cuda12.9-cudnn9.22 `
   -f windows_runtime_delivery_mode=split `
-  -f windows_split_package_roles=vendor `
+  -f windows_split_package_roles=cuda-cudnn,tensorrt `
   -f publish_runtime_to_github_packages=true `
   -f attach_runtime_to_github_release=true
 ```
@@ -161,8 +161,10 @@ gh workflow run release-bundle.yml `
   -f windows_runtime_keys=win-x64-trt11.0-cuda12.9-cudnn9.22 `
   -f windows_runtime_delivery_mode=split `
   -f windows_split_package_roles=bridge,collection `
-  -f windows_vendor_package_version=4.0.6142 `
-  -f windows_vendor_package_release_tag=v4.0.6142 `
+  -f windows_cuda_cudnn_package_version=4.0.6156 `
+  -f windows_cuda_cudnn_package_release_tag=v4.0.6156 `
+  -f windows_tensorrt_package_version=4.0.6156 `
+  -f windows_tensorrt_package_release_tag=v4.0.6156 `
   -f publish_managed_to_github_packages=true `
   -f publish_runtime_to_github_packages=false `
   -f attach_runtime_to_github_release=true
@@ -179,9 +181,9 @@ powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalReleaseBundle.ps1 `
 本地刷新 bridge 和 collection 示例：
 
 ```powershell
-gh release download v4.0.6142 `
-  --pattern "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.*.4.0.6142.nupkg" `
-  --dir .\artifacts\vendor-package-source\win-x64-trt11.0-cuda12.9-cudnn9.22 `
+gh release download v4.0.6156 `
+  --pattern "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.*.4.0.6156.nupkg" `
+  --dir .\artifacts\stable-runtime-package-source\win-x64-trt11.0-cuda12.9-cudnn9.22 `
   --repo guojin-yan/TensorRT-CSharp-API
 
 powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalReleaseBundle.ps1 `
@@ -190,8 +192,9 @@ powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalReleaseBundle.ps1 `
   -WindowsRuntimeKeys win-x64-trt11.0-cuda12.9-cudnn9.22 `
   -WindowsRuntimeDeliveryMode split `
   -WindowsSplitPackageRoles bridge,collection `
-  -WindowsVendorPackageVersion 4.0.6142 `
-  -WindowsAdditionalPackageSource .\artifacts\vendor-package-source\win-x64-trt11.0-cuda12.9-cudnn9.22
+  -WindowsCudaCudnnPackageVersion 4.0.6156 `
+  -WindowsTensorRtPackageVersion 4.0.6156 `
+  -WindowsAdditionalPackageSource .\artifacts\stable-runtime-package-source\win-x64-trt11.0-cuda12.9-cudnn9.22
 ```
 
 `release-bundle.yml` 默认不再触发 runtime 打包。需要 runtime 时显式设置 `run_windows_runtime_packaging=true` 或 `run_linux_runtime_packaging=true`；如果启用 Linux runtime 但 `linux_runtime_keys` 为空，Linux 模块会干净 no-op。
