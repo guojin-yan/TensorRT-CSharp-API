@@ -127,7 +127,7 @@ if ($oversizedAssets.Count -gt 0) {
   throw "One or more assets exceed MaxPackageBytes '$MaxPackageBytes': $($details -join ', ')"
 }
 
-$downloadRoot = Join-Path ([IO.Path]::GetTempPath()) ("jyppx-release-package-assets-{0}" -f [Guid]::NewGuid().ToString("N"))
+$downloadRoot = [IO.Path]::Combine([IO.Path]::GetTempPath(), ("jyppx-release-package-assets-{0}" -f [Guid]::NewGuid().ToString("N")))
 New-Item -ItemType Directory -Path $downloadRoot -Force | Out-Null
 
 $published = New-Object System.Collections.Generic.List[object]
@@ -139,7 +139,7 @@ try {
     }
 
     $assetSize = [long]$asset.size
-    $packagePath = Join-Path $downloadRoot $assetName
+    $packagePath = Join-Path -Path $downloadRoot -ChildPath $assetName
 
     for ($attempt = 1; $attempt -le $DownloadAttempts; $attempt++) {
       if (Test-Path -LiteralPath $packagePath -PathType Leaf) {
