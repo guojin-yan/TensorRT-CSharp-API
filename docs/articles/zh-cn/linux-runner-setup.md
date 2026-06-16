@@ -2,12 +2,19 @@
 
 ## 目标
 
-当前 Linux runtime 打包已经具备结构和工作流骨架，但默认假设会在 self-hosted Linux x64 runner 上执行。
+当前 Linux runtime 打包已经具备 hosted 与 self-hosted 两条执行路径。默认发布线优先使用 GitHub-hosted Ubuntu 22.04 x64 runner，其他发行版和架构需要显式选择 runtime key。
+
+## Linux 发布矩阵边界
+
+- Ubuntu 22.04 x64 是当前默认发布主线，`runtime-linux.yml` 默认会打包该发行版下的 6 个 TensorRT / CUDA / cuDNN 组合。
+- Ubuntu 24.04 x64 可以在 hosted runner 上发布，但 NVIDIA apt 仓库不覆盖旧的 TensorRT 8.6 / CUDA 11.8 / CUDA 12.0 线，因此只保留 TensorRT 10.11 / 11.0 的新组合。
+- Ubuntu 20.04 x64 已从 GitHub-hosted runner 下线，manifest 中保留对应 runtime key，但必须用 self-hosted runner 或手动准备的官方 NVIDIA 根目录发布。
+- ARM64 / Jetson / L4T 不建议混入通用 `linux-x64` 包线。它们需要单独的 runtime key、RID、runner label、NVIDIA repo architecture 和 L4T 依赖策略，后续应作为独立发布线维护。
 
 ## Runner 基本要求
 
-- Linux x64 主机
-- self-hosted runner 标签：`self-hosted`、`linux`、`x64`
+- Linux x64 主机；Ubuntu 22.04 / 24.04 可使用 GitHub-hosted runner，Ubuntu 20.04 需要 self-hosted runner
+- self-hosted runner 标签建议包含：`self-hosted`、`linux`、`x64`，以及目标发行版标签，例如 `ubuntu-20.04`
 - .NET 10 SDK
 - `pwsh`
 - CMake
@@ -15,26 +22,17 @@
 - 从 NVIDIA 官方渠道下载并解压的对应版本 TensorRT Linux 包
 - 从 NVIDIA 官方渠道下载并安装/解压的对应版本 cuDNN Linux 包
 
-不要把 CUDA / cuDNN / TensorRT 二进制提交到 Git。当前 workflow 不在 CI 中自动登录 NVIDIA 或自动下载安装包，而是读取 self-hosted runner 上已经准备好的官方库目录。
-
-## Runner 可用性检查 token
-
-`runtime-linux.yml` 会在执行昂贵的 build job 前，先检查仓库里是否存在在线的 Linux x64 self-hosted runner。某些仓库配置下，默认 `GITHUB_TOKEN` 不能调用 repository runner-list API。如果 prepare job 报 `Resource not accessible by integration`，请创建仓库 secret：`LINUX_RUNNER_STATUS_TOKEN`，并授予 Actions runner read access。
-
-这个 token 只用于 prepare 阶段的 runner 可用性检查，不会下载 NVIDIA 文件，也不会替代 self-hosted Linux runner 要求。
+不要把 CUDA / cuDNN / TensorRT 二进制提交到 Git。hosted Linux 路径只通过 NVIDIA 官方 apt 仓库安装可公开获取的运行库和开发头；self-hosted 路径则读取 runner 上已经准备好的官方库目录。
 
 ## `runtime-linux.yml` 需要的输入
 
 - `version`
 - `runtime_keys`：逗号分隔的 Linux runtime key
+- `runner_mode`：默认 `hosted`；发布 Ubuntu 20.04 或手动根目录时使用 `self-hosted`
 - `run_smoke`：只有 runner 有可用 NVIDIA GPU、驱动和匹配 runtime 时才打开
 - `publish_to_github_packages`：默认关闭，Linux runtime 大包通常保留为 GitHub Release assets
 - `release_tag`
 - `attach_to_github_release`
-
-可选 secret：
-
-- `LINUX_RUNNER_STATUS_TOKEN`：用于 Linux runner 可用性检查的 Actions runner read access token
 
 ## 根目录示例
 
@@ -88,14 +86,19 @@ root 解析顺序：
 当前 workflow 侧消费顺序：
 
 1. `Validate-RuntimeManifest`
-2. `Validate-LinuxRuntimeInputs`
-3. `Invoke-LinuxRuntimeDryRun`
-4. `Validate-LinuxDryRunArtifacts`
-5. `Test-LinuxRuntimeWorkflowContract`
-6. `Export-LinuxPreflightSummary`
-7. `Collect-RuntimeAssets`
-8. `dotnet pack`
-9. `Test-RuntimePublishReadiness`
+2. `Prepare-LinuxNvidiaDependencies`，hosted runner 会从 NVIDIA 官方 apt 仓库准备 CUDA / cuDNN / TensorRT
+3. `Validate-LinuxRuntimeInputs`
+4. `cmake --preset`
+5. `cmake --build --preset`
+6. `Invoke-LinuxRuntimeDryRun`
+7. `Validate-LinuxDryRunArtifacts`
+8. `Test-LinuxRuntimeWorkflowContract`
+9. `Export-LinuxPreflightSummary`
+10. `Export-LinuxPackageConsumerPlan`
+11. `Export-LinuxRunnerExecutionStatus`
+12. `Collect-RuntimeAssets`
+13. split runtime pack
+14. GitHub Release asset upload
 
 这三个文件分别用于：
 
@@ -113,7 +116,7 @@ root 解析顺序：
 
 ## 当前状态
 
-仓库中已经补齐 Linux package manifest 与 Linux pack workflow，但在这台 Windows 工作站上还没有完成真实 Linux 打包验证。
+仓库中已经补齐 Linux package manifest 与 Linux pack workflow。Ubuntu 22.04 hosted 路径作为默认远程打包验证线；Ubuntu 20.04 / ARM64 / Jetson 仍需要单独 runner 和依赖策略后再发布。
 
 ## 优先检查的失败场景
 

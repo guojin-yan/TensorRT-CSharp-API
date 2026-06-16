@@ -186,18 +186,26 @@ $results.Add([pscustomobject]@{
   })
 $results.Add([pscustomobject]@{
     workflow = "eng\Prepare-LinuxNvidiaDependencies.ps1"
-    requirement = "CUDA host compiler headers are installed"
+    requirement = "Modern CUDA host compiler headers use cuda-crt"
     status = if ($linuxDependencyPlan.aptPackages -contains "cuda-crt-12-9") { "passed" } else { "failed" }
     detail = "cuda-crt-12-9"
+  })
+$modernCuda132PlanJson = (pwsh -NoProfile -File (Join-Path $RepositoryRoot "eng\Prepare-LinuxNvidiaDependencies.ps1") -RuntimePackageKey "linux-x64-ubuntu22.04-trt11.0-cuda13.2-cudnn9.22" -DescribeDependencyPlan | Out-String).Trim()
+$modernCuda132Plan = $modernCuda132PlanJson | ConvertFrom-Json
+$results.Add([pscustomobject]@{
+    workflow = "eng\Prepare-LinuxNvidiaDependencies.ps1"
+    requirement = "CUDA 13.2 host compiler headers use cuda-crt"
+    status = if ($modernCuda132Plan.aptPackages -contains "cuda-crt-13-2") { "passed" } else { "failed" }
+    detail = "cuda-crt-13-2"
   })
 
 $legacyCudaDependencyPlanJson = (pwsh -NoProfile -File (Join-Path $RepositoryRoot "eng\Prepare-LinuxNvidiaDependencies.ps1") -RuntimePackageKey "linux-x64-ubuntu22.04-trt8.6-cuda11.8-cudnn8.9" -DescribeDependencyPlan | Out-String).Trim()
 $legacyCudaDependencyPlan = $legacyCudaDependencyPlanJson | ConvertFrom-Json
 $results.Add([pscustomobject]@{
     workflow = "eng\Prepare-LinuxNvidiaDependencies.ps1"
-    requirement = "Legacy CUDA 11.8 dependency plan omits unavailable CUDA CRT package"
-    status = if ($legacyCudaDependencyPlan.aptPackages -notcontains "cuda-crt-11-8") { "passed" } else { "failed" }
-    detail = "cuda-crt-11-8"
+    requirement = "Legacy CUDA 11.8 host compiler headers use cuda-nvcc"
+    status = if (($legacyCudaDependencyPlan.aptPackages -contains "cuda-nvcc-11-8") -and ($legacyCudaDependencyPlan.aptPackages -notcontains "cuda-crt-11-8")) { "passed" } else { "failed" }
+    detail = "cuda-nvcc-11-8"
   })
 $results.Add([pscustomobject]@{
     workflow = "eng\Prepare-LinuxNvidiaDependencies.ps1"
@@ -210,9 +218,9 @@ $cuda121DependencyPlanJson = (pwsh -NoProfile -File (Join-Path $RepositoryRoot "
 $cuda121DependencyPlan = $cuda121DependencyPlanJson | ConvertFrom-Json
 $results.Add([pscustomobject]@{
     workflow = "eng\Prepare-LinuxNvidiaDependencies.ps1"
-    requirement = "CUDA 12.1 dependency plan omits unavailable CUDA CRT package"
-    status = if ($cuda121DependencyPlan.aptPackages -notcontains "cuda-crt-12-1") { "passed" } else { "failed" }
-    detail = "cuda-crt-12-1"
+    requirement = "CUDA 12.1 host compiler headers use cuda-nvcc"
+    status = if (($cuda121DependencyPlan.aptPackages -contains "cuda-nvcc-12-1") -and ($cuda121DependencyPlan.aptPackages -notcontains "cuda-crt-12-1")) { "passed" } else { "failed" }
+    detail = "cuda-nvcc-12-1"
   })
 
 $legacyTensorRt10PlanJson = (pwsh -NoProfile -File (Join-Path $RepositoryRoot "eng\Prepare-LinuxNvidiaDependencies.ps1") -RuntimePackageKey "linux-x64-ubuntu22.04-trt10.11-cuda12.9-cudnn9.22" -DescribeDependencyPlan | Out-String).Trim()

@@ -99,6 +99,19 @@ function Test-CudaCrtPackageIsAvailable {
   return $parsed -ge [System.Version]::new(12, 9)
 }
 
+function Get-CudaHostCompilerPackageName {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$CudaPackageVersion
+  )
+
+  if (Test-CudaCrtPackageIsAvailable -CudaPackageVersion $CudaPackageVersion) {
+    return "cuda-crt"
+  }
+
+  return "cuda-nvcc"
+}
+
 function Test-TensorRtSafeHeadersPackageIsAvailable {
   param(
     [Parameter(Mandatory = $true)]
@@ -177,9 +190,7 @@ function Get-LinuxDependencyPlan {
 
   $aptPackages = New-Object System.Collections.Generic.List[string]
   $aptPackages.Add("cuda-cudart-dev-$cudaMinor")
-  if (Test-CudaCrtPackageIsAvailable -CudaPackageVersion $cudaPackageVersion) {
-    $aptPackages.Add("cuda-crt-$cudaMinor")
-  }
+  $aptPackages.Add("$(Get-CudaHostCompilerPackageName -CudaPackageVersion $cudaPackageVersion)-$cudaMinor")
 
   foreach ($name in @($runtimeTensorRtPackages + $devTensorRtPackages)) {
     $aptPackages.Add($name + (New-AptVersionPin -Version $tensorRtDebVersion))
@@ -284,21 +295,15 @@ function Ensure-CudaCrtCompatibility {
 
   $sourceHeader = $null
   foreach ($includeRoot in $includeCandidates) {
-    foreach ($relativePath in @("crt/host_defines.h", "host_defines.h")) {
-      $candidate = Join-Path $includeRoot $relativePath
-      if (Test-Path -LiteralPath $candidate -PathType Leaf) {
-        $sourceHeader = (Resolve-Path -LiteralPath $candidate).Path
-        break
-      }
-    }
-
-    if ($sourceHeader) {
+    $candidate = Join-Path $includeRoot "crt/host_defines.h"
+    if (Test-Path -LiteralPath $candidate -PathType Leaf) {
+      $sourceHeader = (Resolve-Path -LiteralPath $candidate).Path
       break
     }
   }
 
   if (-not $sourceHeader) {
-    Write-Warning "CUDA host compiler header host_defines.h was not found under '$CudaRoot'."
+    Write-Warning "CUDA CRT header crt/host_defines.h was not found under '$CudaRoot'."
     return $null
   }
 

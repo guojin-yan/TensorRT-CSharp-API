@@ -72,11 +72,9 @@ function Find-CudaHostDefinesHeader {
   )
 
   foreach ($includeRoot in $includeCandidates) {
-    foreach ($relativePath in @("crt\host_defines.h", "host_defines.h")) {
-      $candidate = Join-Path $includeRoot $relativePath
-      if (Test-Path -LiteralPath $candidate -PathType Leaf) {
-        return (Resolve-Path -LiteralPath $candidate).Path
-      }
+    $candidate = Join-Path $includeRoot "crt\host_defines.h"
+    if (Test-Path -LiteralPath $candidate -PathType Leaf) {
+      return (Resolve-Path -LiteralPath $candidate).Path
     }
   }
 
@@ -91,7 +89,7 @@ if (-not [string]::IsNullOrWhiteSpace($CudnnRoot)) {
 
 $cudaHostDefinesHeader = Find-CudaHostDefinesHeader -Root $CudaRoot
 if (-not $cudaHostDefinesHeader) {
-  throw "CUDA host compiler headers were not found for '$RuntimePackageKey'. Expected host_defines.h or crt/host_defines.h under '$CudaRoot'."
+  throw "CUDA host compiler headers were not found for '$RuntimePackageKey'. Expected crt/host_defines.h under '$CudaRoot'."
 }
 
 Write-Host "Linux runtime input validation passed for $RuntimePackageKey"

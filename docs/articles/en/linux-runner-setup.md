@@ -2,12 +2,19 @@
 
 ## Purpose
 
-Linux runtime packaging is currently prepared structurally, but it is expected to run on a self-hosted Linux x64 runner.
+Linux runtime packaging now supports both GitHub-hosted and self-hosted execution paths. The default release line uses GitHub-hosted Ubuntu 22.04 x64 runners; other distributions and architectures must be selected through explicit runtime keys.
+
+## Linux Matrix Boundaries
+
+- Ubuntu 22.04 x64 is the default release line. `runtime-linux.yml` builds the six configured TensorRT / CUDA / cuDNN combinations for this distribution by default.
+- Ubuntu 24.04 x64 can run on GitHub-hosted runners, but NVIDIA apt repositories do not cover the older TensorRT 8.6 / CUDA 11.8 / CUDA 12.0 lines there. Keep Ubuntu 24.04 to the newer TensorRT 10.11 / 11.0 combinations.
+- Ubuntu 20.04 x64 is no longer available as a GitHub-hosted runner. The manifest keeps those runtime keys, but publishing them requires a self-hosted runner or explicitly prepared official NVIDIA roots.
+- ARM64 / Jetson / L4T should not be mixed into the generic `linux-x64` package line. They need separate runtime keys, RIDs, runner labels, NVIDIA repo architecture, and L4T dependency handling.
 
 ## Required runner capabilities
 
-- Linux x64 host
-- self-hosted runner labels: `self-hosted`, `linux`, `x64`
+- Linux x64 host; Ubuntu 22.04 / 24.04 can use GitHub-hosted runners, while Ubuntu 20.04 requires self-hosted execution
+- recommended self-hosted runner labels: `self-hosted`, `linux`, `x64`, plus the target distribution label such as `ubuntu-20.04`
 - .NET 10 SDK
 - `pwsh`
 - CMake
@@ -15,13 +22,7 @@ Linux runtime packaging is currently prepared structurally, but it is expected t
 - matching TensorRT Linux package downloaded from NVIDIA and unpacked
 - matching cuDNN Linux package downloaded from NVIDIA and installed or unpacked
 
-Do not commit CUDA, cuDNN, or TensorRT binaries to Git. The current workflow does not log in to NVIDIA or download vendor packages during CI. It reads the official package roots that were already prepared on the self-hosted runner.
-
-## Runner availability token
-
-`runtime-linux.yml` checks whether an online Linux x64 self-hosted runner exists before dispatching the expensive build jobs. GitHub's default `GITHUB_TOKEN` may not be allowed to call the repository runner-list API in every repository configuration. If the prepare job fails with `Resource not accessible by integration`, create a repository secret named `LINUX_RUNNER_STATUS_TOKEN` with Actions runner read access.
-
-This token is only used by the prepare-stage availability check. It does not download NVIDIA files and does not replace the self-hosted Linux runner requirement.
+Do not commit CUDA, cuDNN, or TensorRT binaries to Git. The hosted Linux path installs publicly available runtime libraries and development headers from NVIDIA's official apt repositories; the self-hosted path reads already prepared official package roots from the runner.
 
 ## Expected workflow inputs
 
@@ -29,14 +30,11 @@ For `runtime-linux.yml`, provide:
 
 - `version`
 - `runtime_keys`: comma-separated Linux runtime keys
+- `runner_mode`: defaults to `hosted`; use `self-hosted` for Ubuntu 20.04 or manually prepared roots
 - `run_smoke`: enable only when the runner has a compatible NVIDIA GPU, driver, and runtime stack
 - `publish_to_github_packages`: defaults to false because large Linux runtime packages should normally stay as GitHub Release assets
 - `release_tag`
 - `attach_to_github_release`
-
-Optional secret:
-
-- `LINUX_RUNNER_STATUS_TOKEN`: token with Actions runner read access for the Linux runner availability check
 
 ## Expected root examples
 
@@ -98,18 +96,19 @@ Supporting validation script:
 Current workflow consumption order:
 
 1. `Validate-RuntimeManifest`
-2. `Validate-LinuxRuntimeInputs`
-3. `Invoke-LinuxRuntimeDryRun`
-4. `Validate-LinuxDryRunArtifacts`
-5. `Test-LinuxRuntimeWorkflowContract`
-6. `Export-LinuxPreflightSummary`
-7. `Export-LinuxPackageConsumerPlan`
-8. `Export-LinuxRunnerExecutionStatus`
-9. `Collect-RuntimeAssets`
-10. `dotnet pack` for the managed package
-11. `dotnet pack` for the selected Linux runtime package
-12. `Test-PackageConsumer` without smoke
-13. `Test-RuntimePublishReadiness`
+2. `Prepare-LinuxNvidiaDependencies`, which installs CUDA / cuDNN / TensorRT from NVIDIA official apt repositories on hosted runners
+3. `Validate-LinuxRuntimeInputs`
+4. `cmake --preset`
+5. `cmake --build --preset`
+6. `Invoke-LinuxRuntimeDryRun`
+7. `Validate-LinuxDryRunArtifacts`
+8. `Test-LinuxRuntimeWorkflowContract`
+9. `Export-LinuxPreflightSummary`
+10. `Export-LinuxPackageConsumerPlan`
+11. `Export-LinuxRunnerExecutionStatus`
+12. `Collect-RuntimeAssets`
+13. split runtime pack
+14. GitHub Release asset upload
 
 Those files serve different audiences:
 
@@ -143,7 +142,7 @@ Linux packages cannot move from `dry-run-only` to `local-validated` until this n
 
 ## Current status
 
-The repository now includes Linux package manifest entries and Linux pack workflows, but they are not yet validated on this Windows workstation.
+The repository now includes Linux package manifest entries and Linux pack workflows. Ubuntu 22.04 hosted runners are the default remote packaging validation line; Ubuntu 20.04, ARM64, and Jetson still need dedicated runner and dependency strategies before publishing.
 
 ## Common failure cases to check first
 
