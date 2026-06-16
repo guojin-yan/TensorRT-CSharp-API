@@ -172,6 +172,12 @@ $results.Add([pscustomobject]@{
     status = if ($missingPinnedTensorRtPackages.Count -eq 0) { "passed" } else { "failed" }
     detail = if ($missingPinnedTensorRtPackages.Count -eq 0) { "linux-x64-trt11.0-cuda12.9-cudnn9.22" } else { $missingPinnedTensorRtPackages -join ", " }
   })
+$results.Add([pscustomobject]@{
+    workflow = "eng\Prepare-LinuxNvidiaDependencies.ps1"
+    requirement = "CUDA host compiler headers are installed"
+    status = if ($linuxDependencyPlan.aptPackages -contains "cuda-crt-12-9") { "passed" } else { "failed" }
+    detail = "cuda-crt-12-9"
+  })
 
 $outputRoot = Join-Path $RepositoryRoot "artifacts\workflow-contracts"
 New-Item -ItemType Directory -Path $outputRoot -Force | Out-Null

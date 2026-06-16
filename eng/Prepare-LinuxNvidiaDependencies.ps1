@@ -110,6 +110,7 @@ function Get-LinuxDependencyPlan {
 
   $aptPackages = New-Object System.Collections.Generic.List[string]
   $aptPackages.Add("cuda-cudart-dev-$cudaMinor")
+  $aptPackages.Add("cuda-crt-$cudaMinor")
   foreach ($name in @($runtimeTensorRtPackages + $devTensorRtPackages)) {
     $aptPackages.Add($name + (New-AptVersionPin -Version $tensorRtDebVersion))
   }
