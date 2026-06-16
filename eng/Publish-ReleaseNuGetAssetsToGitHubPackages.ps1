@@ -3,7 +3,7 @@ param(
   [Parameter(Mandatory = $true)]
   [string]$ReleaseTag,
   [string]$Repository,
-  [string[]]$AssetPattern = @("*.nupkg"),
+  [string[]]$AssetPattern = @(),
   [string[]]$AssetName = @(),
   [string]$PackageSource,
   [string]$PackageTokenEnvironmentVariable = "GITHUB_PACKAGES_TOKEN",

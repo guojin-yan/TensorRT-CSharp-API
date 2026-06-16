@@ -10,7 +10,12 @@ on:
       asset_patterns:
         description: Comma/newline separated release asset patterns
         required: false
-        default: "*.nupkg"
+        default: ""
+        type: string
+      asset_names:
+        description: Comma/newline separated exact release asset names
+        required: false
+        default: ""
         type: string
       package_source:
         description: Optional NuGet package source; defaults to this owner's GitHub Packages feed
@@ -50,12 +55,41 @@ jobs:
             '-File', './eng/Publish-ReleaseNuGetAssetsToGitHubPackages.ps1',
             '-ReleaseTag', '${{ inputs.release_tag }}',
             '-Repository', '${{ github.repository }}',
-            '-AssetPattern', '${{ inputs.asset_patterns }}',
             '-MaxPackageBytes', '${{ inputs.max_package_bytes }}'
           )
 
+          if (-not [string]::IsNullOrWhiteSpace('${{ inputs.asset_patterns }}')) {
+            $arguments += @('-AssetPattern', '${{ inputs.asset_patterns }}')
+          }
+
+          if (-not [string]::IsNullOrWhiteSpace('${{ inputs.asset_names }}')) {
+            $arguments += @('-AssetName', '${{ inputs.asset_names }}')
+          }
+
           if (-not [string]::IsNullOrWhiteSpace('${{ inputs.package_source }}')) {
             $arguments += @('-PackageSource', '${{ inputs.package_source }}')
+          }
+
+          pwsh @arguments
+
+      - name: Audit GitHub Packages coverage
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $arguments = @(
+            '-NoProfile',
+            '-File', './eng/Test-GitHubPackagesCoverage.ps1',
+            '-ReleaseTag', '${{ inputs.release_tag }}',
+            '-Repository', '${{ github.repository }}'
+          )
+
+          if (-not [string]::IsNullOrWhiteSpace('${{ inputs.asset_patterns }}')) {
+            $arguments += @('-AssetPattern', '${{ inputs.asset_patterns }}')
+          }
+
+          if (-not [string]::IsNullOrWhiteSpace('${{ inputs.asset_names }}')) {
+            $arguments += @('-AssetName', '${{ inputs.asset_names }}')
           }
 
           pwsh @arguments

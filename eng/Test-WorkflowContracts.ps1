@@ -172,8 +172,10 @@ $workflowContracts = @(
     requirements = @(
       New-Requirement -Needle "workflow_dispatch" -Description "manual trigger"
       New-Requirement -Needle "Publish-ReleaseNuGetAssetsToGitHubPackages.ps1" -Description "release asset publication script"
+      New-Requirement -Needle "Test-GitHubPackagesCoverage.ps1" -Description "post-publish GitHub Packages coverage audit"
       New-Requirement -Needle "packages: write" -Description "GitHub Packages write permission"
       New-Requirement -Needle "asset_patterns" -Description "release asset pattern input"
+      New-Requirement -Needle "asset_names" -Description "exact release asset names input"
     )
   }
   [pscustomobject]@{
@@ -183,6 +185,16 @@ $workflowContracts = @(
       New-Requirement -Needle "A selected release asset has an empty name" -Description "empty release asset guard"
       New-Requirement -Needle "Failed to publish release asset" -Description "NuGet push exit-code guard"
       New-Requirement -Needle 'Selected $(' -Description "selected asset count logging"
+    )
+  }
+  [pscustomobject]@{
+    path = "eng\Test-GitHubPackagesCoverage.ps1"
+    requirements = @(
+      New-Requirement -Needle '$PackageOwnerKind = "auto"' -Description "automatic user/org package owner detection"
+      New-Requirement -Needle "GitHub Packages coverage audit" -Description "coverage report generation"
+      New-Requirement -Needle "Missing package versions" -Description "missing package version reporting"
+      New-Requirement -Needle "versionExists" -Description "package version presence check"
+      New-Requirement -Needle "AssetName" -Description "exact asset name filtering"
     )
   }
 )
