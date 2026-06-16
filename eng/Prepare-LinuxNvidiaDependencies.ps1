@@ -4,7 +4,8 @@ param(
   [string]$RuntimePackageKey,
   [string]$RepositoryRoot,
   [switch]$DescribeDependencyPlan,
-  [switch]$SkipAptInstall
+  [switch]$SkipAptInstall,
+  [switch]$AllowDistroMismatch
 )
 
 if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
@@ -31,7 +32,7 @@ function Invoke-CheckedNativeCommand {
   }
 }
 
-function Resolve-LinuxDistributionId {
+function Get-LinuxOsRelease {
   $osReleasePath = "/etc/os-release"
   if (-not (Test-Path -LiteralPath $osReleasePath -PathType Leaf)) {
     throw "Unable to determine the Linux distribution because /etc/os-release was not found."
@@ -48,15 +49,30 @@ function Resolve-LinuxDistributionId {
     $values[$key] = $value
   }
 
-  if ($values["ID"] -ne "ubuntu") {
-    throw "Hosted Linux NVIDIA dependency preparation currently supports Ubuntu only. Detected ID='$($values["ID"])'."
+  return [pscustomobject]@{
+    id = [string]$values["ID"]
+    versionId = [string]$values["VERSION_ID"]
   }
+}
 
-  $version = [string]$values["VERSION_ID"]
-  switch ($version) {
-    "24.04" { return "ubuntu2404" }
-    "22.04" { return "ubuntu2204" }
-    default { throw "Unsupported Ubuntu version '$version'. Supported versions: 22.04, 24.04." }
+function Assert-LinuxDistributionMatchesPackage {
+  param(
+    [Parameter(Mandatory = $true)]
+    [object]$Package
+  )
+
+  $actual = Get-LinuxOsRelease
+  $expectedId = if ($Package.PSObject.Properties.Name.Contains("linuxDistro")) { [string]$Package.linuxDistro } else { "ubuntu" }
+  $expectedVersion = if ($Package.PSObject.Properties.Name.Contains("linuxDistroVersion")) { [string]$Package.linuxDistroVersion } else { "" }
+
+  if ($actual.id -ne $expectedId -or (-not [string]::IsNullOrWhiteSpace($expectedVersion) -and $actual.versionId -ne $expectedVersion)) {
+    $message = "Runtime package '$($Package.key)' targets $expectedId $expectedVersion but this runner is '$($actual.id) $($actual.versionId)'."
+    if ($AllowDistroMismatch.IsPresent) {
+      Write-Warning $message
+      return
+    }
+
+    throw "$message Use a matching runner or pass -AllowDistroMismatch only for a deliberate manual dependency-root workflow."
   }
 }
 
@@ -75,9 +91,23 @@ function Get-LinuxDependencyPlan {
     [object]$Package
   )
 
-  $cudaMinor = ([string]$Package.cudaVersion).Replace(".", "-")
+  $cudaPackageVersion = if ($Package.PSObject.Properties.Name.Contains("linuxCudaPackageVersion") -and -not [string]::IsNullOrWhiteSpace([string]$Package.linuxCudaPackageVersion)) {
+    [string]$Package.linuxCudaPackageVersion
+  }
+  else {
+    [string]$Package.cudaVersion
+  }
+
+  $tensorRtAptCudaVersion = if ($Package.PSObject.Properties.Name.Contains("tensorRtAptCudaVersion") -and -not [string]::IsNullOrWhiteSpace([string]$Package.tensorRtAptCudaVersion)) {
+    [string]$Package.tensorRtAptCudaVersion
+  }
+  else {
+    [string]$Package.cudaVersion
+  }
+
+  $cudaMinor = $cudaPackageVersion.Replace(".", "-")
   $tensorRtLine = [string]$Package.tensorRtLine
-  $tensorRtDebVersion = "$($Package.tensorRtVersion)-1+cuda$($Package.cudaVersion)"
+  $tensorRtDebVersion = "$($Package.tensorRtVersion)-1+cuda$tensorRtAptCudaVersion"
 
   $runtimeTensorRtPackages = @(
     "libnvinfer$tensorRtLine",
@@ -116,7 +146,12 @@ function Get-LinuxDependencyPlan {
   }
 
   if ([string]$Package.cudnnMajor -eq "9") {
-    $cudnnCudaLine = [string]$Package.cudaLine
+    $cudnnCudaLine = if ($Package.PSObject.Properties.Name.Contains("cudnnAptCudaVersion") -and -not [string]::IsNullOrWhiteSpace([string]$Package.cudnnAptCudaVersion)) {
+      (([string]$Package.cudnnAptCudaVersion) -split "\.")[0]
+    }
+    else {
+      [string]$Package.cudaLine
+    }
     $cudnnVersion = "$($Package.cudnnVersion).52-1"
     if ([string]$Package.cudnnVersion -eq "9.22.0") {
       $cudnnVersion = "9.22.0.52-1"
@@ -124,12 +159,26 @@ function Get-LinuxDependencyPlan {
 
     $aptPackages.Add("libcudnn9-cuda-$cudnnCudaLine" + (New-AptVersionPin -Version $cudnnVersion))
   }
+  elseif ([string]$Package.cudnnMajor -eq "8") {
+    $cudnnAptCudaVersion = if ($Package.PSObject.Properties.Name.Contains("cudnnAptCudaVersion") -and -not [string]::IsNullOrWhiteSpace([string]$Package.cudnnAptCudaVersion)) {
+      [string]$Package.cudnnAptCudaVersion
+    }
+    else {
+      [string]$Package.cudaVersion
+    }
+
+    $cudnnVersion = "$($Package.cudnnVersion)-1+cuda$cudnnAptCudaVersion"
+    $aptPackages.Add("libcudnn8" + (New-AptVersionPin -Version $cudnnVersion))
+    $aptPackages.Add("libcudnn8-dev" + (New-AptVersionPin -Version $cudnnVersion))
+  }
   else {
-    throw "Hosted Linux dependency preparation currently supports cuDNN 9 runtime packages. '$($Package.key)' requests cuDNN major '$($Package.cudnnMajor)'."
+    throw "Hosted Linux dependency preparation supports cuDNN 8 and 9 runtime packages. '$($Package.key)' requests cuDNN major '$($Package.cudnnMajor)'."
   }
 
   return [pscustomobject]@{
     cudaMinor = $cudaMinor
+    cudaPackageVersion = $cudaPackageVersion
+    tensorRtAptCudaVersion = $tensorRtAptCudaVersion
     tensorRtDebVersion = $tensorRtDebVersion
     aptPackages = @($aptPackages)
   }
@@ -138,11 +187,13 @@ function Get-LinuxDependencyPlan {
 function Add-NvidiaCudaRepository {
   param(
     [Parameter(Mandatory = $true)]
-    [string]$DistributionId
+    [string]$DistributionId,
+    [Parameter(Mandatory = $true)]
+    [string]$Architecture
   )
 
   $keyringDeb = "/tmp/cuda-keyring.deb"
-  $keyringUrl = "https://developer.download.nvidia.com/compute/cuda/repos/$DistributionId/x86_64/cuda-keyring_1.1-1_all.deb"
+  $keyringUrl = "https://developer.download.nvidia.com/compute/cuda/repos/$DistributionId/$Architecture/cuda-keyring_1.1-1_all.deb"
   Invoke-CheckedNativeCommand -FilePath "wget" -ArgumentList @("-q", "-O", $keyringDeb, $keyringUrl)
   Invoke-CheckedNativeCommand -FilePath "sudo" -ArgumentList @("dpkg", "-i", $keyringDeb)
 }
@@ -271,13 +322,28 @@ if ($DescribeDependencyPlan.IsPresent) {
 }
 
 if (-not $SkipAptInstall.IsPresent) {
-  $distributionId = Resolve-LinuxDistributionId
-  Add-NvidiaCudaRepository -DistributionId $distributionId
+  Assert-LinuxDistributionMatchesPackage -Package $package
+  $distributionId = if ($package.PSObject.Properties.Name.Contains("nvidiaRepoDistroId") -and -not [string]::IsNullOrWhiteSpace([string]$package.nvidiaRepoDistroId)) {
+    [string]$package.nvidiaRepoDistroId
+  }
+  else {
+    throw "Linux package '$($package.key)' is missing nvidiaRepoDistroId."
+  }
+
+  $repoArchitecture = if ($package.PSObject.Properties.Name.Contains("nvidiaRepoArchitecture") -and -not [string]::IsNullOrWhiteSpace([string]$package.nvidiaRepoArchitecture)) {
+    [string]$package.nvidiaRepoArchitecture
+  }
+  else {
+    "x86_64"
+  }
+
+  Add-NvidiaCudaRepository -DistributionId $distributionId -Architecture $repoArchitecture
   Invoke-CheckedNativeCommand -FilePath "sudo" -ArgumentList @("apt-get", "update")
   Invoke-CheckedNativeCommand -FilePath "sudo" -ArgumentList (@("apt-get", "install", "-y", "--no-install-recommends") + $dependencyPlan.aptPackages)
 }
 
 $cudaRoot = Resolve-ExistingPath -Candidates @(
+  "/usr/local/cuda-$($dependencyPlan.cudaPackageVersion)",
   "/usr/local/cuda-$($package.cudaVersion)",
   "/usr/local/cuda"
 )
@@ -309,7 +375,8 @@ Reset-Directory -Path $cudnnLibraryRoot
 $tensorRtHeaders = Copy-HeaderFiles `
   -Patterns @(
     "/usr/include/Nv*.h",
-    "/usr/include/x86_64-linux-gnu/Nv*.h"
+    "/usr/include/x86_64-linux-gnu/Nv*.h",
+    "/usr/include/aarch64-linux-gnu/Nv*.h"
   ) `
   -DestinationDirectory $tensorRtIncludeRoot `
   -Label "TensorRT"
@@ -317,14 +384,17 @@ $tensorRtHeaders = Copy-HeaderFiles `
 $tensorRtLibraries = Add-StagedLibraryLinks `
   -Patterns @(
     "/usr/lib/x86_64-linux-gnu/libnvinfer*.so*",
-    "/usr/lib/x86_64-linux-gnu/libnvonnxparser*.so*"
+    "/usr/lib/x86_64-linux-gnu/libnvonnxparser*.so*",
+    "/usr/lib/aarch64-linux-gnu/libnvinfer*.so*",
+    "/usr/lib/aarch64-linux-gnu/libnvonnxparser*.so*"
   ) `
   -DestinationDirectory $tensorRtLibraryRoot `
   -Label "TensorRT"
 
 $cudnnLibraries = Add-StagedLibraryLinks `
   -Patterns @(
-    "/usr/lib/x86_64-linux-gnu/libcudnn*.so*"
+    "/usr/lib/x86_64-linux-gnu/libcudnn*.so*",
+    "/usr/lib/aarch64-linux-gnu/libcudnn*.so*"
   ) `
   -DestinationDirectory $cudnnLibraryRoot `
   -Label "cuDNN"
@@ -348,6 +418,12 @@ $summaryPath = Join-Path $summaryRoot "linux-nvidia-dependencies.json"
 [ordered]@{
   runtimeKey = $RuntimePackageKey
   packageId = $package.packageId
+  linuxDistro = $package.linuxDistro
+  linuxDistroVersion = $package.linuxDistroVersion
+  nvidiaRepoDistroId = $package.nvidiaRepoDistroId
+  nvidiaRepoArchitecture = $package.nvidiaRepoArchitecture
+  cudaPackageVersion = $dependencyPlan.cudaPackageVersion
+  tensorRtAptCudaVersion = $dependencyPlan.tensorRtAptCudaVersion
   tensorRtDebVersion = $dependencyPlan.tensorRtDebVersion
   aptPackages = $dependencyPlan.aptPackages
   tensorRtRoot = $tensorRtRoot

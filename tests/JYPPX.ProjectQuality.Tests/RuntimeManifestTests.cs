@@ -42,6 +42,67 @@ public sealed class RuntimeManifestTests
     }
 
     [Fact]
+    public void LinuxRuntimePackagesDeclareDistributionAndArchitecture()
+    {
+        string path = Path.Combine(RepositoryPaths.Root, "pack", "runtime", "runtime-packages.manifest.json");
+        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(path));
+
+        JsonElement[] linuxPackages = document.RootElement.GetProperty("packages")
+            .EnumerateArray()
+            .Where(static package => package.GetProperty("platform").GetString() == "linux")
+            .ToArray();
+
+        Assert.True(linuxPackages.Length >= 6, "Linux runtime packages must cover more than the single TensorRT 11 CUDA 12.9 package.");
+
+        foreach (JsonElement package in linuxPackages)
+        {
+            string key = package.GetProperty("key").GetString()!;
+            string packageId = package.GetProperty("packageId").GetString()!;
+            string distro = package.GetProperty("linuxDistro").GetString()!;
+            string distroVersion = package.GetProperty("linuxDistroVersion").GetString()!;
+            string architecture = package.GetProperty("architecture").GetString()!;
+            string runnerMode = package.GetProperty("runnerMode").GetString()!;
+
+            Assert.Equal("ubuntu", distro);
+            Assert.Contains(architecture, new[] { "x64", "arm64" });
+            Assert.Contains(runnerMode, new[] { "hosted", "self-hosted" });
+            Assert.Contains($"linux-{architecture}-ubuntu{distroVersion}-", key);
+            Assert.Contains($".linux-{architecture}.ubuntu{distroVersion}.", packageId);
+        }
+    }
+
+    [Fact]
+    public void Ubuntu2204LinuxRuntimeMatrixCoversAllConfiguredDependencyCombinations()
+    {
+        string path = Path.Combine(RepositoryPaths.Root, "pack", "runtime", "runtime-packages.manifest.json");
+        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(path));
+
+        string[] expectedSuffixes =
+        [
+            "trt8.6-cuda11.8-cudnn8.9",
+            "trt8.6-cuda12.1-cudnn8.9",
+            "trt10.11-cuda11.8-cudnn8.9",
+            "trt10.11-cuda12.9-cudnn9.22",
+            "trt11.0-cuda12.9-cudnn9.22",
+            "trt11.0-cuda13.2-cudnn9.22",
+        ];
+
+        HashSet<string> ubuntu2204Keys = document.RootElement.GetProperty("packages")
+            .EnumerateArray()
+            .Where(static package =>
+                package.GetProperty("platform").GetString() == "linux" &&
+                package.GetProperty("linuxDistroVersion").GetString() == "22.04" &&
+                package.GetProperty("architecture").GetString() == "x64")
+            .Select(static package => package.GetProperty("key").GetString()!)
+            .ToHashSet(StringComparer.Ordinal);
+
+        foreach (string suffix in expectedSuffixes)
+        {
+            Assert.Contains("linux-x64-ubuntu22.04-" + suffix, ubuntu2204Keys);
+        }
+    }
+
+    [Fact]
     public void SplitRuntimeProjectsExistForEverySplitManifestPackage()
     {
         string path = Path.Combine(RepositoryPaths.Root, "pack", "runtime-split", "split-runtime-packages.manifest.json");

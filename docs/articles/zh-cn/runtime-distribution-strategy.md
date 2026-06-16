@@ -40,16 +40,18 @@ CUDA `12.9` 当前已安装。所有目标为 `cuda12.9` 的 runtime 包现在�
 
 ## Linux runtime 矩阵
 
-Linux package key 与 Windows 保持同一 major.minor 矩阵：
+Linux package key 必须包含发行版版本和架构。默认 hosted Linux 发布线为 Ubuntu 22.04 x64：
 
-- `linux-x64-trt8.6-cuda11.8-cudnn8.9`
-- `linux-x64-trt8.6-cuda12.1-cudnn8.9`
-- `linux-x64-trt10.11-cuda11.8-cudnn8.9`
-- `linux-x64-trt10.11-cuda12.9-cudnn9.22`
-- `linux-x64-trt11.0-cuda12.9-cudnn9.22`
-- `linux-x64-trt11.0-cuda13.2-cudnn9.22`
+- `linux-x64-ubuntu22.04-trt8.6-cuda11.8-cudnn8.9`
+- `linux-x64-ubuntu22.04-trt8.6-cuda12.1-cudnn8.9`
+- `linux-x64-ubuntu22.04-trt10.11-cuda11.8-cudnn8.9`
+- `linux-x64-ubuntu22.04-trt10.11-cuda12.9-cudnn9.22`
+- `linux-x64-ubuntu22.04-trt11.0-cuda12.9-cudnn9.22`
+- `linux-x64-ubuntu22.04-trt11.0-cuda13.2-cudnn9.22`
 
-当前阶段暂不继续深挖 Linux 打包。Linux 组合保持 `dry-run-only`，等待后续真实 Linux x64 runner 验证。
+Ubuntu 24.04 x64 只建模 NVIDIA Ubuntu 24.04 仓库中存在的现代组合。Ubuntu 20.04 x64 只走 self-hosted。arm64/SBSA、Jetson/L4T、非 Ubuntu 发行版都必须作为独立包线加入，不能混用 x64 Ubuntu 包名。
+
+Linux 组合保持 `dry-run-only`，等待匹配的真实 Linux runner 验证。
 
 ## 分发策略
 

@@ -103,7 +103,7 @@ Current local status:
 - TensorRT 10 + CUDA 11.8 is the stable real vendor-backed smoke path and has package-consumer smoke evidence.
 - TensorRT 10 + CUDA 12.9 and TensorRT 11 + CUDA 12.9 have local runtime/package validation and package-consumer smoke evidence.
 - TensorRT 11 + CUDA 13.2 bridge builds, collects assets, packs, and passes package consumer restore/build/native-copy; runtime/builder smoke is pending on a CUDA 13-capable driver/runtime environment.
-- Linux package entries and workflows are structurally prepared, but Linux runtime validation still requires self-hosted Linux x64 runner evidence.
+- Linux runtime packages now include the OS/architecture in the package identity. Ubuntu 22.04 x64 is the default hosted matrix for all six combinations; Ubuntu 24.04 x64 is limited to the modern TensorRT 10/11 combinations that NVIDIA publishes for that distro; Ubuntu 20.04 x64 is self-hosted only.
 
 See:
 

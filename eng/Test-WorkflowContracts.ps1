@@ -107,8 +107,9 @@ $workflowContracts = @(
       New-Requirement -Needle "managed-packages-runtime-linux" -Description "Linux runtime managed package artifact"
       New-Requirement -Needle "runner_mode" -Description "hosted/self-hosted runner mode"
       New-Requirement -Needle "Prepare-LinuxNvidiaDependencies.ps1" -Description "hosted Linux NVIDIA dependency preparation"
-      New-Requirement -Needle "ubuntu-latest" -Description "hosted Linux runner"
-      New-Requirement -Needle "Use runner_mode=hosted" -Description "hosted Linux runner guard"
+      New-Requirement -Needle "fromJson(matrix.runsOnJson)" -Description "manifest-driven Linux runner labels"
+      New-Requirement -Needle "linux-x64-ubuntu22.04-trt8.6-cuda11.8-cudnn8.9" -Description "default Linux matrix includes Ubuntu 22.04 TRT8 CUDA 11.8"
+      New-Requirement -Needle "linux-x64-ubuntu22.04-trt11.0-cuda13.2-cudnn9.22" -Description "default Linux matrix includes Ubuntu 22.04 TRT11 CUDA 13.2"
       New-Requirement -Needle "linux" -Description "linux runner label"
       New-Requirement -Needle "Validate-LinuxRuntimeInputs.ps1" -Description "Linux input validation"
       New-Requirement -Needle "CudnnRoot" -Description "Linux cuDNN input validation"
@@ -147,15 +148,23 @@ foreach ($contract in $workflowContracts) {
   }
 }
 
-$singleLinuxMatrixJson = (pwsh -NoProfile -File (Join-Path $RepositoryRoot "eng\Resolve-RuntimeMatrix.ps1") -Platform linux -RuntimeKey "linux-x64-trt11.0-cuda12.9-cudnn9.22" | Out-String).Trim()
+$singleLinuxMatrixJson = (pwsh -NoProfile -File (Join-Path $RepositoryRoot "eng\Resolve-RuntimeMatrix.ps1") -Platform linux -RuntimeKey "linux-x64-ubuntu22.04-trt11.0-cuda12.9-cudnn9.22" | Out-String).Trim()
 $results.Add([pscustomobject]@{
     workflow = "eng\Resolve-RuntimeMatrix.ps1"
     requirement = "single runtime key emits a JSON array"
     status = if ($singleLinuxMatrixJson.StartsWith("[")) { "passed" } else { "failed" }
-    detail = "linux-x64-trt11.0-cuda12.9-cudnn9.22"
+    detail = "linux-x64-ubuntu22.04-trt11.0-cuda12.9-cudnn9.22"
   })
 
-$linuxDependencyPlanJson = (pwsh -NoProfile -File (Join-Path $RepositoryRoot "eng\Prepare-LinuxNvidiaDependencies.ps1") -RuntimePackageKey "linux-x64-trt11.0-cuda12.9-cudnn9.22" -DescribeDependencyPlan | Out-String).Trim()
+$singleLinuxMatrix = $singleLinuxMatrixJson | ConvertFrom-Json
+$results.Add([pscustomobject]@{
+    workflow = "eng\Resolve-RuntimeMatrix.ps1"
+    requirement = "Ubuntu 22.04 hosted matrix emits the matching runner label"
+    status = if ($singleLinuxMatrix[0].runsOnJson -eq '["ubuntu-22.04"]') { "passed" } else { "failed" }
+    detail = [string]$singleLinuxMatrix[0].runsOnJson
+  })
+
+$linuxDependencyPlanJson = (pwsh -NoProfile -File (Join-Path $RepositoryRoot "eng\Prepare-LinuxNvidiaDependencies.ps1") -RuntimePackageKey "linux-x64-ubuntu22.04-trt11.0-cuda12.9-cudnn9.22" -DescribeDependencyPlan | Out-String).Trim()
 $linuxDependencyPlan = $linuxDependencyPlanJson | ConvertFrom-Json
 $requiredPinnedTensorRtPackages = @(
   "libnvinfer11=11.0.0.114-1+cuda12.9*",
@@ -170,7 +179,7 @@ $results.Add([pscustomobject]@{
     workflow = "eng\Prepare-LinuxNvidiaDependencies.ps1"
     requirement = "TensorRT runtime dependencies are pinned to CUDA 12.9"
     status = if ($missingPinnedTensorRtPackages.Count -eq 0) { "passed" } else { "failed" }
-    detail = if ($missingPinnedTensorRtPackages.Count -eq 0) { "linux-x64-trt11.0-cuda12.9-cudnn9.22" } else { $missingPinnedTensorRtPackages -join ", " }
+    detail = if ($missingPinnedTensorRtPackages.Count -eq 0) { "linux-x64-ubuntu22.04-trt11.0-cuda12.9-cudnn9.22" } else { $missingPinnedTensorRtPackages -join ", " }
   })
 $results.Add([pscustomobject]@{
     workflow = "eng\Prepare-LinuxNvidiaDependencies.ps1"

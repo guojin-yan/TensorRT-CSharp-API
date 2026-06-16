@@ -1,7 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <PackageId>JYPPX.TensorRT.CSharp.API.Runtime.linux-x64.trt10.11.cuda11.8.cudnn8.9</PackageId>
-    <Title>JYPPX.TensorRT.CSharp.API.Runtime.linux-x64.trt10.11.cuda11.8.cudnn8.9</Title>
-    <JYPPXRuntimeKey>linux-x64-trt10.11-cuda11.8-cudnn8.9</JYPPXRuntimeKey>
-  </PropertyGroup>
-</Project>

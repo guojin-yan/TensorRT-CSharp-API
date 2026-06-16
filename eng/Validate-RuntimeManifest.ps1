@@ -25,6 +25,8 @@ if (-not $manifest.packages) {
 $requiredCommon = @("key", "packageId", "rid", "platform", "tensorRtLine", "cudaLine", "tensorRtVersion", "cudaVersion", "cudnnMajor", "cudnnVersion", "distributionTier", "validationState", "distributionNotes", "buildPreset", "bridgeConfiguration", "bridgeFile")
 $allowedDistributionTiers = @("public-sample", "private-feed", "split-delivery-candidate")
 $allowedValidationStates = @("local-validated", "pending-local-validation", "dry-run-only")
+$allowedLinuxRunnerModes = @("hosted", "self-hosted")
+$allowedLinuxArchitectures = @("x64", "arm64")
 $errors = New-Object System.Collections.Generic.List[string]
 
 function Get-MajorMinorVersionLabel {
@@ -95,9 +97,51 @@ foreach ($package in $manifest.packages) {
   }
 
   if ($package.platform -eq "linux") {
-    foreach ($property in @("defaultTensorRtRoot", "defaultCudaRoot")) {
+    foreach ($property in @("defaultTensorRtRoot", "defaultCudaRoot", "linuxDistro", "linuxDistroVersion", "architecture", "nvidiaRepoDistroId", "nvidiaRepoArchitecture", "runnerMode")) {
       if (-not $package.PSObject.Properties.Name.Contains($property) -or [string]::IsNullOrWhiteSpace([string]$package.$property)) {
         $errors.Add("Linux package '$($package.key)' is missing '$property'.")
+      }
+    }
+
+    if ($package.key -match "^linux-(x64|arm64)-trt") {
+      $errors.Add("Linux package '$($package.key)' is ambiguous. Include the distribution version, for example linux-x64-ubuntu22.04-trt11.0-cuda12.9-cudnn9.22.")
+    }
+
+    if ($package.packageId -match "\.Runtime\.linux-(x64|arm64)\.trt") {
+      $errors.Add("Linux package '$($package.key)' packageId '$($package.packageId)' is ambiguous. Include the distribution version, for example .linux-x64.ubuntu22.04.trt11.0.")
+    }
+
+    if ($package.PSObject.Properties.Name.Contains("linuxDistro") -and $package.linuxDistro -ne "ubuntu") {
+      $errors.Add("Linux package '$($package.key)' uses unsupported linuxDistro '$($package.linuxDistro)'. Add explicit preparation logic before enabling it.")
+    }
+
+    if ($package.PSObject.Properties.Name.Contains("architecture") -and $package.architecture -notin $allowedLinuxArchitectures) {
+      $errors.Add("Linux package '$($package.key)' uses unsupported architecture '$($package.architecture)'.")
+    }
+
+    if ($package.PSObject.Properties.Name.Contains("runnerMode") -and $package.runnerMode -notin $allowedLinuxRunnerModes) {
+      $errors.Add("Linux package '$($package.key)' uses unsupported runnerMode '$($package.runnerMode)'.")
+    }
+
+    if ($package.PSObject.Properties.Name.Contains("runnerLabels")) {
+      $runnerLabels = @($package.runnerLabels | Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_) })
+      if ($runnerLabels.Count -eq 0) {
+        $errors.Add("Linux package '$($package.key)' has empty runnerLabels.")
+      }
+    }
+    else {
+      $errors.Add("Linux package '$($package.key)' is missing runnerLabels.")
+    }
+
+    if ($package.runnerMode -eq "hosted") {
+      $runnerLabels = @($package.runnerLabels | ForEach-Object { [string]$_ })
+      if ($package.linuxDistroVersion -eq "20.04") {
+        $errors.Add("Linux package '$($package.key)' targets Ubuntu 20.04 but is marked hosted. GitHub-hosted Ubuntu 20.04 is not available for this runtime workflow.")
+      }
+
+      $expectedHostedLabel = "ubuntu-$($package.linuxDistroVersion)"
+      if ($runnerLabels -notcontains $expectedHostedLabel) {
+        $errors.Add("Linux hosted package '$($package.key)' must include runner label '$expectedHostedLabel'.")
       }
     }
 

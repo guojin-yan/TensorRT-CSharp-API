@@ -96,14 +96,22 @@ Windows runtime 包在 `pack/runtime-split` 下拆成组件包。
 
 ## Linux 状态
 
-Linux runtime 包条目镜像相同的 TensorRT / CUDA / cuDNN major.minor 矩阵，并保留 `.so` 通配资产规则。当前 Linux 仅做结构准备，尚未在真实 Linux runner 上验证。
+Linux runtime 包名必须包含发行版版本和 CPU 架构，因为 NVIDIA 针对不同系统和架构发布不同 apt 仓库和二进制集合。不要再发布泛化的 `linux-x64-trt...` 包；应使用类似 `linux-x64-ubuntu22.04-trt11.0-cuda12.9-cudnn9.22` 的明确 key。
+
+当前 Linux 矩阵：
+
+- Ubuntu 22.04 x64：默认 hosted 矩阵，覆盖全部 6 个 TensorRT / CUDA / cuDNN 组合。
+- Ubuntu 24.04 x64：hosted 只覆盖 `trt10.11-cuda12.9-cudnn9.22`、`trt11.0-cuda12.9-cudnn9.22`、`trt11.0-cuda13.2-cudnn9.22`；NVIDIA 官方 Ubuntu 24.04 仓库不提供旧的 TensorRT 8.6 / CUDA 11.8 组合。
+- Ubuntu 20.04 x64：只作为 self-hosted/manual-root 路线，覆盖 NVIDIA 仓库里仍存在的 TensorRT 8.6 与 TensorRT 10.11 旧组合；不使用 GitHub-hosted Ubuntu 20.04。
+- Linux arm64/SBSA 和 Jetson/L4T 后续要单独建包线。SBSA 服务器 ARM 和 Jetson 不是同一个运行时目标，不能复用 x64 Ubuntu 包名。
+- RHEL/Rocky 等其它发行版只有在明确建模对应 NVIDIA 仓库和 runner 镜像后才能加入。
 
 当前 Linux workflow 模块：
 
 - `runtime-linux.yml`
 - `release-bundle.yml`
 
-Linux 包必须保持 `dry-run-only`，直到真实 Linux runner 完成 build、资产收集、package restore、`.so` 复制和可选 GPU smoke。
+Linux 包保持 `dry-run-only`，直到匹配的 runner 完成 build、资产收集、package restore、`.so` 复制和可选 GPU smoke。
 
 ## 发布风险
 

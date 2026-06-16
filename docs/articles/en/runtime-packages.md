@@ -102,14 +102,22 @@ Component roles:
 
 ## Linux Status
 
-Linux runtime package entries mirror the same TensorRT / CUDA / cuDNN major.minor matrix and include wildcard `.so` asset patterns. Linux packaging remains structurally prepared but not validated on this Windows workstation.
+Linux runtime package identities include the distribution version and CPU architecture because NVIDIA publishes different apt repositories and binary sets per target. Do not publish generic `linux-x64-trt...` packages; use a distro-qualified key such as `linux-x64-ubuntu22.04-trt11.0-cuda12.9-cudnn9.22`.
 
-Current Linux workflow modules target future self-hosted Linux x64 runners:
+Current Linux matrix:
+
+- Ubuntu 22.04 x64: hosted default for all six configured TensorRT / CUDA / cuDNN combinations.
+- Ubuntu 24.04 x64: hosted for `trt10.11-cuda12.9-cudnn9.22`, `trt11.0-cuda12.9-cudnn9.22`, and `trt11.0-cuda13.2-cudnn9.22`; NVIDIA does not publish the older TensorRT 8.6 / CUDA 11.8 lines for Ubuntu 24.04.
+- Ubuntu 20.04 x64: self-hosted/manual-root only for the older TensorRT 8.6 and TensorRT 10.11 combinations that exist in the NVIDIA repo. GitHub-hosted Ubuntu 20.04 is not used.
+- Linux arm64/SBSA and Jetson/L4T are separate future package lines. SBSA server ARM and Jetson are not interchangeable, and neither should share the x64 Ubuntu package IDs.
+- Other Linux distributions such as RHEL/Rocky should be added only after a matching NVIDIA repository and runner image are modeled explicitly.
+
+Current Linux workflow modules:
 
 - `runtime-linux.yml`
 - `release-bundle.yml`
 
-Linux packages must remain `dry-run-only` until a real Linux runner validates build, asset collection, package restore, native `.so` copy, and optional GPU smoke.
+Linux packages remain `dry-run-only` until a matching runner validates build, asset collection, package restore, native `.so` copy, and optional GPU smoke.
 
 ## Publication Risk
 

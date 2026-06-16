@@ -40,16 +40,18 @@ Current Windows package-consumer readiness:
 
 ## Linux runtime matrix
 
-Linux package structure is kept in the manifest and workflows, but Linux packaging is not the current development focus. Linux package keys mirror the Windows matrix:
+Linux package keys must include the distribution version and architecture. The default hosted Linux release line is Ubuntu 22.04 x64:
 
-- `linux-x64-trt8.6-cuda11.8-cudnn8.9`
-- `linux-x64-trt8.6-cuda12.1-cudnn8.9`
-- `linux-x64-trt10.11-cuda11.8-cudnn8.9`
-- `linux-x64-trt10.11-cuda12.9-cudnn9.22`
-- `linux-x64-trt11.0-cuda12.9-cudnn9.22`
-- `linux-x64-trt11.0-cuda13.2-cudnn9.22`
+- `linux-x64-ubuntu22.04-trt8.6-cuda11.8-cudnn8.9`
+- `linux-x64-ubuntu22.04-trt8.6-cuda12.1-cudnn8.9`
+- `linux-x64-ubuntu22.04-trt10.11-cuda11.8-cudnn8.9`
+- `linux-x64-ubuntu22.04-trt10.11-cuda12.9-cudnn9.22`
+- `linux-x64-ubuntu22.04-trt11.0-cuda12.9-cudnn9.22`
+- `linux-x64-ubuntu22.04-trt11.0-cuda13.2-cudnn9.22`
 
-Linux packages stay `dry-run-only` until a real Linux x64 runner validates build, asset collection, pack, and package consumer restore/build.
+Ubuntu 24.04 x64 is modeled only for the modern combinations that exist in NVIDIA's Ubuntu 24.04 repo. Ubuntu 20.04 x64 is self-hosted only. arm64/SBSA, Jetson/L4T, and non-Ubuntu distributions must be added as separate package lines after the matching NVIDIA repository and runner strategy are modeled.
+
+Linux packages stay `dry-run-only` until a matching Linux runner validates build, asset collection, pack, and package consumer restore/build.
 
 ## Distribution lanes
 

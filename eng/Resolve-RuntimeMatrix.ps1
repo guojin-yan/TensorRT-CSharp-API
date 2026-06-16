@@ -4,6 +4,8 @@ param(
   [ValidateSet("windows", "linux")]
   [string]$Platform,
   [string[]]$RuntimeKey,
+  [ValidateSet("any", "hosted", "self-hosted")]
+  [string]$RunnerMode = "any",
   [string]$RepositoryRoot
 )
 
@@ -52,7 +54,32 @@ if ($requestedKeys.Count -gt 0) {
   }
 }
 
+if ($Platform -eq "linux" -and $RunnerMode -ne "any") {
+  $packages = @($packages | Where-Object { $_.runnerMode -eq $RunnerMode })
+  if ($requestedKeys.Count -gt 0) {
+    foreach ($key in $requestedKeys) {
+      if (-not ($packages | Where-Object { $_.key -eq $key })) {
+        throw "Runtime package key '$key' is not available for runner mode '$RunnerMode'."
+      }
+    }
+  }
+}
+
 $matrix = foreach ($package in $packages) {
+  $runnerLabels = @()
+  if ($package.PSObject.Properties.Name.Contains("runnerLabels")) {
+    $runnerLabels = @($package.runnerLabels | Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_) })
+  }
+
+  if ($Platform -eq "linux" -and $runnerLabels.Count -eq 0) {
+    $runnerLabels = if ($package.runnerMode -eq "self-hosted") {
+      @("self-hosted", "linux", "x64")
+    }
+    else {
+      @("ubuntu-22.04")
+    }
+  }
+
   [pscustomobject]@{
     key = $package.key
     packageId = $package.packageId
@@ -64,6 +91,13 @@ $matrix = foreach ($package in $packages) {
     cudnnVersion = $package.cudnnVersion
     distributionTier = $package.distributionTier
     validationState = $package.validationState
+    linuxDistro = $package.linuxDistro
+    linuxDistroVersion = $package.linuxDistroVersion
+    architecture = $package.architecture
+    runnerMode = $package.runnerMode
+    runsOnJson = if ($Platform -eq "linux") { ConvertTo-Json -InputObject @($runnerLabels) -Compress } else { $null }
+    nvidiaRepoDistroId = $package.nvidiaRepoDistroId
+    nvidiaRepoArchitecture = $package.nvidiaRepoArchitecture
   }
 }
 
