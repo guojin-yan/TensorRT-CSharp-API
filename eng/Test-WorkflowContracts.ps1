@@ -155,6 +155,24 @@ $results.Add([pscustomobject]@{
     detail = "linux-x64-trt11.0-cuda12.9-cudnn9.22"
   })
 
+$linuxDependencyPlanJson = (pwsh -NoProfile -File (Join-Path $RepositoryRoot "eng\Prepare-LinuxNvidiaDependencies.ps1") -RuntimePackageKey "linux-x64-trt11.0-cuda12.9-cudnn9.22" -DescribeDependencyPlan | Out-String).Trim()
+$linuxDependencyPlan = $linuxDependencyPlanJson | ConvertFrom-Json
+$requiredPinnedTensorRtPackages = @(
+  "libnvinfer11=11.0.0.114-1+cuda12.9*",
+  "libnvinfer-lean11=11.0.0.114-1+cuda12.9*",
+  "libnvinfer-plugin11=11.0.0.114-1+cuda12.9*",
+  "libnvinfer-vc-plugin11=11.0.0.114-1+cuda12.9*",
+  "libnvinfer-dispatch11=11.0.0.114-1+cuda12.9*",
+  "libnvonnxparsers11=11.0.0.114-1+cuda12.9*"
+)
+$missingPinnedTensorRtPackages = @($requiredPinnedTensorRtPackages | Where-Object { $linuxDependencyPlan.aptPackages -notcontains $_ })
+$results.Add([pscustomobject]@{
+    workflow = "eng\Prepare-LinuxNvidiaDependencies.ps1"
+    requirement = "TensorRT runtime dependencies are pinned to CUDA 12.9"
+    status = if ($missingPinnedTensorRtPackages.Count -eq 0) { "passed" } else { "failed" }
+    detail = if ($missingPinnedTensorRtPackages.Count -eq 0) { "linux-x64-trt11.0-cuda12.9-cudnn9.22" } else { $missingPinnedTensorRtPackages -join ", " }
+  })
+
 $outputRoot = Join-Path $RepositoryRoot "artifacts\workflow-contracts"
 New-Item -ItemType Directory -Path $outputRoot -Force | Out-Null
 

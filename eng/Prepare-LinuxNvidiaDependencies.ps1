@@ -3,6 +3,7 @@ param(
   [Parameter(Mandatory = $true)]
   [string]$RuntimePackageKey,
   [string]$RepositoryRoot,
+  [switch]$DescribeDependencyPlan,
   [switch]$SkipAptInstall
 )
 
@@ -75,23 +76,41 @@ function Get-LinuxDependencyPlan {
   )
 
   $cudaMinor = ([string]$Package.cudaVersion).Replace(".", "-")
+  $tensorRtLine = [string]$Package.tensorRtLine
   $tensorRtDebVersion = "$($Package.tensorRtVersion)-1+cuda$($Package.cudaVersion)"
 
-  $commonTensorRtPackages = @(
+  $runtimeTensorRtPackages = @(
+    "libnvinfer$tensorRtLine",
+    "libnvinfer-lean$tensorRtLine",
+    "libnvinfer-plugin$tensorRtLine",
+    "libnvinfer-dispatch$tensorRtLine",
+    "libnvonnxparsers$tensorRtLine"
+  )
+
+  $devTensorRtPackages = @(
+    "libnvinfer-safe-headers-dev",
     "libnvinfer-headers-dev",
     "libnvinfer-headers-plugin-dev",
     "libnvinfer-dev",
     "libnvinfer-lean-dev",
     "libnvinfer-plugin-dev",
-    "libnvinfer-vc-plugin-dev",
     "libnvinfer-dispatch-dev",
     "libnvonnxparsers-dev",
     "libnvinfer-bin"
   )
 
+  if ($tensorRtLine -eq "8") {
+    $runtimeTensorRtPackages += "libnvparsers$tensorRtLine"
+    $devTensorRtPackages += "libnvparsers-dev"
+  }
+  else {
+    $runtimeTensorRtPackages += "libnvinfer-vc-plugin$tensorRtLine"
+    $devTensorRtPackages += "libnvinfer-vc-plugin-dev"
+  }
+
   $aptPackages = New-Object System.Collections.Generic.List[string]
   $aptPackages.Add("cuda-cudart-dev-$cudaMinor")
-  foreach ($name in $commonTensorRtPackages) {
+  foreach ($name in @($runtimeTensorRtPackages + $devTensorRtPackages)) {
     $aptPackages.Add($name + (New-AptVersionPin -Version $tensorRtDebVersion))
   }
 
@@ -245,6 +264,11 @@ if ($package.platform -ne "linux") {
 }
 
 $dependencyPlan = Get-LinuxDependencyPlan -Package $package
+if ($DescribeDependencyPlan.IsPresent) {
+  $dependencyPlan | ConvertTo-Json -Depth 5
+  exit 0
+}
+
 if (-not $SkipAptInstall.IsPresent) {
   $distributionId = Resolve-LinuxDistributionId
   Add-NvidiaCudaRepository -DistributionId $distributionId
