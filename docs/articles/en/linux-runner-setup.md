@@ -30,11 +30,18 @@ For `runtime-linux.yml`, provide:
 
 - `version`
 - `runtime_keys`: comma-separated Linux runtime keys
+- `runtime_key_set`: use `ubuntu22-hosted`, `hosted-all`, `ubuntu24-hosted`, `self-hosted-ubuntu20`, or `custom` when `runtime_keys` is empty
 - `runner_mode`: defaults to `hosted`; use `self-hosted` for Ubuntu 20.04 or manually prepared roots
+- `split_package_roles`: use `all` for a dependency refresh, or `bridge,collection` when reusing existing CUDA/cuDNN and TensorRT component packages
+- `cuda_cudnn_package_version` and `tensorrt_package_version`: required when publishing `collection` or `meta` without rebuilding those stable dependencies
 - `run_smoke`: enable only when the runner has a compatible NVIDIA GPU, driver, and runtime stack
 - `publish_to_github_packages`: defaults to false because large Linux runtime packages should normally stay as GitHub Release assets
 - `release_tag`
 - `attach_to_github_release`
+
+For `release-bundle.yml`, the hosted Linux lane uses `run_linux_runtime_packaging=true` and defaults to `linux_runtime_key_set=hosted-all`, which dispatches Ubuntu 22.04 x64 plus the modeled Ubuntu 24.04 x64 packages. Ubuntu 20.04 is a separate self-hosted lane: use `run_linux_self_hosted_ubuntu20_runtime_packaging=true`; it defaults to `self-hosted-ubuntu20` and dispatches `runner_mode=self-hosted`.
+
+`release-bundle.yml` keeps common choices as top-level inputs and accepts advanced overrides through `release_config_json`. Use that JSON object for less common values such as `linux_runtime_delivery_mode`, `linux_self_hosted_ubuntu20_runtime_key_set`, package release-tag overrides, bridge/meta package version overrides, and skip-validation toggles.
 
 ## Expected root examples
 

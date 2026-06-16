@@ -28,11 +28,21 @@
 
 - `version`
 - `runtime_keys`：逗号分隔的 Linux runtime key
+- `runtime_key_set`：当 `runtime_keys` 为空时可用 `ubuntu22-hosted`、`hosted-all`、`ubuntu24-hosted`、`self-hosted-ubuntu20` 或 `custom`
 - `runner_mode`：默认 `hosted`；发布 Ubuntu 20.04 或手动根目录时使用 `self-hosted`
+- `split_package_roles`：依赖刷新时用 `all`，复用稳定依赖时用 `bridge,collection`
+- `cuda_cudnn_package_version` 和 `tensorrt_package_version`：当只发 `collection` 或 `meta`、但不重发稳定依赖时必须提供
 - `run_smoke`：只有 runner 有可用 NVIDIA GPU、驱动和匹配 runtime 时才打开
 - `publish_to_github_packages`：默认关闭，Linux runtime 大包通常保留为 GitHub Release assets
 - `release_tag`
 - `attach_to_github_release`
+
+`release-bundle.yml` 里有两条 Linux 编排线：
+
+- `run_linux_runtime_packaging=true`：hosted Linux 发布线，默认 `linux_runtime_key_set=hosted-all`，会同时触发 Ubuntu 22.04 x64 与建模中的 Ubuntu 24.04 x64 组合。
+- `run_linux_self_hosted_ubuntu20_runtime_packaging=true`：Ubuntu 20.04 x64 self-hosted 发布线，默认 `self-hosted-ubuntu20`，并固定 `runner_mode=self-hosted`。
+
+`release-bundle.yml` 会把常用选择保留为顶层输入，并用 `release_config_json` 接收高级覆盖项。较少使用的 `linux_runtime_delivery_mode`、`linux_self_hosted_ubuntu20_runtime_key_set`、依赖 release tag 覆盖、bridge/meta 包版本覆盖、跳过验证开关等都通过这个 JSON 对象传入。
 
 ## 根目录示例
 

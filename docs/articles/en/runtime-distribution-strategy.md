@@ -61,6 +61,13 @@ The `runtime-linux` workflow can resolve package lines through `runtime_key_set`
 
 Explicit `runtime_keys` always win. When `runtime_keys` is empty, `runtime_key_set` selects the package line. This keeps the normal release path on Ubuntu 22.04 hosted while still making hosted-all and Ubuntu 20.04 self-hosted publication explicit and repeatable.
 
+The `release-bundle` workflow now has two Linux orchestration lanes:
+
+- `run_linux_runtime_packaging`: hosted Linux publication, defaulting to `hosted-all` so Ubuntu 22.04 x64 and the modeled Ubuntu 24.04 x64 lines are dispatched together.
+- `run_linux_self_hosted_ubuntu20_runtime_packaging`: Ubuntu 20.04 x64 self-hosted publication, defaulting to `self-hosted-ubuntu20` and always dispatching `runner_mode=self-hosted`.
+
+Use separate release-bundle inputs for Linux split roles and stable dependency versions. Routine bridge or managed changes can publish Linux `bridge,collection` while pinning already-published `CudaCudnn` and `TensorRt` versions; NVIDIA dependency refreshes should use `cuda-cudnn`, `tensorrt`, or `all`. Less common overrides, such as delivery mode, release tags for stable dependency assets, bridge/meta package versions, and skip-validation toggles, are passed through `release_config_json` to keep the manual GitHub Actions form under the `workflow_dispatch` input limit.
+
 Linux packages stay `dry-run-only` until a matching Linux runner validates build, asset collection, pack, and package consumer restore/build.
 
 ## Distribution lanes

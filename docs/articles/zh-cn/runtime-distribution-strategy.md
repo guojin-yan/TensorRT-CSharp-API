@@ -61,6 +61,13 @@ Ubuntu 24.04 x64 只建模 NVIDIA Ubuntu 24.04 仓库中存在的现代组合。
 
 如果 `runtime_keys` 非空，则以显式 key 为准；如果为空，则使用 `runtime_key_set`。这样日常发布可以保持 Ubuntu 22.04 hosted 主线，完整 hosted 发布可以切到 `hosted-all`，Ubuntu 20.04 则单独走 self-hosted。
 
+`release-bundle` workflow 现在有两条 Linux 编排线：
+
+- `run_linux_runtime_packaging`：hosted Linux 发布线，默认使用 `hosted-all`，会一起触发 Ubuntu 22.04 x64 与已经建模的 Ubuntu 24.04 x64 组合。
+- `run_linux_self_hosted_ubuntu20_runtime_packaging`：Ubuntu 20.04 x64 self-hosted 发布线，默认使用 `self-hosted-ubuntu20`，并固定以 `runner_mode=self-hosted` 触发。
+
+Linux split 包角色、稳定依赖版本也有单独输入。日常只改 bridge 或 managed 代码时，可以发布 Linux `bridge,collection` 并固定已发布的 `CudaCudnn` 与 `TensorRt` 版本；只有 NVIDIA 依赖集合变化时才使用 `cuda-cudnn`、`tensorrt` 或 `all` 重发稳定依赖。较少使用的 delivery mode、稳定依赖 release tag、bridge/meta 包版本、跳过验证开关等通过 `release_config_json` 传入，避免超过 GitHub Actions `workflow_dispatch` 顶层输入数量限制。
+
 Linux 组合保持 `dry-run-only`，等待匹配的真实 Linux runner 验证。
 
 ## 分发策略

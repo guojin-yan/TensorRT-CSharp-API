@@ -33,33 +33,13 @@ on:
         required: false
         default: "win-x64-trt8.6-cuda11.8-cudnn8.9,win-x64-trt8.6-cuda12.1-cudnn8.9,win-x64-trt10.11-cuda11.8-cudnn8.9,win-x64-trt10.11-cuda12.9-cudnn9.22,win-x64-trt11.0-cuda12.9-cudnn9.22,win-x64-trt11.0-cuda13.2-cudnn9.22"
         type: string
-      windows_runtime_delivery_mode:
-        description: Windows runtime package layout to produce
-        required: false
-        default: split
-        type: string
       windows_split_package_roles:
         description: Split Windows runtime roles or keys to build
         required: false
         default: "bridge,collection"
         type: string
-      windows_meta_package_version:
-        description: Optional Windows split meta package version override
-        required: false
-        default: ""
-        type: string
-      windows_bridge_package_version:
-        description: Optional Windows bridge split package version override
-        required: false
-        default: ""
-        type: string
       windows_cuda_cudnn_package_version:
         description: Optional version for already-published Windows CUDA/cuDNN split packages
-        required: false
-        default: ""
-        type: string
-      windows_cuda_cudnn_package_release_tag:
-        description: Optional GitHub Release tag that contains previously published Windows CUDA/cuDNN split packages; defaults to v<windows_cuda_cudnn_package_version>
         required: false
         default: ""
         type: string
@@ -68,40 +48,50 @@ on:
         required: false
         default: ""
         type: string
-      windows_tensorrt_package_release_tag:
-        description: Optional GitHub Release tag that contains previously published Windows TensorRT split packages; defaults to v<windows_tensorrt_package_version>
-        required: false
-        default: ""
-        type: string
-      windows_include_meta_package:
-        description: Build Windows split meta package when selected roles are incomplete
-        required: false
-        default: false
-        type: boolean
-      windows_skip_consumer_validation:
-        description: Skip Windows split runtime consumer validation
-        required: false
-        default: false
-        type: boolean
       run_linux_runtime_packaging:
-        description: Build and publish Linux runtime packages
+        description: Build and publish hosted Linux runtime packages
         required: false
         default: false
         type: boolean
       linux_runtime_keys:
-        description: Optional comma-separated Linux runtime keys
+        description: Optional comma-separated hosted Linux runtime keys
         required: false
         default: ""
         type: string
       linux_runtime_key_set:
-        description: Linux runtime key set when linux_runtime_keys is empty
+        description: Hosted Linux runtime key set when linux_runtime_keys is empty
         required: false
-        default: auto
+        default: hosted-all
         type: string
       linux_runner_mode:
-        description: Linux runtime runner mode
+        description: Hosted Linux runtime runner mode
         required: false
         default: hosted
+        type: string
+      linux_split_package_roles:
+        description: Split Linux runtime roles or keys to build
+        required: false
+        default: all
+        type: string
+      linux_cuda_cudnn_package_version:
+        description: Optional version for already-published Linux CUDA/cuDNN split packages
+        required: false
+        default: ""
+        type: string
+      linux_tensorrt_package_version:
+        description: Optional version for already-published Linux TensorRT split packages
+        required: false
+        default: ""
+        type: string
+      run_linux_self_hosted_ubuntu20_runtime_packaging:
+        description: Build and publish Ubuntu 20.04 self-hosted Linux runtime packages
+        required: false
+        default: false
+        type: boolean
+      linux_self_hosted_ubuntu20_runtime_keys:
+        description: Optional comma-separated Ubuntu 20.04 self-hosted Linux runtime keys
+        required: false
+        default: ""
         type: string
       run_windows_smoke:
         description: Run Windows runtime package consumer smoke
@@ -133,6 +123,11 @@ on:
         required: false
         default: true
         type: boolean
+      release_config_json:
+        description: Advanced release-bundle overrides as a JSON object
+        required: false
+        default: "{}"
+        type: string
 
 permissions:
   actions: write
@@ -153,20 +148,18 @@ jobs:
       RUNTIME_VERSION: ${{ inputs.runtime_version }}
       RUN_WINDOWS_RUNTIME_PACKAGING: ${{ inputs.run_windows_runtime_packaging }}
       WINDOWS_RUNTIME_KEYS: ${{ inputs.windows_runtime_keys }}
-      WINDOWS_RUNTIME_DELIVERY_MODE: ${{ inputs.windows_runtime_delivery_mode }}
       WINDOWS_SPLIT_PACKAGE_ROLES: ${{ inputs.windows_split_package_roles }}
-      WINDOWS_META_PACKAGE_VERSION: ${{ inputs.windows_meta_package_version }}
-      WINDOWS_BRIDGE_PACKAGE_VERSION: ${{ inputs.windows_bridge_package_version }}
       WINDOWS_CUDA_CUDNN_PACKAGE_VERSION: ${{ inputs.windows_cuda_cudnn_package_version }}
-      WINDOWS_CUDA_CUDNN_PACKAGE_RELEASE_TAG: ${{ inputs.windows_cuda_cudnn_package_release_tag }}
       WINDOWS_TENSORRT_PACKAGE_VERSION: ${{ inputs.windows_tensorrt_package_version }}
-      WINDOWS_TENSORRT_PACKAGE_RELEASE_TAG: ${{ inputs.windows_tensorrt_package_release_tag }}
-      WINDOWS_INCLUDE_META_PACKAGE: ${{ inputs.windows_include_meta_package }}
-      WINDOWS_SKIP_CONSUMER_VALIDATION: ${{ inputs.windows_skip_consumer_validation }}
       RUN_LINUX_RUNTIME_PACKAGING: ${{ inputs.run_linux_runtime_packaging }}
       LINUX_RUNTIME_KEYS: ${{ inputs.linux_runtime_keys }}
       LINUX_RUNTIME_KEY_SET: ${{ inputs.linux_runtime_key_set }}
       LINUX_RUNNER_MODE: ${{ inputs.linux_runner_mode }}
+      LINUX_SPLIT_PACKAGE_ROLES: ${{ inputs.linux_split_package_roles }}
+      LINUX_CUDA_CUDNN_PACKAGE_VERSION: ${{ inputs.linux_cuda_cudnn_package_version }}
+      LINUX_TENSORRT_PACKAGE_VERSION: ${{ inputs.linux_tensorrt_package_version }}
+      RUN_LINUX_SELF_HOSTED_UBUNTU20_RUNTIME_PACKAGING: ${{ inputs.run_linux_self_hosted_ubuntu20_runtime_packaging }}
+      LINUX_SELF_HOSTED_UBUNTU20_RUNTIME_KEYS: ${{ inputs.linux_self_hosted_ubuntu20_runtime_keys }}
       RUN_WINDOWS_SMOKE: ${{ inputs.run_windows_smoke }}
       SIGN_WINDOWS_CONSUMER_OUTPUT: true
       RUN_LINUX_SMOKE: ${{ inputs.run_linux_smoke }}
@@ -174,6 +167,7 @@ jobs:
       PUBLISH_MANAGED_TO_GITHUB_PACKAGES: ${{ inputs.publish_managed_to_github_packages }}
       PUBLISH_RUNTIME_TO_GITHUB_PACKAGES: ${{ inputs.publish_runtime_to_github_packages }}
       ATTACH_RUNTIME_TO_GITHUB_RELEASE: ${{ inputs.attach_runtime_to_github_release }}
+      RELEASE_CONFIG_JSON: ${{ inputs.release_config_json }}
       RELEASE_TAG: v${{ inputs.version }}
     steps:
       - name: Checkout
@@ -207,6 +201,36 @@ jobs:
           if [ -z "$runtime_version" ]; then
             runtime_version="$RELEASE_VERSION"
           fi
+          config_json="$RELEASE_CONFIG_JSON"
+          if [ -z "$config_json" ]; then
+            config_json="{}"
+          fi
+          if ! jq -e 'type == "object"' <<<"$config_json" >/dev/null; then
+            echo "release_config_json must be a JSON object." >&2
+            exit 1
+          fi
+
+          get_config() {
+            local key="$1"
+            local default_value="$2"
+            jq -r --arg key "$key" --arg defaultValue "$default_value" '.[$key] // $defaultValue | tostring' <<<"$config_json"
+          }
+
+          WINDOWS_RUNTIME_DELIVERY_MODE="$(get_config windows_runtime_delivery_mode split)"
+          WINDOWS_META_PACKAGE_VERSION="$(get_config windows_meta_package_version '')"
+          WINDOWS_BRIDGE_PACKAGE_VERSION="$(get_config windows_bridge_package_version '')"
+          WINDOWS_CUDA_CUDNN_PACKAGE_RELEASE_TAG="$(get_config windows_cuda_cudnn_package_release_tag '')"
+          WINDOWS_TENSORRT_PACKAGE_RELEASE_TAG="$(get_config windows_tensorrt_package_release_tag '')"
+          WINDOWS_INCLUDE_META_PACKAGE="$(get_config windows_include_meta_package false)"
+          WINDOWS_SKIP_CONSUMER_VALIDATION="$(get_config windows_skip_consumer_validation false)"
+          LINUX_RUNTIME_DELIVERY_MODE="$(get_config linux_runtime_delivery_mode split)"
+          LINUX_META_PACKAGE_VERSION="$(get_config linux_meta_package_version '')"
+          LINUX_BRIDGE_PACKAGE_VERSION="$(get_config linux_bridge_package_version '')"
+          LINUX_CUDA_CUDNN_PACKAGE_RELEASE_TAG="$(get_config linux_cuda_cudnn_package_release_tag '')"
+          LINUX_TENSORRT_PACKAGE_RELEASE_TAG="$(get_config linux_tensorrt_package_release_tag '')"
+          LINUX_INCLUDE_META_PACKAGE="$(get_config linux_include_meta_package false)"
+          LINUX_SKIP_CONSUMER_VALIDATION="$(get_config linux_skip_consumer_validation false)"
+          LINUX_SELF_HOSTED_UBUNTU20_RUNTIME_KEY_SET="$(get_config linux_self_hosted_ubuntu20_runtime_key_set self-hosted-ubuntu20)"
 
           role_text="$(printf '%s' "$WINDOWS_SPLIT_PACKAGE_ROLES" | tr '[:upper:]' '[:lower:]')"
           if [ "$RUN_WINDOWS_RUNTIME_PACKAGING" = "true" ] &&
@@ -235,14 +259,46 @@ jobs:
             exit 1
           fi
 
+          linux_role_text="$(printf '%s' "$LINUX_SPLIT_PACKAGE_ROLES" | tr '[:upper:]' '[:lower:]')"
+          if { [ "$RUN_LINUX_RUNTIME_PACKAGING" = "true" ] || [ "$RUN_LINUX_SELF_HOSTED_UBUNTU20_RUNTIME_PACKAGING" = "true" ]; } &&
+             [ "$LINUX_RUNTIME_DELIVERY_MODE" = "split" ] &&
+             { [[ ",$linux_role_text," == *",collection,"* ]] || [[ ",$linux_role_text," == *",meta,"* ]] || [[ "$LINUX_INCLUDE_META_PACKAGE" = "true" ]]; } &&
+             [[ ",$linux_role_text," != *",cuda-cudnn,"* ]] &&
+             [[ ",$linux_role_text," != *",stable-dependencies,"* ]] &&
+             [[ ",$linux_role_text," != *",nvidia-dependencies,"* ]] &&
+             [[ ",$linux_role_text," != *",all,"* ]] &&
+             [ -z "$LINUX_CUDA_CUDNN_PACKAGE_VERSION" ]; then
+            echo "linux_split_package_roles includes collection/meta but no CUDA/cuDNN package version was provided." >&2
+            echo "Pass linux_cuda_cudnn_package_version to pin already-published CUDA/cuDNN packages, or include cuda-cudnn/all in linux_split_package_roles for a dependency refresh." >&2
+            exit 1
+          fi
+
+          if { [ "$RUN_LINUX_RUNTIME_PACKAGING" = "true" ] || [ "$RUN_LINUX_SELF_HOSTED_UBUNTU20_RUNTIME_PACKAGING" = "true" ]; } &&
+             [ "$LINUX_RUNTIME_DELIVERY_MODE" = "split" ] &&
+             { [[ ",$linux_role_text," == *",collection,"* ]] || [[ ",$linux_role_text," == *",meta,"* ]] || [[ "$LINUX_INCLUDE_META_PACKAGE" = "true" ]]; } &&
+             [[ ",$linux_role_text," != *",tensorrt,"* ]] &&
+             [[ ",$linux_role_text," != *",stable-dependencies,"* ]] &&
+             [[ ",$linux_role_text," != *",nvidia-dependencies,"* ]] &&
+             [[ ",$linux_role_text," != *",all,"* ]] &&
+             [ -z "$LINUX_TENSORRT_PACKAGE_VERSION" ]; then
+            echo "linux_split_package_roles includes collection/meta but no TensorRT package version was provided." >&2
+            echo "Pass linux_tensorrt_package_version to pin already-published TensorRT packages, or include tensorrt/all in linux_split_package_roles for a dependency refresh." >&2
+            exit 1
+          fi
+
           dispatch_workflow() {
             local workflow_name="$1"
+            local run_label="$workflow_name"
             shift
+            if [ "${1:-}" = "--label" ]; then
+              run_label="$2"
+              shift 2
+            fi
 
             local start_time
             start_time="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 
-            echo "Dispatching workflow: $workflow_name"
+            echo "Dispatching workflow: $run_label ($workflow_name)"
             gh workflow run "$workflow_name" --repo "$GH_REPO" --ref "$GH_REF_NAME" "$@"
 
             local run_id=""
@@ -270,14 +326,15 @@ jobs:
             fi
 
             jq \
-              --arg workflow "$workflow_name" \
+              --arg workflow "$run_label" \
+              --arg workflowFile "$workflow_name" \
               --argjson id "$run_id" \
               --arg url "$run_url" \
-              '. + [{workflow:$workflow,id:$id,url:$url}]' \
+              '. + [{workflow:$workflow,workflowFile:$workflowFile,id:$id,url:$url}]' \
               "$runs_json" > "$runs_json.tmp"
             mv "$runs_json.tmp" "$runs_json"
 
-            echo "Dispatched $workflow_name -> $run_url"
+            echo "Dispatched $run_label -> $run_url"
           }
 
           if [ "$RUN_DOCS_RELEASE" = "true" ]; then
@@ -313,13 +370,45 @@ jobs:
           fi
 
           if [ "$RUN_LINUX_RUNTIME_PACKAGING" = "true" ]; then
-            dispatch_workflow "runtime-linux" \
+            dispatch_workflow "runtime-linux" --label "runtime-linux-hosted" \
               -f "version=$runtime_version" \
               -f "configuration=$RELEASE_CONFIGURATION" \
               -f "runtime_keys=$LINUX_RUNTIME_KEYS" \
               -f "runtime_key_set=$LINUX_RUNTIME_KEY_SET" \
               -f "runner_mode=$LINUX_RUNNER_MODE" \
-              -f "runtime_delivery_mode=split" \
+              -f "runtime_delivery_mode=$LINUX_RUNTIME_DELIVERY_MODE" \
+              -f "split_package_roles=$LINUX_SPLIT_PACKAGE_ROLES" \
+              -f "meta_package_version=$LINUX_META_PACKAGE_VERSION" \
+              -f "bridge_package_version=$LINUX_BRIDGE_PACKAGE_VERSION" \
+              -f "cuda_cudnn_package_version=$LINUX_CUDA_CUDNN_PACKAGE_VERSION" \
+              -f "cuda_cudnn_package_release_tag=$LINUX_CUDA_CUDNN_PACKAGE_RELEASE_TAG" \
+              -f "tensorrt_package_version=$LINUX_TENSORRT_PACKAGE_VERSION" \
+              -f "tensorrt_package_release_tag=$LINUX_TENSORRT_PACKAGE_RELEASE_TAG" \
+              -f "include_meta_package=$LINUX_INCLUDE_META_PACKAGE" \
+              -f "skip_consumer_validation=$LINUX_SKIP_CONSUMER_VALIDATION" \
+              -f "run_smoke=$RUN_LINUX_SMOKE" \
+              -f "publish_to_github_packages=$PUBLISH_RUNTIME_TO_GITHUB_PACKAGES" \
+              -f "release_tag=$RELEASE_TAG" \
+              -f "attach_to_github_release=$ATTACH_RUNTIME_TO_GITHUB_RELEASE"
+          fi
+
+          if [ "$RUN_LINUX_SELF_HOSTED_UBUNTU20_RUNTIME_PACKAGING" = "true" ]; then
+            dispatch_workflow "runtime-linux" --label "runtime-linux-self-hosted-ubuntu20" \
+              -f "version=$runtime_version" \
+              -f "configuration=$RELEASE_CONFIGURATION" \
+              -f "runtime_keys=$LINUX_SELF_HOSTED_UBUNTU20_RUNTIME_KEYS" \
+              -f "runtime_key_set=$LINUX_SELF_HOSTED_UBUNTU20_RUNTIME_KEY_SET" \
+              -f "runner_mode=self-hosted" \
+              -f "runtime_delivery_mode=$LINUX_RUNTIME_DELIVERY_MODE" \
+              -f "split_package_roles=$LINUX_SPLIT_PACKAGE_ROLES" \
+              -f "meta_package_version=$LINUX_META_PACKAGE_VERSION" \
+              -f "bridge_package_version=$LINUX_BRIDGE_PACKAGE_VERSION" \
+              -f "cuda_cudnn_package_version=$LINUX_CUDA_CUDNN_PACKAGE_VERSION" \
+              -f "cuda_cudnn_package_release_tag=$LINUX_CUDA_CUDNN_PACKAGE_RELEASE_TAG" \
+              -f "tensorrt_package_version=$LINUX_TENSORRT_PACKAGE_VERSION" \
+              -f "tensorrt_package_release_tag=$LINUX_TENSORRT_PACKAGE_RELEASE_TAG" \
+              -f "include_meta_package=$LINUX_INCLUDE_META_PACKAGE" \
+              -f "skip_consumer_validation=$LINUX_SKIP_CONSUMER_VALIDATION" \
               -f "run_smoke=$RUN_LINUX_SMOKE" \
               -f "publish_to_github_packages=$PUBLISH_RUNTIME_TO_GITHUB_PACKAGES" \
               -f "release_tag=$RELEASE_TAG" \
