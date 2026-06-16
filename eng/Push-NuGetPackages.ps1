@@ -331,7 +331,7 @@ function Resolve-NuGetExePath {
     $candidatePaths += (Join-Path $env:RUNNER_TEMP "nuget.exe")
   }
 
-  $candidatePaths += (Join-Path ([IO.Path]::GetTempPath()) "nuget.exe")
+  $candidatePaths += [IO.Path]::Combine([IO.Path]::GetTempPath(), "nuget.exe")
 
   foreach ($candidatePath in $candidatePaths) {
     if (Test-Path -LiteralPath $candidatePath -PathType Leaf) {
@@ -350,7 +350,7 @@ function Resolve-NuGetExePath {
     New-Item -ItemType Directory -Path $downloadRoot -Force | Out-Null
   }
 
-  $downloadPath = Join-Path $downloadRoot "nuget.exe"
+  $downloadPath = Join-Path -Path $downloadRoot -ChildPath "nuget.exe"
   Write-Host "Downloading nuget.exe for local NuGet.config API key fallback."
   Invoke-WebRequest -Uri "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe" -OutFile $downloadPath
   $downloadPath
@@ -378,7 +378,7 @@ try {
   $usingEncryptedLocalNuGetConfig = $false
 
   if ($hasSourceCredentials) {
-    $nugetConfigPath = Join-Path ([IO.Path]::GetTempPath()) ("jyppx-nuget-{0}.config" -f [Guid]::NewGuid().ToString("N"))
+    $nugetConfigPath = [IO.Path]::Combine([IO.Path]::GetTempPath(), ("jyppx-nuget-{0}.config" -f [Guid]::NewGuid().ToString("N")))
     New-TemporaryNuGetConfig -Path $nugetConfigPath -PackageSourceName $SourceName -PackageSource $Source -SourceUserName $SourceUserName -SourcePassword $sourcePassword
     $pushSource = $SourceName
     Write-Host "Using temporary NuGet.config source credentials for '$SourceName'."

@@ -195,7 +195,7 @@ function Get-RestorePackagesPath {
     return Join-Path $root $safeKey
   }
 
-  return Join-Path ([System.IO.Path]::GetTempPath()) ("jyppx-pkgcache/" + $safeKey)
+  return [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), "jyppx-pkgcache", $safeKey)
 }
 
 function Get-NupkgMetadata {

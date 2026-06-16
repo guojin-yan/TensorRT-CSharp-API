@@ -286,10 +286,10 @@ function Get-LocalPackageCachePath {
 
   $safeKey = Get-SafePathName -Value $RuntimeKey
   if ($env:RUNNER_TEMP) {
-    return Join-Path $env:RUNNER_TEMP "jyppx-split-packages\$safeKey"
+    return [System.IO.Path]::Combine($env:RUNNER_TEMP, "jyppx-split-packages", $safeKey)
   }
 
-  return Join-Path ([System.IO.Path]::GetTempPath()) "jyppx-split-packages\$safeKey"
+  return [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), "jyppx-split-packages", $safeKey)
 }
 
 function Remove-SplitPackageIntermediatePaths {
