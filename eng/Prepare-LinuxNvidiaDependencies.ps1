@@ -85,6 +85,40 @@ function New-AptVersionPin {
   return "=$Version*"
 }
 
+function Test-CudaCrtPackageIsAvailable {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$CudaPackageVersion
+  )
+
+  $parsed = $null
+  if (-not [System.Version]::TryParse($CudaPackageVersion, [ref]$parsed)) {
+    return $false
+  }
+
+  return $parsed -ge [System.Version]::new(12, 9)
+}
+
+function Test-TensorRtSafeHeadersPackageIsAvailable {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$TensorRtLine,
+    [Parameter(Mandatory = $true)]
+    [string]$TensorRtVersion
+  )
+
+  if ($TensorRtLine -eq "11") {
+    return $true
+  }
+
+  $parsed = $null
+  if ([System.Version]::TryParse($TensorRtVersion, [ref]$parsed)) {
+    return $TensorRtLine -eq "10" -and $parsed -ge [System.Version]::new(10, 16)
+  }
+
+  return $false
+}
+
 function Get-LinuxDependencyPlan {
   param(
     [Parameter(Mandatory = $true)]
@@ -118,7 +152,6 @@ function Get-LinuxDependencyPlan {
   )
 
   $devTensorRtPackages = @(
-    "libnvinfer-safe-headers-dev",
     "libnvinfer-headers-dev",
     "libnvinfer-headers-plugin-dev",
     "libnvinfer-dev",
@@ -128,6 +161,10 @@ function Get-LinuxDependencyPlan {
     "libnvonnxparsers-dev",
     "libnvinfer-bin"
   )
+
+  if (Test-TensorRtSafeHeadersPackageIsAvailable -TensorRtLine $tensorRtLine -TensorRtVersion ([string]$Package.tensorRtVersion)) {
+    $devTensorRtPackages = @("libnvinfer-safe-headers-dev") + $devTensorRtPackages
+  }
 
   if ($tensorRtLine -eq "8") {
     $runtimeTensorRtPackages += "libnvparsers$tensorRtLine"
@@ -140,7 +177,10 @@ function Get-LinuxDependencyPlan {
 
   $aptPackages = New-Object System.Collections.Generic.List[string]
   $aptPackages.Add("cuda-cudart-dev-$cudaMinor")
-  $aptPackages.Add("cuda-crt-$cudaMinor")
+  if (Test-CudaCrtPackageIsAvailable -CudaPackageVersion $cudaPackageVersion) {
+    $aptPackages.Add("cuda-crt-$cudaMinor")
+  }
+
   foreach ($name in @($runtimeTensorRtPackages + $devTensorRtPackages)) {
     $aptPackages.Add($name + (New-AptVersionPin -Version $tensorRtDebVersion))
   }

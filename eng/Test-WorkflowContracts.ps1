@@ -188,6 +188,35 @@ $results.Add([pscustomobject]@{
     detail = "cuda-crt-12-9"
   })
 
+$legacyCudaDependencyPlanJson = (pwsh -NoProfile -File (Join-Path $RepositoryRoot "eng\Prepare-LinuxNvidiaDependencies.ps1") -RuntimePackageKey "linux-x64-ubuntu22.04-trt8.6-cuda11.8-cudnn8.9" -DescribeDependencyPlan | Out-String).Trim()
+$legacyCudaDependencyPlan = $legacyCudaDependencyPlanJson | ConvertFrom-Json
+$results.Add([pscustomobject]@{
+    workflow = "eng\Prepare-LinuxNvidiaDependencies.ps1"
+    requirement = "Legacy CUDA 11.8 dependency plan omits unavailable CUDA CRT package"
+    status = if ($legacyCudaDependencyPlan.aptPackages -notcontains "cuda-crt-11-8") { "passed" } else { "failed" }
+    detail = "cuda-crt-11-8"
+  })
+
+$cuda121DependencyPlanJson = (pwsh -NoProfile -File (Join-Path $RepositoryRoot "eng\Prepare-LinuxNvidiaDependencies.ps1") -RuntimePackageKey "linux-x64-ubuntu22.04-trt8.6-cuda12.1-cudnn8.9" -DescribeDependencyPlan | Out-String).Trim()
+$cuda121DependencyPlan = $cuda121DependencyPlanJson | ConvertFrom-Json
+$results.Add([pscustomobject]@{
+    workflow = "eng\Prepare-LinuxNvidiaDependencies.ps1"
+    requirement = "CUDA 12.1 dependency plan omits unavailable CUDA CRT package"
+    status = if ($cuda121DependencyPlan.aptPackages -notcontains "cuda-crt-12-1") { "passed" } else { "failed" }
+    detail = "cuda-crt-12-1"
+  })
+
+$legacyTensorRt10PlanJson = (pwsh -NoProfile -File (Join-Path $RepositoryRoot "eng\Prepare-LinuxNvidiaDependencies.ps1") -RuntimePackageKey "linux-x64-ubuntu22.04-trt10.11-cuda12.9-cudnn9.22" -DescribeDependencyPlan | Out-String).Trim()
+$legacyTensorRt10Plan = $legacyTensorRt10PlanJson | ConvertFrom-Json
+$legacyTensorRtPlans = @($legacyCudaDependencyPlan, $legacyTensorRt10Plan)
+$legacySafeHeaders = @($legacyTensorRtPlans | ForEach-Object { $_.aptPackages } | Where-Object { $_ -like "libnvinfer-safe-headers-dev=*" })
+$results.Add([pscustomobject]@{
+    workflow = "eng\Prepare-LinuxNvidiaDependencies.ps1"
+    requirement = "TensorRT 8.6 and 10.11 dependency plans omit unavailable safe headers package"
+    status = if ($legacySafeHeaders.Count -eq 0) { "passed" } else { "failed" }
+    detail = if ($legacySafeHeaders.Count -eq 0) { "trt8.6/trt10.11" } else { $legacySafeHeaders -join ", " }
+  })
+
 $outputRoot = Join-Path $RepositoryRoot "artifacts\workflow-contracts"
 New-Item -ItemType Directory -Path $outputRoot -Force | Out-Null
 
