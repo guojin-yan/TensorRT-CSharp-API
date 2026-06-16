@@ -103,11 +103,6 @@ on:
         required: false
         default: true
         type: boolean
-      sign_windows_consumer_output:
-        description: Sign Windows package-consumer output before smoke
-        required: false
-        default: true
-        type: boolean
       run_linux_smoke:
         description: Run Linux runtime package consumer smoke
         required: false
@@ -167,7 +162,7 @@ jobs:
       LINUX_RUNTIME_KEYS: ${{ inputs.linux_runtime_keys }}
       LINUX_RUNNER_MODE: ${{ inputs.linux_runner_mode }}
       RUN_WINDOWS_SMOKE: ${{ inputs.run_windows_smoke }}
-      SIGN_WINDOWS_CONSUMER_OUTPUT: ${{ inputs.sign_windows_consumer_output }}
+      SIGN_WINDOWS_CONSUMER_OUTPUT: true
       RUN_LINUX_SMOKE: ${{ inputs.run_linux_smoke }}
       PUBLISH_MANAGED_TO_NUGET: ${{ inputs.publish_managed_to_nuget }}
       PUBLISH_MANAGED_TO_GITHUB_PACKAGES: ${{ inputs.publish_managed_to_github_packages }}
