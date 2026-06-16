@@ -4,7 +4,9 @@
 
 #include <NvInfer.h>
 
+#if defined(_WIN32)
 #include <windows.h>
+#endif
 
 class ProbeLogger final : public nvinfer1::ILogger
 {
@@ -15,6 +17,7 @@ public:
     }
 };
 
+#if defined(_WIN32)
 std::string get_module_path(wchar_t const* module_name)
 {
     HMODULE module = GetModuleHandleW(module_name);
@@ -35,6 +38,7 @@ std::string get_module_path(wchar_t const* module_name)
     WideCharToMultiByte(CP_UTF8, 0, buffer, static_cast<int>(length), path.data(), size_needed, nullptr, nullptr);
     return path;
 }
+#endif
 
 int main()
 {
@@ -47,9 +51,13 @@ int main()
         return 1;
     }
 
+#if defined(_WIN32)
     std::cout << "Loaded nvinfer.dll: " << get_module_path(L"nvinfer.dll") << std::endl;
     std::cout << "Loaded nvinfer_builder_resource.dll: " << get_module_path(L"nvinfer_builder_resource.dll") << std::endl;
     std::cout << "Loaded nvinfer_builder_resource_10.dll: " << get_module_path(L"nvinfer_builder_resource_10.dll") << std::endl;
+#else
+    std::cout << "Loaded TensorRT through the platform dynamic loader." << std::endl;
+#endif
 
     const uint32_t explicitBatch = 1U << static_cast<uint32_t>(nvinfer1::NetworkDefinitionCreationFlag::kEXPLICIT_BATCH);
     const uint32_t explicitPrecision = 1U << static_cast<uint32_t>(nvinfer1::NetworkDefinitionCreationFlag::kEXPLICIT_PRECISION);
