@@ -67,4 +67,4 @@ $matrix = foreach ($package in $packages) {
   }
 }
 
-$matrix | ConvertTo-Json -Depth 5 -Compress
+ConvertTo-Json -InputObject @($matrix) -Depth 5 -Compress

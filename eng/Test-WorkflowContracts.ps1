@@ -147,6 +147,14 @@ foreach ($contract in $workflowContracts) {
   }
 }
 
+$singleLinuxMatrixJson = (pwsh -NoProfile -File (Join-Path $RepositoryRoot "eng\Resolve-RuntimeMatrix.ps1") -Platform linux -RuntimeKey "linux-x64-trt11.0-cuda12.9-cudnn9.22" | Out-String).Trim()
+$results.Add([pscustomobject]@{
+    workflow = "eng\Resolve-RuntimeMatrix.ps1"
+    requirement = "single runtime key emits a JSON array"
+    status = if ($singleLinuxMatrixJson.StartsWith("[")) { "passed" } else { "failed" }
+    detail = "linux-x64-trt11.0-cuda12.9-cudnn9.22"
+  })
+
 $outputRoot = Join-Path $RepositoryRoot "artifacts\workflow-contracts"
 New-Item -ItemType Directory -Path $outputRoot -Force | Out-Null
 
