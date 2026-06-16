@@ -425,8 +425,10 @@ $tensorRtLibraries = Add-StagedLibraryLinks `
   -Patterns @(
     "/usr/lib/x86_64-linux-gnu/libnvinfer*.so*",
     "/usr/lib/x86_64-linux-gnu/libnvonnxparser*.so*",
+    "/usr/lib/x86_64-linux-gnu/libnvparsers*.so*",
     "/usr/lib/aarch64-linux-gnu/libnvinfer*.so*",
-    "/usr/lib/aarch64-linux-gnu/libnvonnxparser*.so*"
+    "/usr/lib/aarch64-linux-gnu/libnvonnxparser*.so*",
+    "/usr/lib/aarch64-linux-gnu/libnvparsers*.so*"
   ) `
   -DestinationDirectory $tensorRtLibraryRoot `
   -Label "TensorRT"

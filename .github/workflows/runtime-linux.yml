@@ -123,6 +123,22 @@ jobs:
           "value={""include"":$value}" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
           "has_entries=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
+      - name: Ensure GitHub Release exists
+        if: ${{ inputs.attach_to_github_release && inputs.release_tag != '' }}
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          $releaseTag = "${{ inputs.release_tag }}"
+          $PSNativeCommandUseErrorActionPreference = $false
+          gh release view $releaseTag --repo "$env:GH_REPO" *> $null
+          $releaseExists = $LASTEXITCODE -eq 0
+          $PSNativeCommandUseErrorActionPreference = $true
+          if (-not $releaseExists) {
+            gh release create $releaseTag --title $releaseTag --notes "Automated Linux runtime release for $releaseTag" --repo "$env:GH_REPO"
+          }
+
   managed:
     needs: prepare
     if: ${{ needs.prepare.outputs.has_entries == 'true' }}
@@ -311,9 +327,10 @@ jobs:
             throw "No Linux runtime packages were found for direct release upload."
           }
 
+          $releaseTag = "${{ inputs.release_tag }}"
           foreach ($package in $packages) {
             Write-Host "Uploading release asset: $($package.FullName)"
-            gh release upload "${{ inputs.release_tag }}" $package.FullName --clobber --repo "$env:GH_REPO"
+            gh release upload $releaseTag $package.FullName --clobber --repo "$env:GH_REPO"
           }
 
       - name: Publish Linux runtime package to GitHub Packages

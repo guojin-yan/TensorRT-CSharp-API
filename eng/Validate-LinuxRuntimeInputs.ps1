@@ -65,4 +65,19 @@ if (-not [string]::IsNullOrWhiteSpace($CudnnRoot)) {
   Test-GlobMatches -BaseRoot $CudnnRoot -Patterns $package.cudnnFiles -Label "cuDNN"
 }
 
+if ($package.cudaVersion -like "11.*") {
+  $cudaIncludeCandidates = @(
+    (Join-Path $CudaRoot "include"),
+    (Join-Path $CudaRoot "targets\x86_64-linux\include"),
+    (Join-Path $CudaRoot "targets\aarch64-linux\include")
+  )
+
+  $cudaIncludeRoot = $cudaIncludeCandidates |
+    Where-Object { Test-Path -LiteralPath (Join-Path $_ "crt\host_defines.h") -PathType Leaf } |
+    Select-Object -First 1
+  if (-not $cudaIncludeRoot) {
+    throw "CUDA CRT headers were not found for '$RuntimePackageKey'. Expected crt/host_defines.h under '$CudaRoot'."
+  }
+}
+
 Write-Host "Linux runtime input validation passed for $RuntimePackageKey"
