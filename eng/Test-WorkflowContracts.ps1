@@ -103,6 +103,8 @@ $workflowContracts = @(
       New-Requirement -Needle "workflow_dispatch" -Description "manual trigger"
       New-Requirement -Needle "Resolve-RuntimeMatrix.ps1" -Description "runtime matrix generation"
       New-Requirement -Needle "Resolve-RuntimeRoots.ps1" -Description "runtime root resolution"
+      New-Requirement -Needle "Pack managed package" -Description "Linux runtime managed package artifact build"
+      New-Requirement -Needle "managed-packages-runtime-linux" -Description "Linux runtime managed package artifact"
       New-Requirement -Needle "runner_mode" -Description "hosted/self-hosted runner mode"
       New-Requirement -Needle "Prepare-LinuxNvidiaDependencies.ps1" -Description "hosted Linux NVIDIA dependency preparation"
       New-Requirement -Needle "ubuntu-latest" -Description "hosted Linux runner"

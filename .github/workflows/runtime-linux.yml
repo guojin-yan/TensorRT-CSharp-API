@@ -126,14 +126,44 @@ jobs:
   managed:
     needs: prepare
     if: ${{ needs.prepare.outputs.has_entries == 'true' }}
-    uses: ./.github/workflows/package-managed.yml
-    with:
-      version: ${{ needs.prepare.outputs.package_version }}
-      configuration: ${{ inputs.configuration }}
-      publish_to_nuget: false
-      publish_to_github_packages: false
-      artifact_name: managed-packages-runtime-linux
-    secrets: inherit
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Restore solution
+        run: dotnet restore TensorRtSharp.sln
+
+      - name: Validate runtime manifest
+        run: pwsh -NoProfile -File .\eng\Validate-RuntimeManifest.ps1
+
+      - name: Validate binding generator outputs
+        run: pwsh -NoProfile -File .\eng\Test-BindingGeneratorOutputs.ps1
+
+      - name: Build solution
+        run: dotnet build TensorRtSharp.sln -c "${{ inputs.configuration }}" --no-restore
+
+      - name: Test project quality
+        run: dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c "${{ inputs.configuration }}" --no-build
+
+      - name: Pack managed package
+        run: dotnet pack .\pack\JYPPX.TensorRT.CSharp.API\JYPPX.TensorRT.CSharp.API.csproj -c "${{ inputs.configuration }}" -o .\artifacts\managed -p:JYPPXPackageVersion=${{ needs.prepare.outputs.package_version }}
+
+      - name: Validate managed package content
+        run: pwsh -NoProfile -File .\eng\Test-ManagedPackageContent.ps1
+
+      - name: Upload managed artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: managed-packages-runtime-linux
+          path: artifacts/managed/*.nupkg
 
   pack-runtime:
     needs:
