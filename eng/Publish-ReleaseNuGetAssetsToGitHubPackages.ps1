@@ -105,14 +105,17 @@ foreach ($asset in $assets) {
   }
 
   if ($matchedByName -or $matchedByPattern) {
-    $selectedByName[$assetName] = $asset
+    $selectedByName[$assetName] = [pscustomobject]@{
+      assetName = $assetName
+      assetSize = [long]$asset.size
+    }
   }
 }
 
 $selectedAssets = @(
   $selectedByName.GetEnumerator() |
     ForEach-Object { $_.Value } |
-    Sort-Object -Property @{ Expression = { [long]$_.size } }, @{ Expression = { [string]$_.name } }
+    Sort-Object -Property @{ Expression = { [long]$_.assetSize } }, @{ Expression = { [string]$_.assetName } }
 )
 
 if ($selectedAssets.Count -eq 0) {
@@ -121,9 +124,9 @@ if ($selectedAssets.Count -eq 0) {
 
 Write-Host "Selected $($selectedAssets.Count) release asset(s) from $ReleaseTag."
 
-$oversizedAssets = @($selectedAssets | Where-Object { [long]$_.size -ge $MaxPackageBytes })
+$oversizedAssets = @($selectedAssets | Where-Object { [long]$_.assetSize -ge $MaxPackageBytes })
 if ($oversizedAssets.Count -gt 0) {
-  $details = $oversizedAssets | ForEach-Object { "$($_.name)=$($_.size)" }
+  $details = $oversizedAssets | ForEach-Object { "$($_.assetName)=$($_.assetSize)" }
   throw "One or more assets exceed MaxPackageBytes '$MaxPackageBytes': $($details -join ', ')"
 }
 
@@ -133,13 +136,13 @@ New-Item -ItemType Directory -Path $downloadRoot -Force | Out-Null
 $published = New-Object System.Collections.Generic.List[object]
 try {
   foreach ($asset in $selectedAssets) {
-    $assetName = [string]$asset.name
+    $assetName = [string]$asset.assetName
     if ([string]::IsNullOrWhiteSpace($assetName)) {
       throw "A selected release asset has an empty name. Refusing to publish an ambiguous package asset."
     }
 
-    $assetSize = [long]$asset.size
-    $packagePath = Join-Path -Path $downloadRoot -ChildPath $assetName
+    $assetSize = [long]$asset.assetSize
+    $packagePath = [IO.Path]::Combine($downloadRoot, $assetName)
 
     for ($attempt = 1; $attempt -le $DownloadAttempts; $attempt++) {
       if (Test-Path -LiteralPath $packagePath -PathType Leaf) {
@@ -165,7 +168,7 @@ try {
     }
 
     Write-Host "Publishing release asset to GitHub Packages: $assetName"
-    pwsh -NoProfile -File (Join-Path $RepositoryRoot "eng\Push-NuGetPackages.ps1") `
+    pwsh -NoProfile -File ([IO.Path]::Combine($RepositoryRoot, "eng", "Push-NuGetPackages.ps1")) `
       -PackageRoot $downloadRoot `
       -PackagePattern $assetName `
       -Source $PackageSource `
@@ -191,10 +194,10 @@ finally {
   }
 }
 
-$reportRoot = Join-Path $RepositoryRoot "artifacts\release-package-publish"
+$reportRoot = [IO.Path]::Combine($RepositoryRoot, "artifacts", "release-package-publish")
 New-Item -ItemType Directory -Path $reportRoot -Force | Out-Null
 $safeTag = $ReleaseTag -replace '[^A-Za-z0-9._-]', '-'
-$reportPath = Join-Path $reportRoot "github-packages-$safeTag.json"
+$reportPath = [IO.Path]::Combine($reportRoot, "github-packages-$safeTag.json")
 $report = [ordered]@{
   releaseTag = [string]$ReleaseTag
   repository = [string]$Repository
