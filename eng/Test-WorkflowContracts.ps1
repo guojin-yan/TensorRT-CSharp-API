@@ -162,6 +162,15 @@ $workflowContracts = @(
       New-Requirement -Needle "asset_patterns" -Description "release asset pattern input"
     )
   }
+  [pscustomobject]@{
+    path = "eng\Publish-ReleaseNuGetAssetsToGitHubPackages.ps1"
+    requirements = @(
+      New-Requirement -Needle '$ErrorActionPreference = "Stop"' -Description "fail-fast PowerShell errors"
+      New-Requirement -Needle "A selected release asset has an empty name" -Description "empty release asset guard"
+      New-Requirement -Needle "Failed to publish release asset" -Description "NuGet push exit-code guard"
+      New-Requirement -Needle 'Selected $(' -Description "selected asset count logging"
+    )
+  }
 )
 
 $results = New-Object System.Collections.Generic.List[object]

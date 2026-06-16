@@ -46,6 +46,7 @@ if ($MaxPackageBytes -lt 1) {
 $utf8 = [System.Text.UTF8Encoding]::new($false)
 [Console]::OutputEncoding = $utf8
 $OutputEncoding = $utf8
+$ErrorActionPreference = "Stop"
 
 function Expand-TokenList {
   param(
@@ -82,27 +83,43 @@ if ($LASTEXITCODE -ne 0) {
 
 $release = $releaseJson | ConvertFrom-Json
 $assets = @($release.assets)
-$selectedAssets = @(
-  foreach ($asset in $assets) {
-    $assetName = [string]$asset.name
-    $matchedByName = $names.Count -gt 0 -and ($names -contains $assetName)
-    $matchedByPattern = $false
-    foreach ($pattern in $patterns) {
-      if ($assetName -like $pattern) {
-        $matchedByPattern = $true
-        break
-      }
-    }
+$selectedByName = [ordered]@{}
+foreach ($asset in $assets) {
+  if ($null -eq $asset) {
+    continue
+  }
 
-    if ($matchedByName -or $matchedByPattern) {
-      $asset
+  $assetName = [string]$asset.name
+  if ([string]::IsNullOrWhiteSpace($assetName)) {
+    Write-Warning "Skipping a release asset with an empty name on $ReleaseTag."
+    continue
+  }
+
+  $matchedByName = $names.Count -gt 0 -and ($names -contains $assetName)
+  $matchedByPattern = $false
+  foreach ($pattern in $patterns) {
+    if ($assetName -like $pattern) {
+      $matchedByPattern = $true
+      break
     }
   }
-) | Sort-Object @{ Expression = { [long]$_.size } }, name -Unique
+
+  if ($matchedByName -or $matchedByPattern) {
+    $selectedByName[$assetName] = $asset
+  }
+}
+
+$selectedAssets = @(
+  $selectedByName.GetEnumerator() |
+    ForEach-Object { $_.Value } |
+    Sort-Object -Property @{ Expression = { [long]$_.size } }, @{ Expression = { [string]$_.name } }
+)
 
 if ($selectedAssets.Count -eq 0) {
   throw "No release assets matched the requested names/patterns on $ReleaseTag."
 }
+
+Write-Host "Selected $($selectedAssets.Count) release asset(s) from $ReleaseTag."
 
 $oversizedAssets = @($selectedAssets | Where-Object { [long]$_.size -ge $MaxPackageBytes })
 if ($oversizedAssets.Count -gt 0) {
@@ -117,6 +134,10 @@ $published = New-Object System.Collections.Generic.List[object]
 try {
   foreach ($asset in $selectedAssets) {
     $assetName = [string]$asset.name
+    if ([string]::IsNullOrWhiteSpace($assetName)) {
+      throw "A selected release asset has an empty name. Refusing to publish an ambiguous package asset."
+    }
+
     $assetSize = [long]$asset.size
     $packagePath = Join-Path $downloadRoot $assetName
 
@@ -152,6 +173,9 @@ try {
       -TimeoutSeconds 3600 `
       -MaxAttempts 3 `
       -RetryDelaySeconds $RetryDelaySeconds
+    if ($LASTEXITCODE -ne 0) {
+      throw "Failed to publish release asset '$assetName' to GitHub Packages."
+    }
 
     $published.Add([pscustomobject]@{
         name = $assetName
