@@ -227,10 +227,22 @@ function Get-LocalNuGetApiKeyEntries {
       throw "A local NuGet API key entry for '$Source' contains non-ASCII characters. Recreate the local key with NuGet tooling or provide NUGET_API_KEY as a plain-text secret."
     }
 
+    $originalKeys = @(
+      foreach ($node in $nodes) {
+        $key = [string]$node.GetAttribute("key")
+        $nodeValue = [string]$node.GetAttribute("value")
+        if ($nodeValue -eq $value) {
+          $key
+        }
+      }
+    ) | Select-Object -Unique
+    $originalKey = if ($originalKeys.Count -gt 0) { [string]$originalKeys[0] } else { $Source }
+
     foreach ($alias in $aliases) {
       $entries.Add([pscustomobject]@{
-          Key   = $alias
-          Value = $value
+          Key         = $alias
+          OriginalKey = $originalKey
+          Value       = $value
         })
     }
   }
@@ -363,7 +375,7 @@ $nugetConfigPath = $null
 try {
   $pushSource = $Source
   $usingLocalApiKeyFallback = $false
-  $localApiKey = $null
+  $usingEncryptedLocalNuGetConfig = $false
 
   if ($hasSourceCredentials) {
     $nugetConfigPath = Join-Path ([IO.Path]::GetTempPath()) ("jyppx-nuget-{0}.config" -f [Guid]::NewGuid().ToString("N"))
@@ -374,13 +386,13 @@ try {
   elseif (-not $hasApiKey) {
     $localApiKeyEntries = @(Get-LocalNuGetApiKeyEntries -Source $Source)
     if ($localApiKeyEntries.Count -gt 0) {
-      $localApiKey = [string]$localApiKeyEntries[0].Value
       if ($Source -match "nuget\.org") {
-        $pushSource = "nuget.org"
+        $pushSource = [string]$localApiKeyEntries[0].OriginalKey
       }
 
       $usingLocalApiKeyFallback = $true
-      Write-Host "Using the current user's NuGet.config local API key entries for '$pushSource'."
+      $usingEncryptedLocalNuGetConfig = $true
+      Write-Host "Using the current user's NuGet.config local API key entries through source '$pushSource'."
     }
   }
 
@@ -398,7 +410,7 @@ try {
       $clientName = if ($useNuGetExe) { "nuget.exe" } else { "dotnet" }
       Write-Host ("Pushing package attempt {0}/{1}: {2} ({3} MB) Client={4} ApiKey={5} SourceCredentials={6} LocalConfigApiKey={7} DisableBuffering={8}" -f $attempt, $MaxAttempts, $package.FullName, $packageSizeMb, $clientName, $hasApiKey, $hasSourceCredentials, $usingLocalApiKeyFallback, $disableBuffering)
 
-      $effectiveApiKey = if ($hasSourceCredentials) { $PushApiKey } elseif ($usingLocalApiKeyFallback) { $localApiKey } else { $ApiKey }
+      $effectiveApiKey = if ($hasSourceCredentials) { $PushApiKey } else { $ApiKey }
       if ($useNuGetExe) {
         $nugetExePath = Resolve-NuGetExePath
         $arguments = @(
