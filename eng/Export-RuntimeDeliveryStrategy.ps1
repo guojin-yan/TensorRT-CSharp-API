@@ -17,8 +17,14 @@ function Get-DeliveryLane {
     [object]$Package
   )
 
-  if ($Package.validationState -eq "dry-run-only") {
-    return "hold-linux-validation"
+  if ($Package.platform -eq "linux") {
+    if ($Package.architecture -ne "x64") {
+      return "hold-linux-validation"
+    }
+
+    if ($Package.linuxDistroVersion -eq "20.04" -or $Package.runnerMode -eq "self-hosted") {
+      return "hold-linux-validation"
+    }
   }
 
   switch ($Package.distributionTier) {
@@ -46,7 +52,7 @@ function Get-DeliveryRecommendation {
       return "Keep out of broad public NuGet publication until bridge, CudaCudnn, TensorRt, and collection packages are validated."
     }
     "hold-linux-validation" {
-      return "Do not publish. Keep as dry-run-only until a real Linux x64 self-hosted runner validates build, pack, and package consumer restore."
+      return "Do not publish until a dedicated runner/dependency line validates build, pack, and package consumer restore."
     }
     default {
       return "Review manually before release."
@@ -129,7 +135,7 @@ $lines.Add("")
 $lines.Add("- public-preview: small enough and locally validated enough to use as a public validation sample after license review.")
 $lines.Add("- private-feed: suitable for controlled internal feeds while validation, size, or license constraints remain unresolved.")
 $lines.Add("- split-delivery-design: too large or broad for a single default public package; split into bridge, CudaCudnn, TensorRt, and collection packages first.")
-$lines.Add("- hold-linux-validation: Linux dry-run-only packages; do not publish before real Linux runner validation.")
+$lines.Add("- hold-linux-validation: Linux lines that need a dedicated runner/dependency strategy before publication, such as Ubuntu 20.04 self-hosted or future ARM/Jetson targets.")
 $lines.Add("")
 $lines.Add("| Key | Tier | Validation | Delivery lane | Recommendation |")
 $lines.Add("| --- | --- | --- | --- | --- |")
@@ -181,7 +187,8 @@ if ($splitPackages.Count -gt 0) {
 $lines.Add("## Release blockers")
 $lines.Add("")
 $lines.Add("- NVIDIA TensorRT/CUDA redistribution terms are still a blocker before public release.")
-$lines.Add("- Linux packages remain dry-run-only until build, pack, package consumer validation, and optional smoke run on a real Linux x64 runner.")
+$lines.Add("- Linux Ubuntu 22.04 x64 is the hosted publication line once build, pack, package consumer validation, and release/package upload pass.")
+$lines.Add("- Linux Ubuntu 20.04 x64, ARM/SBSA, Jetson/L4T, and non-Ubuntu targets remain blocked until their dedicated runner and NVIDIA dependency strategy are validated.")
 $lines.Add("- Large Windows runtime component packages should stay on GitHub Packages or GitHub Releases unless their package size fits nuget.org and NVIDIA redistribution terms are cleared.")
 
 $markdownPath = Join-Path $outputRoot "runtime-delivery-strategy.md"

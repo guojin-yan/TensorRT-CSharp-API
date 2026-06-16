@@ -117,7 +117,7 @@ Current Linux workflow modules:
 - `runtime-linux.yml`
 - `release-bundle.yml`
 
-Linux packages remain `dry-run-only` until a matching runner validates build, asset collection, package restore, native `.so` copy, and optional GPU smoke.
+Ubuntu 22.04 x64 is the current hosted Linux publication line and has a successful remote release run. Ubuntu 20.04 x64 remains self-hosted/manual-root only. Ubuntu 24.04 x64 remains hosted for the modern combinations only. Linux arm64/SBSA and Jetson/L4T still need a separate package line before they can be published.
 
 ## Publication Risk
 

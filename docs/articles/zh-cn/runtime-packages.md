@@ -111,7 +111,7 @@ Linux runtime 包名必须包含发行版版本和 CPU 架构，因为 NVIDIA �
 - `runtime-linux.yml`
 - `release-bundle.yml`
 
-Linux 包保持 `dry-run-only`，直到匹配的 runner 完成 build、资产收集、package restore、`.so` 复制和可选 GPU smoke。
+Ubuntu 22.04 x64 是当前 hosted Linux 发布主线，已经有远程 release 成功运行作为证据。Ubuntu 20.04 x64 仍然只走 self-hosted/manual-root。Ubuntu 24.04 x64 仍然只覆盖现代组合。Linux arm64/SBSA 与 Jetson/L4T 需要单独建包线后才能发布。
 
 ## 发布风险
 

@@ -12,7 +12,7 @@ As of 2026-06-12 the release candidate gate starts from a zero-missing interface
 The release candidate gate is split into two paths:
 
 - Hosted gate: source build, runtime manifest validation, binding generator determinism, workflow contracts, DocFX, managed package content, project quality tests, and report exports.
-- Self-hosted runtime gate: native build, runtime asset collection, runtime nupkg, package consumer validation, optional GPU smoke, and publish readiness for the selected runtime key.
+- Runtime gate: native build, runtime asset collection, runtime nupkg, package consumer validation, optional GPU smoke, and publish readiness for the selected runtime key. Windows uses the self-hosted Windows runner; Linux Ubuntu 22.04 x64 uses hosted runners, while Ubuntu 20.04 and future ARM/Jetson lines require explicit self-hosted or dedicated runners.
 
 Current primary Windows runtime keys:
 
@@ -102,4 +102,4 @@ Before using the remote publication lanes:
 
 - `package-managed.yml` with `publish_to_nuget=true` uses `NUGET_API_KEY` when the secret is present, and that value must be a plain-text ASCII nuget.org API key. Leave the secret unset to rely on the self-hosted Windows runner's current-user NuGet configuration; the fallback verifies common nuget.org aliases such as `nuget.org`, `https://api.nuget.org/v3/index.json`, and `https://www.nuget.org`, then lets NuGet or `nuget.exe` read the original user config directly. Encrypted local credential blobs and machine-generated exports are not valid secret values.
 - `runtime-windows.yml` requires the Windows self-hosted runner to stay online with the labels `self-hosted`, `windows`, and `x64`.
-- `runtime-linux.yml` requires a separate Linux x64 self-hosted runner. If no Linux runner is available yet, leave `linux_runtime_keys` empty in `release-bundle.yml` so the Linux module cleanly no-ops.
+- `runtime-linux.yml` can publish the hosted Ubuntu 22.04 x64 matrix through GitHub-hosted runners. Ubuntu 20.04 x64 must use `runner_mode=self-hosted`, Ubuntu 24.04 x64 only covers the modern combinations, and ARM/Jetson targets need separate package lines before publication.
