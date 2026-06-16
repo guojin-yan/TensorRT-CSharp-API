@@ -442,7 +442,6 @@
                                                "lib/libnvinfer.so*",
                                                "lib/libnvinfer_plugin.so*",
                                                "lib/libnvonnxparser.so*",
-                                               "lib/libnvinfer_builder_resource*.so*",
                                                "lib/libnvinfer_dispatch.so*",
                                                "lib/libnvinfer_lean.so*"
                                            ],
@@ -480,7 +479,6 @@
                                                "lib/libnvinfer.so*",
                                                "lib/libnvinfer_plugin.so*",
                                                "lib/libnvonnxparser.so*",
-                                               "lib/libnvinfer_builder_resource*.so*",
                                                "lib/libnvinfer_dispatch.so*",
                                                "lib/libnvinfer_lean.so*"
                                            ],

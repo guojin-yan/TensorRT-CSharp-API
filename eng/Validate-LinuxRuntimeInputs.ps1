@@ -6,6 +6,7 @@ param(
   [string]$TensorRtRoot,
   [Parameter(Mandatory = $true)]
   [string]$CudaRoot,
+  [string]$CudnnRoot,
   [string]$RepositoryRoot
 )
 
@@ -37,6 +38,10 @@ if (-not (Test-Path -LiteralPath $CudaRoot)) {
   throw "CUDA root was not found: $CudaRoot"
 }
 
+if (-not [string]::IsNullOrWhiteSpace($CudnnRoot) -and -not (Test-Path -LiteralPath $CudnnRoot)) {
+  throw "cuDNN root was not found: $CudnnRoot"
+}
+
 function Test-GlobMatches {
   param(
     [string]$BaseRoot,
@@ -56,5 +61,8 @@ function Test-GlobMatches {
 
 Test-GlobMatches -BaseRoot $TensorRtRoot -Patterns $package.tensorRtFiles -Label "TensorRT"
 Test-GlobMatches -BaseRoot $CudaRoot -Patterns $package.cudaFiles -Label "CUDA"
+if (-not [string]::IsNullOrWhiteSpace($CudnnRoot)) {
+  Test-GlobMatches -BaseRoot $CudnnRoot -Patterns $package.cudnnFiles -Label "cuDNN"
+}
 
 Write-Host "Linux runtime input validation passed for $RuntimePackageKey"

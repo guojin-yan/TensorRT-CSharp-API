@@ -152,6 +152,9 @@ function Copy-RelativeFiles {
     return
   }
 
+  $copiedRealPaths = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::Ordinal)
+  $copiedDestinationNames = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::Ordinal)
+
   foreach ($relativePath in $requestedRelativeFiles) {
     $normalizedRelativePath = $relativePath -replace '/', [System.IO.Path]::DirectorySeparatorChar
     $sourcePath = Join-Path $BaseRoot $normalizedRelativePath
@@ -168,11 +171,61 @@ function Copy-RelativeFiles {
       throw "Expected $Label asset was not found: $sourcePath"
     }
 
+    if (-not $IsWindows) {
+      $matchingFiles = @(
+        $matchingFiles |
+          Sort-Object `
+            @{ Expression = {
+                $fileName = [System.IO.Path]::GetFileName([string]$_)
+                if ($fileName -match '\.so\.\d+$') { return 0 }
+                if ($fileName -match '\.so\.\d+\.') { return 1 }
+                if ($fileName -match '\.so$') { return 2 }
+                return 3
+              }
+            },
+            @{ Expression = { [System.IO.Path]::GetFileName([string]$_) } }
+      )
+    }
+
     foreach ($resolvedSourcePath in $matchingFiles) {
-      $destinationPath = Join-Path $nativeOutput ([System.IO.Path]::GetFileName($resolvedSourcePath))
-      $packageDestinationPath = Join-Path $PackageOutput ([System.IO.Path]::GetFileName($resolvedSourcePath))
-      Copy-Item -LiteralPath $resolvedSourcePath -Destination $destinationPath -Force -ErrorAction Stop
-      Copy-Item -LiteralPath $resolvedSourcePath -Destination $packageDestinationPath -Force -ErrorAction Stop
+      $copySourcePath = $resolvedSourcePath
+      $destinationFileName = [System.IO.Path]::GetFileName($resolvedSourcePath)
+      if (-not $IsWindows) {
+        try {
+          $fileInfo = Get-Item -LiteralPath $resolvedSourcePath -Force -ErrorAction Stop
+          if ($fileInfo.LinkType -eq "SymbolicLink" -and $fileInfo.Target) {
+            $targetPath = if ([System.IO.Path]::IsPathRooted([string]$fileInfo.Target)) {
+              [string]$fileInfo.Target
+            }
+            else {
+              Join-Path $fileInfo.DirectoryName ([string]$fileInfo.Target)
+            }
+
+            if (Test-Path -LiteralPath $targetPath -PathType Leaf) {
+              $copySourcePath = (Resolve-Path -LiteralPath $targetPath).Path
+            }
+          }
+        }
+        catch {
+          Write-Warning "Unable to inspect Linux runtime asset '$resolvedSourcePath': $($_.Exception.Message)"
+        }
+
+        $realPath = try { (Resolve-Path -LiteralPath $copySourcePath).Path } catch { $copySourcePath }
+        if (-not $copiedRealPaths.Add($realPath)) {
+          Write-Host "Skipping duplicate Linux runtime asset resolved through symlink: $resolvedSourcePath -> $realPath"
+          continue
+        }
+      }
+
+      if (-not $copiedDestinationNames.Add($destinationFileName)) {
+        Write-Host "Skipping duplicate Linux runtime asset destination: $destinationFileName"
+        continue
+      }
+
+      $destinationPath = Join-Path $nativeOutput $destinationFileName
+      $packageDestinationPath = Join-Path $PackageOutput $destinationFileName
+      Copy-Item -LiteralPath $copySourcePath -Destination $destinationPath -Force -ErrorAction Stop
+      Copy-Item -LiteralPath $copySourcePath -Destination $packageDestinationPath -Force -ErrorAction Stop
       Unblock-CopiedRuntimeAsset -Path $destinationPath
       Unblock-CopiedRuntimeAsset -Path $packageDestinationPath
       $copiedFiles.Add($destinationPath)

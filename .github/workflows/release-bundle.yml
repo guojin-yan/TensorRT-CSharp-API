@@ -93,6 +93,11 @@ on:
         required: false
         default: ""
         type: string
+      linux_runner_mode:
+        description: Linux runtime runner mode
+        required: false
+        default: hosted
+        type: string
       run_windows_smoke:
         description: Run Windows runtime package consumer smoke
         required: false
@@ -160,6 +165,7 @@ jobs:
       WINDOWS_SKIP_CONSUMER_VALIDATION: ${{ inputs.windows_skip_consumer_validation }}
       RUN_LINUX_RUNTIME_PACKAGING: ${{ inputs.run_linux_runtime_packaging }}
       LINUX_RUNTIME_KEYS: ${{ inputs.linux_runtime_keys }}
+      LINUX_RUNNER_MODE: ${{ inputs.linux_runner_mode }}
       RUN_WINDOWS_SMOKE: ${{ inputs.run_windows_smoke }}
       SIGN_WINDOWS_CONSUMER_OUTPUT: ${{ inputs.sign_windows_consumer_output }}
       RUN_LINUX_SMOKE: ${{ inputs.run_linux_smoke }}
@@ -310,6 +316,7 @@ jobs:
               -f "version=$runtime_version" \
               -f "configuration=$RELEASE_CONFIGURATION" \
               -f "runtime_keys=$LINUX_RUNTIME_KEYS" \
+              -f "runner_mode=$LINUX_RUNNER_MODE" \
               -f "run_smoke=$RUN_LINUX_SMOKE" \
               -f "publish_to_github_packages=$PUBLISH_RUNTIME_TO_GITHUB_PACKAGES" \
               -f "release_tag=$RELEASE_TAG" \

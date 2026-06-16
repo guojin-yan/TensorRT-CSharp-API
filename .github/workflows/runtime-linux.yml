@@ -16,7 +16,12 @@ on:
       runtime_keys:
         description: Optional comma-separated Linux runtime keys
         required: false
-        default: ""
+        default: "linux-x64-trt11.0-cuda12.9-cudnn9.22"
+        type: string
+      runner_mode:
+        description: Linux runner mode
+        required: false
+        default: hosted
         type: string
       run_smoke:
         description: Run package consumer smoke after packing
@@ -55,6 +60,11 @@ on:
         required: false
         default: ""
         type: string
+      runner_mode:
+        description: Linux runner mode
+        required: false
+        default: hosted
+        type: string
       run_smoke:
         description: Run package consumer smoke after packing
         required: false
@@ -75,13 +85,7 @@ on:
         required: false
         default: true
         type: boolean
-    secrets:
-      LINUX_RUNNER_STATUS_TOKEN:
-        description: Optional token with Actions runner read access for the prepare-stage Linux self-hosted runner availability check.
-        required: false
-
 permissions:
-  actions: read
   contents: write
   packages: write
 
@@ -119,44 +123,6 @@ jobs:
           "value={""include"":$value}" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
           "has_entries=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
-      - name: Check Linux self-hosted runner availability
-        if: ${{ steps.matrix.outputs.has_entries == 'true' }}
-        shell: pwsh
-        env:
-          GH_TOKEN: ${{ secrets.LINUX_RUNNER_STATUS_TOKEN || github.token }}
-          GH_REPO: ${{ github.repository }}
-          HAS_RUNNER_STATUS_TOKEN: ${{ secrets.LINUX_RUNNER_STATUS_TOKEN != '' }}
-        run: |
-          $rawResponse = gh api "repos/$env:GH_REPO/actions/runners?per_page=100" 2>&1
-          if ($LASTEXITCODE -ne 0) {
-            $message = ($rawResponse | Out-String).Trim()
-            if ($message -match 'HTTP 403|Resource not accessible by integration') {
-              if ($env:HAS_RUNNER_STATUS_TOKEN -ne 'true') {
-                throw "Linux runner availability check requires repository secret LINUX_RUNNER_STATUS_TOKEN with Actions runner read access. The default GITHUB_TOKEN could not read repository runners: $message"
-              }
-
-              throw "LINUX_RUNNER_STATUS_TOKEN could not read repository runners. Verify the token has Actions runner read access: $message"
-            }
-
-            throw "Failed to query repository runners: $message"
-          }
-
-          $response = $rawResponse | ConvertFrom-Json
-          $matching = @($response.runners | Where-Object {
-            $_.status -eq "online" -and
-            (@($_.labels.name) -contains "self-hosted") -and
-            (@($_.labels.name) -contains "linux") -and
-            (@($_.labels.name) -contains "x64")
-          })
-
-          if ($matching.Count -eq 0) {
-            throw "No online Linux x64 self-hosted runner with labels self-hosted, linux, and x64 is registered for this repository."
-          }
-
-          $matching | ForEach-Object {
-            Write-Host ("Linux self-hosted runner available: {0} ({1})" -f $_.name, $_.status)
-          }
-
   managed:
     needs: prepare
     if: ${{ needs.prepare.outputs.has_entries == 'true' }}
@@ -174,10 +140,7 @@ jobs:
       - prepare
       - managed
     if: ${{ needs.prepare.outputs.has_entries == 'true' }}
-    runs-on:
-      - self-hosted
-      - linux
-      - x64
+    runs-on: ${{ inputs.runner_mode == 'self-hosted' && fromJson('["self-hosted","linux","x64"]') || 'ubuntu-latest' }}
     env:
       DOTNET_INSTALL_DIR: ${{ github.workspace }}/.dotnet
     strategy:
@@ -187,6 +150,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Setup .NET
+        if: ${{ inputs.runner_mode != 'self-hosted' }}
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Prepare hosted Linux tools
+        if: ${{ inputs.runner_mode != 'self-hosted' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ninja-build cmake wget ca-certificates
+
       - name: Verify local .NET
         shell: pwsh
         run: dotnet --info
@@ -194,6 +173,11 @@ jobs:
       - name: Verify local CMake
         shell: pwsh
         run: cmake --version
+
+      - name: Prepare NVIDIA dependencies on hosted Linux
+        if: ${{ inputs.runner_mode != 'self-hosted' }}
+        shell: pwsh
+        run: pwsh -NoProfile -File ./eng/Prepare-LinuxNvidiaDependencies.ps1 -RuntimePackageKey "${{ matrix.key }}"
 
       - name: Download managed package artifact
         uses: actions/download-artifact@v8
@@ -216,7 +200,7 @@ jobs:
           "cudnn_root=$($resolved.cudnnRoot)" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
       - name: Validate Linux runtime inputs
-        run: pwsh -NoProfile -File ./eng/Validate-LinuxRuntimeInputs.ps1 -RuntimePackageKey "${{ matrix.key }}" -TensorRtRoot "${{ steps.roots.outputs.tensor_rt_root }}" -CudaRoot "${{ steps.roots.outputs.cuda_root }}"
+        run: pwsh -NoProfile -File ./eng/Validate-LinuxRuntimeInputs.ps1 -RuntimePackageKey "${{ matrix.key }}" -TensorRtRoot "${{ steps.roots.outputs.tensor_rt_root }}" -CudaRoot "${{ steps.roots.outputs.cuda_root }}" -CudnnRoot "${{ steps.roots.outputs.cudnn_root }}"
 
       - name: Configure native bridge
         run: cmake --preset "${{ matrix.buildPreset }}" -DJYPPX_TENSORRT_ROOT="${{ steps.roots.outputs.tensor_rt_root }}" -DCUDAToolkit_ROOT="${{ steps.roots.outputs.cuda_root }}" -DJYPPX_CUDA_ROOT="${{ steps.roots.outputs.cuda_root }}" -DJYPPX_CUDNN_ROOT="${{ steps.roots.outputs.cudnn_root }}"
