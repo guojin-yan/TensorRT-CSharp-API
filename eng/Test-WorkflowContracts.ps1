@@ -108,7 +108,7 @@ $workflowContracts = @(
       New-Requirement -Needle "runner_mode" -Description "hosted/self-hosted runner mode"
       New-Requirement -Needle "Prepare-LinuxNvidiaDependencies.ps1" -Description "hosted Linux NVIDIA dependency preparation"
       New-Requirement -Needle "ubuntu-latest" -Description "hosted Linux runner"
-      New-Requirement -Needle "self-hosted" -Description "self-hosted runner"
+      New-Requirement -Needle "Use runner_mode=hosted" -Description "hosted Linux runner guard"
       New-Requirement -Needle "linux" -Description "linux runner label"
       New-Requirement -Needle "Validate-LinuxRuntimeInputs.ps1" -Description "Linux input validation"
       New-Requirement -Needle "CudnnRoot" -Description "Linux cuDNN input validation"
