@@ -132,50 +132,101 @@ Runtime packages are versioned independently from the managed package. The norma
 
 GitHub Release assets are useful for large public `.nupkg` files, but they are not a NuGet feed. If stable dependency packages live only on a Release, the remote Windows workflow downloads those Release assets into a temporary local package source for validation. Publish `bridge,collection` to GitHub Packages only when the referenced `CudaCudnn` and `TensorRt` component packages are also available from a NuGet feed; otherwise attach the whole `.nupkg` set to a GitHub Release and consume it as a downloaded local package source.
 
+Before dispatching a remote release, audit the current repository secrets and self-hosted runners:
+
+```powershell
+pwsh -NoProfile -File .\eng\Test-RemoteReleasePrerequisites.ps1 -WarnOnly
+```
+
+Use `-WarnOnly` while preparing infrastructure. Remove it for a hard release gate.
+
 Managed-only remote release:
 
 ```powershell
-gh workflow run release-bundle.yml `
-  --ref TensorRtSharp4.0 `
-  -f version=4.0.1 `
-  -f publish_managed_to_nuget=true `
-  -f publish_managed_to_github_packages=true `
-  -f attach_runtime_to_github_release=true
+pwsh -NoProfile -File .\eng\Invoke-RemoteReleaseBundle.ps1 `
+  -Version 4.0.1 `
+  -PublishManagedToNuGet:$true `
+  -PublishManagedToGitHubPackages:$true `
+  -AttachRuntimeToGitHubRelease:$true
 ```
 
 Windows stable dependency component refresh for the first publish or a CUDA/cuDNN/TensorRT upgrade:
 
 ```powershell
-gh workflow run release-bundle.yml `
-  --ref TensorRtSharp4.0 `
-  -f version=4.0.0 `
-  -f runtime_version=4.0.0 `
-  -f run_windows_runtime_packaging=true `
-  -f windows_runtime_keys=win-x64-trt11.0-cuda12.9-cudnn9.22 `
-  -f windows_runtime_delivery_mode=split `
-  -f windows_split_package_roles=cuda-cudnn,tensorrt `
-  -f publish_runtime_to_github_packages=true `
-  -f attach_runtime_to_github_release=true
+pwsh -NoProfile -File .\eng\Invoke-RemoteReleaseBundle.ps1 `
+  -Version 4.0.0 `
+  -RuntimeVersion 4.0.0 `
+  -RunWindowsRuntimePackaging `
+  -WindowsRuntimeKeys win-x64-trt11.0-cuda12.9-cudnn9.22 `
+  -WindowsRuntimeDeliveryMode split `
+  -WindowsSplitPackageRoles cuda-cudnn,tensorrt `
+  -PublishRuntimeToGitHubPackages:$true `
+  -AttachRuntimeToGitHubRelease:$true
 ```
 
 Windows bridge and collection refresh after local native-wrapper changes:
 
 ```powershell
-gh workflow run release-bundle.yml `
-  --ref TensorRtSharp4.0 `
-  -f version=4.0.1 `
-  -f runtime_version=4.0.1 `
-  -f run_windows_runtime_packaging=true `
-  -f windows_runtime_keys=win-x64-trt11.0-cuda12.9-cudnn9.22 `
-  -f windows_runtime_delivery_mode=split `
-  -f windows_split_package_roles=bridge,collection `
-  -f windows_cuda_cudnn_package_version=4.0.6156 `
-  -f windows_cuda_cudnn_package_release_tag=v4.0.6156 `
-  -f windows_tensorrt_package_version=4.0.6156 `
-  -f windows_tensorrt_package_release_tag=v4.0.6156 `
-  -f publish_managed_to_github_packages=true `
-  -f publish_runtime_to_github_packages=false `
-  -f attach_runtime_to_github_release=true
+pwsh -NoProfile -File .\eng\Invoke-RemoteReleaseBundle.ps1 `
+  -Version 4.0.1 `
+  -RuntimeVersion 4.0.1 `
+  -RunWindowsRuntimePackaging `
+  -WindowsRuntimeKeys win-x64-trt11.0-cuda12.9-cudnn9.22 `
+  -WindowsRuntimeDeliveryMode split `
+  -WindowsSplitPackageRoles bridge,collection `
+  -WindowsCudaCudnnPackageVersion 4.0.6156 `
+  -WindowsCudaCudnnPackageReleaseTag v4.0.6156 `
+  -WindowsTensorRtPackageVersion 4.0.6156 `
+  -WindowsTensorRtPackageReleaseTag v4.0.6156 `
+  -PublishManagedToGitHubPackages:$true `
+  -PublishRuntimeToGitHubPackages:$false `
+  -AttachRuntimeToGitHubRelease:$true
+```
+
+Hosted Linux stable dependency refresh for Ubuntu 22.04 x64 plus the modeled Ubuntu 24.04 x64 line:
+
+```powershell
+pwsh -NoProfile -File .\eng\Invoke-RemoteReleaseBundle.ps1 `
+  -Version 4.0.0 `
+  -RuntimeVersion 4.0.0 `
+  -RunLinuxRuntimePackaging `
+  -LinuxRuntimeKeySet hosted-all `
+  -LinuxRuntimeDeliveryMode split `
+  -LinuxSplitPackageRoles cuda-cudnn,tensorrt `
+  -PublishRuntimeToGitHubPackages:$true `
+  -AttachRuntimeToGitHubRelease:$true
+```
+
+Hosted Linux bridge and collection refresh after local native-wrapper changes:
+
+```powershell
+pwsh -NoProfile -File .\eng\Invoke-RemoteReleaseBundle.ps1 `
+  -Version 4.0.1 `
+  -RuntimeVersion 4.0.1 `
+  -RunLinuxRuntimePackaging `
+  -LinuxRuntimeKeySet hosted-all `
+  -LinuxRuntimeDeliveryMode split `
+  -LinuxSplitPackageRoles bridge,collection `
+  -LinuxCudaCudnnPackageVersion 4.0.6167 `
+  -LinuxCudaCudnnPackageReleaseTag v4.0.6167 `
+  -LinuxTensorRtPackageVersion 4.0.6167 `
+  -LinuxTensorRtPackageReleaseTag v4.0.6167 `
+  -PublishManagedToGitHubPackages:$true `
+  -PublishRuntimeToGitHubPackages:$false `
+  -AttachRuntimeToGitHubRelease:$true
+```
+
+Ubuntu 20.04 self-hosted packaging uses a separate lane and requires an online Linux runner labeled `self-hosted`, `linux`, `x64`, and `ubuntu-20.04`:
+
+```powershell
+pwsh -NoProfile -File .\eng\Invoke-RemoteReleaseBundle.ps1 `
+  -Version 4.0.0 `
+  -RuntimeVersion 4.0.0 `
+  -RunLinuxSelfHostedUbuntu20RuntimePackaging `
+  -LinuxRuntimeDeliveryMode split `
+  -LinuxSplitPackageRoles all `
+  -PublishRuntimeToGitHubPackages:$true `
+  -AttachRuntimeToGitHubRelease:$true
 ```
 
 Managed-only local example:

@@ -68,6 +68,8 @@ The `release-bundle` workflow now has two Linux orchestration lanes:
 
 Use separate release-bundle inputs for Linux split roles and stable dependency versions. Routine bridge or managed changes can publish Linux `bridge,collection` while pinning already-published `CudaCudnn` and `TensorRt` versions; NVIDIA dependency refreshes should use `cuda-cudnn`, `tensorrt`, or `all`. Less common overrides, such as delivery mode, release tags for stable dependency assets, bridge/meta package versions, and skip-validation toggles, are passed through `release_config_json` to keep the manual GitHub Actions form under the `workflow_dispatch` input limit.
 
+Prefer `eng/Invoke-RemoteReleaseBundle.ps1` when dispatching releases from a workstation. The script keeps supported top-level workflow inputs as `-f key=value` flags and serializes advanced release settings into `release_config_json`, which avoids accidental dispatch failures from undeclared workflow inputs.
+
 Linux packages stay `dry-run-only` until a matching Linux runner validates build, asset collection, pack, and package consumer restore/build.
 
 ## Distribution lanes

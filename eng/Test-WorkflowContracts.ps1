@@ -170,6 +170,25 @@ $workflowContracts = @(
     )
   }
   [pscustomobject]@{
+    path = "eng\Invoke-RemoteReleaseBundle.ps1"
+    requirements = @(
+      New-Requirement -Needle "release_config_json" -Description "advanced release config serialization"
+      New-Requirement -Needle "DryRun" -Description "dry-run dispatch mode"
+      New-Requirement -Needle "runtime_delivery_mode" -Description "windows/linux runtime delivery mode mapping"
+      New-Requirement -Needle "gh workflow run release-bundle.yml" -Description "remote workflow dispatch command"
+    )
+  }
+  [pscustomobject]@{
+    path = "eng\Test-RemoteReleasePrerequisites.ps1"
+    requirements = @(
+      New-Requirement -Needle "NUGET_API_KEY" -Description "nuget.org secret prerequisite"
+      New-Requirement -Needle "RUNNER_AUDIT_TOKEN" -Description "runner audit secret prerequisite"
+      New-Requirement -Needle "self-hosted,windows,x64" -Description "Windows runner prerequisite"
+      New-Requirement -Needle "self-hosted,linux,x64,ubuntu-20.04" -Description "Ubuntu 20.04 runner prerequisite"
+      New-Requirement -Needle "remote-release-prerequisites" -Description "prerequisite artifact output"
+    )
+  }
+  [pscustomobject]@{
     path = "eng\Resolve-RuntimeKeySet.ps1"
     requirements = @(
       New-Requirement -Needle "auto" -Description "auto key set selection"
