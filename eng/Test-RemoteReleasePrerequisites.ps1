@@ -1,6 +1,10 @@
 [CmdletBinding()]
 param(
   [string]$Repository = "guojin-yan/TensorRT-CSharp-API",
+  [AllowEmptyString()]
+  [string]$NuGetApiKeyAvailable,
+  [AllowEmptyString()]
+  [string]$RunnerAuditTokenAvailable,
   [string[]]$RequiredSecret = @("NUGET_API_KEY", "RUNNER_AUDIT_TOKEN"),
   [string[]]$RequiredRunnerLabelSet = @(
     "self-hosted,windows,x64",
@@ -20,15 +24,57 @@ $utf8 = [System.Text.UTF8Encoding]::new($false)
 $OutputEncoding = $utf8
 $ErrorActionPreference = "Stop"
 
+function ConvertTo-BoolOrNull {
+  param(
+    [AllowEmptyString()]
+    [string]$Value
+  )
+
+  if ([string]::IsNullOrWhiteSpace($Value)) {
+    return $null
+  }
+
+  $Value -in @("1", "true", "True", "TRUE", "yes", "Yes", "YES")
+}
+
+function Expand-TokenList {
+  param(
+    [string[]]$Values
+  )
+
+  $tokens = New-Object System.Collections.Generic.List[string]
+  foreach ($value in @($Values)) {
+    if ([string]::IsNullOrWhiteSpace($value)) {
+      continue
+    }
+
+    foreach ($part in ($value -split "[`r`n;]")) {
+      $trimmed = $part.Trim()
+      if (-not [string]::IsNullOrWhiteSpace($trimmed)) {
+        $tokens.Add($trimmed)
+      }
+    }
+  }
+
+  @($tokens | Select-Object -Unique)
+}
+
 function Invoke-GhJsonLines {
   param(
     [Parameter(Mandatory = $true)]
     [string[]]$Arguments,
+    [AllowEmptyString()]
+    [string]$GitHubToken,
     [switch]$AllowFailure
   )
 
   $stderrPath = [IO.Path]::GetTempFileName()
+  $previousGhToken = $env:GH_TOKEN
   try {
+    if (-not [string]::IsNullOrWhiteSpace($GitHubToken)) {
+      $env:GH_TOKEN = $GitHubToken
+    }
+
     $output = @(& gh @Arguments 2>$stderrPath)
     $exitCode = $LASTEXITCODE
     $stderr = if (Test-Path -LiteralPath $stderrPath -PathType Leaf) { Get-Content -LiteralPath $stderrPath -Raw } else { "" }
@@ -61,6 +107,13 @@ function Invoke-GhJsonLines {
     }
   }
   finally {
+    if ($null -eq $previousGhToken) {
+      Remove-Item Env:\GH_TOKEN -ErrorAction SilentlyContinue
+    }
+    else {
+      $env:GH_TOKEN = $previousGhToken
+    }
+
     Remove-Item -LiteralPath $stderrPath -Force -ErrorAction SilentlyContinue
   }
 }
@@ -81,10 +134,52 @@ function Expand-LabelSet {
   ) | Select-Object -Unique
 }
 
-$secretResult = Invoke-GhJsonLines -Arguments @("secret", "list", "--repo", $Repository, "--json", "name", "--jq", ".[] | @json") -AllowFailure
+$requiredSecrets = @(Expand-TokenList -Values $RequiredSecret)
+$requiredRunnerLabelSets = @(Expand-TokenList -Values $RequiredRunnerLabelSet)
+
+$knownSecretAvailability = @{}
+$nugetApiKeyIsAvailable = ConvertTo-BoolOrNull -Value $NuGetApiKeyAvailable
+$runnerAuditTokenIsAvailable = ConvertTo-BoolOrNull -Value $RunnerAuditTokenAvailable
+if ($null -ne $nugetApiKeyIsAvailable) {
+  $knownSecretAvailability["NUGET_API_KEY"] = [bool]$nugetApiKeyIsAvailable
+}
+if ($null -ne $runnerAuditTokenIsAvailable) {
+  $knownSecretAvailability["RUNNER_AUDIT_TOKEN"] = [bool]$runnerAuditTokenIsAvailable
+}
+
+$unknownRequiredSecrets = @($requiredSecrets | Where-Object { -not $knownSecretAvailability.ContainsKey($_) })
+$secretResult = if ($unknownRequiredSecrets.Count -gt 0) {
+  Invoke-GhJsonLines -Arguments @("secret", "list", "--repo", $Repository, "--json", "name", "--jq", ".[] | @json") -AllowFailure
+}
+else {
+  [pscustomobject]@{
+    success = $true
+    items = @()
+    stderr = ""
+  }
+}
 $secretNames = if ($secretResult.success) { @($secretResult.items | ForEach-Object { [string]$_.name }) } else { @() }
 
-$runnerResult = Invoke-GhJsonLines -Arguments @("api", "/repos/$Repository/actions/runners?per_page=100", "--paginate", "--jq", ".runners[] | @json") -AllowFailure
+$runnerQuerySource = ""
+$runnerQueryToken = ""
+if (-not [string]::IsNullOrWhiteSpace($env:RUNNER_AUDIT_TOKEN)) {
+  $runnerQuerySource = "RUNNER_AUDIT_TOKEN"
+  $runnerQueryToken = $env:RUNNER_AUDIT_TOKEN
+}
+elseif (-not [string]::Equals($env:GITHUB_ACTIONS, "true", [System.StringComparison]::OrdinalIgnoreCase)) {
+  $runnerQuerySource = "gh-auth"
+}
+
+$runnerResult = if ([string]::IsNullOrWhiteSpace($runnerQuerySource)) {
+  [pscustomobject]@{
+    success = $false
+    items = @()
+    stderr = "RUNNER_AUDIT_TOKEN is not set; GitHub Actions' default token cannot query repository self-hosted runners."
+  }
+}
+else {
+  Invoke-GhJsonLines -Arguments @("api", "/repos/$Repository/actions/runners?per_page=100", "--paginate", "--jq", ".runners[] | @json") -GitHubToken $runnerQueryToken -AllowFailure
+}
 $runnerRows = if ($runnerResult.success) {
   @(
     foreach ($runner in $runnerResult.items) {
@@ -105,16 +200,27 @@ else {
 }
 
 $secretChecks = @(
-  foreach ($name in $RequiredSecret) {
+  foreach ($name in $requiredSecrets) {
+    $present = if ($knownSecretAvailability.ContainsKey($name)) {
+      [bool]$knownSecretAvailability[$name]
+    }
+    elseif ($secretResult.success) {
+      $secretNames -contains $name
+    }
+    else {
+      $false
+    }
+
     [pscustomobject]@{
       name = $name
-      present = $secretNames -contains $name
+      present = $present
+      source = if ($knownSecretAvailability.ContainsKey($name)) { "input" } elseif ($secretResult.success) { "gh-secret-list" } else { "query-failed" }
     }
   }
 )
 
 $runnerChecks = @(
-  foreach ($labelSet in $RequiredRunnerLabelSet) {
+  foreach ($labelSet in $requiredRunnerLabelSets) {
     $requiredLabels = @(Expand-LabelSet -Value $labelSet)
     $matching = @(
       $runnerRows | Where-Object {
@@ -154,7 +260,7 @@ if (-not $runnerResult.success) {
 }
 
 foreach ($check in $runnerChecks) {
-  if (-not $check.ready) {
+  if ($runnerResult.success -and -not $check.ready) {
     $failures.Add("No online runner for label set: $($check.requiredLabelSet)") | Out-Null
   }
 }
@@ -169,6 +275,7 @@ $markdownPath = Join-Path $outputRoot "remote-release-prerequisites.md"
   failedCount = $failures.Count
   secrets = @($secretChecks)
   runnerQuerySucceeded = [bool]$runnerResult.success
+  runnerQuerySource = $runnerQuerySource
   runnerQueryError = if ($runnerResult.success) { "" } else { $runnerResult.stderr }
   runners = @($runnerRows | ForEach-Object {
       [pscustomobject]@{

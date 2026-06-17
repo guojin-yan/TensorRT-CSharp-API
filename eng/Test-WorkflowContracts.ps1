@@ -183,6 +183,9 @@ $workflowContracts = @(
     requirements = @(
       New-Requirement -Needle "NUGET_API_KEY" -Description "nuget.org secret prerequisite"
       New-Requirement -Needle "RUNNER_AUDIT_TOKEN" -Description "runner audit secret prerequisite"
+      New-Requirement -Needle "NuGetApiKeyAvailable" -Description "workflow-provided nuget.org secret availability"
+      New-Requirement -Needle "RunnerAuditTokenAvailable" -Description "workflow-provided runner audit token availability"
+      New-Requirement -Needle "runnerQuerySource" -Description "runner query source report"
       New-Requirement -Needle "self-hosted,windows,x64" -Description "Windows runner prerequisite"
       New-Requirement -Needle "self-hosted,linux,x64,ubuntu-20.04" -Description "Ubuntu 20.04 runner prerequisite"
       New-Requirement -Needle "remote-release-prerequisites" -Description "prerequisite artifact output"

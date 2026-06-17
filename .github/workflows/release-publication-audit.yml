@@ -226,8 +226,15 @@ jobs:
             "./eng/Test-RemoteReleasePrerequisites.ps1",
             "-Repository",
             "$env:GH_REPO",
-            "-RequiredRunnerLabelSet"
-          ) + $labelSets
+            "-NuGetApiKeyAvailable",
+            "$env:HAS_NUGET_API_KEY",
+            "-RunnerAuditTokenAvailable",
+            "${{ secrets.RUNNER_AUDIT_TOKEN != '' }}"
+          )
+
+          if ($labelSets.Count -gt 0) {
+            $arguments += @("-RequiredRunnerLabelSet", ($labelSets -join ";"))
+          }
 
           if ("${{ inputs.warn_only }}" -eq "true") {
             $arguments += "-WarnOnly"
