@@ -144,6 +144,7 @@ $workflowContracts = @(
       New-Requirement -Needle "runtime-linux" -Description "Linux runtime child workflow"
       New-Requirement -Needle "gh release create" -Description "release creation"
       New-Requirement -Needle "gh release upload" -Description "release asset upload"
+      New-Requirement -Needle "Publish-ReleaseNuGetAssetsToGitHubPackages.ps1" -Description "release asset GitHub Packages backfill"
       New-Requirement -Needle "linux_runner_mode" -Description "Linux runner mode input"
       New-Requirement -Needle "linux_runtime_key_set" -Description "Linux runtime key set input"
       New-Requirement -Needle "linux_split_package_roles" -Description "Linux split package roles input"
@@ -275,17 +276,6 @@ $workflowContracts = @(
       New-Requirement -Needle "hosted-all" -Description "hosted Linux all key set"
       New-Requirement -Needle "ubuntu24-hosted" -Description "Ubuntu 24.04 hosted key set"
       New-Requirement -Needle "self-hosted-ubuntu20" -Description "Ubuntu 20.04 self-hosted key set"
-    )
-  }
-  [pscustomobject]@{
-    path = ".github\workflows\publish-release-nuget-assets.yml"
-    requirements = @(
-      New-Requirement -Needle "workflow_dispatch" -Description "manual trigger"
-      New-Requirement -Needle "Publish-ReleaseNuGetAssetsToGitHubPackages.ps1" -Description "release asset publication script"
-      New-Requirement -Needle "Test-GitHubPackagesCoverage.ps1" -Description "post-publish GitHub Packages coverage audit"
-      New-Requirement -Needle "packages: write" -Description "GitHub Packages write permission"
-      New-Requirement -Needle "asset_patterns" -Description "release asset pattern input"
-      New-Requirement -Needle "asset_names" -Description "exact release asset names input"
     )
   }
   [pscustomobject]@{
