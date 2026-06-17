@@ -258,6 +258,8 @@ $workflowContracts = @(
       New-Requirement -Needle "RequirePackageRepositoryAssociation" -Description "package repository association gate"
       New-Requirement -Needle "publication-inventory" -Description "publication inventory artifact output"
       New-Requirement -Needle "Unexpected GitHub Package versions" -Description "stale package version reporting"
+      New-Requirement -Needle "Runtime Matrix Summary" -Description "runtime package matrix inventory report"
+      New-Requirement -Needle "runtimeTargetSummary" -Description "runtime target summary JSON output"
     )
   }
   [pscustomobject]@{
@@ -265,6 +267,8 @@ $workflowContracts = @(
     requirements = @(
       New-Requirement -Needle "NUGET_API_KEY" -Description "nuget.org secret readiness"
       New-Requirement -Needle "RUNNER_AUDIT_TOKEN" -Description "runner audit token readiness"
+      New-Requirement -Needle "runnerQuerySource" -Description "runner query source reporting"
+      New-Requirement -Needle "gh-auth" -Description "local gh-auth runner query fallback"
       New-Requirement -Needle "self-hosted,linux,x64,ubuntu-20.04" -Description "Ubuntu 20.04 self-hosted runner readiness"
       New-Requirement -Needle "future-target:linux-arm64-sbsa" -Description "future SBSA readiness blocker"
       New-Requirement -Needle "future-target:linux-jetson-l4t" -Description "future Jetson readiness blocker"

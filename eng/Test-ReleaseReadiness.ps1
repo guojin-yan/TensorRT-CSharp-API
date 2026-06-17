@@ -49,11 +49,18 @@ function Invoke-GhJsonLines {
   param(
     [Parameter(Mandatory = $true)]
     [string[]]$Arguments,
+    [AllowEmptyString()]
+    [string]$GitHubToken,
     [switch]$AllowFailure
   )
 
   $stderrPath = [IO.Path]::GetTempFileName()
+  $previousGhToken = $env:GH_TOKEN
   try {
+    if (-not [string]::IsNullOrWhiteSpace($GitHubToken)) {
+      $env:GH_TOKEN = $GitHubToken
+    }
+
     $output = @(& gh @Arguments 2>$stderrPath)
     $exitCode = $LASTEXITCODE
     $stderr = if (Test-Path -LiteralPath $stderrPath -PathType Leaf) { Get-Content -LiteralPath $stderrPath -Raw } else { "" }
@@ -86,6 +93,24 @@ function Invoke-GhJsonLines {
     }
   }
   finally {
+    if ($null -eq $previousGhToken) {
+      Remove-Item Env:\GH_TOKEN -ErrorAction SilentlyContinue
+    }
+    else {
+      $env:GH_TOKEN = $previousGhToken
+    }
+
+    Remove-Item -LiteralPath $stderrPath -Force -ErrorAction SilentlyContinue
+  }
+}
+
+function Test-GhAuthAvailable {
+  $stderrPath = [IO.Path]::GetTempFileName()
+  try {
+    $null = & gh auth status -h github.com 2>$stderrPath
+    return $LASTEXITCODE -eq 0
+  }
+  finally {
     Remove-Item -LiteralPath $stderrPath -Force -ErrorAction SilentlyContinue
   }
 }
@@ -109,10 +134,12 @@ function Expand-LabelSet {
 function Get-RunnerRows {
   param(
     [Parameter(Mandatory = $true)]
-    [string]$RepositoryName
+    [string]$RepositoryName,
+    [AllowEmptyString()]
+    [string]$GitHubToken
   )
 
-  $result = Invoke-GhJsonLines -Arguments @("api", "/repos/$RepositoryName/actions/runners?per_page=100", "--paginate", "--jq", ".runners[] | @json") -AllowFailure
+  $result = Invoke-GhJsonLines -Arguments @("api", "/repos/$RepositoryName/actions/runners?per_page=100", "--paginate", "--jq", ".runners[] | @json") -GitHubToken $GitHubToken -AllowFailure
   if (-not $result.success) {
     return [pscustomobject]@{
       success = $false
@@ -204,16 +231,32 @@ if ($null -eq $hasNuGetApiKey -or $null -eq $runnerAuditTokenIsAvailable) {
 }
 
 $runnerRows = @()
+$runnerQueryAttempted = $false
 $runnerQuerySucceeded = $false
+$runnerQuerySource = ""
 $runnerQueryDetail = ""
-if ($runnerAuditTokenIsAvailable -or -not [string]::IsNullOrWhiteSpace($env:GH_TOKEN)) {
-  $runnerResult = Get-RunnerRows -RepositoryName $Repository
+
+$runnerQueryToken = ""
+if (-not [string]::IsNullOrWhiteSpace($env:RUNNER_AUDIT_TOKEN)) {
+  $runnerQuerySource = "RUNNER_AUDIT_TOKEN"
+  $runnerQueryToken = $env:RUNNER_AUDIT_TOKEN
+}
+elseif (-not [string]::IsNullOrWhiteSpace($env:GH_TOKEN) -and -not ([string]::Equals($env:GITHUB_ACTIONS, "true", [System.StringComparison]::OrdinalIgnoreCase) -and -not $runnerAuditTokenIsAvailable)) {
+  $runnerQuerySource = "GH_TOKEN"
+}
+elseif (-not [string]::Equals($env:GITHUB_ACTIONS, "true", [System.StringComparison]::OrdinalIgnoreCase) -and (Test-GhAuthAvailable)) {
+  $runnerQuerySource = "gh-auth"
+}
+
+if (-not [string]::IsNullOrWhiteSpace($runnerQuerySource)) {
+  $runnerQueryAttempted = $true
+  $runnerResult = Get-RunnerRows -RepositoryName $Repository -GitHubToken $runnerQueryToken
   $runnerQuerySucceeded = $runnerResult.success
   $runnerRows = @($runnerResult.rows)
-  $runnerQueryDetail = if ($runnerResult.success) { "queried" } else { $runnerResult.stderr }
+  $runnerQueryDetail = if ($runnerResult.success) { "source=$runnerQuerySource; queried $($runnerRows.Count) runner(s)." } else { "source=$runnerQuerySource; $($runnerResult.stderr)" }
 }
 else {
-  $runnerQueryDetail = "RUNNER_AUDIT_TOKEN is not available; runner readiness cannot be queried reliably from workflow default token."
+  $runnerQueryDetail = "not attempted; RUNNER_AUDIT_TOKEN is not available, no usable local gh auth was found, and GitHub Actions' default token cannot query runner availability reliably."
 }
 
 $runnerChecks = @()
@@ -254,7 +297,7 @@ $readiness.Add([pscustomobject]@{
 $readiness.Add([pscustomobject]@{
     area = "runner-audit"
     ready = [bool]$runnerAuditTokenIsAvailable
-    detail = if ($runnerAuditTokenIsAvailable) { "RUNNER_AUDIT_TOKEN is available." } else { "RUNNER_AUDIT_TOKEN is missing; runner availability can only be reported as a warning in GitHub Actions." }
+    detail = if ($runnerAuditTokenIsAvailable) { "RUNNER_AUDIT_TOKEN is available." } else { "RUNNER_AUDIT_TOKEN is missing; GitHub Actions runner availability audit stays warning-only unless local gh-auth can query it." }
   }) | Out-Null
 $readiness.Add([pscustomobject]@{
     area = "runner-query"
@@ -292,7 +335,10 @@ $markdownPath = Join-Path $outputRoot "release-readiness.md"
   readiness = @($readiness.ToArray())
   runnerAuditTokenAvailable = [bool]$runnerAuditTokenIsAvailable
   nugetApiKeyAvailable = [bool]$hasNuGetApiKey
+  runnerQueryAttempted = [bool]$runnerQueryAttempted
   runnerQuerySucceeded = [bool]$runnerQuerySucceeded
+  runnerQuerySource = $runnerQuerySource
+  runnerQueryDetail = $runnerQueryDetail
   runners = @($runnerRows | ForEach-Object {
       [pscustomobject]@{
         name = $_.name

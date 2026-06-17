@@ -130,6 +130,73 @@ function ConvertFrom-NuGetAssetFileName {
   }
 }
 
+function ConvertFrom-RuntimePackageId {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$PackageId
+  )
+
+  $prefix = "JYPPX.TensorRT.CSharp.API.Runtime."
+  if (-not $PackageId.StartsWith($prefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+    return $null
+  }
+
+  $runtimeIdentity = $PackageId.Substring($prefix.Length)
+  $pattern = '^(?<target>win-x64|linux-x64\.ubuntu\d{2}\.\d{2})\.trt(?<tensorRt>[0-9]+\.[0-9]+)\.cuda(?<cuda>[0-9]+\.[0-9]+)\.cudnn(?<cudnn>[0-9]+\.[0-9]+)(?:\.(?<component>.+))?$'
+  if ($runtimeIdentity -notmatch $pattern) {
+    return $null
+  }
+
+  [pscustomobject]@{
+    target = [string]$Matches["target"]
+    tensorRt = [string]$Matches["tensorRt"]
+    cuda = [string]$Matches["cuda"]
+    cudnn = [string]$Matches["cudnn"]
+    dependencyCombination = "trt$($Matches["tensorRt"])-cuda$($Matches["cuda"])-cudnn$($Matches["cudnn"])"
+    component = if ($Matches.ContainsKey("component") -and -not [string]::IsNullOrWhiteSpace([string]$Matches["component"])) { [string]$Matches["component"] } else { "Base" }
+  }
+}
+
+function Add-UniqueString {
+  param(
+    [Parameter(Mandatory = $true)]
+    [AllowEmptyCollection()]
+    [System.Collections.Generic.List[string]]$List,
+    [Parameter(Mandatory = $true)]
+    [string]$Value
+  )
+
+  if (-not $List.Contains($Value)) {
+    $List.Add($Value) | Out-Null
+  }
+}
+
+function Get-RuntimeMatrixEntry {
+  param(
+    [Parameter(Mandatory = $true)]
+    [hashtable]$Map,
+    [Parameter(Mandatory = $true)]
+    [object]$RuntimeIdentity,
+    [Parameter(Mandatory = $true)]
+    [string]$Version
+  )
+
+  $key = "$($RuntimeIdentity.target)|$($RuntimeIdentity.dependencyCombination)|$Version"
+  if (-not $Map.ContainsKey($key)) {
+    $Map[$key] = [pscustomobject]@{
+      target = $RuntimeIdentity.target
+      dependencyCombination = $RuntimeIdentity.dependencyCombination
+      version = $Version
+      releaseAssetCount = 0
+      githubPackageVersionCount = 0
+      releaseComponents = [System.Collections.Generic.List[string]]::new()
+      githubPackageComponents = [System.Collections.Generic.List[string]]::new()
+    }
+  }
+
+  $Map[$key]
+}
+
 function Get-PackageEndpointPrefix {
   param(
     [Parameter(Mandatory = $true)]
@@ -318,6 +385,69 @@ $missingRepositoryAssociationRows = @(
     Sort-Object packageId, version
 )
 
+$runtimeMatrixByKey = @{}
+foreach ($row in $releaseAssetRows) {
+  $runtimeIdentity = ConvertFrom-RuntimePackageId -PackageId ([string]$row.packageId)
+  if ($null -eq $runtimeIdentity) {
+    continue
+  }
+
+  $entry = Get-RuntimeMatrixEntry -Map $runtimeMatrixByKey -RuntimeIdentity $runtimeIdentity -Version ([string]$row.version)
+  $entry.releaseAssetCount += 1
+  Add-UniqueString -List $entry.releaseComponents -Value ([string]$runtimeIdentity.component)
+}
+
+foreach ($row in $packageVersionRows) {
+  $runtimeIdentity = ConvertFrom-RuntimePackageId -PackageId ([string]$row.packageId)
+  if ($null -eq $runtimeIdentity) {
+    continue
+  }
+
+  $entry = Get-RuntimeMatrixEntry -Map $runtimeMatrixByKey -RuntimeIdentity $runtimeIdentity -Version ([string]$row.version)
+  $entry.githubPackageVersionCount += 1
+  Add-UniqueString -List $entry.githubPackageComponents -Value ([string]$runtimeIdentity.component)
+}
+
+$runtimeMatrixRows = @(
+  $runtimeMatrixByKey.Values |
+    ForEach-Object {
+      $releaseComponents = @($_.releaseComponents | Sort-Object)
+      $githubPackageComponents = @($_.githubPackageComponents | Sort-Object)
+      [pscustomobject]@{
+        target = [string]$_.target
+        dependencyCombination = [string]$_.dependencyCombination
+        version = [string]$_.version
+        releaseAssetCount = [int]$_.releaseAssetCount
+        githubPackageVersionCount = [int]$_.githubPackageVersionCount
+        releaseComponents = @($releaseComponents)
+        githubPackageComponents = @($githubPackageComponents)
+        missingGitHubPackageComponents = @($releaseComponents | Where-Object { $githubPackageComponents -notcontains $_ })
+        unexpectedGitHubPackageComponents = @($githubPackageComponents | Where-Object { $releaseComponents -notcontains $_ })
+      }
+    } |
+    Sort-Object target, dependencyCombination, version
+)
+
+$runtimeTargetSummaryRows = @(
+  $runtimeMatrixRows |
+    Group-Object target |
+    ForEach-Object {
+      $group = @($_.Group)
+      $dependencyCombinations = @($group | ForEach-Object { [string]$_.dependencyCombination } | Sort-Object -Unique)
+      $versions = @($group | ForEach-Object { [string]$_.version } | Sort-Object -Unique)
+      [pscustomobject]@{
+        target = [string]$_.Name
+        runtimePackageGroupCount = $group.Count
+        dependencyCombinationCount = $dependencyCombinations.Count
+        releaseAssetComponentCount = [int](($group | Measure-Object -Property releaseAssetCount -Sum).Sum)
+        githubPackageComponentCount = [int](($group | Measure-Object -Property githubPackageVersionCount -Sum).Sum)
+        versions = @($versions)
+        dependencyCombinations = @($dependencyCombinations)
+      }
+    } |
+    Sort-Object target
+)
+
 $failures = New-Object System.Collections.Generic.List[string]
 if ($missingReleaseTags.Count -gt 0) {
   $failures.Add("Missing expected GitHub Releases: $($missingReleaseTags -join ', ')") | Out-Null
@@ -368,6 +498,8 @@ $markdownPath = Join-Path $outputRoot "github-publication-inventory.md"
   packageVersionsMissingRepositoryAssociation = @($missingRepositoryAssociationRows)
   releaseAssets = @($releaseAssetRows.ToArray())
   packageVersions = @($packageVersionRows.ToArray())
+  runtimeTargetSummary = @($runtimeTargetSummaryRows)
+  runtimeMatrix = @($runtimeMatrixRows)
   failedCount = $failures.Count
   failures = @($failures.ToArray())
 } | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $jsonPath -Encoding utf8
@@ -393,6 +525,25 @@ $lines.Add("- Missing package versions: $($missingPackageVersionKeys.Count)")
 $lines.Add("- Unexpected package versions: $($unexpectedPackageVersionRows.Count)")
 $lines.Add("- Package versions associated with another repository: $($unassociatedPackageVersionRows.Count)")
 $lines.Add("- Package versions missing repository association: $($missingRepositoryAssociationRows.Count)")
+$lines.Add("")
+$lines.Add("## Runtime Matrix Summary")
+$lines.Add("")
+$lines.Add("| Target | Runtime package groups | Dependency combinations | Release asset components | GitHub package components | Versions |")
+$lines.Add("| --- | ---: | ---: | ---: | ---: | --- |")
+foreach ($row in $runtimeTargetSummaryRows) {
+  $versions = (($row.versions | ForEach-Object { $codeQuote + $_ + $codeQuote }) -join ", ")
+  $lines.Add("| " + $codeQuote + $row.target + $codeQuote + " | $($row.runtimePackageGroupCount) | $($row.dependencyCombinationCount) | $($row.releaseAssetComponentCount) | $($row.githubPackageComponentCount) | $versions |")
+}
+$lines.Add("")
+$lines.Add("| Target | Dependency combination | Version | Release components | GitHub Package components |")
+$lines.Add("| --- | --- | --- | --- | --- |")
+foreach ($row in $runtimeMatrixRows) {
+  $releaseComponents = (($row.releaseComponents | ForEach-Object { $codeQuote + $_ + $codeQuote }) -join ", ")
+  $githubPackageComponents = (($row.githubPackageComponents | ForEach-Object { $codeQuote + $_ + $codeQuote }) -join ", ")
+  $lines.Add("| " + $codeQuote + $row.target + $codeQuote + " | " + $codeQuote + $row.dependencyCombination + $codeQuote + " | " + $codeQuote + $row.version + $codeQuote + " | $releaseComponents | $githubPackageComponents |")
+}
+$lines.Add("")
+$lines.Add("## Package Versions")
 $lines.Add("")
 $lines.Add("| Package | Version | Expected | Repository |")
 $lines.Add("| --- | --- | --- | --- |")
