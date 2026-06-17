@@ -198,6 +198,7 @@ $workflowContracts = @(
       New-Requirement -Needle "runner_required_label_sets" -Description "runner label audit input"
       New-Requirement -Needle "RUNNER_AUDIT_TOKEN" -Description "runner audit token secret"
       New-Requirement -Needle "Test-GitHubRunnerAvailability.ps1" -Description "runner availability audit script"
+      New-Requirement -Needle "Test-LinuxRuntimeTargetCoverage.ps1" -Description "Linux target coverage audit script"
       New-Requirement -Needle "RequireRuntimeGitHubPackagesCoverage" -Description "runtime GitHub Packages coverage gate"
       New-Requirement -Needle "actions/upload-artifact" -Description "audit artifact upload"
       New-Requirement -Needle "packages: read" -Description "GitHub Packages read permission"
@@ -241,6 +242,18 @@ $workflowContracts = @(
       New-Requirement -Needle "onlineMatchingRunnerCount" -Description "online matching runner audit"
       New-Requirement -Needle "github-runner-availability" -Description "runner availability report"
       New-Requirement -Needle "WarnOnly" -Description "non-failing audit mode"
+    )
+  }
+  [pscustomobject]@{
+    path = "eng\Test-LinuxRuntimeTargetCoverage.ps1"
+    requirements = @(
+      New-Requirement -Needle "ubuntu22.04-x64-hosted" -Description "Ubuntu 22.04 hosted target coverage"
+      New-Requirement -Needle "ubuntu24.04-x64-hosted" -Description "Ubuntu 24.04 hosted target coverage"
+      New-Requirement -Needle "ubuntu20.04-x64-self-hosted" -Description "Ubuntu 20.04 self-hosted target coverage"
+      New-Requirement -Needle "linux-arm64-sbsa" -Description "future SBSA package-line guard"
+      New-Requirement -Needle "linux-jetson-l4t" -Description "future Jetson/L4T package-line guard"
+      New-Requirement -Needle "non-ubuntu-linux" -Description "future non-Ubuntu package-line guard"
+      New-Requirement -Needle "linux-runtime-target-coverage" -Description "target coverage report"
     )
   }
 )
@@ -290,6 +303,16 @@ $results.Add([pscustomobject]@{
     requirement = "Ubuntu 20.04 self-hosted key set resolves the modeled self-hosted package line"
     status = if ($ubuntu20SelfHostedKeySet.Count -eq 3 -and $ubuntu20SelfHostedKeySet -contains "linux-x64-ubuntu20.04-trt8.6-cuda11.8-cudnn8.9") { "passed" } else { "failed" }
     detail = $ubuntu20SelfHostedKeySet -join ", "
+  })
+
+pwsh -NoProfile -File (Join-Path $RepositoryRoot "eng\Test-LinuxRuntimeTargetCoverage.ps1") | Out-Host
+$linuxTargetCoverageJson = Get-Content -LiteralPath (Join-Path $RepositoryRoot "artifacts\linux-target-coverage\linux-runtime-target-coverage.json") -Raw
+$linuxTargetCoverage = $linuxTargetCoverageJson | ConvertFrom-Json
+$results.Add([pscustomobject]@{
+    workflow = "eng\Test-LinuxRuntimeTargetCoverage.ps1"
+    requirement = "Linux runtime target coverage models Ubuntu 20.04, 22.04, and 24.04 while holding future ARM/Jetson lines"
+    status = if ($linuxTargetCoverage.failedCount -eq 0 -and $linuxTargetCoverage.modeledTargets.Count -eq 3 -and ($linuxTargetCoverage.futureTargets | Where-Object { $_.target -eq "linux-jetson-l4t" }).Count -eq 1) { "passed" } else { "failed" }
+    detail = "failed=$($linuxTargetCoverage.failedCount); modeled=$($linuxTargetCoverage.modeledTargets.Count); future=$($linuxTargetCoverage.futureTargets.Count)"
   })
 
 $singleLinuxMatrix = $singleLinuxMatrixJson | ConvertFrom-Json

@@ -131,6 +131,11 @@ jobs:
 
           & pwsh @arguments
 
+      - name: Audit Linux runtime target coverage
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -File ./eng/Test-LinuxRuntimeTargetCoverage.ps1 -RequireFutureTargetPlaceholders
+
       - name: Audit runner availability
         shell: pwsh
         run: |
@@ -209,3 +214,4 @@ jobs:
             artifacts/release-publication/**
             artifacts/github-packages-audit/**
             artifacts/runner-availability/**
+            artifacts/linux-target-coverage/**

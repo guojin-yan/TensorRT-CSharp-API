@@ -119,6 +119,8 @@ Current Linux workflow modules:
 
 Ubuntu 22.04 x64 is the current hosted Linux publication line and has a successful remote release run. Ubuntu 20.04 x64 remains self-hosted/manual-root only. Ubuntu 24.04 x64 remains hosted for the modern combinations only. Linux arm64/SBSA and Jetson/L4T still need a separate package line before they can be published.
 
+Use `eng/Test-LinuxRuntimeTargetCoverage.ps1` to regenerate the target coverage report under `artifacts/linux-target-coverage`. The report is also uploaded by `release-publication-audit.yml` so publication evidence shows which Linux targets are modeled and which future ARM/Jetson/non-Ubuntu lines are intentionally held.
+
 ## Publication Risk
 
 Runtime packages can become very large because they may include TensorRT builder resources, plugins, parser libraries, CUDA runtime assets, cuBLAS, and cuDNN.

@@ -113,6 +113,8 @@ Linux runtime 包名必须包含发行版版本和 CPU 架构，因为 NVIDIA �
 
 Ubuntu 22.04 x64 是当前 hosted Linux 发布主线，已经有远程 release 成功运行作为证据。Ubuntu 20.04 x64 仍然只走 self-hosted/manual-root。Ubuntu 24.04 x64 仍然只覆盖现代组合。Linux arm64/SBSA 与 Jetson/L4T 需要单独建包线后才能发布。
 
+可以用 `eng/Test-LinuxRuntimeTargetCoverage.ps1` 重新生成 `artifacts/linux-target-coverage` 下的目标覆盖报告。`release-publication-audit.yml` 也会上传这份报告，用来证明哪些 Linux 目标已经建模，哪些 ARM/Jetson/非 Ubuntu 未来包线被有意暂缓。
+
 ## 发布风险
 
 runtime 包可能非常大，因为会包含 TensorRT builder resources、plugin、parser、CUDA runtime、cuBLAS 和 cuDNN。
