@@ -389,8 +389,21 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          CMAKE_VERSION="3.31.8"
+          CMAKE_ARCHIVE="cmake-${CMAKE_VERSION}-linux-x86_64.tar.gz"
+          CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/${CMAKE_ARCHIVE}"
+          CMAKE_ROOT="/opt/cmake-${CMAKE_VERSION}"
+
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends ninja-build cmake wget ca-certificates
+          sudo apt-get install -y --no-install-recommends ninja-build wget ca-certificates curl tar gzip
+
+          curl --fail --location --retry 5 --retry-delay 5 "$CMAKE_URL" --output "/tmp/${CMAKE_ARCHIVE}"
+          sudo rm -rf "$CMAKE_ROOT"
+          sudo mkdir -p "$CMAKE_ROOT"
+          sudo tar -xzf "/tmp/${CMAKE_ARCHIVE}" --strip-components=1 -C "$CMAKE_ROOT"
+          sudo ln -sf "$CMAKE_ROOT/bin/cmake" /usr/local/bin/cmake
+          sudo ln -sf "$CMAKE_ROOT/bin/ctest" /usr/local/bin/ctest
+          sudo ln -sf "$CMAKE_ROOT/bin/cpack" /usr/local/bin/cpack
 
       - name: Verify local .NET
         shell: pwsh
@@ -398,7 +411,18 @@ jobs:
 
       - name: Verify local CMake
         shell: pwsh
-        run: cmake --version
+        run: |
+          $versionText = (cmake --version | Select-Object -First 1)
+          Write-Host $versionText
+          if ($versionText -notmatch 'version\s+(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)') {
+            throw "Unable to parse CMake version from '$versionText'."
+          }
+
+          $version = [System.Version]::new([int]$Matches.major, [int]$Matches.minor, [int]$Matches.patch)
+          $minimum = [System.Version]::new(3, 27, 0)
+          if ($version -lt $minimum) {
+            throw "CMake $version is too old for CMakePresets.json. CMake $minimum or newer is required."
+          }
 
       - name: Prepare NVIDIA dependencies from official apt packages
         if: ${{ matrix.nvidiaDependencyMode == 'apt' }}
