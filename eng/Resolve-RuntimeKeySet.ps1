@@ -72,6 +72,24 @@ else {
     }
   }
   else {
+    $targetCatalogPath = Join-Path $RepositoryRoot "pack\runtime\linux-runtime-targets.manifest.json"
+    if (Test-Path -LiteralPath $targetCatalogPath -PathType Leaf) {
+      $targetCatalog = Get-Content -LiteralPath $targetCatalogPath -Raw -Encoding utf8 | ConvertFrom-Json
+      $futureTarget = @(
+        foreach ($target in @($targetCatalog.futureTargets)) {
+          $aliases = @($target.keySetAliases | ForEach-Object { ([string]$_).Trim().ToLowerInvariant() })
+          if ($aliases -contains $normalizedSet -or ([string]$target.target).Trim().ToLowerInvariant() -eq $normalizedSet) {
+            $target
+          }
+        }
+      ) | Select-Object -First 1
+
+      if ($null -ne $futureTarget) {
+        $requiredEvidence = @($futureTarget.requiredEvidenceItems | ForEach-Object { [string]$_ }) -join "; "
+        throw "Linux runtime key set '$RuntimeKeySet' maps to future package line '$($futureTarget.target)' from pack/runtime/linux-runtime-targets.manifest.json, but that line is not dispatchable yet. Package identity rule: $($futureTarget.packageIdentityRule) Required evidence before enabling: $requiredEvidence"
+      }
+    }
+
     switch ($normalizedSet) {
       "auto" {
         if ($RunnerMode -eq "self-hosted") {
@@ -106,7 +124,7 @@ else {
         throw "RuntimeKeySet 'custom' requires explicit RuntimeKey values."
       }
       default {
-        throw "Unsupported Linux runtime key set '$RuntimeKeySet'. Supported values: auto, default, ubuntu22-hosted, hosted-all, ubuntu24-hosted, self-hosted-ubuntu20, all, custom."
+        throw "Unsupported Linux runtime key set '$RuntimeKeySet'. Supported values: auto, default, ubuntu22-hosted, hosted-all, ubuntu24-hosted, self-hosted-ubuntu20, all, custom. Known future lines such as arm64-sbsa, jetson-l4t, and non-ubuntu are tracked in pack/runtime/linux-runtime-targets.manifest.json and require dedicated manifest entries, runners, NVIDIA dependency plans, and package consumer evidence before dispatch."
       }
     }
   }

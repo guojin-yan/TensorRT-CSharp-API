@@ -245,6 +245,16 @@ $workflowContracts = @(
     )
   }
   [pscustomobject]@{
+    path = "eng\Resolve-RuntimeKeySet.ps1"
+    requirements = @(
+      New-Requirement -Needle "linux-runtime-targets.manifest.json" -Description "Linux target catalog is consulted"
+      New-Requirement -Needle "future package line" -Description "future Linux key sets fail with explicit guidance"
+      New-Requirement -Needle "arm64-sbsa" -Description "ARM/SBSA key set is recognized as future"
+      New-Requirement -Needle "jetson-l4t" -Description "Jetson/L4T key set is recognized as future"
+      New-Requirement -Needle "non-ubuntu" -Description "non-Ubuntu key set is recognized as future"
+    )
+  }
+  [pscustomobject]@{
     path = "eng\Export-RuntimePublicationIndex.ps1"
     requirements = @(
       New-Requirement -Needle "Runtime Publication Index" -Description "publication index report title"
@@ -413,14 +423,23 @@ $workflowContracts = @(
   [pscustomobject]@{
     path = "eng\Test-LinuxRuntimeTargetCoverage.ps1"
     requirements = @(
-      New-Requirement -Needle "ubuntu22.04-x64-hosted" -Description "Ubuntu 22.04 hosted target coverage"
-      New-Requirement -Needle "ubuntu24.04-x64-hosted" -Description "Ubuntu 24.04 hosted target coverage"
-      New-Requirement -Needle "ubuntu20.04-x64-self-hosted" -Description "Ubuntu 20.04 self-hosted target coverage"
-      New-Requirement -Needle "linux-arm64-sbsa" -Description "future SBSA package-line guard"
-      New-Requirement -Needle "linux-jetson-l4t" -Description "future Jetson/L4T package-line guard"
-      New-Requirement -Needle "non-ubuntu-linux" -Description "future non-Ubuntu package-line guard"
+      New-Requirement -Needle "linux-runtime-targets.manifest.json" -Description "target coverage is generated from the Linux target catalog"
+      New-Requirement -Needle "targetCatalog.targets" -Description "modeled target rows come from the target catalog"
+      New-Requirement -Needle "targetCatalog.futureTargets" -Description "future target rows come from the target catalog"
       New-Requirement -Needle "requiredEvidenceItems" -Description "structured future-target evidence checklist"
       New-Requirement -Needle "linux-runtime-target-coverage" -Description "target coverage report"
+    )
+  }
+  [pscustomobject]@{
+    path = "pack\runtime\linux-runtime-targets.manifest.json"
+    requirements = @(
+      New-Requirement -Needle "ubuntu22.04-x64-hosted" -Description "Ubuntu 22.04 hosted target is cataloged"
+      New-Requirement -Needle "ubuntu24.04-x64-hosted" -Description "Ubuntu 24.04 hosted target is cataloged"
+      New-Requirement -Needle "ubuntu20.04-x64-self-hosted" -Description "Ubuntu 20.04 self-hosted target is cataloged"
+      New-Requirement -Needle "linux-arm64-sbsa" -Description "future SBSA package line is cataloged"
+      New-Requirement -Needle "linux-jetson-l4t" -Description "future Jetson/L4T package line is cataloged"
+      New-Requirement -Needle "non-ubuntu-linux" -Description "future non-Ubuntu package line is cataloged"
+      New-Requirement -Needle "packageIdentityRule" -Description "future targets document package identity rules"
     )
   }
   [pscustomobject]@{
@@ -484,6 +503,15 @@ $results.Add([pscustomobject]@{
     requirement = "Ubuntu 20.04 self-hosted key set resolves the modeled self-hosted package line"
     status = if ($ubuntu20SelfHostedKeySet.Count -eq 3 -and $ubuntu20SelfHostedKeySet -contains "linux-x64-ubuntu20.04-trt8.6-cuda11.8-cudnn8.9") { "passed" } else { "failed" }
     detail = $ubuntu20SelfHostedKeySet -join ", "
+  })
+
+$futureKeySetOutput = (pwsh -NoProfile -File (Join-Path $RepositoryRoot "eng\Resolve-RuntimeKeySet.ps1") -Platform linux -RuntimeKeySet arm64-sbsa -RunnerMode self-hosted -OutputFormat json 2>&1 | Out-String).Trim()
+$futureKeySetExitCode = $LASTEXITCODE
+$results.Add([pscustomobject]@{
+    workflow = "eng\Resolve-RuntimeKeySet.ps1"
+    requirement = "Future Linux key sets fail with package-line readiness guidance instead of silently dispatching"
+    status = if ($futureKeySetExitCode -ne 0 -and $futureKeySetOutput -match "future package line" -and $futureKeySetOutput -match "linux-arm64-sbsa") { "passed" } else { "failed" }
+    detail = $futureKeySetOutput
   })
 
 pwsh -NoProfile -File (Join-Path $RepositoryRoot "eng\Test-LinuxRuntimeTargetCoverage.ps1") | Out-Host

@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "dependencyCombinations": [
+    "trt8.6-cuda11.8-cudnn8.9",
+    "trt8.6-cuda12.1-cudnn8.9",
+    "trt10.11-cuda11.8-cudnn8.9",
+    "trt10.11-cuda12.9-cudnn9.22",
+    "trt11.0-cuda12.9-cudnn9.22",
+    "trt11.0-cuda13.2-cudnn9.22"
+  ],
+  "targets": [
+    {
+      "target": "ubuntu22.04-x64-hosted",
+      "keySetAliases": [
+        "default",
+        "ubuntu22-hosted",
+        "ubuntu22.04-hosted"
+      ],
+      "linuxDistro": "ubuntu",
+      "linuxDistroVersion": "22.04",
+      "architecture": "x64",
+      "runnerMode": "hosted",
+      "status": "modeled",
+      "publicationRequirement": "published-required",
+      "expectedCombinations": [
+        "all"
+      ],
+      "notes": "Hosted Ubuntu 22.04 x64 is the full six-combination Linux publication line."
+    },
+    {
+      "target": "ubuntu24.04-x64-hosted",
+      "keySetAliases": [
+        "ubuntu24-hosted",
+        "ubuntu24.04-hosted"
+      ],
+      "linuxDistro": "ubuntu",
+      "linuxDistroVersion": "24.04",
+      "architecture": "x64",
+      "runnerMode": "hosted",
+      "status": "modeled",
+      "publicationRequirement": "published-required",
+      "expectedCombinations": [
+        "trt10.11-cuda12.9-cudnn9.22",
+        "trt11.0-cuda12.9-cudnn9.22",
+        "trt11.0-cuda13.2-cudnn9.22"
+      ],
+      "notes": "Ubuntu 24.04 is limited to modern TensorRT/CUDA combinations available from NVIDIA's Ubuntu 24.04 repositories."
+    },
+    {
+      "target": "ubuntu20.04-x64-self-hosted",
+      "keySetAliases": [
+        "self-hosted-ubuntu20",
+        "ubuntu20-self-hosted",
+        "ubuntu20.04-self-hosted"
+      ],
+      "linuxDistro": "ubuntu",
+      "linuxDistroVersion": "20.04",
+      "architecture": "x64",
+      "runnerMode": "self-hosted",
+      "status": "modeled",
+      "publicationRequirement": "infrastructure-blocked",
+      "expectedCombinations": [
+        "trt8.6-cuda11.8-cudnn8.9",
+        "trt8.6-cuda12.1-cudnn8.9",
+        "trt10.11-cuda11.8-cudnn8.9"
+      ],
+      "notes": "Ubuntu 20.04 requires a self-hosted Linux x64 runner and remains separate from hosted Ubuntu 22.04/24.04."
+    }
+  ],
+  "futureTargets": [
+    {
+      "target": "linux-arm64-sbsa",
+      "keySetAliases": [
+        "arm64-sbsa",
+        "linux-arm64-sbsa",
+        "sbsa"
+      ],
+      "status": "future-separate-package-line",
+      "runnerMode": "self-hosted",
+      "architecture": "arm64",
+      "packageIdentityRule": "Use distro-qualified arm64/SBSA package IDs such as linux-arm64-ubuntu22.04-sbsa-trt...; do not reuse linux-x64 package IDs.",
+      "requiredEvidence": "Dedicated arm64/SBSA runner labels, RID/package IDs, NVIDIA repo architecture, and dependency plan.",
+      "requiredEvidenceItems": [
+        "runtime package IDs include linux-arm64-sbsa or a more specific distro-qualified arm64/SBSA target",
+        "runner labels identify an arm64/SBSA Linux runner pool",
+        "NVIDIA repository architecture is modeled as sbsa or the official equivalent",
+        "dependency plan is generated from official NVIDIA arm64/SBSA packages",
+        "package consumer validation evidence exists for the arm64/SBSA runtime package line"
+      ]
+    },
+    {
+      "target": "linux-jetson-l4t",
+      "keySetAliases": [
+        "jetson-l4t",
+        "linux-jetson-l4t",
+        "l4t"
+      ],
+      "status": "future-separate-package-line",
+      "runnerMode": "self-hosted",
+      "architecture": "arm64",
+      "packageIdentityRule": "Use Jetson/L4T-qualified package IDs; Jetson/L4T is not interchangeable with SBSA server ARM.",
+      "requiredEvidence": "Dedicated Jetson/L4T package IDs, runner/board strategy, L4T-specific NVIDIA dependency plan, and validation evidence.",
+      "requiredEvidenceItems": [
+        "runtime package IDs include Jetson/L4T release identity and are not reused from SBSA or x64",
+        "runner or board strategy identifies the Jetson hardware/L4T image used for validation",
+        "NVIDIA dependencies come from the L4T/JetPack-compatible source for that board line",
+        "bridge build and runtime package collection are validated on the target L4T line",
+        "package consumer validation evidence exists for the Jetson/L4T runtime package line"
+      ]
+    },
+    {
+      "target": "non-ubuntu-linux",
+      "keySetAliases": [
+        "non-ubuntu",
+        "non-ubuntu-linux",
+        "rhel-rocky"
+      ],
+      "status": "future-separate-package-line",
+      "runnerMode": "self-hosted",
+      "architecture": "x64-or-arm64",
+      "packageIdentityRule": "Use distribution/version-qualified package IDs for each non-Ubuntu line, for example linux-x64-rhel9-trt...",
+      "requiredEvidence": "Separate package IDs by distro/version plus official NVIDIA dependency source and runner validation.",
+      "requiredEvidenceItems": [
+        "runtime package IDs include the Linux distribution and version",
+        "runner labels or container images identify the target distribution/version",
+        "official NVIDIA dependency source is modeled for the distribution/version",
+        "dependency package names and versions are pinned for that distribution/version",
+        "package consumer validation evidence exists for each non-Ubuntu runtime package line"
+      ]
+    }
+  ]
+}

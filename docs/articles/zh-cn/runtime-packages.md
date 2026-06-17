@@ -108,6 +108,8 @@ Linux runtime 包名必须包含发行版版本和 CPU 架构，因为 NVIDIA �
 - Linux arm64/SBSA 和 Jetson/L4T 后续要单独建包线。SBSA 服务器 ARM 和 Jetson 不是同一个运行时目标，不能复用 x64 Ubuntu 包名。
 - RHEL/Rocky 等其它发行版只有在明确建模对应 NVIDIA 仓库和 runner 镜像后才能加入。
 
+`pack/runtime/linux-runtime-targets.manifest.json` 是 Linux 目标目录。它记录已经建模的 Ubuntu 目标、对应的 `runtime_key_set` 别名，以及仍需要独立 package ID、runner、官方 NVIDIA 依赖计划和 package consumer 证据的未来包线。`Resolve-RuntimeKeySet.ps1` 会识别 `arm64-sbsa`、`jetson-l4t`、`non-ubuntu` 这类未来别名，但会有意失败并给出 readiness 指引，而不是误触发一个尚不支持的打包任务。
+
 当前 Linux workflow 模块：
 
 - `runtime-linux.yml`

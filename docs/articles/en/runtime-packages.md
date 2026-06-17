@@ -114,6 +114,8 @@ Current Linux matrix:
 - Linux arm64/SBSA and Jetson/L4T are separate future package lines. SBSA server ARM and Jetson are not interchangeable, and neither should share the x64 Ubuntu package IDs.
 - Other Linux distributions such as RHEL/Rocky should be added only after a matching NVIDIA repository and runner image are modeled explicitly.
 
+`pack/runtime/linux-runtime-targets.manifest.json` is the target catalog for these Linux lines. It records the modeled Ubuntu targets, their `runtime_key_set` aliases, and the future package lines that still need dedicated package IDs, runners, official NVIDIA dependency plans, and package consumer evidence. `Resolve-RuntimeKeySet.ps1` recognizes future aliases such as `arm64-sbsa`, `jetson-l4t`, and `non-ubuntu`, but intentionally fails with readiness guidance instead of dispatching an unsupported package run.
+
 Current Linux workflow modules:
 
 - `runtime-linux.yml`

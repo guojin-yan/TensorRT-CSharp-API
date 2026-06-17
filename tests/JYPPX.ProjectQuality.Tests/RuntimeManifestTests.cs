@@ -103,6 +103,49 @@ public sealed class RuntimeManifestTests
     }
 
     [Fact]
+    public void LinuxRuntimeTargetCatalogSeparatesModeledAndFuturePackageLines()
+    {
+        string path = Path.Combine(RepositoryPaths.Root, "pack", "runtime", "linux-runtime-targets.manifest.json");
+        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(path));
+
+        string[] dependencyCombinations = document.RootElement.GetProperty("dependencyCombinations")
+            .EnumerateArray()
+            .Select(static item => item.GetString()!)
+            .ToArray();
+
+        Assert.Equal(6, dependencyCombinations.Length);
+        Assert.Contains("trt8.6-cuda11.8-cudnn8.9", dependencyCombinations);
+        Assert.Contains("trt11.0-cuda13.2-cudnn9.22", dependencyCombinations);
+
+        JsonElement[] modeledTargets = document.RootElement.GetProperty("targets").EnumerateArray().ToArray();
+        Assert.Equal(3, modeledTargets.Length);
+        Assert.Contains(modeledTargets, static target => target.GetProperty("target").GetString() == "ubuntu22.04-x64-hosted");
+        Assert.Contains(modeledTargets, static target => target.GetProperty("target").GetString() == "ubuntu24.04-x64-hosted");
+        Assert.Contains(modeledTargets, static target => target.GetProperty("target").GetString() == "ubuntu20.04-x64-self-hosted");
+
+        foreach (JsonElement target in modeledTargets)
+        {
+            Assert.Equal("modeled", target.GetProperty("status").GetString());
+            Assert.True(target.GetProperty("expectedCombinations").GetArrayLength() > 0);
+            Assert.True(target.GetProperty("keySetAliases").GetArrayLength() > 0);
+        }
+
+        JsonElement[] futureTargets = document.RootElement.GetProperty("futureTargets").EnumerateArray().ToArray();
+        Assert.Equal(3, futureTargets.Length);
+        Assert.Contains(futureTargets, static target => target.GetProperty("target").GetString() == "linux-arm64-sbsa");
+        Assert.Contains(futureTargets, static target => target.GetProperty("target").GetString() == "linux-jetson-l4t");
+        Assert.Contains(futureTargets, static target => target.GetProperty("target").GetString() == "non-ubuntu-linux");
+
+        foreach (JsonElement target in futureTargets)
+        {
+            Assert.Equal("future-separate-package-line", target.GetProperty("status").GetString());
+            Assert.False(string.IsNullOrWhiteSpace(target.GetProperty("packageIdentityRule").GetString()));
+            Assert.True(target.GetProperty("requiredEvidenceItems").GetArrayLength() > 0);
+            Assert.True(target.GetProperty("keySetAliases").GetArrayLength() > 0);
+        }
+    }
+
+    [Fact]
     public void SplitRuntimeProjectsExistForEverySplitManifestPackage()
     {
         string path = Path.Combine(RepositoryPaths.Root, "pack", "runtime-split", "split-runtime-packages.manifest.json");

@@ -15,94 +15,37 @@ $utf8 = [System.Text.UTF8Encoding]::new($false)
 $OutputEncoding = $utf8
 $ErrorActionPreference = "Stop"
 
-$expectedDependencyCombos = @(
-  "trt8.6-cuda11.8-cudnn8.9",
-  "trt8.6-cuda12.1-cudnn8.9",
-  "trt10.11-cuda11.8-cudnn8.9",
-  "trt10.11-cuda12.9-cudnn9.22",
-  "trt11.0-cuda12.9-cudnn9.22",
-  "trt11.0-cuda13.2-cudnn9.22"
-)
+$targetCatalogPath = Join-Path $RepositoryRoot "pack\runtime\linux-runtime-targets.manifest.json"
+if (-not (Test-Path -LiteralPath $targetCatalogPath -PathType Leaf)) {
+  throw "Linux runtime target catalog was not found: $targetCatalogPath"
+}
+
+$targetCatalog = Get-Content -LiteralPath $targetCatalogPath -Raw -Encoding utf8 | ConvertFrom-Json
+$expectedDependencyCombos = @($targetCatalog.dependencyCombinations | ForEach-Object { [string]$_ })
 
 $expectedTargets = @(
-  [pscustomobject]@{
-    target = "ubuntu22.04-x64-hosted"
-    linuxDistro = "ubuntu"
-    linuxDistroVersion = "22.04"
-    architecture = "x64"
-    runnerMode = "hosted"
-    expectedCombos = $expectedDependencyCombos
-    status = "modeled"
-    notes = "Hosted Ubuntu 22.04 x64 is the full six-combination Linux publication line."
-  }
-  [pscustomobject]@{
-    target = "ubuntu24.04-x64-hosted"
-    linuxDistro = "ubuntu"
-    linuxDistroVersion = "24.04"
-    architecture = "x64"
-    runnerMode = "hosted"
-    expectedCombos = @(
-      "trt10.11-cuda12.9-cudnn9.22",
-      "trt11.0-cuda12.9-cudnn9.22",
-      "trt11.0-cuda13.2-cudnn9.22"
-    )
-    status = "modeled"
-    notes = "Ubuntu 24.04 is limited to modern TensorRT/CUDA combinations available from NVIDIA's Ubuntu 24.04 repositories."
-  }
-  [pscustomobject]@{
-    target = "ubuntu20.04-x64-self-hosted"
-    linuxDistro = "ubuntu"
-    linuxDistroVersion = "20.04"
-    architecture = "x64"
-    runnerMode = "self-hosted"
-    expectedCombos = @(
-      "trt8.6-cuda11.8-cudnn8.9",
-      "trt8.6-cuda12.1-cudnn8.9",
-      "trt10.11-cuda11.8-cudnn8.9"
-    )
-    status = "modeled"
-    notes = "Ubuntu 20.04 requires a self-hosted Linux x64 runner and remains separate from hosted Ubuntu 22.04/24.04."
+  foreach ($target in @($targetCatalog.targets)) {
+    $expectedCombos = @($target.expectedCombinations | ForEach-Object { [string]$_ })
+    if ($expectedCombos -contains "all") {
+      $expectedCombos = $expectedDependencyCombos
+    }
+
+    [pscustomobject]@{
+      target = [string]$target.target
+      linuxDistro = [string]$target.linuxDistro
+      linuxDistroVersion = [string]$target.linuxDistroVersion
+      architecture = [string]$target.architecture
+      runnerMode = [string]$target.runnerMode
+      expectedCombos = @($expectedCombos)
+      status = [string]$target.status
+      publicationRequirement = [string]$target.publicationRequirement
+      keySetAliases = @($target.keySetAliases | ForEach-Object { [string]$_ })
+      notes = [string]$target.notes
+    }
   }
 )
 
-$futureTargets = @(
-  [pscustomobject]@{
-    target = "linux-arm64-sbsa"
-    status = "future-separate-package-line"
-    requiredEvidence = "Dedicated arm64/SBSA runner labels, RID/package IDs, NVIDIA repo architecture, and dependency plan."
-    requiredEvidenceItems = @(
-      "runtime package IDs include linux-arm64-sbsa or a more specific distro-qualified arm64/SBSA target",
-      "runner labels identify an arm64/SBSA Linux runner pool",
-      "NVIDIA repository architecture is modeled as sbsa or the official equivalent",
-      "dependency plan is generated from official NVIDIA arm64/SBSA packages",
-      "package consumer validation evidence exists for the arm64/SBSA runtime package line"
-    )
-  }
-  [pscustomobject]@{
-    target = "linux-jetson-l4t"
-    status = "future-separate-package-line"
-    requiredEvidence = "Dedicated Jetson/L4T package IDs, runner/board strategy, L4T-specific NVIDIA dependency plan, and validation evidence."
-    requiredEvidenceItems = @(
-      "runtime package IDs include Jetson/L4T release identity and are not reused from SBSA or x64",
-      "runner or board strategy identifies the Jetson hardware/L4T image used for validation",
-      "NVIDIA dependencies come from the L4T/JetPack-compatible source for that board line",
-      "bridge build and runtime package collection are validated on the target L4T line",
-      "package consumer validation evidence exists for the Jetson/L4T runtime package line"
-    )
-  }
-  [pscustomobject]@{
-    target = "non-ubuntu-linux"
-    status = "future-separate-package-line"
-    requiredEvidence = "Separate package IDs by distro/version plus official NVIDIA dependency source and runner validation."
-    requiredEvidenceItems = @(
-      "runtime package IDs include the Linux distribution and version",
-      "runner labels or container images identify the target distribution/version",
-      "official NVIDIA dependency source is modeled for the distribution/version",
-      "dependency package names and versions are pinned for that distribution/version",
-      "package consumer validation evidence exists for each non-Ubuntu runtime package line"
-    )
-  }
-)
+$futureTargets = @($targetCatalog.futureTargets)
 
 function Get-ComboKey {
   param(
@@ -139,6 +82,8 @@ foreach ($target in $expectedTargets) {
   $rows.Add([pscustomobject]@{
       target = $target.target
       status = $target.status
+      publicationRequirement = $target.publicationRequirement
+      keySetAliases = @($target.keySetAliases)
       expectedCount = $target.expectedCombos.Count
       actualCount = $actualCombos.Count
       expectedCombos = @($target.expectedCombos)
@@ -173,6 +118,7 @@ $jsonPath = Join-Path $outputRoot "linux-runtime-target-coverage.json"
 $markdownPath = Join-Path $outputRoot "linux-runtime-target-coverage.md"
 
 [pscustomobject]@{
+  targetCatalogPath = $targetCatalogPath
   expectedDependencyCombinations = @($expectedDependencyCombos)
   failedCount = $failures.Count
   modeledTargets = @($rows.ToArray())
@@ -184,10 +130,10 @@ $lines = New-Object System.Collections.Generic.List[string]
 $codeQuote = [string][char]96
 $lines.Add("# Linux Runtime Target Coverage")
 $lines.Add("")
-$lines.Add("| Target | Status | Expected | Actual | Passed |")
-$lines.Add("| --- | --- | ---: | ---: | --- |")
+$lines.Add("| Target | Status | Requirement | Expected | Actual | Passed |")
+$lines.Add("| --- | --- | --- | ---: | ---: | --- |")
 foreach ($row in $rows) {
-  $lines.Add("| " + $codeQuote + $row.target + $codeQuote + " | " + $codeQuote + $row.status + $codeQuote + " | $($row.expectedCount) | $($row.actualCount) | $($row.passed) |")
+  $lines.Add("| " + $codeQuote + $row.target + $codeQuote + " | " + $codeQuote + $row.status + $codeQuote + " | " + $codeQuote + $row.publicationRequirement + $codeQuote + " | $($row.expectedCount) | $($row.actualCount) | $($row.passed) |")
 }
 
 $lines.Add("")
@@ -199,6 +145,7 @@ foreach ($row in $rows) {
   $lines.Add("- expected combinations: " + (($row.expectedCombos | ForEach-Object { $codeQuote + $_ + $codeQuote }) -join ", "))
   $lines.Add("- actual combinations: " + (($row.actualCombos | ForEach-Object { $codeQuote + $_ + $codeQuote }) -join ", "))
   $lines.Add("- package keys: " + (($row.packageKeys | ForEach-Object { $codeQuote + $_ + $codeQuote }) -join ", "))
+  $lines.Add("- key set aliases: " + (($row.keySetAliases | ForEach-Object { $codeQuote + $_ + $codeQuote }) -join ", "))
   $lines.Add("- notes: $($row.notes)")
 }
 
