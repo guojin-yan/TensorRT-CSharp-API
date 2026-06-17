@@ -99,6 +99,33 @@ function Get-SecretFromEnvironment {
   [Environment]::GetEnvironmentVariable($Name)
 }
 
+function Get-NormalizedSecretValue {
+  param(
+    [string]$Value,
+    [string]$Description
+  )
+
+  if ([string]::IsNullOrWhiteSpace($Value)) {
+    return $null
+  }
+
+  $trimmed = $Value.Trim()
+  if ($trimmed.Length -ne $Value.Length) {
+    Write-Warning "$Description had leading or trailing whitespace; using the trimmed value."
+  }
+
+  $trimmed
+}
+
+function Test-ContainsWhitespace {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$Value
+  )
+
+  [string]::Join("", $Value.ToCharArray()) -match "\s"
+}
+
 function Format-SafeOutputLine {
   param(
     [Parameter(Mandatory = $true)]
@@ -357,7 +384,8 @@ function Resolve-NuGetExePath {
 }
 
 $ApiKey = if ([string]::IsNullOrWhiteSpace($ApiKey)) { Get-SecretFromEnvironment -Name $ApiKeyEnvironmentVariable } else { $ApiKey }
-$sourcePassword = Get-SecretFromEnvironment -Name $SourcePasswordEnvironmentVariable
+$ApiKey = Get-NormalizedSecretValue -Value $ApiKey -Description "The package API key"
+$sourcePassword = Get-NormalizedSecretValue -Value (Get-SecretFromEnvironment -Name $SourcePasswordEnvironmentVariable) -Description "The package source password"
 $hasApiKey = -not [string]::IsNullOrWhiteSpace($ApiKey)
 $hasSourceCredentials = -not [string]::IsNullOrWhiteSpace($SourceName) -and
   -not [string]::IsNullOrWhiteSpace($SourceUserName) -and
@@ -367,8 +395,16 @@ if ($hasApiKey -and -not (Test-IsAsciiText -Value $ApiKey)) {
   throw "ApiKey contains non-ASCII characters. Provide the plain-text package API key instead of an encrypted credential blob or other formatted secret."
 }
 
+if ($hasApiKey -and (Test-ContainsWhitespace -Value $ApiKey)) {
+  throw "ApiKey contains internal whitespace. Provide the exact plain-text package API key without embedded spaces or line breaks."
+}
+
 if ($hasSourceCredentials -and -not (Test-IsAsciiText -Value $sourcePassword)) {
   throw "Source password contains non-ASCII characters. Provide the plain-text package token instead of an encrypted credential blob or other formatted secret."
+}
+
+if ($hasSourceCredentials -and (Test-ContainsWhitespace -Value $sourcePassword)) {
+  throw "Source password contains internal whitespace. Provide the exact plain-text package token without embedded spaces or line breaks."
 }
 
 $nugetConfigPath = $null
