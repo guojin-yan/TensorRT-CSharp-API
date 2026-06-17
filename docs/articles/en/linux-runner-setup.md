@@ -47,6 +47,8 @@ pwsh -File ./eng/Test-LinuxSelfHostedRunnerReadiness.ps1 \
 
 The readiness check writes `artifacts/linux-self-hosted-runner-readiness/linux-self-hosted-runner-readiness.json` and `.md`. It verifies the OS, x64 architecture, `pwsh`, `.NET SDK 10.0.300+`, CMake, Ninja, Git, `gh`, local runner configuration, GitHub runner labels, and the NVIDIA roots resolved for `self-hosted-ubuntu20`.
 
+After the runner is visible in GitHub, you can run the same check remotely with `linux-self-hosted-runner-readiness.yml`. It targets `self-hosted,linux,x64,ubuntu-20.04`, uploads the same readiness artifacts, and does not publish packages. Use it as the final gate before enabling `run_linux_self_hosted_ubuntu20_runtime_packaging=true` in `release-bundle.yml`.
+
 ## Expected workflow inputs
 
 For `runtime-linux.yml`, provide:

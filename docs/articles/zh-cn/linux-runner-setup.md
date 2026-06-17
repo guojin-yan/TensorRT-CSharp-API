@@ -47,6 +47,8 @@ pwsh -File ./eng/Test-LinuxSelfHostedRunnerReadiness.ps1 \
 
 检查结果会写入 `artifacts/linux-self-hosted-runner-readiness/linux-self-hosted-runner-readiness.json` 和 `.md`。它会验证系统是否为 Ubuntu 20.04 x64、`pwsh`、`.NET SDK 10.0.300+`、CMake、Ninja、Git、`gh`、本机 runner 配置、GitHub runner 标签，以及 `self-hosted-ubuntu20` 解析出的 NVIDIA 根目录。
 
+runner 已经出现在 GitHub 后，也可以远程触发 `linux-self-hosted-runner-readiness.yml` 做同一组检查。该 workflow 固定运行在 `self-hosted,linux,x64,ubuntu-20.04`，只上传 readiness 报告，不发布包。建议它通过后，再在 `release-bundle.yml` 中打开 `run_linux_self_hosted_ubuntu20_runtime_packaging=true`。
+
 ## `runtime-linux.yml` 需要的输入
 
 - `version`

@@ -135,6 +135,19 @@ $workflowContracts = @(
     )
   }
   [pscustomobject]@{
+    path = ".github\workflows\linux-self-hosted-runner-readiness.yml"
+    requirements = @(
+      New-Requirement -Needle "workflow_dispatch" -Description "manual trigger"
+      New-Requirement -Needle "self-hosted" -Description "self-hosted runner"
+      New-Requirement -Needle "linux" -Description "linux runner label"
+      New-Requirement -Needle "ubuntu-20.04" -Description "Ubuntu 20.04 runner label"
+      New-Requirement -Needle "Test-LinuxSelfHostedRunnerReadiness.ps1" -Description "Ubuntu 20.04 readiness script"
+      New-Requirement -Needle "RUNNER_AUDIT_TOKEN" -Description "runner audit token support"
+      New-Requirement -Needle "linux-self-hosted-runner-readiness" -Description "readiness artifact upload"
+      New-Requirement -Needle "runtime_key_set" -Description "runtime key set input"
+    )
+  }
+  [pscustomobject]@{
     path = ".github\workflows\release-bundle.yml"
     requirements = @(
       New-Requirement -Needle "workflow_dispatch" -Description "manual trigger"
