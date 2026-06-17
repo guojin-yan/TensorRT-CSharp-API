@@ -84,9 +84,9 @@ on:
         default: "self-hosted,windows,x64"
         type: string
       warn_only:
-        description: Report failed checks as warnings instead of failing the workflow
+        description: Report failed checks as warnings instead of failing the workflow; use only for infrastructure preparation audits
         required: false
-        default: true
+        default: false
         type: boolean
 
 permissions:

@@ -310,6 +310,8 @@ $workflowContracts = @(
       New-Requirement -Needle 'default: "v4.0.6170,v4.0.6156,v4.0.6167,v4.0.6169,v4.0.6171"' -Description "strict publication inventory includes all retained releases by default"
       New-Requirement -Needle "require_managed_nuget_org" -Description "nuget.org managed package gate"
       New-Requirement -Needle "require_nuget_api_key" -Description "nuget.org API key gate"
+      New-Requirement -Needle "use only for infrastructure preparation audits" -Description "warn-only mode is documented as a preparation-only audit"
+      New-Requirement -Needle "default: false" -Description "publication audit is a hard gate by default"
       New-Requirement -Needle "runner_required_label_sets" -Description "runner label audit input"
       New-Requirement -Needle "RequiredLabelSet" -Description "runner availability label-set aggregation"
       New-Requirement -Needle "RUNNER_AUDIT_TOKEN" -Description "runner audit token secret"
