@@ -132,6 +132,8 @@ $workflowContracts = @(
       New-Requirement -Needle "Collect-RuntimeAssets.ps1" -Description "runtime asset collection"
       New-Requirement -Needle "Test-PackageConsumer.ps1" -Description "package consumer validation"
       New-Requirement -Needle "Push-NuGetPackages.ps1" -Description "package publication"
+      New-Requirement -Needle "matrix.nvidiaDependencyMode == 'apt'" -Description "official NVIDIA apt dependency preparation is driven by manifest dependency mode"
+      New-Requirement -Needle "Prepare-LinuxNvidiaDependencies.ps1" -Description "Linux NVIDIA dependency preparation"
     )
   }
   [pscustomobject]@{

@@ -378,17 +378,17 @@ jobs:
         shell: pwsh
         run: cmake --version
 
-      - name: Prepare NVIDIA dependencies on hosted Linux
-        if: ${{ matrix.runnerMode == 'hosted' }}
+      - name: Prepare NVIDIA dependencies from official apt packages
+        if: ${{ matrix.nvidiaDependencyMode == 'apt' }}
         shell: pwsh
         run: pwsh -NoProfile -File ./eng/Prepare-LinuxNvidiaDependencies.ps1 -RuntimePackageKey "${{ matrix.key }}"
 
-      - name: Use preinstalled NVIDIA dependencies on self-hosted Linux
-        if: ${{ matrix.runnerMode == 'self-hosted' }}
+      - name: Use preinstalled NVIDIA dependencies
+        if: ${{ matrix.nvidiaDependencyMode != 'apt' }}
         shell: pwsh
         run: |
-          Write-Host "Skipping hosted apt dependency preparation for ${{ matrix.key }}."
-          Write-Host "Self-hosted runners should provide roots through pack/runtime/runtime-packages.local.json or JYPPX_RUNTIME_PACKAGE_ROOTS_FILE."
+          Write-Host "Skipping apt dependency preparation for ${{ matrix.key }}."
+          Write-Host "Runners should provide roots through pack/runtime/runtime-packages.local.json or JYPPX_RUNTIME_PACKAGE_ROOTS_FILE."
 
       - name: Download managed package artifact
         uses: actions/download-artifact@v8

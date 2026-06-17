@@ -96,6 +96,7 @@ $matrix = foreach ($package in $packages) {
     architecture = $package.architecture
     runnerMode = $package.runnerMode
     runsOnJson = if ($Platform -eq "linux") { ConvertTo-Json -InputObject @($runnerLabels) -Compress } else { $null }
+    nvidiaDependencyMode = $package.nvidiaDependencyMode
     nvidiaRepoDistroId = $package.nvidiaRepoDistroId
     nvidiaRepoArchitecture = $package.nvidiaRepoArchitecture
   }

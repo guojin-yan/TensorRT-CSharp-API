@@ -138,6 +138,24 @@ public sealed class ReleaseAutomationTests
         Assert.Contains(expectedSecondKey, keys);
     }
 
+    [Fact]
+    public void Ubuntu20SelfHostedMatrixUsesOfficialAptDependencyPreparation()
+    {
+        string script = Path.Combine(RepositoryPaths.Root, "eng", "Resolve-RuntimeMatrix.ps1");
+        string output = RunPowerShell(
+            script,
+            "-Platform", "linux",
+            "-RuntimeKey", "linux-x64-ubuntu20.04-trt8.6-cuda11.8-cudnn8.9",
+            "-RunnerMode", "self-hosted");
+
+        using JsonDocument document = JsonDocument.Parse(output);
+        JsonElement entry = Assert.Single(document.RootElement.EnumerateArray());
+
+        Assert.Equal("self-hosted", entry.GetProperty("runnerMode").GetString());
+        Assert.Equal("apt", entry.GetProperty("nvidiaDependencyMode").GetString());
+        Assert.Contains("ubuntu-20.04", entry.GetProperty("runsOnJson").GetString(), StringComparison.Ordinal);
+    }
+
     [Theory]
     [InlineData("arm64-sbsa", "linux-arm64-sbsa")]
     [InlineData("jetson-l4t", "linux-jetson-l4t")]
