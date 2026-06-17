@@ -8,6 +8,8 @@ param(
   [string]$ManagedVersion,
   [string]$ReleaseTag,
   [string[]]$RuntimeReleaseTag = @(),
+  [AllowEmptyString()]
+  [string]$NuGetApiKeyAvailable,
   [switch]$RequireNuGetApiKey,
   [switch]$RequireManagedGitHubPackages,
   [switch]$RequireManagedNuGetOrg,
@@ -224,18 +226,24 @@ function Get-NuGetOrgVersions {
 $checks = New-Object System.Collections.Generic.List[object]
 $runtimeReleaseTags = @(Expand-TokenList -Values $RuntimeReleaseTag)
 
-$secretResult = Invoke-GhJson -Arguments @("secret", "list", "--repo", $Repository) -AllowFailure
-if ($secretResult.success) {
-  $secretNames = @(
-    $secretResult.output -split "`n" |
-      Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
-      ForEach-Object { ($_ -split "\s+")[0] }
-  )
-  $hasNuGetApiKey = $secretNames -contains "NUGET_API_KEY"
-  Add-Check -Name "repository secret NUGET_API_KEY exists" -Passed ($hasNuGetApiKey -or -not $RequireNuGetApiKey.IsPresent) -Detail "found=$hasNuGetApiKey"
+if (-not [string]::IsNullOrWhiteSpace($NuGetApiKeyAvailable)) {
+  $hasNuGetApiKey = $NuGetApiKeyAvailable -in @("1", "true", "True", "TRUE", "yes", "Yes", "YES")
+  Add-Check -Name "repository secret NUGET_API_KEY exists" -Passed ($hasNuGetApiKey -or -not $RequireNuGetApiKey.IsPresent) -Detail "found=$hasNuGetApiKey source=input"
 }
 else {
-  Add-Check -Name "repository secret list is readable" -Passed $false -Detail $secretResult.stderr
+  $secretResult = Invoke-GhJson -Arguments @("secret", "list", "--repo", $Repository) -AllowFailure
+  if ($secretResult.success) {
+    $secretNames = @(
+      $secretResult.output -split "`n" |
+        Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+        ForEach-Object { ($_ -split "\s+")[0] }
+    )
+    $hasNuGetApiKey = $secretNames -contains "NUGET_API_KEY"
+    Add-Check -Name "repository secret NUGET_API_KEY exists" -Passed ($hasNuGetApiKey -or -not $RequireNuGetApiKey.IsPresent) -Detail "found=$hasNuGetApiKey source=gh-secret-list"
+  }
+  else {
+    Add-Check -Name "repository secret list is readable" -Passed $false -Detail $secretResult.stderr
+  }
 }
 
 if (-not [string]::IsNullOrWhiteSpace($ManagedVersion)) {

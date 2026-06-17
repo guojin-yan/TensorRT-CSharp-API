@@ -185,6 +185,17 @@ $workflowContracts = @(
     )
   }
   [pscustomobject]@{
+    path = ".github\workflows\release-publication-audit.yml"
+    requirements = @(
+      New-Requirement -Needle "workflow_dispatch" -Description "manual trigger"
+      New-Requirement -Needle "Test-ReleasePublicationState.ps1" -Description "release publication state audit script"
+      New-Requirement -Needle "HAS_NUGET_API_KEY" -Description "secret availability is passed without listing secrets"
+      New-Requirement -Needle "RequireRuntimeGitHubPackagesCoverage" -Description "runtime GitHub Packages coverage gate"
+      New-Requirement -Needle "actions/upload-artifact" -Description "audit artifact upload"
+      New-Requirement -Needle "packages: read" -Description "GitHub Packages read permission"
+    )
+  }
+  [pscustomobject]@{
     path = "eng\Publish-ReleaseNuGetAssetsToGitHubPackages.ps1"
     requirements = @(
       New-Requirement -Needle '$ErrorActionPreference = "Stop"' -Description "fail-fast PowerShell errors"
@@ -207,6 +218,7 @@ $workflowContracts = @(
     path = "eng\Test-ReleasePublicationState.ps1"
     requirements = @(
       New-Requirement -Needle "NUGET_API_KEY" -Description "nuget.org secret audit"
+      New-Requirement -Needle "NuGetApiKeyAvailable" -Description "workflow-provided secret availability"
       New-Requirement -Needle "Test-GitHubPackagesCoverage.ps1" -Description "runtime GitHub Packages coverage delegation"
       New-Requirement -Needle "api.nuget.org/v3-flatcontainer" -Description "nuget.org managed package visibility audit"
       New-Requirement -Needle "CheckFailedWorkflowRuns" -Description "failed workflow run audit"

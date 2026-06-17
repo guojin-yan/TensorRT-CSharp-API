@@ -1,0 +1,135 @@
+name: release-publication-audit
+
+on:
+  workflow_dispatch:
+    inputs:
+      managed_version:
+        description: Optional managed package version to audit
+        required: false
+        default: ""
+        type: string
+      release_tag:
+        description: Optional managed package GitHub Release tag to audit
+        required: false
+        default: ""
+        type: string
+      runtime_release_tags:
+        description: Comma-separated runtime Release tags to audit
+        required: false
+        default: "v4.0.6156,v4.0.6167,v4.0.6169"
+        type: string
+      require_nuget_api_key:
+        description: Fail when NUGET_API_KEY is missing
+        required: false
+        default: false
+        type: boolean
+      require_managed_github_packages:
+        description: Fail when the managed version is missing from GitHub Packages
+        required: false
+        default: false
+        type: boolean
+      require_managed_nuget_org:
+        description: Fail when the managed version is missing from nuget.org
+        required: false
+        default: false
+        type: boolean
+      require_managed_release_asset:
+        description: Fail when the managed package is missing from the GitHub Release assets
+        required: false
+        default: false
+        type: boolean
+      require_runtime_github_packages_coverage:
+        description: Fail when runtime Release assets are missing from GitHub Packages
+        required: false
+        default: true
+        type: boolean
+      check_failed_workflow_runs:
+        description: Include a failed workflow run audit
+        required: false
+        default: true
+        type: boolean
+      warn_only:
+        description: Report failed checks as warnings instead of failing the workflow
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  actions: read
+  contents: read
+  packages: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      HAS_NUGET_API_KEY: ${{ secrets.NUGET_API_KEY != '' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Audit release publication state
+        shell: pwsh
+        run: |
+          $arguments = @(
+            "-NoProfile",
+            "-File",
+            "./eng/Test-ReleasePublicationState.ps1",
+            "-Repository",
+            "$env:GH_REPO",
+            "-NuGetApiKeyAvailable",
+            "$env:HAS_NUGET_API_KEY"
+          )
+
+          if (-not [string]::IsNullOrWhiteSpace("${{ inputs.managed_version }}")) {
+            $arguments += @("-ManagedVersion", "${{ inputs.managed_version }}")
+          }
+
+          if (-not [string]::IsNullOrWhiteSpace("${{ inputs.release_tag }}")) {
+            $arguments += @("-ReleaseTag", "${{ inputs.release_tag }}")
+          }
+
+          if (-not [string]::IsNullOrWhiteSpace("${{ inputs.runtime_release_tags }}")) {
+            $arguments += @("-RuntimeReleaseTag", "${{ inputs.runtime_release_tags }}")
+          }
+
+          if ("${{ inputs.require_nuget_api_key }}" -eq "true") {
+            $arguments += "-RequireNuGetApiKey"
+          }
+
+          if ("${{ inputs.require_managed_github_packages }}" -eq "true") {
+            $arguments += "-RequireManagedGitHubPackages"
+          }
+
+          if ("${{ inputs.require_managed_nuget_org }}" -eq "true") {
+            $arguments += "-RequireManagedNuGetOrg"
+          }
+
+          if ("${{ inputs.require_managed_release_asset }}" -eq "true") {
+            $arguments += "-RequireManagedReleaseAsset"
+          }
+
+          if ("${{ inputs.require_runtime_github_packages_coverage }}" -eq "true") {
+            $arguments += "-RequireRuntimeGitHubPackagesCoverage"
+          }
+
+          if ("${{ inputs.check_failed_workflow_runs }}" -eq "true") {
+            $arguments += "-CheckFailedWorkflowRuns"
+          }
+
+          if ("${{ inputs.warn_only }}" -eq "true") {
+            $arguments += "-WarnOnly"
+          }
+
+          & pwsh @arguments
+
+      - name: Upload audit artifacts
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: release-publication-audit
+          path: |
+            artifacts/release-publication/**
+            artifacts/github-packages-audit/**
