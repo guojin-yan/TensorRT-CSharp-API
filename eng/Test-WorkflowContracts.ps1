@@ -79,6 +79,7 @@ $workflowContracts = @(
       New-Requirement -Needle "release_tag" -Description "GitHub Release tag input"
       New-Requirement -Needle "attach_to_github_release" -Description "GitHub Release asset upload toggle"
       New-Requirement -Needle "gh release upload" -Description "managed package release asset upload"
+      New-Requirement -Needle "-ApiKeyEnvironmentVariable NUGET_API_KEY" -Description "nuget.org publish uses repository secret"
     )
   }
   [pscustomobject]@{
@@ -160,6 +161,7 @@ $workflowContracts = @(
       New-Requirement -Needle "windows_cuda_cudnn_package_release_tag" -Description "split collection CUDA/cuDNN release tag override"
       New-Requirement -Needle "windows_tensorrt_package_release_tag" -Description "split collection TensorRT release tag override"
       New-Requirement -Needle 'attach_to_github_release=$ATTACH_RUNTIME_TO_GITHUB_RELEASE' -Description "managed package release asset toggle dispatch"
+      New-Requirement -Needle "publish_managed_to_nuget=true requires the repository secret NUGET_API_KEY" -Description "nuget.org secret guard before release creation"
     )
   }
   [pscustomobject]@{

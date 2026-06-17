@@ -169,9 +169,20 @@ jobs:
       ATTACH_RUNTIME_TO_GITHUB_RELEASE: ${{ inputs.attach_runtime_to_github_release }}
       RELEASE_CONFIG_JSON: ${{ inputs.release_config_json }}
       RELEASE_TAG: v${{ inputs.version }}
+      HAS_NUGET_API_KEY: ${{ secrets.NUGET_API_KEY != '' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Validate release publish prerequisites
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ "$PUBLISH_MANAGED_TO_NUGET" = "true" ] && [ "$HAS_NUGET_API_KEY" != "true" ]; then
+            echo "publish_managed_to_nuget=true requires the repository secret NUGET_API_KEY. Add a valid nuget.org API key secret, then rerun with a new version." >&2
+            exit 1
+          fi
 
       - name: Ensure GitHub Release Exists
         if: ${{ inputs.attach_runtime_to_github_release }}
