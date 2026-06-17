@@ -8,6 +8,7 @@ param(
   [string]$PackageNamePrefix = "JYPPX.TensorRT.CSharp.API",
   [switch]$RequireOnlyExpectedReleases,
   [switch]$RequireOnlyExpectedPackageVersions,
+  [switch]$RequirePackageRepositoryAssociation,
   [switch]$WarnOnly,
   [string]$RepositoryRoot
 )
@@ -302,6 +303,20 @@ $actualPackageVersionKeys = @($packageVersionRows | ForEach-Object { [string]$_.
 $expectedPackageVersionKeys = @($expectedPackageVersions.Keys)
 $missingPackageVersionKeys = @($expectedPackageVersionKeys | Where-Object { $actualPackageVersionKeys -notcontains $_ } | Sort-Object)
 $unexpectedPackageVersionRows = @($packageVersionRows | Where-Object { -not $_.expected } | Sort-Object packageId, version)
+$unassociatedPackageVersionRows = @(
+  $packageVersionRows |
+    Where-Object {
+      $_.expected -and -not [string]::IsNullOrWhiteSpace([string]$_.repository) -and [string]$_.repository -ne $Repository
+    } |
+    Sort-Object packageId, version
+)
+$missingRepositoryAssociationRows = @(
+  $packageVersionRows |
+    Where-Object {
+      $_.expected -and [string]::IsNullOrWhiteSpace([string]$_.repository)
+    } |
+    Sort-Object packageId, version
+)
 
 $failures = New-Object System.Collections.Generic.List[string]
 if ($missingReleaseTags.Count -gt 0) {
@@ -318,6 +333,16 @@ if ($missingPackageVersionKeys.Count -gt 0) {
 
 if ($RequireOnlyExpectedPackageVersions.IsPresent -and $unexpectedPackageVersionRows.Count -gt 0) {
   $failures.Add("Unexpected GitHub Package versions: $((@($unexpectedPackageVersionRows | ForEach-Object { $_.key })) -join ', ')") | Out-Null
+}
+
+if ($RequirePackageRepositoryAssociation.IsPresent -and ($unassociatedPackageVersionRows.Count -gt 0 -or $missingRepositoryAssociationRows.Count -gt 0)) {
+  if ($unassociatedPackageVersionRows.Count -gt 0) {
+    $failures.Add("GitHub Package versions associated with another repository: $((@($unassociatedPackageVersionRows | ForEach-Object { "$($_.key) -> $($_.repository)" })) -join ', ')") | Out-Null
+  }
+
+  if ($missingRepositoryAssociationRows.Count -gt 0) {
+    $failures.Add("GitHub Package versions missing repository association: $((@($missingRepositoryAssociationRows | ForEach-Object { $_.key })) -join ', ')") | Out-Null
+  }
 }
 
 $outputRoot = Join-Path $RepositoryRoot "artifacts\publication-inventory"
@@ -339,6 +364,8 @@ $markdownPath = Join-Path $outputRoot "github-publication-inventory.md"
   actualPackageVersionCount = $actualPackageVersionKeys.Count
   missingPackageVersionKeys = @($missingPackageVersionKeys)
   unexpectedPackageVersions = @($unexpectedPackageVersionRows)
+  packageVersionsAssociatedWithAnotherRepository = @($unassociatedPackageVersionRows)
+  packageVersionsMissingRepositoryAssociation = @($missingRepositoryAssociationRows)
   releaseAssets = @($releaseAssetRows.ToArray())
   packageVersions = @($packageVersionRows.ToArray())
   failedCount = $failures.Count
@@ -364,6 +391,8 @@ $lines.Add("- Expected package versions from release assets: $($expectedPackageV
 $lines.Add("- Actual TensorRT package versions in GitHub Packages: $($actualPackageVersionKeys.Count)")
 $lines.Add("- Missing package versions: $($missingPackageVersionKeys.Count)")
 $lines.Add("- Unexpected package versions: $($unexpectedPackageVersionRows.Count)")
+$lines.Add("- Package versions associated with another repository: $($unassociatedPackageVersionRows.Count)")
+$lines.Add("- Package versions missing repository association: $($missingRepositoryAssociationRows.Count)")
 $lines.Add("")
 $lines.Add("| Package | Version | Expected | Repository |")
 $lines.Add("| --- | --- | --- | --- |")

@@ -200,6 +200,7 @@ $workflowContracts = @(
       New-Requirement -Needle "Test-GitHubRunnerAvailability.ps1" -Description "runner availability audit script"
       New-Requirement -Needle "Test-GitHubPublicationInventory.ps1" -Description "publication inventory audit script"
       New-Requirement -Needle "require_publication_inventory_clean" -Description "publication inventory strictness gate"
+      New-Requirement -Needle "require_package_repository_association" -Description "package repository association gate"
       New-Requirement -Needle "Test-LinuxRuntimeTargetCoverage.ps1" -Description "Linux target coverage audit script"
       New-Requirement -Needle "RequireRuntimeGitHubPackagesCoverage" -Description "runtime GitHub Packages coverage gate"
       New-Requirement -Needle "actions/upload-artifact" -Description "audit artifact upload"
@@ -252,6 +253,7 @@ $workflowContracts = @(
       New-Requirement -Needle "ExpectedReleaseTag" -Description "expected release whitelist input"
       New-Requirement -Needle "RequireOnlyExpectedReleases" -Description "strict release inventory gate"
       New-Requirement -Needle "RequireOnlyExpectedPackageVersions" -Description "strict package version inventory gate"
+      New-Requirement -Needle "RequirePackageRepositoryAssociation" -Description "package repository association gate"
       New-Requirement -Needle "publication-inventory" -Description "publication inventory artifact output"
       New-Requirement -Needle "Unexpected GitHub Package versions" -Description "stale package version reporting"
     )
@@ -265,6 +267,7 @@ $workflowContracts = @(
       New-Requirement -Needle "linux-arm64-sbsa" -Description "future SBSA package-line guard"
       New-Requirement -Needle "linux-jetson-l4t" -Description "future Jetson/L4T package-line guard"
       New-Requirement -Needle "non-ubuntu-linux" -Description "future non-Ubuntu package-line guard"
+      New-Requirement -Needle "requiredEvidenceItems" -Description "structured future-target evidence checklist"
       New-Requirement -Needle "linux-runtime-target-coverage" -Description "target coverage report"
     )
   }

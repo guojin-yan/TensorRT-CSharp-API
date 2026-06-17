@@ -58,6 +58,11 @@ on:
         required: false
         default: true
         type: boolean
+      require_package_repository_association:
+        description: Fail when expected GitHub Package versions are not associated with this repository
+        required: false
+        default: true
+        type: boolean
       runner_required_label_sets:
         description: Semicolon-separated self-hosted runner label sets to audit
         required: false
@@ -159,6 +164,10 @@ jobs:
               "-RequireOnlyExpectedReleases",
               "-RequireOnlyExpectedPackageVersions"
             )
+          }
+
+          if ("${{ inputs.require_package_repository_association }}" -eq "true") {
+            $arguments += "-RequirePackageRepositoryAssociation"
           }
 
           if ("${{ inputs.warn_only }}" -eq "true") {

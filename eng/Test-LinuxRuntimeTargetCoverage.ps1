@@ -70,16 +70,37 @@ $futureTargets = @(
     target = "linux-arm64-sbsa"
     status = "future-separate-package-line"
     requiredEvidence = "Dedicated arm64/SBSA runner labels, RID/package IDs, NVIDIA repo architecture, and dependency plan."
+    requiredEvidenceItems = @(
+      "runtime package IDs include linux-arm64-sbsa or a more specific distro-qualified arm64/SBSA target",
+      "runner labels identify an arm64/SBSA Linux runner pool",
+      "NVIDIA repository architecture is modeled as sbsa or the official equivalent",
+      "dependency plan is generated from official NVIDIA arm64/SBSA packages",
+      "package consumer validation evidence exists for the arm64/SBSA runtime package line"
+    )
   }
   [pscustomobject]@{
     target = "linux-jetson-l4t"
     status = "future-separate-package-line"
     requiredEvidence = "Dedicated Jetson/L4T package IDs, runner/board strategy, L4T-specific NVIDIA dependency plan, and validation evidence."
+    requiredEvidenceItems = @(
+      "runtime package IDs include Jetson/L4T release identity and are not reused from SBSA or x64",
+      "runner or board strategy identifies the Jetson hardware/L4T image used for validation",
+      "NVIDIA dependencies come from the L4T/JetPack-compatible source for that board line",
+      "bridge build and runtime package collection are validated on the target L4T line",
+      "package consumer validation evidence exists for the Jetson/L4T runtime package line"
+    )
   }
   [pscustomobject]@{
     target = "non-ubuntu-linux"
     status = "future-separate-package-line"
     requiredEvidence = "Separate package IDs by distro/version plus official NVIDIA dependency source and runner validation."
+    requiredEvidenceItems = @(
+      "runtime package IDs include the Linux distribution and version",
+      "runner labels or container images identify the target distribution/version",
+      "official NVIDIA dependency source is modeled for the distribution/version",
+      "dependency package names and versions are pinned for that distribution/version",
+      "package consumer validation evidence exists for each non-Ubuntu runtime package line"
+    )
   }
 )
 
@@ -185,6 +206,9 @@ $lines.Add("")
 $lines.Add("## Future Separate Package Lines")
 foreach ($futureTarget in $futureTargets) {
   $lines.Add("- " + $codeQuote + $futureTarget.target + $codeQuote + ": " + $futureTarget.requiredEvidence)
+  foreach ($evidenceItem in @($futureTarget.requiredEvidenceItems)) {
+    $lines.Add("  - required evidence: $evidenceItem")
+  }
 }
 
 $lines.Add("")
