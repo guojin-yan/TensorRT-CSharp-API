@@ -228,7 +228,8 @@ $runtimeReleaseTags = @(Expand-TokenList -Values $RuntimeReleaseTag)
 
 if (-not [string]::IsNullOrWhiteSpace($NuGetApiKeyAvailable)) {
   $hasNuGetApiKey = $NuGetApiKeyAvailable -in @("1", "true", "True", "TRUE", "yes", "Yes", "YES")
-  Add-Check -Name "repository secret NUGET_API_KEY exists" -Passed ($hasNuGetApiKey -or -not $RequireNuGetApiKey.IsPresent) -Detail "found=$hasNuGetApiKey source=input"
+  $requirement = if ($RequireNuGetApiKey.IsPresent) { "required" } else { "optional" }
+  Add-Check -Name "repository secret NUGET_API_KEY availability" -Passed ($hasNuGetApiKey -or -not $RequireNuGetApiKey.IsPresent) -Detail "required=$requirement found=$hasNuGetApiKey source=input"
 }
 else {
   $secretResult = Invoke-GhJson -Arguments @("secret", "list", "--repo", $Repository) -AllowFailure
@@ -239,7 +240,8 @@ else {
         ForEach-Object { ($_ -split "\s+")[0] }
     )
     $hasNuGetApiKey = $secretNames -contains "NUGET_API_KEY"
-    Add-Check -Name "repository secret NUGET_API_KEY exists" -Passed ($hasNuGetApiKey -or -not $RequireNuGetApiKey.IsPresent) -Detail "found=$hasNuGetApiKey source=gh-secret-list"
+    $requirement = if ($RequireNuGetApiKey.IsPresent) { "required" } else { "optional" }
+    Add-Check -Name "repository secret NUGET_API_KEY availability" -Passed ($hasNuGetApiKey -or -not $RequireNuGetApiKey.IsPresent) -Detail "required=$requirement found=$hasNuGetApiKey source=gh-secret-list"
   }
   else {
     Add-Check -Name "repository secret list is readable" -Passed $false -Detail $secretResult.stderr

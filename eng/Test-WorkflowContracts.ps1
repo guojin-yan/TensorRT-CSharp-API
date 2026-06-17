@@ -316,6 +316,10 @@ $workflowContracts = @(
       New-Requirement -Needle "workflow_dispatch" -Description "manual trigger"
       New-Requirement -Needle "Test-ReleasePublicationState.ps1" -Description "release publication state audit script"
       New-Requirement -Needle "HAS_NUGET_API_KEY" -Description "secret availability is passed without listing secrets"
+      New-Requirement -Needle 'default: "4.0.6170"' -Description "current managed package version is audited by default"
+      New-Requirement -Needle 'default: "v4.0.6170"' -Description "current managed release tag is audited by default"
+      New-Requirement -Needle "require_managed_nuget_org" -Description "nuget.org managed package gate"
+      New-Requirement -Needle "require_nuget_api_key" -Description "nuget.org API key gate"
       New-Requirement -Needle "runner_required_label_sets" -Description "runner label audit input"
       New-Requirement -Needle "RequiredLabelSet" -Description "runner availability label-set aggregation"
       New-Requirement -Needle "RUNNER_AUDIT_TOKEN" -Description "runner audit token secret"
@@ -359,6 +363,7 @@ $workflowContracts = @(
     path = "eng\Test-ReleasePublicationState.ps1"
     requirements = @(
       New-Requirement -Needle "NUGET_API_KEY" -Description "nuget.org secret audit"
+      New-Requirement -Needle "repository secret NUGET_API_KEY availability" -Description "secret availability report distinguishes optional and required gates"
       New-Requirement -Needle "NuGetApiKeyAvailable" -Description "workflow-provided secret availability"
       New-Requirement -Needle "Test-GitHubPackagesCoverage.ps1" -Description "runtime GitHub Packages coverage delegation"
       New-Requirement -Needle "api.nuget.org/v3-flatcontainer" -Description "nuget.org managed package visibility audit"

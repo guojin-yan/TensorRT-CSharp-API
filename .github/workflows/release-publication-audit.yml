@@ -6,12 +6,12 @@ on:
       managed_version:
         description: Optional managed package version to audit
         required: false
-        default: ""
+        default: "4.0.6170"
         type: string
       release_tag:
         description: Optional managed package GitHub Release tag to audit
         required: false
-        default: ""
+        default: "v4.0.6170"
         type: string
       runtime_release_tags:
         description: Comma-separated runtime Release tags to audit
@@ -26,22 +26,22 @@ on:
       require_nuget_api_key:
         description: Fail when NUGET_API_KEY is missing
         required: false
-        default: false
+        default: true
         type: boolean
       require_managed_github_packages:
         description: Fail when the managed version is missing from GitHub Packages
         required: false
-        default: false
+        default: true
         type: boolean
       require_managed_nuget_org:
         description: Fail when the managed version is missing from nuget.org
         required: false
-        default: false
+        default: true
         type: boolean
       require_managed_release_asset:
         description: Fail when the managed package is missing from the GitHub Release assets
         required: false
-        default: false
+        default: true
         type: boolean
       require_runtime_github_packages_coverage:
         description: Fail when runtime Release assets are missing from GitHub Packages
