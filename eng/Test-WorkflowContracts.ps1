@@ -76,6 +76,9 @@ $workflowContracts = @(
       New-Requirement -Needle "Test-BindingGeneratorOutputs.ps1" -Description "binding generator determinism"
       New-Requirement -Needle "Test-ManagedPackageContent.ps1" -Description "managed package content validation"
       New-Requirement -Needle "Push-NuGetPackages.ps1" -Description "package publication"
+      New-Requirement -Needle "release_tag" -Description "GitHub Release tag input"
+      New-Requirement -Needle "attach_to_github_release" -Description "GitHub Release asset upload toggle"
+      New-Requirement -Needle "gh release upload" -Description "managed package release asset upload"
     )
   }
   [pscustomobject]@{
@@ -156,6 +159,7 @@ $workflowContracts = @(
       New-Requirement -Needle "include tensorrt/all in windows_split_package_roles" -Description "split collection same-run TensorRT refresh guidance"
       New-Requirement -Needle "windows_cuda_cudnn_package_release_tag" -Description "split collection CUDA/cuDNN release tag override"
       New-Requirement -Needle "windows_tensorrt_package_release_tag" -Description "split collection TensorRT release tag override"
+      New-Requirement -Needle 'attach_to_github_release=$ATTACH_RUNTIME_TO_GITHUB_RELEASE' -Description "managed package release asset toggle dispatch"
     )
   }
   [pscustomobject]@{

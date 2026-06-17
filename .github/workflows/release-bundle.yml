@@ -345,7 +345,9 @@ jobs:
             -f "version=$RELEASE_VERSION" \
             -f "configuration=$RELEASE_CONFIGURATION" \
             -f "publish_to_nuget=$PUBLISH_MANAGED_TO_NUGET" \
-            -f "publish_to_github_packages=$PUBLISH_MANAGED_TO_GITHUB_PACKAGES"
+            -f "publish_to_github_packages=$PUBLISH_MANAGED_TO_GITHUB_PACKAGES" \
+            -f "release_tag=$RELEASE_TAG" \
+            -f "attach_to_github_release=$ATTACH_RUNTIME_TO_GITHUB_RELEASE"
 
           if [ "$RUN_WINDOWS_RUNTIME_PACKAGING" = "true" ]; then
             dispatch_workflow "runtime-windows" \

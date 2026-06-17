@@ -28,6 +28,16 @@ on:
         required: false
         default: managed-packages
         type: string
+      release_tag:
+        description: Optional GitHub Release tag for managed package assets
+        required: false
+        default: ""
+        type: string
+      attach_to_github_release:
+        description: Upload managed package assets to the GitHub Release
+        required: false
+        default: false
+        type: boolean
   workflow_call:
     inputs:
       version:
@@ -55,12 +65,22 @@ on:
         required: false
         default: managed-packages
         type: string
+      release_tag:
+        description: Optional GitHub Release tag for managed package assets
+        required: false
+        default: ""
+        type: string
+      attach_to_github_release:
+        description: Upload managed package assets to the GitHub Release
+        required: false
+        default: false
+        type: boolean
     secrets:
       NUGET_API_KEY:
         required: false
 
 permissions:
-  contents: read
+  contents: write
   packages: write
 
 jobs:
@@ -128,6 +148,34 @@ jobs:
         with:
           name: ${{ inputs.artifact_name }}
           path: artifacts/managed/*.nupkg
+
+      - name: Attach managed package to GitHub Release
+        if: ${{ inputs.attach_to_github_release && inputs.release_tag != '' }}
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          $releaseTag = "${{ inputs.release_tag }}"
+          $packages = @(Get-ChildItem -LiteralPath .\artifacts\managed -Filter *.nupkg -File)
+          if ($packages.Count -eq 0) {
+            throw "No managed .nupkg files were found in artifacts/managed."
+          }
+
+          gh release view $releaseTag --repo "$env:GH_REPO" *> $null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $releaseTag --title $releaseTag --notes "Automated release for $releaseTag" --repo "$env:GH_REPO"
+            if ($LASTEXITCODE -ne 0) {
+              throw "Failed to create GitHub Release '$releaseTag'."
+            }
+          }
+
+          foreach ($package in $packages) {
+            gh release upload $releaseTag $package.FullName --clobber --repo "$env:GH_REPO"
+            if ($LASTEXITCODE -ne 0) {
+              throw "Failed to upload managed package '$($package.Name)' to GitHub Release '$releaseTag'."
+            }
+          }
 
   publish-github-packages:
     if: ${{ inputs.publish_to_github_packages }}
