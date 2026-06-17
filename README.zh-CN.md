@@ -213,7 +213,7 @@ powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalReleaseBundle.ps1 `
 
 `release-bundle.yml` 默认不再触发 runtime 打包。需要 runtime 时显式设置 `run_windows_runtime_packaging=true` 或 `run_linux_runtime_packaging=true`；如果启用 Linux runtime 但 `linux_runtime_keys` 为空，Linux 模块会干净 no-op。
 
-发布到 `nuget.org` 时，仓库 secret `NUGET_API_KEY` 应填写 NuGet 官网生成的纯文本 ASCII API key。managed-package workflow 会在发布前校验该 secret；不要把加密后的本机凭据或机器导出的 token 片段填进 `NUGET_API_KEY`。
+发布到 `nuget.org` 时，仓库 secret `NUGET_API_KEY` 应填写 NuGet 官网生成的纯文本 ASCII API key。这个 key 必须仍然有效，并且必须对 `JYPPX.TensorRT.CSharp.API` 这个 package ID 或其所属账号/组织拥有 push 权限。managed-package workflow 会在发布前校验该 secret；不要把加密后的本机凭据或机器导出的 token 片段填进 `NUGET_API_KEY`。如果推送阶段返回 nuget.org `403`，说明 key 无效、过期或没有该包 ID 的权限，需要用包 owner 账号重新生成有 scope 的 key 后再重跑 managed-only workflow。
 
 ## 仓库布局
 

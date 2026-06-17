@@ -91,6 +91,24 @@ public sealed class ReleaseAutomationTests
     }
 
     [Fact]
+    public void NuGetOrgPublicationDocsRequirePackageScopedApiKey()
+    {
+        string englishReadme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "README.md"));
+        string chineseReadme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "README.zh-CN.md"));
+        string englishGate = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "en", "release-candidate-gate.md"));
+        string chineseGate = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "release-candidate-gate.md"));
+        string summaryScript = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Export-ReleaseGateSummary.ps1"));
+
+        Assert.Contains("push permission for the `JYPPX.TensorRT.CSharp.API` package ID", englishReadme, StringComparison.Ordinal);
+        Assert.Contains("nuget.org `403`", englishReadme, StringComparison.Ordinal);
+        Assert.Contains("JYPPX.TensorRT.CSharp.API` 这个 package ID", chineseReadme, StringComparison.Ordinal);
+        Assert.Contains("nuget.org `403`", chineseReadme, StringComparison.Ordinal);
+        Assert.Contains("push permission for `JYPPX.TensorRT.CSharp.API`", englishGate, StringComparison.Ordinal);
+        Assert.Contains("nuget.org `403`", chineseGate, StringComparison.Ordinal);
+        Assert.Contains("NUGET_API_KEY` must be an active plain-text nuget.org key", summaryScript, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void RemoteReleaseBundleDryRunCarriesStableDependencyVersionMaps()
     {
         string script = Path.Combine(RepositoryPaths.Root, "eng", "Invoke-RemoteReleaseBundle.ps1");
