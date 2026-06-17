@@ -115,6 +115,8 @@ Ubuntu 22.04 x64 是当前 hosted Linux 发布主线，已经有远程 release �
 
 可以用 `eng/Test-LinuxRuntimeTargetCoverage.ps1` 重新生成 `artifacts/linux-target-coverage` 下的目标覆盖报告。`release-publication-audit.yml` 也会上传这份报告，用来证明哪些 Linux 目标已经建模，哪些 ARM/Jetson/非 Ubuntu 未来包线被有意暂缓。
 
+可以用 `eng/Test-RuntimePublicationTargetCoverage.ps1` 审计 `artifacts/runtime-publication-target-coverage` 下的已发布覆盖报告。该报告会把 Windows、Ubuntu 22.04、Ubuntu 24.04 标记为 `published-required`，把 Ubuntu 20.04 标记为 `infrastructure-blocked`，把 ARM/SBSA、Jetson/L4T、非 Ubuntu Linux 标记为未来独立包线。它会确认必须发布的目标同时存在 GitHub Release assets 和 GitHub Package versions，避免只看见部分包就误判发布完成。
+
 ## 发布风险
 
 runtime 包可能非常大，因为会包含 TensorRT builder resources、plugin、parser、CUDA runtime、cuBLAS 和 cuDNN。

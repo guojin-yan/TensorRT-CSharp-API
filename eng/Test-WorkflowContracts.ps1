@@ -306,6 +306,7 @@ $workflowContracts = @(
       New-Requirement -Needle "Test-RemoteReleasePrerequisites.ps1" -Description "remote release prerequisites audit script"
       New-Requirement -Needle "remote-release-prerequisites" -Description "remote release prerequisites artifact output"
       New-Requirement -Needle "Test-LinuxRuntimeTargetCoverage.ps1" -Description "Linux target coverage audit script"
+      New-Requirement -Needle "Test-RuntimePublicationTargetCoverage.ps1" -Description "runtime publication target coverage audit script"
       New-Requirement -Needle "RequireRuntimeGitHubPackagesCoverage" -Description "runtime GitHub Packages coverage gate"
       New-Requirement -Needle "actions/upload-artifact" -Description "audit artifact upload"
       New-Requirement -Needle "packages: read" -Description "GitHub Packages read permission"
@@ -393,6 +394,20 @@ $workflowContracts = @(
       New-Requirement -Needle "linux-runtime-target-coverage" -Description "target coverage report"
     )
   }
+  [pscustomobject]@{
+    path = "eng\Test-RuntimePublicationTargetCoverage.ps1"
+    requirements = @(
+      New-Requirement -Needle "published-required" -Description "published target requirement classification"
+      New-Requirement -Needle "infrastructure-blocked" -Description "infrastructure-blocked target classification"
+      New-Requirement -Needle "linux-x64.ubuntu20.04" -Description "Ubuntu 20.04 publication target coverage"
+      New-Requirement -Needle "linux-x64.ubuntu22.04" -Description "Ubuntu 22.04 publication target coverage"
+      New-Requirement -Needle "linux-x64.ubuntu24.04" -Description "Ubuntu 24.04 publication target coverage"
+      New-Requirement -Needle "linux-arm64-sbsa" -Description "future SBSA package line coverage"
+      New-Requirement -Needle "linux-jetson-l4t" -Description "future Jetson/L4T package line coverage"
+      New-Requirement -Needle "runtime-publication-target-coverage" -Description "publication target coverage report"
+      New-Requirement -Needle "RequireInfrastructureBlockedTargetsPublished" -Description "optional strict gate for infrastructure-blocked targets"
+    )
+  }
 )
 
 $results = New-Object System.Collections.Generic.List[object]
@@ -450,6 +465,18 @@ $results.Add([pscustomobject]@{
     requirement = "Linux runtime target coverage models Ubuntu 20.04, 22.04, and 24.04 while holding future ARM/Jetson lines"
     status = if ($linuxTargetCoverage.failedCount -eq 0 -and $linuxTargetCoverage.modeledTargets.Count -eq 3 -and ($linuxTargetCoverage.futureTargets | Where-Object { $_.target -eq "linux-jetson-l4t" }).Count -eq 1) { "passed" } else { "failed" }
     detail = "failed=$($linuxTargetCoverage.failedCount); modeled=$($linuxTargetCoverage.modeledTargets.Count); future=$($linuxTargetCoverage.futureTargets.Count)"
+  })
+
+pwsh -NoProfile -File (Join-Path $RepositoryRoot "eng\Test-RuntimePublicationTargetCoverage.ps1") -InventoryJsonPath (Join-Path $RepositoryRoot "artifacts\publication-inventory\github-publication-inventory.json") | Out-Host
+$publicationTargetCoverageJson = Get-Content -LiteralPath (Join-Path $RepositoryRoot "artifacts\runtime-publication-target-coverage\runtime-publication-target-coverage.json") -Raw
+$publicationTargetCoverage = $publicationTargetCoverageJson | ConvertFrom-Json
+$publishedTargetRows = @($publicationTargetCoverage.targets | Where-Object { $_.requirement -eq "published-required" })
+$infrastructureBlockedTargetRows = @($publicationTargetCoverage.targets | Where-Object { $_.requirement -eq "infrastructure-blocked" })
+$results.Add([pscustomobject]@{
+    workflow = "eng\Test-RuntimePublicationTargetCoverage.ps1"
+    requirement = "Runtime publication target coverage proves Windows, Ubuntu 22.04, and Ubuntu 24.04 publication while keeping Ubuntu 20.04 infrastructure-blocked"
+    status = if ($publicationTargetCoverage.failedCount -eq 0 -and $publishedTargetRows.Count -eq 3 -and (@($publishedTargetRows | Where-Object { $_.coverageState -eq "complete" }).Count -eq 3) -and $infrastructureBlockedTargetRows.Count -eq 1 -and $infrastructureBlockedTargetRows[0].coverageState -eq "not-published") { "passed" } else { "failed" }
+    detail = "failed=$($publicationTargetCoverage.failedCount); publishedTargets=$($publishedTargetRows.Count); blockedTargets=$($infrastructureBlockedTargetRows.Count)"
   })
 
 $singleLinuxMatrix = $singleLinuxMatrixJson | ConvertFrom-Json

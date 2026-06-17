@@ -121,6 +121,8 @@ Ubuntu 22.04 x64 is the current hosted Linux publication line and has a successf
 
 Use `eng/Test-LinuxRuntimeTargetCoverage.ps1` to regenerate the target coverage report under `artifacts/linux-target-coverage`. The report is also uploaded by `release-publication-audit.yml` so publication evidence shows which Linux targets are modeled and which future ARM/Jetson/non-Ubuntu lines are intentionally held.
 
+Use `eng/Test-RuntimePublicationTargetCoverage.ps1` to audit published coverage under `artifacts/runtime-publication-target-coverage`. This report classifies Windows, Ubuntu 22.04, and Ubuntu 24.04 as `published-required`; Ubuntu 20.04 as `infrastructure-blocked`; and ARM/SBSA, Jetson/L4T, and non-Ubuntu Linux as future separate package lines. It verifies that published-required targets have matching GitHub Release assets and GitHub Package versions before the release audit is considered clean.
+
 ## Publication Risk
 
 Runtime packages can become very large because they may include TensorRT builder resources, plugins, parser libraries, CUDA runtime assets, cuBLAS, and cuDNN.

@@ -186,6 +186,25 @@ jobs:
         run: |
           pwsh -NoProfile -File ./eng/Test-LinuxRuntimeTargetCoverage.ps1 -RequireFutureTargetPlaceholders
 
+      - name: Audit runtime publication target coverage
+        shell: pwsh
+        run: |
+          $arguments = @(
+            "-NoProfile",
+            "-File",
+            "./eng/Test-RuntimePublicationTargetCoverage.ps1",
+            "-Repository",
+            "$env:GH_REPO",
+            "-ExpectedReleaseTag",
+            "${{ inputs.expected_release_tags }}"
+          )
+
+          if ("${{ inputs.warn_only }}" -eq "true") {
+            $arguments += "-WarnOnly"
+          }
+
+          & pwsh @arguments
+
       - name: Audit release readiness
         if: ${{ inputs.include_release_readiness }}
         shell: pwsh
@@ -325,3 +344,4 @@ jobs:
             artifacts/remote-release-prerequisites/**
             artifacts/runner-availability/**
             artifacts/linux-target-coverage/**
+            artifacts/runtime-publication-target-coverage/**
