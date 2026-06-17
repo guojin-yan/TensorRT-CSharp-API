@@ -201,6 +201,8 @@ $workflowContracts = @(
       New-Requirement -Needle "Test-GitHubPublicationInventory.ps1" -Description "publication inventory audit script"
       New-Requirement -Needle "require_publication_inventory_clean" -Description "publication inventory strictness gate"
       New-Requirement -Needle "require_package_repository_association" -Description "package repository association gate"
+      New-Requirement -Needle "Test-ReleaseReadiness.ps1" -Description "external release readiness audit script"
+      New-Requirement -Needle "include_release_readiness" -Description "release readiness audit toggle"
       New-Requirement -Needle "Test-LinuxRuntimeTargetCoverage.ps1" -Description "Linux target coverage audit script"
       New-Requirement -Needle "RequireRuntimeGitHubPackagesCoverage" -Description "runtime GitHub Packages coverage gate"
       New-Requirement -Needle "actions/upload-artifact" -Description "audit artifact upload"
@@ -256,6 +258,19 @@ $workflowContracts = @(
       New-Requirement -Needle "RequirePackageRepositoryAssociation" -Description "package repository association gate"
       New-Requirement -Needle "publication-inventory" -Description "publication inventory artifact output"
       New-Requirement -Needle "Unexpected GitHub Package versions" -Description "stale package version reporting"
+    )
+  }
+  [pscustomobject]@{
+    path = "eng\Test-ReleaseReadiness.ps1"
+    requirements = @(
+      New-Requirement -Needle "NUGET_API_KEY" -Description "nuget.org secret readiness"
+      New-Requirement -Needle "RUNNER_AUDIT_TOKEN" -Description "runner audit token readiness"
+      New-Requirement -Needle "self-hosted,linux,x64,ubuntu-20.04" -Description "Ubuntu 20.04 self-hosted runner readiness"
+      New-Requirement -Needle "future-target:linux-arm64-sbsa" -Description "future SBSA readiness blocker"
+      New-Requirement -Needle "future-target:linux-jetson-l4t" -Description "future Jetson readiness blocker"
+      New-Requirement -Needle "future-target:non-ubuntu-linux" -Description "future non-Ubuntu readiness blocker"
+      New-Requirement -Needle "release-readiness" -Description "release readiness artifact output"
+      New-Requirement -Needle "WarnOnly" -Description "non-failing readiness mode"
     )
   }
   [pscustomobject]@{

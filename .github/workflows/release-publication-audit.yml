@@ -63,6 +63,11 @@ on:
         required: false
         default: true
         type: boolean
+      include_release_readiness:
+        description: Emit release readiness report for external publication prerequisites
+        required: false
+        default: true
+        type: boolean
       runner_required_label_sets:
         description: Semicolon-separated self-hosted runner label sets to audit
         required: false
@@ -181,6 +186,28 @@ jobs:
         run: |
           pwsh -NoProfile -File ./eng/Test-LinuxRuntimeTargetCoverage.ps1 -RequireFutureTargetPlaceholders
 
+      - name: Audit release readiness
+        if: ${{ inputs.include_release_readiness }}
+        shell: pwsh
+        run: |
+          $arguments = @(
+            "-NoProfile",
+            "-File",
+            "./eng/Test-ReleaseReadiness.ps1",
+            "-Repository",
+            "$env:GH_REPO",
+            "-NuGetApiKeyAvailable",
+            "$env:HAS_NUGET_API_KEY",
+            "-RunnerAuditTokenAvailable",
+            "${{ secrets.RUNNER_AUDIT_TOKEN != '' }}"
+          )
+
+          if ("${{ inputs.warn_only }}" -eq "true") {
+            $arguments += "-WarnOnly"
+          }
+
+          & pwsh @arguments
+
       - name: Audit runner availability
         shell: pwsh
         run: |
@@ -259,5 +286,6 @@ jobs:
             artifacts/release-publication/**
             artifacts/github-packages-audit/**
             artifacts/publication-inventory/**
+            artifacts/release-readiness/**
             artifacts/runner-availability/**
             artifacts/linux-target-coverage/**
