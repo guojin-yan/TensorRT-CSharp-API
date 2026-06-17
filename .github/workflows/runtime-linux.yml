@@ -357,8 +357,12 @@ jobs:
           wget -q "https://packages.microsoft.com/config/ubuntu/${VERSION_ID}/packages-microsoft-prod.deb" -O /tmp/packages-microsoft-prod.deb
           dpkg -i /tmp/packages-microsoft-prod.deb
           rm -f /tmp/packages-microsoft-prod.deb
+          mkdir -p -m 755 /etc/apt/keyrings
+          wget -qO /etc/apt/keyrings/githubcli-archive-keyring.gpg https://cli.github.com/packages/githubcli-archive-keyring.gpg
+          chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" > /etc/apt/sources.list.d/github-cli.list
           apt-get update
-          apt-get install -y --no-install-recommends powershell
+          apt-get install -y --no-install-recommends powershell gh
 
       - name: Checkout
         uses: actions/checkout@v6
@@ -423,6 +427,10 @@ jobs:
           if ($version -lt $minimum) {
             throw "CMake $version is too old for CMakePresets.json. CMake $minimum or newer is required."
           }
+
+      - name: Verify GitHub CLI
+        shell: pwsh
+        run: gh --version
 
       - name: Prepare NVIDIA dependencies from official apt packages
         if: ${{ matrix.nvidiaDependencyMode == 'apt' }}
