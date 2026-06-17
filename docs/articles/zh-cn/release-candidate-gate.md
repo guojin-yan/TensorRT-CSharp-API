@@ -85,6 +85,6 @@ Linux Ubuntu 22.04 x64 是当前 hosted 发布主线，远程 workflow 必须完
 
 在启用远端发布链前，请先确认：
 
-- `package-managed.yml` 在 `publish_to_nuget=true` 时，如果仓库 secret `NUGET_API_KEY` 存在，就会使用该值，并要求它是纯文本 ASCII 的 nuget.org API key。也可以不设置该 secret，让 self-hosted Windows runner 使用当前用户的 NuGet 配置兜底；兜底逻辑会校验 `nuget.org`、`https://api.nuget.org/v3/index.json`、`https://www.nuget.org` 等常见 nuget.org alias，然后让 NuGet 或 `nuget.exe` 直接读取原始用户配置。不要填加密后的本机凭据或其它机器导出的 token 片段。
+- `package-managed.yml` 在 `publish_to_nuget=true` 时必须使用仓库 secret `NUGET_API_KEY`，并要求它是纯文本 ASCII 的 nuget.org API key。缺少该 secret 时 workflow 会在发布前失败，不再依赖 self-hosted Windows runner 当前用户的 NuGet 配置兜底。不要填加密后的本机凭据或其它机器导出的 token 片段。
 - `runtime-windows.yml` 要求 Windows self-hosted runner 在线，并带有 `self-hosted`、`windows`、`x64` 标签。
 - `runtime-linux.yml` 可以通过 GitHub-hosted runner 发布 Ubuntu 22.04 x64 默认矩阵。Ubuntu 20.04 x64 必须使用 `runner_mode=self-hosted`，Ubuntu 24.04 x64 只覆盖现代组合，ARM/Jetson 目标需要单独建包线后才能发布。

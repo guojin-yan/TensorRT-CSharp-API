@@ -100,6 +100,6 @@ For any runtime package selected for release:
 
 Before using the remote publication lanes:
 
-- `package-managed.yml` with `publish_to_nuget=true` uses `NUGET_API_KEY` when the secret is present, and that value must be a plain-text ASCII nuget.org API key. Leave the secret unset to rely on the self-hosted Windows runner's current-user NuGet configuration; the fallback verifies common nuget.org aliases such as `nuget.org`, `https://api.nuget.org/v3/index.json`, and `https://www.nuget.org`, then lets NuGet or `nuget.exe` read the original user config directly. Encrypted local credential blobs and machine-generated exports are not valid secret values.
+- `package-managed.yml` with `publish_to_nuget=true` requires the repository secret `NUGET_API_KEY`, and that value must be a plain-text ASCII nuget.org API key. The workflow fails before publication when the secret is missing, so official nuget.org pushes no longer depend on a self-hosted runner's current-user NuGet configuration. Encrypted local credential blobs and machine-generated exports are not valid secret values.
 - `runtime-windows.yml` requires the Windows self-hosted runner to stay online with the labels `self-hosted`, `windows`, and `x64`.
 - `runtime-linux.yml` can publish the hosted Ubuntu 22.04 x64 matrix through GitHub-hosted runners. Ubuntu 20.04 x64 must use `runner_mode=self-hosted`, Ubuntu 24.04 x64 only covers the modern combinations, and ARM/Jetson targets need separate package lines before publication.

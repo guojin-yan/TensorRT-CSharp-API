@@ -203,6 +203,16 @@ $workflowContracts = @(
       New-Requirement -Needle "AssetName" -Description "exact asset name filtering"
     )
   }
+  [pscustomobject]@{
+    path = "eng\Test-ReleasePublicationState.ps1"
+    requirements = @(
+      New-Requirement -Needle "NUGET_API_KEY" -Description "nuget.org secret audit"
+      New-Requirement -Needle "Test-GitHubPackagesCoverage.ps1" -Description "runtime GitHub Packages coverage delegation"
+      New-Requirement -Needle "api.nuget.org/v3-flatcontainer" -Description "nuget.org managed package visibility audit"
+      New-Requirement -Needle "CheckFailedWorkflowRuns" -Description "failed workflow run audit"
+      New-Requirement -Needle "RequireManagedReleaseAsset" -Description "managed release asset gate"
+    )
+  }
 )
 
 $results = New-Object System.Collections.Generic.List[object]
