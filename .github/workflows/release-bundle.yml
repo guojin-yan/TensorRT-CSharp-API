@@ -170,6 +170,7 @@ jobs:
       RELEASE_CONFIG_JSON: ${{ inputs.release_config_json }}
       RELEASE_TAG: v${{ inputs.version }}
       HAS_NUGET_API_KEY: ${{ secrets.NUGET_API_KEY != '' }}
+      RUNNER_AUDIT_TOKEN: ${{ secrets.RUNNER_AUDIT_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -185,22 +186,32 @@ jobs:
           fi
 
           runner_args=()
+          strict_runner_preflight=false
           if [ "$RUN_WINDOWS_RUNTIME_PACKAGING" = "true" ]; then
             runner_args+=("-RequiredLabelSet" "self-hosted,windows,x64")
           fi
 
           if [ "$RUN_LINUX_RUNTIME_PACKAGING" = "true" ] && [ "$LINUX_RUNNER_MODE" = "self-hosted" ]; then
             runner_args+=("-RequiredLabelSet" "self-hosted,linux,x64")
+            strict_runner_preflight=true
           fi
 
           if [ "$RUN_LINUX_SELF_HOSTED_UBUNTU20_RUNTIME_PACKAGING" = "true" ]; then
             runner_args+=("-RequiredLabelSet" "self-hosted,linux,x64,ubuntu-20.04")
+            strict_runner_preflight=true
           fi
 
           if [ "${#runner_args[@]}" -gt 0 ]; then
-            pwsh -NoProfile -File ./eng/Test-GitHubRunnerAvailability.ps1 \
-              -Repository "$GH_REPO" \
-              "${runner_args[@]}"
+            if [ -n "${RUNNER_AUDIT_TOKEN:-}" ]; then
+              GH_TOKEN="$RUNNER_AUDIT_TOKEN" pwsh -NoProfile -File ./eng/Test-GitHubRunnerAvailability.ps1 \
+                -Repository "$GH_REPO" \
+                "${runner_args[@]}"
+            elif [ "$strict_runner_preflight" = "true" ]; then
+              echo "Self-hosted Linux runtime packaging requires RUNNER_AUDIT_TOKEN so release-bundle can verify runner labels before creating a Release. Add a fine-grained token that can read repository self-hosted runners, or disable the self-hosted Linux packaging lane." >&2
+              exit 1
+            else
+              echo "::warning::Skipping Windows self-hosted runner availability preflight because RUNNER_AUDIT_TOKEN is not set. GitHub will still route runtime-windows to the required self-hosted/windows/x64 runner labels."
+            fi
           fi
 
       - name: Ensure GitHub Release Exists

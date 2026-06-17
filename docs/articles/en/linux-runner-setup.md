@@ -41,7 +41,7 @@ For `runtime-linux.yml`, provide:
 
 For `release-bundle.yml`, the hosted Linux lane uses `run_linux_runtime_packaging=true` and defaults to `linux_runtime_key_set=hosted-all`, which dispatches Ubuntu 22.04 x64 plus the modeled Ubuntu 24.04 x64 packages. Ubuntu 20.04 is a separate self-hosted lane: use `run_linux_self_hosted_ubuntu20_runtime_packaging=true`; it defaults to `self-hosted-ubuntu20` and dispatches `runner_mode=self-hosted`.
 
-`release-bundle.yml` checks runner availability before creating a GitHub Release. Ubuntu 20.04 self-hosted packaging requires an online repository runner with `self-hosted`, `linux`, `x64`, and `ubuntu-20.04` labels.
+`release-bundle.yml` checks runner availability before creating a GitHub Release when repository secret `RUNNER_AUDIT_TOKEN` is available. Ubuntu 20.04 self-hosted packaging is strict: it requires that audit token and an online repository runner with `self-hosted`, `linux`, `x64`, and `ubuntu-20.04` labels.
 
 `release-bundle.yml` keeps common choices as top-level inputs and accepts advanced overrides through `release_config_json`. Use that JSON object for less common values such as `linux_runtime_delivery_mode`, `linux_self_hosted_ubuntu20_runtime_key_set`, package release-tag overrides, bridge/meta package version overrides, and skip-validation toggles.
 
