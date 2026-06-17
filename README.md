@@ -163,12 +163,13 @@ pwsh -NoProfile -File .\eng\Invoke-RemoteReleaseBundle.ps1 `
 
 Windows stable dependency component refresh for the first publish or a CUDA/cuDNN/TensorRT upgrade:
 
+The Windows remote examples intentionally omit `-WindowsRuntimeKeys` to use the full six-combination Windows matrix; pass explicit keys only for a diagnostic or one-off repair run.
+
 ```powershell
 pwsh -NoProfile -File .\eng\Invoke-RemoteReleaseBundle.ps1 `
   -Version 4.0.0 `
   -RuntimeVersion 4.0.0 `
   -RunWindowsRuntimePackaging `
-  -WindowsRuntimeKeys win-x64-trt11.0-cuda12.9-cudnn9.22 `
   -WindowsRuntimeDeliveryMode split `
   -WindowsSplitPackageRoles cuda-cudnn,tensorrt `
   -PublishRuntimeToGitHubPackages:$true `
@@ -182,7 +183,6 @@ pwsh -NoProfile -File .\eng\Invoke-RemoteReleaseBundle.ps1 `
   -Version 4.0.1 `
   -RuntimeVersion 4.0.1 `
   -RunWindowsRuntimePackaging `
-  -WindowsRuntimeKeys win-x64-trt11.0-cuda12.9-cudnn9.22 `
   -WindowsRuntimeDeliveryMode split `
   -WindowsSplitPackageRoles bridge,collection `
   -WindowsCudaCudnnPackageVersion 4.0.6156 `
@@ -259,21 +259,23 @@ powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalReleaseBundle.ps1 `
 
 Local bridge and collection runtime example:
 
+The local example below uses a single `<runtime-key>` so you can iterate quickly on one installed dependency set. For release packaging, omit `-WindowsRuntimeKeys` or pass all six keys.
+
 ```powershell
 gh release download v4.0.6156 `
-  --pattern "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.*.4.0.6156.nupkg" `
-  --dir .\artifacts\stable-runtime-package-source\win-x64-trt11.0-cuda12.9-cudnn9.22 `
+  --pattern "JYPPX.TensorRT.CSharp.API.Runtime.<runtime-package-id>.*.4.0.6156.nupkg" `
+  --dir .\artifacts\stable-runtime-package-source\<runtime-key> `
   --repo guojin-yan/TensorRT-CSharp-API
 
 powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalReleaseBundle.ps1 `
   -Version 4.0.1 `
   -RuntimeVersion 4.0.1 `
-  -WindowsRuntimeKeys win-x64-trt11.0-cuda12.9-cudnn9.22 `
+  -WindowsRuntimeKeys <runtime-key> `
   -WindowsRuntimeDeliveryMode split `
   -WindowsSplitPackageRoles bridge,collection `
   -WindowsCudaCudnnPackageVersion 4.0.6156 `
   -WindowsTensorRtPackageVersion 4.0.6156 `
-  -WindowsAdditionalPackageSource .\artifacts\stable-runtime-package-source\win-x64-trt11.0-cuda12.9-cudnn9.22
+  -WindowsAdditionalPackageSource .\artifacts\stable-runtime-package-source\<runtime-key>
 ```
 
 On WDAC / application-control machines, the local and self-hosted Windows runtime validation path can sign the generated consumer output before smoke. This helps when `PackageConsumerSmoke.exe` would otherwise be blocked even though package restore, native asset copy, and build succeeded.

@@ -68,9 +68,11 @@ Ubuntu 24.04 x64 只建模 NVIDIA Ubuntu 24.04 仓库中存在的现代组合。
 
 Linux split 包角色、稳定依赖版本也有单独输入。日常只改 bridge 或 managed 代码时，可以发布 Linux `bridge,collection` 并固定已发布的 `CudaCudnn` 与 `TensorRt` 版本；只有 NVIDIA 依赖集合变化时才使用 `cuda-cudnn`、`tensorrt` 或 `all` 重发稳定依赖。如果一次 dispatch 覆盖多个稳定依赖发布版本，例如 `hosted-all`，不要用一个全局版本覆盖所有 runtime key，而应使用 runtime-key 版本映射。当前 hosted Linux bridge/collection 刷新应把 `linux-x64-ubuntu22.04-*` 映射到 `4.0.6167`，把 `linux-x64-ubuntu24.04-*` 映射到 `4.0.6169`；默认 release tag 会按解析出的版本使用 `v<version>`，除非另外提供 release-tag map。较少使用的 delivery mode、稳定依赖 release tag、bridge/meta 包版本、跳过验证开关等通过 `release_config_json` 传入，避免超过 GitHub Actions `workflow_dispatch` 顶层输入数量限制。
 
+不要把当前发布状态误读成“只有最新 tag”。Windows 线仍然有 6 个建模组合，Ubuntu 22.04 x64 也有 6 个建模组合，Ubuntu 24.04 x64 有 3 个建模组合，Ubuntu 20.04 x64 则是建模但 infrastructure-blocked。需要直观查看时，请以 runtime publication index artifact 为准，而不要只看最新 release tag。
+
 建议优先使用 `eng/Invoke-RemoteReleaseBundle.ps1` 从工作站触发远程发布。这个脚本会把支持的顶层参数继续作为 `-f key=value` 传给 workflow，同时把高级参数自动序列化进 `release_config_json`，避免误传未声明的 workflow input。
 
-Linux 组合保持 `dry-run-only`，等待匹配的真实 Linux runner 验证。
+Ubuntu 22.04 和 Ubuntu 24.04 hosted Linux 包已经有远程发布证据。Ubuntu 20.04 以及未来 ARM/Jetson/非 Ubuntu 线仍需要匹配 runner、官方依赖源和 package-consumer 证据后才能发布。
 
 ## 当前发布映射
 
@@ -90,7 +92,7 @@ runtime 包会按 runtime release tag 分散发布，不会复制到每一个 ma
 - `TRT8` Windows 包可作为公开预览候选，但正式公开前仍需复核 NVIDIA 再分发许可和 NuGet.org 包体积限制。
 - `TRT10` Windows 包更适合私有源或 split-delivery，因为 builder resource、plugin、parser 等资产体积较大。两条 Windows TRT10 package-consumer smoke 路径均已有 2026-06-12 本地证据。
 - `TRT11` Windows CUDA `12.9` 当前作为私有源候选，已有 package-consumer smoke 证据；Windows CUDA `13.2` 在 driver/runtime-compatible smoke 可用前保持 blocked。
-- Linux 包保持 dry-run 候选，等待真实 runner 验证。
+- Ubuntu 22.04 和 Ubuntu 24.04 hosted Linux 包已有远程发布证据；Ubuntu 20.04 仍是 self-hosted/infrastructure-blocked，ARM/Jetson/非 Ubuntu 仍是未来独立包线。
 
 ## nuget.org 大小边界
 

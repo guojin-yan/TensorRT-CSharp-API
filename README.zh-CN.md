@@ -149,13 +149,14 @@ gh workflow run release-bundle.yml `
 
 远端首次发布或升级 CUDA/cuDNN/TensorRT 时刷新 vendor 组件示例：
 
+Windows 远端示例默认使用完整 6 组合矩阵，不传 `windows_runtime_keys`，使用默认 Windows 6 组合矩阵。只有调试或修复单一依赖线时才单独传 key。
+
 ```powershell
 gh workflow run release-bundle.yml `
   --ref TensorRtSharp4.0 `
   -f version=4.0.0 `
   -f runtime_version=4.0.0 `
   -f run_windows_runtime_packaging=true `
-  -f windows_runtime_keys=win-x64-trt11.0-cuda12.9-cudnn9.22 `
   -f windows_runtime_delivery_mode=split `
   -f windows_split_package_roles=cuda-cudnn,tensorrt `
   -f publish_runtime_to_github_packages=true `
@@ -170,7 +171,6 @@ gh workflow run release-bundle.yml `
   -f version=4.0.1 `
   -f runtime_version=4.0.1 `
   -f run_windows_runtime_packaging=true `
-  -f windows_runtime_keys=win-x64-trt11.0-cuda12.9-cudnn9.22 `
   -f windows_runtime_delivery_mode=split `
   -f windows_split_package_roles=bridge,collection `
   -f windows_cuda_cudnn_package_version=4.0.6156 `
@@ -192,21 +192,23 @@ powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalReleaseBundle.ps1 `
 
 本地刷新 bridge 和 collection 示例：
 
+下面的示例用单个 `<runtime-key>` 做快速迭代；正式发布时应省略 `windows_runtime_keys`，或一次性传入 6 个 key。
+
 ```powershell
 gh release download v4.0.6156 `
-  --pattern "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.*.4.0.6156.nupkg" `
-  --dir .\artifacts\stable-runtime-package-source\win-x64-trt11.0-cuda12.9-cudnn9.22 `
+  --pattern "JYPPX.TensorRT.CSharp.API.Runtime.<runtime-package-id>.*.4.0.6156.nupkg" `
+  --dir .\artifacts\stable-runtime-package-source\<runtime-key> `
   --repo guojin-yan/TensorRT-CSharp-API
 
 powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalReleaseBundle.ps1 `
   -Version 4.0.1 `
   -RuntimeVersion 4.0.1 `
-  -WindowsRuntimeKeys win-x64-trt11.0-cuda12.9-cudnn9.22 `
+  -WindowsRuntimeKeys <runtime-key> `
   -WindowsRuntimeDeliveryMode split `
   -WindowsSplitPackageRoles bridge,collection `
   -WindowsCudaCudnnPackageVersion 4.0.6156 `
   -WindowsTensorRtPackageVersion 4.0.6156 `
-  -WindowsAdditionalPackageSource .\artifacts\stable-runtime-package-source\win-x64-trt11.0-cuda12.9-cudnn9.22
+  -WindowsAdditionalPackageSource .\artifacts\stable-runtime-package-source\<runtime-key>
 ```
 
 `release-bundle.yml` 默认不再触发 runtime 打包。需要 runtime 时显式设置 `run_windows_runtime_packaging=true` 或 `run_linux_runtime_packaging=true`；如果启用 Linux runtime 但 `linux_runtime_keys` 为空，Linux 模块会干净 no-op。
