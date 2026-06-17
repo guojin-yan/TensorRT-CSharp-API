@@ -143,6 +143,28 @@ function Format-SafeOutputLine {
   $result
 }
 
+function Test-IsNonRetryableNuGetAuthorizationFailure {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$Source,
+    [object[]]$Output
+  )
+
+  if ($Source -notmatch "nuget\.org") {
+    return $false
+  }
+
+  $text = [string]::Join([Environment]::NewLine, @($Output | ForEach-Object { [string]$_ }))
+  if ([string]::IsNullOrWhiteSpace($text)) {
+    return $false
+  }
+
+  $text -match "\b403\b" -or
+    $text -match "(?i)\bforbidden\b" -or
+    $text -match "(?i)api key is invalid" -or
+    $text -match "(?i)does not have permission"
+}
+
 function Get-UniqueStringList {
   param(
     [string[]]$Values
@@ -500,6 +522,10 @@ try {
       if ($LASTEXITCODE -eq 0) {
         $pushed = $true
         break
+      }
+
+      if (Test-IsNonRetryableNuGetAuthorizationFailure -Source $Source -Output $output) {
+        throw "nuget.org rejected the package with a non-retryable authentication/authorization failure. Check that NUGET_API_KEY is active and has push permission for this package ID or its owning account/organization."
       }
 
       if ($attempt -ge $MaxAttempts) {

@@ -81,6 +81,16 @@ public sealed class ReleaseAutomationTests
     }
 
     [Fact]
+    public void NuGetPushScriptFailsFastForNonRetryableNuGetOrgAuthorizationErrors()
+    {
+        string script = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Push-NuGetPackages.ps1"));
+
+        Assert.Contains("Test-IsNonRetryableNuGetAuthorizationFailure", script, StringComparison.Ordinal);
+        Assert.Contains("nuget.org rejected the package with a non-retryable authentication/authorization failure", script, StringComparison.Ordinal);
+        Assert.Contains("does not have permission", script, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void RemoteReleaseBundleDryRunCarriesStableDependencyVersionMaps()
     {
         string script = Path.Combine(RepositoryPaths.Root, "eng", "Invoke-RemoteReleaseBundle.ps1");
