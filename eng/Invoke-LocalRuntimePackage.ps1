@@ -1,12 +1,13 @@
 [CmdletBinding()]
 param(
-  [string[]]$RuntimePackageKey = @("win-x64-trt11.0-cuda12.9-cudnn9.22"),
+  [string[]]$RuntimePackageKey = @(),
   [string]$Version = "4.0.0",
   [string]$Configuration = "Release",
   [switch]$SkipManagedPack,
   [switch]$SkipNativeBuild,
   [switch]$SkipRuntimePack,
   [switch]$SkipConsumerValidation,
+  [switch]$ResolveOnly,
   [switch]$RunSmoke,
   [string[]]$SmokeRuntimePackageKey = @(),
   [switch]$SignConsumerOutput,
@@ -85,6 +86,103 @@ function Get-PlatformName {
   return "unknown"
 }
 
+function Get-ArchitectureName {
+  try {
+    switch ([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture) {
+      "X64" { return "x64" }
+      "Arm64" { return "arm64" }
+      default { return ([string][System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture).ToLowerInvariant() }
+    }
+  }
+  catch {
+    if ($env:PROCESSOR_ARCHITECTURE -match "^(AMD64|x86_64)$") {
+      return "x64"
+    }
+  }
+
+  return "unknown"
+}
+
+function Get-LinuxOsRelease {
+  $values = @{}
+  $path = "/etc/os-release"
+  if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+    return $values
+  }
+
+  foreach ($line in (Get-Content -LiteralPath $path -ErrorAction SilentlyContinue)) {
+    if ([string]::IsNullOrWhiteSpace($line) -or $line.TrimStart().StartsWith("#")) {
+      continue
+    }
+
+    $parts = $line -split "=", 2
+    if ($parts.Count -ne 2) {
+      continue
+    }
+
+    $name = $parts[0].Trim()
+    $value = $parts[1].Trim().Trim('"')
+    if (-not [string]::IsNullOrWhiteSpace($name)) {
+      $values[$name] = $value
+    }
+  }
+
+  return $values
+}
+
+function Resolve-DefaultRuntimeKeys {
+  param(
+    [Parameter(Mandatory = $true)]
+    [object]$Manifest,
+    [Parameter(Mandatory = $true)]
+    [string]$Platform
+  )
+
+  $architecture = Get-ArchitectureName
+  if ($Platform -eq "windows") {
+    $keys = @(
+      $Manifest.packages |
+        Where-Object { $_.platform -eq "windows" -and $_.rid -eq "win-$architecture" } |
+        Select-Object -ExpandProperty key
+    )
+
+    if ($keys.Count -gt 0) {
+      return @($keys)
+    }
+
+    throw "No default Windows runtime keys are modeled for architecture '$architecture'. Pass -RuntimePackageKey explicitly."
+  }
+
+  if ($Platform -eq "linux") {
+    $osRelease = Get-LinuxOsRelease
+    $linuxDistro = if ($osRelease.ContainsKey("ID")) { [string]$osRelease["ID"] } else { "" }
+    $linuxDistroVersion = if ($osRelease.ContainsKey("VERSION_ID")) { [string]$osRelease["VERSION_ID"] } else { "" }
+
+    if ([string]::IsNullOrWhiteSpace($linuxDistro) -or [string]::IsNullOrWhiteSpace($linuxDistroVersion)) {
+      throw "Unable to determine the Linux distribution from /etc/os-release. Pass -RuntimePackageKey explicitly."
+    }
+
+    $keys = @(
+      $Manifest.packages |
+        Where-Object {
+          $_.platform -eq "linux" -and
+          $_.architecture -eq $architecture -and
+          $_.linuxDistro -eq $linuxDistro -and
+          $_.linuxDistroVersion -eq $linuxDistroVersion
+        } |
+        Select-Object -ExpandProperty key
+    )
+
+    if ($keys.Count -gt 0) {
+      return @($keys)
+    }
+
+    throw "No default Linux runtime keys are modeled for '$linuxDistro $linuxDistroVersion $architecture'. Pass -RuntimePackageKey explicitly for future package lines such as ARM/SBSA, Jetson/L4T, or non-Ubuntu targets."
+  }
+
+  throw "Unable to choose default runtime keys for host platform '$Platform'. Pass -RuntimePackageKey explicitly."
+}
+
 $manifestPath = Join-Path $RepositoryRoot "pack\runtime\runtime-packages.manifest.json"
 $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding utf8 | ConvertFrom-Json
 $resolvedVersion = & (Join-Path $RepositoryRoot "eng\Resolve-PackageVersion.ps1") -RequestedVersion $Version
@@ -92,11 +190,54 @@ $hostPlatform = Get-PlatformName
 $runtimeKeys = @(Expand-KeyList -Values $RuntimePackageKey)
 $smokeRuntimeKeys = @(Expand-KeyList -Values $SmokeRuntimePackageKey)
 if ($runtimeKeys.Count -eq 0) {
-  throw "At least one runtime package key is required."
+  $runtimeKeys = @(Resolve-DefaultRuntimeKeys -Manifest $manifest -Platform $hostPlatform)
+  Write-Host "No -RuntimePackageKey was provided. Resolved local host runtime matrix: $($runtimeKeys -join ', ')"
 }
 
 $summaryRoot = Join-Path $RepositoryRoot "artifacts\local-runtime-validation"
 New-Item -ItemType Directory -Path $summaryRoot -Force | Out-Null
+
+if ($ResolveOnly.IsPresent) {
+  $resolvedRows = @(
+    foreach ($key in $runtimeKeys) {
+      $package = $manifest.packages | Where-Object { $_.key -eq $key } | Select-Object -First 1
+      if (-not $package) {
+        throw "Runtime package key '$key' was not found."
+      }
+
+      [pscustomobject]@{
+        runtimeKey = [string]$package.key
+        packageId = [string]$package.packageId
+        platform = [string]$package.platform
+        rid = [string]$package.rid
+        linuxDistro = [string]$package.linuxDistro
+        linuxDistroVersion = [string]$package.linuxDistroVersion
+        architecture = [string]$package.architecture
+        validationState = [string]$package.validationState
+      }
+    }
+  )
+
+  $jsonPath = Join-Path $summaryRoot "local-runtime-key-resolution.json"
+  $markdownPath = Join-Path $summaryRoot "local-runtime-key-resolution.md"
+  $resolvedRows | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $jsonPath -Encoding utf8
+
+  $lines = [System.Collections.Generic.List[string]]::new()
+  $lines.Add("# Local Runtime Key Resolution")
+  $lines.Add("")
+  $lines.Add("Host platform: ``$hostPlatform``")
+  $lines.Add("")
+  $lines.Add("| Runtime key | Package | Platform | Validation |")
+  $lines.Add("| --- | --- | --- | --- |")
+  foreach ($row in $resolvedRows) {
+    $lines.Add("| ``$($row.runtimeKey)`` | ``$($row.packageId)`` | ``$($row.platform)`` | ``$($row.validationState)`` |")
+  }
+  $lines | Set-Content -LiteralPath $markdownPath -Encoding utf8
+
+  Write-Host "Local runtime key resolution written to $jsonPath"
+  Write-Host "Local runtime key resolution written to $markdownPath"
+  return
+}
 
 if ($SkipRuntimePack.IsPresent -and -not $SkipConsumerValidation.IsPresent) {
   throw "SkipRuntimePack requires SkipConsumerValidation because no runtime nupkg will be produced."

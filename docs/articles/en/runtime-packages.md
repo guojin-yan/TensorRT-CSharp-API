@@ -47,6 +47,8 @@ Current package consumer validation:
 
 Windows local roots are intentionally not stored in the public manifest. Use `pack/runtime/runtime-packages.local.json` for machine-specific root overrides; that file is ignored by Git. Start from `pack/runtime/runtime-packages.local.example.json`.
 
+When `eng/Invoke-LocalRuntimePackage.ps1` is called without `-RuntimePackageKey`, it resolves the full modeled runtime key set for the current host from `pack/runtime/runtime-packages.manifest.json` instead of defaulting to one TensorRT combination. Use `-ResolveOnly` first to see the keys it would package without building or collecting native assets.
+
 To sync repository-relative TensorRT/cuDNN roots from the active workstation into the user profile override file used by self-hosted runs, use:
 
 ```powershell
@@ -122,6 +124,8 @@ Ubuntu 22.04 x64 is the current hosted Linux publication line and has a successf
 Use `eng/Test-LinuxRuntimeTargetCoverage.ps1` to regenerate the target coverage report under `artifacts/linux-target-coverage`. The report is also uploaded by `release-publication-audit.yml` so publication evidence shows which Linux targets are modeled and which future ARM/Jetson/non-Ubuntu lines are intentionally held.
 
 Use `eng/Test-RuntimePublicationTargetCoverage.ps1` to audit published coverage under `artifacts/runtime-publication-target-coverage`. This report classifies Windows, Ubuntu 22.04, and Ubuntu 24.04 as `published-required`; Ubuntu 20.04 as `infrastructure-blocked`; and ARM/SBSA, Jetson/L4T, and non-Ubuntu Linux as future separate package lines. It verifies that published-required targets have matching GitHub Release assets and GitHub Package versions before the release audit is considered clean.
+
+Use `eng/Export-RuntimePublicationIndex.ps1` after `eng/Test-GitHubPublicationInventory.ps1` to generate `artifacts/publication-index/runtime-publication-index.md`. This index shows which runtime combinations live under each Release tag and confirms the matching GitHub Packages entries, which is easier to read than the GitHub Packages package list.
 
 ## Publication Risk
 

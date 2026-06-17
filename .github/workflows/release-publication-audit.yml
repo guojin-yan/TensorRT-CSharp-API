@@ -181,6 +181,11 @@ jobs:
 
           & pwsh @arguments
 
+      - name: Export runtime publication index
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -File ./eng/Export-RuntimePublicationIndex.ps1 -Repository "$env:GH_REPO"
+
       - name: Audit Linux runtime target coverage
         shell: pwsh
         run: |
@@ -340,6 +345,7 @@ jobs:
             artifacts/release-publication/**
             artifacts/github-packages-audit/**
             artifacts/publication-inventory/**
+            artifacts/publication-index/**
             artifacts/release-readiness/**
             artifacts/remote-release-prerequisites/**
             artifacts/runner-availability/**

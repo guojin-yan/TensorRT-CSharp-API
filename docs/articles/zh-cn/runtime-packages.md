@@ -47,6 +47,8 @@ TensorRT 11 已纳入矩阵并开始真实适配。Windows `trt11.0-cuda12.9-cud
 
 Windows 本机真实 root 不写入公开 manifest。请用 `pack/runtime/runtime-packages.local.json` 保存本机覆盖配置；该文件已被 Git 忽略。可从 `pack/runtime/runtime-packages.local.example.json` 复制后修改。
 
+`eng/Invoke-LocalRuntimePackage.ps1` 不传 `-RuntimePackageKey` 时，会从 `pack/runtime/runtime-packages.manifest.json` 按当前主机解析完整已建模 runtime key 集合，不再默认只选某一个 TensorRT 组合。可以先加 `-ResolveOnly` 查看将要打包的 key，不会执行 build 或 native asset 收集。
+
 Windows runtime 打包前应先验证显式输入：
 
 ```powershell
@@ -116,6 +118,8 @@ Ubuntu 22.04 x64 是当前 hosted Linux 发布主线，已经有远程 release �
 可以用 `eng/Test-LinuxRuntimeTargetCoverage.ps1` 重新生成 `artifacts/linux-target-coverage` 下的目标覆盖报告。`release-publication-audit.yml` 也会上传这份报告，用来证明哪些 Linux 目标已经建模，哪些 ARM/Jetson/非 Ubuntu 未来包线被有意暂缓。
 
 可以用 `eng/Test-RuntimePublicationTargetCoverage.ps1` 审计 `artifacts/runtime-publication-target-coverage` 下的已发布覆盖报告。该报告会把 Windows、Ubuntu 22.04、Ubuntu 24.04 标记为 `published-required`，把 Ubuntu 20.04 标记为 `infrastructure-blocked`，把 ARM/SBSA、Jetson/L4T、非 Ubuntu Linux 标记为未来独立包线。它会确认必须发布的目标同时存在 GitHub Release assets 和 GitHub Package versions，避免只看见部分包就误判发布完成。
+
+`eng/Test-GitHubPublicationInventory.ps1` 之后可以运行 `eng/Export-RuntimePublicationIndex.ps1` 生成 `artifacts/publication-index/runtime-publication-index.md`。这份索引会列出每个 runtime 组合所在的 Release tag，以及对应 GitHub Packages 是否齐全，比 GitHub Packages 页面按包名分散查看更直观。
 
 ## 发布风险
 

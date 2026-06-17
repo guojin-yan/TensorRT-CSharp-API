@@ -214,11 +214,30 @@ $workflowContracts = @(
   [pscustomobject]@{
     path = "eng\Invoke-LocalSplitRuntimePackage.ps1"
     requirements = @(
+      New-Requirement -Needle "SourceRuntimeKey is required" -Description "split runtime packaging requires an explicit source key"
       New-Requirement -Needle "Resolve-SplitPackagePins.ps1" -Description "shared split package pin resolver"
       New-Requirement -Needle "CudaCudnnPackageVersionMap" -Description "CUDA/cuDNN version map parameter"
       New-Requirement -Needle "TensorRtPackageVersionMap" -Description "TensorRT version map parameter"
       New-Requirement -Needle "Pass -CudaCudnnPackageVersion or -CudaCudnnPackageVersionMap" -Description "meta package guard accepts version map"
       New-Requirement -Needle "Pass -TensorRtPackageVersion or -TensorRtPackageVersionMap" -Description "meta package TensorRT guard accepts version map"
+    )
+  }
+  [pscustomobject]@{
+    path = "eng\Invoke-LocalRuntimePackage.ps1"
+    requirements = @(
+      New-Requirement -Needle "Resolve-DefaultRuntimeKeys" -Description "local runtime packaging resolves the host matrix from the manifest"
+      New-Requirement -Needle "ResolveOnly" -Description "local runtime package key resolution without build side effects"
+      New-Requirement -Needle "No -RuntimePackageKey was provided" -Description "default runtime key resolution is logged"
+      New-Requirement -Needle "ARM/SBSA, Jetson/L4T, or non-Ubuntu" -Description "future Linux package lines require explicit runtime keys"
+    )
+  }
+  [pscustomobject]@{
+    path = "eng\Export-RuntimePublicationIndex.ps1"
+    requirements = @(
+      New-Requirement -Needle "Runtime Publication Index" -Description "publication index report title"
+      New-Requirement -Needle "runtime-publication-index" -Description "publication index artifact output"
+      New-Requirement -Needle "latest managed release does not necessarily contain every runtime asset" -Description "release-tag split guidance"
+      New-Requirement -Needle "Ubuntu 20.04, ARM/SBSA, Jetson/L4T, and non-Ubuntu Linux" -Description "future and infrastructure-blocked package line guidance"
     )
   }
   [pscustomobject]@{
@@ -291,6 +310,8 @@ $workflowContracts = @(
       New-Requirement -Needle "Test-GitHubPublicationInventory.ps1" -Description "publication inventory audit script"
       New-Requirement -Needle "require_publication_inventory_clean" -Description "publication inventory strictness gate"
       New-Requirement -Needle "require_package_repository_association" -Description "package repository association gate"
+      New-Requirement -Needle "Export-RuntimePublicationIndex.ps1" -Description "runtime publication index export script"
+      New-Requirement -Needle "publication-index" -Description "runtime publication index artifact output"
       New-Requirement -Needle "Test-ReleaseReadiness.ps1" -Description "external release readiness audit script"
       New-Requirement -Needle "include_release_readiness" -Description "release readiness audit toggle"
       New-Requirement -Needle "Test-RemoteReleasePrerequisites.ps1" -Description "remote release prerequisites audit script"

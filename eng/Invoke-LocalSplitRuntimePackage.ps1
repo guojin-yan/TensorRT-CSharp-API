@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-  [string]$SourceRuntimeKey = "win-x64-trt11.0-cuda12.9-cudnn9.22",
+  [string]$SourceRuntimeKey,
   [string]$Version = "4.0.0",
   [string[]]$SplitPackageRole = @("all"),
   [string]$MetaPackageVersion,
@@ -557,6 +557,10 @@ $splitManifestPath = Join-Path $RepositoryRoot "pack\runtime-split\split-runtime
 $splitManifest = Get-Content -LiteralPath $splitManifestPath -Raw -Encoding utf8 | ConvertFrom-Json
 $runtimeManifestPath = Join-Path $RepositoryRoot "pack\runtime\runtime-packages.manifest.json"
 $runtimeManifest = Get-Content -LiteralPath $runtimeManifestPath -Raw -Encoding utf8 | ConvertFrom-Json
+if ([string]::IsNullOrWhiteSpace($SourceRuntimeKey)) {
+  throw "SourceRuntimeKey is required. Pass one of the modeled runtime keys, for example from eng/Resolve-RuntimeKeySet.ps1 or pack/runtime/runtime-packages.manifest.json."
+}
+
 $sourcePackage = $runtimeManifest.packages | Where-Object { $_.key -eq $SourceRuntimeKey } | Select-Object -First 1
 if (-not $sourcePackage) {
   throw "Runtime package key '$SourceRuntimeKey' was not found."
