@@ -68,6 +68,16 @@ on:
         required: false
         default: true
         type: boolean
+      check_remote_release_prerequisites:
+        description: Include repository secret and self-hosted runner prerequisite audit
+        required: false
+        default: true
+        type: boolean
+      check_runner_availability:
+        description: Query GitHub self-hosted runner availability
+        required: false
+        default: true
+        type: boolean
       runner_required_label_sets:
         description: Semicolon-separated self-hosted runner label sets to audit
         required: false
@@ -233,6 +243,7 @@ jobs:
           & pwsh @arguments
 
       - name: Audit remote release prerequisites
+        if: ${{ inputs.check_remote_release_prerequisites }}
         shell: pwsh
         run: |
           $labelSetText = @'
@@ -267,6 +278,7 @@ jobs:
           & pwsh @arguments
 
       - name: Audit runner availability
+        if: ${{ inputs.check_runner_availability }}
         shell: pwsh
         run: |
           $labelSetText = @'

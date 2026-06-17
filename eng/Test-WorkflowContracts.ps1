@@ -354,6 +354,8 @@ $workflowContracts = @(
       New-Requirement -Needle "runtime-release-plan" -Description "runtime release plan artifact output"
       New-Requirement -Needle "Test-ReleaseReadiness.ps1" -Description "external release readiness audit script"
       New-Requirement -Needle "include_release_readiness" -Description "release readiness audit toggle"
+      New-Requirement -Needle "check_remote_release_prerequisites" -Description "remote prerequisite audit toggle"
+      New-Requirement -Needle "check_runner_availability" -Description "runner availability audit toggle"
       New-Requirement -Needle "Test-RemoteReleasePrerequisites.ps1" -Description "remote release prerequisites audit script"
       New-Requirement -Needle "remote-release-prerequisites" -Description "remote release prerequisites artifact output"
       New-Requirement -Needle "Test-LinuxRuntimeTargetCoverage.ps1" -Description "Linux target coverage audit script"
