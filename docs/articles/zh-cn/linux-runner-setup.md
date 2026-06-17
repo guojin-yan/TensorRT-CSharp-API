@@ -24,6 +24,29 @@
 
 不要把 CUDA / cuDNN / TensorRT 二进制提交到 Git。hosted Linux 路径只通过 NVIDIA 官方 apt 仓库安装可公开获取的运行库和开发头；self-hosted 路径则读取 runner 上已经准备好的官方库目录。
 
+## Ubuntu 20.04 self-hosted runner 启动步骤
+
+在 Ubuntu 20.04 x64 机器上先用 `gh` 登录一个可以申请仓库 runner 注册 token 的账号，然后运行：
+
+```bash
+pwsh -File ./eng/Install-GitHubSelfHostedRunner.ps1 \
+  -Repository guojin-yan/TensorRT-CSharp-API \
+  -UseGhRegistrationToken \
+  -InstallService
+```
+
+这个脚本会下载官方 GitHub Actions runner，并配置 `ubuntu-20.04,tensorrt-csharp` 自定义标签；GitHub runner 自带的 `self-hosted,linux,x64` 标签会保留。短期注册 token 不会写入磁盘。需要先看命令但不执行时，可以加 `-DryRun`。
+
+触发 Ubuntu 20.04 runtime 发布线之前，先运行：
+
+```bash
+pwsh -File ./eng/Test-LinuxSelfHostedRunnerReadiness.ps1 \
+  -RequireRegisteredRunner \
+  -CheckGitHubRunner
+```
+
+检查结果会写入 `artifacts/linux-self-hosted-runner-readiness/linux-self-hosted-runner-readiness.json` 和 `.md`。它会验证系统是否为 Ubuntu 20.04 x64、`pwsh`、`.NET SDK 10.0.300+`、CMake、Ninja、Git、`gh`、本机 runner 配置、GitHub runner 标签，以及 `self-hosted-ubuntu20` 解析出的 NVIDIA 根目录。
+
 ## `runtime-linux.yml` 需要的输入
 
 - `version`

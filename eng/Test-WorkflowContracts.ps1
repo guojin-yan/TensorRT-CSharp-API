@@ -192,6 +192,31 @@ $workflowContracts = @(
     )
   }
   [pscustomobject]@{
+    path = "eng\Install-GitHubSelfHostedRunner.ps1"
+    requirements = @(
+      New-Requirement -Needle "actions/runner/releases" -Description "official GitHub Actions runner download"
+      New-Requirement -Needle "registration-token" -Description "short-lived registration token support"
+      New-Requirement -Needle "ubuntu-20.04" -Description "Ubuntu 20.04 custom runner label"
+      New-Requirement -Needle "tensorrt-csharp" -Description "project-specific runner label"
+      New-Requirement -Needle "The registration token is never written to disk" -Description "registration token non-persistence note"
+      New-Requirement -Needle "InstallService" -Description "runner service installation option"
+      New-Requirement -Needle "DryRun" -Description "safe command preview mode"
+    )
+  }
+  [pscustomObject]@{
+    path = "eng\Test-LinuxSelfHostedRunnerReadiness.ps1"
+    requirements = @(
+      New-Requirement -Needle "self-hosted-ubuntu20" -Description "Ubuntu 20.04 runtime key set readiness"
+      New-Requirement -Needle "self-hosted,linux,x64,ubuntu-20.04" -Description "release runner label readiness"
+      New-Requirement -Needle "Test-GitHubRunnerAvailability.ps1" -Description "GitHub runner label audit delegation"
+      New-Requirement -Needle "Resolve-RuntimeRoots.ps1" -Description "NVIDIA root resolution"
+      New-Requirement -Needle "Validate-LinuxRuntimeInputs.ps1" -Description "Linux runtime input validation delegation"
+      New-Requirement -Needle ".NET SDK 10.0.300+" -Description "required .NET SDK readiness"
+      New-Requirement -Needle "linux-self-hosted-runner-readiness" -Description "readiness artifact output"
+      New-Requirement -Needle "WarnOnly" -Description "non-failing readiness mode"
+    )
+  }
+  [pscustomobject]@{
     path = "eng\Resolve-RuntimeKeySet.ps1"
     requirements = @(
       New-Requirement -Needle "auto" -Description "auto key set selection"

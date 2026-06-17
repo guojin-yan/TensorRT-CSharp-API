@@ -229,6 +229,15 @@ pwsh -NoProfile -File .\eng\Invoke-RemoteReleaseBundle.ps1 `
   -AttachRuntimeToGitHubRelease:$true
 ```
 
+Before enabling that lane on a new Ubuntu 20.04 x64 machine, register and audit the runner:
+
+```bash
+pwsh -File ./eng/Install-GitHubSelfHostedRunner.ps1 -Repository guojin-yan/TensorRT-CSharp-API -UseGhRegistrationToken -InstallService
+pwsh -File ./eng/Test-LinuxSelfHostedRunnerReadiness.ps1 -RequireRegisteredRunner -CheckGitHubRunner
+```
+
+The registration helper never writes the short-lived GitHub runner token to disk. The readiness helper verifies Ubuntu 20.04 x64, required tooling, the `self-hosted,linux,x64,ubuntu-20.04` label path, and the configured CUDA/cuDNN/TensorRT roots for the modeled Ubuntu 20.04 package keys.
+
 Managed-only local example:
 
 ```powershell

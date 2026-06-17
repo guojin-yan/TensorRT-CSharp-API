@@ -24,6 +24,29 @@ Linux runtime packaging now supports both GitHub-hosted and self-hosted executio
 
 Do not commit CUDA, cuDNN, or TensorRT binaries to Git. The hosted Linux path installs publicly available runtime libraries and development headers from NVIDIA's official apt repositories; the self-hosted path reads already prepared official package roots from the runner.
 
+## Ubuntu 20.04 self-hosted runner bootstrap
+
+Use the helper below on the Ubuntu 20.04 x64 machine after signing in with `gh` as an account that can request repository runner registration tokens:
+
+```bash
+pwsh -File ./eng/Install-GitHubSelfHostedRunner.ps1 \
+  -Repository guojin-yan/TensorRT-CSharp-API \
+  -UseGhRegistrationToken \
+  -InstallService
+```
+
+The helper downloads the official GitHub Actions runner, configures it with `ubuntu-20.04,tensorrt-csharp` custom labels, and leaves the built-in `self-hosted,linux,x64` labels intact. It never writes the short-lived registration token to disk. Use `-DryRun` first when you want to preview the exact commands.
+
+Before dispatching the Ubuntu 20.04 runtime lane, run:
+
+```bash
+pwsh -File ./eng/Test-LinuxSelfHostedRunnerReadiness.ps1 \
+  -RequireRegisteredRunner \
+  -CheckGitHubRunner
+```
+
+The readiness check writes `artifacts/linux-self-hosted-runner-readiness/linux-self-hosted-runner-readiness.json` and `.md`. It verifies the OS, x64 architecture, `pwsh`, `.NET SDK 10.0.300+`, CMake, Ninja, Git, `gh`, local runner configuration, GitHub runner labels, and the NVIDIA roots resolved for `self-hosted-ubuntu20`.
+
 ## Expected workflow inputs
 
 For `runtime-linux.yml`, provide:
