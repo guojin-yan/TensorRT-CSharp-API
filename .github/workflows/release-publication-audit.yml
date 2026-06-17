@@ -18,6 +18,11 @@ on:
         required: false
         default: "v4.0.6156,v4.0.6167,v4.0.6169"
         type: string
+      expected_release_tags:
+        description: Comma-separated GitHub Release tags expected to remain published
+        required: false
+        default: "v4.0.6170,v4.0.6156,v4.0.6167,v4.0.6169"
+        type: string
       require_nuget_api_key:
         description: Fail when NUGET_API_KEY is missing
         required: false
@@ -45,6 +50,11 @@ on:
         type: boolean
       check_failed_workflow_runs:
         description: Include a failed workflow run audit
+        required: false
+        default: true
+        type: boolean
+      require_publication_inventory_clean:
+        description: Fail when unexpected GitHub Releases or package versions remain
         required: false
         default: true
         type: boolean
@@ -123,6 +133,32 @@ jobs:
 
           if ("${{ inputs.check_failed_workflow_runs }}" -eq "true") {
             $arguments += "-CheckFailedWorkflowRuns"
+          }
+
+          if ("${{ inputs.warn_only }}" -eq "true") {
+            $arguments += "-WarnOnly"
+          }
+
+          & pwsh @arguments
+
+      - name: Audit GitHub publication inventory
+        shell: pwsh
+        run: |
+          $arguments = @(
+            "-NoProfile",
+            "-File",
+            "./eng/Test-GitHubPublicationInventory.ps1",
+            "-Repository",
+            "$env:GH_REPO",
+            "-ExpectedReleaseTag",
+            "${{ inputs.expected_release_tags }}"
+          )
+
+          if ("${{ inputs.require_publication_inventory_clean }}" -eq "true") {
+            $arguments += @(
+              "-RequireOnlyExpectedReleases",
+              "-RequireOnlyExpectedPackageVersions"
+            )
           }
 
           if ("${{ inputs.warn_only }}" -eq "true") {
@@ -213,5 +249,6 @@ jobs:
           path: |
             artifacts/release-publication/**
             artifacts/github-packages-audit/**
+            artifacts/publication-inventory/**
             artifacts/runner-availability/**
             artifacts/linux-target-coverage/**
