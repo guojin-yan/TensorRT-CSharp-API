@@ -183,7 +183,7 @@ Linux packages cannot move from `dry-run-only` to `local-validated` until this n
 
 ## Current status
 
-The repository now includes Linux package manifest entries and Linux pack workflows. Ubuntu 22.04 and Ubuntu 24.04 have remote publication evidence; Ubuntu 20.04 is the hosted-container line to publish next. ARM64, Jetson, and non-Ubuntu targets still need dedicated package identities, runner or container strategy, and dependency evidence before publishing.
+The repository now includes Linux package manifest entries and Linux pack workflows. Ubuntu 20.04, Ubuntu 22.04, and Ubuntu 24.04 have remote publication evidence. ARM64, Jetson, and non-Ubuntu targets still need dedicated package identities, runner or container strategy, and dependency evidence before publishing.
 
 ## Common failure cases to check first
 

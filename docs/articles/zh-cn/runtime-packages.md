@@ -115,7 +115,7 @@ Linux runtime 包名必须包含发行版版本和 CPU 架构，因为 NVIDIA �
 - `runtime-linux.yml`
 - `release-bundle.yml`
 
-Ubuntu 22.04 x64 与 Ubuntu 24.04 x64 已经有远程发布成功证据。Ubuntu 20.04 x64 是当前需要补齐的 hosted-container 发布线。Linux arm64/SBSA 与 Jetson/L4T 需要单独建包线后才能发布。
+Ubuntu 20.04 x64、Ubuntu 22.04 x64、Ubuntu 24.04 x64 都已经有远程发布成功证据。Linux arm64/SBSA 与 Jetson/L4T 需要单独建包线后才能发布。
 
 截至 2026-06-17 的远端发布映射：
 
@@ -123,6 +123,7 @@ Ubuntu 22.04 x64 与 Ubuntu 24.04 x64 已经有远程发布成功证据。Ubuntu
 - `v4.0.6167`：Linux x64 Ubuntu 22.04 runtime 矩阵，覆盖 6 个 hosted Ubuntu 22.04 组合。
 - `v4.0.6169`：Linux x64 Ubuntu 24.04 runtime 矩阵，覆盖 3 个 hosted Ubuntu 24.04 现代组合。
 - `v4.0.6170`：只有 managed 包；这个 release tag 不会重复挂载全部 runtime assets。
+- `v4.0.6171`：Linux x64 Ubuntu 20.04 runtime 矩阵，覆盖 3 个 hosted-container Ubuntu 20.04 组合。
 
 可以用 `eng/Test-LinuxRuntimeTargetCoverage.ps1` 重新生成 `artifacts/linux-target-coverage` 下的目标覆盖报告。`release-publication-audit.yml` 也会上传这份报告，用来证明哪些 Linux 目标已经建模，哪些 ARM/Jetson/非 Ubuntu 未来包线被有意暂缓。
 

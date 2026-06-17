@@ -4,7 +4,7 @@ param(
   [string]$PackageOwner,
   [ValidateSet("auto", "user", "org")]
   [string]$PackageOwnerKind = "auto",
-  [string[]]$ExpectedReleaseTag = @("v4.0.6156", "v4.0.6167", "v4.0.6169", "v4.0.6170"),
+  [string[]]$ExpectedReleaseTag = @("v4.0.6156", "v4.0.6167", "v4.0.6169", "v4.0.6170", "v4.0.6171"),
   [string]$InventoryJsonPath,
   [switch]$RequireInfrastructureBlockedTargetsPublished,
   [switch]$WarnOnly,

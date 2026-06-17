@@ -138,6 +138,7 @@ Current remote publication map as of 2026-06-17:
 | `v4.0.6156` | Windows x64 runtime matrix: all six Windows TensorRT/CUDA/cuDNN combinations. |
 | `v4.0.6167` | Linux x64 Ubuntu 22.04 runtime matrix: all six hosted Ubuntu 22.04 combinations. |
 | `v4.0.6169` | Linux x64 Ubuntu 24.04 runtime matrix: the three modern hosted Ubuntu 24.04 combinations. |
+| `v4.0.6171` | Linux x64 Ubuntu 20.04 runtime matrix: the three hosted-container Ubuntu 20.04 combinations. |
 
 The latest managed release is not expected to contain every runtime asset. Use `artifacts/publication-index/runtime-publication-index.md` from `release-publication-audit.yml` when you need the full runtime-to-release-tag map.
 
@@ -225,7 +226,7 @@ pwsh -NoProfile -File .\eng\Invoke-RemoteReleaseBundle.ps1 `
   -AttachRuntimeToGitHubRelease:$true
 ```
 
-Use version maps when one workflow dispatch spans multiple stable dependency releases. The current hosted Linux line uses Ubuntu 22.04 dependency packages from `v4.0.6167` and Ubuntu 24.04 dependency packages from `v4.0.6169`; the release tag defaults to `v<resolved package version>` for each matched key. If a dependency package is attached to a non-default Release tag, pass the matching `-LinuxCudaCudnnPackageReleaseTagMap` and `-LinuxTensorRtPackageReleaseTagMap` values as well.
+Use version maps when one workflow dispatch spans multiple stable dependency releases. The current hosted Linux line uses Ubuntu 22.04 dependency packages from `v4.0.6167` and Ubuntu 24.04 dependency packages from `v4.0.6169`; Ubuntu 20.04 uses the separate hosted-container dependency packages from `v4.0.6171`. The release tag defaults to `v<resolved package version>` for each matched key. If a dependency package is attached to a non-default Release tag, pass the matching `-LinuxCudaCudnnPackageReleaseTagMap` and `-LinuxTensorRtPackageReleaseTagMap` values as well.
 
 Ubuntu 20.04 packaging uses a separate hosted-container lane:
 
@@ -238,6 +239,22 @@ pwsh -NoProfile -File .\eng\Invoke-RemoteReleaseBundle.ps1 `
   -LinuxRuntimeDeliveryMode split `
   -LinuxSplitPackageRoles all `
   -PublishRuntimeToGitHubPackages:$true `
+  -AttachRuntimeToGitHubRelease:$true
+```
+
+Ubuntu 20.04 bridge and collection refreshes should keep the stable dependency packages pinned to `4.0.6171` and publish only the changed `bridge,collection` packages:
+
+```powershell
+pwsh -NoProfile -File .\eng\Invoke-RemoteReleaseBundle.ps1 `
+  -Version 4.0.1 `
+  -RuntimeVersion 4.0.1 `
+  -RunLinuxUbuntu20RuntimePackaging `
+  -LinuxUbuntu20RuntimeKeySet hosted-container-ubuntu20 `
+  -LinuxRuntimeDeliveryMode split `
+  -LinuxSplitPackageRoles bridge,collection `
+  -LinuxCudaCudnnPackageVersionMap 'linux-x64-ubuntu20.04-*=4.0.6171' `
+  -LinuxTensorRtPackageVersionMap 'linux-x64-ubuntu20.04-*=4.0.6171' `
+  -PublishRuntimeToGitHubPackages:$false `
   -AttachRuntimeToGitHubRelease:$true
 ```
 

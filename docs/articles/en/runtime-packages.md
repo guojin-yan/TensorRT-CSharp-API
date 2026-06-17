@@ -121,7 +121,7 @@ Current Linux workflow modules:
 - `runtime-linux.yml`
 - `release-bundle.yml`
 
-Ubuntu 22.04 x64 and Ubuntu 24.04 x64 have successful remote publication runs. Ubuntu 20.04 x64 is the remaining hosted-container publication line to fill. Linux arm64/SBSA and Jetson/L4T still need a separate package line before they can be published.
+Ubuntu 20.04 x64, Ubuntu 22.04 x64, and Ubuntu 24.04 x64 all have successful remote publication runs. Linux arm64/SBSA and Jetson/L4T still need a separate package line before they can be published.
 
 Current remote publication map as of 2026-06-17:
 
@@ -129,6 +129,7 @@ Current remote publication map as of 2026-06-17:
 - `v4.0.6167`: Linux x64 Ubuntu 22.04 runtime matrix, all six hosted Ubuntu 22.04 combinations.
 - `v4.0.6169`: Linux x64 Ubuntu 24.04 runtime matrix, the three modern hosted Ubuntu 24.04 combinations.
 - `v4.0.6170`: managed package only. This release tag intentionally does not duplicate all runtime assets.
+- `v4.0.6171`: Linux x64 Ubuntu 20.04 runtime matrix, the three hosted-container Ubuntu 20.04 combinations.
 
 Use `eng/Test-LinuxRuntimeTargetCoverage.ps1` to regenerate the target coverage report under `artifacts/linux-target-coverage`. The report is also uploaded by `release-publication-audit.yml` so publication evidence shows which Linux targets are modeled and which future ARM/Jetson/non-Ubuntu lines are intentionally held.
 

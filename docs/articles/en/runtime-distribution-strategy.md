@@ -66,13 +66,13 @@ The `release-bundle` workflow now has two Linux orchestration lanes:
 - `run_linux_runtime_packaging`: hosted Linux publication, defaulting to `hosted-all` so Ubuntu 22.04 x64 and the modeled Ubuntu 24.04 x64 lines are dispatched together.
 - `run_linux_ubuntu20_runtime_packaging`: Ubuntu 20.04 x64 hosted-container publication, defaulting to `hosted-container-ubuntu20` and always dispatching `runner_mode=hosted-container`.
 
-Use separate release-bundle inputs for Linux split roles and stable dependency versions. Routine bridge or managed changes can publish Linux `bridge,collection` while pinning already-published `CudaCudnn` and `TensorRt` versions; NVIDIA dependency refreshes should use `cuda-cudnn`, `tensorrt`, or `all`. When one dispatch spans multiple dependency publication versions, such as `hosted-all`, pin the dependencies with runtime-key maps instead of one global version. The current hosted Linux bridge/collection refresh maps `linux-x64-ubuntu22.04-*` to `4.0.6167` and `linux-x64-ubuntu24.04-*` to `4.0.6169`; the default release tag is `v<resolved package version>` unless a release-tag map is supplied. Less common overrides, such as delivery mode, release tags for stable dependency assets, bridge/meta package versions, and skip-validation toggles, are passed through `release_config_json` to keep the manual GitHub Actions form under the `workflow_dispatch` input limit.
+Use separate release-bundle inputs for Linux split roles and stable dependency versions. Routine bridge or managed changes can publish Linux `bridge,collection` while pinning already-published `CudaCudnn` and `TensorRt` versions; NVIDIA dependency refreshes should use `cuda-cudnn`, `tensorrt`, or `all`. When one dispatch spans multiple dependency publication versions, such as `hosted-all`, pin the dependencies with runtime-key maps instead of one global version. The current hosted Linux bridge/collection refresh maps `linux-x64-ubuntu22.04-*` to `4.0.6167` and `linux-x64-ubuntu24.04-*` to `4.0.6169`; Ubuntu 20.04 hosted-container bridge refreshes map `linux-x64-ubuntu20.04-*` to `4.0.6171`. The default release tag is `v<resolved package version>` unless a release-tag map is supplied. Less common overrides, such as delivery mode, release tags for stable dependency assets, bridge/meta package versions, and skip-validation toggles, are passed through `release_config_json` to keep the manual GitHub Actions form under the `workflow_dispatch` input limit.
 
 Do not reduce the published release model to the current latest tag. The Windows line still has six modeled combinations, Ubuntu 20.04 x64 has three modeled combinations, Ubuntu 22.04 x64 has six modeled combinations, and Ubuntu 24.04 x64 has three modeled combinations. Use the runtime publication index artifact as the readable map when a release tag only contains a subset of the runtime lines.
 
 Prefer `eng/Invoke-RemoteReleaseBundle.ps1` when dispatching releases from a workstation. The script keeps supported top-level workflow inputs as `-f key=value` flags and serializes advanced release settings into `release_config_json`, which avoids accidental dispatch failures from undeclared workflow inputs.
 
-Hosted Ubuntu 22.04 and Ubuntu 24.04 Linux packages now have remote publication evidence. Ubuntu 20.04 is modeled as a hosted-container lane and must be published separately. Future ARM/Jetson/non-Ubuntu lines still require matching package identities, runners or containers, dependency sources, and package-consumer evidence before publication.
+Hosted Ubuntu 20.04, Ubuntu 22.04, and Ubuntu 24.04 Linux packages now have remote publication evidence. Future ARM/Jetson/non-Ubuntu lines still require matching package identities, runners or containers, dependency sources, and package-consumer evidence before publication.
 
 ## Current publication map
 
@@ -82,6 +82,7 @@ Runtime packages are intentionally distributed across runtime release tags inste
 - `v4.0.6167`: Linux x64 Ubuntu 22.04 runtime matrix for all six hosted Ubuntu 22.04 combinations.
 - `v4.0.6169`: Linux x64 Ubuntu 24.04 runtime matrix for the three modern hosted Ubuntu 24.04 combinations.
 - `v4.0.6170`: managed package only.
+- `v4.0.6171`: Linux x64 Ubuntu 20.04 runtime matrix for the three hosted-container Ubuntu 20.04 combinations.
 
 Run `release-publication-audit.yml` or `eng/Export-RuntimePublicationIndex.ps1` to generate `artifacts/publication-index/runtime-publication-index.md`, which is the canonical readable map from runtime combination to release tag and GitHub Packages entry.
 
@@ -92,7 +93,7 @@ Current lane guidance:
 - `TRT8` Windows packages are public-preview candidates only after NVIDIA redistribution terms and package size limits are reviewed.
 - `TRT10` Windows packages are private-feed or split-delivery candidates because builder resources, plugins, and parser assets can be large. Both Windows TRT10 package-consumer smoke paths have 2026-06-12 local evidence.
 - `TRT11` Windows CUDA `12.9` is a private-feed candidate with package-consumer smoke evidence. Windows CUDA `13.2` remains blocked until driver/runtime-compatible smoke is available.
-- Hosted Ubuntu 22.04 and Ubuntu 24.04 Linux packages have remote publication evidence; Ubuntu 20.04 is the hosted-container gap to fill next, and ARM/Jetson/non-Ubuntu lines remain future separate package lines.
+- Hosted Ubuntu 20.04, Ubuntu 22.04, and Ubuntu 24.04 Linux packages have remote publication evidence; ARM/Jetson/non-Ubuntu lines remain future separate package lines.
 
 ## nuget.org size boundary
 

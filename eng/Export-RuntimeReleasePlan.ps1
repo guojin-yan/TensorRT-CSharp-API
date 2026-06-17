@@ -533,7 +533,7 @@ $commands.Add((New-TargetCommandPlan `
 $commands.Add((New-TargetCommandPlan `
       -Name "ubuntu20-hosted-container" `
       -Description "Publish Ubuntu 20.04 x64 packages through the hosted Ubuntu 20.04 container lane." `
-      -WhenToUse "Use when Ubuntu 22.04/24.04 hosted Linux packages are already published and the Ubuntu 20.04 package line needs to be filled." `
+      -WhenToUse "Use for a new Ubuntu 20.04 dependency refresh or bridge/collection refresh after the initial hosted-container package line has already been published." `
       -CommandParts @(
         "pwsh", "-NoProfile", "-File", ".\eng\Invoke-RemoteReleaseBundle.ps1",
         "-Repository", $Repository,

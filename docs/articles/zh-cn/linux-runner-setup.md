@@ -160,7 +160,7 @@ root 解析顺序：
 
 ## 当前状态
 
-仓库中已经补齐 Linux package manifest 与 Linux pack workflow。Ubuntu 22.04 和 Ubuntu 24.04 已有远程发布证据；Ubuntu 20.04 是下一条 hosted-container 发布线。ARM64、Jetson 和非 Ubuntu 目标仍需要独立 package identity、runner 或 container 策略和依赖证据后再发布。
+仓库中已经补齐 Linux package manifest 与 Linux pack workflow。Ubuntu 20.04、Ubuntu 22.04 和 Ubuntu 24.04 都已有远程发布证据。ARM64、Jetson 和非 Ubuntu 目标仍需要独立 package identity、runner 或 container 策略和依赖证据后再发布。
 
 ## 优先检查的失败场景
 

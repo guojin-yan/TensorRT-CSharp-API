@@ -306,6 +306,8 @@ $workflowContracts = @(
       New-Requirement -Needle "HAS_NUGET_API_KEY" -Description "secret availability is passed without listing secrets"
       New-Requirement -Needle 'default: "4.0.6170"' -Description "current managed package version is audited by default"
       New-Requirement -Needle 'default: "v4.0.6170"' -Description "current managed release tag is audited by default"
+      New-Requirement -Needle 'default: "v4.0.6156,v4.0.6167,v4.0.6169,v4.0.6171"' -Description "all current runtime release tags are audited by default"
+      New-Requirement -Needle 'default: "v4.0.6170,v4.0.6156,v4.0.6167,v4.0.6169,v4.0.6171"' -Description "strict publication inventory includes all retained releases by default"
       New-Requirement -Needle "require_managed_nuget_org" -Description "nuget.org managed package gate"
       New-Requirement -Needle "require_nuget_api_key" -Description "nuget.org API key gate"
       New-Requirement -Needle "runner_required_label_sets" -Description "runner label audit input"

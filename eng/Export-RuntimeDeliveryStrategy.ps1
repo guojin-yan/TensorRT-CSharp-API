@@ -187,8 +187,8 @@ if ($splitPackages.Count -gt 0) {
 $lines.Add("## Release blockers")
 $lines.Add("")
 $lines.Add("- NVIDIA TensorRT/CUDA redistribution terms are still a blocker before public release.")
-$lines.Add("- Linux Ubuntu 22.04 x64 is the hosted publication line once build, pack, package consumer validation, and release/package upload pass.")
-$lines.Add("- Linux Ubuntu 20.04 x64, ARM/SBSA, Jetson/L4T, and non-Ubuntu targets remain blocked until their dedicated runner and NVIDIA dependency strategy are validated.")
+$lines.Add("- Linux Ubuntu 20.04/22.04/24.04 x64 are the modeled hosted publication lines once build, pack, package consumer validation, and release/package upload pass.")
+$lines.Add("- ARM/SBSA, Jetson/L4T, and non-Ubuntu targets remain blocked until their dedicated package identities, runners or containers, and NVIDIA dependency strategy are validated.")
 $lines.Add("- Large Windows runtime component packages should stay on GitHub Packages or GitHub Releases unless their package size fits nuget.org and NVIDIA redistribution terms are cleared.")
 
 $markdownPath = Join-Path $outputRoot "runtime-delivery-strategy.md"

@@ -16,12 +16,12 @@ on:
       runtime_release_tags:
         description: Comma-separated runtime Release tags to audit
         required: false
-        default: "v4.0.6156,v4.0.6167,v4.0.6169"
+        default: "v4.0.6156,v4.0.6167,v4.0.6169,v4.0.6171"
         type: string
       expected_release_tags:
         description: Comma-separated GitHub Release tags expected to remain published
         required: false
-        default: "v4.0.6170,v4.0.6156,v4.0.6167,v4.0.6169"
+        default: "v4.0.6170,v4.0.6156,v4.0.6167,v4.0.6169,v4.0.6171"
         type: string
       require_nuget_api_key:
         description: Fail when NUGET_API_KEY is missing
