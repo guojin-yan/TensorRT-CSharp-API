@@ -264,6 +264,17 @@ $workflowContracts = @(
     )
   }
   [pscustomobject]@{
+    path = "eng\Export-RuntimeReleasePlan.ps1"
+    requirements = @(
+      New-Requirement -Needle "Runtime Release Plan" -Description "runtime release plan report title"
+      New-Requirement -Needle "runtime-release-plan" -Description "runtime release plan artifact output"
+      New-Requirement -Needle "dispatchableNextTargets" -Description "dispatchable next-target reporting"
+      New-Requirement -Needle "stableDependencyPinMaps" -Description "stable dependency pin maps for bridge/collection refreshes"
+      New-Requirement -Needle "ubuntu20-after-runner-is-online" -Description "Ubuntu 20.04 self-hosted runner guard command"
+      New-Requirement -Needle "future separate package lines" -Description "future ARM/Jetson/non-Ubuntu release planning"
+    )
+  }
+  [pscustomobject]@{
     path = "eng\Restore-PublishedSplitPackageSource.ps1"
     requirements = @(
       New-Requirement -Needle "Resolve-SplitPackagePins.ps1" -Description "shared split package pin resolver"
@@ -339,6 +350,8 @@ $workflowContracts = @(
       New-Requirement -Needle "require_package_repository_association" -Description "package repository association gate"
       New-Requirement -Needle "Export-RuntimePublicationIndex.ps1" -Description "runtime publication index export script"
       New-Requirement -Needle "publication-index" -Description "runtime publication index artifact output"
+      New-Requirement -Needle "Export-RuntimeReleasePlan.ps1" -Description "runtime release plan export script"
+      New-Requirement -Needle "runtime-release-plan" -Description "runtime release plan artifact output"
       New-Requirement -Needle "Test-ReleaseReadiness.ps1" -Description "external release readiness audit script"
       New-Requirement -Needle "include_release_readiness" -Description "release readiness audit toggle"
       New-Requirement -Needle "Test-RemoteReleasePrerequisites.ps1" -Description "remote release prerequisites audit script"

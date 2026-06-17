@@ -336,6 +336,14 @@ jobs:
 
           & pwsh @arguments
 
+      - name: Export runtime release plan
+        if: always()
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -File ./eng/Export-RuntimeReleasePlan.ps1 `
+            -Repository "$env:GH_REPO" `
+            -Ref "${{ github.ref_name }}"
+
       - name: Upload audit artifacts
         uses: actions/upload-artifact@v7
         if: always()
@@ -351,3 +359,4 @@ jobs:
             artifacts/runner-availability/**
             artifacts/linux-target-coverage/**
             artifacts/runtime-publication-target-coverage/**
+            artifacts/runtime-release-plan/**
