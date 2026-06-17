@@ -56,7 +56,8 @@ For `runtime-linux.yml`, provide:
 - `runtime_key_set`: use `ubuntu22-hosted`, `hosted-all`, `ubuntu24-hosted`, `self-hosted-ubuntu20`, or `custom` when `runtime_keys` is empty
 - `runner_mode`: defaults to `hosted`; use `self-hosted` for Ubuntu 20.04 or manually prepared roots
 - `split_package_roles`: use `all` for a dependency refresh, or `bridge,collection` when reusing existing CUDA/cuDNN and TensorRT component packages
-- `cuda_cudnn_package_version` and `tensorrt_package_version`: required when publishing `collection` or `meta` without rebuilding those stable dependencies
+- `cuda_cudnn_package_version` and `tensorrt_package_version`: required when publishing `collection` or `meta` without rebuilding those stable dependencies and every requested runtime key uses the same stable dependency version
+- `cuda_cudnn_package_version_map` and `tensorrt_package_version_map`: use these instead of one global version when requested runtime keys reference different dependency publication versions, for example `linux-x64-ubuntu22.04-*=4.0.6167;linux-x64-ubuntu24.04-*=4.0.6169`
 - `run_smoke`: enable only when the runner has a compatible NVIDIA GPU, driver, and runtime stack
 - `publish_to_github_packages`: defaults to false because large Linux runtime packages should normally stay as GitHub Release assets
 - `release_tag`
@@ -66,7 +67,7 @@ For `release-bundle.yml`, the hosted Linux lane uses `run_linux_runtime_packagin
 
 `release-bundle.yml` checks runner availability before creating a GitHub Release when repository secret `RUNNER_AUDIT_TOKEN` is available. GitHub documents the repository self-hosted runner list API as requiring a fine-grained token with `Administration` repository permission set to `read`: <https://docs.github.com/rest/actions/self-hosted-runners>. Ubuntu 20.04 self-hosted packaging is strict: it requires that audit token and an online repository runner with `self-hosted`, `linux`, `x64`, and `ubuntu-20.04` labels.
 
-`release-bundle.yml` keeps common choices as top-level inputs and accepts advanced overrides through `release_config_json`. Use that JSON object for less common values such as `linux_runtime_delivery_mode`, `linux_self_hosted_ubuntu20_runtime_key_set`, package release-tag overrides, bridge/meta package version overrides, and skip-validation toggles.
+`release-bundle.yml` keeps common choices as top-level inputs and accepts advanced overrides through `release_config_json`. Use that JSON object for less common values such as `linux_runtime_delivery_mode`, `linux_self_hosted_ubuntu20_runtime_key_set`, package release-tag overrides, package version maps, bridge/meta package version overrides, and skip-validation toggles.
 
 ## Expected root examples
 

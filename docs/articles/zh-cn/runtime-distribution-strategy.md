@@ -66,7 +66,7 @@ Ubuntu 24.04 x64 只建模 NVIDIA Ubuntu 24.04 仓库中存在的现代组合。
 - `run_linux_runtime_packaging`：hosted Linux 发布线，默认使用 `hosted-all`，会一起触发 Ubuntu 22.04 x64 与已经建模的 Ubuntu 24.04 x64 组合。
 - `run_linux_self_hosted_ubuntu20_runtime_packaging`：Ubuntu 20.04 x64 self-hosted 发布线，默认使用 `self-hosted-ubuntu20`，并固定以 `runner_mode=self-hosted` 触发。
 
-Linux split 包角色、稳定依赖版本也有单独输入。日常只改 bridge 或 managed 代码时，可以发布 Linux `bridge,collection` 并固定已发布的 `CudaCudnn` 与 `TensorRt` 版本；只有 NVIDIA 依赖集合变化时才使用 `cuda-cudnn`、`tensorrt` 或 `all` 重发稳定依赖。较少使用的 delivery mode、稳定依赖 release tag、bridge/meta 包版本、跳过验证开关等通过 `release_config_json` 传入，避免超过 GitHub Actions `workflow_dispatch` 顶层输入数量限制。
+Linux split 包角色、稳定依赖版本也有单独输入。日常只改 bridge 或 managed 代码时，可以发布 Linux `bridge,collection` 并固定已发布的 `CudaCudnn` 与 `TensorRt` 版本；只有 NVIDIA 依赖集合变化时才使用 `cuda-cudnn`、`tensorrt` 或 `all` 重发稳定依赖。如果一次 dispatch 覆盖多个稳定依赖发布版本，例如 `hosted-all`，不要用一个全局版本覆盖所有 runtime key，而应使用 runtime-key 版本映射。当前 hosted Linux bridge/collection 刷新应把 `linux-x64-ubuntu22.04-*` 映射到 `4.0.6167`，把 `linux-x64-ubuntu24.04-*` 映射到 `4.0.6169`；默认 release tag 会按解析出的版本使用 `v<version>`，除非另外提供 release-tag map。较少使用的 delivery mode、稳定依赖 release tag、bridge/meta 包版本、跳过验证开关等通过 `release_config_json` 传入，避免超过 GitHub Actions `workflow_dispatch` 顶层输入数量限制。
 
 建议优先使用 `eng/Invoke-RemoteReleaseBundle.ps1` 从工作站触发远程发布。这个脚本会把支持的顶层参数继续作为 `-f key=value` 传给 workflow，同时把高级参数自动序列化进 `release_config_json`，避免误传未声明的 workflow input。
 
@@ -90,6 +90,7 @@ nuget.org 单个包大小限制约为 `250 MB`。Windows split runtime 包需要
 - CUDA/cuDNN 和 TensorRT 稳定依赖组件包多数不适合 nuget.org；如果需要 NuGet feed 自动 restore，应优先放 GitHub Packages；如果可以直接下载 `.nupkg` 文件，则可以保留为 GitHub Release assets。
 - GitHub Release assets 不会被 NuGet restore 自动查询。稳定依赖包只放 Release 时，验证和用户消费前都需要先把匹配 `.nupkg` 下载到本地 package source。
 - 后续如果只修改本地 C ABI bridge 或 C# wrapper，重发 `Bridge`、collection 和 managed 包即可，不需要重发 `CudaCudnn` 或 `TensorRt` 包，除非对应 NVIDIA 依赖集合变化。
+- 当 collection 包要引用不同 runtime key 下不同版本的稳定依赖包时，使用 `cuda_cudnn_package_version_map` 和 `tensorrt_package_version_map`，不要使用单个全局版本。
 
 ## 工程规则
 

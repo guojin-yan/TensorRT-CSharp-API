@@ -302,8 +302,9 @@ jobs:
             "./eng/Test-GitHubRunnerAvailability.ps1",
             "-Repository",
             "$env:GH_REPO",
-            "-RequiredLabelSet"
-          ) + $labelSets
+            "-RequiredLabelSet",
+            ($labelSets -join ";")
+          )
 
           if ("${{ inputs.warn_only }}" -eq "true") {
             $arguments += "-WarnOnly"

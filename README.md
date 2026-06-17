@@ -207,14 +207,14 @@ pwsh -NoProfile -File .\eng\Invoke-RemoteReleaseBundle.ps1 `
   -LinuxRuntimeKeySet hosted-all `
   -LinuxRuntimeDeliveryMode split `
   -LinuxSplitPackageRoles bridge,collection `
-  -LinuxCudaCudnnPackageVersion 4.0.6167 `
-  -LinuxCudaCudnnPackageReleaseTag v4.0.6167 `
-  -LinuxTensorRtPackageVersion 4.0.6167 `
-  -LinuxTensorRtPackageReleaseTag v4.0.6167 `
+  -LinuxCudaCudnnPackageVersionMap 'linux-x64-ubuntu22.04-*=4.0.6167;linux-x64-ubuntu24.04-*=4.0.6169' `
+  -LinuxTensorRtPackageVersionMap 'linux-x64-ubuntu22.04-*=4.0.6167;linux-x64-ubuntu24.04-*=4.0.6169' `
   -PublishManagedToGitHubPackages:$true `
   -PublishRuntimeToGitHubPackages:$false `
   -AttachRuntimeToGitHubRelease:$true
 ```
+
+Use version maps when one workflow dispatch spans multiple stable dependency releases. The current hosted Linux line uses Ubuntu 22.04 dependency packages from `v4.0.6167` and Ubuntu 24.04 dependency packages from `v4.0.6169`; the release tag defaults to `v<resolved package version>` for each matched key. If a dependency package is attached to a non-default Release tag, pass the matching `-LinuxCudaCudnnPackageReleaseTagMap` and `-LinuxTensorRtPackageReleaseTagMap` values as well.
 
 Ubuntu 20.04 self-hosted packaging uses a separate lane and requires an online Linux runner labeled `self-hosted`, `linux`, `x64`, and `ubuntu-20.04`:
 

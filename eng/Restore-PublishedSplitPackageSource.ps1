@@ -5,9 +5,13 @@ param(
   [string]$Version,
   [string]$BridgePackageVersion,
   [string]$CudaCudnnPackageVersion,
+  [string]$CudaCudnnPackageVersionMap,
   [string]$CudaCudnnPackageReleaseTag,
+  [string]$CudaCudnnPackageReleaseTagMap,
   [string]$TensorRtPackageVersion,
+  [string]$TensorRtPackageVersionMap,
   [string]$TensorRtPackageReleaseTag,
+  [string]$TensorRtPackageReleaseTagMap,
   [string]$Repository,
   [string]$OutputRoot,
   [string]$OutputPathFile,
@@ -74,6 +78,54 @@ function Resolve-ReleaseTag {
   }
 
   return ""
+}
+
+function Resolve-SplitPackagePins {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$RuntimeKey
+  )
+
+  $powerShellCommand = if ($PSVersionTable.PSEdition -eq "Core") { "pwsh" } else { "powershell" }
+  $arguments = @(
+    "-NoProfile",
+    "-File",
+    (Join-Path $RepositoryRoot "eng\Resolve-SplitPackagePins.ps1"),
+    "-SourceRuntimeKey",
+    $RuntimeKey,
+    "-Version",
+    $Version
+  )
+
+  if (-not [string]::IsNullOrWhiteSpace($BridgePackageVersion)) {
+    $arguments += @("-BridgePackageVersion", $BridgePackageVersion)
+  }
+  if (-not [string]::IsNullOrWhiteSpace($CudaCudnnPackageVersion)) {
+    $arguments += @("-CudaCudnnPackageVersion", $CudaCudnnPackageVersion)
+  }
+  if (-not [string]::IsNullOrWhiteSpace($CudaCudnnPackageVersionMap)) {
+    $arguments += @("-CudaCudnnPackageVersionMap", $CudaCudnnPackageVersionMap)
+  }
+  if (-not [string]::IsNullOrWhiteSpace($CudaCudnnPackageReleaseTag)) {
+    $arguments += @("-CudaCudnnPackageReleaseTag", $CudaCudnnPackageReleaseTag)
+  }
+  if (-not [string]::IsNullOrWhiteSpace($CudaCudnnPackageReleaseTagMap)) {
+    $arguments += @("-CudaCudnnPackageReleaseTagMap", $CudaCudnnPackageReleaseTagMap)
+  }
+  if (-not [string]::IsNullOrWhiteSpace($TensorRtPackageVersion)) {
+    $arguments += @("-TensorRtPackageVersion", $TensorRtPackageVersion)
+  }
+  if (-not [string]::IsNullOrWhiteSpace($TensorRtPackageVersionMap)) {
+    $arguments += @("-TensorRtPackageVersionMap", $TensorRtPackageVersionMap)
+  }
+  if (-not [string]::IsNullOrWhiteSpace($TensorRtPackageReleaseTag)) {
+    $arguments += @("-TensorRtPackageReleaseTag", $TensorRtPackageReleaseTag)
+  }
+  if (-not [string]::IsNullOrWhiteSpace($TensorRtPackageReleaseTagMap)) {
+    $arguments += @("-TensorRtPackageReleaseTagMap", $TensorRtPackageReleaseTagMap)
+  }
+
+  & $powerShellCommand @arguments | ConvertFrom-Json
 }
 
 function Test-SplitPackageRequested {
@@ -439,17 +491,12 @@ if ([string]::IsNullOrWhiteSpace($OutputRoot)) {
   }
 }
 
-$resolvedCudaCudnnPackageVersion = Resolve-RolePackageVersion -Value $CudaCudnnPackageVersion -Fallback $Version
-$resolvedTensorRtPackageVersion = Resolve-RolePackageVersion -Value $TensorRtPackageVersion -Fallback $Version
-$resolvedBridgePackageVersion = Resolve-RolePackageVersion -Value $BridgePackageVersion -Fallback $Version
-$resolvedCudaCudnnPackageReleaseTag = Resolve-ReleaseTag `
-  -ExplicitTag $CudaCudnnPackageReleaseTag `
-  -ExplicitPackageVersion $CudaCudnnPackageVersion `
-  -PackageVersion $resolvedCudaCudnnPackageVersion
-$resolvedTensorRtPackageReleaseTag = Resolve-ReleaseTag `
-  -ExplicitTag $TensorRtPackageReleaseTag `
-  -ExplicitPackageVersion $TensorRtPackageVersion `
-  -PackageVersion $resolvedTensorRtPackageVersion
+$splitPackagePins = Resolve-SplitPackagePins -RuntimeKey $SourceRuntimeKey
+$resolvedCudaCudnnPackageVersion = [string]$splitPackagePins.cudaCudnnPackageVersion
+$resolvedTensorRtPackageVersion = [string]$splitPackagePins.tensorRtPackageVersion
+$resolvedBridgePackageVersion = [string]$splitPackagePins.bridgePackageVersion
+$resolvedCudaCudnnPackageReleaseTag = [string]$splitPackagePins.cudaCudnnPackageReleaseTag
+$resolvedTensorRtPackageReleaseTag = [string]$splitPackagePins.tensorRtPackageReleaseTag
 
 $runtimeManifestPath = Join-Path $RepositoryRoot "pack\runtime\runtime-packages.manifest.json"
 $runtimeManifest = Get-Content -LiteralPath $runtimeManifestPath -Raw -Encoding utf8 | ConvertFrom-Json

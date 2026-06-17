@@ -53,8 +53,18 @@ on:
         required: false
         default: ""
         type: string
+      cuda_cudnn_package_version_map:
+        description: Optional runtime-key map for already-published CUDA/cuDNN split package versions
+        required: false
+        default: ""
+        type: string
       cuda_cudnn_package_release_tag:
         description: Optional GitHub Release tag that contains previously published CUDA/cuDNN split packages; defaults to v<cuda_cudnn package version>
+        required: false
+        default: ""
+        type: string
+      cuda_cudnn_package_release_tag_map:
+        description: Optional runtime-key map for CUDA/cuDNN split package release tags
         required: false
         default: ""
         type: string
@@ -63,8 +73,18 @@ on:
         required: false
         default: ""
         type: string
+      tensorrt_package_version_map:
+        description: Optional runtime-key map for already-published TensorRT split package versions
+        required: false
+        default: ""
+        type: string
       tensorrt_package_release_tag:
         description: Optional GitHub Release tag that contains previously published TensorRT split packages; defaults to v<tensorrt package version>
+        required: false
+        default: ""
+        type: string
+      tensorrt_package_release_tag_map:
+        description: Optional runtime-key map for TensorRT split package release tags
         required: false
         default: ""
         type: string
@@ -150,8 +170,18 @@ on:
         required: false
         default: ""
         type: string
+      cuda_cudnn_package_version_map:
+        description: Optional runtime-key map for already-published CUDA/cuDNN split package versions
+        required: false
+        default: ""
+        type: string
       cuda_cudnn_package_release_tag:
         description: Optional GitHub Release tag that contains previously published CUDA/cuDNN split packages; defaults to v<cuda_cudnn package version>
+        required: false
+        default: ""
+        type: string
+      cuda_cudnn_package_release_tag_map:
+        description: Optional runtime-key map for CUDA/cuDNN split package release tags
         required: false
         default: ""
         type: string
@@ -160,8 +190,18 @@ on:
         required: false
         default: ""
         type: string
+      tensorrt_package_version_map:
+        description: Optional runtime-key map for already-published TensorRT split package versions
+        required: false
+        default: ""
+        type: string
       tensorrt_package_release_tag:
         description: Optional GitHub Release tag that contains previously published TensorRT split packages; defaults to v<tensorrt package version>
+        required: false
+        default: ""
+        type: string
+      tensorrt_package_release_tag_map:
+        description: Optional runtime-key map for TensorRT split package release tags
         required: false
         default: ""
         type: string
@@ -442,16 +482,18 @@ jobs:
               -not ($roleTokens -contains 'cuda-cudnn') -and
               -not ($roleTokens -contains 'stable-dependencies') -and
               -not ($roleTokens -contains 'nvidia-dependencies') -and
-              [string]::IsNullOrWhiteSpace('${{ inputs.cuda_cudnn_package_version }}')) {
-            throw "split_package_roles includes collection/meta but no CUDA/cuDNN package version was provided. Pass cuda_cudnn_package_version to reuse published CudaCudnn packages, or include cuda-cudnn/all in split_package_roles for a dependency refresh."
+              [string]::IsNullOrWhiteSpace('${{ inputs.cuda_cudnn_package_version }}') -and
+              [string]::IsNullOrWhiteSpace('${{ inputs.cuda_cudnn_package_version_map }}')) {
+            throw "split_package_roles includes collection/meta but no CUDA/cuDNN package version was provided. Pass cuda_cudnn_package_version or cuda_cudnn_package_version_map to reuse published CudaCudnn packages, or include cuda-cudnn/all in split_package_roles for a dependency refresh."
           }
           if ($shouldResolvePublishedPackages -and
               -not ($roleTokens -contains 'all') -and
               -not ($roleTokens -contains 'tensorrt') -and
               -not ($roleTokens -contains 'stable-dependencies') -and
               -not ($roleTokens -contains 'nvidia-dependencies') -and
-              [string]::IsNullOrWhiteSpace('${{ inputs.tensorrt_package_version }}')) {
-            throw "split_package_roles includes collection/meta but no TensorRT package version was provided. Pass tensorrt_package_version to reuse published TensorRT component packages, or include tensorrt/all in split_package_roles for a dependency refresh."
+              [string]::IsNullOrWhiteSpace('${{ inputs.tensorrt_package_version }}') -and
+              [string]::IsNullOrWhiteSpace('${{ inputs.tensorrt_package_version_map }}')) {
+            throw "split_package_roles includes collection/meta but no TensorRT package version was provided. Pass tensorrt_package_version or tensorrt_package_version_map to reuse published TensorRT component packages, or include tensorrt/all in split_package_roles for a dependency refresh."
           }
 
           $arguments = @(
@@ -475,8 +517,14 @@ jobs:
           if (-not [string]::IsNullOrWhiteSpace('${{ inputs.cuda_cudnn_package_version }}')) {
             $arguments += @('-CudaCudnnPackageVersion', '${{ inputs.cuda_cudnn_package_version }}')
           }
+          if (-not [string]::IsNullOrWhiteSpace('${{ inputs.cuda_cudnn_package_version_map }}')) {
+            $arguments += @('-CudaCudnnPackageVersionMap', '${{ inputs.cuda_cudnn_package_version_map }}')
+          }
           if (-not [string]::IsNullOrWhiteSpace('${{ inputs.tensorrt_package_version }}')) {
             $arguments += @('-TensorRtPackageVersion', '${{ inputs.tensorrt_package_version }}')
+          }
+          if (-not [string]::IsNullOrWhiteSpace('${{ inputs.tensorrt_package_version_map }}')) {
+            $arguments += @('-TensorRtPackageVersionMap', '${{ inputs.tensorrt_package_version_map }}')
           }
           if ('${{ inputs.include_meta_package }}' -eq 'true') {
             $arguments += '-IncludeMetaPackage'
@@ -507,14 +555,26 @@ jobs:
             if (-not [string]::IsNullOrWhiteSpace('${{ inputs.cuda_cudnn_package_version }}')) {
               $restoreArguments += @('-CudaCudnnPackageVersion', '${{ inputs.cuda_cudnn_package_version }}')
             }
+            if (-not [string]::IsNullOrWhiteSpace('${{ inputs.cuda_cudnn_package_version_map }}')) {
+              $restoreArguments += @('-CudaCudnnPackageVersionMap', '${{ inputs.cuda_cudnn_package_version_map }}')
+            }
             if (-not [string]::IsNullOrWhiteSpace('${{ inputs.cuda_cudnn_package_release_tag }}')) {
               $restoreArguments += @('-CudaCudnnPackageReleaseTag', '${{ inputs.cuda_cudnn_package_release_tag }}')
+            }
+            if (-not [string]::IsNullOrWhiteSpace('${{ inputs.cuda_cudnn_package_release_tag_map }}')) {
+              $restoreArguments += @('-CudaCudnnPackageReleaseTagMap', '${{ inputs.cuda_cudnn_package_release_tag_map }}')
             }
             if (-not [string]::IsNullOrWhiteSpace('${{ inputs.tensorrt_package_version }}')) {
               $restoreArguments += @('-TensorRtPackageVersion', '${{ inputs.tensorrt_package_version }}')
             }
+            if (-not [string]::IsNullOrWhiteSpace('${{ inputs.tensorrt_package_version_map }}')) {
+              $restoreArguments += @('-TensorRtPackageVersionMap', '${{ inputs.tensorrt_package_version_map }}')
+            }
             if (-not [string]::IsNullOrWhiteSpace('${{ inputs.tensorrt_package_release_tag }}')) {
               $restoreArguments += @('-TensorRtPackageReleaseTag', '${{ inputs.tensorrt_package_release_tag }}')
+            }
+            if (-not [string]::IsNullOrWhiteSpace('${{ inputs.tensorrt_package_release_tag_map }}')) {
+              $restoreArguments += @('-TensorRtPackageReleaseTagMap', '${{ inputs.tensorrt_package_release_tag_map }}')
             }
 
             pwsh @restoreArguments

@@ -93,9 +93,13 @@ $workflowContracts = @(
       New-Requirement -Needle "Invoke-LocalSplitRuntimePackage.ps1" -Description "split runtime packaging entrypoint"
       New-Requirement -Needle "Restore-PublishedSplitPackageSource.ps1" -Description "published stable dependency release asset package source"
       New-Requirement -Needle "cuda_cudnn_package_version" -Description "CUDA/cuDNN split version input"
+      New-Requirement -Needle "cuda_cudnn_package_version_map" -Description "CUDA/cuDNN split runtime-key version map input"
       New-Requirement -Needle "tensorrt_package_version" -Description "TensorRT split version input"
+      New-Requirement -Needle "tensorrt_package_version_map" -Description "TensorRT split runtime-key version map input"
       New-Requirement -Needle "cuda_cudnn_package_release_tag" -Description "CUDA/cuDNN split release tag input"
+      New-Requirement -Needle "cuda_cudnn_package_release_tag_map" -Description "CUDA/cuDNN split runtime-key release tag map input"
       New-Requirement -Needle "tensorrt_package_release_tag" -Description "TensorRT split release tag input"
+      New-Requirement -Needle "tensorrt_package_release_tag_map" -Description "TensorRT split runtime-key release tag map input"
       New-Requirement -Needle "sign_consumer_output" -Description "consumer signing toggle"
       New-Requirement -Needle "Push-NuGetPackages.ps1" -Description "package publication"
     )
@@ -115,8 +119,12 @@ $workflowContracts = @(
       New-Requirement -Needle "Prepare-LinuxNvidiaDependencies.ps1" -Description "hosted Linux NVIDIA dependency preparation"
       New-Requirement -Needle "fromJson(matrix.runsOnJson)" -Description "manifest-driven Linux runner labels"
       New-Requirement -Needle "Restore-PublishedSplitPackageSource.ps1" -Description "published stable dependency release asset package source"
+      New-Requirement -Needle "cuda_cudnn_package_version_map" -Description "Linux split CUDA/cuDNN runtime-key version map input"
       New-Requirement -Needle "cuda_cudnn_package_release_tag" -Description "Linux split CUDA/cuDNN release tag input"
+      New-Requirement -Needle "cuda_cudnn_package_release_tag_map" -Description "Linux split CUDA/cuDNN runtime-key release tag map input"
+      New-Requirement -Needle "tensorrt_package_version_map" -Description "Linux split TensorRT runtime-key version map input"
       New-Requirement -Needle "tensorrt_package_release_tag" -Description "Linux split TensorRT release tag input"
+      New-Requirement -Needle "tensorrt_package_release_tag_map" -Description "Linux split TensorRT runtime-key release tag map input"
       New-Requirement -Needle "linux" -Description "linux runner label"
       New-Requirement -Needle "Validate-LinuxRuntimeInputs.ps1" -Description "Linux input validation"
       New-Requirement -Needle "CudnnRoot" -Description "Linux cuDNN input validation"
@@ -148,7 +156,11 @@ $workflowContracts = @(
       New-Requirement -Needle "self-hosted,linux,x64,ubuntu-20.04" -Description "Ubuntu 20.04 self-hosted runner label preflight"
       New-Requirement -Needle "Self-hosted Linux runtime packaging requires RUNNER_AUDIT_TOKEN" -Description "strict Linux self-hosted runner preflight token guard"
       New-Requirement -Needle "linux_cuda_cudnn_package_version" -Description "Linux split CUDA/cuDNN version input"
+      New-Requirement -Needle "linux_cuda_cudnn_package_version_map" -Description "Linux split CUDA/cuDNN runtime-key version map input"
+      New-Requirement -Needle "linux_cuda_cudnn_package_release_tag_map" -Description "Linux split CUDA/cuDNN runtime-key release tag map input"
       New-Requirement -Needle "linux_tensorrt_package_version" -Description "Linux split TensorRT version input"
+      New-Requirement -Needle "linux_tensorrt_package_version_map" -Description "Linux split TensorRT runtime-key version map input"
+      New-Requirement -Needle "linux_tensorrt_package_release_tag_map" -Description "Linux split TensorRT runtime-key release tag map input"
       New-Requirement -Needle "runtime-linux-hosted" -Description "hosted Linux child workflow label"
       New-Requirement -Needle "runtime-linux-self-hosted-ubuntu20" -Description "Ubuntu 20.04 self-hosted Linux child workflow label"
       New-Requirement -Needle "hosted-all" -Description "hosted Linux default key set"
@@ -164,7 +176,11 @@ $workflowContracts = @(
       New-Requirement -Needle "include cuda-cudnn/all in windows_split_package_roles" -Description "split collection same-run CUDA/cuDNN refresh guidance"
       New-Requirement -Needle "include tensorrt/all in windows_split_package_roles" -Description "split collection same-run TensorRT refresh guidance"
       New-Requirement -Needle "windows_cuda_cudnn_package_release_tag" -Description "split collection CUDA/cuDNN release tag override"
+      New-Requirement -Needle "windows_cuda_cudnn_package_version_map" -Description "split collection CUDA/cuDNN version map override"
+      New-Requirement -Needle "windows_cuda_cudnn_package_release_tag_map" -Description "split collection CUDA/cuDNN release tag map override"
       New-Requirement -Needle "windows_tensorrt_package_release_tag" -Description "split collection TensorRT release tag override"
+      New-Requirement -Needle "windows_tensorrt_package_version_map" -Description "split collection TensorRT version map override"
+      New-Requirement -Needle "windows_tensorrt_package_release_tag_map" -Description "split collection TensorRT release tag map override"
       New-Requirement -Needle 'attach_to_github_release=$ATTACH_RUNTIME_TO_GITHUB_RELEASE' -Description "managed package release asset toggle dispatch"
       New-Requirement -Needle "publish_managed_to_nuget=true requires the repository secret NUGET_API_KEY" -Description "nuget.org secret guard before release creation"
     )
@@ -175,7 +191,43 @@ $workflowContracts = @(
       New-Requirement -Needle "release_config_json" -Description "advanced release config serialization"
       New-Requirement -Needle "DryRun" -Description "dry-run dispatch mode"
       New-Requirement -Needle "runtime_delivery_mode" -Description "windows/linux runtime delivery mode mapping"
+      New-Requirement -Needle "WindowsCudaCudnnPackageVersionMap" -Description "Windows split dependency version map parameter"
+      New-Requirement -Needle "WindowsTensorRtPackageVersionMap" -Description "Windows split TensorRT version map parameter"
+      New-Requirement -Needle "LinuxCudaCudnnPackageVersionMap" -Description "Linux split dependency version map parameter"
+      New-Requirement -Needle "LinuxTensorRtPackageVersionMap" -Description "Linux split TensorRT version map parameter"
       New-Requirement -Needle "gh workflow run release-bundle.yml" -Description "remote workflow dispatch command"
+    )
+  }
+  [pscustomobject]@{
+    path = "eng\Resolve-SplitPackagePins.ps1"
+    requirements = @(
+      New-Requirement -Needle "CudaCudnnPackageVersionMap" -Description "CUDA/cuDNN version map parameter"
+      New-Requirement -Needle "TensorRtPackageVersionMap" -Description "TensorRT version map parameter"
+      New-Requirement -Needle "CudaCudnnPackageReleaseTagMap" -Description "CUDA/cuDNN release tag map parameter"
+      New-Requirement -Needle "TensorRtPackageReleaseTagMap" -Description "TensorRT release tag map parameter"
+      New-Requirement -Needle "ConvertFrom-PinMap" -Description "map parser"
+      New-Requirement -Needle "Resolve-PinValue" -Description "exact and wildcard runtime-key map resolver"
+      New-Requirement -Needle "map-wildcard" -Description "wildcard match provenance"
+    )
+  }
+  [pscustomobject]@{
+    path = "eng\Invoke-LocalSplitRuntimePackage.ps1"
+    requirements = @(
+      New-Requirement -Needle "Resolve-SplitPackagePins.ps1" -Description "shared split package pin resolver"
+      New-Requirement -Needle "CudaCudnnPackageVersionMap" -Description "CUDA/cuDNN version map parameter"
+      New-Requirement -Needle "TensorRtPackageVersionMap" -Description "TensorRT version map parameter"
+      New-Requirement -Needle "Pass -CudaCudnnPackageVersion or -CudaCudnnPackageVersionMap" -Description "meta package guard accepts version map"
+      New-Requirement -Needle "Pass -TensorRtPackageVersion or -TensorRtPackageVersionMap" -Description "meta package TensorRT guard accepts version map"
+    )
+  }
+  [pscustomobject]@{
+    path = "eng\Restore-PublishedSplitPackageSource.ps1"
+    requirements = @(
+      New-Requirement -Needle "Resolve-SplitPackagePins.ps1" -Description "shared split package pin resolver"
+      New-Requirement -Needle "CudaCudnnPackageVersionMap" -Description "CUDA/cuDNN version map parameter"
+      New-Requirement -Needle "TensorRtPackageVersionMap" -Description "TensorRT version map parameter"
+      New-Requirement -Needle "CudaCudnnPackageReleaseTagMap" -Description "CUDA/cuDNN release tag map parameter"
+      New-Requirement -Needle "TensorRtPackageReleaseTagMap" -Description "TensorRT release tag map parameter"
     )
   }
   [pscustomobject]@{
@@ -243,6 +295,7 @@ $workflowContracts = @(
       New-Requirement -Needle "Test-ReleasePublicationState.ps1" -Description "release publication state audit script"
       New-Requirement -Needle "HAS_NUGET_API_KEY" -Description "secret availability is passed without listing secrets"
       New-Requirement -Needle "runner_required_label_sets" -Description "runner label audit input"
+      New-Requirement -Needle "RequiredLabelSet" -Description "runner availability label-set aggregation"
       New-Requirement -Needle "RUNNER_AUDIT_TOKEN" -Description "runner audit token secret"
       New-Requirement -Needle "Test-GitHubRunnerAvailability.ps1" -Description "runner availability audit script"
       New-Requirement -Needle "Test-GitHubPublicationInventory.ps1" -Description "publication inventory audit script"
@@ -293,6 +346,7 @@ $workflowContracts = @(
     requirements = @(
       New-Requirement -Needle "actions/runners" -Description "GitHub Actions runner API query"
       New-Requirement -Needle "RequiredLabelSet" -Description "required runner label set input"
+      New-Requirement -Needle "Expand-RequestedLabelSets" -Description "recover accidentally joined required label set arguments"
       New-Requirement -Needle "onlineMatchingRunnerCount" -Description "online matching runner audit"
       New-Requirement -Needle "github-runner-availability" -Description "runner availability report"
       New-Requirement -Needle "WarnOnly" -Description "non-failing audit mode"

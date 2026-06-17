@@ -66,7 +66,7 @@ The `release-bundle` workflow now has two Linux orchestration lanes:
 - `run_linux_runtime_packaging`: hosted Linux publication, defaulting to `hosted-all` so Ubuntu 22.04 x64 and the modeled Ubuntu 24.04 x64 lines are dispatched together.
 - `run_linux_self_hosted_ubuntu20_runtime_packaging`: Ubuntu 20.04 x64 self-hosted publication, defaulting to `self-hosted-ubuntu20` and always dispatching `runner_mode=self-hosted`.
 
-Use separate release-bundle inputs for Linux split roles and stable dependency versions. Routine bridge or managed changes can publish Linux `bridge,collection` while pinning already-published `CudaCudnn` and `TensorRt` versions; NVIDIA dependency refreshes should use `cuda-cudnn`, `tensorrt`, or `all`. Less common overrides, such as delivery mode, release tags for stable dependency assets, bridge/meta package versions, and skip-validation toggles, are passed through `release_config_json` to keep the manual GitHub Actions form under the `workflow_dispatch` input limit.
+Use separate release-bundle inputs for Linux split roles and stable dependency versions. Routine bridge or managed changes can publish Linux `bridge,collection` while pinning already-published `CudaCudnn` and `TensorRt` versions; NVIDIA dependency refreshes should use `cuda-cudnn`, `tensorrt`, or `all`. When one dispatch spans multiple dependency publication versions, such as `hosted-all`, pin the dependencies with runtime-key maps instead of one global version. The current hosted Linux bridge/collection refresh maps `linux-x64-ubuntu22.04-*` to `4.0.6167` and `linux-x64-ubuntu24.04-*` to `4.0.6169`; the default release tag is `v<resolved package version>` unless a release-tag map is supplied. Less common overrides, such as delivery mode, release tags for stable dependency assets, bridge/meta package versions, and skip-validation toggles, are passed through `release_config_json` to keep the manual GitHub Actions form under the `workflow_dispatch` input limit.
 
 Prefer `eng/Invoke-RemoteReleaseBundle.ps1` when dispatching releases from a workstation. The script keeps supported top-level workflow inputs as `-f key=value` flags and serializes advanced release settings into `release_config_json`, which avoids accidental dispatch failures from undeclared workflow inputs.
 
@@ -90,6 +90,7 @@ nuget.org has an approximately `250 MB` per-package size limit. Windows split ru
 - Most CUDA/cuDNN and TensorRT dependency component packages are not suitable for nuget.org and should normally stay on GitHub Packages when a NuGet feed is required, or as GitHub Release assets when direct `.nupkg` download is acceptable.
 - GitHub Release assets are not queried by NuGet restore. If stable dependency packages stay only on a Release, validation and consumers must download the matching `.nupkg` files into a local package source first.
 - If only the local C ABI bridge or C# wrapper changes later, republish the `Bridge`, collection, and managed packages. Do not republish `CudaCudnn` or `TensorRt` packages unless the corresponding NVIDIA dependency set changes.
+- Use `cuda_cudnn_package_version_map` and `tensorrt_package_version_map` when a collection package references stable dependency packages that were published under different versions for different runtime keys.
 
 ## Engineering rules
 

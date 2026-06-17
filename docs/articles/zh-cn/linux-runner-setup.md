@@ -54,7 +54,8 @@ pwsh -File ./eng/Test-LinuxSelfHostedRunnerReadiness.ps1 \
 - `runtime_key_set`：当 `runtime_keys` 为空时可用 `ubuntu22-hosted`、`hosted-all`、`ubuntu24-hosted`、`self-hosted-ubuntu20` 或 `custom`
 - `runner_mode`：默认 `hosted`；发布 Ubuntu 20.04 或手动根目录时使用 `self-hosted`
 - `split_package_roles`：依赖刷新时用 `all`，复用稳定依赖时用 `bridge,collection`
-- `cuda_cudnn_package_version` 和 `tensorrt_package_version`：当只发 `collection` 或 `meta`、但不重发稳定依赖时必须提供
+- `cuda_cudnn_package_version` 和 `tensorrt_package_version`：当只发 `collection` 或 `meta`、但不重发稳定依赖，且所有 runtime key 使用同一个稳定依赖版本时提供
+- `cuda_cudnn_package_version_map` 和 `tensorrt_package_version_map`：当不同 runtime key 引用不同稳定依赖发布版本时使用，例如 `linux-x64-ubuntu22.04-*=4.0.6167;linux-x64-ubuntu24.04-*=4.0.6169`
 - `run_smoke`：只有 runner 有可用 NVIDIA GPU、驱动和匹配 runtime 时才打开
 - `publish_to_github_packages`：默认关闭，Linux runtime 大包通常保留为 GitHub Release assets
 - `release_tag`
@@ -67,7 +68,7 @@ pwsh -File ./eng/Test-LinuxSelfHostedRunnerReadiness.ps1 \
 
 当仓库 secret `RUNNER_AUDIT_TOKEN` 可用时，`release-bundle.yml` 会在创建 GitHub Release 前检查 runner 可用性。GitHub 文档说明，仓库 self-hosted runner 列表 API 需要 fine-grained token，并授予 `Administration` 仓库权限 `read`：<https://docs.github.com/rest/actions/self-hosted-runners>。Ubuntu 20.04 self-hosted 打包是严格预检：必须提供该审计 token，并要求仓库存在在线 runner，且包含 `self-hosted`、`linux`、`x64`、`ubuntu-20.04` 标签。
 
-`release-bundle.yml` 会把常用选择保留为顶层输入，并用 `release_config_json` 接收高级覆盖项。较少使用的 `linux_runtime_delivery_mode`、`linux_self_hosted_ubuntu20_runtime_key_set`、依赖 release tag 覆盖、bridge/meta 包版本覆盖、跳过验证开关等都通过这个 JSON 对象传入。
+`release-bundle.yml` 会把常用选择保留为顶层输入，并用 `release_config_json` 接收高级覆盖项。较少使用的 `linux_runtime_delivery_mode`、`linux_self_hosted_ubuntu20_runtime_key_set`、依赖 release tag 覆盖、依赖版本 map、bridge/meta 包版本覆盖、跳过验证开关等都通过这个 JSON 对象传入。
 
 ## 根目录示例
 

@@ -14,9 +14,13 @@ param(
   [string]$WindowsMetaPackageVersion,
   [string]$WindowsBridgePackageVersion,
   [string]$WindowsCudaCudnnPackageVersion,
+  [string]$WindowsCudaCudnnPackageVersionMap,
   [string]$WindowsCudaCudnnPackageReleaseTag,
+  [string]$WindowsCudaCudnnPackageReleaseTagMap,
   [string]$WindowsTensorRtPackageVersion,
+  [string]$WindowsTensorRtPackageVersionMap,
   [string]$WindowsTensorRtPackageReleaseTag,
+  [string]$WindowsTensorRtPackageReleaseTagMap,
   [switch]$WindowsIncludeMetaPackage,
   [switch]$SkipWindowsConsumerValidation,
   [switch]$RunLinuxRuntimePackaging,
@@ -30,9 +34,13 @@ param(
   [string]$LinuxMetaPackageVersion,
   [string]$LinuxBridgePackageVersion,
   [string]$LinuxCudaCudnnPackageVersion,
+  [string]$LinuxCudaCudnnPackageVersionMap,
   [string]$LinuxCudaCudnnPackageReleaseTag,
+  [string]$LinuxCudaCudnnPackageReleaseTagMap,
   [string]$LinuxTensorRtPackageVersion,
+  [string]$LinuxTensorRtPackageVersionMap,
   [string]$LinuxTensorRtPackageReleaseTag,
+  [string]$LinuxTensorRtPackageReleaseTagMap,
   [switch]$LinuxIncludeMetaPackage,
   [switch]$SkipLinuxConsumerValidation,
   [switch]$RunLinuxSelfHostedUbuntu20RuntimePackaging,
@@ -198,15 +206,23 @@ $releaseConfig = @{}
 Add-ReleaseConfigValue -Config $releaseConfig -Name "windows_runtime_delivery_mode" -Value $WindowsRuntimeDeliveryMode
 Add-ReleaseConfigValue -Config $releaseConfig -Name "windows_meta_package_version" -Value $WindowsMetaPackageVersion
 Add-ReleaseConfigValue -Config $releaseConfig -Name "windows_bridge_package_version" -Value $WindowsBridgePackageVersion
+Add-ReleaseConfigValue -Config $releaseConfig -Name "windows_cuda_cudnn_package_version_map" -Value $WindowsCudaCudnnPackageVersionMap
 Add-ReleaseConfigValue -Config $releaseConfig -Name "windows_cuda_cudnn_package_release_tag" -Value $WindowsCudaCudnnPackageReleaseTag
+Add-ReleaseConfigValue -Config $releaseConfig -Name "windows_cuda_cudnn_package_release_tag_map" -Value $WindowsCudaCudnnPackageReleaseTagMap
+Add-ReleaseConfigValue -Config $releaseConfig -Name "windows_tensorrt_package_version_map" -Value $WindowsTensorRtPackageVersionMap
 Add-ReleaseConfigValue -Config $releaseConfig -Name "windows_tensorrt_package_release_tag" -Value $WindowsTensorRtPackageReleaseTag
+Add-ReleaseConfigValue -Config $releaseConfig -Name "windows_tensorrt_package_release_tag_map" -Value $WindowsTensorRtPackageReleaseTagMap
 Add-ReleaseConfigBoolean -Config $releaseConfig -Name "windows_include_meta_package" -Value $WindowsIncludeMetaPackage.IsPresent
 Add-ReleaseConfigBoolean -Config $releaseConfig -Name "windows_skip_consumer_validation" -Value $SkipWindowsConsumerValidation.IsPresent
 Add-ReleaseConfigValue -Config $releaseConfig -Name "linux_runtime_delivery_mode" -Value $LinuxRuntimeDeliveryMode
 Add-ReleaseConfigValue -Config $releaseConfig -Name "linux_meta_package_version" -Value $LinuxMetaPackageVersion
 Add-ReleaseConfigValue -Config $releaseConfig -Name "linux_bridge_package_version" -Value $LinuxBridgePackageVersion
+Add-ReleaseConfigValue -Config $releaseConfig -Name "linux_cuda_cudnn_package_version_map" -Value $LinuxCudaCudnnPackageVersionMap
 Add-ReleaseConfigValue -Config $releaseConfig -Name "linux_cuda_cudnn_package_release_tag" -Value $LinuxCudaCudnnPackageReleaseTag
+Add-ReleaseConfigValue -Config $releaseConfig -Name "linux_cuda_cudnn_package_release_tag_map" -Value $LinuxCudaCudnnPackageReleaseTagMap
+Add-ReleaseConfigValue -Config $releaseConfig -Name "linux_tensorrt_package_version_map" -Value $LinuxTensorRtPackageVersionMap
 Add-ReleaseConfigValue -Config $releaseConfig -Name "linux_tensorrt_package_release_tag" -Value $LinuxTensorRtPackageReleaseTag
+Add-ReleaseConfigValue -Config $releaseConfig -Name "linux_tensorrt_package_release_tag_map" -Value $LinuxTensorRtPackageReleaseTagMap
 Add-ReleaseConfigBoolean -Config $releaseConfig -Name "linux_include_meta_package" -Value $LinuxIncludeMetaPackage.IsPresent
 Add-ReleaseConfigBoolean -Config $releaseConfig -Name "linux_skip_consumer_validation" -Value $SkipLinuxConsumerValidation.IsPresent
 Add-ReleaseConfigValue -Config $releaseConfig -Name "linux_self_hosted_ubuntu20_runtime_key_set" -Value $LinuxSelfHostedUbuntu20RuntimeKeySet

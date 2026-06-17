@@ -185,27 +185,28 @@ jobs:
             exit 1
           fi
 
-          runner_args=()
+          runner_label_sets=()
           strict_runner_preflight=false
           if [ "$RUN_WINDOWS_RUNTIME_PACKAGING" = "true" ]; then
-            runner_args+=("-RequiredLabelSet" "self-hosted,windows,x64")
+            runner_label_sets+=("self-hosted,windows,x64")
           fi
 
           if [ "$RUN_LINUX_RUNTIME_PACKAGING" = "true" ] && [ "$LINUX_RUNNER_MODE" = "self-hosted" ]; then
-            runner_args+=("-RequiredLabelSet" "self-hosted,linux,x64")
+            runner_label_sets+=("self-hosted,linux,x64")
             strict_runner_preflight=true
           fi
 
           if [ "$RUN_LINUX_SELF_HOSTED_UBUNTU20_RUNTIME_PACKAGING" = "true" ]; then
-            runner_args+=("-RequiredLabelSet" "self-hosted,linux,x64,ubuntu-20.04")
+            runner_label_sets+=("self-hosted,linux,x64,ubuntu-20.04")
             strict_runner_preflight=true
           fi
 
-          if [ "${#runner_args[@]}" -gt 0 ]; then
+          if [ "${#runner_label_sets[@]}" -gt 0 ]; then
+            required_label_sets="$(IFS=';'; printf '%s' "${runner_label_sets[*]}")"
             if [ -n "${RUNNER_AUDIT_TOKEN:-}" ]; then
               GH_TOKEN="$RUNNER_AUDIT_TOKEN" pwsh -NoProfile -File ./eng/Test-GitHubRunnerAvailability.ps1 \
                 -Repository "$GH_REPO" \
-                "${runner_args[@]}"
+                -RequiredLabelSet "$required_label_sets"
             elif [ "$strict_runner_preflight" = "true" ]; then
               echo "Self-hosted Linux runtime packaging requires RUNNER_AUDIT_TOKEN so release-bundle can verify runner labels before creating a Release. Add a fine-grained token that can read repository self-hosted runners, or disable the self-hosted Linux packaging lane." >&2
               exit 1
@@ -261,14 +262,22 @@ jobs:
           WINDOWS_META_PACKAGE_VERSION="$(get_config windows_meta_package_version '')"
           WINDOWS_BRIDGE_PACKAGE_VERSION="$(get_config windows_bridge_package_version '')"
           WINDOWS_CUDA_CUDNN_PACKAGE_RELEASE_TAG="$(get_config windows_cuda_cudnn_package_release_tag '')"
+          WINDOWS_CUDA_CUDNN_PACKAGE_VERSION_MAP="$(get_config windows_cuda_cudnn_package_version_map '')"
+          WINDOWS_CUDA_CUDNN_PACKAGE_RELEASE_TAG_MAP="$(get_config windows_cuda_cudnn_package_release_tag_map '')"
           WINDOWS_TENSORRT_PACKAGE_RELEASE_TAG="$(get_config windows_tensorrt_package_release_tag '')"
+          WINDOWS_TENSORRT_PACKAGE_VERSION_MAP="$(get_config windows_tensorrt_package_version_map '')"
+          WINDOWS_TENSORRT_PACKAGE_RELEASE_TAG_MAP="$(get_config windows_tensorrt_package_release_tag_map '')"
           WINDOWS_INCLUDE_META_PACKAGE="$(get_config windows_include_meta_package false)"
           WINDOWS_SKIP_CONSUMER_VALIDATION="$(get_config windows_skip_consumer_validation false)"
           LINUX_RUNTIME_DELIVERY_MODE="$(get_config linux_runtime_delivery_mode split)"
           LINUX_META_PACKAGE_VERSION="$(get_config linux_meta_package_version '')"
           LINUX_BRIDGE_PACKAGE_VERSION="$(get_config linux_bridge_package_version '')"
           LINUX_CUDA_CUDNN_PACKAGE_RELEASE_TAG="$(get_config linux_cuda_cudnn_package_release_tag '')"
+          LINUX_CUDA_CUDNN_PACKAGE_VERSION_MAP="$(get_config linux_cuda_cudnn_package_version_map '')"
+          LINUX_CUDA_CUDNN_PACKAGE_RELEASE_TAG_MAP="$(get_config linux_cuda_cudnn_package_release_tag_map '')"
           LINUX_TENSORRT_PACKAGE_RELEASE_TAG="$(get_config linux_tensorrt_package_release_tag '')"
+          LINUX_TENSORRT_PACKAGE_VERSION_MAP="$(get_config linux_tensorrt_package_version_map '')"
+          LINUX_TENSORRT_PACKAGE_RELEASE_TAG_MAP="$(get_config linux_tensorrt_package_release_tag_map '')"
           LINUX_INCLUDE_META_PACKAGE="$(get_config linux_include_meta_package false)"
           LINUX_SKIP_CONSUMER_VALIDATION="$(get_config linux_skip_consumer_validation false)"
           LINUX_SELF_HOSTED_UBUNTU20_RUNTIME_KEY_SET="$(get_config linux_self_hosted_ubuntu20_runtime_key_set self-hosted-ubuntu20)"
@@ -281,9 +290,10 @@ jobs:
              [[ ",$role_text," != *",stable-dependencies,"* ]] &&
              [[ ",$role_text," != *",nvidia-dependencies,"* ]] &&
              [[ ",$role_text," != *",all,"* ]] &&
-             [ -z "$WINDOWS_CUDA_CUDNN_PACKAGE_VERSION" ]; then
+             [ -z "$WINDOWS_CUDA_CUDNN_PACKAGE_VERSION" ] &&
+             [ -z "$WINDOWS_CUDA_CUDNN_PACKAGE_VERSION_MAP" ]; then
             echo "windows_split_package_roles includes collection/meta but no CUDA/cuDNN package version was provided." >&2
-            echo "Pass windows_cuda_cudnn_package_version to pin already-published CUDA/cuDNN packages, or include cuda-cudnn/all in windows_split_package_roles for a dependency refresh." >&2
+            echo "Pass windows_cuda_cudnn_package_version or windows_cuda_cudnn_package_version_map to pin already-published CUDA/cuDNN packages, or include cuda-cudnn/all in windows_split_package_roles for a dependency refresh." >&2
             exit 1
           fi
 
@@ -294,9 +304,10 @@ jobs:
              [[ ",$role_text," != *",stable-dependencies,"* ]] &&
              [[ ",$role_text," != *",nvidia-dependencies,"* ]] &&
              [[ ",$role_text," != *",all,"* ]] &&
-             [ -z "$WINDOWS_TENSORRT_PACKAGE_VERSION" ]; then
+             [ -z "$WINDOWS_TENSORRT_PACKAGE_VERSION" ] &&
+             [ -z "$WINDOWS_TENSORRT_PACKAGE_VERSION_MAP" ]; then
             echo "windows_split_package_roles includes collection/meta but no TensorRT package version was provided." >&2
-            echo "Pass windows_tensorrt_package_version to pin already-published TensorRT packages, or include tensorrt/all in windows_split_package_roles for a dependency refresh." >&2
+            echo "Pass windows_tensorrt_package_version or windows_tensorrt_package_version_map to pin already-published TensorRT packages, or include tensorrt/all in windows_split_package_roles for a dependency refresh." >&2
             exit 1
           fi
 
@@ -308,9 +319,10 @@ jobs:
              [[ ",$linux_role_text," != *",stable-dependencies,"* ]] &&
              [[ ",$linux_role_text," != *",nvidia-dependencies,"* ]] &&
              [[ ",$linux_role_text," != *",all,"* ]] &&
-             [ -z "$LINUX_CUDA_CUDNN_PACKAGE_VERSION" ]; then
+             [ -z "$LINUX_CUDA_CUDNN_PACKAGE_VERSION" ] &&
+             [ -z "$LINUX_CUDA_CUDNN_PACKAGE_VERSION_MAP" ]; then
             echo "linux_split_package_roles includes collection/meta but no CUDA/cuDNN package version was provided." >&2
-            echo "Pass linux_cuda_cudnn_package_version to pin already-published CUDA/cuDNN packages, or include cuda-cudnn/all in linux_split_package_roles for a dependency refresh." >&2
+            echo "Pass linux_cuda_cudnn_package_version or linux_cuda_cudnn_package_version_map to pin already-published CUDA/cuDNN packages, or include cuda-cudnn/all in linux_split_package_roles for a dependency refresh." >&2
             exit 1
           fi
 
@@ -321,9 +333,10 @@ jobs:
              [[ ",$linux_role_text," != *",stable-dependencies,"* ]] &&
              [[ ",$linux_role_text," != *",nvidia-dependencies,"* ]] &&
              [[ ",$linux_role_text," != *",all,"* ]] &&
-             [ -z "$LINUX_TENSORRT_PACKAGE_VERSION" ]; then
+             [ -z "$LINUX_TENSORRT_PACKAGE_VERSION" ] &&
+             [ -z "$LINUX_TENSORRT_PACKAGE_VERSION_MAP" ]; then
             echo "linux_split_package_roles includes collection/meta but no TensorRT package version was provided." >&2
-            echo "Pass linux_tensorrt_package_version to pin already-published TensorRT packages, or include tensorrt/all in linux_split_package_roles for a dependency refresh." >&2
+            echo "Pass linux_tensorrt_package_version or linux_tensorrt_package_version_map to pin already-published TensorRT packages, or include tensorrt/all in linux_split_package_roles for a dependency refresh." >&2
             exit 1
           fi
 
@@ -400,9 +413,13 @@ jobs:
               -f "meta_package_version=$WINDOWS_META_PACKAGE_VERSION" \
               -f "bridge_package_version=$WINDOWS_BRIDGE_PACKAGE_VERSION" \
               -f "cuda_cudnn_package_version=$WINDOWS_CUDA_CUDNN_PACKAGE_VERSION" \
+              -f "cuda_cudnn_package_version_map=$WINDOWS_CUDA_CUDNN_PACKAGE_VERSION_MAP" \
               -f "cuda_cudnn_package_release_tag=$WINDOWS_CUDA_CUDNN_PACKAGE_RELEASE_TAG" \
+              -f "cuda_cudnn_package_release_tag_map=$WINDOWS_CUDA_CUDNN_PACKAGE_RELEASE_TAG_MAP" \
               -f "tensorrt_package_version=$WINDOWS_TENSORRT_PACKAGE_VERSION" \
+              -f "tensorrt_package_version_map=$WINDOWS_TENSORRT_PACKAGE_VERSION_MAP" \
               -f "tensorrt_package_release_tag=$WINDOWS_TENSORRT_PACKAGE_RELEASE_TAG" \
+              -f "tensorrt_package_release_tag_map=$WINDOWS_TENSORRT_PACKAGE_RELEASE_TAG_MAP" \
               -f "include_meta_package=$WINDOWS_INCLUDE_META_PACKAGE" \
               -f "skip_consumer_validation=$WINDOWS_SKIP_CONSUMER_VALIDATION" \
               -f "run_smoke=$RUN_WINDOWS_SMOKE" \
@@ -424,9 +441,13 @@ jobs:
               -f "meta_package_version=$LINUX_META_PACKAGE_VERSION" \
               -f "bridge_package_version=$LINUX_BRIDGE_PACKAGE_VERSION" \
               -f "cuda_cudnn_package_version=$LINUX_CUDA_CUDNN_PACKAGE_VERSION" \
+              -f "cuda_cudnn_package_version_map=$LINUX_CUDA_CUDNN_PACKAGE_VERSION_MAP" \
               -f "cuda_cudnn_package_release_tag=$LINUX_CUDA_CUDNN_PACKAGE_RELEASE_TAG" \
+              -f "cuda_cudnn_package_release_tag_map=$LINUX_CUDA_CUDNN_PACKAGE_RELEASE_TAG_MAP" \
               -f "tensorrt_package_version=$LINUX_TENSORRT_PACKAGE_VERSION" \
+              -f "tensorrt_package_version_map=$LINUX_TENSORRT_PACKAGE_VERSION_MAP" \
               -f "tensorrt_package_release_tag=$LINUX_TENSORRT_PACKAGE_RELEASE_TAG" \
+              -f "tensorrt_package_release_tag_map=$LINUX_TENSORRT_PACKAGE_RELEASE_TAG_MAP" \
               -f "include_meta_package=$LINUX_INCLUDE_META_PACKAGE" \
               -f "skip_consumer_validation=$LINUX_SKIP_CONSUMER_VALIDATION" \
               -f "run_smoke=$RUN_LINUX_SMOKE" \
@@ -447,9 +468,13 @@ jobs:
               -f "meta_package_version=$LINUX_META_PACKAGE_VERSION" \
               -f "bridge_package_version=$LINUX_BRIDGE_PACKAGE_VERSION" \
               -f "cuda_cudnn_package_version=$LINUX_CUDA_CUDNN_PACKAGE_VERSION" \
+              -f "cuda_cudnn_package_version_map=$LINUX_CUDA_CUDNN_PACKAGE_VERSION_MAP" \
               -f "cuda_cudnn_package_release_tag=$LINUX_CUDA_CUDNN_PACKAGE_RELEASE_TAG" \
+              -f "cuda_cudnn_package_release_tag_map=$LINUX_CUDA_CUDNN_PACKAGE_RELEASE_TAG_MAP" \
               -f "tensorrt_package_version=$LINUX_TENSORRT_PACKAGE_VERSION" \
+              -f "tensorrt_package_version_map=$LINUX_TENSORRT_PACKAGE_VERSION_MAP" \
               -f "tensorrt_package_release_tag=$LINUX_TENSORRT_PACKAGE_RELEASE_TAG" \
+              -f "tensorrt_package_release_tag_map=$LINUX_TENSORRT_PACKAGE_RELEASE_TAG_MAP" \
               -f "include_meta_package=$LINUX_INCLUDE_META_PACKAGE" \
               -f "skip_consumer_validation=$LINUX_SKIP_CONSUMER_VALIDATION" \
               -f "run_smoke=$RUN_LINUX_SMOKE" \

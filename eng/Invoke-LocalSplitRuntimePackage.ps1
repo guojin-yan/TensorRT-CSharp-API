@@ -6,7 +6,9 @@ param(
   [string]$MetaPackageVersion,
   [string]$BridgePackageVersion,
   [string]$CudaCudnnPackageVersion,
+  [string]$CudaCudnnPackageVersionMap,
   [string]$TensorRtPackageVersion,
+  [string]$TensorRtPackageVersionMap,
   [string]$Configuration = "Release",
   [switch]$SkipManagedPack,
   [switch]$SkipBaseRuntimeBuild,
@@ -70,6 +72,44 @@ function Resolve-RolePackageVersion {
   }
 
   return & (Join-Path $RepositoryRoot "eng\Resolve-PackageVersion.ps1") -RequestedVersion $Value
+}
+
+function Resolve-SplitPackagePins {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$RuntimeKey
+  )
+
+  $arguments = @(
+    "-NoProfile",
+    "-File",
+    (Join-Path $RepositoryRoot "eng\Resolve-SplitPackagePins.ps1"),
+    "-SourceRuntimeKey",
+    $RuntimeKey,
+    "-Version",
+    $resolvedVersion
+  )
+
+  if (-not [string]::IsNullOrWhiteSpace($MetaPackageVersion)) {
+    $arguments += @("-MetaPackageVersion", $MetaPackageVersion)
+  }
+  if (-not [string]::IsNullOrWhiteSpace($BridgePackageVersion)) {
+    $arguments += @("-BridgePackageVersion", $BridgePackageVersion)
+  }
+  if (-not [string]::IsNullOrWhiteSpace($CudaCudnnPackageVersion)) {
+    $arguments += @("-CudaCudnnPackageVersion", $CudaCudnnPackageVersion)
+  }
+  if (-not [string]::IsNullOrWhiteSpace($CudaCudnnPackageVersionMap)) {
+    $arguments += @("-CudaCudnnPackageVersionMap", $CudaCudnnPackageVersionMap)
+  }
+  if (-not [string]::IsNullOrWhiteSpace($TensorRtPackageVersion)) {
+    $arguments += @("-TensorRtPackageVersion", $TensorRtPackageVersion)
+  }
+  if (-not [string]::IsNullOrWhiteSpace($TensorRtPackageVersionMap)) {
+    $arguments += @("-TensorRtPackageVersionMap", $TensorRtPackageVersionMap)
+  }
+
+  & $powerShellCommand @arguments | ConvertFrom-Json
 }
 
 function Get-SplitPackageVersion {
@@ -523,10 +563,11 @@ if (-not $sourcePackage) {
 }
 
 $resolvedVersion = & (Join-Path $RepositoryRoot "eng\Resolve-PackageVersion.ps1") -RequestedVersion $Version
-$resolvedCudaCudnnPackageVersion = Resolve-RolePackageVersion -Value $CudaCudnnPackageVersion -Fallback $resolvedVersion
-$resolvedTensorRtPackageVersion = Resolve-RolePackageVersion -Value $TensorRtPackageVersion -Fallback $resolvedVersion
-$resolvedMetaPackageVersion = Resolve-RolePackageVersion -Value $MetaPackageVersion -Fallback $resolvedVersion
-$resolvedBridgePackageVersion = Resolve-RolePackageVersion -Value $BridgePackageVersion -Fallback $resolvedVersion
+$splitPackagePins = Resolve-SplitPackagePins -RuntimeKey $SourceRuntimeKey
+$resolvedCudaCudnnPackageVersion = [string]$splitPackagePins.cudaCudnnPackageVersion
+$resolvedTensorRtPackageVersion = [string]$splitPackagePins.tensorRtPackageVersion
+$resolvedMetaPackageVersion = [string]$splitPackagePins.metaPackageVersion
+$resolvedBridgePackageVersion = [string]$splitPackagePins.bridgePackageVersion
 $smokeRuntimeKeys = @(Expand-KeyList -Values $SmokeRuntimePackageKey)
 $requestedSplitRoles = @(Expand-KeyList -Values $SplitPackageRole | ForEach-Object { $_.ToLowerInvariant() })
 if ($requestedSplitRoles.Count -eq 0) {
@@ -571,12 +612,12 @@ if ($shouldPackMetaPackage) {
   if ($missingComponentPackages.Count -gt 0) {
     $missingCudaCudnn = @($missingComponentPackages | Where-Object { [string]$_.role -eq "cuda-cudnn" })
     $missingTensorRt = @($missingComponentPackages | Where-Object { [string]$_.role -eq "tensorrt" })
-    if ($missingCudaCudnn.Count -gt 0 -and [string]::IsNullOrWhiteSpace($CudaCudnnPackageVersion)) {
-      throw "The split meta package would reference a non-built CudaCudnn package at version '$resolvedCudaCudnnPackageVersion'. Pass -CudaCudnnPackageVersion to pin an already-published CUDA/cuDNN package explicitly, or build with -SplitPackageRole all/cuda-cudnn first."
+    if ($missingCudaCudnn.Count -gt 0 -and -not [bool]$splitPackagePins.cudaCudnnPackageVersionProvided) {
+      throw "The split meta package would reference a non-built CudaCudnn package at version '$resolvedCudaCudnnPackageVersion'. Pass -CudaCudnnPackageVersion or -CudaCudnnPackageVersionMap to pin an already-published CUDA/cuDNN package explicitly, or build with -SplitPackageRole all/cuda-cudnn first."
     }
 
-    if ($missingTensorRt.Count -gt 0 -and [string]::IsNullOrWhiteSpace($TensorRtPackageVersion)) {
-      throw "The split meta package would reference non-built TensorRT component package(s) at version '$resolvedTensorRtPackageVersion'. Pass -TensorRtPackageVersion to pin already-published TensorRT packages explicitly, or build with -SplitPackageRole all/tensorrt first."
+    if ($missingTensorRt.Count -gt 0 -and -not [bool]$splitPackagePins.tensorRtPackageVersionProvided) {
+      throw "The split meta package would reference non-built TensorRT component package(s) at version '$resolvedTensorRtPackageVersion'. Pass -TensorRtPackageVersion or -TensorRtPackageVersionMap to pin already-published TensorRT packages explicitly, or build with -SplitPackageRole all/tensorrt first."
     }
 
     if ((Expand-KeyList -Values $AdditionalPackageSource).Count -eq 0) {

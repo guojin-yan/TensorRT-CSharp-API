@@ -7,6 +7,26 @@ param(
   [string]$RepositoryRoot
 )
 
+function Test-LabelSetText {
+  param(
+    [AllowEmptyString()]
+    [string]$Value
+  )
+
+  if ([string]::IsNullOrWhiteSpace($Value)) {
+    return $false
+  }
+
+  $text = $Value.Trim()
+  return ($text -match '(^|[,;])\s*self-hosted\s*([,;]|$)' -or
+    $text -match '(^|[,;])\s*(windows|linux|x64|arm64|ubuntu-[0-9]{2}\.[0-9]{2})\s*([,;]|$)')
+}
+
+if (-not [string]::IsNullOrWhiteSpace($RepositoryRoot) -and -not (Test-Path -LiteralPath $RepositoryRoot) -and (Test-LabelSetText -Value $RepositoryRoot)) {
+  $RequiredLabelSet = @($RequiredLabelSet + $RepositoryRoot)
+  $RepositoryRoot = ""
+}
+
 if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
   $scriptRoot = if ([string]::IsNullOrWhiteSpace($PSScriptRoot)) { (Get-Location).Path } else { $PSScriptRoot }
   $RepositoryRoot = (Resolve-Path (Join-Path $scriptRoot "..")).Path
@@ -44,6 +64,47 @@ function Expand-LabelSet {
       }
     }
   ) | Select-Object -Unique
+}
+
+function Expand-RequestedLabelSets {
+  param(
+    [AllowNull()]
+    [string[]]$Values
+  )
+
+  $sets = New-Object System.Collections.Generic.List[string]
+  foreach ($value in @($Values)) {
+    if ([string]::IsNullOrWhiteSpace($value)) {
+      continue
+    }
+
+    $trimmedValue = $value.Trim()
+    $normalized = $trimmedValue -replace '^\s*[''"]', '' -replace '[''"]\s*$', ''
+    $quotedParts = @([regex]::Matches($trimmedValue, "['""]([^'""]+)['""]") | ForEach-Object { $_.Groups[1].Value.Trim() })
+    if ($quotedParts.Count -gt 1) {
+      foreach ($part in $quotedParts) {
+        if (-not [string]::IsNullOrWhiteSpace($part)) {
+          $sets.Add($part)
+        }
+      }
+      continue
+    }
+
+    if ($normalized -match "[,;]\s*self-hosted\s*,") {
+      $pieces = [regex]::Split($normalized, "\s*[,;]\s*(?=self-hosted\s*,)")
+      foreach ($piece in $pieces) {
+        $candidate = $piece.Trim()
+        if (-not [string]::IsNullOrWhiteSpace($candidate)) {
+          $sets.Add($candidate)
+        }
+      }
+      continue
+    }
+
+    $sets.Add($normalized)
+  }
+
+  @($sets | Select-Object -Unique)
 }
 
 function Get-RunnerRows {
@@ -91,7 +152,9 @@ $runnerRows = @(Get-RunnerRows -RepositoryName $Repository)
 $results = New-Object System.Collections.Generic.List[object]
 $missing = New-Object System.Collections.Generic.List[object]
 
-foreach ($labelSetText in @($RequiredLabelSet)) {
+$requestedLabelSets = @(Expand-RequestedLabelSets -Values $RequiredLabelSet)
+
+foreach ($labelSetText in $requestedLabelSets) {
   if ([string]::IsNullOrWhiteSpace($labelSetText)) {
     continue
   }
