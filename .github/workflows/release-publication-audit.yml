@@ -208,6 +208,33 @@ jobs:
 
           & pwsh @arguments
 
+      - name: Audit remote release prerequisites
+        shell: pwsh
+        run: |
+          $labelSetText = @'
+          ${{ inputs.runner_required_label_sets }}
+          '@
+          $labelSets = @(
+            $labelSetText -split "[`r`n;]" |
+              ForEach-Object { $_.Trim() } |
+              Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+          )
+
+          $arguments = @(
+            "-NoProfile",
+            "-File",
+            "./eng/Test-RemoteReleasePrerequisites.ps1",
+            "-Repository",
+            "$env:GH_REPO",
+            "-RequiredRunnerLabelSet"
+          ) + $labelSets
+
+          if ("${{ inputs.warn_only }}" -eq "true") {
+            $arguments += "-WarnOnly"
+          }
+
+          & pwsh @arguments
+
       - name: Audit runner availability
         shell: pwsh
         run: |
@@ -287,5 +314,6 @@ jobs:
             artifacts/github-packages-audit/**
             artifacts/publication-inventory/**
             artifacts/release-readiness/**
+            artifacts/remote-release-prerequisites/**
             artifacts/runner-availability/**
             artifacts/linux-target-coverage/**

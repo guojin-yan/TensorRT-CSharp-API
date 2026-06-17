@@ -222,6 +222,8 @@ $workflowContracts = @(
       New-Requirement -Needle "require_package_repository_association" -Description "package repository association gate"
       New-Requirement -Needle "Test-ReleaseReadiness.ps1" -Description "external release readiness audit script"
       New-Requirement -Needle "include_release_readiness" -Description "release readiness audit toggle"
+      New-Requirement -Needle "Test-RemoteReleasePrerequisites.ps1" -Description "remote release prerequisites audit script"
+      New-Requirement -Needle "remote-release-prerequisites" -Description "remote release prerequisites artifact output"
       New-Requirement -Needle "Test-LinuxRuntimeTargetCoverage.ps1" -Description "Linux target coverage audit script"
       New-Requirement -Needle "RequireRuntimeGitHubPackagesCoverage" -Description "runtime GitHub Packages coverage gate"
       New-Requirement -Needle "actions/upload-artifact" -Description "audit artifact upload"
