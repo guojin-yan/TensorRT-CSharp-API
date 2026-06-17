@@ -61,6 +61,19 @@ public sealed class SampleLayoutTests
     }
 
     [Fact]
+    public void RootReadmesDoNotAdvertiseRemovedSamplePlaceholders()
+    {
+        foreach (string fileName in new[] { "README.md", "README.zh-CN.md" })
+        {
+            string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, fileName));
+
+            Assert.DoesNotContain("CustomKernelPreprocess", readme, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("`Classification`", readme, StringComparison.Ordinal);
+            Assert.Contains("`YoloDet`", readme, StringComparison.Ordinal);
+        }
+    }
+
+    [Fact]
     public void ProgramFilesDoNotUseTopLevelStatements()
     {
         string[] programFiles = Directory.EnumerateFiles(Path.Combine(RepositoryPaths.Root, "samples"), "Program.cs", SearchOption.AllDirectories)

@@ -72,6 +72,17 @@ Prefer `eng/Invoke-RemoteReleaseBundle.ps1` when dispatching releases from a wor
 
 Linux packages stay `dry-run-only` until a matching Linux runner validates build, asset collection, pack, and package consumer restore/build.
 
+## Current publication map
+
+Runtime packages are intentionally distributed across runtime release tags instead of being copied into every managed release:
+
+- `v4.0.6156`: Windows x64 runtime matrix for all six modeled Windows dependency combinations.
+- `v4.0.6167`: Linux x64 Ubuntu 22.04 runtime matrix for all six hosted Ubuntu 22.04 combinations.
+- `v4.0.6169`: Linux x64 Ubuntu 24.04 runtime matrix for the three modern hosted Ubuntu 24.04 combinations.
+- `v4.0.6170`: managed package only.
+
+Run `release-publication-audit.yml` or `eng/Export-RuntimePublicationIndex.ps1` to generate `artifacts/publication-index/runtime-publication-index.md`, which is the canonical readable map from runtime combination to release tag and GitHub Packages entry.
+
 ## Distribution lanes
 
 Current lane guidance:

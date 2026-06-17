@@ -72,6 +72,17 @@ Linux split 包角色、稳定依赖版本也有单独输入。日常只改 brid
 
 Linux 组合保持 `dry-run-only`，等待匹配的真实 Linux runner 验证。
 
+## 当前发布映射
+
+runtime 包会按 runtime release tag 分散发布，不会复制到每一个 managed release：
+
+- `v4.0.6156`：Windows x64 runtime 矩阵，覆盖 6 个已建模 Windows 依赖组合。
+- `v4.0.6167`：Linux x64 Ubuntu 22.04 runtime 矩阵，覆盖 6 个 hosted Ubuntu 22.04 组合。
+- `v4.0.6169`：Linux x64 Ubuntu 24.04 runtime 矩阵，覆盖 3 个 hosted Ubuntu 24.04 现代组合。
+- `v4.0.6170`：只有 managed 包。
+
+运行 `release-publication-audit.yml` 或 `eng/Export-RuntimePublicationIndex.ps1` 会生成 `artifacts/publication-index/runtime-publication-index.md`，这是最直观的 runtime 组合、release tag 和 GitHub Packages 对应表。
+
 ## 分发策略
 
 当前建议：

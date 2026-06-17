@@ -130,6 +130,17 @@ You can also use `act` for local workflow dry-runs, such as parsing `release-bun
 
 Runtime packages are versioned independently from the managed package. The normal maintenance path is to publish `JYPPX.TensorRT.CSharp.API` to nuget.org and GitHub Packages, while keeping large CUDA/cuDNN/TensorRT component packages on GitHub Packages or GitHub Releases. Publish `CudaCudnn` and `TensorRt` component packages once per dependency version, then publish only `bridge,collection` when the local C ABI bridge changes.
 
+Current remote publication map as of 2026-06-17:
+
+| Release tag | Contents |
+| --- | --- |
+| `v4.0.6170` | Managed package only: `JYPPX.TensorRT.CSharp.API.4.0.6170.nupkg`. |
+| `v4.0.6156` | Windows x64 runtime matrix: all six Windows TensorRT/CUDA/cuDNN combinations. |
+| `v4.0.6167` | Linux x64 Ubuntu 22.04 runtime matrix: all six hosted Ubuntu 22.04 combinations. |
+| `v4.0.6169` | Linux x64 Ubuntu 24.04 runtime matrix: the three modern hosted Ubuntu 24.04 combinations. |
+
+The latest managed release is not expected to contain every runtime asset. Use `artifacts/publication-index/runtime-publication-index.md` from `release-publication-audit.yml` when you need the full runtime-to-release-tag map.
+
 GitHub Release assets are useful for large public `.nupkg` files, but they are not a NuGet feed. If stable dependency packages live only on a Release, the remote Windows workflow downloads those Release assets into a temporary local package source for validation. Publish `bridge,collection` to GitHub Packages only when the referenced `CudaCudnn` and `TensorRt` component packages are also available from a NuGet feed; otherwise attach the whole `.nupkg` set to a GitHub Release and consume it as a downloaded local package source.
 
 Before dispatching a remote release, audit the current repository secrets and self-hosted runners:

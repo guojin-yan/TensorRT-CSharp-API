@@ -64,16 +64,16 @@ cmake --preset win-x64-trt8-cuda12-release
 cmake --build --preset win-x64-trt8-cuda12-release --parallel
 ```
 
-推荐 sample smoke 顺序：
+推荐验证顺序：
 
 1. `CudaSmokeRunner`
-2. `MultiStream`
-3. `TensorRtSmokeRunner`
-4. `LifecycleSmokeRunner`
-5. `OnnxToEngineSmokeRunner`
-6. `DynamicShape`
-7. `NetworkBuilderSmokeRunner`
-8. 各类 layer-specific network runners
+2. `TensorRtSmokeRunner`
+3. `LifecycleSmokeRunner`
+4. `OnnxToEngineSmokeRunner`
+5. `NetworkBuilderSmokeRunner`
+6. 各类 layer-specific network runners
+
+常用用户示例请从 `samples/README.md` 进入，例如 `MultiStream`、`DynamicShape`、`InferenceBindings`、`OnnxToEngine`、`Classification` 和 `YoloDet`。
 
 ## Samples
 
@@ -85,7 +85,8 @@ cmake --build --preset win-x64-trt8-cuda12-release --parallel
 - `DynamicShape` 是真实 TensorRT dynamic-shape/profile/binding 示例，并已纳入 solution。
 - `InferenceBindings` 是真实 TensorRT inference-binding 示例，并已纳入 solution。
 - `OnnxToEngine` 现在是可运行的常用 ONNX-to-engine 示例，并已纳入 solution。
-- `Classification`、`CustomKernelPreprocess`、`YoloDet` 仍是 README/roadmap 目录，不是空 `.gitkeep` 占位目录。
+- `Classification` 和 `YoloDet` 是依赖用户自备 ONNX 模型、labels 和 input-shape metadata 的可运行示例。
+- CUDA custom-kernel preprocessing 先保留为文档路线图，等待安全的公开 `CudaModule` / `CudaKernel` wrapper 后再加入 samples。
 
 ## Runtime Packages
 
@@ -123,6 +124,17 @@ runtime 包为一个明确 TensorRT / CUDA / cuDNN 组合承载原生部署资�
 也可以用 `act` 在本机做 workflow dry-run，例如解析 `release-bundle.yml` 或 `runtime-linux.yml` 的调度图。`act` 适合做轻量检查，但不能替代正式发布证据：Windows hosted job 不能被 Linux 容器可靠复刻，self-hosted runtime job 仍依赖真实本机/runner 上的 CUDA、cuDNN、TensorRT 和签名环境。详见 `docs/articles/zh-cn/local-actions.md`。
 
 runtime 包现在和 managed 包独立版本。日常维护优先只发布 `JYPPX.TensorRT.CSharp.API` 到 nuget.org 和 GitHub Packages；CUDA/cuDNN/TensorRT 这类大组件保持在 GitHub Packages 或 GitHub Releases。每个 NVIDIA 依赖版本只发布一次 vendor 组件包；后续本地 C ABI bridge 变化时，只重发 `bridge,collection`。
+
+截至 2026-06-17 的远端发布映射：
+
+| Release tag | 内容 |
+| --- | --- |
+| `v4.0.6170` | 只有 managed 包：`JYPPX.TensorRT.CSharp.API.4.0.6170.nupkg`。 |
+| `v4.0.6156` | Windows x64 runtime 矩阵：6 个 Windows TensorRT/CUDA/cuDNN 组合。 |
+| `v4.0.6167` | Linux x64 Ubuntu 22.04 runtime 矩阵：6 个 hosted Ubuntu 22.04 组合。 |
+| `v4.0.6169` | Linux x64 Ubuntu 24.04 runtime 矩阵：3 个 hosted Ubuntu 24.04 现代组合。 |
+
+最新 managed release 不应该被理解为“包含全部 runtime asset”。需要核对完整 runtime 到 release tag 的对应关系时，看 `release-publication-audit.yml` 上传的 `artifacts/publication-index/runtime-publication-index.md`。
 
 远端 managed-only 发布示例：
 
@@ -199,7 +211,7 @@ powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalReleaseBundle.ps1 `
 
 `release-bundle.yml` 默认不再触发 runtime 打包。需要 runtime 时显式设置 `run_windows_runtime_packaging=true` 或 `run_linux_runtime_packaging=true`；如果启用 Linux runtime 但 `linux_runtime_keys` 为空，Linux 模块会干净 no-op。
 
-发布到 `nuget.org` 时，仓库 secret `NUGET_API_KEY` 应填写 NuGet 官网生成的纯文本 ASCII API key；也可以不设置这个 secret，让 self-hosted Windows runner 使用本机 NuGet 配置。本机兜底配置需要为 `https://www.nuget.org` 保存 API key。不要把加密后的本机凭据或机器导出的 token 片段填进 `NUGET_API_KEY`。只要该 secret 存在，workflow 就会优先校验并使用它。
+发布到 `nuget.org` 时，仓库 secret `NUGET_API_KEY` 应填写 NuGet 官网生成的纯文本 ASCII API key。managed-package workflow 会在发布前校验该 secret；不要把加密后的本机凭据或机器导出的 token 片段填进 `NUGET_API_KEY`。
 
 ## 仓库布局
 

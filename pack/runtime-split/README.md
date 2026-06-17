@@ -1,6 +1,8 @@
 # split runtime packages
 
-This directory contains split runtime component packages for Windows runtime combinations that are too large to publish as a single nupkg.
+This directory contains split runtime component packages for runtime combinations that are too large or too stable to republish as a single nupkg.
+
+Windows split projects are checked in because they are packaged on the self-hosted Windows runner. Linux split projects are generated dynamically from `pack/runtime/runtime-packages.manifest.json` by `eng/Invoke-LocalSplitRuntimePackage.ps1`, so Linux runtime split packages do not require checked-in per-combination project directories.
 
 Current goals:
 
