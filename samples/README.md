@@ -43,7 +43,7 @@ This is a focused single-key example. Omit `-WindowsRuntimeKeys` when you want t
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\eng\Invoke-LocalReleaseBundle.ps1 `
   -Version 4.0.0 `
-  -WindowsRuntimeKeys win-x64-trt11.0-cuda12.9-cudnn9.22 `
+  -WindowsRuntimeKeys <runtime-key> `
   -WindowsRuntimeDeliveryMode split `
   -RunWindowsSmoke `
   -SignWindowsConsumerOutput `
