@@ -263,7 +263,6 @@ $runnerChecks = @()
 if ($runnerQuerySucceeded) {
   $runnerChecks = @(
     Test-RunnerLabelSet -RunnerRows $runnerRows -RequiredLabelSet "self-hosted,windows,x64"
-    Test-RunnerLabelSet -RunnerRows $runnerRows -RequiredLabelSet "self-hosted,linux,x64,ubuntu-20.04"
   )
 }
 

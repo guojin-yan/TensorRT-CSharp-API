@@ -470,7 +470,7 @@ $routineReleaseConfigJson = ConvertTo-ReleaseConfigJsonText -Config $routineRele
 
 $linuxUbuntu20ReleaseConfig = [ordered]@{}
 foreach ($entry in $linuxReleaseConfig.GetEnumerator()) { $linuxUbuntu20ReleaseConfig[$entry.Key] = $entry.Value }
-$linuxUbuntu20ReleaseConfig["linux_self_hosted_ubuntu20_runtime_key_set"] = "self-hosted-ubuntu20"
+$linuxUbuntu20ReleaseConfig["linux_ubuntu20_runtime_key_set"] = "hosted-container-ubuntu20"
 $linuxUbuntu20ReleaseConfigJson = ConvertTo-ReleaseConfigJsonText -Config $linuxUbuntu20ReleaseConfig
 
 $commands = New-Object System.Collections.Generic.List[object]
@@ -531,18 +531,18 @@ $commands.Add((New-TargetCommandPlan `
       ))) | Out-Null
 
 $commands.Add((New-TargetCommandPlan `
-      -Name "ubuntu20-after-runner-is-online" `
-      -Description "Publish Ubuntu 20.04 x64 packages after a self-hosted linux/x64/ubuntu-20.04 runner is online." `
-      -WhenToUse "Use only after runner readiness reports an online self-hosted Linux Ubuntu 20.04 runner." `
+      -Name "ubuntu20-hosted-container" `
+      -Description "Publish Ubuntu 20.04 x64 packages through the hosted Ubuntu 20.04 container lane." `
+      -WhenToUse "Use when Ubuntu 22.04/24.04 hosted Linux packages are already published and the Ubuntu 20.04 package line needs to be filled." `
       -CommandParts @(
         "pwsh", "-NoProfile", "-File", ".\eng\Invoke-RemoteReleaseBundle.ps1",
         "-Repository", $Repository,
         "-Ref", $Ref,
         "-Version", $SuggestedVersion,
         "-RuntimeVersion", $SuggestedVersion,
-        "-RunLinuxSelfHostedUbuntu20RuntimePackaging",
-        "-LinuxRunnerMode", "self-hosted",
-        "-LinuxSelfHostedUbuntu20RuntimeKeySet", "self-hosted-ubuntu20",
+        "-RunLinuxUbuntu20RuntimePackaging",
+        "-LinuxRunnerMode", "hosted-container",
+        "-LinuxUbuntu20RuntimeKeySet", "hosted-container-ubuntu20",
         "-LinuxSplitPackageRoles", "all",
         "-PublishManagedToGitHubPackages", "false",
         "-PublishRuntimeToGitHubPackages", "true",
@@ -550,8 +550,7 @@ $commands.Add((New-TargetCommandPlan `
         "-RunLinuxSmoke", "false"
       ) `
       -Notes @(
-        "Do not run this while runner:self-hosted,linux,x64,ubuntu-20.04 is not ready.",
-        "Release-bundle will require RUNNER_AUDIT_TOKEN before dispatching this self-hosted lane.",
+        "This lane runs on GitHub-hosted infrastructure with an Ubuntu 20.04 job container, not a repository self-hosted runner.",
         "Bridge-only refresh for this lane can use release_config_json: $linuxUbuntu20ReleaseConfigJson"
       ))) | Out-Null
 

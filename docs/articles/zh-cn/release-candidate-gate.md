@@ -79,7 +79,7 @@ cmake --build --preset win-x64-trt11-cuda13-release --parallel
 
 CUDA `12.9` 和 TensorRT 11 Windows 组合必须使用精确 CUDA/TensorRT/cuDNN 依赖链证据。`trt11.0-cuda13.2-cudnn9.22` 可以构建，但当前机器 runtime/builder 创建仍依赖 CUDA 13-capable driver/runtime 环境。
 
-Linux Ubuntu 22.04 x64 是当前 hosted 发布主线，远程 workflow 必须完成 build、asset collection、pack、consumer validation 和 release/package 上传后才算发布证据。Ubuntu 20.04 x64 仍然需要 `runner_mode=self-hosted` 或手动 root；Ubuntu 24.04 x64 只覆盖现代组合；ARM/Jetson 目标需要单独建包线。
+Linux Ubuntu 20.04/22.04/24.04 x64 都通过 GitHub-hosted runner 和匹配的 Ubuntu job container 发布，远程 workflow 必须完成 build、asset collection、pack、consumer validation 和 release/package 上传后才算发布证据。Ubuntu 20.04 x64 使用 `runner_mode=hosted-container`；Ubuntu 24.04 x64 只覆盖现代组合；ARM/Jetson 目标需要单独建包线。
 
 ## 远端发布前置条件
 
@@ -87,4 +87,4 @@ Linux Ubuntu 22.04 x64 是当前 hosted 发布主线，远程 workflow 必须完
 
 - `package-managed.yml` 在 `publish_to_nuget=true` 时必须使用仓库 secret `NUGET_API_KEY`，并要求它是纯文本 ASCII 的 nuget.org API key。缺少该 secret 时 workflow 会在发布前失败，不再依赖 self-hosted Windows runner 当前用户的 NuGet 配置兜底。不要填加密后的本机凭据或其它机器导出的 token 片段。
 - `runtime-windows.yml` 要求 Windows self-hosted runner 在线，并带有 `self-hosted`、`windows`、`x64` 标签。
-- `runtime-linux.yml` 可以通过 GitHub-hosted runner 发布 Ubuntu 22.04 x64 默认矩阵。Ubuntu 20.04 x64 必须使用 `runner_mode=self-hosted`，Ubuntu 24.04 x64 只覆盖现代组合，ARM/Jetson 目标需要单独建包线后才能发布。
+- `runtime-linux.yml` 可以通过 GitHub-hosted runner 和匹配的 Ubuntu job container 发布 Ubuntu 20.04、Ubuntu 22.04、Ubuntu 24.04 x64。Ubuntu 20.04 x64 使用 `runner_mode=hosted-container`，Ubuntu 24.04 x64 只覆盖现代组合，ARM/Jetson 目标需要单独建包线后才能发布。

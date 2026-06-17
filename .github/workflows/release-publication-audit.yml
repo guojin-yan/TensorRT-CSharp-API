@@ -81,7 +81,7 @@ on:
       runner_required_label_sets:
         description: Semicolon-separated self-hosted runner label sets to audit
         required: false
-        default: "self-hosted,windows,x64;self-hosted,linux,x64,ubuntu-20.04"
+        default: "self-hosted,windows,x64"
         type: string
       warn_only:
         description: Report failed checks as warnings instead of failing the workflow

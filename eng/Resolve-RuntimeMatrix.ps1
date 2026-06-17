@@ -4,7 +4,7 @@ param(
   [ValidateSet("windows", "linux")]
   [string]$Platform,
   [string[]]$RuntimeKey,
-  [ValidateSet("any", "hosted", "self-hosted")]
+  [ValidateSet("any", "hosted", "hosted-container", "self-hosted")]
   [string]$RunnerMode = "any",
   [string]$RepositoryRoot
 )
@@ -96,6 +96,7 @@ $matrix = foreach ($package in $packages) {
     architecture = $package.architecture
     runnerMode = $package.runnerMode
     runsOnJson = if ($Platform -eq "linux") { ConvertTo-Json -InputObject @($runnerLabels) -Compress } else { $null }
+    containerImage = if ($package.PSObject.Properties.Name.Contains("containerImage") -and -not [string]::IsNullOrWhiteSpace([string]$package.containerImage)) { $package.containerImage } elseif ($Platform -eq "linux" -and $package.linuxDistro -eq "ubuntu") { "ubuntu:$($package.linuxDistroVersion)" } else { "" }
     nvidiaDependencyMode = $package.nvidiaDependencyMode
     nvidiaRepoDistroId = $package.nvidiaRepoDistroId
     nvidiaRepoArchitecture = $package.nvidiaRepoArchitecture

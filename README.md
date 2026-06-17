@@ -103,7 +103,7 @@ Current local status:
 - TensorRT 10 + CUDA 11.8 is the stable real vendor-backed smoke path and has package-consumer smoke evidence.
 - TensorRT 10 + CUDA 12.9 and TensorRT 11 + CUDA 12.9 have local runtime/package validation and package-consumer smoke evidence.
 - TensorRT 11 + CUDA 13.2 bridge builds, collects assets, packs, and passes package consumer restore/build/native-copy; runtime/builder smoke is pending on a CUDA 13-capable driver/runtime environment.
-- Linux runtime packages now include the OS/architecture in the package identity. Ubuntu 22.04 x64 is the default hosted matrix for all six combinations; Ubuntu 24.04 x64 is limited to the modern TensorRT 10/11 combinations that NVIDIA publishes for that distro; Ubuntu 20.04 x64 is self-hosted only.
+- Linux runtime packages now include the OS/architecture in the package identity. Ubuntu 22.04 x64 is the default hosted matrix for all six combinations; Ubuntu 24.04 x64 is limited to the modern TensorRT 10/11 combinations that NVIDIA publishes for that distro; Ubuntu 20.04 x64 uses the hosted-container lane with an `ubuntu:20.04` job container.
 
 See:
 
@@ -227,27 +227,21 @@ pwsh -NoProfile -File .\eng\Invoke-RemoteReleaseBundle.ps1 `
 
 Use version maps when one workflow dispatch spans multiple stable dependency releases. The current hosted Linux line uses Ubuntu 22.04 dependency packages from `v4.0.6167` and Ubuntu 24.04 dependency packages from `v4.0.6169`; the release tag defaults to `v<resolved package version>` for each matched key. If a dependency package is attached to a non-default Release tag, pass the matching `-LinuxCudaCudnnPackageReleaseTagMap` and `-LinuxTensorRtPackageReleaseTagMap` values as well.
 
-Ubuntu 20.04 self-hosted packaging uses a separate lane and requires an online Linux runner labeled `self-hosted`, `linux`, `x64`, and `ubuntu-20.04`:
+Ubuntu 20.04 packaging uses a separate hosted-container lane:
 
 ```powershell
 pwsh -NoProfile -File .\eng\Invoke-RemoteReleaseBundle.ps1 `
   -Version 4.0.0 `
   -RuntimeVersion 4.0.0 `
-  -RunLinuxSelfHostedUbuntu20RuntimePackaging `
+  -RunLinuxUbuntu20RuntimePackaging `
+  -LinuxUbuntu20RuntimeKeySet hosted-container-ubuntu20 `
   -LinuxRuntimeDeliveryMode split `
   -LinuxSplitPackageRoles all `
   -PublishRuntimeToGitHubPackages:$true `
   -AttachRuntimeToGitHubRelease:$true
 ```
 
-Before enabling that lane on a new Ubuntu 20.04 x64 machine, register and audit the runner:
-
-```bash
-pwsh -File ./eng/Install-GitHubSelfHostedRunner.ps1 -Repository guojin-yan/TensorRT-CSharp-API -UseGhRegistrationToken -InstallService
-pwsh -File ./eng/Test-LinuxSelfHostedRunnerReadiness.ps1 -RequireRegisteredRunner -CheckGitHubRunner
-```
-
-The registration helper never writes the short-lived GitHub runner token to disk. The readiness helper verifies Ubuntu 20.04 x64, required tooling, the `self-hosted,linux,x64,ubuntu-20.04` label path, and the configured CUDA/cuDNN/TensorRT roots for the modeled Ubuntu 20.04 package keys.
+The old `self-hosted-ubuntu20` key set is no longer a release path. Use `hosted-container-ubuntu20` with `runner_mode=hosted-container`.
 
 Managed-only local example:
 
@@ -282,7 +276,7 @@ On WDAC / application-control machines, the local and self-hosted Windows runtim
 
 `release-bundle.yml` treats runtime packaging as opt-in. Set `run_windows_runtime_packaging=true` or `run_linux_runtime_packaging=true` only for runtime releases. If Linux runtime packaging is enabled with an empty `linux_runtime_keys` input, the Linux module cleanly no-ops.
 
-When runtime packaging is enabled, `release-bundle.yml` can check the required self-hosted runner labels before it creates a GitHub Release. Set repository secret `RUNNER_AUDIT_TOKEN` to a token that can read repository self-hosted runners to enable the check. GitHub documents the repository runner list API as requiring a fine-grained token with `Administration` repository permission set to `read`: <https://docs.github.com/rest/actions/self-hosted-runners>. Windows runtime packaging routes to `self-hosted,windows,x64`; Ubuntu 20.04 Linux runtime packaging requires a strict preflight for `self-hosted,linux,x64,ubuntu-20.04`.
+When runtime packaging is enabled, `release-bundle.yml` can check the required Windows self-hosted runner labels before it creates a GitHub Release. Set repository secret `RUNNER_AUDIT_TOKEN` to a token that can read repository self-hosted runners to enable the check. GitHub documents the repository runner list API as requiring a fine-grained token with `Administration` repository permission set to `read`: <https://docs.github.com/rest/actions/self-hosted-runners>. Windows runtime packaging routes to `self-hosted,windows,x64`; Ubuntu 20.04 Linux runtime packaging runs through the hosted-container lane and does not require a repository self-hosted Linux runner.
 
 For `nuget.org` publication, store a plain-text ASCII NuGet API key in the repository secret `NUGET_API_KEY`. The managed-package workflow fails before publication when this secret is missing, so it no longer depends on a self-hosted runner's current-user NuGet configuration or any machine-local credential fallback. Do not store an encrypted local credential blob or other machine-generated token format in `NUGET_API_KEY`.
 

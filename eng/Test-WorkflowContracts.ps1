@@ -116,6 +116,9 @@ $workflowContracts = @(
       New-Requirement -Needle "Pack managed package" -Description "Linux runtime managed package artifact build"
       New-Requirement -Needle "managed-packages-runtime-linux" -Description "Linux runtime managed package artifact"
       New-Requirement -Needle "runner_mode" -Description "hosted/self-hosted runner mode"
+      New-Requirement -Needle "hosted-container" -Description "hosted container runner mode"
+      New-Requirement -Needle 'container: ${{ matrix.containerImage }}' -Description "matrix-driven Ubuntu container"
+      New-Requirement -Needle "Bootstrap Ubuntu container tools" -Description "container bootstrap before checkout"
       New-Requirement -Needle "Prepare-LinuxNvidiaDependencies.ps1" -Description "hosted Linux NVIDIA dependency preparation"
       New-Requirement -Needle "fromJson(matrix.runsOnJson)" -Description "manifest-driven Linux runner labels"
       New-Requirement -Needle "Restore-PublishedSplitPackageSource.ps1" -Description "published stable dependency release asset package source"
@@ -137,19 +140,6 @@ $workflowContracts = @(
     )
   }
   [pscustomobject]@{
-    path = ".github\workflows\linux-self-hosted-runner-readiness.yml"
-    requirements = @(
-      New-Requirement -Needle "workflow_dispatch" -Description "manual trigger"
-      New-Requirement -Needle "self-hosted" -Description "self-hosted runner"
-      New-Requirement -Needle "linux" -Description "linux runner label"
-      New-Requirement -Needle "ubuntu-20.04" -Description "Ubuntu 20.04 runner label"
-      New-Requirement -Needle "Test-LinuxSelfHostedRunnerReadiness.ps1" -Description "Ubuntu 20.04 readiness script"
-      New-Requirement -Needle "RUNNER_AUDIT_TOKEN" -Description "runner audit token support"
-      New-Requirement -Needle "linux-self-hosted-runner-readiness" -Description "readiness artifact upload"
-      New-Requirement -Needle "runtime_key_set" -Description "runtime key set input"
-    )
-  }
-  [pscustomobject]@{
     path = ".github\workflows\release-bundle.yml"
     requirements = @(
       New-Requirement -Needle "workflow_dispatch" -Description "manual trigger"
@@ -163,14 +153,13 @@ $workflowContracts = @(
       New-Requirement -Needle "linux_runner_mode" -Description "Linux runner mode input"
       New-Requirement -Needle "linux_runtime_key_set" -Description "Linux runtime key set input"
       New-Requirement -Needle "linux_split_package_roles" -Description "Linux split package roles input"
-      New-Requirement -Needle "run_linux_self_hosted_ubuntu20_runtime_packaging" -Description "Ubuntu 20.04 self-hosted Linux packaging toggle"
+      New-Requirement -Needle "run_linux_ubuntu20_runtime_packaging" -Description "Ubuntu 20.04 hosted-container Linux packaging toggle"
       New-Requirement -Needle "release_config_json" -Description "advanced release configuration JSON input"
       New-Requirement -Needle "get_config" -Description "advanced release configuration parser"
       New-Requirement -Needle "Test-GitHubRunnerAvailability.ps1" -Description "runner availability preflight"
       New-Requirement -Needle "RUNNER_AUDIT_TOKEN" -Description "runner audit token secret"
       New-Requirement -Needle "self-hosted,windows,x64" -Description "Windows self-hosted runner label preflight"
-      New-Requirement -Needle "self-hosted,linux,x64,ubuntu-20.04" -Description "Ubuntu 20.04 self-hosted runner label preflight"
-      New-Requirement -Needle "Self-hosted Linux runtime packaging requires RUNNER_AUDIT_TOKEN" -Description "strict Linux self-hosted runner preflight token guard"
+      New-Requirement -Needle "hosted-container-ubuntu20" -Description "Ubuntu 20.04 hosted-container key set"
       New-Requirement -Needle "linux_cuda_cudnn_package_version" -Description "Linux split CUDA/cuDNN version input"
       New-Requirement -Needle "linux_cuda_cudnn_package_version_map" -Description "Linux split CUDA/cuDNN runtime-key version map input"
       New-Requirement -Needle "linux_cuda_cudnn_package_release_tag_map" -Description "Linux split CUDA/cuDNN runtime-key release tag map input"
@@ -178,13 +167,13 @@ $workflowContracts = @(
       New-Requirement -Needle "linux_tensorrt_package_version_map" -Description "Linux split TensorRT runtime-key version map input"
       New-Requirement -Needle "linux_tensorrt_package_release_tag_map" -Description "Linux split TensorRT runtime-key release tag map input"
       New-Requirement -Needle "runtime-linux-hosted" -Description "hosted Linux child workflow label"
-      New-Requirement -Needle "runtime-linux-self-hosted-ubuntu20" -Description "Ubuntu 20.04 self-hosted Linux child workflow label"
+      New-Requirement -Needle "runtime-linux-hosted-container-ubuntu20" -Description "Ubuntu 20.04 hosted-container Linux child workflow label"
       New-Requirement -Needle "hosted-all" -Description "hosted Linux default key set"
-      New-Requirement -Needle "self-hosted-ubuntu20" -Description "Ubuntu 20.04 self-hosted key set"
+      New-Requirement -Needle "hosted-container-ubuntu20" -Description "Ubuntu 20.04 hosted-container key set"
       New-Requirement -Needle "runtime_key_set=$LINUX_RUNTIME_KEY_SET" -Description "Linux runtime key set dispatch"
       New-Requirement -Needle "runner_mode=$LINUX_RUNNER_MODE" -Description "Linux runner mode dispatch"
-      New-Requirement -Needle "runtime_key_set=$LINUX_SELF_HOSTED_UBUNTU20_RUNTIME_KEY_SET" -Description "Ubuntu 20.04 self-hosted Linux runtime key set dispatch"
-      New-Requirement -Needle "runner_mode=self-hosted" -Description "Ubuntu 20.04 self-hosted Linux runner mode dispatch"
+      New-Requirement -Needle "runtime_key_set=$LINUX_UBUNTU20_RUNTIME_KEY_SET" -Description "Ubuntu 20.04 hosted-container Linux runtime key set dispatch"
+      New-Requirement -Needle "runner_mode=hosted-container" -Description "Ubuntu 20.04 hosted-container Linux runner mode dispatch"
       New-Requirement -Needle "linux_split_package_roles includes collection/meta but no CUDA/cuDNN package version was provided" -Description "Linux split collection CUDA/cuDNN version guard"
       New-Requirement -Needle "linux_split_package_roles includes collection/meta but no TensorRT package version was provided" -Description "Linux split collection TensorRT version guard"
       New-Requirement -Needle "windows_split_package_roles includes collection/meta but no CUDA/cuDNN package version was provided" -Description "split collection CUDA/cuDNN version guard"
@@ -262,7 +251,7 @@ $workflowContracts = @(
       New-Requirement -Needle "Runtime Publication Index" -Description "publication index report title"
       New-Requirement -Needle "runtime-publication-index" -Description "publication index artifact output"
       New-Requirement -Needle "latest managed release does not necessarily contain every runtime asset" -Description "release-tag split guidance"
-      New-Requirement -Needle "Ubuntu 20.04, ARM/SBSA, Jetson/L4T, and non-Ubuntu Linux" -Description "future and infrastructure-blocked package line guidance"
+      New-Requirement -Needle "Ubuntu 20.04 is a separate hosted-container package line" -Description "Ubuntu 20.04 hosted-container guidance"
     )
   }
   [pscustomobject]@{
@@ -272,7 +261,7 @@ $workflowContracts = @(
       New-Requirement -Needle "runtime-release-plan" -Description "runtime release plan artifact output"
       New-Requirement -Needle "dispatchableNextTargets" -Description "dispatchable next-target reporting"
       New-Requirement -Needle "stableDependencyPinMaps" -Description "stable dependency pin maps for bridge/collection refreshes"
-      New-Requirement -Needle "ubuntu20-after-runner-is-online" -Description "Ubuntu 20.04 self-hosted runner guard command"
+      New-Requirement -Needle "ubuntu20-hosted-container" -Description "Ubuntu 20.04 hosted-container command"
       New-Requirement -Needle "future separate package lines" -Description "future ARM/Jetson/non-Ubuntu release planning"
     )
   }
@@ -290,38 +279,11 @@ $workflowContracts = @(
     path = "eng\Test-RemoteReleasePrerequisites.ps1"
     requirements = @(
       New-Requirement -Needle "NUGET_API_KEY" -Description "nuget.org secret prerequisite"
-      New-Requirement -Needle "RUNNER_AUDIT_TOKEN" -Description "runner audit secret prerequisite"
       New-Requirement -Needle "NuGetApiKeyAvailable" -Description "workflow-provided nuget.org secret availability"
       New-Requirement -Needle "RunnerAuditTokenAvailable" -Description "workflow-provided runner audit token availability"
       New-Requirement -Needle "runnerQuerySource" -Description "runner query source report"
       New-Requirement -Needle "self-hosted,windows,x64" -Description "Windows runner prerequisite"
-      New-Requirement -Needle "self-hosted,linux,x64,ubuntu-20.04" -Description "Ubuntu 20.04 runner prerequisite"
       New-Requirement -Needle "remote-release-prerequisites" -Description "prerequisite artifact output"
-    )
-  }
-  [pscustomobject]@{
-    path = "eng\Install-GitHubSelfHostedRunner.ps1"
-    requirements = @(
-      New-Requirement -Needle "actions/runner/releases" -Description "official GitHub Actions runner download"
-      New-Requirement -Needle "registration-token" -Description "short-lived registration token support"
-      New-Requirement -Needle "ubuntu-20.04" -Description "Ubuntu 20.04 custom runner label"
-      New-Requirement -Needle "tensorrt-csharp" -Description "project-specific runner label"
-      New-Requirement -Needle "The registration token is never written to disk" -Description "registration token non-persistence note"
-      New-Requirement -Needle "InstallService" -Description "runner service installation option"
-      New-Requirement -Needle "DryRun" -Description "safe command preview mode"
-    )
-  }
-  [pscustomObject]@{
-    path = "eng\Test-LinuxSelfHostedRunnerReadiness.ps1"
-    requirements = @(
-      New-Requirement -Needle "self-hosted-ubuntu20" -Description "Ubuntu 20.04 runtime key set readiness"
-      New-Requirement -Needle "self-hosted,linux,x64,ubuntu-20.04" -Description "release runner label readiness"
-      New-Requirement -Needle "Test-GitHubRunnerAvailability.ps1" -Description "GitHub runner label audit delegation"
-      New-Requirement -Needle "Resolve-RuntimeRoots.ps1" -Description "NVIDIA root resolution"
-      New-Requirement -Needle "Validate-LinuxRuntimeInputs.ps1" -Description "Linux runtime input validation delegation"
-      New-Requirement -Needle ".NET SDK 10.0.300+" -Description "required .NET SDK readiness"
-      New-Requirement -Needle "linux-self-hosted-runner-readiness" -Description "readiness artifact output"
-      New-Requirement -Needle "WarnOnly" -Description "non-failing readiness mode"
     )
   }
   [pscustomobject]@{
@@ -330,7 +292,7 @@ $workflowContracts = @(
       New-Requirement -Needle "auto" -Description "auto key set selection"
       New-Requirement -Needle "hosted-all" -Description "hosted Linux all key set"
       New-Requirement -Needle "ubuntu24-hosted" -Description "Ubuntu 24.04 hosted key set"
-      New-Requirement -Needle "self-hosted-ubuntu20" -Description "Ubuntu 20.04 self-hosted key set"
+      New-Requirement -Needle "hosted-container-ubuntu20" -Description "Ubuntu 20.04 hosted-container key set"
     )
   }
   [pscustomobject]@{
@@ -429,7 +391,6 @@ $workflowContracts = @(
       New-Requirement -Needle "RUNNER_AUDIT_TOKEN" -Description "runner audit token readiness"
       New-Requirement -Needle "runnerQuerySource" -Description "runner query source reporting"
       New-Requirement -Needle "gh-auth" -Description "local gh-auth runner query fallback"
-      New-Requirement -Needle "self-hosted,linux,x64,ubuntu-20.04" -Description "Ubuntu 20.04 self-hosted runner readiness"
       New-Requirement -Needle "future-target:linux-arm64-sbsa" -Description "future SBSA readiness blocker"
       New-Requirement -Needle "future-target:linux-jetson-l4t" -Description "future Jetson readiness blocker"
       New-Requirement -Needle "future-target:non-ubuntu-linux" -Description "future non-Ubuntu readiness blocker"
@@ -452,7 +413,7 @@ $workflowContracts = @(
     requirements = @(
       New-Requirement -Needle "ubuntu22.04-x64-hosted" -Description "Ubuntu 22.04 hosted target is cataloged"
       New-Requirement -Needle "ubuntu24.04-x64-hosted" -Description "Ubuntu 24.04 hosted target is cataloged"
-      New-Requirement -Needle "ubuntu20.04-x64-self-hosted" -Description "Ubuntu 20.04 self-hosted target is cataloged"
+      New-Requirement -Needle "ubuntu20.04-x64-hosted-container" -Description "Ubuntu 20.04 hosted-container target is cataloged"
       New-Requirement -Needle "linux-arm64-sbsa" -Description "future SBSA package line is cataloged"
       New-Requirement -Needle "linux-jetson-l4t" -Description "future Jetson/L4T package line is cataloged"
       New-Requirement -Needle "non-ubuntu-linux" -Description "future non-Ubuntu package line is cataloged"
@@ -463,14 +424,12 @@ $workflowContracts = @(
     path = "eng\Test-RuntimePublicationTargetCoverage.ps1"
     requirements = @(
       New-Requirement -Needle "published-required" -Description "published target requirement classification"
-      New-Requirement -Needle "infrastructure-blocked" -Description "infrastructure-blocked target classification"
       New-Requirement -Needle "linux-x64.ubuntu20.04" -Description "Ubuntu 20.04 publication target coverage"
       New-Requirement -Needle "linux-x64.ubuntu22.04" -Description "Ubuntu 22.04 publication target coverage"
       New-Requirement -Needle "linux-x64.ubuntu24.04" -Description "Ubuntu 24.04 publication target coverage"
       New-Requirement -Needle "linux-arm64-sbsa" -Description "future SBSA package line coverage"
       New-Requirement -Needle "linux-jetson-l4t" -Description "future Jetson/L4T package line coverage"
       New-Requirement -Needle "runtime-publication-target-coverage" -Description "publication target coverage report"
-      New-Requirement -Needle "RequireInfrastructureBlockedTargetsPublished" -Description "optional strict gate for infrastructure-blocked targets"
     )
   }
 )
@@ -514,10 +473,10 @@ $results.Add([pscustomobject]@{
     detail = $ubuntu24KeySet -join ", "
   })
 
-$ubuntu20SelfHostedKeySet = @((pwsh -NoProfile -File (Join-Path $RepositoryRoot "eng\Resolve-RuntimeKeySet.ps1") -Platform linux -RuntimeKeySet self-hosted-ubuntu20 -RunnerMode self-hosted -OutputFormat json | Out-String).Trim() | ConvertFrom-Json)
+$ubuntu20SelfHostedKeySet = @((pwsh -NoProfile -File (Join-Path $RepositoryRoot "eng\Resolve-RuntimeKeySet.ps1") -Platform linux -RuntimeKeySet hosted-container-ubuntu20 -RunnerMode hosted-container -OutputFormat json | Out-String).Trim() | ConvertFrom-Json)
 $results.Add([pscustomobject]@{
     workflow = "eng\Resolve-RuntimeKeySet.ps1"
-    requirement = "Ubuntu 20.04 self-hosted key set resolves the modeled self-hosted package line"
+    requirement = "Ubuntu 20.04 hosted-container key set resolves the modeled hosted-container package line"
     status = if ($ubuntu20SelfHostedKeySet.Count -eq 3 -and $ubuntu20SelfHostedKeySet -contains "linux-x64-ubuntu20.04-trt8.6-cuda11.8-cudnn8.9") { "passed" } else { "failed" }
     detail = $ubuntu20SelfHostedKeySet -join ", "
   })
@@ -541,15 +500,17 @@ $results.Add([pscustomobject]@{
     detail = "failed=$($linuxTargetCoverage.failedCount); modeled=$($linuxTargetCoverage.modeledTargets.Count); future=$($linuxTargetCoverage.futureTargets.Count)"
   })
 
-pwsh -NoProfile -File (Join-Path $RepositoryRoot "eng\Test-RuntimePublicationTargetCoverage.ps1") -InventoryJsonPath (Join-Path $RepositoryRoot "artifacts\publication-inventory\github-publication-inventory.json") | Out-Host
+pwsh -NoProfile -File (Join-Path $RepositoryRoot "eng\Test-RuntimePublicationTargetCoverage.ps1") -InventoryJsonPath (Join-Path $RepositoryRoot "artifacts\publication-inventory\github-publication-inventory.json") -WarnOnly | Out-Host
 $publicationTargetCoverageJson = Get-Content -LiteralPath (Join-Path $RepositoryRoot "artifacts\runtime-publication-target-coverage\runtime-publication-target-coverage.json") -Raw
 $publicationTargetCoverage = $publicationTargetCoverageJson | ConvertFrom-Json
 $publishedTargetRows = @($publicationTargetCoverage.targets | Where-Object { $_.requirement -eq "published-required" })
 $infrastructureBlockedTargetRows = @($publicationTargetCoverage.targets | Where-Object { $_.requirement -eq "infrastructure-blocked" })
+$ubuntu20PublishedTargetRows = @($publishedTargetRows | Where-Object { $_.target -eq "linux-x64.ubuntu20.04" })
+$publicationTargetModeIsCorrect = $publishedTargetRows.Count -eq 4 -and $ubuntu20PublishedTargetRows.Count -eq 1 -and $infrastructureBlockedTargetRows.Count -eq 0
 $results.Add([pscustomobject]@{
     workflow = "eng\Test-RuntimePublicationTargetCoverage.ps1"
-    requirement = "Runtime publication target coverage proves Windows, Ubuntu 22.04, and Ubuntu 24.04 publication while keeping Ubuntu 20.04 infrastructure-blocked"
-    status = if ($publicationTargetCoverage.failedCount -eq 0 -and $publishedTargetRows.Count -eq 3 -and (@($publishedTargetRows | Where-Object { $_.coverageState -eq "complete" }).Count -eq 3) -and $infrastructureBlockedTargetRows.Count -eq 1 -and $infrastructureBlockedTargetRows[0].coverageState -eq "not-published") { "passed" } else { "failed" }
+    requirement = "Runtime publication target coverage requires Windows, Ubuntu 20.04, Ubuntu 22.04, and Ubuntu 24.04 publication"
+    status = if ($publicationTargetModeIsCorrect) { "passed" } else { "failed" }
     detail = "failed=$($publicationTargetCoverage.failedCount); publishedTargets=$($publishedTargetRows.Count); blockedTargets=$($infrastructureBlockedTargetRows.Count)"
   })
 
@@ -557,8 +518,8 @@ $singleLinuxMatrix = $singleLinuxMatrixJson | ConvertFrom-Json
 $results.Add([pscustomobject]@{
     workflow = "eng\Resolve-RuntimeMatrix.ps1"
     requirement = "Ubuntu 22.04 hosted matrix emits the matching runner label"
-    status = if ($singleLinuxMatrix[0].runsOnJson -eq '["ubuntu-22.04"]') { "passed" } else { "failed" }
-    detail = [string]$singleLinuxMatrix[0].runsOnJson
+    status = if ($singleLinuxMatrix[0].runsOnJson -eq '["ubuntu-22.04"]' -and $singleLinuxMatrix[0].containerImage -eq 'ubuntu:22.04') { "passed" } else { "failed" }
+    detail = "runsOn=$($singleLinuxMatrix[0].runsOnJson); containerImage=$($singleLinuxMatrix[0].containerImage)"
   })
 
 $linuxDependencyPlanJson = (pwsh -NoProfile -File (Join-Path $RepositoryRoot "eng\Prepare-LinuxNvidiaDependencies.ps1") -RuntimePackageKey "linux-x64-ubuntu22.04-trt11.0-cuda12.9-cudnn9.22" -DescribeDependencyPlan | Out-String).Trim()

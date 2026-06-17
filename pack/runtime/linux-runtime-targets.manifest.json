@@ -47,24 +47,24 @@
       "notes": "Ubuntu 24.04 is limited to modern TensorRT/CUDA combinations available from NVIDIA's Ubuntu 24.04 repositories."
     },
     {
-      "target": "ubuntu20.04-x64-self-hosted",
+      "target": "ubuntu20.04-x64-hosted-container",
       "keySetAliases": [
-        "self-hosted-ubuntu20",
-        "ubuntu20-self-hosted",
-        "ubuntu20.04-self-hosted"
+        "hosted-container-ubuntu20",
+        "ubuntu20-hosted-container",
+        "ubuntu20.04-hosted-container"
       ],
       "linuxDistro": "ubuntu",
       "linuxDistroVersion": "20.04",
       "architecture": "x64",
-      "runnerMode": "self-hosted",
+      "runnerMode": "hosted-container",
       "status": "modeled",
-      "publicationRequirement": "infrastructure-blocked",
+      "publicationRequirement": "published-required",
       "expectedCombinations": [
         "trt8.6-cuda11.8-cudnn8.9",
         "trt8.6-cuda12.1-cudnn8.9",
         "trt10.11-cuda11.8-cudnn8.9"
       ],
-      "notes": "Ubuntu 20.04 requires a self-hosted Linux x64 runner and remains separate from hosted Ubuntu 22.04/24.04."
+      "notes": "Ubuntu 20.04 runs on GitHub-hosted runners through an Ubuntu 20.04 job container because the native GitHub-hosted Ubuntu 20.04 runner image is no longer available. It remains a separate package line from Ubuntu 22.04/24.04."
     }
   ],
   "futureTargets": [

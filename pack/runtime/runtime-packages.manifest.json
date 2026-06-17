@@ -274,13 +274,11 @@
       "linuxDistroVersion": "20.04",
       "nvidiaRepoDistroId": "ubuntu2004",
       "nvidiaRepoArchitecture": "x86_64",
-      "runnerMode": "self-hosted",
+      "runnerMode": "hosted-container",
       "runnerLabels": [
-        "self-hosted",
-        "linux",
-        "x64",
-        "ubuntu-20.04"
+        "ubuntu-latest"
       ],
+      "containerImage": "ubuntu:20.04",
       "nvidiaDependencyMode": "apt",
       "tensorRtLine": "8",
       "tensorRtVersion": "8.6.1.6",
@@ -292,7 +290,7 @@
       "cudnnVersion": "8.9.7.29",
       "distributionTier": "private-feed",
       "validationState": "dry-run-only",
-      "distributionNotes": "Linux x64 Ubuntu 20.04 target. Ubuntu 20.04 hosted runners are not available for this workflow; use a self-hosted runner with NVIDIA apt access or preinstalled roots.",
+      "distributionNotes": "Linux x64 Ubuntu 20.04 target. GitHub-hosted Ubuntu 20.04 runner images are no longer available, so this package line runs on a GitHub-hosted runner with an Ubuntu 20.04 job container and official NVIDIA apt dependencies.",
       "buildPreset": "linux-x64-trt8-cuda11-release",
       "bridgeConfiguration": "Release",
       "defaultTensorRtRoot": "/opt/tensorrt/ubuntu20.04/trt8.6-cuda11.8-cudnn8.9",
@@ -329,13 +327,11 @@
       "linuxDistroVersion": "20.04",
       "nvidiaRepoDistroId": "ubuntu2004",
       "nvidiaRepoArchitecture": "x86_64",
-      "runnerMode": "self-hosted",
+      "runnerMode": "hosted-container",
       "runnerLabels": [
-        "self-hosted",
-        "linux",
-        "x64",
-        "ubuntu-20.04"
+        "ubuntu-latest"
       ],
+      "containerImage": "ubuntu:20.04",
       "nvidiaDependencyMode": "apt",
       "tensorRtLine": "8",
       "tensorRtVersion": "8.6.1.6",
@@ -347,7 +343,7 @@
       "cudnnVersion": "8.9.7.29",
       "distributionTier": "private-feed",
       "validationState": "dry-run-only",
-      "distributionNotes": "Linux x64 Ubuntu 20.04 target. Ubuntu 20.04 hosted runners are not available for this workflow; use a self-hosted runner with NVIDIA apt access or preinstalled roots. NVIDIA Linux apt repositories publish TensorRT 8.6 CUDA 12 packages as +cuda12.0 and cuDNN 8.9 CUDA 12 packages as +cuda12.2; the runtime key keeps the project CUDA 12.1 compatibility label.",
+      "distributionNotes": "Linux x64 Ubuntu 20.04 target. GitHub-hosted Ubuntu 20.04 runner images are no longer available, so this package line runs on a GitHub-hosted runner with an Ubuntu 20.04 job container and official NVIDIA apt dependencies. NVIDIA Linux apt repositories publish TensorRT 8.6 CUDA 12 packages as +cuda12.0 and cuDNN 8.9 CUDA 12 packages as +cuda12.2; the runtime key keeps the project CUDA 12.1 compatibility label.",
       "buildPreset": "linux-x64-trt8-cuda12-release",
       "bridgeConfiguration": "Release",
       "defaultTensorRtRoot": "/opt/tensorrt/ubuntu20.04/trt8.6-cuda12.1-cudnn8.9",
@@ -384,13 +380,11 @@
       "linuxDistroVersion": "20.04",
       "nvidiaRepoDistroId": "ubuntu2004",
       "nvidiaRepoArchitecture": "x86_64",
-      "runnerMode": "self-hosted",
+      "runnerMode": "hosted-container",
       "runnerLabels": [
-        "self-hosted",
-        "linux",
-        "x64",
-        "ubuntu-20.04"
+        "ubuntu-latest"
       ],
+      "containerImage": "ubuntu:20.04",
       "nvidiaDependencyMode": "apt",
       "tensorRtLine": "10",
       "tensorRtVersion": "10.11.0.33",
@@ -402,7 +396,7 @@
       "cudnnVersion": "8.9.7.29",
       "distributionTier": "private-feed",
       "validationState": "dry-run-only",
-      "distributionNotes": "Linux x64 Ubuntu 20.04 target. Ubuntu 20.04 hosted runners are not available for this workflow; use a self-hosted runner with NVIDIA apt access or preinstalled roots.",
+      "distributionNotes": "Linux x64 Ubuntu 20.04 target. GitHub-hosted Ubuntu 20.04 runner images are no longer available, so this package line runs on a GitHub-hosted runner with an Ubuntu 20.04 job container and official NVIDIA apt dependencies.",
       "buildPreset": "linux-x64-trt10-cuda11-release",
       "bridgeConfiguration": "Release",
       "defaultTensorRtRoot": "/opt/tensorrt/ubuntu20.04/trt10.11-cuda11.8-cudnn8.9",

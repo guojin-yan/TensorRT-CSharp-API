@@ -12,7 +12,7 @@ As of 2026-06-12 the release candidate gate starts from a zero-missing interface
 The release candidate gate is split into two paths:
 
 - Hosted gate: source build, runtime manifest validation, binding generator determinism, workflow contracts, DocFX, managed package content, project quality tests, and report exports.
-- Runtime gate: native build, runtime asset collection, runtime nupkg, package consumer validation, optional GPU smoke, and publish readiness for the selected runtime key. Windows uses the self-hosted Windows runner; Linux Ubuntu 22.04 x64 uses hosted runners, while Ubuntu 20.04 and future ARM/Jetson lines require explicit self-hosted or dedicated runners.
+- Runtime gate: native build, runtime asset collection, runtime nupkg, package consumer validation, optional GPU smoke, and publish readiness for the selected runtime key. Windows uses the self-hosted Windows runner; Linux Ubuntu 20.04/22.04/24.04 x64 use GitHub-hosted runners with distro-matched Ubuntu job containers, while future ARM/Jetson lines require dedicated package lines and runners.
 
 Current primary Windows runtime keys:
 
@@ -102,4 +102,4 @@ Before using the remote publication lanes:
 
 - `package-managed.yml` with `publish_to_nuget=true` requires the repository secret `NUGET_API_KEY`, and that value must be a plain-text ASCII nuget.org API key. The workflow fails before publication when the secret is missing, so official nuget.org pushes no longer depend on a self-hosted runner's current-user NuGet configuration. Encrypted local credential blobs and machine-generated exports are not valid secret values.
 - `runtime-windows.yml` requires the Windows self-hosted runner to stay online with the labels `self-hosted`, `windows`, and `x64`.
-- `runtime-linux.yml` can publish the hosted Ubuntu 22.04 x64 matrix through GitHub-hosted runners. Ubuntu 20.04 x64 must use `runner_mode=self-hosted`, Ubuntu 24.04 x64 only covers the modern combinations, and ARM/Jetson targets need separate package lines before publication.
+- `runtime-linux.yml` can publish Ubuntu 20.04, Ubuntu 22.04, and Ubuntu 24.04 x64 through GitHub-hosted runners with distro-matched Ubuntu job containers. Ubuntu 20.04 uses `runner_mode=hosted-container`; Ubuntu 24.04 only covers the modern combinations; ARM/Jetson targets need separate package lines before publication.

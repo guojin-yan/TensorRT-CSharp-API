@@ -49,30 +49,30 @@ Linux package keys must include the distribution version and architecture. The d
 - `linux-x64-ubuntu22.04-trt11.0-cuda12.9-cudnn9.22`
 - `linux-x64-ubuntu22.04-trt11.0-cuda13.2-cudnn9.22`
 
-Ubuntu 24.04 x64 is modeled only for the modern combinations that exist in NVIDIA's Ubuntu 24.04 repo. Ubuntu 20.04 x64 is self-hosted only. arm64/SBSA, Jetson/L4T, and non-Ubuntu distributions must be added as separate package lines after the matching NVIDIA repository and runner strategy are modeled.
+Ubuntu 24.04 x64 is modeled only for the modern combinations that exist in NVIDIA's Ubuntu 24.04 repo. Ubuntu 20.04 x64 is a separate hosted-container line that runs on a GitHub-hosted runner with an `ubuntu:20.04` job container. arm64/SBSA, Jetson/L4T, and non-Ubuntu distributions must be added as separate package lines after the matching NVIDIA repository and runner strategy are modeled.
 
 The `runtime-linux` workflow can resolve package lines through `runtime_key_set`:
 
 - `ubuntu22-hosted`: the default hosted publication line with all six Ubuntu 22.04 x64 combinations.
 - `hosted-all`: every hosted Linux line, currently the six Ubuntu 22.04 x64 combinations plus the three modern Ubuntu 24.04 x64 combinations.
 - `ubuntu24-hosted`: only the modern Ubuntu 24.04 x64 combinations.
-- `self-hosted-ubuntu20`: only the modeled Ubuntu 20.04 x64 self-hosted combinations; dispatch with `runner_mode=self-hosted`.
+- `hosted-container-ubuntu20`: the modeled Ubuntu 20.04 x64 combinations; dispatch with `runner_mode=hosted-container`.
 - `custom`: requires explicit `runtime_keys`.
 
-Explicit `runtime_keys` always win. When `runtime_keys` is empty, `runtime_key_set` selects the package line. This keeps the normal release path on Ubuntu 22.04 hosted while still making hosted-all and Ubuntu 20.04 self-hosted publication explicit and repeatable.
+Explicit `runtime_keys` always win. When `runtime_keys` is empty, `runtime_key_set` selects the package line. This keeps the normal release path on Ubuntu 22.04 hosted while still making hosted-all and Ubuntu 20.04 hosted-container publication explicit and repeatable.
 
 The `release-bundle` workflow now has two Linux orchestration lanes:
 
 - `run_linux_runtime_packaging`: hosted Linux publication, defaulting to `hosted-all` so Ubuntu 22.04 x64 and the modeled Ubuntu 24.04 x64 lines are dispatched together.
-- `run_linux_self_hosted_ubuntu20_runtime_packaging`: Ubuntu 20.04 x64 self-hosted publication, defaulting to `self-hosted-ubuntu20` and always dispatching `runner_mode=self-hosted`.
+- `run_linux_ubuntu20_runtime_packaging`: Ubuntu 20.04 x64 hosted-container publication, defaulting to `hosted-container-ubuntu20` and always dispatching `runner_mode=hosted-container`.
 
 Use separate release-bundle inputs for Linux split roles and stable dependency versions. Routine bridge or managed changes can publish Linux `bridge,collection` while pinning already-published `CudaCudnn` and `TensorRt` versions; NVIDIA dependency refreshes should use `cuda-cudnn`, `tensorrt`, or `all`. When one dispatch spans multiple dependency publication versions, such as `hosted-all`, pin the dependencies with runtime-key maps instead of one global version. The current hosted Linux bridge/collection refresh maps `linux-x64-ubuntu22.04-*` to `4.0.6167` and `linux-x64-ubuntu24.04-*` to `4.0.6169`; the default release tag is `v<resolved package version>` unless a release-tag map is supplied. Less common overrides, such as delivery mode, release tags for stable dependency assets, bridge/meta package versions, and skip-validation toggles, are passed through `release_config_json` to keep the manual GitHub Actions form under the `workflow_dispatch` input limit.
 
-Do not reduce the published release model to the current latest tag. The Windows line still has six modeled combinations, Ubuntu 22.04 x64 has six modeled combinations, and Ubuntu 24.04 x64 has three modeled combinations. Ubuntu 20.04 x64 remains modeled but infrastructure-blocked until a self-hosted runner is available. Use the runtime publication index artifact as the readable map when a release tag only contains a subset of the runtime lines.
+Do not reduce the published release model to the current latest tag. The Windows line still has six modeled combinations, Ubuntu 20.04 x64 has three modeled combinations, Ubuntu 22.04 x64 has six modeled combinations, and Ubuntu 24.04 x64 has three modeled combinations. Use the runtime publication index artifact as the readable map when a release tag only contains a subset of the runtime lines.
 
 Prefer `eng/Invoke-RemoteReleaseBundle.ps1` when dispatching releases from a workstation. The script keeps supported top-level workflow inputs as `-f key=value` flags and serializes advanced release settings into `release_config_json`, which avoids accidental dispatch failures from undeclared workflow inputs.
 
-Hosted Ubuntu 22.04 and Ubuntu 24.04 Linux packages now have remote publication evidence. Ubuntu 20.04 and future ARM/Jetson/non-Ubuntu lines still require their matching runner, dependency source, and package-consumer evidence before publication.
+Hosted Ubuntu 22.04 and Ubuntu 24.04 Linux packages now have remote publication evidence. Ubuntu 20.04 is modeled as a hosted-container lane and must be published separately. Future ARM/Jetson/non-Ubuntu lines still require matching package identities, runners or containers, dependency sources, and package-consumer evidence before publication.
 
 ## Current publication map
 
@@ -92,7 +92,7 @@ Current lane guidance:
 - `TRT8` Windows packages are public-preview candidates only after NVIDIA redistribution terms and package size limits are reviewed.
 - `TRT10` Windows packages are private-feed or split-delivery candidates because builder resources, plugins, and parser assets can be large. Both Windows TRT10 package-consumer smoke paths have 2026-06-12 local evidence.
 - `TRT11` Windows CUDA `12.9` is a private-feed candidate with package-consumer smoke evidence. Windows CUDA `13.2` remains blocked until driver/runtime-compatible smoke is available.
-- Hosted Ubuntu 22.04 and Ubuntu 24.04 Linux packages have remote publication evidence; Ubuntu 20.04 remains self-hosted/infrastructure-blocked, and ARM/Jetson/non-Ubuntu lines remain future separate package lines.
+- Hosted Ubuntu 22.04 and Ubuntu 24.04 Linux packages have remote publication evidence; Ubuntu 20.04 is the hosted-container gap to fill next, and ARM/Jetson/non-Ubuntu lines remain future separate package lines.
 
 ## nuget.org size boundary
 

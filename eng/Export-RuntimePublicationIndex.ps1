@@ -198,7 +198,7 @@ $lines.Add("")
 $lines.Add("## Notes")
 $lines.Add("")
 $lines.Add("- Windows and Linux runtime packages are intentionally spread across runtime release tags. The latest managed release does not necessarily contain every runtime asset.")
-$lines.Add("- Ubuntu 20.04, ARM/SBSA, Jetson/L4T, and non-Ubuntu Linux remain separate or infrastructure-blocked package lines until their dedicated runner and NVIDIA dependency strategy are validated.")
+$lines.Add("- Ubuntu 20.04 is a separate hosted-container package line. ARM/SBSA, Jetson/L4T, and non-Ubuntu Linux remain future package lines until their package IDs, runners or containers, NVIDIA dependency strategy, and consumer validation are modeled.")
 
 $lines | Set-Content -LiteralPath $markdownPath -Encoding utf8
 

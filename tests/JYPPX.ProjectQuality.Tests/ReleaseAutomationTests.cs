@@ -60,7 +60,7 @@ public sealed class ReleaseAutomationTests
         JsonElement[] targets = document.RootElement.GetProperty("targets").EnumerateArray().ToArray();
         Assert.Contains(targets, static target => target.GetProperty("target").GetString() == "ubuntu22.04-x64-hosted");
         Assert.Contains(targets, static target => target.GetProperty("target").GetString() == "ubuntu24.04-x64-hosted");
-        Assert.Contains(targets, static target => target.GetProperty("target").GetString() == "ubuntu20.04-x64-self-hosted");
+        Assert.Contains(targets, static target => target.GetProperty("target").GetString() == "ubuntu20.04-x64-hosted-container");
 
         JsonElement[] futureTargets = document.RootElement.GetProperty("futureTargets").EnumerateArray().ToArray();
         Assert.Contains(futureTargets, static target => target.GetProperty("target").GetString() == "linux-arm64-sbsa");
@@ -115,7 +115,7 @@ public sealed class ReleaseAutomationTests
     [Theory]
     [InlineData("hosted-all", "hosted", 9, "linux-x64-ubuntu22.04-trt8.6-cuda11.8-cudnn8.9", "linux-x64-ubuntu24.04-trt11.0-cuda13.2-cudnn9.22")]
     [InlineData("ubuntu24-hosted", "hosted", 3, "linux-x64-ubuntu24.04-trt10.11-cuda12.9-cudnn9.22", "linux-x64-ubuntu24.04-trt11.0-cuda13.2-cudnn9.22")]
-    [InlineData("self-hosted-ubuntu20", "self-hosted", 3, "linux-x64-ubuntu20.04-trt8.6-cuda11.8-cudnn8.9", "linux-x64-ubuntu20.04-trt10.11-cuda11.8-cudnn8.9")]
+    [InlineData("hosted-container-ubuntu20", "hosted-container", 3, "linux-x64-ubuntu20.04-trt8.6-cuda11.8-cudnn8.9", "linux-x64-ubuntu20.04-trt10.11-cuda11.8-cudnn8.9")]
     public void LinuxRuntimeKeySetsResolveExpectedPackageLines(
         string keySet,
         string runnerMode,
@@ -139,21 +139,56 @@ public sealed class ReleaseAutomationTests
     }
 
     [Fact]
-    public void Ubuntu20SelfHostedMatrixUsesOfficialAptDependencyPreparation()
+    public void LegacyUbuntu20SelfHostedKeySetFailsWithMigrationGuidance()
+    {
+        string script = Path.Combine(RepositoryPaths.Root, "eng", "Resolve-RuntimeKeySet.ps1");
+        (int exitCode, string output) = RunPowerShellAllowFailure(
+            script,
+            "-Platform", "linux",
+            "-RuntimeKeySet", "self-hosted-ubuntu20",
+            "-RunnerMode", "self-hosted",
+            "-OutputFormat", "json");
+
+        Assert.NotEqual(0, exitCode);
+        Assert.Contains("hosted-container-ubuntu20", output, StringComparison.Ordinal);
+        Assert.Contains("runner_mode='hosted-container'", output, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Ubuntu20HostedContainerMatrixUsesOfficialAptDependencyPreparation()
     {
         string script = Path.Combine(RepositoryPaths.Root, "eng", "Resolve-RuntimeMatrix.ps1");
         string output = RunPowerShell(
             script,
             "-Platform", "linux",
             "-RuntimeKey", "linux-x64-ubuntu20.04-trt8.6-cuda11.8-cudnn8.9",
-            "-RunnerMode", "self-hosted");
+            "-RunnerMode", "hosted-container");
 
         using JsonDocument document = JsonDocument.Parse(output);
         JsonElement entry = Assert.Single(document.RootElement.EnumerateArray());
 
-        Assert.Equal("self-hosted", entry.GetProperty("runnerMode").GetString());
+        Assert.Equal("hosted-container", entry.GetProperty("runnerMode").GetString());
         Assert.Equal("apt", entry.GetProperty("nvidiaDependencyMode").GetString());
-        Assert.Contains("ubuntu-20.04", entry.GetProperty("runsOnJson").GetString(), StringComparison.Ordinal);
+        Assert.Equal("ubuntu:20.04", entry.GetProperty("containerImage").GetString());
+        Assert.Contains("ubuntu-latest", entry.GetProperty("runsOnJson").GetString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Ubuntu22HostedMatrixUsesTheMatchingJobContainer()
+    {
+        string script = Path.Combine(RepositoryPaths.Root, "eng", "Resolve-RuntimeMatrix.ps1");
+        string output = RunPowerShell(
+            script,
+            "-Platform", "linux",
+            "-RuntimeKey", "linux-x64-ubuntu22.04-trt11.0-cuda12.9-cudnn9.22",
+            "-RunnerMode", "hosted");
+
+        using JsonDocument document = JsonDocument.Parse(output);
+        JsonElement entry = Assert.Single(document.RootElement.EnumerateArray());
+
+        Assert.Equal("hosted", entry.GetProperty("runnerMode").GetString());
+        Assert.Equal("ubuntu:22.04", entry.GetProperty("containerImage").GetString());
+        Assert.Equal("[\"ubuntu-22.04\"]", entry.GetProperty("runsOnJson").GetString());
     }
 
     [Theory]

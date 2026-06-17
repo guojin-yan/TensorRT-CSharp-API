@@ -337,12 +337,29 @@ jobs:
       - managed
     if: ${{ needs.prepare.outputs.has_entries == 'true' }}
     runs-on: ${{ fromJson(matrix.runsOnJson) }}
+    container: ${{ matrix.containerImage }}
     env:
       DOTNET_INSTALL_DIR: ${{ github.workspace }}/.dotnet
+      DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: "1"
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
     steps:
+      - name: Bootstrap Ubuntu container tools
+        if: ${{ matrix.containerImage != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update
+          apt-get install -y --no-install-recommends ca-certificates curl wget gnupg apt-transport-https sudo git jq unzip zip tar gzip xz-utils
+          . /etc/os-release
+          wget -q "https://packages.microsoft.com/config/ubuntu/${VERSION_ID}/packages-microsoft-prod.deb" -O /tmp/packages-microsoft-prod.deb
+          dpkg -i /tmp/packages-microsoft-prod.deb
+          rm -f /tmp/packages-microsoft-prod.deb
+          apt-get update
+          apt-get install -y --no-install-recommends powershell
+
       - name: Checkout
         uses: actions/checkout@v6
 
@@ -350,6 +367,11 @@ jobs:
         if: ${{ inputs.runner_mode == 'hosted' && matrix.runnerMode != 'hosted' }}
         shell: pwsh
         run: throw "Runtime key '${{ matrix.key }}' requires runner_mode='${{ matrix.runnerMode }}', but hosted mode was requested."
+
+      - name: Validate hosted container runner mode
+        if: ${{ inputs.runner_mode == 'hosted-container' && matrix.runnerMode != 'hosted-container' }}
+        shell: pwsh
+        run: throw "Runtime key '${{ matrix.key }}' requires runner_mode='${{ matrix.runnerMode }}', but hosted-container mode was requested."
 
       - name: Validate self-hosted runner mode
         if: ${{ inputs.runner_mode == 'self-hosted' && matrix.runnerMode != 'self-hosted' }}

@@ -25,7 +25,7 @@ if (-not $manifest.packages) {
 $requiredCommon = @("key", "packageId", "rid", "platform", "tensorRtLine", "cudaLine", "tensorRtVersion", "cudaVersion", "cudnnMajor", "cudnnVersion", "distributionTier", "validationState", "distributionNotes", "buildPreset", "bridgeConfiguration", "bridgeFile")
 $allowedDistributionTiers = @("public-sample", "private-feed", "split-delivery-candidate")
 $allowedValidationStates = @("local-validated", "pending-local-validation", "dry-run-only")
-$allowedLinuxRunnerModes = @("hosted", "self-hosted")
+$allowedLinuxRunnerModes = @("hosted", "hosted-container", "self-hosted")
 $allowedLinuxArchitectures = @("x64", "arm64")
 $errors = New-Object System.Collections.Generic.List[string]
 
@@ -142,6 +142,17 @@ foreach ($package in $manifest.packages) {
       $expectedHostedLabel = "ubuntu-$($package.linuxDistroVersion)"
       if ($runnerLabels -notcontains $expectedHostedLabel) {
         $errors.Add("Linux hosted package '$($package.key)' must include runner label '$expectedHostedLabel'.")
+      }
+    }
+
+    if ($package.runnerMode -eq "hosted-container") {
+      if (-not $package.PSObject.Properties.Name.Contains("containerImage") -or [string]::IsNullOrWhiteSpace([string]$package.containerImage)) {
+        $errors.Add("Linux hosted-container package '$($package.key)' must include containerImage.")
+      }
+
+      $runnerLabels = @($package.runnerLabels | ForEach-Object { [string]$_ })
+      if ($runnerLabels -notcontains "ubuntu-latest") {
+        $errors.Add("Linux hosted-container package '$($package.key)' must run on the ubuntu-latest host label.")
       }
     }
 

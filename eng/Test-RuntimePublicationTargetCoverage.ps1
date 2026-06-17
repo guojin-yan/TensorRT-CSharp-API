@@ -187,8 +187,8 @@ $targetDefinitions = @(
     -Packages $linuxUbuntu24Packages
   New-TargetDefinition `
     -Target "linux-x64.ubuntu20.04" `
-    -Requirement "infrastructure-blocked" `
-    -Notes "Ubuntu 20.04 x64 is modeled but requires an online self-hosted linux/x64/ubuntu-20.04 runner before publication." `
+    -Requirement "published-required" `
+    -Notes "Ubuntu 20.04 x64 runs through the hosted Ubuntu 20.04 container lane and must publish its modeled legacy dependency combinations." `
     -Packages $linuxUbuntu20Packages
 )
 

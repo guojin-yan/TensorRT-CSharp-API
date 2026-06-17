@@ -83,13 +83,13 @@ on:
         required: false
         default: ""
         type: string
-      run_linux_self_hosted_ubuntu20_runtime_packaging:
-        description: Build and publish Ubuntu 20.04 self-hosted Linux runtime packages
+      run_linux_ubuntu20_runtime_packaging:
+        description: Build and publish Ubuntu 20.04 Linux runtime packages through a hosted container lane
         required: false
         default: false
         type: boolean
-      linux_self_hosted_ubuntu20_runtime_keys:
-        description: Optional comma-separated Ubuntu 20.04 self-hosted Linux runtime keys
+      linux_ubuntu20_runtime_keys:
+        description: Optional comma-separated Ubuntu 20.04 hosted-container Linux runtime keys
         required: false
         default: ""
         type: string
@@ -158,8 +158,8 @@ jobs:
       LINUX_SPLIT_PACKAGE_ROLES: ${{ inputs.linux_split_package_roles }}
       LINUX_CUDA_CUDNN_PACKAGE_VERSION: ${{ inputs.linux_cuda_cudnn_package_version }}
       LINUX_TENSORRT_PACKAGE_VERSION: ${{ inputs.linux_tensorrt_package_version }}
-      RUN_LINUX_SELF_HOSTED_UBUNTU20_RUNTIME_PACKAGING: ${{ inputs.run_linux_self_hosted_ubuntu20_runtime_packaging }}
-      LINUX_SELF_HOSTED_UBUNTU20_RUNTIME_KEYS: ${{ inputs.linux_self_hosted_ubuntu20_runtime_keys }}
+      RUN_LINUX_UBUNTU20_RUNTIME_PACKAGING: ${{ inputs.run_linux_ubuntu20_runtime_packaging }}
+      LINUX_UBUNTU20_RUNTIME_KEYS: ${{ inputs.linux_ubuntu20_runtime_keys }}
       RUN_WINDOWS_SMOKE: ${{ inputs.run_windows_smoke }}
       SIGN_WINDOWS_CONSUMER_OUTPUT: true
       RUN_LINUX_SMOKE: ${{ inputs.run_linux_smoke }}
@@ -193,11 +193,6 @@ jobs:
 
           if [ "$RUN_LINUX_RUNTIME_PACKAGING" = "true" ] && [ "$LINUX_RUNNER_MODE" = "self-hosted" ]; then
             runner_label_sets+=("self-hosted,linux,x64")
-            strict_runner_preflight=true
-          fi
-
-          if [ "$RUN_LINUX_SELF_HOSTED_UBUNTU20_RUNTIME_PACKAGING" = "true" ]; then
-            runner_label_sets+=("self-hosted,linux,x64,ubuntu-20.04")
             strict_runner_preflight=true
           fi
 
@@ -280,7 +275,7 @@ jobs:
           LINUX_TENSORRT_PACKAGE_RELEASE_TAG_MAP="$(get_config linux_tensorrt_package_release_tag_map '')"
           LINUX_INCLUDE_META_PACKAGE="$(get_config linux_include_meta_package false)"
           LINUX_SKIP_CONSUMER_VALIDATION="$(get_config linux_skip_consumer_validation false)"
-          LINUX_SELF_HOSTED_UBUNTU20_RUNTIME_KEY_SET="$(get_config linux_self_hosted_ubuntu20_runtime_key_set self-hosted-ubuntu20)"
+          LINUX_UBUNTU20_RUNTIME_KEY_SET="$(get_config linux_ubuntu20_runtime_key_set "$(get_config linux_self_hosted_ubuntu20_runtime_key_set hosted-container-ubuntu20)")"
 
           role_text="$(printf '%s' "$WINDOWS_SPLIT_PACKAGE_ROLES" | tr '[:upper:]' '[:lower:]')"
           if [ "$RUN_WINDOWS_RUNTIME_PACKAGING" = "true" ] &&
@@ -312,7 +307,7 @@ jobs:
           fi
 
           linux_role_text="$(printf '%s' "$LINUX_SPLIT_PACKAGE_ROLES" | tr '[:upper:]' '[:lower:]')"
-          if { [ "$RUN_LINUX_RUNTIME_PACKAGING" = "true" ] || [ "$RUN_LINUX_SELF_HOSTED_UBUNTU20_RUNTIME_PACKAGING" = "true" ]; } &&
+          if { [ "$RUN_LINUX_RUNTIME_PACKAGING" = "true" ] || [ "$RUN_LINUX_UBUNTU20_RUNTIME_PACKAGING" = "true" ]; } &&
              [ "$LINUX_RUNTIME_DELIVERY_MODE" = "split" ] &&
              { [[ ",$linux_role_text," == *",collection,"* ]] || [[ ",$linux_role_text," == *",meta,"* ]] || [[ "$LINUX_INCLUDE_META_PACKAGE" = "true" ]]; } &&
              [[ ",$linux_role_text," != *",cuda-cudnn,"* ]] &&
@@ -326,7 +321,7 @@ jobs:
             exit 1
           fi
 
-          if { [ "$RUN_LINUX_RUNTIME_PACKAGING" = "true" ] || [ "$RUN_LINUX_SELF_HOSTED_UBUNTU20_RUNTIME_PACKAGING" = "true" ]; } &&
+          if { [ "$RUN_LINUX_RUNTIME_PACKAGING" = "true" ] || [ "$RUN_LINUX_UBUNTU20_RUNTIME_PACKAGING" = "true" ]; } &&
              [ "$LINUX_RUNTIME_DELIVERY_MODE" = "split" ] &&
              { [[ ",$linux_role_text," == *",collection,"* ]] || [[ ",$linux_role_text," == *",meta,"* ]] || [[ "$LINUX_INCLUDE_META_PACKAGE" = "true" ]]; } &&
              [[ ",$linux_role_text," != *",tensorrt,"* ]] &&
@@ -456,13 +451,13 @@ jobs:
               -f "attach_to_github_release=$ATTACH_RUNTIME_TO_GITHUB_RELEASE"
           fi
 
-          if [ "$RUN_LINUX_SELF_HOSTED_UBUNTU20_RUNTIME_PACKAGING" = "true" ]; then
-            dispatch_workflow "runtime-linux" --label "runtime-linux-self-hosted-ubuntu20" \
+          if [ "$RUN_LINUX_UBUNTU20_RUNTIME_PACKAGING" = "true" ]; then
+            dispatch_workflow "runtime-linux" --label "runtime-linux-hosted-container-ubuntu20" \
               -f "version=$runtime_version" \
               -f "configuration=$RELEASE_CONFIGURATION" \
-              -f "runtime_keys=$LINUX_SELF_HOSTED_UBUNTU20_RUNTIME_KEYS" \
-              -f "runtime_key_set=$LINUX_SELF_HOSTED_UBUNTU20_RUNTIME_KEY_SET" \
-              -f "runner_mode=self-hosted" \
+              -f "runtime_keys=$LINUX_UBUNTU20_RUNTIME_KEYS" \
+              -f "runtime_key_set=$LINUX_UBUNTU20_RUNTIME_KEY_SET" \
+              -f "runner_mode=hosted-container" \
               -f "runtime_delivery_mode=$LINUX_RUNTIME_DELIVERY_MODE" \
               -f "split_package_roles=$LINUX_SPLIT_PACKAGE_ROLES" \
               -f "meta_package_version=$LINUX_META_PACKAGE_VERSION" \

@@ -22,7 +22,7 @@ function Get-DeliveryLane {
       return "hold-linux-validation"
     }
 
-    if ($Package.linuxDistroVersion -eq "20.04" -or $Package.runnerMode -eq "self-hosted") {
+    if ($Package.runnerMode -eq "self-hosted") {
       return "hold-linux-validation"
     }
   }
@@ -135,7 +135,7 @@ $lines.Add("")
 $lines.Add("- public-preview: small enough and locally validated enough to use as a public validation sample after license review.")
 $lines.Add("- private-feed: suitable for controlled internal feeds while validation, size, or license constraints remain unresolved.")
 $lines.Add("- split-delivery-design: too large or broad for a single default public package; split into bridge, CudaCudnn, TensorRt, and collection packages first.")
-$lines.Add("- hold-linux-validation: Linux lines that need a dedicated runner/dependency strategy before publication, such as Ubuntu 20.04 self-hosted or future ARM/Jetson targets.")
+$lines.Add("- hold-linux-validation: Linux lines that need a dedicated runner/dependency strategy before publication, such as future ARM/Jetson targets.")
 $lines.Add("")
 $lines.Add("| Key | Tier | Validation | Delivery lane | Recommendation |")
 $lines.Add("| --- | --- | --- | --- | --- |")

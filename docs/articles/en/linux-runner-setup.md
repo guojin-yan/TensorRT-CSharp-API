@@ -2,52 +2,58 @@
 
 ## Purpose
 
-Linux runtime packaging now supports both GitHub-hosted and self-hosted execution paths. The default release line uses GitHub-hosted Ubuntu 22.04 x64 runners; other distributions and architectures must be selected through explicit runtime keys.
+Linux runtime packaging now supports GitHub-hosted Ubuntu x64 package lines with distro-matched job containers. Other distributions and architectures must be selected through explicit runtime keys and are future separate package lines until their NVIDIA dependency strategy is modeled.
 
 ## Linux Matrix Boundaries
 
 - Ubuntu 22.04 x64 is the default release line. `runtime-linux.yml` builds the six configured TensorRT / CUDA / cuDNN combinations for this distribution by default.
 - Ubuntu 24.04 x64 can run on GitHub-hosted runners, but NVIDIA apt repositories do not cover the older TensorRT 8.6 / CUDA 11.8 / CUDA 12.0 lines there. Keep Ubuntu 24.04 to the newer TensorRT 10.11 / 11.0 combinations.
-- Ubuntu 20.04 x64 is no longer available as a GitHub-hosted runner. The manifest keeps those runtime keys, but publishing them requires a self-hosted runner or explicitly prepared official NVIDIA roots.
+- Ubuntu 20.04 x64 is no longer available as a native GitHub-hosted runner image, so this repository publishes it through `runner_mode=hosted-container` on an `ubuntu-latest` host with an `ubuntu:20.04` job container.
 - ARM64 / Jetson / L4T should not be mixed into the generic `linux-x64` package line. They need separate runtime keys, RIDs, runner labels, NVIDIA repo architecture, and L4T dependency handling.
 
 ## Required runner capabilities
 
-- Linux x64 host; Ubuntu 22.04 / 24.04 can use GitHub-hosted runners, while Ubuntu 20.04 requires self-hosted execution
-- recommended self-hosted runner labels: `self-hosted`, `linux`, `x64`, plus the target distribution label such as `ubuntu-20.04`
+- GitHub-hosted Linux x64 runner host
+- distro-matched Ubuntu job container from the manifest, for example `ubuntu:20.04`, `ubuntu:22.04`, or `ubuntu:24.04`
 - .NET 10 SDK
 - `pwsh`
 - CMake
-- matching CUDA Toolkit installed from an official NVIDIA distribution
-- matching TensorRT Linux package downloaded from NVIDIA and unpacked
-- matching cuDNN Linux package downloaded from NVIDIA and installed or unpacked
+- matching CUDA Toolkit installed from NVIDIA's official apt repository
+- matching TensorRT Linux packages installed from NVIDIA's official apt repository
+- matching cuDNN Linux packages installed from NVIDIA's official apt repository
 
-Do not commit CUDA, cuDNN, or TensorRT binaries to Git. The hosted Linux path installs publicly available runtime libraries and development headers from NVIDIA's official apt repositories; the self-hosted path reads already prepared official package roots from the runner.
+Do not commit CUDA, cuDNN, or TensorRT binaries to Git. The hosted Linux path installs publicly available runtime libraries and development headers from NVIDIA's official apt repositories during the workflow.
 
-## Ubuntu 20.04 self-hosted runner bootstrap
+## Ubuntu 20.04 Hosted-Container Lane
 
-Use the helper below on the Ubuntu 20.04 x64 machine after signing in with `gh` as an account that can request repository runner registration tokens:
-
-```bash
-pwsh -File ./eng/Install-GitHubSelfHostedRunner.ps1 \
-  -Repository guojin-yan/TensorRT-CSharp-API \
-  -UseGhRegistrationToken \
-  -InstallService
-```
-
-The helper downloads the official GitHub Actions runner, configures it with `ubuntu-20.04,tensorrt-csharp` custom labels, and leaves the built-in `self-hosted,linux,x64` labels intact. It never writes the short-lived registration token to disk. Use `-DryRun` first when you want to preview the exact commands.
-
-Before dispatching the Ubuntu 20.04 runtime lane, run:
+Use the hosted-container key set for Ubuntu 20.04:
 
 ```bash
-pwsh -File ./eng/Test-LinuxSelfHostedRunnerReadiness.ps1 \
-  -RequireRegisteredRunner \
-  -CheckGitHubRunner
+gh workflow run runtime-linux.yml \
+  --ref TensorRtSharp4.0 \
+  -f version=4.0.x \
+  -f runtime_key_set=hosted-container-ubuntu20 \
+  -f runner_mode=hosted-container \
+  -f runtime_delivery_mode=split \
+  -f split_package_roles=all \
+  -f attach_to_github_release=true
 ```
 
-The readiness check writes `artifacts/linux-self-hosted-runner-readiness/linux-self-hosted-runner-readiness.json` and `.md`. It verifies the OS, x64 architecture, `pwsh`, `.NET SDK 10.0.300+`, CMake, Ninja, Git, `gh`, local runner configuration, GitHub runner labels, and the NVIDIA roots resolved for `self-hosted-ubuntu20`.
+Or dispatch it through `release-bundle.yml`:
 
-After the runner is visible in GitHub, you can run the same check remotely with `linux-self-hosted-runner-readiness.yml`. It targets `self-hosted,linux,x64,ubuntu-20.04`, uploads the same readiness artifacts, and does not publish packages. Use it as the final gate before enabling `run_linux_self_hosted_ubuntu20_runtime_packaging=true` in `release-bundle.yml`.
+```bash
+pwsh -File ./eng/Invoke-RemoteReleaseBundle.ps1 \
+  -Version 4.0.x \
+  -RuntimeVersion 4.0.x \
+  -RunLinuxUbuntu20RuntimePackaging \
+  -LinuxUbuntu20RuntimeKeySet hosted-container-ubuntu20 \
+  -LinuxSplitPackageRoles all \
+  -PublishRuntimeToGitHubPackages true \
+  -AttachRuntimeToGitHubRelease true \
+  -RunLinuxSmoke false
+```
+
+The old `self-hosted-ubuntu20` key set is intentionally not supported. Use `hosted-container-ubuntu20` with `runner_mode=hosted-container`.
 
 ## Expected workflow inputs
 
@@ -55,8 +61,8 @@ For `runtime-linux.yml`, provide:
 
 - `version`
 - `runtime_keys`: comma-separated Linux runtime keys
-- `runtime_key_set`: use `ubuntu22-hosted`, `hosted-all`, `ubuntu24-hosted`, `self-hosted-ubuntu20`, or `custom` when `runtime_keys` is empty
-- `runner_mode`: defaults to `hosted`; use `self-hosted` for Ubuntu 20.04 or manually prepared roots
+- `runtime_key_set`: use `ubuntu22-hosted`, `hosted-all`, `ubuntu24-hosted`, `hosted-container-ubuntu20`, or `custom` when `runtime_keys` is empty
+- `runner_mode`: defaults to `hosted`; use `hosted-container` for Ubuntu 20.04
 - `split_package_roles`: use `all` for a dependency refresh, or `bridge,collection` when reusing existing CUDA/cuDNN and TensorRT component packages
 - `cuda_cudnn_package_version` and `tensorrt_package_version`: required when publishing `collection` or `meta` without rebuilding those stable dependencies and every requested runtime key uses the same stable dependency version
 - `cuda_cudnn_package_version_map` and `tensorrt_package_version_map`: use these instead of one global version when requested runtime keys reference different dependency publication versions, for example `linux-x64-ubuntu22.04-*=4.0.6167;linux-x64-ubuntu24.04-*=4.0.6169`
@@ -65,11 +71,11 @@ For `runtime-linux.yml`, provide:
 - `release_tag`
 - `attach_to_github_release`
 
-For `release-bundle.yml`, the hosted Linux lane uses `run_linux_runtime_packaging=true` and defaults to `linux_runtime_key_set=hosted-all`, which dispatches Ubuntu 22.04 x64 plus the modeled Ubuntu 24.04 x64 packages. Ubuntu 20.04 is a separate self-hosted lane: use `run_linux_self_hosted_ubuntu20_runtime_packaging=true`; it defaults to `self-hosted-ubuntu20` and dispatches `runner_mode=self-hosted`.
+For `release-bundle.yml`, the hosted Linux lane uses `run_linux_runtime_packaging=true` and defaults to `linux_runtime_key_set=hosted-all`, which dispatches Ubuntu 22.04 x64 plus the modeled Ubuntu 24.04 x64 packages. Ubuntu 20.04 is a separate hosted-container lane: use `run_linux_ubuntu20_runtime_packaging=true`; it defaults to `hosted-container-ubuntu20` and dispatches `runner_mode=hosted-container`.
 
-`release-bundle.yml` checks runner availability before creating a GitHub Release when repository secret `RUNNER_AUDIT_TOKEN` is available. GitHub documents the repository self-hosted runner list API as requiring a fine-grained token with `Administration` repository permission set to `read`: <https://docs.github.com/rest/actions/self-hosted-runners>. Ubuntu 20.04 self-hosted packaging is strict: it requires that audit token and an online repository runner with `self-hosted`, `linux`, `x64`, and `ubuntu-20.04` labels.
+`release-bundle.yml` checks Windows self-hosted runner availability before creating a GitHub Release when repository secret `RUNNER_AUDIT_TOKEN` is available. The Ubuntu 20.04 hosted-container lane does not require a repository self-hosted Linux runner.
 
-`release-bundle.yml` keeps common choices as top-level inputs and accepts advanced overrides through `release_config_json`. Use that JSON object for less common values such as `linux_runtime_delivery_mode`, `linux_self_hosted_ubuntu20_runtime_key_set`, package release-tag overrides, package version maps, bridge/meta package version overrides, and skip-validation toggles.
+`release-bundle.yml` keeps common choices as top-level inputs and accepts advanced overrides through `release_config_json`. Use that JSON object for less common values such as `linux_runtime_delivery_mode`, `linux_ubuntu20_runtime_key_set`, package release-tag overrides, package version maps, bridge/meta package version overrides, and skip-validation toggles.
 
 ## Expected root examples
 
@@ -171,20 +177,20 @@ pwsh -File ./eng/Test-PackageConsumer.ps1 -RuntimePackageKey <linux key>
 
 This checks local package restore, consumer build, managed assembly copy, bridge copy, and TensorRT/CUDA `.so` asset copy.
 
-Only add `-RunSmoke` when the self-hosted runner has a usable NVIDIA driver, a compatible GPU, and runtime access to the selected CUDA/TensorRT combination.
+Only add `-RunSmoke` when the runner has a usable NVIDIA driver, a compatible GPU, and runtime access to the selected CUDA/TensorRT combination.
 
 Linux packages cannot move from `dry-run-only` to `local-validated` until this non-smoke consumer validation passes on a real Linux x64 runner.
 
 ## Current status
 
-The repository now includes Linux package manifest entries and Linux pack workflows. Ubuntu 22.04 hosted runners are the default remote packaging validation line; Ubuntu 20.04, ARM64, and Jetson still need dedicated runner and dependency strategies before publishing.
+The repository now includes Linux package manifest entries and Linux pack workflows. Ubuntu 22.04 and Ubuntu 24.04 have remote publication evidence; Ubuntu 20.04 is the hosted-container line to publish next. ARM64, Jetson, and non-Ubuntu targets still need dedicated package identities, runner or container strategy, and dependency evidence before publishing.
 
 ## Common failure cases to check first
 
 - `TensorRT root` does not match the requested runtime key line
 - `CUDA root` does not match the requested runtime key line
 - expected `.so` wildcard patterns do not resolve
-- self-hosted runner is missing `pwsh`
-- self-hosted runner is missing `dotnet` or `cmake`
+- runner or container bootstrap is missing `pwsh`
+- runner or container bootstrap is missing `dotnet` or `cmake`
 - native build succeeds, but `Collect-RuntimeAssets.ps1` still fails because the supplied roots do not match the manifest layout assumptions
 - artifact upload succeeds but native assets are incomplete because the roots were wrong

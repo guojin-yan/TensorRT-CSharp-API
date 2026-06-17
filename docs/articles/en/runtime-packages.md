@@ -110,7 +110,7 @@ Current Linux matrix:
 
 - Ubuntu 22.04 x64: hosted default for all six configured TensorRT / CUDA / cuDNN combinations.
 - Ubuntu 24.04 x64: hosted for `trt10.11-cuda12.9-cudnn9.22`, `trt11.0-cuda12.9-cudnn9.22`, and `trt11.0-cuda13.2-cudnn9.22`; NVIDIA does not publish the older TensorRT 8.6 / CUDA 11.8 lines for Ubuntu 24.04.
-- Ubuntu 20.04 x64: self-hosted/manual-root only for the older TensorRT 8.6 and TensorRT 10.11 combinations that exist in the NVIDIA repo. GitHub-hosted Ubuntu 20.04 is not used.
+- Ubuntu 20.04 x64: hosted-container line for the older TensorRT 8.6 and TensorRT 10.11 combinations that exist in the NVIDIA Ubuntu 20.04 repo. It runs on a GitHub-hosted runner with an `ubuntu:20.04` job container.
 - Linux arm64/SBSA and Jetson/L4T are separate future package lines. SBSA server ARM and Jetson are not interchangeable, and neither should share the x64 Ubuntu package IDs.
 - Other Linux distributions such as RHEL/Rocky should be added only after a matching NVIDIA repository and runner image are modeled explicitly.
 
@@ -121,7 +121,7 @@ Current Linux workflow modules:
 - `runtime-linux.yml`
 - `release-bundle.yml`
 
-Ubuntu 22.04 x64 is the current hosted Linux publication line and has a successful remote release run. Ubuntu 20.04 x64 remains self-hosted/manual-root only. Ubuntu 24.04 x64 remains hosted for the modern combinations only. Linux arm64/SBSA and Jetson/L4T still need a separate package line before they can be published.
+Ubuntu 22.04 x64 and Ubuntu 24.04 x64 have successful remote publication runs. Ubuntu 20.04 x64 is the remaining hosted-container publication line to fill. Linux arm64/SBSA and Jetson/L4T still need a separate package line before they can be published.
 
 Current remote publication map as of 2026-06-17:
 
@@ -132,7 +132,7 @@ Current remote publication map as of 2026-06-17:
 
 Use `eng/Test-LinuxRuntimeTargetCoverage.ps1` to regenerate the target coverage report under `artifacts/linux-target-coverage`. The report is also uploaded by `release-publication-audit.yml` so publication evidence shows which Linux targets are modeled and which future ARM/Jetson/non-Ubuntu lines are intentionally held.
 
-Use `eng/Test-RuntimePublicationTargetCoverage.ps1` to audit published coverage under `artifacts/runtime-publication-target-coverage`. This report classifies Windows, Ubuntu 22.04, and Ubuntu 24.04 as `published-required`; Ubuntu 20.04 as `infrastructure-blocked`; and ARM/SBSA, Jetson/L4T, and non-Ubuntu Linux as future separate package lines. It verifies that published-required targets have matching GitHub Release assets and GitHub Package versions before the release audit is considered clean.
+Use `eng/Test-RuntimePublicationTargetCoverage.ps1` to audit published coverage under `artifacts/runtime-publication-target-coverage`. This report classifies Windows, Ubuntu 20.04, Ubuntu 22.04, and Ubuntu 24.04 as `published-required`; ARM/SBSA, Jetson/L4T, and non-Ubuntu Linux remain future separate package lines. It verifies that published-required targets have matching GitHub Release assets and GitHub Package versions before the release audit is considered clean.
 
 Use `eng/Export-RuntimePublicationIndex.ps1` after `eng/Test-GitHubPublicationInventory.ps1` to generate `artifacts/publication-index/runtime-publication-index.md`. This index shows which runtime combinations live under each Release tag and confirms the matching GitHub Packages entries, which is easier to read than the GitHub Packages package list.
 

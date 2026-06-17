@@ -40,7 +40,7 @@ $lines.Add("")
 $lines.Add("- `win-x64-trt8.6-cuda11.8-cudnn8.9` remains the primary public-preview sample candidate.")
 $lines.Add("- Large CUDA/cuDNN/TensorRT component packages should stay on GitHub Packages or GitHub Releases unless package size and NVIDIA redistribution terms are cleared for nuget.org.")
 $lines.Add("- Managed, bridge, CUDA/cuDNN, TensorRT, and collection packages are versioned independently; routine C# releases should not republish stable NVIDIA component packages.")
-$lines.Add("- Ubuntu 22.04 x64 Linux packages are the hosted publication line; Ubuntu 20.04 stays self-hosted/manual-root and ARM/Jetson need separate package lines.")
+$lines.Add("- Ubuntu 20.04, Ubuntu 22.04, and Ubuntu 24.04 x64 Linux packages are published through GitHub-hosted runners with distro-matched Ubuntu job containers; ARM/Jetson still need separate package lines.")
 $lines.Add("- Linux package consumer validation is part of the runtime pack workflow and must pass for each published Linux runtime key.")
 $lines.Add("- Hosted quality gates must not imply runtime package readiness unless runtime package checks are explicitly enabled.")
 

@@ -5,10 +5,9 @@ param(
   [string]$NuGetApiKeyAvailable,
   [AllowEmptyString()]
   [string]$RunnerAuditTokenAvailable,
-  [string[]]$RequiredSecret = @("NUGET_API_KEY", "RUNNER_AUDIT_TOKEN"),
+  [string[]]$RequiredSecret = @("NUGET_API_KEY"),
   [string[]]$RequiredRunnerLabelSet = @(
-    "self-hosted,windows,x64",
-    "self-hosted,linux,x64,ubuntu-20.04"
+    "self-hosted,windows,x64"
   ),
   [switch]$WarnOnly,
   [string]$RepositoryRoot

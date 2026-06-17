@@ -65,7 +65,7 @@ public sealed class RuntimeManifestTests
 
             Assert.Equal("ubuntu", distro);
             Assert.Contains(architecture, new[] { "x64", "arm64" });
-            Assert.Contains(runnerMode, new[] { "hosted", "self-hosted" });
+            Assert.Contains(runnerMode, new[] { "hosted", "hosted-container", "self-hosted" });
             Assert.Contains($"linux-{architecture}-ubuntu{distroVersion}-", key);
             Assert.Contains($".linux-{architecture}.ubuntu{distroVersion}.", packageId);
         }
@@ -121,7 +121,7 @@ public sealed class RuntimeManifestTests
         Assert.Equal(3, modeledTargets.Length);
         Assert.Contains(modeledTargets, static target => target.GetProperty("target").GetString() == "ubuntu22.04-x64-hosted");
         Assert.Contains(modeledTargets, static target => target.GetProperty("target").GetString() == "ubuntu24.04-x64-hosted");
-        Assert.Contains(modeledTargets, static target => target.GetProperty("target").GetString() == "ubuntu20.04-x64-self-hosted");
+        Assert.Contains(modeledTargets, static target => target.GetProperty("target").GetString() == "ubuntu20.04-x64-hosted-container");
 
         foreach (JsonElement target in modeledTargets)
         {

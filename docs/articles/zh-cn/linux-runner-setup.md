@@ -2,59 +2,65 @@
 
 ## 目标
 
-当前 Linux runtime 打包已经具备 hosted 与 self-hosted 两条执行路径。默认发布线优先使用 GitHub-hosted Ubuntu 22.04 x64 runner，其他发行版和架构需要显式选择 runtime key。
+当前 Linux runtime 打包使用 GitHub-hosted Ubuntu x64 runner，并通过 manifest 指定的 Ubuntu job container 匹配目标发行版。其他发行版和架构需要显式选择 runtime key，并在 NVIDIA 依赖策略建模前保持为未来独立包线。
 
 ## Linux 发布矩阵边界
 
 - Ubuntu 22.04 x64 是当前默认发布主线，`runtime-linux.yml` 默认会打包该发行版下的 6 个 TensorRT / CUDA / cuDNN 组合。
 - Ubuntu 24.04 x64 可以在 hosted runner 上发布，但 NVIDIA apt 仓库不覆盖旧的 TensorRT 8.6 / CUDA 11.8 / CUDA 12.0 线，因此只保留 TensorRT 10.11 / 11.0 的新组合。
-- Ubuntu 20.04 x64 已从 GitHub-hosted runner 下线，manifest 中保留对应 runtime key，但必须用 self-hosted runner 或手动准备的官方 NVIDIA 根目录发布。
+- Ubuntu 20.04 x64 已从 GitHub-hosted 原生 runner 镜像下线，因此仓库使用 `runner_mode=hosted-container`，在 `ubuntu-latest` 主机上启动 `ubuntu:20.04` job container 发布。
 - ARM64 / Jetson / L4T 不建议混入通用 `linux-x64` 包线。它们需要单独的 runtime key、RID、runner label、NVIDIA repo architecture 和 L4T 依赖策略，后续应作为独立发布线维护。
 
 ## Runner 基本要求
 
-- Linux x64 主机；Ubuntu 22.04 / 24.04 可使用 GitHub-hosted runner，Ubuntu 20.04 需要 self-hosted runner
-- self-hosted runner 标签建议包含：`self-hosted`、`linux`、`x64`，以及目标发行版标签，例如 `ubuntu-20.04`
+- GitHub-hosted Linux x64 runner 主机
+- manifest 指定的 Ubuntu job container，例如 `ubuntu:20.04`、`ubuntu:22.04` 或 `ubuntu:24.04`
 - .NET 10 SDK
 - `pwsh`
 - CMake
-- 从 NVIDIA 官方渠道下载并安装/解压的对应版本 CUDA Toolkit
-- 从 NVIDIA 官方渠道下载并解压的对应版本 TensorRT Linux 包
-- 从 NVIDIA 官方渠道下载并安装/解压的对应版本 cuDNN Linux 包
+- 从 NVIDIA 官方 apt 仓库安装的对应版本 CUDA Toolkit
+- 从 NVIDIA 官方 apt 仓库安装的对应版本 TensorRT Linux 包
+- 从 NVIDIA 官方 apt 仓库安装的对应版本 cuDNN Linux 包
 
-不要把 CUDA / cuDNN / TensorRT 二进制提交到 Git。hosted Linux 路径只通过 NVIDIA 官方 apt 仓库安装可公开获取的运行库和开发头；self-hosted 路径则读取 runner 上已经准备好的官方库目录。
+不要把 CUDA / cuDNN / TensorRT 二进制提交到 Git。hosted Linux 路径会在 workflow 中通过 NVIDIA 官方 apt 仓库安装可公开获取的运行库和开发头。
 
-## Ubuntu 20.04 self-hosted runner 启动步骤
+## Ubuntu 20.04 Hosted-Container 发布线
 
-在 Ubuntu 20.04 x64 机器上先用 `gh` 登录一个可以申请仓库 runner 注册 token 的账号，然后运行：
-
-```bash
-pwsh -File ./eng/Install-GitHubSelfHostedRunner.ps1 \
-  -Repository guojin-yan/TensorRT-CSharp-API \
-  -UseGhRegistrationToken \
-  -InstallService
-```
-
-这个脚本会下载官方 GitHub Actions runner，并配置 `ubuntu-20.04,tensorrt-csharp` 自定义标签；GitHub runner 自带的 `self-hosted,linux,x64` 标签会保留。短期注册 token 不会写入磁盘。需要先看命令但不执行时，可以加 `-DryRun`。
-
-触发 Ubuntu 20.04 runtime 发布线之前，先运行：
+Ubuntu 20.04 使用 hosted-container key set：
 
 ```bash
-pwsh -File ./eng/Test-LinuxSelfHostedRunnerReadiness.ps1 \
-  -RequireRegisteredRunner \
-  -CheckGitHubRunner
+gh workflow run runtime-linux.yml \
+  --ref TensorRtSharp4.0 \
+  -f version=4.0.x \
+  -f runtime_key_set=hosted-container-ubuntu20 \
+  -f runner_mode=hosted-container \
+  -f runtime_delivery_mode=split \
+  -f split_package_roles=all \
+  -f attach_to_github_release=true
 ```
 
-检查结果会写入 `artifacts/linux-self-hosted-runner-readiness/linux-self-hosted-runner-readiness.json` 和 `.md`。它会验证系统是否为 Ubuntu 20.04 x64、`pwsh`、`.NET SDK 10.0.300+`、CMake、Ninja、Git、`gh`、本机 runner 配置、GitHub runner 标签，以及 `self-hosted-ubuntu20` 解析出的 NVIDIA 根目录。
+也可以通过 `release-bundle.yml` 编排触发：
 
-runner 已经出现在 GitHub 后，也可以远程触发 `linux-self-hosted-runner-readiness.yml` 做同一组检查。该 workflow 固定运行在 `self-hosted,linux,x64,ubuntu-20.04`，只上传 readiness 报告，不发布包。建议它通过后，再在 `release-bundle.yml` 中打开 `run_linux_self_hosted_ubuntu20_runtime_packaging=true`。
+```bash
+pwsh -File ./eng/Invoke-RemoteReleaseBundle.ps1 \
+  -Version 4.0.x \
+  -RuntimeVersion 4.0.x \
+  -RunLinuxUbuntu20RuntimePackaging \
+  -LinuxUbuntu20RuntimeKeySet hosted-container-ubuntu20 \
+  -LinuxSplitPackageRoles all \
+  -PublishRuntimeToGitHubPackages true \
+  -AttachRuntimeToGitHubRelease true \
+  -RunLinuxSmoke false
+```
+
+旧的 `self-hosted-ubuntu20` key set 已不再支持。Ubuntu 20.04 请统一使用 `hosted-container-ubuntu20` 和 `runner_mode=hosted-container`。
 
 ## `runtime-linux.yml` 需要的输入
 
 - `version`
 - `runtime_keys`：逗号分隔的 Linux runtime key
-- `runtime_key_set`：当 `runtime_keys` 为空时可用 `ubuntu22-hosted`、`hosted-all`、`ubuntu24-hosted`、`self-hosted-ubuntu20` 或 `custom`
-- `runner_mode`：默认 `hosted`；发布 Ubuntu 20.04 或手动根目录时使用 `self-hosted`
+- `runtime_key_set`：当 `runtime_keys` 为空时可用 `ubuntu22-hosted`、`hosted-all`、`ubuntu24-hosted`、`hosted-container-ubuntu20` 或 `custom`
+- `runner_mode`：默认 `hosted`；发布 Ubuntu 20.04 时使用 `hosted-container`
 - `split_package_roles`：依赖刷新时用 `all`，复用稳定依赖时用 `bridge,collection`
 - `cuda_cudnn_package_version` 和 `tensorrt_package_version`：当只发 `collection` 或 `meta`、但不重发稳定依赖，且所有 runtime key 使用同一个稳定依赖版本时提供
 - `cuda_cudnn_package_version_map` 和 `tensorrt_package_version_map`：当不同 runtime key 引用不同稳定依赖发布版本时使用，例如 `linux-x64-ubuntu22.04-*=4.0.6167;linux-x64-ubuntu24.04-*=4.0.6169`
@@ -66,11 +72,11 @@ runner 已经出现在 GitHub 后，也可以远程触发 `linux-self-hosted-run
 `release-bundle.yml` 里有两条 Linux 编排线：
 
 - `run_linux_runtime_packaging=true`：hosted Linux 发布线，默认 `linux_runtime_key_set=hosted-all`，会同时触发 Ubuntu 22.04 x64 与建模中的 Ubuntu 24.04 x64 组合。
-- `run_linux_self_hosted_ubuntu20_runtime_packaging=true`：Ubuntu 20.04 x64 self-hosted 发布线，默认 `self-hosted-ubuntu20`，并固定 `runner_mode=self-hosted`。
+- `run_linux_ubuntu20_runtime_packaging=true`：Ubuntu 20.04 x64 hosted-container 发布线，默认 `hosted-container-ubuntu20`，并固定 `runner_mode=hosted-container`。
 
-当仓库 secret `RUNNER_AUDIT_TOKEN` 可用时，`release-bundle.yml` 会在创建 GitHub Release 前检查 runner 可用性。GitHub 文档说明，仓库 self-hosted runner 列表 API 需要 fine-grained token，并授予 `Administration` 仓库权限 `read`：<https://docs.github.com/rest/actions/self-hosted-runners>。Ubuntu 20.04 self-hosted 打包是严格预检：必须提供该审计 token，并要求仓库存在在线 runner，且包含 `self-hosted`、`linux`、`x64`、`ubuntu-20.04` 标签。
+当仓库 secret `RUNNER_AUDIT_TOKEN` 可用时，`release-bundle.yml` 会在创建 GitHub Release 前检查 Windows self-hosted runner 可用性。Ubuntu 20.04 hosted-container 发布线不需要仓库自托管 Linux runner。
 
-`release-bundle.yml` 会把常用选择保留为顶层输入，并用 `release_config_json` 接收高级覆盖项。较少使用的 `linux_runtime_delivery_mode`、`linux_self_hosted_ubuntu20_runtime_key_set`、依赖 release tag 覆盖、依赖版本 map、bridge/meta 包版本覆盖、跳过验证开关等都通过这个 JSON 对象传入。
+`release-bundle.yml` 会把常用选择保留为顶层输入，并用 `release_config_json` 接收高级覆盖项。较少使用的 `linux_runtime_delivery_mode`、`linux_ubuntu20_runtime_key_set`、依赖 release tag 覆盖、依赖版本 map、bridge/meta 包版本覆盖、跳过验证开关等都通过这个 JSON 对象传入。
 
 ## 根目录示例
 
@@ -154,14 +160,14 @@ root 解析顺序：
 
 ## 当前状态
 
-仓库中已经补齐 Linux package manifest 与 Linux pack workflow。Ubuntu 22.04 hosted 路径作为默认远程打包验证线；Ubuntu 20.04 / ARM64 / Jetson 仍需要单独 runner 和依赖策略后再发布。
+仓库中已经补齐 Linux package manifest 与 Linux pack workflow。Ubuntu 22.04 和 Ubuntu 24.04 已有远程发布证据；Ubuntu 20.04 是下一条 hosted-container 发布线。ARM64、Jetson 和非 Ubuntu 目标仍需要独立 package identity、runner 或 container 策略和依赖证据后再发布。
 
 ## 优先检查的失败场景
 
 - `TensorRT root` 与请求的 `runtime_key` 版本线不一致
 - `CUDA root` 与请求的 `runtime_key` 版本线不一致
 - 预期 `.so` 通配规则没有匹配到文件
-- self-hosted runner 上缺少 `pwsh`
-- self-hosted runner 上缺少 `dotnet` 或 `cmake`
+- runner 或 container bootstrap 缺少 `pwsh`
+- runner 或 container bootstrap 缺少 `dotnet` 或 `cmake`
 - native build 成功，但 `Collect-RuntimeAssets.ps1` 仍失败，通常说明传入的根目录布局不匹配 manifest 约定
 - artifact 上传成功，但 native 资产不完整，通常是因为传入的根目录不正确

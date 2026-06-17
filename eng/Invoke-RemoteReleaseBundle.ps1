@@ -26,7 +26,7 @@ param(
   [switch]$RunLinuxRuntimePackaging,
   [string[]]$LinuxRuntimeKeys = @(),
   [string]$LinuxRuntimeKeySet = "hosted-all",
-  [ValidateSet("hosted", "self-hosted")]
+  [ValidateSet("hosted", "hosted-container", "self-hosted")]
   [string]$LinuxRunnerMode = "hosted",
   [string[]]$LinuxSplitPackageRoles = @(),
   [ValidateSet("full", "split")]
@@ -43,9 +43,12 @@ param(
   [string]$LinuxTensorRtPackageReleaseTagMap,
   [switch]$LinuxIncludeMetaPackage,
   [switch]$SkipLinuxConsumerValidation,
-  [switch]$RunLinuxSelfHostedUbuntu20RuntimePackaging,
-  [string[]]$LinuxSelfHostedUbuntu20RuntimeKeys = @(),
-  [string]$LinuxSelfHostedUbuntu20RuntimeKeySet = "self-hosted-ubuntu20",
+  [Alias("RunLinuxSelfHostedUbuntu20RuntimePackaging")]
+  [switch]$RunLinuxUbuntu20RuntimePackaging,
+  [Alias("LinuxSelfHostedUbuntu20RuntimeKeys")]
+  [string[]]$LinuxUbuntu20RuntimeKeys = @(),
+  [Alias("LinuxSelfHostedUbuntu20RuntimeKeySet")]
+  [string]$LinuxUbuntu20RuntimeKeySet = "hosted-container-ubuntu20",
   [object]$RunWindowsSmoke = $true,
   [object]$RunLinuxSmoke = $false,
   [object]$PublishManagedToNuGet = $false,
@@ -193,7 +196,7 @@ $windowsKeys = @(Expand-TokenList -Values $WindowsRuntimeKeys)
 $windowsRoles = @(Expand-TokenList -Values $WindowsSplitPackageRoles)
 $linuxKeys = @(Expand-TokenList -Values $LinuxRuntimeKeys)
 $linuxRoles = @(Expand-TokenList -Values $LinuxSplitPackageRoles)
-$linuxUbuntu20Keys = @(Expand-TokenList -Values $LinuxSelfHostedUbuntu20RuntimeKeys)
+$linuxUbuntu20Keys = @(Expand-TokenList -Values $LinuxUbuntu20RuntimeKeys)
 $runDocsReleaseValue = ConvertFrom-BooleanInput -Value $RunDocsRelease -DefaultValue $true
 $runWindowsSmokeValue = ConvertFrom-BooleanInput -Value $RunWindowsSmoke -DefaultValue $true
 $runLinuxSmokeValue = ConvertFrom-BooleanInput -Value $RunLinuxSmoke -DefaultValue $false
@@ -225,7 +228,7 @@ Add-ReleaseConfigValue -Config $releaseConfig -Name "linux_tensorrt_package_rele
 Add-ReleaseConfigValue -Config $releaseConfig -Name "linux_tensorrt_package_release_tag_map" -Value $LinuxTensorRtPackageReleaseTagMap
 Add-ReleaseConfigBoolean -Config $releaseConfig -Name "linux_include_meta_package" -Value $LinuxIncludeMetaPackage.IsPresent
 Add-ReleaseConfigBoolean -Config $releaseConfig -Name "linux_skip_consumer_validation" -Value $SkipLinuxConsumerValidation.IsPresent
-Add-ReleaseConfigValue -Config $releaseConfig -Name "linux_self_hosted_ubuntu20_runtime_key_set" -Value $LinuxSelfHostedUbuntu20RuntimeKeySet
+Add-ReleaseConfigValue -Config $releaseConfig -Name "linux_ubuntu20_runtime_key_set" -Value $LinuxUbuntu20RuntimeKeySet
 
 $releaseConfigJson = if ($releaseConfig.Count -gt 0) {
   $releaseConfig | ConvertTo-Json -Compress -Depth 5
@@ -253,8 +256,8 @@ Add-WorkflowInput -ArgumentList $arguments -Name "linux_runner_mode" -Value $Lin
 Add-WorkflowInput -ArgumentList $arguments -Name "linux_split_package_roles" -Value ($linuxRoles -join ",")
 Add-WorkflowInput -ArgumentList $arguments -Name "linux_cuda_cudnn_package_version" -Value $LinuxCudaCudnnPackageVersion
 Add-WorkflowInput -ArgumentList $arguments -Name "linux_tensorrt_package_version" -Value $LinuxTensorRtPackageVersion
-Add-WorkflowInput -ArgumentList $arguments -Name "run_linux_self_hosted_ubuntu20_runtime_packaging" -Value (ConvertTo-WorkflowBoolean -Value $RunLinuxSelfHostedUbuntu20RuntimePackaging.IsPresent)
-Add-WorkflowInput -ArgumentList $arguments -Name "linux_self_hosted_ubuntu20_runtime_keys" -Value ($linuxUbuntu20Keys -join ",")
+Add-WorkflowInput -ArgumentList $arguments -Name "run_linux_ubuntu20_runtime_packaging" -Value (ConvertTo-WorkflowBoolean -Value $RunLinuxUbuntu20RuntimePackaging.IsPresent)
+Add-WorkflowInput -ArgumentList $arguments -Name "linux_ubuntu20_runtime_keys" -Value ($linuxUbuntu20Keys -join ",")
 Add-WorkflowInput -ArgumentList $arguments -Name "run_windows_smoke" -Value (ConvertTo-WorkflowBoolean -Value $runWindowsSmokeValue)
 Add-WorkflowInput -ArgumentList $arguments -Name "run_linux_smoke" -Value (ConvertTo-WorkflowBoolean -Value $runLinuxSmokeValue)
 Add-WorkflowInput -ArgumentList $arguments -Name "publish_managed_to_nuget" -Value (ConvertTo-WorkflowBoolean -Value $publishManagedToNuGetValue)

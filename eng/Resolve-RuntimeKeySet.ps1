@@ -5,7 +5,7 @@ param(
   [string]$Platform,
   [string[]]$RuntimeKey = @(),
   [string]$RuntimeKeySet = "auto",
-  [ValidateSet("any", "hosted", "self-hosted")]
+  [ValidateSet("any", "hosted", "hosted-container", "self-hosted")]
   [string]$RunnerMode = "any",
   [ValidateSet("csv", "json")]
   [string]$OutputFormat = "csv",
@@ -92,8 +92,11 @@ else {
 
     switch ($normalizedSet) {
       "auto" {
-        if ($RunnerMode -eq "self-hosted") {
-          $resolvedKeys = @($packages | Where-Object { $_.runnerMode -eq "self-hosted" -and $_.linuxDistro -eq "ubuntu" -and $_.linuxDistroVersion -eq "20.04" } | Select-Object -ExpandProperty key)
+        if ($RunnerMode -eq "hosted-container") {
+          $resolvedKeys = @($packages | Where-Object { $_.runnerMode -eq "hosted-container" -and $_.linuxDistro -eq "ubuntu" -and $_.linuxDistroVersion -eq "20.04" } | Select-Object -ExpandProperty key)
+        }
+        elseif ($RunnerMode -eq "self-hosted") {
+          $resolvedKeys = @($packages | Where-Object { $_.runnerMode -eq "self-hosted" } | Select-Object -ExpandProperty key)
         }
         else {
           $resolvedKeys = @($packages | Where-Object { $_.runnerMode -eq "hosted" -and $_.linuxDistro -eq "ubuntu" -and $_.linuxDistroVersion -eq "22.04" } | Select-Object -ExpandProperty key)
@@ -112,8 +115,8 @@ else {
         $resolvedKeys = @($packages | Where-Object { $_.runnerMode -eq "hosted" -and $_.linuxDistro -eq "ubuntu" -and $_.linuxDistroVersion -eq "24.04" } | Select-Object -ExpandProperty key)
         break
       }
-      { $_ -in @("self-hosted-ubuntu20", "ubuntu20-self-hosted", "ubuntu20.04-self-hosted") } {
-        $resolvedKeys = @($packages | Where-Object { $_.runnerMode -eq "self-hosted" -and $_.linuxDistro -eq "ubuntu" -and $_.linuxDistroVersion -eq "20.04" } | Select-Object -ExpandProperty key)
+      { $_ -in @("hosted-container-ubuntu20", "ubuntu20-hosted-container", "ubuntu20.04-hosted-container") } {
+        $resolvedKeys = @($packages | Where-Object { $_.runnerMode -eq "hosted-container" -and $_.linuxDistro -eq "ubuntu" -and $_.linuxDistroVersion -eq "20.04" } | Select-Object -ExpandProperty key)
         break
       }
       "all" {
@@ -124,7 +127,7 @@ else {
         throw "RuntimeKeySet 'custom' requires explicit RuntimeKey values."
       }
       default {
-        throw "Unsupported Linux runtime key set '$RuntimeKeySet'. Supported values: auto, default, ubuntu22-hosted, hosted-all, ubuntu24-hosted, self-hosted-ubuntu20, all, custom. Known future lines such as arm64-sbsa, jetson-l4t, and non-ubuntu are tracked in pack/runtime/linux-runtime-targets.manifest.json and require dedicated manifest entries, runners, NVIDIA dependency plans, and package consumer evidence before dispatch."
+        throw "Unsupported Linux runtime key set '$RuntimeKeySet'. Supported values: auto, default, ubuntu22-hosted, hosted-all, ubuntu24-hosted, hosted-container-ubuntu20, all, custom. Ubuntu 20.04 now uses hosted-container-ubuntu20 with runner_mode='hosted-container'. Known future lines such as arm64-sbsa, jetson-l4t, and non-ubuntu are tracked in pack/runtime/linux-runtime-targets.manifest.json and require dedicated manifest entries, runners, NVIDIA dependency plans, and package consumer evidence before dispatch."
       }
     }
   }
@@ -152,7 +155,7 @@ if ($Platform -eq "linux" -and $RunnerMode -ne "any") {
   )
 
   if ($modeMismatches.Count -gt 0) {
-    throw "Runtime key set '$RuntimeKeySet' includes keys that require a different runner mode than '$RunnerMode': $($modeMismatches -join ', '). Use runner_mode='any' only for inspection, or dispatch separate hosted/self-hosted runs."
+    throw "Runtime key set '$RuntimeKeySet' includes keys that require a different runner mode than '$RunnerMode': $($modeMismatches -join ', '). Use runner_mode='any' only for inspection, or dispatch separate hosted/hosted-container/self-hosted runs."
   }
 }
 
