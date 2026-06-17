@@ -142,6 +142,9 @@ $workflowContracts = @(
       New-Requirement -Needle "run_linux_self_hosted_ubuntu20_runtime_packaging" -Description "Ubuntu 20.04 self-hosted Linux packaging toggle"
       New-Requirement -Needle "release_config_json" -Description "advanced release configuration JSON input"
       New-Requirement -Needle "get_config" -Description "advanced release configuration parser"
+      New-Requirement -Needle "Test-GitHubRunnerAvailability.ps1" -Description "runner availability preflight"
+      New-Requirement -Needle "self-hosted,windows,x64" -Description "Windows self-hosted runner label preflight"
+      New-Requirement -Needle "self-hosted,linux,x64,ubuntu-20.04" -Description "Ubuntu 20.04 self-hosted runner label preflight"
       New-Requirement -Needle "linux_cuda_cudnn_package_version" -Description "Linux split CUDA/cuDNN version input"
       New-Requirement -Needle "linux_tensorrt_package_version" -Description "Linux split TensorRT version input"
       New-Requirement -Needle "runtime-linux-hosted" -Description "hosted Linux child workflow label"
@@ -223,6 +226,16 @@ $workflowContracts = @(
       New-Requirement -Needle "api.nuget.org/v3-flatcontainer" -Description "nuget.org managed package visibility audit"
       New-Requirement -Needle "CheckFailedWorkflowRuns" -Description "failed workflow run audit"
       New-Requirement -Needle "RequireManagedReleaseAsset" -Description "managed release asset gate"
+    )
+  }
+  [pscustomobject]@{
+    path = "eng\Test-GitHubRunnerAvailability.ps1"
+    requirements = @(
+      New-Requirement -Needle "actions/runners" -Description "GitHub Actions runner API query"
+      New-Requirement -Needle "RequiredLabelSet" -Description "required runner label set input"
+      New-Requirement -Needle "onlineMatchingRunnerCount" -Description "online matching runner audit"
+      New-Requirement -Needle "github-runner-availability" -Description "runner availability report"
+      New-Requirement -Needle "WarnOnly" -Description "non-failing audit mode"
     )
   }
 )

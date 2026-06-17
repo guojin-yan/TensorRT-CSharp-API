@@ -184,6 +184,25 @@ jobs:
             exit 1
           fi
 
+          runner_args=()
+          if [ "$RUN_WINDOWS_RUNTIME_PACKAGING" = "true" ]; then
+            runner_args+=("-RequiredLabelSet" "self-hosted,windows,x64")
+          fi
+
+          if [ "$RUN_LINUX_RUNTIME_PACKAGING" = "true" ] && [ "$LINUX_RUNNER_MODE" = "self-hosted" ]; then
+            runner_args+=("-RequiredLabelSet" "self-hosted,linux,x64")
+          fi
+
+          if [ "$RUN_LINUX_SELF_HOSTED_UBUNTU20_RUNTIME_PACKAGING" = "true" ]; then
+            runner_args+=("-RequiredLabelSet" "self-hosted,linux,x64,ubuntu-20.04")
+          fi
+
+          if [ "${#runner_args[@]}" -gt 0 ]; then
+            pwsh -NoProfile -File ./eng/Test-GitHubRunnerAvailability.ps1 \
+              -Repository "$GH_REPO" \
+              "${runner_args[@]}"
+          fi
+
       - name: Ensure GitHub Release Exists
         if: ${{ inputs.attach_runtime_to_github_release }}
         shell: bash

@@ -209,6 +209,8 @@ On WDAC / application-control machines, the local and self-hosted Windows runtim
 
 `release-bundle.yml` treats runtime packaging as opt-in. Set `run_windows_runtime_packaging=true` or `run_linux_runtime_packaging=true` only for runtime releases. If Linux runtime packaging is enabled with an empty `linux_runtime_keys` input, the Linux module cleanly no-ops.
 
+When runtime packaging is enabled, `release-bundle.yml` checks the required self-hosted runner labels before it creates a GitHub Release. Windows runtime packaging requires an online runner matching `self-hosted,windows,x64`; Ubuntu 20.04 Linux runtime packaging requires `self-hosted,linux,x64,ubuntu-20.04`.
+
 For `nuget.org` publication, store a plain-text ASCII NuGet API key in the repository secret `NUGET_API_KEY`. The managed-package workflow fails before publication when this secret is missing, so it no longer depends on a self-hosted runner's current-user NuGet configuration or any machine-local credential fallback. Do not store an encrypted local credential blob or other machine-generated token format in `NUGET_API_KEY`.
 
 The managed-package workflow validates that `NUGET_API_KEY` is plain ASCII text before publishing. If the secret contains non-ASCII characters or embedded whitespace, the job fails immediately with a configuration error instead of spending time on a doomed publish attempt.

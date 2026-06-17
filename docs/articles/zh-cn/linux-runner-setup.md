@@ -42,6 +42,8 @@
 - `run_linux_runtime_packaging=true`：hosted Linux 发布线，默认 `linux_runtime_key_set=hosted-all`，会同时触发 Ubuntu 22.04 x64 与建模中的 Ubuntu 24.04 x64 组合。
 - `run_linux_self_hosted_ubuntu20_runtime_packaging=true`：Ubuntu 20.04 x64 self-hosted 发布线，默认 `self-hosted-ubuntu20`，并固定 `runner_mode=self-hosted`。
 
+`release-bundle.yml` 会在创建 GitHub Release 前检查 runner 可用性。Ubuntu 20.04 self-hosted 打包要求仓库存在在线 runner，并包含 `self-hosted`、`linux`、`x64`、`ubuntu-20.04` 标签。
+
 `release-bundle.yml` 会把常用选择保留为顶层输入，并用 `release_config_json` 接收高级覆盖项。较少使用的 `linux_runtime_delivery_mode`、`linux_self_hosted_ubuntu20_runtime_key_set`、依赖 release tag 覆盖、bridge/meta 包版本覆盖、跳过验证开关等都通过这个 JSON 对象传入。
 
 ## 根目录示例
