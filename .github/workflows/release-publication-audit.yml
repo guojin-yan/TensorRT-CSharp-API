@@ -74,7 +74,7 @@ on:
         default: true
         type: boolean
       check_runner_availability:
-        description: Query GitHub self-hosted runner availability
+        description: Emit GitHub self-hosted runner availability report when RUNNER_AUDIT_TOKEN is available
         required: false
         default: true
         type: boolean
@@ -246,6 +246,7 @@ jobs:
         if: ${{ inputs.check_remote_release_prerequisites }}
         shell: pwsh
         run: |
+          $runnerAuditTokenAvailable = "${{ secrets.RUNNER_AUDIT_TOKEN != '' }}" -eq "true"
           $labelSetText = @'
           ${{ inputs.runner_required_label_sets }}
           '@
@@ -267,8 +268,11 @@ jobs:
             "${{ secrets.RUNNER_AUDIT_TOKEN != '' }}"
           )
 
-          if ($labelSets.Count -gt 0) {
+          if ($runnerAuditTokenAvailable -and $labelSets.Count -gt 0) {
             $arguments += @("-RequiredRunnerLabelSet", ($labelSets -join ";"))
+          }
+          else {
+            $arguments += @("-RequiredRunnerLabelSet", "")
           }
 
           if ("${{ inputs.warn_only }}" -eq "true") {
@@ -323,12 +327,8 @@ jobs:
             $lines += "To enable this audit, store a fine-grained token in repository secret ``RUNNER_AUDIT_TOKEN`` with repository ``Administration`` read permission."
             $lines | Set-Content -LiteralPath (Join-Path $outputRoot "github-runner-availability.md") -Encoding utf8
 
-            if ("${{ inputs.warn_only }}" -eq "true") {
-              Write-Warning $message
-              return
-            }
-
-            throw $message
+            Write-Warning $message
+            return
           }
 
           $env:GH_TOKEN = $env:RUNNER_AUDIT_TOKEN

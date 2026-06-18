@@ -269,18 +269,21 @@ if ($runnerQuerySucceeded) {
 $futureTargetReadiness = @(
   [pscustomobject]@{
     area = "future-target:linux-arm64-sbsa"
+    gate = "advisory"
     target = "linux-arm64-sbsa"
     ready = $false
     reason = "Future package line only: needs dedicated arm64/SBSA package IDs, runner labels, NVIDIA repository architecture, dependency plan, and consumer validation."
   }
   [pscustomobject]@{
     area = "future-target:linux-jetson-l4t"
+    gate = "advisory"
     target = "linux-jetson-l4t"
     ready = $false
     reason = "Future package line only: needs Jetson/L4T package IDs, board or runner strategy, L4T dependency source, bridge/runtime validation, and consumer validation."
   }
   [pscustomobject]@{
     area = "future-target:non-ubuntu-linux"
+    gate = "advisory"
     target = "non-ubuntu-linux"
     ready = $false
     reason = "Future package line only: needs distro/version package IDs, runner image, official NVIDIA dependency source, pinned dependency plan, and consumer validation."
@@ -290,16 +293,19 @@ $futureTargetReadiness = @(
 $readiness = New-Object System.Collections.Generic.List[object]
 $readiness.Add([pscustomobject]@{
     area = "managed-nuget-org"
+    gate = "required"
     ready = [bool]$hasNuGetApiKey
     detail = if ($hasNuGetApiKey) { "NUGET_API_KEY is available." } else { "NUGET_API_KEY is missing; managed package cannot be published to nuget.org from GitHub Actions." }
   }) | Out-Null
 $readiness.Add([pscustomobject]@{
     area = "runner-audit"
+    gate = "advisory"
     ready = [bool]$runnerAuditTokenIsAvailable
     detail = if ($runnerAuditTokenIsAvailable) { "RUNNER_AUDIT_TOKEN is available." } else { "RUNNER_AUDIT_TOKEN is missing; GitHub Actions runner availability audit stays warning-only unless local gh-auth can query it." }
   }) | Out-Null
 $readiness.Add([pscustomobject]@{
     area = "runner-query"
+    gate = "advisory"
     ready = [bool]$runnerQuerySucceeded
     detail = $runnerQueryDetail
   }) | Out-Null
@@ -307,6 +313,7 @@ $readiness.Add([pscustomobject]@{
 foreach ($runnerCheck in $runnerChecks) {
   $readiness.Add([pscustomobject]@{
       area = "runner:$($runnerCheck.requiredLabelSet)"
+      gate = "advisory"
       ready = [bool]$runnerCheck.passed
       detail = "onlineMatchingRunnerCount=$($runnerCheck.onlineMatchingRunnerCount); matchingRunnerCount=$($runnerCheck.matchingRunnerCount)"
     }) | Out-Null
@@ -315,12 +322,15 @@ foreach ($runnerCheck in $runnerChecks) {
 foreach ($futureTarget in $futureTargetReadiness) {
   $readiness.Add([pscustomobject]@{
       area = $futureTarget.area
+      gate = $futureTarget.gate
       ready = [bool]$futureTarget.ready
       detail = $futureTarget.reason
     }) | Out-Null
 }
 
 $notReady = @($readiness | Where-Object { -not $_.ready })
+$blockingNotReady = @($notReady | Where-Object { [string]$_.gate -eq "required" })
+$advisoryNotReady = @($notReady | Where-Object { [string]$_.gate -ne "required" })
 $outputRoot = Join-Path $RepositoryRoot "artifacts\release-readiness"
 New-Item -ItemType Directory -Path $outputRoot -Force | Out-Null
 
@@ -331,6 +341,8 @@ $markdownPath = Join-Path $outputRoot "release-readiness.md"
   repository = $Repository
   readyCount = @($readiness | Where-Object { $_.ready }).Count
   notReadyCount = $notReady.Count
+  blockingNotReadyCount = $blockingNotReady.Count
+  advisoryNotReadyCount = $advisoryNotReady.Count
   readiness = @($readiness.ToArray())
   runnerAuditTokenAvailable = [bool]$runnerAuditTokenIsAvailable
   nugetApiKeyAvailable = [bool]$hasNuGetApiKey
@@ -356,24 +368,26 @@ $lines.Add("# Release Readiness")
 $lines.Add("")
 $lines.Add("Repository: " + $codeQuote + $Repository + $codeQuote)
 $lines.Add("")
-$lines.Add("| Area | Ready | Detail |")
-$lines.Add("| --- | --- | --- |")
+$lines.Add("| Area | Gate | Ready | Detail |")
+$lines.Add("| --- | --- | --- | --- |")
 foreach ($item in $readiness) {
   $detail = ([string]$item.detail).Replace("|", "\|")
-  $lines.Add("| " + $codeQuote + $item.area + $codeQuote + " | $($item.ready) | $detail |")
+  $lines.Add("| " + $codeQuote + $item.area + $codeQuote + " | $($item.gate) | $($item.ready) | $detail |")
 }
 $lines.Add("")
 $lines.Add("## Summary")
 $lines.Add("")
 $lines.Add("- Ready checks: $(@($readiness | Where-Object { $_.ready }).Count)")
 $lines.Add("- Not-ready checks: $($notReady.Count)")
+$lines.Add("- Blocking not-ready checks: $($blockingNotReady.Count)")
+$lines.Add("- Advisory not-ready checks: $($advisoryNotReady.Count)")
 $lines | Set-Content -LiteralPath $markdownPath -Encoding utf8
 
 Write-Host "Release readiness written to $jsonPath"
 Write-Host "Release readiness written to $markdownPath"
 
-if ($notReady.Count -gt 0) {
-  $message = "Release readiness has $($notReady.Count) not-ready check(s)."
+if ($blockingNotReady.Count -gt 0) {
+  $message = "Release readiness has $($blockingNotReady.Count) blocking not-ready check(s)."
   if ($WarnOnly.IsPresent) {
     Write-Warning $message
   }

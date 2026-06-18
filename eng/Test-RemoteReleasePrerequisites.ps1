@@ -169,7 +169,14 @@ elseif (-not [string]::Equals($env:GITHUB_ACTIONS, "true", [System.StringCompari
   $runnerQuerySource = "gh-auth"
 }
 
-$runnerResult = if ([string]::IsNullOrWhiteSpace($runnerQuerySource)) {
+$runnerResult = if ($requiredRunnerLabelSets.Count -eq 0) {
+  [pscustomobject]@{
+    success = $true
+    items = @()
+    stderr = "No runner label sets requested; runner query skipped."
+  }
+}
+elseif ([string]::IsNullOrWhiteSpace($runnerQuerySource)) {
   [pscustomobject]@{
     success = $false
     items = @()
