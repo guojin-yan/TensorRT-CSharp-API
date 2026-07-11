@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.IO.Compression;
 using System.Text.Json;
 using Xunit;
 
@@ -227,6 +228,132 @@ public sealed class ReleaseQualityGateWorkflowTests
         Assert.Contains("-Strict/", gitignore, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void GitHubActionsRunEvidenceImportPromotesDryRunPackWithoutPublishingClaims()
+    {
+        string tempRoot = Path.Combine(Path.GetTempPath(), "trtsharp-run-evidence-" + Guid.NewGuid().ToString("N"));
+        string runId = "29160655818";
+        string headSha = "72d65909a120e1e550568e01796bbbdb5ec2b2e4";
+        string artifactsRoot = Path.Combine(tempRoot, "artifacts", "github-actions-runs", runId);
+        string packageRoot = Path.Combine(artifactsRoot, "package-managed-dry-run");
+        string releaseGateRoot = Path.Combine(artifactsRoot, "release-quality-gate", "release-quality-gate");
+        string finalReleaseRoot = Path.Combine(artifactsRoot, "release-quality-gate", "final-release");
+        string outputPath = Path.Combine(tempRoot, "github-actions-run-evidence-import.json");
+        string markdownPath = Path.Combine(tempRoot, "github-actions-run-evidence-import.md");
+        string runMetadataPath = Path.Combine(artifactsRoot, "github-run-view.json");
+
+        try
+        {
+            Directory.CreateDirectory(packageRoot);
+            Directory.CreateDirectory(releaseGateRoot);
+            Directory.CreateDirectory(finalReleaseRoot);
+
+            File.WriteAllText(
+                Path.Combine(releaseGateRoot, "release-quality-gate-summary.json"),
+                $$"""
+                {
+                  "recordKind": "release-quality-gate-summary",
+                  "state": "release-quality-gate-passed",
+                  "performsPublish": false,
+                  "usesPublishToken": false,
+                  "isRuntimeExecutionProof": false,
+                  "isPackageConsumerRuntimeProof": false,
+                  "canPublishPublicly": false,
+                  "canCloseReleaseIssue": false,
+                  "checks": []
+                }
+                """);
+            File.WriteAllText(
+                Path.Combine(finalReleaseRoot, "github-actions-package-validation-audit.json"),
+                $$"""
+                {
+                  "recordKind": "github-actions-package-validation-audit",
+                  "headSha": "{{headSha}}",
+                  "performsPublish": false,
+                  "usesPublishToken": false,
+                  "isPackageConsumerRuntimeProof": false,
+                  "isPostPublishProof": false,
+                  "canPublishPublicly": false
+                }
+                """);
+            File.WriteAllText(
+                runMetadataPath,
+                $$"""
+                {
+                  "databaseId": 29160655818,
+                  "headSha": "{{headSha}}",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "url": "https://github.com/guojin-yan/TensorRT-CSharp-API/actions/runs/29160655818",
+                  "jobs": [
+                    { "name": "source-quality", "status": "completed", "conclusion": "success" },
+                    { "name": "package-managed-dry-run / pack", "status": "completed", "conclusion": "success" },
+                    { "name": "package-managed-dry-run / publish-nuget", "status": "completed", "conclusion": "skipped" },
+                    { "name": "package-managed-dry-run / publish-github-packages", "status": "completed", "conclusion": "skipped" }
+                  ]
+                }
+                """);
+
+            CreateMinimalManagedNupkg(Path.Combine(packageRoot, "JYPPX.TensorRT.CSharp.API.4.0.0.nupkg"));
+
+            string script = Path.Combine(RepositoryPaths.Root, "eng", "Export-GitHubActionsRunEvidenceImport.ps1");
+            RunPowerShell(
+                script,
+                "-RunId",
+                runId,
+                "-ArtifactsRoot",
+                artifactsRoot,
+                "-RunMetadataPath",
+                runMetadataPath,
+                "-ExpectedHeadSha",
+                headSha,
+                "-OutputPath",
+                outputPath,
+                "-MarkdownOutputPath",
+                markdownPath);
+
+            using JsonDocument document = JsonDocument.Parse(File.ReadAllText(outputPath));
+            JsonElement root = document.RootElement;
+
+            Assert.Equal("github-actions-run-evidence-import", root.GetProperty("recordKind").GetString());
+            Assert.Equal(runId, root.GetProperty("runId").GetString());
+            Assert.Equal(headSha, root.GetProperty("headSha").GetString());
+            Assert.Equal("success", root.GetProperty("runConclusion").GetString());
+            Assert.Equal("success", root.GetProperty("sourceQualityConclusion").GetString());
+            Assert.Equal("success", root.GetProperty("packageManagedDryRunPackConclusion").GetString());
+            Assert.Equal("skipped", root.GetProperty("publishNugetConclusion").GetString());
+            Assert.Equal("skipped", root.GetProperty("publishGitHubPackagesConclusion").GetString());
+            Assert.Equal(0, root.GetProperty("failedBlockerCount").GetInt32());
+            Assert.True(root.GetProperty("canClaimGitHubActionsPackageDryRunPackForRun").GetBoolean());
+            Assert.False(root.GetProperty("canClaimNuGetPublished").GetBoolean());
+            Assert.False(root.GetProperty("canClaimGitHubPackagesPublished").GetBoolean());
+            Assert.False(root.GetProperty("performsPublish").GetBoolean());
+            Assert.False(root.GetProperty("usesPublishToken").GetBoolean());
+            Assert.False(root.GetProperty("isPackageConsumerRuntimeProof").GetBoolean());
+            Assert.False(root.GetProperty("isPostPublishProof").GetBoolean());
+
+            JsonElement package = Assert.Single(root.GetProperty("nupkgPackages").EnumerateArray());
+            Assert.Equal("JYPPX.TensorRT.CSharp.API.4.0.0.nupkg", package.GetProperty("fileName").GetString());
+            Assert.True(package.GetProperty("hasNuspec").GetBoolean());
+            Assert.True(package.GetProperty("hasReadme").GetBoolean());
+            Assert.True(package.GetProperty("dllEntryCount").GetInt32() > 0);
+            Assert.True(package.GetProperty("xmlEntryCount").GetInt32() > 0);
+
+            string markdown = File.ReadAllText(markdownPath);
+            Assert.Contains("Can claim package dry-run pack: `True`", markdown, StringComparison.Ordinal);
+            Assert.Contains("Can claim NuGet published: `False`", markdown, StringComparison.Ordinal);
+            Assert.Contains("Can claim GitHub Packages published: `False`", markdown, StringComparison.Ordinal);
+            Assert.Contains("is not package-consumer runtime proof", markdown, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            if (Directory.Exists(tempRoot))
+            {
+                Directory.Delete(tempRoot, recursive: true);
+            }
+        }
+    }
+
     private static void RunPowerShell(string scriptPath, params string[] arguments)
     {
         ProcessStartInfo startInfo = new()
@@ -278,5 +405,27 @@ public sealed class ReleaseQualityGateWorkflowTests
     private static string ReadSource(params string[] pathParts)
     {
         return File.ReadAllText(Path.Combine(new[] { RepositoryPaths.Root }.Concat(pathParts).ToArray()));
+    }
+
+    private static void CreateMinimalManagedNupkg(string path)
+    {
+        using ZipArchive archive = ZipFile.Open(path, ZipArchiveMode.Create);
+        AddZipEntry(archive, "_rels/.rels", "<Relationships />");
+        AddZipEntry(archive, "JYPPX.TensorRT.CSharp.API.nuspec", "<package><metadata><id>JYPPX.TensorRT.CSharp.API</id><version>4.0.0</version></metadata></package>");
+        AddZipEntry(archive, "README.md", "# JYPPX TensorRT CSharp API");
+        AddZipEntry(archive, "lib/net8.0/JYPPX.CudaSharp.dll", "binary");
+        AddZipEntry(archive, "lib/net8.0/JYPPX.CudaSharp.xml", "<doc />");
+        AddZipEntry(archive, "lib/net8.0/JYPPX.Shared.dll", "binary");
+        AddZipEntry(archive, "lib/net8.0/JYPPX.Shared.xml", "<doc />");
+        AddZipEntry(archive, "lib/net8.0/JYPPX.TensorRtSharp.dll", "binary");
+        AddZipEntry(archive, "lib/net8.0/JYPPX.TensorRtSharp.xml", "<doc />");
+    }
+
+    private static void AddZipEntry(ZipArchive archive, string entryName, string content)
+    {
+        ZipArchiveEntry entry = archive.CreateEntry(entryName);
+        using Stream stream = entry.Open();
+        using StreamWriter writer = new(stream);
+        writer.Write(content);
     }
 }
