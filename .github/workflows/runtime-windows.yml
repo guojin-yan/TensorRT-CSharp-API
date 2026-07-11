@@ -291,6 +291,23 @@ jobs:
         shell: pwsh
         run: cmake --version
 
+      - name: Restore solution
+        run: dotnet restore TensorRtSharp.sln
+
+      - name: Validate runtime manifest
+        shell: pwsh
+        run: pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Validate-RuntimeManifest.ps1
+
+      - name: Validate binding generator outputs
+        shell: pwsh
+        run: pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-BindingGeneratorOutputs.ps1
+
+      - name: Build solution
+        run: dotnet build TensorRtSharp.sln -c "${{ inputs.configuration }}" --no-restore
+
+      - name: Test project quality
+        run: dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c "${{ inputs.configuration }}" --no-build
+
       - name: Ensure GitHub Release exists
         if: ${{ inputs.attach_to_github_release && inputs.release_tag != '' }}
         shell: pwsh

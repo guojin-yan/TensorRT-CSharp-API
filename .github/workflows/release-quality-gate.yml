@@ -1,0 +1,201 @@
+name: release-quality-gate
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/**"
+      - "eng/**"
+      - "native/**"
+      - "src/**"
+      - "tests/**"
+      - "samples/**"
+      - "applications/**"
+      - "pack/**"
+      - "docs/**"
+      - "TensorRtSharp.sln"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/**"
+      - "eng/**"
+      - "native/**"
+      - "src/**"
+      - "tests/**"
+      - "samples/**"
+      - "applications/**"
+      - "pack/**"
+      - "docs/**"
+      - "TensorRtSharp.sln"
+  workflow_dispatch:
+    inputs:
+      runtime_package_key:
+        description: Runtime key used by optional package gates
+        required: false
+        default: win-x64-trt11.0-cuda13.2-cudnn9.22
+        type: string
+      run_release_artifact_audit:
+        description: Run strict audit against a runner with complete release artifacts
+        required: false
+        default: false
+        type: boolean
+      run_split_package_build:
+        description: Build split all plus meta and run the clean consumer contract
+        required: false
+        default: false
+        type: boolean
+      run_package_managed_dry_run:
+        description: Run package-managed without publishing and archive pack artifacts
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-quality-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-quality:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Source-only release quality contract
+        shell: pwsh
+        run: pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-ReleaseQualityGate.ps1 -Strict
+
+      - name: Restore solution
+        run: dotnet restore TensorRtSharp.sln
+
+      - name: Generate bindings
+        shell: pwsh
+        run: pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Generate-Bindings.ps1
+
+      - name: Validate binding outputs
+        shell: pwsh
+        run: pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-BindingGeneratorOutputs.ps1
+
+      - name: Refresh interface coverage
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-InterfaceCoverageMatrix.ps1
+          pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-DeferredReadOnlyApiCandidatePlan.ps1
+
+      - name: Build solution
+        run: dotnet build TensorRtSharp.sln -c Debug --no-restore
+
+      - name: Run grouped release quality tests
+        shell: pwsh
+        run: |
+          dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj `
+            -c Debug `
+            --no-build `
+            --filter "FullyQualifiedName~ReleaseAutomationTests|FullyQualifiedName~ReleaseQualityGateWorkflowTests|FullyQualifiedName~RnnV2BorrowedStateDesignGateTests|FullyQualifiedName~EngineAndRnnReadonlyDiagnosticsTests|FullyQualifiedName~RuntimePackageReadinessTests|FullyQualifiedName~FinalReleaseMarkdownRenderingTests" `
+            --logger "trx;LogFileName=release-quality-gate.trx" `
+            --results-directory .\artifacts\release-quality-gate\test-results
+
+      - name: Refresh source-only machine summary
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-ReleaseQualityGate.ps1 -Strict
+          pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-GitHubActionsPackageValidationAudit.ps1
+
+      - name: Upload quality gate summary
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-quality-gate
+          path: |
+            artifacts/release-quality-gate/**
+            artifacts/interface-coverage/tensorrt-interface-comparison.csv
+            artifacts/interface-coverage/deferred-candidate-safety-triage.json
+            artifacts/final-release/github-actions-package-validation-audit.*
+
+  package-managed-dry-run:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_package_managed_dry_run }}
+    uses: ./.github/workflows/package-managed.yml
+    with:
+      version: 4.0.0
+      configuration: Release
+      publish_to_nuget: false
+      publish_to_github_packages: false
+      artifact_name: package-managed-dry-run
+      release_tag: ""
+      attach_to_github_release: false
+    secrets: inherit
+
+  release-artifact-audit:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_release_artifact_audit }}
+    runs-on: [self-hosted, windows, x64, release-artifacts]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Strict release evidence classification audit
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-ReleaseEvidenceClassificationAudit.ps1 -Strict
+          pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-PublicProofClaimBoundaryAudit.ps1 -Strict
+          pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-ReleaseQualityGate.ps1 `
+            -RuntimePackageKey "${{ inputs.runtime_package_key }}" `
+            -RequirePackageInventory `
+            -RequireClassificationAudit `
+            -Strict
+
+      - name: Upload release artifact audit
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-quality-gate-artifact-audit
+          path: |
+            artifacts/release-quality-gate/**
+            artifacts/final-release/release-evidence-classification-audit.*
+            artifacts/final-release/release-candidate-package-inventory.*
+
+  split-package-all:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_split_package_build }}
+    runs-on: [self-hosted, windows, x64]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Build split all plus meta without publishing
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Invoke-LocalSplitRuntimePackage.ps1 `
+            -SourceRuntimeKey "${{ inputs.runtime_package_key }}" `
+            -Version 4.0.0 `
+            -SplitPackageRole all `
+            -IncludeMetaPackage `
+            -Configuration Release
+
+      - name: Validate split package inventory
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-ReleaseCandidatePackageInventory.ps1 `
+            -RuntimePackageKey "${{ inputs.runtime_package_key }}"
+          pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-ReleaseQualityGate.ps1 `
+            -RuntimePackageKey "${{ inputs.runtime_package_key }}" `
+            -RequirePackageInventory `
+            -Strict
+
+      - name: Upload split gate reports
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-quality-gate-split-package
+          path: |
+            artifacts/release-quality-gate/**
+            artifacts/package-consumer/package-consumer-validation-summary.*
+            artifacts/final-release/release-candidate-package-inventory.*

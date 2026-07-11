@@ -25,6 +25,7 @@ Testing/
 *.sqlite
 docs/_site/
 docs/api/
+-Strict/
 third_party/nvidia/
 !third_party/README.md
 native/nvidia/
