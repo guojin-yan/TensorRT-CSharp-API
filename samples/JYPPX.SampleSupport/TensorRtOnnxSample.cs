@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using JYPPX.CudaSharp;
 using JYPPX.Shared.Interop;
 using JYPPX.TensorRtSharp;
@@ -19,7 +20,9 @@ internal sealed class OnnxSampleOptions
         TensorRtDims optShape,
         TensorRtDims maxShape,
         bool hasProfileOverride,
-        string inputPattern)
+        string inputPattern,
+        string inputPath,
+        string inputDataPath)
     {
         Line = line;
         ModelPath = modelPath;
@@ -31,6 +34,8 @@ internal sealed class OnnxSampleOptions
         MaxShape = maxShape;
         HasProfileOverride = hasProfileOverride;
         InputPattern = inputPattern;
+        InputPath = inputPath;
+        InputDataPath = inputDataPath;
     }
 
     public TensorRtApiLine Line { get; }
@@ -52,6 +57,12 @@ internal sealed class OnnxSampleOptions
     public bool HasProfileOverride { get; }
 
     public string InputPattern { get; }
+
+    public string InputPath { get; }
+
+    public string InputDataPath { get; }
+
+    public bool UsesExternalInput => !string.IsNullOrWhiteSpace(InputPath) || !string.IsNullOrWhiteSpace(InputDataPath);
 
     public static OnnxSampleOptions FromArgs(string[] args, string defaultInputShape)
     {
@@ -90,7 +101,26 @@ internal sealed class OnnxSampleOptions
             optShape,
             maxShape,
             hasProfileOverride,
-            SampleCommandLine.GetStringArgument(args, "--input-pattern", "ramp"));
+            SampleCommandLine.GetStringArgument(args, "--input-pattern", "ramp"),
+            ResolveOptionalInputFile(args, "--input"),
+            ResolveOptionalInputFile(args, "--input-data"));
+    }
+
+    private static string ResolveOptionalInputFile(string[] args, string name)
+    {
+        string value = SampleCommandLine.GetStringArgument(args, name, string.Empty);
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return string.Empty;
+        }
+
+        string fullPath = Path.GetFullPath(value);
+        if (!File.Exists(fullPath))
+        {
+            throw new FileNotFoundException($"Input file for {name} was not found.", fullPath);
+        }
+
+        return fullPath;
     }
 }
 
@@ -145,6 +175,91 @@ internal sealed class OnnxSampleResult
     public ulong EngineDeviceMemoryBytes { get; }
 }
 
+internal sealed class OnnxSampleOutputTensor
+{
+    public OnnxSampleOutputTensor(string name, TensorRtDims shape, float[] values)
+    {
+        Name = name ?? string.Empty;
+        Shape = shape ?? throw new ArgumentNullException(nameof(shape));
+        Values = values ?? throw new ArgumentNullException(nameof(values));
+    }
+
+    public string Name { get; }
+
+    public TensorRtDims Shape { get; }
+
+    public float[] Values { get; }
+
+    public int ElementCount => Values.Length;
+
+    public override string ToString()
+    {
+        return $"{Name}:{Shape} Values={ElementCount}";
+    }
+}
+
+internal sealed class OnnxSampleMultiOutputResult
+{
+    public OnnxSampleMultiOutputResult(
+        TensorRtApiLine line,
+        string inputName,
+        string primaryOutputName,
+        TensorRtDims inputShape,
+        IReadOnlyList<OnnxSampleOutputTensor> outputs,
+        TensorRtEngineBindingReport report,
+        TensorRtInferenceExecutionSummary executionSummary,
+        float elapsedMilliseconds,
+        int profileIndex,
+        ulong engineDeviceMemoryBytes)
+    {
+        Line = line;
+        InputName = inputName ?? string.Empty;
+        PrimaryOutputName = primaryOutputName ?? string.Empty;
+        InputShape = inputShape ?? throw new ArgumentNullException(nameof(inputShape));
+        Outputs = outputs ?? Array.Empty<OnnxSampleOutputTensor>();
+        Report = report;
+        ExecutionSummary = executionSummary;
+        ElapsedMilliseconds = elapsedMilliseconds;
+        ProfileIndex = profileIndex;
+        EngineDeviceMemoryBytes = engineDeviceMemoryBytes;
+    }
+
+    public TensorRtApiLine Line { get; }
+
+    public string InputName { get; }
+
+    public string PrimaryOutputName { get; }
+
+    public TensorRtDims InputShape { get; }
+
+    public IReadOnlyList<OnnxSampleOutputTensor> Outputs { get; }
+
+    public TensorRtEngineBindingReport Report { get; }
+
+    public TensorRtInferenceExecutionSummary ExecutionSummary { get; }
+
+    public float ElapsedMilliseconds { get; }
+
+    public int ProfileIndex { get; }
+
+    public ulong EngineDeviceMemoryBytes { get; }
+
+    public OnnxSampleOutputTensor PrimaryOutput => GetOutput(PrimaryOutputName);
+
+    public OnnxSampleOutputTensor GetOutput(string name)
+    {
+        foreach (OnnxSampleOutputTensor output in Outputs)
+        {
+            if (string.Equals(output.Name, name, StringComparison.Ordinal))
+            {
+                return output;
+            }
+        }
+
+        throw new ArgumentException($"Output tensor '{name}' was not captured.", nameof(name));
+    }
+}
+
 internal sealed class SampleSkippedException : Exception
 {
     public SampleSkippedException(string message)
@@ -183,6 +298,29 @@ internal static class TensorRtOnnxSample
     }
 
     public static OnnxSampleResult RunSingleFloatInputOutput(OnnxSampleOptions options)
+    {
+        OnnxSampleMultiOutputResult result = RunSingleFloatInputOutputsCore(options, captureAllOutputs: false);
+        OnnxSampleOutputTensor output = result.PrimaryOutput;
+        return new OnnxSampleResult(
+            result.Line,
+            result.InputName,
+            output.Name,
+            result.InputShape,
+            output.Shape,
+            output.Values,
+            result.Report,
+            result.ExecutionSummary,
+            result.ElapsedMilliseconds,
+            result.ProfileIndex,
+            result.EngineDeviceMemoryBytes);
+    }
+
+    public static OnnxSampleMultiOutputResult RunSingleFloatInputOutputs(OnnxSampleOptions options)
+    {
+        return RunSingleFloatInputOutputsCore(options, captureAllOutputs: true);
+    }
+
+    private static OnnxSampleMultiOutputResult RunSingleFloatInputOutputsCore(OnnxSampleOptions options, bool captureAllOutputs)
     {
         TensorRtEnvironmentSnapshot snapshot = TensorRtEnvironmentProbe.GetCurrent();
         TensorRtAdapterInfo adapter = TensorRtSampleSupport.SelectAdapter(snapshot, options.Line);
@@ -234,11 +372,15 @@ internal static class TensorRtOnnxSample
         using TensorRtExecutionContext context = engine.CreateExecutionContext();
         using TensorRtInferenceBindings bindings = new TensorRtInferenceBindings(engine, context, profileIndex);
 
-        string outputName = ResolveOutputName(bindings.Report, options.OutputName);
-        TensorRtEngineTensorBinding outputBinding = bindings.Report.GetTensor(outputName);
-        if (outputBinding.DataType != TensorRtDataType.Float)
+        string primaryOutputName = ResolveOutputName(bindings.Report, options.OutputName);
+        List<string> outputNames = ResolveOutputNames(bindings.Report, primaryOutputName, captureAllOutputs);
+        foreach (string outputName in outputNames)
         {
-            throw new NotSupportedException($"This sample supports float output tensors only. Output '{outputName}' is {outputBinding.DataType}.");
+            TensorRtEngineTensorBinding outputBinding = bindings.Report.GetTensor(outputName);
+            if (outputBinding.DataType != TensorRtDataType.Float)
+            {
+                throw new NotSupportedException($"This sample supports float output tensors only. Output '{outputName}' is {outputBinding.DataType}.");
+            }
         }
 
         if (dynamicInput || options.HasProfileOverride)
@@ -246,10 +388,15 @@ internal static class TensorRtOnnxSample
             bindings.SetInputShape(inputTensor.Name, options.InputShape);
         }
 
-        float[] inputValues = CreateInputValues(CountElements(options.InputShape), options.InputPattern);
+        float[] inputValues = CreateInputValues(CountElements(options.InputShape), options);
         bindings.CopyInputFromHost(inputTensor.Name, inputValues, options.InputShape);
         _ = bindings.GetReadiness(runShapeInference: true);
-        TensorRtInferenceBuffer outputBuffer = bindings.AllocateDeviceBuffer(outputName);
+
+        Dictionary<string, TensorRtInferenceBuffer> outputBuffers = new Dictionary<string, TensorRtInferenceBuffer>(StringComparer.Ordinal);
+        foreach (string outputName in outputNames)
+        {
+            outputBuffers[outputName] = bindings.AllocateDeviceBuffer(outputName);
+        }
 
         TensorRtInferenceExecutionSummary executionSummary = null!;
         float elapsedMilliseconds = stream.MeasureElapsedTime(cudaStream =>
@@ -257,16 +404,21 @@ internal static class TensorRtOnnxSample
             executionSummary = bindings.EnqueueAsync(cudaStream, synchronize: false, runShapeInference: true);
         });
 
-        int outputElementCount = CountElements(outputBuffer.RuntimeShape!);
-        float[] outputValues = bindings.ReadOutputSingles(outputName, outputElementCount);
+        List<OnnxSampleOutputTensor> outputs = new List<OnnxSampleOutputTensor>();
+        foreach (string outputName in outputNames)
+        {
+            TensorRtInferenceBuffer outputBuffer = outputBuffers[outputName];
+            int outputElementCount = CountElements(outputBuffer.RuntimeShape!);
+            float[] outputValues = bindings.ReadOutputSingles(outputName, outputElementCount);
+            outputs.Add(new OnnxSampleOutputTensor(outputName, outputBuffer.RuntimeShape!, outputValues));
+        }
 
-        return new OnnxSampleResult(
+        return new OnnxSampleMultiOutputResult(
             options.Line,
             inputTensor.Name,
-            outputName,
+            primaryOutputName,
             options.InputShape,
-            outputBuffer.RuntimeShape!,
-            outputValues,
+            outputs,
             bindings.Report,
             executionSummary,
             elapsedMilliseconds,
@@ -353,6 +505,23 @@ internal static class TensorRtOnnxSample
         throw new ArgumentException($"Output tensor '{requestedName}' was not found.");
     }
 
+    private static List<string> ResolveOutputNames(TensorRtEngineBindingReport report, string primaryOutputName, bool captureAllOutputs)
+    {
+        List<string> names = new List<string>();
+        if (!captureAllOutputs)
+        {
+            names.Add(primaryOutputName);
+            return names;
+        }
+
+        foreach (TensorRtEngineTensorBinding output in report.GetOutputs())
+        {
+            names.Add(output.Name);
+        }
+
+        return names;
+    }
+
     private static bool HasDynamicDimension(TensorRtDims shape)
     {
         foreach (int value in shape.Values)
@@ -366,18 +535,55 @@ internal static class TensorRtOnnxSample
         return false;
     }
 
-    private static float[] CreateInputValues(int count, string pattern)
+    public static float[] CreateInputValuesForTesting(int count, string inputPattern, string inputPath = "", string inputDataPath = "")
     {
+        return CreateInputValues(
+            count,
+            new ExternalInputRequest(inputPattern ?? string.Empty, inputPath ?? string.Empty, inputDataPath ?? string.Empty));
+    }
+
+    private static float[] CreateInputValues(int count, OnnxSampleOptions options)
+    {
+        if (options == null)
+        {
+            throw new ArgumentNullException(nameof(options));
+        }
+
+        return CreateInputValues(count, new ExternalInputRequest(options.InputPattern, options.InputPath, options.InputDataPath));
+    }
+
+    private static float[] CreateInputValues(int count, ExternalInputRequest request)
+    {
+        if (count <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(count), "Input element count must be positive.");
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.InputDataPath))
+        {
+            return ReadFloatInputData(count, request.InputDataPath);
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.InputPath))
+        {
+            return ReadByteInputData(count, request.InputPath);
+        }
+
         float[] values = new float[count];
-        if (string.Equals(pattern, "ones", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(request.Pattern, "ones", StringComparison.OrdinalIgnoreCase))
         {
             Array.Fill(values, 1.0f);
             return values;
         }
 
-        if (string.Equals(pattern, "zeros", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(request.Pattern, "zeros", StringComparison.OrdinalIgnoreCase))
         {
             return values;
+        }
+
+        if (!string.Equals(request.Pattern, "ramp", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException("Input pattern must be zeros, ones, or ramp when no --input/--input-data file is supplied.", nameof(request));
         }
 
         for (int index = 0; index < values.Length; index++)
@@ -386,5 +592,74 @@ internal static class TensorRtOnnxSample
         }
 
         return values;
+    }
+
+    private static float[] ReadFloatInputData(int expectedCount, string path)
+    {
+        string extension = Path.GetExtension(path);
+        if (string.Equals(extension, ".bin", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(extension, ".raw", StringComparison.OrdinalIgnoreCase))
+        {
+            byte[] bytes = File.ReadAllBytes(path);
+            if (bytes.Length % sizeof(float) != 0)
+            {
+                throw new ArgumentException($"Float input file byte length must be divisible by {sizeof(float)}.");
+            }
+
+            int actualCount = bytes.Length / sizeof(float);
+            if (actualCount != expectedCount)
+            {
+                throw new ArgumentException($"Float input file has {actualCount} elements, expected {expectedCount}.");
+            }
+
+            float[] values = new float[actualCount];
+            Buffer.BlockCopy(bytes, 0, values, 0, bytes.Length);
+            return values;
+        }
+
+        string text = File.ReadAllText(path);
+        float[] parsed = text
+            .Split(new[] { ',', ';', ' ', '\t', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(static value => float.Parse(value, System.Globalization.CultureInfo.InvariantCulture))
+            .ToArray();
+        if (parsed.Length != expectedCount)
+        {
+            throw new ArgumentException($"Text input file has {parsed.Length} float values, expected {expectedCount}.");
+        }
+
+        return parsed;
+    }
+
+    private static float[] ReadByteInputData(int expectedCount, string path)
+    {
+        byte[] bytes = File.ReadAllBytes(path);
+        if (bytes.Length != expectedCount)
+        {
+            throw new ArgumentException("--input currently accepts raw byte tensors only. Use --input-data for text/.bin float tensors, or provide a raw byte file whose length matches input element count.");
+        }
+
+        float[] values = new float[bytes.Length];
+        for (int index = 0; index < bytes.Length; index++)
+        {
+            values[index] = bytes[index] / 255.0f;
+        }
+
+        return values;
+    }
+
+    private readonly struct ExternalInputRequest
+    {
+        public ExternalInputRequest(string pattern, string inputPath, string inputDataPath)
+        {
+            Pattern = string.IsNullOrWhiteSpace(pattern) ? "ramp" : pattern;
+            InputPath = inputPath ?? string.Empty;
+            InputDataPath = inputDataPath ?? string.Empty;
+        }
+
+        public string Pattern { get; }
+
+        public string InputPath { get; }
+
+        public string InputDataPath { get; }
     }
 }

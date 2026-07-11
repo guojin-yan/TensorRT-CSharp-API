@@ -1,0 +1,157 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
+
+namespace YoloVisionSample;
+
+public sealed class YoloCapabilityEntry
+{
+    public YoloCapabilityEntry(
+        YoloModelFamily family,
+        YoloTaskType taskType,
+        string familyAlias,
+        string taskAlias,
+        string decodePath,
+        string auxiliaryMetadata,
+        string evidenceLevel)
+    {
+        Family = family;
+        TaskType = taskType;
+        FamilyAlias = familyAlias ?? throw new ArgumentNullException(nameof(familyAlias));
+        TaskAlias = taskAlias ?? throw new ArgumentNullException(nameof(taskAlias));
+        DecodePath = decodePath ?? throw new ArgumentNullException(nameof(decodePath));
+        AuxiliaryMetadata = auxiliaryMetadata ?? throw new ArgumentNullException(nameof(auxiliaryMetadata));
+        EvidenceLevel = evidenceLevel ?? throw new ArgumentNullException(nameof(evidenceLevel));
+    }
+
+    public YoloModelFamily Family { get; }
+
+    public YoloTaskType TaskType { get; }
+
+    public string FamilyAlias { get; }
+
+    public string TaskAlias { get; }
+
+    public string DecodePath { get; }
+
+    public string AuxiliaryMetadata { get; }
+
+    public string EvidenceLevel { get; }
+}
+
+public static class YoloCapabilityMatrix
+{
+    private static readonly (YoloModelFamily Family, string Alias)[] Families =
+    {
+        (YoloModelFamily.Custom, "custom"),
+        (YoloModelFamily.YoloV5, "v5"),
+        (YoloModelFamily.YoloV6, "v6"),
+        (YoloModelFamily.YoloV7, "v7"),
+        (YoloModelFamily.YoloV8, "v8"),
+        (YoloModelFamily.YoloV9, "v9"),
+        (YoloModelFamily.YoloV10, "v10"),
+        (YoloModelFamily.YoloV11, "v11"),
+        (YoloModelFamily.YoloV26, "v26")
+    };
+
+    private static readonly (YoloTaskType Task, string Alias, string DecodePath, string AuxiliaryMetadata, string EvidenceLevel)[] Tasks =
+    {
+        (YoloTaskType.Detection, "det", "single-output boxes with score filtering and class-aware/class-agnostic NMS", "none", "runtime-smoke-ready"),
+        (YoloTaskType.Classification, "cls", "single-output logits/top-k classification decoder", "none", "managed-smoke-ready"),
+        (YoloTaskType.Segmentation, "seg", "detection rows plus mask prototype composition", "mask coefficient count, prototype tensor role, optional auxiliary channel start/layout", "managed-metadata-ready"),
+        (YoloTaskType.OrientedBoundingBox, "obb", "detection rows plus angle tensor conversion", "angle tensor role, degrees/radians flag, optional auxiliary layout", "managed-metadata-ready"),
+        (YoloTaskType.Pose, "pose", "detection rows plus keypoint tensor mapping", "keypoint count, keypoint stride, optional auxiliary layout", "managed-metadata-ready"),
+        (YoloTaskType.SemanticSegmentation, "sem", "single-output semantic map decoder", "class count and semantic tensor role", "managed-smoke-ready")
+    };
+
+    public static IReadOnlyList<YoloCapabilityEntry> Entries { get; } = Families
+        .SelectMany(static family => Tasks.Select(task => new YoloCapabilityEntry(
+            family.Family,
+            task.Task,
+            family.Alias,
+            task.Alias,
+            task.DecodePath,
+            task.AuxiliaryMetadata,
+            task.EvidenceLevel)))
+        .ToArray();
+
+    public static string FormatConsoleTable()
+    {
+        string[] lines = Entries
+            .Select(static entry =>
+                string.Join(
+                    " | ",
+                    entry.FamilyAlias,
+                    entry.TaskAlias,
+                    entry.TaskType,
+                    entry.DecodePath,
+                    entry.AuxiliaryMetadata,
+                    entry.EvidenceLevel))
+            .ToArray();
+
+        return string.Join(
+            Environment.NewLine,
+            new[]
+            {
+                "YoloVision Capability Matrix",
+                "family | task | task-name | decode-path | auxiliary-metadata | evidence-level"
+            }.Concat(lines));
+    }
+
+    public static string FormatJson()
+    {
+        var payload = new
+        {
+            matrixId = "yolovision-capability-matrix",
+            sample = "samples/YoloVision",
+            matrixState = "managed-capability-surface",
+            proofBoundary = "capability matrix only; not runtime proof; not real-model-runtime proof; not package-consumer-runtime proof; not post-publish proof",
+            familyCount = Families.Length,
+            taskCount = Tasks.Length,
+            entryCount = Entries.Count,
+            families = Families.Select(static item => item.Alias).ToArray(),
+            tasks = Tasks.Select(static item => item.Alias).ToArray(),
+            requiredOwnerEvidence = new[]
+            {
+                "model ONNX source URL, license, SHA256, and export command",
+                "labels source/license/SHA256 and class count",
+                "input image or preprocessed tensor source/license/SHA256",
+                "TensorRtExec or OnnxToEngine build-only report plus SHA256",
+                "YoloVision run log with YoloVision Passed=True",
+                "sample-run-evidence record validated by owner-filled hashes and host metadata"
+            },
+            forbiddenProofSubstitutes = new[]
+            {
+                "YoloVision matrix",
+                "TensorRtExec report",
+                "OnnxToEngine report",
+                "template",
+                "dry-run",
+                "build-only",
+                "screenshot",
+                "local feed",
+                "ProjectReference",
+                "direct .nupkg",
+                "failedBlockerCount=0"
+            },
+            entries = Entries.Select(static entry => new
+            {
+                family = entry.FamilyAlias,
+                task = entry.TaskAlias,
+                familyName = entry.Family.ToString(),
+                taskName = entry.TaskType.ToString(),
+                decodePath = entry.DecodePath,
+                auxiliaryMetadata = entry.AuxiliaryMetadata,
+                evidenceLevel = entry.EvidenceLevel,
+                canPromoteRealModelRuntime = false,
+                canPromotePackageConsumerRuntime = false
+            }).ToArray()
+        };
+
+        return JsonSerializer.Serialize(payload, new JsonSerializerOptions
+        {
+            WriteIndented = true
+        });
+    }
+}

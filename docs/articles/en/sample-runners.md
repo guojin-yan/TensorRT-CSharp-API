@@ -273,7 +273,7 @@ Expected signals:
 The repository keeps real user-facing sample projects for common model workflows. Model and image assets are not bundled, because those files have licensing and size constraints that are separate from API validation.
 
 - `samples/Classification`: executable ONNX classifier pipeline. Provide `--model`, optional `--labels`, and `--input-shape`; the sample builds a TensorRT engine, runs synthetic float input, and prints Top-K scores.
-- `samples/YoloDet`: executable YOLO-family ONNX detector pipeline. Provide `--model`, optional `--labels`, and `--input-shape`; the sample decodes common `[1, 84, 8400]` and `[1, 8400, 84]` output layouts.
+- `samples/YoloVision`: executable YOLO-family ONNX vision sample. Provide `--model`, optional `--labels`, and `--input-shape`; the sample includes family/task profiles plus managed helpers for detection, classification, segmentation, pose, OBB, and semantic outputs.
 - `samples/InferenceBindings`: user-facing tensor-binding workflow example.
 - `samples/OnnxToEngine`: user-facing ONNX-to-engine example with an embedded tiny identity ONNX graph.
 
@@ -288,7 +288,7 @@ dotnet run --project .\samples\Classification -- --model .\models\classifier.onn
 YOLO detection:
 
 ```powershell
-dotnet run --project .\samples\YoloDet -- --model .\models\yolo.onnx --labels .\models\coco.names --input-shape 1x3x640x640 --tensor-rt-line 10
+dotnet run --project .\samples\YoloVision -- --model .\models\yolo.onnx --labels .\models\coco.names --input-shape 1x3x640x640 --tensor-rt-line 10
 ```
 
 ## NetworkBuilderSmokeRunner

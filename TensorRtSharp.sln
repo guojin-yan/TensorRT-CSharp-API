@@ -81,7 +81,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnnxToEngine", "samples\Onn
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Classification", "samples\Classification\Classification.csproj", "{B5DB72E9-310B-4A93-BDC8-88A05AE76C25}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YoloDet", "samples\YoloDet\YoloDet.csproj", "{0A5A9D22-A421-4208-AFA7-FC9F380F79F9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YoloVision", "samples\YoloVision\YoloVision.csproj", "{0A5A9D22-A421-4208-AFA7-FC9F380F79F9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

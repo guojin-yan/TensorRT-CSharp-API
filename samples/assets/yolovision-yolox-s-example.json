@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "sampleName": "YoloVision",
+  "status": "candidate-not-downloaded",
+  "proofClassification": "build-only",
+  "evidenceClassifications": [
+    "template-only",
+    "build-only",
+    "dependency-probe-only",
+    "synthetic-input-runtime",
+    "real-model-runtime",
+    "package-consumer-runtime"
+  ],
+  "isSmokePassed": false,
+  "isRedistributableInRepository": false,
+  "model": {
+    "name": "YOLOX-S candidate",
+    "family": "custom",
+    "task": "det",
+    "sourceUrl": "https://github.com/Megvii-BaseDetection/YOLOX",
+    "documentationUrl": "https://yolox.readthedocs.io/en/latest/demo/onnx_readme.html",
+    "license": "YOLOX source repository is Apache-2.0. Review official weight, label, and image redistribution terms before bundling any assets.",
+    "licenseEvidence": "owner-required",
+    "downloadUrl": "owner-required-from-official-model-zoo",
+    "sha256": "owner-required",
+    "opset": "11-or-owner-selected",
+    "exportCommand": "python3 tools/export_onnx.py --output-name yolox_s.onnx -n yolox-s -c yolox_s.pth",
+    "localPath": "models/yolox_s.onnx"
+  },
+  "labels": {
+    "sourceUrl": "https://cocodataset.org/",
+    "license": "Review COCO label and dataset terms before redistribution.",
+    "licenseEvidence": "owner-required",
+    "sha256": "owner-required",
+    "classCount": 80,
+    "localPath": "models/coco.names"
+  },
+  "input": {
+    "sourceUrl": "owner-required-redistributable-test-image",
+    "license": "owner-required",
+    "licenseEvidence": "owner-required",
+    "sha256": "owner-required",
+    "localPath": "models/yolox-test.jpg"
+  },
+  "inputTensor": {
+    "localPath": "models/yolox_s-preprocessed-fp32.bin",
+    "sourceImagePath": "models/yolox-test.jpg",
+    "sha256": "owner-required",
+    "format": "float32-bin",
+    "elementCount": "1228800",
+    "elementCountNumeric": 1228800,
+    "command": "owner-required YOLOX preprocessing command that resizes/letterboxes, converts RGB/BGR as required, scales, and writes 1x3x640x640 float32 tensor",
+    "notes": "This file is local owner evidence and is not committed until license and size are approved."
+  },
+  "tensor": {
+    "inputName": "images-or-owner-confirmed",
+    "inputShape": "1x3x640x640",
+    "layout": "NCHW",
+    "dtype": "float32",
+    "outputName": "output-or-owner-confirmed",
+    "outputShape": "owner-required"
+  },
+  "preprocess": {
+    "resize": "letterbox-or-owner-confirmed",
+    "padding": "owner-required",
+    "colorOrder": "RGB",
+    "scale": "1/255-or-owner-confirmed",
+    "mean": "none-or-owner-required",
+    "std": "none-or-owner-required"
+  },
+  "postprocess": {
+    "layout": "auto",
+    "hasObjectness": "owner-required",
+    "classCount": 80,
+    "confidence": 0.25,
+    "iouThreshold": 0.45,
+    "nmsLocation": "application-side",
+    "nmsMode": "class-aware",
+    "outputVariants": [
+      "anchor-free",
+      "owner-confirmed-output-shape"
+    ]
+  },
+  "evidence": {
+    "evidenceSidecar": "models/yolox_s-evidence.sidecar.json",
+    "sampleRunEvidenceRecord": "models/yolox_s-sample-run-evidence.json",
+    "sampleRunEvidenceValidation": "artifacts/user-acceptance/sample-run-evidence-record-validation.json",
+    "sampleRunEvidenceValidatorState": "owner-action-required",
+    "sampleRunEvidenceCanPromoteRealModelRuntime": false,
+    "sampleRunEvidenceFailureReasons": [
+      "owner must replace owner-required hashes with real SHA256 values",
+      "owner must capture YoloVision sample run log and SHA256",
+      "validator must pass before real-model-runtime promotion"
+    ],
+    "buildOnlyCommand": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\yolox_s.onnx --saveEngine .\\models\\yolox_s.plan --minShapes images:1x3x640x640 --optShapes images:1x3x640x640 --maxShapes images:1x3x640x640 --fp16 --workspace 512 --buildOnly --exportReport .\\models\\yolox_s-build-report.json --evidenceSidecar .\\models\\yolox_s-evidence.sidecar.json",
+    "runCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolox_s.onnx --labels .\\models\\coco.names --input-data .\\models\\yolox_s-preprocessed-fp32.bin --input-shape 1x3x640x640 --tensor-rt-line 10 --family custom --task det --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45",
+    "sampleRunCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolox_s.onnx --labels .\\models\\coco.names --input-data .\\models\\yolox_s-preprocessed-fp32.bin --input-shape 1x3x640x640 --tensor-rt-line 10 --family custom --task det --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45",
+    "expectedEvidenceLines": [
+      "YoloVision TensorRtLine=...",
+      "Profile Family=... Task=Detection Layout=... Nms=... NmsMode=...",
+      "InputSource=external InputFile=...",
+      "Input=... Output=...",
+      "Detection Class=... Score=... BoxCxCyWh=... or Detections=0 ...",
+      "YoloVision Passed=True"
+    ],
+    "lastRunStatus": "not-run",
+    "stdoutSummary": "",
+    "stderrSummary": "",
+    "lastRunLog": "",
+    "lastRunLogSha256": ""
+  },
+  "notes": [
+    "This is an example candidate manifest, not bundled model evidence.",
+    "Do not mark isSmokePassed=true until model, labels, image, hashes, output tensor metadata, and real command output are recorded.",
+    "proofClassification=build-only is non-promotable here; the example does not prove YoloVision runtime or detection quality.",
+    "The evidence sidecar may enrich a TensorRtExec build report, but it cannot promote this sample to package-consumer-runtime.",
+    "Build-only TensorRtExec output is not object-detection quality proof."
+  ]
+}

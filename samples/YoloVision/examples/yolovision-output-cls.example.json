@@ -1,0 +1,74 @@
+{
+  "schemaVersion": "yolovision-output.v1",
+  "task": "cls",
+  "modelFamily": "yolov8",
+  "input": {
+    "path": "synthetic-ramp",
+    "sha256": "",
+    "width": 224,
+    "height": 224,
+    "sourceKind": "synthetic-pattern"
+  },
+  "engine": {
+    "path": "",
+    "sha256": "",
+    "inputShape": [1, 3, 224, 224],
+    "precision": "unknown",
+    "materialization": "in-memory-from-onnx",
+    "modelPath": "owner-classifier.onnx",
+    "modelSha256": "",
+    "engineDeviceMemoryBytes": 0
+  },
+  "runtime": {
+    "os": "example",
+    "rid": "example",
+    "cudaVersion": "captured-by-run-log",
+    "tensorRtVersion": "line-11",
+    "runtimePackageId": "owner-record-required",
+    "tensorRtLine": 11,
+    "profileIndex": 0,
+    "elapsedMilliseconds": 0
+  },
+  "outputs": [
+    {
+      "name": "logits",
+      "role": "logits",
+      "shape": [1, 1000],
+      "elementCount": 1000
+    }
+  ],
+  "postprocess": {
+    "confidenceThreshold": 0.0,
+    "nmsThreshold": 0.0,
+    "topK": 5,
+    "applyNms": false,
+    "nmsMode": "None",
+    "layout": "Auto",
+    "angleUnit": "unknown",
+    "angleRange": "owner-record-required"
+  },
+  "predictions": [
+    {
+      "task": "cls",
+      "classId": 281,
+      "className": "tabby",
+      "score": 0.87
+    }
+  ],
+  "boundary": {
+    "isRuntimeProof": false,
+    "evidenceKind": "YoloVision output schema; readonly diagnostics; not runtime proof",
+    "forbiddenSubstitutes": [
+      "build-only",
+      "dry-run",
+      "template",
+      "local feed",
+      "ProjectReference",
+      "direct `.nupkg`",
+      "TensorRtExec report",
+      "YoloVision matrix",
+      "OnnxToEngine report",
+      "readonly diagnostics"
+    ]
+  }
+}

@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "sampleName": "YoloVision",
+  "status": "candidate-not-downloaded",
+  "proofClassification": "template-only",
+  "evidenceClassifications": [
+    "template-only",
+    "build-only",
+    "dependency-probe-only",
+    "synthetic-input-runtime",
+    "real-model-runtime",
+    "package-consumer-runtime"
+  ],
+  "isSmokePassed": false,
+  "isRedistributableInRepository": false,
+  "model": {
+    "name": "YOLO-family candidate",
+    "family": "v5|v6|v7|v8|v9|v10|v11|v26|custom",
+    "task": "det|cls|seg|obb|pose|sem",
+    "sourceUrl": "owner-required",
+    "license": "Review code, model weights, labels, and test image terms before redistribution.",
+    "licenseEvidence": "owner-required",
+    "downloadUrl": "",
+    "sha256": "",
+    "opset": "",
+    "exportCommand": "python tools/export_onnx.py --output-name models/yolo.onnx",
+    "localPath": "models/yolo.onnx"
+  },
+  "labels": {
+    "sourceUrl": "https://cocodataset.org/",
+    "license": "Review COCO labels and image terms before redistribution.",
+    "licenseEvidence": "owner-required",
+    "sha256": "",
+    "classCount": 80,
+    "localPath": "models/coco.names"
+  },
+  "input": {
+    "sourceUrl": "",
+    "license": "",
+    "licenseEvidence": "owner-required",
+    "sha256": "",
+    "localPath": "models/image.jpg"
+  },
+  "inputTensor": {
+    "localPath": "models/yolo-preprocessed-fp32.bin",
+    "sourceImagePath": "models/image.jpg",
+    "sha256": "",
+    "format": "float32-bin|float32-text|raw-byte-normalized",
+    "elementCount": "owner-required",
+    "elementCountNumeric": 0,
+    "command": "owner-required preprocessing command that creates the exact NCHW/NHWC tensor consumed by --input-data",
+    "notes": "The runner does not hide resize/letterbox/channel-order policy. Record the preprocessing command and hash before claiming real-model-runtime."
+  },
+  "tensor": {
+    "inputName": "",
+    "inputShape": "1x3x640x640",
+    "layout": "NCHW",
+    "dtype": "float32",
+    "outputName": "",
+    "outputShape": "owner-required",
+    "outputTensors": [
+      {
+        "name": "",
+        "role": "detection|classification|semantic-map|mask-prototypes|mask-coefficients|obb-angles|pose-keypoints",
+        "shape": "owner-required",
+        "layout": "auto|channels-first|boxes-first|semantic-map",
+        "capturePath": "OnnxSampleMultiOutputResult -> YoloRuntimeOutputTensor",
+        "notes": "Record every output tensor required by the selected task."
+      }
+    ]
+  },
+  "preprocess": {
+    "resize": "letterbox-or-owner-required",
+    "padding": "owner-required",
+    "colorOrder": "RGB",
+    "scale": "1/255",
+    "mean": "none-or-owner-required",
+    "std": "none-or-owner-required"
+  },
+  "postprocess": {
+    "layout": "auto",
+    "hasObjectness": "auto",
+    "classCount": 80,
+    "confidence": 0.25,
+    "iouThreshold": 0.45,
+    "nmsLocation": "application-side|graph|plugin|owner-required",
+    "nmsMode": "class-aware|class-agnostic|none|owner-required",
+    "segmentation": {
+      "metadataHelper": "YoloMultiOutputMetadata.ForSegmentation",
+      "prototypeShape": "owner-required",
+      "coefficientCount": "owner-required",
+      "coefficientChannelStart": "owner-required-or-auto-after-box-objectness-class-channels",
+      "maskCompose": "linear-combination-or-owner-required"
+    },
+    "pose": {
+      "metadataHelper": "YoloMultiOutputMetadata.ForPose",
+      "keypointCount": "owner-required",
+      "keypointStride": "owner-required",
+      "keypointTensorLayout": "boxes-first|channels-first|owner-required"
+    },
+    "obb": {
+      "metadataHelper": "YoloMultiOutputMetadata.ForObb",
+      "angleUnit": "degrees|radians|owner-required",
+      "angleChannel": "owner-required",
+      "angleTensorLayout": "boxes-first|channels-first|owner-required"
+    },
+    "outputVariants": [
+      "[1,84,8400]",
+      "[1,8400,84]",
+      "anchor-based",
+      "anchor-free",
+      "end2end-nms",
+      "semantic-map",
+      "multi-output-seg-pose-obb"
+    ]
+  },
+  "evidence": {
+    "evidenceSidecar": "models/yolo-evidence.sidecar.json",
+    "sampleRunEvidenceRecord": "models/yolovision-sample-run-evidence.json",
+    "sampleRunEvidenceValidation": "artifacts/user-acceptance/sample-run-evidence-record-validation.json",
+    "sampleRunEvidenceValidatorState": "owner-action-required",
+    "sampleRunEvidenceCanPromoteRealModelRuntime": false,
+    "sampleRunEvidenceFailureReasons": [
+      "owner must fill model/license/hash evidence",
+      "owner must capture sample run log and SHA256",
+      "validator must pass before real-model-runtime promotion"
+    ],
+    "buildOnlyCommand": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\yolo.onnx --saveEngine .\\models\\yolo.plan --minShapes images:1x3x640x640 --optShapes images:1x3x640x640 --maxShapes images:1x3x640x640 --buildOnly --exportReport .\\models\\yolo-build-report.json --evidenceSidecar .\\models\\yolo-evidence.sidecar.json",
+    "runCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolo.onnx --labels .\\models\\coco.names --input-data .\\models\\yolo-preprocessed-fp32.bin --input-shape 1x3x640x640 --tensor-rt-line 10 --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25",
+    "expectedEvidenceLines": [
+      "YoloVision TensorRtLine=...",
+      "Profile Family=... Task=... Layout=... Nms=... NmsMode=...",
+      "InputSource=external InputFile=...",
+      "Input=... Output=...",
+      "Postprocess Task=...;Detections=...;Segmentations=...;OrientedBoxes=...;Poses=...;Semantic=...",
+      "Detection Class=... Score=... BoxCxCyWh=... or Detections=0 ...",
+      "YoloVision Passed=True"
+    ],
+    "lastRunStatus": "not-run",
+    "stdoutSummary": "",
+    "stderrSummary": "",
+    "lastRunLog": "",
+    "lastRunLogSha256": ""
+  },
+  "notes": [
+    "This template is a candidate asset manifest, not a bundled detector.",
+    "Do not mark the sample as smoke passed until model, labels, image, hashes, output layout, and real command output are recorded.",
+    "proofClassification=template-only means this file is not build-only, synthetic runtime, real-model runtime, or package-consumer runtime proof.",
+    "The evidence sidecar may feed TensorRtExec/OnnxToEngine report metadata, but it cannot promote a build report to package-consumer-runtime.",
+    "Synthetic input pipeline evidence is not object detection quality evidence."
+  ]
+}

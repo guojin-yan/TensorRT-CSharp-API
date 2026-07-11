@@ -1,0 +1,714 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jyppx.github.io/TensorRtSharp/schemas/yolovision-output.schema.json",
+  "title": "YoloVision output schema",
+  "description": "Machine-readable schema for YoloVision detection, segmentation, pose, OBB, classification, and semantic output records. This schema is diagnostic/adoption infrastructure and is not runtime proof.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "task",
+    "modelFamily",
+    "input",
+    "engine",
+    "runtime",
+    "outputs",
+    "postprocess",
+    "predictions",
+    "boundary"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "yolovision-output.v1"
+    },
+    "task": {
+      "type": "string",
+      "enum": [
+        "det",
+        "cls",
+        "seg",
+        "obb",
+        "pose",
+        "sem"
+      ]
+    },
+    "modelFamily": {
+      "type": "string",
+      "enum": [
+        "yolov5",
+        "yolov6",
+        "yolov7",
+        "yolov8",
+        "yolov9",
+        "yolov10",
+        "yolov11",
+        "yolov26",
+        "custom"
+      ]
+    },
+    "labels": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^$|^[a-fA-F0-9]{64}$"
+        },
+        "classCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "license": {
+          "type": "string"
+        }
+      }
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "sha256",
+        "width",
+        "height"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^$|^[a-fA-F0-9]{64}$"
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sourceKind": {
+          "type": "string",
+          "enum": [
+            "external-tensor",
+            "synthetic-pattern",
+            "preprocessed-image-tensor"
+          ]
+        },
+        "image": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^$|^[a-fA-F0-9]{64}$"
+            },
+            "width": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "height": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "preprocessedTensor": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^$|^[a-fA-F0-9]{64}$"
+            },
+            "elementCount": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "layout": {
+              "type": "string",
+              "enum": [
+                "NCHW",
+                "NHWC"
+              ]
+            },
+            "colorOrder": {
+              "type": "string",
+              "enum": [
+                "RGB",
+                "BGR"
+              ]
+            },
+            "normalized": {
+              "type": "boolean"
+            },
+            "scale": {
+              "type": "number"
+            }
+          }
+        },
+        "letterbox": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "resizeMode": {
+              "type": "string",
+              "enum": [
+                "letterbox",
+                "stretch"
+              ]
+            },
+            "targetWidth": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "targetHeight": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "resizedWidth": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "resizedHeight": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "padX": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "padY": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "scaleX": {
+              "type": "number"
+            },
+            "scaleY": {
+              "type": "number"
+            },
+            "fillValue": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 255
+            }
+          }
+        }
+      }
+    },
+    "engine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "sha256",
+        "inputShape"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^$|^[a-fA-F0-9]{64}$"
+        },
+        "inputShape": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "precision": {
+          "type": "string",
+          "enum": [
+            "fp32",
+            "fp16",
+            "int8",
+            "mixed",
+            "unknown"
+          ]
+        },
+        "materialization": {
+          "type": "string",
+          "enum": [
+            "in-memory-from-onnx",
+            "engine-file"
+          ]
+        },
+        "modelPath": {
+          "type": "string"
+        },
+        "modelSha256": {
+          "type": "string",
+          "pattern": "^$|^[a-fA-F0-9]{64}$"
+        },
+        "engineDeviceMemoryBytes": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "os",
+        "rid",
+        "cudaVersion",
+        "tensorRtVersion",
+        "runtimePackageId"
+      ],
+      "properties": {
+        "os": {
+          "type": "string"
+        },
+        "rid": {
+          "type": "string"
+        },
+        "cudaVersion": {
+          "type": "string"
+        },
+        "tensorRtVersion": {
+          "type": "string"
+        },
+        "runtimePackageId": {
+          "type": "string"
+        }
+      }
+    },
+    "outputs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "name",
+          "role",
+          "shape"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "boxes",
+              "scores",
+            "classes",
+            "logits",
+            "masks",
+            "maskCoefficients",
+            "prototypes",
+            "keypoints",
+              "obb",
+              "semantic",
+              "endToEnd",
+              "unknown"
+            ]
+          },
+          "shape": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "valueSha256": {
+            "type": "string",
+            "pattern": "^$|^[a-fA-F0-9]{64}$"
+          },
+          "valuePreview": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "postprocess": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "confidenceThreshold",
+        "nmsThreshold"
+      ],
+      "properties": {
+        "confidenceThreshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "nmsThreshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "maskThreshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "angleUnit": {
+          "type": "string",
+          "enum": [
+            "degree",
+            "radian",
+            "normalized",
+            "unknown"
+          ]
+        },
+        "angleRange": {
+          "type": "string"
+        }
+      }
+    },
+    "predictions": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/$defs/detectionPrediction"
+          },
+          {
+            "$ref": "#/$defs/classificationPrediction"
+          },
+          {
+            "$ref": "#/$defs/segmentationPrediction"
+          },
+          {
+            "$ref": "#/$defs/posePrediction"
+          },
+          {
+            "$ref": "#/$defs/obbPrediction"
+          },
+          {
+            "$ref": "#/$defs/semanticPrediction"
+          }
+        ]
+      }
+    },
+    "boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "isRuntimeProof",
+        "evidenceKind",
+        "forbiddenSubstitutes"
+      ],
+      "properties": {
+        "isRuntimeProof": {
+          "type": "boolean",
+          "const": false
+        },
+        "evidenceKind": {
+          "type": "string",
+          "const": "YoloVision output schema; readonly diagnostics; not runtime proof"
+        },
+        "forbiddenSubstitutes": {
+          "type": "array",
+          "contains": {
+            "const": "build-only"
+          },
+          "items": {
+            "type": "string",
+            "enum": [
+              "build-only",
+              "dry-run",
+              "template",
+              "local feed",
+              "ProjectReference",
+              "direct `.nupkg`",
+              "TensorRtExec report",
+              "YoloVision matrix",
+              "OnnxToEngine report",
+              "readonly diagnostics"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "box": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "x",
+        "y",
+        "width",
+        "height"
+      ],
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "width": {
+          "type": "number"
+        },
+        "height": {
+          "type": "number"
+        }
+      }
+    },
+    "detectionPrediction": {
+      "type": "object",
+      "required": [
+        "task",
+        "box",
+        "classId",
+        "className",
+        "score"
+      ],
+      "properties": {
+        "task": {
+          "const": "det"
+        },
+        "box": {
+          "$ref": "#/$defs/box"
+        },
+        "classId": {
+          "type": "integer"
+        },
+        "className": {
+          "type": "string"
+        },
+        "score": {
+          "type": "number"
+        }
+      }
+    },
+    "classificationPrediction": {
+      "type": "object",
+      "required": [
+        "task",
+        "classId",
+        "className",
+        "score"
+      ],
+      "properties": {
+        "task": {
+          "const": "cls"
+        },
+        "classId": {
+          "type": "integer"
+        },
+        "className": {
+          "type": "string"
+        },
+        "score": {
+          "type": "number"
+        }
+      }
+    },
+    "segmentationPrediction": {
+      "type": "object",
+      "required": [
+        "task",
+        "box",
+        "classId",
+        "className",
+        "score",
+        "maskShape",
+        "maskPixelCount",
+        "maskThreshold"
+      ],
+      "properties": {
+        "task": {
+          "const": "seg"
+        },
+        "box": {
+          "$ref": "#/$defs/box"
+        },
+        "classId": {
+          "type": "integer"
+        },
+        "className": {
+          "type": "string"
+        },
+        "score": {
+          "type": "number"
+        },
+        "maskShape": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "maskPixelCount": {
+          "type": "integer"
+        },
+        "maskThreshold": {
+          "type": "number"
+        }
+      }
+    },
+    "posePrediction": {
+      "type": "object",
+      "required": [
+        "task",
+        "box",
+        "score",
+        "keypoints"
+      ],
+      "properties": {
+        "task": {
+          "const": "pose"
+        },
+        "box": {
+          "$ref": "#/$defs/box"
+        },
+        "score": {
+          "type": "number"
+        },
+        "keypoints": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "index",
+              "x",
+              "y",
+              "score"
+            ],
+            "properties": {
+              "index": {
+                "type": "integer"
+              },
+              "x": {
+                "type": "number"
+              },
+              "y": {
+                "type": "number"
+              },
+              "score": {
+                "type": "number"
+              },
+              "visibility": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    "obbPrediction": {
+      "type": "object",
+      "required": [
+        "task",
+        "center",
+        "size",
+        "angle",
+        "angleUnit",
+        "angleRange",
+        "classId",
+        "className",
+        "score"
+      ],
+      "properties": {
+        "task": {
+          "const": "obb"
+        },
+        "center": {
+          "type": "object",
+          "required": [
+            "x",
+            "y"
+          ],
+          "properties": {
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            }
+          }
+        },
+        "size": {
+          "type": "object",
+          "required": [
+            "width",
+            "height"
+          ],
+          "properties": {
+            "width": {
+              "type": "number"
+            },
+            "height": {
+              "type": "number"
+            }
+          }
+        },
+        "angle": {
+          "type": "number"
+        },
+        "angleUnit": {
+          "type": "string"
+        },
+        "angleRange": {
+          "type": "string"
+        },
+        "classId": {
+          "type": "integer"
+        },
+        "className": {
+          "type": "string"
+        },
+        "score": {
+          "type": "number"
+        }
+      }
+    },
+    "semanticPrediction": {
+      "type": "object",
+      "required": [
+        "task",
+        "classCount",
+        "width",
+        "height",
+        "valueCount"
+      ],
+      "properties": {
+        "task": {
+          "const": "sem"
+        },
+        "classCount": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "valueCount": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  }
+}

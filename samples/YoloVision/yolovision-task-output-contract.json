@@ -1,0 +1,130 @@
+{
+  "contractId": "yolovision-task-output-contract",
+  "sample": "samples/YoloVision",
+  "contractState": "release-readiness-planning",
+  "proofBoundary": "Machine-readable task/output contract only; not real-model-runtime proof; not package-consumer-runtime proof; not post-publish proof. TensorRtExec reports, OnnxToEngine reports, dry-run output, build-only output, templates, screenshots, local feeds, ProjectReference, and direct .nupkg references cannot promote this contract to proof.",
+  "requiredOwnerEvidenceForPromotion": [
+    "model source URL, license, export command, and model SHA256",
+    "labels source, class count, license, and labels SHA256 when labels are used",
+    "input image or preprocessed tensor source, license, shape, and SHA256",
+    "TensorRtExec or OnnxToEngine build-only report path and SHA256",
+    "YoloVision run command, stdout/stderr summaries, run log SHA256, and owner-reviewed output JSON",
+    "sample-run-evidence record validated by eng/Test-SampleRunEvidenceRecord.ps1 or the YoloVision owner proof validator"
+  ],
+  "forbiddenSubstitutes": [
+    "support matrix",
+    "build-only report",
+    "parse-only report",
+    "dry-run report",
+    "dependency-probe-only report",
+    "capability-probe-only report",
+    "TensorRtExec report",
+    "OnnxToEngine report",
+    "GUI screenshot",
+    "command preview",
+    "local feed",
+    "ProjectReference",
+    "direct .nupkg",
+    "package-consumer-runtime string in sample evidence"
+  ],
+  "tasks": [
+    {
+      "task": "det",
+      "displayName": "Detection",
+      "families": ["yolov5", "yolov6", "yolov7", "yolov8", "yolov9", "yolov10", "yolov11", "yolov26", "custom"],
+      "primaryOutputRoles": ["boxes", "scores", "classes"],
+      "requiredMetadata": ["inputShape", "outputLayout", "classCount", "boxFormat", "scoreRule", "nmsMode"],
+      "optionalMetadata": ["objectnessChannel", "graphIncludesNms", "confidenceThreshold", "iouThreshold"],
+      "managedSurface": ["YoloDetectionDecoder", "YoloSampleRunner.DecodeOutput", "YoloVisionResult.Detections"],
+      "tensorRtExecProfileHint": "--minShapes images:1x3x640x640 --optShapes images:1x3x640x640 --maxShapes images:4x3x640x640",
+      "articleEntrypoints": [
+        "docs/articles/zh-cn/yolovision-detection-real-model-tutorial.md",
+        "docs/articles/zh-cn/yolovision-detection-yolov8n-download-export-run.md"
+      ],
+      "evidenceBoundary": "Detection decode readiness is not image-quality proof until a real model, real input, output JSON, log SHA256, and owner review are supplied.",
+      "canPromoteRealModelRuntime": false,
+      "canPromotePackageConsumerRuntime": false
+    },
+    {
+      "task": "cls",
+      "displayName": "Classification",
+      "families": ["yolov5", "yolov8", "yolov11", "yolov26", "custom"],
+      "primaryOutputRoles": ["logits", "topK"],
+      "requiredMetadata": ["inputShape", "classificationOutput", "classCount", "labelsPath", "topK"],
+      "optionalMetadata": ["softmaxApplied", "labelLocale", "scorePrecision"],
+      "managedSurface": ["YoloClassificationPrediction", "YoloVisionResult.Classifications"],
+      "tensorRtExecProfileHint": "--minShapes images:1x3x224x224 --optShapes images:1x3x224x224 --maxShapes images:8x3x224x224",
+      "articleEntrypoints": [
+        "docs/articles/zh-cn/yolovision-classification-yolov8n-labels-topk-guide.md"
+      ],
+      "evidenceBoundary": "Classification logits/top-k output is not real-model-runtime proof until labels, input, output JSON, run log SHA256, and owner review are aligned.",
+      "canPromoteRealModelRuntime": false,
+      "canPromotePackageConsumerRuntime": false
+    },
+    {
+      "task": "seg",
+      "displayName": "Segmentation",
+      "families": ["yolov5", "yolov8", "yolov9", "yolov11", "yolov26", "custom"],
+      "primaryOutputRoles": ["boxes", "maskCoefficients", "maskPrototypes"],
+      "requiredMetadata": ["inputShape", "outputRoleMap", "classCount", "maskCoefficientCount", "prototypeShape", "maskResizePolicy"],
+      "optionalMetadata": ["prototypeLayout", "cropToBox", "maskThreshold", "auxiliaryChannelStart"],
+      "managedSurface": ["YoloMaskComposer", "YoloSegmentationPrediction", "YoloVisionResult.Segmentations"],
+      "tensorRtExecProfileHint": "--minShapes images:1x3x640x640 --optShapes images:1x3x640x640 --maxShapes images:4x3x640x640",
+      "articleEntrypoints": [
+        "docs/articles/zh-cn/yolovision-segmentation-mask-postprocess-guide.md",
+        "docs/articles/zh-cn/yolovision-yolov8-seg-real-asset-tutorial.md"
+      ],
+      "evidenceBoundary": "Segmentation metadata readiness is not mask correctness proof until real mask outputs, hashes, and owner-reviewed visual/result evidence are supplied.",
+      "canPromoteRealModelRuntime": false,
+      "canPromotePackageConsumerRuntime": false
+    },
+    {
+      "task": "obb",
+      "displayName": "Oriented Bounding Box",
+      "families": ["yolov8", "yolov11", "yolov26", "custom"],
+      "primaryOutputRoles": ["boxes", "scores", "classes", "angles"],
+      "requiredMetadata": ["inputShape", "outputRoleMap", "classCount", "angleOutput", "angleUnit", "boxFormat"],
+      "optionalMetadata": ["angleRange", "rotatedNmsMode", "clockwisePositive", "graphIncludesNms"],
+      "managedSurface": ["YoloObbDecoder", "YoloObbDetection", "YoloVisionResult.OrientedBoxes"],
+      "tensorRtExecProfileHint": "--minShapes images:1x3x1024x1024 --optShapes images:1x3x1024x1024 --maxShapes images:2x3x1024x1024",
+      "articleEntrypoints": [
+        "docs/articles/zh-cn/yolovision-obb-angle-output-guide.md"
+      ],
+      "evidenceBoundary": "OBB angle decode is not rotated-box correctness proof until angle metadata, output JSON, log hash, and owner review are provided.",
+      "canPromoteRealModelRuntime": false,
+      "canPromotePackageConsumerRuntime": false
+    },
+    {
+      "task": "pose",
+      "displayName": "Pose",
+      "families": ["yolov7", "yolov8", "yolov11", "yolov26", "custom"],
+      "primaryOutputRoles": ["boxes", "keypoints"],
+      "requiredMetadata": ["inputShape", "outputRoleMap", "classCount", "keypointCount", "keypointStride", "coordinateLayout"],
+      "optionalMetadata": ["visibilityChannel", "skeletonName", "keypointScoreThreshold", "auxiliaryLayout"],
+      "managedSurface": ["YoloPoseDecoder", "YoloPosePrediction", "YoloVisionResult.Poses"],
+      "tensorRtExecProfileHint": "--minShapes images:1x3x640x640 --optShapes images:1x3x640x640 --maxShapes images:4x3x640x640",
+      "articleEntrypoints": [
+        "docs/articles/zh-cn/yolovision-pose-keypoint-output-guide.md"
+      ],
+      "evidenceBoundary": "Pose keypoint decode is not pose correctness proof until keypoint metadata, output JSON, log hash, and owner review are supplied.",
+      "canPromoteRealModelRuntime": false,
+      "canPromotePackageConsumerRuntime": false
+    },
+    {
+      "task": "sem",
+      "displayName": "Semantic Segmentation",
+      "families": ["yolov26", "custom"],
+      "primaryOutputRoles": ["semanticMap"],
+      "requiredMetadata": ["inputShape", "semanticOutput", "classCount", "mapWidth", "mapHeight", "argmaxRule"],
+      "optionalMetadata": ["palettePath", "ignoreIndex", "resizePolicy", "logitLayout"],
+      "managedSurface": ["YoloSemanticMap", "YoloVisionResult.SemanticMap"],
+      "tensorRtExecProfileHint": "--minShapes images:1x3x512x512 --optShapes images:1x3x512x512 --maxShapes images:2x3x512x512",
+      "articleEntrypoints": [
+        "docs/articles/zh-cn/yolovision-semantic-segmentation-map-guide.md"
+      ],
+      "evidenceBoundary": "Semantic map decode is not semantic correctness proof until class map output, hashes, and owner-reviewed evidence are supplied.",
+      "canPromoteRealModelRuntime": false,
+      "canPromotePackageConsumerRuntime": false
+    }
+  ]
+}

@@ -60,7 +60,7 @@ dotnet run --project .\samples\Classification -- --model .\models\classifier.onn
 YOLO-family detection with your own ONNX detector assets:
 
 ```powershell
-dotnet run --project .\samples\YoloDet -- --model .\models\yolo.onnx --labels .\models\coco.names --input-shape 1x3x640x640 --tensor-rt-line 10
+dotnet run --project .\samples\YoloVision -- --model .\models\yolo.onnx --labels .\models\coco.names --input-shape 1x3x640x640 --tensor-rt-line 10
 ```
 
 ## Verified smoke commands

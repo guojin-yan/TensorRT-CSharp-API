@@ -18,11 +18,37 @@ That split keeps:
 | `MultiStream` | CUDA multi-stream and cross-stream wait example | runnable |
 | `DynamicShape` | TensorRT dynamic-shape/profile/binding example | runnable |
 | `InferenceBindings` | TensorRtInferenceBindings host/device workflow example | runnable |
-| `OnnxToEngine` | user-facing ONNX to engine walkthrough | runnable |
+| `OnnxToEngine` | user-facing ONNX to engine walkthrough with trtexec-like option parsing | runnable |
 | `Classification` | External ONNX classifier inference and Top-K output walkthrough | runnable with user-provided ONNX assets |
-| `YoloDet` | External YOLO-family ONNX detector pipeline and output decoding walkthrough | runnable with user-provided ONNX assets |
+| `YoloVision` | External YOLO-family ONNX vision sample with family/task profiles, raw/preprocessed tensor input, detection/classification/segmentation/pose/OBB/semantic helpers, layout decoding, score filtering, and NMS walkthrough | runnable with user-provided ONNX assets |
+
+`YoloVision` also exposes an offline capability matrix for documentation, smoke, and asset-planning workflows:
+
+```powershell
+dotnet run --project .\samples\YoloVision -- --list-capabilities
+```
+
+This command does not require CUDA, TensorRT, ONNX models, labels, or images. It lists the supported family/task matrix for `custom`, YOLOv5/v6/v7/v8/v9/v10/v11/v26 and `det`/`cls`/`seg`/`obb`/`pose`/`sem`, including each task's managed decode path, auxiliary metadata boundary, and evidence level.
+
+Recommended YoloVision documentation starts at `docs/articles/zh-cn/yolovision-sample-overview.md`, then continues through preprocess/postprocess, engine build/run, and troubleshooting. These articles keep the old detection-only naming out of the user-facing path and treat all asset-dependent runs as sample evidence until real owner logs and hashes are supplied.
+
+For the broader publishable article route, use `docs/articles/zh-cn/yolovision-series-roadmap.md`. That roadmap is the owner-facing checklist for YOLOv5/v6/v7/v8/v9/v10/v11/v26/custom and `det`/`cls`/`seg`/`obb`/`pose`/`sem`. It intentionally keeps TensorRtExec build reports, screenshots, templates, sidecars, local package-feed results, project-reference runs, and direct `.nupkg` runs out of runtime evidence promotion.
 
 CUDA custom-kernel preprocessing is tracked as documentation rather than a placeholder sample until safe public `CudaModule` / `CudaKernel` wrappers exist. See [CUDA Kernel Wrapper Roadmap](../docs/articles/en/cuda-kernel-roadmap.md).
+
+## Evidence Ladder For Asset-Dependent Samples
+
+Classification and YoloVision are intentionally runnable with user-provided assets instead of bundled model files. Treat their evidence as a ladder:
+
+| Evidence level | Meaning | Promotion boundary |
+| --- | --- | --- |
+| `precheck` | command, shape, report, or manifest template can be parsed | not runtime proof |
+| `build-only` | ONNX parser/builder produced build evidence or a conversion report | not inference proof |
+| `synthetic-input-runtime` | a sample pipeline executed with synthetic input | not real model quality proof |
+| `real-model-runtime` | real model, labels, input asset, hashes, license notes, runner log, and sample-run-evidence all agree | sample-level proof only |
+| `package-consumer-runtime` | clean external package consumer runtime smoke with validated release proof record | release proof records only |
+
+`sample-run-evidence` files and asset manifests can promote a sample to real-model evidence only. package-consumer-runtime belongs to release proof records, and `blocked-by-cuda-driver` is an environment compatibility blocker rather than smoke passed.
 
 ## Environment
 

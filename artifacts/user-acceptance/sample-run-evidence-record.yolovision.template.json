@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "sample-run-evidence-record-template",
+  "templateName": "yolovision",
+  "templateOnly": true,
+  "sampleName": "YoloVision",
+  "manifestPath": "samples/assets/yolovision-assets.template.json",
+  "proofClassification": "template-only",
+  "evidenceClassifications": [
+    "template-only",
+    "build-only",
+    "dependency-probe-only",
+    "synthetic-input-runtime",
+    "real-model-runtime"
+  ],
+  "modelPath": ".\\models\\yolo.onnx",
+  "modelSha256": "",
+  "modelLicense": "owner-required",
+  "labelsPath": ".\\models\\coco.names",
+  "labelsSha256": "",
+  "labelsLicense": "owner-required",
+  "inputAssetPath": ".\\models\\image.jpg",
+  "inputAssetSha256": "",
+  "inputAssetLicense": "owner-required",
+  "preprocessedInputTensorPath": ".\\models\\yolo-preprocessed-fp32.bin",
+  "preprocessedInputTensorSha256": "",
+  "preprocessedInputTensorElementCount": "",
+  "evidenceSidecarPath": ".\\models\\yolo-evidence.sidecar.json",
+  "buildReportPath": ".\\models\\yolo-build-report.json",
+  "sampleRunCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolo.onnx --labels .\\models\\coco.names --input-data .\\models\\yolo-preprocessed-fp32.bin --input-shape 1x3x640x640 --tensor-rt-line 10 --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25",
+  "sampleRunLogPath": ".\\models\\yolo-sample-run.log",
+  "sampleRunLogSha256": "",
+  "stdoutSummary": "",
+  "stderrSummary": "",
+  "expectedEvidenceLines": [
+    "YoloVision TensorRtLine=...",
+    "Profile Family=... Task=... Layout=... Nms=... NmsMode=...",
+    "InputSource=external InputFile=...",
+    "Postprocess Task=...",
+    "YoloVision Passed=True"
+  ],
+  "isSmokePassed": false,
+  "canPromoteRealModelRuntime": false,
+  "validatorState": "owner-action-required",
+  "failureReasons": [
+    "owner must fill model/labels/input licenses and hashes",
+    "owner must capture real sample run log and SHA256",
+    "validator must pass before canPromoteRealModelRuntime=true"
+  ],
+  "requiredEvidenceSummary": [
+    "recordKind identifies this as a sample-run-evidence-record template or real record.",
+    "proofClassification starts as template-only and can only promote to real-model-runtime for sample evidence.",
+    "modelSha256, labelsSha256, inputAssetSha256, preprocessedInputTensorSha256 when applicable, and sampleRunLogSha256 must be 64-character SHA256 values before promotion.",
+    "modelLicense, labelsLicense, inputAssetLicense, and preprocessedInputTensorElementCount must be owner-filled before promotion.",
+    "evidenceSidecarPath links the sample run to TensorRtExec/OnnxToEngine model evidence.",
+    "buildReportPath links the sample run to parser/builder evidence.",
+    "sampleRunCommand and sampleRunLogPath must identify the exact runner invocation and captured log.",
+    "YoloVision real image evidence should use --input-data with a preprocessed tensor and record InputSource=external in expected evidence lines.",
+    "stdoutSummary or stderrSummary must summarize reviewed runner output.",
+    "isSmokePassed and canPromoteRealModelRuntime must remain false in templates."
+  ],
+  "validationRules": [
+    "template-only records are owner-action-required and not proof.",
+    "build-only records are conversion evidence and not sample runtime proof.",
+    "dependency-probe-only records are diagnostics and not sample runtime proof.",
+    "synthetic-input-runtime records are pipeline evidence and not real model proof.",
+    "real-model-runtime records require model, labels, input, run log hashes, stdout/stderr summary, sampleRunLogPath, and isSmokePassed=true.",
+    "package-consumer-runtime is forbidden in sample run evidence records and belongs to release proof records."
+  ],
+  "promotionRules": [
+    "Only proofClassification=real-model-runtime can promote a sample run evidence record.",
+    "package-consumer-runtime cannot be claimed by sample run evidence records; sample run evidence is never package-consumer-runtime.",
+    "Do not set isSmokePassed=true without a real sample runner log and hash.",
+    "Do not fabricate modelSha256, labelsSha256, inputAssetSha256, preprocessedInputTensorSha256, sampleRunLogSha256, stdoutSummary, or stderrSummary.",
+    "Do not fabricate modelLicense, labelsLicense, inputAssetLicense, preprocessedInputTensorElementCount, validatorState, or failureReasons.",
+    "Run eng/Test-SampleRunEvidenceRecord.ps1, eng/Test-OnnxEngineBuildEvidenceSidecar.ps1, and eng/Test-SampleAssetManifest.ps1 after owner backfill."
+  ],
+  "notes": [
+    "This template does not download assets or run samples.",
+    "Keep proofClassification=template-only until the real sample runner log, hashes, and summaries are recorded.",
+    "Sample run evidence can promote only to real-model-runtime, never package-consumer-runtime."
+  ]
+}

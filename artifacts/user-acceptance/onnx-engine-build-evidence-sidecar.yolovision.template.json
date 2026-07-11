@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "onnx-engine-build-evidence-sidecar-template",
+  "templateName": "yolovision",
+  "templateOnly": true,
+  "sampleName": "YoloVision",
+  "proofClassification": "template-only",
+  "evidenceClassifications": [
+    "template-only",
+    "build-only",
+    "dependency-probe-only",
+    "synthetic-input-runtime",
+    "real-model-runtime",
+    "package-consumer-runtime"
+  ],
+  "stdoutSummary": "",
+  "stderrSummary": "",
+  "modelEvidence": {
+    "modelSource": ".\\models\\yolo.onnx",
+    "modelSha256": "",
+    "modelLicense": "",
+    "inputAssetName": ".\\models\\image.jpg",
+    "inputAssetSha256": "",
+    "preprocessedInputTensorName": ".\\models\\yolo-preprocessed-fp32.bin",
+    "preprocessedInputTensorSha256": ""
+  },
+  "recommendedBuildCommand": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\yolo.onnx --saveEngine .\\models\\yolo.plan --minShapes images:1x3x640x640 --optShapes images:1x3x640x640 --maxShapes images:1x3x640x640 --buildOnly --exportReport .\\models\\yolo-build-report.json --evidenceSidecar .\\models\\yolo-evidence.sidecar.json",
+  "recommendedSampleRunCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolo.onnx --labels .\\models\\coco.names --input-data .\\models\\yolo-preprocessed-fp32.bin --input-shape 1x3x640x640 --tensor-rt-line 10 --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25",
+  "manifestPath": "samples/assets/yolovision-assets.template.json",
+  "requiredEvidenceSummary": [
+    "proofClassification records the evidence boundary; templates start as template-only.",
+    "modelEvidence.modelSource identifies the ONNX file or source URL used by TensorRtExec/OnnxToEngine.",
+    "modelEvidence.modelSha256 must be a 64-character SHA256 before real-model-runtime is promotable.",
+    "modelEvidence.modelLicense records the reviewed model/license terms.",
+    "modelEvidence.inputAssetName and modelEvidence.inputAssetSha256 identify the real source input asset.",
+    "modelEvidence.preprocessedInputTensorName and modelEvidence.preprocessedInputTensorSha256 identify the tensor passed to --input-data when the sample uses an external preprocessed tensor.",
+    "stdoutSummary or stderrSummary must summarize the reviewed build/sample run output.",
+    "The sidecar enriches reports but does not mark Classification/YoloVision smoke passed."
+  ],
+  "classificationRules": [
+    "template-only sidecars are owner templates and are not proof.",
+    "build-only sidecars can enrich parser/builder reports but are not runtime proof.",
+    "dependency-probe-only sidecars are diagnostics only.",
+    "synthetic-input-runtime sidecars are pipeline evidence, not real model proof.",
+    "real-model-runtime sidecars require model/input hashes, license, input asset, and stdout/stderr summary.",
+    "package-consumer-runtime belongs to release proof records; a sidecar can record it but cannot promote a build report."
+  ],
+  "promotionRules": [
+    "Do not use a sidecar to promote TensorRtExec or OnnxToEngine build reports to package-consumer-runtime.",
+    "package-consumer-runtime cannot be claimed by TensorRtExec/OnnxToEngine build reports.",
+    "Do not mark a sample manifest smoke-passed until the sample runner uses real assets and records log SHA256.",
+    "Do not fabricate modelSha256, inputAssetSha256, stdoutSummary, or stderrSummary.",
+    "Run eng/Test-OnnxEngineBuildEvidenceSidecar.ps1 and eng/Test-SampleAssetManifest.ps1 after backfill."
+  ],
+  "notes": [
+    "Fill this sidecar after model, labels, image, license, and command output are known.",
+    "Keep proofClassification=template-only until there is a real build or sample run record.",
+    "package-consumer-runtime cannot be claimed by TensorRtExec/OnnxToEngine build reports."
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "matrixId": "yolovision-model-matrix",
+  "matrixState": "release-readiness-planning",
+  "sample": "samples/YoloVision",
+  "proofBoundary": "support matrix only; not real-model-runtime proof; not package-consumer-runtime proof; not post-publish proof",
+  "families": [
+    "yolov5",
+    "yolov6",
+    "yolov7",
+    "yolov8",
+    "yolov9",
+    "yolov10",
+    "yolov11",
+    "yolov26",
+    "custom"
+  ],
+  "tasks": [
+    "det",
+    "cls",
+    "seg",
+    "obb",
+    "pose",
+    "sem"
+  ],
+  "assetRequirements": [
+    "model ONNX path and source URL",
+    "model license and SHA256",
+    "labels path, license, class count, and SHA256",
+    "input image or preprocessed tensor source/license/SHA256",
+    "TensorRtExec or OnnxToEngine build-only report",
+    "YoloVision runner log and sample-run-evidence record before any real-model-runtime promotion"
+  ],
+  "entries": [
+    {
+      "family": "yolov5",
+      "supportedTasks": ["det", "cls", "seg"],
+      "status": "managed-postprocess-ready; requires owner assets",
+      "modelSourceHint": "Use the model owner's YOLOv5 export path; record repository, checkpoint, export command, opset, and license.",
+      "onnxExportNotes": "Prefer static or profile-compatible NCHW exports; document whether output is channel-first or box-first.",
+      "postprocessNotes": "Detection uses score filtering plus NMS; segmentation requires mask coefficients and prototype tensor metadata."
+    },
+    {
+      "family": "yolov6",
+      "supportedTasks": ["det"],
+      "status": "managed-postprocess-ready; requires owner assets",
+      "modelSourceHint": "Use the official or owner-approved YOLOv6 export path and record license/hash evidence.",
+      "onnxExportNotes": "Record input shape, class count, and any graph-side NMS.",
+      "postprocessNotes": "Use detection layout metadata; do not assume objectness semantics without owner-provided output description."
+    },
+    {
+      "family": "yolov7",
+      "supportedTasks": ["det", "pose"],
+      "status": "managed-postprocess-ready; pose requires auxiliary metadata",
+      "modelSourceHint": "Use owner-approved YOLOv7/pose assets and record source URL plus license.",
+      "onnxExportNotes": "Record output layout and keypoint tensor shape when pose is used.",
+      "postprocessNotes": "Detection path is ready; pose path requires keypoint count, stride, and tensor role metadata."
+    },
+    {
+      "family": "yolov8",
+      "supportedTasks": ["det", "cls", "seg", "obb", "pose"],
+      "status": "broad managed support; requires owner assets and task metadata",
+      "modelSourceHint": "Use owner-approved Ultralytics export; document exact package version and export command.",
+      "onnxExportNotes": "Record dynamic/static shape, task type, output names, and whether graph includes NMS.",
+      "postprocessNotes": "Det/cls paths are direct; seg/obb/pose require task-specific auxiliary tensor metadata."
+    },
+    {
+      "family": "yolov9",
+      "supportedTasks": ["det", "seg"],
+      "status": "planned-runtime-proof; managed decode surface available",
+      "modelSourceHint": "Use owner-approved YOLOv9 export and keep model redistribution separate from the repository.",
+      "onnxExportNotes": "Record export branch, opset, output layout, class count, and graph-side postprocess.",
+      "postprocessNotes": "Treat as metadata-driven until real runner log and evidence record exist."
+    },
+    {
+      "family": "yolov10",
+      "supportedTasks": ["det"],
+      "status": "planned-runtime-proof; no bundled model",
+      "modelSourceHint": "Use owner-approved YOLOv10 export; record NMS-free/end-to-end output semantics.",
+      "onnxExportNotes": "Record whether the model returns pre-NMS or end-to-end boxes.",
+      "postprocessNotes": "Do not reuse YOLOv8 assumptions unless output metadata proves compatibility."
+    },
+    {
+      "family": "yolov11",
+      "supportedTasks": ["det", "cls", "seg", "obb", "pose"],
+      "status": "planned-runtime-proof; matrix-ready",
+      "modelSourceHint": "Use owner-approved YOLOv11 export; record model release, license, and hashes.",
+      "onnxExportNotes": "Record task, class count, output tensor roles, and profile shapes.",
+      "postprocessNotes": "Use the same task metadata model as YOLOv8, but require real evidence before promotion."
+    },
+    {
+      "family": "yolov26",
+      "supportedTasks": ["det", "cls", "seg", "obb", "pose", "sem"],
+      "status": "future-family-planning; blocked until owner assets and output metadata exist",
+      "modelSourceHint": "Treat as forward-compatible/custom family until a concrete owner-approved implementation and model source are supplied.",
+      "onnxExportNotes": "Require explicit tensor names, shapes, task, and output roles.",
+      "postprocessNotes": "Use custom metadata; never claim real runtime proof from matrix presence."
+    },
+    {
+      "family": "custom",
+      "supportedTasks": ["det", "cls", "seg", "obb", "pose", "sem"],
+      "status": "metadata-driven custom path",
+      "modelSourceHint": "Owner supplies model, labels, input tensor, license, SHA256, and output metadata.",
+      "onnxExportNotes": "Use TensorRtExec or OnnxToEngine build-only report before sample runtime.",
+      "postprocessNotes": "Promotion requires YoloVision run log, sample-run-evidence record, and validator output."
+    }
+  ]
+}

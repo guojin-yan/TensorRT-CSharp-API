@@ -197,7 +197,7 @@ dotnet .\samples\InferenceBindings\bin\Debug\net8.0\InferenceBindings.dll --tens
 仓库保留真实可执行的用户侧常用模型示例。模型、labels 和图片资产不随仓库分发，因为它们有独立的授权和体积约束。
 
 - `Classification`：可执行 ONNX 分类 pipeline。提供 `--model`、可选 `--labels` 和 `--input-shape` 后，会构建 TensorRT engine、运行合成 float 输入并打印 Top-K。
-- `YoloDet`：可执行 YOLO-family ONNX 检测 pipeline。提供 `--model`、可选 `--labels` 和 `--input-shape` 后，会解码常见 `[1, 84, 8400]` 与 `[1, 8400, 84]` 输出布局。
+- `YoloVision`：可执行 YOLO-family ONNX 视觉任务样例。提供 `--model`、可选 `--labels` 和 `--input-shape` 后，可按 family/task profile 使用检测、分类、分割、姿态、OBB、语义分割等托管后处理底座。
 - `InferenceBindings`：用户侧常用 tensor binding / enqueue 示例。
 - `OnnxToEngine`：用户侧常用 ONNX 转 engine 示例，内置一个极小 identity ONNX 图。
 
@@ -212,6 +212,6 @@ dotnet run --project .\samples\Classification -- --model .\models\classifier.onn
 YOLO 检测模型示例：
 
 ```powershell
-dotnet run --project .\samples\YoloDet -- --model .\models\yolo.onnx --labels .\models\coco.names --input-shape 1x3x640x640 --tensor-rt-line 10
+dotnet run --project .\samples\YoloVision -- --model .\models\yolo.onnx --labels .\models\coco.names --input-shape 1x3x640x640 --tensor-rt-line 10
 ```
 
