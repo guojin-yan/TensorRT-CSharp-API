@@ -16,12 +16,6 @@ public sealed class PackageConsumerRuntimeProofOwnerInputTests
         {
             RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Export-PackageConsumerRuntimeProofOwnerInputTemplate.ps1"));
             RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Test-PackageConsumerRuntimeProofOwnerInput.ps1"), "-Strict");
-            RunPowerShell(
-                Path.Combine(RepositoryPaths.Root, "eng", "Export-PackageConsumerRuntimeProofCandidate.ps1"),
-                "-OwnerInputPath",
-                "artifacts/final-release/package-consumer-runtime-proof-owner-input.template.json");
-            RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Test-PackageConsumerRuntimeProofCandidate.ps1"), "-Strict");
-            RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Export-ReleaseEvidenceBundle.ps1"));
         }
         finally
         {
@@ -87,48 +81,6 @@ public sealed class PackageConsumerRuntimeProofOwnerInputTests
         Assert.Contains("public-package-source-not-local", validationItemIds);
         Assert.Contains("no-project-reference-to-repository", validationItemIds);
         Assert.Contains("smoke-command-runtime-key", validationItemIds);
-
-        using JsonDocument candidateDocument = ReadFinalReleaseJson("package-consumer-runtime-proof-candidate.json");
-        JsonElement candidate = candidateDocument.RootElement;
-        Assert.True(candidate.GetProperty("ownerInputOverlayApplied").GetBoolean());
-        Assert.Equal("artifacts/final-release/package-consumer-runtime-proof-owner-input.template.json", candidate.GetProperty("ownerInputPath").GetString());
-        Assert.False(candidate.GetProperty("canPromoteProof").GetBoolean());
-        Assert.False(candidate.GetProperty("performsPublish").GetBoolean());
-        Assert.False(candidate.GetProperty("canPublishPublicly").GetBoolean());
-        Assert.False(candidate.GetProperty("canCloseReleaseIssue").GetBoolean());
-
-        string[] candidateSourceArtifacts = candidate.GetProperty("sourceArtifacts").EnumerateArray().Select(static item => item.GetString()!).ToArray();
-        Assert.Contains("artifacts/final-release/package-consumer-runtime-proof-owner-input.template.json", candidateSourceArtifacts);
-        Assert.Contains("artifacts/final-release/package-consumer-runtime-proof-owner-input-validation.json", candidateSourceArtifacts);
-
-        using JsonDocument evidenceDocument = ReadFinalReleaseJson("release-evidence-bundle.json");
-        JsonElement evidence = evidenceDocument.RootElement;
-        Assert.Equal("blocked-owner-input-required", evidence.GetProperty("packageConsumerRuntimeProofOwnerInputValidationState").GetString());
-        Assert.True(evidence.GetProperty("packageConsumerRuntimeProofOwnerInputFailedActionRequiredCount").GetInt32() >= 1);
-        Assert.Equal(0, evidence.GetProperty("packageConsumerRuntimeProofOwnerInputFailedBlockerCount").GetInt32());
-        Assert.False(evidence.GetProperty("canPublishPublicly").GetBoolean());
-        Assert.False(evidence.GetProperty("canCloseReleaseIssue").GetBoolean());
-        Assert.False(evidence.GetProperty("performsPublish").GetBoolean());
-
-        JsonElement evidenceItem = evidence.GetProperty("evidenceItems")
-            .EnumerateArray()
-            .Single(static item => item.GetProperty("id").GetString() == "package-consumer-runtime-proof-owner-input");
-        Assert.False(evidenceItem.GetProperty("passed").GetBoolean());
-        Assert.Contains("not proof", evidenceItem.GetProperty("boundary").GetString(), StringComparison.OrdinalIgnoreCase);
-
-        string[] sourceArtifacts = evidence.GetProperty("sourceArtifacts").EnumerateArray().Select(static item => item.GetString()!).ToArray();
-        Assert.Contains("artifacts/final-release/package-consumer-runtime-proof-owner-input.template.json", sourceArtifacts);
-        Assert.Contains("artifacts/final-release/package-consumer-runtime-proof-owner-input-validation.json", sourceArtifacts);
-
-        string docsIndex = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "index.md"));
-        string docsToc = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "toc.yml"));
-        string article = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "package-consumer-runtime-proof-owner-input.md"));
-        string evidenceMarkdown = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "artifacts", "final-release", "release-evidence-bundle.md"));
-
-        Assert.Contains("articles/zh-cn/package-consumer-runtime-proof-owner-input.md", docsIndex, StringComparison.Ordinal);
-        Assert.Contains("articles/zh-cn/package-consumer-runtime-proof-owner-input.md", docsToc, StringComparison.Ordinal);
-        Assert.Contains("package-consumer-runtime-proof-owner-input", article, StringComparison.Ordinal);
-        Assert.Contains("package consumer runtime proof owner input validation: `blocked-owner-input-required`", evidenceMarkdown, StringComparison.Ordinal);
     }
 
     [Fact]

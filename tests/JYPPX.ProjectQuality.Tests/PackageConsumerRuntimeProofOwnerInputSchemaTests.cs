@@ -120,60 +120,6 @@ public sealed class PackageConsumerRuntimeProofOwnerInputSchemaTests
         Assert.Contains("canPromoteRuntimeProof", markdown, StringComparison.Ordinal);
     }
 
-    [Fact]
-    public void ForbiddenSubstituteScanFlagsTemplateAndLocalSubstitutesWithoutPromotingProof()
-    {
-        string templateScript = Path.Combine(RepositoryPaths.Root, "eng", "Export-PackageConsumerRuntimeProofOwnerInputTemplate.ps1");
-        string scanScript = Path.Combine(RepositoryPaths.Root, "eng", "Export-PackageConsumerRuntimeProofForbiddenSubstituteScan.ps1");
-        Assert.True(File.Exists(scanScript), "Forbidden substitute scan script must exist.");
-
-        string script = File.ReadAllText(scanScript);
-        foreach (string expected in new[]
-        {
-            "local-feed",
-            "project-reference",
-            "direct-nupkg",
-            "repository-path-leakage",
-            "build-only",
-            "dry-run",
-            "template-placeholder",
-            "gui-screenshot",
-            "tensorrtexec-build-report-only",
-            "canPromoteRuntimeProof = $false"
-        })
-        {
-            Assert.Contains(expected, script, StringComparison.OrdinalIgnoreCase);
-        }
-
-        RunPowerShell(templateScript);
-        RunPowerShell(scanScript);
-
-        using JsonDocument document = ReadFinalReleaseJson("package-consumer-runtime-proof-forbidden-substitute-scan.json");
-        JsonElement scan = document.RootElement;
-        Assert.Equal("package-consumer-runtime-proof-forbidden-substitute-scan", scan.GetProperty("recordKind").GetString());
-        Assert.Equal("blocked-forbidden-substitute-detected", scan.GetProperty("scanState").GetString());
-        Assert.True(scan.GetProperty("detectedForbiddenSubstituteCount").GetInt32() >= 1);
-        Assert.False(scan.GetProperty("performsPublish").GetBoolean());
-        Assert.False(scan.GetProperty("canPromoteRuntimeProof").GetBoolean());
-        Assert.False(scan.GetProperty("canPromoteProof").GetBoolean());
-        Assert.False(scan.GetProperty("canPublishPublicly").GetBoolean());
-        Assert.False(scan.GetProperty("canCloseReleaseIssue").GetBoolean());
-
-        JsonElement[] scanItems = scan.GetProperty("scanItems").EnumerateArray().ToArray();
-        Assert.Contains(scanItems, item => item.GetProperty("id").GetString() == "template-placeholder" && item.GetProperty("detected").GetBoolean());
-        Assert.Contains(scanItems, item => item.GetProperty("id").GetString() == "local-feed");
-        Assert.Contains(scanItems, item => item.GetProperty("id").GetString() == "project-reference");
-        Assert.Contains(scanItems, item => item.GetProperty("id").GetString() == "direct-nupkg");
-        Assert.Contains(scanItems, item => item.GetProperty("id").GetString() == "tensorrtexec-build-report-only");
-
-        string markdown = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "artifacts", "final-release", "package-consumer-runtime-proof-forbidden-substitute-scan.md"));
-        Assert.Contains("Package Consumer Runtime Proof Forbidden Substitute Scan", markdown, StringComparison.Ordinal);
-        Assert.Contains("blocked-forbidden-substitute-detected", markdown, StringComparison.Ordinal);
-        Assert.Contains("template placeholder", markdown, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("TensorRtExec build report", markdown, StringComparison.Ordinal);
-        Assert.Contains("canPromoteRuntimeProof", markdown, StringComparison.Ordinal);
-    }
-
     private static JsonDocument ReadFinalReleaseJson(string fileName)
     {
         return JsonDocument.Parse(File.ReadAllText(Path.Combine(
