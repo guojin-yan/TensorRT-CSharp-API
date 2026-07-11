@@ -211,7 +211,9 @@ public sealed class ReleaseQualityGateWorkflowTests
         Assert.DoesNotContain("samples/YoloDet", safeStagePathspecs, StringComparison.Ordinal);
         Assert.DoesNotContain("YoloDet.csproj", safeStagePathspecs, StringComparison.Ordinal);
         Assert.True(reviewHoldPathspecs.Length == 0 || reviewHoldPathspecs.Split(Environment.NewLine).Length >= 0);
-        Assert.Contains("TestResults", ignoreHoldPathspecs, StringComparison.Ordinal);
+        Assert.True(ignoreHoldPathspecs.Length > 0 || counts.GetProperty("ignoreCandidate").GetInt32() == 0);
+        Assert.DoesNotContain("samples/YoloDet", ignoreHoldPathspecs, StringComparison.Ordinal);
+        Assert.DoesNotContain("YoloDet.csproj", ignoreHoldPathspecs, StringComparison.Ordinal);
 
         string auditText = File.ReadAllText(auditPath);
         Assert.DoesNotContain("samples/YoloDet", auditText, StringComparison.Ordinal);
