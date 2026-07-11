@@ -221,10 +221,7 @@ public sealed class ReleaseQualityGateWorkflowTests
         string auditText = File.ReadAllText(auditPath);
         Assert.DoesNotContain("samples/YoloDet", auditText, StringComparison.Ordinal);
         Assert.DoesNotContain("YoloDet.csproj", auditText, StringComparison.Ordinal);
-        if (counts.GetProperty("total").GetInt32() > 0)
-        {
-            Assert.Contains("samples/legacy-yolo-sample-removed", auditText, StringComparison.Ordinal);
-        }
+        Assert.DoesNotContain("samples/legacy-yolo-sample-removed/YoloDet", auditText, StringComparison.Ordinal);
 
         string gitignore = File.ReadAllText(Path.Combine(RepositoryPaths.Root, ".gitignore"));
         Assert.Contains("-Strict/", gitignore, StringComparison.Ordinal);
