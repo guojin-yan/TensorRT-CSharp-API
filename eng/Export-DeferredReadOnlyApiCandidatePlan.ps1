@@ -61,9 +61,35 @@ function Write-TextFileWithRetry {
   }
 }
 
-$matrixPath = Join-Path $RepositoryRoot "artifacts\interface-coverage\tensorrt-interface-comparison.csv"
+$comparisonMatrixPath = Join-Path $RepositoryRoot "artifacts\interface-coverage\tensorrt-interface-comparison.csv"
+$coverageMatrixPath = Join-Path $RepositoryRoot "artifacts\interface-coverage\tensorrt-interface-coverage.csv"
+$matrixPath = $comparisonMatrixPath
+$matrixSource = "artifacts/interface-coverage/tensorrt-interface-comparison.csv"
 if (-not (Test-Path -LiteralPath $matrixPath -PathType Leaf)) {
-  throw "TensorRT interface comparison CSV was not found: $matrixPath"
+  $matrixPath = $coverageMatrixPath
+  $matrixSource = "artifacts/interface-coverage/tensorrt-interface-coverage.csv"
+}
+
+if (-not (Test-Path -LiteralPath $matrixPath -PathType Leaf)) {
+  throw "TensorRT interface coverage CSV was not found. Checked: $comparisonMatrixPath and $coverageMatrixPath"
+}
+
+function Get-RowValue {
+  param(
+    [Parameter(Mandatory = $true)][object]$Row,
+    [Parameter(Mandatory = $true)][string]$Name,
+    [string]$FallbackName = ""
+  )
+
+  if ($Row.PSObject.Properties.Name -contains $Name) {
+    return [string]$Row.$Name
+  }
+
+  if (-not [string]::IsNullOrWhiteSpace($FallbackName) -and $Row.PSObject.Properties.Name -contains $FallbackName) {
+    return [string]$Row.$FallbackName
+  }
+
+  return ""
 }
 
 function Test-UnsafeBoundary {
@@ -375,20 +401,23 @@ $deferredRows = @($rows | Where-Object {
 $annotatedCandidates = @(
   $deferredRows |
     ForEach-Object {
-      $risk = Get-Risk -Class $_.Class -Method $_.Method -Interface $_.Interface
-      $designGroup = Get-ManualDesignGroup -Class $_.Class -Method $_.Method -Interface $_.Interface
+      $class = Get-RowValue -Row $_ -Name "Class"
+      $method = Get-RowValue -Row $_ -Name "Method"
+      $interface = Get-RowValue -Row $_ -Name "Interface"
+      $risk = Get-Risk -Class $class -Method $method -Interface $interface
+      $designGroup = Get-ManualDesignGroup -Class $class -Method $method -Interface $interface
       [pscustomobject]@{
-        interface = $_.Interface
-        class = $_.Class
-        method = $_.Method
-        tensorRtLine = $_.TensorRtLine
-        header = $_.Header
-        implementationStatus = $_.ImplementationStatus
-        nativeManifestStatus = $_.NativeManifestStatus
-        nativeSourceStatus = $_.NativeSourceStatus
-        managedInteropStatus = $_.ManagedInteropStatus
-        matchedManifestIds = $_.MatchedManifestIds
-        priority = Get-Priority -Class $_.Class -Method $_.Method -Interface $_.Interface
+        interface = $interface
+        class = $class
+        method = $method
+        tensorRtLine = Get-RowValue -Row $_ -Name "TensorRtLine" -FallbackName "VersionLine"
+        header = Get-RowValue -Row $_ -Name "Header"
+        implementationStatus = Get-RowValue -Row $_ -Name "ImplementationStatus"
+        nativeManifestStatus = Get-RowValue -Row $_ -Name "NativeManifestStatus"
+        nativeSourceStatus = Get-RowValue -Row $_ -Name "NativeSourceStatus"
+        managedInteropStatus = Get-RowValue -Row $_ -Name "ManagedInteropStatus"
+        matchedManifestIds = Get-RowValue -Row $_ -Name "MatchedManifestIds"
+        priority = Get-Priority -Class $class -Method $method -Interface $interface
         ownershipRisk = $risk
         recommendedAction = if ($risk -eq "low") { "candidate-for-readonly-diagnostic-promotion" } elseif ($risk -eq "medium") { "manual-review-before-promotion" } else { "defer-ownership-or-callback-boundary" }
         designGroup = $designGroup
@@ -408,32 +437,40 @@ $triageRows = @(
       $_.ManagedInteropStatus -match "deferred"
     } |
     ForEach-Object {
-      $risk = Get-Risk -Class $_.Class -Method $_.Method -Interface $_.Interface
-      $designGroup = Get-ManualDesignGroup -Class $_.Class -Method $_.Method -Interface $_.Interface
+      $class = Get-RowValue -Row $_ -Name "Class"
+      $method = Get-RowValue -Row $_ -Name "Method"
+      $interface = Get-RowValue -Row $_ -Name "Interface"
+      $implementationStatus = Get-RowValue -Row $_ -Name "ImplementationStatus"
+      $nativeManifestStatus = Get-RowValue -Row $_ -Name "NativeManifestStatus"
+      $nativeSourceStatus = Get-RowValue -Row $_ -Name "NativeSourceStatus"
+      $managedInteropStatus = Get-RowValue -Row $_ -Name "ManagedInteropStatus"
+      $matchedManifestIds = Get-RowValue -Row $_ -Name "MatchedManifestIds"
+      $risk = Get-Risk -Class $class -Method $method -Interface $interface
+      $designGroup = Get-ManualDesignGroup -Class $class -Method $method -Interface $interface
       $boundary = Get-ManualDesignRecommendation -DesignGroup $designGroup
       $tier = Get-SafetyTier `
-        -Class $_.Class `
-        -Method $_.Method `
-        -Interface $_.Interface `
+        -Class $class `
+        -Method $method `
+        -Interface $interface `
         -OwnershipRisk $risk `
         -DesignGroup $designGroup `
-        -ImplementationStatus $_.ImplementationStatus `
-        -NativeManifestStatus $_.NativeManifestStatus `
-        -NativeSourceStatus $_.NativeSourceStatus `
-        -ManagedInteropStatus $_.ManagedInteropStatus `
-        -MatchedManifestIds $_.MatchedManifestIds
+        -ImplementationStatus $implementationStatus `
+        -NativeManifestStatus $nativeManifestStatus `
+        -NativeSourceStatus $nativeSourceStatus `
+        -ManagedInteropStatus $managedInteropStatus `
+        -MatchedManifestIds $matchedManifestIds
 
       [pscustomobject]@{
-        interface = $_.Interface
-        class = $_.Class
-        method = $_.Method
-        tensorRtLine = $_.TensorRtLine
-        header = $_.Header
-        implementationStatus = $_.ImplementationStatus
-        nativeManifestStatus = $_.NativeManifestStatus
-        nativeSourceStatus = $_.NativeSourceStatus
-        managedInteropStatus = $_.ManagedInteropStatus
-        matchedManifestIds = $_.MatchedManifestIds
+        interface = $interface
+        class = $class
+        method = $method
+        tensorRtLine = Get-RowValue -Row $_ -Name "TensorRtLine" -FallbackName "VersionLine"
+        header = Get-RowValue -Row $_ -Name "Header"
+        implementationStatus = $implementationStatus
+        nativeManifestStatus = $nativeManifestStatus
+        nativeSourceStatus = $nativeSourceStatus
+        managedInteropStatus = $managedInteropStatus
+        matchedManifestIds = $matchedManifestIds
         ownershipRisk = $risk
         designGroup = $designGroup
         safetyTier = $tier
@@ -537,7 +574,7 @@ $selectedDesignGroups = @(
 $summary = [pscustomobject]@{
   generatedAtUtc = [DateTimeOffset]::UtcNow.ToString("O")
   planKind = "deferred-readonly-api-candidate-plan"
-  sourceMatrix = "artifacts/interface-coverage/tensorrt-interface-comparison.csv"
+  sourceMatrix = $matrixSource
   totalDeferredRowCount = $deferredRows.Count
   annotatedCandidateCount = $annotatedCandidates.Count
   eligibleCandidateCount = $eligibleCandidates.Count
@@ -574,7 +611,7 @@ Write-TextFileWithRetry -Path $jsonPath -Value ($summary | ConvertTo-Json -Depth
 $triageSummary = [pscustomobject]@{
   generatedAtUtc = [DateTimeOffset]::UtcNow.ToString("O")
   triageKind = "deferred-candidate-safety-triage"
-  sourceMatrix = "artifacts/interface-coverage/tensorrt-interface-comparison.csv"
+  sourceMatrix = $matrixSource
   totalTriageRowCount = $triageRows.Count
   tierSummaries = $tierSummaries
   policy = @(
