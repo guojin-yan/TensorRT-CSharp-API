@@ -125,6 +125,9 @@ jobs:
   package-managed-dry-run:
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_package_managed_dry_run }}
     uses: ./.github/workflows/package-managed.yml
+    permissions:
+      contents: write
+      packages: write
     with:
       version: 4.0.0
       configuration: Release
