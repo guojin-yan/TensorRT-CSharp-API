@@ -57,11 +57,15 @@ $fields = @(
   New-Field -Name "isPackageConsumerRuntimeProof" -Type "boolean" -ValidatorItemId "package-consumer-runtime-proof-false" -ProofRole "must remain false; owner input template is not proof and not runtime proof" -Required $false -PlaceholderAllowed $true
   New-Field -Name "cleanExternalConsumerRoot" -Type "absolute directory path" -ValidatorItemId "clean-root-outside-repository" -ProofRole "clean consumer root outside this repository"
   New-Field -Name "consumerProjectPath" -Type "absolute or repository-relative .csproj path" -ValidatorItemId "consumer-project-exists" -ProofRole "external consumer project to scan and validate"
+  New-Field -Name "publicPackageSourceKind" -Type "enum string" -ValidatorItemId "public-package-source-kind" -ProofRole "must be NuGet or GitHub Packages; local feed and direct file source kinds are forbidden"
   New-Field -Name "publicPackageSource" -Type "string URL or public feed id" -ValidatorItemId "public-package-source-not-local" -ProofRole "public package source; local feeds are forbidden"
+  New-Field -Name "publicPackageFeedUrl" -Type "URL string" -ValidatorItemId "public-package-feed-url" -ProofRole "public NuGet or GitHub Packages feed URL used by the clean consumer restore"
+  New-Field -Name "managedPackageUrl" -Type "URL string" -ValidatorItemId "managed-package-url" -ProofRole "public managed package detail/download URL"
   New-Field -Name "managedPackageId" -Type "string" -ValidatorItemId "field-managedPackageId" -ProofRole "managed package identity"
   New-Field -Name "managedPackageVersion" -Type "SemVer string" -ValidatorItemId "field-managedPackageVersion" -ProofRole "managed package version restored by clean consumer"
   New-Field -Name "managedNupkgPath" -Type "file path" -ValidatorItemId "managed-nupkg-hash-match" -ProofRole "public managed nupkg hash evidence"
   New-Field -Name "managedNupkgSha256" -Type "sha256 hex string" -ValidatorItemId "managed-nupkg-sha256-format" -ProofRole "managed nupkg integrity"
+  New-Field -Name "runtimePackageUrl" -Type "URL string" -ValidatorItemId "runtime-package-url" -ProofRole "public runtime package detail/download URL"
   New-Field -Name "runtimePackageId" -Type "string" -ValidatorItemId "field-runtimePackageId" -ProofRole "runtime package identity"
   New-Field -Name "runtimePackageVersion" -Type "SemVer string" -ValidatorItemId "field-runtimePackageVersion" -ProofRole "runtime package version restored by clean consumer"
   New-Field -Name "runtimePackageKey" -Type "string" -ValidatorItemId "runtime-key-ready" -ProofRole "runtime package key used by smoke command"
@@ -92,6 +96,9 @@ $fields = @(
   New-Field -Name "stdoutSummary" -Type "string" -ValidatorItemId "field-stdoutSummary" -ProofRole "stdout summary from real run"
   New-Field -Name "stderrSummary" -Type "string" -ValidatorItemId "field-stderrSummary" -ProofRole "stderr summary from real run"
   New-Field -Name "failureDiagnostic" -Type "string" -ValidatorItemId "field-failureDiagnostic" -ProofRole "failure detail or explicit empty diagnostic"
+  New-Field -Name "sourceRunnerQueueStatus" -Type "enum string" -ValidatorItemId "source-runner-not-queued" -ProofRole "must show the source GitHub Actions context is completed/not queued when used as context; queued is owner-infra-action only"
+  New-Field -Name "sourceRunnerInfrastructureStatus" -Type "enum string" -ValidatorItemId "source-runner-infrastructure-ready" -ProofRole "must show runner infrastructure is available; missing self-hosted runner is owner-infra-action only"
+  New-Field -Name "sourceRunnerOwnerAction" -Type "string" -ValidatorItemId "source-runner-owner-action-boundary" -ProofRole "documents owner/infra action required for queued or missing runner states; not proof"
   New-Field -Name "performsPublish" -Type "boolean" -ValidatorItemId "no-side-effects" -ProofRole "must remain false; owner input cannot publish"
   New-Field -Name "canPublishPublicly" -Type "boolean" -ValidatorItemId "no-side-effects" -ProofRole "must remain false; owner input cannot approve publication"
   New-Field -Name "canCloseReleaseIssue" -Type "boolean" -ValidatorItemId "no-side-effects" -ProofRole "must remain false; owner input cannot close release issue"
@@ -105,6 +112,8 @@ $forbiddenSubstitutes = @(
   [pscustomobject]@{ id = "repository-path-leakage"; label = "repository path leakage"; reason = "Clean consumer proof must run outside the repository and cannot depend on source paths." },
   [pscustomobject]@{ id = "build-only"; label = "build-only"; reason = "Build success does not prove TensorRT runtime execution." },
   [pscustomobject]@{ id = "dry-run"; label = "dry-run"; reason = "Dry-run output does not deserialize, bind, enqueue, or validate runtime output." },
+  [pscustomobject]@{ id = "queued-github-actions-run"; label = "queued GitHub Actions run"; reason = "A queued workflow is an infrastructure state, not a completed package validation." },
+  [pscustomobject]@{ id = "missing-self-hosted-runner"; label = "missing self-hosted runner"; reason = "Runner absence is owner-infra-action and cannot be promoted to CI or runtime proof." },
   [pscustomobject]@{ id = "github-actions-dry-run-nupkg"; label = "GitHub Actions dry-run .nupkg"; reason = "The dry-run nupkg SHA256 is comparison context only and is not the downloaded public package SHA256." },
   [pscustomobject]@{ id = "dashboard"; label = "dashboard"; reason = "Dashboards summarize status but cannot replace machine-verifiable clean consumer runtime proof." },
   [pscustomobject]@{ id = "template-placeholder"; label = "template placeholder"; reason = "Placeholder/template values are owner-action-required, not proof." },

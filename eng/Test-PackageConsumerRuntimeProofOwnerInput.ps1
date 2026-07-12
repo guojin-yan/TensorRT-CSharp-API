@@ -261,6 +261,57 @@ function Test-PublicPackageSourceIsLocal {
     $text.Contains(".nupkg", [StringComparison]::OrdinalIgnoreCase)
 }
 
+function Test-PublicPackageSourceKind {
+  param([AllowNull()][object]$Value)
+
+  if (Test-IsPlaceholder -Value $Value) {
+    return $false
+  }
+
+  $text = ([string]$Value).Trim()
+  return $text.Equals("nuget", [StringComparison]::OrdinalIgnoreCase) -or
+    $text.Equals("github-packages", [StringComparison]::OrdinalIgnoreCase) -or
+    $text.Equals("github packages", [StringComparison]::OrdinalIgnoreCase)
+}
+
+function Test-PublicUrl {
+  param([AllowNull()][object]$Value)
+
+  if (Test-IsPlaceholder -Value $Value) {
+    return $false
+  }
+
+  $text = ([string]$Value).Trim()
+  return ($text.StartsWith("https://", [StringComparison]::OrdinalIgnoreCase) -or
+    $text.StartsWith("http://", [StringComparison]::OrdinalIgnoreCase)) -and
+    -not (Test-PublicPackageSourceIsLocal -Value $text)
+}
+
+function Test-RunnerQueueCompleted {
+  param([AllowNull()][object]$Value)
+
+  if (Test-IsPlaceholder -Value $Value) {
+    return $false
+  }
+
+  $text = ([string]$Value).Trim()
+  return $text.Equals("completed", [StringComparison]::OrdinalIgnoreCase) -or
+    $text.Equals("not-queued", [StringComparison]::OrdinalIgnoreCase)
+}
+
+function Test-RunnerInfrastructureReady {
+  param([AllowNull()][object]$Value)
+
+  if (Test-IsPlaceholder -Value $Value) {
+    return $false
+  }
+
+  $text = ([string]$Value).Trim()
+  return $text.Equals("available", [StringComparison]::OrdinalIgnoreCase) -or
+    $text.Equals("ready", [StringComparison]::OrdinalIgnoreCase) -or
+    $text.Equals("not-required", [StringComparison]::OrdinalIgnoreCase)
+}
+
 function Get-ConsumerProjectReferenceFlags {
   param([AllowNull()][object]$ProjectPath)
 
@@ -331,7 +382,11 @@ $items.Add((New-ValidationItem -Id "package-consumer-runtime-proof-false" -Passe
 $items.Add((New-ValidationItem -Id "clean-root-outside-repository" -Passed (Test-IsOutsideRepository -Path (Get-PropertyOrDefault -Object $record -Name "cleanExternalConsumerRoot" -DefaultValue "")) -Severity "action-required" -Detail "cleanExternalConsumerRoot must be a real path outside this repository.")) | Out-Null
 $items.Add((New-ValidationItem -Id "consumer-project-exists" -Passed $consumerProjectFlags.projectExists -Severity "action-required" -Detail "consumerProjectPath must point to a real external .csproj.")) | Out-Null
 $items.Add((New-ValidationItem -Id "no-project-reference-to-repository" -Passed (-not $consumerProjectFlags.usesProjectReference) -Severity "action-required" -Detail "Clean consumer project must not use ProjectReference into this repository.")) | Out-Null
+$items.Add((New-ValidationItem -Id "public-package-source-kind" -Passed (Test-PublicPackageSourceKind -Value (Get-PropertyOrDefault -Object $record -Name "publicPackageSourceKind" -DefaultValue "")) -Severity "action-required" -Detail "publicPackageSourceKind must be NuGet or GitHub Packages; local-feed, direct-nupkg, dry-run, and queued-run source kinds are forbidden.")) | Out-Null
 $items.Add((New-ValidationItem -Id "public-package-source-not-local" -Passed (-not (Test-PublicPackageSourceIsLocal -Value (Get-PropertyOrDefault -Object $record -Name "publicPackageSource" -DefaultValue "")) -and -not $consumerProjectFlags.usesLocalFeed) -Severity "action-required" -Detail "publicPackageSource and consumer project restore sources must not be local folder/feed evidence.")) | Out-Null
+$items.Add((New-ValidationItem -Id "public-package-feed-url" -Passed (Test-PublicUrl -Value (Get-PropertyOrDefault -Object $record -Name "publicPackageFeedUrl" -DefaultValue "")) -Severity "action-required" -Detail "publicPackageFeedUrl must be a public NuGet/GitHub Packages URL, not a local path or dry-run artifact.")) | Out-Null
+$items.Add((New-ValidationItem -Id "managed-package-url" -Passed (Test-PublicUrl -Value (Get-PropertyOrDefault -Object $record -Name "managedPackageUrl" -DefaultValue "")) -Severity "action-required" -Detail "managedPackageUrl must point to public managed package evidence.")) | Out-Null
+$items.Add((New-ValidationItem -Id "runtime-package-url" -Passed (Test-PublicUrl -Value (Get-PropertyOrDefault -Object $record -Name "runtimePackageUrl" -DefaultValue "")) -Severity "action-required" -Detail "runtimePackageUrl must point to public runtime package evidence.")) | Out-Null
 $items.Add((New-ValidationItem -Id "no-direct-nupkg-reference" -Passed (-not $consumerProjectFlags.usesDirectNupkg) -Severity "action-required" -Detail "Direct .nupkg references cannot be used as public proof.")) | Out-Null
 $items.Add((New-ValidationItem -Id "managed-nupkg-not-dry-run-artifact" -Passed (Test-ManagedNupkgPathIsNotDryRunArtifact -ManagedPath (Get-PropertyOrDefault -Object $record -Name "managedNupkgPath" -DefaultValue "") -DryRunPath $packageDryRunArtifactPath) -Severity "action-required" -Detail "managedNupkgPath must be the public package download evidence path, not the GitHub Actions package-managed dry-run artifact path.")) | Out-Null
 $items.Add((New-ValidationItem -Id "managed-nupkg-sha256-format" -Passed (Test-Sha256Format -Value (Get-PropertyOrDefault -Object $record -Name "managedNupkgSha256" -DefaultValue "")) -Severity "action-required" -Detail "managedNupkgSha256 must be a 64-character SHA256 hash.")) | Out-Null
@@ -357,6 +412,9 @@ $items.Add((New-ValidationItem -Id "finished-at-utc-parseable" -Passed (Test-Dat
 $items.Add((New-ValidationItem -Id "dependency-probe-status-passed" -Passed (Test-ValueInSet -Value (Get-PropertyOrDefault -Object $record -Name "dependencyProbeStatus" -DefaultValue "") -AllowedValues @("passed", "compatible-host-passed")) -Severity "action-required" -Detail "dependencyProbeStatus must be passed or compatible-host-passed.")) | Out-Null
 $items.Add((New-ValidationItem -Id "smoke-status-passed" -Passed (Test-ValueInSet -Value (Get-PropertyOrDefault -Object $record -Name "smokeStatus" -DefaultValue "") -AllowedValues @("passed")) -Severity "action-required" -Detail "smokeStatus must be passed.")) | Out-Null
 $items.Add((New-ValidationItem -Id "native-assets-copied-true" -Passed (Test-BoolTrue -Value (Get-PropertyOrDefault -Object $record -Name "nativeAssetsCopied" -DefaultValue "")) -Severity "action-required" -Detail "nativeAssetsCopied must be true for package consumer runtime proof owner input.")) | Out-Null
+$items.Add((New-ValidationItem -Id "source-runner-not-queued" -Passed (Test-RunnerQueueCompleted -Value (Get-PropertyOrDefault -Object $record -Name "sourceRunnerQueueStatus" -DefaultValue "")) -Severity "action-required" -Detail "sourceRunnerQueueStatus must be completed/not-queued. queued is owner-infra-action only and not proof.")) | Out-Null
+$items.Add((New-ValidationItem -Id "source-runner-infrastructure-ready" -Passed (Test-RunnerInfrastructureReady -Value (Get-PropertyOrDefault -Object $record -Name "sourceRunnerInfrastructureStatus" -DefaultValue "")) -Severity "action-required" -Detail "sourceRunnerInfrastructureStatus must be available/ready/not-required. missing self-hosted runner is owner-infra-action only and not proof.")) | Out-Null
+$items.Add((New-ValidationItem -Id "source-runner-owner-action-boundary" -Passed (([string](Get-PropertyOrDefault -Object $record -Name "sourceRunnerOwnerAction" -DefaultValue "")).Contains("owner-infra-action", [StringComparison]::OrdinalIgnoreCase)) -Severity "action-required" -Detail "sourceRunnerOwnerAction must explicitly preserve queued/missing-runner states as owner-infra-action, not CI proof.")) | Out-Null
 
 $failedBlockers = @($items | Where-Object { -not $_.passed -and $_.severity -eq "blocker" })
 $failedActionRequired = @($items | Where-Object { -not $_.passed -and $_.severity -eq "action-required" })
@@ -365,7 +423,11 @@ $cleanOwnerInputReady = $failedBlockers.Count -eq 0 -and $failedActionRequired.C
 $ownerInputForbiddenSubstituteFree = $passedItemIds -contains "clean-root-outside-repository" -and
   $passedItemIds -contains "consumer-project-exists" -and
   $passedItemIds -contains "no-project-reference-to-repository" -and
+  $passedItemIds -contains "public-package-source-kind" -and
   $passedItemIds -contains "public-package-source-not-local" -and
+  $passedItemIds -contains "public-package-feed-url" -and
+  $passedItemIds -contains "managed-package-url" -and
+  $passedItemIds -contains "runtime-package-url" -and
   $passedItemIds -contains "no-direct-nupkg-reference" -and
   $passedItemIds -contains "managed-nupkg-not-dry-run-artifact"
 $ownerInputHashFieldsReady = $passedItemIds -contains "managed-nupkg-sha256-format" -and
@@ -396,6 +458,9 @@ $ownerInputCommandEvidenceReady = $passedItemIds -contains "field-restoreCommand
   $passedItemIds -contains "finished-at-utc-parseable" -and
   $passedItemIds -contains "field-stdoutSummary" -and
   $passedItemIds -contains "field-stderrSummary"
+$ownerInputRunnerInfrastructureReady = $passedItemIds -contains "source-runner-not-queued" -and
+  $passedItemIds -contains "source-runner-infrastructure-ready" -and
+  $passedItemIds -contains "source-runner-owner-action-boundary"
 $ownerInputBlockedReasons = @($items | Where-Object { -not $_.passed } | ForEach-Object { [string]$_.id })
 $validationState = if ($failedBlockers.Count -eq 0 -and $failedActionRequired.Count -eq 0) {
   "owner-input-ready-for-candidate-overlay"
@@ -419,6 +484,7 @@ $validation = [pscustomobject]@{
   ownerInputSmokeLogReady = $ownerInputSmokeLogReady
   ownerInputHostMetadataReady = $ownerInputHostMetadataReady
   ownerInputCommandEvidenceReady = $ownerInputCommandEvidenceReady
+  ownerInputRunnerInfrastructureReady = $ownerInputRunnerInfrastructureReady
   sourceGitHubActionsRunEvidenceImportPresent = $sourceEvidenceImportPresent
   sourceGitHubActionsDryRunPackClaimReady = $sourceEvidenceDryRunClaim
   sourceGitHubActionsRunId = $sourceGitHubActionsRunId
@@ -435,6 +501,9 @@ $validation = [pscustomobject]@{
   consumerProjectUsesProjectReference = $consumerProjectFlags.usesProjectReference
   consumerProjectUsesLocalFeed = $consumerProjectFlags.usesLocalFeed
   consumerProjectUsesDirectNupkg = $consumerProjectFlags.usesDirectNupkg
+  sourceRunnerQueueStatus = [string](Get-PropertyOrDefault -Object $record -Name "sourceRunnerQueueStatus" -DefaultValue "")
+  sourceRunnerInfrastructureStatus = [string](Get-PropertyOrDefault -Object $record -Name "sourceRunnerInfrastructureStatus" -DefaultValue "")
+  sourceRunnerOwnerAction = [string](Get-PropertyOrDefault -Object $record -Name "sourceRunnerOwnerAction" -DefaultValue "")
   performsPublish = $false
   canPublishPublicly = $false
   canCloseReleaseIssue = $false

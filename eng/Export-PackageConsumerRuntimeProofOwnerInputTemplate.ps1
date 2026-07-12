@@ -108,11 +108,15 @@ $template = [pscustomobject]@{
   isPackageConsumerRuntimeProof = $false
   cleanExternalConsumerRoot = "<owner-fill-clean-external-consumer-root-outside-repository>"
   consumerProjectPath = "<owner-fill-clean-consumer-csproj-path>"
+  publicPackageSourceKind = "<owner-fill-nuget-or-github-packages>"
   publicPackageSource = "<owner-fill-public-package-source-url-or-id>"
+  publicPackageFeedUrl = "<owner-fill-public-feed-url>"
+  managedPackageUrl = "<owner-fill-public-managed-package-url>"
   managedPackageId = "JYPPX.TensorRT.CSharp.API"
   managedPackageVersion = "<owner-fill-managed-package-version>"
   managedNupkgPath = "<owner-fill-public-managed-nupkg-path>"
   managedNupkgSha256 = "<owner-fill-managed-nupkg-sha256>"
+  runtimePackageUrl = "<owner-fill-public-runtime-package-url>"
   runtimePackageId = "JYPPX.TensorRT.CSharp.API.runtime.$RuntimePackageKey"
   runtimePackageVersion = "<owner-fill-runtime-package-version>"
   runtimePackageKey = $RuntimePackageKey
@@ -143,6 +147,9 @@ $template = [pscustomobject]@{
   stdoutSummary = "<owner-fill-stdout-summary>"
   stderrSummary = "<owner-fill-stderr-summary>"
   failureDiagnostic = "<owner-fill-failure-diagnostic-or-empty>"
+  sourceRunnerQueueStatus = "<owner-fill-completed-not-queued>"
+  sourceRunnerInfrastructureStatus = "<owner-fill-available-not-missing-self-hosted-runner>"
+  sourceRunnerOwnerAction = "owner-infra-action-required-until-public-package-run-completes"
   performsPublish = $false
   canPublishPublicly = $false
   canCloseReleaseIssue = $false
@@ -153,11 +160,13 @@ $template = [pscustomobject]@{
     "direct .nupkg",
     "build-only",
     "dry-run",
+    "queued GitHub Actions run",
+    "missing self-hosted runner",
     "dashboard",
     "template",
     "skipped run"
   )
-  safetyBoundary = "Owner input template only. It may carry GitHub Actions package dry-run context to reduce manual copying, but that context is not a published package proof and is not package-consumer runtime proof. It does not publish packages, close the release issue, or promote package-consumer runtime proof. local feed, ProjectReference, direct .nupkg, build-only, dry-run, dashboard, template, and skipped run cannot be used as public package proof."
+  safetyBoundary = "Owner input template only. It may carry GitHub Actions package dry-run context to reduce manual copying, but that context is not a published package proof and is not package-consumer runtime proof. It does not publish packages, close the release issue, or promote package-consumer runtime proof. local feed, ProjectReference, direct .nupkg, build-only, dry-run, queued GitHub Actions run, missing self-hosted runner, dashboard, template, and skipped run cannot be used as public package proof."
 }
 
 $jsonPath = Join-Path $artifactRoot "package-consumer-runtime-proof-owner-input.template.json"
@@ -193,7 +202,8 @@ $markdown = @"
 
 - cleanExternalConsumerRoot
 - consumerProjectPath
-- publicPackageSource
+- publicPackageSourceKind / publicPackageSource / publicPackageFeedUrl
+- managedPackageUrl / runtimePackageUrl
 - managedPackageId / managedPackageVersion / managedNupkgPath / managedNupkgSha256
 - runtimePackageId / runtimePackageVersion / runtimePackageKey / runtimeNupkgPath / runtimeNupkgSha256
 - ownerName / machineName / hostOs / hostArchitecture / gpuName
@@ -203,6 +213,7 @@ $markdown = @"
 - exitCode / startedAtUtc / finishedAtUtc
 - dependencyProbeStatus / smokeStatus / nativeAssetsCopied
 - smokeLogPath / smokeLogSha256
+- sourceRunnerQueueStatus / sourceRunnerInfrastructureStatus / sourceRunnerOwnerAction
 - stdoutSummary / stderrSummary
 - failureDiagnostic
 
