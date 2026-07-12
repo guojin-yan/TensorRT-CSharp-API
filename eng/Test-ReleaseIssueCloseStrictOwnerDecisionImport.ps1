@@ -1,0 +1,105 @@
+[CmdletBinding()]
+param(
+  [string]$InputPath = "artifacts\final-release\release-issue-close-strict-owner-decision-import.json",
+  [string]$OutputRoot = "artifacts\final-release",
+  [switch]$Strict,
+  [string]$RepositoryRoot
+)
+
+$ErrorActionPreference = "Stop"
+
+if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
+  $scriptRoot = if ([string]::IsNullOrWhiteSpace($PSScriptRoot)) { (Get-Location).Path } else { $PSScriptRoot }
+  $RepositoryRoot = (Resolve-Path (Join-Path $scriptRoot "..")).Path
+}
+
+$utf8 = [System.Text.UTF8Encoding]::new($false)
+[Console]::OutputEncoding = $utf8
+$OutputEncoding = $utf8
+
+if (-not [System.IO.Path]::IsPathRooted($InputPath)) { $InputPath = Join-Path $RepositoryRoot $InputPath }
+if (-not [System.IO.Path]::IsPathRooted($OutputRoot)) { $OutputRoot = Join-Path $RepositoryRoot $OutputRoot }
+New-Item -ItemType Directory -Path $OutputRoot -Force | Out-Null
+
+function Get-PropertyOrDefault {
+  param([AllowNull()][object]$Object, [string]$Name, [AllowNull()][object]$DefaultValue)
+  if ($null -eq $Object) { return $DefaultValue }
+  if ($Object.PSObject.Properties.Name -contains $Name) { return $Object.$Name }
+  return $DefaultValue
+}
+
+function New-ValidationItem {
+  param([string]$Id, [bool]$Passed, [string]$Severity, [string]$Detail)
+  [pscustomobject]@{ id = $Id; passed = $Passed; severity = $Severity; detail = $Detail }
+}
+
+if (-not (Test-Path -LiteralPath $InputPath -PathType Leaf)) {
+  throw "Release issue close strict owner decision import not found: $InputPath"
+}
+
+$record = Get-Content -LiteralPath $InputPath -Raw -Encoding utf8 | ConvertFrom-Json
+$lanes = @((Get-PropertyOrDefault -Object $record -Name "decisionLanes" -DefaultValue @()))
+$blockedLanes = @($lanes | Where-Object { -not [bool](Get-PropertyOrDefault -Object $_ -Name "ready" -DefaultValue $false) })
+
+$items = New-Object System.Collections.Generic.List[object]
+$items.Add((New-ValidationItem -Id "record-kind" -Passed ([string](Get-PropertyOrDefault -Object $record -Name "recordKind" -DefaultValue "") -eq "release-issue-close-strict-owner-decision-import") -Severity "blocker" -Detail "recordKind must be release-issue-close-strict-owner-decision-import.")) | Out-Null
+$items.Add((New-ValidationItem -Id "state-blocked" -Passed ([string](Get-PropertyOrDefault -Object $record -Name "importState" -DefaultValue "") -eq "blocked-release-issue-close-strict-owner-decision-required") -Severity "blocker" -Detail "Import must stay blocked until all real owner close decision inputs are present.")) | Out-Null
+$items.Add((New-ValidationItem -Id "lane-shape" -Passed ($lanes.Count -ge 5) -Severity "blocker" -Detail "Import must expose all strict close decision lanes.")) | Out-Null
+$items.Add((New-ValidationItem -Id "owner-lanes-required" -Passed ($blockedLanes.Count -eq 0) -Severity "action-required" -Detail "Owner must complete all strict close decision lanes.")) | Out-Null
+$items.Add((New-ValidationItem -Id "no-side-effects" -Passed ([bool](Get-PropertyOrDefault -Object $record -Name "notExecutedByAutomation" -DefaultValue $false) -and [bool](Get-PropertyOrDefault -Object $record -Name "ownerExecutionOnly" -DefaultValue $false) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "performsPublish" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canPromoteRuntimeProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canPublishPublicly" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canCloseReleaseIssue" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isRuntimeExecutionProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isReleaseCloseProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isPostPublishProof" -DefaultValue $true)) -Severity "blocker" -Detail "Import must not publish, approve, promote proof, or close release issue.")) | Out-Null
+
+$failedBlockers = @($items | Where-Object { -not $_.passed -and $_.severity -eq "blocker" })
+$failedActionRequired = @($items | Where-Object { -not $_.passed -and $_.severity -eq "action-required" })
+$validationState = if ($failedBlockers.Count -gt 0) { "invalid-release-issue-close-strict-owner-decision-import" } else { "blocked-release-issue-close-strict-owner-decision-required" }
+
+$validation = [pscustomobject]@{
+  recordKind = "release-issue-close-strict-owner-decision-import-validation"
+  generatedAtUtc = [DateTimeOffset]::UtcNow.ToString("O")
+  inputPath = $InputPath
+  validationState = $validationState
+  laneCount = $lanes.Count
+  blockedLaneCount = $blockedLanes.Count
+  failedBlockerCount = $failedBlockers.Count
+  failedActionRequiredCount = $failedActionRequired.Count
+  validationItems = @($items.ToArray())
+  notExecutedByAutomation = $true
+  ownerExecutionOnly = $true
+  performsPublish = $false
+  approvesPublicRelease = $false
+  canPromoteRuntimeProof = $false
+  canPublishPublicly = $false
+  canCloseReleaseIssue = $false
+  isRuntimeExecutionProof = $false
+  isReleaseCloseProof = $false
+  isPostPublishProof = $false
+  boundary = "Validation checks strict owner decision import shape only. It is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push."
+}
+
+$jsonPath = Join-Path $OutputRoot "release-issue-close-strict-owner-decision-import-validation.json"
+$markdownPath = Join-Path $OutputRoot "release-issue-close-strict-owner-decision-import-validation.md"
+$validation | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $jsonPath -Encoding utf8
+
+$markdown = @(
+  "# Release Issue Close Strict Owner Decision Import Validation",
+  "",
+  "| Field | Value |",
+  "| --- | --- |",
+  "| validationState | ``$($validation.validationState)`` |",
+  "| laneCount | ``$($validation.laneCount)`` |",
+  "| blockedLaneCount | ``$($validation.blockedLaneCount)`` |",
+  "| failedBlockerCount | ``$($validation.failedBlockerCount)`` |",
+  "| failedActionRequiredCount | ``$($validation.failedActionRequiredCount)`` |",
+  "| canCloseReleaseIssue | ``$($validation.canCloseReleaseIssue)`` |",
+  "",
+  "## Boundary",
+  "",
+  $validation.boundary
+)
+$markdown | Set-Content -LiteralPath $markdownPath -Encoding utf8
+
+Write-Host "Release issue close strict owner decision import validation written to $jsonPath"
+Write-Host "ValidationState=$($validation.validationState) Lanes=$($validation.laneCount) Blocked=$($validation.blockedLaneCount) FailedBlockers=$($validation.failedBlockerCount) FailedActionRequired=$($validation.failedActionRequiredCount)"
+
+if ($Strict -and $failedBlockers.Count -gt 0) {
+  throw "Release issue close strict owner decision import validation failed with $($failedBlockers.Count) blocker(s)."
+}
