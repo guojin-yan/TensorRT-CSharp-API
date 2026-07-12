@@ -86,6 +86,81 @@ public sealed class FinalOwnerPublishAndArticleActionDashboardTests
         AssertNonProofFlags(scanValidation);
     }
 
+    [Fact]
+    public void ArticleOwnerReviewRewriteDraftAndFinalActionPackStayArtifactOnly()
+    {
+        RunActionDashboardPipeline();
+        RunPowerShell("Export-PublicArticleBlockedClaimOwnerReviewList.ps1");
+        RunPowerShell("Test-PublicArticleBlockedClaimOwnerReviewList.ps1", "-Strict");
+        RunPowerShell("Export-PublicArticleSafeRewriteDraftPack.ps1");
+        RunPowerShell("Test-PublicArticleSafeRewriteDraftPack.ps1", "-Strict");
+        RunPowerShell("Export-OwnerFinalMissingActionOneScreenPack.ps1");
+        RunPowerShell("Test-OwnerFinalMissingActionOneScreenPack.ps1", "-Strict");
+
+        using JsonDocument reviewDocument = ReadFinalReleaseJson("public-article-blocked-claim-owner-review-list.json");
+        JsonElement review = reviewDocument.RootElement;
+        Assert.Equal("public-article-blocked-claim-owner-review-list", review.GetProperty("recordKind").GetString());
+        Assert.Equal("blocked-public-article-claim-owner-review-required", review.GetProperty("reviewState").GetString());
+        Assert.True(review.GetProperty("blockedClaimCount").GetInt32() >= 1);
+        Assert.Equal(review.GetProperty("blockedClaimCount").GetInt32(), review.GetProperty("reviewItemCount").GetInt32());
+        AssertNonProofFlags(review);
+
+        string reviewRaw = review.GetRawText();
+        Assert.Contains("remove", reviewRaw, StringComparison.Ordinal);
+        Assert.Contains("downgrade-to-roadmap", reviewRaw, StringComparison.Ordinal);
+        Assert.Contains("wait-for-real-proof", reviewRaw, StringComparison.Ordinal);
+        Assert.Contains("bind-to-evidence-field", reviewRaw, StringComparison.Ordinal);
+        Assert.Contains("post-publish-owner-input", reviewRaw, StringComparison.Ordinal);
+        Assert.Contains("forbidden-substitute-scan", reviewRaw, StringComparison.Ordinal);
+
+        using JsonDocument reviewValidationDocument = ReadFinalReleaseJson("public-article-blocked-claim-owner-review-list-validation.json");
+        JsonElement reviewValidation = reviewValidationDocument.RootElement;
+        Assert.Equal("public-article-blocked-claim-owner-review-list-validation-ready-non-proof", reviewValidation.GetProperty("validationState").GetString());
+        Assert.Equal(0, reviewValidation.GetProperty("failedBlockerCount").GetInt32());
+        AssertNonProofFlags(reviewValidation);
+
+        using JsonDocument rewriteDocument = ReadFinalReleaseJson("public-article-safe-rewrite-draft-pack.json");
+        JsonElement rewrite = rewriteDocument.RootElement;
+        Assert.Equal("public-article-safe-rewrite-draft-pack", rewrite.GetProperty("recordKind").GetString());
+        Assert.Equal("blocked-public-article-safe-rewrite-draft-owner-review-required", rewrite.GetProperty("draftState").GetString());
+        Assert.True(rewrite.GetProperty("draftItemCount").GetInt32() >= 1);
+        Assert.False(rewrite.GetProperty("writesSourceArticles").GetBoolean());
+        AssertNonProofFlags(rewrite);
+
+        string rewriteRaw = rewrite.GetRawText();
+        Assert.Contains("artifact-only-no-source-overwrite", rewriteRaw, StringComparison.Ordinal);
+        Assert.Contains("不能作为 proof", rewriteRaw, StringComparison.Ordinal);
+        Assert.Contains("不得宣称已关闭", rewriteRaw, StringComparison.Ordinal);
+        Assert.Contains("post-publish-owner-input", rewriteRaw, StringComparison.Ordinal);
+
+        using JsonDocument rewriteValidationDocument = ReadFinalReleaseJson("public-article-safe-rewrite-draft-pack-validation.json");
+        JsonElement rewriteValidation = rewriteValidationDocument.RootElement;
+        Assert.Equal("public-article-safe-rewrite-draft-pack-validation-ready-non-proof", rewriteValidation.GetProperty("validationState").GetString());
+        Assert.Equal(0, rewriteValidation.GetProperty("failedBlockerCount").GetInt32());
+        AssertNonProofFlags(rewriteValidation);
+
+        using JsonDocument oneScreenDocument = ReadFinalReleaseJson("owner-final-missing-action-one-screen-pack.json");
+        JsonElement oneScreen = oneScreenDocument.RootElement;
+        Assert.Equal("owner-final-missing-action-one-screen-pack", oneScreen.GetProperty("recordKind").GetString());
+        Assert.Equal("blocked-owner-final-missing-actions-required", oneScreen.GetProperty("oneScreenState").GetString());
+        Assert.True(oneScreen.GetProperty("missingActionCount").GetInt32() >= 7);
+        AssertNonProofFlags(oneScreen);
+
+        string oneScreenRaw = oneScreen.GetRawText();
+        Assert.Contains("owner-authorize-real-publish", oneScreenRaw, StringComparison.Ordinal);
+        Assert.Contains("run-real-public-publish", oneScreenRaw, StringComparison.Ordinal);
+        Assert.Contains("run-external-clean-consumer", oneScreenRaw, StringComparison.Ordinal);
+        Assert.Contains("clear-article-proof-gate", oneScreenRaw, StringComparison.Ordinal);
+        Assert.Contains("close-release-strictly", oneScreenRaw, StringComparison.Ordinal);
+        Assert.Contains("TensorRtExec", oneScreenRaw, StringComparison.Ordinal);
+
+        using JsonDocument oneScreenValidationDocument = ReadFinalReleaseJson("owner-final-missing-action-one-screen-pack-validation.json");
+        JsonElement oneScreenValidation = oneScreenValidationDocument.RootElement;
+        Assert.Equal("owner-final-missing-action-one-screen-pack-validation-ready-non-proof", oneScreenValidation.GetProperty("validationState").GetString());
+        Assert.Equal(0, oneScreenValidation.GetProperty("failedBlockerCount").GetInt32());
+        AssertNonProofFlags(oneScreenValidation);
+    }
+
     private static void RunActionDashboardPipeline()
     {
         RunPowerShell("Export-FinalReadonlyPublishAuditPack.ps1");
