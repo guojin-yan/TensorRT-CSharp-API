@@ -46,11 +46,19 @@ $requiredLaneIds = @(
   "final-prepublish-freeze"
 )
 $missingLaneIds = @($requiredLaneIds | Where-Object { $laneIds -notcontains $_ })
+$postPublishLane = $lanes | Where-Object { [string](Get-PropertyOrDefault -Object $_ -Name "id" -DefaultValue "") -eq "post-publish-clean-consumer-proof" } | Select-Object -First 1
+$postPublishLaneRequiresRealProof = $null -ne $postPublishLane -and
+  [bool](Get-PropertyOrDefault -Object $postPublishLane -Name "requireProofReady" -DefaultValue $false) -and
+  [string](Get-PropertyOrDefault -Object $postPublishLane -Name "proofReadyProperty" -DefaultValue "") -eq "proofCandidateReady" -and
+  [bool](Get-PropertyOrDefault -Object $postPublishLane -Name "stateReady" -DefaultValue $false) -and
+  -not [bool](Get-PropertyOrDefault -Object $postPublishLane -Name "proofReady" -DefaultValue $true) -and
+  -not [bool](Get-PropertyOrDefault -Object $postPublishLane -Name "ready" -DefaultValue $true)
 
 $items = New-Object System.Collections.Generic.List[object]
 $items.Add((New-ValidationItem -Id "record-kind" -Passed ([string](Get-PropertyOrDefault -Object $record -Name "recordKind" -DefaultValue "") -eq "remote-ci-and-public-publish-proof-backfill-gate") -Severity "blocker" -Detail "recordKind must match.")) | Out-Null
 $items.Add((New-ValidationItem -Id "state" -Passed (@("blocked-remote-ci-and-public-publish-proof-backfill-required", "remote-ci-and-public-publish-proof-backfill-ready-for-owner-review") -contains [string](Get-PropertyOrDefault -Object $record -Name "gateState" -DefaultValue "")) -Severity "blocker" -Detail "gateState must be blocked or owner-review ready.")) | Out-Null
 $items.Add((New-ValidationItem -Id "required-lanes" -Passed ($missingLaneIds.Count -eq 0) -Severity "blocker" -Detail ("Missing lanes: " + ($missingLaneIds -join ", ")))) | Out-Null
+$items.Add((New-ValidationItem -Id "post-publish-proof-lane-requires-real-proof" -Passed $postPublishLaneRequiresRealProof -Severity "blocker" -Detail "Post-publish clean consumer lane must not become ready from validation-ready alone; proofCandidateReady must be true.")) | Out-Null
 $items.Add((New-ValidationItem -Id "blocked-until-real-proof" -Passed (-not [bool](Get-PropertyOrDefault -Object $record -Name "readyForOwnerReview" -DefaultValue $true)) -Severity "action-required" -Detail "Gate must remain blocked until real GitHub Actions, publish result, public download, and post-publish clean consumer proof exist.")) | Out-Null
 $items.Add((New-ValidationItem -Id "non-proof-flags" -Passed ([bool](Get-PropertyOrDefault -Object $record -Name "notExecutedByAutomation" -DefaultValue $false) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "performsPublish" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canPromoteRuntimeProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canPublishPublicly" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canCloseReleaseIssue" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isRuntimeExecutionProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isPostPublishProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isReleaseCloseProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isGitHubActionsProof" -DefaultValue $true)) -Severity "blocker" -Detail "Gate must not publish, close, promote proof, or claim GitHub Actions proof.")) | Out-Null
 $items.Add((New-ValidationItem -Id "boundary-failures" -Passed ([int](Get-PropertyOrDefault -Object $record -Name "boundaryFailureCount" -DefaultValue 999) -eq 0) -Severity "blocker" -Detail "All lanes must keep non-proof/no-side-effect flags false.")) | Out-Null

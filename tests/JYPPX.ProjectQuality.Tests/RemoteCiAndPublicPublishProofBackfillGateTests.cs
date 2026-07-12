@@ -22,6 +22,7 @@ public sealed class RemoteCiAndPublicPublishProofBackfillGateTests
         Assert.False(gate.GetProperty("readyForOwnerReview").GetBoolean());
         AssertFlagsStayNonProof(gate);
         AssertContainsRequiredLanes(gate);
+        AssertPostPublishLaneRequiresRealProof(gate);
 
         using JsonDocument validationDocument = ReadFinalReleaseJson("remote-ci-and-public-publish-proof-backfill-gate-validation.json");
         JsonElement validation = validationDocument.RootElement;
@@ -78,6 +79,21 @@ public sealed class RemoteCiAndPublicPublishProofBackfillGateTests
         {
             Assert.Contains(laneId, laneIds);
         }
+    }
+
+    private static void AssertPostPublishLaneRequiresRealProof(JsonElement gate)
+    {
+        JsonElement lane = gate.GetProperty("lanes")
+            .EnumerateArray()
+            .Single(static lane => lane.GetProperty("id").GetString() == "post-publish-clean-consumer-proof");
+
+        Assert.True(lane.GetProperty("stateReady").GetBoolean());
+        Assert.True(lane.GetProperty("requireProofReady").GetBoolean());
+        Assert.Equal("proofCandidateReady", lane.GetProperty("proofReadyProperty").GetString());
+        Assert.False(lane.GetProperty("proofReady").GetBoolean());
+        Assert.False(lane.GetProperty("ready").GetBoolean());
+        Assert.True(lane.GetProperty("blocked").GetBoolean());
+        Assert.Contains("Validation-ready alone is not enough", lane.GetProperty("requiredEvidence").GetString(), StringComparison.OrdinalIgnoreCase);
     }
 
     private static void AssertRequiredSourceArtifacts(JsonElement evidence)
