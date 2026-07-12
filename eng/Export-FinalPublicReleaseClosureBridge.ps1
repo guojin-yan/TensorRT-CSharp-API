@@ -80,6 +80,7 @@ function New-ClosureLane {
 }
 
 $ownerAuthorization = Read-JsonOrNull "artifacts\final-release\owner-publish-authorization-input-validation.json"
+$ownerPublishExecutionResult = Read-JsonOrNull "artifacts\final-release\owner-publish-execution-result-input-validation.json"
 $publicDownload = Read-JsonOrNull "artifacts\final-release\public-package-download-proof-input-validation.json"
 $cleanConsumerSmoke = Read-JsonOrNull "artifacts\final-release\clean-external-consumer-smoke-input-validation.json"
 $postPublishProof = Read-JsonOrNull "artifacts\final-release\post-publish-proof-input-validation.json"
@@ -97,6 +98,16 @@ $lanes = @(
     -OwnerAction "Owner reviews publish commands, hashes, release notes, rollback plan, and explicitly approves only an owner-run publish." `
     -RequiredBeforeClose @("owner identity", "package hashes reviewed", "publish command reviewed", "post-publish proof still required") `
     -Boundary "Authorization validation never publishes, stores tokens, proves public download, proves runtime smoke, or closes the release issue."
+  New-ClosureLane `
+    -Id "owner-publish-execution-result" `
+    -Title "Owner publish execution result input" `
+    -Artifact "artifacts/final-release/owner-publish-execution-result-input-validation.json" `
+    -Record $ownerPublishExecutionResult `
+    -StateProperty "validationState" `
+    -RequiredState "owner-publish-execution-result-input-ready" `
+    -OwnerAction "Owner imports redacted publish transcript, public package URLs, downloaded package hashes, release notes, rollback plan, and no-token confirmations after the owner-run publish." `
+    -RequiredBeforeClose @("owner-run publish result", "redacted transcript hashes", "public package URLs", "downloaded package hashes", "rollback review") `
+    -Boundary "Owner publish execution result validation does not publish, use tokens, prove clean consumer runtime smoke, prove post-publish verification, or close the release issue."
   New-ClosureLane `
     -Id "public-package-download-proof" `
     -Title "Public package download proof input" `
@@ -185,7 +196,7 @@ $record = [pscustomobject]@{
   closureLanes = @($lanes)
   sourceArtifacts = @($lanes | ForEach-Object { $_.artifact })
   nextOwnerActions = @($blockedLanes | ForEach-Object { [pscustomobject]@{ laneId = $_.laneId; state = $_.state; ownerAction = $_.ownerAction; requiredBeforeClose = $_.requiredBeforeClose } })
-  safetyBoundary = "Final public release closure bridge only joins owner authorization, public package download proof, clean external consumer smoke, post-publish proof, release issue close owner decision, and strict close dashboard. It does not publish packages, use tokens, claim runtime proof, claim post-publish proof, or close the release issue."
+  safetyBoundary = "Final public release closure bridge only joins owner authorization, owner publish execution result, public package download proof, clean external consumer smoke, post-publish proof, release issue close owner decision, and strict close dashboard. It does not publish packages, use tokens, claim runtime proof, claim post-publish proof, or close the release issue."
 }
 
 $jsonPath = Join-Path $OutputRoot "final-public-release-closure-bridge.json"

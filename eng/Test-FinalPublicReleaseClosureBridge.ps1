@@ -53,6 +53,7 @@ $items = New-Object System.Collections.Generic.List[object]
 
 $requiredLaneIds = @(
   "owner-publish-authorization",
+  "owner-publish-execution-result",
   "public-package-download-proof",
   "clean-external-consumer-smoke",
   "post-publish-proof",
@@ -62,6 +63,7 @@ $requiredLaneIds = @(
 
 $requiredArtifacts = @(
   "artifacts/final-release/owner-publish-authorization-input-validation.json",
+  "artifacts/final-release/owner-publish-execution-result-input-validation.json",
   "artifacts/final-release/public-package-download-proof-input-validation.json",
   "artifacts/final-release/clean-external-consumer-smoke-input-validation.json",
   "artifacts/final-release/post-publish-proof-input-validation.json",
@@ -91,7 +93,7 @@ $items.Add((New-ValidationItem -Id "required-source-artifacts-present" -Passed (
 $items.Add((New-ValidationItem -Id "lane-count-consistent" -Passed ([int](Get-PropertyOrDefault -Object $record -Name "laneCount" -DefaultValue 0) -eq $lanes.Count) -Severity "blocker" -Detail "laneCount must match closureLanes count.")) | Out-Null
 $items.Add((New-ValidationItem -Id "lanes-safe" -Passed $allLanesSafe -Severity "blocker" -Detail "Every lane must keep publish/token/close/proof flags false and include ownerAction plus boundary.")) | Out-Null
 $items.Add((New-ValidationItem -Id "no-side-effects" -Passed ([bool](Get-PropertyOrDefault -Object $record -Name "notExecutedByAutomation" -DefaultValue $false) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "performsPublish" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "usesPublishToken" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canPromoteRuntimeProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canPublishPublicly" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canCloseReleaseIssue" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isRuntimeExecutionProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isPackageConsumerRuntimeProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isReleaseCloseProof" -DefaultValue $true)) -Severity "blocker" -Detail "Bridge must not publish, use tokens, promote proof, or close release issue.")) | Out-Null
-$items.Add((New-ValidationItem -Id "all-close-lanes-ready" -Passed ([int](Get-PropertyOrDefault -Object $record -Name "blockedLaneCount" -DefaultValue 0) -eq 0 -and [string](Get-PropertyOrDefault -Object $record -Name "bridgeState" -DefaultValue "") -eq "final-public-release-closure-bridge-ready-for-owner-close-review") -Severity "action-required" -Detail "Bridge remains blocked until all owner authorization, public download, external smoke, post-publish proof, close decision, and strict dashboard lanes are ready.")) | Out-Null
+$items.Add((New-ValidationItem -Id "all-close-lanes-ready" -Passed ([int](Get-PropertyOrDefault -Object $record -Name "blockedLaneCount" -DefaultValue 0) -eq 0 -and [string](Get-PropertyOrDefault -Object $record -Name "bridgeState" -DefaultValue "") -eq "final-public-release-closure-bridge-ready-for-owner-close-review") -Severity "action-required" -Detail "Bridge remains blocked until all owner authorization, owner publish execution result, public download, external smoke, post-publish proof, close decision, and strict dashboard lanes are ready.")) | Out-Null
 
 $failedBlockers = @($items | Where-Object { -not $_.passed -and $_.severity -eq "blocker" })
 $failedActionRequired = @($items | Where-Object { -not $_.passed -and $_.severity -eq "action-required" })

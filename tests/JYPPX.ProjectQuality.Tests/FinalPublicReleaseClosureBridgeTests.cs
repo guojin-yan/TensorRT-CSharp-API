@@ -16,6 +16,8 @@ public sealed class FinalPublicReleaseClosureBridgeTests
         RunPowerShell("Test-CleanExternalConsumerSmokeInput.ps1", "-Strict");
         RunPowerShell("Export-OwnerPublishAuthorizationInputTemplate.ps1");
         RunPowerShell("Test-OwnerPublishAuthorizationInput.ps1", "-Strict");
+        RunPowerShell("Export-OwnerPublishExecutionResultInputTemplate.ps1");
+        RunPowerShell("Test-OwnerPublishExecutionResultInput.ps1", "-Strict");
         RunPowerShell("Export-PostPublishProofInputTemplate.ps1");
         RunPowerShell("Test-PostPublishProofInput.ps1", "-Strict");
         RunPowerShell("Export-ReleaseIssueCloseOwnerDecisionInput.ps1");
@@ -29,7 +31,7 @@ public sealed class FinalPublicReleaseClosureBridgeTests
         JsonElement bridge = bridgeDocument.RootElement;
         Assert.Equal("final-public-release-closure-bridge", bridge.GetProperty("recordKind").GetString());
         Assert.Equal("blocked-final-public-release-closure-real-owner-proof-required", bridge.GetProperty("bridgeState").GetString());
-        Assert.Equal(6, bridge.GetProperty("laneCount").GetInt32());
+        Assert.Equal(7, bridge.GetProperty("laneCount").GetInt32());
         Assert.True(bridge.GetProperty("blockedLaneCount").GetInt32() > 0);
         AssertFalseProofPublishCloseFlags(bridge);
 
@@ -38,6 +40,7 @@ public sealed class FinalPublicReleaseClosureBridgeTests
             .ToArray();
 
         Assert.Contains("owner-publish-authorization", laneIds);
+        Assert.Contains("owner-publish-execution-result", laneIds);
         Assert.Contains("public-package-download-proof", laneIds);
         Assert.Contains("clean-external-consumer-smoke", laneIds);
         Assert.Contains("post-publish-proof", laneIds);
@@ -59,6 +62,7 @@ public sealed class FinalPublicReleaseClosureBridgeTests
             .Select(static item => item.GetString()!)
             .ToArray();
         Assert.Contains("artifacts/final-release/owner-publish-authorization-input-validation.json", sourceArtifacts);
+        Assert.Contains("artifacts/final-release/owner-publish-execution-result-input-validation.json", sourceArtifacts);
         Assert.Contains("artifacts/final-release/public-package-download-proof-input-validation.json", sourceArtifacts);
         Assert.Contains("artifacts/final-release/clean-external-consumer-smoke-input-validation.json", sourceArtifacts);
         Assert.Contains("artifacts/final-release/post-publish-proof-input-validation.json", sourceArtifacts);
@@ -71,7 +75,7 @@ public sealed class FinalPublicReleaseClosureBridgeTests
         Assert.Equal("blocked-final-public-release-closure-real-owner-proof-required", validation.GetProperty("validationState").GetString());
         Assert.Equal(0, validation.GetProperty("failedBlockerCount").GetInt32());
         Assert.True(validation.GetProperty("failedActionRequiredCount").GetInt32() > 0);
-        Assert.Equal(6, validation.GetProperty("laneCount").GetInt32());
+        Assert.Equal(7, validation.GetProperty("laneCount").GetInt32());
         AssertFalseProofPublishCloseFlags(validation);
     }
 
