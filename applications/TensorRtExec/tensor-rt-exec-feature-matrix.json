@@ -1,0 +1,25 @@
+{
+  "matrixId": "tensor-rt-exec-feature-matrix",
+  "application": "applications/TensorRtExec",
+  "modes": ["CLI", "WinForms"],
+  "proofBoundary": "tool feature matrix only; build/report evidence is not runtime proof or release close approval",
+  "features": [
+    { "feature": "CLI argument parsing", "modes": ["CLI"], "status": "implemented", "notes": "Uses shared trtexec-like parser and TensorRtExecService." },
+    { "feature": "WinForms parameter entry", "modes": ["WinForms"], "status": "implemented", "notes": "GUI creates the same TensorRtExecOptions model as CLI." },
+    { "feature": "ONNX build-only report", "modes": ["CLI", "WinForms"], "status": "implemented", "notes": "External model runtime proof remains sample-runner owned; generic --loadInputs can collect bounded runtime output without promoting proof." },
+    { "feature": "Dry-run/precheck report", "modes": ["CLI", "WinForms"], "status": "implemented", "notes": "No runtime probing or package proof promotion." },
+    { "feature": "Shape profile configuration", "modes": ["CLI", "WinForms"], "status": "implemented", "notes": "min/opt/max shapes and aliases are normalized." },
+    { "feature": "Precision switches", "modes": ["CLI", "WinForms"], "status": "wrapper-ready-plus-parse-report-only", "notes": "FP16/BF16/TF32 are represented; INT8, --calib, --fp8, and --best are parsed/reported, but calibration cache, capability checks, and model-specific precision proof remain blocked from promotion." },
+    { "feature": "Timing and profiling options", "modes": ["CLI", "WinForms"], "status": "implemented-report", "notes": "Runtime timing, dumpProfile, separateProfileRun, exportProfile, and saveProfile are routed through the shared options model; bounded load-engine timing can execute for one-float-input engines, while external model proof still needs explicit semantics." },
+    { "feature": "Load-engine bounded runtime", "modes": ["CLI", "WinForms"], "status": "bounded-runtime-output", "notes": "--loadEngine performs readonly readback, then bounded enqueue/readback for one float input and float outputs when shape is concrete. Unmatched output remains runtime-output-captured-unverified and is not real-model or package-consumer proof." },
+    { "feature": "Layer/profile diagnostic switches", "modes": ["CLI", "WinForms"], "status": "implemented-report", "notes": "dumpLayerInfo, exportLayerInfo, dumpProfile, and separateProfileRun are CLI/GUI surfaced diagnostics, not runtime proof." },
+    { "feature": "Report alias compatibility", "modes": ["CLI"], "status": "implemented-report", "notes": "--report is accepted as a compatibility alias and normalized to --exportReport; reports remain build/report evidence, not runtime proof." },
+    { "feature": "Refit, weight streaming, and debug tensor diagnostics", "modes": ["CLI", "WinForms"], "status": "parse-report-only", "notes": "--dumpRefit, --allowWeightStreaming, --markDebug, and --dumpDebugTensors are surfaced in CLI/WinForms/normalized commands and OptionImplementationStatus.ParseOnlyOptions; they are not refit lifecycle, weight streaming, or debug tensor runtime proof." },
+    { "feature": "YoloVision owner backfill shape profiles", "modes": ["CLI", "WinForms"], "status": "documented-report", "notes": "YOLOv8n det/seg/pose use 1x3x640x640 profiles, cls uses 1x3x224x224, and OBB uses 1x3x1024x1024; these profiles remain build/report evidence until YoloVision real run logs validate." },
+    { "feature": "DLA/device options", "modes": ["CLI", "WinForms"], "status": "diagnostic", "notes": "Device and DLA intent are captured; runtime proof is host/model specific." },
+    { "feature": "Timing cache lifecycle", "modes": ["CLI", "WinForms"], "status": "parse-report-only", "notes": "--timingCacheFile, --timingCache, and --exportTimingCache are routed through CLI, WinForms, normalized command, diagnostics, and OptionImplementationStatus.ParseOnlyOptions; import/export lifecycle is not promoted." },
+    { "feature": "GUI/CLI field map", "modes": ["CLI", "WinForms"], "status": "checklist-backed", "notes": "Export-TensorRtExecGuiCliParityChecklist.ps1 records each trtexec-like option, CLI token, WinForms field, command preview path, status, next action, and non-proof boundary." },
+    { "feature": "Full trtexec parity", "modes": ["CLI", "WinForms"], "status": "planned", "notes": "Requires continued option mapping, native API readiness, and smoke proof." },
+    { "feature": "Release proof promotion", "modes": ["CLI", "WinForms"], "status": "blocked by runtime proof", "notes": "Needs public package, clean consumer, real model runtime, and post-publish proof." }
+  ]
+}

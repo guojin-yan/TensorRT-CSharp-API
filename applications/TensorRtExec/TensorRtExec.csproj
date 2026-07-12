@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\JYPPX.CudaSharp\JYPPX.CudaSharp.csproj" />
+    <ProjectReference Include="..\..\src\JYPPX.TensorRtSharp\JYPPX.TensorRtSharp.csproj" />
+    <ProjectReference Include="..\..\src\JYPPX.TensorRtSharp.Tools\JYPPX.TensorRtSharp.Tools.csproj" />
+  </ItemGroup>
+</Project>

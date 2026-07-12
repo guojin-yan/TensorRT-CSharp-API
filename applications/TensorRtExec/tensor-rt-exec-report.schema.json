@@ -1,0 +1,313 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jyppx.github.io/TensorRtSharp/schemas/tensor-rt-exec-report.schema.json",
+  "title": "TensorRtExec report schema",
+  "description": "Schema for the current TensorRtExec/OnnxEngineBuildDiagnostics JSON output. A TensorRtExec report is build/report evidence only and is not runtime proof.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "Success",
+    "Skipped",
+    "State",
+    "TensorRtLine",
+    "ModelSource",
+    "EnginePath",
+    "Parsed",
+    "EngineSaved",
+    "EngineFileRoundTrip",
+    "DryRun",
+    "InferenceRan",
+    "OutputMatch",
+    "ProfileIndex",
+    "SkipReason",
+    "NormalizedCommandLine",
+    "NormalizedCommandSha256",
+    "DeploymentOptions",
+    "RuntimeOptions",
+    "PreflightMetadata",
+    "LoadedEngineDiagnostics",
+    "CapabilityProbe",
+    "WorkspaceBytes",
+    "OptionImplementationStatus",
+    "BenchmarkSummary",
+    "ProofClassification",
+    "EvidenceClassifications",
+    "BuildEvidenceOnly",
+    "IsRealModelRuntimeProof",
+    "IsPackageConsumerRuntimeProof",
+    "StdoutSummary",
+    "StderrSummary",
+    "ModelEvidence",
+    "EvidenceSidecarPath",
+    "EvidenceSidecarProofClassification",
+    "EvidenceSidecarDiagnostics",
+    "Diagnostics",
+    "LogLines",
+    "IsRuntimeExecutionProof",
+    "ReportBoundary"
+  ],
+  "properties": {
+    "Success": { "type": "boolean" },
+    "Skipped": { "type": "boolean" },
+    "State": { "type": "string" },
+    "TensorRtLine": { "type": "integer" },
+    "ModelSource": { "type": "string" },
+    "EnginePath": { "type": "string" },
+    "Parsed": { "type": "boolean" },
+    "EngineSaved": { "type": "boolean" },
+    "EngineFileRoundTrip": { "type": "boolean" },
+    "DryRun": { "type": "boolean" },
+    "InferenceRan": { "type": "boolean" },
+    "OutputMatch": { "type": "boolean" },
+    "ProfileIndex": { "type": "integer" },
+    "ElapsedMilliseconds": { "type": [ "number", "null" ] },
+    "SkipReason": { "type": "string" },
+    "NormalizedCommandLine": { "type": "string" },
+    "NormalizedCommandSha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "DeploymentOptions": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "BuilderOptimizationLevel",
+        "MemoryPoolSizes",
+        "CalibrationCacheFile",
+        "VersionCompatible",
+        "ExportTimingCachePath",
+        "Safe",
+        "Consistency",
+        "BuilderCache",
+        "NoBuilderCache"
+      ]
+    },
+    "RuntimeOptions": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "NoDataTransfers",
+        "UseSpinWait",
+        "LoadInputs",
+        "DumpOutput",
+        "DumpRawBindingsToFile",
+        "ExportOutputPath",
+        "ExportTimesPath",
+        "ExportProfilePath",
+        "SaveProfilePath"
+      ]
+    },
+    "PreflightMetadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "Kind",
+        "Path",
+        "Exists",
+        "LengthBytes",
+        "Sha256",
+        "PreflightState",
+        "ProofClassification",
+        "EvidenceBoundary"
+      ]
+    },
+    "LoadedEngineDiagnostics": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "Attempted",
+        "Succeeded",
+        "DiagnosticsState",
+        "FailureReason",
+        "EngineName",
+        "IOTensorCount",
+        "LayerCount",
+        "OptimizationProfileCount",
+        "DeviceMemorySizeInBytes",
+        "AuxiliaryStreamCount",
+        "Capability",
+        "ProfilingVerbosity",
+        "InspectorInformationLength",
+        "IOTensorSummaries",
+        "ReadbackFingerprint",
+        "ReadbackSha256",
+        "EvidenceBoundary"
+      ]
+    },
+    "CapabilityProbe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "Attempted",
+        "ProbeState",
+        "TensorRtLine",
+        "TensorRtVersion",
+        "CudaToolkitVersion",
+        "RuntimeAvailable",
+        "BuilderAvailable",
+        "BuilderConfigAvailable",
+        "EngineInspectorApiAvailable",
+        "Fp8FlagRequested",
+        "Fp8FlagKnown",
+        "DebugTensorOptionsRequested",
+        "DebugTensorApiKnown",
+        "WeightStreamingRequested",
+        "WeightStreamingApiKnown",
+        "ProbeItems",
+        "EvidenceBoundary"
+      ],
+      "properties": {
+        "Attempted": { "type": "boolean" },
+        "ProbeState": { "type": "string" },
+        "TensorRtLine": { "type": "integer" },
+        "TensorRtVersion": { "type": "string" },
+        "CudaToolkitVersion": { "type": "string" },
+        "RuntimeAvailable": { "type": "boolean" },
+        "BuilderAvailable": { "type": "boolean" },
+        "BuilderConfigAvailable": { "type": "boolean" },
+        "EngineInspectorApiAvailable": { "type": "boolean" },
+        "Fp8FlagRequested": { "type": "boolean" },
+        "Fp8FlagKnown": { "type": "boolean" },
+        "DebugTensorOptionsRequested": { "type": "boolean" },
+        "DebugTensorApiKnown": { "type": "boolean" },
+        "WeightStreamingRequested": { "type": "boolean" },
+        "WeightStreamingApiKnown": { "type": "boolean" },
+        "ProbeItems": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "EvidenceBoundary": {
+          "type": "string"
+        }
+      }
+    },
+    "WorkspaceBytes": { "type": "integer" },
+    "OptionImplementationStatus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ParsedOptions",
+        "AppliedOptions",
+        "ParseOnlyOptions",
+        "EvidenceBoundary"
+      ],
+      "properties": {
+        "ParsedOptions": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "AppliedOptions": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "ParseOnlyOptions": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "EvidenceBoundary": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "BenchmarkSummary": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "TimingSamplesMilliseconds",
+        "TimingSampleCount",
+        "AvgRunsExecuted",
+        "ThreadsExecuted",
+        "NoDataTransfersRequested",
+        "NoDataTransfersApplied",
+        "BenchmarkBoundary"
+      ]
+    },
+    "ProofClassification": {
+      "type": "string",
+      "enum": [
+        "build-only",
+        "dependency-probe-only",
+        "precheck",
+        "synthetic-input-runtime",
+        "real-model-runtime",
+        "package-consumer-runtime"
+      ]
+    },
+    "EvidenceClassifications": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "BuildEvidenceOnly": { "type": "boolean" },
+    "IsRealModelRuntimeProof": { "type": "boolean" },
+    "IsPackageConsumerRuntimeProof": { "type": "boolean" },
+    "StdoutSummary": { "type": "string" },
+    "StderrSummary": { "type": "string" },
+    "ModelEvidence": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "ModelSource",
+        "ModelSha256",
+        "ModelLicense",
+        "InputAssetName",
+        "InputAssetSha256"
+      ]
+    },
+    "EvidenceSidecarPath": { "type": "string" },
+    "EvidenceSidecarProofClassification": { "type": "string" },
+    "EvidenceSidecarDiagnostics": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "Diagnostics": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "LogLines": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "IsRuntimeExecutionProof": { "type": "boolean" },
+    "ReportBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "IsRuntimeProof",
+        "IsBuildOnly",
+        "ForbiddenSubstituteReason",
+        "ForbiddenSubstitutes"
+      ],
+      "properties": {
+        "IsRuntimeProof": {
+          "type": "boolean",
+          "const": false
+        },
+        "IsBuildOnly": { "type": "boolean" },
+        "ForbiddenSubstituteReason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ForbiddenSubstitutes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "build-only",
+              "dry-run",
+              "template",
+              "local feed",
+              "ProjectReference",
+              "direct `.nupkg`",
+              "TensorRtExec report",
+              "YoloVision matrix",
+              "OnnxToEngine report",
+              "readonly diagnostics",
+              "capability-probe-only"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

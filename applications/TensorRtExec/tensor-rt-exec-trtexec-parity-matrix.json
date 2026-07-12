@@ -1,0 +1,200 @@
+{
+  "matrixId": "tensor-rt-exec-trtexec-parity-matrix",
+  "application": "applications/TensorRtExec",
+  "modes": ["CLI", "WinForms"],
+  "matrixState": "release-readiness-planning",
+  "proofBoundary": "Machine-readable trtexec parity matrix only. TensorRtExec reports, dry-run output, build-only output, GUI screenshots, and sidecars are not runtime proof or release-close approval.",
+  "entries": [
+    {
+      "id": "onnx-input",
+      "trtexecOption": "--onnx",
+      "tensorRtExecStatus": "implemented",
+      "entryPoints": ["TensorRtExecOptions.OnnxPath", "TrtexecLikeParser", "OnnxEngineBuildOptions.FromTrtexecLikeOptions"],
+      "proofBoundary": "ONNX parsing/build report is build-only unless a sample runner records real model execution.",
+      "isRuntimeProof": false,
+      "gap": "Real model quality still requires model assets, input tensor, output metadata, logs, hashes, and owner review.",
+      "nextStep": "Cross-link with YoloVision and Classification sample-run evidence records."
+    },
+    {
+      "id": "save-engine",
+      "trtexecOption": "--saveEngine",
+      "tensorRtExecStatus": "implemented",
+      "entryPoints": ["TensorRtExecOptions.EnginePath", "OnnxEngineBuildService", "TensorRtExecReport.EnginePath"],
+      "proofBoundary": "Serialized engine creation is build evidence, not inference proof.",
+      "isRuntimeProof": false,
+      "gap": "Engine hash and runtime output proof must be collected separately.",
+      "nextStep": "Record engine SHA256 in real-model candidate manifests."
+    },
+    {
+      "id": "load-engine",
+      "trtexecOption": "--loadEngine",
+      "tensorRtExecStatus": "bounded-runtime-output",
+      "entryPoints": ["TensorRtExecOptions.LoadEnginePath", "PreflightMetadata", "LoadedEngineDiagnostics", "TryRunGenericFloatEngineFromFile"],
+      "proofBoundary": "Current load-engine path records preflight/readback metadata and may execute bounded one-float-input enqueue/readback. Unmatched output is runtime-output-captured-unverified and is not real-model or package-consumer proof.",
+      "isRuntimeProof": false,
+      "gap": "Needs model-specific expected output, asset hashes, logs, and owner review before promotion.",
+      "nextStep": "Use YoloVision or another model-specific runner to promote real-model evidence; keep TensorRtExec generic output as bounded evidence."
+    },
+    {
+      "id": "dynamic-shape",
+      "trtexecOption": "--minShapes/--optShapes/--maxShapes",
+      "tensorRtExecStatus": "implemented-report",
+      "entryPoints": ["TrtexecLikeShapeProfile", "TensorRtExecOptions.MinShapes", "TensorRtExecOptions.OptShapes", "TensorRtExecOptions.MaxShapes"],
+      "proofBoundary": "Shape profiles in reports do not prove every dynamic shape ran correctly.",
+      "isRuntimeProof": false,
+      "gap": "Real profile coverage requires sample runner logs with selected shape and output evidence.",
+      "nextStep": "Add real YOLO and classification dynamic-shape proof candidates."
+    },
+    {
+      "id": "shape-profile",
+      "trtexecOption": "--minShapes input:... --optShapes input:... --maxShapes input:...",
+      "tensorRtExecStatus": "implemented-report",
+      "entryPoints": ["ShapeProfile", "NormalizedCommandLine", "WinForms Min/Opt/Max Shapes"],
+      "proofBoundary": "Profile configuration is not output correctness proof.",
+      "isRuntimeProof": false,
+      "gap": "Needs profile-specific runtime smoke and log hash.",
+      "nextStep": "Tie YoloVision asset manifests to explicit profile metadata."
+    },
+    {
+      "id": "yolovision-owner-backfill-shape-profiles",
+      "trtexecOption": "--minShapes/--optShapes/--maxShapes per YOLOv8n task",
+      "tensorRtExecStatus": "documented-report",
+      "entryPoints": ["samples/assets/yolovision-real-asset-owner-backfill-pack.json", "applications/TensorRtExec/README.md"],
+      "proofBoundary": "Task-specific shape profiles are build/report evidence only; real-model-runtime requires YoloVision run log, output JSON, hashes, and owner review.",
+      "isRuntimeProof": false,
+      "implementedEvidence": ["cls 1x3x224x224", "det/seg/pose 1x3x640x640", "obb 1x3x1024x1024"],
+      "gap": "Owner still needs to backfill real assets, TensorRtExec report hashes, YoloVision logs, and sample-run evidence.",
+      "nextStep": "Validate owner backfill pack before promoting any real-model-runtime candidate."
+    },
+    {
+      "id": "fp16",
+      "trtexecOption": "--fp16",
+      "tensorRtExecStatus": "wrapper-ready",
+      "entryPoints": ["TensorRtExecOptions.Fp16", "OnnxEngineBuildOptions"],
+      "proofBoundary": "The switch can be represented; GPU/model support must be proven by smoke.",
+      "isRuntimeProof": false,
+      "gap": "No owner host FP16 result is bundled.",
+      "nextStep": "Record FP16 host/model runs in compatible-host proof packs."
+    },
+    {
+      "id": "int8",
+      "trtexecOption": "--int8 --calib",
+      "tensorRtExecStatus": "parse-report-only-calibration-boundary",
+      "entryPoints": ["TensorRtExecOptions.Int8", "CalibrationCacheFile", "OnnxEngineBuildDiagnostics.OptionImplementationStatus", "WinForms Calibration Cache"],
+      "proofBoundary": "INT8 and calibration cache paths are CLI/GUI/report fields only; calibrator ownership and cache validity are not promoted by this application matrix.",
+      "isRuntimeProof": false,
+      "gap": "Calibrator callback ownership, calibration dataset provenance, cache hash, and model-specific INT8 accuracy evidence still need a stricter bridge.",
+      "nextStep": "Create INT8/calibration owner field guide and native ownership design before implementation."
+    },
+    {
+      "id": "precision-shortcuts-debug-boundary",
+      "trtexecOption": "--fp8 --best --dumpRefit --allowWeightStreaming --markDebug --dumpDebugTensors",
+      "tensorRtExecStatus": "parse-report-only",
+      "entryPoints": ["TrtexecLikeParser", "TrtexecLikeDeploymentOptions", "TensorRtExecOptions", "WinForms Precision and Packaging fields", "OnnxEngineBuildDiagnostics.OptionImplementationStatus"],
+      "proofBoundary": "FP8/best precision shortcuts, refit dumps, weight-streaming intent, and debug tensor names are CLI/GUI/report fields only; they do not prove precision support, refit lifecycle, weight streaming execution, or debug tensor runtime output.",
+      "isRuntimeProof": false,
+      "gap": "Needs TensorRT-line-specific capability checks, model-specific debug tensor ownership, runtime artifact hashes, and owner-reviewed logs before promotion.",
+      "nextStep": "Keep as parse/report-only while deferred boundary work promotes safe read-only capability probes and model-specific runtime proofs."
+    },
+    {
+      "id": "workspace-memory-pool",
+      "trtexecOption": "--workspace --memPoolSize",
+      "tensorRtExecStatus": "implemented-report",
+      "entryPoints": ["WorkspaceBytes", "MemoryPoolSizes", "WinForms Mem Pools"],
+      "proofBoundary": "Recorded memory settings are build/report evidence only.",
+      "isRuntimeProof": false,
+      "gap": "Need builder config readback or smoke confirming applied memory policy.",
+      "nextStep": "Add read-only builder config diagnostics where ABI-safe."
+    },
+    {
+      "id": "timing-cache",
+      "trtexecOption": "--timingCacheFile --exportTimingCache",
+      "tensorRtExecStatus": "parse-report-only",
+      "entryPoints": ["TimingCacheFile", "ExportTimingCachePath", "OnnxEngineBuildDiagnostics.OptionImplementationStatus", "WinForms Timing Cache Fields"],
+      "proofBoundary": "Timing cache path capture, normalized command output, and ParseOnlyOptions entries are not cache import/export lifecycle proof.",
+      "isRuntimeProof": false,
+      "gap": "No cache lifecycle ownership model, cache content hash contract, or native import/export smoke is promoted yet.",
+      "nextStep": "Keep as parse/report-only until safe native cache lifecycle tests and owner hash evidence exist."
+    },
+    {
+      "id": "gui-cli-field-map",
+      "trtexecOption": "CLI/WinForms parity checklist",
+      "tensorRtExecStatus": "checklist-backed",
+      "entryPoints": ["eng/Export-TensorRtExecGuiCliParityChecklist.ps1", "eng/Test-TensorRtExecGuiCliParityChecklist.ps1", "applications/TensorRtExec/WinForms/MainForm.cs", "applications/TensorRtExec/Core/TensorRtExecOptions.cs"],
+      "proofBoundary": "GUI/CLI field parity proves option surface alignment only; command preview, GUI screenshots, dry-runs, and reports are not runtime proof.",
+      "isRuntimeProof": false,
+      "gap": "Checklist-backed parity still needs real model runner evidence and package-consumer validators for proof promotion.",
+      "nextStep": "Keep GUI/CLI parity in the release checklist while owner evidence templates collect real logs and hashes."
+    },
+    {
+      "id": "plugin-library-boundary",
+      "trtexecOption": "--plugins/--plugin/--dynamicPlugins/--setPluginsToSerialize",
+      "tensorRtExecStatus": "diagnostic-alias-compatible",
+      "entryPoints": ["TrtexecLikeParser.ParsePluginLibraries", "TensorRtExecOptions.Plugins", "TensorRtPluginRegistryInventory"],
+      "proofBoundary": "Plugin library paths, trtexec-compatible aliases, and copied inventory metadata do not prove plugin library load/register/deregister.",
+      "isRuntimeProof": false,
+      "gap": "Register/deregister/load library and serialized plugin ownership remain deferred due to ownership risk.",
+      "nextStep": "Use parsed plugin paths and copied Plugin Inventory only as diagnostics; promote load/register only after an explicit safe ownership design and smoke proof."
+    },
+    {
+      "id": "profiling",
+      "trtexecOption": "--profilingVerbosity --dumpProfile --exportProfile --saveProfile",
+      "tensorRtExecStatus": "implemented-report",
+      "entryPoints": ["ProfilingVerbosity", "DumpProfile", "SeparateProfileRun", "ExportProfilePath", "SaveProfilePath", "WinForms Runtime Flags"],
+      "proofBoundary": "Profiling artifacts are diagnostics unless a real enqueue run and log prove runtime execution.",
+      "isRuntimeProof": false,
+      "gap": "Real model profile output still needs model-specific sample proof.",
+      "nextStep": "Add profile artifact schema to real-model candidate manifests."
+    },
+    {
+      "id": "layer-dump",
+      "trtexecOption": "--dumpLayerInfo --exportLayerInfo",
+      "tensorRtExecStatus": "implemented-report",
+      "entryPoints": ["DumpLayerInfo", "ExportLayerInfoPath", "TensorRtEngineInspector", "WinForms Runtime Flags"],
+      "proofBoundary": "Layer info is diagnostic metadata, not output correctness proof.",
+      "isRuntimeProof": false,
+      "gap": "External ONNX layer semantics require model-specific documentation.",
+      "nextStep": "Cross-check EngineInspector read-only APIs in future diagnostics."
+    },
+    {
+      "id": "report-export-alias",
+      "trtexecOption": "--exportReport / --report",
+      "tensorRtExecStatus": "implemented-report",
+      "entryPoints": ["TrtexecLikeParser", "TrtexecLikeOptions.ExportReportPath", "OnnxEngineBuildDiagnostics.WriteReport", "TensorRtExecCommand", "OnnxToEngine Program"],
+      "proofBoundary": "Report aliases only choose JSON/Markdown output paths; reports remain build/report evidence and cannot promote runtime proof.",
+      "isRuntimeProof": false,
+      "gap": "No gap for CLI alias parsing; proof promotion still needs real model runner logs and package-consumer-runtime records.",
+      "nextStep": "Keep --exportReport as the canonical normalized command while accepting --report in owner-facing handoff snippets."
+    },
+    {
+      "id": "verbose-logging",
+      "trtexecOption": "--verbose",
+      "tensorRtExecStatus": "implemented-report",
+      "entryPoints": ["ProfilingVerbosity=detailed", "TensorRtExecReport.LogLines"],
+      "proofBoundary": "Verbose logs are supporting evidence only; logs need SHA256 and owner review.",
+      "isRuntimeProof": false,
+      "gap": "No bundled owner-reviewed compatible-host log.",
+      "nextStep": "Require stdout/stderr summaries and log hashes in proof inputs."
+    },
+    {
+      "id": "binding-metadata",
+      "trtexecOption": "--loadInputs --dumpOutput --dumpRawBindingsToFile --exportOutput",
+      "tensorRtExecStatus": "synthetic-runtime-ready-external-guarded",
+      "entryPoints": ["RuntimeOptions", "YoloRuntimeOutputTensor", "OnnxSampleMultiOutputResult"],
+      "proofBoundary": "Synthetic runtime may prove a tiny pipeline; bounded external/load-engine output can prove enqueue/readback only; external ONNX binding metadata still requires real model evidence.",
+      "isRuntimeProof": false,
+      "gap": "Real model input/output tensor roles, hashes, and expected evidence lines must be owner-filled.",
+      "nextStep": "Use YoloVision real asset candidate packs to collect binding metadata."
+    },
+    {
+      "id": "package-consumer-runtime-proof-boundary",
+      "trtexecOption": "release-proof-validator",
+      "tensorRtExecStatus": "release-proof-records-only",
+      "entryPoints": ["package-consumer-runtime-proof-owner-input", "Test-PackageConsumerRuntimeProofRecord.ps1"],
+      "proofBoundary": "Only clean external package consumer smoke validated as package-consumer-runtime can promote release proof.",
+      "isRuntimeProof": false,
+      "gap": "Owner must provide public package source, clean consumer, real host metadata, exitCode=0, and matching hashes.",
+      "nextStep": "Collect real owner input and run strict validators after public package availability."
+    }
+  ]
+}

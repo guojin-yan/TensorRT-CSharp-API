@@ -1,0 +1,182 @@
+{
+  "gapListId": "tensor-rt-exec-release-candidate-gap-list",
+  "application": "applications/TensorRtExec",
+  "sourceMatrix": "applications/TensorRtExec/tensor-rt-exec-trtexec-parity-matrix.json",
+  "state": "release-candidate-gap-planning",
+  "proofBoundary": "This gap list is planning evidence only. CLI reports, WinForms screenshots, dry-run output, build-only reports, templates, local feeds, ProjectReference, and direct .nupkg references are not package-consumer-runtime proof.",
+  "summary": {
+    "totalItems": 15,
+    "implementedOrReportReady": 8,
+    "partialOrDiagnostic": 5,
+    "releaseProofRecordsOnly": 1,
+    "runtimeProofItems": 0,
+    "packageConsumerRuntimeProofItems": 0
+  },
+  "items": [
+    {
+      "id": "onnx-input",
+      "officialTrtexecParity": "--onnx",
+      "currentStatus": "implemented",
+      "isRuntimeProof": false,
+      "isPackageConsumerRuntimeProof": false,
+      "cliSupported": true,
+      "winFormsSupported": true,
+      "nextImplementationPaths": ["applications/TensorRtExec", "samples/OnnxToEngine", "samples/YoloVision"],
+      "nextStep": "Cross-link build reports to real model candidate records and require owner hashes before proof promotion."
+    },
+    {
+      "id": "save-engine",
+      "officialTrtexecParity": "--saveEngine",
+      "currentStatus": "implemented",
+      "isRuntimeProof": false,
+      "isPackageConsumerRuntimeProof": false,
+      "cliSupported": true,
+      "winFormsSupported": true,
+      "nextImplementationPaths": ["applications/TensorRtExec", "eng/Test-YoloVisionRealAssetCandidate.ps1"],
+      "nextStep": "Add optional engine SHA256 fields to real-model candidate overlays after owner produces engines."
+    },
+    {
+      "id": "load-engine",
+      "officialTrtexecParity": "--loadEngine",
+      "currentStatus": "implemented-readonly-diagnostics",
+      "isRuntimeProof": false,
+      "isPackageConsumerRuntimeProof": false,
+      "cliSupported": true,
+      "winFormsSupported": true,
+      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp/TensorRtRuntime.cs", "applications/TensorRtExec"],
+      "nextStep": "Readonly deserialize diagnostics are available. Keep enqueue, binding execution, output validation, and package-consumer-runtime proof gated behind explicit runtime proof records."
+    },
+    {
+      "id": "dynamic-shape",
+      "officialTrtexecParity": "--minShapes/--optShapes/--maxShapes",
+      "currentStatus": "implemented-report",
+      "isRuntimeProof": false,
+      "isPackageConsumerRuntimeProof": false,
+      "cliSupported": true,
+      "winFormsSupported": true,
+      "nextImplementationPaths": ["applications/TensorRtExec", "samples/YoloVision", "samples/YoloVision/yolovision-task-output-contract.json", "samples/OnnxToEngine"],
+      "nextStep": "Tie each model candidate to explicit profile metadata from yolovision-task-output-contract.json and real run logs."
+    },
+    {
+      "id": "fp16",
+      "officialTrtexecParity": "--fp16",
+      "currentStatus": "wrapper-ready",
+      "isRuntimeProof": false,
+      "isPackageConsumerRuntimeProof": false,
+      "cliSupported": true,
+      "winFormsSupported": true,
+      "nextImplementationPaths": ["applications/TensorRtExec", "docs/articles/zh-cn/publishing"],
+      "nextStep": "Document that FP16 switch support is not host/model proof until owner run evidence is imported."
+    },
+    {
+      "id": "int8",
+      "officialTrtexecParity": "--int8 --calib",
+      "currentStatus": "parse-report-only-calibration-boundary",
+      "isRuntimeProof": false,
+      "isPackageConsumerRuntimeProof": false,
+      "cliSupported": true,
+      "winFormsSupported": true,
+      "nextImplementationPaths": ["docs/articles/zh-cn/allocator-callback-owner-design.md", "native/src/tensorrt"],
+      "nextStep": "CLI and WinForms expose INT8/calibration-cache intent, but calibration lifecycle remains guarded until native lifetime and owner evidence are designed."
+    },
+    {
+      "id": "workspace-memory-pool",
+      "officialTrtexecParity": "--workspace --memPoolSize",
+      "currentStatus": "implemented-readback-report",
+      "isRuntimeProof": false,
+      "isPackageConsumerRuntimeProof": false,
+      "cliSupported": true,
+      "winFormsSupported": true,
+      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp/TensorRtBuilderConfig.cs", "native/src/tensorrt"],
+      "nextStep": "Workspace bytes and builder config readback are reported; keep model/runtime proof gated behind real execution logs."
+    },
+    {
+      "id": "timing-cache",
+      "officialTrtexecParity": "--timingCacheFile --exportTimingCache",
+      "currentStatus": "parse-report-only-gui-cli",
+      "isRuntimeProof": false,
+      "isPackageConsumerRuntimeProof": false,
+      "cliSupported": true,
+      "winFormsSupported": true,
+      "nextImplementationPaths": ["applications/TensorRtExec", "native/src/tensorrt"],
+      "nextStep": "GUI and CLI now share timing-cache import/export fields; do not promote timing cache lifecycle until ownership and import/export smoke are available."
+    },
+    {
+      "id": "plugin-library-boundary",
+      "officialTrtexecParity": "--plugins",
+      "currentStatus": "diagnostic-gui-cli",
+      "isRuntimeProof": false,
+      "isPackageConsumerRuntimeProof": false,
+      "cliSupported": true,
+      "winFormsSupported": true,
+      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp/TensorRtPluginRegistryInventory.cs", "native/src/tensorrt/common/plugin_registry_inventory.inc"],
+      "nextStep": "Keep register/deregister/load-library deferred; use copied inventory metadata and command-surface diagnostics only."
+    },
+    {
+      "id": "profiling",
+      "officialTrtexecParity": "--profilingVerbosity --dumpProfile --exportProfile --saveProfile",
+      "currentStatus": "implemented-report",
+      "isRuntimeProof": false,
+      "isPackageConsumerRuntimeProof": false,
+      "cliSupported": true,
+      "winFormsSupported": true,
+      "nextImplementationPaths": ["applications/TensorRtExec", "src/JYPPX.TensorRtSharp/TensorRtEngineInspector.Trt11Diagnostics.cs"],
+      "nextStep": "Require real enqueue logs and hashes before profile artifacts support runtime claims."
+    },
+    {
+      "id": "layer-dump",
+      "officialTrtexecParity": "--dumpLayerInfo --exportLayerInfo",
+      "currentStatus": "implemented-report",
+      "isRuntimeProof": false,
+      "isPackageConsumerRuntimeProof": false,
+      "cliSupported": true,
+      "winFormsSupported": true,
+      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp/TensorRtEngineInspector.Trt11Diagnostics.cs", "docs/articles/zh-cn/publishing"],
+      "nextStep": "Treat EngineInspector output as diagnostic metadata, not model correctness proof."
+    },
+    {
+      "id": "verbose-logging",
+      "officialTrtexecParity": "--verbose",
+      "currentStatus": "implemented-report",
+      "isRuntimeProof": false,
+      "isPackageConsumerRuntimeProof": false,
+      "cliSupported": true,
+      "winFormsSupported": true,
+      "nextImplementationPaths": ["applications/TensorRtExec", "eng/Test-YoloVisionRealAssetCandidate.ps1"],
+      "nextStep": "Hash owner logs and summarize stdout/stderr in proof records."
+    },
+    {
+      "id": "binding-metadata",
+      "officialTrtexecParity": "--loadInputs --dumpOutput --dumpRawBindingsToFile --exportOutput",
+      "currentStatus": "bounded-artifact-gui-cli",
+      "isRuntimeProof": false,
+      "isPackageConsumerRuntimeProof": false,
+      "cliSupported": true,
+      "winFormsSupported": true,
+      "nextImplementationPaths": ["samples/YoloVision", "samples/YoloVision/yolovision-task-output-contract.json", "eng/Test-YoloVisionRealAssetCandidate.ps1", "eng/Test-YoloVisionRealAssetOwnerBackfillPack.ps1"],
+      "nextStep": "GUI and CLI expose bounded input/output artifact fields; use yolovision-task-output-contract.json plus YoloVision real cases to capture task-specific output roles, required metadata, and hashes."
+    },
+    {
+      "id": "winforms-command-surface",
+      "officialTrtexecParity": "GUI parity for CLI options",
+      "currentStatus": "checklist-backed-command-preview",
+      "isRuntimeProof": false,
+      "isPackageConsumerRuntimeProof": false,
+      "cliSupported": false,
+      "winFormsSupported": true,
+      "nextImplementationPaths": ["applications/TensorRtExec/WinForms", "docs/articles/zh-cn/publishing/tensorrtexec-cli-public-article.md"],
+      "nextStep": "Continue using the GUI/CLI field map and generated command preview to lock parity without promoting screenshots or preview text as proof."
+    },
+    {
+      "id": "package-consumer-runtime-proof-boundary",
+      "officialTrtexecParity": "release-proof-validator",
+      "currentStatus": "owner-action-required",
+      "isRuntimeProof": false,
+      "isPackageConsumerRuntimeProof": false,
+      "cliSupported": false,
+      "winFormsSupported": false,
+      "nextImplementationPaths": ["eng/Test-PackageConsumerRuntimeProofRecord.ps1", "docs/articles/zh-cn/publishing/package-consumer-proof-public-article.md"],
+      "nextStep": "Wait for clean external consumer proof using public package source and strict validators."
+    }
+  ]
+}
