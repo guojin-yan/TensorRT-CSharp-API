@@ -284,6 +284,70 @@ public sealed class FinalOwnerPublishAndArticleActionDashboardTests
         AssertNonProofFlags(summaryValidation);
     }
 
+    [Fact]
+    public void GitHubRunnerGuardAndFinalOwnerHandoffIndexStayNonProof()
+    {
+        RunActionDashboardPipeline();
+        RunPowerShell("Export-PublicArticleBlockedClaimOwnerReviewList.ps1");
+        RunPowerShell("Test-PublicArticleBlockedClaimOwnerReviewList.ps1", "-Strict");
+        RunPowerShell("Export-PublicArticleSafeRewriteDraftPack.ps1");
+        RunPowerShell("Test-PublicArticleSafeRewriteDraftPack.ps1", "-Strict");
+        RunPowerShell("Export-PublicArticleSourcePatchProposalPack.ps1");
+        RunPowerShell("Test-PublicArticleSourcePatchProposalPack.ps1", "-Strict");
+        RunPowerShell("Export-PublicArticleSourcePatchApplyReadinessPack.ps1");
+        RunPowerShell("Test-PublicArticleSourcePatchApplyReadinessPack.ps1", "-Strict");
+        RunPowerShell("Export-OwnerAuthorizationCommandGuardPack.ps1");
+        RunPowerShell("Test-OwnerAuthorizationCommandGuardPack.ps1", "-Strict");
+        RunPowerShell("Export-OwnerFinalMissingActionOneScreenPack.ps1");
+        RunPowerShell("Test-OwnerFinalMissingActionOneScreenPack.ps1", "-Strict");
+        RunPowerShell("Export-OwnerFinalAuthorizationRequestSummary.ps1");
+        RunPowerShell("Test-OwnerFinalAuthorizationRequestSummary.ps1", "-Strict");
+        RunPowerShell("Export-GitHubActionsRunnerNonProofGuardPack.ps1");
+        RunPowerShell("Test-GitHubActionsRunnerNonProofGuardPack.ps1", "-Strict");
+        RunPowerShell("Export-FinalOwnerHandoffIndex.ps1");
+        RunPowerShell("Test-FinalOwnerHandoffIndex.ps1", "-Strict");
+
+        using JsonDocument runnerGuardDocument = ReadFinalReleaseJson("github-actions-runner-non-proof-guard-pack.json");
+        JsonElement runnerGuard = runnerGuardDocument.RootElement;
+        Assert.Equal("github-actions-runner-non-proof-guard-pack", runnerGuard.GetProperty("recordKind").GetString());
+        Assert.Equal("github-actions-runner-non-proof-guard-ready-non-proof", runnerGuard.GetProperty("guardState").GetString());
+        Assert.True(runnerGuard.GetProperty("signalCount").GetInt32() >= 9);
+        AssertNonProofFlags(runnerGuard);
+
+        string runnerRaw = runnerGuard.GetRawText();
+        Assert.Contains("queued workflow", runnerRaw, StringComparison.Ordinal);
+        Assert.Contains("manual approval", runnerRaw, StringComparison.Ordinal);
+        Assert.Contains("missing self-hosted runner", runnerRaw, StringComparison.Ordinal);
+        Assert.Contains("TensorRtExec report", runnerRaw, StringComparison.Ordinal);
+        Assert.Contains("local feed", runnerRaw, StringComparison.Ordinal);
+
+        using JsonDocument runnerGuardValidationDocument = ReadFinalReleaseJson("github-actions-runner-non-proof-guard-pack-validation.json");
+        JsonElement runnerGuardValidation = runnerGuardValidationDocument.RootElement;
+        Assert.Equal("github-actions-runner-non-proof-guard-pack-validation-ready-non-proof", runnerGuardValidation.GetProperty("validationState").GetString());
+        Assert.Equal(0, runnerGuardValidation.GetProperty("failedBlockerCount").GetInt32());
+        AssertNonProofFlags(runnerGuardValidation);
+
+        using JsonDocument handoffDocument = ReadFinalReleaseJson("final-owner-handoff-index.json");
+        JsonElement handoff = handoffDocument.RootElement;
+        Assert.Equal("final-owner-handoff-index", handoff.GetProperty("recordKind").GetString());
+        Assert.Equal("blocked-final-owner-handoff-index-awaiting-owner-authorization", handoff.GetProperty("handoffState").GetString());
+        Assert.True(handoff.GetProperty("sectionCount").GetInt32() >= 9);
+        AssertNonProofFlags(handoff);
+
+        string handoffRaw = handoff.GetRawText();
+        Assert.Contains("owner-final-authorization-request-summary", handoffRaw, StringComparison.Ordinal);
+        Assert.Contains("owner-authorization-command-guard", handoffRaw, StringComparison.Ordinal);
+        Assert.Contains("article-source-patch-readiness", handoffRaw, StringComparison.Ordinal);
+        Assert.Contains("github-actions-runner-non-proof-guard", handoffRaw, StringComparison.Ordinal);
+        Assert.Contains("release-close-strict-closure", handoffRaw, StringComparison.Ordinal);
+
+        using JsonDocument handoffValidationDocument = ReadFinalReleaseJson("final-owner-handoff-index-validation.json");
+        JsonElement handoffValidation = handoffValidationDocument.RootElement;
+        Assert.Equal("final-owner-handoff-index-validation-ready-non-proof", handoffValidation.GetProperty("validationState").GetString());
+        Assert.Equal(0, handoffValidation.GetProperty("failedBlockerCount").GetInt32());
+        AssertNonProofFlags(handoffValidation);
+    }
+
     private static void RunActionDashboardPipeline()
     {
         RunPowerShell("Export-FinalReadonlyPublishAuditPack.ps1");
