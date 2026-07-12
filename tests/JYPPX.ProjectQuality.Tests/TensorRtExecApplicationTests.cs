@@ -1,3 +1,4 @@
+using JYPPX.TensorRtSharp.Tools;
 using Xunit;
 
 namespace JYPPX.ProjectQuality.Tests;
@@ -50,6 +51,11 @@ public sealed class TensorRtExecApplicationTests
         Assert.Contains("return TrtexecOptions.ToArgumentLine()", optionsSource, StringComparison.Ordinal);
         Assert.Contains("\"--onnx\"", toolsOptionsSource, StringComparison.Ordinal);
         Assert.Contains("\"--saveEngine\"", toolsOptionsSource, StringComparison.Ordinal);
+        Assert.Contains("\"--model\"", toolsParserSource, StringComparison.Ordinal);
+        Assert.Contains("\"--onnxFile\"", toolsParserSource, StringComparison.Ordinal);
+        Assert.Contains("\"--plan\"", toolsParserSource, StringComparison.Ordinal);
+        Assert.Contains("\"--engineFile\"", toolsParserSource, StringComparison.Ordinal);
+        Assert.Contains("ShouldTreatEngineAliasAsLoad", toolsParserSource, StringComparison.Ordinal);
         Assert.Contains("\"--fp16\"", optionsSource, StringComparison.Ordinal);
         Assert.Contains("\"--buildOnly\"", optionsSource, StringComparison.Ordinal);
         Assert.Contains("\"--skipInference\"", optionsSource, StringComparison.Ordinal);
@@ -124,6 +130,42 @@ public sealed class TensorRtExecApplicationTests
         Assert.Contains("\"--noDataTransfers\"", optionsSource, StringComparison.Ordinal);
         Assert.Contains("\"--dumpRawBindingsToFile\"", optionsSource, StringComparison.Ordinal);
         Assert.Contains("\"--exportTimes\"", optionsSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TensorRtExecParserNormalizesModelAndEngineFileAliasesToCanonicalOptions()
+    {
+        string tempPath = Path.GetTempPath();
+        TrtexecLikeOptions buildOptions = TrtexecLikeParser.Parse(new[]
+        {
+            "--dryRun",
+            "--model", Path.Combine(tempPath, "owner-model.onnx"),
+            "--plan", Path.Combine(tempPath, "owner-model.plan"),
+            "--buildOnly"
+        });
+
+        string buildLine = buildOptions.ToArgumentLine();
+        Assert.EndsWith("owner-model.onnx", buildOptions.OnnxPath, StringComparison.OrdinalIgnoreCase);
+        Assert.EndsWith("owner-model.plan", buildOptions.SaveEnginePath, StringComparison.OrdinalIgnoreCase);
+        Assert.Empty(buildOptions.LoadEnginePath);
+        Assert.Contains("--onnx", buildLine, StringComparison.Ordinal);
+        Assert.Contains("--saveEngine", buildLine, StringComparison.Ordinal);
+        Assert.DoesNotContain("--model ", buildLine, StringComparison.Ordinal);
+        Assert.DoesNotContain("--plan ", buildLine, StringComparison.Ordinal);
+
+        TrtexecLikeOptions loadOptions = TrtexecLikeParser.Parse(new[]
+        {
+            "--dryRun",
+            "--engineFile", Path.Combine(tempPath, "existing.plan"),
+            "--skipInference"
+        });
+
+        string loadLine = loadOptions.ToArgumentLine();
+        Assert.Empty(loadOptions.OnnxPath);
+        Assert.Empty(loadOptions.SaveEnginePath);
+        Assert.EndsWith("existing.plan", loadOptions.LoadEnginePath, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--loadEngine", loadLine, StringComparison.Ordinal);
+        Assert.DoesNotContain("--engineFile", loadLine, StringComparison.Ordinal);
     }
 
     [Fact]

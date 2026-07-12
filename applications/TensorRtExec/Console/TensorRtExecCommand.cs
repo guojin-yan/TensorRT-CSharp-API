@@ -76,7 +76,7 @@ public static class TensorRtExecCommand
         System.Console.WriteLine("  TensorRtExec --onnx model.onnx --saveEngine model.plan --minShapes input:1x3x640x640 --optShapes input:1x3x640x640 --maxShapes input:4x3x640x640 --buildOnly");
         System.Console.WriteLine("  TensorRtExec --ui");
         System.Console.WriteLine("Input options:");
-        System.Console.WriteLine("  --onnx <path> --saveEngine <path> --loadEngine <path>");
+        System.Console.WriteLine("  --onnx|--model|--onnxFile <path> --saveEngine|--save-engine|--plan|--engineFile <path> --loadEngine|--load-engine <path>");
         System.Console.WriteLine("  --minShapes/--optShapes/--maxShapes input:1x3x640x640[,other:...]");
         System.Console.WriteLine("  --shapes|--inputShapes input:1x3x640x640[,other:...] --batch <n>");
         System.Console.WriteLine("Build options:");

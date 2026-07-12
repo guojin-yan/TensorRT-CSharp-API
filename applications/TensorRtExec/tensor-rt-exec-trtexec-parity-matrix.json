@@ -7,7 +7,7 @@
   "entries": [
     {
       "id": "onnx-input",
-      "trtexecOption": "--onnx",
+      "trtexecOption": "--onnx / --model / --onnxFile",
       "tensorRtExecStatus": "implemented",
       "entryPoints": ["TensorRtExecOptions.OnnxPath", "TrtexecLikeParser", "OnnxEngineBuildOptions.FromTrtexecLikeOptions"],
       "proofBoundary": "ONNX parsing/build report is build-only unless a sample runner records real model execution.",
@@ -17,7 +17,7 @@
     },
     {
       "id": "save-engine",
-      "trtexecOption": "--saveEngine",
+      "trtexecOption": "--saveEngine / --save-engine / --engine / --plan / --engineFile",
       "tensorRtExecStatus": "implemented",
       "entryPoints": ["TensorRtExecOptions.EnginePath", "OnnxEngineBuildService", "TensorRtExecReport.EnginePath"],
       "proofBoundary": "Serialized engine creation is build evidence, not inference proof.",

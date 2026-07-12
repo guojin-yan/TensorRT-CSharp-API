@@ -55,8 +55,9 @@ dotnet run --project .\applications\TensorRtExec -- `
 
 | 功能 | 推荐参数 | 兼容别名 | 当前状态 |
 | --- | --- | --- | --- |
-| 保存 engine | `--saveEngine` | `--save-engine`、`--engine` | 写出 serialized engine 或 dry-run 预检 |
-| 加载 engine | `--loadEngine` | `--load-engine` | load-engine readonly diagnostics；在 one-float-input / float-output / concrete-shape 条件满足时执行 bounded enqueue/readback；report 输出 `PreflightMetadata`、`LoadedEngineDiagnostics`、文件长度、SHA256、engine/tensor metadata、ReadbackFingerprint、ReadbackSha256 和 proof 边界 |
+| ONNX 输入 | `--onnx` | `--model`、`--onnxFile` | 归一化为 `--onnx`；只是 build input，不是 runtime proof |
+| 保存 engine | `--saveEngine` | `--save-engine`、`--engine`、`--plan`、`--engineFile` | 写出 serialized engine 或 dry-run 预检；当同时存在 ONNX/build-only 意图时，engine 文件别名归一化为 `--saveEngine` |
+| 加载 engine | `--loadEngine` | `--load-engine`、无 ONNX/build-only 时的 `--engine` / `--plan` / `--engineFile` | load-engine readonly diagnostics；在 one-float-input / float-output / concrete-shape 条件满足时执行 bounded enqueue/readback；report 输出 `PreflightMetadata`、`LoadedEngineDiagnostics`、文件长度、SHA256、engine/tensor metadata、ReadbackFingerprint、ReadbackSha256 和 proof 边界 |
 | Shape alias / batch | `--minShapes --optShapes --maxShapes --batch` | `--shapes`、`--inputShapes` | `--shapes` / `--inputShapes` 会复制到 min/opt/max profile；`--batch` 只进入 normalized command 与报告，不替代 explicit shape profile proof |
 | Timing cache | `--timingCacheFile` | `--timingCache` | 记录诊断；当前不导入/导出 cache 生命周期 |
 | Profiling verbosity | `--profilingVerbosity detailed` | `--verbose` | 归一化为 `none` / `layer_names_only` / `detailed` |

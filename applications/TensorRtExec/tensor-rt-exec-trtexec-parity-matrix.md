@@ -4,8 +4,8 @@ This file mirrors `tensor-rt-exec-trtexec-parity-matrix.json` for quick review. 
 
 | ID | trtexec option | Status | Proof boundary |
 |---|---|---|---|
-| `onnx-input` | `--onnx` | implemented | ONNX parsing/build report is build-only unless a sample runner records real model execution. |
-| `save-engine` | `--saveEngine` | implemented | Serialized engine creation is build evidence, not inference proof. |
+| `onnx-input` | `--onnx` / `--model` / `--onnxFile` | implemented | ONNX parsing/build report is build-only unless a sample runner records real model execution. |
+| `save-engine` | `--saveEngine` / `--save-engine` / `--engine` / `--plan` / `--engineFile` | implemented | Serialized engine creation is build evidence, not inference proof. |
 | `load-engine` | `--loadEngine` | bounded-runtime-output | Current load-engine path records preflight/readback metadata and may execute bounded one-float-input enqueue/readback. Unmatched output is runtime-output-captured-unverified and is not real-model or package-consumer proof. |
 | `dynamic-shape` | `--minShapes/--optShapes/--maxShapes` | implemented-report | Shape profiles in reports do not prove every dynamic shape ran correctly. |
 | `shape-profile` | `--minShapes input:... --optShapes input:... --maxShapes input:...` | implemented-report | Profile configuration is not output correctness proof. |
