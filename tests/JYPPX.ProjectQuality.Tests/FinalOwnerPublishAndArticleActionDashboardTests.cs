@@ -161,6 +161,67 @@ public sealed class FinalOwnerPublishAndArticleActionDashboardTests
         AssertNonProofFlags(oneScreenValidation);
     }
 
+    [Fact]
+    public void ArticlePatchProposalAndAuthorizationCommandGuardStayNonProof()
+    {
+        RunActionDashboardPipeline();
+        RunPowerShell("Export-PublicArticleBlockedClaimOwnerReviewList.ps1");
+        RunPowerShell("Test-PublicArticleBlockedClaimOwnerReviewList.ps1", "-Strict");
+        RunPowerShell("Export-PublicArticleSafeRewriteDraftPack.ps1");
+        RunPowerShell("Test-PublicArticleSafeRewriteDraftPack.ps1", "-Strict");
+        RunPowerShell("Export-PublicArticleSourcePatchProposalPack.ps1");
+        RunPowerShell("Test-PublicArticleSourcePatchProposalPack.ps1", "-Strict");
+        RunPowerShell("Export-OwnerAuthorizationCommandGuardPack.ps1");
+        RunPowerShell("Test-OwnerAuthorizationCommandGuardPack.ps1", "-Strict");
+
+        using JsonDocument proposalDocument = ReadFinalReleaseJson("public-article-source-patch-proposal-pack.json");
+        JsonElement proposal = proposalDocument.RootElement;
+        Assert.Equal("public-article-source-patch-proposal-pack", proposal.GetProperty("recordKind").GetString());
+        Assert.Equal("blocked-public-article-source-patch-proposal-owner-review-required", proposal.GetProperty("proposalState").GetString());
+        Assert.True(proposal.GetProperty("proposalCount").GetInt32() >= 64);
+        Assert.False(proposal.GetProperty("writesSourceArticles").GetBoolean());
+        AssertNonProofFlags(proposal);
+
+        string proposalRaw = proposal.GetRawText();
+        Assert.Contains("artifact-only-proposal", proposalRaw, StringComparison.Ordinal);
+        Assert.Contains("originalMatchedText", proposalRaw, StringComparison.Ordinal);
+        Assert.Contains("safeRewriteZh", proposalRaw, StringComparison.Ordinal);
+        Assert.Contains("requiredProofFieldOrGate", proposalRaw, StringComparison.Ordinal);
+        Assert.Contains("patchRisk", proposalRaw, StringComparison.Ordinal);
+        Assert.Contains("ProjectReference", proposalRaw, StringComparison.Ordinal);
+        Assert.Contains("TensorRtExec", proposalRaw, StringComparison.Ordinal);
+
+        using JsonDocument proposalValidationDocument = ReadFinalReleaseJson("public-article-source-patch-proposal-pack-validation.json");
+        JsonElement proposalValidation = proposalValidationDocument.RootElement;
+        Assert.Equal("public-article-source-patch-proposal-pack-validation-ready-non-proof", proposalValidation.GetProperty("validationState").GetString());
+        Assert.Equal(0, proposalValidation.GetProperty("failedBlockerCount").GetInt32());
+        AssertNonProofFlags(proposalValidation);
+
+        using JsonDocument guardDocument = ReadFinalReleaseJson("owner-authorization-command-guard-pack.json");
+        JsonElement guard = guardDocument.RootElement;
+        Assert.Equal("owner-authorization-command-guard-pack", guard.GetProperty("recordKind").GetString());
+        Assert.Equal("blocked-owner-authorization-required-for-publish-close-and-article-release", guard.GetProperty("guardState").GetString());
+        Assert.True(guard.GetProperty("commandCount").GetInt32() >= 8);
+        Assert.True(guard.GetProperty("blockedCommandCount").GetInt32() >= 5);
+        Assert.True(guard.GetProperty("allowedReadonlyCommandCount").GetInt32() >= 3);
+        AssertNonProofFlags(guard);
+
+        string guardRaw = guard.GetRawText();
+        Assert.Contains("dotnet nuget push", guardRaw, StringComparison.Ordinal);
+        Assert.Contains("nuget-org-push", guardRaw, StringComparison.Ordinal);
+        Assert.Contains("github-packages-push", guardRaw, StringComparison.Ordinal);
+        Assert.Contains("workflow-dispatch-publish", guardRaw, StringComparison.Ordinal);
+        Assert.Contains("blocked-until-owner-authorization-and-real-proof", guardRaw, StringComparison.Ordinal);
+        Assert.Contains("allowed-before-owner-authorization-readonly-non-proof", guardRaw, StringComparison.Ordinal);
+        Assert.Contains("deprecation", guardRaw, StringComparison.Ordinal);
+
+        using JsonDocument guardValidationDocument = ReadFinalReleaseJson("owner-authorization-command-guard-pack-validation.json");
+        JsonElement guardValidation = guardValidationDocument.RootElement;
+        Assert.Equal("owner-authorization-command-guard-pack-validation-ready-non-proof", guardValidation.GetProperty("validationState").GetString());
+        Assert.Equal(0, guardValidation.GetProperty("failedBlockerCount").GetInt32());
+        AssertNonProofFlags(guardValidation);
+    }
+
     private static void RunActionDashboardPipeline()
     {
         RunPowerShell("Export-FinalReadonlyPublishAuditPack.ps1");
