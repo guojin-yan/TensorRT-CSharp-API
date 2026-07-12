@@ -18,6 +18,11 @@ param(
   [string]$AdditionalPackageSourceUsername,
   [string]$AdditionalPackageSourcePassword,
   [switch]$RunSmoke,
+  [switch]$RunBridgeRuntimeSmoke,
+  [string]$TensorRtRoot,
+  [string]$CudaRoot,
+  [string]$CudnnRoot,
+  [string]$BridgeRuntimeConsumerOutputRoot,
   [string[]]$SmokeRuntimePackageKey = @(),
   [switch]$SignConsumerOutput,
   [switch]$TrustConsumerSigningCertificate,
@@ -600,6 +605,8 @@ if ($splitPackages.Count -eq 0 -and -not $shouldPackMetaPackage) {
   throw "No split runtime packages matched roles '$($requestedSplitRoles -join ', ')' for source runtime '$SourceRuntimeKey'."
 }
 
+$bridgeOnlySplitSet = $splitPackages.Count -gt 0 -and -not $shouldPackMetaPackage -and @($splitPackages | Where-Object { [string]$_.role -ne "bridge" }).Count -eq 0
+
 if ($splitPackages.Count -ne $allSplitPackages.Count -and $RunSmoke.IsPresent) {
   Write-Host "Skipping smoke request because only a subset of split runtime packages is being built."
 }
@@ -630,7 +637,31 @@ if ($shouldPackMetaPackage) {
   }
 }
 
-$shouldRunBaseRuntimeBuild = (-not $SkipBaseRuntimeBuild.IsPresent) -and ($splitPackages.Count -gt 0)
+$shouldRunBaseRuntimeBuild = (-not $SkipBaseRuntimeBuild.IsPresent) -and ($splitPackages.Count -gt 0) -and (-not $bridgeOnlySplitSet)
+if ($bridgeOnlySplitSet -and -not $SkipBaseRuntimeBuild.IsPresent) {
+  Write-Host "Skipping full base runtime build for bridge-only split packaging. The bridge asset will be collected from build-out."
+}
+
+if ($bridgeOnlySplitSet -and -not $SkipManagedPack.IsPresent) {
+  Invoke-CheckedCommand -FilePath "dotnet" -ArgumentList @(
+    "pack",
+    (Join-Path $RepositoryRoot "pack\JYPPX.TensorRT.CSharp.API\JYPPX.TensorRT.CSharp.API.csproj"),
+    "-c",
+    $Configuration,
+    "-o",
+    (Join-Path $RepositoryRoot "artifacts\managed"),
+    "-p:JYPPXPackageVersion=$resolvedVersion"
+  )
+
+  Invoke-CheckedCommand -FilePath $powerShellCommand -ArgumentList @(
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    (Join-Path $RepositoryRoot "eng\Test-ManagedPackageContent.ps1")
+  )
+}
+
 if ($shouldRunBaseRuntimeBuild) {
   $baseArguments = @(
     "-NoProfile",
@@ -644,8 +675,7 @@ if ($shouldRunBaseRuntimeBuild) {
     $resolvedVersion,
     "-Configuration",
     $Configuration,
-    "-SkipRuntimePack",
-    "-SkipConsumerValidation"
+   "-SkipConsumerValidation"
   )
 
   if ($SkipManagedPack.IsPresent) {
@@ -653,6 +683,9 @@ if ($shouldRunBaseRuntimeBuild) {
   }
 
   Invoke-CheckedCommand -FilePath $powerShellCommand -ArgumentList $baseArguments
+}
+elseif ($bridgeOnlySplitSet) {
+  Write-Host "Skipping base runtime build because bridge-only split packaging uses the existing bridge build output."
 }
 elseif (-not $SkipBaseRuntimeBuild.IsPresent) {
   Write-Host "Skipping base runtime build because only the split meta package is being produced."
@@ -679,11 +712,13 @@ for ($splitPackageIndex = 0; $splitPackageIndex -lt $splitPackages.Count; $split
     (Join-Path $RepositoryRoot "eng\Collect-SplitRuntimeAssets.ps1"),
     "-SplitPackageKey",
     $splitPackage.key,
+    "-BridgeConfiguration",
+    $Configuration,
     "-RepositoryRoot",
     $RepositoryRoot
   )
 
-  if ($splitPackageIndex -eq $lastSplitPackageIndex) {
+  if ($splitPackageIndex -eq $lastSplitPackageIndex -and -not $bridgeOnlySplitSet) {
     Remove-BaseRuntimeIntermediatePaths -RuntimeKey $SourceRuntimeKey -RuntimePackage $sourcePackage
     Write-DiskSpaceSummary -Label "Disk space after pruning base runtime intermediates for $SourceRuntimeKey"
   }
@@ -837,6 +872,62 @@ if (-not $SkipConsumerValidation.IsPresent -and $shouldPackMetaPackage) {
   }
 
   Invoke-CheckedCommand -FilePath $powerShellCommand -ArgumentList $consumerArguments
+}
+elseif (-not $SkipConsumerValidation.IsPresent -and $bridgeOnlySplitSet) {
+  $bridgeConsumerArguments = @(
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    (Join-Path $RepositoryRoot "eng\Test-BridgePackageConsumer.ps1"),
+    "-SourceRuntimeKey",
+    $SourceRuntimeKey,
+    "-ManagedPackageDirectory",
+    (Join-Path $RepositoryRoot "artifacts\managed"),
+    "-BridgePackageDirectory",
+    $splitOutputDirectory
+  )
+
+  $consumerAdditionalPackageSources = @(Expand-KeyList -Values $AdditionalPackageSource)
+  if ($consumerAdditionalPackageSources.Count -gt 0) {
+    $bridgeConsumerArguments += @("-AdditionalPackageSource", ($consumerAdditionalPackageSources -join ","))
+  }
+
+  Invoke-CheckedCommand -FilePath $powerShellCommand -ArgumentList $bridgeConsumerArguments
+
+  if ($RunBridgeRuntimeSmoke.IsPresent) {
+    $bridgeRuntimeConsumerArguments = @(
+      "-NoProfile",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-File",
+      (Join-Path $RepositoryRoot "eng\Test-BridgePackageRuntimeConsumer.ps1"),
+      "-SourceRuntimeKey",
+      $SourceRuntimeKey,
+      "-ManagedPackageDirectory",
+      (Join-Path $RepositoryRoot "artifacts\managed"),
+      "-BridgePackageDirectory",
+      $splitOutputDirectory
+    )
+
+    if (-not [string]::IsNullOrWhiteSpace($TensorRtRoot)) {
+      $bridgeRuntimeConsumerArguments += @("-TensorRtRoot", $TensorRtRoot)
+    }
+    if (-not [string]::IsNullOrWhiteSpace($CudaRoot)) {
+      $bridgeRuntimeConsumerArguments += @("-CudaRoot", $CudaRoot)
+    }
+    if (-not [string]::IsNullOrWhiteSpace($CudnnRoot)) {
+      $bridgeRuntimeConsumerArguments += @("-CudnnRoot", $CudnnRoot)
+    }
+    if (-not [string]::IsNullOrWhiteSpace($BridgeRuntimeConsumerOutputRoot)) {
+      $bridgeRuntimeConsumerArguments += @("-OutputRoot", $BridgeRuntimeConsumerOutputRoot)
+    }
+    if ($consumerAdditionalPackageSources.Count -gt 0) {
+      $bridgeRuntimeConsumerArguments += @("-AdditionalPackageSource", ($consumerAdditionalPackageSources -join ","))
+    }
+
+    Invoke-CheckedCommand -FilePath $powerShellCommand -ArgumentList $bridgeRuntimeConsumerArguments
+  }
 }
 elseif (-not $shouldPackMetaPackage) {
   Write-Host "Skipping package consumer validation because no split meta package was produced."
