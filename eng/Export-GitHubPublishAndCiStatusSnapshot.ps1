@@ -31,6 +31,48 @@ function Invoke-GitLines {
   return @($output)
 }
 
+function Get-RemoteHeadMatches {
+  param(
+    [string]$RemoteName,
+    [string]$BranchName,
+    [string]$HeadSha
+  )
+
+  if ([string]::IsNullOrWhiteSpace($RemoteName) -or [string]::IsNullOrWhiteSpace($BranchName) -or [string]::IsNullOrWhiteSpace($HeadSha)) {
+    return [pscustomobject]@{
+      remoteName = $RemoteName
+      branchName = $BranchName
+      remoteHeadSha = ""
+      remoteHeadMatchesCurrentHead = $false
+      querySucceeded = $false
+      detail = "Remote name, branch name, or local head SHA is missing."
+    }
+  }
+
+  $remoteHeadLine = (Invoke-GitLines @("ls-remote", "--heads", $RemoteName, $BranchName) | Select-Object -First 1)
+  if ([string]::IsNullOrWhiteSpace($remoteHeadLine)) {
+    return [pscustomobject]@{
+      remoteName = $RemoteName
+      branchName = $BranchName
+      remoteHeadSha = ""
+      remoteHeadMatchesCurrentHead = $false
+      querySucceeded = $false
+      detail = "git ls-remote did not return a head for the remote branch."
+    }
+  }
+
+  $remoteHeadSha = ($remoteHeadLine -split "\s+")[0]
+  $matches = $remoteHeadSha.Equals($HeadSha, [StringComparison]::OrdinalIgnoreCase)
+  return [pscustomobject]@{
+    remoteName = $RemoteName
+    branchName = $BranchName
+    remoteHeadSha = $remoteHeadSha
+    remoteHeadMatchesCurrentHead = $matches
+    querySucceeded = $true
+    detail = if ($matches) { "Read-only ls-remote confirms current HEAD is present on the remote branch." } else { "Read-only ls-remote confirms the remote branch points at a different SHA." }
+  }
+}
+
 function ConvertTo-MarkdownCell {
   param([AllowNull()][object]$Value)
   if ($null -eq $Value) { return "" }
@@ -43,7 +85,10 @@ $headShort = (Invoke-GitLines @("log", "-1", "--oneline") | Select-Object -First
 $remotes = @(Invoke-GitLines @("remote", "-v"))
 $upstream = (Invoke-GitLines @("rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}") | Select-Object -First 1)
 $remoteContainsHead = @(Invoke-GitLines @("branch", "-r", "--contains", "HEAD"))
-$hasRemoteContainingHead = $remoteContainsHead.Count -gt 0
+$remoteName = if (-not [string]::IsNullOrWhiteSpace($upstream) -and $upstream.Contains("/")) { $upstream.Split("/", 2)[0] } else { "origin" }
+$remoteBranchName = if (-not [string]::IsNullOrWhiteSpace($upstream) -and $upstream.Contains("/")) { $upstream.Split("/", 2)[1] } else { [string]$branch }
+$remoteHeadMatch = Get-RemoteHeadMatches -RemoteName $remoteName -BranchName $remoteBranchName -HeadSha ([string]$head)
+$hasRemoteContainingHead = $remoteContainsHead.Count -gt 0 -or [bool]$remoteHeadMatch.remoteHeadMatchesCurrentHead
 
 $localValidationCommands = @(
   "git diff --check",
@@ -60,7 +105,7 @@ $statusItems = @(
     id = "source-code-pushed"
     state = if ($hasRemoteContainingHead) { "source-head-present-on-remote-branch" } else { "missing-remote-head-proof" }
     proofAvailable = $hasRemoteContainingHead
-    detail = "git branch -r --contains HEAD reports remote branch containment only; it is not CI proof and not package publish proof."
+    detail = "Read-only git branch -r --contains HEAD and git ls-remote remote/branch checks report source presence only; they are not CI proof and not package publish proof."
   }
   [pscustomobject]@{
     id = "local-validation"
@@ -96,8 +141,14 @@ $record = [pscustomobject]@{
   headCommit = [string]$head
   headCommitSummary = [string]$headShort
   upstream = [string]$upstream
+  remoteName = [string]$remoteName
+  remoteBranchName = [string]$remoteBranchName
   remoteContainsHead = @($remoteContainsHead)
   remoteContainsHeadCount = $remoteContainsHead.Count
+  remoteHeadSha = [string]$remoteHeadMatch.remoteHeadSha
+  remoteHeadQuerySucceeded = [bool]$remoteHeadMatch.querySucceeded
+  remoteHeadMatchesCurrentHead = [bool]$remoteHeadMatch.remoteHeadMatchesCurrentHead
+  remoteHeadMatchDetail = [string]$remoteHeadMatch.detail
   sourceHeadPresentOnRemote = $hasRemoteContainingHead
   remotes = @($remotes)
   localValidationCommands = @($localValidationCommands)
@@ -130,6 +181,10 @@ $markdown = @"
 | snapshotState | ``$($record.snapshotState)`` |
 | branch | ``$($record.branch)`` |
 | headCommit | ``$($record.headCommit)`` |
+| remoteName | ``$($record.remoteName)`` |
+| remoteBranchName | ``$($record.remoteBranchName)`` |
+| remoteHeadSha | ``$($record.remoteHeadSha)`` |
+| remoteHeadMatchesCurrentHead | ``$($record.remoteHeadMatchesCurrentHead)`` |
 | sourceHeadPresentOnRemote | ``$($record.sourceHeadPresentOnRemote)`` |
 | githubActionsProofState | ``$($record.githubActionsProofState)`` |
 | packagePublishOnGitHubState | ``$($record.packagePublishOnGitHubState)`` |
