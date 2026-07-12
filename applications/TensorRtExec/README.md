@@ -57,12 +57,14 @@ dotnet run --project .\applications\TensorRtExec -- `
 | --- | --- | --- | --- |
 | 保存 engine | `--saveEngine` | `--save-engine`、`--engine` | 写出 serialized engine 或 dry-run 预检 |
 | 加载 engine | `--loadEngine` | `--load-engine` | load-engine readonly diagnostics；在 one-float-input / float-output / concrete-shape 条件满足时执行 bounded enqueue/readback；report 输出 `PreflightMetadata`、`LoadedEngineDiagnostics`、文件长度、SHA256、engine/tensor metadata、ReadbackFingerprint、ReadbackSha256 和 proof 边界 |
+| Shape alias / batch | `--minShapes --optShapes --maxShapes --batch` | `--shapes`、`--inputShapes` | `--shapes` / `--inputShapes` 会复制到 min/opt/max profile；`--batch` 只进入 normalized command 与报告，不替代 explicit shape profile proof |
 | Timing cache | `--timingCacheFile` | `--timingCache` | 记录诊断；当前不导入/导出 cache 生命周期 |
 | Profiling verbosity | `--profilingVerbosity detailed` | `--verbose` | 归一化为 `none` / `layer_names_only` / `detailed` |
+| Plugin libraries | `--plugins` | `--plugin`、`--dynamicPlugins`、`--setPluginsToSerialize` | 路径会去重并归一化到共享 command；不执行 load/register/deregister，也不证明 plugin 运行 |
 | Workspace | `--workspace 512MiB` | 无后缀默认 MiB；支持 `GiB/GB`、`MiB/MB`、`KiB/KB`、`B` | active builder workspace limit |
 | Memory pools | `--memPoolSize workspace:512MiB,tacticDram:1GiB` | 无后缀默认 MiB | 记录诊断；要求每项换算后是整 MiB |
 | Runtime timing | `--iterations --warmUp --duration --streams --useCudaGraph` | 无 | 进入报告和 GUI 参数预览；CUDA graph 仍是边界诊断 |
-| Advanced timing | `--minTiming --avgTiming --infStreams` | 无 | parse/report-only；用于和官方 trtexec 配置对齐，不声明 tactic timing 或并发推理已经真实执行 |
+| Advanced timing | `--minTiming --avgTiming --infStreams --sleepTime --idleTime` | 无 | parse/report-only；用于和官方 trtexec 配置对齐，不声明 tactic timing、等待策略或并发推理已经真实执行 |
 | Precision constraints | `--precisionConstraints --layerPrecisions --layerOutputTypes` | 无 | parse/report-only；进入 normalized command、report 和 GUI，不做模型专属 layer precision 路由 |
 | Engine packaging/refit | `--versionCompatible --excludeLeanRuntime --stripWeights --refit --weightStreamingBudget` | 无 | parse/report-only；不伪造成 lean runtime、weight stripping、refit 或 weight streaming 已真实生效 |
 | Safety / builder cache | `--safe --consistency --builderCache --noBuilderCache` | 无 | parse/report-only；记录 safety/consistency 和 builder cache intent，不声明已执行安全 runtime 或 cache lifecycle |
@@ -82,10 +84,12 @@ Precision/debug parse-report-only boundary：`--fp8`、`--best`、`--dumpRefit`�
 | 分组 | 代表参数 | 状态 | 说明 |
 | --- | --- | --- | --- |
 | Model/build | `--onnx`、`--saveEngine`、`--loadEngine`、`--workspace`、`--minShapes`、`--optShapes`、`--maxShapes` | implemented | 外部 ONNX build-only、load-engine preflight metadata、bounded runtime output、shape profile 和 workspace 已进入共享 build/report 服务 |
+| Shape aliases / batch | `--shapes`、`--inputShapes`、`--batch` | implemented-report | alias 可降低 trtexec 迁移成本；batch 仍不能替代 explicit binding/shape/runtime proof |
 | Precision | `--fp16`、`--bf16`、`--noTF32`、`--int8` | partially implemented | FP16/BF16/TF32 进入 builder config；INT8 calibrator 仍是边界诊断 |
 | Runtime benchmark | `--iterations`、`--warmUp`、`--duration`、`--streams`、`--avgRuns`、`--percentile` | implemented for embedded synthetic runtime; diagnostic for external ONNX | 外部模型没有 binding 语义时不提升为真实 runtime proof |
 | Runtime streams | `--infStreams` | parse-only | 进入 normalized command/report/GUI，暂不并行创建多 execution context |
 | Advanced timing | `--minTiming`、`--avgTiming` | parse-only | 记录 tactic timing 意图，不声明已完整应用官方 tactic timing 策略 |
+| Wait / idle controls | `--sleepTime`、`--idleTime` | parse-only | 记录 benchmark 等待/空闲配置，不声明官方 benchmark 调度语义已完整执行 |
 | Precision constraints | `--precisionConstraints`、`--layerPrecisions`、`--layerOutputTypes` | parse-only | 等待模型专属 layer precision routing 后再提升 |
 | Engine packaging | `--versionCompatible`、`--excludeLeanRuntime`、`--stripWeights` | parse-only | 不把 packaging intent 写成实际 engine capability proof |
 | Refit / weight streaming | `--refit`、`--weightStreamingBudget` | parse-only | 真实 refit 和 weight streaming 仍由底层 API smoke 与模型证据单独证明 |
@@ -136,7 +140,7 @@ Raw bindings 只有在 embedded identity synthetic runtime 已真实执行、输
 
 `--loadEngine` 现在分两层执行。第一层是 readonly diagnostics/report：报告会记录 engine path、文件是否存在、length bytes、SHA256、preflight state、proof classification 和 evidence boundary；在 TensorRT runtime 可用时，会反序列化 engine 并复制 engine name、I/O tensor、layer count、profile count、device memory、aux stream、capability、profiling verbosity、inspector 文本长度、ReadbackFingerprint 和 ReadbackSha256 等只读 metadata。第二层是 bounded runtime：当 engine 只有一个 float input、float outputs，且 runtime shape 可由 engine/profile 或 `--optShapes` 推断时，工具会创建 execution context、绑定输入输出、enqueue 并导出 output/timing summary。只有 identity output 与输入完全匹配时才保持 `synthetic-input-runtime`；否则输出会写成 `runtime-output-captured-unverified`，不能晋级为 `real-model-runtime` 或 `package-consumer-runtime`。
 
-`OptionImplementationStatus` 会把参数拆成 `ParsedOptions`、`AppliedOptions` 和 `ParseOnlyOptions`。这不是另一套完成度口径，而是防越级证据边界：`--builderOptimizationLevel`、workspace、shape profile 等可在 build/report 服务中标为 applied；`--minTiming`、`--avgTiming`、`--infStreams`、`--precisionConstraints`、`--layerPrecisions`、`--layerOutputTypes`、`--fp8`、`--best`、`--dumpRefit`、`--allowWeightStreaming`、`--markDebug`、`--dumpDebugTensors`、`--versionCompatible`、`--excludeLeanRuntime`、`--stripWeights`、`--refit`、`--weightStreamingBudget`、`--safe`、`--consistency`、`--builderCache`、`--noBuilderCache`、`--exportTimingCache` 和 `capability-probe-only` 只能保持 parse-only / probe-only，直到 native TensorRT 行为和模型级 smoke 同时证明其真实效果。
+`OptionImplementationStatus` 会把参数拆成 `ParsedOptions`、`AppliedOptions` 和 `ParseOnlyOptions`。这不是另一套完成度口径，而是防越级证据边界：`--builderOptimizationLevel`、workspace、shape profile 等可在 build/report 服务中标为 applied；`--batch`、`--minTiming`、`--avgTiming`、`--infStreams`、`--sleepTime`、`--idleTime`、`--precisionConstraints`、`--layerPrecisions`、`--layerOutputTypes`、`--fp8`、`--best`、`--dumpRefit`、`--allowWeightStreaming`、`--markDebug`、`--dumpDebugTensors`、`--versionCompatible`、`--excludeLeanRuntime`、`--stripWeights`、`--refit`、`--weightStreamingBudget`、`--safe`、`--consistency`、`--builderCache`、`--noBuilderCache`、`--exportTimingCache` 和 `capability-probe-only` 只能保持 parse-only / probe-only，直到 native TensorRT 行为和模型级 smoke 同时证明其真实效果。
 
 `GUI/CLI field map` 由 `eng/Export-TensorRtExecGuiCliParityChecklist.ps1` 和 `eng/Test-TensorRtExecGuiCliParityChecklist.ps1` 维护。它记录 CLI token、WinForms 字段、command preview、状态和下一步，但只是 surface parity 证据；GUI 截图、dry-run、build report、timing cache 路径、INT8 calibration cache 路径和 command preview 都不是 runtime proof，也不是 package-consumer-runtime proof。
 

@@ -315,9 +315,14 @@ public sealed class TensorRtExecApplicationTests
         Assert.Contains("--versionCompatible --excludeLeanRuntime --stripWeights --refit --weightStreamingBudget <MiB>", commandSource, StringComparison.Ordinal);
         Assert.Contains("--safe --consistency --builderCache|--noBuilderCache", commandSource, StringComparison.Ordinal);
         Assert.Contains("--memPoolSize workspace:512,tacticDram:1024", commandSource, StringComparison.Ordinal);
+        Assert.Contains("--shapes|--inputShapes input:1x3x640x640[,other:...] --batch <n>", commandSource, StringComparison.Ordinal);
+        Assert.Contains("--fp16 --int8 --bf16 --fp8 --best --noTF32 --workspace <MiB>", commandSource, StringComparison.Ordinal);
+        Assert.Contains("--dumpRefit --allowWeightStreaming --markDebug <names> --dumpDebugTensors", commandSource, StringComparison.Ordinal);
         Assert.Contains("--dryRun|--previewOnly", commandSource, StringComparison.Ordinal);
+        Assert.Contains("--plugins|--plugin|--dynamicPlugins|--setPluginsToSerialize", commandSource, StringComparison.Ordinal);
+        Assert.Contains("--profilingVerbosity <none|layer_names_only|detailed> --verbose", commandSource, StringComparison.Ordinal);
         Assert.Contains("--iterations <n> --warmUp <ms> --duration <sec> --streams <n> --infStreams <n> --useCudaGraph", commandSource, StringComparison.Ordinal);
-        Assert.Contains("--noDataTransfers --useSpinWait --threads <n> --avgRuns <n> --percentile <0..100>", commandSource, StringComparison.Ordinal);
+        Assert.Contains("--noDataTransfers --useSpinWait --threads <n> --avgRuns <n> --percentile <0..100> --sleepTime <ms> --idleTime <ms>", commandSource, StringComparison.Ordinal);
         Assert.Contains("--loadInputs input:file --dumpOutput --dumpRawBindingsToFile <path>", commandSource, StringComparison.Ordinal);
         Assert.Contains("--exportOutput <path> --exportTimes <path> --exportProfile <path> --saveProfile <path>", commandSource, StringComparison.Ordinal);
         Assert.Contains("--exportReport|--report <path.json|path.md>", commandSource, StringComparison.Ordinal);
@@ -407,6 +412,51 @@ public sealed class TensorRtExecApplicationTests
         Assert.Contains("_saveProfilePath", formSource, StringComparison.Ordinal);
         Assert.Contains("_commandPreview", formSource, StringComparison.Ordinal);
         Assert.Contains("CreateOptionsFromControls", formSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TensorRtExecHelpAndParityArtifactsExposeAdvancedTrtexecAliasesWithoutProofPromotion()
+    {
+        string commandSource = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "TensorRtExec", "Console", "TensorRtExecCommand.cs"));
+        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "TensorRtExec", "README.md"));
+        string featureMatrix = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "TensorRtExec", "tensor-rt-exec-feature-matrix.json"));
+        string parityJson = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "TensorRtExec", "tensor-rt-exec-trtexec-parity-matrix.json"));
+        string parityMarkdown = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "TensorRtExec", "tensor-rt-exec-trtexec-parity-matrix.md"));
+        string article = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "tensorrt-exec-trtexec-parity-matrix.md"));
+        string combined = commandSource + readme + featureMatrix + parityJson + parityMarkdown + article;
+
+        foreach (string marker in new[]
+        {
+            "--shapes",
+            "--inputShapes",
+            "--batch",
+            "--fp8",
+            "--best",
+            "--dumpRefit",
+            "--allowWeightStreaming",
+            "--markDebug",
+            "--dumpDebugTensors",
+            "--plugin",
+            "--dynamicPlugins",
+            "--setPluginsToSerialize",
+            "--timingCache",
+            "--profilingVerbosity",
+            "--verbose",
+            "--sleepTime",
+            "--idleTime",
+            "shape-alias-batch",
+            "wait-idle-controls",
+            "Plugin alias compatibility",
+            "parse-report-only",
+            "not runtime proof",
+            "\"isRuntimeProof\": false"
+        })
+        {
+            Assert.Contains(marker, combined, StringComparison.OrdinalIgnoreCase);
+        }
+
+        Assert.DoesNotContain("\"isRuntimeProof\": true", parityJson, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("canPromotePackageConsumerRuntime=true", combined, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

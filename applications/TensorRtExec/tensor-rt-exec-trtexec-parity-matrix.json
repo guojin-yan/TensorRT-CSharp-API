@@ -56,6 +56,16 @@
       "nextStep": "Tie YoloVision asset manifests to explicit profile metadata."
     },
     {
+      "id": "shape-alias-batch",
+      "trtexecOption": "--shapes --inputShapes --batch",
+      "tensorRtExecStatus": "implemented-report",
+      "entryPoints": ["TrtexecLikeParser", "TrtexecLikeOptions.Batch", "TensorRtExecCommand.PrintUsage", "applications/TensorRtExec/README.md"],
+      "proofBoundary": "Shape aliases and batch values are normalized/reportable migration aids; they do not prove binding coverage, dynamic profile execution, or output correctness.",
+      "isRuntimeProof": false,
+      "gap": "Batch/profile behavior still needs model-specific runner logs, selected shape, and output hash evidence.",
+      "nextStep": "Keep aliases in help/parity artifacts and require sample-run evidence before proof promotion."
+    },
+    {
       "id": "yolovision-owner-backfill-shape-profiles",
       "trtexecOption": "--minShapes/--optShapes/--maxShapes per YOLOv8n task",
       "tensorRtExecStatus": "documented-report",
@@ -145,6 +155,16 @@
       "isRuntimeProof": false,
       "gap": "Real model profile output still needs model-specific sample proof.",
       "nextStep": "Add profile artifact schema to real-model candidate manifests."
+    },
+    {
+      "id": "wait-idle-controls",
+      "trtexecOption": "--sleepTime --idleTime",
+      "tensorRtExecStatus": "parse-report-only",
+      "entryPoints": ["TrtexecLikeRuntimeOptions.SleepTimeMilliseconds", "TrtexecLikeRuntimeOptions.IdleTimeMilliseconds", "TensorRtExecCommand.PrintUsage", "OnnxEngineBuildDiagnostics.OptionImplementationStatus"],
+      "proofBoundary": "Wait/idle controls are accepted and reported for command parity; they do not prove official benchmark scheduler semantics or runtime performance.",
+      "isRuntimeProof": false,
+      "gap": "Needs real benchmark execution logs and host metadata before these controls can support performance claims.",
+      "nextStep": "Retain parse/report-only status until package-consumer runtime benchmark evidence is owner-supplied."
     },
     {
       "id": "layer-dump",
