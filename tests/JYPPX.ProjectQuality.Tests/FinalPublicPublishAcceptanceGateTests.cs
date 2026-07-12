@@ -94,6 +94,21 @@ public sealed class FinalPublicPublishAcceptanceGateTests
         Assert.False(gate.GetProperty("isPostPublishProof").GetBoolean());
         Assert.Contains("never executes dotnet nuget push", gate.GetProperty("boundary").GetString(), StringComparison.OrdinalIgnoreCase);
         Assert.Contains("pre-publish smoke", gate.GetProperty("boundary").GetString(), StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("local feed", gate.GetProperty("boundary").GetString(), StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("queued workflow", gate.GetProperty("boundary").GetString(), StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("TensorRtExec report", gate.GetProperty("boundary").GetString(), StringComparison.OrdinalIgnoreCase);
+        AssertStringArrayContainsAll(
+            gate.GetProperty("forbiddenNonProofSubstitutes"),
+            "local feed",
+            "ProjectReference",
+            "direct .nupkg",
+            "dashboard",
+            "dry-run",
+            "manual approval",
+            "queued GitHub Actions run",
+            "missing self-hosted runner",
+            "sidecar-only",
+            "TensorRtExec report");
 
         string markdown = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "artifacts", "final-release", "final-public-publish-acceptance-gate.md"));
         Assert.DoesNotContain("System.Object[]", markdown, StringComparison.Ordinal);
@@ -102,6 +117,8 @@ public sealed class FinalPublicPublishAcceptanceGateTests
         Assert.Contains("post-publish-clean-consumer-real-proof-accepted", markdown, StringComparison.Ordinal);
         Assert.Contains("final-release-close-approval-real-input-accepted", markdown, StringComparison.Ordinal);
         Assert.Contains("final-owner-real-proof-convergence-ready", markdown, StringComparison.Ordinal);
+        Assert.Contains("local feed", markdown, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("manual approval", markdown, StringComparison.OrdinalIgnoreCase);
 
         Assert.Contains(gate.GetProperty("checks").EnumerateArray(), static item =>
             item.GetProperty("id").GetString() == "owner-public-publish-real-result-accepted" &&
