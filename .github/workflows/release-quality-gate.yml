@@ -111,6 +111,15 @@ jobs:
           pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-ReleaseQualityGate.ps1 -Strict
           pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-GitHubActionsPackageValidationAudit.ps1
 
+      - name: Record split runner availability
+        if: ${{ always() && github.event_name == 'workflow_dispatch' && inputs.run_split_package_build }}
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-GitHubRunnerAvailability.ps1 `
+            -Repository "${{ github.repository }}" `
+            -RequiredLabelSet "self-hosted,windows,x64" `
+            -WarnOnly
+
       - name: Upload quality gate summary
         if: ${{ always() }}
         uses: actions/upload-artifact@v7
@@ -118,6 +127,7 @@ jobs:
           name: release-quality-gate
           path: |
             artifacts/release-quality-gate/**
+            artifacts/runner-availability/**
             artifacts/interface-coverage/tensorrt-interface-comparison.csv
             artifacts/interface-coverage/deferred-candidate-safety-triage.json
             artifacts/final-release/github-actions-package-validation-audit.*

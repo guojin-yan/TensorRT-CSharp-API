@@ -25,6 +25,11 @@ public sealed class ReleaseQualityGateWorkflowTests
         Assert.Contains("artifact_name: package-managed-dry-run", workflow, StringComparison.Ordinal);
         Assert.Contains("Export-GitHubActionsPackageValidationAudit.ps1", workflow, StringComparison.Ordinal);
         Assert.Contains("github-actions-package-validation-audit.*", workflow, StringComparison.Ordinal);
+        Assert.Contains("Record split runner availability", workflow, StringComparison.Ordinal);
+        Assert.Contains("Test-GitHubRunnerAvailability.ps1", workflow, StringComparison.Ordinal);
+        Assert.Contains("-RequiredLabelSet \"self-hosted,windows,x64\"", workflow, StringComparison.Ordinal);
+        Assert.Contains("-WarnOnly", workflow, StringComparison.Ordinal);
+        Assert.Contains("artifacts/runner-availability/**", workflow, StringComparison.Ordinal);
         Assert.Contains("runs-on: [self-hosted, windows, x64, release-artifacts]", workflow, StringComparison.Ordinal);
         Assert.Contains("runs-on: [self-hosted, windows, x64]", workflow, StringComparison.Ordinal);
         Assert.Contains("-SplitPackageRole all", workflow, StringComparison.Ordinal);
