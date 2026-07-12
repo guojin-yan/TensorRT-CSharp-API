@@ -148,7 +148,21 @@ function Get-RunnerRows {
   }
 }
 
-$runnerRows = @(Get-RunnerRows -RepositoryName $Repository)
+$querySucceeded = $true
+$queryError = ""
+try {
+  $runnerRows = @(Get-RunnerRows -RepositoryName $Repository)
+}
+catch {
+  $querySucceeded = $false
+  $queryError = [string]$_.Exception.Message
+  $runnerRows = @()
+
+  if (-not $WarnOnly.IsPresent) {
+    throw
+  }
+}
+
 $results = New-Object System.Collections.Generic.List[object]
 $missing = New-Object System.Collections.Generic.List[object]
 
@@ -164,34 +178,49 @@ foreach ($labelSetText in $requestedLabelSets) {
     continue
   }
 
-  $matchingRunners = @(
-    $runnerRows | Where-Object {
-      $runner = $_
-      $labelMatches = @($requiredLabels | Where-Object { $runner.normalizedLabels -contains $_ })
-      $labelMatches.Count -eq $requiredLabels.Count
+  if (-not $querySucceeded) {
+    $result = [pscustomobject]@{
+      requiredLabels = @($requiredLabels)
+      passed = $false
+      matchingRunnerCount = 0
+      onlineMatchingRunnerCount = 0
+      matchingRunners = @()
+      querySucceeded = $false
+      queryError = $queryError
     }
-  )
-  $onlineMatchingRunners = @($matchingRunners | Where-Object { [string]$_.status -eq "online" })
-  $passed = $onlineMatchingRunners.Count -gt 0
+  }
+  else {
+    $matchingRunners = @(
+      $runnerRows | Where-Object {
+        $runner = $_
+        $labelMatches = @($requiredLabels | Where-Object { $runner.normalizedLabels -contains $_ })
+        $labelMatches.Count -eq $requiredLabels.Count
+      }
+    )
+    $onlineMatchingRunners = @($matchingRunners | Where-Object { [string]$_.status -eq "online" })
+    $passed = $onlineMatchingRunners.Count -gt 0
 
-  $result = [pscustomobject]@{
-    requiredLabels = @($requiredLabels)
-    passed = $passed
-    matchingRunnerCount = $matchingRunners.Count
-    onlineMatchingRunnerCount = $onlineMatchingRunners.Count
-    matchingRunners = @($matchingRunners | ForEach-Object {
-        [pscustomobject]@{
-          name = $_.name
-          os = $_.os
-          status = $_.status
-          busy = $_.busy
-          labels = @($_.labels)
-        }
-      })
+    $result = [pscustomobject]@{
+      requiredLabels = @($requiredLabels)
+      passed = $passed
+      matchingRunnerCount = $matchingRunners.Count
+      onlineMatchingRunnerCount = $onlineMatchingRunners.Count
+      matchingRunners = @($matchingRunners | ForEach-Object {
+          [pscustomobject]@{
+            name = $_.name
+            os = $_.os
+            status = $_.status
+            busy = $_.busy
+            labels = @($_.labels)
+          }
+        })
+      querySucceeded = $true
+      queryError = ""
+    }
   }
   $results.Add($result) | Out-Null
 
-  if (-not $passed) {
+  if (-not [bool]$result.passed) {
     $missing.Add($result) | Out-Null
   }
 }
@@ -203,7 +232,10 @@ $jsonPath = Join-Path $outputRoot "github-runner-availability.json"
 $markdownPath = Join-Path $outputRoot "github-runner-availability.md"
 
 [pscustomobject]@{
+  recordKind = "github-runner-availability"
   repository = $Repository
+  querySucceeded = $querySucceeded
+  queryError = $queryError
   runnerCount = $runnerRows.Count
   failedCount = $missing.Count
   requestedLabelSets = @($results.ToArray())
@@ -223,6 +255,12 @@ $codeQuote = [string][char]96
 $lines.Add("# GitHub Runner Availability")
 $lines.Add("")
 $lines.Add("Repository: " + $codeQuote + $Repository + $codeQuote)
+$lines.Add("")
+$lines.Add("Query succeeded: " + $codeQuote + $querySucceeded + $codeQuote)
+if (-not $querySucceeded) {
+  $lines.Add("")
+  $lines.Add("Query error: " + $codeQuote + $queryError + $codeQuote)
+}
 $lines.Add("")
 $lines.Add("| Required labels | Online match | Matching runners |")
 $lines.Add("| --- | --- | --- |")

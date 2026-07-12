@@ -113,7 +113,10 @@ jobs:
 
       - name: Record split runner availability
         if: ${{ always() && github.event_name == 'workflow_dispatch' && inputs.run_split_package_build }}
+        continue-on-error: true
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-GitHubRunnerAvailability.ps1 `
             -Repository "${{ github.repository }}" `
