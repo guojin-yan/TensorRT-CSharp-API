@@ -222,6 +222,68 @@ public sealed class FinalOwnerPublishAndArticleActionDashboardTests
         AssertNonProofFlags(guardValidation);
     }
 
+    [Fact]
+    public void ArticlePatchApplyReadinessAndFinalAuthorizationSummaryStayNonProof()
+    {
+        RunActionDashboardPipeline();
+        RunPowerShell("Export-PublicArticleBlockedClaimOwnerReviewList.ps1");
+        RunPowerShell("Test-PublicArticleBlockedClaimOwnerReviewList.ps1", "-Strict");
+        RunPowerShell("Export-PublicArticleSafeRewriteDraftPack.ps1");
+        RunPowerShell("Test-PublicArticleSafeRewriteDraftPack.ps1", "-Strict");
+        RunPowerShell("Export-PublicArticleSourcePatchProposalPack.ps1");
+        RunPowerShell("Test-PublicArticleSourcePatchProposalPack.ps1", "-Strict");
+        RunPowerShell("Export-PublicArticleSourcePatchApplyReadinessPack.ps1");
+        RunPowerShell("Test-PublicArticleSourcePatchApplyReadinessPack.ps1", "-Strict");
+        RunPowerShell("Export-OwnerAuthorizationCommandGuardPack.ps1");
+        RunPowerShell("Test-OwnerAuthorizationCommandGuardPack.ps1", "-Strict");
+        RunPowerShell("Export-OwnerFinalMissingActionOneScreenPack.ps1");
+        RunPowerShell("Test-OwnerFinalMissingActionOneScreenPack.ps1", "-Strict");
+        RunPowerShell("Export-OwnerFinalAuthorizationRequestSummary.ps1");
+        RunPowerShell("Test-OwnerFinalAuthorizationRequestSummary.ps1", "-Strict");
+
+        using JsonDocument readinessDocument = ReadFinalReleaseJson("public-article-source-patch-apply-readiness-pack.json");
+        JsonElement readiness = readinessDocument.RootElement;
+        Assert.Equal("public-article-source-patch-apply-readiness-pack", readiness.GetProperty("recordKind").GetString());
+        Assert.True(readiness.GetProperty("readinessItemCount").GetInt32() >= 64);
+        Assert.False(readiness.GetProperty("writesSourceArticles").GetBoolean());
+        AssertNonProofFlags(readiness);
+
+        string readinessRaw = readiness.GetRawText();
+        Assert.Contains("lineExists", readinessRaw, StringComparison.Ordinal);
+        Assert.Contains("matchedTextStillPresent", readinessRaw, StringComparison.Ordinal);
+        Assert.Contains("nearbyMatchFound", readinessRaw, StringComparison.Ordinal);
+        Assert.Contains("canApplyAfterOwnerApproval", readinessRaw, StringComparison.Ordinal);
+        Assert.Contains("证据导入前", readinessRaw, StringComparison.Ordinal);
+
+        using JsonDocument readinessValidationDocument = ReadFinalReleaseJson("public-article-source-patch-apply-readiness-pack-validation.json");
+        JsonElement readinessValidation = readinessValidationDocument.RootElement;
+        Assert.Equal("public-article-source-patch-apply-readiness-pack-validation-ready-non-proof", readinessValidation.GetProperty("validationState").GetString());
+        Assert.Equal(0, readinessValidation.GetProperty("failedBlockerCount").GetInt32());
+        AssertNonProofFlags(readinessValidation);
+
+        using JsonDocument summaryDocument = ReadFinalReleaseJson("owner-final-authorization-request-summary.json");
+        JsonElement summary = summaryDocument.RootElement;
+        Assert.Equal("owner-final-authorization-request-summary", summary.GetProperty("recordKind").GetString());
+        Assert.Equal("blocked-owner-final-authorization-required", summary.GetProperty("requestState").GetString());
+        Assert.True(summary.GetProperty("blockedCommandCount").GetInt32() >= 5);
+        Assert.True(summary.GetProperty("allowedReadonlyCommandCount").GetInt32() >= 3);
+        Assert.True(summary.GetProperty("articleProposalCount").GetInt32() >= 64);
+        AssertNonProofFlags(summary);
+
+        string summaryRaw = summary.GetRawText();
+        Assert.Contains("Authorize real public publish", summaryRaw, StringComparison.Ordinal);
+        Assert.Contains("keep all publish/article/release-close commands blocked", summaryRaw, StringComparison.Ordinal);
+        Assert.Contains("owner-public-publish-evidence", summaryRaw, StringComparison.Ordinal);
+        Assert.Contains("post-publish-owner-input", summaryRaw, StringComparison.Ordinal);
+        Assert.Contains("TensorRtExec report", summaryRaw, StringComparison.Ordinal);
+
+        using JsonDocument summaryValidationDocument = ReadFinalReleaseJson("owner-final-authorization-request-summary-validation.json");
+        JsonElement summaryValidation = summaryValidationDocument.RootElement;
+        Assert.Equal("owner-final-authorization-request-summary-validation-ready-non-proof", summaryValidation.GetProperty("validationState").GetString());
+        Assert.Equal(0, summaryValidation.GetProperty("failedBlockerCount").GetInt32());
+        AssertNonProofFlags(summaryValidation);
+    }
+
     private static void RunActionDashboardPipeline()
     {
         RunPowerShell("Export-FinalReadonlyPublishAuditPack.ps1");
