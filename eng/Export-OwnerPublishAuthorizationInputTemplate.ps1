@@ -32,6 +32,12 @@ $template = [pscustomobject]@{
   ownerDecisionTimestampUtc = "<owner-fill-decision-timestamp-utc>"
   authorizationDecision = "owner-authorization-required"
   authorizedRoutes = @()
+  publishTargetChannels = @(
+    "nuget-small-bridge-core",
+    "github-packages-full-runtime"
+  )
+  ownerAuthorizationId = "<owner-fill-owner-authorization-id>"
+  ownerAuthorizationScope = "manual-owner-run-only"
   managedPackageId = "JYPPX.TensorRT.CSharp.API"
   managedPackageVersion = "<owner-fill-managed-package-version>"
   managedNupkgPath = "<owner-fill-managed-nupkg-path>"
@@ -47,10 +53,20 @@ $template = [pscustomobject]@{
   releaseNotesSha256 = "<owner-fill-release-notes-sha256>"
   rollbackPlanPath = "<owner-fill-rollback-plan-path>"
   rollbackPlanSha256 = "<owner-fill-rollback-plan-sha256>"
+  publishCommandPlanPath = "artifacts/final-release/owner-authorized-publish-command-plan.json"
+  publishCommandPlanSha256 = "<owner-fill-publish-command-plan-sha256>"
+  managedPublishCommandSha256 = "<owner-fill-managed-publish-command-template-sha256>"
+  runtimePublishCommandSha256 = "<owner-fill-runtime-publish-command-template-sha256>"
+  sourceRunnerQueueStatus = "<owner-fill-completed-not-queued>"
+  sourceRunnerInfrastructureStatus = "<owner-fill-available-not-missing-self-hosted-runner>"
+  sourceRunnerOwnerAction = "owner-infra-action-required-until-runner-completed-and-available"
   confirmsNoTokenPersisted = "<owner-fill-true>"
   confirmsNoDryRunArtifactSubstitution = "<owner-fill-true>"
   confirmsPackageHashesReviewed = "<owner-fill-true>"
   confirmsPublishCommandReviewed = "<owner-fill-true>"
+  confirmsPublishCommandHashesReviewed = "<owner-fill-true>"
+  confirmsNoForcePublish = "<owner-fill-true>"
+  confirmsNoQueuedRunOrMissingRunnerSubstitution = "<owner-fill-true>"
   confirmsPublicPackageDownloadProofStillRequired = "<owner-fill-true>"
   performsPublish = $false
   usesPublishToken = $false
@@ -74,13 +90,17 @@ $template = [pscustomobject]@{
     "github-actions-runs artifact path",
     "template placeholder",
     "local feed",
-    "direct .nupkg as public proof"
+    "direct .nupkg as public proof",
+    "queued GitHub Actions run",
+    "missing self-hosted runner",
+    "--force publish",
+    "--skip-duplicate as authorization substitute"
   )
   publishCommandTemplates = @(
     "dotnet nuget push <managed-nupkg> --api-key <NUGET_API_KEY> --source https://api.nuget.org/v3/index.json",
     "dotnet nuget push <runtime-nupkg> --api-key <GITHUB_TOKEN> --source https://nuget.pkg.github.com/<owner>/index.json"
   )
-  proofBoundary = "Owner authorization input only. This template does not execute dotnet nuget push, does not use a publish token, does not publish NuGet or GitHub Packages, and cannot close the release issue. Even an approved owner run still requires post-publish public package download proof and clean external consumer smoke proof."
+  proofBoundary = "Owner authorization input only. This template does not execute dotnet nuget push, does not use a publish token, does not publish NuGet or GitHub Packages, and cannot close the release issue. Even an approved owner run still requires post-publish public package download proof and clean external consumer smoke proof. queued GitHub Actions run, missing self-hosted runner, --force publish, and --skip-duplicate-only outcomes cannot substitute owner authorization or post-publish proof."
 }
 
 $jsonPath = Join-Path $artifactRoot "owner-publish-authorization-input.template.json"
@@ -104,10 +124,15 @@ $markdown = @"
 | 字段 | 当前值 |
 |---|---|
 | validationState | ``$($template.validationState)`` |
+| ownerAuthorizationId | ``$($template.ownerAuthorizationId)`` |
 | authorizationDecision | ``$($template.authorizationDecision)`` |
+| ownerAuthorizationScope | ``$($template.ownerAuthorizationScope)`` |
 | managedPackageId | ``$($template.managedPackageId)`` |
 | runtimePackageId | ``$($template.runtimePackageId)`` |
 | runtimePackageKey | ``$($template.runtimePackageKey)`` |
+| publishCommandPlanPath | ``$($template.publishCommandPlanPath)`` |
+| sourceRunnerQueueStatus | ``$($template.sourceRunnerQueueStatus)`` |
+| sourceRunnerInfrastructureStatus | ``$($template.sourceRunnerInfrastructureStatus)`` |
 | performsPublish | ``$($template.performsPublish)`` |
 | usesPublishToken | ``$($template.usesPublishToken)`` |
 | requiresOwnerAuthorization | ``$($template.requiresOwnerAuthorization)`` |

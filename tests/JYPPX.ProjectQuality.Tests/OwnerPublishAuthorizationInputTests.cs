@@ -19,6 +19,15 @@ public sealed class OwnerPublishAuthorizationInputTests
         Assert.Equal("owner-publish-authorization-input", template.GetProperty("recordKind").GetString());
         Assert.Equal("blocked-owner-publish-authorization-required", template.GetProperty("validationState").GetString());
         Assert.Equal("owner-authorization-required", template.GetProperty("authorizationDecision").GetString());
+        Assert.Equal("manual-owner-run-only", template.GetProperty("ownerAuthorizationScope").GetString());
+        Assert.True(template.GetProperty("publishTargetChannels").GetArrayLength() >= 2);
+        Assert.True(template.TryGetProperty("ownerAuthorizationId", out _));
+        Assert.True(template.TryGetProperty("publishCommandPlanSha256", out _));
+        Assert.True(template.TryGetProperty("managedPublishCommandSha256", out _));
+        Assert.True(template.TryGetProperty("runtimePublishCommandSha256", out _));
+        Assert.True(template.TryGetProperty("sourceRunnerQueueStatus", out _));
+        Assert.True(template.TryGetProperty("sourceRunnerInfrastructureStatus", out _));
+        Assert.True(template.TryGetProperty("sourceRunnerOwnerAction", out _));
         Assert.False(template.GetProperty("performsPublish").GetBoolean());
         Assert.False(template.GetProperty("usesPublishToken").GetBoolean());
         Assert.True(template.GetProperty("requiresOwnerAuthorization").GetBoolean());
@@ -27,6 +36,9 @@ public sealed class OwnerPublishAuthorizationInputTests
         Assert.False(template.GetProperty("isPostPublishProof").GetBoolean());
         Assert.Contains("dotnet nuget push", template.GetProperty("publishCommandTemplates").EnumerateArray().First().GetString(), StringComparison.OrdinalIgnoreCase);
         Assert.Contains("does not execute dotnet nuget push", template.GetProperty("proofBoundary").GetString(), StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("queued GitHub Actions run", template.GetProperty("proofBoundary").GetString(), StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("missing self-hosted runner", template.GetProperty("proofBoundary").GetString(), StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--force publish", template.GetProperty("forbiddenSubstitutes").EnumerateArray().Select(static item => item.GetString()), StringComparer.OrdinalIgnoreCase);
 
         using JsonDocument validationDocument = ReadFinalReleaseJson("owner-publish-authorization-input-validation.json");
         JsonElement validation = validationDocument.RootElement;
@@ -35,6 +47,10 @@ public sealed class OwnerPublishAuthorizationInputTests
         Assert.Equal(0, validation.GetProperty("failedBlockerCount").GetInt32());
         Assert.True(validation.GetProperty("failedActionRequiredCount").GetInt32() > 0);
         Assert.False(validation.GetProperty("ownerPublishAuthorizationReady").GetBoolean());
+        Assert.Equal("manual-owner-run-only", validation.GetProperty("ownerAuthorizationScope").GetString());
+        Assert.Equal(2, validation.GetProperty("publishTargetChannelCount").GetInt32());
+        AssertValidationItemFailed(validation, "source-runner-not-queued");
+        AssertValidationItemFailed(validation, "source-runner-infrastructure-ready");
         Assert.False(validation.GetProperty("performsPublish").GetBoolean());
         Assert.False(validation.GetProperty("usesPublishToken").GetBoolean());
         Assert.False(validation.GetProperty("canPublishPublicly").GetBoolean());
@@ -51,6 +67,9 @@ public sealed class OwnerPublishAuthorizationInputTests
         values["ownerName"] = "ghp_abcdefghijklmnopqrstuvwxyz123456";
         values["authorizationDecision"] = "approved-for-owner-run";
         values["authorizedRoutes"] = new[] { "nuget-small-bridge-core" };
+        values["publishTargetChannels"] = new[] { "nuget-small-bridge-core" };
+        values["ownerAuthorizationId"] = "owner-auth-20260712-001";
+        values["ownerAuthorizationScope"] = "manual-owner-run-only";
         values["managedNupkgPath"] = Path.Combine(RepositoryPaths.Root, "artifacts", "github-actions-runs", "29162977180", "package-managed-dry-run", "JYPPX.TensorRT.CSharp.API.4.0.0.nupkg");
         values["runtimeNupkgPath"] = Path.Combine(RepositoryPaths.Root, "artifacts", "github-actions-runs", "29162977180", "package-managed-dry-run", "runtime.nupkg");
         values["releaseNotesPath"] = Path.Combine(RepositoryPaths.Root, "artifacts", "github-actions-runs", "release-notes.md");
@@ -59,6 +78,12 @@ public sealed class OwnerPublishAuthorizationInputTests
         values["runtimeNupkgSha256"] = SixtyFour("b");
         values["releaseNotesSha256"] = SixtyFour("c");
         values["rollbackPlanSha256"] = SixtyFour("d");
+        values["publishCommandPlanSha256"] = SixtyFour("e");
+        values["managedPublishCommandSha256"] = SixtyFour("f");
+        values["runtimePublishCommandSha256"] = SixtyFour("0");
+        values["sourceRunnerQueueStatus"] = "queued";
+        values["sourceRunnerInfrastructureStatus"] = "missing-self-hosted-runner";
+        values["sourceRunnerOwnerAction"] = "owner-infra-action-required-until-runner-completed-and-available";
         values["ownerDecisionTimestampUtc"] = DateTimeOffset.UtcNow.ToString("O");
         values["managedPackageVersion"] = "4.0.0";
         values["runtimePackageVersion"] = "4.0.0";
@@ -66,6 +91,9 @@ public sealed class OwnerPublishAuthorizationInputTests
         values["confirmsNoDryRunArtifactSubstitution"] = "true";
         values["confirmsPackageHashesReviewed"] = "true";
         values["confirmsPublishCommandReviewed"] = "true";
+        values["confirmsPublishCommandHashesReviewed"] = "true";
+        values["confirmsNoForcePublish"] = "true";
+        values["confirmsNoQueuedRunOrMissingRunnerSubstitution"] = "true";
         values["confirmsPublicPackageDownloadProofStillRequired"] = "true";
 
         string misusePath = Path.Combine(RepositoryPaths.Root, "artifacts", "final-release", "owner-publish-authorization-input.misuse.json");
@@ -84,6 +112,8 @@ public sealed class OwnerPublishAuthorizationInputTests
         AssertValidationItemFailed(validation, "no-token-like-secret-persisted");
         AssertValidationItemFailed(validation, "managedNupkgPath-not-dry-run-artifact");
         AssertValidationItemFailed(validation, "runtimeNupkgPath-not-dry-run-artifact");
+        AssertValidationItemFailed(validation, "source-runner-not-queued");
+        AssertValidationItemFailed(validation, "source-runner-infrastructure-ready");
     }
 
     [Fact]
@@ -110,6 +140,9 @@ public sealed class OwnerPublishAuthorizationInputTests
             values["ownerDecisionTimestampUtc"] = DateTimeOffset.UtcNow.ToString("O");
             values["authorizationDecision"] = "approved-for-owner-run";
             values["authorizedRoutes"] = new[] { "nuget-small-bridge-core", "github-packages-full-runtime" };
+            values["publishTargetChannels"] = new[] { "nuget-small-bridge-core", "github-packages-full-runtime" };
+            values["ownerAuthorizationId"] = "owner-auth-20260712-001";
+            values["ownerAuthorizationScope"] = "manual-owner-run-only";
             values["managedPackageVersion"] = "4.0.0";
             values["runtimePackageVersion"] = "4.0.0";
             values["managedNupkgPath"] = managedPath;
@@ -120,10 +153,20 @@ public sealed class OwnerPublishAuthorizationInputTests
             values["releaseNotesSha256"] = Sha256(releaseNotesPath);
             values["rollbackPlanPath"] = rollbackPlanPath;
             values["rollbackPlanSha256"] = Sha256(rollbackPlanPath);
+            values["publishCommandPlanPath"] = releaseNotesPath;
+            values["publishCommandPlanSha256"] = Sha256(releaseNotesPath);
+            values["managedPublishCommandSha256"] = SixtyFour("e");
+            values["runtimePublishCommandSha256"] = SixtyFour("f");
+            values["sourceRunnerQueueStatus"] = "completed";
+            values["sourceRunnerInfrastructureStatus"] = "available";
+            values["sourceRunnerOwnerAction"] = "owner-infra-action-reviewed-and-clear";
             values["confirmsNoTokenPersisted"] = "true";
             values["confirmsNoDryRunArtifactSubstitution"] = "true";
             values["confirmsPackageHashesReviewed"] = "true";
             values["confirmsPublishCommandReviewed"] = "true";
+            values["confirmsPublishCommandHashesReviewed"] = "true";
+            values["confirmsNoForcePublish"] = "true";
+            values["confirmsNoQueuedRunOrMissingRunnerSubstitution"] = "true";
             values["confirmsPublicPackageDownloadProofStillRequired"] = "true";
 
             string readyPath = Path.Combine(RepositoryPaths.Root, "artifacts", "final-release", "owner-publish-authorization-input.ready.json");
@@ -141,6 +184,11 @@ public sealed class OwnerPublishAuthorizationInputTests
             Assert.Equal(0, validation.GetProperty("failedBlockerCount").GetInt32());
             Assert.Equal(0, validation.GetProperty("failedActionRequiredCount").GetInt32());
             Assert.True(validation.GetProperty("ownerPublishAuthorizationReady").GetBoolean());
+            Assert.Equal("manual-owner-run-only", validation.GetProperty("ownerAuthorizationScope").GetString());
+            Assert.Equal(2, validation.GetProperty("publishTargetChannelCount").GetInt32());
+            Assert.Equal(2, validation.GetProperty("authorizedRouteCount").GetInt32());
+            Assert.Equal("completed", validation.GetProperty("sourceRunnerQueueStatus").GetString());
+            Assert.Equal("available", validation.GetProperty("sourceRunnerInfrastructureStatus").GetString());
             Assert.False(validation.GetProperty("performsPublish").GetBoolean());
             Assert.False(validation.GetProperty("usesPublishToken").GetBoolean());
             Assert.False(validation.GetProperty("canPublishPublicly").GetBoolean());

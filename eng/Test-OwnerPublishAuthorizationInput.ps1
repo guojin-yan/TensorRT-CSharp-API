@@ -92,6 +92,37 @@ function Test-BoolTrue {
   return [bool]::TryParse(([string]$Value).Trim(), [ref]$parsed) -and $parsed
 }
 
+function Test-ValueInSet {
+  param([AllowNull()][object]$Value, [string[]]$AllowedValues)
+  if (Test-IsPlaceholder -Value $Value) { return $false }
+  $text = ([string]$Value).Trim()
+  foreach ($allowed in $AllowedValues) {
+    if ($text.Equals($allowed, [StringComparison]::OrdinalIgnoreCase)) { return $true }
+  }
+  return $false
+}
+
+function Test-TextDoesNotContainPublishBypass {
+  param([AllowNull()][object]$Object)
+
+  if ($null -eq $Object) { return $true }
+
+  $texts = New-Object System.Collections.Generic.List[string]
+  if ($Object.PSObject.Properties.Name -contains "publishCommandTemplates") {
+    foreach ($command in @(Get-PropertyOrDefault -Object $Object -Name "publishCommandTemplates" -DefaultValue @())) {
+      $texts.Add([string]$command) | Out-Null
+    }
+  }
+
+  if ($Object.PSObject.Properties.Name -contains "materializedExecutableCommand") {
+    $texts.Add([string](Get-PropertyOrDefault -Object $Object -Name "materializedExecutableCommand" -DefaultValue "")) | Out-Null
+  }
+
+  if ($texts.Count -eq 0) { return $true }
+
+  return -not (($texts -join "`n") -match "(?i)--force|--skip-duplicate|skip duplicate|force publish")
+}
+
 function Test-NotDryRunArtifactPath {
   param([AllowNull()][object]$Path)
   $text = [string]$Path
@@ -130,6 +161,11 @@ $items = New-Object System.Collections.Generic.List[object]
 $recordKind = [string](Get-PropertyOrDefault -Object $record -Name "recordKind" -DefaultValue "")
 $authorizationDecision = [string](Get-PropertyOrDefault -Object $record -Name "authorizationDecision" -DefaultValue "")
 $authorizedRoutes = @(Get-PropertyOrDefault -Object $record -Name "authorizedRoutes" -DefaultValue @())
+$publishTargetChannels = @(Get-PropertyOrDefault -Object $record -Name "publishTargetChannels" -DefaultValue @())
+$ownerAuthorizationScope = [string](Get-PropertyOrDefault -Object $record -Name "ownerAuthorizationScope" -DefaultValue "")
+$sourceRunnerQueueStatus = [string](Get-PropertyOrDefault -Object $record -Name "sourceRunnerQueueStatus" -DefaultValue "")
+$sourceRunnerInfrastructureStatus = [string](Get-PropertyOrDefault -Object $record -Name "sourceRunnerInfrastructureStatus" -DefaultValue "")
+$sourceRunnerOwnerAction = [string](Get-PropertyOrDefault -Object $record -Name "sourceRunnerOwnerAction" -DefaultValue "")
 $performsPublish = Get-BoolPropertyOrDefault -Object $record -Name "performsPublish" -DefaultValue $true
 $usesPublishToken = Get-BoolPropertyOrDefault -Object $record -Name "usesPublishToken" -DefaultValue $true
 $canPublishPublicly = Get-BoolPropertyOrDefault -Object $record -Name "canPublishPublicly" -DefaultValue $true
@@ -139,10 +175,16 @@ $isPostPublishProof = Get-BoolPropertyOrDefault -Object $record -Name "isPostPub
 $items.Add((New-ValidationItem -Id "record-kind" -Passed ($recordKind -eq "owner-publish-authorization-input") -Severity "blocker" -Detail "recordKind must be owner-publish-authorization-input.")) | Out-Null
 $items.Add((New-ValidationItem -Id "no-side-effects" -Passed (-not $performsPublish -and -not $usesPublishToken -and -not $canPublishPublicly -and -not $canCloseReleaseIssue -and -not $isPostPublishProof) -Severity "blocker" -Detail "Authorization input must not publish, use token, claim post-publish proof, or close release issue.")) | Out-Null
 $items.Add((New-ValidationItem -Id "no-token-like-secret-persisted" -Passed (Test-NoTokenLikeText -Object $record) -Severity "blocker" -Detail "Authorization input must not persist token-like strings.")) | Out-Null
+$items.Add((New-ValidationItem -Id "no-publish-bypass-switches" -Passed (Test-TextDoesNotContainPublishBypass -Object $record) -Severity "blocker" -Detail "Authorization input must not contain --force, --skip-duplicate, or equivalent publish bypass wording.")) | Out-Null
 $items.Add((New-ValidationItem -Id "authorization-decision-approved-for-owner-run" -Passed ($authorizationDecision -eq "approved-for-owner-run") -Severity "action-required" -Detail "Only explicit approved-for-owner-run can make the input ready; automation still does not publish.")) | Out-Null
 $items.Add((New-ValidationItem -Id "authorized-routes-present" -Passed ($authorizedRoutes.Count -gt 0) -Severity "action-required" -Detail "authorizedRoutes must list the owner-approved package routes.")) | Out-Null
+$items.Add((New-ValidationItem -Id "publish-target-channels-present" -Passed ($publishTargetChannels.Count -gt 0 -and $publishTargetChannels.Count -ge $authorizedRoutes.Count) -Severity "action-required" -Detail "publishTargetChannels must list the intended publish targets before owner execution.")) | Out-Null
+$items.Add((New-ValidationItem -Id "owner-authorization-scope-manual-only" -Passed ($ownerAuthorizationScope -eq "manual-owner-run-only") -Severity "action-required" -Detail "ownerAuthorizationScope must remain manual-owner-run-only.")) | Out-Null
+$items.Add((New-ValidationItem -Id "source-runner-not-queued" -Passed (Test-ValueInSet -Value $sourceRunnerQueueStatus -AllowedValues @("completed", "not-queued")) -Severity "action-required" -Detail "sourceRunnerQueueStatus must be completed/not-queued. queued GitHub Actions run is owner-infra-action only.")) | Out-Null
+$items.Add((New-ValidationItem -Id "source-runner-infrastructure-ready" -Passed (Test-ValueInSet -Value $sourceRunnerInfrastructureStatus -AllowedValues @("available", "ready", "not-required")) -Severity "action-required" -Detail "sourceRunnerInfrastructureStatus must be available/ready/not-required. missing self-hosted runner is owner-infra-action only.")) | Out-Null
+$items.Add((New-ValidationItem -Id "source-runner-owner-action-boundary" -Passed ($sourceRunnerOwnerAction.Contains("owner-infra-action", [StringComparison]::OrdinalIgnoreCase)) -Severity "action-required" -Detail "sourceRunnerOwnerAction must keep queued/missing-runner cases as owner-infra-action, not proof.")) | Out-Null
 
-foreach ($field in @("ownerName", "managedPackageVersion", "runtimePackageVersion")) {
+foreach ($field in @("ownerName", "ownerAuthorizationId", "managedPackageVersion", "runtimePackageVersion")) {
   $items.Add((New-ValidationItem -Id "field-$field" -Passed (-not (Test-IsPlaceholder -Value (Get-PropertyOrDefault -Object $record -Name $field -DefaultValue ""))) -Severity "action-required" -Detail "$field must be real owner input.")) | Out-Null
 }
 
@@ -156,15 +198,20 @@ foreach ($pair in @(
   @{ Path = "managedNupkgPath"; Sha = "managedNupkgSha256" },
   @{ Path = "runtimeNupkgPath"; Sha = "runtimeNupkgSha256" },
   @{ Path = "releaseNotesPath"; Sha = "releaseNotesSha256" },
-  @{ Path = "rollbackPlanPath"; Sha = "rollbackPlanSha256" }
+  @{ Path = "rollbackPlanPath"; Sha = "rollbackPlanSha256" },
+  @{ Path = "publishCommandPlanPath"; Sha = "publishCommandPlanSha256" }
 )) {
   $shaValue = Get-PropertyOrDefault -Object $record -Name $pair.Sha -DefaultValue ""
   $items.Add((New-ValidationItem -Id "$($pair.Sha)-format" -Passed (Test-Sha256Format -Value $shaValue) -Severity "action-required" -Detail "$($pair.Sha) must be a 64-character SHA256.")) | Out-Null
   $items.Add((New-ValidationItem -Id "$($pair.Sha)-hash-match-if-file-exists" -Passed (Test-FileHashMatchesIfExists -Path (Get-PropertyOrDefault -Object $record -Name $pair.Path -DefaultValue "") -Sha256 $shaValue) -Severity "action-required" -Detail "$($pair.Path), when present, must match $($pair.Sha).")) | Out-Null
 }
 
-foreach ($field in @("confirmsNoTokenPersisted", "confirmsNoDryRunArtifactSubstitution", "confirmsPackageHashesReviewed", "confirmsPublishCommandReviewed", "confirmsPublicPackageDownloadProofStillRequired")) {
+foreach ($field in @("confirmsNoTokenPersisted", "confirmsNoDryRunArtifactSubstitution", "confirmsPackageHashesReviewed", "confirmsPublishCommandReviewed", "confirmsPublishCommandHashesReviewed", "confirmsNoForcePublish", "confirmsNoQueuedRunOrMissingRunnerSubstitution", "confirmsPublicPackageDownloadProofStillRequired")) {
   $items.Add((New-ValidationItem -Id "$field-true" -Passed (Test-BoolTrue -Value (Get-PropertyOrDefault -Object $record -Name $field -DefaultValue "")) -Severity "action-required" -Detail "$field must be true.")) | Out-Null
+}
+
+foreach ($field in @("managedPublishCommandSha256", "runtimePublishCommandSha256")) {
+  $items.Add((New-ValidationItem -Id "$field-format" -Passed (Test-Sha256Format -Value (Get-PropertyOrDefault -Object $record -Name $field -DefaultValue "")) -Severity "action-required" -Detail "$field must be a 64-character SHA256 for the reviewed command template.")) | Out-Null
 }
 
 $failedBlockers = @($items | Where-Object { -not $_.passed -and $_.severity -eq "blocker" })
@@ -184,13 +231,19 @@ $validation = [pscustomobject]@{
   failedBlockerCount = $failedBlockers.Count
   failedActionRequiredCount = $failedActionRequired.Count
   ownerPublishAuthorizationReady = ($failedBlockers.Count -eq 0 -and $failedActionRequired.Count -eq 0)
+  ownerAuthorizationScope = $ownerAuthorizationScope
+  publishTargetChannelCount = $publishTargetChannels.Count
+  authorizedRouteCount = $authorizedRoutes.Count
+  sourceRunnerQueueStatus = $sourceRunnerQueueStatus
+  sourceRunnerInfrastructureStatus = $sourceRunnerInfrastructureStatus
+  sourceRunnerOwnerAction = $sourceRunnerOwnerAction
   performsPublish = $false
   usesPublishToken = $false
   canPublishPublicly = $false
   canCloseReleaseIssue = $false
   isPostPublishProof = $false
   validationItems = @($items.ToArray())
-  safetyBoundary = "Owner authorization validation only. A ready result means owner-run command review is complete; automation still must not publish and post-publish proof remains required."
+  safetyBoundary = "Owner authorization validation only. A ready result means owner-run command review is complete; automation still must not publish, must not use --force or --skip-duplicate as an authorization substitute, and post-publish proof remains required. queued GitHub Actions run and missing self-hosted runner remain owner-infra-action states."
 }
 
 $jsonPath = Join-Path $OutputRoot "owner-publish-authorization-input-validation.json"
@@ -212,6 +265,11 @@ $markdown = @"
 | failedBlockerCount | ``$($validation.failedBlockerCount)`` |
 | failedActionRequiredCount | ``$($validation.failedActionRequiredCount)`` |
 | ownerPublishAuthorizationReady | ``$($validation.ownerPublishAuthorizationReady)`` |
+| ownerAuthorizationScope | ``$($validation.ownerAuthorizationScope)`` |
+| publishTargetChannelCount | ``$($validation.publishTargetChannelCount)`` |
+| authorizedRouteCount | ``$($validation.authorizedRouteCount)`` |
+| sourceRunnerQueueStatus | ``$($validation.sourceRunnerQueueStatus)`` |
+| sourceRunnerInfrastructureStatus | ``$($validation.sourceRunnerInfrastructureStatus)`` |
 | performsPublish | ``$($validation.performsPublish)`` |
 | usesPublishToken | ``$($validation.usesPublishToken)`` |
 | canPublishPublicly | ``$($validation.canPublishPublicly)`` |
