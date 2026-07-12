@@ -348,6 +348,62 @@ public sealed class FinalOwnerPublishAndArticleActionDashboardTests
         AssertNonProofFlags(handoffValidation);
     }
 
+    [Fact]
+    public void FinalOwnerNextDecisionGateKeepsReleaseBlockedUntilOwnerChooses()
+    {
+        RunActionDashboardPipeline();
+        RunPowerShell("Export-PublicArticleBlockedClaimOwnerReviewList.ps1");
+        RunPowerShell("Test-PublicArticleBlockedClaimOwnerReviewList.ps1", "-Strict");
+        RunPowerShell("Export-PublicArticleSafeRewriteDraftPack.ps1");
+        RunPowerShell("Test-PublicArticleSafeRewriteDraftPack.ps1", "-Strict");
+        RunPowerShell("Export-PublicArticleSourcePatchProposalPack.ps1");
+        RunPowerShell("Test-PublicArticleSourcePatchProposalPack.ps1", "-Strict");
+        RunPowerShell("Export-PublicArticleSourcePatchApplyReadinessPack.ps1");
+        RunPowerShell("Test-PublicArticleSourcePatchApplyReadinessPack.ps1", "-Strict");
+        RunPowerShell("Export-OwnerAuthorizationCommandGuardPack.ps1");
+        RunPowerShell("Test-OwnerAuthorizationCommandGuardPack.ps1", "-Strict");
+        RunPowerShell("Export-OwnerFinalMissingActionOneScreenPack.ps1");
+        RunPowerShell("Test-OwnerFinalMissingActionOneScreenPack.ps1", "-Strict");
+        RunPowerShell("Export-OwnerFinalAuthorizationRequestSummary.ps1");
+        RunPowerShell("Test-OwnerFinalAuthorizationRequestSummary.ps1", "-Strict");
+        RunPowerShell("Export-GitHubActionsRunnerNonProofGuardPack.ps1");
+        RunPowerShell("Test-GitHubActionsRunnerNonProofGuardPack.ps1", "-Strict");
+        RunPowerShell("Export-FinalOwnerHandoffIndex.ps1");
+        RunPowerShell("Test-FinalOwnerHandoffIndex.ps1", "-Strict");
+        RunPowerShell("Export-FinalOwnerNextDecisionGate.ps1");
+        RunPowerShell("Test-FinalOwnerNextDecisionGate.ps1", "-Strict");
+
+        using JsonDocument gateDocument = ReadFinalReleaseJson("final-owner-next-decision-gate.json");
+        JsonElement gate = gateDocument.RootElement;
+        Assert.Equal("final-owner-next-decision-gate", gate.GetProperty("recordKind").GetString());
+        Assert.Equal("blocked-final-owner-next-decision-required", gate.GetProperty("gateState").GetString());
+        Assert.Equal("keep-blocked-wait-for-owner", gate.GetProperty("recommendedDefault").GetString());
+        Assert.Equal(3, gate.GetProperty("decisionOptionCount").GetInt32());
+        Assert.True(gate.GetProperty("blockedCommandCount").GetInt32() >= 5);
+        Assert.True(gate.GetProperty("blockedHandoffSectionCount").GetInt32() >= 9);
+        Assert.True(gate.GetProperty("articleReadinessItemCount").GetInt32() >= 64);
+        AssertNonProofFlags(gate);
+
+        string gateRaw = gate.GetRawText();
+        Assert.Contains("authorize-real-public-publish", gateRaw, StringComparison.Ordinal);
+        Assert.Contains("authorize-article-source-patch-only", gateRaw, StringComparison.Ordinal);
+        Assert.Contains("keep-blocked-wait-for-owner", gateRaw, StringComparison.Ordinal);
+        Assert.Contains("dotnet-nuget-push", gateRaw, StringComparison.Ordinal);
+        Assert.Contains("github-packages-push", gateRaw, StringComparison.Ordinal);
+        Assert.Contains("workflow-dispatch-publish", gateRaw, StringComparison.Ordinal);
+        Assert.Contains("release-close", gateRaw, StringComparison.Ordinal);
+        Assert.Contains("apply-public-article-source-patch-proposals-after-owner-approval", gateRaw, StringComparison.Ordinal);
+        Assert.Contains("no public publish claim without real proof", gateRaw, StringComparison.Ordinal);
+        Assert.Contains("TensorRtExec report", gateRaw, StringComparison.Ordinal);
+
+        using JsonDocument validationDocument = ReadFinalReleaseJson("final-owner-next-decision-gate-validation.json");
+        JsonElement validation = validationDocument.RootElement;
+        Assert.Equal("final-owner-next-decision-gate-validation-ready-non-proof", validation.GetProperty("validationState").GetString());
+        Assert.Equal(0, validation.GetProperty("failedBlockerCount").GetInt32());
+        Assert.Equal(3, validation.GetProperty("decisionOptionCount").GetInt32());
+        AssertNonProofFlags(validation);
+    }
+
     private static void RunActionDashboardPipeline()
     {
         RunPowerShell("Export-FinalReadonlyPublishAuditPack.ps1");
