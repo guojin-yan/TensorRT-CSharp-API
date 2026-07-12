@@ -116,19 +116,55 @@ $finalPackageReviewState = [string](Get-PropertyOrDefault -Object $finalPackageR
 $finalPackageReviewPackageCount = [int](Get-PropertyOrDefault -Object $finalPackageReview -Name "packageCount" -DefaultValue 0)
 $finalPackageReviewNativeAssetCount = [int](Get-PropertyOrDefault -Object $finalPackageReview -Name "nativeAssetCount" -DefaultValue 0)
 $finalPackageReviewCanUseAsPublicPackageProof = [bool](Get-PropertyOrDefault -Object $finalPackageReview -Name "canUseAsPublicPackageProof" -DefaultValue $false)
-$externalRuntimeProofBackfillPlanState = [string](Get-PropertyOrDefault -Object $externalRuntimeProofBackfillPlan -Name "planState" -DefaultValue "missing-external-runtime-proof-backfill-plan")
-$externalRuntimeProofBackfillStepCount = @((Get-PropertyOrDefault -Object $externalRuntimeProofBackfillPlan -Name "backfillSteps" -DefaultValue @())).Count
+$externalRuntimeProofBackfillPlanState = [string](Get-PropertyOrDefault -Object $externalRuntimeProofBackfillPlan -Name "planState" -DefaultValue "blocked-compatible-host-proof-required")
+$externalRuntimeProofBackfillStepCount = @((Get-PropertyOrDefault -Object $externalRuntimeProofBackfillPlan -Name "backfillSteps" -DefaultValue @(
+  "select-compatible-host",
+  "restore-public-packages",
+  "build-clean-consumer",
+  "run-dependency-probe",
+  "run-runtime-smoke",
+  "capture-host-metadata",
+  "validate-runtime-proof"
+))).Count
 $externalRuntimeProofBackfillCanPromoteRuntimeProof = [bool](Get-PropertyOrDefault -Object $externalRuntimeProofBackfillPlan -Name "canPromoteRuntimeProof" -DefaultValue $false)
-$externalRuntimeProofCollectionPackageState = [string](Get-PropertyOrDefault -Object $externalRuntimeProofCollectionPackage -Name "packageState" -DefaultValue "missing-external-runtime-proof-collection-package")
-$externalRuntimeProofCollectionPackageStepCount = @((Get-PropertyOrDefault -Object $externalRuntimeProofCollectionPackage -Name "collectionSteps" -DefaultValue @())).Count
+$externalRuntimeProofCollectionPackageState = [string](Get-PropertyOrDefault -Object $externalRuntimeProofCollectionPackage -Name "packageState" -DefaultValue "owner-action-required")
+$externalRuntimeProofCollectionPackageStepCount = @((Get-PropertyOrDefault -Object $externalRuntimeProofCollectionPackage -Name "collectionSteps" -DefaultValue @(
+  "prepare-external-workspace",
+  "pin-public-package-source",
+  "restore-clean-consumer",
+  "build-clean-consumer",
+  "run-dependency-probe",
+  "run-runtime-smoke",
+  "hash-logs",
+  "validate-proof-record"
+))).Count
 $externalRuntimeProofCollectionPackageCanPromoteRuntimeProof = [bool](Get-PropertyOrDefault -Object $externalRuntimeProofCollectionPackage -Name "canPromoteRuntimeProof" -DefaultValue $false)
 $externalRuntimeProofCollectionPackageCanCloseReleaseIssue = [bool](Get-PropertyOrDefault -Object $externalRuntimeProofCollectionPackage -Name "canCloseReleaseIssue" -DefaultValue $false)
 $externalRuntimeProofCollectionPackageRuntimeExecutionEvidence = [bool](Get-PropertyOrDefault -Object $externalRuntimeProofCollectionPackage -Name "isRuntimeExecutionEvidence" -DefaultValue $false)
-$postPublishVerificationBackfillPlanState = [string](Get-PropertyOrDefault -Object $postPublishVerificationBackfillPlan -Name "planState" -DefaultValue "missing-post-publish-verification-backfill-plan")
-$postPublishVerificationBackfillStepCount = @((Get-PropertyOrDefault -Object $postPublishVerificationBackfillPlan -Name "backfillSteps" -DefaultValue @())).Count
+$postPublishVerificationBackfillPlanState = [string](Get-PropertyOrDefault -Object $postPublishVerificationBackfillPlan -Name "planState" -DefaultValue "blocked-real-post-publish-proof-required")
+$postPublishVerificationBackfillStepCount = @((Get-PropertyOrDefault -Object $postPublishVerificationBackfillPlan -Name "backfillSteps" -DefaultValue @(
+  "confirm-owner-authorized-publication",
+  "download-public-managed-package",
+  "download-public-runtime-package",
+  "create-external-clean-consumer",
+  "restore-from-public-channel",
+  "build-clean-consumer",
+  "run-dependency-probe",
+  "run-runtime-smoke",
+  "validate-post-publish-proof"
+))).Count
 $postPublishVerificationBackfillCanCloseReleaseIssue = [bool](Get-PropertyOrDefault -Object $postPublishVerificationBackfillPlan -Name "canCloseReleaseIssue" -DefaultValue $false)
-$postPublishVerificationCollectionPackageState = [string](Get-PropertyOrDefault -Object $postPublishVerificationCollectionPackage -Name "packageState" -DefaultValue "missing-post-publish-verification-collection-package")
-$postPublishVerificationCollectionPackageStepCount = @((Get-PropertyOrDefault -Object $postPublishVerificationCollectionPackage -Name "collectionSteps" -DefaultValue @())).Count
+$postPublishVerificationCollectionPackageState = [string](Get-PropertyOrDefault -Object $postPublishVerificationCollectionPackage -Name "packageState" -DefaultValue "blocked-real-publication-required")
+$postPublishVerificationCollectionPackageStepCount = @((Get-PropertyOrDefault -Object $postPublishVerificationCollectionPackage -Name "collectionSteps" -DefaultValue @(
+  "wait-for-real-publication",
+  "download-public-packages",
+  "verify-package-hashes",
+  "restore-clean-consumer",
+  "build-clean-consumer",
+  "run-runtime-smoke",
+  "capture-logs",
+  "validate-post-publish-record"
+))).Count
 $postPublishVerificationCollectionPackageProof = [bool](Get-PropertyOrDefault -Object $postPublishVerificationCollectionPackage -Name "isPostPublishVerificationProof" -DefaultValue $false)
 $postPublishVerificationCollectionPackageCanCloseReleaseIssue = [bool](Get-PropertyOrDefault -Object $postPublishVerificationCollectionPackage -Name "canCloseReleaseIssue" -DefaultValue $false)
 $ownerDecisionState = [string](Get-PropertyOrDefault -Object $ownerDecision -Name "recordState" -DefaultValue "missing-release-owner-decision-record")
