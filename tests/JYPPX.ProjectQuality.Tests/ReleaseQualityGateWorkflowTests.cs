@@ -26,10 +26,17 @@ public sealed class ReleaseQualityGateWorkflowTests
         Assert.Contains("Export-GitHubActionsPackageValidationAudit.ps1", workflow, StringComparison.Ordinal);
         Assert.Contains("github-actions-package-validation-audit.*", workflow, StringComparison.Ordinal);
         Assert.Contains("Record split runner availability", workflow, StringComparison.Ordinal);
+        Assert.Contains("continue-on-error: true", workflow, StringComparison.Ordinal);
+        Assert.Contains("GH_TOKEN: ${{ github.token }}", workflow, StringComparison.Ordinal);
         Assert.Contains("Test-GitHubRunnerAvailability.ps1", workflow, StringComparison.Ordinal);
         Assert.Contains("-RequiredLabelSet \"self-hosted,windows,x64\"", workflow, StringComparison.Ordinal);
         Assert.Contains("-WarnOnly", workflow, StringComparison.Ordinal);
         Assert.Contains("artifacts/runner-availability/**", workflow, StringComparison.Ordinal);
+        string runnerScript = ReadSource("eng", "Test-GitHubRunnerAvailability.ps1");
+        Assert.Contains("recordKind = \"github-runner-availability\"", runnerScript, StringComparison.Ordinal);
+        Assert.Contains("querySucceeded", runnerScript, StringComparison.Ordinal);
+        Assert.Contains("queryError", runnerScript, StringComparison.Ordinal);
+        Assert.Contains("if (-not $WarnOnly.IsPresent)", runnerScript, StringComparison.Ordinal);
         Assert.Contains("runs-on: [self-hosted, windows, x64, release-artifacts]", workflow, StringComparison.Ordinal);
         Assert.Contains("runs-on: [self-hosted, windows, x64]", workflow, StringComparison.Ordinal);
         Assert.Contains("-SplitPackageRole all", workflow, StringComparison.Ordinal);
