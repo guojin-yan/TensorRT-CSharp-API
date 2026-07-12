@@ -993,5 +993,4 @@ Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "build-out\package-c
 if ($shouldRunBaseRuntimeBuild) {
   Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "artifacts\runtime\$SourceRuntimeKey")
   Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "pack\runtime\$SourceRuntimeKey\assets")
-  Remove-OptionalPath -LiteralPath (Join-Path $RepositoryRoot "artifacts\runtime-nupkg\$($sourcePackage.packageId).$resolvedVersion.nupkg")
 }
