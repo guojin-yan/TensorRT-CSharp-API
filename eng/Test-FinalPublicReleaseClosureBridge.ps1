@@ -49,9 +49,12 @@ if (-not (Test-Path -LiteralPath $resolvedInputPath -PathType Leaf)) {
 $record = Get-Content -LiteralPath $resolvedInputPath -Raw -Encoding utf8 | ConvertFrom-Json
 $lanes = @((Get-PropertyOrDefault -Object $record -Name "closureLanes" -DefaultValue @()))
 $sourceArtifacts = @((Get-PropertyOrDefault -Object $record -Name "sourceArtifacts" -DefaultValue @()) | ForEach-Object { [string]$_ })
+$crossLaneConsistencyChecks = @((Get-PropertyOrDefault -Object $record -Name "crossLaneConsistencyChecks" -DefaultValue @()))
 $items = New-Object System.Collections.Generic.List[object]
 
 $requiredLaneIds = @(
+  "github-actions-run-proof",
+  "owner-public-publish-result",
   "owner-publish-authorization",
   "owner-publish-execution-result",
   "public-package-download-proof",
@@ -62,6 +65,8 @@ $requiredLaneIds = @(
 )
 
 $requiredArtifacts = @(
+  "artifacts/final-release/github-actions-run-evidence-import-validation.json",
+  "artifacts/final-release/owner-public-publish-execution-result-candidate-validation.json",
   "artifacts/final-release/owner-publish-authorization-input-validation.json",
   "artifacts/final-release/owner-publish-execution-result-input-validation.json",
   "artifacts/final-release/public-package-download-proof-candidate-validation.json",
@@ -74,6 +79,27 @@ $requiredArtifacts = @(
 $laneIds = @($lanes | ForEach-Object { [string](Get-PropertyOrDefault -Object $_ -Name "laneId" -DefaultValue "") })
 $missingLaneIds = @($requiredLaneIds | Where-Object { $laneIds -notcontains $_ })
 $missingArtifacts = @($requiredArtifacts | Where-Object { $sourceArtifacts -notcontains $_ })
+$checkIds = @($crossLaneConsistencyChecks | ForEach-Object { [string](Get-PropertyOrDefault -Object $_ -Name "id" -DefaultValue "") })
+$requiredCheckIds = @(
+  "github-actions-run-evidence-ready",
+  "github-actions-run-url-present",
+  "github-actions-head-sha-format",
+  "github-actions-log-and-artifact-hashes",
+  "owner-public-publish-result-ready",
+  "owner-public-publish-links-github-actions",
+  "public-download-proof-ready",
+  "public-download-links-source-proofs",
+  "owner-and-public-download-package-url-match",
+  "owner-and-public-download-version-match",
+  "owner-and-public-download-sha-match",
+  "runtime-package-url-public",
+  "github-release-asset-consistent",
+  "owner-reviewer-and-timestamp-present",
+  "forbidden-substitutes-absent"
+)
+$missingCheckIds = @($requiredCheckIds | Where-Object { $checkIds -notcontains $_ })
+$failedConsistencyBlockers = @($crossLaneConsistencyChecks | Where-Object { -not [bool](Get-PropertyOrDefault -Object $_ -Name "passed" -DefaultValue $false) -and [string](Get-PropertyOrDefault -Object $_ -Name "severity" -DefaultValue "") -eq "blocker" })
+$failedConsistencyActionRequired = @($crossLaneConsistencyChecks | Where-Object { -not [bool](Get-PropertyOrDefault -Object $_ -Name "passed" -DefaultValue $false) -and [string](Get-PropertyOrDefault -Object $_ -Name "severity" -DefaultValue "") -eq "action-required" })
 
 $allLanesSafe = $lanes.Count -ge $requiredLaneIds.Count
 foreach ($lane in $lanes) {
@@ -90,6 +116,8 @@ foreach ($lane in $lanes) {
 $items.Add((New-ValidationItem -Id "record-kind" -Passed ([string](Get-PropertyOrDefault -Object $record -Name "recordKind" -DefaultValue "") -eq "final-public-release-closure-bridge") -Severity "blocker" -Detail "recordKind must be final-public-release-closure-bridge.")) | Out-Null
 $items.Add((New-ValidationItem -Id "required-lanes-present" -Passed ($missingLaneIds.Count -eq 0) -Severity "blocker" -Detail "Missing required lanes: $($missingLaneIds -join ', ')")) | Out-Null
 $items.Add((New-ValidationItem -Id "required-source-artifacts-present" -Passed ($missingArtifacts.Count -eq 0) -Severity "blocker" -Detail "Missing source artifacts: $($missingArtifacts -join ', ')")) | Out-Null
+$items.Add((New-ValidationItem -Id "required-cross-lane-consistency-checks-present" -Passed ($missingCheckIds.Count -eq 0) -Severity "blocker" -Detail "Missing cross-lane consistency checks: $($missingCheckIds -join ', ')")) | Out-Null
+$items.Add((New-ValidationItem -Id "cross-lane-consistency-no-blockers" -Passed ($failedConsistencyBlockers.Count -eq 0 -and [int](Get-PropertyOrDefault -Object $record -Name "failedConsistencyBlockerCount" -DefaultValue 0) -eq 0) -Severity "blocker" -Detail "Cross-lane consistency checks must not contain blocker failures.")) | Out-Null
 $items.Add((New-ValidationItem -Id "lane-count-consistent" -Passed ([int](Get-PropertyOrDefault -Object $record -Name "laneCount" -DefaultValue 0) -eq $lanes.Count) -Severity "blocker" -Detail "laneCount must match closureLanes count.")) | Out-Null
 $items.Add((New-ValidationItem -Id "lanes-safe" -Passed $allLanesSafe -Severity "blocker" -Detail "Every lane must keep publish/token/close/proof flags false and include ownerAction plus boundary.")) | Out-Null
 $items.Add((New-ValidationItem -Id "no-side-effects" -Passed ([bool](Get-PropertyOrDefault -Object $record -Name "notExecutedByAutomation" -DefaultValue $false) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "performsPublish" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "usesPublishToken" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canPromoteRuntimeProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canPublishPublicly" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canCloseReleaseIssue" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isRuntimeExecutionProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isPackageConsumerRuntimeProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isReleaseCloseProof" -DefaultValue $true)) -Severity "blocker" -Detail "Bridge must not publish, use tokens, promote proof, or close release issue.")) | Out-Null
@@ -116,6 +144,10 @@ $validation = [pscustomobject]@{
   readyLaneCount = [int](Get-PropertyOrDefault -Object $record -Name "readyLaneCount" -DefaultValue 0)
   blockedLaneCount = [int](Get-PropertyOrDefault -Object $record -Name "blockedLaneCount" -DefaultValue 0)
   missingArtifactCount = [int](Get-PropertyOrDefault -Object $record -Name "missingArtifactCount" -DefaultValue 0)
+  crossLaneConsistencyCheckCount = $crossLaneConsistencyChecks.Count
+  failedConsistencyBlockerCount = $failedConsistencyBlockers.Count
+  failedConsistencyActionRequiredCount = $failedConsistencyActionRequired.Count
+  forbiddenSubstituteFindingCount = [int](Get-PropertyOrDefault -Object $record -Name "forbiddenSubstituteFindingCount" -DefaultValue 0)
   failedBlockerCount = $failedBlockers.Count
   failedActionRequiredCount = $failedActionRequired.Count
   notExecutedByAutomation = $true

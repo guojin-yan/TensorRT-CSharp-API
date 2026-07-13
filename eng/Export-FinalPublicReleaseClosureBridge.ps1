@@ -41,6 +41,33 @@ function Get-PropertyOrDefault {
   return $DefaultValue
 }
 
+function Test-Sha256Format {
+  param([AllowNull()][object]$Value)
+  return ([string]$Value) -match "^[0-9a-fA-F]{64}$"
+}
+
+function Test-ReadyUrl {
+  param([AllowNull()][object]$Value, [string]$Prefix = "https://")
+  $text = ([string]$Value).Trim()
+  return -not [string]::IsNullOrWhiteSpace($text) -and $text.StartsWith($Prefix, [StringComparison]::OrdinalIgnoreCase)
+}
+
+function Get-StringArrayProperty {
+  param([AllowNull()][object]$Object, [string]$Name)
+  $value = Get-PropertyOrDefault -Object $Object -Name $Name -DefaultValue @()
+  return @($value | ForEach-Object { [string]$_ } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+}
+
+function New-ClosureConsistencyCheck {
+  param([string]$Id, [bool]$Passed, [string]$Severity, [string]$Detail)
+  [pscustomobject]@{
+    id = $Id
+    passed = $Passed
+    severity = $Severity
+    detail = $Detail
+  }
+}
+
 function New-ClosureLane {
   param(
     [string]$Id,
@@ -89,6 +116,8 @@ function New-ClosureLane {
 
 $ownerAuthorization = Read-JsonOrNull "artifacts\final-release\owner-publish-authorization-input-validation.json"
 $ownerPublishExecutionResult = Read-JsonOrNull "artifacts\final-release\owner-publish-execution-result-input-validation.json"
+$githubActionsRunEvidence = Read-JsonOrNull "artifacts\final-release\github-actions-run-evidence-import-validation.json"
+$ownerPublicPublishResult = Read-JsonOrNull "artifacts\final-release\owner-public-publish-execution-result-candidate-validation.json"
 $publicDownload = Read-JsonOrNull "artifacts\final-release\public-package-download-proof-candidate-validation.json"
 $cleanConsumerSmoke = Read-JsonOrNull "artifacts\final-release\clean-external-consumer-smoke-input-validation.json"
 $postPublishProof = Read-JsonOrNull "artifacts\final-release\post-publish-clean-consumer-proof-result-validation.json"
@@ -96,6 +125,30 @@ $releaseCloseDecision = Read-JsonOrNull "artifacts\final-release\release-issue-c
 $strictCloseDashboard = Read-JsonOrNull "artifacts\final-release\strict-close-ready-convergence-dashboard-validation.json"
 
 $lanes = @(
+  New-ClosureLane `
+    -Id "github-actions-run-proof" `
+    -Title "GitHub Actions run evidence import" `
+    -Artifact "artifacts/final-release/github-actions-run-evidence-import-validation.json" `
+    -Record $githubActionsRunEvidence `
+    -StateProperty "validationState" `
+    -RequiredState "github-actions-run-evidence-ready" `
+    -OwnerAction "Import a real successful GitHub Actions run for the exact release commit, including run URL, run id, head SHA, workflow log hash, and artifact manifest hash." `
+    -RequiredBeforeClose @("real GitHub Actions run URL", "run id", "head SHA", "workflow log SHA256", "artifact manifest SHA256") `
+    -Boundary "GitHub Actions run evidence import validation is read-only; it does not trigger workflows, publish packages, prove runtime smoke, or close release issues." `
+    -RequireProofReady $true `
+    -ProofReadyProperty "githubActionsRunEvidenceReady"
+  New-ClosureLane `
+    -Id "owner-public-publish-result" `
+    -Title "Owner public publish execution result candidate" `
+    -Artifact "artifacts/final-release/owner-public-publish-execution-result-candidate-validation.json" `
+    -Record $ownerPublicPublishResult `
+    -StateProperty "validationState" `
+    -RequiredState "owner-public-publish-execution-result-candidate-ready" `
+    -OwnerAction "Import Owner-supplied public publish result with public package URL/version/SHA, managed/runtime package URLs, GitHub release asset, reviewer, authorization, and GitHub Actions linkage." `
+    -RequiredBeforeClose @("owner reviewer", "public package URL", "public package version", "public package SHA256", "managed/runtime package URLs", "GitHub release asset SHA256") `
+    -Boundary "Owner public publish result candidate validation is strict-validator input only; it does not execute publish, use tokens, prove clean consumer runtime, or close the release issue." `
+    -RequireProofReady $true `
+    -ProofReadyProperty "proofCandidateReady"
   New-ClosureLane `
     -Id "owner-publish-authorization" `
     -Title "Owner publish authorization input" `
@@ -170,8 +223,67 @@ $lanes = @(
     -Boundary "The dashboard summarizes readiness only; it is not package push, publish approval, runtime proof, or issue closure."
 )
 
+$githubActionsReady = [bool](Get-PropertyOrDefault -Object $githubActionsRunEvidence -Name "githubActionsRunEvidenceReady" -DefaultValue $false)
+$githubActionsRunId = [string](Get-PropertyOrDefault -Object $githubActionsRunEvidence -Name "runId" -DefaultValue "")
+$githubActionsRunUrl = [string](Get-PropertyOrDefault -Object $githubActionsRunEvidence -Name "runUrl" -DefaultValue "")
+$githubActionsHeadSha = [string](Get-PropertyOrDefault -Object $githubActionsRunEvidence -Name "headSha" -DefaultValue "")
+$githubActionsWorkflowRunLogSha256 = [string](Get-PropertyOrDefault -Object $githubActionsRunEvidence -Name "workflowRunLogSha256" -DefaultValue "")
+$githubActionsArtifactManifestSha256 = [string](Get-PropertyOrDefault -Object $githubActionsRunEvidence -Name "artifactManifestSha256" -DefaultValue "")
+
+$ownerPublicPublishReady = [bool](Get-PropertyOrDefault -Object $ownerPublicPublishResult -Name "proofCandidateReady" -DefaultValue $false)
+$ownerPublicPublishSourceGitHubActionsReady = [bool](Get-PropertyOrDefault -Object $ownerPublicPublishResult -Name "sourceGitHubActionsRunEvidenceReady" -DefaultValue $false)
+$ownerPublicPackageUrl = [string](Get-PropertyOrDefault -Object $ownerPublicPublishResult -Name "publicPackageUrl" -DefaultValue "")
+$ownerPublicPackageVersion = [string](Get-PropertyOrDefault -Object $ownerPublicPublishResult -Name "publicPackageVersion" -DefaultValue "")
+$ownerPublicPackageSha256 = [string](Get-PropertyOrDefault -Object $ownerPublicPublishResult -Name "publicPackageSha256" -DefaultValue "")
+$ownerManagedPackageUrl = [string](Get-PropertyOrDefault -Object $ownerPublicPublishResult -Name "managedPackageUrl" -DefaultValue "")
+$ownerRuntimePackageUrl = [string](Get-PropertyOrDefault -Object $ownerPublicPublishResult -Name "runtimePackageUrl" -DefaultValue "")
+$ownerGitHubReleaseUrl = [string](Get-PropertyOrDefault -Object $ownerPublicPublishResult -Name "githubReleaseUrl" -DefaultValue "")
+$ownerGitHubReleaseAssetUrl = [string](Get-PropertyOrDefault -Object $ownerPublicPublishResult -Name "githubReleaseAssetUrl" -DefaultValue "")
+$ownerGitHubReleaseAssetSha256 = [string](Get-PropertyOrDefault -Object $ownerPublicPublishResult -Name "githubReleaseAssetSha256" -DefaultValue "")
+$ownerReviewer = [string](Get-PropertyOrDefault -Object $ownerPublicPublishResult -Name "ownerReviewer" -DefaultValue "")
+$ownerReviewTimestampUtc = [string](Get-PropertyOrDefault -Object $ownerPublicPublishResult -Name "ownerReviewTimestampUtc" -DefaultValue "")
+
+$publicDownloadReady = [bool](Get-PropertyOrDefault -Object $publicDownload -Name "proofCandidateReady" -DefaultValue $false)
+$publicDownloadSourceGitHubActionsReady = [bool](Get-PropertyOrDefault -Object $publicDownload -Name "sourceGitHubActionsRunEvidenceReady" -DefaultValue $false)
+$publicDownloadSourceOwnerReady = [bool](Get-PropertyOrDefault -Object $publicDownload -Name "sourceOwnerPublicPublishResultReady" -DefaultValue $false)
+$publicDownloadManagedPackageUrl = [string](Get-PropertyOrDefault -Object $publicDownload -Name "managedPackagePageUrl" -DefaultValue "")
+$publicDownloadManagedPackageDownloadUrl = [string](Get-PropertyOrDefault -Object $publicDownload -Name "managedPackageDownloadUrl" -DefaultValue "")
+$publicDownloadRuntimePackageUrl = [string](Get-PropertyOrDefault -Object $publicDownload -Name "runtimePackagePageUrl" -DefaultValue "")
+$publicDownloadRuntimePackageDownloadUrl = [string](Get-PropertyOrDefault -Object $publicDownload -Name "runtimePackageDownloadUrl" -DefaultValue "")
+$publicDownloadSourceOwnerPackageUrl = [string](Get-PropertyOrDefault -Object $publicDownload -Name "sourceOwnerPublicPackageUrl" -DefaultValue "")
+$publicDownloadSourceOwnerPackageVersion = [string](Get-PropertyOrDefault -Object $publicDownload -Name "sourceOwnerPublicPackageVersion" -DefaultValue "")
+$publicDownloadSourceOwnerPackageSha256 = [string](Get-PropertyOrDefault -Object $publicDownload -Name "sourceOwnerPublicPackageSha256" -DefaultValue "")
+$publicDownloadGitHubReleaseUrl = [string](Get-PropertyOrDefault -Object $publicDownload -Name "githubReleaseUrl" -DefaultValue "")
+$publicDownloadGitHubReleaseAssetUrl = [string](Get-PropertyOrDefault -Object $publicDownload -Name "githubReleaseAssetUrl" -DefaultValue "")
+$publicDownloadGitHubReleaseAssetSha256 = [string](Get-PropertyOrDefault -Object $publicDownload -Name "githubReleaseAssetSha256" -DefaultValue "")
+$publicDownloadForbiddenFindings = Get-StringArrayProperty -Object $publicDownload -Name "forbiddenSubstituteFindings"
+$ownerForbiddenFindings = Get-StringArrayProperty -Object $ownerPublicPublishResult -Name "forbiddenSubstituteFindings"
+$githubActionsForbiddenFindings = Get-StringArrayProperty -Object $githubActionsRunEvidence -Name "forbiddenSubstituteFindings"
+$allForbiddenFindings = @($publicDownloadForbiddenFindings + $ownerForbiddenFindings + $githubActionsForbiddenFindings) | Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_) } | Select-Object -Unique
+$forbiddenFindingCount = @($allForbiddenFindings).Count
+
+$crossLaneConsistencyChecks = @(
+  New-ClosureConsistencyCheck -Id "github-actions-run-evidence-ready" -Passed $githubActionsReady -Severity "action-required" -Detail "A real GitHub Actions run evidence validation must be ready before release close review."
+  New-ClosureConsistencyCheck -Id "github-actions-run-url-present" -Passed (Test-ReadyUrl -Value $githubActionsRunUrl -Prefix "https://github.com/") -Severity "action-required" -Detail "GitHub Actions run URL must be a real github.com actions URL."
+  New-ClosureConsistencyCheck -Id "github-actions-head-sha-format" -Passed ($githubActionsHeadSha -match "^[0-9a-fA-F]{40}$") -Severity "action-required" -Detail "GitHub Actions head SHA must identify the reviewed commit."
+  New-ClosureConsistencyCheck -Id "github-actions-log-and-artifact-hashes" -Passed ((Test-Sha256Format -Value $githubActionsWorkflowRunLogSha256) -and (Test-Sha256Format -Value $githubActionsArtifactManifestSha256)) -Severity "action-required" -Detail "Workflow log SHA256 and artifact manifest SHA256 must be present."
+  New-ClosureConsistencyCheck -Id "owner-public-publish-result-ready" -Passed $ownerPublicPublishReady -Severity "action-required" -Detail "Owner public publish result candidate must be ready."
+  New-ClosureConsistencyCheck -Id "owner-public-publish-links-github-actions" -Passed ($ownerPublicPublishSourceGitHubActionsReady -and $githubActionsReady) -Severity "action-required" -Detail "Owner public publish result must link to ready GitHub Actions run evidence."
+  New-ClosureConsistencyCheck -Id "public-download-proof-ready" -Passed $publicDownloadReady -Severity "action-required" -Detail "Public package download proof candidate must be ready."
+  New-ClosureConsistencyCheck -Id "public-download-links-source-proofs" -Passed ($publicDownloadSourceGitHubActionsReady -and $publicDownloadSourceOwnerReady) -Severity "action-required" -Detail "Public download proof must link to ready GitHub Actions and Owner public publish result."
+  New-ClosureConsistencyCheck -Id "owner-and-public-download-package-url-match" -Passed (-not [string]::IsNullOrWhiteSpace($ownerPublicPackageUrl) -and $ownerPublicPackageUrl.Equals($publicDownloadSourceOwnerPackageUrl, [StringComparison]::OrdinalIgnoreCase) -and $ownerPublicPackageUrl.Equals($publicDownloadManagedPackageUrl, [StringComparison]::OrdinalIgnoreCase)) -Severity "action-required" -Detail "Owner public package URL must match the public download candidate managed package page URL."
+  New-ClosureConsistencyCheck -Id "owner-and-public-download-version-match" -Passed (-not [string]::IsNullOrWhiteSpace($ownerPublicPackageVersion) -and $ownerPublicPackageVersion.Equals($publicDownloadSourceOwnerPackageVersion, [StringComparison]::OrdinalIgnoreCase)) -Severity "action-required" -Detail "Owner public package version must match the public download candidate source version."
+  New-ClosureConsistencyCheck -Id "owner-and-public-download-sha-match" -Passed ((Test-Sha256Format -Value $ownerPublicPackageSha256) -and $ownerPublicPackageSha256.Equals($publicDownloadSourceOwnerPackageSha256, [StringComparison]::OrdinalIgnoreCase)) -Severity "action-required" -Detail "Owner public package SHA256 must match the public download candidate source SHA256."
+  New-ClosureConsistencyCheck -Id "runtime-package-url-public" -Passed ((Test-ReadyUrl -Value $ownerRuntimePackageUrl -Prefix "https://www.nuget.org/packages/") -and (Test-ReadyUrl -Value $publicDownloadRuntimePackageUrl -Prefix "https://www.nuget.org/packages/") -and (Test-ReadyUrl -Value $publicDownloadRuntimePackageDownloadUrl)) -Severity "action-required" -Detail "Runtime package page and download URLs must be public HTTPS URLs."
+  New-ClosureConsistencyCheck -Id "github-release-asset-consistent" -Passed ((Test-ReadyUrl -Value $ownerGitHubReleaseAssetUrl -Prefix "https://github.com/") -and $ownerGitHubReleaseAssetUrl.Equals($publicDownloadGitHubReleaseAssetUrl, [StringComparison]::OrdinalIgnoreCase) -and (Test-Sha256Format -Value $ownerGitHubReleaseAssetSha256) -and $ownerGitHubReleaseAssetSha256.Equals($publicDownloadGitHubReleaseAssetSha256, [StringComparison]::OrdinalIgnoreCase)) -Severity "action-required" -Detail "GitHub release asset URL and SHA256 must match between Owner publish result and public download proof."
+  New-ClosureConsistencyCheck -Id "owner-reviewer-and-timestamp-present" -Passed (-not [string]::IsNullOrWhiteSpace($ownerReviewer) -and -not [string]::IsNullOrWhiteSpace($ownerReviewTimestampUtc)) -Severity "action-required" -Detail "Owner reviewer and review timestamp must be present."
+  New-ClosureConsistencyCheck -Id "forbidden-substitutes-absent" -Passed ($forbiddenFindingCount -eq 0) -Severity "blocker" -Detail $(if ($forbiddenFindingCount -eq 0) { "No forbidden substitute findings were propagated from GitHub Actions, Owner publish, or public download proof lanes." } else { "Forbidden substitute findings were propagated: $($allForbiddenFindings -join ', ')" })
+)
+
 $blockedLanes = @($lanes | Where-Object { -not $_.ready })
 $readyLanes = @($lanes | Where-Object { $_.ready })
+$failedConsistencyBlockers = @($crossLaneConsistencyChecks | Where-Object { -not $_.passed -and $_.severity -eq "blocker" })
+$failedConsistencyActionRequired = @($crossLaneConsistencyChecks | Where-Object { -not $_.passed -and $_.severity -eq "action-required" })
 $allSafe = $true
 foreach ($lane in $lanes) {
   $allSafe = $allSafe -and
@@ -182,7 +294,15 @@ foreach ($lane in $lanes) {
     -not [bool](Get-PropertyOrDefault -Object $lane -Name "isReleaseCloseProof" -DefaultValue $true)
 }
 
-$bridgeState = if ($blockedLanes.Count -eq 0) { "final-public-release-closure-bridge-ready-for-owner-close-review" } else { "blocked-final-public-release-closure-real-owner-proof-required" }
+$bridgeState = if ($failedConsistencyBlockers.Count -gt 0) {
+  "invalid-final-public-release-closure-bridge"
+}
+elseif ($blockedLanes.Count -eq 0 -and $failedConsistencyActionRequired.Count -eq 0) {
+  "final-public-release-closure-bridge-ready-for-owner-close-review"
+}
+else {
+  "blocked-final-public-release-closure-real-owner-proof-required"
+}
 
 $record = [pscustomobject]@{
   recordKind = "final-public-release-closure-bridge"
@@ -192,6 +312,9 @@ $record = [pscustomobject]@{
   readyLaneCount = $readyLanes.Count
   blockedLaneCount = $blockedLanes.Count
   missingArtifactCount = @($lanes | Where-Object { -not $_.artifactExists }).Count
+  failedConsistencyBlockerCount = $failedConsistencyBlockers.Count
+  failedConsistencyActionRequiredCount = $failedConsistencyActionRequired.Count
+  forbiddenSubstituteFindingCount = $forbiddenFindingCount
   notExecutedByAutomation = $true
   performsPublish = $false
   usesPublishToken = $false
@@ -204,6 +327,40 @@ $record = [pscustomobject]@{
   isReleaseCloseProof = $false
   allLanesSideEffectSafe = $allSafe
   closureLanes = @($lanes)
+  crossLaneConsistencyChecks = @($crossLaneConsistencyChecks)
+  closureProofSourceSummary = [pscustomobject]@{
+    githubActionsRunEvidenceReady = $githubActionsReady
+    githubActionsRunId = $githubActionsRunId
+    githubActionsRunUrl = $githubActionsRunUrl
+    githubActionsHeadSha = $githubActionsHeadSha
+    githubActionsWorkflowRunLogSha256 = $githubActionsWorkflowRunLogSha256
+    githubActionsArtifactManifestSha256 = $githubActionsArtifactManifestSha256
+    ownerPublicPublishResultReady = $ownerPublicPublishReady
+    ownerPublicPublishSourceGitHubActionsReady = $ownerPublicPublishSourceGitHubActionsReady
+    ownerPublicPackageUrl = $ownerPublicPackageUrl
+    ownerPublicPackageVersion = $ownerPublicPackageVersion
+    ownerPublicPackageSha256 = $ownerPublicPackageSha256
+    ownerManagedPackageUrl = $ownerManagedPackageUrl
+    ownerRuntimePackageUrl = $ownerRuntimePackageUrl
+    ownerGitHubReleaseUrl = $ownerGitHubReleaseUrl
+    ownerGitHubReleaseAssetUrl = $ownerGitHubReleaseAssetUrl
+    ownerGitHubReleaseAssetSha256 = $ownerGitHubReleaseAssetSha256
+    ownerReviewer = $ownerReviewer
+    ownerReviewTimestampUtc = $ownerReviewTimestampUtc
+    publicDownloadProofReady = $publicDownloadReady
+    publicDownloadSourceGitHubActionsReady = $publicDownloadSourceGitHubActionsReady
+    publicDownloadSourceOwnerPublicPublishResultReady = $publicDownloadSourceOwnerReady
+    publicDownloadManagedPackageUrl = $publicDownloadManagedPackageUrl
+    publicDownloadManagedPackageDownloadUrl = $publicDownloadManagedPackageDownloadUrl
+    publicDownloadRuntimePackageUrl = $publicDownloadRuntimePackageUrl
+    publicDownloadRuntimePackageDownloadUrl = $publicDownloadRuntimePackageDownloadUrl
+    publicDownloadSourceOwnerPackageUrl = $publicDownloadSourceOwnerPackageUrl
+    publicDownloadSourceOwnerPackageVersion = $publicDownloadSourceOwnerPackageVersion
+    publicDownloadSourceOwnerPackageSha256 = $publicDownloadSourceOwnerPackageSha256
+    publicDownloadGitHubReleaseUrl = $publicDownloadGitHubReleaseUrl
+    publicDownloadGitHubReleaseAssetUrl = $publicDownloadGitHubReleaseAssetUrl
+    publicDownloadGitHubReleaseAssetSha256 = $publicDownloadGitHubReleaseAssetSha256
+  }
   sourceArtifacts = @($lanes | ForEach-Object { $_.artifact })
   nextOwnerActions = @($blockedLanes | ForEach-Object { [pscustomobject]@{ laneId = $_.laneId; state = $_.state; ownerAction = $_.ownerAction; requiredBeforeClose = $_.requiredBeforeClose } })
   safetyBoundary = "Final public release closure bridge only joins owner authorization, owner publish execution result, public package download proof, clean external consumer smoke, post-publish proof, release issue close owner decision, and strict close dashboard. It does not publish packages, use tokens, claim runtime proof, claim post-publish proof, or close the release issue."
@@ -229,6 +386,9 @@ $markdown = @"
 | readyLaneCount | ``$($record.readyLaneCount)`` |
 | blockedLaneCount | ``$($record.blockedLaneCount)`` |
 | missingArtifactCount | ``$($record.missingArtifactCount)`` |
+| failedConsistencyBlockerCount | ``$($record.failedConsistencyBlockerCount)`` |
+| failedConsistencyActionRequiredCount | ``$($record.failedConsistencyActionRequiredCount)`` |
+| forbiddenSubstituteFindingCount | ``$($record.forbiddenSubstituteFindingCount)`` |
 | performsPublish | ``$($record.performsPublish)`` |
 | usesPublishToken | ``$($record.usesPublishToken)`` |
 | canPublishPublicly | ``$($record.canPublishPublicly)`` |
@@ -239,6 +399,12 @@ $markdown = @"
 | Lane | State | Ready | Owner Action |
 |---|---:|---:|---|
 $($laneRows -join "`r`n")
+
+## Cross-Lane Consistency
+
+| Check | Passed | Severity | Detail |
+|---|---:|---|---|
+$(($record.crossLaneConsistencyChecks | ForEach-Object { "| ``$($_.id)`` | ``$($_.passed)`` | ``$($_.severity)`` | $($_.detail.Replace("|", "\|")) |" }) -join "`r`n")
 
 ## Boundary
 
