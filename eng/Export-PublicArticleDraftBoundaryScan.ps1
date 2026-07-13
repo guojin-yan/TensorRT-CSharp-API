@@ -85,7 +85,7 @@ $record = [pscustomobject]@{
 
 $jsonPath = Join-Path $OutputRoot "public-article-draft-boundary-scan.json"
 $mdPath = Join-Path $OutputRoot "public-article-draft-boundary-scan.md"
-$record | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $jsonPath -Encoding utf8
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($record | ConvertTo-Json -Depth 12)
 $md = New-Object System.Collections.Generic.List[string]
 $md.Add("# Public Article Draft Boundary Scan") | Out-Null
 $md.Add("") | Out-Null

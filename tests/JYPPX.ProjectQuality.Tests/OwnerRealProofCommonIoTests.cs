@@ -50,4 +50,74 @@ public sealed class OwnerRealProofCommonIoTests
             Assert.DoesNotContain("Set-Content -LiteralPath $jsonPath", script, StringComparison.Ordinal);
         }
     }
+
+    [Fact]
+    public void OwnerCloseAndPublicArticleProofScriptsUseCommonAtomicWriterForJson()
+    {
+        foreach (string scriptName in new[]
+        {
+            "Export-FinalOwnerHandoffIndex.ps1",
+            "Export-FinalOwnerNextDecisionGate.ps1",
+            "Export-FinalOwnerPublishAndArticleActionDashboard.ps1",
+            "Export-GitHubActionsRunnerNonProofGuardPack.ps1",
+            "Export-OwnerAuthorizationCommandGuardPack.ps1",
+            "Export-OwnerFinalAuthorizationRequestSummary.ps1",
+            "Export-OwnerFinalMissingActionOneScreenPack.ps1",
+            "Export-OwnerMissingRealPublishEvidenceRepairPack.ps1",
+            "Export-OwnerRealProofEvidenceBackfillPackage.ps1",
+            "Export-OwnerRealProofStagingWorkspaceContract.ps1",
+            "Export-PackageConsumerPreflight.ps1",
+            "Export-PublicArticleBlockedClaimOwnerReviewList.ps1",
+            "Export-PublicArticleDraftBoundaryScan.ps1",
+            "Export-PublicArticleSafeRewriteDraftPack.ps1",
+            "Export-PublicArticleSourcePatchApplyReadinessPack.ps1",
+            "Export-PublicArticleSourcePatchProposalPack.ps1",
+            "Export-ReleaseCloseStrictEvidenceClosureDashboard.ps1",
+            "Import-FinalOwnerCloseDecision.ps1",
+            "Import-FinalOwnerRollbackReview.ps1",
+            "Test-FinalOwnerCloseDecision.ps1",
+            "Test-FinalOwnerHandoffIndex.ps1",
+            "Test-FinalOwnerNextDecisionGate.ps1",
+            "Test-FinalOwnerPublishAndArticleActionDashboard.ps1",
+            "Test-FinalOwnerRollbackReview.ps1",
+            "Test-GitHubActionsRunnerNonProofGuardPack.ps1",
+            "Test-OwnerAuthorizationCommandGuardPack.ps1",
+            "Test-OwnerFinalAuthorizationRequestSummary.ps1",
+            "Test-OwnerFinalMissingActionOneScreenPack.ps1",
+            "Test-OwnerMissingRealPublishEvidenceRepairPack.ps1",
+            "Test-OwnerRealProofEvidenceBackfillPackage.ps1",
+            "Test-OwnerRealProofStagingWorkspace.ps1",
+            "Test-OwnerRealProofStagingWorkspaceContract.ps1",
+            "Test-PackageConsumerPreflight.ps1",
+            "Test-PublicArticleBlockedClaimOwnerReviewList.ps1",
+            "Test-PublicArticleDraftBoundaryScan.ps1",
+            "Test-PublicArticleSafeRewriteDraftPack.ps1",
+            "Test-PublicArticleSourcePatchApplyReadinessPack.ps1",
+            "Test-PublicArticleSourcePatchProposalPack.ps1",
+            "Test-ReleaseCloseStrictEvidenceClosureDashboard.ps1"
+        })
+        {
+            string scriptPath = Path.Combine(RepositoryPaths.Root, "eng", scriptName);
+            string script = File.ReadAllText(scriptPath);
+
+            Assert.Contains("Write-Utf8File -LiteralPath $", script, StringComparison.Ordinal);
+            Assert.DoesNotContain("Set-Content -LiteralPath $jsonPath", script, StringComparison.Ordinal);
+            Assert.DoesNotContain("Set-Content -LiteralPath $templatePath", script, StringComparison.Ordinal);
+        }
+    }
+
+    [Fact]
+    public void OwnerPublicPublishExecutionResultCommonUsesAtomicWritesAndRetryReads()
+    {
+        string commonPath = Path.Combine(RepositoryPaths.Root, "eng", "OwnerPublicPublishExecutionResultCommon.ps1");
+        string common = File.ReadAllText(commonPath);
+
+        Assert.Contains("function Write-OwnerUtf8File", common, StringComparison.Ordinal);
+        Assert.Contains("[IO.File]::Replace", common, StringComparison.Ordinal);
+        Assert.Contains("for ($attempt = 1; $attempt -le 10; $attempt++)", common, StringComparison.Ordinal);
+        Assert.Contains("for ($attempt = 1; $attempt -le 8; $attempt++)", common, StringComparison.Ordinal);
+        Assert.Contains("[IO.File]::ReadAllText", common, StringComparison.Ordinal);
+        Assert.DoesNotContain("[IO.File]::WriteAllText($LiteralPath", common, StringComparison.Ordinal);
+        Assert.DoesNotContain("Get-Content -LiteralPath $resolvedPath -Raw -Encoding utf8 | ConvertFrom-Json", common, StringComparison.Ordinal);
+    }
 }

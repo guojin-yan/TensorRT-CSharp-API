@@ -44,7 +44,7 @@ $validation = [pscustomobject]@{
 }
 $jsonPath = Join-Path $OutputRoot "final-owner-close-decision-validation.json"
 $mdPath = Join-Path $OutputRoot "final-owner-close-decision-validation.md"
-$validation | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $jsonPath -Encoding utf8
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($validation | ConvertTo-Json -Depth 8)
 Write-Utf8File -LiteralPath $mdPath -InputObject @("# Final Owner Close Decision Validation", "", "- validationState: ``$state``", "- failedBlockerCount: ``$($failed.Count)``", "", "## Boundary", "", $validation.boundary)
 Write-Host "FinalOwnerCloseDecisionValidationState=$state FailedBlockers=$($failed.Count)"
 if ($Strict.IsPresent -and $failed.Count -gt 0) { throw "Final Owner close decision validation failed." }

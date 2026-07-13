@@ -54,7 +54,7 @@ $validation = [pscustomobject]@{
 
 $jsonPath = Join-Path $OutputRoot "public-article-source-patch-proposal-pack-validation.json"
 $mdPath = Join-Path $OutputRoot "public-article-source-patch-proposal-pack-validation.md"
-$validation | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $jsonPath -Encoding utf8
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($validation | ConvertTo-Json -Depth 10)
 Write-Utf8File -LiteralPath $mdPath -InputObject @(
   "# Public Article Source Patch Proposal Pack Validation",
   "",

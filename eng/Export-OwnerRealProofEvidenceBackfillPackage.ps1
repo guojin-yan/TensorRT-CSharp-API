@@ -91,8 +91,7 @@ $record = [pscustomobject]@{
 
 $jsonPath = Join-Path $OutputRoot "owner-real-proof-evidence-backfill-package.json"
 $mdPath = Join-Path $OutputRoot "owner-real-proof-evidence-backfill-package.md"
-$record | ConvertTo-Json -Depth 14 | Set-Content -LiteralPath $jsonPath -Encoding utf8
-
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($record | ConvertTo-Json -Depth 14)
 $rows = foreach ($item in ($items.ToArray() | Select-Object -First 160)) {
   "| $($item.order) | ``$($item.group)`` | ``$(ConvertTo-MarkdownCell $item.targetJson)`` | ``$(ConvertTo-MarkdownCell $item.targetField)`` | $(ConvertTo-MarkdownCell $item.strictValidator) |"
 }

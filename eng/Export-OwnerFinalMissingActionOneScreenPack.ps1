@@ -91,7 +91,7 @@ $record = [pscustomobject]@{
 
 $jsonPath = Join-Path $OutputRoot "owner-final-missing-action-one-screen-pack.json"
 $mdPath = Join-Path $OutputRoot "owner-final-missing-action-one-screen-pack.md"
-$record | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $jsonPath -Encoding utf8
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($record | ConvertTo-Json -Depth 12)
 $md = New-Object System.Collections.Generic.List[string]
 $md.Add("# Owner Final Missing Action One-Screen Pack") | Out-Null
 $md.Add("") | Out-Null

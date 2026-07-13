@@ -55,7 +55,7 @@ $validation = [pscustomobject]@{
 }
 $jsonPath = Join-Path $OutputRoot "owner-real-proof-evidence-backfill-package-validation.json"
 $mdPath = Join-Path $OutputRoot "owner-real-proof-evidence-backfill-package-validation.md"
-$validation | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $jsonPath -Encoding utf8
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($validation | ConvertTo-Json -Depth 10)
 Write-Utf8File -LiteralPath $mdPath -InputObject @("# Owner Real Proof Evidence Backfill Package Validation", "", "- validationState: ``$state``", "- failedBlockerCount: ``$($failed.Count)``", "- backfillItemCount: ``$($items.Count)``", "", "## Boundary", "", $validation.boundary)
 Write-Host "OwnerRealProofEvidenceBackfillPackageValidationState=$state FailedBlockers=$($failed.Count) BackfillItems=$($items.Count)"
 if ($Strict.IsPresent -and $failed.Count -gt 0) { throw "Owner real proof evidence backfill package validation failed." }

@@ -52,7 +52,7 @@ $validation = [pscustomobject]@{
 
 $jsonPath = Join-Path $OutputRoot "owner-final-missing-action-one-screen-pack-validation.json"
 $mdPath = Join-Path $OutputRoot "owner-final-missing-action-one-screen-pack-validation.md"
-$validation | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $jsonPath -Encoding utf8
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($validation | ConvertTo-Json -Depth 10)
 Write-Utf8File -LiteralPath $mdPath -InputObject @(
   "# Owner Final Missing Action One-Screen Pack Validation",
   "",

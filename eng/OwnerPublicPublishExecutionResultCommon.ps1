@@ -57,20 +57,69 @@ function Write-OwnerUtf8File {
   param([string]$LiteralPath, [AllowNull()][object]$InputObject)
 
   $directory = Split-Path -Parent $LiteralPath
-  if (-not [string]::IsNullOrWhiteSpace($directory)) {
-    New-Item -ItemType Directory -Path $directory -Force | Out-Null
+  if ([string]::IsNullOrWhiteSpace($directory)) {
+    $directory = "."
   }
+  New-Item -ItemType Directory -Path $directory -Force | Out-Null
 
   $lines = @(ConvertTo-OwnerFlatStringLines -Value $InputObject)
-  [IO.File]::WriteAllText($LiteralPath, (($lines -join [Environment]::NewLine) + [Environment]::NewLine), $script:OwnerPublicPublishUtf8)
+  $content = ($lines -join [Environment]::NewLine) + [Environment]::NewLine
+  $fileName = Split-Path -Leaf $LiteralPath
+  $tempPath = Join-Path $directory (".{0}.{1}.tmp" -f $fileName, [System.Guid]::NewGuid().ToString("N"))
+  $backupPath = Join-Path $directory (".{0}.{1}.bak" -f $fileName, [System.Guid]::NewGuid().ToString("N"))
+  try {
+    [IO.File]::WriteAllText($tempPath, $content, $script:OwnerPublicPublishUtf8)
+    for ($attempt = 1; $attempt -le 10; $attempt++) {
+      try {
+        if (Test-Path -LiteralPath $LiteralPath -PathType Leaf) {
+          [IO.File]::Replace($tempPath, $LiteralPath, $backupPath)
+          Remove-Item -LiteralPath $backupPath -Force -ErrorAction SilentlyContinue
+        }
+        else {
+          [IO.File]::Move($tempPath, $LiteralPath)
+        }
+
+        return
+      }
+      catch {
+        if ($attempt -eq 10) { throw }
+        Start-Sleep -Milliseconds ([Math]::Min(250, 25 * $attempt))
+      }
+    }
+  }
+  finally {
+    if (Test-Path -LiteralPath $tempPath -PathType Leaf) {
+      Remove-Item -LiteralPath $tempPath -Force -ErrorAction SilentlyContinue
+    }
+    if (Test-Path -LiteralPath $backupPath -PathType Leaf) {
+      Remove-Item -LiteralPath $backupPath -Force -ErrorAction SilentlyContinue
+    }
+  }
 }
 
 function Read-OwnerJsonOrNull {
   param([string]$RepositoryRoot, [string]$Path)
 
   $resolvedPath = Resolve-OwnerPath -RepositoryRoot $RepositoryRoot -Path $Path
-  if (-not (Test-Path -LiteralPath $resolvedPath -PathType Leaf)) { return $null }
-  return Get-Content -LiteralPath $resolvedPath -Raw -Encoding utf8 | ConvertFrom-Json
+  $lastError = $null
+  for ($attempt = 1; $attempt -le 8; $attempt++) {
+    if (-not (Test-Path -LiteralPath $resolvedPath -PathType Leaf)) { return $null }
+    try {
+      $json = [IO.File]::ReadAllText($resolvedPath, $script:OwnerPublicPublishUtf8)
+      if ([string]::IsNullOrWhiteSpace($json)) {
+        throw "JSON file is empty: $resolvedPath"
+      }
+
+      return $json | ConvertFrom-Json
+    }
+    catch {
+      $lastError = $_
+      if ($attempt -eq 8) { throw }
+      Start-Sleep -Milliseconds ([Math]::Min(250, 25 * $attempt))
+    }
+  }
+
+  throw $lastError
 }
 
 function Get-OwnerPropertyOrDefault {

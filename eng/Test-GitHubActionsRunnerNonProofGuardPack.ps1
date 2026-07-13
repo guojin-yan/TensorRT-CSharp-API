@@ -53,7 +53,7 @@ $validation = [pscustomobject]@{
 
 $jsonPath = Join-Path $OutputRoot "github-actions-runner-non-proof-guard-pack-validation.json"
 $mdPath = Join-Path $OutputRoot "github-actions-runner-non-proof-guard-pack-validation.md"
-$validation | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $jsonPath -Encoding utf8
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($validation | ConvertTo-Json -Depth 10)
 Write-Utf8File -LiteralPath $mdPath -InputObject @(
   "# GitHub Actions Runner Non-Proof Guard Pack Validation",
   "",

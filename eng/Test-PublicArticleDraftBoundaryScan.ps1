@@ -53,7 +53,7 @@ $validation = [pscustomobject]@{
 
 $jsonPath = Join-Path $OutputRoot "public-article-draft-boundary-scan-validation.json"
 $mdPath = Join-Path $OutputRoot "public-article-draft-boundary-scan-validation.md"
-$validation | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $jsonPath -Encoding utf8
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($validation | ConvertTo-Json -Depth 10)
 Write-Utf8File -LiteralPath $mdPath -InputObject @(
   "# Public Article Draft Boundary Scan Validation",
   "",

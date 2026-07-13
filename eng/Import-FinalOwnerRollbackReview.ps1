@@ -39,7 +39,7 @@ $requiredRollbackFields = @(
 
 $templatePath = Join-Path $OutputRoot "final-owner-rollback-review.template.json"
 if (-not (Test-Path -LiteralPath $templatePath -PathType Leaf)) {
-  [pscustomobject]@{
+  $template = [pscustomobject]@{
     recordKind = "final-owner-rollback-review-owner-input"
     reviewer = "<owner-reviewer>"
     reviewedAtUtc = "<owner-reviewed-at-utc>"
@@ -66,7 +66,8 @@ if (-not (Test-Path -LiteralPath $templatePath -PathType Leaf)) {
     confirmsNoRollbackExecutionByAutomation = $false
     confirmsNoDeleteDelistWithdrawDeprecateExecution = $false
     confirmsRollbackPlanNotReleaseCloseProof = $false
-  } | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $templatePath -Encoding utf8
+  }
+  Write-Utf8File -LiteralPath $templatePath -InputObject ($template | ConvertTo-Json -Depth 6)
 }
 if (-not (Test-Path -LiteralPath $OwnerInputPath -PathType Leaf)) { $OwnerInputPath = $templatePath }
 $input = Get-Content -LiteralPath $OwnerInputPath -Raw -Encoding utf8 | ConvertFrom-Json
@@ -133,7 +134,7 @@ $record = [pscustomobject]@{
 }
 $jsonPath = Join-Path $OutputRoot "final-owner-rollback-review-import.json"
 $mdPath = Join-Path $OutputRoot "final-owner-rollback-review-import.md"
-$record | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $jsonPath -Encoding utf8
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($record | ConvertTo-Json -Depth 10)
 Write-Utf8File -LiteralPath $mdPath -InputObject @("# Final Owner Rollback Review Import", "", "- importState: ``$($record.importState)``", "- rollbackReviewReady: ``$ready``", "- failedActionRequiredCount: ``$($failed.Count)``", "", "## Boundary", "", $record.boundary)
 Write-Host "FinalOwnerRollbackReviewImportState=$($record.importState) Ready=$ready FailedActionRequired=$($failed.Count)"
 if ($FailOnNotReady.IsPresent -and -not $ready) { throw "Final Owner rollback review is not ready." }

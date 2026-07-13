@@ -62,7 +62,7 @@ $record = [pscustomobject]@{
 
 $jsonPath = Join-Path $OutputRoot "owner-real-proof-staging-workspace-contract.json"
 $mdPath = Join-Path $OutputRoot "owner-real-proof-staging-workspace-contract.md"
-$record | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $jsonPath -Encoding utf8
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($record | ConvertTo-Json -Depth 10)
 $rows = foreach ($file in $files) { "| $($file.order) | ``$($file.lane)`` | ``$($file.relativePath)`` | ``$($file.requiresSha256)`` | $(ConvertTo-MarkdownCell $file.purpose) |" }
 Write-Utf8File -LiteralPath $mdPath -InputObject @("# Owner Real Proof Staging Workspace Contract", "", "| Order | Lane | Relative Path | SHA256 | Purpose |", "|---:|---|---|---:|---|", @($rows), "", "## Boundary", "", $record.boundary)
 Write-Host "Wrote $jsonPath"

@@ -14,7 +14,7 @@ $OutputRoot = $ctx.OutputRoot
 if (-not [System.IO.Path]::IsPathRooted($OwnerInputPath)) { $OwnerInputPath = Join-Path $RepositoryRoot $OwnerInputPath }
 $templatePath = Join-Path $OutputRoot "final-owner-close-decision.template.json"
 if (-not (Test-Path -LiteralPath $templatePath -PathType Leaf)) {
-  [pscustomobject]@{
+  $template = [pscustomobject]@{
     recordKind = "final-owner-close-decision-owner-input"
     reviewer = "<owner-reviewer>"
     reviewedAtUtc = "<owner-reviewed-at-utc>"
@@ -26,7 +26,8 @@ if (-not (Test-Path -LiteralPath $templatePath -PathType Leaf)) {
     externalCleanConsumerProofReady = $false
     postPublishProofReady = $false
     rollbackReviewReady = $false
-  } | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $templatePath -Encoding utf8
+  }
+  Write-Utf8File -LiteralPath $templatePath -InputObject ($template | ConvertTo-Json -Depth 6)
 }
 if (-not (Test-Path -LiteralPath $OwnerInputPath -PathType Leaf)) { $OwnerInputPath = $templatePath }
 $input = Get-Content -LiteralPath $OwnerInputPath -Raw -Encoding utf8 | ConvertFrom-Json
@@ -69,7 +70,7 @@ $record = [pscustomobject]@{
 }
 $jsonPath = Join-Path $OutputRoot "final-owner-close-decision-import.json"
 $mdPath = Join-Path $OutputRoot "final-owner-close-decision-import.md"
-$record | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $jsonPath -Encoding utf8
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($record | ConvertTo-Json -Depth 10)
 Write-Utf8File -LiteralPath $mdPath -InputObject @("# Final Owner Close Decision Import", "", "- importState: ``$($record.importState)``", "- finalCloseDecisionReady: ``$ready``", "- failedActionRequiredCount: ``$($failed.Count)``", "", "## Boundary", "", $record.boundary)
 Write-Host "FinalOwnerCloseDecisionImportState=$($record.importState) Ready=$ready FailedActionRequired=$($failed.Count)"
 if ($FailOnNotReady.IsPresent -and -not $ready) { throw "Final Owner close decision is not ready." }

@@ -57,7 +57,7 @@ $validation = [pscustomobject]@{
 
 $jsonPath = Join-Path $OutputRoot "package-consumer-preflight-validation.json"
 $mdPath = Join-Path $OutputRoot "package-consumer-preflight-validation.md"
-$validation | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $jsonPath -Encoding utf8
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($validation | ConvertTo-Json -Depth 10)
 Write-Utf8File -LiteralPath $mdPath -InputObject @(
   "# Package Consumer Preflight Validation",
   "",

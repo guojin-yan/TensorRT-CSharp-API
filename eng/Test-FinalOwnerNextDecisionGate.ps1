@@ -55,7 +55,7 @@ $validation = [pscustomobject]@{
 
 $jsonPath = Join-Path $OutputRoot "final-owner-next-decision-gate-validation.json"
 $mdPath = Join-Path $OutputRoot "final-owner-next-decision-gate-validation.md"
-$validation | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $jsonPath -Encoding utf8
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($validation | ConvertTo-Json -Depth 10)
 Write-Utf8File -LiteralPath $mdPath -InputObject @(
   "# Final Owner Next Decision Gate Validation",
   "",

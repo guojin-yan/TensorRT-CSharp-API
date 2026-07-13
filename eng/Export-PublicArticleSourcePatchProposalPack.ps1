@@ -100,8 +100,7 @@ $record = [pscustomobject]@{
 
 $jsonPath = Join-Path $OutputRoot "public-article-source-patch-proposal-pack.json"
 $mdPath = Join-Path $OutputRoot "public-article-source-patch-proposal-pack.md"
-$record | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $jsonPath -Encoding utf8
-
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($record | ConvertTo-Json -Depth 12)
 $md = New-Object System.Collections.Generic.List[string]
 $md.Add("# Public Article Source Patch Proposal Pack") | Out-Null
 $md.Add("") | Out-Null

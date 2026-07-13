@@ -58,7 +58,7 @@ $validation = [pscustomobject]@{
 }
 $jsonPath = Join-Path $OutputRoot "owner-real-proof-staging-workspace-validation.json"
 $mdPath = Join-Path $OutputRoot "owner-real-proof-staging-workspace-validation.md"
-$validation | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $jsonPath -Encoding utf8
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($validation | ConvertTo-Json -Depth 10)
 Write-Utf8File -LiteralPath $mdPath -InputObject @("# Owner Real Proof Staging Workspace Validation", "", "- validationState: ``$state``", "- failedBlockerCount: ``$($failed.Count)``", "- readyForStrictImport: ``$ready``", "", "## Boundary", "", $validation.boundary)
 Write-Host "OwnerRealProofStagingWorkspaceValidationState=$state FailedBlockers=$($failed.Count) ReadyForStrictImport=$ready"
 if ($Strict.IsPresent -and $failed.Count -gt 0) { throw "Owner real proof staging workspace validation failed." }
