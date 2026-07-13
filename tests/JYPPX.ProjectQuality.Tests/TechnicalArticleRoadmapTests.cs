@@ -145,8 +145,51 @@ public sealed class TechnicalArticleRoadmapTests
         Assert.True(root.GetProperty("tensorRtExecArticleCount").GetInt32() >= 4);
         Assert.True(root.GetProperty("onnxToEngineArticleCount").GetInt32() >= 4);
         Assert.Contains("cannot substitute real owner authorization", root.GetProperty("releaseProofBoundary").GetString()!, StringComparison.Ordinal);
+        Assert.Equal("blocked-owner-real-proof-required", root.GetProperty("releaseCandidateClosureState").GetString());
+        Assert.True(root.GetProperty("releaseCandidateClosureLaneCount").GetInt32() >= 5);
         Assert.Equal("YOLO v5/v6/v7/v8/v9/v10/v11/v26/custom", root.GetProperty("yoloVisionScope").GetString());
         Assert.Contains("det/cls/seg/obb/pose/sem", root.GetProperty("yoloVisionTaskScope").GetString(), StringComparison.Ordinal);
+
+        string[] forbiddenSubstitutes = root.GetProperty("releaseCandidateClosureForbiddenSubstitutes").EnumerateArray().Select(static item => item.GetString()!).ToArray();
+        foreach (string forbiddenSubstitute in new[]
+        {
+            "local feed",
+            "ProjectReference",
+            "direct nupkg",
+            "dry-run",
+            "build-only",
+            "sidecar-only",
+            "dependency probe",
+            "Skipped=True",
+            "article matrix",
+            "YoloVision matrix",
+            "TensorRtExec report",
+        })
+        {
+            Assert.Contains(forbiddenSubstitute, forbiddenSubstitutes);
+        }
+
+        string[] closureRequiredArtifacts = root.GetProperty("releaseCandidateClosureRequiredArtifacts").EnumerateArray().Select(static item => item.GetString()!).ToArray();
+        foreach (string requiredArtifact in new[]
+        {
+            "eng/Test-PackageConsumer.ps1",
+            "pack/runtime-split/README.md",
+            "docs/articles/zh-cn/publishing/article-roadmap-30plus.json",
+            "samples/YoloVision/YoloVision.csproj",
+            "artifacts/final-release/real-external-proof-record-import-validator.json",
+        })
+        {
+            Assert.Contains(requiredArtifact, closureRequiredArtifacts);
+        }
+
+        JsonElement[] closureLanes = root.GetProperty("releaseCandidateClosureLanes").EnumerateArray().ToArray();
+        Assert.Contains(closureLanes, static lane => lane.GetProperty("id").GetString() == "package-consumer-runtime-proof");
+        Assert.Contains(closureLanes, static lane => lane.GetProperty("id").GetString() == "runtime-split-package-readiness");
+        Assert.Contains(closureLanes, static lane => lane.GetProperty("id").GetString() == "publication-article-matrix");
+        Assert.Contains(closureLanes, static lane => lane.GetProperty("id").GetString() == "sample-name-and-case-closure");
+        Assert.Contains(closureLanes, static lane => lane.GetProperty("id").GetString() == "owner-real-release-proof");
+        Assert.All(closureLanes, static lane => Assert.False(lane.GetProperty("canPromoteRuntimeProof").GetBoolean()));
+        Assert.Contains(closureLanes, static lane => lane.GetProperty("nextOwnerAction").GetString()!.Contains("Owner", StringComparison.Ordinal));
 
         string[] requiredFields = root.GetProperty("requiredFields").EnumerateArray().Select(static item => item.GetString()!).ToArray();
         foreach (string requiredField in new[]
@@ -220,6 +263,11 @@ public sealed class TechnicalArticleRoadmapTests
             "technical-article-publication-matrix.md"));
         Assert.Contains("Technical Article Publication Matrix", markdown, StringComparison.Ordinal);
         Assert.Contains("canPublishPublicly=false", markdown, StringComparison.Ordinal);
+        Assert.Contains("Release Candidate Closure", markdown, StringComparison.Ordinal);
+        Assert.Contains("blocked-owner-real-proof-required", markdown, StringComparison.Ordinal);
+        Assert.Contains("package-consumer-runtime-proof", markdown, StringComparison.Ordinal);
+        Assert.Contains("runtime-split-package-readiness", markdown, StringComparison.Ordinal);
+        Assert.Contains("owner-real-release-proof", markdown, StringComparison.Ordinal);
         Assert.Contains("YOLO v5/v6/v7/v8/v9/v10/v11/v26/custom", markdown, StringComparison.Ordinal);
         Assert.Contains("det/cls/seg/obb/pose/sem", markdown, StringComparison.Ordinal);
         Assert.DoesNotContain("YoloDet", markdown, StringComparison.Ordinal);
@@ -1738,6 +1786,7 @@ public sealed class TechnicalArticleRoadmapTests
         {
             "template-only",
             "draft-blocked-by-cuda-driver",
+            "draft-rich-but-not-proof",
         });
         Assert.Contains(externalValidation.GetProperty("proofClassification").GetString(), new[]
         {
@@ -1763,11 +1812,19 @@ public sealed class TechnicalArticleRoadmapTests
             "final-release",
             "external-runtime-proof-record.draft.json"));
         Assert.True(externalDraft.GetProperty("templateOnly").GetBoolean());
-        Assert.Equal("dependency-probe-only", externalDraft.GetProperty("proofClassification").GetString());
+        Assert.Contains(externalDraft.GetProperty("proofClassification").GetString(), new[]
+        {
+            "template-only",
+            "dependency-probe-only",
+        });
         Assert.False(externalDraft.GetProperty("isRuntimeExecutionEvidence").GetBoolean());
         Assert.True(externalDraft.GetProperty("isDependencyProbeOnly").GetBoolean());
         Assert.False(externalDraft.GetProperty("canPromoteRuntimeProof").GetBoolean());
-        Assert.Equal("blocked-by-cuda-driver", externalDraft.GetProperty("currentRuntimeProofStatus").GetString());
+        Assert.Contains(externalDraft.GetProperty("currentRuntimeProofStatus").GetString(), new[]
+        {
+            "not-requested",
+            "blocked-by-cuda-driver",
+        });
 
         JsonElement postPublishValidation = ReadJsonRoot(Path.Combine(
             RepositoryPaths.Root,

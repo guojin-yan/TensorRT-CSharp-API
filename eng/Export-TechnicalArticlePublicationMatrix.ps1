@@ -227,6 +227,69 @@ $tensorRtExecArticles = @($articleArray | Where-Object { $_.title -match "Tensor
 $onnxToEngineArticles = @($articleArray | Where-Object { $_.title -match "OnnxToEngine|ONNX" -or $_.coreScenario -match "OnnxToEngine|ONNX" })
 $ownerActionArticles = @($articleArray | Where-Object { @($_.commands | Where-Object { $_ -match "owner-action-required" }).Count -gt 0 -or $_.modelAssetsRequired -match "owner|用户自备|真实|兼容" })
 
+$releaseCandidateClosureLanes = @(
+  [pscustomobject]@{
+    id = "package-consumer-runtime-proof"
+    state = "blocked-owner-external-proof-required"
+    requiredArtifacts = @(
+      "eng/Test-PackageConsumer.ps1",
+      "artifacts/final-release/package-consumer-runtime-proof-owner-input.schema.json",
+      "artifacts/final-release/package-consumer-runtime-proof-forbidden-substitute-scan.json"
+    )
+    proofBoundary = "Package consumer dry-run, local feed restore, ProjectReference, direct nupkg, skipped smoke, and dependency probes are not package-consumer-runtime proof."
+    nextOwnerAction = "Import repository-external clean package consumer runtime evidence from the intended public package source after real publication."
+    canPromoteRuntimeProof = $false
+  }
+  [pscustomobject]@{
+    id = "runtime-split-package-readiness"
+    state = "package-layout-guidance-only"
+    requiredArtifacts = @(
+      "pack/runtime-split/README.md",
+      "pack/runtime/runtime-packages.manifest.json",
+      "eng/Test-RuntimePackageReadiness.ps1"
+    )
+    proofBoundary = "Runtime split package layout and local package consumption are package readiness evidence only; they do not prove public availability or engine execution."
+    nextOwnerAction = "Validate split package layout, symbols/source-link metadata, and public package hashes after Owner publishes real artifacts."
+    canPromoteRuntimeProof = $false
+  }
+  [pscustomobject]@{
+    id = "publication-article-matrix"
+    state = "matrix-ready-non-proof"
+    requiredArtifacts = @(
+      "docs/articles/zh-cn/technical-article-roadmap.md",
+      "docs/articles/zh-cn/publishing/article-roadmap-30plus.json",
+      "artifacts/final-release/technical-article-publication-matrix.json"
+    )
+    proofBoundary = "Article matrices, public article drafts, screenshots, and tutorials are publication planning only, not release approval and not runtime proof."
+    nextOwnerAction = "Finish article bodies and screenshots, then keep proof claims tied to strict release validators."
+    canPromoteRuntimeProof = $false
+  }
+  [pscustomobject]@{
+    id = "sample-name-and-case-closure"
+    state = "current-sample-name-yolovision"
+    requiredArtifacts = @(
+      "samples/YoloVision",
+      "samples/YoloVision/YoloVision.csproj",
+      "samples/YoloVision/yolovision-task-output-contract.json"
+    )
+    proofBoundary = "YoloVision sample naming and case matrices are documentation and sample readiness signals only; they do not replace real model runtime proof."
+    nextOwnerAction = "Keep the retired detection-only project identity out of live docs/source/package metadata while collecting real YoloVision assets and hashes."
+    canPromoteRuntimeProof = $false
+  }
+  [pscustomobject]@{
+    id = "owner-real-release-proof"
+    state = "blocked-owner-real-evidence-required"
+    requiredArtifacts = @(
+      "artifacts/final-release/owner-external-proof-execution-result-import.json",
+      "artifacts/final-release/real-external-proof-record-import-validator.json",
+      "artifacts/final-release/release-issue-close-record-validation.json"
+    )
+    proofBoundary = "Only strict validators over Owner-provided public publish, public package download, external clean consumer, real model runtime, and post-publish verification evidence can unblock release close."
+    nextOwnerAction = "Owner must provide real external execution evidence, package URLs, hashes, transcripts, and close decision input."
+    canPromoteRuntimeProof = $false
+  }
+)
+
 $record = [ordered]@{
   generatedAtUtc = (Get-Date).ToUniversalTime().ToString("o")
   recordKind = "technical-article-publication-matrix"
@@ -236,6 +299,23 @@ $record = [ordered]@{
   canPublishPublicly = $false
   canCloseReleaseIssue = $false
   releaseProofBoundary = "Article planning, tutorials, screenshots, build-only reports, sidecars, local feeds, ProjectReference consumers, and owner-action-required records cannot substitute real owner authorization, package-consumer-runtime, Linux runner, real-model-runtime, or post-publish verification proof."
+  releaseCandidateClosureState = "blocked-owner-real-proof-required"
+  releaseCandidateClosureLaneCount = $releaseCandidateClosureLanes.Count
+  releaseCandidateClosureForbiddenSubstitutes = @(
+    "local feed",
+    "ProjectReference",
+    "direct nupkg",
+    "dry-run",
+    "build-only",
+    "sidecar-only",
+    "dependency probe",
+    "Skipped=True",
+    "article matrix",
+    "YoloVision matrix",
+    "TensorRtExec report"
+  )
+  releaseCandidateClosureRequiredArtifacts = @($releaseCandidateClosureLanes | ForEach-Object { $_.requiredArtifacts } | Select-Object -Unique)
+  releaseCandidateClosureLanes = $releaseCandidateClosureLanes
   articleCount = $articleArray.Count
   categoryCount = $categories.Count
   categories = $categories
@@ -302,6 +382,19 @@ $markdown = @"
 ## Proof Boundary
 
 $($record.releaseProofBoundary)
+
+## Release Candidate Closure
+
+- closure state: ``$($record.releaseCandidateClosureState)``
+- closure lane count: ``$($record.releaseCandidateClosureLaneCount)``
+- forbidden substitutes: ``$($record.releaseCandidateClosureForbiddenSubstitutes -join ", ")``
+
+| ID | State | Required artifacts | Proof boundary | Next owner action |
+|---|---|---|---|---|
+$(@($record.releaseCandidateClosureLanes | ForEach-Object {
+  $artifactCell = ($_.requiredArtifacts -join "<br>").Replace("|", "\|")
+  "| $($_.id) | $($_.state) | $artifactCell | $($_.proofBoundary.Replace("|", "\|")) | $($_.nextOwnerAction.Replace("|", "\|")) |"
+}) -join "`r`n")
 
 ## YoloVision Scope
 
