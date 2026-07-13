@@ -143,6 +143,90 @@ function New-Finding {
   [pscustomobject]@{ id = $Id; severity = $Severity; category = $Category; message = $Message; ownerActionRequired = $true }
 }
 
+$postPublishCleanConsumerProofRequiredFields = @(
+  "publicPackageSourceUrl",
+  "publicPackageUrl",
+  "publicPackageSourceKind",
+  "managedPackageId",
+  "managedPackageVersion",
+  "runtimePackageId",
+  "runtimePackageVersion",
+  "runtimePackageKey",
+  "downloadedManagedPackagePath",
+  "downloadedManagedPackageSha256",
+  "downloadedRuntimePackagePath",
+  "downloadedRuntimePackageSha256",
+  "cleanConsumerRoot",
+  "consumerProjectPath",
+  "restoreCommand",
+  "restoreLogPath",
+  "restoreLogSha256",
+  "buildCommand",
+  "buildLogPath",
+  "buildLogSha256",
+  "runCommand",
+  "runLogPath",
+  "runLogSha256",
+  "smokeStdoutPath",
+  "smokeStdoutSha256",
+  "smokeStderrPath",
+  "smokeStderrSha256",
+  "nativeAssetListingPath",
+  "nativeAssetListingSha256",
+  "dotnetInfoPath",
+  "dotnetInfoSha256",
+  "exitCode",
+  "hostMetadata.os",
+  "hostMetadata.arch",
+  "hostMetadata.rid",
+  "hostMetadata.gpuName",
+  "hostMetadata.nvidiaDriver",
+  "hostMetadata.cudaRuntimeToolkit",
+  "hostMetadata.tensorrt",
+  "hostMetadata.cudnn",
+  "sourceGitHubActionsRunEvidenceReady",
+  "sourceOwnerPublicPublishResultReady",
+  "sourcePublicPackageDownloadProofReady",
+  "sourceGitHubActionsRunId",
+  "sourceGitHubActionsRunUrl",
+  "sourceGitHubActionsHeadSha",
+  "sourceOwnerPublicPackageUrl",
+  "sourceOwnerPublicPackageVersion",
+  "sourceOwnerPublicPackageSha256",
+  "sourcePublicDownloadManagedPackageDownloadUrl",
+  "sourcePublicDownloadRuntimePackageDownloadUrl",
+  "ownerReviewer",
+  "ownerReviewedAtUtc"
+)
+
+$postPublishCleanConsumerProofRejectedSubstitutes = @(
+  "project-reference",
+  "local-feed",
+  "direct-local-nupkg",
+  "repo-internal-consumer",
+  "dependency-probe-only",
+  "skipped-smoke",
+  "blocked-by-cuda-driver",
+  "tensorrtexec-report-only",
+  "dashboard-only",
+  "runbook-only",
+  "template-or-candidate-only"
+)
+
+$postPublishCleanConsumerProofSourceReadinessSignals = @(
+  "sourceGitHubActionsRunEvidenceReady",
+  "sourceGitHubActionsRunId",
+  "sourceGitHubActionsRunUrl",
+  "sourceGitHubActionsHeadSha",
+  "sourceOwnerPublicPublishResultReady",
+  "sourceOwnerPublicPackageUrl",
+  "sourceOwnerPublicPackageVersion",
+  "sourceOwnerPublicPackageSha256",
+  "sourcePublicPackageDownloadProofReady",
+  "sourcePublicDownloadManagedPackageDownloadUrl",
+  "sourcePublicDownloadRuntimePackageDownloadUrl"
+)
+
 function New-TemplateRecord {
   [pscustomobject]@{
     recordKind = "post-publish-clean-consumer-proof-result-owner-input"
@@ -421,6 +505,7 @@ $sourceProofLinkageReady = $sourceGitHubActionsReady -and $sourceOwnerPublicPubl
 
 $failedBlockers = @($findings | Where-Object { [string]$_.severity -eq "blocker" })
 $failedActionRequired = @($findings | Where-Object { [string]$_.severity -eq "action-required" })
+$blockedRealInputCount = @($findings | Where-Object { [string]$_.severity -eq "blocker" -or [string]$_.severity -eq "action-required" }).Count
 $proofReady = $failedBlockers.Count -eq 0 -and $failedActionRequired.Count -eq 0
 $importState = if ($proofReady) { "post-publish-clean-consumer-proof-result-import-ready" } else { "blocked-post-publish-clean-consumer-proof-result-required" }
 
@@ -433,6 +518,13 @@ $candidate = [pscustomobject]@{
   findingCount = $findings.Count
   failedBlockerCount = $failedBlockers.Count
   failedActionRequiredCount = $failedActionRequired.Count
+  postPublishCleanConsumerProofRequiredFields = @($postPublishCleanConsumerProofRequiredFields)
+  postPublishCleanConsumerProofRequiredFieldCount = $postPublishCleanConsumerProofRequiredFields.Count
+  postPublishCleanConsumerProofRejectedSubstitutes = @($postPublishCleanConsumerProofRejectedSubstitutes)
+  postPublishCleanConsumerProofRejectedSubstituteCount = $postPublishCleanConsumerProofRejectedSubstitutes.Count
+  postPublishCleanConsumerProofBlockedRealInputCount = $blockedRealInputCount
+  postPublishCleanConsumerProofSourceReadinessSignals = @($postPublishCleanConsumerProofSourceReadinessSignals)
+  postPublishCleanConsumerProofSourceReadinessSignalCount = $postPublishCleanConsumerProofSourceReadinessSignals.Count
   publicPackageSourceUrl = $sourceUrl
   publicPackageUrl = $publicPackageUrl
   managedPackageVersion = $managedPackageVersion
@@ -480,6 +572,13 @@ $import = [pscustomobject]@{
   findingCount = $findings.Count
   failedBlockerCount = $failedBlockers.Count
   failedActionRequiredCount = $failedActionRequired.Count
+  postPublishCleanConsumerProofRequiredFields = @($postPublishCleanConsumerProofRequiredFields)
+  postPublishCleanConsumerProofRequiredFieldCount = $postPublishCleanConsumerProofRequiredFields.Count
+  postPublishCleanConsumerProofRejectedSubstitutes = @($postPublishCleanConsumerProofRejectedSubstitutes)
+  postPublishCleanConsumerProofRejectedSubstituteCount = $postPublishCleanConsumerProofRejectedSubstitutes.Count
+  postPublishCleanConsumerProofBlockedRealInputCount = $blockedRealInputCount
+  postPublishCleanConsumerProofSourceReadinessSignals = @($postPublishCleanConsumerProofSourceReadinessSignals)
+  postPublishCleanConsumerProofSourceReadinessSignalCount = $postPublishCleanConsumerProofSourceReadinessSignals.Count
   proofCandidateReady = $proofReady
   publicPackageUrl = $publicPackageUrl
   managedPackageVersion = $managedPackageVersion
@@ -532,6 +631,10 @@ Write-Utf8File -LiteralPath $importMdPath -InputObject @(
   "- proofCandidateReady: ``$proofReady``",
   "- failedBlockerCount: ``$($failedBlockers.Count)``",
   "- failedActionRequiredCount: ``$($failedActionRequired.Count)``",
+  "- postPublishCleanConsumerProofRequiredFieldCount: ``$($postPublishCleanConsumerProofRequiredFields.Count)``",
+  "- postPublishCleanConsumerProofRejectedSubstituteCount: ``$($postPublishCleanConsumerProofRejectedSubstitutes.Count)``",
+  "- postPublishCleanConsumerProofBlockedRealInputCount: ``$blockedRealInputCount``",
+  "- postPublishCleanConsumerProofSourceReadinessSignalCount: ``$($postPublishCleanConsumerProofSourceReadinessSignals.Count)``",
   "",
   "| ID | Severity | Category | Message |",
   "|---|---|---|---|",
@@ -547,6 +650,9 @@ Write-Utf8File -LiteralPath $candidateMdPath -InputObject @(
   "",
   "- candidateState: ``$($candidate.candidateState)``",
   "- proofCandidateReady: ``$($candidate.proofCandidateReady)``",
+  "- postPublishCleanConsumerProofRequiredFieldCount: ``$($candidate.postPublishCleanConsumerProofRequiredFieldCount)``",
+  "- postPublishCleanConsumerProofRejectedSubstituteCount: ``$($candidate.postPublishCleanConsumerProofRejectedSubstituteCount)``",
+  "- postPublishCleanConsumerProofBlockedRealInputCount: ``$($candidate.postPublishCleanConsumerProofBlockedRealInputCount)``",
   "- isPostPublishProof: ``$($candidate.isPostPublishProof)``",
   "- canCloseReleaseIssue: ``$($candidate.canCloseReleaseIssue)``",
   "",

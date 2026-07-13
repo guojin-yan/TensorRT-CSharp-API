@@ -261,6 +261,67 @@ function ConvertTo-MarkdownCell {
   return ([string]$Value).Replace("|", "\|").Replace("`r", " ").Replace("`n", " ")
 }
 
+$publicPackageDownloadProofRequiredFields = @(
+  "managedPackageId",
+  "managedPackageVersion",
+  "managedPackagePageUrl",
+  "managedPackageDownloadUrl",
+  "downloadedManagedNupkgPath",
+  "downloadedManagedNupkgSha256",
+  "downloadedManagedNupkgSizeBytes",
+  "runtimePackageId",
+  "runtimePackageVersion",
+  "runtimePackageKey",
+  "runtimePackagePageUrl",
+  "runtimePackageDownloadUrl",
+  "downloadedRuntimeNupkgPath",
+  "downloadedRuntimeNupkgSha256",
+  "downloadedRuntimeNupkgSizeBytes",
+  "publicPackageSourceKind",
+  "publicPackageSourceUrl",
+  "downloadCommand",
+  "downloadedAtUtc",
+  "capturedAtUtc",
+  "ownerName",
+  "ownerReviewer",
+  "sourceGitHubActionsRunEvidenceReady",
+  "sourceOwnerPublicPublishResultReady",
+  "sourceWorkflowRunLogSha256",
+  "sourceArtifactManifestSha256",
+  "sourceOwnerPublicPackageUrl",
+  "sourceOwnerPublicPackageVersion",
+  "sourceOwnerPublicPackageSha256",
+  "githubReleaseUrl",
+  "githubReleaseAssetUrl",
+  "githubReleaseAssetDownloadedPath",
+  "githubReleaseAssetSha256",
+  "githubReleaseAssetSizeBytes"
+)
+
+$publicPackageDownloadProofRejectedSubstitutes = @(
+  "local-feed-restore",
+  "direct-local-nupkg",
+  "project-reference",
+  "repo-internal-consumer",
+  "package-managed-dry-run-artifact",
+  "github-actions-artifact-only",
+  "dashboard-only",
+  "queued-workflow-only",
+  "missing-runner",
+  "local-dotnet-test-only",
+  "sidecar-only-report"
+)
+
+$publicPackageDownloadProofSourceReadinessSignals = @(
+  "sourceGitHubActionsRunEvidenceReady",
+  "sourceWorkflowRunLogSha256",
+  "sourceArtifactManifestSha256",
+  "sourceOwnerPublicPublishResultReady",
+  "sourceOwnerPublicPackageUrl",
+  "sourceOwnerPublicPackageVersion",
+  "sourceOwnerPublicPackageSha256"
+)
+
 $resolvedInputPath = Resolve-RepositoryPath -Path $InputPath
 if (-not (Test-Path -LiteralPath $resolvedInputPath -PathType Leaf)) {
   & (Join-Path $RepositoryRoot "eng\Import-PublicPackageDownloadProofCandidate.ps1") -RepositoryRoot $RepositoryRoot -OutputRoot $OutputRoot
@@ -398,6 +459,8 @@ $items.Add((New-ValidationItem -Id "github-release-asset-size-positive" -Passed 
 $items.Add((New-ValidationItem -Id "github-release-asset-hash-match" -Passed (Test-FileHashMatches -Path $githubReleaseAssetPath -Sha256 $githubReleaseAssetSha) -Severity "action-required" -Detail "GitHub release asset downloaded path must exist and match githubReleaseAssetSha256.")) | Out-Null
 $items.Add((New-ValidationItem -Id "github-release-asset-size-match" -Passed (Test-FileSizeMatches -Path $githubReleaseAssetPath -ExpectedSize $githubReleaseAssetSize) -Severity "action-required" -Detail "GitHub release asset downloaded path size must match githubReleaseAssetSizeBytes.")) | Out-Null
 $items.Add((New-ValidationItem -Id "forbidden-substitutes-absent" -Passed ($forbiddenFindings.Count -eq 0) -Severity "blocker" -Detail $(if ($forbiddenFindings.Count -eq 0) { "No local feed, direct nupkg, dry-run, dashboard-only, artifact-only, ProjectReference, manual approval, queued workflow, missing runner, sidecar-only, or local test substitute was detected." } else { "Forbidden substitute(s): $($forbiddenFindings -join ', ')" }))) | Out-Null
+$items.Add((New-ValidationItem -Id "public-package-download-required-field-contract" -Passed ($publicPackageDownloadProofRequiredFields.Count -ge 16) -Severity "blocker" -Detail "Public package download proof candidate must expose a stable required-field contract.")) | Out-Null
+$items.Add((New-ValidationItem -Id "public-package-download-rejected-substitute-contract" -Passed ($publicPackageDownloadProofRejectedSubstitutes.Count -ge 10) -Severity "blocker" -Detail "Public package download proof candidate must expose a stable rejected-substitute contract.")) | Out-Null
 
 $failedBlockers = @($items | Where-Object { -not $_.passed -and $_.severity -eq "blocker" })
 $failedActionRequired = @($items | Where-Object { -not $_.passed -and $_.severity -eq "action-required" })
@@ -438,6 +501,12 @@ $validation = [pscustomobject]@{
   githubReleaseAssetUrl = $githubReleaseAssetUrl
   githubReleaseAssetSha256 = $githubReleaseAssetSha
   forbiddenSubstituteFindings = @($forbiddenFindings)
+  publicPackageDownloadProofRequiredFields = @($publicPackageDownloadProofRequiredFields)
+  publicPackageDownloadProofRequiredFieldCount = $publicPackageDownloadProofRequiredFields.Count
+  publicPackageDownloadProofRejectedSubstitutes = @($publicPackageDownloadProofRejectedSubstitutes)
+  publicPackageDownloadProofRejectedSubstituteCount = $publicPackageDownloadProofRejectedSubstitutes.Count
+  publicPackageDownloadProofSourceReadinessSignals = @($publicPackageDownloadProofSourceReadinessSignals)
+  publicPackageDownloadProofSourceReadinessSignalCount = $publicPackageDownloadProofSourceReadinessSignals.Count
   candidateItemCount = $candidateItemCount
   readyCandidateCount = $readyCandidateCount
   blockedCandidateCount = $blockedCandidateCount
@@ -496,6 +565,9 @@ $markdown = @"
 | candidateItemCount | ``$($validation.candidateItemCount)`` |
 | failedBlockerCount | ``$($validation.failedBlockerCount)`` |
 | failedActionRequiredCount | ``$($validation.failedActionRequiredCount)`` |
+| publicPackageDownloadProofRequiredFieldCount | ``$($validation.publicPackageDownloadProofRequiredFieldCount)`` |
+| publicPackageDownloadProofRejectedSubstituteCount | ``$($validation.publicPackageDownloadProofRejectedSubstituteCount)`` |
+| publicPackageDownloadProofSourceReadinessSignalCount | ``$($validation.publicPackageDownloadProofSourceReadinessSignalCount)`` |
 | publicPackageDownloadProofCandidateReady | ``$($validation.publicPackageDownloadProofCandidateReady)`` |
 | proofCandidateReady | ``$($validation.proofCandidateReady)`` |
 | performsPublish | ``$($validation.performsPublish)`` |

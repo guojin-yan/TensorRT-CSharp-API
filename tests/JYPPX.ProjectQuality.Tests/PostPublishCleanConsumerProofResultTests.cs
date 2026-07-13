@@ -41,6 +41,10 @@ public sealed class PostPublishCleanConsumerProofResultTests
         Assert.False(import.GetProperty("proofCandidateReady").GetBoolean());
         Assert.True(import.GetProperty("ownerActionRequired").GetBoolean());
         Assert.True(import.GetProperty("failedActionRequiredCount").GetInt32() > 0);
+        Assert.True(import.GetProperty("postPublishCleanConsumerProofRequiredFieldCount").GetInt32() >= 50);
+        Assert.Equal(11, import.GetProperty("postPublishCleanConsumerProofRejectedSubstituteCount").GetInt32());
+        Assert.True(import.GetProperty("postPublishCleanConsumerProofBlockedRealInputCount").GetInt32() > 0);
+        Assert.Equal(11, import.GetProperty("postPublishCleanConsumerProofSourceReadinessSignalCount").GetInt32());
         Assert.False(import.GetProperty("isPostPublishProof").GetBoolean());
         Assert.False(import.GetProperty("canCloseReleaseIssue").GetBoolean());
 
@@ -58,6 +62,20 @@ public sealed class PostPublishCleanConsumerProofResultTests
         Assert.Equal("post-publish-clean-consumer-proof-result-validation-ready", validation.GetProperty("validationState").GetString());
         Assert.Equal(0, validation.GetProperty("failedBlockerCount").GetInt32());
         Assert.False(validation.GetProperty("proofCandidateReady").GetBoolean());
+        Assert.True(validation.GetProperty("postPublishCleanConsumerProofRequiredFieldCount").GetInt32() >= 50);
+        Assert.Equal(11, validation.GetProperty("postPublishCleanConsumerProofRejectedSubstituteCount").GetInt32());
+        Assert.True(validation.GetProperty("postPublishCleanConsumerProofBlockedRealInputCount").GetInt32() > 0);
+        Assert.Equal(11, validation.GetProperty("postPublishCleanConsumerProofSourceReadinessSignalCount").GetInt32());
+        Assert.Contains(validation.GetProperty("postPublishCleanConsumerProofRequiredFields").EnumerateArray(), static field => field.GetString() == "cleanConsumerRoot");
+        Assert.Contains(validation.GetProperty("postPublishCleanConsumerProofRejectedSubstitutes").EnumerateArray(), static item => item.GetString() == "project-reference");
+
+        RunPowerShell("Export-ReleaseEvidenceBundle.ps1");
+        using JsonDocument evidenceDocument = ReadFinalReleaseJson("release-evidence-bundle.json");
+        JsonElement evidence = evidenceDocument.RootElement;
+        Assert.True(evidence.GetProperty("postPublishCleanConsumerProofResultRequiredFieldCount").GetInt32() >= 50);
+        Assert.Equal(11, evidence.GetProperty("postPublishCleanConsumerProofResultRejectedSubstituteCount").GetInt32());
+        Assert.True(evidence.GetProperty("postPublishCleanConsumerProofResultBlockedRealInputCount").GetInt32() > 0);
+        Assert.Equal(11, evidence.GetProperty("postPublishCleanConsumerProofResultSourceReadinessSignalCount").GetInt32());
     }
 
     [Fact]
@@ -152,6 +170,10 @@ public sealed class PostPublishCleanConsumerProofResultTests
             Assert.False(import.GetProperty("isPackageConsumerRuntimeProof").GetBoolean());
             Assert.False(import.GetProperty("isPostPublishProof").GetBoolean());
             Assert.False(import.GetProperty("canCloseReleaseIssue").GetBoolean());
+            Assert.True(import.GetProperty("postPublishCleanConsumerProofRequiredFieldCount").GetInt32() >= 50);
+            Assert.Equal(11, import.GetProperty("postPublishCleanConsumerProofRejectedSubstituteCount").GetInt32());
+            Assert.Equal(0, import.GetProperty("postPublishCleanConsumerProofBlockedRealInputCount").GetInt32());
+            Assert.Equal(11, import.GetProperty("postPublishCleanConsumerProofSourceReadinessSignalCount").GetInt32());
 
             using JsonDocument validationDocument = ReadFinalReleaseJson("post-publish-clean-consumer-proof-result-validation.json");
             JsonElement validation = validationDocument.RootElement;
@@ -168,6 +190,10 @@ public sealed class PostPublishCleanConsumerProofResultTests
             Assert.False(validation.GetProperty("isRuntimeExecutionProof").GetBoolean());
             Assert.False(validation.GetProperty("isPackageConsumerRuntimeProof").GetBoolean());
             Assert.False(validation.GetProperty("isPostPublishProof").GetBoolean());
+            Assert.True(validation.GetProperty("postPublishCleanConsumerProofRequiredFieldCount").GetInt32() >= 50);
+            Assert.Equal(11, validation.GetProperty("postPublishCleanConsumerProofRejectedSubstituteCount").GetInt32());
+            Assert.Equal(0, validation.GetProperty("postPublishCleanConsumerProofBlockedRealInputCount").GetInt32());
+            Assert.Equal(11, validation.GetProperty("postPublishCleanConsumerProofSourceReadinessSignalCount").GetInt32());
         }
         finally
         {
@@ -293,6 +319,20 @@ public sealed class PostPublishCleanConsumerProofResultTests
         Assert.Equal("post-publish-clean-consumer-proof-result-validation-ready", validation.GetProperty("validationState").GetString());
         Assert.Equal(0, validation.GetProperty("failedBlockerCount").GetInt32());
         Assert.False(validation.GetProperty("proofCandidateReady").GetBoolean());
+        Assert.True(validation.GetProperty("postPublishCleanConsumerProofRequiredFieldCount").GetInt32() >= 50);
+        Assert.Equal(11, validation.GetProperty("postPublishCleanConsumerProofRejectedSubstituteCount").GetInt32());
+        Assert.True(validation.GetProperty("postPublishCleanConsumerProofBlockedRealInputCount").GetInt32() > 0);
+        Assert.Equal(11, validation.GetProperty("postPublishCleanConsumerProofSourceReadinessSignalCount").GetInt32());
+        Assert.Contains(validation.GetProperty("postPublishCleanConsumerProofRequiredFields").EnumerateArray(), static field => field.GetString() == "cleanConsumerRoot");
+        Assert.Contains(validation.GetProperty("postPublishCleanConsumerProofRejectedSubstitutes").EnumerateArray(), static item => item.GetString() == "project-reference");
+
+        RunPowerShell("Export-ReleaseEvidenceBundle.ps1");
+        using JsonDocument evidenceDocument = ReadFinalReleaseJson("release-evidence-bundle.json");
+        JsonElement evidence = evidenceDocument.RootElement;
+        Assert.True(evidence.GetProperty("postPublishCleanConsumerProofResultRequiredFieldCount").GetInt32() >= 50);
+        Assert.Equal(11, evidence.GetProperty("postPublishCleanConsumerProofResultRejectedSubstituteCount").GetInt32());
+        Assert.True(evidence.GetProperty("postPublishCleanConsumerProofResultBlockedRealInputCount").GetInt32() > 0);
+        Assert.Equal(11, evidence.GetProperty("postPublishCleanConsumerProofResultSourceReadinessSignalCount").GetInt32());
         Assert.False(validation.GetProperty("isPostPublishProof").GetBoolean());
     }
 

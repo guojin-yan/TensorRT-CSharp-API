@@ -70,6 +70,90 @@ function New-ValidationItem {
   [pscustomobject]@{ id = $Id; passed = $Passed; severity = $Severity; detail = $Detail }
 }
 
+$defaultPostPublishCleanConsumerProofRequiredFields = @(
+  "publicPackageSourceUrl",
+  "publicPackageUrl",
+  "publicPackageSourceKind",
+  "managedPackageId",
+  "managedPackageVersion",
+  "runtimePackageId",
+  "runtimePackageVersion",
+  "runtimePackageKey",
+  "downloadedManagedPackagePath",
+  "downloadedManagedPackageSha256",
+  "downloadedRuntimePackagePath",
+  "downloadedRuntimePackageSha256",
+  "cleanConsumerRoot",
+  "consumerProjectPath",
+  "restoreCommand",
+  "restoreLogPath",
+  "restoreLogSha256",
+  "buildCommand",
+  "buildLogPath",
+  "buildLogSha256",
+  "runCommand",
+  "runLogPath",
+  "runLogSha256",
+  "smokeStdoutPath",
+  "smokeStdoutSha256",
+  "smokeStderrPath",
+  "smokeStderrSha256",
+  "nativeAssetListingPath",
+  "nativeAssetListingSha256",
+  "dotnetInfoPath",
+  "dotnetInfoSha256",
+  "exitCode",
+  "hostMetadata.os",
+  "hostMetadata.arch",
+  "hostMetadata.rid",
+  "hostMetadata.gpuName",
+  "hostMetadata.nvidiaDriver",
+  "hostMetadata.cudaRuntimeToolkit",
+  "hostMetadata.tensorrt",
+  "hostMetadata.cudnn",
+  "sourceGitHubActionsRunEvidenceReady",
+  "sourceOwnerPublicPublishResultReady",
+  "sourcePublicPackageDownloadProofReady",
+  "sourceGitHubActionsRunId",
+  "sourceGitHubActionsRunUrl",
+  "sourceGitHubActionsHeadSha",
+  "sourceOwnerPublicPackageUrl",
+  "sourceOwnerPublicPackageVersion",
+  "sourceOwnerPublicPackageSha256",
+  "sourcePublicDownloadManagedPackageDownloadUrl",
+  "sourcePublicDownloadRuntimePackageDownloadUrl",
+  "ownerReviewer",
+  "ownerReviewedAtUtc"
+)
+
+$defaultPostPublishCleanConsumerProofRejectedSubstitutes = @(
+  "project-reference",
+  "local-feed",
+  "direct-local-nupkg",
+  "repo-internal-consumer",
+  "dependency-probe-only",
+  "skipped-smoke",
+  "blocked-by-cuda-driver",
+  "tensorrtexec-report-only",
+  "dashboard-only",
+  "runbook-only",
+  "template-or-candidate-only"
+)
+
+$defaultPostPublishCleanConsumerProofSourceReadinessSignals = @(
+  "sourceGitHubActionsRunEvidenceReady",
+  "sourceGitHubActionsRunId",
+  "sourceGitHubActionsRunUrl",
+  "sourceGitHubActionsHeadSha",
+  "sourceOwnerPublicPublishResultReady",
+  "sourceOwnerPublicPackageUrl",
+  "sourceOwnerPublicPackageVersion",
+  "sourceOwnerPublicPackageSha256",
+  "sourcePublicPackageDownloadProofReady",
+  "sourcePublicDownloadManagedPackageDownloadUrl",
+  "sourcePublicDownloadRuntimePackageDownloadUrl"
+)
+
 if (-not (Test-Path -LiteralPath $ImportPath -PathType Leaf) -or -not (Test-Path -LiteralPath $CandidatePath -PathType Leaf)) {
   & (Join-Path $RepositoryRoot "eng\Import-PostPublishCleanConsumerProofResult.ps1") -RepositoryRoot $RepositoryRoot
 }
@@ -77,6 +161,12 @@ if (-not (Test-Path -LiteralPath $ImportPath -PathType Leaf) -or -not (Test-Path
 $import = Get-Content -LiteralPath $ImportPath -Raw -Encoding utf8 | ConvertFrom-Json
 $candidate = Get-Content -LiteralPath $CandidatePath -Raw -Encoding utf8 | ConvertFrom-Json
 $proofReady = [bool](Get-PropertyOrDefault -Object $import -Name "proofCandidateReady" -DefaultValue $false)
+$postPublishCleanConsumerProofRequiredFields = @((Get-PropertyOrDefault -Object $import -Name "postPublishCleanConsumerProofRequiredFields" -DefaultValue $defaultPostPublishCleanConsumerProofRequiredFields))
+$postPublishCleanConsumerProofRejectedSubstitutes = @((Get-PropertyOrDefault -Object $import -Name "postPublishCleanConsumerProofRejectedSubstitutes" -DefaultValue $defaultPostPublishCleanConsumerProofRejectedSubstitutes))
+$postPublishCleanConsumerProofSourceReadinessSignals = @((Get-PropertyOrDefault -Object $import -Name "postPublishCleanConsumerProofSourceReadinessSignals" -DefaultValue $defaultPostPublishCleanConsumerProofSourceReadinessSignals))
+$importFailedBlockerCount = [int](Get-PropertyOrDefault -Object $import -Name "failedBlockerCount" -DefaultValue 0)
+$importFailedActionRequiredCount = [int](Get-PropertyOrDefault -Object $import -Name "failedActionRequiredCount" -DefaultValue 0)
+$postPublishCleanConsumerProofBlockedRealInputCount = [int](Get-PropertyOrDefault -Object $import -Name "postPublishCleanConsumerProofBlockedRealInputCount" -DefaultValue ($importFailedBlockerCount + $importFailedActionRequiredCount))
 
 $recordKindOk = [string](Get-PropertyOrDefault $import "recordKind" "") -eq "post-publish-clean-consumer-proof-result-import" -and [string](Get-PropertyOrDefault $candidate "recordKind" "") -eq "post-publish-clean-consumer-proof-result-candidate"
 $defaultBlockedOk = ([string](Get-PropertyOrDefault $import "importState" "")).Contains("blocked", [StringComparison]::OrdinalIgnoreCase) -or $proofReady
@@ -101,6 +191,8 @@ $items.Add((New-ValidationItem -Id "non-proof-flags" -Passed $nonProofFlagsOk -S
 $items.Add((New-ValidationItem -Id "no-publish-close" -Passed $noPublishCloseOk -Severity "blocker" -Detail "Import must never publish or close.")) | Out-Null
 $items.Add((New-ValidationItem -Id "owner-evidence-findings-present" -Passed $findingsPresentOk -Severity "blocker" -Detail "Blocked imports must report blocker or action-required owner evidence findings.")) | Out-Null
 $items.Add((New-ValidationItem -Id "boundary" -Passed $boundaryOk -Severity "blocker" -Detail "Boundary must preserve non-proof classification.")) | Out-Null
+$items.Add((New-ValidationItem -Id "post-publish-required-field-contract" -Passed ($postPublishCleanConsumerProofRequiredFields.Count -ge 16) -Severity "blocker" -Detail "Post-publish CleanConsumer proof result must expose a stable required-field contract.")) | Out-Null
+$items.Add((New-ValidationItem -Id "post-publish-rejected-substitute-contract" -Passed ($postPublishCleanConsumerProofRejectedSubstitutes.Count -ge 10) -Severity "blocker" -Detail "Post-publish CleanConsumer proof result must expose a stable rejected-substitute contract.")) | Out-Null
 $items.Add((New-ValidationItem -Id "proof-candidate-ready" -Passed $proofReady -Severity "action-required" -Detail "Real owner evidence must make proofCandidateReady true before the remote proof lane can become ready.")) | Out-Null
 $items.Add((New-ValidationItem -Id "source-proof-linkage-ready" -Passed $sourceProofLinkageReady -Severity "action-required" -Detail "Post-publish proof must link to ready GitHub Actions, Owner public publish, and public package download proof records.")) | Out-Null
 
@@ -117,6 +209,13 @@ $validation = [pscustomobject]@{
   failedBlockerCount = $failedBlockers.Count
   failedActionRequiredCount = $failedActionRequired.Count
   proofCandidateReady = $proofReady
+  postPublishCleanConsumerProofRequiredFields = @($postPublishCleanConsumerProofRequiredFields)
+  postPublishCleanConsumerProofRequiredFieldCount = $postPublishCleanConsumerProofRequiredFields.Count
+  postPublishCleanConsumerProofRejectedSubstitutes = @($postPublishCleanConsumerProofRejectedSubstitutes)
+  postPublishCleanConsumerProofRejectedSubstituteCount = $postPublishCleanConsumerProofRejectedSubstitutes.Count
+  postPublishCleanConsumerProofBlockedRealInputCount = $postPublishCleanConsumerProofBlockedRealInputCount
+  postPublishCleanConsumerProofSourceReadinessSignals = @($postPublishCleanConsumerProofSourceReadinessSignals)
+  postPublishCleanConsumerProofSourceReadinessSignalCount = $postPublishCleanConsumerProofSourceReadinessSignals.Count
   sourceProofLinkageReady = $sourceProofLinkageReady
   sourceGitHubActionsRunEvidenceReady = [bool](Get-PropertyOrDefault $import "sourceGitHubActionsRunEvidenceReady" $false)
   sourceGitHubActionsRunId = [string](Get-PropertyOrDefault $import "sourceGitHubActionsRunId" "")
@@ -165,6 +264,10 @@ Write-Utf8File -LiteralPath $markdownPath -InputObject @(
   "- failedActionRequiredCount: ``$($failedActionRequired.Count)``",
   "- proofCandidateReady: ``$proofReady``",
   "- sourceProofLinkageReady: ``$sourceProofLinkageReady``",
+  "- postPublishCleanConsumerProofRequiredFieldCount: ``$($postPublishCleanConsumerProofRequiredFields.Count)``",
+  "- postPublishCleanConsumerProofRejectedSubstituteCount: ``$($postPublishCleanConsumerProofRejectedSubstitutes.Count)``",
+  "- postPublishCleanConsumerProofBlockedRealInputCount: ``$postPublishCleanConsumerProofBlockedRealInputCount``",
+  "- postPublishCleanConsumerProofSourceReadinessSignalCount: ``$($postPublishCleanConsumerProofSourceReadinessSignals.Count)``",
   "",
   "| ID | Passed | Severity | Detail |",
   "|---|---:|---|---|",

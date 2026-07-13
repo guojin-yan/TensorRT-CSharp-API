@@ -46,6 +46,11 @@ public sealed class PublicPackageDownloadProofInputTests
         Assert.False(validation.GetProperty("canClaimPackageConsumerRuntimeProof").GetBoolean());
         Assert.False(validation.GetProperty("isPackageConsumerRuntimeProof").GetBoolean());
         Assert.False(validation.GetProperty("isPostPublishProof").GetBoolean());
+        Assert.True(validation.GetProperty("publicPackageDownloadProofRequiredFieldCount").GetInt32() >= 30);
+        Assert.Equal(11, validation.GetProperty("publicPackageDownloadProofRejectedSubstituteCount").GetInt32());
+        Assert.Equal(7, validation.GetProperty("publicPackageDownloadProofSourceReadinessSignalCount").GetInt32());
+        Assert.Contains(validation.GetProperty("publicPackageDownloadProofRequiredFields").EnumerateArray(), static field => field.GetString() == "managedPackageDownloadUrl");
+        Assert.Contains(validation.GetProperty("publicPackageDownloadProofRejectedSubstitutes").EnumerateArray(), static item => item.GetString() == "local-feed-restore");
 
         using JsonDocument candidateDocument = ReadFinalReleaseJson("public-package-download-proof-candidate.json");
         JsonElement candidate = candidateDocument.RootElement;
@@ -81,6 +86,9 @@ public sealed class PublicPackageDownloadProofInputTests
         Assert.False(candidateValidation.GetProperty("isRuntimeExecutionProof").GetBoolean());
         Assert.False(candidateValidation.GetProperty("isPostPublishProof").GetBoolean());
         Assert.False(candidateValidation.GetProperty("isReleaseCloseProof").GetBoolean());
+        Assert.True(candidateValidation.GetProperty("publicPackageDownloadProofRequiredFieldCount").GetInt32() >= 30);
+        Assert.Equal(11, candidateValidation.GetProperty("publicPackageDownloadProofRejectedSubstituteCount").GetInt32());
+        Assert.Equal(7, candidateValidation.GetProperty("publicPackageDownloadProofSourceReadinessSignalCount").GetInt32());
 
         string[] validationItemIds = validation.GetProperty("validationItems")
             .EnumerateArray()
@@ -91,6 +99,16 @@ public sealed class PublicPackageDownloadProofInputTests
         Assert.Contains("downloaded-managed-sha256-format", validationItemIds);
         Assert.Contains("downloaded-managed-hash-match", validationItemIds);
         Assert.Contains("dry-run-sha-not-substituted", validationItemIds);
+        Assert.Contains("public-package-download-required-field-contract", validationItemIds);
+        Assert.Contains("public-package-download-rejected-substitute-contract", validationItemIds);
+
+        RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Export-ReleaseEvidenceBundle.ps1"));
+        using JsonDocument evidenceDocument = ReadFinalReleaseJson("release-evidence-bundle.json");
+        JsonElement evidence = evidenceDocument.RootElement;
+        Assert.True(evidence.GetProperty("publicPackageDownloadProofRequiredFieldCount").GetInt32() >= 30);
+        Assert.Equal(11, evidence.GetProperty("publicPackageDownloadProofRejectedSubstituteCount").GetInt32());
+        Assert.Equal(7, evidence.GetProperty("publicPackageDownloadProofSourceReadinessSignalCount").GetInt32());
+        Assert.False(evidence.GetProperty("publicPackageDownloadProofCandidateReady").GetBoolean());
 
         string markdown = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "artifacts", "final-release", "public-package-download-proof-input.template.md"));
         Assert.Contains("Public Package Download Proof Input Template", markdown, StringComparison.Ordinal);

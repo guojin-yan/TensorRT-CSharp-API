@@ -80,6 +80,67 @@ function Read-JsonOrNull {
   return Get-Content -LiteralPath $resolved -Raw -Encoding utf8 | ConvertFrom-Json
 }
 
+$publicPackageDownloadProofRequiredFields = @(
+  "managedPackageId",
+  "managedPackageVersion",
+  "managedPackagePageUrl",
+  "managedPackageDownloadUrl",
+  "downloadedManagedNupkgPath",
+  "downloadedManagedNupkgSha256",
+  "downloadedManagedNupkgSizeBytes",
+  "runtimePackageId",
+  "runtimePackageVersion",
+  "runtimePackageKey",
+  "runtimePackagePageUrl",
+  "runtimePackageDownloadUrl",
+  "downloadedRuntimeNupkgPath",
+  "downloadedRuntimeNupkgSha256",
+  "downloadedRuntimeNupkgSizeBytes",
+  "publicPackageSourceKind",
+  "publicPackageSourceUrl",
+  "downloadCommand",
+  "downloadedAtUtc",
+  "capturedAtUtc",
+  "ownerName",
+  "ownerReviewer",
+  "sourceGitHubActionsRunEvidenceReady",
+  "sourceOwnerPublicPublishResultReady",
+  "sourceWorkflowRunLogSha256",
+  "sourceArtifactManifestSha256",
+  "sourceOwnerPublicPackageUrl",
+  "sourceOwnerPublicPackageVersion",
+  "sourceOwnerPublicPackageSha256",
+  "githubReleaseUrl",
+  "githubReleaseAssetUrl",
+  "githubReleaseAssetDownloadedPath",
+  "githubReleaseAssetSha256",
+  "githubReleaseAssetSizeBytes"
+)
+
+$publicPackageDownloadProofRejectedSubstitutes = @(
+  "local-feed-restore",
+  "direct-local-nupkg",
+  "project-reference",
+  "repo-internal-consumer",
+  "package-managed-dry-run-artifact",
+  "github-actions-artifact-only",
+  "dashboard-only",
+  "queued-workflow-only",
+  "missing-runner",
+  "local-dotnet-test-only",
+  "sidecar-only-report"
+)
+
+$publicPackageDownloadProofSourceReadinessSignals = @(
+  "sourceGitHubActionsRunEvidenceReady",
+  "sourceWorkflowRunLogSha256",
+  "sourceArtifactManifestSha256",
+  "sourceOwnerPublicPublishResultReady",
+  "sourceOwnerPublicPackageUrl",
+  "sourceOwnerPublicPackageVersion",
+  "sourceOwnerPublicPackageSha256"
+)
+
 $resolvedInputPath = Resolve-RepositoryPath -Path $InputPath
 if (-not (Test-Path -LiteralPath $resolvedInputPath -PathType Leaf)) {
   & (Join-Path $RepositoryRoot "eng\Export-PublicPackageDownloadProofInputTemplate.ps1") -RepositoryRoot $RepositoryRoot
@@ -230,6 +291,12 @@ $projection = [ordered]@{
   preReleasePublicPackageDownloadLaneReady = $preReleasePublicPackageDownloadLaneReady
   preReleaseCanPromotePublicProof = $preReleaseCanPromotePublicProof
   forbiddenSubstituteFindings = @($forbiddenSubstituteFindings)
+  publicPackageDownloadProofRequiredFields = @($publicPackageDownloadProofRequiredFields)
+  publicPackageDownloadProofRequiredFieldCount = $publicPackageDownloadProofRequiredFields.Count
+  publicPackageDownloadProofRejectedSubstitutes = @($publicPackageDownloadProofRejectedSubstitutes)
+  publicPackageDownloadProofRejectedSubstituteCount = $publicPackageDownloadProofRejectedSubstitutes.Count
+  publicPackageDownloadProofSourceReadinessSignals = @($publicPackageDownloadProofSourceReadinessSignals)
+  publicPackageDownloadProofSourceReadinessSignalCount = $publicPackageDownloadProofSourceReadinessSignals.Count
 }
 
 $candidateItems = @()
@@ -315,6 +382,9 @@ $markdown = @"
 | candidateItemCount | ``$($record.candidateItemCount)`` |
 | readyCandidateCount | ``$($record.readyCandidateCount)`` |
 | blockedCandidateCount | ``$($record.blockedCandidateCount)`` |
+| publicPackageDownloadProofRequiredFieldCount | ``$($record.publicPackageDownloadProofRequiredFieldCount)`` |
+| publicPackageDownloadProofRejectedSubstituteCount | ``$($record.publicPackageDownloadProofRejectedSubstituteCount)`` |
+| publicPackageDownloadProofSourceReadinessSignalCount | ``$($record.publicPackageDownloadProofSourceReadinessSignalCount)`` |
 | publicPackageDownloadProofCandidateReady | ``$($record.publicPackageDownloadProofCandidateReady)`` |
 | proofCandidateReady | ``$($record.proofCandidateReady)`` |
 | performsPublish | ``$($record.performsPublish)`` |
