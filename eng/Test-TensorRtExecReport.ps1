@@ -67,7 +67,11 @@ $forbiddenSubstitutes = @(
     "ProjectReference",
     'direct `.nupkg`',
     "YoloVision matrix",
-    "capability-probe-only"
+    "capability-probe-only",
+    "ONNX Parser diagnostic snapshot",
+    "ONNX ParserRefitter diagnostic snapshot",
+    "copied-parser-diagnostics",
+    "copied-parser-refitter-diagnostics"
 )
 
 function Resolve-RepoPath {
@@ -147,6 +151,11 @@ else {
     Add-ValidationItem $items "normalized-command-sha256" ($normalizedCommandSha256 -cmatch "^[0-9a-f]{64}$") "blocker" "NormalizedCommandSha256 must be a lowercase SHA256 string."
     Add-ValidationItem $items "report-boundary-present" (Test-JsonProperty $report "ReportBoundary") "blocker" "ReportBoundary must be present."
     Add-ValidationItem $items "report-boundary-not-runtime-proof" ((Test-JsonProperty $report "ReportBoundary") -and -not [bool]$report.ReportBoundary.IsRuntimeProof) "blocker" "ReportBoundary.IsRuntimeProof must be false for build/report evidence."
+    Add-ValidationItem $items "copied-diagnostics-boundary-present" ((Test-JsonProperty $report "ReportBoundary") -and (Test-JsonProperty $report.ReportBoundary "CopiedDiagnosticsBoundary")) "blocker" "ReportBoundary.CopiedDiagnosticsBoundary must be present."
+    Add-ValidationItem $items "parser-diagnostics-kind" ((Test-JsonProperty $report "ReportBoundary") -and [string]$report.ReportBoundary.ParserDiagnosticsEvidenceKind -eq "copied-parser-diagnostics") "blocker" "ReportBoundary.ParserDiagnosticsEvidenceKind must be copied-parser-diagnostics."
+    Add-ValidationItem $items "parser-refitter-diagnostics-kind" ((Test-JsonProperty $report "ReportBoundary") -and [string]$report.ReportBoundary.ParserRefitterDiagnosticsEvidenceKind -eq "copied-parser-refitter-diagnostics") "blocker" "ReportBoundary.ParserRefitterDiagnosticsEvidenceKind must be copied-parser-refitter-diagnostics."
+    Add-ValidationItem $items "copied-diagnostics-not-runtime-proof" ((Test-JsonProperty $report "ReportBoundary") -and -not [bool]$report.ReportBoundary.CanPromoteCopiedDiagnosticsToRuntimeProof) "blocker" "Copied parser/refitter diagnostics cannot promote runtime proof."
+    Add-ValidationItem $items "parser-diagnostics-owner-action-present" ((Test-JsonProperty $report "ReportBoundary") -and (Test-JsonProperty $report.ReportBoundary "ParserDiagnosticsOwnerAction")) "blocker" "ReportBoundary.ParserDiagnosticsOwnerAction must be present."
     Add-ValidationItem $items "forbidden-substitutes-complete" (($forbiddenSubstitutes | Where-Object { $forbidden -notcontains $_ }).Count -eq 0) "blocker" "ReportBoundary.ForbiddenSubstitutes must include every non-proof substitute."
     Add-ValidationItem $items "option-status-present" ((Test-JsonProperty $report.OptionImplementationStatus "ParsedOptions") -and (Test-JsonProperty $report.OptionImplementationStatus "AppliedOptions") -and (Test-JsonProperty $report.OptionImplementationStatus "ParseOnlyOptions")) "blocker" "OptionImplementationStatus must split parsed/applied/parse-only options."
     Add-ValidationItem $items "preflight-boundary-present" (Test-JsonProperty $report.PreflightMetadata "EvidenceBoundary") "blocker" "PreflightMetadata.EvidenceBoundary must be present."

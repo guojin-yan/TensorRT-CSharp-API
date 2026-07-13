@@ -83,6 +83,7 @@ public static class OnnxEngineBuildDiagnostics
     public static string ToMarkdown(OnnxEngineBuildResult result)
     {
         OnnxEngineBuildOptionImplementationStatus optionImplementationStatus = CreateOptionImplementationStatus(result);
+        OnnxEngineBuildReportBoundary reportBoundary = CreateReportBoundary(result);
 
         return string.Join(Environment.NewLine, new[]
         {
@@ -239,6 +240,11 @@ public static class OnnxEngineBuildDiagnostics
             $"Input asset SHA256: `{result.ModelEvidence.InputAssetSha256}`",
             $"Evidence sidecar path: `{result.EvidenceSidecar.Path}`",
             $"Evidence sidecar proof classification: `{result.EvidenceSidecar.ProofClassification}`",
+            $"Report boundary copied diagnostics: `{reportBoundary.CopiedDiagnosticsBoundary}`",
+            $"Report boundary parser diagnostics evidence kind: `{reportBoundary.ParserDiagnosticsEvidenceKind}`",
+            $"Report boundary parser-refitter diagnostics evidence kind: `{reportBoundary.ParserRefitterDiagnosticsEvidenceKind}`",
+            $"Report boundary copied diagnostics runtime proof: `{reportBoundary.CanPromoteCopiedDiagnosticsToRuntimeProof}`",
+            $"Report boundary parser diagnostics owner action: `{reportBoundary.ParserDiagnosticsOwnerAction}`",
             string.Empty,
             "This report is build/sample evidence only. precheck, build-only and dependency-probe-only are not runtime proof; synthetic-input-runtime is not real model proof; package-consumer-runtime is tracked by release proof records.",
             string.Empty,
@@ -436,6 +442,11 @@ public static class OnnxEngineBuildDiagnostics
             isRuntimeProof: false,
             isBuildOnly: result.BuildEvidenceOnly,
             forbiddenSubstituteReason: "TensorRtExec reports are diagnostic/build artifacts. They do not replace real-model-runtime, package-consumer-runtime, post-publish verification, or owner release-close evidence.",
+            copiedDiagnosticsBoundary: "ONNX Parser and ParserRefitter copied diagnostics are troubleshooting and release-gate surface evidence only. They do not prove engine execution, model correctness, package-consumer-runtime, post-publish verification, or release close readiness.",
+            parserDiagnosticsEvidenceKind: "copied-parser-diagnostics",
+            parserRefitterDiagnosticsEvidenceKind: "copied-parser-refitter-diagnostics",
+            canPromoteCopiedDiagnosticsToRuntimeProof: false,
+            parserDiagnosticsOwnerAction: "Use copied parser/refitter diagnostics to repair ONNX export, shape/profile, or plugin plans; then collect real-model-runtime evidence with real inputs, output JSON, logs, hashes, host metadata, and owner review.",
             forbiddenSubstitutes: new[]
             {
                 "build-only",
@@ -448,7 +459,11 @@ public static class OnnxEngineBuildDiagnostics
                 "YoloVision matrix",
                 "OnnxToEngine report",
                 "readonly diagnostics",
-                "capability-probe-only"
+                "capability-probe-only",
+                "ONNX Parser diagnostic snapshot",
+                "ONNX ParserRefitter diagnostic snapshot",
+                "copied-parser-diagnostics",
+                "copied-parser-refitter-diagnostics"
             });
     }
 }
@@ -482,11 +497,21 @@ public sealed class OnnxEngineBuildReportBoundary
         bool isRuntimeProof,
         bool isBuildOnly,
         string forbiddenSubstituteReason,
+        string copiedDiagnosticsBoundary,
+        string parserDiagnosticsEvidenceKind,
+        string parserRefitterDiagnosticsEvidenceKind,
+        bool canPromoteCopiedDiagnosticsToRuntimeProof,
+        string parserDiagnosticsOwnerAction,
         IReadOnlyList<string> forbiddenSubstitutes)
     {
         IsRuntimeProof = isRuntimeProof;
         IsBuildOnly = isBuildOnly;
         ForbiddenSubstituteReason = forbiddenSubstituteReason ?? string.Empty;
+        CopiedDiagnosticsBoundary = copiedDiagnosticsBoundary ?? string.Empty;
+        ParserDiagnosticsEvidenceKind = parserDiagnosticsEvidenceKind ?? string.Empty;
+        ParserRefitterDiagnosticsEvidenceKind = parserRefitterDiagnosticsEvidenceKind ?? string.Empty;
+        CanPromoteCopiedDiagnosticsToRuntimeProof = canPromoteCopiedDiagnosticsToRuntimeProof;
+        ParserDiagnosticsOwnerAction = parserDiagnosticsOwnerAction ?? string.Empty;
         ForbiddenSubstitutes = forbiddenSubstitutes ?? Array.Empty<string>();
     }
 
@@ -495,6 +520,16 @@ public sealed class OnnxEngineBuildReportBoundary
     public bool IsBuildOnly { get; }
 
     public string ForbiddenSubstituteReason { get; }
+
+    public string CopiedDiagnosticsBoundary { get; }
+
+    public string ParserDiagnosticsEvidenceKind { get; }
+
+    public string ParserRefitterDiagnosticsEvidenceKind { get; }
+
+    public bool CanPromoteCopiedDiagnosticsToRuntimeProof { get; }
+
+    public string ParserDiagnosticsOwnerAction { get; }
 
     public IReadOnlyList<string> ForbiddenSubstitutes { get; }
 }

@@ -55,6 +55,11 @@ public sealed class TensorRtExecReportSchemaTests
                      "IsRuntimeProof",
                      "IsBuildOnly",
                      "ForbiddenSubstituteReason",
+                     "CopiedDiagnosticsBoundary",
+                     "ParserDiagnosticsEvidenceKind",
+                     "ParserRefitterDiagnosticsEvidenceKind",
+                     "CanPromoteCopiedDiagnosticsToRuntimeProof",
+                     "ParserDiagnosticsOwnerAction",
                      "TensorRtExec report",
                      "build-only",
                      "dry-run",
@@ -65,6 +70,10 @@ public sealed class TensorRtExecReportSchemaTests
                      "YoloVision matrix",
                      "OnnxToEngine report",
                      "readonly diagnostics",
+                     "ONNX Parser diagnostic snapshot",
+                     "ONNX ParserRefitter diagnostic snapshot",
+                     "copied-parser-diagnostics",
+                     "copied-parser-refitter-diagnostics",
                  })
         {
             Assert.Contains(term, text, StringComparison.Ordinal);
@@ -124,10 +133,19 @@ public sealed class TensorRtExecReportSchemaTests
         Assert.False(boundary.GetProperty("IsRuntimeProof").GetBoolean());
         Assert.True(boundary.GetProperty("IsBuildOnly").GetBoolean());
         Assert.Contains("diagnostic/build artifacts", boundary.GetProperty("ForbiddenSubstituteReason").GetString(), StringComparison.Ordinal);
+        Assert.Contains("copied diagnostics", boundary.GetProperty("CopiedDiagnosticsBoundary").GetString(), StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("copied-parser-diagnostics", boundary.GetProperty("ParserDiagnosticsEvidenceKind").GetString());
+        Assert.Equal("copied-parser-refitter-diagnostics", boundary.GetProperty("ParserRefitterDiagnosticsEvidenceKind").GetString());
+        Assert.False(boundary.GetProperty("CanPromoteCopiedDiagnosticsToRuntimeProof").GetBoolean());
+        Assert.Contains("real-model-runtime evidence", boundary.GetProperty("ParserDiagnosticsOwnerAction").GetString(), StringComparison.Ordinal);
         Assert.Contains(boundary.GetProperty("ForbiddenSubstitutes").EnumerateArray(), static item => item.GetString() == "TensorRtExec report");
         Assert.Contains(boundary.GetProperty("ForbiddenSubstitutes").EnumerateArray(), static item => item.GetString() == "OnnxToEngine report");
         Assert.Contains(boundary.GetProperty("ForbiddenSubstitutes").EnumerateArray(), static item => item.GetString() == "readonly diagnostics");
         Assert.Contains(boundary.GetProperty("ForbiddenSubstitutes").EnumerateArray(), static item => item.GetString() == "capability-probe-only");
+        Assert.Contains(boundary.GetProperty("ForbiddenSubstitutes").EnumerateArray(), static item => item.GetString() == "ONNX Parser diagnostic snapshot");
+        Assert.Contains(boundary.GetProperty("ForbiddenSubstitutes").EnumerateArray(), static item => item.GetString() == "ONNX ParserRefitter diagnostic snapshot");
+        Assert.Contains(boundary.GetProperty("ForbiddenSubstitutes").EnumerateArray(), static item => item.GetString() == "copied-parser-diagnostics");
+        Assert.Contains(boundary.GetProperty("ForbiddenSubstitutes").EnumerateArray(), static item => item.GetString() == "copied-parser-refitter-diagnostics");
         Assert.False(reportRoot.GetProperty("IsRuntimeExecutionProof").GetBoolean());
         Assert.False(reportRoot.GetProperty("IsRealModelRuntimeProof").GetBoolean());
         Assert.False(reportRoot.GetProperty("IsPackageConsumerRuntimeProof").GetBoolean());

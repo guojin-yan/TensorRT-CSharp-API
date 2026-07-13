@@ -15,6 +15,13 @@ public sealed class TensorRtExecReportValidatorTests
         Assert.Contains("tensor-rt-exec-report-ready", script, StringComparison.Ordinal);
         Assert.Contains("ReportBoundary", script, StringComparison.Ordinal);
         Assert.Contains("report-boundary-not-runtime-proof", script, StringComparison.Ordinal);
+        Assert.Contains("copied-diagnostics-boundary-present", script, StringComparison.Ordinal);
+        Assert.Contains("parser-diagnostics-kind", script, StringComparison.Ordinal);
+        Assert.Contains("parser-refitter-diagnostics-kind", script, StringComparison.Ordinal);
+        Assert.Contains("copied-diagnostics-not-runtime-proof", script, StringComparison.Ordinal);
+        Assert.Contains("parser-diagnostics-owner-action-present", script, StringComparison.Ordinal);
+        Assert.Contains("copied-parser-diagnostics", script, StringComparison.Ordinal);
+        Assert.Contains("copied-parser-refitter-diagnostics", script, StringComparison.Ordinal);
         Assert.Contains("OptionImplementationStatus", script, StringComparison.Ordinal);
         Assert.Contains("PreflightMetadata", script, StringComparison.Ordinal);
         Assert.Contains("LoadedEngineDiagnostics", script, StringComparison.Ordinal);
@@ -28,6 +35,9 @@ public sealed class TensorRtExecReportValidatorTests
         string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "TensorRtExec", "README.md"));
         Assert.Contains("Test-TensorRtExecReport.ps1", readme, StringComparison.Ordinal);
         Assert.Contains("ReportBoundary.ForbiddenSubstitutes", readme, StringComparison.Ordinal);
+        Assert.Contains("ReportBoundary.CopiedDiagnosticsBoundary", readme, StringComparison.Ordinal);
+        Assert.Contains("copied-parser-diagnostics", readme, StringComparison.Ordinal);
+        Assert.Contains("copied-parser-refitter-diagnostics", readme, StringComparison.Ordinal);
         Assert.Contains("OnnxToEngine report", readme, StringComparison.Ordinal);
     }
 }

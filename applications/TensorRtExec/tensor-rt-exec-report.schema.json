@@ -276,6 +276,11 @@
         "IsRuntimeProof",
         "IsBuildOnly",
         "ForbiddenSubstituteReason",
+        "CopiedDiagnosticsBoundary",
+        "ParserDiagnosticsEvidenceKind",
+        "ParserRefitterDiagnosticsEvidenceKind",
+        "CanPromoteCopiedDiagnosticsToRuntimeProof",
+        "ParserDiagnosticsOwnerAction",
         "ForbiddenSubstitutes"
       ],
       "properties": {
@@ -285,6 +290,26 @@
         },
         "IsBuildOnly": { "type": "boolean" },
         "ForbiddenSubstituteReason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "CopiedDiagnosticsBoundary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ParserDiagnosticsEvidenceKind": {
+          "type": "string",
+          "const": "copied-parser-diagnostics"
+        },
+        "ParserRefitterDiagnosticsEvidenceKind": {
+          "type": "string",
+          "const": "copied-parser-refitter-diagnostics"
+        },
+        "CanPromoteCopiedDiagnosticsToRuntimeProof": {
+          "type": "boolean",
+          "const": false
+        },
+        "ParserDiagnosticsOwnerAction": {
           "type": "string",
           "minLength": 1
         },
@@ -303,7 +328,11 @@
               "YoloVision matrix",
               "OnnxToEngine report",
               "readonly diagnostics",
-              "capability-probe-only"
+              "capability-probe-only",
+              "ONNX Parser diagnostic snapshot",
+              "ONNX ParserRefitter diagnostic snapshot",
+              "copied-parser-diagnostics",
+              "copied-parser-refitter-diagnostics"
             ]
           }
         }
