@@ -982,6 +982,10 @@ public sealed class CallbackAllocatorBoundaryTests
         Assert.Contains("CallbackStatePinned", program);
         Assert.Contains("DelegatePinned", program);
         Assert.Contains("CallbackInterfaceInfoSafeControls=TryGetOutputAllocatorInterfaceInfo;TryGetTemporaryStorageAllocatorInterfaceInfo;TryGetDebugListenerInterfaceInfo", program);
+        Assert.Contains("CallbackAllocatorSafeControlSummary=GetCallbackAllocatorSafeControlSummary;TensorRtExecutionContextCallbackAllocatorSafeControlSummary;copied-metadata-only;pointer-free;not-runtime-proof", program);
+        Assert.Contains("context.GetCallbackAllocatorSafeControlSummary(outputTensorName)", program);
+        Assert.Contains("FormatCallbackAllocatorSafeControlSummary", program);
+        Assert.Contains("execution-context-callback-allocator-safe-control-summary", program);
         Assert.Contains("Skipped=True Reason=AdapterNotReady", program);
         Assert.Contains("FullEngineContextCallbackAllocatorSafeControlsRequireTensorRt11", program);
         Assert.Contains("ProgressMonitor=Skipped/RequiresTensorRt10Or11", program);

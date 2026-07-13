@@ -62,6 +62,8 @@ TensorRT 的 callback、allocator、debug listener 等接口很有价值，但�
 
 这个 snapshot 的价值是减少发布前检查时的文件往返：它给出一个高层 C# API、smoke、package consumer 和质量测试都能引用的统一摘要。但它不改变 deferred 边界，不删除 `IGpuAllocator::allocate`、`IOutputAllocator::reallocateOutput`、`IDebugListener::processDebugTensor` 等 callback 行的 deferred 状态，也不能把 blocked / skipped proof 说成 passed。
 
+`TensorRtExecutionContextCallbackAllocatorSafeControlSummary` 进一步把单个 execution context / output tensor 的安全只读查询收束成一个 wrapper：`GetCallbackAllocatorSafeControlSummary(outputTensorName)` 只聚合 copied metadata only 结果，包括 output allocator、temporary-storage allocator、debug listener 的 interface-info availability、diagnostic 与 `CopiedInterfaceInfoCount`。它是 smoke 与 package consumer 的高层诊断面，不进行 callback invocation，不暴露 borrowed pointer，也不是 runtime proof。
+
 `TensorRtCallbackOwnerClosureMatrixResult` 则把 managed readiness 往下拆成 family-level closure matrix：`GpuAllocator`、`GpuAsyncAllocator`、`OutputAllocator`、`DebugListener`、`StreamReaderWriter` 分别输出 `ReadyClosureColumnCount`、`PackageConsumerRuntimeProofRequired`、`PackageConsumerRuntimeProofReady`、`RuntimeProofBlocked` 和 `DeferredRowsStillRequired`。该矩阵可以作为下一阶段排工入口，但仍是 `RuntimeEvidenceKind=closure-matrix`，不能作为真实 callback runtime proof。
 
 下一批如果继续推进，应优先沿矩阵中缺失列补真实 runtime proof 的外部证据输入、兼容主机执行记录、native vtable install、detach/release 归零和 invocation 记录，而不是继续扩展 managed-only gate 的字段数量。

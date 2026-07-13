@@ -180,6 +180,8 @@ internal static class Program
 
         TensorRtExecutionContextRuntimeDiagnosticSnapshot runtimeSnapshot = context.GetRuntimeDiagnosticSnapshot(outputTensorName);
         TensorRtExecutionContextRuntimeDiagnosticSummary runtimeSummary = runtimeSnapshot.ToSummary();
+        TensorRtExecutionContextCallbackAllocatorSafeControlSummary safeControlSummary =
+            context.GetCallbackAllocatorSafeControlSummary(outputTensorName);
         bool hasOutputAllocatorBefore = context.HasOutputAllocator(outputTensorName);
         TensorRtExecutionContextCallbackStateSnapshot callbackSnapshot = context.GetCallbackStateSnapshot(outputTensorName);
         bool outputAllocatorInfoAvailable = context.TryGetOutputAllocatorInterfaceInfo(outputTensorName, out TensorRtInterfaceInfo outputAllocatorInfo, out string outputAllocatorInfoDiagnostic);
@@ -210,9 +212,36 @@ internal static class Program
             $"TemporaryStorageAllocator={hasTemporaryAllocatorBefore}->{hasTemporaryAllocatorAfter}/Cleared={temporaryAllocatorCleared}/DirectClear={directTemporaryAllocatorCleared}/Info={temporaryAllocatorInfoAvailable}:{FormatInterfaceInfo(temporaryAllocatorInfo, temporaryAllocatorInfoDiagnostic)} " +
             $"DebugListener={hasDebugListenerBefore}->{hasDebugListenerAfter}/Cleared={debugListenerCleared}/DirectClear={directDebugListenerCleared}/Info={debugListenerInfoAvailable}:{FormatInterfaceInfo(debugListenerInfo, debugListenerInfoDiagnostic)} " +
             $"CallbackStateSnapshot={callbackSnapshot.LastOperation}->{clearedCallbackSnapshot.LastOperation}/OutputInfo={callbackSnapshot.OutputAllocatorInterfaceInfoAvailable}/TempInfo={callbackSnapshot.TemporaryStorageAllocatorInterfaceInfoAvailable}/DebugInfo={callbackSnapshot.DebugListenerInterfaceInfoAvailable} " +
+            $"CallbackAllocatorSafeControlSummary={FormatCallbackAllocatorSafeControlSummary(safeControlSummary)} " +
             $"RuntimeDiagnosticSnapshot={runtimeSnapshot.OutputTensorName}/{runtimeSnapshot.HasErrorRecorder}/{runtimeSnapshot.HasOutputAllocator}/{runtimeSnapshot.IsOutputTensorAddressSet}/{runtimeSnapshot.HasTemporaryStorageAllocator}/{runtimeSnapshot.HasDebugListener}/{runtimeSnapshot.HasNativeProfiler}/{runtimeSnapshot.CallbackState.LastOperation}/{runtimeSnapshot.Diagnostics.Count} " +
             $"ExecutionContextRuntimeDiagnosticSummary={runtimeSummary.HasErrorRecorder}/{runtimeSummary.HasOutputAllocator}/{runtimeSummary.IsOutputTensorAddressSet}/{runtimeSummary.HasTemporaryStorageAllocator}/{runtimeSummary.HasDebugListener}/{runtimeSummary.HasNativeProfiler}/{runtimeSummary.CallbackStateLastStatus}/{runtimeSummary.DiagnosticCount} " +
             $"ProfilerNative={hasProfilerBefore}->{hasProfilerAfter}/Managed={hasManagedProfilerAfter}";
+    }
+
+    private static string FormatCallbackAllocatorSafeControlSummary(TensorRtExecutionContextCallbackAllocatorSafeControlSummary result)
+    {
+        return "execution-context-callback-allocator-safe-control-summary" +
+            $";EvidenceKind={result.EvidenceKind}" +
+            $";RuntimeEvidenceKind={result.RuntimeEvidenceKind}" +
+            $";RealCallbackRuntime={result.RealCallbackRuntime}" +
+            $";IsRealCallbackRuntimeProof={result.IsRealCallbackRuntimeProof}" +
+            $";Line={(int)result.Line}" +
+            $";OutputTensorName={SanitizeSmokeValue(result.OutputTensorName)}" +
+            $";HasOutputAllocator={result.HasOutputAllocator}" +
+            $";HasTemporaryStorageAllocator={result.HasTemporaryStorageAllocator}" +
+            $";HasDebugListener={result.HasDebugListener}" +
+            $";OutputAllocatorInterfaceInfoAvailable={result.OutputAllocatorInterfaceInfoAvailable}" +
+            $";TemporaryStorageAllocatorInterfaceInfoAvailable={result.TemporaryStorageAllocatorInterfaceInfoAvailable}" +
+            $";DebugListenerInterfaceInfoAvailable={result.DebugListenerInterfaceInfoAvailable}" +
+            $";CopiedInterfaceInfoCount={result.CopiedInterfaceInfoCount}" +
+            $";DiagnosticCount={result.DiagnosticCount}" +
+            $";PointerFreeSurfaceReady={result.PointerFreeSurfaceReady}" +
+            $";CallbackInvocationAttempted={result.CallbackInvocationAttempted}" +
+            $";IsRuntimeInvocationProofComplete={result.IsRuntimeInvocationProofComplete}" +
+            $";OutputAllocatorDiagnostic={SanitizeSmokeValue(result.OutputAllocatorDiagnostic)}" +
+            $";TemporaryStorageAllocatorDiagnostic={SanitizeSmokeValue(result.TemporaryStorageAllocatorDiagnostic)}" +
+            $";DebugListenerDiagnostic={SanitizeSmokeValue(result.DebugListenerDiagnostic)}" +
+            $";Summary={SanitizeSmokeValue(result.Summary)}";
     }
 
     private static string FormatInterfaceInfo(TensorRtInterfaceInfo interfaceInfo, string diagnostic)
@@ -230,9 +259,10 @@ internal static class Program
 
     private static void PrintSafeControlSurface(bool enableRuntimeSmoke = false, string runtimePackageKey = "")
     {
-        Console.WriteLine("SafeControlSurface=allocator-debug-listener-safe-controls;callback-interface-info-safe-controls;execution-context-callback-state-snapshot;error-recorder-diagnostics-design-gate;dimension-expression-snapshot-design-gate;calibrator-metadata-design-gate;runtime-deserialization-boundary-precheck;runtime-deserialization-dependency-diagnostics;allocator-owner-dry-run-diagnostics;allocator-owner-native-dry-run-controls;allocator-owner-state-ledger-dry-run-controls;allocator-owner-internal-runtime-prototype;allocator-owner-ledger-safety-gate;output-allocator-internal-runtime-gate;output-allocator-callback-owner-design;output-allocator-attach-detach-design-gate;output-buffer-ownership-safety-gate;output-allocator-runtime-proof-precheck;debug-listener-callback-owner-design;debug-listener-attach-detach-design-gate;debug-listener-borrowed-tensor-safety-gate;debug-listener-attach-vtable-safety-gate;debug-listener-native-attach-nothrow-preflight;debug-listener-native-owner-address-design-gate;debug-listener-native-nothrow-vtable-design-gate;debug-listener-native-attach-entry-design-gate;debug-listener-native-detach-before-release-design-gate;debug-listener-native-owner-lifecycle-dry-run;debug-listener-native-attach-entry-runtime-scaffold;debug-listener-native-attach-entry-minimal-safety;debug-listener-native-owner-stable-identity;debug-listener-native-owner-noncopyable-storage;debug-listener-native-nothrow-destructor;debug-listener-native-owner-lifecycle-gate;debug-listener-native-attach-bridge-shape-gate;debug-listener-exception-status-mapping-gate;debug-listener-inflight-accounting-gate;debug-listener-native-nothrow-vtable-scaffold-gate;debug-listener-nothrow-vtable-callback-stub;debug-listener-borrowed-debug-tensor-metadata-runtime-gate;debug-listener-native-vtable-install-preflight;debug-listener-native-owner-vtable-install-experiment;debug-listener-runtime-proof-precheck;debug-listener-runtime-proof-attempt-preflight;debug-listener-real-non-null-attach-runtime-smoke;debug-listener-process-debug-tensor-callback-trampoline;callback-trampoline-shape;debug-listener-real-callback-runtime-proof;debug-listener-callback-proof-gap-report;callback-owner-closure-matrix;real-callback-runtime-blocked;attempted-no-invocation");
+        Console.WriteLine("SafeControlSurface=allocator-debug-listener-safe-controls;callback-interface-info-safe-controls;execution-context-callback-state-snapshot;execution-context-callback-allocator-safe-control-summary;error-recorder-diagnostics-design-gate;dimension-expression-snapshot-design-gate;calibrator-metadata-design-gate;runtime-deserialization-boundary-precheck;runtime-deserialization-dependency-diagnostics;allocator-owner-dry-run-diagnostics;allocator-owner-native-dry-run-controls;allocator-owner-state-ledger-dry-run-controls;allocator-owner-internal-runtime-prototype;allocator-owner-ledger-safety-gate;output-allocator-internal-runtime-gate;output-allocator-callback-owner-design;output-allocator-attach-detach-design-gate;output-buffer-ownership-safety-gate;output-allocator-runtime-proof-precheck;debug-listener-callback-owner-design;debug-listener-attach-detach-design-gate;debug-listener-borrowed-tensor-safety-gate;debug-listener-attach-vtable-safety-gate;debug-listener-native-attach-nothrow-preflight;debug-listener-native-owner-address-design-gate;debug-listener-native-nothrow-vtable-design-gate;debug-listener-native-attach-entry-design-gate;debug-listener-native-detach-before-release-design-gate;debug-listener-native-owner-lifecycle-dry-run;debug-listener-native-attach-entry-runtime-scaffold;debug-listener-native-attach-entry-minimal-safety;debug-listener-native-owner-stable-identity;debug-listener-native-owner-noncopyable-storage;debug-listener-native-nothrow-destructor;debug-listener-native-owner-lifecycle-gate;debug-listener-native-attach-bridge-shape-gate;debug-listener-exception-status-mapping-gate;debug-listener-inflight-accounting-gate;debug-listener-native-nothrow-vtable-scaffold-gate;debug-listener-nothrow-vtable-callback-stub;debug-listener-borrowed-debug-tensor-metadata-runtime-gate;debug-listener-native-vtable-install-preflight;debug-listener-native-owner-vtable-install-experiment;debug-listener-runtime-proof-precheck;debug-listener-runtime-proof-attempt-preflight;debug-listener-real-non-null-attach-runtime-smoke;debug-listener-process-debug-tensor-callback-trampoline;callback-trampoline-shape;debug-listener-real-callback-runtime-proof;debug-listener-callback-proof-gap-report;callback-owner-closure-matrix;real-callback-runtime-blocked;attempted-no-invocation");
         Console.WriteLine("CallbackInterfaceInfoSafeControls=TryGetOutputAllocatorInterfaceInfo;TryGetTemporaryStorageAllocatorInterfaceInfo;TryGetDebugListenerInterfaceInfo");
         Console.WriteLine("ExecutionContextCallbackStateSnapshot=GetCallbackStateSnapshot;ClearCallbackState;TensorRtExecutionContextCallbackStateSnapshot");
+        Console.WriteLine("CallbackAllocatorSafeControlSummary=GetCallbackAllocatorSafeControlSummary;TensorRtExecutionContextCallbackAllocatorSafeControlSummary;copied-metadata-only;pointer-free;not-runtime-proof");
         Console.WriteLine("ExecutionContextRuntimeDiagnosticSnapshot=GetRuntimeDiagnosticSnapshot;TensorRtExecutionContextRuntimeDiagnosticSnapshot;pointer-free");
         Console.WriteLine("ExecutionContextRuntimeDiagnosticSummary=ToSummary;TensorRtExecutionContextRuntimeDiagnosticSummary;pointer-free;not-runtime-proof");
         Console.WriteLine("RuntimeDiagnosticSnapshot=GetDiagnosticSnapshot;TensorRtRuntimeDiagnosticSnapshot;pointer-free");

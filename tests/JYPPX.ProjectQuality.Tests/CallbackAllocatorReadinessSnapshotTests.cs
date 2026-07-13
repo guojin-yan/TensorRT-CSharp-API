@@ -82,7 +82,8 @@ public sealed class CallbackAllocatorReadinessSnapshotTests
         Type[] publicTypes =
         {
             typeof(TensorRtCallbackAllocatorReadiness),
-            typeof(TensorRtCallbackAllocatorReadinessSnapshot)
+            typeof(TensorRtCallbackAllocatorReadinessSnapshot),
+            typeof(TensorRtExecutionContextCallbackAllocatorSafeControlSummary)
         };
 
         foreach (Type type in publicTypes)
@@ -119,6 +120,8 @@ public sealed class CallbackAllocatorReadinessSnapshotTests
     public void SmokeConsumerAndDocsExposeReadinessSnapshotBoundary()
     {
         string readinessSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtCallbackAllocatorReadiness.cs");
+        string safeControlSummarySource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContextCallbackAllocatorSafeControlSummary.cs");
+        string executionContextDiagnostics = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs");
         string smokeProgram = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
         string bridgeConsumer = ReadSource("eng", "Test-BridgePackageConsumer.ps1");
         string boundaryGuide = ReadSource("docs", "articles", "zh-cn", "callback-allocator-boundary-guide.md");
@@ -134,6 +137,25 @@ public sealed class CallbackAllocatorReadinessSnapshotTests
         Assert.DoesNotContain("public IntPtr", readinessSource);
         Assert.DoesNotContain("public nint", readinessSource);
 
+        Assert.Contains("public sealed class TensorRtExecutionContextCallbackAllocatorSafeControlSummary", safeControlSummarySource);
+        Assert.Contains("public TensorRtExecutionContextCallbackAllocatorSafeControlSummary GetCallbackAllocatorSafeControlSummary", executionContextDiagnostics);
+        Assert.Contains("copied metadata only", safeControlSummarySource + executionContextDiagnostics);
+        Assert.Contains("Borrowed pointer not exposed/owned", safeControlSummarySource + executionContextDiagnostics);
+        Assert.Contains("no callback invocation", safeControlSummarySource + executionContextDiagnostics);
+        Assert.Contains("not runtime proof", safeControlSummarySource + executionContextDiagnostics);
+        Assert.Contains("public int CopiedInterfaceInfoCount", safeControlSummarySource);
+        Assert.Contains("public int DiagnosticCount", safeControlSummarySource);
+        Assert.Contains("public bool PointerFreeSurfaceReady", safeControlSummarySource);
+        Assert.Contains("public bool IsRuntimeInvocationProofComplete", safeControlSummarySource);
+        Assert.DoesNotContain("public IntPtr", safeControlSummarySource + executionContextDiagnostics);
+        Assert.DoesNotContain("public nint", safeControlSummarySource + executionContextDiagnostics);
+
+        Assert.Contains("CallbackAllocatorSafeControlSummary=", smokeProgram);
+        Assert.Contains("FormatCallbackAllocatorSafeControlSummary", smokeProgram);
+        Assert.Contains("context.GetCallbackAllocatorSafeControlSummary(outputTensorName)", smokeProgram);
+        Assert.Contains("execution-context-callback-allocator-safe-control-summary", smokeProgram);
+        Assert.Contains("copied-metadata-only;pointer-free;not-runtime-proof", smokeProgram);
+
         Assert.Contains("CallbackAllocatorReadinessSnapshot=", smokeProgram);
         Assert.Contains("FormatCallbackAllocatorReadinessSnapshot", smokeProgram);
         Assert.Contains("IsPublishSafeForManagedCallbacks", smokeProgram);
@@ -148,9 +170,12 @@ public sealed class CallbackAllocatorReadinessSnapshotTests
         Assert.Contains("TensorRtCallbackAllocatorReadinessSnapshot", boundaryGuide);
         Assert.Contains("managed readiness", boundaryGuide);
         Assert.Contains("不能作为真实 TensorRT callback runtime proof", boundaryGuide);
+        Assert.Contains("TensorRtExecutionContextCallbackAllocatorSafeControlSummary", boundaryGuide);
+        Assert.Contains("copied metadata only", boundaryGuide);
         Assert.Contains("TensorRtCallbackAllocatorReadinessSnapshot", roadmap);
         Assert.Contains("BlockedReasonCount", roadmap);
         Assert.Contains("IsRuntimeInvocationProofComplete", roadmap);
+        Assert.Contains("TensorRtExecutionContextCallbackAllocatorSafeControlSummary", roadmap);
     }
 
     private static string ReadSource(params string[] pathParts)

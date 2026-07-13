@@ -79,6 +79,12 @@ flowchart LR
 
 当前阶段必须保持边界清晰：`TensorRtCallbackAllocatorReadinessSnapshot` 的 `RealCallbackRuntime` 与 `IsRealCallbackRuntimeProof` 仍为 `false`，`RuntimeProofBlocked` 和 `BlockedReasonCount` 用来解释为什么真实 TensorRT callback runtime proof 仍未完成。它不能作为真实 TensorRT callback runtime proof，也不能替代 package consumer 在兼容主机上触发 allocator、output allocator 或 debug listener callback 的证据。
 
+## ExecutionContext Safe-Control Summary
+
+`TensorRtExecutionContextCallbackAllocatorSafeControlSummary` 是面向单个 output tensor 的高层 C# 摘要。它调用 `GetCallbackAllocatorSafeControlSummary(outputTensorName)` 聚合 output allocator、temporary-storage allocator 与 debug listener 的 copied metadata only 查询结果，并把 `CopiedInterfaceInfoCount`、`DiagnosticCount`、`PointerFreeSurfaceReady`、`CallbackInvocationAttempted=False` 和 `IsRuntimeInvocationProofComplete=False` 放在同一个 pointer-free 对象里。
+
+这个 summary 的作用是减少 smoke 与 package consumer 反复读取多个低层方法的成本：它只读现有 `TryGetOutputAllocatorInterfaceInfo`、`TryGetTemporaryStorageAllocatorInterfaceInfo`、`TryGetDebugListenerInterfaceInfo` 和 `GetCallbackStateSnapshot` 的 copy-out 结果。它不会暴露或拥有 borrowed pointer，不会执行 callback invocation，也不能作为真实 TensorRT callback runtime proof。
+
 ## Callback Owner Closure Matrix
 
 `TensorRtCallbackOwnerClosureMatrix` / `TensorRtCallbackOwnerClosureMatrixResult` 是比 managed readiness 更细的一层 owner 闭环矩阵。它把 `GpuAllocator`、`GpuAsyncAllocator`、`OutputAllocator`、`DebugListener` 和 `StreamReaderWriter` 放到同一张 pointer-free 表中，逐列记录 managed owner state、SafeHandle/GCHandle keep-alive、native noncopyable owner storage、create/destroy 对称性、attach/detach/clear、detach-before-release、no-throw destructor、no-throw vtable、exception-to-status、in-flight accounting、borrowed pointer escape blocker、opt-in runtime smoke readiness 和 package-consumer proof requirement。

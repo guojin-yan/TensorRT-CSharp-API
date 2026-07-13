@@ -254,6 +254,81 @@ public sealed partial class TensorRtExecutionContext
     }
 
     /// <summary>
+    /// Gets a high-level pointer-free summary of callback allocator safe controls for one output tensor.
+    /// 获取单个 output tensor 的 callback allocator 安全控制高层无指针摘要。
+    /// </summary>
+    /// <param name="outputTensorName">The output tensor name used for output allocator queries. / 用于 output allocator 查询的输出 tensor 名称。</param>
+    /// <returns>A copied safe-control summary. 复制式安全控制摘要。</returns>
+    /// <remarks>
+    /// This helper aggregates copied metadata only from existing safe read-only queries. Borrowed pointer not
+    /// exposed/owned, no callback invocation is attempted, and the result is not runtime proof of TensorRT callback
+    /// execution.
+    /// 该 helper 只聚合现有安全只读查询复制出的元数据；不会暴露或拥有 borrowed pointer，不会尝试 callback 调用，
+    /// 其结果也不是 TensorRT callback 已真实执行的 runtime proof。
+    /// </remarks>
+    public TensorRtExecutionContextCallbackAllocatorSafeControlSummary GetCallbackAllocatorSafeControlSummary(string outputTensorName)
+    {
+        if (outputTensorName == null)
+        {
+            throw new ArgumentNullException(nameof(outputTensorName));
+        }
+
+        List<string> diagnostics = new List<string>();
+        bool hasOutputAllocator = TryCollect("HasOutputAllocator", diagnostics, () => HasOutputAllocator(outputTensorName), false);
+        bool hasTemporaryStorageAllocator = TryCollect("HasTemporaryStorageAllocator", diagnostics, () => HasTemporaryStorageAllocator, false);
+        bool hasDebugListener = TryCollect("HasDebugListener", diagnostics, () => HasDebugListener, false);
+
+        bool outputAllocatorInfoAvailable = TryGetOutputAllocatorInterfaceInfo(
+            outputTensorName,
+            out TensorRtInterfaceInfo outputAllocatorInfo,
+            out string outputAllocatorDiagnostic);
+        AddCallbackAllocatorSafeControlDiagnostic(
+            diagnostics,
+            "OutputAllocatorInterfaceInfo",
+            outputAllocatorInfoAvailable,
+            outputAllocatorDiagnostic);
+
+        bool temporaryStorageAllocatorInfoAvailable = TryGetTemporaryStorageAllocatorInterfaceInfo(
+            out TensorRtInterfaceInfo temporaryStorageAllocatorInfo,
+            out string temporaryStorageAllocatorDiagnostic);
+        AddCallbackAllocatorSafeControlDiagnostic(
+            diagnostics,
+            "TemporaryStorageAllocatorInterfaceInfo",
+            temporaryStorageAllocatorInfoAvailable,
+            temporaryStorageAllocatorDiagnostic);
+
+        bool debugListenerInfoAvailable = TryGetDebugListenerInterfaceInfo(
+            out TensorRtInterfaceInfo debugListenerInfo,
+            out string debugListenerDiagnostic);
+        AddCallbackAllocatorSafeControlDiagnostic(
+            diagnostics,
+            "DebugListenerInterfaceInfo",
+            debugListenerInfoAvailable,
+            debugListenerDiagnostic);
+
+        TensorRtExecutionContextCallbackStateSnapshot callbackState =
+            TryCollect("CallbackState", diagnostics, () => GetCallbackStateSnapshot(outputTensorName), CreateUnavailableCallbackStateSnapshot(outputTensorName));
+
+        return new TensorRtExecutionContextCallbackAllocatorSafeControlSummary(
+            line: Line,
+            outputTensorName: outputTensorName,
+            hasOutputAllocator: hasOutputAllocator,
+            hasTemporaryStorageAllocator: hasTemporaryStorageAllocator,
+            hasDebugListener: hasDebugListener,
+            outputAllocatorInterfaceInfoAvailable: outputAllocatorInfoAvailable,
+            temporaryStorageAllocatorInterfaceInfoAvailable: temporaryStorageAllocatorInfoAvailable,
+            debugListenerInterfaceInfoAvailable: debugListenerInfoAvailable,
+            outputAllocatorInterfaceInfo: outputAllocatorInfo,
+            temporaryStorageAllocatorInterfaceInfo: temporaryStorageAllocatorInfo,
+            debugListenerInterfaceInfo: debugListenerInfo,
+            outputAllocatorDiagnostic: outputAllocatorDiagnostic,
+            temporaryStorageAllocatorDiagnostic: temporaryStorageAllocatorDiagnostic,
+            debugListenerDiagnostic: debugListenerDiagnostic,
+            callbackState: callbackState,
+            diagnostics: diagnostics.ToArray());
+    }
+
+    /// <summary>
     /// Clears supported callback attachments and returns a copied post-clear callback boundary snapshot.
     /// 清除受支持的回调附加项，并返回清除后的回调边界复制快照。
     /// </summary>
@@ -425,5 +500,17 @@ public sealed partial class TensorRtExecutionContext
             lastStatus: BridgeStatusCode.NotSupported,
             lastOperation: "Unavailable",
             diagnostic: "Callback state snapshot unavailable.");
+    }
+
+    private static void AddCallbackAllocatorSafeControlDiagnostic(
+        List<string> diagnostics,
+        string fieldName,
+        bool available,
+        string diagnostic)
+    {
+        if (!available || !string.Equals(diagnostic, "OK", StringComparison.Ordinal))
+        {
+            diagnostics.Add($"{fieldName}: {diagnostic}");
+        }
     }
 }
