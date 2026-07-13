@@ -52,6 +52,20 @@ function Convert-ToStringArray {
   return @($Values | Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_) } | ForEach-Object { [string]$_ })
 }
 
+function ConvertTo-Array {
+  param([AllowNull()][object]$Value)
+
+  if ($null -eq $Value) {
+    return @()
+  }
+
+  if ($Value -is [System.Array]) {
+    return @($Value)
+  }
+
+  return @($Value)
+}
+
 function ConvertTo-MarkdownCell {
   param([AllowNull()][object]$Value)
 
@@ -191,12 +205,56 @@ function New-ExecutionStepFromAction {
   }
 }
 
+function New-OwnerReleaseCloseHardGate {
+  param([object]$Step)
+
+  $id = [string](Get-PropertyOrDefault -Object $Step -Name "id" -DefaultValue "")
+  $blockedReason = [string](Get-PropertyOrDefault -Object $Step -Name "blockedReason" -DefaultValue "")
+
+  [pscustomobject]@{
+    order = [int](Get-PropertyOrDefault -Object $Step -Name "order" -DefaultValue 0)
+    id = $id
+    title = [string](Get-PropertyOrDefault -Object $Step -Name "title" -DefaultValue $id)
+    sourceArtifact = [string](Get-PropertyOrDefault -Object $Step -Name "sourceArtifact" -DefaultValue "")
+    currentState = [string](Get-PropertyOrDefault -Object $Step -Name "currentState" -DefaultValue "")
+    requiredReadyState = [string](Get-PropertyOrDefault -Object $Step -Name "requiredReadyState" -DefaultValue "")
+    requiredFieldCount = [int](Get-PropertyOrDefault -Object $Step -Name "requiredFieldCount" -DefaultValue 0)
+    rejectedSubstituteCount = [int](Get-PropertyOrDefault -Object $Step -Name "rejectedSubstituteCount" -DefaultValue 0)
+    sourceReadinessSignalCount = [int](Get-PropertyOrDefault -Object $Step -Name "sourceReadinessSignalCount" -DefaultValue 0)
+    blockedRealInputCount = [int](Get-PropertyOrDefault -Object $Step -Name "blockedRealInputCount" -DefaultValue 0)
+    proofCandidateReady = [bool](Get-PropertyOrDefault -Object $Step -Name "proofCandidateReady" -DefaultValue $false)
+    sourceLinkageReady = [bool](Get-PropertyOrDefault -Object $Step -Name "sourceLinkageReady" -DefaultValue $false)
+    artifactSha256 = [string](Get-PropertyOrDefault -Object $Step -Name "artifactSha256" -DefaultValue "")
+    ownerAction = [string](Get-PropertyOrDefault -Object $Step -Name "ownerAction" -DefaultValue "")
+    strictValidator = [string](Get-PropertyOrDefault -Object $Step -Name "strictValidator" -DefaultValue "")
+    blockedReason = $blockedReason
+    blocked = $true
+    ownerActionRequired = $true
+    performsPublish = $false
+    canPromoteRuntimeProof = $false
+    canPublishPublicly = $false
+    canCloseReleaseIssue = $false
+    isRuntimeExecutionProof = $false
+    isPostPublishProof = $false
+    isReleaseCloseProof = $false
+    boundary = "Release-close hard gate only. It records the required Owner input and strict validator; it is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push. $blockedReason"
+  }
+}
+
 $worklist = Read-JsonOrNull "artifacts\final-release\final-owner-proof-action-worklist.json"
 $worklistValidation = Read-JsonOrNull "artifacts\final-release\final-owner-proof-action-worklist-validation.json"
 $releaseEvidenceBundle = Read-JsonOrNull "artifacts\final-release\release-evidence-bundle.json"
 $readinessPack = Read-JsonOrNull "artifacts\final-release\release-publish-readiness-evidence-pack.json"
 $ownerRuntimeSmokeFieldAlignment = Read-JsonOrNull "artifacts\final-release\package-consumer-owner-runtime-smoke-field-alignment.json"
 $ownerRuntimeSmokeFieldAlignmentValidation = Read-JsonOrNull "artifacts\final-release\package-consumer-owner-runtime-smoke-field-alignment-validation.json"
+$finalOwnerExecutionOneScreenPack = Read-JsonOrNull "artifacts\final-release\final-owner-execution-one-screen-pack.json"
+$finalOwnerExecutionOneScreenPackValidation = Read-JsonOrNull "artifacts\final-release\final-owner-execution-one-screen-pack-validation.json"
+$finalOwnerStrictCloseExecutionOrderValidation = Read-JsonOrNull "artifacts\final-release\final-owner-strict-close-execution-order-validation.json"
+$postPublishCleanConsumerProofResultValidation = Read-JsonOrNull "artifacts\final-release\post-publish-clean-consumer-proof-result-validation.json"
+$publicPackageDownloadProofCandidateValidation = Read-JsonOrNull "artifacts\final-release\public-package-download-proof-candidate-validation.json"
+$ownerPublicPublishExecutionResultCandidateValidation = Read-JsonOrNull "artifacts\final-release\owner-public-publish-execution-result-candidate-validation.json"
+$releaseIssueCloseOwnerDecisionInputValidation = Read-JsonOrNull "artifacts\final-release\release-issue-close-owner-decision-input-validation.json"
+$finalCloseGateConvergenceValidation = Read-JsonOrNull "artifacts\final-release\final-close-gate-convergence-validation.json"
 $ownerRuntimeSmokeFieldAlignmentState = [string](Get-PropertyOrDefault -Object $ownerRuntimeSmokeFieldAlignment -Name "alignmentState" -DefaultValue "missing-package-consumer-owner-runtime-smoke-field-alignment")
 $ownerRuntimeSmokeFieldAlignmentValidationState = [string](Get-PropertyOrDefault -Object $ownerRuntimeSmokeFieldAlignmentValidation -Name "validationState" -DefaultValue "missing-package-consumer-owner-runtime-smoke-field-alignment-validation")
 $ownerRuntimeSmokeFieldAlignmentRuntimeSmokeStatus = [string](Get-PropertyOrDefault -Object $ownerRuntimeSmokeFieldAlignment -Name "runtimeSmokeStatus" -DefaultValue "Smoke=missing")
@@ -219,6 +277,56 @@ $allValidatorCommands = @($executionSteps | ForEach-Object { $_.validatorCommand
 $allOwnerCommands = @($executionSteps | ForEach-Object { $_.ownerCommands } | Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_) } | ForEach-Object { [string]$_ } | Select-Object -Unique)
 $allResultArtifacts = @($executionSteps | ForEach-Object { $_.expectedResultArtifacts } | Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_) } | ForEach-Object { [string]$_ } | Select-Object -Unique)
 
+$releaseCloseRealInputChain = @(ConvertTo-Array (Get-PropertyOrDefault -Object $finalOwnerExecutionOneScreenPack -Name "releaseCloseRealInputChain" -DefaultValue @()))
+$ownerReleaseCloseHardGates = @($releaseCloseRealInputChain | ForEach-Object { New-OwnerReleaseCloseHardGate -Step $_ })
+$releaseCloseRealInputChainRequiredFieldCount = [int](Get-PropertyOrDefault -Object $finalOwnerExecutionOneScreenPackValidation -Name "releaseCloseRealInputChainRequiredFieldCount" -DefaultValue (Get-PropertyOrDefault -Object $finalOwnerExecutionOneScreenPack -Name "releaseCloseRealInputChainRequiredFieldCount" -DefaultValue 0))
+$releaseCloseRealInputChainRejectedSubstituteCount = [int](Get-PropertyOrDefault -Object $finalOwnerExecutionOneScreenPackValidation -Name "releaseCloseRealInputChainRejectedSubstituteCount" -DefaultValue (Get-PropertyOrDefault -Object $finalOwnerExecutionOneScreenPack -Name "releaseCloseRealInputChainRejectedSubstituteCount" -DefaultValue 0))
+$releaseCloseRealInputChainSourceReadinessSignalCount = [int](Get-PropertyOrDefault -Object $finalOwnerExecutionOneScreenPackValidation -Name "releaseCloseRealInputChainSourceReadinessSignalCount" -DefaultValue (Get-PropertyOrDefault -Object $finalOwnerExecutionOneScreenPack -Name "releaseCloseRealInputChainSourceReadinessSignalCount" -DefaultValue 0))
+$releaseCloseRealInputChainBlockedRealInputCount = [int](Get-PropertyOrDefault -Object $finalOwnerExecutionOneScreenPackValidation -Name "releaseCloseRealInputChainBlockedRealInputCount" -DefaultValue (Get-PropertyOrDefault -Object $finalOwnerExecutionOneScreenPack -Name "releaseCloseRealInputChainBlockedRealInputCount" -DefaultValue 0))
+$releaseEvidenceBundleSha256 = [string](Get-PropertyOrDefault -Object $finalOwnerExecutionOneScreenPackValidation -Name "releaseEvidenceBundleSha256" -DefaultValue (Get-PropertyOrDefault -Object $finalOwnerExecutionOneScreenPack -Name "releaseEvidenceBundleSha256" -DefaultValue ""))
+$finalCloseStrictValidatorOutputState = [string](Get-PropertyOrDefault -Object $finalOwnerExecutionOneScreenPackValidation -Name "finalCloseStrictValidatorOutputState" -DefaultValue (Get-PropertyOrDefault -Object $finalCloseGateConvergenceValidation -Name "validationState" -DefaultValue "missing-final-close-gate-convergence-validation"))
+$publicPackageDownloadProofCandidateReady = [bool](Get-PropertyOrDefault -Object $finalOwnerExecutionOneScreenPackValidation -Name "publicPackageDownloadProofCandidateReady" -DefaultValue (Get-PropertyOrDefault -Object $publicPackageDownloadProofCandidateValidation -Name "proofCandidateReady" -DefaultValue $false))
+$postPublishProofCandidateReady = [bool](Get-PropertyOrDefault -Object $finalOwnerExecutionOneScreenPackValidation -Name "postPublishCleanConsumerProofCandidateReady" -DefaultValue (Get-PropertyOrDefault -Object $postPublishCleanConsumerProofResultValidation -Name "proofCandidateReady" -DefaultValue $false))
+$postPublishProofSourceLinkageReady = [bool](Get-PropertyOrDefault -Object $finalOwnerExecutionOneScreenPackValidation -Name "postPublishCleanConsumerProofSourceProofLinkageReady" -DefaultValue (Get-PropertyOrDefault -Object $postPublishCleanConsumerProofResultValidation -Name "sourceProofLinkageReady" -DefaultValue $false))
+$releaseIssueCloseOwnerDecisionValidationState = [string](Get-PropertyOrDefault -Object $releaseIssueCloseOwnerDecisionInputValidation -Name "validationState" -DefaultValue "missing-release-issue-close-owner-decision-input-validation")
+$ownerPublicPublishResultCandidateValidationState = [string](Get-PropertyOrDefault -Object $ownerPublicPublishExecutionResultCandidateValidation -Name "validationState" -DefaultValue "missing-owner-public-publish-execution-result-candidate-validation")
+$publicPackageDownloadProofCandidateValidationState = [string](Get-PropertyOrDefault -Object $publicPackageDownloadProofCandidateValidation -Name "validationState" -DefaultValue "missing-public-package-download-proof-candidate-validation")
+$postPublishCleanConsumerProofResultValidationState = [string](Get-PropertyOrDefault -Object $postPublishCleanConsumerProofResultValidation -Name "validationState" -DefaultValue "missing-post-publish-clean-consumer-proof-result-validation")
+$finalOwnerExecutionOneScreenPackValidationState = [string](Get-PropertyOrDefault -Object $finalOwnerExecutionOneScreenPackValidation -Name "validationState" -DefaultValue "missing-final-owner-execution-one-screen-pack-validation")
+$finalOwnerStrictCloseExecutionOrderValidationState = [string](Get-PropertyOrDefault -Object $finalOwnerStrictCloseExecutionOrderValidation -Name "validationState" -DefaultValue "missing-final-owner-strict-close-execution-order-validation")
+$finalCloseProofAdmissionRequiredFieldCount = [int](Get-PropertyOrDefault -Object $finalOwnerExecutionOneScreenPackValidation -Name "finalCloseProofAdmissionRequiredFieldCount" -DefaultValue (Get-PropertyOrDefault -Object $finalCloseGateConvergenceValidation -Name "finalCloseProofAdmissionRequiredFieldCount" -DefaultValue 0))
+$finalCloseRejectedNonProofStateCount = [int](Get-PropertyOrDefault -Object $finalOwnerExecutionOneScreenPackValidation -Name "finalCloseRejectedNonProofStateCount" -DefaultValue (Get-PropertyOrDefault -Object $finalCloseGateConvergenceValidation -Name "finalCloseRejectedNonProofStateCount" -DefaultValue 0))
+$hardGateForbiddenSubstitutes = @(
+  "public package download proof alone",
+  "post-publish validation-ready without proofCandidateReady",
+  "release evidence bundle hash only",
+  "strict close validator output without real proof",
+  "strict close validator output alone",
+  "bundle hash without Owner final close decision"
+)
+$allForbiddenSubstitutes = @($allForbiddenSubstitutes + $hardGateForbiddenSubstitutes | Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_) } | Select-Object -Unique)
+
+$sourceArtifacts = @(
+  "artifacts/final-release/final-owner-proof-action-worklist.json",
+  "artifacts/final-release/final-owner-proof-action-worklist-validation.json",
+  "artifacts/final-release/clean-external-package-consumer-owner-runbook.json",
+  "artifacts/final-release/clean-external-package-consumer-owner-runbook-validation.json",
+  "artifacts/final-release/post-publish-owner-verification-runbook.json",
+  "artifacts/final-release/post-publish-owner-verification-runbook-validation.json",
+  "artifacts/final-release/release-evidence-bundle.json",
+  "artifacts/final-release/release-publish-readiness-evidence-pack.json",
+  "artifacts/final-release/package-consumer-owner-runtime-smoke-field-alignment.json",
+  "artifacts/final-release/package-consumer-owner-runtime-smoke-field-alignment-validation.json",
+  "artifacts/final-release/final-owner-execution-one-screen-pack.json",
+  "artifacts/final-release/final-owner-execution-one-screen-pack-validation.json",
+  "artifacts/final-release/final-owner-strict-close-execution-order-validation.json",
+  "artifacts/final-release/post-publish-clean-consumer-proof-result-validation.json",
+  "artifacts/final-release/public-package-download-proof-candidate-validation.json",
+  "artifacts/final-release/owner-public-publish-execution-result-candidate-validation.json",
+  "artifacts/final-release/release-issue-close-owner-decision-input-validation.json",
+  "artifacts/final-release/final-close-gate-convergence-validation.json"
+)
+
 $record = [ordered]@{
   recordKind = "final-owner-execution-package"
   generatedAtUtc = (Get-Date).ToUniversalTime().ToString("o")
@@ -233,6 +341,29 @@ $record = [ordered]@{
   packageConsumerOwnerRuntimeSmokeFieldAlignmentFieldCount = $ownerRuntimeSmokeFieldAlignmentFieldCount
   packageConsumerOwnerRuntimeSmokeFieldAlignmentMissingRequiredFieldCount = $ownerRuntimeSmokeFieldAlignmentMissingRequiredFieldCount
   packageConsumerOwnerRuntimeSmokeFieldAlignmentFailedBlockerCount = $ownerRuntimeSmokeFieldAlignmentFailedBlockerCount
+  finalOwnerExecutionOneScreenPackValidationState = $finalOwnerExecutionOneScreenPackValidationState
+  finalOwnerStrictCloseExecutionOrderValidationState = $finalOwnerStrictCloseExecutionOrderValidationState
+  ownerPublicPublishResultCandidateValidationState = $ownerPublicPublishResultCandidateValidationState
+  publicPackageDownloadProofCandidateValidationState = $publicPackageDownloadProofCandidateValidationState
+  postPublishCleanConsumerProofResultValidationState = $postPublishCleanConsumerProofResultValidationState
+  releaseIssueCloseOwnerDecisionValidationState = $releaseIssueCloseOwnerDecisionValidationState
+  finalCloseStrictValidatorOutputState = $finalCloseStrictValidatorOutputState
+  releaseEvidenceBundleSha256 = $releaseEvidenceBundleSha256
+  releaseCloseRealInputChainCount = $releaseCloseRealInputChain.Count
+  blockedReleaseCloseRealInputChainCount = @($ownerReleaseCloseHardGates | Where-Object { $_.blocked }).Count
+  releaseCloseRealInputChainRequiredFieldCount = $releaseCloseRealInputChainRequiredFieldCount
+  releaseCloseRealInputChainRejectedSubstituteCount = $releaseCloseRealInputChainRejectedSubstituteCount
+  releaseCloseRealInputChainSourceReadinessSignalCount = $releaseCloseRealInputChainSourceReadinessSignalCount
+  releaseCloseRealInputChainBlockedRealInputCount = $releaseCloseRealInputChainBlockedRealInputCount
+  releaseCloseRealInputChain = @($releaseCloseRealInputChain)
+  ownerReleaseCloseHardGateCount = $ownerReleaseCloseHardGates.Count
+  blockedOwnerReleaseCloseHardGateCount = @($ownerReleaseCloseHardGates | Where-Object { $_.blocked }).Count
+  ownerReleaseCloseHardGates = @($ownerReleaseCloseHardGates)
+  publicPackageDownloadProofCandidateReady = $publicPackageDownloadProofCandidateReady
+  postPublishProofCandidateReady = $postPublishProofCandidateReady
+  postPublishProofSourceLinkageReady = $postPublishProofSourceLinkageReady
+  finalCloseProofAdmissionRequiredFieldCount = $finalCloseProofAdmissionRequiredFieldCount
+  finalCloseRejectedNonProofStateCount = $finalCloseRejectedNonProofStateCount
   actionCount = $actions.Count
   executionStepCount = $executionSteps.Count
   blockedExecutionStepCount = @($executionSteps | Where-Object { $_.blocked }).Count
@@ -254,19 +385,12 @@ $record = [ordered]@{
   requiresRealExternalProof = $true
   requiresPostPublishProof = $true
   requiresReleaseCloseOwnerDecision = $true
-  sourceArtifacts = @(
-    "artifacts/final-release/final-owner-proof-action-worklist.json",
-    "artifacts/final-release/final-owner-proof-action-worklist-validation.json",
-    "artifacts/final-release/clean-external-package-consumer-owner-runbook.json",
-    "artifacts/final-release/clean-external-package-consumer-owner-runbook-validation.json",
-    "artifacts/final-release/post-publish-owner-verification-runbook.json",
-    "artifacts/final-release/post-publish-owner-verification-runbook-validation.json",
-    "artifacts/final-release/release-evidence-bundle.json",
-    "artifacts/final-release/release-publish-readiness-evidence-pack.json",
-    "artifacts/final-release/package-consumer-owner-runtime-smoke-field-alignment.json",
-    "artifacts/final-release/package-consumer-owner-runtime-smoke-field-alignment-validation.json"
-  )
-  boundary = "Final owner execution package maps two owner runbook preflight items and five final owner actions to commands, input contracts, expected result artifacts, and validators. It is owner handoff only; it does not publish, does not promote runtime proof, does not verify post-publish proof, cannot close the release issue, and is not package push."
+  publicDownloadCannotSubstitutePostPublishProof = $true
+  postPublishValidationReadyCannotSubstituteProofCandidateReady = $true
+  bundleHashCannotSubstituteFinalCloseDecision = $true
+  strictCloseOutputCannotCloseIssue = $true
+  sourceArtifacts = @($sourceArtifacts)
+  boundary = "Final owner execution package maps owner actions plus the eight-step release-close real input chain to commands, input contracts, hard gates, expected result artifacts, and validators. It is owner handoff only; public package download proof alone is not post-publish CleanConsumer proof, post-publish validation-ready without proofCandidateReady is not proof, release evidence bundle hash only is not final close decision, strict close validator output alone cannot close the issue, and this package does not publish, does not promote runtime proof, does not verify post-publish proof, cannot close the release issue, and is not package push."
 }
 
 $jsonPath = Join-Path $OutputRoot "final-owner-execution-package.json"
@@ -275,6 +399,10 @@ $record | ConvertTo-Json -Depth 18 | Set-Content -LiteralPath $jsonPath -Encodin
 
 $rows = foreach ($step in $executionSteps) {
   "| ``$(ConvertTo-MarkdownCell $step.id)`` | ``$(ConvertTo-MarkdownCell $step.laneId)`` | ``$(ConvertTo-MarkdownCell $step.state)`` | ``$($step.requiredInputCount)`` | ``$($step.expectedResultArtifactCount)`` | $(ConvertTo-MarkdownCell $step.promotionBoundary) |"
+}
+
+$hardGateRows = foreach ($gate in $ownerReleaseCloseHardGates) {
+  "| ``$(ConvertTo-MarkdownCell $gate.id)`` | ``$($gate.order)`` | $(ConvertTo-MarkdownCell $gate.currentState) | $(ConvertTo-MarkdownCell $gate.requiredReadyState) | ``$($gate.requiredFieldCount)`` | ``$($gate.rejectedSubstituteCount)`` | ``$($gate.sourceReadinessSignalCount)`` | ``$($gate.blockedRealInputCount)`` | ``$($gate.proofCandidateReady)`` | ``$($gate.sourceLinkageReady)`` | $(ConvertTo-MarkdownCell $gate.blockedReason) |"
 }
 
 $sections = foreach ($step in $executionSteps) {
@@ -314,12 +442,39 @@ Generated at: ``$($record.generatedAtUtc)``
 - packageConsumerOwnerRuntimeSmokeFieldAlignmentFieldCount: ``$($record.packageConsumerOwnerRuntimeSmokeFieldAlignmentFieldCount)``
 - packageConsumerOwnerRuntimeSmokeFieldAlignmentMissingRequiredFieldCount: ``$($record.packageConsumerOwnerRuntimeSmokeFieldAlignmentMissingRequiredFieldCount)``
 - packageConsumerOwnerRuntimeSmokeFieldAlignmentFailedBlockerCount: ``$($record.packageConsumerOwnerRuntimeSmokeFieldAlignmentFailedBlockerCount)``
+- finalOwnerExecutionOneScreenPackValidationState: ``$($record.finalOwnerExecutionOneScreenPackValidationState)``
+- finalOwnerStrictCloseExecutionOrderValidationState: ``$($record.finalOwnerStrictCloseExecutionOrderValidationState)``
+- ownerPublicPublishResultCandidateValidationState: ``$($record.ownerPublicPublishResultCandidateValidationState)``
+- publicPackageDownloadProofCandidateValidationState: ``$($record.publicPackageDownloadProofCandidateValidationState)``
+- postPublishCleanConsumerProofResultValidationState: ``$($record.postPublishCleanConsumerProofResultValidationState)``
+- releaseIssueCloseOwnerDecisionValidationState: ``$($record.releaseIssueCloseOwnerDecisionValidationState)``
+- finalCloseStrictValidatorOutputState: ``$($record.finalCloseStrictValidatorOutputState)``
+- releaseEvidenceBundleSha256: ``$($record.releaseEvidenceBundleSha256)``
+- releaseCloseRealInputChainCount: ``$($record.releaseCloseRealInputChainCount)``
+- releaseCloseRealInputChainRequiredFieldCount: ``$($record.releaseCloseRealInputChainRequiredFieldCount)``
+- releaseCloseRealInputChainRejectedSubstituteCount: ``$($record.releaseCloseRealInputChainRejectedSubstituteCount)``
+- releaseCloseRealInputChainSourceReadinessSignalCount: ``$($record.releaseCloseRealInputChainSourceReadinessSignalCount)``
+- releaseCloseRealInputChainBlockedRealInputCount: ``$($record.releaseCloseRealInputChainBlockedRealInputCount)``
+- ownerReleaseCloseHardGateCount: ``$($record.ownerReleaseCloseHardGateCount)``
 - executionStepCount: ``$($record.executionStepCount)``
 - blockedExecutionStepCount: ``$($record.blockedExecutionStepCount)``
+- publicPackageDownloadProofCandidateReady: ``$($record.publicPackageDownloadProofCandidateReady)``
+- postPublishProofCandidateReady: ``$($record.postPublishProofCandidateReady)``
+- postPublishProofSourceLinkageReady: ``$($record.postPublishProofSourceLinkageReady)``
+- publicDownloadCannotSubstitutePostPublishProof: ``True``
+- postPublishValidationReadyCannotSubstituteProofCandidateReady: ``True``
+- bundleHashCannotSubstituteFinalCloseDecision: ``True``
+- strictCloseOutputCannotCloseIssue: ``True``
 - performsPublish: ``False``
 - canPromoteRuntimeProof: ``False``
 - canPublishPublicly: ``False``
 - canCloseReleaseIssue: ``False``
+
+## Release Close Hard Gates
+
+| Gate | Order | Current State | Required Ready State | Required Fields | Rejected Substitutes | Source Signals | Blocked Inputs | Proof Candidate Ready | Source Linkage Ready | Blocked Reason |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+$($hardGateRows -join "`r`n")
 
 ## Execution Steps
 

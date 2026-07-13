@@ -211,6 +211,22 @@ public sealed class ReleasePublishReadinessEvidencePackAndPublicDocsGateTests
         Assert.Equal(8, bundle.GetProperty("finalOwnerExecutionPackageExecutionStepCount").GetInt32());
         Assert.Equal(8, bundle.GetProperty("finalOwnerExecutionPackageBlockedExecutionStepCount").GetInt32());
         Assert.Equal(0, bundle.GetProperty("finalOwnerExecutionPackageFailedBlockerCount").GetInt32());
+        Assert.Equal(8, bundle.GetProperty("finalOwnerExecutionPackageReleaseCloseRealInputChainCount").GetInt32());
+        Assert.True(bundle.GetProperty("finalOwnerExecutionPackageReleaseCloseRealInputChainRequiredFieldCount").GetInt32() >= 100);
+        Assert.True(bundle.GetProperty("finalOwnerExecutionPackageReleaseCloseRealInputChainRejectedSubstituteCount").GetInt32() >= 30);
+        Assert.True(bundle.GetProperty("finalOwnerExecutionPackageReleaseCloseRealInputChainSourceReadinessSignalCount").GetInt32() >= 18);
+        Assert.True(bundle.GetProperty("finalOwnerExecutionPackageReleaseCloseRealInputChainBlockedRealInputCount").GetInt32() > 0);
+        Assert.Equal(8, bundle.GetProperty("finalOwnerExecutionPackageOwnerReleaseCloseHardGateCount").GetInt32());
+        Assert.Equal(8, bundle.GetProperty("finalOwnerExecutionPackageBlockedOwnerReleaseCloseHardGateCount").GetInt32());
+        Assert.False(bundle.GetProperty("finalOwnerExecutionPackagePublicPackageDownloadProofCandidateReady").GetBoolean());
+        Assert.False(bundle.GetProperty("finalOwnerExecutionPackagePostPublishProofCandidateReady").GetBoolean());
+        Assert.False(bundle.GetProperty("finalOwnerExecutionPackagePostPublishProofSourceLinkageReady").GetBoolean());
+        Assert.NotEmpty(bundle.GetProperty("finalOwnerExecutionPackageReleaseEvidenceBundleSha256").GetString());
+        Assert.Equal("blocked-release-issue-close-owner-decision-input-required", bundle.GetProperty("finalOwnerExecutionPackageReleaseIssueCloseOwnerDecisionValidationState").GetString());
+        Assert.Equal("blocked-final-close-gate-owner-proof-required", bundle.GetProperty("finalOwnerExecutionPackageFinalCloseStrictValidatorOutputState").GetString());
+        Assert.True(bundle.GetProperty("finalOwnerExecutionPackagePublicDownloadCannotSubstitutePostPublishProof").GetBoolean());
+        Assert.True(bundle.GetProperty("finalOwnerExecutionPackageBundleHashCannotSubstituteFinalCloseDecision").GetBoolean());
+        Assert.True(bundle.GetProperty("finalOwnerExecutionPackageStrictCloseOutputCannotCloseIssue").GetBoolean());
         Assert.Equal("blocked-owner-external-proof-execution-result-required", bundle.GetProperty("ownerExternalProofExecutionResultImportState").GetString());
         Assert.Equal("blocked-owner-external-proof-execution-result-required", bundle.GetProperty("ownerExternalProofExecutionResultImportValidationState").GetString());
         Assert.Equal(6, bundle.GetProperty("ownerExternalProofExecutionResultImportStrictBlockedLaneCount").GetInt32());
@@ -262,6 +278,12 @@ public sealed class ReleasePublishReadinessEvidencePackAndPublicDocsGateTests
             .EnumerateArray()
             .Single(static candidate => candidate.GetProperty("id").GetString() == "final-owner-execution-package");
         Assert.False(executionItem.GetProperty("passed").GetBoolean());
+        string executionItemState = executionItem.GetProperty("state").GetString()!;
+        Assert.Contains("hardGates=8", executionItemState, StringComparison.Ordinal);
+        Assert.Contains("publicDownloadCannotSubstitutePostPublish=True", executionItemState, StringComparison.Ordinal);
+        Assert.Contains("bundleHashCannotSubstituteFinalCloseDecision=True", executionItemState, StringComparison.Ordinal);
+        Assert.Contains("strictCloseOutputCannotCloseIssue=True", executionItemState, StringComparison.Ordinal);
+        Assert.Contains("strictCloseOutput=blocked-final-close-gate-owner-proof-required", executionItemState, StringComparison.Ordinal);
 
         foreach (string id in new[]
         {

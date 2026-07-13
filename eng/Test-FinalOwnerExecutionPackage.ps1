@@ -83,12 +83,36 @@ $validatorCommands = Convert-ToStringArray (Get-PropertyOrDefault -Object $recor
 $ownerCommands = Convert-ToStringArray (Get-PropertyOrDefault -Object $record -Name "ownerCommandSequence" -DefaultValue @())
 $expectedResultArtifacts = Convert-ToStringArray (Get-PropertyOrDefault -Object $record -Name "expectedResultArtifacts" -DefaultValue @())
 $sourceArtifacts = Convert-ToStringArray (Get-PropertyOrDefault -Object $record -Name "sourceArtifacts" -DefaultValue @())
+$releaseCloseRealInputChain = @((Get-PropertyOrDefault -Object $record -Name "releaseCloseRealInputChain" -DefaultValue @()))
+$ownerReleaseCloseHardGates = @((Get-PropertyOrDefault -Object $record -Name "ownerReleaseCloseHardGates" -DefaultValue @()))
+$releaseCloseRealInputChainRequiredFieldCount = [int](Get-PropertyOrDefault -Object $record -Name "releaseCloseRealInputChainRequiredFieldCount" -DefaultValue 0)
+$releaseCloseRealInputChainRejectedSubstituteCount = [int](Get-PropertyOrDefault -Object $record -Name "releaseCloseRealInputChainRejectedSubstituteCount" -DefaultValue 0)
+$releaseCloseRealInputChainSourceReadinessSignalCount = [int](Get-PropertyOrDefault -Object $record -Name "releaseCloseRealInputChainSourceReadinessSignalCount" -DefaultValue 0)
+$releaseCloseRealInputChainBlockedRealInputCount = [int](Get-PropertyOrDefault -Object $record -Name "releaseCloseRealInputChainBlockedRealInputCount" -DefaultValue 0)
+$hardGateIds = Convert-ToStringArray ($ownerReleaseCloseHardGates | ForEach-Object { Get-PropertyOrDefault -Object $_ -Name "id" -DefaultValue "" })
 
 $items.Add((New-ValidationItem -Id "record-kind" -Passed ($recordKind -eq "final-owner-execution-package") -Severity "blocker" -Detail "recordKind must be final-owner-execution-package.")) | Out-Null
 $items.Add((New-ValidationItem -Id "package-state" -Passed ($packageState -eq "blocked-final-owner-execution-required") -Severity "blocker" -Detail "Package must remain blocked until owner provides real proof.")) | Out-Null
 $items.Add((New-ValidationItem -Id "does-not-publish-or-promote" -Passed ((-not [bool](Get-PropertyOrDefault -Object $record -Name "performsPublish" -DefaultValue $true)) -and (-not [bool](Get-PropertyOrDefault -Object $record -Name "canPromoteRuntimeProof" -DefaultValue $true)) -and (-not [bool](Get-PropertyOrDefault -Object $record -Name "canPublishPublicly" -DefaultValue $true)) -and (-not [bool](Get-PropertyOrDefault -Object $record -Name "canCloseReleaseIssue" -DefaultValue $true)) -and (-not [bool](Get-PropertyOrDefault -Object $record -Name "isRuntimeExecutionProof" -DefaultValue $true)) -and (-not [bool](Get-PropertyOrDefault -Object $record -Name "isPostPublishProof" -DefaultValue $true)) -and (-not [bool](Get-PropertyOrDefault -Object $record -Name "isReleaseCloseProof" -DefaultValue $true)) -and (-not [bool](Get-PropertyOrDefault -Object $record -Name "isPackagePush" -DefaultValue $true))) -Severity "blocker" -Detail "Package must not publish, promote proof, push packages, or close release.")) | Out-Null
 $items.Add((New-ValidationItem -Id "owner-runtime-smoke-field-alignment-projected" -Passed ([string](Get-PropertyOrDefault -Object $record -Name "packageConsumerOwnerRuntimeSmokeFieldAlignmentState" -DefaultValue "") -eq "blocked-owner-compatible-host-runtime-smoke-field-alignment" -and [string](Get-PropertyOrDefault -Object $record -Name "packageConsumerOwnerRuntimeSmokeFieldAlignmentValidationState" -DefaultValue "") -eq "blocked-owner-compatible-host-runtime-smoke-field-alignment-valid" -and [string](Get-PropertyOrDefault -Object $record -Name "packageConsumerOwnerRuntimeSmokeFieldAlignmentRuntimeSmokeStatus" -DefaultValue "") -eq "Smoke=not-requested" -and [int](Get-PropertyOrDefault -Object $record -Name "packageConsumerOwnerRuntimeSmokeFieldAlignmentFieldCount" -DefaultValue 0) -ge 30 -and [int](Get-PropertyOrDefault -Object $record -Name "packageConsumerOwnerRuntimeSmokeFieldAlignmentMissingRequiredFieldCount" -DefaultValue -1) -eq 0 -and [int](Get-PropertyOrDefault -Object $record -Name "packageConsumerOwnerRuntimeSmokeFieldAlignmentFailedBlockerCount" -DefaultValue -1) -eq 0 -and $sourceArtifacts -contains "artifacts/final-release/package-consumer-owner-runtime-smoke-field-alignment.json" -and $sourceArtifacts -contains "artifacts/final-release/package-consumer-owner-runtime-smoke-field-alignment-validation.json") -Severity "blocker" -Detail "Final owner execution package must project owner runtime smoke field alignment as zero-missing non-proof coverage.")) | Out-Null
 $items.Add((New-ValidationItem -Id "eight-execution-steps" -Passed ($steps.Count -eq 8 -and [int](Get-PropertyOrDefault -Object $record -Name "executionStepCount" -DefaultValue 0) -eq 8 -and [int](Get-PropertyOrDefault -Object $record -Name "blockedExecutionStepCount" -DefaultValue 0) -eq 8) -Severity "blocker" -Detail "Package must expose exactly eight blocked execution steps: two owner runbook preflight items plus six final owner actions.")) | Out-Null
+$items.Add((New-ValidationItem -Id "release-close-real-input-chain-projected" -Passed ($releaseCloseRealInputChain.Count -eq 8 -and [int](Get-PropertyOrDefault -Object $record -Name "releaseCloseRealInputChainCount" -DefaultValue 0) -eq 8 -and [int](Get-PropertyOrDefault -Object $record -Name "blockedReleaseCloseRealInputChainCount" -DefaultValue 0) -eq 8 -and $releaseCloseRealInputChainRequiredFieldCount -ge 100 -and $releaseCloseRealInputChainRejectedSubstituteCount -ge 30 -and $releaseCloseRealInputChainSourceReadinessSignalCount -ge 18 -and $releaseCloseRealInputChainBlockedRealInputCount -gt 0) -Severity "blocker" -Detail "Package must project the eight-step release-close real input chain and its field/substitute/source-linkage counts.")) | Out-Null
+$items.Add((New-ValidationItem -Id "owner-release-close-hard-gates" -Passed ($ownerReleaseCloseHardGates.Count -eq 8 -and [int](Get-PropertyOrDefault -Object $record -Name "ownerReleaseCloseHardGateCount" -DefaultValue 0) -eq 8 -and [int](Get-PropertyOrDefault -Object $record -Name "blockedOwnerReleaseCloseHardGateCount" -DefaultValue 0) -eq 8) -Severity "blocker" -Detail "Package must expose the eight blocked owner release-close hard gates.")) | Out-Null
+$items.Add((New-ValidationItem -Id "hard-gate-readiness-flags" -Passed ((-not [bool](Get-PropertyOrDefault -Object $record -Name "publicPackageDownloadProofCandidateReady" -DefaultValue $true)) -and (-not [bool](Get-PropertyOrDefault -Object $record -Name "postPublishProofCandidateReady" -DefaultValue $true)) -and (-not [bool](Get-PropertyOrDefault -Object $record -Name "postPublishProofSourceLinkageReady" -DefaultValue $true)) -and [bool](Get-PropertyOrDefault -Object $record -Name "publicDownloadCannotSubstitutePostPublishProof" -DefaultValue $false) -and [bool](Get-PropertyOrDefault -Object $record -Name "postPublishValidationReadyCannotSubstituteProofCandidateReady" -DefaultValue $false) -and [bool](Get-PropertyOrDefault -Object $record -Name "bundleHashCannotSubstituteFinalCloseDecision" -DefaultValue $false) -and [bool](Get-PropertyOrDefault -Object $record -Name "strictCloseOutputCannotCloseIssue" -DefaultValue $false)) -Severity "blocker" -Detail "Public download, validation-ready, bundle hash, and strict validator output must remain non-substitutes for real post-publish/final-close proof.")) | Out-Null
+$items.Add((New-ValidationItem -Id "hard-gate-source-states" -Passed (-not [string]::IsNullOrWhiteSpace([string](Get-PropertyOrDefault -Object $record -Name "releaseEvidenceBundleSha256" -DefaultValue "")) -and [string](Get-PropertyOrDefault -Object $record -Name "finalCloseStrictValidatorOutputState" -DefaultValue "") -eq "blocked-final-close-gate-owner-proof-required" -and [string](Get-PropertyOrDefault -Object $record -Name "releaseIssueCloseOwnerDecisionValidationState" -DefaultValue "") -eq "blocked-release-issue-close-owner-decision-input-required" -and [int](Get-PropertyOrDefault -Object $record -Name "finalCloseProofAdmissionRequiredFieldCount" -DefaultValue 0) -ge 20 -and [int](Get-PropertyOrDefault -Object $record -Name "finalCloseRejectedNonProofStateCount" -DefaultValue 0) -ge 10) -Severity "blocker" -Detail "Package must carry bundle SHA, strict close output state, final close decision state, and final close admission contract counts without approving close.")) | Out-Null
+
+foreach ($expectedGate in @(
+  "github-actions-run-evidence",
+  "owner-public-publish-result",
+  "public-package-download-proof",
+  "post-publish-clean-consumer-proof-result",
+  "rollback-review",
+  "final-close-decision",
+  "release-evidence-bundle-sha",
+  "strict-close-validator-output"
+)) {
+  $items.Add((New-ValidationItem -Id "hard-gate-$expectedGate-present" -Passed ($hardGateIds -contains $expectedGate) -Severity "blocker" -Detail "Hard gate $expectedGate must be present.")) | Out-Null
+}
 
 foreach ($expected in @(
   "00-clean-external-package-consumer-owner-runbook",
@@ -140,7 +164,24 @@ foreach ($step in $steps) {
   $items.Add((New-ValidationItem -Id "step-$id-boundary" -Passed ($stepBoundary.Contains("not runtime proof", [StringComparison]::OrdinalIgnoreCase) -and $stepBoundary.Contains("not post-publish proof", [StringComparison]::OrdinalIgnoreCase) -and $stepBoundary.Contains("not package push", [StringComparison]::OrdinalIgnoreCase) -and -not [string]::IsNullOrWhiteSpace($promotionBoundary)) -Severity "blocker" -Detail "Step $id must preserve non-proof and promotion boundaries.")) | Out-Null
 }
 
-foreach ($marker in @("local feed", "ProjectReference", "direct .nupkg", "build-only", "dry-run", "template", "candidate", "dashboard", "blocked-by-cuda-driver", "repository-external", "public package source URL", "stdoutPath", "stderrPath", "mergedTranscriptPath", "nonSubstituteConfirmations", "does not run dotnet nuget push")) {
+foreach ($gate in $ownerReleaseCloseHardGates) {
+  $id = [string](Get-PropertyOrDefault -Object $gate -Name "id" -DefaultValue "")
+  $boundary = [string](Get-PropertyOrDefault -Object $gate -Name "boundary" -DefaultValue "")
+  $nonPromotingGate = [bool](Get-PropertyOrDefault -Object $gate -Name "blocked" -DefaultValue $false) -and
+    [bool](Get-PropertyOrDefault -Object $gate -Name "ownerActionRequired" -DefaultValue $false) -and
+    (-not [bool](Get-PropertyOrDefault -Object $gate -Name "performsPublish" -DefaultValue $true)) -and
+    (-not [bool](Get-PropertyOrDefault -Object $gate -Name "canPromoteRuntimeProof" -DefaultValue $true)) -and
+    (-not [bool](Get-PropertyOrDefault -Object $gate -Name "canPublishPublicly" -DefaultValue $true)) -and
+    (-not [bool](Get-PropertyOrDefault -Object $gate -Name "canCloseReleaseIssue" -DefaultValue $true)) -and
+    (-not [bool](Get-PropertyOrDefault -Object $gate -Name "isRuntimeExecutionProof" -DefaultValue $true)) -and
+    (-not [bool](Get-PropertyOrDefault -Object $gate -Name "isPostPublishProof" -DefaultValue $true)) -and
+    (-not [bool](Get-PropertyOrDefault -Object $gate -Name "isReleaseCloseProof" -DefaultValue $true))
+
+  $items.Add((New-ValidationItem -Id "hard-gate-$id-non-promoting" -Passed ($nonPromotingGate -and -not [string]::IsNullOrWhiteSpace([string](Get-PropertyOrDefault -Object $gate -Name "sourceArtifact" -DefaultValue "")) -and -not [string]::IsNullOrWhiteSpace([string](Get-PropertyOrDefault -Object $gate -Name "strictValidator" -DefaultValue ""))) -Severity "blocker" -Detail "Hard gate $id must remain blocked, owner-action-required, non-promoting, and tied to a source artifact plus validator.")) | Out-Null
+  $items.Add((New-ValidationItem -Id "hard-gate-$id-boundary" -Passed ($boundary.Contains("not runtime proof", [StringComparison]::OrdinalIgnoreCase) -and $boundary.Contains("not post-publish proof", [StringComparison]::OrdinalIgnoreCase) -and $boundary.Contains("not release close approval", [StringComparison]::OrdinalIgnoreCase) -and $boundary.Contains("not package push", [StringComparison]::OrdinalIgnoreCase)) -Severity "blocker" -Detail "Hard gate $id must preserve proof, close, and publish exclusions.")) | Out-Null
+}
+
+foreach ($marker in @("local feed", "ProjectReference", "direct .nupkg", "build-only", "dry-run", "template", "candidate", "dashboard", "blocked-by-cuda-driver", "repository-external", "public package source URL", "stdoutPath", "stderrPath", "mergedTranscriptPath", "nonSubstituteConfirmations", "does not run dotnet nuget push", "public package download proof alone", "post-publish validation-ready without proofCandidateReady", "release evidence bundle hash only", "strict close validator output without real proof")) {
   $items.Add((New-ValidationItem -Id "forbidden-substitute-$($marker.Replace(' ', '-').Replace('.', 'dot'))-visible" -Passed (($forbiddenSubstitutes -join "`n").Contains($marker, [StringComparison]::OrdinalIgnoreCase) -or $raw.Contains($marker, [StringComparison]::OrdinalIgnoreCase)) -Severity "blocker" -Detail "Forbidden substitute marker '$marker' must remain visible.")) | Out-Null
 }
 
@@ -150,6 +191,19 @@ foreach ($needle in @("Test-CleanExternalPackageConsumerOwnerRunbook.ps1", "Test
 
 foreach ($needle in @("clean-external-package-consumer-owner-runbook-validation.json", "post-publish-owner-verification-runbook-validation.json", "owner-external-proof-execution-result.input.json", "sample-run-evidence-record-validation.json", "package-consumer-runtime-proof-record-validation.json", "post-publish-verification-validation.json", "final-owner-real-input-template-pack-validation.json", "owner-external-proof-execution-result-import-validation.json", "real-proof-record-candidate-from-owner-result-import-validation.json")) {
   $items.Add((New-ValidationItem -Id "result-artifact-$($needle.Replace('.json',''))-present" -Passed (($expectedResultArtifacts -join "`n").Contains($needle, [StringComparison]::OrdinalIgnoreCase)) -Severity "blocker" -Detail "Expected result artifact $needle must be listed.")) | Out-Null
+}
+
+foreach ($needle in @(
+  "artifacts/final-release/final-owner-execution-one-screen-pack.json",
+  "artifacts/final-release/final-owner-execution-one-screen-pack-validation.json",
+  "artifacts/final-release/final-owner-strict-close-execution-order-validation.json",
+  "artifacts/final-release/post-publish-clean-consumer-proof-result-validation.json",
+  "artifacts/final-release/public-package-download-proof-candidate-validation.json",
+  "artifacts/final-release/owner-public-publish-execution-result-candidate-validation.json",
+  "artifacts/final-release/release-issue-close-owner-decision-input-validation.json",
+  "artifacts/final-release/final-close-gate-convergence-validation.json"
+)) {
+  $items.Add((New-ValidationItem -Id "source-artifact-$($needle.Replace('artifacts/final-release/','').Replace('.json',''))-present" -Passed ($sourceArtifacts -contains $needle) -Severity "blocker" -Detail "Source artifact $needle must be listed.")) | Out-Null
 }
 
 $failedBlockers = @($items | Where-Object { -not $_.passed -and $_.severity -eq "blocker" })
@@ -173,6 +227,22 @@ $validation = [pscustomobject]@{
   packageConsumerOwnerRuntimeSmokeFieldAlignmentState = [string](Get-PropertyOrDefault -Object $record -Name "packageConsumerOwnerRuntimeSmokeFieldAlignmentState" -DefaultValue "")
   packageConsumerOwnerRuntimeSmokeFieldAlignmentValidationState = [string](Get-PropertyOrDefault -Object $record -Name "packageConsumerOwnerRuntimeSmokeFieldAlignmentValidationState" -DefaultValue "")
   packageConsumerOwnerRuntimeSmokeFieldAlignmentMissingRequiredFieldCount = [int](Get-PropertyOrDefault -Object $record -Name "packageConsumerOwnerRuntimeSmokeFieldAlignmentMissingRequiredFieldCount" -DefaultValue -1)
+  releaseCloseRealInputChainCount = $releaseCloseRealInputChain.Count
+  releaseCloseRealInputChainRequiredFieldCount = $releaseCloseRealInputChainRequiredFieldCount
+  releaseCloseRealInputChainRejectedSubstituteCount = $releaseCloseRealInputChainRejectedSubstituteCount
+  releaseCloseRealInputChainSourceReadinessSignalCount = $releaseCloseRealInputChainSourceReadinessSignalCount
+  releaseCloseRealInputChainBlockedRealInputCount = $releaseCloseRealInputChainBlockedRealInputCount
+  ownerReleaseCloseHardGateCount = $ownerReleaseCloseHardGates.Count
+  blockedOwnerReleaseCloseHardGateCount = @($ownerReleaseCloseHardGates | Where-Object { [bool](Get-PropertyOrDefault -Object $_ -Name "blocked" -DefaultValue $false) }).Count
+  publicPackageDownloadProofCandidateReady = [bool](Get-PropertyOrDefault -Object $record -Name "publicPackageDownloadProofCandidateReady" -DefaultValue $true)
+  postPublishProofCandidateReady = [bool](Get-PropertyOrDefault -Object $record -Name "postPublishProofCandidateReady" -DefaultValue $true)
+  postPublishProofSourceLinkageReady = [bool](Get-PropertyOrDefault -Object $record -Name "postPublishProofSourceLinkageReady" -DefaultValue $true)
+  releaseEvidenceBundleSha256 = [string](Get-PropertyOrDefault -Object $record -Name "releaseEvidenceBundleSha256" -DefaultValue "")
+  releaseIssueCloseOwnerDecisionValidationState = [string](Get-PropertyOrDefault -Object $record -Name "releaseIssueCloseOwnerDecisionValidationState" -DefaultValue "")
+  finalCloseStrictValidatorOutputState = [string](Get-PropertyOrDefault -Object $record -Name "finalCloseStrictValidatorOutputState" -DefaultValue "")
+  publicDownloadCannotSubstitutePostPublishProof = [bool](Get-PropertyOrDefault -Object $record -Name "publicDownloadCannotSubstitutePostPublishProof" -DefaultValue $false)
+  bundleHashCannotSubstituteFinalCloseDecision = [bool](Get-PropertyOrDefault -Object $record -Name "bundleHashCannotSubstituteFinalCloseDecision" -DefaultValue $false)
+  strictCloseOutputCannotCloseIssue = [bool](Get-PropertyOrDefault -Object $record -Name "strictCloseOutputCannotCloseIssue" -DefaultValue $false)
   failedBlockerCount = $failedBlockers.Count
   performsPublish = $false
   canPromoteRuntimeProof = $false
@@ -207,6 +277,22 @@ Generated at: ``$($validation.generatedAtUtc)``
 - packageConsumerOwnerRuntimeSmokeFieldAlignmentState: ``$($validation.packageConsumerOwnerRuntimeSmokeFieldAlignmentState)``
 - packageConsumerOwnerRuntimeSmokeFieldAlignmentValidationState: ``$($validation.packageConsumerOwnerRuntimeSmokeFieldAlignmentValidationState)``
 - packageConsumerOwnerRuntimeSmokeFieldAlignmentMissingRequiredFieldCount: ``$($validation.packageConsumerOwnerRuntimeSmokeFieldAlignmentMissingRequiredFieldCount)``
+- releaseCloseRealInputChainCount: ``$($validation.releaseCloseRealInputChainCount)``
+- releaseCloseRealInputChainRequiredFieldCount: ``$($validation.releaseCloseRealInputChainRequiredFieldCount)``
+- releaseCloseRealInputChainRejectedSubstituteCount: ``$($validation.releaseCloseRealInputChainRejectedSubstituteCount)``
+- releaseCloseRealInputChainSourceReadinessSignalCount: ``$($validation.releaseCloseRealInputChainSourceReadinessSignalCount)``
+- releaseCloseRealInputChainBlockedRealInputCount: ``$($validation.releaseCloseRealInputChainBlockedRealInputCount)``
+- ownerReleaseCloseHardGateCount: ``$($validation.ownerReleaseCloseHardGateCount)``
+- blockedOwnerReleaseCloseHardGateCount: ``$($validation.blockedOwnerReleaseCloseHardGateCount)``
+- publicPackageDownloadProofCandidateReady: ``$($validation.publicPackageDownloadProofCandidateReady)``
+- postPublishProofCandidateReady: ``$($validation.postPublishProofCandidateReady)``
+- postPublishProofSourceLinkageReady: ``$($validation.postPublishProofSourceLinkageReady)``
+- releaseEvidenceBundleSha256: ``$($validation.releaseEvidenceBundleSha256)``
+- releaseIssueCloseOwnerDecisionValidationState: ``$($validation.releaseIssueCloseOwnerDecisionValidationState)``
+- finalCloseStrictValidatorOutputState: ``$($validation.finalCloseStrictValidatorOutputState)``
+- publicDownloadCannotSubstitutePostPublishProof: ``$($validation.publicDownloadCannotSubstitutePostPublishProof)``
+- bundleHashCannotSubstituteFinalCloseDecision: ``$($validation.bundleHashCannotSubstituteFinalCloseDecision)``
+- strictCloseOutputCannotCloseIssue: ``$($validation.strictCloseOutputCannotCloseIssue)``
 - failedBlockerCount: ``$($validation.failedBlockerCount)``
 - performsPublish: ``False``
 - canPromoteRuntimeProof: ``False``
