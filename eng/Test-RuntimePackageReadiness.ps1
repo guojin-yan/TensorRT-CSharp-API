@@ -320,6 +320,19 @@ function New-WrapperSurfaceCapabilityEvidence {
       requiredMarkers = @("EmitDiagnostic", "CallbackFailureCount", "LastCallbackException", "TryGetInterfaceInfo")
     },
     [pscustomobject]@{
+      name = "callback-api-language-safe-controls"
+      categoryMarkers = @("callback-api-language-safe-controls")
+      requiredMarkers = @(
+        "TensorRtApiLanguage",
+        "TensorRtLogger.ApiLanguage",
+        "TensorRtLogger.TryGetApiLanguage",
+        "TensorRtProfiler.ApiLanguage",
+        "TensorRtProfiler.TryGetApiLanguage",
+        "TensorRtProgressMonitor.ApiLanguage",
+        "TensorRtProgressMonitor.TryGetApiLanguage"
+      )
+    },
+    [pscustomobject]@{
       name = "error-recorder-snapshot"
       categoryMarkers = @("error-recorder-snapshot", "error-recorder-snapshots")
       requiredMarkers = @("TensorRtErrorRecorderSnapshot", "TensorRtErrorRecord", "TryGetErrorRecorderSnapshot", "HasErrorRecorder", "ClearErrorRecorder")
@@ -655,6 +668,7 @@ function New-WrapperSurfaceCapabilityEvidence {
     hasEngineRnnReadonlyDiagnostics = [bool]$groupStatus["engine-rnn-readonly-diagnostics"]
     hasManagedCallbacks = [bool]$groupStatus["managed-callbacks"]
     hasCallbackDiagnostics = [bool]$groupStatus["callback-diagnostics"]
+    hasCallbackApiLanguageSafeControls = [bool]$groupStatus["callback-api-language-safe-controls"]
     hasErrorRecorderSnapshots = [bool]$groupStatus["error-recorder-snapshot"]
     hasErrorRecorderDiagnosticsDesignGate = [bool]$groupStatus["error-recorder-diagnostics-design-gate"]
     hasDimensionExpressionSnapshotDesignGate = [bool]$groupStatus["dimension-expression-snapshot-design-gate"]
@@ -7998,6 +8012,7 @@ function Write-ReadinessReports {
     $readyWrapperGroups = @($result.bridgeConsumer.wrapperSurfaceCapabilities.groups | Where-Object { [string]$_.status -eq "ready" } | ForEach-Object { [string]$_.name }) -join ", "
     $missingWrapperGroups = @($result.bridgeConsumer.wrapperSurfaceCapabilities.missingGroups) -join ", "
     $lines.Add("- bridge consumer wrapper capability status: $($result.bridgeConsumer.wrapperSurfaceCapabilities.status); ready=``$readyWrapperGroups``; missing=``$missingWrapperGroups``")
+    $lines.Add("- bridge consumer callback api-language safe controls: $($result.bridgeConsumer.wrapperSurfaceCapabilities.hasCallbackApiLanguageSafeControls); marker=``callback-api-language-safe-controls``; evidence-kind=compile-surface-proof; runtime-evidence=scalar-copy-api-language; proof=false")
     $lines.Add("- bridge consumer callback allocator safe-control summary: $($result.bridgeConsumer.wrapperSurfaceCapabilities.hasExecutionContextCallbackAllocatorSafeControlSummary); marker=``execution-context-callback-allocator-safe-control-summary``; evidence-kind=compile-surface-proof; runtime-evidence=copied-interface-info-safe-controls; proof=false")
     $lines.Add("- error recorder diagnostics design gate: $($result.errorRecorderDiagnosticsDesignGate.status); marker=``$($result.errorRecorderDiagnosticsDesignGate.marker)``; evidence-kind=$($result.errorRecorderDiagnosticsDesignGate.evidenceKind); runtime-evidence=$($result.errorRecorderDiagnosticsDesignGate.runtimeEvidenceKind); runtime-execution=$($result.errorRecorderDiagnosticsDesignGate.isRuntimeExecutionEvidence); proof=$($result.errorRecorderDiagnosticsDesignGate.isRuntimeExecutionProof); runtime-blocked=$($result.errorRecorderDiagnosticsDesignGate.runtimeProofBlocked); deferred-rows=$($result.errorRecorderDiagnosticsDesignGate.hasDeferredRowEvidence)")
     $lines.Add("- error recorder diagnostics design gate diagnostic: $($result.errorRecorderDiagnosticsDesignGate.diagnostic)")

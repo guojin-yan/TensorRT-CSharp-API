@@ -1202,6 +1202,13 @@ static class HighLevelWrapperSurfaceProbe
                 bool success = logger.TryGetInterfaceInfo(out TensorRtInterfaceInfo info, out string diagnostic);
                 return (success, info, diagnostic);
             };
+        Func<TensorRtLogger, TensorRtApiLanguage> loggerApiLanguage = static logger => logger.ApiLanguage;
+        Func<TensorRtLogger, (bool success, TensorRtApiLanguage apiLanguage, string diagnostic)> tryLoggerApiLanguage =
+            static logger =>
+            {
+                bool success = logger.TryGetApiLanguage(out TensorRtApiLanguage apiLanguage, out string diagnostic);
+                return (success, apiLanguage, diagnostic);
+            };
         Func<TensorRtProfiler, bool> profilerDiagnostic =
             static profiler => profiler.EmitDiagnostic("package-consumer", 0.125f);
         Func<TensorRtProfiler, string> profilerCallbackState =
@@ -1212,6 +1219,13 @@ static class HighLevelWrapperSurfaceProbe
             {
                 bool success = profiler.TryGetInterfaceInfo(out TensorRtInterfaceInfo info, out string diagnostic);
                 return (success, info, diagnostic);
+            };
+        Func<TensorRtProfiler, TensorRtApiLanguage> profilerApiLanguage = static profiler => profiler.ApiLanguage;
+        Func<TensorRtProfiler, (bool success, TensorRtApiLanguage apiLanguage, string diagnostic)> tryProfilerApiLanguage =
+            static profiler =>
+            {
+                bool success = profiler.TryGetApiLanguage(out TensorRtApiLanguage apiLanguage, out string diagnostic);
+                return (success, apiLanguage, diagnostic);
             };
         Action<TensorRtExecutionContext, TensorRtProfiler> attachProfiler =
             static (context, profiler) => context.SetProfiler(profiler);
@@ -1232,6 +1246,13 @@ static class HighLevelWrapperSurfaceProbe
             {
                 bool success = monitor.TryGetInterfaceInfo(out TensorRtInterfaceInfo info, out string diagnostic);
                 return (success, info, diagnostic);
+            };
+        Func<TensorRtProgressMonitor, TensorRtApiLanguage> progressApiLanguage = static monitor => monitor.ApiLanguage;
+        Func<TensorRtProgressMonitor, (bool success, TensorRtApiLanguage apiLanguage, string diagnostic)> tryProgressApiLanguage =
+            static monitor =>
+            {
+                bool success = monitor.TryGetApiLanguage(out TensorRtApiLanguage apiLanguage, out string diagnostic);
+                return (success, apiLanguage, diagnostic);
             };
         Action<TensorRtBuilderConfig, TensorRtProgressMonitor> attachProgressMonitor =
             static (config, monitor) => config.SetProgressMonitor(monitor);
@@ -2466,10 +2487,14 @@ static class HighLevelWrapperSurfaceProbe
         _ = loggerCallbackState;
         _ = loggerInterfaceInfo;
         _ = tryLoggerInterfaceInfo;
+        _ = loggerApiLanguage;
+        _ = tryLoggerApiLanguage;
         _ = profilerDiagnostic;
         _ = profilerCallbackState;
         _ = profilerInterfaceInfo;
         _ = tryProfilerInterfaceInfo;
+        _ = profilerApiLanguage;
+        _ = tryProfilerApiLanguage;
         _ = attachProfiler;
         _ = clearProfiler;
         _ = hasManagedProfiler;
@@ -2478,6 +2503,8 @@ static class HighLevelWrapperSurfaceProbe
         _ = progressCallbackState;
         _ = progressInterfaceInfo;
         _ = tryProgressInterfaceInfo;
+        _ = progressApiLanguage;
+        _ = tryProgressApiLanguage;
         _ = attachProgressMonitor;
         _ = clearProgressMonitor;
         _ = hasProgressMonitor;
@@ -2594,6 +2621,7 @@ static class HighLevelWrapperSurfaceProbe
             "engine-rnn-readonly-diagnostics",
             "managed-callbacks",
             "callback-diagnostics",
+            "callback-api-language-safe-controls",
             "error-recorder-snapshot",
             "error-recorder-diagnostics-design-gate",
             "dimension-expression-snapshot-design-gate",
@@ -2725,12 +2753,19 @@ static class HighLevelWrapperSurfaceProbe
             nameof(TensorRtLogger.LastCallbackException),
             nameof(TensorRtLogger.InterfaceInfo),
             nameof(TensorRtLogger.TryGetInterfaceInfo),
+            nameof(TensorRtLogger.ApiLanguage),
+            nameof(TensorRtLogger.TryGetApiLanguage),
+            nameof(TensorRtApiLanguage),
             nameof(TensorRtProfiler),
             nameof(TensorRtProfiler.EmitDiagnostic),
             nameof(TensorRtProfiler.CallbackFailureCount),
             nameof(TensorRtProfiler.LastCallbackException),
             nameof(TensorRtProfiler.InterfaceInfo),
             nameof(TensorRtProfiler.TryGetInterfaceInfo),
+            nameof(TensorRtProfiler.ApiLanguage),
+            nameof(TensorRtProfiler.TryGetApiLanguage),
+            nameof(TensorRtProgressMonitor.ApiLanguage),
+            nameof(TensorRtProgressMonitor.TryGetApiLanguage),
             nameof(TensorRtErrorRecorderSnapshot),
             nameof(TensorRtErrorRecord),
             nameof(TensorRtRuntimeDiagnosticSnapshot),
@@ -4010,7 +4045,7 @@ static class HighLevelWrapperSurfaceProbe
 
     $timer.Stop()
     $elapsedSeconds = [Math]::Round($timer.Elapsed.TotalSeconds, 2)
-    $wrapperSurfaceProbe = "compiled:plugin-inventory;engine-rnn-readonly-diagnostics;rnnv2-borrowed-state-design-gate;rnnv2-owner-bound-tensors;rnnv2-copied-gate-weights;managed-callbacks;callback-diagnostics;error-recorder-snapshot;logger-presence-safe-controls;allocator-debug-listener-safe-controls;callback-interface-info-safe-controls;execution-context-callback-state-snapshot;execution-context-callback-allocator-safe-control-summary;allocator-owner-dry-run-diagnostics;allocator-owner-native-dry-run-controls;allocator-owner-state-ledger-dry-run-controls;allocator-owner-ledger-safety-gate;output-allocator-callback-owner-design;output-allocator-attach-detach-design-gate;output-allocator-runtime-proof-precheck;debug-listener-callback-owner-design;debug-listener-attach-detach-design-gate;debug-listener-borrowed-tensor-safety-gate;debug-listener-attach-vtable-safety-gate;debug-listener-native-attach-nothrow-preflight;debug-listener-native-owner-address-design-gate;debug-listener-native-nothrow-vtable-design-gate;debug-listener-native-attach-entry-design-gate;debug-listener-native-detach-before-release-design-gate;debug-listener-native-owner-lifecycle-dry-run;debug-listener-native-attach-entry-runtime-scaffold;debug-listener-native-attach-entry-minimal-safety;debug-listener-native-owner-stable-identity;debug-listener-native-owner-noncopyable-storage;debug-listener-native-nothrow-destructor;debug-listener-native-owner-lifecycle-gate;debug-listener-native-attach-bridge-shape-gate;debug-listener-exception-status-mapping-gate;debug-listener-inflight-accounting-gate;debug-listener-native-nothrow-vtable-scaffold-gate;debug-listener-nothrow-vtable-callback-stub;callback-stub-gate;debug-listener-borrowed-debug-tensor-metadata-runtime-gate;borrowed-debug-tensor-metadata-gate;debug-listener-native-vtable-install-preflight;native-vtable-install-preflight;debug-listener-native-owner-vtable-install-experiment;native-owner-vtable-install-experiment;debug-listener-runtime-proof-precheck;debug-listener-runtime-proof-attempt-preflight;debug-listener-real-non-null-attach-runtime-smoke;runtime-smoke-skipped;runtime-smoke-blocked;runtime-smoke-attempted;debug-listener-process-debug-tensor-callback-trampoline;callback-trampoline-shape;onnx-parser-diagnostic-snapshot;onnx-parser-diagnostic-summary;onnx-parser-refitter-diagnostic-snapshot;onnx-parser-refitter-diagnostic-summary;profiler-safe-controls;progress-monitor-safe-controls;cuda-memory-range;HasImplicitBatchDimensionCompatibility;SerializedPluginPathCountCompatibility;GetRnnV2LayerCount;GetRnnV2HiddenSize;GetRnnV2DataLength;GetRnnV2MaxSequenceLength;GetRnnV2Operation;GetRnnV2Direction;GetRnnV2InputMode;GetRnnV2CellState;GetRnnV2HiddenState;GetRnnV2SequenceLengths;GetRnnV2WeightsForGate;GetRnnV2BiasForGate;TensorRtRnnV2GateWeightsSnapshot;TensorRtRnnOperation;TensorRtRnnDirection;TensorRtRnnInputMode;TensorRtRnnGateType"
+    $wrapperSurfaceProbe = "compiled:plugin-inventory;engine-rnn-readonly-diagnostics;rnnv2-borrowed-state-design-gate;rnnv2-owner-bound-tensors;rnnv2-copied-gate-weights;managed-callbacks;callback-diagnostics;callback-api-language-safe-controls;error-recorder-snapshot;logger-presence-safe-controls;allocator-debug-listener-safe-controls;callback-interface-info-safe-controls;execution-context-callback-state-snapshot;execution-context-callback-allocator-safe-control-summary;allocator-owner-dry-run-diagnostics;allocator-owner-native-dry-run-controls;allocator-owner-state-ledger-dry-run-controls;allocator-owner-ledger-safety-gate;output-allocator-callback-owner-design;output-allocator-attach-detach-design-gate;output-allocator-runtime-proof-precheck;debug-listener-callback-owner-design;debug-listener-attach-detach-design-gate;debug-listener-borrowed-tensor-safety-gate;debug-listener-attach-vtable-safety-gate;debug-listener-native-attach-nothrow-preflight;debug-listener-native-owner-address-design-gate;debug-listener-native-nothrow-vtable-design-gate;debug-listener-native-attach-entry-design-gate;debug-listener-native-detach-before-release-design-gate;debug-listener-native-owner-lifecycle-dry-run;debug-listener-native-attach-entry-runtime-scaffold;debug-listener-native-attach-entry-minimal-safety;debug-listener-native-owner-stable-identity;debug-listener-native-owner-noncopyable-storage;debug-listener-native-nothrow-destructor;debug-listener-native-owner-lifecycle-gate;debug-listener-native-attach-bridge-shape-gate;debug-listener-exception-status-mapping-gate;debug-listener-inflight-accounting-gate;debug-listener-native-nothrow-vtable-scaffold-gate;debug-listener-nothrow-vtable-callback-stub;callback-stub-gate;debug-listener-borrowed-debug-tensor-metadata-runtime-gate;borrowed-debug-tensor-metadata-gate;debug-listener-native-vtable-install-preflight;native-vtable-install-preflight;debug-listener-native-owner-vtable-install-experiment;native-owner-vtable-install-experiment;debug-listener-runtime-proof-precheck;debug-listener-runtime-proof-attempt-preflight;debug-listener-real-non-null-attach-runtime-smoke;runtime-smoke-skipped;runtime-smoke-blocked;runtime-smoke-attempted;debug-listener-process-debug-tensor-callback-trampoline;callback-trampoline-shape;onnx-parser-diagnostic-snapshot;onnx-parser-diagnostic-summary;onnx-parser-refitter-diagnostic-snapshot;onnx-parser-refitter-diagnostic-summary;profiler-safe-controls;progress-monitor-safe-controls;cuda-memory-range;HasImplicitBatchDimensionCompatibility;SerializedPluginPathCountCompatibility;GetRnnV2LayerCount;GetRnnV2HiddenSize;GetRnnV2DataLength;GetRnnV2MaxSequenceLength;GetRnnV2Operation;GetRnnV2Direction;GetRnnV2InputMode;GetRnnV2CellState;GetRnnV2HiddenState;GetRnnV2SequenceLengths;GetRnnV2WeightsForGate;GetRnnV2BiasForGate;TensorRtRnnV2GateWeightsSnapshot;TensorRtRnnOperation;TensorRtRnnDirection;TensorRtRnnInputMode;TensorRtRnnGateType"
     $wrapperSurfaceEvidenceKind = "compile-surface-proof"
     $isRuntimeExecutionProof = $false
     $runtimeProofBoundary = "bridge-only consumer validates package layout, high-level wrapper compile surface, and dependency diagnostics; it is not clean package-consumer runtime proof."

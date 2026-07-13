@@ -382,6 +382,15 @@ public sealed class RuntimePackageReadinessTests
         Assert.Contains("hasLoggerPresenceSafeControls", script);
         Assert.Contains("hasAllocatorDebugListenerSafeControls", script);
         Assert.Contains("hasCallbackInterfaceInfoSafeControls", script);
+        Assert.Contains("hasCallbackApiLanguageSafeControls", script);
+        Assert.Contains("callback-api-language-safe-controls", script);
+        Assert.Contains("TensorRtLogger.ApiLanguage", script);
+        Assert.Contains("TensorRtLogger.TryGetApiLanguage", script);
+        Assert.Contains("TensorRtProfiler.ApiLanguage", script);
+        Assert.Contains("TensorRtProfiler.TryGetApiLanguage", script);
+        Assert.Contains("TensorRtProgressMonitor.ApiLanguage", script);
+        Assert.Contains("TensorRtProgressMonitor.TryGetApiLanguage", script);
+        Assert.Contains("TensorRtApiLanguage", script);
         Assert.Contains("callback-interface-info-safe-controls", script);
         Assert.Contains("execution-context-callback-state-snapshot", script);
         Assert.Contains("hasExecutionContextCallbackStateSnapshot", script);
@@ -456,6 +465,8 @@ public sealed class RuntimePackageReadinessTests
         Assert.Contains("bridge consumer evidence scope", script);
         Assert.Contains("bridge consumer wrapper surface", script);
         Assert.Contains("bridge consumer wrapper capability status", script);
+        Assert.Contains("bridge consumer callback api-language safe controls", script);
+        Assert.Contains("runtime-evidence=scalar-copy-api-language", script);
         Assert.Contains("allocator owner ledger design gate:", script);
         Assert.Contains("allocator owner ledger diagnostic:", script);
         Assert.Contains("allocator owner internal runtime prototype:", script);

@@ -79,10 +79,15 @@ public sealed class BridgePackageConsumerTests
         Assert.Contains("TensorRtLogger.LastCallbackException", script);
         Assert.Contains("TensorRtLogger.InterfaceInfo", script);
         Assert.Contains("TensorRtLogger.TryGetInterfaceInfo", script);
+        Assert.Contains("TensorRtLogger.ApiLanguage", script);
+        Assert.Contains("TensorRtLogger.TryGetApiLanguage", script);
+        Assert.Contains("TensorRtApiLanguage", script);
         Assert.Contains("TensorRtProfiler.EmitDiagnostic", script);
         Assert.Contains("TensorRtProfiler.CallbackFailureCount", script);
         Assert.Contains("TensorRtProfiler.LastCallbackException", script);
         Assert.Contains("TensorRtProfiler.TryGetInterfaceInfo", script);
+        Assert.Contains("TensorRtProfiler.ApiLanguage", script);
+        Assert.Contains("TensorRtProfiler.TryGetApiLanguage", script);
         Assert.Contains("TensorRtErrorRecorderSnapshot", script);
         Assert.Contains("TensorRtErrorRecord", script);
         Assert.Contains("TensorRtRuntimeDiagnosticSnapshot", script);
@@ -217,9 +222,12 @@ public sealed class BridgePackageConsumerTests
         Assert.Contains("TensorRtProgressMonitor.CallbackFailureCount", script);
         Assert.Contains("TensorRtProgressMonitor.LastCallbackException", script);
         Assert.Contains("TensorRtProgressMonitor.TryGetInterfaceInfo", script);
+        Assert.Contains("TensorRtProgressMonitor.ApiLanguage", script);
+        Assert.Contains("TensorRtProgressMonitor.TryGetApiLanguage", script);
         Assert.Contains("TensorRtBuilderConfig.SetProgressMonitor", script);
         Assert.Contains("TensorRtBuilderConfig.ClearProgressMonitor", script);
         Assert.Contains("callback-diagnostics", script);
+        Assert.Contains("callback-api-language-safe-controls", script);
         Assert.Contains("error-recorder-snapshot", script);
         Assert.Contains("logger-presence-safe-controls", script);
         Assert.Contains("error-recorder-snapshot;logger-presence-safe-controls;allocator-debug-listener-safe-controls;callback-interface-info-safe-controls;execution-context-callback-state-snapshot;execution-context-callback-allocator-safe-control-summary", script);
