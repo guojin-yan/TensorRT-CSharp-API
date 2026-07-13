@@ -70,6 +70,9 @@ public sealed class EvidenceLadderAndArticleMatrixTests
             "YOLOv8 Detection",
             "YOLOv8 Segmentation",
             "Plugin Registry Inventory",
+            "ONNX Parser",
+            "ParserRefitter",
+            "copied diagnostics",
             "Package Consumer Runtime Proof",
             "Troubleshooting",
             "证据梯度图"

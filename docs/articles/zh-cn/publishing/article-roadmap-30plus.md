@@ -1,13 +1,13 @@
 # 30+ 篇技术与宣发文章规划
 
-rticle-roadmap-30plus.json 是面向微信公众号、博客和项目文档的机器可读文章规划。它不是 proof，不批准公开发布，也不关闭 release issue。
+`article-roadmap-30plus.json` 是面向微信公众号、博客和项目文档的机器可读文章规划。它不是 proof，不批准公开发布，也不关闭 release issue。
 
 ## Summary
 
 | Field | Value |
 | --- | --- |
 | roadmapState | `release-readiness-planning` |
-| articleCount | `40` |
+| articleCount | `41` |
 | minimumArticleCount | `30` |
 | canPublishPublicly | `False` |
 | canCloseReleaseIssue | `False` |
@@ -62,6 +62,7 @@ Rows marked `near-ready-owner-proof-input` are article-body and owner proof inpu
 | `38` | CUDA Graph Event Node borrowed handle 安全边界：HasEvent 替代 GetEvent | CUDA Graph API 维护者、安全评审者 | `ready` | docs/articles/zh-cn/publishing/cuda-graph-event-node-borrowed-handle-安全边界.md |
 | `39` | Package Consumer Proof 分层边界：local smoke、package-feed substitute 与 clean external evidence | 发布负责人、包验证维护者 | `ready` | docs/articles/zh-cn/publishing/package-consumer-分层边界-local-smoke-package-feed-substitute-clean-external-evidence.md |
 | `40` | YoloVision 真实资产证据链：从样例矩阵到 owner proof | 视觉样例维护者、发布负责人 | `near-ready-owner-proof-input` | docs/articles/zh-cn/publishing/yolovision-真实资产证据链-从样例矩阵到-owner-proof.md |
+| `41` | ONNX Parser 与 ParserRefitter 诊断：copied diagnostics 到 release gate | 模型转换维护者、发布负责人 | `ready` | docs/articles/zh-cn/publishing/onnx-parser-parserrefitter-诊断-copied-diagnostics-release-gate.md |
 
 ## Must Avoid Claims
 

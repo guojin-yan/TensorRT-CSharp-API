@@ -282,6 +282,45 @@ function New-WrapperSurfaceCapabilityEvidence {
       )
     },
     [pscustomobject]@{
+      name = "onnx-parser-diagnostic-readiness"
+      categoryMarkers = @("onnx-parser-diagnostic-snapshot", "onnx-parser-diagnostic-summary")
+      requiredMarkers = @(
+        "TensorRtOnnxParserDiagnosticSnapshot",
+        "TensorRtOnnxParserDiagnosticSnapshot.ToSummary",
+        "TensorRtOnnxParserDiagnosticSummary",
+        "TensorRtOnnxParserDiagnosticSnapshot.ErrorCount",
+        "TensorRtOnnxParserDiagnosticSnapshot.Diagnostics",
+        "TensorRtOnnxParserDiagnosticSnapshot.DiagnosticSummary",
+        "TensorRtOnnxParserDiagnosticSnapshot.UsedVCPluginLibraries",
+        "TensorRtOnnxParserDiagnosticSnapshot.IdentityOperatorSupported",
+        "TensorRtOnnxParserDiagnosticSummary.CopiedDiagnosticCount",
+        "TensorRtOnnxParserDiagnosticSummary.UsedVCPluginLibraryCount",
+        "TensorRtOnnxParserDiagnosticSummary.DiagnosticSummaryLength",
+        "TensorRtOnnxParserDiagnosticSummary.RuntimeEvidenceKind",
+        "TensorRtOnnxParserDiagnosticSummary.IsRuntimeExecutionProof",
+        "TensorRtOnnxParserDiagnosticSummary.CanPromoteReleaseProof",
+        "TensorRtOnnxParser.GetDiagnosticSnapshot"
+      )
+    },
+    [pscustomobject]@{
+      name = "onnx-parser-refitter-diagnostic-readiness"
+      categoryMarkers = @("onnx-parser-refitter-diagnostic-snapshot", "onnx-parser-refitter-diagnostic-summary")
+      requiredMarkers = @(
+        "TensorRtOnnxParserRefitterDiagnosticSnapshot",
+        "TensorRtOnnxParserRefitterDiagnosticSnapshot.ToSummary",
+        "TensorRtOnnxParserRefitterDiagnosticSummary",
+        "TensorRtOnnxParserRefitterDiagnosticSnapshot.ErrorCount",
+        "TensorRtOnnxParserRefitterDiagnosticSnapshot.Diagnostics",
+        "TensorRtOnnxParserRefitterDiagnosticSnapshot.DiagnosticSummary",
+        "TensorRtOnnxParserRefitterDiagnosticSummary.CopiedDiagnosticCount",
+        "TensorRtOnnxParserRefitterDiagnosticSummary.DiagnosticSummaryLength",
+        "TensorRtOnnxParserRefitterDiagnosticSummary.RuntimeEvidenceKind",
+        "TensorRtOnnxParserRefitterDiagnosticSummary.IsRuntimeExecutionProof",
+        "TensorRtOnnxParserRefitterDiagnosticSummary.CanPromoteReleaseProof",
+        "TensorRtOnnxParserRefitter.GetDiagnosticSnapshot"
+      )
+    },
+    [pscustomobject]@{
       name = "engine-rnn-readonly-diagnostics"
       categoryMarkers = @("engine-rnn-readonly-diagnostics")
       requiredMarkers = @(
@@ -679,6 +718,8 @@ function New-WrapperSurfaceCapabilityEvidence {
     missingGroups = @($missingGroups)
     hasPluginInventory = [bool]$groupStatus["plugin-inventory"]
     hasPluginInventoryFieldMetadata = [bool]$groupStatus["plugin-inventory-field-metadata"]
+    hasOnnxParserDiagnosticReadiness = [bool]$groupStatus["onnx-parser-diagnostic-readiness"]
+    hasOnnxParserRefitterDiagnosticReadiness = [bool]$groupStatus["onnx-parser-refitter-diagnostic-readiness"]
     hasEngineRnnReadonlyDiagnostics = [bool]$groupStatus["engine-rnn-readonly-diagnostics"]
     hasManagedCallbacks = [bool]$groupStatus["managed-callbacks"]
     hasCallbackDiagnostics = [bool]$groupStatus["callback-diagnostics"]
@@ -8027,6 +8068,8 @@ function Write-ReadinessReports {
     $missingWrapperGroups = @($result.bridgeConsumer.wrapperSurfaceCapabilities.missingGroups) -join ", "
     $lines.Add("- bridge consumer wrapper capability status: $($result.bridgeConsumer.wrapperSurfaceCapabilities.status); ready=``$readyWrapperGroups``; missing=``$missingWrapperGroups``")
     $lines.Add("- bridge consumer plugin inventory field metadata: $($result.bridgeConsumer.wrapperSurfaceCapabilities.hasPluginInventoryFieldMetadata); marker=``plugin-inventory-field-metadata``; evidence-kind=compile-surface-proof; runtime-evidence=copied-plugin-field-metadata; proof=false")
+    $lines.Add("- bridge consumer onnx parser diagnostics: $($result.bridgeConsumer.wrapperSurfaceCapabilities.hasOnnxParserDiagnosticReadiness); marker=``onnx-parser-diagnostic-readiness``; evidence-kind=compile-surface-proof; runtime-evidence=copied-parser-diagnostics; proof=false")
+    $lines.Add("- bridge consumer onnx parser-refitter diagnostics: $($result.bridgeConsumer.wrapperSurfaceCapabilities.hasOnnxParserRefitterDiagnosticReadiness); marker=``onnx-parser-refitter-diagnostic-readiness``; evidence-kind=compile-surface-proof; runtime-evidence=copied-parser-refitter-diagnostics; proof=false")
     $lines.Add("- bridge consumer callback api-language safe controls: $($result.bridgeConsumer.wrapperSurfaceCapabilities.hasCallbackApiLanguageSafeControls); marker=``callback-api-language-safe-controls``; evidence-kind=compile-surface-proof; runtime-evidence=scalar-copy-api-language; proof=false")
     $lines.Add("- bridge consumer callback allocator safe-control summary: $($result.bridgeConsumer.wrapperSurfaceCapabilities.hasExecutionContextCallbackAllocatorSafeControlSummary); marker=``execution-context-callback-allocator-safe-control-summary``; evidence-kind=compile-surface-proof; runtime-evidence=copied-interface-info-safe-controls; proof=false")
     $lines.Add("- error recorder diagnostics design gate: $($result.errorRecorderDiagnosticsDesignGate.status); marker=``$($result.errorRecorderDiagnosticsDesignGate.marker)``; evidence-kind=$($result.errorRecorderDiagnosticsDesignGate.evidenceKind); runtime-evidence=$($result.errorRecorderDiagnosticsDesignGate.runtimeEvidenceKind); runtime-execution=$($result.errorRecorderDiagnosticsDesignGate.isRuntimeExecutionEvidence); proof=$($result.errorRecorderDiagnosticsDesignGate.isRuntimeExecutionProof); runtime-blocked=$($result.errorRecorderDiagnosticsDesignGate.runtimeProofBlocked); deferred-rows=$($result.errorRecorderDiagnosticsDesignGate.hasDeferredRowEvidence)")

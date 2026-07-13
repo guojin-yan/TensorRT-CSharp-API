@@ -48,6 +48,7 @@
 | 33 | Release proof evidence ladder | 发布负责人 | 深度解析 | `onnxtoengine-tensorrtexec-yolovision-evidence-ladder.md` | 是 | validator 才能晋级 | P0 |
 | 34 | 发布流程与 owner action checklist | 发布负责人 | 发布说明 | `docs/articles/zh-cn/release-final-owner-action-sequence.md` | 是 | 不执行 publish | P0 |
 | 35 | 案例合集：从 ONNX 到 YOLO 实战 | 决策者/开发者 | 宣发+案例 | `samples` / `applications` | 是 | 文章合集不是 proof | P1 |
+| 36 | ONNX Parser 与 ParserRefitter 诊断 release gate | 模型转换维护者、发布负责人 | 发布证据说明 | `TensorRtOnnxParserDiagnosticSnapshot.cs` / `Test-RuntimePackageReadiness.ps1` | 否 | copied diagnostics，不是 runtime proof | P0 |
 
 ## 配图计划
 

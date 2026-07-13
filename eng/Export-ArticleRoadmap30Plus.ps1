@@ -164,6 +164,18 @@ $articles = Add-OrReplaceArticle $articles (New-RoadmapArticle `
     -TargetPath "docs/articles/zh-cn/publishing/yolovision-真实资产证据链-从样例矩阵到-owner-proof.md" `
     -SourceArtifacts @("samples/YoloVision/yolo-model-matrix.json", "docs/articles/zh-cn/yolovision-owner-asset-evidence-guide.md"))
 
+$articles = Add-OrReplaceArticle $articles (New-RoadmapArticle `
+    -Id 41 `
+    -Title "ONNX Parser 与 ParserRefitter 诊断：copied diagnostics 到 release gate" `
+    -Audience "模型转换维护者、发布负责人" `
+    -Type "发布证据说明" `
+    -Outline @("parser error count", "copied diagnostic text", "used VC plugin library summary", "readiness wrapper group boundary") `
+    -SampleOrCodePath "src/JYPPX.TensorRtSharp/TensorRtOnnxParserDiagnosticSnapshot.cs" `
+    -VisualAssets @("parser/refitter diagnostic evidence ladder 图") `
+    -Status "ready" `
+    -TargetPath "docs/articles/zh-cn/publishing/onnx-parser-parserrefitter-诊断-copied-diagnostics-release-gate.md" `
+    -SourceArtifacts @("src/JYPPX.TensorRtSharp/TensorRtOnnxParserDiagnosticSnapshot.cs", "eng/Test-BridgePackageConsumer.ps1", "eng/Test-RuntimePackageReadiness.ps1"))
+
 $enhancedArticles = New-Object System.Collections.Generic.List[object]
 
 foreach ($article in $articles) {
@@ -255,7 +267,7 @@ $markdownPath = [IO.Path]::ChangeExtension($RoadmapPath, ".md")
 $lines = New-Object System.Collections.Generic.List[string]
 $lines.Add("# 30+ 篇技术与宣发文章规划")
 $lines.Add("")
-$lines.Add("`article-roadmap-30plus.json` 是面向微信公众号、博客和项目文档的机器可读文章规划。它不是 proof，不批准公开发布，也不关闭 release issue。")
+$lines.Add("``article-roadmap-30plus.json`` 是面向微信公众号、博客和项目文档的机器可读文章规划。它不是 proof，不批准公开发布，也不关闭 release issue。")
 $lines.Add("")
 $lines.Add("## Summary")
 $lines.Add("")

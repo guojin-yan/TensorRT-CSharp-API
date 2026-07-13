@@ -86,6 +86,7 @@ public sealed class ReleaseReadinessSamplesAndApplicationsTests
         Assert.Contains($"articleCount | `{articleCount}`", roadmap, StringComparison.Ordinal);
         Assert.Contains("YoloVision", roadmap, StringComparison.Ordinal);
         Assert.Contains("TensorRtExec", roadmap, StringComparison.Ordinal);
+        Assert.Contains("ONNX Parser 与 ParserRefitter 诊断", roadmap, StringComparison.Ordinal);
     }
 
     [Fact]

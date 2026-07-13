@@ -553,6 +553,7 @@ DebugListener callback proof gap report marker index: `debug-listener-callback-p
 - [Technical Article Roadmap](articles/zh-cn/technical-article-roadmap.md)
 - [30+ Article Roadmap](articles/zh-cn/publishing/article-roadmap-30plus.md)
 - [Technical And Promo Article Matrix 30+](articles/zh-cn/publishing/technical-and-promo-article-matrix-30plus.md)
+- [ONNX Parser ParserRefitter Diagnostics Release Gate](articles/zh-cn/publishing/onnx-parser-parserrefitter-诊断-copied-diagnostics-release-gate.md)
 - [Project Overview Public Article](articles/zh-cn/publishing/project-overview-public-article.md)
 - [TensorRtExec CLI Public Article](articles/zh-cn/publishing/tensorrtexec-cli-public-article.md)
 - [YoloVision Real Asset Owner Backfill Validator](articles/zh-cn/yolovision-real-asset-owner-backfill-validator.md)

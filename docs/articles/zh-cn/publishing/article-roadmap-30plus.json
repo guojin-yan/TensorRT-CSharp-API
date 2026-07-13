@@ -2,7 +2,7 @@
   "roadmapId": "article-roadmap-30plus",
   "roadmapState": "release-readiness-planning",
   "minimumArticleCount": 30,
-  "articleCount": 40,
+  "articleCount": 41,
   "performsPublish": false,
   "canPublishPublicly": false,
   "canCloseReleaseIssue": false,
@@ -1278,6 +1278,39 @@
         "docs/articles/zh-cn/yolovision-owner-asset-evidence-guide.md"
       ],
       "proofBoundary": "Article body and owner proof input are near-ready guidance only: Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push. Owner proof input still requires real assets, host/package metadata, stdout/stderr logs, hashes, and validators.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 41,
+      "title": "ONNX Parser 与 ParserRefitter 诊断：copied diagnostics 到 release gate",
+      "audience": "模型转换维护者、发布负责人",
+      "type": "发布证据说明",
+      "outline": [
+        "parser error count",
+        "copied diagnostic text",
+        "used VC plugin library summary",
+        "readiness wrapper group boundary"
+      ],
+      "sampleOrCodePath": "src/JYPPX.TensorRtSharp/TensorRtOnnxParserDiagnosticSnapshot.cs",
+      "visualAssets": [
+        "parser/refitter diagnostic evidence ladder 图"
+      ],
+      "status": "ready",
+      "targetPath": "docs/articles/zh-cn/publishing/onnx-parser-parserrefitter-诊断-copied-diagnostics-release-gate.md",
+      "sourceArtifacts": [
+        "src/JYPPX.TensorRtSharp/TensorRtOnnxParserDiagnosticSnapshot.cs",
+        "eng/Test-BridgePackageConsumer.ps1",
+        "eng/Test-RuntimePackageReadiness.ps1"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
       "mustAvoidClaims": [
         "must not claim local feed is public package proof",
         "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
