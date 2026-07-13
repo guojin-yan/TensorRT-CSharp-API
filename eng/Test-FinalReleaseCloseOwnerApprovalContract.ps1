@@ -31,7 +31,61 @@ function Resolve-RepositoryPath {
 
 function Write-Utf8File {
   param([string]$LiteralPath, [AllowNull()][object]$InputObject)
-  [System.IO.File]::WriteAllText($LiteralPath, ((@($InputObject) -join [Environment]::NewLine) + [Environment]::NewLine), $script:utf8)
+
+  $directory = Split-Path -Parent $LiteralPath
+  if ([string]::IsNullOrWhiteSpace($directory)) {
+    $directory = "."
+  }
+  New-Item -ItemType Directory -Path $directory -Force | Out-Null
+
+  $lines = New-Object System.Collections.Generic.List[string]
+  foreach ($item in @($InputObject)) {
+    if ($null -eq $item) {
+      $lines.Add("") | Out-Null
+    }
+    elseif ($item -is [string]) {
+      $lines.Add($item) | Out-Null
+    }
+    elseif ($item -is [System.Collections.IEnumerable]) {
+      foreach ($child in $item) { $lines.Add([string]$child) | Out-Null }
+    }
+    else {
+      $lines.Add([string]$item) | Out-Null
+    }
+  }
+
+  $content = (($lines.ToArray() -join [Environment]::NewLine) + [Environment]::NewLine)
+  $fileName = Split-Path -Leaf $LiteralPath
+  $tempPath = Join-Path $directory (".{0}.{1}.tmp" -f $fileName, [System.Guid]::NewGuid().ToString("N"))
+  $backupPath = Join-Path $directory (".{0}.{1}.bak" -f $fileName, [System.Guid]::NewGuid().ToString("N"))
+  try {
+    [System.IO.File]::WriteAllText($tempPath, $content, $script:utf8)
+    for ($attempt = 1; $attempt -le 10; $attempt++) {
+      try {
+        if (Test-Path -LiteralPath $LiteralPath -PathType Leaf) {
+          [System.IO.File]::Replace($tempPath, $LiteralPath, $backupPath)
+          Remove-Item -LiteralPath $backupPath -Force -ErrorAction SilentlyContinue
+        }
+        else {
+          [System.IO.File]::Move($tempPath, $LiteralPath)
+        }
+
+        return
+      }
+      catch {
+        if ($attempt -eq 10) { throw }
+        Start-Sleep -Milliseconds ([Math]::Min(250, 25 * $attempt))
+      }
+    }
+  }
+  finally {
+    if (Test-Path -LiteralPath $tempPath -PathType Leaf) {
+      Remove-Item -LiteralPath $tempPath -Force -ErrorAction SilentlyContinue
+    }
+    if (Test-Path -LiteralPath $backupPath -PathType Leaf) {
+      Remove-Item -LiteralPath $backupPath -Force -ErrorAction SilentlyContinue
+    }
+  }
 }
 
 function Get-PropertyOrDefault {
@@ -113,8 +167,7 @@ $validation = [ordered]@{
 
 $jsonPath = Join-Path $OutputRoot "final-release-close-owner-approval-contract-validation.json"
 $markdownPath = Join-Path $OutputRoot "final-release-close-owner-approval-contract-validation.md"
-$validation | ConvertTo-Json -Depth 32 | Set-Content -LiteralPath $jsonPath -Encoding utf8
-
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($validation | ConvertTo-Json -Depth 32)
 $markdown = @(
   "# Final Release Close Owner Approval Contract Validation",
   "",

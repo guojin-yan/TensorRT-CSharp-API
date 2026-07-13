@@ -120,4 +120,63 @@ public sealed class OwnerRealProofCommonIoTests
         Assert.DoesNotContain("[IO.File]::WriteAllText($LiteralPath", common, StringComparison.Ordinal);
         Assert.DoesNotContain("Get-Content -LiteralPath $resolvedPath -Raw -Encoding utf8 | ConvertFrom-Json", common, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void FinalOwnerExecutionAndCloseProofScriptsUseAtomicLocalWritersForJson()
+    {
+        foreach (string scriptName in new[]
+        {
+            "Export-FinalOwnerExecutionBlockerLedger.ps1",
+            "Export-FinalOwnerExecutionChecklist.ps1",
+            "Export-FinalOwnerExecutionExternalResultInputContract.ps1",
+            "Export-FinalOwnerExecutionInputSkeleton.ps1",
+            "Export-FinalOwnerExecutionOwnerInputDraft.ps1",
+            "Export-FinalOwnerExecutionRealInputTemplate.ps1",
+            "Export-FinalOwnerExecutionRepairChecklist.ps1",
+            "Export-FinalOwnerExecutionRepairInputSkeleton.ps1",
+            "Export-FinalOwnerRealProofExecutionPackage.ps1",
+            "Export-FinalOwnerRealProofGapMatrix.ps1",
+            "Export-FinalPostPublishCleanConsumerProofRecordContract.ps1",
+            "Export-FinalReleaseCloseOwnerApprovalContract.ps1",
+            "Import-FinalOwnerExecutionExternalResultCandidate.ps1",
+            "Import-FinalOwnerExecutionRealInput.ps1",
+            "Import-FinalPostPublishCleanConsumerProofCandidate.ps1",
+            "Import-FinalReleaseCloseOwnerApprovalCandidate.ps1",
+            "Test-FinalOwnerExecutionBlockerLedger.ps1",
+            "Test-FinalOwnerExecutionChecklist.ps1",
+            "Test-FinalOwnerExecutionCloseReadinessFromRealInput.ps1",
+            "Test-FinalOwnerExecutionExternalResultCandidate.ps1",
+            "Test-FinalOwnerExecutionExternalResultInputContract.ps1",
+            "Test-FinalOwnerExecutionExternalResultInputPreflight.ps1",
+            "Test-FinalOwnerExecutionInputPreflight.ps1",
+            "Test-FinalOwnerExecutionInputSkeleton.ps1",
+            "Test-FinalOwnerExecutionOwnerInputDraft.ps1",
+            "Test-FinalOwnerExecutionRealInputImport.ps1",
+            "Test-FinalOwnerExecutionRealInputStrictPreflight.ps1",
+            "Test-FinalOwnerExecutionRealInputTemplate.ps1",
+            "Test-FinalOwnerExecutionRepairChecklist.ps1",
+            "Test-FinalOwnerExecutionRepairInputSkeleton.ps1",
+            "Test-FinalOwnerRealProofConvergenceGate.ps1",
+            "Test-FinalOwnerRealProofExecutionPackage.ps1",
+            "Test-FinalOwnerRealProofGapMatrix.ps1",
+            "Test-FinalPostPublishCleanConsumerProofCandidate.ps1",
+            "Test-FinalPostPublishCleanConsumerProofPreflight.ps1",
+            "Test-FinalPostPublishCleanConsumerProofRecordContract.ps1",
+            "Test-FinalReleaseCloseOwnerApprovalCandidate.ps1",
+            "Test-FinalReleaseCloseOwnerApprovalContract.ps1",
+            "Test-FinalReleaseCloseOwnerApprovalPreflight.ps1"
+        })
+        {
+            string scriptPath = Path.Combine(RepositoryPaths.Root, "eng", scriptName);
+            string script = File.ReadAllText(scriptPath);
+
+            Assert.Contains("function Write-Utf8File", script, StringComparison.Ordinal);
+            Assert.Contains("[System.IO.File]::Replace", script, StringComparison.Ordinal);
+            Assert.Contains("for ($attempt = 1; $attempt -le 10; $attempt++)", script, StringComparison.Ordinal);
+            Assert.DoesNotContain("WriteAllText($LiteralPath", script, StringComparison.Ordinal);
+            Assert.DoesNotContain("Set-Content -LiteralPath $jsonPath", script, StringComparison.Ordinal);
+            Assert.DoesNotContain("Set-Content -LiteralPath $templateJsonPath", script, StringComparison.Ordinal);
+            Assert.DoesNotContain("Set-Content -LiteralPath $exampleJsonPath", script, StringComparison.Ordinal);
+        }
+    }
 }
