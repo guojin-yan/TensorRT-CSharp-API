@@ -13,6 +13,8 @@ public sealed class ReleaseQualityGateWorkflowTests
         string workflow = ReadSource(".github", "workflows", "release-quality-gate.yml");
 
         Assert.Contains("permissions:\n  contents: read", Normalize(workflow), StringComparison.Ordinal);
+        Assert.Contains("push:", workflow, StringComparison.Ordinal);
+        Assert.Contains("- TensorRtSharp4.0", workflow, StringComparison.Ordinal);
         Assert.Contains("source-quality:", workflow, StringComparison.Ordinal);
         Assert.Contains("run_release_artifact_audit", workflow, StringComparison.Ordinal);
         Assert.Contains("run_split_package_build", workflow, StringComparison.Ordinal);
@@ -25,6 +27,12 @@ public sealed class ReleaseQualityGateWorkflowTests
         Assert.Contains("artifact_name: package-managed-dry-run", workflow, StringComparison.Ordinal);
         Assert.Contains("Export-GitHubActionsPackageValidationAudit.ps1", workflow, StringComparison.Ordinal);
         Assert.Contains("github-actions-package-validation-audit.*", workflow, StringComparison.Ordinal);
+        Assert.Contains("Run bounded ProjectQuality shard smoke", workflow, StringComparison.Ordinal);
+        Assert.Contains("Invoke-ProjectQualityTestShards.ps1", workflow, StringComparison.Ordinal);
+        Assert.Contains("-Shard N-S", workflow, StringComparison.Ordinal);
+        Assert.Contains("PluginRegistryInventory|PluginCreatorApiLanguageReadonly|PublicApiHandleExposureAudit|ReleaseQualityGateWorkflow", workflow, StringComparison.Ordinal);
+        Assert.Contains("artifacts/test-analysis/project-quality-test-inventory.*", workflow, StringComparison.Ordinal);
+        Assert.Contains("artifacts/test-analysis/project-quality-shards/**", workflow, StringComparison.Ordinal);
         Assert.Contains("Record split runner availability", workflow, StringComparison.Ordinal);
         Assert.Contains("continue-on-error: true", workflow, StringComparison.Ordinal);
         Assert.Contains("GH_TOKEN: ${{ github.token }}", workflow, StringComparison.Ordinal);
@@ -83,6 +91,12 @@ public sealed class ReleaseQualityGateWorkflowTests
         JsonElement[] checks = root.GetProperty("checks").EnumerateArray().ToArray();
         Assert.Contains(checks, static check =>
             check.GetProperty("id").GetString() == "workflow-no-publish-side-effects" &&
+            check.GetProperty("passed").GetBoolean());
+        Assert.Contains(checks, static check =>
+            check.GetProperty("id").GetString() == "workflow-push-current-branch" &&
+            check.GetProperty("passed").GetBoolean());
+        Assert.Contains(checks, static check =>
+            check.GetProperty("id").GetString() == "workflow-project-quality-shard-smoke" &&
             check.GetProperty("passed").GetBoolean());
         Assert.Contains(checks, static check =>
             check.GetProperty("id").GetString() == "split-manifest-component-roles" &&

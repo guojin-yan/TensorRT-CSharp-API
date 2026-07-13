@@ -16,6 +16,7 @@ on:
   push:
     branches:
       - main
+      - TensorRtSharp4.0
     paths:
       - ".github/workflows/**"
       - "eng/**"
@@ -105,6 +106,16 @@ jobs:
             --logger "trx;LogFileName=release-quality-gate.trx" `
             --results-directory .\artifacts\release-quality-gate\test-results
 
+      - name: Run bounded ProjectQuality shard smoke
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Invoke-ProjectQualityTestShards.ps1 `
+            -RefreshInventory `
+            -Shard N-S `
+            -ClassNamePattern "PluginRegistryInventory|PluginCreatorApiLanguageReadonly|PublicApiHandleExposureAudit|ReleaseQualityGateWorkflow" `
+            -TimeoutSeconds 300 `
+            -RunId ci-release-critical-shard
+
       - name: Refresh source-only machine summary
         shell: pwsh
         run: |
@@ -131,6 +142,8 @@ jobs:
           path: |
             artifacts/release-quality-gate/**
             artifacts/runner-availability/**
+            artifacts/test-analysis/project-quality-test-inventory.*
+            artifacts/test-analysis/project-quality-shards/**
             artifacts/interface-coverage/tensorrt-interface-comparison.csv
             artifacts/interface-coverage/deferred-candidate-safety-triage.json
             artifacts/final-release/github-actions-package-validation-audit.*
