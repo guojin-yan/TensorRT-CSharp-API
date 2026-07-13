@@ -36,7 +36,7 @@ public sealed class ReleaseQualityGateWorkflowTests
         Assert.Contains("Run bounded ProjectQuality shard smoke", workflow, StringComparison.Ordinal);
         Assert.Contains("Invoke-ProjectQualityTestShards.ps1", workflow, StringComparison.Ordinal);
         Assert.Contains("-Shard N-S", workflow, StringComparison.Ordinal);
-        Assert.Contains("PluginRegistryInventory|PluginCreatorApiLanguageReadonly|PublicApiHandleExposureAudit|ReleaseQualityGateWorkflow", workflow, StringComparison.Ordinal);
+        Assert.Contains("PluginInventorySourceOnlySmoke|PublicApiHandleExposureAudit|ReleaseQualityGateWorkflow", workflow, StringComparison.Ordinal);
         Assert.Contains("artifacts/test-analysis/project-quality-test-inventory.*", workflow, StringComparison.Ordinal);
         Assert.Contains("artifacts/test-analysis/project-quality-shards/**", workflow, StringComparison.Ordinal);
         Assert.Contains("Record split runner availability", workflow, StringComparison.Ordinal);

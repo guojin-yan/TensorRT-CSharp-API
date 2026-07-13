@@ -124,7 +124,7 @@ Add-Check -Id "workflow-source-only-test-filter" -Passed (
 Add-Check -Id "workflow-project-quality-shard-smoke" -Passed (
   $workflow.Contains("Invoke-ProjectQualityTestShards.ps1", [StringComparison]::Ordinal) -and
   $workflow.Contains("-Shard N-S", [StringComparison]::Ordinal) -and
-  $workflow.Contains("PluginRegistryInventory|PluginCreatorApiLanguageReadonly|PublicApiHandleExposureAudit|ReleaseQualityGateWorkflow", [StringComparison]::Ordinal) -and
+  $workflow.Contains("PluginInventorySourceOnlySmoke|PublicApiHandleExposureAudit|ReleaseQualityGateWorkflow", [StringComparison]::Ordinal) -and
   $workflow.Contains("artifacts/test-analysis/project-quality-shards/**", [StringComparison]::Ordinal)
 ) -Required $true -Detail "Workflow must execute a bounded ProjectQuality shard smoke and archive shard evidence."
 Add-Check -Id "workflow-opt-in-large-jobs" -Passed (

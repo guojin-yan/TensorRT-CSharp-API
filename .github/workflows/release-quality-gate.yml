@@ -112,7 +112,7 @@ jobs:
           pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Invoke-ProjectQualityTestShards.ps1 `
             -RefreshInventory `
             -Shard N-S `
-            -ClassNamePattern "PluginRegistryInventory|PluginCreatorApiLanguageReadonly|PublicApiHandleExposureAudit|ReleaseQualityGateWorkflow" `
+            -ClassNamePattern "PluginInventorySourceOnlySmoke|PublicApiHandleExposureAudit|ReleaseQualityGateWorkflow" `
             -TimeoutSeconds 300 `
             -RunId ci-release-critical-shard
 
