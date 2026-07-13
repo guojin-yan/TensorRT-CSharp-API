@@ -203,9 +203,25 @@ public sealed class PackageDryRunDispatchAndReadinessMatrixTests
             AssertLane(lanes, "clean-external-package-consumer-runtime", ready: false);
             AssertLane(lanes, "post-publish-clean-consumer-proof", ready: false);
 
+            JsonElement publicDownloadLane = Assert.Single(lanes, item => item.GetProperty("id").GetString() == "public-package-download");
+            Assert.Equal("eng\\Test-PublicPackageDownloadProofInput.ps1 -Strict", publicDownloadLane.GetProperty("validatorPath").GetString());
+            Assert.Contains("Public NuGet/GitHub Packages package URLs", publicDownloadLane.GetProperty("requiredEvidence").GetString(), StringComparison.Ordinal);
+            Assert.Equal(0, publicDownloadLane.GetProperty("failedBlockerCount").GetInt32());
+            Assert.Equal(1, publicDownloadLane.GetProperty("failedActionRequiredCount").GetInt32());
+            Assert.False(publicDownloadLane.GetProperty("canPromotePublicProof").GetBoolean());
+
+            JsonElement runtimeLane = Assert.Single(lanes, item => item.GetProperty("id").GetString() == "clean-external-package-consumer-runtime");
+            Assert.Equal("eng\\Test-PackageConsumerRuntimeProofOwnerInput.ps1 -Strict", runtimeLane.GetProperty("validatorPath").GetString());
+            Assert.False(runtimeLane.GetProperty("canPromoteRuntimeProof").GetBoolean());
+
+            JsonElement postPublishLane = Assert.Single(lanes, item => item.GetProperty("id").GetString() == "post-publish-clean-consumer-proof");
+            Assert.Equal("eng\\Test-PostPublishCleanConsumerProofResult.ps1 -Strict", postPublishLane.GetProperty("validatorPath").GetString());
+            Assert.False(postPublishLane.GetProperty("canPromotePostPublishProof").GetBoolean());
+
             string markdown = File.ReadAllText(matrixMarkdownPath);
             Assert.Contains("Pre-Release Package Proof Readiness Matrix", markdown, StringComparison.Ordinal);
             Assert.Contains("blocked-real-public-package-and-runtime-proof-required", markdown, StringComparison.Ordinal);
+            Assert.Contains("Validator", markdown, StringComparison.Ordinal);
         }
         finally
         {
@@ -224,6 +240,11 @@ public sealed class PackageDryRunDispatchAndReadinessMatrixTests
         Assert.False(lane.GetProperty("canPublishPublicly").GetBoolean());
         Assert.False(lane.GetProperty("canCloseReleaseIssue").GetBoolean());
         Assert.False(lane.GetProperty("canPromoteProof").GetBoolean());
+        Assert.False(lane.GetProperty("canPromotePublicProof").GetBoolean());
+        Assert.False(lane.GetProperty("canPromoteRuntimeProof").GetBoolean());
+        Assert.False(lane.GetProperty("canPromotePostPublishProof").GetBoolean());
+        Assert.False(string.IsNullOrWhiteSpace(lane.GetProperty("requiredEvidence").GetString()));
+        Assert.False(string.IsNullOrWhiteSpace(lane.GetProperty("validatorPath").GetString()));
     }
 
     private static void WriteBlockedPreflight(string path)

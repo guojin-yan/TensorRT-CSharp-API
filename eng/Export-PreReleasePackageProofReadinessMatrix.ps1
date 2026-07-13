@@ -100,8 +100,14 @@ function New-Lane {
     [string]$State,
     [bool]$Ready,
     [string]$SourceArtifact,
-    [string]$RequiredProof,
-    [string]$BlockedReason
+    [string]$RequiredEvidence,
+    [string]$BlockedReason,
+    [string]$ValidatorPath,
+    [int]$FailedBlockerCount = 0,
+    [int]$FailedActionRequiredCount = 0,
+    [bool]$CanPromotePublicProof = $false,
+    [bool]$CanPromoteRuntimeProof = $false,
+    [bool]$CanPromotePostPublishProof = $false
   )
 
   [pscustomobject]@{
@@ -110,15 +116,43 @@ function New-Lane {
     state = $State
     ready = $Ready
     sourceArtifact = $SourceArtifact
-    requiredProof = $RequiredProof
+    requiredEvidence = $RequiredEvidence
+    requiredProof = $RequiredEvidence
     blockedReason = $BlockedReason
+    validatorPath = $ValidatorPath
+    failedBlockerCount = $FailedBlockerCount
+    failedActionRequiredCount = $FailedActionRequiredCount
     performsPublish = $false
-    canPromoteProof = $false
+    canPromotePublicProof = $CanPromotePublicProof
+    canPromoteRuntimeProof = $CanPromoteRuntimeProof
+    canPromotePostPublishProof = $CanPromotePostPublishProof
+    canPromoteProof = $CanPromotePublicProof -or $CanPromoteRuntimeProof -or $CanPromotePostPublishProof
     canPublishPublicly = $false
     canCloseReleaseIssue = $false
     isPackageConsumerRuntimeProof = $false
     isPostPublishProof = $false
   }
+}
+
+function Get-ValidationBlockedReason {
+  param(
+    [AllowNull()][object]$Validation,
+    [string]$MissingReason,
+    [string]$ReadyReason = "none"
+  )
+
+  if ($null -eq $Validation) {
+    return $MissingReason
+  }
+
+  $state = [string](Get-PropertyOrDefault -Object $Validation -Name "validationState" -DefaultValue "")
+  $failedBlockers = [int](Get-PropertyOrDefault -Object $Validation -Name "failedBlockerCount" -DefaultValue 0)
+  $failedActionRequired = [int](Get-PropertyOrDefault -Object $Validation -Name "failedActionRequiredCount" -DefaultValue 0)
+  if ($failedBlockers -eq 0 -and $failedActionRequired -eq 0) {
+    return $ReadyReason
+  }
+
+  return "validationState=$state; failedBlockerCount=$failedBlockers; failedActionRequiredCount=$failedActionRequired"
 }
 
 $sourceQualityValidation = Read-JsonOrNull -Path $SourceQualityEvidenceValidationPath
@@ -138,14 +172,17 @@ $consumerRuntimeReady = Get-BoolPropertyOrDefault -Object $consumerRuntimeValida
 $postPublishReady = Get-BoolPropertyOrDefault -Object $postPublishValidation -Name "postPublishProofReady" -DefaultValue $false
 $sourceQualityBlockedReason = if ($sourceQualityReady) { "none" } else { "Current source-quality evidence is missing or not ready." }
 $dispatchPackBlockedReason = if ($dispatchPackReadyForOwner) { "none; still not proof" } else { "Owner dispatch pack has not been generated or validated." }
+$publicDownloadBlockedReason = Get-ValidationBlockedReason -Validation $publicDownloadValidation -MissingReason "Public package download validator output is missing; real public package URL/download/hash owner evidence is required."
+$consumerRuntimeBlockedReason = Get-ValidationBlockedReason -Validation $consumerRuntimeValidation -MissingReason "Package consumer runtime owner input validation is missing; clean external consumer runtime evidence is required."
+$postPublishBlockedReason = Get-ValidationBlockedReason -Validation $postPublishValidation -MissingReason "Post-publish proof validation is missing; real published package clean consumer evidence is required."
 
 $lanes = @(
-  New-Lane -Id "source-quality-ci" -Title "Source-quality CI evidence" -State ([string](Get-PropertyOrDefault -Object $sourceQualityValidation -Name "validationState" -DefaultValue "missing-source-quality-validation")) -Ready $sourceQualityReady -SourceArtifact $SourceQualityEvidenceValidationPath -RequiredProof "Successful source-quality run for current HEAD; source-quality only and not package proof." -BlockedReason $sourceQualityBlockedReason
-  New-Lane -Id "current-head-package-dry-run" -Title "Current HEAD package-managed dry-run" -State ([string](Get-PropertyOrDefault -Object $packageDryRunPreflight -Name "state" -DefaultValue "missing-current-head-package-dry-run-preflight")) -Ready $packageDryRunReady -SourceArtifact $CurrentHeadPackageDryRunPreflightPath -RequiredProof "workflow_dispatch package-managed dry-run for current HEAD with publish flags disabled, imported and validated from run artifacts." -BlockedReason ([string](Get-PropertyOrDefault -Object $packageDryRunPreflight -Name "blockedReason" -DefaultValue "Owner authorization and current-head dry-run run are required."))
-  New-Lane -Id "owner-dispatch-pack" -Title "Owner non-publish dry-run dispatch pack" -State ([string](Get-PropertyOrDefault -Object $dispatchPackValidation -Name "validationState" -DefaultValue "missing-current-head-package-dry-run-owner-dispatch-pack-validation")) -Ready $dispatchPackReadyForOwner -SourceArtifact $DispatchPackValidationPath -RequiredProof "Owner-reviewed command pack only; executing it still requires explicit Owner action and later artifact import." -BlockedReason $dispatchPackBlockedReason
-  New-Lane -Id "public-package-download" -Title "Public package download proof" -State ([string](Get-PropertyOrDefault -Object $publicDownloadValidation -Name "validationState" -DefaultValue "missing-public-package-download-proof-input-validation")) -Ready $publicDownloadReady -SourceArtifact $PublicPackageDownloadProofInputValidationPath -RequiredProof "Public NuGet/GitHub Packages package URLs, downloaded nupkg hashes, and source proof linkage." -BlockedReason "Public package publication/download evidence is still owner-action-required."
-  New-Lane -Id "clean-external-package-consumer-runtime" -Title "Clean external package consumer runtime proof" -State ([string](Get-PropertyOrDefault -Object $consumerRuntimeValidation -Name "validationState" -DefaultValue "missing-package-consumer-runtime-owner-input-validation")) -Ready $consumerRuntimeReady -SourceArtifact $PackageConsumerRuntimeOwnerInputValidationPath -RequiredProof "Repository-external clean consumer restore/build/runtime smoke logs with public package source, hash-matched packages, host metadata, and no ProjectReference/local feed/direct nupkg." -BlockedReason ([string](Get-PropertyOrDefault -Object $consumerRuntimeValidation -Name "ownerInputBlockedReason" -DefaultValue "Owner clean consumer runtime input is incomplete."))
-  New-Lane -Id "post-publish-clean-consumer-proof" -Title "Post-publish clean consumer proof" -State ([string](Get-PropertyOrDefault -Object $postPublishValidation -Name "validationState" -DefaultValue "missing-post-publish-proof-validation")) -Ready $postPublishReady -SourceArtifact $PostPublishProofValidationPath -RequiredProof "After actual public publication, separate clean consumer install/run proof from public channel." -BlockedReason "Post-publish proof cannot be completed before publication and public package download evidence."
+  New-Lane -Id "source-quality-ci" -Title "Source-quality CI evidence" -State ([string](Get-PropertyOrDefault -Object $sourceQualityValidation -Name "validationState" -DefaultValue "missing-source-quality-validation")) -Ready $sourceQualityReady -SourceArtifact $SourceQualityEvidenceValidationPath -RequiredEvidence "Successful source-quality run for current HEAD; source-quality only and not package proof." -BlockedReason $sourceQualityBlockedReason -ValidatorPath "eng\Test-GitHubActionsRunEvidenceImport.ps1 -Strict" -FailedBlockerCount ([int](Get-PropertyOrDefault -Object $sourceQualityValidation -Name "failedBlockerCount" -DefaultValue 0)) -FailedActionRequiredCount ([int](Get-PropertyOrDefault -Object $sourceQualityValidation -Name "failedActionRequiredCount" -DefaultValue 0))
+  New-Lane -Id "current-head-package-dry-run" -Title "Current HEAD package-managed dry-run" -State ([string](Get-PropertyOrDefault -Object $packageDryRunPreflight -Name "state" -DefaultValue "missing-current-head-package-dry-run-preflight")) -Ready $packageDryRunReady -SourceArtifact $CurrentHeadPackageDryRunPreflightPath -RequiredEvidence "workflow_dispatch package-managed dry-run for current HEAD with publish flags disabled, imported and validated from run artifacts." -BlockedReason ([string](Get-PropertyOrDefault -Object $packageDryRunPreflight -Name "blockedReason" -DefaultValue "Owner authorization and current-head dry-run run are required.")) -ValidatorPath "eng\Export-CurrentHeadPackageDryRunPreflight.ps1"
+  New-Lane -Id "owner-dispatch-pack" -Title "Owner non-publish dry-run dispatch pack" -State ([string](Get-PropertyOrDefault -Object $dispatchPackValidation -Name "validationState" -DefaultValue "missing-current-head-package-dry-run-owner-dispatch-pack-validation")) -Ready $dispatchPackReadyForOwner -SourceArtifact $DispatchPackValidationPath -RequiredEvidence "Owner-reviewed command pack only; executing it still requires explicit Owner action and later artifact import." -BlockedReason $dispatchPackBlockedReason -ValidatorPath "eng\Test-CurrentHeadPackageDryRunOwnerDispatchPack.ps1 -Strict" -FailedBlockerCount ([int](Get-PropertyOrDefault -Object $dispatchPackValidation -Name "failedBlockerCount" -DefaultValue 1)) -FailedActionRequiredCount ([int](Get-PropertyOrDefault -Object $dispatchPackValidation -Name "failedActionRequiredCount" -DefaultValue 1))
+  New-Lane -Id "public-package-download" -Title "Public package download proof" -State ([string](Get-PropertyOrDefault -Object $publicDownloadValidation -Name "validationState" -DefaultValue "missing-public-package-download-proof-input-validation")) -Ready $publicDownloadReady -SourceArtifact $PublicPackageDownloadProofInputValidationPath -RequiredEvidence "Public NuGet/GitHub Packages package URLs, downloaded nupkg hashes, and source proof linkage." -BlockedReason $publicDownloadBlockedReason -ValidatorPath "eng\Test-PublicPackageDownloadProofInput.ps1 -Strict" -FailedBlockerCount ([int](Get-PropertyOrDefault -Object $publicDownloadValidation -Name "failedBlockerCount" -DefaultValue 0)) -FailedActionRequiredCount ([int](Get-PropertyOrDefault -Object $publicDownloadValidation -Name "failedActionRequiredCount" -DefaultValue 1)) -CanPromotePublicProof $publicDownloadReady
+  New-Lane -Id "clean-external-package-consumer-runtime" -Title "Clean external package consumer runtime proof" -State ([string](Get-PropertyOrDefault -Object $consumerRuntimeValidation -Name "validationState" -DefaultValue "missing-package-consumer-runtime-owner-input-validation")) -Ready $consumerRuntimeReady -SourceArtifact $PackageConsumerRuntimeOwnerInputValidationPath -RequiredEvidence "Repository-external clean consumer restore/build/runtime smoke logs with public package source, hash-matched packages, host metadata, and no ProjectReference/local feed/direct nupkg." -BlockedReason $consumerRuntimeBlockedReason -ValidatorPath "eng\Test-PackageConsumerRuntimeProofOwnerInput.ps1 -Strict" -FailedBlockerCount ([int](Get-PropertyOrDefault -Object $consumerRuntimeValidation -Name "failedBlockerCount" -DefaultValue 0)) -FailedActionRequiredCount ([int](Get-PropertyOrDefault -Object $consumerRuntimeValidation -Name "failedActionRequiredCount" -DefaultValue 1)) -CanPromoteRuntimeProof $consumerRuntimeReady
+  New-Lane -Id "post-publish-clean-consumer-proof" -Title "Post-publish clean consumer proof" -State ([string](Get-PropertyOrDefault -Object $postPublishValidation -Name "validationState" -DefaultValue "missing-post-publish-proof-validation")) -Ready $postPublishReady -SourceArtifact $PostPublishProofValidationPath -RequiredEvidence "After actual public publication, separate clean consumer install/run proof from public channel." -BlockedReason $postPublishBlockedReason -ValidatorPath "eng\Test-PostPublishCleanConsumerProofResult.ps1 -Strict" -FailedBlockerCount ([int](Get-PropertyOrDefault -Object $postPublishValidation -Name "failedBlockerCount" -DefaultValue 0)) -FailedActionRequiredCount ([int](Get-PropertyOrDefault -Object $postPublishValidation -Name "failedActionRequiredCount" -DefaultValue 1)) -CanPromotePostPublishProof $postPublishReady
 )
 
 $readyLanes = @($lanes | Where-Object { $_.ready })
@@ -194,7 +231,7 @@ New-Item -ItemType Directory -Force -Path ([IO.Path]::GetDirectoryName($resolved
 $matrix | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $resolvedOutputPath -Encoding utf8
 
 $laneRows = $matrix.lanes | ForEach-Object {
-  "| ``$(ConvertTo-MarkdownCell $_.id)`` | $(ConvertTo-MarkdownCell $_.title) | ``$($_.state)`` | ``$($_.ready)`` | $(ConvertTo-MarkdownCell $_.blockedReason) |"
+  "| ``$(ConvertTo-MarkdownCell $_.id)`` | $(ConvertTo-MarkdownCell $_.title) | ``$($_.state)`` | ``$($_.ready)`` | ``$($_.failedBlockerCount)`` | ``$($_.failedActionRequiredCount)`` | ``$(ConvertTo-MarkdownCell $_.validatorPath)`` | $(ConvertTo-MarkdownCell $_.blockedReason) |"
 }
 
 $markdown = @"
@@ -220,8 +257,8 @@ $markdown = @"
 
 ## Lanes
 
-| ID | Title | State | Ready | Blocked Reason |
-|---|---|---|---|---|
+| ID | Title | State | Ready | Blockers | Action Required | Validator | Blocked Reason |
+|---|---|---|---|---:|---:|---|---|
 $($laneRows -join "`r`n")
 
 ## Safety Boundary
