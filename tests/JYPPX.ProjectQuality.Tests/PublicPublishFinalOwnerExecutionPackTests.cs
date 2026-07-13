@@ -1,4 +1,6 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization.Metadata;
 using Xunit;
 
 namespace JYPPX.ProjectQuality.Tests;
@@ -6,6 +8,12 @@ namespace JYPPX.ProjectQuality.Tests;
 [Collection("ReleaseCloseProofArtifacts")]
 public sealed class PublicPublishFinalOwnerExecutionPackTests
 {
+    private static readonly JsonSerializerOptions IndentedJsonOptions = new()
+    {
+        WriteIndented = true,
+        TypeInfoResolver = new DefaultJsonTypeInfoResolver(),
+    };
+
     [Fact]
     public void FinalOwnerExecutionPackArtifactsStayBlockedNonProof()
     {
@@ -32,7 +40,22 @@ public sealed class PublicPublishFinalOwnerExecutionPackTests
         Assert.Equal("blocked-release-issue-close-owner-decision-input-required", decision.GetProperty("validationState").GetString());
         Assert.Equal(0, decision.GetProperty("failedBlockerCount").GetInt32());
         Assert.True(decision.GetProperty("failedActionRequiredCount").GetInt32() > 0);
+        Assert.Equal("blocked-final-public-release-closure-real-owner-proof-required", decision.GetProperty("finalPublicReleaseClosureBridgeValidationState").GetString());
+        Assert.Equal(9, decision.GetProperty("closureLaneCount").GetInt32());
+        Assert.True(decision.GetProperty("closureBlockedLaneCount").GetInt32() > 0);
+        Assert.False(decision.GetProperty("postPublishProofCandidateReady").GetBoolean());
+        Assert.False(decision.GetProperty("postPublishProofSourceLinkageReady").GetBoolean());
         AssertFalseProofPublishCloseFlags(decision);
+
+        string[] decisionValidationItemIds = decision.GetProperty("validationItems")
+            .EnumerateArray()
+            .Select(static item => item.GetProperty("id").GetString()!)
+            .ToArray();
+        Assert.Contains("final-public-release-closure-bridge-hash", decisionValidationItemIds);
+        Assert.Contains("final-bridge-lane-count-match", decisionValidationItemIds);
+        Assert.Contains("final-bridge-ready-before-close", decisionValidationItemIds);
+        Assert.Contains("post-publish-source-proof-linkage-ready", decisionValidationItemIds);
+        Assert.Contains("public-package-sha-match", decisionValidationItemIds);
 
         using JsonDocument freezeAuditDocument = ReadFinalReleaseJson("final-evidence-freeze-non-proof-audit-validation.json");
         JsonElement freezeAudit = freezeAuditDocument.RootElement;
@@ -123,12 +146,58 @@ public sealed class PublicPublishFinalOwnerExecutionPackTests
         Assert.Contains("final-evidence-freeze-non-proof-audit", releaseEvidenceDoc, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void ReleaseIssueCloseOwnerDecisionRejectsApprovedCloseWhenFinalBridgeIsStillBlocked()
+    {
+        RunPowerShell("Export-FinalPublicReleaseClosureBridge.ps1");
+        RunPowerShell("Test-FinalPublicReleaseClosureBridge.ps1", "-Strict");
+        RunPowerShell("Export-ReleaseIssueCloseOwnerDecisionInput.ps1");
+
+        string templatePath = Path.Combine(RepositoryPaths.Root, "artifacts", "final-release", "release-issue-close-owner-decision-input.template.json");
+        JsonObject input = JsonNode.Parse(File.ReadAllText(templatePath))!.AsObject();
+        input["ownerDecisionInputState"] = "owner-filled-release-issue-close-owner-decision-input";
+        input["ownerName"] = "owner";
+        input["ownerEmail"] = "owner@example.com";
+        input["ownerDecisionTimestampUtc"] = DateTimeOffset.UtcNow.ToString("O");
+        input["releaseIssueUrl"] = "https://github.com/guojin-yan/TensorRT-CSharp-API/issues/1";
+        input["releaseIssueNumber"] = "1";
+        input["selectedChannel"] = "nuget.org";
+        input["approvedPublicPackageProofHash"] = new string('a', 64);
+        input["approvedPostPublishProofHash"] = new string('b', 64);
+        input["rollbackPlan"] = "Owner will unlist packages and republish after blocker repair.";
+        input["rollbackOwner"] = "owner";
+        input["rollbackTrigger"] = "Critical post-publish runtime regression.";
+        input["knownLimitationsAcknowledgement"] = "Known limitations reviewed.";
+        input["finalCloseDecision"] = "approved-close-release-issue";
+        input["closureLaneCount"] = 99;
+
+        string misusePath = Path.Combine(RepositoryPaths.Root, "artifacts", "final-release", "release-issue-close-owner-decision-input.misuse.json");
+        File.WriteAllText(misusePath, input.ToJsonString(IndentedJsonOptions));
+
+        RunPowerShell(
+            "Test-ReleaseIssueCloseOwnerDecisionInput.ps1",
+            "-InputPath",
+            "artifacts/final-release/release-issue-close-owner-decision-input.misuse.json");
+
+        using JsonDocument validationDocument = ReadFinalReleaseJson("release-issue-close-owner-decision-input-validation.json");
+        JsonElement validation = validationDocument.RootElement;
+        Assert.Equal("invalid-release-issue-close-owner-decision-input", validation.GetProperty("validationState").GetString());
+        Assert.True(validation.GetProperty("failedBlockerCount").GetInt32() > 0);
+        Assert.False(validation.GetProperty("canCloseReleaseIssue").GetBoolean());
+
+        AssertValidationItemFailed(validation, "approved-close-requires-ready-final-bridge", "blocker");
+        AssertValidationItemFailed(validation, "approved-close-requires-post-publish-source-linkage", "blocker");
+        AssertValidationItemFailed(validation, "final-bridge-lane-count-match", "blocker");
+    }
+
     private static void RunFinalOwnerExecutionPipeline()
     {
         RunPowerShell("Export-PublicPublishFinalOwnerExecutionPack.ps1");
         RunPowerShell("Test-PublicPublishFinalOwnerExecutionPack.ps1", "-Strict");
         RunPowerShell("Export-PublicPublishCommandCrossCheck.ps1");
         RunPowerShell("Test-PublicPublishCommandCrossCheck.ps1", "-Strict");
+        RunPowerShell("Export-FinalPublicReleaseClosureBridge.ps1");
+        RunPowerShell("Test-FinalPublicReleaseClosureBridge.ps1", "-Strict");
         RunPowerShell("Export-ReleaseIssueCloseOwnerDecisionInput.ps1");
         RunPowerShell("Test-ReleaseIssueCloseOwnerDecisionInput.ps1", "-Strict");
         RunPowerShell("Export-FinalEvidenceFreezeNonProofAudit.ps1");
@@ -181,6 +250,16 @@ public sealed class PublicPublishFinalOwnerExecutionPackTests
             item.GetProperty("id").GetString() == id &&
             item.GetProperty("passed").GetBoolean() == false &&
             item.GetProperty("hasNonProofBoundary").GetBoolean());
+    }
+
+    private static void AssertValidationItemFailed(JsonElement validation, string id, string severity)
+    {
+        JsonElement item = validation.GetProperty("validationItems")
+            .EnumerateArray()
+            .Single(candidate => candidate.GetProperty("id").GetString() == id);
+
+        Assert.False(item.GetProperty("passed").GetBoolean());
+        Assert.Equal(severity, item.GetProperty("severity").GetString());
     }
 
     private static void RunPowerShell(string scriptName, params string[] arguments)
