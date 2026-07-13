@@ -69,6 +69,37 @@ public sealed class ReleaseQualityGateWorkflowTests
     }
 
     [Fact]
+    public void PackageDryRunRequiresManualDispatchAndDisabledPublishFlags()
+    {
+        string workflow = Normalize(ReadSource(".github", "workflows", "release-quality-gate.yml"));
+        string packageManagedWorkflow = Normalize(ReadSource(".github", "workflows", "package-managed.yml"));
+        string remoteBundleScript = ReadSource("eng", "Invoke-RemoteReleaseBundle.ps1");
+
+        Assert.Contains("workflow_dispatch:", workflow, StringComparison.Ordinal);
+        Assert.Contains("run_package_managed_dry_run:", workflow, StringComparison.Ordinal);
+        Assert.Contains("default: false", workflow, StringComparison.Ordinal);
+        Assert.Contains("package-managed-dry-run:", workflow, StringComparison.Ordinal);
+        Assert.Contains("if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_package_managed_dry_run }}", workflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("package-managed-dry-run:\n    if: ${{ github.event_name == 'push'", workflow, StringComparison.Ordinal);
+        Assert.Contains("publish_to_nuget: false", workflow, StringComparison.Ordinal);
+        Assert.Contains("publish_to_github_packages: false", workflow, StringComparison.Ordinal);
+        Assert.Contains("attach_to_github_release: false", workflow, StringComparison.Ordinal);
+        Assert.Contains("release_tag: \"\"", workflow, StringComparison.Ordinal);
+        Assert.Contains("artifact_name: package-managed-dry-run", workflow, StringComparison.Ordinal);
+
+        Assert.Contains("publish_to_nuget:", packageManagedWorkflow, StringComparison.Ordinal);
+        Assert.Contains("publish_to_github_packages:", packageManagedWorkflow, StringComparison.Ordinal);
+        Assert.True(CountOccurrences(packageManagedWorkflow, "default: false") >= 4);
+        Assert.Contains("if: ${{ inputs.publish_to_nuget }}", packageManagedWorkflow, StringComparison.Ordinal);
+        Assert.Contains("if: ${{ inputs.publish_to_github_packages }}", packageManagedWorkflow, StringComparison.Ordinal);
+
+        Assert.Contains("[object]$PublishManagedToNuGet = $false", remoteBundleScript, StringComparison.Ordinal);
+        Assert.Contains("[object]$PublishRuntimeToGitHubPackages = $false", remoteBundleScript, StringComparison.Ordinal);
+        Assert.Contains("Add-WorkflowInput -ArgumentList $arguments -Name \"publish_managed_to_nuget\"", remoteBundleScript, StringComparison.Ordinal);
+        Assert.Contains("Add-WorkflowInput -ArgumentList $arguments -Name \"publish_managed_to_github_packages\"", remoteBundleScript, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void SourceQualityGateProducesMachineReadableNonProofSummary()
     {
         string script = Path.Combine(RepositoryPaths.Root, "eng", "Test-ReleaseQualityGate.ps1");

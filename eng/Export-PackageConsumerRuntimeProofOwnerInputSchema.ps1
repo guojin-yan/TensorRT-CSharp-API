@@ -45,13 +45,27 @@ function New-Field {
 
 $fields = @(
   New-Field -Name "recordKind" -Type "string" -ValidatorItemId "record-kind" -ProofRole "must be package-consumer-runtime-proof-owner-input"
-  New-Field -Name "sourceGitHubActionsRunEvidenceImportPath" -Type "file path" -ValidatorItemId "source-github-actions-run-evidence-import-present" -ProofRole "optional context pointing to imported GitHub Actions dry-run evidence; not proof" -Required $false -PlaceholderAllowed $true
+  New-Field -Name "currentHead" -Type "git SHA string" -ValidatorItemId "package-dry-run-current-head-match" -ProofRole "current source HEAD used to classify package dry-run evidence; not proof" -Required $false -PlaceholderAllowed $true
+  New-Field -Name "sourceQualityRunEvidenceImportPath" -Type "file path" -ValidatorItemId "source-quality-run-evidence-present" -ProofRole "optional context pointing to source-quality run evidence; source-quality is not proof for package dry-run or runtime" -Required $false -PlaceholderAllowed $true
+  New-Field -Name "sourceQualityRunId" -Type "string" -ValidatorItemId "source-quality-run-evidence-ready" -ProofRole "source-quality run id; not proof for package dry-run or runtime" -Required $false -PlaceholderAllowed $true
+  New-Field -Name "sourceQualityRunUrl" -Type "string" -ValidatorItemId "source-quality-run-evidence-ready" -ProofRole "source-quality run URL; not proof for package dry-run or runtime" -Required $false -PlaceholderAllowed $true
+  New-Field -Name "sourceQualityHeadSha" -Type "git SHA string" -ValidatorItemId "source-quality-current-head-match" -ProofRole "source-quality head SHA; not proof for package dry-run or runtime" -Required $false -PlaceholderAllowed $true
+  New-Field -Name "sourceQualityRunEvidenceReady" -Type "boolean" -ValidatorItemId "source-quality-run-evidence-ready" -ProofRole "true only for ready source-quality run evidence; not proof for package dry-run or runtime" -Required $false -PlaceholderAllowed $true
+  New-Field -Name "sourceGitHubActionsRunEvidenceImportPath" -Type "file path" -ValidatorItemId "source-github-actions-run-evidence-import-present" -ProofRole "legacy alias for package dry-run evidence path; source-quality evidence must not be used here; not proof" -Required $false -PlaceholderAllowed $true
+  New-Field -Name "packageDryRunEvidenceImportPath" -Type "file path" -ValidatorItemId "package-dry-run-evidence-present" -ProofRole "optional context pointing to imported package-managed dry-run evidence; not proof" -Required $false -PlaceholderAllowed $true
+  New-Field -Name "packageDryRunRunId" -Type "string" -ValidatorItemId "package-dry-run-evidence-present" -ProofRole "package dry-run run id; not proof and must match currentHead before current-head claim" -Required $false -PlaceholderAllowed $true
+  New-Field -Name "packageDryRunRunUrl" -Type "string" -ValidatorItemId "package-dry-run-evidence-present" -ProofRole "package dry-run run URL; not proof" -Required $false -PlaceholderAllowed $true
+  New-Field -Name "packageDryRunHeadSha" -Type "git SHA string" -ValidatorItemId "package-dry-run-current-head-match" -ProofRole "package dry-run head SHA; not proof unless it matches currentHead and all dry-run checks pass" -Required $false -PlaceholderAllowed $true
+  New-Field -Name "packageDryRunHeadMatchesCurrentHead" -Type "boolean" -ValidatorItemId "package-dry-run-current-head-match" -ProofRole "current-head match classifier for dry-run context; not proof by itself" -Required $false -PlaceholderAllowed $true
   New-Field -Name "sourceGitHubActionsRunId" -Type "string" -ValidatorItemId "source-github-actions-run-evidence-import-present" -ProofRole "GitHub Actions run id used only as dry-run context; not proof" -Required $false -PlaceholderAllowed $true
   New-Field -Name "sourceGitHubActionsRunUrl" -Type "string" -ValidatorItemId "source-github-actions-run-evidence-import-present" -ProofRole "GitHub Actions run URL used only as dry-run context; not proof" -Required $false -PlaceholderAllowed $true
   New-Field -Name "sourceHeadSha" -Type "git SHA string" -ValidatorItemId "source-github-actions-run-evidence-import-present" -ProofRole "head SHA from dry-run import; not proof and not a runtime proof claim" -Required $false -PlaceholderAllowed $true
   New-Field -Name "packageDryRunArtifactPath" -Type "file path" -ValidatorItemId "source-github-actions-dry-run-pack-claim-ready" -ProofRole "dry-run managed package artifact path; not proof and must not be reused as public managedNupkgPath" -Required $false -PlaceholderAllowed $true
   New-Field -Name "packageDryRunManagedNupkgSha256" -Type "sha256 hex string" -ValidatorItemId "source-github-actions-dry-run-pack-claim-ready" -ProofRole "dry-run managed nupkg hash for comparison only; not proof and not the downloaded public package hash" -Required $false -PlaceholderAllowed $true
   New-Field -Name "packageDryRunCanClaimPack" -Type "boolean" -ValidatorItemId "source-github-actions-dry-run-pack-claim-ready" -ProofRole "true only when imported run can claim package-managed dry-run pack success; not proof" -Required $false -PlaceholderAllowed $true
+  New-Field -Name "packageDryRunCanClaimCurrentHeadPack" -Type "boolean" -ValidatorItemId "package-dry-run-current-head-claim-ready" -ProofRole "true only when dry-run pack is claimable for currentHead; still not proof for public package or runtime" -Required $false -PlaceholderAllowed $true
+  New-Field -Name "packageDryRunRequiresOwnerAuthorization" -Type "boolean" -ValidatorItemId "package-dry-run-current-head-claim-ready" -ProofRole "true when owner must explicitly authorize workflow_dispatch dry-run; not proof" -Required $false -PlaceholderAllowed $true
+  New-Field -Name "manualWorkflowDispatchNotPerformed" -Type "boolean" -ValidatorItemId "package-dry-run-current-head-claim-ready" -ProofRole "records that this template did not trigger workflow_dispatch; not proof" -Required $false -PlaceholderAllowed $true
   New-Field -Name "isDryRunOnly" -Type "boolean" -ValidatorItemId "dry-run-only-not-proof" -ProofRole "must remain true for imported dry-run context; dry-run is not proof" -Required $false -PlaceholderAllowed $true
   New-Field -Name "isPublishedPackageProof" -Type "boolean" -ValidatorItemId "published-package-proof-false" -ProofRole "must remain false; owner input template is not proof and not published package proof" -Required $false -PlaceholderAllowed $true
   New-Field -Name "isPackageConsumerRuntimeProof" -Type "boolean" -ValidatorItemId "package-consumer-runtime-proof-false" -ProofRole "must remain false; owner input template is not proof and not runtime proof" -Required $false -PlaceholderAllowed $true
@@ -161,7 +175,7 @@ $markdown = @"
 
 ## 用途
 
-该 schema 产物记录 Owner 回填 `package-consumer-runtime` 证据所需字段、对应 validator item 和 proof role。它只定义输入契约，不执行发布、不导入 owner input、不关闭 release issue，也不会把任何 template、local feed、ProjectReference、direct `.nupkg`、dry-run、dashboard 或 build-only 输出晋级为 runtime proof。`packageDryRunManagedNupkgSha256` 仅用于对照 GitHub Actions dry-run pack，不是 Owner 从 public feed 下载的 package hash。
+该 schema 产物记录 Owner 回填 `package-consumer-runtime` 证据所需字段、对应 validator item 和 proof role。它只定义输入契约，不执行发布、不导入 owner input、不关闭 release issue，也不会把任何 template、local feed、ProjectReference、direct `.nupkg`、dry-run、dashboard 或 build-only 输出晋级为 runtime proof。source-quality evidence 与 package dry-run evidence 必须分开记录；source-quality run 不能填充 dry-run package artifact。`packageDryRunManagedNupkgSha256` 仅用于对照 GitHub Actions dry-run pack，不是 Owner 从 public feed 下载的 package hash。
 
 | 项目 | 当前值 |
 |---|---|

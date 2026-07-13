@@ -152,11 +152,39 @@ function Test-ValueInSet {
 function Resolve-InputPath {
   param([string]$Path)
 
+  if ([string]::IsNullOrWhiteSpace($Path)) {
+    return $Path
+  }
+
   if ([System.IO.Path]::IsPathRooted($Path)) {
     return $Path
   }
 
   return Join-Path $RepositoryRoot $Path
+}
+
+function Get-GitHeadOrEmpty {
+  try {
+    $head = (& git -C $RepositoryRoot rev-parse HEAD 2>$null)
+    if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace($head)) {
+      return ([string]$head).Trim()
+    }
+  }
+  catch {
+  }
+
+  return ""
+}
+
+function Test-SameSha {
+  param(
+    [string]$Left,
+    [string]$Right
+  )
+
+  return -not [string]::IsNullOrWhiteSpace($Left) -and
+    -not [string]::IsNullOrWhiteSpace($Right) -and
+    $Left.Trim().Equals($Right.Trim(), [StringComparison]::OrdinalIgnoreCase)
 }
 
 function Test-IsOutsideRepository {
@@ -360,22 +388,55 @@ $isDryRunOnly = Get-BoolPropertyOrDefault -Object $record -Name "isDryRunOnly" -
 $isPublishedPackageProof = Get-BoolPropertyOrDefault -Object $record -Name "isPublishedPackageProof" -DefaultValue $false
 $isPackageConsumerRuntimeProof = Get-BoolPropertyOrDefault -Object $record -Name "isPackageConsumerRuntimeProof" -DefaultValue $false
 $packageDryRunCanClaimPack = Get-BoolPropertyOrDefault -Object $record -Name "packageDryRunCanClaimPack" -DefaultValue $false
+$packageDryRunCanClaimCurrentHeadPack = Get-BoolPropertyOrDefault -Object $record -Name "packageDryRunCanClaimCurrentHeadPack" -DefaultValue $false
 $runtimePackageKey = [string](Get-PropertyOrDefault -Object $record -Name "runtimePackageKey" -DefaultValue "")
 $smokeCommand = [string](Get-PropertyOrDefault -Object $record -Name "smokeCommand" -DefaultValue "")
 $consumerProjectFlags = Get-ConsumerProjectReferenceFlags -ProjectPath (Get-PropertyOrDefault -Object $record -Name "consumerProjectPath" -DefaultValue "")
-$sourceGitHubActionsRunEvidenceImportPath = [string](Get-PropertyOrDefault -Object $record -Name "sourceGitHubActionsRunEvidenceImportPath" -DefaultValue "")
+$currentHead = [string](Get-PropertyOrDefault -Object $record -Name "currentHead" -DefaultValue "")
+if (Test-IsPlaceholder -Value $currentHead) {
+  $currentHead = Get-GitHeadOrEmpty
+}
+$sourceQualityRunEvidenceImportPath = [string](Get-PropertyOrDefault -Object $record -Name "sourceQualityRunEvidenceImportPath" -DefaultValue "")
+$packageDryRunEvidenceImportPath = [string](Get-PropertyOrDefault -Object $record -Name "packageDryRunEvidenceImportPath" -DefaultValue "")
+$legacyGitHubActionsRunEvidenceImportPath = [string](Get-PropertyOrDefault -Object $record -Name "sourceGitHubActionsRunEvidenceImportPath" -DefaultValue "")
+if (Test-IsPlaceholder -Value $packageDryRunEvidenceImportPath) {
+  $packageDryRunEvidenceImportPath = $legacyGitHubActionsRunEvidenceImportPath
+}
 $sourceGitHubActionsRunId = [string](Get-PropertyOrDefault -Object $record -Name "sourceGitHubActionsRunId" -DefaultValue "")
 $sourceHeadSha = [string](Get-PropertyOrDefault -Object $record -Name "sourceHeadSha" -DefaultValue "")
+$sourceQualityRunId = [string](Get-PropertyOrDefault -Object $record -Name "sourceQualityRunId" -DefaultValue "")
+$sourceQualityHeadSha = [string](Get-PropertyOrDefault -Object $record -Name "sourceQualityHeadSha" -DefaultValue "")
+$packageDryRunRunId = [string](Get-PropertyOrDefault -Object $record -Name "packageDryRunRunId" -DefaultValue $sourceGitHubActionsRunId)
+$packageDryRunHeadSha = [string](Get-PropertyOrDefault -Object $record -Name "packageDryRunHeadSha" -DefaultValue $sourceHeadSha)
 $packageDryRunArtifactPath = [string](Get-PropertyOrDefault -Object $record -Name "packageDryRunArtifactPath" -DefaultValue "")
 $packageDryRunManagedNupkgSha256 = [string](Get-PropertyOrDefault -Object $record -Name "packageDryRunManagedNupkgSha256" -DefaultValue "")
-$sourceEvidenceImport = Read-JsonOrNull -Path $sourceGitHubActionsRunEvidenceImportPath
-$sourceEvidenceImportPresent = $null -ne $sourceEvidenceImport -and ([string](Get-PropertyOrDefault -Object $sourceEvidenceImport -Name "recordKind" -DefaultValue "")).Equals("github-actions-run-evidence-import", [StringComparison]::Ordinal)
-$sourceEvidenceDryRunClaim = $sourceEvidenceImportPresent -and $packageDryRunCanClaimPack -and (Test-Sha256Format -Value $packageDryRunManagedNupkgSha256) -and -not (Test-IsPlaceholder -Value $packageDryRunArtifactPath)
+$sourceQualityEvidenceImport = Read-JsonOrNull -Path $sourceQualityRunEvidenceImportPath
+$sourceQualityEvidenceImportPresent = $null -ne $sourceQualityEvidenceImport -and ([string](Get-PropertyOrDefault -Object $sourceQualityEvidenceImport -Name "recordKind" -DefaultValue "")).Equals("github-actions-run-evidence-import", [StringComparison]::Ordinal)
+$sourceQualityEvidenceReady = $sourceQualityEvidenceImportPresent -and (
+  (Get-BoolPropertyOrDefault -Object $sourceQualityEvidenceImport -Name "canClaimGitHubActionsSourceQualityForRun" -DefaultValue $false) -or
+  ([string](Get-PropertyOrDefault -Object $sourceQualityEvidenceImport -Name "evidenceState" -DefaultValue "")).Equals("source-quality-run-evidence-ready", [StringComparison]::OrdinalIgnoreCase)
+)
+$sourceQualityEvidenceHeadSha = if ($sourceQualityEvidenceImportPresent) { [string](Get-PropertyOrDefault -Object $sourceQualityEvidenceImport -Name "headSha" -DefaultValue $sourceQualityHeadSha) } else { $sourceQualityHeadSha }
+$sourceQualityHeadMatchesCurrentHead = Test-SameSha -Left $sourceQualityEvidenceHeadSha -Right $currentHead
+
+$packageDryRunEvidenceImport = Read-JsonOrNull -Path $packageDryRunEvidenceImportPath
+$sourceEvidenceImportPresent = $null -ne $packageDryRunEvidenceImport -and ([string](Get-PropertyOrDefault -Object $packageDryRunEvidenceImport -Name "recordKind" -DefaultValue "")).Equals("github-actions-run-evidence-import", [StringComparison]::Ordinal)
+$packageDryRunEvidenceCanClaimPackForRun = $sourceEvidenceImportPresent -and (Get-BoolPropertyOrDefault -Object $packageDryRunEvidenceImport -Name "canClaimGitHubActionsPackageDryRunPackForRun" -DefaultValue $false)
+$packageDryRunEvidenceHeadSha = if ($sourceEvidenceImportPresent) { [string](Get-PropertyOrDefault -Object $packageDryRunEvidenceImport -Name "headSha" -DefaultValue $packageDryRunHeadSha) } else { $packageDryRunHeadSha }
+$packageDryRunHeadMatchesCurrentHead = Test-SameSha -Left $packageDryRunEvidenceHeadSha -Right $currentHead
+$sourceEvidenceDryRunClaim = $sourceEvidenceImportPresent -and $packageDryRunCanClaimPack -and $packageDryRunEvidenceCanClaimPackForRun -and (Test-Sha256Format -Value $packageDryRunManagedNupkgSha256) -and -not (Test-IsPlaceholder -Value $packageDryRunArtifactPath)
+$packageDryRunCurrentHeadClaimReady = $sourceEvidenceDryRunClaim -and $packageDryRunHeadMatchesCurrentHead -and $packageDryRunCanClaimCurrentHeadPack
 
 $items.Add((New-ValidationItem -Id "record-kind" -Passed ($recordKind -eq "package-consumer-runtime-proof-owner-input") -Severity "blocker" -Detail "recordKind must be package-consumer-runtime-proof-owner-input.")) | Out-Null
 $items.Add((New-ValidationItem -Id "no-side-effects" -Passed (-not $performsPublish -and -not $canPublishPublicly -and -not $canCloseReleaseIssue -and -not $canPromoteProof) -Severity "blocker" -Detail "Owner input validation must not publish, approve publication, close the issue, or promote proof.")) | Out-Null
-$items.Add((New-ValidationItem -Id "source-github-actions-run-evidence-import-present" -Passed $sourceEvidenceImportPresent -Severity "action-required" -Detail "sourceGitHubActionsRunEvidenceImportPath should point to github-actions-run-evidence-import.json when dry-run pack context is available.")) | Out-Null
-$items.Add((New-ValidationItem -Id "source-github-actions-dry-run-pack-claim-ready" -Passed $sourceEvidenceDryRunClaim -Severity "action-required" -Detail "GitHub Actions dry-run context must include run id, head SHA, package artifact path, package SHA256, and canClaimGitHubActionsPackageDryRunPackForRun=true.")) | Out-Null
+$items.Add((New-ValidationItem -Id "source-quality-run-evidence-present" -Passed $sourceQualityEvidenceImportPresent -Severity "action-required" -Detail "sourceQualityRunEvidenceImportPath should point to source-quality run evidence when current source-quality context is available.")) | Out-Null
+$items.Add((New-ValidationItem -Id "source-quality-run-evidence-ready" -Passed $sourceQualityEvidenceReady -Severity "action-required" -Detail "Source-quality evidence must be source-quality-run-evidence-ready or canClaimGitHubActionsSourceQualityForRun=true.")) | Out-Null
+$items.Add((New-ValidationItem -Id "source-quality-current-head-match" -Passed $sourceQualityHeadMatchesCurrentHead -Severity "action-required" -Detail "sourceQualityHeadSha must match currentHead when source-quality context is used.")) | Out-Null
+$items.Add((New-ValidationItem -Id "package-dry-run-evidence-present" -Passed $sourceEvidenceImportPresent -Severity "action-required" -Detail "packageDryRunEvidenceImportPath should point to package dry-run github-actions-run-evidence-import.json when dry-run pack context is available.")) | Out-Null
+$items.Add((New-ValidationItem -Id "source-github-actions-run-evidence-import-present" -Passed $sourceEvidenceImportPresent -Severity "action-required" -Detail "Legacy sourceGitHubActionsRunEvidenceImportPath maps to package dry-run context only, not source-quality evidence.")) | Out-Null
+$items.Add((New-ValidationItem -Id "source-github-actions-dry-run-pack-claim-ready" -Passed $sourceEvidenceDryRunClaim -Severity "action-required" -Detail "GitHub Actions dry-run context must come from package dry-run evidence and include run id, head SHA, package artifact path, package SHA256, and canClaimGitHubActionsPackageDryRunPackForRun=true.")) | Out-Null
+$items.Add((New-ValidationItem -Id "package-dry-run-current-head-match" -Passed $packageDryRunHeadMatchesCurrentHead -Severity "action-required" -Detail "Package dry-run evidence head SHA must match currentHead before it can satisfy current-head package proof.")) | Out-Null
+$items.Add((New-ValidationItem -Id "package-dry-run-current-head-claim-ready" -Passed $packageDryRunCurrentHeadClaimReady -Severity "action-required" -Detail "Current-head package dry-run pack claim is ready only when package dry-run evidence is claimable and head SHA matches currentHead.")) | Out-Null
 $items.Add((New-ValidationItem -Id "dry-run-only-not-proof" -Passed $isDryRunOnly -Severity "blocker" -Detail "GitHub Actions package dry-run context must remain marked as dry-run-only and not proof.")) | Out-Null
 $items.Add((New-ValidationItem -Id "published-package-proof-false" -Passed (-not $isPublishedPackageProof) -Severity "blocker" -Detail "Owner input template and dry-run context are not published package proof.")) | Out-Null
 $items.Add((New-ValidationItem -Id "package-consumer-runtime-proof-false" -Passed (-not $isPackageConsumerRuntimeProof) -Severity "blocker" -Detail "Owner input template and dry-run context are not package-consumer runtime proof.")) | Out-Null
@@ -485,6 +546,23 @@ $validation = [pscustomobject]@{
   ownerInputHostMetadataReady = $ownerInputHostMetadataReady
   ownerInputCommandEvidenceReady = $ownerInputCommandEvidenceReady
   ownerInputRunnerInfrastructureReady = $ownerInputRunnerInfrastructureReady
+  currentHead = $currentHead
+  sourceQualityRunEvidenceImportPath = $sourceQualityRunEvidenceImportPath
+  sourceQualityRunEvidenceImportPresent = $sourceQualityEvidenceImportPresent
+  sourceQualityRunEvidenceReady = $sourceQualityEvidenceReady
+  sourceQualityRunId = $sourceQualityRunId
+  sourceQualityHeadSha = $sourceQualityEvidenceHeadSha
+  sourceQualityHeadMatchesCurrentHead = $sourceQualityHeadMatchesCurrentHead
+  packageDryRunEvidenceImportPath = $packageDryRunEvidenceImportPath
+  packageDryRunEvidenceImportPresent = $sourceEvidenceImportPresent
+  packageDryRunEvidenceCanClaimPackForRun = $packageDryRunEvidenceCanClaimPackForRun
+  packageDryRunRunId = $packageDryRunRunId
+  packageDryRunHeadSha = $packageDryRunEvidenceHeadSha
+  packageDryRunHeadMatchesCurrentHead = $packageDryRunHeadMatchesCurrentHead
+  packageDryRunCanClaimCurrentHeadPack = $packageDryRunCanClaimCurrentHeadPack
+  packageDryRunCurrentHeadClaimReady = $packageDryRunCurrentHeadClaimReady
+  packageDryRunRequiresOwnerAuthorization = -not $packageDryRunCurrentHeadClaimReady
+  manualWorkflowDispatchNotPerformed = Get-BoolPropertyOrDefault -Object $record -Name "manualWorkflowDispatchNotPerformed" -DefaultValue $true
   sourceGitHubActionsRunEvidenceImportPresent = $sourceEvidenceImportPresent
   sourceGitHubActionsDryRunPackClaimReady = $sourceEvidenceDryRunClaim
   sourceGitHubActionsRunId = $sourceGitHubActionsRunId
@@ -539,6 +617,21 @@ $markdown = @"
 | ownerInputSmokeLogReady | ``$($validation.ownerInputSmokeLogReady)`` |
 | ownerInputHostMetadataReady | ``$($validation.ownerInputHostMetadataReady)`` |
 | ownerInputCommandEvidenceReady | ``$($validation.ownerInputCommandEvidenceReady)`` |
+| currentHead | ``$($validation.currentHead)`` |
+| sourceQualityRunEvidenceImportPresent | ``$($validation.sourceQualityRunEvidenceImportPresent)`` |
+| sourceQualityRunEvidenceReady | ``$($validation.sourceQualityRunEvidenceReady)`` |
+| sourceQualityRunId | ``$($validation.sourceQualityRunId)`` |
+| sourceQualityHeadSha | ``$($validation.sourceQualityHeadSha)`` |
+| sourceQualityHeadMatchesCurrentHead | ``$($validation.sourceQualityHeadMatchesCurrentHead)`` |
+| packageDryRunEvidenceImportPresent | ``$($validation.packageDryRunEvidenceImportPresent)`` |
+| packageDryRunEvidenceCanClaimPackForRun | ``$($validation.packageDryRunEvidenceCanClaimPackForRun)`` |
+| packageDryRunRunId | ``$($validation.packageDryRunRunId)`` |
+| packageDryRunHeadSha | ``$($validation.packageDryRunHeadSha)`` |
+| packageDryRunHeadMatchesCurrentHead | ``$($validation.packageDryRunHeadMatchesCurrentHead)`` |
+| packageDryRunCanClaimCurrentHeadPack | ``$($validation.packageDryRunCanClaimCurrentHeadPack)`` |
+| packageDryRunCurrentHeadClaimReady | ``$($validation.packageDryRunCurrentHeadClaimReady)`` |
+| packageDryRunRequiresOwnerAuthorization | ``$($validation.packageDryRunRequiresOwnerAuthorization)`` |
+| manualWorkflowDispatchNotPerformed | ``$($validation.manualWorkflowDispatchNotPerformed)`` |
 | sourceGitHubActionsRunEvidenceImportPresent | ``$($validation.sourceGitHubActionsRunEvidenceImportPresent)`` |
 | sourceGitHubActionsDryRunPackClaimReady | ``$($validation.sourceGitHubActionsDryRunPackClaimReady)`` |
 | packageDryRunCanClaimPack | ``$($validation.packageDryRunCanClaimPack)`` |

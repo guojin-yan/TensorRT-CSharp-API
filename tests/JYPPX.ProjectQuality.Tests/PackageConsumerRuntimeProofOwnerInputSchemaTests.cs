@@ -55,13 +55,27 @@ public sealed class PackageConsumerRuntimeProofOwnerInputSchemaTests
 
         string[] dryRunContextFields =
         [
+            "currentHead",
+            "sourceQualityRunEvidenceImportPath",
+            "sourceQualityRunId",
+            "sourceQualityRunUrl",
+            "sourceQualityHeadSha",
+            "sourceQualityRunEvidenceReady",
             "sourceGitHubActionsRunEvidenceImportPath",
+            "packageDryRunEvidenceImportPath",
+            "packageDryRunRunId",
+            "packageDryRunRunUrl",
+            "packageDryRunHeadSha",
+            "packageDryRunHeadMatchesCurrentHead",
             "sourceGitHubActionsRunId",
             "sourceGitHubActionsRunUrl",
             "sourceHeadSha",
             "packageDryRunArtifactPath",
             "packageDryRunManagedNupkgSha256",
             "packageDryRunCanClaimPack",
+            "packageDryRunCanClaimCurrentHeadPack",
+            "packageDryRunRequiresOwnerAuthorization",
+            "manualWorkflowDispatchNotPerformed",
             "isDryRunOnly",
             "isPublishedPackageProof",
             "isPackageConsumerRuntimeProof"
@@ -115,6 +129,10 @@ public sealed class PackageConsumerRuntimeProofOwnerInputSchemaTests
         Assert.Contains("Package Consumer Runtime Proof Owner Input Schema", markdown, StringComparison.Ordinal);
         Assert.Contains("Forbidden Substitutes", markdown, StringComparison.Ordinal);
         Assert.Contains("TensorRtExec build report", markdown, StringComparison.Ordinal);
+        Assert.Contains("sourceQualityRunEvidenceImportPath", markdown, StringComparison.Ordinal);
+        Assert.Contains("packageDryRunEvidenceImportPath", markdown, StringComparison.Ordinal);
+        Assert.Contains("packageDryRunCanClaimCurrentHeadPack", markdown, StringComparison.Ordinal);
+        Assert.Contains("source-quality run 不能填充 dry-run package artifact", markdown, StringComparison.Ordinal);
         Assert.Contains("packageDryRunManagedNupkgSha256", markdown, StringComparison.Ordinal);
         Assert.Contains("不是 Owner 从 public feed 下载的 package hash", markdown, StringComparison.Ordinal);
         Assert.Contains("canPromoteRuntimeProof", markdown, StringComparison.Ordinal);

@@ -1,7 +1,10 @@
 [CmdletBinding()]
 param(
   [string]$RuntimePackageKey = "win-x64-trt11.0-cuda13.2-cudnn9.22",
-  [string]$GitHubActionsRunEvidenceImportPath = "artifacts\final-release\github-actions-run-evidence-import.json",
+  [string]$SourceQualityRunEvidenceImportPath = "artifacts\final-release\github-actions-source-quality-run-evidence-import.json",
+  [string]$PackageDryRunEvidenceImportPath = "artifacts\final-release\github-actions-run-evidence-import.json",
+  [string]$GitHubActionsRunEvidenceImportPath = "",
+  [string]$CurrentHead,
   [string]$RepositoryRoot
 )
 
@@ -68,12 +71,76 @@ function Read-JsonOrNull {
   return Get-Content -LiteralPath $resolvedPath -Raw -Encoding utf8 | ConvertFrom-Json
 }
 
-$githubActionsEvidence = Read-JsonOrNull -Path $GitHubActionsRunEvidenceImportPath
-$dryRunPackages = if ($null -eq $githubActionsEvidence) {
+function Get-BoolPropertyOrDefault {
+  param(
+    [AllowNull()][object]$Object,
+    [string]$Name,
+    [bool]$DefaultValue
+  )
+
+  $value = Get-PropertyOrDefault -Object $Object -Name $Name -DefaultValue $DefaultValue
+  if ($value -is [bool]) {
+    return [bool]$value
+  }
+
+  $parsed = $false
+  if ([bool]::TryParse(([string]$value).Trim(), [ref]$parsed)) {
+    return $parsed
+  }
+
+  return $DefaultValue
+}
+
+function Get-GitHeadOrEmpty {
+  if (-not [string]::IsNullOrWhiteSpace($CurrentHead)) {
+    return $CurrentHead.Trim()
+  }
+
+  try {
+    $head = (& git -C $RepositoryRoot rev-parse HEAD 2>$null)
+    if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace($head)) {
+      return ([string]$head).Trim()
+    }
+  }
+  catch {
+  }
+
+  return ""
+}
+
+function Test-SameSha {
+  param(
+    [string]$Left,
+    [string]$Right
+  )
+
+  return -not [string]::IsNullOrWhiteSpace($Left) -and
+    -not [string]::IsNullOrWhiteSpace($Right) -and
+    $Left.Trim().Equals($Right.Trim(), [StringComparison]::OrdinalIgnoreCase)
+}
+
+if (-not [string]::IsNullOrWhiteSpace($GitHubActionsRunEvidenceImportPath)) {
+  $PackageDryRunEvidenceImportPath = $GitHubActionsRunEvidenceImportPath
+}
+
+$currentHeadValue = Get-GitHeadOrEmpty
+$sourceQualityEvidence = Read-JsonOrNull -Path $SourceQualityRunEvidenceImportPath
+$packageDryRunEvidence = Read-JsonOrNull -Path $PackageDryRunEvidenceImportPath
+
+$sourceQualityRunId = if ($null -eq $sourceQualityEvidence) { "<no-source-quality-run-evidence-import>" } else { [string](Get-PropertyOrDefault -Object $sourceQualityEvidence -Name "runId" -DefaultValue "<missing-source-quality-run-id>") }
+$sourceQualityRunUrl = if ($null -eq $sourceQualityEvidence) { "<no-source-quality-run-evidence-import>" } else { [string](Get-PropertyOrDefault -Object $sourceQualityEvidence -Name "runUrl" -DefaultValue "<missing-source-quality-run-url>") }
+$sourceQualityHeadSha = if ($null -eq $sourceQualityEvidence) { "<no-source-quality-run-evidence-import>" } else { [string](Get-PropertyOrDefault -Object $sourceQualityEvidence -Name "headSha" -DefaultValue "<missing-source-quality-head-sha>") }
+$sourceQualityRunEvidenceReady = $null -ne $sourceQualityEvidence -and (
+  (Get-BoolPropertyOrDefault -Object $sourceQualityEvidence -Name "canClaimGitHubActionsSourceQualityForRun" -DefaultValue $false) -or
+  ([string](Get-PropertyOrDefault -Object $sourceQualityEvidence -Name "evidenceState" -DefaultValue "")).Equals("source-quality-run-evidence-ready", [StringComparison]::OrdinalIgnoreCase)
+)
+$sourceQualityHeadMatchesCurrentHead = Test-SameSha -Left $sourceQualityHeadSha -Right $currentHeadValue
+
+$dryRunPackages = if ($null -eq $packageDryRunEvidence) {
   @()
 }
 else {
-  @(Get-PropertyOrDefault -Object $githubActionsEvidence -Name "nupkgPackages" -DefaultValue @())
+  @(Get-PropertyOrDefault -Object $packageDryRunEvidence -Name "nupkgPackages" -DefaultValue @())
 }
 
 $dryRunManagedPackage = @($dryRunPackages | Where-Object {
@@ -84,10 +151,13 @@ if ($dryRunManagedPackage.Count -eq 0 -and $dryRunPackages.Count -gt 0) {
   $dryRunManagedPackage = @($dryRunPackages[0])
 }
 
-$sourceGitHubActionsRunId = if ($null -eq $githubActionsEvidence) { "<no-github-actions-run-evidence-import>" } else { [string](Get-PropertyOrDefault -Object $githubActionsEvidence -Name "runId" -DefaultValue "<missing-run-id>") }
-$sourceGitHubActionsRunUrl = if ($null -eq $githubActionsEvidence) { "<no-github-actions-run-evidence-import>" } else { [string](Get-PropertyOrDefault -Object $githubActionsEvidence -Name "runUrl" -DefaultValue "<missing-run-url>") }
-$sourceHeadSha = if ($null -eq $githubActionsEvidence) { "<no-github-actions-run-evidence-import>" } else { [string](Get-PropertyOrDefault -Object $githubActionsEvidence -Name "headSha" -DefaultValue "<missing-head-sha>") }
-$packageDryRunCanClaimPack = if ($null -eq $githubActionsEvidence) { $false } else { [bool](Get-PropertyOrDefault -Object $githubActionsEvidence -Name "canClaimGitHubActionsPackageDryRunPackForRun" -DefaultValue $false) }
+$sourceGitHubActionsRunId = if ($null -eq $packageDryRunEvidence) { "<no-package-dry-run-evidence-import>" } else { [string](Get-PropertyOrDefault -Object $packageDryRunEvidence -Name "runId" -DefaultValue "<missing-package-dry-run-run-id>") }
+$sourceGitHubActionsRunUrl = if ($null -eq $packageDryRunEvidence) { "<no-package-dry-run-evidence-import>" } else { [string](Get-PropertyOrDefault -Object $packageDryRunEvidence -Name "runUrl" -DefaultValue "<missing-package-dry-run-run-url>") }
+$sourceHeadSha = if ($null -eq $packageDryRunEvidence) { "<no-package-dry-run-evidence-import>" } else { [string](Get-PropertyOrDefault -Object $packageDryRunEvidence -Name "headSha" -DefaultValue "<missing-package-dry-run-head-sha>") }
+$packageDryRunCanClaimPack = if ($null -eq $packageDryRunEvidence) { $false } else { [bool](Get-PropertyOrDefault -Object $packageDryRunEvidence -Name "canClaimGitHubActionsPackageDryRunPackForRun" -DefaultValue $false) }
+$packageDryRunHeadMatchesCurrentHead = Test-SameSha -Left $sourceHeadSha -Right $currentHeadValue
+$packageDryRunCanClaimCurrentHeadPack = $packageDryRunCanClaimPack -and $packageDryRunHeadMatchesCurrentHead
+$packageDryRunRequiresOwnerAuthorization = -not $packageDryRunCanClaimCurrentHeadPack
 $packageDryRunArtifactPath = if ($dryRunManagedPackage.Count -eq 0) { "<no-package-managed-dry-run-artifact>" } else { [string](Get-PropertyOrDefault -Object $dryRunManagedPackage[0] -Name "fullPath" -DefaultValue "<missing-dry-run-package-path>") }
 $packageDryRunManagedNupkgSha256 = if ($dryRunManagedPackage.Count -eq 0) { "<no-package-managed-dry-run-sha256>" } else { [string](Get-PropertyOrDefault -Object $dryRunManagedPackage[0] -Name "sha256" -DefaultValue "<missing-dry-run-package-sha256>") }
 
@@ -96,13 +166,29 @@ $template = [pscustomobject]@{
   generatedAtUtc = [DateTimeOffset]::UtcNow.ToString("O")
   ownerInputState = "template-owner-input-required"
   proofLineId = "package-consumer-runtime"
-  sourceGitHubActionsRunEvidenceImportPath = $GitHubActionsRunEvidenceImportPath
+  currentHead = $currentHeadValue
+  sourceQualityRunEvidenceImportPath = $SourceQualityRunEvidenceImportPath
+  sourceQualityRunId = $sourceQualityRunId
+  sourceQualityRunUrl = $sourceQualityRunUrl
+  sourceQualityHeadSha = $sourceQualityHeadSha
+  sourceQualityRunEvidenceReady = $sourceQualityRunEvidenceReady
+  sourceQualityHeadMatchesCurrentHead = $sourceQualityHeadMatchesCurrentHead
+  sourceGitHubActionsRunEvidenceImportPath = $PackageDryRunEvidenceImportPath
+  packageDryRunEvidenceImportPath = $PackageDryRunEvidenceImportPath
+  packageDryRunRunId = $sourceGitHubActionsRunId
+  packageDryRunRunUrl = $sourceGitHubActionsRunUrl
+  packageDryRunHeadSha = $sourceHeadSha
+  packageDryRunHeadMatchesCurrentHead = $packageDryRunHeadMatchesCurrentHead
   sourceGitHubActionsRunId = $sourceGitHubActionsRunId
   sourceGitHubActionsRunUrl = $sourceGitHubActionsRunUrl
   sourceHeadSha = $sourceHeadSha
   packageDryRunArtifactPath = $packageDryRunArtifactPath
   packageDryRunManagedNupkgSha256 = $packageDryRunManagedNupkgSha256
   packageDryRunCanClaimPack = $packageDryRunCanClaimPack
+  packageDryRunCanClaimCurrentHeadPack = $packageDryRunCanClaimCurrentHeadPack
+  packageDryRunRequiresOwnerAuthorization = $packageDryRunRequiresOwnerAuthorization
+  manualWorkflowDispatchNotPerformed = $true
+  ownerAuthorizationState = if ($packageDryRunRequiresOwnerAuthorization) { "owner-authorization-required-before-current-head-package-dry-run" } else { "current-head-package-dry-run-context-available" }
   isDryRunOnly = $true
   isPublishedPackageProof = $false
   isPackageConsumerRuntimeProof = $false
@@ -166,7 +252,7 @@ $template = [pscustomobject]@{
     "template",
     "skipped run"
   )
-  safetyBoundary = "Owner input template only. It may carry GitHub Actions package dry-run context to reduce manual copying, but that context is not a published package proof and is not package-consumer runtime proof. It does not publish packages, close the release issue, or promote package-consumer runtime proof. local feed, ProjectReference, direct .nupkg, build-only, dry-run, queued GitHub Actions run, missing self-hosted runner, dashboard, template, and skipped run cannot be used as public package proof."
+  safetyBoundary = "Owner input template only. It records source-quality run evidence separately from package-managed dry-run evidence. Source-quality evidence cannot fill packageDryRunArtifactPath or packageDryRunManagedNupkgSha256. Package dry-run context may reduce manual copying only when it is imported separately, but it is not published package proof and is not package-consumer runtime proof. It does not publish packages, close the release issue, or promote package-consumer runtime proof. local feed, ProjectReference, direct .nupkg, build-only, dry-run, queued GitHub Actions run, missing self-hosted runner, dashboard, template, and skipped run cannot be used as public package proof."
 }
 
 $jsonPath = Join-Path $artifactRoot "package-consumer-runtime-proof-owner-input.template.json"
@@ -185,15 +271,26 @@ $markdown = @"
 
 ## GitHub Actions Dry-Run 上下文
 
-模板会读取 `github-actions-run-evidence-import.json` 的 dry-run pack 结果，预填 `sourceGitHubActionsRunId`、`sourceHeadSha`、`packageDryRunArtifactPath` 和 `packageDryRunManagedNupkgSha256`，用于 Owner 对照远端包构建证据。该上下文仍是 dry-run-only：不能替代 NuGet/GitHub Packages 已发布证明，不能替代 clean external package consumer runtime smoke，也不能把 `packageDryRunArtifactPath` 直接填入 `managedNupkgPath`。
+模板会分别读取 source-quality evidence 和 package dry-run evidence。source-quality evidence 只能说明当前代码已通过 source-quality run，不能预填 `packageDryRunArtifactPath` 或 `packageDryRunManagedNupkgSha256`。只有单独导入的 package dry-run evidence 才能提供 dry-run pack 对照信息；它仍是 dry-run-only，不能替代 NuGet/GitHub Packages 已发布证明，不能替代 clean external package consumer runtime smoke，也不能把 `packageDryRunArtifactPath` 直接填入 `managedNupkgPath`。
 
 | 字段 | 当前值 |
 |---|---|
+| currentHead | ``$($template.currentHead)`` |
+| sourceQualityRunId | ``$($template.sourceQualityRunId)`` |
+| sourceQualityHeadSha | ``$($template.sourceQualityHeadSha)`` |
+| sourceQualityRunEvidenceReady | ``$($template.sourceQualityRunEvidenceReady)`` |
+| sourceQualityHeadMatchesCurrentHead | ``$($template.sourceQualityHeadMatchesCurrentHead)`` |
+| packageDryRunRunId | ``$($template.packageDryRunRunId)`` |
+| packageDryRunHeadSha | ``$($template.packageDryRunHeadSha)`` |
+| packageDryRunHeadMatchesCurrentHead | ``$($template.packageDryRunHeadMatchesCurrentHead)`` |
 | sourceGitHubActionsRunId | ``$($template.sourceGitHubActionsRunId)`` |
 | sourceHeadSha | ``$($template.sourceHeadSha)`` |
 | packageDryRunArtifactPath | ``$($template.packageDryRunArtifactPath)`` |
 | packageDryRunManagedNupkgSha256 | ``$($template.packageDryRunManagedNupkgSha256)`` |
 | packageDryRunCanClaimPack | ``$($template.packageDryRunCanClaimPack)`` |
+| packageDryRunCanClaimCurrentHeadPack | ``$($template.packageDryRunCanClaimCurrentHeadPack)`` |
+| packageDryRunRequiresOwnerAuthorization | ``$($template.packageDryRunRequiresOwnerAuthorization)`` |
+| manualWorkflowDispatchNotPerformed | ``$($template.manualWorkflowDispatchNotPerformed)`` |
 | isDryRunOnly | ``$($template.isDryRunOnly)`` |
 | isPublishedPackageProof | ``$($template.isPublishedPackageProof)`` |
 | isPackageConsumerRuntimeProof | ``$($template.isPackageConsumerRuntimeProof)`` |
