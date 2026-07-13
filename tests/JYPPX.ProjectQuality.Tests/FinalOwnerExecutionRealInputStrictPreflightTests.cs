@@ -21,16 +21,33 @@ public sealed class FinalOwnerExecutionRealInputStrictPreflightTests
         Assert.Equal("final-owner-execution-real-input-strict-preflight", preflight.GetProperty("recordKind").GetString());
         Assert.Equal("blocked-final-owner-real-input-required", preflight.GetProperty("preflightState").GetString());
         Assert.True(preflight.GetProperty("ownerActionRequired").GetBoolean());
-        Assert.True(preflight.GetProperty("checkedFieldCount").GetInt32() >= 39);
+        Assert.Equal(49, preflight.GetProperty("checkedFieldCount").GetInt32());
         Assert.True(preflight.GetProperty("findingCount").GetInt32() >= 50);
         Assert.Equal(0, preflight.GetProperty("failedBlockerCount").GetInt32());
         Assert.True(preflight.GetProperty("failedActionRequiredCount").GetInt32() >= 50);
+        Assert.Equal(2, preflight.GetProperty("dualPackageRouteProofRouteCount").GetInt32());
+        Assert.Equal(8, preflight.GetProperty("dualPackageRouteProofFieldCount").GetInt32());
+        Assert.Equal(0, preflight.GetProperty("dualPackageRouteProofReadyFieldCount").GetInt32());
+        Assert.Equal(8, preflight.GetProperty("dualPackageRouteProofPlaceholderFieldCount").GetInt32());
+        Assert.False(preflight.GetProperty("dualPackageRouteProofReadyForCloseValidation").GetBoolean());
         Assert.False(preflight.GetProperty("readyForCloseValidation").GetBoolean());
         AssertNonProof(preflight);
+
+        string[] routeIds = preflight.GetProperty("dualPackageRouteIds").EnumerateArray().Select(static item => item.GetString()!).ToArray();
+        Assert.Contains("nuget-small-bridge-core", routeIds);
+        Assert.Contains("github-packages-full-runtime", routeIds);
+
+        string[] routeFieldPaths = preflight.GetProperty("dualPackageRouteProofFieldPaths").EnumerateArray().Select(static item => item.GetString()!).ToArray();
+        Assert.Contains("dualPackageRoutes.nugetSmallBridgeCore.ownerAuthorizationUrl", routeFieldPaths);
+        Assert.Contains("dualPackageRoutes.githubPackagesFullRuntime.runtimeDllResolutionReportPath", routeFieldPaths);
 
         string preflightText = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "artifacts", "final-release", "final-owner-execution-real-input-strict-preflight.json"));
         foreach (string expected in new[]
         {
+            "dualPackageRoutes.nugetSmallBridgeCore.ownerAuthorizationUrl",
+            "dualPackageRoutes.githubPackagesFullRuntime.runtimeDllResolutionReportPath",
+            "nuget-small-bridge-core",
+            "github-packages-full-runtime",
             "placeholder",
             "SHA256 invalid",
             "path missing",

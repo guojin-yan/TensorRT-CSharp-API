@@ -76,6 +76,18 @@ public sealed class FinalOwnerExecutionCloseReadinessFromRealInputTests
         JsonElement bundle = bundleDocument.RootElement;
         string bundleText = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "artifacts", "final-release", "release-evidence-bundle.json"));
 
+        Assert.Equal(2, bundle.GetProperty("finalOwnerExecutionRealInputStrictPreflightDualPackageRouteProofRouteCount").GetInt32());
+        Assert.Equal(8, bundle.GetProperty("finalOwnerExecutionRealInputStrictPreflightDualPackageRouteProofFieldCount").GetInt32());
+        Assert.Equal(0, bundle.GetProperty("finalOwnerExecutionRealInputStrictPreflightDualPackageRouteProofReadyFieldCount").GetInt32());
+        Assert.Equal(8, bundle.GetProperty("finalOwnerExecutionRealInputStrictPreflightDualPackageRouteProofPlaceholderFieldCount").GetInt32());
+
+        JsonElement strictPreflightItem = bundle.GetProperty("evidenceItems").EnumerateArray().Single(item => item.GetProperty("id").GetString() == "final-owner-execution-real-input-strict-preflight");
+        string strictPreflightState = strictPreflightItem.GetProperty("state").GetString()!;
+        Assert.Contains("dualPackageRouteProofRoutes=2", strictPreflightState, StringComparison.Ordinal);
+        Assert.Contains("dualPackageRouteProofFields=8", strictPreflightState, StringComparison.Ordinal);
+        Assert.Contains("dualPackageRouteProofReadyFields=0", strictPreflightState, StringComparison.Ordinal);
+        Assert.Contains("dualPackageRouteProofPlaceholders=8", strictPreflightState, StringComparison.Ordinal);
+
         foreach (string id in new[]
         {
             "final-owner-execution-real-input-template",

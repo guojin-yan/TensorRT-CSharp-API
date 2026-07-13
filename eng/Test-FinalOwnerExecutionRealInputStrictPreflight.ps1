@@ -71,6 +71,23 @@ $fieldResults = @(Convert-ToArray (Get-PropertyOrDefault -Object $candidate -Nam
 $nonSubstituteConfirmations = @(Convert-ToArray (Get-PropertyOrDefault -Object $candidate -Name "nonSubstituteConfirmations" -DefaultValue @()))
 $findings = New-Object System.Collections.Generic.List[object]
 
+$dualPackageRouteIds = @("nuget-small-bridge-core", "github-packages-full-runtime")
+$dualPackageRouteProofResults = @($fieldResults | Where-Object {
+    [string](Get-PropertyOrDefault -Object $_ -Name "fieldPath" -DefaultValue "") -like "dualPackageRoutes.*"
+  })
+$dualPackageRouteProofFieldIds = @($dualPackageRouteProofResults | ForEach-Object {
+    [string](Get-PropertyOrDefault -Object $_ -Name "fieldId" -DefaultValue "")
+  } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+$dualPackageRouteProofFieldPaths = @($dualPackageRouteProofResults | ForEach-Object {
+    [string](Get-PropertyOrDefault -Object $_ -Name "fieldPath" -DefaultValue "")
+  } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+$dualPackageRouteProofReadyFieldCount = @($dualPackageRouteProofResults | Where-Object {
+    [bool](Get-PropertyOrDefault -Object $_ -Name "readyForImport" -DefaultValue $false)
+  }).Count
+$dualPackageRouteProofPlaceholderFieldCount = @($dualPackageRouteProofResults | Where-Object {
+    -not [bool](Get-PropertyOrDefault -Object $_ -Name "placeholderReplaced" -DefaultValue $false)
+  }).Count
+
 foreach ($result in $fieldResults) {
   $fieldId = [string](Get-PropertyOrDefault -Object $result -Name "fieldId" -DefaultValue "")
   $kind = [string](Get-PropertyOrDefault -Object $result -Name "kind" -DefaultValue "")
@@ -135,6 +152,14 @@ $preflight = [pscustomobject]@{
   requireExistingFiles = $RequireExistingFiles.IsPresent
   requireHashMatch = $RequireHashMatch.IsPresent
   failOnNotReady = $FailOnNotReady.IsPresent
+  dualPackageRouteIds = @($dualPackageRouteIds)
+  dualPackageRouteProofRouteCount = $dualPackageRouteIds.Count
+  dualPackageRouteProofFieldCount = $dualPackageRouteProofResults.Count
+  dualPackageRouteProofReadyFieldCount = $dualPackageRouteProofReadyFieldCount
+  dualPackageRouteProofPlaceholderFieldCount = $dualPackageRouteProofPlaceholderFieldCount
+  dualPackageRouteProofFieldIds = @($dualPackageRouteProofFieldIds)
+  dualPackageRouteProofFieldPaths = @($dualPackageRouteProofFieldPaths)
+  dualPackageRouteProofReadyForCloseValidation = $dualPackageRouteProofReadyFieldCount -eq $dualPackageRouteProofResults.Count -and $dualPackageRouteProofResults.Count -gt 0
   readyForCloseValidation = $readyForCloseValidation
   ownerActionRequired = -not $readyForCloseValidation
   findings = @($findings.ToArray())
@@ -167,7 +192,17 @@ $markdown = @"
 | findingCount | ``$($preflight.findingCount)`` |
 | failedBlockerCount | ``$($preflight.failedBlockerCount)`` |
 | failedActionRequiredCount | ``$($preflight.failedActionRequiredCount)`` |
+| dualPackageRouteProofRouteCount | ``$($preflight.dualPackageRouteProofRouteCount)`` |
+| dualPackageRouteProofFieldCount | ``$($preflight.dualPackageRouteProofFieldCount)`` |
+| dualPackageRouteProofReadyFieldCount | ``$($preflight.dualPackageRouteProofReadyFieldCount)`` |
+| dualPackageRouteProofPlaceholderFieldCount | ``$($preflight.dualPackageRouteProofPlaceholderFieldCount)`` |
 | readyForCloseValidation | ``$($preflight.readyForCloseValidation)`` |
+
+## Dual-Package Route Proof
+
+| Field Path |
+|---|
+$(($dualPackageRouteProofFieldPaths | ForEach-Object { "| ``$(ConvertTo-MarkdownCell $_)`` |" }) -join "`r`n")
 
 ## Findings
 
