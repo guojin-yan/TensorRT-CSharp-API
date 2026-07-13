@@ -22,6 +22,7 @@ public sealed class RemoteCiAndPublicPublishProofBackfillGateTests
         Assert.False(gate.GetProperty("readyForOwnerReview").GetBoolean());
         AssertFlagsStayNonProof(gate);
         AssertContainsRequiredLanes(gate);
+        AssertGitHubActionsRunLaneUsesValidation(gate);
         AssertPostPublishLaneRequiresRealProof(gate);
 
         using JsonDocument validationDocument = ReadFinalReleaseJson("remote-ci-and-public-publish-proof-backfill-gate-validation.json");
@@ -62,6 +63,16 @@ public sealed class RemoteCiAndPublicPublishProofBackfillGateTests
         RunPowerShell("Test-GitHubPublishAndCiStatusSnapshot.ps1", "-Strict");
         RunPowerShell("Export-FinalPrepublishQualityFreezeDashboard.ps1");
         RunPowerShell("Test-FinalPrepublishQualityFreezeDashboard.ps1", "-Strict");
+        RunPowerShell("Test-GitHubActionsRunEvidenceImport.ps1", "-Strict");
+        RunPowerShell("Export-OwnerPublicPublishExecutionResultInputContract.ps1");
+        RunPowerShell("Export-OwnerPublicPublishExecutionResultInputTemplate.ps1");
+        RunPowerShell("Test-OwnerPublicPublishExecutionResultPreflight.ps1", "-Strict");
+        RunPowerShell("Import-OwnerPublicPublishExecutionResultCandidate.ps1");
+        RunPowerShell("Test-OwnerPublicPublishExecutionResultCandidate.ps1", "-Strict");
+        RunPowerShell("Export-PublicPackageDownloadProofInputTemplate.ps1");
+        RunPowerShell("Test-PublicPackageDownloadProofInput.ps1", "-Strict");
+        RunPowerShell("Import-PostPublishCleanConsumerProofResult.ps1");
+        RunPowerShell("Test-PostPublishCleanConsumerProofResult.ps1", "-Strict");
         RunPowerShell("Export-RemoteCiAndPublicPublishProofBackfillGate.ps1");
         RunPowerShell("Test-RemoteCiAndPublicPublishProofBackfillGate.ps1", "-Strict");
         RunPowerShell("Export-ReleaseEvidenceBundle.ps1");
@@ -94,6 +105,18 @@ public sealed class RemoteCiAndPublicPublishProofBackfillGateTests
         Assert.False(lane.GetProperty("ready").GetBoolean());
         Assert.True(lane.GetProperty("blocked").GetBoolean());
         Assert.Contains("Validation-ready alone is not enough", lane.GetProperty("requiredEvidence").GetString(), StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static void AssertGitHubActionsRunLaneUsesValidation(JsonElement gate)
+    {
+        JsonElement lane = gate.GetProperty("lanes")
+            .EnumerateArray()
+            .Single(static lane => lane.GetProperty("id").GetString() == "github-actions-run-proof");
+
+        Assert.Equal("artifacts/final-release/github-actions-run-evidence-import-validation.json", lane.GetProperty("artifact").GetString());
+        Assert.Equal("blocked-github-actions-run-evidence-required", lane.GetProperty("state").GetString());
+        Assert.False(lane.GetProperty("ready").GetBoolean());
+        Assert.Contains("Test-GitHubActionsRunEvidenceImport.ps1", lane.GetProperty("requiredEvidence").GetString(), StringComparison.OrdinalIgnoreCase);
     }
 
     private static void AssertRequiredSourceArtifacts(JsonElement evidence)
@@ -171,5 +194,7 @@ public sealed class RemoteCiAndPublicPublishProofBackfillGateTests
         "artifacts/final-release/remote-ci-and-public-publish-proof-backfill-gate.md",
         "artifacts/final-release/remote-ci-and-public-publish-proof-backfill-gate-validation.json",
         "artifacts/final-release/remote-ci-and-public-publish-proof-backfill-gate-validation.md",
+        "artifacts/final-release/github-actions-run-evidence-import-validation.json",
+        "artifacts/final-release/github-actions-run-evidence-import-validation.md",
     ];
 }

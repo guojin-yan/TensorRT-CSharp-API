@@ -122,6 +122,16 @@ public sealed class StrictCloseRemoteProofDependencyGateTests
         RunPowerShell("Test-GitHubPublishAndCiStatusSnapshot.ps1", "-Strict");
         RunPowerShell("Export-FinalPrepublishQualityFreezeDashboard.ps1");
         RunPowerShell("Test-FinalPrepublishQualityFreezeDashboard.ps1", "-Strict");
+        RunPowerShell("Test-GitHubActionsRunEvidenceImport.ps1", "-Strict");
+        RunPowerShell("Export-OwnerPublicPublishExecutionResultInputContract.ps1");
+        RunPowerShell("Export-OwnerPublicPublishExecutionResultInputTemplate.ps1");
+        RunPowerShell("Test-OwnerPublicPublishExecutionResultPreflight.ps1", "-Strict");
+        RunPowerShell("Import-OwnerPublicPublishExecutionResultCandidate.ps1");
+        RunPowerShell("Test-OwnerPublicPublishExecutionResultCandidate.ps1", "-Strict");
+        RunPowerShell("Export-PublicPackageDownloadProofInputTemplate.ps1");
+        RunPowerShell("Test-PublicPackageDownloadProofInput.ps1", "-Strict");
+        RunPowerShell("Import-PostPublishCleanConsumerProofResult.ps1");
+        RunPowerShell("Test-PostPublishCleanConsumerProofResult.ps1", "-Strict");
         RunPowerShell("Export-RemoteCiAndPublicPublishProofBackfillGate.ps1");
         RunPowerShell("Test-RemoteCiAndPublicPublishProofBackfillGate.ps1", "-Strict");
         RunPowerShell("Export-StrictCloseReadyConvergenceDashboard.ps1");
