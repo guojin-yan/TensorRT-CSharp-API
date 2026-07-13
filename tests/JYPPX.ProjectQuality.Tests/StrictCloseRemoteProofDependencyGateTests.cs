@@ -67,8 +67,10 @@ public sealed class StrictCloseRemoteProofDependencyGateTests
         JsonElement finalClose = finalCloseDocument.RootElement;
         Assert.Equal("final-close-gate-convergence", finalClose.GetProperty("recordKind").GetString());
         Assert.Equal("blocked-final-close-gate-owner-proof-required", finalClose.GetProperty("convergenceState").GetString());
-        Assert.Equal(14, finalClose.GetProperty("laneCount").GetInt32());
-        Assert.Equal(14, finalClose.GetProperty("blockedLaneCount").GetInt32());
+        Assert.Equal(16, finalClose.GetProperty("laneCount").GetInt32());
+        Assert.Equal(16, finalClose.GetProperty("blockedLaneCount").GetInt32());
+        Assert.Equal(2, finalClose.GetProperty("dualPackageRouteCount").GetInt32());
+        Assert.False(finalClose.GetProperty("dualPackageAcceptsSubstituteProof").GetBoolean());
         Assert.Equal("blocked-remote-ci-and-public-publish-proof-backfill-required", finalClose.GetProperty("remoteCiAndPublicPublishProofBackfillGateState").GetString());
         AssertFlagsStayNonProof(finalClose);
 
@@ -79,6 +81,12 @@ public sealed class StrictCloseRemoteProofDependencyGateTests
             Assert.False(lane.GetProperty("ready").GetBoolean());
             Assert.Equal(laneId, lane.GetProperty("remoteProofGateLaneId").GetString());
             AssertFlagsStayNonProof(lane);
+        }
+
+        foreach (string laneId in RequiredDualPackageLaneIds)
+        {
+            JsonElement lane = finalCloseLanes.Single(lane => lane.GetProperty("id").GetString() == laneId);
+            AssertDualPackageLaneBlocksClose(lane);
         }
 
         JsonElement finalClosePostPublishLane = finalCloseLanes.Single(static lane => lane.GetProperty("id").GetString() == "post-publish-clean-consumer-proof");
@@ -92,8 +100,13 @@ public sealed class StrictCloseRemoteProofDependencyGateTests
         JsonElement finalCloseValidation = finalCloseValidationDocument.RootElement;
         Assert.Equal("blocked-final-close-gate-owner-proof-required", finalCloseValidation.GetProperty("validationState").GetString());
         Assert.Equal(0, finalCloseValidation.GetProperty("failedBlockerCount").GetInt32());
+        Assert.Equal(2, finalCloseValidation.GetProperty("dualPackageRouteCount").GetInt32());
+        Assert.Equal(2, finalCloseValidation.GetProperty("dualPackageBlockedLaneCount").GetInt32());
+        Assert.False(finalCloseValidation.GetProperty("dualPackageAcceptsSubstituteProof").GetBoolean());
         AssertValidationItemPassed(finalCloseValidation, "remote-proof-lanes-present");
         AssertValidationItemPassed(finalCloseValidation, "remote-proof-lanes-block-close");
+        AssertValidationItemPassed(finalCloseValidation, "dual-package-lanes-present");
+        AssertValidationItemPassed(finalCloseValidation, "dual-package-lanes-block-close");
         AssertValidationItemPassed(finalCloseValidation, "post-publish-proof-lane-requires-proof-candidate-ready");
         AssertFlagsStayNonProof(finalCloseValidation);
 
@@ -114,6 +127,14 @@ public sealed class StrictCloseRemoteProofDependencyGateTests
         Assert.Contains("publicPackageDownloadProofPath", ownerApprovalRaw, StringComparison.Ordinal);
         Assert.Contains("postPublishCleanConsumerProofResultPath", ownerApprovalRaw, StringComparison.Ordinal);
         AssertFlagsStayNonProof(ownerApproval);
+
+        using JsonDocument evidenceDocument = ReadFinalReleaseJson("release-evidence-bundle.json");
+        JsonElement evidence = evidenceDocument.RootElement;
+        Assert.Equal(16, evidence.GetProperty("finalCloseGateConvergenceLaneCount").GetInt32());
+        Assert.Equal(16, evidence.GetProperty("finalCloseGateConvergenceBlockedLaneCount").GetInt32());
+        Assert.Equal(2, evidence.GetProperty("finalCloseGateConvergenceDualPackageRouteCount").GetInt32());
+        Assert.Equal(2, evidence.GetProperty("finalCloseGateConvergenceDualPackageBlockedLaneCount").GetInt32());
+        Assert.False(evidence.GetProperty("finalCloseGateConvergenceDualPackageAcceptsSubstituteProof").GetBoolean());
     }
 
     private static void RunPipeline()
@@ -136,6 +157,8 @@ public sealed class StrictCloseRemoteProofDependencyGateTests
         RunPowerShell("Test-PostPublishCleanConsumerProofResult.ps1", "-Strict");
         RunPowerShell("Export-RemoteCiAndPublicPublishProofBackfillGate.ps1");
         RunPowerShell("Test-RemoteCiAndPublicPublishProofBackfillGate.ps1", "-Strict");
+        RunPowerShell("Export-DualPackagePublishPreflightMatrix.ps1");
+        RunPowerShell("Test-DualPackagePublishPreflightMatrix.ps1", "-Strict");
         RunPowerShell("Export-StrictCloseReadyConvergenceDashboard.ps1");
         RunPowerShell("Test-StrictCloseReadyConvergenceDashboard.ps1", "-Strict");
         RunPowerShell("Export-FinalCloseGateConvergence.ps1");
@@ -173,6 +196,19 @@ public sealed class StrictCloseRemoteProofDependencyGateTests
         Assert.False(element.GetProperty("isReleaseCloseProof").GetBoolean());
     }
 
+    private static void AssertDualPackageLaneBlocksClose(JsonElement lane)
+    {
+        Assert.False(lane.GetProperty("ready").GetBoolean());
+        Assert.True(lane.GetProperty("ownerActionRequired").GetBoolean());
+        Assert.True(lane.GetProperty("externalProofRequired").GetBoolean());
+        Assert.True(lane.GetProperty("postPublishProofRequired").GetBoolean());
+        Assert.False(lane.GetProperty("acceptsSubstituteProof").GetBoolean());
+        Assert.False(string.IsNullOrWhiteSpace(lane.GetProperty("nextOwnerAction").GetString()));
+        Assert.False(string.IsNullOrWhiteSpace(lane.GetProperty("externalProofMissingReason").GetString()));
+        Assert.False(string.IsNullOrWhiteSpace(lane.GetProperty("postPublishProofMissingReason").GetString()));
+        AssertFlagsStayNonProof(lane);
+    }
+
     private static void RunPowerShell(string scriptName, params string[] arguments)
     {
         string scriptPath = Path.Combine(RepositoryPaths.Root, "eng", scriptName);
@@ -185,6 +221,12 @@ public sealed class StrictCloseRemoteProofDependencyGateTests
         "owner-public-publish-result",
         "public-package-download-proof",
         "post-publish-clean-consumer-proof",
+    ];
+
+    private static readonly string[] RequiredDualPackageLaneIds =
+    [
+        "dual-package-nuget-small-bridge-core",
+        "dual-package-github-packages-full-runtime",
     ];
 
     private static readonly string[] RequiredRemoteProofSourceArtifacts =

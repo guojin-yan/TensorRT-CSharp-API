@@ -32,6 +32,8 @@ public sealed class PostPublishOwnerProofAndFinalCloseGateTests
         "artifacts/final-release/final-close-gate-convergence.md",
         "artifacts/final-release/final-close-gate-convergence-validation.json",
         "artifacts/final-release/final-close-gate-convergence-validation.md",
+        "artifacts/final-release/dual-package-publish-preflight-matrix-validation.json",
+        "artifacts/final-release/dual-package-publish-preflight-matrix-validation.md",
     ];
 
     [Fact]
@@ -71,8 +73,11 @@ public sealed class PostPublishOwnerProofAndFinalCloseGateTests
         JsonElement convergence = convergenceDocument.RootElement;
         Assert.Equal("blocked-final-close-gate-owner-proof-required", convergence.GetProperty("validationState").GetString());
         int convergenceLaneCount = convergence.GetProperty("laneCount").GetInt32();
-        Assert.True(convergenceLaneCount >= 10);
+        Assert.True(convergenceLaneCount >= 16);
         Assert.Equal(convergenceLaneCount, convergence.GetProperty("blockedLaneCount").GetInt32());
+        Assert.Equal(2, convergence.GetProperty("dualPackageRouteCount").GetInt32());
+        Assert.Equal(2, convergence.GetProperty("dualPackageBlockedLaneCount").GetInt32());
+        Assert.False(convergence.GetProperty("dualPackageAcceptsSubstituteProof").GetBoolean());
         Assert.Equal(0, convergence.GetProperty("failedBlockerCount").GetInt32());
         Assert.True(convergence.GetProperty("failedActionRequiredCount").GetInt32() >= 1);
         AssertFalseProofPublishCloseFlags(convergence);
@@ -90,6 +95,9 @@ public sealed class PostPublishOwnerProofAndFinalCloseGateTests
         Assert.Equal("blocked-post-publish-clean-consumer-proof-record-required", evidence.GetProperty("postPublishCleanConsumerProofRecordContractValidationState").GetString());
         Assert.Equal("blocked-release-issue-close-strict-owner-decision-required", evidence.GetProperty("releaseIssueCloseStrictOwnerDecisionImportValidationState").GetString());
         Assert.Equal("blocked-final-close-gate-owner-proof-required", evidence.GetProperty("finalCloseGateConvergenceValidationState").GetString());
+        Assert.Equal(2, evidence.GetProperty("finalCloseGateConvergenceDualPackageRouteCount").GetInt32());
+        Assert.Equal(2, evidence.GetProperty("finalCloseGateConvergenceDualPackageBlockedLaneCount").GetInt32());
+        Assert.False(evidence.GetProperty("finalCloseGateConvergenceDualPackageAcceptsSubstituteProof").GetBoolean());
         Assert.False(evidence.GetProperty("publicPublishRealResultOwnerInputContractCanPublishPublicly").GetBoolean());
         Assert.False(evidence.GetProperty("postPublishCleanConsumerProofRecordContractCanPublishPublicly").GetBoolean());
         Assert.False(evidence.GetProperty("releaseIssueCloseStrictOwnerDecisionImportCanCloseReleaseIssue").GetBoolean());
@@ -139,6 +147,8 @@ public sealed class PostPublishOwnerProofAndFinalCloseGateTests
         RunPowerShell("Test-PostPublishCleanConsumerProofRecordContract.ps1", "-Strict");
         RunPowerShell("Export-ReleaseIssueCloseStrictOwnerDecisionImport.ps1");
         RunPowerShell("Test-ReleaseIssueCloseStrictOwnerDecisionImport.ps1", "-Strict");
+        RunPowerShell("Export-DualPackagePublishPreflightMatrix.ps1");
+        RunPowerShell("Test-DualPackagePublishPreflightMatrix.ps1", "-Strict");
         RunPowerShell("Export-FinalCloseGateConvergence.ps1");
         RunPowerShell("Test-FinalCloseGateConvergence.ps1", "-Strict");
         RunPowerShell("Export-ReleaseEvidenceBundle.ps1");

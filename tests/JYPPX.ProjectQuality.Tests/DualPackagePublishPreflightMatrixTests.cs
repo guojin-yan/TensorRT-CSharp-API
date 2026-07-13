@@ -11,11 +11,15 @@ public sealed class DualPackagePublishPreflightMatrixTests
     public void DualPackagePreflightMatrixSeparatesNuGetSmallPackageAndGitHubFullRuntimeWithoutPublishingClaims()
     {
         string scriptPath = Path.Combine(RepositoryPaths.Root, "eng", "Export-DualPackagePublishPreflightMatrix.ps1");
+        string validatorPath = Path.Combine(RepositoryPaths.Root, "eng", "Test-DualPackagePublishPreflightMatrix.ps1");
         Assert.True(File.Exists(scriptPath), "Dual package publish preflight matrix export script must exist.");
+        Assert.True(File.Exists(validatorPath), "Dual package publish preflight matrix validator script must exist.");
 
         string script = File.ReadAllText(scriptPath);
+        string validator = File.ReadAllText(validatorPath);
         Assert.Contains("nuget-small-bridge-core", script, StringComparison.Ordinal);
         Assert.Contains("github-packages-full-runtime", script, StringComparison.Ordinal);
+        Assert.Contains("blocked-dual-package-publish-preflight-owner-proof-required", validator, StringComparison.Ordinal);
         Assert.Contains("performsPublish = $false", script, StringComparison.Ordinal);
         Assert.Contains("usesPublishToken = $false", script, StringComparison.Ordinal);
         Assert.Contains("requiresOwnerAuthorization = $true", script, StringComparison.Ordinal);
@@ -29,6 +33,7 @@ public sealed class DualPackagePublishPreflightMatrixTests
         Assert.Contains("acceptsSubstituteProof = $false", script, StringComparison.Ordinal);
 
         RunPowerShell(scriptPath);
+        RunPowerShell(validatorPath, "-Strict");
 
         using JsonDocument document = ReadFinalReleaseJson("dual-package-publish-preflight-matrix.json");
         JsonElement root = document.RootElement;
@@ -122,6 +127,18 @@ public sealed class DualPackagePublishPreflightMatrixTests
         Assert.Contains("Post-Publish Proof Missing Reason", markdown, StringComparison.Ordinal);
         Assert.Contains("Accepts Substitute Proof", markdown, StringComparison.Ordinal);
         Assert.Contains("does not publish", markdown, StringComparison.OrdinalIgnoreCase);
+
+        using JsonDocument validationDocument = ReadFinalReleaseJson("dual-package-publish-preflight-matrix-validation.json");
+        JsonElement validation = validationDocument.RootElement;
+        Assert.Equal("dual-package-publish-preflight-matrix-validation", validation.GetProperty("recordKind").GetString());
+        Assert.Equal("blocked-dual-package-publish-preflight-owner-proof-required", validation.GetProperty("validationState").GetString());
+        Assert.Equal(2, validation.GetProperty("routeCount").GetInt32());
+        Assert.Equal(0, validation.GetProperty("failedBlockerCount").GetInt32());
+        Assert.False(validation.GetProperty("performsPublish").GetBoolean());
+        Assert.False(validation.GetProperty("canPublishPublicly").GetBoolean());
+        Assert.False(validation.GetProperty("canPublishGitHubPackages").GetBoolean());
+        Assert.False(validation.GetProperty("canCloseReleaseIssue").GetBoolean());
+        Assert.False(validation.GetProperty("acceptsSubstituteProof").GetBoolean());
     }
 
     private static JsonDocument ReadFinalReleaseJson(string fileName)

@@ -130,6 +130,47 @@ function New-RemoteProofGateLane {
   }
 }
 
+function New-DualPackageGateLane {
+  param([AllowNull()][object]$Route)
+
+  $routeId = [string](Get-PropertyOrDefault -Object $Route -Name "id" -DefaultValue "missing-dual-package-route")
+  $blockedReasons = ConvertTo-StringArray (Get-PropertyOrDefault -Object $Route -Name "blockedReasons" -DefaultValue @("dual-package-owner-action-required"))
+  [pscustomobject]@{
+    id = "dual-package-$routeId"
+    state = "blocked-dual-package-publish-route-owner-proof-required"
+    ready = $false
+    strictValidatorRequired = $true
+    strictValidatorInputOnly = $true
+    bridgeInputOnly = $true
+    validatorCommand = "eng\Test-DualPackagePublishPreflightMatrix.ps1 -Strict"
+    sourceArtifactStateProperty = "dualPackagePublishPreflightRoute"
+    blockedReason = if ($blockedReasons.Count -gt 0) { [string]$blockedReasons[0] } else { "dual-package-owner-action-required" }
+    blockedReasons = @($blockedReasons)
+    sourceOwnerResultRows = @()
+    resultArtifactPaths = @("artifacts/final-release/dual-package-publish-preflight-matrix.json", "artifacts/final-release/dual-package-publish-preflight-matrix.md", "artifacts/final-release/dual-package-publish-preflight-matrix-validation.json")
+    hashProof = $null
+    nextOwnerAction = [string](Get-PropertyOrDefault -Object $Route -Name "nextOwnerAction" -DefaultValue "owner-authorize-package-route-and-import-real-proof")
+    requiredEvidence = "Owner authorization, external clean consumer proof, public/package-source download proof, and post-publish clean consumer proof for this package route."
+    dualPackageRouteId = $routeId
+    distributionChannel = [string](Get-PropertyOrDefault -Object $Route -Name "distributionChannel" -DefaultValue "")
+    packageId = [string](Get-PropertyOrDefault -Object $Route -Name "packageId" -DefaultValue "")
+    externalProofRequired = [bool](Get-PropertyOrDefault -Object $Route -Name "externalProofRequired" -DefaultValue $true)
+    externalProofMissingReason = [string](Get-PropertyOrDefault -Object $Route -Name "externalProofMissingReason" -DefaultValue "external-proof-missing")
+    postPublishProofRequired = [bool](Get-PropertyOrDefault -Object $Route -Name "postPublishProofRequired" -DefaultValue $true)
+    postPublishProofMissingReason = [string](Get-PropertyOrDefault -Object $Route -Name "postPublishProofMissingReason" -DefaultValue "post-publish-proof-missing")
+    ownerActionRequired = [bool](Get-PropertyOrDefault -Object $Route -Name "ownerActionRequired" -DefaultValue $true)
+    acceptsSubstituteProof = [bool](Get-PropertyOrDefault -Object $Route -Name "acceptsSubstituteProof" -DefaultValue $true)
+    performsPublish = $false
+    canPromoteRuntimeProof = $false
+    canPublishPublicly = $false
+    canCloseReleaseIssue = $false
+    isRuntimeExecutionProof = $false
+    isReleaseCloseProof = $false
+    isPostPublishProof = $false
+    boundary = "Dual package final-close lane only; not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push."
+  }
+}
+
 $publicPublishRealResult = Read-JsonOrNull "artifacts\final-release\public-publish-real-result-owner-input-contract-validation.json"
 $cleanConsumerProof = Read-JsonOrNull "artifacts\final-release\post-publish-clean-consumer-proof-record-contract-validation.json"
 $postPublishVerification = Read-JsonOrNull "artifacts\final-release\post-publish-verification-validation.json"
@@ -142,14 +183,18 @@ $candidateFromOwnerResult = Read-JsonOrNull "artifacts\final-release\real-proof-
 $realExternalImportValidator = Read-JsonOrNull "artifacts\final-release\real-external-proof-record-import-validator-validation.json"
 $remoteProofBackfillGate = Read-JsonOrNull "artifacts\final-release\remote-ci-and-public-publish-proof-backfill-gate.json"
 $remoteProofBackfillGateValidation = Read-JsonOrNull "artifacts\final-release\remote-ci-and-public-publish-proof-backfill-gate-validation.json"
+$dualPackagePublishPreflightMatrix = Read-JsonOrNull "artifacts\final-release\dual-package-publish-preflight-matrix.json"
 $remoteProofBackfillGateState = [string](Get-PropertyOrDefault -Object $remoteProofBackfillGateValidation -Name "validationState" -DefaultValue "missing-remote-ci-and-public-publish-proof-backfill-gate-validation")
 $remoteProofLanes = @((Get-PropertyOrDefault -Object $remoteProofBackfillGate -Name "lanes" -DefaultValue @()))
+$dualPackageRoutes = @((Get-PropertyOrDefault -Object $dualPackagePublishPreflightMatrix -Name "routes" -DefaultValue @()))
+$dualPackageGateLanes = @($dualPackageRoutes | ForEach-Object { New-DualPackageGateLane -Route $_ })
 
 $gateLanes = @(
   New-RemoteProofGateLane -Id "github-actions-run-proof" -RemoteLane (Get-LaneById -Lanes $remoteProofLanes -Id "github-actions-run-proof") -RequiredEvidence "Real GitHub Actions workflow run URL, run id, head SHA, conclusion, log hash, and artifact hash." -NextOwnerAction "Import a real successful GitHub Actions run proof for the pushed commit; queued workflow and local tests remain substitutes."
   New-RemoteProofGateLane -Id "owner-public-publish-result" -RemoteLane (Get-LaneById -Lanes $remoteProofLanes -Id "owner-public-publish-result") -RequiredEvidence "Owner public publish result with public package URLs, package identity, hashes, transcript hashes, reviewer, and authorization linkage." -NextOwnerAction "Import actual public NuGet/GitHub publish result from Owner execution."
   New-RemoteProofGateLane -Id "public-package-download-proof" -RemoteLane (Get-LaneById -Lanes $remoteProofLanes -Id "public-package-download-proof") -RequiredEvidence "Public package download source/URL, package identity, timestamp, and SHA256 from a non-local source." -NextOwnerAction "Download the public package from the public source and import hash proof."
   New-RemoteProofGateLane -Id "post-publish-clean-consumer-proof" -RemoteLane (Get-LaneById -Lanes $remoteProofLanes -Id "post-publish-clean-consumer-proof") -RequiredEvidence "Repository-external clean consumer restore/build/smoke proof with proofCandidateReady=true after public publication." -RequireProofReady $true -ProofReadyProperty "proofCandidateReady" -NextOwnerAction "Provide repository-external clean consumer proof from public packages; validation-ready without proofCandidateReady remains blocked."
+) + $dualPackageGateLanes + @(
   New-GateLane -Id "public-publish-real-result" -Record $publicPublishRealResult -StateProperty "validationState" -DefaultState "missing-public-publish-real-result-owner-input-contract-validation" -NextOwnerAction "Provide real public package source, URL, SHA256, timestamp, transcript, reviewer, and rollback review."
   New-GateLane -Id "post-publish-clean-consumer-proof-record-contract" -Record $cleanConsumerProof -StateProperty "validationState" -DefaultState "missing-post-publish-clean-consumer-proof-record-contract-validation" -NextOwnerAction "Provide repository-external clean consumer restore/build/smoke evidence and no-substitute scan."
   New-GateLane -Id "post-publish-verification" -Record $postPublishVerification -StateProperty "validationState" -DefaultState "missing-post-publish-verification-validation" -NextOwnerAction "Run or import post-publish verification after real public package publish."
@@ -179,9 +224,10 @@ $strictValidatorSourceArtifacts = @(
   "artifacts/final-release/owner-external-proof-execution-result-import-validation.json",
   "artifacts/final-release/real-external-proof-record-import-validator-validation.json",
   "artifacts/final-release/real-proof-record-candidate-from-owner-result-import-validation.json",
-  "artifacts/final-release/release-close-real-proof-import-bridge-validation.json",
-  "artifacts/final-release/release-issue-close-record-validation.json"
-)
+    "artifacts/final-release/release-close-real-proof-import-bridge-validation.json",
+    "artifacts/final-release/release-issue-close-record-validation.json"
+    "artifacts/final-release/dual-package-publish-preflight-matrix-validation.json"
+  )
 
 $record = [pscustomobject]@{
   recordKind = "final-close-gate-convergence"
@@ -193,6 +239,12 @@ $record = [pscustomobject]@{
   gateLanes = @($gateLanes)
   remoteCiAndPublicPublishProofBackfillGateState = $remoteProofBackfillGateState
   remoteProofRequiredLaneIds = @("github-actions-run-proof", "owner-public-publish-result", "public-package-download-proof", "post-publish-clean-consumer-proof")
+  dualPackagePublishPreflightState = [string](Get-PropertyOrDefault -Object $dualPackagePublishPreflightMatrix -Name "recordKind" -DefaultValue "missing-dual-package-publish-preflight-matrix")
+  dualPackageRouteCount = $dualPackageRoutes.Count
+  dualPackageRouteOwnerActions = @($dualPackageRoutes | ForEach-Object { [string](Get-PropertyOrDefault -Object $_ -Name "nextOwnerAction" -DefaultValue "") })
+  dualPackageExternalProofMissingReasons = @($dualPackageRoutes | ForEach-Object { [string](Get-PropertyOrDefault -Object $_ -Name "externalProofMissingReason" -DefaultValue "") })
+  dualPackagePostPublishProofMissingReasons = @($dualPackageRoutes | ForEach-Object { [string](Get-PropertyOrDefault -Object $_ -Name "postPublishProofMissingReason" -DefaultValue "") })
+  dualPackageAcceptsSubstituteProof = [bool](Get-PropertyOrDefault -Object $dualPackagePublishPreflightMatrix -Name "acceptsSubstituteProof" -DefaultValue $true)
   sourceArtifacts = @(
     "artifacts/final-release/remote-ci-and-public-publish-proof-backfill-gate.json",
     "artifacts/final-release/remote-ci-and-public-publish-proof-backfill-gate.md",
@@ -205,6 +257,8 @@ $record = [pscustomobject]@{
     "artifacts/final-release/real-external-proof-record-import-validator-validation.json",
     "artifacts/final-release/real-proof-record-candidate-from-owner-result-import-validation.json",
     "artifacts/final-release/release-close-real-proof-import-bridge-validation.json",
+    "artifacts/final-release/dual-package-publish-preflight-matrix.json",
+    "artifacts/final-release/dual-package-publish-preflight-matrix.md",
     "artifacts/final-release/release-issue-close-strict-owner-decision-import-validation.json",
     "artifacts/final-release/strict-close-ready-convergence-dashboard-validation.json",
     "artifacts/final-release/release-issue-close-record-validation.json"
@@ -233,6 +287,7 @@ $record = [pscustomobject]@{
     bridgeInputOnly = $true
     dashboardsCloseNothing = $true
     ownerRealProofRequired = $true
+    dualPackageOwnerActionRequired = $true
   }
   notExecutedByAutomation = $true
   ownerExecutionOnly = $true

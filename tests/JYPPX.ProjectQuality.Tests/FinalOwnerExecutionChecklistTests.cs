@@ -10,6 +10,7 @@ public sealed class FinalOwnerExecutionChecklistTests
     public void ChecklistPrescribesFinalOwnerPathWithoutAutomatedPush()
     {
         OwnerRealInputLandingPackTests.RunPowerShell("Export-DualPackagePublishPreflightMatrix.ps1");
+        OwnerRealInputLandingPackTests.RunPowerShell("Test-DualPackagePublishPreflightMatrix.ps1", "-Strict");
         OwnerRealInputLandingPackTests.RunPowerShell("Export-FinalOwnerExecutionChecklist.ps1");
         OwnerRealInputLandingPackTests.RunPowerShell("Test-FinalOwnerExecutionChecklist.ps1", "-Strict");
 

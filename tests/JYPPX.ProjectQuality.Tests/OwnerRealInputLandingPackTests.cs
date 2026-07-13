@@ -92,6 +92,7 @@ public sealed class OwnerRealInputLandingPackTests
         RunPowerShell("Export-OwnerRealInputLandingPack.ps1");
         RunPowerShell("Test-OwnerRealInputLandingPack.ps1", "-Strict");
         RunPowerShell("Export-DualPackagePublishPreflightMatrix.ps1");
+        RunPowerShell("Test-DualPackagePublishPreflightMatrix.ps1", "-Strict");
         RunPowerShell("Export-FinalOwnerExecutionChecklist.ps1");
         RunPowerShell("Test-FinalOwnerExecutionChecklist.ps1", "-Strict");
         RunPowerShell("Test-RealProofImportBoundaryAudit.ps1", "-Strict");
