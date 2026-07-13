@@ -99,12 +99,23 @@ public sealed class FinalOwnerExecutionChecklistTests
         Assert.False(evidence.GetProperty("finalOwnerExecutionChecklistCanPublishPublicly").GetBoolean());
         Assert.False(evidence.GetProperty("finalOwnerExecutionChecklistCanCloseReleaseIssue").GetBoolean());
         Assert.False(evidence.GetProperty("finalOwnerExecutionChecklistIsRuntimeExecutionProof").GetBoolean());
+        Assert.Equal(2, evidence.GetProperty("finalOwnerExecutionChecklistDualPackageRouteCount").GetInt32());
+        Assert.Equal(2, evidence.GetProperty("finalOwnerExecutionChecklistDualPackageOwnerActionCount").GetInt32());
+        Assert.Equal(2, evidence.GetProperty("finalOwnerExecutionChecklistDualPackageExternalProofMissingReasonCount").GetInt32());
+        Assert.Equal(2, evidence.GetProperty("finalOwnerExecutionChecklistDualPackagePostPublishProofMissingReasonCount").GetInt32());
+        Assert.False(evidence.GetProperty("finalOwnerExecutionChecklistDualPackageAcceptsSubstituteProof").GetBoolean());
+
+        string[] dualOwnerActions = evidence.GetProperty("finalOwnerExecutionChecklistDualPackageRouteOwnerActions").EnumerateArray().Select(static item => item.GetString()!).ToArray();
+        Assert.Contains("owner-authorize-public-nuget-publish-and-import-clean-external-consumer-proof", dualOwnerActions);
+        Assert.Contains("owner-authorize-github-packages-publish-and-import-credentialed-clean-runtime-proof", dualOwnerActions);
 
         OwnerRealInputLandingPackTests.AssertBlockedEvidenceItem(evidence, "final-owner-execution-checklist");
 
         string[] sourceArtifacts = evidence.GetProperty("sourceArtifacts").EnumerateArray().Select(static item => item.GetString()!).ToArray();
         Assert.Contains("artifacts/final-release/final-owner-execution-checklist.json", sourceArtifacts);
         Assert.Contains("artifacts/final-release/final-owner-execution-checklist-validation.json", sourceArtifacts);
+        Assert.Contains("artifacts/final-release/dual-package-publish-preflight-matrix.json", sourceArtifacts);
+        Assert.Contains("artifacts/final-release/dual-package-publish-preflight-matrix.md", sourceArtifacts);
 
         using JsonDocument auditDocument = OwnerRealInputLandingPackTests.ReadFinalReleaseJson("release-evidence-classification-audit.json");
         JsonElement audit = auditDocument.RootElement;

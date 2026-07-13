@@ -2689,6 +2689,14 @@ $finalOwnerExecutionChecklistCanCloseReleaseIssue = [bool](Get-PropertyOrDefault
 $finalOwnerExecutionChecklistIsRuntimeExecutionProof = [bool](Get-PropertyOrDefault -Object $finalOwnerExecutionChecklistValidation -Name "isRuntimeExecutionProof" -DefaultValue $false)
 $finalOwnerExecutionChecklistIsPostPublishProof = [bool](Get-PropertyOrDefault -Object $finalOwnerExecutionChecklistValidation -Name "isPostPublishProof" -DefaultValue $false)
 $finalOwnerExecutionChecklistIsReleaseCloseProof = [bool](Get-PropertyOrDefault -Object $finalOwnerExecutionChecklistValidation -Name "isReleaseCloseProof" -DefaultValue $false)
+$finalOwnerExecutionChecklistDualPackageRouteCount = [int](Get-PropertyOrDefault -Object $finalOwnerExecutionChecklistValidation -Name "dualPackageRouteCount" -DefaultValue 0)
+$finalOwnerExecutionChecklistDualPackageOwnerActionCount = [int](Get-PropertyOrDefault -Object $finalOwnerExecutionChecklistValidation -Name "dualPackageOwnerActionCount" -DefaultValue 0)
+$finalOwnerExecutionChecklistDualPackageExternalProofMissingReasonCount = [int](Get-PropertyOrDefault -Object $finalOwnerExecutionChecklistValidation -Name "dualPackageExternalProofMissingReasonCount" -DefaultValue 0)
+$finalOwnerExecutionChecklistDualPackagePostPublishProofMissingReasonCount = [int](Get-PropertyOrDefault -Object $finalOwnerExecutionChecklistValidation -Name "dualPackagePostPublishProofMissingReasonCount" -DefaultValue 0)
+$finalOwnerExecutionChecklistDualPackageRouteOwnerActions = @((Get-PropertyOrDefault -Object $finalOwnerExecutionChecklist -Name "dualPackageRouteOwnerActions" -DefaultValue @()) | ForEach-Object { [string]$_ })
+$finalOwnerExecutionChecklistDualPackageExternalProofMissingReasons = @((Get-PropertyOrDefault -Object $finalOwnerExecutionChecklist -Name "dualPackageExternalProofMissingReasons" -DefaultValue @()) | ForEach-Object { [string]$_ })
+$finalOwnerExecutionChecklistDualPackagePostPublishProofMissingReasons = @((Get-PropertyOrDefault -Object $finalOwnerExecutionChecklist -Name "dualPackagePostPublishProofMissingReasons" -DefaultValue @()) | ForEach-Object { [string]$_ })
+$finalOwnerExecutionChecklistDualPackageAcceptsSubstituteProof = [bool](Get-PropertyOrDefault -Object $finalOwnerExecutionChecklist -Name "dualPackageAcceptsSubstituteProof" -DefaultValue $false)
 $realProofImportBoundaryAuditState = [string](Get-PropertyOrDefault -Object $realProofImportBoundaryAudit -Name "auditState" -DefaultValue "missing-real-proof-import-boundary-audit")
 $realProofImportBoundaryAuditScannedFileCount = [int](Get-PropertyOrDefault -Object $realProofImportBoundaryAudit -Name "scannedFileCount" -DefaultValue 0)
 $realProofImportBoundaryAuditFindingCount = [int](Get-PropertyOrDefault -Object $realProofImportBoundaryAudit -Name "findingCount" -DefaultValue 999)
@@ -4928,6 +4936,14 @@ $record = [pscustomobject]@{
   finalOwnerExecutionChecklistCanPublishPublicly = $finalOwnerExecutionChecklistCanPublishPublicly
   finalOwnerExecutionChecklistCanCloseReleaseIssue = $finalOwnerExecutionChecklistCanCloseReleaseIssue
   finalOwnerExecutionChecklistIsRuntimeExecutionProof = $finalOwnerExecutionChecklistIsRuntimeExecutionProof
+  finalOwnerExecutionChecklistDualPackageRouteCount = $finalOwnerExecutionChecklistDualPackageRouteCount
+  finalOwnerExecutionChecklistDualPackageOwnerActionCount = $finalOwnerExecutionChecklistDualPackageOwnerActionCount
+  finalOwnerExecutionChecklistDualPackageExternalProofMissingReasonCount = $finalOwnerExecutionChecklistDualPackageExternalProofMissingReasonCount
+  finalOwnerExecutionChecklistDualPackagePostPublishProofMissingReasonCount = $finalOwnerExecutionChecklistDualPackagePostPublishProofMissingReasonCount
+  finalOwnerExecutionChecklistDualPackageRouteOwnerActions = @($finalOwnerExecutionChecklistDualPackageRouteOwnerActions)
+  finalOwnerExecutionChecklistDualPackageExternalProofMissingReasons = @($finalOwnerExecutionChecklistDualPackageExternalProofMissingReasons)
+  finalOwnerExecutionChecklistDualPackagePostPublishProofMissingReasons = @($finalOwnerExecutionChecklistDualPackagePostPublishProofMissingReasons)
+  finalOwnerExecutionChecklistDualPackageAcceptsSubstituteProof = $finalOwnerExecutionChecklistDualPackageAcceptsSubstituteProof
   realProofImportBoundaryAuditState = $realProofImportBoundaryAuditState
   realProofImportBoundaryAuditScannedFileCount = $realProofImportBoundaryAuditScannedFileCount
   realProofImportBoundaryAuditFindingCount = $realProofImportBoundaryAuditFindingCount
@@ -5893,6 +5909,8 @@ $record = [pscustomobject]@{
     "artifacts/final-release/final-owner-execution-checklist.md",
     "artifacts/final-release/final-owner-execution-checklist-validation.json",
     "artifacts/final-release/final-owner-execution-checklist-validation.md",
+    "artifacts/final-release/dual-package-publish-preflight-matrix.json",
+    "artifacts/final-release/dual-package-publish-preflight-matrix.md",
     "artifacts/final-release/final-owner-execution-one-screen-pack.json",
     "artifacts/final-release/final-owner-execution-one-screen-pack.md",
     "artifacts/final-release/final-owner-execution-one-screen-pack-validation.json",
