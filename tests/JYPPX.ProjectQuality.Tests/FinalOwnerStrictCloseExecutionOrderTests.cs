@@ -18,7 +18,7 @@ public sealed class FinalOwnerStrictCloseExecutionOrderTests
         Assert.Equal("blocked-final-owner-strict-close-owner-execution-required", order.GetProperty("orderState").GetString());
         Assert.Equal(7, order.GetProperty("stepCount").GetInt32());
         Assert.Equal(7, order.GetProperty("blockedStepCount").GetInt32());
-        Assert.True(order.GetProperty("sourceRecordCount").GetInt32() >= 9);
+        Assert.True(order.GetProperty("sourceRecordCount").GetInt32() >= 11);
         Assert.True(order.GetProperty("sourceActionCount").GetInt32() >= 7);
         Assert.True(order.GetProperty("sourceExecutionStepCount").GetInt32() >= 7);
         Assert.True(order.GetProperty("cleanExternalRunbookStepCount").GetInt32() >= 9);
@@ -30,6 +30,7 @@ public sealed class FinalOwnerStrictCloseExecutionOrderTests
         Assert.True(order.GetProperty("ownerInputContractSurfaceCount").GetInt32() >= 5);
         Assert.True(order.GetProperty("ownerInputContractCanonicalFieldCount").GetInt32() >= 14);
         Assert.Equal(2, order.GetProperty("ownerInputContractRunbookInputCount").GetInt32());
+        AssertRealInputChainFields(order);
         Assert.True(order.GetProperty("notExecutedByAutomation").GetBoolean());
         Assert.False(order.GetProperty("performsPublish").GetBoolean());
         Assert.False(order.GetProperty("canPromoteRuntimeProof").GetBoolean());
@@ -70,8 +71,9 @@ public sealed class FinalOwnerStrictCloseExecutionOrderTests
         Assert.Equal("blocked-final-owner-strict-close-owner-execution-required", validation.GetProperty("validationState").GetString());
         Assert.Equal(7, validation.GetProperty("stepCount").GetInt32());
         Assert.Equal(7, validation.GetProperty("blockedStepCount").GetInt32());
-        Assert.True(validation.GetProperty("sourceRecordCount").GetInt32() >= 9);
+        Assert.True(validation.GetProperty("sourceRecordCount").GetInt32() >= 11);
         Assert.Equal(0, validation.GetProperty("failedBlockerCount").GetInt32());
+        AssertRealInputChainFields(validation);
         Assert.True(validation.GetProperty("notExecutedByAutomation").GetBoolean());
         Assert.False(validation.GetProperty("performsPublish").GetBoolean());
         Assert.False(validation.GetProperty("canPromoteRuntimeProof").GetBoolean());
@@ -97,12 +99,29 @@ public sealed class FinalOwnerStrictCloseExecutionOrderTests
         Assert.Equal("blocked-final-owner-strict-close-owner-execution-required", evidence.GetProperty("finalOwnerStrictCloseExecutionOrderValidationState").GetString());
         Assert.Equal(7, evidence.GetProperty("finalOwnerStrictCloseExecutionOrderStepCount").GetInt32());
         Assert.Equal(7, evidence.GetProperty("finalOwnerStrictCloseExecutionOrderBlockedStepCount").GetInt32());
-        Assert.True(evidence.GetProperty("finalOwnerStrictCloseExecutionOrderSourceRecordCount").GetInt32() >= 9);
+        Assert.True(evidence.GetProperty("finalOwnerStrictCloseExecutionOrderSourceRecordCount").GetInt32() >= 11);
         Assert.True(evidence.GetProperty("finalOwnerStrictCloseExecutionOrderReadinessCheckCount").GetInt32() >= 12);
         Assert.True(evidence.GetProperty("finalOwnerStrictCloseExecutionOrderBlockerCount").GetInt32() >= 19);
         Assert.True(evidence.GetProperty("finalOwnerStrictCloseExecutionOrderContractSurfaceCount").GetInt32() >= 5);
         Assert.True(evidence.GetProperty("finalOwnerStrictCloseExecutionOrderCanonicalFieldCount").GetInt32() >= 14);
         Assert.Equal(2, evidence.GetProperty("finalOwnerStrictCloseExecutionOrderRunbookInputCount").GetInt32());
+        Assert.Equal(8, evidence.GetProperty("finalOwnerStrictCloseExecutionOrderReleaseCloseRealInputChainCount").GetInt32());
+        Assert.True(evidence.GetProperty("finalOwnerStrictCloseExecutionOrderReleaseCloseRealInputChainRequiredFieldCount").GetInt32() >= 100);
+        Assert.True(evidence.GetProperty("finalOwnerStrictCloseExecutionOrderReleaseCloseRealInputChainRejectedSubstituteCount").GetInt32() >= 30);
+        Assert.Equal(18, evidence.GetProperty("finalOwnerStrictCloseExecutionOrderReleaseCloseRealInputChainSourceReadinessSignalCount").GetInt32());
+        Assert.True(evidence.GetProperty("finalOwnerStrictCloseExecutionOrderReleaseCloseRealInputChainBlockedRealInputCount").GetInt32() > 0);
+        Assert.True(evidence.GetProperty("finalOwnerStrictCloseExecutionOrderPublicPackageDownloadProofRequiredFieldCount").GetInt32() >= 30);
+        Assert.Equal(11, evidence.GetProperty("finalOwnerStrictCloseExecutionOrderPublicPackageDownloadProofRejectedSubstituteCount").GetInt32());
+        Assert.Equal(7, evidence.GetProperty("finalOwnerStrictCloseExecutionOrderPublicPackageDownloadProofSourceReadinessSignalCount").GetInt32());
+        Assert.False(evidence.GetProperty("finalOwnerStrictCloseExecutionOrderPublicPackageDownloadProofCandidateReady").GetBoolean());
+        Assert.True(evidence.GetProperty("finalOwnerStrictCloseExecutionOrderPostPublishCleanConsumerProofRequiredFieldCount").GetInt32() >= 50);
+        Assert.Equal(11, evidence.GetProperty("finalOwnerStrictCloseExecutionOrderPostPublishCleanConsumerProofRejectedSubstituteCount").GetInt32());
+        Assert.True(evidence.GetProperty("finalOwnerStrictCloseExecutionOrderPostPublishCleanConsumerProofBlockedRealInputCount").GetInt32() > 0);
+        Assert.Equal(11, evidence.GetProperty("finalOwnerStrictCloseExecutionOrderPostPublishCleanConsumerProofSourceReadinessSignalCount").GetInt32());
+        Assert.False(evidence.GetProperty("finalOwnerStrictCloseExecutionOrderPostPublishCleanConsumerProofCandidateReady").GetBoolean());
+        Assert.False(evidence.GetProperty("finalOwnerStrictCloseExecutionOrderPostPublishCleanConsumerProofSourceProofLinkageReady").GetBoolean());
+        Assert.Matches("^[0-9a-f]{64}$", evidence.GetProperty("finalOwnerStrictCloseExecutionOrderReleaseEvidenceBundleSha256").GetString()!);
+        Assert.Equal("blocked-final-close-gate-owner-proof-required", evidence.GetProperty("finalOwnerStrictCloseExecutionOrderFinalCloseStrictValidatorOutputState").GetString());
         Assert.Equal(0, evidence.GetProperty("finalOwnerStrictCloseExecutionOrderFailedBlockerCount").GetInt32());
         Assert.True(evidence.GetProperty("finalOwnerStrictCloseExecutionOrderNotExecutedByAutomation").GetBoolean());
         Assert.False(evidence.GetProperty("finalOwnerStrictCloseExecutionOrderPerformsPublish").GetBoolean());
@@ -125,6 +144,8 @@ public sealed class FinalOwnerStrictCloseExecutionOrderTests
         Assert.Contains("artifacts/final-release/final-owner-strict-close-execution-order.md", sourceArtifacts);
         Assert.Contains("artifacts/final-release/final-owner-strict-close-execution-order-validation.json", sourceArtifacts);
         Assert.Contains("artifacts/final-release/final-owner-strict-close-execution-order-validation.md", sourceArtifacts);
+        Assert.Contains("artifacts/final-release/final-owner-execution-one-screen-pack.json", sourceArtifacts);
+        Assert.Contains("artifacts/final-release/final-owner-execution-one-screen-pack-validation.json", sourceArtifacts);
 
         using JsonDocument auditDocument = ReadFinalReleaseJson("release-evidence-classification-audit.json");
         JsonElement audit = auditDocument.RootElement;
@@ -156,6 +177,27 @@ public sealed class FinalOwnerStrictCloseExecutionOrderTests
         Assert.Contains("not publish approval", boundary, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("not release close approval", boundary, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("not package push", boundary, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static void AssertRealInputChainFields(JsonElement element)
+    {
+        Assert.Equal(8, element.GetProperty("releaseCloseRealInputChainCount").GetInt32());
+        Assert.True(element.GetProperty("releaseCloseRealInputChainRequiredFieldCount").GetInt32() >= 100);
+        Assert.True(element.GetProperty("releaseCloseRealInputChainRejectedSubstituteCount").GetInt32() >= 30);
+        Assert.Equal(18, element.GetProperty("releaseCloseRealInputChainSourceReadinessSignalCount").GetInt32());
+        Assert.True(element.GetProperty("releaseCloseRealInputChainBlockedRealInputCount").GetInt32() > 0);
+        Assert.True(element.GetProperty("publicPackageDownloadProofRequiredFieldCount").GetInt32() >= 30);
+        Assert.Equal(11, element.GetProperty("publicPackageDownloadProofRejectedSubstituteCount").GetInt32());
+        Assert.Equal(7, element.GetProperty("publicPackageDownloadProofSourceReadinessSignalCount").GetInt32());
+        Assert.False(element.GetProperty("publicPackageDownloadProofCandidateReady").GetBoolean());
+        Assert.True(element.GetProperty("postPublishCleanConsumerProofRequiredFieldCount").GetInt32() >= 50);
+        Assert.Equal(11, element.GetProperty("postPublishCleanConsumerProofRejectedSubstituteCount").GetInt32());
+        Assert.True(element.GetProperty("postPublishCleanConsumerProofBlockedRealInputCount").GetInt32() > 0);
+        Assert.Equal(11, element.GetProperty("postPublishCleanConsumerProofSourceReadinessSignalCount").GetInt32());
+        Assert.False(element.GetProperty("postPublishCleanConsumerProofCandidateReady").GetBoolean());
+        Assert.False(element.GetProperty("postPublishCleanConsumerProofSourceProofLinkageReady").GetBoolean());
+        Assert.Matches("^[0-9a-f]{64}$", element.GetProperty("releaseEvidenceBundleSha256").GetString()!);
+        Assert.Equal("blocked-final-close-gate-owner-proof-required", element.GetProperty("finalCloseStrictValidatorOutputState").GetString());
     }
 
     private static void RunPowerShell(string scriptName, params string[] arguments)

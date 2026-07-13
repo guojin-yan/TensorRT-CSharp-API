@@ -65,7 +65,35 @@ public sealed class FinalReadonlyPublishAuditAndOwnerManualTests
         Assert.False(manual.GetProperty("performsGitHubPackagesPublish").GetBoolean());
         Assert.False(manual.GetProperty("performsNuGetPublish").GetBoolean());
         Assert.False(manual.GetProperty("canCloseReleaseIssue").GetBoolean());
-        AssertStringArrayContainsAll(manual.GetProperty("forbiddenNonProofSubstitutes"), RequiredSubstitutes);
+        AssertStringArrayContainsAll(manual.GetProperty("forbiddenNonProofSubstitutes"), ManualRequiredSubstitutes);
+        Assert.Equal(8, manual.GetProperty("releaseCloseRealInputChainCount").GetInt32());
+        Assert.True(manual.GetProperty("releaseCloseRealInputChainRequiredFieldCount").GetInt32() >= 100);
+        Assert.True(manual.GetProperty("releaseCloseRealInputChainRejectedSubstituteCount").GetInt32() >= 30);
+        Assert.Equal(18, manual.GetProperty("releaseCloseRealInputChainSourceReadinessSignalCount").GetInt32());
+        Assert.True(manual.GetProperty("releaseCloseRealInputChainBlockedRealInputCount").GetInt32() > 0);
+        Assert.True(manual.GetProperty("publicPackageDownloadProofRequiredFieldCount").GetInt32() >= 30);
+        Assert.Equal(11, manual.GetProperty("publicPackageDownloadProofRejectedSubstituteCount").GetInt32());
+        Assert.Equal(7, manual.GetProperty("publicPackageDownloadProofSourceReadinessSignalCount").GetInt32());
+        Assert.False(manual.GetProperty("publicPackageDownloadProofCandidateReady").GetBoolean());
+        Assert.True(manual.GetProperty("postPublishCleanConsumerProofRequiredFieldCount").GetInt32() >= 50);
+        Assert.Equal(11, manual.GetProperty("postPublishCleanConsumerProofRejectedSubstituteCount").GetInt32());
+        Assert.True(manual.GetProperty("postPublishCleanConsumerProofBlockedRealInputCount").GetInt32() > 0);
+        Assert.Equal(11, manual.GetProperty("postPublishCleanConsumerProofSourceReadinessSignalCount").GetInt32());
+        Assert.False(manual.GetProperty("postPublishCleanConsumerProofCandidateReady").GetBoolean());
+        Assert.False(manual.GetProperty("postPublishCleanConsumerProofSourceProofLinkageReady").GetBoolean());
+        Assert.Matches("^[0-9a-f]{64}$", manual.GetProperty("releaseEvidenceBundleSha256").GetString()!);
+        Assert.Equal("blocked-final-close-gate-owner-proof-required", manual.GetProperty("finalCloseStrictValidatorOutputState").GetString());
+        AssertIds(manual, "releaseCloseRealInputChain",
+        [
+            "github-actions-run-evidence",
+            "owner-public-publish-result",
+            "public-package-download-proof",
+            "post-publish-clean-consumer-proof-result",
+            "rollback-review",
+            "final-close-decision",
+            "release-evidence-bundle-sha",
+            "strict-close-validator-output"
+        ]);
         AssertStepExists(manual, "preflight-freeze");
         AssertStepExists(manual, "owner-authorization");
         AssertStepExists(manual, "public-publish-command");
@@ -84,6 +112,16 @@ public sealed class FinalReadonlyPublishAuditAndOwnerManualTests
         JsonElement validation = validationDocument.RootElement;
         Assert.Equal("final-owner-one-screen-execution-manual-validation-ready-non-proof", validation.GetProperty("validationState").GetString());
         Assert.Equal(0, validation.GetProperty("failedBlockerCount").GetInt32());
+        Assert.Equal(8, validation.GetProperty("releaseCloseRealInputChainCount").GetInt32());
+        Assert.True(validation.GetProperty("releaseCloseRealInputChainRequiredFieldCount").GetInt32() >= 100);
+        Assert.True(validation.GetProperty("releaseCloseRealInputChainRejectedSubstituteCount").GetInt32() >= 30);
+        Assert.Equal(18, validation.GetProperty("releaseCloseRealInputChainSourceReadinessSignalCount").GetInt32());
+        Assert.True(validation.GetProperty("releaseCloseRealInputChainBlockedRealInputCount").GetInt32() > 0);
+        Assert.False(validation.GetProperty("publicPackageDownloadProofCandidateReady").GetBoolean());
+        Assert.False(validation.GetProperty("postPublishCleanConsumerProofCandidateReady").GetBoolean());
+        Assert.False(validation.GetProperty("postPublishCleanConsumerProofSourceProofLinkageReady").GetBoolean());
+        Assert.Matches("^[0-9a-f]{64}$", validation.GetProperty("releaseEvidenceBundleSha256").GetString()!);
+        Assert.Equal("blocked-final-close-gate-owner-proof-required", validation.GetProperty("finalCloseStrictValidatorOutputState").GetString());
         Assert.False(validation.GetProperty("manualIsProof").GetBoolean());
         Assert.False(validation.GetProperty("canCloseReleaseIssue").GetBoolean());
     }
@@ -100,6 +138,15 @@ public sealed class FinalReadonlyPublishAuditAndOwnerManualTests
         "missing self-hosted runner",
         "sidecar-only",
         "TensorRtExec report",
+    ];
+
+    private static readonly string[] ManualRequiredSubstitutes =
+    [
+        .. RequiredSubstitutes,
+        "public package download proof alone",
+        "post-publish validation-ready without proofCandidateReady",
+        "release evidence bundle hash only",
+        "strict close validator output without real proof",
     ];
 
     private static void RunReadonlyAuditPipeline()
@@ -149,6 +196,19 @@ public sealed class FinalReadonlyPublishAuditAndOwnerManualTests
             !item.GetProperty("performsPublish").GetBoolean() &&
             !item.GetProperty("canCloseReleaseIssue").GetBoolean() &&
             item.GetProperty("validatorCommand").GetString()!.Contains(".ps1", StringComparison.Ordinal));
+    }
+
+    private static void AssertIds(JsonElement root, string propertyName, string[] expectedIds)
+    {
+        string[] actual = root.GetProperty(propertyName)
+            .EnumerateArray()
+            .Select(static item => item.GetProperty("id").GetString()!)
+            .ToArray();
+
+        foreach (string expectedId in expectedIds)
+        {
+            Assert.Contains(expectedId, actual);
+        }
     }
 
     private static void AssertStringArrayContainsAll(JsonElement array, params string[] expected)

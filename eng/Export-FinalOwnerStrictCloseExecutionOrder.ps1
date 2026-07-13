@@ -54,7 +54,7 @@ function ConvertTo-MarkdownCell {
 
 function Get-RecordState {
   param([AllowNull()][object]$Record)
-  foreach ($name in @("worklistState", "packageState", "runbookState", "executionPackState", "crossCheckState", "checkpointState", "dashboardState", "convergenceState", "validationState")) {
+  foreach ($name in @("worklistState", "packageState", "runbookState", "executionPackState", "crossCheckState", "checkpointState", "dashboardState", "convergenceState", "packState", "validationState")) {
     $value = [string](Get-PropertyOrDefault -Object $Record -Name $name -DefaultValue "")
     if (-not [string]::IsNullOrWhiteSpace($value)) { return $value }
   }
@@ -140,6 +140,59 @@ $finalOwnerCloseReadinessCheckpoint = Read-JsonOrNull "artifacts\final-release\f
 $finalReleaseCloseBlockerDashboard = Read-JsonOrNull "artifacts\final-release\final-release-close-blocker-dashboard.json"
 $ownerInputContractConvergence = Read-JsonOrNull "artifacts\final-release\owner-input-contract-convergence.json"
 $ownerInputContractConvergenceValidation = Read-JsonOrNull "artifacts\final-release\owner-input-contract-convergence-validation.json"
+$finalOwnerExecutionOneScreenPackPath = Join-Path $RepositoryRoot "artifacts\final-release\final-owner-execution-one-screen-pack.json"
+$finalOwnerExecutionOneScreenPackValidationPath = Join-Path $RepositoryRoot "artifacts\final-release\final-owner-execution-one-screen-pack-validation.json"
+if (-not (Test-Path -LiteralPath $finalOwnerExecutionOneScreenPackPath -PathType Leaf) -or -not (Test-Path -LiteralPath $finalOwnerExecutionOneScreenPackValidationPath -PathType Leaf)) {
+  & (Join-Path $RepositoryRoot "eng\Export-FinalOwnerExecutionOneScreenPack.ps1") -RepositoryRoot $RepositoryRoot -OutputRoot $OutputRoot
+  & (Join-Path $RepositoryRoot "eng\Test-FinalOwnerExecutionOneScreenPack.ps1") -RepositoryRoot $RepositoryRoot -OutputRoot $OutputRoot -Strict
+}
+$finalOwnerExecutionOneScreenPack = Read-JsonOrNull "artifacts\final-release\final-owner-execution-one-screen-pack.json"
+$finalOwnerExecutionOneScreenPackValidation = Read-JsonOrNull "artifacts\final-release\final-owner-execution-one-screen-pack-validation.json"
+
+function Get-OneScreenMetric {
+  param([string]$Name, [AllowNull()][object]$DefaultValue)
+  $value = Get-PropertyOrDefault -Object $finalOwnerExecutionOneScreenPackValidation -Name $Name -DefaultValue $null
+  if ($null -ne $value) { return $value }
+  return Get-PropertyOrDefault -Object $finalOwnerExecutionOneScreenPack -Name $Name -DefaultValue $DefaultValue
+}
+
+$releaseCloseRealInputChain = @(ConvertTo-Array (Get-PropertyOrDefault -Object $finalOwnerExecutionOneScreenPack -Name "releaseCloseRealInputChain" -DefaultValue @()))
+$releaseCloseRealInputChainProjection = foreach ($step in $releaseCloseRealInputChain) {
+  [pscustomobject]@{
+    order = [int](Get-PropertyOrDefault -Object $step -Name "order" -DefaultValue 0)
+    id = [string](Get-PropertyOrDefault -Object $step -Name "id" -DefaultValue "")
+    title = [string](Get-PropertyOrDefault -Object $step -Name "title" -DefaultValue "")
+    currentState = [string](Get-PropertyOrDefault -Object $step -Name "currentState" -DefaultValue "")
+    requiredReadyState = [string](Get-PropertyOrDefault -Object $step -Name "requiredReadyState" -DefaultValue "")
+    requiredFieldCount = [int](Get-PropertyOrDefault -Object $step -Name "requiredFieldCount" -DefaultValue 0)
+    rejectedSubstituteCount = [int](Get-PropertyOrDefault -Object $step -Name "rejectedSubstituteCount" -DefaultValue 0)
+    sourceReadinessSignalCount = [int](Get-PropertyOrDefault -Object $step -Name "sourceReadinessSignalCount" -DefaultValue 0)
+    blockedRealInputCount = [int](Get-PropertyOrDefault -Object $step -Name "blockedRealInputCount" -DefaultValue 0)
+    proofCandidateReady = [bool](Get-PropertyOrDefault -Object $step -Name "proofCandidateReady" -DefaultValue $false)
+    sourceLinkageReady = [bool](Get-PropertyOrDefault -Object $step -Name "sourceLinkageReady" -DefaultValue $false)
+    strictValidator = [string](Get-PropertyOrDefault -Object $step -Name "strictValidator" -DefaultValue "")
+    blockedReason = [string](Get-PropertyOrDefault -Object $step -Name "blockedReason" -DefaultValue "")
+    boundary = [string](Get-PropertyOrDefault -Object $step -Name "boundary" -DefaultValue "")
+  }
+}
+
+$releaseCloseRealInputChainCount = [int](Get-OneScreenMetric -Name "releaseCloseRealInputChainCount" -DefaultValue 0)
+$releaseCloseRealInputChainRequiredFieldCount = [int](Get-OneScreenMetric -Name "releaseCloseRealInputChainRequiredFieldCount" -DefaultValue 0)
+$releaseCloseRealInputChainRejectedSubstituteCount = [int](Get-OneScreenMetric -Name "releaseCloseRealInputChainRejectedSubstituteCount" -DefaultValue 0)
+$releaseCloseRealInputChainSourceReadinessSignalCount = [int](Get-OneScreenMetric -Name "releaseCloseRealInputChainSourceReadinessSignalCount" -DefaultValue 0)
+$releaseCloseRealInputChainBlockedRealInputCount = [int](Get-OneScreenMetric -Name "releaseCloseRealInputChainBlockedRealInputCount" -DefaultValue 0)
+$publicPackageDownloadProofRequiredFieldCount = [int](Get-OneScreenMetric -Name "publicPackageDownloadProofRequiredFieldCount" -DefaultValue 0)
+$publicPackageDownloadProofRejectedSubstituteCount = [int](Get-OneScreenMetric -Name "publicPackageDownloadProofRejectedSubstituteCount" -DefaultValue 0)
+$publicPackageDownloadProofSourceReadinessSignalCount = [int](Get-OneScreenMetric -Name "publicPackageDownloadProofSourceReadinessSignalCount" -DefaultValue 0)
+$publicPackageDownloadProofCandidateReady = [bool](Get-OneScreenMetric -Name "publicPackageDownloadProofCandidateReady" -DefaultValue $false)
+$postPublishCleanConsumerProofRequiredFieldCount = [int](Get-OneScreenMetric -Name "postPublishCleanConsumerProofRequiredFieldCount" -DefaultValue 0)
+$postPublishCleanConsumerProofRejectedSubstituteCount = [int](Get-OneScreenMetric -Name "postPublishCleanConsumerProofRejectedSubstituteCount" -DefaultValue 0)
+$postPublishCleanConsumerProofBlockedRealInputCount = [int](Get-OneScreenMetric -Name "postPublishCleanConsumerProofBlockedRealInputCount" -DefaultValue 0)
+$postPublishCleanConsumerProofSourceReadinessSignalCount = [int](Get-OneScreenMetric -Name "postPublishCleanConsumerProofSourceReadinessSignalCount" -DefaultValue 0)
+$postPublishCleanConsumerProofCandidateReady = [bool](Get-OneScreenMetric -Name "postPublishCleanConsumerProofCandidateReady" -DefaultValue $false)
+$postPublishCleanConsumerProofSourceProofLinkageReady = [bool](Get-OneScreenMetric -Name "postPublishCleanConsumerProofSourceProofLinkageReady" -DefaultValue $false)
+$releaseEvidenceBundleSha256 = [string](Get-OneScreenMetric -Name "releaseEvidenceBundleSha256" -DefaultValue "")
+$finalCloseStrictValidatorOutputState = [string](Get-OneScreenMetric -Name "finalCloseStrictValidatorOutputState" -DefaultValue "missing-final-close-strict-validator-output-state")
 
 $sourceRecords = @(
   New-SourceRecordSummary -Id "final-owner-proof-action-worklist" -ArtifactPath "artifacts/final-release/final-owner-proof-action-worklist.json" -Record $finalOwnerProofActionWorklist -CountField "actionCount" -BlockedCountField "blockedActionCount"
@@ -151,6 +204,8 @@ $sourceRecords = @(
   New-SourceRecordSummary -Id "final-owner-close-readiness-checkpoint" -ArtifactPath "artifacts/final-release/final-owner-close-readiness-checkpoint.json" -Record $finalOwnerCloseReadinessCheckpoint -CountField "readinessCheckCount" -BlockedCountField "blockedReadinessCheckCount"
   New-SourceRecordSummary -Id "final-release-close-blocker-dashboard" -ArtifactPath "artifacts/final-release/final-release-close-blocker-dashboard.json" -Record $finalReleaseCloseBlockerDashboard -CountField "blockerCount" -BlockedCountField "blockedBlockerCount"
   New-SourceRecordSummary -Id "owner-input-contract-convergence" -ArtifactPath "artifacts/final-release/owner-input-contract-convergence.json" -Record $ownerInputContractConvergence -CountField "contractSurfaceCount" -BlockedCountField "blockedContractSurfaceCount"
+  New-SourceRecordSummary -Id "final-owner-execution-one-screen-pack" -ArtifactPath "artifacts/final-release/final-owner-execution-one-screen-pack.json" -Record $finalOwnerExecutionOneScreenPack -CountField "releaseCloseRealInputChainCount" -BlockedCountField "blockedReleaseCloseRealInputChainCount"
+  New-SourceRecordSummary -Id "final-owner-execution-one-screen-pack-validation" -ArtifactPath "artifacts/final-release/final-owner-execution-one-screen-pack-validation.json" -Record $finalOwnerExecutionOneScreenPackValidation -CountField "releaseCloseRealInputChainCount" -BlockedCountField "releaseCloseRealInputChainBlockedRealInputCount"
 )
 
 $sourceArtifacts = @(
@@ -172,6 +227,10 @@ $sourceArtifacts = @(
   "artifacts/final-release/final-release-close-blocker-dashboard-validation.json",
   "artifacts/final-release/owner-input-contract-convergence.json",
   "artifacts/final-release/owner-input-contract-convergence-validation.json",
+  "artifacts/final-release/final-owner-execution-one-screen-pack.json",
+  "artifacts/final-release/final-owner-execution-one-screen-pack.md",
+  "artifacts/final-release/final-owner-execution-one-screen-pack-validation.json",
+  "artifacts/final-release/final-owner-execution-one-screen-pack-validation.md",
   "artifacts/final-release/release-evidence-bundle.json",
   "artifacts/final-release/release-evidence-classification-audit.json"
 )
@@ -207,6 +266,24 @@ $record = [pscustomobject]@{
   ownerInputContractSurfaceCount = [int](Get-PropertyOrDefault -Object $ownerInputContractConvergence -Name "contractSurfaceCount" -DefaultValue 0)
   ownerInputContractCanonicalFieldCount = [int](Get-PropertyOrDefault -Object $ownerInputContractConvergence -Name "canonicalFieldCount" -DefaultValue 0)
   ownerInputContractRunbookInputCount = [int](Get-PropertyOrDefault -Object $ownerInputContractConvergence -Name "runbookInputCount" -DefaultValue 0)
+  releaseCloseRealInputChainCount = $releaseCloseRealInputChainCount
+  releaseCloseRealInputChainRequiredFieldCount = $releaseCloseRealInputChainRequiredFieldCount
+  releaseCloseRealInputChainRejectedSubstituteCount = $releaseCloseRealInputChainRejectedSubstituteCount
+  releaseCloseRealInputChainSourceReadinessSignalCount = $releaseCloseRealInputChainSourceReadinessSignalCount
+  releaseCloseRealInputChainBlockedRealInputCount = $releaseCloseRealInputChainBlockedRealInputCount
+  releaseCloseRealInputChain = @($releaseCloseRealInputChainProjection)
+  publicPackageDownloadProofRequiredFieldCount = $publicPackageDownloadProofRequiredFieldCount
+  publicPackageDownloadProofRejectedSubstituteCount = $publicPackageDownloadProofRejectedSubstituteCount
+  publicPackageDownloadProofSourceReadinessSignalCount = $publicPackageDownloadProofSourceReadinessSignalCount
+  publicPackageDownloadProofCandidateReady = $publicPackageDownloadProofCandidateReady
+  postPublishCleanConsumerProofRequiredFieldCount = $postPublishCleanConsumerProofRequiredFieldCount
+  postPublishCleanConsumerProofRejectedSubstituteCount = $postPublishCleanConsumerProofRejectedSubstituteCount
+  postPublishCleanConsumerProofBlockedRealInputCount = $postPublishCleanConsumerProofBlockedRealInputCount
+  postPublishCleanConsumerProofSourceReadinessSignalCount = $postPublishCleanConsumerProofSourceReadinessSignalCount
+  postPublishCleanConsumerProofCandidateReady = $postPublishCleanConsumerProofCandidateReady
+  postPublishCleanConsumerProofSourceProofLinkageReady = $postPublishCleanConsumerProofSourceProofLinkageReady
+  releaseEvidenceBundleSha256 = $releaseEvidenceBundleSha256
+  finalCloseStrictValidatorOutputState = $finalCloseStrictValidatorOutputState
   sourceStates = [pscustomobject]@{
     finalOwnerProofActionWorklist = Get-RecordState -Record $finalOwnerProofActionWorklist
     finalOwnerExecutionPackage = Get-RecordState -Record $finalOwnerExecutionPackage
@@ -218,6 +295,8 @@ $record = [pscustomobject]@{
     finalReleaseCloseBlockerDashboard = Get-RecordState -Record $finalReleaseCloseBlockerDashboard
     ownerInputContractConvergence = Get-RecordState -Record $ownerInputContractConvergence
     ownerInputContractConvergenceValidation = Get-RecordState -Record $ownerInputContractConvergenceValidation
+    finalOwnerExecutionOneScreenPack = Get-RecordState -Record $finalOwnerExecutionOneScreenPack
+    finalOwnerExecutionOneScreenPackValidation = Get-RecordState -Record $finalOwnerExecutionOneScreenPackValidation
   }
   executionSteps = @($steps)
   forbiddenSubstitutes = @(
@@ -234,7 +313,11 @@ $record = [pscustomobject]@{
     "runbook as proof",
     "manual handoff as proof",
     "bundle-ready as proof",
-    "blocked-by-cuda-driver"
+    "blocked-by-cuda-driver",
+    "public package download proof alone",
+    "post-publish validation-ready without proofCandidateReady",
+    "release evidence bundle hash only",
+    "strict close validator output without real proof"
   )
   ownerManualOnlyCommands = @(
     "dotnet nuget push must be executed by Owner outside automation only after strict proof gates pass",
@@ -281,6 +364,18 @@ $lines.Add("| finalReleaseCloseBlockerCount | ``$($record.finalReleaseCloseBlock
 $lines.Add("| ownerInputContractSurfaceCount | ``$($record.ownerInputContractSurfaceCount)`` |")
 $lines.Add("| ownerInputContractCanonicalFieldCount | ``$($record.ownerInputContractCanonicalFieldCount)`` |")
 $lines.Add("| ownerInputContractRunbookInputCount | ``$($record.ownerInputContractRunbookInputCount)`` |")
+$lines.Add("| releaseCloseRealInputChainCount | ``$($record.releaseCloseRealInputChainCount)`` |")
+$lines.Add("| releaseCloseRealInputChainRequiredFieldCount | ``$($record.releaseCloseRealInputChainRequiredFieldCount)`` |")
+$lines.Add("| releaseCloseRealInputChainRejectedSubstituteCount | ``$($record.releaseCloseRealInputChainRejectedSubstituteCount)`` |")
+$lines.Add("| releaseCloseRealInputChainSourceReadinessSignalCount | ``$($record.releaseCloseRealInputChainSourceReadinessSignalCount)`` |")
+$lines.Add("| releaseCloseRealInputChainBlockedRealInputCount | ``$($record.releaseCloseRealInputChainBlockedRealInputCount)`` |")
+$lines.Add("| publicPackageDownloadProofRequiredFieldCount | ``$($record.publicPackageDownloadProofRequiredFieldCount)`` |")
+$lines.Add("| publicPackageDownloadProofCandidateReady | ``$($record.publicPackageDownloadProofCandidateReady)`` |")
+$lines.Add("| postPublishCleanConsumerProofRequiredFieldCount | ``$($record.postPublishCleanConsumerProofRequiredFieldCount)`` |")
+$lines.Add("| postPublishCleanConsumerProofCandidateReady | ``$($record.postPublishCleanConsumerProofCandidateReady)`` |")
+$lines.Add("| postPublishCleanConsumerProofSourceProofLinkageReady | ``$($record.postPublishCleanConsumerProofSourceProofLinkageReady)`` |")
+$lines.Add("| releaseEvidenceBundleSha256 | ``$($record.releaseEvidenceBundleSha256)`` |")
+$lines.Add("| finalCloseStrictValidatorOutputState | ``$($record.finalCloseStrictValidatorOutputState)`` |")
 $lines.Add("| performsPublish | ``$($record.performsPublish)`` |")
 $lines.Add("| canCloseReleaseIssue | ``$($record.canCloseReleaseIssue)`` |")
 $lines.Add("")
@@ -290,6 +385,14 @@ $lines.Add("| # | ID | Source State | Validators | Failure Stop Rule |")
 $lines.Add("| --- | --- | --- | --- | --- |")
 foreach ($step in $steps) {
   $lines.Add("| $($step.sequence) | ``$(ConvertTo-MarkdownCell $step.id)`` | ``$(ConvertTo-MarkdownCell $step.sourceState)`` | ``$(ConvertTo-MarkdownCell (($step.validatorScripts -join '; ')))`` | $(ConvertTo-MarkdownCell $step.failureStopRule) |")
+}
+$lines.Add("")
+$lines.Add("## Release Close Real Input Chain")
+$lines.Add("")
+$lines.Add("| # | ID | State | Required Fields | Rejected Substitutes | Source Signals | Blocked Inputs | Proof Ready | Linkage Ready |")
+$lines.Add("| --- | --- | --- | ---: | ---: | ---: | ---: | --- | --- |")
+foreach ($step in $releaseCloseRealInputChainProjection) {
+  $lines.Add("| $($step.order) | ``$(ConvertTo-MarkdownCell $step.id)`` | ``$(ConvertTo-MarkdownCell $step.currentState)`` | $($step.requiredFieldCount) | $($step.rejectedSubstituteCount) | $($step.sourceReadinessSignalCount) | $($step.blockedRealInputCount) | ``$($step.proofCandidateReady)`` | ``$($step.sourceLinkageReady)`` |")
 }
 $lines.Add("")
 $lines.Add("## Source Records")
