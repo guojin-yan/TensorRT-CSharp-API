@@ -81,6 +81,11 @@ $items = New-Object System.Collections.Generic.List[object]
 $steps = @((Get-PropertyOrDefault -Object $record -Name "executionSteps" -DefaultValue @()))
 $stepIds = Convert-ToStringArray ($steps | ForEach-Object { Get-PropertyOrDefault -Object $_ -Name "stepId" -DefaultValue "" })
 $requiredCapture = Convert-ToStringArray (Get-PropertyOrDefault -Object $record -Name "requiredCapture" -DefaultValue @())
+$sourceArtifacts = Convert-ToStringArray (Get-PropertyOrDefault -Object $record -Name "sourceArtifacts" -DefaultValue @())
+$dualPackageRoutes = @((Get-PropertyOrDefault -Object $record -Name "dualPackageRoutes" -DefaultValue @()))
+$dualPackageRouteOwnerActions = Convert-ToStringArray (Get-PropertyOrDefault -Object $record -Name "dualPackageRouteOwnerActions" -DefaultValue @())
+$dualPackageExternalProofMissingReasons = Convert-ToStringArray (Get-PropertyOrDefault -Object $record -Name "dualPackageExternalProofMissingReasons" -DefaultValue @())
+$dualPackagePostPublishProofMissingReasons = Convert-ToStringArray (Get-PropertyOrDefault -Object $record -Name "dualPackagePostPublishProofMissingReasons" -DefaultValue @())
 
 $items.Add((New-ValidationItem -Id "record-kind" -Passed ([string](Get-PropertyOrDefault -Object $record -Name "recordKind" -DefaultValue "") -eq "final-owner-execution-checklist") -Severity "blocker" -Detail "recordKind must be final-owner-execution-checklist.")) | Out-Null
 $items.Add((New-ValidationItem -Id "checklist-state" -Passed ([string](Get-PropertyOrDefault -Object $record -Name "checklistState" -DefaultValue "") -eq "blocked-final-owner-execution-checklist-real-owner-input-required") -Severity "blocker" -Detail "Checklist must remain blocked until real Owner input is imported.")) | Out-Null
@@ -101,6 +106,13 @@ $items.Add((New-ValidationItem -Id "does-not-contain-nuget-push-command" -Passed
 $items.Add((New-ValidationItem -Id "package-consumer-proof-strong-gate" -Passed (@($strictValidators | Where-Object { $_.Contains("Test-PackageConsumerRuntimeProofRecord.ps1", [StringComparison]::OrdinalIgnoreCase) -and $_.Contains("-Strict", [StringComparison]::OrdinalIgnoreCase) -and $_.Contains("-RequireExistingLog", [StringComparison]::OrdinalIgnoreCase) -and $_.Contains("-FailOnNotProof", [StringComparison]::OrdinalIgnoreCase) }).Count -ge 1) -Severity "blocker" -Detail "Package consumer proof validator must require Strict, existing logs, and FailOnNotProof.")) | Out-Null
 $items.Add((New-ValidationItem -Id "post-publish-proof-strong-gate" -Passed (@($strictValidators | Where-Object { $_.Contains("Test-PostPublishVerificationRecord.ps1", [StringComparison]::OrdinalIgnoreCase) -and $_.Contains("-RequireExistingLog", [StringComparison]::OrdinalIgnoreCase) -and $_.Contains("-FailOnNotProof", [StringComparison]::OrdinalIgnoreCase) }).Count -ge 1) -Severity "blocker" -Detail "Post-publish proof validator must require existing logs and FailOnNotProof.")) | Out-Null
 $items.Add((New-ValidationItem -Id "top-level-non-proof-flags" -Passed ((-not [bool](Get-PropertyOrDefault -Object $record -Name "performsPublish" -DefaultValue $true)) -and (-not [bool](Get-PropertyOrDefault -Object $record -Name "canPromoteRuntimeProof" -DefaultValue $true)) -and (-not [bool](Get-PropertyOrDefault -Object $record -Name "canPublishPublicly" -DefaultValue $true)) -and (-not [bool](Get-PropertyOrDefault -Object $record -Name "canCloseReleaseIssue" -DefaultValue $true)) -and (-not [bool](Get-PropertyOrDefault -Object $record -Name "isRuntimeExecutionProof" -DefaultValue $true)) -and (-not [bool](Get-PropertyOrDefault -Object $record -Name "isPostPublishProof" -DefaultValue $true)) -and (-not [bool](Get-PropertyOrDefault -Object $record -Name "isReleaseCloseProof" -DefaultValue $true))) -Severity "blocker" -Detail "Checklist must not publish, promote proof, or close release.")) | Out-Null
+$items.Add((New-ValidationItem -Id "dual-package-source-artifact" -Passed ($sourceArtifacts -contains "artifacts/final-release/dual-package-publish-preflight-matrix.json") -Severity "blocker" -Detail "Checklist must cite the dual-package publish preflight matrix source artifact.")) | Out-Null
+$items.Add((New-ValidationItem -Id "dual-package-route-count" -Passed ([int](Get-PropertyOrDefault -Object $record -Name "dualPackageRouteCount" -DefaultValue 0) -eq 2 -and $dualPackageRoutes.Count -eq 2) -Severity "blocker" -Detail "Checklist must surface both NuGet small bridge/core and GitHub Packages full runtime routes.")) | Out-Null
+$items.Add((New-ValidationItem -Id "dual-package-owner-actions" -Passed (($dualPackageRouteOwnerActions -contains "owner-authorize-public-nuget-publish-and-import-clean-external-consumer-proof") -and ($dualPackageRouteOwnerActions -contains "owner-authorize-github-packages-publish-and-import-credentialed-clean-runtime-proof")) -Severity "blocker" -Detail "Checklist must surface next owner actions for both publish routes.")) | Out-Null
+$items.Add((New-ValidationItem -Id "dual-package-external-proof-gaps" -Passed (($dualPackageExternalProofMissingReasons -contains "public-package-download-and-clean-consumer-runtime-proof-missing") -and ($dualPackageExternalProofMissingReasons -contains "github-packages-restore-source-runtime-dll-resolution-clean-smoke-missing")) -Severity "blocker" -Detail "Checklist must carry external proof missing reasons from the dual-package matrix.")) | Out-Null
+$items.Add((New-ValidationItem -Id "dual-package-post-publish-proof-gaps" -Passed (($dualPackagePostPublishProofMissingReasons -contains "post-publish-clean-consumer-proof-missing") -and ($dualPackagePostPublishProofMissingReasons -contains "post-publish-github-packages-clean-consumer-proof-missing")) -Severity "blocker" -Detail "Checklist must carry post-publish proof missing reasons from the dual-package matrix.")) | Out-Null
+$unsafeDualPackageRoutes = @($dualPackageRoutes | Where-Object { [bool](Get-PropertyOrDefault -Object $_ -Name "canPublishPublicly" -DefaultValue $true) -or [bool](Get-PropertyOrDefault -Object $_ -Name "canPublishGitHubPackages" -DefaultValue $true) -or [bool](Get-PropertyOrDefault -Object $_ -Name "canClaimPackageConsumerRuntimeProof" -DefaultValue $true) -or [bool](Get-PropertyOrDefault -Object $_ -Name "acceptsSubstituteProof" -DefaultValue $true) })
+$items.Add((New-ValidationItem -Id "dual-package-routes-non-proof" -Passed ((-not [bool](Get-PropertyOrDefault -Object $record -Name "dualPackageAcceptsSubstituteProof" -DefaultValue $true)) -and $unsafeDualPackageRoutes.Count -eq 0) -Severity "blocker" -Detail "Dual-package route summaries must not publish, claim package consumer proof, or accept substitute proof.")) | Out-Null
 
 foreach ($step in $steps) {
   $id = [string](Get-PropertyOrDefault -Object $step -Name "stepId" -DefaultValue "")
@@ -133,6 +145,10 @@ $validation = [ordered]@{
   findingCount = $failedItems.Count
   findings = @($failedItems)
   validationItems = @($items.ToArray())
+  dualPackageRouteCount = $dualPackageRoutes.Count
+  dualPackageOwnerActionCount = $dualPackageRouteOwnerActions.Count
+  dualPackageExternalProofMissingReasonCount = $dualPackageExternalProofMissingReasons.Count
+  dualPackagePostPublishProofMissingReasonCount = $dualPackagePostPublishProofMissingReasons.Count
   performsPublish = $false
   notExecutedByAutomation = $true
   canPromoteRuntimeProof = $false
@@ -158,6 +174,8 @@ Write-Utf8File -LiteralPath $markdownPath -InputObject @(
   "- validationState: $validationState",
   "- failedBlockerCount: $failedBlockers",
   "- failedActionRequiredCount: 6",
+  "- dualPackageRouteCount: $($dualPackageRoutes.Count)",
+  "- dualPackageOwnerActionCount: $($dualPackageRouteOwnerActions.Count)",
   "- canPublishPublicly: False",
   "- canCloseReleaseIssue: False",
   "",

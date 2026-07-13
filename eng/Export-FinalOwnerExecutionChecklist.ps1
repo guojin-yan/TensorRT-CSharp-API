@@ -52,6 +52,36 @@ function ConvertTo-MarkdownCell {
   return ([string]$Value).Replace("|", "\|").Replace("`r", " ").Replace("`n", " ")
 }
 
+function Get-PropertyOrDefault {
+  param([AllowNull()][object]$Object, [string]$Name, [AllowNull()][object]$DefaultValue)
+  if ($null -eq $Object) { return $DefaultValue }
+  if ($Object.PSObject.Properties.Name -contains $Name) { return $Object.$Name }
+  return $DefaultValue
+}
+
+function Read-JsonOrNull {
+  param([string]$Path)
+  if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { return $null }
+  return Get-Content -LiteralPath $Path -Raw -Encoding utf8 | ConvertFrom-Json
+}
+
+function ConvertTo-DualPackageRouteSummary {
+  param([AllowNull()][object]$Route)
+
+  [pscustomobject]@{
+    id = [string](Get-PropertyOrDefault -Object $Route -Name "id" -DefaultValue "")
+    distributionChannel = [string](Get-PropertyOrDefault -Object $Route -Name "distributionChannel" -DefaultValue "")
+    packageId = [string](Get-PropertyOrDefault -Object $Route -Name "packageId" -DefaultValue "")
+    nextOwnerAction = [string](Get-PropertyOrDefault -Object $Route -Name "nextOwnerAction" -DefaultValue "owner-action-required")
+    externalProofMissingReason = [string](Get-PropertyOrDefault -Object $Route -Name "externalProofMissingReason" -DefaultValue "external-proof-missing")
+    postPublishProofMissingReason = [string](Get-PropertyOrDefault -Object $Route -Name "postPublishProofMissingReason" -DefaultValue "post-publish-proof-missing")
+    canPublishPublicly = [bool](Get-PropertyOrDefault -Object $Route -Name "canPublishPublicly" -DefaultValue $false)
+    canPublishGitHubPackages = [bool](Get-PropertyOrDefault -Object $Route -Name "canPublishGitHubPackages" -DefaultValue $false)
+    canClaimPackageConsumerRuntimeProof = [bool](Get-PropertyOrDefault -Object $Route -Name "canClaimPackageConsumerRuntimeProof" -DefaultValue $false)
+    acceptsSubstituteProof = [bool](Get-PropertyOrDefault -Object $Route -Name "acceptsSubstituteProof" -DefaultValue $false)
+  }
+}
+
 function New-Step {
   param(
     [int]$Order,
@@ -94,6 +124,19 @@ function New-Step {
   }
 }
 
+$dualPackageMatrixArtifact = "artifacts/final-release/dual-package-publish-preflight-matrix.json"
+$dualPackageMatrixPath = Join-Path $RepositoryRoot $dualPackageMatrixArtifact
+$dualPackageMatrix = Read-JsonOrNull -Path $dualPackageMatrixPath
+$dualPackageRoutes = if ($null -eq $dualPackageMatrix) {
+  @(
+    [pscustomobject]@{ id = "nuget-small-bridge-core"; distributionChannel = "nuget.org"; packageId = "JYPPX.TensorRT.CSharp.API"; nextOwnerAction = "owner-authorize-public-nuget-publish-and-import-clean-external-consumer-proof"; externalProofMissingReason = "public-package-download-and-clean-consumer-runtime-proof-missing"; postPublishProofMissingReason = "post-publish-clean-consumer-proof-missing"; canPublishPublicly = $false; canPublishGitHubPackages = $false; canClaimPackageConsumerRuntimeProof = $false; acceptsSubstituteProof = $false }
+    [pscustomobject]@{ id = "github-packages-full-runtime"; distributionChannel = "GitHub Packages"; packageId = "JYPPX.TensorRT.CSharp.API.runtime.<runtimePackageKey>"; nextOwnerAction = "owner-authorize-github-packages-publish-and-import-credentialed-clean-runtime-proof"; externalProofMissingReason = "github-packages-restore-source-runtime-dll-resolution-clean-smoke-missing"; postPublishProofMissingReason = "post-publish-github-packages-clean-consumer-proof-missing"; canPublishPublicly = $false; canPublishGitHubPackages = $false; canClaimPackageConsumerRuntimeProof = $false; acceptsSubstituteProof = $false }
+  )
+}
+else {
+  @((Get-PropertyOrDefault -Object $dualPackageMatrix -Name "routes" -DefaultValue @()) | ForEach-Object { ConvertTo-DualPackageRouteSummary -Route $_ })
+}
+
 $steps = @(
   New-Step -Order 1 -StepId "01-owner-authorization" -BlockerId "owner-authorization" -Title "Owner authorization" -OwnerAction "回填 Owner 发布授权、rollback review 和 close decision 草案。" -ExecutionLocation "仓库内记录校验；必须引用真实公开包和真实 proof validator 输出。" -Command "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-ReleaseOwnerApprovalInput.ps1 -Strict" -RequiredBackfillFields @("ownerName", "ownerEmail", "approvalDecision", "approvalTimestampUtc", "packageVersion", "rollbackPlanReviewed", "releaseIssueCloseDecision", "ownerSignature") -ExpectedArtifacts @("artifacts/final-release/release-owner-approval-input-validation.json", "artifacts/final-release/release-issue-close-owner-decision-input-validation.json") -StrictValidator "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-ReleaseOwnerApprovalInput.ps1 -Strict"
   New-Step -Order 2 -StepId "02-clean-external-package-consumer" -BlockerId "package-consumer-runtime" -Title "Clean external package consumer runtime smoke" -OwnerAction "在仓库外新建 clean consumer，安装公开包，执行 runtime smoke 并回填日志/hash。" -ExecutionLocation "仓库外 clean consumer 目录。" -Command "dotnet new console --framework net8.0; dotnet add package JYPPX.TensorRtSharp --version <public-version>; dotnet run -- --runtime-package-key <runtime-key>" -RequiredBackfillFields @("consumerProjectPath", "consumerProjectCreatedOutsideRepository", "packageSourceUrl", "managedNupkgSha256", "runtimeNupkgSha256", "smokeCommand", "smokeExitCode", "stdoutPath", "stderrPath", "smokeLogPath", "smokeLogSha256", "hostIdentity") -ExpectedArtifacts @("artifacts/final-release/package-consumer-runtime-proof-record.json", "artifacts/final-release/package-consumer-runtime-proof-record-validation.json") -StrictValidator "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-PackageConsumerRuntimeProofRecord.ps1 -Strict -RequireExistingLog -FailOnNotProof"
@@ -114,6 +157,14 @@ $record = [ordered]@{
   strictValidators = @($steps | ForEach-Object { $_.strictValidator } | Select-Object -Unique)
   requiredCapture = @("stdout", "stderr", "log", "hash", "SHA256", "exitCode", "host identity")
   externalExecutionStepIds = @($steps | Where-Object { $_.mustRunOutsideRepository } | ForEach-Object { $_.stepId })
+  dualPackagePublishPreflightArtifact = $dualPackageMatrixArtifact
+  dualPackagePublishPreflightBoundary = if ($null -eq $dualPackageMatrix) { "Dual package preflight matrix missing at generation time; final owner checklist keeps route defaults blocked and non-proof." } else { [string](Get-PropertyOrDefault -Object $dualPackageMatrix -Name "proofBoundary" -DefaultValue "") }
+  dualPackageRouteCount = @($dualPackageRoutes).Count
+  dualPackageRoutes = @($dualPackageRoutes)
+  dualPackageRouteOwnerActions = @($dualPackageRoutes | ForEach-Object { $_.nextOwnerAction })
+  dualPackageExternalProofMissingReasons = @($dualPackageRoutes | ForEach-Object { $_.externalProofMissingReason })
+  dualPackagePostPublishProofMissingReasons = @($dualPackageRoutes | ForEach-Object { $_.postPublishProofMissingReason })
+  dualPackageAcceptsSubstituteProof = $false
   forbiddenSubstitutes = @("local feed", "ProjectReference", "direct nupkg", "dry-run", "dashboard", "runbook", "candidate", "draft", "build-only", "parse-only", "sidecar-only", "template")
   performsPublish = $false
   notExecutedByAutomation = $true
@@ -126,6 +177,8 @@ $record = [ordered]@{
   sourceArtifacts = @(
     "artifacts/final-release/owner-real-input-landing-pack.json",
     "artifacts/final-release/final-publish-proof-gate-report.json",
+    $dualPackageMatrixArtifact,
+    "artifacts/final-release/dual-package-publish-preflight-matrix.md",
     "artifacts/final-release/release-evidence-bundle.json"
   )
   boundary = "Final owner execution checklist is the shortest manual execution path and backfill contract only; it does not run dotnet nuget push, does not publish, is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push."
@@ -137,6 +190,10 @@ $record | ConvertTo-Json -Depth 18 | Set-Content -LiteralPath $jsonPath -Encodin
 
 $rows = foreach ($step in $steps) {
   "| ``$($step.order)`` | ``$(ConvertTo-MarkdownCell $step.stepId)`` | ``$(ConvertTo-MarkdownCell $step.blockerId)`` | $(ConvertTo-MarkdownCell $step.executionLocation) | ``$($step.requiredBackfillFieldCount)`` | ``$(ConvertTo-MarkdownCell $step.strictValidator)`` |"
+}
+
+$dualPackageRows = foreach ($route in $dualPackageRoutes) {
+  "| ``$(ConvertTo-MarkdownCell $route.id)`` | ``$(ConvertTo-MarkdownCell $route.distributionChannel)`` | ``$(ConvertTo-MarkdownCell $route.externalProofMissingReason)`` | ``$(ConvertTo-MarkdownCell $route.postPublishProofMissingReason)`` | ``$(ConvertTo-MarkdownCell $route.nextOwnerAction)`` | ``$($route.acceptsSubstituteProof)`` |"
 }
 
 $markdown = @(
@@ -154,6 +211,12 @@ $markdown = @(
   "| Order | Step | Blocker | Execution Location | Fields | Strict Validator |",
   "|---:|---|---|---|---:|---|",
   @($rows),
+  "",
+  "## Dual Package Owner Actions",
+  "",
+  "| Route | Channel | External Proof Missing | Post-Publish Proof Missing | Next Owner Action | Accepts Substitute Proof |",
+  "|---|---|---|---|---|---:|",
+  @($dualPackageRows),
   "",
   "## Required Capture",
   "",
