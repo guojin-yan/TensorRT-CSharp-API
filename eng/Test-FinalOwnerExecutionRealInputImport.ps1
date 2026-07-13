@@ -61,6 +61,7 @@ if (-not (Test-Path -LiteralPath $ImportPath -PathType Leaf) -or -not (Test-Path
 }
 
 $import = Get-Content -LiteralPath $ImportPath -Raw -Encoding utf8 | ConvertFrom-Json
+$raw = Get-Content -LiteralPath $CandidatePath -Raw -Encoding utf8
 $candidate = Get-Content -LiteralPath $CandidatePath -Raw -Encoding utf8 | ConvertFrom-Json
 $fieldResults = @(Convert-ToArray (Get-PropertyOrDefault -Object $candidate -Name "fieldResults" -DefaultValue @()))
 $boundary = [string](Get-PropertyOrDefault -Object $candidate -Name "boundary" -DefaultValue "")
@@ -68,7 +69,8 @@ $boundary = [string](Get-PropertyOrDefault -Object $candidate -Name "boundary" -
 $items = New-Object System.Collections.Generic.List[object]
 $items.Add((New-ValidationItem -Id "record-kinds" -Passed ([string]$import.recordKind -eq "final-owner-execution-real-input-import" -and [string]$candidate.recordKind -eq "final-owner-execution-real-input-candidate") -Severity "blocker" -Detail "Import and candidate recordKind values must match.")) | Out-Null
 $items.Add((New-ValidationItem -Id "blocked-default" -Passed ([string]$import.importState -eq "blocked-final-owner-real-input-required" -and [string]$candidate.candidateState -eq "blocked-final-owner-real-input-required") -Severity "blocker" -Detail "Default template import must remain blocked.")) | Out-Null
-$items.Add((New-ValidationItem -Id "field-results" -Passed ($fieldResults.Count -ge 39 -and [int]$candidate.fieldResultCount -eq $fieldResults.Count) -Severity "blocker" -Detail "Candidate must carry per-field overlay results.")) | Out-Null
+$items.Add((New-ValidationItem -Id "field-results" -Passed ($fieldResults.Count -ge 47 -and [int]$candidate.fieldResultCount -eq $fieldResults.Count) -Severity "blocker" -Detail "Candidate must carry per-field overlay results, including dual-package route proof fields.")) | Out-Null
+$items.Add((New-ValidationItem -Id "dual-package-route-fields" -Passed ($raw.Contains("dualPackageRoutes.nugetSmallBridgeCore.ownerAuthorizationUrl", [StringComparison]::OrdinalIgnoreCase) -and $raw.Contains("dualPackageRoutes.githubPackagesFullRuntime.runtimeDllResolutionReportPath", [StringComparison]::OrdinalIgnoreCase)) -Severity "blocker" -Detail "Candidate import must preserve both NuGet and GitHub Packages dual-package route proof fields.")) | Out-Null
 $items.Add((New-ValidationItem -Id "placeholder-tracking" -Passed ([int]$candidate.placeholderFieldCount -gt 0 -and [int]$candidate.readyFieldCount -lt [int]$candidate.fieldResultCount) -Severity "blocker" -Detail "Template import must report placeholders and not be ready.")) | Out-Null
 $items.Add((New-ValidationItem -Id "non-proof-flags" -Passed ((-not [bool]$import.performsPublish) -and (-not [bool]$import.performsRuntimeExecution) -and (-not [bool]$import.canPromoteRuntimeProof) -and (-not [bool]$import.canPublishPublicly) -and (-not [bool]$import.canCloseReleaseIssue) -and (-not [bool]$candidate.isRuntimeExecutionProof) -and (-not [bool]$candidate.isPostPublishProof) -and (-not [bool]$candidate.isReleaseCloseProof)) -Severity "blocker" -Detail "Import and candidate must remain non-proof and non-publish.")) | Out-Null
 $items.Add((New-ValidationItem -Id "boundary" -Passed ($boundary.Contains("not runtime proof") -and $boundary.Contains("not post-publish proof") -and $boundary.Contains("not publish approval") -and $boundary.Contains("not release close approval") -and $boundary.Contains("not package push")) -Severity "blocker" -Detail "Boundary must exclude proof, publish, close, and package push.")) | Out-Null

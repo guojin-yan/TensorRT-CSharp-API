@@ -174,6 +174,16 @@ $groups = @(
     New-OwnerField -Id "post-publish-proof-log-path" -Group "post-publish" -FieldPath "postPublish.proofLogPath" -Kind "path" -Description "Post-publish clean consumer proof log." -AcceptedEvidence @("existing post-publish proof log") -Rejects $commonRejects
     New-OwnerField -Id "post-publish-proof-log-sha256" -Group "post-publish" -FieldPath "postPublish.proofLogSha256" -Kind "sha256" -Description "SHA256 of post-publish proof log." -AcceptedEvidence @("64-character SHA256") -Rejects $commonRejects
   )
+  New-FieldGroup -Id "dual-package-route-proof" -Title "Dual-package route proof" -Fields @(
+    New-OwnerField -Id "dual-package-nuget-owner-authorization-url" -Group "dual-package-route-proof" -FieldPath "dualPackageRoutes.nugetSmallBridgeCore.ownerAuthorizationUrl" -Kind "url" -Description "Owner authorization record for the NuGet small core/bridge route." -AcceptedEvidence @("owner-approved public NuGet publish authorization URL or signed record") -Rejects $commonRejects
+    New-OwnerField -Id "dual-package-nuget-public-download-url" -Group "dual-package-route-proof" -FieldPath "dualPackageRoutes.nugetSmallBridgeCore.publicPackageDownloadUrl" -Kind "url" -Description "Public NuGet package download URL captured after publication." -AcceptedEvidence @("public NuGet package URL from the published channel") -Rejects $commonRejects
+    New-OwnerField -Id "dual-package-nuget-clean-consumer-log-path" -Group "dual-package-route-proof" -FieldPath "dualPackageRoutes.nugetSmallBridgeCore.cleanConsumerProofLogPath" -Kind "path" -Description "Repository-external clean consumer proof log for the NuGet small core/bridge route." -AcceptedEvidence @("existing clean consumer restore/build/run log from public NuGet packages") -Rejects $commonRejects
+    New-OwnerField -Id "dual-package-nuget-post-publish-proof-log-sha256" -Group "dual-package-route-proof" -FieldPath "dualPackageRoutes.nugetSmallBridgeCore.postPublishProofLogSha256" -Kind "sha256" -Description "SHA256 of the NuGet-route post-publish clean consumer proof log." -AcceptedEvidence @("64-character SHA256 from the real post-publish proof log") -Rejects $commonRejects
+    New-OwnerField -Id "dual-package-github-owner-authorization-url" -Group "dual-package-route-proof" -FieldPath "dualPackageRoutes.githubPackagesFullRuntime.ownerAuthorizationUrl" -Kind "url" -Description "Owner authorization record for the GitHub Packages full runtime route." -AcceptedEvidence @("owner-approved GitHub Packages publish authorization URL or signed record") -Rejects $commonRejects
+    New-OwnerField -Id "dual-package-github-restore-source-url" -Group "dual-package-route-proof" -FieldPath "dualPackageRoutes.githubPackagesFullRuntime.restoreSourceUrl" -Kind "url" -Description "GitHub Packages restore source URL used by the external consumer." -AcceptedEvidence @("credentialed GitHub Packages source URL from the real restore") -Rejects $commonRejects
+    New-OwnerField -Id "dual-package-github-runtime-dll-resolution-report-path" -Group "dual-package-route-proof" -FieldPath "dualPackageRoutes.githubPackagesFullRuntime.runtimeDllResolutionReportPath" -Kind "path" -Description "Runtime DLL resolution report from the GitHub Packages full runtime route." -AcceptedEvidence @("existing runtime DLL resolution report from external consumer") -Rejects $commonRejects
+    New-OwnerField -Id "dual-package-github-clean-runtime-smoke-log-sha256" -Group "dual-package-route-proof" -FieldPath "dualPackageRoutes.githubPackagesFullRuntime.cleanRuntimeSmokeLogSha256" -Kind "sha256" -Description "SHA256 of the GitHub Packages full runtime clean smoke log." -AcceptedEvidence @("64-character SHA256 from the real GitHub Packages runtime smoke log") -Rejects $commonRejects
+  )
   New-FieldGroup -Id "release-close" -Title "Rollback review and final close" -Fields @(
     New-OwnerField -Id "rollback-review" -Group "release-close" -FieldPath "rollback.review" -Kind "text" -Description "Rollback review and decision." -AcceptedEvidence @("owner rollback review") -Rejects $commonRejects
     New-OwnerField -Id "final-close-decision" -Group "release-close" -FieldPath "finalClose.decision" -Kind "decision" -Description "Final release close decision." -AcceptedEvidence @("owner final close approval") -Rejects $commonRejects
@@ -217,7 +227,7 @@ $record = [pscustomobject]@{
   isRuntimeExecutionProof = $false
   isPostPublishProof = $false
   isReleaseCloseProof = $false
-  nonSubstituteProofKinds = @($commonRejects + @("final owner execution input skeleton", "owner fillable input skeleton", "placeholder owner input"))
+  nonSubstituteProofKinds = @($commonRejects + @("final owner execution input skeleton", "owner fillable input skeleton", "placeholder owner input", "dual package route proof", "dual package final close lanes"))
   sourceArtifacts = @(
     "artifacts/final-release/final-owner-execution-one-screen-pack.json",
     "artifacts/final-release/final-owner-execution-one-screen-pack-validation.json",

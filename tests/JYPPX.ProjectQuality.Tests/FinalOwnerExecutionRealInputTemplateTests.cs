@@ -31,7 +31,7 @@ public sealed class FinalOwnerExecutionRealInputTemplateTests
         Assert.False(template.GetProperty("isPostPublishProof").GetBoolean());
         Assert.False(template.GetProperty("isReleaseCloseProof").GetBoolean());
 
-        Assert.True(template.GetProperty("fieldValues").EnumerateObject().Count() >= 39);
+        Assert.True(template.GetProperty("fieldValues").EnumerateObject().Count() >= 47);
         Assert.True(template.GetProperty("fileEvidence").EnumerateArray().Count() >= 8);
         Assert.True(template.GetProperty("hashEvidence").EnumerateArray().Count() >= 8);
         Assert.True(template.GetProperty("nonSubstituteConfirmations").EnumerateArray().Count() >= 10);
@@ -50,6 +50,7 @@ public sealed class FinalOwnerExecutionRealInputTemplateTests
             "hostMetadata",
             "packageMetadata",
             "postPublishEvidence",
+            "dualPackageRouteProof",
             "rollbackReview",
             "finalCloseDecision",
             "strictValidatorOutputs",
@@ -66,6 +67,12 @@ public sealed class FinalOwnerExecutionRealInputTemplateTests
             "ProjectReference",
             "direct .nupkg",
             "pre-publish smoke reused as post-publish proof",
+            "nuget-small-bridge-core",
+            "github-packages-full-runtime",
+            "owner-dual-package-nuget-owner-authorization-url",
+            "owner-dual-package-github-runtime-dll-resolution-report-path",
+            "Test-DualPackagePublishPreflightMatrix.ps1",
+            "Test-FinalCloseGateConvergence.ps1",
             "not runtime proof",
             "not post-publish proof",
             "not publish approval",
@@ -87,7 +94,7 @@ public sealed class FinalOwnerExecutionRealInputTemplateTests
         JsonElement validation = validationDocument.RootElement;
         Assert.Equal("final-owner-execution-real-input-template-validation", validation.GetProperty("recordKind").GetString());
         Assert.Equal("blocked-final-owner-real-input-template-ready", validation.GetProperty("validationState").GetString());
-        Assert.True(validation.GetProperty("fieldValueCount").GetInt32() >= 39);
+        Assert.True(validation.GetProperty("fieldValueCount").GetInt32() >= 47);
         Assert.Equal(0, validation.GetProperty("failedBlockerCount").GetInt32());
         Assert.False(validation.GetProperty("canPromoteRuntimeProof").GetBoolean());
         Assert.False(validation.GetProperty("canPublishPublicly").GetBoolean());

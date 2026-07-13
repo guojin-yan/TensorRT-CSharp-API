@@ -154,6 +154,28 @@ $template = [pscustomobject]@{
     proofLogSha256 = "<owner-post-publish-proof-log-sha256>"
     confirmsNotPrePublishSmoke = $false
   }
+  dualPackageRouteProof = [pscustomobject]@{
+    nugetSmallBridgeCore = [pscustomobject]@{
+      ownerAuthorizationUrl = "<owner-dual-package-nuget-owner-authorization-url>"
+      publicPackageDownloadUrl = "<owner-dual-package-nuget-public-download-url>"
+      cleanConsumerProofLogPath = "<owner-dual-package-nuget-clean-consumer-log-path>"
+      postPublishProofLogSha256 = "<owner-dual-package-nuget-post-publish-proof-log-sha256>"
+      confirmsNoSubstituteProof = $false
+    }
+    githubPackagesFullRuntime = [pscustomobject]@{
+      ownerAuthorizationUrl = "<owner-dual-package-github-owner-authorization-url>"
+      restoreSourceUrl = "<owner-dual-package-github-restore-source-url>"
+      runtimeDllResolutionReportPath = "<owner-dual-package-github-runtime-dll-resolution-report-path>"
+      cleanRuntimeSmokeLogSha256 = "<owner-dual-package-github-clean-runtime-smoke-log-sha256>"
+      confirmsNoSubstituteProof = $false
+    }
+    routeIds = @("nuget-small-bridge-core", "github-packages-full-runtime")
+    sourceValidators = @(
+      "eng/Test-DualPackagePublishPreflightMatrix.ps1 -Strict",
+      "eng/Test-FinalCloseGateConvergence.ps1 -Strict"
+    )
+    boundary = "Dual-package route proof fields are Owner-fillable placeholders only. They are not publish approval, not package push, not post-publish proof, and cannot close release lanes until real public publish, public download/restore, clean consumer, and strict validation evidence is supplied."
+  }
   rollbackReview = [pscustomobject]@{
     decision = "<owner-rollback-decision>"
     rationale = "<owner-rollback-rationale>"

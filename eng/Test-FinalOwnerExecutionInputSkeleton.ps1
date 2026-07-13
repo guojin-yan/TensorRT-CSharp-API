@@ -106,6 +106,14 @@ $requiredFieldIds = @(
   "post-publish-downloaded-package-hash",
   "post-publish-proof-log-path",
   "post-publish-proof-log-sha256",
+  "dual-package-nuget-owner-authorization-url",
+  "dual-package-nuget-public-download-url",
+  "dual-package-nuget-clean-consumer-log-path",
+  "dual-package-nuget-post-publish-proof-log-sha256",
+  "dual-package-github-owner-authorization-url",
+  "dual-package-github-restore-source-url",
+  "dual-package-github-runtime-dll-resolution-report-path",
+  "dual-package-github-clean-runtime-smoke-log-sha256",
   "rollback-review",
   "final-close-decision",
   "strict-validator-output-path",
@@ -120,7 +128,9 @@ $requiredMarkers = @(
   "pre-publish smoke reused as post-publish proof",
   "final owner execution input skeleton",
   "owner fillable input skeleton",
-  "placeholder owner input"
+  "placeholder owner input",
+  "dual package route proof",
+  "dual package final close lanes"
 )
 
 $items = New-Object System.Collections.Generic.List[object]

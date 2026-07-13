@@ -37,7 +37,7 @@ public sealed class FinalOwnerExecutionInputSkeletonTests
         Assert.Equal(0, skeleton.GetProperty("packageConsumerOwnerRuntimeSmokeFieldAlignmentFailedBlockerCount").GetInt32());
 
         int requiredFieldCount = skeleton.GetProperty("requiredFieldCount").GetInt32();
-        Assert.True(requiredFieldCount >= 39);
+        Assert.True(requiredFieldCount >= 47);
         Assert.Equal(requiredFieldCount, skeleton.GetProperty("missingFieldCount").GetInt32());
         Assert.Equal(requiredFieldCount, skeleton.GetProperty("placeholderFieldCount").GetInt32());
         Assert.Equal(0, skeleton.GetProperty("readyForImportFieldCount").GetInt32());
@@ -54,6 +54,12 @@ public sealed class FinalOwnerExecutionInputSkeletonTests
             "host.cudaRuntimeToolkit",
             "host.tensorrt",
             "postPublish.downloadedPackageSha256",
+            "dualPackageRoutes.nugetSmallBridgeCore.ownerAuthorizationUrl",
+            "dualPackageRoutes.nugetSmallBridgeCore.publicPackageDownloadUrl",
+            "dualPackageRoutes.githubPackagesFullRuntime.restoreSourceUrl",
+            "dualPackageRoutes.githubPackagesFullRuntime.runtimeDllResolutionReportPath",
+            "dual package route proof",
+            "dual package final close lanes",
             "rollback.review",
             "finalClose.decision",
             "strictValidators.outputSha256",

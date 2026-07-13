@@ -20,10 +20,10 @@ public sealed class FinalOwnerExecutionRealInputImportTests
         JsonElement import = importDocument.RootElement;
         Assert.Equal("final-owner-execution-real-input-import", import.GetProperty("recordKind").GetString());
         Assert.Equal("blocked-final-owner-real-input-required", import.GetProperty("importState").GetString());
-        Assert.Equal(41, import.GetProperty("overlayFieldCount").GetInt32());
+        Assert.Equal(49, import.GetProperty("overlayFieldCount").GetInt32());
         Assert.Equal(0, import.GetProperty("readyFieldCount").GetInt32());
-        Assert.True(import.GetProperty("placeholderFieldCount").GetInt32() >= 39);
-        Assert.True(import.GetProperty("invalidSha256FieldCount").GetInt32() >= 8);
+        Assert.True(import.GetProperty("placeholderFieldCount").GetInt32() >= 47);
+        Assert.True(import.GetProperty("invalidSha256FieldCount").GetInt32() >= 10);
         Assert.False(import.GetProperty("readyForImport").GetBoolean());
         AssertNonProof(import);
 
@@ -31,13 +31,15 @@ public sealed class FinalOwnerExecutionRealInputImportTests
         JsonElement candidate = candidateDocument.RootElement;
         Assert.Equal("final-owner-execution-real-input-candidate", candidate.GetProperty("recordKind").GetString());
         Assert.Equal("blocked-final-owner-real-input-required", candidate.GetProperty("candidateState").GetString());
-        Assert.True(candidate.GetProperty("fieldResultCount").GetInt32() >= 39);
+        Assert.True(candidate.GetProperty("fieldResultCount").GetInt32() >= 47);
         Assert.Equal(0, candidate.GetProperty("readyFieldCount").GetInt32());
         Assert.False(candidate.GetProperty("readyForImport").GetBoolean());
         AssertNonProof(candidate);
 
         JsonElement[] fieldResults = candidate.GetProperty("fieldResults").EnumerateArray().ToArray();
         Assert.Contains(fieldResults, item => item.GetProperty("fieldPath").GetString() == "cleanConsumer.projectRoot" && !item.GetProperty("placeholderReplaced").GetBoolean());
+        Assert.Contains(fieldResults, item => item.GetProperty("fieldPath").GetString() == "dualPackageRoutes.nugetSmallBridgeCore.ownerAuthorizationUrl" && !item.GetProperty("placeholderReplaced").GetBoolean());
+        Assert.Contains(fieldResults, item => item.GetProperty("fieldPath").GetString() == "dualPackageRoutes.githubPackagesFullRuntime.runtimeDllResolutionReportPath" && !item.GetProperty("placeholderReplaced").GetBoolean());
         Assert.Contains(fieldResults, item => item.GetProperty("kind").GetString() == "sha256" && !item.GetProperty("sha256FormatValid").GetBoolean());
         Assert.Contains(fieldResults, item => item.GetProperty("kind").GetString() == "path" && !item.GetProperty("pathExists").GetBoolean());
 
@@ -45,7 +47,7 @@ public sealed class FinalOwnerExecutionRealInputImportTests
         JsonElement validation = validationDocument.RootElement;
         Assert.Equal("final-owner-execution-real-input-import-validation", validation.GetProperty("recordKind").GetString());
         Assert.Equal("blocked-final-owner-real-input-required", validation.GetProperty("validationState").GetString());
-        Assert.True(validation.GetProperty("fieldResultCount").GetInt32() >= 39);
+        Assert.True(validation.GetProperty("fieldResultCount").GetInt32() >= 47);
         Assert.Equal(0, validation.GetProperty("readyFieldCount").GetInt32());
         Assert.Equal(0, validation.GetProperty("failedBlockerCount").GetInt32());
         AssertNonProof(validation);
