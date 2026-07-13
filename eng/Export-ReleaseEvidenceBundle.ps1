@@ -548,6 +548,8 @@ $finalOwnerCloseDecisionImport = Read-JsonOrNull "artifacts\final-release\final-
 $finalOwnerCloseDecisionValidation = Read-JsonOrNull "artifacts\final-release\final-owner-close-decision-validation.json"
 $finalOwnerExecutionOneScreenPack = Read-JsonOrNull "artifacts\final-release\final-owner-execution-one-screen-pack.json"
 $finalOwnerExecutionOneScreenPackValidation = Read-JsonOrNull "artifacts\final-release\final-owner-execution-one-screen-pack-validation.json"
+$releaseCandidatePublicProofFinalAudit = Read-JsonOrNull "artifacts\final-release\release-candidate-public-proof-final-audit.json"
+$releaseCandidatePublicProofFinalAuditValidation = Read-JsonOrNull "artifacts\final-release\release-candidate-public-proof-final-audit-validation.json"
 $finalOwnerExecutionInputSkeleton = Read-JsonOrNull "artifacts\final-release\final-owner-execution-input-skeleton.json"
 $finalOwnerExecutionInputSkeletonValidation = Read-JsonOrNull "artifacts\final-release\final-owner-execution-input-skeleton-validation.json"
 $finalOwnerExecutionBlockerLedger = Read-JsonOrNull "artifacts\final-release\final-owner-execution-blocker-ledger.json"
@@ -2502,6 +2504,19 @@ $finalOwnerExecutionOneScreenPackIsRuntimeExecutionProof = [bool](Get-PropertyOr
 $finalOwnerExecutionOneScreenPackIsPackageConsumerRuntimeProof = [bool](Get-PropertyOrDefault -Object $finalOwnerExecutionOneScreenPack -Name "isPackageConsumerRuntimeProof" -DefaultValue $false)
 $finalOwnerExecutionOneScreenPackIsPostPublishProof = [bool](Get-PropertyOrDefault -Object $finalOwnerExecutionOneScreenPack -Name "isPostPublishProof" -DefaultValue $false)
 $finalOwnerExecutionOneScreenPackIsReleaseCloseProof = [bool](Get-PropertyOrDefault -Object $finalOwnerExecutionOneScreenPack -Name "isReleaseCloseProof" -DefaultValue $false)
+$releaseCandidatePublicProofFinalAuditState = [string](Get-PropertyOrDefault -Object $releaseCandidatePublicProofFinalAudit -Name "auditState" -DefaultValue "missing-release-candidate-public-proof-final-audit")
+$releaseCandidatePublicProofFinalAuditValidationState = [string](Get-PropertyOrDefault -Object $releaseCandidatePublicProofFinalAuditValidation -Name "validationState" -DefaultValue "missing-release-candidate-public-proof-final-audit-validation")
+$releaseCandidatePublicProofFinalAuditChainCount = [int](Get-PropertyOrDefault -Object $releaseCandidatePublicProofFinalAudit -Name "finalProofChainCount" -DefaultValue 0)
+$releaseCandidatePublicProofFinalAuditBlockedChainCount = [int](Get-PropertyOrDefault -Object $releaseCandidatePublicProofFinalAudit -Name "blockedFinalProofChainCount" -DefaultValue 0)
+$releaseCandidatePublicProofFinalAuditFailedBlockerCount = [int](Get-PropertyOrDefault -Object $releaseCandidatePublicProofFinalAuditValidation -Name "failedBlockerCount" -DefaultValue 999)
+$releaseCandidatePublicProofFinalAuditFailedActionRequiredCount = [int](Get-PropertyOrDefault -Object $releaseCandidatePublicProofFinalAuditValidation -Name "failedActionRequiredCount" -DefaultValue 0)
+$releaseCandidatePublicProofFinalAuditPerformsPublish = [bool](Get-PropertyOrDefault -Object $releaseCandidatePublicProofFinalAudit -Name "performsPublish" -DefaultValue $false)
+$releaseCandidatePublicProofFinalAuditCanPromoteRuntimeProof = [bool](Get-PropertyOrDefault -Object $releaseCandidatePublicProofFinalAudit -Name "canPromoteRuntimeProof" -DefaultValue $false)
+$releaseCandidatePublicProofFinalAuditCanPublishPublicly = [bool](Get-PropertyOrDefault -Object $releaseCandidatePublicProofFinalAudit -Name "canPublishPublicly" -DefaultValue $false)
+$releaseCandidatePublicProofFinalAuditCanCloseReleaseIssue = [bool](Get-PropertyOrDefault -Object $releaseCandidatePublicProofFinalAudit -Name "canCloseReleaseIssue" -DefaultValue $false)
+$releaseCandidatePublicProofFinalAuditIsRuntimeExecutionProof = [bool](Get-PropertyOrDefault -Object $releaseCandidatePublicProofFinalAudit -Name "isRuntimeExecutionProof" -DefaultValue $false)
+$releaseCandidatePublicProofFinalAuditIsPostPublishProof = [bool](Get-PropertyOrDefault -Object $releaseCandidatePublicProofFinalAudit -Name "isPostPublishProof" -DefaultValue $false)
+$releaseCandidatePublicProofFinalAuditIsReleaseCloseProof = [bool](Get-PropertyOrDefault -Object $releaseCandidatePublicProofFinalAudit -Name "isReleaseCloseProof" -DefaultValue $false)
 $finalOwnerExecutionInputSkeletonState = [string](Get-PropertyOrDefault -Object $finalOwnerExecutionInputSkeleton -Name "skeletonState" -DefaultValue "missing-final-owner-execution-input-skeleton")
 $finalOwnerExecutionInputSkeletonValidationState = [string](Get-PropertyOrDefault -Object $finalOwnerExecutionInputSkeletonValidation -Name "validationState" -DefaultValue "missing-final-owner-execution-input-skeleton-validation")
 $finalOwnerExecutionInputSkeletonRequiredFieldCount = [int](Get-PropertyOrDefault -Object $finalOwnerExecutionInputSkeleton -Name "requiredFieldCount" -DefaultValue 0)
@@ -3164,6 +3179,7 @@ $evidenceItems = @(
   New-EvidenceItem -Id "final-owner-rollback-review-import" -Title "Final Owner rollback review import" -Artifact "artifacts/final-release/final-owner-rollback-review-validation.json" -State "$finalOwnerRollbackReviewValidationState; importState=$finalOwnerRollbackReviewImportState; rollbackReviewReady=$finalOwnerRollbackReviewReady; failedActionRequired=$finalOwnerRollbackReviewFailedActionRequiredCount" -Passed $false -Boundary "The final Owner rollback review import records governance input only; it is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push."
   New-EvidenceItem -Id "final-owner-close-decision-import" -Title "Final Owner close decision import" -Artifact "artifacts/final-release/final-owner-close-decision-validation.json" -State "$finalOwnerCloseDecisionValidationState; importState=$finalOwnerCloseDecisionImportState; finalCloseDecisionReady=$finalOwnerCloseDecisionReady; failedActionRequired=$finalOwnerCloseDecisionFailedActionRequiredCount" -Passed $false -Boundary "The final Owner close decision import records release governance input only; while blocked it is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push."
   New-EvidenceItem -Id "final-owner-execution-one-screen-pack" -Title "Final Owner execution one-screen pack" -Artifact "artifacts/final-release/final-owner-execution-one-screen-pack-validation.json" -State "$finalOwnerExecutionOneScreenPackValidationState; packState=$finalOwnerExecutionOneScreenPackState; lanes=$finalOwnerExecutionOneScreenPackLaneCount; blockedLanes=$finalOwnerExecutionOneScreenPackBlockedLaneCount; ownerInputGaps=$finalOwnerExecutionOneScreenPackOwnerInputGapCount; blockedOwnerInputGaps=$finalOwnerExecutionOneScreenPackBlockedOwnerInputGapCount; failedBlockers=$finalOwnerExecutionOneScreenPackFailedBlockerCount; ownerActionRequired=$finalOwnerExecutionOneScreenPackOwnerActionRequired; performsPublish=$finalOwnerExecutionOneScreenPackPerformsPublish; performsRuntimeExecution=$finalOwnerExecutionOneScreenPackPerformsRuntimeExecution; canPromoteRuntimeProof=$finalOwnerExecutionOneScreenPackCanPromoteRuntimeProof; canPublishPublicly=$finalOwnerExecutionOneScreenPackCanPublishPublicly; canCloseReleaseIssue=$finalOwnerExecutionOneScreenPackCanCloseReleaseIssue; isRuntimeExecutionProof=$finalOwnerExecutionOneScreenPackIsRuntimeExecutionProof; isPackageConsumerRuntimeProof=$finalOwnerExecutionOneScreenPackIsPackageConsumerRuntimeProof; isPostPublishProof=$finalOwnerExecutionOneScreenPackIsPostPublishProof; isReleaseCloseProof=$finalOwnerExecutionOneScreenPackIsReleaseCloseProof" -Passed $false -Boundary "The final Owner execution one-screen pack is blocked owner guidance and an owner input gap table only; it is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push. It cannot promote proof or close the release without real owner logs, package hashes, host metadata, post-publish evidence, rollback review, final close decision, and accepted strict validators."
+  New-EvidenceItem -Id "release-candidate-public-proof-final-audit" -Title "Release candidate public proof final audit" -Artifact "artifacts/final-release/release-candidate-public-proof-final-audit-validation.json" -State "$releaseCandidatePublicProofFinalAuditValidationState; auditState=$releaseCandidatePublicProofFinalAuditState; chain=$releaseCandidatePublicProofFinalAuditChainCount; blockedChain=$releaseCandidatePublicProofFinalAuditBlockedChainCount; failedBlockers=$releaseCandidatePublicProofFinalAuditFailedBlockerCount; failedActionRequired=$releaseCandidatePublicProofFinalAuditFailedActionRequiredCount; performsPublish=$releaseCandidatePublicProofFinalAuditPerformsPublish; canPromoteRuntimeProof=$releaseCandidatePublicProofFinalAuditCanPromoteRuntimeProof; canPublishPublicly=$releaseCandidatePublicProofFinalAuditCanPublishPublicly; canCloseReleaseIssue=$releaseCandidatePublicProofFinalAuditCanCloseReleaseIssue; isRuntimeExecutionProof=$releaseCandidatePublicProofFinalAuditIsRuntimeExecutionProof; isPostPublishProof=$releaseCandidatePublicProofFinalAuditIsPostPublishProof; isReleaseCloseProof=$releaseCandidatePublicProofFinalAuditIsReleaseCloseProof" -Passed $false -Boundary "The release candidate public proof final audit verifies final proof-chain coverage and non-proof boundaries only; it is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push. It cannot accept forbidden substitutes or close the release issue."
   New-EvidenceItem -Id "final-owner-execution-input-skeleton" -Title "Final Owner execution input skeleton" -Artifact "artifacts/final-release/final-owner-execution-input-skeleton-validation.json" -State "$finalOwnerExecutionInputSkeletonValidationState; skeletonState=$finalOwnerExecutionInputSkeletonState; requiredFields=$finalOwnerExecutionInputSkeletonRequiredFieldCount; missingFields=$finalOwnerExecutionInputSkeletonMissingFieldCount; placeholderFields=$finalOwnerExecutionInputSkeletonPlaceholderFieldCount; readyForImportFields=$finalOwnerExecutionInputSkeletonReadyForImportFieldCount; failedBlockers=$finalOwnerExecutionInputSkeletonFailedBlockerCount; ownerActionRequired=$finalOwnerExecutionInputSkeletonOwnerActionRequired; performsPublish=$finalOwnerExecutionInputSkeletonPerformsPublish; performsRuntimeExecution=$finalOwnerExecutionInputSkeletonPerformsRuntimeExecution; canPromoteRuntimeProof=$finalOwnerExecutionInputSkeletonCanPromoteRuntimeProof; canPublishPublicly=$finalOwnerExecutionInputSkeletonCanPublishPublicly; canCloseReleaseIssue=$finalOwnerExecutionInputSkeletonCanCloseReleaseIssue; isRuntimeExecutionProof=$finalOwnerExecutionInputSkeletonIsRuntimeExecutionProof; isPostPublishProof=$finalOwnerExecutionInputSkeletonIsPostPublishProof; isReleaseCloseProof=$finalOwnerExecutionInputSkeletonIsReleaseCloseProof" -Passed $false -Boundary "The final Owner execution input skeleton is placeholder-only owner input scaffolding; it is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push. It cannot promote proof or close release until real owner logs, hashes, package metadata, host metadata, post-publish evidence, rollback review, final close decision, and strict validator outputs are supplied."
   New-EvidenceItem -Id "final-owner-execution-blocker-ledger" -Title "Final Owner execution blocker ledger" -Artifact "artifacts/final-release/final-owner-execution-blocker-ledger-validation.json" -State "$finalOwnerExecutionBlockerLedgerValidationState; ledgerState=$finalOwnerExecutionBlockerLedgerState; blockers=$finalOwnerExecutionBlockerLedgerBlockerCount; remainingBlockers=$finalOwnerExecutionBlockerLedgerRemainingBlockerCount; readyForImportCandidates=$finalOwnerExecutionBlockerLedgerReadyForImportCandidateCount; failedBlockers=$finalOwnerExecutionBlockerLedgerFailedBlockerCount; ownerActionRequired=$finalOwnerExecutionBlockerLedgerOwnerActionRequired; performsPublish=$finalOwnerExecutionBlockerLedgerPerformsPublish; performsRuntimeExecution=$finalOwnerExecutionBlockerLedgerPerformsRuntimeExecution; canPromoteRuntimeProof=$finalOwnerExecutionBlockerLedgerCanPromoteRuntimeProof; canPublishPublicly=$finalOwnerExecutionBlockerLedgerCanPublishPublicly; canCloseReleaseIssue=$finalOwnerExecutionBlockerLedgerCanCloseReleaseIssue; isRuntimeExecutionProof=$finalOwnerExecutionBlockerLedgerIsRuntimeExecutionProof; isPostPublishProof=$finalOwnerExecutionBlockerLedgerIsPostPublishProof; isReleaseCloseProof=$finalOwnerExecutionBlockerLedgerIsReleaseCloseProof" -Passed $false -Boundary "The final Owner execution blocker ledger is blocked owner-action tracking only; it is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push. remainingBlockerCount=0 by itself is not proof or release readiness."
   New-EvidenceItem -Id "final-owner-execution-input-preflight" -Title "Final Owner execution input preflight" -Artifact "artifacts/final-release/final-owner-execution-input-preflight.json" -State "$finalOwnerExecutionInputPreflightState; checkedFields=$finalOwnerExecutionInputPreflightCheckedFieldCount; findings=$finalOwnerExecutionInputPreflightFindingCount; failedBlockers=$finalOwnerExecutionInputPreflightFailedBlockerCount; failedActionRequired=$finalOwnerExecutionInputPreflightFailedActionRequiredCount; readyForImport=$finalOwnerExecutionInputPreflightReadyForImport; ownerActionRequired=$finalOwnerExecutionInputPreflightOwnerActionRequired; performsPublish=$finalOwnerExecutionInputPreflightPerformsPublish; performsRuntimeExecution=$finalOwnerExecutionInputPreflightPerformsRuntimeExecution; canPromoteRuntimeProof=$finalOwnerExecutionInputPreflightCanPromoteRuntimeProof; canPublishPublicly=$finalOwnerExecutionInputPreflightCanPublishPublicly; canCloseReleaseIssue=$finalOwnerExecutionInputPreflightCanCloseReleaseIssue; isRuntimeExecutionProof=$finalOwnerExecutionInputPreflightIsRuntimeExecutionProof; isPostPublishProof=$finalOwnerExecutionInputPreflightIsPostPublishProof; isReleaseCloseProof=$finalOwnerExecutionInputPreflightIsReleaseCloseProof" -Passed $false -Boundary "The final Owner execution input preflight validates placeholders, paths, SHA256s, strict validator output, and forbidden substitutes only; it is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push."
@@ -4957,6 +4973,7 @@ $record = [pscustomobject]@{
     "input package"
     "local feed"
     "ProjectReference"
+    "direct .nupkg"
     "build-only"
     "parse-only"
     "sidecar-only"
@@ -4976,7 +4993,14 @@ $record = [pscustomobject]@{
     "CallbackAllocatorReadinessSnapshot"
     "TensorRtCallbackAllocatorReadinessSnapshot"
     "precheck-only"
+    "dry-run"
     "dry-run-only"
+    "package-managed-dry-run"
+    "dashboard-only"
+    "artifact-only"
+    "queued workflow"
+    "missing runner"
+    "local test"
     "schema-only"
     "final owner execution real input template"
     "final owner execution real input import"
@@ -5023,6 +5047,8 @@ $record = [pscustomobject]@{
     "final owner execution one-screen pack"
     "owner one-screen execution guidance"
     "owner input gap table"
+    "final public proof path"
+    "release candidate public proof final audit"
     "final owner execution input skeleton"
     "final owner execution blocker ledger"
     "final owner execution input preflight"
@@ -5611,6 +5637,8 @@ $record = [pscustomobject]@{
     "artifacts/final-release/public-package-download-proof-candidate.md",
     "artifacts/final-release/public-package-download-proof-candidate-validation.json",
     "artifacts/final-release/public-package-download-proof-candidate-validation.md",
+    "artifacts/final-release/post-publish-clean-consumer-proof-result-validation.json",
+    "artifacts/final-release/post-publish-clean-consumer-proof-result-validation.md",
     "artifacts/final-release/remote-ci-and-public-publish-proof-backfill-gate.json",
     "artifacts/final-release/remote-ci-and-public-publish-proof-backfill-gate.md",
     "artifacts/final-release/remote-ci-and-public-publish-proof-backfill-gate-validation.json",
@@ -5766,6 +5794,10 @@ $record = [pscustomobject]@{
     "artifacts/final-release/final-owner-execution-one-screen-pack.md",
     "artifacts/final-release/final-owner-execution-one-screen-pack-validation.json",
     "artifacts/final-release/final-owner-execution-one-screen-pack-validation.md",
+    "artifacts/final-release/release-candidate-public-proof-final-audit.json",
+    "artifacts/final-release/release-candidate-public-proof-final-audit.md",
+    "artifacts/final-release/release-candidate-public-proof-final-audit-validation.json",
+    "artifacts/final-release/release-candidate-public-proof-final-audit-validation.md",
     "artifacts/final-release/final-owner-execution-input-skeleton.json",
     "artifacts/final-release/final-owner-execution-input-skeleton.md",
     "artifacts/final-release/final-owner-execution-input-skeleton-validation.json",
@@ -6322,6 +6354,8 @@ $record = [pscustomobject]@{
     "artifacts/final-release/public-package-download-proof-candidate.md",
     "artifacts/final-release/public-package-download-proof-candidate-validation.json",
     "artifacts/final-release/public-package-download-proof-candidate-validation.md",
+    "artifacts/final-release/post-publish-clean-consumer-proof-result-validation.json",
+    "artifacts/final-release/post-publish-clean-consumer-proof-result-validation.md",
     "artifacts/final-release/remote-ci-and-public-publish-proof-backfill-gate.json",
     "artifacts/final-release/remote-ci-and-public-publish-proof-backfill-gate.md",
     "artifacts/final-release/remote-ci-and-public-publish-proof-backfill-gate-validation.json",
