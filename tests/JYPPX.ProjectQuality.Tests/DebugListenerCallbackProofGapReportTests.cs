@@ -40,9 +40,17 @@ public sealed class DebugListenerCallbackProofGapReportTests
         Assert.True(report.DeferredRowsStillRequired);
         Assert.Equal("blocked", report.Status);
         Assert.True(report.GapReasonCount > 0);
+        Assert.Contains("non-null", report.PrimaryGapReason, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("non-null-attach-disabled", report.RuntimeProofBlockerCategory);
+        Assert.True(report.PackageConsumerRuntimeProofRequired);
+        Assert.True(report.RuntimeInvocationRequired);
+        Assert.Equal("copied-preflight-smoke-trampoline-proof-gate", report.EvidenceSource);
+        Assert.Equal("enable-and-verify-non-null-debug-listener-attach-under-version-guards", report.NextOwnerAction);
         Assert.Contains(report.GapReasons, reason => reason.Contains("TensorRT has not invoked", StringComparison.OrdinalIgnoreCase));
         Assert.Contains("RuntimeEvidenceKind=proof-gap-report", report.Diagnostic, StringComparison.Ordinal);
         Assert.Contains("IsRealCallbackRuntimeProof=False", report.Diagnostic, StringComparison.Ordinal);
+        Assert.Contains("RuntimeProofBlockerCategory=non-null-attach-disabled", report.Diagnostic, StringComparison.Ordinal);
+        Assert.Contains("NextOwnerAction=enable-and-verify-non-null-debug-listener-attach-under-version-guards", report.Diagnostic, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -58,6 +66,9 @@ public sealed class DebugListenerCallbackProofGapReportTests
         Assert.Contains("PointerFreeSurfaceReady", source);
         Assert.Contains("proof-gap-report", source);
         Assert.Contains("debug-listener-callback-proof-gap-report", source);
+        Assert.Contains("PrimaryGapReason", source);
+        Assert.Contains("RuntimeProofBlockerCategory", source);
+        Assert.Contains("NextOwnerAction", source);
     }
 
     [Fact]
@@ -84,6 +95,12 @@ public sealed class DebugListenerCallbackProofGapReportTests
         AssertGapReportMarkers(schema);
         AssertGapReportMarkers(smokeReadme);
         AssertGapReportMarkers(runtimeSplitReadme);
+        AssertActionableGapMarkers(source);
+        AssertActionableGapMarkers(smoke);
+        AssertActionableGapMarkers(bridgeConsumer);
+        AssertActionableGapMarkers(readiness);
+        AssertActionableGapMarkers(doc);
+        AssertActionableGapMarkers(schema);
         Assert.Contains("IsRealCallbackRuntimeProof=False", doc);
         Assert.Contains("IsRealCallbackRuntimeProof=False", schema);
         Assert.Contains("IsRealCallbackRuntimeProof=False", smokeReadme);
@@ -153,6 +170,16 @@ public sealed class DebugListenerCallbackProofGapReportTests
         Assert.Contains("ProcessDebugTensorRuntimeInvoked", text);
         Assert.Contains("FullPackageConsumerRuntimeProofReady", text);
         Assert.Contains("GapReasonCount", text);
+    }
+
+    private static void AssertActionableGapMarkers(string text)
+    {
+        Assert.Contains("PrimaryGapReason", text);
+        Assert.Contains("RuntimeProofBlockerCategory", text);
+        Assert.Contains("PackageConsumerRuntimeProofRequired", text);
+        Assert.Contains("RuntimeInvocationRequired", text);
+        Assert.Contains("EvidenceSource", text);
+        Assert.Contains("NextOwnerAction", text);
     }
 
     private static void AssertNoRawPointerTypes(Type type)

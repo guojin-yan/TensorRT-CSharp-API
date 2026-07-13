@@ -296,6 +296,24 @@ public sealed class TensorRtDebugListenerCallbackProofGapReportResult
     /// <summary>Gets the gap reason count. 该成员提供 DebugListener callback proof 缺口的只读诊断信息；不能替代真实 TensorRT callback runtime proof。</summary>
     public int GapReasonCount => (_gapReasons ?? Array.Empty<string>()).Length;
 
+    /// <summary>Gets the first copied gap reason, when present. 该成员提供 DebugListener callback proof 缺口的只读诊断信息；不能替代真实 TensorRT callback runtime proof。</summary>
+    public string PrimaryGapReason => GapReasonCount == 0 ? string.Empty : _gapReasons[0];
+
+    /// <summary>Gets a stable blocker category for release-readiness dashboards. 该成员提供 DebugListener callback proof 缺口的只读诊断信息；不能替代真实 TensorRT callback runtime proof。</summary>
+    public string RuntimeProofBlockerCategory => GetRuntimeProofBlockerCategory();
+
+    /// <summary>Gets whether package-consumer runtime proof is still required. 该成员提供 DebugListener callback proof 缺口的只读诊断信息；不能替代真实 TensorRT callback runtime proof。</summary>
+    public bool PackageConsumerRuntimeProofRequired => !FullPackageConsumerRuntimeProofReady;
+
+    /// <summary>Gets whether a real TensorRT processDebugTensor invocation is still required. 该成员提供 DebugListener callback proof 缺口的只读诊断信息；不能替代真实 TensorRT callback runtime proof。</summary>
+    public bool RuntimeInvocationRequired => !ProcessDebugTensorRuntimeInvoked || InvocationCount == 0;
+
+    /// <summary>Gets the copied evidence source classification. 该成员提供 DebugListener callback proof 缺口的只读诊断信息；不能替代真实 TensorRT callback runtime proof。</summary>
+    public string EvidenceSource => "copied-preflight-smoke-trampoline-proof-gate";
+
+    /// <summary>Gets the next owner action needed to close the proof gap. 该成员提供 DebugListener callback proof 缺口的只读诊断信息；不能替代真实 TensorRT callback runtime proof。</summary>
+    public string NextOwnerAction => GetNextOwnerAction();
+
     /// <summary>Gets the report status. 该成员提供 DebugListener callback proof 缺口的只读诊断信息；不能替代真实 TensorRT callback runtime proof。</summary>
     public string Status => CanPromoteRealCallbackRuntime ? "ready" : "blocked";
 
@@ -312,5 +330,85 @@ public sealed class TensorRtDebugListenerCallbackProofGapReportResult
         "PointerFreeSurfaceReady=" + PointerFreeSurfaceReady + "; AttemptedNoInvocation=" + AttemptedNoInvocation + "; " +
         "InvocationCount=" + InvocationCount + "; FailureCount=" + FailureCount + "; InFlightCallbackCount=" + InFlightCallbackCount + "; " +
         "CanPromoteRealCallbackRuntime=" + CanPromoteRealCallbackRuntime + "; RuntimeProofBlocked=" + RuntimeProofBlocked + "; " +
-        "DeferredRowsStillRequired=" + DeferredRowsStillRequired + "; GapReasonCount=" + GapReasonCount + ".";
+        "DeferredRowsStillRequired=" + DeferredRowsStillRequired + "; GapReasonCount=" + GapReasonCount + "; " +
+        "PrimaryGapReason=" + PrimaryGapReason + "; RuntimeProofBlockerCategory=" + RuntimeProofBlockerCategory + "; " +
+        "PackageConsumerRuntimeProofRequired=" + PackageConsumerRuntimeProofRequired + "; RuntimeInvocationRequired=" + RuntimeInvocationRequired + "; " +
+        "EvidenceSource=" + EvidenceSource + "; NextOwnerAction=" + NextOwnerAction + ".";
+
+    private string GetRuntimeProofBlockerCategory()
+    {
+        if (CanPromoteRealCallbackRuntime)
+        {
+            return "none";
+        }
+
+        if (NonNullAttachStillDisabled)
+        {
+            return "non-null-attach-disabled";
+        }
+
+        if (!NativeAttachEntryReady)
+        {
+            return "native-attach-entry-not-ready";
+        }
+
+        if (NativeVTableInstallBlocked)
+        {
+            return "native-vtable-install-blocked";
+        }
+
+        if (!NoThrowCallbackEntryReady || !ExceptionStatusMappingReady || !InFlightAccountingReady)
+        {
+            return "callback-trampoline-safety-incomplete";
+        }
+
+        if (!BorrowedDebugTensorMetadataCopied || !PointerFreeSurfaceReady)
+        {
+            return "borrowed-debug-tensor-copy-incomplete";
+        }
+
+        if (!DetachRollbackReady)
+        {
+            return "detach-rollback-incomplete";
+        }
+
+        if (RuntimeInvocationRequired || AttemptedNoInvocation)
+        {
+            return "runtime-callback-invocation-missing";
+        }
+
+        if (PackageConsumerRuntimeProofRequired)
+        {
+            return "full-package-consumer-proof-missing";
+        }
+
+        return "real-callback-runtime-promotion-blocked";
+    }
+
+    private string GetNextOwnerAction()
+    {
+        switch (RuntimeProofBlockerCategory)
+        {
+            case "none":
+                return "no-action-required";
+            case "non-null-attach-disabled":
+                return "enable-and-verify-non-null-debug-listener-attach-under-version-guards";
+            case "native-attach-entry-not-ready":
+                return "complete-native-set-debug-listener-attach-entry-with-no-throw-boundary";
+            case "native-vtable-install-blocked":
+                return "install-owned-no-throw-debug-listener-vtable-with-detach-before-release";
+            case "callback-trampoline-safety-incomplete":
+                return "complete-no-throw-callback-status-mapping-and-inflight-accounting";
+            case "borrowed-debug-tensor-copy-incomplete":
+                return "copy-borrowed-debug-tensor-metadata-before-returning-from-callback";
+            case "detach-rollback-incomplete":
+                return "prove-detach-rollback-and-dispose-idempotency-before-release";
+            case "runtime-callback-invocation-missing":
+                return "run-full-package-consumer-smoke-that-triggers-process-debug-tensor";
+            case "full-package-consumer-proof-missing":
+                return "collect-compatible-host-package-consumer-runtime-proof-with-invocation-count";
+            default:
+                return "inspect-gap-reasons-and-refresh-runtime-readiness-evidence";
+        }
+    }
 }

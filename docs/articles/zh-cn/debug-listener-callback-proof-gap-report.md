@@ -36,6 +36,12 @@
 - `RuntimeProofBlocked`
 - `DeferredRowsStillRequired`
 - `GapReasonCount`
+- `PrimaryGapReason`
+- `RuntimeProofBlockerCategory`
+- `PackageConsumerRuntimeProofRequired`
+- `RuntimeInvocationRequired`
+- `EvidenceSource`
+- `NextOwnerAction`
 
 默认路径必须保持：
 
@@ -73,3 +79,5 @@ DebugListenerCallbackProofGapReport=debug-listener-callback-proof-gap-report;Run
 - 在 full package consumer 中用真实 TensorRT build/enqueue 触发 `IDebugListener::processDebugTensor`。
 - 复制 borrowed debug tensor metadata，禁止 borrowed pointer 逃逸。
 - 记录 `InvocationCount>0`、`FailureCount=0` 和 `InFlightCallbackCount=0` 后再允许 `real-callback-runtime` promotion。
+
+`RuntimeProofBlockerCategory` 和 `NextOwnerAction` 是发布收口使用的稳定机器字段。默认阻塞分类为 `non-null-attach-disabled`，下一步动作为 `enable-and-verify-non-null-debug-listener-attach-under-version-guards`；它们只帮助 owner 定位下一批工作，不改变 `RuntimeEvidenceKind=proof-gap-report`，也不会把当前报告提升为 proof。

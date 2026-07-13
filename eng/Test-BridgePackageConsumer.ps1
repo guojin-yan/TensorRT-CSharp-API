@@ -328,6 +328,12 @@ $script:ManagedPackageFreshnessRequiredMarkers = @(
   "DetachRollbackReady",
   "FullPackageConsumerRuntimeProofReady",
   "GapReasonCount",
+  "PrimaryGapReason",
+  "RuntimeProofBlockerCategory",
+  "PackageConsumerRuntimeProofRequired",
+  "RuntimeInvocationRequired",
+  "EvidenceSource",
+  "NextOwnerAction",
   "LastDiagnostic",
   "FullPackageConsumerReport",
   "ReportPointerFree",
@@ -2342,6 +2348,12 @@ static class HighLevelWrapperSurfaceProbe
                 gap.RuntimeProofBlocked + ":" +
                 gap.DeferredRowsStillRequired + ":" +
                 gap.GapReasonCount + ":" +
+                gap.PrimaryGapReason + ":" +
+                gap.RuntimeProofBlockerCategory + ":" +
+                gap.PackageConsumerRuntimeProofRequired + ":" +
+                gap.RuntimeInvocationRequired + ":" +
+                gap.EvidenceSource + ":" +
+                gap.NextOwnerAction + ":" +
                 gap.Status + ":" +
                 gap.Diagnostic;
 
@@ -3861,6 +3873,12 @@ static class HighLevelWrapperSurfaceProbe
             nameof(TensorRtDebugListenerCallbackProofGapReportResult.RuntimeProofBlocked),
             nameof(TensorRtDebugListenerCallbackProofGapReportResult.DeferredRowsStillRequired),
             nameof(TensorRtDebugListenerCallbackProofGapReportResult.GapReasonCount),
+            nameof(TensorRtDebugListenerCallbackProofGapReportResult.PrimaryGapReason),
+            nameof(TensorRtDebugListenerCallbackProofGapReportResult.RuntimeProofBlockerCategory),
+            nameof(TensorRtDebugListenerCallbackProofGapReportResult.PackageConsumerRuntimeProofRequired),
+            nameof(TensorRtDebugListenerCallbackProofGapReportResult.RuntimeInvocationRequired),
+            nameof(TensorRtDebugListenerCallbackProofGapReportResult.EvidenceSource),
+            nameof(TensorRtDebugListenerCallbackProofGapReportResult.NextOwnerAction),
             nameof(CudaMemory.GetRangeAttribute),
             nameof(CudaMemory.GetRangeAttributes),
             nameof(CudaMemory.GetRangeAccessedByDevices),

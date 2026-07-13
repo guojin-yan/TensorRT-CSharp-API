@@ -598,7 +598,7 @@ function New-WrapperSurfaceCapabilityEvidence {
     [pscustomobject]@{
       name = "debug-listener-callback-proof-gap-report"
       categoryMarkers = @("debug-listener-callback-proof-gap-report", "proof-gap-report")
-      requiredMarkers = @("TensorRtDebugListenerCallbackProofGapReport", "TensorRtDebugListenerCallbackProofGapReportResult", "Evaluate", "RuntimeEvidenceKind", "NonNullAttachStillDisabled", "NativeAttachEntryReady", "NativeVTableInstallBlocked", "NoThrowCallbackEntryReady", "ExceptionStatusMappingReady", "InFlightAccountingReady", "BorrowedDebugTensorMetadataCopied", "DetachRollbackReady", "ProcessDebugTensorRuntimeInvoked", "FullPackageConsumerRuntimeProofReady", "PointerFreeSurfaceReady", "AttemptedNoInvocation", "InvocationCount", "FailureCount", "InFlightCallbackCount", "CanPromoteRealCallbackRuntime", "RuntimeProofBlocked", "GapReasonCount")
+      requiredMarkers = @("TensorRtDebugListenerCallbackProofGapReport", "TensorRtDebugListenerCallbackProofGapReportResult", "Evaluate", "RuntimeEvidenceKind", "NonNullAttachStillDisabled", "NativeAttachEntryReady", "NativeVTableInstallBlocked", "NoThrowCallbackEntryReady", "ExceptionStatusMappingReady", "InFlightAccountingReady", "BorrowedDebugTensorMetadataCopied", "DetachRollbackReady", "ProcessDebugTensorRuntimeInvoked", "FullPackageConsumerRuntimeProofReady", "PointerFreeSurfaceReady", "AttemptedNoInvocation", "InvocationCount", "FailureCount", "InFlightCallbackCount", "CanPromoteRealCallbackRuntime", "RuntimeProofBlocked", "GapReasonCount", "PrimaryGapReason", "RuntimeProofBlockerCategory", "PackageConsumerRuntimeProofRequired", "RuntimeInvocationRequired", "EvidenceSource", "NextOwnerAction")
     },
     [pscustomobject]@{
       name = "profiler-safe-controls"
@@ -7444,6 +7444,12 @@ function New-DebugListenerCallbackProofGapReportEvidence {
     "RuntimeProofBlocked",
     "DeferredRowsStillRequired",
     "GapReasonCount",
+    "PrimaryGapReason",
+    "RuntimeProofBlockerCategory",
+    "PackageConsumerRuntimeProofRequired",
+    "RuntimeInvocationRequired",
+    "EvidenceSource",
+    "NextOwnerAction",
     "DebugListenerCallbackProofGapReport=",
     "NoNonProofCallbackRuntimeMarker",
     "not proof",

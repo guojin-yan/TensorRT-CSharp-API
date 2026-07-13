@@ -2597,6 +2597,12 @@ internal static class Program
             $";RuntimeProofBlocked={result.RuntimeProofBlocked}" +
             $";DeferredRowsStillRequired={result.DeferredRowsStillRequired}" +
             $";GapReasonCount={result.GapReasonCount}" +
+            $";PrimaryGapReason={SanitizeSmokeValue(result.PrimaryGapReason)}" +
+            $";RuntimeProofBlockerCategory={SanitizeSmokeValue(result.RuntimeProofBlockerCategory)}" +
+            $";PackageConsumerRuntimeProofRequired={result.PackageConsumerRuntimeProofRequired}" +
+            $";RuntimeInvocationRequired={result.RuntimeInvocationRequired}" +
+            $";EvidenceSource={SanitizeSmokeValue(result.EvidenceSource)}" +
+            $";NextOwnerAction={SanitizeSmokeValue(result.NextOwnerAction)}" +
             $";GapReasons={SanitizeSmokeValue(string.Join(",", result.GapReasons))}" +
             $";Diagnostic={SanitizeSmokeValue(result.Diagnostic)}";
     }

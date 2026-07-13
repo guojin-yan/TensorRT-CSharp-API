@@ -329,6 +329,12 @@ public sealed class RuntimePackageReadinessTests
         Assert.Contains("New-DebugListenerCallbackProofGapReportEvidence", script);
         Assert.Contains("debug-listener-callback-proof-gap-report", script);
         Assert.Contains("RuntimeEvidenceKind=proof-gap-report", script);
+        Assert.Contains("PrimaryGapReason", script);
+        Assert.Contains("RuntimeProofBlockerCategory", script);
+        Assert.Contains("PackageConsumerRuntimeProofRequired", script);
+        Assert.Contains("RuntimeInvocationRequired", script);
+        Assert.Contains("EvidenceSource", script);
+        Assert.Contains("NextOwnerAction", script);
         Assert.Contains("NoNonProofCallbackRuntimeMarker", script);
         Assert.Contains("proof-gap-report-ready", script);
         Assert.Contains("callback owner closure matrix must be complete", script);
