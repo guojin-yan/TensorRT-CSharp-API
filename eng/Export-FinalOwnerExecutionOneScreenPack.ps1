@@ -179,6 +179,10 @@ $postPublishCleanConsumerProofResultValidation = Read-JsonOrNull "artifacts/fina
 $postPublishUserVerificationPackValidation = Read-JsonOrNull "artifacts/final-release/post-publish-user-verification-pack-validation.json"
 $finalPublicReleaseClosureBridgeValidation = Read-JsonOrNull "artifacts/final-release/final-public-release-closure-bridge-validation.json"
 $releaseIssueCloseOwnerDecisionInputValidation = Read-JsonOrNull "artifacts/final-release/release-issue-close-owner-decision-input-validation.json"
+$dualPackagePublishPreflightMatrix = Read-JsonOrNull "artifacts/final-release/dual-package-publish-preflight-matrix.json"
+$dualPackagePublishPreflightMatrixValidation = Read-JsonOrNull "artifacts/final-release/dual-package-publish-preflight-matrix-validation.json"
+$finalCloseGateConvergence = Read-JsonOrNull "artifacts/final-release/final-close-gate-convergence.json"
+$finalCloseGateConvergenceValidation = Read-JsonOrNull "artifacts/final-release/final-close-gate-convergence-validation.json"
 
 $sourceArtifacts = @(
   "artifacts/final-release/clean-external-package-consumer-owner-runbook.json",
@@ -203,7 +207,15 @@ $sourceArtifacts = @(
   "artifacts/final-release/post-publish-clean-consumer-proof-result-validation.json",
   "artifacts/final-release/post-publish-user-verification-pack-validation.json",
   "artifacts/final-release/final-public-release-closure-bridge-validation.json",
-  "artifacts/final-release/release-issue-close-owner-decision-input-validation.json"
+  "artifacts/final-release/release-issue-close-owner-decision-input-validation.json",
+  "artifacts/final-release/dual-package-publish-preflight-matrix.json",
+  "artifacts/final-release/dual-package-publish-preflight-matrix.md",
+  "artifacts/final-release/dual-package-publish-preflight-matrix-validation.json",
+  "artifacts/final-release/dual-package-publish-preflight-matrix-validation.md",
+  "artifacts/final-release/final-close-gate-convergence.json",
+  "artifacts/final-release/final-close-gate-convergence.md",
+  "artifacts/final-release/final-close-gate-convergence-validation.json",
+  "artifacts/final-release/final-close-gate-convergence-validation.md"
 )
 
 $sourceStates = [pscustomobject]@{
@@ -231,6 +243,10 @@ $sourceStates = [pscustomobject]@{
   postPublishUserVerificationPack = [string](Get-PropertyOrDefault -Object $postPublishUserVerificationPackValidation -Name "validationState" -DefaultValue "missing-post-publish-user-verification-pack-validation")
   finalPublicReleaseClosureBridge = [string](Get-PropertyOrDefault -Object $finalPublicReleaseClosureBridgeValidation -Name "validationState" -DefaultValue "missing-final-public-release-closure-bridge-validation")
   releaseIssueCloseOwnerDecisionInput = [string](Get-PropertyOrDefault -Object $releaseIssueCloseOwnerDecisionInputValidation -Name "validationState" -DefaultValue "missing-release-issue-close-owner-decision-input-validation")
+  dualPackagePublishPreflightMatrix = [string](Get-PropertyOrDefault -Object $dualPackagePublishPreflightMatrix -Name "recordKind" -DefaultValue "missing-dual-package-publish-preflight-matrix")
+  dualPackagePublishPreflightMatrixValidation = [string](Get-PropertyOrDefault -Object $dualPackagePublishPreflightMatrixValidation -Name "validationState" -DefaultValue "missing-dual-package-publish-preflight-matrix-validation")
+  finalCloseGateConvergence = [string](Get-PropertyOrDefault -Object $finalCloseGateConvergence -Name "convergenceState" -DefaultValue "missing-final-close-gate-convergence")
+  finalCloseGateConvergenceValidation = [string](Get-PropertyOrDefault -Object $finalCloseGateConvergenceValidation -Name "validationState" -DefaultValue "missing-final-close-gate-convergence-validation")
 }
 
 $lanes = @(
@@ -371,6 +387,8 @@ $gapFields = @(
   New-GapField -Id "host-metadata" -Group "host" -FieldPath "host.os/arch/rid/gpu/driver/cuda/tensorrt/cudnn" -RequiredEvidence "OS, architecture, RID, GPU, driver, CUDA, TensorRT, and cuDNN metadata." -Status "missing owner input" -StrictValidators @("Test-PackageConsumerRuntimeProofOwnerInput.ps1 -Strict")
   New-GapField -Id "owner-review" -Group "owner-review" -FieldPath "owner.name/machine/reviewedAtUtc/note" -RequiredEvidence "Owner reviewer, machine, timestamp, and review note." -Status "missing owner input" -StrictValidators @("Import-OwnerExternalProofExecutionResult.ps1 -Strict")
   New-GapField -Id "post-publish-downloaded-package-hash" -Group "post-publish" -FieldPath "postPublish.downloadedNupkgSha256" -RequiredEvidence "Downloaded public-channel nupkg SHA256." -Status "missing owner input" -StrictValidators @("Test-PostPublishCleanConsumerProofRecordDraft.ps1 -Strict")
+  New-GapField -Id "dual-package-nuget-route-owner-proof" -Group "dual-package" -FieldPath "dualPackageRoutes.nuget-small-bridge-core.ownerAuthorization/externalProof/postPublishProof" -RequiredEvidence "Owner-authorized NuGet small bridge/core public publish result, public package download proof, clean external consumer proof, and post-publish clean consumer proof." -Status "blocked by dual-package final close lane" -StrictValidators @("Test-DualPackagePublishPreflightMatrix.ps1 -Strict", "Test-FinalCloseGateConvergence.ps1 -Strict")
+  New-GapField -Id "dual-package-github-runtime-route-owner-proof" -Group "dual-package" -FieldPath "dualPackageRoutes.github-packages-full-runtime.ownerAuthorization/externalProof/postPublishProof" -RequiredEvidence "Owner-authorized GitHub Packages full runtime publish/restore proof, runtime DLL resolution report, clean external runtime smoke, and post-publish proof." -Status "blocked by dual-package final close lane" -StrictValidators @("Test-DualPackagePublishPreflightMatrix.ps1 -Strict", "Test-FinalCloseGateConvergence.ps1 -Strict")
   New-GapField -Id "rollback-review" -Group "release-close" -FieldPath "rollbackReview" -RequiredEvidence "Rollback review and owner decision." -Status "missing owner input" -StrictValidators @("Test-FinalReleaseCloseOwnerApprovalContract.ps1 -Strict")
   New-GapField -Id "final-close-decision" -Group "release-close" -FieldPath "finalCloseDecision" -RequiredEvidence "Final owner close decision and release issue close approval input." -Status "missing owner input" -StrictValidators @("Test-FinalReleaseCloseApprovalRealInputFromOwnerResult.ps1 -Strict")
   New-GapField -Id "strict-validator-chain" -Group "validators" -FieldPath "strictValidators.output" -RequiredEvidence "Accepted strict validator outputs for runtime, post-publish, release evidence, and final close." -Status "strict validator not run" -StrictValidators @("Test-ReleaseEvidenceClassificationAudit.ps1 -Strict", "Test-ReleaseIssueCloseRecord.ps1 -FailOnNotCloseReady")
@@ -385,6 +403,7 @@ $finalPublicProofPath = @(
   New-PublicProofStep -Order 6 -Id "post-publish-user-verification-pack" -Title "Post-publish user verification pack" -SourceArtifact "artifacts/final-release/post-publish-user-verification-pack-validation.json" -ValidationArtifact "artifacts/final-release/post-publish-user-verification-pack-validation.json" -CurrentState $sourceStates.postPublishUserVerificationPack -RequiredReadyState "post-publish-user-verification-ready-for-owner-close-review" -OwnerAction "Owner reviews the post-publish verification pack after public download, clean consumer proof, final evidence audit, and final bridge inputs are refreshed." -StrictValidator "eng\Test-PostPublishUserVerificationPack.ps1 -Strict" -BlockedReason "Post-publish user verification pack remains owner-action guidance until public download, clean consumer, and final audit evidence is real."
   New-PublicProofStep -Order 7 -Id "final-public-release-closure-bridge" -Title "Final public release closure bridge" -SourceArtifact "artifacts/final-release/final-public-release-closure-bridge-validation.json" -ValidationArtifact "artifacts/final-release/final-public-release-closure-bridge-validation.json" -CurrentState $sourceStates.finalPublicReleaseClosureBridge -RequiredReadyState "final-public-release-closure-bridge-ready-for-owner-close-review" -OwnerAction "Owner refreshes the read-only final bridge after all upstream proof lanes are ready and verifies URL/version/SHA/source linkage consistency." -StrictValidator "eng\Test-FinalPublicReleaseClosureBridge.ps1 -Strict" -BlockedReason "Final bridge remains blocked until every upstream public proof lane is ready and cross-lane consistency passes."
   New-PublicProofStep -Order 8 -Id "release-issue-close-owner-decision-input" -Title "Release issue close owner decision input" -SourceArtifact "artifacts/final-release/release-issue-close-owner-decision-input-validation.json" -ValidationArtifact "artifacts/final-release/release-issue-close-owner-decision-input-validation.json" -CurrentState $sourceStates.releaseIssueCloseOwnerDecisionInput -RequiredReadyState "release-issue-close-owner-decision-input-ready" -OwnerAction "Owner records final close decision only after final bridge ready, post-publish source linkage ready, evidence bundle hash matches, and rollback review is complete." -StrictValidator "eng\Test-ReleaseIssueCloseOwnerDecisionInput.ps1 -Strict" -BlockedReason "Release issue close decision must remain blocked until real final bridge and post-publish proof linkage are ready."
+  New-PublicProofStep -Order 9 -Id "dual-package-final-close-lanes" -Title "Dual-package final close route lanes" -SourceArtifact "artifacts/final-release/final-close-gate-convergence-validation.json" -ValidationArtifact "artifacts/final-release/final-close-gate-convergence-validation.json" -CurrentState $sourceStates.finalCloseGateConvergenceValidation -RequiredReadyState "dualPackageRouteCount=2, dualPackageBlockedLaneCount=0, acceptsSubstituteProof=false, and all route owner proofs accepted" -OwnerAction "Owner must satisfy both NuGet small bridge/core and GitHub Packages full runtime route lanes with real publish/download/consumer/post-publish proof before final close." -StrictValidator "eng\Test-FinalCloseGateConvergence.ps1 -Strict" -BlockedReason "Dual-package final close lanes remain blocked until both route-specific Owner proof sets are real and accepted."
 )
 
 $forbiddenSubstitutes = @(
@@ -434,6 +453,9 @@ $record = [pscustomobject]@{
   blockedFinalPublicProofPathCount = $finalPublicProofPath.Count
   finalPublicProofPath = @($finalPublicProofPath)
   finalPublicProofSourceArtifacts = @($finalPublicProofPath | ForEach-Object { $_.validationArtifact })
+  dualPackageRouteCount = [int](Get-PropertyOrDefault -Object $dualPackagePublishPreflightMatrixValidation -Name "routeCount" -DefaultValue 0)
+  dualPackageFinalCloseBlockedLaneCount = [int](Get-PropertyOrDefault -Object $finalCloseGateConvergenceValidation -Name "dualPackageBlockedLaneCount" -DefaultValue 0)
+  dualPackageAcceptsSubstituteProof = [bool](Get-PropertyOrDefault -Object $finalCloseGateConvergenceValidation -Name "dualPackageAcceptsSubstituteProof" -DefaultValue $true)
   forbiddenSubstitutes = @($forbiddenSubstitutes)
   ownerActionRequired = $true
   performsPublish = $false
@@ -445,7 +467,7 @@ $record = [pscustomobject]@{
   isPackageConsumerRuntimeProof = $false
   isPostPublishProof = $false
   isReleaseCloseProof = $false
-  nonSubstituteProofKinds = @($forbiddenSubstitutes + @("final owner execution one-screen pack", "owner one-screen execution guidance", "owner input gap table", "final public proof path", "release candidate public proof final audit"))
+  nonSubstituteProofKinds = @($forbiddenSubstitutes + @("final owner execution one-screen pack", "owner one-screen execution guidance", "owner input gap table", "final public proof path", "release candidate public proof final audit", "dual package final close lanes", "dual package publish preflight matrix"))
   boundary = "This final owner execution one-screen pack is blocked owner guidance and an owner input gap table only. It is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push. It cannot promote proof or close the release until real owner logs, package hashes, host metadata, post-publish evidence, rollback review, final close decision, and strict validators are supplied and accepted."
 }
 
