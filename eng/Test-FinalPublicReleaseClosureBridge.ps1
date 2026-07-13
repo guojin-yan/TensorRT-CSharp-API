@@ -53,6 +53,7 @@ $crossLaneConsistencyChecks = @((Get-PropertyOrDefault -Object $record -Name "cr
 $items = New-Object System.Collections.Generic.List[object]
 
 $requiredLaneIds = @(
+  "pre-release-package-proof-readiness",
   "github-actions-run-proof",
   "owner-public-publish-result",
   "owner-publish-authorization",
@@ -65,6 +66,7 @@ $requiredLaneIds = @(
 )
 
 $requiredArtifacts = @(
+  "artifacts/final-release/pre-release-package-proof-readiness-matrix.json",
   "artifacts/final-release/github-actions-run-evidence-import-validation.json",
   "artifacts/final-release/owner-public-publish-execution-result-candidate-validation.json",
   "artifacts/final-release/owner-publish-authorization-input-validation.json",
@@ -82,6 +84,11 @@ $missingArtifacts = @($requiredArtifacts | Where-Object { $sourceArtifacts -notc
 $checkIds = @($crossLaneConsistencyChecks | ForEach-Object { [string](Get-PropertyOrDefault -Object $_ -Name "id" -DefaultValue "") })
 $requiredCheckIds = @(
   "github-actions-run-evidence-ready",
+  "pre-release-readiness-matrix-present",
+  "pre-release-readiness-lanes-present",
+  "pre-release-readiness-lane-metadata-present",
+  "pre-release-readiness-no-premature-promote-flags",
+  "pre-release-readiness-ready-for-close",
   "github-actions-run-url-present",
   "github-actions-head-sha-format",
   "github-actions-log-and-artifact-hashes",
@@ -118,6 +125,22 @@ foreach ($lane in $lanes) {
     -not [string]::IsNullOrWhiteSpace([string](Get-PropertyOrDefault -Object $lane -Name "boundary" -DefaultValue ""))
 }
 
+$preReleaseLane = $null
+foreach ($lane in $lanes) {
+  if ([string](Get-PropertyOrDefault -Object $lane -Name "laneId" -DefaultValue "") -eq "pre-release-package-proof-readiness") {
+    $preReleaseLane = $lane
+    break
+  }
+}
+$preReleaseLaneCarriesMatrixMetadata = $null -ne $preReleaseLane -and
+  -not [string]::IsNullOrWhiteSpace([string](Get-PropertyOrDefault -Object $preReleaseLane -Name "requiredEvidence" -DefaultValue "")) -and
+  -not [string]::IsNullOrWhiteSpace([string](Get-PropertyOrDefault -Object $preReleaseLane -Name "validatorPath" -DefaultValue ""))
+$closureProofSourceSummary = Get-PropertyOrDefault -Object $record -Name "closureProofSourceSummary" -DefaultValue $null
+$preReleaseSummaryPresent = $null -ne $closureProofSourceSummary -and
+  $closureProofSourceSummary.PSObject.Properties.Name -contains "preReleaseReadinessMatrixState" -and
+  $closureProofSourceSummary.PSObject.Properties.Name -contains "preReleaseLaneMetadataReady" -and
+  $closureProofSourceSummary.PSObject.Properties.Name -contains "preReleasePromoteFlagsSafe"
+
 $items.Add((New-ValidationItem -Id "record-kind" -Passed ([string](Get-PropertyOrDefault -Object $record -Name "recordKind" -DefaultValue "") -eq "final-public-release-closure-bridge") -Severity "blocker" -Detail "recordKind must be final-public-release-closure-bridge.")) | Out-Null
 $items.Add((New-ValidationItem -Id "required-lanes-present" -Passed ($missingLaneIds.Count -eq 0) -Severity "blocker" -Detail "Missing required lanes: $($missingLaneIds -join ', ')")) | Out-Null
 $items.Add((New-ValidationItem -Id "required-source-artifacts-present" -Passed ($missingArtifacts.Count -eq 0) -Severity "blocker" -Detail "Missing source artifacts: $($missingArtifacts -join ', ')")) | Out-Null
@@ -125,6 +148,8 @@ $items.Add((New-ValidationItem -Id "required-cross-lane-consistency-checks-prese
 $items.Add((New-ValidationItem -Id "cross-lane-consistency-no-blockers" -Passed ($failedConsistencyBlockers.Count -eq 0 -and [int](Get-PropertyOrDefault -Object $record -Name "failedConsistencyBlockerCount" -DefaultValue 0) -eq 0) -Severity "blocker" -Detail "Cross-lane consistency checks must not contain blocker failures.")) | Out-Null
 $items.Add((New-ValidationItem -Id "lane-count-consistent" -Passed ([int](Get-PropertyOrDefault -Object $record -Name "laneCount" -DefaultValue 0) -eq $lanes.Count) -Severity "blocker" -Detail "laneCount must match closureLanes count.")) | Out-Null
 $items.Add((New-ValidationItem -Id "lanes-safe" -Passed $allLanesSafe -Severity "blocker" -Detail "Every lane must keep publish/token/close/proof flags false and include ownerAction plus boundary.")) | Out-Null
+$items.Add((New-ValidationItem -Id "pre-release-readiness-lane-metadata-bridged" -Passed $preReleaseLaneCarriesMatrixMetadata -Severity "blocker" -Detail "Final bridge must carry the pre-release readiness matrix requiredEvidence and validatorPath into a closure lane.")) | Out-Null
+$items.Add((New-ValidationItem -Id "pre-release-readiness-summary-bridged" -Passed $preReleaseSummaryPresent -Severity "blocker" -Detail "Final bridge must expose pre-release readiness matrix state, lane metadata readiness, and promote flag safety in closureProofSourceSummary.")) | Out-Null
 $items.Add((New-ValidationItem -Id "no-side-effects" -Passed ([bool](Get-PropertyOrDefault -Object $record -Name "notExecutedByAutomation" -DefaultValue $false) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "performsPublish" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "usesPublishToken" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canPromoteRuntimeProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canPublishPublicly" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canCloseReleaseIssue" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isRuntimeExecutionProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isPackageConsumerRuntimeProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isReleaseCloseProof" -DefaultValue $true)) -Severity "blocker" -Detail "Bridge must not publish, use tokens, promote proof, or close release issue.")) | Out-Null
 $items.Add((New-ValidationItem -Id "all-close-lanes-ready" -Passed ([int](Get-PropertyOrDefault -Object $record -Name "blockedLaneCount" -DefaultValue 0) -eq 0 -and [string](Get-PropertyOrDefault -Object $record -Name "bridgeState" -DefaultValue "") -eq "final-public-release-closure-bridge-ready-for-owner-close-review") -Severity "action-required" -Detail "Bridge remains blocked until all owner authorization, owner publish execution result, public download, external smoke, post-publish proof, close decision, and strict dashboard lanes are ready.")) | Out-Null
 

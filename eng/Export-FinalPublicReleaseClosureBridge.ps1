@@ -80,7 +80,9 @@ function New-ClosureLane {
     [string]$Boundary,
     [string[]]$RequiredBeforeClose,
     [bool]$RequireProofReady = $false,
-    [string]$ProofReadyProperty = "proofCandidateReady"
+    [string]$ProofReadyProperty = "proofCandidateReady",
+    [string]$ValidatorPath = "",
+    [string]$RequiredEvidence = ""
   )
 
   $state = [string](Get-PropertyOrDefault -Object $Record -Name $StateProperty -DefaultValue "missing-$Id")
@@ -88,6 +90,7 @@ function New-ClosureLane {
   $stateReady = $state -eq $RequiredState
   $ready = if ($RequireProofReady) { $stateReady -and $proofReady } else { $stateReady }
   $exists = $null -ne $Record
+  $evidence = if ([string]::IsNullOrWhiteSpace($RequiredEvidence)) { $RequiredBeforeClose -join "; " } else { $RequiredEvidence }
   return [pscustomobject]@{
     laneId = $Id
     title = $Title
@@ -101,6 +104,8 @@ function New-ClosureLane {
     proofReady = $proofReady
     ready = $ready
     ownerAction = $OwnerAction
+    requiredEvidence = $evidence
+    validatorPath = $ValidatorPath
     requiredBeforeClose = @($RequiredBeforeClose)
     performsPublish = $false
     usesPublishToken = $false
@@ -114,6 +119,18 @@ function New-ClosureLane {
   }
 }
 
+function Get-MatrixLaneById {
+  param([AllowNull()][object]$Matrix, [string]$Id)
+  foreach ($lane in @((Get-PropertyOrDefault -Object $Matrix -Name "lanes" -DefaultValue @()))) {
+    $laneId = [string](Get-PropertyOrDefault -Object $lane -Name "id" -DefaultValue "")
+    if ($laneId.Equals($Id, [StringComparison]::OrdinalIgnoreCase)) {
+      return $lane
+    }
+  }
+
+  return $null
+}
+
 $ownerAuthorization = Read-JsonOrNull "artifacts\final-release\owner-publish-authorization-input-validation.json"
 $ownerPublishExecutionResult = Read-JsonOrNull "artifacts\final-release\owner-publish-execution-result-input-validation.json"
 $githubActionsRunEvidence = Read-JsonOrNull "artifacts\final-release\github-actions-run-evidence-import-validation.json"
@@ -123,8 +140,63 @@ $cleanConsumerSmoke = Read-JsonOrNull "artifacts\final-release\clean-external-co
 $postPublishProof = Read-JsonOrNull "artifacts\final-release\post-publish-clean-consumer-proof-result-validation.json"
 $releaseCloseDecision = Read-JsonOrNull "artifacts\final-release\release-issue-close-owner-decision-input-validation.json"
 $strictCloseDashboard = Read-JsonOrNull "artifacts\final-release\strict-close-ready-convergence-dashboard-validation.json"
+$preReleaseReadinessMatrix = Read-JsonOrNull "artifacts\final-release\pre-release-package-proof-readiness-matrix.json"
+
+$preReleaseMatrixState = [string](Get-PropertyOrDefault -Object $preReleaseReadinessMatrix -Name "matrixState" -DefaultValue "missing-pre-release-package-proof-readiness-matrix")
+$preReleaseMatrixReady = $preReleaseMatrixState.Equals("pre-release-package-proof-ready", [StringComparison]::OrdinalIgnoreCase)
+$preReleaseReadyLaneCount = [int](Get-PropertyOrDefault -Object $preReleaseReadinessMatrix -Name "readyLaneCount" -DefaultValue 0)
+$preReleaseBlockedLaneCount = [int](Get-PropertyOrDefault -Object $preReleaseReadinessMatrix -Name "blockedLaneCount" -DefaultValue 0)
+$preReleaseCurrentHead = [string](Get-PropertyOrDefault -Object $preReleaseReadinessMatrix -Name "currentHead" -DefaultValue "")
+$preReleaseSourceQualityRunId = [string](Get-PropertyOrDefault -Object $preReleaseReadinessMatrix -Name "sourceQualityRunId" -DefaultValue "")
+$preReleaseMatrixLanes = @((Get-PropertyOrDefault -Object $preReleaseReadinessMatrix -Name "lanes" -DefaultValue @()))
+$preReleaseRequiredLaneIds = @(
+  "source-quality-ci",
+  "current-head-package-dry-run",
+  "owner-dispatch-pack",
+  "public-package-download",
+  "clean-external-package-consumer-runtime",
+  "post-publish-clean-consumer-proof"
+)
+$preReleaseLaneIds = @($preReleaseMatrixLanes | ForEach-Object { [string](Get-PropertyOrDefault -Object $_ -Name "id" -DefaultValue "") })
+$preReleaseMissingLaneIds = @($preReleaseRequiredLaneIds | Where-Object { $preReleaseLaneIds -notcontains $_ })
+$preReleaseLaneMetadataFindings = New-Object System.Collections.Generic.List[string]
+$preReleasePrematurePromoteFindings = New-Object System.Collections.Generic.List[string]
+foreach ($lane in $preReleaseMatrixLanes) {
+  $laneId = [string](Get-PropertyOrDefault -Object $lane -Name "id" -DefaultValue "")
+  $requiredEvidence = [string](Get-PropertyOrDefault -Object $lane -Name "requiredEvidence" -DefaultValue "")
+  $validatorPath = [string](Get-PropertyOrDefault -Object $lane -Name "validatorPath" -DefaultValue "")
+  $ready = [bool](Get-PropertyOrDefault -Object $lane -Name "ready" -DefaultValue $false)
+  $canPromotePublic = [bool](Get-PropertyOrDefault -Object $lane -Name "canPromotePublicProof" -DefaultValue $false)
+  $canPromoteRuntime = [bool](Get-PropertyOrDefault -Object $lane -Name "canPromoteRuntimeProof" -DefaultValue $false)
+  $canPromotePostPublish = [bool](Get-PropertyOrDefault -Object $lane -Name "canPromotePostPublishProof" -DefaultValue $false)
+  if ([string]::IsNullOrWhiteSpace($requiredEvidence) -or [string]::IsNullOrWhiteSpace($validatorPath)) {
+    $preReleaseLaneMetadataFindings.Add($laneId) | Out-Null
+  }
+
+  if (-not $ready -and ($canPromotePublic -or $canPromoteRuntime -or $canPromotePostPublish)) {
+    $preReleasePrematurePromoteFindings.Add("$laneId:promote-flag-on-blocked-lane") | Out-Null
+  }
+
+  if (@("source-quality-ci", "current-head-package-dry-run", "owner-dispatch-pack") -contains $laneId -and ($canPromotePublic -or $canPromoteRuntime -or $canPromotePostPublish)) {
+    $preReleasePrematurePromoteFindings.Add("$laneId:non-proof-lane-promote-flag") | Out-Null
+  }
+}
+$preReleaseLaneMetadataReady = $null -ne $preReleaseReadinessMatrix -and $preReleaseMissingLaneIds.Count -eq 0 -and $preReleaseLaneMetadataFindings.Count -eq 0
+$preReleasePromoteFlagsSafe = $preReleasePrematurePromoteFindings.Count -eq 0
 
 $lanes = @(
+  New-ClosureLane `
+    -Id "pre-release-package-proof-readiness" `
+    -Title "Pre-release package proof readiness matrix" `
+    -Artifact "artifacts/final-release/pre-release-package-proof-readiness-matrix.json" `
+    -Record $preReleaseReadinessMatrix `
+    -StateProperty "matrixState" `
+    -RequiredState "pre-release-package-proof-ready" `
+    -OwnerAction "Unblock current-head package dry-run, public package download, clean external consumer runtime, and post-publish proof lanes according to each matrix lane's validatorPath and requiredEvidence." `
+    -RequiredBeforeClose @("matrix lane validatorPath", "matrix lane requiredEvidence", "current-head package dry-run evidence", "public package download proof", "clean external consumer runtime proof", "post-publish proof") `
+    -Boundary "Pre-release readiness matrix is an upstream classifier only; source-quality, dispatch packs, preflights, templates, local artifacts, and blocked lanes cannot promote public/runtime/post-publish proof." `
+    -ValidatorPath "eng\Export-PreReleasePackageProofReadinessMatrix.ps1" `
+    -RequiredEvidence "All pre-release proof lanes expose validatorPath/requiredEvidence and are ready without premature promote flags."
   New-ClosureLane `
     -Id "github-actions-run-proof" `
     -Title "GitHub Actions run evidence import" `
@@ -275,6 +347,11 @@ $forbiddenFindingCount = @($allForbiddenFindings).Count
 
 $crossLaneConsistencyChecks = @(
   New-ClosureConsistencyCheck -Id "github-actions-run-evidence-ready" -Passed $githubActionsReady -Severity "action-required" -Detail "A real GitHub Actions run evidence validation must be ready before release close review."
+  New-ClosureConsistencyCheck -Id "pre-release-readiness-matrix-present" -Passed ($null -ne $preReleaseReadinessMatrix) -Severity "action-required" -Detail "Pre-release readiness matrix must be generated before final public release closure review."
+  New-ClosureConsistencyCheck -Id "pre-release-readiness-lanes-present" -Passed ($preReleaseMissingLaneIds.Count -eq 0) -Severity "blocker" -Detail $(if ($preReleaseMissingLaneIds.Count -eq 0) { "All required pre-release readiness lanes are present." } else { "Missing pre-release lane(s): $($preReleaseMissingLaneIds -join ', ')" })
+  New-ClosureConsistencyCheck -Id "pre-release-readiness-lane-metadata-present" -Passed $preReleaseLaneMetadataReady -Severity "blocker" -Detail $(if ($preReleaseLaneMetadataReady) { "Every pre-release lane exposes requiredEvidence and validatorPath." } else { "Lane metadata missing for: $($preReleaseLaneMetadataFindings -join ', ')" })
+  New-ClosureConsistencyCheck -Id "pre-release-readiness-no-premature-promote-flags" -Passed $preReleasePromoteFlagsSafe -Severity "blocker" -Detail $(if ($preReleasePromoteFlagsSafe) { "No blocked or non-proof pre-release lane exposes public/runtime/post-publish promote flags." } else { "Premature promote flag(s): $($preReleasePrematurePromoteFindings -join ', ')" })
+  New-ClosureConsistencyCheck -Id "pre-release-readiness-ready-for-close" -Passed $preReleaseMatrixReady -Severity "action-required" -Detail "Pre-release package proof readiness matrix must be ready before owner close review."
   New-ClosureConsistencyCheck -Id "github-actions-run-url-present" -Passed (Test-ReadyUrl -Value $githubActionsRunUrl -Prefix "https://github.com/") -Severity "action-required" -Detail "GitHub Actions run URL must be a real github.com actions URL."
   New-ClosureConsistencyCheck -Id "github-actions-head-sha-format" -Passed ($githubActionsHeadSha -match "^[0-9a-fA-F]{40}$") -Severity "action-required" -Detail "GitHub Actions head SHA must identify the reviewed commit."
   New-ClosureConsistencyCheck -Id "github-actions-log-and-artifact-hashes" -Passed ((Test-Sha256Format -Value $githubActionsWorkflowRunLogSha256) -and (Test-Sha256Format -Value $githubActionsArtifactManifestSha256)) -Severity "action-required" -Detail "Workflow log SHA256 and artifact manifest SHA256 must be present."
@@ -345,6 +422,17 @@ $record = [pscustomobject]@{
   closureLanes = @($lanes)
   crossLaneConsistencyChecks = @($crossLaneConsistencyChecks)
   closureProofSourceSummary = [pscustomobject]@{
+    preReleaseReadinessMatrixState = $preReleaseMatrixState
+    preReleaseReadinessMatrixReady = $preReleaseMatrixReady
+    preReleaseCurrentHead = $preReleaseCurrentHead
+    preReleaseSourceQualityRunId = $preReleaseSourceQualityRunId
+    preReleaseReadyLaneCount = $preReleaseReadyLaneCount
+    preReleaseBlockedLaneCount = $preReleaseBlockedLaneCount
+    preReleaseLaneMetadataReady = $preReleaseLaneMetadataReady
+    preReleasePromoteFlagsSafe = $preReleasePromoteFlagsSafe
+    preReleaseMissingLaneIds = @($preReleaseMissingLaneIds)
+    preReleaseLaneMetadataFindings = @($preReleaseLaneMetadataFindings.ToArray())
+    preReleasePrematurePromoteFindings = @($preReleasePrematurePromoteFindings.ToArray())
     githubActionsRunEvidenceReady = $githubActionsReady
     githubActionsRunId = $githubActionsRunId
     githubActionsRunUrl = $githubActionsRunUrl

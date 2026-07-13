@@ -34,6 +34,7 @@ public sealed class FinalPublicReleaseClosureBridgeTests
         RunPowerShell("Test-ReleaseIssueCloseOwnerDecisionInput.ps1", "-Strict");
         RunPowerShell("Export-StrictCloseReadyConvergenceDashboard.ps1");
         RunPowerShell("Test-StrictCloseReadyConvergenceDashboard.ps1", "-Strict");
+        RunPowerShell("Export-PreReleasePackageProofReadinessMatrix.ps1");
         RunPowerShell("Export-FinalPublicReleaseClosureBridge.ps1");
         RunPowerShell("Test-FinalPublicReleaseClosureBridge.ps1", "-Strict");
 
@@ -41,7 +42,7 @@ public sealed class FinalPublicReleaseClosureBridgeTests
         JsonElement bridge = bridgeDocument.RootElement;
         Assert.Equal("final-public-release-closure-bridge", bridge.GetProperty("recordKind").GetString());
         Assert.Equal("blocked-final-public-release-closure-real-owner-proof-required", bridge.GetProperty("bridgeState").GetString());
-        Assert.Equal(9, bridge.GetProperty("laneCount").GetInt32());
+        Assert.Equal(10, bridge.GetProperty("laneCount").GetInt32());
         Assert.True(bridge.GetProperty("blockedLaneCount").GetInt32() > 0);
         AssertFalseProofPublishCloseFlags(bridge);
         Assert.Equal(0, bridge.GetProperty("failedConsistencyBlockerCount").GetInt32());
@@ -52,6 +53,7 @@ public sealed class FinalPublicReleaseClosureBridgeTests
             .Select(static lane => lane.GetProperty("laneId").GetString()!)
             .ToArray();
 
+        Assert.Contains("pre-release-package-proof-readiness", laneIds);
         Assert.Contains("github-actions-run-proof", laneIds);
         Assert.Contains("owner-public-publish-result", laneIds);
         Assert.Contains("owner-publish-authorization", laneIds);
@@ -73,10 +75,19 @@ public sealed class FinalPublicReleaseClosureBridgeTests
             AssertHasNonProofBoundary(lane.GetProperty("boundary").GetString());
         }
 
+        JsonElement preReleaseLane = bridge.GetProperty("closureLanes").EnumerateArray()
+            .Single(static lane => lane.GetProperty("laneId").GetString() == "pre-release-package-proof-readiness");
+        Assert.Equal("eng\\Export-PreReleasePackageProofReadinessMatrix.ps1", preReleaseLane.GetProperty("validatorPath").GetString());
+        Assert.Contains("validatorPath", preReleaseLane.GetProperty("requiredEvidence").GetString(), StringComparison.Ordinal);
+
         string[] checkIds = bridge.GetProperty("crossLaneConsistencyChecks").EnumerateArray()
             .Select(static check => check.GetProperty("id").GetString()!)
             .ToArray();
         Assert.Contains("github-actions-run-evidence-ready", checkIds);
+        Assert.Contains("pre-release-readiness-matrix-present", checkIds);
+        Assert.Contains("pre-release-readiness-lane-metadata-present", checkIds);
+        Assert.Contains("pre-release-readiness-no-premature-promote-flags", checkIds);
+        Assert.Contains("pre-release-readiness-ready-for-close", checkIds);
         Assert.Contains("owner-public-publish-result-ready", checkIds);
         Assert.Contains("public-download-proof-ready", checkIds);
         Assert.Contains("post-publish-proof-candidate-ready", checkIds);
@@ -84,6 +95,10 @@ public sealed class FinalPublicReleaseClosureBridgeTests
         Assert.Contains("forbidden-substitutes-absent", checkIds);
 
         JsonElement proofSummary = bridge.GetProperty("closureProofSourceSummary");
+        Assert.Equal("blocked-real-public-package-and-runtime-proof-required", proofSummary.GetProperty("preReleaseReadinessMatrixState").GetString());
+        Assert.False(proofSummary.GetProperty("preReleaseReadinessMatrixReady").GetBoolean());
+        Assert.True(proofSummary.GetProperty("preReleaseLaneMetadataReady").GetBoolean());
+        Assert.True(proofSummary.GetProperty("preReleasePromoteFlagsSafe").GetBoolean());
         Assert.False(proofSummary.GetProperty("githubActionsRunEvidenceReady").GetBoolean());
         Assert.False(proofSummary.GetProperty("ownerPublicPublishResultReady").GetBoolean());
         Assert.False(proofSummary.GetProperty("publicDownloadProofReady").GetBoolean());
@@ -93,6 +108,7 @@ public sealed class FinalPublicReleaseClosureBridgeTests
         string[] sourceArtifacts = bridge.GetProperty("sourceArtifacts").EnumerateArray()
             .Select(static item => item.GetString()!)
             .ToArray();
+        Assert.Contains("artifacts/final-release/pre-release-package-proof-readiness-matrix.json", sourceArtifacts);
         Assert.Contains("artifacts/final-release/github-actions-run-evidence-import-validation.json", sourceArtifacts);
         Assert.Contains("artifacts/final-release/owner-public-publish-execution-result-candidate-validation.json", sourceArtifacts);
         Assert.Contains("artifacts/final-release/owner-publish-authorization-input-validation.json", sourceArtifacts);
@@ -109,7 +125,7 @@ public sealed class FinalPublicReleaseClosureBridgeTests
         Assert.Equal("blocked-final-public-release-closure-real-owner-proof-required", validation.GetProperty("validationState").GetString());
         Assert.Equal(0, validation.GetProperty("failedBlockerCount").GetInt32());
         Assert.True(validation.GetProperty("failedActionRequiredCount").GetInt32() > 0);
-        Assert.Equal(9, validation.GetProperty("laneCount").GetInt32());
+        Assert.Equal(10, validation.GetProperty("laneCount").GetInt32());
         Assert.Equal(0, validation.GetProperty("failedConsistencyBlockerCount").GetInt32());
         Assert.True(validation.GetProperty("failedConsistencyActionRequiredCount").GetInt32() > 0);
         Assert.Equal(0, validation.GetProperty("forbiddenSubstituteFindingCount").GetInt32());
@@ -167,6 +183,7 @@ public sealed class FinalPublicReleaseClosureBridgeTests
     {
         string[] laneIds =
         [
+            "pre-release-package-proof-readiness",
             "github-actions-run-proof",
             "owner-public-publish-result",
             "owner-publish-authorization",
@@ -180,6 +197,7 @@ public sealed class FinalPublicReleaseClosureBridgeTests
 
         string[] sourceArtifacts =
         [
+            "artifacts/final-release/pre-release-package-proof-readiness-matrix.json",
             "artifacts/final-release/github-actions-run-evidence-import-validation.json",
             "artifacts/final-release/owner-public-publish-execution-result-candidate-validation.json",
             "artifacts/final-release/owner-publish-authorization-input-validation.json",
@@ -207,6 +225,8 @@ public sealed class FinalPublicReleaseClosureBridgeTests
                 ["isReleaseCloseProof"] = false,
                 ["ownerAction"] = "Ready-shaped fixture action only.",
                 ["boundary"] = "Fixture cannot publish, cannot use tokens, cannot promote proof, and cannot close a release issue.",
+                ["requiredEvidence"] = "Ready-shaped fixture required evidence.",
+                ["validatorPath"] = "eng\\ReadyFixtureValidator.ps1 -Strict",
             });
         }
 
@@ -256,6 +276,10 @@ public sealed class FinalPublicReleaseClosureBridgeTests
             ["closureProofSourceSummary"] = new JsonObject
             {
                 ["githubActionsRunEvidenceReady"] = true,
+                ["preReleaseReadinessMatrixState"] = "pre-release-package-proof-ready",
+                ["preReleaseReadinessMatrixReady"] = true,
+                ["preReleaseLaneMetadataReady"] = true,
+                ["preReleasePromoteFlagsSafe"] = true,
                 ["ownerPublicPublishResultReady"] = true,
                 ["publicDownloadProofReady"] = true,
                 ["postPublishProofReady"] = true,
@@ -272,6 +296,11 @@ public sealed class FinalPublicReleaseClosureBridgeTests
         return
         [
             "github-actions-run-evidence-ready",
+            "pre-release-readiness-matrix-present",
+            "pre-release-readiness-lanes-present",
+            "pre-release-readiness-lane-metadata-present",
+            "pre-release-readiness-no-premature-promote-flags",
+            "pre-release-readiness-ready-for-close",
             "github-actions-run-url-present",
             "github-actions-head-sha-format",
             "github-actions-log-and-artifact-hashes",
