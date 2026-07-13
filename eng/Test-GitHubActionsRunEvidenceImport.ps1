@@ -28,6 +28,7 @@ $OutputEncoding = $utf8
 
 function Resolve-RepositoryPath {
   param([string]$Path)
+  if ([string]::IsNullOrWhiteSpace($Path)) { return "" }
   if ([System.IO.Path]::IsPathRooted($Path)) { return $Path }
   return Join-Path $RepositoryRoot $Path
 }
@@ -55,6 +56,161 @@ function ConvertTo-MarkdownCell {
   return ([string]$Value).Replace("|", "\|").Replace("`r", " ").Replace("`n", " ")
 }
 
+function Test-Sha256Format {
+  param([string]$Value)
+  return -not [string]::IsNullOrWhiteSpace($Value) -and $Value -match "^[0-9a-fA-F]{64}$"
+}
+
+function Get-Sha256 {
+  param([Parameter(Mandatory = $true)][string]$Path)
+
+  $stream = [System.IO.File]::OpenRead($Path)
+  try {
+    $sha = [System.Security.Cryptography.SHA256]::Create()
+    try {
+      return ([System.BitConverter]::ToString($sha.ComputeHash($stream)) -replace "-", "").ToLowerInvariant()
+    }
+    finally {
+      $sha.Dispose()
+    }
+  }
+  finally {
+    $stream.Dispose()
+  }
+}
+
+function Test-FileHashMatches {
+  param([string]$Path, [string]$Sha256)
+
+  if ([string]::IsNullOrWhiteSpace($Path) -or -not (Test-Sha256Format -Value $Sha256)) {
+    return $false
+  }
+
+  $resolvedPath = Resolve-RepositoryPath -Path $Path
+  if (-not (Test-Path -LiteralPath $resolvedPath -PathType Leaf)) {
+    return $false
+  }
+
+  return (Get-Sha256 -Path $resolvedPath).Equals($Sha256, [StringComparison]::OrdinalIgnoreCase)
+}
+
+function Test-DateTimeOffsetFormat {
+  param([string]$Value)
+
+  if ([string]::IsNullOrWhiteSpace($Value)) {
+    return $false
+  }
+
+  $parsed = [DateTimeOffset]::MinValue
+  return [DateTimeOffset]::TryParse(
+    $Value,
+    [System.Globalization.CultureInfo]::InvariantCulture,
+    [System.Globalization.DateTimeStyles]::AssumeUniversal,
+    [ref]$parsed)
+}
+
+function Test-CompletedAfterStarted {
+  param([string]$StartedAtUtc, [string]$CompletedAtUtc)
+
+  $started = [DateTimeOffset]::MinValue
+  $completed = [DateTimeOffset]::MinValue
+  $startedOk = [DateTimeOffset]::TryParse($StartedAtUtc, [System.Globalization.CultureInfo]::InvariantCulture, [System.Globalization.DateTimeStyles]::AssumeUniversal, [ref]$started)
+  $completedOk = [DateTimeOffset]::TryParse($CompletedAtUtc, [System.Globalization.CultureInfo]::InvariantCulture, [System.Globalization.DateTimeStyles]::AssumeUniversal, [ref]$completed)
+  return $startedOk -and $completedOk -and $completed -ge $started
+}
+
+function Test-ConcreteValue {
+  param([string]$Value)
+
+  if ([string]::IsNullOrWhiteSpace($Value)) {
+    return $false
+  }
+
+  $text = $Value.Trim()
+  if ($text -match '^<.*>$') {
+    return $false
+  }
+
+  return $text -notmatch '(?i)\b(placeholder|todo|tbd|sample|example|dummy|fake)\b'
+}
+
+function Test-GitHubActionsRunUrl {
+  param([string]$Value)
+
+  return -not [string]::IsNullOrWhiteSpace($Value) -and
+    $Value.StartsWith("https://github.com/", [StringComparison]::OrdinalIgnoreCase) -and
+    $Value -match '(?i)/actions/runs/[0-9]+'
+}
+
+function Get-ForbiddenSubstituteFindings {
+  param(
+    [AllowNull()][object]$Record,
+    [string]$RunUrl,
+    [string]$RunStatus,
+    [string]$RunConclusion,
+    [string]$WorkflowRunLogPath,
+    [string]$ArtifactManifestPath,
+    [string]$OwnerReviewer
+  )
+
+  $findings = New-Object System.Collections.Generic.List[string]
+  if ($null -eq $Record) {
+    return @()
+  }
+
+  if (-not [string]::IsNullOrWhiteSpace($RunStatus) -and $RunStatus -match '(?i)\b(queued|waiting|requested|pending)\b') {
+    $findings.Add("queued-or-pending-workflow-status:$RunStatus") | Out-Null
+  }
+
+  if (-not [string]::IsNullOrWhiteSpace($RunUrl) -and $RunUrl.StartsWith("https://github.com/", [StringComparison]::OrdinalIgnoreCase) -and -not (Test-GitHubActionsRunUrl -Value $RunUrl)) {
+    $findings.Add("dashboard-or-non-run-url:$RunUrl") | Out-Null
+  }
+
+  foreach ($pathPair in @(
+      @{ name = "workflowRunLogPath"; value = $WorkflowRunLogPath },
+      @{ name = "artifactManifestPath"; value = $ArtifactManifestPath }
+    )) {
+    $pathValue = [string]$pathPair.value
+    if ([string]::IsNullOrWhiteSpace($pathValue)) {
+      continue
+    }
+
+    $normalized = $pathValue.Replace("\", "/")
+    if ($normalized -match '(?i)/package-managed-dry-run(/|$)') {
+      $findings.Add("$($pathPair.name)-points-to-package-managed-dry-run") | Out-Null
+    }
+
+    if ($normalized -match '(?i)\.nupkg$') {
+      $findings.Add("$($pathPair.name)-points-to-direct-nupkg") | Out-Null
+    }
+  }
+
+  $selectedText = @(
+    $RunUrl,
+    $RunStatus,
+    $RunConclusion,
+    $WorkflowRunLogPath,
+    $ArtifactManifestPath,
+    $OwnerReviewer
+  ) -join "`n"
+
+  foreach ($pattern in @(
+      @{ id = "local-dotnet-test"; regex = '(?i)local\s+dotnet\s+test' },
+      @{ id = "missing-runner"; regex = '(?i)missing\s+runner' },
+      @{ id = "manual-approval"; regex = '(?i)manual\s+approval' },
+      @{ id = "local-feed"; regex = '(?i)local\s+feed|local-feed' },
+      @{ id = "project-reference"; regex = '(?i)projectreference|project\s+reference' },
+      @{ id = "package-managed-dry-run-only"; regex = '(?i)package-managed-dry-run[-\s]+only' },
+      @{ id = "direct-nupkg"; regex = '(?i)direct\s+\.?nupkg|direct-nupkg' }
+    )) {
+    if ($selectedText -match $pattern.regex) {
+      $findings.Add([string]$pattern.id) | Out-Null
+    }
+  }
+
+  return @($findings.ToArray() | Select-Object -Unique)
+}
+
 $resolvedInputPath = Resolve-RepositoryPath -Path $InputPath
 $record = $null
 if (Test-Path -LiteralPath $resolvedInputPath -PathType Leaf) {
@@ -63,8 +219,20 @@ if (Test-Path -LiteralPath $resolvedInputPath -PathType Leaf) {
 
 $runId = [string](Get-PropertyOrDefault -Object $record -Name "runId" -DefaultValue "")
 $runUrl = [string](Get-PropertyOrDefault -Object $record -Name "runUrl" -DefaultValue "")
-$headSha = [string](Get-PropertyOrDefault -Object $record -Name "headSha" -DefaultValue "")
+$runStatus = [string](Get-PropertyOrDefault -Object $record -Name "runStatus" -DefaultValue "")
 $runConclusion = [string](Get-PropertyOrDefault -Object $record -Name "runConclusion" -DefaultValue "")
+$runAttempt = [string](Get-PropertyOrDefault -Object $record -Name "runAttempt" -DefaultValue "")
+$workflowName = [string](Get-PropertyOrDefault -Object $record -Name "workflowName" -DefaultValue "")
+$workflowFile = [string](Get-PropertyOrDefault -Object $record -Name "workflowFile" -DefaultValue "")
+$runEvent = [string](Get-PropertyOrDefault -Object $record -Name "runEvent" -DefaultValue "")
+$runBranch = [string](Get-PropertyOrDefault -Object $record -Name "runBranch" -DefaultValue "")
+$runRef = [string](Get-PropertyOrDefault -Object $record -Name "runRef" -DefaultValue "")
+$startedAtUtc = [string](Get-PropertyOrDefault -Object $record -Name "startedAtUtc" -DefaultValue "")
+$completedAtUtc = [string](Get-PropertyOrDefault -Object $record -Name "completedAtUtc" -DefaultValue "")
+$headSha = [string](Get-PropertyOrDefault -Object $record -Name "headSha" -DefaultValue "")
+$expectedHeadSha = [string](Get-PropertyOrDefault -Object $record -Name "expectedHeadSha" -DefaultValue "")
+$runHeadMatchesCurrentHead = [bool](Get-PropertyOrDefault -Object $record -Name "runHeadMatchesCurrentHead" -DefaultValue $false)
+$runHeadMatchesUpstreamHead = [bool](Get-PropertyOrDefault -Object $record -Name "runHeadMatchesUpstreamHead" -DefaultValue $false)
 $sourceQualityConclusion = [string](Get-PropertyOrDefault -Object $record -Name "sourceQualityConclusion" -DefaultValue "")
 $packagePackConclusion = [string](Get-PropertyOrDefault -Object $record -Name "packageManagedDryRunPackConclusion" -DefaultValue "")
 $publishNugetConclusion = [string](Get-PropertyOrDefault -Object $record -Name "publishNugetConclusion" -DefaultValue "")
@@ -72,24 +240,63 @@ $publishGitHubPackagesConclusion = [string](Get-PropertyOrDefault -Object $recor
 $nupkgPackages = @((Get-PropertyOrDefault -Object $record -Name "nupkgPackages" -DefaultValue @()))
 $importFailedBlockerCount = [int](Get-PropertyOrDefault -Object $record -Name "failedBlockerCount" -DefaultValue 999)
 $canClaimDryRunPack = [bool](Get-PropertyOrDefault -Object $record -Name "canClaimGitHubActionsPackageDryRunPackForRun" -DefaultValue $false)
+$workflowRunLogPath = [string](Get-PropertyOrDefault -Object $record -Name "workflowRunLogPath" -DefaultValue "")
 $workflowRunLogSha256 = [string](Get-PropertyOrDefault -Object $record -Name "workflowRunLogSha256" -DefaultValue "")
+$artifactManifestPath = [string](Get-PropertyOrDefault -Object $record -Name "artifactManifestPath" -DefaultValue "")
 $artifactManifestSha256 = [string](Get-PropertyOrDefault -Object $record -Name "artifactManifestSha256" -DefaultValue "")
+$ownerReviewer = [string](Get-PropertyOrDefault -Object $record -Name "ownerReviewer" -DefaultValue "")
+$capturedAtUtc = [string](Get-PropertyOrDefault -Object $record -Name "capturedAtUtc" -DefaultValue "")
+
+$runAttemptIsPositiveInteger = $runAttempt -match '^[0-9]+$' -and [int64]$runAttempt -gt 0
+$runHeadLinksSource = $headSha -match '^[0-9a-fA-F]{40}$' -and (
+  $runHeadMatchesCurrentHead -or
+  $runHeadMatchesUpstreamHead -or
+  (-not [string]::IsNullOrWhiteSpace($expectedHeadSha) -and $headSha.Equals($expectedHeadSha, [StringComparison]::OrdinalIgnoreCase))
+)
+$nupkgSha256s = @($nupkgPackages | ForEach-Object { [string](Get-PropertyOrDefault -Object $_ -Name "sha256" -DefaultValue "") })
+$packageSha256sPresent = $nupkgSha256s.Count -gt 0 -and @($nupkgSha256s | Where-Object { -not (Test-Sha256Format -Value $_) }).Count -eq 0
+$forbiddenFindings = Get-ForbiddenSubstituteFindings `
+  -Record $record `
+  -RunUrl $runUrl `
+  -RunStatus $runStatus `
+  -RunConclusion $runConclusion `
+  -WorkflowRunLogPath $workflowRunLogPath `
+  -ArtifactManifestPath $artifactManifestPath `
+  -OwnerReviewer $ownerReviewer
 
 $items = New-Object System.Collections.Generic.List[object]
 $items.Add((New-ValidationItem -Id "input-present" -Passed ($null -ne $record) -Severity "action-required" -Detail "Owner must import a real GitHub Actions run evidence artifact before this lane can be ready.")) | Out-Null
 $items.Add((New-ValidationItem -Id "record-kind" -Passed ($null -eq $record -or [string](Get-PropertyOrDefault -Object $record -Name "recordKind" -DefaultValue "") -eq "github-actions-run-evidence-import") -Severity "blocker" -Detail "recordKind must be github-actions-run-evidence-import when input is present.")) | Out-Null
 $items.Add((New-ValidationItem -Id "run-id-present" -Passed (-not [string]::IsNullOrWhiteSpace($runId)) -Severity "action-required" -Detail "runId must identify the GitHub Actions workflow run.")) | Out-Null
-$items.Add((New-ValidationItem -Id "run-url-public" -Passed ($runUrl.StartsWith("https://github.com/", [StringComparison]::OrdinalIgnoreCase)) -Severity "action-required" -Detail "runUrl must be a GitHub workflow run URL.")) | Out-Null
-$items.Add((New-ValidationItem -Id "head-sha-format" -Passed ($headSha -match "^[0-9a-fA-F]{40}$") -Severity "action-required" -Detail "headSha must be a 40-character git commit SHA.")) | Out-Null
+$items.Add((New-ValidationItem -Id "run-url-public-run-detail" -Passed (Test-GitHubActionsRunUrl -Value $runUrl) -Severity "action-required" -Detail "runUrl must be a GitHub workflow run detail URL under /actions/runs/<id>, not a dashboard or placeholder.")) | Out-Null
+$items.Add((New-ValidationItem -Id "run-status-completed" -Passed ($runStatus.Equals("completed", [StringComparison]::OrdinalIgnoreCase)) -Severity "action-required" -Detail "GitHub Actions run status must be completed.")) | Out-Null
 $items.Add((New-ValidationItem -Id "run-conclusion-success" -Passed ($runConclusion.Equals("success", [StringComparison]::OrdinalIgnoreCase)) -Severity "action-required" -Detail "GitHub Actions run conclusion must be success.")) | Out-Null
+$items.Add((New-ValidationItem -Id "run-attempt-present" -Passed $runAttemptIsPositiveInteger -Severity "action-required" -Detail "runAttempt must be a positive integer captured from the workflow run.")) | Out-Null
+$items.Add((New-ValidationItem -Id "workflow-name-present" -Passed (Test-ConcreteValue -Value $workflowName) -Severity "action-required" -Detail "workflowName must identify the workflow that ran.")) | Out-Null
+$items.Add((New-ValidationItem -Id "workflow-file-present" -Passed (Test-ConcreteValue -Value $workflowFile) -Severity "action-required" -Detail "workflowFile must identify the workflow YAML file.")) | Out-Null
+$items.Add((New-ValidationItem -Id "event-present" -Passed (Test-ConcreteValue -Value $runEvent) -Severity "action-required" -Detail "runEvent must identify the trigger event, such as workflow_dispatch or push.")) | Out-Null
+$items.Add((New-ValidationItem -Id "ref-or-branch-present" -Passed ((Test-ConcreteValue -Value $runRef) -or (Test-ConcreteValue -Value $runBranch)) -Severity "action-required" -Detail "runRef or runBranch must link the run back to the release branch/ref.")) | Out-Null
+$items.Add((New-ValidationItem -Id "started-at-utc-parseable" -Passed (Test-DateTimeOffsetFormat -Value $startedAtUtc) -Severity "action-required" -Detail "startedAtUtc must be parseable as a DateTimeOffset.")) | Out-Null
+$items.Add((New-ValidationItem -Id "completed-at-utc-parseable" -Passed (Test-DateTimeOffsetFormat -Value $completedAtUtc) -Severity "action-required" -Detail "completedAtUtc must be parseable as a DateTimeOffset.")) | Out-Null
+$items.Add((New-ValidationItem -Id "completed-at-after-started-at" -Passed (Test-CompletedAfterStarted -StartedAtUtc $startedAtUtc -CompletedAtUtc $completedAtUtc) -Severity "action-required" -Detail "completedAtUtc must be equal to or later than startedAtUtc.")) | Out-Null
+$items.Add((New-ValidationItem -Id "head-sha-format" -Passed ($headSha -match "^[0-9a-fA-F]{40}$") -Severity "action-required" -Detail "headSha must be a 40-character git commit SHA.")) | Out-Null
+$items.Add((New-ValidationItem -Id "source-head-link-present" -Passed $runHeadLinksSource -Severity "action-required" -Detail "headSha must match expectedHeadSha, current HEAD, or upstream HEAD to link this run to the reviewed release source.")) | Out-Null
 $items.Add((New-ValidationItem -Id "source-quality-success" -Passed ($sourceQualityConclusion.Equals("success", [StringComparison]::OrdinalIgnoreCase)) -Severity "action-required" -Detail "source-quality job must succeed.")) | Out-Null
 $items.Add((New-ValidationItem -Id "package-dry-run-pack-success" -Passed ($packagePackConclusion.Equals("success", [StringComparison]::OrdinalIgnoreCase)) -Severity "action-required" -Detail "package-managed-dry-run / pack job must succeed.")) | Out-Null
 $items.Add((New-ValidationItem -Id "publish-jobs-skipped" -Passed ($null -eq $record -or ($publishNugetConclusion.Equals("skipped", [StringComparison]::OrdinalIgnoreCase) -and $publishGitHubPackagesConclusion.Equals("skipped", [StringComparison]::OrdinalIgnoreCase))) -Severity "blocker" -Detail "Publish jobs must be skipped for this import; it is CI/package dry-run evidence, not publish proof.")) | Out-Null
 $items.Add((New-ValidationItem -Id "nupkg-packages-present" -Passed ($nupkgPackages.Count -gt 0) -Severity "action-required" -Detail "At least one package dry-run nupkg artifact must be present.")) | Out-Null
+$items.Add((New-ValidationItem -Id "package-artifact-sha256s-present" -Passed $packageSha256sPresent -Severity "action-required" -Detail "Every package artifact summary must include a 64-character SHA256.")) | Out-Null
 $items.Add((New-ValidationItem -Id "import-blockers-zero" -Passed ($null -eq $record -or $importFailedBlockerCount -eq 0) -Severity "blocker" -Detail "Import failedBlockerCount must be zero.")) | Out-Null
 $items.Add((New-ValidationItem -Id "dry-run-pack-claim-ready" -Passed $canClaimDryRunPack -Severity "action-required" -Detail "Import must be internally ready to claim GitHub Actions package dry-run pack evidence.")) | Out-Null
-$items.Add((New-ValidationItem -Id "workflow-run-log-sha256-present" -Passed ($workflowRunLogSha256 -match "^[0-9a-fA-F]{64}$") -Severity "action-required" -Detail "A real GitHub Actions proof lane needs the workflow run log SHA256; dry-run package evidence alone is not enough.")) | Out-Null
-$items.Add((New-ValidationItem -Id "artifact-manifest-sha256-present" -Passed ($artifactManifestSha256 -match "^[0-9a-fA-F]{64}$") -Severity "action-required" -Detail "A real GitHub Actions proof lane needs an artifact manifest SHA256 tying downloaded artifacts to the run.")) | Out-Null
+$items.Add((New-ValidationItem -Id "workflow-run-log-path-present" -Passed (Test-ConcreteValue -Value $workflowRunLogPath) -Severity "action-required" -Detail "A real GitHub Actions proof lane needs the workflow run log path.")) | Out-Null
+$items.Add((New-ValidationItem -Id "workflow-run-log-sha256-present" -Passed (Test-Sha256Format -Value $workflowRunLogSha256) -Severity "action-required" -Detail "A real GitHub Actions proof lane needs the workflow run log SHA256; dry-run package evidence alone is not enough.")) | Out-Null
+$items.Add((New-ValidationItem -Id "workflow-run-log-hash-match" -Passed (Test-FileHashMatches -Path $workflowRunLogPath -Sha256 $workflowRunLogSha256) -Severity "action-required" -Detail "workflowRunLogSha256 must match the imported workflow run log file.")) | Out-Null
+$items.Add((New-ValidationItem -Id "artifact-manifest-path-present" -Passed (Test-ConcreteValue -Value $artifactManifestPath) -Severity "action-required" -Detail "A real GitHub Actions proof lane needs an artifact manifest path.")) | Out-Null
+$items.Add((New-ValidationItem -Id "artifact-manifest-sha256-present" -Passed (Test-Sha256Format -Value $artifactManifestSha256) -Severity "action-required" -Detail "A real GitHub Actions proof lane needs an artifact manifest SHA256 tying downloaded artifacts to the run.")) | Out-Null
+$items.Add((New-ValidationItem -Id "artifact-manifest-hash-match" -Passed (Test-FileHashMatches -Path $artifactManifestPath -Sha256 $artifactManifestSha256) -Severity "action-required" -Detail "artifactManifestSha256 must match the imported artifact manifest file.")) | Out-Null
+$items.Add((New-ValidationItem -Id "owner-reviewer-present" -Passed (Test-ConcreteValue -Value $ownerReviewer) -Severity "action-required" -Detail "ownerReviewer must identify the person who captured or reviewed the imported run evidence.")) | Out-Null
+$items.Add((New-ValidationItem -Id "captured-at-utc-parseable" -Passed (Test-DateTimeOffsetFormat -Value $capturedAtUtc) -Severity "action-required" -Detail "capturedAtUtc must be parseable as a DateTimeOffset.")) | Out-Null
+$items.Add((New-ValidationItem -Id "forbidden-substitutes-absent" -Passed ($forbiddenFindings.Count -eq 0) -Severity "blocker" -Detail $(if ($forbiddenFindings.Count -eq 0) { "No queued workflow, dashboard, local feed, direct nupkg, manual approval, ProjectReference, or dry-run-only substitute was detected in owner evidence fields." } else { "Forbidden substitute(s): $($forbiddenFindings -join ', ')" }))) | Out-Null
 $items.Add((New-ValidationItem -Id "no-side-effects" -Passed ($null -eq $record -or (
       [bool](Get-PropertyOrDefault -Object $record -Name "notExecutedByAutomation" -DefaultValue $true) -and
       -not [bool](Get-PropertyOrDefault -Object $record -Name "performsPublish" -DefaultValue $true) -and
@@ -125,8 +332,33 @@ $validation = [pscustomobject]@{
   githubActionsRunEvidenceReady = $ready
   runId = $runId
   runUrl = $runUrl
-  headSha = $headSha
+  runStatus = $runStatus
   runConclusion = $runConclusion
+  runAttempt = $runAttempt
+  workflowName = $workflowName
+  workflowFile = $workflowFile
+  runEvent = $runEvent
+  runBranch = $runBranch
+  runRef = $runRef
+  startedAtUtc = $startedAtUtc
+  completedAtUtc = $completedAtUtc
+  headSha = $headSha
+  expectedHeadSha = $expectedHeadSha
+  runHeadMatchesCurrentHead = $runHeadMatchesCurrentHead
+  runHeadMatchesUpstreamHead = $runHeadMatchesUpstreamHead
+  sourceQualityConclusion = $sourceQualityConclusion
+  packageManagedDryRunPackConclusion = $packagePackConclusion
+  publishNugetConclusion = $publishNugetConclusion
+  publishGitHubPackagesConclusion = $publishGitHubPackagesConclusion
+  nupkgPackageCount = $nupkgPackages.Count
+  nupkgPackageSha256s = @($nupkgSha256s)
+  workflowRunLogPath = $workflowRunLogPath
+  workflowRunLogSha256 = $workflowRunLogSha256
+  artifactManifestPath = $artifactManifestPath
+  artifactManifestSha256 = $artifactManifestSha256
+  ownerReviewer = $ownerReviewer
+  capturedAtUtc = $capturedAtUtc
+  forbiddenSubstituteFindings = @($forbiddenFindings)
   failedBlockerCount = $failedBlockers.Count
   failedActionRequiredCount = $failedActionRequired.Count
   notExecutedByAutomation = $true
@@ -161,7 +393,15 @@ $markdown = @"
 | validationState | ``$($validation.validationState)`` |
 | githubActionsRunEvidenceReady | ``$($validation.githubActionsRunEvidenceReady)`` |
 | runId | ``$($validation.runId)`` |
+| runUrl | ``$($validation.runUrl)`` |
 | headSha | ``$($validation.headSha)`` |
+| workflowName | ``$($validation.workflowName)`` |
+| workflowFile | ``$($validation.workflowFile)`` |
+| runAttempt | ``$($validation.runAttempt)`` |
+| workflowRunLogSha256 | ``$($validation.workflowRunLogSha256)`` |
+| artifactManifestSha256 | ``$($validation.artifactManifestSha256)`` |
+| ownerReviewer | ``$($validation.ownerReviewer)`` |
+| capturedAtUtc | ``$($validation.capturedAtUtc)`` |
 | failedBlockerCount | ``$($validation.failedBlockerCount)`` |
 | failedActionRequiredCount | ``$($validation.failedActionRequiredCount)`` |
 | performsPublish | ``$($validation.performsPublish)`` |

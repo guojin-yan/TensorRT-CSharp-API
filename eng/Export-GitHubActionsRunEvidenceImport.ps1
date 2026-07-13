@@ -5,6 +5,10 @@ param(
   [string]$ArtifactsRoot,
   [string]$RunMetadataPath,
   [string]$ExpectedHeadSha,
+  [string]$WorkflowRunLogPath,
+  [string]$ArtifactManifestPath,
+  [string]$OwnerReviewer,
+  [string]$CapturedAtUtc,
   [string]$OutputPath = "artifacts\final-release\github-actions-run-evidence-import.json",
   [string]$MarkdownOutputPath = "artifacts\final-release\github-actions-run-evidence-import.md"
 )
@@ -237,6 +241,26 @@ if ([string]::IsNullOrWhiteSpace($runHeadSha)) {
 $runConclusion = [string](Get-PropertyOrDefault -Object $runMetadata -Name "conclusion" -DefaultValue "")
 $runStatus = [string](Get-PropertyOrDefault -Object $runMetadata -Name "status" -DefaultValue "")
 $runUrl = [string](Get-PropertyOrDefault -Object $runMetadata -Name "url" -DefaultValue "")
+$runAttempt = [string](Get-PropertyOrDefault -Object $runMetadata -Name "runAttempt" -DefaultValue (Get-PropertyOrDefault -Object $runMetadata -Name "attempt" -DefaultValue ""))
+$workflowName = [string](Get-PropertyOrDefault -Object $runMetadata -Name "workflowName" -DefaultValue (Get-PropertyOrDefault -Object $runMetadata -Name "name" -DefaultValue ""))
+$workflowFile = [string](Get-PropertyOrDefault -Object $runMetadata -Name "workflowFile" -DefaultValue (Get-PropertyOrDefault -Object $runMetadata -Name "workflowPath" -DefaultValue ""))
+$runEvent = [string](Get-PropertyOrDefault -Object $runMetadata -Name "event" -DefaultValue (Get-PropertyOrDefault -Object $runMetadata -Name "eventName" -DefaultValue ""))
+$runBranch = [string](Get-PropertyOrDefault -Object $runMetadata -Name "headBranch" -DefaultValue (Get-PropertyOrDefault -Object $runMetadata -Name "branch" -DefaultValue ""))
+$runRef = [string](Get-PropertyOrDefault -Object $runMetadata -Name "ref" -DefaultValue (Get-PropertyOrDefault -Object $runMetadata -Name "headRefName" -DefaultValue ""))
+$startedAtUtc = [string](Get-PropertyOrDefault -Object $runMetadata -Name "startedAtUtc" -DefaultValue (Get-PropertyOrDefault -Object $runMetadata -Name "createdAt" -DefaultValue ""))
+$completedAtUtc = [string](Get-PropertyOrDefault -Object $runMetadata -Name "completedAtUtc" -DefaultValue (Get-PropertyOrDefault -Object $runMetadata -Name "updatedAt" -DefaultValue ""))
+
+$workflowRunLogFullPath = if ([string]::IsNullOrWhiteSpace($WorkflowRunLogPath)) { "" } else { Resolve-RepoPath -Path $WorkflowRunLogPath }
+$artifactManifestFullPath = if ([string]::IsNullOrWhiteSpace($ArtifactManifestPath)) { "" } else { Resolve-RepoPath -Path $ArtifactManifestPath }
+$workflowRunLogSha256 = if (-not [string]::IsNullOrWhiteSpace($workflowRunLogFullPath) -and (Test-Path -LiteralPath $workflowRunLogFullPath -PathType Leaf)) { Get-Sha256 -Path $workflowRunLogFullPath } else { [string](Get-PropertyOrDefault -Object $runMetadata -Name "workflowRunLogSha256" -DefaultValue "") }
+$artifactManifestSha256 = if (-not [string]::IsNullOrWhiteSpace($artifactManifestFullPath) -and (Test-Path -LiteralPath $artifactManifestFullPath -PathType Leaf)) { Get-Sha256 -Path $artifactManifestFullPath } else { [string](Get-PropertyOrDefault -Object $runMetadata -Name "artifactManifestSha256" -DefaultValue "") }
+
+if ([string]::IsNullOrWhiteSpace($OwnerReviewer)) {
+  $OwnerReviewer = [string](Get-PropertyOrDefault -Object $runMetadata -Name "ownerReviewer" -DefaultValue "")
+}
+if ([string]::IsNullOrWhiteSpace($CapturedAtUtc)) {
+  $CapturedAtUtc = [string](Get-PropertyOrDefault -Object $runMetadata -Name "capturedAtUtc" -DefaultValue "")
+}
 
 $sourceQualityConclusion = Get-JobConclusion -Jobs $metadataJobs -Name "source-quality"
 $packagePackConclusion = Get-JobConclusion -Jobs $metadataJobs -Name "package-managed-dry-run / pack"
@@ -288,6 +312,14 @@ $record = [pscustomobject]@{
   runUrl = $runUrl
   runStatus = $runStatus
   runConclusion = $runConclusion
+  runAttempt = $runAttempt
+  workflowName = $workflowName
+  workflowFile = $workflowFile
+  runEvent = $runEvent
+  runBranch = $runBranch
+  runRef = $runRef
+  startedAtUtc = $startedAtUtc
+  completedAtUtc = $completedAtUtc
   headSha = $runHeadSha
   expectedHeadSha = $ExpectedHeadSha
   currentHead = $currentHead
@@ -300,6 +332,12 @@ $record = [pscustomobject]@{
   publishGitHubPackagesConclusion = $publishGitHubPackagesConclusion
   releaseQualitySummaryPath = $releaseQualitySummaryPath
   packageValidationAuditPath = $packageValidationAuditPath
+  workflowRunLogPath = $workflowRunLogFullPath
+  workflowRunLogSha256 = $workflowRunLogSha256
+  artifactManifestPath = $artifactManifestFullPath
+  artifactManifestSha256 = $artifactManifestSha256
+  ownerReviewer = $OwnerReviewer
+  capturedAtUtc = $CapturedAtUtc
   nupkgPackages = $nupkgInfos
   failedBlockerCount = $failedBlockerCount
   canClaimGitHubActionsPackageDryRunPackForRun = $canClaimPackageDryRun
@@ -330,6 +368,13 @@ $lines.Add("- Run ID: ``$RunId``")
 $lines.Add("- Run URL: $runUrl")
 $lines.Add("- Head SHA: ``$runHeadSha``")
 $lines.Add("- Run conclusion: ``$runConclusion``")
+$lines.Add("- Run attempt: ``$runAttempt``")
+$lines.Add("- Workflow: ``$workflowName``")
+$lines.Add("- Workflow file: ``$workflowFile``")
+$lines.Add("- Event: ``$runEvent``")
+$lines.Add("- Ref: ``$runRef``")
+$lines.Add("- Started at UTC: ``$startedAtUtc``")
+$lines.Add("- Completed at UTC: ``$completedAtUtc``")
 $lines.Add("- Source quality: ``$sourceQualityConclusion``")
 $lines.Add("- Package dry-run pack: ``$packagePackConclusion``")
 $lines.Add("- publish-nuget: ``$publishNugetConclusion``")
@@ -338,6 +383,8 @@ $lines.Add("- Can claim package dry-run pack: ``$canClaimPackageDryRun``")
 $lines.Add("- Can claim NuGet published: ``False``")
 $lines.Add("- Can claim GitHub Packages published: ``False``")
 $lines.Add("- Is package-consumer runtime proof: ``False``")
+$lines.Add("- Workflow run log SHA256: ``$workflowRunLogSha256``")
+$lines.Add("- Artifact manifest SHA256: ``$artifactManifestSha256``")
 $lines.Add("")
 $lines.Add("## Boundary")
 $lines.Add("")
