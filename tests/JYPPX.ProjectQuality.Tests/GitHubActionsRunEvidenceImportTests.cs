@@ -30,12 +30,182 @@ public sealed class GitHubActionsRunEvidenceImportTests
             Assert.Equal("github-actions-run-evidence-import-validation", root.GetProperty("recordKind").GetString());
             Assert.Equal("blocked-github-actions-run-evidence-required", root.GetProperty("validationState").GetString());
             Assert.False(root.GetProperty("githubActionsRunEvidenceReady").GetBoolean());
+            Assert.False(root.GetProperty("sourceQualityRunEvidenceReady").GetBoolean());
+            Assert.False(root.GetProperty("packageDryRunEvidenceReady").GetBoolean());
             Assert.Equal(0, root.GetProperty("failedBlockerCount").GetInt32());
             Assert.True(root.GetProperty("failedActionRequiredCount").GetInt32() > 0);
             Assert.False(root.GetProperty("isGitHubActionsProof").GetBoolean());
             Assert.False(root.GetProperty("canPublishPublicly").GetBoolean());
             AssertValidationItem(root, "input-present", passed: false);
             AssertValidationItem(root, "forbidden-substitutes-absent", passed: true);
+        }
+        finally
+        {
+            DeleteTempRoot(tempRoot);
+        }
+    }
+
+    [Fact]
+    public void SourceOnlyPushRunValidatesAsSourceQualityEvidenceWithoutPackageClaims()
+    {
+        string tempRoot = CreateTempRoot();
+        string runId = "29229700998";
+        string headSha = "ab618c5cb6e37c7cb882063d9782991fa03b3170";
+        string artifactsRoot = Path.Combine(tempRoot, "artifacts", "github-actions-runs", runId);
+        string releaseGateRoot = Path.Combine(artifactsRoot, "release-quality-gate", "release-quality-gate");
+        string finalReleaseRoot = Path.Combine(artifactsRoot, "release-quality-gate", "final-release");
+        string evidenceRoot = Path.Combine(artifactsRoot, "owner-run-evidence");
+        string runMetadataPath = Path.Combine(artifactsRoot, "github-run-view.json");
+        string workflowRunLogPath = Path.Combine(evidenceRoot, "workflow-run.log");
+        string artifactManifestPath = Path.Combine(evidenceRoot, "artifact-manifest.json");
+        string outputRoot = Path.Combine(tempRoot, "final-release");
+        string importPath = Path.Combine(outputRoot, "github-actions-run-evidence-import.json");
+        string importMarkdownPath = Path.Combine(outputRoot, "github-actions-run-evidence-import.md");
+
+        try
+        {
+            Directory.CreateDirectory(releaseGateRoot);
+            Directory.CreateDirectory(finalReleaseRoot);
+            Directory.CreateDirectory(evidenceRoot);
+            Directory.CreateDirectory(outputRoot);
+
+            File.WriteAllText(
+                Path.Combine(releaseGateRoot, "release-quality-gate-summary.json"),
+                """
+                {
+                  "recordKind": "release-quality-gate-summary",
+                  "state": "release-quality-gate-passed",
+                  "sourceGatePassed": true,
+                  "performsPublish": false,
+                  "usesPublishToken": false,
+                  "isRuntimeExecutionProof": false,
+                  "isPackageConsumerRuntimeProof": false,
+                  "canPublishPublicly": false,
+                  "canCloseReleaseIssue": false,
+                  "checks": []
+                }
+                """);
+
+            File.WriteAllText(
+                Path.Combine(finalReleaseRoot, "github-actions-package-validation-audit.json"),
+                $$"""
+                {
+                  "recordKind": "github-actions-package-validation-audit",
+                  "headSha": "{{headSha}}",
+                  "hasGitHubActionsRunEvidenceForCurrentCode": false,
+                  "canClaimGitHubActionsPackageValidationForCurrentCode": false,
+                  "performsPublish": false,
+                  "usesPublishToken": false,
+                  "isPackageConsumerRuntimeProof": false,
+                  "isPostPublishProof": false,
+                  "canPublishPublicly": false
+                }
+                """);
+
+            File.WriteAllText(
+                runMetadataPath,
+                $$"""
+                {
+                  "databaseId": 29229700998,
+                  "headSha": "{{headSha}}",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "url": "https://github.com/guojin-yan/TensorRT-CSharp-API/actions/runs/29229700998",
+                  "runAttempt": 1,
+                  "workflowName": "release-quality-gate",
+                  "workflowFile": ".github/workflows/release-quality-gate.yml",
+                  "event": "push",
+                  "headBranch": "TensorRtSharp4.0",
+                  "ref": "refs/heads/TensorRtSharp4.0",
+                  "startedAtUtc": "2026-07-13T06:30:00Z",
+                  "completedAtUtc": "2026-07-13T06:45:12Z",
+                  "jobs": [
+                    { "name": "source-quality", "status": "completed", "conclusion": "success" }
+                  ]
+                }
+                """);
+
+            File.WriteAllText(
+                workflowRunLogPath,
+                """
+                release-quality-gate push run 29229700998
+                source-quality: success
+                package-managed-dry-run: skipped by push event
+                publish jobs: not created
+                """);
+            File.WriteAllText(
+                artifactManifestPath,
+                $$"""
+                {
+                  "runId": "{{runId}}",
+                  "headSha": "{{headSha}}",
+                  "artifacts": [
+                    "release-quality-gate/release-quality-gate-summary.json",
+                    "final-release/github-actions-package-validation-audit.json"
+                  ],
+                  "packageManagedDryRunArtifactPresent": false
+                }
+                """);
+
+            RunPowerShell(
+                Path.Combine(RepositoryPaths.Root, "eng", "Export-GitHubActionsRunEvidenceImport.ps1"),
+                "-RunId",
+                runId,
+                "-ArtifactsRoot",
+                artifactsRoot,
+                "-RunMetadataPath",
+                runMetadataPath,
+                "-ExpectedHeadSha",
+                headSha,
+                "-WorkflowRunLogPath",
+                workflowRunLogPath,
+                "-ArtifactManifestPath",
+                artifactManifestPath,
+                "-OwnerReviewer",
+                "guojin-yan",
+                "-CapturedAtUtc",
+                "2026-07-13T06:50:00Z",
+                "-SourceQualityOnly",
+                "-OutputPath",
+                importPath,
+                "-MarkdownOutputPath",
+                importMarkdownPath);
+
+            RunPowerShell(
+                Path.Combine(RepositoryPaths.Root, "eng", "Test-GitHubActionsRunEvidenceImport.ps1"),
+                "-InputPath",
+                importPath,
+                "-OutputRoot",
+                outputRoot,
+                "-Strict");
+
+            using JsonDocument importDocument = ReadJson(importPath);
+            JsonElement importRoot = importDocument.RootElement;
+            Assert.Equal("source-quality-only", importRoot.GetProperty("importMode").GetString());
+            Assert.Equal("source-quality-run-evidence-ready", importRoot.GetProperty("evidenceState").GetString());
+            Assert.True(importRoot.GetProperty("canClaimGitHubActionsSourceQualityForRun").GetBoolean());
+            Assert.False(importRoot.GetProperty("canClaimGitHubActionsPackageDryRunPackForRun").GetBoolean());
+            Assert.False(importRoot.GetProperty("canClaimNuGetPublished").GetBoolean());
+            Assert.False(importRoot.GetProperty("canClaimGitHubPackagesPublished").GetBoolean());
+            Assert.Empty(importRoot.GetProperty("nupkgPackages").EnumerateArray());
+
+            using JsonDocument validationDocument = ReadJson(Path.Combine(outputRoot, "github-actions-run-evidence-import-validation.json"));
+            JsonElement validation = validationDocument.RootElement;
+            Assert.Equal("source-quality-run-evidence-ready", validation.GetProperty("validationState").GetString());
+            Assert.True(validation.GetProperty("sourceQualityRunEvidenceReady").GetBoolean());
+            Assert.False(validation.GetProperty("packageDryRunEvidenceReady").GetBoolean());
+            Assert.False(validation.GetProperty("githubActionsRunEvidenceReady").GetBoolean());
+            Assert.True(validation.GetProperty("canClaimGitHubActionsSourceQualityForRun").GetBoolean());
+            Assert.False(validation.GetProperty("canClaimGitHubActionsPackageDryRunPackForRun").GetBoolean());
+            Assert.Equal(0, validation.GetProperty("failedBlockerCount").GetInt32());
+            Assert.Equal(0, validation.GetProperty("failedActionRequiredCount").GetInt32());
+            Assert.False(validation.GetProperty("performsPublish").GetBoolean());
+            Assert.False(validation.GetProperty("isPackageConsumerRuntimeProof").GetBoolean());
+            Assert.False(validation.GetProperty("isPostPublishProof").GetBoolean());
+            AssertValidationItem(validation, "source-quality-claim-ready", passed: true);
+            AssertValidationItem(validation, "package-dry-run-pack-success", passed: true);
+            AssertValidationItem(validation, "nupkg-packages-present", passed: true);
+            AssertValidationItem(validation, "dry-run-pack-claim-ready", passed: true);
         }
         finally
         {

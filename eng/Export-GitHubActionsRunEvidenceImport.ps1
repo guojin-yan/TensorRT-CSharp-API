@@ -9,6 +9,7 @@ param(
   [string]$ArtifactManifestPath,
   [string]$OwnerReviewer,
   [string]$CapturedAtUtc,
+  [switch]$SourceQualityOnly,
   [string]$OutputPath = "artifacts\final-release\github-actions-run-evidence-import.json",
   [string]$MarkdownOutputPath = "artifacts\final-release\github-actions-run-evidence-import.md"
 )
@@ -194,13 +195,31 @@ function Get-JobConclusion {
   return ""
 }
 
+function Select-FirstExistingPath {
+  param([Parameter(Mandatory = $true)][string[]]$Candidates)
+
+  foreach ($candidate in $Candidates) {
+    if (Test-Path -LiteralPath $candidate -PathType Leaf) {
+      return $candidate
+    }
+  }
+
+  return $Candidates[0]
+}
+
 if ([string]::IsNullOrWhiteSpace($ArtifactsRoot)) {
   $ArtifactsRoot = Join-Path "artifacts\github-actions-runs" $RunId
 }
 
 $artifactsRootFullPath = Resolve-RepoPath -Path $ArtifactsRoot
-$releaseQualitySummaryPath = Join-Path $artifactsRootFullPath "release-quality-gate\release-quality-gate\release-quality-gate-summary.json"
-$packageValidationAuditPath = Join-Path $artifactsRootFullPath "release-quality-gate\final-release\github-actions-package-validation-audit.json"
+$releaseQualitySummaryPath = Select-FirstExistingPath -Candidates @(
+  (Join-Path $artifactsRootFullPath "release-quality-gate\release-quality-gate\release-quality-gate-summary.json"),
+  (Join-Path $artifactsRootFullPath "release-quality-gate\release-quality-gate-summary.json")
+)
+$packageValidationAuditPath = Select-FirstExistingPath -Candidates @(
+  (Join-Path $artifactsRootFullPath "release-quality-gate\final-release\github-actions-package-validation-audit.json"),
+  (Join-Path $artifactsRootFullPath "final-release\github-actions-package-validation-audit.json")
+)
 $packageRoot = Join-Path $artifactsRootFullPath "package-managed-dry-run"
 
 if ([string]::IsNullOrWhiteSpace($RunMetadataPath)) {
@@ -283,6 +302,27 @@ $packagePackSucceeded = $packagePackConclusion.Equals("success", [StringComparis
 $publishNugetSkipped = $publishNugetConclusion.Equals("skipped", [StringComparison]::OrdinalIgnoreCase)
 $publishGitHubPackagesSkipped = $publishGitHubPackagesConclusion.Equals("skipped", [StringComparison]::OrdinalIgnoreCase)
 $runSucceeded = $runConclusion.Equals("success", [StringComparison]::OrdinalIgnoreCase)
+$sourceQualityOnlyMode = $SourceQualityOnly.IsPresent
+$packageEvidenceRequired = -not $sourceQualityOnlyMode
+$packagePackSafeForSelectedMode = if ($sourceQualityOnlyMode) {
+  [string]::IsNullOrWhiteSpace($packagePackConclusion) -or
+  $packagePackConclusion.Equals("skipped", [StringComparison]::OrdinalIgnoreCase)
+}
+else {
+  $packagePackSucceeded
+}
+$publishJobsSafeForSelectedMode = if ($sourceQualityOnlyMode) {
+  (
+    [string]::IsNullOrWhiteSpace($publishNugetConclusion) -or
+    $publishNugetConclusion.Equals("skipped", [StringComparison]::OrdinalIgnoreCase)
+  ) -and (
+    [string]::IsNullOrWhiteSpace($publishGitHubPackagesConclusion) -or
+    $publishGitHubPackagesConclusion.Equals("skipped", [StringComparison]::OrdinalIgnoreCase)
+  )
+}
+else {
+  $publishNugetSkipped -and $publishGitHubPackagesSkipped
+}
 
 $checks = @(
   New-Check -Id "run-metadata-present" -Passed ($null -ne $runMetadata) -Severity "blocker" -Detail $(if ($null -ne $runMetadata) { $RunMetadataPath } else { "Run metadata JSON is required to import job conclusions without network access." })
@@ -290,22 +330,39 @@ $checks = @(
   New-Check -Id "release-quality-summary-passed" -Passed $releaseQualityPassed -Severity "blocker" -Detail "release-quality-gate-summary state must be release-quality-gate-passed."
   New-Check -Id "package-validation-audit-present" -Passed $packageAuditPresent -Severity "blocker" -Detail $packageValidationAuditPath
   New-Check -Id "run-head-sha-matches-expected" -Passed $expectedHeadReady -Severity "blocker" -Detail "runHeadSha=$runHeadSha; expected=$ExpectedHeadSha"
+  New-Check -Id "workflow-run-success" -Passed $runSucceeded -Severity "blocker" -Detail "runConclusion=$runConclusion"
   New-Check -Id "source-quality-job-success" -Passed $sourceQualitySucceeded -Severity "blocker" -Detail "source-quality=$sourceQualityConclusion"
-  New-Check -Id "package-managed-dry-run-pack-success" -Passed $packagePackSucceeded -Severity "blocker" -Detail "package-managed-dry-run / pack=$packagePackConclusion"
-  New-Check -Id "publish-nuget-skipped" -Passed $publishNugetSkipped -Severity "blocker" -Detail "package-managed-dry-run / publish-nuget=$publishNugetConclusion"
-  New-Check -Id "publish-github-packages-skipped" -Passed $publishGitHubPackagesSkipped -Severity "blocker" -Detail "package-managed-dry-run / publish-github-packages=$publishGitHubPackagesConclusion"
-  New-Check -Id "managed-nupkg-present" -Passed ($nupkgInfos.Count -gt 0) -Severity "blocker" -Detail "nupkgCount=$($nupkgInfos.Count)"
-  New-Check -Id "managed-nupkg-content-readable" -Passed $packageContentReadable -Severity "blocker" -Detail "nuspec/dll/xml entries must be readable from the package artifact."
+  New-Check -Id "package-managed-dry-run-pack-success" -Passed $packagePackSafeForSelectedMode -Severity $(if ($packageEvidenceRequired) { "blocker" } else { "info" }) -Detail "package-managed-dry-run / pack=$packagePackConclusion; sourceQualityOnly=$sourceQualityOnlyMode"
+  New-Check -Id "publish-nuget-skipped" -Passed $publishJobsSafeForSelectedMode -Severity $(if ($packageEvidenceRequired) { "blocker" } else { "info" }) -Detail "package-managed-dry-run / publish-nuget=$publishNugetConclusion; sourceQualityOnly=$sourceQualityOnlyMode"
+  New-Check -Id "publish-github-packages-skipped" -Passed $publishJobsSafeForSelectedMode -Severity $(if ($packageEvidenceRequired) { "blocker" } else { "info" }) -Detail "package-managed-dry-run / publish-github-packages=$publishGitHubPackagesConclusion; sourceQualityOnly=$sourceQualityOnlyMode"
+  New-Check -Id "managed-nupkg-present" -Passed (($nupkgInfos.Count -gt 0) -or $sourceQualityOnlyMode) -Severity $(if ($packageEvidenceRequired) { "blocker" } else { "info" }) -Detail "nupkgCount=$($nupkgInfos.Count); sourceQualityOnly=$sourceQualityOnlyMode"
+  New-Check -Id "managed-nupkg-content-readable" -Passed ($packageContentReadable -or $sourceQualityOnlyMode) -Severity $(if ($packageEvidenceRequired) { "blocker" } else { "info" }) -Detail "nuspec/dll/xml entries must be readable from the package artifact when package dry-run evidence is imported."
 )
 
 $failedBlockerCount = @($checks | Where-Object { -not $_.passed -and $_.severity -eq "blocker" }).Count
 $canClaimPackageDryRun = $failedBlockerCount -eq 0 -and $runSucceeded -and $sourceQualitySucceeded -and $packagePackSucceeded -and $publishNugetSkipped -and $publishGitHubPackagesSkipped
-$evidenceState = if ($canClaimPackageDryRun) { "github-actions-run-evidence-ready" } else { "blocked-github-actions-run-evidence-required" }
+$canClaimSourceQualityRun = $failedBlockerCount -eq 0 -and $runSucceeded -and $sourceQualitySucceeded -and $releaseQualityPassed -and $packagePackSafeForSelectedMode -and $publishJobsSafeForSelectedMode
+$evidenceState = if ($canClaimPackageDryRun) {
+  "github-actions-run-evidence-ready"
+}
+elseif ($canClaimSourceQualityRun) {
+  "source-quality-run-evidence-ready"
+}
+else {
+  "blocked-github-actions-run-evidence-required"
+}
+$proofBoundary = if ($sourceQualityOnlyMode) {
+  "This imported evidence proves only that the specified GitHub Actions run completed source-quality when all source checks pass. It does not prove package-managed dry-run pack, does not publish NuGet, does not publish GitHub Packages, does not run dotnet nuget push, is not compatible-host runtime proof, is not package-consumer runtime proof, and is not post-publish proof."
+}
+else {
+  "This imported evidence proves only that the specified GitHub Actions run completed source-quality and package-managed dry-run pack when all checks pass. It does not publish NuGet, does not publish GitHub Packages, does not run dotnet nuget push, is not compatible-host runtime proof, is not package-consumer runtime proof, and is not post-publish proof."
+}
 
 $record = [pscustomobject]@{
   recordKind = "github-actions-run-evidence-import"
   generatedAt = (Get-Date).ToString("o")
   evidenceState = $evidenceState
+  importMode = if ($sourceQualityOnlyMode) { "source-quality-only" } else { "package-dry-run" }
   repositoryRoot = $RepositoryRoot
   artifactsRoot = $artifactsRootFullPath
   runId = $RunId
@@ -340,6 +397,7 @@ $record = [pscustomobject]@{
   capturedAtUtc = $CapturedAtUtc
   nupkgPackages = $nupkgInfos
   failedBlockerCount = $failedBlockerCount
+  canClaimGitHubActionsSourceQualityForRun = $canClaimSourceQualityRun
   canClaimGitHubActionsPackageDryRunPackForRun = $canClaimPackageDryRun
   canClaimNuGetPublished = $false
   canClaimGitHubPackagesPublished = $false
@@ -355,7 +413,7 @@ $record = [pscustomobject]@{
   isGitHubActionsProof = $false
   canPublishPublicly = $false
   canCloseReleaseIssue = $false
-  proofBoundary = "This imported evidence proves only that the specified GitHub Actions run completed source-quality and package-managed dry-run pack when all checks pass. It does not publish NuGet, does not publish GitHub Packages, does not run dotnet nuget push, is not compatible-host runtime proof, is not package-consumer runtime proof, and is not post-publish proof."
+  proofBoundary = $proofBoundary
   checks = $checks
 }
 
@@ -366,6 +424,8 @@ $lines.Add("# GitHub Actions Run Evidence Import")
 $lines.Add("")
 $lines.Add("- Run ID: ``$RunId``")
 $lines.Add("- Run URL: $runUrl")
+$lines.Add("- Import mode: ``$($record.importMode)``")
+$lines.Add("- Evidence state: ``$evidenceState``")
 $lines.Add("- Head SHA: ``$runHeadSha``")
 $lines.Add("- Run conclusion: ``$runConclusion``")
 $lines.Add("- Run attempt: ``$runAttempt``")
@@ -379,6 +439,7 @@ $lines.Add("- Source quality: ``$sourceQualityConclusion``")
 $lines.Add("- Package dry-run pack: ``$packagePackConclusion``")
 $lines.Add("- publish-nuget: ``$publishNugetConclusion``")
 $lines.Add("- publish-github-packages: ``$publishGitHubPackagesConclusion``")
+$lines.Add("- Can claim source-quality run: ``$canClaimSourceQualityRun``")
 $lines.Add("- Can claim package dry-run pack: ``$canClaimPackageDryRun``")
 $lines.Add("- Can claim NuGet published: ``False``")
 $lines.Add("- Can claim GitHub Packages published: ``False``")

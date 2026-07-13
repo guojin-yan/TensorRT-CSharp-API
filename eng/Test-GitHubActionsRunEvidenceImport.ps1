@@ -246,6 +246,11 @@ $artifactManifestPath = [string](Get-PropertyOrDefault -Object $record -Name "ar
 $artifactManifestSha256 = [string](Get-PropertyOrDefault -Object $record -Name "artifactManifestSha256" -DefaultValue "")
 $ownerReviewer = [string](Get-PropertyOrDefault -Object $record -Name "ownerReviewer" -DefaultValue "")
 $capturedAtUtc = [string](Get-PropertyOrDefault -Object $record -Name "capturedAtUtc" -DefaultValue "")
+$importMode = [string](Get-PropertyOrDefault -Object $record -Name "importMode" -DefaultValue "package-dry-run")
+$evidenceState = [string](Get-PropertyOrDefault -Object $record -Name "evidenceState" -DefaultValue "")
+$canClaimSourceQuality = [bool](Get-PropertyOrDefault -Object $record -Name "canClaimGitHubActionsSourceQualityForRun" -DefaultValue $false)
+$sourceQualityOnlyMode = $importMode.Equals("source-quality-only", [StringComparison]::OrdinalIgnoreCase)
+$packageEvidenceRequired = -not $sourceQualityOnlyMode
 
 $runAttemptIsPositiveInteger = $runAttempt -match '^[0-9]+$' -and [int64]$runAttempt -gt 0
 $runHeadLinksSource = $headSha -match '^[0-9a-fA-F]{40}$' -and (
@@ -255,6 +260,13 @@ $runHeadLinksSource = $headSha -match '^[0-9a-fA-F]{40}$' -and (
 )
 $nupkgSha256s = @($nupkgPackages | ForEach-Object { [string](Get-PropertyOrDefault -Object $_ -Name "sha256" -DefaultValue "") })
 $packageSha256sPresent = $nupkgSha256s.Count -gt 0 -and @($nupkgSha256s | Where-Object { -not (Test-Sha256Format -Value $_) }).Count -eq 0
+$packagePackSafe = if ($sourceQualityOnlyMode) {
+  [string]::IsNullOrWhiteSpace($packagePackConclusion) -or
+  $packagePackConclusion.Equals("skipped", [StringComparison]::OrdinalIgnoreCase)
+}
+else {
+  $packagePackConclusion.Equals("success", [StringComparison]::OrdinalIgnoreCase)
+}
 $forbiddenFindings = Get-ForbiddenSubstituteFindings `
   -Record $record `
   -RunUrl $runUrl `
@@ -282,12 +294,26 @@ $items.Add((New-ValidationItem -Id "completed-at-after-started-at" -Passed (Test
 $items.Add((New-ValidationItem -Id "head-sha-format" -Passed ($headSha -match "^[0-9a-fA-F]{40}$") -Severity "action-required" -Detail "headSha must be a 40-character git commit SHA.")) | Out-Null
 $items.Add((New-ValidationItem -Id "source-head-link-present" -Passed $runHeadLinksSource -Severity "action-required" -Detail "headSha must match expectedHeadSha, current HEAD, or upstream HEAD to link this run to the reviewed release source.")) | Out-Null
 $items.Add((New-ValidationItem -Id "source-quality-success" -Passed ($sourceQualityConclusion.Equals("success", [StringComparison]::OrdinalIgnoreCase)) -Severity "action-required" -Detail "source-quality job must succeed.")) | Out-Null
-$items.Add((New-ValidationItem -Id "package-dry-run-pack-success" -Passed ($packagePackConclusion.Equals("success", [StringComparison]::OrdinalIgnoreCase)) -Severity "action-required" -Detail "package-managed-dry-run / pack job must succeed.")) | Out-Null
-$items.Add((New-ValidationItem -Id "publish-jobs-skipped" -Passed ($null -eq $record -or ($publishNugetConclusion.Equals("skipped", [StringComparison]::OrdinalIgnoreCase) -and $publishGitHubPackagesConclusion.Equals("skipped", [StringComparison]::OrdinalIgnoreCase))) -Severity "blocker" -Detail "Publish jobs must be skipped for this import; it is CI/package dry-run evidence, not publish proof.")) | Out-Null
-$items.Add((New-ValidationItem -Id "nupkg-packages-present" -Passed ($nupkgPackages.Count -gt 0) -Severity "action-required" -Detail "At least one package dry-run nupkg artifact must be present.")) | Out-Null
-$items.Add((New-ValidationItem -Id "package-artifact-sha256s-present" -Passed $packageSha256sPresent -Severity "action-required" -Detail "Every package artifact summary must include a 64-character SHA256.")) | Out-Null
+$items.Add((New-ValidationItem -Id "source-quality-claim-ready" -Passed $canClaimSourceQuality -Severity "action-required" -Detail "Import must be internally ready to claim GitHub Actions source-quality evidence for the run.")) | Out-Null
+$items.Add((New-ValidationItem -Id "package-dry-run-pack-success" -Passed $packagePackSafe -Severity "action-required" -Detail "package-managed-dry-run / pack job must be success for package imports, or absent/skipped for source-only imports.")) | Out-Null
+$publishJobsSafe = if ($sourceQualityOnlyMode) {
+  (
+    [string]::IsNullOrWhiteSpace($publishNugetConclusion) -or
+    $publishNugetConclusion.Equals("skipped", [StringComparison]::OrdinalIgnoreCase)
+  ) -and (
+    [string]::IsNullOrWhiteSpace($publishGitHubPackagesConclusion) -or
+    $publishGitHubPackagesConclusion.Equals("skipped", [StringComparison]::OrdinalIgnoreCase)
+  )
+}
+else {
+  $publishNugetConclusion.Equals("skipped", [StringComparison]::OrdinalIgnoreCase) -and
+  $publishGitHubPackagesConclusion.Equals("skipped", [StringComparison]::OrdinalIgnoreCase)
+}
+$items.Add((New-ValidationItem -Id "publish-jobs-skipped" -Passed ($null -eq $record -or $publishJobsSafe) -Severity "blocker" -Detail "Publish jobs must be absent or skipped for this import; it is CI evidence, not publish proof.")) | Out-Null
+$items.Add((New-ValidationItem -Id "nupkg-packages-present" -Passed ((-not $packageEvidenceRequired) -or $nupkgPackages.Count -gt 0) -Severity "action-required" -Detail "At least one package dry-run nupkg artifact must be present when package dry-run evidence is imported.")) | Out-Null
+$items.Add((New-ValidationItem -Id "package-artifact-sha256s-present" -Passed ((-not $packageEvidenceRequired) -or $packageSha256sPresent) -Severity "action-required" -Detail "Every package artifact summary must include a 64-character SHA256 when package dry-run evidence is imported.")) | Out-Null
 $items.Add((New-ValidationItem -Id "import-blockers-zero" -Passed ($null -eq $record -or $importFailedBlockerCount -eq 0) -Severity "blocker" -Detail "Import failedBlockerCount must be zero.")) | Out-Null
-$items.Add((New-ValidationItem -Id "dry-run-pack-claim-ready" -Passed $canClaimDryRunPack -Severity "action-required" -Detail "Import must be internally ready to claim GitHub Actions package dry-run pack evidence.")) | Out-Null
+$items.Add((New-ValidationItem -Id "dry-run-pack-claim-ready" -Passed ((-not $packageEvidenceRequired) -or $canClaimDryRunPack) -Severity "action-required" -Detail "Import must be internally ready to claim GitHub Actions package dry-run pack evidence when package dry-run mode is used.")) | Out-Null
 $items.Add((New-ValidationItem -Id "workflow-run-log-path-present" -Passed (Test-ConcreteValue -Value $workflowRunLogPath) -Severity "action-required" -Detail "A real GitHub Actions proof lane needs the workflow run log path.")) | Out-Null
 $items.Add((New-ValidationItem -Id "workflow-run-log-sha256-present" -Passed (Test-Sha256Format -Value $workflowRunLogSha256) -Severity "action-required" -Detail "A real GitHub Actions proof lane needs the workflow run log SHA256; dry-run package evidence alone is not enough.")) | Out-Null
 $items.Add((New-ValidationItem -Id "workflow-run-log-hash-match" -Passed (Test-FileHashMatches -Path $workflowRunLogPath -Sha256 $workflowRunLogSha256) -Severity "action-required" -Detail "workflowRunLogSha256 must match the imported workflow run log file.")) | Out-Null
@@ -313,12 +339,17 @@ $items.Add((New-ValidationItem -Id "no-side-effects" -Passed ($null -eq $record 
 
 $failedBlockers = @($items | Where-Object { -not $_.passed -and $_.severity -eq "blocker" })
 $failedActionRequired = @($items | Where-Object { -not $_.passed -and $_.severity -eq "action-required" })
-$ready = $failedBlockers.Count -eq 0 -and $failedActionRequired.Count -eq 0
+$sourceQualityRunEvidenceReady = $sourceQualityOnlyMode -and $failedBlockers.Count -eq 0 -and $failedActionRequired.Count -eq 0 -and $canClaimSourceQuality
+$packageDryRunEvidenceReady = (-not $sourceQualityOnlyMode) -and $failedBlockers.Count -eq 0 -and $failedActionRequired.Count -eq 0 -and $canClaimDryRunPack
+$ready = $sourceQualityRunEvidenceReady -or $packageDryRunEvidenceReady
 $validationState = if ($failedBlockers.Count -gt 0) {
   "invalid-github-actions-run-evidence-import"
 }
-elseif ($ready) {
+elseif ($packageDryRunEvidenceReady) {
   "github-actions-run-evidence-ready"
+}
+elseif ($sourceQualityRunEvidenceReady) {
+  "source-quality-run-evidence-ready"
 }
 else {
   "blocked-github-actions-run-evidence-required"
@@ -329,7 +360,13 @@ $validation = [pscustomobject]@{
   generatedAtUtc = [DateTimeOffset]::UtcNow.ToString("O")
   inputPath = $resolvedInputPath
   validationState = $validationState
-  githubActionsRunEvidenceReady = $ready
+  importMode = $importMode
+  evidenceState = $evidenceState
+  sourceQualityRunEvidenceReady = $sourceQualityRunEvidenceReady
+  packageDryRunEvidenceReady = $packageDryRunEvidenceReady
+  githubActionsRunEvidenceReady = $packageDryRunEvidenceReady
+  canClaimGitHubActionsSourceQualityForRun = $canClaimSourceQuality
+  canClaimGitHubActionsPackageDryRunPackForRun = $canClaimDryRunPack
   runId = $runId
   runUrl = $runUrl
   runStatus = $runStatus
@@ -392,6 +429,10 @@ $markdown = @"
 |---|---|
 | validationState | ``$($validation.validationState)`` |
 | githubActionsRunEvidenceReady | ``$($validation.githubActionsRunEvidenceReady)`` |
+| sourceQualityRunEvidenceReady | ``$($validation.sourceQualityRunEvidenceReady)`` |
+| packageDryRunEvidenceReady | ``$($validation.packageDryRunEvidenceReady)`` |
+| importMode | ``$($validation.importMode)`` |
+| evidenceState | ``$($validation.evidenceState)`` |
 | runId | ``$($validation.runId)`` |
 | runUrl | ``$($validation.runUrl)`` |
 | headSha | ``$($validation.headSha)`` |
