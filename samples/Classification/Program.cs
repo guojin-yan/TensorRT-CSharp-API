@@ -80,5 +80,7 @@ internal static class Program
         Console.WriteLine("  --opt-shape <dims>        Optional dynamic profile optimum.");
         Console.WriteLine("  --max-shape <dims>        Optional dynamic profile maximum.");
         Console.WriteLine("  --input-pattern <pattern> zeros, ones, or ramp. Default: ramp.");
+        Console.WriteLine("  --input <path>            Raw byte tensor normalized to [0,1]; byte count must match input element count.");
+        Console.WriteLine("  --input-data <path>       Float tensor data from .bin/.raw float32 or comma/space/newline text.");
     }
 }

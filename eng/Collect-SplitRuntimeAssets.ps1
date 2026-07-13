@@ -3,6 +3,7 @@ param(
   [Parameter(Mandatory = $true)]
   [string]$SplitPackageKey,
   [string]$SourceAssetsRoot,
+  [string]$BridgeConfiguration,
   [string]$OutputRoot,
   [string]$RepositoryRoot
 )
@@ -190,6 +191,31 @@ if (-not $sourcePackage) {
 
 if ([string]::IsNullOrWhiteSpace($SourceAssetsRoot)) {
   $SourceAssetsRoot = Join-Path $RepositoryRoot "pack\runtime\$($splitPackage.sourceRuntimeKey)\assets\runtimes\$($sourcePackage.rid)\native"
+  if (-not (Test-Path -LiteralPath $SourceAssetsRoot -PathType Container) -and [string]$splitPackage.role -eq "bridge") {
+    $configuration = if (-not [string]::IsNullOrWhiteSpace($BridgeConfiguration)) {
+      $BridgeConfiguration
+    }
+    elseif ($sourcePackage.PSObject.Properties.Name.Contains("bridgeConfiguration") -and -not [string]::IsNullOrWhiteSpace([string]$sourcePackage.bridgeConfiguration)) {
+      [string]$sourcePackage.bridgeConfiguration
+    }
+    else {
+      "Release"
+    }
+
+    $buildPreset = if ($sourcePackage.PSObject.Properties.Name.Contains("buildPreset") -and -not [string]::IsNullOrWhiteSpace([string]$sourcePackage.buildPreset)) {
+      [string]$sourcePackage.buildPreset
+    }
+    else {
+      [string]$splitPackage.sourceRuntimeKey
+    }
+
+    $bridgeSourceRoot = Join-Path $RepositoryRoot "build-out\$buildPreset\bin\$configuration"
+    $bridgeFile = [string]($splitPackage.assets | Select-Object -First 1)
+    if (-not [string]::IsNullOrWhiteSpace([string]$bridgeFile) -and (Test-Path -LiteralPath (Join-Path $bridgeSourceRoot ([string]$bridgeFile)) -PathType Leaf)) {
+      $SourceAssetsRoot = $bridgeSourceRoot
+      Write-Host "Using bridge build output as split source assets root: $SourceAssetsRoot"
+    }
+  }
 }
 
 if (-not (Test-Path -LiteralPath $SourceAssetsRoot -PathType Container)) {

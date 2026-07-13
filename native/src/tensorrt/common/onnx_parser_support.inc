@@ -44,6 +44,175 @@ static JYPPX_StatusCode ensure_onnx_parser_support_ready(const nvonnxparser::IPa
     return JYPPX_STATUS_INVALID_STATE;
 }
 
+static JYPPX_StatusCode report_onnx_parser_support_exception(const char* feature_name, const std::exception& exception)
+{
+    return jyppx::tensorrt::report_vendor_exception(kLine, feature_name, exception.what());
+}
+
+static JYPPX_StatusCode report_onnx_parser_support_unknown_exception(const char* feature_name)
+{
+    return jyppx::tensorrt::report_vendor_exception(kLine, feature_name, "unknown native exception");
+}
+
+static JYPPX_StatusCode get_onnx_parser_used_vc_plugin_libraries_with_seh_guard(
+    nvonnxparser::IParser* parser,
+    const char* const** out_libraries,
+    int64_t* out_count,
+    const char* feature_name)
+{
+    *out_libraries = nullptr;
+    *out_count = 0;
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        *out_libraries = parser->getUsedVCPluginLibraries(*out_count);
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        *out_libraries = nullptr;
+        *out_count = 0;
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    *out_libraries = parser->getUsedVCPluginLibraries(*out_count);
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+#if JYPPX_TENSORRT_VERSION_MAJOR_NUM >= 10
+static JYPPX_StatusCode onnx_parser_supports_model_v2_with_seh_guard(
+    nvonnxparser::IParser* parser,
+    const void* model_data,
+    const size_t model_size,
+    const char* model_path,
+    JYPPX_Boolean* out_supported,
+    const char* feature_name)
+{
+    *out_supported = JYPPX_FALSE;
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        *out_supported = parser->supportsModelV2(model_data, model_size, model_path) ? JYPPX_TRUE : JYPPX_FALSE;
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        *out_supported = JYPPX_FALSE;
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    *out_supported = parser->supportsModelV2(model_data, model_size, model_path) ? JYPPX_TRUE : JYPPX_FALSE;
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+static JYPPX_StatusCode get_onnx_parser_subgraph_count_with_seh_guard(
+    nvonnxparser::IParser* parser,
+    int64_t* out_count,
+    const char* feature_name)
+{
+    *out_count = 0;
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        *out_count = parser->getNbSubgraphs();
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        *out_count = 0;
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    *out_count = parser->getNbSubgraphs();
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+static JYPPX_StatusCode is_onnx_parser_subgraph_supported_with_seh_guard(
+    nvonnxparser::IParser* parser,
+    const int64_t index,
+    JYPPX_Boolean* out_supported,
+    const char* feature_name)
+{
+    *out_supported = JYPPX_FALSE;
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        *out_supported = parser->isSubgraphSupported(index) ? JYPPX_TRUE : JYPPX_FALSE;
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        *out_supported = JYPPX_FALSE;
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    *out_supported = parser->isSubgraphSupported(index) ? JYPPX_TRUE : JYPPX_FALSE;
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+static JYPPX_StatusCode get_onnx_parser_subgraph_nodes_with_seh_guard(
+    nvonnxparser::IParser* parser,
+    const int64_t subgraph_index,
+    int64_t** out_nodes,
+    int64_t* out_count,
+    const char* feature_name)
+{
+    *out_nodes = nullptr;
+    *out_count = 0;
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        *out_nodes = parser->getSubgraphNodes(subgraph_index, *out_count);
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        *out_nodes = nullptr;
+        *out_count = 0;
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    *out_nodes = parser->getSubgraphNodes(subgraph_index, *out_count);
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+static JYPPX_StatusCode onnx_parser_layer_output_tensor_exists_with_seh_guard(
+    nvonnxparser::IParser* parser,
+    const char* layer_name,
+    const int64_t output_index,
+    JYPPX_Boolean* out_exists,
+    const char* feature_name)
+{
+    *out_exists = JYPPX_FALSE;
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        *out_exists = parser->getLayerOutputTensor(layer_name, output_index) != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        *out_exists = JYPPX_FALSE;
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    *out_exists = parser->getLayerOutputTensor(layer_name, output_index) != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
+    return JYPPX_STATUS_OK;
+#endif
+}
+#endif
+
 static JYPPX_StatusCode get_onnx_parser_subgraph_nodes_for_support(
     nvonnxparser::IParser* parser,
     const int64_t subgraph_index,
@@ -66,7 +235,16 @@ static JYPPX_StatusCode get_onnx_parser_subgraph_nodes_for_support(
         return JYPPX_STATUS_INVALID_ARGUMENT;
     }
 
-    const int64_t subgraph_count = parser->getNbSubgraphs();
+    int64_t subgraph_count = 0;
+    status = get_onnx_parser_subgraph_count_with_seh_guard(
+        parser,
+        &subgraph_count,
+        "ONNX parser subgraph count query");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
     if (subgraph_count < 0)
     {
         jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT returned a negative ONNX parser subgraph count.");
@@ -80,7 +258,18 @@ static JYPPX_StatusCode get_onnx_parser_subgraph_nodes_for_support(
     }
 
     int64_t node_count = 0;
-    int64_t* nodes = parser->getSubgraphNodes(subgraph_index, node_count);
+    int64_t* nodes = nullptr;
+    status = get_onnx_parser_subgraph_nodes_with_seh_guard(
+        parser,
+        subgraph_index,
+        &nodes,
+        &node_count,
+        "ONNX parser subgraph node query");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
     if (node_count < 0)
     {
         jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT returned a negative ONNX parser subgraph node count.");
@@ -115,7 +304,16 @@ static JYPPX_StatusCode count_onnx_parser_subgraphs_by_support(
         return status;
     }
 
-    const int64_t subgraph_count = parser->getNbSubgraphs();
+    int64_t subgraph_count = 0;
+    status = get_onnx_parser_subgraph_count_with_seh_guard(
+        parser,
+        &subgraph_count,
+        "ONNX parser subgraph support count query");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
     if (subgraph_count < 0)
     {
         jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT returned a negative ONNX parser subgraph count.");
@@ -125,7 +323,18 @@ static JYPPX_StatusCode count_onnx_parser_subgraphs_by_support(
     int64_t match_count = 0;
     for (int64_t index = 0; index < subgraph_count; ++index)
     {
-        if (parser->isSubgraphSupported(index) == supported)
+        JYPPX_Boolean is_supported = JYPPX_FALSE;
+        status = is_onnx_parser_subgraph_supported_with_seh_guard(
+            parser,
+            index,
+            &is_supported,
+            "ONNX parser subgraph support count query");
+        if (status != JYPPX_STATUS_OK)
+        {
+            return status;
+        }
+
+        if ((is_supported == JYPPX_TRUE) == supported)
         {
             ++match_count;
         }
@@ -160,16 +369,39 @@ JYPPX_StatusCode JYPPX_TRT_ONNX_PARSER_API(get_used_vc_plugin_library_count)(JYP
         return status;
     }
 
-    int64_t count = 0;
-    const char* const* libraries = parser_payload->getUsedVCPluginLibraries(count);
-    if (count < 0 || (count > 0 && libraries == nullptr))
+    try
     {
-        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT returned invalid used VC plugin library metadata.");
-        return JYPPX_STATUS_INVALID_STATE;
-    }
+        int64_t count = 0;
+        const char* const* libraries = nullptr;
+        status = get_onnx_parser_used_vc_plugin_libraries_with_seh_guard(
+            parser_payload,
+            &libraries,
+            &count,
+            "ONNX parser used VC plugin library count query");
+        if (status != JYPPX_STATUS_OK)
+        {
+            return status;
+        }
 
-    *out_count = count;
-    return JYPPX_STATUS_OK;
+        if (count < 0 || (count > 0 && libraries == nullptr))
+        {
+            jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT returned invalid used VC plugin library metadata.");
+            return JYPPX_STATUS_INVALID_STATE;
+        }
+
+        *out_count = count;
+        return JYPPX_STATUS_OK;
+    }
+    catch (const std::exception& exception)
+    {
+        *out_count = 0;
+        return report_onnx_parser_support_exception("ONNX parser used VC plugin library count query", exception);
+    }
+    catch (...)
+    {
+        *out_count = 0;
+        return report_onnx_parser_support_unknown_exception("ONNX parser used VC plugin library count query");
+    }
 #elif JYPPX_HAS_TENSORRT
     (void)parser;
     jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT ONNX parser library was not found at build time.");
@@ -203,21 +435,44 @@ JYPPX_StatusCode JYPPX_TRT_ONNX_PARSER_API(get_used_vc_plugin_library)(JYPPX_Ten
         return status;
     }
 
-    int64_t count = 0;
-    const char* const* libraries = parser_payload->getUsedVCPluginLibraries(count);
-    if (count < 0 || (count > 0 && libraries == nullptr))
+    try
     {
-        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT returned invalid used VC plugin library metadata.");
-        return JYPPX_STATUS_INVALID_STATE;
-    }
+        int64_t count = 0;
+        const char* const* libraries = nullptr;
+        status = get_onnx_parser_used_vc_plugin_libraries_with_seh_guard(
+            parser_payload,
+            &libraries,
+            &count,
+            "ONNX parser used VC plugin library query");
+        if (status != JYPPX_STATUS_OK)
+        {
+            return status;
+        }
 
-    if (index >= count)
+        if (count < 0 || (count > 0 && libraries == nullptr))
+        {
+            jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT returned invalid used VC plugin library metadata.");
+            return JYPPX_STATUS_INVALID_STATE;
+        }
+
+        if (index >= count)
+        {
+            jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Used VC plugin library index is out of range.");
+            return JYPPX_STATUS_INVALID_ARGUMENT;
+        }
+
+        return copy_string_to_buffer(libraries[index], output_buffer, output_buffer_size, out_required_size);
+    }
+    catch (const std::exception& exception)
     {
-        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Used VC plugin library index is out of range.");
-        return JYPPX_STATUS_INVALID_ARGUMENT;
+        *out_required_size = 0;
+        return report_onnx_parser_support_exception("ONNX parser used VC plugin library query", exception);
     }
-
-    return copy_string_to_buffer(libraries[index], output_buffer, output_buffer_size, out_required_size);
+    catch (...)
+    {
+        *out_required_size = 0;
+        return report_onnx_parser_support_unknown_exception("ONNX parser used VC plugin library query");
+    }
 #elif JYPPX_HAS_TENSORRT
     (void)parser;
     (void)output_buffer;
@@ -257,10 +512,33 @@ JYPPX_StatusCode JYPPX_TRT_ONNX_PARSER_API(supports_model_v2)(JYPPX_TensorRtOnnx
     }
 
 #if JYPPX_TENSORRT_VERSION_MAJOR_NUM >= 10
-    const bool supported = parser_payload->supportsModelV2(model_data, model_size, model_path);
-    mark_onnx_parser_support_ready(parser_payload, true);
-    *out_supported = supported ? JYPPX_TRUE : JYPPX_FALSE;
-    return JYPPX_STATUS_OK;
+    try
+    {
+        status = onnx_parser_supports_model_v2_with_seh_guard(
+            parser_payload,
+            model_data,
+            model_size,
+            model_path,
+            out_supported,
+            "ONNX parser model support query");
+        if (status != JYPPX_STATUS_OK)
+        {
+            return status;
+        }
+
+        mark_onnx_parser_support_ready(parser_payload, true);
+        return JYPPX_STATUS_OK;
+    }
+    catch (const std::exception& exception)
+    {
+        *out_supported = JYPPX_FALSE;
+        return report_onnx_parser_support_exception("ONNX parser model support query", exception);
+    }
+    catch (...)
+    {
+        *out_supported = JYPPX_FALSE;
+        return report_onnx_parser_support_unknown_exception("ONNX parser model support query");
+    }
 #else
     (void)parser_payload;
     (void)model_path;
@@ -297,21 +575,43 @@ JYPPX_StatusCode JYPPX_TRT_ONNX_PARSER_API(get_subgraph_count)(JYPPX_TensorRtOnn
     }
 
 #if JYPPX_TENSORRT_VERSION_MAJOR_NUM >= 10
-    status = ensure_onnx_parser_support_ready(parser_payload);
-    if (status != JYPPX_STATUS_OK)
+    try
     {
-        return status;
-    }
+        status = ensure_onnx_parser_support_ready(parser_payload);
+        if (status != JYPPX_STATUS_OK)
+        {
+            return status;
+        }
 
-    const int64_t count = parser_payload->getNbSubgraphs();
-    if (count < 0)
+        int64_t count = 0;
+        status = get_onnx_parser_subgraph_count_with_seh_guard(
+            parser_payload,
+            &count,
+            "ONNX parser subgraph count query");
+        if (status != JYPPX_STATUS_OK)
+        {
+            return status;
+        }
+
+        if (count < 0)
+        {
+            jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT returned a negative ONNX parser subgraph count.");
+            return JYPPX_STATUS_INVALID_STATE;
+        }
+
+        *out_count = count;
+        return JYPPX_STATUS_OK;
+    }
+    catch (const std::exception& exception)
     {
-        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT returned a negative ONNX parser subgraph count.");
-        return JYPPX_STATUS_INVALID_STATE;
+        *out_count = 0;
+        return report_onnx_parser_support_exception("ONNX parser subgraph count query", exception);
     }
-
-    *out_count = count;
-    return JYPPX_STATUS_OK;
+    catch (...)
+    {
+        *out_count = 0;
+        return report_onnx_parser_support_unknown_exception("ONNX parser subgraph count query");
+    }
 #else
     (void)parser_payload;
     return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "ONNX parser subgraph count query");
@@ -350,27 +650,52 @@ JYPPX_StatusCode JYPPX_TRT_ONNX_PARSER_API(is_subgraph_supported)(JYPPX_TensorRt
     }
 
 #if JYPPX_TENSORRT_VERSION_MAJOR_NUM >= 10
-    status = ensure_onnx_parser_support_ready(parser_payload);
-    if (status != JYPPX_STATUS_OK)
+    try
     {
-        return status;
-    }
+        status = ensure_onnx_parser_support_ready(parser_payload);
+        if (status != JYPPX_STATUS_OK)
+        {
+            return status;
+        }
 
-    const int64_t count = parser_payload->getNbSubgraphs();
-    if (count < 0)
+        int64_t count = 0;
+        status = get_onnx_parser_subgraph_count_with_seh_guard(
+            parser_payload,
+            &count,
+            "ONNX parser subgraph support query");
+        if (status != JYPPX_STATUS_OK)
+        {
+            return status;
+        }
+
+        if (count < 0)
+        {
+            jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT returned a negative ONNX parser subgraph count.");
+            return JYPPX_STATUS_INVALID_STATE;
+        }
+
+        if (index >= count)
+        {
+            jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "ONNX parser subgraph index is out of range.");
+            return JYPPX_STATUS_INVALID_ARGUMENT;
+        }
+
+        return is_onnx_parser_subgraph_supported_with_seh_guard(
+            parser_payload,
+            index,
+            out_supported,
+            "ONNX parser subgraph support query");
+    }
+    catch (const std::exception& exception)
     {
-        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT returned a negative ONNX parser subgraph count.");
-        return JYPPX_STATUS_INVALID_STATE;
+        *out_supported = JYPPX_FALSE;
+        return report_onnx_parser_support_exception("ONNX parser subgraph support query", exception);
     }
-
-    if (index >= count)
+    catch (...)
     {
-        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "ONNX parser subgraph index is out of range.");
-        return JYPPX_STATUS_INVALID_ARGUMENT;
+        *out_supported = JYPPX_FALSE;
+        return report_onnx_parser_support_unknown_exception("ONNX parser subgraph support query");
     }
-
-    *out_supported = parser_payload->isSubgraphSupported(index) ? JYPPX_TRUE : JYPPX_FALSE;
-    return JYPPX_STATUS_OK;
 #else
     (void)parser_payload;
     return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "ONNX parser subgraph support query");
@@ -403,8 +728,21 @@ JYPPX_StatusCode JYPPX_TRT_ONNX_PARSER_API(get_subgraph_node_count)(JYPPX_Tensor
         return status;
     }
 
-    int64_t* nodes = nullptr;
-    return get_onnx_parser_subgraph_nodes_for_support(parser_payload, index, &nodes, out_count);
+    try
+    {
+        int64_t* nodes = nullptr;
+        return get_onnx_parser_subgraph_nodes_for_support(parser_payload, index, &nodes, out_count);
+    }
+    catch (const std::exception& exception)
+    {
+        *out_count = 0;
+        return report_onnx_parser_support_exception("ONNX parser subgraph node count query", exception);
+    }
+    catch (...)
+    {
+        *out_count = 0;
+        return report_onnx_parser_support_unknown_exception("ONNX parser subgraph node count query");
+    }
 #elif JYPPX_HAS_TENSORRT
     (void)parser;
     (void)index;
@@ -440,22 +778,35 @@ JYPPX_StatusCode JYPPX_TRT_ONNX_PARSER_API(get_subgraph_node)(JYPPX_TensorRtOnnx
         return status;
     }
 
-    int64_t* nodes = nullptr;
-    int64_t node_count = 0;
-    status = get_onnx_parser_subgraph_nodes_for_support(parser_payload, subgraph_index, &nodes, &node_count);
-    if (status != JYPPX_STATUS_OK)
+    try
     {
-        return status;
-    }
+        int64_t* nodes = nullptr;
+        int64_t node_count = 0;
+        status = get_onnx_parser_subgraph_nodes_for_support(parser_payload, subgraph_index, &nodes, &node_count);
+        if (status != JYPPX_STATUS_OK)
+        {
+            return status;
+        }
 
-    if (node_index >= node_count)
+        if (node_index >= node_count)
+        {
+            jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "ONNX parser subgraph node index is out of range.");
+            return JYPPX_STATUS_INVALID_ARGUMENT;
+        }
+
+        *out_node = nodes[node_index];
+        return JYPPX_STATUS_OK;
+    }
+    catch (const std::exception& exception)
     {
-        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "ONNX parser subgraph node index is out of range.");
-        return JYPPX_STATUS_INVALID_ARGUMENT;
+        *out_node = 0;
+        return report_onnx_parser_support_exception("ONNX parser subgraph node query", exception);
     }
-
-    *out_node = nodes[node_index];
-    return JYPPX_STATUS_OK;
+    catch (...)
+    {
+        *out_node = 0;
+        return report_onnx_parser_support_unknown_exception("ONNX parser subgraph node query");
+    }
 #elif JYPPX_HAS_TENSORRT
     (void)parser;
     (void)subgraph_index;
@@ -499,8 +850,25 @@ JYPPX_StatusCode JYPPX_TRT_ONNX_PARSER_API(layer_output_tensor_exists)(JYPPX_Ten
     }
 
 #if JYPPX_TENSORRT_VERSION_MAJOR_NUM >= 10
-    *out_exists = parser_payload->getLayerOutputTensor(layer_name, output_index) != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
-    return JYPPX_STATUS_OK;
+    try
+    {
+        return onnx_parser_layer_output_tensor_exists_with_seh_guard(
+            parser_payload,
+            layer_name,
+            output_index,
+            out_exists,
+            "ONNX parser layer output tensor existence query");
+    }
+    catch (const std::exception& exception)
+    {
+        *out_exists = JYPPX_FALSE;
+        return report_onnx_parser_support_exception("ONNX parser layer output tensor existence query", exception);
+    }
+    catch (...)
+    {
+        *out_exists = JYPPX_FALSE;
+        return report_onnx_parser_support_unknown_exception("ONNX parser layer output tensor existence query");
+    }
 #else
     (void)parser_payload;
     return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "ONNX parser layer output tensor existence query");
@@ -533,7 +901,20 @@ JYPPX_StatusCode JYPPX_TRT_ONNX_PARSER_API(get_supported_subgraph_count)(JYPPX_T
         return status;
     }
 
-    return count_onnx_parser_subgraphs_by_support(parser_payload, true, out_count);
+    try
+    {
+        return count_onnx_parser_subgraphs_by_support(parser_payload, true, out_count);
+    }
+    catch (const std::exception& exception)
+    {
+        *out_count = 0;
+        return report_onnx_parser_support_exception("ONNX parser supported subgraph count query", exception);
+    }
+    catch (...)
+    {
+        *out_count = 0;
+        return report_onnx_parser_support_unknown_exception("ONNX parser supported subgraph count query");
+    }
 #elif JYPPX_HAS_TENSORRT
     (void)parser;
     jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT ONNX parser library was not found at build time.");
@@ -562,7 +943,20 @@ JYPPX_StatusCode JYPPX_TRT_ONNX_PARSER_API(get_unsupported_subgraph_count)(JYPPX
         return status;
     }
 
-    return count_onnx_parser_subgraphs_by_support(parser_payload, false, out_count);
+    try
+    {
+        return count_onnx_parser_subgraphs_by_support(parser_payload, false, out_count);
+    }
+    catch (const std::exception& exception)
+    {
+        *out_count = 0;
+        return report_onnx_parser_support_exception("ONNX parser unsupported subgraph count query", exception);
+    }
+    catch (...)
+    {
+        *out_count = 0;
+        return report_onnx_parser_support_unknown_exception("ONNX parser unsupported subgraph count query");
+    }
 #elif JYPPX_HAS_TENSORRT
     (void)parser;
     jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT ONNX parser library was not found at build time.");

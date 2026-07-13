@@ -154,6 +154,18 @@
       ]
     },
     {
+      "id": "trt10-engine-get-minimum-weight-streaming-budget",
+      "entryPoint": "jyppx_trt10_engine_get_minimum_weight_streaming_budget",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "engine", "type": "JYPPX_TensorRtCudaEngine*", "direction": "in" },
+        { "name": "out_budget", "type": "int64_t*", "direction": "out" }
+      ]
+    },
+    {
       "id": "trt10-engine-set-weight-streaming-budget-v2",
       "entryPoint": "jyppx_trt10_engine_set_weight_streaming_budget_v2",
       "returnType": "BridgeStatusCode",

@@ -8,6 +8,18 @@
 
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_query_adapter_info(JYPPX_TensorRtAdapterInfo* out_info);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_logger_create(JYPPX_TensorRtLogger** out_logger);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_logger_create_with_callback(JYPPX_TensorRtLoggerCallback callback, void* user_state, int32_t minimum_severity, JYPPX_TensorRtLogger** out_logger);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_logger_emit_diagnostic(JYPPX_TensorRtLogger* logger, int32_t severity, const char* message, JYPPX_Boolean* out_callback_failed);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_profiler_create_with_callback(JYPPX_TensorRtProfilerCallback callback, void* user_state, JYPPX_TensorRtProfiler** out_profiler);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_profiler_emit_diagnostic(JYPPX_TensorRtProfiler* profiler, const char* layer_name, float milliseconds, JYPPX_Boolean* out_callback_failed);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_allocator_owner_dry_run_create(JYPPX_TensorRtAllocatorOwner** out_owner);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_allocator_owner_dry_run_emit_diagnostic(JYPPX_TensorRtAllocatorOwner* owner, uint64_t size, uint64_t alignment, const char* reason, JYPPX_TensorRtAllocatorOwnerDiagnosticInfo* out_info);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_allocator_owner_dry_run_get_info(JYPPX_TensorRtAllocatorOwner* owner, JYPPX_TensorRtAllocatorOwnerDiagnosticInfo* out_info);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_allocator_owner_dry_run_get_state(JYPPX_TensorRtAllocatorOwner* owner, JYPPX_TensorRtAllocatorOwnerStateInfo* out_info);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_allocator_owner_dry_run_attach_intent(JYPPX_TensorRtAllocatorOwner* owner, const char* target_kind, JYPPX_TensorRtAllocatorOwnerStateInfo* out_info);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_allocator_owner_dry_run_detach_intent(JYPPX_TensorRtAllocatorOwner* owner, const char* target_kind, JYPPX_TensorRtAllocatorOwnerStateInfo* out_info);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_allocator_owner_dry_run_ledger_record_allocation_intent(JYPPX_TensorRtAllocatorOwner* owner, uint64_t size, uint64_t alignment, uint64_t stream_value, JYPPX_TensorRtAllocatorOwnerStateInfo* out_info);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_allocator_owner_dry_run_ledger_record_release_intent(JYPPX_TensorRtAllocatorOwner* owner, uint64_t allocation_id, uint64_t stream_value, JYPPX_TensorRtAllocatorOwnerStateInfo* out_info);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_runtime_create(JYPPX_TensorRtLogger* logger, JYPPX_TensorRtRuntime** out_runtime);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_runtime_set_dla_core(JYPPX_TensorRtRuntime* runtime, int32_t dla_core);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_runtime_get_dla_core(JYPPX_TensorRtRuntime* runtime, int32_t* out_dla_core);
@@ -22,6 +34,9 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_runtime_get_tempfile_control_flags(JYPP
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_runtime_set_engine_host_code_allowed(JYPPX_TensorRtRuntime* runtime, JYPPX_Boolean allowed);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_runtime_get_engine_host_code_allowed(JYPPX_TensorRtRuntime* runtime, JYPPX_Boolean* out_allowed);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_runtime_has_error_recorder(JYPPX_TensorRtRuntime* runtime, JYPPX_Boolean* out_has_recorder);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_runtime_has_logger(JYPPX_TensorRtRuntime* runtime, JYPPX_Boolean* out_has_logger);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_runtime_get_error_recorder_snapshot_info(JYPPX_TensorRtRuntime* runtime, JYPPX_TensorRtErrorRecorderSnapshotInfo* out_info);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_runtime_get_error_recorder_error(JYPPX_TensorRtRuntime* runtime, int32_t index, JYPPX_TensorRtErrorRecordInfo* out_error);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_runtime_clear_error_recorder(JYPPX_TensorRtRuntime* runtime);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_runtime_clear_gpu_allocator(JYPPX_TensorRtRuntime* runtime);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_global_get_infer_lib_version(int32_t* out_version);
@@ -32,6 +47,12 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_platform_has_fast_fp16(JYPPX_Te
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_platform_has_fast_int8(JYPPX_TensorRtBuilder* builder, JYPPX_Boolean* out_supported);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_platform_has_tf32(JYPPX_TensorRtBuilder* builder, JYPPX_Boolean* out_supported);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_get_dla_core_count(JYPPX_TensorRtBuilder* builder, int32_t* out_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_get_max_dla_batch_size(JYPPX_TensorRtBuilder* builder, int32_t* out_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_get_max_batch_size(JYPPX_TensorRtBuilder* builder, int32_t* out_max_batch_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_set_max_threads(JYPPX_TensorRtBuilder* builder, int32_t max_threads, JYPPX_Boolean* out_set);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_get_max_threads(JYPPX_TensorRtBuilder* builder, int32_t* out_max_threads);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_is_network_supported(JYPPX_TensorRtBuilder* builder, JYPPX_TensorRtNetworkDefinition* network, JYPPX_TensorRtBuilderConfig* config, JYPPX_Boolean* out_supported);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_has_logger(JYPPX_TensorRtBuilder* builder, JYPPX_Boolean* out_has_logger);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_create_config(JYPPX_TensorRtBuilder* builder, JYPPX_TensorRtBuilderConfig** out_config);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_create_network(JYPPX_TensorRtBuilder* builder, uint32_t creation_flags, JYPPX_TensorRtNetworkDefinition** out_network);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_create_optimization_profile(JYPPX_TensorRtBuilder* builder, JYPPX_TensorRtOptimizationProfile** out_profile);
@@ -49,6 +70,8 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_is_profile_stream_set(JY
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_get_optimization_profile_count(JYPPX_TensorRtBuilderConfig* config, int32_t* out_count);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_set_calibration_profile(JYPPX_TensorRtBuilderConfig* config, JYPPX_TensorRtOptimizationProfile* profile);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_has_calibration_profile(JYPPX_TensorRtBuilderConfig* config, JYPPX_Boolean* out_has_profile);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_has_algorithm_selector(JYPPX_TensorRtBuilderConfig* config, JYPPX_Boolean* out_has_selector);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_has_int8_calibrator(JYPPX_TensorRtBuilderConfig* config, JYPPX_Boolean* out_has_calibrator);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_set_flag(JYPPX_TensorRtBuilderConfig* config, int32_t flag, JYPPX_Boolean enabled);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_get_flag(JYPPX_TensorRtBuilderConfig* config, int32_t flag, JYPPX_Boolean* out_enabled);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_set_engine_capability(JYPPX_TensorRtBuilderConfig* config, int32_t capability);
@@ -69,8 +92,21 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_set_max_aux_streams(JYPP
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_get_max_aux_streams(JYPPX_TensorRtBuilderConfig* config, int32_t* out_stream_count);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_set_average_timing_iterations(JYPPX_TensorRtBuilderConfig* config, int32_t iterations);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_get_average_timing_iterations(JYPPX_TensorRtBuilderConfig* config, int32_t* out_iterations);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_get_max_workspace_size(JYPPX_TensorRtBuilderConfig* config, size_t* out_workspace_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_get_min_timing_iterations(JYPPX_TensorRtBuilderConfig* config, int32_t* out_iterations);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_set_tactic_sources(JYPPX_TensorRtBuilderConfig* config, uint32_t tactic_sources);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_get_tactic_sources(JYPPX_TensorRtBuilderConfig* config, uint32_t* out_tactic_sources);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_set_default_device_type(JYPPX_TensorRtBuilderConfig* config, int32_t device_type);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_get_default_device_type(JYPPX_TensorRtBuilderConfig* config, int32_t* out_device_type);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_set_dla_core(JYPPX_TensorRtBuilderConfig* config, int32_t dla_core);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_get_dla_core(JYPPX_TensorRtBuilderConfig* config, int32_t* out_dla_core);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_can_run_on_dla(JYPPX_TensorRtBuilderConfig* config, JYPPX_TensorRtLayer* layer, JYPPX_Boolean* out_can_run);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_get_flags(JYPPX_TensorRtBuilderConfig* config, uint32_t* out_flags);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_set_quantization_flags(JYPPX_TensorRtBuilderConfig* config, uint32_t flags);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_get_quantization_flags(JYPPX_TensorRtBuilderConfig* config, uint32_t* out_flags);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_clear_quantization_flag(JYPPX_TensorRtBuilderConfig* config, int32_t flag);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_set_quantization_flag(JYPPX_TensorRtBuilderConfig* config, int32_t flag);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_get_quantization_flag(JYPPX_TensorRtBuilderConfig* config, int32_t flag, JYPPX_Boolean* out_enabled);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_set_layer_device_type(JYPPX_TensorRtBuilderConfig* config, JYPPX_TensorRtLayer* layer, int32_t device_type);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_get_layer_device_type(JYPPX_TensorRtBuilderConfig* config, JYPPX_TensorRtLayer* layer, int32_t* out_device_type);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_is_layer_device_type_set(JYPPX_TensorRtBuilderConfig* config, JYPPX_TensorRtLayer* layer, JYPPX_Boolean* out_is_set);
@@ -346,6 +382,21 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_onnx_parser_supports_operator(JYPPX_Ten
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_onnx_parser_get_used_vc_plugin_library_count(JYPPX_TensorRtOnnxParser* parser, int64_t* out_count);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_onnx_parser_get_used_vc_plugin_library(JYPPX_TensorRtOnnxParser* parser, int64_t index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_onnx_parser_supports_model(JYPPX_TensorRtOnnxParser* parser, const void* model_data, size_t model_size, const char* model_path, JYPPX_Boolean* out_supported);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_onnx_config_create(JYPPX_TensorRtOnnxConfig** out_config);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_onnx_config_get_model_dtype(JYPPX_TensorRtOnnxConfig* config, int32_t* out_data_type);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_onnx_config_set_model_dtype(JYPPX_TensorRtOnnxConfig* config, int32_t data_type);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_onnx_config_get_verbosity_level(JYPPX_TensorRtOnnxConfig* config, int32_t* out_verbosity);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_onnx_config_set_verbosity_level(JYPPX_TensorRtOnnxConfig* config, int32_t verbosity);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_onnx_config_add_verbosity(JYPPX_TensorRtOnnxConfig* config);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_onnx_config_reduce_verbosity(JYPPX_TensorRtOnnxConfig* config);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_onnx_config_get_model_file_name(JYPPX_TensorRtOnnxConfig* config, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_onnx_config_set_model_file_name(JYPPX_TensorRtOnnxConfig* config, const char* value);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_onnx_config_get_text_file_name(JYPPX_TensorRtOnnxConfig* config, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_onnx_config_set_text_file_name(JYPPX_TensorRtOnnxConfig* config, const char* value);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_onnx_config_get_full_text_file_name(JYPPX_TensorRtOnnxConfig* config, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_onnx_config_set_full_text_file_name(JYPPX_TensorRtOnnxConfig* config, const char* value);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_onnx_config_get_print_layer_info(JYPPX_TensorRtOnnxConfig* config, JYPPX_Boolean* out_enabled);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_onnx_config_set_print_layer_info(JYPPX_TensorRtOnnxConfig* config, JYPPX_Boolean enabled);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_build_serialized_network(JYPPX_TensorRtBuilder* builder, JYPPX_TensorRtNetworkDefinition* network, JYPPX_TensorRtBuilderConfig* config, JYPPX_TensorRtHostMemory** out_host_memory);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_host_memory_get_size(JYPPX_TensorRtHostMemory* host_memory, size_t* out_size);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_host_memory_get_type(JYPPX_TensorRtHostMemory* host_memory, int32_t* out_data_type);
@@ -505,16 +556,34 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_engine_get_engine_capability(JYPPX_Tens
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_engine_get_tactic_sources(JYPPX_TensorRtCudaEngine* engine, uint32_t* out_tactic_sources);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_engine_get_profiling_verbosity(JYPPX_TensorRtCudaEngine* engine, int32_t* out_verbosity);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_engine_get_max_batch_size(JYPPX_TensorRtCudaEngine* engine, int32_t* out_max_batch_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_engine_get_hardware_compatibility_level(JYPPX_TensorRtCudaEngine* engine, int32_t* out_level);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_get_nb_plugins_to_serialize(JYPPX_TensorRtBuilderConfig* config, int32_t* out_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_rnn_v2_layer_get_layer_count(JYPPX_TensorRtLayer* layer, int32_t* out_layer_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_rnn_v2_layer_get_hidden_size(JYPPX_TensorRtLayer* layer, int32_t* out_hidden_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_rnn_v2_layer_get_data_length(JYPPX_TensorRtLayer* layer, int32_t* out_data_length);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_rnn_v2_layer_get_max_seq_length(JYPPX_TensorRtLayer* layer, int32_t* out_max_seq_length);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_rnn_v2_layer_get_operation(JYPPX_TensorRtLayer* layer, int32_t* out_operation);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_rnn_v2_layer_get_direction(JYPPX_TensorRtLayer* layer, int32_t* out_direction);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_rnn_v2_layer_get_input_mode(JYPPX_TensorRtLayer* layer, int32_t* out_input_mode);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_rnn_v2_layer_get_cell_state(JYPPX_TensorRtLayer* layer, JYPPX_TensorRtTensor** out_tensor);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_rnn_v2_layer_get_hidden_state(JYPPX_TensorRtLayer* layer, JYPPX_TensorRtTensor** out_tensor);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_rnn_v2_layer_get_sequence_lengths(JYPPX_TensorRtLayer* layer, JYPPX_TensorRtTensor** out_tensor);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_rnn_v2_layer_get_weights_for_gate_copy(JYPPX_TensorRtLayer* layer, int32_t layer_index, int32_t gate, JYPPX_Boolean is_w, JYPPX_TensorRtWeightsInfo* out_info, uint8_t* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_rnn_v2_layer_get_bias_for_gate_copy(JYPPX_TensorRtLayer* layer, int32_t layer_index, int32_t gate, JYPPX_Boolean is_w, JYPPX_TensorRtWeightsInfo* out_info, uint8_t* output_buffer, size_t output_buffer_size, size_t* out_required_size);
 
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_get_tensor_shape(JYPPX_TensorRtExecutionContext* context, const char* tensor_name, JYPPX_TensorRtDims* out_shape);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_get_tensor_strides(JYPPX_TensorRtExecutionContext* context, const char* tensor_name, JYPPX_TensorRtDims* out_strides);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_get_max_output_size(JYPPX_TensorRtExecutionContext* context, const char* tensor_name, int64_t* out_size);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_is_tensor_address_bound(JYPPX_TensorRtExecutionContext* context, const char* tensor_name, JYPPX_Boolean* out_bound);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_get_callback_state_snapshot(JYPPX_TensorRtExecutionContext* context, const char* tensor_name, JYPPX_TensorRtExecutionContextCallbackStateInfo* out_info);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_clear_callback_state(JYPPX_TensorRtExecutionContext* context, const char* tensor_name, JYPPX_TensorRtExecutionContextCallbackStateInfo* out_info);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_set_tensor_debug_state(JYPPX_TensorRtExecutionContext* context, const char* tensor_name, JYPPX_Boolean debug_state);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_get_tensor_debug_state(JYPPX_TensorRtExecutionContext* context, const char* tensor_name, JYPPX_Boolean* out_debug_state);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_set_all_tensors_debug_state(JYPPX_TensorRtExecutionContext* context, JYPPX_Boolean debug_state);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_set_debug_sync(JYPPX_TensorRtExecutionContext* context, JYPPX_Boolean debug_sync);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_get_debug_sync(JYPPX_TensorRtExecutionContext* context, JYPPX_Boolean* out_debug_sync);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_set_nvtx_verbosity(JYPPX_TensorRtExecutionContext* context, int32_t verbosity, JYPPX_Boolean* out_set);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_get_nvtx_verbosity(JYPPX_TensorRtExecutionContext* context, int32_t* out_verbosity);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_set_name(JYPPX_TensorRtExecutionContext* context, const char* name);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_get_name(JYPPX_TensorRtExecutionContext* context, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_get_optimization_profile(JYPPX_TensorRtExecutionContext* context, int32_t* out_profile_index);
@@ -525,6 +594,9 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_infer_shapes(JYPPX_Te
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_set_enqueue_emits_profile(JYPPX_TensorRtExecutionContext* context, JYPPX_Boolean enqueue_emits_profile);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_get_enqueue_emits_profile(JYPPX_TensorRtExecutionContext* context, JYPPX_Boolean* out_enqueue_emits_profile);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_report_to_profiler(JYPPX_TensorRtExecutionContext* context, JYPPX_Boolean* out_reported);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_set_profiler(JYPPX_TensorRtExecutionContext* context, JYPPX_TensorRtProfiler* profiler);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_clear_profiler(JYPPX_TensorRtExecutionContext* context);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_has_profiler(JYPPX_TensorRtExecutionContext* context, JYPPX_Boolean* out_has_profiler);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_set_device_memory(JYPPX_TensorRtExecutionContext* context, JYPPX_CudaMemory* memory);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_get_device_memory_size(JYPPX_TensorRtExecutionContext* context, size_t* out_size);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_update_device_memory_size_for_shapes(JYPPX_TensorRtExecutionContext* context, size_t* out_size);
@@ -547,6 +619,9 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_cuda_engine_get_binding_vectorized_dim(
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_cuda_engine_is_execution_binding(JYPPX_TensorRtCudaEngine* engine, int32_t binding_index, JYPPX_Boolean* out_is_execution_binding);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_cuda_engine_is_shape_binding(JYPPX_TensorRtCudaEngine* engine, int32_t binding_index, JYPPX_Boolean* out_is_shape_binding);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_cuda_engine_has_implicit_batch_dimension(JYPPX_TensorRtCudaEngine* engine, JYPPX_Boolean* out_has_implicit_batch);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_cuda_engine_get_profile_shape_values(JYPPX_TensorRtCudaEngine* engine, int32_t binding_index, int32_t profile_index, int32_t selector, int32_t* output_values, int32_t output_count, int32_t* out_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_engine_get_error_recorder_snapshot_info(JYPPX_TensorRtCudaEngine* engine, JYPPX_TensorRtErrorRecorderSnapshotInfo* out_info);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_engine_get_error_recorder_error(JYPPX_TensorRtCudaEngine* engine, int32_t index, JYPPX_TensorRtErrorRecordInfo* out_error);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_cuda_engine_destroy_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_cuda_engine_get_error_recorder_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_cuda_engine_get_hardware_compatibility_level_deferred(void);
@@ -563,6 +638,9 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_get_error_buffer_defe
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_get_error_recorder_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_get_nvtx_verbosity_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_get_output_allocator_deferred(void);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_get_error_recorder_snapshot_info(JYPPX_TensorRtExecutionContext* context, JYPPX_TensorRtErrorRecorderSnapshotInfo* out_info);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_get_error_recorder_error(JYPPX_TensorRtExecutionContext* context, int32_t index, JYPPX_TensorRtErrorRecordInfo* out_error);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_get_shape_binding(JYPPX_TensorRtExecutionContext* context, int32_t binding_index, int32_t* output_values, int32_t output_count, int32_t* out_count);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_get_shape_binding_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_get_temporary_storage_allocator_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_no_copy_deferred(void);
@@ -759,6 +837,37 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_uff_parser_register_output_deferred(voi
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_uff_parser_set_error_recorder_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_uff_parser_set_plugin_namespace_deferred(void);
 /* END TRT8 CROSS-VERSION TENTH BATCH DECLARATIONS */
+
+/* BEGIN TRT8 PLUGIN REGISTRY INVENTORY DECLARATIONS */
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_plugin_registry_exists(JYPPX_TensorRtBuilder* builder, JYPPX_Boolean* out_exists);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_plugin_registry_get_creator_count(JYPPX_TensorRtBuilder* builder, int32_t* out_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_plugin_registry_has_error_recorder(JYPPX_TensorRtBuilder* builder, JYPPX_Boolean* out_has_recorder);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_plugin_registry_is_parent_search_enabled(JYPPX_TensorRtBuilder* builder, JYPPX_Boolean* out_enabled);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_plugin_creator_get_name(JYPPX_TensorRtBuilder* builder, int32_t creator_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_plugin_creator_get_version(JYPPX_TensorRtBuilder* builder, int32_t creator_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_plugin_creator_get_namespace(JYPPX_TensorRtBuilder* builder, int32_t creator_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_plugin_creator_get_field_count(JYPPX_TensorRtBuilder* builder, int32_t creator_index, int32_t* out_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_plugin_creator_get_field_name(JYPPX_TensorRtBuilder* builder, int32_t creator_index, int32_t field_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_plugin_creator_get_field_metadata(JYPPX_TensorRtBuilder* builder, int32_t creator_index, int32_t field_index, int32_t* out_field_type, int32_t* out_length, JYPPX_Boolean* out_has_data);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_plugin_creator_lookup(JYPPX_TensorRtBuilder* builder, const char* plugin_name, const char* plugin_version, const char* plugin_namespace, JYPPX_Boolean* out_found);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_plugin_creator_lookup_get_field_count(JYPPX_TensorRtBuilder* builder, const char* plugin_name, const char* plugin_version, const char* plugin_namespace, int32_t* out_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_plugin_creator_lookup_get_field_name(JYPPX_TensorRtBuilder* builder, const char* plugin_name, const char* plugin_version, const char* plugin_namespace, int32_t field_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_plugin_creator_lookup_get_field_metadata(JYPPX_TensorRtBuilder* builder, const char* plugin_name, const char* plugin_version, const char* plugin_namespace, int32_t field_index, int32_t* out_field_type, int32_t* out_length, JYPPX_Boolean* out_has_data);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_runtime_plugin_registry_exists(JYPPX_TensorRtRuntime* runtime, JYPPX_Boolean* out_exists);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_runtime_plugin_registry_get_creator_count(JYPPX_TensorRtRuntime* runtime, int32_t* out_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_runtime_plugin_registry_has_error_recorder(JYPPX_TensorRtRuntime* runtime, JYPPX_Boolean* out_has_recorder);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_runtime_plugin_registry_is_parent_search_enabled(JYPPX_TensorRtRuntime* runtime, JYPPX_Boolean* out_enabled);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_runtime_plugin_creator_get_name(JYPPX_TensorRtRuntime* runtime, int32_t creator_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_runtime_plugin_creator_get_version(JYPPX_TensorRtRuntime* runtime, int32_t creator_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_runtime_plugin_creator_get_namespace(JYPPX_TensorRtRuntime* runtime, int32_t creator_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_runtime_plugin_creator_get_field_count(JYPPX_TensorRtRuntime* runtime, int32_t creator_index, int32_t* out_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_runtime_plugin_creator_get_field_name(JYPPX_TensorRtRuntime* runtime, int32_t creator_index, int32_t field_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_runtime_plugin_creator_get_field_metadata(JYPPX_TensorRtRuntime* runtime, int32_t creator_index, int32_t field_index, int32_t* out_field_type, int32_t* out_length, JYPPX_Boolean* out_has_data);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_runtime_plugin_creator_lookup(JYPPX_TensorRtRuntime* runtime, const char* plugin_name, const char* plugin_version, const char* plugin_namespace, JYPPX_Boolean* out_found);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_runtime_plugin_creator_lookup_get_field_count(JYPPX_TensorRtRuntime* runtime, const char* plugin_name, const char* plugin_version, const char* plugin_namespace, int32_t* out_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_runtime_plugin_creator_lookup_get_field_name(JYPPX_TensorRtRuntime* runtime, const char* plugin_name, const char* plugin_version, const char* plugin_namespace, int32_t field_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_runtime_plugin_creator_lookup_get_field_metadata(JYPPX_TensorRtRuntime* runtime, const char* plugin_name, const char* plugin_version, const char* plugin_namespace, int32_t field_index, int32_t* out_field_type, int32_t* out_length, JYPPX_Boolean* out_has_data);
+/* END TRT8 PLUGIN REGISTRY INVENTORY DECLARATIONS */
 
 /* BEGIN TRT8 CROSS-VERSION ELEVENTH BATCH PLUGIN DECLARATIONS */
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_plugin_checker_validate_deferred(void);

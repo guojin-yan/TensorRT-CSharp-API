@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using JYPPX.Shared.Interop;
 using JYPPX.TensorRtSharp.Internal.Interop;
@@ -101,6 +102,58 @@ internal static class BridgeInfoMapper
             nodeOperator: ReadFixedUtf8(value.NodeOperator));
     }
 
+    public static TensorRtErrorRecord ToManaged(NativeTensorRtErrorRecordInfo value)
+    {
+        return new TensorRtErrorRecord(
+            index: value.Index,
+            code: value.Code,
+            description: ReadFixedUtf8(value.Description));
+    }
+
+    public static TensorRtErrorRecorderSnapshot ToManaged(
+        TensorRtApiLine line,
+        NativeTensorRtErrorRecorderSnapshotInfo value,
+        IReadOnlyList<TensorRtErrorRecord> records)
+    {
+        TensorRtInterfaceInfo interfaceInfo = new TensorRtInterfaceInfo(
+            ReadFixedUtf8(value.InterfaceInfoKind),
+            value.InterfaceInfoMajor,
+            value.InterfaceInfoMinor);
+
+        return new TensorRtErrorRecorderSnapshot(
+            line,
+            value.HasRecorder != 0,
+            value.ErrorCount,
+            value.HasOverflowed != 0,
+            value.InterfaceInfoAvailable != 0,
+            interfaceInfo,
+            records ?? Array.Empty<TensorRtErrorRecord>());
+    }
+
+    public static TensorRtRuntimeCreateDiagnosticSnapshot ToManaged(NativeTensorRtRuntimeCreateDiagnosticInfo value)
+    {
+        return new TensorRtRuntimeCreateDiagnosticSnapshot(
+            line: (TensorRtApiLine)value.Line,
+            diagnosticAvailable: true,
+            attempted: value.Attempted != 0,
+            loggerHandlePresent: value.LoggerHandlePresent != 0,
+            loggerPayloadPresent: value.LoggerPayloadPresent != 0,
+            createInferRuntimeReturnedNonNull: value.CreateInferRuntimeReturnedNonNull != 0,
+            createInferRuntimeReturnedNull: value.CreateInferRuntimeReturnedNull != 0,
+            lastStatus: (BridgeStatusCode)value.LastStatus,
+            tensorRtAvailable: value.TensorRtAvailable != 0,
+            expectedMajor: value.ExpectedMajor,
+            bridgeBuiltMajor: value.BridgeBuiltMajor,
+            detectedVersion: ReadFixedUtf8(value.DetectedVersion),
+            loggerCallbackAvailable: value.LoggerCallbackAvailable != 0,
+            loggerMessageCount: value.LoggerMessageCount,
+            lastLoggerSeverity: value.LastLoggerSeverity,
+            lastLoggerMessage: ReadFixedUtf8(value.LastLoggerMessage),
+            createRuntimePhase: ReadFixedUtf8(value.CreateRuntimePhase),
+            nativeDetail: ReadFixedUtf8(value.NativeDetail),
+            diagnostic: ReadFixedUtf8(value.Diagnostic));
+    }
+
     private static TensorRtDataType MapDataType(int value)
     {
         return Enum.IsDefined(typeof(TensorRtDataType), value)
@@ -108,7 +161,7 @@ internal static class BridgeInfoMapper
             : TensorRtDataType.Unknown;
     }
 
-    private static string ReadFixedUtf8(byte[] value)
+    public static string ReadFixedUtf8(byte[] value)
     {
         int terminator = Array.IndexOf(value, (byte)0);
         int length = terminator >= 0 ? terminator : value.Length;

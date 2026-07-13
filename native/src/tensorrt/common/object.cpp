@@ -1,5 +1,9 @@
 #include "object.hpp"
 
+#if defined(_MSC_VER)
+#include <excpt.h>
+#endif
+
 #include <new>
 #include <sstream>
 
@@ -62,6 +66,16 @@ const char* kind_to_name(const JYPPX_TensorRtObjectKind kind)
         return "runtime-config";
     case JYPPX_TENSORRT_OBJECT_KIND_ATTENTION:
         return "attention";
+    case JYPPX_TENSORRT_OBJECT_KIND_PROGRESS_MONITOR:
+        return "progress-monitor";
+    case JYPPX_TENSORRT_OBJECT_KIND_PROFILER:
+        return "profiler";
+    case JYPPX_TENSORRT_OBJECT_KIND_ONNX_PARSER_REFITTER:
+        return "onnx-parser-refitter";
+    case JYPPX_TENSORRT_OBJECT_KIND_ALLOCATOR_CALLBACK_OWNER:
+        return "allocator-callback-owner";
+    case JYPPX_TENSORRT_OBJECT_KIND_ONNX_CONFIG:
+        return "onnx-config";
     default:
         return "unknown";
     }
@@ -184,6 +198,47 @@ JYPPX_StatusCode report_vendor_mismatch(const JYPPX_TensorRtLine requested_line,
     jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, builder.str().c_str());
     return JYPPX_STATUS_NOT_SUPPORTED;
 }
+
+JYPPX_StatusCode report_vendor_exception(const JYPPX_TensorRtLine line, const char* feature_name, const char* exception_message)
+{
+    std::ostringstream builder;
+    builder << "TensorRT " << line_to_version_text(line) << " " << feature_name << " raised a native exception";
+    if (exception_message != nullptr && exception_message[0] != '\0')
+    {
+        builder << ": " << exception_message;
+    }
+
+    builder << ".";
+    jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, builder.str().c_str());
+    return JYPPX_STATUS_RUNTIME_ERROR;
+}
+
+JYPPX_StatusCode report_vendor_seh_exception(const JYPPX_TensorRtLine line, const char* feature_name, const uint32_t exception_code)
+{
+    std::ostringstream builder;
+    builder << "TensorRT " << line_to_version_text(line) << " " << feature_name
+            << " raised a structured exception with code " << exception_code << ".";
+    jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, builder.str().c_str());
+    return JYPPX_STATUS_RUNTIME_ERROR;
+}
+
+#if defined(_MSC_VER)
+int capture_vendor_seh_exception_code(uint32_t* out_exception_code, const uint32_t exception_code)
+{
+    constexpr uint32_t kMsvcCppExceptionCode = 0xE06D7363U;
+    if (exception_code == kMsvcCppExceptionCode)
+    {
+        return EXCEPTION_CONTINUE_SEARCH;
+    }
+
+    if (out_exception_code != nullptr)
+    {
+        *out_exception_code = exception_code;
+    }
+
+    return EXCEPTION_EXECUTE_HANDLER;
+}
+#endif
 
 JYPPX_StatusCode report_not_implemented(const JYPPX_TensorRtLine line, const char* feature_name)
 {

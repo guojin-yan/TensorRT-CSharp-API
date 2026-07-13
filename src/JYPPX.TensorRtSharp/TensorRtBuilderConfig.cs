@@ -13,6 +13,8 @@ namespace JYPPX.TensorRtSharp;
 public sealed partial class TensorRtBuilderConfig : IDisposable
 {
     private readonly SafeTensorRtObjectHandle _handle;
+    private TensorRtProgressMonitor? _progressMonitorKeepAlive;
+    private bool _disposed;
 
     internal TensorRtBuilderConfig(TensorRtApiLine line, SafeTensorRtObjectHandle handle)
     {
@@ -109,6 +111,26 @@ public sealed partial class TensorRtBuilderConfig : IDisposable
     /// 返回 TensorRT 当前是否为此 builder config 附加了 calibration profile。
     /// </summary>
     public bool HasCalibrationProfile => NativeBridgeApi.HasBuilderConfigCalibrationProfile(Line, _handle);
+
+    /// <summary>
+    /// Returns whether TensorRT currently has an algorithm selector attached, without exposing the borrowed selector pointer.
+    /// 返回 TensorRT 当前是否附加了 algorithm selector；该属性只报告 presence，不暴露 borrowed selector 指针。
+    /// </summary>
+    /// <remarks>
+    /// This TensorRT 8/10 compatibility probe does not transfer ownership and cannot be used to invoke selector callbacks.
+    /// 这是 TensorRT 8/10 compatibility 查询，不转移生命周期，也不能用于调用 selector 回调。
+    /// </remarks>
+    public bool HasAlgorithmSelectorCompatibility => NativeBridgeApi.HasBuilderConfigAlgorithmSelectorCompatibility(Line, _handle);
+
+    /// <summary>
+    /// Returns whether TensorRT currently has an INT8 calibrator attached, without exposing the borrowed calibrator pointer.
+    /// 返回 TensorRT 当前是否附加了 INT8 calibrator；该属性只报告 presence，不暴露 borrowed calibrator 指针。
+    /// </summary>
+    /// <remarks>
+    /// This TensorRT 8/10 compatibility probe does not transfer ownership and cannot be used to invoke calibrator callbacks.
+    /// 这是 TensorRT 8/10 compatibility 查询，不转移生命周期，也不能用于调用 calibrator 回调。
+    /// </remarks>
+    public bool HasInt8CalibratorCompatibility => NativeBridgeApi.HasBuilderConfigInt8CalibratorCompatibility(Line, _handle);
 
     /// <summary>
     /// Enables or disables one TensorRT builder flag.
@@ -388,6 +410,30 @@ public sealed partial class TensorRtBuilderConfig : IDisposable
     }
 
     /// <summary>
+    /// Gets TensorRT 8's legacy maximum workspace-size setting.
+    /// 获取 TensorRT 8 legacy 最大 workspace size 设置。
+    /// </summary>
+    /// <remarks>
+    /// This is a TensorRT 8 compatibility diagnostic for the deprecated <c>IBuilderConfig::getMaxWorkspaceSize</c> API.
+    /// Prefer <see cref="GetMemoryPoolLimit"/> with <see cref="TensorRtMemoryPoolType.Workspace"/> for portable TensorRT 8/10/11 code.
+    /// 这是 TensorRT 8 兼容诊断，用于 deprecated <c>IBuilderConfig::getMaxWorkspaceSize</c> 接口。跨版本代码请优先使用
+    /// <see cref="GetMemoryPoolLimit"/> 和 <see cref="TensorRtMemoryPoolType.Workspace"/>。
+    /// </remarks>
+    public ulong MaxWorkspaceSizeCompatibilityInBytes => NativeBridgeApi.GetMaxWorkspaceSizeCompatibility(Line, _handle);
+
+    /// <summary>
+    /// Gets TensorRT 8's legacy minimum timing-iteration count.
+    /// 获取 TensorRT 8 legacy 最小 timing 迭代次数。
+    /// </summary>
+    /// <remarks>
+    /// This is a TensorRT 8 compatibility diagnostic for the deprecated <c>IBuilderConfig::getMinTimingIterations</c> API.
+    /// Prefer <see cref="GetAverageTimingIterations"/> for portable TensorRT 8/10/11 timing diagnostics.
+    /// 这是 TensorRT 8 兼容诊断，用于 deprecated <c>IBuilderConfig::getMinTimingIterations</c> 接口。跨版本 timing 诊断请优先使用
+    /// <see cref="GetAverageTimingIterations"/>。
+    /// </remarks>
+    public int MinTimingIterationsCompatibility => NativeBridgeApi.GetMinTimingIterationsCompatibility(Line, _handle);
+
+    /// <summary>
     /// Sets the TensorRT tactic-source mask.
     /// 设置 TensorRT tactic source 掩码。
     /// </summary>
@@ -445,8 +491,55 @@ public sealed partial class TensorRtBuilderConfig : IDisposable
     /// </summary>
     public void Dispose()
     {
+        if (_disposed)
+        {
+            return;
+        }
+
+        TensorRtProgressMonitor? monitor = _progressMonitorKeepAlive;
+        _disposed = true;
+        if (monitor != null)
+        {
+            TryClearProgressMonitorForDispose();
+        }
+
         _handle.Dispose();
+        GC.KeepAlive(monitor);
+        DetachProgressMonitor();
         GC.SuppressFinalize(this);
+    }
+
+    private void TryClearProgressMonitorForDispose()
+    {
+        try
+        {
+            NativeBridgeApi.ClearBuilderConfigProgressMonitor(Line, _handle);
+        }
+        catch (BridgeProbeException)
+        {
+            // Dispose must still release the config handle. Keep the progress monitor alive until
+            // the config handle is released so TensorRT never observes a freed borrowed monitor.
+        }
+    }
+
+    private void ThrowIfDisposed()
+    {
+        if (_disposed)
+        {
+            throw new ObjectDisposedException(nameof(TensorRtBuilderConfig));
+        }
+    }
+
+    private TensorRtProgressMonitor? DetachProgressMonitor()
+    {
+        TensorRtProgressMonitor? monitor = _progressMonitorKeepAlive;
+        if (monitor != null)
+        {
+            _progressMonitorKeepAlive = null;
+            monitor.DetachBorrower();
+        }
+
+        return monitor;
     }
 
     private void ValidateLayer(TensorRtLayer layer)

@@ -133,3 +133,126 @@ internal struct NativeTensorRtWeightsInfo
     public long Count;
     public int HasValues;
 }
+
+[StructLayout(LayoutKind.Sequential)]
+internal struct NativeTensorRtErrorRecorderSnapshotInfo
+{
+    public int HasRecorder;
+    public int ErrorCount;
+    public int HasOverflowed;
+    public int InterfaceInfoAvailable;
+    public int InterfaceInfoMajor;
+    public int InterfaceInfoMinor;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)]
+    public byte[] InterfaceInfoKind;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+internal struct NativeTensorRtErrorRecordInfo
+{
+    public int Index;
+    public int Code;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1024)]
+    public byte[] Description;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+internal struct NativeTensorRtAllocatorOwnerDiagnosticInfo
+{
+    public uint Line;
+    public ulong InvocationCount;
+    public ulong FailureCount;
+    public int LastStatus;
+    public int IsAttached;
+    public ulong LastSize;
+    public ulong LastAlignment;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1024)]
+    public byte[] LastDiagnostic;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+internal struct NativeTensorRtAllocatorOwnerStateInfo
+{
+    public uint Line;
+    public ulong OwnerId;
+    public ulong StateTransitionCount;
+    public ulong LedgerAllocationCount;
+    public ulong LedgerReleaseCount;
+    public ulong LedgerFailureCount;
+    public ulong LastAllocationId;
+    public ulong LastReleaseAllocationId;
+    public ulong LastSize;
+    public ulong LastAlignment;
+    public ulong LastStreamValue;
+    public int AttachState;
+    public int LastStatus;
+    public int IsAttached;
+    public int HasLiveAllocation;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
+    public byte[] LastOperation;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1024)]
+    public byte[] LastDiagnostic;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+internal struct NativeTensorRtRuntimeCreateDiagnosticInfo
+{
+    public uint Line;
+    public int Attempted;
+    public int LoggerHandlePresent;
+    public int LoggerPayloadPresent;
+    public int CreateInferRuntimeReturnedNonNull;
+    public int CreateInferRuntimeReturnedNull;
+    public int LastStatus;
+    public int TensorRtAvailable;
+    public int ExpectedMajor;
+    public int BridgeBuiltMajor;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
+    public byte[] DetectedVersion;
+    public int LoggerCallbackAvailable;
+    public uint LoggerMessageCount;
+    public int LastLoggerSeverity;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1024)]
+    public byte[] LastLoggerMessage;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)]
+    public byte[] CreateRuntimePhase;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1024)]
+    public byte[] NativeDetail;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1024)]
+    public byte[] Diagnostic;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+internal struct NativeTensorRtExecutionContextCallbackStateInfo
+{
+    public uint Line;
+    public int HasOutputAllocator;
+    public int HasTemporaryStorageAllocator;
+    public int HasDebugListener;
+    public int OutputAllocatorInterfaceInfoAvailable;
+    public int TemporaryStorageAllocatorInterfaceInfoAvailable;
+    public int DebugListenerInterfaceInfoAvailable;
+    public int OutputAllocatorClearSupported;
+    public int TemporaryStorageAllocatorClearSupported;
+    public int DebugListenerClearSupported;
+    public int OutputAllocatorCleared;
+    public int TemporaryStorageAllocatorCleared;
+    public int DebugListenerCleared;
+    public int OutputAllocatorInterfaceMajor;
+    public int OutputAllocatorInterfaceMinor;
+    public int TemporaryStorageAllocatorInterfaceMajor;
+    public int TemporaryStorageAllocatorInterfaceMinor;
+    public int DebugListenerInterfaceMajor;
+    public int DebugListenerInterfaceMinor;
+    public int LastStatus;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)]
+    public byte[] OutputAllocatorInterfaceKind;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)]
+    public byte[] TemporaryStorageAllocatorInterfaceKind;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)]
+    public byte[] DebugListenerInterfaceKind;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
+    public byte[] LastOperation;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1024)]
+    public byte[] LastDiagnostic;
+}

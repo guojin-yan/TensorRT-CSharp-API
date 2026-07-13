@@ -9,7 +9,32 @@ internal static class Program
 {
     private static void Main(string[] args)
     {
-        TensorRtApiLine line = ResolveLine(JYPPX.SampleSupport.SampleCommandLine.GetStringArgument(args, "--tensor-rt-line", "10"));
+        string requestedLine = JYPPX.SampleSupport.SampleCommandLine.GetStringArgument(args, "--tensor-rt-line", "10");
+        bool dependencyProbeOnly = JYPPX.SampleSupport.SampleCommandLine.HasSwitch(args, "--dependency-probe-only");
+
+        Console.WriteLine($"RefitWeightsSmokeRunner TensorRtLineRequest={requestedLine} DependencyProbeOnly={dependencyProbeOnly}");
+
+        if (dependencyProbeOnly)
+        {
+            TensorRtApiLine probeLine = ResolveLine(requestedLine);
+            PrintDependencyProbe(probeLine);
+            Console.WriteLine("Skipped=True Reason=DependencyProbeOnly");
+            return;
+        }
+
+        try
+        {
+            Run(requestedLine);
+        }
+        catch (Exception exception) when (IsSkippableEnvironmentException(exception))
+        {
+            Console.WriteLine($"Skipped=True Reason={exception.GetType().Name}:{exception.Message}");
+        }
+    }
+
+    private static void Run(string requestedLine)
+    {
+        TensorRtApiLine line = ResolveLine(requestedLine);
 
         TensorRtEnvironmentSnapshot snapshot = TensorRtEnvironmentProbe.GetCurrent();
         TensorRtAdapterInfo adapter = line switch
@@ -20,6 +45,7 @@ internal static class Program
             _ => snapshot.TensorRt10
         };
         Console.WriteLine($"RefitWeightsSmokeRunner TensorRtLine={(int)line} TRT={snapshot.BuildInfo.TensorRtVersion} CUDA={snapshot.BuildInfo.CudaToolkitVersion}");
+        PrintDependencyProbe(line);
         if (!adapter.RuntimeCreationSupported || !adapter.BuilderCreationSupported)
         {
             Console.WriteLine($"Skipped=True Message={adapter.StatusMessage}");
@@ -58,6 +84,8 @@ internal static class Program
 
         using TensorRtHostMemory hostMemory = builder.BuildSerializedNetwork(network, config);
         using TensorRtEngine engine = runtime.Deserialize(hostMemory);
+        using TensorRtEngineInspector inspector = engine.CreateInspector();
+        string inspectorDiagnostics = ProbeEngineInspectorDiagnostics(inspector);
         Console.WriteLine($"Engine Refittable={engine.IsRefittable} HostMemory={hostMemory.SizeInBytes} DeviceMemory={engine.DeviceMemorySizeInBytes}");
         if (!engine.IsRefittable)
         {
@@ -69,10 +97,12 @@ internal static class Program
         AssertClose("RefitBefore", expectedBefore, before, 0.0001f);
 
         using TensorRtRefitter refitter = engine.CreateRefitter(logger);
+        string refitterDiagnostics = ProbeRefitterDiagnostics(refitter);
         IReadOnlyList<TensorRtRefitEntry> allEntries = refitter.GetAllEntries();
         IReadOnlyList<TensorRtRefitEntry> missingEntries = refitter.GetMissingEntries();
         string allSummary = string.Join(";", allEntries.Select(static entry => $"{entry.LayerName}:{entry.Role}"));
         string missingSummary = string.Join(";", missingEntries.Select(static entry => $"{entry.LayerName}:{entry.Role}"));
+        Console.WriteLine($"RefitDiagnostics Refitter=[{refitterDiagnostics}] Inspector=[{inspectorDiagnostics}]");
         Console.WriteLine($"RefitEntries All={allEntries.Count}/{refitter.AllRefittableWeightCount} Missing={missingEntries.Count}/{refitter.MissingWeightCount} All=[{allSummary}] Missing=[{missingSummary}]");
 
         TensorRtRefitEntry scaleEntry = default;
@@ -111,6 +141,54 @@ internal static class Program
         AssertClose("RefitAfter", expectedAfter, after, 0.0001f);
         Console.WriteLine($"RefitWeights Set=True Refit=True Before=[{string.Join(", ", before)}] After=[{string.Join(", ", after)}] OutputChanged=True");
 
+    }
+
+    static string ProbeRefitterDiagnostics(TensorRtRefitter refitter)
+    {
+        return string.Join(
+            " ",
+            $"MaxThreads={ProbeValue(() => refitter.MaxThreads)}",
+            $"ErrorRecorder={ProbeValue(() => refitter.HasErrorRecorder)}",
+            $"ErrorSnapshot={ProbeValue(() => DescribeRefitterErrorRecorderSnapshot(refitter))}",
+            $"Logger={ProbeValue(() => refitter.HasLogger)}",
+            $"DynamicRangeTensors={ProbeValue(() => $"{refitter.GetDynamicRangeTensorNames().Count}/{refitter.DynamicRangeTensorCount}")}",
+            $"MissingNamed={ProbeValue(() => $"{refitter.GetMissingNamedWeights().Count}/{refitter.MissingNamedWeightCount}")}",
+            $"AllNamed={ProbeValue(() => $"{refitter.GetAllNamedWeights().Count}/{refitter.AllNamedWeightCount}")}");
+    }
+
+    static string DescribeRefitterErrorRecorderSnapshot(TensorRtRefitter refitter)
+    {
+        bool available = refitter.TryGetErrorRecorderSnapshot(out TensorRtErrorRecorderSnapshot snapshot);
+        return $"{available}/{snapshot.ErrorCount}/{snapshot.Records.Count}/Overflow={snapshot.HasOverflowed}";
+    }
+
+    static string ProbeEngineInspectorDiagnostics(TensorRtEngineInspector inspector)
+    {
+        return string.Join(
+            " ",
+            $"EngineBytes={ProbeValue(() => inspector.GetEngineInformation(TensorRtLayerInformationFormat.Oneline).Length)}",
+            $"Layer0Bytes={ProbeValue(() => inspector.GetLayerInformation(0, TensorRtLayerInformationFormat.Oneline).Length)}",
+            $"Context={ProbeValue(() => inspector.HasExecutionContext)}",
+            $"ErrorRecorder={ProbeValue(() =>
+            {
+                bool before = inspector.HasErrorRecorder;
+                inspector.ClearErrorRecorder();
+                bool after = inspector.HasErrorRecorder;
+                return $"{before}->{after}";
+            })}");
+    }
+
+    static string ProbeValue<T>(Func<T> action)
+    {
+        try
+        {
+            T value = action();
+            return value?.ToString() ?? string.Empty;
+        }
+        catch (Exception exception) when (exception is BridgeProbeException || exception is NotSupportedException || exception is InvalidOperationException)
+        {
+            return $"Skipped:{exception.GetType().Name}:{exception.Message}";
+        }
     }
 
     static float[] RunInference(TensorRtEngine engine, float[] inputValues)
@@ -160,5 +238,35 @@ internal static class Program
         }
 
         throw new ArgumentException("TensorRT line must be 8, 10, or 11.", nameof(value));
+    }
+
+    private static void PrintDependencyProbe(TensorRtApiLine line)
+    {
+        TensorRtDependencyProbeReport dependencyProbe = TensorRtEnvironmentProbe.ProbeNativeDependencies(line);
+        Console.WriteLine($"DependencyProbe Line={(int)line} BridgeInitialized={dependencyProbe.BridgeInitialized} Candidates={dependencyProbe.NativeBridgeCandidates.Count} Loaded={dependencyProbe.LoadedModuleCount} SearchPathCandidates={dependencyProbe.SearchPathCandidateCount} Diagnostics={dependencyProbe.Diagnostics.Count} Message={dependencyProbe.BridgeDiagnostic}");
+    }
+
+    private static bool IsSkippableEnvironmentException(Exception exception)
+    {
+        if (exception is DllNotFoundException || exception is BadImageFormatException)
+        {
+            return true;
+        }
+
+        if (exception is BridgeProbeException bridgeProbe)
+        {
+            return bridgeProbe.StatusCode == BridgeStatusCode.DependencyMissing ||
+                   bridgeProbe.StatusCode == BridgeStatusCode.NotSupported ||
+                   bridgeProbe.StatusCode == BridgeStatusCode.InvalidState ||
+                   IsKnownVendorSeh(bridgeProbe);
+        }
+
+        return false;
+    }
+
+    private static bool IsKnownVendorSeh(BridgeProbeException exception)
+    {
+        return exception.StatusCode == BridgeStatusCode.RuntimeError &&
+               exception.Message.Contains("structured exception with code 3228369022", StringComparison.Ordinal);
     }
 }

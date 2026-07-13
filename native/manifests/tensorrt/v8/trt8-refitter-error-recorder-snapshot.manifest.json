@@ -1,0 +1,32 @@
+{
+  "$schema": "../../bridge-api.schema.json",
+  "module": "tensorrt",
+  "versionLine": "8",
+  "apis": [
+    {
+      "id": "jyppx-trt8-refitter-get-error-recorder-snapshot-info",
+      "entryPoint": "jyppx_trt8_refitter_get_error_recorder_snapshot_info",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "refitter", "type": "JYPPX_TensorRtRefitter*", "direction": "in" },
+        { "name": "out_info", "type": "JYPPX_TensorRtErrorRecorderSnapshotInfo*", "direction": "out", "managedType": "IntPtr", "moduleManagedType": "out NativeTensorRtErrorRecorderSnapshotInfo" }
+      ]
+    },
+    {
+      "id": "jyppx-trt8-refitter-get-error-recorder-error",
+      "entryPoint": "jyppx_trt8_refitter_get_error_recorder_error",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "refitter", "type": "JYPPX_TensorRtRefitter*", "direction": "in" },
+        { "name": "index", "type": "int32_t", "direction": "in" },
+        { "name": "out_error", "type": "JYPPX_TensorRtErrorRecordInfo*", "direction": "out", "managedType": "IntPtr", "moduleManagedType": "out NativeTensorRtErrorRecordInfo" }
+      ]
+    }
+  ]
+}

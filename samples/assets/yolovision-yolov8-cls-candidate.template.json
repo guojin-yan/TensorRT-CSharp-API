@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "sampleName": "YoloVision",
+  "candidateId": "yolovision-yolov8-cls-candidate",
+  "status": "owner-action-required",
+  "runtimeProofState": "owner-action-required",
+  "proofClassification": "template-only",
+  "canPromoteRealModelRuntime": false,
+  "canPromotePackageConsumerRuntime": false,
+  "taskOutputContract": "samples/YoloVision/yolovision-task-output-contract.json",
+  "family": "YOLOv8",
+  "task": "cls",
+  "model": {
+    "name": "YOLOv8 classification candidate",
+    "sourceUrl": "owner-required official or self-trained YOLOv8 classification model source",
+    "downloadUrl": "owner-required",
+    "license": "owner-required",
+    "licenseEvidence": "owner-required",
+    "localPath": "models/yolov8-cls.onnx",
+    "sha256": "owner-required",
+    "opset": "owner-required",
+    "onnxExportCommand": "yolo export model=yolov8n-cls.pt format=onnx imgsz=224 opset=17 simplify=True dynamic=False"
+  },
+  "labels": {
+    "sourceUrl": "owner-required classification label source such as ImageNet labels",
+    "license": "owner-required",
+    "localPath": "models/imagenet.names",
+    "sha256": "owner-required",
+    "classCount": 1000
+  },
+  "input": {
+    "imageSourceUrl": "owner-required redistributable classification test image",
+    "imageLicense": "owner-required",
+    "imagePath": "models/yolov8-cls-test.jpg",
+    "imageSha256": "owner-required",
+    "preprocessedTensorPath": "models/yolov8-cls-fp32.bin",
+    "preprocessedTensorSha256": "owner-required",
+    "preprocessCommand": "owner-required command that performs resize/crop/RGB/normalize/NCHW conversion",
+    "inputShape": "1x3x224x224"
+  },
+  "outputMetadata": {
+    "inputTensorName": "images-or-owner-confirmed",
+    "outputTensorNames": ["output0-or-owner-confirmed"],
+    "outputShape": "1x1000 or owner-confirmed",
+    "classificationOutput": "output0-or-owner-confirmed",
+    "classCount": 1000,
+    "labelsPath": "models/imagenet.names",
+    "layout": "class-score-vector",
+    "topK": 5,
+    "classScoreField": "probability-or-logit-owner-confirmed",
+    "labelsRequired": true,
+    "postprocessMetadata": {
+      "activation": "softmax-or-owner-confirmed",
+      "sortOrder": "score-descending"
+    }
+  },
+  "commands": {
+    "tensorRtExecBuildCommand": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\yolov8-cls.onnx --saveEngine .\\models\\yolov8-cls.plan --minShapes images:1x3x224x224 --optShapes images:1x3x224x224 --maxShapes images:8x3x224x224 --fp16 --workspace 1024 --buildOnly --exportReport .\\models\\yolov8-cls-build-report.json --evidenceSidecar .\\models\\yolov8-cls-evidence.sidecar.json",
+    "yoloVisionRunCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8-cls.onnx --labels .\\models\\imagenet.names --input-data .\\models\\yolov8-cls-fp32.bin --input-shape 1x3x224x224 --tensor-rt-line 10 --family v8 --task cls --top-k 5 --class-score-field probability-or-logit-owner-confirmed"
+  },
+  "proofChecklist": {
+    "requiredEvidenceLines": [
+      "YoloVision TensorRtLine=...",
+      "Profile Family=v8 Task=Classification Layout=class-score-vector TopK=5",
+      "InputSource=external InputFile=...",
+      "Output=... Outputs=...",
+      "Postprocess Task=Classification;TopK=5;Predictions=...",
+      "Classification Class=... Score=...",
+      "YoloVision Passed=True"
+    ],
+    "requiredHashes": ["modelSha256", "labelsSha256", "imageSha256", "preprocessedTensorSha256", "runLogSha256"],
+    "stdoutSummary": "owner-required",
+    "stderrSummary": "owner-required or explicit no-stderr-emitted",
+    "notProofUntil": "owner backfills real assets for classification, labels, hashes, run log, stdout/stderr summaries, and validator passes",
+    "packageConsumerBoundary": "This candidate can support real-model-runtime only; package-consumer-runtime must come from clean external package consumer validators."
+  }
+}

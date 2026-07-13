@@ -13,12 +13,22 @@ namespace JYPPX.TensorRtSharp;
 /// </summary>
 public sealed partial class TensorRtRefitter : IDisposable
 {
+    private readonly object _gate = new object();
     private readonly SafeTensorRtObjectHandle _handle;
+    private readonly TensorRtLogger? _loggerKeepAlive;
+    private bool _disposeRequested;
+    private bool _handleReleased;
+    private int _attachmentCount;
 
-    internal TensorRtRefitter(TensorRtApiLine line, SafeTensorRtObjectHandle handle)
+    internal TensorRtRefitter(TensorRtApiLine line, SafeTensorRtObjectHandle handle, TensorRtLogger? loggerKeepAlive = null, bool loggerBorrowAttached = false)
     {
         Line = line;
         _handle = handle;
+        _loggerKeepAlive = loggerKeepAlive;
+        if (_loggerKeepAlive != null && !loggerBorrowAttached)
+        {
+            _loggerKeepAlive.AttachBorrower(Line);
+        }
     }
 
     /// <summary>
@@ -100,13 +110,113 @@ public sealed partial class TensorRtRefitter : IDisposable
     }
 
     /// <summary>
+    /// Creates an ONNX parser-refitter wrapper that can expose copied refit diagnostics.
+    /// 创建 ONNX parser-refitter 封装，用于读取已复制的 refit 诊断信息。
+    /// </summary>
+    /// <param name="logger">The TensorRT logger used by the ONNX parser-refitter. ONNX parser-refitter 使用的 TensorRT logger。</param>
+    /// <returns>A managed ONNX parser-refitter wrapper. 托管 ONNX parser-refitter 封装。</returns>
+    /// <remarks>
+    /// TensorRT 10 and 11 expose this ONNX parser-refitter object. The managed wrapper keeps this refitter and logger borrowed until the parser-refitter is disposed.
+    /// TensorRT 10 和 11 暴露该 ONNX parser-refitter 对象；托管封装会在 parser-refitter 释放前保持当前 refitter 与 logger 的借用关系。
+    /// </remarks>
+    public TensorRtOnnxParserRefitter CreateOnnxParserRefitter(TensorRtLogger logger)
+    {
+        if (logger == null)
+        {
+            throw new ArgumentNullException(nameof(logger));
+        }
+
+        if (logger.Line != Line)
+        {
+            throw new ArgumentException("Logger and refitter must belong to the same TensorRT API line.", nameof(logger));
+        }
+
+        return new TensorRtOnnxParserRefitter(this, logger);
+    }
+
+    /// <summary>
     /// Releases the native refitter handle.
     /// 释放原生 refitter 句柄。
     /// </summary>
     public void Dispose()
     {
-        _handle.Dispose();
+        bool releaseNow;
+        lock (_gate)
+        {
+            if (_disposeRequested)
+            {
+                return;
+            }
+
+            _disposeRequested = true;
+            releaseNow = _attachmentCount == 0;
+        }
+
+        if (releaseNow)
+        {
+            ReleaseHandle();
+            GC.KeepAlive(_loggerKeepAlive);
+            _loggerKeepAlive?.DetachBorrower();
+        }
+
         GC.SuppressFinalize(this);
+    }
+
+    internal void AttachBorrower(TensorRtApiLine expectedLine)
+    {
+        if (expectedLine != Line)
+        {
+            throw new ArgumentException("Refitter must belong to the same TensorRT API line as the owner.");
+        }
+
+        lock (_gate)
+        {
+            if (_disposeRequested)
+            {
+                throw new ObjectDisposedException(nameof(TensorRtRefitter));
+            }
+
+            checked
+            {
+                _attachmentCount++;
+            }
+        }
+    }
+
+    internal void DetachBorrower()
+    {
+        bool releaseNow;
+        lock (_gate)
+        {
+            if (_attachmentCount > 0)
+            {
+                _attachmentCount--;
+            }
+
+            releaseNow = _attachmentCount == 0 && _disposeRequested;
+        }
+
+        if (releaseNow)
+        {
+            ReleaseHandle();
+            GC.KeepAlive(_loggerKeepAlive);
+            _loggerKeepAlive?.DetachBorrower();
+        }
+    }
+
+    private void ReleaseHandle()
+    {
+        bool shouldRelease;
+        lock (_gate)
+        {
+            shouldRelease = !_handleReleased;
+            _handleReleased = true;
+        }
+
+        if (shouldRelease)
+        {
+            _handle.Dispose();
+        }
     }
 
     private static IReadOnlyList<TensorRtRefitEntry> ConvertEntries(NativeTensorRtRefitEntryInfo[] nativeEntries)

@@ -5,6 +5,7 @@
 #include <string>
 #include <string_view>
 #include <new>
+#include <vector>
 
 #include "object.hpp"
 
@@ -192,6 +193,175 @@ JYPPX_StatusCode validate_pitched_copy_region_3d(
     }
 
     return JYPPX_STATUS_OK;
+}
+
+JYPPX_StatusCode validate_memory_range_query(
+    const MemoryObject* memory,
+    const size_t offset,
+    const size_t count,
+    const char* operation,
+    const void** out_pointer)
+{
+    if (count == 0)
+    {
+        jyppx::cuda::set_cuda_error(operation, 0, "invalid-range", "CUDA memory range count must be greater than zero.");
+        return JYPPX_STATUS_INVALID_ARGUMENT;
+    }
+
+    if (offset > memory->size || count > memory->size - offset)
+    {
+        jyppx::cuda::set_cuda_error(operation, 0, "range-out-of-bounds", "CUDA memory range exceeds the managed bridge allocation.");
+        return JYPPX_STATUS_INVALID_ARGUMENT;
+    }
+
+    *out_pointer = static_cast<const unsigned char*>(memory->pointer) + offset;
+    return JYPPX_STATUS_OK;
+}
+
+JYPPX_StatusCode validate_scalar_mem_range_attribute(const int32_t attribute, const char* operation)
+{
+    switch (attribute)
+    {
+    case 1:
+    case 2:
+    case 4:
+        return JYPPX_STATUS_OK;
+
+    case 3:
+        jyppx::cuda::set_cuda_error(operation, 0, "array-attribute-not-supported", "cudaMemRangeAttributeAccessedBy returns an array and is intentionally not exposed by this scalar bridge.");
+        return JYPPX_STATUS_INVALID_ARGUMENT;
+
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+#if JYPPX_HAS_CUDA_TOOLKIT && defined(CUDART_VERSION) && CUDART_VERSION >= 12030
+        return JYPPX_STATUS_OK;
+#else
+        jyppx::cuda::set_cuda_error(operation, 0, "attribute-not-supported", "This CUDA Toolkit version does not expose the requested memory range location attribute.");
+        return JYPPX_STATUS_NOT_SUPPORTED;
+#endif
+
+    default:
+        jyppx::cuda::set_cuda_error(operation, 0, "invalid-attribute", "Unsupported CUDA memory range attribute.");
+        return JYPPX_STATUS_INVALID_ARGUMENT;
+    }
+}
+
+size_t get_scalar_mem_range_attribute_size(const int32_t attribute)
+{
+#if JYPPX_HAS_CUDA_TOOLKIT && defined(CUDART_VERSION) && CUDART_VERSION >= 12030
+    if (attribute == 5 || attribute == 7)
+    {
+        return sizeof(cudaMemLocationType);
+    }
+#else
+    (void)attribute;
+#endif
+
+    return sizeof(int32_t);
+}
+
+JYPPX_StatusCode query_memory_range_accessed_by_devices(
+    const MemoryObject* memory,
+    const size_t offset,
+    const size_t count,
+    int32_t** out_devices,
+    size_t* out_device_count)
+{
+    *out_devices = nullptr;
+    *out_device_count = 0;
+
+    const void* range_pointer = nullptr;
+    auto status = validate_memory_range_query(memory, offset, count, "cudaMemRangeGetAttribute(AccessedBy)", &range_pointer);
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+#if JYPPX_HAS_CUDA_TOOLKIT
+    int cuda_device_count = 0;
+    status = jyppx::cuda::map_cuda_status(cudaGetDeviceCount(&cuda_device_count), "cudaGetDeviceCount");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    if (cuda_device_count <= 0)
+    {
+        return JYPPX_STATUS_OK;
+    }
+
+    const size_t candidate_count = static_cast<size_t>(cuda_device_count);
+    if (candidate_count > (std::numeric_limits<size_t>::max() / sizeof(int32_t)))
+    {
+        jyppx::cuda::set_cuda_error("cudaMemRangeGetAttribute(AccessedBy)", 0, "device-count-overflow", "CUDA device count is too large for memory range AccessedBy query.");
+        return JYPPX_STATUS_INVALID_ARGUMENT;
+    }
+
+    int32_t* candidates = new (std::nothrow) int32_t[candidate_count];
+    if (candidates == nullptr)
+    {
+        return JYPPX_STATUS_OUT_OF_MEMORY;
+    }
+
+    for (size_t index = 0; index < candidate_count; ++index)
+    {
+        candidates[index] = static_cast<int32_t>(cudaInvalidDeviceId);
+    }
+
+    status = jyppx::cuda::map_cuda_status(
+        cudaMemRangeGetAttribute(
+            candidates,
+            sizeof(int32_t) * candidate_count,
+            cudaMemRangeAttributeAccessedBy,
+            range_pointer,
+            count),
+        "cudaMemRangeGetAttribute(AccessedBy)");
+    if (status != JYPPX_STATUS_OK)
+    {
+        delete[] candidates;
+        return status;
+    }
+
+    size_t valid_count = 0;
+    for (size_t index = 0; index < candidate_count; ++index)
+    {
+        if (candidates[index] != static_cast<int32_t>(cudaInvalidDeviceId))
+        {
+            ++valid_count;
+        }
+    }
+
+    if (valid_count == 0)
+    {
+        delete[] candidates;
+        return JYPPX_STATUS_OK;
+    }
+
+    int32_t* devices = new (std::nothrow) int32_t[valid_count];
+    if (devices == nullptr)
+    {
+        delete[] candidates;
+        return JYPPX_STATUS_OUT_OF_MEMORY;
+    }
+
+    size_t write_index = 0;
+    for (size_t index = 0; index < candidate_count; ++index)
+    {
+        if (candidates[index] != static_cast<int32_t>(cudaInvalidDeviceId))
+        {
+            devices[write_index++] = candidates[index];
+        }
+    }
+
+    delete[] candidates;
+    *out_devices = devices;
+    *out_device_count = valid_count;
+    return JYPPX_STATUS_OK;
+#else
+    return jyppx::cuda::report_cuda_dependency_missing("CUDA memory range AccessedBy query");
+#endif
 }
 }
 
@@ -798,6 +968,73 @@ JYPPX_StatusCode jyppx_cuda_set_device_flags(uint32_t flags)
 #else
     (void)flags;
     return jyppx::cuda::report_cuda_dependency_missing("CUDA device flags set");
+#endif
+}
+
+JYPPX_StatusCode jyppx_cuda_init_device(int32_t device, uint32_t device_flags, uint32_t flags)
+{
+    if (device < 0)
+    {
+        jyppx::cuda::set_cuda_error("cudaInitDevice", 0, "invalid-device", "CUDA device ordinal must be greater than or equal to zero.");
+        return JYPPX_STATUS_INVALID_ARGUMENT;
+    }
+
+#if JYPPX_HAS_CUDA_TOOLKIT
+#if defined(CUDART_VERSION) && CUDART_VERSION >= 12000
+    return jyppx::cuda::map_cuda_status(cudaInitDevice(device, device_flags, flags), "cudaInitDevice");
+#else
+    (void)device;
+    (void)device_flags;
+    (void)flags;
+    jyppx::cuda::set_cuda_error("cudaInitDevice", 0, "cuda-version-not-supported", "cudaInitDevice requires CUDA runtime 12.0 or later.");
+    return JYPPX_STATUS_NOT_SUPPORTED;
+#endif
+#else
+    (void)device;
+    (void)device_flags;
+    (void)flags;
+    return jyppx::cuda::report_cuda_dependency_missing("CUDA device initialization");
+#endif
+}
+
+JYPPX_StatusCode jyppx_cuda_set_valid_devices(const int32_t* devices, uint32_t count)
+{
+    if (count == 0)
+    {
+        jyppx::cuda::set_cuda_error("cudaSetValidDevices", 0, "invalid-count", "At least one CUDA device ordinal is required.");
+        return JYPPX_STATUS_INVALID_ARGUMENT;
+    }
+
+    if (devices == nullptr)
+    {
+        jyppx::cuda::set_cuda_error("cudaSetValidDevices", 0, "invalid-devices", "CUDA valid-device ordinal array must not be null.");
+        return JYPPX_STATUS_INVALID_ARGUMENT;
+    }
+
+    if (count > static_cast<uint32_t>(std::numeric_limits<int>::max()))
+    {
+        jyppx::cuda::set_cuda_error("cudaSetValidDevices", 0, "invalid-count", "CUDA valid-device count exceeds the native runtime limit.");
+        return JYPPX_STATUS_INVALID_ARGUMENT;
+    }
+
+    std::vector<int> copied_devices;
+    copied_devices.reserve(count);
+    for (uint32_t index = 0; index < count; ++index)
+    {
+        const int32_t device = devices[index];
+        if (device < 0)
+        {
+            jyppx::cuda::set_cuda_error("cudaSetValidDevices", 0, "invalid-device", "CUDA valid-device ordinals must be greater than or equal to zero.");
+            return JYPPX_STATUS_INVALID_ARGUMENT;
+        }
+
+        copied_devices.push_back(static_cast<int>(device));
+    }
+
+#if JYPPX_HAS_CUDA_TOOLKIT
+    return jyppx::cuda::map_cuda_status(cudaSetValidDevices(copied_devices.data(), static_cast<int>(copied_devices.size())), "cudaSetValidDevices");
+#else
+    return jyppx::cuda::report_cuda_dependency_missing("CUDA valid-device set");
 #endif
 }
 
@@ -1981,7 +2218,7 @@ JYPPX_StatusCode jyppx_cuda_memory_memset_async(JYPPX_CudaMemory* memory, int32_
 #endif
 }
 
-JYPPX_StatusCode jyppx_cuda_memory_prefetch_async(JYPPX_CudaMemory* memory, size_t size, int32_t destination_device, JYPPX_CudaStream* stream)
+JYPPX_StatusCode jyppx_cuda_memory_prefetch_range_async(JYPPX_CudaMemory* memory, size_t offset, size_t count, int32_t destination_device, JYPPX_CudaStream* stream)
 {
     auto status = jyppx::cuda::validate_memory(memory, "memory");
     if (status != JYPPX_STATUS_OK)
@@ -2002,26 +2239,32 @@ JYPPX_StatusCode jyppx_cuda_memory_prefetch_async(JYPPX_CudaMemory* memory, size
     }
 
     auto* memory_object = reinterpret_cast<MemoryObject*>(memory);
-    if (size > memory_object->size)
+    const void* range_pointer = nullptr;
+    status = validate_memory_range_query(memory_object, offset, count, "cudaMemPrefetchAsync", &range_pointer);
+    if (status != JYPPX_STATUS_OK)
     {
-        jyppx::cuda::set_cuda_error("cudaMemPrefetchAsync", 0, "size-out-of-range", "Prefetch size exceeds allocated device memory.");
-        return JYPPX_STATUS_INVALID_ARGUMENT;
+        return status;
     }
 
 #if JYPPX_HAS_CUDA_TOOLKIT
     auto* stream_object = reinterpret_cast<StreamObject*>(stream);
 #if defined(CUDART_VERSION) && CUDART_VERSION >= 13000
     const auto location = make_device_mem_location(destination_device);
-    return jyppx::cuda::map_cuda_status(cudaMemPrefetchAsync(memory_object->pointer, size, location, 0U, stream_object->handle), "cudaMemPrefetchAsync");
+    return jyppx::cuda::map_cuda_status(cudaMemPrefetchAsync(range_pointer, count, location, 0U, stream_object->handle), "cudaMemPrefetchAsync");
 #else
-    return jyppx::cuda::map_cuda_status(cudaMemPrefetchAsync(memory_object->pointer, size, destination_device, stream_object->handle), "cudaMemPrefetchAsync");
+    return jyppx::cuda::map_cuda_status(cudaMemPrefetchAsync(range_pointer, count, destination_device, stream_object->handle), "cudaMemPrefetchAsync");
 #endif
 #else
     return jyppx::cuda::report_cuda_dependency_missing("CUDA memory prefetch");
 #endif
 }
 
-JYPPX_StatusCode jyppx_cuda_memory_advise(JYPPX_CudaMemory* memory, size_t size, int32_t advice, int32_t device)
+JYPPX_StatusCode jyppx_cuda_memory_prefetch_async(JYPPX_CudaMemory* memory, size_t size, int32_t destination_device, JYPPX_CudaStream* stream)
+{
+    return jyppx_cuda_memory_prefetch_range_async(memory, 0, size, destination_device, stream);
+}
+
+JYPPX_StatusCode jyppx_cuda_memory_advise_range(JYPPX_CudaMemory* memory, size_t offset, size_t count, int32_t advice, int32_t device)
 {
     auto status = jyppx::cuda::validate_memory(memory, "memory");
     if (status != JYPPX_STATUS_OK)
@@ -2036,23 +2279,276 @@ JYPPX_StatusCode jyppx_cuda_memory_advise(JYPPX_CudaMemory* memory, size_t size,
     }
 
     auto* memory_object = reinterpret_cast<MemoryObject*>(memory);
-    if (size > memory_object->size)
+    const void* range_pointer = nullptr;
+    status = validate_memory_range_query(memory_object, offset, count, "cudaMemAdvise", &range_pointer);
+    if (status != JYPPX_STATUS_OK)
     {
-        jyppx::cuda::set_cuda_error("cudaMemAdvise", 0, "size-out-of-range", "Memory advise size exceeds allocated device memory.");
-        return JYPPX_STATUS_INVALID_ARGUMENT;
+        return status;
     }
 
 #if JYPPX_HAS_CUDA_TOOLKIT
 #if defined(CUDART_VERSION) && CUDART_VERSION >= 13000
     const auto location = make_device_mem_location(device);
-    return jyppx::cuda::map_cuda_status(cudaMemAdvise(memory_object->pointer, size, static_cast<cudaMemoryAdvise>(advice), location), "cudaMemAdvise");
+    return jyppx::cuda::map_cuda_status(cudaMemAdvise(range_pointer, count, static_cast<cudaMemoryAdvise>(advice), location), "cudaMemAdvise");
 #else
-    return jyppx::cuda::map_cuda_status(cudaMemAdvise(memory_object->pointer, size, static_cast<cudaMemoryAdvise>(advice), device), "cudaMemAdvise");
+    return jyppx::cuda::map_cuda_status(cudaMemAdvise(range_pointer, count, static_cast<cudaMemoryAdvise>(advice), device), "cudaMemAdvise");
 #endif
 #else
     (void)advice;
     return jyppx::cuda::report_cuda_dependency_missing("CUDA memory advise");
 #endif
+}
+
+JYPPX_StatusCode jyppx_cuda_memory_advise(JYPPX_CudaMemory* memory, size_t size, int32_t advice, int32_t device)
+{
+    return jyppx_cuda_memory_advise_range(memory, 0, size, advice, device);
+}
+
+JYPPX_StatusCode jyppx_cuda_memory_range_get_attribute(JYPPX_CudaMemory* memory, size_t offset, size_t count, int32_t attribute, int32_t* out_value)
+{
+    auto status = jyppx::cuda::validate_output_pointer(out_value, "out_value");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_value = 0;
+    status = jyppx::cuda::validate_memory(memory, "memory");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    auto* memory_object = reinterpret_cast<MemoryObject*>(memory);
+    const void* range_pointer = nullptr;
+    status = validate_memory_range_query(memory_object, offset, count, "cudaMemRangeGetAttribute", &range_pointer);
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    status = validate_scalar_mem_range_attribute(attribute, "cudaMemRangeGetAttribute");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+#if JYPPX_HAS_CUDA_TOOLKIT
+    int32_t value = 0;
+    status = jyppx::cuda::map_cuda_status(
+        cudaMemRangeGetAttribute(
+            &value,
+            get_scalar_mem_range_attribute_size(attribute),
+            static_cast<cudaMemRangeAttribute>(attribute),
+            range_pointer,
+            count),
+        "cudaMemRangeGetAttribute");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_value = value;
+    return JYPPX_STATUS_OK;
+#else
+    (void)attribute;
+    return jyppx::cuda::report_cuda_dependency_missing("CUDA memory range attribute query");
+#endif
+}
+
+JYPPX_StatusCode jyppx_cuda_memory_range_get_attributes(
+    JYPPX_CudaMemory* memory,
+    size_t offset,
+    size_t count,
+    const int32_t* attributes,
+    size_t attribute_count,
+    JYPPX_CudaMemRangeAttributeValue* out_values)
+{
+    if (attribute_count == 0)
+    {
+        jyppx::cuda::set_cuda_error("cudaMemRangeGetAttributes", 0, "invalid-attribute-count", "At least one CUDA memory range attribute must be requested.");
+        return JYPPX_STATUS_INVALID_ARGUMENT;
+    }
+
+    if (attribute_count > 16)
+    {
+        jyppx::cuda::set_cuda_error("cudaMemRangeGetAttributes", 0, "too-many-attributes", "CUDA memory range scalar batch query is limited to 16 attributes.");
+        return JYPPX_STATUS_INVALID_ARGUMENT;
+    }
+
+    if (attributes == nullptr)
+    {
+        jyppx::cuda::set_cuda_error("cudaMemRangeGetAttributes", 0, "invalid-attributes", "CUDA memory range attribute array must not be null.");
+        return JYPPX_STATUS_INVALID_ARGUMENT;
+    }
+
+    auto status = jyppx::cuda::validate_output_pointer(out_values, "out_values");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    std::memset(out_values, 0, sizeof(*out_values) * attribute_count);
+    status = jyppx::cuda::validate_memory(memory, "memory");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    auto* memory_object = reinterpret_cast<MemoryObject*>(memory);
+    const void* range_pointer = nullptr;
+    status = validate_memory_range_query(memory_object, offset, count, "cudaMemRangeGetAttributes", &range_pointer);
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    for (size_t index = 0; index < attribute_count; ++index)
+    {
+        status = validate_scalar_mem_range_attribute(attributes[index], "cudaMemRangeGetAttributes");
+        if (status != JYPPX_STATUS_OK)
+        {
+            return status;
+        }
+    }
+
+#if JYPPX_HAS_CUDA_TOOLKIT
+    void** data = new (std::nothrow) void*[attribute_count];
+    auto* data_sizes = new (std::nothrow) size_t[attribute_count];
+    auto* cuda_attributes = new (std::nothrow) cudaMemRangeAttribute[attribute_count];
+    auto* values = new (std::nothrow) int32_t[attribute_count];
+    if (data == nullptr || data_sizes == nullptr || cuda_attributes == nullptr || values == nullptr)
+    {
+        delete[] data;
+        delete[] data_sizes;
+        delete[] cuda_attributes;
+        delete[] values;
+        return JYPPX_STATUS_OUT_OF_MEMORY;
+    }
+
+    for (size_t index = 0; index < attribute_count; ++index)
+    {
+        values[index] = 0;
+        data[index] = &values[index];
+        data_sizes[index] = get_scalar_mem_range_attribute_size(attributes[index]);
+        cuda_attributes[index] = static_cast<cudaMemRangeAttribute>(attributes[index]);
+    }
+
+    status = jyppx::cuda::map_cuda_status(
+        cudaMemRangeGetAttributes(
+            data,
+            data_sizes,
+            cuda_attributes,
+            attribute_count,
+            range_pointer,
+            count),
+        "cudaMemRangeGetAttributes");
+    if (status == JYPPX_STATUS_OK)
+    {
+        for (size_t index = 0; index < attribute_count; ++index)
+        {
+            out_values[index].attribute = attributes[index];
+            out_values[index].value = values[index];
+        }
+    }
+
+    delete[] data;
+    delete[] data_sizes;
+    delete[] cuda_attributes;
+    delete[] values;
+    return status;
+#else
+    return jyppx::cuda::report_cuda_dependency_missing("CUDA memory range attributes query");
+#endif
+}
+
+JYPPX_StatusCode jyppx_cuda_memory_range_get_accessed_by_count(JYPPX_CudaMemory* memory, size_t offset, size_t count, size_t* out_device_count)
+{
+    auto status = jyppx::cuda::validate_output_pointer(out_device_count, "out_device_count");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_device_count = 0;
+    status = jyppx::cuda::validate_memory(memory, "memory");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    auto* memory_object = reinterpret_cast<MemoryObject*>(memory);
+    int32_t* devices = nullptr;
+    size_t device_count = 0;
+    status = query_memory_range_accessed_by_devices(memory_object, offset, count, &devices, &device_count);
+    delete[] devices;
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_device_count = device_count;
+    return JYPPX_STATUS_OK;
+}
+
+JYPPX_StatusCode jyppx_cuda_memory_range_copy_accessed_by_devices(
+    JYPPX_CudaMemory* memory,
+    size_t offset,
+    size_t count,
+    int32_t* output_devices,
+    size_t output_device_count,
+    size_t* out_required_count)
+{
+    auto status = jyppx::cuda::validate_output_pointer(out_required_count, "out_required_count");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_required_count = 0;
+    if (output_devices == nullptr && output_device_count != 0)
+    {
+        jyppx::cuda::set_cuda_error("cudaMemRangeGetAttribute(AccessedBy)", 0, "invalid-output-buffer", "AccessedBy output buffer must not be null when output count is non-zero.");
+        return JYPPX_STATUS_INVALID_ARGUMENT;
+    }
+
+    status = jyppx::cuda::validate_memory(memory, "memory");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    auto* memory_object = reinterpret_cast<MemoryObject*>(memory);
+    int32_t* devices = nullptr;
+    size_t device_count = 0;
+    status = query_memory_range_accessed_by_devices(memory_object, offset, count, &devices, &device_count);
+    if (status != JYPPX_STATUS_OK)
+    {
+        delete[] devices;
+        return status;
+    }
+
+    *out_required_count = device_count;
+    if (output_devices == nullptr || output_device_count == 0)
+    {
+        delete[] devices;
+        return JYPPX_STATUS_OK;
+    }
+
+    if (output_device_count < device_count)
+    {
+        delete[] devices;
+        jyppx::cuda::set_cuda_error("cudaMemRangeGetAttribute(AccessedBy)", 0, "buffer-too-small", "AccessedBy output buffer is too small for the queried device list.");
+        return JYPPX_STATUS_BUFFER_TOO_SMALL;
+    }
+
+    if (device_count != 0)
+    {
+        std::memcpy(output_devices, devices, sizeof(int32_t) * device_count);
+    }
+
+    delete[] devices;
+    return JYPPX_STATUS_OK;
 }
 
 JYPPX_StatusCode jyppx_cuda_memory_free(JYPPX_CudaMemory* memory)

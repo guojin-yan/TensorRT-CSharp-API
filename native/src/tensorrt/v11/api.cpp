@@ -1,10 +1,12 @@
 #include "jyppx/tensorrt/trt11.h"
 
 #include <cstring>
+#include <exception>
 #include <limits>
 #include <mutex>
 #include <new>
 #include <sstream>
+#include <string>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -19,11 +21,16 @@
 #endif
 
 #if JYPPX_HAS_TENSORRT_ONNXPARSER
+#include <NvOnnxConfig.h>
 #include <NvOnnxParser.h>
 #endif
 
 #ifndef JYPPX_TENSORRT_VERSION_MAJOR_NUM
 #define JYPPX_TENSORRT_VERSION_MAJOR_NUM 0
+#endif
+
+#ifndef JYPPX_TENSORRT_VERSION_TEXT
+#define JYPPX_TENSORRT_VERSION_TEXT "not-detected"
 #endif
 
 #ifndef JYPPX_HAS_TENSORRT_ONNXPARSER
@@ -38,6 +45,15 @@ constexpr JYPPX_TensorRtLine kLine = JYPPX_TENSORRT_LINE_11;
 class ManagedLogger final : public nvinfer1::ILogger
 {
 public:
+    ManagedLogger() = default;
+
+    ManagedLogger(JYPPX_TensorRtLoggerCallback callback, void* user_state, const int32_t minimum_severity) noexcept
+        : callback_(callback),
+          user_state_(user_state),
+          minimum_severity_(minimum_severity)
+    {
+    }
+
     void log(Severity severity, char const* msg) noexcept override
     {
         if (msg == nullptr)
@@ -45,13 +61,309 @@ public:
             return;
         }
 
-        if (severity <= Severity::kWARNING)
+        last_callback_failed_ = false;
+        const auto severity_value = static_cast<int32_t>(severity);
+        ++message_count_;
+        last_severity_ = severity_value;
+        copy_c_string_noexcept(msg, last_message_, sizeof(last_message_));
+        if (severity_value > minimum_severity_)
         {
+            return;
+        }
+
+        try
+        {
+            if (callback_ != nullptr)
+            {
+                const auto callback_status = callback_(severity_value, msg, std::strlen(msg), user_state_);
+                if (callback_status != JYPPX_STATUS_OK)
+                {
+                    last_callback_failed_ = true;
+                    std::ostringstream builder;
+                    builder << "Managed TensorRT logger callback returned status " << static_cast<int32_t>(callback_status) << ".";
+                    jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, builder.str().c_str());
+                }
+
+                return;
+            }
+
+            if (severity <= Severity::kWARNING)
+            {
+                std::ostringstream builder;
+                builder << "TensorRT logger: " << msg;
+                jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, builder.str().c_str());
+            }
+        }
+        catch (const std::exception& exception)
+        {
+            last_callback_failed_ = true;
             std::ostringstream builder;
-            builder << "TensorRT logger: " << msg;
+            builder << "TensorRT logger callback boundary caught a native exception: " << exception.what();
             jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, builder.str().c_str());
         }
+        catch (...)
+        {
+            last_callback_failed_ = true;
+            jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT logger callback boundary caught an unknown native exception.");
+        }
     }
+
+    bool last_callback_failed() const noexcept
+    {
+        return last_callback_failed_;
+    }
+
+    bool callback_available() const noexcept
+    {
+        return callback_ != nullptr;
+    }
+
+    uint32_t message_count() const noexcept
+    {
+        return message_count_;
+    }
+
+    int32_t last_severity() const noexcept
+    {
+        return last_severity_;
+    }
+
+    const char* last_message() const noexcept
+    {
+        return last_message_;
+    }
+
+private:
+    static void copy_c_string_noexcept(const char* source, char* destination, const size_t capacity) noexcept
+    {
+        if (destination == nullptr || capacity == 0)
+        {
+            return;
+        }
+
+        std::memset(destination, 0, capacity);
+        if (source == nullptr)
+        {
+            return;
+        }
+
+        const size_t length = std::strlen(source);
+        const size_t copy_length = length < capacity - 1 ? length : capacity - 1;
+        std::memcpy(destination, source, copy_length);
+        destination[copy_length] = '\0';
+    }
+
+    JYPPX_TensorRtLoggerCallback callback_{nullptr};
+    void* user_state_{nullptr};
+    int32_t minimum_severity_{static_cast<int32_t>(Severity::kWARNING)};
+    bool last_callback_failed_{false};
+    uint32_t message_count_{0};
+    int32_t last_severity_{0};
+    char last_message_[1024]{};
+};
+
+class ManagedProgressMonitor final : public nvinfer1::IProgressMonitor
+{
+public:
+    ManagedProgressMonitor(JYPPX_TensorRtProgressMonitorCallback callback, void* user_state) noexcept
+        : callback_(callback),
+          user_state_(user_state)
+    {
+    }
+
+    void phaseStart(char const* phase_name, char const* parent_phase, int32_t nb_steps) noexcept override
+    {
+        JYPPX_Boolean should_continue = JYPPX_TRUE;
+        notify(JYPPX_TENSORRT_PROGRESS_MONITOR_EVENT_PHASE_START, phase_name, parent_phase, -1, nb_steps, &should_continue);
+    }
+
+    bool stepComplete(char const* phase_name, int32_t step) noexcept override
+    {
+        JYPPX_Boolean should_continue = JYPPX_TRUE;
+        notify(JYPPX_TENSORRT_PROGRESS_MONITOR_EVENT_STEP_COMPLETE, phase_name, nullptr, step, 0, &should_continue);
+        return should_continue != JYPPX_FALSE;
+    }
+
+    void phaseFinish(char const* phase_name) noexcept override
+    {
+        JYPPX_Boolean should_continue = JYPPX_TRUE;
+        notify(JYPPX_TENSORRT_PROGRESS_MONITOR_EVENT_PHASE_FINISH, phase_name, nullptr, -1, 0, &should_continue);
+    }
+
+    bool emit_diagnostic(
+        const int32_t event_kind,
+        const char* phase_name,
+        const char* parent_phase,
+        const int32_t step,
+        const int32_t nb_steps,
+        JYPPX_Boolean* out_should_continue) noexcept
+    {
+        if (out_should_continue == nullptr)
+        {
+            return false;
+        }
+
+        *out_should_continue = JYPPX_TRUE;
+        switch (event_kind)
+        {
+        case JYPPX_TENSORRT_PROGRESS_MONITOR_EVENT_PHASE_START:
+            phaseStart(phase_name, parent_phase, nb_steps);
+            return true;
+        case JYPPX_TENSORRT_PROGRESS_MONITOR_EVENT_STEP_COMPLETE:
+            *out_should_continue = stepComplete(phase_name, step) ? JYPPX_TRUE : JYPPX_FALSE;
+            return true;
+        case JYPPX_TENSORRT_PROGRESS_MONITOR_EVENT_PHASE_FINISH:
+            phaseFinish(phase_name);
+            return true;
+        default:
+            return false;
+        }
+    }
+
+    bool last_callback_failed() const noexcept
+    {
+        return last_callback_failed_;
+    }
+
+private:
+    static size_t safe_length(const char* value) noexcept
+    {
+        return value != nullptr ? std::strlen(value) : 0U;
+    }
+
+    void notify(
+        const int32_t event_kind,
+        const char* phase_name,
+        const char* parent_phase,
+        const int32_t step,
+        const int32_t nb_steps,
+        JYPPX_Boolean* out_should_continue) noexcept
+    {
+        last_callback_failed_ = false;
+        if (out_should_continue != nullptr)
+        {
+            *out_should_continue = JYPPX_TRUE;
+        }
+
+        try
+        {
+            if (callback_ == nullptr)
+            {
+                return;
+            }
+
+            JYPPX_Boolean local_continue = JYPPX_TRUE;
+            JYPPX_Boolean* continue_output = out_should_continue != nullptr ? out_should_continue : &local_continue;
+            const auto callback_status = callback_(
+                event_kind,
+                phase_name,
+                safe_length(phase_name),
+                parent_phase,
+                safe_length(parent_phase),
+                step,
+                nb_steps,
+                continue_output,
+                user_state_);
+            if (callback_status != JYPPX_STATUS_OK)
+            {
+                last_callback_failed_ = true;
+                if (continue_output != nullptr)
+                {
+                    *continue_output = JYPPX_TRUE;
+                }
+
+                std::ostringstream builder;
+                builder << "Managed TensorRT progress monitor callback returned status " << static_cast<int32_t>(callback_status) << ".";
+                jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, builder.str().c_str());
+            }
+        }
+        catch (const std::exception& exception)
+        {
+            last_callback_failed_ = true;
+            if (out_should_continue != nullptr)
+            {
+                *out_should_continue = JYPPX_TRUE;
+            }
+
+            std::ostringstream builder;
+            builder << "TensorRT progress monitor callback boundary caught a native exception: " << exception.what();
+            jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, builder.str().c_str());
+        }
+        catch (...)
+        {
+            last_callback_failed_ = true;
+            if (out_should_continue != nullptr)
+            {
+                *out_should_continue = JYPPX_TRUE;
+            }
+
+            jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT progress monitor callback boundary caught an unknown native exception.");
+        }
+    }
+
+    JYPPX_TensorRtProgressMonitorCallback callback_{nullptr};
+    void* user_state_{nullptr};
+    bool last_callback_failed_{false};
+};
+
+class ManagedProfiler final : public nvinfer1::IProfiler
+{
+public:
+    ManagedProfiler(JYPPX_TensorRtProfilerCallback callback, void* user_state) noexcept
+        : callback_(callback),
+          user_state_(user_state)
+    {
+    }
+
+    void reportLayerTime(char const* layer_name, float milliseconds) noexcept override
+    {
+        last_callback_failed_ = false;
+
+        try
+        {
+            if (callback_ == nullptr)
+            {
+                return;
+            }
+
+            const char* safe_layer_name = layer_name != nullptr ? layer_name : "";
+            const auto callback_status = callback_(safe_layer_name, std::strlen(safe_layer_name), milliseconds, user_state_);
+            if (callback_status != JYPPX_STATUS_OK)
+            {
+                last_callback_failed_ = true;
+                std::ostringstream builder;
+                builder << "Managed TensorRT profiler callback returned status " << static_cast<int32_t>(callback_status) << ".";
+                jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, builder.str().c_str());
+            }
+        }
+        catch (const std::exception& exception)
+        {
+            last_callback_failed_ = true;
+            std::ostringstream builder;
+            builder << "TensorRT profiler callback boundary caught a native exception: " << exception.what();
+            jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, builder.str().c_str());
+        }
+        catch (...)
+        {
+            last_callback_failed_ = true;
+            jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT profiler callback boundary caught an unknown native exception.");
+        }
+    }
+
+    void emit_diagnostic(const char* layer_name, const float milliseconds) noexcept
+    {
+        reportLayerTime(layer_name, milliseconds);
+    }
+
+    bool last_callback_failed() const noexcept
+    {
+        return last_callback_failed_;
+    }
+
+private:
+    JYPPX_TensorRtProfilerCallback callback_{nullptr};
+    void* user_state_{nullptr};
+    bool last_callback_failed_{false};
 };
 
 struct LayerReferencePayload
@@ -113,6 +425,13 @@ void destroy_attention_reference_payload(void* payload)
 }
 
 #if JYPPX_HAS_TENSORRT_ONNXPARSER
+void destroy_onnx_config_payload(void* payload)
+{
+    delete static_cast<nvonnxparser::IOnnxConfig*>(payload);
+}
+#endif
+
+#if JYPPX_HAS_TENSORRT_ONNXPARSER
 std::mutex g_onnx_parser_support_mutex;
 std::unordered_set<const nvonnxparser::IParser*> g_onnx_parser_support_ready;
 
@@ -156,6 +475,84 @@ JYPPX_StatusCode report_null_vendor_object(const char* feature_name)
     jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, builder.str().c_str());
     return JYPPX_STATUS_RUNTIME_ERROR;
 }
+
+#if JYPPX_HAS_TENSORRT
+JYPPX_StatusCode create_infer_runtime_with_seh_guard(ManagedLogger& logger, nvinfer1::IRuntime** out_runtime)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        *out_runtime = nvinfer1::createInferRuntime(logger);
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        *out_runtime = nullptr;
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, "runtime creation", seh_exception_code);
+    }
+#else
+    *out_runtime = nvinfer1::createInferRuntime(logger);
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+JYPPX_StatusCode create_infer_builder_with_seh_guard(ManagedLogger& logger, nvinfer1::IBuilder** out_builder)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        *out_builder = nvinfer1::createInferBuilder(logger);
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        *out_builder = nullptr;
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, "builder creation", seh_exception_code);
+    }
+#else
+    *out_builder = nvinfer1::createInferBuilder(logger);
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+JYPPX_StatusCode create_infer_runtime_with_guard(ManagedLogger& logger, nvinfer1::IRuntime** out_runtime)
+{
+    try
+    {
+        return create_infer_runtime_with_seh_guard(logger, out_runtime);
+    }
+    catch (const std::exception& exception)
+    {
+        *out_runtime = nullptr;
+        return jyppx::tensorrt::report_vendor_exception(kLine, "runtime creation", exception.what());
+    }
+    catch (...)
+    {
+        *out_runtime = nullptr;
+        return jyppx::tensorrt::report_vendor_exception(kLine, "runtime creation", "unknown native exception");
+    }
+}
+
+JYPPX_StatusCode create_infer_builder_with_guard(ManagedLogger& logger, nvinfer1::IBuilder** out_builder)
+{
+    try
+    {
+        return create_infer_builder_with_seh_guard(logger, out_builder);
+    }
+    catch (const std::exception& exception)
+    {
+        *out_builder = nullptr;
+        return jyppx::tensorrt::report_vendor_exception(kLine, "builder creation", exception.what());
+    }
+    catch (...)
+    {
+        *out_builder = nullptr;
+        return jyppx::tensorrt::report_vendor_exception(kLine, "builder creation", "unknown native exception");
+    }
+}
+#endif
 
 JYPPX_StatusCode create_handle_with_payload(
     JYPPX_TensorRtObjectBase** out_handle,
@@ -230,6 +627,55 @@ void copy_c_string(const char* source, char* destination, const size_t capacity)
     destination[copy_length] = '\0';
 }
 
+void reset_runtime_create_diagnostic_info(JYPPX_TensorRtRuntimeCreateDiagnosticInfo* out_info) noexcept
+{
+    if (out_info == nullptr)
+    {
+        return;
+    }
+
+    std::memset(out_info, 0, sizeof(*out_info));
+    out_info->line = static_cast<uint32_t>(kLine);
+    out_info->last_status = static_cast<int32_t>(JYPPX_STATUS_NOT_READY);
+    out_info->tensor_rt_available = JYPPX_HAS_TENSORRT ? JYPPX_TRUE : JYPPX_FALSE;
+    out_info->expected_major = 11;
+    out_info->bridge_built_major = JYPPX_TENSORRT_VERSION_MAJOR_NUM;
+    out_info->last_logger_severity = 0;
+    copy_c_string(JYPPX_TENSORRT_VERSION_TEXT, out_info->detected_version, sizeof(out_info->detected_version));
+    copy_c_string("not-attempted", out_info->create_runtime_phase, sizeof(out_info->create_runtime_phase));
+    copy_c_string("Runtime create diagnostic has not reached createInferRuntime.", out_info->native_detail, sizeof(out_info->native_detail));
+    copy_c_string("Runtime create diagnostic was not attempted.", out_info->diagnostic, sizeof(out_info->diagnostic));
+}
+
+void set_runtime_create_diagnostic_message(
+    JYPPX_TensorRtRuntimeCreateDiagnosticInfo* out_info,
+    const char* message) noexcept
+{
+    if (out_info == nullptr)
+    {
+        return;
+    }
+
+    copy_c_string(message, out_info->diagnostic, sizeof(out_info->diagnostic));
+}
+
+#if JYPPX_HAS_TENSORRT
+void copy_logger_runtime_create_diagnostic(
+    const ManagedLogger& logger,
+    JYPPX_TensorRtRuntimeCreateDiagnosticInfo* out_info) noexcept
+{
+    if (out_info == nullptr)
+    {
+        return;
+    }
+
+    out_info->logger_callback_available = logger.callback_available() ? JYPPX_TRUE : JYPPX_FALSE;
+    out_info->logger_message_count = logger.message_count();
+    out_info->last_logger_severity = logger.last_severity();
+    copy_c_string(logger.last_message(), out_info->last_logger_message, sizeof(out_info->last_logger_message));
+}
+#endif
+
 JYPPX_StatusCode copy_string_to_buffer(const char* value, char* output_buffer, const size_t output_buffer_size, size_t* out_required_size)
 {
     const char* safe_value = value != nullptr ? value : "";
@@ -250,6 +696,114 @@ JYPPX_StatusCode copy_string_to_buffer(const char* value, char* output_buffer, c
     std::memcpy(output_buffer, safe_value, required_size);
     return JYPPX_STATUS_OK;
 }
+
+#if JYPPX_HAS_TENSORRT
+JYPPX_StatusCode copy_interface_info_to_buffer(
+    const nvinfer1::InterfaceInfo& info,
+    char* output_buffer,
+    const size_t output_buffer_size,
+    size_t* out_required_size,
+    int32_t* out_major,
+    int32_t* out_minor)
+{
+    *out_major = static_cast<int32_t>(info.major);
+    *out_minor = static_cast<int32_t>(info.minor);
+    return copy_string_to_buffer(info.kind, output_buffer, output_buffer_size, out_required_size);
+}
+
+template <typename TObject>
+JYPPX_StatusCode get_callback_interface_info_with_seh_guard(
+    const TObject* object,
+    nvinfer1::InterfaceInfo* out_info,
+    const char* feature_name)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        *out_info = object->getInterfaceInfo();
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        *out_info = nvinfer1::InterfaceInfo{"", 0, 0};
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    *out_info = object->getInterfaceInfo();
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+template <typename TObject>
+JYPPX_StatusCode get_callback_interface_info(
+    const TObject* object,
+    nvinfer1::InterfaceInfo* out_info,
+    const char* feature_name)
+{
+    try
+    {
+        return get_callback_interface_info_with_seh_guard(object, out_info, feature_name);
+    }
+    catch (const std::exception& exception)
+    {
+        *out_info = nvinfer1::InterfaceInfo{"", 0, 0};
+        return jyppx::tensorrt::report_vendor_exception(kLine, feature_name, exception.what());
+    }
+    catch (...)
+    {
+        *out_info = nvinfer1::InterfaceInfo{"", 0, 0};
+        return jyppx::tensorrt::report_vendor_exception(kLine, feature_name, "unknown native exception");
+    }
+}
+
+template <typename TObject>
+JYPPX_StatusCode get_callback_api_language_with_seh_guard(
+    const TObject* object,
+    int32_t* out_api_language,
+    const char* feature_name)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        *out_api_language = static_cast<int32_t>(object->getAPILanguage());
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        *out_api_language = 0;
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    (void)feature_name;
+    *out_api_language = static_cast<int32_t>(object->getAPILanguage());
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+template <typename TObject>
+JYPPX_StatusCode get_callback_api_language(
+    const TObject* object,
+    int32_t* out_api_language,
+    const char* feature_name)
+{
+    try
+    {
+        return get_callback_api_language_with_seh_guard(object, out_api_language, feature_name);
+    }
+    catch (const std::exception& exception)
+    {
+        *out_api_language = 0;
+        return jyppx::tensorrt::report_vendor_exception(kLine, feature_name, exception.what());
+    }
+    catch (...)
+    {
+        *out_api_language = 0;
+        return jyppx::tensorrt::report_vendor_exception(kLine, feature_name, "unknown native exception");
+    }
+}
+#endif
 
 JYPPX_StatusCode validate_c_string(const char* value, const char* parameter_name)
 {
@@ -853,6 +1407,585 @@ JYPPX_StatusCode jyppx_trt11_logger_create(JYPPX_TensorRtLogger** out_logger)
 #endif
 }
 
+JYPPX_StatusCode jyppx_trt11_logger_create_with_callback(
+    JYPPX_TensorRtLoggerCallback callback,
+    void* user_state,
+    int32_t minimum_severity,
+    JYPPX_TensorRtLogger** out_logger)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_logger, "out_logger");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_logger = nullptr;
+    if (callback == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Managed logger callback must not be null.");
+        return JYPPX_STATUS_INVALID_ARGUMENT;
+    }
+
+#if JYPPX_HAS_TENSORRT
+    auto* logger = new (std::nothrow) ManagedLogger(callback, user_state, minimum_severity);
+    if (logger == nullptr)
+    {
+        return JYPPX_STATUS_OUT_OF_MEMORY;
+    }
+
+    JYPPX_TensorRtObjectBase* handle = nullptr;
+    status = create_handle_with_payload(&handle, JYPPX_TENSORRT_OBJECT_KIND_LOGGER, logger, &destroy_payload<ManagedLogger>);
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_logger = reinterpret_cast<JYPPX_TensorRtLogger*>(handle);
+    return JYPPX_STATUS_OK;
+#else
+    return jyppx::tensorrt::report_vendor_missing(kLine, "managed logger callback creation");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt11_logger_emit_diagnostic(
+    JYPPX_TensorRtLogger* logger,
+    int32_t severity,
+    const char* message,
+    JYPPX_Boolean* out_callback_failed)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_callback_failed, "out_callback_failed");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_callback_failed = JYPPX_FALSE;
+    status = jyppx::tensorrt::validate_handle(logger, kLine, JYPPX_TENSORRT_OBJECT_KIND_LOGGER, "logger");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    status = validate_c_string(message, "message");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+#if JYPPX_HAS_TENSORRT
+    auto* logger_payload = get_payload<ManagedLogger>(logger);
+    if (logger_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Logger handle does not carry a TensorRT logger payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    logger_payload->log(static_cast<nvinfer1::ILogger::Severity>(severity), message);
+    *out_callback_failed = logger_payload->last_callback_failed() ? JYPPX_TRUE : JYPPX_FALSE;
+    return JYPPX_STATUS_OK;
+#else
+    return jyppx::tensorrt::report_vendor_missing(kLine, "managed logger diagnostic emission");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt11_logger_get_interface_info(
+    JYPPX_TensorRtLogger* logger,
+    char* output_buffer,
+    size_t output_buffer_size,
+    size_t* out_required_size,
+    int32_t* out_major,
+    int32_t* out_minor)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_required_size, "out_required_size");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    status = jyppx::tensorrt::validate_output_pointer(out_major, "out_major");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    status = jyppx::tensorrt::validate_output_pointer(out_minor, "out_minor");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_required_size = 0;
+    *out_major = 0;
+    *out_minor = 0;
+    status = jyppx::tensorrt::validate_handle(logger, kLine, JYPPX_TENSORRT_OBJECT_KIND_LOGGER, "logger");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+#if JYPPX_HAS_TENSORRT && JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11
+    auto* logger_payload = get_payload<ManagedLogger>(logger);
+    if (logger_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Logger handle does not carry a TensorRT logger payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    nvinfer1::InterfaceInfo info{"", 0, 0};
+    status = get_callback_interface_info(logger_payload, &info, "managed logger interface info query");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    return copy_interface_info_to_buffer(info, output_buffer, output_buffer_size, out_required_size, out_major, out_minor);
+#elif JYPPX_HAS_TENSORRT
+    (void)logger;
+    (void)output_buffer;
+    (void)output_buffer_size;
+    return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "managed logger interface info query");
+#else
+    (void)logger;
+    (void)output_buffer;
+    (void)output_buffer_size;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "managed logger interface info query");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt11_logger_get_api_language(
+    JYPPX_TensorRtLogger* logger,
+    int32_t* out_api_language)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_api_language, "out_api_language");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_api_language = 0;
+    status = jyppx::tensorrt::validate_handle(logger, kLine, JYPPX_TENSORRT_OBJECT_KIND_LOGGER, "logger");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+#if JYPPX_HAS_TENSORRT && JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11
+    auto* logger_payload = get_payload<ManagedLogger>(logger);
+    if (logger_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Logger handle does not carry a TensorRT logger payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    return get_callback_api_language(logger_payload, out_api_language, "managed logger API language query");
+#elif JYPPX_HAS_TENSORRT
+    (void)logger;
+    return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "managed logger API language query");
+#else
+    (void)logger;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "managed logger API language query");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt11_progress_monitor_create_with_callback(
+    JYPPX_TensorRtProgressMonitorCallback callback,
+    void* user_state,
+    JYPPX_TensorRtProgressMonitor** out_monitor)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_monitor, "out_monitor");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_monitor = nullptr;
+    if (callback == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Managed progress monitor callback must not be null.");
+        return JYPPX_STATUS_INVALID_ARGUMENT;
+    }
+
+#if JYPPX_HAS_TENSORRT
+    if (JYPPX_TENSORRT_VERSION_MAJOR_NUM != 11)
+    {
+        return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "managed progress monitor callback creation");
+    }
+
+    auto* monitor = new (std::nothrow) ManagedProgressMonitor(callback, user_state);
+    if (monitor == nullptr)
+    {
+        return JYPPX_STATUS_OUT_OF_MEMORY;
+    }
+
+    JYPPX_TensorRtObjectBase* handle = nullptr;
+    status = create_handle_with_payload(&handle, JYPPX_TENSORRT_OBJECT_KIND_PROGRESS_MONITOR, monitor, &destroy_payload<ManagedProgressMonitor>);
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_monitor = reinterpret_cast<JYPPX_TensorRtProgressMonitor*>(handle);
+    return JYPPX_STATUS_OK;
+#else
+    return jyppx::tensorrt::report_vendor_missing(kLine, "managed progress monitor callback creation");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt11_progress_monitor_emit_diagnostic(
+    JYPPX_TensorRtProgressMonitor* monitor,
+    int32_t event_kind,
+    const char* phase_name,
+    const char* parent_phase,
+    int32_t step,
+    int32_t nb_steps,
+    JYPPX_Boolean* out_should_continue,
+    JYPPX_Boolean* out_callback_failed)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_should_continue, "out_should_continue");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    status = jyppx::tensorrt::validate_output_pointer(out_callback_failed, "out_callback_failed");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_should_continue = JYPPX_TRUE;
+    *out_callback_failed = JYPPX_FALSE;
+    status = jyppx::tensorrt::validate_handle(monitor, kLine, JYPPX_TENSORRT_OBJECT_KIND_PROGRESS_MONITOR, "monitor");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    status = validate_c_string(phase_name, "phase_name");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+#if JYPPX_HAS_TENSORRT
+    if (JYPPX_TENSORRT_VERSION_MAJOR_NUM != 11)
+    {
+        return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "managed progress monitor diagnostic emission");
+    }
+
+    auto* monitor_payload = get_payload<ManagedProgressMonitor>(monitor);
+    if (monitor_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Progress monitor handle does not carry a TensorRT progress monitor payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    if (!monitor_payload->emit_diagnostic(event_kind, phase_name, parent_phase, step, nb_steps, out_should_continue))
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Unsupported TensorRT progress monitor diagnostic event kind.");
+        return JYPPX_STATUS_INVALID_ARGUMENT;
+    }
+
+    *out_callback_failed = monitor_payload->last_callback_failed() ? JYPPX_TRUE : JYPPX_FALSE;
+    return JYPPX_STATUS_OK;
+#else
+    (void)event_kind;
+    (void)parent_phase;
+    (void)step;
+    (void)nb_steps;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "managed progress monitor diagnostic emission");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt11_progress_monitor_get_interface_info(
+    JYPPX_TensorRtProgressMonitor* monitor,
+    char* output_buffer,
+    size_t output_buffer_size,
+    size_t* out_required_size,
+    int32_t* out_major,
+    int32_t* out_minor)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_required_size, "out_required_size");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    status = jyppx::tensorrt::validate_output_pointer(out_major, "out_major");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    status = jyppx::tensorrt::validate_output_pointer(out_minor, "out_minor");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_required_size = 0;
+    *out_major = 0;
+    *out_minor = 0;
+    status = jyppx::tensorrt::validate_handle(monitor, kLine, JYPPX_TENSORRT_OBJECT_KIND_PROGRESS_MONITOR, "monitor");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+#if JYPPX_HAS_TENSORRT && JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11
+    auto* monitor_payload = get_payload<ManagedProgressMonitor>(monitor);
+    if (monitor_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Progress monitor handle does not carry a TensorRT progress monitor payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    nvinfer1::InterfaceInfo info{"", 0, 0};
+    status = get_callback_interface_info(monitor_payload, &info, "managed progress monitor interface info query");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    return copy_interface_info_to_buffer(info, output_buffer, output_buffer_size, out_required_size, out_major, out_minor);
+#elif JYPPX_HAS_TENSORRT
+    (void)monitor;
+    (void)output_buffer;
+    (void)output_buffer_size;
+    return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "managed progress monitor interface info query");
+#else
+    (void)monitor;
+    (void)output_buffer;
+    (void)output_buffer_size;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "managed progress monitor interface info query");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt11_progress_monitor_get_api_language(
+    JYPPX_TensorRtProgressMonitor* monitor,
+    int32_t* out_api_language)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_api_language, "out_api_language");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_api_language = 0;
+    status = jyppx::tensorrt::validate_handle(monitor, kLine, JYPPX_TENSORRT_OBJECT_KIND_PROGRESS_MONITOR, "monitor");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+#if JYPPX_HAS_TENSORRT && JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11
+    auto* monitor_payload = get_payload<ManagedProgressMonitor>(monitor);
+    if (monitor_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Progress monitor handle does not carry a TensorRT progress monitor payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    return get_callback_api_language(monitor_payload, out_api_language, "managed progress monitor API language query");
+#elif JYPPX_HAS_TENSORRT
+    (void)monitor;
+    return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "managed progress monitor API language query");
+#else
+    (void)monitor;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "managed progress monitor API language query");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt11_profiler_create_with_callback(
+    JYPPX_TensorRtProfilerCallback callback,
+    void* user_state,
+    JYPPX_TensorRtProfiler** out_profiler)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_profiler, "out_profiler");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_profiler = nullptr;
+    if (callback == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Managed profiler callback must not be null.");
+        return JYPPX_STATUS_INVALID_ARGUMENT;
+    }
+
+#if JYPPX_HAS_TENSORRT
+    if (JYPPX_TENSORRT_VERSION_MAJOR_NUM != 11)
+    {
+        return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "managed profiler callback creation");
+    }
+
+    auto* profiler = new (std::nothrow) ManagedProfiler(callback, user_state);
+    if (profiler == nullptr)
+    {
+        return JYPPX_STATUS_OUT_OF_MEMORY;
+    }
+
+    JYPPX_TensorRtObjectBase* handle = nullptr;
+    status = create_handle_with_payload(&handle, JYPPX_TENSORRT_OBJECT_KIND_PROFILER, profiler, &destroy_payload<ManagedProfiler>);
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_profiler = reinterpret_cast<JYPPX_TensorRtProfiler*>(handle);
+    return JYPPX_STATUS_OK;
+#else
+    return jyppx::tensorrt::report_vendor_missing(kLine, "managed profiler callback creation");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt11_profiler_emit_diagnostic(
+    JYPPX_TensorRtProfiler* profiler,
+    const char* layer_name,
+    float milliseconds,
+    JYPPX_Boolean* out_callback_failed)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_callback_failed, "out_callback_failed");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_callback_failed = JYPPX_FALSE;
+    status = jyppx::tensorrt::validate_handle(profiler, kLine, JYPPX_TENSORRT_OBJECT_KIND_PROFILER, "profiler");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    status = validate_c_string(layer_name, "layer_name");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+#if JYPPX_HAS_TENSORRT
+    if (JYPPX_TENSORRT_VERSION_MAJOR_NUM != 11)
+    {
+        return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "managed profiler diagnostic emission");
+    }
+
+    auto* profiler_payload = get_payload<ManagedProfiler>(profiler);
+    if (profiler_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Profiler handle does not carry a TensorRT profiler payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    profiler_payload->emit_diagnostic(layer_name, milliseconds);
+    *out_callback_failed = profiler_payload->last_callback_failed() ? JYPPX_TRUE : JYPPX_FALSE;
+    return JYPPX_STATUS_OK;
+#else
+    (void)milliseconds;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "managed profiler diagnostic emission");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt11_profiler_get_interface_info(
+    JYPPX_TensorRtProfiler* profiler,
+    char* output_buffer,
+    size_t output_buffer_size,
+    size_t* out_required_size,
+    int32_t* out_major,
+    int32_t* out_minor)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_required_size, "out_required_size");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    status = jyppx::tensorrt::validate_output_pointer(out_major, "out_major");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    status = jyppx::tensorrt::validate_output_pointer(out_minor, "out_minor");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_required_size = 0;
+    *out_major = 0;
+    *out_minor = 0;
+    status = jyppx::tensorrt::validate_handle(profiler, kLine, JYPPX_TENSORRT_OBJECT_KIND_PROFILER, "profiler");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+#if JYPPX_HAS_TENSORRT && JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11
+    auto* profiler_payload = get_payload<ManagedProfiler>(profiler);
+    if (profiler_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Profiler handle does not carry a TensorRT profiler payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    nvinfer1::InterfaceInfo info{"", 0, 0};
+    status = get_callback_interface_info(profiler_payload, &info, "managed profiler interface info query");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    return copy_interface_info_to_buffer(info, output_buffer, output_buffer_size, out_required_size, out_major, out_minor);
+#elif JYPPX_HAS_TENSORRT
+    (void)profiler;
+    (void)output_buffer;
+    (void)output_buffer_size;
+    return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "managed profiler interface info query");
+#else
+    (void)profiler;
+    (void)output_buffer;
+    (void)output_buffer_size;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "managed profiler interface info query");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt11_profiler_get_api_language(
+    JYPPX_TensorRtProfiler* profiler,
+    int32_t* out_api_language)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_api_language, "out_api_language");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_api_language = 0;
+    status = jyppx::tensorrt::validate_handle(profiler, kLine, JYPPX_TENSORRT_OBJECT_KIND_PROFILER, "profiler");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+#if JYPPX_HAS_TENSORRT && JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11
+    auto* profiler_payload = get_payload<ManagedProfiler>(profiler);
+    if (profiler_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Profiler handle does not carry a TensorRT profiler payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    return get_callback_api_language(profiler_payload, out_api_language, "managed profiler API language query");
+#elif JYPPX_HAS_TENSORRT
+    (void)profiler;
+    return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "managed profiler API language query");
+#else
+    (void)profiler;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "managed profiler API language query");
+#endif
+}
+
 JYPPX_StatusCode jyppx_trt11_runtime_create(JYPPX_TensorRtLogger* logger, JYPPX_TensorRtRuntime** out_runtime)
 {
     auto status = jyppx::tensorrt::validate_output_pointer(out_runtime, "out_runtime");
@@ -877,7 +2010,13 @@ JYPPX_StatusCode jyppx_trt11_runtime_create(JYPPX_TensorRtLogger* logger, JYPPX_
         return JYPPX_STATUS_INVALID_STATE;
     }
 
-    nvinfer1::IRuntime* runtime = nvinfer1::createInferRuntime(*logger_payload);
+    nvinfer1::IRuntime* runtime = nullptr;
+    status = create_infer_runtime_with_guard(*logger_payload, &runtime);
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
     if (runtime == nullptr)
     {
         return report_null_vendor_object("createInferRuntime");
@@ -894,6 +2033,109 @@ JYPPX_StatusCode jyppx_trt11_runtime_create(JYPPX_TensorRtLogger* logger, JYPPX_
     return JYPPX_STATUS_OK;
 #else
     return jyppx::tensorrt::report_vendor_missing(kLine, "runtime creation");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt11_runtime_create_diagnostic(
+    JYPPX_TensorRtLogger* logger,
+    JYPPX_TensorRtRuntimeCreateDiagnosticInfo* out_info)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_info, "out_info");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    reset_runtime_create_diagnostic_info(out_info);
+    out_info->logger_handle_present = logger != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
+
+    status = jyppx::tensorrt::validate_handle(logger, kLine, JYPPX_TENSORRT_OBJECT_KIND_LOGGER, "logger");
+    if (status != JYPPX_STATUS_OK)
+    {
+        out_info->last_status = static_cast<int32_t>(status);
+        set_runtime_create_diagnostic_message(out_info, "Logger handle validation failed before createInferRuntime.");
+        return JYPPX_STATUS_OK;
+    }
+
+#if JYPPX_HAS_TENSORRT && JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11
+    try
+    {
+        auto* logger_payload = get_payload<ManagedLogger>(logger);
+        out_info->logger_payload_present = logger_payload != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
+        if (logger_payload == nullptr)
+        {
+            out_info->last_status = static_cast<int32_t>(JYPPX_STATUS_INVALID_STATE);
+            copy_c_string("logger-payload-missing", out_info->create_runtime_phase, sizeof(out_info->create_runtime_phase));
+            copy_c_string("Logger handle validation passed, but the handle did not carry a ManagedLogger payload.", out_info->native_detail, sizeof(out_info->native_detail));
+            set_runtime_create_diagnostic_message(out_info, "Logger handle does not carry a TensorRT logger payload.");
+            return JYPPX_STATUS_OK;
+        }
+
+        nvinfer1::IRuntime* runtime = nullptr;
+        out_info->attempted = JYPPX_TRUE;
+        copy_logger_runtime_create_diagnostic(*logger_payload, out_info);
+        copy_c_string("before-createInferRuntime", out_info->create_runtime_phase, sizeof(out_info->create_runtime_phase));
+        copy_c_string("About to call nvinfer1::createInferRuntime through the guarded TRT11 bridge path.", out_info->native_detail, sizeof(out_info->native_detail));
+        status = create_infer_runtime_with_guard(*logger_payload, &runtime);
+        copy_logger_runtime_create_diagnostic(*logger_payload, out_info);
+        out_info->last_status = static_cast<int32_t>(status);
+        out_info->create_infer_runtime_returned_non_null = runtime != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
+        out_info->create_infer_runtime_returned_null = runtime == nullptr ? JYPPX_TRUE : JYPPX_FALSE;
+
+        if (runtime != nullptr)
+        {
+            delete runtime;
+            copy_c_string("after-createInferRuntime-non-null-destroyed", out_info->create_runtime_phase, sizeof(out_info->create_runtime_phase));
+            copy_c_string("createInferRuntime returned a non-null runtime; the diagnostic destroyed it immediately without exposing the native pointer.", out_info->native_detail, sizeof(out_info->native_detail));
+            set_runtime_create_diagnostic_message(out_info, "createInferRuntime returned a non-null runtime; diagnostic destroyed the temporary runtime immediately.");
+            return JYPPX_STATUS_OK;
+        }
+
+        if (status == JYPPX_STATUS_OK)
+        {
+            copy_c_string("after-createInferRuntime-null-guard-ok", out_info->create_runtime_phase, sizeof(out_info->create_runtime_phase));
+            copy_c_string("The guarded native call completed with OK status, but TensorRT returned a null IRuntime pointer. Inspect logger message fields and vendor initialization state.", out_info->native_detail, sizeof(out_info->native_detail));
+            set_runtime_create_diagnostic_message(out_info, "createInferRuntime returned null while the native guard reported OK.");
+        }
+        else
+        {
+            copy_c_string("after-createInferRuntime-status-failed", out_info->create_runtime_phase, sizeof(out_info->create_runtime_phase));
+            copy_c_string("The guarded native createInferRuntime call returned a failing bridge status before a runtime was created.", out_info->native_detail, sizeof(out_info->native_detail));
+            set_runtime_create_diagnostic_message(out_info, "createInferRuntime failed before returning a runtime; see last_status and bridge last-error state.");
+        }
+
+        return JYPPX_STATUS_OK;
+    }
+    catch (const std::exception& exception)
+    {
+        out_info->last_status = static_cast<int32_t>(JYPPX_STATUS_RUNTIME_ERROR);
+        out_info->create_infer_runtime_returned_null = JYPPX_TRUE;
+        copy_c_string("native-exception", out_info->create_runtime_phase, sizeof(out_info->create_runtime_phase));
+        copy_c_string("A native C++ exception was caught inside the diagnostic wrapper.", out_info->native_detail, sizeof(out_info->native_detail));
+        set_runtime_create_diagnostic_message(out_info, exception.what());
+        return JYPPX_STATUS_OK;
+    }
+    catch (...)
+    {
+        out_info->last_status = static_cast<int32_t>(JYPPX_STATUS_RUNTIME_ERROR);
+        out_info->create_infer_runtime_returned_null = JYPPX_TRUE;
+        copy_c_string("native-unknown-exception", out_info->create_runtime_phase, sizeof(out_info->create_runtime_phase));
+        copy_c_string("An unknown native exception was caught inside the diagnostic wrapper.", out_info->native_detail, sizeof(out_info->native_detail));
+        set_runtime_create_diagnostic_message(out_info, "Unknown native exception while diagnosing createInferRuntime.");
+        return JYPPX_STATUS_OK;
+    }
+#elif JYPPX_HAS_TENSORRT
+    out_info->last_status = static_cast<int32_t>(JYPPX_STATUS_NOT_SUPPORTED);
+    copy_c_string("version-guard-not-supported", out_info->create_runtime_phase, sizeof(out_info->create_runtime_phase));
+    copy_c_string("The bridge was built with TensorRT support, but not against TensorRT major version 11.", out_info->native_detail, sizeof(out_info->native_detail));
+    set_runtime_create_diagnostic_message(out_info, "TRT11 runtime create diagnostic requires a bridge built against TensorRT 11.");
+    return JYPPX_STATUS_OK;
+#else
+    out_info->last_status = static_cast<int32_t>(JYPPX_STATUS_DEPENDENCY_MISSING);
+    copy_c_string("tensorrt-dependency-missing", out_info->create_runtime_phase, sizeof(out_info->create_runtime_phase));
+    copy_c_string("The native bridge was built without TensorRT support.", out_info->native_detail, sizeof(out_info->native_detail));
+    set_runtime_create_diagnostic_message(out_info, "TensorRT dependency is not available in this native bridge.");
+    return JYPPX_STATUS_OK;
 #endif
 }
 
@@ -921,7 +2163,13 @@ JYPPX_StatusCode jyppx_trt11_builder_create(JYPPX_TensorRtLogger* logger, JYPPX_
         return JYPPX_STATUS_INVALID_STATE;
     }
 
-    nvinfer1::IBuilder* builder = nvinfer1::createInferBuilder(*logger_payload);
+    nvinfer1::IBuilder* builder = nullptr;
+    status = create_infer_builder_with_guard(*logger_payload, &builder);
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
     if (builder == nullptr)
     {
         return report_null_vendor_object("createInferBuilder");
@@ -3402,6 +4650,54 @@ JYPPX_StatusCode jyppx_trt11_execution_context_set_enqueue_emits_profile(JYPPX_T
 #endif
 }
 
+JYPPX_StatusCode jyppx_trt11_execution_context_set_profiler(JYPPX_TensorRtExecutionContext* context, JYPPX_TensorRtProfiler* profiler)
+{
+#if JYPPX_HAS_TENSORRT
+    if (JYPPX_TENSORRT_VERSION_MAJOR_NUM != 11)
+    {
+        return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "execution context profiler attach");
+    }
+
+    nvinfer1::IExecutionContext* context_payload = nullptr;
+    auto status = get_context_payload_ext(context, &context_payload, "execution context profiler attach");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    status = jyppx::tensorrt::validate_handle(profiler, kLine, JYPPX_TENSORRT_OBJECT_KIND_PROFILER, "profiler");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    auto* profiler_payload = get_payload<ManagedProfiler>(profiler);
+    if (profiler_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Profiler handle does not carry a TensorRT profiler payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    try
+    {
+        context_payload->setProfiler(profiler_payload);
+        return JYPPX_STATUS_OK;
+    }
+    catch (const std::exception& exception)
+    {
+        return jyppx::tensorrt::report_vendor_exception(kLine, "execution context profiler attach", exception.what());
+    }
+    catch (...)
+    {
+        return jyppx::tensorrt::report_vendor_exception(kLine, "execution context profiler attach", "unknown native exception");
+    }
+#else
+    (void)context;
+    (void)profiler;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "execution context profiler attach");
+#endif
+}
+
 JYPPX_StatusCode jyppx_trt11_execution_context_report_to_profiler(JYPPX_TensorRtExecutionContext* context, JYPPX_Boolean* out_reported)
 {
     auto status = jyppx::tensorrt::validate_output_pointer(out_reported, "out_reported");
@@ -3556,6 +4852,128 @@ JYPPX_StatusCode jyppx_trt11_onnx_parser_parse_from_memory(JYPPX_TensorRtOnnxPar
     return JYPPX_STATUS_DEPENDENCY_MISSING;
 #else
     return jyppx::tensorrt::report_vendor_missing(kLine, "ONNX parser parse from memory");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt11_onnx_parser_load_model_proto(JYPPX_TensorRtOnnxParser* parser, const void* model_data, size_t model_size, const char* model_path, JYPPX_Boolean* out_loaded)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_loaded, "out_loaded");
+    if (status != JYPPX_STATUS_OK) { return status; }
+    status = jyppx::tensorrt::validate_handle(parser, kLine, JYPPX_TENSORRT_OBJECT_KIND_ONNX_PARSER, "parser");
+    if (status != JYPPX_STATUS_OK) { return status; }
+    if (model_data == nullptr || model_size == 0)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "ONNX model proto data must not be null or empty.");
+        return JYPPX_STATUS_INVALID_ARGUMENT;
+    }
+    *out_loaded = JYPPX_FALSE;
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+    auto* parser_payload = get_payload<nvonnxparser::IParser>(parser);
+    if (parser_payload == nullptr) { return JYPPX_STATUS_INVALID_STATE; }
+    try
+    {
+        mark_onnx_parser_support_ready(parser_payload, false);
+        *out_loaded = parser_payload->loadModelProto(model_data, model_size, model_path) ? JYPPX_TRUE : JYPPX_FALSE;
+        return JYPPX_STATUS_OK;
+    }
+    catch (const std::exception& exception)
+    {
+        std::ostringstream builder;
+        builder << "ONNX parser loadModelProto caught a native exception: " << exception.what();
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, builder.str().c_str());
+        return JYPPX_STATUS_RUNTIME_ERROR;
+    }
+    catch (...)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "ONNX parser loadModelProto caught an unknown native exception.");
+        return JYPPX_STATUS_RUNTIME_ERROR;
+    }
+#elif JYPPX_HAS_TENSORRT
+    (void)model_path;
+    jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT ONNX parser library was not found at build time.");
+    return JYPPX_STATUS_DEPENDENCY_MISSING;
+#else
+    (void)model_path;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "ONNX parser model proto load");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt11_onnx_parser_load_initializer(JYPPX_TensorRtOnnxParser* parser, const char* name, const void* data, size_t data_size, JYPPX_Boolean* out_loaded)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_loaded, "out_loaded");
+    if (status != JYPPX_STATUS_OK) { return status; }
+    status = jyppx::tensorrt::validate_handle(parser, kLine, JYPPX_TENSORRT_OBJECT_KIND_ONNX_PARSER, "parser");
+    if (status != JYPPX_STATUS_OK) { return status; }
+    status = validate_c_string(name, "name");
+    if (status != JYPPX_STATUS_OK) { return status; }
+    if (data == nullptr || data_size == 0)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "ONNX initializer data must not be null or empty.");
+        return JYPPX_STATUS_INVALID_ARGUMENT;
+    }
+    *out_loaded = JYPPX_FALSE;
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+    auto* parser_payload = get_payload<nvonnxparser::IParser>(parser);
+    if (parser_payload == nullptr) { return JYPPX_STATUS_INVALID_STATE; }
+    try
+    {
+        mark_onnx_parser_support_ready(parser_payload, false);
+        *out_loaded = parser_payload->loadInitializer(name, data, data_size) ? JYPPX_TRUE : JYPPX_FALSE;
+        return JYPPX_STATUS_OK;
+    }
+    catch (const std::exception& exception)
+    {
+        std::ostringstream builder;
+        builder << "ONNX parser loadInitializer caught a native exception: " << exception.what();
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, builder.str().c_str());
+        return JYPPX_STATUS_RUNTIME_ERROR;
+    }
+    catch (...)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "ONNX parser loadInitializer caught an unknown native exception.");
+        return JYPPX_STATUS_RUNTIME_ERROR;
+    }
+#elif JYPPX_HAS_TENSORRT
+    jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT ONNX parser library was not found at build time.");
+    return JYPPX_STATUS_DEPENDENCY_MISSING;
+#else
+    return jyppx::tensorrt::report_vendor_missing(kLine, "ONNX parser initializer load");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt11_onnx_parser_parse_model_proto(JYPPX_TensorRtOnnxParser* parser, JYPPX_Boolean* out_parsed)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_parsed, "out_parsed");
+    if (status != JYPPX_STATUS_OK) { return status; }
+    status = jyppx::tensorrt::validate_handle(parser, kLine, JYPPX_TENSORRT_OBJECT_KIND_ONNX_PARSER, "parser");
+    if (status != JYPPX_STATUS_OK) { return status; }
+    *out_parsed = JYPPX_FALSE;
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+    auto* parser_payload = get_payload<nvonnxparser::IParser>(parser);
+    if (parser_payload == nullptr) { return JYPPX_STATUS_INVALID_STATE; }
+    try
+    {
+        mark_onnx_parser_support_ready(parser_payload, false);
+        *out_parsed = parser_payload->parseModelProto() ? JYPPX_TRUE : JYPPX_FALSE;
+        return JYPPX_STATUS_OK;
+    }
+    catch (const std::exception& exception)
+    {
+        std::ostringstream builder;
+        builder << "ONNX parser parseModelProto caught a native exception: " << exception.what();
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, builder.str().c_str());
+        return JYPPX_STATUS_RUNTIME_ERROR;
+    }
+    catch (...)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "ONNX parser parseModelProto caught an unknown native exception.");
+        return JYPPX_STATUS_RUNTIME_ERROR;
+    }
+#elif JYPPX_HAS_TENSORRT
+    jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT ONNX parser library was not found at build time.");
+    return JYPPX_STATUS_DEPENDENCY_MISSING;
+#else
+    return jyppx::tensorrt::report_vendor_missing(kLine, "ONNX parser model proto parse");
 #endif
 }
 
@@ -3727,6 +5145,10 @@ JYPPX_StatusCode jyppx_trt11_onnx_parser_clear_flag(JYPPX_TensorRtOnnxParser* pa
 #define JYPPX_TRT_EXPECTED_MAJOR 11
 #define JYPPX_TRT_ONNX_PARSER_API(name) jyppx_trt11_onnx_parser_##name
 #include "../common/onnx_parser_support.inc"
+
+#define JYPPX_TRT_EXPECTED_MAJOR 11
+#define JYPPX_TRT_PARSER_REFITTER_API(name) jyppx_trt11_parser_refitter_##name
+#include "../common/parser_refitter_diagnostics.inc"
 
 JYPPX_StatusCode jyppx_trt11_builder_get_dla_core_count(JYPPX_TensorRtBuilder* builder, int32_t* out_count)
 {
@@ -6840,6 +8262,12 @@ JYPPX_StatusCode jyppx_trt11_tensor_reset_dynamic_range(JYPPX_TensorRtTensor*)
 #include "modules/deployment/runtime_controls.inc"
 #include "modules/deployment/diagnostics.inc"
 #include "modules/deployment/boundary_controls.inc"
+#define JYPPX_TRT_EXECUTION_CONTEXT_CALLBACK_INTERFACE_INFO_API(name) jyppx_trt11_##name
+#include "../common/execution_context_callback_interface_info.inc"
+#undef JYPPX_TRT_EXECUTION_CONTEXT_CALLBACK_INTERFACE_INFO_API
+#define JYPPX_TRT_EXECUTION_CONTEXT_CALLBACK_STATE_API(name) jyppx_trt11_##name
+#include "../common/execution_context_callback_state_snapshot.inc"
+#undef JYPPX_TRT_EXECUTION_CONTEXT_CALLBACK_STATE_API
 #include "modules/deployment/fourteenth_batch_controls.inc"
 #include "modules/deployment/fifteenth_batch_controls.inc"
 #define JYPPX_TRT_PLUGIN_PREFIX jyppx_trt11_
@@ -6848,6 +8276,30 @@ JYPPX_StatusCode jyppx_trt11_tensor_reset_dynamic_range(JYPPX_TensorRtTensor*)
 #define JYPPX_TRT_GLOBAL_PLUGIN_PREFIX jyppx_trt11_
 #include "../common/global_runtime_plugin_probe.inc"
 #undef JYPPX_TRT_GLOBAL_PLUGIN_PREFIX
+
+#define JYPPX_TRT_ALLOCATOR_OWNER_DRY_RUN_API(name) jyppx_trt11_##name
+#include "../common/allocator_owner_dry_run.inc"
+#undef JYPPX_TRT_ALLOCATOR_OWNER_DRY_RUN_API
+
+#define JYPPX_TRT_ONNX_CONFIG_API(name) jyppx_trt11_onnx_config_##name
+#define JYPPX_TRT_EXPECTED_MAJOR 11
+#include "../common/onnx_config_controls.inc"
+
+#include "../common/debug_listener_native_owner_noncopyable_storage.inc"
+#include "../common/debug_listener_native_nothrow_destructor.inc"
+#include "../common/debug_listener_native_owner_lifecycle_gate.inc"
+#include "../common/debug_listener_native_attach_entry_minimal_safety.inc"
+#include "../common/debug_listener_native_attach_bridge_shape_gate.inc"
+#include "../common/debug_listener_native_nothrow_vtable_scaffold_gate.inc"
+#include "../common/debug_listener_exception_status_mapping_gate.inc"
+#include "../common/debug_listener_inflight_accounting_gate.inc"
+#include "../common/debug_listener_nothrow_vtable_callback_stub.inc"
+#include "../common/debug_listener_borrowed_debug_tensor_metadata_runtime_gate.inc"
+#include "../common/debug_listener_native_vtable_install_preflight.inc"
+#include "../common/debug_listener_native_owner_vtable_install_experiment.inc"
+#include "../common/debug_listener_real_non_null_attach_runtime_smoke.inc"
+#include "../common/debug_listener_process_debug_tensor_callback_trampoline.inc"
+#include "../common/debug_listener_real_callback_runtime_proof.inc"
 
 #define jyppx_trt10_network_add_convolution_nd jyppx_trt11_network_add_convolution_nd
 #define jyppx_trt10_network_add_scale_nd jyppx_trt11_network_add_scale_nd

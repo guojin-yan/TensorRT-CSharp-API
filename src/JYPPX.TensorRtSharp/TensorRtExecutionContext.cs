@@ -13,6 +13,7 @@ namespace JYPPX.TensorRtSharp;
 public sealed partial class TensorRtExecutionContext : IDisposable
 {
     private readonly SafeTensorRtObjectHandle _handle;
+    private TensorRtProfiler? _profilerKeepAlive;
 
     internal TensorRtExecutionContext(TensorRtApiLine line, SafeTensorRtObjectHandle handle)
     {
@@ -200,6 +201,17 @@ public sealed partial class TensorRtExecutionContext : IDisposable
     }
 
     /// <summary>
+    /// Gets TensorRT 8 legacy shape-binding values for a binding index.
+    /// 获取 TensorRT 8 legacy shape binding 的运行时取值。
+    /// </summary>
+    /// <param name="bindingIndex">The legacy binding index. legacy binding 索引。</param>
+    /// <returns>Caller-owned copied shape-binding values. 调用方拥有的 shape-binding 值副本。</returns>
+    public int[] GetShapeBinding(int bindingIndex)
+    {
+        return NativeBridgeApi.GetExecutionContextShapeBinding(Line, _handle, bindingIndex);
+    }
+
+    /// <summary>
     /// Gets a TensorRT 11 execution-context tensor shape with 64-bit dimension extents.
     /// 获取 TensorRT 11 execution context 中张量的形状，并保留 64 位维度 extent。
     /// </summary>
@@ -283,7 +295,40 @@ public sealed partial class TensorRtExecutionContext : IDisposable
     /// </summary>
     public void Dispose()
     {
+        TensorRtProfiler? profiler = _profilerKeepAlive;
+        if (profiler != null)
+        {
+            TryClearProfilerForDispose();
+        }
+
         _handle.Dispose();
+        GC.KeepAlive(profiler);
+        DetachProfiler();
         GC.SuppressFinalize(this);
+    }
+
+    private void TryClearProfilerForDispose()
+    {
+        try
+        {
+            NativeBridgeApi.ClearExecutionContextProfiler(Line, _handle);
+        }
+        catch (BridgeProbeException)
+        {
+            // Dispose must still release the context handle. Keep the profiler alive until after
+            // the context handle is released so TensorRT never observes a freed borrowed profiler.
+        }
+    }
+
+    private TensorRtProfiler? DetachProfiler()
+    {
+        TensorRtProfiler? profiler = _profilerKeepAlive;
+        if (profiler != null)
+        {
+            _profilerKeepAlive = null;
+            profiler.DetachBorrower();
+        }
+
+        return profiler;
     }
 }

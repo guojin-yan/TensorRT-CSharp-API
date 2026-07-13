@@ -1,0 +1,288 @@
+{
+  "$schema": "../../bridge-api.schema.json",
+  "module": "tensorrt",
+  "versionLine": "11",
+  "apis": [
+    {
+      "id": "trt11-runtime-plugin-registry-exists",
+      "entryPoint": "jyppx_trt11_runtime_plugin_registry_exists",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "out_exists", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-runtime-plugin-registry-get-creator-count",
+      "entryPoint": "jyppx_trt11_runtime_plugin_registry_get_creator_count",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "out_count", "type": "int32_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-runtime-plugin-registry-get-recursive-creator-count",
+      "entryPoint": "jyppx_trt11_runtime_plugin_registry_get_recursive_creator_count",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "out_count", "type": "int32_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-runtime-plugin-registry-has-error-recorder",
+      "entryPoint": "jyppx_trt11_runtime_plugin_registry_has_error_recorder",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "out_has_recorder", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-runtime-plugin-registry-is-parent-search-enabled",
+      "entryPoint": "jyppx_trt11_runtime_plugin_registry_is_parent_search_enabled",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "out_enabled", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-runtime-plugin-creator-get-name",
+      "entryPoint": "jyppx_trt11_runtime_plugin_creator_get_name",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "creator_index", "type": "int32_t", "direction": "in" },
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-runtime-plugin-creator-get-version",
+      "entryPoint": "jyppx_trt11_runtime_plugin_creator_get_version",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "creator_index", "type": "int32_t", "direction": "in" },
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-runtime-plugin-creator-get-namespace",
+      "entryPoint": "jyppx_trt11_runtime_plugin_creator_get_namespace",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "creator_index", "type": "int32_t", "direction": "in" },
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-runtime-plugin-creator-get-interface-info",
+      "entryPoint": "jyppx_trt11_runtime_plugin_creator_get_interface_info",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "creator_index", "type": "int32_t", "direction": "in" },
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out" },
+        { "name": "out_major", "type": "int32_t*", "direction": "out" },
+        { "name": "out_minor", "type": "int32_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-runtime-plugin-creator-get-field-count",
+      "entryPoint": "jyppx_trt11_runtime_plugin_creator_get_field_count",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "creator_index", "type": "int32_t", "direction": "in" },
+        { "name": "out_count", "type": "int32_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-runtime-plugin-creator-get-api-language",
+      "entryPoint": "jyppx_trt11_runtime_plugin_creator_get_api_language",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "creator_index", "type": "int32_t", "direction": "in" },
+        { "name": "out_api_language", "type": "int32_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-runtime-plugin-creator-get-field-name",
+      "entryPoint": "jyppx_trt11_runtime_plugin_creator_get_field_name",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "creator_index", "type": "int32_t", "direction": "in" },
+        { "name": "field_index", "type": "int32_t", "direction": "in" },
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-runtime-plugin-creator-get-field-metadata",
+      "entryPoint": "jyppx_trt11_runtime_plugin_creator_get_field_metadata",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "creator_index", "type": "int32_t", "direction": "in" },
+        { "name": "field_index", "type": "int32_t", "direction": "in" },
+        { "name": "out_field_type", "type": "int32_t*", "direction": "out" },
+        { "name": "out_length", "type": "int32_t*", "direction": "out" },
+        { "name": "out_has_data", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-runtime-plugin-creator-lookup",
+      "entryPoint": "jyppx_trt11_runtime_plugin_creator_lookup",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "plugin_name", "type": "const char*", "direction": "in" },
+        { "name": "plugin_version", "type": "const char*", "direction": "in" },
+        { "name": "plugin_namespace", "type": "const char*", "direction": "in" },
+        { "name": "out_found", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-runtime-plugin-creator-lookup-get-api-language",
+      "entryPoint": "jyppx_trt11_runtime_plugin_creator_lookup_get_api_language",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "plugin_name", "type": "const char*", "direction": "in" },
+        { "name": "plugin_version", "type": "const char*", "direction": "in" },
+        { "name": "plugin_namespace", "type": "const char*", "direction": "in" },
+        { "name": "out_api_language", "type": "int32_t*", "direction": "out" }
+      ]
+    }
+  ,
+    {
+      "id": "trt11-runtime-plugin-creator-lookup-get-interface-info",
+      "entryPoint": "jyppx_trt11_runtime_plugin_creator_lookup_get_interface_info",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "plugin_name", "type": "const char*", "direction": "in" },
+        { "name": "plugin_version", "type": "const char*", "direction": "in" },
+        { "name": "plugin_namespace", "type": "const char*", "direction": "in" },
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out" },
+        { "name": "out_major", "type": "int32_t*", "direction": "out" },
+        { "name": "out_minor", "type": "int32_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-runtime-plugin-creator-lookup-get-field-count",
+      "entryPoint": "jyppx_trt11_runtime_plugin_creator_lookup_get_field_count",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "plugin_name", "type": "const char*", "direction": "in" },
+        { "name": "plugin_version", "type": "const char*", "direction": "in" },
+        { "name": "plugin_namespace", "type": "const char*", "direction": "in" },
+        { "name": "out_count", "type": "int32_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-runtime-plugin-creator-lookup-get-field-name",
+      "entryPoint": "jyppx_trt11_runtime_plugin_creator_lookup_get_field_name",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "plugin_name", "type": "const char*", "direction": "in" },
+        { "name": "plugin_version", "type": "const char*", "direction": "in" },
+        { "name": "plugin_namespace", "type": "const char*", "direction": "in" },
+        { "name": "field_index", "type": "int32_t", "direction": "in" },
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-runtime-plugin-creator-lookup-get-field-metadata",
+      "entryPoint": "jyppx_trt11_runtime_plugin_creator_lookup_get_field_metadata",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "plugin_name", "type": "const char*", "direction": "in" },
+        { "name": "plugin_version", "type": "const char*", "direction": "in" },
+        { "name": "plugin_namespace", "type": "const char*", "direction": "in" },
+        { "name": "field_index", "type": "int32_t", "direction": "in" },
+        { "name": "out_field_type", "type": "int32_t*", "direction": "out" },
+        { "name": "out_length", "type": "int32_t*", "direction": "out" },
+        { "name": "out_has_data", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    }
+  ]
+}

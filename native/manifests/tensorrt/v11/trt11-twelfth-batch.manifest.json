@@ -162,6 +162,18 @@
       ]
     },
     {
+      "id": "jyppx-trt11-runtime-has-logger",
+      "entryPoint": "jyppx_trt11_runtime_has_logger",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "out_has_logger", "type": "JYPPX_Boolean*", "direction": "out" }
+      ]
+    },
+    {
       "id": "jyppx-trt11-runtime-clear-error-recorder",
       "entryPoint": "jyppx_trt11_runtime_clear_error_recorder",
       "returnType": "BridgeStatusCode",

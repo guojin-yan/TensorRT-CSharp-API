@@ -1,0 +1,33 @@
+{
+  "$schema": "../bridge-api.schema.json",
+  "module": "cuda",
+  "versionLine": "common",
+  "apis": [
+    {
+      "id": "cuda-graph-memset-node-get-params-safe",
+      "entryPoint": "jyppx_cuda_graph_memset_node_get_params_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_params", "type": "JYPPX_CudaGraphMemsetNodeParams*", "direction": "out", "managedType": "out NativeCudaGraphMemsetNodeParams", "moduleManagedType": "out NativeCudaGraphMemsetNodeParams" }
+      ]
+    },
+    {
+      "id": "cuda-graph-memset-node-set-params-safe",
+      "entryPoint": "jyppx_cuda_graph_memset_node_set_params_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "destination", "type": "JYPPX_CudaMemory*", "direction": "in" },
+        { "name": "value", "type": "uint32_t", "direction": "in", "managedType": "uint", "moduleManagedType": "uint" },
+        { "name": "count", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" }
+      ]
+    }
+  ]
+}

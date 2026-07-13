@@ -6,6 +6,8 @@ internal static class Program
 {
     private static void Main(string[] args)
     {
+        try
+        {
         CudaEnvironmentSnapshot snapshot = CudaEnvironmentProbe.GetCurrent();
         Console.WriteLine($"Bridge={snapshot.BuildInfo.BridgeName} CUDA Toolkit={snapshot.BuildInfo.CudaToolkitVersion} DeviceCount={snapshot.CudaRuntimeInfo.DeviceCount}");
 
@@ -22,6 +24,16 @@ internal static class Program
 
         Console.WriteLine($"CurrentDevice={CudaDevice.Current}");
         Console.WriteLine($"CudaVersions Runtime={CudaDevice.RuntimeVersion} Driver={CudaDevice.DriverVersion}");
+        try
+        {
+            CudaDevice.InitDevice(CudaDevice.Current, CudaDevice.RuntimeFlags);
+            Console.WriteLine($"InitDevice Device={CudaDevice.Current} Flags={CudaDevice.RuntimeFlags}");
+        }
+        catch (CudaException exception)
+        {
+            Console.WriteLine($"InitDevice=Skipped Reason=CudaException:{exception.Message}");
+            _ = CudaDevice.GetLastErrorCode();
+        }
         try
         {
             string pciBusId = CudaDevice.GetPciBusId(CudaDevice.Current);
@@ -43,6 +55,25 @@ internal static class Program
             $"Block=[{string.Join(",", properties.MaxBlockDimensions)}] Grid=[{string.Join(",", properties.MaxGridDimensions)}] " +
             $"AsyncEngines={properties.AsyncEngineCount?.ToString() ?? "n/a"} Managed={properties.ManagedMemory?.ToString() ?? "n/a"} " +
             $"UnifiedAddressing={properties.UnifiedAddressing?.ToString() ?? "n/a"} L2={properties.L2CacheSizeBytes?.ToString() ?? "n/a"}");
+        try
+        {
+            CudaDeviceSelectionRequirements chooseRequirements = new CudaDeviceSelectionRequirements
+            {
+                Major = properties.Info.Major,
+                Minor = properties.Info.Minor,
+                MultiProcessorCount = Math.Max(1, properties.Info.MultiProcessorCount),
+                MaxThreadsPerBlock = Math.Max(1, properties.Info.MaxThreadsPerBlock),
+                TotalGlobalMemory = properties.Info.TotalGlobalMemory
+            };
+            int chosenDevice = CudaDevice.ChooseDevice(chooseRequirements);
+            Console.WriteLine($"ChooseDevice Chosen={chosenDevice} RequirementsCC={chooseRequirements.Major}.{chooseRequirements.Minor} MinSms={chooseRequirements.MultiProcessorCount} MinThreadsPerBlock={chooseRequirements.MaxThreadsPerBlock}");
+        }
+        catch (CudaException exception)
+        {
+            Console.WriteLine($"ChooseDevice=Skipped Reason=CudaException:{exception.Message}");
+            _ = CudaDevice.GetLastErrorCode();
+        }
+
         CudaStreamPriorityRange priorityRange = CudaStream.GetPriorityRange();
         Console.WriteLine($"StreamPriorityRange {priorityRange}");
         CudaMemoryInfo memoryInfo = CudaDevice.GetMemoryInfo();
@@ -188,14 +219,58 @@ internal static class Program
             managedMemory.CopyFrom(floatSource);
             try
             {
-                managedMemory.Advise(managedMemory.SizeInBytes, CudaMemoryAdvice.SetPreferredLocation, CudaDevice.Current);
-                managedMemory.PrefetchAsync(managedMemory.SizeInBytes, CudaDevice.Current, stream);
+                managedMemory.Advise(0, managedMemory.SizeInBytes, CudaMemoryAdvice.SetPreferredLocation, CudaDevice.Current);
+                managedMemory.PrefetchAsync(0, managedMemory.SizeInBytes, CudaDevice.Current, stream);
                 stream.Synchronize();
                 Console.WriteLine("ManagedMemoryAdvice=True");
             }
             catch (CudaException exception)
             {
                 Console.WriteLine($"ManagedMemoryAdvice=Skipped Reason={exception.Message}");
+                _ = CudaDevice.GetLastErrorCode();
+            }
+
+            try
+            {
+                CudaMemoryRangeAttributeValue preferredLocation = managedMemory.GetRangeAttribute(CudaMemoryRangeAttribute.PreferredLocation);
+                CudaMemoryRangeAttributeValue[] rangeAttributes = managedMemory.GetRangeAttributes(
+                    CudaMemoryRangeAttribute.ReadMostly,
+                    CudaMemoryRangeAttribute.PreferredLocation,
+                    CudaMemoryRangeAttribute.LastPrefetchLocation);
+                CudaMemoryRangeDiagnosticSummary rangeSummary = managedMemory.GetRangeDiagnosticSummary(
+                    0,
+                    managedMemory.SizeInBytes,
+                    adviceControlAttempted: true,
+                    prefetchControlAttempted: true,
+                    CudaMemoryRangeAttribute.ReadMostly,
+                    CudaMemoryRangeAttribute.PreferredLocation,
+                    CudaMemoryRangeAttribute.LastPrefetchLocation);
+                Console.WriteLine($"ManagedMemoryRangeAttributes PreferredLocation={preferredLocation.RawValue} Count={rangeAttributes.Length} MemoryRangeSummary={rangeSummary}");
+            }
+            catch (CudaException exception)
+            {
+                Console.WriteLine($"ManagedMemoryRangeAttributes=Skipped Reason={exception.Message}");
+                _ = CudaDevice.GetLastErrorCode();
+            }
+
+            try
+            {
+                managedMemory.Advise(0, managedMemory.SizeInBytes, CudaMemoryAdvice.SetAccessedBy, CudaDevice.Current);
+            }
+            catch (CudaException exception)
+            {
+                Console.WriteLine($"ManagedMemoryAccessedByAdvice=Skipped Reason={exception.Message}");
+                _ = CudaDevice.GetLastErrorCode();
+            }
+
+            try
+            {
+                int[] accessedByDevices = managedMemory.GetRangeAccessedByDevices();
+                Console.WriteLine($"ManagedMemoryAccessedBy Count={accessedByDevices.Length} Devices={string.Join(",", accessedByDevices)}");
+            }
+            catch (CudaException exception)
+            {
+                Console.WriteLine($"ManagedMemoryAccessedBy=Skipped Reason={exception.Message}");
                 _ = CudaDevice.GetLastErrorCode();
             }
 
@@ -476,6 +551,23 @@ internal static class Program
             int p2pAccessSupported = CudaDevice.GetP2PAttribute(CudaDeviceP2PAttribute.AccessSupported, 0, 1);
             int p2pPerformanceRank = CudaDevice.GetP2PAttribute(CudaDeviceP2PAttribute.PerformanceRank, 0, 1);
             Console.WriteLine($"PeerAccess Device0To1={canAccessPeer} AttributeAccessSupported={p2pAccessSupported} PerformanceRank={p2pPerformanceRank}");
+            try
+            {
+                CudaAtomicOperation[] atomicOperations =
+                {
+                    CudaAtomicOperation.IntegerAdd,
+                    CudaAtomicOperation.CompareAndSwap,
+                    CudaAtomicOperation.FloatAdd
+                };
+                CudaAtomicCapability[] hostAtomicCapabilities = CudaDevice.GetHostAtomicCapabilities(0, atomicOperations);
+                CudaAtomicCapability[] p2pAtomicCapabilities = CudaDevice.GetP2PAtomicCapabilities(0, 1, atomicOperations);
+                Console.WriteLine($"AtomicCapabilities Host={string.Join('|', hostAtomicCapabilities)} P2P={string.Join('|', p2pAtomicCapabilities)}");
+            }
+            catch (CudaException exception)
+            {
+                Console.WriteLine($"AtomicCapabilities Skipped=True Reason=CudaException:{exception.Message}");
+            }
+
             if (canAccessPeer)
             {
                 bool peerAccessEnabled = false;
@@ -527,6 +619,22 @@ internal static class Program
         else
         {
             Console.WriteLine("PeerAccess Skipped=True Reason=SingleDevice");
+            try
+            {
+                CudaAtomicCapability[] hostAtomicCapabilities = CudaDevice.GetHostAtomicCapabilities(
+                    CudaDevice.Current,
+                    new[]
+                    {
+                        CudaAtomicOperation.IntegerAdd,
+                        CudaAtomicOperation.CompareAndSwap,
+                        CudaAtomicOperation.FloatAdd
+                    });
+                Console.WriteLine($"AtomicCapabilities Host={string.Join('|', hostAtomicCapabilities)} P2P=SkippedSingleDevice");
+            }
+            catch (CudaException exception)
+            {
+                Console.WriteLine($"AtomicCapabilities Skipped=True Reason=CudaException:{exception.Message}");
+            }
         }
 
         try
@@ -555,5 +663,18 @@ internal static class Program
         Console.WriteLine($"PinnedFloatAsyncRoundTrip={pinnedFloatAsyncRoundTripOk}");
         int finalCudaError = CudaDevice.GetLastErrorCode();
         Console.WriteLine($"CudaGetLastError={finalCudaError}:{CudaDevice.GetErrorName(finalCudaError)}:{CudaDevice.GetErrorString(finalCudaError)}");
+        }
+        catch (CudaException exception)
+        {
+            Console.WriteLine($"Skipped=True Reason=CudaException:{exception.Message}");
+        }
+        catch (DllNotFoundException exception)
+        {
+            Console.WriteLine($"Skipped=True Reason=DllNotFoundException:{exception.Message}");
+        }
+        catch (BadImageFormatException exception)
+        {
+            Console.WriteLine($"Skipped=True Reason=BadImageFormatException:{exception.Message}");
+        }
     }
 }

@@ -34,6 +34,56 @@ public sealed partial class TensorRtRefitter
     public bool HasErrorRecorder => NativeBridgeApi.HasRefitterErrorRecorder(Line, _handle);
 
     /// <summary>
+    /// Attempts to collect a copied read-only snapshot from the refitter error recorder.
+    /// 尝试从 refitter error recorder 采集只读托管快照。
+    /// </summary>
+    /// <param name="snapshot">The copied snapshot. 已复制到托管内存的快照。</param>
+    /// <returns><c>true</c> when a recorder was attached; otherwise <c>false</c>. 附加了 recorder 时返回 <c>true</c>，否则返回 <c>false</c>。</returns>
+    /// <remarks>
+    /// This method does not expose, retain, increment, decrement, or destroy the native recorder pointer.
+    /// 此方法不会暴露、持有、增加引用、减少引用或销毁原生 recorder 指针。适用于 TensorRT 8/10/11。
+    /// </remarks>
+    public bool TryGetErrorRecorderSnapshot(out TensorRtErrorRecorderSnapshot snapshot)
+    {
+        snapshot = NativeBridgeApi.GetRefitterErrorRecorderSnapshot(Line, _handle);
+        return snapshot.HasRecorder;
+    }
+
+    /// <summary>
+    /// Gets a copied read-only diagnostic snapshot for this refitter.
+    /// 获取当前 refitter 的复制型只读诊断快照。
+    /// </summary>
+    public TensorRtRefitterDiagnosticSnapshot GetDiagnosticSnapshot()
+    {
+        List<string> diagnostics = new List<string>();
+        bool hasErrorRecorder = TryCollect("HasErrorRecorder", diagnostics, () => HasErrorRecorder, false);
+        TensorRtErrorRecorderSnapshot errorRecorder = TryCollect(
+            "ErrorRecorderSnapshot",
+            diagnostics,
+            () =>
+            {
+                TryGetErrorRecorderSnapshot(out TensorRtErrorRecorderSnapshot snapshot);
+                return snapshot;
+            },
+            new TensorRtErrorRecorderSnapshot(Line, false, 0, false, Array.Empty<TensorRtErrorRecord>()));
+
+        return new TensorRtRefitterDiagnosticSnapshot(
+            Line,
+            TryCollect("MaxThreads", diagnostics, () => MaxThreads, 0),
+            TryCollect("WeightsValidation", diagnostics, () => WeightsValidation, false),
+            TryCollect("HasLogger", diagnostics, () => HasLogger, false),
+            hasErrorRecorder,
+            errorRecorder,
+            TryCollect("DynamicRangeTensorCount", diagnostics, () => DynamicRangeTensorCount, 0),
+            TryCollect("MissingNamedWeightCount", diagnostics, () => MissingNamedWeightCount, 0),
+            TryCollect("AllNamedWeightCount", diagnostics, () => AllNamedWeightCount, 0),
+            TryCollect<IReadOnlyList<string>>("DynamicRangeTensorNames", diagnostics, GetDynamicRangeTensorNames, Array.Empty<string>()),
+            TryCollect<IReadOnlyList<string>>("MissingNamedWeights", diagnostics, GetMissingNamedWeights, Array.Empty<string>()),
+            TryCollect<IReadOnlyList<string>>("AllNamedWeights", diagnostics, GetAllNamedWeights, Array.Empty<string>()),
+            diagnostics);
+    }
+
+    /// <summary>
     /// Gets whether this refitter has a TensorRT logger associated with it.
     /// 获取当前 refitter 是否关联了 TensorRT logger；只返回布尔值，不跨 ABI 暴露借用的 logger 指针。适用于 TensorRT 8/10。
     /// </summary>
@@ -217,5 +267,18 @@ public sealed partial class TensorRtRefitter
         }
 
         return names;
+    }
+
+    private static T TryCollect<T>(string fieldName, List<string> diagnostics, Func<T> getter, T fallback)
+    {
+        try
+        {
+            return getter();
+        }
+        catch (Exception ex) when (ex is BridgeProbeException || ex is NotSupportedException || ex is InvalidOperationException)
+        {
+            diagnostics.Add($"{fieldName}: {ex.Message}");
+            return fallback;
+        }
     }
 }

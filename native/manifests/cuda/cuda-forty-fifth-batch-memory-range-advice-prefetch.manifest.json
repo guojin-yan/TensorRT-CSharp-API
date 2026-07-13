@@ -1,0 +1,37 @@
+{
+  "$schema": "../bridge-api.schema.json",
+  "module": "cuda",
+  "versionLine": "common",
+  "apis": [
+    {
+      "id": "cuda-memory-prefetch-range-async-safe",
+      "entryPoint": "jyppx_cuda_memory_prefetch_range_async",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "memory", "type": "JYPPX_CudaMemory*", "direction": "in" },
+        { "name": "offset", "type": "size_t", "direction": "in" },
+        { "name": "count", "type": "size_t", "direction": "in" },
+        { "name": "destination_device", "type": "int32_t", "direction": "in", "managedType": "int", "moduleManagedType": "int" },
+        { "name": "stream", "type": "JYPPX_CudaStream*", "direction": "in" }
+      ]
+    },
+    {
+      "id": "cuda-memory-advise-range-safe",
+      "entryPoint": "jyppx_cuda_memory_advise_range",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "memory", "type": "JYPPX_CudaMemory*", "direction": "in" },
+        { "name": "offset", "type": "size_t", "direction": "in" },
+        { "name": "count", "type": "size_t", "direction": "in" },
+        { "name": "advice", "type": "int32_t", "direction": "in", "managedType": "int", "moduleManagedType": "int" },
+        { "name": "device", "type": "int32_t", "direction": "in", "managedType": "int", "moduleManagedType": "int" }
+      ]
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using System.Text;
 using JYPPX.CudaSharp.Internal.Handles;
 using JYPPX.Shared.Interop;
@@ -9,6 +10,7 @@ namespace JYPPX.TensorRtSharp.Internal.Interop;
 internal static partial class NativeBridgeApi
 {
     private delegate BridgeStatusCode Utf8BufferGetter(byte[] outputBuffer, UIntPtr outputBufferSize, out UIntPtr requiredSize);
+    private delegate BridgeStatusCode Int32ArrayGetter(SafeTensorRtObjectHandle handle, int index, int profileIndex, int selector, IntPtr outputValues, int outputCount, out int actualCount);
     private delegate BridgeStatusCode EngineIntGetter(SafeTensorRtObjectHandle engine, out int value);
     private delegate BridgeStatusCode EngineUIntGetter(SafeTensorRtObjectHandle engine, out uint value);
     private delegate BridgeStatusCode EngineBoolGetter(SafeTensorRtObjectHandle engine, out int value);
@@ -279,6 +281,17 @@ internal static partial class NativeBridgeApi
         return TensorRtDims.FromNative(shape);
     }
 
+    public static int[] GetEngineProfileShapeValues(TensorRtApiLine line, SafeTensorRtObjectHandle engine, int bindingIndex, int profileIndex, TensorRtOptimizationProfileSelector selector)
+    {
+        EnsureTensorRt8Only(line, nameof(GetEngineProfileShapeValues));
+        return ReadInt32Array(
+            static (handle, index, prof, sel, buffer, bufferCount, out actualCount) => NativeMethodsTensorRt.jyppx_trt8_cuda_engine_get_profile_shape_values(handle, index, prof, sel, buffer, bufferCount, out actualCount),
+            engine,
+            bindingIndex,
+            profileIndex,
+            (int)selector);
+    }
+
     public static TensorRtEngineCapability GetEngineCapability(TensorRtApiLine line, SafeTensorRtObjectHandle engine)
     {
         return (TensorRtEngineCapability)GetEngineInt(line, engine, NativeMethodsTensorRt.jyppx_trt8_engine_get_engine_capability, NativeMethodsTensorRt.jyppx_trt10_engine_get_engine_capability, NativeMethodsTensorRt.jyppx_trt11_engine_get_engine_capability);
@@ -314,6 +327,17 @@ internal static partial class NativeBridgeApi
 
         NativeStatus.ThrowIfFailed(status);
         return TensorRtDims.FromNative(dims);
+    }
+
+    public static int[] GetExecutionContextShapeBinding(TensorRtApiLine line, SafeTensorRtObjectHandle context, int bindingIndex)
+    {
+        EnsureTensorRt8Only(line, nameof(GetExecutionContextShapeBinding));
+        return ReadInt32Array(
+            static (handle, index, _, _, buffer, bufferCount, out actualCount) => NativeMethodsTensorRt.jyppx_trt8_execution_context_get_shape_binding(handle, index, buffer, bufferCount, out actualCount),
+            context,
+            bindingIndex,
+            0,
+            0);
     }
 
     public static TensorRtDims GetExecutionContextTensorStrides(TensorRtApiLine line, SafeTensorRtObjectHandle context, string tensorName)
@@ -1360,6 +1384,36 @@ internal static partial class NativeBridgeApi
         if (string.IsNullOrWhiteSpace(tensorName))
         {
             throw new ArgumentException("Tensor name must not be null or empty.", nameof(tensorName));
+        }
+    }
+
+    private static int[] ReadInt32Array(Int32ArrayGetter getter, SafeTensorRtObjectHandle handle, int index, int profileIndex, int selector)
+    {
+        BridgeStatusCode status = getter(handle, index, profileIndex, selector, IntPtr.Zero, 0, out int requiredCount);
+        NativeStatus.ThrowIfFailed(status);
+        if (requiredCount <= 0)
+        {
+            return Array.Empty<int>();
+        }
+
+        int[] values = new int[requiredCount];
+        GCHandle pinned = GCHandle.Alloc(values, GCHandleType.Pinned);
+        try
+        {
+            status = getter(handle, index, profileIndex, selector, pinned.AddrOfPinnedObject(), values.Length, out int actualCount);
+            NativeStatus.ThrowIfFailed(status);
+            if (actualCount == values.Length)
+            {
+                return values;
+            }
+
+            int[] trimmed = new int[Math.Max(actualCount, 0)];
+            Array.Copy(values, trimmed, trimmed.Length);
+            return trimmed;
+        }
+        finally
+        {
+            pinned.Free();
         }
     }
 

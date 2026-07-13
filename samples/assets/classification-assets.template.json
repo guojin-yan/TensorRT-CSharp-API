@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "sampleName": "Classification",
+  "status": "candidate-not-downloaded",
+  "proofClassification": "template-only",
+  "evidenceClassifications": [
+    "template-only",
+    "build-only",
+    "dependency-probe-only",
+    "synthetic-input-runtime",
+    "real-model-runtime",
+    "package-consumer-runtime"
+  ],
+  "isSmokePassed": false,
+  "isRedistributableInRepository": false,
+  "model": {
+    "name": "TorchVision ResNet18 candidate",
+    "sourceUrl": "https://docs.pytorch.org/vision/main/models/generated/torchvision.models.resnet18.html",
+    "license": "BSD-3-Clause for TorchVision code; review pretrained weight terms before redistribution.",
+    "downloadUrl": "",
+    "sha256": "",
+    "opset": "",
+    "exportCommand": "python export_resnet18_to_onnx.py --output models/classifier.onnx",
+    "localPath": "models/classifier.onnx"
+  },
+  "labels": {
+    "sourceUrl": "",
+    "license": "",
+    "sha256": "",
+    "classCount": 1000,
+    "localPath": "models/labels.txt"
+  },
+  "input": {
+    "sourceUrl": "",
+    "license": "",
+    "sha256": "",
+    "localPath": "models/image.jpg"
+  },
+  "tensor": {
+    "inputName": "",
+    "inputShape": "1x3x224x224",
+    "layout": "NCHW",
+    "dtype": "float32",
+    "outputName": "",
+    "outputShape": "1x1000"
+  },
+  "preprocess": {
+    "resize": "owner-required",
+    "crop": "owner-required",
+    "colorOrder": "RGB",
+    "scale": "1/255",
+    "mean": "owner-required",
+    "std": "owner-required"
+  },
+  "postprocess": {
+    "topK": 5
+  },
+  "evidence": {
+    "evidenceSidecar": "models/classifier-evidence.sidecar.json",
+    "sampleRunEvidenceRecord": "models/classifier-sample-run-evidence.json",
+    "sampleRunEvidenceValidation": "artifacts/user-acceptance/sample-run-evidence-record-validation.json",
+    "buildOnlyCommand": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\classifier.onnx --saveEngine .\\models\\classifier.plan --minShapes input:1x3x224x224 --optShapes input:1x3x224x224 --maxShapes input:1x3x224x224 --buildOnly --exportReport .\\models\\classifier-build-report.json --evidenceSidecar .\\models\\classifier-evidence.sidecar.json",
+    "runCommand": "dotnet run --project .\\samples\\Classification -- --model .\\models\\classifier.onnx --labels .\\models\\labels.txt --input .\\models\\image.jpg --input-shape 1x3x224x224 --tensor-rt-line 10 --top-k 5",
+    "expectedEvidenceLines": [
+      "Classification TensorRtLine=...",
+      "TopK Index=... Label=... Score=...",
+      "Classification Passed=True"
+    ],
+    "lastRunStatus": "not-run",
+    "stdoutSummary": "",
+    "stderrSummary": "",
+    "lastRunLog": "",
+    "lastRunLogSha256": ""
+  },
+  "notes": [
+    "This template is a candidate asset manifest, not a bundled model.",
+    "Do not mark the sample as smoke passed until model, labels, image, hashes, and real command output are recorded.",
+    "proofClassification=template-only means this file is not build-only, synthetic runtime, real-model runtime, or package-consumer runtime proof.",
+    "The evidence sidecar may feed TensorRtExec/OnnxToEngine report metadata, but it cannot promote a build report to package-consumer-runtime.",
+    "Synthetic input pipeline evidence is not image classification accuracy evidence."
+  ]
+}

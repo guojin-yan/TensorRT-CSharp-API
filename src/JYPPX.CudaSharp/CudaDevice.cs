@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using JYPPX.CudaSharp.Internal.Interop;
 
 namespace JYPPX.CudaSharp;
@@ -165,10 +167,34 @@ public static class CudaDevice
     }
 
     /// <summary>
+    /// Gets a pointer-free copied summary of CUDA graph-memory allocator counters for a device.
+    /// 获取指定设备 CUDA graph memory 分配器计数的无指针复制型摘要。
+    /// </summary>
+    /// <param name="ordinal">The CUDA device ordinal. CUDA 设备序号。</param>
+    /// <returns>A graph-memory copied readonly summary. Graph memory 复制型只读摘要。</returns>
+    /// <remarks>
+    /// This is a convenience wrapper over <see cref="GetGraphMemoryInfo(int)"/> and
+    /// <see cref="CudaDeviceGraphMemoryInfo.ToSummary"/>. It is diagnostic evidence only and cannot
+    /// promote runtime proof.
+    /// 这是 <see cref="GetGraphMemoryInfo(int)"/> 与 <see cref="CudaDeviceGraphMemoryInfo.ToSummary"/>
+    /// 的便利封装；它只是诊断证据，不能晋级 runtime proof。
+    /// </remarks>
+    public static CudaDeviceGraphMemorySummary GetGraphMemorySummary(int ordinal)
+    {
+        return GetGraphMemoryInfo(ordinal).ToSummary();
+    }
+
+    /// <summary>
     /// Gets CUDA graph-memory allocator counters for the current device.
     /// 获取当前设备的 CUDA graph memory 分配器计数。
     /// </summary>
     public static CudaDeviceGraphMemoryInfo CurrentGraphMemoryInfo => GetGraphMemoryInfo(Current);
+
+    /// <summary>
+    /// Gets a pointer-free copied graph-memory allocator summary for the current device.
+    /// 获取当前设备 CUDA graph memory 分配器的无指针复制型摘要。
+    /// </summary>
+    public static CudaDeviceGraphMemorySummary CurrentGraphMemorySummary => GetGraphMemorySummary(Current);
 
     /// <summary>
     /// Trims graph-memory allocations cached by CUDA for a device.
@@ -303,6 +329,43 @@ public static class CudaDevice
     }
 
     /// <summary>
+    /// Initializes the primary CUDA context for a device using CUDA 12.0+ <c>cudaInitDevice</c>.
+    /// 使用 CUDA 12.0+ <c>cudaInitDevice</c> 初始化指定设备的 primary context。
+    /// </summary>
+    /// <param name="ordinal">The CUDA device ordinal. CUDA 设备序号。</param>
+    /// <param name="deviceFlags">The CUDA runtime device flags to apply during initialization. 初始化时应用的 CUDA runtime device flags。</param>
+    /// <param name="flags">Reserved CUDA flags. CUDA 保留 flags，通常为 0。</param>
+    /// <remarks>
+    /// This wrapper keeps the boundary scalar-only and does not expose CUDA context handles.
+    /// 该封装仅暴露标量边界，不向托管层暴露 CUDA context 句柄。
+    /// </remarks>
+    public static void InitDevice(int ordinal, CudaDeviceRuntimeFlags deviceFlags = CudaDeviceRuntimeFlags.ScheduleAuto, uint flags = 0)
+    {
+        if (ordinal < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(ordinal), ordinal, "CUDA device ordinal must be greater than or equal to zero.");
+        }
+
+        NativeBridgeLoader.EnsureInitialized();
+        NativeCudaApi.InitDevice(ordinal, (uint)deviceFlags, flags);
+    }
+
+    /// <summary>
+    /// Restricts CUDA runtime initialization to a caller-owned list of valid device ordinals using <c>cudaSetValidDevices</c>.
+    /// 使用 <c>cudaSetValidDevices</c> 和 caller-owned 的设备序号列表限制 CUDA runtime 可初始化的设备集合。
+    /// </summary>
+    /// <param name="ordinals">The CUDA device ordinals that may be used by the process. 允许当前进程使用的 CUDA 设备序号。</param>
+    /// <remarks>
+    /// This method copies the managed list before calling native code. Call it before creating a CUDA context.
+    /// 该方法会先复制托管列表再调用 native；应在创建 CUDA context 前调用。
+    /// </remarks>
+    public static void SetValidDevices(IReadOnlyList<int> ordinals)
+    {
+        NativeBridgeLoader.EnsureInitialized();
+        NativeCudaApi.SetValidDevices(CopyDeviceOrdinals(ordinals));
+    }
+
+    /// <summary>
     /// Gets the PCI bus id string for a CUDA device.
     /// 获取 CUDA 设备的 PCI bus id 字符串。
     /// </summary>
@@ -389,6 +452,55 @@ public static class CudaDevice
     {
         NativeBridgeLoader.EnsureInitialized();
         return NativeCudaApi.GetDeviceP2PAttribute((int)attribute, sourceOrdinal, destinationOrdinal);
+    }
+
+    /// <summary>
+    /// Gets native host atomic capabilities for the selected CUDA operations on a device.
+    /// 获取指定设备对一组 CUDA atomic operation 的 host atomic 原生能力。
+    /// </summary>
+    /// <param name="ordinal">The CUDA device ordinal. CUDA 设备序号。</param>
+    /// <param name="operations">The CUDA atomic operations to query. 要查询的 CUDA atomic operation 列表。</param>
+    /// <returns>One capability bitmask per operation, in the same order. 按输入顺序返回每个 operation 的能力位掩码。</returns>
+    public static CudaAtomicCapability[] GetHostAtomicCapabilities(int ordinal, IReadOnlyList<CudaAtomicOperation> operations)
+    {
+        NativeBridgeLoader.EnsureInitialized();
+        return NativeCudaApi.GetDeviceHostAtomicCapabilities(ordinal, CopyAtomicOperations(operations));
+    }
+
+    /// <summary>
+    /// Gets native peer-to-peer atomic capabilities for the selected CUDA operations between two devices.
+    /// 获取两个 CUDA 设备之间对一组 CUDA atomic operation 的 P2P atomic 原生能力。
+    /// </summary>
+    /// <param name="sourceOrdinal">The source CUDA device ordinal. 源 CUDA 设备序号。</param>
+    /// <param name="destinationOrdinal">The destination CUDA device ordinal. 目标 CUDA 设备序号。</param>
+    /// <param name="operations">The CUDA atomic operations to query. 要查询的 CUDA atomic operation 列表。</param>
+    /// <returns>One capability bitmask per operation, in the same order. 按输入顺序返回每个 operation 的能力位掩码。</returns>
+    public static CudaAtomicCapability[] GetP2PAtomicCapabilities(int sourceOrdinal, int destinationOrdinal, IReadOnlyList<CudaAtomicOperation> operations)
+    {
+        NativeBridgeLoader.EnsureInitialized();
+        return NativeCudaApi.GetDeviceP2PAtomicCapabilities(sourceOrdinal, destinationOrdinal, CopyAtomicOperations(operations));
+    }
+
+    /// <summary>
+    /// Chooses the CUDA device that best matches a safe managed subset of <c>cudaDeviceProp</c> requirements.
+    /// 根据托管层安全表达的 <c>cudaDeviceProp</c> 子集选择最匹配的 CUDA 设备。
+    /// </summary>
+    /// <param name="requirements">The desired CUDA device requirements. 期望的 CUDA 设备约束。</param>
+    /// <returns>The CUDA device ordinal chosen by <c>cudaChooseDevice</c>. <c>cudaChooseDevice</c> 选择的 CUDA 设备序号。</returns>
+    /// <remarks>
+    /// The wrapper does not expose native <c>cudaDeviceProp</c> pointers. It copies a small caller-owned value structure into native code.
+    /// 该封装不会暴露原生 <c>cudaDeviceProp</c> 指针，而是把小型 caller-owned 值结构复制到 native 侧。
+    /// </remarks>
+    public static int ChooseDevice(CudaDeviceSelectionRequirements requirements)
+    {
+        if (requirements == null)
+        {
+            throw new ArgumentNullException(nameof(requirements));
+        }
+
+        NativeBridgeLoader.EnsureInitialized();
+        NativeCudaDeviceSelectionRequirements nativeRequirements = requirements.ToNative();
+        return NativeCudaApi.ChooseDevice(in nativeRequirements);
     }
 
     /// <summary>
@@ -591,5 +703,53 @@ public static class CudaDevice
     {
         NativeBridgeLoader.EnsureInitialized();
         return NativeCudaApi.GetErrorString(errorCode);
+    }
+
+    private static CudaAtomicOperation[] CopyAtomicOperations(IReadOnlyList<CudaAtomicOperation> operations)
+    {
+        if (operations == null)
+        {
+            throw new ArgumentNullException(nameof(operations));
+        }
+
+        if (operations.Count == 0)
+        {
+            throw new ArgumentException("At least one CUDA atomic operation is required.", nameof(operations));
+        }
+
+        CudaAtomicOperation[] copy = new CudaAtomicOperation[operations.Count];
+        for (int index = 0; index < operations.Count; index++)
+        {
+            copy[index] = operations[index];
+        }
+
+        return copy;
+    }
+
+    private static int[] CopyDeviceOrdinals(IReadOnlyList<int> ordinals)
+    {
+        if (ordinals == null)
+        {
+            throw new ArgumentNullException(nameof(ordinals));
+        }
+
+        if (ordinals.Count == 0)
+        {
+            throw new ArgumentException("At least one CUDA device ordinal is required.", nameof(ordinals));
+        }
+
+        int[] copy = new int[ordinals.Count];
+        for (int index = 0; index < ordinals.Count; index++)
+        {
+            int ordinal = ordinals[index];
+            if (ordinal < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(ordinals), ordinal, "CUDA device ordinal must be greater than or equal to zero.");
+            }
+
+            copy[index] = ordinal;
+        }
+
+        return copy;
     }
 }

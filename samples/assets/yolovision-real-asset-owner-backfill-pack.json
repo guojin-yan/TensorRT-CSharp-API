@@ -1,0 +1,633 @@
+{
+  "recordKind": "yolovision-real-asset-owner-backfill-pack",
+  "sampleName": "YoloVision",
+  "samplePath": "samples/YoloVision",
+  "sourcePack": "samples/assets/yolovision-article-case-pack.json",
+  "taskOutputContract": "samples/YoloVision/yolovision-task-output-contract.json",
+  "packState": "owner-action-required",
+  "proofBoundary": "owner backfill contract only; not real-model-runtime proof; not package-consumer-runtime proof; not post-publish proof",
+  "performsPublish": false,
+  "canPromoteRealModelRuntime": false,
+  "canPromotePackageConsumerRuntime": false,
+  "canPublishPublicly": false,
+  "requiredOwnerEvidence": {
+    "hostMetadata": {
+      "hostOs": "owner-required",
+      "hostMachineId": "owner-required",
+      "osArchitecture": "owner-required",
+      "gpuName": "owner-required",
+      "gpuComputeCapability": "owner-required",
+      "driverVersion": "owner-required",
+      "cudaDriverVersion": "owner-required",
+      "cudaRuntimeVersion": "owner-required",
+      "tensorRtVersion": "owner-required",
+      "tensorRtLine": "owner-required",
+      "cudnnVersion": "owner-required"
+    },
+    "packageMetadata": {
+      "packageSource": "owner-required",
+      "packageChannel": "owner-required",
+      "runtimePackageVersion": "owner-required",
+      "runtimePackageKey": "owner-required",
+      "managedPackageSha256": "owner-required",
+      "nativeBridgeSha256": "owner-required",
+      "runtimePackageSha256": "owner-required"
+    },
+    "ownerReview": {
+      "ownerReviewer": "owner-required",
+      "ownerReviewedAtUtc": "owner-required",
+      "ownerAcceptanceDecision": "owner-required",
+      "ownerAcceptanceNotes": "owner-required"
+    }
+  },
+  "requiredGlobalEvidence": [
+    "hostOs",
+    "hostMachineId",
+    "osArchitecture",
+    "gpuName",
+    "gpuComputeCapability",
+    "driverVersion",
+    "cudaDriverVersion",
+    "cudaRuntimeVersion",
+    "tensorRtVersion",
+    "tensorRtLine",
+    "cudnnVersion",
+    "packageSource",
+    "packageChannel",
+    "runtimePackageVersion",
+    "runtimePackageKey",
+    "managedPackageSha256",
+    "nativeBridgeSha256",
+    "runtimePackageSha256",
+    "ownerReviewer",
+    "ownerReviewedAtUtc",
+    "ownerAcceptanceDecision"
+  ],
+  "forbiddenSubstitutes": [
+    "build-only",
+    "dry-run",
+    "template",
+    "local feed",
+    "ProjectReference",
+    "direct .nupkg",
+    "TensorRtExec report",
+    "YoloVision matrix",
+    "OnnxToEngine report",
+    "readonly diagnostics",
+    "screenshot",
+    "sidecar-only report",
+    "skipped run",
+    "blocked-by-cuda-driver"
+  ],
+  "cases": [
+    {
+      "id": "yolov8n-det",
+      "task": "det",
+      "state": "owner-action-required",
+      "article": "docs/articles/zh-cn/yolovision-detection-yolov8n-download-export-run.md",
+      "model": {
+        "sourceUrl": "owner-required",
+        "license": "owner-required",
+        "sha256": "owner-required",
+        "onnxPath": "models\\yolov8n.onnx",
+        "onnxSha256": "owner-required",
+        "exportCommand": "yolo export model=.\\models\\yolov8n.pt format=onnx opset=12 dynamic=True simplify=True imgsz=640"
+      },
+      "labels": {
+        "path": "models\\coco.names",
+        "license": "owner-required",
+        "classCount": "owner-required",
+        "sha256": "owner-required"
+      },
+      "input": {
+        "imagePath": "models/yolov8n-det.jpg",
+        "imageLicense": "owner-required",
+        "imageSha256": "owner-required",
+        "preprocessedTensorPath": "models\\yolov8n-det-fp32.bin",
+        "preprocessedTensorSha256": "owner-required",
+        "inputShape": "1x3x640x640",
+        "preprocessContract": "owner-required"
+      },
+      "tensorRtExec": {
+        "buildCommand": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\yolov8n.onnx --saveEngine .\\models\\yolov8n.plan --minShapes images:1x3x640x640 --optShapes images:1x3x640x640 --maxShapes images:4x3x640x640 --fp16 --buildOnly --exportReport .\\models\\yolov8n-build-report.json",
+        "reportPath": "models\\yolov8n-build-report.json",
+        "reportSha256": "owner-required",
+        "stdoutLogPath": "models/yolov8n-det-tensorrtexec.stdout.log",
+        "stdoutLogSha256": "owner-required",
+        "stderrLogPath": "models/yolov8n-det-tensorrtexec.stderr.log",
+        "stderrLogSha256": "owner-required-or-no-stderr",
+        "enginePath": "models\\yolov8n.plan",
+        "engineSha256": "owner-required",
+        "proofBoundary": "TensorRtExec build report, command transcript, stdout/stderr logs, and engine hash are build evidence only; they are not real-model-runtime proof and never package-consumer-runtime proof."
+      },
+      "yoloVision": {
+        "runCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n.onnx --labels .\\models\\coco.names --input-data .\\models\\yolov8n-det-fp32.bin --input-shape 1x3x640x640 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware",
+        "expectedEvidenceLines": [
+          "Profile Family=v8 Task=det",
+          "Postprocess Task=det",
+          "YoloVision Passed=True"
+        ],
+        "runLogPath": "models/yolov8n-det-run.log",
+        "runLogSha256": "owner-required",
+        "stdoutLogPath": "models/yolov8n-det-yolovision.stdout.log",
+        "stdoutLogSha256": "owner-required",
+        "stderrLogPath": "models/yolov8n-det-yolovision.stderr.log",
+        "stderrLogSha256": "owner-required-or-no-stderr",
+        "stdoutSummary": "owner-required",
+        "stderrSummary": "owner-required-or-no-stderr",
+        "outputJsonPath": "models/yolov8n-det-output.json",
+        "outputJsonSha256": "owner-required"
+      },
+      "outputMetadata": {
+        "classCount": "owner-required",
+        "outputLayout": "owner-required",
+        "boxFormat": "owner-required",
+        "scoreRule": "owner-required",
+        "hasObjectness": "owner-required",
+        "nmsMode": "class-aware",
+        "scoreThreshold": "owner-required",
+        "iouThreshold": "owner-required"
+      },
+      "articleEvidence": {
+        "readiness": "owner-action-required",
+        "articleStatus": "near-ready-owner-evidence-missing",
+        "screenshotPlan": "owner-required-or-not-public",
+        "diagramPlan": "owner-required-or-not-public",
+        "ownerBackfillChecklist": [
+          "model source/license/hash",
+          "labels/input/preprocessed tensor hashes",
+          "TensorRtExec build report plus stdout/stderr transcript hashes",
+          "YoloVision run log plus stdout/stderr transcript hashes",
+          "owner review and publication decision"
+        ],
+        "proofBoundary": "Article readiness, screenshots, diagrams, and walkthrough text do not promote runtime proof."
+      },
+      "ownerReview": {
+        "reviewer": "owner-required",
+        "reviewedAtUtc": "owner-required",
+        "acceptanceDecision": "owner-required",
+        "acceptedForRealModelRuntimeCandidate": false,
+        "notes": "owner-required"
+      },
+      "canPromoteRealModelRuntime": false,
+      "canPromotePackageConsumerRuntime": false
+    },
+    {
+      "id": "yolov8n-seg",
+      "task": "seg",
+      "state": "owner-action-required",
+      "article": "docs/articles/zh-cn/yolovision-segmentation-mask-postprocess-guide.md",
+      "model": {
+        "sourceUrl": "owner-required",
+        "license": "owner-required",
+        "sha256": "owner-required",
+        "onnxPath": "models\\yolov8n-seg.onnx",
+        "onnxSha256": "owner-required",
+        "exportCommand": "yolo export model=.\\models\\yolov8n-seg.pt format=onnx opset=12 dynamic=True simplify=True imgsz=640"
+      },
+      "labels": {
+        "path": "models\\coco.names",
+        "license": "owner-required",
+        "classCount": "owner-required",
+        "sha256": "owner-required"
+      },
+      "input": {
+        "imagePath": "models/yolov8n-seg.jpg",
+        "imageLicense": "owner-required",
+        "imageSha256": "owner-required",
+        "preprocessedTensorPath": "models\\yolov8n-seg-fp32.bin",
+        "preprocessedTensorSha256": "owner-required",
+        "inputShape": "1x3x640x640",
+        "preprocessContract": "owner-required"
+      },
+      "tensorRtExec": {
+        "buildCommand": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\yolov8n-seg.onnx --saveEngine .\\models\\yolov8n-seg.plan --minShapes images:1x3x640x640 --optShapes images:1x3x640x640 --maxShapes images:4x3x640x640 --fp16 --buildOnly --exportReport .\\models\\yolov8n-seg-build-report.json",
+        "reportPath": "models\\yolov8n-seg-build-report.json",
+        "reportSha256": "owner-required",
+        "stdoutLogPath": "models/yolov8n-seg-tensorrtexec.stdout.log",
+        "stdoutLogSha256": "owner-required",
+        "stderrLogPath": "models/yolov8n-seg-tensorrtexec.stderr.log",
+        "stderrLogSha256": "owner-required-or-no-stderr",
+        "enginePath": "models\\yolov8n-seg.plan",
+        "engineSha256": "owner-required",
+        "proofBoundary": "TensorRtExec build report, command transcript, stdout/stderr logs, and engine hash are build evidence only; they are not real-model-runtime proof and never package-consumer-runtime proof."
+      },
+      "yoloVision": {
+        "runCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-seg.onnx --labels .\\models\\coco.names --input-data .\\models\\yolov8n-seg-fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map boxes:det,proto:mask-prototypes --mask-coefficient-count 32",
+        "expectedEvidenceLines": [
+          "Profile Family=v8 Task=seg",
+          "Segmentations=",
+          "YoloVision Passed=True"
+        ],
+        "runLogPath": "models/yolov8n-seg-run.log",
+        "runLogSha256": "owner-required",
+        "stdoutLogPath": "models/yolov8n-seg-yolovision.stdout.log",
+        "stdoutLogSha256": "owner-required",
+        "stderrLogPath": "models/yolov8n-seg-yolovision.stderr.log",
+        "stderrLogSha256": "owner-required-or-no-stderr",
+        "stdoutSummary": "owner-required",
+        "stderrSummary": "owner-required-or-no-stderr",
+        "outputJsonPath": "models/yolov8n-seg-output.json",
+        "outputJsonSha256": "owner-required"
+      },
+      "outputMetadata": {
+        "classCount": "owner-required",
+        "outputRoleMap": "boxes:det,proto:mask-prototypes",
+        "maskCoefficientCount": 32,
+        "prototypeShape": "owner-required",
+        "maskResizePolicy": "owner-required",
+        "maskThreshold": "owner-required",
+        "letterboxContract": "owner-required"
+      },
+      "articleEvidence": {
+        "readiness": "owner-action-required",
+        "articleStatus": "near-ready-owner-evidence-missing",
+        "screenshotPlan": "owner-required-or-not-public",
+        "diagramPlan": "owner-required-or-not-public",
+        "ownerBackfillChecklist": [
+          "model source/license/hash",
+          "labels/input/preprocessed tensor hashes",
+          "TensorRtExec build report plus stdout/stderr transcript hashes",
+          "YoloVision run log plus stdout/stderr transcript hashes",
+          "owner review and publication decision"
+        ],
+        "proofBoundary": "Article readiness, screenshots, diagrams, and walkthrough text do not promote runtime proof."
+      },
+      "ownerReview": {
+        "reviewer": "owner-required",
+        "reviewedAtUtc": "owner-required",
+        "acceptanceDecision": "owner-required",
+        "acceptedForRealModelRuntimeCandidate": false,
+        "notes": "owner-required"
+      },
+      "canPromoteRealModelRuntime": false,
+      "canPromotePackageConsumerRuntime": false
+    },
+    {
+      "id": "yolov8n-pose",
+      "task": "pose",
+      "state": "owner-action-required",
+      "article": "docs/articles/zh-cn/yolovision-pose-keypoint-output-guide.md",
+      "model": {
+        "sourceUrl": "owner-required",
+        "license": "owner-required",
+        "sha256": "owner-required",
+        "onnxPath": "models\\yolov8n-pose.onnx",
+        "onnxSha256": "owner-required",
+        "exportCommand": "yolo export model=.\\models\\yolov8n-pose.pt format=onnx opset=12 dynamic=True simplify=True imgsz=640"
+      },
+      "labels": {
+        "path": "models\\coco.names",
+        "license": "owner-required",
+        "classCount": "owner-required",
+        "sha256": "owner-required"
+      },
+      "input": {
+        "imagePath": "models/yolov8n-pose.jpg",
+        "imageLicense": "owner-required",
+        "imageSha256": "owner-required",
+        "preprocessedTensorPath": "models\\yolov8n-pose-fp32.bin",
+        "preprocessedTensorSha256": "owner-required",
+        "inputShape": "1x3x640x640",
+        "preprocessContract": "owner-required"
+      },
+      "tensorRtExec": {
+        "buildCommand": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\yolov8n-pose.onnx --saveEngine .\\models\\yolov8n-pose.plan --minShapes images:1x3x640x640 --optShapes images:1x3x640x640 --maxShapes images:4x3x640x640 --fp16 --buildOnly --exportReport .\\models\\yolov8n-pose-build-report.json",
+        "reportPath": "models\\yolov8n-pose-build-report.json",
+        "reportSha256": "owner-required",
+        "stdoutLogPath": "models/yolov8n-pose-tensorrtexec.stdout.log",
+        "stdoutLogSha256": "owner-required",
+        "stderrLogPath": "models/yolov8n-pose-tensorrtexec.stderr.log",
+        "stderrLogSha256": "owner-required-or-no-stderr",
+        "enginePath": "models\\yolov8n-pose.plan",
+        "engineSha256": "owner-required",
+        "proofBoundary": "TensorRtExec build report, command transcript, stdout/stderr logs, and engine hash are build evidence only; they are not real-model-runtime proof and never package-consumer-runtime proof."
+      },
+      "yoloVision": {
+        "runCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-pose.onnx --labels .\\models\\coco.names --input-data .\\models\\yolov8n-pose-fp32.bin --input-shape 1x3x640x640 --family v8 --task pose --output-role-map boxes:det,keypoints:pose-keypoints --pose-keypoint-count 17",
+        "expectedEvidenceLines": [
+          "Profile Family=v8 Task=pose",
+          "Poses=",
+          "YoloVision Passed=True"
+        ],
+        "runLogPath": "models/yolov8n-pose-run.log",
+        "runLogSha256": "owner-required",
+        "stdoutLogPath": "models/yolov8n-pose-yolovision.stdout.log",
+        "stdoutLogSha256": "owner-required",
+        "stderrLogPath": "models/yolov8n-pose-yolovision.stderr.log",
+        "stderrLogSha256": "owner-required-or-no-stderr",
+        "stdoutSummary": "owner-required",
+        "stderrSummary": "owner-required-or-no-stderr",
+        "outputJsonPath": "models/yolov8n-pose-output.json",
+        "outputJsonSha256": "owner-required"
+      },
+      "outputMetadata": {
+        "classCount": "owner-required",
+        "keypointCount": 17,
+        "keypointStride": "owner-required",
+        "coordinateLayout": "owner-required",
+        "keypointLayout": "owner-required",
+        "keypointScoreField": "owner-required",
+        "skeletonMap": "owner-required",
+        "letterboxContract": "owner-required"
+      },
+      "articleEvidence": {
+        "readiness": "owner-action-required",
+        "articleStatus": "near-ready-owner-evidence-missing",
+        "screenshotPlan": "owner-required-or-not-public",
+        "diagramPlan": "owner-required-or-not-public",
+        "ownerBackfillChecklist": [
+          "model source/license/hash",
+          "labels/input/preprocessed tensor hashes",
+          "TensorRtExec build report plus stdout/stderr transcript hashes",
+          "YoloVision run log plus stdout/stderr transcript hashes",
+          "owner review and publication decision"
+        ],
+        "proofBoundary": "Article readiness, screenshots, diagrams, and walkthrough text do not promote runtime proof."
+      },
+      "ownerReview": {
+        "reviewer": "owner-required",
+        "reviewedAtUtc": "owner-required",
+        "acceptanceDecision": "owner-required",
+        "acceptedForRealModelRuntimeCandidate": false,
+        "notes": "owner-required"
+      },
+      "canPromoteRealModelRuntime": false,
+      "canPromotePackageConsumerRuntime": false
+    },
+    {
+      "id": "yolov8n-obb",
+      "task": "obb",
+      "state": "owner-action-required",
+      "article": "docs/articles/zh-cn/yolovision-obb-angle-output-guide.md",
+      "model": {
+        "sourceUrl": "owner-required",
+        "license": "owner-required",
+        "sha256": "owner-required",
+        "onnxPath": "models\\yolov8n-obb.onnx",
+        "onnxSha256": "owner-required",
+        "exportCommand": "yolo export model=.\\models\\yolov8n-obb.pt format=onnx opset=12 dynamic=True simplify=True imgsz=1024"
+      },
+      "labels": {
+        "path": "models\\dota.names",
+        "license": "owner-required",
+        "classCount": "owner-required",
+        "sha256": "owner-required"
+      },
+      "input": {
+        "imagePath": "models/yolov8n-obb.jpg",
+        "imageLicense": "owner-required",
+        "imageSha256": "owner-required",
+        "preprocessedTensorPath": "models\\yolov8n-obb-fp32.bin",
+        "preprocessedTensorSha256": "owner-required",
+        "inputShape": "1x3x1024x1024",
+        "preprocessContract": "owner-required"
+      },
+      "tensorRtExec": {
+        "buildCommand": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\yolov8n-obb.onnx --saveEngine .\\models\\yolov8n-obb.plan --minShapes images:1x3x1024x1024 --optShapes images:1x3x1024x1024 --maxShapes images:2x3x1024x1024 --fp16 --buildOnly --exportReport .\\models\\yolov8n-obb-build-report.json",
+        "reportPath": "models\\yolov8n-obb-build-report.json",
+        "reportSha256": "owner-required",
+        "stdoutLogPath": "models/yolov8n-obb-tensorrtexec.stdout.log",
+        "stdoutLogSha256": "owner-required",
+        "stderrLogPath": "models/yolov8n-obb-tensorrtexec.stderr.log",
+        "stderrLogSha256": "owner-required-or-no-stderr",
+        "enginePath": "models\\yolov8n-obb.plan",
+        "engineSha256": "owner-required",
+        "proofBoundary": "TensorRtExec build report, command transcript, stdout/stderr logs, and engine hash are build evidence only; they are not real-model-runtime proof and never package-consumer-runtime proof."
+      },
+      "yoloVision": {
+        "runCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-obb.onnx --labels .\\models\\dota.names --input-data .\\models\\yolov8n-obb-fp32.bin --input-shape 1x3x1024x1024 --family v8 --task obb --output-role-map boxes:det,angles:obb-angle --obb-angle-output angles",
+        "expectedEvidenceLines": [
+          "Profile Family=v8 Task=obb",
+          "OrientedBoxes=",
+          "YoloVision Passed=True"
+        ],
+        "runLogPath": "models/yolov8n-obb-run.log",
+        "runLogSha256": "owner-required",
+        "stdoutLogPath": "models/yolov8n-obb-yolovision.stdout.log",
+        "stdoutLogSha256": "owner-required",
+        "stderrLogPath": "models/yolov8n-obb-yolovision.stderr.log",
+        "stderrLogSha256": "owner-required-or-no-stderr",
+        "stdoutSummary": "owner-required",
+        "stderrSummary": "owner-required-or-no-stderr",
+        "outputJsonPath": "models/yolov8n-obb-output.json",
+        "outputJsonSha256": "owner-required"
+      },
+      "outputMetadata": {
+        "classCount": "owner-required",
+        "boxFormat": "owner-required",
+        "angleUnit": "owner-required",
+        "angleRange": "owner-required",
+        "rotatedBoxLayout": "owner-required",
+        "coordinateSpace": "owner-required",
+        "rotatedNmsMode": "owner-required"
+      },
+      "articleEvidence": {
+        "readiness": "owner-action-required",
+        "articleStatus": "near-ready-owner-evidence-missing",
+        "screenshotPlan": "owner-required-or-not-public",
+        "diagramPlan": "owner-required-or-not-public",
+        "ownerBackfillChecklist": [
+          "model source/license/hash",
+          "labels/input/preprocessed tensor hashes",
+          "TensorRtExec build report plus stdout/stderr transcript hashes",
+          "YoloVision run log plus stdout/stderr transcript hashes",
+          "owner review and publication decision"
+        ],
+        "proofBoundary": "Article readiness, screenshots, diagrams, and walkthrough text do not promote runtime proof."
+      },
+      "ownerReview": {
+        "reviewer": "owner-required",
+        "reviewedAtUtc": "owner-required",
+        "acceptanceDecision": "owner-required",
+        "acceptedForRealModelRuntimeCandidate": false,
+        "notes": "owner-required"
+      },
+      "canPromoteRealModelRuntime": false,
+      "canPromotePackageConsumerRuntime": false
+    },
+    {
+      "id": "yolov8n-cls",
+      "task": "cls",
+      "state": "owner-action-required",
+      "article": "docs/articles/zh-cn/yolovision-classification-yolov8n-labels-topk-guide.md",
+      "model": {
+        "sourceUrl": "owner-required",
+        "license": "owner-required",
+        "sha256": "owner-required",
+        "onnxPath": "models\\yolov8n-cls.onnx",
+        "onnxSha256": "owner-required",
+        "exportCommand": "yolo export model=.\\models\\yolov8n-cls.pt format=onnx opset=12 dynamic=True simplify=True imgsz=224"
+      },
+      "labels": {
+        "path": "models\\imagenet.names",
+        "license": "owner-required",
+        "classCount": "owner-required",
+        "sha256": "owner-required"
+      },
+      "input": {
+        "imagePath": "models/yolov8n-cls.jpg",
+        "imageLicense": "owner-required",
+        "imageSha256": "owner-required",
+        "preprocessedTensorPath": "models\\yolov8n-cls-fp32.bin",
+        "preprocessedTensorSha256": "owner-required",
+        "inputShape": "1x3x224x224",
+        "preprocessContract": "owner-required"
+      },
+      "tensorRtExec": {
+        "buildCommand": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\yolov8n-cls.onnx --saveEngine .\\models\\yolov8n-cls.plan --minShapes images:1x3x224x224 --optShapes images:1x3x224x224 --maxShapes images:8x3x224x224 --fp16 --buildOnly --exportReport .\\models\\yolov8n-cls-build-report.json",
+        "reportPath": "models\\yolov8n-cls-build-report.json",
+        "reportSha256": "owner-required",
+        "stdoutLogPath": "models/yolov8n-cls-tensorrtexec.stdout.log",
+        "stdoutLogSha256": "owner-required",
+        "stderrLogPath": "models/yolov8n-cls-tensorrtexec.stderr.log",
+        "stderrLogSha256": "owner-required-or-no-stderr",
+        "enginePath": "models\\yolov8n-cls.plan",
+        "engineSha256": "owner-required",
+        "proofBoundary": "TensorRtExec build report, command transcript, stdout/stderr logs, and engine hash are build evidence only; they are not real-model-runtime proof and never package-consumer-runtime proof."
+      },
+      "yoloVision": {
+        "runCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-cls.onnx --labels .\\models\\imagenet.names --input-data .\\models\\yolov8n-cls-fp32.bin --input-shape 1x3x224x224 --family v8 --task cls --classification-output logits",
+        "expectedEvidenceLines": [
+          "Profile Family=v8 Task=cls",
+          "Classification Class=",
+          "YoloVision Passed=True"
+        ],
+        "runLogPath": "models/yolov8n-cls-run.log",
+        "runLogSha256": "owner-required",
+        "stdoutLogPath": "models/yolov8n-cls-yolovision.stdout.log",
+        "stdoutLogSha256": "owner-required",
+        "stderrLogPath": "models/yolov8n-cls-yolovision.stderr.log",
+        "stderrLogSha256": "owner-required-or-no-stderr",
+        "stdoutSummary": "owner-required",
+        "stderrSummary": "owner-required-or-no-stderr",
+        "outputJsonPath": "models/yolov8n-cls-output.json",
+        "outputJsonSha256": "owner-required"
+      },
+      "outputMetadata": {
+        "classCount": "owner-required",
+        "labelsSha256": "owner-required",
+        "topK": 5,
+        "classScoreField": "owner-required",
+        "softmaxApplied": "owner-required"
+      },
+      "articleEvidence": {
+        "readiness": "owner-action-required",
+        "articleStatus": "near-ready-owner-evidence-missing",
+        "screenshotPlan": "owner-required-or-not-public",
+        "diagramPlan": "owner-required-or-not-public",
+        "ownerBackfillChecklist": [
+          "model source/license/hash",
+          "labels/input/preprocessed tensor hashes",
+          "TensorRtExec build report plus stdout/stderr transcript hashes",
+          "YoloVision run log plus stdout/stderr transcript hashes",
+          "owner review and publication decision"
+        ],
+        "proofBoundary": "Article readiness, screenshots, diagrams, and walkthrough text do not promote runtime proof."
+      },
+      "ownerReview": {
+        "reviewer": "owner-required",
+        "reviewedAtUtc": "owner-required",
+        "acceptanceDecision": "owner-required",
+        "acceptedForRealModelRuntimeCandidate": false,
+        "notes": "owner-required"
+      },
+      "canPromoteRealModelRuntime": false,
+      "canPromotePackageConsumerRuntime": false
+    },
+    {
+      "id": "yolov8n-sem",
+      "task": "sem",
+      "state": "owner-action-required",
+      "article": "docs/articles/zh-cn/yolovision-semantic-segmentation-map-guide.md",
+      "model": {
+        "sourceUrl": "owner-required",
+        "license": "owner-required",
+        "sha256": "owner-required",
+        "onnxPath": "models\\yolov8n-sem.onnx",
+        "onnxSha256": "owner-required",
+        "exportCommand": "yolo export model=.\\models\\yolov8n-sem.pt format=onnx opset=12 dynamic=True simplify=True imgsz=512"
+      },
+      "labels": {
+        "path": "models\\semantic-classes.names",
+        "license": "owner-required",
+        "classCount": "owner-required",
+        "sha256": "owner-required"
+      },
+      "input": {
+        "imagePath": "models/yolov8n-sem.jpg",
+        "imageLicense": "owner-required",
+        "imageSha256": "owner-required",
+        "preprocessedTensorPath": "models\\yolov8n-sem-fp32.bin",
+        "preprocessedTensorSha256": "owner-required",
+        "inputShape": "1x3x512x512",
+        "preprocessContract": "owner-required"
+      },
+      "tensorRtExec": {
+        "buildCommand": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\yolov8n-sem.onnx --saveEngine .\\models\\yolov8n-sem.plan --minShapes images:1x3x512x512 --optShapes images:1x3x512x512 --maxShapes images:2x3x512x512 --fp16 --buildOnly --exportReport .\\models\\yolov8n-sem-build-report.json",
+        "reportPath": "models\\yolov8n-sem-build-report.json",
+        "reportSha256": "owner-required",
+        "stdoutLogPath": "models/yolov8n-sem-tensorrtexec.stdout.log",
+        "stdoutLogSha256": "owner-required",
+        "stderrLogPath": "models/yolov8n-sem-tensorrtexec.stderr.log",
+        "stderrLogSha256": "owner-required-or-no-stderr",
+        "enginePath": "models\\yolov8n-sem.plan",
+        "engineSha256": "owner-required",
+        "proofBoundary": "TensorRtExec build report, command transcript, stdout/stderr logs, and engine hash are build evidence only; they are not real-model-runtime proof and never package-consumer-runtime proof."
+      },
+      "yoloVision": {
+        "runCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-sem.onnx --labels .\\models\\semantic-classes.names --input-data .\\models\\yolov8n-sem-fp32.bin --input-shape 1x3x512x512 --family v8 --task sem --semantic-output semantic --class-count owner-required --semantic-map-shape owner-required --class-map-layout NCHW-logits-or-NHW-class-index-owner-confirmed --palette .\\models\\semantic-palette.json",
+        "expectedEvidenceLines": [
+          "Profile Family=v8 Task=sem",
+          "SemanticMap Classes=",
+          "YoloVision Passed=True"
+        ],
+        "runLogPath": "models/yolov8n-sem-run.log",
+        "runLogSha256": "owner-required",
+        "stdoutLogPath": "models/yolov8n-sem-yolovision.stdout.log",
+        "stdoutLogSha256": "owner-required",
+        "stderrLogPath": "models/yolov8n-sem-yolovision.stderr.log",
+        "stderrLogSha256": "owner-required-or-no-stderr",
+        "stdoutSummary": "owner-required",
+        "stderrSummary": "owner-required-or-no-stderr",
+        "outputJsonPath": "models/yolov8n-sem-output.json",
+        "outputJsonSha256": "owner-required"
+      },
+      "outputMetadata": {
+        "classCount": "owner-required",
+        "semanticOutput": "semantic",
+        "semanticOutputRole": "semanticMap",
+        "semanticMapShape": "owner-required",
+        "mapWidth": "owner-required",
+        "mapHeight": "owner-required",
+        "classMapLayout": "NCHW-logits-or-NHW-class-index-owner-confirmed",
+        "argmaxRule": "argmax-or-owner-confirmed",
+        "paletteSha256": "owner-required",
+        "voidClassPolicy": "owner-required"
+      },
+      "articleEvidence": {
+        "readiness": "owner-action-required",
+        "articleStatus": "near-ready-owner-evidence-missing",
+        "screenshotPlan": "owner-required-or-not-public",
+        "diagramPlan": "owner-required-or-not-public",
+        "ownerBackfillChecklist": [
+          "model source/license/hash",
+          "labels/input/preprocessed tensor hashes",
+          "TensorRtExec build report plus stdout/stderr transcript hashes",
+          "YoloVision run log plus stdout/stderr transcript hashes",
+          "owner review and publication decision"
+        ],
+        "proofBoundary": "Article readiness, screenshots, diagrams, and walkthrough text do not promote runtime proof."
+      },
+      "ownerReview": {
+        "reviewer": "owner-required",
+        "reviewedAtUtc": "owner-required",
+        "acceptanceDecision": "owner-required",
+        "acceptedForRealModelRuntimeCandidate": false,
+        "notes": "owner-required"
+      },
+      "canPromoteRealModelRuntime": false,
+      "canPromotePackageConsumerRuntime": false
+    }
+  ]
+}

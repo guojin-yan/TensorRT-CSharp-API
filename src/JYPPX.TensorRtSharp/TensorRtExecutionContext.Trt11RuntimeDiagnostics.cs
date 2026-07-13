@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using JYPPX.Shared.Interop;
+using JYPPX.TensorRtSharp.Internal;
 using JYPPX.TensorRtSharp.Internal.Interop;
 
 namespace JYPPX.TensorRtSharp;
@@ -35,7 +39,7 @@ public sealed partial class TensorRtExecutionContext
 
     /// <summary>
     /// Clears the output allocator attached to a named output tensor.
-    /// 清除绑定到指定输出 tensor 的 output allocator。
+    /// 清除绑定到指定输出 tensor 的 output allocator；适用于 TensorRT 8/10/11，不会销毁 allocator 或调用用户 reallocate 回调。
     /// </summary>
     /// <param name="tensorName">The output tensor name. / 输出 tensor 名称。</param>
     /// <returns><see langword="true"/> when TensorRT accepts the clear operation. / TensorRT 接受清理操作时返回 <see langword="true"/>。</returns>
@@ -46,7 +50,7 @@ public sealed partial class TensorRtExecutionContext
 
     /// <summary>
     /// Clears the temporary-storage allocator attached to this execution context.
-    /// 清除绑定到当前 execution context 的 temporary-storage allocator。
+    /// 清除绑定到当前 execution context 的 temporary-storage allocator；适用于 TensorRT 8/10/11，不会销毁 allocator 或调用用户 deallocate 回调。
     /// </summary>
     /// <returns><see langword="true"/> when TensorRT accepts the clear operation. / TensorRT 接受清理操作时返回 <see langword="true"/>。</returns>
     public bool ClearTemporaryStorageAllocator()
@@ -55,8 +59,8 @@ public sealed partial class TensorRtExecutionContext
     }
 
     /// <summary>
-    /// Clears the debug listener attached to this TensorRT 11 execution context.
-    /// 清除绑定到当前 TensorRT 11 execution context 的 debug listener。
+    /// Clears the debug listener attached to this TensorRT 10/11 execution context.
+    /// 清除绑定到当前 TensorRT 10/11 execution context 的 debug listener；不会销毁 listener 或调用用户回调。
     /// </summary>
     /// <returns><see langword="true"/> when TensorRT accepts the clear operation. / TensorRT 接受清理操作时返回 <see langword="true"/>。</returns>
     public bool ClearDebugListener()
@@ -65,25 +69,244 @@ public sealed partial class TensorRtExecutionContext
     }
 
     /// <summary>
-    /// Gets whether this TensorRT 11 execution context has a debug listener attached.
-    /// 获取当前 TensorRT 11 execution context 是否绑定了 debug listener。
+    /// Gets whether this TensorRT 10/11 execution context has a debug listener attached.
+    /// 获取当前 TensorRT 10/11 execution context 是否绑定了 debug listener；不会暴露 listener 指针或接管其生命周期。
     /// </summary>
     public bool HasDebugListener => NativeBridgeApi.HasExecutionContextDebugListener(Line, _handle);
 
     /// <summary>
-    /// Clears the profiler attached to this TensorRT 11 execution context.
-    /// 清除绑定到当前 TensorRT 11 execution context 的 profiler。
+    /// Tries to get copied versioned-interface metadata for the output allocator attached to a named output tensor.
+    /// 尝试获取指定输出 tensor 已绑定 output allocator 的 versioned-interface 元数据副本。
+    /// </summary>
+    /// <param name="tensorName">The output tensor name. / 输出 tensor 名称。</param>
+    /// <param name="interfaceInfo">The copied interface metadata when the query succeeds. / 查询成功时复制出的 interface 元数据。</param>
+    /// <returns><see langword="true"/> when TensorRT reports an output allocator for the tensor and metadata was copied. / TensorRT 报告该 tensor 已绑定 output allocator 且成功复制元数据时返回 <see langword="true"/>。</returns>
+    public bool TryGetOutputAllocatorInterfaceInfo(string tensorName, out TensorRtInterfaceInfo interfaceInfo)
+    {
+        return TryGetOutputAllocatorInterfaceInfo(tensorName, out interfaceInfo, out _);
+    }
+
+    /// <summary>
+    /// Tries to get copied versioned-interface metadata for the output allocator attached to a named output tensor.
+    /// 尝试获取指定输出 tensor 已绑定 output allocator 的 versioned-interface 元数据副本。
+    /// </summary>
+    /// <param name="tensorName">The output tensor name. / 输出 tensor 名称。</param>
+    /// <param name="interfaceInfo">The copied interface metadata when the query succeeds. / 查询成功时复制出的 interface 元数据。</param>
+    /// <param name="diagnostic">A short diagnostic string describing success or the reason for failure. / 描述成功或失败原因的简短诊断。</param>
+    /// <returns><see langword="true"/> when TensorRT reports an output allocator for the tensor and metadata was copied. / TensorRT 报告该 tensor 已绑定 output allocator 且成功复制元数据时返回 <see langword="true"/>。</returns>
+    /// <remarks>
+    /// This query copies TensorRT metadata immediately and does not expose, retain, or take ownership of the borrowed allocator pointer.
+    /// 该查询会立即复制 TensorRT 元数据，不会暴露、保留或接管 borrowed allocator 指针。
+    /// </remarks>
+    public bool TryGetOutputAllocatorInterfaceInfo(string tensorName, out TensorRtInterfaceInfo interfaceInfo, out string diagnostic)
+    {
+        try
+        {
+            interfaceInfo = NativeBridgeApi.GetExecutionContextOutputAllocatorInterfaceInfo(Line, _handle, tensorName);
+            diagnostic = "OK";
+            return true;
+        }
+        catch (Exception exception) when (exception is BridgeProbeException || exception is NotSupportedException || exception is InvalidOperationException)
+        {
+            interfaceInfo = new TensorRtInterfaceInfo(string.Empty, 0, 0);
+            diagnostic = exception.Message;
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Tries to get copied versioned-interface metadata for the temporary-storage allocator attached to this execution context.
+    /// 尝试获取当前 execution context 已绑定 temporary-storage allocator 的 versioned-interface 元数据副本。
+    /// </summary>
+    /// <param name="interfaceInfo">The copied interface metadata when the query succeeds. / 查询成功时复制出的 interface 元数据。</param>
+    /// <returns><see langword="true"/> when TensorRT reports a temporary-storage allocator and metadata was copied. / TensorRT 报告已绑定 temporary-storage allocator 且成功复制元数据时返回 <see langword="true"/>。</returns>
+    public bool TryGetTemporaryStorageAllocatorInterfaceInfo(out TensorRtInterfaceInfo interfaceInfo)
+    {
+        return TryGetTemporaryStorageAllocatorInterfaceInfo(out interfaceInfo, out _);
+    }
+
+    /// <summary>
+    /// Tries to get copied versioned-interface metadata for the temporary-storage allocator attached to this execution context.
+    /// 尝试获取当前 execution context 已绑定 temporary-storage allocator 的 versioned-interface 元数据副本。
+    /// </summary>
+    /// <param name="interfaceInfo">The copied interface metadata when the query succeeds. / 查询成功时复制出的 interface 元数据。</param>
+    /// <param name="diagnostic">A short diagnostic string describing success or the reason for failure. / 描述成功或失败原因的简短诊断。</param>
+    /// <returns><see langword="true"/> when TensorRT reports a temporary-storage allocator and metadata was copied. / TensorRT 报告已绑定 temporary-storage allocator 且成功复制元数据时返回 <see langword="true"/>。</returns>
+    /// <remarks>
+    /// This query maps the TensorRT <c>IGpuAllocator::getInterfaceInfo</c> surface through the execution context's borrowed temporary-storage allocator.
+    /// It copies metadata only and does not expose or own the allocator pointer.
+    /// 该查询通过 execution context 借出的 temporary-storage allocator 覆盖 TensorRT <c>IGpuAllocator::getInterfaceInfo</c> 表面；
+    /// 只复制元数据，不暴露或拥有 allocator 指针。
+    /// </remarks>
+    public bool TryGetTemporaryStorageAllocatorInterfaceInfo(out TensorRtInterfaceInfo interfaceInfo, out string diagnostic)
+    {
+        try
+        {
+            interfaceInfo = NativeBridgeApi.GetExecutionContextTemporaryStorageAllocatorInterfaceInfo(Line, _handle);
+            diagnostic = "OK";
+            return true;
+        }
+        catch (Exception exception) when (exception is BridgeProbeException || exception is NotSupportedException || exception is InvalidOperationException)
+        {
+            interfaceInfo = new TensorRtInterfaceInfo(string.Empty, 0, 0);
+            diagnostic = exception.Message;
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Tries to get copied versioned-interface metadata for the debug listener attached to this execution context.
+    /// 尝试获取当前 execution context 已绑定 debug listener 的 versioned-interface 元数据副本。
+    /// </summary>
+    /// <param name="interfaceInfo">The copied interface metadata when the query succeeds. / 查询成功时复制出的 interface 元数据。</param>
+    /// <returns><see langword="true"/> when TensorRT reports a debug listener and metadata was copied. / TensorRT 报告已绑定 debug listener 且成功复制元数据时返回 <see langword="true"/>。</returns>
+    public bool TryGetDebugListenerInterfaceInfo(out TensorRtInterfaceInfo interfaceInfo)
+    {
+        return TryGetDebugListenerInterfaceInfo(out interfaceInfo, out _);
+    }
+
+    /// <summary>
+    /// Tries to get copied versioned-interface metadata for the debug listener attached to this execution context.
+    /// 尝试获取当前 execution context 已绑定 debug listener 的 versioned-interface 元数据副本。
+    /// </summary>
+    /// <param name="interfaceInfo">The copied interface metadata when the query succeeds. / 查询成功时复制出的 interface 元数据。</param>
+    /// <param name="diagnostic">A short diagnostic string describing success or the reason for failure. / 描述成功或失败原因的简短诊断。</param>
+    /// <returns><see langword="true"/> when TensorRT reports a debug listener and metadata was copied. / TensorRT 报告已绑定 debug listener 且成功复制元数据时返回 <see langword="true"/>。</returns>
+    /// <remarks>
+    /// This query copies TensorRT metadata immediately and does not expose, retain, or take ownership of the borrowed debug-listener pointer.
+    /// 该查询会立即复制 TensorRT 元数据，不会暴露、保留或接管 borrowed debug-listener 指针。
+    /// </remarks>
+    public bool TryGetDebugListenerInterfaceInfo(out TensorRtInterfaceInfo interfaceInfo, out string diagnostic)
+    {
+        try
+        {
+            interfaceInfo = NativeBridgeApi.GetExecutionContextDebugListenerInterfaceInfo(Line, _handle);
+            diagnostic = "OK";
+            return true;
+        }
+        catch (Exception exception) when (exception is BridgeProbeException || exception is NotSupportedException || exception is InvalidOperationException)
+        {
+            interfaceInfo = new TensorRtInterfaceInfo(string.Empty, 0, 0);
+            diagnostic = exception.Message;
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Gets a copied snapshot of output allocator, temporary-storage allocator, and debug listener boundary state.
+    /// 获取 output allocator、temporary-storage allocator 与 debug listener 边界状态的复制快照。
+    /// </summary>
+    /// <param name="outputTensorName">The output tensor name used for output allocator queries. / 用于 output allocator 查询的输出 tensor 名称。</param>
+    /// <returns>A copied callback state snapshot. 复制出的回调状态快照。</returns>
+    /// <remarks>
+    /// This query copies state and interface metadata immediately. It does not expose, retain, or take ownership of
+    /// borrowed allocator/debug-listener pointers and it does not invoke output allocator or debug listener callbacks.
+    /// 该查询会立即复制状态与 interface 元数据，不会暴露、保留或接管 borrowed allocator/debug-listener 指针，也不会调用
+    /// output allocator 或 debug listener 回调。
+    /// </remarks>
+    public TensorRtExecutionContextCallbackStateSnapshot GetCallbackStateSnapshot(string outputTensorName)
+    {
+        NativeTensorRtExecutionContextCallbackStateInfo info =
+            NativeBridgeApi.GetExecutionContextCallbackStateSnapshot(Line, _handle, outputTensorName);
+        return CreateCallbackStateSnapshot(info);
+    }
+
+    /// <summary>
+    /// Gets a pointer-free runtime diagnostic snapshot for one output tensor.
+    /// 获取单个 output tensor 对应的 pointer-free 运行时诊断快照。
+    /// </summary>
+    /// <param name="outputTensorName">The output tensor name used for output-address and callback-state queries. / 用于输出地址与回调状态查询的 output tensor 名称。</param>
+    /// <returns>A copied runtime diagnostic snapshot. 复制出的运行时诊断快照。</returns>
+    /// <remarks>
+    /// This helper aggregates existing safe read-only queries. It does not expose, retain, or take ownership of borrowed
+    /// TensorRT pointers, and address values are emitted only as integer diagnostics.
+    /// 该 helper 聚合既有安全只读查询；不会暴露、保留或接管 TensorRT borrowed pointer，地址也仅以整数诊断值返回。
+    /// </remarks>
+    public TensorRtExecutionContextRuntimeDiagnosticSnapshot GetRuntimeDiagnosticSnapshot(string outputTensorName)
+    {
+        if (outputTensorName == null)
+        {
+            throw new ArgumentNullException(nameof(outputTensorName));
+        }
+
+        List<string> diagnostics = new List<string>();
+        TensorRtExecutionContextCallbackStateSnapshot callbackState =
+            TryCollect("CallbackState", diagnostics, () => GetCallbackStateSnapshot(outputTensorName), CreateUnavailableCallbackStateSnapshot(outputTensorName));
+
+        return new TensorRtExecutionContextRuntimeDiagnosticSnapshot(
+            line: Line,
+            outputTensorName: outputTensorName,
+            hasErrorRecorder: TryCollect("HasErrorRecorder", diagnostics, () => HasErrorRecorder, false),
+            isInputConsumedEventSet: TryCollect("IsInputConsumedEventSet", diagnostics, () => IsInputConsumedEventSet, false),
+            inputConsumedEventAddressValue: TryCollect("InputConsumedEventAddressValue", diagnostics, () => InputConsumedEventAddressValue, 0UL),
+            hasOutputAllocator: TryCollect("HasOutputAllocator", diagnostics, () => HasOutputAllocator(outputTensorName), false),
+            isOutputTensorAddressSet: TryCollect("IsOutputTensorAddressSet", diagnostics, () => IsOutputTensorAddressSet(outputTensorName), false),
+            outputTensorAddressValue: TryCollect("OutputTensorAddressValue", diagnostics, () => GetOutputTensorAddressValue(outputTensorName), 0UL),
+            hasTemporaryStorageAllocator: TryCollect("HasTemporaryStorageAllocator", diagnostics, () => HasTemporaryStorageAllocator, false),
+            hasDebugListener: TryCollect("HasDebugListener", diagnostics, () => HasDebugListener, false),
+            hasManagedProfiler: TryCollect("HasProfiler", diagnostics, () => HasProfiler, false),
+            hasNativeProfiler: TryCollect("HasNativeProfiler", diagnostics, () => HasNativeProfiler, false),
+            hasRuntimeConfig: TryCollect("HasRuntimeConfig", diagnostics, () => HasRuntimeConfig, false),
+            nvtxVerbosity: TryCollect("NvtxVerbosity", diagnostics, GetNvtxVerbosity, TensorRtProfilingVerbosity.LayerNamesOnly),
+            unfusedTensorsDebugState: TryCollect("UnfusedTensorsDebugState", diagnostics, GetUnfusedTensorsDebugState, false),
+            callbackState: callbackState,
+            diagnostics: diagnostics);
+    }
+
+    /// <summary>
+    /// Clears supported callback attachments and returns a copied post-clear callback boundary snapshot.
+    /// 清除受支持的回调附加项，并返回清除后的回调边界复制快照。
+    /// </summary>
+    /// <param name="outputTensorName">The output tensor name used for output allocator clearing. / 用于 output allocator 清理的输出 tensor 名称。</param>
+    /// <returns>A copied post-clear callback state snapshot. 清理后的回调状态复制快照。</returns>
+    /// <remarks>
+    /// This method may call TensorRT clear operations for output allocator, temporary-storage allocator, and TensorRT
+    /// 10/11 debug listener. It never destroys the callback objects and never calls
+    /// <c>IOutputAllocator::reallocateOutput</c>, <c>IOutputAllocator::notifyShape</c>, or
+    /// <c>IDebugListener::processDebugTensor</c>.
+    /// 该方法可能调用 TensorRT 的 output allocator、temporary-storage allocator 和 TensorRT 10/11 debug listener 清理操作；
+    /// 它不会销毁回调对象，也不会调用 <c>IOutputAllocator::reallocateOutput</c>、<c>IOutputAllocator::notifyShape</c>
+    /// 或 <c>IDebugListener::processDebugTensor</c>。
+    /// </remarks>
+    public TensorRtExecutionContextCallbackStateSnapshot ClearCallbackState(string outputTensorName)
+    {
+        NativeTensorRtExecutionContextCallbackStateInfo info =
+            NativeBridgeApi.ClearExecutionContextCallbackState(Line, _handle, outputTensorName);
+        return CreateCallbackStateSnapshot(info);
+    }
+
+    /// <summary>
+    /// Clears the profiler attached to this execution context.
+    /// 清除绑定到当前 execution context 的 profiler；不会销毁 profiler 或调用用户回调。
     /// </summary>
     public void ClearProfiler()
     {
         NativeBridgeApi.ClearExecutionContextProfiler(Line, _handle);
+        DetachProfiler();
     }
 
     /// <summary>
-    /// Gets whether this TensorRT 11 execution context has a profiler attached.
-    /// 获取当前 TensorRT 11 execution context 是否绑定了 profiler。
+    /// Gets whether this execution context has a profiler attached.
+    /// 获取当前 execution context 是否绑定了由托管 wrapper 借出的 profiler；不会暴露 profiler 指针或接管其生命周期。
     /// </summary>
-    public bool HasProfiler => NativeBridgeApi.HasExecutionContextProfiler(Line, _handle);
+    /// <remarks>
+    /// This is the managed ownership signal used by <see cref="SetProfiler"/> and <see cref="ClearProfiler"/>.
+    /// TensorRT may still report an internal native profiler through <see cref="HasNativeProfiler"/> after the managed
+    /// borrow has been detached.
+    /// 该属性表示 <see cref="SetProfiler"/> 与 <see cref="ClearProfiler"/> 管理的托管借用状态。即使托管借用已解除，
+    /// TensorRT 仍可能通过 <see cref="HasNativeProfiler"/> 报告内部 native profiler。
+    /// </remarks>
+    public bool HasProfiler => _profilerKeepAlive != null;
+
+    /// <summary>
+    /// Gets whether TensorRT currently reports a non-null native profiler pointer.
+    /// 获取 TensorRT 当前是否报告非空 native profiler 指针。
+    /// </summary>
+    /// <remarks>
+    /// This diagnostic does not expose the pointer and must not be used as a managed ownership signal.
+    /// 该诊断不会暴露指针，且不应作为托管 ownership 信号使用。
+    /// </remarks>
+    public bool HasNativeProfiler => NativeBridgeApi.HasExecutionContextProfiler(Line, _handle);
 
     /// <summary>
     /// Gets whether this TensorRT 11 execution context has an associated runtime config object.
@@ -92,8 +315,8 @@ public sealed partial class TensorRtExecutionContext
     public bool HasRuntimeConfig => NativeBridgeApi.HasExecutionContextRuntimeConfig(Line, _handle);
 
     /// <summary>
-    /// Sets the NVTX verbosity used by this TensorRT 11 execution context.
-    /// 设置当前 TensorRT 11 execution context 使用的 NVTX 详细程度。
+    /// Sets the NVTX verbosity used by this TensorRT execution context.
+    /// 设置当前 TensorRT execution context 使用的 NVTX 详细程度。
     /// </summary>
     /// <param name="verbosity">The desired NVTX verbosity. / 期望的 NVTX 详细程度。</param>
     /// <returns><see langword="true"/> when TensorRT accepts the value. / TensorRT 接受该值时返回 <see langword="true"/>。</returns>
@@ -103,8 +326,8 @@ public sealed partial class TensorRtExecutionContext
     }
 
     /// <summary>
-    /// Gets the NVTX verbosity currently used by this TensorRT 11 execution context.
-    /// 获取当前 TensorRT 11 execution context 使用的 NVTX 详细程度。
+    /// Gets the NVTX verbosity currently used by this TensorRT execution context.
+    /// 获取当前 TensorRT execution context 使用的 NVTX 详细程度。
     /// </summary>
     public TensorRtProfilingVerbosity GetNvtxVerbosity()
     {
@@ -138,5 +361,69 @@ public sealed partial class TensorRtExecutionContext
     public bool GetUnfusedTensorsDebugState()
     {
         return NativeBridgeApi.GetExecutionContextUnfusedTensorsDebugState(Line, _handle);
+    }
+
+    private static TensorRtExecutionContextCallbackStateSnapshot CreateCallbackStateSnapshot(
+        NativeTensorRtExecutionContextCallbackStateInfo info)
+    {
+        TensorRtInterfaceInfo outputAllocatorInfo = new TensorRtInterfaceInfo(
+            BridgeInfoMapper.ReadFixedUtf8(info.OutputAllocatorInterfaceKind),
+            info.OutputAllocatorInterfaceMajor,
+            info.OutputAllocatorInterfaceMinor);
+        TensorRtInterfaceInfo temporaryStorageAllocatorInfo = new TensorRtInterfaceInfo(
+            BridgeInfoMapper.ReadFixedUtf8(info.TemporaryStorageAllocatorInterfaceKind),
+            info.TemporaryStorageAllocatorInterfaceMajor,
+            info.TemporaryStorageAllocatorInterfaceMinor);
+        TensorRtInterfaceInfo debugListenerInfo = new TensorRtInterfaceInfo(
+            BridgeInfoMapper.ReadFixedUtf8(info.DebugListenerInterfaceKind),
+            info.DebugListenerInterfaceMajor,
+            info.DebugListenerInterfaceMinor);
+
+        return new TensorRtExecutionContextCallbackStateSnapshot(
+            line: (TensorRtApiLine)info.Line,
+            hasOutputAllocator: info.HasOutputAllocator != 0,
+            hasTemporaryStorageAllocator: info.HasTemporaryStorageAllocator != 0,
+            hasDebugListener: info.HasDebugListener != 0,
+            outputAllocatorInterfaceInfoAvailable: info.OutputAllocatorInterfaceInfoAvailable != 0,
+            temporaryStorageAllocatorInterfaceInfoAvailable: info.TemporaryStorageAllocatorInterfaceInfoAvailable != 0,
+            debugListenerInterfaceInfoAvailable: info.DebugListenerInterfaceInfoAvailable != 0,
+            outputAllocatorClearSupported: info.OutputAllocatorClearSupported != 0,
+            temporaryStorageAllocatorClearSupported: info.TemporaryStorageAllocatorClearSupported != 0,
+            debugListenerClearSupported: info.DebugListenerClearSupported != 0,
+            outputAllocatorCleared: info.OutputAllocatorCleared != 0,
+            temporaryStorageAllocatorCleared: info.TemporaryStorageAllocatorCleared != 0,
+            debugListenerCleared: info.DebugListenerCleared != 0,
+            outputAllocatorInterfaceInfo: outputAllocatorInfo,
+            temporaryStorageAllocatorInterfaceInfo: temporaryStorageAllocatorInfo,
+            debugListenerInterfaceInfo: debugListenerInfo,
+            lastStatus: (BridgeStatusCode)info.LastStatus,
+            lastOperation: BridgeInfoMapper.ReadFixedUtf8(info.LastOperation),
+            diagnostic: BridgeInfoMapper.ReadFixedUtf8(info.LastDiagnostic));
+    }
+
+    private TensorRtExecutionContextCallbackStateSnapshot CreateUnavailableCallbackStateSnapshot(string outputTensorName)
+    {
+        _ = outputTensorName;
+        TensorRtInterfaceInfo unavailable = new TensorRtInterfaceInfo(string.Empty, 0, 0);
+        return new TensorRtExecutionContextCallbackStateSnapshot(
+            line: Line,
+            hasOutputAllocator: false,
+            hasTemporaryStorageAllocator: false,
+            hasDebugListener: false,
+            outputAllocatorInterfaceInfoAvailable: false,
+            temporaryStorageAllocatorInterfaceInfoAvailable: false,
+            debugListenerInterfaceInfoAvailable: false,
+            outputAllocatorClearSupported: false,
+            temporaryStorageAllocatorClearSupported: false,
+            debugListenerClearSupported: false,
+            outputAllocatorCleared: false,
+            temporaryStorageAllocatorCleared: false,
+            debugListenerCleared: false,
+            outputAllocatorInterfaceInfo: unavailable,
+            temporaryStorageAllocatorInterfaceInfo: unavailable,
+            debugListenerInterfaceInfo: unavailable,
+            lastStatus: BridgeStatusCode.NotSupported,
+            lastOperation: "Unavailable",
+            diagnostic: "Callback state snapshot unavailable.");
     }
 }

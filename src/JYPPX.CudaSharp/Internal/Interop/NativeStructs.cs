@@ -82,6 +82,19 @@ internal struct NativeCudaDeviceInfo
 }
 
 [StructLayout(LayoutKind.Sequential)]
+internal struct NativeCudaDeviceSelectionRequirements
+{
+    public int Major;
+    public int Minor;
+    public int MultiProcessorCount;
+    public int WarpSize;
+    public int MaxThreadsPerBlock;
+    public int CanMapHostMemory;
+    public int Integrated;
+    public ulong TotalGlobalMemory;
+}
+
+[StructLayout(LayoutKind.Sequential)]
 internal struct NativeCudaMemoryInfo
 {
     public ulong FreeBytes;
@@ -95,6 +108,13 @@ internal struct NativeCudaPointerAttributes
     public int Device;
     public ulong DevicePointer;
     public ulong HostPointer;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+internal struct NativeCudaMemRangeAttributeValue
+{
+    public int Attribute;
+    public int Value;
 }
 
 [StructLayout(LayoutKind.Sequential)]
@@ -243,6 +263,68 @@ internal struct NativeCudaMemPoolPtrExportData
 {
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
     public byte[] Reserved;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+internal struct NativeCudaGraphEdgeData
+{
+    public byte FromPort;
+    public byte ToPort;
+    public byte Type;
+    public byte Reserved0;
+    public byte Reserved1;
+    public byte Reserved2;
+    public byte Reserved3;
+    public byte Reserved4;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+internal struct NativeCudaGraphMemsetNodeParams
+{
+    public ulong DestinationAddress;
+    public ulong Pitch;
+    public uint Value;
+    public uint ElementSize;
+    public ulong Width;
+    public ulong Height;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+internal struct NativeCudaGraphMemcpyNodeParams
+{
+    public ulong SourceAddress;
+    public ulong DestinationAddress;
+    public ulong SourcePitch;
+    public ulong DestinationPitch;
+    public ulong SourceXSize;
+    public ulong SourceYSize;
+    public ulong DestinationXSize;
+    public ulong DestinationYSize;
+    public ulong SourcePositionX;
+    public ulong SourcePositionY;
+    public ulong SourcePositionZ;
+    public ulong DestinationPositionX;
+    public ulong DestinationPositionY;
+    public ulong DestinationPositionZ;
+    public ulong Width;
+    public ulong Height;
+    public ulong Depth;
+    public int Kind;
+    public uint SourceIsArray;
+    public uint DestinationIsArray;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+internal struct NativeCudaGraphKernelNodeAttributeValue
+{
+    public int Attribute;
+    public int IntValue;
+    public uint X;
+    public uint Y;
+    public uint Z;
+    public uint Reserved0;
+    public uint Reserved1;
+    public uint Reserved2;
 }
 
 [StructLayout(LayoutKind.Sequential)]

@@ -155,7 +155,17 @@ public sealed partial class TensorRtNetworkDefinition : IDisposable
     /// </summary>
     public TensorRtLayer GetLayer(int index)
     {
-        return new TensorRtLayer(Line, NativeBridgeApi.GetNetworkLayer(Line, _handle, index));
+        SafeTensorRtObjectHandleLease ownerLease = SafeTensorRtObjectHandleLease.Create(_handle);
+        try
+        {
+            SafeTensorRtObjectHandle layer = NativeBridgeApi.GetNetworkLayer(Line, _handle, index);
+            return new TensorRtLayer(Line, layer, ownerLease);
+        }
+        catch
+        {
+            ownerLease.Dispose();
+            throw;
+        }
     }
 
     /// <summary>

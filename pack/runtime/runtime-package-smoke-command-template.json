@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "runtime-package-smoke-command-template.v1",
+  "title": "Runtime package smoke command template",
+  "description": "Command placeholders for external clean consumer runtime package validation. This template is not runtime proof until executed on a real compatible host with validator-passing evidence.",
+  "canPublishPublicly": false,
+  "canCloseReleaseIssue": false,
+  "boundary": {
+    "isRuntimeProof": false,
+    "evidenceKind": "template; not runtime proof; not post-publish proof; not package push",
+    "forbiddenSubstitutes": [
+      "build-only",
+      "dry-run",
+      "template",
+      "local feed",
+      "ProjectReference",
+      "direct `.nupkg`",
+      "TensorRtExec report",
+      "YoloVision matrix",
+      "OnnxToEngine report",
+      "readonly diagnostics"
+    ]
+  },
+  "requiredEvidenceFields": [
+    "hostMetadata",
+    "packageSource",
+    "managedPackageSha256",
+    "runtimePackageSha256",
+    "restoreExitCode",
+    "buildExitCode",
+    "nativeLoadExitCode",
+    "smokeExitCode",
+    "stdoutSummary",
+    "stderrSummary",
+    "validatorResult"
+  ],
+  "windowsPowerShell": {
+    "restore": "dotnet restore .\\CleanConsumer.csproj --source <public-or-owner-approved-package-source>",
+    "build": "dotnet build .\\CleanConsumer.csproj -c Release --no-restore",
+    "nativeLoad": "dotnet run --project .\\CleanConsumer.csproj -c Release --no-build -- --smoke native-load",
+    "deserialize": "dotnet run --project .\\CleanConsumer.csproj -c Release --no-build -- --smoke deserialize --engine <engine-path>",
+    "sampleRun": "dotnet run --project .\\CleanConsumer.csproj -c Release --no-build -- --smoke sample-run --engine <engine-path> --input <input-path>",
+    "validator": "pwsh -NoProfile -ExecutionPolicy Bypass -File <repo>\\eng\\Test-ExternalRuntimeProofRecord.ps1 -Record <record-path> -FailOnNotPromotable"
+  },
+  "linuxBash": {
+    "restore": "dotnet restore ./CleanConsumer.csproj --source <public-or-owner-approved-package-source>",
+    "build": "dotnet build ./CleanConsumer.csproj -c Release --no-restore",
+    "nativeLoad": "dotnet run --project ./CleanConsumer.csproj -c Release --no-build -- --smoke native-load",
+    "deserialize": "dotnet run --project ./CleanConsumer.csproj -c Release --no-build -- --smoke deserialize --engine <engine-path>",
+    "sampleRun": "dotnet run --project ./CleanConsumer.csproj -c Release --no-build -- --smoke sample-run --engine <engine-path> --input <input-path>",
+    "validator": "pwsh -NoProfile -ExecutionPolicy Bypass -File <repo>/eng/Test-ExternalRuntimeProofRecord.ps1 -Record <record-path> -FailOnNotPromotable"
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "$schema": "../../bridge-api.schema.json",
+  "module": "tensorrt",
+  "versionLine": "8",
+  "apis": [
+    {
+      "id": "trt8-allocator-owner-native-dry-run-create",
+      "entryPoint": "jyppx_trt8_allocator_owner_dry_run_create",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "out_owner", "type": "JYPPX_TensorRtAllocatorOwner**", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt8-allocator-owner-native-dry-run-emit-diagnostic",
+      "entryPoint": "jyppx_trt8_allocator_owner_dry_run_emit_diagnostic",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "owner", "type": "JYPPX_TensorRtAllocatorOwner*", "direction": "in" },
+        { "name": "size", "type": "uint64_t", "direction": "in" },
+        { "name": "alignment", "type": "uint64_t", "direction": "in" },
+        { "name": "reason", "type": "const char*", "direction": "in" },
+        { "name": "out_info", "type": "JYPPX_TensorRtAllocatorOwnerDiagnosticInfo*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt8-allocator-owner-native-dry-run-get-info",
+      "entryPoint": "jyppx_trt8_allocator_owner_dry_run_get_info",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "owner", "type": "JYPPX_TensorRtAllocatorOwner*", "direction": "in" },
+        { "name": "out_info", "type": "JYPPX_TensorRtAllocatorOwnerDiagnosticInfo*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt8-allocator-owner-native-dry-run-get-state",
+      "entryPoint": "jyppx_trt8_allocator_owner_dry_run_get_state",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "owner", "type": "JYPPX_TensorRtAllocatorOwner*", "direction": "in" },
+        { "name": "out_info", "type": "JYPPX_TensorRtAllocatorOwnerStateInfo*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt8-allocator-owner-native-dry-run-attach-intent",
+      "entryPoint": "jyppx_trt8_allocator_owner_dry_run_attach_intent",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "owner", "type": "JYPPX_TensorRtAllocatorOwner*", "direction": "in" },
+        { "name": "target_kind", "type": "const char*", "direction": "in" },
+        { "name": "out_info", "type": "JYPPX_TensorRtAllocatorOwnerStateInfo*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt8-allocator-owner-native-dry-run-detach-intent",
+      "entryPoint": "jyppx_trt8_allocator_owner_dry_run_detach_intent",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "owner", "type": "JYPPX_TensorRtAllocatorOwner*", "direction": "in" },
+        { "name": "target_kind", "type": "const char*", "direction": "in" },
+        { "name": "out_info", "type": "JYPPX_TensorRtAllocatorOwnerStateInfo*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt8-allocator-owner-native-dry-run-ledger-record-allocation-intent",
+      "entryPoint": "jyppx_trt8_allocator_owner_dry_run_ledger_record_allocation_intent",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "owner", "type": "JYPPX_TensorRtAllocatorOwner*", "direction": "in" },
+        { "name": "size", "type": "uint64_t", "direction": "in" },
+        { "name": "alignment", "type": "uint64_t", "direction": "in" },
+        { "name": "stream_value", "type": "uint64_t", "direction": "in" },
+        { "name": "out_info", "type": "JYPPX_TensorRtAllocatorOwnerStateInfo*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt8-allocator-owner-native-dry-run-ledger-record-release-intent",
+      "entryPoint": "jyppx_trt8_allocator_owner_dry_run_ledger_record_release_intent",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "owner", "type": "JYPPX_TensorRtAllocatorOwner*", "direction": "in" },
+        { "name": "allocation_id", "type": "uint64_t", "direction": "in" },
+        { "name": "stream_value", "type": "uint64_t", "direction": "in" },
+        { "name": "out_info", "type": "JYPPX_TensorRtAllocatorOwnerStateInfo*", "direction": "out" }
+      ]
+    }
+  ]
+}

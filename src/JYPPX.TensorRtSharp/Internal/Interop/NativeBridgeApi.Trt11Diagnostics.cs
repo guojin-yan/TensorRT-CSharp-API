@@ -22,46 +22,95 @@ internal static partial class NativeBridgeApi
 
     public static bool CanBuilderConfigRunLayerOnDla(TensorRtApiLine line, SafeTensorRtObjectHandle config, SafeTensorRtObjectHandle layer)
     {
-        EnsureTensorRt11DeploymentApi(line, nameof(CanBuilderConfigRunLayerOnDla));
-        BridgeStatusCode status = NativeMethodsTensorRt.jyppx_trt11_builder_config_can_run_on_dla(config, layer, out int canRun);
+        int canRun;
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_builder_config_can_run_on_dla(config, layer, out canRun),
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_config_can_run_on_dla(config, layer, out canRun),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_builder_config_can_run_on_dla(config, layer, out canRun),
+            _ => throw UnsupportedLine()
+        };
         NativeStatus.ThrowIfFailed(status);
         return canRun != 0;
     }
 
     public static void ClearBuilderConfigPluginsToSerialize(TensorRtApiLine line, SafeTensorRtObjectHandle config)
     {
-        EnsureTensorRt11DeploymentApi(line, nameof(ClearBuilderConfigPluginsToSerialize));
-        NativeStatus.ThrowIfFailed(NativeMethodsTensorRt.jyppx_trt11_builder_config_clear_plugins_to_serialize(config));
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_config_clear_plugins_to_serialize(config),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_builder_config_clear_plugins_to_serialize(config),
+            TensorRtApiLine.TensorRt8 => throw new BridgeProbeException(BridgeStatusCode.NotSupported, BridgeErrorCategory.TensorRt, $"{nameof(ClearBuilderConfigPluginsToSerialize)} is available for TensorRT 10 and TensorRT 11 adapters."),
+            _ => throw UnsupportedLine()
+        };
+
+        NativeStatus.ThrowIfFailed(status);
     }
 
     public static int GetBuilderConfigPluginToSerializeCount(TensorRtApiLine line, SafeTensorRtObjectHandle config)
     {
-        EnsureTensorRt11DeploymentApi(line, nameof(GetBuilderConfigPluginToSerializeCount));
-        BridgeStatusCode status = NativeMethodsTensorRt.jyppx_trt11_builder_config_get_plugin_to_serialize_count(config, out int count);
+        int count;
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_builder_config_get_nb_plugins_to_serialize(config, out count),
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_config_get_nb_plugins_to_serialize(config, out count),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_builder_config_get_nb_plugins_to_serialize(config, out count),
+            _ => throw UnsupportedLine()
+        };
+
         NativeStatus.ThrowIfFailed(status);
         return count;
     }
 
     public static string GetBuilderConfigPluginToSerialize(TensorRtApiLine line, SafeTensorRtObjectHandle config, int index)
     {
-        EnsureTensorRt11DeploymentApi(line, nameof(GetBuilderConfigPluginToSerialize));
+        EnsureTensorRt10Or11(line, nameof(GetBuilderConfigPluginToSerialize));
         return ReadUtf8Buffer(
-            (byte[] buffer, UIntPtr size, out UIntPtr required) => NativeMethodsTensorRt.jyppx_trt11_builder_config_get_plugin_to_serialize(config, index, buffer, size, out required),
+            (byte[] buffer, UIntPtr size, out UIntPtr required) => line switch
+            {
+                TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_config_get_plugin_to_serialize(config, index, buffer, size, out required),
+                TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_builder_config_get_plugin_to_serialize(config, index, buffer, size, out required),
+                _ => throw UnsupportedLine()
+            },
             "Serialized plugin path is too large for the managed buffer.");
     }
 
     public static bool HasBuilderConfigProgressMonitor(TensorRtApiLine line, SafeTensorRtObjectHandle config)
     {
-        EnsureTensorRt11DeploymentApi(line, nameof(HasBuilderConfigProgressMonitor));
-        BridgeStatusCode status = NativeMethodsTensorRt.jyppx_trt11_builder_config_has_progress_monitor(config, out int hasMonitor);
+        int hasMonitor;
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_config_has_progress_monitor(config, out hasMonitor),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_builder_config_has_progress_monitor(config, out hasMonitor),
+            TensorRtApiLine.TensorRt8 => throw new BridgeProbeException(BridgeStatusCode.NotSupported, BridgeErrorCategory.TensorRt, $"{nameof(HasBuilderConfigProgressMonitor)} is available for TensorRT 10 and TensorRT 11 adapters."),
+            _ => throw UnsupportedLine()
+        };
         NativeStatus.ThrowIfFailed(status);
         return hasMonitor != 0;
     }
 
     public static void ClearBuilderConfigProgressMonitor(TensorRtApiLine line, SafeTensorRtObjectHandle config)
     {
-        EnsureTensorRt11DeploymentApi(line, nameof(ClearBuilderConfigProgressMonitor));
-        NativeStatus.ThrowIfFailed(NativeMethodsTensorRt.jyppx_trt11_builder_config_clear_progress_monitor(config));
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_config_clear_progress_monitor(config),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_builder_config_clear_progress_monitor(config),
+            TensorRtApiLine.TensorRt8 => throw new BridgeProbeException(BridgeStatusCode.NotSupported, BridgeErrorCategory.TensorRt, $"{nameof(ClearBuilderConfigProgressMonitor)} is available for TensorRT 10 and TensorRT 11 adapters."),
+            _ => throw UnsupportedLine()
+        };
+        NativeStatus.ThrowIfFailed(status);
+    }
+
+    public static void SetBuilderConfigProgressMonitor(TensorRtApiLine line, SafeTensorRtObjectHandle config, SafeTensorRtObjectHandle monitor)
+    {
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_config_set_progress_monitor(config, monitor),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_builder_config_set_progress_monitor(config, monitor),
+            TensorRtApiLine.TensorRt8 => throw new BridgeProbeException(BridgeStatusCode.NotSupported, BridgeErrorCategory.TensorRt, $"{nameof(SetBuilderConfigProgressMonitor)} is available for TensorRT 10 and TensorRT 11 adapters."),
+            _ => throw UnsupportedLine()
+        };
+        NativeStatus.ThrowIfFailed(status);
     }
 
     public static bool MarkNetworkDebugTensor(TensorRtApiLine line, SafeTensorRtObjectHandle network, SafeTensorRtObjectHandle tensor)
@@ -179,8 +228,14 @@ internal static partial class NativeBridgeApi
 
     public static bool HasEngineInspectorErrorRecorder(TensorRtApiLine line, SafeTensorRtObjectHandle inspector)
     {
-        EnsureTensorRt11DeploymentApi(line, nameof(HasEngineInspectorErrorRecorder));
-        BridgeStatusCode status = NativeMethodsTensorRt.jyppx_trt11_engine_inspector_has_error_recorder(inspector, out int hasRecorder);
+        int hasRecorder = 0;
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_engine_inspector_has_error_recorder(inspector, out hasRecorder),
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_engine_inspector_has_error_recorder(inspector, out hasRecorder),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_engine_inspector_has_error_recorder(inspector, out hasRecorder),
+            _ => throw UnsupportedLine()
+        };
         NativeStatus.ThrowIfFailed(status);
         return hasRecorder != 0;
     }
@@ -207,50 +262,98 @@ internal static partial class NativeBridgeApi
 
     public static bool ClearExecutionContextOutputAllocator(TensorRtApiLine line, SafeTensorRtObjectHandle context, string tensorName)
     {
-        EnsureTensorRt11DeploymentApi(line, nameof(ClearExecutionContextOutputAllocator));
         ValidateTensorName(tensorName);
         using Utf8Interop.Utf8StringScope tensorNameUtf8 = Utf8Interop.ToNativeString(tensorName);
-        BridgeStatusCode status = NativeMethodsTensorRt.jyppx_trt11_execution_context_clear_output_allocator(context, tensorNameUtf8.Pointer, out int cleared);
+        int cleared = 0;
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_execution_context_clear_output_allocator(context, tensorNameUtf8.Pointer, out cleared),
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_execution_context_clear_output_allocator(context, tensorNameUtf8.Pointer, out cleared),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_execution_context_clear_output_allocator(context, tensorNameUtf8.Pointer, out cleared),
+            _ => throw UnsupportedLine()
+        };
         NativeStatus.ThrowIfFailed(status);
         return cleared != 0;
     }
 
     public static bool ClearExecutionContextTemporaryStorageAllocator(TensorRtApiLine line, SafeTensorRtObjectHandle context)
     {
-        EnsureTensorRt11DeploymentApi(line, nameof(ClearExecutionContextTemporaryStorageAllocator));
-        BridgeStatusCode status = NativeMethodsTensorRt.jyppx_trt11_execution_context_clear_temporary_storage_allocator(context, out int cleared);
+        int cleared = 0;
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_execution_context_clear_temporary_storage_allocator(context, out cleared),
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_execution_context_clear_temporary_storage_allocator(context, out cleared),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_execution_context_clear_temporary_storage_allocator(context, out cleared),
+            _ => throw UnsupportedLine()
+        };
         NativeStatus.ThrowIfFailed(status);
         return cleared != 0;
     }
 
     public static bool ClearExecutionContextDebugListener(TensorRtApiLine line, SafeTensorRtObjectHandle context)
     {
-        EnsureTensorRt11DeploymentApi(line, nameof(ClearExecutionContextDebugListener));
-        BridgeStatusCode status = NativeMethodsTensorRt.jyppx_trt11_execution_context_clear_debug_listener(context, out int cleared);
+        int cleared;
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_execution_context_clear_debug_listener(context, out cleared),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_execution_context_clear_debug_listener(context, out cleared),
+            TensorRtApiLine.TensorRt8 => throw new BridgeProbeException(BridgeStatusCode.NotSupported, BridgeErrorCategory.TensorRt, $"{nameof(ClearExecutionContextDebugListener)} is available for TensorRT 10 and TensorRT 11 adapters."),
+            _ => throw UnsupportedLine()
+        };
         NativeStatus.ThrowIfFailed(status);
         return cleared != 0;
     }
 
     public static bool HasExecutionContextDebugListener(TensorRtApiLine line, SafeTensorRtObjectHandle context)
     {
-        EnsureTensorRt11DeploymentApi(line, nameof(HasExecutionContextDebugListener));
-        BridgeStatusCode status = NativeMethodsTensorRt.jyppx_trt11_execution_context_has_debug_listener(context, out int hasListener);
+        int hasListener;
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_execution_context_has_debug_listener(context, out hasListener),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_execution_context_has_debug_listener(context, out hasListener),
+            TensorRtApiLine.TensorRt8 => throw new BridgeProbeException(BridgeStatusCode.NotSupported, BridgeErrorCategory.TensorRt, $"{nameof(HasExecutionContextDebugListener)} is available for TensorRT 10 and TensorRT 11 adapters."),
+            _ => throw UnsupportedLine()
+        };
         NativeStatus.ThrowIfFailed(status);
         return hasListener != 0;
     }
 
     public static void ClearExecutionContextProfiler(TensorRtApiLine line, SafeTensorRtObjectHandle context)
     {
-        EnsureTensorRt11DeploymentApi(line, nameof(ClearExecutionContextProfiler));
-        NativeStatus.ThrowIfFailed(NativeMethodsTensorRt.jyppx_trt11_execution_context_clear_profiler(context));
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_execution_context_clear_profiler(context),
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_execution_context_clear_profiler(context),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_execution_context_clear_profiler(context),
+            _ => throw UnsupportedLine()
+        };
+        NativeStatus.ThrowIfFailed(status);
     }
 
     public static bool HasExecutionContextProfiler(TensorRtApiLine line, SafeTensorRtObjectHandle context)
     {
-        EnsureTensorRt11DeploymentApi(line, nameof(HasExecutionContextProfiler));
-        BridgeStatusCode status = NativeMethodsTensorRt.jyppx_trt11_execution_context_has_profiler(context, out int hasProfiler);
+        int hasProfiler;
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_execution_context_has_profiler(context, out hasProfiler),
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_execution_context_has_profiler(context, out hasProfiler),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_execution_context_has_profiler(context, out hasProfiler),
+            _ => throw UnsupportedLine()
+        };
         NativeStatus.ThrowIfFailed(status);
         return hasProfiler != 0;
+    }
+
+    public static void SetExecutionContextProfiler(TensorRtApiLine line, SafeTensorRtObjectHandle context, SafeTensorRtObjectHandle profiler)
+    {
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_execution_context_set_profiler(context, profiler),
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_execution_context_set_profiler(context, profiler),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_execution_context_set_profiler(context, profiler),
+            _ => throw UnsupportedLine()
+        };
+        NativeStatus.ThrowIfFailed(status);
     }
 
     public static bool HasExecutionContextRuntimeConfig(TensorRtApiLine line, SafeTensorRtObjectHandle context)
@@ -263,16 +366,28 @@ internal static partial class NativeBridgeApi
 
     public static bool SetExecutionContextNvtxVerbosity(TensorRtApiLine line, SafeTensorRtObjectHandle context, TensorRtProfilingVerbosity verbosity)
     {
-        EnsureTensorRt11DeploymentApi(line, nameof(SetExecutionContextNvtxVerbosity));
-        BridgeStatusCode status = NativeMethodsTensorRt.jyppx_trt11_execution_context_set_nvtx_verbosity(context, (int)verbosity, out int set);
+        int set = 0;
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_execution_context_set_nvtx_verbosity(context, (int)verbosity, out set),
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_execution_context_set_nvtx_verbosity(context, (int)verbosity, out set),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_execution_context_set_nvtx_verbosity(context, (int)verbosity, out set),
+            _ => throw UnsupportedLine()
+        };
         NativeStatus.ThrowIfFailed(status);
         return set != 0;
     }
 
     public static TensorRtProfilingVerbosity GetExecutionContextNvtxVerbosity(TensorRtApiLine line, SafeTensorRtObjectHandle context)
     {
-        EnsureTensorRt11DeploymentApi(line, nameof(GetExecutionContextNvtxVerbosity));
-        BridgeStatusCode status = NativeMethodsTensorRt.jyppx_trt11_execution_context_get_nvtx_verbosity(context, out int verbosity);
+        int verbosity = 0;
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_execution_context_get_nvtx_verbosity(context, out verbosity),
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_execution_context_get_nvtx_verbosity(context, out verbosity),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_execution_context_get_nvtx_verbosity(context, out verbosity),
+            _ => throw UnsupportedLine()
+        };
         NativeStatus.ThrowIfFailed(status);
         return (TensorRtProfilingVerbosity)verbosity;
     }

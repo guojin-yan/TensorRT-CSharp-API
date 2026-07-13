@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "sampleName": "YoloVision",
+  "candidateId": "yolovision-yolov8-obb-candidate",
+  "status": "owner-action-required",
+  "runtimeProofState": "owner-action-required",
+  "proofClassification": "template-only",
+  "canPromoteRealModelRuntime": false,
+  "canPromotePackageConsumerRuntime": false,
+  "taskOutputContract": "samples/YoloVision/yolovision-task-output-contract.json",
+  "family": "YOLOv8",
+  "task": "obb",
+  "model": {
+    "name": "YOLOv8 oriented bounding box candidate",
+    "sourceUrl": "owner-required official or self-trained YOLOv8 OBB model source",
+    "downloadUrl": "owner-required",
+    "license": "owner-required",
+    "licenseEvidence": "owner-required",
+    "localPath": "models/yolov8-obb.onnx",
+    "sha256": "owner-required",
+    "opset": "owner-required",
+    "onnxExportCommand": "yolo export model=yolov8n-obb.pt format=onnx imgsz=1024 opset=17 simplify=True dynamic=False"
+  },
+  "labels": {
+    "sourceUrl": "owner-required OBB dataset label source such as DOTAv1 labels",
+    "license": "owner-required",
+    "localPath": "models/dota.names",
+    "sha256": "owner-required",
+    "classCount": "owner-required"
+  },
+  "input": {
+    "imageSourceUrl": "owner-required redistributable OBB test image",
+    "imageLicense": "owner-required",
+    "imagePath": "models/yolov8-obb-test.jpg",
+    "imageSha256": "owner-required",
+    "preprocessedTensorPath": "models/yolov8-obb-fp32.bin",
+    "preprocessedTensorSha256": "owner-required",
+    "preprocessCommand": "owner-required command that performs resize/letterbox/RGB/normalize/NCHW conversion",
+    "inputShape": "1x3x1024x1024"
+  },
+  "outputMetadata": {
+    "inputTensorName": "images-or-owner-confirmed",
+    "outputTensorNames": ["output0-or-owner-confirmed"],
+    "outputRoleMap": "boxes:obb,scores:scores,classes:classes,angles:angle",
+    "classCount": "owner-required",
+    "angleOutput": "angle-or-owner-confirmed",
+    "boxFormat": "cx,cy,w,h,angle",
+    "outputShape": "1x(4+classes+angle)x8400 or owner-confirmed",
+    "layout": "auto",
+    "hasObjectness": "auto",
+    "angleUnit": "radians-or-owner-confirmed",
+    "rotatedBoxLayout": "cx,cy,w,h,angle",
+    "coordinateSpace": "letterboxed-input-or-original-image-owner-confirmed",
+    "postprocessMetadata": {
+      "confidence": 0.25,
+      "iouThreshold": 0.45,
+      "nmsMode": "rotated-class-aware",
+      "nmsLocation": "application-side",
+      "angleRange": "owner-required"
+    }
+  },
+  "commands": {
+    "tensorRtExecBuildCommand": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\yolov8-obb.onnx --saveEngine .\\models\\yolov8-obb.plan --minShapes images:1x3x1024x1024 --optShapes images:1x3x1024x1024 --maxShapes images:2x3x1024x1024 --fp16 --workspace 1024 --buildOnly --exportReport .\\models\\yolov8-obb-build-report.json --evidenceSidecar .\\models\\yolov8-obb-evidence.sidecar.json",
+    "yoloVisionRunCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8-obb.onnx --labels .\\models\\dota.names --input-data .\\models\\yolov8-obb-fp32.bin --input-shape 1x3x1024x1024 --tensor-rt-line 10 --family v8 --task obb --output-role-map boxes:obb,scores:scores,classes:classes,angles:angle --rotated-box-layout cx,cy,w,h,angle --angle-unit radians-or-owner-confirmed --layout auto --has-objectness auto --nms-mode rotated-class-aware --confidence 0.25 --iou-threshold 0.45"
+  },
+  "proofChecklist": {
+    "requiredEvidenceLines": [
+      "YoloVision TensorRtLine=...",
+      "Profile Family=v8 Task=OBB Layout=... Nms=... NmsMode=rotated-class-aware",
+      "InputSource=external InputFile=...",
+      "Output=... Outputs=...",
+      "Postprocess Task=OBB;Detections=...;RotatedBoxes=...",
+      "OBB AngleUnit=... RotatedBoxLayout=cx,cy,w,h,angle",
+      "YoloVision Passed=True"
+    ],
+    "requiredHashes": ["modelSha256", "labelsSha256", "imageSha256", "preprocessedTensorSha256", "runLogSha256"],
+    "stdoutSummary": "owner-required",
+    "stderrSummary": "owner-required or explicit no-stderr-emitted",
+    "notProofUntil": "owner backfills real assets for OBB, rotated-box metadata, hashes, run log, stdout/stderr summaries, and validator passes",
+    "packageConsumerBoundary": "This candidate can support real-model-runtime only; package-consumer-runtime must come from clean external package consumer validators."
+  }
+}

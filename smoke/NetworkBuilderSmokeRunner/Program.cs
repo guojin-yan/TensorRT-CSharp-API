@@ -9,6 +9,18 @@ internal static class Program
 {
     private static void Main(string[] args)
     {
+        try
+        {
+            Run(args);
+        }
+        catch (Exception exception) when (IsSkippableEnvironmentException(exception))
+        {
+            Console.WriteLine($"Skipped=True Reason={exception.GetType().Name}:{exception.Message}");
+        }
+    }
+
+    private static void Run(string[] args)
+    {
         TensorRtApiLine line = ResolveLine(JYPPX.SampleSupport.SampleCommandLine.GetStringArgument(args, "--tensor-rt-line", "10"));
         int batch = JYPPX.SampleSupport.SampleCommandLine.GetIntArgument(args, "--batch", 2);
         if (batch < 1 || batch > 4)
@@ -36,7 +48,9 @@ internal static class Program
         using TensorRtBuilder builder = new TensorRtBuilder(logger);
         using TensorRtBuilderConfig config = builder.CreateBuilderConfig();
         using CudaStream stream = new CudaStream();
-        config.SetMemoryPoolLimit(TensorRtMemoryPoolType.Workspace, 64UL * 1024UL * 1024UL);
+        const ulong workspaceMemoryPoolLimit = 64UL * 1024UL * 1024UL;
+        config.SetMemoryPoolLimit(TensorRtMemoryPoolType.Workspace, workspaceMemoryPoolLimit);
+        ulong configuredWorkspaceMemoryPoolLimit = config.GetMemoryPoolLimit(TensorRtMemoryPoolType.Workspace);
         config.SetOptimizationLevel(3);
         config.SetMaxAuxStreams(0);
         config.SetProfilingVerbosity(TensorRtProfilingVerbosity.Detailed);
@@ -44,11 +58,14 @@ internal static class Program
         config.SetHardwareCompatibilityLevel(TensorRtHardwareCompatibilityLevel.None);
         config.SetProfileStream(stream);
         bool profileStreamSet = config.IsProfileStreamSet;
+        string builderScalarControlState = ProbeBuilderScalarControls(builder, config);
         string builderConfigDeploymentState = ProbeBuilderConfigDeploymentState(config, line);
+        string pluginSerializeCountState = ProbeSerializedPluginPathCount(config);
 
         using TensorRtNetworkDefinition network = builder.CreateNetwork(TensorRtNetworkDefinitionCreationFlags.ExplicitBatch);
         using TensorRtTensor inputTensor = network.AddInput("input", TensorRtDataType.Float, new TensorRtDims(new[] { -1, 4 }));
         using TensorRtLayer identity = network.AddIdentity(inputTensor);
+        string layerDlaCapabilityState = ProbeLayerDlaCapability(config, identity);
         using TensorRtTensor outputTensor = identity.GetOutput(0);
         outputTensor.Name = "output";
         network.MarkOutput(outputTensor);
@@ -71,6 +88,7 @@ internal static class Program
 
         using TensorRtHostMemory hostMemory = builder.BuildSerializedNetwork(network, config);
         using TensorRtEngine engine = runtime.Deserialize(hostMemory);
+        string engineImplicitBatchState = ProbeEngineImplicitBatchCompatibility(engine);
         using TensorRtEngineInspector inspector = engine.CreateInspector();
         using TensorRtExecutionContext context = engine.CreateExecutionContext();
 
@@ -102,8 +120,8 @@ internal static class Program
         string inspectorText = inspector.GetEngineInformation(TensorRtLayerInformationFormat.Oneline);
         ulong profileMemory = line == TensorRtApiLine.TensorRt10 ? engine.GetDeviceMemorySizeForProfileV2(profileIndex) : engine.DeviceMemorySizeInBytes;
         Console.WriteLine($"ProfileIndex={profileIndex} HostMemory={hostMemory.SizeInBytes} EngineIOTensors={engine.IOTensorCount}");
-        Console.WriteLine($"BuilderConfig OptLevel={config.GetOptimizationLevel()} AuxStreams={config.GetMaxAuxStreams()} Profiling={config.GetProfilingVerbosity()} ProfileStream={profileStreamSet} ProfileCount={configProfileCount} CalibrationProfile={calibrationProfileState} {builderConfigDeploymentState}");
-        Console.WriteLine($"EngineMemory Device={engine.DeviceMemorySizeInBytes} Profile={profileMemory} AuxStreams={engine.AuxiliaryStreamCount}");
+        Console.WriteLine($"BuilderConfig OptLevel={config.GetOptimizationLevel()} AuxStreams={config.GetMaxAuxStreams()} Profiling={config.GetProfilingVerbosity()} WorkspaceMemoryPoolLimit={configuredWorkspaceMemoryPoolLimit} ProfileStream={profileStreamSet} ProfileCount={configProfileCount} CalibrationProfile={calibrationProfileState} PluginSerializeCount={pluginSerializeCountState} {builderScalarControlState} {layerDlaCapabilityState} {builderConfigDeploymentState}");
+        Console.WriteLine($"EngineMemory Device={engine.DeviceMemorySizeInBytes} Profile={profileMemory} AuxStreams={engine.AuxiliaryStreamCount} ImplicitBatch={engineImplicitBatchState}");
         Console.WriteLine($"ProfileConfigured Min={configuredProfileRange.Min} Opt={configuredProfileRange.Opt} Max={configuredProfileRange.Max} Valid={configuredProfileValid} ExtraMemoryTarget={profileExtraMemoryTarget} ShapeValueCount={inputShapeValueCount}");
         Console.WriteLine($"Readiness Ready={readiness.IsReadyForEnqueue} Bound={readiness.AllTensorAddressesBound} Missing={readiness.ShapeInferenceMissingTensorCount?.ToString() ?? "n/a"} ActiveProfile={readiness.ActiveOptimizationProfile} Tensors={readiness.Tensors.Count}");
         Console.WriteLine($"BindingReport Ready={bindingReport.IsReadyForEnqueue} Profile={bindingReport.ProfileIndex} Inputs={bindingReport.GetInputs().Count} Outputs={bindingReport.GetOutputs().Count} Tensors={bindingReport.Tensors.Count} Formats=[{bindingSummary}]");
@@ -135,6 +153,169 @@ internal static class Program
     }
 
 
+    static string ProbeBuilderScalarControls(TensorRtBuilder builder, TensorRtBuilderConfig config)
+    {
+        try
+        {
+            int originalMaxThreads = builder.MaxThreads;
+            int targetMaxThreads = Math.Max(1, originalMaxThreads);
+            bool maxThreadsAccepted = builder.SetMaxThreads(targetMaxThreads);
+            int currentMaxThreads = builder.MaxThreads;
+            int maxDlaBatchSize = builder.MaxDlaBatchSize;
+            string maxBatchSizeCompatibility = ProbeBuilderMaxBatchSizeCompatibility(builder);
+            config.SetDefaultDeviceType(TensorRtDeviceType.Gpu);
+            TensorRtDeviceType defaultDeviceType = config.GetDefaultDeviceType();
+            TensorRtBuilderFlags builderFlags = config.GetFlags();
+            int dlaCore = config.GetDlaCore();
+            string legacyConfig = ProbeBuilderConfigLegacyCompatibility(config);
+            string quantization = ProbeQuantizationFlags(config);
+            string tiling = ProbeTilingControls(config);
+            string callbackPresence = ProbeBuilderConfigCallbackPresence(config);
+            return $"ScalarControls=MaxThreads:{originalMaxThreads}->{currentMaxThreads}:Set={maxThreadsAccepted};MaxDlaBatch={maxDlaBatchSize};{maxBatchSizeCompatibility};DefaultDevice={defaultDeviceType};BuilderFlags={builderFlags};DlaCore={dlaCore};{legacyConfig};{quantization};{tiling};{callbackPresence}";
+        }
+        catch (Exception exception) when (exception is BridgeProbeException || exception is NotSupportedException || exception is InvalidOperationException)
+        {
+            return $"ScalarControls=Skipped:{exception.GetType().Name}:{exception.Message}";
+        }
+    }
+
+    static string ProbeBuilderMaxBatchSizeCompatibility(TensorRtBuilder builder)
+    {
+        if (builder.Line != TensorRtApiLine.TensorRt8)
+        {
+            return "MaxBatchCompatibility=Skipped:ModernExplicitBatch";
+        }
+
+        try
+        {
+            return $"MaxBatchCompatibility={builder.MaxBatchSizeCompatibility}";
+        }
+        catch (Exception exception) when (exception is BridgeProbeException || exception is NotSupportedException || exception is InvalidOperationException)
+        {
+            return $"MaxBatchCompatibility=Skipped:{exception.GetType().Name}:{exception.Message}";
+        }
+    }
+
+    static string ProbeSerializedPluginPathCount(TensorRtBuilderConfig config)
+    {
+        try
+        {
+            return config.SerializedPluginPathCountCompatibility.ToString();
+        }
+        catch (Exception exception) when (exception is BridgeProbeException || exception is NotSupportedException || exception is InvalidOperationException)
+        {
+            return $"Skipped:{exception.GetType().Name}:{exception.Message}";
+        }
+    }
+
+    static string ProbeEngineImplicitBatchCompatibility(TensorRtEngine engine)
+    {
+        if (engine.Line == TensorRtApiLine.TensorRt11)
+        {
+            return "Skipped:TensorRt11ExplicitBatch";
+        }
+
+        try
+        {
+            return engine.HasImplicitBatchDimensionCompatibility.ToString();
+        }
+        catch (Exception exception) when (exception is BridgeProbeException || exception is NotSupportedException || exception is InvalidOperationException)
+        {
+            return $"Skipped:{exception.GetType().Name}:{exception.Message}";
+        }
+    }
+
+    static string ProbeBuilderConfigLegacyCompatibility(TensorRtBuilderConfig config)
+    {
+        if (config.Line != TensorRtApiLine.TensorRt8)
+        {
+            return "LegacyConfigCompatibility=Skipped:ModernMemoryPools";
+        }
+
+        try
+        {
+            return $"LegacyConfigCompatibility=Workspace:{config.MaxWorkspaceSizeCompatibilityInBytes};MinTiming:{config.MinTimingIterationsCompatibility}";
+        }
+        catch (Exception exception) when (exception is BridgeProbeException || exception is NotSupportedException || exception is InvalidOperationException)
+        {
+            return $"LegacyConfigCompatibility=Skipped:{exception.GetType().Name}:{exception.Message}";
+        }
+    }
+
+    static string ProbeQuantizationFlags(TensorRtBuilderConfig config)
+    {
+        if (config.Line == TensorRtApiLine.TensorRt11)
+        {
+            return "QuantizationFlags=Skipped:TensorRt11";
+        }
+
+        try
+        {
+            TensorRtQuantizationFlags originalFlags = config.GetQuantizationFlags();
+            config.SetQuantizationFlag(TensorRtQuantizationFlag.CalibrateBeforeFusion);
+            bool enabled = config.GetQuantizationFlag(TensorRtQuantizationFlag.CalibrateBeforeFusion);
+            config.ClearQuantizationFlag(TensorRtQuantizationFlag.CalibrateBeforeFusion);
+            TensorRtQuantizationFlags clearedFlags = config.GetQuantizationFlags();
+            config.SetQuantizationFlags(originalFlags);
+            return $"QuantizationFlags=Original:{originalFlags};Enabled={enabled};Cleared:{clearedFlags}";
+        }
+        catch (Exception exception) when (exception is BridgeProbeException || exception is NotSupportedException || exception is InvalidOperationException)
+        {
+            return $"QuantizationFlags=Skipped:{exception.GetType().Name}:{exception.Message}";
+        }
+    }
+
+    static string ProbeTilingControls(TensorRtBuilderConfig config)
+    {
+        if (config.Line == TensorRtApiLine.TensorRt8)
+        {
+            return "TilingControls=Skipped:TensorRt8";
+        }
+
+        try
+        {
+            int originalMaxTactics = config.GetMaxTactics();
+            TensorRtTilingOptimizationLevel originalLevel = config.GetTilingOptimizationLevel();
+            long originalL2Limit = config.GetL2LimitForTiling();
+            config.SetMaxTactics(Math.Max(0, originalMaxTactics));
+            bool tilingAccepted = config.SetTilingOptimizationLevel(TensorRtTilingOptimizationLevel.None);
+            bool l2Accepted = config.SetL2LimitForTiling(0);
+            TensorRtTilingOptimizationLevel currentLevel = config.GetTilingOptimizationLevel();
+            long currentL2Limit = config.GetL2LimitForTiling();
+            return $"TilingControls=MaxTactics:{originalMaxTactics};Tiling:{originalLevel}->{currentLevel}:Set={tilingAccepted};L2:{originalL2Limit}->{currentL2Limit}:Set={l2Accepted}";
+        }
+        catch (Exception exception) when (exception is BridgeProbeException || exception is NotSupportedException || exception is InvalidOperationException)
+        {
+            return $"TilingControls=Skipped:{exception.GetType().Name}:{exception.Message}";
+        }
+    }
+
+    static string ProbeBuilderConfigCallbackPresence(TensorRtBuilderConfig config)
+    {
+        try
+        {
+            bool hasAlgorithmSelector = config.HasAlgorithmSelectorCompatibility;
+            bool hasInt8Calibrator = config.HasInt8CalibratorCompatibility;
+            return $"CallbackPresence=AlgorithmSelector:{hasAlgorithmSelector};Int8Calibrator:{hasInt8Calibrator}";
+        }
+        catch (Exception exception) when (exception is BridgeProbeException || exception is NotSupportedException || exception is InvalidOperationException)
+        {
+            return $"CallbackPresence=Skipped:{exception.GetType().Name}:{exception.Message}";
+        }
+    }
+
+    static string ProbeLayerDlaCapability(TensorRtBuilderConfig config, TensorRtLayer layer)
+    {
+        try
+        {
+            return $"LayerDla={config.CanRunOnDla(layer)}";
+        }
+        catch (Exception exception) when (exception is BridgeProbeException || exception is NotSupportedException || exception is InvalidOperationException)
+        {
+            return $"LayerDla=Skipped:{exception.GetType().Name}:{exception.Message}";
+        }
+    }
+
     static string ProbeCalibrationProfile(TensorRtBuilderConfig config, TensorRtOptimizationProfile profile)
     {
         try
@@ -163,6 +344,26 @@ internal static class Program
             runtimePlatform = config.GetRuntimePlatform().ToString();
         }
 
-        return $"Capability={capability} HardwareCompatibility={hardwareCompatibility} PreviewFeature={previewFeature}:{previewEnabled} RuntimePlatform={runtimePlatform}";
+        TensorRtBuilderConfigDeploymentSnapshot deploymentSnapshot = config.GetDeploymentSnapshot();
+        return $"Capability={capability} HardwareCompatibility={hardwareCompatibility} PreviewFeature={previewFeature}:{previewEnabled} RuntimePlatform={runtimePlatform} DeploymentSnapshot={deploymentSnapshot.PluginToSerializeCount}/{deploymentSnapshot.SerializedPluginSnapshot.Count}/{deploymentSnapshot.SerializedPluginSnapshot.PluginLibraryPaths.Count}/{deploymentSnapshot.Diagnostics.Count}";
+    }
+
+    private static bool IsSkippableEnvironmentException(Exception exception)
+    {
+        if (exception is BridgeProbeException bridgeProbe)
+        {
+            return bridgeProbe.StatusCode == BridgeStatusCode.DependencyMissing ||
+                   bridgeProbe.StatusCode == BridgeStatusCode.NotSupported ||
+                   bridgeProbe.StatusCode == BridgeStatusCode.InvalidState ||
+                   IsKnownVendorSeh(bridgeProbe);
+        }
+
+        return false;
+    }
+
+    private static bool IsKnownVendorSeh(BridgeProbeException exception)
+    {
+        return exception.StatusCode == BridgeStatusCode.RuntimeError &&
+               exception.Message.Contains("structured exception with code 3228369022", StringComparison.Ordinal);
     }
 }

@@ -105,6 +105,88 @@ internal static partial class NativeCudaApi
         return (CudaPinnedMemoryAllocationFlags)flags;
     }
 
+    public static CudaAtomicCapability[] GetDeviceHostAtomicCapabilities(int device, CudaAtomicOperation[] operations)
+    {
+        return GetDeviceAtomicCapabilities(
+            operations,
+            (IntPtr capabilities, IntPtr pinnedOperations, uint count) =>
+                NativeMethodsCuda.jyppx_cuda_device_get_host_atomic_capabilities(capabilities, pinnedOperations, count, device));
+    }
+
+    public static CudaAtomicCapability[] GetDeviceP2PAtomicCapabilities(int sourceDevice, int destinationDevice, CudaAtomicOperation[] operations)
+    {
+        return GetDeviceAtomicCapabilities(
+            operations,
+            (IntPtr capabilities, IntPtr pinnedOperations, uint count) =>
+                NativeMethodsCuda.jyppx_cuda_device_get_p2p_atomic_capabilities(capabilities, pinnedOperations, count, sourceDevice, destinationDevice));
+    }
+
+    public static int ChooseDevice(in NativeCudaDeviceSelectionRequirements requirements)
+    {
+        CudaNativeStatus.ThrowIfFailed(NativeMethodsCuda.jyppx_cuda_choose_device(in requirements, out int device));
+        return device;
+    }
+
+    public static void InitDevice(int device, uint deviceFlags, uint flags)
+    {
+        CudaNativeStatus.ThrowIfFailed(NativeMethodsCuda.jyppx_cuda_init_device(device, deviceFlags, flags));
+    }
+
+    public static void SetValidDevices(int[] ordinals)
+    {
+        if (ordinals.Length == 0)
+        {
+            throw new ArgumentException("At least one CUDA device ordinal is required.", nameof(ordinals));
+        }
+
+        GCHandle ordinalsHandle = GCHandle.Alloc(ordinals, GCHandleType.Pinned);
+        try
+        {
+            CudaNativeStatus.ThrowIfFailed(NativeMethodsCuda.jyppx_cuda_set_valid_devices(ordinalsHandle.AddrOfPinnedObject(), (uint)ordinals.Length));
+        }
+        finally
+        {
+            ordinalsHandle.Free();
+        }
+    }
+
+    private static CudaAtomicCapability[] GetDeviceAtomicCapabilities(
+        CudaAtomicOperation[] operations,
+        Func<IntPtr, IntPtr, uint, BridgeStatusCode> query)
+    {
+        if (operations.Length == 0)
+        {
+            throw new ArgumentException("At least one CUDA atomic operation is required.", nameof(operations));
+        }
+
+        int[] operationValues = new int[operations.Length];
+        uint[] capabilityValues = new uint[operations.Length];
+        for (int index = 0; index < operations.Length; index++)
+        {
+            operationValues[index] = (int)operations[index];
+        }
+
+        GCHandle operationsHandle = GCHandle.Alloc(operationValues, GCHandleType.Pinned);
+        GCHandle capabilitiesHandle = GCHandle.Alloc(capabilityValues, GCHandleType.Pinned);
+        try
+        {
+            CudaNativeStatus.ThrowIfFailed(query(capabilitiesHandle.AddrOfPinnedObject(), operationsHandle.AddrOfPinnedObject(), (uint)operations.Length));
+        }
+        finally
+        {
+            capabilitiesHandle.Free();
+            operationsHandle.Free();
+        }
+
+        CudaAtomicCapability[] capabilities = new CudaAtomicCapability[capabilityValues.Length];
+        for (int index = 0; index < capabilityValues.Length; index++)
+        {
+            capabilities[index] = (CudaAtomicCapability)capabilityValues[index];
+        }
+
+        return capabilities;
+    }
+
     private static string ReadCudaUtf8Buffer(CudaUtf8BufferGetter getter, string tooLargeMessage)
     {
         BridgeStatusCode status = getter(Array.Empty<byte>(), UIntPtr.Zero, out UIntPtr requiredSize);

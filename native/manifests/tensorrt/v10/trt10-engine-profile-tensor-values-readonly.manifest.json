@@ -1,0 +1,41 @@
+{
+  "$schema": "../../bridge-api.schema.json",
+  "module": "tensorrt",
+  "versionLine": "10",
+  "apis": [
+    {
+      "id": "jyppx-trt10-engine-get-profile-tensor-values",
+      "entryPoint": "jyppx_trt10_engine_get_profile_tensor_values",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "engine", "type": "JYPPX_TensorRtCudaEngine*", "direction": "in" },
+        { "name": "tensor_name", "type": "const char*", "direction": "in" },
+        { "name": "profile_index", "type": "int32_t", "direction": "in" },
+        { "name": "selector", "type": "int32_t", "direction": "in" },
+        { "name": "output_values", "type": "int32_t*", "direction": "out", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "output_count", "type": "int32_t", "direction": "in" },
+        { "name": "out_count", "type": "int32_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "jyppx-trt10-engine-get-profile-tensor-values-v2",
+      "entryPoint": "jyppx_trt10_engine_get_profile_tensor_values_v2",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "engine", "type": "JYPPX_TensorRtCudaEngine*", "direction": "in" },
+        { "name": "tensor_name", "type": "const char*", "direction": "in" },
+        { "name": "profile_index", "type": "int32_t", "direction": "in" },
+        { "name": "selector", "type": "int32_t", "direction": "in" },
+        { "name": "output_values", "type": "int64_t*", "direction": "out", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "output_count", "type": "int32_t", "direction": "in" },
+        { "name": "out_count", "type": "int32_t*", "direction": "out" }
+      ]
+    }
+  ]
+}

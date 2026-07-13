@@ -12,12 +12,18 @@ namespace JYPPX.TensorRtSharp;
 public sealed partial class TensorRtBuilder : IDisposable
 {
     private readonly SafeTensorRtObjectHandle _handle;
+    private readonly TensorRtLogger _loggerKeepAlive;
+    private bool _disposed;
 
     /// <summary>
     /// Creates a TensorRT builder from a logger.
     /// 使用 logger 创建一个 TensorRT builder。
     /// </summary>
     /// <param name="logger">The TensorRT logger used by the builder. builder 使用的 TensorRT logger。</param>
+    /// <remarks>
+    /// TensorRT borrows the logger pointer. This builder keeps the managed logger attached until the builder is disposed.
+    /// TensorRT 只借用 logger 指针；当前 builder 会保持托管 logger 借用关系直到 builder 释放。
+    /// </remarks>
     public TensorRtBuilder(TensorRtLogger logger)
     {
         if (logger == null)
@@ -26,7 +32,17 @@ public sealed partial class TensorRtBuilder : IDisposable
         }
 
         Line = logger.Line;
-        _handle = NativeBridgeApi.CreateBuilder(Line, logger.Handle);
+        _loggerKeepAlive = logger;
+        _loggerKeepAlive.AttachBorrower(Line);
+        try
+        {
+            _handle = NativeBridgeApi.CreateBuilder(Line, logger.Handle);
+        }
+        catch
+        {
+            _loggerKeepAlive.DetachBorrower();
+            throw;
+        }
     }
 
     internal SafeTensorRtObjectHandle Handle => _handle;
@@ -125,7 +141,15 @@ public sealed partial class TensorRtBuilder : IDisposable
     /// </summary>
     public void Dispose()
     {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _disposed = true;
         _handle.Dispose();
+        GC.KeepAlive(_loggerKeepAlive);
+        _loggerKeepAlive.DetachBorrower();
         GC.SuppressFinalize(this);
     }
 }

@@ -390,11 +390,13 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
     "Global::createInferRuntime_INTERNAL" = @("id:*runtime-create")
     "Global::createInferRefitter_INTERNAL" = @("id:*engine-create-refitter")
     "Global::createNvOnnxParser_INTERNAL" = @("id:*onnx-parser-create")
-    "Global::createNvOnnxParserRefitter_INTERNAL" = @("id:*parser-refitter-create-deferred")
+    "Global::createNvOnnxParserRefitter_INTERNAL" = @("id:*parser-refitter-create", "id:*parser-refitter-create-deferred")
     "Global::createONNXConfig" = @("id:*onnx-config-create-deferred")
     "Global::initLibNvInferPlugins" = @("id:*global-init-lib-nvinfer-plugins-deferred")
     "Global::setInternalLibraryPath" = @("id:*global-set-internal-library-path-deferred")
     "Global::getBuilderPluginRegistry" = @("builder-capability-plugin-registry")
+    "IBuilder::getPluginRegistry" = @("id:*builder-plugin-registry-exists", "id:*builder-plugin-registry-get-creator-count", "id:*builder-plugin-registry-get-recursive-creator-count", "id:*builder-plugin-registry-has-error-recorder", "id:*builder-plugin-registry-is-parent-search-enabled", "id:*builder-plugin-creator-get-name", "id:*builder-plugin-creator-get-version", "id:*builder-plugin-creator-get-namespace", "id:*builder-plugin-creator-get-interface-info", "id:*builder-plugin-creator-get-field-count", "id:*builder-plugin-creator-get-field-name", "id:*builder-plugin-creator-get-field-metadata", "id:*builder-plugin-creator-lookup", "id:*builder-get-plugin-registry-deferred")
+    "IRuntime::getPluginRegistry" = @("id:*runtime-plugin-registry-exists", "id:*runtime-plugin-registry-get-creator-count", "id:*runtime-plugin-registry-has-error-recorder", "id:*runtime-plugin-registry-is-parent-search-enabled", "id:*runtime-plugin-creator-get-name", "id:*runtime-plugin-creator-get-version", "id:*runtime-plugin-creator-get-namespace", "id:*runtime-plugin-creator-get-interface-info", "id:*runtime-plugin-creator-get-field-count", "id:*runtime-plugin-creator-get-field-name", "id:*runtime-plugin-creator-get-field-metadata", "id:*runtime-plugin-creator-lookup", "id:*runtime-get-plugin-registry-deferred")
     "IRuntime::destroy" = @("id:*trt-object-destroy")
     "IRefitter::destroy" = @("id:*trt-object-destroy")
     "IParser::destroy" = @("id:*trt-object-destroy")
@@ -402,41 +404,92 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
     "IHostMemory::destroy" = @("id:*trt-object-destroy")
     "IGpuAllocator::free" = @("id:*gpu-allocator-free*")
     "IAlgorithm::getTimingMSec" = @("id:*algorithm-get-timing-msec*")
+    "IBuilder::getErrorRecorder" = @("id:*builder-has-error-recorder", "id:*builder-clear-error-recorder")
+    "IBuilder::getLogger" = @("id:*builder-has-logger", "id:*builder-get-logger-deferred")
+    "IBuilder::setErrorRecorder" = @("id:*builder-has-error-recorder", "id:*builder-clear-error-recorder")
+    "IBuilder::setGpuAllocator" = @("id:*builder-clear-gpu-allocator")
+    "ICudaEngine::getErrorRecorder" = @("id:*engine-has-error-recorder", "id:*engine-clear-error-recorder")
+    "ICudaEngine::setErrorRecorder" = @("id:*engine-has-error-recorder", "id:*engine-clear-error-recorder")
+    "IEngineInspector::getErrorRecorder" = @("id:*engine-inspector-has-error-recorder", "id:*engine-inspector-clear-error-recorder")
+    "IEngineInspector::setErrorRecorder" = @("id:*engine-inspector-has-error-recorder", "id:*engine-inspector-clear-error-recorder")
+    "IExecutionContext::getErrorRecorder" = @("id:*execution-context-has-error-recorder", "id:*execution-context-clear-error-recorder")
+    "IExecutionContext::setErrorRecorder" = @("id:*execution-context-has-error-recorder", "id:*execution-context-clear-error-recorder")
+    "INetworkDefinition::getErrorRecorder" = @("id:*network-has-error-recorder", "id:*network-clear-error-recorder")
+    "INetworkDefinition::setErrorRecorder" = @("id:*network-has-error-recorder", "id:*network-clear-error-recorder")
+    "IPluginRegistry::getErrorRecorder" = @("id:*plugin-registry-has-error-recorder", "id:*plugin-registry-get-error-recorder-deferred")
+    "IErrorRecorder::getNbErrors" = @("id:*runtime-get-error-recorder-snapshot-info", "id:*refitter-get-error-recorder-snapshot-info", "id:*error-recorder-get-nb-errors-deferred")
+    "IErrorRecorder::getErrorCode" = @("id:*runtime-get-error-recorder-error", "id:*refitter-get-error-recorder-error", "id:*error-recorder-get-error-code-deferred")
+    "IErrorRecorder::getErrorDesc" = @("id:*runtime-get-error-recorder-error", "id:*refitter-get-error-recorder-error", "id:*error-recorder-get-error-desc-deferred")
+    "IErrorRecorder::getInterfaceInfo" = @("id:*runtime-get-error-recorder-snapshot-info", "id:*refitter-get-error-recorder-snapshot-info", "id:*engine-get-error-recorder-snapshot-info", "id:*execution-context-get-error-recorder-snapshot-info", "id:*error-recorder-get-interface-info-deferred")
+    "IErrorRecorder::hasOverflowed" = @("id:*runtime-get-error-recorder-snapshot-info", "id:*refitter-get-error-recorder-snapshot-info", "id:*error-recorder-has-overflowed-deferred")
+    "IBuilderConfig::getAvgTimingIterations" = @("id:*builder-config-get-average-timing-iterations", "id:*builder-config-get-avg-timing-iterations-deferred")
+    "IBuilderConfig::setAvgTimingIterations" = @("id:*builder-config-set-average-timing-iterations", "id:*builder-config-set-avg-timing-iterations-deferred")
+    "IBuilderConfig::getBuilderOptimizationLevel" = @("id:*builder-config-get-optimization-level", "id:*builder-config-get-builder-optimization-level-deferred")
+    "IBuilderConfig::setBuilderOptimizationLevel" = @("id:*builder-config-set-optimization-level", "id:*builder-config-set-builder-optimization-level-deferred")
+    "IBuilderConfig::getFlags" = @("id:*builder-config-get-flags", "id:*builder-config-get-flags-deferred")
+    "IBuilderConfig::getAlgorithmSelector" = @("id:*builder-config-has-algorithm-selector", "id:*builder-config-get-algorithm-selector-deferred")
+    "IBuilderConfig::getInt8Calibrator" = @("id:*builder-config-has-int8-calibrator", "id:*builder-config-get-int8-calibrator-deferred")
+    "IRuntime::getLogger" = @("id:*runtime-has-logger", "id:*runtime-get-logger-deferred")
+    "IParser::getNbErrors" = @("id:*onnx-parser-get-error-count", "id:*parser-get-nb-errors")
+    "IParser::getNbSubgraphs" = @("id:*onnx-parser-get-subgraph-count")
+    "IParser::getLayerOutputTensor" = @("id:*onnx-parser-layer-output-tensor-exists", "id:*parser-get-layer-output-tensor-deferred")
+    "IParser::getSubgraphNodes" = @("id:*onnx-parser-get-subgraph-node-count", "id:*onnx-parser-get-subgraph-node")
+    "IParser::getUsedVCPluginLibraries" = @("id:*onnx-parser-get-used-vc-plugin-library-count", "id:*onnx-parser-get-used-vc-plugin-library")
+    "IParserRefitter::getNbErrors" = @("id:*parser-refitter-get-error-count")
+    "IExecutionContext::getOutputAllocator" = @("id:*execution-context-has-output-allocator", "id:*execution-context-clear-output-allocator")
+    "IExecutionContext::setOutputAllocator" = @("id:*execution-context-has-output-allocator", "id:*execution-context-clear-output-allocator")
+    "IExecutionContext::getTemporaryStorageAllocator" = @("id:*execution-context-has-temporary-storage-allocator", "id:*execution-context-clear-temporary-storage-allocator")
+    "IExecutionContext::setTemporaryStorageAllocator" = @("id:*execution-context-has-temporary-storage-allocator", "id:*execution-context-clear-temporary-storage-allocator")
+    "IExecutionContext::getDebugListener" = @("id:*execution-context-has-debug-listener", "id:*execution-context-clear-debug-listener")
+    "IExecutionContext::setDebugListener" = @("id:*execution-context-has-debug-listener", "id:*execution-context-clear-debug-listener")
+    "IBuilderConfig::getProgressMonitor" = @("id:*builder-config-has-progress-monitor", "id:*builder-config-clear-progress-monitor", "id:*builder-config-set-progress-monitor")
+    "IBuilderConfig::setProgressMonitor" = @("id:*builder-config-has-progress-monitor", "id:*builder-config-clear-progress-monitor", "id:*builder-config-set-progress-monitor")
+    "IDebugListener::getInterfaceInfo" = @("id:*execution-context-debug-listener-get-interface-info", "id:*debug-listener-get-interface-info-deferred")
+    "IGpuAllocator::getInterfaceInfo" = @("id:*execution-context-temporary-storage-allocator-get-interface-info", "id:*gpu-allocator-get-interface-info-deferred")
+    "IProfiler::reportLayerTime" = @("id:*profiler-create-with-callback", "id:*profiler-emit-diagnostic", "id:*execution-context-set-profiler", "id:*profiler-report-layer-time-deferred")
+    "IOutputAllocator::getInterfaceInfo" = @("id:*execution-context-output-allocator-get-interface-info", "id:*output-allocator-get-interface-info-deferred")
+    "IProgressMonitor::getInterfaceInfo" = @("id:*progress-monitor-get-interface-info")
+    "IProgressMonitor::phaseStart" = @("id:*progress-monitor-create-with-callback", "id:*progress-monitor-emit-diagnostic", "id:*builder-config-set-progress-monitor", "id:*progress-monitor-phase-start-deferred")
+    "IProgressMonitor::stepComplete" = @("id:*progress-monitor-create-with-callback", "id:*progress-monitor-emit-diagnostic", "id:*builder-config-set-progress-monitor", "id:*progress-monitor-step-complete-deferred")
+    "IProgressMonitor::phaseFinish" = @("id:*progress-monitor-create-with-callback", "id:*progress-monitor-emit-diagnostic", "id:*builder-config-set-progress-monitor", "id:*progress-monitor-phase-finish-deferred")
     "INetworkDefinition::addRNNv2" = @("id:*network-add-rnnv2*")
-    "IRNNv2Layer::getBiasForGate" = @("id:*rnnv2-layer-get-bias-for-gate*")
-    "IRNNv2Layer::getCellState" = @("id:*rnnv2-layer-get-cell-state*")
-    "IRNNv2Layer::getDataLength" = @("id:*rnnv2-layer-get-data-length*")
-    "IRNNv2Layer::getDirection" = @("id:*rnnv2-layer-get-direction*")
-    "IRNNv2Layer::getHiddenSize" = @("id:*rnnv2-layer-get-hidden-size*")
-    "IRNNv2Layer::getHiddenState" = @("id:*rnnv2-layer-get-hidden-state*")
-    "IRNNv2Layer::getInputMode" = @("id:*rnnv2-layer-get-input-mode*")
-    "IRNNv2Layer::getLayerCount" = @("id:*rnnv2-layer-get-layer-count*")
-    "IRNNv2Layer::getMaxSeqLength" = @("id:*rnnv2-layer-get-max-seq-length*")
-    "IRNNv2Layer::getOperation" = @("id:*rnnv2-layer-get-operation*")
-    "IRNNv2Layer::getSequenceLengths" = @("id:*rnnv2-layer-get-sequence-lengths*")
-    "IRNNv2Layer::getWeightsForGate" = @("id:*rnnv2-layer-get-weights-for-gate*")
-    "IRNNv2Layer::setBiasForGate" = @("id:*rnnv2-layer-set-bias-for-gate*")
-    "IRNNv2Layer::setCellState" = @("id:*rnnv2-layer-set-cell-state*")
-    "IRNNv2Layer::setDirection" = @("id:*rnnv2-layer-set-direction*")
-    "IRNNv2Layer::setHiddenState" = @("id:*rnnv2-layer-set-hidden-state*")
-    "IRNNv2Layer::setInputMode" = @("id:*rnnv2-layer-set-input-mode*")
-    "IRNNv2Layer::setOperation" = @("id:*rnnv2-layer-set-operation*")
-    "IRNNv2Layer::setSequenceLengths" = @("id:*rnnv2-layer-set-sequence-lengths*")
-    "IRNNv2Layer::setWeightsForGate" = @("id:*rnnv2-layer-set-weights-for-gate*")
+    "IRNNv2Layer::getBiasForGate" = @("id:*rnnv2-layer-get-bias-for-gate*", "id:*rnn-v2-layer-get-bias-for-gate*")
+    "IRNNv2Layer::getCellState" = @("id:*rnnv2-layer-get-cell-state*", "id:*rnn-v2-layer-get-cell-state*")
+    "IRNNv2Layer::getDataLength" = @("id:*rnnv2-layer-get-data-length*", "id:*rnn-v2-layer-get-data-length*")
+    "IRNNv2Layer::getDirection" = @("id:*rnnv2-layer-get-direction*", "id:*rnn-v2-layer-get-direction*")
+    "IRNNv2Layer::getHiddenSize" = @("id:*rnnv2-layer-get-hidden-size*", "id:*rnn-v2-layer-get-hidden-size*")
+    "IRNNv2Layer::getHiddenState" = @("id:*rnnv2-layer-get-hidden-state*", "id:*rnn-v2-layer-get-hidden-state*")
+    "IRNNv2Layer::getInputMode" = @("id:*rnnv2-layer-get-input-mode*", "id:*rnn-v2-layer-get-input-mode*")
+    "IRNNv2Layer::getLayerCount" = @("id:*rnnv2-layer-get-layer-count*", "id:*rnn-v2-layer-get-layer-count*")
+    "IRNNv2Layer::getMaxSeqLength" = @("id:*rnnv2-layer-get-max-seq-length*", "id:*rnn-v2-layer-get-max-seq-length*")
+    "IRNNv2Layer::getOperation" = @("id:*rnnv2-layer-get-operation*", "id:*rnn-v2-layer-get-operation*")
+    "IRNNv2Layer::getSequenceLengths" = @("id:*rnnv2-layer-get-sequence-lengths*", "id:*rnn-v2-layer-get-sequence-lengths*")
+    "IRNNv2Layer::getWeightsForGate" = @("id:*rnnv2-layer-get-weights-for-gate*", "id:*rnn-v2-layer-get-weights-for-gate*")
+    "IRNNv2Layer::setBiasForGate" = @("id:*rnnv2-layer-set-bias-for-gate*", "id:*rnn-v2-layer-set-bias-for-gate*")
+    "IRNNv2Layer::setCellState" = @("id:*rnnv2-layer-set-cell-state*", "id:*rnn-v2-layer-set-cell-state*")
+    "IRNNv2Layer::setDirection" = @("id:*rnnv2-layer-set-direction*", "id:*rnn-v2-layer-set-direction*")
+    "IRNNv2Layer::setHiddenState" = @("id:*rnnv2-layer-set-hidden-state*", "id:*rnn-v2-layer-set-hidden-state*")
+    "IRNNv2Layer::setInputMode" = @("id:*rnnv2-layer-set-input-mode*", "id:*rnn-v2-layer-set-input-mode*")
+    "IRNNv2Layer::setOperation" = @("id:*rnnv2-layer-set-operation*", "id:*rnn-v2-layer-set-operation*")
+    "IRNNv2Layer::setSequenceLengths" = @("id:*rnnv2-layer-set-sequence-lengths*", "id:*rnn-v2-layer-set-sequence-lengths*")
+    "IRNNv2Layer::setWeightsForGate" = @("id:*rnnv2-layer-set-weights-for-gate*", "id:*rnn-v2-layer-set-weights-for-gate*")
     "IMoELayer::setInput" = @("id:*layer-set-input")
     "IRefitter::getTensorsWithDynamicRange" = @("id:*refitter-get-dynamic-range-tensor-count", "id:*refitter-get-dynamic-range-tensor-entries")
     "IPluginRegistry::getBuilderSafePluginRegistry" = @("id:*builder-safe-plugin-registry-exists", "id:*builder-capability-plugin-registry-exists")
-    "IPluginCreator::getPluginName" = @("id:*builder-capability-plugin-creator-get-name", "id:*builder-plugin-creator-get-name", "id:*global-plugin-creator-get-name")
-    "IPluginCreator::getPluginVersion" = @("id:*builder-capability-plugin-creator-get-version", "id:*builder-plugin-creator-get-version", "id:*global-plugin-creator-get-version")
-    "IPluginCreator::getPluginNamespace" = @("id:*builder-capability-plugin-creator-get-namespace", "id:*builder-plugin-creator-get-namespace", "id:*global-plugin-creator-get-namespace")
-    "IPluginCreator::getFieldNames" = @("id:*builder-capability-plugin-creator-get-field-count", "id:*builder-capability-plugin-creator-get-field-name", "id:*builder-capability-plugin-creator-get-field-metadata", "id:*builder-plugin-creator-get-field-count", "id:*builder-plugin-creator-get-field-name", "id:*builder-plugin-creator-get-field-metadata", "id:*global-plugin-creator-get-field-count", "id:*global-plugin-creator-get-field-name", "id:*global-plugin-creator-get-field-metadata")
-    "IPluginCreatorV3One::getPluginName" = @("id:*builder-capability-plugin-creator-get-name", "id:*builder-plugin-creator-get-name", "id:*global-plugin-creator-get-name")
-    "IPluginCreatorV3One::getPluginVersion" = @("id:*builder-capability-plugin-creator-get-version", "id:*builder-plugin-creator-get-version", "id:*global-plugin-creator-get-version")
-    "IPluginCreatorV3One::getPluginNamespace" = @("id:*builder-capability-plugin-creator-get-namespace", "id:*builder-plugin-creator-get-namespace", "id:*global-plugin-creator-get-namespace")
-    "IPluginCreatorV3One::getFieldNames" = @("id:*builder-capability-plugin-creator-get-field-count", "id:*builder-capability-plugin-creator-get-field-name", "id:*builder-capability-plugin-creator-get-field-metadata", "id:*builder-plugin-creator-get-field-count", "id:*builder-plugin-creator-get-field-name", "id:*builder-plugin-creator-get-field-metadata", "id:*global-plugin-creator-get-field-count", "id:*global-plugin-creator-get-field-name", "id:*global-plugin-creator-get-field-metadata")
-    "IPluginCreatorV3One::getInterfaceInfo" = @("id:*builder-capability-plugin-creator-get-interface-info", "id:*builder-plugin-creator-get-interface-info", "id:*global-plugin-creator-get-interface-info")
+    "IPluginCreator::getPluginName" = @("id:*builder-capability-plugin-creator-get-name", "id:*builder-plugin-creator-get-name", "id:*global-plugin-creator-get-name", "id:*runtime-plugin-creator-get-name")
+    "IPluginCreator::getPluginVersion" = @("id:*builder-capability-plugin-creator-get-version", "id:*builder-plugin-creator-get-version", "id:*global-plugin-creator-get-version", "id:*runtime-plugin-creator-get-version")
+    "IPluginCreator::getPluginNamespace" = @("id:*builder-capability-plugin-creator-get-namespace", "id:*builder-plugin-creator-get-namespace", "id:*global-plugin-creator-get-namespace", "id:*runtime-plugin-creator-get-namespace")
+    "IPluginCreator::getFieldNames" = @("id:*builder-capability-plugin-creator-get-field-count", "id:*builder-capability-plugin-creator-get-field-name", "id:*builder-capability-plugin-creator-get-field-metadata", "id:*builder-plugin-creator-get-field-count", "id:*builder-plugin-creator-get-field-name", "id:*builder-plugin-creator-get-field-metadata", "id:*global-plugin-creator-get-field-count", "id:*global-plugin-creator-get-field-name", "id:*global-plugin-creator-get-field-metadata", "id:*runtime-plugin-creator-get-field-count", "id:*runtime-plugin-creator-get-field-name", "id:*runtime-plugin-creator-get-field-metadata")
+    "IPluginCreator::getInterfaceInfo" = @("id:*builder-capability-plugin-creator-get-interface-info", "id:*builder-plugin-creator-get-interface-info", "id:*global-plugin-creator-get-interface-info", "id:*runtime-plugin-creator-get-interface-info")
+    "IPluginCreatorV3One::getPluginName" = @("id:*builder-capability-plugin-creator-get-name", "id:*builder-plugin-creator-get-name", "id:*global-plugin-creator-get-name", "id:*runtime-plugin-creator-get-name")
+    "IPluginCreatorV3One::getPluginVersion" = @("id:*builder-capability-plugin-creator-get-version", "id:*builder-plugin-creator-get-version", "id:*global-plugin-creator-get-version", "id:*runtime-plugin-creator-get-version")
+    "IPluginCreatorV3One::getPluginNamespace" = @("id:*builder-capability-plugin-creator-get-namespace", "id:*builder-plugin-creator-get-namespace", "id:*global-plugin-creator-get-namespace", "id:*runtime-plugin-creator-get-namespace")
+    "IPluginCreatorV3One::getFieldNames" = @("id:*builder-capability-plugin-creator-get-field-count", "id:*builder-capability-plugin-creator-get-field-name", "id:*builder-capability-plugin-creator-get-field-metadata", "id:*builder-plugin-creator-get-field-count", "id:*builder-plugin-creator-get-field-name", "id:*builder-plugin-creator-get-field-metadata", "id:*global-plugin-creator-get-field-count", "id:*global-plugin-creator-get-field-name", "id:*global-plugin-creator-get-field-metadata", "id:*runtime-plugin-creator-get-field-count", "id:*runtime-plugin-creator-get-field-name", "id:*runtime-plugin-creator-get-field-metadata")
+    "IPluginCreatorV3One::getInterfaceInfo" = @("id:*builder-capability-plugin-creator-get-interface-info", "id:*builder-plugin-creator-get-interface-info", "id:*global-plugin-creator-get-interface-info", "id:*runtime-plugin-creator-get-interface-info")
     "IPluginRegistry::getPluginCreator" = @("id:*plugin-creator-lookup", "id:*plugin-creator-lookup-get-interface-info", "id:*plugin-creator-lookup-get-field-count", "id:*plugin-creator-lookup-get-field-name", "id:*plugin-creator-lookup-get-field-metadata")
+    "IPluginRegistry::getPluginCreatorList" = @("id:*plugin-registry-get-creator-count", "id:*plugin-creator-get-name", "id:*plugin-creator-get-version", "id:*plugin-creator-get-namespace", "id:*plugin-creator-get-interface-info", "id:*plugin-creator-get-field-count", "id:*plugin-creator-get-field-name", "id:*plugin-creator-get-field-metadata", "id:*plugin-registry-get-plugin-creator-list-deferred")
     "IPluginRegistry::getAllCreators" = @("id:*plugin-registry-get-creator-count", "id:*plugin-creator-get-name", "id:*plugin-creator-get-version", "id:*plugin-creator-get-namespace", "id:*plugin-creator-get-interface-info", "id:*plugin-creator-get-field-count")
+    "IPluginRegistry::getAllCreatorsRecursive" = @("id:*plugin-registry-get-recursive-creator-count")
   }
 
   if (-not $aliasMap.ContainsKey($InterfaceKey)) {
@@ -494,6 +547,85 @@ function Find-MatchedManifestApis {
   $classAliases = Get-TensorRtClassAliases $ClassName
   $methodCandidates = Get-MethodCandidates -MethodName $MethodName -ClassName $ClassName
   $versionCandidates = @($VersionLine, "common", "")
+  $interfaceKey = "$ClassName::$MethodName"
+  $explicitOnlyOnMiss = @(
+    "IBuilderConfig::getFlags"
+  )
+
+  if ($interfaceKey -in @(
+    "IBuilder::getPluginRegistry",
+    "IBuilder::getErrorRecorder",
+    "IBuilder::getLogger",
+    "IBuilder::setErrorRecorder",
+    "IBuilder::setGpuAllocator",
+    "ICudaEngine::getErrorRecorder",
+    "ICudaEngine::setErrorRecorder",
+    "IEngineInspector::getErrorRecorder",
+    "IEngineInspector::setErrorRecorder",
+    "IExecutionContext::getErrorRecorder",
+    "IExecutionContext::setErrorRecorder",
+    "INetworkDefinition::getErrorRecorder",
+    "INetworkDefinition::setErrorRecorder",
+    "IPluginRegistry::getErrorRecorder",
+    "IErrorRecorder::getNbErrors",
+    "IErrorRecorder::getErrorCode",
+    "IErrorRecorder::getErrorDesc",
+    "IErrorRecorder::getInterfaceInfo",
+    "IErrorRecorder::hasOverflowed",
+    "IBuilderConfig::getAvgTimingIterations",
+    "IBuilderConfig::setAvgTimingIterations",
+    "IBuilderConfig::getBuilderOptimizationLevel",
+    "IBuilderConfig::setBuilderOptimizationLevel",
+    "IBuilderConfig::getFlags",
+    "IRuntime::getPluginRegistry",
+    "IRuntime::getLogger",
+    "IParser::getNbErrors",
+    "IParser::getNbSubgraphs",
+    "IParser::getLayerOutputTensor",
+    "IParser::getSubgraphNodes",
+    "IParser::getUsedVCPluginLibraries",
+    "IParserRefitter::getNbErrors",
+    "IExecutionContext::getOutputAllocator",
+    "IExecutionContext::setOutputAllocator",
+    "IExecutionContext::getTemporaryStorageAllocator",
+    "IExecutionContext::setTemporaryStorageAllocator",
+    "IExecutionContext::getDebugListener",
+    "IExecutionContext::setDebugListener",
+    "IBuilderConfig::getAlgorithmSelector",
+    "IBuilderConfig::getInt8Calibrator",
+    "IBuilderConfig::getProgressMonitor",
+    "IBuilderConfig::setProgressMonitor",
+    "IDebugListener::getInterfaceInfo",
+    "IGpuAllocator::getInterfaceInfo",
+    "IProfiler::reportLayerTime",
+    "IOutputAllocator::getInterfaceInfo",
+    "IProgressMonitor::getInterfaceInfo",
+    "IProgressMonitor::phaseStart",
+    "IProgressMonitor::stepComplete",
+    "IProgressMonitor::phaseFinish",
+    "IPluginCreator::getPluginName",
+    "IPluginCreator::getPluginVersion",
+    "IPluginCreator::getPluginNamespace",
+    "IPluginCreator::getFieldNames",
+    "IPluginCreator::getInterfaceInfo",
+    "IPluginCreatorV3One::getPluginName",
+    "IPluginCreatorV3One::getPluginVersion",
+    "IPluginCreatorV3One::getPluginNamespace",
+    "IPluginCreatorV3One::getFieldNames",
+    "IPluginCreatorV3One::getInterfaceInfo",
+    "IPluginRegistry::getPluginCreator",
+    "IPluginRegistry::getPluginCreatorList",
+    "IPluginRegistry::getAllCreators",
+    "IPluginRegistry::getAllCreatorsRecursive")) {
+    $explicitMatches = @(Find-ExplicitTensorRtInterfaceAliasApis $ManifestApis $Module $VersionLine $interfaceKey)
+    if ($explicitMatches.Count -gt 0) {
+      return $explicitMatches
+    }
+
+    if ($explicitOnlyOnMiss -contains $interfaceKey) {
+      return @()
+    }
+  }
 
   foreach ($candidate in $methodCandidates) {
     $matches = New-Object System.Collections.Generic.List[object]
@@ -520,7 +652,7 @@ function Find-MatchedManifestApis {
     }
   }
 
-  $explicitMatches = @(Find-ExplicitTensorRtInterfaceAliasApis $ManifestApis $Module $VersionLine "$ClassName::$MethodName")
+  $explicitMatches = @(Find-ExplicitTensorRtInterfaceAliasApis $ManifestApis $Module $VersionLine $interfaceKey)
   if ($explicitMatches.Count -gt 0) {
     return $explicitMatches
   }
@@ -677,7 +809,7 @@ function Get-CudaCandidates {
     "cudaDeviceCanAccessPeer" = @("device-can-access-peer", "peer-access")
     "cudaDeviceEnablePeerAccess" = @("device-enable-peer-access", "enable-peer-access")
     "cudaDeviceDisablePeerAccess" = @("device-disable-peer-access", "disable-peer-access")
-    "cudaChooseDevice" = @("choose-device-deferred")
+    "cudaChooseDevice" = @("choose-device")
     "cudaDeviceGetTexture1DLinearMaxWidth" = @("device-get-texture-1d-linear-max-width")
     "cudaDeviceGetGraphMemAttribute" = @("device-get-graph-memory-attribute")
     "cudaDeviceGraphMemTrim" = @("device-trim-graph-memory")
@@ -794,8 +926,8 @@ function Get-CudaCandidates {
     "cudaMemPoolImportFromShareableHandle" = @("mem-pool-import-from-shareable-handle")
     "cudaMemPoolImportPointer" = @("mem-pool-import-pointer")
     "cudaMallocManaged" = @("managed-memory-allocate")
-    "cudaMemPrefetchAsync" = @("managed-memory-prefetch")
-    "cudaMemAdvise" = @("managed-memory-advise")
+    "cudaMemPrefetchAsync" = @("managed-memory-prefetch", "memory-prefetch-range-async-safe")
+    "cudaMemAdvise" = @("managed-memory-advise", "memory-advise-range-safe")
     "cudaHostAlloc" = @("pinned-memory-allocate", "host-alloc")
     "cudaHostRegister" = @("registered-host-memory-register", "host-register")
     "cudaHostUnregister" = @("registered-host-memory-free", "host-unregister")
@@ -864,39 +996,54 @@ function Get-CudaCandidates {
     "cudaLogsDumpToMemory" = @("logs-dump-to-memory-deferred")
     "cudaLogsRegisterCallback" = @("logs-register-callback-deferred")
     "cudaLogsUnregisterCallback" = @("logs-unregister-callback-deferred")
-    "cudaInitDevice" = @("init-device-deferred")
-    "cudaSetValidDevices" = @("set-valid-devices-deferred")
+    "cudaInitDevice" = @("init-device")
+    "cudaSetValidDevices" = @("set-valid-devices")
     "cudaMemAdvise_v2" = @("mem-advise-v2-deferred")
     "cudaMemDiscardAndPrefetchBatchAsync" = @("mem-discard-and-prefetch-batch-async-deferred")
     "cudaMemDiscardBatchAsync" = @("mem-discard-batch-async-deferred")
     "cudaMemPrefetchAsync_v2" = @("mem-prefetch-async-v2-deferred")
     "cudaMemPrefetchBatchAsync" = @("mem-prefetch-batch-async-deferred")
-    "cudaMemRangeGetAttribute" = @("mem-range-get-attribute-deferred")
-    "cudaMemRangeGetAttributes" = @("mem-range-get-attributes-deferred")
-    "cudaGraphKernelNodeGetAttribute" = @("graph-kernel-node-get-attribute-deferred")
+    "cudaMemRangeGetAttribute" = @("mem-range-get-attribute-deferred", "mem-range-get-attribute-scalar-safe", "mem-range-get-accessed-by-count-safe", "mem-range-copy-accessed-by-devices-safe")
+    "cudaMemRangeGetAttributes" = @("mem-range-get-attributes-deferred", "mem-range-get-attributes-scalar-safe")
+    "cudaGraphDebugDotPrint" = @("graph-debug-dot-print-deferred", "graph-debug-dot-print-safe")
+    "cudaGraphAddEventRecordNode" = @("graph-add-event-record-node-deferred", "graph-add-event-record-node-safe")
+    "cudaGraphAddEventWaitNode" = @("graph-add-event-wait-node-deferred", "graph-add-event-wait-node-safe")
+    "cudaGraphAddMemcpyNode1D" = @("graph-add-memcpy-node1-d-deferred", "graph-add-memcpy-node-1d-device-to-device-safe", "graph-add-memcpy-node-1d-host-to-device-safe", "graph-add-memcpy-node-1d-device-to-host-safe")
+    "cudaGraphEventRecordNodeSetEvent" = @("graph-event-record-node-set-event-deferred", "graph-event-record-node-set-event-safe")
+    "cudaGraphEventRecordNodeGetEvent" = @("graph-event-record-node-get-event-deferred", "graph-event-record-node-has-event-safe")
+    "cudaGraphEventWaitNodeSetEvent" = @("graph-event-wait-node-set-event-deferred", "graph-event-wait-node-set-event-safe")
+    "cudaGraphEventWaitNodeGetEvent" = @("graph-event-wait-node-get-event-deferred", "graph-event-wait-node-has-event-safe")
+    "cudaGraphExecEventRecordNodeSetEvent" = @("graph-exec-event-record-node-set-event-deferred", "graph-exec-event-record-node-set-event-safe")
+    "cudaGraphExecEventWaitNodeSetEvent" = @("graph-exec-event-wait-node-set-event-deferred", "graph-exec-event-wait-node-set-event-safe")
+    "cudaGraphExecMemcpyNodeSetParams1D" = @("graph-exec-memcpy-node-set-params1-d-deferred", "graph-exec-memcpy-node-set-params-1d-device-to-device-safe", "graph-exec-memcpy-node-set-params-1d-host-to-device-safe", "graph-exec-memcpy-node-set-params-1d-device-to-host-safe")
+    "cudaGraphKernelNodeGetAttribute" = @("graph-kernel-node-get-attribute-deferred", "graph-kernel-node-get-attribute-scalar-safe")
     "cudaGraphKernelNodeGetParams" = @("graph-kernel-node-get-params-deferred")
-    "cudaGraphKernelNodeSetAttribute" = @("graph-kernel-node-set-attribute-deferred")
+    "cudaGraphKernelNodeSetAttribute" = @("graph-kernel-node-set-attribute-deferred", "graph-kernel-node-set-attribute-scalar-safe")
     "cudaGraphKernelNodeSetParams" = @("graph-kernel-node-set-params-deferred")
     "cudaGraphMemAllocNodeGetParams" = @("graph-mem-alloc-node-get-params-deferred")
-    "cudaGraphMemcpyNodeGetParams" = @("graph-memcpy-node-get-params-deferred")
+    "cudaGraphMemcpyNodeGetParams" = @("graph-memcpy-node-get-params-deferred", "graph-memcpy-node-get-params-safe")
     "cudaGraphMemcpyNodeSetParams" = @("graph-memcpy-node-set-params-deferred")
-    "cudaGraphMemcpyNodeSetParams1D" = @("graph-memcpy-node-set-params-1d-deferred")
+    "cudaGraphMemcpyNodeSetParams1D" = @("graph-memcpy-node-set-params-1d-deferred", "graph-memcpy-node-set-params-1d-device-to-device-safe", "graph-memcpy-node-set-params-1d-host-to-device-safe", "graph-memcpy-node-set-params-1d-device-to-host-safe")
     "cudaGraphMemcpyNodeSetParamsFromSymbol" = @("graph-memcpy-node-set-params-from-symbol-deferred")
     "cudaGraphMemcpyNodeSetParamsToSymbol" = @("graph-memcpy-node-set-params-to-symbol-deferred")
     "cudaGraphMemFreeNodeGetParams" = @("graph-mem-free-node-get-params-deferred")
-    "cudaGraphMemsetNodeGetParams" = @("graph-memset-node-get-params-deferred")
-    "cudaGraphMemsetNodeSetParams" = @("graph-memset-node-set-params-deferred")
+    "cudaGraphMemsetNodeGetParams" = @("graph-memset-node-get-params-deferred", "graph-memset-node-get-params-safe")
+    "cudaGraphMemsetNodeSetParams" = @("graph-memset-node-set-params-deferred", "graph-memset-node-set-params-safe")
+    "cudaGraphAddDependencies" = @("cuda-graph-add-dependencies-deferred", "graph-add-dependency-safe", "graph-add-dependency-v2-safe")
+    "cudaGraphAddDependencies_v2" = @("cuda-graph-add-dependencies-v2-deferred", "graph-add-dependency-v2-safe")
+    "cudaGraphGetEdges" = @("graph-get-edges-v2-deferred", "graph-get-edges-v2-count-safe", "graph-get-edge-v2-safe")
+    "cudaGraphGetEdges_v2" = @("graph-get-edges-v2-deferred", "graph-get-edges-v2-count-safe", "graph-get-edge-v2-safe")
     "cudaGraphNodeGetContainingGraph" = @("graph-node-get-containing-graph-deferred", "graph-node-is-in-graph-safe")
-    "cudaGraphNodeGetDependencies" = @("graph-node-get-dependency-count-safe", "graph-node-get-dependency-safe")
-    "cudaGraphNodeGetDependencies_v2" = @("graph-node-get-dependencies-v2-deferred")
-    "cudaGraphNodeGetDependentNodes" = @("graph-node-get-dependent-count-safe", "graph-node-get-dependent-safe")
-    "cudaGraphNodeGetDependentNodes_v2" = @("graph-node-get-dependent-nodes-v2-deferred")
+    "cudaGraphNodeGetDependencies" = @("graph-node-get-dependency-count-safe", "graph-node-get-dependency-safe", "graph-node-get-dependencies-v2-count-safe", "graph-node-get-dependency-v2-safe")
+    "cudaGraphNodeGetDependencies_v2" = @("graph-node-get-dependencies-v2-deferred", "graph-node-get-dependencies-v2-count-safe", "graph-node-get-dependency-v2-safe")
+    "cudaGraphNodeGetDependentNodes" = @("graph-node-get-dependent-count-safe", "graph-node-get-dependent-safe", "graph-node-get-dependent-nodes-v2-count-safe", "graph-node-get-dependent-node-v2-safe")
+    "cudaGraphNodeGetDependentNodes_v2" = @("graph-node-get-dependent-nodes-v2-deferred", "graph-node-get-dependent-nodes-v2-count-safe", "graph-node-get-dependent-node-v2-safe")
     "cudaGraphNodeGetEnabled" = @("graph-exec-node-get-enabled-safe")
     "cudaGraphNodeGetParams" = @("graph-node-get-params-deferred")
     "cudaGraphNodeSetEnabled" = @("graph-exec-node-set-enabled-safe")
     "cudaGraphReleaseUserObject" = @("graph-release-user-object-deferred")
-    "cudaGraphRemoveDependencies" = @("graph-remove-dependency-safe")
-    "cudaGraphRemoveDependencies_v2" = @("graph-remove-dependencies-v2-deferred")
+    "cudaGraphRemoveDependencies" = @("graph-remove-dependency-safe", "graph-remove-dependency-v2-safe")
+    "cudaGraphRemoveDependencies_v2" = @("graph-remove-dependencies-v2-deferred", "graph-remove-dependency-v2-safe")
     "cudaGraphRetainUserObject" = @("graph-retain-user-object-deferred")
     "cudaUserObjectCreate" = @("user-object-create-deferred")
     "cudaUserObjectRelease" = @("user-object-release-deferred")
@@ -938,6 +1085,43 @@ function Find-CudaManifestApis {
   return @($matches | Select-Object -Unique)
 }
 
+function Test-DeferredManifestId {
+  param([string]$Id)
+
+  return -not [string]::IsNullOrWhiteSpace($Id) -and $Id.EndsWith("-deferred", [System.StringComparison]::OrdinalIgnoreCase)
+}
+
+function Get-ResolvedImplementationStatus {
+  param(
+    [object[]]$Matches,
+    [System.Collections.Generic.HashSet[string]]$NativeExports
+  )
+
+  if (@($Matches).Count -eq 0) {
+    return "missing"
+  }
+
+  $presentMatches = @($Matches | Where-Object {
+      -not [string]::IsNullOrWhiteSpace([string]$_.EntryPoint) -and $NativeExports.Contains([string]$_.EntryPoint)
+    })
+  if ($presentMatches.Count -eq 0) {
+    return "manifest-only"
+  }
+
+  $implementedMatches = @($presentMatches | Where-Object { -not (Test-DeferredManifestId -Id ([string]$_.Id)) })
+  $deferredMatches = @($presentMatches | Where-Object { Test-DeferredManifestId -Id ([string]$_.Id) })
+
+  if ($implementedMatches.Count -gt 0 -and $deferredMatches.Count -gt 0) {
+    return "implemented-with-deferred-history"
+  }
+
+  if ($implementedMatches.Count -gt 0) {
+    return "implemented"
+  }
+
+  return "deferred-only"
+}
+
 function Get-CudaRuntimeInterfaces {
   param([object]$Toolkit)
 
@@ -974,6 +1158,7 @@ foreach ($package in $tensorRtPackages) {
     $entryPoints = @($matches | ForEach-Object { $_.EntryPoint })
     $ids = @($matches | ForEach-Object { $_.Id })
     $nativeStatus = if ($entryPoints.Count -eq 0) { "missing" } elseif (@($entryPoints | Where-Object { -not $nativeExports.Contains($_) }).Count -eq 0) { "present" } else { "manifest-only" }
+    $implementationStatus = Get-ResolvedImplementationStatus -Matches $matches -NativeExports $nativeExports
     $managedInterop = if ($matches.Count -gt 0) { "generated-or-manual" } else { "missing" }
     $managedLikely = "unknown"
     foreach ($candidate in (Get-CSharpMethodCandidates $item.Method)) {
@@ -994,6 +1179,7 @@ foreach ($package in $tensorRtPackages) {
       Method = $item.Method
       Interface = $item.Interface
       Category = $item.Category
+      ImplementationStatus = $implementationStatus
       NativeManifestStatus = if ($matches.Count -gt 0) { "present" } else { "missing" }
       NativeSourceStatus = $nativeStatus
       ManagedInteropStatus = $managedInterop
@@ -1014,6 +1200,7 @@ foreach ($toolkit in $cudaToolkits) {
     $entryPoints = @($matches | ForEach-Object { $_.EntryPoint })
     $ids = @($matches | ForEach-Object { $_.Id })
     $nativeStatus = if ($entryPoints.Count -eq 0) { "missing" } elseif (@($entryPoints | Where-Object { -not $nativeExports.Contains($_) }).Count -eq 0) { "present" } else { "manifest-only" }
+    $implementationStatus = Get-ResolvedImplementationStatus -Matches $matches -NativeExports $nativeExports
     $managedLikely = "unknown"
     foreach ($candidate in (Get-CSharpMethodCandidates $item.Function)) {
       if ($cudaSourceText.Contains($candidate)) {
@@ -1029,6 +1216,7 @@ foreach ($toolkit in $cudaToolkits) {
       Header = $item.Header
       Function = $item.Function
       Category = $item.Category
+      ImplementationStatus = $implementationStatus
       NativeManifestStatus = if ($matches.Count -gt 0) { "present" } else { "missing" }
       NativeSourceStatus = $nativeStatus
       ManagedInteropStatus = if ($matches.Count -gt 0) { "generated-or-manual" } else { "missing" }
@@ -1042,14 +1230,57 @@ foreach ($toolkit in $cudaToolkits) {
 
 $tensorRtCsv = Join-Path $OutputDirectory "tensorrt-interface-coverage.csv"
 $cudaCsv = Join-Path $OutputDirectory "cuda-runtime-interface-coverage.csv"
+$tensorRtComparisonCsv = Join-Path $OutputDirectory "tensorrt-interface-comparison.csv"
+$cudaComparisonCsv = Join-Path $OutputDirectory "cuda-runtime-interface-comparison.csv"
 $tensorRtJson = Join-Path $OutputDirectory "tensorrt-interface-coverage.json"
 $cudaJson = Join-Path $OutputDirectory "cuda-runtime-interface-coverage.json"
 $summaryPath = Join-Path $OutputDirectory "interface-coverage-summary.md"
 
-$tensorRtRows | Sort-Object Package,Class,Method | Export-Csv -LiteralPath $tensorRtCsv -NoTypeInformation -Encoding utf8
-$cudaRows | Sort-Object ToolkitVersion,Function | Export-Csv -LiteralPath $cudaCsv -NoTypeInformation -Encoding utf8
-$tensorRtRows | Sort-Object Package,Class,Method | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $tensorRtJson -Encoding utf8
-$cudaRows | Sort-Object ToolkitVersion,Function | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $cudaJson -Encoding utf8
+$sortedTensorRtRows = @($tensorRtRows | Sort-Object Package,Class,Method)
+$sortedCudaRows = @($cudaRows | Sort-Object ToolkitVersion,Function)
+
+$sortedTensorRtRows | Export-Csv -LiteralPath $tensorRtCsv -NoTypeInformation -Encoding utf8
+$sortedCudaRows | Export-Csv -LiteralPath $cudaCsv -NoTypeInformation -Encoding utf8
+$sortedTensorRtRows | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $tensorRtJson -Encoding utf8
+$sortedCudaRows | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $cudaJson -Encoding utf8
+
+$sortedTensorRtRows |
+  Select-Object Vendor,
+    @{ Name = "TensorRtPackage"; Expression = { $_.Package } },
+    @{ Name = "TensorRtVersion"; Expression = { $_.Version } },
+    @{ Name = "TensorRtLine"; Expression = { $_.VersionLine } },
+    CudaVariant,
+    Header,
+    Class,
+    Method,
+    Interface,
+    Category,
+    ImplementationStatus,
+    NativeManifestStatus,
+    NativeSourceStatus,
+    ManagedInteropStatus,
+    ManagedHighLevelHeuristic,
+    MatchedManifestIds,
+    MatchedEntryPoints,
+    Notes |
+  Export-Csv -LiteralPath $tensorRtComparisonCsv -NoTypeInformation -Encoding utf8
+
+$sortedCudaRows |
+  Select-Object Vendor,
+    @{ Name = "CudaToolkitVersion"; Expression = { $_.ToolkitVersion } },
+    @{ Name = "CudaLine"; Expression = { $_.VersionLine } },
+    Header,
+    Function,
+    Category,
+    ImplementationStatus,
+    NativeManifestStatus,
+    NativeSourceStatus,
+    ManagedInteropStatus,
+    ManagedHighLevelHeuristic,
+    MatchedManifestIds,
+    MatchedEntryPoints,
+    Notes |
+  Export-Csv -LiteralPath $cudaComparisonCsv -NoTypeInformation -Encoding utf8
 
 $summary = [System.Text.StringBuilder]::new()
 [void]$summary.AppendLine("# Interface Coverage Summary")
@@ -1070,7 +1301,9 @@ foreach ($group in $tensorRtRows | Group-Object Package) {
   $total = $group.Count
   $covered = @($group.Group | Where-Object { $_.NativeManifestStatus -eq "present" }).Count
   $source = @($group.Group | Where-Object { $_.NativeSourceStatus -eq "present" }).Count
-  [void]$summary.AppendLine("- ``$($group.Name)``: official interfaces scanned=$total, manifest matched=$covered, native source present=$source")
+  $implemented = @($group.Group | Where-Object { $_.ImplementationStatus -in @("implemented", "implemented-with-deferred-history") }).Count
+  $deferredOnly = @($group.Group | Where-Object { $_.ImplementationStatus -eq "deferred-only" }).Count
+  [void]$summary.AppendLine("- ``$($group.Name)``: official interfaces scanned=$total, manifest matched=$covered, native source present=$source, implemented=$implemented, deferred-only=$deferredOnly")
 }
 [void]$summary.AppendLine()
 [void]$summary.AppendLine("## TensorRT Missing By Package / Category")
@@ -1085,7 +1318,9 @@ foreach ($group in $cudaRows | Group-Object ToolkitVersion) {
   $total = $group.Count
   $covered = @($group.Group | Where-Object { $_.NativeManifestStatus -eq "present" }).Count
   $source = @($group.Group | Where-Object { $_.NativeSourceStatus -eq "present" }).Count
-  [void]$summary.AppendLine("- ``CUDA $($group.Name)``: runtime functions scanned=$total, manifest matched=$covered, native source present=$source")
+  $implemented = @($group.Group | Where-Object { $_.ImplementationStatus -in @("implemented", "implemented-with-deferred-history") }).Count
+  $deferredOnly = @($group.Group | Where-Object { $_.ImplementationStatus -eq "deferred-only" }).Count
+  [void]$summary.AppendLine("- ``CUDA $($group.Name)``: runtime functions scanned=$total, manifest matched=$covered, native source present=$source, implemented=$implemented, deferred-only=$deferredOnly")
 }
 [void]$summary.AppendLine()
 [void]$summary.AppendLine("## CUDA Missing By Toolkit / Category")
@@ -1097,11 +1332,15 @@ foreach ($group in $cudaRows | Where-Object { $_.NativeManifestStatus -ne "prese
 [void]$summary.AppendLine("## Next Use")
 [void]$summary.AppendLine()
 [void]$summary.AppendLine('- Use `tensorrt-interface-coverage.csv` and `cuda-runtime-interface-coverage.csv` as the persistent interface checklist.')
-[void]$summary.AppendLine('- After each API batch, rerun `eng/Export-InterfaceCoverageMatrix.ps1`; rows should move from `missing` to `present`.')
+[void]$summary.AppendLine('- `ImplementationStatus` separates `implemented`, `implemented-with-deferred-history`, `deferred-only`, `manifest-only`, and `missing`; do not treat deferred history as the active implementation when a real non-deferred export is present.')
+[void]$summary.AppendLine('- Compatibility CSVs are also written to `tensorrt-interface-comparison.csv` and `cuda-runtime-interface-comparison.csv` for older review notes.')
+[void]$summary.AppendLine('- After each API batch, rerun `eng/Export-InterfaceCoverageMatrix.ps1`; rows should move from `missing`, `manifest-only`, or `deferred-only` toward `implemented` or `implemented-with-deferred-history`.')
 [void]$summary.AppendLine('- For release-quality decisions, manually review high-priority rows because token matching can produce false negatives or broad matches.')
 
 Set-Content -LiteralPath $summaryPath -Value $summary.ToString() -Encoding utf8
 
 Write-Host "TensorRT interface coverage written to $tensorRtCsv"
 Write-Host "CUDA runtime interface coverage written to $cudaCsv"
+Write-Host "TensorRT interface comparison written to $tensorRtComparisonCsv"
+Write-Host "CUDA runtime interface comparison written to $cudaComparisonCsv"
 Write-Host "Interface coverage summary written to $summaryPath"

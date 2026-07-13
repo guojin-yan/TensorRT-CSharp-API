@@ -34,14 +34,14 @@ runtime package key 和 NuGet package ID 必须包含依赖的 `major.minor` 版
 
 当前维护环境已安装 CUDA `12.9`。目标为 CUDA `12.9` 的包现在使用 CUDA `12.9` 作为本地编译工具链；`win-x64-trt10.11-cuda12.9-cudnn9.22` 与 `win-x64-trt11.0-cuda12.9-cudnn9.22` 已完成本地 runtime 资产收集、runtime pack、消费端验证和消费端 smoke。
 
-TensorRT 11 已纳入矩阵并开始真实适配。Windows `trt11.0-cuda12.9-cudnn9.22` 已完成最小原生 smoke 和消费端 smoke：logger、runtime、builder、config、network、serialized engine、deserialize 和 execution context。2026-06-14，`trt11.0-cuda13.2-cudnn9.22` 已完成 native bridge 构建、完整 split 组件包与 collection 包打包，并通过 package consumer restore/build/native-copy；但当前驱动报告 CUDA `12.9`，不是 CUDA 13-capable runtime stack，因此 runtime smoke 保持 pending。
+TensorRT 11 已纳入矩阵并开始真实适配。Windows `trt11.0-cuda12.9-cudnn9.22` 已完成最小原生 smoke 和消费端 smoke：logger、runtime、builder、config、network、serialized engine、deserialize 和 execution context。2026-06-25，`trt11.0-cuda13.2-cudnn9.22` 已完成 native bridge 构建、完整 split 组件包与 collection 包打包，并通过 package consumer restore/build/native-copy；full package consumer smoke 已实际请求并启动 packaged runtime，但当前机器在 `cudaRuntimeGetVersion` 处返回 CUDA error 35，因此 readiness 记录为 `blocked-by-cuda-driver`，不是 API 缺失或 callback proof。
 
 当前包消费端验证：
 
 - `win-x64-trt10.11-cuda11.8-cudnn8.9`：`16/16` 个 native assets 成功复制，消费端 smoke 通过。
 - `win-x64-trt10.11-cuda12.9-cudnn9.22`：`19/19` 个 native asset patterns 成功复制，消费端 smoke 通过。
 - `win-x64-trt11.0-cuda12.9-cudnn9.22`：`19/19` 个 native asset patterns 成功复制，消费端 smoke 通过。
-- `win-x64-trt11.0-cuda13.2-cudnn9.22`：2026-06-14 完整 split 包打包通过，`19/19` 个 native asset patterns 成功复制，restore/build 通过；当前驱动仅报告 CUDA `12.9`，因此未请求 CUDA 13 消费端 smoke。
+- `win-x64-trt11.0-cuda13.2-cudnn9.22`：2026-06-25 完整 split/full 包打包通过，`19/19` 个 native asset patterns 成功复制，restore/build 通过；full package consumer smoke 已请求并被 CUDA driver/runtime compatibility 阻塞为 `blocked-by-cuda-driver`，真实 callback runtime proof 仍为 `false`。
 
 ## 本机 root
 
@@ -137,12 +137,38 @@ runtime 包可能非常大，因为会包含 TensorRT builder resources、plugin
 
 当前发布策略：
 
-- `JYPPX.TensorRT.CSharp.API` 发布到 nuget.org 和 GitHub Packages。
-- 大体积 CUDA/cuDNN/TensorRT 组件包优先发布到 GitHub Packages；如果不适合 NuGet feed，则作为 GitHub Release asset 发布。
+- owner 授权且 package-consumer/post-publish gate 通过后，`JYPPX.TensorRT.CSharp.API` 可投递到 nuget.org 和 GitHub Packages。
+- owner 授权且 package-consumer/post-publish gate 通过后，大体积 CUDA/cuDNN/TensorRT 组件包优先投递到 GitHub Packages；如果不适合 NuGet feed，则作为 GitHub Release asset 投递。
 - GitHub Release assets 只是可下载的 `.nupkg` 文件，不是 NuGet feed。稳定依赖包只保留在 Release 时，发布 workflow 会先下载这些文件到临时本地包源，再验证 `bridge,collection`。
 - runtime 包版本和 managed 包版本独立维护。
 - 只有对应的 NVIDIA 依赖集合变化时，才重发 `CudaCudnn` 或 `TensorRt` 包。
 - 本地 C ABI bridge 变化时，重发 `bridge,collection` split 包，并显式传入已有 `CudaCudnn` 和 `TensorRt` 包版本，避免重复发布稳定依赖包。
 
 公开发布前仍需针对实际发布的 NVIDIA TensorRT / CUDA / cuDNN 二进制文件复核再分发许可。
+
+## 第二批正文门禁
+
+### 适用读者
+
+本文适合准备安装 TensorRtSharp runtime 包的用户，也适合维护 split runtime package、GitHub Release assets 和 GitHub Packages 发布矩阵的负责人。
+
+### 解决问题
+
+TensorRT/CUDA/cuDNN 二进制体积大、版本组合多、许可证和再分发边界复杂。runtime package 文档要解决的是：用户如何选择正确包，维护者如何避免重复发布稳定 vendor 包，发布负责人如何区分包存在、包可还原、包可运行和真实 runtime proof。
+
+### 核心思路
+
+核心思路是把 managed 包、bridge 包、CudaCudnn 包、TensorRt 包和 collection 包拆开管理。所有组合都要保留 manifest、asset inventory、hash 和 consumer 证据。
+
+### 操作路径
+
+选择目标 RID 和 TensorRT/CUDA/cuDNN 组合，检查 runtime manifest 和 split runtime manifest，用本机 local override 指向 NVIDIA 安装目录，生成 runtime split package，并在 clean consumer 中验证 restore/build/dependency probe。
+
+### 边界说明
+
+runtime package 存在不等于 runtime proof。build-only、dry-run、template、local feed、ProjectReference、direct `.nupkg`、TensorRtExec report、YoloVision matrix、OnnxToEngine report、readonly diagnostics 都不是 runtime proof。public package proof 和 post-publish proof 还必须证明公开来源、版本、hash、host metadata 和 validator 结果。
+
+### 下一步
+
+下一步应继续把 package consumer proof 与 release close record 串起来：当 owner 提供真实 clean consumer 结果时，导入 validator；没有输入时，继续完善安装教程、故障排查和 runtime target coverage 文章。
 

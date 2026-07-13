@@ -23,12 +23,158 @@ internal static partial class NativeBridgeApi
         return CreateLoggerCore(GetBindings(line));
     }
 
+    public static SafeTensorRtObjectHandle CreateLogger(
+        TensorRtApiLine line,
+        TensorRtLoggerCallback callback,
+        IntPtr userState,
+        TensorRtLogSeverity minimumSeverity)
+    {
+        SafeTensorRtObjectHandle logger;
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_logger_create_with_callback(callback, userState, (int)minimumSeverity, out logger),
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_logger_create_with_callback(callback, userState, (int)minimumSeverity, out logger),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_logger_create_with_callback(callback, userState, (int)minimumSeverity, out logger),
+            _ => throw new BridgeProbeException(BridgeStatusCode.InvalidArgument, BridgeErrorCategory.Common, "Unsupported TensorRT API line.")
+        };
+
+        NativeStatus.ThrowIfFailed(status);
+        return logger;
+    }
+
+    public static bool EmitLoggerDiagnostic(TensorRtApiLine line, SafeTensorRtObjectHandle logger, TensorRtLogSeverity severity, string message)
+    {
+        using Utf8Interop.Utf8StringScope messageUtf8 = Utf8Interop.ToNativeString(message);
+        int callbackFailed;
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_logger_emit_diagnostic(logger, (int)severity, messageUtf8.Pointer, out callbackFailed),
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_logger_emit_diagnostic(logger, (int)severity, messageUtf8.Pointer, out callbackFailed),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_logger_emit_diagnostic(logger, (int)severity, messageUtf8.Pointer, out callbackFailed),
+            _ => throw new BridgeProbeException(BridgeStatusCode.InvalidArgument, BridgeErrorCategory.Common, "Unsupported TensorRT API line.")
+        };
+
+        NativeStatus.ThrowIfFailed(status);
+        return callbackFailed == 0;
+    }
+
+    public static SafeTensorRtObjectHandle CreateProfiler(
+        TensorRtApiLine line,
+        TensorRtProfilerCallback callback,
+        IntPtr userState)
+    {
+        SafeTensorRtObjectHandle profiler;
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_profiler_create_with_callback(callback, userState, out profiler),
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_profiler_create_with_callback(callback, userState, out profiler),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_profiler_create_with_callback(callback, userState, out profiler),
+            _ => throw new BridgeProbeException(BridgeStatusCode.InvalidArgument, BridgeErrorCategory.Common, "Unsupported TensorRT API line.")
+        };
+
+        NativeStatus.ThrowIfFailed(status);
+        return profiler;
+    }
+
+    public static bool EmitProfilerDiagnostic(TensorRtApiLine line, SafeTensorRtObjectHandle profiler, string layerName, float milliseconds)
+    {
+        using Utf8Interop.Utf8StringScope layerNameUtf8 = Utf8Interop.ToNativeString(layerName);
+        int callbackFailed;
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_profiler_emit_diagnostic(profiler, layerNameUtf8.Pointer, milliseconds, out callbackFailed),
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_profiler_emit_diagnostic(profiler, layerNameUtf8.Pointer, milliseconds, out callbackFailed),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_profiler_emit_diagnostic(profiler, layerNameUtf8.Pointer, milliseconds, out callbackFailed),
+            _ => throw new BridgeProbeException(BridgeStatusCode.InvalidArgument, BridgeErrorCategory.Common, "Unsupported TensorRT API line.")
+        };
+
+        NativeStatus.ThrowIfFailed(status);
+        return callbackFailed == 0;
+    }
+
+    public static SafeTensorRtObjectHandle CreateProgressMonitor(
+        TensorRtApiLine line,
+        TensorRtProgressMonitorCallback callback,
+        IntPtr userState)
+    {
+        SafeTensorRtObjectHandle monitor;
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_progress_monitor_create_with_callback(callback, userState, out monitor),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_progress_monitor_create_with_callback(callback, userState, out monitor),
+            TensorRtApiLine.TensorRt8 => throw new BridgeProbeException(BridgeStatusCode.NotSupported, BridgeErrorCategory.TensorRt, "TensorRT progress monitor callbacks are available for TensorRT 10 and TensorRT 11 adapters."),
+            _ => throw new BridgeProbeException(BridgeStatusCode.InvalidArgument, BridgeErrorCategory.Common, "Unsupported TensorRT API line.")
+        };
+
+        NativeStatus.ThrowIfFailed(status);
+        return monitor;
+    }
+
+    public static TensorRtProgressMonitorDiagnosticResult EmitProgressMonitorDiagnostic(
+        TensorRtApiLine line,
+        SafeTensorRtObjectHandle monitor,
+        TensorRtProgressMonitorEventKind kind,
+        string phaseName,
+        string? parentPhase,
+        int step,
+        int stepCount)
+    {
+        using Utf8Interop.Utf8StringScope phaseNameUtf8 = Utf8Interop.ToNativeString(phaseName);
+        using Utf8Interop.Utf8StringScope parentPhaseUtf8 = Utf8Interop.ToNativeString(parentPhase);
+
+        int shouldContinue;
+        int callbackFailed;
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_progress_monitor_emit_diagnostic(monitor, (int)kind, phaseNameUtf8.Pointer, parentPhaseUtf8.Pointer, step, stepCount, out shouldContinue, out callbackFailed),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_progress_monitor_emit_diagnostic(monitor, (int)kind, phaseNameUtf8.Pointer, parentPhaseUtf8.Pointer, step, stepCount, out shouldContinue, out callbackFailed),
+            TensorRtApiLine.TensorRt8 => throw new BridgeProbeException(BridgeStatusCode.NotSupported, BridgeErrorCategory.TensorRt, "TensorRT progress monitor callbacks are available for TensorRT 10 and TensorRT 11 adapters."),
+            _ => throw new BridgeProbeException(BridgeStatusCode.InvalidArgument, BridgeErrorCategory.Common, "Unsupported TensorRT API line.")
+        };
+
+        NativeStatus.ThrowIfFailed(status);
+        return new TensorRtProgressMonitorDiagnosticResult(shouldContinue != 0, callbackFailed == 0);
+    }
+
     public static SafeTensorRtObjectHandle CreateRuntime(TensorRtApiLine line, SafeTensorRtObjectHandle logger)
     {
         TensorRtLineBindings bindings = GetBindings(line);
         BridgeStatusCode status = bindings.RuntimeCreate(logger, out SafeTensorRtObjectHandle runtime);
         NativeStatus.ThrowIfFailed(status);
         return runtime;
+    }
+
+    public static TensorRtRuntimeCreateDiagnosticSnapshot GetRuntimeCreateDiagnostic(
+        TensorRtApiLine line,
+        SafeTensorRtObjectHandle logger)
+    {
+        if (line != TensorRtApiLine.TensorRt11)
+        {
+            return new TensorRtRuntimeCreateDiagnosticSnapshot(
+                line,
+                diagnosticAvailable: false,
+                attempted: false,
+                loggerHandlePresent: logger != null && !logger.IsInvalid,
+                loggerPayloadPresent: false,
+                createInferRuntimeReturnedNonNull: false,
+                createInferRuntimeReturnedNull: false,
+                lastStatus: BridgeStatusCode.NotSupported,
+                tensorRtAvailable: false,
+                expectedMajor: 11,
+                bridgeBuiltMajor: 0,
+                detectedVersion: string.Empty,
+                loggerCallbackAvailable: false,
+                loggerMessageCount: 0,
+                lastLoggerSeverity: 0,
+                lastLoggerMessage: string.Empty,
+                createRuntimePhase: "not-supported",
+                nativeDetail: "TRT11 runtime create diagnostic is not implemented for this TensorRT API line.",
+                diagnostic: "TRT11 runtime create diagnostic is only available for the TensorRT 11 adapter.");
+        }
+
+        BridgeStatusCode status = NativeMethodsTensorRt.jyppx_trt11_runtime_create_diagnostic(logger, out NativeTensorRtRuntimeCreateDiagnosticInfo info);
+        NativeStatus.ThrowIfFailed(status);
+        return BridgeInfoMapper.ToManaged(info);
     }
 
     public static SafeTensorRtObjectHandle CreateBuilder(TensorRtApiLine line, SafeTensorRtObjectHandle logger)
@@ -546,6 +692,36 @@ internal static partial class NativeBridgeApi
         return hasProfile != 0;
     }
 
+    public static bool HasBuilderConfigAlgorithmSelectorCompatibility(TensorRtApiLine line, SafeTensorRtObjectHandle config)
+    {
+        int hasSelector;
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_builder_config_has_algorithm_selector(config, out hasSelector),
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_config_has_algorithm_selector(config, out hasSelector),
+            TensorRtApiLine.TensorRt11 => throw new BridgeProbeException(BridgeStatusCode.NotSupported, BridgeErrorCategory.TensorRt, "IBuilderConfig::getAlgorithmSelector presence is exposed by this bridge for TensorRT 8 and 10; TensorRT 11 callback ownership remains deferred."),
+            _ => throw new BridgeProbeException(BridgeStatusCode.InvalidArgument, BridgeErrorCategory.Common, "Unsupported TensorRT API line.")
+        };
+
+        NativeStatus.ThrowIfFailed(status);
+        return hasSelector != 0;
+    }
+
+    public static bool HasBuilderConfigInt8CalibratorCompatibility(TensorRtApiLine line, SafeTensorRtObjectHandle config)
+    {
+        int hasCalibrator;
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_builder_config_has_int8_calibrator(config, out hasCalibrator),
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_config_has_int8_calibrator(config, out hasCalibrator),
+            TensorRtApiLine.TensorRt11 => throw new BridgeProbeException(BridgeStatusCode.NotSupported, BridgeErrorCategory.TensorRt, "IBuilderConfig::getInt8Calibrator presence is exposed by this bridge for TensorRT 8 and 10; TensorRT 11 callback ownership remains deferred."),
+            _ => throw new BridgeProbeException(BridgeStatusCode.InvalidArgument, BridgeErrorCategory.Common, "Unsupported TensorRT API line.")
+        };
+
+        NativeStatus.ThrowIfFailed(status);
+        return hasCalibrator != 0;
+    }
+
     public static void SetBuilderConfigFlag(TensorRtApiLine line, SafeTensorRtObjectHandle config, TensorRtBuilderFlag flag, bool enabled)
     {
         BridgeStatusCode status = line switch
@@ -878,6 +1054,30 @@ internal static partial class NativeBridgeApi
             _ => throw new BridgeProbeException(BridgeStatusCode.InvalidArgument, BridgeErrorCategory.Common, "Unsupported TensorRT API line.")
         };
 
+        NativeStatus.ThrowIfFailed(status);
+        return iterations;
+    }
+
+    public static ulong GetMaxWorkspaceSizeCompatibility(TensorRtApiLine line, SafeTensorRtObjectHandle config)
+    {
+        if (line != TensorRtApiLine.TensorRt8)
+        {
+            throw new BridgeProbeException(BridgeStatusCode.NotSupported, BridgeErrorCategory.TensorRt, "IBuilderConfig::getMaxWorkspaceSize is a TensorRT 8 legacy compatibility API. Use GetMemoryPoolLimit(Workspace) for portable TensorRT 8/10/11 diagnostics.");
+        }
+
+        BridgeStatusCode status = NativeMethodsTensorRt.jyppx_trt8_builder_config_get_max_workspace_size(config, out UIntPtr workspaceSize);
+        NativeStatus.ThrowIfFailed(status);
+        return workspaceSize.ToUInt64();
+    }
+
+    public static int GetMinTimingIterationsCompatibility(TensorRtApiLine line, SafeTensorRtObjectHandle config)
+    {
+        if (line != TensorRtApiLine.TensorRt8)
+        {
+            throw new BridgeProbeException(BridgeStatusCode.NotSupported, BridgeErrorCategory.TensorRt, "IBuilderConfig::getMinTimingIterations is a TensorRT 8 legacy compatibility API. Use GetAverageTimingIterations for portable TensorRT 8/10/11 diagnostics.");
+        }
+
+        BridgeStatusCode status = NativeMethodsTensorRt.jyppx_trt8_builder_config_get_min_timing_iterations(config, out int iterations);
         NativeStatus.ThrowIfFailed(status);
         return iterations;
     }

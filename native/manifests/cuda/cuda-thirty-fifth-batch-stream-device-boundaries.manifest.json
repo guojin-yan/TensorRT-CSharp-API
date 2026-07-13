@@ -72,7 +72,18 @@
         { "name": "destination_device", "type": "int32_t", "direction": "in", "managedType": "int", "moduleManagedType": "int" }
       ]
     },
-    { "id": "cuda-choose-device-deferred", "entryPoint": "jyppx_cuda_choose_device_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT", "parameters": [] },
+    {
+      "id": "cuda-choose-device",
+      "entryPoint": "jyppx_cuda_choose_device",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "requirements", "type": "const JYPPX_CudaDeviceSelectionRequirements*", "direction": "in", "managedType": "in NativeCudaDeviceSelectionRequirements", "moduleManagedType": "in NativeCudaDeviceSelectionRequirements" },
+        { "name": "out_device", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
     { "id": "cuda-device-get-dev-resource-deferred", "entryPoint": "jyppx_cuda_device_get_dev_resource_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT", "parameters": [] },
     { "id": "cuda-device-get-execution-ctx-deferred", "entryPoint": "jyppx_cuda_device_get_execution_ctx_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT", "parameters": [] },
     { "id": "cuda-device-get-nv-sci-sync-attributes-deferred", "entryPoint": "jyppx_cuda_device_get_nv_sci_sync_attributes_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT", "parameters": [] },

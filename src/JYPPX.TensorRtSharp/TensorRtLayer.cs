@@ -12,11 +12,16 @@ namespace JYPPX.TensorRtSharp;
 public sealed partial class TensorRtLayer : IDisposable
 {
     private readonly SafeTensorRtObjectHandle _handle;
+    private readonly SafeTensorRtObjectHandleLease? _ownerLease;
 
-    internal TensorRtLayer(TensorRtApiLine line, SafeTensorRtObjectHandle handle)
+    internal TensorRtLayer(
+        TensorRtApiLine line,
+        SafeTensorRtObjectHandle handle,
+        SafeTensorRtObjectHandleLease? ownerLease = null)
     {
         Line = line;
         _handle = handle;
+        _ownerLease = ownerLease;
     }
 
     internal SafeTensorRtObjectHandle Handle => _handle;
@@ -86,7 +91,10 @@ public sealed partial class TensorRtLayer : IDisposable
     /// </summary>
     public TensorRtTensor GetInput(int index)
     {
-        return new TensorRtTensor(Line, NativeBridgeApi.GetLayerInput(Line, _handle, index));
+        return new TensorRtTensor(
+            Line,
+            NativeBridgeApi.GetLayerInput(Line, _handle, index),
+            _ownerLease?.Clone());
     }
 
     /// <summary>
@@ -95,7 +103,10 @@ public sealed partial class TensorRtLayer : IDisposable
     /// </summary>
     public TensorRtTensor GetOutput(int index)
     {
-        return new TensorRtTensor(Line, NativeBridgeApi.GetLayerOutput(Line, _handle, index));
+        return new TensorRtTensor(
+            Line,
+            NativeBridgeApi.GetLayerOutput(Line, _handle, index),
+            _ownerLease?.Clone());
     }
 
     /// <summary>
@@ -1327,7 +1338,19 @@ public sealed partial class TensorRtLayer : IDisposable
     public void Dispose()
     {
         _handle.Dispose();
+        _ownerLease?.Dispose();
         GC.SuppressFinalize(this);
+    }
+
+    internal SafeTensorRtObjectHandleLease CloneRequiredOwnerLease()
+    {
+        if (_ownerLease == null)
+        {
+            throw new InvalidOperationException(
+                "This layer is not bound to a network owner. Retrieve the TensorRT 8 RNNv2 layer through TensorRtNetworkDefinition.GetLayer before querying borrowed state tensors.");
+        }
+
+        return _ownerLease.Clone();
     }
 
     private void ValidateOutputIndex(int index)

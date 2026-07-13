@@ -1,0 +1,20 @@
+{
+  "$schema": "../bridge-api.schema.json",
+  "module": "cuda",
+  "versionLine": "common",
+  "apis": [
+    {
+      "id": "cuda-graph-debug-dot-print-safe",
+      "entryPoint": "jyppx_cuda_graph_debug_dot_print_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "graph", "type": "JYPPX_CudaGraph*", "direction": "in" },
+        { "name": "path", "type": "const char*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "flags", "type": "uint32_t", "direction": "in", "managedType": "uint", "moduleManagedType": "uint" }
+      ]
+    }
+  ]
+}

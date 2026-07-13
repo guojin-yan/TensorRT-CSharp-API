@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "yolovision-reference-asset-acquisition-manifest",
+  "assetSetId": "tensorrt-10.11-local-yolov8s-detection",
+  "sampleName": "YoloVision",
+  "status": "source-files-hash-verified-license-review-required",
+  "proofClassification": "acquisition-candidate",
+  "tensorRtVersion": "10.11.0.33",
+  "sourceRootEnvironmentVariable": "TENSORRT_PATH",
+  "sourceRootHints": [
+    "D:\\Program Files\\TensorRT-10.11.0.33-cu12"
+  ],
+  "licenseBoundary": {
+    "state": "owner-review-required",
+    "allRedistributionApproved": false,
+    "canPromoteRealModelRuntime": false,
+    "reason": "The files are shipped in a local TensorRT installation and are hash-verifiable, but the exact upstream provenance and repository redistribution terms for the YOLOv8 model and airliner image are not established. The label file is part of a TensorRT sample governed by the TensorRT SLA, while its upstream label-set terms still require owner review.",
+    "tensorRtSoftwareLicenseAgreement": "https://docs.nvidia.com/deeplearning/tensorrt/latest/reference/sla.html"
+  },
+  "assets": [
+    {
+      "id": "yolov8s-onnx",
+      "role": "model",
+      "relativeSourcePath": "bin\\yolov8s.onnx",
+      "cacheFileName": "yolov8s.onnx",
+      "expectedLength": 44825783,
+      "expectedSha256": "274e13839331bbe1551e0386e7f02ff52a184ef49d7d23a6062a875cdd911399",
+      "sourceUrl": "owner-required-exact-upstream-model-url",
+      "downloadUrl": "",
+      "documentationUrls": [
+        "https://developer.nvidia.com/tensorrt",
+        "https://github.com/NVIDIA/TensorRT/"
+      ],
+      "license": {
+        "name": "TensorRT SLA applies to the installation package; YOLOv8 upstream model terms unresolved",
+        "url": "https://docs.nvidia.com/deeplearning/tensorrt/latest/reference/sla.html",
+        "status": "owner-review-required",
+        "redistributionApproved": false,
+        "evidence": [
+          "TensorRT doc/Readme.txt points to the TensorRT Software License Agreement.",
+          "No local README or metadata was found that identifies the exact upstream URL and redistribution terms for bin/yolov8s.onnx."
+        ]
+      }
+    },
+    {
+      "id": "coco-labels-80",
+      "role": "labels",
+      "relativeSourcePath": "samples\\python\\yolov3_onnx\\coco_labels.txt",
+      "cacheFileName": "coco_labels.txt",
+      "expectedLength": 703,
+      "expectedSha256": "0f36cd339dc48f84d65b4d983dc0df8259db3a8ecabaae93a520d01ad30ff510",
+      "sourceUrl": "https://github.com/NVIDIA/TensorRT/",
+      "downloadUrl": "",
+      "documentationUrls": [
+        "https://github.com/NVIDIA/TensorRT/tree/main/samples/python/yolov3_onnx",
+        "https://cocodataset.org/"
+      ],
+      "license": {
+        "name": "TensorRT Software License Agreement; upstream COCO label-set review required",
+        "url": "https://docs.nvidia.com/deeplearning/tensorrt/latest/reference/sla.html",
+        "status": "owner-review-required",
+        "redistributionApproved": false,
+        "evidence": [
+          "samples/python/yolov3_onnx/README.md states that sample use, reproduction, and distribution are governed by the TensorRT Software License Agreement.",
+          "The README identifies COCO as the dataset but does not by itself approve repository redistribution of this copied label file."
+        ]
+      }
+    },
+    {
+      "id": "airliner-ppm",
+      "role": "input-image",
+      "relativeSourcePath": "data\\resnet50\\airliner.ppm",
+      "cacheFileName": "airliner.ppm",
+      "expectedLength": 150543,
+      "expectedSha256": "eac2811e99893115847d2e6ab24bae5a1e4ff64820a000a672333c07dc29e083",
+      "sourceUrl": "owner-required-exact-upstream-image-url",
+      "downloadUrl": "",
+      "documentationUrls": [
+        "https://github.com/NVIDIA/TensorRT/",
+        "https://docs.nvidia.com/deeplearning/tensorrt/latest/reference/sla.html"
+      ],
+      "license": {
+        "name": "TensorRT SLA applies to the installation package; upstream image provenance unresolved",
+        "url": "https://docs.nvidia.com/deeplearning/tensorrt/latest/reference/sla.html",
+        "status": "owner-review-required",
+        "redistributionApproved": false,
+        "evidence": [
+          "data/int8_api/README.md and samples/sampleINT8API/README.md identify airliner.ppm as included TensorRT sample data.",
+          "The local documentation does not identify the original image source or independently approve repository redistribution."
+        ]
+      }
+    }
+  ],
+  "boundary": {
+    "performsPublish": false,
+    "canPublishPublicly": false,
+    "canCloseReleaseIssue": false,
+    "notes": [
+      "Hash verification proves file identity only.",
+      "Copying assets into a local cache does not approve repository redistribution.",
+      "The acquisition report may support source-tree runtime evidence but cannot promote real-model-runtime until every license status is approved."
+    ]
+  }
+}

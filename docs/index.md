@@ -12,6 +12,8 @@ Verified on 2026-06-12:
 - Latest coverage report: `artifacts/interface-coverage/interface-coverage-summary.md`.
 - Native validation: `win-x64-trt11-cuda13-release` configures and builds.
 - Managed validation: solution build and project quality tests pass.
+- Runtime proof boundary: `blocked-by-cuda-driver` on the current host remains a compatibility blocker for package-consumer runtime proof. Runbooks and collection bundles are owner guidance, not smoke passed evidence.
+- Release close state: `canCloseReleaseIssue=false`; `release-issue-close-record-validation=blocked-template-only`, and `release-issue-close-record-template.json` is not proof. Remaining owner proof blockers are owner authorization, `package-consumer-runtime`, `linux-runner-proof`, `real-model-runtime`, and post-publish verification; `ownerProofFinalBackfillTracks` is only a work map. The shortest owner action surface is `owner-release-execution-package` and its `oneScreenReleaseHoldChecklist` one-screen Release Hold checklist; the focused command/input companion is `owner-proof-backfill-execution-pack`; the owner execution dashboard is `owner-proof-execution-handoff`; the owner candidate input audit is `owner-external-proof-input-preflight`; the blocked input repair companion is `owner-proof-input-repair-pack`; the non-proof draft surface is `owner-proof-input-draft-pack`; the external proof command planner is `owner-external-proof-backfill-orchestrator`; the focused owner input overlays are `package-consumer-runtime-proof-owner-input` and `release-issue-close-record-owner-input`; the focused candidate surfaces are `package-consumer-runtime-proof-candidate` and `release-issue-close-record-candidate`; the compact status view is `release-proof-readiness-snapshot`. These guidance/candidate/input artifacts are not proof. Local feed, ProjectReference, bridge-only logs, `Skipped=True`, mismatched log SHA256, build-only/precheck output, sidecar-only reports, collection packages, runbooks, repair packs, input drafts, orchestrators, owner input templates, candidates, template-only release issue close records, and Windows handoff for Linux proof are explicitly non-substitute evidence. After all real proof gates pass, `Test-ReleaseIssueCloseRecord.ps1 -FailOnNotCloseReady` remains the final owner close gate.
 
 The project is now past raw interface coverage closure for the locally scanned headers. The active work is release hardening: sample coverage, documentation, package validation, and promotion of high-value deferred boundaries into safe public wrappers.
 
@@ -33,17 +35,562 @@ English:
 
 Chinese articles:
 
+- [Project Overview](articles/zh-cn/project-overview.md)
+- [Project Release Story And Boundaries](articles/zh-cn/project-release-story-and-boundaries.md)
+- [Blog Project Introduction](articles/zh-cn/blog-project-introduction.md)
+- [Why Not Plain P/Invoke](articles/zh-cn/why-not-plain-pinvoke.md)
+- [Interface Zero To Deferred Boundary](articles/zh-cn/interface-zero-to-deferred-boundary.md)
+- [Deferred Manual Design Groups](articles/zh-cn/deferred-manual-design-groups.md)
+- [Deferred Boundary Risk Tier Gate](articles/zh-cn/deferred-boundary-risk-tier-gate.md)
+- [TRT Cross-Version Strategy](articles/zh-cn/trt-cross-version-strategy.md)
 - [Getting Started](articles/zh-cn/getting-started.md)
+- [Windows Local Development Environment](articles/zh-cn/windows-local-dev-environment.md)
 - [Installation Layout](articles/zh-cn/installation-layout.md)
 - [API Reference](articles/zh-cn/api-reference.md)
 - [Windows API Completion](articles/zh-cn/windows-api-completion.md)
 - [Latest Windows API Status](articles/zh-cn/windows-api-completion-latest.md)
+- [ExecutionContext And Inference Binding Tutorial](articles/zh-cn/inference-bindings-tutorial.md)
+- [Blog InferenceBindings Identity Network](articles/zh-cn/blog-inference-bindings-identity-network.md)
+- [Dynamic Shape Optimization Profile Tutorial](articles/zh-cn/dynamic-shape-optimization-profile-tutorial.md)
+- [Blog Dynamic Shape Optimization Profile](articles/zh-cn/blog-dynamic-shape-optimization-profile.md)
+- [ONNX Parser To Serialized Engine Tutorial](articles/zh-cn/onnx-parser-to-serialized-engine-tutorial.md)
+- [Blog ONNX Parser Engine RoundTrip](articles/zh-cn/blog-onnx-parser-engine-roundtrip.md)
+- [TensorRT Builder Runtime Engine Object Model](articles/zh-cn/tensorrt-object-model.md)
+- [Plugin Inventory Readonly API](articles/zh-cn/plugin-inventory-readonly-api.md)
+- [Plugin Ownership Boundary](articles/zh-cn/plugin-ownership-boundary.md)
+- [Blog Plugin Inventory Readonly API](articles/zh-cn/blog-plugin-inventory-readonly-api.md)
+- [Plugin Serialization Paths](articles/zh-cn/plugin-serialization-paths.md)
+- [Classification Model Assets](articles/zh-cn/classification-model-assets.md)
+- [Classification Asset Candidates](articles/zh-cn/classification-asset-candidates.md)
+- [Classification Real Asset Walkthrough](articles/zh-cn/classification-real-asset-walkthrough.md)
+- [YoloVision Sample Overview](articles/zh-cn/yolovision-sample-overview.md)
+- [YoloVision Model Assets](articles/zh-cn/yolovision-model-assets.md)
+- [YoloVision Asset Candidates](articles/zh-cn/yolovision-asset-candidates.md)
+- [YoloVision Model Matrix](articles/zh-cn/yolo-vision-model-matrix.md)
+- [YoloVision Family Task Real Asset Roadmap](articles/zh-cn/yolovision-family-task-real-asset-roadmap.md)
+- [YOLO Family Profile And Postprocess Guide](articles/zh-cn/yolo-family-profile-and-postprocess-guide.md)
+- [YoloVision Preprocess And Postprocess](articles/zh-cn/yolovision-preprocess-postprocess.md)
+- [YoloVision Engine Build And Run](articles/zh-cn/yolovision-engine-build-and-run.md)
+- [YoloVision Troubleshooting](articles/zh-cn/yolovision-troubleshooting.md)
+- [YoloVision Multi-Output Metadata Guide](articles/zh-cn/yolovision-multi-output-metadata-guide.md)
+- [YoloVision All Task Overview](articles/zh-cn/yolovision-all-task-overview.md)
+- [YoloVision Detection Tutorial](articles/zh-cn/yolovision-detection-tutorial.md)
+- [YoloVision Segmentation Tutorial](articles/zh-cn/yolovision-segmentation-tutorial.md)
+- [YoloVision Pose Tutorial](articles/zh-cn/yolovision-pose-tutorial.md)
+- [YoloVision OBB Tutorial](articles/zh-cn/yolovision-obb-tutorial.md)
+- [YoloVision Classification And Semantic Tutorial](articles/zh-cn/yolovision-classification-semantic-tutorial.md)
+- [YoloVision Real Asset Walkthrough](articles/zh-cn/yolovision-real-asset-walkthrough.md)
+- [TensorRtExec Tool Getting Started](articles/zh-cn/tensorrtexec-tool-getting-started.md)
+- [TensorRtExec Trtexec Parity Matrix](articles/zh-cn/tensorrt-exec-trtexec-parity-matrix.md)
+- [OnnxToEngine TensorRtExec YoloVision Evidence Ladder](articles/zh-cn/onnxtoengine-tensorrtexec-yolovision-evidence-ladder.md)
+- [ONNX To Engine Quickstart](articles/zh-cn/onnx-to-engine-quickstart.md)
+- [ONNX To Engine Dynamic Shape Profile](articles/zh-cn/onnx-to-engine-dynamic-shape-profile.md)
+- [ONNX To Engine FP16 INT8 Boundary](articles/zh-cn/onnx-to-engine-fp16-int8-boundary.md)
+- [ONNX To Engine Output Artifacts](articles/zh-cn/onnx-to-engine-output-artifacts.md)
+- [ONNX To Engine Trtexec Conversion Guide](articles/zh-cn/onnx-to-engine-trtexec-conversion-guide.md)
+- [TensorRtExec CLI Parameter Map](articles/zh-cn/tensorrtexec-cli-parameter-map.md)
+- [TensorRtExec WinForms Guide](articles/zh-cn/tensorrtexec-winforms-guide.md)
+- [TensorRtExec GUI User Guide](articles/zh-cn/tensorrtexec-gui-user-guide.md)
+- [TensorRtExec External ONNX Build Report](articles/zh-cn/tensorrtexec-external-onnx-build-report.md)
+- [TensorRtExec Option Layering Deep Dive](articles/zh-cn/tensorrtexec-option-layering-deep-dive.md)
+- [TensorRtExec Timing Cache Owner Field Guide](articles/zh-cn/tensorrtexec-timing-cache-owner-field-guide.md)
+- [TensorRtExec INT8 Calibration Owner Field Guide](articles/zh-cn/tensorrtexec-int8-calibration-owner-field-guide.md)
+- [YoloVision YOLOv8 Detection Real Asset Tutorial](articles/zh-cn/yolovision-yolov8-det-real-asset-tutorial.md)
+- [YoloVision YOLOv8 Segmentation Real Asset Tutorial](articles/zh-cn/yolovision-yolov8-seg-real-asset-tutorial.md)
+- [YoloVision YOLOv8n Semantic Segmentation Map Guide](articles/zh-cn/yolovision-semantic-segmentation-map-guide.md)
+- [Sample Asset Manifest Guide](articles/zh-cn/sample-asset-manifest-guide.md)
+- [Sample Asset Acquisition Plan](articles/zh-cn/sample-asset-acquisition-plan.md)
+- [Real Model Owner Backfill Checklist](articles/zh-cn/real-model-owner-backfill-checklist.md)
+- [Real Model Evidence Backfill Playbook](articles/zh-cn/real-model-evidence-backfill-playbook.md)
+- [External Model Evidence Case Study](articles/zh-cn/external-model-evidence-case-study.md)
+- [Sample Evidence Ladder](articles/zh-cn/sample-evidence-ladder.md)
+- [OnnxToEngine And TensorRtExec Boundary](articles/zh-cn/onnxtoengine-and-tensorrtexec-boundary.md)
+- [OnnxToEngine Trtexec Proof Boundary](articles/zh-cn/onnx-to-engine-trtexec-proof-boundary.md)
+- [Tool Report To Release Proof Record](articles/zh-cn/tool-report-to-release-proof-record.md)
+- [Stale Claim Prepublish Audit](articles/zh-cn/stale-claim-prepublish-audit.md)
+- [Publish Final Mile Checklist](articles/zh-cn/publish-final-mile-checklist.md)
+- [CUDA Stream Event MultiStream Tutorial](articles/zh-cn/cuda-stream-event-multistream-tutorial.md)
+- [Blog MultiStream CUDA Stream Event](articles/zh-cn/blog-multistream-cuda-stream-event.md)
+- [CUDA Graph Capabilities And Boundary](articles/zh-cn/cuda-graph-capabilities-boundary.md)
+- [CUDA Memory Wrapper](articles/zh-cn/cuda-memory-wrapper.md)
+- [Blog CUDA Memory Wrapper](articles/zh-cn/blog-cuda-memory-wrapper.md)
+- [CUDA Memory Range APIs](articles/zh-cn/cuda-memory-range-apis.md)
+- [NuGet Package Consumer Validation Flow](articles/zh-cn/nuget-package-consumer-validation-flow.md)
+- [Package Consumer Runtime Proof Playbook](articles/zh-cn/package-consumer-runtime-proof-playbook.md)
+- [Blog Package Consumer Evidence Chain](articles/zh-cn/blog-package-consumer-evidence-chain.md)
+- [Runtime Package Selection](articles/zh-cn/runtime-package-selection.md)
+- [Runtime Package Matrix Reading Guide](articles/zh-cn/runtime-package-matrix-reading-guide.md)
+- [Readiness Summary Guide](articles/zh-cn/readiness-summary-guide.md)
+- [CUDA Error 35 Troubleshooting](articles/zh-cn/cuda-error-35-troubleshooting.md)
+- [Public API Bilingual Documentation Progress](articles/zh-cn/public-api-bilingual-documentation-progress.md)
+- [Current Package Readiness State](articles/zh-cn/package-readiness-current-state.md)
+- [Allocator Callback Owner Design](articles/zh-cn/allocator-callback-owner-design.md)
+- [Allocator Owner Ledger Design](articles/zh-cn/allocator-owner-ledger-design.md)
+- [Allocator Owner Ledger Safety Gate](articles/zh-cn/allocator-owner-ledger-safety-gate.md)
+- [Callback And Allocator Boundary Guide](articles/zh-cn/callback-allocator-boundary-guide.md)
+- [Callback Allocator Safety Bridge Roadmap](articles/zh-cn/callback-allocator-safety-bridge-roadmap.md)
+- [Callback Owner Closure Matrix](articles/zh-cn/callback-owner-closure-matrix.md)
+- [Real Callback Trampoline Gate](articles/zh-cn/real-callback-trampoline-gate.md)
+- [OutputAllocator Runtime Gate](articles/zh-cn/output-allocator-runtime-gate.md)
+- [OutputAllocator Callback Owner Design](articles/zh-cn/output-allocator-callback-owner-design.md)
+- [OutputAllocator Attach/Detach Design Gate](articles/zh-cn/output-allocator-attach-detach-design-gate.md)
+- [OutputBuffer Ownership Safety Gate](articles/zh-cn/output-buffer-ownership-safety-gate.md)
+- [OutputAllocator Runtime Proof Precheck](articles/zh-cn/output-allocator-runtime-proof-precheck.md)
+- [DebugListener Callback Owner Design](articles/zh-cn/debug-listener-callback-owner-design.md)
+- [DebugListener Attach/Detach Design Gate](articles/zh-cn/debug-listener-attach-detach-design-gate.md)
+- [DebugListener Borrowed Tensor Safety Gate](articles/zh-cn/debug-listener-borrowed-tensor-safety-gate.md)
+- [DebugListener Attach/VTable Safety Gate](articles/zh-cn/debug-listener-attach-vtable-safety-gate.md)
+- [DebugListener Native Attach/No-Throw Preflight](articles/zh-cn/debug-listener-native-attach-nothrow-preflight.md)
+- [DebugListener Native Owner Address Design Gate](articles/zh-cn/debug-listener-native-owner-address-design-gate.md)
+- [DebugListener Native No-Throw VTable Design Gate](articles/zh-cn/debug-listener-native-nothrow-vtable-design-gate.md)
+- [DebugListener Native Attach Entry Design Gate](articles/zh-cn/debug-listener-native-attach-entry-design-gate.md)
+- [DebugListener Native Detach Before Release Design Gate](articles/zh-cn/debug-listener-native-detach-before-release-design-gate.md)
+- [DebugListener Native Owner Lifecycle Dry-Run](articles/zh-cn/debug-listener-native-owner-lifecycle-dry-run.md)
+- [DebugListener Native Attach Entry Runtime Scaffold](articles/zh-cn/debug-listener-native-attach-entry-runtime-scaffold.md)
+- [DebugListener Native Attach Entry Minimal Safety](articles/zh-cn/debug-listener-native-attach-entry-minimal-safety.md)
+- [DebugListener Native Owner Stable Identity](articles/zh-cn/debug-listener-native-owner-stable-identity.md)
+- [DebugListener Native Owner NonCopyable Storage](articles/zh-cn/debug-listener-native-owner-noncopyable-storage.md)
+- [DebugListener Native No-Throw Destructor](articles/zh-cn/debug-listener-native-nothrow-destructor.md)
+- [DebugListener Native Owner Lifecycle Gate](articles/zh-cn/debug-listener-native-owner-lifecycle-gate.md)
+- [DebugListener Native Attach Bridge Shape Gate](articles/zh-cn/debug-listener-native-attach-bridge-shape-gate.md)
+- [DebugListener Exception Status Mapping Gate](articles/zh-cn/debug-listener-exception-status-mapping-gate.md)
+- [DebugListener In-Flight Accounting Gate](articles/zh-cn/debug-listener-inflight-accounting-gate.md)
+- [DebugListener Native No-Throw VTable Scaffold Gate](articles/zh-cn/debug-listener-native-nothrow-vtable-scaffold-gate.md)
+- [DebugListener No-Throw VTable Callback Stub](articles/zh-cn/debug-listener-nothrow-vtable-callback-stub.md)
+- [DebugListener Borrowed Debug Tensor Metadata Runtime Gate](articles/zh-cn/debug-listener-borrowed-debug-tensor-metadata-runtime-gate.md)
+- [DebugListener Native VTable Install Preflight](articles/zh-cn/debug-listener-native-vtable-install-preflight.md)
+- [DebugListener Native Owner VTable Install Experiment](articles/zh-cn/debug-listener-native-owner-vtable-install-experiment.md)
+- [DebugListener Runtime Proof Precheck](articles/zh-cn/debug-listener-runtime-proof-precheck.md)
+- [DebugListener Real Callback Runtime Proof Preflight](articles/zh-cn/debug-listener-real-callback-runtime-proof-preflight.md)
+- [DebugListener Real Non-Null Attach Runtime Smoke](articles/zh-cn/debug-listener-real-non-null-attach-runtime-smoke.md)
+- [DebugListener ProcessDebugTensor Callback Trampoline](articles/zh-cn/debug-listener-process-debug-tensor-callback-trampoline.md)
+- [DebugListener Real Callback Runtime Proof](articles/zh-cn/debug-listener-real-callback-runtime-proof.md)
+- [DebugListener Callback Proof Gap Report](articles/zh-cn/debug-listener-callback-proof-gap-report.md)
+- [Real Callback Runtime Evidence Schema](articles/zh-cn/real-callback-runtime-evidence-schema.md)
+
+DebugListener runtime proof attempt marker index: `debug-listener-runtime-proof-attempt-preflight`, `TensorRtDebugListenerRuntimeProofAttemptPreflight`, `CanEnableSetDebugListenerNonNull`, `CanInstallNativeVTable`, `CanCallProcessDebugTensorRuntime`, `CanPromoteRealCallbackRuntime`, `ReasonNonNullAttachStillBlocked`, `ReasonNativeVTableStillBlocked`, `ReasonRuntimeProofStillBlocked`, and `isRealCallbackRuntimeProof=false`.
+
+DebugListener real non-null attach runtime smoke marker index: `debug-listener-real-non-null-attach-runtime-smoke`, `TensorRtDebugListenerRealNonNullAttachRuntimeSmoke`, `RuntimeEvidenceKind=runtime-smoke-skipped`, `runtime-smoke-blocked`, `runtime-smoke-attempted`, `runtime-smoke-failed`, `AttachGuardReady`, `NativeVTableReady`, `BorrowedDebugTensorRuntimeReady`, `CallbackInvocationReady`, `AttachSucceeded=False`, `NativeVTableInstalled=False`, `ProcessDebugTensorInvoked=False`, `ReportPointerFree=True`, `CanPromoteRealCallbackRuntime=False`, and `IsRealCallbackRuntimeProof=False`.
+
+DebugListener processDebugTensor callback trampoline marker index: `debug-listener-process-debug-tensor-callback-trampoline`, `TensorRtDebugListenerProcessDebugTensorCallbackTrampoline`, `TensorRtDebugListenerProcessDebugTensorCallbackTrampolineResult`, `TensorRtDebugTensorMetadataSnapshot`, `RuntimeEvidenceKind=callback-trampoline-shape`, `TrampolineShapeReady`, `NativeCallbackEntryLocated`, `NoThrowCallbackEntryReady`, `ExceptionCaptureReady`, `CallbackStatusMappingReady`, `InFlightAccountingReady`, `BorrowedDebugTensorMetadataCopyReady`, `PointerFreeSurfaceReady=True`, `ProcessDebugTensorRuntimeReady=False`, `CanPromoteRealCallbackRuntime=False`, and `IsRealCallbackRuntimeProof=False`.
+
+DebugListener real callback runtime proof marker index: `debug-listener-real-callback-runtime-proof`, `TensorRtDebugListenerRealCallbackRuntimeProof`, `TensorRtDebugListenerRealCallbackRuntimeProofResult`, `RuntimeEvidenceKind=runtime-smoke-skipped`, `real-callback-runtime-blocked`, `attempted-no-invocation`, `RuntimeSmokeReady`, `TrampolineShapeReady`, `AttachSucceeded=False`, `NativeVTableInstalled=False`, `ProcessDebugTensorInvoked=False`, `InvocationCount=0`, `InvocationCount>0`, `BorrowedDebugTensorMetadataCopied`, `PointerFreeSurfaceReady=True`, `AttemptedNoInvocation`, `CanPromoteRealCallbackRuntime=False`, and `IsRealCallbackRuntimeProof=False`.
+
+DebugListener callback proof gap report marker index: `debug-listener-callback-proof-gap-report`, `TensorRtDebugListenerCallbackProofGapReport`, `TensorRtDebugListenerCallbackProofGapReportResult`, `RuntimeEvidenceKind=proof-gap-report`, `NonNullAttachStillDisabled`, `NativeAttachEntryReady`, `NativeVTableInstallBlocked`, `NoThrowCallbackEntryReady`, `ExceptionStatusMappingReady`, `InFlightAccountingReady`, `BorrowedDebugTensorMetadataCopied`, `DetachRollbackReady`, `ProcessDebugTensorRuntimeInvoked`, `FullPackageConsumerRuntimeProofReady`, `GapReasonCount`, `NoNonProofCallbackRuntimeMarker`, and `IsRealCallbackRuntimeProof=False`.
+
 - [Runtime Packages](articles/zh-cn/runtime-packages.md)
 - [Runtime Distribution Strategy](articles/zh-cn/runtime-distribution-strategy.md)
 - [Local GitHub Actions Checks](articles/zh-cn/local-actions.md)
 - [Package Consumer Validation](articles/zh-cn/package-consumer-validation.md)
 - [Release Candidate Gate](articles/zh-cn/release-candidate-gate.md)
+- [Local NuGet Feed Consumer](articles/zh-cn/local-nuget-feed-consumer.md)
+- [Runtime Package Matrix](articles/zh-cn/runtime-package-matrix.md)
+- [4.0.0 RC Release Notes](articles/zh-cn/release-notes-4.0.0-rc.md)
+- [4.0.0 RC Known Limitations](articles/zh-cn/known-limitations-4.0.0-rc.md)
+- [4.0.0 RC Release Checklist](articles/zh-cn/release-checklist-4.0.0-rc.md)
+- [Final Release Dry Run](articles/zh-cn/final-release-dry-run.md)
+- [Linux Runtime Handoff](articles/zh-cn/linux-runtime-handoff.md)
+- [Release Owner Handoff](articles/zh-cn/release-owner-handoff.md)
+- [Release Owner Approval Guide](articles/zh-cn/release-owner-approval-guide.md)
+- [Release Owner Decision Record](articles/zh-cn/release-owner-decision-record.md)
+- [Final Package Review Bundle](articles/zh-cn/final-package-review-bundle.md)
+- [Release Evidence Bundle](articles/zh-cn/release-evidence-bundle.md)
+- [Release Evidence Classification Audit](articles/zh-cn/release-evidence-classification-audit.md)
+- [Release Evidence Closure Index](articles/zh-cn/release-evidence-closure-index.md)
+- [Release Candidate Package Consumer Closure Map](articles/zh-cn/release-candidate-package-consumer-closure-map.md)
+- [Final Prepublish Quality Gate Dashboard](articles/zh-cn/final-prepublish-quality-gate-dashboard.md)
+- [Owner Real Proof Import Master Pack](articles/zh-cn/owner-real-proof-import-master-pack.md)
+- [Real External Execution Backfill Final Freeze](articles/zh-cn/real-external-execution-backfill-final-freeze.md)
+- [Owner Execution Result Import Prepublish Recheck](articles/zh-cn/owner-execution-result-import-prepublish-recheck.md)
+- [Real Release Proof Backfill Final Close Gate](articles/zh-cn/real-release-proof-backfill-final-close-gate.md)
+- [Prepublish Owner Evidence Input Landing Pack](articles/zh-cn/prepublish-owner-evidence-input-landing-pack.md)
+- [Real GPU Public Package Execution Backfill Pack](articles/zh-cn/real-gpu-public-package-execution-backfill-pack.md)
+- [Release Proof Auto Summary Owner Backfill Check](articles/zh-cn/release-proof-auto-summary-owner-backfill-check.md)
+- [Real Proof Import Validator Orchestration](articles/zh-cn/real-proof-import-validator-orchestration.md)
+- [Release Final Blocker Convergence](articles/zh-cn/release-final-blocker-convergence.md)
+- [Owner Real Proof Final Action Worklist](articles/zh-cn/owner-real-proof-final-action-worklist.md)
+- [Final Prepublish Readiness Snapshot](articles/zh-cn/final-prepublish-readiness-snapshot.md)
+- [Real Owner Proof Postback Release Decision](articles/zh-cn/real-owner-proof-postback-release-decision.md)
+- [Release Candidate Owner One-Screen Execution Pack](articles/zh-cn/release-candidate-owner-one-screen-execution-pack.md)
+- [Release Package Proof Bundle](articles/zh-cn/release-package-proof-bundle.md)
+- [Docs Publish Readiness Bundle](articles/zh-cn/docs-publish-readiness-bundle.md)
+- [Release Owner Approval Input](articles/zh-cn/release-owner-approval-input.md)
+- [Release Owner From Dry Run To Decision](articles/zh-cn/release-owner-dry-run-to-decision.md)
+- [Linux Runner Evidence Checklist](articles/zh-cn/linux-runner-evidence-checklist.md)
+- [Linux Runner Evidence Record Schema](articles/zh-cn/linux-runner-evidence-record-schema.md)
+- [Blog Linux Runner Evidence Guide](articles/zh-cn/blog-linux-runner-evidence-guide.md)
+- [Release Channel Preflight And Rollback](articles/zh-cn/release-channel-preflight-and-rollback.md)
+- [Release Publish Execution Checklist](articles/zh-cn/release-publish-execution-checklist.md)
+- [Release Candidate Freeze](articles/zh-cn/release-candidate-freeze.md)
+- [Release Candidate Full Acceptance Summary](articles/zh-cn/release-candidate-full-acceptance-summary.md)
+- [Owner Authorized Publish Command Plan](articles/zh-cn/owner-authorized-publish-command-plan.md)
+- [Owner Release Execution Package](articles/zh-cn/owner-release-execution-package.md)
+- [Owner Release Execution Package Validation](articles/zh-cn/owner-release-execution-package-validation.md)
+- [Owner Proof Backfill Execution Pack](articles/zh-cn/owner-proof-backfill-execution-pack.md)
+- [Owner Proof Execution Handoff](articles/zh-cn/owner-proof-execution-handoff.md)
+- [Owner External Proof Input Preflight](articles/zh-cn/owner-external-proof-input-preflight.md)
+- [Owner Proof Input Repair Pack](articles/zh-cn/owner-proof-input-repair-pack.md)
+- [Owner Proof Input Draft Pack](articles/zh-cn/owner-proof-input-draft-pack.md)
+- [Owner External Proof Backfill Orchestrator](articles/zh-cn/owner-external-proof-backfill-orchestrator.md)
+- [Package Consumer Runtime Proof Candidate](articles/zh-cn/package-consumer-runtime-proof-candidate.md)
+- [Package Consumer Runtime Proof Owner Input](articles/zh-cn/package-consumer-runtime-proof-owner-input.md)
+- [Package Consumer Runtime Proof Owner Input Field Guide](articles/zh-cn/package-consumer-runtime-proof-owner-input-field-guide.md)
+- [Package Consumer Runtime Proof Record](articles/zh-cn/package-consumer-runtime-proof-record.md)
+- [Package Consumer Runtime Proof Worklist](articles/zh-cn/package-consumer-runtime-proof-worklist.md)
+- [Release Close Proof Worklist](articles/zh-cn/release-close-proof-worklist.md)
+- [Real External Proof Backfill Execution Bundle](articles/zh-cn/real-external-proof-backfill-execution-bundle.md)
+- [Real Proof Runner Input Backfill](articles/zh-cn/real-proof-runner-input-backfill.md)
+- [Real Proof Execution Record Projection](articles/zh-cn/real-proof-execution-record-projection.md)
+- [Owner Real Proof Report Pack](articles/zh-cn/owner-real-proof-report-pack.md)
+- [Real Proof Input Candidate Strict Record](articles/zh-cn/real-proof-input-candidate-strict-record.md)
+- [Owner Real Proof Field Delta Pack](articles/zh-cn/owner-real-proof-field-delta-pack.md)
+- [Real Proof Candidate Promotion Guard](articles/zh-cn/real-proof-candidate-promotion-guard.md)
+- [Real Proof Record Validator](articles/zh-cn/real-proof-record-validator.md)
+- [Owner Real Proof Execution Closure Pack](articles/zh-cn/owner-real-proof-execution-closure-pack.md)
+- [Runtime Proof Execution Input Record](articles/zh-cn/runtime-proof-execution-input-record.md)
+- [Owner Runtime Proof Execution Runbook](articles/zh-cn/owner-runtime-proof-execution-runbook.md)
+- [Release Close Strict Validation Bridge](articles/zh-cn/release-close-strict-validation-bridge.md)
+- [Owner Runtime Proof Result Input](articles/zh-cn/owner-runtime-proof-result-input.md)
+- [Runtime Proof Lane Dry-Run Summary](articles/zh-cn/runtime-proof-lane-dry-run-summary.md)
+- [Release Close Strict Dry-Run Summary](articles/zh-cn/release-close-strict-dry-run-summary.md)
+- [Owner External Proof Execution Bundle](articles/zh-cn/owner-external-proof-execution-bundle.md)
+- [Owner External Proof Execution Result Import](articles/zh-cn/owner-external-proof-execution-result-import.md)
+- [Real External Proof Record Import Validator](articles/zh-cn/real-external-proof-record-import-validator.md)
+- [Release Close Owner Input Bridge](articles/zh-cn/release-close-owner-input-bridge.md)
+- [Public Package Proof Owner Input](articles/zh-cn/public-package-proof-owner-input.md)
+- [Post Publish Proof Owner Confirmation](articles/zh-cn/post-publish-proof-owner-confirmation.md)
+- [Release Close Public Proof Bridge](articles/zh-cn/release-close-public-proof-bridge.md)
+- [Release Issue Close Final Owner Decision Audit](articles/zh-cn/release-issue-close-final-owner-decision-audit.md)
+- [Final Post Publish Audit Pack](articles/zh-cn/final-post-publish-audit-pack.md)
+- [Release Candidate Final Freeze Manifest](articles/zh-cn/release-candidate-final-freeze-manifest.md)
+- [Public Publish Owner Manual Command Handoff](articles/zh-cn/public-publish-owner-manual-command-handoff.md)
+- [Final Release Close Blocker Dashboard](articles/zh-cn/final-release-close-blocker-dashboard.md)
+- [Public Publish Result Owner Input](articles/zh-cn/public-publish-result-owner-input.md)
+- [Public Publish Result Import](articles/zh-cn/public-publish-result-import.md)
+- [Post Publish Clean Consumer Result Convergence](articles/zh-cn/post-publish-clean-consumer-result-convergence.md)
+- [Strict Close Ready Convergence Dashboard](articles/zh-cn/strict-close-ready-convergence-dashboard.md)
+- [Public Publish Final Owner Execution Pack](articles/zh-cn/public-publish-final-owner-execution-pack.md)
+- [Public Publish Command Cross Check](articles/zh-cn/public-publish-command-cross-check.md)
+- [Post Publish Clean Consumer Owner Proof Input](articles/zh-cn/post-publish-clean-consumer-owner-proof-input.md)
+- [Release Issue Close Owner Decision Input](articles/zh-cn/release-issue-close-owner-decision-input.md)
+- [Final Evidence Freeze Non Proof Audit](articles/zh-cn/final-evidence-freeze-non-proof-audit.md)
+- [Public Publish Real Result Owner Input Contract](articles/zh-cn/public-publish-real-result-owner-input-contract.md)
+- [Post Publish Clean Consumer Proof Record Contract](articles/zh-cn/post-publish-clean-consumer-proof-record-contract.md)
+- [Release Issue Close Strict Owner Decision Import](articles/zh-cn/release-issue-close-strict-owner-decision-import.md)
+- [Final Close Gate Convergence](articles/zh-cn/final-close-gate-convergence.md)
+- [Public Publish Real Result Record Draft](articles/zh-cn/public-publish-real-result-record-draft.md)
+- [Post Publish Clean Consumer Proof Record Draft](articles/zh-cn/post-publish-clean-consumer-proof-record-draft.md)
+- [Public Publish Forbidden Substitute Scan](articles/zh-cn/public-publish-forbidden-substitute-scan.md)
+- [Release Close Real Proof Import Bridge](articles/zh-cn/release-close-real-proof-import-bridge.md)
+- [Final Owner Close Readiness Checkpoint](articles/zh-cn/final-owner-close-readiness-checkpoint.md)
+- [Final Owner StrictClose Execution Order](articles/zh-cn/final-owner-strict-close-execution-order.md)
+- [Real Owner Evidence StrictValidator Orchestration](articles/zh-cn/real-owner-evidence-strict-validator-orchestration.md)
+- [ReleaseClose 真实输入候选晋级 Readiness](articles/zh-cn/release-close-real-input-candidate-promotion-readiness.md)
+- [Final Release Close Record Real Validator](articles/zh-cn/final-release-close-record-real-validator.md)
+- [Final Owner Release Close Record Projection](articles/zh-cn/final-owner-release-close-record-projection.md)
+- [Final Release Close Hash Consistency Gate](articles/zh-cn/final-release-close-hash-consistency-gate.md)
+- [Final Close Owner Approval Boundary Audit](articles/zh-cn/final-close-owner-approval-boundary-audit.md)
+- [Release Candidate Final Publishability Audit](articles/zh-cn/release-candidate-final-publishability-audit.md)
+- [Release Candidate Owner Action Roadmap](articles/zh-cn/release-candidate-owner-action-roadmap.md)
+- [Release Candidate Non Substitute Final Scan](articles/zh-cn/release-candidate-non-substitute-final-scan.md)
+- [Release Candidate Final Owner Checklist](articles/zh-cn/release-candidate-final-owner-checklist.md)
+- [Package Consumer External Smoke Scaffold](articles/zh-cn/package-consumer-external-smoke-scaffold.md)
+- [Release Issue Close Record Candidate](articles/zh-cn/release-issue-close-record-candidate.md)
+- [Release Issue Close Record Owner Input](articles/zh-cn/release-issue-close-record-owner-input.md)
+- [Final Evidence Freeze](articles/zh-cn/final-evidence-freeze.md)
+- [Release Issue Final Close Decision](articles/zh-cn/release-issue-final-close-decision.md)
+- [Real External Proof Overlay Pack](articles/zh-cn/real-external-proof-overlay-pack.md)
+- [Release Issue Close Record Overlay Candidate](articles/zh-cn/release-issue-close-record-overlay-candidate.md)
+- [Owner External Execution Result Backfill Kit](articles/zh-cn/owner-external-execution-result-backfill-kit.md)
+- [Owner Input Cross-Hash Audit](articles/zh-cn/owner-input-cross-hash-audit.md)
+- [Release Close Strict Record Candidate](articles/zh-cn/release-close-strict-record-candidate.md)
+- [Owner Proof Real Backfill Execution Pack](articles/zh-cn/owner-proof-real-backfill-execution-pack.md)
+- [Release Issue Close Record Real Input Map](articles/zh-cn/release-issue-close-record-real-input-map.md)
+- [Owner Proof Real Input Convergence](articles/zh-cn/owner-proof-real-input-convergence.md)
+- [Release Close Final Owner Runbook](articles/zh-cn/release-close-final-owner-runbook.md)
+- [Compatible Host Proof Backfill Package](articles/zh-cn/compatible-host-proof-backfill-package.md)
+- [Real Model And Package Proof Input Package](articles/zh-cn/real-model-and-package-proof-input-package.md)
+- [Release Close Gap Dashboard](articles/zh-cn/release-close-gap-dashboard.md)
+- [Compatible Host Proof Execution Pack](articles/zh-cn/compatible-host-proof-execution-pack.md)
+- [Release Candidate Final Evidence Freeze](articles/zh-cn/release-candidate-final-evidence-freeze.md)
+- [Release Final Audit Map](articles/zh-cn/release-final-audit-map.md)
+- [Release Public Story Pack](articles/zh-cn/release-public-story-pack.md)
+- [Release Owner Proof Backlog](articles/zh-cn/release-owner-proof-backlog.md)
+- [Release Proof Non Substitutes](articles/zh-cn/release-proof-non-substitutes.md)
+- [Release Article Index And Publishing Order](articles/zh-cn/release-article-index-and-publishing-order.md)
+- [Release README Frontpage Checklist](articles/zh-cn/release-readme-frontpage-checklist.md)
+- [Release Final Owner Action Sequence](articles/zh-cn/release-final-owner-action-sequence.md)
+- [Release Frontpage And Proof Boundary Final Audit](articles/zh-cn/release-frontpage-and-proof-boundary-final-audit.md)
+- [Release Candidate Final Cross Check](articles/zh-cn/release-candidate-final-cross-check.md)
+- [Release Candidate Article Matrix Summary](articles/zh-cn/release-candidate-article-matrix-summary.md)
+- [Release Candidate Publication Summary](articles/zh-cn/release-candidate-publication-summary.md)
+- [Release Candidate Final Hold Owner Waiting](articles/zh-cn/release-candidate-final-hold-owner-waiting.md)
+- [Release Owner Action Checklist Final Hold](articles/zh-cn/release-owner-action-checklist-final-hold.md)
+- [Release Hold Final Inspection](articles/zh-cn/release-hold-final-inspection.md)
+- [External Runtime Proof Record](articles/zh-cn/external-runtime-proof-record.md)
+- [External Runtime Proof Backfill Plan](articles/zh-cn/external-runtime-proof-backfill-plan.md)
+- [External Runtime Proof Collection Package](articles/zh-cn/external-runtime-proof-collection-package.md)
+- [Compatible Host Runtime Proof Runbook](articles/zh-cn/compatible-host-runtime-proof-runbook.md)
+- [Compatible Host Runtime Proof Collection Bundle](articles/zh-cn/compatible-host-runtime-proof-collection-bundle.md)
+- [Post Publish Verification Record](articles/zh-cn/post-publish-verification-record.md)
+- [Post Publish Verification Owner Input](articles/zh-cn/post-publish-verification-owner-input.md)
+- [Post Publish Verification Proof Playbook](articles/zh-cn/post-publish-verification-proof-playbook.md)
+- [Post Publish Clean Consumer Project Scan](articles/zh-cn/post-publish-clean-consumer-project-scan.md)
+- [Post Publish Verification Record Input Draft](articles/zh-cn/post-publish-verification-record-input-draft.md)
+- [Post Publish Verification Backfill Plan](articles/zh-cn/post-publish-verification-backfill-plan.md)
+- [Post Publish Verification Collection Package](articles/zh-cn/post-publish-verification-collection-package.md)
+- [Release Close Preflight](articles/zh-cn/release-close-preflight.md)
+- Release owner decision template: `artifacts/final-release/release-owner-decision-template.md`
+- Release owner decision record: `artifacts/final-release/release-owner-decision-record.md`
+- Final package review bundle: `artifacts/final-release/final-package-review-bundle.md`
+- Release evidence bundle: `artifacts/final-release/release-evidence-bundle.md`
+- Final Owner StrictClose execution order: `artifacts/final-release/final-owner-strict-close-execution-order.md`
+- Real Owner evidence StrictValidator orchestration: `artifacts/final-release/real-owner-evidence-strict-validator-orchestration.md`
+- ReleaseClose real input candidate promotion readiness: `artifacts/final-release/release-close-real-input-candidate-promotion-readiness.md`
+- Final quality freeze dashboard: `artifacts/final-release/final-quality-freeze-dashboard.md`
+- Public proof claim boundary audit: `artifacts/final-release/public-proof-claim-boundary-audit.md`
+- Article roadmap 30+ validation: `artifacts/final-release/article-roadmap-30plus-validation.md`
+- Release evidence classification audit: `artifacts/final-release/release-evidence-classification-audit.md`
+- Release evidence closure index: `artifacts/final-release/release-evidence-closure-index.md`
+- Release candidate package consumer closure map: `artifacts/final-release/release-candidate-package-consumer-closure-map.md`
+- Final prepublish quality gate dashboard: `artifacts/final-release/final-prepublish-quality-gate-dashboard.md`
+- Owner real proof import master pack: `artifacts/final-release/owner-real-proof-import-master-pack.md`
+- Real external execution backfill final freeze: `artifacts/final-release/real-external-execution-backfill-final-freeze.md`
+- Owner execution result import prepublish recheck: `artifacts/final-release/owner-execution-result-import-prepublish-recheck.md`
+- Real release proof backfill final close gate: `artifacts/final-release/real-release-proof-backfill-final-close-gate.md`
+- Prepublish owner evidence input landing pack: `artifacts/final-release/prepublish-owner-evidence-input-landing-pack.md`
+- Real GPU public package execution backfill pack: `artifacts/final-release/real-gpu-public-package-execution-backfill-pack.md`
+- Release proof auto summary owner backfill check: `artifacts/final-release/release-proof-auto-summary-owner-backfill-check.md`
+- Real proof import validator orchestration: `artifacts/final-release/real-proof-import-validator-orchestration.md`
+- Release proof owner backfill summary validation: `artifacts/final-release/release-proof-owner-backfill-summary-validation.json`
+- Release final blocker convergence: `artifacts/final-release/release-final-blocker-convergence.md`
+- Owner real proof final action worklist: `artifacts/final-release/owner-real-proof-final-action-worklist.md`
+- Final prepublish readiness snapshot: `artifacts/final-release/final-prepublish-readiness-snapshot.md`
+- Real owner proof postback release decision: `artifacts/final-release/real-owner-proof-postback-release-decision.md`
+- Release candidate owner one-screen execution pack: `artifacts/final-release/release-candidate-owner-one-screen-execution-pack.md`
+- Release package proof bundle: `artifacts/final-release/release-package-proof-bundle.md`
+- Docs publish readiness bundle: `artifacts/final-release/docs-publish-readiness-bundle.md`
+- Release publish execution checklist: `artifacts/final-release/release-publish-execution-checklist.md`
+- Release candidate freeze summary: `artifacts/release/release-candidate-freeze-summary.md`
+- Release candidate freeze checklist: `artifacts/release/release-candidate-freeze-checklist.md`
+- Release candidate freeze validation: `artifacts/release/release-candidate-freeze-validation.md`
+- Release candidate full acceptance summary: `artifacts/final-release/release-candidate-full-acceptance-summary.md`
+- Owner authorized publish command plan: `artifacts/final-release/owner-authorized-publish-command-plan.md`
+- Owner authorized publish command plan validation: `artifacts/final-release/owner-authorized-publish-command-plan-validation.md`
+- Owner release execution package: `artifacts/final-release/owner-release-execution-package.md`
+- Owner release execution package validation: `artifacts/final-release/owner-release-execution-package-validation.md`
+- Owner one-screen Release Hold checklist field: `oneScreenReleaseHoldChecklist`
+- Owner proof backfill execution pack: `artifacts/final-release/owner-proof-backfill-execution-pack.md`
+- Owner proof execution handoff: `artifacts/final-release/owner-proof-execution-handoff.md`
+- Owner external proof input preflight: `artifacts/final-release/owner-external-proof-input-preflight.md`
+- Owner proof input repair pack: `artifacts/final-release/owner-proof-input-repair-pack.md`
+- Owner proof input draft pack: `artifacts/final-release/owner-proof-input-draft-pack.md`
+- Owner external proof backfill orchestrator: `artifacts/final-release/owner-external-proof-backfill-orchestrator.md`
+- Package consumer runtime proof candidate: `artifacts/final-release/package-consumer-runtime-proof-candidate.md`
+- Package consumer runtime proof owner input template: `artifacts/final-release/package-consumer-runtime-proof-owner-input.template.md`
+- Package consumer runtime proof record validation: `artifacts/final-release/package-consumer-runtime-proof-record-validation.md`
+- Package consumer runtime proof worklist: `artifacts/final-release/package-consumer-runtime-proof-worklist.md`
+- Release close proof worklist: `artifacts/final-release/release-close-proof-worklist.md`
+- Real external proof backfill execution bundle: `artifacts/final-release/real-external-proof-backfill-execution-bundle.md`
+- Package consumer external smoke scaffold: `artifacts/final-release/package-consumer-external-smoke-scaffold.md`
+- Release issue close record candidate: `artifacts/final-release/release-issue-close-record-candidate.md`
+- Final evidence freeze: `artifacts/final-release/final-evidence-freeze.md`
+- Final evidence freeze validation: `artifacts/final-release/final-evidence-freeze-validation.md`
+- Release issue final close decision template: `artifacts/final-release/release-issue-final-close-decision.template.md`
+- Release issue final close decision validation: `artifacts/final-release/release-issue-final-close-decision-validation.md`
+- Real external proof overlay pack: `artifacts/final-release/real-external-proof-overlay-pack.md`
+- Real external proof overlay pack validation: `artifacts/final-release/real-external-proof-overlay-pack-validation.md`
+- Release issue close record overlay candidate: `artifacts/final-release/release-issue-close-record-overlay-candidate.md`
+- Release issue close record overlay candidate validation: `artifacts/final-release/release-issue-close-record-overlay-candidate-validation.md`
+- Owner external execution result backfill kit: `artifacts/final-release/owner-external-execution-result-backfill-kit.md`
+- Owner external execution result backfill kit validation: `artifacts/final-release/owner-external-execution-result-backfill-kit-validation.md`
+- Owner input cross-hash audit: `artifacts/final-release/owner-input-cross-hash-audit.md`
+- Owner input cross-hash audit validation: `artifacts/final-release/owner-input-cross-hash-audit-validation.md`
+- Release close strict record candidate: `artifacts/final-release/release-close-strict-record-candidate.md`
+- Release close strict record candidate validation: `artifacts/final-release/release-close-strict-record-candidate-validation.md`
+- Owner proof real backfill execution pack: `artifacts/final-release/owner-proof-real-backfill-execution-pack.md`
+- Owner proof real backfill execution pack validation: `artifacts/final-release/owner-proof-real-backfill-execution-pack-validation.md`
+- Real proof record validator: `artifacts/final-release/real-proof-record-validator.md`
+- Real proof record validator validation: `artifacts/final-release/real-proof-record-validator-validation.md`
+- Owner real proof execution closure pack: `artifacts/final-release/owner-real-proof-execution-closure-pack.md`
+- Owner real proof execution closure pack validation: `artifacts/final-release/owner-real-proof-execution-closure-pack-validation.md`
+- Runtime proof execution input record: `artifacts/final-release/runtime-proof-execution-input-record.md`
+- Runtime proof execution input record validation: `artifacts/final-release/runtime-proof-execution-input-record-validation.md`
+- Owner runtime proof execution runbook: `artifacts/final-release/owner-runtime-proof-execution-runbook.md`
+- Owner runtime proof execution runbook validation: `artifacts/final-release/owner-runtime-proof-execution-runbook-validation.md`
+- Release close strict validation bridge: `artifacts/final-release/release-close-strict-validation-bridge.md`
+- Release close strict validation bridge validation: `artifacts/final-release/release-close-strict-validation-bridge-validation.md`
+- Owner runtime proof result input template: `artifacts/final-release/owner-runtime-proof-result-input.template.md`
+- Owner runtime proof result input validation: `artifacts/final-release/owner-runtime-proof-result-input-validation.md`
+- Runtime proof lane dry-run summary: `artifacts/final-release/runtime-proof-lane-dry-run-summary.md`
+- Runtime proof lane dry-run summary validation: `artifacts/final-release/runtime-proof-lane-dry-run-summary-validation.md`
+- Release close strict dry-run summary: `artifacts/final-release/release-close-strict-dry-run-summary.md`
+- Release close strict dry-run summary validation: `artifacts/final-release/release-close-strict-dry-run-summary-validation.md`
+- Owner external proof execution bundle: `artifacts/final-release/owner-external-proof-execution-bundle.md`
+- Owner external proof execution bundle validation: `artifacts/final-release/owner-external-proof-execution-bundle-validation.md`
+- Owner external proof execution result import: `artifacts/final-release/owner-external-proof-execution-result-import.md`
+- Owner external proof execution result import validation: `artifacts/final-release/owner-external-proof-execution-result-import-validation.md`
+- Real external proof record import validator: `artifacts/final-release/real-external-proof-record-import-validator.md`
+- Real external proof record import validator validation: `artifacts/final-release/real-external-proof-record-import-validator-validation.md`
+- Release close owner input bridge: `artifacts/final-release/release-close-owner-input-bridge.md`
+- Release close owner input bridge validation: `artifacts/final-release/release-close-owner-input-bridge-validation.md`
+- Public package proof owner input template: `artifacts/final-release/public-package-proof-owner-input.template.md`
+- Public package proof owner input validation: `artifacts/final-release/public-package-proof-owner-input-validation.md`
+- Post publish proof owner confirmation: `artifacts/final-release/post-publish-proof-owner-confirmation.md`
+- Post publish proof owner confirmation validation: `artifacts/final-release/post-publish-proof-owner-confirmation-validation.md`
+- Release close public proof bridge: `artifacts/final-release/release-close-public-proof-bridge.md`
+- Release close public proof bridge validation: `artifacts/final-release/release-close-public-proof-bridge-validation.md`
+- Release issue close record real input map: `artifacts/final-release/release-issue-close-record-real-input-map.md`
+- Release issue close record real input map validation: `artifacts/final-release/release-issue-close-record-real-input-map-validation.md`
+- Owner proof real input convergence: `artifacts/final-release/owner-proof-real-input-convergence.md`
+- Owner proof real input convergence validation: `artifacts/final-release/owner-proof-real-input-convergence-validation.md`
+- Release close final owner runbook: `artifacts/final-release/release-close-final-owner-runbook.md`
+- Release close final owner runbook validation: `artifacts/final-release/release-close-final-owner-runbook-validation.md`
+- Release issue close final owner decision audit: `artifacts/final-release/release-issue-close-final-owner-decision-audit.md`
+- Release issue close final owner decision audit validation: `artifacts/final-release/release-issue-close-final-owner-decision-audit-validation.md`
+- Final post publish audit pack: `artifacts/final-release/final-post-publish-audit-pack.md`
+- Final post publish audit pack validation: `artifacts/final-release/final-post-publish-audit-pack-validation.md`
+- Release candidate final freeze manifest: `artifacts/final-release/release-candidate-final-freeze-manifest.md`
+- Release candidate final freeze manifest validation: `artifacts/final-release/release-candidate-final-freeze-manifest-validation.md`
+- Public publish owner manual command handoff: `artifacts/final-release/public-publish-owner-manual-command-handoff.md`
+- Public publish owner manual command handoff validation: `artifacts/final-release/public-publish-owner-manual-command-handoff-validation.md`
+- Final release close blocker dashboard: `artifacts/final-release/final-release-close-blocker-dashboard.md`
+- Final release close blocker dashboard validation: `artifacts/final-release/final-release-close-blocker-dashboard-validation.md`
+- Public publish result owner input: `artifacts/final-release/public-publish-result-owner-input.template.md`
+- Public publish result owner input validation: `artifacts/final-release/public-publish-result-owner-input-validation.md`
+- Public publish result import: `artifacts/final-release/public-publish-result-import.md`
+- Public publish result import validation: `artifacts/final-release/public-publish-result-import-validation.md`
+- Post publish clean consumer result convergence: `artifacts/final-release/post-publish-clean-consumer-result-convergence.md`
+- Post publish clean consumer result convergence validation: `artifacts/final-release/post-publish-clean-consumer-result-convergence-validation.md`
+- Strict close ready convergence dashboard: `artifacts/final-release/strict-close-ready-convergence-dashboard.md`
+- Strict close ready convergence dashboard validation: `artifacts/final-release/strict-close-ready-convergence-dashboard-validation.md`
+- Public publish final owner execution pack: `artifacts/final-release/public-publish-final-owner-execution-pack.md`
+- Public publish final owner execution pack validation: `artifacts/final-release/public-publish-final-owner-execution-pack-validation.md`
+- Public publish command cross-check: `artifacts/final-release/public-publish-command-cross-check.md`
+- Public publish command cross-check validation: `artifacts/final-release/public-publish-command-cross-check-validation.md`
+- Release issue close owner decision input template: `artifacts/final-release/release-issue-close-owner-decision-input.template.md`
+- Release issue close owner decision input validation: `artifacts/final-release/release-issue-close-owner-decision-input-validation.md`
+- Final evidence freeze non-proof audit: `artifacts/final-release/final-evidence-freeze-non-proof-audit.md`
+- Final evidence freeze non-proof audit validation: `artifacts/final-release/final-evidence-freeze-non-proof-audit-validation.md`
+- Public publish real result owner input contract: `artifacts/final-release/public-publish-real-result-owner-input-contract.md`
+- Public publish real result owner input contract validation: `artifacts/final-release/public-publish-real-result-owner-input-contract-validation.md`
+- Post publish clean consumer proof record contract: `artifacts/final-release/post-publish-clean-consumer-proof-record-contract.md`
+- Post publish clean consumer proof record contract validation: `artifacts/final-release/post-publish-clean-consumer-proof-record-contract-validation.md`
+- Release issue close strict owner decision import: `artifacts/final-release/release-issue-close-strict-owner-decision-import.md`
+- Release issue close strict owner decision import validation: `artifacts/final-release/release-issue-close-strict-owner-decision-import-validation.md`
+- Final close gate convergence: `artifacts/final-release/final-close-gate-convergence.md`
+- Final close gate convergence validation: `artifacts/final-release/final-close-gate-convergence-validation.md`
+- Public publish real result record draft: `artifacts/final-release/public-publish-real-result-record-draft.md`
+- Public publish real result record draft validation: `artifacts/final-release/public-publish-real-result-record-draft-validation.md`
+- Post publish clean consumer proof record draft: `artifacts/final-release/post-publish-clean-consumer-proof-record-draft.md`
+- Post publish clean consumer proof record draft validation: `artifacts/final-release/post-publish-clean-consumer-proof-record-draft-validation.md`
+- Public publish forbidden substitute scan: `artifacts/final-release/public-publish-forbidden-substitute-scan.md`
+- Public publish forbidden substitute scan validation: `artifacts/final-release/public-publish-forbidden-substitute-scan-validation.md`
+- Release close real proof import bridge: `artifacts/final-release/release-close-real-proof-import-bridge.md`
+- Release close real proof import bridge validation: `artifacts/final-release/release-close-real-proof-import-bridge-validation.md`
+- Final owner close readiness checkpoint: `artifacts/final-release/final-owner-close-readiness-checkpoint.md`
+- Final owner close readiness checkpoint validation: `artifacts/final-release/final-owner-close-readiness-checkpoint-validation.md`
+- Final release close record real validator: `artifacts/final-release/final-release-close-record-real-validator.md`
+- Final release close record real validator validation: `artifacts/final-release/final-release-close-record-real-validator-validation.md`
+- Final owner release close record projection: `artifacts/final-release/final-owner-release-close-record-projection.md`
+- Final owner release close record projection validation: `artifacts/final-release/final-owner-release-close-record-projection-validation.md`
+- Final release close hash consistency gate: `artifacts/final-release/final-release-close-hash-consistency-gate.md`
+- Final release close hash consistency gate validation: `artifacts/final-release/final-release-close-hash-consistency-gate-validation.md`
+- Final close owner approval boundary audit: `artifacts/final-release/final-close-owner-approval-boundary-audit.md`
+- Final close owner approval boundary audit validation: `artifacts/final-release/final-close-owner-approval-boundary-audit-validation.md`
+- Release candidate final publishability audit: `artifacts/final-release/release-candidate-final-publishability-audit.md`
+- Release candidate final publishability audit validation: `artifacts/final-release/release-candidate-final-publishability-audit-validation.md`
+- Release candidate owner action roadmap: `artifacts/final-release/release-candidate-owner-action-roadmap.md`
+- Release candidate owner action roadmap validation: `artifacts/final-release/release-candidate-owner-action-roadmap-validation.md`
+- Release candidate non substitute final scan: `artifacts/final-release/release-candidate-non-substitute-final-scan.md`
+- Release candidate non substitute final scan validation: `artifacts/final-release/release-candidate-non-substitute-final-scan-validation.md`
+- Release candidate final owner checklist: `artifacts/final-release/release-candidate-final-owner-checklist.md`
+- Release candidate final owner checklist validation: `artifacts/final-release/release-candidate-final-owner-checklist-validation.md`
+- Release issue close record owner input template: `artifacts/final-release/release-issue-close-record-owner-input.template.md`
+- Release proof readiness snapshot: `artifacts/final-release/release-proof-readiness-snapshot.md`
+- Compatible host proof backfill package: `artifacts/final-release/compatible-host-proof-backfill-package.md`
+- Real model and package proof input package: `artifacts/final-release/real-model-and-package-proof-input-package.md`
+- Release close gap dashboard: `artifacts/final-release/release-close-gap-dashboard.md`
+- Compatible host proof execution pack: `artifacts/final-release/compatible-host-proof-execution-pack.md`
+- Release candidate final evidence freeze: `artifacts/final-release/release-candidate-final-evidence-freeze.md`
+- External runtime proof record template: `artifacts/final-release/external-runtime-proof-record-template.md`
+- External runtime proof backfill plan: `artifacts/final-release/external-runtime-proof-backfill-plan.md`
+- External runtime proof collection package: `artifacts/final-release/external-runtime-proof-collection-package.md`
+- Compatible host runtime proof runbook: `artifacts/final-release/compatible-host-runtime-proof-runbook.md`
+- Compatible host runtime proof collection bundle: `artifacts/final-release/compatible-host-runtime-proof-collection-bundle.md`
+- Post publish verification record template: `artifacts/final-release/post-publish-verification-record-template.md`
+- Post publish verification owner input template: `artifacts/final-release/post-publish-verification-owner-input.template.md`
+- Post publish verification record projection: `artifacts/final-release/post-publish-verification-record.md`
+- Post publish clean consumer project scan: `artifacts/final-release/post-publish-clean-consumer-project-scan.md`
+- Post publish verification record input draft: `artifacts/final-release/post-publish-verification-record.input-draft.md`
+- Post publish verification backfill plan: `artifacts/final-release/post-publish-verification-backfill-plan.md`
+- Post publish verification collection package: `artifacts/final-release/post-publish-verification-collection-package.md`
+- Release close preflight: `artifacts/final-release/release-close-preflight.md`
+- Owner action required: `artifacts/final-release/owner-action-required.md`
+- Release promotion issue record: `artifacts/final-release/release-promotion-issue-record.md`
+- Linux runner evidence template: `artifacts/linux-dry-run/linux-x64-ubuntu22.04-trt11.0-cuda13.2-cudnn9.22/linux-runner-evidence-template.md`
+- Linux runner evidence record template: `artifacts/linux-dry-run/linux-x64-ubuntu22.04-trt11.0-cuda13.2-cudnn9.22/linux-runner-evidence-record-template.md`
+- Stale release claims audit: `artifacts/final-release/stale-release-claims-audit.md`
+- [Refit Weights Guide](articles/zh-cn/refit-weights-guide.md)
+- [Blog Refit Weights Guide](articles/zh-cn/blog-refit-weights-guide.md)
+- [TensorRT 11 Modern Layers Guide](articles/zh-cn/trt11-modern-layers-guide.md)
+- [Network Layer Coverage Guide](articles/zh-cn/network-layer-coverage-guide.md)
+- [Blog Network Layer Coverage Guide](articles/zh-cn/blog-network-layer-coverage-guide.md)
+- [ErrorRecorder Snapshot Guide](articles/zh-cn/error-recorder-snapshot-guide.md)
+- [ErrorRecorder Diagnostics Design Gate](articles/zh-cn/error-recorder-diagnostics-design-gate.md)
+- [Dimension Expression Snapshot Design Gate](articles/zh-cn/dimension-expression-snapshot-design-gate.md)
+- [Calibrator Metadata Design Gate](articles/zh-cn/calibrator-metadata-design-gate.md)
+- [Runtime Deserialization Boundary Precheck](articles/zh-cn/runtime-deserialization-boundary-precheck.md)
+- [Runtime Deserialization Dependency Diagnostics](articles/zh-cn/runtime-deserialization-dependency-diagnostics.md)
+- [Plugin Ownership Boundary](articles/zh-cn/plugin-ownership-boundary.md)
+- [Managed Logger Profiler Progress Monitor](articles/zh-cn/managed-logger-profiler-progress-monitor.md)
+- [Local NuGet Feed Deep Dive](articles/zh-cn/local-nuget-feed-deep-dive.md)
+- [Signing And Trust Policy](articles/zh-cn/signing-and-trust-policy.md)
+- [NuGet And GitHub Packages Release Guide](articles/zh-cn/nuget-and-github-packages-release-guide.md)
+- [User Acceptance Samples](articles/zh-cn/user-acceptance-samples.md)
+- [Troubleshooting Index](articles/zh-cn/troubleshooting-index.md)
 - [Sample Runners](articles/zh-cn/sample-runners.md)
+- [Technical Article Roadmap](articles/zh-cn/technical-article-roadmap.md)
+- [30+ Article Roadmap](articles/zh-cn/publishing/article-roadmap-30plus.md)
+- [Technical And Promo Article Matrix 30+](articles/zh-cn/publishing/technical-and-promo-article-matrix-30plus.md)
+- [Project Overview Public Article](articles/zh-cn/publishing/project-overview-public-article.md)
+- [TensorRtExec CLI Public Article](articles/zh-cn/publishing/tensorrtexec-cli-public-article.md)
+- [YoloVision Real Asset Owner Backfill Validator](articles/zh-cn/yolovision-real-asset-owner-backfill-validator.md)
+- [NuGet Install Runtime Package Public Article](articles/zh-cn/publishing/nuget-install-runtime-package-public-article.md)
+- [YoloVision Overview Public Article](articles/zh-cn/publishing/yolovision-overview-public-article.md)
+- [OnnxToEngine Trtexec Parity Public Article](articles/zh-cn/publishing/onnxtoengine-trtexec-parity-public-article.md)
+- [CUDA TensorRT DLL Troubleshooting Public Article](articles/zh-cn/publishing/cuda-tensorrt-dll-troubleshooting-public-article.md)
+- [Package Consumer Proof Public Article](articles/zh-cn/publishing/package-consumer-proof-public-article.md)
+- [Plugin Inventory Public Article](articles/zh-cn/publishing/plugin-inventory-public-article.md)
+- [Engine Inspector Public Article](articles/zh-cn/publishing/engine-inspector-public-article.md)
+- [Deferred Boundary Public Article](articles/zh-cn/publishing/deferred-boundary-public-article.md)
+- [Release Evidence Ladder Public Article](articles/zh-cn/publishing/release-evidence-ladder-public-article.md)
+- [Builder Config Readback Public Article](articles/zh-cn/publishing/builder-config-readback-public-article.md)
+- [Source Build Windows Public Article](articles/zh-cn/publishing/source-build-windows-public-article.md)
+- [Native Bridge Build Public Article](articles/zh-cn/publishing/native-bridge-build-public-article.md)
+- [Package Strategy Public Article](articles/zh-cn/publishing/package-strategy-public-article.md)
+- [ONNX To Engine Public Article](articles/zh-cn/publishing/onnx-to-engine-public-article.md)
+- [Windows C++ Bridge Source Build Guide](articles/zh-cn/source-build-windows-cpp-bridge.md)
+- [CMake Presets And Bindings Source Build Guide](articles/zh-cn/source-build-cmake-presets-and-bindings.md)
+- [TensorRtSharp C++ Source Build Guide](articles/zh-cn/tensorrtsharp-source-build-cpp-guide.md)
+- [NuGet And GitHub Dual Package Strategy](articles/zh-cn/nuget-github-dual-package-strategy.md)
+- [YoloVision Series Roadmap](articles/zh-cn/yolovision-series-roadmap.md)
+- [OnnxToEngine Trtexec Parity Roadmap](articles/zh-cn/onnx-to-engine-trtexec-parity-roadmap.md)
+- [TensorRtExec Console WinForms Application Roadmap](articles/zh-cn/tensorrtexec-console-winforms-application-roadmap.md)
+- [TensorRtExec Release Candidate Gap List](articles/zh-cn/tensorrtexec-release-candidate-gap-list.md)
+- [TensorRtSharp 4 Project Overview Campaign](articles/zh-cn/tensorrtsharp-4-project-overview-campaign.md)
+- [TensorRtSharp 4 Architecture ABI Wrapper](articles/zh-cn/tensorrtsharp-4-architecture-abi-wrapper.md)
+- [CUDA TensorRT cuDNN Version Matrix Guide](articles/zh-cn/cuda-tensorrt-cudnn-version-matrix-guide.md)
+- [Windows Source Build CMake Guide](articles/zh-cn/source-build-cmake-windows-guide.md)
+- [TensorRtSharp NuGet Runtime Package Guide](articles/zh-cn/tensorrtsharp-nuget-runtime-package-guide.md)
+- [Windows Installation And Troubleshooting Guide](articles/zh-cn/windows-installation-and-troubleshooting-guide.md)
+- [Linux Installation Runner Boundary Guide](articles/zh-cn/linux-installation-runner-boundary-guide.md)
+- [TensorRtExec GUI CLI Parity Design](articles/zh-cn/tensorrtexec-gui-cli-parity-design.md)
+- [Plugin Registry Inventory Readonly Design](articles/zh-cn/plugin-registry-inventory-readonly-design.md)
+- [Package Consumer Runtime Proof Clean Consumer Guide](articles/zh-cn/package-consumer-runtime-proof-clean-consumer-guide.md)
+- [Release Proof And Post Publish Verification Guide](articles/zh-cn/release-proof-and-post-publish-verification-guide.md)
+- [TensorRtSharp 4 FAQ](articles/zh-cn/tensorrtsharp-4-faq.md)
+- [TensorRtSharp 4 Release Story](articles/zh-cn/tensorrtsharp-4-release-story.md)
 
 ## Example And Smoke Path
 
@@ -54,7 +601,7 @@ Recommended common-example order:
 3. `InferenceBindings`
 4. `OnnxToEngine`
 5. `Classification` with your own classifier ONNX assets
-6. `YoloDet` with your own YOLO-family ONNX assets
+6. `YoloVision` with your own YOLO-family ONNX assets
 
 Recommended smoke order:
 
@@ -66,3 +613,103 @@ Recommended smoke order:
 6. Layer-specific network runners
 
 See [Sample Runners](articles/en/sample-runners.md), `samples/README.md`, and `smoke/README.md` for commands and expected evidence lines.
+
+Application entry points:
+
+- `applications/TensorRtExec/README.md` explains the CLI/WinForms ONNX-to-engine workflow, report fields, and why build-only/precheck output cannot be promoted to package-consumer-runtime proof.
+- Release-readiness matrices: `samples/YoloVision/yolo-model-matrix.json`, `samples/OnnxToEngine/trtexec-parity-matrix.json`, `applications/TensorRtExec/tensor-rt-exec-feature-matrix.json`, and `artifacts/interface-coverage/release-api-readiness-audit.json`.
+
+
+- [真实公开发布 Owner 执行包](articles/zh-cn/public-release-owner-execution-package.md)
+- [外部干净 Consumer Proof 采集包](articles/zh-cn/external-clean-consumer-proof-kit.md)
+- [兼容主机 Runtime Proof 采集包](articles/zh-cn/runtime-proof-compatible-host-kit.md)
+- [发布后 Owner 验证采集包](articles/zh-cn/post-publish-owner-verification-kit.md)
+- [Owner 公开发布执行 Readiness 汇总包](articles/zh-cn/owner-public-release-execution-readiness-pack.md)
+- [Owner Proof Execution Checklist](articles/zh-cn/owner-proof-execution-checklist.md)
+- [Owner Real Proof Field Delta Dashboard](articles/zh-cn/owner-real-proof-field-delta-dashboard.md)
+- [Owner Proof Import Preflight](articles/zh-cn/owner-proof-import-preflight.md)
+- [ReleaseCandidate Freeze Manifest](articles/zh-cn/release-candidate-freeze-manifest.md)
+- [Public Material Final Scan](articles/zh-cn/public-material-final-scan.md)
+- [Final Owner Proof Blocker Dashboard](articles/zh-cn/final-owner-proof-blocker-dashboard.md)
+- [Owner Real Proof Import Audit Bundle](articles/zh-cn/owner-real-proof-import-audit-bundle.md)
+- [Owner Evidence File Manifest Template](articles/zh-cn/owner-evidence-file-manifest-template.md)
+- [Strict Validator Command Runbook](articles/zh-cn/strict-validator-command-runbook.md)
+- [Release Issue Close Owner Input Final Checklist](articles/zh-cn/release-issue-close-owner-input-final-checklist.md)
+- [Owner 外部真实 Proof 输入合同](articles/zh-cn/owner-external-real-proof-input-contract.md)
+- [Owner 外部真实 Proof 导入校验器](articles/zh-cn/owner-external-real-proof-import-validator.md)
+- [发布后 Clean Consumer 真实 Proof Gate](articles/zh-cn/post-publish-clean-consumer-real-proof-gate.md)
+- [Post Publish Clean Consumer Owner Input Guide](articles/zh-cn/post-publish-clean-consumer-owner-input-guide.md)
+- [兼容主机 Runtime 真实 Proof Gate](articles/zh-cn/runtime-compatible-host-real-proof-gate.md)
+- [ReleaseClose 真实 Proof 准入 Gate](articles/zh-cn/release-close-real-proof-readiness-gate.md)
+- [ReleaseClose Strict Gate Dashboard](articles/zh-cn/release-close-strict-gate-dashboard.md)
+- [发布候选真实 Proof 最终冻结](articles/zh-cn/release-candidate-real-proof-final-freeze.md)
+- [Owner 真实输入导入预检](articles/zh-cn/owner-real-input-import-preflight.md)
+- [公开包 Hash 交叉核对 Gate](articles/zh-cn/public-package-hash-cross-check-gate.md)
+- [Clean Consumer 与 Runtime Proof 交叉核对 Gate](articles/zh-cn/clean-consumer-runtime-proof-cross-check-gate.md)
+- [ReleaseClose 真实输入候选晋级 Readiness](articles/zh-cn/release-close-real-input-candidate-promotion-readiness.md)
+- [Owner Real Input Landing Pack](articles/zh-cn/owner-real-input-landing-pack.md)
+- [Final Owner Execution Checklist](articles/zh-cn/final-owner-execution-checklist.md)
+- [Real Proof Import Boundary Audit](articles/zh-cn/real-proof-import-boundary-audit.md)
+- [发布后 Rollback 与 Owner 决策 Gate](articles/zh-cn/post-publish-rollback-owner-decision-gate.md)
+- [ReleaseClose 最终真实输入准入包](articles/zh-cn/release-close-final-real-input-admission-pack.md)
+- [Owner 真实输入 JSON 合同](articles/zh-cn/owner-real-input-json-contract.md)
+- [Owner 真实输入 JSON 导入](articles/zh-cn/owner-real-input-json-import.md)
+- [Owner 真实输入 Hash 与路径校验器](articles/zh-cn/owner-real-input-hash-and-path-validator.md)
+- [Owner 真实输入禁止替代项校验器](articles/zh-cn/owner-real-input-forbidden-substitute-validator.md)
+- [StrictClose 真实输入 Dry Run](articles/zh-cn/strict-close-real-input-dry-run.md)
+- [StrictClose 真实输入 Finding 报告](articles/zh-cn/strict-close-real-input-finding-report.md)
+- [StrictClose Owner 行动包](articles/zh-cn/strict-close-owner-action-pack.md)
+- [ReleaseClose 真实输入最终 Blocker 台账](articles/zh-cn/release-close-real-input-final-blocker-ledger.md)
+
+## Third Campaign Body Batch
+
+- [YoloVision Detection Real Model Tutorial](articles/zh-cn/yolovision-detection-real-model-tutorial.md)
+- [YoloVision Classification Real Model Tutorial](articles/zh-cn/yolovision-classification-real-model-tutorial.md)
+- [YoloVision Segmentation Real Model Tutorial](articles/zh-cn/yolovision-segmentation-real-model-tutorial.md)
+- [YoloVision Pose OBB Sem Roadmap](articles/zh-cn/yolovision-pose-obb-sem-roadmap.md)
+- [TensorRtExec GUI User Guide](articles/zh-cn/tensorrtexec-gui-user-guide.md)
+- [TensorRtExec Trtexec Parity Deep Dive](articles/zh-cn/tensorrtexec-trtexec-parity-deep-dive.md)
+- [ONNX To Engine Trtexec Conversion Guide](articles/zh-cn/onnx-to-engine-trtexec-conversion-guide.md)
+- [Runtime Package Installation Deep Dive](articles/zh-cn/runtime-package-installation-deep-dive.md)
+- [CUDA Error 35 Troubleshooting](articles/zh-cn/cuda-error-35-troubleshooting.md)
+- [Deferred API Real Completion Review](articles/zh-cn/deferred-api-real-completion-review.md)
+- [Plugin Inventory Readonly API](articles/zh-cn/plugin-inventory-readonly-api.md)
+- [Package Consumer Runtime Proof Playbook](articles/zh-cn/package-consumer-runtime-proof-playbook.md)
+
+## Fourth Campaign Body Batch
+
+- [YoloVision Detection YOLOv8n Download Export Run](articles/zh-cn/yolovision-detection-yolov8n-download-export-run.md)
+- [YoloVision Segmentation Mask Postprocess Guide](articles/zh-cn/yolovision-segmentation-mask-postprocess-guide.md)
+- [YoloVision Pose Keypoint Output Guide](articles/zh-cn/yolovision-pose-keypoint-output-guide.md)
+- [YoloVision OBB Angle Output Guide](articles/zh-cn/yolovision-obb-angle-output-guide.md)
+- [YoloVision Classification YOLOv8n Labels TopK Guide](articles/zh-cn/yolovision-classification-yolov8n-labels-topk-guide.md)
+- [YoloVision Real Asset Owner Backfill Pack](articles/zh-cn/yolovision-real-asset-owner-backfill-pack.md)
+- [TensorRtExec WinForms Screenshot Walkthrough](articles/zh-cn/tensorrtexec-winforms-screenshot-walkthrough.md)
+- [TensorRtExec Report Schema Guide](articles/zh-cn/tensorrtexec-report-schema-guide.md)
+- [TensorRtExec Report Proof Boundary](articles/zh-cn/tensorrtexec-report-proof-boundary.md)
+- [Runtime Package Windows Linux Install FAQ](articles/zh-cn/runtime-package-windows-linux-install-faq.md)
+- [Plugin Registry Inventory User Guide](articles/zh-cn/plugin-registry-inventory-user-guide.md)
+- [Deferred Readonly API Upgrade Playbook](articles/zh-cn/deferred-readonly-api-upgrade-playbook.md)
+- [CSharp Wrapper Lifetime Design](articles/zh-cn/csharp-wrapper-lifetime-design.md)
+- [Callback Allocator Listener Readonly Safety Gates](articles/zh-cn/callback-allocator-listener-readonly-safety-gates.md)
+- [Release Evidence Non Substitute Guide](articles/zh-cn/release-evidence-non-substitute-guide.md)
+- [Project Roadmap To Public Release](articles/zh-cn/project-roadmap-to-public-release.md)
+
+## Fifth Campaign Body Batch
+
+- [YoloVision Output JSON Schema Guide](articles/zh-cn/yolovision-output-json-schema-guide.md)
+- [YoloVision Real Asset Record Template Guide](articles/zh-cn/yolovision-real-asset-record-template-guide.md)
+- [YoloVision Owner Asset Evidence Guide](articles/zh-cn/yolovision-owner-asset-evidence-guide.md)
+- [YoloVision Owner Asset Evidence Example](articles/zh-cn/yolovision-owner-asset-evidence-example.md)
+- [YoloVision Golden Output Validation Guide](articles/zh-cn/yolovision-golden-output-validation-guide.md)
+- [TensorRtExec Report JSON Schema Snapshot](articles/zh-cn/tensorrtexec-report-json-schema-snapshot.md)
+- [TensorRtExec GUI CLI Field Map](articles/zh-cn/tensorrtexec-gui-cli-field-map.md)
+- [Runtime Package Minimal Smoke Commands](articles/zh-cn/runtime-package-minimal-smoke-commands.md)
+- [Runtime Package Native Load Troubleshooting](articles/zh-cn/runtime-package-native-load-troubleshooting.md)
+- [Plugin Inventory Field Metadata Smoke Guide](articles/zh-cn/plugin-inventory-field-metadata-smoke-guide.md)
+- [Deferred Next Readonly Candidate List](articles/zh-cn/deferred-next-readonly-candidate-list.md)
+- [CSharp Public API Handle Exposure Audit](articles/zh-cn/csharp-public-api-handle-exposure-audit.md)
+- [Release Proof Strict Validator Playbook](articles/zh-cn/release-proof-strict-validator-playbook.md)
+- [Release Proof Owner Input Dashboard](articles/zh-cn/release-proof-owner-input-dashboard.md)
+- [Release Proof Sample Article Closure](articles/zh-cn/release-proof-sample-article-closure.md)
+- [Public Release Owner Final Checklist](articles/zh-cn/public-release-owner-final-checklist.md)

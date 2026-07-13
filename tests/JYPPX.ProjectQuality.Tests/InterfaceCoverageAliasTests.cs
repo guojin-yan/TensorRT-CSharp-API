@@ -48,12 +48,89 @@ public sealed class InterfaceCoverageAliasTests
     }
 
     [Fact]
+    public void TensorRtExecutionContextAllocatorAliasesPreferSafeControls()
+    {
+        string script = ReadCoverageScript();
+
+        Assert.Contains("\"IExecutionContext::getOutputAllocator\" = @(\"id:*execution-context-has-output-allocator\", \"id:*execution-context-clear-output-allocator\")", script);
+        Assert.Contains("\"IExecutionContext::setOutputAllocator\" = @(\"id:*execution-context-has-output-allocator\", \"id:*execution-context-clear-output-allocator\")", script);
+        Assert.Contains("\"IExecutionContext::getTemporaryStorageAllocator\" = @(\"id:*execution-context-has-temporary-storage-allocator\", \"id:*execution-context-clear-temporary-storage-allocator\")", script);
+        Assert.Contains("\"IExecutionContext::setTemporaryStorageAllocator\" = @(\"id:*execution-context-has-temporary-storage-allocator\", \"id:*execution-context-clear-temporary-storage-allocator\")", script);
+    }
+
+    [Fact]
+    public void TensorRtBuilderAndDebugListenerAliasesPreferSafeBoundaryControls()
+    {
+        string script = ReadCoverageScript();
+
+        Assert.Contains("\"IBuilder::getErrorRecorder\" = @(\"id:*builder-has-error-recorder\", \"id:*builder-clear-error-recorder\")", script);
+        Assert.Contains("\"IBuilder::getLogger\" = @(\"id:*builder-has-logger\", \"id:*builder-get-logger-deferred\")", script);
+        Assert.Contains("\"IBuilder::setErrorRecorder\" = @(\"id:*builder-has-error-recorder\", \"id:*builder-clear-error-recorder\")", script);
+        Assert.Contains("\"IBuilder::setGpuAllocator\" = @(\"id:*builder-clear-gpu-allocator\")", script);
+        Assert.Contains("\"ICudaEngine::getErrorRecorder\" = @(\"id:*engine-has-error-recorder\", \"id:*engine-clear-error-recorder\")", script);
+        Assert.Contains("\"ICudaEngine::setErrorRecorder\" = @(\"id:*engine-has-error-recorder\", \"id:*engine-clear-error-recorder\")", script);
+        Assert.Contains("\"IEngineInspector::getErrorRecorder\" = @(\"id:*engine-inspector-has-error-recorder\", \"id:*engine-inspector-clear-error-recorder\")", script);
+        Assert.Contains("\"IEngineInspector::setErrorRecorder\" = @(\"id:*engine-inspector-has-error-recorder\", \"id:*engine-inspector-clear-error-recorder\")", script);
+        Assert.Contains("\"IExecutionContext::getErrorRecorder\" = @(\"id:*execution-context-has-error-recorder\", \"id:*execution-context-clear-error-recorder\")", script);
+        Assert.Contains("\"IExecutionContext::setErrorRecorder\" = @(\"id:*execution-context-has-error-recorder\", \"id:*execution-context-clear-error-recorder\")", script);
+        Assert.Contains("\"INetworkDefinition::getErrorRecorder\" = @(\"id:*network-has-error-recorder\", \"id:*network-clear-error-recorder\")", script);
+        Assert.Contains("\"INetworkDefinition::setErrorRecorder\" = @(\"id:*network-has-error-recorder\", \"id:*network-clear-error-recorder\")", script);
+        Assert.Contains("\"IPluginRegistry::getErrorRecorder\" = @(\"id:*plugin-registry-has-error-recorder\", \"id:*plugin-registry-get-error-recorder-deferred\")", script);
+        Assert.Contains("\"IErrorRecorder::getNbErrors\" = @(\"id:*runtime-get-error-recorder-snapshot-info\", \"id:*refitter-get-error-recorder-snapshot-info\", \"id:*error-recorder-get-nb-errors-deferred\")", script);
+        Assert.Contains("\"IErrorRecorder::getErrorCode\" = @(\"id:*runtime-get-error-recorder-error\", \"id:*refitter-get-error-recorder-error\", \"id:*error-recorder-get-error-code-deferred\")", script);
+        Assert.Contains("\"IErrorRecorder::getErrorDesc\" = @(\"id:*runtime-get-error-recorder-error\", \"id:*refitter-get-error-recorder-error\", \"id:*error-recorder-get-error-desc-deferred\")", script);
+        Assert.Contains("\"IErrorRecorder::getInterfaceInfo\" = @(\"id:*runtime-get-error-recorder-snapshot-info\", \"id:*refitter-get-error-recorder-snapshot-info\", \"id:*engine-get-error-recorder-snapshot-info\", \"id:*execution-context-get-error-recorder-snapshot-info\", \"id:*error-recorder-get-interface-info-deferred\")", script);
+        Assert.Contains("\"IErrorRecorder::hasOverflowed\" = @(\"id:*runtime-get-error-recorder-snapshot-info\", \"id:*refitter-get-error-recorder-snapshot-info\", \"id:*error-recorder-has-overflowed-deferred\")", script);
+        Assert.Contains("\"IRuntime::getLogger\" = @(\"id:*runtime-has-logger\", \"id:*runtime-get-logger-deferred\")", script);
+        Assert.Contains("\"IExecutionContext::getDebugListener\" = @(\"id:*execution-context-has-debug-listener\", \"id:*execution-context-clear-debug-listener\")", script);
+        Assert.Contains("\"IExecutionContext::setDebugListener\" = @(\"id:*execution-context-has-debug-listener\", \"id:*execution-context-clear-debug-listener\")", script);
+        Assert.Contains("\"IBuilderConfig::getAlgorithmSelector\" = @(\"id:*builder-config-has-algorithm-selector\", \"id:*builder-config-get-algorithm-selector-deferred\")", script);
+        Assert.Contains("\"IBuilderConfig::getInt8Calibrator\" = @(\"id:*builder-config-has-int8-calibrator\", \"id:*builder-config-get-int8-calibrator-deferred\")", script);
+    }
+
+    [Fact]
+    public void TensorRtProgressMonitorAliasesPreferSafeBoundaryControls()
+    {
+        string script = ReadCoverageScript();
+
+        Assert.Contains("\"IBuilderConfig::getProgressMonitor\" = @(\"id:*builder-config-has-progress-monitor\", \"id:*builder-config-clear-progress-monitor\", \"id:*builder-config-set-progress-monitor\")", script);
+        Assert.Contains("\"IBuilderConfig::setProgressMonitor\" = @(\"id:*builder-config-has-progress-monitor\", \"id:*builder-config-clear-progress-monitor\", \"id:*builder-config-set-progress-monitor\")", script);
+        Assert.Contains("\"IProgressMonitor::getInterfaceInfo\" = @(\"id:*progress-monitor-get-interface-info\")", script);
+        Assert.Contains("\"IProgressMonitor::phaseStart\" = @(\"id:*progress-monitor-create-with-callback\", \"id:*progress-monitor-emit-diagnostic\", \"id:*builder-config-set-progress-monitor\", \"id:*progress-monitor-phase-start-deferred\")", script);
+        Assert.Contains("\"IProgressMonitor::stepComplete\" = @(\"id:*progress-monitor-create-with-callback\", \"id:*progress-monitor-emit-diagnostic\", \"id:*builder-config-set-progress-monitor\", \"id:*progress-monitor-step-complete-deferred\")", script);
+        Assert.Contains("\"IProgressMonitor::phaseFinish\" = @(\"id:*progress-monitor-create-with-callback\", \"id:*progress-monitor-emit-diagnostic\", \"id:*builder-config-set-progress-monitor\", \"id:*progress-monitor-phase-finish-deferred\")", script);
+    }
+
+    [Fact]
+    public void TensorRtCallbackInterfaceInfoAliasesPreferCopiedMetadataControls()
+    {
+        string script = ReadCoverageScript();
+
+        Assert.Contains("\"IDebugListener::getInterfaceInfo\" = @(\"id:*execution-context-debug-listener-get-interface-info\", \"id:*debug-listener-get-interface-info-deferred\")", script);
+        Assert.Contains("\"IGpuAllocator::getInterfaceInfo\" = @(\"id:*execution-context-temporary-storage-allocator-get-interface-info\", \"id:*gpu-allocator-get-interface-info-deferred\")", script);
+        Assert.Contains("\"IOutputAllocator::getInterfaceInfo\" = @(\"id:*execution-context-output-allocator-get-interface-info\", \"id:*output-allocator-get-interface-info-deferred\")", script);
+        Assert.Contains("\"IDebugListener::getInterfaceInfo\"", script);
+        Assert.Contains("\"IGpuAllocator::getInterfaceInfo\"", script);
+        Assert.Contains("\"IOutputAllocator::getInterfaceInfo\"", script);
+    }
+
+    [Fact]
+    public void TensorRtProfilerCallbackAliasesPreferManagedOwnerBridge()
+    {
+        string script = ReadCoverageScript();
+
+        Assert.Contains("\"IProfiler::reportLayerTime\" = @(\"id:*profiler-create-with-callback\", \"id:*profiler-emit-diagnostic\", \"id:*execution-context-set-profiler\", \"id:*profiler-report-layer-time-deferred\")", script);
+    }
+
+    [Fact]
     public void TensorRtGlobalAliasesCoverReadonlyProbeFalseNegativeRows()
     {
         string script = ReadCoverageScript();
 
         Assert.Contains("\"Global::getNvOnnxParserVersion\" = @(\"global-get-onnx-parser-version\")", script);
         Assert.Contains("\"Global::getBuilderPluginRegistry\" = @(\"builder-capability-plugin-registry\")", script);
+        Assert.Contains("\"IBuilder::getPluginRegistry\" = @(\"id:*builder-plugin-registry-exists\", \"id:*builder-plugin-registry-get-creator-count\"", script);
+        Assert.Contains("\"IRuntime::getPluginRegistry\" = @(\"id:*runtime-plugin-registry-exists\", \"id:*runtime-plugin-registry-get-creator-count\"", script);
         Assert.Contains("function Find-ExplicitTensorRtInterfaceAliasApis", script);
     }
 
@@ -66,7 +143,7 @@ public sealed class InterfaceCoverageAliasTests
         Assert.Contains("\"Global::createInferRuntime_INTERNAL\" = @(\"id:*runtime-create\")", script);
         Assert.Contains("\"Global::createInferRefitter_INTERNAL\" = @(\"id:*engine-create-refitter\")", script);
         Assert.Contains("\"Global::createNvOnnxParser_INTERNAL\" = @(\"id:*onnx-parser-create\")", script);
-        Assert.Contains("\"Global::createNvOnnxParserRefitter_INTERNAL\" = @(\"id:*parser-refitter-create-deferred\")", script);
+        Assert.Contains("\"Global::createNvOnnxParserRefitter_INTERNAL\" = @(\"id:*parser-refitter-create\", \"id:*parser-refitter-create-deferred\")", script);
         Assert.Contains("\"Global::createONNXConfig\" = @(\"id:*onnx-config-create-deferred\")", script);
         Assert.Contains("\"Global::initLibNvInferPlugins\" = @(\"id:*global-init-lib-nvinfer-plugins-deferred\")", script);
         Assert.Contains("\"Global::setInternalLibraryPath\" = @(\"id:*global-set-internal-library-path-deferred\")", script);
@@ -134,12 +211,20 @@ public sealed class InterfaceCoverageAliasTests
     {
         string script = ReadCoverageScript();
 
-        Assert.Contains("\"cudaGraphNodeGetDependencies\" = @(\"graph-node-get-dependency-count-safe\", \"graph-node-get-dependency-safe\")", script);
-        Assert.Contains("\"cudaGraphNodeGetDependentNodes\" = @(\"graph-node-get-dependent-count-safe\", \"graph-node-get-dependent-safe\")", script);
+        Assert.Contains("\"cudaGraphDebugDotPrint\" = @(\"graph-debug-dot-print-deferred\", \"graph-debug-dot-print-safe\")", script);
+        Assert.Contains("\"cudaGraphNodeGetDependencies\" = @(\"graph-node-get-dependency-count-safe\", \"graph-node-get-dependency-safe\", \"graph-node-get-dependencies-v2-count-safe\", \"graph-node-get-dependency-v2-safe\")", script);
+        Assert.Contains("\"cudaGraphNodeGetDependentNodes\" = @(\"graph-node-get-dependent-count-safe\", \"graph-node-get-dependent-safe\", \"graph-node-get-dependent-nodes-v2-count-safe\", \"graph-node-get-dependent-node-v2-safe\")", script);
+        Assert.Contains("\"cudaGraphGetEdges\" = @(\"graph-get-edges-v2-deferred\", \"graph-get-edges-v2-count-safe\", \"graph-get-edge-v2-safe\")", script);
+        Assert.Contains("\"cudaGraphGetEdges_v2\" = @(\"graph-get-edges-v2-deferred\", \"graph-get-edges-v2-count-safe\", \"graph-get-edge-v2-safe\")", script);
         Assert.Contains("\"cudaGraphNodeSetEnabled\" = @(\"graph-exec-node-set-enabled-safe\")", script);
-        Assert.Contains("\"cudaGraphRemoveDependencies\" = @(\"graph-remove-dependency-safe\")", script);
+        Assert.Contains("\"cudaGraphRemoveDependencies\" = @(\"graph-remove-dependency-safe\", \"graph-remove-dependency-v2-safe\")", script);
+        Assert.Contains("\"cudaGraphKernelNodeGetAttribute\" = @(\"graph-kernel-node-get-attribute-deferred\", \"graph-kernel-node-get-attribute-scalar-safe\")", script);
         Assert.Contains("\"cudaGraphKernelNodeGetParams\" = @(\"graph-kernel-node-get-params-deferred\")", script);
-        Assert.Contains("\"cudaGraphMemcpyNodeSetParams1D\" = @(\"graph-memcpy-node-set-params-1d-deferred\")", script);
+        Assert.Contains("\"cudaGraphKernelNodeSetAttribute\" = @(\"graph-kernel-node-set-attribute-deferred\", \"graph-kernel-node-set-attribute-scalar-safe\")", script);
+        Assert.Contains("\"cudaGraphMemcpyNodeSetParams1D\" = @(\"graph-memcpy-node-set-params-1d-deferred\", \"graph-memcpy-node-set-params-1d-device-to-device-safe\", \"graph-memcpy-node-set-params-1d-host-to-device-safe\", \"graph-memcpy-node-set-params-1d-device-to-host-safe\")", script);
+        Assert.Contains("\"cudaGraphAddDependencies\" = @(\"cuda-graph-add-dependencies-deferred\", \"graph-add-dependency-safe\", \"graph-add-dependency-v2-safe\")", script);
+        Assert.Contains("\"cudaGraphAddDependencies_v2\" = @(\"cuda-graph-add-dependencies-v2-deferred\", \"graph-add-dependency-v2-safe\")", script);
+        Assert.Contains("\"cudaGraphExecMemcpyNodeSetParams1D\" = @(\"graph-exec-memcpy-node-set-params1-d-deferred\", \"graph-exec-memcpy-node-set-params-1d-device-to-device-safe\", \"graph-exec-memcpy-node-set-params-1d-host-to-device-safe\", \"graph-exec-memcpy-node-set-params-1d-device-to-host-safe\")", script);
         Assert.Contains("\"cudaGraphNodeGetParams\" = @(\"graph-node-get-params-deferred\")", script);
         Assert.Contains("\"cudaUserObjectCreate\" = @(\"user-object-create-deferred\")", script);
     }
@@ -173,7 +258,8 @@ public sealed class InterfaceCoverageAliasTests
         Assert.Contains("\"cudaLibraryLoadData\" = @(\"library-load-data-deferred\")", script);
         Assert.Contains("\"cudaExecutionCtxStreamCreate\" = @(\"execution-ctx-stream-create-deferred\")", script);
         Assert.Contains("\"cudaLogsRegisterCallback\" = @(\"logs-register-callback-deferred\")", script);
-        Assert.Contains("\"cudaMemRangeGetAttributes\" = @(\"mem-range-get-attributes-deferred\")", script);
+        Assert.Contains("\"cudaMemRangeGetAttribute\" = @(\"mem-range-get-attribute-deferred\", \"mem-range-get-attribute-scalar-safe\", \"mem-range-get-accessed-by-count-safe\", \"mem-range-copy-accessed-by-devices-safe\")", script);
+        Assert.Contains("\"cudaMemRangeGetAttributes\" = @(\"mem-range-get-attributes-deferred\", \"mem-range-get-attributes-scalar-safe\")", script);
     }
 
     [Fact]
@@ -234,13 +320,15 @@ public sealed class InterfaceCoverageAliasTests
     {
         string script = ReadCoverageScript();
 
-        Assert.Contains("\"IPluginCreatorV3One::getPluginName\" = @(\"id:*builder-capability-plugin-creator-get-name\", \"id:*builder-plugin-creator-get-name\", \"id:*global-plugin-creator-get-name\")", script);
-        Assert.Contains("\"IPluginCreatorV3One::getPluginVersion\" = @(\"id:*builder-capability-plugin-creator-get-version\", \"id:*builder-plugin-creator-get-version\", \"id:*global-plugin-creator-get-version\")", script);
-        Assert.Contains("\"IPluginCreatorV3One::getPluginNamespace\" = @(\"id:*builder-capability-plugin-creator-get-namespace\", \"id:*builder-plugin-creator-get-namespace\", \"id:*global-plugin-creator-get-namespace\")", script);
-        Assert.Contains("\"IPluginCreatorV3One::getFieldNames\" = @(\"id:*builder-capability-plugin-creator-get-field-count\", \"id:*builder-capability-plugin-creator-get-field-name\", \"id:*builder-capability-plugin-creator-get-field-metadata\", \"id:*builder-plugin-creator-get-field-count\", \"id:*builder-plugin-creator-get-field-name\", \"id:*builder-plugin-creator-get-field-metadata\", \"id:*global-plugin-creator-get-field-count\", \"id:*global-plugin-creator-get-field-name\", \"id:*global-plugin-creator-get-field-metadata\")", script);
-        Assert.Contains("\"IPluginCreatorV3One::getInterfaceInfo\" = @(\"id:*builder-capability-plugin-creator-get-interface-info\", \"id:*builder-plugin-creator-get-interface-info\", \"id:*global-plugin-creator-get-interface-info\")", script);
+        Assert.Contains("\"IPluginCreatorV3One::getPluginName\" = @(\"id:*builder-capability-plugin-creator-get-name\", \"id:*builder-plugin-creator-get-name\", \"id:*global-plugin-creator-get-name\", \"id:*runtime-plugin-creator-get-name\")", script);
+        Assert.Contains("\"IPluginCreatorV3One::getPluginVersion\" = @(\"id:*builder-capability-plugin-creator-get-version\", \"id:*builder-plugin-creator-get-version\", \"id:*global-plugin-creator-get-version\", \"id:*runtime-plugin-creator-get-version\")", script);
+        Assert.Contains("\"IPluginCreatorV3One::getPluginNamespace\" = @(\"id:*builder-capability-plugin-creator-get-namespace\", \"id:*builder-plugin-creator-get-namespace\", \"id:*global-plugin-creator-get-namespace\", \"id:*runtime-plugin-creator-get-namespace\")", script);
+        Assert.Contains("\"IPluginCreatorV3One::getFieldNames\" = @(\"id:*builder-capability-plugin-creator-get-field-count\", \"id:*builder-capability-plugin-creator-get-field-name\", \"id:*builder-capability-plugin-creator-get-field-metadata\", \"id:*builder-plugin-creator-get-field-count\", \"id:*builder-plugin-creator-get-field-name\", \"id:*builder-plugin-creator-get-field-metadata\", \"id:*global-plugin-creator-get-field-count\", \"id:*global-plugin-creator-get-field-name\", \"id:*global-plugin-creator-get-field-metadata\", \"id:*runtime-plugin-creator-get-field-count\", \"id:*runtime-plugin-creator-get-field-name\", \"id:*runtime-plugin-creator-get-field-metadata\")", script);
+        Assert.Contains("\"IPluginCreatorV3One::getInterfaceInfo\" = @(\"id:*builder-capability-plugin-creator-get-interface-info\", \"id:*builder-plugin-creator-get-interface-info\", \"id:*global-plugin-creator-get-interface-info\", \"id:*runtime-plugin-creator-get-interface-info\")", script);
+        Assert.Contains("\"IPluginCreator::getInterfaceInfo\" = @(\"id:*builder-capability-plugin-creator-get-interface-info\", \"id:*builder-plugin-creator-get-interface-info\", \"id:*global-plugin-creator-get-interface-info\", \"id:*runtime-plugin-creator-get-interface-info\")", script);
         Assert.Contains("\"IPluginRegistry::getPluginCreator\" = @(\"id:*plugin-creator-lookup\", \"id:*plugin-creator-lookup-get-interface-info\", \"id:*plugin-creator-lookup-get-field-count\", \"id:*plugin-creator-lookup-get-field-name\", \"id:*plugin-creator-lookup-get-field-metadata\")", script);
         Assert.Contains("\"IPluginRegistry::getAllCreators\" = @(\"id:*plugin-registry-get-creator-count\", \"id:*plugin-creator-get-name\", \"id:*plugin-creator-get-version\", \"id:*plugin-creator-get-namespace\", \"id:*plugin-creator-get-interface-info\", \"id:*plugin-creator-get-field-count\")", script);
+        Assert.Contains("\"IPluginRegistry::getAllCreatorsRecursive\" = @(\"id:*plugin-registry-get-recursive-creator-count\")", script);
     }
 
     [Fact]
@@ -248,10 +336,11 @@ public sealed class InterfaceCoverageAliasTests
     {
         string script = ReadCoverageScript();
 
-        Assert.Contains("\"IPluginCreator::getPluginName\" = @(\"id:*builder-capability-plugin-creator-get-name\", \"id:*builder-plugin-creator-get-name\", \"id:*global-plugin-creator-get-name\")", script);
-        Assert.Contains("\"IPluginCreator::getPluginVersion\" = @(\"id:*builder-capability-plugin-creator-get-version\", \"id:*builder-plugin-creator-get-version\", \"id:*global-plugin-creator-get-version\")", script);
-        Assert.Contains("\"IPluginCreator::getPluginNamespace\" = @(\"id:*builder-capability-plugin-creator-get-namespace\", \"id:*builder-plugin-creator-get-namespace\", \"id:*global-plugin-creator-get-namespace\")", script);
-        Assert.Contains("\"IPluginCreator::getFieldNames\" = @(\"id:*builder-capability-plugin-creator-get-field-count\", \"id:*builder-capability-plugin-creator-get-field-name\", \"id:*builder-capability-plugin-creator-get-field-metadata\", \"id:*builder-plugin-creator-get-field-count\", \"id:*builder-plugin-creator-get-field-name\", \"id:*builder-plugin-creator-get-field-metadata\", \"id:*global-plugin-creator-get-field-count\", \"id:*global-plugin-creator-get-field-name\", \"id:*global-plugin-creator-get-field-metadata\")", script);
+        Assert.Contains("\"IPluginCreator::getPluginName\" = @(\"id:*builder-capability-plugin-creator-get-name\", \"id:*builder-plugin-creator-get-name\", \"id:*global-plugin-creator-get-name\", \"id:*runtime-plugin-creator-get-name\")", script);
+        Assert.Contains("\"IPluginCreator::getPluginVersion\" = @(\"id:*builder-capability-plugin-creator-get-version\", \"id:*builder-plugin-creator-get-version\", \"id:*global-plugin-creator-get-version\", \"id:*runtime-plugin-creator-get-version\")", script);
+        Assert.Contains("\"IPluginCreator::getPluginNamespace\" = @(\"id:*builder-capability-plugin-creator-get-namespace\", \"id:*builder-plugin-creator-get-namespace\", \"id:*global-plugin-creator-get-namespace\", \"id:*runtime-plugin-creator-get-namespace\")", script);
+        Assert.Contains("\"IPluginCreator::getFieldNames\" = @(\"id:*builder-capability-plugin-creator-get-field-count\", \"id:*builder-capability-plugin-creator-get-field-name\", \"id:*builder-capability-plugin-creator-get-field-metadata\", \"id:*builder-plugin-creator-get-field-count\", \"id:*builder-plugin-creator-get-field-name\", \"id:*builder-plugin-creator-get-field-metadata\", \"id:*global-plugin-creator-get-field-count\", \"id:*global-plugin-creator-get-field-name\", \"id:*global-plugin-creator-get-field-metadata\", \"id:*runtime-plugin-creator-get-field-count\", \"id:*runtime-plugin-creator-get-field-name\", \"id:*runtime-plugin-creator-get-field-metadata\")", script);
+        Assert.Contains("\"IPluginCreator::getInterfaceInfo\" = @(\"id:*builder-capability-plugin-creator-get-interface-info\", \"id:*builder-plugin-creator-get-interface-info\", \"id:*global-plugin-creator-get-interface-info\", \"id:*runtime-plugin-creator-get-interface-info\")", script);
     }
 
     [Fact]
@@ -328,8 +417,25 @@ public sealed class InterfaceCoverageAliasTests
     {
         string script = ReadCoverageScript();
 
+        Assert.Contains("\"IParser::getNbErrors\" = @(\"id:*onnx-parser-get-error-count\", \"id:*parser-get-nb-errors\")", script);
+        Assert.Contains("\"IParser::getNbSubgraphs\" = @(\"id:*onnx-parser-get-subgraph-count\")", script);
+        Assert.Contains("\"IParser::getLayerOutputTensor\" = @(\"id:*onnx-parser-layer-output-tensor-exists\", \"id:*parser-get-layer-output-tensor-deferred\")", script);
         Assert.Contains("\"IParser::getSubgraphNodes\" = @(\"get-subgraph-node-count\", \"get-subgraph-node\", \"subgraph-node\", \"subgraph-nodes\")", script);
+        Assert.Contains("\"IParser::getSubgraphNodes\" = @(\"id:*onnx-parser-get-subgraph-node-count\", \"id:*onnx-parser-get-subgraph-node\")", script);
         Assert.Contains("\"IParser::getUsedVCPluginLibraries\" = @(\"get-used-vc-plugin-library-count\", \"get-used-vc-plugin-library\", \"used-vc-plugin-library\", \"used-vc-plugin-libraries\")", script);
+        Assert.Contains("\"IParser::getUsedVCPluginLibraries\" = @(\"id:*onnx-parser-get-used-vc-plugin-library-count\", \"id:*onnx-parser-get-used-vc-plugin-library\")", script);
+        Assert.Contains("\"IParserRefitter::getNbErrors\" = @(\"id:*parser-refitter-get-error-count\")", script);
+    }
+
+    [Fact]
+    public void TensorRtBuilderConfigAliasesCoverOfficialScalarGetterNames()
+    {
+        string script = ReadCoverageScript();
+
+        Assert.Contains("\"IBuilderConfig::getAvgTimingIterations\" = @(\"id:*builder-config-get-average-timing-iterations\", \"id:*builder-config-get-avg-timing-iterations-deferred\")", script);
+        Assert.Contains("\"IBuilderConfig::getBuilderOptimizationLevel\" = @(\"id:*builder-config-get-optimization-level\", \"id:*builder-config-get-builder-optimization-level-deferred\")", script);
+        Assert.Contains("\"IBuilderConfig::getFlags\" = @(\"id:*builder-config-get-flags\", \"id:*builder-config-get-flags-deferred\")", script);
+        Assert.Contains("\"IBuilderConfig::getFlags\"", script);
     }
 
     [Fact]
@@ -523,7 +629,7 @@ public sealed class InterfaceCoverageAliasTests
         Assert.Contains("\"IMoELayer::setInput\" = @(\"id:*layer-set-input\")", script);
         Assert.Contains("\"INetworkDefinition::setWeightsName\" = @(\"id:*network-set-weights-name\")", script);
         Assert.Contains("\"INetworkDefinition::addRNNv2\" = @(\"id:*network-add-rnnv2*\")", script);
-        Assert.Contains("\"IRNNv2Layer::getWeightsForGate\" = @(\"id:*rnnv2-layer-get-weights-for-gate*\")", script);
+        Assert.Contains("\"IRNNv2Layer::getWeightsForGate\" = @(\"id:*rnnv2-layer-get-weights-for-gate*\", \"id:*rnn-v2-layer-get-weights-for-gate*\")", script);
         Assert.Contains("\"IGpuAllocator::free\" = @(\"id:*gpu-allocator-free*\")", script);
         Assert.Contains("\"IAlgorithm::getTimingMSec\" = @(\"id:*algorithm-get-timing-msec*\")", script);
     }

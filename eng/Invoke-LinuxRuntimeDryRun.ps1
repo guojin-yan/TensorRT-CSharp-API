@@ -101,14 +101,14 @@ $summary | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $summaryPath -Enco
 
 $tensorRtPatternLines = ($package.tensorRtFiles | ForEach-Object { "- " + $_ }) -join [Environment]::NewLine
 $cudaPatternLines = ($package.cudaFiles | ForEach-Object { "- " + $_ }) -join [Environment]::NewLine
-$preflightLines = ($preflightCommands | ForEach-Object { "1. " + $_ })
-$executionLines = ($executionCommands | ForEach-Object { "1. " + $_ })
-$buildArtifactLines = ($expectedBuildArtifacts | ForEach-Object { "- " + $_ })
-$packArtifactLines = ($expectedPackArtifacts | ForEach-Object { "- " + $_ })
-$promotionLines = ($summary.promotionCriteria | ForEach-Object { "- " + $_ })
-$failureLines = ($failureScenarios | ForEach-Object { "- $_" })
-$labelLines = (@("self-hosted", "linux", "x64") | ForEach-Object { "- " + $_ })
-$toolLines = (@(".NET 10 SDK", "pwsh", "cmake", "matching TensorRT root", "matching CUDA root") | ForEach-Object { "- $_" })
+$preflightLines = ($preflightCommands | ForEach-Object { "1. " + $_ }) -join [Environment]::NewLine
+$executionLines = ($executionCommands | ForEach-Object { "1. " + $_ }) -join [Environment]::NewLine
+$buildArtifactLines = ($expectedBuildArtifacts | ForEach-Object { "- " + $_ }) -join [Environment]::NewLine
+$packArtifactLines = ($expectedPackArtifacts | ForEach-Object { "- " + $_ }) -join [Environment]::NewLine
+$promotionLines = ($summary.promotionCriteria | ForEach-Object { "- " + $_ }) -join [Environment]::NewLine
+$failureLines = ($failureScenarios | ForEach-Object { "- $_" }) -join [Environment]::NewLine
+$labelLines = (@("self-hosted", "linux", "x64") | ForEach-Object { "- " + $_ }) -join [Environment]::NewLine
+$toolLines = (@(".NET 10 SDK", "pwsh", "cmake", "matching TensorRT root", "matching CUDA root") | ForEach-Object { "- $_" }) -join [Environment]::NewLine
 
 $readmeLines = @(
   "# Linux Runtime Dry Run",

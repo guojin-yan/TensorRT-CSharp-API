@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using JYPPX.CudaSharp.Internal.Handles;
 using JYPPX.CudaSharp.Internal.Interop;
 
@@ -51,6 +52,144 @@ public sealed class CudaGraphExec : IDisposable
     public bool GetNodeEnabled(CudaGraphNode node)
     {
         return NativeCudaApi.GetGraphExecNodeEnabled(_handle, node);
+    }
+
+    /// <summary>
+    /// Gets a copied executable-state snapshot for a graph node.
+    /// 获取 graph node 在当前 executable graph 中的复制型执行状态快照。
+    /// </summary>
+    /// <param name="node">A node token owned by the source graph. 源 graph 拥有的节点 token。</param>
+    /// <returns>A snapshot containing node-enabled state and executable flags. 包含节点启用状态和 executable flags 的快照。</returns>
+    /// <remarks>
+    /// The returned snapshot contains copied scalar values only and does not transfer ownership of the node token.
+    /// 返回的快照仅包含复制出的标量值，不转移 node token 的所有权。
+    /// </remarks>
+    public CudaGraphExecNodeStateSnapshot GetNodeStateSnapshot(CudaGraphNode node)
+    {
+        return new CudaGraphExecNodeStateSnapshot(GetNodeEnabled(node), Flags);
+    }
+
+    /// <summary>
+    /// Gets copied executable-state snapshots for multiple graph nodes.
+    /// 获取多个 graph node 的复制型 executable 状态快照。
+    /// </summary>
+    /// <param name="nodes">The graph-owned node value tokens. graph 拥有的 node 值 token。</param>
+    /// <returns>A copied executable diagnostic snapshot. 复制型 executable 诊断快照。</returns>
+    public CudaGraphExecDiagnosticSnapshot GetDiagnosticSnapshot(IReadOnlyList<CudaGraphNode> nodes)
+    {
+        if (nodes == null)
+        {
+            throw new ArgumentNullException(nameof(nodes));
+        }
+
+        List<CudaGraphExecNodeStateSnapshot> snapshots = new List<CudaGraphExecNodeStateSnapshot>(nodes.Count);
+        for (int index = 0; index < nodes.Count; index++)
+        {
+            CudaGraphNode node = nodes[index];
+            snapshots.Add(new CudaGraphExecNodeStateSnapshot((ulong)index, node, GetNodeEnabled(node), Flags));
+        }
+
+        return new CudaGraphExecDiagnosticSnapshot(snapshots);
+    }
+
+    /// <summary>
+    /// Updates an executable graph event-record node to use a caller-owned CUDA event.
+    /// 将 executable graph 的 event-record 节点更新为使用调用方拥有的 CUDA event。
+    /// </summary>
+    /// <param name="node">A node token owned by the source graph. 源 graph 拥有的节点 token。</param>
+    /// <param name="eventHandle">The caller-owned CUDA event. 调用方拥有的 CUDA event。</param>
+    /// <remarks>
+    /// The event must remain alive while this executable graph may use the updated node.
+    /// 该 event 必须在当前 executable graph 可能使用更新节点期间保持存活。
+    /// </remarks>
+    public void SetEventRecordNodeEvent(CudaGraphNode node, CudaEvent eventHandle)
+    {
+        if (eventHandle == null)
+        {
+            throw new ArgumentNullException(nameof(eventHandle));
+        }
+
+        NativeCudaApi.SetGraphExecEventRecordNodeEvent(_handle, node, eventHandle.Handle);
+    }
+
+    /// <summary>
+    /// Updates an executable graph event-wait node to use a caller-owned CUDA event.
+    /// 将 executable graph 的 event-wait 节点更新为使用调用方拥有的 CUDA event。
+    /// </summary>
+    /// <param name="node">A node token owned by the source graph. 源 graph 拥有的节点 token。</param>
+    /// <param name="eventHandle">The caller-owned CUDA event. 调用方拥有的 CUDA event。</param>
+    /// <remarks>
+    /// The event must remain alive while this executable graph may use the updated node.
+    /// 该 event 必须在当前 executable graph 可能使用更新节点期间保持存活。
+    /// </remarks>
+    public void SetEventWaitNodeEvent(CudaGraphNode node, CudaEvent eventHandle)
+    {
+        if (eventHandle == null)
+        {
+            throw new ArgumentNullException(nameof(eventHandle));
+        }
+
+        NativeCudaApi.SetGraphExecEventWaitNodeEvent(_handle, node, eventHandle.Handle);
+    }
+
+    /// <summary>
+    /// Updates an executable graph memcpy node for a 1D device-to-device copy.
+    /// 将 executable graph 的 memcpy 节点更新为 1D device-to-device 复制。
+    /// </summary>
+    /// <param name="node">A memcpy node token owned by the source graph. 源 graph 拥有的 memcpy 节点 token。</param>
+    /// <param name="destination">The destination device memory owner. 目标设备内存所有者。</param>
+    /// <param name="source">The source device memory owner. 源设备内存所有者。</param>
+    /// <param name="count">The byte count to copy. 要复制的字节数。</param>
+    /// <remarks>
+    /// The memory owners must remain alive while this executable graph may use the updated node.
+    /// 内存所有者必须在当前 executable graph 可能使用更新节点期间保持存活。
+    /// </remarks>
+    public void SetDeviceToDeviceMemcpyNodeParameters(CudaGraphNode node, CudaMemory destination, CudaMemory source, int count)
+    {
+        CudaGraph.ValidateDeviceMemory(destination, nameof(destination));
+        CudaGraph.ValidateDeviceMemory(source, nameof(source));
+        CudaGraph.ValidateMemcpyCount(count, destination.SizeInBytes, source.SizeInBytes, nameof(count));
+        NativeCudaApi.SetGraphExecMemcpyNodeParametersDeviceToDevice(_handle, node, destination.Handle, source.Handle, count);
+    }
+
+    /// <summary>
+    /// Updates an executable graph memcpy node for a 1D pinned-host-to-device copy.
+    /// 将 executable graph 的 memcpy 节点更新为 1D pinned-host-to-device 复制。
+    /// </summary>
+    /// <param name="node">A memcpy node token owned by the source graph. 源 graph 拥有的 memcpy 节点 token。</param>
+    /// <param name="destination">The destination device memory owner. 目标设备内存所有者。</param>
+    /// <param name="source">The source pinned host memory owner. 源 pinned host memory 所有者。</param>
+    /// <param name="count">The byte count to copy. 要复制的字节数。</param>
+    /// <remarks>
+    /// The memory owners must remain alive while this executable graph may use the updated node.
+    /// 内存所有者必须在当前 executable graph 可能使用更新节点期间保持存活。
+    /// </remarks>
+    public void SetHostToDeviceMemcpyNodeParameters(CudaGraphNode node, CudaMemory destination, CudaPinnedMemory source, int count)
+    {
+        CudaGraph.ValidateDeviceMemory(destination, nameof(destination));
+        CudaGraph.ValidatePinnedMemory(source, nameof(source));
+        CudaGraph.ValidateMemcpyCount(count, destination.SizeInBytes, source.SizeInBytes, nameof(count));
+        NativeCudaApi.SetGraphExecMemcpyNodeParametersHostToDevice(_handle, node, destination.Handle, source.Handle, count);
+    }
+
+    /// <summary>
+    /// Updates an executable graph memcpy node for a 1D device-to-pinned-host copy.
+    /// 将 executable graph 的 memcpy 节点更新为 1D device-to-pinned-host 复制。
+    /// </summary>
+    /// <param name="node">A memcpy node token owned by the source graph. 源 graph 拥有的 memcpy 节点 token。</param>
+    /// <param name="destination">The destination pinned host memory owner. 目标 pinned host memory 所有者。</param>
+    /// <param name="source">The source device memory owner. 源设备内存所有者。</param>
+    /// <param name="count">The byte count to copy. 要复制的字节数。</param>
+    /// <remarks>
+    /// The memory owners must remain alive while this executable graph may use the updated node.
+    /// 内存所有者必须在当前 executable graph 可能使用更新节点期间保持存活。
+    /// </remarks>
+    public void SetDeviceToHostMemcpyNodeParameters(CudaGraphNode node, CudaPinnedMemory destination, CudaMemory source, int count)
+    {
+        CudaGraph.ValidatePinnedMemory(destination, nameof(destination));
+        CudaGraph.ValidateDeviceMemory(source, nameof(source));
+        CudaGraph.ValidateMemcpyCount(count, destination.SizeInBytes, source.SizeInBytes, nameof(count));
+        NativeCudaApi.SetGraphExecMemcpyNodeParametersDeviceToHost(_handle, node, destination.Handle, source.Handle, count);
     }
 
     /// <summary>

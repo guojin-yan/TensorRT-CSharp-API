@@ -41,6 +41,43 @@ public sealed partial class TensorRtExecutionContext
     }
 
     /// <summary>
+    /// Attaches a managed TensorRT profiler to this execution context.
+    /// 将托管 TensorRT profiler 绑定到当前 execution context。
+    /// </summary>
+    /// <param name="profiler">The managed profiler to borrow. 要借用的托管 profiler。</param>
+    /// <remarks>
+    /// TensorRT borrows the native profiler pointer and does not take ownership. This execution context keeps the managed
+    /// profiler alive until <see cref="ClearProfiler"/> or <see cref="Dispose"/> detaches it. Dispose the execution context
+    /// or clear the profiler before disposing the profiler when possible; if the profiler is disposed first, native release
+    /// is deferred until this context detaches it.
+    /// TensorRT 只借用 native profiler 指针，不接管所有权。当前 execution context 会保持托管 profiler 存活，直到
+    /// <see cref="ClearProfiler"/> 或 <see cref="Dispose"/> 解除绑定。建议先释放 execution context 或清除 profiler 再释放 profiler；
+    /// 如果先释放 profiler，native 释放会延迟到 context 解除绑定之后。
+    /// </remarks>
+    public void SetProfiler(TensorRtProfiler profiler)
+    {
+        if (profiler == null)
+        {
+            throw new ArgumentNullException(nameof(profiler));
+        }
+
+        profiler.ThrowIfDisposed();
+        profiler.AttachBorrower(Line);
+        try
+        {
+            NativeBridgeApi.SetExecutionContextProfiler(Line, _handle, profiler.Handle);
+            TensorRtProfiler? previous = _profilerKeepAlive;
+            _profilerKeepAlive = profiler;
+            previous?.DetachBorrower();
+        }
+        catch
+        {
+            profiler.DetachBorrower();
+            throw;
+        }
+    }
+
+    /// <summary>
     /// Reports accumulated execution data to the profiler attached to the context, when one exists.
     /// 将当前执行上下文已累计的执行数据上报给关联的 profiler（如果存在）。
     /// </summary>

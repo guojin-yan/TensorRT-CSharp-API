@@ -41,6 +41,11 @@ public sealed partial class TensorRtBuilderConfig
             TryCollect("PluginToSerializeCount", diagnostics, () => PluginToSerializeCount, 0),
             TryCollect("HasProgressMonitor", diagnostics, () => HasProgressMonitor, false),
             TryCollect("RemoteAutoTuningConfig", diagnostics, GetRemoteAutoTuningConfig, string.Empty),
+            TryCollect(
+                "SerializedPluginSnapshot",
+                diagnostics,
+                GetSerializedPluginSnapshot,
+                new TensorRtBuilderConfigSerializedPluginSnapshot(Line, 0, Array.Empty<string>(), false, "Unavailable")),
             diagnostics);
     }
 

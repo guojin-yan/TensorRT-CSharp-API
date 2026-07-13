@@ -73,8 +73,6 @@ JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_logs_dump_to_memory_deferred, "cudaLogsDump
 JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_logs_register_callback_deferred, "cudaLogsRegisterCallback", "cudaLogsRegisterCallback deferred: CUDA log callbacks need a managed callback lifetime policy")
 JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_logs_unregister_callback_deferred, "cudaLogsUnregisterCallback", "cudaLogsUnregisterCallback deferred: CUDA log callbacks need a managed callback lifetime policy")
 
-JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_init_device_deferred, "cudaInitDevice", "cudaInitDevice deferred: device initialization flags need an explicit runtime policy")
-JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_set_valid_devices_deferred, "cudaSetValidDevices", "cudaSetValidDevices deferred: device ordinal arrays need a dedicated validation bridge")
 JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_mem_advise_v2_deferred, "cudaMemAdvise_v2", "cudaMemAdvise_v2 deferred: cudaMemLocation needs a dedicated location-aware memory advisory bridge")
 JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_mem_discard_and_prefetch_batch_async_deferred, "cudaMemDiscardAndPrefetchBatchAsync", "cudaMemDiscardAndPrefetchBatchAsync deferred: batch memory range arrays need a dedicated bridge")
 JYPPX_CUDA_OTHER_DEFERRED(jyppx_cuda_mem_discard_batch_async_deferred, "cudaMemDiscardBatchAsync", "cudaMemDiscardBatchAsync deferred: batch memory range arrays need a dedicated bridge")

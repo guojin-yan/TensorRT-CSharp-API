@@ -1,0 +1,1292 @@
+{
+  "roadmapId": "article-roadmap-30plus",
+  "roadmapState": "release-readiness-planning",
+  "minimumArticleCount": 30,
+  "articleCount": 40,
+  "performsPublish": false,
+  "canPublishPublicly": false,
+  "canCloseReleaseIssue": false,
+  "isRuntimeExecutionProof": false,
+  "isPostPublishProof": false,
+  "isReleaseCloseProof": false,
+  "boundary": "The 30+ article roadmap is publication planning only: not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push. failedBlockerCount=0 is not ready.",
+  "requiredFields": [
+    "id",
+    "title",
+    "audience",
+    "status",
+    "targetPath",
+    "sourceArtifacts",
+    "proofBoundary",
+    "mustAvoidClaims"
+  ],
+  "articles": [
+    {
+      "id": 1,
+      "title": "TensorRtSharp4.0 项目总览：把 TensorRT/CUDA 带到 .NET",
+      "audience": "C# 工程师、AI 推理平台开发者",
+      "type": "宣发",
+      "outline": [
+        "项目定位",
+        "C# API 与 native bridge",
+        "当前完成度与边界",
+        "适合的业务场景"
+      ],
+      "sampleOrCodePath": "README.zh-CN.md",
+      "visualAssets": [
+        "架构图",
+        "包结构图"
+      ],
+      "status": "planned",
+      "targetPath": "docs/articles/zh-cn/publishing/tensorrtsharp4-0-项目总览-把-tensorrt-cuda-带到-net.md",
+      "sourceArtifacts": [
+        "README.zh-CN.md"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 2,
+      "title": "为什么 TensorRT C# Binding 不能只是简单 P/Invoke",
+      "audience": "系统开发者、库维护者",
+      "type": "深度解析",
+      "outline": [
+        "ABI 稳定",
+        "no-throw C ABI",
+        "对象生命周期",
+        "跨版本 guard"
+      ],
+      "sampleOrCodePath": "native/src/tensorrt",
+      "visualAssets": [
+        "调用链图"
+      ],
+      "status": "planned",
+      "targetPath": "docs/articles/zh-cn/publishing/为什么-tensorrt-c-binding-不能只是简单-p-invoke.md",
+      "sourceArtifacts": [
+        "native/src/tensorrt"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 3,
+      "title": "从 missing 清零到 deferred 边界提升：真实完成度怎么看",
+      "audience": "项目评审者、贡献者",
+      "type": "技术解析",
+      "outline": [
+        "manifest/source 覆盖",
+        "deferred 风险分类",
+        "高层 wrapper",
+        "smoke 证据"
+      ],
+      "sampleOrCodePath": "artifacts/interface-coverage/release-api-readiness-audit.md",
+      "visualAssets": [
+        "完成度漏斗图"
+      ],
+      "status": "ready",
+      "targetPath": "docs/articles/zh-cn/publishing/从-missing-清零到-deferred-边界提升-真实完成度怎么看.md",
+      "sourceArtifacts": [
+        "artifacts/interface-coverage/release-api-readiness-audit.md"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 4,
+      "title": "TensorRT 8/10/11 跨版本封装策略",
+      "audience": "TensorRT 用户、库维护者",
+      "type": "深度解析",
+      "outline": [
+        "version guard",
+        "manifest 分层",
+        "托管路由",
+        "移除 API 的诊断表达"
+      ],
+      "sampleOrCodePath": "native/manifests/tensorrt",
+      "visualAssets": [
+        "版本矩阵图"
+      ],
+      "status": "planned",
+      "targetPath": "docs/articles/zh-cn/publishing/tensorrt-8-10-11-跨版本封装策略.md",
+      "sourceArtifacts": [
+        "native/manifests/tensorrt"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Windows 本地开发环境：CUDA、TensorRT、.NET 与 CMake",
+      "audience": "Windows 用户",
+      "type": "技术教程",
+      "outline": [
+        "SDK 安装",
+        "环境变量",
+        "development probing",
+        "常见错误"
+      ],
+      "sampleOrCodePath": "docs/articles/zh-cn/windows-local-dev-environment.md",
+      "visualAssets": [
+        "环境变量截图",
+        "命令输出截图"
+      ],
+      "status": "needs screenshot",
+      "targetPath": "docs/articles/zh-cn/publishing/windows-本地开发环境-cuda-tensorrt-net-与-cmake.md",
+      "sourceArtifacts": [
+        "docs/articles/zh-cn/windows-local-dev-environment.md"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 6,
+      "title": "NuGet 安装与 runtime 包选择指南",
+      "audience": "NuGet 消费者",
+      "type": "技术教程",
+      "outline": [
+        "managed 包",
+        "native runtime 包",
+        "split/full package",
+        "恢复与复制验证"
+      ],
+      "sampleOrCodePath": "docs/articles/zh-cn/runtime-package-selection.md",
+      "visualAssets": [
+        "包依赖图"
+      ],
+      "status": "planned",
+      "targetPath": "docs/articles/zh-cn/publishing/nuget-安装与-runtime-包选择指南.md",
+      "sourceArtifacts": [
+        "docs/articles/zh-cn/runtime-package-selection.md"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Package Consumer Runtime Proof 为什么不能用本地 feed 替代",
+      "audience": "发布负责人",
+      "type": "深度解析",
+      "outline": [
+        "local feed 边界",
+        "ProjectReference 边界",
+        "真实公开包 proof",
+        "release evidence"
+      ],
+      "sampleOrCodePath": "artifacts/final-release/release-evidence-bundle.md",
+      "visualAssets": [
+        "proof ladder 图"
+      ],
+      "status": "planned",
+      "targetPath": "docs/articles/zh-cn/publishing/package-consumer-runtime-proof-为什么不能用本地-feed-替代.md",
+      "sourceArtifacts": [
+        "artifacts/final-release/release-evidence-bundle.md"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Plugin Registry Inventory 只读 API 使用指南",
+      "audience": "TensorRT plugin 用户",
+      "type": "接口介绍",
+      "outline": [
+        "registry exists",
+        "creator count",
+        "name/version/namespace",
+        "field metadata"
+      ],
+      "sampleOrCodePath": "src/JYPPX.TensorRtSharp/TensorRtPluginRegistryInventory.cs",
+      "visualAssets": [
+        "Plugin 查询流程图"
+      ],
+      "status": "needs smoke",
+      "targetPath": "docs/articles/zh-cn/publishing/plugin-registry-inventory-只读-api-使用指南.md",
+      "sourceArtifacts": [
+        "src/JYPPX.TensorRtSharp/TensorRtPluginRegistryInventory.cs"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 9,
+      "title": "TensorRT Engine 与 ExecutionContext 部署诊断",
+      "audience": "推理服务开发者",
+      "type": "接口介绍",
+      "outline": [
+        "engine snapshot",
+        "context snapshot",
+        "runtime diagnostic",
+        "非致命诊断"
+      ],
+      "sampleOrCodePath": "src/JYPPX.TensorRtSharp",
+      "visualAssets": [
+        "诊断对象关系图"
+      ],
+      "status": "planned",
+      "targetPath": "docs/articles/zh-cn/publishing/tensorrt-engine-与-executioncontext-部署诊断.md",
+      "sourceArtifacts": [
+        "src/JYPPX.TensorRtSharp"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 10,
+      "title": "OnnxToEngine 快速入门：从 ONNX 到 TensorRT Engine",
+      "audience": "模型部署工程师",
+      "type": "技术教程",
+      "outline": [
+        "ONNX parser",
+        "profile",
+        "engine 保存",
+        "report 输出"
+      ],
+      "sampleOrCodePath": "samples/OnnxToEngine",
+      "visualAssets": [
+        "命令输出截图"
+      ],
+      "status": "ready",
+      "targetPath": "docs/articles/zh-cn/publishing/onnxtoengine-快速入门-从-onnx-到-tensorrt-engine.md",
+      "sourceArtifacts": [
+        "samples/OnnxToEngine"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 11,
+      "title": "OnnxToEngine 与官方 trtexec 参数对照",
+      "audience": "TensorRT 命令行用户",
+      "type": "深度解析",
+      "outline": [
+        "shape profile",
+        "precision",
+        "workspace",
+        "timing cache",
+        "proof 边界"
+      ],
+      "sampleOrCodePath": "samples/OnnxToEngine/trtexec-parity-matrix.json",
+      "visualAssets": [
+        "参数对照表"
+      ],
+      "status": "ready",
+      "targetPath": "docs/articles/zh-cn/publishing/onnxtoengine-与官方-trtexec-参数对照.md",
+      "sourceArtifacts": [
+        "samples/OnnxToEngine/trtexec-parity-matrix.json"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 12,
+      "title": "TensorRtExec CLI：面向用户的 trtexec-like 工具",
+      "audience": "命令行用户",
+      "type": "应用教程",
+      "outline": [
+        "CLI 参数",
+        "build-only report",
+        "dry-run",
+        "normalized command hash"
+      ],
+      "sampleOrCodePath": "applications/TensorRtExec",
+      "visualAssets": [
+        "CLI 截图"
+      ],
+      "status": "ready",
+      "targetPath": "docs/articles/zh-cn/publishing/tensorrtexec-cli-面向用户的-trtexec-like-工具.md",
+      "sourceArtifacts": [
+        "applications/TensorRtExec"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 13,
+      "title": "TensorRtExec WinForms：Windows 桌面模型转换工作流",
+      "audience": "Windows 桌面用户",
+      "type": "应用教程",
+      "outline": [
+        "界面入口",
+        "ONNX 选择",
+        "shape/profile",
+        "报告导出"
+      ],
+      "sampleOrCodePath": "applications/TensorRtExec/WinForms",
+      "visualAssets": [
+        "WinForms 截图"
+      ],
+      "status": "needs screenshot",
+      "targetPath": "docs/articles/zh-cn/publishing/tensorrtexec-winforms-windows-桌面模型转换工作流.md",
+      "sourceArtifacts": [
+        "applications/TensorRtExec/WinForms"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 14,
+      "title": "TensorRtExec 能力矩阵：哪些已实现，哪些仍是 planned",
+      "audience": "用户和维护者",
+      "type": "技术解析",
+      "outline": [
+        "CLI",
+        "WinForms",
+        "implemented",
+        "wrapper-ready",
+        "blocked by runtime proof"
+      ],
+      "sampleOrCodePath": "applications/TensorRtExec/tensor-rt-exec-feature-matrix.json",
+      "visualAssets": [
+        "矩阵表"
+      ],
+      "status": "ready",
+      "targetPath": "docs/articles/zh-cn/publishing/tensorrtexec-能力矩阵-哪些已实现-哪些仍是-planned.md",
+      "sourceArtifacts": [
+        "applications/TensorRtExec/tensor-rt-exec-feature-matrix.json"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 15,
+      "title": "YoloVision 总览：一个样例覆盖 YOLO 全系列",
+      "audience": "视觉模型部署用户",
+      "type": "宣发",
+      "outline": [
+        "统一入口",
+        "YOLO v5-v26",
+        "det/cls/seg/obb/pose/sem",
+        "证据边界"
+      ],
+      "sampleOrCodePath": "samples/YoloVision/yolo-model-matrix.json",
+      "visualAssets": [
+        "YOLO family/task 矩阵图"
+      ],
+      "status": "ready",
+      "targetPath": "docs/articles/zh-cn/publishing/yolovision-总览-一个样例覆盖-yolo-全系列.md",
+      "sourceArtifacts": [
+        "samples/YoloVision/yolo-model-matrix.json"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 16,
+      "title": "YoloVision Detection 教程",
+      "audience": "检测模型用户",
+      "type": "案例教程",
+      "outline": [
+        "模型获取",
+        "ONNX export",
+        "TensorRtExec build",
+        "YoloVision run",
+        "evidence"
+      ],
+      "sampleOrCodePath": "docs/articles/zh-cn/yolovision-detection-tutorial.md",
+      "visualAssets": [
+        "检测结果示意图"
+      ],
+      "status": "near-ready-owner-proof-input",
+      "targetPath": "docs/articles/zh-cn/publishing/yolovision-detection-教程.md",
+      "sourceArtifacts": [
+        "docs/articles/zh-cn/yolovision-detection-tutorial.md",
+        "samples/assets/yolovision-real-asset-owner-backfill-pack.json",
+        "artifacts/user-acceptance/yolovision-real-asset-owner-proof-input.template.json"
+      ],
+      "proofBoundary": "Article body and owner proof input are near-ready guidance only: not runtime proof, not package-consumer-runtime proof, not post-publish proof, not publish approval, and not release close approval. Owner proof input still requires real assets, host/package metadata, stdout/stderr logs, hashes, and validators. not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 17,
+      "title": "YoloVision Segmentation 教程",
+      "audience": "分割模型用户",
+      "type": "案例教程",
+      "outline": [
+        "mask prototype",
+        "metadata",
+        "postprocess",
+        "evidence"
+      ],
+      "sampleOrCodePath": "docs/articles/zh-cn/yolovision-segmentation-tutorial.md",
+      "visualAssets": [
+        "mask 可视化"
+      ],
+      "status": "near-ready-owner-proof-input",
+      "targetPath": "docs/articles/zh-cn/publishing/yolovision-segmentation-教程.md",
+      "sourceArtifacts": [
+        "docs/articles/zh-cn/yolovision-segmentation-tutorial.md",
+        "samples/assets/yolovision-real-asset-owner-backfill-pack.json",
+        "artifacts/user-acceptance/yolovision-real-asset-owner-proof-input.template.json"
+      ],
+      "proofBoundary": "Article body and owner proof input are near-ready guidance only: not runtime proof, not package-consumer-runtime proof, not post-publish proof, not publish approval, and not release close approval. Owner proof input still requires real assets, host/package metadata, stdout/stderr logs, hashes, and validators. not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 18,
+      "title": "YoloVision Pose 教程",
+      "audience": "姿态估计用户",
+      "type": "案例教程",
+      "outline": [
+        "keypoint metadata",
+        "输出 layout",
+        "runner log",
+        "proof 边界"
+      ],
+      "sampleOrCodePath": "docs/articles/zh-cn/yolovision-pose-tutorial.md",
+      "visualAssets": [
+        "关键点示意图"
+      ],
+      "status": "needs sample",
+      "targetPath": "docs/articles/zh-cn/publishing/yolovision-pose-教程.md",
+      "sourceArtifacts": [
+        "docs/articles/zh-cn/yolovision-pose-tutorial.md"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 19,
+      "title": "YoloVision OBB 教程",
+      "audience": "遥感/旋转框检测用户",
+      "type": "案例教程",
+      "outline": [
+        "angle tensor",
+        "degrees/radians",
+        "OBB metadata",
+        "evidence"
+      ],
+      "sampleOrCodePath": "docs/articles/zh-cn/yolovision-obb-tutorial.md",
+      "visualAssets": [
+        "旋转框示意图"
+      ],
+      "status": "needs sample",
+      "targetPath": "docs/articles/zh-cn/publishing/yolovision-obb-教程.md",
+      "sourceArtifacts": [
+        "docs/articles/zh-cn/yolovision-obb-tutorial.md"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 20,
+      "title": "YoloVision Classification 与 Semantic Segmentation",
+      "audience": "分类/语义分割用户",
+      "type": "案例教程",
+      "outline": [
+        "cls logits",
+        "semantic map",
+        "labels",
+        "argmax/调色板"
+      ],
+      "sampleOrCodePath": "docs/articles/zh-cn/yolovision-classification-semantic-tutorial.md",
+      "visualAssets": [
+        "分类和语义图示"
+      ],
+      "status": "needs sample",
+      "targetPath": "docs/articles/zh-cn/publishing/yolovision-classification-与-semantic-segmentation.md",
+      "sourceArtifacts": [
+        "docs/articles/zh-cn/yolovision-classification-semantic-tutorial.md"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 21,
+      "title": "YOLO 模型资产怎么选：许可证、hash 与可再分发边界",
+      "audience": "样例维护者、发布负责人",
+      "type": "FAQ",
+      "outline": [
+        "模型来源",
+        "license",
+        "SHA256",
+        "不能内置权重的原因"
+      ],
+      "sampleOrCodePath": "samples/assets",
+      "visualAssets": [
+        "资产清单图"
+      ],
+      "status": "planned",
+      "targetPath": "docs/articles/zh-cn/publishing/yolo-模型资产怎么选-许可证-hash-与可再分发边界.md",
+      "sourceArtifacts": [
+        "samples/assets"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 22,
+      "title": "YoloVision 预处理与后处理 Metadata 指南",
+      "audience": "视觉模型开发者",
+      "type": "深度解析",
+      "outline": [
+        "letterbox",
+        "NCHW",
+        "layout",
+        "objectness",
+        "NMS"
+      ],
+      "sampleOrCodePath": "docs/articles/zh-cn/yolovision-preprocess-postprocess.md",
+      "visualAssets": [
+        "预处理流程图"
+      ],
+      "status": "ready",
+      "targetPath": "docs/articles/zh-cn/publishing/yolovision-预处理与后处理-metadata-指南.md",
+      "sourceArtifacts": [
+        "docs/articles/zh-cn/yolovision-preprocess-postprocess.md"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 23,
+      "title": "Classification 样例：自备 ONNX 分类模型接入",
+      "audience": "分类模型用户",
+      "type": "案例教程",
+      "outline": [
+        "模型和 labels",
+        "输入图片",
+        "运行命令",
+        "evidence"
+      ],
+      "sampleOrCodePath": "samples/Classification",
+      "visualAssets": [
+        "分类结果截图"
+      ],
+      "status": "needs sample",
+      "targetPath": "docs/articles/zh-cn/publishing/classification-样例-自备-onnx-分类模型接入.md",
+      "sourceArtifacts": [
+        "samples/Classification"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 24,
+      "title": "Dynamic Shape 与 Optimization Profile 实战",
+      "audience": "部署工程师",
+      "type": "技术教程",
+      "outline": [
+        "min/opt/max",
+        "profile index",
+        "runtime shape",
+        "binding readiness"
+      ],
+      "sampleOrCodePath": "samples/DynamicShape",
+      "visualAssets": [
+        "shape profile 图"
+      ],
+      "status": "ready",
+      "targetPath": "docs/articles/zh-cn/publishing/dynamic-shape-与-optimization-profile-实战.md",
+      "sourceArtifacts": [
+        "samples/DynamicShape"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 25,
+      "title": "InferenceBindings：让 TensorRT 输入输出绑定更像 C#",
+      "audience": "C# 开发者",
+      "type": "接口教程",
+      "outline": [
+        "tensor address",
+        "shape inference",
+        "enqueue",
+        "readback"
+      ],
+      "sampleOrCodePath": "samples/InferenceBindings",
+      "visualAssets": [
+        "绑定流程图"
+      ],
+      "status": "ready",
+      "targetPath": "docs/articles/zh-cn/publishing/inferencebindings-让-tensorrt-输入输出绑定更像-c.md",
+      "sourceArtifacts": [
+        "samples/InferenceBindings"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 26,
+      "title": "MultiStream：CUDA Stream/Event 入门",
+      "audience": "CUDA 初学者",
+      "type": "技术教程",
+      "outline": [
+        "stream",
+        "event",
+        "wait",
+        "copy",
+        "ordering"
+      ],
+      "sampleOrCodePath": "samples/MultiStream",
+      "visualAssets": [
+        "stream timeline 图"
+      ],
+      "status": "ready",
+      "targetPath": "docs/articles/zh-cn/publishing/multistream-cuda-stream-event-入门.md",
+      "sourceArtifacts": [
+        "samples/MultiStream"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 27,
+      "title": "CUDA error 35 排查：驱动、runtime 与 TensorRT 版本",
+      "audience": "环境部署用户",
+      "type": "FAQ",
+      "outline": [
+        "错误含义",
+        "兼容矩阵",
+        "blocked-by-cuda-driver",
+        "不是 API 缺失"
+      ],
+      "sampleOrCodePath": "docs/articles/zh-cn/cuda-error-35-troubleshooting.md",
+      "visualAssets": [
+        "错误输出截图"
+      ],
+      "status": "planned",
+      "targetPath": "docs/articles/zh-cn/publishing/cuda-error-35-排查-驱动-runtime-与-tensorrt-版本.md",
+      "sourceArtifacts": [
+        "docs/articles/zh-cn/cuda-error-35-troubleshooting.md"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 28,
+      "title": "Callback 与 Allocator 为什么要谨慎提升",
+      "audience": "高级用户、贡献者",
+      "type": "深度解析",
+      "outline": [
+        "跨语言 callback",
+        "ownership",
+        "allocator 生命周期",
+        "deferred 边界"
+      ],
+      "sampleOrCodePath": "tests/JYPPX.ProjectQuality.Tests/CallbackAllocatorBoundaryTests.cs",
+      "visualAssets": [
+        "生命周期图"
+      ],
+      "status": "planned",
+      "targetPath": "docs/articles/zh-cn/publishing/callback-与-allocator-为什么要谨慎提升.md",
+      "sourceArtifacts": [
+        "tests/JYPPX.ProjectQuality.Tests/CallbackAllocatorBoundaryTests.cs"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 29,
+      "title": "Release Evidence Bundle 怎么读",
+      "audience": "发布负责人",
+      "type": "发布说明",
+      "outline": [
+        "evidence items",
+        "non-proof",
+        "owner action",
+        "close gate"
+      ],
+      "sampleOrCodePath": "artifacts/final-release/release-evidence-bundle.md",
+      "visualAssets": [
+        "evidence bundle 结构图"
+      ],
+      "status": "planned",
+      "targetPath": "docs/articles/zh-cn/publishing/release-evidence-bundle-怎么读.md",
+      "sourceArtifacts": [
+        "artifacts/final-release/release-evidence-bundle.md"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 30,
+      "title": "真实公开发布前最后一步：Owner 输入与 StrictClose",
+      "audience": "发布 Owner",
+      "type": "发布说明",
+      "outline": [
+        "Owner 输入 JSON",
+        "hash/path validator",
+        "forbidden substitutes",
+        "final blocker ledger"
+      ],
+      "sampleOrCodePath": "docs/articles/zh-cn/release-close-real-input-final-blocker-ledger.md",
+      "visualAssets": [
+        "strict close checklist"
+      ],
+      "status": "planned",
+      "targetPath": "docs/articles/zh-cn/publishing/真实公开发布前最后一步-owner-输入与-strictclose.md",
+      "sourceArtifacts": [
+        "docs/articles/zh-cn/release-close-real-input-final-blocker-ledger.md"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 31,
+      "title": "TensorRtSharp4.0 常见问题排查合集",
+      "audience": "所有用户",
+      "type": "FAQ",
+      "outline": [
+        "安装",
+        "native asset",
+        "CUDA driver",
+        "ONNX parser",
+        "YOLO metadata"
+      ],
+      "sampleOrCodePath": "docs/articles/zh-cn/troubleshooting-index.md",
+      "visualAssets": [
+        "FAQ 导航图"
+      ],
+      "status": "planned",
+      "targetPath": "docs/articles/zh-cn/publishing/tensorrtsharp4-0-常见问题排查合集.md",
+      "sourceArtifacts": [
+        "docs/articles/zh-cn/troubleshooting-index.md"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 32,
+      "title": "从样例到博客：如何准备一篇可复现的模型部署文章",
+      "audience": "项目维护者、技术作者",
+      "type": "写作指南",
+      "outline": [
+        "模型获取",
+        "命令",
+        "截图",
+        "日志",
+        "proof boundary"
+      ],
+      "sampleOrCodePath": "docs/articles/zh-cn/publishing/article-roadmap-30plus.json",
+      "visualAssets": [
+        "文章生产流程图"
+      ],
+      "status": "planned",
+      "targetPath": "docs/articles/zh-cn/publishing/从样例到博客-如何准备一篇可复现的模型部署文章.md",
+      "sourceArtifacts": [
+        "docs/articles/zh-cn/publishing/article-roadmap-30plus.json"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 33,
+      "title": "发布前 Proof 边界：样例、工具报告与真实运行证据的分层",
+      "audience": "发布负责人、项目评审者、贡献者",
+      "type": "发布说明",
+      "outline": [
+        "proof ladder",
+        "forbidden substitutes",
+        "sample-run-evidence 边界",
+        "owner runtime proof"
+      ],
+      "sampleOrCodePath": "docs/articles/zh-cn/release-proof-sample-article-closure.md",
+      "visualAssets": [
+        "proof ladder 图",
+        "发布前收口矩阵"
+      ],
+      "status": "ready",
+      "targetPath": "docs/articles/zh-cn/publishing/发布前-proof-边界-样例-工具报告与真实运行证据的分层.md",
+      "sourceArtifacts": [
+        "docs/articles/zh-cn/release-proof-sample-article-closure.md"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 34,
+      "title": "TensorRtExec 报告为什么不能替代真实模型运行 Proof",
+      "audience": "工具用户、发布 Owner",
+      "type": "深度解析",
+      "outline": [
+        "CLI/GUI parity",
+        "build-only report",
+        "load-engine preflight",
+        "real-model-runtime 边界"
+      ],
+      "sampleOrCodePath": "docs/articles/zh-cn/tensorrtexec-report-proof-boundary.md",
+      "visualAssets": [
+        "CLI 与 WinForms 对照图",
+        "非 proof 边界表"
+      ],
+      "status": "ready",
+      "targetPath": "docs/articles/zh-cn/publishing/tensorrtexec-报告为什么不能替代真实模型运行-proof.md",
+      "sourceArtifacts": [
+        "docs/articles/zh-cn/tensorrtexec-report-proof-boundary.md"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 35,
+      "title": "OnnxToEngine 与 trtexec-like 转换：能力、报告和 Proof 边界",
+      "audience": "模型部署工程师、TensorRT 命令行用户",
+      "type": "技术教程",
+      "outline": [
+        "ONNX 到 engine",
+        "shape profile",
+        "FP16/INT8 boundary",
+        "report 与 proof 分离"
+      ],
+      "sampleOrCodePath": "docs/articles/zh-cn/onnx-to-engine-trtexec-proof-boundary.md",
+      "visualAssets": [
+        "参数对照表",
+        "转换流程图"
+      ],
+      "status": "ready",
+      "targetPath": "docs/articles/zh-cn/publishing/onnxtoengine-与-trtexec-like-转换-能力-报告和-proof-边界.md",
+      "sourceArtifacts": [
+        "docs/articles/zh-cn/onnx-to-engine-trtexec-proof-boundary.md"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 36,
+      "title": "YoloVision 真实资产证据包：模型、图片、labels、hash 与输出校验",
+      "audience": "视觉样例维护者、发布负责人",
+      "type": "案例教程",
+      "outline": [
+        "owner asset pack",
+        "license 与 SHA256",
+        "stdout/stderr 与输出 JSON",
+        "golden output validation"
+      ],
+      "sampleOrCodePath": "docs/articles/zh-cn/yolovision-owner-asset-evidence-guide.md",
+      "visualAssets": [
+        "YOLO family/task 矩阵图",
+        "输出校验截图"
+      ],
+      "status": "near-ready-owner-proof-input",
+      "targetPath": "docs/articles/zh-cn/publishing/yolovision-真实资产证据包-模型-图片-labels-hash-与输出校验.md",
+      "sourceArtifacts": [
+        "docs/articles/zh-cn/yolovision-owner-asset-evidence-guide.md",
+        "samples/assets/yolovision-real-asset-owner-backfill-pack.json",
+        "artifacts/user-acceptance/yolovision-real-asset-owner-proof-input.template.json"
+      ],
+      "proofBoundary": "Article body and owner proof input are near-ready guidance only: not runtime proof, not package-consumer-runtime proof, not post-publish proof, not publish approval, and not release close approval. Owner proof input still requires real assets, host/package metadata, stdout/stderr logs, hashes, and validators. not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 37,
+      "title": "CUDA 初始化 Proof Scaffold：SetValidDevices、InitDevice 与 ChooseDevice 的本地 smoke 分层",
+      "audience": "CUDA wrapper 维护者、发布负责人",
+      "type": "发布证据说明",
+      "outline": [
+        "pre-init call order",
+        "local-smoke-not-external-proof",
+        "Skipped=True forbidden substitute",
+        "clean external validator promotion gate"
+      ],
+      "sampleOrCodePath": "smoke/CudaDeviceInitializationProofRunner/Program.cs",
+      "visualAssets": [
+        "CUDA 初始化 proof ladder 图"
+      ],
+      "status": "ready",
+      "targetPath": "docs/articles/zh-cn/publishing/cuda-初始化-proof-scaffold-本地-smoke-分层.md",
+      "sourceArtifacts": [
+        "smoke/CudaDeviceInitializationProofRunner/Program.cs",
+        "artifacts/final-release/cuda-device-initialization-local-smoke-classification.json",
+        "docs/articles/zh-cn/package-consumer-validation.md"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 38,
+      "title": "CUDA Graph Event Node borrowed handle 安全边界：HasEvent 替代 GetEvent",
+      "audience": "CUDA Graph API 维护者、安全评审者",
+      "type": "安全边界说明",
+      "outline": [
+        "borrowed cudaEvent_t risk",
+        "EventRecordNodeHasEvent",
+        "EventWaitNodeHasEvent",
+        "no public borrowed handle"
+      ],
+      "sampleOrCodePath": "docs/articles/zh-cn/cuda-graph-borrowed-handle-safety-gate.md",
+      "visualAssets": [
+        "Graph event node ownership 图"
+      ],
+      "status": "ready",
+      "targetPath": "docs/articles/zh-cn/publishing/cuda-graph-event-node-borrowed-handle-安全边界.md",
+      "sourceArtifacts": [
+        "docs/articles/zh-cn/cuda-graph-borrowed-handle-safety-gate.md",
+        "src/JYPPX.CudaSharp/CudaGraph.cs",
+        "smoke/CudaGraphSmokeRunner/Program.cs"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 39,
+      "title": "Package Consumer Proof 分层边界：local smoke、package-feed substitute 与 clean external evidence",
+      "audience": "发布负责人、包验证维护者",
+      "type": "发布门禁说明",
+      "outline": [
+        "local smoke classification",
+        "local feed boundary",
+        "clean consumer proof inputs",
+        "strict validator promotion"
+      ],
+      "sampleOrCodePath": "docs/articles/zh-cn/package-consumer-validation.md",
+      "visualAssets": [
+        "package consumer proof ladder 图"
+      ],
+      "status": "ready",
+      "targetPath": "docs/articles/zh-cn/publishing/package-consumer-分层边界-local-smoke-package-feed-substitute-clean-external-evidence.md",
+      "sourceArtifacts": [
+        "docs/articles/zh-cn/package-consumer-validation.md",
+        "docs/articles/zh-cn/package-consumer-runtime-proof-preflight-matrix.md",
+        "artifacts/final-release/cuda-device-initialization-local-smoke-classification.json"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 40,
+      "title": "YoloVision 真实资产证据链：从样例矩阵到 owner proof",
+      "audience": "视觉样例维护者、发布负责人",
+      "type": "案例教程",
+      "outline": [
+        "YoloVision model matrix",
+        "owner asset pack",
+        "license and SHA256",
+        "golden output validation"
+      ],
+      "sampleOrCodePath": "docs/articles/zh-cn/yolovision-owner-asset-evidence-guide.md",
+      "visualAssets": [
+        "YOLO task matrix 图",
+        "owner asset proof checklist"
+      ],
+      "status": "near-ready-owner-proof-input",
+      "targetPath": "docs/articles/zh-cn/publishing/yolovision-真实资产证据链-从样例矩阵到-owner-proof.md",
+      "sourceArtifacts": [
+        "samples/YoloVision/yolo-model-matrix.json",
+        "docs/articles/zh-cn/yolovision-owner-asset-evidence-guide.md"
+      ],
+      "proofBoundary": "Article body and owner proof input are near-ready guidance only: Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push. Owner proof input still requires real assets, host/package metadata, stdout/stderr logs, hashes, and validators.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    }
+  ]
+}

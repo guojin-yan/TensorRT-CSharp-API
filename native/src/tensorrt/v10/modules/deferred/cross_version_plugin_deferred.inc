@@ -10,15 +10,29 @@ JYPPX_TRT10_PLUGIN_DEFERRED_STUB(jyppx_trt10_plugin_registry_acquire_plugin_reso
 JYPPX_TRT10_PLUGIN_DEFERRED_STUB(jyppx_trt10_plugin_registry_deregister_creator_deferred, "IPluginRegistry::deregisterCreator")
 JYPPX_TRT10_PLUGIN_DEFERRED_STUB(jyppx_trt10_plugin_registry_deregister_library_deferred, "IPluginRegistry::deregisterLibrary")
 JYPPX_TRT10_PLUGIN_DEFERRED_STUB(jyppx_trt10_plugin_registry_get_all_creators_recursive_deferred, "IPluginRegistry::getAllCreatorsRecursive")
-JYPPX_TRT10_PLUGIN_DEFERRED_STUB(jyppx_trt10_plugin_registry_get_plugin_creator_list_deferred, "IPluginRegistry::getPluginCreatorList")
+
+JYPPX_StatusCode jyppx_trt10_plugin_registry_get_plugin_creator_list_deferred(void)
+{
+    return jyppx::tensorrt::report_not_implemented(kLine, "IPluginRegistry::getPluginCreatorList deferred: returns borrowed plugin creator pointer lists; use copied plugin registry inventory metadata instead of exposing native creator pointers");
+}
+
 JYPPX_TRT10_PLUGIN_DEFERRED_STUB(jyppx_trt10_plugin_registry_load_library_deferred, "IPluginRegistry::loadLibrary")
 JYPPX_TRT10_PLUGIN_DEFERRED_STUB(jyppx_trt10_plugin_registry_register_creator_deferred, "IPluginRegistry::registerCreator")
 JYPPX_TRT10_PLUGIN_DEFERRED_STUB(jyppx_trt10_plugin_registry_release_plugin_resource_deferred, "IPluginRegistry::releasePluginResource")
 JYPPX_TRT10_PLUGIN_DEFERRED_STUB(jyppx_trt10_plugin_resource_clone_deferred, "IPluginResource::clone")
 JYPPX_TRT10_PLUGIN_DEFERRED_STUB(jyppx_trt10_plugin_resource_get_interface_info_deferred, "IPluginResource::getInterfaceInfo")
 JYPPX_TRT10_PLUGIN_DEFERRED_STUB(jyppx_trt10_plugin_resource_release_deferred, "IPluginResource::release")
-JYPPX_TRT10_PLUGIN_DEFERRED_STUB(jyppx_trt10_plugin_resource_context_get_error_recorder_deferred, "IPluginResourceContext::getErrorRecorder")
-JYPPX_TRT10_PLUGIN_DEFERRED_STUB(jyppx_trt10_plugin_resource_context_get_gpu_allocator_deferred, "IPluginResourceContext::getGpuAllocator")
+
+JYPPX_StatusCode jyppx_trt10_plugin_resource_context_get_error_recorder_deferred(void)
+{
+    return jyppx::tensorrt::report_not_implemented(kLine, "IPluginResourceContext::getErrorRecorder deferred: resource context returns a borrowed callback object owned by TensorRT/plugin execution");
+}
+
+JYPPX_StatusCode jyppx_trt10_plugin_resource_context_get_gpu_allocator_deferred(void)
+{
+    return jyppx::tensorrt::report_not_implemented(kLine, "IPluginResourceContext::getGpuAllocator deferred: resource context returns a borrowed allocator callback with device-memory ownership");
+}
+
 JYPPX_TRT10_PLUGIN_DEFERRED_STUB(jyppx_trt10_plugin_v2_clone_deferred, "IPluginV2::clone")
 JYPPX_TRT10_PLUGIN_DEFERRED_STUB(jyppx_trt10_plugin_v2_configure_with_format_deferred, "IPluginV2::configureWithFormat")
 JYPPX_TRT10_PLUGIN_DEFERRED_STUB(jyppx_trt10_plugin_v2_destroy_deferred, "IPluginV2::destroy")

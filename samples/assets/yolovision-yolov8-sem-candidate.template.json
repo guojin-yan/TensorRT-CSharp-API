@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "sampleName": "YoloVision",
+  "candidateId": "yolovision-yolov8-sem-candidate",
+  "status": "owner-action-required",
+  "runtimeProofState": "owner-action-required",
+  "proofClassification": "template-only",
+  "canPromoteRealModelRuntime": false,
+  "canPromotePackageConsumerRuntime": false,
+  "taskOutputContract": "samples/YoloVision/yolovision-task-output-contract.json",
+  "family": "YOLOv8",
+  "task": "sem",
+  "model": {
+    "name": "YOLOv8 semantic segmentation candidate",
+    "sourceUrl": "owner-required semantic segmentation model source compatible with YoloVision sem task",
+    "downloadUrl": "owner-required",
+    "license": "owner-required",
+    "licenseEvidence": "owner-required",
+    "localPath": "models/yolov8-sem.onnx",
+    "sha256": "owner-required",
+    "opset": "owner-required",
+    "onnxExportCommand": "yolo export model=owner-required-semantic-segmentation.pt format=onnx imgsz=512 opset=17 simplify=True dynamic=False"
+  },
+  "labels": {
+    "sourceUrl": "owner-required semantic label and palette source",
+    "license": "owner-required",
+    "localPath": "models/semantic-classes.names",
+    "palettePath": "models/semantic-palette.json",
+    "sha256": "owner-required",
+    "classCount": "owner-required"
+  },
+  "input": {
+    "imageSourceUrl": "owner-required redistributable semantic segmentation test image",
+    "imageLicense": "owner-required",
+    "imagePath": "models/yolov8-sem-test.jpg",
+    "imageSha256": "owner-required",
+    "preprocessedTensorPath": "models/yolov8-sem-fp32.bin",
+    "preprocessedTensorSha256": "owner-required",
+    "preprocessCommand": "owner-required command that performs resize/RGB/normalize/NCHW conversion",
+    "inputShape": "1x3x512x512"
+  },
+  "outputMetadata": {
+    "inputTensorName": "images-or-owner-confirmed",
+    "outputTensorNames": ["semantics-or-owner-confirmed"],
+    "semanticOutput": "semantic-or-owner-confirmed",
+    "semanticOutputRole": "semanticMap",
+    "classCount": "owner-required",
+    "mapWidth": "owner-required",
+    "mapHeight": "owner-required",
+    "argmaxRule": "argmax-or-owner-confirmed",
+    "outputShape": "1xClassesxHxW or 1xHxW owner-confirmed",
+    "semanticMapShape": "owner-required",
+    "classMapLayout": "NCHW-logits-or-NHW-class-index-owner-confirmed",
+    "paletteRequired": true,
+    "labelsRequired": true,
+    "postprocessMetadata": {
+      "activation": "argmax-or-owner-confirmed",
+      "resizeBackRule": "owner-required",
+      "ignoreIndex": "owner-required or none"
+    }
+  },
+  "commands": {
+    "tensorRtExecBuildCommand": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\yolov8-sem.onnx --saveEngine .\\models\\yolov8-sem.plan --minShapes images:1x3x512x512 --optShapes images:1x3x512x512 --maxShapes images:2x3x512x512 --fp16 --workspace 1024 --buildOnly --exportReport .\\models\\yolov8-sem-build-report.json --evidenceSidecar .\\models\\yolov8-sem-evidence.sidecar.json",
+    "yoloVisionRunCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8-sem.onnx --labels .\\models\\semantic-classes.names --input-data .\\models\\yolov8-sem-fp32.bin --input-shape 1x3x512x512 --tensor-rt-line 10 --family v8 --task sem --semantic-output semantic --semantic-map-shape owner-required --class-map-layout NCHW-logits-or-NHW-class-index-owner-confirmed --palette .\\models\\semantic-palette.json"
+  },
+  "proofChecklist": {
+    "requiredEvidenceLines": [
+      "YoloVision TensorRtLine=...",
+      "Profile Family=v8 Task=SemanticSegmentation ClassMapLayout=... SemanticMapShape=...",
+      "InputSource=external InputFile=...",
+      "Output=... Outputs=...",
+      "Postprocess Task=SemanticSegmentation;Pixels=...;Classes=...",
+      "SemanticSegmentation SemanticMapShape=... ClassMapLayout=...",
+      "YoloVision Passed=True"
+    ],
+    "requiredHashes": ["modelSha256", "labelsSha256", "imageSha256", "preprocessedTensorSha256", "runLogSha256"],
+    "stdoutSummary": "owner-required",
+    "stderrSummary": "owner-required or explicit no-stderr-emitted",
+    "notProofUntil": "owner backfills real assets for semantic segmentation, palette metadata, hashes, run log, stdout/stderr summaries, and validator passes",
+    "packageConsumerBoundary": "This candidate can support real-model-runtime only; package-consumer-runtime must come from clean external package consumer validators."
+  }
+}

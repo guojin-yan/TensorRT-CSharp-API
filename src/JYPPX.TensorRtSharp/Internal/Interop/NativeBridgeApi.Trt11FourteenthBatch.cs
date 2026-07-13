@@ -174,7 +174,7 @@ internal static partial class NativeBridgeApi
 
     public static bool SetBuilderConfigPluginsToSerialize(TensorRtApiLine line, SafeTensorRtObjectHandle config, IReadOnlyList<string> pluginLibraryPaths)
     {
-        EnsureTensorRt11DeploymentApi(line, nameof(SetBuilderConfigPluginsToSerialize));
+        EnsureTensorRt10Or11(line, nameof(SetBuilderConfigPluginsToSerialize));
         if (pluginLibraryPaths == null)
         {
             throw new ArgumentNullException(nameof(pluginLibraryPaths));
@@ -182,7 +182,14 @@ internal static partial class NativeBridgeApi
 
         if (pluginLibraryPaths.Count == 0)
         {
-            BridgeStatusCode clearStatus = NativeMethodsTensorRt.jyppx_trt11_builder_config_set_plugins_to_serialize(config, IntPtr.Zero, 0, out int cleared);
+            int cleared;
+            BridgeStatusCode clearStatus = line switch
+            {
+                TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_config_set_plugins_to_serialize(config, IntPtr.Zero, 0, out cleared),
+                TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_builder_config_set_plugins_to_serialize(config, IntPtr.Zero, 0, out cleared),
+                _ => throw UnsupportedLine()
+            };
+
             NativeStatus.ThrowIfFailed(clearStatus);
             return cleared != 0;
         }
@@ -205,7 +212,14 @@ internal static partial class NativeBridgeApi
             GCHandle pinned = GCHandle.Alloc(pointers, GCHandleType.Pinned);
             try
             {
-                BridgeStatusCode status = NativeMethodsTensorRt.jyppx_trt11_builder_config_set_plugins_to_serialize(config, pinned.AddrOfPinnedObject(), pointers.Length, out int set);
+                int set;
+                BridgeStatusCode status = line switch
+                {
+                    TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_config_set_plugins_to_serialize(config, pinned.AddrOfPinnedObject(), pointers.Length, out set),
+                    TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_builder_config_set_plugins_to_serialize(config, pinned.AddrOfPinnedObject(), pointers.Length, out set),
+                    _ => throw UnsupportedLine()
+                };
+
                 NativeStatus.ThrowIfFailed(status);
                 return set != 0;
             }

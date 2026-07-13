@@ -46,6 +46,15 @@ $lines.Add("7. linux-package-consumer-plan.md")
 $lines.Add("8. linux-package-consumer-plan.json")
 $lines.Add("9. linux-runner-execution-status.md")
 $lines.Add("10. linux-runner-execution-status.json")
+$lines.Add("11. linux-runner-evidence-template.md")
+$lines.Add("12. linux-runner-evidence-template.json")
+$lines.Add("13. linux-runner-issue-template.md")
+$lines.Add("14. linux-runner-evidence-record-template.md")
+$lines.Add("15. linux-runner-evidence-record-template.json")
+$lines.Add("")
+$lines.Add("## Boundary")
+$lines.Add("")
+$lines.Add("This index is a handoff map. It does not prove that the Linux runtime package has been built or consumed on a Linux x64 runner.")
 
 $markdownPath = Join-Path $root "linux-handoff-index.md"
 $lines | Set-Content -LiteralPath $markdownPath -Encoding utf8

@@ -35,15 +35,19 @@ public sealed partial class TensorRtEngineInspector
     /// Gets whether TensorRT reports an error recorder attached to this inspector.
     /// 获取 TensorRT 是否报告当前 inspector 绑定了 error recorder。
     /// </summary>
+    /// <remarks>
+    /// Supported on TensorRT 8, TensorRT 10, and TensorRT 11 through a safe boolean boundary.
+    /// 通过安全 bool 边界支持 TensorRT 8、TensorRT 10 和 TensorRT 11。
+    /// </remarks>
     public bool HasErrorRecorder => NativeBridgeApi.HasEngineInspectorErrorRecorder(Line, _handle);
 
     /// <summary>
-    /// Clears the error recorder attached to this engine inspector when the active TensorRT line supports it.
-    /// 在当前 TensorRT 版本线支持时，清除绑定到该 engine inspector 的 error recorder。
+    /// Clears the error recorder attached to this engine inspector.
+    /// 清除绑定到该 engine inspector 的 error recorder。
     /// </summary>
     /// <remarks>
-    /// The managed wrapper does not expose user-owned TensorRT error-recorder callbacks yet; this method only clears a recorder TensorRT may report.
-    /// 托管层目前尚未向普通用户暴露自定义 TensorRT error-recorder callback；该方法仅清理 TensorRT 报告的 recorder。
+    /// Supported on TensorRT 8, TensorRT 10, and TensorRT 11. The managed wrapper does not expose user-owned TensorRT error-recorder callbacks or borrowed recorder pointers.
+    /// 支持 TensorRT 8、TensorRT 10 和 TensorRT 11。托管层不暴露用户自定义 TensorRT error-recorder callback，也不暴露 borrowed recorder 指针。
     /// </remarks>
     public void ClearErrorRecorder()
     {

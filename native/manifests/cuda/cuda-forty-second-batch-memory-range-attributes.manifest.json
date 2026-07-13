@@ -1,0 +1,38 @@
+{
+  "$schema": "../bridge-api.schema.json",
+  "module": "cuda",
+  "versionLine": "common",
+  "apis": [
+    {
+      "id": "cuda-mem-range-get-attribute-scalar-safe",
+      "entryPoint": "jyppx_cuda_memory_range_get_attribute",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "memory", "type": "JYPPX_CudaMemory*", "direction": "in" },
+        { "name": "offset", "type": "size_t", "direction": "in" },
+        { "name": "count", "type": "size_t", "direction": "in" },
+        { "name": "attribute", "type": "int32_t", "direction": "in", "managedType": "int", "moduleManagedType": "int" },
+        { "name": "out_value", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "cuda-mem-range-get-attributes-scalar-safe",
+      "entryPoint": "jyppx_cuda_memory_range_get_attributes",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "memory", "type": "JYPPX_CudaMemory*", "direction": "in" },
+        { "name": "offset", "type": "size_t", "direction": "in" },
+        { "name": "count", "type": "size_t", "direction": "in" },
+        { "name": "attributes", "type": "const int32_t*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "attribute_count", "type": "size_t", "direction": "in" },
+        { "name": "out_values", "type": "JYPPX_CudaMemRangeAttributeValue*", "direction": "out", "managedType": "IntPtr", "moduleManagedType": "IntPtr" }
+      ]
+    }
+  ]
+}

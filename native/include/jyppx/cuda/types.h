@@ -49,6 +49,18 @@ typedef struct JYPPX_CudaDeviceInfo
     uint64_t total_global_memory;
 } JYPPX_CudaDeviceInfo;
 
+typedef struct JYPPX_CudaDeviceSelectionRequirements
+{
+    int32_t major;
+    int32_t minor;
+    int32_t multi_processor_count;
+    int32_t warp_size;
+    int32_t max_threads_per_block;
+    int32_t can_map_host_memory;
+    int32_t integrated;
+    uint64_t total_global_memory;
+} JYPPX_CudaDeviceSelectionRequirements;
+
 typedef struct JYPPX_CudaMemoryInfo
 {
     uint64_t free_bytes;
@@ -62,6 +74,12 @@ typedef struct JYPPX_CudaPointerAttributes
     uint64_t device_pointer;
     uint64_t host_pointer;
 } JYPPX_CudaPointerAttributes;
+
+typedef struct JYPPX_CudaMemRangeAttributeValue
+{
+    int32_t attribute;
+    int32_t value;
+} JYPPX_CudaMemRangeAttributeValue;
 
 typedef struct JYPPX_CudaPitchedMemoryInfo
 {
@@ -192,6 +210,64 @@ typedef struct JYPPX_CudaMemPoolPtrExportData
 {
     uint8_t reserved[64];
 } JYPPX_CudaMemPoolPtrExportData;
+
+typedef struct JYPPX_CudaGraphEdgeData
+{
+    uint8_t from_port;
+    uint8_t to_port;
+    uint8_t type;
+    uint8_t reserved0;
+    uint8_t reserved1;
+    uint8_t reserved2;
+    uint8_t reserved3;
+    uint8_t reserved4;
+} JYPPX_CudaGraphEdgeData;
+
+typedef struct JYPPX_CudaGraphMemsetNodeParams
+{
+    uint64_t destination_address;
+    uint64_t pitch;
+    uint32_t value;
+    uint32_t element_size;
+    uint64_t width;
+    uint64_t height;
+} JYPPX_CudaGraphMemsetNodeParams;
+
+typedef struct JYPPX_CudaGraphMemcpyNodeParams
+{
+    uint64_t source_address;
+    uint64_t destination_address;
+    uint64_t source_pitch;
+    uint64_t destination_pitch;
+    uint64_t source_x_size;
+    uint64_t source_y_size;
+    uint64_t destination_x_size;
+    uint64_t destination_y_size;
+    uint64_t source_position_x;
+    uint64_t source_position_y;
+    uint64_t source_position_z;
+    uint64_t destination_position_x;
+    uint64_t destination_position_y;
+    uint64_t destination_position_z;
+    uint64_t width;
+    uint64_t height;
+    uint64_t depth;
+    int32_t kind;
+    uint32_t source_is_array;
+    uint32_t destination_is_array;
+} JYPPX_CudaGraphMemcpyNodeParams;
+
+typedef struct JYPPX_CudaGraphKernelNodeAttributeValue
+{
+    int32_t attribute;
+    int32_t int_value;
+    uint32_t x;
+    uint32_t y;
+    uint32_t z;
+    uint32_t reserved0;
+    uint32_t reserved1;
+    uint32_t reserved2;
+} JYPPX_CudaGraphKernelNodeAttributeValue;
 
 typedef struct JYPPX_CudaDim3
 {

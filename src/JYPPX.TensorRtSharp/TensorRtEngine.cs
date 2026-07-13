@@ -102,6 +102,16 @@ public sealed partial class TensorRtEngine : IDisposable
     public int MaxBatchSizeCompatibility => NativeBridgeApi.GetEngineMaxBatchSizeCompatibility(Line, _handle);
 
     /// <summary>
+    /// Gets whether this legacy TensorRT 8/10 engine reports an implicit batch dimension.
+    /// 获取 legacy TensorRT 8/10 engine 是否报告 implicit batch dimension。
+    /// </summary>
+    /// <remarks>
+    /// This compatibility query is for deprecated implicit-batch engines. Modern explicit-batch code should not use it for control flow.
+    /// 该兼容查询面向已弃用的 implicit-batch engine；现代 explicit-batch 代码不应依赖它做流程控制。
+    /// </remarks>
+    public bool HasImplicitBatchDimensionCompatibility => NativeBridgeApi.HasEngineImplicitBatchDimensionCompatibility(Line, _handle);
+
+    /// <summary>
     /// Gets high-level metadata for one engine I/O tensor.
     /// 获取一个 engine I/O tensor 的高层元数据。
     /// </summary>
@@ -365,6 +375,19 @@ public sealed partial class TensorRtEngine : IDisposable
     }
 
     /// <summary>
+    /// Gets TensorRT 8 legacy input shape-binding values for one optimization profile.
+    /// 获取 TensorRT 8 legacy input shape binding 在某个 optimization profile 下的取值。
+    /// </summary>
+    /// <param name="bindingIndex">The legacy binding index. legacy binding 索引。</param>
+    /// <param name="profileIndex">The optimization profile index. optimization profile 索引。</param>
+    /// <param name="selector">The min/opt/max selector. min/opt/max 选择器。</param>
+    /// <returns>Caller-owned copied shape-binding values. 调用方拥有的 shape-binding 值副本。</returns>
+    public int[] GetProfileShapeValues(int bindingIndex, int profileIndex, TensorRtOptimizationProfileSelector selector)
+    {
+        return NativeBridgeApi.GetEngineProfileShapeValues(Line, _handle, bindingIndex, profileIndex, selector);
+    }
+
+    /// <summary>
     /// Gets one TensorRT 11 engine profile shape with 64-bit dimension extents.
     /// 获取 TensorRT 11 引擎中某个 profile selector 的形状，并保留 64 位维度 extent。
     /// </summary>
@@ -565,7 +588,20 @@ public sealed partial class TensorRtEngine : IDisposable
             throw new ArgumentException("Logger and engine must belong to the same TensorRT API line.", nameof(logger));
         }
 
-        return new TensorRtRefitter(Line, NativeBridgeApi.CreateRefitter(Line, _handle, logger.Handle));
+        logger.AttachBorrower(Line);
+        try
+        {
+            return new TensorRtRefitter(
+                Line,
+                NativeBridgeApi.CreateRefitter(Line, _handle, logger.Handle),
+                logger,
+                loggerBorrowAttached: true);
+        }
+        catch
+        {
+            logger.DetachBorrower();
+            throw;
+        }
     }
 
     /// <summary>

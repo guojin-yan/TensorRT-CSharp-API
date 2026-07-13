@@ -31,6 +31,61 @@
       "parameters": []
     },
     {
+      "id": "trt8-cuda-engine-get-profile-shape-values",
+      "entryPoint": "jyppx_trt8_cuda_engine_get_profile_shape_values",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "JYPPX_TensorRtCudaEngine*",
+          "direction": "in"
+        },
+        {
+          "name": "binding_index",
+          "type": "int32_t",
+          "direction": "in",
+          "managedType": "int",
+          "moduleManagedType": "int"
+        },
+        {
+          "name": "profile_index",
+          "type": "int32_t",
+          "direction": "in",
+          "managedType": "int",
+          "moduleManagedType": "int"
+        },
+        {
+          "name": "selector",
+          "type": "int32_t",
+          "direction": "in",
+          "managedType": "int",
+          "moduleManagedType": "int"
+        },
+        {
+          "name": "output_values",
+          "type": "int32_t*",
+          "direction": "out",
+          "managedType": "IntPtr",
+          "moduleManagedType": "IntPtr"
+        },
+        {
+          "name": "output_count",
+          "type": "int32_t",
+          "direction": "in",
+          "managedType": "int",
+          "moduleManagedType": "int"
+        },
+        {
+          "name": "out_count",
+          "type": "int32_t*",
+          "direction": "out"
+        }
+      ]
+    },
+    {
       "id": "trt8-cuda-engine-get-profile-shape-values-deferred",
       "entryPoint": "jyppx_trt8_cuda_engine_get_profile_shape_values_deferred",
       "returnType": "BridgeStatusCode",
@@ -146,6 +201,47 @@
       "manualOverride": false,
       "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
       "parameters": []
+    },
+    {
+      "id": "trt8-execution-context-get-shape-binding",
+      "entryPoint": "jyppx_trt8_execution_context_get_shape_binding",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        {
+          "name": "context",
+          "type": "JYPPX_TensorRtExecutionContext*",
+          "direction": "in"
+        },
+        {
+          "name": "binding_index",
+          "type": "int32_t",
+          "direction": "in",
+          "managedType": "int",
+          "moduleManagedType": "int"
+        },
+        {
+          "name": "output_values",
+          "type": "int32_t*",
+          "direction": "out",
+          "managedType": "IntPtr",
+          "moduleManagedType": "IntPtr"
+        },
+        {
+          "name": "output_count",
+          "type": "int32_t",
+          "direction": "in",
+          "managedType": "int",
+          "moduleManagedType": "int"
+        },
+        {
+          "name": "out_count",
+          "type": "int32_t*",
+          "direction": "out"
+        }
+      ]
     },
     {
       "id": "trt8-execution-context-get-shape-binding-deferred",

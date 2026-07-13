@@ -26,7 +26,7 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_device_enable_peer_access(int32_t peer_
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_device_disable_peer_access(int32_t peer_device);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_device_get_host_atomic_capabilities(uint32_t* capabilities, const int32_t* operations, uint32_t count, int32_t device);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_device_get_p2p_atomic_capabilities(uint32_t* capabilities, const int32_t* operations, uint32_t count, int32_t source_device, int32_t destination_device);
-JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_choose_device_deferred(void);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_choose_device(const JYPPX_CudaDeviceSelectionRequirements* requirements, int32_t* out_device);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_device_get_dev_resource_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_device_get_execution_ctx_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_device_get_nv_sci_sync_attributes_deferred(void);
@@ -34,6 +34,8 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_device_register_async_notification_defe
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_device_unregister_async_notification_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_get_device_flags(uint32_t* out_flags);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_set_device_flags(uint32_t flags);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_init_device(int32_t device, uint32_t device_flags, uint32_t flags);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_set_valid_devices(const int32_t* devices, uint32_t count);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_get_memory_info(JYPPX_CudaMemoryInfo* out_info);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_get_last_error(int32_t* out_error_code);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_peek_at_last_error(int32_t* out_error_code);
@@ -127,7 +129,13 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_memory_copy_peer_async(JYPPX_CudaMemory
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_memory_memset(JYPPX_CudaMemory* memory, int32_t value, size_t size);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_memory_memset_async(JYPPX_CudaMemory* memory, int32_t value, size_t size, JYPPX_CudaStream* stream);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_memory_prefetch_async(JYPPX_CudaMemory* memory, size_t size, int32_t destination_device, JYPPX_CudaStream* stream);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_memory_prefetch_range_async(JYPPX_CudaMemory* memory, size_t offset, size_t count, int32_t destination_device, JYPPX_CudaStream* stream);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_memory_advise(JYPPX_CudaMemory* memory, size_t size, int32_t advice, int32_t device);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_memory_advise_range(JYPPX_CudaMemory* memory, size_t offset, size_t count, int32_t advice, int32_t device);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_memory_range_get_attribute(JYPPX_CudaMemory* memory, size_t offset, size_t count, int32_t attribute, int32_t* out_value);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_memory_range_get_attributes(JYPPX_CudaMemory* memory, size_t offset, size_t count, const int32_t* attributes, size_t attribute_count, JYPPX_CudaMemRangeAttributeValue* out_values);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_memory_range_get_accessed_by_count(JYPPX_CudaMemory* memory, size_t offset, size_t count, size_t* out_device_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_memory_range_copy_accessed_by_devices(JYPPX_CudaMemory* memory, size_t offset, size_t count, int32_t* output_devices, size_t output_device_count, size_t* out_required_count);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_memory_free_async(JYPPX_CudaMemory* memory, JYPPX_CudaStream* stream);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_memory_free(JYPPX_CudaMemory* memory);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_malloc_host(size_t size, JYPPX_CudaPinnedMemory** out_memory);
@@ -423,21 +431,64 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_destroy_v2(JYPPX_CudaGraph* graph
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_add_empty_node_safe(JYPPX_CudaGraph* graph, uintptr_t* out_node);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_add_empty_node_after_safe(JYPPX_CudaGraph* graph, uintptr_t dependency_node, uintptr_t* out_node);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_add_dependency_safe(JYPPX_CudaGraph* graph, uintptr_t from_node, uintptr_t to_node);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_add_dependency_v2_safe(JYPPX_CudaGraph* graph, uintptr_t from_node, uintptr_t to_node, const JYPPX_CudaGraphEdgeData* edge_data);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_remove_dependency_safe(JYPPX_CudaGraph* graph, uintptr_t from_node, uintptr_t to_node);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_get_node_handle(JYPPX_CudaGraph* graph, size_t index, uintptr_t* out_node);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_get_root_node_handle(JYPPX_CudaGraph* graph, size_t index, uintptr_t* out_node);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_get_edge_handle_pair(JYPPX_CudaGraph* graph, size_t index, uintptr_t* out_from_node, uintptr_t* out_to_node);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_get_edges_v2_count_safe(JYPPX_CudaGraph* graph, size_t* out_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_get_edge_v2_safe(JYPPX_CudaGraph* graph, size_t index, uintptr_t* out_from_node, uintptr_t* out_to_node, JYPPX_CudaGraphEdgeData* out_edge_data);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_debug_dot_print_safe(JYPPX_CudaGraph* graph, const char* path, uint32_t flags);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_node_get_type_safe(uintptr_t node, int32_t* out_type);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_node_get_dependency_count_safe(uintptr_t node, size_t* out_count);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_node_get_dependency_safe(uintptr_t node, size_t index, uintptr_t* out_dependency_node);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_node_get_dependent_count_safe(uintptr_t node, size_t* out_count);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_node_get_dependent_safe(uintptr_t node, size_t index, uintptr_t* out_dependent_node);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_node_get_dependencies_v2_count_safe(uintptr_t node, size_t* out_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_node_get_dependency_v2_safe(uintptr_t node, size_t index, uintptr_t* out_dependency_node, JYPPX_CudaGraphEdgeData* out_edge_data);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_node_get_dependent_nodes_v2_count_safe(uintptr_t node, size_t* out_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_node_get_dependent_node_v2_safe(uintptr_t node, size_t index, uintptr_t* out_dependent_node, JYPPX_CudaGraphEdgeData* out_edge_data);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_remove_dependency_v2_safe(JYPPX_CudaGraph* graph, uintptr_t from_node, uintptr_t to_node, const JYPPX_CudaGraphEdgeData* edge_data);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_node_find_in_clone_safe(uintptr_t original_node, JYPPX_CudaGraph* cloned_graph, uintptr_t* out_cloned_node);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_exec_node_set_enabled_safe(JYPPX_CudaGraphExec* graph_exec, uintptr_t node, JYPPX_Boolean enabled);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_exec_node_get_enabled_safe(JYPPX_CudaGraphExec* graph_exec, uintptr_t node, JYPPX_Boolean* out_enabled);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_get_id_safe(JYPPX_CudaGraph* graph, uint32_t* out_id);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_exec_get_id_safe(JYPPX_CudaGraphExec* graph_exec, uint32_t* out_id);
 /* END CUDA TWENTY-FIFTH BATCH GRAPH TOPOLOGY DECLARATIONS */
+
+/* BEGIN CUDA FORTY-FOURTH BATCH GRAPH NODE PARAMETER DESCRIPTORS */
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_memset_node_get_params_safe(uintptr_t node, JYPPX_CudaGraphMemsetNodeParams* out_params);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_memset_node_set_params_safe(uintptr_t node, JYPPX_CudaMemory* destination, uint32_t value, size_t count);
+/* END CUDA FORTY-FOURTH BATCH GRAPH NODE PARAMETER DESCRIPTORS */
+
+/* BEGIN CUDA FORTY-SIXTH BATCH GRAPH EVENT NODES */
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_add_event_record_node_safe(JYPPX_CudaGraph* graph, uintptr_t dependency_node, JYPPX_CudaEvent* event_handle, uintptr_t* out_node);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_add_event_wait_node_safe(JYPPX_CudaGraph* graph, uintptr_t dependency_node, JYPPX_CudaEvent* event_handle, uintptr_t* out_node);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_event_record_node_set_event_safe(uintptr_t node, JYPPX_CudaEvent* event_handle);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_event_record_node_has_event_safe(uintptr_t node, JYPPX_Boolean* out_has_event);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_event_wait_node_set_event_safe(uintptr_t node, JYPPX_CudaEvent* event_handle);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_event_wait_node_has_event_safe(uintptr_t node, JYPPX_Boolean* out_has_event);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_exec_event_record_node_set_event_safe(JYPPX_CudaGraphExec* graph_exec, uintptr_t node, JYPPX_CudaEvent* event_handle);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_exec_event_wait_node_set_event_safe(JYPPX_CudaGraphExec* graph_exec, uintptr_t node, JYPPX_CudaEvent* event_handle);
+/* END CUDA FORTY-SIXTH BATCH GRAPH EVENT NODES */
+
+/* BEGIN CUDA FORTY-SEVENTH BATCH GRAPH MEMCPY 1D NODES */
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_add_memcpy_node_1d_device_to_device_safe(JYPPX_CudaGraph* graph, uintptr_t dependency_node, JYPPX_CudaMemory* destination, JYPPX_CudaMemory* source, size_t count, uintptr_t* out_node);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_add_memcpy_node_1d_host_to_device_safe(JYPPX_CudaGraph* graph, uintptr_t dependency_node, JYPPX_CudaMemory* destination, JYPPX_CudaPinnedMemory* source, size_t count, uintptr_t* out_node);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_add_memcpy_node_1d_device_to_host_safe(JYPPX_CudaGraph* graph, uintptr_t dependency_node, JYPPX_CudaPinnedMemory* destination, JYPPX_CudaMemory* source, size_t count, uintptr_t* out_node);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_memcpy_node_get_params_safe(uintptr_t node, JYPPX_CudaGraphMemcpyNodeParams* out_params);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_memcpy_node_set_params_1d_device_to_device_safe(uintptr_t node, JYPPX_CudaMemory* destination, JYPPX_CudaMemory* source, size_t count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_memcpy_node_set_params_1d_host_to_device_safe(uintptr_t node, JYPPX_CudaMemory* destination, JYPPX_CudaPinnedMemory* source, size_t count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_memcpy_node_set_params_1d_device_to_host_safe(uintptr_t node, JYPPX_CudaPinnedMemory* destination, JYPPX_CudaMemory* source, size_t count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_exec_memcpy_node_set_params_1d_device_to_device_safe(JYPPX_CudaGraphExec* graph_exec, uintptr_t node, JYPPX_CudaMemory* destination, JYPPX_CudaMemory* source, size_t count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_exec_memcpy_node_set_params_1d_host_to_device_safe(JYPPX_CudaGraphExec* graph_exec, uintptr_t node, JYPPX_CudaMemory* destination, JYPPX_CudaPinnedMemory* source, size_t count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_exec_memcpy_node_set_params_1d_device_to_host_safe(JYPPX_CudaGraphExec* graph_exec, uintptr_t node, JYPPX_CudaPinnedMemory* destination, JYPPX_CudaMemory* source, size_t count);
+/* END CUDA FORTY-SEVENTH BATCH GRAPH MEMCPY 1D NODES */
+
+/* BEGIN CUDA FORTY-EIGHTH BATCH GRAPH KERNEL NODE ATTRIBUTES */
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_kernel_node_get_attribute_scalar_safe(uintptr_t node, int32_t attribute, JYPPX_CudaGraphKernelNodeAttributeValue* out_value);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_kernel_node_set_attribute_scalar_safe(uintptr_t node, const JYPPX_CudaGraphKernelNodeAttributeValue* value);
+/* END CUDA FORTY-EIGHTH BATCH GRAPH KERNEL NODE ATTRIBUTES */
 
 /* BEGIN CUDA TWENTY-NINTH BATCH GRAPH MEMORY AND NODE IDENTITY DECLARATIONS */
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_device_get_graph_memory_attribute(int32_t device, int32_t attribute, uint64_t* out_value);
@@ -542,8 +593,6 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_logs_dump_to_file_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_logs_dump_to_memory_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_logs_register_callback_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_logs_unregister_callback_deferred(void);
-JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_init_device_deferred(void);
-JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_set_valid_devices_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_mem_advise_v2_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_mem_discard_and_prefetch_batch_async_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_mem_discard_batch_async_deferred(void);

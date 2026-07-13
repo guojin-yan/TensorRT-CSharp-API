@@ -106,6 +106,29 @@ public sealed class TensorRtEngineTensorBinding
     public int ComponentsPerElement { get; }
 
     /// <summary>
+    /// Gets the usable bytes-per-component value, falling back to the scalar data type when
+    /// older TensorRT lines do not expose optional format metadata.
+    /// 获取可用的每 component 字节数；旧 TensorRT 版本未提供可选格式元数据时，
+    /// 按标量数据类型安全回退。
+    /// </summary>
+    public int EffectiveBytesPerComponent =>
+        BytesPerComponent > 0 ? BytesPerComponent : GetDefaultBytesPerComponent(DataType);
+
+    /// <summary>
+    /// Gets the usable components-per-element value. Non-vectorized tensors fall back to one
+    /// component when older TensorRT lines return zero for optional format metadata.
+    /// 获取可用的每元素 component 数；旧 TensorRT 版本对可选格式元数据返回零时，
+    /// 非向量化 tensor 安全回退为一个 component。
+    /// </summary>
+    public int EffectiveComponentsPerElement => ComponentsPerElement > 0 ? ComponentsPerElement : 1;
+
+    /// <summary>
+    /// Gets whether byte-size estimation uses a data-type metadata fallback.
+    /// 获取字节数估算是否使用了数据类型元数据回退。
+    /// </summary>
+    public bool UsesDataTypeSizeFallback => BytesPerComponent <= 0 || ComponentsPerElement <= 0;
+
+    /// <summary>
     /// Gets the TensorRT tensor format enum value.
     /// 获取 TensorRT tensor format 枚举值。
     /// </summary>
@@ -181,12 +204,40 @@ public sealed class TensorRtEngineTensorBinding
             elementCount = checked(elementCount * value);
         }
 
-        long bytes = checked(elementCount * BytesPerComponent * ComponentsPerElement);
-        if (bytes > int.MaxValue)
+        int bytesPerComponent = EffectiveBytesPerComponent;
+        int componentsPerElement = EffectiveComponentsPerElement;
+        if (bytesPerComponent <= 0)
+        {
+            throw new NotSupportedException(
+                $"Tensor '{Name}' data type {DataType} does not have an integral byte-size fallback.");
+        }
+
+        long bytes = checked(elementCount * bytesPerComponent * componentsPerElement);
+        if (bytes <= 0 || bytes > int.MaxValue)
         {
             throw new InvalidOperationException("Estimated tensor byte size exceeds the managed allocation range.");
         }
 
         return (int)bytes;
+    }
+
+    private static int GetDefaultBytesPerComponent(TensorRtDataType dataType)
+    {
+        return dataType switch
+        {
+            TensorRtDataType.Float => sizeof(float),
+            TensorRtDataType.Half => sizeof(ushort),
+            TensorRtDataType.Int8 => sizeof(byte),
+            TensorRtDataType.Int32 => sizeof(int),
+            TensorRtDataType.Bool => sizeof(byte),
+            TensorRtDataType.UInt8 => sizeof(byte),
+            TensorRtDataType.Float8 => sizeof(byte),
+            TensorRtDataType.BFloat16 => sizeof(ushort),
+            TensorRtDataType.Int64 => sizeof(long),
+            TensorRtDataType.E8M0 => sizeof(byte),
+            TensorRtDataType.Int4 => 0,
+            TensorRtDataType.Float4 => 0,
+            _ => 0
+        };
     }
 }

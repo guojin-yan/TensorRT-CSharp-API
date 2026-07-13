@@ -39,8 +39,8 @@ public sealed partial class TensorRtBuilderConfig
     }
 
     /// <summary>
-    /// Clears the plugin-library path list serialized into TensorRT 11 version-compatible engines.
-    /// 清空会被序列化进 TensorRT 11 version-compatible engine 的插件库路径列表。
+    /// Clears the plugin-library path list serialized into TensorRT 10/11 version-compatible engines.
+    /// 清空会被序列化进 TensorRT 10/11 version-compatible engine 的插件库路径列表。
     /// </summary>
     public void ClearPluginsToSerialize()
     {
@@ -48,10 +48,20 @@ public sealed partial class TensorRtBuilderConfig
     }
 
     /// <summary>
-    /// Gets the number of plugin-library paths that TensorRT will serialize with compatible engines.
-    /// 获取 TensorRT 将随兼容 engine 序列化的插件库路径数量。
+    /// Gets the number of plugin-library paths that TensorRT reports for version-compatible serialization.
+    /// 获取 TensorRT 报告的 version-compatible 序列化插件库路径数量。
     /// </summary>
+    /// <remarks>
+    /// TensorRT 8 is supported for count-only compatibility. Path copying remains supported only for TensorRT 10/11.
+    /// TensorRT 8 仅支持数量查询；路径复制仍仅支持 TensorRT 10/11。
+    /// </remarks>
     public int PluginToSerializeCount => NativeBridgeApi.GetBuilderConfigPluginToSerializeCount(Line, _handle);
+
+    /// <summary>
+    /// Gets the count-only serialized plugin inventory across TensorRT 8, 10, and 11.
+    /// 获取跨 TensorRT 8、10、11 的只读 serialized plugin 数量。
+    /// </summary>
+    public int SerializedPluginPathCountCompatibility => PluginToSerializeCount;
 
     /// <summary>
     /// Gets a plugin-library path from TensorRT's version-compatible serialization list.
@@ -112,18 +122,94 @@ public sealed partial class TensorRtBuilderConfig
     }
 
     /// <summary>
+    /// Gets a copied read-only snapshot of TensorRT serialized plugin path state.
+    /// 获取 TensorRT serialized plugin path 状态的复制型只读快照。
+    /// </summary>
+    /// <returns>A copied snapshot containing count, optional copied paths, and diagnostics. 包含数量、可选路径副本和诊断信息的复制型快照。</returns>
+    /// <remarks>
+    /// TensorRT 8 supports count-only compatibility through this bridge. TensorRT 10/11 additionally support copied path inventory.
+    /// This method does not load plugin libraries, create plugins, deserialize plugins, or expose TensorRT-owned pointers.
+    /// TensorRT 8 通过该桥接层支持仅数量兼容查询；TensorRT 10/11 额外支持复制 path inventory。
+    /// 该方法不会加载插件库、创建插件、反序列化插件或暴露 TensorRT 拥有的指针。
+    /// </remarks>
+    public TensorRtBuilderConfigSerializedPluginSnapshot GetSerializedPluginSnapshot()
+    {
+        int count = SerializedPluginPathCountCompatibility;
+        if (TryGetPluginsToSerialize(out IReadOnlyList<string> pluginLibraryPaths, out string diagnostic))
+        {
+            return new TensorRtBuilderConfigSerializedPluginSnapshot(Line, count, pluginLibraryPaths, true, diagnostic);
+        }
+
+        return new TensorRtBuilderConfigSerializedPluginSnapshot(Line, count, Array.Empty<string>(), false, diagnostic);
+    }
+
+    /// <summary>
+    /// Tries to get a copied read-only snapshot of TensorRT serialized plugin path state.
+    /// 尝试获取 TensorRT serialized plugin path 状态的复制型只读快照。
+    /// </summary>
+    /// <param name="snapshot">The copied snapshot. 复制出的快照。</param>
+    /// <param name="diagnostic">A short diagnostic string describing success or the reason for path inventory unavailability. 描述成功或 path inventory 不可用原因的简短诊断。</param>
+    /// <returns><see langword="true"/> when copied path inventory is available; count-only snapshots return <see langword="false"/> with a valid snapshot. 当复制 path inventory 可用时返回 <see langword="true"/>；仅数量快照会返回 <see langword="false"/>，但仍提供有效快照。</returns>
+    public bool TryGetSerializedPluginSnapshot(out TensorRtBuilderConfigSerializedPluginSnapshot snapshot, out string diagnostic)
+    {
+        snapshot = GetSerializedPluginSnapshot();
+        diagnostic = snapshot.Diagnostic;
+        return snapshot.HasPathInventory;
+    }
+
+    /// <summary>
     /// Gets whether a TensorRT progress monitor is attached to this builder configuration.
-    /// 获取当前 builder config 是否绑定了 TensorRT progress monitor。
+    /// 获取当前 builder config 是否绑定了 TensorRT progress monitor；不会暴露 monitor 指针或接管其生命周期。
     /// </summary>
     public bool HasProgressMonitor => NativeBridgeApi.HasBuilderConfigProgressMonitor(Line, _handle);
 
     /// <summary>
+    /// Attaches a managed TensorRT progress monitor to this builder configuration.
+    /// 将托管 TensorRT progress monitor 绑定到当前 builder config。
+    /// </summary>
+    /// <param name="monitor">The managed progress monitor to borrow. 要借用的托管 progress monitor。</param>
+    /// <remarks>
+    /// TensorRT borrows the native monitor pointer and does not take ownership. This builder config keeps the managed
+    /// monitor alive until <see cref="ClearProgressMonitor"/> or <see cref="Dispose"/> detaches it. Dispose the builder config
+    /// or clear the monitor before disposing the monitor when possible; if the monitor is disposed first, native release is
+    /// deferred until this config detaches it.
+    /// TensorRT 只借用 native monitor 指针，不接管所有权。当前 builder config 会保持托管 monitor 存活，直到
+    /// <see cref="ClearProgressMonitor"/> 或 <see cref="Dispose"/> 解除绑定。建议先释放 builder config 或清除 monitor 再释放 monitor；
+    /// 如果先释放 monitor，native 释放会延迟到 config 解除绑定之后。
+    /// </remarks>
+    public void SetProgressMonitor(TensorRtProgressMonitor monitor)
+    {
+        if (monitor == null)
+        {
+            throw new ArgumentNullException(nameof(monitor));
+        }
+
+        ThrowIfDisposed();
+        monitor.ThrowIfDisposed();
+        monitor.AttachBorrower(Line);
+        try
+        {
+            NativeBridgeApi.SetBuilderConfigProgressMonitor(Line, _handle, monitor.Handle);
+            TensorRtProgressMonitor? previous = _progressMonitorKeepAlive;
+            _progressMonitorKeepAlive = monitor;
+            previous?.DetachBorrower();
+        }
+        catch
+        {
+            monitor.DetachBorrower();
+            throw;
+        }
+    }
+
+    /// <summary>
     /// Clears any TensorRT progress monitor attached to this builder configuration.
-    /// 清除当前 builder config 上绑定的 TensorRT progress monitor。
+    /// 清除当前 builder config 上绑定的 TensorRT progress monitor；不会调用用户回调。
     /// </summary>
     public void ClearProgressMonitor()
     {
+        ThrowIfDisposed();
         NativeBridgeApi.ClearBuilderConfigProgressMonitor(Line, _handle);
+        DetachProgressMonitor();
     }
 
 }

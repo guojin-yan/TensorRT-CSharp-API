@@ -86,27 +86,27 @@ Directory.CreateDirectory(Path.GetDirectoryName(cudaApiGeneratedOutput)!);
 Directory.CreateDirectory(Path.GetDirectoryName(tensorRtLineBindingsOutput)!);
 Directory.CreateDirectory(Path.GetDirectoryName(tensorRtLineHelpersOutput)!);
 
-File.WriteAllText(
+WriteAllTextAtomic(
     nativeOutput,
     nativeTemplate.Replace("{{GeneratedOn}}", generatedOn).Replace("{{ApiRows}}", nativeRows),
     new UTF8Encoding(false));
 
-File.WriteAllText(
+WriteAllTextAtomic(
     nativeDeclarationsOutput,
     nativeDeclarationsTemplate.Replace("{{GeneratedOn}}", generatedOn).Replace("{{ApiDeclarationRows}}", nativeDeclarationRows),
     new UTF8Encoding(false));
 
-File.WriteAllText(
+WriteAllTextAtomic(
     managedOutput,
     managedTemplate.Replace("{{GeneratedOn}}", generatedOn).Replace("{{ApiRows}}", managedRows),
     new UTF8Encoding(false));
 
-File.WriteAllText(
+WriteAllTextAtomic(
     entryPointsOutput,
     entryPointsTemplate.Replace("{{GeneratedOn}}", generatedOn).Replace("{{EntryPointRows}}", entryPointRows),
     new UTF8Encoding(false));
 
-File.WriteAllText(
+WriteAllTextAtomic(
     nativeMethodsOutput,
     nativeMethodsTemplate.Replace("{{GeneratedOn}}", generatedOn).Replace("{{NativeMethodRows}}", nativeMethodRows),
     new UTF8Encoding(false));
@@ -223,6 +223,44 @@ Console.WriteLine(cudaApiGeneratedOutput);
 Console.WriteLine(tensorRtLineBindingsOutput);
 Console.WriteLine(tensorRtLineHelpersOutput);
 
+static void WriteAllTextAtomic(string outputPath, string contents, Encoding encoding)
+{
+    string directory = Path.GetDirectoryName(outputPath) ?? Directory.GetCurrentDirectory();
+    Directory.CreateDirectory(directory);
+
+    string tempPath = Path.Combine(directory, $"{Path.GetFileName(outputPath)}.{Guid.NewGuid():N}.tmp");
+    string backupPath = Path.Combine(directory, $"{Path.GetFileName(outputPath)}.{Guid.NewGuid():N}.bak");
+    File.WriteAllText(tempPath, contents, encoding);
+
+    try
+    {
+        try
+        {
+            File.Move(tempPath, outputPath, overwrite: true);
+        }
+        catch (IOException)
+        {
+            if (File.Exists(outputPath))
+            {
+                File.Move(outputPath, backupPath, overwrite: true);
+            }
+
+            File.Move(tempPath, outputPath, overwrite: true);
+
+            if (File.Exists(backupPath))
+            {
+                File.Delete(backupPath);
+            }
+        }
+    }
+    finally
+    {
+        if (File.Exists(tempPath))
+        {
+            File.Delete(tempPath);
+        }
+    }
+}
 static string ResolveRepoRoot(string[] args)
 {
     for (int i = 0; i < args.Length; i++)
@@ -422,6 +460,8 @@ static string GetManagedType(ManifestParameterRecord parameter, bool moduleSpeci
         "JYPPX_Boolean*" when string.Equals(parameter.Direction, "out", StringComparison.OrdinalIgnoreCase) => "out int",
         "uint32_t" => "uint",
         "uint32_t*" when string.Equals(parameter.Direction, "out", StringComparison.OrdinalIgnoreCase) => "out uint",
+        "uint64_t" => "ulong",
+        "uint64_t*" when string.Equals(parameter.Direction, "out", StringComparison.OrdinalIgnoreCase) => "out ulong",
         "uintptr_t" => "UIntPtr",
         "uintptr_t*" when string.Equals(parameter.Direction, "out", StringComparison.OrdinalIgnoreCase) => "out UIntPtr",
         "int32_t" => "int",
@@ -461,6 +501,8 @@ static string GetManagedType(ManifestParameterRecord parameter, bool moduleSpeci
         "JYPPX_TensorRtCudaEngine**" => moduleSpecific ? "out SafeTensorRtObjectHandle" : "out IntPtr",
         "JYPPX_TensorRtExecutionContext**" => moduleSpecific ? "out SafeTensorRtObjectHandle" : "out IntPtr",
         "JYPPX_TensorRtOnnxParser**" => moduleSpecific ? "out SafeTensorRtObjectHandle" : "out IntPtr",
+        "JYPPX_TensorRtOnnxParserRefitter**" => moduleSpecific ? "out SafeTensorRtObjectHandle" : "out IntPtr",
+        "JYPPX_TensorRtOnnxConfig**" => moduleSpecific ? "out SafeTensorRtObjectHandle" : "out IntPtr",
         "JYPPX_TensorRtOptimizationProfile**" => moduleSpecific ? "out SafeTensorRtObjectHandle" : "out IntPtr",
         "JYPPX_TensorRtEngineInspector**" => moduleSpecific ? "out SafeTensorRtObjectHandle" : "out IntPtr",
         "JYPPX_TensorRtTimingCache**" => moduleSpecific ? "out SafeTensorRtObjectHandle" : "out IntPtr",
@@ -473,7 +515,11 @@ static string GetManagedType(ManifestParameterRecord parameter, bool moduleSpeci
         "JYPPX_TensorRtRuntimeConfig**" => moduleSpecific ? "out SafeTensorRtObjectHandle" : "out IntPtr",
         "JYPPX_TensorRtAttention**" => moduleSpecific ? "out SafeTensorRtObjectHandle" : "out IntPtr",
         "JYPPX_TensorRtLogger**" => moduleSpecific ? "out SafeTensorRtObjectHandle" : "out IntPtr",
+        "JYPPX_TensorRtProgressMonitor**" => moduleSpecific ? "out SafeTensorRtObjectHandle" : "out IntPtr",
+        "JYPPX_TensorRtAllocatorOwner**" => moduleSpecific ? "out SafeTensorRtObjectHandle" : "out IntPtr",
         "JYPPX_TensorRtLogger*" => moduleSpecific ? "SafeTensorRtObjectHandle" : "IntPtr",
+        "JYPPX_TensorRtProgressMonitor*" => moduleSpecific ? "SafeTensorRtObjectHandle" : "IntPtr",
+        "JYPPX_TensorRtAllocatorOwner*" => moduleSpecific ? "SafeTensorRtObjectHandle" : "IntPtr",
         "JYPPX_TensorRtBuilder*" => moduleSpecific ? "SafeTensorRtObjectHandle" : "IntPtr",
         "JYPPX_TensorRtBuilderConfig*" => moduleSpecific ? "SafeTensorRtObjectHandle" : "IntPtr",
         "JYPPX_TensorRtNetworkDefinition*" => moduleSpecific ? "SafeTensorRtObjectHandle" : "IntPtr",
@@ -482,6 +528,8 @@ static string GetManagedType(ManifestParameterRecord parameter, bool moduleSpeci
         "JYPPX_TensorRtCudaEngine*" => moduleSpecific ? "SafeTensorRtObjectHandle" : "IntPtr",
         "JYPPX_TensorRtExecutionContext*" => moduleSpecific ? "SafeTensorRtObjectHandle" : "IntPtr",
         "JYPPX_TensorRtOnnxParser*" => moduleSpecific ? "SafeTensorRtObjectHandle" : "IntPtr",
+        "JYPPX_TensorRtOnnxParserRefitter*" => moduleSpecific ? "SafeTensorRtObjectHandle" : "IntPtr",
+        "JYPPX_TensorRtOnnxConfig*" => moduleSpecific ? "SafeTensorRtObjectHandle" : "IntPtr",
         "JYPPX_TensorRtOptimizationProfile*" => moduleSpecific ? "SafeTensorRtObjectHandle" : "IntPtr",
         "JYPPX_TensorRtEngineInspector*" => moduleSpecific ? "SafeTensorRtObjectHandle" : "IntPtr",
         "JYPPX_TensorRtTimingCache*" => moduleSpecific ? "SafeTensorRtObjectHandle" : "IntPtr",
@@ -497,6 +545,9 @@ static string GetManagedType(ManifestParameterRecord parameter, bool moduleSpeci
         "JYPPX_TensorRtTensorInfo*" when string.Equals(parameter.Direction, "out", StringComparison.OrdinalIgnoreCase) => moduleSpecific ? "out NativeTensorRtTensorInfo" : "out IntPtr",
         "JYPPX_TensorRtDims*" when string.Equals(parameter.Direction, "out", StringComparison.OrdinalIgnoreCase) => moduleSpecific ? "out NativeTensorRtDims" : "out IntPtr",
         "JYPPX_TensorRtWeightsInfo*" when string.Equals(parameter.Direction, "out", StringComparison.OrdinalIgnoreCase) => moduleSpecific ? "out NativeTensorRtWeightsInfo" : "out IntPtr",
+        "JYPPX_TensorRtAllocatorOwnerDiagnosticInfo*" when string.Equals(parameter.Direction, "out", StringComparison.OrdinalIgnoreCase) => moduleSpecific ? "out NativeTensorRtAllocatorOwnerDiagnosticInfo" : "out IntPtr",
+        "JYPPX_TensorRtAllocatorOwnerStateInfo*" when string.Equals(parameter.Direction, "out", StringComparison.OrdinalIgnoreCase) => moduleSpecific ? "out NativeTensorRtAllocatorOwnerStateInfo" : "out IntPtr",
+        "JYPPX_TensorRtExecutionContextCallbackStateInfo*" when string.Equals(parameter.Direction, "out", StringComparison.OrdinalIgnoreCase) => moduleSpecific ? "out NativeTensorRtExecutionContextCallbackStateInfo" : "out IntPtr",
         "JYPPX_TensorRtDims*" => moduleSpecific ? "ref NativeTensorRtDims" : "IntPtr",
         "const JYPPX_TensorRtDims*" => moduleSpecific ? "ref NativeTensorRtDims" : "IntPtr",
         "const void*" => "IntPtr",
@@ -531,7 +582,7 @@ static void WriteModuleNativeMethods(
         apis.Select(api =>
             $"    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]{Environment.NewLine}    internal static extern {api.ReturnType} {api.EntryPoint}({BuildModuleManagedParameterList(api)});"));
 
-    File.WriteAllText(
+    WriteAllTextAtomic(
         outputPath,
         templateText
             .Replace("{{GeneratedOn}}", generatedOn)
@@ -567,7 +618,7 @@ static void WriteNativeMethodsPartial(
         rows = "    // No missing manifest-driven interop declarations for this module in the current generation pass.";
     }
 
-    File.WriteAllText(
+    WriteAllTextAtomic(
         outputPath,
         templateText
             .Replace("{{GeneratedOn}}", generatedOn)
@@ -671,7 +722,7 @@ static void WriteNativeBridgeApiCommonWrapper(
         rows = "    // No common bridge helper methods were generated for this namespace.";
     }
 
-    File.WriteAllText(
+    WriteAllTextAtomic(
         outputPath,
         templateText
             .Replace("{{GeneratedOn}}", generatedOn)
@@ -1391,7 +1442,7 @@ $@"    private static readonly PinnedByteBufferDescriptor CopyToHostDescriptor =
         rows = "    // No CUDA wrapper methods were generated in this pass.";
     }
 
-    File.WriteAllText(
+    WriteAllTextAtomic(
         outputPath,
         templateText
             .Replace("{{GeneratedOn}}", generatedOn)
@@ -1475,7 +1526,7 @@ $@"    private static readonly TensorRtLineBindings {fieldName} = new(
         ? "    // No TensorRT line bindings were generated in this pass."
         : string.Join(Environment.NewLine + Environment.NewLine, rows);
 
-    File.WriteAllText(
+    WriteAllTextAtomic(
         outputPath,
         templateText
             .Replace("{{GeneratedOn}}", generatedOn)
@@ -1559,7 +1610,7 @@ static void WriteTensorRtLineHelpers(
         ? "    // No TensorRT line helper methods were generated in this pass."
         : string.Join(Environment.NewLine + Environment.NewLine, helperRows);
 
-    File.WriteAllText(
+    WriteAllTextAtomic(
         outputPath,
         templateText
             .Replace("{{GeneratedOn}}", generatedOn)

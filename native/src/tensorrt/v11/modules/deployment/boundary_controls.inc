@@ -33,6 +33,465 @@ JYPPX_StatusCode validate_topk_indices_type(const int32_t indices_type)
     jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT TopK V2 indices type must be INT32 or INT64.");
     return JYPPX_STATUS_INVALID_ARGUMENT;
 }
+
+#if JYPPX_HAS_TENSORRT
+static JYPPX_StatusCode trt11_boundary_control_exception(const char* feature_name, const std::exception& exception)
+{
+    return jyppx::tensorrt::report_vendor_exception(kLine, feature_name, exception.what());
+}
+
+static JYPPX_StatusCode trt11_boundary_control_unknown_exception(const char* feature_name)
+{
+    return jyppx::tensorrt::report_vendor_exception(kLine, feature_name, "unknown native exception");
+}
+
+static void trt11_reset_error_recorder_interface_info(JYPPX_TensorRtErrorRecorderSnapshotInfo* out_info)
+{
+    if (out_info == nullptr)
+    {
+        return;
+    }
+
+    out_info->interface_info_available = JYPPX_FALSE;
+    out_info->interface_info_major = 0;
+    out_info->interface_info_minor = 0;
+    out_info->interface_info_kind[0] = '\0';
+}
+
+static void trt11_copy_error_recorder_interface_info(
+    nvinfer1::IErrorRecorder* recorder,
+    JYPPX_TensorRtErrorRecorderSnapshotInfo* out_info)
+{
+    if (recorder == nullptr || out_info == nullptr)
+    {
+        return;
+    }
+
+    const auto interface_info = recorder->getInterfaceInfo();
+    out_info->interface_info_available = JYPPX_TRUE;
+    out_info->interface_info_major = static_cast<int32_t>(interface_info.major);
+    out_info->interface_info_minor = static_cast<int32_t>(interface_info.minor);
+    copy_c_string(interface_info.kind, out_info->interface_info_kind, sizeof(out_info->interface_info_kind));
+}
+
+static JYPPX_StatusCode trt11_builder_clear_gpu_allocator_with_seh_guard(
+    nvinfer1::IBuilder* builder_payload,
+    const char* feature_name)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        builder_payload->setGpuAllocator(nullptr);
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    builder_payload->setGpuAllocator(nullptr);
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+static JYPPX_StatusCode trt11_builder_has_error_recorder_with_seh_guard(
+    nvinfer1::IBuilder* builder_payload,
+    JYPPX_Boolean* out_has_recorder,
+    const char* feature_name)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        *out_has_recorder = builder_payload->getErrorRecorder() != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        *out_has_recorder = JYPPX_FALSE;
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    *out_has_recorder = builder_payload->getErrorRecorder() != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+static JYPPX_StatusCode trt11_builder_has_logger_with_seh_guard(
+    nvinfer1::IBuilder* builder_payload,
+    JYPPX_Boolean* out_has_logger,
+    const char* feature_name)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        *out_has_logger = builder_payload->getLogger() != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        *out_has_logger = JYPPX_FALSE;
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    *out_has_logger = builder_payload->getLogger() != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+static JYPPX_StatusCode trt11_builder_clear_error_recorder_with_seh_guard(
+    nvinfer1::IBuilder* builder_payload,
+    const char* feature_name)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        builder_payload->setErrorRecorder(nullptr);
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    builder_payload->setErrorRecorder(nullptr);
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+static JYPPX_StatusCode trt11_engine_has_error_recorder_with_seh_guard(
+    nvinfer1::ICudaEngine* engine_payload,
+    JYPPX_Boolean* out_has_recorder,
+    const char* feature_name)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        *out_has_recorder = engine_payload->getErrorRecorder() != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        *out_has_recorder = JYPPX_FALSE;
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    *out_has_recorder = engine_payload->getErrorRecorder() != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+static JYPPX_StatusCode trt11_engine_clear_error_recorder_with_seh_guard(
+    nvinfer1::ICudaEngine* engine_payload,
+    const char* feature_name)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        engine_payload->setErrorRecorder(nullptr);
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    engine_payload->setErrorRecorder(nullptr);
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+static JYPPX_StatusCode trt11_engine_get_error_recorder_snapshot_info_with_seh_guard(
+    nvinfer1::ICudaEngine* engine_payload,
+    JYPPX_TensorRtErrorRecorderSnapshotInfo* out_info,
+    const char* feature_name)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        auto* recorder = engine_payload->getErrorRecorder();
+        if (recorder == nullptr)
+        {
+            return JYPPX_STATUS_OK;
+        }
+
+        out_info->has_recorder = JYPPX_TRUE;
+        const int32_t error_count = recorder->getNbErrors();
+        out_info->error_count = error_count > 0 ? error_count : 0;
+        out_info->has_overflowed = recorder->hasOverflowed() ? JYPPX_TRUE : JYPPX_FALSE;
+        trt11_copy_error_recorder_interface_info(recorder, out_info);
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        trt11_reset_runtime_error_recorder_snapshot_info(out_info);
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    auto* recorder = engine_payload->getErrorRecorder();
+    if (recorder == nullptr)
+    {
+        return JYPPX_STATUS_OK;
+    }
+
+    out_info->has_recorder = JYPPX_TRUE;
+    const int32_t error_count = recorder->getNbErrors();
+    out_info->error_count = error_count > 0 ? error_count : 0;
+    out_info->has_overflowed = recorder->hasOverflowed() ? JYPPX_TRUE : JYPPX_FALSE;
+    trt11_copy_error_recorder_interface_info(recorder, out_info);
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+static JYPPX_StatusCode trt11_engine_get_error_recorder_error_with_seh_guard(
+    nvinfer1::ICudaEngine* engine_payload,
+    const int32_t index,
+    JYPPX_TensorRtErrorRecordInfo* out_error,
+    const char* feature_name)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        auto* recorder = engine_payload->getErrorRecorder();
+        if (recorder == nullptr)
+        {
+            jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Engine error recorder snapshot is unavailable because no recorder is attached.");
+            return JYPPX_STATUS_INVALID_STATE;
+        }
+
+        const int32_t error_count = recorder->getNbErrors();
+        if (index < 0 || index >= error_count)
+        {
+            jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Engine error recorder error index is out of range.");
+            return JYPPX_STATUS_INVALID_ARGUMENT;
+        }
+
+        out_error->index = index;
+        out_error->code = static_cast<int32_t>(recorder->getErrorCode(index));
+        copy_c_string(recorder->getErrorDesc(index), out_error->description, sizeof(out_error->description));
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        trt11_reset_runtime_error_record_info(out_error);
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    auto* recorder = engine_payload->getErrorRecorder();
+    if (recorder == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Engine error recorder snapshot is unavailable because no recorder is attached.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    const int32_t error_count = recorder->getNbErrors();
+    if (index < 0 || index >= error_count)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Engine error recorder error index is out of range.");
+        return JYPPX_STATUS_INVALID_ARGUMENT;
+    }
+
+    out_error->index = index;
+    out_error->code = static_cast<int32_t>(recorder->getErrorCode(index));
+    copy_c_string(recorder->getErrorDesc(index), out_error->description, sizeof(out_error->description));
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+static JYPPX_StatusCode trt11_execution_context_has_error_recorder_with_seh_guard(
+    nvinfer1::IExecutionContext* context_payload,
+    JYPPX_Boolean* out_has_recorder,
+    const char* feature_name)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        *out_has_recorder = context_payload->getErrorRecorder() != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        *out_has_recorder = JYPPX_FALSE;
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    *out_has_recorder = context_payload->getErrorRecorder() != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+static JYPPX_StatusCode trt11_execution_context_get_error_recorder_snapshot_info_with_seh_guard(
+    nvinfer1::IExecutionContext* context_payload,
+    JYPPX_TensorRtErrorRecorderSnapshotInfo* out_info,
+    const char* feature_name)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        auto* recorder = context_payload->getErrorRecorder();
+        if (recorder == nullptr)
+        {
+            return JYPPX_STATUS_OK;
+        }
+
+        out_info->has_recorder = JYPPX_TRUE;
+        const int32_t error_count = recorder->getNbErrors();
+        out_info->error_count = error_count > 0 ? error_count : 0;
+        out_info->has_overflowed = recorder->hasOverflowed() ? JYPPX_TRUE : JYPPX_FALSE;
+        trt11_copy_error_recorder_interface_info(recorder, out_info);
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        trt11_reset_runtime_error_recorder_snapshot_info(out_info);
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    auto* recorder = context_payload->getErrorRecorder();
+    if (recorder == nullptr)
+    {
+        return JYPPX_STATUS_OK;
+    }
+
+    out_info->has_recorder = JYPPX_TRUE;
+    const int32_t error_count = recorder->getNbErrors();
+    out_info->error_count = error_count > 0 ? error_count : 0;
+    out_info->has_overflowed = recorder->hasOverflowed() ? JYPPX_TRUE : JYPPX_FALSE;
+    trt11_copy_error_recorder_interface_info(recorder, out_info);
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+static JYPPX_StatusCode trt11_execution_context_get_error_recorder_error_with_seh_guard(
+    nvinfer1::IExecutionContext* context_payload,
+    const int32_t index,
+    JYPPX_TensorRtErrorRecordInfo* out_error,
+    const char* feature_name)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        auto* recorder = context_payload->getErrorRecorder();
+        if (recorder == nullptr)
+        {
+            jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Execution context error recorder snapshot is unavailable because no recorder is attached.");
+            return JYPPX_STATUS_INVALID_STATE;
+        }
+
+        const int32_t error_count = recorder->getNbErrors();
+        if (index < 0 || index >= error_count)
+        {
+            jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Execution context error recorder error index is out of range.");
+            return JYPPX_STATUS_INVALID_ARGUMENT;
+        }
+
+        out_error->index = index;
+        out_error->code = static_cast<int32_t>(recorder->getErrorCode(index));
+        copy_c_string(recorder->getErrorDesc(index), out_error->description, sizeof(out_error->description));
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        trt11_reset_runtime_error_record_info(out_error);
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    auto* recorder = context_payload->getErrorRecorder();
+    if (recorder == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Execution context error recorder snapshot is unavailable because no recorder is attached.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    const int32_t error_count = recorder->getNbErrors();
+    if (index < 0 || index >= error_count)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Execution context error recorder error index is out of range.");
+        return JYPPX_STATUS_INVALID_ARGUMENT;
+    }
+
+    out_error->index = index;
+    out_error->code = static_cast<int32_t>(recorder->getErrorCode(index));
+    copy_c_string(recorder->getErrorDesc(index), out_error->description, sizeof(out_error->description));
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+static JYPPX_StatusCode trt11_execution_context_clear_error_recorder_with_seh_guard(
+    nvinfer1::IExecutionContext* context_payload,
+    const char* feature_name)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        context_payload->setErrorRecorder(nullptr);
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    context_payload->setErrorRecorder(nullptr);
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+static JYPPX_StatusCode trt11_network_has_error_recorder_with_seh_guard(
+    nvinfer1::INetworkDefinition* network_payload,
+    JYPPX_Boolean* out_has_recorder,
+    const char* feature_name)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        *out_has_recorder = network_payload->getErrorRecorder() != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        *out_has_recorder = JYPPX_FALSE;
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    *out_has_recorder = network_payload->getErrorRecorder() != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+static JYPPX_StatusCode trt11_network_clear_error_recorder_with_seh_guard(
+    nvinfer1::INetworkDefinition* network_payload,
+    const char* feature_name)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        network_payload->setErrorRecorder(nullptr);
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    network_payload->setErrorRecorder(nullptr);
+    return JYPPX_STATUS_OK;
+#endif
+}
+#endif
 }
 
 JYPPX_StatusCode jyppx_trt11_builder_get_max_dla_batch_size(JYPPX_TensorRtBuilder* builder, int32_t* out_size)
@@ -98,8 +557,20 @@ JYPPX_StatusCode jyppx_trt11_builder_clear_gpu_allocator(JYPPX_TensorRtBuilder* 
     nvinfer1::IBuilder* builder_payload = nullptr;
     auto status = get_builder_payload_for_boundary(builder, &builder_payload, "builder GPU allocator clear");
     if (status != JYPPX_STATUS_OK) { return status; }
-    builder_payload->setGpuAllocator(nullptr);
-    return JYPPX_STATUS_OK;
+    try
+    {
+        return trt11_builder_clear_gpu_allocator_with_seh_guard(
+            builder_payload,
+            "builder GPU allocator clear");
+    }
+    catch (const std::exception& exception)
+    {
+        return trt11_boundary_control_exception("builder GPU allocator clear", exception);
+    }
+    catch (...)
+    {
+        return trt11_boundary_control_unknown_exception("builder GPU allocator clear");
+    }
 #else
     (void)builder;
     return jyppx::tensorrt::report_vendor_missing(kLine, "builder GPU allocator clear");
@@ -115,11 +586,58 @@ JYPPX_StatusCode jyppx_trt11_builder_has_error_recorder(JYPPX_TensorRtBuilder* b
     nvinfer1::IBuilder* builder_payload = nullptr;
     status = get_builder_payload_for_boundary(builder, &builder_payload, "builder error recorder query");
     if (status != JYPPX_STATUS_OK) { return status; }
-    *out_has_recorder = builder_payload->getErrorRecorder() != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
-    return JYPPX_STATUS_OK;
+    try
+    {
+        return trt11_builder_has_error_recorder_with_seh_guard(
+            builder_payload,
+            out_has_recorder,
+            "builder error recorder query");
+    }
+    catch (const std::exception& exception)
+    {
+        *out_has_recorder = JYPPX_FALSE;
+        return trt11_boundary_control_exception("builder error recorder query", exception);
+    }
+    catch (...)
+    {
+        *out_has_recorder = JYPPX_FALSE;
+        return trt11_boundary_control_unknown_exception("builder error recorder query");
+    }
 #else
     (void)builder;
     return jyppx::tensorrt::report_vendor_missing(kLine, "builder error recorder query");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt11_builder_has_logger(JYPPX_TensorRtBuilder* builder, JYPPX_Boolean* out_has_logger)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_has_logger, "out_has_logger");
+    if (status != JYPPX_STATUS_OK) { return status; }
+    *out_has_logger = JYPPX_FALSE;
+#if JYPPX_HAS_TENSORRT
+    nvinfer1::IBuilder* builder_payload = nullptr;
+    status = get_builder_payload_for_boundary(builder, &builder_payload, "builder logger presence query");
+    if (status != JYPPX_STATUS_OK) { return status; }
+    try
+    {
+        return trt11_builder_has_logger_with_seh_guard(
+            builder_payload,
+            out_has_logger,
+            "builder logger presence query");
+    }
+    catch (const std::exception& exception)
+    {
+        *out_has_logger = JYPPX_FALSE;
+        return trt11_boundary_control_exception("builder logger presence query", exception);
+    }
+    catch (...)
+    {
+        *out_has_logger = JYPPX_FALSE;
+        return trt11_boundary_control_unknown_exception("builder logger presence query");
+    }
+#else
+    (void)builder;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "builder logger presence query");
 #endif
 }
 
@@ -129,8 +647,20 @@ JYPPX_StatusCode jyppx_trt11_builder_clear_error_recorder(JYPPX_TensorRtBuilder*
     nvinfer1::IBuilder* builder_payload = nullptr;
     auto status = get_builder_payload_for_boundary(builder, &builder_payload, "builder error recorder clear");
     if (status != JYPPX_STATUS_OK) { return status; }
-    builder_payload->setErrorRecorder(nullptr);
-    return JYPPX_STATUS_OK;
+    try
+    {
+        return trt11_builder_clear_error_recorder_with_seh_guard(
+            builder_payload,
+            "builder error recorder clear");
+    }
+    catch (const std::exception& exception)
+    {
+        return trt11_boundary_control_exception("builder error recorder clear", exception);
+    }
+    catch (...)
+    {
+        return trt11_boundary_control_unknown_exception("builder error recorder clear");
+    }
 #else
     (void)builder;
     return jyppx::tensorrt::report_vendor_missing(kLine, "builder error recorder clear");
@@ -190,8 +720,23 @@ JYPPX_StatusCode jyppx_trt11_engine_has_error_recorder(JYPPX_TensorRtCudaEngine*
     nvinfer1::ICudaEngine* engine_payload = nullptr;
     status = get_engine_payload_ext(engine, &engine_payload, "engine error recorder query");
     if (status != JYPPX_STATUS_OK) { return status; }
-    *out_has_recorder = engine_payload->getErrorRecorder() != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
-    return JYPPX_STATUS_OK;
+    try
+    {
+        return trt11_engine_has_error_recorder_with_seh_guard(
+            engine_payload,
+            out_has_recorder,
+            "engine error recorder query");
+    }
+    catch (const std::exception& exception)
+    {
+        *out_has_recorder = JYPPX_FALSE;
+        return trt11_boundary_control_exception("engine error recorder query", exception);
+    }
+    catch (...)
+    {
+        *out_has_recorder = JYPPX_FALSE;
+        return trt11_boundary_control_unknown_exception("engine error recorder query");
+    }
 #else
     (void)engine;
     return jyppx::tensorrt::report_vendor_missing(kLine, "engine error recorder query");
@@ -204,11 +749,97 @@ JYPPX_StatusCode jyppx_trt11_engine_clear_error_recorder(JYPPX_TensorRtCudaEngin
     nvinfer1::ICudaEngine* engine_payload = nullptr;
     auto status = get_engine_payload_ext(engine, &engine_payload, "engine error recorder clear");
     if (status != JYPPX_STATUS_OK) { return status; }
-    engine_payload->setErrorRecorder(nullptr);
-    return JYPPX_STATUS_OK;
+    try
+    {
+        return trt11_engine_clear_error_recorder_with_seh_guard(
+            engine_payload,
+            "engine error recorder clear");
+    }
+    catch (const std::exception& exception)
+    {
+        return trt11_boundary_control_exception("engine error recorder clear", exception);
+    }
+    catch (...)
+    {
+        return trt11_boundary_control_unknown_exception("engine error recorder clear");
+    }
 #else
     (void)engine;
     return jyppx::tensorrt::report_vendor_missing(kLine, "engine error recorder clear");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt11_engine_get_error_recorder_snapshot_info(
+    JYPPX_TensorRtCudaEngine* engine,
+    JYPPX_TensorRtErrorRecorderSnapshotInfo* out_info)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_info, "out_info");
+    if (status != JYPPX_STATUS_OK) { return status; }
+    trt11_reset_runtime_error_recorder_snapshot_info(out_info);
+    trt11_reset_error_recorder_interface_info(out_info);
+#if JYPPX_HAS_TENSORRT
+    nvinfer1::ICudaEngine* engine_payload = nullptr;
+    status = get_engine_payload_ext(engine, &engine_payload, "engine error recorder snapshot query");
+    if (status != JYPPX_STATUS_OK) { return status; }
+    try
+    {
+        return trt11_engine_get_error_recorder_snapshot_info_with_seh_guard(
+            engine_payload,
+            out_info,
+            "engine error recorder snapshot query");
+    }
+    catch (const std::exception& exception)
+    {
+        trt11_reset_runtime_error_recorder_snapshot_info(out_info);
+        trt11_reset_error_recorder_interface_info(out_info);
+        return trt11_boundary_control_exception("engine error recorder snapshot query", exception);
+    }
+    catch (...)
+    {
+        trt11_reset_runtime_error_recorder_snapshot_info(out_info);
+        trt11_reset_error_recorder_interface_info(out_info);
+        return trt11_boundary_control_unknown_exception("engine error recorder snapshot query");
+    }
+#else
+    (void)engine;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "engine error recorder snapshot query");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt11_engine_get_error_recorder_error(
+    JYPPX_TensorRtCudaEngine* engine,
+    int32_t index,
+    JYPPX_TensorRtErrorRecordInfo* out_error)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_error, "out_error");
+    if (status != JYPPX_STATUS_OK) { return status; }
+    trt11_reset_runtime_error_record_info(out_error);
+#if JYPPX_HAS_TENSORRT
+    nvinfer1::ICudaEngine* engine_payload = nullptr;
+    status = get_engine_payload_ext(engine, &engine_payload, "engine error recorder error copy");
+    if (status != JYPPX_STATUS_OK) { return status; }
+    try
+    {
+        return trt11_engine_get_error_recorder_error_with_seh_guard(
+            engine_payload,
+            index,
+            out_error,
+            "engine error recorder error copy");
+    }
+    catch (const std::exception& exception)
+    {
+        trt11_reset_runtime_error_record_info(out_error);
+        return trt11_boundary_control_exception("engine error recorder error copy", exception);
+    }
+    catch (...)
+    {
+        trt11_reset_runtime_error_record_info(out_error);
+        return trt11_boundary_control_unknown_exception("engine error recorder error copy");
+    }
+#else
+    (void)engine;
+    (void)index;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "engine error recorder error copy");
 #endif
 }
 
@@ -246,8 +877,23 @@ JYPPX_StatusCode jyppx_trt11_execution_context_has_error_recorder(JYPPX_TensorRt
     nvinfer1::IExecutionContext* context_payload = nullptr;
     status = get_context_payload_ext(context, &context_payload, "execution context error recorder query");
     if (status != JYPPX_STATUS_OK) { return status; }
-    *out_has_recorder = context_payload->getErrorRecorder() != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
-    return JYPPX_STATUS_OK;
+    try
+    {
+        return trt11_execution_context_has_error_recorder_with_seh_guard(
+            context_payload,
+            out_has_recorder,
+            "execution context error recorder query");
+    }
+    catch (const std::exception& exception)
+    {
+        *out_has_recorder = JYPPX_FALSE;
+        return trt11_boundary_control_exception("execution context error recorder query", exception);
+    }
+    catch (...)
+    {
+        *out_has_recorder = JYPPX_FALSE;
+        return trt11_boundary_control_unknown_exception("execution context error recorder query");
+    }
 #else
     (void)context;
     return jyppx::tensorrt::report_vendor_missing(kLine, "execution context error recorder query");
@@ -260,11 +906,97 @@ JYPPX_StatusCode jyppx_trt11_execution_context_clear_error_recorder(JYPPX_Tensor
     nvinfer1::IExecutionContext* context_payload = nullptr;
     auto status = get_context_payload_ext(context, &context_payload, "execution context error recorder clear");
     if (status != JYPPX_STATUS_OK) { return status; }
-    context_payload->setErrorRecorder(nullptr);
-    return JYPPX_STATUS_OK;
+    try
+    {
+        return trt11_execution_context_clear_error_recorder_with_seh_guard(
+            context_payload,
+            "execution context error recorder clear");
+    }
+    catch (const std::exception& exception)
+    {
+        return trt11_boundary_control_exception("execution context error recorder clear", exception);
+    }
+    catch (...)
+    {
+        return trt11_boundary_control_unknown_exception("execution context error recorder clear");
+    }
 #else
     (void)context;
     return jyppx::tensorrt::report_vendor_missing(kLine, "execution context error recorder clear");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt11_execution_context_get_error_recorder_snapshot_info(
+    JYPPX_TensorRtExecutionContext* context,
+    JYPPX_TensorRtErrorRecorderSnapshotInfo* out_info)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_info, "out_info");
+    if (status != JYPPX_STATUS_OK) { return status; }
+    trt11_reset_runtime_error_recorder_snapshot_info(out_info);
+    trt11_reset_error_recorder_interface_info(out_info);
+#if JYPPX_HAS_TENSORRT
+    nvinfer1::IExecutionContext* context_payload = nullptr;
+    status = get_context_payload_ext(context, &context_payload, "execution context error recorder snapshot query");
+    if (status != JYPPX_STATUS_OK) { return status; }
+    try
+    {
+        return trt11_execution_context_get_error_recorder_snapshot_info_with_seh_guard(
+            context_payload,
+            out_info,
+            "execution context error recorder snapshot query");
+    }
+    catch (const std::exception& exception)
+    {
+        trt11_reset_runtime_error_recorder_snapshot_info(out_info);
+        trt11_reset_error_recorder_interface_info(out_info);
+        return trt11_boundary_control_exception("execution context error recorder snapshot query", exception);
+    }
+    catch (...)
+    {
+        trt11_reset_runtime_error_recorder_snapshot_info(out_info);
+        trt11_reset_error_recorder_interface_info(out_info);
+        return trt11_boundary_control_unknown_exception("execution context error recorder snapshot query");
+    }
+#else
+    (void)context;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "execution context error recorder snapshot query");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt11_execution_context_get_error_recorder_error(
+    JYPPX_TensorRtExecutionContext* context,
+    int32_t index,
+    JYPPX_TensorRtErrorRecordInfo* out_error)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_error, "out_error");
+    if (status != JYPPX_STATUS_OK) { return status; }
+    trt11_reset_runtime_error_record_info(out_error);
+#if JYPPX_HAS_TENSORRT
+    nvinfer1::IExecutionContext* context_payload = nullptr;
+    status = get_context_payload_ext(context, &context_payload, "execution context error recorder error copy");
+    if (status != JYPPX_STATUS_OK) { return status; }
+    try
+    {
+        return trt11_execution_context_get_error_recorder_error_with_seh_guard(
+            context_payload,
+            index,
+            out_error,
+            "execution context error recorder error copy");
+    }
+    catch (const std::exception& exception)
+    {
+        trt11_reset_runtime_error_record_info(out_error);
+        return trt11_boundary_control_exception("execution context error recorder error copy", exception);
+    }
+    catch (...)
+    {
+        trt11_reset_runtime_error_record_info(out_error);
+        return trt11_boundary_control_unknown_exception("execution context error recorder error copy");
+    }
+#else
+    (void)context;
+    (void)index;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "execution context error recorder error copy");
 #endif
 }
 
@@ -277,8 +1009,23 @@ JYPPX_StatusCode jyppx_trt11_network_has_error_recorder(JYPPX_TensorRtNetworkDef
     nvinfer1::INetworkDefinition* network_payload = nullptr;
     status = get_network_payload_for_api(network, &network_payload, "network error recorder query");
     if (status != JYPPX_STATUS_OK) { return status; }
-    *out_has_recorder = network_payload->getErrorRecorder() != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
-    return JYPPX_STATUS_OK;
+    try
+    {
+        return trt11_network_has_error_recorder_with_seh_guard(
+            network_payload,
+            out_has_recorder,
+            "network error recorder query");
+    }
+    catch (const std::exception& exception)
+    {
+        *out_has_recorder = JYPPX_FALSE;
+        return trt11_boundary_control_exception("network error recorder query", exception);
+    }
+    catch (...)
+    {
+        *out_has_recorder = JYPPX_FALSE;
+        return trt11_boundary_control_unknown_exception("network error recorder query");
+    }
 #else
     (void)network;
     return jyppx::tensorrt::report_vendor_missing(kLine, "network error recorder query");
@@ -291,8 +1038,20 @@ JYPPX_StatusCode jyppx_trt11_network_clear_error_recorder(JYPPX_TensorRtNetworkD
     nvinfer1::INetworkDefinition* network_payload = nullptr;
     auto status = get_network_payload_for_api(network, &network_payload, "network error recorder clear");
     if (status != JYPPX_STATUS_OK) { return status; }
-    network_payload->setErrorRecorder(nullptr);
-    return JYPPX_STATUS_OK;
+    try
+    {
+        return trt11_network_clear_error_recorder_with_seh_guard(
+            network_payload,
+            "network error recorder clear");
+    }
+    catch (const std::exception& exception)
+    {
+        return trt11_boundary_control_exception("network error recorder clear", exception);
+    }
+    catch (...)
+    {
+        return trt11_boundary_control_unknown_exception("network error recorder clear");
+    }
 #else
     (void)network;
     return jyppx::tensorrt::report_vendor_missing(kLine, "network error recorder clear");

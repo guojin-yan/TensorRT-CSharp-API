@@ -17,4 +17,7 @@ internal static partial class NativeMethodsTensorRt
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt11_network_get_name(SafeTensorRtObjectHandle network, IntPtr output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt11_runtime_create_diagnostic(SafeTensorRtObjectHandle logger, out NativeTensorRtRuntimeCreateDiagnosticInfo out_info);
 }

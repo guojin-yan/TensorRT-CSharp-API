@@ -1,0 +1,154 @@
+{
+  "$schema": "../bridge-api.schema.json",
+  "module": "cuda",
+  "versionLine": "common",
+  "apis": [
+    {
+      "id": "cuda-graph-add-memcpy-node-1d-device-to-device-safe",
+      "entryPoint": "jyppx_cuda_graph_add_memcpy_node_1d_device_to_device_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "graph", "type": "JYPPX_CudaGraph*", "direction": "in" },
+        { "name": "dependency_node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "destination", "type": "JYPPX_CudaMemory*", "direction": "in" },
+        { "name": "source", "type": "JYPPX_CudaMemory*", "direction": "in" },
+        { "name": "count", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_node", "type": "uintptr_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" }
+      ]
+    },
+    {
+      "id": "cuda-graph-add-memcpy-node-1d-host-to-device-safe",
+      "entryPoint": "jyppx_cuda_graph_add_memcpy_node_1d_host_to_device_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "graph", "type": "JYPPX_CudaGraph*", "direction": "in" },
+        { "name": "dependency_node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "destination", "type": "JYPPX_CudaMemory*", "direction": "in" },
+        { "name": "source", "type": "JYPPX_CudaPinnedMemory*", "direction": "in" },
+        { "name": "count", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_node", "type": "uintptr_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" }
+      ]
+    },
+    {
+      "id": "cuda-graph-add-memcpy-node-1d-device-to-host-safe",
+      "entryPoint": "jyppx_cuda_graph_add_memcpy_node_1d_device_to_host_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "graph", "type": "JYPPX_CudaGraph*", "direction": "in" },
+        { "name": "dependency_node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "destination", "type": "JYPPX_CudaPinnedMemory*", "direction": "in" },
+        { "name": "source", "type": "JYPPX_CudaMemory*", "direction": "in" },
+        { "name": "count", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_node", "type": "uintptr_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" }
+      ]
+    },
+    {
+      "id": "cuda-graph-memcpy-node-get-params-safe",
+      "entryPoint": "jyppx_cuda_graph_memcpy_node_get_params_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_params", "type": "JYPPX_CudaGraphMemcpyNodeParams*", "direction": "out", "managedType": "out NativeCudaGraphMemcpyNodeParams", "moduleManagedType": "out NativeCudaGraphMemcpyNodeParams" }
+      ]
+    },
+    {
+      "id": "cuda-graph-memcpy-node-set-params-1d-device-to-device-safe",
+      "entryPoint": "jyppx_cuda_graph_memcpy_node_set_params_1d_device_to_device_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "destination", "type": "JYPPX_CudaMemory*", "direction": "in" },
+        { "name": "source", "type": "JYPPX_CudaMemory*", "direction": "in" },
+        { "name": "count", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" }
+      ]
+    },
+    {
+      "id": "cuda-graph-memcpy-node-set-params-1d-host-to-device-safe",
+      "entryPoint": "jyppx_cuda_graph_memcpy_node_set_params_1d_host_to_device_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "destination", "type": "JYPPX_CudaMemory*", "direction": "in" },
+        { "name": "source", "type": "JYPPX_CudaPinnedMemory*", "direction": "in" },
+        { "name": "count", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" }
+      ]
+    },
+    {
+      "id": "cuda-graph-memcpy-node-set-params-1d-device-to-host-safe",
+      "entryPoint": "jyppx_cuda_graph_memcpy_node_set_params_1d_device_to_host_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "destination", "type": "JYPPX_CudaPinnedMemory*", "direction": "in" },
+        { "name": "source", "type": "JYPPX_CudaMemory*", "direction": "in" },
+        { "name": "count", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" }
+      ]
+    },
+    {
+      "id": "cuda-graph-exec-memcpy-node-set-params-1d-device-to-device-safe",
+      "entryPoint": "jyppx_cuda_graph_exec_memcpy_node_set_params_1d_device_to_device_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "graph_exec", "type": "JYPPX_CudaGraphExec*", "direction": "in" },
+        { "name": "node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "destination", "type": "JYPPX_CudaMemory*", "direction": "in" },
+        { "name": "source", "type": "JYPPX_CudaMemory*", "direction": "in" },
+        { "name": "count", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" }
+      ]
+    },
+    {
+      "id": "cuda-graph-exec-memcpy-node-set-params-1d-host-to-device-safe",
+      "entryPoint": "jyppx_cuda_graph_exec_memcpy_node_set_params_1d_host_to_device_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "graph_exec", "type": "JYPPX_CudaGraphExec*", "direction": "in" },
+        { "name": "node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "destination", "type": "JYPPX_CudaMemory*", "direction": "in" },
+        { "name": "source", "type": "JYPPX_CudaPinnedMemory*", "direction": "in" },
+        { "name": "count", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" }
+      ]
+    },
+    {
+      "id": "cuda-graph-exec-memcpy-node-set-params-1d-device-to-host-safe",
+      "entryPoint": "jyppx_cuda_graph_exec_memcpy_node_set_params_1d_device_to_host_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "graph_exec", "type": "JYPPX_CudaGraphExec*", "direction": "in" },
+        { "name": "node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "destination", "type": "JYPPX_CudaPinnedMemory*", "direction": "in" },
+        { "name": "source", "type": "JYPPX_CudaMemory*", "direction": "in" },
+        { "name": "count", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" }
+      ]
+    }
+  ]
+}

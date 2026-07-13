@@ -23,7 +23,7 @@ public sealed partial class TensorRtExecutionContext
 
     /// <summary>
     /// Gets whether a named output tensor uses a TensorRT output allocator.
-    /// 获取指定输出 tensor 是否使用 TensorRT output allocator。
+    /// 获取指定输出 tensor 是否使用 TensorRT output allocator；适用于 TensorRT 8/10/11，不会暴露 allocator 指针或接管其生命周期。
     /// </summary>
     /// <param name="tensorName">The output tensor name. / 输出 tensor 名称。</param>
     /// <returns><c>true</c> if TensorRT reports an output allocator. / TensorRT 报告存在 output allocator 时返回 <c>true</c>。</returns>
@@ -34,7 +34,7 @@ public sealed partial class TensorRtExecutionContext
 
     /// <summary>
     /// Gets whether this execution context has a temporary-storage allocator attached.
-    /// 获取此 execution context 是否绑定了 temporary-storage allocator。
+    /// 获取此 execution context 是否绑定了 temporary-storage allocator；适用于 TensorRT 8/10/11，不会暴露 allocator 指针或接管其生命周期。
     /// </summary>
     public bool HasTemporaryStorageAllocator => NativeBridgeApi.HasExecutionContextTemporaryStorageAllocator(Line, _handle);
 }

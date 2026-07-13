@@ -1,0 +1,106 @@
+using Xunit;
+
+namespace JYPPX.ProjectQuality.Tests;
+
+public sealed class PublishingPublicArticleTests
+{
+    [Fact]
+    public void PublishingPublicArticlesAreLinkedAndKeepProofBoundaries()
+    {
+        string docsIndex = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "index.md"));
+        string docsToc = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "toc.yml"));
+
+        foreach (ArticleExpectation article in Articles)
+        {
+            string href = article.Href;
+            string path = Path.Combine(RepositoryPaths.Root, "docs", href.Replace('/', Path.DirectorySeparatorChar));
+            Assert.True(File.Exists(path), href);
+
+            string content = File.ReadAllText(path);
+            Assert.Contains(href, docsIndex, StringComparison.Ordinal);
+            Assert.Contains(href, docsToc, StringComparison.Ordinal);
+            Assert.Contains("## 适合", content, StringComparison.Ordinal);
+            Assert.Contains("## 配图建议", content, StringComparison.Ordinal);
+            Assert.Contains("## 下一步", content, StringComparison.Ordinal);
+            Assert.Contains(article.RequiredPath, content, StringComparison.Ordinal);
+            Assert.Contains(article.RequiredBoundary, content, StringComparison.Ordinal);
+        }
+    }
+
+    [Fact]
+    public void PublishingPublicArticlesDoNotClaimRuntimeProofFromTemplatesOrBuildOnlyOutputs()
+    {
+        foreach (ArticleExpectation article in Articles)
+        {
+            string path = Path.Combine(RepositoryPaths.Root, "docs", article.Href.Replace('/', Path.DirectorySeparatorChar));
+            string content = File.ReadAllText(path);
+
+            Assert.DoesNotContain("已经证明 package-consumer-runtime", content, StringComparison.Ordinal);
+            Assert.DoesNotContain("模板就是 runtime proof", content, StringComparison.Ordinal);
+            Assert.DoesNotContain("build-only 就是 runtime proof", content, StringComparison.Ordinal);
+            Assert.Contains("proof", content, StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    private static readonly ArticleExpectation[] Articles =
+    {
+        new(
+            "articles/zh-cn/publishing/nuget-install-runtime-package-public-article.md",
+            "JYPPX.TensorRT.CSharp.API",
+            "package-consumer-runtime proof"),
+        new(
+            "articles/zh-cn/publishing/yolovision-overview-public-article.md",
+            "samples/assets/yolovision-yolov8-det-candidate.template.json",
+            "owner-action-required"),
+        new(
+            "articles/zh-cn/publishing/onnxtoengine-trtexec-parity-public-article.md",
+            "applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.json",
+            "build-only"),
+        new(
+            "articles/zh-cn/publishing/cuda-tensorrt-dll-troubleshooting-public-article.md",
+            "dotnet --info",
+            "package-consumer-runtime proof"),
+        new(
+            "articles/zh-cn/publishing/package-consumer-proof-public-article.md",
+            "ProjectReference",
+            "Package Consumer Runtime Proof"),
+        new(
+            "articles/zh-cn/publishing/plugin-inventory-public-article.md",
+            "src/JYPPX.TensorRtSharp/TensorRtPluginRegistryInventory.cs",
+            "package-consumer-runtime proof"),
+        new(
+            "articles/zh-cn/publishing/engine-inspector-public-article.md",
+            "applications/TensorRtExec/Core/TensorRtExecReport.cs",
+            "readonly diagnostics"),
+        new(
+            "articles/zh-cn/publishing/deferred-boundary-public-article.md",
+            "artifacts/interface-coverage/project-completion-review.md",
+            "manifest/source"),
+        new(
+            "articles/zh-cn/publishing/release-evidence-ladder-public-article.md",
+            "artifacts/final-release/package-consumer-runtime-proof-forbidden-substitute-scan.json",
+            "package-consumer-runtime proof"),
+        new(
+            "articles/zh-cn/publishing/builder-config-readback-public-article.md",
+            "applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.json",
+            "build-only"),
+        new(
+            "articles/zh-cn/publishing/source-build-windows-public-article.md",
+            "cmake --preset win-x64-trt11-cuda13-release",
+            "build-only"),
+        new(
+            "articles/zh-cn/publishing/native-bridge-build-public-article.md",
+            "native/generated/bridge_entrypoints.g.h",
+            "readonly diagnostics"),
+        new(
+            "articles/zh-cn/publishing/package-strategy-public-article.md",
+            "artifacts/final-release/owner-external-proof-execution-result.input.json",
+            "package-consumer-runtime proof"),
+        new(
+            "articles/zh-cn/publishing/onnx-to-engine-public-article.md",
+            "samples/OnnxToEngine/Program.cs",
+            "build-only")
+    };
+
+    private sealed record ArticleExpectation(string Href, string RequiredPath, string RequiredBoundary);
+}

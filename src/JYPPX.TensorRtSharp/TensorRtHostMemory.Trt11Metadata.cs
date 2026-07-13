@@ -10,7 +10,7 @@ public sealed partial class TensorRtHostMemory
     /// </summary>
     /// <remarks>
     /// This metadata endpoint is available for TensorRT 8, TensorRT 10, and TensorRT 11 adapters.
-    /// 当前该属性通过 TensorRT 11 适配器接入；TensorRT 8/10 适配线在补齐相同元数据端点前可能返回 NotSupported。
+    /// 当前该属性通过 TensorRT 8、TensorRT 10 和 TensorRT 11 适配线接入，只复制标量数据类型，不暴露 host-memory 指针。
     /// </remarks>
     public TensorRtDataType DataType => NativeBridgeApi.GetHostMemoryDataType(Line, _handle);
 }

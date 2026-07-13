@@ -9,6 +9,17 @@ internal static class Program
 {
     private static void Main(string[] args)
     {
+        string requestedLine = GetStringArgument(args, "--tensor-rt-line", "auto");
+        bool dependencyProbeOnly = HasSwitch(args, "--dependency-probe-only");
+        Console.WriteLine($"TensorRtSmokeRunner TensorRtLineRequest={requestedLine} DependencyProbeOnly={dependencyProbeOnly}");
+        if (dependencyProbeOnly)
+        {
+            TensorRtApiLine probeLine = ResolveProbeLine(requestedLine);
+            PrintDependencyProbe(probeLine);
+            Console.WriteLine("Skipped=True Reason=DependencyProbeOnly");
+            return;
+        }
+
         TensorRtEnvironmentSnapshot snapshot = TensorRtEnvironmentProbe.GetCurrent();
         Console.WriteLine($"Bridge={snapshot.BuildInfo.BridgeName} TRT={snapshot.BuildInfo.TensorRtVersion} CUDA={snapshot.BuildInfo.CudaToolkitVersion}");
         Console.WriteLine($"TRT8 Vendor={snapshot.TensorRt8.VendorDependencyAvailable} Runtime={snapshot.TensorRt8.RuntimeCreationSupported} Message={snapshot.TensorRt8.StatusMessage}");
@@ -134,7 +145,7 @@ internal static class Program
                 }
 
                 string trt10RuntimeSerializationState = ProbeTrt10RuntimeSerializationControls(line, engine);
-                message = $"HostMemory={hostMemory.SizeInBytes} EngineSerialized={serializedEngine.SizeInBytes} RuntimeSerialization=[{trt10RuntimeSerializationState}] Parser={parserState} BuilderCaps=[{builderCaps}] BuilderConfig=[ProfileStream={profileStreamSet} ProfileCount={config.OptimizationProfileCount} {builderConfigDeploymentState}] InspectorContext=True InspectorBytes={{INSPECTOR_BYTES}} InspectorLayer={{INSPECTOR_LAYER_STATE}} Enqueue=True InferShapesMissing={missingShapeInferenceCount} Readiness=[Ready={readiness.IsReadyForEnqueue} Profile={readiness.ActiveOptimizationProfile} Bound={readiness.AllTensorAddressesBound} Tensors={readiness.Tensors.Count}] OutputSizing=[{outputSizingState}] TensorDebug={tensorDebugState} Refitter={refitterState} IOTensors={{IO_TENSOR_COUNT}} [{{TENSORS}}]";
+                message = $"HostMemory={hostMemory.SizeInBytes}/{hostMemory.DataType} EngineSerialized={serializedEngine.SizeInBytes}/{serializedEngine.DataType} RuntimeSerialization=[{trt10RuntimeSerializationState}] Parser={parserState} BuilderCaps=[{builderCaps}] BuilderConfig=[ProfileStream={profileStreamSet} ProfileCount={config.OptimizationProfileCount} {builderConfigDeploymentState}] InspectorContext=True InspectorBytes={{INSPECTOR_BYTES}} InspectorLayer={{INSPECTOR_LAYER_STATE}} Enqueue=True InferShapesMissing={missingShapeInferenceCount} Readiness=[Ready={readiness.IsReadyForEnqueue} Profile={readiness.ActiveOptimizationProfile} Bound={readiness.AllTensorAddressesBound} Tensors={readiness.Tensors.Count}] OutputSizing=[{outputSizingState}] TensorDebug={tensorDebugState} Refitter={refitterState} IOTensors={{IO_TENSOR_COUNT}} [{{TENSORS}}]";
             }
             finally
             {
@@ -196,12 +207,13 @@ internal static class Program
             using TensorRtExecutionContext runtimeContext = engine.CreateExecutionContext(runtimeConfig);
 
             long streamableWeights = engine.StreamableWeightsSizeInBytes;
+            long minimumBudget = engine.MinimumWeightStreamingBudgetInBytes;
             long budget = engine.WeightStreamingBudgetV2InBytes;
             long automaticBudget = engine.WeightStreamingAutomaticBudgetInBytes;
             long scratch = engine.WeightStreamingScratchMemorySizeInBytes;
             TensorRtHardwareCompatibilityLevel hardware = engine.EngineHardwareCompatibilityLevel;
 
-            return $"ConfigPlan={configuredPlan.SizeInBytes} Flags={flagsBefore} RuntimeStrategy={strategyBefore}->{strategyAfter} RuntimeContext={runtimeContext != null} Streamable={streamableWeights} Budget={budget}/Auto={automaticBudget} Scratch={scratch} Hardware={hardware}";
+            return $"ConfigPlan={configuredPlan.SizeInBytes}/{configuredPlan.DataType} Flags={flagsBefore} RuntimeStrategy={strategyBefore}->{strategyAfter} RuntimeContext={runtimeContext != null} Streamable={streamableWeights} MinimumBudget={minimumBudget} Budget={budget}/Auto={automaticBudget} Scratch={scratch} Hardware={hardware}";
         }
         catch (Exception exception)
         {
@@ -230,6 +242,7 @@ internal static class Program
             string trt11ConfigRuntimeControls = ProbeTrt11BuilderConfigRuntimeControls(config);
             TensorRtBuilderConfigDeploymentSnapshot configSnapshot = config.GetDeploymentSnapshot();
             string trt11ConfigSnapshot = configSnapshot.ToString();
+            string trt11ConfigSerializedPluginSnapshot = $"{configSnapshot.SerializedPluginSnapshot.Count}/{configSnapshot.SerializedPluginSnapshot.PluginLibraryPaths.Count}/{configSnapshot.SerializedPluginSnapshot.HasPathInventory}";
             string trt11FourteenthBatchBuildOutputs = ProbeTrt11FourteenthBatchBuildOutputs(builder, runtime);
 
             using CudaStream stream = new CudaStream();
@@ -281,11 +294,13 @@ internal static class Program
             byte[] serialized = hostMemory.ToArray();
             using TensorRtEngine engine = runtime.Deserialize(hostMemory);
             string trt11EngineBoundary = ProbeTrt11EngineBoundary(engine);
+            string trt8LegacyShapeBindingBoundary = ProbeTrt8LegacyShapeBindingBoundary(engine);
             string trt11SerializationRuntimeConfig = ProbeTrt11SerializationRuntimeConfig(engine);
             string trt11RefitterControls = ProbeTrt11RefitterControls(engine, logger, stream);
             using TensorRtEngineInspector inspector = engine.CreateInspector();
             using TensorRtExecutionContext context = engine.CreateExecutionContext();
             string trt11ContextBoundary = ProbeTrt11ContextBoundary(context);
+            string trt8LegacyContextShapeBindingBoundary = ProbeTrt8LegacyContextShapeBindingBoundary(context);
             inspector.SetExecutionContext(context);
             context.SetOptimizationProfileAsync(0, stream);
             IReadOnlyList<TensorRtTensorInfo> ioTensors = engine.GetIOTensors();
@@ -313,7 +328,11 @@ internal static class Program
                 string trt11EngineContextRuntimeControls = ProbeTrt11EngineContextRuntimeControls(engine, context, ioTensors);
                 TensorRtEngineDeploymentSnapshot engineSnapshot = engine.GetDeploymentSnapshot(0);
                 TensorRtExecutionContextDeploymentSnapshot contextSnapshot = context.GetDeploymentSnapshot(engine);
+                TensorRtEngineDeploymentSummary engineDeploymentSummary = engineSnapshot.ToSummary();
+                TensorRtExecutionContextDeploymentSummary contextDeploymentSummary = contextSnapshot.ToSummary();
+                string deploymentSnapshotEvidence = $"EngineProfileTensorValues={engineSnapshot.ProfileTensorValues.Count} ContextRuntimeDiagnostics={contextSnapshot.RuntimeDiagnostics.Count} EngineDeploymentSummary=[{engineDeploymentSummary}] ExecutionContextDeploymentSummary=[{contextDeploymentSummary}]";
                 string profileTensorValuesV2 = ProbeTrt11EngineProfileTensorValuesV2(engine, ioTensors);
+                string profileTensorSnapshots = ProbeTrt11EngineProfileTensorValueSnapshots(engine, ioTensors);
                 string dims64Evidence = ProbeTrt11Dims64(network, input, output, identity, configuredProfileRange64, engine, context, ioTensors, profileIndex);
                 context.EnqueueAsync(stream);
                 stream.Synchronize();
@@ -332,7 +351,7 @@ internal static class Program
                 string tensors = string.Join(
                     "; ",
                     ioTensors.Select(tensor => $"{tensor.Index}:{tensor.Name}:{tensor.IOMode}:{tensor.DataType}:{tensor.Shape}:Ctx={context.GetTensorShape(tensor.Name)}"));
-                message = $"HostMemory={hostMemory.SizeInBytes}/{hostMemory.DataType} SerializedBytes={serialized.Length} ProfileIndex={profileIndex} ProfileValid={profile.IsValid} ProfileCount={config.OptimizationProfileCount} ProfileShapeValuesV2={shapeValueCountV2}/{shapeValueReadCountV2} EngineProfileTensorValuesV2=[{profileTensorValuesV2}] Dims64=[{dims64Evidence}] ProfileStream={config.IsProfileStreamSet} NetworkSupported={networkSupported} Parser={parserState} Network={network.Name}:I{network.InputCount}:O{network.OutputCount}:L{network.LayerCount} NetworkDebug=[{trt11NetworkDebug}] LayerTensorMetadata=[{trt11LayerTensorMetadata}] BuilderBoundary=[{trt11BuilderBoundary}] Runtime=[{trt11RuntimeControls}] Config=Capability:{config.GetEngineCapability()}:Hardware:{config.GetHardwareCompatibilityLevel()}:Opt:{config.GetOptimizationLevel()}:Verbosity:{config.GetProfilingVerbosity()}:Aux:{config.GetMaxAuxStreams()}:Timing:{config.GetAverageTimingIterations()} Workspace={config.GetMemoryPoolLimit(TensorRtMemoryPoolType.Workspace)} ConfigSnapshot=[{trt11ConfigSnapshot}] Trt11ConfigRuntime=[{trt11ConfigRuntimeControls}] Trt11BuildOutputs=[{trt11FourteenthBatchBuildOutputs}] EngineBoundary=[{trt11EngineBoundary}] EngineSnapshot=[{engineSnapshot}] ContextBoundary=[{trt11ContextBoundary}] ContextSnapshot=[{contextSnapshot}] SerializationRuntimeConfig=[{trt11SerializationRuntimeConfig}] Refitter=[{trt11RefitterControls}] Trt11EngineContextRuntime=[{trt11EngineContextRuntimeControls}] Context=True ActiveProfile={context.OptimizationProfileIndex} MissingShapes={missingShapes} Ready={readiness.IsReadyForEnqueue}/{bindingReport.IsReadyForEnqueue} InspectorBytes={inspectorText.Length} InspectorLayerBytes={layerInformation.Length} InspectorContext={inspectorHasContextBefore}->{inspectorHasContextAfter} InspectorErrorRecorder={inspectorHasErrorRecorder}->{inspectorHasErrorRecorderAfterClear} ByteDeserializeIOTensors={bytePathTensorCount} Enqueue=True IOTensors={ioTensors.Count} [{tensors}]";
+                message = $"HostMemory={hostMemory.SizeInBytes}/{hostMemory.DataType} SerializedBytes={serialized.Length} ProfileIndex={profileIndex} ProfileValid={profile.IsValid} ProfileCount={config.OptimizationProfileCount} ProfileShapeValuesV2={shapeValueCountV2}/{shapeValueReadCountV2} EngineProfileTensorValuesV2=[{profileTensorValuesV2}] EngineProfileTensorSnapshot=[{profileTensorSnapshots}] DeploymentSnapshotEvidence=[{deploymentSnapshotEvidence}] Dims64=[{dims64Evidence}] ProfileStream={config.IsProfileStreamSet} NetworkSupported={networkSupported} Parser={parserState} Network={network.Name}:I{network.InputCount}:O{network.OutputCount}:L{network.LayerCount} NetworkDebug=[{trt11NetworkDebug}] LayerTensorMetadata=[{trt11LayerTensorMetadata}] BuilderBoundary=[{trt11BuilderBoundary}] Runtime=[{trt11RuntimeControls}] Config=Capability:{config.GetEngineCapability()}:Hardware:{config.GetHardwareCompatibilityLevel()}:Opt:{config.GetOptimizationLevel()}:Verbosity:{config.GetProfilingVerbosity()}:Aux:{config.GetMaxAuxStreams()}:Timing:{config.GetAverageTimingIterations()} Workspace={config.GetMemoryPoolLimit(TensorRtMemoryPoolType.Workspace)} ConfigSnapshot=[{trt11ConfigSnapshot}] ConfigSerializedPlugins=[{trt11ConfigSerializedPluginSnapshot}] Trt11ConfigRuntime=[{trt11ConfigRuntimeControls}] Trt11BuildOutputs=[{trt11FourteenthBatchBuildOutputs}] EngineBoundary=[{trt11EngineBoundary}] Trt8LegacyShapeBinding=[{trt8LegacyShapeBindingBoundary}] EngineSnapshot=[{engineSnapshot}] EngineDeploymentSummary=[{engineDeploymentSummary}] ContextBoundary=[{trt11ContextBoundary}] Trt8LegacyContextShapeBinding=[{trt8LegacyContextShapeBindingBoundary}] ContextSnapshot=[{contextSnapshot}] ExecutionContextDeploymentSummary=[{contextDeploymentSummary}] SerializationRuntimeConfig=[{trt11SerializationRuntimeConfig}] Refitter=[{trt11RefitterControls}] Trt11EngineContextRuntime=[{trt11EngineContextRuntimeControls}] Context=True ActiveProfile={context.OptimizationProfileIndex} MissingShapes={missingShapes} Ready={readiness.IsReadyForEnqueue}/{bindingReport.IsReadyForEnqueue} InspectorBytes={inspectorText.Length} InspectorLayerBytes={layerInformation.Length} InspectorContext={inspectorHasContextBefore}->{inspectorHasContextAfter} InspectorErrorRecorder={inspectorHasErrorRecorder}->{inspectorHasErrorRecorderAfterClear} ByteDeserializeIOTensors={bytePathTensorCount} Enqueue=True IOTensors={ioTensors.Count} [{tensors}]";
             }
             finally
             {
@@ -382,7 +401,9 @@ internal static class Program
             runtimePlatform = config.GetRuntimePlatform().ToString();
         }
 
-        return $"Capability={capability} HardwareCompatibility={hardwareCompatibility} PreviewFeature={previewFeature}:{previewEnabled} RuntimePlatform={runtimePlatform}";
+        TensorRtBuilderConfigDeploymentSnapshot deploymentSnapshot = config.GetDeploymentSnapshot();
+        TensorRtBuilderConfigDeploymentSummary deploymentSummary = deploymentSnapshot.ToSummary();
+        return $"Capability={capability} HardwareCompatibility={hardwareCompatibility} PreviewFeature={previewFeature}:{previewEnabled} RuntimePlatform={runtimePlatform} DeploymentSnapshot={deploymentSnapshot.PluginToSerializeCount}/{deploymentSnapshot.SerializedPluginSnapshot.Count}/{deploymentSnapshot.SerializedPluginSnapshot.PluginLibraryPaths.Count}/{deploymentSnapshot.Diagnostics.Count} BuilderConfigDeploymentSummary=[{deploymentSummary}]";
     }
 
     static string ProbeTrt11BuilderBoundary(TensorRtBuilder builder)
@@ -462,6 +483,19 @@ internal static class Program
         }
     }
 
+    static string ProbeTrt8LegacyShapeBindingBoundary(TensorRtEngine engine)
+    {
+        try
+        {
+            int[] values = engine.GetProfileShapeValues(0, 0, TensorRtOptimizationProfileSelector.Min);
+            return $"Values={values.Length}";
+        }
+        catch (Exception exception)
+        {
+            return $"Skipped:{exception.GetType().Name}:{exception.Message}";
+        }
+    }
+
     static string ProbeTrt11ContextBoundary(TensorRtExecutionContext context)
     {
         try
@@ -485,6 +519,7 @@ internal static class Program
             using TensorRtSerializationConfig serializationConfig = engine.CreateSerializationConfig();
             TensorRtSerializationFlags flagsBefore = serializationConfig.Flags;
             serializationConfig.Flags = flagsBefore;
+            TensorRtSerializationConfigSummary serializationSummary = serializationConfig.ToSummary();
             bool includeRefitBefore = serializationConfig.GetFlag(TensorRtSerializationFlag.IncludeRefit);
             bool includeRefitSet = serializationConfig.SetFlag(TensorRtSerializationFlag.IncludeRefit);
             bool includeRefitAfterSet = serializationConfig.GetFlag(TensorRtSerializationFlag.IncludeRefit);
@@ -496,10 +531,11 @@ internal static class Program
             TensorRtExecutionContextAllocationStrategy strategyBefore = runtimeConfig.AllocationStrategy;
             runtimeConfig.AllocationStrategy = TensorRtExecutionContextAllocationStrategy.Static;
             TensorRtExecutionContextAllocationStrategy strategyAfter = runtimeConfig.AllocationStrategy;
+            TensorRtRuntimeConfigSummary runtimeSummary = runtimeConfig.ToSummary();
             using TensorRtExecutionContext contextByStrategy = engine.CreateExecutionContext(TensorRtExecutionContextAllocationStrategy.Static);
             using TensorRtExecutionContext contextByConfig = engine.CreateExecutionContext(runtimeConfig);
 
-            return $"Serialized={serializedDefault.SizeInBytes}/{serializedWithConfig.SizeInBytes} Flags={flagsBefore} IncludeRefit={includeRefitBefore}->{includeRefitSet}/{includeRefitAfterSet}->{includeRefitCleared}/{includeRefitAfterClear} RuntimeStrategy={strategyBefore}->{strategyAfter} Contexts=True/True";
+            return $"Serialized={serializedDefault.SizeInBytes}/{serializedDefault.DataType}->{serializedWithConfig.SizeInBytes}/{serializedWithConfig.DataType} Flags={flagsBefore} SerializationConfigSummary=[{serializationSummary}] IncludeRefit={includeRefitBefore}->{includeRefitSet}/{includeRefitAfterSet}->{includeRefitCleared}/{includeRefitAfterClear} RuntimeStrategy={strategyBefore}->{strategyAfter} RuntimeConfigSummary=[{runtimeSummary}] Contexts=True/True";
         }
         catch (Exception exception)
         {
@@ -645,9 +681,10 @@ internal static class Program
             bool nvtxSet = context.SetNvtxVerbosity(nvtxBefore);
             TensorRtProfilingVerbosity nvtxAfter = context.GetNvtxVerbosity();
             context.ClearAuxStreams();
-            bool profilerBefore = context.HasProfiler;
+            bool profilerBefore = context.HasNativeProfiler;
             context.ClearProfiler();
-            bool profilerAfter = context.HasProfiler;
+            bool profilerAfter = context.HasNativeProfiler;
+            bool managedProfilerAfter = context.HasProfiler;
             bool debugListenerBefore = context.HasDebugListener;
             bool debugListenerCleared = context.ClearDebugListener();
             bool debugListenerAfter = context.HasDebugListener;
@@ -673,7 +710,7 @@ internal static class Program
             bool clearInputConsumedEvent = clearContext.ClearInputConsumedEvent();
             clearContext.SetAuxStreams(Array.Empty<CudaStream>());
 
-            return $"Streamable={streamableWeights} Budget={budget}/Auto={automaticBudget}/Set={budgetSet} Scratch={scratch} Stats={totalWeights}/{strippedWeights} Hardware={hardware} ContextEngine={contextEngineName}:IO{contextEngineIOTensors}:L{contextEngineLayers}:P{contextEngineProfiles} InputConsumedEvent={inputConsumedEventSet}:0x{inputConsumedEventAddress:X}->{clearInputConsumedEvent} TempAllocator={temporaryAllocator}->{temporaryAllocatorCleared} Nvtx={nvtxBefore}->{nvtxAfter}/Set={nvtxSet} Profiler={profilerBefore}->{profilerAfter} DebugListener={debugListenerBefore}->{debugListenerAfter}/Clear={debugListenerCleared} RuntimeConfig={runtimeConfig}:{runtimeConfigStrategy} UnfusedDebug={unfusedState}/Set={unfusedSet} Address={addressState} Output={outputState} Clears=Any:{clearAnyAddress}/Input:{clearInputAddress}/Output:{clearOutputAddress}/DeviceMemory:True/AuxStreams:True";
+            return $"Streamable={streamableWeights} Budget={budget}/Auto={automaticBudget}/Set={budgetSet} Scratch={scratch} Stats={totalWeights}/{strippedWeights} Hardware={hardware} ContextEngine={contextEngineName}:IO{contextEngineIOTensors}:L{contextEngineLayers}:P{contextEngineProfiles} InputConsumedEvent={inputConsumedEventSet}:0x{inputConsumedEventAddress:X}->{clearInputConsumedEvent} TempAllocator={temporaryAllocator}->{temporaryAllocatorCleared} Nvtx={nvtxBefore}->{nvtxAfter}/Set={nvtxSet} ProfilerNative={profilerBefore}->{profilerAfter}/Managed={managedProfilerAfter} DebugListener={debugListenerBefore}->{debugListenerAfter}/Clear={debugListenerCleared} RuntimeConfig={runtimeConfig}:{runtimeConfigStrategy} UnfusedDebug={unfusedState}/Set={unfusedSet} Address={addressState} Output={outputState} Clears=Any:{clearAnyAddress}/Input:{clearInputAddress}/Output:{clearOutputAddress}/DeviceMemory:True/AuxStreams:True";
         }
         catch (Exception exception)
         {
@@ -703,6 +740,58 @@ internal static class Program
         {
             return $"Skipped:{exception.GetType().Name}:{exception.Message}";
         }
+    }
+
+    static string ProbeTrt11EngineProfileTensorValueSnapshots(TensorRtEngine engine, IReadOnlyList<TensorRtTensorInfo> ioTensors)
+    {
+        try
+        {
+            List<string> states = new List<string>();
+            foreach (TensorRtTensorInfo tensor in ioTensors)
+            {
+                int valueCount = Math.Max(1, tensor.Shape.Rank);
+                TensorRtEngineProfileTensorValuesSnapshot snapshot =
+                    engine.GetProfileTensorValuesSnapshot(tensor.Name, 0, TensorRtOptimizationProfileSelector.Opt, valueCount);
+                bool trySnapshot = engine.TryGetProfileTensorValuesSnapshot(
+                    tensor.Name,
+                    0,
+                    TensorRtOptimizationProfileSelector.Opt,
+                    valueCount,
+                    out TensorRtEngineProfileTensorValuesSnapshot tryGetSnapshot,
+                    out string diagnostic);
+                states.Add($"{tensor.Name}:V2={snapshot.ValuesV2.Count}:Legacy={snapshot.LegacyInt32Values.Count}:Try={trySnapshot}/{tryGetSnapshot.HasAnyValues}:Diag={snapshot.Diagnostics.Count}:{SanitizeSmokeValue(diagnostic)}");
+                if (states.Count >= 3)
+                {
+                    break;
+                }
+            }
+
+            return states.Count == 0 ? "NoTensor" : string.Join(",", states);
+        }
+        catch (Exception exception)
+        {
+            return $"Skipped:{exception.GetType().Name}:{exception.Message}";
+        }
+    }
+
+    static string ProbeTrt8LegacyContextShapeBindingBoundary(TensorRtExecutionContext context)
+    {
+        try
+        {
+            int[] values = context.GetShapeBinding(0);
+            return $"Values={values.Length}";
+        }
+        catch (Exception exception)
+        {
+            return $"Skipped:{exception.GetType().Name}:{exception.Message}";
+        }
+    }
+
+    static string SanitizeSmokeValue(string value)
+    {
+        return string.IsNullOrEmpty(value)
+            ? string.Empty
+            : value.Replace(Environment.NewLine, " ").Replace('\r', ' ').Replace('\n', ' ').Replace(' ', '_');
     }
 
     static string ProbeTrt11Dims64(
@@ -834,5 +923,57 @@ internal static class Program
             default:
                 return 4;
         }
+    }
+
+    static void PrintDependencyProbe(TensorRtApiLine line)
+    {
+        TensorRtDependencyProbeReport dependencyProbe = TensorRtEnvironmentProbe.ProbeNativeDependencies(line);
+        Console.WriteLine($"DependencyProbe Line={(int)line} BridgeInitialized={dependencyProbe.BridgeInitialized} Candidates={dependencyProbe.NativeBridgeCandidates.Count} Loaded={dependencyProbe.LoadedModuleCount} SearchPathCandidates={dependencyProbe.SearchPathCandidateCount} Diagnostics={dependencyProbe.Diagnostics.Count} Message={dependencyProbe.BridgeDiagnostic}");
+    }
+
+    static TensorRtApiLine ResolveProbeLine(string requestedLine)
+    {
+        if (string.Equals(requestedLine, "auto", StringComparison.OrdinalIgnoreCase))
+        {
+            return TensorRtApiLine.TensorRt11;
+        }
+
+        if (string.Equals(requestedLine, "8", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(requestedLine, "trt8", StringComparison.OrdinalIgnoreCase))
+        {
+            return TensorRtApiLine.TensorRt8;
+        }
+
+        if (string.Equals(requestedLine, "10", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(requestedLine, "trt10", StringComparison.OrdinalIgnoreCase))
+        {
+            return TensorRtApiLine.TensorRt10;
+        }
+
+        if (string.Equals(requestedLine, "11", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(requestedLine, "trt11", StringComparison.OrdinalIgnoreCase))
+        {
+            return TensorRtApiLine.TensorRt11;
+        }
+
+        throw new ArgumentException("TensorRT line must be auto, 8, 10, or 11.", nameof(requestedLine));
+    }
+
+    static string GetStringArgument(string[] args, string name, string defaultValue)
+    {
+        for (int index = 0; index < args.Length - 1; index++)
+        {
+            if (string.Equals(args[index], name, StringComparison.OrdinalIgnoreCase))
+            {
+                return args[index + 1];
+            }
+        }
+
+        return defaultValue;
+    }
+
+    static bool HasSwitch(string[] args, string name)
+    {
+        return args.Any(argument => string.Equals(argument, name, StringComparison.OrdinalIgnoreCase));
     }
 }

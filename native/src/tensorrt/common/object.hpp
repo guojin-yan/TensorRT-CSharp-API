@@ -2,6 +2,10 @@
 
 #include <cstdint>
 
+#if defined(_MSC_VER)
+#include <excpt.h>
+#endif
+
 #include "jyppx/common/status.h"
 #include "jyppx/tensorrt/types.h"
 
@@ -26,6 +30,11 @@ void* get_payload(const JYPPX_TensorRtObjectBase* object);
 const char* line_to_version_text(JYPPX_TensorRtLine line);
 JYPPX_StatusCode report_vendor_missing(JYPPX_TensorRtLine line, const char* feature_name);
 JYPPX_StatusCode report_vendor_mismatch(JYPPX_TensorRtLine requested_line, int32_t detected_major, const char* feature_name);
+JYPPX_StatusCode report_vendor_exception(JYPPX_TensorRtLine line, const char* feature_name, const char* exception_message);
+JYPPX_StatusCode report_vendor_seh_exception(JYPPX_TensorRtLine line, const char* feature_name, uint32_t exception_code);
+#if defined(_MSC_VER)
+int capture_vendor_seh_exception_code(uint32_t* out_exception_code, uint32_t exception_code);
+#endif
 JYPPX_StatusCode report_not_implemented(JYPPX_TensorRtLine line, const char* feature_name);
 void fill_adapter_info(JYPPX_TensorRtAdapterInfo* out_info, JYPPX_TensorRtLine line);
 }

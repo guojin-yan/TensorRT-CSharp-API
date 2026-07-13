@@ -10,6 +10,7 @@ param(
   [string]$OutputRoot,
   [string]$ReportDirectory,
   [switch]$RunSmoke,
+  [switch]$AllowSmokeFailure,
   [string[]]$SmokeRuntimePackageKey = @(),
   [switch]$KeepConsumerOutput,
   [switch]$SignConsumerOutput,
@@ -232,6 +233,7 @@ function Get-NupkgMetadata {
       Path = $Path
       Id = $id
       Version = $version
+      LastWriteTime = (Get-Item -LiteralPath $Path).LastWriteTime
     }
   }
   finally {
@@ -261,7 +263,198 @@ function Find-Package {
     throw "Package '$PackageId' was not found under $Directory."
   }
 
-  return @($matches | Sort-Object Version -Descending)[0]
+  return @($matches | Sort-Object LastWriteTime, Version -Descending)[0]
+}
+
+$script:ManagedPackageFreshnessPackCommand = "dotnet pack .\pack\JYPPX.TensorRT.CSharp.API\JYPPX.TensorRT.CSharp.API.csproj -c Debug -o .\artifacts\managed -p:JYPPXPackageVersion=4.0.0 /p:UseSharedCompilation=false"
+$script:ManagedPackageFreshnessRequiredMarkers = @(
+  "TensorRtDebugListenerNativeAttachBridgeShapeGate",
+  "TensorRtDebugListenerExceptionStatusMappingGate",
+  "TensorRtDebugListenerInFlightAccountingGate",
+  "TensorRtDebugListenerNativeNoThrowVTableScaffoldGate",
+  "TensorRtDebugListenerNoThrowVTableCallbackStub",
+  "TensorRtDebugListenerNoThrowVTableCallbackStubResult",
+  "TensorRtDebugListenerBorrowedDebugTensorMetadataRuntimeGate",
+  "TensorRtDebugListenerBorrowedDebugTensorMetadataRuntimeGateResult",
+  "TensorRtDebugListenerNativeVTableInstallPreflight",
+  "TensorRtDebugListenerNativeVTableInstallPreflightResult",
+  "TensorRtDebugListenerNativeOwnerVTableInstallExperiment",
+  "TensorRtDebugListenerNativeOwnerVTableInstallExperimentResult",
+  "TensorRtDebugListenerRealNonNullAttachRuntimeSmoke",
+  "TensorRtDebugListenerRealNonNullAttachRuntimeSmokeResult",
+  "TensorRtDebugListenerProcessDebugTensorCallbackTrampoline",
+  "TensorRtDebugListenerProcessDebugTensorCallbackTrampolineResult",
+  "TensorRtDebugTensorMetadataSnapshot",
+  "TensorRtDebugListenerRealCallbackRuntimeProof",
+  "TensorRtDebugListenerRealCallbackRuntimeProofResult",
+  "TensorRtDebugListenerCallbackProofGapReport",
+  "TensorRtDebugListenerCallbackProofGapReportResult",
+  "CallbackStubGateReady",
+  "CallbackStubNoThrowReady",
+  "CallbackMetadataCopyReady",
+  "MetadataGateReady",
+  "TensorNameCopied",
+  "TensorNameLength",
+  "TensorTypeCopied",
+  "TensorLocationCopied",
+  "TensorShapeCopied",
+  "TensorFlagsCopied",
+  "BorrowedDebugTensorMetadataCopyReady",
+  "BorrowedDebugTensorPointerEscapeBlocked",
+  "BorrowedDebugTensorDataPointerEscapeBlocked",
+  "DebugTensorPointerExposed",
+  "DebugTensorDataPointerExposed",
+  "BorrowedDebugTensorMetadataGateReady",
+  "NativeVTableInstallPreflightReady",
+  "VTableInstallShapeReady",
+  "VTableInstallVersionGuardReady",
+  "VTableInstallNoThrowBoundaryReady",
+  "VTableInstallOwnershipDiagnosticsReady",
+  "VTableInstallPointerFree",
+  "NativeVTableInstallRuntimeReady",
+  "ReasonNativeVTableInstallStillBlocked",
+  "ExperimentShapeReady",
+  "InstallAttemptGuardReady",
+  "NonNullAttachEnabled",
+  "RuntimeProofEnabled",
+  "NativeVTableInstallAttempted",
+  "RollbackReady",
+  "DetachBeforeReleaseReady",
+  "FailureStatusMappingReady",
+  "PointerFree",
+  "ReasonNativeOwnerVTableInstallStillBlocked",
+  "OptInEnabled",
+  "AttachGuardReady",
+  "AttachAttempted",
+  "AttachSucceeded",
+  "DetachAttempted",
+  "DetachSucceeded",
+  "RollbackAttempted",
+  "RollbackSucceeded",
+  "ProcessDebugTensorInvoked",
+  "InvocationCount",
+  "AllocationCount",
+  "ReleaseCount",
+  "InFlightCallbackCount",
+  "NonNullAttachStillDisabled",
+  "NativeAttachEntryReady",
+  "NativeVTableInstallBlocked",
+  "NoThrowCallbackEntryReady",
+  "ExceptionStatusMappingReady",
+  "InFlightAccountingReady",
+  "BorrowedDebugTensorMetadataCopied",
+  "DetachRollbackReady",
+  "FullPackageConsumerRuntimeProofReady",
+  "GapReasonCount",
+  "LastDiagnostic",
+  "FullPackageConsumerReport",
+  "ReportPointerFree",
+  "BorrowedDebugTensorLifetimeReady",
+  "BorrowedDebugTensorDataLifetimeReady",
+  "ReasonMetadataRuntimeStillBlocked",
+  "RuntimeProofBlocked",
+  "CallbackExceptionCaptureReady",
+  "CallbackStatusMappingReady",
+  "CallbackInFlightPairingReady",
+  "DebugTensorDataPointerExposed",
+  "NativeVTableInstalled",
+  "ReasonCallbackRuntimeStillBlocked",
+  "TensorRtDebugListenerNativeAttachEntryMinimalSafety",
+  "TensorRtDebugListenerNativeAttachEntryMinimalSafetyResult",
+  "MinimalSafetyReady",
+  "RuntimeScaffoldReady",
+  "LifecycleGateReady",
+  "NativeAttachEntryLocated",
+  "SetDebugListenerNonNullEnabled",
+  "NonNullAttachStillDisabled",
+  "NativeAttachWouldBeBlocked",
+  "ReasonNativeAttachStillBlocked",
+  "TensorRtDebugListenerRuntimeProofPrecheck",
+  "TensorRtDebugListenerRuntimeProofAttemptPreflight",
+  "TensorRtDebugListenerRuntimeProofAttemptPreflightResult",
+  "CanEnableSetDebugListenerNonNull",
+  "CanInstallNativeVTable",
+  "CanCallProcessDebugTensorRuntime",
+  "CanPromoteRealCallbackRuntime",
+  "ReasonNonNullAttachStillBlocked",
+  "ReasonNativeVTableStillBlocked",
+  "ReasonRuntimeProofStillBlocked",
+  "TrampolineShapeReady",
+  "NativeCallbackEntryLocated",
+  "NoThrowCallbackEntryReady",
+  "ExceptionCaptureReady",
+  "InFlightAccountingReady",
+  "PointerFreeSurfaceReady",
+  "CallbackStubEntryCount",
+  "CallbackStubLeaveCount",
+  "TensorRtDebugTensorMetadataSnapshot",
+  "RuntimeSmokeReady",
+  "TrampolineShapeReady",
+  "AttemptedNoInvocation",
+  "BorrowedDebugTensorMetadataCopied"
+)
+
+function Get-ManagedPackageXmlSurface {
+  param(
+    [Parameter(Mandatory = $true)]
+    [object]$ManagedPackage
+  )
+
+  $zip = [System.IO.Compression.ZipFile]::OpenRead($ManagedPackage.Path)
+  try {
+    $xmlEntries = @($zip.Entries | Where-Object {
+        $_.FullName.EndsWith("JYPPX.TensorRtSharp.xml", [System.StringComparison]::OrdinalIgnoreCase) -and
+        $_.FullName.StartsWith("lib/", [System.StringComparison]::OrdinalIgnoreCase)
+      })
+    if ($xmlEntries.Count -eq 0) {
+      throw "Managed package appears stale: '$($ManagedPackage.Id)' $($ManagedPackage.Version) at '$($ManagedPackage.Path)' does not contain lib/*/JYPPX.TensorRtSharp.xml. Repack the managed package with: $script:ManagedPackageFreshnessPackCommand"
+    }
+
+    $builder = [System.Text.StringBuilder]::new()
+    foreach ($entry in @($xmlEntries)) {
+      $stream = $entry.Open()
+      try {
+        $reader = [System.IO.StreamReader]::new($stream, [System.Text.Encoding]::UTF8)
+        try {
+          [void]$builder.AppendLine($entry.FullName)
+          [void]$builder.AppendLine($reader.ReadToEnd())
+        }
+        finally {
+          $reader.Dispose()
+        }
+      }
+      finally {
+        $stream.Dispose()
+      }
+    }
+
+    return $builder.ToString()
+  }
+  finally {
+    $zip.Dispose()
+  }
+}
+
+function Assert-ManagedPackageFreshness {
+  param(
+    [Parameter(Mandatory = $true)]
+    [object]$ManagedPackage,
+    [string[]]$RequiredMarkers = $script:ManagedPackageFreshnessRequiredMarkers
+  )
+
+  $surface = Get-ManagedPackageXmlSurface -ManagedPackage $ManagedPackage
+  $missingMarkers = New-Object System.Collections.Generic.List[string]
+  foreach ($marker in @($RequiredMarkers)) {
+    if ($surface.IndexOf($marker, [System.StringComparison]::OrdinalIgnoreCase) -lt 0) {
+      $missingMarkers.Add($marker)
+    }
+  }
+
+  if ($missingMarkers.Count -gt 0) {
+    throw "Managed package appears stale: '$($ManagedPackage.Id)' $($ManagedPackage.Version) at '$($ManagedPackage.Path)' is missing public API marker(s): $($missingMarkers -join ', '). Repack the managed package with: $script:ManagedPackageFreshnessPackCommand"
+  }
+
+  Write-Host "Managed package freshness validated: $($ManagedPackage.Id) $($ManagedPackage.Version)"
 }
 
 function Invoke-DotNetCommand {
@@ -302,6 +495,330 @@ function Test-ApplicationControlPolicyBlock {
     $text -match 'application control policy' -or
     $text -match '应用程序控制策略'
   )
+}
+
+function Test-CudaDriverRuntimeCompatibilityBlock {
+  param(
+    [string[]]$OutputLines
+  )
+
+  $text = ($OutputLines -join "`n")
+  return (
+    $text -match 'CUDA error 35' -or
+    $text -match 'cudaErrorInsufficientDriver' -or
+    $text -match 'driver version is insufficient' -or
+    $text -match 'cudaRuntimeGetVersion failed'
+  )
+}
+
+$script:RealCallbackRuntimeRequiredSmokeMarkers = @(
+  "EvidenceKind=real-callback-runtime",
+  "RuntimeEvidenceKind=real-callback-runtime",
+  "RealCallbackRuntime=True",
+  "IsRealCallbackRuntimeProof=True",
+  "CallbackKind",
+  "TensorRtLine",
+  "CudaLine",
+  "RuntimePackageKey",
+  "OwnerId",
+  "InvocationCount",
+  "AllocationCount",
+  "ReleaseCount",
+  "FailureCount",
+  "InFlightCallbackCount",
+  "LastStatus",
+  "LastDiagnostic",
+  "FullPackageConsumerReport"
+)
+
+$script:RealCallbackRuntimeNonProofSmokeMarkers = @(
+  "allocator-owner-internal-runtime-prototype",
+  "allocator-owner-ledger-safety-gate",
+  "output-allocator-internal-runtime-gate",
+  "output-allocator-callback-owner-design",
+  "output-allocator-attach-detach-design-gate",
+  "output-buffer-ownership-safety-gate",
+  "output-allocator-runtime-proof-precheck",
+  "debug-listener-callback-owner-design",
+  "debug-listener-attach-detach-design-gate",
+  "debug-listener-borrowed-tensor-safety-gate",
+  "debug-listener-attach-vtable-safety-gate",
+  "debug-listener-native-attach-nothrow-preflight",
+  "debug-listener-native-owner-address-design-gate",
+  "debug-listener-native-nothrow-vtable-design-gate",
+  "debug-listener-native-attach-entry-design-gate",
+  "debug-listener-native-detach-before-release-design-gate",
+  "debug-listener-native-owner-lifecycle-dry-run",
+  "debug-listener-native-attach-entry-runtime-scaffold",
+  "debug-listener-native-attach-entry-minimal-safety",
+  "debug-listener-native-owner-stable-identity",
+  "debug-listener-native-owner-noncopyable-storage",
+  "debug-listener-native-nothrow-destructor",
+  "debug-listener-native-owner-lifecycle-gate",
+  "debug-listener-native-attach-bridge-shape-gate",
+  "debug-listener-exception-status-mapping-gate",
+  "debug-listener-inflight-accounting-gate",
+  "debug-listener-native-nothrow-vtable-scaffold-gate",
+  "debug-listener-nothrow-vtable-callback-stub",
+  "debug-listener-borrowed-debug-tensor-metadata-runtime-gate",
+  "debug-listener-native-vtable-install-preflight",
+  "debug-listener-native-owner-vtable-install-experiment",
+  "debug-listener-real-non-null-attach-runtime-smoke",
+  "debug-listener-process-debug-tensor-callback-trampoline",
+  "debug-listener-real-callback-runtime-proof",
+  "debug-listener-callback-proof-gap-report",
+  "callback-owner-closure-matrix",
+  "debug-listener-runtime-proof-precheck",
+  "debug-listener-runtime-proof-attempt-preflight",
+  "attach-bridge-shape-gate",
+  "exception-status-gate",
+  "inflight-accounting-gate",
+  "vtable-scaffold-gate",
+  "callback-stub-gate",
+  "borrowed-debug-tensor-metadata-gate",
+  "native-vtable-install-preflight",
+  "native-owner-vtable-install-experiment",
+  "callback-trampoline-shape",
+  "real-callback-runtime-blocked",
+  "attempted-no-invocation",
+  "runtime-smoke-skipped",
+  "runtime-smoke-blocked",
+  "runtime-smoke-attempted",
+  "runtime-smoke-failed",
+  "RealCallbackRuntime=False",
+  "IsRealCallbackRuntimeProof=False",
+  "CanPromoteRealCallbackRuntime=False",
+  "not proof",
+  "minimal-safety",
+  "runtime-gate",
+  "runtime-proof-attempt-preflight",
+  "dependency-probe-only",
+  "copied-state",
+  "dry-run"
+)
+
+function Test-SmokeOutputContainsAnyMarker {
+  param(
+    [AllowNull()]
+    [AllowEmptyString()]
+    [string]$Text = "",
+    [Parameter(Mandatory = $true)]
+    [string[]]$Markers
+  )
+
+  if ([string]::IsNullOrEmpty($Text)) {
+    return $false
+  }
+
+  foreach ($marker in @($Markers)) {
+    if ($Text.IndexOf($marker, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
+      return $true
+    }
+  }
+
+  return $false
+}
+
+function New-RealCallbackRuntimeEvidenceFromSmoke {
+  param(
+    [bool]$SmokeRequested,
+    [string]$SmokeResult,
+    $SmokeExitCode = $null,
+    [string]$SmokeDiagnostic = "",
+    [string[]]$SmokeOutputLines = @()
+  )
+
+  $requiredSmokeMarkers = @($script:RealCallbackRuntimeRequiredSmokeMarkers)
+  $smokeLines = @($SmokeOutputLines | ForEach-Object { [string]$_ })
+  $combinedSmokeOutput = $smokeLines -join "`n"
+  $hasRuntimeMarker = $combinedSmokeOutput.IndexOf("EvidenceKind=real-callback-runtime", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+  $hasNonProofCallbackEvidence = Test-SmokeOutputContainsAnyMarker -Text $combinedSmokeOutput -Markers $script:RealCallbackRuntimeNonProofSmokeMarkers
+  $runtimeSmokeLines = @($smokeLines | Where-Object {
+      $_.IndexOf("DebugListenerRealNonNullAttachRuntimeSmoke=", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+      $_.IndexOf("debug-listener-real-non-null-attach-runtime-smoke", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+      $_.IndexOf("DebugListenerProcessDebugTensorCallbackTrampoline=", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+      $_.IndexOf("debug-listener-process-debug-tensor-callback-trampoline", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+      $_.IndexOf("DebugListenerRealCallbackRuntimeProof=", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+      $_.IndexOf("debug-listener-real-callback-runtime-proof", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+      $_.IndexOf("DebugListenerCallbackProofGapReport=", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+      $_.IndexOf("debug-listener-callback-proof-gap-report", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+      $_.IndexOf("callback-owner-closure-matrix", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+    })
+
+  if (-not $SmokeRequested) {
+    return [pscustomobject]@{
+      Status = "not-present"
+      Marker = "real-callback-runtime"
+      EvidenceKind = "not-present"
+      RuntimeEvidenceKind = "not-present"
+      RequiredSmokeMarkers = @($requiredSmokeMarkers)
+      MissingSmokeMarkers = @()
+      MatchedSmokeLines = @($runtimeSmokeLines)
+      IsRealCallbackRuntimeProof = $false
+      Diagnostic = "package consumer smoke was not requested; real-callback-runtime evidence is not present."
+    }
+  }
+
+  if (-not $hasRuntimeMarker) {
+    $status = switch ($SmokeResult) {
+      "blocked-by-cuda-driver" { "blocked-by-cuda-driver"; break }
+      "blocked-by-application-control" { "blocked-by-application-control"; break }
+      "failed" { "blocked"; break }
+      default {
+        if ($runtimeSmokeLines.Count -gt 0) {
+          if ($combinedSmokeOutput.IndexOf("RuntimeEvidenceKind=runtime-smoke-skipped", [System.StringComparison]::OrdinalIgnoreCase) -ge 0) { "skipped"; break }
+          if ($combinedSmokeOutput.IndexOf("RuntimeEvidenceKind=runtime-smoke-blocked", [System.StringComparison]::OrdinalIgnoreCase) -ge 0) { "blocked"; break }
+          if ($combinedSmokeOutput.IndexOf("RuntimeEvidenceKind=runtime-smoke-attempted", [System.StringComparison]::OrdinalIgnoreCase) -ge 0) { "attempted"; break }
+          if ($combinedSmokeOutput.IndexOf("RuntimeEvidenceKind=runtime-smoke-failed", [System.StringComparison]::OrdinalIgnoreCase) -ge 0) { "failed"; break }
+          if ($combinedSmokeOutput.IndexOf("RuntimeEvidenceKind=real-callback-runtime-blocked", [System.StringComparison]::OrdinalIgnoreCase) -ge 0) { "blocked"; break }
+          if ($combinedSmokeOutput.IndexOf("RuntimeEvidenceKind=attempted-no-invocation", [System.StringComparison]::OrdinalIgnoreCase) -ge 0) { "attempted"; break }
+          "blocked"
+          break
+        }
+
+        "not-present"
+        break
+      }
+    }
+
+    $diagnostic = switch ($status) {
+      "blocked-by-cuda-driver" { "package consumer smoke reached the packaged runtime, but CUDA driver/runtime compatibility blocked callback runtime evidence collection."; break }
+      "blocked-by-application-control" { "package consumer smoke was blocked by application control before callback runtime evidence could be collected."; break }
+      "blocked" { "package consumer smoke failed without reporting real-callback-runtime evidence: $SmokeDiagnostic"; break }
+      "skipped" { "package consumer smoke reported debug-listener runtime smoke skipped evidence only; real-callback-runtime evidence is not present."; break }
+      "attempted" { "package consumer smoke reported debug-listener runtime smoke attempted evidence only; real-callback-runtime proof is not present."; break }
+      "failed" { "package consumer smoke reported debug-listener runtime smoke failed evidence only; real-callback-runtime proof is not present."; break }
+      default {
+        if ($hasNonProofCallbackEvidence) {
+          "package consumer smoke reported dry-run/copied-state/internal-runtime-gate/precheck/dependency-probe evidence only; real-callback-runtime evidence is not present."
+        }
+        else {
+          "package consumer smoke did not report real-callback-runtime evidence."
+        }
+        break
+      }
+    }
+
+    return [pscustomobject]@{
+      Status = $status
+      Marker = "real-callback-runtime"
+      EvidenceKind = "not-present"
+      RuntimeEvidenceKind = "not-present"
+      RequiredSmokeMarkers = @($requiredSmokeMarkers)
+      MissingSmokeMarkers = @()
+      MatchedSmokeLines = @($runtimeSmokeLines)
+      IsRealCallbackRuntimeProof = $false
+      Diagnostic = $diagnostic
+    }
+  }
+
+  $missingSmokeMarkers = New-Object System.Collections.Generic.List[string]
+  foreach ($marker in @($requiredSmokeMarkers)) {
+    if ($combinedSmokeOutput.IndexOf($marker, [System.StringComparison]::OrdinalIgnoreCase) -lt 0) {
+      $missingSmokeMarkers.Add($marker)
+    }
+  }
+
+  $matchedSmokeLines = @($smokeLines | Where-Object {
+      $_.IndexOf("real-callback-runtime", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+      $_.IndexOf("RealCallbackRuntime", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+      $_.IndexOf("CallbackKind", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+      $_.IndexOf("RuntimeEvidenceKind", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+      $_.IndexOf("IsRealCallbackRuntimeProof", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+      $_.IndexOf("InvocationCount", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+      $_.IndexOf("AllocationCount", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+      $_.IndexOf("ReleaseCount", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+      $_.IndexOf("FailureCount", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+      $_.IndexOf("FullPackageConsumerReport", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+    })
+
+  $invocationCount = 0
+  $invocationMatches = [regex]::Matches($combinedSmokeOutput, "InvocationCount=(?<count>\d+)")
+  foreach ($match in @($invocationMatches)) {
+    $parsedCount = 0
+    if ([int]::TryParse($match.Groups["count"].Value, [ref]$parsedCount) -and $parsedCount -gt $invocationCount) {
+      $invocationCount = $parsedCount
+    }
+  }
+
+  if ($invocationCount -le 0) {
+    $missingSmokeMarkers.Add("InvocationCount>0")
+  }
+
+  $hasBlockingNonProofRuntimeKind =
+    $combinedSmokeOutput.IndexOf("RuntimeEvidenceKind=proof-gap-report", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+    $combinedSmokeOutput.IndexOf("RuntimeEvidenceKind=closure-matrix", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+    $combinedSmokeOutput.IndexOf("RuntimeEvidenceKind=runtime-smoke-skipped", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+    $combinedSmokeOutput.IndexOf("RuntimeEvidenceKind=runtime-smoke-blocked", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+    $combinedSmokeOutput.IndexOf("RuntimeEvidenceKind=runtime-smoke-attempted", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+    $combinedSmokeOutput.IndexOf("RuntimeEvidenceKind=runtime-smoke-failed", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+    $combinedSmokeOutput.IndexOf("RuntimeEvidenceKind=callback-trampoline-shape", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+    $combinedSmokeOutput.IndexOf("RuntimeEvidenceKind=real-callback-runtime-blocked", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+    $combinedSmokeOutput.IndexOf("RuntimeEvidenceKind=attempted-no-invocation", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+    $combinedSmokeOutput.IndexOf("IsRealCallbackRuntimeProof=False", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+  if ($hasBlockingNonProofRuntimeKind) {
+    $missingSmokeMarkers.Add("NoNonProofCallbackRuntimeMarker")
+  }
+
+  $isReady = [string]$SmokeResult -eq "passed" -and $missingSmokeMarkers.Count -eq 0 -and $invocationCount -gt 0 -and -not $hasBlockingNonProofRuntimeKind
+  $status = if ($isReady) { "ready" } else { "incomplete" }
+  $diagnostic = if ($isReady) {
+    "package consumer smoke reported complete real-callback-runtime evidence."
+  }
+  elseif ([string]$SmokeResult -ne "passed") {
+    "real-callback-runtime markers were found, but package consumer smoke did not pass."
+  }
+  else {
+    "real-callback-runtime markers were found, but required smoke fields are missing, InvocationCount is zero, or non-proof callback markers are present."
+  }
+
+  return [pscustomobject]@{
+    Status = $status
+    Marker = "real-callback-runtime"
+    EvidenceKind = if ($isReady) { "real-callback-runtime" } else { "incomplete-real-callback-runtime" }
+    RuntimeEvidenceKind = if ($isReady) { "real-callback-runtime" } else { "incomplete-real-callback-runtime" }
+    RequiredSmokeMarkers = @($requiredSmokeMarkers)
+    MissingSmokeMarkers = @($missingSmokeMarkers.ToArray())
+    MatchedSmokeLines = @($matchedSmokeLines)
+    InvocationCount = $invocationCount
+    IsRealCallbackRuntimeProof = $isReady
+    Diagnostic = $diagnostic
+  }
+}
+
+function ConvertTo-MarkdownCell {
+  param(
+    [string]$Value
+  )
+
+  if ([string]::IsNullOrWhiteSpace($Value)) {
+    return ""
+  }
+
+  return (($Value -replace '\|', '\|') -replace "(`r`n|`n|`r)", "<br>")
+}
+
+function Get-PackageConsumerRuntimeProofPreflightMatrix {
+  $matrixPath = Join-Path $RepositoryRoot "artifacts\final-release\package-consumer-runtime-proof-preflight-matrix.json"
+  if (-not (Test-Path -LiteralPath $matrixPath -PathType Leaf)) {
+    return $null
+  }
+
+  return Get-Content -LiteralPath $matrixPath -Raw -Encoding utf8 | ConvertFrom-Json
+}
+
+function Find-PackageConsumerRuntimeProofPreflightEntry {
+  param(
+    [object]$Matrix,
+    [Parameter(Mandatory = $true)]
+    [string]$RuntimePackageKey
+  )
+
+  if ($null -eq $Matrix -or $Matrix.PSObject.Properties.Name -notcontains "entries") {
+    return $null
+  }
+
+  return @($Matrix.entries | Where-Object { $_.runtimePackageKey -eq $RuntimePackageKey } | Select-Object -First 1)[0]
 }
 
 function Find-Signtool {
@@ -567,7 +1084,8 @@ function New-RuntimePackageReferenceItems {
 function Write-ValidationReports {
   param(
     [object[]]$Results,
-    [string]$Directory
+    [string]$Directory,
+    [object]$PreflightMatrix
   )
 
   New-Item -ItemType Directory -Path $Directory -Force | Out-Null
@@ -579,14 +1097,91 @@ function Write-ValidationReports {
   $lines = New-Object System.Collections.Generic.List[string]
   $lines.Add("# Package Consumer Validation Summary")
   $lines.Add("")
-  $lines.Add("| Runtime key | Package | Native assets | Missing native assets | Smoke | Signed consumer output | Elapsed |")
-  $lines.Add("| --- | --- | ---: | --- | --- | --- | ---: |")
+  $lines.Add("| Runtime key | Package | Configuration | Restore | Build | Validation | Native assets | Missing native assets | Smoke | Smoke exit code | Callback runtime evidence | Runtime proof | Smoke diagnostic | Signed consumer output | Elapsed |")
+  $lines.Add("| --- | --- | --- | --- | --- | --- | ---: | --- | --- | ---: | --- | --- | --- | --- | ---: |")
   foreach ($result in $Results) {
     $missing = if ($result.MissingNativeAssets.Count -eq 0) { "none" } else { ($result.MissingNativeAssets -join ", ") }
     $package = '`' + $result.RuntimePackageId + ' ' + $result.RuntimePackageVersion + '`'
-    $lines.Add("| $($result.RuntimePackageKey) | $package | $($result.NativeAssetsFound)/$($result.NativeAssetsExpected) | $missing | $($result.SmokeResult) | $($result.ConsumerOutputSigned) | $($result.ElapsedSeconds)s |")
+    $smokeExitCode = if ($null -eq $result.SmokeExitCode) { "" } else { [string]$result.SmokeExitCode }
+    $callbackEvidenceStatus = if ($result.PSObject.Properties.Name -contains "RealCallbackRuntimeEvidence") { [string]$result.RealCallbackRuntimeEvidence.Status } else { "not-present" }
+    $callbackEvidenceProof = if ($result.PSObject.Properties.Name -contains "RealCallbackRuntimeEvidence") { [bool]$result.RealCallbackRuntimeEvidence.IsRealCallbackRuntimeProof } else { $false }
+    $lines.Add("| $($result.RuntimePackageKey) | $package | $($result.ConsumerBuildConfiguration) | $($result.RestoreSucceeded) | $($result.BuildSucceeded) | $($result.PackageConsumerValidationSucceeded) | $($result.NativeAssetsFound)/$($result.NativeAssetsExpected) | $missing | $($result.SmokeResult) | $smokeExitCode | $callbackEvidenceStatus | $callbackEvidenceProof | $(ConvertTo-MarkdownCell -Value ([string]$result.SmokeDiagnostic)) | $($result.ConsumerOutputSigned) | $($result.ElapsedSeconds)s |")
   }
 
+  $lines.Add("")
+  $lines.Add("## Evidence Classification")
+  $lines.Add("")
+  $lines.Add("| Runtime key | Evidence kind | Runtime smoke classification | Runtime execution evidence | Package consumer runtime proof | Dependency probe only | Readonly summary evidence | Wrapper surface evidence | Real callback proof |")
+  $lines.Add("| --- | --- | --- | --- | --- | --- | --- | --- | --- |")
+  foreach ($result in $Results) {
+    $evidenceKind = if ($result.PSObject.Properties.Name -contains "EvidenceKind") { [string]$result.EvidenceKind } else { "legacy-package-consumer-evidence" }
+    $runtimeSmokeClassification = if ($result.PSObject.Properties.Name -contains "RuntimeSmokeClassification") { [string]$result.RuntimeSmokeClassification } else { [string]$result.SmokeResult }
+    $isRuntimeExecutionEvidence = if ($result.PSObject.Properties.Name -contains "IsRuntimeExecutionEvidence") { [bool]$result.IsRuntimeExecutionEvidence } else { $false }
+    $isPackageConsumerRuntimeProof = if ($result.PSObject.Properties.Name -contains "IsPackageConsumerRuntimeProof") { [bool]$result.IsPackageConsumerRuntimeProof } else { $false }
+    $isDependencyProbeOnly = if ($result.PSObject.Properties.Name -contains "IsDependencyProbeOnly") { [bool]$result.IsDependencyProbeOnly } else { $true }
+    $readonlySummaryEvidenceKind = if ($result.PSObject.Properties.Name -contains "ReadonlySummaryEvidenceKind") { [string]$result.ReadonlySummaryEvidenceKind } else { "not-recorded" }
+    $wrapperSurfaceEvidenceKind = if ($result.PSObject.Properties.Name -contains "WrapperSurfaceEvidenceKind") { [string]$result.WrapperSurfaceEvidenceKind } else { "not-recorded" }
+    $isRealCallbackRuntimeProof = if ($result.PSObject.Properties.Name -contains "IsRealCallbackRuntimeProof") { [bool]$result.IsRealCallbackRuntimeProof } else { $false }
+    $lines.Add("| $($result.RuntimePackageKey) | $evidenceKind | $runtimeSmokeClassification | $isRuntimeExecutionEvidence | $isPackageConsumerRuntimeProof | $isDependencyProbeOnly | $readonlySummaryEvidenceKind | $wrapperSurfaceEvidenceKind | $isRealCallbackRuntimeProof |")
+  }
+  $lines.Add("")
+  $lines.Add("`IsRuntimeExecutionEvidence=True` only means the package consumer smoke exited successfully. It still does not imply real callback runtime proof unless `IsRealCallbackRuntimeProof=True` and the callback markers are present.")
+  $lines.Add("`IsPackageConsumerRuntimeProof=True` is reserved for a clean consumer restore/build/native-copy/runtime-smoke record with package hashes, host metadata, stdout/stderr summaries, real log hashes, no ProjectReference, and strict validator success. This script does not infer that state from readonly summary markers, bridge-only evidence, local feed restore, dependency probe, or `SmokeResult=passed` alone.")
+  $lines.Add("`IsDependencyProbeOnly=True` means the report must be treated as packaging/native-copy/dependency evidence, not as runtime execution proof.")
+  $lines.Add("Readonly summary markers such as `EngineDeploymentSummary=`, `BuilderConfigDeploymentSummary=`, `ExecutionContextDeploymentSummary=`, `SerializationConfigSummary=`, `RuntimeConfigSummary=`, `GraphDiagnosticSummary=`, `GraphExecDiagnosticSummary=`, and `MemoryRangeSummary=` are API/wrapper diagnostics only and are not package-consumer runtime proof.")
+  $lines.Add("")
+  $lines.Add("## Runtime Proof Preflight Boundary")
+  $lines.Add("")
+  if ($null -eq $PreflightMatrix) {
+    $lines.Add("`artifacts/final-release/package-consumer-runtime-proof-preflight-matrix.json` was not found. Treat this report as package-consumer diagnostics only; it cannot promote package-consumer runtime proof.")
+    $lines.Add("")
+  }
+  else {
+    $boundary = $PreflightMatrix.proofBoundary
+    $lines.Add("Preflight matrix schema: ``$($PreflightMatrix.schemaVersion)``.")
+    $lines.Add("Promotion rule: $(ConvertTo-MarkdownCell -Value ([string]$boundary.promotionRule))")
+    $lines.Add("This script copies preflight boundary fields into each result, but it keeps `IsPackageConsumerRuntimeProof=False` until a strict external proof validator promotes a real owner runtime smoke record.")
+    $lines.Add("")
+    $lines.Add("| Runtime key | Preflight entry | Owner action required | Restore source mode | Native assets expected | Can promote from this report | Blocked reason |")
+    $lines.Add("| --- | --- | --- | --- | ---: | --- | --- |")
+    foreach ($result in $Results) {
+      if ($result.PSObject.Properties.Name -contains "RuntimeProofPreflight") {
+        $preflight = $result.RuntimeProofPreflight
+        $hasEntry = [bool]$preflight.EntryFound
+        $ownerAction = [bool]$preflight.OwnerActionRequired
+        $restoreSourceMode = [string]$preflight.RestoreSourceMode
+        $expected = [string]$preflight.NativeAssetCopyExpected
+        $canPromote = [bool]$preflight.CanPromotePackageConsumerRuntimeProof
+        $blockedReason = [string]$preflight.BlockedReason
+      }
+      else {
+        $hasEntry = $false
+        $ownerAction = $true
+        $restoreSourceMode = "not-recorded"
+        $expected = ""
+        $canPromote = $false
+        $blockedReason = "preflight-entry-not-recorded"
+      }
+
+      $lines.Add("| $($result.RuntimePackageKey) | $hasEntry | $ownerAction | $restoreSourceMode | $expected | $canPromote | $(ConvertTo-MarkdownCell -Value $blockedReason) |")
+    }
+    $lines.Add("")
+  }
+
+  $lines.Add("Real callback runtime evidence is not inferred from `SmokeResult=passed`. Future TensorRT callback smoke must emit `EvidenceKind=real-callback-runtime`, `RealCallbackRuntime=True`, `CallbackKind`, `TensorRtLine`, `CudaLine`, `RuntimePackageKey`, `OwnerId`, `InvocationCount`, `AllocationCount`, `ReleaseCount`, `FailureCount`, `InFlightCallbackCount`, `LastStatus`, `LastDiagnostic`, and `FullPackageConsumerReport` before readiness can set `isRealCallbackRuntimeProof=true`.")
+  $lines.Add('`RealCallbackRuntimeEvidence.Status` is `not-present`, `blocked-by-cuda-driver`, `blocked-by-application-control`, `blocked`, `incomplete`, or `ready`; only `ready` with `IsRealCallbackRuntimeProof=True` can be promoted by readiness.')
+  $lines.Add("")
+  $lines.Add("| Runtime key | Callback runtime status | Evidence kind | Missing markers | Diagnostic |")
+  $lines.Add("| --- | --- | --- | --- | --- |")
+  foreach ($result in $Results) {
+    if ($result.PSObject.Properties.Name -notcontains "RealCallbackRuntimeEvidence") {
+      continue
+    }
+
+    $evidence = $result.RealCallbackRuntimeEvidence
+    $missingMarkers = if (@($evidence.MissingSmokeMarkers).Count -eq 0) { "none" } else { @($evidence.MissingSmokeMarkers) -join ", " }
+    $lines.Add("| $($result.RuntimePackageKey) | $($evidence.Status) | $($evidence.EvidenceKind) | $(ConvertTo-MarkdownCell -Value $missingMarkers) | $(ConvertTo-MarkdownCell -Value ([string]$evidence.Diagnostic)) |")
+  }
   $lines.Add("")
   $lines.Add('Generated by `eng/Test-PackageConsumer.ps1`.')
   Set-Content -LiteralPath $markdownPath -Value $lines -Encoding utf8
@@ -706,7 +1301,204 @@ $($runtimePackageReferences -join "`r`n")
 
   $program = @"
 using JYPPX.CudaSharp;
+using JYPPX.Shared.Interop;
 using JYPPX.TensorRtSharp;
+
+static string GetStringArgument(string[] args, string name, string defaultValue)
+{
+    for (int index = 0; index < args.Length - 1; index++)
+    {
+        if (string.Equals(args[index], name, StringComparison.OrdinalIgnoreCase))
+        {
+            return args[index + 1];
+        }
+    }
+
+    return defaultValue;
+}
+
+static bool HasSwitch(string[] args, string name)
+{
+    return args.Any(argument => string.Equals(argument, name, StringComparison.OrdinalIgnoreCase));
+}
+
+static string SanitizeSmokeValue(string value)
+{
+    return value.Replace(Environment.NewLine, " ").Replace(';', ',');
+}
+
+static string FormatDebugListenerRealNonNullAttachRuntimeSmoke(TensorRtDebugListenerRealNonNullAttachRuntimeSmokeResult result)
+{
+    return "debug-listener-real-non-null-attach-runtime-smoke" +
+        $";EvidenceKind={result.EvidenceKind}" +
+        $";RuntimeEvidenceKind={result.RuntimeEvidenceKind}" +
+        $";RealCallbackRuntime={result.RealCallbackRuntime}" +
+        $";IsRealCallbackRuntimeProof={result.IsRealCallbackRuntimeProof}" +
+        $";CallbackKind={result.CallbackKind}" +
+        $";TensorRtLine={result.TensorRtLine}" +
+        $";RuntimePackageKey={SanitizeSmokeValue(result.RuntimePackageKey)}" +
+        $";Status={result.Status}" +
+        $";OptInEnabled={result.OptInEnabled}" +
+        $";FullPackageConsumerReport={result.FullPackageConsumerReport}" +
+        $";AttachGuardReady={result.AttachGuardReady}" +
+        $";NativeVTableReady={result.NativeVTableReady}" +
+        $";BorrowedDebugTensorRuntimeReady={result.BorrowedDebugTensorRuntimeReady}" +
+        $";CallbackInvocationReady={result.CallbackInvocationReady}" +
+        $";AttachAttempted={result.AttachAttempted}" +
+        $";AttachSucceeded={result.AttachSucceeded}" +
+        $";DetachAttempted={result.DetachAttempted}" +
+        $";DetachSucceeded={result.DetachSucceeded}" +
+        $";RollbackAttempted={result.RollbackAttempted}" +
+        $";RollbackSucceeded={result.RollbackSucceeded}" +
+        $";NativeVTableInstalled={result.NativeVTableInstalled}" +
+        $";ProcessDebugTensorInvoked={result.ProcessDebugTensorInvoked}" +
+        $";InvocationCount={result.InvocationCount}" +
+        $";AllocationCount={result.AllocationCount}" +
+        $";ReleaseCount={result.ReleaseCount}" +
+        $";FailureCount={result.FailureCount}" +
+        $";InFlightCallbackCount={result.InFlightCallbackCount}" +
+        $";LastStatus={result.LastStatus}" +
+        $";LastDiagnostic={SanitizeSmokeValue(result.LastDiagnostic)}" +
+        $";ReportPointerFree={result.ReportPointerFree}" +
+        $";CanAttemptRuntimeProof={result.CanAttemptRuntimeProof}" +
+        $";CanPromoteRealCallbackRuntime={result.CanPromoteRealCallbackRuntime}" +
+        $";RuntimeProofBlocked={result.RuntimeProofBlocked}" +
+        $";DeferredRowsStillRequired={result.DeferredRowsStillRequired}" +
+        $";BlockedPrerequisiteCount={result.BlockedPrerequisiteCount}" +
+        $";ReasonRuntimeProofStillBlocked={SanitizeSmokeValue(result.ReasonRuntimeProofStillBlocked)}" +
+        $";BlockedPrerequisites={SanitizeSmokeValue(string.Join(",", result.BlockedPrerequisites))}" +
+        $";Diagnostic={SanitizeSmokeValue(result.Diagnostic)}";
+}
+
+static string FormatDebugListenerProcessDebugTensorCallbackTrampoline(TensorRtDebugListenerProcessDebugTensorCallbackTrampolineResult result)
+{
+    return "debug-listener-process-debug-tensor-callback-trampoline" +
+        $";EvidenceKind={result.EvidenceKind}" +
+        $";RuntimeEvidenceKind={result.RuntimeEvidenceKind}" +
+        $";RealCallbackRuntime={result.RealCallbackRuntime}" +
+        $";IsRealCallbackRuntimeProof={result.IsRealCallbackRuntimeProof}" +
+        $";CallbackKind={result.CallbackKind}" +
+        $";TensorRtLine={result.TensorRtLine}" +
+        $";RuntimePackageKey={SanitizeSmokeValue(result.RuntimePackageKey)}" +
+        $";Status={result.Status}" +
+        $";TrampolineShapeReady={result.TrampolineShapeReady}" +
+        $";NativeCallbackEntryLocated={result.NativeCallbackEntryLocated}" +
+        $";NoThrowCallbackEntryReady={result.NoThrowCallbackEntryReady}" +
+        $";ExceptionCaptureReady={result.ExceptionCaptureReady}" +
+        $";CallbackStatusMappingReady={result.CallbackStatusMappingReady}" +
+        $";InFlightAccountingReady={result.InFlightAccountingReady}" +
+        $";DetachBeforeReleaseReady={result.DetachBeforeReleaseReady}" +
+        $";BorrowedDebugTensorMetadataCopyReady={result.BorrowedDebugTensorMetadataCopyReady}" +
+        $";BorrowedDebugTensorPointerExposed={result.BorrowedDebugTensorPointerExposed}" +
+        $";BorrowedDebugTensorDataPointerExposed={result.BorrowedDebugTensorDataPointerExposed}" +
+        $";PointerFreeSurfaceReady={result.PointerFreeSurfaceReady}" +
+        $";ProcessDebugTensorRuntimeReady={result.ProcessDebugTensorRuntimeReady}" +
+        $";OptInEnabled={result.OptInEnabled}" +
+        $";FullPackageConsumerReport={result.FullPackageConsumerReport}" +
+        $";AttachAttempted={result.AttachAttempted}" +
+        $";AttachSucceeded={result.AttachSucceeded}" +
+        $";NativeVTableInstalled={result.NativeVTableInstalled}" +
+        $";ProcessDebugTensorInvoked={result.ProcessDebugTensorInvoked}" +
+        $";InvocationCount={result.InvocationCount}" +
+        $";CallbackStubEntryCount={result.CallbackStubEntryCount}" +
+        $";CallbackStubLeaveCount={result.CallbackStubLeaveCount}" +
+        $";FailureCount={result.FailureCount}" +
+        $";InFlightCallbackCount={result.InFlightCallbackCount}" +
+        $";LastStatus={result.LastStatus}" +
+        $";LastDiagnostic={SanitizeSmokeValue(result.LastDiagnostic)}" +
+        $";CanAttemptRuntimeProof={result.CanAttemptRuntimeProof}" +
+        $";CanPromoteRealCallbackRuntime={result.CanPromoteRealCallbackRuntime}" +
+        $";RuntimeProofBlocked={result.RuntimeProofBlocked}" +
+        $";DeferredRowsStillRequired={result.DeferredRowsStillRequired}" +
+        $";BlockedPrerequisiteCount={result.BlockedPrerequisiteCount}" +
+        $";TensorName={SanitizeSmokeValue(result.Metadata.TensorName)}" +
+        $";TensorNameLength={result.Metadata.TensorNameLength}" +
+        $";DataType={result.Metadata.DataType}" +
+        $";Location={result.Metadata.Location}" +
+        $";TensorShapeRank={result.Metadata.TensorShapeRank}" +
+        $";ShapeSummary={SanitizeSmokeValue(result.Metadata.ShapeSummary)}" +
+        $";MetadataCopied={result.Metadata.MetadataCopied}" +
+        $";ReasonRuntimeProofStillBlocked={SanitizeSmokeValue(result.ReasonRuntimeProofStillBlocked)}" +
+        $";BlockedPrerequisites={SanitizeSmokeValue(string.Join(",", result.BlockedPrerequisites))}" +
+        $";Diagnostic={SanitizeSmokeValue(result.Diagnostic)}";
+}
+
+static string FormatDebugListenerRealCallbackRuntimeProof(TensorRtDebugListenerRealCallbackRuntimeProofResult result)
+{
+    return "debug-listener-real-callback-runtime-proof" +
+        $";EvidenceKind={result.EvidenceKind}" +
+        $";RuntimeEvidenceKind={result.RuntimeEvidenceKind}" +
+        $";RealCallbackRuntime={result.RealCallbackRuntime}" +
+        $";IsRealCallbackRuntimeProof={result.IsRealCallbackRuntimeProof}" +
+        $";CallbackKind={result.CallbackKind}" +
+        $";TensorRtLine={result.TensorRtLine}" +
+        $";RuntimePackageKey={SanitizeSmokeValue(result.RuntimePackageKey)}" +
+        $";Status={result.Status}" +
+        $";OptInEnabled={result.OptInEnabled}" +
+        $";FullPackageConsumerReport={result.FullPackageConsumerReport}" +
+        $";RuntimeSmokeReady={result.RuntimeSmokeReady}" +
+        $";TrampolineShapeReady={result.TrampolineShapeReady}" +
+        $";AttachAttempted={result.AttachAttempted}" +
+        $";AttachSucceeded={result.AttachSucceeded}" +
+        $";DetachAttempted={result.DetachAttempted}" +
+        $";DetachSucceeded={result.DetachSucceeded}" +
+        $";RollbackAttempted={result.RollbackAttempted}" +
+        $";RollbackSucceeded={result.RollbackSucceeded}" +
+        $";NativeVTableInstalled={result.NativeVTableInstalled}" +
+        $";ProcessDebugTensorInvoked={result.ProcessDebugTensorInvoked}" +
+        $";InvocationCount={result.InvocationCount}" +
+        $";FailureCount={result.FailureCount}" +
+        $";InFlightCallbackCount={result.InFlightCallbackCount}" +
+        $";BorrowedDebugTensorMetadataCopied={result.BorrowedDebugTensorMetadataCopied}" +
+        $";PointerFreeSurfaceReady={result.PointerFreeSurfaceReady}" +
+        $";ProcessDebugTensorRuntimeReady={result.ProcessDebugTensorRuntimeReady}" +
+        $";AttemptedNoInvocation={result.AttemptedNoInvocation}" +
+        $";LastStatus={result.LastStatus}" +
+        $";LastDiagnostic={SanitizeSmokeValue(result.LastDiagnostic)}" +
+        $";CanAttemptRuntimeProof={result.CanAttemptRuntimeProof}" +
+        $";CanPromoteRealCallbackRuntime={result.CanPromoteRealCallbackRuntime}" +
+        $";RuntimeProofBlocked={result.RuntimeProofBlocked}" +
+        $";DeferredRowsStillRequired={result.DeferredRowsStillRequired}" +
+        $";BlockedPrerequisiteCount={result.BlockedPrerequisiteCount}" +
+        $";ReasonRuntimeProofStillBlocked={SanitizeSmokeValue(result.ReasonRuntimeProofStillBlocked)}" +
+        $";BlockedPrerequisites={SanitizeSmokeValue(string.Join(",", result.BlockedPrerequisites))}" +
+        $";Diagnostic={SanitizeSmokeValue(result.Diagnostic)}";
+}
+
+static string FormatDebugListenerCallbackProofGapReport(TensorRtDebugListenerCallbackProofGapReportResult result)
+{
+    return "debug-listener-callback-proof-gap-report" +
+        $";EvidenceKind={result.EvidenceKind}" +
+        $";RuntimeEvidenceKind={result.RuntimeEvidenceKind}" +
+        $";RealCallbackRuntime={result.RealCallbackRuntime}" +
+        $";IsRealCallbackRuntimeProof={result.IsRealCallbackRuntimeProof}" +
+        $";CallbackKind={result.CallbackKind}" +
+        $";TensorRtLine={result.TensorRtLine}" +
+        $";RuntimePackageKey={SanitizeSmokeValue(result.RuntimePackageKey)}" +
+        $";Status={result.Status}" +
+        $";NonNullAttachStillDisabled={result.NonNullAttachStillDisabled}" +
+        $";NativeAttachEntryReady={result.NativeAttachEntryReady}" +
+        $";NativeVTableInstallBlocked={result.NativeVTableInstallBlocked}" +
+        $";NoThrowCallbackEntryReady={result.NoThrowCallbackEntryReady}" +
+        $";ExceptionStatusMappingReady={result.ExceptionStatusMappingReady}" +
+        $";InFlightAccountingReady={result.InFlightAccountingReady}" +
+        $";BorrowedDebugTensorMetadataCopied={result.BorrowedDebugTensorMetadataCopied}" +
+        $";DetachRollbackReady={result.DetachRollbackReady}" +
+        $";ProcessDebugTensorRuntimeInvoked={result.ProcessDebugTensorRuntimeInvoked}" +
+        $";FullPackageConsumerRuntimeProofReady={result.FullPackageConsumerRuntimeProofReady}" +
+        $";PointerFreeSurfaceReady={result.PointerFreeSurfaceReady}" +
+        $";AttemptedNoInvocation={result.AttemptedNoInvocation}" +
+        $";InvocationCount={result.InvocationCount}" +
+        $";FailureCount={result.FailureCount}" +
+        $";InFlightCallbackCount={result.InFlightCallbackCount}" +
+        $";CanAttemptRuntimeProof={result.CanAttemptRuntimeProof}" +
+        $";CanPromoteRealCallbackRuntime={result.CanPromoteRealCallbackRuntime}" +
+        $";RuntimeProofBlocked={result.RuntimeProofBlocked}" +
+        $";DeferredRowsStillRequired={result.DeferredRowsStillRequired}" +
+        $";GapReasonCount={result.GapReasonCount}" +
+        $";GapReasons={SanitizeSmokeValue(string.Join(",", result.GapReasons))}" +
+        $";Diagnostic={SanitizeSmokeValue(result.Diagnostic)}";
+}
 
 Console.WriteLine("TensorRtAssemblyBridge=" + TensorRtSharpInfo.NativeBridgeLibraryName);
 Console.WriteLine("CudaAssemblyBridge=" + CudaSharpInfo.NativeBridgeLibraryName);
@@ -716,6 +1508,54 @@ Console.WriteLine("Bridge=" + tensorRt.BuildInfo.BridgeName + " TRT=" + tensorRt
 
 var cuda = CudaEnvironmentProbe.GetCurrent();
 Console.WriteLine("CudaDevices=" + cuda.CudaRuntimeInfo.DeviceCount + " Vendor=" + cuda.CudaRuntimeInfo.VendorDependencyAvailable);
+
+string runtimePackageKey = GetStringArgument(args, "--runtime-package-key", string.Empty);
+bool enableDebugListenerRuntimeSmoke =
+    HasSwitch(args, "--enable-debug-listener-runtime-smoke") ||
+    string.Equals(Environment.GetEnvironmentVariable("JYPPX_ENABLE_DEBUG_LISTENER_RUNTIME_SMOKE"), "1", StringComparison.OrdinalIgnoreCase);
+using TensorRtDebugListenerCallbackOwner debugListenerOwner = new TensorRtDebugListenerCallbackOwner();
+TensorRtDebugListenerCallbackRequest debugListenerRequest = new TensorRtDebugListenerCallbackRequest(
+    "package_consumer_debug_tensor",
+    TensorRtDataType.Float,
+    TensorRtTensorLocation.Device,
+    new long[] { 1, 3, 16, 16 },
+    "package-consumer-debug-listener-runtime-smoke",
+    isInput: true,
+    isExecutionTensor: true);
+debugListenerOwner.RunDesignDiagnostic(TensorRtApiLine.TensorRt11, debugListenerRequest);
+debugListenerOwner.Dispose();
+TensorRtDebugListenerCallbackOwnerSnapshot debugListenerSnapshot = debugListenerOwner.GetSnapshot("post-dispose");
+TensorRtDebugListenerRuntimeProofAttemptPreflightResult debugListenerAttemptPreflight =
+    TensorRtDebugListenerRuntimeProofAttemptPreflight.Evaluate(debugListenerSnapshot);
+TensorRtDebugListenerRealNonNullAttachRuntimeSmokeResult debugListenerRuntimeSmoke =
+    TensorRtDebugListenerRealNonNullAttachRuntimeSmoke.Evaluate(
+        debugListenerAttemptPreflight,
+        runtimePackageKey,
+        enableDebugListenerRuntimeSmoke,
+        fullPackageConsumerReport: true);
+Console.WriteLine("DebugListenerRealNonNullAttachRuntimeSmoke=" + FormatDebugListenerRealNonNullAttachRuntimeSmoke(debugListenerRuntimeSmoke));
+TensorRtDebugListenerNoThrowVTableCallbackStubResult debugListenerCallbackStub =
+    TensorRtDebugListenerNoThrowVTableCallbackStub.Evaluate(debugListenerSnapshot);
+TensorRtDebugListenerBorrowedDebugTensorMetadataRuntimeGateResult debugListenerMetadataGate =
+    TensorRtDebugListenerBorrowedDebugTensorMetadataRuntimeGate.Evaluate(debugListenerSnapshot);
+TensorRtDebugListenerProcessDebugTensorCallbackTrampolineResult debugListenerCallbackTrampoline =
+    TensorRtDebugListenerProcessDebugTensorCallbackTrampoline.Evaluate(
+        debugListenerCallbackStub,
+        debugListenerMetadataGate,
+        debugListenerRuntimeSmoke);
+Console.WriteLine("DebugListenerProcessDebugTensorCallbackTrampoline=" + FormatDebugListenerProcessDebugTensorCallbackTrampoline(debugListenerCallbackTrampoline));
+TensorRtDebugListenerRealCallbackRuntimeProofResult debugListenerRealCallbackRuntimeProof =
+    TensorRtDebugListenerRealCallbackRuntimeProof.Evaluate(
+        debugListenerRuntimeSmoke,
+        debugListenerCallbackTrampoline);
+Console.WriteLine("DebugListenerRealCallbackRuntimeProof=" + FormatDebugListenerRealCallbackRuntimeProof(debugListenerRealCallbackRuntimeProof));
+TensorRtDebugListenerCallbackProofGapReportResult debugListenerCallbackProofGapReport =
+    TensorRtDebugListenerCallbackProofGapReport.Evaluate(
+        debugListenerAttemptPreflight,
+        debugListenerRuntimeSmoke,
+        debugListenerCallbackTrampoline,
+        debugListenerRealCallbackRuntimeProof);
+Console.WriteLine("DebugListenerCallbackProofGapReport=" + FormatDebugListenerCallbackProofGapReport(debugListenerCallbackProofGapReport));
 "@
 
   Set-Content -LiteralPath (Join-Path $resolvedConsumerRoot "NuGet.config") -Value $nugetConfig -Encoding utf8
@@ -777,30 +1617,149 @@ Console.WriteLine("CudaDevices=" + cuda.CudaRuntimeInfo.DeviceCount + " Vendor="
     @("PackageConsumerSmoke.dll", "PackageConsumerSmoke.exe")
   )
 
+  $smokeRequested = [bool]$ShouldRunSmoke
   $smokeResult = "not-requested"
+  $smokeExitCode = $null
+  $smokeCommand = ""
+  $smokeDiagnostic = "smoke was not requested."
+  $smokeOutputLines = @()
   if ($ShouldRunSmoke) {
-    $smokeArguments = @("run", "--project", (Join-Path $resolvedConsumerRoot "PackageConsumerSmoke.csproj"), "-c", "Release", "--no-build")
+    $smokeArguments = @("run", "--project", (Join-Path $resolvedConsumerRoot "PackageConsumerSmoke.csproj"), "-c", "Release", "--no-build", "--", "--runtime-package-key", $Key)
+    $smokeCommand = "dotnet $($smokeArguments -join ' ')"
     $smokeRun = Invoke-DotNetCommand -Arguments $smokeArguments
+    $smokeExitCode = [int]$smokeRun.ExitCode
+    $smokeOutputLines = @($smokeRun.OutputLines | ForEach-Object { [string]$_ })
     if ($smokeRun.ExitCode -eq 0) {
       $smokeResult = "passed"
+      $smokeDiagnostic = "smoke completed successfully."
     }
     elseif (Test-ApplicationControlPolicyBlock -OutputLines $smokeRun.OutputLines) {
       $smokeResult = "blocked-by-application-control"
+      $smokeDiagnostic = "smoke execution was blocked by the Windows application control policy."
       Write-Warning "Package consumer smoke was blocked by the Windows application control policy on this runner (0x800711C7). Restore/build/native asset validation passed, so packaging will continue."
     }
+    elseif (Test-CudaDriverRuntimeCompatibilityBlock -OutputLines $smokeRun.OutputLines) {
+      $smokeResult = "blocked-by-cuda-driver"
+      $smokeDiagnostic = "smoke execution reached the packaged runtime, but CUDA driver/runtime compatibility blocked execution; cudaRuntimeGetVersion reported CUDA error 35."
+      Write-Warning "Package consumer smoke reached the packaged runtime but was blocked by CUDA driver/runtime compatibility (CUDA error 35). Restore/build/native asset validation passed, so packaging will continue."
+    }
     else {
-      throw "dotnet $($smokeArguments -join ' ') failed with exit code $($smokeRun.ExitCode)."
+      $smokeResult = "failed"
+      $smokeDiagnostic = "$smokeCommand failed with exit code $($smokeRun.ExitCode)."
+      if (-not $AllowSmokeFailure.IsPresent) {
+        throw "$smokeDiagnostic`n$($smokeOutputLines -join [Environment]::NewLine)"
+      }
+
+      Write-Warning "Package consumer smoke failed but -AllowSmokeFailure was provided. Restore/build/native asset validation passed, so a diagnostic report will be written."
     }
   }
 
   $timer.Stop()
   $elapsedSeconds = [Math]::Round($timer.Elapsed.TotalSeconds, 2)
+  $realCallbackRuntimeEvidence = New-RealCallbackRuntimeEvidenceFromSmoke `
+    -SmokeRequested $smokeRequested `
+    -SmokeResult $smokeResult `
+    -SmokeExitCode $smokeExitCode `
+    -SmokeDiagnostic $smokeDiagnostic `
+    -SmokeOutputLines $smokeOutputLines
+
+  if (-not $smokeRequested) {
+    $runtimeSmokeClassification = "not-requested"
+    $packageConsumerEvidenceKind = "package-consumer-native-copy"
+  }
+  elseif ($smokeResult -eq "passed") {
+    $runtimeSmokeClassification = "runtime-smoke-passed"
+    $packageConsumerEvidenceKind = "full-runtime-package-consumer-smoke"
+  }
+  elseif ($smokeResult -eq "blocked-by-cuda-driver") {
+    $runtimeSmokeClassification = "runtime-smoke-driver-blocked"
+    $packageConsumerEvidenceKind = "full-runtime-package-consumer-smoke-driver-blocked"
+  }
+  elseif ($smokeResult -eq "blocked-by-application-control") {
+    $runtimeSmokeClassification = "runtime-smoke-application-control-blocked"
+    $packageConsumerEvidenceKind = "full-runtime-package-consumer-smoke-application-control-blocked"
+  }
+  else {
+    $runtimeSmokeClassification = "runtime-smoke-failed"
+    $packageConsumerEvidenceKind = "full-runtime-package-consumer-smoke-failed"
+  }
+
+  $isRuntimeExecutionEvidence = $smokeRequested -and $smokeResult -eq "passed"
+  $isDependencyProbeOnly = -not $smokeRequested -or $smokeResult -ne "passed"
+  $isRealCallbackRuntimeProof = [bool]$realCallbackRuntimeEvidence.IsRealCallbackRuntimeProof
+  $isPackageConsumerRuntimeProof = $false
+  $readonlySummaryEvidenceKind = "readonly-summary-diagnostics-not-runtime-proof"
+  $wrapperSurfaceEvidenceKind = "package-consumer-wrapper-surface-diagnostics"
+  $runtimeProofPreflightEntry = Find-PackageConsumerRuntimeProofPreflightEntry -Matrix $packageConsumerRuntimeProofPreflightMatrix -RuntimePackageKey $Key
+  $runtimeProofPreflight = if ($null -eq $runtimeProofPreflightEntry) {
+    [pscustomobject]@{
+      MatrixSchemaVersion = if ($null -eq $packageConsumerRuntimeProofPreflightMatrix) { "not-found" } else { [string]$packageConsumerRuntimeProofPreflightMatrix.schemaVersion }
+      EntryFound = $false
+      OwnerActionRequired = $true
+      RestoreSourceMode = "not-recorded"
+      UsesProjectReference = $false
+      NativeAssetCopyExpected = $expectedNativeFiles.Count
+      NativeAssetCopyActual = $null
+      RuntimeSmokeRequired = $true
+      CanPromotePackageConsumerRuntimeProof = $false
+      BlockedReason = "preflight-entry-missing-or-matrix-not-found"
+      ValidatorCommand = ""
+    }
+  }
+  else {
+    [pscustomobject]@{
+      MatrixSchemaVersion = [string]$packageConsumerRuntimeProofPreflightMatrix.schemaVersion
+      EntryFound = $true
+      OwnerActionRequired = [bool]$runtimeProofPreflightEntry.ownerActionRequired
+      RestoreSourceMode = [string]$runtimeProofPreflightEntry.restoreSourceMode
+      UsesProjectReference = [bool]$runtimeProofPreflightEntry.usesProjectReference
+      NativeAssetCopyExpected = [int]$runtimeProofPreflightEntry.nativeAssetCopyExpected
+      NativeAssetCopyActual = $runtimeProofPreflightEntry.nativeAssetCopyActual
+      RuntimeSmokeRequired = [bool]$runtimeProofPreflightEntry.runtimeSmokeRequired
+      CanPromotePackageConsumerRuntimeProof = [bool]$runtimeProofPreflightEntry.canPromotePackageConsumerRuntimeProof
+      BlockedReason = [string]$runtimeProofPreflightEntry.blockedReason
+      ValidatorCommand = [string]$runtimeProofPreflightEntry.validatorCommand
+    }
+  }
+  $forbiddenProofSubstitutes = @(
+    "readonly summary",
+    "readonly diagnostics",
+    "TensorRtExec report",
+    "OnnxToEngine report",
+    "YoloVision matrix",
+    "bridge-only",
+    "dependency probe",
+    "local feed",
+    "ProjectReference",
+    "direct .nupkg",
+    "build-only",
+    "dry-run",
+    "template",
+    "blocked-by-cuda-driver",
+    "SmokeResult=passed without strict validator"
+  )
+  $requiredRuntimeProofFields = @(
+    "cleanConsumerRoot",
+    "noProjectReference",
+    "packageRestoreSource",
+    "managedPackageSha256",
+    "runtimePackageSha256",
+    "nativeAssetListingSha256",
+    "runtimeSmokeLogPath",
+    "runtimeSmokeLogSha256",
+    "stdoutSummary",
+    "stderrSummary",
+    "hostMetadata",
+    "strictValidatorPassed"
+  )
 
   Write-Host "Package consumer validation passed for $Key."
   Write-Host "  Managed package: $($ManagedPackage.Id) $($ManagedPackage.Version)"
   Write-Host "  Runtime package: $($RuntimeNupkg.Id) $($RuntimeNupkg.Version)"
   Write-Host "  Native assets: $foundNativeFileCount/$($expectedNativeFiles.Count)"
   Write-Host "  Smoke: $smokeResult"
+  Write-Host "  Smoke diagnostic: $smokeDiagnostic"
+  Write-Host "  Real callback runtime evidence: $($realCallbackRuntimeEvidence.Status) proof=$($realCallbackRuntimeEvidence.IsRealCallbackRuntimeProof)"
   Write-Host "  Signed consumer output: $signedConsumerOutputCount"
   Write-Host "  Consumer signing certificate: $consumerSigningThumbprint"
   Write-Host "  Consumer signing trust: publisher=$consumerSigningTrustedPublisher root=$consumerSigningRoot"
@@ -818,10 +1777,35 @@ Console.WriteLine("CudaDevices=" + cuda.CudaRuntimeInfo.DeviceCount + " Vendor="
     RuntimeIdentifier = $RuntimePackage.rid
     DistributionTier = $RuntimePackage.distributionTier
     ValidationState = $RuntimePackage.validationState
+    ConsumerBuildConfiguration = "Release"
+    RestoreSucceeded = $true
+    BuildSucceeded = $true
+    PackageConsumerValidationSucceeded = $true
     NativeAssetsExpected = $expectedNativeFiles.Count
     NativeAssetsFound = $foundNativeFileCount
     MissingNativeAssets = @($missingNativeFiles.ToArray())
+    SmokeRequested = $smokeRequested
     SmokeResult = $smokeResult
+    SmokeExitCode = $smokeExitCode
+    SmokeCommand = $smokeCommand
+    SmokeDiagnostic = $smokeDiagnostic
+    SmokeOutputLines = @($smokeOutputLines)
+    SmokeFailureAllowed = $AllowSmokeFailure.IsPresent
+    EvidenceKind = $packageConsumerEvidenceKind
+    IsRuntimeExecutionEvidence = $isRuntimeExecutionEvidence
+    IsPackageConsumerRuntimeProof = $isPackageConsumerRuntimeProof
+    CanPromoteRuntimeProof = $false
+    CanPublishPublicly = $false
+    CanCloseReleaseIssue = $false
+    RuntimeSmokeClassification = $runtimeSmokeClassification
+    IsDependencyProbeOnly = $isDependencyProbeOnly
+    IsRealCallbackRuntimeProof = $isRealCallbackRuntimeProof
+    ReadonlySummaryEvidenceKind = $readonlySummaryEvidenceKind
+    WrapperSurfaceEvidenceKind = $wrapperSurfaceEvidenceKind
+    RuntimeProofPreflight = $runtimeProofPreflight
+    ForbiddenProofSubstitutes = @($forbiddenProofSubstitutes)
+    RequiredRuntimeProofFields = @($requiredRuntimeProofFields)
+    RealCallbackRuntimeEvidence = $realCallbackRuntimeEvidence
     ConsumerOutputSigned = $SignConsumerOutput.IsPresent
     ConsumerOutputSignedFileCount = $signedConsumerOutputCount
     ConsumerOutputSigningCertificateThumbprint = $consumerSigningThumbprint
@@ -863,7 +1847,9 @@ if ($keys.Count -eq 0) {
 $smokeKeys = @(Expand-KeyList -Values $SmokeRuntimePackageKey)
 $manifestPath = Join-Path $RepositoryRoot "pack\runtime\runtime-packages.manifest.json"
 $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding utf8 | ConvertFrom-Json
+$packageConsumerRuntimeProofPreflightMatrix = Get-PackageConsumerRuntimeProofPreflightMatrix
 $managedPackage = Find-Package -Directory $ManagedPackageDirectory -PackageId "JYPPX.TensorRT.CSharp.API"
+Assert-ManagedPackageFreshness -ManagedPackage $managedPackage
 $results = New-Object System.Collections.Generic.List[object]
 
 foreach ($key in $keys) {
@@ -877,4 +1863,4 @@ foreach ($key in $keys) {
   $results.Add((Invoke-PackageConsumerValidation -Key $key -RuntimePackage $runtimePackage -ManagedPackage $managedPackage -RuntimeNupkg $runtimeNupkg -ShouldRunSmoke $shouldRunSmoke))
 }
 
-Write-ValidationReports -Results @($results.ToArray()) -Directory $ReportDirectory
+Write-ValidationReports -Results @($results.ToArray()) -Directory $ReportDirectory -PreflightMatrix $packageConsumerRuntimeProofPreflightMatrix

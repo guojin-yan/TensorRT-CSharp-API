@@ -1,3 +1,241 @@
+#if JYPPX_HAS_TENSORRT
+static JYPPX_StatusCode jyppx_trt11_callback_allocator_control_exception(const char* feature_name, const std::exception& exception)
+{
+    return jyppx::tensorrt::report_vendor_exception(kLine, feature_name, exception.what());
+}
+
+static JYPPX_StatusCode jyppx_trt11_callback_allocator_control_unknown_exception(const char* feature_name)
+{
+    return jyppx::tensorrt::report_vendor_exception(kLine, feature_name, "unknown native exception");
+}
+
+static JYPPX_StatusCode trt11_builder_config_set_progress_monitor_with_seh_guard(
+    nvinfer1::IBuilderConfig* config_payload,
+    ManagedProgressMonitor* monitor_payload,
+    const char* feature_name)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        config_payload->setProgressMonitor(monitor_payload);
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    config_payload->setProgressMonitor(monitor_payload);
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+static JYPPX_StatusCode trt11_builder_config_has_progress_monitor_with_seh_guard(
+    nvinfer1::IBuilderConfig* config_payload,
+    JYPPX_Boolean* out_has_monitor,
+    const char* feature_name)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        *out_has_monitor = config_payload->getProgressMonitor() != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        *out_has_monitor = JYPPX_FALSE;
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    *out_has_monitor = config_payload->getProgressMonitor() != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+static JYPPX_StatusCode trt11_builder_config_clear_progress_monitor_with_seh_guard(
+    nvinfer1::IBuilderConfig* config_payload,
+    const char* feature_name)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        config_payload->setProgressMonitor(nullptr);
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    config_payload->setProgressMonitor(nullptr);
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+static JYPPX_StatusCode trt11_engine_inspector_has_error_recorder_with_seh_guard(
+    nvinfer1::IEngineInspector* inspector_payload,
+    JYPPX_Boolean* out_has_recorder,
+    const char* feature_name)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        *out_has_recorder = inspector_payload->getErrorRecorder() != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        *out_has_recorder = JYPPX_FALSE;
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    *out_has_recorder = inspector_payload->getErrorRecorder() != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+static JYPPX_StatusCode trt11_execution_context_clear_output_allocator_with_seh_guard(
+    nvinfer1::IExecutionContext* context_payload,
+    const char* tensor_name,
+    JYPPX_Boolean* out_cleared,
+    const char* feature_name)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        *out_cleared = context_payload->setOutputAllocator(tensor_name, nullptr) ? JYPPX_TRUE : JYPPX_FALSE;
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        *out_cleared = JYPPX_FALSE;
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    *out_cleared = context_payload->setOutputAllocator(tensor_name, nullptr) ? JYPPX_TRUE : JYPPX_FALSE;
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+static JYPPX_StatusCode trt11_execution_context_clear_temporary_storage_allocator_with_seh_guard(
+    nvinfer1::IExecutionContext* context_payload,
+    JYPPX_Boolean* out_cleared,
+    const char* feature_name)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        *out_cleared = context_payload->setTemporaryStorageAllocator(nullptr) ? JYPPX_TRUE : JYPPX_FALSE;
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        *out_cleared = JYPPX_FALSE;
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    *out_cleared = context_payload->setTemporaryStorageAllocator(nullptr) ? JYPPX_TRUE : JYPPX_FALSE;
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+static JYPPX_StatusCode trt11_execution_context_clear_debug_listener_with_seh_guard(
+    nvinfer1::IExecutionContext* context_payload,
+    JYPPX_Boolean* out_cleared,
+    const char* feature_name)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        *out_cleared = context_payload->setDebugListener(nullptr) ? JYPPX_TRUE : JYPPX_FALSE;
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        *out_cleared = JYPPX_FALSE;
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    *out_cleared = context_payload->setDebugListener(nullptr) ? JYPPX_TRUE : JYPPX_FALSE;
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+static JYPPX_StatusCode trt11_execution_context_has_debug_listener_with_seh_guard(
+    nvinfer1::IExecutionContext* context_payload,
+    JYPPX_Boolean* out_has_listener,
+    const char* feature_name)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        *out_has_listener = context_payload->getDebugListener() != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        *out_has_listener = JYPPX_FALSE;
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    *out_has_listener = context_payload->getDebugListener() != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+static JYPPX_StatusCode trt11_execution_context_clear_profiler_with_seh_guard(
+    nvinfer1::IExecutionContext* context_payload,
+    const char* feature_name)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        context_payload->setProfiler(nullptr);
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    context_payload->setProfiler(nullptr);
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+static JYPPX_StatusCode trt11_execution_context_has_profiler_with_seh_guard(
+    nvinfer1::IExecutionContext* context_payload,
+    JYPPX_Boolean* out_has_profiler,
+    const char* feature_name)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        *out_has_profiler = context_payload->getProfiler() != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        *out_has_profiler = JYPPX_FALSE;
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    *out_has_profiler = context_payload->getProfiler() != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
+    return JYPPX_STATUS_OK;
+#endif
+}
+#endif
+
 JYPPX_StatusCode jyppx_trt11_builder_config_reset(JYPPX_TensorRtBuilderConfig* config)
 {
     auto status = jyppx::tensorrt::validate_handle(config, kLine, JYPPX_TENSORRT_OBJECT_KIND_BUILDER_CONFIG, "config");
@@ -100,6 +338,41 @@ JYPPX_StatusCode jyppx_trt11_builder_config_get_plugin_to_serialize(JYPPX_Tensor
 #endif
 }
 
+JYPPX_StatusCode jyppx_trt11_builder_config_set_progress_monitor(JYPPX_TensorRtBuilderConfig* config, JYPPX_TensorRtProgressMonitor* monitor)
+{
+    auto status = jyppx::tensorrt::validate_handle(config, kLine, JYPPX_TENSORRT_OBJECT_KIND_BUILDER_CONFIG, "config");
+    if (status != JYPPX_STATUS_OK) { return status; }
+    status = jyppx::tensorrt::validate_handle(monitor, kLine, JYPPX_TENSORRT_OBJECT_KIND_PROGRESS_MONITOR, "monitor");
+    if (status != JYPPX_STATUS_OK) { return status; }
+#if JYPPX_HAS_TENSORRT
+    auto* config_payload = get_payload<nvinfer1::IBuilderConfig>(config);
+    auto* monitor_payload = get_payload<ManagedProgressMonitor>(monitor);
+    if (config_payload == nullptr || monitor_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Builder config or progress monitor handle does not carry the expected TensorRT payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    try
+    {
+        return trt11_builder_config_set_progress_monitor_with_seh_guard(
+            config_payload,
+            monitor_payload,
+            "builder config progress monitor attach");
+    }
+    catch (const std::exception& exception)
+    {
+        return jyppx_trt11_callback_allocator_control_exception("builder config progress monitor attach", exception);
+    }
+    catch (...)
+    {
+        return jyppx_trt11_callback_allocator_control_unknown_exception("builder config progress monitor attach");
+    }
+#else
+    return jyppx::tensorrt::report_vendor_missing(kLine, "builder config progress monitor attach");
+#endif
+}
+
 JYPPX_StatusCode jyppx_trt11_builder_config_has_progress_monitor(JYPPX_TensorRtBuilderConfig* config, JYPPX_Boolean* out_has_monitor)
 {
     auto status = jyppx::tensorrt::validate_output_pointer(out_has_monitor, "out_has_monitor");
@@ -110,8 +383,23 @@ JYPPX_StatusCode jyppx_trt11_builder_config_has_progress_monitor(JYPPX_TensorRtB
 #if JYPPX_HAS_TENSORRT
     auto* config_payload = get_payload<nvinfer1::IBuilderConfig>(config);
     if (config_payload == nullptr) { return JYPPX_STATUS_INVALID_STATE; }
-    *out_has_monitor = config_payload->getProgressMonitor() != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
-    return JYPPX_STATUS_OK;
+    try
+    {
+        return trt11_builder_config_has_progress_monitor_with_seh_guard(
+            config_payload,
+            out_has_monitor,
+            "builder config progress monitor query");
+    }
+    catch (const std::exception& exception)
+    {
+        *out_has_monitor = JYPPX_FALSE;
+        return jyppx_trt11_callback_allocator_control_exception("builder config progress monitor query", exception);
+    }
+    catch (...)
+    {
+        *out_has_monitor = JYPPX_FALSE;
+        return jyppx_trt11_callback_allocator_control_unknown_exception("builder config progress monitor query");
+    }
 #else
     return jyppx::tensorrt::report_vendor_missing(kLine, "builder config progress monitor query");
 #endif
@@ -124,8 +412,20 @@ JYPPX_StatusCode jyppx_trt11_builder_config_clear_progress_monitor(JYPPX_TensorR
 #if JYPPX_HAS_TENSORRT
     auto* config_payload = get_payload<nvinfer1::IBuilderConfig>(config);
     if (config_payload == nullptr) { return JYPPX_STATUS_INVALID_STATE; }
-    config_payload->setProgressMonitor(nullptr);
-    return JYPPX_STATUS_OK;
+    try
+    {
+        return trt11_builder_config_clear_progress_monitor_with_seh_guard(
+            config_payload,
+            "builder config progress monitor clear");
+    }
+    catch (const std::exception& exception)
+    {
+        return jyppx_trt11_callback_allocator_control_exception("builder config progress monitor clear", exception);
+    }
+    catch (...)
+    {
+        return jyppx_trt11_callback_allocator_control_unknown_exception("builder config progress monitor clear");
+    }
 #else
     return jyppx::tensorrt::report_vendor_missing(kLine, "builder config progress monitor clear");
 #endif
@@ -336,8 +636,23 @@ JYPPX_StatusCode jyppx_trt11_engine_inspector_has_error_recorder(JYPPX_TensorRtE
 #if JYPPX_HAS_TENSORRT
     auto* inspector_payload = get_payload<nvinfer1::IEngineInspector>(inspector);
     if (inspector_payload == nullptr) { return JYPPX_STATUS_INVALID_STATE; }
-    *out_has_recorder = inspector_payload->getErrorRecorder() != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
-    return JYPPX_STATUS_OK;
+    try
+    {
+        return trt11_engine_inspector_has_error_recorder_with_seh_guard(
+            inspector_payload,
+            out_has_recorder,
+            "engine inspector error recorder query");
+    }
+    catch (const std::exception& exception)
+    {
+        *out_has_recorder = JYPPX_FALSE;
+        return jyppx_trt11_callback_allocator_control_exception("engine inspector error recorder query", exception);
+    }
+    catch (...)
+    {
+        *out_has_recorder = JYPPX_FALSE;
+        return jyppx_trt11_callback_allocator_control_unknown_exception("engine inspector error recorder query");
+    }
 #else
     return jyppx::tensorrt::report_vendor_missing(kLine, "engine inspector error recorder query");
 #endif
@@ -392,8 +707,24 @@ JYPPX_StatusCode jyppx_trt11_execution_context_clear_output_allocator(JYPPX_Tens
     nvinfer1::IExecutionContext* context_payload = nullptr;
     status = get_context_payload_ext(context, &context_payload, "execution context output allocator clear");
     if (status != JYPPX_STATUS_OK) { return status; }
-    *out_cleared = context_payload->setOutputAllocator(tensor_name, nullptr) ? JYPPX_TRUE : JYPPX_FALSE;
-    return JYPPX_STATUS_OK;
+    try
+    {
+        return trt11_execution_context_clear_output_allocator_with_seh_guard(
+            context_payload,
+            tensor_name,
+            out_cleared,
+            "execution context output allocator clear");
+    }
+    catch (const std::exception& exception)
+    {
+        *out_cleared = JYPPX_FALSE;
+        return jyppx_trt11_callback_allocator_control_exception("execution context output allocator clear", exception);
+    }
+    catch (...)
+    {
+        *out_cleared = JYPPX_FALSE;
+        return jyppx_trt11_callback_allocator_control_unknown_exception("execution context output allocator clear");
+    }
 #else
     (void)context;
     return jyppx::tensorrt::report_vendor_missing(kLine, "execution context output allocator clear");
@@ -409,8 +740,23 @@ JYPPX_StatusCode jyppx_trt11_execution_context_clear_temporary_storage_allocator
     nvinfer1::IExecutionContext* context_payload = nullptr;
     status = get_context_payload_ext(context, &context_payload, "execution context temporary storage allocator clear");
     if (status != JYPPX_STATUS_OK) { return status; }
-    *out_cleared = context_payload->setTemporaryStorageAllocator(nullptr) ? JYPPX_TRUE : JYPPX_FALSE;
-    return JYPPX_STATUS_OK;
+    try
+    {
+        return trt11_execution_context_clear_temporary_storage_allocator_with_seh_guard(
+            context_payload,
+            out_cleared,
+            "execution context temporary storage allocator clear");
+    }
+    catch (const std::exception& exception)
+    {
+        *out_cleared = JYPPX_FALSE;
+        return jyppx_trt11_callback_allocator_control_exception("execution context temporary storage allocator clear", exception);
+    }
+    catch (...)
+    {
+        *out_cleared = JYPPX_FALSE;
+        return jyppx_trt11_callback_allocator_control_unknown_exception("execution context temporary storage allocator clear");
+    }
 #else
     (void)context;
     return jyppx::tensorrt::report_vendor_missing(kLine, "execution context temporary storage allocator clear");
@@ -426,8 +772,23 @@ JYPPX_StatusCode jyppx_trt11_execution_context_clear_debug_listener(JYPPX_Tensor
     nvinfer1::IExecutionContext* context_payload = nullptr;
     status = get_context_payload_ext(context, &context_payload, "execution context debug listener clear");
     if (status != JYPPX_STATUS_OK) { return status; }
-    *out_cleared = context_payload->setDebugListener(nullptr) ? JYPPX_TRUE : JYPPX_FALSE;
-    return JYPPX_STATUS_OK;
+    try
+    {
+        return trt11_execution_context_clear_debug_listener_with_seh_guard(
+            context_payload,
+            out_cleared,
+            "execution context debug listener clear");
+    }
+    catch (const std::exception& exception)
+    {
+        *out_cleared = JYPPX_FALSE;
+        return jyppx_trt11_callback_allocator_control_exception("execution context debug listener clear", exception);
+    }
+    catch (...)
+    {
+        *out_cleared = JYPPX_FALSE;
+        return jyppx_trt11_callback_allocator_control_unknown_exception("execution context debug listener clear");
+    }
 #else
     (void)context;
     return jyppx::tensorrt::report_vendor_missing(kLine, "execution context debug listener clear");
@@ -443,8 +804,23 @@ JYPPX_StatusCode jyppx_trt11_execution_context_has_debug_listener(JYPPX_TensorRt
     nvinfer1::IExecutionContext* context_payload = nullptr;
     status = get_context_payload_ext(context, &context_payload, "execution context debug listener query");
     if (status != JYPPX_STATUS_OK) { return status; }
-    *out_has_listener = context_payload->getDebugListener() != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
-    return JYPPX_STATUS_OK;
+    try
+    {
+        return trt11_execution_context_has_debug_listener_with_seh_guard(
+            context_payload,
+            out_has_listener,
+            "execution context debug listener query");
+    }
+    catch (const std::exception& exception)
+    {
+        *out_has_listener = JYPPX_FALSE;
+        return jyppx_trt11_callback_allocator_control_exception("execution context debug listener query", exception);
+    }
+    catch (...)
+    {
+        *out_has_listener = JYPPX_FALSE;
+        return jyppx_trt11_callback_allocator_control_unknown_exception("execution context debug listener query");
+    }
 #else
     (void)context;
     return jyppx::tensorrt::report_vendor_missing(kLine, "execution context debug listener query");
@@ -457,8 +833,20 @@ JYPPX_StatusCode jyppx_trt11_execution_context_clear_profiler(JYPPX_TensorRtExec
     nvinfer1::IExecutionContext* context_payload = nullptr;
     auto status = get_context_payload_ext(context, &context_payload, "execution context profiler clear");
     if (status != JYPPX_STATUS_OK) { return status; }
-    context_payload->setProfiler(nullptr);
-    return JYPPX_STATUS_OK;
+    try
+    {
+        return trt11_execution_context_clear_profiler_with_seh_guard(
+            context_payload,
+            "execution context profiler clear");
+    }
+    catch (const std::exception& exception)
+    {
+        return jyppx_trt11_callback_allocator_control_exception("execution context profiler clear", exception);
+    }
+    catch (...)
+    {
+        return jyppx_trt11_callback_allocator_control_unknown_exception("execution context profiler clear");
+    }
 #else
     (void)context;
     return jyppx::tensorrt::report_vendor_missing(kLine, "execution context profiler clear");
@@ -474,8 +862,23 @@ JYPPX_StatusCode jyppx_trt11_execution_context_has_profiler(JYPPX_TensorRtExecut
     nvinfer1::IExecutionContext* context_payload = nullptr;
     status = get_context_payload_ext(context, &context_payload, "execution context profiler query");
     if (status != JYPPX_STATUS_OK) { return status; }
-    *out_has_profiler = context_payload->getProfiler() != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
-    return JYPPX_STATUS_OK;
+    try
+    {
+        return trt11_execution_context_has_profiler_with_seh_guard(
+            context_payload,
+            out_has_profiler,
+            "execution context profiler query");
+    }
+    catch (const std::exception& exception)
+    {
+        *out_has_profiler = JYPPX_FALSE;
+        return jyppx_trt11_callback_allocator_control_exception("execution context profiler query", exception);
+    }
+    catch (...)
+    {
+        *out_has_profiler = JYPPX_FALSE;
+        return jyppx_trt11_callback_allocator_control_unknown_exception("execution context profiler query");
+    }
 #else
     (void)context;
     return jyppx::tensorrt::report_vendor_missing(kLine, "execution context profiler query");

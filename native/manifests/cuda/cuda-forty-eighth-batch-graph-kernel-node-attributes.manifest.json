@@ -1,0 +1,32 @@
+{
+  "$schema": "../bridge-api.schema.json",
+  "module": "cuda",
+  "versionLine": "common",
+  "apis": [
+    {
+      "id": "cuda-graph-kernel-node-get-attribute-scalar-safe",
+      "entryPoint": "jyppx_cuda_graph_kernel_node_get_attribute_scalar_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "attribute", "type": "int32_t", "direction": "in", "managedType": "int", "moduleManagedType": "int" },
+        { "name": "out_value", "type": "JYPPX_CudaGraphKernelNodeAttributeValue*", "direction": "out", "managedType": "out NativeCudaGraphKernelNodeAttributeValue", "moduleManagedType": "out NativeCudaGraphKernelNodeAttributeValue" }
+      ]
+    },
+    {
+      "id": "cuda-graph-kernel-node-set-attribute-scalar-safe",
+      "entryPoint": "jyppx_cuda_graph_kernel_node_set_attribute_scalar_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "value", "type": "const JYPPX_CudaGraphKernelNodeAttributeValue*", "direction": "in", "managedType": "in NativeCudaGraphKernelNodeAttributeValue", "moduleManagedType": "in NativeCudaGraphKernelNodeAttributeValue" }
+      ]
+    }
+  ]
+}

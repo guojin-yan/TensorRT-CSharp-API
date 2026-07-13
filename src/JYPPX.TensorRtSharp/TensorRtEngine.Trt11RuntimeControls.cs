@@ -15,6 +15,16 @@ public sealed partial class TensorRtEngine
     public long StreamableWeightsSizeInBytes => NativeBridgeApi.GetEngineStreamableWeightsSize(Line, _handle);
 
     /// <summary>
+    /// Gets TensorRT 10's legacy minimum weight-streaming budget.
+    /// 获取 TensorRT 10 legacy 最小权重流式加载预算。
+    /// </summary>
+    /// <remarks>
+    /// This TensorRT API is legacy/deprecated and is exposed only for TensorRT 10 compatibility. Use <see cref="WeightStreamingBudgetV2InBytes"/> or <see cref="WeightStreamingAutomaticBudgetInBytes"/> for TensorRT 10/11 portable budget queries.
+    /// 该 TensorRT 接口属于 legacy/deprecated 兼容面，仅为 TensorRT 10 暴露。跨 TensorRT 10/11 查询请优先使用 <see cref="WeightStreamingBudgetV2InBytes"/> 或 <see cref="WeightStreamingAutomaticBudgetInBytes"/>。
+    /// </remarks>
+    public long MinimumWeightStreamingBudgetInBytes => NativeBridgeApi.GetEngineMinimumWeightStreamingBudget(Line, _handle);
+
+    /// <summary>
     /// Gets the currently configured TensorRT weight-streaming budget.
     /// 获取当前配置的 TensorRT 权重流式加载预算。
     /// </summary>
@@ -49,8 +59,8 @@ public sealed partial class TensorRtEngine
     /// 获取当前 TensorRT engine 记录的硬件兼容级别。
     /// </summary>
     /// <remarks>
-    /// Supported by this bridge for TensorRT 10 and TensorRT 11.
-    /// 当前桥接库支持 TensorRT 10 和 TensorRT 11。
+    /// Supported by this bridge for TensorRT 8, TensorRT 10, and TensorRT 11.
+    /// 当前桥接库支持 TensorRT 8、TensorRT 10 和 TensorRT 11。
     /// </remarks>
     public TensorRtHardwareCompatibilityLevel EngineHardwareCompatibilityLevel => NativeBridgeApi.GetEngineHardwareCompatibilityLevel(Line, _handle);
 

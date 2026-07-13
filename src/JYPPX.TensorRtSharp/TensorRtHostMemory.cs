@@ -46,6 +46,45 @@ public sealed partial class TensorRtHostMemory : IDisposable
     }
 
     /// <summary>
+    /// Copies the TensorRT host-memory payload into a managed stream.
+    /// 将 TensorRT host memory 负载复制到托管 stream。
+    /// </summary>
+    /// <param name="destination">The writable destination stream. 可写目标 stream。</param>
+    /// <remarks>
+    /// The payload is first copied into a managed byte array, so no borrowed TensorRT pointer escapes this wrapper.
+    /// 负载会先复制到托管字节数组，因此不会从当前封装泄露 borrowed TensorRT 指针。
+    /// </remarks>
+    public void CopyTo(Stream destination)
+    {
+        if (destination == null)
+        {
+            throw new ArgumentNullException(nameof(destination));
+        }
+
+        if (!destination.CanWrite)
+        {
+            throw new ArgumentException("Destination stream must be writable.", nameof(destination));
+        }
+
+        byte[] buffer = ToArray();
+        destination.Write(buffer, 0, buffer.Length);
+    }
+
+    /// <summary>
+    /// Opens a read-only managed stream over a copied TensorRT host-memory payload.
+    /// 基于 TensorRT host memory 负载副本打开只读托管 stream。
+    /// </summary>
+    /// <returns>A read-only managed memory stream containing a copied payload. 包含负载副本的只读托管内存流。</returns>
+    /// <remarks>
+    /// The returned stream owns an independent managed copy and remains valid after this host-memory object is disposed.
+    /// 返回的 stream 持有独立托管副本，因此当前 host memory 对象释放后仍然有效。
+    /// </remarks>
+    public MemoryStream OpenRead()
+    {
+        return new MemoryStream(ToArray(), writable: false);
+    }
+
+    /// <summary>
     /// Saves the TensorRT host-memory payload to a file.
     /// 将 TensorRT host memory 负载保存到文件。
     /// </summary>

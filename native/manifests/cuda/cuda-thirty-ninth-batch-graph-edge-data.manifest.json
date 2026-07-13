@@ -1,0 +1,87 @@
+{
+  "$schema": "../bridge-api.schema.json",
+  "module": "cuda",
+  "versionLine": "common",
+  "apis": [
+    {
+      "id": "cuda-graph-add-dependency-v2-safe",
+      "entryPoint": "jyppx_cuda_graph_add_dependency_v2_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "graph", "type": "JYPPX_CudaGraph*", "direction": "in" },
+        { "name": "from_node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "to_node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "edge_data", "type": "const JYPPX_CudaGraphEdgeData*", "direction": "in", "managedType": "in NativeCudaGraphEdgeData", "moduleManagedType": "in NativeCudaGraphEdgeData" }
+      ]
+    },
+    {
+      "id": "cuda-graph-node-get-dependencies-v2-count-safe",
+      "entryPoint": "jyppx_cuda_graph_node_get_dependencies_v2_count_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_count", "type": "size_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" }
+      ]
+    },
+    {
+      "id": "cuda-graph-node-get-dependency-v2-safe",
+      "entryPoint": "jyppx_cuda_graph_node_get_dependency_v2_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "index", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_dependency_node", "type": "uintptr_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" },
+        { "name": "out_edge_data", "type": "JYPPX_CudaGraphEdgeData*", "direction": "out", "managedType": "out NativeCudaGraphEdgeData", "moduleManagedType": "out NativeCudaGraphEdgeData" }
+      ]
+    },
+    {
+      "id": "cuda-graph-node-get-dependent-nodes-v2-count-safe",
+      "entryPoint": "jyppx_cuda_graph_node_get_dependent_nodes_v2_count_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_count", "type": "size_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" }
+      ]
+    },
+    {
+      "id": "cuda-graph-node-get-dependent-node-v2-safe",
+      "entryPoint": "jyppx_cuda_graph_node_get_dependent_node_v2_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "index", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_dependent_node", "type": "uintptr_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" },
+        { "name": "out_edge_data", "type": "JYPPX_CudaGraphEdgeData*", "direction": "out", "managedType": "out NativeCudaGraphEdgeData", "moduleManagedType": "out NativeCudaGraphEdgeData" }
+      ]
+    },
+    {
+      "id": "cuda-graph-remove-dependency-v2-safe",
+      "entryPoint": "jyppx_cuda_graph_remove_dependency_v2_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "graph", "type": "JYPPX_CudaGraph*", "direction": "in" },
+        { "name": "from_node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "to_node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "edge_data", "type": "const JYPPX_CudaGraphEdgeData*", "direction": "in", "managedType": "in NativeCudaGraphEdgeData", "moduleManagedType": "in NativeCudaGraphEdgeData" }
+      ]
+    }
+  ]
+}

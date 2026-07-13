@@ -57,6 +57,16 @@ internal static partial class NativeBridgeApi
             string version = GetBuilderCapabilityPluginCreatorVersion(line, capability, creatorIndex);
             string pluginNamespace = GetBuilderCapabilityPluginCreatorNamespace(line, capability, creatorIndex);
             string interfaceKind = GetBuilderCapabilityPluginCreatorInterfaceKind(line, capability, creatorIndex, out int interfaceMajor, out int interfaceMinor);
+            TensorRtApiLanguage apiLanguage = GetBuilderCapabilityPluginCreatorApiLanguage(line, capability, creatorIndex);
+            int fieldCount = GetBuilderCapabilityPluginCreatorFieldCount(line, capability, creatorIndex);
+            List<TensorRtPluginFieldInfo> fields = new List<TensorRtPluginFieldInfo>(fieldCount);
+
+            for (int fieldIndex = 0; fieldIndex < fieldCount; fieldIndex++)
+            {
+                string fieldName = GetBuilderCapabilityPluginCreatorFieldName(line, capability, creatorIndex, fieldIndex);
+                GetBuilderCapabilityPluginCreatorFieldMetadata(line, capability, creatorIndex, fieldIndex, out TensorRtPluginFieldType fieldType, out int length, out bool hasData);
+                fields.Add(new TensorRtPluginFieldInfo(fieldName, fieldType, length, hasData));
+            }
 
             creators.Add(new TensorRtPluginCreatorInfo(
                 creatorIndex,
@@ -66,7 +76,8 @@ internal static partial class NativeBridgeApi
                 interfaceKind,
                 interfaceMajor,
                 interfaceMinor,
-                Array.Empty<TensorRtPluginFieldInfo>()));
+                apiLanguage,
+                fields));
         }
 
         return new TensorRtPluginRegistryInventory(line, TensorRtPluginRegistrySource.BuilderCapability, hasErrorRecorder, parentSearchEnabled, recursiveCreatorCount, creators);
@@ -118,6 +129,7 @@ internal static partial class NativeBridgeApi
             pluginNamespace,
             out int interfaceMajor,
             out int interfaceMinor);
+        TensorRtApiLanguage apiLanguage = GetBuilderCapabilityLookupPluginCreatorApiLanguage(line, capability, pluginName, pluginVersion, pluginNamespace);
         int fieldCount = GetBuilderCapabilityLookupPluginCreatorFieldCount(line, capability, pluginName, pluginVersion, pluginNamespace);
         List<TensorRtPluginFieldInfo> fields = new List<TensorRtPluginFieldInfo>(fieldCount);
 
@@ -136,6 +148,7 @@ internal static partial class NativeBridgeApi
             interfaceKind,
             interfaceMajor,
             interfaceMinor,
+            apiLanguage,
             fields);
         return true;
     }
@@ -303,6 +316,20 @@ internal static partial class NativeBridgeApi
         return count;
     }
 
+    private static TensorRtApiLanguage GetBuilderCapabilityPluginCreatorApiLanguage(TensorRtApiLine line, TensorRtEngineCapability capability, int creatorIndex)
+    {
+        int apiLanguage = (int)TensorRtApiLanguage.Unknown;
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_capability_plugin_creator_get_api_language((int)capability, creatorIndex, out apiLanguage),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_builder_capability_plugin_creator_get_api_language((int)capability, creatorIndex, out apiLanguage),
+            _ => throw UnsupportedBuilderCapabilityPluginRegistryLine()
+        };
+
+        NativeStatus.ThrowIfFailed(status);
+        return ToTensorRtApiLanguage(apiLanguage);
+    }
+
     private static string GetBuilderCapabilityPluginCreatorFieldName(TensorRtApiLine line, TensorRtEngineCapability capability, int creatorIndex, int fieldIndex)
     {
         return ReadUtf8Buffer(
@@ -401,6 +428,24 @@ internal static partial class NativeBridgeApi
 
         NativeStatus.ThrowIfFailed(status);
         return count;
+    }
+
+    private static TensorRtApiLanguage GetBuilderCapabilityLookupPluginCreatorApiLanguage(TensorRtApiLine line, TensorRtEngineCapability capability, string pluginName, string pluginVersion, string pluginNamespace)
+    {
+        using Utf8Interop.Utf8StringScope nameUtf8 = Utf8Interop.ToNativeString(pluginName ?? string.Empty);
+        using Utf8Interop.Utf8StringScope versionUtf8 = Utf8Interop.ToNativeString(pluginVersion ?? string.Empty);
+        using Utf8Interop.Utf8StringScope namespaceUtf8 = Utf8Interop.ToNativeString(pluginNamespace ?? string.Empty);
+
+        int apiLanguage = (int)TensorRtApiLanguage.Unknown;
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_capability_plugin_creator_lookup_get_api_language((int)capability, nameUtf8.Pointer, versionUtf8.Pointer, namespaceUtf8.Pointer, out apiLanguage),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_builder_capability_plugin_creator_lookup_get_api_language((int)capability, nameUtf8.Pointer, versionUtf8.Pointer, namespaceUtf8.Pointer, out apiLanguage),
+            _ => throw UnsupportedBuilderCapabilityPluginRegistryLine()
+        };
+
+        NativeStatus.ThrowIfFailed(status);
+        return ToTensorRtApiLanguage(apiLanguage);
     }
 
     private static string GetBuilderCapabilityLookupPluginCreatorFieldName(

@@ -15,8 +15,8 @@ public sealed partial class TensorRtBuilderConfig
     }
 
     /// <summary>
-    /// Gets the complete TensorRT 11 builder flag bitmask.
-    /// 获取完整的 TensorRT 11 builder flag 位掩码。
+    /// Gets the complete TensorRT builder flag bitmask.
+    /// 获取完整的 TensorRT builder flag 位掩码。
     /// </summary>
     public TensorRtBuilderFlags GetFlags()
     {
@@ -60,8 +60,8 @@ public sealed partial class TensorRtBuilderConfig
     }
 
     /// <summary>
-    /// Sets the TensorRT 11 tiling optimization level.
-    /// 设置 TensorRT 11 tiling 优化级别。
+    /// Sets the TensorRT 10/11 tiling optimization level.
+    /// 设置 TensorRT 10/11 tiling 优化级别。
     /// </summary>
     /// <param name="level">The tiling optimization level. / tiling 优化级别。</param>
     /// <returns><c>true</c> if TensorRT accepted the setting. / TensorRT 接受该设置时返回 <c>true</c>。</returns>
@@ -71,8 +71,8 @@ public sealed partial class TensorRtBuilderConfig
     }
 
     /// <summary>
-    /// Gets the TensorRT 11 tiling optimization level.
-    /// 获取 TensorRT 11 tiling 优化级别。
+    /// Gets the TensorRT 10/11 tiling optimization level.
+    /// 获取 TensorRT 10/11 tiling 优化级别。
     /// </summary>
     public TensorRtTilingOptimizationLevel GetTilingOptimizationLevel()
     {
@@ -80,8 +80,8 @@ public sealed partial class TensorRtBuilderConfig
     }
 
     /// <summary>
-    /// Sets the L2 byte limit used by TensorRT 11 tiling optimization.
-    /// 设置 TensorRT 11 tiling 优化使用的 L2 字节上限。
+    /// Sets the L2 byte limit used by TensorRT 10/11 tiling optimization.
+    /// 设置 TensorRT 10/11 tiling 优化使用的 L2 字节上限。
     /// </summary>
     /// <param name="bytes">L2 byte limit. / L2 字节上限。</param>
     /// <returns><c>true</c> if TensorRT accepted the setting. / TensorRT 接受该设置时返回 <c>true</c>。</returns>
@@ -91,8 +91,8 @@ public sealed partial class TensorRtBuilderConfig
     }
 
     /// <summary>
-    /// Gets the L2 byte limit used by TensorRT 11 tiling optimization.
-    /// 获取 TensorRT 11 tiling 优化使用的 L2 字节上限。
+    /// Gets the L2 byte limit used by TensorRT 10/11 tiling optimization.
+    /// 获取 TensorRT 10/11 tiling 优化使用的 L2 字节上限。
     /// </summary>
     public long GetL2LimitForTiling()
     {
@@ -115,6 +115,52 @@ public sealed partial class TensorRtBuilderConfig
     public int GetMaxTactics()
     {
         return NativeBridgeApi.GetBuilderConfigMaxTactics(Line, _handle);
+    }
+
+    /// <summary>
+    /// Sets the complete TensorRT 8/10 quantization flag bitmask.
+    /// 设置完整的 TensorRT 8/10 quantization flag 位掩码。
+    /// </summary>
+    /// <param name="flags">The full quantization flag bitmask. / 完整 quantization flag 位掩码。</param>
+    public void SetQuantizationFlags(TensorRtQuantizationFlags flags)
+    {
+        NativeBridgeApi.SetBuilderConfigQuantizationFlags(Line, _handle, flags);
+    }
+
+    /// <summary>
+    /// Gets the complete TensorRT 8/10 quantization flag bitmask.
+    /// 获取完整的 TensorRT 8/10 quantization flag 位掩码。
+    /// </summary>
+    public TensorRtQuantizationFlags GetQuantizationFlags()
+    {
+        return NativeBridgeApi.GetBuilderConfigQuantizationFlags(Line, _handle);
+    }
+
+    /// <summary>
+    /// Enables one TensorRT 8/10 quantization flag.
+    /// 启用一个 TensorRT 8/10 quantization flag。
+    /// </summary>
+    public void SetQuantizationFlag(TensorRtQuantizationFlag flag)
+    {
+        NativeBridgeApi.SetBuilderConfigQuantizationFlag(Line, _handle, flag);
+    }
+
+    /// <summary>
+    /// Clears one TensorRT 8/10 quantization flag.
+    /// 清除一个 TensorRT 8/10 quantization flag。
+    /// </summary>
+    public void ClearQuantizationFlag(TensorRtQuantizationFlag flag)
+    {
+        NativeBridgeApi.ClearBuilderConfigQuantizationFlag(Line, _handle, flag);
+    }
+
+    /// <summary>
+    /// Returns whether one TensorRT 8/10 quantization flag is enabled.
+    /// 返回某个 TensorRT 8/10 quantization flag 当前是否启用。
+    /// </summary>
+    public bool GetQuantizationFlag(TensorRtQuantizationFlag flag)
+    {
+        return NativeBridgeApi.GetBuilderConfigQuantizationFlag(Line, _handle, flag);
     }
 
     /// <summary>

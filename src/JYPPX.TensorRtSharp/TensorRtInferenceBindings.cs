@@ -462,7 +462,15 @@ public sealed class TensorRtInferenceBindings : IDisposable
             elementCount = checked(elementCount * value);
         }
 
-        long bytes = checked(elementCount * tensor.BytesPerComponent * tensor.ComponentsPerElement);
+        int bytesPerComponent = tensor.EffectiveBytesPerComponent;
+        int componentsPerElement = tensor.EffectiveComponentsPerElement;
+        if (bytesPerComponent <= 0)
+        {
+            throw new NotSupportedException(
+                $"Tensor '{tensor.Name}' data type {tensor.DataType} does not have an integral byte-size fallback.");
+        }
+
+        long bytes = checked(elementCount * bytesPerComponent * componentsPerElement);
         if (bytes <= 0 || bytes > int.MaxValue)
         {
             throw new InvalidOperationException($"Tensor '{tensor.Name}' estimated byte size is outside the managed allocation range.");

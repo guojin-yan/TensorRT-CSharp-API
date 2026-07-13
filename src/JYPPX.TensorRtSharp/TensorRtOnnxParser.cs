@@ -16,6 +16,9 @@ namespace JYPPX.TensorRtSharp;
 public sealed partial class TensorRtOnnxParser : IDisposable
 {
     private readonly SafeTensorRtObjectHandle _handle;
+    private readonly TensorRtLogger? _loggerKeepAlive;
+    private readonly TensorRtPinnedInitializerSet _initializerPins = new TensorRtPinnedInitializerSet();
+    private bool _disposed;
 
     /// <summary>
     /// Creates an ONNX parser for the specified TensorRT logger and network.
@@ -23,6 +26,10 @@ public sealed partial class TensorRtOnnxParser : IDisposable
     /// </summary>
     /// <param name="logger">The TensorRT logger used by the parser. Parser 使用的 TensorRT logger。</param>
     /// <param name="network">The target TensorRT network definition. 目标 TensorRT network definition。</param>
+    /// <remarks>
+    /// TensorRT borrows the logger pointer. This parser keeps the managed logger attached until the parser is disposed.
+    /// TensorRT 只借用 logger 指针；当前 parser 会保持托管 logger 借用关系直到 parser 释放。
+    /// </remarks>
     public TensorRtOnnxParser(TensorRtLogger logger, TensorRtNetworkDefinition network)
     {
         if (logger == null)
@@ -41,7 +48,17 @@ public sealed partial class TensorRtOnnxParser : IDisposable
         }
 
         Line = logger.Line;
-        _handle = NativeBridgeApi.CreateOnnxParser(Line, logger.Handle, network.Handle);
+        _loggerKeepAlive = logger;
+        _loggerKeepAlive.AttachBorrower(Line);
+        try
+        {
+            _handle = NativeBridgeApi.CreateOnnxParser(Line, logger.Handle, network.Handle);
+        }
+        catch
+        {
+            _loggerKeepAlive.DetachBorrower();
+            throw;
+        }
     }
 
     internal TensorRtOnnxParser(TensorRtApiLine line, SafeTensorRtObjectHandle handle)
@@ -108,6 +125,231 @@ public sealed partial class TensorRtOnnxParser : IDisposable
     }
 
     /// <summary>
+    /// Parses ONNX model bytes from a managed byte-array segment into the target network.
+    /// 将托管字节数组片段中的 ONNX 模型解析到目标 network。
+    /// </summary>
+    /// <param name="modelData">Serialized ONNX model byte segment. 已序列化 ONNX 模型字节片段。</param>
+    /// <param name="modelPath">Optional model path used by TensorRT diagnostics. TensorRT 诊断信息使用的可选模型路径。</param>
+    /// <returns><c>true</c> when parsing succeeds. 解析成功时返回 <c>true</c>。</returns>
+    /// <remarks>
+    /// The segment is copied into an exact managed byte array before native interop.
+    /// 调用 native interop 前会将片段复制为精确长度的托管字节数组。
+    /// </remarks>
+    public bool Parse(ArraySegment<byte> modelData, string? modelPath = null)
+    {
+        return Parse(CopyModelSegment(modelData, nameof(modelData)), modelPath);
+    }
+
+#if NETCOREAPP3_1_OR_GREATER || NET5_0_OR_GREATER || NET6_0_OR_GREATER || NET7_0_OR_GREATER || NET8_0_OR_GREATER || NET9_0_OR_GREATER || NET10_0_OR_GREATER
+    /// <summary>
+    /// Parses ONNX model bytes from a managed read-only span into the target network.
+    /// 将托管只读 span 中的 ONNX 模型字节解析到目标 network。
+    /// </summary>
+    /// <param name="modelData">Serialized ONNX model bytes. 已序列化 ONNX 模型字节。</param>
+    /// <param name="modelPath">Optional model path used by TensorRT diagnostics. TensorRT 诊断信息使用的可选模型路径。</param>
+    /// <returns><c>true</c> when parsing succeeds. 解析成功时返回 <c>true</c>。</returns>
+    /// <remarks>
+    /// The span is copied into a managed byte array before native interop, and TensorRT does not retain caller-owned memory.
+    /// 调用 native interop 前会将 span 复制到托管字节数组，TensorRT 不会保留调用方拥有的内存。
+    /// </remarks>
+    public bool Parse(ReadOnlySpan<byte> modelData, string? modelPath = null)
+    {
+        return Parse(modelData.ToArray(), modelPath);
+    }
+
+#endif
+    /// <summary>
+    /// Parses ONNX model bytes from a managed stream into the target network.
+    /// 从托管 stream 读取 ONNX 模型字节并解析到目标 network。
+    /// </summary>
+    /// <param name="modelStream">The readable stream containing serialized ONNX model bytes. 包含已序列化 ONNX 模型字节的可读 stream。</param>
+    /// <param name="modelPath">Optional model path used by TensorRT diagnostics. TensorRT 诊断信息使用的可选模型路径。</param>
+    /// <returns><c>true</c> when parsing succeeds. 解析成功时返回 <c>true</c>。</returns>
+    /// <remarks>
+    /// The stream is copied into managed memory before native interop; this is not a TensorRT model-proto or external-initializer lifetime bridge.
+    /// 调用 native interop 前会将 stream 内容复制到托管内存；该入口不是 TensorRT model proto 或 external initializer 生命周期桥。
+    /// </remarks>
+    public bool Parse(Stream modelStream, string? modelPath = null)
+    {
+        return Parse(CopyModelStream(modelStream, nameof(modelStream)), modelPath);
+    }
+
+    /// <summary>
+    /// Loads serialized ONNX model-proto bytes into the TensorRT 11 parser without parsing immediately.
+    /// 将已序列化 ONNX model proto 字节加载到 TensorRT 11 parser，但暂不立即解析。
+    /// </summary>
+    /// <param name="modelData">Serialized ONNX model-proto bytes. 已序列化的 ONNX model proto 字节。</param>
+    /// <param name="modelPath">Optional model path used by TensorRT diagnostics. TensorRT 诊断信息使用的可选模型路径。</param>
+    /// <returns><c>true</c> when TensorRT accepts the model proto. TensorRT 接受 model proto 时返回 <c>true</c>。</returns>
+    /// <remarks>
+    /// TensorRT 11 does not retain the model-proto byte buffer after this call returns; the managed buffer is pinned only for the native call.
+    /// TensorRT 11 在该调用返回后不会继续持有 model-proto 字节缓冲区；托管缓冲区仅在 native 调用期间短期 pin。
+    /// </remarks>
+    public bool LoadModelProto(byte[] modelData, string? modelPath = null)
+    {
+        return NativeBridgeApi.LoadOnnxParserModelProto(Line, _handle, modelData, modelPath);
+    }
+
+    /// <summary>
+    /// Loads serialized ONNX model-proto bytes from a byte-array segment into the TensorRT 11 parser.
+    /// 从托管字节数组片段加载 ONNX model proto 到 TensorRT 11 parser。
+    /// </summary>
+    /// <param name="modelData">Serialized ONNX model-proto byte segment. 已序列化 ONNX model proto 字节片段。</param>
+    /// <param name="modelPath">Optional model path used by TensorRT diagnostics. TensorRT 诊断信息使用的可选模型路径。</param>
+    /// <returns><c>true</c> when TensorRT accepts the model proto. TensorRT 接受 model proto 时返回 <c>true</c>。</returns>
+    public bool LoadModelProto(ArraySegment<byte> modelData, string? modelPath = null)
+    {
+        return LoadModelProto(CopyModelSegment(modelData, nameof(modelData)), modelPath);
+    }
+
+#if NETCOREAPP3_1_OR_GREATER || NET5_0_OR_GREATER || NET6_0_OR_GREATER || NET7_0_OR_GREATER || NET8_0_OR_GREATER || NET9_0_OR_GREATER || NET10_0_OR_GREATER
+    /// <summary>
+    /// Loads serialized ONNX model-proto bytes from a read-only span into the TensorRT 11 parser.
+    /// 从只读 span 加载 ONNX model proto 到 TensorRT 11 parser。
+    /// </summary>
+    /// <param name="modelData">Serialized ONNX model-proto bytes. 已序列化 ONNX model proto 字节。</param>
+    /// <param name="modelPath">Optional model path used by TensorRT diagnostics. TensorRT 诊断信息使用的可选模型路径。</param>
+    /// <returns><c>true</c> when TensorRT accepts the model proto. TensorRT 接受 model proto 时返回 <c>true</c>。</returns>
+    public bool LoadModelProto(ReadOnlySpan<byte> modelData, string? modelPath = null)
+    {
+        return LoadModelProto(modelData.ToArray(), modelPath);
+    }
+
+#endif
+    /// <summary>
+    /// Loads serialized ONNX model-proto bytes from a stream into the TensorRT 11 parser.
+    /// 从 stream 加载 ONNX model proto 到 TensorRT 11 parser。
+    /// </summary>
+    /// <param name="modelStream">Readable stream containing serialized ONNX model-proto bytes. 包含已序列化 ONNX model proto 字节的可读 stream。</param>
+    /// <param name="modelPath">Optional model path used by TensorRT diagnostics. TensorRT 诊断信息使用的可选模型路径。</param>
+    /// <returns><c>true</c> when TensorRT accepts the model proto. TensorRT 接受 model proto 时返回 <c>true</c>。</returns>
+    public bool LoadModelProto(Stream modelStream, string? modelPath = null)
+    {
+        return LoadModelProto(CopyModelStream(modelStream, nameof(modelStream)), modelPath);
+    }
+
+    /// <summary>
+    /// Loads an external ONNX initializer into the TensorRT 11 parser.
+    /// 将外部 ONNX initializer 加载到 TensorRT 11 parser。
+    /// </summary>
+    /// <param name="name">Initializer name. initializer 名称。</param>
+    /// <param name="data">Initializer data. initializer 数据。</param>
+    /// <returns><c>true</c> when TensorRT accepts the initializer. TensorRT 接受 initializer 时返回 <c>true</c>。</returns>
+    /// <remarks>
+    /// The initializer data is copied into an owned managed array and pinned until this parser is disposed, matching TensorRT's lifetime requirement.
+    /// initializer 数据会复制到当前 parser 拥有的托管数组，并 pin 到 parser 释放为止，以满足 TensorRT 生命周期要求。
+    /// </remarks>
+    public bool LoadInitializer(string name, byte[] data)
+    {
+        return _initializerPins.LoadOrReplace(
+            name,
+            data,
+            (pointer, size) => NativeBridgeApi.LoadOnnxParserInitializer(Line, _handle, name, pointer, size));
+    }
+
+    /// <summary>
+    /// Loads an external ONNX initializer from a byte-array segment into the TensorRT 11 parser.
+    /// 从托管字节数组片段加载外部 ONNX initializer 到 TensorRT 11 parser。
+    /// </summary>
+    /// <param name="name">Initializer name. initializer 名称。</param>
+    /// <param name="data">Initializer data segment. initializer 数据片段。</param>
+    /// <returns><c>true</c> when TensorRT accepts the initializer. TensorRT 接受 initializer 时返回 <c>true</c>。</returns>
+    public bool LoadInitializer(string name, ArraySegment<byte> data)
+    {
+        return LoadInitializer(name, CopyModelSegment(data, nameof(data)));
+    }
+
+#if NETCOREAPP3_1_OR_GREATER || NET5_0_OR_GREATER || NET6_0_OR_GREATER || NET7_0_OR_GREATER || NET8_0_OR_GREATER || NET9_0_OR_GREATER || NET10_0_OR_GREATER
+    /// <summary>
+    /// Loads an external ONNX initializer from a read-only span into the TensorRT 11 parser.
+    /// 从只读 span 加载外部 ONNX initializer 到 TensorRT 11 parser。
+    /// </summary>
+    /// <param name="name">Initializer name. initializer 名称。</param>
+    /// <param name="data">Initializer data. initializer 数据。</param>
+    /// <returns><c>true</c> when TensorRT accepts the initializer. TensorRT 接受 initializer 时返回 <c>true</c>。</returns>
+    public bool LoadInitializer(string name, ReadOnlySpan<byte> data)
+    {
+        return LoadInitializer(name, data.ToArray());
+    }
+
+#endif
+    /// <summary>
+    /// Loads an external ONNX initializer from a stream into the TensorRT 11 parser.
+    /// 从 stream 加载外部 ONNX initializer 到 TensorRT 11 parser。
+    /// </summary>
+    /// <param name="name">Initializer name. initializer 名称。</param>
+    /// <param name="dataStream">Readable stream containing initializer data. 包含 initializer 数据的可读 stream。</param>
+    /// <returns><c>true</c> when TensorRT accepts the initializer. TensorRT 接受 initializer 时返回 <c>true</c>。</returns>
+    public bool LoadInitializer(string name, Stream dataStream)
+    {
+        return LoadInitializer(name, CopyModelStream(dataStream, nameof(dataStream)));
+    }
+
+    /// <summary>
+    /// Parses the model proto previously loaded through <see cref="LoadModelProto(byte[], string?)"/>.
+    /// 解析先前通过 <see cref="LoadModelProto(byte[], string?)"/> 加载的 model proto。
+    /// </summary>
+    /// <returns><c>true</c> when parsing succeeds. 解析成功时返回 <c>true</c>。</returns>
+    public bool ParseLoadedModel()
+    {
+        return NativeBridgeApi.ParseOnnxLoadedModelProto(Line, _handle);
+    }
+
+    /// <summary>
+    /// Attempts to parse ONNX model bytes and returns copied TensorRT parser diagnostics.
+    /// 尝试解析 ONNX 模型字节并返回已复制的 TensorRT parser 诊断信息。
+    /// </summary>
+    /// <param name="modelData">Serialized ONNX model bytes. 已序列化 ONNX 模型字节。</param>
+    /// <param name="diagnostics">Copied parser diagnostics collected after the parse attempt. 解析尝试后收集到的 parser 诊断信息副本。</param>
+    /// <returns><c>true</c> when parsing succeeds. 解析成功时返回 <c>true</c>。</returns>
+    public bool TryParse(byte[] modelData, out IReadOnlyList<TensorRtOnnxParserDiagnostic> diagnostics)
+    {
+        return TryParse(modelData, null, out diagnostics);
+    }
+
+    /// <summary>
+    /// Attempts to parse ONNX model bytes and returns copied TensorRT parser diagnostics.
+    /// 尝试解析 ONNX 模型字节并返回已复制的 TensorRT parser 诊断信息。
+    /// </summary>
+    /// <param name="modelData">Serialized ONNX model bytes. 已序列化 ONNX 模型字节。</param>
+    /// <param name="modelPath">Optional model path used by TensorRT diagnostics. TensorRT 诊断信息使用的可选模型路径。</param>
+    /// <param name="diagnostics">Copied parser diagnostics collected after the parse attempt. 解析尝试后收集到的 parser 诊断信息副本。</param>
+    /// <returns><c>true</c> when parsing succeeds. 解析成功时返回 <c>true</c>。</returns>
+    public bool TryParse(byte[] modelData, string? modelPath, out IReadOnlyList<TensorRtOnnxParserDiagnostic> diagnostics)
+    {
+        bool parsed = Parse(modelData, modelPath);
+        diagnostics = GetDiagnostics();
+        return parsed;
+    }
+
+    /// <summary>
+    /// Attempts to parse ONNX model bytes from a managed stream and returns copied TensorRT parser diagnostics.
+    /// 尝试从托管 stream 解析 ONNX 模型字节并返回已复制的 TensorRT parser 诊断信息。
+    /// </summary>
+    /// <param name="modelStream">The readable stream containing serialized ONNX model bytes. 包含已序列化 ONNX 模型字节的可读 stream。</param>
+    /// <param name="diagnostics">Copied parser diagnostics collected after the parse attempt. 解析尝试后收集到的 parser 诊断信息副本。</param>
+    /// <returns><c>true</c> when parsing succeeds. 解析成功时返回 <c>true</c>。</returns>
+    public bool TryParse(Stream modelStream, out IReadOnlyList<TensorRtOnnxParserDiagnostic> diagnostics)
+    {
+        return TryParse(modelStream, null, out diagnostics);
+    }
+
+    /// <summary>
+    /// Attempts to parse ONNX model bytes from a managed stream and returns copied TensorRT parser diagnostics.
+    /// 尝试从托管 stream 解析 ONNX 模型字节并返回已复制的 TensorRT parser 诊断信息。
+    /// </summary>
+    /// <param name="modelStream">The readable stream containing serialized ONNX model bytes. 包含已序列化 ONNX 模型字节的可读 stream。</param>
+    /// <param name="modelPath">Optional model path used by TensorRT diagnostics. TensorRT 诊断信息使用的可选模型路径。</param>
+    /// <param name="diagnostics">Copied parser diagnostics collected after the parse attempt. 解析尝试后收集到的 parser 诊断信息副本。</param>
+    /// <returns><c>true</c> when parsing succeeds. 解析成功时返回 <c>true</c>。</returns>
+    public bool TryParse(Stream modelStream, string? modelPath, out IReadOnlyList<TensorRtOnnxParserDiagnostic> diagnostics)
+    {
+        bool parsed = Parse(modelStream, modelPath);
+        diagnostics = GetDiagnostics();
+        return parsed;
+    }
+
+    /// <summary>
     /// Gets one parser error by index.
     /// 按索引获取一个 parser 错误。
     /// </summary>
@@ -151,6 +393,21 @@ public sealed partial class TensorRtOnnxParser : IDisposable
     public bool SupportsOperator(string operatorName)
     {
         return NativeBridgeApi.OnnxParserSupportsOperator(Line, _handle, operatorName);
+    }
+
+    /// <summary>
+    /// Returns whether TensorRT reports the ONNX subgraph at the specified index as supported.
+    /// 返回 TensorRT 是否报告指定索引处的 ONNX subgraph 受支持。
+    /// </summary>
+    /// <param name="index">Zero-based subgraph index. 从零开始的 subgraph 索引。</param>
+    /// <returns><c>true</c> when TensorRT reports the subgraph as supported. TensorRT 报告该 subgraph 受支持时返回 <c>true</c>。</returns>
+    /// <remarks>
+    /// This is a copied scalar query over the native parser state. The native bridge keeps TensorRT version guards in place and does not expose a borrowed parser pointer.
+    /// 这是对 native parser 状态的标量只读查询；native bridge 保留 TensorRT 版本保护，不暴露 borrowed parser 指针。
+    /// </remarks>
+    public bool IsSubgraphSupported(long index)
+    {
+        return NativeBridgeApi.IsOnnxParserSubgraphSupported(Line, _handle, index);
     }
 
     /// <summary>
@@ -238,7 +495,11 @@ public sealed partial class TensorRtOnnxParser : IDisposable
     /// <returns>A parser diagnostic summary string. 解析器诊断摘要字符串。</returns>
     public string GetDiagnosticSummary()
     {
-        IReadOnlyList<TensorRtOnnxParserDiagnostic> diagnostics = GetDiagnostics();
+        return BuildDiagnosticSummary(GetDiagnostics());
+    }
+
+    private static string BuildDiagnosticSummary(IReadOnlyList<TensorRtOnnxParserDiagnostic> diagnostics)
+    {
         if (diagnostics.Count == 0)
         {
             return "ONNX parser reported no errors.";
@@ -302,7 +563,16 @@ public sealed partial class TensorRtOnnxParser : IDisposable
     /// </summary>
     public void Dispose()
     {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _disposed = true;
         _handle.Dispose();
+        _initializerPins.Dispose();
+        GC.KeepAlive(_loggerKeepAlive);
+        _loggerKeepAlive?.DetachBorrower();
         GC.SuppressFinalize(this);
     }
 
@@ -321,5 +591,34 @@ public sealed partial class TensorRtOnnxParser : IDisposable
         {
             throw new NotSupportedException("TensorRT 8 ONNX parser does not expose EnableUInt8AndAsymmetricQuantizationDla.");
         }
+    }
+
+    private static byte[] CopyModelSegment(ArraySegment<byte> modelData, string argumentName)
+    {
+        if (modelData.Array == null)
+        {
+            throw new ArgumentException("ONNX model segment must reference a byte array.", argumentName);
+        }
+
+        byte[] buffer = new byte[modelData.Count];
+        Buffer.BlockCopy(modelData.Array, modelData.Offset, buffer, 0, modelData.Count);
+        return buffer;
+    }
+
+    private static byte[] CopyModelStream(Stream modelStream, string argumentName)
+    {
+        if (modelStream == null)
+        {
+            throw new ArgumentNullException(argumentName);
+        }
+
+        if (!modelStream.CanRead)
+        {
+            throw new ArgumentException("ONNX model stream must be readable.", argumentName);
+        }
+
+        using MemoryStream copy = new MemoryStream();
+        modelStream.CopyTo(copy);
+        return copy.ToArray();
     }
 }

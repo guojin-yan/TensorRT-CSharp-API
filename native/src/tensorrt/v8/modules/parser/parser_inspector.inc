@@ -1371,10 +1371,12 @@ JYPPX_StatusCode get_context_payload_ext(JYPPX_TensorRtExecutionContext* context
     return JYPPX_STATUS_OK;
 }
 
+#ifndef JYPPX_TRT8_VALIDATE_NAMED_TENSOR_DEFINED
 JYPPX_StatusCode validate_named_tensor(const char* tensor_name)
 {
     return validate_c_string(tensor_name, "tensor_name");
 }
+#endif
 
 JYPPX_StatusCode validate_profile_selector(const int32_t selector)
 {

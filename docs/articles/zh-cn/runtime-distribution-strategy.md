@@ -8,6 +8,8 @@ runtime 包必须显式绑定 TensorRT / CUDA / cuDNN 的 major.minor 组合：
 - CUDA：例如 `cuda12.9`
 - cuDNN：例如 `cudnn9.22`
 
+发布前 PublicDocs proof boundary freeze 要求本文持续区分 runtime package 发布策略、`local feed` 验证和真实 proof：runtime package 的本地打包、restore/build、native-copy、dependency-probe 或 local feed smoke 只能证明分发结构可检查，不能替代 package-consumer runtime proof、post-publish proof、publish approval 或 release close approval。真实 proof 仍必须来自仓库外 clean consumer、公开或 Owner 批准的 package source、runtime smoke 日志、SHA256、host metadata 和 strict validator。
+
 示例 runtime key：
 
 - `win-x64-trt10.11-cuda12.9-cudnn9.22`
@@ -66,7 +68,7 @@ Ubuntu 24.04 x64 只建模 NVIDIA Ubuntu 24.04 仓库中存在的现代组合。
 - `run_linux_runtime_packaging`：hosted Linux 发布线，默认使用 `hosted-all`，会一起触发 Ubuntu 22.04 x64 与已经建模的 Ubuntu 24.04 x64 组合。
 - `run_linux_ubuntu20_runtime_packaging`：Ubuntu 20.04 x64 hosted-container 发布线，默认使用 `hosted-container-ubuntu20`，并固定以 `runner_mode=hosted-container` 触发。
 
-Linux split 包角色、稳定依赖版本也有单独输入。日常只改 bridge 或 managed 代码时，可以发布 Linux `bridge,collection` 并固定已发布的 `CudaCudnn` 与 `TensorRt` 版本；只有 NVIDIA 依赖集合变化时才使用 `cuda-cudnn`、`tensorrt` 或 `all` 重发稳定依赖。如果一次 dispatch 覆盖多个稳定依赖发布版本，例如 `hosted-all`，不要用一个全局版本覆盖所有 runtime key，而应使用 runtime-key 版本映射。当前 hosted Linux bridge/collection 刷新应把 `linux-x64-ubuntu22.04-*` 映射到 `4.0.6167`，把 `linux-x64-ubuntu24.04-*` 映射到 `4.0.6169`；Ubuntu 20.04 hosted-container bridge 刷新应把 `linux-x64-ubuntu20.04-*` 映射到 `4.0.6171`。默认 release tag 会按解析出的版本使用 `v<version>`，除非另外提供 release-tag map。较少使用的 delivery mode、稳定依赖 release tag、bridge/meta 包版本、跳过验证开关等通过 `release_config_json` 传入，避免超过 GitHub Actions `workflow_dispatch` 顶层输入数量限制。
+Linux split 包角色、稳定依赖版本也有单独输入。日常只改 bridge 或 managed 代码时，owner 授权且 package-consumer/post-publish gate 通过后，可刷新 Linux `bridge,collection` 并固定已发布的 `CudaCudnn` 与 `TensorRt` 版本；只有 NVIDIA 依赖集合变化时才使用 `cuda-cudnn`、`tensorrt` 或 `all` 重发稳定依赖。如果一次 dispatch 覆盖多个稳定依赖发布版本，例如 `hosted-all`，不要用一个全局版本覆盖所有 runtime key，而应使用 runtime-key 版本映射。当前 hosted Linux bridge/collection 刷新应把 `linux-x64-ubuntu22.04-*` 映射到 `4.0.6167`，把 `linux-x64-ubuntu24.04-*` 映射到 `4.0.6169`；Ubuntu 20.04 hosted-container bridge 刷新应把 `linux-x64-ubuntu20.04-*` 映射到 `4.0.6171`。默认 release tag 会按解析出的版本使用 `v<version>`，除非另外提供 release-tag map。较少使用的 delivery mode、稳定依赖 release tag、bridge/meta 包版本、跳过验证开关等通过 `release_config_json` 传入，避免超过 GitHub Actions `workflow_dispatch` 顶层输入数量限制。
 
 不要把当前发布状态误读成“只有最新 tag”。Windows 线仍然有 6 个建模组合，Ubuntu 20.04 x64 有 3 个建模组合，Ubuntu 22.04 x64 也有 6 个建模组合，Ubuntu 24.04 x64 有 3 个建模组合。需要直观查看时，请以 runtime publication index artifact 为准，而不要只看最新 release tag。
 
@@ -99,8 +101,8 @@ runtime 包会按 runtime release tag 分散发布，不会复制到每一个 ma
 
 nuget.org 单个包大小限制约为 `250 MB`。Windows split runtime 包需要每次发布前重新审计大小，因为 CUDA/cuDNN 和 TensorRT 组件包仍可能超过该限制。因此：
 
-- `JYPPX.TensorRT.CSharp.API` managed 包可以发布到 nuget.org。
-- 体积较小的 `Bridge` 和 collection 包可以在需要时发布到 nuget.org 或 GitHub Packages。
+- owner 授权且 package-consumer/post-publish gate 通过后，`JYPPX.TensorRT.CSharp.API` managed 包适合投递到 nuget.org。
+- owner 授权且 package-consumer/post-publish gate 通过后，体积较小的 `Bridge` 和 collection 包适合投递到 nuget.org 或 GitHub Packages。
 - CUDA/cuDNN 和 TensorRT 稳定依赖组件包多数不适合 nuget.org；如果需要 NuGet feed 自动 restore，应优先放 GitHub Packages；如果可以直接下载 `.nupkg` 文件，则可以保留为 GitHub Release assets。
 - GitHub Release assets 不会被 NuGet restore 自动查询。稳定依赖包只放 Release 时，验证和用户消费前都需要先把匹配 `.nupkg` 下载到本地 package source。
 - 后续如果只修改本地 C ABI bridge 或 C# wrapper，重发 `Bridge`、collection 和 managed 包即可，不需要重发 `CudaCudnn` 或 `TensorRt` 包，除非对应 NVIDIA 依赖集合变化。

@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "sampleName": "YoloVision",
+  "candidateId": "yolovision-yolov8-seg-candidate",
+  "status": "owner-action-required",
+  "runtimeProofState": "owner-action-required",
+  "proofClassification": "template-only",
+  "canPromoteRealModelRuntime": false,
+  "canPromotePackageConsumerRuntime": false,
+  "taskOutputContract": "samples/YoloVision/yolovision-task-output-contract.json",
+  "family": "YOLOv8",
+  "task": "seg",
+  "model": {
+    "name": "YOLOv8 segmentation candidate",
+    "sourceUrl": "owner-required official or self-trained YOLOv8 segmentation model source",
+    "downloadUrl": "owner-required",
+    "license": "owner-required",
+    "licenseEvidence": "owner-required",
+    "localPath": "models/yolov8-seg.onnx",
+    "sha256": "owner-required",
+    "opset": "owner-required",
+    "onnxExportCommand": "yolo export model=yolov8n-seg.pt format=onnx imgsz=640 opset=17 simplify=True dynamic=False"
+  },
+  "labels": {
+    "sourceUrl": "owner-required label source such as COCO labels",
+    "license": "owner-required",
+    "localPath": "models/coco.names",
+    "sha256": "owner-required",
+    "classCount": 80
+  },
+  "input": {
+    "imageSourceUrl": "owner-required redistributable test image",
+    "imageLicense": "owner-required",
+    "imagePath": "models/yolov8-seg-test.jpg",
+    "imageSha256": "owner-required",
+    "preprocessedTensorPath": "models/yolov8-seg-fp32.bin",
+    "preprocessedTensorSha256": "owner-required",
+    "preprocessCommand": "owner-required command that performs resize/letterbox/RGB/normalize/NCHW conversion",
+    "inputShape": "1x3x640x640"
+  },
+  "outputMetadata": {
+    "inputTensorName": "images-or-owner-confirmed",
+    "outputTensorNames": ["boxes-or-owner-confirmed", "proto-or-owner-confirmed"],
+    "outputRoleMap": "boxes:det,proto:mask-prototypes",
+    "classCount": 80,
+    "detectionOutputShape": "owner-required",
+    "prototypeOutputShape": "owner-required",
+    "prototypeShape": "owner-required",
+    "maskResizePolicy": "owner-required",
+    "layout": "auto",
+    "maskCoefficientCount": 32,
+    "auxiliaryLayout": "boxes-first",
+    "postprocessMetadata": {
+      "confidence": 0.25,
+      "iouThreshold": 0.45,
+      "nmsMode": "class-aware",
+      "nmsLocation": "application-side",
+      "maskCompose": "linear-combination",
+      "maskCropAndScaleRule": "owner-required"
+    }
+  },
+  "commands": {
+    "tensorRtExecBuildCommand": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\yolov8-seg.onnx --saveEngine .\\models\\yolov8-seg.plan --minShapes images:1x3x640x640 --optShapes images:1x3x640x640 --maxShapes images:4x3x640x640 --fp16 --workspace 1024 --buildOnly --exportReport .\\models\\yolov8-seg-build-report.json --evidenceSidecar .\\models\\yolov8-seg-evidence.sidecar.json",
+    "yoloVisionRunCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8-seg.onnx --labels .\\models\\coco.names --input-data .\\models\\yolov8-seg-fp32.bin --input-shape 1x3x640x640 --tensor-rt-line 10 --family v8 --task seg --output-role-map boxes:det,proto:mask-prototypes --mask-coefficient-count 32 --aux-layout boxes-first --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45"
+  },
+  "proofChecklist": {
+    "requiredEvidenceLines": [
+      "YoloVision TensorRtLine=...",
+      "Profile Family=v8 Task=Segmentation Layout=... Nms=... NmsMode=class-aware",
+      "InputSource=external InputFile=...",
+      "Output=... Outputs=...",
+      "Postprocess Task=Segmentation;Detections=...;Segmentations=...",
+      "Segmentations=...",
+      "YoloVision Passed=True"
+    ],
+    "requiredHashes": ["modelSha256", "labelsSha256", "imageSha256", "preprocessedTensorSha256", "runLogSha256"],
+    "stdoutSummary": "owner-required",
+    "stderrSummary": "owner-required or explicit no-stderr-emitted",
+    "notProofUntil": "owner backfills real assets, output tensor roles, hashes, run log, stdout/stderr summaries, and validator passes",
+    "packageConsumerBoundary": "This candidate can support real-model-runtime only; package-consumer-runtime must come from clean external package consumer validators."
+  }
+}

@@ -1,0 +1,190 @@
+{
+  "$schema": "../../bridge-api.schema.json",
+  "module": "tensorrt",
+  "versionLine": "10",
+  "apis": [
+    {
+      "id": "trt10-onnx-config-create",
+      "entryPoint": "jyppx_trt10_onnx_config_create",
+      "returnType": "BridgeStatusCode",
+      "ownership": "bridge-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "out_config", "type": "JYPPX_TensorRtOnnxConfig**", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt10-onnx-config-get-model-dtype",
+      "entryPoint": "jyppx_trt10_onnx_config_get_model_dtype",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "config", "type": "JYPPX_TensorRtOnnxConfig*", "direction": "in" },
+        { "name": "out_data_type", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt10-onnx-config-set-model-dtype",
+      "entryPoint": "jyppx_trt10_onnx_config_set_model_dtype",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "config", "type": "JYPPX_TensorRtOnnxConfig*", "direction": "in" },
+        { "name": "data_type", "type": "int32_t", "direction": "in", "managedType": "int", "moduleManagedType": "int" }
+      ]
+    },
+    {
+      "id": "trt10-onnx-config-get-verbosity-level",
+      "entryPoint": "jyppx_trt10_onnx_config_get_verbosity_level",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "config", "type": "JYPPX_TensorRtOnnxConfig*", "direction": "in" },
+        { "name": "out_verbosity", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt10-onnx-config-set-verbosity-level",
+      "entryPoint": "jyppx_trt10_onnx_config_set_verbosity_level",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "config", "type": "JYPPX_TensorRtOnnxConfig*", "direction": "in" },
+        { "name": "verbosity", "type": "int32_t", "direction": "in", "managedType": "int", "moduleManagedType": "int" }
+      ]
+    },
+    {
+      "id": "trt10-onnx-config-add-verbosity",
+      "entryPoint": "jyppx_trt10_onnx_config_add_verbosity",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "config", "type": "JYPPX_TensorRtOnnxConfig*", "direction": "in" }
+      ]
+    },
+    {
+      "id": "trt10-onnx-config-reduce-verbosity",
+      "entryPoint": "jyppx_trt10_onnx_config_reduce_verbosity",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "config", "type": "JYPPX_TensorRtOnnxConfig*", "direction": "in" }
+      ]
+    },
+    {
+      "id": "trt10-onnx-config-get-model-file-name",
+      "entryPoint": "jyppx_trt10_onnx_config_get_model_file_name",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "config", "type": "JYPPX_TensorRtOnnxConfig*", "direction": "in" },
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" }
+      ]
+    },
+    {
+      "id": "trt10-onnx-config-set-model-file-name",
+      "entryPoint": "jyppx_trt10_onnx_config_set_model_file_name",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "config", "type": "JYPPX_TensorRtOnnxConfig*", "direction": "in" },
+        { "name": "value", "type": "const char*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" }
+      ]
+    },
+    {
+      "id": "trt10-onnx-config-get-text-file-name",
+      "entryPoint": "jyppx_trt10_onnx_config_get_text_file_name",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "config", "type": "JYPPX_TensorRtOnnxConfig*", "direction": "in" },
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" }
+      ]
+    },
+    {
+      "id": "trt10-onnx-config-set-text-file-name",
+      "entryPoint": "jyppx_trt10_onnx_config_set_text_file_name",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "config", "type": "JYPPX_TensorRtOnnxConfig*", "direction": "in" },
+        { "name": "value", "type": "const char*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" }
+      ]
+    },
+    {
+      "id": "trt10-onnx-config-get-full-text-file-name",
+      "entryPoint": "jyppx_trt10_onnx_config_get_full_text_file_name",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "config", "type": "JYPPX_TensorRtOnnxConfig*", "direction": "in" },
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" }
+      ]
+    },
+    {
+      "id": "trt10-onnx-config-set-full-text-file-name",
+      "entryPoint": "jyppx_trt10_onnx_config_set_full_text_file_name",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "config", "type": "JYPPX_TensorRtOnnxConfig*", "direction": "in" },
+        { "name": "value", "type": "const char*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" }
+      ]
+    },
+    {
+      "id": "trt10-onnx-config-get-print-layer-info",
+      "entryPoint": "jyppx_trt10_onnx_config_get_print_layer_info",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "config", "type": "JYPPX_TensorRtOnnxConfig*", "direction": "in" },
+        { "name": "out_enabled", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt10-onnx-config-set-print-layer-info",
+      "entryPoint": "jyppx_trt10_onnx_config_set_print_layer_info",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "config", "type": "JYPPX_TensorRtOnnxConfig*", "direction": "in" },
+        { "name": "enabled", "type": "JYPPX_Boolean", "direction": "in", "managedType": "int", "moduleManagedType": "int" }
+      ]
+    }
+  ]
+}

@@ -64,8 +64,15 @@
     { "id": "cuda-logs-dump-to-memory-deferred", "entryPoint": "jyppx_cuda_logs_dump_to_memory_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT", "parameters": [] },
     { "id": "cuda-logs-register-callback-deferred", "entryPoint": "jyppx_cuda_logs_register_callback_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT", "parameters": [] },
     { "id": "cuda-logs-unregister-callback-deferred", "entryPoint": "jyppx_cuda_logs_unregister_callback_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT", "parameters": [] },
-    { "id": "cuda-init-device-deferred", "entryPoint": "jyppx_cuda_init_device_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT", "parameters": [] },
-    { "id": "cuda-set-valid-devices-deferred", "entryPoint": "jyppx_cuda_set_valid_devices_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT", "parameters": [] },
+    { "id": "cuda-init-device", "entryPoint": "jyppx_cuda_init_device", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT", "parameters": [
+      { "name": "device", "type": "int32_t", "direction": "in" },
+      { "name": "device_flags", "type": "uint32_t", "direction": "in" },
+      { "name": "flags", "type": "uint32_t", "direction": "in" }
+    ] },
+    { "id": "cuda-set-valid-devices", "entryPoint": "jyppx_cuda_set_valid_devices", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT", "parameters": [
+      { "name": "devices", "type": "const int32_t*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+      { "name": "count", "type": "uint32_t", "direction": "in", "managedType": "uint", "moduleManagedType": "uint" }
+    ] },
     { "id": "cuda-mem-advise-v2-deferred", "entryPoint": "jyppx_cuda_mem_advise_v2_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT", "parameters": [] },
     { "id": "cuda-mem-discard-and-prefetch-batch-async-deferred", "entryPoint": "jyppx_cuda_mem_discard_and_prefetch_batch_async_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT", "parameters": [] },
     { "id": "cuda-mem-discard-batch-async-deferred", "entryPoint": "jyppx_cuda_mem_discard_batch_async_deferred", "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false, "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT", "parameters": [] },

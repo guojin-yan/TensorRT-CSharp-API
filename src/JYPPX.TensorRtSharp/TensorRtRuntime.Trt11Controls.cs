@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using JYPPX.TensorRtSharp.Internal.Interop;
 
 namespace JYPPX.TensorRtSharp;
@@ -52,9 +54,63 @@ public sealed partial class TensorRtRuntime
 
     /// <summary>
     /// Gets whether this runtime currently has a TensorRT error recorder attached.
-    /// 获取当前 runtime 是否附加了 TensorRT error recorder。
+    /// 获取当前 runtime 是否附加了 TensorRT error recorder；不会暴露 recorder 指针或接管其生命周期。
     /// </summary>
     public bool HasErrorRecorder => NativeBridgeApi.HasRuntimeErrorRecorder(Line, _handle);
+
+    /// <summary>
+    /// Gets whether this runtime still has a native TensorRT logger attached.
+    /// 获取当前 runtime 是否仍附加 TensorRT 原生 logger；不会暴露 logger 指针或接管其生命周期。
+    /// </summary>
+    public bool HasLogger => NativeBridgeApi.HasRuntimeLogger(Line, _handle);
+
+    /// <summary>
+    /// Attempts to collect a copied read-only snapshot from the runtime error recorder.
+    /// 尝试从 runtime error recorder 采集只读托管快照。
+    /// </summary>
+    /// <param name="snapshot">The copied snapshot. 已复制到托管内存的快照。</param>
+    /// <returns><c>true</c> when a recorder was attached; otherwise <c>false</c>. 附加了 recorder 时返回 <c>true</c>，否则返回 <c>false</c>。</returns>
+    /// <remarks>
+    /// This method does not expose, retain, increment, decrement, or destroy the native recorder pointer.
+    /// 此方法不会暴露、持有、增加引用、减少引用或销毁原生 recorder 指针。
+    /// </remarks>
+    public bool TryGetErrorRecorderSnapshot(out TensorRtErrorRecorderSnapshot snapshot)
+    {
+        snapshot = NativeBridgeApi.GetRuntimeErrorRecorderSnapshot(Line, _handle);
+        return snapshot.HasRecorder;
+    }
+
+    /// <summary>
+    /// Gets a copied read-only diagnostic snapshot for this runtime.
+    /// 获取当前 runtime 的复制型只读诊断快照。
+    /// </summary>
+    public TensorRtRuntimeDiagnosticSnapshot GetDiagnosticSnapshot()
+    {
+        List<string> diagnostics = new List<string>();
+        bool hasErrorRecorder = TryCollect("HasErrorRecorder", diagnostics, () => HasErrorRecorder, false);
+        TensorRtErrorRecorderSnapshot errorRecorder = TryCollect(
+            "ErrorRecorderSnapshot",
+            diagnostics,
+            () =>
+            {
+                TryGetErrorRecorderSnapshot(out TensorRtErrorRecorderSnapshot snapshot);
+                return snapshot;
+            },
+            new TensorRtErrorRecorderSnapshot(Line, false, 0, false, Array.Empty<TensorRtErrorRecord>()));
+
+        return new TensorRtRuntimeDiagnosticSnapshot(
+            Line,
+            TryCollect("DlaCore", diagnostics, () => DlaCore, -1),
+            TryCollect("DlaCoreCount", diagnostics, () => DlaCoreCount, 0),
+            TryCollect("MaxThreads", diagnostics, () => MaxThreads, 0),
+            TryCollect("EngineHostCodeAllowed", diagnostics, () => EngineHostCodeAllowed, false),
+            TryCollect("TempfileControlFlags", diagnostics, () => TempfileControlFlags, TensorRtTempfileControlFlags.None),
+            TryCollect("TemporaryDirectory", diagnostics, GetTemporaryDirectory, string.Empty),
+            TryCollect("HasLogger", diagnostics, () => HasLogger, false),
+            hasErrorRecorder,
+            errorRecorder,
+            diagnostics);
+    }
 
     /// <summary>
     /// Gets the runtime temporary directory configured through TensorRT.
@@ -87,7 +143,7 @@ public sealed partial class TensorRtRuntime
 
     /// <summary>
     /// Clears the native error recorder pointer if one was attached externally.
-    /// 清除外部附加的原生 error recorder 指针。
+    /// 清除外部附加的原生 error recorder 指针；不会销毁 recorder 或接管其生命周期。
     /// </summary>
     public void ClearErrorRecorder()
     {
@@ -96,10 +152,23 @@ public sealed partial class TensorRtRuntime
 
     /// <summary>
     /// Clears the native GPU allocator pointer and returns runtime allocation to TensorRT defaults.
-    /// 清除原生 GPU allocator 指针，让 runtime allocation 回到 TensorRT 默认行为。
+    /// 清除原生 GPU allocator 指针，让 runtime allocation 回到 TensorRT 默认行为；不会调用用户 allocator 的 free/deallocate 回调。
     /// </summary>
     public void ClearGpuAllocator()
     {
         NativeBridgeApi.ClearRuntimeGpuAllocator(Line, _handle);
+    }
+
+    private static T TryCollect<T>(string fieldName, List<string> diagnostics, Func<T> getter, T fallback)
+    {
+        try
+        {
+            return getter();
+        }
+        catch (Exception ex) when (ex is BridgeProbeException || ex is NotSupportedException || ex is InvalidOperationException)
+        {
+            diagnostics.Add($"{fieldName}: {ex.Message}");
+            return fallback;
+        }
     }
 }

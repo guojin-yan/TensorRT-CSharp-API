@@ -70,6 +70,7 @@ public sealed partial class TensorRtExecutionContext
 
         List<string> diagnostics = new List<string>();
         List<TensorRtTensorBindingState> states = new List<TensorRtTensorBindingState>();
+        List<TensorRtExecutionContextRuntimeDiagnosticSnapshot> runtimeDiagnostics = new List<TensorRtExecutionContextRuntimeDiagnosticSnapshot>();
         foreach (TensorRtTensorInfo tensor in engine.GetIOTensors())
         {
             TensorRtDims? contextShape = TryCollect($"ContextShape[{tensor.Name}]", diagnostics, () => GetTensorShape(tensor.Name), (TensorRtDims?)null);
@@ -90,6 +91,15 @@ public sealed partial class TensorRtExecutionContext
                 isBound,
                 maxOutputSize,
                 null));
+
+            if (tensor.IOMode == TensorRtIOMode.Output)
+            {
+                runtimeDiagnostics.Add(TryCollect(
+                    $"RuntimeDiagnosticSnapshot[{tensor.Name}]",
+                    diagnostics,
+                    () => GetRuntimeDiagnosticSnapshot(tensor.Name),
+                    CreateUnavailableRuntimeDiagnosticSnapshot(tensor.Name)));
+            }
         }
 
         bool hasRuntimeConfig = TryCollect("HasRuntimeConfig", diagnostics, () => HasRuntimeConfig, false);
@@ -120,7 +130,30 @@ public sealed partial class TensorRtExecutionContext
             TryCollect("NvtxVerbosity", diagnostics, GetNvtxVerbosity, TensorRtProfilingVerbosity.LayerNamesOnly),
             TryCollect("UnfusedTensorsDebugState", diagnostics, GetUnfusedTensorsDebugState, false),
             states,
+            runtimeDiagnostics,
             diagnostics);
+    }
+
+    private TensorRtExecutionContextRuntimeDiagnosticSnapshot CreateUnavailableRuntimeDiagnosticSnapshot(string outputTensorName)
+    {
+        return new TensorRtExecutionContextRuntimeDiagnosticSnapshot(
+            Line,
+            outputTensorName,
+            hasErrorRecorder: false,
+            isInputConsumedEventSet: false,
+            inputConsumedEventAddressValue: 0UL,
+            hasOutputAllocator: false,
+            isOutputTensorAddressSet: false,
+            outputTensorAddressValue: 0UL,
+            hasTemporaryStorageAllocator: false,
+            hasDebugListener: false,
+            hasManagedProfiler: false,
+            hasNativeProfiler: false,
+            hasRuntimeConfig: false,
+            nvtxVerbosity: TensorRtProfilingVerbosity.LayerNamesOnly,
+            unfusedTensorsDebugState: false,
+            callbackState: CreateUnavailableCallbackStateSnapshot(outputTensorName),
+            diagnostics: new[] { "Runtime diagnostic snapshot unavailable." });
     }
 
     private static T TryCollect<T>(string fieldName, List<string> diagnostics, Func<T> getter, T fallback)

@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using JYPPX.CudaSharp.Internal.Handles;
 using JYPPX.Shared.Interop;
+using JYPPX.TensorRtSharp.Internal;
 using JYPPX.TensorRtSharp.Internal.Handles;
 
 namespace JYPPX.TensorRtSharp.Internal.Interop;
@@ -182,6 +184,57 @@ internal static partial class NativeBridgeApi
         };
         NativeStatus.ThrowIfFailed(status);
         return hasRecorder != 0;
+    }
+
+    public static bool HasRuntimeLogger(TensorRtApiLine line, SafeTensorRtObjectHandle runtime)
+    {
+        int hasLogger;
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_runtime_has_logger(runtime, out hasLogger),
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_runtime_has_logger(runtime, out hasLogger),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_runtime_has_logger(runtime, out hasLogger),
+            _ => throw new BridgeProbeException(BridgeStatusCode.InvalidArgument, BridgeErrorCategory.Common, "Unsupported TensorRT API line.")
+        };
+        NativeStatus.ThrowIfFailed(status);
+        return hasLogger != 0;
+    }
+
+    public static TensorRtErrorRecorderSnapshot GetRuntimeErrorRecorderSnapshot(TensorRtApiLine line, SafeTensorRtObjectHandle runtime)
+    {
+        NativeTensorRtErrorRecorderSnapshotInfo info;
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_runtime_get_error_recorder_snapshot_info(runtime, out info),
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_runtime_get_error_recorder_snapshot_info(runtime, out info),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_runtime_get_error_recorder_snapshot_info(runtime, out info),
+            _ => throw new BridgeProbeException(BridgeStatusCode.InvalidArgument, BridgeErrorCategory.Common, "Unsupported TensorRT API line.")
+        };
+        NativeStatus.ThrowIfFailed(status);
+
+        bool hasRecorder = info.HasRecorder != 0;
+        int errorCount = Math.Max(0, info.ErrorCount);
+        if (!hasRecorder || errorCount == 0)
+        {
+            return BridgeInfoMapper.ToManaged(line, info, Array.Empty<TensorRtErrorRecord>());
+        }
+
+        List<TensorRtErrorRecord> records = new List<TensorRtErrorRecord>(errorCount);
+        for (int index = 0; index < errorCount; index++)
+        {
+            NativeTensorRtErrorRecordInfo error;
+            status = line switch
+            {
+                TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_runtime_get_error_recorder_error(runtime, index, out error),
+                TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_runtime_get_error_recorder_error(runtime, index, out error),
+                TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_runtime_get_error_recorder_error(runtime, index, out error),
+                _ => throw new BridgeProbeException(BridgeStatusCode.InvalidArgument, BridgeErrorCategory.Common, "Unsupported TensorRT API line.")
+            };
+            NativeStatus.ThrowIfFailed(status);
+            records.Add(BridgeInfoMapper.ToManaged(error));
+        }
+
+        return BridgeInfoMapper.ToManaged(line, info, records);
     }
 
     public static void ClearRuntimeErrorRecorder(TensorRtApiLine line, SafeTensorRtObjectHandle runtime)
@@ -517,6 +570,43 @@ internal static partial class NativeBridgeApi
         };
         NativeStatus.ThrowIfFailed(status);
         return hasRecorder != 0;
+    }
+
+    public static TensorRtErrorRecorderSnapshot GetRefitterErrorRecorderSnapshot(TensorRtApiLine line, SafeTensorRtObjectHandle refitter)
+    {
+        NativeTensorRtErrorRecorderSnapshotInfo info;
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_refitter_get_error_recorder_snapshot_info(refitter, out info),
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_refitter_get_error_recorder_snapshot_info(refitter, out info),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_refitter_get_error_recorder_snapshot_info(refitter, out info),
+            _ => throw UnsupportedLine()
+        };
+        NativeStatus.ThrowIfFailed(status);
+
+        bool hasRecorder = info.HasRecorder != 0;
+        int errorCount = Math.Max(0, info.ErrorCount);
+        if (!hasRecorder || errorCount == 0)
+        {
+            return BridgeInfoMapper.ToManaged(line, info, Array.Empty<TensorRtErrorRecord>());
+        }
+
+        List<TensorRtErrorRecord> records = new List<TensorRtErrorRecord>(errorCount);
+        for (int index = 0; index < errorCount; index++)
+        {
+            NativeTensorRtErrorRecordInfo error;
+            status = line switch
+            {
+                TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_refitter_get_error_recorder_error(refitter, index, out error),
+                TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_refitter_get_error_recorder_error(refitter, index, out error),
+                TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_refitter_get_error_recorder_error(refitter, index, out error),
+                _ => throw UnsupportedLine()
+            };
+            NativeStatus.ThrowIfFailed(status);
+            records.Add(BridgeInfoMapper.ToManaged(error));
+        }
+
+        return BridgeInfoMapper.ToManaged(line, info, records);
     }
 
     public static void ClearRefitterErrorRecorder(TensorRtApiLine line, SafeTensorRtObjectHandle refitter)

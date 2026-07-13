@@ -112,6 +112,52 @@ public static class TensorRtEnvironmentProbe
     }
 
     /// <summary>
+    /// Checks whether TensorRT exposes a non-null global plugin registry.
+    /// 检查 TensorRT 是否暴露非空全局 plugin registry。
+    /// </summary>
+    /// <remarks>
+    /// This method only checks whether <c>getPluginRegistry</c> returns a non-null registry pointer.
+    /// It does not return the registry pointer, register creators, unregister creators, load plugin libraries, or take ownership of native objects.
+    /// 该方法只检查 <c>getPluginRegistry</c> 是否返回非空 registry 指针；不会返回 registry 指针、注册或注销 creator、加载 plugin library，也不会接管 native 对象所有权。
+    /// </remarks>
+    /// <param name="line">The TensorRT API line to query. 要查询的 TensorRT API line。</param>
+    /// <returns><see langword="true"/> when TensorRT reports a global plugin registry. TensorRT 报告存在全局 plugin registry 时返回 <see langword="true"/>。</returns>
+    public static bool IsGlobalPluginRegistryAvailable(TensorRtApiLine line)
+    {
+        NativeBridgeLoader.EnsureInitialized();
+        return NativeBridgeApi.GlobalPluginRegistryExists(line);
+    }
+
+    /// <summary>
+    /// Tries to check whether TensorRT exposes a global plugin registry without throwing probe exceptions.
+    /// 尝试检查 TensorRT 是否暴露全局 plugin registry；探针异常会转为诊断字符串。
+    /// </summary>
+    /// <remarks>
+    /// This method only checks whether <c>getPluginRegistry</c> returns a non-null registry pointer.
+    /// It does not return the registry pointer or take ownership of native objects.
+    /// 该方法只检查 <c>getPluginRegistry</c> 是否返回非空 registry 指针；不会返回 registry 指针，也不会接管 native 对象所有权。
+    /// </remarks>
+    /// <param name="line">The TensorRT API line to query. 要查询的 TensorRT API line。</param>
+    /// <param name="available">Set to <see langword="true"/> when TensorRT reports a registry. TensorRT 报告存在 registry 时设为 <see langword="true"/>。</param>
+    /// <param name="diagnostic">A diagnostic string describing success or failure. 描述成功或失败原因的诊断字符串。</param>
+    /// <returns><see langword="true"/> when the probe completed successfully. 探针成功完成时返回 <see langword="true"/>。</returns>
+    public static bool TryIsGlobalPluginRegistryAvailable(TensorRtApiLine line, out bool available, out string diagnostic)
+    {
+        try
+        {
+            available = IsGlobalPluginRegistryAvailable(line);
+            diagnostic = "OK";
+            return true;
+        }
+        catch (Exception exception) when (IsProbeException(exception))
+        {
+            available = false;
+            diagnostic = FormatProbeException("Global plugin registry availability query", exception);
+            return false;
+        }
+    }
+
+    /// <summary>
     /// Checks whether TensorRT's global plugin registry contains a creator matching the supplied metadata.
     /// 检查 TensorRT 全局 plugin registry 是否存在匹配给定元数据的 creator。
     /// </summary>
@@ -128,6 +174,134 @@ public static class TensorRtEnvironmentProbe
     {
         NativeBridgeLoader.EnsureInitialized();
         return NativeBridgeApi.IsGlobalPluginCreatorRegistered(line, pluginName, pluginVersion, pluginNamespace);
+    }
+
+    /// <summary>
+    /// Tries to check whether TensorRT's global plugin registry contains a matching creator without throwing probe exceptions.
+    /// 尝试检查 TensorRT 全局 plugin registry 是否存在匹配 creator；探针异常会转为诊断字符串。
+    /// </summary>
+    /// <remarks>
+    /// This lookup does not create a plugin and does not return or own the native creator pointer.
+    /// 该 lookup 不会创建 plugin，也不会返回或持有 native creator 指针。
+    /// </remarks>
+    /// <param name="line">The TensorRT API line to query. 要查询的 TensorRT API line。</param>
+    /// <param name="pluginName">The plugin creator name. plugin creator 名称。</param>
+    /// <param name="pluginVersion">The plugin creator version. plugin creator 版本。</param>
+    /// <param name="pluginNamespace">The plugin creator namespace. plugin creator 命名空间。</param>
+    /// <param name="found">Set to <see langword="true"/> when TensorRT finds a matching creator. 找到匹配 creator 时设为 <see langword="true"/>。</param>
+    /// <param name="diagnostic">A diagnostic string describing success or failure. 描述成功或失败原因的诊断字符串。</param>
+    /// <returns><see langword="true"/> when the lookup completed successfully. lookup 成功完成时返回 <see langword="true"/>。</returns>
+    public static bool TryIsGlobalPluginCreatorRegistered(
+        TensorRtApiLine line,
+        string pluginName,
+        string pluginVersion,
+        string pluginNamespace,
+        out bool found,
+        out string diagnostic)
+    {
+        try
+        {
+            found = IsGlobalPluginCreatorRegistered(line, pluginName, pluginVersion, pluginNamespace);
+            diagnostic = "OK";
+            return true;
+        }
+        catch (Exception exception) when (IsProbeException(exception))
+        {
+            found = false;
+            diagnostic = FormatProbeException("Global plugin creator lookup", exception);
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Tries to read metadata for a plugin creator from TensorRT's global plugin registry.
+    /// 尝试从 TensorRT 全局 plugin registry 读取某个 plugin creator 的元数据。
+    /// </summary>
+    /// <remarks>
+    /// The lookup does not create a plugin, does not return the native creator pointer, and does not take ownership of TensorRT objects.
+    /// The returned metadata is copied into managed objects.
+    /// 该 lookup 不会创建 plugin、不会返回 native creator 指针，也不会接管 TensorRT 对象所有权；返回的元数据会复制到托管对象中。
+    /// </remarks>
+    /// <param name="line">The TensorRT API line to query. 要查询的 TensorRT API line。</param>
+    /// <param name="pluginName">The plugin creator name. plugin creator 名称。</param>
+    /// <param name="pluginVersion">The plugin creator version. plugin creator 版本。</param>
+    /// <param name="pluginNamespace">The plugin creator namespace. plugin creator 命名空间。</param>
+    /// <param name="creator">The copied creator metadata when a matching creator is found. 找到匹配 creator 时复制出的 creator 元数据。</param>
+    /// <param name="diagnostic">A diagnostic string describing success or failure. 描述成功或失败原因的诊断字符串。</param>
+    /// <returns><see langword="true"/> when a matching creator was found and copied. 找到并复制匹配 creator 时返回 <see langword="true"/>。</returns>
+    public static bool TryGetGlobalPluginCreator(
+        TensorRtApiLine line,
+        string pluginName,
+        string pluginVersion,
+        string pluginNamespace,
+        out TensorRtPluginCreatorInfo? creator,
+        out string diagnostic)
+    {
+        try
+        {
+            NativeBridgeLoader.EnsureInitialized();
+            bool found = NativeBridgeApi.TryGetGlobalPluginCreator(line, pluginName, pluginVersion, pluginNamespace, out creator);
+            diagnostic = found ? "OK" : "Plugin creator was not found.";
+            return found;
+        }
+        catch (Exception exception) when (IsProbeException(exception))
+        {
+            creator = null;
+            diagnostic = FormatProbeException("Global plugin creator metadata query", exception);
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Checks whether TensorRT exposes a builder capability plugin registry for the requested engine capability.
+    /// 检查 TensorRT 是否为指定 engine capability 暴露 builder capability plugin registry。
+    /// </summary>
+    /// <remarks>
+    /// This method only checks whether <c>getBuilderPluginRegistry</c> returns a non-null registry pointer.
+    /// It does not return the registry pointer, register creators, unregister creators, load plugin libraries, or take ownership of native objects.
+    /// 该方法只检查 <c>getBuilderPluginRegistry</c> 是否返回非空 registry 指针；不会返回 registry 指针、注册或注销 creator、加载 plugin library，也不会接管 native 对象所有权。
+    /// </remarks>
+    /// <param name="line">The TensorRT API line to query. 要查询的 TensorRT API line。</param>
+    /// <param name="capability">The engine capability whose builder registry should be checked. 要检查 builder registry 的 engine capability。</param>
+    /// <returns><see langword="true"/> when TensorRT reports a builder capability plugin registry. TensorRT 报告存在 builder capability plugin registry 时返回 <see langword="true"/>。</returns>
+    public static bool IsBuilderCapabilityPluginRegistryAvailable(TensorRtApiLine line, TensorRtEngineCapability capability)
+    {
+        NativeBridgeLoader.EnsureInitialized();
+        return NativeBridgeApi.BuilderCapabilityPluginRegistryExists(line, capability);
+    }
+
+    /// <summary>
+    /// Tries to check whether TensorRT exposes a builder capability plugin registry without throwing probe exceptions.
+    /// 尝试检查 TensorRT 是否暴露 builder capability plugin registry；探针异常会转为诊断字符串。
+    /// </summary>
+    /// <remarks>
+    /// This method only checks whether <c>getBuilderPluginRegistry</c> returns a non-null registry pointer.
+    /// It does not return the registry pointer or take ownership of native objects.
+    /// 该方法只检查 <c>getBuilderPluginRegistry</c> 是否返回非空 registry 指针；不会返回 registry 指针，也不会接管 native 对象所有权。
+    /// </remarks>
+    /// <param name="line">The TensorRT API line to query. 要查询的 TensorRT API line。</param>
+    /// <param name="capability">The engine capability whose builder registry should be checked. 要检查 builder registry 的 engine capability。</param>
+    /// <param name="available">Set to <see langword="true"/> when TensorRT reports a registry. TensorRT 报告存在 registry 时设为 <see langword="true"/>。</param>
+    /// <param name="diagnostic">A diagnostic string describing success or failure. 描述成功或失败原因的诊断字符串。</param>
+    /// <returns><see langword="true"/> when the probe completed successfully. 探针成功完成时返回 <see langword="true"/>。</returns>
+    public static bool TryIsBuilderCapabilityPluginRegistryAvailable(
+        TensorRtApiLine line,
+        TensorRtEngineCapability capability,
+        out bool available,
+        out string diagnostic)
+    {
+        try
+        {
+            available = IsBuilderCapabilityPluginRegistryAvailable(line, capability);
+            diagnostic = "OK";
+            return true;
+        }
+        catch (Exception exception) when (IsProbeException(exception))
+        {
+            available = false;
+            diagnostic = FormatProbeException("Builder capability plugin registry existence query", exception);
+            return false;
+        }
     }
 
     /// <summary>
@@ -149,13 +323,49 @@ public static class TensorRtEnvironmentProbe
     }
 
     /// <summary>
+    /// Tries to check whether TensorRT exposes a builder safe plugin registry without throwing probe exceptions.
+    /// 尝试检查 TensorRT 是否暴露 builder safe plugin registry；探针异常会转为诊断字符串。
+    /// </summary>
+    /// <remarks>
+    /// This method only checks whether TensorRT returns a non-null safe registry pointer.
+    /// It does not return the registry pointer or take ownership of native objects.
+    /// 该方法只检查 TensorRT 是否返回非空 safe registry 指针；不会返回 registry 指针，也不会接管 native 对象所有权。
+    /// </remarks>
+    /// <param name="line">The TensorRT API line to query. 要查询的 TensorRT API line。</param>
+    /// <param name="capability">The engine capability whose safe builder registry should be checked. 要检查 safe builder registry 的 engine capability。</param>
+    /// <param name="available">Set to <see langword="true"/> when TensorRT reports a safe registry. TensorRT 报告存在 safe registry 时设为 <see langword="true"/>。</param>
+    /// <param name="diagnostic">A diagnostic string describing success or failure. 描述成功或失败原因的诊断字符串。</param>
+    /// <returns><see langword="true"/> when the probe completed successfully. 探针成功完成时返回 <see langword="true"/>。</returns>
+    public static bool TryIsBuilderSafePluginRegistryAvailable(
+        TensorRtApiLine line,
+        TensorRtEngineCapability capability,
+        out bool available,
+        out string diagnostic)
+    {
+        try
+        {
+            available = IsBuilderSafePluginRegistryAvailable(line, capability);
+            diagnostic = "OK";
+            return true;
+        }
+        catch (Exception exception) when (IsProbeException(exception))
+        {
+            available = false;
+            diagnostic = FormatProbeException("Builder safe plugin registry existence query", exception);
+            return false;
+        }
+    }
+
+    /// <summary>
     /// Gets a read-only snapshot of TensorRT's builder capability plugin registry.
     /// 获取 TensorRT builder capability plugin registry 的只读快照。
     /// </summary>
     /// <remarks>
     /// This method queries <c>getBuilderPluginRegistry</c> for the requested engine capability. It does not create plugins,
     /// register plugins, unregister plugins, initialize plugin libraries, or take ownership of creator objects.
+    /// Creator identity, interface info, and field metadata are copied into managed value objects.
     /// 该方法会针对请求的 engine capability 查询 <c>getBuilderPluginRegistry</c>；不会创建 plugin、注册或注销 plugin、初始化 plugin library，也不会接管 creator 对象所有权。
+    /// Creator 标识、interface 信息和字段元数据会复制到托管值对象中。
     /// </remarks>
     /// <param name="line">The TensorRT API line to query. 要查询的 TensorRT API line。</param>
     /// <param name="capability">The engine capability whose builder-visible registry should be inspected. 要检查其 builder-visible registry 的 engine capability。</param>
@@ -218,6 +428,45 @@ public static class TensorRtEnvironmentProbe
     {
         NativeBridgeLoader.EnsureInitialized();
         return NativeBridgeApi.IsBuilderCapabilityPluginCreatorRegistered(line, capability, pluginName, pluginVersion, pluginNamespace);
+    }
+
+    /// <summary>
+    /// Tries to check whether TensorRT's builder capability plugin registry contains a matching creator without throwing probe exceptions.
+    /// 尝试检查 TensorRT builder capability plugin registry 是否存在匹配 creator；探针异常会转为诊断字符串。
+    /// </summary>
+    /// <remarks>
+    /// This lookup does not create a plugin and does not return or own the native creator pointer.
+    /// 该 lookup 不会创建 plugin，也不会返回或持有 native creator 指针。
+    /// </remarks>
+    /// <param name="line">The TensorRT API line to query. 要查询的 TensorRT API line。</param>
+    /// <param name="capability">The engine capability whose builder-visible registry should be inspected. 要检查其 builder-visible registry 的 engine capability。</param>
+    /// <param name="pluginName">The plugin creator name. plugin creator 名称。</param>
+    /// <param name="pluginVersion">The plugin creator version. plugin creator 版本。</param>
+    /// <param name="pluginNamespace">The plugin creator namespace. plugin creator 命名空间。</param>
+    /// <param name="found">Set to <see langword="true"/> when TensorRT finds a matching creator. 找到匹配 creator 时设为 <see langword="true"/>。</param>
+    /// <param name="diagnostic">A diagnostic string describing success or failure. 描述成功或失败原因的诊断字符串。</param>
+    /// <returns><see langword="true"/> when the lookup completed successfully. lookup 成功完成时返回 <see langword="true"/>。</returns>
+    public static bool TryIsBuilderCapabilityPluginCreatorRegistered(
+        TensorRtApiLine line,
+        TensorRtEngineCapability capability,
+        string pluginName,
+        string pluginVersion,
+        string pluginNamespace,
+        out bool found,
+        out string diagnostic)
+    {
+        try
+        {
+            found = IsBuilderCapabilityPluginCreatorRegistered(line, capability, pluginName, pluginVersion, pluginNamespace);
+            diagnostic = "OK";
+            return true;
+        }
+        catch (Exception exception) when (IsProbeException(exception))
+        {
+            found = false;
+            diagnostic = FormatProbeException("Builder capability plugin creator lookup", exception);
+            return false;
+        }
     }
 
     /// <summary>
@@ -776,6 +1025,50 @@ public static class TensorRtEnvironmentProbe
         {
             message = $"Runtime creation raised AccessViolationException: {exception.Message}";
             return false;
+        }
+    }
+
+    /// <summary>
+    /// Gets a copied no-throw diagnostic snapshot for TensorRT runtime creation.
+    /// 获取 TensorRT runtime 创建的复制型 no-throw 诊断快照。
+    /// </summary>
+    /// <param name="line">The TensorRT API line to diagnose. 要诊断的 TensorRT API line。</param>
+    /// <returns>A pointer-free runtime creation diagnostic snapshot. 无指针 runtime 创建诊断快照。</returns>
+    /// <remarks>
+    /// The native diagnostic entry is currently implemented for TensorRT 11. Other lines return a managed not-supported snapshot.
+    /// native 诊断入口目前仅实现 TensorRT 11；其他版本线返回托管 not-supported 快照。
+    /// </remarks>
+    public static TensorRtRuntimeCreateDiagnosticSnapshot GetRuntimeCreateDiagnostic(TensorRtApiLine line)
+    {
+        NativeBridgeLoader.EnsureInitialized();
+
+        try
+        {
+            using SafeTensorRtObjectHandle logger = NativeBridgeApi.CreateLogger(line);
+            return NativeBridgeApi.GetRuntimeCreateDiagnostic(line, logger);
+        }
+        catch (Exception exception) when (IsProbeException(exception))
+        {
+            return new TensorRtRuntimeCreateDiagnosticSnapshot(
+                line,
+                diagnosticAvailable: false,
+                attempted: false,
+                loggerHandlePresent: false,
+                loggerPayloadPresent: false,
+                createInferRuntimeReturnedNonNull: false,
+                createInferRuntimeReturnedNull: false,
+                lastStatus: exception is BridgeProbeException bridgeException ? bridgeException.StatusCode : BridgeStatusCode.RuntimeError,
+                tensorRtAvailable: false,
+                expectedMajor: line == TensorRtApiLine.TensorRt11 ? 11 : 0,
+                bridgeBuiltMajor: 0,
+                detectedVersion: string.Empty,
+                loggerCallbackAvailable: false,
+                loggerMessageCount: 0,
+                lastLoggerSeverity: 0,
+                lastLoggerMessage: string.Empty,
+                createRuntimePhase: "managed-probe-exception",
+                nativeDetail: "Managed probe caught an exception before a native diagnostic snapshot was available.",
+                diagnostic: FormatProbeException("Runtime create diagnostic", exception));
         }
     }
 

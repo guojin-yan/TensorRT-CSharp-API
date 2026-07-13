@@ -7,13 +7,13 @@ public sealed partial class TensorRtNetworkDefinition
 {
     /// <summary>
     /// Gets whether a native TensorRT error recorder is attached to this network definition.
-    /// 获取当前 network definition 是否绑定了 TensorRT 原生 error recorder。
+    /// 获取当前 network definition 是否绑定了 TensorRT 原生 error recorder；支持 TensorRT 8/10/11，不会暴露 recorder 指针或接管其生命周期。
     /// </summary>
     public bool HasErrorRecorder => NativeBridgeApi.HasNetworkErrorRecorder(Line, _handle);
 
     /// <summary>
     /// Clears the native TensorRT error recorder attached to this network definition.
-    /// 清除当前 network definition 上绑定的 TensorRT 原生 error recorder。
+    /// 清除当前 network definition 上绑定的 TensorRT 原生 error recorder；支持 TensorRT 8/10/11，不会销毁 recorder 或接管其生命周期。
     /// </summary>
     public void ClearErrorRecorder()
     {

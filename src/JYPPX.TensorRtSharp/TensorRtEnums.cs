@@ -580,6 +580,103 @@ public enum TensorRtRuntimePlatform
 }
 
 /// <summary>
+/// Represents TensorRT 8 RNNv2 operation kinds.
+/// 表示 TensorRT 8 RNNv2 运算类型。
+/// </summary>
+public enum TensorRtRnnOperation
+{
+    /// <summary>
+    /// Single-gate RNN with ReLU activation.
+    /// 使用 ReLU 激活的单门 RNN。
+    /// </summary>
+    Relu = 0,
+
+    /// <summary>
+    /// Single-gate RNN with tanh activation.
+    /// 使用 tanh 激活的单门 RNN。
+    /// </summary>
+    Tanh = 1,
+
+    /// <summary>
+    /// Four-gate LSTM network without peephole connections.
+    /// 不含 peephole 连接的四门 LSTM 网络。
+    /// </summary>
+    Lstm = 2,
+
+    /// <summary>
+    /// Three-gate gated recurrent unit network.
+    /// 三门 GRU 网络。
+    /// </summary>
+    Gru = 3
+}
+
+/// <summary>
+/// Represents TensorRT 8 RNNv2 direction modes.
+/// 表示 TensorRT 8 RNNv2 方向模式。
+/// </summary>
+public enum TensorRtRnnDirection
+{
+    /// <summary>
+    /// Iterate from the first input to the last input.
+    /// 从第一个输入迭代到最后一个输入。
+    /// </summary>
+    Unidirection = 0,
+
+    /// <summary>
+    /// Iterate in both directions and concatenate outputs.
+    /// 双向迭代并拼接输出。
+    /// </summary>
+    Bidirection = 1
+}
+
+/// <summary>
+/// Represents TensorRT 8 RNNv2 input modes.
+/// 表示 TensorRT 8 RNNv2 输入模式。
+/// </summary>
+public enum TensorRtRnnInputMode
+{
+    /// <summary>
+    /// Perform the normal matrix multiplication in the first recurrent layer.
+    /// 在第一个 recurrent layer 执行常规矩阵乘法。
+    /// </summary>
+    Linear = 0,
+
+    /// <summary>
+    /// Skip the first recurrent layer input matrix multiplication.
+    /// 跳过第一个 recurrent layer 的输入矩阵乘法。
+    /// </summary>
+    Skip = 1
+}
+
+/// <summary>
+/// Represents an individual TensorRT 8 RNNv2 gate.
+/// 表示 TensorRT 8 RNNv2 单个门类型。
+/// </summary>
+public enum TensorRtRnnGateType
+{
+    /// <summary>Input gate (i). 输入门（i）。</summary>
+    Input = 0,
+
+    /// <summary>Output gate (o). 输出门（o）。</summary>
+    Output = 1,
+
+    /// <summary>Forget gate (f). 遗忘门（f）。</summary>
+    Forget = 2,
+
+    /// <summary>Update gate (z). 更新门（z）。</summary>
+    Update = 3,
+
+    /// <summary>Reset gate (r). 重置门（r）。</summary>
+    Reset = 4,
+
+    /// <summary>Cell gate (c). 单元门（c）。</summary>
+    Cell = 5,
+
+    /// <summary>Hidden gate (h). 隐状态门（h）。</summary>
+    Hidden = 6
+}
+
+/// <summary>
 /// Represents TensorRT TensorRtDeviceType values.
 /// 表示 TensorRT TensorRtDeviceType 枚举值。
 /// </summary>
@@ -1479,6 +1576,39 @@ public enum TensorRtTilingOptimizationLevel
     /// 使用更完整的 tiling 搜索。
     /// </summary>
     Full = 3
+}
+
+/// <summary>
+/// Selects TensorRT 8/10 quantization calibration behavior.
+/// 选择 TensorRT 8/10 quantization calibration 行为。
+/// </summary>
+public enum TensorRtQuantizationFlag
+{
+    /// <summary>
+    /// Run the INT8 calibration pass before layer fusion.
+    /// 在 layer fusion 前运行 INT8 calibration pass。
+    /// </summary>
+    CalibrateBeforeFusion = 0
+}
+
+/// <summary>
+/// Represents a TensorRT 8/10 quantization flag bitmask.
+/// 表示 TensorRT 8/10 quantization flag 位掩码。
+/// </summary>
+[Flags]
+public enum TensorRtQuantizationFlags : uint
+{
+    /// <summary>
+    /// No quantization flags are enabled.
+    /// 不启用任何 quantization flag。
+    /// </summary>
+    None = 0,
+
+    /// <summary>
+    /// Run the INT8 calibration pass before layer fusion.
+    /// 在 layer fusion 前运行 INT8 calibration pass。
+    /// </summary>
+    CalibrateBeforeFusion = 1u << (int)TensorRtQuantizationFlag.CalibrateBeforeFusion
 }
 
 /// <summary>

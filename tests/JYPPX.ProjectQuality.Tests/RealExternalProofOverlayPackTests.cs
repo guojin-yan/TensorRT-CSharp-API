@@ -1,0 +1,121 @@
+using System.Diagnostics;
+using System.Text.Json;
+using Xunit;
+
+namespace JYPPX.ProjectQuality.Tests;
+
+[Collection("ReleaseCloseProofArtifacts")]
+public sealed class RealExternalProofOverlayPackTests
+{
+    [Fact]
+    public void RealExternalProofOverlayPackStaysBlockedAndAuditable()
+    {
+        RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Export-ReleaseEvidenceBundle.ps1"));
+        RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Export-ReleaseIssueFinalCloseDecisionTemplate.ps1"));
+        RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Test-ReleaseIssueFinalCloseDecision.ps1"), "-Strict");
+        RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Export-FinalEvidenceFreeze.ps1"));
+        RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Test-FinalEvidenceFreeze.ps1"), "-Strict");
+        RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Export-RealExternalProofOverlayPack.ps1"));
+        RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Test-RealExternalProofOverlayPack.ps1"), "-Strict");
+        RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Export-ReleaseEvidenceBundle.ps1"));
+
+        using JsonDocument packDocument = ReadFinalReleaseJson("real-external-proof-overlay-pack.json");
+        JsonElement pack = packDocument.RootElement;
+        Assert.Equal("real-external-proof-overlay-pack", pack.GetProperty("recordKind").GetString());
+        Assert.Equal("blocked-real-owner-input-required", pack.GetProperty("overlayState").GetString());
+        Assert.True(pack.GetProperty("overlayLineCount").GetInt32() >= 4);
+        Assert.True(pack.GetProperty("missingOwnerInputFieldCount").GetInt32() >= 10);
+        Assert.False(pack.GetProperty("performsPublish").GetBoolean());
+        Assert.False(pack.GetProperty("canPublishPublicly").GetBoolean());
+        Assert.False(pack.GetProperty("canCloseReleaseIssue").GetBoolean());
+
+        string[] lineIds = pack.GetProperty("overlayLines")
+            .EnumerateArray()
+            .Select(static item => item.GetProperty("id").GetString()!)
+            .ToArray();
+        Assert.Contains("package-consumer-runtime-proof", lineIds);
+        Assert.Contains("post-publish-verification", lineIds);
+        Assert.Contains("release-close-owner-input", lineIds);
+        Assert.Contains("release-issue-final-close-decision", lineIds);
+
+        using JsonDocument validationDocument = ReadFinalReleaseJson("real-external-proof-overlay-pack-validation.json");
+        JsonElement validation = validationDocument.RootElement;
+        Assert.Equal("real-external-proof-overlay-pack-validation", validation.GetProperty("recordKind").GetString());
+        Assert.Equal("blocked-real-owner-input-required", validation.GetProperty("validationState").GetString());
+        Assert.True(validation.GetProperty("isValidOverlayShape").GetBoolean());
+        Assert.Equal(0, validation.GetProperty("failedBlockerCount").GetInt32());
+        Assert.True(validation.GetProperty("failedActionRequiredCount").GetInt32() >= 1);
+        Assert.False(validation.GetProperty("performsPublish").GetBoolean());
+        Assert.False(validation.GetProperty("canPublishPublicly").GetBoolean());
+        Assert.False(validation.GetProperty("canCloseReleaseIssue").GetBoolean());
+
+        using JsonDocument evidenceDocument = ReadFinalReleaseJson("release-evidence-bundle.json");
+        JsonElement evidence = evidenceDocument.RootElement;
+        Assert.Equal("blocked-real-owner-input-required", evidence.GetProperty("realExternalProofOverlayPackState").GetString());
+        Assert.Equal("blocked-real-owner-input-required", evidence.GetProperty("realExternalProofOverlayPackValidationState").GetString());
+        Assert.Equal(0, evidence.GetProperty("realExternalProofOverlayPackFailedBlockerCount").GetInt32());
+        Assert.True(evidence.GetProperty("realExternalProofOverlayPackFailedActionRequiredCount").GetInt32() >= 1);
+        Assert.False(evidence.GetProperty("realExternalProofOverlayPackCanCloseReleaseIssue").GetBoolean());
+
+        JsonElement evidenceItem = evidence.GetProperty("evidenceItems")
+            .EnumerateArray()
+            .Single(static item => item.GetProperty("id").GetString() == "real-external-proof-overlay-pack");
+        Assert.False(evidenceItem.GetProperty("passed").GetBoolean());
+        Assert.Contains("owner input guidance only", evidenceItem.GetProperty("boundary").GetString(), StringComparison.OrdinalIgnoreCase);
+
+        string[] sourceArtifacts = evidence.GetProperty("sourceArtifacts").EnumerateArray().Select(static item => item.GetString()!).ToArray();
+        Assert.Contains("artifacts/final-release/real-external-proof-overlay-pack.json", sourceArtifacts);
+        Assert.Contains("artifacts/final-release/real-external-proof-overlay-pack-validation.json", sourceArtifacts);
+
+        string docsIndex = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "index.md"));
+        string docsToc = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "toc.yml"));
+        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "README.md"));
+        string readmeZh = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "README.zh-CN.md"));
+        string article = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "real-external-proof-overlay-pack.md"));
+        string evidenceMarkdown = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "artifacts", "final-release", "release-evidence-bundle.md"));
+
+        Assert.Contains("articles/zh-cn/real-external-proof-overlay-pack.md", docsIndex, StringComparison.Ordinal);
+        Assert.Contains("articles/zh-cn/real-external-proof-overlay-pack.md", docsToc, StringComparison.Ordinal);
+        Assert.Contains("real-external-proof-overlay-pack", readme, StringComparison.Ordinal);
+        Assert.Contains("real-external-proof-overlay-pack", readmeZh, StringComparison.Ordinal);
+        Assert.Contains("overlayState=blocked-real-owner-input-required", article, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("real external proof overlay pack validation: `blocked-real-owner-input-required`", evidenceMarkdown, StringComparison.Ordinal);
+    }
+
+    private static JsonDocument ReadFinalReleaseJson(string fileName)
+    {
+        return JsonDocument.Parse(File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "artifacts",
+            "final-release",
+            fileName)));
+    }
+
+    private static string RunPowerShell(string scriptPath, params string[] arguments)
+    {
+        using Process process = new();
+        process.StartInfo.FileName = "pwsh";
+        process.StartInfo.ArgumentList.Add("-NoProfile");
+        process.StartInfo.ArgumentList.Add("-ExecutionPolicy");
+        process.StartInfo.ArgumentList.Add("Bypass");
+        process.StartInfo.ArgumentList.Add("-File");
+        process.StartInfo.ArgumentList.Add(scriptPath);
+        foreach (string argument in arguments)
+        {
+            process.StartInfo.ArgumentList.Add(argument);
+        }
+
+        process.StartInfo.WorkingDirectory = RepositoryPaths.Root;
+        process.StartInfo.RedirectStandardOutput = true;
+        process.StartInfo.RedirectStandardError = true;
+        process.StartInfo.UseShellExecute = false;
+
+        process.Start();
+        string stdout = process.StandardOutput.ReadToEnd();
+        string stderr = process.StandardError.ReadToEnd();
+        process.WaitForExit();
+
+        Assert.True(process.ExitCode == 0, $"Command failed: {scriptPath}{Environment.NewLine}{stdout}{Environment.NewLine}{stderr}");
+        return stdout;
+    }
+}

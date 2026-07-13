@@ -80,7 +80,7 @@ After the local quality gate, run validation-oriented smoke runners from `smoke/
 Asset-dependent sample projects are executable but require user-provided model metadata:
 
 - `Classification`
-- `YoloDet`
+- `YoloVision`
 
 Those projects are not release blockers by themselves as long as their README files describe required external assets and runnable substitutes. CUDA custom-kernel preprocessing remains a documentation roadmap item until safe public `CudaModule` / `CudaKernel` wrappers are available.
 

@@ -1,7 +1,43 @@
-JYPPX_StatusCode jyppx_cuda_choose_device_deferred(void)
+JYPPX_StatusCode jyppx_cuda_choose_device(const JYPPX_CudaDeviceSelectionRequirements* requirements, int32_t* out_device)
 {
-    jyppx::cuda::set_cuda_error("cudaChooseDevice", 0, "deferred-interface-boundary", "cudaChooseDevice deferred: cudaDeviceProp parity is not modeled by the current bridge ABI");
-    return JYPPX_STATUS_NOT_IMPLEMENTED;
+    if (requirements == nullptr)
+    {
+        jyppx::cuda::set_cuda_error("cudaChooseDevice", 0, "invalid-requirements", "CUDA device selection requirements must not be null.");
+        return JYPPX_STATUS_INVALID_ARGUMENT;
+    }
+
+    auto status = jyppx::cuda::validate_output_pointer(out_device, "out_device");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_device = -1;
+
+#if JYPPX_HAS_CUDA_TOOLKIT
+    cudaDeviceProp properties{};
+    properties.major = requirements->major;
+    properties.minor = requirements->minor;
+    properties.multiProcessorCount = requirements->multi_processor_count;
+    properties.warpSize = requirements->warp_size;
+    properties.maxThreadsPerBlock = requirements->max_threads_per_block;
+    properties.canMapHostMemory = requirements->can_map_host_memory;
+    properties.integrated = requirements->integrated;
+    properties.totalGlobalMem = static_cast<size_t>(requirements->total_global_memory);
+
+    int device = -1;
+    status = jyppx::cuda::map_cuda_status(cudaChooseDevice(&device, &properties), "cudaChooseDevice");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_device = device;
+    return JYPPX_STATUS_OK;
+#else
+    (void)requirements;
+    return jyppx::cuda::report_cuda_dependency_missing("CUDA device selection");
+#endif
 }
 
 JYPPX_StatusCode jyppx_cuda_device_get_dev_resource_deferred(void)

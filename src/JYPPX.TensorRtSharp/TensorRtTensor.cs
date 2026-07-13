@@ -12,11 +12,16 @@ namespace JYPPX.TensorRtSharp;
 public sealed partial class TensorRtTensor : IDisposable
 {
     private readonly SafeTensorRtObjectHandle _handle;
+    private readonly SafeTensorRtObjectHandleLease? _ownerLease;
 
-    internal TensorRtTensor(TensorRtApiLine line, SafeTensorRtObjectHandle handle)
+    internal TensorRtTensor(
+        TensorRtApiLine line,
+        SafeTensorRtObjectHandle handle,
+        SafeTensorRtObjectHandleLease? ownerLease = null)
     {
         Line = line;
         _handle = handle;
+        _ownerLease = ownerLease;
     }
 
     internal SafeTensorRtObjectHandle Handle => _handle;
@@ -26,6 +31,12 @@ public sealed partial class TensorRtTensor : IDisposable
     /// 获取拥有此张量的 TensorRT 适配线。
     /// </summary>
     public TensorRtApiLine Line { get; }
+
+    /// <summary>
+    /// Gets whether this borrowed tensor wrapper keeps its native owner alive.
+    /// 获取此 borrowed tensor 包装是否会保持其 native owner 存活。
+    /// </summary>
+    public bool IsOwnerLifetimeBound => _ownerLease != null;
 
     /// <summary>
     /// Gets or sets the tensor name.
@@ -161,6 +172,7 @@ public sealed partial class TensorRtTensor : IDisposable
     public void Dispose()
     {
         _handle.Dispose();
+        _ownerLease?.Dispose();
         GC.SuppressFinalize(this);
     }
 }

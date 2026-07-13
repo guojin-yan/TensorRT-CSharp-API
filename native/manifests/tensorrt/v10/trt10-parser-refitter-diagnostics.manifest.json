@@ -1,0 +1,160 @@
+{
+  "$schema": "../../bridge-api.schema.json",
+  "module": "tensorrt",
+  "versionLine": "10",
+  "apis": [
+    {
+      "id": "trt10-parser-refitter-create",
+      "entryPoint": "jyppx_trt10_parser_refitter_create",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "refitter", "type": "JYPPX_TensorRtRefitter*", "direction": "in" },
+        { "name": "logger", "type": "JYPPX_TensorRtLogger*", "direction": "in" },
+        { "name": "out_parser_refitter", "type": "JYPPX_TensorRtOnnxParserRefitter**", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt10-parser-refitter-get-error-count",
+      "entryPoint": "jyppx_trt10_parser_refitter_get_error_count",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "parser_refitter", "type": "JYPPX_TensorRtOnnxParserRefitter*", "direction": "in" },
+        { "name": "out_count", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt10-parser-refitter-get-error",
+      "entryPoint": "jyppx_trt10_parser_refitter_get_error",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "parser_refitter", "type": "JYPPX_TensorRtOnnxParserRefitter*", "direction": "in" },
+        { "name": "index", "type": "int32_t", "direction": "in", "managedType": "int", "moduleManagedType": "int" },
+        { "name": "out_error", "type": "JYPPX_TensorRtParserErrorInfo*", "direction": "out", "managedType": "out IntPtr", "moduleManagedType": "out NativeTensorRtParserErrorInfo" }
+      ]
+    },
+    {
+      "id": "trt10-parser-refitter-error-get-description",
+      "entryPoint": "jyppx_trt10_parser_refitter_error_get_description",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "parser_refitter", "type": "JYPPX_TensorRtOnnxParserRefitter*", "direction": "in" },
+        { "name": "index", "type": "int32_t", "direction": "in", "managedType": "int", "moduleManagedType": "int" },
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" }
+      ]
+    },
+    {
+      "id": "trt10-parser-refitter-error-get-file",
+      "entryPoint": "jyppx_trt10_parser_refitter_error_get_file",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "parser_refitter", "type": "JYPPX_TensorRtOnnxParserRefitter*", "direction": "in" },
+        { "name": "index", "type": "int32_t", "direction": "in", "managedType": "int", "moduleManagedType": "int" },
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" }
+      ]
+    },
+    {
+      "id": "trt10-parser-refitter-error-get-function",
+      "entryPoint": "jyppx_trt10_parser_refitter_error_get_function",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "parser_refitter", "type": "JYPPX_TensorRtOnnxParserRefitter*", "direction": "in" },
+        { "name": "index", "type": "int32_t", "direction": "in", "managedType": "int", "moduleManagedType": "int" },
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" }
+      ]
+    },
+    {
+      "id": "trt10-parser-refitter-error-get-node-name",
+      "entryPoint": "jyppx_trt10_parser_refitter_error_get_node_name",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "parser_refitter", "type": "JYPPX_TensorRtOnnxParserRefitter*", "direction": "in" },
+        { "name": "index", "type": "int32_t", "direction": "in", "managedType": "int", "moduleManagedType": "int" },
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" }
+      ]
+    },
+    {
+      "id": "trt10-parser-refitter-error-get-node-operator",
+      "entryPoint": "jyppx_trt10_parser_refitter_error_get_node_operator",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "parser_refitter", "type": "JYPPX_TensorRtOnnxParserRefitter*", "direction": "in" },
+        { "name": "index", "type": "int32_t", "direction": "in", "managedType": "int", "moduleManagedType": "int" },
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" }
+      ]
+    },
+    {
+      "id": "trt10-parser-refitter-error-get-local-function-stack-size",
+      "entryPoint": "jyppx_trt10_parser_refitter_error_get_local_function_stack_size",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "parser_refitter", "type": "JYPPX_TensorRtOnnxParserRefitter*", "direction": "in" },
+        { "name": "index", "type": "int32_t", "direction": "in", "managedType": "int", "moduleManagedType": "int" },
+        { "name": "out_count", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt10-parser-refitter-error-get-local-function-stack-entry",
+      "entryPoint": "jyppx_trt10_parser_refitter_error_get_local_function_stack_entry",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "parser_refitter", "type": "JYPPX_TensorRtOnnxParserRefitter*", "direction": "in" },
+        { "name": "index", "type": "int32_t", "direction": "in", "managedType": "int", "moduleManagedType": "int" },
+        { "name": "stack_index", "type": "int32_t", "direction": "in", "managedType": "int", "moduleManagedType": "int" },
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" }
+      ]
+    },
+    {
+      "id": "trt10-parser-refitter-clear-errors",
+      "entryPoint": "jyppx_trt10_parser_refitter_clear_errors",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "parser_refitter", "type": "JYPPX_TensorRtOnnxParserRefitter*", "direction": "in" }
+      ]
+    }
+  ]
+}

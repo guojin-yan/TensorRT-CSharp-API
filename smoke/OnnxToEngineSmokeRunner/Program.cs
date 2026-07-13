@@ -28,7 +28,17 @@ internal static class Program
             return;
         }
 
-        TensorRtEnvironmentSnapshot environment = TensorRtEnvironmentProbe.GetCurrent();
+        TensorRtEnvironmentSnapshot environment;
+        try
+        {
+            environment = TensorRtEnvironmentProbe.GetCurrent();
+        }
+        catch (Exception exception) when (IsSkippableEnvironmentException(exception))
+        {
+            Console.WriteLine($"Skipped=True Reason=EnvironmentProbe:{exception.GetType().Name}:{exception.Message}");
+            return;
+        }
+
         TensorRtAdapterInfo adapter = GetAdapterInfo(environment, line);
         Console.WriteLine($"TensorRtPreflight BridgeTrt={environment.BuildInfo.TensorRtVersion} Cuda={environment.BuildInfo.CudaToolkitVersion} RuntimeTensorRtAvailable={environment.RuntimeInfo.TensorRtAvailable} AdapterVendor={adapter.VendorDependencyAvailable} AdapterRuntime={adapter.RuntimeCreationSupported} AdapterBuilder={adapter.BuilderCreationSupported} Status={adapter.StatusMessage}");
         TensorRtRuntimeProbeReport runtimeProbe = TensorRtEnvironmentProbe.ProbeRuntime(line);
@@ -48,6 +58,15 @@ internal static class Program
         string builderCaps = $"FastFp16={builder.PlatformHasFastFp16} FastInt8={builder.PlatformHasFastInt8} Tf32={builder.PlatformHasTf32} DlaCores={builder.DlaCoreCount}";
         string runtimeControls = ProbeRuntimeControls(runtime);
         using TensorRtBuilderConfig config = builder.CreateBuilderConfig();
+        using TensorRtOnnxConfig onnxConfig = new TensorRtOnnxConfig(line);
+        onnxConfig.ModelDataType = TensorRtDataType.Float;
+        onnxConfig.VerbosityLevel = 1;
+        onnxConfig.ModelFileName = "generated-dynamic-identity.onnx";
+        onnxConfig.TextFileName = "generated-dynamic-identity.layers.txt";
+        onnxConfig.FullTextFileName = "generated-dynamic-identity.full.txt";
+        onnxConfig.PrintLayerInfo = true;
+        TensorRtOnnxConfigSnapshot onnxConfigSnapshot = onnxConfig.ToSnapshot();
+        TensorRtOnnxConfigSummary onnxConfigSummary = onnxConfigSnapshot.ToSummary();
         config.SetMemoryPoolLimit(TensorRtMemoryPoolType.Workspace, 64UL * 1024UL * 1024UL);
         ulong workspaceLimit = config.GetMemoryPoolLimit(TensorRtMemoryPoolType.Workspace);
         using CudaStream stream = new CudaStream();
@@ -63,6 +82,7 @@ internal static class Program
         using TensorRtTimingCache timingCache = config.CreateTimingCache();
         config.SetTimingCache(timingCache, ignoreMismatch: false);
         (TensorRtOnnxModelSupportReport parserModelSupport, string parserModelSupportFirstSubgraph) = ProbeModelSupport(builder, logger, model);
+        TensorRtOnnxModelSupportSummary parserModelSupportSummary = parserModelSupport.ToSummary();
         using TensorRtNetworkDefinition network = builder.CreateNetwork(TensorRtNetworkDefinitionCreationFlags.ExplicitBatch);
         TensorRtOnnxParser parser;
         try
@@ -84,13 +104,16 @@ internal static class Program
         parser.SetFlag(TensorRtOnnxParserFlag.NativeInstanceNormalization);
         bool nativeInstanceNormalizationAfterSet = parser.GetFlag(TensorRtOnnxParserFlag.NativeInstanceNormalization);
 
-        bool parsed = parser.Parse(model, "generated-dynamic-identity.onnx");
+        using MemoryStream parserModelStream = new MemoryStream(model, writable: false);
+        bool parsed = parser.Parse(parserModelStream, "generated-dynamic-identity.onnx");
         if (!parsed)
         {
             throw new InvalidOperationException($"ONNX parser failed. {parser.GetErrorSummary()}");
         }
 
-        IReadOnlyList<string> parserUsedVCPluginLibraries = parser.GetUsedVCPluginLibraries();
+        TensorRtOnnxParserDiagnosticSnapshot parserDiagnosticSnapshot = parser.GetDiagnosticSnapshot();
+        TensorRtOnnxParserDiagnosticSummary parserDiagnosticSummary = parserDiagnosticSnapshot.ToSummary();
+        IReadOnlyList<string> parserUsedVCPluginLibraries = parserDiagnosticSnapshot.UsedVCPluginLibraries;
         string parserLayerOutputState = ProbeLayerOutputTensor(parser, "identity");
         string diagnosticProbe = ProbeParserDiagnostics(builder, logger, line);
 
@@ -115,9 +138,18 @@ internal static class Program
         using TensorRtHostMemory hostMemory = builder.BuildSerializedNetwork(network, config);
         using TensorRtHostMemory serializedTimingCache = timingCache.Serialize();
         byte[] engineBytes = hostMemory.ToArray();
+        using MemoryStream copiedEngineStream = new MemoryStream();
+        hostMemory.CopyTo(copiedEngineStream);
+        byte[] streamEngineBytes = copiedEngineStream.ToArray();
+        if (!engineBytes.SequenceEqual(streamEngineBytes))
+        {
+            throw new InvalidOperationException("TensorRT host-memory stream copy did not match the byte-array copy.");
+        }
+
+        copiedEngineStream.Position = 0;
         engineFile = Path.Combine(Path.GetTempPath(), $"jyppx-trt-engine-{Guid.NewGuid():N}.plan");
         hostMemory.SaveToFile(engineFile);
-        using TensorRtEngine engine = runtime.DeserializeFromFile(engineFile);
+        using TensorRtEngine engine = runtime.Deserialize(copiedEngineStream);
         using TensorRtEngineInspector inspector = engine.CreateInspector();
         using TensorRtExecutionContext context = engine.CreateExecutionContext();
         inspector.SetExecutionContext(context);
@@ -147,8 +179,9 @@ internal static class Program
         {
             using TensorRtRefitter refitter = engine.CreateRefitter(logger);
             string refitterControls = ProbeRefitterControls(refitter);
+            string parserRefitterControls = ProbeParserRefitterControls(refitter, logger);
             bool refitted = refitter.RefitCudaEngine();
-            refitterState = $"Created All={refitter.AllRefittableWeightCount} Missing={refitter.MissingWeightCount} Refit={refitted} Controls=[{refitterControls}]";
+            refitterState = $"Created All={refitter.AllRefittableWeightCount} Missing={refitter.MissingWeightCount} Refit={refitted} Controls=[{refitterControls}] ParserRefitter=[{parserRefitterControls}]";
         }
         else
         {
@@ -185,17 +218,22 @@ internal static class Program
 
         string inspectorText = inspector.GetEngineInformation(TensorRtLayerInformationFormat.Oneline);
         string bindingSummary = string.Join("; ", bindingReport.Tensors.Select(tensor => $"{tensor.Index}:{tensor.Name}:{tensor.IOMode}:{tensor.Format}:{tensor.VectorizedDimension}:{tensor.FormatDescription}"));
-        Console.WriteLine($"Parsed=True ParserErrors={parser.ErrorCount} ProfileIndex={profileIndex} HostMemory={hostMemory.SizeInBytes}");
+        Console.WriteLine($"Parsed=True ParserErrors={parser.ErrorCount} ProfileIndex={profileIndex} HostMemory={hostMemory.SizeInBytes}/{hostMemory.DataType}");
         Console.WriteLine($"BuilderCaps {builderCaps}");
         Console.WriteLine($"RuntimeControls {runtimeControls}");
         Console.WriteLine($"BuilderPluginRegistry Ok={pluginRegistryOk} Source={pluginRegistryInventory.Source} Creators={pluginRegistryInventory.CreatorCount} Recursive={pluginRegistryInventory.RecursiveCreatorCount?.ToString() ?? "n/a"} ParentSearch={pluginRegistryInventory.ParentSearchEnabled} ErrorRecorder={pluginRegistryInventory.HasErrorRecorder} Diagnostic={pluginRegistryDiagnostic} First={pluginRegistryFirst}");
         Console.WriteLine($"GlobalPluginRegistryLookup {globalPluginRegistryLookupState}");
-        Console.WriteLine($"BuilderConfig WorkspaceLimit={workspaceLimit} Tf32={tf32Enabled} Refit={refitEnabled} ProfileStream={profileStreamSet} ProfileCount={configProfileCount} CalibrationProfile={calibrationProfileState} PluginInventory={pluginInventoryOk}:{pluginInventory.Count}:{pluginInventoryDiagnostic} {builderConfigDeploymentState} TimingCacheBytes={serializedTimingCache.SizeInBytes}");
-        Console.WriteLine($"EngineFileRoundTrip=True EngineBytes={engineBytes.Length} EngineFileBytes={new FileInfo(engineFile).Length}");
+        Console.WriteLine($"BuilderConfig WorkspaceLimit={workspaceLimit} Tf32={tf32Enabled} Refit={refitEnabled} ProfileStream={profileStreamSet} ProfileCount={configProfileCount} CalibrationProfile={calibrationProfileState} PluginInventory={pluginInventoryOk}:{pluginInventory.Count}:{pluginInventoryDiagnostic} {builderConfigDeploymentState} TimingCacheBytes={serializedTimingCache.SizeInBytes}/{serializedTimingCache.DataType}");
+        Console.WriteLine($"EngineFileRoundTrip=True EngineBytes={engineBytes.Length} EngineFileBytes={new FileInfo(engineFile).Length} StreamRoundTrip=True StreamBytes={streamEngineBytes.Length}");
         Console.WriteLine($"ProfileShapes ConfiguredMin={configuredProfileRange.Min} ConfiguredOpt={configuredProfileRange.Opt} ConfiguredMax={configuredProfileRange.Max} Valid={configuredProfileValid} ExtraMemoryTarget={profileExtraMemoryTarget} ShapeValueCount={inputShapeValueCount} Min={minShape} Opt={optShape} Max={maxShape} ActiveBefore={activeProfileBefore} ActiveAfter={activeProfileAfter} EnqueueEmitsProfileToggle={enqueueEmitsProfileAfterToggle}");
-        Console.WriteLine($"ParserFlags Before={parserFlagsBefore} NativeInstanceNorm={nativeInstanceNormalizationFlag}->{nativeInstanceNormalizationAfterSet} SupportsIdentity={parserSupportsIdentity}");
+        Console.WriteLine($"ParserFlags Before={parserFlagsBefore} NativeInstanceNorm={nativeInstanceNormalizationFlag}->{nativeInstanceNormalizationAfterSet} SupportsIdentity={parserSupportsIdentity} ParseStream={parsed}");
         Console.WriteLine($"ParserModelSupport {parserModelSupport} FirstSubgraph={parserModelSupportFirstSubgraph}");
+        Console.WriteLine($"ParserModelSupportSummary={parserModelSupportSummary} RuntimeEvidenceKind={parserModelSupportSummary.RuntimeEvidenceKind} RuntimeProof={parserModelSupportSummary.IsRuntimeExecutionProof} ReleaseProof={parserModelSupportSummary.CanPromoteReleaseProof} DeleteDeferred={parserModelSupportSummary.CanDeleteDeferredRecord}");
         Console.WriteLine($"ParserUsedVCPluginLibraries Count={parserUsedVCPluginLibraries.Count} First={FormatFirst(parserUsedVCPluginLibraries)} LayerOutputIdentity={parserLayerOutputState}");
+        Console.WriteLine($"OnnxConfigSnapshot={onnxConfigSnapshot}");
+        Console.WriteLine($"OnnxConfigSummary={onnxConfigSummary}");
+        Console.WriteLine($"ParserDiagnosticSnapshot={parserDiagnosticSnapshot}");
+        Console.WriteLine($"ParserDiagnosticSummary={parserDiagnosticSummary}");
         Console.WriteLine($"CompatibilityBindings Count={engine.CompatibilityBindingCount} First={compatibilityBinding.Index}:{compatibilityBinding.Name}:{compatibilityBinding.IOMode}:{compatibilityBinding.Shape}");
         Console.WriteLine($"InferShapes MissingCount={missingShapeInferenceCount} MaxOutputSize={maxOutputSize} Readiness=Ready:{readiness.IsReadyForEnqueue}/Bound:{readiness.AllTensorAddressesBound}/Profile:{readiness.ActiveOptimizationProfile}/Tensors:{readiness.Tensors.Count} TensorDebug={tensorDebugState} Refitter={refitterState}");
         Console.WriteLine($"BindingReport Ready={bindingReport.IsReadyForEnqueue} Profile={bindingReport.ProfileIndex} Inputs={bindingReport.GetInputs().Count} Outputs={bindingReport.GetOutputs().Count} Tensors={bindingReport.Tensors.Count} Formats=[{bindingSummary}]");
@@ -243,6 +281,24 @@ internal static class Program
         };
     }
 
+    static bool IsSkippableEnvironmentException(Exception exception)
+    {
+        if (exception is DllNotFoundException || exception is BadImageFormatException)
+        {
+            return true;
+        }
+
+        if (exception is BridgeProbeException bridgeProbe)
+        {
+            return bridgeProbe.StatusCode == BridgeStatusCode.DependencyMissing ||
+                bridgeProbe.StatusCode == BridgeStatusCode.NotSupported ||
+                bridgeProbe.StatusCode == BridgeStatusCode.InvalidState ||
+                bridgeProbe.StatusCode == BridgeStatusCode.RuntimeError;
+        }
+
+        return false;
+    }
+
     static string FormatRuntimeProbe(TensorRtRuntimeProbeReport report)
     {
         string version = report.GlobalVersion != null
@@ -279,8 +335,10 @@ internal static class Program
             TensorRtTempfileControlFlags tempfileFlags = runtime.TempfileControlFlags;
             string temporaryDirectory = runtime.GetTemporaryDirectory();
             bool hasErrorRecorder = runtime.HasErrorRecorder;
+            TensorRtRuntimeDiagnosticSnapshot diagnosticSnapshot = runtime.GetDiagnosticSnapshot();
+            TensorRtRuntimeDiagnosticSummary diagnosticSummary = diagnosticSnapshot.ToSummary();
             string directory = string.IsNullOrEmpty(temporaryDirectory) ? "Default" : temporaryDirectory;
-            return $"Dla={dlaCore}/{dlaCount} MaxThreads={maxThreads} HostCode={hostCodeAllowed} TempFlags={tempfileFlags} TempDir={directory} ErrorRecorder={hasErrorRecorder}";
+            return $"Dla={dlaCore}/{dlaCount} MaxThreads={maxThreads} HostCode={hostCodeAllowed} TempFlags={tempfileFlags} TempDir={directory} ErrorRecorder={hasErrorRecorder} RuntimeDiagnosticSnapshot={diagnosticSnapshot.HasLogger}/{diagnosticSnapshot.HasErrorRecorder}/{diagnosticSnapshot.ErrorRecorder.ErrorCount}/{diagnosticSnapshot.Diagnostics.Count} RuntimeDiagnosticSummary={diagnosticSummary.HasLogger}/{diagnosticSummary.HasErrorRecorder}/{diagnosticSummary.ErrorCount}/{diagnosticSummary.CopiedErrorRecordCount}/{diagnosticSummary.DiagnosticCount}";
         }
         catch (Exception exception)
         {
@@ -292,11 +350,15 @@ internal static class Program
     {
         int originalMaxThreads = refitter.MaxThreads;
         refitter.MaxThreads = Math.Max(1, originalMaxThreads);
+        TensorRtRefitterDiagnosticSnapshot diagnosticSnapshot = refitter.GetDiagnosticSnapshot();
+        TensorRtRefitterDiagnosticSummary diagnosticSummary = diagnosticSnapshot.ToSummary();
 
         List<string> parts = new()
         {
             $"MaxThreads={refitter.MaxThreads}",
-            $"ErrorRecorder={refitter.HasErrorRecorder}"
+            $"ErrorRecorder={refitter.HasErrorRecorder}",
+            $"RefitterDiagnosticSnapshot={diagnosticSnapshot.HasLogger}/{diagnosticSnapshot.HasErrorRecorder}/{diagnosticSnapshot.MissingNamedWeightCount}/{diagnosticSnapshot.AllNamedWeightCount}/{diagnosticSnapshot.Diagnostics.Count}",
+            $"RefitterDiagnosticSummary={diagnosticSummary.HasLogger}/{diagnosticSummary.HasErrorRecorder}/{diagnosticSummary.MissingNamedWeightCount}/{diagnosticSummary.CopiedMissingNamedWeightCount}/{diagnosticSummary.AllNamedWeightCount}/{diagnosticSummary.CopiedAllNamedWeightCount}/{diagnosticSummary.DiagnosticCount}"
         };
 
         if (refitter.Line == TensorRtApiLine.TensorRt8 || refitter.Line == TensorRtApiLine.TensorRt10)
@@ -317,6 +379,27 @@ internal static class Program
         }
 
         return string.Join(" ", parts);
+    }
+
+    static string ProbeParserRefitterControls(TensorRtRefitter refitter, TensorRtLogger logger)
+    {
+        if (refitter.Line == TensorRtApiLine.TensorRt8)
+        {
+            return "Skipped:TensorRT8";
+        }
+
+        try
+        {
+            using TensorRtOnnxParserRefitter parserRefitter = refitter.CreateOnnxParserRefitter(logger);
+            TensorRtOnnxParserRefitterDiagnosticSnapshot snapshot = parserRefitter.GetDiagnosticSnapshot();
+            TensorRtOnnxParserRefitterDiagnosticSummary summarySnapshot = snapshot.ToSummary();
+            string summary = snapshot.DiagnosticSummary.Length == 0 ? "Empty" : snapshot.DiagnosticSummary.Substring(0, Math.Min(snapshot.DiagnosticSummary.Length, 32)).Replace(' ', '_');
+            return $"ParserRefitterDiagnosticSnapshot={snapshot.ErrorCount}/{snapshot.Diagnostics.Count}/{snapshot.DiagnosticSummary.Length}:{summary} ParserRefitterDiagnosticSummary={summarySnapshot.ErrorCount}/{summarySnapshot.CopiedDiagnosticCount}/{summarySnapshot.DiagnosticSummaryLength}";
+        }
+        catch (Exception exception)
+        {
+            return $"Skipped:{exception.GetType().Name}:{exception.Message}";
+        }
     }
 
     static string FormatDependencyProbe(TensorRtDependencyProbeReport report)
@@ -386,7 +469,8 @@ internal static class Program
         {
             using TensorRtNetworkDefinition supportNetwork = builder.CreateNetwork(TensorRtNetworkDefinitionCreationFlags.ExplicitBatch);
             using TensorRtOnnxParser supportParser = new TensorRtOnnxParser(logger, supportNetwork);
-            TensorRtOnnxModelSupportReport report = supportParser.CheckModelSupport(model, "generated-dynamic-identity.onnx");
+            using MemoryStream modelStream = new MemoryStream(model, writable: false);
+            TensorRtOnnxModelSupportReport report = supportParser.CheckModelSupport(modelStream, "generated-dynamic-identity.onnx");
             return (report, FormatFirstSubgraph(report));
         }
         catch (Exception exception)
@@ -402,8 +486,8 @@ internal static class Program
         {
             using TensorRtNetworkDefinition diagnosticNetwork = builder.CreateNetwork(TensorRtNetworkDefinitionCreationFlags.ExplicitBatch);
             using TensorRtOnnxParser diagnosticParser = new TensorRtOnnxParser(logger, diagnosticNetwork);
-            bool parsed = diagnosticParser.Parse(new byte[] { 0xFF, 0xFF, 0xFF, 0xFF }, $"jyppx-invalid-diagnostic-trt{(int)line}.onnx");
-            IReadOnlyList<TensorRtOnnxParserDiagnostic> diagnostics = diagnosticParser.GetDiagnostics();
+            using MemoryStream invalidModelStream = new MemoryStream(new byte[] { 0xFF, 0xFF, 0xFF, 0xFF }, writable: false);
+            bool parsed = diagnosticParser.TryParse(invalidModelStream, $"jyppx-invalid-diagnostic-trt{(int)line}.onnx", out IReadOnlyList<TensorRtOnnxParserDiagnostic> diagnostics);
             string first = diagnostics.Count == 0
                 ? "None"
                 : $"{diagnostics[0].Code}:{diagnostics[0].Line}:{diagnostics[0].Node}:{diagnostics[0].Description.Length}:{diagnostics[0].NodeName}:{diagnostics[0].NodeOperator}:{diagnostics[0].LocalFunctionStack.Count}";
@@ -467,7 +551,7 @@ internal static class Program
 
         TensorRtPluginCreatorInfo creator = inventory.Creators[0];
         string firstField = creator.Fields.Count == 0 ? "NoFields" : creator.Fields[0].ToString();
-        return $"{creator.Index}:{creator.Name}:{creator.Version}:{creator.Namespace}:{creator.InterfaceKind}:{creator.InterfaceMajor}.{creator.InterfaceMinor}:Fields={creator.Fields.Count}:FirstField={firstField}";
+        return $"{creator.Index}:{creator.Name}:{creator.Version}:{creator.Namespace}:{creator.InterfaceKind}:{creator.InterfaceMajor}.{creator.InterfaceMinor}:ApiLanguage={creator.ApiLanguage}:Fields={creator.Fields.Count}:FirstField={firstField}";
     }
 
     static string ProbeGlobalPluginRegistryLookup(TensorRtRuntimeProbeReport runtimeProbe)
@@ -498,7 +582,7 @@ internal static class Program
     static string FormatPluginCreator(TensorRtPluginCreatorInfo creator)
     {
         string firstField = creator.Fields.Count == 0 ? "NoFields" : creator.Fields[0].ToString();
-        return $"{creator.Index}:{creator.Name}:{creator.Version}:{creator.Namespace}:{creator.InterfaceKind}:{creator.InterfaceMajor}.{creator.InterfaceMinor}:Fields={creator.Fields.Count}:FirstField={firstField}";
+        return $"{creator.Index}:{creator.Name}:{creator.Version}:{creator.Namespace}:{creator.InterfaceKind}:{creator.InterfaceMajor}.{creator.InterfaceMinor}:ApiLanguage={creator.ApiLanguage}:Fields={creator.Fields.Count}:FirstField={firstField}";
     }
 
     static string ProbeBuilderConfigDeploymentState(TensorRtBuilderConfig config, TensorRtApiLine line)
@@ -516,7 +600,8 @@ internal static class Program
             runtimePlatform = config.GetRuntimePlatform().ToString();
         }
 
-        return $"Capability={capability} HardwareCompatibility={hardwareCompatibility} PreviewFeature={previewFeature}:{previewEnabled} RuntimePlatform={runtimePlatform}";
+        TensorRtBuilderConfigDeploymentSnapshot deploymentSnapshot = config.GetDeploymentSnapshot();
+        return $"Capability={capability} HardwareCompatibility={hardwareCompatibility} PreviewFeature={previewFeature}:{previewEnabled} RuntimePlatform={runtimePlatform} DeploymentSnapshot={deploymentSnapshot.PluginToSerializeCount}/{deploymentSnapshot.SerializedPluginSnapshot.Count}/{deploymentSnapshot.SerializedPluginSnapshot.PluginLibraryPaths.Count}/{deploymentSnapshot.Diagnostics.Count}";
     }
 
     internal static class OnnxIdentityModel

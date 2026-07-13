@@ -2,6 +2,18 @@
   href: index.md
 - name: Latest Windows API Status
   href: articles/zh-cn/windows-api-completion-latest.md
+# Release proof boundary: canPublishPublicly=false; canCloseReleaseIssue=false; navigation entries are not proof.
+# DebugListener runtime proof attempt marker index:
+# debug-listener-runtime-proof-attempt-preflight
+# TensorRtDebugListenerRuntimeProofAttemptPreflight
+# CanEnableSetDebugListenerNonNull
+# CanInstallNativeVTable
+# CanCallProcessDebugTensorRuntime
+# CanPromoteRealCallbackRuntime
+# ReasonNonNullAttachStillBlocked
+# ReasonNativeVTableStillBlocked
+# ReasonRuntimeProofStillBlocked
+# isRealCallbackRuntimeProof=false
 - name: English
   items:
   - name: Getting Started
@@ -36,14 +48,324 @@
     href: articles/en/sample-runners.md
 - name: Chinese
   items:
+  - name: Project Overview
+    href: articles/zh-cn/project-overview.md
+  - name: TensorRtSharp 4 Project Overview Campaign
+    href: articles/zh-cn/tensorrtsharp-4-project-overview-campaign.md
+  - name: TensorRtSharp 4 Architecture ABI Wrapper
+    href: articles/zh-cn/tensorrtsharp-4-architecture-abi-wrapper.md
+  - name: CUDA TensorRT cuDNN Version Matrix Guide
+    href: articles/zh-cn/cuda-tensorrt-cudnn-version-matrix-guide.md
+  - name: Windows Source Build CMake Guide
+    href: articles/zh-cn/source-build-cmake-windows-guide.md
+  - name: TensorRtSharp NuGet Runtime Package Guide
+    href: articles/zh-cn/tensorrtsharp-nuget-runtime-package-guide.md
+  - name: Windows Installation And Troubleshooting Guide
+    href: articles/zh-cn/windows-installation-and-troubleshooting-guide.md
+  - name: Linux Installation Runner Boundary Guide
+    href: articles/zh-cn/linux-installation-runner-boundary-guide.md
+  - name: TensorRtExec GUI CLI Parity Design
+    href: articles/zh-cn/tensorrtexec-gui-cli-parity-design.md
+  - name: Plugin Registry Inventory Readonly Design
+    href: articles/zh-cn/plugin-registry-inventory-readonly-design.md
+  - name: Package Consumer Runtime Proof Clean Consumer Guide
+    href: articles/zh-cn/package-consumer-runtime-proof-clean-consumer-guide.md
+  - name: Release Proof And Post Publish Verification Guide
+    href: articles/zh-cn/release-proof-and-post-publish-verification-guide.md
+  - name: TensorRtSharp 4 FAQ
+    href: articles/zh-cn/tensorrtsharp-4-faq.md
+  - name: TensorRtSharp 4 Release Story
+    href: articles/zh-cn/tensorrtsharp-4-release-story.md
+  - name: Project Release Story And Boundaries
+    href: articles/zh-cn/project-release-story-and-boundaries.md
+  - name: Blog Project Introduction
+    href: articles/zh-cn/blog-project-introduction.md
+  - name: Why Not Plain P/Invoke
+    href: articles/zh-cn/why-not-plain-pinvoke.md
+  - name: Interface Zero To Deferred Boundary
+    href: articles/zh-cn/interface-zero-to-deferred-boundary.md
+  - name: Deferred Manual Design Groups
+    href: articles/zh-cn/deferred-manual-design-groups.md
+  - name: Deferred Boundary Risk Tier Gate
+    href: articles/zh-cn/deferred-boundary-risk-tier-gate.md
+  - name: Deferred BTier 41 45 Proof Closure
+    href: articles/zh-cn/deferred-btier-41-45-proof-closure.md
+  - name: TRT Cross-Version Strategy
+    href: articles/zh-cn/trt-cross-version-strategy.md
   - name: Getting Started
     href: articles/zh-cn/getting-started.md
+  - name: Windows Local Development Environment
+    href: articles/zh-cn/windows-local-dev-environment.md
   - name: Installation Layout
     href: articles/zh-cn/installation-layout.md
   - name: API Reference
     href: articles/zh-cn/api-reference.md
   - name: Windows API Completion
     href: articles/zh-cn/windows-api-completion.md
+  - name: ExecutionContext And Inference Binding Tutorial
+    href: articles/zh-cn/inference-bindings-tutorial.md
+  - name: Blog InferenceBindings Identity Network
+    href: articles/zh-cn/blog-inference-bindings-identity-network.md
+  - name: Dynamic Shape Optimization Profile Tutorial
+    href: articles/zh-cn/dynamic-shape-optimization-profile-tutorial.md
+  - name: Blog Dynamic Shape Optimization Profile
+    href: articles/zh-cn/blog-dynamic-shape-optimization-profile.md
+  - name: ONNX Parser To Serialized Engine Tutorial
+    href: articles/zh-cn/onnx-parser-to-serialized-engine-tutorial.md
+  - name: Blog ONNX Parser Engine RoundTrip
+    href: articles/zh-cn/blog-onnx-parser-engine-roundtrip.md
+  - name: TensorRT Builder Runtime Engine Object Model
+    href: articles/zh-cn/tensorrt-object-model.md
+  - name: Plugin Inventory Readonly API
+    href: articles/zh-cn/plugin-inventory-readonly-api.md
+  - name: Plugin Ownership Boundary
+    href: articles/zh-cn/plugin-ownership-boundary.md
+  - name: Blog Plugin Inventory Readonly API
+    href: articles/zh-cn/blog-plugin-inventory-readonly-api.md
+  - name: Plugin Serialization Paths
+    href: articles/zh-cn/plugin-serialization-paths.md
+  - name: Classification Model Assets
+    href: articles/zh-cn/classification-model-assets.md
+  - name: Classification Asset Candidates
+    href: articles/zh-cn/classification-asset-candidates.md
+  - name: Classification Real Asset Walkthrough
+    href: articles/zh-cn/classification-real-asset-walkthrough.md
+  - name: YoloVision Sample Overview
+    href: articles/zh-cn/yolovision-sample-overview.md
+  - name: YoloVision Model Assets
+    href: articles/zh-cn/yolovision-model-assets.md
+  - name: YoloVision Asset Candidates
+    href: articles/zh-cn/yolovision-asset-candidates.md
+  - name: YoloVision Model Matrix
+    href: articles/zh-cn/yolo-vision-model-matrix.md
+  - name: YOLO Family Profile And Postprocess Guide
+    href: articles/zh-cn/yolo-family-profile-and-postprocess-guide.md
+  - name: YoloVision Preprocess And Postprocess
+    href: articles/zh-cn/yolovision-preprocess-postprocess.md
+  - name: YoloVision Engine Build And Run
+    href: articles/zh-cn/yolovision-engine-build-and-run.md
+  - name: YoloVision Troubleshooting
+    href: articles/zh-cn/yolovision-troubleshooting.md
+  - name: YoloVision Multi-Output Metadata Guide
+    href: articles/zh-cn/yolovision-multi-output-metadata-guide.md
+  - name: YoloVision All Task Overview
+    href: articles/zh-cn/yolovision-all-task-overview.md
+  - name: YoloVision Detection Tutorial
+    href: articles/zh-cn/yolovision-detection-tutorial.md
+  - name: YoloVision Segmentation Tutorial
+    href: articles/zh-cn/yolovision-segmentation-tutorial.md
+  - name: YoloVision Pose Tutorial
+    href: articles/zh-cn/yolovision-pose-tutorial.md
+  - name: YoloVision OBB Tutorial
+    href: articles/zh-cn/yolovision-obb-tutorial.md
+  - name: YoloVision Classification And Semantic Tutorial
+    href: articles/zh-cn/yolovision-classification-semantic-tutorial.md
+  - name: YoloVision Real Asset Walkthrough
+    href: articles/zh-cn/yolovision-real-asset-walkthrough.md
+  - name: TensorRtExec Tool Getting Started
+    href: articles/zh-cn/tensorrtexec-tool-getting-started.md
+  - name: TensorRtExec Trtexec Parity Matrix
+    href: articles/zh-cn/tensorrt-exec-trtexec-parity-matrix.md
+  - name: OnnxToEngine TensorRtExec YoloVision Evidence Ladder
+    href: articles/zh-cn/onnxtoengine-tensorrtexec-yolovision-evidence-ladder.md
+  - name: ONNX To Engine Quickstart
+    href: articles/zh-cn/onnx-to-engine-quickstart.md
+  - name: ONNX To Engine Dynamic Shape Profile
+    href: articles/zh-cn/onnx-to-engine-dynamic-shape-profile.md
+  - name: ONNX To Engine FP16 INT8 Boundary
+    href: articles/zh-cn/onnx-to-engine-fp16-int8-boundary.md
+  - name: ONNX To Engine Output Artifacts
+    href: articles/zh-cn/onnx-to-engine-output-artifacts.md
+  - name: ONNX To Engine Trtexec Conversion Guide
+    href: articles/zh-cn/onnx-to-engine-trtexec-conversion-guide.md
+  - name: TensorRtExec CLI Parameter Map
+    href: articles/zh-cn/tensorrtexec-cli-parameter-map.md
+  - name: TensorRtExec WinForms Guide
+    href: articles/zh-cn/tensorrtexec-winforms-guide.md
+  - name: TensorRtExec GUI User Guide
+    href: articles/zh-cn/tensorrtexec-gui-user-guide.md
+  - name: TensorRtExec External ONNX Build Report
+    href: articles/zh-cn/tensorrtexec-external-onnx-build-report.md
+  - name: TensorRtExec Option Layering Deep Dive
+    href: articles/zh-cn/tensorrtexec-option-layering-deep-dive.md
+  - name: TensorRtExec Timing Cache Owner Field Guide
+    href: articles/zh-cn/tensorrtexec-timing-cache-owner-field-guide.md
+  - name: TensorRtExec INT8 Calibration Owner Field Guide
+    href: articles/zh-cn/tensorrtexec-int8-calibration-owner-field-guide.md
+  - name: YoloVision YOLOv8 Detection Real Asset Tutorial
+    href: articles/zh-cn/yolovision-yolov8-det-real-asset-tutorial.md
+  - name: YoloVision YOLOv8 Segmentation Real Asset Tutorial
+    href: articles/zh-cn/yolovision-yolov8-seg-real-asset-tutorial.md
+  - name: YoloVision YOLOv8n Semantic Segmentation Map Guide
+    href: articles/zh-cn/yolovision-semantic-segmentation-map-guide.md
+  - name: Sample Asset Manifest Guide
+    href: articles/zh-cn/sample-asset-manifest-guide.md
+  - name: Sample Asset Acquisition Plan
+    href: articles/zh-cn/sample-asset-acquisition-plan.md
+  - name: Real Model Owner Backfill Checklist
+    href: articles/zh-cn/real-model-owner-backfill-checklist.md
+  - name: Real Model Evidence Backfill Playbook
+    href: articles/zh-cn/real-model-evidence-backfill-playbook.md
+  - name: External Model Evidence Case Study
+    href: articles/zh-cn/external-model-evidence-case-study.md
+  - name: Sample Evidence Ladder
+    href: articles/zh-cn/sample-evidence-ladder.md
+- name: OnnxToEngine And TensorRtExec Boundary
+  href: articles/zh-cn/onnxtoengine-and-tensorrtexec-boundary.md
+- name: OnnxToEngine Trtexec Proof Boundary
+  href: articles/zh-cn/onnx-to-engine-trtexec-proof-boundary.md
+- name: Tool Report To Release Proof Record
+  href: articles/zh-cn/tool-report-to-release-proof-record.md
+  - name: Stale Claim Prepublish Audit
+    href: articles/zh-cn/stale-claim-prepublish-audit.md
+  - name: Publish Final Mile Checklist
+    href: articles/zh-cn/publish-final-mile-checklist.md
+  - name: CUDA Stream Event MultiStream Tutorial
+    href: articles/zh-cn/cuda-stream-event-multistream-tutorial.md
+  - name: Blog MultiStream CUDA Stream Event
+    href: articles/zh-cn/blog-multistream-cuda-stream-event.md
+  - name: CUDA Graph Capabilities And Boundary
+    href: articles/zh-cn/cuda-graph-capabilities-boundary.md
+  - name: CUDA Graph Borrowed Handle Safety Gate
+    href: articles/zh-cn/cuda-graph-borrowed-handle-safety-gate.md
+  - name: CUDA Memory Wrapper
+    href: articles/zh-cn/cuda-memory-wrapper.md
+  - name: Blog CUDA Memory Wrapper
+    href: articles/zh-cn/blog-cuda-memory-wrapper.md
+  - name: CUDA Memory Range APIs
+    href: articles/zh-cn/cuda-memory-range-apis.md
+  - name: NuGet Package Consumer Validation Flow
+    href: articles/zh-cn/nuget-package-consumer-validation-flow.md
+  - name: Package Consumer Runtime Proof Playbook
+    href: articles/zh-cn/package-consumer-runtime-proof-playbook.md
+  - name: YoloVision Detection YOLOv8n Download Export Run
+    href: articles/zh-cn/yolovision-detection-yolov8n-download-export-run.md
+  - name: YoloVision Segmentation Mask Postprocess Guide
+    href: articles/zh-cn/yolovision-segmentation-mask-postprocess-guide.md
+  - name: YoloVision Pose Keypoint Output Guide
+    href: articles/zh-cn/yolovision-pose-keypoint-output-guide.md
+  - name: YoloVision OBB Angle Output Guide
+    href: articles/zh-cn/yolovision-obb-angle-output-guide.md
+  - name: TensorRtExec WinForms Screenshot Walkthrough
+    href: articles/zh-cn/tensorrtexec-winforms-screenshot-walkthrough.md
+- name: TensorRtExec Report Schema Guide
+  href: articles/zh-cn/tensorrtexec-report-schema-guide.md
+- name: TensorRtExec Report Proof Boundary
+  href: articles/zh-cn/tensorrtexec-report-proof-boundary.md
+- name: Runtime Package Windows Linux Install FAQ
+    href: articles/zh-cn/runtime-package-windows-linux-install-faq.md
+  - name: Plugin Registry Inventory User Guide
+    href: articles/zh-cn/plugin-registry-inventory-user-guide.md
+  - name: Deferred Readonly API Upgrade Playbook
+    href: articles/zh-cn/deferred-readonly-api-upgrade-playbook.md
+- name: CSharp Wrapper Lifetime Design
+  href: articles/zh-cn/csharp-wrapper-lifetime-design.md
+- name: Callback Allocator Listener Readonly Safety Gates
+  href: articles/zh-cn/callback-allocator-listener-readonly-safety-gates.md
+- name: Release Evidence Non Substitute Guide
+    href: articles/zh-cn/release-evidence-non-substitute-guide.md
+  - name: Project Roadmap To Public Release
+    href: articles/zh-cn/project-roadmap-to-public-release.md
+  - name: Blog Package Consumer Evidence Chain
+    href: articles/zh-cn/blog-package-consumer-evidence-chain.md
+  - name: Runtime Package Selection
+    href: articles/zh-cn/runtime-package-selection.md
+  - name: Runtime Package Matrix Reading Guide
+    href: articles/zh-cn/runtime-package-matrix-reading-guide.md
+  - name: Readiness Summary Guide
+    href: articles/zh-cn/readiness-summary-guide.md
+  - name: CUDA Error 35 Troubleshooting
+    href: articles/zh-cn/cuda-error-35-troubleshooting.md
+  - name: Public API Bilingual Documentation Progress
+    href: articles/zh-cn/public-api-bilingual-documentation-progress.md
+  - name: Current Package Readiness State
+    href: articles/zh-cn/package-readiness-current-state.md
+  - name: Allocator Callback Owner Design
+    href: articles/zh-cn/allocator-callback-owner-design.md
+  - name: Allocator Owner Ledger Design
+    href: articles/zh-cn/allocator-owner-ledger-design.md
+  - name: Allocator Owner Ledger Safety Gate
+    href: articles/zh-cn/allocator-owner-ledger-safety-gate.md
+  - name: Callback And Allocator Boundary Guide
+    href: articles/zh-cn/callback-allocator-boundary-guide.md
+  - name: Callback Allocator Safety Bridge Roadmap
+    href: articles/zh-cn/callback-allocator-safety-bridge-roadmap.md
+  - name: Callback Owner Closure Matrix
+    href: articles/zh-cn/callback-owner-closure-matrix.md
+  - name: Real Callback Trampoline Gate
+    href: articles/zh-cn/real-callback-trampoline-gate.md
+  - name: OutputAllocator Runtime Gate
+    href: articles/zh-cn/output-allocator-runtime-gate.md
+  - name: OutputAllocator Callback Owner Design
+    href: articles/zh-cn/output-allocator-callback-owner-design.md
+  - name: OutputAllocator Attach/Detach Design Gate
+    href: articles/zh-cn/output-allocator-attach-detach-design-gate.md
+  - name: OutputBuffer Ownership Safety Gate
+    href: articles/zh-cn/output-buffer-ownership-safety-gate.md
+  - name: OutputAllocator Runtime Proof Precheck
+    href: articles/zh-cn/output-allocator-runtime-proof-precheck.md
+  - name: DebugListener Callback Owner Design
+    href: articles/zh-cn/debug-listener-callback-owner-design.md
+  - name: DebugListener Attach/Detach Design Gate
+    href: articles/zh-cn/debug-listener-attach-detach-design-gate.md
+  - name: DebugListener Borrowed Tensor Safety Gate
+    href: articles/zh-cn/debug-listener-borrowed-tensor-safety-gate.md
+  - name: DebugListener Attach/VTable Safety Gate
+    href: articles/zh-cn/debug-listener-attach-vtable-safety-gate.md
+  - name: DebugListener Native Attach/No-Throw Preflight
+    href: articles/zh-cn/debug-listener-native-attach-nothrow-preflight.md
+  - name: DebugListener Native Owner Address Design Gate
+    href: articles/zh-cn/debug-listener-native-owner-address-design-gate.md
+  - name: DebugListener Native No-Throw VTable Design Gate
+    href: articles/zh-cn/debug-listener-native-nothrow-vtable-design-gate.md
+  - name: DebugListener Native Attach Entry Design Gate
+    href: articles/zh-cn/debug-listener-native-attach-entry-design-gate.md
+  - name: DebugListener Native Detach Before Release Design Gate
+    href: articles/zh-cn/debug-listener-native-detach-before-release-design-gate.md
+  - name: DebugListener Native Owner Lifecycle Dry-Run
+    href: articles/zh-cn/debug-listener-native-owner-lifecycle-dry-run.md
+  - name: DebugListener Native Attach Entry Runtime Scaffold
+    href: articles/zh-cn/debug-listener-native-attach-entry-runtime-scaffold.md
+  - name: DebugListener Native Attach Entry Minimal Safety
+    href: articles/zh-cn/debug-listener-native-attach-entry-minimal-safety.md
+  - name: DebugListener Native Owner Stable Identity
+    href: articles/zh-cn/debug-listener-native-owner-stable-identity.md
+  - name: DebugListener Native Owner NonCopyable Storage
+    href: articles/zh-cn/debug-listener-native-owner-noncopyable-storage.md
+  - name: DebugListener Native No-Throw Destructor
+    href: articles/zh-cn/debug-listener-native-nothrow-destructor.md
+  - name: DebugListener Native Owner Lifecycle Gate
+    href: articles/zh-cn/debug-listener-native-owner-lifecycle-gate.md
+  - name: DebugListener Native Attach Bridge Shape Gate
+    href: articles/zh-cn/debug-listener-native-attach-bridge-shape-gate.md
+  - name: DebugListener Exception Status Mapping Gate
+    href: articles/zh-cn/debug-listener-exception-status-mapping-gate.md
+  - name: DebugListener In-Flight Accounting Gate
+    href: articles/zh-cn/debug-listener-inflight-accounting-gate.md
+  - name: DebugListener Native No-Throw VTable Scaffold Gate
+    href: articles/zh-cn/debug-listener-native-nothrow-vtable-scaffold-gate.md
+  - name: DebugListener No-Throw VTable Callback Stub
+    href: articles/zh-cn/debug-listener-nothrow-vtable-callback-stub.md
+  - name: DebugListener Borrowed Debug Tensor Metadata Runtime Gate
+    href: articles/zh-cn/debug-listener-borrowed-debug-tensor-metadata-runtime-gate.md
+  - name: DebugListener Native VTable Install Preflight
+    href: articles/zh-cn/debug-listener-native-vtable-install-preflight.md
+  - name: DebugListener Native Owner VTable Install Experiment
+    href: articles/zh-cn/debug-listener-native-owner-vtable-install-experiment.md
+  - name: DebugListener Runtime Proof Precheck
+    href: articles/zh-cn/debug-listener-runtime-proof-precheck.md
+  - name: DebugListener Real Callback Runtime Proof Preflight
+    href: articles/zh-cn/debug-listener-real-callback-runtime-proof-preflight.md
+  - name: DebugListener Real Non-Null Attach Runtime Smoke
+    href: articles/zh-cn/debug-listener-real-non-null-attach-runtime-smoke.md
+  - name: DebugListener ProcessDebugTensor Callback Trampoline
+    href: articles/zh-cn/debug-listener-process-debug-tensor-callback-trampoline.md
+  - name: DebugListener Real Callback Runtime Proof
+    href: articles/zh-cn/debug-listener-real-callback-runtime-proof.md
+  - name: DebugListener Callback Proof Gap Report
+    href: articles/zh-cn/debug-listener-callback-proof-gap-report.md
+  - name: Real Callback Runtime Evidence Schema
+    href: articles/zh-cn/real-callback-runtime-evidence-schema.md
   - name: Source Organization
     href: articles/zh-cn/source-organization.md
   - name: CUDA Kernel Roadmap
@@ -60,5 +382,547 @@
     href: articles/zh-cn/package-consumer-validation.md
   - name: Release Candidate Gate
     href: articles/zh-cn/release-candidate-gate.md
+  - name: Local NuGet Feed Consumer
+    href: articles/zh-cn/local-nuget-feed-consumer.md
+  - name: Runtime Package Matrix
+    href: articles/zh-cn/runtime-package-matrix.md
+  - name: 4.0.0 RC Release Notes
+    href: articles/zh-cn/release-notes-4.0.0-rc.md
+  - name: 4.0.0 RC Known Limitations
+    href: articles/zh-cn/known-limitations-4.0.0-rc.md
+  - name: 4.0.0 RC Release Checklist
+    href: articles/zh-cn/release-checklist-4.0.0-rc.md
+  - name: Final Release Dry Run
+    href: articles/zh-cn/final-release-dry-run.md
+  - name: Linux Runtime Handoff
+    href: articles/zh-cn/linux-runtime-handoff.md
+  - name: Release Owner Handoff
+    href: articles/zh-cn/release-owner-handoff.md
+  - name: Release Owner Approval Guide
+    href: articles/zh-cn/release-owner-approval-guide.md
+  - name: Release Owner Decision Record
+    href: articles/zh-cn/release-owner-decision-record.md
+  - name: Final Package Review Bundle
+    href: articles/zh-cn/final-package-review-bundle.md
+  - name: Release Evidence Bundle
+    href: articles/zh-cn/release-evidence-bundle.md
+  - name: Release Evidence Classification Audit
+    href: articles/zh-cn/release-evidence-classification-audit.md
+  - name: Release Evidence Closure Index
+    href: articles/zh-cn/release-evidence-closure-index.md
+  - name: Release Candidate Package Consumer Closure Map
+    href: articles/zh-cn/release-candidate-package-consumer-closure-map.md
+  - name: Final Prepublish Quality Gate Dashboard
+    href: articles/zh-cn/final-prepublish-quality-gate-dashboard.md
+  - name: Owner Real Proof Import Master Pack
+    href: articles/zh-cn/owner-real-proof-import-master-pack.md
+  - name: Real External Execution Backfill Final Freeze
+    href: articles/zh-cn/real-external-execution-backfill-final-freeze.md
+  - name: Owner Execution Result Import Prepublish Recheck
+    href: articles/zh-cn/owner-execution-result-import-prepublish-recheck.md
+  - name: Real Release Proof Backfill Final Close Gate
+    href: articles/zh-cn/real-release-proof-backfill-final-close-gate.md
+  - name: Prepublish Owner Evidence Input Landing Pack
+    href: articles/zh-cn/prepublish-owner-evidence-input-landing-pack.md
+  - name: Real GPU Public Package Execution Backfill Pack
+    href: articles/zh-cn/real-gpu-public-package-execution-backfill-pack.md
+  - name: Release Proof Auto Summary Owner Backfill Check
+    href: articles/zh-cn/release-proof-auto-summary-owner-backfill-check.md
+  - name: Real Proof Import Validator Orchestration
+    href: articles/zh-cn/real-proof-import-validator-orchestration.md
+  - name: Release Final Blocker Convergence
+    href: articles/zh-cn/release-final-blocker-convergence.md
+  - name: Owner Real Proof Final Action Worklist
+    href: articles/zh-cn/owner-real-proof-final-action-worklist.md
+  - name: Final Prepublish Readiness Snapshot
+    href: articles/zh-cn/final-prepublish-readiness-snapshot.md
+  - name: Real Owner Proof Postback Release Decision
+    href: articles/zh-cn/real-owner-proof-postback-release-decision.md
+  - name: Release Candidate Owner One-Screen Execution Pack
+    href: articles/zh-cn/release-candidate-owner-one-screen-execution-pack.md
+  - name: Release Package Proof Bundle
+    href: articles/zh-cn/release-package-proof-bundle.md
+  - name: Docs Publish Readiness Bundle
+    href: articles/zh-cn/docs-publish-readiness-bundle.md
+  - name: Release Owner Approval Input
+    href: articles/zh-cn/release-owner-approval-input.md
+  - name: Release Owner From Dry Run To Decision
+    href: articles/zh-cn/release-owner-dry-run-to-decision.md
+  - name: Linux Runner Evidence Checklist
+    href: articles/zh-cn/linux-runner-evidence-checklist.md
+  - name: Linux Runner Evidence Record Schema
+    href: articles/zh-cn/linux-runner-evidence-record-schema.md
+  - name: Blog Linux Runner Evidence Guide
+    href: articles/zh-cn/blog-linux-runner-evidence-guide.md
+  - name: Release Channel Preflight And Rollback
+    href: articles/zh-cn/release-channel-preflight-and-rollback.md
+  - name: Release Publish Execution Checklist
+    href: articles/zh-cn/release-publish-execution-checklist.md
+  - name: Release Candidate Freeze
+    href: articles/zh-cn/release-candidate-freeze.md
+  - name: Release Candidate Full Acceptance Summary
+    href: articles/zh-cn/release-candidate-full-acceptance-summary.md
+  - name: Owner Authorized Publish Command Plan
+    href: articles/zh-cn/owner-authorized-publish-command-plan.md
+  - name: Owner Release Execution Package
+    href: articles/zh-cn/owner-release-execution-package.md
+  - name: Owner Release Execution Package Validation
+    href: articles/zh-cn/owner-release-execution-package-validation.md
+  - name: Owner Proof Backfill Execution Pack
+    href: articles/zh-cn/owner-proof-backfill-execution-pack.md
+  - name: Owner Proof Execution Handoff
+    href: articles/zh-cn/owner-proof-execution-handoff.md
+  - name: Owner External Proof Input Preflight
+    href: articles/zh-cn/owner-external-proof-input-preflight.md
+  - name: Owner Proof Input Repair Pack
+    href: articles/zh-cn/owner-proof-input-repair-pack.md
+  - name: Owner Proof Input Draft Pack
+    href: articles/zh-cn/owner-proof-input-draft-pack.md
+  - name: Owner External Proof Backfill Orchestrator
+    href: articles/zh-cn/owner-external-proof-backfill-orchestrator.md
+  - name: Package Consumer Runtime Proof Candidate
+    href: articles/zh-cn/package-consumer-runtime-proof-candidate.md
+  - name: Package Consumer Runtime Proof Owner Input
+    href: articles/zh-cn/package-consumer-runtime-proof-owner-input.md
+  - name: Package Consumer Runtime Proof Owner Input Field Guide
+    href: articles/zh-cn/package-consumer-runtime-proof-owner-input-field-guide.md
+  - name: Package Consumer Runtime Proof Record
+    href: articles/zh-cn/package-consumer-runtime-proof-record.md
+  - name: Package Consumer Runtime Proof Worklist
+    href: articles/zh-cn/package-consumer-runtime-proof-worklist.md
+  - name: Release Close Proof Worklist
+    href: articles/zh-cn/release-close-proof-worklist.md
+  - name: Real External Proof Backfill Execution Bundle
+    href: articles/zh-cn/real-external-proof-backfill-execution-bundle.md
+  - name: Real Proof Runner Input Backfill
+    href: articles/zh-cn/real-proof-runner-input-backfill.md
+  - name: Real Proof Execution Record Projection
+    href: articles/zh-cn/real-proof-execution-record-projection.md
+  - name: Owner Real Proof Report Pack
+    href: articles/zh-cn/owner-real-proof-report-pack.md
+  - name: Real Proof Input Candidate Strict Record
+    href: articles/zh-cn/real-proof-input-candidate-strict-record.md
+  - name: Owner Real Proof Field Delta Pack
+    href: articles/zh-cn/owner-real-proof-field-delta-pack.md
+  - name: Real Proof Candidate Promotion Guard
+    href: articles/zh-cn/real-proof-candidate-promotion-guard.md
+  - name: Real Proof Record Validator
+    href: articles/zh-cn/real-proof-record-validator.md
+  - name: Owner Real Proof Execution Closure Pack
+    href: articles/zh-cn/owner-real-proof-execution-closure-pack.md
+  - name: Runtime Proof Execution Input Record
+    href: articles/zh-cn/runtime-proof-execution-input-record.md
+  - name: Owner Runtime Proof Execution Runbook
+    href: articles/zh-cn/owner-runtime-proof-execution-runbook.md
+  - name: Release Close Strict Validation Bridge
+    href: articles/zh-cn/release-close-strict-validation-bridge.md
+  - name: Owner Runtime Proof Result Input
+    href: articles/zh-cn/owner-runtime-proof-result-input.md
+  - name: Runtime Proof Lane Dry-Run Summary
+    href: articles/zh-cn/runtime-proof-lane-dry-run-summary.md
+  - name: Release Close Strict Dry-Run Summary
+    href: articles/zh-cn/release-close-strict-dry-run-summary.md
+  - name: Owner External Proof Execution Bundle
+    href: articles/zh-cn/owner-external-proof-execution-bundle.md
+  - name: Owner External Proof Execution Result Import
+    href: articles/zh-cn/owner-external-proof-execution-result-import.md
+  - name: Real External Proof Record Import Validator
+    href: articles/zh-cn/real-external-proof-record-import-validator.md
+  - name: Release Close Owner Input Bridge
+    href: articles/zh-cn/release-close-owner-input-bridge.md
+  - name: Public Package Proof Owner Input
+    href: articles/zh-cn/public-package-proof-owner-input.md
+  - name: Post Publish Proof Owner Confirmation
+    href: articles/zh-cn/post-publish-proof-owner-confirmation.md
+  - name: Release Close Public Proof Bridge
+    href: articles/zh-cn/release-close-public-proof-bridge.md
+  - name: Release Issue Close Final Owner Decision Audit
+    href: articles/zh-cn/release-issue-close-final-owner-decision-audit.md
+  - name: Final Post Publish Audit Pack
+    href: articles/zh-cn/final-post-publish-audit-pack.md
+  - name: Release Candidate Final Freeze Manifest
+    href: articles/zh-cn/release-candidate-final-freeze-manifest.md
+  - name: Public Publish Owner Manual Command Handoff
+    href: articles/zh-cn/public-publish-owner-manual-command-handoff.md
+  - name: Final Release Close Blocker Dashboard
+    href: articles/zh-cn/final-release-close-blocker-dashboard.md
+  - name: Public Publish Result Owner Input
+    href: articles/zh-cn/public-publish-result-owner-input.md
+  - name: Public Publish Result Import
+    href: articles/zh-cn/public-publish-result-import.md
+  - name: Post Publish Clean Consumer Result Convergence
+    href: articles/zh-cn/post-publish-clean-consumer-result-convergence.md
+  - name: Strict Close Ready Convergence Dashboard
+    href: articles/zh-cn/strict-close-ready-convergence-dashboard.md
+  - name: Public Publish Final Owner Execution Pack
+    href: articles/zh-cn/public-publish-final-owner-execution-pack.md
+  - name: Public Publish Command Cross Check
+    href: articles/zh-cn/public-publish-command-cross-check.md
+  - name: Post Publish Clean Consumer Owner Proof Input
+    href: articles/zh-cn/post-publish-clean-consumer-owner-proof-input.md
+  - name: Release Issue Close Owner Decision Input
+    href: articles/zh-cn/release-issue-close-owner-decision-input.md
+  - name: Final Evidence Freeze Non Proof Audit
+    href: articles/zh-cn/final-evidence-freeze-non-proof-audit.md
+  - name: Public Publish Real Result Owner Input Contract
+    href: articles/zh-cn/public-publish-real-result-owner-input-contract.md
+  - name: Post Publish Clean Consumer Proof Record Contract
+    href: articles/zh-cn/post-publish-clean-consumer-proof-record-contract.md
+  - name: Release Issue Close Strict Owner Decision Import
+    href: articles/zh-cn/release-issue-close-strict-owner-decision-import.md
+  - name: Final Close Gate Convergence
+    href: articles/zh-cn/final-close-gate-convergence.md
+  - name: Public Publish Real Result Record Draft
+    href: articles/zh-cn/public-publish-real-result-record-draft.md
+  - name: Post Publish Clean Consumer Proof Record Draft
+    href: articles/zh-cn/post-publish-clean-consumer-proof-record-draft.md
+  - name: Public Publish Forbidden Substitute Scan
+    href: articles/zh-cn/public-publish-forbidden-substitute-scan.md
+  - name: Release Close Real Proof Import Bridge
+    href: articles/zh-cn/release-close-real-proof-import-bridge.md
+  - name: Final Owner Close Readiness Checkpoint
+    href: articles/zh-cn/final-owner-close-readiness-checkpoint.md
+  - name: Final Owner StrictClose Execution Order
+    href: articles/zh-cn/final-owner-strict-close-execution-order.md
+  - name: Real Owner Evidence StrictValidator Orchestration
+    href: articles/zh-cn/real-owner-evidence-strict-validator-orchestration.md
+  - name: ReleaseClose 真实输入候选晋级 Readiness
+    href: articles/zh-cn/release-close-real-input-candidate-promotion-readiness.md
+  - name: Final Release Close Record Real Validator
+    href: articles/zh-cn/final-release-close-record-real-validator.md
+  - name: Final Owner Release Close Record Projection
+    href: articles/zh-cn/final-owner-release-close-record-projection.md
+  - name: Final Release Close Hash Consistency Gate
+    href: articles/zh-cn/final-release-close-hash-consistency-gate.md
+  - name: Final Close Owner Approval Boundary Audit
+    href: articles/zh-cn/final-close-owner-approval-boundary-audit.md
+  - name: Release Candidate Final Publishability Audit
+    href: articles/zh-cn/release-candidate-final-publishability-audit.md
+  - name: Release Candidate Owner Action Roadmap
+    href: articles/zh-cn/release-candidate-owner-action-roadmap.md
+  - name: Release Candidate Non Substitute Final Scan
+    href: articles/zh-cn/release-candidate-non-substitute-final-scan.md
+  - name: Release Candidate Final Owner Checklist
+    href: articles/zh-cn/release-candidate-final-owner-checklist.md
+  - name: Package Consumer External Smoke Scaffold
+    href: articles/zh-cn/package-consumer-external-smoke-scaffold.md
+  - name: Release Issue Close Record Candidate
+    href: articles/zh-cn/release-issue-close-record-candidate.md
+  - name: Release Issue Close Record Owner Input
+    href: articles/zh-cn/release-issue-close-record-owner-input.md
+  - name: Final Evidence Freeze
+    href: articles/zh-cn/final-evidence-freeze.md
+  - name: Release Issue Final Close Decision
+    href: articles/zh-cn/release-issue-final-close-decision.md
+  - name: Real External Proof Overlay Pack
+    href: articles/zh-cn/real-external-proof-overlay-pack.md
+  - name: Release Issue Close Record Overlay Candidate
+    href: articles/zh-cn/release-issue-close-record-overlay-candidate.md
+  - name: Owner External Execution Result Backfill Kit
+    href: articles/zh-cn/owner-external-execution-result-backfill-kit.md
+  - name: Owner Input Cross-Hash Audit
+    href: articles/zh-cn/owner-input-cross-hash-audit.md
+  - name: Release Close Strict Record Candidate
+    href: articles/zh-cn/release-close-strict-record-candidate.md
+  - name: Owner Proof Real Backfill Execution Pack
+    href: articles/zh-cn/owner-proof-real-backfill-execution-pack.md
+  - name: Release Issue Close Record Real Input Map
+    href: articles/zh-cn/release-issue-close-record-real-input-map.md
+  - name: Owner Proof Real Input Convergence
+    href: articles/zh-cn/owner-proof-real-input-convergence.md
+  - name: Release Close Final Owner Runbook
+    href: articles/zh-cn/release-close-final-owner-runbook.md
+  - name: Compatible Host Proof Backfill Package
+    href: articles/zh-cn/compatible-host-proof-backfill-package.md
+  - name: Real Model And Package Proof Input Package
+    href: articles/zh-cn/real-model-and-package-proof-input-package.md
+  - name: Release Close Gap Dashboard
+    href: articles/zh-cn/release-close-gap-dashboard.md
+  - name: Compatible Host Proof Execution Pack
+    href: articles/zh-cn/compatible-host-proof-execution-pack.md
+  - name: Release Candidate Final Evidence Freeze
+    href: articles/zh-cn/release-candidate-final-evidence-freeze.md
+  - name: Release Final Audit Map
+    href: articles/zh-cn/release-final-audit-map.md
+  - name: Release Public Story Pack
+    href: articles/zh-cn/release-public-story-pack.md
+  - name: Release Owner Proof Backlog
+    href: articles/zh-cn/release-owner-proof-backlog.md
+  - name: Release Proof Non Substitutes
+    href: articles/zh-cn/release-proof-non-substitutes.md
+  - name: Release Article Index And Publishing Order
+    href: articles/zh-cn/release-article-index-and-publishing-order.md
+  - name: Release README Frontpage Checklist
+    href: articles/zh-cn/release-readme-frontpage-checklist.md
+  - name: Release Final Owner Action Sequence
+    href: articles/zh-cn/release-final-owner-action-sequence.md
+  - name: Release Frontpage And Proof Boundary Final Audit
+    href: articles/zh-cn/release-frontpage-and-proof-boundary-final-audit.md
+  - name: Release Candidate Final Cross Check
+    href: articles/zh-cn/release-candidate-final-cross-check.md
+  - name: Release Candidate Article Matrix Summary
+    href: articles/zh-cn/release-candidate-article-matrix-summary.md
+  - name: Release Candidate Publication Summary
+    href: articles/zh-cn/release-candidate-publication-summary.md
+  - name: Release Candidate Final Hold Owner Waiting
+    href: articles/zh-cn/release-candidate-final-hold-owner-waiting.md
+  - name: Release Owner Action Checklist Final Hold
+    href: articles/zh-cn/release-owner-action-checklist-final-hold.md
+  - name: Release Hold Final Inspection
+    href: articles/zh-cn/release-hold-final-inspection.md
+  - name: External Runtime Proof Record
+    href: articles/zh-cn/external-runtime-proof-record.md
+  - name: External Runtime Proof Backfill Plan
+    href: articles/zh-cn/external-runtime-proof-backfill-plan.md
+  - name: External Runtime Proof Collection Package
+    href: articles/zh-cn/external-runtime-proof-collection-package.md
+  - name: Compatible Host Runtime Proof Runbook
+    href: articles/zh-cn/compatible-host-runtime-proof-runbook.md
+  - name: Compatible Host Runtime Proof Collection Bundle
+    href: articles/zh-cn/compatible-host-runtime-proof-collection-bundle.md
+  - name: Post Publish Verification Record
+    href: articles/zh-cn/post-publish-verification-record.md
+  - name: Post Publish Verification Owner Input
+    href: articles/zh-cn/post-publish-verification-owner-input.md
+  - name: Post Publish Verification Proof Playbook
+    href: articles/zh-cn/post-publish-verification-proof-playbook.md
+  - name: Post Publish Clean Consumer Project Scan
+    href: articles/zh-cn/post-publish-clean-consumer-project-scan.md
+  - name: Post Publish Verification Record Input Draft
+    href: articles/zh-cn/post-publish-verification-record-input-draft.md
+  - name: Post Publish Verification Backfill Plan
+    href: articles/zh-cn/post-publish-verification-backfill-plan.md
+  - name: Post Publish Verification Collection Package
+    href: articles/zh-cn/post-publish-verification-collection-package.md
+  - name: Release Close Preflight
+    href: articles/zh-cn/release-close-preflight.md
+  - name: Signing And Trust Policy
+    href: articles/zh-cn/signing-and-trust-policy.md
+  - name: NuGet And GitHub Packages Release Guide
+    href: articles/zh-cn/nuget-and-github-packages-release-guide.md
+  - name: Refit Weights Guide
+    href: articles/zh-cn/refit-weights-guide.md
+  - name: Blog Refit Weights Guide
+    href: articles/zh-cn/blog-refit-weights-guide.md
+  - name: TensorRT 11 Modern Layers Guide
+    href: articles/zh-cn/trt11-modern-layers-guide.md
+  - name: Network Layer Coverage Guide
+    href: articles/zh-cn/network-layer-coverage-guide.md
+  - name: Blog Network Layer Coverage Guide
+    href: articles/zh-cn/blog-network-layer-coverage-guide.md
+  - name: ErrorRecorder Snapshot Guide
+    href: articles/zh-cn/error-recorder-snapshot-guide.md
+  - name: ErrorRecorder Diagnostics Design Gate
+    href: articles/zh-cn/error-recorder-diagnostics-design-gate.md
+  - name: Dimension Expression Snapshot Design Gate
+    href: articles/zh-cn/dimension-expression-snapshot-design-gate.md
+  - name: Calibrator Metadata Design Gate
+    href: articles/zh-cn/calibrator-metadata-design-gate.md
+  - name: RNNv2 Borrowed State Design Gate
+    href: articles/zh-cn/rnnv2-borrowed-state-design-gate.md
+  - name: Runtime Deserialization Boundary Precheck
+    href: articles/zh-cn/runtime-deserialization-boundary-precheck.md
+  - name: Runtime Deserialization Dependency Diagnostics
+    href: articles/zh-cn/runtime-deserialization-dependency-diagnostics.md
+  - name: Plugin Ownership Boundary
+    href: articles/zh-cn/plugin-ownership-boundary.md
+  - name: Managed Logger Profiler Progress Monitor
+    href: articles/zh-cn/managed-logger-profiler-progress-monitor.md
+  - name: Local NuGet Feed Deep Dive
+    href: articles/zh-cn/local-nuget-feed-deep-dive.md
+  - name: User Acceptance Samples
+    href: articles/zh-cn/user-acceptance-samples.md
+  - name: Troubleshooting Index
+    href: articles/zh-cn/troubleshooting-index.md
   - name: Sample Runners
     href: articles/zh-cn/sample-runners.md
+  - name: Technical Article Roadmap
+    href: articles/zh-cn/technical-article-roadmap.md
+  - name: 30+ Article Roadmap
+    href: articles/zh-cn/publishing/article-roadmap-30plus.md
+  - name: Technical And Promo Article Matrix 30+
+    href: articles/zh-cn/publishing/technical-and-promo-article-matrix-30plus.md
+  - name: Project Overview Public Article
+    href: articles/zh-cn/publishing/project-overview-public-article.md
+  - name: TensorRtExec CLI Public Article
+    href: articles/zh-cn/publishing/tensorrtexec-cli-public-article.md
+  - name: YoloVision Real Asset Owner Backfill Validator
+    href: articles/zh-cn/yolovision-real-asset-owner-backfill-validator.md
+  - name: NuGet Install Runtime Package Public Article
+    href: articles/zh-cn/publishing/nuget-install-runtime-package-public-article.md
+  - name: YoloVision Overview Public Article
+    href: articles/zh-cn/publishing/yolovision-overview-public-article.md
+  - name: OnnxToEngine Trtexec Parity Public Article
+    href: articles/zh-cn/publishing/onnxtoengine-trtexec-parity-public-article.md
+  - name: CUDA TensorRT DLL Troubleshooting Public Article
+    href: articles/zh-cn/publishing/cuda-tensorrt-dll-troubleshooting-public-article.md
+  - name: Package Consumer Proof Public Article
+    href: articles/zh-cn/publishing/package-consumer-proof-public-article.md
+  - name: Plugin Inventory Public Article
+    href: articles/zh-cn/publishing/plugin-inventory-public-article.md
+  - name: Engine Inspector Public Article
+    href: articles/zh-cn/publishing/engine-inspector-public-article.md
+  - name: Deferred Boundary Public Article
+    href: articles/zh-cn/publishing/deferred-boundary-public-article.md
+  - name: Release Evidence Ladder Public Article
+    href: articles/zh-cn/publishing/release-evidence-ladder-public-article.md
+  - name: Builder Config Readback Public Article
+    href: articles/zh-cn/publishing/builder-config-readback-public-article.md
+  - name: Source Build Windows Public Article
+    href: articles/zh-cn/publishing/source-build-windows-public-article.md
+  - name: Native Bridge Build Public Article
+    href: articles/zh-cn/publishing/native-bridge-build-public-article.md
+  - name: Package Strategy Public Article
+    href: articles/zh-cn/publishing/package-strategy-public-article.md
+  - name: ONNX To Engine Public Article
+    href: articles/zh-cn/publishing/onnx-to-engine-public-article.md
+  - name: Windows C++ Bridge Source Build Guide
+    href: articles/zh-cn/source-build-windows-cpp-bridge.md
+  - name: CMake Presets And Bindings Source Build Guide
+    href: articles/zh-cn/source-build-cmake-presets-and-bindings.md
+  - name: TensorRtSharp C++ Source Build Guide
+    href: articles/zh-cn/tensorrtsharp-source-build-cpp-guide.md
+  - name: NuGet And GitHub Dual Package Strategy
+    href: articles/zh-cn/nuget-github-dual-package-strategy.md
+  - name: YoloVision Series Roadmap
+    href: articles/zh-cn/yolovision-series-roadmap.md
+  - name: OnnxToEngine Trtexec Parity Roadmap
+    href: articles/zh-cn/onnx-to-engine-trtexec-parity-roadmap.md
+  - name: TensorRtExec Console WinForms Application Roadmap
+    href: articles/zh-cn/tensorrtexec-console-winforms-application-roadmap.md
+  - name: TensorRtExec Release Candidate Gap List
+    href: articles/zh-cn/tensorrtexec-release-candidate-gap-list.md
+
+
+- name: 真实公开发布 Owner 执行包
+  href: articles/zh-cn/public-release-owner-execution-package.md
+- name: 外部干净 Consumer Proof 采集包
+  href: articles/zh-cn/external-clean-consumer-proof-kit.md
+- name: 兼容主机 Runtime Proof 采集包
+  href: articles/zh-cn/runtime-proof-compatible-host-kit.md
+- name: 发布后 Owner 验证采集包
+  href: articles/zh-cn/post-publish-owner-verification-kit.md
+- name: Owner 公开发布执行 Readiness 汇总包
+  href: articles/zh-cn/owner-public-release-execution-readiness-pack.md
+- name: Owner Proof Execution Checklist
+  href: articles/zh-cn/owner-proof-execution-checklist.md
+- name: Owner Real Proof Field Delta Dashboard
+  href: articles/zh-cn/owner-real-proof-field-delta-dashboard.md
+- name: Owner Proof Import Preflight
+  href: articles/zh-cn/owner-proof-import-preflight.md
+- name: ReleaseCandidate Freeze Manifest
+  href: articles/zh-cn/release-candidate-freeze-manifest.md
+- name: Public Material Final Scan
+  href: articles/zh-cn/public-material-final-scan.md
+- name: Final Owner Proof Blocker Dashboard
+  href: articles/zh-cn/final-owner-proof-blocker-dashboard.md
+- name: Owner Real Proof Import Audit Bundle
+  href: articles/zh-cn/owner-real-proof-import-audit-bundle.md
+- name: Owner Evidence File Manifest Template
+  href: articles/zh-cn/owner-evidence-file-manifest-template.md
+- name: Strict Validator Command Runbook
+  href: articles/zh-cn/strict-validator-command-runbook.md
+- name: Release Issue Close Owner Input Final Checklist
+  href: articles/zh-cn/release-issue-close-owner-input-final-checklist.md
+- name: Owner 外部真实 Proof 输入合同
+  href: articles/zh-cn/owner-external-real-proof-input-contract.md
+- name: Owner 外部真实 Proof 导入校验器
+  href: articles/zh-cn/owner-external-real-proof-import-validator.md
+- name: 发布后 Clean Consumer 真实 Proof Gate
+  href: articles/zh-cn/post-publish-clean-consumer-real-proof-gate.md
+- name: Post Publish Clean Consumer Owner Input Guide
+  href: articles/zh-cn/post-publish-clean-consumer-owner-input-guide.md
+- name: 兼容主机 Runtime 真实 Proof Gate
+  href: articles/zh-cn/runtime-compatible-host-real-proof-gate.md
+- name: ReleaseClose 真实 Proof 准入 Gate
+  href: articles/zh-cn/release-close-real-proof-readiness-gate.md
+- name: ReleaseClose Strict Gate Dashboard
+  href: articles/zh-cn/release-close-strict-gate-dashboard.md
+- name: 发布候选真实 Proof 最终冻结
+  href: articles/zh-cn/release-candidate-real-proof-final-freeze.md
+- name: Owner 真实输入导入预检
+  href: articles/zh-cn/owner-real-input-import-preflight.md
+- name: 公开包 Hash 交叉核对 Gate
+  href: articles/zh-cn/public-package-hash-cross-check-gate.md
+- name: Clean Consumer 与 Runtime Proof 交叉核对 Gate
+  href: articles/zh-cn/clean-consumer-runtime-proof-cross-check-gate.md
+- name: ReleaseClose 真实输入候选晋级 Readiness
+  href: articles/zh-cn/release-close-real-input-candidate-promotion-readiness.md
+- name: Owner Real Input Landing Pack
+  href: articles/zh-cn/owner-real-input-landing-pack.md
+- name: Final Owner Execution Checklist
+  href: articles/zh-cn/final-owner-execution-checklist.md
+- name: Real Proof Import Boundary Audit
+  href: articles/zh-cn/real-proof-import-boundary-audit.md
+- name: 发布后 Rollback 与 Owner 决策 Gate
+  href: articles/zh-cn/post-publish-rollback-owner-decision-gate.md
+- name: ReleaseClose 最终真实输入准入包
+  href: articles/zh-cn/release-close-final-real-input-admission-pack.md
+- name: Owner 真实输入 JSON 合同
+  href: articles/zh-cn/owner-real-input-json-contract.md
+- name: Owner 真实输入 JSON 导入
+  href: articles/zh-cn/owner-real-input-json-import.md
+- name: Owner 真实输入 Hash 与路径校验器
+  href: articles/zh-cn/owner-real-input-hash-and-path-validator.md
+- name: Owner 真实输入禁止替代项校验器
+  href: articles/zh-cn/owner-real-input-forbidden-substitute-validator.md
+- name: StrictClose 真实输入 Dry Run
+  href: articles/zh-cn/strict-close-real-input-dry-run.md
+- name: StrictClose 真实输入 Finding 报告
+  href: articles/zh-cn/strict-close-real-input-finding-report.md
+- name: StrictClose Owner 行动包
+  href: articles/zh-cn/strict-close-owner-action-pack.md
+- name: ReleaseClose 真实输入最终 Blocker 台账
+  href: articles/zh-cn/release-close-real-input-final-blocker-ledger.md
+- name: YoloVision Detection Real Model Tutorial
+  href: articles/zh-cn/yolovision-detection-real-model-tutorial.md
+- name: YoloVision Classification Real Model Tutorial
+  href: articles/zh-cn/yolovision-classification-real-model-tutorial.md
+- name: YoloVision Segmentation Real Model Tutorial
+  href: articles/zh-cn/yolovision-segmentation-real-model-tutorial.md
+- name: YoloVision Pose OBB Sem Roadmap
+  href: articles/zh-cn/yolovision-pose-obb-sem-roadmap.md
+- name: TensorRtExec Trtexec Parity Deep Dive
+  href: articles/zh-cn/tensorrtexec-trtexec-parity-deep-dive.md
+- name: Runtime Package Installation Deep Dive
+  href: articles/zh-cn/runtime-package-installation-deep-dive.md
+- name: Deferred API Real Completion Review
+  href: articles/zh-cn/deferred-api-real-completion-review.md
+- name: YoloVision Output JSON Schema Guide
+  href: articles/zh-cn/yolovision-output-json-schema-guide.md
+- name: YoloVision Family Task Real Asset Roadmap
+  href: articles/zh-cn/yolovision-family-task-real-asset-roadmap.md
+- name: YoloVision Real Asset Record Template Guide
+  href: articles/zh-cn/yolovision-real-asset-record-template-guide.md
+- name: YoloVision Owner Asset Evidence Guide
+  href: articles/zh-cn/yolovision-owner-asset-evidence-guide.md
+- name: YoloVision Owner Asset Evidence Example
+  href: articles/zh-cn/yolovision-owner-asset-evidence-example.md
+- name: YoloVision Golden Output Validation Guide
+  href: articles/zh-cn/yolovision-golden-output-validation-guide.md
+- name: TensorRtExec Report JSON Schema Snapshot
+  href: articles/zh-cn/tensorrtexec-report-json-schema-snapshot.md
+- name: TensorRtExec GUI CLI Field Map
+  href: articles/zh-cn/tensorrtexec-gui-cli-field-map.md
+- name: Runtime Package Minimal Smoke Commands
+  href: articles/zh-cn/runtime-package-minimal-smoke-commands.md
+- name: Runtime Package Native Load Troubleshooting
+  href: articles/zh-cn/runtime-package-native-load-troubleshooting.md
+- name: Plugin Inventory Field Metadata Smoke Guide
+  href: articles/zh-cn/plugin-inventory-field-metadata-smoke-guide.md
+- name: Deferred Next Readonly Candidate List
+  href: articles/zh-cn/deferred-next-readonly-candidate-list.md
+- name: CSharp Public API Handle Exposure Audit
+  href: articles/zh-cn/csharp-public-api-handle-exposure-audit.md
+- name: Release Proof Strict Validator Playbook
+  href: articles/zh-cn/release-proof-strict-validator-playbook.md
+- name: Release Proof Owner Input Dashboard
+  href: articles/zh-cn/release-proof-owner-input-dashboard.md
+- name: Release Proof Sample Article Closure
+  href: articles/zh-cn/release-proof-sample-article-closure.md
+- name: Public Release Owner Final Checklist
+  href: articles/zh-cn/public-release-owner-final-checklist.md
+- name: YoloVision Classification YOLOv8n Labels TopK Guide
+  href: articles/zh-cn/yolovision-classification-yolov8n-labels-topk-guide.md
+- name: YoloVision Real Asset Owner Backfill Pack
+  href: articles/zh-cn/yolovision-real-asset-owner-backfill-pack.md

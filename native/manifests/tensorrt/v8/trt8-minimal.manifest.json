@@ -36,6 +36,145 @@
                                             "direction":  "out",
                                             "ownership":  "caller-destroys"
                                         }
+                                     ]
+                 },
+                 {
+                     "id":  "trt8-logger-create-with-callback",
+                     "entryPoint":  "jyppx_trt8_logger_create_with_callback",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-destroys",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+                     "parameters":  [
+                                        {
+                                            "name":  "callback",
+                                            "type":  "JYPPX_TensorRtLoggerCallback",
+                                            "direction":  "in",
+                                            "managedType":  "IntPtr",
+                                            "moduleManagedType":  "TensorRtLoggerCallback"
+                                        },
+                                        {
+                                            "name":  "user_state",
+                                            "type":  "void*",
+                                            "direction":  "in",
+                                            "managedType":  "IntPtr",
+                                            "moduleManagedType":  "IntPtr"
+                                        },
+                                        {
+                                            "name":  "minimum_severity",
+                                            "type":  "int32_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_logger",
+                                            "type":  "JYPPX_TensorRtLogger**",
+                                            "direction":  "out",
+                                            "ownership":  "caller-destroys"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt8-logger-emit-diagnostic",
+                     "entryPoint":  "jyppx_trt8_logger_emit_diagnostic",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+                     "parameters":  [
+                                        {
+                                            "name":  "logger",
+                                            "type":  "JYPPX_TensorRtLogger*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "severity",
+                                            "type":  "int32_t",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "message",
+                                            "type":  "const char*",
+                                            "direction":  "in",
+                                            "managedType":  "IntPtr",
+                                            "moduleManagedType":  "IntPtr"
+                                        },
+                                        {
+                                            "name":  "out_callback_failed",
+                                            "type":  "JYPPX_Boolean*",
+                                            "direction":  "out",
+                                            "managedType":  "out int",
+                                            "moduleManagedType":  "out int"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt8-profiler-create-with-callback",
+                     "entryPoint":  "jyppx_trt8_profiler_create_with_callback",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-destroys",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+                     "parameters":  [
+                                        {
+                                            "name":  "callback",
+                                            "type":  "JYPPX_TensorRtProfilerCallback",
+                                            "direction":  "in",
+                                            "managedType":  "IntPtr",
+                                            "moduleManagedType":  "TensorRtProfilerCallback"
+                                        },
+                                        {
+                                            "name":  "user_state",
+                                            "type":  "void*",
+                                            "direction":  "in",
+                                            "managedType":  "IntPtr",
+                                            "moduleManagedType":  "IntPtr"
+                                        },
+                                        {
+                                            "name":  "out_profiler",
+                                            "type":  "JYPPX_TensorRtProfiler**",
+                                            "direction":  "out",
+                                            "ownership":  "caller-destroys",
+                                            "managedType":  "out SafeTensorRtObjectHandle",
+                                            "moduleManagedType":  "out SafeTensorRtObjectHandle"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt8-profiler-emit-diagnostic",
+                     "entryPoint":  "jyppx_trt8_profiler_emit_diagnostic",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+                     "parameters":  [
+                                        {
+                                            "name":  "profiler",
+                                            "type":  "JYPPX_TensorRtProfiler*",
+                                            "direction":  "in",
+                                            "managedType":  "SafeTensorRtObjectHandle",
+                                            "moduleManagedType":  "SafeTensorRtObjectHandle"
+                                        },
+                                        {
+                                            "name":  "layer_name",
+                                            "type":  "const char*",
+                                            "direction":  "in",
+                                            "managedType":  "IntPtr",
+                                            "moduleManagedType":  "IntPtr"
+                                        },
+                                        {
+                                            "name":  "milliseconds",
+                                            "type":  "float",
+                                            "direction":  "in",
+                                            "managedType":  "float",
+                                            "moduleManagedType":  "float"
+                                        },
+                                        {
+                                            "name":  "out_callback_failed",
+                                            "type":  "JYPPX_Boolean*",
+                                            "direction":  "out",
+                                            "managedType":  "out int",
+                                            "moduleManagedType":  "out int"
+                                        }
                                     ]
                  },
                  {
@@ -890,6 +1029,50 @@
                                         },
                                         {
                                             "name":  "out_has_profile",
+                                            "type":  "JYPPX_Boolean*",
+                                            "direction":  "out",
+                                            "managedType":  "out int",
+                                            "moduleManagedType":  "out int"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt8-builder-config-has-algorithm-selector",
+                     "entryPoint":  "jyppx_trt8_builder_config_has_algorithm_selector",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+                     "parameters":  [
+                                        {
+                                            "name":  "config",
+                                            "type":  "JYPPX_TensorRtBuilderConfig*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_has_selector",
+                                            "type":  "JYPPX_Boolean*",
+                                            "direction":  "out",
+                                            "managedType":  "out int",
+                                            "moduleManagedType":  "out int"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt8-builder-config-has-int8-calibrator",
+                     "entryPoint":  "jyppx_trt8_builder_config_has_int8_calibrator",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+                     "parameters":  [
+                                        {
+                                            "name":  "config",
+                                            "type":  "JYPPX_TensorRtBuilderConfig*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_has_calibrator",
                                             "type":  "JYPPX_Boolean*",
                                             "direction":  "out",
                                             "managedType":  "out int",
@@ -6352,6 +6535,65 @@
                                             "direction":  "in",
                                             "managedType":  "int",
                                             "moduleManagedType":  "int"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt8-execution-context-set-profiler",
+                     "entryPoint":  "jyppx_trt8_execution_context_set_profiler",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+                     "parameters":  [
+                                        {
+                                            "name":  "context",
+                                            "type":  "JYPPX_TensorRtExecutionContext*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "profiler",
+                                            "type":  "JYPPX_TensorRtProfiler*",
+                                            "direction":  "in",
+                                            "managedType":  "SafeTensorRtObjectHandle",
+                                            "moduleManagedType":  "SafeTensorRtObjectHandle"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt8-execution-context-clear-profiler",
+                     "entryPoint":  "jyppx_trt8_execution_context_clear_profiler",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+                     "parameters":  [
+                                        {
+                                            "name":  "context",
+                                            "type":  "JYPPX_TensorRtExecutionContext*",
+                                            "direction":  "in"
+                                        }
+                                    ]
+                 },
+                 {
+                     "id":  "trt8-execution-context-has-profiler",
+                     "entryPoint":  "jyppx_trt8_execution_context_has_profiler",
+                     "returnType":  "BridgeStatusCode",
+                     "ownership":  "caller-owned",
+                     "manualOverride":  false,
+                     "versionGuard":  "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+                     "parameters":  [
+                                        {
+                                            "name":  "context",
+                                            "type":  "JYPPX_TensorRtExecutionContext*",
+                                            "direction":  "in"
+                                        },
+                                        {
+                                            "name":  "out_has_profiler",
+                                            "type":  "JYPPX_Boolean*",
+                                            "direction":  "out",
+                                            "managedType":  "out int",
+                                            "moduleManagedType":  "out int"
                                         }
                                     ]
                  },

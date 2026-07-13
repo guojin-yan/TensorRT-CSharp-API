@@ -231,6 +231,78 @@ JYPPX_StatusCode jyppx_trt10_builder_config_has_calibration_profile(JYPPX_Tensor
 #endif
 }
 
+JYPPX_StatusCode jyppx_trt10_builder_config_has_algorithm_selector(JYPPX_TensorRtBuilderConfig* config, JYPPX_Boolean* out_has_selector)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_has_selector, "out_has_selector");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    status = jyppx::tensorrt::validate_handle(config, kLine, JYPPX_TENSORRT_OBJECT_KIND_BUILDER_CONFIG, "config");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_has_selector = JYPPX_FALSE;
+
+#if JYPPX_HAS_TENSORRT
+    if (JYPPX_TENSORRT_VERSION_MAJOR_NUM != 10)
+    {
+        return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "builder config algorithm selector presence query");
+    }
+
+    auto* config_payload = get_payload<nvinfer1::IBuilderConfig>(config);
+    if (config_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Builder config handle does not carry the expected TensorRT payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    *out_has_selector = config_payload->getAlgorithmSelector() != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
+    return JYPPX_STATUS_OK;
+#else
+    return jyppx::tensorrt::report_vendor_missing(kLine, "builder config algorithm selector presence query");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt10_builder_config_has_int8_calibrator(JYPPX_TensorRtBuilderConfig* config, JYPPX_Boolean* out_has_calibrator)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_has_calibrator, "out_has_calibrator");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    status = jyppx::tensorrt::validate_handle(config, kLine, JYPPX_TENSORRT_OBJECT_KIND_BUILDER_CONFIG, "config");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_has_calibrator = JYPPX_FALSE;
+
+#if JYPPX_HAS_TENSORRT
+    if (JYPPX_TENSORRT_VERSION_MAJOR_NUM != 10)
+    {
+        return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "builder config INT8 calibrator presence query");
+    }
+
+    auto* config_payload = get_payload<nvinfer1::IBuilderConfig>(config);
+    if (config_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Builder config handle does not carry the expected TensorRT payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    *out_has_calibrator = config_payload->getInt8Calibrator() != nullptr ? JYPPX_TRUE : JYPPX_FALSE;
+    return JYPPX_STATUS_OK;
+#else
+    return jyppx::tensorrt::report_vendor_missing(kLine, "builder config INT8 calibrator presence query");
+#endif
+}
+
 JYPPX_StatusCode jyppx_trt10_builder_config_set_flag(JYPPX_TensorRtBuilderConfig* config, int32_t flag, JYPPX_Boolean enabled)
 {
     auto status = jyppx::tensorrt::validate_handle(config, kLine, JYPPX_TENSORRT_OBJECT_KIND_BUILDER_CONFIG, "config");
@@ -313,6 +385,42 @@ JYPPX_StatusCode jyppx_trt10_builder_config_get_flag(JYPPX_TensorRtBuilderConfig
     return JYPPX_STATUS_OK;
 #else
     return jyppx::tensorrt::report_vendor_missing(kLine, "builder config flag query");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt10_builder_config_get_flags(JYPPX_TensorRtBuilderConfig* config, uint32_t* out_flags)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_flags, "out_flags");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    status = jyppx::tensorrt::validate_handle(config, kLine, JYPPX_TENSORRT_OBJECT_KIND_BUILDER_CONFIG, "config");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_flags = 0;
+
+#if JYPPX_HAS_TENSORRT
+    if (JYPPX_TENSORRT_VERSION_MAJOR_NUM != 10)
+    {
+        return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "builder config flags query");
+    }
+
+    auto* config_payload = get_payload<nvinfer1::IBuilderConfig>(config);
+    if (config_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Builder config handle does not carry the expected TensorRT payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    *out_flags = static_cast<uint32_t>(config_payload->getFlags());
+    return JYPPX_STATUS_OK;
+#else
+    return jyppx::tensorrt::report_vendor_missing(kLine, "builder config flags query");
 #endif
 }
 
@@ -1029,6 +1137,355 @@ JYPPX_StatusCode jyppx_trt10_builder_config_get_tactic_sources(JYPPX_TensorRtBui
 #endif
 }
 
+JYPPX_StatusCode jyppx_trt10_builder_config_clear_plugins_to_serialize(JYPPX_TensorRtBuilderConfig* config)
+{
+    auto status = jyppx::tensorrt::validate_handle(config, kLine, JYPPX_TENSORRT_OBJECT_KIND_BUILDER_CONFIG, "config");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+#if JYPPX_HAS_TENSORRT
+    if (JYPPX_TENSORRT_VERSION_MAJOR_NUM != 10)
+    {
+        return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "builder config plugin serialization clear");
+    }
+
+    auto* config_payload = get_payload<nvinfer1::IBuilderConfig>(config);
+    if (config_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Builder config handle does not carry the expected TensorRT payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    config_payload->setPluginsToSerialize(nullptr, 0);
+    return JYPPX_STATUS_OK;
+#else
+    return jyppx::tensorrt::report_vendor_missing(kLine, "builder config plugin serialization clear");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt10_builder_config_get_plugin_to_serialize_count(JYPPX_TensorRtBuilderConfig* config, int32_t* out_count)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_count, "out_count");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_count = 0;
+    status = jyppx::tensorrt::validate_handle(config, kLine, JYPPX_TENSORRT_OBJECT_KIND_BUILDER_CONFIG, "config");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+#if JYPPX_HAS_TENSORRT
+    if (JYPPX_TENSORRT_VERSION_MAJOR_NUM != 10)
+    {
+        return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "builder config plugin serialization count query");
+    }
+
+    auto* config_payload = get_payload<nvinfer1::IBuilderConfig>(config);
+    if (config_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Builder config handle does not carry the expected TensorRT payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    *out_count = config_payload->getNbPluginsToSerialize();
+    return JYPPX_STATUS_OK;
+#else
+    return jyppx::tensorrt::report_vendor_missing(kLine, "builder config plugin serialization count query");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt10_builder_config_get_nb_plugins_to_serialize(JYPPX_TensorRtBuilderConfig* config, int32_t* out_count)
+{
+    return jyppx_trt10_builder_config_get_plugin_to_serialize_count(config, out_count);
+}
+
+JYPPX_StatusCode jyppx_trt10_builder_config_get_plugin_to_serialize(
+    JYPPX_TensorRtBuilderConfig* config,
+    int32_t index,
+    char* output_buffer,
+    size_t output_buffer_size,
+    size_t* out_required_size)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_required_size, "out_required_size");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_required_size = 0;
+    status = jyppx::tensorrt::validate_handle(config, kLine, JYPPX_TENSORRT_OBJECT_KIND_BUILDER_CONFIG, "config");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+#if JYPPX_HAS_TENSORRT
+    if (JYPPX_TENSORRT_VERSION_MAJOR_NUM != 10)
+    {
+        return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "builder config plugin serialization path query");
+    }
+
+    auto* config_payload = get_payload<nvinfer1::IBuilderConfig>(config);
+    if (config_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Builder config handle does not carry the expected TensorRT payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    status = validate_index(index, config_payload->getNbPluginsToSerialize(), "plugin_to_serialize");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    return copy_string_to_buffer(config_payload->getPluginToSerialize(index), output_buffer, output_buffer_size, out_required_size);
+#else
+    (void)index;
+    (void)output_buffer;
+    (void)output_buffer_size;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "builder config plugin serialization path query");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt10_builder_config_set_plugins_to_serialize(
+    JYPPX_TensorRtBuilderConfig* config,
+    const char** paths,
+    int32_t path_count,
+    JYPPX_Boolean* out_set)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_set, "out_set");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_set = JYPPX_FALSE;
+    if (path_count < 0 || (path_count > 0 && paths == nullptr))
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Plugin serialization path array must be present when path_count is positive.");
+        return JYPPX_STATUS_INVALID_ARGUMENT;
+    }
+
+    for (int32_t i = 0; i < path_count; ++i)
+    {
+        status = validate_c_string(paths[i], "plugin_path");
+        if (status != JYPPX_STATUS_OK)
+        {
+            return status;
+        }
+    }
+
+    status = jyppx::tensorrt::validate_handle(config, kLine, JYPPX_TENSORRT_OBJECT_KIND_BUILDER_CONFIG, "config");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+#if JYPPX_HAS_TENSORRT
+    if (JYPPX_TENSORRT_VERSION_MAJOR_NUM != 10)
+    {
+        return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "builder config plugin serialization path set");
+    }
+
+    auto* config_payload = get_payload<nvinfer1::IBuilderConfig>(config);
+    if (config_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Builder config handle does not carry the expected TensorRT payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    config_payload->setPluginsToSerialize(paths, path_count);
+    *out_set = JYPPX_TRUE;
+    return JYPPX_STATUS_OK;
+#else
+    return jyppx::tensorrt::report_vendor_missing(kLine, "builder config plugin serialization path set");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt10_builder_config_set_default_device_type(JYPPX_TensorRtBuilderConfig* config, int32_t device_type)
+{
+    if (device_type < 0 || device_type > 1)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT device type must be 0 (GPU) or 1 (DLA).");
+        return JYPPX_STATUS_INVALID_ARGUMENT;
+    }
+
+    auto status = jyppx::tensorrt::validate_handle(config, kLine, JYPPX_TENSORRT_OBJECT_KIND_BUILDER_CONFIG, "config");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+#if JYPPX_HAS_TENSORRT
+    if (JYPPX_TENSORRT_VERSION_MAJOR_NUM != 10)
+    {
+        return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "builder config default device type set");
+    }
+
+    auto* config_payload = get_payload<nvinfer1::IBuilderConfig>(config);
+    if (config_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Builder config handle does not carry the expected TensorRT payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    config_payload->setDefaultDeviceType(static_cast<nvinfer1::DeviceType>(device_type));
+    return JYPPX_STATUS_OK;
+#else
+    (void)device_type;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "builder config default device type set");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt10_builder_config_get_default_device_type(JYPPX_TensorRtBuilderConfig* config, int32_t* out_device_type)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_device_type, "out_device_type");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    status = jyppx::tensorrt::validate_handle(config, kLine, JYPPX_TENSORRT_OBJECT_KIND_BUILDER_CONFIG, "config");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_device_type = 0;
+
+#if JYPPX_HAS_TENSORRT
+    if (JYPPX_TENSORRT_VERSION_MAJOR_NUM != 10)
+    {
+        return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "builder config default device type query");
+    }
+
+    auto* config_payload = get_payload<nvinfer1::IBuilderConfig>(config);
+    if (config_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Builder config handle does not carry the expected TensorRT payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    *out_device_type = static_cast<int32_t>(config_payload->getDefaultDeviceType());
+    return JYPPX_STATUS_OK;
+#else
+    return jyppx::tensorrt::report_vendor_missing(kLine, "builder config default device type query");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt10_builder_config_set_dla_core(JYPPX_TensorRtBuilderConfig* config, int32_t dla_core)
+{
+    auto status = jyppx::tensorrt::validate_handle(config, kLine, JYPPX_TENSORRT_OBJECT_KIND_BUILDER_CONFIG, "config");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+#if JYPPX_HAS_TENSORRT
+    if (JYPPX_TENSORRT_VERSION_MAJOR_NUM != 10)
+    {
+        return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "builder config DLA core set");
+    }
+
+    auto* config_payload = get_payload<nvinfer1::IBuilderConfig>(config);
+    if (config_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Builder config handle does not carry the expected TensorRT payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    config_payload->setDLACore(dla_core);
+    return JYPPX_STATUS_OK;
+#else
+    (void)dla_core;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "builder config DLA core set");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt10_builder_config_get_dla_core(JYPPX_TensorRtBuilderConfig* config, int32_t* out_dla_core)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_dla_core, "out_dla_core");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    status = jyppx::tensorrt::validate_handle(config, kLine, JYPPX_TENSORRT_OBJECT_KIND_BUILDER_CONFIG, "config");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_dla_core = -1;
+
+#if JYPPX_HAS_TENSORRT
+    if (JYPPX_TENSORRT_VERSION_MAJOR_NUM != 10)
+    {
+        return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "builder config DLA core query");
+    }
+
+    auto* config_payload = get_payload<nvinfer1::IBuilderConfig>(config);
+    if (config_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Builder config handle does not carry the expected TensorRT payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    *out_dla_core = config_payload->getDLACore();
+    return JYPPX_STATUS_OK;
+#else
+    return jyppx::tensorrt::report_vendor_missing(kLine, "builder config DLA core query");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt10_builder_config_can_run_on_dla(JYPPX_TensorRtBuilderConfig* config, JYPPX_TensorRtLayer* layer, JYPPX_Boolean* out_can_run)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_can_run, "out_can_run");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_can_run = JYPPX_FALSE;
+    status = jyppx::tensorrt::validate_handle(config, kLine, JYPPX_TENSORRT_OBJECT_KIND_BUILDER_CONFIG, "config");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    status = jyppx::tensorrt::validate_handle(layer, kLine, JYPPX_TENSORRT_OBJECT_KIND_LAYER, "layer");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+#if JYPPX_HAS_TENSORRT
+    if (JYPPX_TENSORRT_VERSION_MAJOR_NUM != 10)
+    {
+        return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "layer DLA capability query");
+    }
+
+    auto* config_payload = get_payload<nvinfer1::IBuilderConfig>(config);
+    auto* layer_payload = get_layer_payload(layer);
+    if (config_payload == nullptr || layer_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Builder config or layer handle does not carry the expected TensorRT payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    *out_can_run = config_payload->canRunOnDLA(layer_payload) ? JYPPX_TRUE : JYPPX_FALSE;
+    return JYPPX_STATUS_OK;
+#else
+    return jyppx::tensorrt::report_vendor_missing(kLine, "layer DLA capability query");
+#endif
+}
+
 JYPPX_StatusCode jyppx_trt10_builder_config_set_layer_device_type(JYPPX_TensorRtBuilderConfig* config, JYPPX_TensorRtLayer* layer, int32_t device_type)
 {
     if (device_type < 0 || device_type > 1)
@@ -1284,6 +1741,392 @@ JYPPX_StatusCode jyppx_trt10_builder_config_set_timing_cache(JYPPX_TensorRtBuild
     return JYPPX_STATUS_OK;
 #else
     return jyppx::tensorrt::report_vendor_missing(kLine, "timing cache attach");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt10_builder_config_set_quantization_flags(JYPPX_TensorRtBuilderConfig* config, uint32_t flags)
+{
+    auto status = jyppx::tensorrt::validate_handle(config, kLine, JYPPX_TENSORRT_OBJECT_KIND_BUILDER_CONFIG, "config");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+#if JYPPX_HAS_TENSORRT
+    if (JYPPX_TENSORRT_VERSION_MAJOR_NUM != 10)
+    {
+        return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "builder config quantization flags set");
+    }
+
+    auto* config_payload = get_payload<nvinfer1::IBuilderConfig>(config);
+    if (config_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Builder config handle does not carry the expected TensorRT payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    config_payload->setQuantizationFlags(static_cast<nvinfer1::QuantizationFlags>(flags));
+    return JYPPX_STATUS_OK;
+#else
+    (void)flags;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "builder config quantization flags set");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt10_builder_config_get_quantization_flags(JYPPX_TensorRtBuilderConfig* config, uint32_t* out_flags)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_flags, "out_flags");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    status = jyppx::tensorrt::validate_handle(config, kLine, JYPPX_TENSORRT_OBJECT_KIND_BUILDER_CONFIG, "config");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_flags = 0;
+
+#if JYPPX_HAS_TENSORRT
+    if (JYPPX_TENSORRT_VERSION_MAJOR_NUM != 10)
+    {
+        return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "builder config quantization flags query");
+    }
+
+    auto* config_payload = get_payload<nvinfer1::IBuilderConfig>(config);
+    if (config_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Builder config handle does not carry the expected TensorRT payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    *out_flags = static_cast<uint32_t>(config_payload->getQuantizationFlags());
+    return JYPPX_STATUS_OK;
+#else
+    return jyppx::tensorrt::report_vendor_missing(kLine, "builder config quantization flags query");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt10_builder_config_clear_quantization_flag(JYPPX_TensorRtBuilderConfig* config, int32_t flag)
+{
+    auto status = jyppx::tensorrt::validate_handle(config, kLine, JYPPX_TENSORRT_OBJECT_KIND_BUILDER_CONFIG, "config");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    if (flag < 0)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Quantization flag must be greater than or equal to zero.");
+        return JYPPX_STATUS_INVALID_ARGUMENT;
+    }
+
+#if JYPPX_HAS_TENSORRT
+    if (JYPPX_TENSORRT_VERSION_MAJOR_NUM != 10)
+    {
+        return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "builder config quantization flag clear");
+    }
+
+    auto* config_payload = get_payload<nvinfer1::IBuilderConfig>(config);
+    if (config_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Builder config handle does not carry the expected TensorRT payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    config_payload->clearQuantizationFlag(static_cast<nvinfer1::QuantizationFlag>(flag));
+    return JYPPX_STATUS_OK;
+#else
+    (void)flag;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "builder config quantization flag clear");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt10_builder_config_set_quantization_flag(JYPPX_TensorRtBuilderConfig* config, int32_t flag)
+{
+    auto status = jyppx::tensorrt::validate_handle(config, kLine, JYPPX_TENSORRT_OBJECT_KIND_BUILDER_CONFIG, "config");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    if (flag < 0)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Quantization flag must be greater than or equal to zero.");
+        return JYPPX_STATUS_INVALID_ARGUMENT;
+    }
+
+#if JYPPX_HAS_TENSORRT
+    if (JYPPX_TENSORRT_VERSION_MAJOR_NUM != 10)
+    {
+        return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "builder config quantization flag set");
+    }
+
+    auto* config_payload = get_payload<nvinfer1::IBuilderConfig>(config);
+    if (config_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Builder config handle does not carry the expected TensorRT payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    config_payload->setQuantizationFlag(static_cast<nvinfer1::QuantizationFlag>(flag));
+    return JYPPX_STATUS_OK;
+#else
+    (void)flag;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "builder config quantization flag set");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt10_builder_config_get_quantization_flag(JYPPX_TensorRtBuilderConfig* config, int32_t flag, JYPPX_Boolean* out_enabled)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_enabled, "out_enabled");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    status = jyppx::tensorrt::validate_handle(config, kLine, JYPPX_TENSORRT_OBJECT_KIND_BUILDER_CONFIG, "config");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    if (flag < 0)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Quantization flag must be greater than or equal to zero.");
+        return JYPPX_STATUS_INVALID_ARGUMENT;
+    }
+
+    *out_enabled = JYPPX_FALSE;
+
+#if JYPPX_HAS_TENSORRT
+    if (JYPPX_TENSORRT_VERSION_MAJOR_NUM != 10)
+    {
+        return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "builder config quantization flag query");
+    }
+
+    auto* config_payload = get_payload<nvinfer1::IBuilderConfig>(config);
+    if (config_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Builder config handle does not carry the expected TensorRT payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    *out_enabled = config_payload->getQuantizationFlag(static_cast<nvinfer1::QuantizationFlag>(flag)) ? JYPPX_TRUE : JYPPX_FALSE;
+    return JYPPX_STATUS_OK;
+#else
+    (void)flag;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "builder config quantization flag query");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt10_builder_config_set_tiling_optimization_level(JYPPX_TensorRtBuilderConfig* config, int32_t level, JYPPX_Boolean* out_set)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_set, "out_set");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    status = jyppx::tensorrt::validate_handle(config, kLine, JYPPX_TENSORRT_OBJECT_KIND_BUILDER_CONFIG, "config");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    if (level < 0)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Tiling optimization level must be greater than or equal to zero.");
+        return JYPPX_STATUS_INVALID_ARGUMENT;
+    }
+
+    *out_set = JYPPX_FALSE;
+
+#if JYPPX_HAS_TENSORRT && JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10
+    auto* config_payload = get_payload<nvinfer1::IBuilderConfig>(config);
+    if (config_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Builder config handle does not carry the expected TensorRT payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    *out_set = config_payload->setTilingOptimizationLevel(static_cast<nvinfer1::TilingOptimizationLevel>(level)) ? JYPPX_TRUE : JYPPX_FALSE;
+    return JYPPX_STATUS_OK;
+#elif JYPPX_HAS_TENSORRT
+    (void)level;
+    return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "builder config tiling optimization level set");
+#else
+    (void)level;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "builder config tiling optimization level set");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt10_builder_config_get_tiling_optimization_level(JYPPX_TensorRtBuilderConfig* config, int32_t* out_level)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_level, "out_level");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    status = jyppx::tensorrt::validate_handle(config, kLine, JYPPX_TENSORRT_OBJECT_KIND_BUILDER_CONFIG, "config");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_level = 0;
+
+#if JYPPX_HAS_TENSORRT && JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10
+    auto* config_payload = get_payload<nvinfer1::IBuilderConfig>(config);
+    if (config_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Builder config handle does not carry the expected TensorRT payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    *out_level = static_cast<int32_t>(config_payload->getTilingOptimizationLevel());
+    return JYPPX_STATUS_OK;
+#elif JYPPX_HAS_TENSORRT
+    return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "builder config tiling optimization level query");
+#else
+    return jyppx::tensorrt::report_vendor_missing(kLine, "builder config tiling optimization level query");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt10_builder_config_set_l2_limit_for_tiling(JYPPX_TensorRtBuilderConfig* config, int64_t bytes, JYPPX_Boolean* out_set)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_set, "out_set");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    status = jyppx::tensorrt::validate_handle(config, kLine, JYPPX_TENSORRT_OBJECT_KIND_BUILDER_CONFIG, "config");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_set = JYPPX_FALSE;
+
+#if JYPPX_HAS_TENSORRT && JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10
+    auto* config_payload = get_payload<nvinfer1::IBuilderConfig>(config);
+    if (config_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Builder config handle does not carry the expected TensorRT payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    *out_set = config_payload->setL2LimitForTiling(bytes) ? JYPPX_TRUE : JYPPX_FALSE;
+    return JYPPX_STATUS_OK;
+#elif JYPPX_HAS_TENSORRT
+    (void)bytes;
+    return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "builder config L2 tiling limit set");
+#else
+    (void)bytes;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "builder config L2 tiling limit set");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt10_builder_config_get_l2_limit_for_tiling(JYPPX_TensorRtBuilderConfig* config, int64_t* out_bytes)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_bytes, "out_bytes");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    status = jyppx::tensorrt::validate_handle(config, kLine, JYPPX_TENSORRT_OBJECT_KIND_BUILDER_CONFIG, "config");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_bytes = 0;
+
+#if JYPPX_HAS_TENSORRT && JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10
+    auto* config_payload = get_payload<nvinfer1::IBuilderConfig>(config);
+    if (config_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Builder config handle does not carry the expected TensorRT payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    *out_bytes = config_payload->getL2LimitForTiling();
+    return JYPPX_STATUS_OK;
+#elif JYPPX_HAS_TENSORRT
+    return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "builder config L2 tiling limit query");
+#else
+    return jyppx::tensorrt::report_vendor_missing(kLine, "builder config L2 tiling limit query");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt10_builder_config_set_max_nb_tactics(JYPPX_TensorRtBuilderConfig* config, int32_t max_tactics)
+{
+    auto status = jyppx::tensorrt::validate_handle(config, kLine, JYPPX_TENSORRT_OBJECT_KIND_BUILDER_CONFIG, "config");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    if (max_tactics < 0)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Builder config max tactics must be greater than or equal to zero.");
+        return JYPPX_STATUS_INVALID_ARGUMENT;
+    }
+
+#if JYPPX_HAS_TENSORRT && JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10
+    auto* config_payload = get_payload<nvinfer1::IBuilderConfig>(config);
+    if (config_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Builder config handle does not carry the expected TensorRT payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    config_payload->setMaxNbTactics(max_tactics);
+    return JYPPX_STATUS_OK;
+#elif JYPPX_HAS_TENSORRT
+    (void)max_tactics;
+    return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "builder config max tactics set");
+#else
+    (void)max_tactics;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "builder config max tactics set");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt10_builder_config_get_max_nb_tactics(JYPPX_TensorRtBuilderConfig* config, int32_t* out_max_tactics)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_max_tactics, "out_max_tactics");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    status = jyppx::tensorrt::validate_handle(config, kLine, JYPPX_TENSORRT_OBJECT_KIND_BUILDER_CONFIG, "config");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_max_tactics = 0;
+
+#if JYPPX_HAS_TENSORRT && JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10
+    auto* config_payload = get_payload<nvinfer1::IBuilderConfig>(config);
+    if (config_payload == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Builder config handle does not carry the expected TensorRT payload.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    *out_max_tactics = config_payload->getMaxNbTactics();
+    return JYPPX_STATUS_OK;
+#elif JYPPX_HAS_TENSORRT
+    return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "builder config max tactics query");
+#else
+    return jyppx::tensorrt::report_vendor_missing(kLine, "builder config max tactics query");
 #endif
 }
 
