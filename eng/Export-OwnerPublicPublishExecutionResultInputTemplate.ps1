@@ -16,6 +16,9 @@ if (-not (Test-Path -LiteralPath $ContractPath -PathType Leaf)) {
 
 $contract = Get-Content -LiteralPath $ContractPath -Raw -Encoding utf8 | ConvertFrom-Json
 $requiredFields = @((Get-OwnerPropertyOrDefault -Object $contract -Name "requiredFields" -DefaultValue @()))
+$dualPackageRouteFields = @($requiredFields | Where-Object {
+    @("nugetSmallBridgeCoreRoute", "githubPackagesFullRuntimeRoute") -contains [string](Get-OwnerPropertyOrDefault -Object $_ -Name "group" -DefaultValue "")
+  })
 $ownerInputFields = @($requiredFields | ForEach-Object {
     [pscustomobject]@{
       group = [string](Get-OwnerPropertyOrDefault -Object $_ -Name "group" -DefaultValue "")
@@ -34,6 +37,9 @@ $record = [ordered]@{
   sourceContractPath = $ContractPath
   requiredFieldCount = $requiredFields.Count
   placeholderFieldCount = $ownerInputFields.Count
+  dualPackageRouteCount = [int](Get-OwnerPropertyOrDefault -Object $contract -Name "dualPackageRouteCount" -DefaultValue 2)
+  dualPackageRouteRequiredFieldCount = $dualPackageRouteFields.Count
+  dualPackageRoutePlaceholderFieldCount = $dualPackageRouteFields.Count
   ownerInputFields = @($ownerInputFields)
   notExecutedByAutomation = $true
   ownerExecutionOnly = $true
@@ -57,6 +63,8 @@ Write-OwnerUtf8File -LiteralPath $markdownPath -InputObject @(
   "- templateState: ``$($record.templateState)``",
   "- requiredFieldCount: ``$($record.requiredFieldCount)``",
   "- placeholderFieldCount: ``$($record.placeholderFieldCount)``",
+  "- dualPackageRouteCount: ``$($record.dualPackageRouteCount)``",
+  "- dualPackageRouteRequiredFieldCount: ``$($record.dualPackageRouteRequiredFieldCount)``",
   "- performsPublish: ``$($record.performsPublish)``",
   "- canCloseReleaseIssue: ``$($record.canCloseReleaseIssue)``",
   "",
@@ -66,4 +74,3 @@ Write-OwnerUtf8File -LiteralPath $markdownPath -InputObject @(
 Write-Host "Wrote $jsonPath"
 Write-Host "Wrote $markdownPath"
 Write-Host "PlaceholderFieldCount=$($record.placeholderFieldCount)"
-

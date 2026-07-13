@@ -124,6 +124,20 @@ function Get-OwnerPublicPublishRequiredFields {
     "TensorRtExec report"
   )
   $groups = [ordered]@{
+    nugetSmallBridgeCoreRoute = @(
+      "nugetSmallBridgeCoreOwnerAuthorizationUrl", "nugetSmallBridgeCorePublicPackageUrl",
+      "nugetSmallBridgeCorePackageId", "nugetSmallBridgeCorePackageVersion",
+      "nugetSmallBridgeCoreDownloadedNupkgPath", "nugetSmallBridgeCoreDownloadedNupkgSha256",
+      "nugetSmallBridgeCoreCleanExternalConsumerLogPath", "nugetSmallBridgeCoreCleanExternalConsumerLogSha256",
+      "nugetSmallBridgeCorePostPublishCleanConsumerProofLogSha256"
+    )
+    githubPackagesFullRuntimeRoute = @(
+      "githubPackagesFullRuntimeOwnerAuthorizationUrl", "githubPackagesFullRuntimeRestoreSourceUrl",
+      "githubPackagesFullRuntimePackageId", "githubPackagesFullRuntimePackageVersion",
+      "githubPackagesFullRuntimePackageKey", "githubPackagesFullRuntimePackageSha256",
+      "githubPackagesFullRuntimeDllResolutionReportPath", "githubPackagesFullRuntimeDllResolutionReportSha256",
+      "githubPackagesFullRuntimeCleanRuntimeSmokeLogSha256"
+    )
     publicPackage = @(
       "publicPackageId", "publicPackageVersion", "publicPackageSource", "publicPackageUrl", "publicPackageDownloadedPath",
       "publicPackageSha256", "publicPackagePublishedAtUtc", "publicPackageOwnerAccount", "publicPackageVisibility",

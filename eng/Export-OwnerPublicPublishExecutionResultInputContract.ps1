@@ -10,6 +10,8 @@ $ErrorActionPreference = "Stop"
 $ctx = Initialize-OwnerPublicPublishContext -RepositoryRoot $RepositoryRoot -OutputDirectory $OutputDirectory
 $requiredFields = @(Get-OwnerPublicPublishRequiredFields)
 $fieldGroups = @($requiredFields | Group-Object group | ForEach-Object { [pscustomobject]@{ group = $_.Name; requiredFieldCount = $_.Count } })
+$dualPackageRouteGroups = @("nugetSmallBridgeCoreRoute", "githubPackagesFullRuntimeRoute")
+$dualPackageRouteFields = @($requiredFields | Where-Object { $dualPackageRouteGroups -contains [string]$_.group })
 
 $record = [ordered]@{
   recordKind = "owner-public-publish-execution-result-input-contract"
@@ -19,9 +21,16 @@ $record = [ordered]@{
   blockedRequiredFieldCount = $requiredFields.Count
   readyRequiredFieldCount = 0
   requiredGroupCount = $fieldGroups.Count
+  dualPackageRouteCount = $dualPackageRouteGroups.Count
+  dualPackageRouteRequiredFieldCount = $dualPackageRouteFields.Count
+  dualPackageRouteReadyFieldCount = 0
+  dualPackageRouteBlockedFieldCount = $dualPackageRouteFields.Count
+  dualPackageRouteIds = @("nuget-small-bridge-core", "github-packages-full-runtime")
   requiredGroups = @($fieldGroups)
   requiredFields = @($requiredFields)
   requiredOwnerEvidenceAreas = @(
+    "NuGet small bridge/core route owner authorization, public NuGet URL, downloaded nupkg hash, clean external consumer log, and post-publish clean consumer proof hash",
+    "GitHub Packages full runtime route owner authorization, restore source URL, runtime package identity/hash, DLL resolution report, and clean runtime smoke hash",
     "managed/runtime package id/version/public source/url/sha256",
     "GitHub release asset url/sha256 or explicit not-uploaded reason",
     "NuGet push transcript/stdout/stderr/hash, publish command plan hash, managed/runtime publish command hash",
@@ -84,6 +93,8 @@ Write-OwnerUtf8File -LiteralPath $markdownPath -InputObject @(
   "",
   "- contractState: ``$($record.contractState)``",
   "- requiredFieldCount: ``$($record.requiredFieldCount)``",
+  "- dualPackageRouteCount: ``$($record.dualPackageRouteCount)``",
+  "- dualPackageRouteRequiredFieldCount: ``$($record.dualPackageRouteRequiredFieldCount)``",
   "- blockedRequiredFieldCount: ``$($record.blockedRequiredFieldCount)``",
   "- performsPublish: ``$($record.performsPublish)``",
   "- canPublishPublicly: ``$($record.canPublishPublicly)``",

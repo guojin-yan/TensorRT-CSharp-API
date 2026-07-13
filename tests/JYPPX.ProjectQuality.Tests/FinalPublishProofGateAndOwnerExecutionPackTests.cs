@@ -1497,6 +1497,10 @@ public sealed class FinalPublishProofGateAndOwnerExecutionPackTests
         Assert.Equal("owner-public-publish-execution-result-input-contract", contract.GetProperty("recordKind").GetString());
         Assert.Equal("blocked-owner-public-publish-execution-result-input-required", contract.GetProperty("contractState").GetString());
         Assert.True(contract.GetProperty("requiredFieldCount").GetInt32() >= 100);
+        Assert.Equal(2, contract.GetProperty("dualPackageRouteCount").GetInt32());
+        Assert.True(contract.GetProperty("dualPackageRouteRequiredFieldCount").GetInt32() >= 18);
+        Assert.Equal(0, contract.GetProperty("dualPackageRouteReadyFieldCount").GetInt32());
+        Assert.Equal(contract.GetProperty("dualPackageRouteRequiredFieldCount").GetInt32(), contract.GetProperty("dualPackageRouteBlockedFieldCount").GetInt32());
         Assert.False(contract.GetProperty("performsPublish").GetBoolean());
         Assert.False(contract.GetProperty("canPublishPublicly").GetBoolean());
         Assert.False(contract.GetProperty("canCloseReleaseIssue").GetBoolean());
@@ -1531,7 +1535,17 @@ public sealed class FinalPublishProofGateAndOwnerExecutionPackTests
             "noBuildOnlyConfirmation",
             "noDependencyProbeOnlyConfirmation",
             "noDryRunOnlyConfirmation",
-            "noCandidateDashboardRunbookSubstitutionConfirmation"
+            "noCandidateDashboardRunbookSubstitutionConfirmation",
+            "nugetSmallBridgeCoreOwnerAuthorizationUrl",
+            "nugetSmallBridgeCorePublicPackageUrl",
+            "nugetSmallBridgeCoreDownloadedNupkgSha256",
+            "nugetSmallBridgeCoreCleanExternalConsumerLogSha256",
+            "nugetSmallBridgeCorePostPublishCleanConsumerProofLogSha256",
+            "githubPackagesFullRuntimeOwnerAuthorizationUrl",
+            "githubPackagesFullRuntimeRestoreSourceUrl",
+            "githubPackagesFullRuntimePackageKey",
+            "githubPackagesFullRuntimeDllResolutionReportPath",
+            "githubPackagesFullRuntimeCleanRuntimeSmokeLogSha256"
         })
         {
             Assert.Contains(marker, raw, StringComparison.OrdinalIgnoreCase);
@@ -1542,6 +1556,10 @@ public sealed class FinalPublishProofGateAndOwnerExecutionPackTests
         Assert.Equal("owner-public-publish-execution-result-input-contract-validation", validation.GetProperty("recordKind").GetString());
         Assert.Equal("blocked-owner-public-publish-execution-result-input-required", validation.GetProperty("validationState").GetString());
         Assert.True(validation.GetProperty("requiredFieldCount").GetInt32() >= 100);
+        Assert.Equal(2, validation.GetProperty("dualPackageRouteCount").GetInt32());
+        Assert.True(validation.GetProperty("dualPackageRouteRequiredFieldCount").GetInt32() >= 18);
+        Assert.Equal(0, validation.GetProperty("dualPackageRouteReadyFieldCount").GetInt32());
+        Assert.Equal(validation.GetProperty("dualPackageRouteRequiredFieldCount").GetInt32(), validation.GetProperty("dualPackageRouteBlockedFieldCount").GetInt32());
         Assert.Equal(0, validation.GetProperty("failedBlockerCount").GetInt32());
         Assert.True(validation.GetProperty("failedActionRequiredCount").GetInt32() > 0);
 
@@ -1550,10 +1568,21 @@ public sealed class FinalPublishProofGateAndOwnerExecutionPackTests
         Assert.Equal("owner-public-publish-execution-result-preflight", preflight.GetProperty("recordKind").GetString());
         Assert.Equal(0, preflight.GetProperty("readyCandidateCount").GetInt32());
         Assert.True(preflight.GetProperty("blockedRequiredFieldCount").GetInt32() >= 100);
+        Assert.Equal(2, preflight.GetProperty("dualPackageRouteCount").GetInt32());
+        Assert.True(preflight.GetProperty("dualPackageRouteRequiredFieldCount").GetInt32() >= 18);
+        Assert.Equal(0, preflight.GetProperty("dualPackageRouteReadyFieldCount").GetInt32());
+        Assert.Equal(preflight.GetProperty("dualPackageRouteRequiredFieldCount").GetInt32(), preflight.GetProperty("dualPackageRouteBlockedFieldCount").GetInt32());
         Assert.False(preflight.GetProperty("canPublishPublicly").GetBoolean());
         Assert.False(preflight.GetProperty("canCloseReleaseIssue").GetBoolean());
 
         using JsonDocument bundleDocument = ReadJson("artifacts", "final-release", "release-evidence-bundle.json");
+        JsonElement bundle = bundleDocument.RootElement;
+        Assert.Equal(2, bundle.GetProperty("ownerPublicPublishExecutionResultInputContractDualPackageRouteCount").GetInt32());
+        Assert.True(bundle.GetProperty("ownerPublicPublishExecutionResultInputContractDualPackageRouteRequiredFieldCount").GetInt32() >= 18);
+        Assert.Equal(0, bundle.GetProperty("ownerPublicPublishExecutionResultInputContractDualPackageRouteReadyFieldCount").GetInt32());
+        Assert.Equal(
+            bundle.GetProperty("ownerPublicPublishExecutionResultInputContractDualPackageRouteRequiredFieldCount").GetInt32(),
+            bundle.GetProperty("ownerPublicPublishExecutionResultInputContractDualPackageRouteBlockedFieldCount").GetInt32());
         JsonElement[] evidenceItems = bundleDocument.RootElement.GetProperty("evidenceItems").EnumerateArray().ToArray();
         foreach (string id in new[]
         {
@@ -1566,6 +1595,11 @@ public sealed class FinalPublishProofGateAndOwnerExecutionPackTests
             Assert.False(evidence.GetProperty("passed").GetBoolean());
             Assert.Contains("not proof", evidence.GetProperty("boundary").GetString(), StringComparison.OrdinalIgnoreCase);
         }
+
+        JsonElement contractEvidence = evidenceItems.Single(item => item.GetProperty("id").GetString() == "owner-public-publish-execution-result-input-contract");
+        string contractEvidenceState = contractEvidence.GetProperty("state").GetString()!;
+        Assert.Contains("dualPackageRoutes=2", contractEvidenceState, StringComparison.Ordinal);
+        Assert.Contains("dualPackageRouteReadyFields=0", contractEvidenceState, StringComparison.Ordinal);
 
         using JsonDocument auditDocument = ReadJson("artifacts", "final-release", "release-evidence-classification-audit.json");
         Assert.Equal("classification-audit-passed-non-proof-boundaries-intact", auditDocument.RootElement.GetProperty("auditState").GetString());

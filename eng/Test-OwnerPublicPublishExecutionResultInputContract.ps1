@@ -19,7 +19,18 @@ $record = Get-Content -LiteralPath $InputPath -Raw -Encoding utf8 | ConvertFrom-
 $raw = $record | ConvertTo-Json -Depth 32
 $fields = @((Get-OwnerPropertyOrDefault -Object $record -Name "requiredFields" -DefaultValue @()))
 $blockedFields = @($fields | Where-Object { -not [bool](Get-OwnerPropertyOrDefault -Object $_ -Name "ready" -DefaultValue $false) })
+$dualPackageRouteFields = @($fields | Where-Object {
+    @("nugetSmallBridgeCoreRoute", "githubPackagesFullRuntimeRoute") -contains [string](Get-OwnerPropertyOrDefault -Object $_ -Name "group" -DefaultValue "")
+  })
 $requiredMarkers = @(
+  "nugetSmallBridgeCoreOwnerAuthorizationUrl", "nugetSmallBridgeCorePublicPackageUrl",
+  "nugetSmallBridgeCorePackageId", "nugetSmallBridgeCorePackageVersion",
+  "nugetSmallBridgeCoreDownloadedNupkgSha256", "nugetSmallBridgeCoreCleanExternalConsumerLogPath",
+  "nugetSmallBridgeCoreCleanExternalConsumerLogSha256", "nugetSmallBridgeCorePostPublishCleanConsumerProofLogSha256",
+  "githubPackagesFullRuntimeOwnerAuthorizationUrl", "githubPackagesFullRuntimeRestoreSourceUrl",
+  "githubPackagesFullRuntimePackageId", "githubPackagesFullRuntimePackageVersion",
+  "githubPackagesFullRuntimePackageKey", "githubPackagesFullRuntimePackageSha256",
+  "githubPackagesFullRuntimeDllResolutionReportPath", "githubPackagesFullRuntimeCleanRuntimeSmokeLogSha256",
   "publicPackageUrl", "publicPackageSha256", "githubReleaseAssetUrl", "githubReleaseAssetSha256",
   "nugetPushTranscriptPath", "nugetPushTranscriptSha256", "cleanConsumerRestoreStdoutPath",
   "cleanConsumerBuildStdoutPath", "cleanConsumerRuntimeSmokeStdoutPath", "strictValidatorOutputPath",
@@ -35,6 +46,7 @@ $items = New-Object System.Collections.Generic.List[object]
 $items.Add((New-OwnerValidationItem -Id "record-kind" -Passed ([string](Get-OwnerPropertyOrDefault -Object $record -Name "recordKind" -DefaultValue "") -eq "owner-public-publish-execution-result-input-contract") -Severity "blocker" -Detail "recordKind must match.")) | Out-Null
 $items.Add((New-OwnerValidationItem -Id "state-blocked" -Passed ([string](Get-OwnerPropertyOrDefault -Object $record -Name "contractState" -DefaultValue "") -eq "blocked-owner-public-publish-execution-result-input-required") -Severity "blocker" -Detail "Contract must remain blocked until real Owner input exists.")) | Out-Null
 $items.Add((New-OwnerValidationItem -Id "required-fields-at-least-100" -Passed ($fields.Count -ge 100) -Severity "blocker" -Detail "Contract must expose at least 100 required Owner fields.")) | Out-Null
+$items.Add((New-OwnerValidationItem -Id "dual-package-route-fields" -Passed ([int](Get-OwnerPropertyOrDefault -Object $record -Name "dualPackageRouteCount" -DefaultValue 0) -eq 2 -and $dualPackageRouteFields.Count -ge 18) -Severity "blocker" -Detail "Contract must expose both NuGet small bridge/core and GitHub Packages full runtime route fields.")) | Out-Null
 $items.Add((New-OwnerValidationItem -Id "all-fields-blocked-by-default" -Passed ($blockedFields.Count -eq $fields.Count) -Severity "action-required" -Detail "Owner must provide real values for every required field.")) | Out-Null
 $items.Add((New-OwnerValidationItem -Id "non-proof-flags" -Passed ((-not [bool](Get-OwnerPropertyOrDefault -Object $record -Name "performsPublish" -DefaultValue $true)) -and (-not [bool](Get-OwnerPropertyOrDefault -Object $record -Name "canPublishPublicly" -DefaultValue $true)) -and (-not [bool](Get-OwnerPropertyOrDefault -Object $record -Name "canCloseReleaseIssue" -DefaultValue $true)) -and (-not [bool](Get-OwnerPropertyOrDefault -Object $record -Name "isReleaseReady" -DefaultValue $true)) -and (-not [bool](Get-OwnerPropertyOrDefault -Object $record -Name "isRuntimeExecutionProof" -DefaultValue $true)) -and (-not [bool](Get-OwnerPropertyOrDefault -Object $record -Name "isPostPublishProof" -DefaultValue $true)) -and (-not [bool](Get-OwnerPropertyOrDefault -Object $record -Name "isReleaseCloseProof" -DefaultValue $true))) -Severity "blocker" -Detail "Contract must be non-proof, non-publish, and non-close.")) | Out-Null
 
@@ -52,6 +64,10 @@ $validation = [ordered]@{
   requiredFieldCount = $fields.Count
   blockedRequiredFieldCount = $blockedFields.Count
   readyRequiredFieldCount = 0
+  dualPackageRouteCount = [int](Get-OwnerPropertyOrDefault -Object $record -Name "dualPackageRouteCount" -DefaultValue 0)
+  dualPackageRouteRequiredFieldCount = $dualPackageRouteFields.Count
+  dualPackageRouteReadyFieldCount = 0
+  dualPackageRouteBlockedFieldCount = $dualPackageRouteFields.Count
   failedBlockerCount = $failedBlockers.Count
   failedActionRequiredCount = [Math]::Max($failedActionRequired.Count, 1)
   performsPublish = $false
@@ -73,6 +89,8 @@ Write-OwnerUtf8File -LiteralPath $markdownPath -InputObject @(
   "",
   "- validationState: ``$($validation.validationState)``",
   "- requiredFieldCount: ``$($validation.requiredFieldCount)``",
+  "- dualPackageRouteCount: ``$($validation.dualPackageRouteCount)``",
+  "- dualPackageRouteRequiredFieldCount: ``$($validation.dualPackageRouteRequiredFieldCount)``",
   "- blockedRequiredFieldCount: ``$($validation.blockedRequiredFieldCount)``",
   "- failedBlockerCount: ``$($validation.failedBlockerCount)``",
   "- failedActionRequiredCount: ``$($validation.failedActionRequiredCount)``",

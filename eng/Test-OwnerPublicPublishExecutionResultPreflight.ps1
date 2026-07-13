@@ -19,6 +19,10 @@ $template = Get-Content -LiteralPath $InputPath -Raw -Encoding utf8 | ConvertFro
 $fields = @((Get-OwnerPropertyOrDefault -Object $template -Name "ownerInputFields" -DefaultValue @()))
 $readyFields = @($fields | Where-Object { Test-OwnerInputValueReady -Name ([string](Get-OwnerPropertyOrDefault -Object $_ -Name "name" -DefaultValue "")) -Value (Get-OwnerPropertyOrDefault -Object $_ -Name "value" -DefaultValue "") })
 $blockedFields = @($fields | Where-Object { -not (Test-OwnerInputValueReady -Name ([string](Get-OwnerPropertyOrDefault -Object $_ -Name "name" -DefaultValue "")) -Value (Get-OwnerPropertyOrDefault -Object $_ -Name "value" -DefaultValue "")) })
+$dualPackageRouteFields = @($fields | Where-Object {
+    @("nugetSmallBridgeCoreRoute", "githubPackagesFullRuntimeRoute") -contains [string](Get-OwnerPropertyOrDefault -Object $_ -Name "group" -DefaultValue "")
+  })
+$dualPackageRouteReadyFields = @($dualPackageRouteFields | Where-Object { Test-OwnerInputValueReady -Name ([string](Get-OwnerPropertyOrDefault -Object $_ -Name "name" -DefaultValue "")) -Value (Get-OwnerPropertyOrDefault -Object $_ -Name "value" -DefaultValue "") })
 $readyCandidateCount = if ($fields.Count -ge 100 -and $blockedFields.Count -eq 0) { 1 } else { 0 }
 $failedBlockerCount = if ($fields.Count -ge 100) { 0 } else { 1 }
 
@@ -30,6 +34,10 @@ $record = [ordered]@{
   requiredFieldCount = $fields.Count
   readyFieldCount = $readyFields.Count
   blockedRequiredFieldCount = $blockedFields.Count
+  dualPackageRouteCount = [int](Get-OwnerPropertyOrDefault -Object $template -Name "dualPackageRouteCount" -DefaultValue 0)
+  dualPackageRouteRequiredFieldCount = $dualPackageRouteFields.Count
+  dualPackageRouteReadyFieldCount = $dualPackageRouteReadyFields.Count
+  dualPackageRouteBlockedFieldCount = $dualPackageRouteFields.Count - $dualPackageRouteReadyFields.Count
   readyCandidateCount = $readyCandidateCount
   blockedCandidateCount = if ($readyCandidateCount -eq 0) { 1 } else { 0 }
   failedBlockerCount = $failedBlockerCount
@@ -63,6 +71,9 @@ Write-OwnerUtf8File -LiteralPath $markdownPath -InputObject @(
   "",
   "- preflightState: ``$($record.preflightState)``",
   "- requiredFieldCount: ``$($record.requiredFieldCount)``",
+  "- dualPackageRouteRequiredFieldCount: ``$($record.dualPackageRouteRequiredFieldCount)``",
+  "- dualPackageRouteReadyFieldCount: ``$($record.dualPackageRouteReadyFieldCount)``",
+  "- dualPackageRouteBlockedFieldCount: ``$($record.dualPackageRouteBlockedFieldCount)``",
   "- readyFieldCount: ``$($record.readyFieldCount)``",
   "- blockedRequiredFieldCount: ``$($record.blockedRequiredFieldCount)``",
   "- readyCandidateCount: ``$($record.readyCandidateCount)``",
@@ -76,4 +87,3 @@ Write-Host "PreflightState=$($record.preflightState)"
 Write-Host "ReadyCandidateCount=$($record.readyCandidateCount)"
 Write-Host "FailedBlockerCount=$($record.failedBlockerCount)"
 if ($Strict -and $failedBlockerCount -gt 0) { throw "Owner public publish execution result preflight failed." }
-
