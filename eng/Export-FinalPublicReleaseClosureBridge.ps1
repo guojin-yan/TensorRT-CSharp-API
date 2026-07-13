@@ -136,8 +136,10 @@ $ownerPublishExecutionResult = Read-JsonOrNull "artifacts\final-release\owner-pu
 $githubActionsRunEvidence = Read-JsonOrNull "artifacts\final-release\github-actions-run-evidence-import-validation.json"
 $ownerPublicPublishResult = Read-JsonOrNull "artifacts\final-release\owner-public-publish-execution-result-candidate-validation.json"
 $publicDownload = Read-JsonOrNull "artifacts\final-release\public-package-download-proof-candidate-validation.json"
+$publicPackageDownloadOwnerExecutionPack = Read-JsonOrNull "artifacts\final-release\public-package-download-proof-owner-execution-pack-validation.json"
 $cleanConsumerSmoke = Read-JsonOrNull "artifacts\final-release\clean-external-consumer-smoke-input-validation.json"
 $postPublishProof = Read-JsonOrNull "artifacts\final-release\post-publish-clean-consumer-proof-result-validation.json"
+$postPublishUserVerificationPack = Read-JsonOrNull "artifacts\final-release\post-publish-user-verification-pack-validation.json"
 $releaseCloseDecision = Read-JsonOrNull "artifacts\final-release\release-issue-close-owner-decision-input-validation.json"
 $strictCloseDashboard = Read-JsonOrNull "artifacts\final-release\strict-close-ready-convergence-dashboard-validation.json"
 $preReleaseReadinessMatrix = Read-JsonOrNull "artifacts\final-release\pre-release-package-proof-readiness-matrix.json"
@@ -252,6 +254,18 @@ $lanes = @(
     -RequiredBeforeClose @("public managed package URL", "public runtime package URL", "downloaded managed SHA256", "downloaded runtime SHA256") `
     -Boundary "Public download proof is not a local feed, direct nupkg, dry-run artifact, or GitHub Actions artifact substitute."
   New-ClosureLane `
+    -Id "public-package-download-owner-execution-pack" `
+    -Title "Public package download proof owner execution pack" `
+    -Artifact "artifacts/final-release/public-package-download-proof-owner-execution-pack-validation.json" `
+    -Record $publicPackageDownloadOwnerExecutionPack `
+    -StateProperty "validationState" `
+    -RequiredState "public-package-download-proof-owner-execution-ready-for-owner-review" `
+    -OwnerAction "Owner uses the manual execution pack to download public managed/runtime packages, capture SHA256/size fields, fill the public download proof input, import the candidate, and refresh evidence." `
+    -RequiredBeforeClose @("owner download commands reviewed", "public URLs captured", "downloaded package hashes captured", "candidate validator run", "post-publish verification pack refreshed") `
+    -Boundary "The Owner execution pack is manual guidance only; it is not public package download proof by itself, not runtime proof, not post-publish proof, not publish approval, not package push, and cannot close the release issue." `
+    -ValidatorPath "eng\Test-PublicPackageDownloadProofOwnerExecutionPack.ps1 -Strict" `
+    -RequiredEvidence "A completed owner-filled public-package-download-proof-input plus public-package-download-proof-candidate-validation.json, not this guidance pack alone."
+  New-ClosureLane `
     -Id "clean-external-consumer-smoke" `
     -Title "Clean external consumer smoke input" `
     -Artifact "artifacts/final-release/clean-external-consumer-smoke-input-validation.json" `
@@ -273,6 +287,18 @@ $lanes = @(
     -Boundary "Validation-ready alone cannot close this lane; proofCandidateReady must be true, and the bridge itself is not runtime proof, not post-publish proof, not publish approval, and not release close approval." `
     -RequireProofReady $true `
     -ProofReadyProperty "proofCandidateReady"
+  New-ClosureLane `
+    -Id "post-publish-user-verification-pack" `
+    -Title "Post-publish user verification pack" `
+    -Artifact "artifacts/final-release/post-publish-user-verification-pack-validation.json" `
+    -Record $postPublishUserVerificationPack `
+    -StateProperty "validationState" `
+    -RequiredState "post-publish-user-verification-ready-for-owner-close-review" `
+    -OwnerAction "Refresh and review the user verification pack after public download, clean external consumer, post-publish proof, final audit, and strict close lanes are all ready." `
+    -RequiredBeforeClose @("public download lane ready", "clean external consumer lane ready", "post-publish proof lane ready", "final post-publish audit ready", "strict close dashboard ready") `
+    -Boundary "The post-publish user verification pack is owner action aggregation only; it is not runtime proof, not post-publish proof, not publish approval, not release close approval, not package push, and cannot close release issue." `
+    -ValidatorPath "eng\Test-PostPublishUserVerificationPack.ps1 -Strict" `
+    -RequiredEvidence "All post-publish user verification lanes ready with real public download and clean external consumer evidence."
   New-ClosureLane `
     -Id "release-issue-close-owner-decision" `
     -Title "Release issue close owner decision input" `
@@ -328,6 +354,15 @@ $publicDownloadSourceOwnerPackageSha256 = [string](Get-PropertyOrDefault -Object
 $publicDownloadGitHubReleaseUrl = [string](Get-PropertyOrDefault -Object $publicDownload -Name "githubReleaseUrl" -DefaultValue "")
 $publicDownloadGitHubReleaseAssetUrl = [string](Get-PropertyOrDefault -Object $publicDownload -Name "githubReleaseAssetUrl" -DefaultValue "")
 $publicDownloadGitHubReleaseAssetSha256 = [string](Get-PropertyOrDefault -Object $publicDownload -Name "githubReleaseAssetSha256" -DefaultValue "")
+$publicPackageDownloadOwnerExecutionState = [string](Get-PropertyOrDefault -Object $publicPackageDownloadOwnerExecutionPack -Name "validationState" -DefaultValue "missing-public-package-download-proof-owner-execution-pack-validation")
+$publicPackageDownloadOwnerExecutionBlocked = $publicPackageDownloadOwnerExecutionState -eq "blocked-public-package-download-proof-owner-execution-required"
+$publicPackageDownloadOwnerExecutionSafe =
+  $null -eq $publicPackageDownloadOwnerExecutionPack -or (
+  -not [bool](Get-PropertyOrDefault -Object $publicPackageDownloadOwnerExecutionPack -Name "performsPublish" -DefaultValue $true) -and
+  -not [bool](Get-PropertyOrDefault -Object $publicPackageDownloadOwnerExecutionPack -Name "usesPublishToken" -DefaultValue $true) -and
+  -not [bool](Get-PropertyOrDefault -Object $publicPackageDownloadOwnerExecutionPack -Name "canPublishPublicly" -DefaultValue $true) -and
+  -not [bool](Get-PropertyOrDefault -Object $publicPackageDownloadOwnerExecutionPack -Name "canCloseReleaseIssue" -DefaultValue $true) -and
+  -not [bool](Get-PropertyOrDefault -Object $publicPackageDownloadOwnerExecutionPack -Name "isPostPublishProof" -DefaultValue $true))
 $postPublishProofReady = [bool](Get-PropertyOrDefault -Object $postPublishProof -Name "proofCandidateReady" -DefaultValue $false)
 $postPublishSourceProofLinkageReady = [bool](Get-PropertyOrDefault -Object $postPublishProof -Name "sourceProofLinkageReady" -DefaultValue $false)
 $postPublishSourceGitHubActionsReady = [bool](Get-PropertyOrDefault -Object $postPublishProof -Name "sourceGitHubActionsRunEvidenceReady" -DefaultValue $false)
@@ -339,6 +374,15 @@ $postPublishPublicPackageSha256 = [string](Get-PropertyOrDefault -Object $postPu
 $postPublishSourceOwnerPackageUrl = [string](Get-PropertyOrDefault -Object $postPublishProof -Name "sourceOwnerPublicPackageUrl" -DefaultValue "")
 $postPublishSourceOwnerPackageVersion = [string](Get-PropertyOrDefault -Object $postPublishProof -Name "sourceOwnerPublicPackageVersion" -DefaultValue "")
 $postPublishSourceOwnerPackageSha256 = [string](Get-PropertyOrDefault -Object $postPublishProof -Name "sourceOwnerPublicPackageSha256" -DefaultValue "")
+$postPublishUserVerificationState = [string](Get-PropertyOrDefault -Object $postPublishUserVerificationPack -Name "validationState" -DefaultValue "missing-post-publish-user-verification-pack-validation")
+$postPublishUserVerificationBlocked = $postPublishUserVerificationState -eq "blocked-post-publish-user-verification-required"
+$postPublishUserVerificationSafe =
+  $null -eq $postPublishUserVerificationPack -or (
+  -not [bool](Get-PropertyOrDefault -Object $postPublishUserVerificationPack -Name "performsPublish" -DefaultValue $true) -and
+  -not [bool](Get-PropertyOrDefault -Object $postPublishUserVerificationPack -Name "usesPublishToken" -DefaultValue $true) -and
+  -not [bool](Get-PropertyOrDefault -Object $postPublishUserVerificationPack -Name "canPublishPublicly" -DefaultValue $true) -and
+  -not [bool](Get-PropertyOrDefault -Object $postPublishUserVerificationPack -Name "canCloseReleaseIssue" -DefaultValue $true) -and
+  -not [bool](Get-PropertyOrDefault -Object $postPublishUserVerificationPack -Name "isPostPublishProof" -DefaultValue $true))
 $publicDownloadForbiddenFindings = Get-StringArrayProperty -Object $publicDownload -Name "forbiddenSubstituteFindings"
 $ownerForbiddenFindings = Get-StringArrayProperty -Object $ownerPublicPublishResult -Name "forbiddenSubstituteFindings"
 $githubActionsForbiddenFindings = Get-StringArrayProperty -Object $githubActionsRunEvidence -Name "forbiddenSubstituteFindings"
@@ -359,6 +403,9 @@ $crossLaneConsistencyChecks = @(
   New-ClosureConsistencyCheck -Id "owner-public-publish-links-github-actions" -Passed ($ownerPublicPublishSourceGitHubActionsReady -and $githubActionsReady) -Severity "action-required" -Detail "Owner public publish result must link to ready GitHub Actions run evidence."
   New-ClosureConsistencyCheck -Id "public-download-proof-ready" -Passed $publicDownloadReady -Severity "action-required" -Detail "Public package download proof candidate must be ready."
   New-ClosureConsistencyCheck -Id "public-download-links-source-proofs" -Passed ($publicDownloadSourceGitHubActionsReady -and $publicDownloadSourceOwnerReady) -Severity "action-required" -Detail "Public download proof must link to ready GitHub Actions and Owner public publish result."
+  New-ClosureConsistencyCheck -Id "public-package-download-owner-execution-pack-present" -Passed ($null -ne $publicPackageDownloadOwnerExecutionPack) -Severity "action-required" -Detail "Owner public package download execution pack validation must be present before final closure review."
+  New-ClosureConsistencyCheck -Id "public-package-download-owner-execution-pack-blocked" -Passed $publicPackageDownloadOwnerExecutionBlocked -Severity "action-required" -Detail "Owner execution pack must remain blocked until real owner public package download evidence is supplied; it is guidance only and not proof."
+  New-ClosureConsistencyCheck -Id "public-package-download-owner-execution-pack-safe" -Passed $publicPackageDownloadOwnerExecutionSafe -Severity "blocker" -Detail "Owner execution pack must keep publish/token/proof/close flags false."
   New-ClosureConsistencyCheck -Id "owner-and-public-download-package-url-match" -Passed (-not [string]::IsNullOrWhiteSpace($ownerPublicPackageUrl) -and $ownerPublicPackageUrl.Equals($publicDownloadSourceOwnerPackageUrl, [StringComparison]::OrdinalIgnoreCase) -and $ownerPublicPackageUrl.Equals($publicDownloadManagedPackageUrl, [StringComparison]::OrdinalIgnoreCase)) -Severity "action-required" -Detail "Owner public package URL must match the public download candidate managed package page URL."
   New-ClosureConsistencyCheck -Id "owner-and-public-download-version-match" -Passed (-not [string]::IsNullOrWhiteSpace($ownerPublicPackageVersion) -and $ownerPublicPackageVersion.Equals($publicDownloadSourceOwnerPackageVersion, [StringComparison]::OrdinalIgnoreCase)) -Severity "action-required" -Detail "Owner public package version must match the public download candidate source version."
   New-ClosureConsistencyCheck -Id "owner-and-public-download-sha-match" -Passed ((Test-Sha256Format -Value $ownerPublicPackageSha256) -and $ownerPublicPackageSha256.Equals($publicDownloadSourceOwnerPackageSha256, [StringComparison]::OrdinalIgnoreCase)) -Severity "action-required" -Detail "Owner public package SHA256 must match the public download candidate source SHA256."
@@ -367,6 +414,9 @@ $crossLaneConsistencyChecks = @(
   New-ClosureConsistencyCheck -Id "owner-reviewer-and-timestamp-present" -Passed (-not [string]::IsNullOrWhiteSpace($ownerReviewer) -and -not [string]::IsNullOrWhiteSpace($ownerReviewTimestampUtc)) -Severity "action-required" -Detail "Owner reviewer and review timestamp must be present."
   New-ClosureConsistencyCheck -Id "post-publish-proof-candidate-ready" -Passed $postPublishProofReady -Severity "action-required" -Detail "Post-publish clean consumer proof result must have proofCandidateReady=true."
   New-ClosureConsistencyCheck -Id "post-publish-links-source-proofs" -Passed ($postPublishSourceProofLinkageReady -and $postPublishSourceGitHubActionsReady -and $postPublishSourceOwnerReady -and $postPublishSourcePublicDownloadReady) -Severity "action-required" -Detail "Post-publish proof must link to ready GitHub Actions, Owner public publish, and public package download proofs."
+  New-ClosureConsistencyCheck -Id "post-publish-user-verification-pack-present" -Passed ($null -ne $postPublishUserVerificationPack) -Severity "action-required" -Detail "Post-publish user verification pack validation must be present before final closure review."
+  New-ClosureConsistencyCheck -Id "post-publish-user-verification-pack-blocked" -Passed $postPublishUserVerificationBlocked -Severity "action-required" -Detail "Post-publish user verification pack must remain blocked until real public download, clean consumer, post-publish proof, and final audit lanes are ready."
+  New-ClosureConsistencyCheck -Id "post-publish-user-verification-pack-safe" -Passed $postPublishUserVerificationSafe -Severity "blocker" -Detail "Post-publish user verification pack must keep publish/token/proof/close flags false."
   New-ClosureConsistencyCheck -Id "post-publish-owner-package-url-match" -Passed (-not [string]::IsNullOrWhiteSpace($postPublishPublicPackageUrl) -and $postPublishPublicPackageUrl.Equals($ownerPublicPackageUrl, [StringComparison]::OrdinalIgnoreCase) -and $postPublishPublicPackageUrl.Equals($postPublishSourceOwnerPackageUrl, [StringComparison]::OrdinalIgnoreCase)) -Severity "action-required" -Detail "Post-publish public package URL must match Owner public publish URL."
   New-ClosureConsistencyCheck -Id "post-publish-owner-package-version-match" -Passed (-not [string]::IsNullOrWhiteSpace($postPublishPublicPackageVersion) -and $postPublishPublicPackageVersion.Equals($ownerPublicPackageVersion, [StringComparison]::OrdinalIgnoreCase) -and $postPublishPublicPackageVersion.Equals($postPublishSourceOwnerPackageVersion, [StringComparison]::OrdinalIgnoreCase)) -Severity "action-required" -Detail "Post-publish package version must match Owner public publish version."
   New-ClosureConsistencyCheck -Id "post-publish-owner-package-sha-match" -Passed ((Test-Sha256Format -Value $postPublishPublicPackageSha256) -and $postPublishPublicPackageSha256.Equals($ownerPublicPackageSha256, [StringComparison]::OrdinalIgnoreCase) -and $postPublishPublicPackageSha256.Equals($postPublishSourceOwnerPackageSha256, [StringComparison]::OrdinalIgnoreCase)) -Severity "action-required" -Detail "Post-publish downloaded managed package SHA256 must match Owner/public download source SHA256."
@@ -464,6 +514,9 @@ $record = [pscustomobject]@{
     publicDownloadGitHubReleaseUrl = $publicDownloadGitHubReleaseUrl
     publicDownloadGitHubReleaseAssetUrl = $publicDownloadGitHubReleaseAssetUrl
     publicDownloadGitHubReleaseAssetSha256 = $publicDownloadGitHubReleaseAssetSha256
+    publicPackageDownloadOwnerExecutionPackState = $publicPackageDownloadOwnerExecutionState
+    publicPackageDownloadOwnerExecutionPackBlocked = $publicPackageDownloadOwnerExecutionBlocked
+    publicPackageDownloadOwnerExecutionPackSafe = $publicPackageDownloadOwnerExecutionSafe
     postPublishProofReady = $postPublishProofReady
     postPublishSourceProofLinkageReady = $postPublishSourceProofLinkageReady
     postPublishSourceGitHubActionsReady = $postPublishSourceGitHubActionsReady
@@ -475,10 +528,13 @@ $record = [pscustomobject]@{
     postPublishSourceOwnerPackageUrl = $postPublishSourceOwnerPackageUrl
     postPublishSourceOwnerPackageVersion = $postPublishSourceOwnerPackageVersion
     postPublishSourceOwnerPackageSha256 = $postPublishSourceOwnerPackageSha256
+    postPublishUserVerificationPackState = $postPublishUserVerificationState
+    postPublishUserVerificationPackBlocked = $postPublishUserVerificationBlocked
+    postPublishUserVerificationPackSafe = $postPublishUserVerificationSafe
   }
   sourceArtifacts = @($lanes | ForEach-Object { $_.artifact })
   nextOwnerActions = @($blockedLanes | ForEach-Object { [pscustomobject]@{ laneId = $_.laneId; state = $_.state; ownerAction = $_.ownerAction; requiredBeforeClose = $_.requiredBeforeClose } })
-  safetyBoundary = "Final public release closure bridge only joins owner authorization, owner publish execution result, public package download proof, clean external consumer smoke, post-publish proof, release issue close owner decision, and strict close dashboard. It does not publish packages, use tokens, claim runtime proof, claim post-publish proof, or close the release issue."
+  safetyBoundary = "Final public release closure bridge only joins owner authorization, owner publish execution result, public package download proof, public package download owner guidance, clean external consumer smoke, post-publish proof, post-publish user verification, release issue close owner decision, and strict close dashboard. It does not publish packages, use tokens, claim runtime proof, claim post-publish proof, or close the release issue."
 }
 
 $jsonPath = Join-Path $OutputRoot "final-public-release-closure-bridge.json"

@@ -19,6 +19,14 @@ public sealed class FinalPublicReleaseClosureBridgeTests
     public void FinalPublicReleaseClosureBridgeKeepsRealOwnerProofBlockedAndSideEffectFree()
     {
         WriteBlockedSourceProofValidations();
+        RunPowerShell("Test-PublicDocsAndPackageMetadataGate.ps1", "-Strict");
+        RunPowerShell("Export-ReleaseDocsAndNuGetMetadataAudit.ps1");
+        RunPowerShell("Test-ReleaseDocsAndNuGetMetadataAudit.ps1", "-Strict");
+        RunPowerShell("Export-PublicPackageDownloadProofInputTemplate.ps1");
+        RunPowerShell("Export-PostPublishUserVerificationPack.ps1");
+        RunPowerShell("Test-PostPublishUserVerificationPack.ps1", "-Strict");
+        RunPowerShell("Export-PublicPackageDownloadProofOwnerExecutionPack.ps1");
+        RunPowerShell("Test-PublicPackageDownloadProofOwnerExecutionPack.ps1", "-Strict");
         RunPowerShell("Export-PublicPackageDownloadProofInputTemplate.ps1");
         RunPowerShell("Test-PublicPackageDownloadProofInput.ps1", "-Strict");
         RunPowerShell("Import-PublicPackageDownloadProofCandidate.ps1");
@@ -44,7 +52,7 @@ public sealed class FinalPublicReleaseClosureBridgeTests
         JsonElement bridge = bridgeDocument.RootElement;
         Assert.Equal("final-public-release-closure-bridge", bridge.GetProperty("recordKind").GetString());
         Assert.Equal("blocked-final-public-release-closure-real-owner-proof-required", bridge.GetProperty("bridgeState").GetString());
-        Assert.Equal(10, bridge.GetProperty("laneCount").GetInt32());
+        Assert.Equal(12, bridge.GetProperty("laneCount").GetInt32());
         Assert.True(bridge.GetProperty("blockedLaneCount").GetInt32() > 0);
         AssertFalseProofPublishCloseFlags(bridge);
         Assert.Equal(0, bridge.GetProperty("failedConsistencyBlockerCount").GetInt32());
@@ -61,8 +69,10 @@ public sealed class FinalPublicReleaseClosureBridgeTests
         Assert.Contains("owner-publish-authorization", laneIds);
         Assert.Contains("owner-publish-execution-result", laneIds);
         Assert.Contains("public-package-download-proof", laneIds);
+        Assert.Contains("public-package-download-owner-execution-pack", laneIds);
         Assert.Contains("clean-external-consumer-smoke", laneIds);
         Assert.Contains("post-publish-proof", laneIds);
+        Assert.Contains("post-publish-user-verification-pack", laneIds);
         Assert.Contains("release-issue-close-owner-decision", laneIds);
         Assert.Contains("strict-close-ready-convergence-dashboard", laneIds);
 
@@ -72,6 +82,9 @@ public sealed class FinalPublicReleaseClosureBridgeTests
             Assert.False(lane.GetProperty("usesPublishToken").GetBoolean());
             Assert.False(lane.GetProperty("canPublishPublicly").GetBoolean());
             Assert.False(lane.GetProperty("canCloseReleaseIssue").GetBoolean());
+            Assert.False(lane.GetProperty("isRuntimeExecutionProof").GetBoolean());
+            Assert.False(lane.GetProperty("isPackageConsumerRuntimeProof").GetBoolean());
+            Assert.False(lane.GetProperty("isPostPublishProof").GetBoolean());
             Assert.False(lane.GetProperty("isReleaseCloseProof").GetBoolean());
             Assert.False(string.IsNullOrWhiteSpace(lane.GetProperty("ownerAction").GetString()));
             AssertHasNonProofBoundary(lane.GetProperty("boundary").GetString());
@@ -92,8 +105,14 @@ public sealed class FinalPublicReleaseClosureBridgeTests
         Assert.Contains("pre-release-readiness-ready-for-close", checkIds);
         Assert.Contains("owner-public-publish-result-ready", checkIds);
         Assert.Contains("public-download-proof-ready", checkIds);
+        Assert.Contains("public-package-download-owner-execution-pack-present", checkIds);
+        Assert.Contains("public-package-download-owner-execution-pack-blocked", checkIds);
+        Assert.Contains("public-package-download-owner-execution-pack-safe", checkIds);
         Assert.Contains("post-publish-proof-candidate-ready", checkIds);
         Assert.Contains("post-publish-links-source-proofs", checkIds);
+        Assert.Contains("post-publish-user-verification-pack-present", checkIds);
+        Assert.Contains("post-publish-user-verification-pack-blocked", checkIds);
+        Assert.Contains("post-publish-user-verification-pack-safe", checkIds);
         Assert.Contains("forbidden-substitutes-absent", checkIds);
 
         JsonElement proofSummary = bridge.GetProperty("closureProofSourceSummary");
@@ -104,8 +123,14 @@ public sealed class FinalPublicReleaseClosureBridgeTests
         Assert.False(proofSummary.GetProperty("githubActionsRunEvidenceReady").GetBoolean());
         Assert.False(proofSummary.GetProperty("ownerPublicPublishResultReady").GetBoolean());
         Assert.False(proofSummary.GetProperty("publicDownloadProofReady").GetBoolean());
+        Assert.Equal("blocked-public-package-download-proof-owner-execution-required", proofSummary.GetProperty("publicPackageDownloadOwnerExecutionPackState").GetString());
+        Assert.True(proofSummary.GetProperty("publicPackageDownloadOwnerExecutionPackBlocked").GetBoolean());
+        Assert.True(proofSummary.GetProperty("publicPackageDownloadOwnerExecutionPackSafe").GetBoolean());
         Assert.False(proofSummary.GetProperty("postPublishProofReady").GetBoolean());
         Assert.False(proofSummary.GetProperty("postPublishSourceProofLinkageReady").GetBoolean());
+        Assert.Equal("blocked-post-publish-user-verification-required", proofSummary.GetProperty("postPublishUserVerificationPackState").GetString());
+        Assert.True(proofSummary.GetProperty("postPublishUserVerificationPackBlocked").GetBoolean());
+        Assert.True(proofSummary.GetProperty("postPublishUserVerificationPackSafe").GetBoolean());
 
         string[] sourceArtifacts = bridge.GetProperty("sourceArtifacts").EnumerateArray()
             .Select(static item => item.GetString()!)
@@ -116,8 +141,10 @@ public sealed class FinalPublicReleaseClosureBridgeTests
         Assert.Contains("artifacts/final-release/owner-publish-authorization-input-validation.json", sourceArtifacts);
         Assert.Contains("artifacts/final-release/owner-publish-execution-result-input-validation.json", sourceArtifacts);
         Assert.Contains("artifacts/final-release/public-package-download-proof-candidate-validation.json", sourceArtifacts);
+        Assert.Contains("artifacts/final-release/public-package-download-proof-owner-execution-pack-validation.json", sourceArtifacts);
         Assert.Contains("artifacts/final-release/clean-external-consumer-smoke-input-validation.json", sourceArtifacts);
         Assert.Contains("artifacts/final-release/post-publish-clean-consumer-proof-result-validation.json", sourceArtifacts);
+        Assert.Contains("artifacts/final-release/post-publish-user-verification-pack-validation.json", sourceArtifacts);
         Assert.Contains("artifacts/final-release/release-issue-close-owner-decision-input-validation.json", sourceArtifacts);
         Assert.Contains("artifacts/final-release/strict-close-ready-convergence-dashboard-validation.json", sourceArtifacts);
 
@@ -127,11 +154,41 @@ public sealed class FinalPublicReleaseClosureBridgeTests
         Assert.Equal("blocked-final-public-release-closure-real-owner-proof-required", validation.GetProperty("validationState").GetString());
         Assert.Equal(0, validation.GetProperty("failedBlockerCount").GetInt32());
         Assert.True(validation.GetProperty("failedActionRequiredCount").GetInt32() > 0);
-        Assert.Equal(10, validation.GetProperty("laneCount").GetInt32());
+        Assert.Equal(12, validation.GetProperty("laneCount").GetInt32());
         Assert.Equal(0, validation.GetProperty("failedConsistencyBlockerCount").GetInt32());
         Assert.True(validation.GetProperty("failedConsistencyActionRequiredCount").GetInt32() > 0);
         Assert.Equal(0, validation.GetProperty("forbiddenSubstituteFindingCount").GetInt32());
         AssertFalseProofPublishCloseFlags(validation);
+    }
+
+    [Fact]
+    public void FinalPublicReleaseClosureBridgeValidatorRejectsGuidancePacksMarkedAsProof()
+    {
+        RunPowerShell("Export-FinalPublicReleaseClosureBridge.ps1");
+
+        string sourcePath = Path.Combine(RepositoryPaths.Root, "artifacts", "final-release", "final-public-release-closure-bridge.json");
+        JsonObject bridge = JsonNode.Parse(File.ReadAllText(sourcePath))!.AsObject();
+        JsonArray lanes = bridge["closureLanes"]!.AsArray();
+        foreach (string laneId in new[] { "public-package-download-owner-execution-pack", "post-publish-user-verification-pack" })
+        {
+            JsonObject lane = lanes.Single(lane => lane!["laneId"]!.GetValue<string>() == laneId)!.AsObject();
+            lane["isRuntimeExecutionProof"] = true;
+            lane["isPostPublishProof"] = true;
+            lane["boundary"] = "misuse fixture tries to promote guidance into proof";
+        }
+
+        string misusePath = Path.Combine(RepositoryPaths.Root, "artifacts", "final-release", "final-public-release-closure-bridge.guidance-proof-misuse.json");
+        File.WriteAllText(misusePath, bridge.ToJsonString(IndentedJsonOptions));
+
+        RunPowerShell("Test-FinalPublicReleaseClosureBridge.ps1", "-InputPath", "artifacts/final-release/final-public-release-closure-bridge.guidance-proof-misuse.json");
+
+        using JsonDocument validationDocument = ReadFinalReleaseJson("final-public-release-closure-bridge-validation.json");
+        JsonElement validation = validationDocument.RootElement;
+        Assert.Equal("invalid-final-public-release-closure-bridge", validation.GetProperty("validationState").GetString());
+        Assert.Contains(validation.GetProperty("validationItems").EnumerateArray(), static item =>
+            item.GetProperty("id").GetString() == "lanes-safe" &&
+            item.GetProperty("passed").GetBoolean() == false &&
+            item.GetProperty("severity").GetString() == "blocker");
     }
 
     [Fact]
@@ -191,8 +248,10 @@ public sealed class FinalPublicReleaseClosureBridgeTests
             "owner-publish-authorization",
             "owner-publish-execution-result",
             "public-package-download-proof",
+            "public-package-download-owner-execution-pack",
             "clean-external-consumer-smoke",
             "post-publish-proof",
+            "post-publish-user-verification-pack",
             "release-issue-close-owner-decision",
             "strict-close-ready-convergence-dashboard",
         ];
@@ -205,8 +264,10 @@ public sealed class FinalPublicReleaseClosureBridgeTests
             "artifacts/final-release/owner-publish-authorization-input-validation.json",
             "artifacts/final-release/owner-publish-execution-result-input-validation.json",
             "artifacts/final-release/public-package-download-proof-candidate-validation.json",
+            "artifacts/final-release/public-package-download-proof-owner-execution-pack-validation.json",
             "artifacts/final-release/clean-external-consumer-smoke-input-validation.json",
             "artifacts/final-release/post-publish-clean-consumer-proof-result-validation.json",
+            "artifacts/final-release/post-publish-user-verification-pack-validation.json",
             "artifacts/final-release/release-issue-close-owner-decision-input-validation.json",
             "artifacts/final-release/strict-close-ready-convergence-dashboard-validation.json",
         ];
@@ -224,6 +285,9 @@ public sealed class FinalPublicReleaseClosureBridgeTests
                 ["usesPublishToken"] = false,
                 ["canPublishPublicly"] = false,
                 ["canCloseReleaseIssue"] = false,
+                ["isRuntimeExecutionProof"] = false,
+                ["isPackageConsumerRuntimeProof"] = false,
+                ["isPostPublishProof"] = false,
                 ["isReleaseCloseProof"] = false,
                 ["ownerAction"] = "Ready-shaped fixture action only.",
                 ["boundary"] = "Fixture cannot publish, cannot use tokens, cannot promote proof, and cannot close a release issue.",
@@ -284,8 +348,14 @@ public sealed class FinalPublicReleaseClosureBridgeTests
                 ["preReleasePromoteFlagsSafe"] = true,
                 ["ownerPublicPublishResultReady"] = true,
                 ["publicDownloadProofReady"] = true,
+                ["publicPackageDownloadOwnerExecutionPackState"] = "public-package-download-proof-owner-execution-ready-for-owner-review",
+                ["publicPackageDownloadOwnerExecutionPackBlocked"] = false,
+                ["publicPackageDownloadOwnerExecutionPackSafe"] = true,
                 ["postPublishProofReady"] = true,
                 ["postPublishSourceProofLinkageReady"] = true,
+                ["postPublishUserVerificationPackState"] = "post-publish-user-verification-ready-for-owner-close-review",
+                ["postPublishUserVerificationPackBlocked"] = false,
+                ["postPublishUserVerificationPackSafe"] = true,
             },
             ["sourceArtifacts"] = artifactNodes,
             ["nextOwnerActions"] = new JsonArray(),
@@ -310,6 +380,9 @@ public sealed class FinalPublicReleaseClosureBridgeTests
             "owner-public-publish-links-github-actions",
             "public-download-proof-ready",
             "public-download-links-source-proofs",
+            "public-package-download-owner-execution-pack-present",
+            "public-package-download-owner-execution-pack-blocked",
+            "public-package-download-owner-execution-pack-safe",
             "owner-and-public-download-package-url-match",
             "owner-and-public-download-version-match",
             "owner-and-public-download-sha-match",
@@ -318,6 +391,9 @@ public sealed class FinalPublicReleaseClosureBridgeTests
             "owner-reviewer-and-timestamp-present",
             "post-publish-proof-candidate-ready",
             "post-publish-links-source-proofs",
+            "post-publish-user-verification-pack-present",
+            "post-publish-user-verification-pack-blocked",
+            "post-publish-user-verification-pack-safe",
             "post-publish-owner-package-url-match",
             "post-publish-owner-package-version-match",
             "post-publish-owner-package-sha-match",
@@ -381,6 +457,7 @@ public sealed class FinalPublicReleaseClosureBridgeTests
         Assert.False(element.GetProperty("canPublishPublicly").GetBoolean());
         Assert.False(element.GetProperty("canCloseReleaseIssue").GetBoolean());
         Assert.False(element.GetProperty("isRuntimeExecutionProof").GetBoolean());
+        Assert.False(element.GetProperty("isPostPublishProof").GetBoolean());
         Assert.False(element.GetProperty("isReleaseCloseProof").GetBoolean());
     }
 
