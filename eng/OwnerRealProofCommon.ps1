@@ -46,17 +46,86 @@ function ConvertTo-FlatStringLines {
     }
   }
 }
+
+function Get-OwnerUtf8Encoding {
+  if ($null -eq $script:utf8) {
+    $script:utf8 = [System.Text.UTF8Encoding]::new($false)
+  }
+
+  return $script:utf8
+}
+
+function Write-Utf8FileAtomic {
+  param([string]$LiteralPath, [string]$Content)
+
+  $encoding = Get-OwnerUtf8Encoding
+  $directory = Split-Path -Parent $LiteralPath
+  if ([string]::IsNullOrWhiteSpace($directory)) {
+    $directory = "."
+  }
+  New-Item -ItemType Directory -Path $directory -Force | Out-Null
+
+  $fileName = Split-Path -Leaf $LiteralPath
+  $tempPath = Join-Path $directory (".{0}.{1}.tmp" -f $fileName, [System.Guid]::NewGuid().ToString("N"))
+  $backupPath = Join-Path $directory (".{0}.{1}.bak" -f $fileName, [System.Guid]::NewGuid().ToString("N"))
+  try {
+    [System.IO.File]::WriteAllText($tempPath, $Content, $encoding)
+    for ($attempt = 1; $attempt -le 10; $attempt++) {
+      try {
+        if (Test-Path -LiteralPath $LiteralPath -PathType Leaf) {
+          [System.IO.File]::Replace($tempPath, $LiteralPath, $backupPath)
+          Remove-Item -LiteralPath $backupPath -Force -ErrorAction SilentlyContinue
+        }
+        else {
+          [System.IO.File]::Move($tempPath, $LiteralPath)
+        }
+
+        return
+      }
+      catch {
+        if ($attempt -eq 10) { throw }
+        Start-Sleep -Milliseconds ([Math]::Min(250, 25 * $attempt))
+      }
+    }
+  }
+  finally {
+    if (Test-Path -LiteralPath $tempPath -PathType Leaf) {
+      Remove-Item -LiteralPath $tempPath -Force -ErrorAction SilentlyContinue
+    }
+    if (Test-Path -LiteralPath $backupPath -PathType Leaf) {
+      Remove-Item -LiteralPath $backupPath -Force -ErrorAction SilentlyContinue
+    }
+  }
+}
+
 function Write-Utf8File {
   param([string]$LiteralPath, [AllowNull()][object]$InputObject)
   $lines = @(ConvertTo-FlatStringLines -Value $InputObject)
-  [System.IO.File]::WriteAllText($LiteralPath, (($lines -join [Environment]::NewLine) + [Environment]::NewLine), $script:utf8)
+  Write-Utf8FileAtomic -LiteralPath $LiteralPath -Content (($lines -join [Environment]::NewLine) + [Environment]::NewLine)
 }
 
 function Read-JsonOrNull {
   param([string]$RepositoryRoot, [string]$RelativePath)
   $path = if ([System.IO.Path]::IsPathRooted($RelativePath)) { $RelativePath } else { Join-Path $RepositoryRoot $RelativePath }
-  if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { return $null }
-  return Get-Content -LiteralPath $path -Raw -Encoding utf8 | ConvertFrom-Json
+  $lastError = $null
+  for ($attempt = 1; $attempt -le 8; $attempt++) {
+    if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { return $null }
+    try {
+      $json = [System.IO.File]::ReadAllText($path, (Get-OwnerUtf8Encoding))
+      if ([string]::IsNullOrWhiteSpace($json)) {
+        throw "JSON file is empty: $path"
+      }
+
+      return $json | ConvertFrom-Json
+    }
+    catch {
+      $lastError = $_
+      if ($attempt -eq 8) { throw }
+      Start-Sleep -Milliseconds ([Math]::Min(250, 25 * $attempt))
+    }
+  }
+
+  throw $lastError
 }
 
 function Get-PropertyOrDefault {
