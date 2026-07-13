@@ -117,9 +117,13 @@ $items = New-Object System.Collections.Generic.List[object]
 $bridgePath = [string](Get-PropertyOrDefault -Object $record -Name "finalPublicReleaseClosureBridgePath" -DefaultValue "artifacts/final-release/final-public-release-closure-bridge.json")
 $bridgeValidationPath = [string](Get-PropertyOrDefault -Object $record -Name "finalPublicReleaseClosureBridgeValidationPath" -DefaultValue "artifacts/final-release/final-public-release-closure-bridge-validation.json")
 $postPublishProofResultValidationPath = [string](Get-PropertyOrDefault -Object $record -Name "postPublishProofResultValidationPath" -DefaultValue "artifacts/final-release/post-publish-clean-consumer-proof-result-validation.json")
+$publicPackageDownloadProofOwnerExecutionPackValidationPath = [string](Get-PropertyOrDefault -Object $record -Name "publicPackageDownloadProofOwnerExecutionPackValidationPath" -DefaultValue "artifacts/final-release/public-package-download-proof-owner-execution-pack-validation.json")
+$postPublishUserVerificationPackValidationPath = [string](Get-PropertyOrDefault -Object $record -Name "postPublishUserVerificationPackValidationPath" -DefaultValue "artifacts/final-release/post-publish-user-verification-pack-validation.json")
 $bridge = Read-JsonOrNull -Path $bridgePath
 $bridgeValidation = Read-JsonOrNull -Path $bridgeValidationPath
 $postPublishProofResultValidation = Read-JsonOrNull -Path $postPublishProofResultValidationPath
+$publicPackageDownloadProofOwnerExecutionPackValidation = Read-JsonOrNull -Path $publicPackageDownloadProofOwnerExecutionPackValidationPath
+$postPublishUserVerificationPackValidation = Read-JsonOrNull -Path $postPublishUserVerificationPackValidationPath
 $bridgeSummary = Get-PropertyOrDefault -Object $bridge -Name "closureProofSourceSummary" -DefaultValue ([pscustomobject]@{})
 
 $state = [string](Get-PropertyOrDefault -Object $record -Name "ownerDecisionInputState" -DefaultValue "")
@@ -144,6 +148,8 @@ foreach ($pair in @(
   @("release-evidence-bundle-hash", "releaseEvidenceBundlePath", "releaseEvidenceBundleSha256", "releaseEvidenceBundleSha256 must match releaseEvidenceBundlePath.", "action-required"),
   @("post-publish-validation-hash", "postPublishValidationPath", "postPublishValidationSha256", "postPublishValidationSha256 must match postPublishValidationPath.", "action-required"),
   @("post-publish-proof-result-validation-hash", "postPublishProofResultValidationPath", "postPublishProofResultValidationSha256", "postPublishProofResultValidationSha256 must match postPublishProofResultValidationPath.", "blocker"),
+  @("public-package-download-proof-owner-execution-pack-validation-hash", "publicPackageDownloadProofOwnerExecutionPackValidationPath", "publicPackageDownloadProofOwnerExecutionPackValidationSha256", "publicPackageDownloadProofOwnerExecutionPackValidationSha256 must match publicPackageDownloadProofOwnerExecutionPackValidationPath.", "blocker"),
+  @("post-publish-user-verification-pack-validation-hash", "postPublishUserVerificationPackValidationPath", "postPublishUserVerificationPackValidationSha256", "postPublishUserVerificationPackValidationSha256 must match postPublishUserVerificationPackValidationPath.", "blocker"),
   @("final-public-release-closure-bridge-hash", "finalPublicReleaseClosureBridgePath", "finalPublicReleaseClosureBridgeSha256", "finalPublicReleaseClosureBridgeSha256 must match finalPublicReleaseClosureBridgePath.", "blocker"),
   @("final-public-release-closure-bridge-validation-hash", "finalPublicReleaseClosureBridgeValidationPath", "finalPublicReleaseClosureBridgeValidationSha256", "finalPublicReleaseClosureBridgeValidationSha256 must match finalPublicReleaseClosureBridgeValidationPath.", "blocker")
 )) {
@@ -156,8 +162,14 @@ $bridgeLaneCount = [int](Get-PropertyOrDefault -Object $bridge -Name "laneCount"
 $bridgeBlockedLaneCount = [int](Get-PropertyOrDefault -Object $bridge -Name "blockedLaneCount" -DefaultValue 0)
 $bridgeFailedConsistencyBlockerCount = [int](Get-PropertyOrDefault -Object $bridge -Name "failedConsistencyBlockerCount" -DefaultValue 0)
 $bridgeFailedConsistencyActionRequiredCount = [int](Get-PropertyOrDefault -Object $bridge -Name "failedConsistencyActionRequiredCount" -DefaultValue 0)
+$publicPackageDownloadProofOwnerExecutionPackValidationState = [string](Get-PropertyOrDefault -Object $publicPackageDownloadProofOwnerExecutionPackValidation -Name "validationState" -DefaultValue "missing-public-package-download-proof-owner-execution-pack-validation")
+$postPublishUserVerificationPackValidationState = [string](Get-PropertyOrDefault -Object $postPublishUserVerificationPackValidation -Name "validationState" -DefaultValue "missing-post-publish-user-verification-pack-validation")
 
 Compare-StringSnapshot -Id "final-bridge-validation-state-match" -Expected $bridgeValidationState -Actual (Get-PropertyOrDefault -Object $record -Name "finalPublicReleaseClosureBridgeValidationState" -DefaultValue "") -Detail "Owner decision bridge validation state snapshot must match final-public-release-closure-bridge-validation.json."
+Compare-StringSnapshot -Id "public-package-download-owner-execution-validation-state-match" -Expected $publicPackageDownloadProofOwnerExecutionPackValidationState -Actual (Get-PropertyOrDefault -Object $record -Name "publicPackageDownloadProofOwnerExecutionPackValidationState" -DefaultValue "") -Detail "Owner decision public package download owner execution pack validation state snapshot must match its validation artifact."
+Compare-StringSnapshot -Id "post-publish-user-verification-validation-state-match" -Expected $postPublishUserVerificationPackValidationState -Actual (Get-PropertyOrDefault -Object $record -Name "postPublishUserVerificationPackValidationState" -DefaultValue "") -Detail "Owner decision post-publish user verification pack validation state snapshot must match its validation artifact."
+Compare-StringSnapshot -Id "public-package-download-owner-execution-bridge-state-match" -Expected (Get-PropertyOrDefault -Object $bridgeSummary -Name "publicPackageDownloadOwnerExecutionPackState" -DefaultValue "") -Actual (Get-PropertyOrDefault -Object $record -Name "publicPackageDownloadOwnerExecutionPackState" -DefaultValue "") -Detail "Owner decision public package download owner execution pack state snapshot must match final bridge source summary."
+Compare-StringSnapshot -Id "post-publish-user-verification-bridge-state-match" -Expected (Get-PropertyOrDefault -Object $bridgeSummary -Name "postPublishUserVerificationPackState" -DefaultValue "") -Actual (Get-PropertyOrDefault -Object $record -Name "postPublishUserVerificationPackState" -DefaultValue "") -Detail "Owner decision post-publish user verification pack state snapshot must match final bridge source summary."
 Compare-IntSnapshot -Id "final-bridge-lane-count-match" -Expected $bridgeLaneCount -Actual (Get-PropertyOrDefault -Object $record -Name "closureLaneCount" -DefaultValue -1) -Detail "Owner decision closureLaneCount must match final bridge laneCount."
 Compare-IntSnapshot -Id "final-bridge-blocked-lane-count-match" -Expected $bridgeBlockedLaneCount -Actual (Get-PropertyOrDefault -Object $record -Name "closureBlockedLaneCount" -DefaultValue -1) -Detail "Owner decision closureBlockedLaneCount must match final bridge blockedLaneCount."
 Compare-IntSnapshot -Id "final-bridge-consistency-blocker-count-match" -Expected $bridgeFailedConsistencyBlockerCount -Actual (Get-PropertyOrDefault -Object $record -Name "closureFailedConsistencyBlockerCount" -DefaultValue -1) -Detail "Owner decision closureFailedConsistencyBlockerCount must match final bridge."
@@ -211,6 +223,10 @@ $validation = [pscustomobject]@{
   closureBlockedLaneCount = $bridgeBlockedLaneCount
   closureFailedConsistencyBlockerCount = $bridgeFailedConsistencyBlockerCount
   closureFailedConsistencyActionRequiredCount = $bridgeFailedConsistencyActionRequiredCount
+  publicPackageDownloadProofOwnerExecutionPackValidationState = $publicPackageDownloadProofOwnerExecutionPackValidationState
+  postPublishUserVerificationPackValidationState = $postPublishUserVerificationPackValidationState
+  publicPackageDownloadOwnerExecutionPackState = [string](Get-PropertyOrDefault -Object $record -Name "publicPackageDownloadOwnerExecutionPackState" -DefaultValue "")
+  postPublishUserVerificationPackState = [string](Get-PropertyOrDefault -Object $record -Name "postPublishUserVerificationPackState" -DefaultValue "")
   postPublishProofCandidateReady = $postPublishProofCandidateReady
   postPublishProofSourceLinkageReady = $postPublishSourceLinkageReady
   publicPackageUrl = [string](Get-PropertyOrDefault -Object $record -Name "publicPackageUrl" -DefaultValue "")
@@ -248,6 +264,10 @@ $markdown = @"
 | finalPublicReleaseClosureBridgeValidationState | ``$($validation.finalPublicReleaseClosureBridgeValidationState)`` |
 | closureLaneCount | ``$($validation.closureLaneCount)`` |
 | closureBlockedLaneCount | ``$($validation.closureBlockedLaneCount)`` |
+| publicPackageDownloadProofOwnerExecutionPackValidationState | ``$($validation.publicPackageDownloadProofOwnerExecutionPackValidationState)`` |
+| postPublishUserVerificationPackValidationState | ``$($validation.postPublishUserVerificationPackValidationState)`` |
+| publicPackageDownloadOwnerExecutionPackState | ``$($validation.publicPackageDownloadOwnerExecutionPackState)`` |
+| postPublishUserVerificationPackState | ``$($validation.postPublishUserVerificationPackState)`` |
 | postPublishProofSourceLinkageReady | ``$($validation.postPublishProofSourceLinkageReady)`` |
 | canPublishPublicly | ``$($validation.canPublishPublicly)`` |
 | canCloseReleaseIssue | ``$($validation.canCloseReleaseIssue)`` |

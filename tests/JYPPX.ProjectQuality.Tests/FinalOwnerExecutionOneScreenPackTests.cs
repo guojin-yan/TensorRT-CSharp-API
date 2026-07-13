@@ -30,8 +30,8 @@ public sealed class FinalOwnerExecutionOneScreenPackTests
 
         Assert.True(pack.GetProperty("laneCount").GetInt32() >= 6);
         Assert.True(pack.GetProperty("ownerInputGapCount").GetInt32() >= 14);
-        Assert.Equal(6, pack.GetProperty("finalPublicProofPathCount").GetInt32());
-        Assert.Equal(6, pack.GetProperty("blockedFinalPublicProofPathCount").GetInt32());
+        Assert.Equal(8, pack.GetProperty("finalPublicProofPathCount").GetInt32());
+        Assert.Equal(8, pack.GetProperty("blockedFinalPublicProofPathCount").GetInt32());
         Assert.Equal(pack.GetProperty("laneCount").GetInt32(), pack.GetProperty("blockedLaneCount").GetInt32());
         Assert.Equal(pack.GetProperty("ownerInputGapCount").GetInt32(), pack.GetProperty("blockedOwnerInputGapCount").GetInt32());
 
@@ -67,7 +67,9 @@ public sealed class FinalOwnerExecutionOneScreenPackTests
             "github-actions-run-evidence",
             "owner-public-publish-result",
             "public-package-download-proof",
+            "public-package-download-owner-execution-pack",
             "post-publish-clean-consumer-proof-result",
+            "post-publish-user-verification-pack",
             "final-public-release-closure-bridge",
             "release-issue-close-owner-decision-input"
         });
@@ -110,7 +112,9 @@ public sealed class FinalOwnerExecutionOneScreenPackTests
         Assert.Contains("artifacts/final-release/github-actions-run-evidence-import-validation.json", sources);
         Assert.Contains("artifacts/final-release/owner-public-publish-execution-result-candidate-validation.json", sources);
         Assert.Contains("artifacts/final-release/public-package-download-proof-candidate-validation.json", sources);
+        Assert.Contains("artifacts/final-release/public-package-download-proof-owner-execution-pack-validation.json", sources);
         Assert.Contains("artifacts/final-release/post-publish-clean-consumer-proof-result-validation.json", sources);
+        Assert.Contains("artifacts/final-release/post-publish-user-verification-pack-validation.json", sources);
         Assert.Contains("artifacts/final-release/final-public-release-closure-bridge-validation.json", sources);
         Assert.Contains("artifacts/final-release/release-issue-close-owner-decision-input-validation.json", sources);
 
@@ -123,6 +127,8 @@ public sealed class FinalOwnerExecutionOneScreenPackTests
         Assert.Contains("Test-GitHubActionsRunEvidenceImport.ps1", packText, StringComparison.Ordinal);
         Assert.Contains("Test-OwnerPublicPublishExecutionResultCandidate.ps1", packText, StringComparison.Ordinal);
         Assert.Contains("Test-PublicPackageDownloadProofCandidate.ps1", packText, StringComparison.Ordinal);
+        Assert.Contains("Test-PublicPackageDownloadProofOwnerExecutionPack.ps1", packText, StringComparison.Ordinal);
+        Assert.Contains("Test-PostPublishUserVerificationPack.ps1", packText, StringComparison.Ordinal);
         Assert.Contains("Test-FinalPublicReleaseClosureBridge.ps1", packText, StringComparison.Ordinal);
         Assert.Contains("Test-ReleaseIssueCloseOwnerDecisionInput.ps1", packText, StringComparison.Ordinal);
         Assert.Contains("owner input gap table", packText, StringComparison.OrdinalIgnoreCase);
@@ -133,7 +139,7 @@ public sealed class FinalOwnerExecutionOneScreenPackTests
         Assert.Equal("final-owner-execution-one-screen-pack-validation", validation.GetProperty("recordKind").GetString());
         Assert.Equal("blocked-final-owner-execution-one-screen-real-owner-input-required", validation.GetProperty("validationState").GetString());
         Assert.Equal(0, validation.GetProperty("failedBlockerCount").GetInt32());
-        Assert.Equal(6, validation.GetProperty("finalPublicProofPathCount").GetInt32());
+        Assert.Equal(8, validation.GetProperty("finalPublicProofPathCount").GetInt32());
         Assert.False(validation.GetProperty("performsPublish").GetBoolean());
         Assert.False(validation.GetProperty("canPromoteRuntimeProof").GetBoolean());
         Assert.False(validation.GetProperty("canPublishPublicly").GetBoolean());

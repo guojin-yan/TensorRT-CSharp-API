@@ -41,8 +41,12 @@ public sealed class PublicPublishFinalOwnerExecutionPackTests
         Assert.Equal(0, decision.GetProperty("failedBlockerCount").GetInt32());
         Assert.True(decision.GetProperty("failedActionRequiredCount").GetInt32() > 0);
         Assert.Equal("blocked-final-public-release-closure-real-owner-proof-required", decision.GetProperty("finalPublicReleaseClosureBridgeValidationState").GetString());
-        Assert.Equal(9, decision.GetProperty("closureLaneCount").GetInt32());
+        Assert.Equal(12, decision.GetProperty("closureLaneCount").GetInt32());
         Assert.True(decision.GetProperty("closureBlockedLaneCount").GetInt32() > 0);
+        Assert.Equal("blocked-public-package-download-proof-owner-execution-required", decision.GetProperty("publicPackageDownloadProofOwnerExecutionPackValidationState").GetString());
+        Assert.Equal("blocked-post-publish-user-verification-required", decision.GetProperty("postPublishUserVerificationPackValidationState").GetString());
+        Assert.Equal("blocked-public-package-download-proof-owner-execution-required", decision.GetProperty("publicPackageDownloadOwnerExecutionPackState").GetString());
+        Assert.Equal("blocked-post-publish-user-verification-required", decision.GetProperty("postPublishUserVerificationPackState").GetString());
         Assert.False(decision.GetProperty("postPublishProofCandidateReady").GetBoolean());
         Assert.False(decision.GetProperty("postPublishProofSourceLinkageReady").GetBoolean());
         AssertFalseProofPublishCloseFlags(decision);
@@ -52,6 +56,12 @@ public sealed class PublicPublishFinalOwnerExecutionPackTests
             .Select(static item => item.GetProperty("id").GetString()!)
             .ToArray();
         Assert.Contains("final-public-release-closure-bridge-hash", decisionValidationItemIds);
+        Assert.Contains("public-package-download-proof-owner-execution-pack-validation-hash", decisionValidationItemIds);
+        Assert.Contains("post-publish-user-verification-pack-validation-hash", decisionValidationItemIds);
+        Assert.Contains("public-package-download-owner-execution-validation-state-match", decisionValidationItemIds);
+        Assert.Contains("post-publish-user-verification-validation-state-match", decisionValidationItemIds);
+        Assert.Contains("public-package-download-owner-execution-bridge-state-match", decisionValidationItemIds);
+        Assert.Contains("post-publish-user-verification-bridge-state-match", decisionValidationItemIds);
         Assert.Contains("final-bridge-lane-count-match", decisionValidationItemIds);
         Assert.Contains("final-bridge-ready-before-close", decisionValidationItemIds);
         Assert.Contains("post-publish-source-proof-linkage-ready", decisionValidationItemIds);
@@ -196,6 +206,10 @@ public sealed class PublicPublishFinalOwnerExecutionPackTests
         RunPowerShell("Test-PublicPublishFinalOwnerExecutionPack.ps1", "-Strict");
         RunPowerShell("Export-PublicPublishCommandCrossCheck.ps1");
         RunPowerShell("Test-PublicPublishCommandCrossCheck.ps1", "-Strict");
+        RunPowerShell("Export-PostPublishUserVerificationPack.ps1");
+        RunPowerShell("Test-PostPublishUserVerificationPack.ps1", "-Strict");
+        RunPowerShell("Export-PublicPackageDownloadProofOwnerExecutionPack.ps1");
+        RunPowerShell("Test-PublicPackageDownloadProofOwnerExecutionPack.ps1", "-Strict");
         RunPowerShell("Export-FinalPublicReleaseClosureBridge.ps1");
         RunPowerShell("Test-FinalPublicReleaseClosureBridge.ps1", "-Strict");
         RunPowerShell("Export-ReleaseIssueCloseOwnerDecisionInput.ps1");

@@ -56,6 +56,8 @@ New-Item -ItemType Directory -Force -Path $artifactRoot | Out-Null
 $releaseEvidenceBundlePath = "artifacts/final-release/release-evidence-bundle.json"
 $postPublishValidationPath = "artifacts/final-release/post-publish-verification-validation.json"
 $postPublishProofResultValidationPath = "artifacts/final-release/post-publish-clean-consumer-proof-result-validation.json"
+$publicPackageDownloadProofOwnerExecutionPackValidationPath = "artifacts/final-release/public-package-download-proof-owner-execution-pack-validation.json"
+$postPublishUserVerificationPackValidationPath = "artifacts/final-release/post-publish-user-verification-pack-validation.json"
 $strictCloseReadyPath = "artifacts/final-release/strict-close-ready-convergence-dashboard-validation.json"
 $classificationAuditPath = "artifacts/final-release/release-evidence-classification-audit.json"
 $finalPublicReleaseClosureBridgePath = "artifacts/final-release/final-public-release-closure-bridge.json"
@@ -64,6 +66,8 @@ $finalPublicReleaseClosureBridgeValidationPath = "artifacts/final-release/final-
 $bridge = Read-JsonOrNull -RelativePath $finalPublicReleaseClosureBridgePath
 $bridgeValidation = Read-JsonOrNull -RelativePath $finalPublicReleaseClosureBridgeValidationPath
 $postPublishProofResultValidation = Read-JsonOrNull -RelativePath $postPublishProofResultValidationPath
+$publicPackageDownloadProofOwnerExecutionPackValidation = Read-JsonOrNull -RelativePath $publicPackageDownloadProofOwnerExecutionPackValidationPath
+$postPublishUserVerificationPackValidation = Read-JsonOrNull -RelativePath $postPublishUserVerificationPackValidationPath
 $summary = Get-PropertyOrDefault -Object $bridge -Name "closureProofSourceSummary" -DefaultValue ([pscustomobject]@{})
 
 $template = [pscustomobject]@{
@@ -94,6 +98,14 @@ $template = [pscustomobject]@{
   postPublishValidationSha256 = Get-RelativeFileSha256OrPlaceholder -RelativePath $postPublishValidationPath
   postPublishProofResultValidationPath = $postPublishProofResultValidationPath
   postPublishProofResultValidationSha256 = Get-RelativeFileSha256OrPlaceholder -RelativePath $postPublishProofResultValidationPath
+  publicPackageDownloadProofOwnerExecutionPackValidationPath = $publicPackageDownloadProofOwnerExecutionPackValidationPath
+  publicPackageDownloadProofOwnerExecutionPackValidationSha256 = Get-RelativeFileSha256OrPlaceholder -RelativePath $publicPackageDownloadProofOwnerExecutionPackValidationPath
+  publicPackageDownloadProofOwnerExecutionPackValidationState = [string](Get-PropertyOrDefault -Object $publicPackageDownloadProofOwnerExecutionPackValidation -Name "validationState" -DefaultValue "missing-public-package-download-proof-owner-execution-pack-validation")
+  postPublishUserVerificationPackValidationPath = $postPublishUserVerificationPackValidationPath
+  postPublishUserVerificationPackValidationSha256 = Get-RelativeFileSha256OrPlaceholder -RelativePath $postPublishUserVerificationPackValidationPath
+  postPublishUserVerificationPackValidationState = [string](Get-PropertyOrDefault -Object $postPublishUserVerificationPackValidation -Name "validationState" -DefaultValue "missing-post-publish-user-verification-pack-validation")
+  publicPackageDownloadOwnerExecutionPackState = [string](Get-PropertyOrDefault -Object $summary -Name "publicPackageDownloadOwnerExecutionPackState" -DefaultValue "")
+  postPublishUserVerificationPackState = [string](Get-PropertyOrDefault -Object $summary -Name "postPublishUserVerificationPackState" -DefaultValue "")
   postPublishProofCandidateReady = [bool](Get-PropertyOrDefault -Object $postPublishProofResultValidation -Name "proofCandidateReady" -DefaultValue $false)
   postPublishProofSourceLinkageReady = [bool](Get-PropertyOrDefault -Object $postPublishProofResultValidation -Name "sourceProofLinkageReady" -DefaultValue $false)
   githubActionsRunId = [string](Get-PropertyOrDefault -Object $summary -Name "githubActionsRunId" -DefaultValue "")
@@ -131,6 +143,8 @@ $template = [pscustomobject]@{
     "approvedPostPublishProofHash",
     "approvedReleaseEvidenceBundleHash",
     "finalPublicReleaseClosureBridgeSha256",
+    "publicPackageDownloadProofOwnerExecutionPackValidationSha256",
+    "postPublishUserVerificationPackValidationSha256",
     "publicPackageUrl",
     "publicPackageVersion",
     "publicPackageSha256",
@@ -147,6 +161,8 @@ $template = [pscustomobject]@{
     $finalPublicReleaseClosureBridgePath,
     $finalPublicReleaseClosureBridgeValidationPath,
     $postPublishProofResultValidationPath,
+    $publicPackageDownloadProofOwnerExecutionPackValidationPath,
+    $postPublishUserVerificationPackValidationPath,
     $postPublishValidationPath,
     $releaseEvidenceBundlePath,
     $strictCloseReadyPath,
@@ -187,6 +203,10 @@ $markdown = @"
 | closureBlockedLaneCount | ``$($template.closureBlockedLaneCount)`` |
 | closureFailedConsistencyBlockerCount | ``$($template.closureFailedConsistencyBlockerCount)`` |
 | closureFailedConsistencyActionRequiredCount | ``$($template.closureFailedConsistencyActionRequiredCount)`` |
+| publicPackageDownloadProofOwnerExecutionPackValidationState | ``$($template.publicPackageDownloadProofOwnerExecutionPackValidationState)`` |
+| postPublishUserVerificationPackValidationState | ``$($template.postPublishUserVerificationPackValidationState)`` |
+| publicPackageDownloadOwnerExecutionPackState | ``$($template.publicPackageDownloadOwnerExecutionPackState)`` |
+| postPublishUserVerificationPackState | ``$($template.postPublishUserVerificationPackState)`` |
 | postPublishProofCandidateReady | ``$($template.postPublishProofCandidateReady)`` |
 | postPublishProofSourceLinkageReady | ``$($template.postPublishProofSourceLinkageReady)`` |
 | notExecutedByAutomation | ``$($template.notExecutedByAutomation)`` |
