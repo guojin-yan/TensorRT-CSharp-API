@@ -68,6 +68,19 @@ $requiredFields = @(
   New-RequiredField -Name "forbiddenSubstituteCounts.buildOnlyCount" -Description "Build-only evidence count, expected 0." -ForbiddenSubstitutes @("build-only")
   New-RequiredField -Name "forbiddenSubstituteCounts.dependencyProbeOnlyCount" -Description "Dependency-probe-only evidence count, expected 0." -ForbiddenSubstitutes @("dependency probe")
   New-RequiredField -Name "forbiddenSubstituteCounts.blockedByDriverOnlyCount" -Description "Blocked-by-driver-only evidence count, expected 0." -ForbiddenSubstitutes @("blocked-by-driver")
+  New-RequiredField -Name "sourceProofs.githubActionsRunEvidenceReady" -Description "Owner links the post-publish proof to a ready GitHub Actions run evidence record." -ForbiddenSubstitutes @("queued workflow", "missing runner", "dashboard-only")
+  New-RequiredField -Name "sourceProofs.githubActionsRunId" -Description "GitHub Actions run id used by the public publish proof chain." -ForbiddenSubstitutes @("queued workflow", "dashboard-only")
+  New-RequiredField -Name "sourceProofs.githubActionsRunUrl" -Description "GitHub Actions run URL used by the public publish proof chain." -ForbiddenSubstitutes @("dashboard-only")
+  New-RequiredField -Name "sourceProofs.githubActionsHeadSha" -Description "GitHub Actions head SHA for the release commit." -ForbiddenSubstitutes @("manual approval")
+  New-RequiredField -Name "sourceProofs.ownerPublicPublishResultReady" -Description "Owner public publish result candidate must be ready before post-publish proof can close." -ForbiddenSubstitutes @("manual approval", "template", "draft")
+  New-RequiredField -Name "sourceProofs.publicPackageDownloadProofReady" -Description "Public package download proof candidate must be ready before post-publish proof can close." -ForbiddenSubstitutes @("local feed", "direct nupkg", "artifact-only")
+  New-RequiredField -Name "sourceProofs.publicPackageUrl" -Description "Public managed package page URL shared with owner/public download proof." -ForbiddenSubstitutes @("local feed", "direct nupkg", "package-managed-dry-run")
+  New-RequiredField -Name "sourceProofs.publicPackageVersion" -Description "Public managed package version shared with owner/public download proof." -ForbiddenSubstitutes @("local build version")
+  New-RequiredField -Name "sourceProofs.publicPackageSha256" -Description "Public managed package SHA256 shared with owner/public download proof." -ForbiddenSubstitutes @("direct nupkg", "artifact-only")
+  New-RequiredField -Name "sourceProofs.managedPackageDownloadUrl" -Description "Public managed package download URL from the public download proof." -ForbiddenSubstitutes @("local feed", "direct nupkg")
+  New-RequiredField -Name "sourceProofs.runtimePackageDownloadUrl" -Description "Public runtime package download URL from the public download proof." -ForbiddenSubstitutes @("local feed", "direct nupkg")
+  New-RequiredField -Name "sourceProofs.githubReleaseAssetUrl" -Description "GitHub release asset URL shared with the public proof chain." -ForbiddenSubstitutes @("artifact-only", "dashboard-only")
+  New-RequiredField -Name "sourceProofs.githubReleaseAssetSha256" -Description "GitHub release asset SHA256 shared with the public proof chain." -ForbiddenSubstitutes @("missing hash", "artifact-only")
   New-RequiredField -Name "cleanConsumerProjectPath" -Description "Repository-external clean consumer project path or archive." -ForbiddenSubstitutes @("repo sample", "ProjectReference")
   New-RequiredField -Name "packageSourceUrl" -Description "Public package source used by clean consumer restore." -ForbiddenSubstitutes @("local feed")
   New-RequiredField -Name "restoredPackageId" -Description "Package id resolved by clean consumer restore." -ForbiddenSubstitutes @("ProjectReference")
@@ -96,6 +109,9 @@ $record = [pscustomobject]@{
   readyRequiredFieldCount = 0
   requiredFields = @($requiredFields)
   sourceArtifacts = @(
+    "artifacts/final-release/github-actions-run-evidence-import-validation.json",
+    "artifacts/final-release/owner-public-publish-execution-result-candidate-validation.json",
+    "artifacts/final-release/public-package-download-proof-candidate-validation.json",
     "artifacts/final-release/public-publish-real-result-owner-input-contract-validation.json",
     "artifacts/final-release/post-publish-clean-consumer-result-convergence-validation.json",
     "artifacts/final-release/strict-close-ready-convergence-dashboard-validation.json"

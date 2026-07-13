@@ -256,6 +256,17 @@ $publicDownloadSourceOwnerPackageSha256 = [string](Get-PropertyOrDefault -Object
 $publicDownloadGitHubReleaseUrl = [string](Get-PropertyOrDefault -Object $publicDownload -Name "githubReleaseUrl" -DefaultValue "")
 $publicDownloadGitHubReleaseAssetUrl = [string](Get-PropertyOrDefault -Object $publicDownload -Name "githubReleaseAssetUrl" -DefaultValue "")
 $publicDownloadGitHubReleaseAssetSha256 = [string](Get-PropertyOrDefault -Object $publicDownload -Name "githubReleaseAssetSha256" -DefaultValue "")
+$postPublishProofReady = [bool](Get-PropertyOrDefault -Object $postPublishProof -Name "proofCandidateReady" -DefaultValue $false)
+$postPublishSourceProofLinkageReady = [bool](Get-PropertyOrDefault -Object $postPublishProof -Name "sourceProofLinkageReady" -DefaultValue $false)
+$postPublishSourceGitHubActionsReady = [bool](Get-PropertyOrDefault -Object $postPublishProof -Name "sourceGitHubActionsRunEvidenceReady" -DefaultValue $false)
+$postPublishSourceOwnerReady = [bool](Get-PropertyOrDefault -Object $postPublishProof -Name "sourceOwnerPublicPublishResultReady" -DefaultValue $false)
+$postPublishSourcePublicDownloadReady = [bool](Get-PropertyOrDefault -Object $postPublishProof -Name "sourcePublicPackageDownloadProofReady" -DefaultValue $false)
+$postPublishPublicPackageUrl = [string](Get-PropertyOrDefault -Object $postPublishProof -Name "publicPackageUrl" -DefaultValue "")
+$postPublishPublicPackageVersion = [string](Get-PropertyOrDefault -Object $postPublishProof -Name "managedPackageVersion" -DefaultValue "")
+$postPublishPublicPackageSha256 = [string](Get-PropertyOrDefault -Object $postPublishProof -Name "downloadedManagedPackageSha256" -DefaultValue "")
+$postPublishSourceOwnerPackageUrl = [string](Get-PropertyOrDefault -Object $postPublishProof -Name "sourceOwnerPublicPackageUrl" -DefaultValue "")
+$postPublishSourceOwnerPackageVersion = [string](Get-PropertyOrDefault -Object $postPublishProof -Name "sourceOwnerPublicPackageVersion" -DefaultValue "")
+$postPublishSourceOwnerPackageSha256 = [string](Get-PropertyOrDefault -Object $postPublishProof -Name "sourceOwnerPublicPackageSha256" -DefaultValue "")
 $publicDownloadForbiddenFindings = Get-StringArrayProperty -Object $publicDownload -Name "forbiddenSubstituteFindings"
 $ownerForbiddenFindings = Get-StringArrayProperty -Object $ownerPublicPublishResult -Name "forbiddenSubstituteFindings"
 $githubActionsForbiddenFindings = Get-StringArrayProperty -Object $githubActionsRunEvidence -Name "forbiddenSubstituteFindings"
@@ -277,6 +288,11 @@ $crossLaneConsistencyChecks = @(
   New-ClosureConsistencyCheck -Id "runtime-package-url-public" -Passed ((Test-ReadyUrl -Value $ownerRuntimePackageUrl -Prefix "https://www.nuget.org/packages/") -and (Test-ReadyUrl -Value $publicDownloadRuntimePackageUrl -Prefix "https://www.nuget.org/packages/") -and (Test-ReadyUrl -Value $publicDownloadRuntimePackageDownloadUrl)) -Severity "action-required" -Detail "Runtime package page and download URLs must be public HTTPS URLs."
   New-ClosureConsistencyCheck -Id "github-release-asset-consistent" -Passed ((Test-ReadyUrl -Value $ownerGitHubReleaseAssetUrl -Prefix "https://github.com/") -and $ownerGitHubReleaseAssetUrl.Equals($publicDownloadGitHubReleaseAssetUrl, [StringComparison]::OrdinalIgnoreCase) -and (Test-Sha256Format -Value $ownerGitHubReleaseAssetSha256) -and $ownerGitHubReleaseAssetSha256.Equals($publicDownloadGitHubReleaseAssetSha256, [StringComparison]::OrdinalIgnoreCase)) -Severity "action-required" -Detail "GitHub release asset URL and SHA256 must match between Owner publish result and public download proof."
   New-ClosureConsistencyCheck -Id "owner-reviewer-and-timestamp-present" -Passed (-not [string]::IsNullOrWhiteSpace($ownerReviewer) -and -not [string]::IsNullOrWhiteSpace($ownerReviewTimestampUtc)) -Severity "action-required" -Detail "Owner reviewer and review timestamp must be present."
+  New-ClosureConsistencyCheck -Id "post-publish-proof-candidate-ready" -Passed $postPublishProofReady -Severity "action-required" -Detail "Post-publish clean consumer proof result must have proofCandidateReady=true."
+  New-ClosureConsistencyCheck -Id "post-publish-links-source-proofs" -Passed ($postPublishSourceProofLinkageReady -and $postPublishSourceGitHubActionsReady -and $postPublishSourceOwnerReady -and $postPublishSourcePublicDownloadReady) -Severity "action-required" -Detail "Post-publish proof must link to ready GitHub Actions, Owner public publish, and public package download proofs."
+  New-ClosureConsistencyCheck -Id "post-publish-owner-package-url-match" -Passed (-not [string]::IsNullOrWhiteSpace($postPublishPublicPackageUrl) -and $postPublishPublicPackageUrl.Equals($ownerPublicPackageUrl, [StringComparison]::OrdinalIgnoreCase) -and $postPublishPublicPackageUrl.Equals($postPublishSourceOwnerPackageUrl, [StringComparison]::OrdinalIgnoreCase)) -Severity "action-required" -Detail "Post-publish public package URL must match Owner public publish URL."
+  New-ClosureConsistencyCheck -Id "post-publish-owner-package-version-match" -Passed (-not [string]::IsNullOrWhiteSpace($postPublishPublicPackageVersion) -and $postPublishPublicPackageVersion.Equals($ownerPublicPackageVersion, [StringComparison]::OrdinalIgnoreCase) -and $postPublishPublicPackageVersion.Equals($postPublishSourceOwnerPackageVersion, [StringComparison]::OrdinalIgnoreCase)) -Severity "action-required" -Detail "Post-publish package version must match Owner public publish version."
+  New-ClosureConsistencyCheck -Id "post-publish-owner-package-sha-match" -Passed ((Test-Sha256Format -Value $postPublishPublicPackageSha256) -and $postPublishPublicPackageSha256.Equals($ownerPublicPackageSha256, [StringComparison]::OrdinalIgnoreCase) -and $postPublishPublicPackageSha256.Equals($postPublishSourceOwnerPackageSha256, [StringComparison]::OrdinalIgnoreCase)) -Severity "action-required" -Detail "Post-publish downloaded managed package SHA256 must match Owner/public download source SHA256."
   New-ClosureConsistencyCheck -Id "forbidden-substitutes-absent" -Passed ($forbiddenFindingCount -eq 0) -Severity "blocker" -Detail $(if ($forbiddenFindingCount -eq 0) { "No forbidden substitute findings were propagated from GitHub Actions, Owner publish, or public download proof lanes." } else { "Forbidden substitute findings were propagated: $($allForbiddenFindings -join ', ')" })
 )
 
@@ -360,6 +376,17 @@ $record = [pscustomobject]@{
     publicDownloadGitHubReleaseUrl = $publicDownloadGitHubReleaseUrl
     publicDownloadGitHubReleaseAssetUrl = $publicDownloadGitHubReleaseAssetUrl
     publicDownloadGitHubReleaseAssetSha256 = $publicDownloadGitHubReleaseAssetSha256
+    postPublishProofReady = $postPublishProofReady
+    postPublishSourceProofLinkageReady = $postPublishSourceProofLinkageReady
+    postPublishSourceGitHubActionsReady = $postPublishSourceGitHubActionsReady
+    postPublishSourceOwnerReady = $postPublishSourceOwnerReady
+    postPublishSourcePublicDownloadReady = $postPublishSourcePublicDownloadReady
+    postPublishPublicPackageUrl = $postPublishPublicPackageUrl
+    postPublishPublicPackageVersion = $postPublishPublicPackageVersion
+    postPublishPublicPackageSha256 = $postPublishPublicPackageSha256
+    postPublishSourceOwnerPackageUrl = $postPublishSourceOwnerPackageUrl
+    postPublishSourceOwnerPackageVersion = $postPublishSourceOwnerPackageVersion
+    postPublishSourceOwnerPackageSha256 = $postPublishSourceOwnerPackageSha256
   }
   sourceArtifacts = @($lanes | ForEach-Object { $_.artifact })
   nextOwnerActions = @($blockedLanes | ForEach-Object { [pscustomobject]@{ laneId = $_.laneId; state = $_.state; ownerAction = $_.ownerAction; requiredBeforeClose = $_.requiredBeforeClose } })

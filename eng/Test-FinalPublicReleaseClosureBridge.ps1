@@ -95,6 +95,11 @@ $requiredCheckIds = @(
   "runtime-package-url-public",
   "github-release-asset-consistent",
   "owner-reviewer-and-timestamp-present",
+  "post-publish-proof-candidate-ready",
+  "post-publish-links-source-proofs",
+  "post-publish-owner-package-url-match",
+  "post-publish-owner-package-version-match",
+  "post-publish-owner-package-sha-match",
   "forbidden-substitutes-absent"
 )
 $missingCheckIds = @($requiredCheckIds | Where-Object { $checkIds -notcontains $_ })

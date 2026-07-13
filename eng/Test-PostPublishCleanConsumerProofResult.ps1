@@ -90,6 +90,7 @@ $nonProofFlagsOk = -not [bool](Get-PropertyOrDefault $import "canPromoteRuntimeP
   -not [bool](Get-PropertyOrDefault $candidate "isPostPublishProof" $true)
 $noPublishCloseOk = -not [bool](Get-PropertyOrDefault $import "performsPublish" $true) -and -not [bool](Get-PropertyOrDefault $import "canPublishPublicly" $true) -and -not [bool](Get-PropertyOrDefault $import "canCloseReleaseIssue" $true)
 $findingsPresentOk = [int](Get-PropertyOrDefault $import "failedActionRequiredCount" 0) -gt 0 -or [int](Get-PropertyOrDefault $import "failedBlockerCount" 0) -gt 0 -or $proofReady
+$sourceProofLinkageReady = [bool](Get-PropertyOrDefault $import "sourceProofLinkageReady" $false)
 $boundary = [string](Get-PropertyOrDefault $import "boundary" "")
 $boundaryOk = $boundary.Contains("not runtime proof", [StringComparison]::OrdinalIgnoreCase) -and $boundary.Contains("not post-publish proof", [StringComparison]::OrdinalIgnoreCase) -and $boundary.Contains("not publish approval", [StringComparison]::OrdinalIgnoreCase) -and $boundary.Contains("not package push", [StringComparison]::OrdinalIgnoreCase)
 
@@ -101,6 +102,7 @@ $items.Add((New-ValidationItem -Id "no-publish-close" -Passed $noPublishCloseOk 
 $items.Add((New-ValidationItem -Id "owner-evidence-findings-present" -Passed $findingsPresentOk -Severity "blocker" -Detail "Blocked imports must report blocker or action-required owner evidence findings.")) | Out-Null
 $items.Add((New-ValidationItem -Id "boundary" -Passed $boundaryOk -Severity "blocker" -Detail "Boundary must preserve non-proof classification.")) | Out-Null
 $items.Add((New-ValidationItem -Id "proof-candidate-ready" -Passed $proofReady -Severity "action-required" -Detail "Real owner evidence must make proofCandidateReady true before the remote proof lane can become ready.")) | Out-Null
+$items.Add((New-ValidationItem -Id "source-proof-linkage-ready" -Passed $sourceProofLinkageReady -Severity "action-required" -Detail "Post-publish proof must link to ready GitHub Actions, Owner public publish, and public package download proof records.")) | Out-Null
 
 $validationItems = @($items.ToArray())
 $failedBlockers = @($validationItems | Where-Object { -not [bool]$_.passed -and [string]$_.severity -eq "blocker" })
@@ -115,6 +117,25 @@ $validation = [pscustomobject]@{
   failedBlockerCount = $failedBlockers.Count
   failedActionRequiredCount = $failedActionRequired.Count
   proofCandidateReady = $proofReady
+  sourceProofLinkageReady = $sourceProofLinkageReady
+  sourceGitHubActionsRunEvidenceReady = [bool](Get-PropertyOrDefault $import "sourceGitHubActionsRunEvidenceReady" $false)
+  sourceGitHubActionsRunId = [string](Get-PropertyOrDefault $import "sourceGitHubActionsRunId" "")
+  sourceGitHubActionsRunUrl = [string](Get-PropertyOrDefault $import "sourceGitHubActionsRunUrl" "")
+  sourceGitHubActionsHeadSha = [string](Get-PropertyOrDefault $import "sourceGitHubActionsHeadSha" "")
+  sourceOwnerPublicPublishResultReady = [bool](Get-PropertyOrDefault $import "sourceOwnerPublicPublishResultReady" $false)
+  sourceOwnerPublicPackageUrl = [string](Get-PropertyOrDefault $import "sourceOwnerPublicPackageUrl" "")
+  sourceOwnerPublicPackageVersion = [string](Get-PropertyOrDefault $import "sourceOwnerPublicPackageVersion" "")
+  sourceOwnerPublicPackageSha256 = [string](Get-PropertyOrDefault $import "sourceOwnerPublicPackageSha256" "")
+  sourcePublicPackageDownloadProofReady = [bool](Get-PropertyOrDefault $import "sourcePublicPackageDownloadProofReady" $false)
+  sourcePublicDownloadManagedPackageUrl = [string](Get-PropertyOrDefault $import "sourcePublicDownloadManagedPackageUrl" "")
+  sourcePublicDownloadManagedPackageDownloadUrl = [string](Get-PropertyOrDefault $import "sourcePublicDownloadManagedPackageDownloadUrl" "")
+  sourcePublicDownloadRuntimePackageUrl = [string](Get-PropertyOrDefault $import "sourcePublicDownloadRuntimePackageUrl" "")
+  sourcePublicDownloadRuntimePackageDownloadUrl = [string](Get-PropertyOrDefault $import "sourcePublicDownloadRuntimePackageDownloadUrl" "")
+  sourceGitHubReleaseAssetUrl = [string](Get-PropertyOrDefault $import "sourceGitHubReleaseAssetUrl" "")
+  sourceGitHubReleaseAssetSha256 = [string](Get-PropertyOrDefault $import "sourceGitHubReleaseAssetSha256" "")
+  publicPackageUrl = [string](Get-PropertyOrDefault $import "publicPackageUrl" "")
+  managedPackageVersion = [string](Get-PropertyOrDefault $import "managedPackageVersion" "")
+  downloadedManagedPackageSha256 = [string](Get-PropertyOrDefault $import "downloadedManagedPackageSha256" "")
   ownerActionRequired = -not $proofReady
   performsPublish = $false
   performsRuntimeExecution = $false
@@ -143,6 +164,7 @@ Write-Utf8File -LiteralPath $markdownPath -InputObject @(
   "- failedBlockerCount: ``$($failedBlockers.Count)``",
   "- failedActionRequiredCount: ``$($failedActionRequired.Count)``",
   "- proofCandidateReady: ``$proofReady``",
+  "- sourceProofLinkageReady: ``$sourceProofLinkageReady``",
   "",
   "| ID | Passed | Severity | Detail |",
   "|---|---:|---|---|",

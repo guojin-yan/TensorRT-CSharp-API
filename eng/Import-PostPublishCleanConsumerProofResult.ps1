@@ -70,6 +70,13 @@ function Resolve-InputPath {
   return Join-Path $RepositoryRoot $Path
 }
 
+function Read-JsonOrNull {
+  param([string]$RelativePath)
+  $path = Join-Path $RepositoryRoot $RelativePath
+  if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { return $null }
+  return Get-Content -LiteralPath $path -Raw -Encoding utf8 | ConvertFrom-Json
+}
+
 function Test-Placeholder {
   param([AllowNull()][object]$Value)
   $text = [string]$Value
@@ -148,6 +155,16 @@ function New-TemplateRecord {
     runtimePackageId = "JYPPX.TensorRtSharp.Native.<runtime-key>"
     runtimePackageVersion = "<owner-package-version>"
     runtimePackageKey = "<owner-runtime-key>"
+    sourceGitHubActionsRunId = "<owner-source-github-actions-run-id>"
+    sourceGitHubActionsRunUrl = "<owner-source-github-actions-run-url>"
+    sourceGitHubActionsHeadSha = "<owner-source-github-actions-head-sha>"
+    sourceOwnerPublicPackageUrl = "<owner-source-public-package-url>"
+    sourceOwnerPublicPackageVersion = "<owner-source-public-package-version>"
+    sourceOwnerPublicPackageSha256 = "<owner-source-public-package-sha256>"
+    sourceManagedPackageDownloadUrl = "<owner-source-managed-package-download-url>"
+    sourceRuntimePackageDownloadUrl = "<owner-source-runtime-package-download-url>"
+    sourceGitHubReleaseAssetUrl = "<owner-source-github-release-asset-url>"
+    sourceGitHubReleaseAssetSha256 = "<owner-source-github-release-asset-sha256>"
     downloadedManagedPackagePath = "<owner-downloaded-managed-package-path>"
     downloadedManagedPackageSha256 = "<owner-downloaded-managed-package-sha256>"
     downloadedRuntimePackagePath = "<owner-downloaded-runtime-package-path>"
@@ -342,6 +359,66 @@ foreach ($field in @("os", "arch", "rid", "gpuName", "nvidiaDriver", "cudaRuntim
   }
 }
 
+$githubActionsRunEvidence = Read-JsonOrNull "artifacts\final-release\github-actions-run-evidence-import-validation.json"
+$ownerPublicPublishResult = Read-JsonOrNull "artifacts\final-release\owner-public-publish-execution-result-candidate-validation.json"
+$publicPackageDownloadProof = Read-JsonOrNull "artifacts\final-release\public-package-download-proof-candidate-validation.json"
+
+$sourceGitHubActionsReady = [bool](Get-PropertyOrDefault -Object $githubActionsRunEvidence -Name "githubActionsRunEvidenceReady" -DefaultValue $false)
+$sourceGitHubActionsRunId = [string](Get-PropertyOrDefault -Object $githubActionsRunEvidence -Name "runId" -DefaultValue "")
+$sourceGitHubActionsRunUrl = [string](Get-PropertyOrDefault -Object $githubActionsRunEvidence -Name "runUrl" -DefaultValue "")
+$sourceGitHubActionsHeadSha = [string](Get-PropertyOrDefault -Object $githubActionsRunEvidence -Name "headSha" -DefaultValue "")
+$sourceOwnerPublicPublishReady = [bool](Get-PropertyOrDefault -Object $ownerPublicPublishResult -Name "proofCandidateReady" -DefaultValue $false)
+$sourceOwnerPublicPackageUrl = [string](Get-PropertyOrDefault -Object $ownerPublicPublishResult -Name "publicPackageUrl" -DefaultValue "")
+$sourceOwnerPublicPackageVersion = [string](Get-PropertyOrDefault -Object $ownerPublicPublishResult -Name "publicPackageVersion" -DefaultValue "")
+$sourceOwnerPublicPackageSha256 = [string](Get-PropertyOrDefault -Object $ownerPublicPublishResult -Name "publicPackageSha256" -DefaultValue "")
+$sourceOwnerGitHubReleaseAssetUrl = [string](Get-PropertyOrDefault -Object $ownerPublicPublishResult -Name "githubReleaseAssetUrl" -DefaultValue "")
+$sourceOwnerGitHubReleaseAssetSha256 = [string](Get-PropertyOrDefault -Object $ownerPublicPublishResult -Name "githubReleaseAssetSha256" -DefaultValue "")
+$sourcePublicDownloadReady = [bool](Get-PropertyOrDefault -Object $publicPackageDownloadProof -Name "proofCandidateReady" -DefaultValue $false)
+$sourcePublicDownloadManagedPackageUrl = [string](Get-PropertyOrDefault -Object $publicPackageDownloadProof -Name "managedPackagePageUrl" -DefaultValue "")
+$sourcePublicDownloadManagedPackageDownloadUrl = [string](Get-PropertyOrDefault -Object $publicPackageDownloadProof -Name "managedPackageDownloadUrl" -DefaultValue "")
+$sourcePublicDownloadRuntimePackageUrl = [string](Get-PropertyOrDefault -Object $publicPackageDownloadProof -Name "runtimePackagePageUrl" -DefaultValue "")
+$sourcePublicDownloadRuntimePackageDownloadUrl = [string](Get-PropertyOrDefault -Object $publicPackageDownloadProof -Name "runtimePackageDownloadUrl" -DefaultValue "")
+$sourcePublicDownloadOwnerPackageUrl = [string](Get-PropertyOrDefault -Object $publicPackageDownloadProof -Name "sourceOwnerPublicPackageUrl" -DefaultValue "")
+$sourcePublicDownloadOwnerPackageVersion = [string](Get-PropertyOrDefault -Object $publicPackageDownloadProof -Name "sourceOwnerPublicPackageVersion" -DefaultValue "")
+$sourcePublicDownloadOwnerPackageSha256 = [string](Get-PropertyOrDefault -Object $publicPackageDownloadProof -Name "sourceOwnerPublicPackageSha256" -DefaultValue "")
+$sourcePublicDownloadGitHubReleaseAssetUrl = [string](Get-PropertyOrDefault -Object $publicPackageDownloadProof -Name "githubReleaseAssetUrl" -DefaultValue "")
+$sourcePublicDownloadGitHubReleaseAssetSha256 = [string](Get-PropertyOrDefault -Object $publicPackageDownloadProof -Name "githubReleaseAssetSha256" -DefaultValue "")
+
+if (-not $sourceGitHubActionsReady) {
+  $findings.Add((New-Finding "source-github-actions-run-evidence-ready" "action-required" "source proof" "GitHub Actions run evidence must be ready before post-publish clean consumer proof can close.")) | Out-Null
+}
+if (-not $sourceOwnerPublicPublishReady) {
+  $findings.Add((New-Finding "source-owner-public-publish-result-ready" "action-required" "source proof" "Owner public publish result must be ready before post-publish clean consumer proof can close.")) | Out-Null
+}
+if (-not $sourcePublicDownloadReady) {
+  $findings.Add((New-Finding "source-public-package-download-proof-ready" "action-required" "source proof" "Public package download proof must be ready before post-publish clean consumer proof can close.")) | Out-Null
+}
+
+if ($sourceOwnerPublicPublishReady -and -not (Test-Placeholder -Value $publicPackageUrl) -and -not $publicPackageUrl.Equals($sourceOwnerPublicPackageUrl, [StringComparison]::OrdinalIgnoreCase)) {
+  $findings.Add((New-Finding "post-publish-owner-public-package-url-match" "blocker" "source proof mismatch" "Post-publish publicPackageUrl must match Owner public publish result publicPackageUrl.")) | Out-Null
+}
+if ($sourcePublicDownloadReady -and -not (Test-Placeholder -Value $publicPackageUrl) -and -not $publicPackageUrl.Equals($sourcePublicDownloadManagedPackageUrl, [StringComparison]::OrdinalIgnoreCase)) {
+  $findings.Add((New-Finding "post-publish-public-download-package-url-match" "blocker" "source proof mismatch" "Post-publish publicPackageUrl must match public package download proof managedPackagePageUrl.")) | Out-Null
+}
+
+$managedPackageVersion = [string](Get-PropertyOrDefault -Object $input -Name "managedPackageVersion" -DefaultValue "")
+if ($sourceOwnerPublicPublishReady -and -not (Test-Placeholder -Value $managedPackageVersion) -and -not $managedPackageVersion.Equals($sourceOwnerPublicPackageVersion, [StringComparison]::OrdinalIgnoreCase)) {
+  $findings.Add((New-Finding "post-publish-owner-public-package-version-match" "blocker" "source proof mismatch" "Post-publish managedPackageVersion must match Owner public publish result publicPackageVersion.")) | Out-Null
+}
+if ($sourcePublicDownloadReady -and -not (Test-Placeholder -Value $managedPackageVersion) -and -not $managedPackageVersion.Equals($sourcePublicDownloadOwnerPackageVersion, [StringComparison]::OrdinalIgnoreCase)) {
+  $findings.Add((New-Finding "post-publish-public-download-package-version-match" "blocker" "source proof mismatch" "Post-publish managedPackageVersion must match public package download proof sourceOwnerPublicPackageVersion.")) | Out-Null
+}
+
+$downloadedManagedPackageSha256 = [string](Get-PropertyOrDefault -Object $input -Name "downloadedManagedPackageSha256" -DefaultValue "")
+if ($sourceOwnerPublicPublishReady -and (Test-Sha256 -Value $downloadedManagedPackageSha256) -and -not $downloadedManagedPackageSha256.Equals($sourceOwnerPublicPackageSha256, [StringComparison]::OrdinalIgnoreCase)) {
+  $findings.Add((New-Finding "post-publish-owner-public-package-sha-match" "blocker" "source proof mismatch" "Post-publish downloadedManagedPackageSha256 must match Owner public publish result publicPackageSha256.")) | Out-Null
+}
+if ($sourcePublicDownloadReady -and (Test-Sha256 -Value $downloadedManagedPackageSha256) -and -not $downloadedManagedPackageSha256.Equals($sourcePublicDownloadOwnerPackageSha256, [StringComparison]::OrdinalIgnoreCase)) {
+  $findings.Add((New-Finding "post-publish-public-download-package-sha-match" "blocker" "source proof mismatch" "Post-publish downloadedManagedPackageSha256 must match public package download proof sourceOwnerPublicPackageSha256.")) | Out-Null
+}
+
+$sourceProofLinkageReady = $sourceGitHubActionsReady -and $sourceOwnerPublicPublishReady -and $sourcePublicDownloadReady
+
 $failedBlockers = @($findings | Where-Object { [string]$_.severity -eq "blocker" })
 $failedActionRequired = @($findings | Where-Object { [string]$_.severity -eq "action-required" })
 $proofReady = $failedBlockers.Count -eq 0 -and $failedActionRequired.Count -eq 0
@@ -358,6 +435,24 @@ $candidate = [pscustomobject]@{
   failedActionRequiredCount = $failedActionRequired.Count
   publicPackageSourceUrl = $sourceUrl
   publicPackageUrl = $publicPackageUrl
+  managedPackageVersion = $managedPackageVersion
+  downloadedManagedPackageSha256 = $downloadedManagedPackageSha256
+  sourceProofLinkageReady = $sourceProofLinkageReady
+  sourceGitHubActionsRunEvidenceReady = $sourceGitHubActionsReady
+  sourceGitHubActionsRunId = $sourceGitHubActionsRunId
+  sourceGitHubActionsRunUrl = $sourceGitHubActionsRunUrl
+  sourceGitHubActionsHeadSha = $sourceGitHubActionsHeadSha
+  sourceOwnerPublicPublishResultReady = $sourceOwnerPublicPublishReady
+  sourceOwnerPublicPackageUrl = $sourceOwnerPublicPackageUrl
+  sourceOwnerPublicPackageVersion = $sourceOwnerPublicPackageVersion
+  sourceOwnerPublicPackageSha256 = $sourceOwnerPublicPackageSha256
+  sourcePublicPackageDownloadProofReady = $sourcePublicDownloadReady
+  sourcePublicDownloadManagedPackageUrl = $sourcePublicDownloadManagedPackageUrl
+  sourcePublicDownloadManagedPackageDownloadUrl = $sourcePublicDownloadManagedPackageDownloadUrl
+  sourcePublicDownloadRuntimePackageUrl = $sourcePublicDownloadRuntimePackageUrl
+  sourcePublicDownloadRuntimePackageDownloadUrl = $sourcePublicDownloadRuntimePackageDownloadUrl
+  sourceGitHubReleaseAssetUrl = $sourceOwnerGitHubReleaseAssetUrl
+  sourceGitHubReleaseAssetSha256 = $sourceOwnerGitHubReleaseAssetSha256
   cleanConsumerRoot = $cleanConsumerRoot
   exitCode = $exitCode
   ownerActionRequired = -not $proofReady
@@ -386,6 +481,25 @@ $import = [pscustomobject]@{
   failedBlockerCount = $failedBlockers.Count
   failedActionRequiredCount = $failedActionRequired.Count
   proofCandidateReady = $proofReady
+  publicPackageUrl = $publicPackageUrl
+  managedPackageVersion = $managedPackageVersion
+  downloadedManagedPackageSha256 = $downloadedManagedPackageSha256
+  sourceProofLinkageReady = $sourceProofLinkageReady
+  sourceGitHubActionsRunEvidenceReady = $sourceGitHubActionsReady
+  sourceGitHubActionsRunId = $sourceGitHubActionsRunId
+  sourceGitHubActionsRunUrl = $sourceGitHubActionsRunUrl
+  sourceGitHubActionsHeadSha = $sourceGitHubActionsHeadSha
+  sourceOwnerPublicPublishResultReady = $sourceOwnerPublicPublishReady
+  sourceOwnerPublicPackageUrl = $sourceOwnerPublicPackageUrl
+  sourceOwnerPublicPackageVersion = $sourceOwnerPublicPackageVersion
+  sourceOwnerPublicPackageSha256 = $sourceOwnerPublicPackageSha256
+  sourcePublicPackageDownloadProofReady = $sourcePublicDownloadReady
+  sourcePublicDownloadManagedPackageUrl = $sourcePublicDownloadManagedPackageUrl
+  sourcePublicDownloadManagedPackageDownloadUrl = $sourcePublicDownloadManagedPackageDownloadUrl
+  sourcePublicDownloadRuntimePackageUrl = $sourcePublicDownloadRuntimePackageUrl
+  sourcePublicDownloadRuntimePackageDownloadUrl = $sourcePublicDownloadRuntimePackageDownloadUrl
+  sourceGitHubReleaseAssetUrl = $sourceOwnerGitHubReleaseAssetUrl
+  sourceGitHubReleaseAssetSha256 = $sourceOwnerGitHubReleaseAssetSha256
   findings = @($findings.ToArray())
   ownerActionRequired = -not $proofReady
   performsPublish = $false

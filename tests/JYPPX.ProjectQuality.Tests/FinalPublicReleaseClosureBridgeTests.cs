@@ -79,12 +79,16 @@ public sealed class FinalPublicReleaseClosureBridgeTests
         Assert.Contains("github-actions-run-evidence-ready", checkIds);
         Assert.Contains("owner-public-publish-result-ready", checkIds);
         Assert.Contains("public-download-proof-ready", checkIds);
+        Assert.Contains("post-publish-proof-candidate-ready", checkIds);
+        Assert.Contains("post-publish-links-source-proofs", checkIds);
         Assert.Contains("forbidden-substitutes-absent", checkIds);
 
         JsonElement proofSummary = bridge.GetProperty("closureProofSourceSummary");
         Assert.False(proofSummary.GetProperty("githubActionsRunEvidenceReady").GetBoolean());
         Assert.False(proofSummary.GetProperty("ownerPublicPublishResultReady").GetBoolean());
         Assert.False(proofSummary.GetProperty("publicDownloadProofReady").GetBoolean());
+        Assert.False(proofSummary.GetProperty("postPublishProofReady").GetBoolean());
+        Assert.False(proofSummary.GetProperty("postPublishSourceProofLinkageReady").GetBoolean());
 
         string[] sourceArtifacts = bridge.GetProperty("sourceArtifacts").EnumerateArray()
             .Select(static item => item.GetString()!)
@@ -254,6 +258,8 @@ public sealed class FinalPublicReleaseClosureBridgeTests
                 ["githubActionsRunEvidenceReady"] = true,
                 ["ownerPublicPublishResultReady"] = true,
                 ["publicDownloadProofReady"] = true,
+                ["postPublishProofReady"] = true,
+                ["postPublishSourceProofLinkageReady"] = true,
             },
             ["sourceArtifacts"] = artifactNodes,
             ["nextOwnerActions"] = new JsonArray(),
@@ -279,6 +285,11 @@ public sealed class FinalPublicReleaseClosureBridgeTests
             "runtime-package-url-public",
             "github-release-asset-consistent",
             "owner-reviewer-and-timestamp-present",
+            "post-publish-proof-candidate-ready",
+            "post-publish-links-source-proofs",
+            "post-publish-owner-package-url-match",
+            "post-publish-owner-package-version-match",
+            "post-publish-owner-package-sha-match",
             "forbidden-substitutes-absent",
         ];
     }

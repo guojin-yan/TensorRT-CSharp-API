@@ -70,7 +70,20 @@ $requiredCanonicalFields = @(
   "forbiddenSubstituteCounts.directNupkgReferenceCount",
   "forbiddenSubstituteCounts.buildOnlyCount",
   "forbiddenSubstituteCounts.dependencyProbeOnlyCount",
-  "forbiddenSubstituteCounts.blockedByDriverOnlyCount"
+  "forbiddenSubstituteCounts.blockedByDriverOnlyCount",
+  "sourceProofs.githubActionsRunEvidenceReady",
+  "sourceProofs.githubActionsRunId",
+  "sourceProofs.githubActionsRunUrl",
+  "sourceProofs.githubActionsHeadSha",
+  "sourceProofs.ownerPublicPublishResultReady",
+  "sourceProofs.publicPackageDownloadProofReady",
+  "sourceProofs.publicPackageUrl",
+  "sourceProofs.publicPackageVersion",
+  "sourceProofs.publicPackageSha256",
+  "sourceProofs.managedPackageDownloadUrl",
+  "sourceProofs.runtimePackageDownloadUrl",
+  "sourceProofs.githubReleaseAssetUrl",
+  "sourceProofs.githubReleaseAssetSha256"
 )
 
 $items = New-Object System.Collections.Generic.List[object]

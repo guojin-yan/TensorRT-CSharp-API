@@ -57,12 +57,27 @@ $items = New-Object System.Collections.Generic.List[object]
 $requiredIds = @(
   "public-publish-result-import",
   "post-publish-verification",
+  "post-publish-clean-consumer-proof-result",
   "package-consumer-runtime-proof",
   "clean-consumer-source-scan",
   "final-post-publish-audit-pack"
 )
 $ids = @($lanes | ForEach-Object { [string](Get-PropertyOrDefault -Object $_ -Name "laneId" -DefaultValue "") })
 $missingRequired = @($requiredIds | Where-Object { $ids -notcontains $_ })
+$crossLaneConsistencyChecks = @((Get-PropertyOrDefault -Object $record -Name "crossLaneConsistencyChecks" -DefaultValue @()))
+$checkIds = @($crossLaneConsistencyChecks | ForEach-Object { [string](Get-PropertyOrDefault -Object $_ -Name "id" -DefaultValue "") })
+$requiredCheckIds = @(
+  "post-publish-proof-result-validation-ready",
+  "post-publish-proof-candidate-ready",
+  "post-publish-source-proof-linkage-ready",
+  "post-publish-source-proof-flags-ready",
+  "post-publish-public-package-url-match",
+  "post-publish-public-package-version-match",
+  "post-publish-public-package-sha-match"
+)
+$missingCheckIds = @($requiredCheckIds | Where-Object { $checkIds -notcontains $_ })
+$failedConsistencyBlockers = @($crossLaneConsistencyChecks | Where-Object { -not [bool](Get-PropertyOrDefault -Object $_ -Name "passed" -DefaultValue $false) -and [string](Get-PropertyOrDefault -Object $_ -Name "severity" -DefaultValue "") -eq "blocker" })
+$failedConsistencyActionRequired = @($crossLaneConsistencyChecks | Where-Object { -not [bool](Get-PropertyOrDefault -Object $_ -Name "passed" -DefaultValue $false) -and [string](Get-PropertyOrDefault -Object $_ -Name "severity" -DefaultValue "") -eq "action-required" })
 
 $allLanesSafe = $lanes.Count -ge $requiredIds.Count
 foreach ($lane in $lanes) {
@@ -80,6 +95,8 @@ foreach ($lane in $lanes) {
 
 $items.Add((New-ValidationItem -Id "record-kind" -Passed ([string](Get-PropertyOrDefault -Object $record -Name "recordKind" -DefaultValue "") -eq "post-publish-clean-consumer-result-convergence") -Severity "blocker" -Detail "recordKind must be post-publish-clean-consumer-result-convergence.")) | Out-Null
 $items.Add((New-ValidationItem -Id "required-lanes-present" -Passed ($missingRequired.Count -eq 0) -Severity "blocker" -Detail "Missing required lanes: $($missingRequired -join ', ')")) | Out-Null
+$items.Add((New-ValidationItem -Id "required-consistency-checks-present" -Passed ($missingCheckIds.Count -eq 0) -Severity "blocker" -Detail "Missing required consistency checks: $($missingCheckIds -join ', ')")) | Out-Null
+$items.Add((New-ValidationItem -Id "cross-lane-consistency-no-blockers" -Passed ($failedConsistencyBlockers.Count -eq 0 -and [int](Get-PropertyOrDefault -Object $record -Name "failedConsistencyBlockerCount" -DefaultValue 0) -eq 0) -Severity "blocker" -Detail "Post-publish convergence consistency checks must not contain blocker failures.")) | Out-Null
 $items.Add((New-ValidationItem -Id "all-lanes-ready" -Passed ([int](Get-PropertyOrDefault -Object $record -Name "blockedLaneCount" -DefaultValue 0) -eq 0 -and [string](Get-PropertyOrDefault -Object $record -Name "convergenceState" -DefaultValue "") -eq "post-publish-clean-consumer-result-convergence-ready") -Severity "action-required" -Detail "Convergence remains blocked until every public publish, clean consumer, package-consumer runtime, scan, and audit lane is ready.")) | Out-Null
 $items.Add((New-ValidationItem -Id "lanes-safe" -Passed $allLanesSafe -Severity "blocker" -Detail "Every lane must keep proof/publish/close flags false and include owner action plus validator.")) | Out-Null
 $items.Add((New-ValidationItem -Id "no-side-effects" -Passed ([bool](Get-PropertyOrDefault -Object $record -Name "notExecutedByAutomation" -DefaultValue $false) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "performsPublish" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canPromoteRuntimeProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canPublishPublicly" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canCloseReleaseIssue" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isRuntimeExecutionProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isReleaseCloseProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isPostPublishProof" -DefaultValue $true)) -Severity "blocker" -Detail "Convergence validation must not publish, prove runtime/post-publish, or close release issue.")) | Out-Null
@@ -106,6 +123,9 @@ $validation = [pscustomobject]@{
   readyLaneCount = [int](Get-PropertyOrDefault -Object $record -Name "readyLaneCount" -DefaultValue 0)
   failedBlockerCount = $failedBlockers.Count
   failedActionRequiredCount = $failedActionRequired.Count
+  crossLaneConsistencyCheckCount = $crossLaneConsistencyChecks.Count
+  failedConsistencyBlockerCount = $failedConsistencyBlockers.Count
+  failedConsistencyActionRequiredCount = $failedConsistencyActionRequired.Count
   notExecutedByAutomation = $true
   performsPublish = $false
   canPromoteRuntimeProof = $false
@@ -135,6 +155,9 @@ $markdown = @"
 | readyLaneCount | ``$($validation.readyLaneCount)`` |
 | failedBlockerCount | ``$($validation.failedBlockerCount)`` |
 | failedActionRequiredCount | ``$($validation.failedActionRequiredCount)`` |
+| crossLaneConsistencyCheckCount | ``$($validation.crossLaneConsistencyCheckCount)`` |
+| failedConsistencyBlockerCount | ``$($validation.failedConsistencyBlockerCount)`` |
+| failedConsistencyActionRequiredCount | ``$($validation.failedConsistencyActionRequiredCount)`` |
 | performsPublish | ``$($validation.performsPublish)`` |
 | canCloseReleaseIssue | ``$($validation.canCloseReleaseIssue)`` |
 
@@ -146,7 +169,7 @@ $($validation.safetyBoundary)
 $markdown | Set-Content -LiteralPath $markdownPath -Encoding utf8
 
 Write-Host "Post-publish clean consumer result convergence validation written to $jsonPath"
-Write-Host "ValidationState=$validationState Lanes=$($validation.laneCount) Blocked=$($validation.blockedLaneCount) FailedBlockers=$($failedBlockers.Count) FailedActionRequired=$($failedActionRequired.Count)"
+Write-Host "ValidationState=$validationState Lanes=$($validation.laneCount) Blocked=$($validation.blockedLaneCount) FailedBlockers=$($failedBlockers.Count) FailedActionRequired=$($failedActionRequired.Count) FailedConsistencyBlockers=$($failedConsistencyBlockers.Count)"
 
 if ($Strict.IsPresent -and $failedBlockers.Count -gt 0) {
   throw "Post-publish clean consumer result convergence has blocker validation failures."
