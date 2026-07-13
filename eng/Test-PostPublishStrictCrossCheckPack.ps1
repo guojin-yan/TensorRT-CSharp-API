@@ -56,7 +56,7 @@ $validation = [pscustomobject]@{
 
 $jsonPath = Join-Path $OutputRoot "post-publish-strict-cross-check-pack-validation.json"
 $mdPath = Join-Path $OutputRoot "post-publish-strict-cross-check-pack-validation.md"
-$validation | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $jsonPath -Encoding utf8
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($validation | ConvertTo-Json -Depth 10)
 Write-Utf8File -LiteralPath $mdPath -InputObject @(
   "# PostPublish Strict Cross-Check Pack Validation",
   "",

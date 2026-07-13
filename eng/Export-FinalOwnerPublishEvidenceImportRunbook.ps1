@@ -78,7 +78,7 @@ $record = [pscustomobject]@{
 
 $jsonPath = Join-Path $OutputRoot "final-owner-publish-evidence-import-runbook.json"
 $mdPath = Join-Path $OutputRoot "final-owner-publish-evidence-import-runbook.md"
-$record | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $jsonPath -Encoding utf8
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($record | ConvertTo-Json -Depth 12)
 $md = New-Object System.Collections.Generic.List[string]
 $md.Add("# Final Owner Publish Evidence Import Runbook") | Out-Null
 $md.Add("") | Out-Null

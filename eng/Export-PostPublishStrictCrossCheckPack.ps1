@@ -82,7 +82,7 @@ $record = [pscustomobject]@{
 
 $jsonPath = Join-Path $OutputRoot "post-publish-strict-cross-check-pack.json"
 $mdPath = Join-Path $OutputRoot "post-publish-strict-cross-check-pack.md"
-$record | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $jsonPath -Encoding utf8
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($record | ConvertTo-Json -Depth 10)
 $md = New-Object System.Collections.Generic.List[string]
 $md.Add("# PostPublish Strict Cross-Check Pack") | Out-Null
 $md.Add("") | Out-Null

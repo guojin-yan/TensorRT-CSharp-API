@@ -117,7 +117,7 @@ $validation = [pscustomobject]@{
 
 $jsonPath = Join-Path $OutputRoot "release-close-strict-evidence-closure-validation.json"
 $mdPath = Join-Path $OutputRoot "release-close-strict-evidence-closure-validation.md"
-$validation | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $jsonPath -Encoding utf8
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($validation | ConvertTo-Json -Depth 10)
 Write-Utf8File -LiteralPath $mdPath -InputObject @(
   "# ReleaseClose Strict Evidence Closure Validation",
   "",

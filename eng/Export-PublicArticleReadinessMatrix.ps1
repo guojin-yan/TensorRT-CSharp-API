@@ -104,7 +104,7 @@ $record = [pscustomobject]@{
 
 $jsonPath = Join-Path $OutputRoot "public-article-readiness-matrix.json"
 $mdPath = Join-Path $OutputRoot "public-article-readiness-matrix.md"
-$record | ConvertTo-Json -Depth 14 | Set-Content -LiteralPath $jsonPath -Encoding utf8
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($record | ConvertTo-Json -Depth 14)
 $md = New-Object System.Collections.Generic.List[string]
 $md.Add("# Public Article Readiness Matrix") | Out-Null
 $md.Add("") | Out-Null

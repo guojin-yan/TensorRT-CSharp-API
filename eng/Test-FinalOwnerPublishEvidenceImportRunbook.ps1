@@ -56,7 +56,7 @@ $validation = [pscustomobject]@{
 
 $jsonPath = Join-Path $OutputRoot "final-owner-publish-evidence-import-runbook-validation.json"
 $mdPath = Join-Path $OutputRoot "final-owner-publish-evidence-import-runbook-validation.md"
-$validation | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $jsonPath -Encoding utf8
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($validation | ConvertTo-Json -Depth 10)
 Write-Utf8File -LiteralPath $mdPath -InputObject @(
   "# Final Owner Publish Evidence Import Runbook Validation",
   "",

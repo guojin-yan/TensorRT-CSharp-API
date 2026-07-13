@@ -150,7 +150,7 @@ $record = [pscustomobject]@{
 
 $jsonPath = Join-Path $OutputRoot "final-readonly-publish-audit-pack.json"
 $mdPath = Join-Path $OutputRoot "final-readonly-publish-audit-pack.md"
-$record | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $jsonPath -Encoding utf8
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($record | ConvertTo-Json -Depth 12)
 
 $md = New-Object System.Collections.Generic.List[string]
 $md.Add("# Final Readonly Publish Audit Pack") | Out-Null

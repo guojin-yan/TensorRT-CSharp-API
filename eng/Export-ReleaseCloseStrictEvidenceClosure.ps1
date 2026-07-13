@@ -202,7 +202,7 @@ $record = [pscustomobject]@{
 
 $jsonPath = Join-Path $OutputRoot "release-close-strict-evidence-closure.json"
 $mdPath = Join-Path $OutputRoot "release-close-strict-evidence-closure.md"
-$record | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $jsonPath -Encoding utf8
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($record | ConvertTo-Json -Depth 12)
 
 $md = New-Object System.Collections.Generic.List[string]
 $md.Add("# ReleaseClose Strict Evidence Closure") | Out-Null

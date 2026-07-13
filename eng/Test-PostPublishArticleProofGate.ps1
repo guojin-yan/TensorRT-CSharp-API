@@ -56,7 +56,7 @@ $validation = [pscustomobject]@{
 
 $jsonPath = Join-Path $OutputRoot "post-publish-article-proof-gate-validation.json"
 $mdPath = Join-Path $OutputRoot "post-publish-article-proof-gate-validation.md"
-$validation | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $jsonPath -Encoding utf8
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($validation | ConvertTo-Json -Depth 10)
 Write-Utf8File -LiteralPath $mdPath -InputObject @(
   "# PostPublish Article Proof Gate Validation",
   "",
