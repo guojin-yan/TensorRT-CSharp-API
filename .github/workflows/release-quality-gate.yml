@@ -96,13 +96,13 @@ jobs:
       - name: Build solution
         run: dotnet build TensorRtSharp.sln -c Debug --no-restore
 
-      - name: Run grouped release quality tests
+      - name: Run source-only release quality tests
         shell: pwsh
         run: |
           dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj `
             -c Debug `
             --no-build `
-            --filter "FullyQualifiedName~ReleaseAutomationTests|FullyQualifiedName~ReleaseQualityGateWorkflowTests|FullyQualifiedName~RnnV2BorrowedStateDesignGateTests|FullyQualifiedName~EngineAndRnnReadonlyDiagnosticsTests|FullyQualifiedName~RuntimePackageReadinessTests|FullyQualifiedName~FinalReleaseMarkdownRenderingTests" `
+            --filter "FullyQualifiedName~ReleaseAutomationTests|FullyQualifiedName~ReleaseQualityGateWorkflowTests" `
             --logger "trx;LogFileName=release-quality-gate.trx" `
             --results-directory .\artifacts\release-quality-gate\test-results
 

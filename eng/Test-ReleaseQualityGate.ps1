@@ -112,7 +112,15 @@ Add-Check -Id "workflow-bindings-and-coverage" -Passed (
 Add-Check -Id "workflow-build-and-tests" -Passed (
   $workflow.Contains("dotnet build TensorRtSharp.sln", [StringComparison]::Ordinal) -and
   $workflow.Contains("dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj", [StringComparison]::Ordinal)
-) -Required $true -Detail "Workflow must build the solution and run grouped quality tests."
+) -Required $true -Detail "Workflow must build the solution and run source-only quality tests."
+Add-Check -Id "workflow-source-only-test-filter" -Passed (
+  $workflow.Contains("Run source-only release quality tests", [StringComparison]::Ordinal) -and
+  $workflow.Contains("--filter ""FullyQualifiedName~ReleaseAutomationTests|FullyQualifiedName~ReleaseQualityGateWorkflowTests""", [StringComparison]::Ordinal) -and
+  -not $workflow.Contains("FinalReleaseMarkdownRenderingTests", [StringComparison]::Ordinal) -and
+  -not $workflow.Contains("RnnV2BorrowedStateDesignGateTests", [StringComparison]::Ordinal) -and
+  -not $workflow.Contains("EngineAndRnnReadonlyDiagnosticsTests", [StringComparison]::Ordinal) -and
+  -not $workflow.Contains("RuntimePackageReadinessTests", [StringComparison]::Ordinal)
+) -Required $true -Detail "Push/PR source-quality must run deterministic source-only tests and leave artifact-only release-close tests to opt-in gates."
 Add-Check -Id "workflow-project-quality-shard-smoke" -Passed (
   $workflow.Contains("Invoke-ProjectQualityTestShards.ps1", [StringComparison]::Ordinal) -and
   $workflow.Contains("-Shard N-S", [StringComparison]::Ordinal) -and

@@ -27,6 +27,12 @@ public sealed class ReleaseQualityGateWorkflowTests
         Assert.Contains("artifact_name: package-managed-dry-run", workflow, StringComparison.Ordinal);
         Assert.Contains("Export-GitHubActionsPackageValidationAudit.ps1", workflow, StringComparison.Ordinal);
         Assert.Contains("github-actions-package-validation-audit.*", workflow, StringComparison.Ordinal);
+        Assert.Contains("Run source-only release quality tests", workflow, StringComparison.Ordinal);
+        Assert.Contains("--filter \"FullyQualifiedName~ReleaseAutomationTests|FullyQualifiedName~ReleaseQualityGateWorkflowTests\"", workflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("FinalReleaseMarkdownRenderingTests", workflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("RnnV2BorrowedStateDesignGateTests", workflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("EngineAndRnnReadonlyDiagnosticsTests", workflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("RuntimePackageReadinessTests", workflow, StringComparison.Ordinal);
         Assert.Contains("Run bounded ProjectQuality shard smoke", workflow, StringComparison.Ordinal);
         Assert.Contains("Invoke-ProjectQualityTestShards.ps1", workflow, StringComparison.Ordinal);
         Assert.Contains("-Shard N-S", workflow, StringComparison.Ordinal);
@@ -99,6 +105,9 @@ public sealed class ReleaseQualityGateWorkflowTests
             check.GetProperty("id").GetString() == "workflow-project-quality-shard-smoke" &&
             check.GetProperty("passed").GetBoolean());
         Assert.Contains(checks, static check =>
+            check.GetProperty("id").GetString() == "workflow-source-only-test-filter" &&
+            check.GetProperty("passed").GetBoolean());
+        Assert.Contains(checks, static check =>
             check.GetProperty("id").GetString() == "split-manifest-component-roles" &&
             check.GetProperty("passed").GetBoolean());
         Assert.Contains(checks, static check =>
@@ -144,6 +153,7 @@ public sealed class ReleaseQualityGateWorkflowTests
         Assert.True(workflowContracts.GetProperty("packageManagedDryRunReady").GetBoolean());
         Assert.True(workflowContracts.GetProperty("packageManagedPublishGuarded").GetBoolean());
         Assert.True(workflowContracts.GetProperty("releaseQualityHasSourceGate").GetBoolean());
+        Assert.True(workflowContracts.GetProperty("releaseQualitySourceOnlyFilterClean").GetBoolean());
         Assert.True(workflowContracts.GetProperty("releaseQualityHasPackageDryRunAudit").GetBoolean());
         Assert.True(workflowContracts.GetProperty("releaseBundleRemoteReady").GetBoolean());
         Assert.True(workflowContracts.GetProperty("runtimeWorkflowsPackageReady").GetBoolean());
@@ -159,11 +169,17 @@ public sealed class ReleaseQualityGateWorkflowTests
             check.GetProperty("id").GetString() == "workflow-release-quality-package-dry-run-audit" &&
             check.GetProperty("passed").GetBoolean());
         Assert.Contains(checks, static check =>
+            check.GetProperty("id").GetString() == "workflow-release-quality-source-only-filter" &&
+            check.GetProperty("passed").GetBoolean());
+        Assert.Contains(checks, static check =>
             check.GetProperty("id").GetString() == "workflow-runtime-package-ready" &&
             check.GetProperty("passed").GetBoolean());
 
         string markdown = File.ReadAllText(markdownPath);
-        Assert.Contains("不能声称本轮代码已在 GitHub Actions 上完成 NuGet/包验证", markdown, StringComparison.Ordinal);
+        Assert.True(
+            markdown.Contains("仍需用 GitHub Actions run URL/artifact 补充包验证证据", StringComparison.Ordinal) ||
+            markdown.Contains("不能声称本轮代码已在 GitHub Actions 上完成 NuGet/包验证", StringComparison.Ordinal),
+            "Expected the audit Markdown to keep the current-run package validation boundary.");
         Assert.Contains("可声称 GitHub Actions 已验证当前代码包构建：`False`", markdown, StringComparison.Ordinal);
     }
 

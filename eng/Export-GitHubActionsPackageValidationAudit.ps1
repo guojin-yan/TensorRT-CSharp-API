@@ -150,6 +150,15 @@ $releaseQualityHasSourceGate = Test-ContainsAll -Text $releaseQualityWorkflow -N
   "dotnet build TensorRtSharp.sln",
   "dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj"
 )
+$releaseQualitySourceOnlyFilterClean =
+  (Test-ContainsAll -Text $releaseQualityWorkflow -Needles @(
+    "Run source-only release quality tests",
+    "--filter `"FullyQualifiedName~ReleaseAutomationTests|FullyQualifiedName~ReleaseQualityGateWorkflowTests`""
+  )) -and
+  -not $releaseQualityWorkflow.Contains("FinalReleaseMarkdownRenderingTests", [StringComparison]::Ordinal) -and
+  -not $releaseQualityWorkflow.Contains("RnnV2BorrowedStateDesignGateTests", [StringComparison]::Ordinal) -and
+  -not $releaseQualityWorkflow.Contains("EngineAndRnnReadonlyDiagnosticsTests", [StringComparison]::Ordinal) -and
+  -not $releaseQualityWorkflow.Contains("RuntimePackageReadinessTests", [StringComparison]::Ordinal)
 
 $releaseQualityHasPackageDryRunAudit = Test-ContainsAll -Text $releaseQualityWorkflow -Needles @(
   "Export-GitHubActionsPackageValidationAudit.ps1",
@@ -202,6 +211,7 @@ $checks = @(
   New-Check -Id "workflow-package-managed-dry-run-contract" -Passed $packageManagedDryRunReady -Severity "blocker" -Detail "package-managed.yml must test, pack, validate package content, upload artifacts, and default publish toggles to false."
   New-Check -Id "workflow-package-managed-publish-guard" -Passed $packageManagedPublishGuarded -Severity "blocker" -Detail "package-managed.yml must guard nuget.org/GitHub Packages publication behind explicit inputs and prerequisites."
   New-Check -Id "workflow-release-quality-source-gate" -Passed $releaseQualityHasSourceGate -Severity "blocker" -Detail "release-quality-gate.yml must run source quality, bindings, coverage, build, and tests."
+  New-Check -Id "workflow-release-quality-source-only-filter" -Passed $releaseQualitySourceOnlyFilterClean -Severity "blocker" -Detail "release-quality-gate.yml source-quality must not depend on final-release artifact-only test classes."
   New-Check -Id "workflow-release-quality-package-dry-run-audit" -Passed $releaseQualityHasPackageDryRunAudit -Severity "blocker" -Detail "release-quality-gate.yml must expose an opt-in package-managed dry run and archive this audit."
   New-Check -Id "workflow-release-bundle-remote-orchestration" -Passed $releaseBundleRemoteReady -Severity "blocker" -Detail "release-bundle.yml must orchestrate managed/runtime workflows and explicit publish toggles."
   New-Check -Id "workflow-runtime-package-ready" -Passed $runtimeWorkflowsPackageReady -Severity "blocker" -Detail "runtime Windows/Linux workflows must provide package build/test and guarded GitHub Packages publication routes."
@@ -230,6 +240,7 @@ $record = [pscustomobject]@{
     packageManagedDryRunReady = $packageManagedDryRunReady
     packageManagedPublishGuarded = $packageManagedPublishGuarded
     releaseQualityHasSourceGate = $releaseQualityHasSourceGate
+    releaseQualitySourceOnlyFilterClean = $releaseQualitySourceOnlyFilterClean
     releaseQualityHasPackageDryRunAudit = $releaseQualityHasPackageDryRunAudit
     releaseBundleRemoteReady = $releaseBundleRemoteReady
   runtimeWorkflowsPackageReady = $runtimeWorkflowsPackageReady
