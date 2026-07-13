@@ -184,6 +184,77 @@ function Test-SourceUrlIsPublicCandidate {
   return $text.StartsWith("https://", [StringComparison]::OrdinalIgnoreCase)
 }
 
+function Test-NuGetPackagePageUrl {
+  param([AllowNull()][object]$Value)
+
+  $text = ([string]$Value).Trim()
+  return -not (Test-IsPlaceholder -Value $text) -and $text.StartsWith("https://www.nuget.org/packages/", [StringComparison]::OrdinalIgnoreCase)
+}
+
+function Test-PublicDownloadUrl {
+  param([AllowNull()][object]$Value)
+
+  $text = ([string]$Value).Trim()
+  if (Test-IsPlaceholder -Value $text) { return $false }
+  if (-not $text.StartsWith("https://", [StringComparison]::OrdinalIgnoreCase)) { return $false }
+  if ($text.Contains("package-managed-dry-run", [StringComparison]::OrdinalIgnoreCase) -or
+      $text.Contains("github-actions-runs", [StringComparison]::OrdinalIgnoreCase) -or
+      $text.Contains("local", [StringComparison]::OrdinalIgnoreCase)) { return $false }
+  return $true
+}
+
+function Test-GitHubPublicUrl {
+  param([AllowNull()][object]$Value)
+
+  $text = ([string]$Value).Trim()
+  return -not (Test-IsPlaceholder -Value $text) -and $text.StartsWith("https://github.com/", [StringComparison]::OrdinalIgnoreCase)
+}
+
+function Test-PositiveInt64 {
+  param([AllowNull()][object]$Value)
+
+  if (Test-IsPlaceholder -Value $Value) { return $false }
+  $parsed = [Int64]::MinValue
+  return [Int64]::TryParse(([string]$Value).Trim(), [ref]$parsed) -and $parsed -gt 0
+}
+
+function Test-FileSizeMatches {
+  param(
+    [AllowNull()][object]$Path,
+    [AllowNull()][object]$ExpectedSize
+  )
+
+  if ((Test-IsPlaceholder -Value $Path) -or -not (Test-PositiveInt64 -Value $ExpectedSize)) { return $false }
+  $resolvedPath = Resolve-InputPath -Path ([string]$Path)
+  if (-not (Test-Path -LiteralPath $resolvedPath -PathType Leaf)) { return $false }
+  $expected = [Int64]([string]$ExpectedSize)
+  return ([IO.FileInfo]::new($resolvedPath)).Length -eq $expected
+}
+
+function Get-ForbiddenSubstituteFindings {
+  param([string[]]$Values)
+
+  $findings = New-Object System.Collections.Generic.List[string]
+  $text = ($Values -join "`n")
+  foreach ($pattern in @(
+      @{ id = "local-feed"; regex = '(?i)local\s+feed|local-feed|file://' },
+      @{ id = "project-reference"; regex = '(?i)projectreference|project\s+reference' },
+      @{ id = "direct-nupkg"; regex = '(?i)direct\s+\.?nupkg|direct-nupkg' },
+      @{ id = "package-managed-dry-run"; regex = '(?i)package-managed-dry-run' },
+      @{ id = "manual-approval"; regex = '(?i)manual\s+approval' },
+      @{ id = "queued-workflow"; regex = '(?i)queued\s+(github\s+actions\s+)?workflow|queued\s+github\s+actions\s+run' },
+      @{ id = "missing-runner"; regex = '(?i)missing\s+(self-hosted\s+)?runner' },
+      @{ id = "dashboard-only"; regex = '(?i)dashboard-only|dashboard\s+only' },
+      @{ id = "artifact-only"; regex = '(?i)artifact-only|artifact\s+only' },
+      @{ id = "local-dotnet-test"; regex = '(?i)local\s+dotnet\s+test' },
+      @{ id = "sidecar-only"; regex = '(?i)sidecar-only|sidecar\s+only' }
+    )) {
+    if ($text -match $pattern.regex) { $findings.Add([string]$pattern.id) | Out-Null }
+  }
+
+  return @($findings.ToArray() | Select-Object -Unique)
+}
+
 function Test-DownloadedPathIsPublicDownloadCandidate {
   param(
     [AllowNull()][object]$Path,
@@ -243,36 +314,87 @@ $isPublishedPackageProof = Get-BoolPropertyOrDefault -Object $record -Name "isPu
 $ownerAuthorizationState = [string](Get-PropertyOrDefault -Object $record -Name "ownerAuthorizationState" -DefaultValue "")
 $sourceKind = [string](Get-PropertyOrDefault -Object $record -Name "publicPackageSourceKind" -DefaultValue "")
 $sourceUrl = [string](Get-PropertyOrDefault -Object $record -Name "publicPackageSourceUrl" -DefaultValue "")
+$managedPageUrl = [string](Get-PropertyOrDefault -Object $record -Name "managedPackagePageUrl" -DefaultValue "")
+$managedDownloadUrl = [string](Get-PropertyOrDefault -Object $record -Name "managedPackageDownloadUrl" -DefaultValue "")
+$runtimePageUrl = [string](Get-PropertyOrDefault -Object $record -Name "runtimePackagePageUrl" -DefaultValue "")
+$runtimeDownloadUrl = [string](Get-PropertyOrDefault -Object $record -Name "runtimePackageDownloadUrl" -DefaultValue "")
+$githubReleaseUrl = [string](Get-PropertyOrDefault -Object $record -Name "githubReleaseUrl" -DefaultValue "")
+$githubReleaseAssetUrl = [string](Get-PropertyOrDefault -Object $record -Name "githubReleaseAssetUrl" -DefaultValue "")
+$githubReleaseAssetPath = [string](Get-PropertyOrDefault -Object $record -Name "githubReleaseAssetDownloadedPath" -DefaultValue "")
+$githubReleaseAssetSha = [string](Get-PropertyOrDefault -Object $record -Name "githubReleaseAssetSha256" -DefaultValue "")
+$githubReleaseAssetSize = [string](Get-PropertyOrDefault -Object $record -Name "githubReleaseAssetSizeBytes" -DefaultValue "")
 $managedPath = [string](Get-PropertyOrDefault -Object $record -Name "downloadedManagedNupkgPath" -DefaultValue "")
 $runtimePath = [string](Get-PropertyOrDefault -Object $record -Name "downloadedRuntimeNupkgPath" -DefaultValue "")
 $managedSha = [string](Get-PropertyOrDefault -Object $record -Name "downloadedManagedNupkgSha256" -DefaultValue "")
 $runtimeSha = [string](Get-PropertyOrDefault -Object $record -Name "downloadedRuntimeNupkgSha256" -DefaultValue "")
+$managedSize = [string](Get-PropertyOrDefault -Object $record -Name "downloadedManagedNupkgSizeBytes" -DefaultValue "")
+$runtimeSize = [string](Get-PropertyOrDefault -Object $record -Name "downloadedRuntimeNupkgSizeBytes" -DefaultValue "")
 $dryRunPath = [string](Get-PropertyOrDefault -Object $record -Name "packageDryRunArtifactPath" -DefaultValue "")
 $dryRunSha = [string](Get-PropertyOrDefault -Object $record -Name "packageDryRunManagedNupkgSha256" -DefaultValue "")
+$sourceGitHubActionsRunEvidenceReady = Get-BoolPropertyOrDefault -Object $record -Name "sourceGitHubActionsRunEvidenceReady" -DefaultValue $false
+$sourceOwnerPublicPublishResultReady = Get-BoolPropertyOrDefault -Object $record -Name "sourceOwnerPublicPublishResultReady" -DefaultValue $false
+$sourceWorkflowRunLogSha256 = [string](Get-PropertyOrDefault -Object $record -Name "sourceWorkflowRunLogSha256" -DefaultValue "")
+$sourceArtifactManifestSha256 = [string](Get-PropertyOrDefault -Object $record -Name "sourceArtifactManifestSha256" -DefaultValue "")
+$sourceOwnerPublicPackageUrl = [string](Get-PropertyOrDefault -Object $record -Name "sourceOwnerPublicPackageUrl" -DefaultValue "")
+$sourceOwnerPublicPackageVersion = [string](Get-PropertyOrDefault -Object $record -Name "sourceOwnerPublicPackageVersion" -DefaultValue "")
+$sourceOwnerPublicPackageSha256 = [string](Get-PropertyOrDefault -Object $record -Name "sourceOwnerPublicPackageSha256" -DefaultValue "")
+$capturedAtUtc = [string](Get-PropertyOrDefault -Object $record -Name "capturedAtUtc" -DefaultValue "")
+$ownerReviewer = [string](Get-PropertyOrDefault -Object $record -Name "ownerReviewer" -DefaultValue "")
+$forbiddenFindings = Get-ForbiddenSubstituteFindings -Values @(
+  $sourceKind, $sourceUrl, $managedPageUrl, $managedDownloadUrl, $runtimePageUrl, $runtimeDownloadUrl,
+  $githubReleaseUrl, $githubReleaseAssetUrl, $githubReleaseAssetPath, $managedPath, $runtimePath,
+  [string](Get-PropertyOrDefault -Object $record -Name "downloadCommand" -DefaultValue ""),
+  $ownerName, $ownerReviewer
+)
 
 $items.Add((New-ValidationItem -Id "record-kind" -Passed ($recordKind -eq "public-package-download-proof-input") -Severity "blocker" -Detail "recordKind must be public-package-download-proof-input.")) | Out-Null
 $items.Add((New-ValidationItem -Id "no-side-effects" -Passed (-not $performsPublish -and -not $usesPublishToken -and -not $canPublishPublicly -and -not $canPublishGitHubPackages -and -not $canCloseReleaseIssue) -Severity "blocker" -Detail "Public package download proof input validation must not publish, use token, approve publication, or close issues.")) | Out-Null
 $items.Add((New-ValidationItem -Id "proof-claims-false" -Passed (-not $canClaimRuntimeProof -and -not $canClaimPackageConsumerRuntimeProof -and -not $isPackageConsumerRuntimeProof -and -not $isPostPublishProof) -Severity "blocker" -Detail "Download proof input is not runtime proof, package-consumer runtime proof, or post-publish proof.")) | Out-Null
 $items.Add((New-ValidationItem -Id "owner-authorization-not-default-true" -Passed (-not $ownerAuthorizationState.Equals("true", [StringComparison]::OrdinalIgnoreCase) -and -not $ownerAuthorizationState.Equals("authorized", [StringComparison]::OrdinalIgnoreCase) -and -not $ownerAuthorizationState.Equals("approved", [StringComparison]::OrdinalIgnoreCase)) -Severity "blocker" -Detail "ownerAuthorizationState must not default to true/authorized/approved.")) | Out-Null
-$items.Add((New-ValidationItem -Id "source-kind-valid" -Passed (Test-ValueInSet -Value $sourceKind -AllowedValues @("nuget.org", "github-packages", "private-feed")) -Severity "action-required" -Detail "publicPackageSourceKind must be nuget.org, github-packages, or private-feed.")) | Out-Null
+$items.Add((New-ValidationItem -Id "source-kind-valid" -Passed (Test-ValueInSet -Value $sourceKind -AllowedValues @("nuget.org", "github-packages")) -Severity "action-required" -Detail "publicPackageSourceKind must be nuget.org or github-packages.")) | Out-Null
 $items.Add((New-ValidationItem -Id "source-url-public-not-local" -Passed (Test-SourceUrlIsPublicCandidate -Value $sourceUrl) -Severity "action-required" -Detail "publicPackageSourceUrl must be an HTTPS package source, not a local path, artifacts path, direct .nupkg, template placeholder, or dry-run artifact.")) | Out-Null
+$items.Add((New-ValidationItem -Id "managed-package-page-url-nuget" -Passed (Test-NuGetPackagePageUrl -Value $managedPageUrl) -Severity "action-required" -Detail "managedPackagePageUrl must be a nuget.org package page.")) | Out-Null
+$items.Add((New-ValidationItem -Id "managed-package-download-url-public" -Passed (Test-PublicDownloadUrl -Value $managedDownloadUrl) -Severity "action-required" -Detail "managedPackageDownloadUrl must be an HTTPS public download URL.")) | Out-Null
+$items.Add((New-ValidationItem -Id "runtime-package-page-url-nuget" -Passed (Test-NuGetPackagePageUrl -Value $runtimePageUrl) -Severity "action-required" -Detail "runtimePackagePageUrl must be a nuget.org package page.")) | Out-Null
+$items.Add((New-ValidationItem -Id "runtime-package-download-url-public" -Passed (Test-PublicDownloadUrl -Value $runtimeDownloadUrl) -Severity "action-required" -Detail "runtimePackageDownloadUrl must be an HTTPS public download URL.")) | Out-Null
+$items.Add((New-ValidationItem -Id "github-release-url-public" -Passed (Test-GitHubPublicUrl -Value $githubReleaseUrl) -Severity "action-required" -Detail "githubReleaseUrl must be a GitHub release URL for the full dependency package route.")) | Out-Null
+$items.Add((New-ValidationItem -Id "github-release-asset-url-public" -Passed (Test-GitHubPublicUrl -Value $githubReleaseAssetUrl) -Severity "action-required" -Detail "githubReleaseAssetUrl must be a GitHub release asset URL for the full dependency package route.")) | Out-Null
 $items.Add((New-ValidationItem -Id "download-command-present" -Passed (-not (Test-IsPlaceholder -Value (Get-PropertyOrDefault -Object $record -Name "downloadCommand" -DefaultValue ""))) -Severity "action-required" -Detail "downloadCommand must capture the exact public package download command.")) | Out-Null
 $items.Add((New-ValidationItem -Id "downloaded-at-utc-parseable" -Passed (Test-DateTimeOffsetFormat -Value (Get-PropertyOrDefault -Object $record -Name "downloadedAtUtc" -DefaultValue "")) -Severity "action-required" -Detail "downloadedAtUtc must be a real parseable DateTimeOffset.")) | Out-Null
 $items.Add((New-ValidationItem -Id "owner-name-present" -Passed (-not (Test-IsPlaceholder -Value (Get-PropertyOrDefault -Object $record -Name "ownerName" -DefaultValue ""))) -Severity "action-required" -Detail "ownerName must be filled by the owner collecting real public package proof.")) | Out-Null
+$items.Add((New-ValidationItem -Id "owner-reviewer-present" -Passed (-not (Test-IsPlaceholder -Value $ownerReviewer)) -Severity "action-required" -Detail "ownerReviewer must identify the person reviewing public download proof.")) | Out-Null
+$items.Add((New-ValidationItem -Id "captured-at-utc-parseable" -Passed (Test-DateTimeOffsetFormat -Value $capturedAtUtc) -Severity "action-required" -Detail "capturedAtUtc must be parseable.")) | Out-Null
 $items.Add((New-ValidationItem -Id "managed-package-version-present" -Passed (-not (Test-IsPlaceholder -Value (Get-PropertyOrDefault -Object $record -Name "managedPackageVersion" -DefaultValue ""))) -Severity "action-required" -Detail "managedPackageVersion must be real.")) | Out-Null
 $items.Add((New-ValidationItem -Id "runtime-package-version-present" -Passed (-not (Test-IsPlaceholder -Value (Get-PropertyOrDefault -Object $record -Name "runtimePackageVersion" -DefaultValue ""))) -Severity "action-required" -Detail "runtimePackageVersion must be real.")) | Out-Null
+$items.Add((New-ValidationItem -Id "source-github-actions-run-evidence-ready" -Passed $sourceGitHubActionsRunEvidenceReady -Severity "action-required" -Detail "Public download proof must link to ready GitHub Actions run evidence.")) | Out-Null
+$items.Add((New-ValidationItem -Id "source-owner-public-publish-result-ready" -Passed $sourceOwnerPublicPublishResultReady -Severity "action-required" -Detail "Public download proof must link to a ready Owner public publish result.")) | Out-Null
+$items.Add((New-ValidationItem -Id "source-workflow-log-sha256" -Passed (Test-Sha256Format -Value $sourceWorkflowRunLogSha256) -Severity "action-required" -Detail "Source workflow run log SHA256 must be present.")) | Out-Null
+$items.Add((New-ValidationItem -Id "source-artifact-manifest-sha256" -Passed (Test-Sha256Format -Value $sourceArtifactManifestSha256) -Severity "action-required" -Detail "Source artifact manifest SHA256 must be present.")) | Out-Null
+$items.Add((New-ValidationItem -Id "source-owner-public-package-url-match" -Passed (-not (Test-IsPlaceholder -Value $sourceOwnerPublicPackageUrl) -and $managedPageUrl.Equals($sourceOwnerPublicPackageUrl, [StringComparison]::OrdinalIgnoreCase)) -Severity "action-required" -Detail "managedPackagePageUrl must match the Owner public publish result package URL.")) | Out-Null
+$items.Add((New-ValidationItem -Id "source-owner-public-package-version-match" -Passed (-not (Test-IsPlaceholder -Value $sourceOwnerPublicPackageVersion) -and ([string](Get-PropertyOrDefault -Object $record -Name "managedPackageVersion" -DefaultValue "")).Equals($sourceOwnerPublicPackageVersion, [StringComparison]::OrdinalIgnoreCase)) -Severity "action-required" -Detail "managedPackageVersion must match the Owner public publish result version.")) | Out-Null
+$items.Add((New-ValidationItem -Id "source-owner-public-package-sha256-match" -Passed (Test-Sha256Format -Value $sourceOwnerPublicPackageSha256) -Severity "action-required" -Detail "Owner public publish result SHA256 must be present for cross-checking.")) | Out-Null
 $items.Add((New-ValidationItem -Id "downloaded-managed-path-public-download" -Passed (Test-DownloadedPathIsPublicDownloadCandidate -Path $managedPath -DryRunPath $dryRunPath) -Severity "action-required" -Detail "downloadedManagedNupkgPath must be a real downloaded .nupkg path and not a dry-run/artifacts path.")) | Out-Null
 $items.Add((New-ValidationItem -Id "downloaded-runtime-path-public-download" -Passed (Test-DownloadedPathIsPublicDownloadCandidate -Path $runtimePath -DryRunPath "") -Severity "action-required" -Detail "downloadedRuntimeNupkgPath must be a real downloaded .nupkg path and not an artifacts path.")) | Out-Null
+$items.Add((New-ValidationItem -Id "downloaded-managed-size-positive" -Passed (Test-PositiveInt64 -Value $managedSize) -Severity "action-required" -Detail "downloadedManagedNupkgSizeBytes must be a positive integer.")) | Out-Null
+$items.Add((New-ValidationItem -Id "downloaded-runtime-size-positive" -Passed (Test-PositiveInt64 -Value $runtimeSize) -Severity "action-required" -Detail "downloadedRuntimeNupkgSizeBytes must be a positive integer.")) | Out-Null
 $items.Add((New-ValidationItem -Id "downloaded-managed-sha256-format" -Passed (Test-Sha256Format -Value $managedSha) -Severity "action-required" -Detail "downloadedManagedNupkgSha256 must be a 64-character SHA256.")) | Out-Null
 $items.Add((New-ValidationItem -Id "downloaded-runtime-sha256-format" -Passed (Test-Sha256Format -Value $runtimeSha) -Severity "action-required" -Detail "downloadedRuntimeNupkgSha256 must be a 64-character SHA256.")) | Out-Null
 $items.Add((New-ValidationItem -Id "downloaded-managed-hash-match" -Passed (Test-FileHashMatches -Path $managedPath -Sha256 $managedSha) -Severity "action-required" -Detail "downloadedManagedNupkgPath must exist and match downloadedManagedNupkgSha256.")) | Out-Null
 $items.Add((New-ValidationItem -Id "downloaded-runtime-hash-match" -Passed (Test-FileHashMatches -Path $runtimePath -Sha256 $runtimeSha) -Severity "action-required" -Detail "downloadedRuntimeNupkgPath must exist and match downloadedRuntimeNupkgSha256.")) | Out-Null
+$items.Add((New-ValidationItem -Id "downloaded-managed-size-match" -Passed (Test-FileSizeMatches -Path $managedPath -ExpectedSize $managedSize) -Severity "action-required" -Detail "Downloaded managed package size must match downloadedManagedNupkgSizeBytes.")) | Out-Null
+$items.Add((New-ValidationItem -Id "downloaded-runtime-size-match" -Passed (Test-FileSizeMatches -Path $runtimePath -ExpectedSize $runtimeSize) -Severity "action-required" -Detail "Downloaded runtime package size must match downloadedRuntimeNupkgSizeBytes.")) | Out-Null
+$items.Add((New-ValidationItem -Id "github-release-asset-sha256" -Passed (Test-Sha256Format -Value $githubReleaseAssetSha) -Severity "action-required" -Detail "githubReleaseAssetSha256 must be present.")) | Out-Null
+$items.Add((New-ValidationItem -Id "github-release-asset-size-positive" -Passed (Test-PositiveInt64 -Value $githubReleaseAssetSize) -Severity "action-required" -Detail "githubReleaseAssetSizeBytes must be positive.")) | Out-Null
 $items.Add((New-ValidationItem -Id "dry-run-sha-not-substituted" -Passed (-not (Test-Sha256Format -Value $dryRunSha) -or -not $managedSha.Equals($dryRunSha, [StringComparison]::OrdinalIgnoreCase)) -Severity "action-required" -Detail "GitHub Actions dry-run SHA256 must not be reused as downloaded public package SHA256.")) | Out-Null
+$items.Add((New-ValidationItem -Id "forbidden-substitutes-absent" -Passed ($forbiddenFindings.Count -eq 0) -Severity "blocker" -Detail $(if ($forbiddenFindings.Count -eq 0) { "No local feed, direct nupkg, dry-run, dashboard-only, artifact-only, ProjectReference, manual approval, queued workflow, or local test substitute was detected." } else { "Forbidden substitute(s): $($forbiddenFindings -join ', ')" }))) | Out-Null
 $items.Add((New-ValidationItem -Id "template-default-blocked" -Passed ([string](Get-PropertyOrDefault -Object $record -Name "validationState" -DefaultValue "") -ne "ready" -and -not $isPublishedPackageProof) -Severity "blocker" -Detail "Template/default input must stay blocked until owner supplies real download evidence.")) | Out-Null
 
 $failedBlockers = @($items | Where-Object { -not $_.passed -and $_.severity -eq "blocker" })
 $failedActionRequired = @($items | Where-Object { -not $_.passed -and $_.severity -eq "action-required" })
-$validationState = if ($failedBlockers.Count -eq 0 -and $failedActionRequired.Count -eq 0) {
+$validationState = if ($failedBlockers.Count -gt 0) {
+  "invalid-public-package-download-proof-input"
+}
+elseif ($failedActionRequired.Count -eq 0) {
   "public-package-download-proof-input-ready"
 }
 else {
@@ -291,6 +413,15 @@ $validation = [pscustomobject]@{
   downloadedManagedNupkgSha256Ready = (@($items | Where-Object { $_.id -eq "downloaded-managed-sha256-format" -and $_.passed }).Count -eq 1)
   downloadedManagedNupkgHashMatches = (@($items | Where-Object { $_.id -eq "downloaded-managed-hash-match" -and $_.passed }).Count -eq 1)
   dryRunShaNotSubstituted = (@($items | Where-Object { $_.id -eq "dry-run-sha-not-substituted" -and $_.passed }).Count -eq 1)
+  sourceGitHubActionsRunEvidenceReady = $sourceGitHubActionsRunEvidenceReady
+  sourceOwnerPublicPublishResultReady = $sourceOwnerPublicPublishResultReady
+  managedPackagePageUrl = $managedPageUrl
+  managedPackageDownloadUrl = $managedDownloadUrl
+  runtimePackagePageUrl = $runtimePageUrl
+  runtimePackageDownloadUrl = $runtimeDownloadUrl
+  githubReleaseUrl = $githubReleaseUrl
+  githubReleaseAssetUrl = $githubReleaseAssetUrl
+  forbiddenSubstituteFindings = @($forbiddenFindings)
   performsPublish = $false
   usesPublishToken = $false
   canPublishPublicly = $false

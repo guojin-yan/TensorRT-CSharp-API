@@ -2,6 +2,8 @@
 param(
   [string]$RuntimePackageKey = "win-x64-trt11.0-cuda13.2-cudnn9.22",
   [string]$GitHubActionsRunEvidenceImportPath = "artifacts\final-release\github-actions-run-evidence-import.json",
+  [string]$GitHubActionsRunEvidenceValidationPath = "artifacts\final-release\github-actions-run-evidence-import-validation.json",
+  [string]$OwnerPublicPublishResultValidationPath = "artifacts\final-release\owner-public-publish-execution-result-candidate-validation.json",
   [string]$RepositoryRoot
 )
 
@@ -69,6 +71,8 @@ function Read-JsonOrNull {
 }
 
 $githubActionsEvidence = Read-JsonOrNull -Path $GitHubActionsRunEvidenceImportPath
+$githubActionsValidation = Read-JsonOrNull -Path $GitHubActionsRunEvidenceValidationPath
+$ownerPublishValidation = Read-JsonOrNull -Path $OwnerPublicPublishResultValidationPath
 $dryRunPackages = if ($null -eq $githubActionsEvidence) {
   @()
 }
@@ -88,6 +92,13 @@ if ($dryRunManagedPackage.Count -eq 0 -and $dryRunPackages.Count -gt 0) {
 $sourceRunId = if ($null -eq $githubActionsEvidence) { "<no-github-actions-run-evidence-import>" } else { [string](Get-PropertyOrDefault -Object $githubActionsEvidence -Name "runId" -DefaultValue "<missing-run-id>") }
 $sourceRunUrl = if ($null -eq $githubActionsEvidence) { "<no-github-actions-run-evidence-import>" } else { [string](Get-PropertyOrDefault -Object $githubActionsEvidence -Name "runUrl" -DefaultValue "<missing-run-url>") }
 $sourceHeadSha = if ($null -eq $githubActionsEvidence) { "<no-github-actions-run-evidence-import>" } else { [string](Get-PropertyOrDefault -Object $githubActionsEvidence -Name "headSha" -DefaultValue "<missing-head-sha>") }
+$sourceGitHubActionsRunEvidenceReady = if ($null -eq $githubActionsValidation) { $false } else { [bool](Get-PropertyOrDefault -Object $githubActionsValidation -Name "githubActionsRunEvidenceReady" -DefaultValue $false) }
+$sourceWorkflowRunLogSha256 = if ($null -eq $githubActionsValidation) { "<missing-workflow-run-log-sha256>" } else { [string](Get-PropertyOrDefault -Object $githubActionsValidation -Name "workflowRunLogSha256" -DefaultValue "<missing-workflow-run-log-sha256>") }
+$sourceArtifactManifestSha256 = if ($null -eq $githubActionsValidation) { "<missing-artifact-manifest-sha256>" } else { [string](Get-PropertyOrDefault -Object $githubActionsValidation -Name "artifactManifestSha256" -DefaultValue "<missing-artifact-manifest-sha256>") }
+$sourceOwnerPublicPublishResultReady = if ($null -eq $ownerPublishValidation) { $false } else { [bool](Get-PropertyOrDefault -Object $ownerPublishValidation -Name "proofCandidateReady" -DefaultValue $false) }
+$sourceOwnerPublicPackageUrl = if ($null -eq $ownerPublishValidation) { "<missing-owner-public-package-url>" } else { [string](Get-PropertyOrDefault -Object $ownerPublishValidation -Name "publicPackageUrl" -DefaultValue "<missing-owner-public-package-url>") }
+$sourceOwnerPublicPackageVersion = if ($null -eq $ownerPublishValidation) { "<missing-owner-public-package-version>" } else { [string](Get-PropertyOrDefault -Object $ownerPublishValidation -Name "publicPackageVersion" -DefaultValue "<missing-owner-public-package-version>") }
+$sourceOwnerPublicPackageSha256 = if ($null -eq $ownerPublishValidation) { "<missing-owner-public-package-sha256>" } else { [string](Get-PropertyOrDefault -Object $ownerPublishValidation -Name "publicPackageSha256" -DefaultValue "<missing-owner-public-package-sha256>") }
 $packageDryRunCanClaimPack = if ($null -eq $githubActionsEvidence) { $false } else { [bool](Get-PropertyOrDefault -Object $githubActionsEvidence -Name "canClaimGitHubActionsPackageDryRunPackForRun" -DefaultValue $false) }
 $packageDryRunArtifactPath = if ($dryRunManagedPackage.Count -eq 0) { "<no-package-managed-dry-run-artifact>" } else { [string](Get-PropertyOrDefault -Object $dryRunManagedPackage[0] -Name "fullPath" -DefaultValue "<missing-dry-run-package-path>") }
 $packageDryRunManagedNupkgSha256 = if ($dryRunManagedPackage.Count -eq 0) { "<no-package-managed-dry-run-sha256>" } else { [string](Get-PropertyOrDefault -Object $dryRunManagedPackage[0] -Name "sha256" -DefaultValue "<missing-dry-run-package-sha256>") }
@@ -98,26 +109,48 @@ $template = [pscustomobject]@{
   validationState = "blocked-public-package-download-proof-required"
   proofLineId = "public-package-download"
   sourceGitHubActionsRunEvidenceImportPath = $GitHubActionsRunEvidenceImportPath
+  sourceGitHubActionsRunEvidenceValidationPath = $GitHubActionsRunEvidenceValidationPath
+  sourceOwnerPublicPublishResultValidationPath = $OwnerPublicPublishResultValidationPath
   sourceGitHubActionsRunId = $sourceRunId
   sourceGitHubActionsRunUrl = $sourceRunUrl
   sourceHeadSha = $sourceHeadSha
+  sourceGitHubActionsRunEvidenceReady = $sourceGitHubActionsRunEvidenceReady
+  sourceWorkflowRunLogSha256 = $sourceWorkflowRunLogSha256
+  sourceArtifactManifestSha256 = $sourceArtifactManifestSha256
+  sourceOwnerPublicPublishResultReady = $sourceOwnerPublicPublishResultReady
+  sourceOwnerPublicPackageUrl = $sourceOwnerPublicPackageUrl
+  sourceOwnerPublicPackageVersion = $sourceOwnerPublicPackageVersion
+  sourceOwnerPublicPackageSha256 = $sourceOwnerPublicPackageSha256
   packageDryRunArtifactPath = $packageDryRunArtifactPath
   packageDryRunManagedNupkgSha256 = $packageDryRunManagedNupkgSha256
   packageDryRunCanClaimPack = $packageDryRunCanClaimPack
   managedPackageId = "JYPPX.TensorRT.CSharp.API"
   managedPackageVersion = "<owner-fill-managed-package-version>"
+  managedPackagePageUrl = "<owner-fill-managed-package-page-url>"
+  managedPackageDownloadUrl = "<owner-fill-managed-package-download-url>"
   publicPackageSourceUrl = "<owner-fill-public-package-source-url>"
-  publicPackageSourceKind = "<owner-fill-nuget.org-or-github-packages-or-private-feed>"
+  publicPackageSourceKind = "<owner-fill-nuget.org-or-github-packages>"
   downloadedManagedNupkgPath = "<owner-fill-downloaded-managed-nupkg-path>"
   downloadedManagedNupkgSha256 = "<owner-fill-downloaded-managed-nupkg-sha256>"
+  downloadedManagedNupkgSizeBytes = "<owner-fill-downloaded-managed-nupkg-size-bytes>"
   runtimePackageId = "JYPPX.TensorRT.CSharp.API.runtime.$RuntimePackageKey"
   runtimePackageVersion = "<owner-fill-runtime-package-version>"
   runtimePackageKey = $RuntimePackageKey
+  runtimePackagePageUrl = "<owner-fill-runtime-package-page-url>"
+  runtimePackageDownloadUrl = "<owner-fill-runtime-package-download-url>"
   downloadedRuntimeNupkgPath = "<owner-fill-downloaded-runtime-nupkg-path>"
   downloadedRuntimeNupkgSha256 = "<owner-fill-downloaded-runtime-nupkg-sha256>"
+  downloadedRuntimeNupkgSizeBytes = "<owner-fill-downloaded-runtime-nupkg-size-bytes>"
+  githubReleaseUrl = "<owner-fill-github-release-url>"
+  githubReleaseAssetUrl = "<owner-fill-github-release-asset-url>"
+  githubReleaseAssetDownloadedPath = "<owner-fill-github-release-asset-downloaded-path>"
+  githubReleaseAssetSha256 = "<owner-fill-github-release-asset-sha256>"
+  githubReleaseAssetSizeBytes = "<owner-fill-github-release-asset-size-bytes>"
   downloadCommand = "dotnet package search/download from public feed; owner must replace with exact command"
   downloadedAtUtc = "<owner-fill-downloaded-at-utc>"
+  capturedAtUtc = "<owner-fill-captured-at-utc>"
   ownerName = "<owner-fill-owner-name>"
+  ownerReviewer = "<owner-fill-owner-reviewer>"
   ownerAuthorizationState = "owner-authorization-required"
   performsPublish = $false
   usesPublishToken = $false
@@ -176,6 +209,12 @@ $markdown = @"
 | runtimePackageKey | ``$($template.runtimePackageKey)`` |
 | publicPackageSourceUrl | ``$($template.publicPackageSourceUrl)`` |
 | publicPackageSourceKind | ``$($template.publicPackageSourceKind)`` |
+| managedPackagePageUrl | ``$($template.managedPackagePageUrl)`` |
+| managedPackageDownloadUrl | ``$($template.managedPackageDownloadUrl)`` |
+| runtimePackagePageUrl | ``$($template.runtimePackagePageUrl)`` |
+| runtimePackageDownloadUrl | ``$($template.runtimePackageDownloadUrl)`` |
+| sourceOwnerPublicPublishResultReady | ``$($template.sourceOwnerPublicPublishResultReady)`` |
+| sourceGitHubActionsRunEvidenceReady | ``$($template.sourceGitHubActionsRunEvidenceReady)`` |
 | packageDryRunArtifactPath | ``$($template.packageDryRunArtifactPath)`` |
 | packageDryRunManagedNupkgSha256 | ``$($template.packageDryRunManagedNupkgSha256)`` |
 | packageDryRunCanClaimPack | ``$($template.packageDryRunCanClaimPack)`` |

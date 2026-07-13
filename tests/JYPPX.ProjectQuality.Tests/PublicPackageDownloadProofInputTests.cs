@@ -119,25 +119,24 @@ public sealed class PublicPackageDownloadProofInputTests
         RunPowerShell(
             Path.Combine(RepositoryPaths.Root, "eng", "Test-PublicPackageDownloadProofInput.ps1"),
             "-InputPath",
-            "artifacts/final-release/public-package-download-proof-input.misuse.json",
-            "-Strict");
+            "artifacts/final-release/public-package-download-proof-input.misuse.json");
 
         using JsonDocument validationDocument = ReadFinalReleaseJson("public-package-download-proof-input-validation.json");
         JsonElement validation = validationDocument.RootElement;
-        Assert.Equal("blocked-public-package-download-proof-required", validation.GetProperty("validationState").GetString());
-        Assert.Equal(0, validation.GetProperty("failedBlockerCount").GetInt32());
+        Assert.Equal("invalid-public-package-download-proof-input", validation.GetProperty("validationState").GetString());
+        Assert.True(validation.GetProperty("failedBlockerCount").GetInt32() > 0);
         Assert.False(validation.GetProperty("publicPackageDownloadProofReady").GetBoolean());
 
         RunPowerShell(
             Path.Combine(RepositoryPaths.Root, "eng", "Import-PublicPackageDownloadProofCandidate.ps1"),
             "-InputPath",
             "artifacts/final-release/public-package-download-proof-input.misuse.json");
-        RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Test-PublicPackageDownloadProofCandidate.ps1"), "-Strict");
+        RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Test-PublicPackageDownloadProofCandidate.ps1"));
 
         using JsonDocument candidateValidationDocument = ReadFinalReleaseJson("public-package-download-proof-candidate-validation.json");
         JsonElement candidateValidation = candidateValidationDocument.RootElement;
-        Assert.Equal("blocked-public-package-download-proof-required", candidateValidation.GetProperty("validationState").GetString());
-        Assert.Equal(0, candidateValidation.GetProperty("failedBlockerCount").GetInt32());
+        Assert.Equal("invalid-public-package-download-proof-candidate", candidateValidation.GetProperty("validationState").GetString());
+        Assert.True(candidateValidation.GetProperty("failedBlockerCount").GetInt32() > 0);
         Assert.False(candidateValidation.GetProperty("publicPackageDownloadProofCandidateReady").GetBoolean());
         Assert.False(candidateValidation.GetProperty("proofCandidateReady").GetBoolean());
 
@@ -145,6 +144,8 @@ public sealed class PublicPackageDownloadProofInputTests
         AssertValidationItemFailed(validation, "downloaded-managed-path-public-download");
         AssertValidationItemFailed(validation, "downloaded-runtime-path-public-download");
         AssertValidationItemFailed(validation, "dry-run-sha-not-substituted");
+        AssertValidationItemFailed(validation, "forbidden-substitutes-absent");
+        AssertValidationItemFailed(candidateValidation, "forbidden-substitutes-absent");
     }
 
     [Fact]
@@ -159,21 +160,40 @@ public sealed class PublicPackageDownloadProofInputTests
         {
             CreateMinimalNupkg(managedPackagePath, "JYPPX.TensorRT.CSharp.API");
             CreateMinimalNupkg(runtimePackagePath, "JYPPX.TensorRT.CSharp.API.runtime.win-x64-trt11.0-cuda13.2-cudnn9.22");
+            string managedPackageHash = Sha256(managedPackagePath);
+            string runtimePackageHash = Sha256(runtimePackagePath);
+            string managedPackagePageUrl = "https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API/4.0.0";
+            string runtimePackagePageUrl = "https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API.runtime.win-x64-trt11.0-cuda13.2-cudnn9.22/4.0.0";
+
+            WriteReadySourceValidations(managedPackagePageUrl, managedPackageHash);
 
             RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Export-PublicPackageDownloadProofInputTemplate.ps1"));
             using JsonDocument templateDocument = ReadFinalReleaseJson("public-package-download-proof-input.template.json");
             Dictionary<string, object?> values = ToDictionary(templateDocument.RootElement);
             values["managedPackageVersion"] = "4.0.0";
             values["runtimePackageVersion"] = "4.0.0";
+            values["managedPackagePageUrl"] = managedPackagePageUrl;
+            values["managedPackageDownloadUrl"] = "https://www.nuget.org/api/v2/package/JYPPX.TensorRT.CSharp.API/4.0.0";
+            values["runtimePackagePageUrl"] = runtimePackagePageUrl;
+            values["runtimePackageDownloadUrl"] = "https://www.nuget.org/api/v2/package/JYPPX.TensorRT.CSharp.API.runtime.win-x64-trt11.0-cuda13.2-cudnn9.22/4.0.0";
             values["publicPackageSourceUrl"] = "https://api.nuget.org/v3/index.json";
             values["publicPackageSourceKind"] = "nuget.org";
             values["downloadedManagedNupkgPath"] = managedPackagePath;
-            values["downloadedManagedNupkgSha256"] = Sha256(managedPackagePath);
+            values["downloadedManagedNupkgSha256"] = managedPackageHash;
+            values["downloadedManagedNupkgSizeBytes"] = new FileInfo(managedPackagePath).Length.ToString();
             values["downloadedRuntimeNupkgPath"] = runtimePackagePath;
-            values["downloadedRuntimeNupkgSha256"] = Sha256(runtimePackagePath);
+            values["downloadedRuntimeNupkgSha256"] = runtimePackageHash;
+            values["downloadedRuntimeNupkgSizeBytes"] = new FileInfo(runtimePackagePath).Length.ToString();
+            values["githubReleaseUrl"] = "https://github.com/guojin-yan/TensorRT-CSharp-API/releases/tag/v4.0.0";
+            values["githubReleaseAssetUrl"] = "https://github.com/guojin-yan/TensorRT-CSharp-API/releases/download/v4.0.0/JYPPX.TensorRT.CSharp.API.runtime.win-x64-trt11.0-cuda13.2-cudnn9.22.4.0.0.nupkg";
+            values["githubReleaseAssetDownloadedPath"] = runtimePackagePath;
+            values["githubReleaseAssetSha256"] = runtimePackageHash;
+            values["githubReleaseAssetSizeBytes"] = new FileInfo(runtimePackagePath).Length.ToString();
             values["downloadCommand"] = "dotnet restore --source https://api.nuget.org/v3/index.json";
             values["downloadedAtUtc"] = DateTimeOffset.UtcNow.ToString("O");
+            values["capturedAtUtc"] = DateTimeOffset.UtcNow.ToString("O");
             values["ownerName"] = "owner";
+            values["ownerReviewer"] = "owner-reviewer";
             values["ownerAuthorizationState"] = "owner-reviewed-download-only";
             values["isPublishedPackageProof"] = false;
 
@@ -209,9 +229,13 @@ public sealed class PublicPackageDownloadProofInputTests
             Assert.True(candidate.GetProperty("proofCandidateReady").GetBoolean());
             Assert.Equal("JYPPX.TensorRT.CSharp.API", candidate.GetProperty("managedPackageId").GetString());
             Assert.Equal(managedPackagePath, candidate.GetProperty("downloadedManagedNupkgPath").GetString());
-            Assert.Equal(Sha256(managedPackagePath), candidate.GetProperty("downloadedManagedNupkgSha256").GetString());
+            Assert.Equal(managedPackageHash, candidate.GetProperty("downloadedManagedNupkgSha256").GetString());
+            Assert.Equal(managedPackagePageUrl, candidate.GetProperty("managedPackagePageUrl").GetString());
+            Assert.Equal("https://www.nuget.org/api/v2/package/JYPPX.TensorRT.CSharp.API/4.0.0", candidate.GetProperty("managedPackageDownloadUrl").GetString());
             Assert.Equal(runtimePackagePath, candidate.GetProperty("downloadedRuntimeNupkgPath").GetString());
-            Assert.Equal(Sha256(runtimePackagePath), candidate.GetProperty("downloadedRuntimeNupkgSha256").GetString());
+            Assert.Equal(runtimePackageHash, candidate.GetProperty("downloadedRuntimeNupkgSha256").GetString());
+            Assert.True(candidate.GetProperty("sourceGitHubActionsRunEvidenceReady").GetBoolean());
+            Assert.True(candidate.GetProperty("sourceOwnerPublicPublishResultReady").GetBoolean());
             Assert.False(candidate.GetProperty("performsPublish").GetBoolean());
             Assert.False(candidate.GetProperty("usesPublishToken").GetBoolean());
             Assert.False(candidate.GetProperty("canClaimPackageConsumerRuntimeProof").GetBoolean());
@@ -226,6 +250,9 @@ public sealed class PublicPackageDownloadProofInputTests
             Assert.Equal(0, candidateValidation.GetProperty("failedActionRequiredCount").GetInt32());
             Assert.True(candidateValidation.GetProperty("publicPackageDownloadProofCandidateReady").GetBoolean());
             Assert.True(candidateValidation.GetProperty("proofCandidateReady").GetBoolean());
+            Assert.True(candidateValidation.GetProperty("sourceGitHubActionsRunEvidenceReady").GetBoolean());
+            Assert.True(candidateValidation.GetProperty("sourceOwnerPublicPublishResultReady").GetBoolean());
+            Assert.Equal(managedPackagePageUrl, candidateValidation.GetProperty("sourceOwnerPublicPackageUrl").GetString());
             Assert.False(candidateValidation.GetProperty("isRuntimeExecutionProof").GetBoolean());
             Assert.False(candidateValidation.GetProperty("isPackageConsumerRuntimeProof").GetBoolean());
             Assert.False(candidateValidation.GetProperty("isPostPublishProof").GetBoolean());
@@ -267,6 +294,42 @@ public sealed class PublicPackageDownloadProofInputTests
             "artifacts",
             "final-release",
             fileName)));
+    }
+
+    private static void WriteReadySourceValidations(string publicPackageUrl, string publicPackageSha256)
+    {
+        string outputRoot = Path.Combine(RepositoryPaths.Root, "artifacts", "final-release");
+        Directory.CreateDirectory(outputRoot);
+
+        File.WriteAllText(
+            Path.Combine(outputRoot, "github-actions-run-evidence-import-validation.json"),
+            JsonSerializer.Serialize(
+                new Dictionary<string, object?>
+                {
+                    ["recordKind"] = "github-actions-run-evidence-import-validation",
+                    ["validationState"] = "github-actions-run-evidence-ready",
+                    ["githubActionsRunEvidenceReady"] = true,
+                    ["runId"] = "123456789",
+                    ["runUrl"] = "https://github.com/guojin-yan/TensorRT-CSharp-API/actions/runs/123456789",
+                    ["headSha"] = "0123456789abcdef0123456789abcdef01234567",
+                    ["workflowRunLogSha256"] = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                    ["artifactManifestSha256"] = "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+                },
+                new JsonSerializerOptions { WriteIndented = true }));
+
+        File.WriteAllText(
+            Path.Combine(outputRoot, "owner-public-publish-execution-result-candidate-validation.json"),
+            JsonSerializer.Serialize(
+                new Dictionary<string, object?>
+                {
+                    ["recordKind"] = "owner-public-publish-execution-result-candidate-validation",
+                    ["validationState"] = "owner-public-publish-execution-result-candidate-ready",
+                    ["proofCandidateReady"] = true,
+                    ["publicPackageUrl"] = publicPackageUrl,
+                    ["publicPackageVersion"] = "4.0.0",
+                    ["publicPackageSha256"] = publicPackageSha256
+                },
+                new JsonSerializerOptions { WriteIndented = true }));
     }
 
     private static void CreateMinimalNupkg(string path, string packageId)
