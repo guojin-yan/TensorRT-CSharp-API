@@ -379,6 +379,12 @@ public sealed class RuntimePackageReadinessTests
         Assert.Contains("callback-interface-info-safe-controls", script);
         Assert.Contains("execution-context-callback-state-snapshot", script);
         Assert.Contains("hasExecutionContextCallbackStateSnapshot", script);
+        Assert.Contains("execution-context-callback-allocator-safe-control-summary", script);
+        Assert.Contains("hasExecutionContextCallbackAllocatorSafeControlSummary", script);
+        Assert.Contains("TensorRtExecutionContext.GetCallbackAllocatorSafeControlSummary", script);
+        Assert.Contains("TensorRtExecutionContextCallbackAllocatorSafeControlSummary", script);
+        Assert.Contains("bridge consumer callback allocator safe-control summary", script);
+        Assert.Contains("copied-interface-info-safe-controls", script);
         Assert.Contains("hasAllocatorOwnerDryRunDiagnostics", script);
         Assert.Contains("allocator-owner-dry-run-diagnostics", script);
         Assert.Contains("hasAllocatorOwnerNativeDryRunControls", script);

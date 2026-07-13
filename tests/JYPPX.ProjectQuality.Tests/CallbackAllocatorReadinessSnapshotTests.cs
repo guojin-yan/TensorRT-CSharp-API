@@ -166,6 +166,10 @@ public sealed class CallbackAllocatorReadinessSnapshotTests
         Assert.Contains("TensorRtCallbackAllocatorReadinessSnapshot", bridgeConsumer);
         Assert.Contains("callbackAllocatorReadinessSnapshot", bridgeConsumer);
         Assert.Contains("callbackAllocatorReadinessSummary", bridgeConsumer);
+        Assert.Contains("TensorRtExecutionContextCallbackAllocatorSafeControlSummary", bridgeConsumer);
+        Assert.Contains("contextCallbackAllocatorSafeControlSummary", bridgeConsumer);
+        Assert.Contains("execution-context-callback-allocator-safe-control-summary", bridgeConsumer);
+        Assert.Contains("GetCallbackAllocatorSafeControlSummary", bridgeConsumer);
 
         Assert.Contains("TensorRtCallbackAllocatorReadinessSnapshot", boundaryGuide);
         Assert.Contains("managed readiness", boundaryGuide);

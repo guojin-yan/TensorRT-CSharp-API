@@ -195,6 +195,7 @@ public sealed class BridgePackageConsumerTests
         Assert.Contains("TensorRtExecutionContext.GetCallbackStateSnapshot", script);
         Assert.Contains("TensorRtExecutionContext.ClearCallbackState", script);
         Assert.Contains("TensorRtExecutionContext.GetRuntimeDiagnosticSnapshot", script);
+        Assert.Contains("TensorRtExecutionContext.GetCallbackAllocatorSafeControlSummary", script);
         Assert.Contains("TensorRtExecutionContextCallbackStateSnapshot", script);
         Assert.Contains("TensorRtExecutionContextCallbackStateSnapshot.HasOutputAllocator", script);
         Assert.Contains("TensorRtExecutionContextCallbackStateSnapshot.OutputAllocatorInterfaceInfoAvailable", script);
@@ -206,6 +207,12 @@ public sealed class BridgePackageConsumerTests
         Assert.Contains("TensorRtExecutionContextRuntimeDiagnosticSummary.CallbackStateLastStatus", script);
         Assert.Contains("contextRuntimeDiagnosticSummary", script);
         Assert.Contains("contextRuntimeDiagnosticSummaryText", script);
+        Assert.Contains("TensorRtExecutionContextCallbackAllocatorSafeControlSummary", script);
+        Assert.Contains("contextCallbackAllocatorSafeControlSummary", script);
+        Assert.Contains("callbackAllocatorSafeControlSummaryText", script);
+        Assert.Contains("CopiedInterfaceInfoCount", script);
+        Assert.Contains("CallbackInvocationAttempted", script);
+        Assert.Contains("execution-context-callback-allocator-safe-control-summary", script);
         Assert.Contains("TensorRtProgressMonitor.EmitDiagnostic", script);
         Assert.Contains("TensorRtProgressMonitor.CallbackFailureCount", script);
         Assert.Contains("TensorRtProgressMonitor.LastCallbackException", script);
@@ -215,7 +222,7 @@ public sealed class BridgePackageConsumerTests
         Assert.Contains("callback-diagnostics", script);
         Assert.Contains("error-recorder-snapshot", script);
         Assert.Contains("logger-presence-safe-controls", script);
-        Assert.Contains("error-recorder-snapshot;logger-presence-safe-controls;allocator-debug-listener-safe-controls;callback-interface-info-safe-controls;execution-context-callback-state-snapshot", script);
+        Assert.Contains("error-recorder-snapshot;logger-presence-safe-controls;allocator-debug-listener-safe-controls;callback-interface-info-safe-controls;execution-context-callback-state-snapshot;execution-context-callback-allocator-safe-control-summary", script);
         Assert.Contains("allocator-debug-listener-safe-controls", script);
         Assert.Contains("callback-interface-info-safe-controls", script);
         Assert.Contains("execution-context-callback-state-snapshot", script);

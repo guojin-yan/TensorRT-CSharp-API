@@ -384,6 +384,23 @@ function New-WrapperSurfaceCapabilityEvidence {
       )
     },
     [pscustomobject]@{
+      name = "execution-context-callback-allocator-safe-control-summary"
+      categoryMarkers = @("execution-context-callback-allocator-safe-control-summary")
+      requiredMarkers = @(
+        "TensorRtExecutionContext.GetCallbackAllocatorSafeControlSummary",
+        "TensorRtExecutionContextCallbackAllocatorSafeControlSummary",
+        "EvidenceKind",
+        "RuntimeEvidenceKind",
+        "RealCallbackRuntime",
+        "IsRealCallbackRuntimeProof",
+        "CopiedInterfaceInfoCount",
+        "DiagnosticCount",
+        "PointerFreeSurfaceReady",
+        "CallbackInvocationAttempted",
+        "IsRuntimeInvocationProofComplete"
+      )
+    },
+    [pscustomobject]@{
       name = "allocator-owner-dry-run-diagnostics"
       categoryMarkers = @("allocator-owner-dry-run-diagnostics")
       requiredMarkers = @("TensorRtAllocatorCallbackOwner", "TensorRtAllocatorDryRunRequest", "TensorRtAllocatorDryRunResult", "RunDryRunDiagnostic", "CallbackInvocationCount", "CallbackFailureCount", "LastDiagnostic")
@@ -647,6 +664,7 @@ function New-WrapperSurfaceCapabilityEvidence {
     hasAllocatorDebugListenerSafeControls = [bool]$groupStatus["allocator-debug-listener-safe-controls"]
     hasCallbackInterfaceInfoSafeControls = [bool]$groupStatus["callback-interface-info-safe-controls"]
     hasExecutionContextCallbackStateSnapshot = [bool]$groupStatus["execution-context-callback-state-snapshot"]
+    hasExecutionContextCallbackAllocatorSafeControlSummary = [bool]$groupStatus["execution-context-callback-allocator-safe-control-summary"]
     hasAllocatorOwnerDryRunDiagnostics = [bool]$groupStatus["allocator-owner-dry-run-diagnostics"]
     hasAllocatorOwnerNativeDryRunControls = [bool]$groupStatus["allocator-owner-native-dry-run-controls"]
     hasAllocatorOwnerStateLedgerDryRunControls = [bool]$groupStatus["allocator-owner-state-ledger-dry-run-controls"]
@@ -7974,6 +7992,7 @@ function Write-ReadinessReports {
     $readyWrapperGroups = @($result.bridgeConsumer.wrapperSurfaceCapabilities.groups | Where-Object { [string]$_.status -eq "ready" } | ForEach-Object { [string]$_.name }) -join ", "
     $missingWrapperGroups = @($result.bridgeConsumer.wrapperSurfaceCapabilities.missingGroups) -join ", "
     $lines.Add("- bridge consumer wrapper capability status: $($result.bridgeConsumer.wrapperSurfaceCapabilities.status); ready=``$readyWrapperGroups``; missing=``$missingWrapperGroups``")
+    $lines.Add("- bridge consumer callback allocator safe-control summary: $($result.bridgeConsumer.wrapperSurfaceCapabilities.hasExecutionContextCallbackAllocatorSafeControlSummary); marker=``execution-context-callback-allocator-safe-control-summary``; evidence-kind=compile-surface-proof; runtime-evidence=copied-interface-info-safe-controls; proof=false")
     $lines.Add("- error recorder diagnostics design gate: $($result.errorRecorderDiagnosticsDesignGate.status); marker=``$($result.errorRecorderDiagnosticsDesignGate.marker)``; evidence-kind=$($result.errorRecorderDiagnosticsDesignGate.evidenceKind); runtime-evidence=$($result.errorRecorderDiagnosticsDesignGate.runtimeEvidenceKind); runtime-execution=$($result.errorRecorderDiagnosticsDesignGate.isRuntimeExecutionEvidence); proof=$($result.errorRecorderDiagnosticsDesignGate.isRuntimeExecutionProof); runtime-blocked=$($result.errorRecorderDiagnosticsDesignGate.runtimeProofBlocked); deferred-rows=$($result.errorRecorderDiagnosticsDesignGate.hasDeferredRowEvidence)")
     $lines.Add("- error recorder diagnostics design gate diagnostic: $($result.errorRecorderDiagnosticsDesignGate.diagnostic)")
     $lines.Add("- dimension expression snapshot design gate: $($result.dimensionExpressionSnapshotDesignGate.status); marker=``$($result.dimensionExpressionSnapshotDesignGate.marker)``; evidence-kind=$($result.dimensionExpressionSnapshotDesignGate.evidenceKind); runtime-evidence=$($result.dimensionExpressionSnapshotDesignGate.runtimeEvidenceKind); owner-lifetime=$($result.dimensionExpressionSnapshotDesignGate.ownerLifetimeKnown); expression-pointer=$($result.dimensionExpressionSnapshotDesignGate.expressionPointerExposed); expr-builder-create=$($result.dimensionExpressionSnapshotDesignGate.exprBuilderCreationEnabled); proof=$($result.dimensionExpressionSnapshotDesignGate.isRuntimeExecutionProof); runtime-blocked=$($result.dimensionExpressionSnapshotDesignGate.runtimeProofBlocked); deferred-rows=$($result.dimensionExpressionSnapshotDesignGate.hasDeferredRowEvidence)")

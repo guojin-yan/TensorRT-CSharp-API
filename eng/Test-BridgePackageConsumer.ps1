@@ -214,6 +214,10 @@ $script:ManagedPackageFreshnessRequiredMarkers = @(
   "TensorRtRuntimeConfigSummary",
   "TensorRtRefitterDiagnosticSummary",
   "TensorRtExecutionContextRuntimeDiagnosticSummary",
+  "TensorRtExecutionContextCallbackAllocatorSafeControlSummary",
+  "GetCallbackAllocatorSafeControlSummary",
+  "CopiedInterfaceInfoCount",
+  "CallbackInvocationAttempted",
   "CudaGraphDiagnosticSummary",
   "CudaGraphExecDiagnosticSummary",
   "CudaDevice.GetGraphMemorySummary",
@@ -1162,6 +1166,25 @@ static class HighLevelWrapperSurfaceProbe
                 summary.HasNativeProfiler + ":" +
                 summary.CallbackStateLastStatus + ":" +
                 summary.DiagnosticCount;
+        Func<TensorRtExecutionContext, string, TensorRtExecutionContextCallbackAllocatorSafeControlSummary> contextCallbackAllocatorSafeControlSummary =
+            static (context, tensorName) => context.GetCallbackAllocatorSafeControlSummary(tensorName);
+        Func<TensorRtExecutionContextCallbackAllocatorSafeControlSummary, string> callbackAllocatorSafeControlSummaryText =
+            static summary =>
+                summary.EvidenceKind + ":" +
+                summary.RuntimeEvidenceKind + ":" +
+                summary.RealCallbackRuntime + ":" +
+                summary.IsRealCallbackRuntimeProof + ":" +
+                summary.HasOutputAllocator + ":" +
+                summary.HasTemporaryStorageAllocator + ":" +
+                summary.HasDebugListener + ":" +
+                summary.OutputAllocatorInterfaceInfoAvailable + ":" +
+                summary.TemporaryStorageAllocatorInterfaceInfoAvailable + ":" +
+                summary.DebugListenerInterfaceInfoAvailable + ":" +
+                summary.CopiedInterfaceInfoCount + ":" +
+                summary.DiagnosticCount + ":" +
+                summary.PointerFreeSurfaceReady + ":" +
+                summary.CallbackInvocationAttempted + ":" +
+                summary.IsRuntimeInvocationProofComplete;
         Func<TensorRtLogger, bool> loggerDiagnostic =
             static logger => logger.EmitDiagnostic(TensorRtLogSeverity.Info, "package-consumer");
         Func<TensorRtLogger, string> loggerCallbackState =
@@ -2425,6 +2448,8 @@ static class HighLevelWrapperSurfaceProbe
         _ = contextRuntimeDiagnosticSnapshot;
         _ = contextRuntimeDiagnosticSummary;
         _ = contextRuntimeDiagnosticSummaryText;
+        _ = contextCallbackAllocatorSafeControlSummary;
+        _ = callbackAllocatorSafeControlSummaryText;
         _ = loggerDiagnostic;
         _ = loggerCallbackState;
         _ = loggerInterfaceInfo;
@@ -2569,6 +2594,7 @@ static class HighLevelWrapperSurfaceProbe
             "allocator-debug-listener-safe-controls",
             "callback-interface-info-safe-controls",
             "execution-context-callback-state-snapshot",
+            "execution-context-callback-allocator-safe-control-summary",
             "allocator-owner-dry-run-diagnostics",
             "allocator-owner-native-dry-run-controls",
             "allocator-owner-state-ledger-dry-run-controls",
@@ -2834,6 +2860,7 @@ static class HighLevelWrapperSurfaceProbe
             nameof(TensorRtExecutionContext.GetCallbackStateSnapshot),
             nameof(TensorRtExecutionContext.ClearCallbackState),
             nameof(TensorRtExecutionContext.GetRuntimeDiagnosticSnapshot),
+            nameof(TensorRtExecutionContext.GetCallbackAllocatorSafeControlSummary),
             nameof(TensorRtExecutionContextCallbackStateSnapshot),
             nameof(TensorRtExecutionContextCallbackStateSnapshot.HasOutputAllocator),
             nameof(TensorRtExecutionContextCallbackStateSnapshot.HasTemporaryStorageAllocator),
@@ -2858,6 +2885,16 @@ static class HighLevelWrapperSurfaceProbe
             nameof(TensorRtExecutionContextRuntimeDiagnosticSummary.IsOutputTensorAddressSet),
             nameof(TensorRtExecutionContextRuntimeDiagnosticSummary.CallbackStateLastStatus),
             nameof(TensorRtExecutionContextRuntimeDiagnosticSummary.DiagnosticCount),
+            nameof(TensorRtExecutionContextCallbackAllocatorSafeControlSummary),
+            nameof(TensorRtExecutionContextCallbackAllocatorSafeControlSummary.EvidenceKind),
+            nameof(TensorRtExecutionContextCallbackAllocatorSafeControlSummary.RuntimeEvidenceKind),
+            nameof(TensorRtExecutionContextCallbackAllocatorSafeControlSummary.RealCallbackRuntime),
+            nameof(TensorRtExecutionContextCallbackAllocatorSafeControlSummary.IsRealCallbackRuntimeProof),
+            nameof(TensorRtExecutionContextCallbackAllocatorSafeControlSummary.CopiedInterfaceInfoCount),
+            nameof(TensorRtExecutionContextCallbackAllocatorSafeControlSummary.DiagnosticCount),
+            nameof(TensorRtExecutionContextCallbackAllocatorSafeControlSummary.PointerFreeSurfaceReady),
+            nameof(TensorRtExecutionContextCallbackAllocatorSafeControlSummary.CallbackInvocationAttempted),
+            nameof(TensorRtExecutionContextCallbackAllocatorSafeControlSummary.IsRuntimeInvocationProofComplete),
             nameof(TensorRtProgressMonitor),
             nameof(TensorRtProgressMonitor.EmitDiagnostic),
             nameof(TensorRtProgressMonitor.CallbackFailureCount),
@@ -3955,7 +3992,7 @@ static class HighLevelWrapperSurfaceProbe
 
     $timer.Stop()
     $elapsedSeconds = [Math]::Round($timer.Elapsed.TotalSeconds, 2)
-    $wrapperSurfaceProbe = "compiled:plugin-inventory;engine-rnn-readonly-diagnostics;rnnv2-borrowed-state-design-gate;rnnv2-owner-bound-tensors;rnnv2-copied-gate-weights;managed-callbacks;callback-diagnostics;error-recorder-snapshot;logger-presence-safe-controls;allocator-debug-listener-safe-controls;callback-interface-info-safe-controls;execution-context-callback-state-snapshot;allocator-owner-dry-run-diagnostics;allocator-owner-native-dry-run-controls;allocator-owner-state-ledger-dry-run-controls;allocator-owner-ledger-safety-gate;output-allocator-callback-owner-design;output-allocator-attach-detach-design-gate;output-allocator-runtime-proof-precheck;debug-listener-callback-owner-design;debug-listener-attach-detach-design-gate;debug-listener-borrowed-tensor-safety-gate;debug-listener-attach-vtable-safety-gate;debug-listener-native-attach-nothrow-preflight;debug-listener-native-owner-address-design-gate;debug-listener-native-nothrow-vtable-design-gate;debug-listener-native-attach-entry-design-gate;debug-listener-native-detach-before-release-design-gate;debug-listener-native-owner-lifecycle-dry-run;debug-listener-native-attach-entry-runtime-scaffold;debug-listener-native-attach-entry-minimal-safety;debug-listener-native-owner-stable-identity;debug-listener-native-owner-noncopyable-storage;debug-listener-native-nothrow-destructor;debug-listener-native-owner-lifecycle-gate;debug-listener-native-attach-bridge-shape-gate;debug-listener-exception-status-mapping-gate;debug-listener-inflight-accounting-gate;debug-listener-native-nothrow-vtable-scaffold-gate;debug-listener-nothrow-vtable-callback-stub;callback-stub-gate;debug-listener-borrowed-debug-tensor-metadata-runtime-gate;borrowed-debug-tensor-metadata-gate;debug-listener-native-vtable-install-preflight;native-vtable-install-preflight;debug-listener-native-owner-vtable-install-experiment;native-owner-vtable-install-experiment;debug-listener-runtime-proof-precheck;debug-listener-runtime-proof-attempt-preflight;debug-listener-real-non-null-attach-runtime-smoke;runtime-smoke-skipped;runtime-smoke-blocked;runtime-smoke-attempted;debug-listener-process-debug-tensor-callback-trampoline;callback-trampoline-shape;onnx-parser-diagnostic-snapshot;onnx-parser-diagnostic-summary;onnx-parser-refitter-diagnostic-snapshot;onnx-parser-refitter-diagnostic-summary;profiler-safe-controls;progress-monitor-safe-controls;cuda-memory-range;HasImplicitBatchDimensionCompatibility;SerializedPluginPathCountCompatibility;GetRnnV2LayerCount;GetRnnV2HiddenSize;GetRnnV2DataLength;GetRnnV2MaxSequenceLength;GetRnnV2Operation;GetRnnV2Direction;GetRnnV2InputMode;GetRnnV2CellState;GetRnnV2HiddenState;GetRnnV2SequenceLengths;GetRnnV2WeightsForGate;GetRnnV2BiasForGate;TensorRtRnnV2GateWeightsSnapshot;TensorRtRnnOperation;TensorRtRnnDirection;TensorRtRnnInputMode;TensorRtRnnGateType"
+    $wrapperSurfaceProbe = "compiled:plugin-inventory;engine-rnn-readonly-diagnostics;rnnv2-borrowed-state-design-gate;rnnv2-owner-bound-tensors;rnnv2-copied-gate-weights;managed-callbacks;callback-diagnostics;error-recorder-snapshot;logger-presence-safe-controls;allocator-debug-listener-safe-controls;callback-interface-info-safe-controls;execution-context-callback-state-snapshot;execution-context-callback-allocator-safe-control-summary;allocator-owner-dry-run-diagnostics;allocator-owner-native-dry-run-controls;allocator-owner-state-ledger-dry-run-controls;allocator-owner-ledger-safety-gate;output-allocator-callback-owner-design;output-allocator-attach-detach-design-gate;output-allocator-runtime-proof-precheck;debug-listener-callback-owner-design;debug-listener-attach-detach-design-gate;debug-listener-borrowed-tensor-safety-gate;debug-listener-attach-vtable-safety-gate;debug-listener-native-attach-nothrow-preflight;debug-listener-native-owner-address-design-gate;debug-listener-native-nothrow-vtable-design-gate;debug-listener-native-attach-entry-design-gate;debug-listener-native-detach-before-release-design-gate;debug-listener-native-owner-lifecycle-dry-run;debug-listener-native-attach-entry-runtime-scaffold;debug-listener-native-attach-entry-minimal-safety;debug-listener-native-owner-stable-identity;debug-listener-native-owner-noncopyable-storage;debug-listener-native-nothrow-destructor;debug-listener-native-owner-lifecycle-gate;debug-listener-native-attach-bridge-shape-gate;debug-listener-exception-status-mapping-gate;debug-listener-inflight-accounting-gate;debug-listener-native-nothrow-vtable-scaffold-gate;debug-listener-nothrow-vtable-callback-stub;callback-stub-gate;debug-listener-borrowed-debug-tensor-metadata-runtime-gate;borrowed-debug-tensor-metadata-gate;debug-listener-native-vtable-install-preflight;native-vtable-install-preflight;debug-listener-native-owner-vtable-install-experiment;native-owner-vtable-install-experiment;debug-listener-runtime-proof-precheck;debug-listener-runtime-proof-attempt-preflight;debug-listener-real-non-null-attach-runtime-smoke;runtime-smoke-skipped;runtime-smoke-blocked;runtime-smoke-attempted;debug-listener-process-debug-tensor-callback-trampoline;callback-trampoline-shape;onnx-parser-diagnostic-snapshot;onnx-parser-diagnostic-summary;onnx-parser-refitter-diagnostic-snapshot;onnx-parser-refitter-diagnostic-summary;profiler-safe-controls;progress-monitor-safe-controls;cuda-memory-range;HasImplicitBatchDimensionCompatibility;SerializedPluginPathCountCompatibility;GetRnnV2LayerCount;GetRnnV2HiddenSize;GetRnnV2DataLength;GetRnnV2MaxSequenceLength;GetRnnV2Operation;GetRnnV2Direction;GetRnnV2InputMode;GetRnnV2CellState;GetRnnV2HiddenState;GetRnnV2SequenceLengths;GetRnnV2WeightsForGate;GetRnnV2BiasForGate;TensorRtRnnV2GateWeightsSnapshot;TensorRtRnnOperation;TensorRtRnnDirection;TensorRtRnnInputMode;TensorRtRnnGateType"
     $wrapperSurfaceEvidenceKind = "compile-surface-proof"
     $isRuntimeExecutionProof = $false
     $runtimeProofBoundary = "bridge-only consumer validates package layout, high-level wrapper compile surface, and dependency diagnostics; it is not clean package-consumer runtime proof."
