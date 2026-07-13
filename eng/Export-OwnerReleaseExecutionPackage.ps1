@@ -6,6 +6,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "OwnerRealProofCommon.ps1")
 
 if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
   if ([string]::IsNullOrWhiteSpace($PSScriptRoot)) {
@@ -769,8 +770,7 @@ New-Item -ItemType Directory -Force -Path $artifactRoot | Out-Null
 $jsonPath = Join-Path $artifactRoot "owner-release-execution-package.json"
 $markdownPath = Join-Path $artifactRoot "owner-release-execution-package.md"
 
-$record | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $jsonPath -Encoding utf8
-
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($record | ConvertTo-Json -Depth 8)
 $stepRows = $executionSteps | ForEach-Object {
   $step = $_
   "| ``$($step.id)`` | $($step.phase) | $($step.currentState) | ``$($step.validator)`` | $($step.boundary) |"

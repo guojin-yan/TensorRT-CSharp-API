@@ -7,6 +7,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "OwnerRealProofCommon.ps1")
 
 if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
   if ([string]::IsNullOrWhiteSpace($PSScriptRoot)) {
@@ -169,8 +170,7 @@ $summary = [pscustomobject]@{
 $jsonPath = Join-Path $OutputRoot "owner-external-proof-backfill-orchestrator-validation.json"
 $markdownPath = Join-Path $OutputRoot "owner-external-proof-backfill-orchestrator-validation.md"
 
-$summary | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $jsonPath -Encoding utf8
-
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($summary | ConvertTo-Json -Depth 12)
 $lines = New-Object System.Collections.Generic.List[string]
 $lines.Add("# Owner External Proof Backfill Orchestrator Validation")
 $lines.Add("")

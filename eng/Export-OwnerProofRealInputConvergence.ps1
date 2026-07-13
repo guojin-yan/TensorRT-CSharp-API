@@ -4,6 +4,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "OwnerRealProofCommon.ps1")
 
 if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
   if ([string]::IsNullOrWhiteSpace($PSScriptRoot)) {
@@ -209,8 +210,7 @@ New-Item -ItemType Directory -Force -Path $artifactRoot | Out-Null
 
 $jsonPath = Join-Path $artifactRoot "owner-proof-real-input-convergence.json"
 $markdownPath = Join-Path $artifactRoot "owner-proof-real-input-convergence.md"
-$convergence | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $jsonPath -Encoding utf8
-
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($convergence | ConvertTo-Json -Depth 12)
 $rowLines = $convergenceRows | ForEach-Object {
   "| ``$($_.id)`` | ``$($_.category)`` | ``$($_.currentState)`` | ``$($_.targetArtifact)`` | ``$($_.targetField)`` | $($_.blockingReason.Replace("|", "\|")) |"
 }

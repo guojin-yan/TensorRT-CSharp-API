@@ -7,6 +7,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "OwnerRealProofCommon.ps1")
 
 if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
   if ([string]::IsNullOrWhiteSpace($PSScriptRoot)) {
@@ -168,8 +169,7 @@ $validation = [pscustomobject]@{
 $jsonPath = Join-Path $OutputRoot "owner-release-execution-package-validation.json"
 $markdownPath = Join-Path $OutputRoot "owner-release-execution-package-validation.md"
 
-$validation | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $jsonPath -Encoding utf8
-
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($validation | ConvertTo-Json -Depth 12)
 $rows = $validation.validationItems | ForEach-Object {
   "| ``$($_.id)`` | ``$($_.passed)`` | ``$($_.severity)`` | $($_.detail.Replace("|", "\|")) |"
 }

@@ -6,6 +6,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "OwnerRealProofCommon.ps1")
 
 if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
   if ([string]::IsNullOrWhiteSpace($PSScriptRoot)) {
@@ -404,8 +405,7 @@ New-Item -ItemType Directory -Force -Path $artifactRoot | Out-Null
 $jsonPath = Join-Path $artifactRoot "owner-proof-backfill-execution-pack.json"
 $markdownPath = Join-Path $artifactRoot "owner-proof-backfill-execution-pack.md"
 
-$record | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $jsonPath -Encoding utf8
-
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($record | ConvertTo-Json -Depth 12)
 $itemRows = $backfillItems | ForEach-Object {
   $state = ([string]$_.currentState).Replace("|", "\|")
   $validator = ([string]$_.validatorCommand).Replace("|", "\|")

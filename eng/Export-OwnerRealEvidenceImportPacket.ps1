@@ -7,6 +7,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "OwnerRealProofCommon.ps1")
 
 if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
   $scriptRoot = if ([string]::IsNullOrWhiteSpace($PSScriptRoot)) { (Get-Location).Path } else { $PSScriptRoot }
@@ -216,8 +217,7 @@ $packet = [pscustomobject]@{
 
 $jsonPath = Join-Path $OutputRoot "owner-real-evidence-import-packet.json"
 $markdownPath = Join-Path $OutputRoot "owner-real-evidence-import-packet.md"
-$packet | ConvertTo-Json -Depth 18 | Set-Content -LiteralPath $jsonPath -Encoding utf8
-
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($packet | ConvertTo-Json -Depth 18)
 $rows = foreach ($lane in $lanes) {
   "| ``$(ConvertTo-MarkdownCell $lane.laneId)`` | ``$(ConvertTo-MarkdownCell $lane.proofLane)`` | ``$($lane.requiredFields.Count)`` | ``$($lane.requiredFiles.Count)`` | ``$($lane.requiredHashes.Count)`` | ``False`` |"
 }

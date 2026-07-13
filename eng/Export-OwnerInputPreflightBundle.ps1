@@ -5,6 +5,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "OwnerRealProofCommon.ps1")
 
 if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
   $scriptRoot = if ([string]::IsNullOrWhiteSpace($PSScriptRoot)) { (Get-Location).Path } else { $PSScriptRoot }
@@ -300,8 +301,7 @@ $bundle = [ordered]@{
 
 $jsonPath = Join-Path $OutputRoot "owner-input-preflight-bundle.json"
 $markdownPath = Join-Path $OutputRoot "owner-input-preflight-bundle.md"
-$bundle | ConvertTo-Json -Depth 16 | Set-Content -LiteralPath $jsonPath -Encoding utf8
-
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($bundle | ConvertTo-Json -Depth 16)
 $laneRows = foreach ($lane in $lanes) {
   "| ``$(ConvertTo-MarkdownCell $lane.id)`` | ``$(ConvertTo-MarkdownCell $lane.state)`` | ``$($lane.requiredFieldCount)`` | ``$($lane.blocked)`` | $(ConvertTo-MarkdownCell (($lane.failFastOrder) -join " -> ")) |"
 }

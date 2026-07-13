@@ -6,6 +6,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "OwnerRealProofCommon.ps1")
 
 if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
   $scriptRoot = if ([string]::IsNullOrWhiteSpace($PSScriptRoot)) { (Get-Location).Path } else { $PSScriptRoot }
@@ -175,8 +176,7 @@ $record = [pscustomobject]@{
 
 $jsonPath = Join-Path $OutputRoot "owner-external-proof-execution-result.input.template.json"
 $markdownPath = Join-Path $OutputRoot "owner-external-proof-execution-result.input.template.md"
-$record | ConvertTo-Json -Depth 18 | Set-Content -LiteralPath $jsonPath -Encoding utf8
-
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($record | ConvertTo-Json -Depth 18)
 $lines = New-Object System.Collections.Generic.List[string]
 $lines.Add("# Owner External Proof Execution Result Input Template")
 $lines.Add("")

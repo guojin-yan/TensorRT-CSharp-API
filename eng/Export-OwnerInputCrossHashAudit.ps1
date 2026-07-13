@@ -4,6 +4,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "OwnerRealProofCommon.ps1")
 
 if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
   if ([string]::IsNullOrWhiteSpace($PSScriptRoot)) {
@@ -153,8 +154,7 @@ New-Item -ItemType Directory -Force -Path $artifactRoot | Out-Null
 
 $jsonPath = Join-Path $artifactRoot "owner-input-cross-hash-audit.json"
 $markdownPath = Join-Path $artifactRoot "owner-input-cross-hash-audit.md"
-$record | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $jsonPath -Encoding utf8
-
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($record | ConvertTo-Json -Depth 12)
 $rows = $auditLines | ForEach-Object {
   "| ``$($_.id)`` | ``$($_.state)`` | ``$($_.sha256Matches)`` | $($_.boundary.Replace("|", "\|")) |"
 }

@@ -7,6 +7,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "OwnerRealProofCommon.ps1")
 
 if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
   $scriptRoot = if ([string]::IsNullOrWhiteSpace($PSScriptRoot)) { (Get-Location).Path } else { $PSScriptRoot }
@@ -145,8 +146,7 @@ $runbook = [pscustomobject]@{
 
 $jsonPath = Join-Path $OutputRoot "owner-runtime-proof-execution-runbook.json"
 $markdownPath = Join-Path $OutputRoot "owner-runtime-proof-execution-runbook.md"
-$runbook | ConvertTo-Json -Depth 18 | Set-Content -LiteralPath $jsonPath -Encoding utf8
-
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($runbook | ConvertTo-Json -Depth 18)
 $lines = New-Object System.Collections.Generic.List[string]
 $lines.Add("# Owner Runtime Proof Execution Runbook")
 $lines.Add("")

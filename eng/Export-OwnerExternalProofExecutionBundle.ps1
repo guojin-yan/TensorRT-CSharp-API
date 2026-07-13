@@ -4,6 +4,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "OwnerRealProofCommon.ps1")
 
 if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
   if ([string]::IsNullOrWhiteSpace($PSScriptRoot)) {
@@ -268,8 +269,7 @@ New-Item -ItemType Directory -Force -Path $artifactRoot | Out-Null
 
 $jsonPath = Join-Path $artifactRoot "owner-external-proof-execution-bundle.json"
 $markdownPath = Join-Path $artifactRoot "owner-external-proof-execution-bundle.md"
-$record | ConvertTo-Json -Depth 14 | Set-Content -LiteralPath $jsonPath -Encoding utf8
-
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($record | ConvertTo-Json -Depth 14)
 $lines = New-Object System.Collections.Generic.List[string]
 $lines.Add("# Owner External Proof Execution Bundle")
 $lines.Add("")

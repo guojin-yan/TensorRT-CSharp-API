@@ -6,6 +6,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "OwnerRealProofCommon.ps1")
 
 if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
   if ([string]::IsNullOrWhiteSpace($PSScriptRoot)) {
@@ -246,8 +247,7 @@ New-Item -ItemType Directory -Force -Path $artifactRoot | Out-Null
 $jsonPath = Join-Path $artifactRoot "owner-proof-execution-handoff.json"
 $markdownPath = Join-Path $artifactRoot "owner-proof-execution-handoff.md"
 
-$record | ConvertTo-Json -Depth 14 | Set-Content -LiteralPath $jsonPath -Encoding utf8
-
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($record | ConvertTo-Json -Depth 14)
 $lineRows = $handoffLines | ForEach-Object {
   $state = ([string]$_.currentState).Replace("|", "\|")
   $action = ([string]$_.ownerNextAction).Replace("|", "\|")

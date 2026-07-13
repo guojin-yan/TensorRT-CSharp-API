@@ -6,6 +6,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "OwnerRealProofCommon.ps1")
 
 if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
   if ([string]::IsNullOrWhiteSpace($PSScriptRoot)) {
@@ -220,8 +221,7 @@ New-Item -ItemType Directory -Force -Path $artifactRoot | Out-Null
 $jsonPath = Join-Path $artifactRoot "owner-external-proof-backfill-orchestrator.json"
 $markdownPath = Join-Path $artifactRoot "owner-external-proof-backfill-orchestrator.md"
 
-$record | ConvertTo-Json -Depth 16 | Set-Content -LiteralPath $jsonPath -Encoding utf8
-
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($record | ConvertTo-Json -Depth 16)
 $rows = $backfillLines | ForEach-Object {
   $strict = ([string]$_.strictValidationCommand).Replace("|", "\|")
   "| ``$($_.id)`` | ``$($_.backfillState)`` | ``$($_.targetProofRecordPath)`` | ``$($_.requiredFileCount)`` | ``$($_.requiredSha256FieldCount)`` | ``$($_.requiredOwnerDecisionCount)`` | ``$($_.requiredRollbackFieldCount)`` | ``$($_.canPromoteProof)`` | ``$strict`` |"

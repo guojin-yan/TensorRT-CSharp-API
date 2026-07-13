@@ -5,6 +5,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "OwnerRealProofCommon.ps1")
 
 if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
   $scriptRoot = if ([string]::IsNullOrWhiteSpace($PSScriptRoot)) { (Get-Location).Path } else { $PSScriptRoot }
@@ -311,8 +312,7 @@ $record = [ordered]@{
 
 $jsonPath = Join-Path $OutputRoot "owner-input-contract-convergence.json"
 $markdownPath = Join-Path $OutputRoot "owner-input-contract-convergence.md"
-$record | ConvertTo-Json -Depth 18 | Set-Content -LiteralPath $jsonPath -Encoding utf8
-
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($record | ConvertTo-Json -Depth 18)
 $fieldRows = foreach ($field in $fieldCoverage) {
   "| $(ConvertTo-MarkdownCell $field.canonicalName) | ``$($field.coveredSurfaceCount)`` | $(ConvertTo-MarkdownCell (($field.aliases -join ', '))) |"
 }

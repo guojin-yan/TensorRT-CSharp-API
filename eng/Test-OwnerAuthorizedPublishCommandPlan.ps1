@@ -5,6 +5,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "OwnerRealProofCommon.ps1")
 
 if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
   if ([string]::IsNullOrWhiteSpace($PSScriptRoot)) {
@@ -271,8 +272,7 @@ New-Item -ItemType Directory -Path $outputRoot -Force | Out-Null
 $jsonPath = Join-Path $outputRoot "owner-authorized-publish-command-plan-validation.json"
 $markdownPath = Join-Path $outputRoot "owner-authorized-publish-command-plan-validation.md"
 
-$record | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $jsonPath -Encoding utf8
-
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($record | ConvertTo-Json -Depth 8)
 $lines = New-Object System.Collections.Generic.List[string]
 $lines.Add("# Owner Authorized Publish Command Plan Validation")
 $lines.Add("")

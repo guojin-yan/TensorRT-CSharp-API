@@ -6,6 +6,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "OwnerRealProofCommon.ps1")
 
 if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
   $scriptRoot = if ([string]::IsNullOrWhiteSpace($PSScriptRoot)) { (Get-Location).Path } else { $PSScriptRoot }
@@ -283,8 +284,7 @@ $recordOut = [pscustomobject]@{
 
 $jsonPath = Join-Path $OutputRoot "owner-real-proof-report-pack.json"
 $markdownPath = Join-Path $OutputRoot "owner-real-proof-report-pack.md"
-$recordOut | ConvertTo-Json -Depth 18 | Set-Content -LiteralPath $jsonPath -Encoding utf8
-
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($recordOut | ConvertTo-Json -Depth 18)
 $lines = New-Object System.Collections.Generic.List[string]
 $lines.Add("# Owner Real Proof Report Pack")
 $lines.Add("")

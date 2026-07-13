@@ -6,6 +6,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "OwnerRealProofCommon.ps1")
 
 if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
   if ([string]::IsNullOrWhiteSpace($PSScriptRoot)) {
@@ -225,8 +226,7 @@ New-Item -ItemType Directory -Force -Path $artifactRoot | Out-Null
 $jsonPath = Join-Path $artifactRoot "owner-proof-input-draft-pack.json"
 $markdownPath = Join-Path $artifactRoot "owner-proof-input-draft-pack.md"
 
-$record | ConvertTo-Json -Depth 16 | Set-Content -LiteralPath $jsonPath -Encoding utf8
-
+Write-Utf8File -LiteralPath $jsonPath -InputObject ($record | ConvertTo-Json -Depth 16)
 $rows = $draftSpecs | ForEach-Object {
   $validator = ([string]$_.strictValidationCommand).Replace("|", "\|")
   "| ``$($_.id)`` | ``$($_.draftState)`` | ``$($_.inputDraftIsProof)`` | ``$($_.canPromoteProof)`` | ``$($_.placeholderFieldsToReplace.Count)`` | ``$($_.fieldsRequiringExistingFiles.Count)`` | ``$($_.fieldsRequiringSha256.Count)`` | ``$($_.fieldsRequiringCleanConsumerEvidence.Count)`` | ``$($_.fieldsRequiringOwnerDecision.Count)`` | ``$($_.fieldsRequiringRollbackPlan.Count)`` | ``$validator`` |"

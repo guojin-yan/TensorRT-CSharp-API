@@ -179,4 +179,67 @@ public sealed class OwnerRealProofCommonIoTests
             Assert.DoesNotContain("Set-Content -LiteralPath $exampleJsonPath", script, StringComparison.Ordinal);
         }
     }
+
+    [Fact]
+    public void OwnerProofAndRealProofScriptsUseCommonAtomicWriterForJson()
+    {
+        foreach (string scriptName in new[]
+        {
+            "Export-OwnerInputPreflightBundle.ps1",
+            "Export-OwnerAuthorizedPublishCommandPlan.ps1",
+            "Export-OwnerExternalProofBackfillOrchestrator.ps1",
+            "Export-OwnerExternalExecutionResultBackfillKit.ps1",
+            "Export-OwnerInputContractConvergence.ps1",
+            "Export-OwnerExternalProofExecutionResultInputTemplate.ps1",
+            "Export-OwnerInputCrossHashAudit.ps1",
+            "Export-OwnerExternalProofExecutionBundle.ps1",
+            "Export-OwnerExternalProofInputPreflight.ps1",
+            "Test-OwnerExternalExecutionResultBackfillKit.ps1",
+            "Export-OwnerRealProofFinalActionWorklist.ps1",
+            "Test-OwnerInputContractConvergence.ps1",
+            "Test-OwnerProofInputDraftPack.ps1",
+            "Test-OwnerAuthorizedPublishCommandPlan.ps1",
+            "Export-OwnerRealProofReportPack.ps1",
+            "Export-OwnerRealProofFieldDeltaPack.ps1",
+            "Export-OwnerRuntimeProofResultInputTemplate.ps1",
+            "Test-OwnerOnlyPublishExecutionCandidate.ps1",
+            "Export-OwnerRealProofExecutionClosurePack.ps1",
+            "Test-OwnerExternalProofExecutionResultInputTemplate.ps1",
+            "Export-OwnerRuntimeProofExecutionRunbook.ps1",
+            "Export-OwnerReleaseExecutionPackage.ps1",
+            "Test-OwnerExternalProofExecutionBundle.ps1",
+            "Test-OwnerExternalProofBackfillOrchestrator.ps1",
+            "Test-OwnerExternalProofExecutionResultImport.ps1",
+            "Test-OwnerInputCrossHashAudit.ps1",
+            "Export-OwnerProofBackfillExecutionPack.ps1",
+            "Export-OwnerProofExecutionHandoff.ps1",
+            "Export-OwnerProofInputReadiness.ps1",
+            "Export-OwnerProofInputDraftPack.ps1",
+            "Export-OwnerProofRealBackfillExecutionPack.ps1",
+            "Export-OwnerProofInputRepairPack.ps1",
+            "Export-OwnerProofRealInputConvergence.ps1",
+            "Test-OwnerProofRealInputConvergence.ps1",
+            "Export-OwnerRealEvidenceImportPacket.ps1",
+            "Test-OwnerProofInputReadiness.ps1",
+            "Test-OwnerProofRealBackfillExecutionPack.ps1",
+            "Test-OwnerRealEvidenceImportPacket.ps1",
+            "Test-OwnerRealProofExecutionClosurePack.ps1",
+            "Test-OwnerRealProofReportPack.ps1",
+            "Test-OwnerRealProofFieldDeltaPack.ps1",
+            "Test-OwnerReleaseExecutionPackage.ps1",
+            "Test-OwnerRuntimeProofExecutionRunbook.ps1",
+            "Test-OwnerRuntimeProofResultInput.ps1"
+        })
+        {
+            string scriptPath = Path.Combine(RepositoryPaths.Root, "eng", scriptName);
+            string script = File.ReadAllText(scriptPath);
+
+            Assert.Contains("OwnerRealProofCommon.ps1", script, StringComparison.Ordinal);
+            Assert.Contains("Write-Utf8File -LiteralPath $", script, StringComparison.Ordinal);
+            Assert.DoesNotContain("Set-Content -LiteralPath $jsonPath", script, StringComparison.Ordinal);
+            Assert.DoesNotContain("Set-Content -LiteralPath $outputFullPath", script, StringComparison.Ordinal);
+            Assert.DoesNotContain("Set-Content -LiteralPath $resolvedOutputPath", script, StringComparison.Ordinal);
+            Assert.DoesNotContain("Set-Content -LiteralPath $templatePath", script, StringComparison.Ordinal);
+        }
+    }
 }

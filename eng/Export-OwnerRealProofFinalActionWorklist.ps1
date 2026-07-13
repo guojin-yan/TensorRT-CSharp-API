@@ -7,6 +7,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "OwnerRealProofCommon.ps1")
 Set-StrictMode -Version Latest
 
 if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
@@ -124,8 +125,7 @@ $result = [pscustomobject]@{
 
 $outputFullPath = Resolve-RepoPath -Path $OutputPath
 New-Item -ItemType Directory -Force -Path (Split-Path -Parent $outputFullPath) | Out-Null
-$result | ConvertTo-Json -Depth 14 | Set-Content -LiteralPath $outputFullPath -Encoding utf8
-
+Write-Utf8File -LiteralPath $outputFullPath -InputObject ($result | ConvertTo-Json -Depth 14)
 $markdownFullPath = Resolve-RepoPath -Path $MarkdownOutputPath
 $markdownLines = [System.Collections.Generic.List[string]]::new()
 $markdownLines.Add('# Owner Real Proof Final Action Worklist')
