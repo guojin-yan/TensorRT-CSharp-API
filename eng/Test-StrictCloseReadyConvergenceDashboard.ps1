@@ -46,6 +46,11 @@ function New-ValidationItem {
   }
 }
 
+function Get-LaneById {
+  param([AllowNull()][object[]]$Lanes, [string]$Id)
+  return @($Lanes | Where-Object { [string](Get-PropertyOrDefault -Object $_ -Name "laneId" -DefaultValue "") -eq $Id } | Select-Object -First 1)[0]
+}
+
 $resolvedInputPath = Resolve-RepositoryPath -Path $InputPath
 if (-not (Test-Path -LiteralPath $resolvedInputPath -PathType Leaf)) {
   throw "Strict close ready convergence dashboard not found: $resolvedInputPath"
@@ -55,6 +60,10 @@ $record = Get-Content -LiteralPath $resolvedInputPath -Raw -Encoding utf8 | Conv
 $lanes = @((Get-PropertyOrDefault -Object $record -Name "closeReadinessLanes" -DefaultValue @()))
 $items = New-Object System.Collections.Generic.List[object]
 $requiredIds = @(
+  "github-actions-run-proof",
+  "owner-public-publish-result",
+  "public-package-download-proof",
+  "post-publish-clean-consumer-proof",
   "final-release-close-blocker-dashboard",
   "public-publish-result-owner-input",
   "public-publish-result-import",
@@ -86,6 +95,10 @@ $items.Add((New-ValidationItem -Id "record-kind" -Passed ([string](Get-PropertyO
 $items.Add((New-ValidationItem -Id "required-lanes-present" -Passed ($missingRequired.Count -eq 0) -Severity "blocker" -Detail "Missing required close lanes: $($missingRequired -join ', ')")) | Out-Null
 $sourceArtifacts = @((Get-PropertyOrDefault -Object $record -Name "sourceArtifacts" -DefaultValue @()) | ForEach-Object { [string]$_ })
 $requiredSourceArtifacts = @(
+  "artifacts/final-release/remote-ci-and-public-publish-proof-backfill-gate.json",
+  "artifacts/final-release/remote-ci-and-public-publish-proof-backfill-gate.md",
+  "artifacts/final-release/remote-ci-and-public-publish-proof-backfill-gate-validation.json",
+  "artifacts/final-release/remote-ci-and-public-publish-proof-backfill-gate-validation.md",
   "artifacts/final-release/public-publish-result-owner-input-validation.json",
   "artifacts/final-release/public-publish-result-import-validation.json",
   "artifacts/final-release/post-publish-clean-consumer-proof-record-contract-validation.json",
@@ -97,6 +110,21 @@ $requiredSourceArtifacts = @(
 )
 $missingSourceArtifacts = @($requiredSourceArtifacts | Where-Object { $sourceArtifacts -notcontains $_ })
 $items.Add((New-ValidationItem -Id "required-source-artifacts-present" -Passed ($missingSourceArtifacts.Count -eq 0) -Severity "blocker" -Detail "Missing required strict-close source artifacts: $($missingSourceArtifacts -join ', ')")) | Out-Null
+
+$remoteProofIds = @("github-actions-run-proof", "owner-public-publish-result", "public-package-download-proof", "post-publish-clean-consumer-proof")
+$remoteProofLanes = @($remoteProofIds | ForEach-Object { Get-LaneById -Lanes $lanes -Id $_ })
+$remoteProofLanesPresent = @($remoteProofLanes | Where-Object { $null -ne $_ }).Count -eq $remoteProofIds.Count
+$remoteProofLanesBlockClose = $remoteProofLanesPresent -and @($remoteProofLanes | Where-Object { [bool](Get-PropertyOrDefault -Object $_ -Name "ready" -DefaultValue $true) }).Count -eq 0 -and @($remoteProofLanes | Where-Object { -not [bool](Get-PropertyOrDefault -Object $_ -Name "blocksStrictClose" -DefaultValue $false) }).Count -eq 0
+$postPublishProofLane = Get-LaneById -Lanes $lanes -Id "post-publish-clean-consumer-proof"
+$postPublishProofRequiresCandidate = $null -ne $postPublishProofLane -and
+  [bool](Get-PropertyOrDefault -Object $postPublishProofLane -Name "remoteGateStateReady" -DefaultValue $false) -and
+  [bool](Get-PropertyOrDefault -Object $postPublishProofLane -Name "requireProofReady" -DefaultValue $false) -and
+  [string](Get-PropertyOrDefault -Object $postPublishProofLane -Name "proofReadyProperty" -DefaultValue "") -eq "proofCandidateReady" -and
+  -not [bool](Get-PropertyOrDefault -Object $postPublishProofLane -Name "proofReady" -DefaultValue $true) -and
+  -not [bool](Get-PropertyOrDefault -Object $postPublishProofLane -Name "ready" -DefaultValue $true)
+$items.Add((New-ValidationItem -Id "remote-proof-lanes-present" -Passed $remoteProofLanesPresent -Severity "blocker" -Detail "Strict close dashboard must include remote proof dependency lanes from remote-ci-and-public-publish-proof-backfill-gate.")) | Out-Null
+$items.Add((New-ValidationItem -Id "remote-proof-lanes-block-close" -Passed $remoteProofLanesBlockClose -Severity "blocker" -Detail "Missing real GitHub Actions, public publish, public download, and post-publish proof lanes must block strict close.")) | Out-Null
+$items.Add((New-ValidationItem -Id "post-publish-proof-lane-requires-proof-candidate-ready" -Passed $postPublishProofRequiresCandidate -Severity "blocker" -Detail "Post-publish proof lane must stay blocked when validation is ready but proofCandidateReady is false.")) | Out-Null
 $items.Add((New-ValidationItem -Id "all-close-lanes-ready" -Passed ([int](Get-PropertyOrDefault -Object $record -Name "blockedLaneCount" -DefaultValue 0) -eq 0 -and [string](Get-PropertyOrDefault -Object $record -Name "dashboardState" -DefaultValue "") -eq "strict-close-ready-convergence-ready") -Severity "action-required" -Detail "Dashboard remains blocked until every strict close lane is backed by real Owner proof.")) | Out-Null
 $items.Add((New-ValidationItem -Id "lanes-safe" -Passed $allLanesSafe -Severity "blocker" -Detail "Every close readiness lane must keep proof/publish/close flags false and include owner action plus validator.")) | Out-Null
 $items.Add((New-ValidationItem -Id "no-side-effects" -Passed ([bool](Get-PropertyOrDefault -Object $record -Name "notExecutedByAutomation" -DefaultValue $false) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "performsPublish" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canPromoteRuntimeProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canPublishPublicly" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canCloseReleaseIssue" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isRuntimeExecutionProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isReleaseCloseProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isPostPublishProof" -DefaultValue $true)) -Severity "blocker" -Detail "Strict close dashboard must not publish, prove runtime/post-publish, or close release issue.")) | Out-Null

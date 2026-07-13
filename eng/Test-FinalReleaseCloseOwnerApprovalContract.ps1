@@ -66,6 +66,10 @@ foreach ($marker in @("ownerReviewer", "ownerReviewTimestampUtc", "ownerApproval
   $items.Add((New-ValidationItem -Id "raw-marker-$($marker.Replace(' ', '-').Replace('.', 'dot'))" -Passed ($raw.IndexOf($marker, [StringComparison]::OrdinalIgnoreCase) -ge 0) -Severity "blocker" -Detail "Contract raw JSON must contain marker $marker.")) | Out-Null
 }
 
+foreach ($marker in @("github-actions-run-proof", "owner-public-publish-result", "public-package-download-proof", "post-publish-clean-consumer-proof", "githubActionsRunProofPath", "ownerPublicPublishResultPath", "publicPackageDownloadProofPath", "postPublishCleanConsumerProofResultPath", "remote-ci-and-public-publish-proof-backfill-gate-validation.json")) {
+  $items.Add((New-ValidationItem -Id "remote-proof-marker-$($marker.Replace(' ', '-').Replace('.', 'dot'))" -Passed ($raw.IndexOf($marker, [StringComparison]::OrdinalIgnoreCase) -ge 0) -Severity "blocker" -Detail "Contract must preserve remote proof dependency marker $marker.")) | Out-Null
+}
+
 foreach ($lane in $approvalLanes) {
   $id = [string](Get-PropertyOrDefault -Object $lane -Name "id" -DefaultValue "")
   $finalPackageIdentity = Get-PropertyOrDefault -Object $lane -Name "finalPackageIdentity" -DefaultValue $null

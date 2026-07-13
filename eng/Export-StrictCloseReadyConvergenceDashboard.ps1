@@ -67,6 +67,59 @@ function New-CloseLane {
   }
 }
 
+function Get-LaneById {
+  param([AllowNull()][object[]]$Lanes, [string]$Id)
+  return @($Lanes | Where-Object { [string](Get-PropertyOrDefault -Object $_ -Name "id" -DefaultValue "") -eq $Id } | Select-Object -First 1)[0]
+}
+
+function New-RemoteProofCloseLane {
+  param(
+    [string]$Id,
+    [AllowNull()][object]$RemoteLane,
+    [string]$OwnerNextAction,
+    [string]$Validator,
+    [string]$MissingRealProof
+  )
+
+  $state = [string](Get-PropertyOrDefault -Object $RemoteLane -Name "state" -DefaultValue "missing-remote-proof-lane")
+  $ready = [bool](Get-PropertyOrDefault -Object $RemoteLane -Name "ready" -DefaultValue $false)
+  $stateReady = [bool](Get-PropertyOrDefault -Object $RemoteLane -Name "stateReady" -DefaultValue $false)
+  $requireProofReady = [bool](Get-PropertyOrDefault -Object $RemoteLane -Name "requireProofReady" -DefaultValue $false)
+  $proofReadyProperty = [string](Get-PropertyOrDefault -Object $RemoteLane -Name "proofReadyProperty" -DefaultValue "")
+  $proofReady = [bool](Get-PropertyOrDefault -Object $RemoteLane -Name "proofReady" -DefaultValue $false)
+  $requiredEvidence = [string](Get-PropertyOrDefault -Object $RemoteLane -Name "requiredEvidence" -DefaultValue $MissingRealProof)
+  $sourceArtifact = [string](Get-PropertyOrDefault -Object $RemoteLane -Name "artifact" -DefaultValue "artifacts/final-release/remote-ci-and-public-publish-proof-backfill-gate.json")
+  $missingRealProof = if ($ready) { @() } else { @($MissingRealProof) }
+
+  [pscustomobject]@{
+    laneId = $Id
+    state = $state
+    requiredState = "remote-proof-lane-ready"
+    ready = $ready
+    closeReadinessState = if ($ready) { "ready" } else { "blocked-strict-close-ready-owner-action-required" }
+    missingOwnerInput = if ($ready) { @() } else { @("owner-supplied real remote/public proof input") }
+    missingRealProof = $missingRealProof
+    ownerNextAction = $OwnerNextAction
+    validator = $Validator
+    sourceArtifact = $sourceArtifact
+    remoteProofGateLaneId = $Id
+    remoteGateStateReady = $stateReady
+    requireProofReady = $requireProofReady
+    proofReadyProperty = $proofReadyProperty
+    proofReady = $proofReady
+    requiredEvidence = $requiredEvidence
+    performsPublish = $false
+    canPromoteRuntimeProof = $false
+    canPublishPublicly = $false
+    canCloseReleaseIssue = $false
+    isRuntimeExecutionProof = $false
+    isReleaseCloseProof = $false
+    isPostPublishProof = $false
+    isGitHubActionsProof = $false
+    blocksStrictClose = -not $ready
+  }
+}
+
 $finalBlockerDashboardValidation = Read-JsonOrNull "artifacts\final-release\final-release-close-blocker-dashboard-validation.json"
 $publicPublishOwnerInputValidation = Read-JsonOrNull "artifacts\final-release\public-publish-result-owner-input-validation.json"
 $publicPublishImportValidation = Read-JsonOrNull "artifacts\final-release\public-publish-result-import-validation.json"
@@ -77,6 +130,8 @@ $finalOwnerDecisionValidation = Read-JsonOrNull "artifacts\final-release\release
 $closeRecordValidation = Read-JsonOrNull "artifacts\final-release\release-issue-close-record-validation.json"
 $classificationAudit = Read-JsonOrNull "artifacts\final-release\release-evidence-classification-audit.json"
 $releaseEvidence = Read-JsonOrNull "artifacts\final-release\release-evidence-bundle.json"
+$remoteProofBackfillGate = Read-JsonOrNull "artifacts\final-release\remote-ci-and-public-publish-proof-backfill-gate.json"
+$remoteProofBackfillGateValidation = Read-JsonOrNull "artifacts\final-release\remote-ci-and-public-publish-proof-backfill-gate-validation.json"
 
 $finalBlockerState = [string](Get-PropertyOrDefault -Object $finalBlockerDashboardValidation -Name "validationState" -DefaultValue "missing-final-release-close-blocker-dashboard-validation")
 $publicPublishOwnerInputState = [string](Get-PropertyOrDefault -Object $publicPublishOwnerInputValidation -Name "validationState" -DefaultValue "missing-public-publish-result-owner-input-validation")
@@ -88,8 +143,14 @@ $finalOwnerState = [string](Get-PropertyOrDefault -Object $finalOwnerDecisionVal
 $closeRecordState = [string](Get-PropertyOrDefault -Object $closeRecordValidation -Name "validationState" -DefaultValue "missing-release-issue-close-record-validation")
 $classificationState = [string](Get-PropertyOrDefault -Object $classificationAudit -Name "auditState" -DefaultValue "missing-release-evidence-classification-audit")
 $releaseEvidenceState = [string](Get-PropertyOrDefault -Object $releaseEvidence -Name "bundleState" -DefaultValue "missing-release-evidence-bundle")
+$remoteProofBackfillGateState = [string](Get-PropertyOrDefault -Object $remoteProofBackfillGateValidation -Name "validationState" -DefaultValue "missing-remote-ci-and-public-publish-proof-backfill-gate-validation")
+$remoteProofLanes = @((Get-PropertyOrDefault -Object $remoteProofBackfillGate -Name "lanes" -DefaultValue @()))
 
 $lanes = @(
+  New-RemoteProofCloseLane -Id "github-actions-run-proof" -RemoteLane (Get-LaneById -Lanes $remoteProofLanes -Id "github-actions-run-proof") -MissingRealProof "real GitHub Actions run URL, run id, head SHA, conclusion, log hash, and artifact hash" -OwnerNextAction "Owner imports real GitHub Actions run evidence; queued workflow, missing runner, local test, or dashboard output remain blocked." -Validator "Test-RemoteCiAndPublicPublishProofBackfillGate.ps1 -Strict"
+  New-RemoteProofCloseLane -Id "owner-public-publish-result" -RemoteLane (Get-LaneById -Lanes $remoteProofLanes -Id "owner-public-publish-result") -MissingRealProof "owner public publish result with public NuGet/GitHub package URLs, hashes, transcript hashes, reviewer, and authorization linkage" -OwnerNextAction "Owner supplies real public publish result after actual package publication; dry run and command plan are not proof." -Validator "Test-RemoteCiAndPublicPublishProofBackfillGate.ps1 -Strict"
+  New-RemoteProofCloseLane -Id "public-package-download-proof" -RemoteLane (Get-LaneById -Lanes $remoteProofLanes -Id "public-package-download-proof") -MissingRealProof "public package download URL/source, package identity, SHA256, timestamp, and non-local source proof" -OwnerNextAction "Owner downloads the public package from the public source and imports SHA256 evidence." -Validator "Test-RemoteCiAndPublicPublishProofBackfillGate.ps1 -Strict"
+  New-RemoteProofCloseLane -Id "post-publish-clean-consumer-proof" -RemoteLane (Get-LaneById -Lanes $remoteProofLanes -Id "post-publish-clean-consumer-proof") -MissingRealProof "post-publication repository-external clean consumer restore/build/smoke proof with proofCandidateReady=true" -OwnerNextAction "Owner provides repository-external clean consumer proof from public packages; validation-ready alone must remain blocked until proofCandidateReady is true." -Validator "Test-RemoteCiAndPublicPublishProofBackfillGate.ps1 -Strict"
   New-CloseLane -Id "final-release-close-blocker-dashboard" -State $finalBlockerState -RequiredState "final-release-close-blocker-dashboard-ready" -MissingOwnerInput @("remaining close blockers resolved by Owner") -MissingRealProof @("public package proof", "post-publish proof") -OwnerNextAction "Owner resolves every final release close blocker after real public publish and clean consumer proof." -Validator "Test-FinalReleaseCloseBlockerDashboard.ps1 -Strict" -SourceArtifact "artifacts/final-release/final-release-close-blocker-dashboard-validation.json"
   New-CloseLane -Id "public-publish-result-owner-input" -State $publicPublishOwnerInputState -RequiredState "public-publish-result-owner-input-ready" -MissingOwnerInput @("owner-filled public publish result input") -MissingRealProof @("NuGet/GitHub public URLs, download hashes, release transcript, rollback review, final close decision fields") -OwnerNextAction "Owner fills real public publish result metadata; templates, dry runs, local feeds, and command plans remain non-proof." -Validator "Test-PublicPublishResultOwnerInput.ps1 -Strict" -SourceArtifact "artifacts/final-release/public-publish-result-owner-input-validation.json"
   New-CloseLane -Id "public-publish-result-import" -State $publicPublishState -RequiredState "public-publish-result-import-ready" -MissingOwnerInput @("public publish result owner input") -MissingRealProof @("public package URL/hash/timestamp/transcript") -OwnerNextAction "Owner imports real public publish metadata and runs the strict import validator." -Validator "Test-PublicPublishResultImport.ps1 -Strict" -SourceArtifact "artifacts/final-release/public-publish-result-import-validation.json"
@@ -112,8 +173,14 @@ $record = [pscustomobject]@{
   blockedLaneCount = $blocked.Count
   readyLaneCount = $ready.Count
   releaseEvidenceBundleState = $releaseEvidenceState
+  remoteCiAndPublicPublishProofBackfillGateState = $remoteProofBackfillGateState
+  remoteProofRequiredLaneIds = @("github-actions-run-proof", "owner-public-publish-result", "public-package-download-proof", "post-publish-clean-consumer-proof")
   closeReadinessLanes = $lanes
   sourceArtifacts = @(
+    "artifacts/final-release/remote-ci-and-public-publish-proof-backfill-gate.json",
+    "artifacts/final-release/remote-ci-and-public-publish-proof-backfill-gate.md",
+    "artifacts/final-release/remote-ci-and-public-publish-proof-backfill-gate-validation.json",
+    "artifacts/final-release/remote-ci-and-public-publish-proof-backfill-gate-validation.md",
     "artifacts/final-release/final-release-close-blocker-dashboard-validation.json",
     "artifacts/final-release/public-publish-result-owner-input-validation.json",
     "artifacts/final-release/public-publish-result-import-validation.json",

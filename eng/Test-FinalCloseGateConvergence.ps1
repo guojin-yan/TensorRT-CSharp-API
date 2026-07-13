@@ -40,6 +40,11 @@ function New-ValidationItem {
   [pscustomobject]@{ id = $Id; passed = $Passed; severity = $Severity; detail = $Detail }
 }
 
+function Get-LaneById {
+  param([AllowNull()][object[]]$Lanes, [string]$Id)
+  return @($Lanes | Where-Object { [string](Get-PropertyOrDefault -Object $_ -Name "id" -DefaultValue "") -eq $Id } | Select-Object -First 1)[0]
+}
+
 if (-not (Test-Path -LiteralPath $InputPath -PathType Leaf)) {
   throw "Final close gate convergence not found: $InputPath"
 }
@@ -52,13 +57,26 @@ $rejectedCloseSubstitutes = @((ConvertTo-Array (Get-PropertyOrDefault -Object $r
 $strictValidatorSourceArtifacts = @((ConvertTo-Array (Get-PropertyOrDefault -Object $record -Name "strictValidatorSourceArtifacts" -DefaultValue @())) | ForEach-Object { [string]$_ })
 $acceptedProofSources = @((ConvertTo-Array (Get-PropertyOrDefault -Object $record -Name "finalCloseAcceptedProofSources" -DefaultValue @())) | ForEach-Object { [string]$_ })
 $summary = Get-PropertyOrDefault -Object $record -Name "summary" -DefaultValue $null
+$remoteProofIds = @("github-actions-run-proof", "owner-public-publish-result", "public-package-download-proof", "post-publish-clean-consumer-proof")
+$remoteProofLanes = @($remoteProofIds | ForEach-Object { Get-LaneById -Lanes $lanes -Id $_ })
+$remoteProofLanesPresent = @($remoteProofLanes | Where-Object { $null -ne $_ }).Count -eq $remoteProofIds.Count
+$remoteProofLanesBlockClose = $remoteProofLanesPresent -and @($remoteProofLanes | Where-Object { [bool](Get-PropertyOrDefault -Object $_ -Name "ready" -DefaultValue $true) }).Count -eq 0
+$postPublishRemoteLane = Get-LaneById -Lanes $lanes -Id "post-publish-clean-consumer-proof"
+$postPublishRemoteLaneRequiresCandidate = $null -ne $postPublishRemoteLane -and
+  [bool](Get-PropertyOrDefault -Object $postPublishRemoteLane -Name "requireProofReady" -DefaultValue $false) -and
+  [string](Get-PropertyOrDefault -Object $postPublishRemoteLane -Name "proofReadyProperty" -DefaultValue "") -eq "proofCandidateReady" -and
+  -not [bool](Get-PropertyOrDefault -Object $postPublishRemoteLane -Name "proofReady" -DefaultValue $true) -and
+  -not [bool](Get-PropertyOrDefault -Object $postPublishRemoteLane -Name "ready" -DefaultValue $true)
 
 $items = New-Object System.Collections.Generic.List[object]
 $items.Add((New-ValidationItem -Id "record-kind" -Passed ([string](Get-PropertyOrDefault -Object $record -Name "recordKind" -DefaultValue "") -eq "final-close-gate-convergence") -Severity "blocker" -Detail "recordKind must be final-close-gate-convergence.")) | Out-Null
 $items.Add((New-ValidationItem -Id "state-blocked" -Passed ([string](Get-PropertyOrDefault -Object $record -Name "convergenceState" -DefaultValue "") -eq "blocked-final-close-gate-owner-proof-required") -Severity "blocker" -Detail "Convergence must stay blocked until all real close proof lanes pass.")) | Out-Null
-$items.Add((New-ValidationItem -Id "lane-shape" -Passed ($lanes.Count -ge 10) -Severity "blocker" -Detail "Convergence must expose all final close gate lanes, including owner import and strict validator bridge lanes.")) | Out-Null
+$items.Add((New-ValidationItem -Id "lane-shape" -Passed ($lanes.Count -ge 14) -Severity "blocker" -Detail "Convergence must expose all final close gate lanes, including remote proof, owner import, and strict validator bridge lanes.")) | Out-Null
 $items.Add((New-ValidationItem -Id "owner-lanes-required" -Passed ($blockedLanes.Count -eq 0) -Severity "action-required" -Detail "Owner must complete all final close gate lanes.")) | Out-Null
 $items.Add((New-ValidationItem -Id "no-side-effects" -Passed ([bool](Get-PropertyOrDefault -Object $record -Name "notExecutedByAutomation" -DefaultValue $false) -and [bool](Get-PropertyOrDefault -Object $record -Name "ownerExecutionOnly" -DefaultValue $false) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "performsPublish" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canPromoteRuntimeProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canPublishPublicly" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canCloseReleaseIssue" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isRuntimeExecutionProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isReleaseCloseProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isPostPublishProof" -DefaultValue $true)) -Severity "blocker" -Detail "Convergence must not publish, approve, promote proof, or close release issue.")) | Out-Null
+$items.Add((New-ValidationItem -Id "remote-proof-lanes-present" -Passed $remoteProofLanesPresent -Severity "blocker" -Detail "Final close convergence must include GitHub Actions, owner public publish, public package download, and post-publish clean consumer proof dependency lanes.")) | Out-Null
+$items.Add((New-ValidationItem -Id "remote-proof-lanes-block-close" -Passed $remoteProofLanesBlockClose -Severity "blocker" -Detail "Remote/public proof dependency lanes must block final close until real proof is imported.")) | Out-Null
+$items.Add((New-ValidationItem -Id "post-publish-proof-lane-requires-proof-candidate-ready" -Passed $postPublishRemoteLaneRequiresCandidate -Severity "blocker" -Detail "Final close post-publish lane must require proofCandidateReady=true, not validation-ready alone.")) | Out-Null
 $items.Add((New-ValidationItem -Id "strict-validator-sources" -Passed ($strictValidatorSourceArtifacts -contains "artifacts/final-release/real-external-proof-record-import-validator-validation.json" -and $strictValidatorSourceArtifacts -contains "artifacts/final-release/release-close-real-proof-import-bridge-validation.json" -and $acceptedProofSources -contains "strict-validator-accepted-real-external-proof-record") -Severity "blocker" -Detail "Final close must name strict validator accepted real proof as the only promotable source.")) | Out-Null
 $items.Add((New-ValidationItem -Id "candidate-bridge-input-only" -Passed ([bool](Get-PropertyOrDefault -Object $summary -Name "candidateInputOnly" -DefaultValue $false) -and [bool](Get-PropertyOrDefault -Object $summary -Name "bridgeInputOnly" -DefaultValue $false) -and [bool](Get-PropertyOrDefault -Object $summary -Name "strictValidatorRequired" -DefaultValue $false)) -Severity "blocker" -Detail "Candidate and bridge records must remain strict-validator input only.")) | Out-Null
 $items.Add((New-ValidationItem -Id "forbidden-substitute-markers" -Passed ((@("candidate","draft","dashboard","dry-run","local feed","ProjectReference","direct .nupkg","template","build-only","blocked-by-cuda-driver") | Where-Object { $forbiddenSubstituteMarkers -notcontains $_ -or $rejectedCloseSubstitutes -notcontains $_ }).Count -eq 0) -Severity "blocker" -Detail "Final close must reject candidate, draft, dashboard, dry-run, local feed, ProjectReference, direct nupkg, template, build-only, and blocked-by-driver substitutes.")) | Out-Null

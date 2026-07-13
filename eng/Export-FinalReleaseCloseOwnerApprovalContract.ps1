@@ -142,6 +142,8 @@ $postPublishCandidate = Read-JsonOrNull "artifacts\final-release\final-post-publ
 $postPublishCandidateValidation = Read-JsonOrNull "artifacts\final-release\final-post-publish-clean-consumer-proof-candidate-validation.json"
 $releaseEvidenceBundle = Read-JsonOrNull "artifacts\final-release\release-evidence-bundle.json"
 $classificationAudit = Read-JsonOrNull "artifacts\final-release\release-evidence-classification-audit.json"
+$remoteProofBackfillGate = Read-JsonOrNull "artifacts\final-release\remote-ci-and-public-publish-proof-backfill-gate.json"
+$remoteProofBackfillGateValidation = Read-JsonOrNull "artifacts\final-release\remote-ci-and-public-publish-proof-backfill-gate-validation.json"
 
 $approvalLanes = @(
   New-ApprovalLane -Id "owner-final-release-close-decision" -Description "Owner supplies the final decision to close or keep open the release issue."
@@ -158,10 +160,13 @@ $record = [ordered]@{
   sourcePostPublishCleanConsumerProofCandidateValidationState = [string](Get-PropertyOrDefault -Object $postPublishCandidateValidation -Name "validationState" -DefaultValue "missing-final-post-publish-clean-consumer-proof-candidate-validation")
   sourceReleaseEvidenceBundleRecordKind = [string](Get-PropertyOrDefault -Object $releaseEvidenceBundle -Name "recordKind" -DefaultValue "missing-release-evidence-bundle")
   sourceClassificationAuditState = [string](Get-PropertyOrDefault -Object $classificationAudit -Name "auditState" -DefaultValue "missing-release-evidence-classification-audit")
+  sourceRemoteCiAndPublicPublishProofBackfillGateState = [string](Get-PropertyOrDefault -Object $remoteProofBackfillGate -Name "gateState" -DefaultValue "missing-remote-ci-and-public-publish-proof-backfill-gate")
+  sourceRemoteCiAndPublicPublishProofBackfillGateValidationState = [string](Get-PropertyOrDefault -Object $remoteProofBackfillGateValidation -Name "validationState" -DefaultValue "missing-remote-ci-and-public-publish-proof-backfill-gate-validation")
+  requiredRemoteProofLaneIds = @("github-actions-run-proof", "owner-public-publish-result", "public-package-download-proof", "post-publish-clean-consumer-proof")
   approvalLaneCount = $approvalLanes.Count
   blockedApprovalLaneCount = $approvalLanes.Count
   readyForPreflightCount = 0
-  requiredOwnerInputFieldCount = 22 * $approvalLanes.Count
+  requiredOwnerInputFieldCount = 30 * $approvalLanes.Count
   approvalLanes = @($approvalLanes)
   requiredOwnerInputFields = @(
     "ownerReviewer",
@@ -185,6 +190,14 @@ $record = [ordered]@{
     "classificationAuditSha256",
     "releaseEvidenceBundlePath",
     "releaseEvidenceBundleSha256",
+    "githubActionsRunProofPath",
+    "githubActionsRunProofSha256",
+    "ownerPublicPublishResultPath",
+    "ownerPublicPublishResultSha256",
+    "publicPackageDownloadProofPath",
+    "publicPackageDownloadProofSha256",
+    "postPublishCleanConsumerProofResultPath",
+    "postPublishCleanConsumerProofResultSha256",
     "nonSubstituteConfirmations"
   )
   forbiddenSubstituteMarkers = @(
@@ -209,6 +222,10 @@ $record = [ordered]@{
   isPostPublishProof = $false
   isReleaseCloseProof = $false
   sourceArtifacts = @(
+    "artifacts/final-release/remote-ci-and-public-publish-proof-backfill-gate.json",
+    "artifacts/final-release/remote-ci-and-public-publish-proof-backfill-gate.md",
+    "artifacts/final-release/remote-ci-and-public-publish-proof-backfill-gate-validation.json",
+    "artifacts/final-release/remote-ci-and-public-publish-proof-backfill-gate-validation.md",
     "artifacts/final-release/final-post-publish-clean-consumer-proof-candidate.json",
     "artifacts/final-release/final-post-publish-clean-consumer-proof-candidate-validation.json",
     "artifacts/final-release/release-evidence-bundle.json",
