@@ -118,6 +118,10 @@ TensorRtSharp4.0 是面向生产部署的 TensorRT / CUDA .NET 桥接工程。
 - Release issue close final owner decision audit validation：`artifacts/final-release/release-issue-close-final-owner-decision-audit-validation.json`
 - Final post-publish audit pack：`artifacts/final-release/final-post-publish-audit-pack.json`
 - Final post-publish audit pack validation：`artifacts/final-release/final-post-publish-audit-pack-validation.json`
+- Release docs and NuGet metadata audit：`artifacts/final-release/release-docs-and-nuget-metadata-audit.json`
+- Release docs and NuGet metadata audit validation：`artifacts/final-release/release-docs-and-nuget-metadata-audit-validation.json`
+- Post-publish user verification pack：`artifacts/final-release/post-publish-user-verification-pack.json`
+- Post-publish user verification pack validation：`artifacts/final-release/post-publish-user-verification-pack-validation.json`
 - Release candidate final freeze manifest：`artifacts/final-release/release-candidate-final-freeze-manifest.json`
 - Release candidate final freeze manifest validation：`artifacts/final-release/release-candidate-final-freeze-manifest-validation.json`
 - Public publish owner manual command handoff：`artifacts/final-release/public-publish-owner-manual-command-handoff.json`
