@@ -236,3 +236,140 @@ function Test-OwnerInputValueReady {
   if ($Name -match "Url$" -and $text -notmatch "^https?://") { return $false }
   return $true
 }
+
+function ConvertTo-OwnerPublicPublishFieldMap {
+  param([AllowNull()][object[]]$Fields)
+
+  $map = [ordered]@{}
+  foreach ($field in @($Fields)) {
+    $name = [string](Get-OwnerPropertyOrDefault -Object $field -Name "name" -DefaultValue "")
+    if ([string]::IsNullOrWhiteSpace($name)) { continue }
+    $map[$name] = [string](Get-OwnerPropertyOrDefault -Object $field -Name "value" -DefaultValue "")
+  }
+
+  return $map
+}
+
+function Get-OwnerPublicPublishFieldValue {
+  param(
+    [AllowNull()][object]$FieldMap,
+    [string]$Name
+  )
+
+  if ($null -eq $FieldMap) { return "" }
+  if ($FieldMap -is [System.Collections.IDictionary] -and $FieldMap.Contains($Name)) { return [string]$FieldMap[$Name] }
+  if ($FieldMap.PSObject.Properties.Name -contains $Name) { return [string]$FieldMap.PSObject.Properties[$Name].Value }
+  return ""
+}
+
+function Test-OwnerSha256Format {
+  param([string]$Value)
+  return -not [string]::IsNullOrWhiteSpace($Value) -and $Value -match '^[0-9a-fA-F]{64}$'
+}
+
+function Test-OwnerHttpUrl {
+  param([string]$Value)
+  return -not [string]::IsNullOrWhiteSpace($Value) -and $Value -match '^https?://'
+}
+
+function Test-OwnerDateTimeOffset {
+  param([string]$Value)
+
+  if ([string]::IsNullOrWhiteSpace($Value)) { return $false }
+  $parsed = [DateTimeOffset]::MinValue
+  return [DateTimeOffset]::TryParse(
+    $Value,
+    [System.Globalization.CultureInfo]::InvariantCulture,
+    [System.Globalization.DateTimeStyles]::AssumeUniversal,
+    [ref]$parsed)
+}
+
+function Test-OwnerPublicNuGetUrl {
+  param([string]$Value)
+  return (Test-OwnerHttpUrl -Value $Value) -and $Value.StartsWith("https://www.nuget.org/packages/", [StringComparison]::OrdinalIgnoreCase)
+}
+
+function Test-OwnerGitHubUrl {
+  param([string]$Value)
+  return (Test-OwnerHttpUrl -Value $Value) -and $Value.StartsWith("https://github.com/", [StringComparison]::OrdinalIgnoreCase)
+}
+
+function Get-OwnerPublicPublishForbiddenFindings {
+  param(
+    [AllowNull()][object]$Record,
+    [AllowNull()][object]$FieldMap
+  )
+
+  $findings = New-Object System.Collections.Generic.List[string]
+  if ($null -eq $Record) { return @() }
+
+  $pieces = New-Object System.Collections.Generic.List[string]
+  foreach ($property in $Record.PSObject.Properties) {
+    if ($property.Value -is [string]) { $pieces.Add([string]$property.Value) | Out-Null }
+  }
+  if ($null -ne $FieldMap) {
+    if ($FieldMap -is [System.Collections.IDictionary]) {
+      foreach ($key in $FieldMap.Keys) { $pieces.Add([string]$FieldMap[$key]) | Out-Null }
+    }
+    else {
+      foreach ($property in $FieldMap.PSObject.Properties) { $pieces.Add([string]$property.Value) | Out-Null }
+    }
+  }
+
+  $text = ($pieces.ToArray() -join "`n")
+  foreach ($pattern in @(
+      @{ id = "local-feed"; regex = '(?i)local\s+feed|local-feed|file://|\\local-feed\\|/local-feed/' },
+      @{ id = "project-reference"; regex = '(?i)projectreference|project\s+reference' },
+      @{ id = "direct-nupkg"; regex = '(?i)direct\s+\.?nupkg|direct-nupkg' },
+      @{ id = "package-managed-dry-run"; regex = '(?i)package-managed-dry-run' },
+      @{ id = "manual-approval"; regex = '(?i)manual\s+approval' },
+      @{ id = "queued-workflow"; regex = '(?i)queued\s+(github\s+actions\s+)?workflow|queued\s+github\s+actions\s+run' },
+      @{ id = "missing-runner"; regex = '(?i)missing\s+(self-hosted\s+)?runner' },
+      @{ id = "dashboard-only"; regex = '(?i)dashboard-only|dashboard\s+only' },
+      @{ id = "artifact-only"; regex = '(?i)artifact-only|artifact\s+only' },
+      @{ id = "local-dotnet-test"; regex = '(?i)local\s+dotnet\s+test' },
+      @{ id = "sidecar-only"; regex = '(?i)sidecar-only|sidecar\s+only' },
+      @{ id = "tensorrtexec-report"; regex = '(?i)tensorrtexec\s+report|tensorrt\s*exec\s+report' }
+    )) {
+    if ($text -match $pattern.regex) { $findings.Add([string]$pattern.id) | Out-Null }
+  }
+
+  return @($findings.ToArray() | Select-Object -Unique)
+}
+
+function New-OwnerPublicPublishResultSummary {
+  param(
+    [AllowNull()][object]$FieldMap,
+    [AllowNull()][object]$GitHubActionsRunEvidence
+  )
+
+  [pscustomobject]@{
+    publicPackageId = Get-OwnerPublicPublishFieldValue -FieldMap $FieldMap -Name "publicPackageId"
+    publicPackageVersion = Get-OwnerPublicPublishFieldValue -FieldMap $FieldMap -Name "publicPackageVersion"
+    publicPackageSource = Get-OwnerPublicPublishFieldValue -FieldMap $FieldMap -Name "publicPackageSource"
+    publicPackageUrl = Get-OwnerPublicPublishFieldValue -FieldMap $FieldMap -Name "publicPackageUrl"
+    publicPackageSha256 = Get-OwnerPublicPublishFieldValue -FieldMap $FieldMap -Name "publicPackageSha256"
+    publicPackagePublishedAtUtc = Get-OwnerPublicPublishFieldValue -FieldMap $FieldMap -Name "publicPackagePublishedAtUtc"
+    managedPackageId = Get-OwnerPublicPublishFieldValue -FieldMap $FieldMap -Name "managedPackageId"
+    runtimePackageId = Get-OwnerPublicPublishFieldValue -FieldMap $FieldMap -Name "runtimePackageId"
+    managedPackageUrl = Get-OwnerPublicPublishFieldValue -FieldMap $FieldMap -Name "managedPackageUrl"
+    runtimePackageUrl = Get-OwnerPublicPublishFieldValue -FieldMap $FieldMap -Name "runtimePackageUrl"
+    managedPackageSha256 = Get-OwnerPublicPublishFieldValue -FieldMap $FieldMap -Name "managedPackageSha256"
+    runtimePackageSha256 = Get-OwnerPublicPublishFieldValue -FieldMap $FieldMap -Name "runtimePackageSha256"
+    githubReleaseUrl = Get-OwnerPublicPublishFieldValue -FieldMap $FieldMap -Name "githubReleaseUrl"
+    githubReleaseAssetUrl = Get-OwnerPublicPublishFieldValue -FieldMap $FieldMap -Name "githubReleaseAssetUrl"
+    githubReleaseAssetSha256 = Get-OwnerPublicPublishFieldValue -FieldMap $FieldMap -Name "githubReleaseAssetSha256"
+    packageManagedPackageSourceChannel = Get-OwnerPublicPublishFieldValue -FieldMap $FieldMap -Name "packageManagedPackageSourceChannel"
+    packageSourceChannel = Get-OwnerPublicPublishFieldValue -FieldMap $FieldMap -Name "packageSourceChannel"
+    ownerReviewer = Get-OwnerPublicPublishFieldValue -FieldMap $FieldMap -Name "ownerReviewer"
+    ownerReviewTimestampUtc = Get-OwnerPublicPublishFieldValue -FieldMap $FieldMap -Name "ownerReviewTimestampUtc"
+    ownerAuthorizationId = Get-OwnerPublicPublishFieldValue -FieldMap $FieldMap -Name "ownerAuthorizationId"
+    ownerAuthorizationTimestampUtc = Get-OwnerPublicPublishFieldValue -FieldMap $FieldMap -Name "ownerAuthorizationTimestampUtc"
+    sourceGitHubActionsRunEvidenceReady = [bool](Get-OwnerPropertyOrDefault -Object $GitHubActionsRunEvidence -Name "githubActionsRunEvidenceReady" -DefaultValue $false)
+    sourceGitHubActionsRunId = [string](Get-OwnerPropertyOrDefault -Object $GitHubActionsRunEvidence -Name "runId" -DefaultValue "")
+    sourceGitHubActionsRunUrl = [string](Get-OwnerPropertyOrDefault -Object $GitHubActionsRunEvidence -Name "runUrl" -DefaultValue "")
+    sourceHeadSha = [string](Get-OwnerPropertyOrDefault -Object $GitHubActionsRunEvidence -Name "headSha" -DefaultValue "")
+    sourceWorkflowRunLogSha256 = [string](Get-OwnerPropertyOrDefault -Object $GitHubActionsRunEvidence -Name "workflowRunLogSha256" -DefaultValue "")
+    sourceArtifactManifestSha256 = [string](Get-OwnerPropertyOrDefault -Object $GitHubActionsRunEvidence -Name "artifactManifestSha256" -DefaultValue "")
+  }
+}
