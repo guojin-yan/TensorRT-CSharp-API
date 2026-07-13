@@ -357,6 +357,12 @@ $releaseIssueCloseFinalOwnerDecisionAudit = Read-JsonOrNull "artifacts\final-rel
 $releaseIssueCloseFinalOwnerDecisionAuditValidation = Read-JsonOrNull "artifacts\final-release\release-issue-close-final-owner-decision-audit-validation.json"
 $finalPostPublishAuditPack = Read-JsonOrNull "artifacts\final-release\final-post-publish-audit-pack.json"
 $finalPostPublishAuditPackValidation = Read-JsonOrNull "artifacts\final-release\final-post-publish-audit-pack-validation.json"
+$releaseDocsAndNuGetMetadataAudit = Read-JsonOrNull "artifacts\final-release\release-docs-and-nuget-metadata-audit.json"
+$releaseDocsAndNuGetMetadataAuditValidation = Read-JsonOrNull "artifacts\final-release\release-docs-and-nuget-metadata-audit-validation.json"
+$postPublishUserVerificationPack = Read-JsonOrNull "artifacts\final-release\post-publish-user-verification-pack.json"
+$postPublishUserVerificationPackValidation = Read-JsonOrNull "artifacts\final-release\post-publish-user-verification-pack-validation.json"
+$publicPackageDownloadProofOwnerExecutionPack = Read-JsonOrNull "artifacts\final-release\public-package-download-proof-owner-execution-pack.json"
+$publicPackageDownloadProofOwnerExecutionPackValidation = Read-JsonOrNull "artifacts\final-release\public-package-download-proof-owner-execution-pack-validation.json"
 $releaseCandidateFinalFreezeManifest = Read-JsonOrNull "artifacts\final-release\release-candidate-final-freeze-manifest.json"
 $releaseCandidateFinalFreezeManifestValidation = Read-JsonOrNull "artifacts\final-release\release-candidate-final-freeze-manifest-validation.json"
 $publicPublishOwnerManualCommandHandoff = Read-JsonOrNull "artifacts\final-release\public-publish-owner-manual-command-handoff.json"
@@ -1407,6 +1413,47 @@ $finalPostPublishAuditPackCanCloseReleaseIssue = [bool](Get-PropertyOrDefault -O
 $finalPostPublishAuditPackIsRuntimeExecutionProof = [bool](Get-PropertyOrDefault -Object $finalPostPublishAuditPackValidation -Name "isRuntimeExecutionProof" -DefaultValue $false)
 $finalPostPublishAuditPackIsReleaseCloseProof = [bool](Get-PropertyOrDefault -Object $finalPostPublishAuditPackValidation -Name "isReleaseCloseProof" -DefaultValue $false)
 $finalPostPublishAuditPackIsPostPublishProof = [bool](Get-PropertyOrDefault -Object $finalPostPublishAuditPackValidation -Name "isPostPublishProof" -DefaultValue $false)
+$releaseDocsAndNuGetMetadataAuditState = [string](Get-PropertyOrDefault -Object $releaseDocsAndNuGetMetadataAudit -Name "auditState" -DefaultValue "missing-release-docs-and-nuget-metadata-audit")
+$releaseDocsAndNuGetMetadataAuditValidationState = [string](Get-PropertyOrDefault -Object $releaseDocsAndNuGetMetadataAuditValidation -Name "validationState" -DefaultValue "missing-release-docs-and-nuget-metadata-audit-validation")
+$releaseDocsAndNuGetMetadataAuditItemCount = [int](Get-PropertyOrDefault -Object $releaseDocsAndNuGetMetadataAuditValidation -Name "auditItemCount" -DefaultValue 0)
+$releaseDocsAndNuGetMetadataAuditFailedBlockerCount = [int](Get-PropertyOrDefault -Object $releaseDocsAndNuGetMetadataAuditValidation -Name "failedBlockerCount" -DefaultValue 0)
+$releaseDocsAndNuGetMetadataAuditYoloDetBlockedMatchCount = [int](Get-PropertyOrDefault -Object $releaseDocsAndNuGetMetadataAuditValidation -Name "yoloDetBlockedMatchCount" -DefaultValue 0)
+$releaseDocsAndNuGetMetadataAuditSplitRuntimePackageCount = [int](Get-PropertyOrDefault -Object $releaseDocsAndNuGetMetadataAuditValidation -Name "splitRuntimePackageCount" -DefaultValue 0)
+$releaseDocsAndNuGetMetadataAuditPerformsPublish = [bool](Get-PropertyOrDefault -Object $releaseDocsAndNuGetMetadataAuditValidation -Name "performsPublish" -DefaultValue $false)
+$releaseDocsAndNuGetMetadataAuditCanPromoteRuntimeProof = [bool](Get-PropertyOrDefault -Object $releaseDocsAndNuGetMetadataAuditValidation -Name "canPromoteRuntimeProof" -DefaultValue $false)
+$releaseDocsAndNuGetMetadataAuditCanPublishPublicly = [bool](Get-PropertyOrDefault -Object $releaseDocsAndNuGetMetadataAuditValidation -Name "canPublishPublicly" -DefaultValue $false)
+$releaseDocsAndNuGetMetadataAuditCanCloseReleaseIssue = [bool](Get-PropertyOrDefault -Object $releaseDocsAndNuGetMetadataAuditValidation -Name "canCloseReleaseIssue" -DefaultValue $false)
+$releaseDocsAndNuGetMetadataAuditIsRuntimeExecutionProof = [bool](Get-PropertyOrDefault -Object $releaseDocsAndNuGetMetadataAuditValidation -Name "isRuntimeExecutionProof" -DefaultValue $false)
+$releaseDocsAndNuGetMetadataAuditIsReleaseCloseProof = [bool](Get-PropertyOrDefault -Object $releaseDocsAndNuGetMetadataAuditValidation -Name "isReleaseCloseProof" -DefaultValue $false)
+$releaseDocsAndNuGetMetadataAuditIsPostPublishProof = [bool](Get-PropertyOrDefault -Object $releaseDocsAndNuGetMetadataAuditValidation -Name "isPostPublishProof" -DefaultValue $false)
+$postPublishUserVerificationPackState = [string](Get-PropertyOrDefault -Object $postPublishUserVerificationPack -Name "packState" -DefaultValue "missing-post-publish-user-verification-pack")
+$postPublishUserVerificationPackValidationState = [string](Get-PropertyOrDefault -Object $postPublishUserVerificationPackValidation -Name "validationState" -DefaultValue "missing-post-publish-user-verification-pack-validation")
+$postPublishUserVerificationPackLaneCount = [int](Get-PropertyOrDefault -Object $postPublishUserVerificationPackValidation -Name "verificationLaneCount" -DefaultValue 0)
+$postPublishUserVerificationPackReadyLaneCount = [int](Get-PropertyOrDefault -Object $postPublishUserVerificationPackValidation -Name "readyVerificationLaneCount" -DefaultValue 0)
+$postPublishUserVerificationPackBlockedLaneCount = [int](Get-PropertyOrDefault -Object $postPublishUserVerificationPackValidation -Name "blockedVerificationLaneCount" -DefaultValue 0)
+$postPublishUserVerificationPackFailedBlockerCount = [int](Get-PropertyOrDefault -Object $postPublishUserVerificationPackValidation -Name "failedBlockerCount" -DefaultValue 0)
+$postPublishUserVerificationPackFailedActionRequiredCount = [int](Get-PropertyOrDefault -Object $postPublishUserVerificationPackValidation -Name "failedActionRequiredCount" -DefaultValue 0)
+$postPublishUserVerificationPackPerformsPublish = [bool](Get-PropertyOrDefault -Object $postPublishUserVerificationPackValidation -Name "performsPublish" -DefaultValue $false)
+$postPublishUserVerificationPackCanPromoteRuntimeProof = [bool](Get-PropertyOrDefault -Object $postPublishUserVerificationPackValidation -Name "canPromoteRuntimeProof" -DefaultValue $false)
+$postPublishUserVerificationPackCanPublishPublicly = [bool](Get-PropertyOrDefault -Object $postPublishUserVerificationPackValidation -Name "canPublishPublicly" -DefaultValue $false)
+$postPublishUserVerificationPackCanCloseReleaseIssue = [bool](Get-PropertyOrDefault -Object $postPublishUserVerificationPackValidation -Name "canCloseReleaseIssue" -DefaultValue $false)
+$postPublishUserVerificationPackIsRuntimeExecutionProof = [bool](Get-PropertyOrDefault -Object $postPublishUserVerificationPackValidation -Name "isRuntimeExecutionProof" -DefaultValue $false)
+$postPublishUserVerificationPackIsReleaseCloseProof = [bool](Get-PropertyOrDefault -Object $postPublishUserVerificationPackValidation -Name "isReleaseCloseProof" -DefaultValue $false)
+$postPublishUserVerificationPackIsPostPublishProof = [bool](Get-PropertyOrDefault -Object $postPublishUserVerificationPackValidation -Name "isPostPublishProof" -DefaultValue $false)
+$publicPackageDownloadProofOwnerExecutionPackState = [string](Get-PropertyOrDefault -Object $publicPackageDownloadProofOwnerExecutionPack -Name "packState" -DefaultValue "missing-public-package-download-proof-owner-execution-pack")
+$publicPackageDownloadProofOwnerExecutionPackValidationState = [string](Get-PropertyOrDefault -Object $publicPackageDownloadProofOwnerExecutionPackValidation -Name "validationState" -DefaultValue "missing-public-package-download-proof-owner-execution-pack-validation")
+$publicPackageDownloadProofOwnerExecutionPackStepCount = [int](Get-PropertyOrDefault -Object $publicPackageDownloadProofOwnerExecutionPackValidation -Name "ownerStepCount" -DefaultValue 0)
+$publicPackageDownloadProofOwnerExecutionPackBlockedStepCount = [int](Get-PropertyOrDefault -Object $publicPackageDownloadProofOwnerExecutionPackValidation -Name "blockedOwnerStepCount" -DefaultValue 0)
+$publicPackageDownloadProofOwnerExecutionPackCommandCount = [int](Get-PropertyOrDefault -Object $publicPackageDownloadProofOwnerExecutionPackValidation -Name "manualCommandCount" -DefaultValue 0)
+$publicPackageDownloadProofOwnerExecutionPackFailedBlockerCount = [int](Get-PropertyOrDefault -Object $publicPackageDownloadProofOwnerExecutionPackValidation -Name "failedBlockerCount" -DefaultValue 0)
+$publicPackageDownloadProofOwnerExecutionPackFailedActionRequiredCount = [int](Get-PropertyOrDefault -Object $publicPackageDownloadProofOwnerExecutionPackValidation -Name "failedActionRequiredCount" -DefaultValue 0)
+$publicPackageDownloadProofOwnerExecutionPackPerformsPublish = [bool](Get-PropertyOrDefault -Object $publicPackageDownloadProofOwnerExecutionPackValidation -Name "performsPublish" -DefaultValue $false)
+$publicPackageDownloadProofOwnerExecutionPackCanPromoteRuntimeProof = [bool](Get-PropertyOrDefault -Object $publicPackageDownloadProofOwnerExecutionPackValidation -Name "canPromoteRuntimeProof" -DefaultValue $false)
+$publicPackageDownloadProofOwnerExecutionPackCanPublishPublicly = [bool](Get-PropertyOrDefault -Object $publicPackageDownloadProofOwnerExecutionPackValidation -Name "canPublishPublicly" -DefaultValue $false)
+$publicPackageDownloadProofOwnerExecutionPackCanCloseReleaseIssue = [bool](Get-PropertyOrDefault -Object $publicPackageDownloadProofOwnerExecutionPackValidation -Name "canCloseReleaseIssue" -DefaultValue $false)
+$publicPackageDownloadProofOwnerExecutionPackIsRuntimeExecutionProof = [bool](Get-PropertyOrDefault -Object $publicPackageDownloadProofOwnerExecutionPackValidation -Name "isRuntimeExecutionProof" -DefaultValue $false)
+$publicPackageDownloadProofOwnerExecutionPackIsReleaseCloseProof = [bool](Get-PropertyOrDefault -Object $publicPackageDownloadProofOwnerExecutionPackValidation -Name "isReleaseCloseProof" -DefaultValue $false)
+$publicPackageDownloadProofOwnerExecutionPackIsPostPublishProof = [bool](Get-PropertyOrDefault -Object $publicPackageDownloadProofOwnerExecutionPackValidation -Name "isPostPublishProof" -DefaultValue $false)
 $releaseCandidateFinalFreezeManifestState = [string](Get-PropertyOrDefault -Object $releaseCandidateFinalFreezeManifest -Name "freezeState" -DefaultValue "missing-release-candidate-final-freeze-manifest")
 $releaseCandidateFinalFreezeManifestValidationState = [string](Get-PropertyOrDefault -Object $releaseCandidateFinalFreezeManifestValidation -Name "validationState" -DefaultValue "missing-release-candidate-final-freeze-manifest-validation")
 $releaseCandidateFinalFreezeManifestArtifactCount = [int](Get-PropertyOrDefault -Object $releaseCandidateFinalFreezeManifestValidation -Name "artifactCount" -DefaultValue 0)
@@ -3078,6 +3125,9 @@ $evidenceItems = @(
   New-EvidenceItem -Id "release-close-final-owner-runbook" -Title "Release close final owner runbook" -Artifact "artifacts/final-release/release-close-final-owner-runbook.json" -State "$releaseCloseFinalOwnerRunbookState; validationState=$releaseCloseFinalOwnerRunbookValidationState; failedBlockers=$releaseCloseFinalOwnerRunbookFailedBlockerCount; failedActionRequired=$releaseCloseFinalOwnerRunbookFailedActionRequiredCount; blockedStepCount=$releaseCloseFinalOwnerRunbookBlockedStepCount; ownerActionStepCount=$releaseCloseFinalOwnerRunbookOwnerActionStepCount; performsPublish=$releaseCloseFinalOwnerRunbookPerformsPublish; canPublishPublicly=$releaseCloseFinalOwnerRunbookCanPublishPublicly; canCloseReleaseIssue=$releaseCloseFinalOwnerRunbookCanCloseReleaseIssue" -Passed $false -Boundary "The release close final owner runbook is the final owner execution manual only; it cannot collect proof automatically, publish, approve public release, or close the release issue."
   New-EvidenceItem -Id "release-issue-close-final-owner-decision-audit" -Title "Release issue close final owner decision audit" -Artifact "artifacts/final-release/release-issue-close-final-owner-decision-audit-validation.json" -State "$releaseIssueCloseFinalOwnerDecisionAuditValidationState; auditState=$releaseIssueCloseFinalOwnerDecisionAuditState; gates=$releaseIssueCloseFinalOwnerDecisionAuditGateCount; blockedGates=$releaseIssueCloseFinalOwnerDecisionAuditBlockedGateCount; readyGates=$releaseIssueCloseFinalOwnerDecisionAuditReadyGateCount; failedBlockers=$releaseIssueCloseFinalOwnerDecisionAuditFailedBlockerCount; failedActionRequired=$releaseIssueCloseFinalOwnerDecisionAuditFailedActionRequiredCount; performsPublish=$releaseIssueCloseFinalOwnerDecisionAuditPerformsPublish; canPromoteRuntimeProof=$releaseIssueCloseFinalOwnerDecisionAuditCanPromoteRuntimeProof; canPublishPublicly=$releaseIssueCloseFinalOwnerDecisionAuditCanPublishPublicly; canCloseReleaseIssue=$releaseIssueCloseFinalOwnerDecisionAuditCanCloseReleaseIssue; isRuntimeExecutionProof=$releaseIssueCloseFinalOwnerDecisionAuditIsRuntimeExecutionProof; isReleaseCloseProof=$releaseIssueCloseFinalOwnerDecisionAuditIsReleaseCloseProof; isPostPublishProof=$releaseIssueCloseFinalOwnerDecisionAuditIsPostPublishProof" -Passed $false -Boundary "The release issue close final owner decision audit is final owner decision gate aggregation only; it is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push."
   New-EvidenceItem -Id "final-post-publish-audit-pack" -Title "Final post-publish audit pack" -Artifact "artifacts/final-release/final-post-publish-audit-pack-validation.json" -State "$finalPostPublishAuditPackValidationState; auditState=$finalPostPublishAuditPackState; lanes=$finalPostPublishAuditPackLaneCount; blockedLanes=$finalPostPublishAuditPackBlockedLaneCount; readyLanes=$finalPostPublishAuditPackReadyLaneCount; failedBlockers=$finalPostPublishAuditPackFailedBlockerCount; failedActionRequired=$finalPostPublishAuditPackFailedActionRequiredCount; performsPublish=$finalPostPublishAuditPackPerformsPublish; canPromoteRuntimeProof=$finalPostPublishAuditPackCanPromoteRuntimeProof; canPublishPublicly=$finalPostPublishAuditPackCanPublishPublicly; canCloseReleaseIssue=$finalPostPublishAuditPackCanCloseReleaseIssue; isRuntimeExecutionProof=$finalPostPublishAuditPackIsRuntimeExecutionProof; isReleaseCloseProof=$finalPostPublishAuditPackIsReleaseCloseProof; isPostPublishProof=$finalPostPublishAuditPackIsPostPublishProof" -Passed $false -Boundary "The final post-publish audit pack is final post-publish audit aggregation only; it is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push."
+  New-EvidenceItem -Id "release-docs-and-nuget-metadata-audit" -Title "Release docs and NuGet metadata audit" -Artifact "artifacts/final-release/release-docs-and-nuget-metadata-audit-validation.json" -State "$releaseDocsAndNuGetMetadataAuditValidationState; auditState=$releaseDocsAndNuGetMetadataAuditState; auditItems=$releaseDocsAndNuGetMetadataAuditItemCount; yoloDetBlockedMatches=$releaseDocsAndNuGetMetadataAuditYoloDetBlockedMatchCount; splitRuntimePackages=$releaseDocsAndNuGetMetadataAuditSplitRuntimePackageCount; failedBlockers=$releaseDocsAndNuGetMetadataAuditFailedBlockerCount; performsPublish=$releaseDocsAndNuGetMetadataAuditPerformsPublish; canPromoteRuntimeProof=$releaseDocsAndNuGetMetadataAuditCanPromoteRuntimeProof; canPublishPublicly=$releaseDocsAndNuGetMetadataAuditCanPublishPublicly; canCloseReleaseIssue=$releaseDocsAndNuGetMetadataAuditCanCloseReleaseIssue; isRuntimeExecutionProof=$releaseDocsAndNuGetMetadataAuditIsRuntimeExecutionProof; isReleaseCloseProof=$releaseDocsAndNuGetMetadataAuditIsReleaseCloseProof; isPostPublishProof=$releaseDocsAndNuGetMetadataAuditIsPostPublishProof" -Passed $false -Boundary "The release docs and NuGet metadata audit is documentation and package metadata claim-safety only; it is not runtime proof, not post-publish proof, not public package download proof, not publish approval, not release close approval, not package push, and cannot close release issue."
+  New-EvidenceItem -Id "post-publish-user-verification-pack" -Title "Post-publish user verification pack" -Artifact "artifacts/final-release/post-publish-user-verification-pack-validation.json" -State "$postPublishUserVerificationPackValidationState; packState=$postPublishUserVerificationPackState; lanes=$postPublishUserVerificationPackLaneCount; readyLanes=$postPublishUserVerificationPackReadyLaneCount; blockedLanes=$postPublishUserVerificationPackBlockedLaneCount; failedBlockers=$postPublishUserVerificationPackFailedBlockerCount; failedActionRequired=$postPublishUserVerificationPackFailedActionRequiredCount; performsPublish=$postPublishUserVerificationPackPerformsPublish; canPromoteRuntimeProof=$postPublishUserVerificationPackCanPromoteRuntimeProof; canPublishPublicly=$postPublishUserVerificationPackCanPublishPublicly; canCloseReleaseIssue=$postPublishUserVerificationPackCanCloseReleaseIssue; isRuntimeExecutionProof=$postPublishUserVerificationPackIsRuntimeExecutionProof; isReleaseCloseProof=$postPublishUserVerificationPackIsReleaseCloseProof; isPostPublishProof=$postPublishUserVerificationPackIsPostPublishProof" -Passed $false -Boundary "The post-publish user verification pack is owner action aggregation only; it is not runtime proof, not post-publish proof, not public package download proof, not publish approval, not release close approval, not package push, and cannot close release issue."
+  New-EvidenceItem -Id "public-package-download-proof-owner-execution-pack" -Title "Public package download proof owner execution pack" -Artifact "artifacts/final-release/public-package-download-proof-owner-execution-pack-validation.json" -State "$publicPackageDownloadProofOwnerExecutionPackValidationState; packState=$publicPackageDownloadProofOwnerExecutionPackState; ownerSteps=$publicPackageDownloadProofOwnerExecutionPackStepCount; blockedOwnerSteps=$publicPackageDownloadProofOwnerExecutionPackBlockedStepCount; manualCommands=$publicPackageDownloadProofOwnerExecutionPackCommandCount; failedBlockers=$publicPackageDownloadProofOwnerExecutionPackFailedBlockerCount; failedActionRequired=$publicPackageDownloadProofOwnerExecutionPackFailedActionRequiredCount; performsPublish=$publicPackageDownloadProofOwnerExecutionPackPerformsPublish; canPromoteRuntimeProof=$publicPackageDownloadProofOwnerExecutionPackCanPromoteRuntimeProof; canPublishPublicly=$publicPackageDownloadProofOwnerExecutionPackCanPublishPublicly; canCloseReleaseIssue=$publicPackageDownloadProofOwnerExecutionPackCanCloseReleaseIssue; isRuntimeExecutionProof=$publicPackageDownloadProofOwnerExecutionPackIsRuntimeExecutionProof; isReleaseCloseProof=$publicPackageDownloadProofOwnerExecutionPackIsReleaseCloseProof; isPostPublishProof=$publicPackageDownloadProofOwnerExecutionPackIsPostPublishProof" -Passed $false -Boundary "The public package download proof owner execution pack is manual owner guidance only; it is not runtime proof, not post-publish proof, not public package download proof by itself, not publish approval, not release close approval, not package push, and cannot close release issue."
   New-EvidenceItem -Id "release-candidate-final-freeze-manifest" -Title "Release candidate final freeze manifest" -Artifact "artifacts/final-release/release-candidate-final-freeze-manifest-validation.json" -State "$releaseCandidateFinalFreezeManifestValidationState; freezeState=$releaseCandidateFinalFreezeManifestState; artifacts=$releaseCandidateFinalFreezeManifestArtifactCount; failedBlockers=$releaseCandidateFinalFreezeManifestFailedBlockerCount; failedActionRequired=$releaseCandidateFinalFreezeManifestFailedActionRequiredCount; performsPublish=$releaseCandidateFinalFreezeManifestPerformsPublish; canPromoteRuntimeProof=$releaseCandidateFinalFreezeManifestCanPromoteRuntimeProof; canPublishPublicly=$releaseCandidateFinalFreezeManifestCanPublishPublicly; canCloseReleaseIssue=$releaseCandidateFinalFreezeManifestCanCloseReleaseIssue; isRuntimeExecutionProof=$releaseCandidateFinalFreezeManifestIsRuntimeExecutionProof; isReleaseCloseProof=$releaseCandidateFinalFreezeManifestIsReleaseCloseProof; isPostPublishProof=$releaseCandidateFinalFreezeManifestIsPostPublishProof" -Passed $false -Boundary "The release candidate final freeze manifest is local artifact hash inventory only; it is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push."
   New-EvidenceItem -Id "public-publish-owner-manual-command-handoff" -Title "Public publish owner manual command handoff" -Artifact "artifacts/final-release/public-publish-owner-manual-command-handoff-validation.json" -State "$publicPublishOwnerManualCommandHandoffValidationState; handoffState=$publicPublishOwnerManualCommandHandoffState; commands=$publicPublishOwnerManualCommandHandoffCommandCount; manualPrerequisites=$publicPublishOwnerManualCommandHandoffManualPrerequisiteCount; failedBlockers=$publicPublishOwnerManualCommandHandoffFailedBlockerCount; failedActionRequired=$publicPublishOwnerManualCommandHandoffFailedActionRequiredCount; notExecutedByAutomation=$publicPublishOwnerManualCommandHandoffNotExecutedByAutomation; performsPublish=$publicPublishOwnerManualCommandHandoffPerformsPublish; canPromoteRuntimeProof=$publicPublishOwnerManualCommandHandoffCanPromoteRuntimeProof; canPublishPublicly=$publicPublishOwnerManualCommandHandoffCanPublishPublicly; canCloseReleaseIssue=$publicPublishOwnerManualCommandHandoffCanCloseReleaseIssue; isRuntimeExecutionProof=$publicPublishOwnerManualCommandHandoffIsRuntimeExecutionProof; isReleaseCloseProof=$publicPublishOwnerManualCommandHandoffIsReleaseCloseProof; isPostPublishProof=$publicPublishOwnerManualCommandHandoffIsPostPublishProof" -Passed $false -Boundary "The public publish owner manual command handoff is placeholder command guidance only; it is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push."
   New-EvidenceItem -Id "final-release-close-blocker-dashboard" -Title "Final release close blocker dashboard" -Artifact "artifacts/final-release/final-release-close-blocker-dashboard-validation.json" -State "$finalReleaseCloseBlockerDashboardValidationState; dashboardState=$finalReleaseCloseBlockerDashboardState; blockers=$finalReleaseCloseBlockerDashboardBlockerCount; blockedBlockers=$finalReleaseCloseBlockerDashboardBlockedBlockerCount; readyBlockers=$finalReleaseCloseBlockerDashboardReadyBlockerCount; failedBlockers=$finalReleaseCloseBlockerDashboardFailedBlockerCount; failedActionRequired=$finalReleaseCloseBlockerDashboardFailedActionRequiredCount; performsPublish=$finalReleaseCloseBlockerDashboardPerformsPublish; canPromoteRuntimeProof=$finalReleaseCloseBlockerDashboardCanPromoteRuntimeProof; canPublishPublicly=$finalReleaseCloseBlockerDashboardCanPublishPublicly; canCloseReleaseIssue=$finalReleaseCloseBlockerDashboardCanCloseReleaseIssue; isRuntimeExecutionProof=$finalReleaseCloseBlockerDashboardIsRuntimeExecutionProof; isReleaseCloseProof=$finalReleaseCloseBlockerDashboardIsReleaseCloseProof; isPostPublishProof=$finalReleaseCloseBlockerDashboardIsPostPublishProof" -Passed $false -Boundary "The final release close blocker dashboard is owner-action aggregation only; it is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push."
@@ -4069,6 +4119,47 @@ $record = [pscustomobject]@{
   finalPostPublishAuditPackIsRuntimeExecutionProof = $finalPostPublishAuditPackIsRuntimeExecutionProof
   finalPostPublishAuditPackIsReleaseCloseProof = $finalPostPublishAuditPackIsReleaseCloseProof
   finalPostPublishAuditPackIsPostPublishProof = $finalPostPublishAuditPackIsPostPublishProof
+  releaseDocsAndNuGetMetadataAuditState = $releaseDocsAndNuGetMetadataAuditState
+  releaseDocsAndNuGetMetadataAuditValidationState = $releaseDocsAndNuGetMetadataAuditValidationState
+  releaseDocsAndNuGetMetadataAuditItemCount = $releaseDocsAndNuGetMetadataAuditItemCount
+  releaseDocsAndNuGetMetadataAuditFailedBlockerCount = $releaseDocsAndNuGetMetadataAuditFailedBlockerCount
+  releaseDocsAndNuGetMetadataAuditYoloDetBlockedMatchCount = $releaseDocsAndNuGetMetadataAuditYoloDetBlockedMatchCount
+  releaseDocsAndNuGetMetadataAuditSplitRuntimePackageCount = $releaseDocsAndNuGetMetadataAuditSplitRuntimePackageCount
+  releaseDocsAndNuGetMetadataAuditPerformsPublish = $releaseDocsAndNuGetMetadataAuditPerformsPublish
+  releaseDocsAndNuGetMetadataAuditCanPromoteRuntimeProof = $releaseDocsAndNuGetMetadataAuditCanPromoteRuntimeProof
+  releaseDocsAndNuGetMetadataAuditCanPublishPublicly = $releaseDocsAndNuGetMetadataAuditCanPublishPublicly
+  releaseDocsAndNuGetMetadataAuditCanCloseReleaseIssue = $releaseDocsAndNuGetMetadataAuditCanCloseReleaseIssue
+  releaseDocsAndNuGetMetadataAuditIsRuntimeExecutionProof = $releaseDocsAndNuGetMetadataAuditIsRuntimeExecutionProof
+  releaseDocsAndNuGetMetadataAuditIsReleaseCloseProof = $releaseDocsAndNuGetMetadataAuditIsReleaseCloseProof
+  releaseDocsAndNuGetMetadataAuditIsPostPublishProof = $releaseDocsAndNuGetMetadataAuditIsPostPublishProof
+  postPublishUserVerificationPackState = $postPublishUserVerificationPackState
+  postPublishUserVerificationPackValidationState = $postPublishUserVerificationPackValidationState
+  postPublishUserVerificationPackLaneCount = $postPublishUserVerificationPackLaneCount
+  postPublishUserVerificationPackReadyLaneCount = $postPublishUserVerificationPackReadyLaneCount
+  postPublishUserVerificationPackBlockedLaneCount = $postPublishUserVerificationPackBlockedLaneCount
+  postPublishUserVerificationPackFailedBlockerCount = $postPublishUserVerificationPackFailedBlockerCount
+  postPublishUserVerificationPackFailedActionRequiredCount = $postPublishUserVerificationPackFailedActionRequiredCount
+  postPublishUserVerificationPackPerformsPublish = $postPublishUserVerificationPackPerformsPublish
+  postPublishUserVerificationPackCanPromoteRuntimeProof = $postPublishUserVerificationPackCanPromoteRuntimeProof
+  postPublishUserVerificationPackCanPublishPublicly = $postPublishUserVerificationPackCanPublishPublicly
+  postPublishUserVerificationPackCanCloseReleaseIssue = $postPublishUserVerificationPackCanCloseReleaseIssue
+  postPublishUserVerificationPackIsRuntimeExecutionProof = $postPublishUserVerificationPackIsRuntimeExecutionProof
+  postPublishUserVerificationPackIsReleaseCloseProof = $postPublishUserVerificationPackIsReleaseCloseProof
+  postPublishUserVerificationPackIsPostPublishProof = $postPublishUserVerificationPackIsPostPublishProof
+  publicPackageDownloadProofOwnerExecutionPackState = $publicPackageDownloadProofOwnerExecutionPackState
+  publicPackageDownloadProofOwnerExecutionPackValidationState = $publicPackageDownloadProofOwnerExecutionPackValidationState
+  publicPackageDownloadProofOwnerExecutionPackStepCount = $publicPackageDownloadProofOwnerExecutionPackStepCount
+  publicPackageDownloadProofOwnerExecutionPackBlockedStepCount = $publicPackageDownloadProofOwnerExecutionPackBlockedStepCount
+  publicPackageDownloadProofOwnerExecutionPackCommandCount = $publicPackageDownloadProofOwnerExecutionPackCommandCount
+  publicPackageDownloadProofOwnerExecutionPackFailedBlockerCount = $publicPackageDownloadProofOwnerExecutionPackFailedBlockerCount
+  publicPackageDownloadProofOwnerExecutionPackFailedActionRequiredCount = $publicPackageDownloadProofOwnerExecutionPackFailedActionRequiredCount
+  publicPackageDownloadProofOwnerExecutionPackPerformsPublish = $publicPackageDownloadProofOwnerExecutionPackPerformsPublish
+  publicPackageDownloadProofOwnerExecutionPackCanPromoteRuntimeProof = $publicPackageDownloadProofOwnerExecutionPackCanPromoteRuntimeProof
+  publicPackageDownloadProofOwnerExecutionPackCanPublishPublicly = $publicPackageDownloadProofOwnerExecutionPackCanPublishPublicly
+  publicPackageDownloadProofOwnerExecutionPackCanCloseReleaseIssue = $publicPackageDownloadProofOwnerExecutionPackCanCloseReleaseIssue
+  publicPackageDownloadProofOwnerExecutionPackIsRuntimeExecutionProof = $publicPackageDownloadProofOwnerExecutionPackIsRuntimeExecutionProof
+  publicPackageDownloadProofOwnerExecutionPackIsReleaseCloseProof = $publicPackageDownloadProofOwnerExecutionPackIsReleaseCloseProof
+  publicPackageDownloadProofOwnerExecutionPackIsPostPublishProof = $publicPackageDownloadProofOwnerExecutionPackIsPostPublishProof
   releaseCandidateFinalFreezeManifestState = $releaseCandidateFinalFreezeManifestState
   releaseCandidateFinalFreezeManifestValidationState = $releaseCandidateFinalFreezeManifestValidationState
   releaseCandidateFinalFreezeManifestArtifactCount = $releaseCandidateFinalFreezeManifestArtifactCount
@@ -5339,6 +5430,18 @@ $record = [pscustomobject]@{
     "artifacts/final-release/final-post-publish-audit-pack.md",
     "artifacts/final-release/final-post-publish-audit-pack-validation.json",
     "artifacts/final-release/final-post-publish-audit-pack-validation.md",
+    "artifacts/final-release/release-docs-and-nuget-metadata-audit.json",
+    "artifacts/final-release/release-docs-and-nuget-metadata-audit.md",
+    "artifacts/final-release/release-docs-and-nuget-metadata-audit-validation.json",
+    "artifacts/final-release/release-docs-and-nuget-metadata-audit-validation.md",
+    "artifacts/final-release/post-publish-user-verification-pack.json",
+    "artifacts/final-release/post-publish-user-verification-pack.md",
+    "artifacts/final-release/post-publish-user-verification-pack-validation.json",
+    "artifacts/final-release/post-publish-user-verification-pack-validation.md",
+    "artifacts/final-release/public-package-download-proof-owner-execution-pack.json",
+    "artifacts/final-release/public-package-download-proof-owner-execution-pack.md",
+    "artifacts/final-release/public-package-download-proof-owner-execution-pack-validation.json",
+    "artifacts/final-release/public-package-download-proof-owner-execution-pack-validation.md",
     "artifacts/final-release/release-candidate-final-freeze-manifest.json",
     "artifacts/final-release/release-candidate-final-freeze-manifest.md",
     "artifacts/final-release/release-candidate-final-freeze-manifest-validation.json",
@@ -6134,6 +6237,18 @@ $record = [pscustomobject]@{
     "artifacts/final-release/final-post-publish-audit-pack.md",
     "artifacts/final-release/final-post-publish-audit-pack-validation.json",
     "artifacts/final-release/final-post-publish-audit-pack-validation.md",
+    "artifacts/final-release/release-docs-and-nuget-metadata-audit.json",
+    "artifacts/final-release/release-docs-and-nuget-metadata-audit.md",
+    "artifacts/final-release/release-docs-and-nuget-metadata-audit-validation.json",
+    "artifacts/final-release/release-docs-and-nuget-metadata-audit-validation.md",
+    "artifacts/final-release/post-publish-user-verification-pack.json",
+    "artifacts/final-release/post-publish-user-verification-pack.md",
+    "artifacts/final-release/post-publish-user-verification-pack-validation.json",
+    "artifacts/final-release/post-publish-user-verification-pack-validation.md",
+    "artifacts/final-release/public-package-download-proof-owner-execution-pack.json",
+    "artifacts/final-release/public-package-download-proof-owner-execution-pack.md",
+    "artifacts/final-release/public-package-download-proof-owner-execution-pack-validation.json",
+    "artifacts/final-release/public-package-download-proof-owner-execution-pack-validation.md",
     "artifacts/final-release/release-candidate-final-freeze-manifest.json",
     "artifacts/final-release/release-candidate-final-freeze-manifest.md",
     "artifacts/final-release/release-candidate-final-freeze-manifest-validation.json",
@@ -6876,6 +6991,16 @@ $lines.Add("- release issue close final owner decision blocked gates: ``$release
 $lines.Add("- final post-publish audit pack: ``$finalPostPublishAuditPackState``")
 $lines.Add("- final post-publish audit pack validation: ``$finalPostPublishAuditPackValidationState``")
 $lines.Add("- final post-publish audit blocked lanes: ``$finalPostPublishAuditPackBlockedLaneCount``")
+$lines.Add("- release docs and NuGet metadata audit: ``$releaseDocsAndNuGetMetadataAuditState``")
+$lines.Add("- release docs and NuGet metadata audit validation: ``$releaseDocsAndNuGetMetadataAuditValidationState``")
+$lines.Add("- release docs and NuGet metadata audit items: ``$releaseDocsAndNuGetMetadataAuditItemCount``")
+$lines.Add("- release docs and NuGet metadata audit YoloDet blocked matches: ``$releaseDocsAndNuGetMetadataAuditYoloDetBlockedMatchCount``")
+$lines.Add("- post-publish user verification pack: ``$postPublishUserVerificationPackState``")
+$lines.Add("- post-publish user verification pack validation: ``$postPublishUserVerificationPackValidationState``")
+$lines.Add("- post-publish user verification blocked lanes: ``$postPublishUserVerificationPackBlockedLaneCount``")
+$lines.Add("- public package download proof owner execution pack: ``$publicPackageDownloadProofOwnerExecutionPackState``")
+$lines.Add("- public package download proof owner execution pack validation: ``$publicPackageDownloadProofOwnerExecutionPackValidationState``")
+$lines.Add("- public package download proof owner execution blocked steps: ``$publicPackageDownloadProofOwnerExecutionPackBlockedStepCount``")
 $lines.Add("- release candidate final freeze manifest: ``$releaseCandidateFinalFreezeManifestState``")
 $lines.Add("- release candidate final freeze manifest validation: ``$releaseCandidateFinalFreezeManifestValidationState``")
 $lines.Add("- release candidate final freeze manifest artifacts: ``$releaseCandidateFinalFreezeManifestArtifactCount``")
