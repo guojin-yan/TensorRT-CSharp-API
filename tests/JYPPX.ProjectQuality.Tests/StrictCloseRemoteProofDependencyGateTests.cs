@@ -95,6 +95,10 @@ public sealed class StrictCloseRemoteProofDependencyGateTests
         Assert.Equal("proofCandidateReady", finalClosePostPublishLane.GetProperty("proofReadyProperty").GetString());
         Assert.False(finalClosePostPublishLane.GetProperty("proofReady").GetBoolean());
         Assert.False(finalClosePostPublishLane.GetProperty("ready").GetBoolean());
+        JsonElement finalClosePublicDownloadLane = finalCloseLanes.Single(static lane => lane.GetProperty("id").GetString() == "public-package-download-proof");
+        Assert.False(finalClosePublicDownloadLane.GetProperty("ready").GetBoolean());
+        Assert.Contains("Repository-external clean consumer", finalClosePostPublishLane.GetProperty("requiredEvidence").GetString(), StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("public package download proof only", finalClosePostPublishLane.GetProperty("requiredEvidence").GetString(), StringComparison.OrdinalIgnoreCase);
 
         using JsonDocument finalCloseValidationDocument = ReadFinalReleaseJson("final-close-gate-convergence-validation.json");
         JsonElement finalCloseValidation = finalCloseValidationDocument.RootElement;

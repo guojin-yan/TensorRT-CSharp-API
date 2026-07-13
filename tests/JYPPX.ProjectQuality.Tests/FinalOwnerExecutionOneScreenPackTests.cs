@@ -34,6 +34,25 @@ public sealed class FinalOwnerExecutionOneScreenPackTests
         Assert.Equal(9, pack.GetProperty("blockedFinalPublicProofPathCount").GetInt32());
         Assert.Equal(7, pack.GetProperty("ownerExecutionSequenceCount").GetInt32());
         Assert.Equal(7, pack.GetProperty("blockedOwnerExecutionSequenceCount").GetInt32());
+        Assert.Equal(8, pack.GetProperty("releaseCloseRealInputChainCount").GetInt32());
+        Assert.Equal(8, pack.GetProperty("blockedReleaseCloseRealInputChainCount").GetInt32());
+        Assert.True(pack.GetProperty("releaseCloseRealInputChainRequiredFieldCount").GetInt32() >= 100);
+        Assert.True(pack.GetProperty("releaseCloseRealInputChainRejectedSubstituteCount").GetInt32() >= 30);
+        Assert.Equal(18, pack.GetProperty("releaseCloseRealInputChainSourceReadinessSignalCount").GetInt32());
+        Assert.True(pack.GetProperty("releaseCloseRealInputChainBlockedRealInputCount").GetInt32() > 0);
+        Assert.True(pack.GetProperty("publicPackageDownloadProofRequiredFieldCount").GetInt32() >= 30);
+        Assert.Equal(11, pack.GetProperty("publicPackageDownloadProofRejectedSubstituteCount").GetInt32());
+        Assert.Equal(7, pack.GetProperty("publicPackageDownloadProofSourceReadinessSignalCount").GetInt32());
+        Assert.False(pack.GetProperty("publicPackageDownloadProofCandidateReady").GetBoolean());
+        Assert.True(pack.TryGetProperty("releaseEvidenceBundleSha256", out JsonElement bundleSha));
+        Assert.Matches("^[0-9a-f]{64}$", bundleSha.GetString()!);
+        Assert.Equal("blocked-final-close-gate-owner-proof-required", pack.GetProperty("finalCloseStrictValidatorOutputState").GetString());
+        Assert.True(pack.GetProperty("postPublishCleanConsumerProofRequiredFieldCount").GetInt32() >= 50);
+        Assert.Equal(11, pack.GetProperty("postPublishCleanConsumerProofRejectedSubstituteCount").GetInt32());
+        Assert.True(pack.GetProperty("postPublishCleanConsumerProofBlockedRealInputCount").GetInt32() > 0);
+        Assert.Equal(11, pack.GetProperty("postPublishCleanConsumerProofSourceReadinessSignalCount").GetInt32());
+        Assert.False(pack.GetProperty("postPublishCleanConsumerProofCandidateReady").GetBoolean());
+        Assert.False(pack.GetProperty("postPublishCleanConsumerProofSourceProofLinkageReady").GetBoolean());
         Assert.Equal(5, pack.GetProperty("finalCloseProofAdmissionLaneCount").GetInt32());
         Assert.Equal(20, pack.GetProperty("finalCloseProofAdmissionRequiredFieldCount").GetInt32());
         Assert.Equal(10, pack.GetProperty("finalCloseRejectedNonProofStateCount").GetInt32());
@@ -93,6 +112,17 @@ public sealed class FinalOwnerExecutionOneScreenPackTests
             "post-publish-verification-proof",
             "rollback-review",
             "final-close-decision"
+        });
+        AssertIds(pack, "releaseCloseRealInputChain", new[]
+        {
+            "github-actions-run-evidence",
+            "owner-public-publish-result",
+            "public-package-download-proof",
+            "post-publish-clean-consumer-proof-result",
+            "rollback-review",
+            "final-close-decision",
+            "release-evidence-bundle-sha",
+            "strict-close-validator-output"
         });
         AssertStringArray(pack, "finalCloseProofAdmissionLaneIds", new[]
         {
@@ -167,6 +197,34 @@ public sealed class FinalOwnerExecutionOneScreenPackTests
             AssertBoundary(item.GetProperty("boundary").GetString()!);
         });
 
+        JsonElement[] releaseCloseRealInputChain = pack.GetProperty("releaseCloseRealInputChain").EnumerateArray().ToArray();
+        Assert.All(releaseCloseRealInputChain, item =>
+        {
+            Assert.True(item.GetProperty("blocked").GetBoolean());
+            Assert.True(item.GetProperty("ownerActionRequired").GetBoolean());
+            Assert.False(item.GetProperty("performsPublish").GetBoolean());
+            Assert.False(item.GetProperty("performsRuntimeExecution").GetBoolean());
+            Assert.False(item.GetProperty("canPromoteRuntimeProof").GetBoolean());
+            Assert.False(item.GetProperty("canPublishPublicly").GetBoolean());
+            Assert.False(item.GetProperty("canCloseReleaseIssue").GetBoolean());
+            AssertBoundary(item.GetProperty("boundary").GetString()!);
+        });
+
+        JsonElement publicDownloadStep = releaseCloseRealInputChain.Single(static item => item.GetProperty("id").GetString() == "public-package-download-proof");
+        Assert.True(publicDownloadStep.GetProperty("requiredFieldCount").GetInt32() >= 30);
+        Assert.Equal(11, publicDownloadStep.GetProperty("rejectedSubstituteCount").GetInt32());
+        Assert.Equal(7, publicDownloadStep.GetProperty("sourceReadinessSignalCount").GetInt32());
+        Assert.False(publicDownloadStep.GetProperty("proofCandidateReady").GetBoolean());
+
+        JsonElement postPublishStep = releaseCloseRealInputChain.Single(static item => item.GetProperty("id").GetString() == "post-publish-clean-consumer-proof-result");
+        Assert.True(postPublishStep.GetProperty("requiredFieldCount").GetInt32() >= 50);
+        Assert.Equal(11, postPublishStep.GetProperty("rejectedSubstituteCount").GetInt32());
+        Assert.True(postPublishStep.GetProperty("blockedRealInputCount").GetInt32() > 0);
+        Assert.Equal(11, postPublishStep.GetProperty("sourceReadinessSignalCount").GetInt32());
+        Assert.False(postPublishStep.GetProperty("proofCandidateReady").GetBoolean());
+        Assert.False(postPublishStep.GetProperty("sourceLinkageReady").GetBoolean());
+        Assert.Contains("Public package download proof alone is not post-publish CleanConsumer proof.", postPublishStep.GetProperty("blockedReason").GetString(), StringComparison.Ordinal);
+
         string[] sources = pack.GetProperty("sourceArtifacts").EnumerateArray().Select(static item => item.GetString()!).ToArray();
         Assert.Contains("artifacts/final-release/clean-external-package-consumer-owner-runbook.json", sources);
         Assert.Contains("artifacts/final-release/post-publish-owner-verification-runbook.json", sources);
@@ -182,6 +240,9 @@ public sealed class FinalOwnerExecutionOneScreenPackTests
         Assert.Contains("artifacts/final-release/post-publish-user-verification-pack-validation.json", sources);
         Assert.Contains("artifacts/final-release/final-public-release-closure-bridge-validation.json", sources);
         Assert.Contains("artifacts/final-release/release-issue-close-owner-decision-input-validation.json", sources);
+        Assert.Contains("artifacts/final-release/final-owner-rollback-review-validation.json", sources);
+        Assert.Contains("artifacts/final-release/final-owner-close-decision-validation.json", sources);
+        Assert.Contains("artifacts/final-release/release-issue-final-close-decision-validation.json", sources);
         Assert.Contains("artifacts/final-release/dual-package-publish-preflight-matrix.json", sources);
         Assert.Contains("artifacts/final-release/dual-package-publish-preflight-matrix-validation.json", sources);
         Assert.Contains("artifacts/final-release/final-close-gate-convergence.json", sources);
@@ -205,6 +266,9 @@ public sealed class FinalOwnerExecutionOneScreenPackTests
         Assert.Contains("owner input gap table", packText, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("final public proof path", packText, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("ownerExecutionSequence", packText, StringComparison.Ordinal);
+        Assert.Contains("releaseCloseRealInputChain", packText, StringComparison.Ordinal);
+        Assert.Contains("public package download proof alone", packText, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("post-publish validation-ready without proofCandidateReady", packText, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("finalCloseProofAdmissionLaneIds", packText, StringComparison.Ordinal);
 
         using JsonDocument validationDocument = ReadFinalReleaseJson("final-owner-execution-one-screen-pack-validation.json");
@@ -214,6 +278,23 @@ public sealed class FinalOwnerExecutionOneScreenPackTests
         Assert.Equal(0, validation.GetProperty("failedBlockerCount").GetInt32());
         Assert.Equal(9, validation.GetProperty("finalPublicProofPathCount").GetInt32());
         Assert.Equal(7, validation.GetProperty("ownerExecutionSequenceCount").GetInt32());
+        Assert.Equal(8, validation.GetProperty("releaseCloseRealInputChainCount").GetInt32());
+        Assert.True(validation.GetProperty("releaseCloseRealInputChainRequiredFieldCount").GetInt32() >= 100);
+        Assert.True(validation.GetProperty("releaseCloseRealInputChainRejectedSubstituteCount").GetInt32() >= 30);
+        Assert.Equal(18, validation.GetProperty("releaseCloseRealInputChainSourceReadinessSignalCount").GetInt32());
+        Assert.True(validation.GetProperty("releaseCloseRealInputChainBlockedRealInputCount").GetInt32() > 0);
+        Assert.True(validation.GetProperty("publicPackageDownloadProofRequiredFieldCount").GetInt32() >= 30);
+        Assert.Equal(11, validation.GetProperty("publicPackageDownloadProofRejectedSubstituteCount").GetInt32());
+        Assert.Equal(7, validation.GetProperty("publicPackageDownloadProofSourceReadinessSignalCount").GetInt32());
+        Assert.False(validation.GetProperty("publicPackageDownloadProofCandidateReady").GetBoolean());
+        Assert.True(validation.GetProperty("postPublishCleanConsumerProofRequiredFieldCount").GetInt32() >= 50);
+        Assert.Equal(11, validation.GetProperty("postPublishCleanConsumerProofRejectedSubstituteCount").GetInt32());
+        Assert.True(validation.GetProperty("postPublishCleanConsumerProofBlockedRealInputCount").GetInt32() > 0);
+        Assert.Equal(11, validation.GetProperty("postPublishCleanConsumerProofSourceReadinessSignalCount").GetInt32());
+        Assert.False(validation.GetProperty("postPublishCleanConsumerProofCandidateReady").GetBoolean());
+        Assert.False(validation.GetProperty("postPublishCleanConsumerProofSourceProofLinkageReady").GetBoolean());
+        Assert.Matches("^[0-9a-f]{64}$", validation.GetProperty("releaseEvidenceBundleSha256").GetString()!);
+        Assert.Equal("blocked-final-close-gate-owner-proof-required", validation.GetProperty("finalCloseStrictValidatorOutputState").GetString());
         Assert.Equal(5, validation.GetProperty("finalCloseProofAdmissionLaneCount").GetInt32());
         Assert.Equal(20, validation.GetProperty("finalCloseProofAdmissionRequiredFieldCount").GetInt32());
         Assert.Equal(10, validation.GetProperty("finalCloseRejectedNonProofStateCount").GetInt32());
@@ -238,6 +319,23 @@ public sealed class FinalOwnerExecutionOneScreenPackTests
         using JsonDocument evidenceDocument = ReadFinalReleaseJson("release-evidence-bundle.json");
         JsonElement evidence = evidenceDocument.RootElement;
         Assert.Equal(7, evidence.GetProperty("finalOwnerExecutionOneScreenPackOwnerExecutionSequenceCount").GetInt32());
+        Assert.Equal(8, evidence.GetProperty("finalOwnerExecutionOneScreenPackReleaseCloseRealInputChainCount").GetInt32());
+        Assert.True(evidence.GetProperty("finalOwnerExecutionOneScreenPackReleaseCloseRealInputChainRequiredFieldCount").GetInt32() >= 100);
+        Assert.True(evidence.GetProperty("finalOwnerExecutionOneScreenPackReleaseCloseRealInputChainRejectedSubstituteCount").GetInt32() >= 30);
+        Assert.Equal(18, evidence.GetProperty("finalOwnerExecutionOneScreenPackReleaseCloseRealInputChainSourceReadinessSignalCount").GetInt32());
+        Assert.True(evidence.GetProperty("finalOwnerExecutionOneScreenPackReleaseCloseRealInputChainBlockedRealInputCount").GetInt32() > 0);
+        Assert.True(evidence.GetProperty("finalOwnerExecutionOneScreenPackPublicPackageDownloadProofRequiredFieldCount").GetInt32() >= 30);
+        Assert.Equal(11, evidence.GetProperty("finalOwnerExecutionOneScreenPackPublicPackageDownloadProofRejectedSubstituteCount").GetInt32());
+        Assert.Equal(7, evidence.GetProperty("finalOwnerExecutionOneScreenPackPublicPackageDownloadProofSourceReadinessSignalCount").GetInt32());
+        Assert.False(evidence.GetProperty("finalOwnerExecutionOneScreenPackPublicPackageDownloadProofCandidateReady").GetBoolean());
+        Assert.True(evidence.GetProperty("finalOwnerExecutionOneScreenPackPostPublishCleanConsumerProofRequiredFieldCount").GetInt32() >= 50);
+        Assert.Equal(11, evidence.GetProperty("finalOwnerExecutionOneScreenPackPostPublishCleanConsumerProofRejectedSubstituteCount").GetInt32());
+        Assert.True(evidence.GetProperty("finalOwnerExecutionOneScreenPackPostPublishCleanConsumerProofBlockedRealInputCount").GetInt32() > 0);
+        Assert.Equal(11, evidence.GetProperty("finalOwnerExecutionOneScreenPackPostPublishCleanConsumerProofSourceReadinessSignalCount").GetInt32());
+        Assert.False(evidence.GetProperty("finalOwnerExecutionOneScreenPackPostPublishCleanConsumerProofCandidateReady").GetBoolean());
+        Assert.False(evidence.GetProperty("finalOwnerExecutionOneScreenPackPostPublishCleanConsumerProofSourceProofLinkageReady").GetBoolean());
+        Assert.Matches("^[0-9a-f]{64}$", evidence.GetProperty("finalOwnerExecutionOneScreenPackReleaseEvidenceBundleSha256").GetString()!);
+        Assert.Equal("blocked-final-close-gate-owner-proof-required", evidence.GetProperty("finalOwnerExecutionOneScreenPackFinalCloseStrictValidatorOutputState").GetString());
         Assert.Equal(5, evidence.GetProperty("finalOwnerExecutionOneScreenPackFinalCloseProofAdmissionLaneCount").GetInt32());
         Assert.Equal(20, evidence.GetProperty("finalOwnerExecutionOneScreenPackFinalCloseProofAdmissionRequiredFieldCount").GetInt32());
         Assert.Equal(10, evidence.GetProperty("finalOwnerExecutionOneScreenPackFinalCloseRejectedNonProofStateCount").GetInt32());
@@ -249,6 +347,11 @@ public sealed class FinalOwnerExecutionOneScreenPackTests
         AssertBoundary(item.GetProperty("boundary").GetString()!);
         Assert.Contains("ownerInputGaps=", item.GetProperty("state").GetString(), StringComparison.Ordinal);
         Assert.Contains("ownerExecutionSequence=7", item.GetProperty("state").GetString(), StringComparison.Ordinal);
+        Assert.Contains("releaseCloseRealInputChain=8", item.GetProperty("state").GetString(), StringComparison.Ordinal);
+        Assert.Contains("publicDownloadFields=", item.GetProperty("state").GetString(), StringComparison.Ordinal);
+        Assert.Contains("postPublishFields=", item.GetProperty("state").GetString(), StringComparison.Ordinal);
+        Assert.Contains("postPublishReady=False", item.GetProperty("state").GetString(), StringComparison.Ordinal);
+        Assert.Contains("strictCloseOutput=blocked-final-close-gate-owner-proof-required", item.GetProperty("state").GetString(), StringComparison.Ordinal);
         Assert.Contains("finalCloseAdmissionLanes=5", item.GetProperty("state").GetString(), StringComparison.Ordinal);
         Assert.Contains("finalCloseAdmissionFields=20", item.GetProperty("state").GetString(), StringComparison.Ordinal);
         Assert.Contains("finalCloseRejectedNonProofStates=10", item.GetProperty("state").GetString(), StringComparison.Ordinal);

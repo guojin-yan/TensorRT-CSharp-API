@@ -63,6 +63,7 @@ $lanes = Convert-ToArray (Get-PropertyOrDefault -Object $record -Name "lanes" -D
 $gaps = Convert-ToArray (Get-PropertyOrDefault -Object $record -Name "ownerInputGapTable" -DefaultValue @())
 $finalPublicProofPath = Convert-ToArray (Get-PropertyOrDefault -Object $record -Name "finalPublicProofPath" -DefaultValue @())
 $ownerExecutionSequence = Convert-ToArray (Get-PropertyOrDefault -Object $record -Name "ownerExecutionSequence" -DefaultValue @())
+$releaseCloseRealInputChain = Convert-ToArray (Get-PropertyOrDefault -Object $record -Name "releaseCloseRealInputChain" -DefaultValue @())
 $sourceArtifacts = @(Convert-ToArray (Get-PropertyOrDefault -Object $record -Name "sourceArtifacts" -DefaultValue @()) | ForEach-Object { [string]$_ })
 $nonSubstitutes = @(Convert-ToArray (Get-PropertyOrDefault -Object $record -Name "nonSubstituteProofKinds" -DefaultValue @()) | ForEach-Object { [string]$_ })
 $finalCloseProofAdmissionLaneIds = @(Convert-ToArray (Get-PropertyOrDefault -Object $record -Name "finalCloseProofAdmissionLaneIds" -DefaultValue @()) | ForEach-Object { [string]$_ })
@@ -131,6 +132,26 @@ $invalidOwnerExecutionSteps = @($ownerExecutionSequence | Where-Object {
     [string]::IsNullOrWhiteSpace([string](Get-PropertyOrDefault -Object $_ -Name "requiredEvidence" -DefaultValue "")) -or
     [string]::IsNullOrWhiteSpace([string](Get-PropertyOrDefault -Object $_ -Name "ownerAction" -DefaultValue ""))
 })
+$requiredReleaseCloseRealInputChainIds = @(
+  "github-actions-run-evidence",
+  "owner-public-publish-result",
+  "public-package-download-proof",
+  "post-publish-clean-consumer-proof-result",
+  "rollback-review",
+  "final-close-decision",
+  "release-evidence-bundle-sha",
+  "strict-close-validator-output"
+)
+$releaseCloseRealInputChainIds = @($releaseCloseRealInputChain | ForEach-Object { [string](Get-PropertyOrDefault -Object $_ -Name "id" -DefaultValue "") })
+$invalidReleaseCloseRealInputSteps = @($releaseCloseRealInputChain | Where-Object {
+  -not [bool](Get-PropertyOrDefault -Object $_ -Name "blocked" -DefaultValue $false) -or
+    -not [bool](Get-PropertyOrDefault -Object $_ -Name "ownerActionRequired" -DefaultValue $false) -or
+    [bool](Get-PropertyOrDefault -Object $_ -Name "performsPublish" -DefaultValue $true) -or
+    [bool](Get-PropertyOrDefault -Object $_ -Name "canPublishPublicly" -DefaultValue $true) -or
+    [bool](Get-PropertyOrDefault -Object $_ -Name "canCloseReleaseIssue" -DefaultValue $true) -or
+    [string]::IsNullOrWhiteSpace([string](Get-PropertyOrDefault -Object $_ -Name "strictValidator" -DefaultValue "")) -or
+    [string]::IsNullOrWhiteSpace([string](Get-PropertyOrDefault -Object $_ -Name "blockedReason" -DefaultValue ""))
+})
 
 $requiredAdmissionLaneIds = @(
   "github-actions-run-proof",
@@ -192,6 +213,9 @@ $requiredSources = @(
   "artifacts/final-release/post-publish-user-verification-pack-validation.json",
   "artifacts/final-release/final-public-release-closure-bridge-validation.json",
   "artifacts/final-release/release-issue-close-owner-decision-input-validation.json",
+  "artifacts/final-release/final-owner-rollback-review-validation.json",
+  "artifacts/final-release/final-owner-close-decision-validation.json",
+  "artifacts/final-release/release-issue-final-close-decision-validation.json",
   "artifacts/final-release/dual-package-publish-preflight-matrix.json",
   "artifacts/final-release/dual-package-publish-preflight-matrix-validation.json",
   "artifacts/final-release/final-close-gate-convergence.json",
@@ -226,9 +250,14 @@ $items.Add((New-ValidationItem -Id "required-lanes" -Passed (@($requiredLaneIds 
 $items.Add((New-ValidationItem -Id "required-owner-gap-table" -Passed (@($requiredGapIds | Where-Object { $gapIds -notcontains $_ }).Count -eq 0 -and $gaps.Count -ge 17) -Severity "blocker" -Detail "Pack must include a real Owner input gap table covering logs, hashes, timestamps, host metadata, post-publish evidence, dual-package route proof, rollback, and final close.")) | Out-Null
 $items.Add((New-ValidationItem -Id "required-final-public-proof-path" -Passed (@($requiredFinalPublicProofStepIds | Where-Object { $finalPublicProofStepIds -notcontains $_ }).Count -eq 0 -and $finalPublicProofPath.Count -ge 9) -Severity "blocker" -Detail "Pack must include the final public proof path: GitHub Actions, Owner publish result, public download, owner download execution pack, post-publish clean consumer, post-publish user verification pack, final bridge, release issue close decision, and dual-package final close lanes.")) | Out-Null
 $items.Add((New-ValidationItem -Id "owner-execution-sequence" -Passed (@($requiredOwnerExecutionStepIds | Where-Object { $ownerExecutionStepIds -notcontains $_ }).Count -eq 0 -and $ownerExecutionSequence.Count -eq 7 -and $invalidOwnerExecutionSteps.Count -eq 0) -Severity "blocker" -Detail "Pack must expose the seven-step Owner execution sequence: remote CI, public publish result, public download proof, clean external consumer proof, post-publish proof, rollback review, and final close decision.")) | Out-Null
+$items.Add((New-ValidationItem -Id "release-close-real-input-chain" -Passed (@($requiredReleaseCloseRealInputChainIds | Where-Object { $releaseCloseRealInputChainIds -notcontains $_ }).Count -eq 0 -and $releaseCloseRealInputChain.Count -eq 8 -and [int](Get-PropertyOrDefault -Object $record -Name "blockedReleaseCloseRealInputChainCount" -DefaultValue 0) -eq 8 -and $invalidReleaseCloseRealInputSteps.Count -eq 0) -Severity "blocker" -Detail "Pack must expose the ordered release-close real input chain: GitHub Actions, Owner publish, public download, post-publish CleanConsumer, rollback, final decision, evidence bundle SHA, and strict close validator output.")) | Out-Null
 $items.Add((New-ValidationItem -Id "final-close-admission-contract-surface" -Passed (@($requiredAdmissionLaneIds | Where-Object { $finalCloseProofAdmissionLaneIds -notcontains $_ }).Count -eq 0 -and @($requiredAdmissionFields | Where-Object { $finalCloseProofAdmissionRequiredFields -notcontains $_ }).Count -eq 0 -and @($requiredRejectedStates | Where-Object { $finalCloseRejectedNonProofStates -notcontains $_ }).Count -eq 0) -Severity "blocker" -Detail "Pack must surface FinalClose admission lanes, required proof fields, and rejected non-proof states from final-close-gate-convergence.")) | Out-Null
+$items.Add((New-ValidationItem -Id "public-download-contract-counts" -Passed ([int](Get-PropertyOrDefault -Object $record -Name "publicPackageDownloadProofRequiredFieldCount" -DefaultValue 0) -ge 30 -and [int](Get-PropertyOrDefault -Object $record -Name "publicPackageDownloadProofRejectedSubstituteCount" -DefaultValue 0) -eq 11 -and [int](Get-PropertyOrDefault -Object $record -Name "publicPackageDownloadProofSourceReadinessSignalCount" -DefaultValue 0) -eq 7 -and -not [bool](Get-PropertyOrDefault -Object $record -Name "publicPackageDownloadProofCandidateReady" -DefaultValue $true)) -Severity "blocker" -Detail "Pack must surface public package download proof required fields, rejected substitutes, source readiness signals, and blocked proofCandidateReady state.")) | Out-Null
+$items.Add((New-ValidationItem -Id "post-publish-contract-counts" -Passed ([int](Get-PropertyOrDefault -Object $record -Name "postPublishCleanConsumerProofRequiredFieldCount" -DefaultValue 0) -ge 50 -and [int](Get-PropertyOrDefault -Object $record -Name "postPublishCleanConsumerProofRejectedSubstituteCount" -DefaultValue 0) -eq 11 -and [int](Get-PropertyOrDefault -Object $record -Name "postPublishCleanConsumerProofSourceReadinessSignalCount" -DefaultValue 0) -eq 11 -and [int](Get-PropertyOrDefault -Object $record -Name "postPublishCleanConsumerProofBlockedRealInputCount" -DefaultValue 0) -gt 0 -and -not [bool](Get-PropertyOrDefault -Object $record -Name "postPublishCleanConsumerProofCandidateReady" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "postPublishCleanConsumerProofSourceProofLinkageReady" -DefaultValue $true)) -Severity "blocker" -Detail "Pack must surface post-publish CleanConsumer required fields, rejected substitutes, blocked real inputs, source readiness signals, and blocked proof/source linkage state.")) | Out-Null
+$items.Add((New-ValidationItem -Id "release-evidence-bundle-sha-and-strict-close-output" -Passed (([string](Get-PropertyOrDefault -Object $record -Name "releaseEvidenceBundleSha256" -DefaultValue "")) -match "^[0-9a-f]{64}$" -and [string](Get-PropertyOrDefault -Object $record -Name "finalCloseStrictValidatorOutputState" -DefaultValue "") -eq "blocked-final-close-gate-owner-proof-required" -and [int](Get-PropertyOrDefault -Object $record -Name "finalCloseStrictValidatorFailedBlockerCount" -DefaultValue 999) -eq 0) -Severity "blocker" -Detail "Pack must carry the release evidence bundle SHA and the strict close validator output state without treating them as close approval.")) | Out-Null
 $items.Add((New-ValidationItem -Id "all-lanes-blocked-non-proof" -Passed (@($lanes | Where-Object { -not [bool](Get-PropertyOrDefault -Object $_ -Name "blocked" -DefaultValue $false) -or [bool](Get-PropertyOrDefault -Object $_ -Name "performsPublish" -DefaultValue $true) -or [bool](Get-PropertyOrDefault -Object $_ -Name "canPromoteRuntimeProof" -DefaultValue $true) -or [bool](Get-PropertyOrDefault -Object $_ -Name "canPublishPublicly" -DefaultValue $true) -or [bool](Get-PropertyOrDefault -Object $_ -Name "canCloseReleaseIssue" -DefaultValue $true) }).Count -eq 0) -Severity "blocker" -Detail "Every lane must remain blocked, non-publish, non-promoting, and non-closing.")) | Out-Null
 $items.Add((New-ValidationItem -Id "final-public-proof-path-blocked-non-proof" -Passed (@($finalPublicProofPath | Where-Object { -not [bool](Get-PropertyOrDefault -Object $_ -Name "blocked" -DefaultValue $false) -or [bool](Get-PropertyOrDefault -Object $_ -Name "performsPublish" -DefaultValue $true) -or [bool](Get-PropertyOrDefault -Object $_ -Name "canPromoteRuntimeProof" -DefaultValue $true) -or [bool](Get-PropertyOrDefault -Object $_ -Name "canPublishPublicly" -DefaultValue $true) -or [bool](Get-PropertyOrDefault -Object $_ -Name "canCloseReleaseIssue" -DefaultValue $true) -or [bool](Get-PropertyOrDefault -Object $_ -Name "isRuntimeExecutionProof" -DefaultValue $true) -or [bool](Get-PropertyOrDefault -Object $_ -Name "isPostPublishProof" -DefaultValue $true) -or [bool](Get-PropertyOrDefault -Object $_ -Name "isReleaseCloseProof" -DefaultValue $true) }).Count -eq 0) -Severity "blocker" -Detail "Every final public proof path step must remain blocked and non-proof until real owner evidence is accepted.")) | Out-Null
+$items.Add((New-ValidationItem -Id "public-proof-cannot-substitute-post-publish" -Passed ($allText.Contains("public package download proof alone", [StringComparison]::OrdinalIgnoreCase) -and $allText.Contains("post-publish validation-ready without proofCandidateReady", [StringComparison]::OrdinalIgnoreCase) -and $allText.Contains("Test-PostPublishCleanConsumerProofResult.ps1", [StringComparison]::OrdinalIgnoreCase)) -Severity "blocker" -Detail "Pack must explicitly reject public package download proof as a substitute for post-publish CleanConsumer proof.")) | Out-Null
 $items.Add((New-ValidationItem -Id "source-artifacts" -Passed (@($requiredSources | Where-Object { $sourceArtifacts -notcontains $_ }).Count -eq 0) -Severity "blocker" -Detail "Pack must source upstream owner runbooks/contracts, release evidence, public docs freeze, and closure pack.")) | Out-Null
 $items.Add((New-ValidationItem -Id "strict-validator-coverage" -Passed ($allText.Contains("Test-PackageConsumerRuntimeProofRecord.ps1", [StringComparison]::OrdinalIgnoreCase) -and $allText.Contains("-RequireExistingLog", [StringComparison]::OrdinalIgnoreCase) -and $allText.Contains("-FailOnNotProof", [StringComparison]::OrdinalIgnoreCase) -and $allText.Contains("Test-PostPublishCleanConsumerProofRecordDraft.ps1", [StringComparison]::OrdinalIgnoreCase) -and $allText.Contains("Test-ReleaseEvidenceClassificationAudit.ps1", [StringComparison]::OrdinalIgnoreCase) -and $allText.Contains("Test-FinalReleaseCloseApprovalRealInputFromOwnerResult.ps1", [StringComparison]::OrdinalIgnoreCase) -and $allText.Contains("Test-GitHubActionsRunEvidenceImport.ps1", [StringComparison]::OrdinalIgnoreCase) -and $allText.Contains("Test-OwnerPublicPublishExecutionResultCandidate.ps1", [StringComparison]::OrdinalIgnoreCase) -and $allText.Contains("Test-PublicPackageDownloadProofCandidate.ps1", [StringComparison]::OrdinalIgnoreCase) -and $allText.Contains("Test-PublicPackageDownloadProofOwnerExecutionPack.ps1", [StringComparison]::OrdinalIgnoreCase) -and $allText.Contains("Test-PostPublishUserVerificationPack.ps1", [StringComparison]::OrdinalIgnoreCase) -and $allText.Contains("Test-FinalPublicReleaseClosureBridge.ps1", [StringComparison]::OrdinalIgnoreCase) -and $allText.Contains("Test-ReleaseIssueCloseOwnerDecisionInput.ps1", [StringComparison]::OrdinalIgnoreCase) -and $allText.Contains("Test-DualPackagePublishPreflightMatrix.ps1", [StringComparison]::OrdinalIgnoreCase)) -Severity "blocker" -Detail "Pack must expose strict validators for runtime proof, post-publish proof, release evidence classification, final close approval, dual-package route proof, and the final public proof path.")) | Out-Null
 $items.Add((New-ValidationItem -Id "dual-package-final-close-surface" -Passed ([int](Get-PropertyOrDefault -Object $record -Name "dualPackageRouteCount" -DefaultValue 0) -eq 2 -and [int](Get-PropertyOrDefault -Object $record -Name "dualPackageFinalCloseBlockedLaneCount" -DefaultValue 0) -eq 2 -and -not [bool](Get-PropertyOrDefault -Object $record -Name "dualPackageAcceptsSubstituteProof" -DefaultValue $true) -and $allText.Contains("Test-DualPackagePublishPreflightMatrix.ps1", [StringComparison]::OrdinalIgnoreCase) -and $allText.Contains("dual-package-final-close-lanes", [StringComparison]::OrdinalIgnoreCase)) -Severity "blocker" -Detail "Pack must surface both dual-package final close lanes as blocked, non-substitute Owner proof requirements.")) | Out-Null
@@ -249,6 +278,23 @@ $validation = [pscustomobject]@{
   ownerInputGapCount = $gaps.Count
   finalPublicProofPathCount = $finalPublicProofPath.Count
   ownerExecutionSequenceCount = $ownerExecutionSequence.Count
+  releaseCloseRealInputChainCount = $releaseCloseRealInputChain.Count
+  releaseCloseRealInputChainRequiredFieldCount = [int](Get-PropertyOrDefault -Object $record -Name "releaseCloseRealInputChainRequiredFieldCount" -DefaultValue 0)
+  releaseCloseRealInputChainRejectedSubstituteCount = [int](Get-PropertyOrDefault -Object $record -Name "releaseCloseRealInputChainRejectedSubstituteCount" -DefaultValue 0)
+  releaseCloseRealInputChainSourceReadinessSignalCount = [int](Get-PropertyOrDefault -Object $record -Name "releaseCloseRealInputChainSourceReadinessSignalCount" -DefaultValue 0)
+  releaseCloseRealInputChainBlockedRealInputCount = [int](Get-PropertyOrDefault -Object $record -Name "releaseCloseRealInputChainBlockedRealInputCount" -DefaultValue 0)
+  publicPackageDownloadProofRequiredFieldCount = [int](Get-PropertyOrDefault -Object $record -Name "publicPackageDownloadProofRequiredFieldCount" -DefaultValue 0)
+  publicPackageDownloadProofRejectedSubstituteCount = [int](Get-PropertyOrDefault -Object $record -Name "publicPackageDownloadProofRejectedSubstituteCount" -DefaultValue 0)
+  publicPackageDownloadProofSourceReadinessSignalCount = [int](Get-PropertyOrDefault -Object $record -Name "publicPackageDownloadProofSourceReadinessSignalCount" -DefaultValue 0)
+  publicPackageDownloadProofCandidateReady = [bool](Get-PropertyOrDefault -Object $record -Name "publicPackageDownloadProofCandidateReady" -DefaultValue $false)
+  postPublishCleanConsumerProofRequiredFieldCount = [int](Get-PropertyOrDefault -Object $record -Name "postPublishCleanConsumerProofRequiredFieldCount" -DefaultValue 0)
+  postPublishCleanConsumerProofRejectedSubstituteCount = [int](Get-PropertyOrDefault -Object $record -Name "postPublishCleanConsumerProofRejectedSubstituteCount" -DefaultValue 0)
+  postPublishCleanConsumerProofBlockedRealInputCount = [int](Get-PropertyOrDefault -Object $record -Name "postPublishCleanConsumerProofBlockedRealInputCount" -DefaultValue 0)
+  postPublishCleanConsumerProofSourceReadinessSignalCount = [int](Get-PropertyOrDefault -Object $record -Name "postPublishCleanConsumerProofSourceReadinessSignalCount" -DefaultValue 0)
+  postPublishCleanConsumerProofCandidateReady = [bool](Get-PropertyOrDefault -Object $record -Name "postPublishCleanConsumerProofCandidateReady" -DefaultValue $false)
+  postPublishCleanConsumerProofSourceProofLinkageReady = [bool](Get-PropertyOrDefault -Object $record -Name "postPublishCleanConsumerProofSourceProofLinkageReady" -DefaultValue $false)
+  releaseEvidenceBundleSha256 = [string](Get-PropertyOrDefault -Object $record -Name "releaseEvidenceBundleSha256" -DefaultValue "")
+  finalCloseStrictValidatorOutputState = [string](Get-PropertyOrDefault -Object $record -Name "finalCloseStrictValidatorOutputState" -DefaultValue "")
   finalCloseProofAdmissionLaneCount = $finalCloseProofAdmissionLaneIds.Count
   finalCloseProofAdmissionRequiredFieldCount = $finalCloseProofAdmissionRequiredFields.Count
   finalCloseRejectedNonProofStateCount = $finalCloseRejectedNonProofStates.Count
@@ -287,6 +333,23 @@ $markdown = @"
 | ownerInputGapCount | ``$($validation.ownerInputGapCount)`` |
 | finalPublicProofPathCount | ``$($validation.finalPublicProofPathCount)`` |
 | ownerExecutionSequenceCount | ``$($validation.ownerExecutionSequenceCount)`` |
+| releaseCloseRealInputChainCount | ``$($validation.releaseCloseRealInputChainCount)`` |
+| releaseCloseRealInputChainRequiredFieldCount | ``$($validation.releaseCloseRealInputChainRequiredFieldCount)`` |
+| releaseCloseRealInputChainRejectedSubstituteCount | ``$($validation.releaseCloseRealInputChainRejectedSubstituteCount)`` |
+| releaseCloseRealInputChainSourceReadinessSignalCount | ``$($validation.releaseCloseRealInputChainSourceReadinessSignalCount)`` |
+| releaseCloseRealInputChainBlockedRealInputCount | ``$($validation.releaseCloseRealInputChainBlockedRealInputCount)`` |
+| publicPackageDownloadProofRequiredFieldCount | ``$($validation.publicPackageDownloadProofRequiredFieldCount)`` |
+| publicPackageDownloadProofRejectedSubstituteCount | ``$($validation.publicPackageDownloadProofRejectedSubstituteCount)`` |
+| publicPackageDownloadProofSourceReadinessSignalCount | ``$($validation.publicPackageDownloadProofSourceReadinessSignalCount)`` |
+| publicPackageDownloadProofCandidateReady | ``$($validation.publicPackageDownloadProofCandidateReady)`` |
+| postPublishCleanConsumerProofRequiredFieldCount | ``$($validation.postPublishCleanConsumerProofRequiredFieldCount)`` |
+| postPublishCleanConsumerProofRejectedSubstituteCount | ``$($validation.postPublishCleanConsumerProofRejectedSubstituteCount)`` |
+| postPublishCleanConsumerProofBlockedRealInputCount | ``$($validation.postPublishCleanConsumerProofBlockedRealInputCount)`` |
+| postPublishCleanConsumerProofSourceReadinessSignalCount | ``$($validation.postPublishCleanConsumerProofSourceReadinessSignalCount)`` |
+| postPublishCleanConsumerProofCandidateReady | ``$($validation.postPublishCleanConsumerProofCandidateReady)`` |
+| postPublishCleanConsumerProofSourceProofLinkageReady | ``$($validation.postPublishCleanConsumerProofSourceProofLinkageReady)`` |
+| releaseEvidenceBundleSha256 | ``$($validation.releaseEvidenceBundleSha256)`` |
+| finalCloseStrictValidatorOutputState | ``$($validation.finalCloseStrictValidatorOutputState)`` |
 | finalCloseProofAdmissionLaneCount | ``$($validation.finalCloseProofAdmissionLaneCount)`` |
 | finalCloseProofAdmissionRequiredFieldCount | ``$($validation.finalCloseProofAdmissionRequiredFieldCount)`` |
 | finalCloseRejectedNonProofStateCount | ``$($validation.finalCloseRejectedNonProofStateCount)`` |

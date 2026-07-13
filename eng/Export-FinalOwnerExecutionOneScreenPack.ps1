@@ -32,6 +32,17 @@ function Read-JsonOrNull {
   return Get-Content -LiteralPath $path -Raw -Encoding utf8 | ConvertFrom-Json
 }
 
+function Get-ArtifactSha256OrEmpty {
+  param([string]$RelativePath)
+
+  $path = Join-Path $RepositoryRoot $RelativePath
+  if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+    return ""
+  }
+
+  return (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
+}
+
 function Get-PropertyOrDefault {
   param([AllowNull()][object]$Object, [string]$Name, [AllowNull()][object]$DefaultValue)
 
@@ -156,6 +167,58 @@ function New-PublicProofStep {
   }
 }
 
+function New-ReleaseCloseRealInputStep {
+  param(
+    [int]$Order,
+    [string]$Id,
+    [string]$Title,
+    [string]$SourceArtifact,
+    [string]$CurrentState,
+    [string]$RequiredReadyState,
+    [int]$RequiredFieldCount,
+    [int]$RejectedSubstituteCount,
+    [int]$SourceReadinessSignalCount,
+    [int]$BlockedRealInputCount,
+    [bool]$ProofCandidateReady,
+    [bool]$SourceLinkageReady,
+    [string]$ArtifactSha256,
+    [string]$OwnerAction,
+    [string]$StrictValidator,
+    [string]$BlockedReason
+  )
+
+  [pscustomobject]@{
+    order = $Order
+    id = $Id
+    title = $Title
+    sourceArtifact = $SourceArtifact
+    currentState = $CurrentState
+    requiredReadyState = $RequiredReadyState
+    requiredFieldCount = $RequiredFieldCount
+    rejectedSubstituteCount = $RejectedSubstituteCount
+    sourceReadinessSignalCount = $SourceReadinessSignalCount
+    blockedRealInputCount = $BlockedRealInputCount
+    proofCandidateReady = $ProofCandidateReady
+    sourceLinkageReady = $SourceLinkageReady
+    artifactSha256 = $ArtifactSha256
+    ownerAction = $OwnerAction
+    strictValidator = $StrictValidator
+    blocked = $true
+    blockedReason = $BlockedReason
+    ownerActionRequired = $true
+    performsPublish = $false
+    performsRuntimeExecution = $false
+    canPromoteRuntimeProof = $false
+    canPublishPublicly = $false
+    canCloseReleaseIssue = $false
+    isRuntimeExecutionProof = $false
+    isPostPublishProof = $false
+    isReleaseCloseProof = $false
+    forbiddenSubstitutes = @("local feed", "direct .nupkg", "ProjectReference", "dry-run", "dashboard-only", "candidate-only", "public package download proof alone", "post-publish validation-ready without proofCandidateReady")
+    boundary = "release close input-chain mapping only; not runtime proof; not post-publish proof; not publish approval; not release close approval; not package push"
+  }
+}
+
 $cleanRunbook = Read-JsonOrNull "artifacts/final-release/clean-external-package-consumer-owner-runbook.json"
 $cleanRunbookValidation = Read-JsonOrNull "artifacts/final-release/clean-external-package-consumer-owner-runbook-validation.json"
 $postPublishRunbook = Read-JsonOrNull "artifacts/final-release/post-publish-owner-verification-runbook.json"
@@ -179,6 +242,9 @@ $postPublishCleanConsumerProofResultValidation = Read-JsonOrNull "artifacts/fina
 $postPublishUserVerificationPackValidation = Read-JsonOrNull "artifacts/final-release/post-publish-user-verification-pack-validation.json"
 $finalPublicReleaseClosureBridgeValidation = Read-JsonOrNull "artifacts/final-release/final-public-release-closure-bridge-validation.json"
 $releaseIssueCloseOwnerDecisionInputValidation = Read-JsonOrNull "artifacts/final-release/release-issue-close-owner-decision-input-validation.json"
+$finalOwnerRollbackReviewValidation = Read-JsonOrNull "artifacts/final-release/final-owner-rollback-review-validation.json"
+$finalOwnerCloseDecisionValidation = Read-JsonOrNull "artifacts/final-release/final-owner-close-decision-validation.json"
+$releaseIssueFinalCloseDecisionValidation = Read-JsonOrNull "artifacts/final-release/release-issue-final-close-decision-validation.json"
 $dualPackagePublishPreflightMatrix = Read-JsonOrNull "artifacts/final-release/dual-package-publish-preflight-matrix.json"
 $dualPackagePublishPreflightMatrixValidation = Read-JsonOrNull "artifacts/final-release/dual-package-publish-preflight-matrix-validation.json"
 $finalCloseGateConvergence = Read-JsonOrNull "artifacts/final-release/final-close-gate-convergence.json"
@@ -208,6 +274,9 @@ $sourceArtifacts = @(
   "artifacts/final-release/post-publish-user-verification-pack-validation.json",
   "artifacts/final-release/final-public-release-closure-bridge-validation.json",
   "artifacts/final-release/release-issue-close-owner-decision-input-validation.json",
+  "artifacts/final-release/final-owner-rollback-review-validation.json",
+  "artifacts/final-release/final-owner-close-decision-validation.json",
+  "artifacts/final-release/release-issue-final-close-decision-validation.json",
   "artifacts/final-release/dual-package-publish-preflight-matrix.json",
   "artifacts/final-release/dual-package-publish-preflight-matrix.md",
   "artifacts/final-release/dual-package-publish-preflight-matrix-validation.json",
@@ -243,6 +312,9 @@ $sourceStates = [pscustomobject]@{
   postPublishUserVerificationPack = [string](Get-PropertyOrDefault -Object $postPublishUserVerificationPackValidation -Name "validationState" -DefaultValue "missing-post-publish-user-verification-pack-validation")
   finalPublicReleaseClosureBridge = [string](Get-PropertyOrDefault -Object $finalPublicReleaseClosureBridgeValidation -Name "validationState" -DefaultValue "missing-final-public-release-closure-bridge-validation")
   releaseIssueCloseOwnerDecisionInput = [string](Get-PropertyOrDefault -Object $releaseIssueCloseOwnerDecisionInputValidation -Name "validationState" -DefaultValue "missing-release-issue-close-owner-decision-input-validation")
+  finalOwnerRollbackReview = [string](Get-PropertyOrDefault -Object $finalOwnerRollbackReviewValidation -Name "validationState" -DefaultValue "missing-final-owner-rollback-review-validation")
+  finalOwnerCloseDecision = [string](Get-PropertyOrDefault -Object $finalOwnerCloseDecisionValidation -Name "validationState" -DefaultValue "missing-final-owner-close-decision-validation")
+  releaseIssueFinalCloseDecision = [string](Get-PropertyOrDefault -Object $releaseIssueFinalCloseDecisionValidation -Name "validationState" -DefaultValue "missing-release-issue-final-close-decision-validation")
   dualPackagePublishPreflightMatrix = [string](Get-PropertyOrDefault -Object $dualPackagePublishPreflightMatrix -Name "recordKind" -DefaultValue "missing-dual-package-publish-preflight-matrix")
   dualPackagePublishPreflightMatrixValidation = [string](Get-PropertyOrDefault -Object $dualPackagePublishPreflightMatrixValidation -Name "validationState" -DefaultValue "missing-dual-package-publish-preflight-matrix-validation")
   finalCloseGateConvergence = [string](Get-PropertyOrDefault -Object $finalCloseGateConvergence -Name "convergenceState" -DefaultValue "missing-final-close-gate-convergence")
@@ -475,6 +547,39 @@ $ownerExecutionSequence = @(
 $finalCloseProofAdmissionLaneIds = @(Convert-ToArray (Get-PropertyOrDefault -Object $finalCloseGateConvergence -Name "acceptedProofAdmissionContractLaneIds" -DefaultValue @()) | ForEach-Object { [string]$_ })
 $finalCloseProofAdmissionRequiredFields = @(Convert-ToArray (Get-PropertyOrDefault -Object $finalCloseGateConvergence -Name "finalCloseProofAdmissionRequiredFields" -DefaultValue @()) | ForEach-Object { [string]$_ })
 $finalCloseRejectedNonProofStates = @(Convert-ToArray (Get-PropertyOrDefault -Object $finalCloseGateConvergence -Name "rejectedNonProofStates" -DefaultValue @()) | ForEach-Object { [string]$_ })
+$publicPackageDownloadProofRequiredFieldCount = [int](Get-PropertyOrDefault -Object $publicPackageDownloadProofCandidateValidation -Name "publicPackageDownloadProofRequiredFieldCount" -DefaultValue 0)
+$publicPackageDownloadProofRejectedSubstituteCount = [int](Get-PropertyOrDefault -Object $publicPackageDownloadProofCandidateValidation -Name "publicPackageDownloadProofRejectedSubstituteCount" -DefaultValue 0)
+$publicPackageDownloadProofSourceReadinessSignalCount = [int](Get-PropertyOrDefault -Object $publicPackageDownloadProofCandidateValidation -Name "publicPackageDownloadProofSourceReadinessSignalCount" -DefaultValue 0)
+$publicPackageDownloadProofCandidateReady = [bool](Get-PropertyOrDefault -Object $publicPackageDownloadProofCandidateValidation -Name "proofCandidateReady" -DefaultValue $false)
+$publicPackageDownloadProofSourceGitHubActionsRunEvidenceReady = [bool](Get-PropertyOrDefault -Object $publicPackageDownloadProofCandidateValidation -Name "sourceGitHubActionsRunEvidenceReady" -DefaultValue $false)
+$publicPackageDownloadProofSourceOwnerPublicPublishResultReady = [bool](Get-PropertyOrDefault -Object $publicPackageDownloadProofCandidateValidation -Name "sourceOwnerPublicPublishResultReady" -DefaultValue $false)
+$postPublishCleanConsumerProofRequiredFieldCount = [int](Get-PropertyOrDefault -Object $postPublishCleanConsumerProofResultValidation -Name "postPublishCleanConsumerProofRequiredFieldCount" -DefaultValue 0)
+$postPublishCleanConsumerProofRejectedSubstituteCount = [int](Get-PropertyOrDefault -Object $postPublishCleanConsumerProofResultValidation -Name "postPublishCleanConsumerProofRejectedSubstituteCount" -DefaultValue 0)
+$postPublishCleanConsumerProofBlockedRealInputCount = [int](Get-PropertyOrDefault -Object $postPublishCleanConsumerProofResultValidation -Name "postPublishCleanConsumerProofBlockedRealInputCount" -DefaultValue 0)
+$postPublishCleanConsumerProofSourceReadinessSignalCount = [int](Get-PropertyOrDefault -Object $postPublishCleanConsumerProofResultValidation -Name "postPublishCleanConsumerProofSourceReadinessSignalCount" -DefaultValue 0)
+$postPublishCleanConsumerProofCandidateReady = [bool](Get-PropertyOrDefault -Object $postPublishCleanConsumerProofResultValidation -Name "proofCandidateReady" -DefaultValue $false)
+$postPublishCleanConsumerProofSourceProofLinkageReady = [bool](Get-PropertyOrDefault -Object $postPublishCleanConsumerProofResultValidation -Name "sourceProofLinkageReady" -DefaultValue $false)
+$postPublishCleanConsumerProofSourceGitHubActionsRunEvidenceReady = [bool](Get-PropertyOrDefault -Object $postPublishCleanConsumerProofResultValidation -Name "sourceGitHubActionsRunEvidenceReady" -DefaultValue $false)
+$postPublishCleanConsumerProofSourceOwnerPublicPublishResultReady = [bool](Get-PropertyOrDefault -Object $postPublishCleanConsumerProofResultValidation -Name "sourceOwnerPublicPublishResultReady" -DefaultValue $false)
+$postPublishCleanConsumerProofSourcePublicPackageDownloadProofReady = [bool](Get-PropertyOrDefault -Object $postPublishCleanConsumerProofResultValidation -Name "sourcePublicPackageDownloadProofReady" -DefaultValue $false)
+$finalCloseGateConvergenceFailedBlockerCount = [int](Get-PropertyOrDefault -Object $finalCloseGateConvergenceValidation -Name "failedBlockerCount" -DefaultValue 999)
+$releaseEvidenceBundleSha256 = Get-ArtifactSha256OrEmpty "artifacts/final-release/release-evidence-bundle.json"
+
+$releaseCloseRealInputChain = @(
+  New-ReleaseCloseRealInputStep -Order 1 -Id "github-actions-run-evidence" -Title "Remote GitHub Actions proof input" -SourceArtifact "artifacts/final-release/github-actions-run-evidence-import-validation.json" -CurrentState $sourceStates.githubActionsRunEvidence -RequiredReadyState "github-actions-run-evidence-ready with head SHA/log/artifact hashes" -RequiredFieldCount 0 -RejectedSubstituteCount 0 -SourceReadinessSignalCount 0 -BlockedRealInputCount 0 -ProofCandidateReady $false -SourceLinkageReady $false -ArtifactSha256 (Get-ArtifactSha256OrEmpty "artifacts/final-release/github-actions-run-evidence-import-validation.json") -OwnerAction "Import the real release-quality-gate run after push and require head SHA match." -StrictValidator "eng\Test-GitHubActionsRunEvidenceImport.ps1 -Strict" -BlockedReason "Remote GitHub Actions proof is required before public publish and final close."
+  New-ReleaseCloseRealInputStep -Order 2 -Id "owner-public-publish-result" -Title "Owner public publish result input" -SourceArtifact "artifacts/final-release/owner-public-publish-execution-result-candidate-validation.json" -CurrentState $sourceStates.ownerPublicPublishResultCandidate -RequiredReadyState "owner-public-publish-execution-result-candidate-ready" -RequiredFieldCount 0 -RejectedSubstituteCount 0 -SourceReadinessSignalCount 0 -BlockedRealInputCount 0 -ProofCandidateReady $false -SourceLinkageReady $false -ArtifactSha256 (Get-ArtifactSha256OrEmpty "artifacts/final-release/owner-public-publish-execution-result-candidate-validation.json") -OwnerAction "Owner fills real publish URLs, package SHA256 values, transcript hashes, rollback review, and authorization link after manual publish." -StrictValidator "eng\Test-OwnerPublicPublishExecutionResultCandidate.ps1 -Strict" -BlockedReason "Owner public publish result is missing real public package evidence."
+  New-ReleaseCloseRealInputStep -Order 3 -Id "public-package-download-proof" -Title "Public package download proof input" -SourceArtifact "artifacts/final-release/public-package-download-proof-candidate-validation.json" -CurrentState $sourceStates.publicPackageDownloadProofCandidate -RequiredReadyState "public-package-download-proof-candidate-ready" -RequiredFieldCount $publicPackageDownloadProofRequiredFieldCount -RejectedSubstituteCount $publicPackageDownloadProofRejectedSubstituteCount -SourceReadinessSignalCount $publicPackageDownloadProofSourceReadinessSignalCount -BlockedRealInputCount 0 -ProofCandidateReady $publicPackageDownloadProofCandidateReady -SourceLinkageReady ($publicPackageDownloadProofSourceGitHubActionsRunEvidenceReady -and $publicPackageDownloadProofSourceOwnerPublicPublishResultReady) -ArtifactSha256 (Get-ArtifactSha256OrEmpty "artifacts/final-release/public-package-download-proof-candidate-validation.json") -OwnerAction "Download packages from public URLs and record package pages, direct download URLs, SHA256 values, timestamps, and source proof linkage." -StrictValidator "eng\Test-PublicPackageDownloadProofCandidate.ps1 -Strict" -BlockedReason "Public package download proof is still candidate-only or lacks source GitHub Actions / Owner publish linkage."
+  New-ReleaseCloseRealInputStep -Order 4 -Id "post-publish-clean-consumer-proof-result" -Title "Post-publish CleanConsumer proof input" -SourceArtifact "artifacts/final-release/post-publish-clean-consumer-proof-result-validation.json" -CurrentState $sourceStates.postPublishCleanConsumerProofResult -RequiredReadyState "proofCandidateReady=true and sourceProofLinkageReady=true" -RequiredFieldCount $postPublishCleanConsumerProofRequiredFieldCount -RejectedSubstituteCount $postPublishCleanConsumerProofRejectedSubstituteCount -SourceReadinessSignalCount $postPublishCleanConsumerProofSourceReadinessSignalCount -BlockedRealInputCount $postPublishCleanConsumerProofBlockedRealInputCount -ProofCandidateReady $postPublishCleanConsumerProofCandidateReady -SourceLinkageReady $postPublishCleanConsumerProofSourceProofLinkageReady -ArtifactSha256 (Get-ArtifactSha256OrEmpty "artifacts/final-release/post-publish-clean-consumer-proof-result-validation.json") -OwnerAction "Run repository-external CleanConsumer restore/build/smoke from public packages and link GitHub Actions, Owner publish, and public download proofs." -StrictValidator "eng\Test-PostPublishCleanConsumerProofResult.ps1 -Strict" -BlockedReason "Public package download proof alone is not post-publish CleanConsumer proof."
+  New-ReleaseCloseRealInputStep -Order 5 -Id "rollback-review" -Title "Rollback review input" -SourceArtifact "artifacts/final-release/final-owner-rollback-review-validation.json" -CurrentState $sourceStates.finalOwnerRollbackReview -RequiredReadyState "rollback review accepted after real proof lanes pass" -RequiredFieldCount 0 -RejectedSubstituteCount 0 -SourceReadinessSignalCount 0 -BlockedRealInputCount 0 -ProofCandidateReady $false -SourceLinkageReady $false -ArtifactSha256 (Get-ArtifactSha256OrEmpty "artifacts/final-release/final-owner-rollback-review-validation.json") -OwnerAction "Review rollback readiness after public publish, download, and post-publish proof validators pass." -StrictValidator "eng\Test-FinalOwnerRollbackReview.ps1 -Strict" -BlockedReason "Rollback review is governance input only and cannot substitute for runtime or post-publish proof."
+  New-ReleaseCloseRealInputStep -Order 6 -Id "final-close-decision" -Title "Owner final close decision input" -SourceArtifact "artifacts/final-release/release-issue-close-owner-decision-input-validation.json" -CurrentState $sourceStates.releaseIssueCloseOwnerDecisionInput -RequiredReadyState "release-issue-close-owner-decision-input-ready" -RequiredFieldCount 0 -RejectedSubstituteCount 0 -SourceReadinessSignalCount 0 -BlockedRealInputCount 0 -ProofCandidateReady $false -SourceLinkageReady $false -ArtifactSha256 (Get-ArtifactSha256OrEmpty "artifacts/final-release/release-issue-close-owner-decision-input-validation.json") -OwnerAction "Record final close decision only after real proof lanes, rollback review, bundle SHA, and strict validators pass." -StrictValidator "eng\Test-ReleaseIssueCloseOwnerDecisionInput.ps1 -Strict" -BlockedReason "Final close decision is still missing or blocked."
+  New-ReleaseCloseRealInputStep -Order 7 -Id "release-evidence-bundle-sha" -Title "Release evidence bundle SHA input" -SourceArtifact "artifacts/final-release/release-evidence-bundle.json" -CurrentState $sourceStates.releaseEvidenceBundle -RequiredReadyState "bundle SHA captured and reviewed by Owner" -RequiredFieldCount 0 -RejectedSubstituteCount 0 -SourceReadinessSignalCount 0 -BlockedRealInputCount 0 -ProofCandidateReady $false -SourceLinkageReady $false -ArtifactSha256 $releaseEvidenceBundleSha256 -OwnerAction "Review and copy the final release evidence bundle SHA into Owner close inputs." -StrictValidator "eng\Test-ReleaseEvidenceClassificationAudit.ps1 -Strict" -BlockedReason "Bundle generation or hash alone is not final close approval."
+  New-ReleaseCloseRealInputStep -Order 8 -Id "strict-close-validator-output" -Title "Strict close validator output" -SourceArtifact "artifacts/final-release/final-close-gate-convergence-validation.json" -CurrentState $sourceStates.finalCloseGateConvergenceValidation -RequiredReadyState "blockedLaneCount=0 and accepted proof admission lanes all real" -RequiredFieldCount $finalCloseProofAdmissionRequiredFields.Count -RejectedSubstituteCount $finalCloseRejectedNonProofStates.Count -SourceReadinessSignalCount 0 -BlockedRealInputCount $finalCloseGateConvergenceFailedBlockerCount -ProofCandidateReady $false -SourceLinkageReady $false -ArtifactSha256 (Get-ArtifactSha256OrEmpty "artifacts/final-release/final-close-gate-convergence-validation.json") -OwnerAction "Run strict close validator after all proof lanes are real; do not close the issue while lanes remain blocked." -StrictValidator "eng\Test-FinalCloseGateConvergence.ps1 -Strict" -BlockedReason "FinalClose strict validator still blocks close on missing Owner proof."
+)
+
+$releaseCloseRealInputChainRequiredFieldCount = [int](($releaseCloseRealInputChain | Measure-Object -Property requiredFieldCount -Sum).Sum)
+$releaseCloseRealInputChainRejectedSubstituteCount = [int](($releaseCloseRealInputChain | Measure-Object -Property rejectedSubstituteCount -Sum).Sum)
+$releaseCloseRealInputChainSourceReadinessSignalCount = [int](($releaseCloseRealInputChain | Measure-Object -Property sourceReadinessSignalCount -Sum).Sum)
+$releaseCloseRealInputChainBlockedRealInputCount = [int](($releaseCloseRealInputChain | Measure-Object -Property blockedRealInputCount -Sum).Sum)
 
 $forbiddenSubstitutes = @(
   "Skipped=True",
@@ -504,7 +609,9 @@ $forbiddenSubstitutes = @(
   "queued workflow",
   "missing runner",
   "sidecar-only",
-  "local test"
+  "local test",
+  "public package download proof alone",
+  "post-publish validation-ready without proofCandidateReady"
 )
 
 $record = [pscustomobject]@{
@@ -526,6 +633,31 @@ $record = [pscustomobject]@{
   ownerExecutionSequenceCount = $ownerExecutionSequence.Count
   blockedOwnerExecutionSequenceCount = $ownerExecutionSequence.Count
   ownerExecutionSequence = @($ownerExecutionSequence)
+  releaseCloseRealInputChainCount = $releaseCloseRealInputChain.Count
+  blockedReleaseCloseRealInputChainCount = $releaseCloseRealInputChain.Count
+  releaseCloseRealInputChainRequiredFieldCount = $releaseCloseRealInputChainRequiredFieldCount
+  releaseCloseRealInputChainRejectedSubstituteCount = $releaseCloseRealInputChainRejectedSubstituteCount
+  releaseCloseRealInputChainSourceReadinessSignalCount = $releaseCloseRealInputChainSourceReadinessSignalCount
+  releaseCloseRealInputChainBlockedRealInputCount = $releaseCloseRealInputChainBlockedRealInputCount
+  releaseCloseRealInputChain = @($releaseCloseRealInputChain)
+  releaseEvidenceBundleSha256 = $releaseEvidenceBundleSha256
+  finalCloseStrictValidatorOutputState = $sourceStates.finalCloseGateConvergenceValidation
+  finalCloseStrictValidatorFailedBlockerCount = $finalCloseGateConvergenceFailedBlockerCount
+  publicPackageDownloadProofRequiredFieldCount = $publicPackageDownloadProofRequiredFieldCount
+  publicPackageDownloadProofRejectedSubstituteCount = $publicPackageDownloadProofRejectedSubstituteCount
+  publicPackageDownloadProofSourceReadinessSignalCount = $publicPackageDownloadProofSourceReadinessSignalCount
+  publicPackageDownloadProofCandidateReady = $publicPackageDownloadProofCandidateReady
+  publicPackageDownloadProofSourceGitHubActionsRunEvidenceReady = $publicPackageDownloadProofSourceGitHubActionsRunEvidenceReady
+  publicPackageDownloadProofSourceOwnerPublicPublishResultReady = $publicPackageDownloadProofSourceOwnerPublicPublishResultReady
+  postPublishCleanConsumerProofRequiredFieldCount = $postPublishCleanConsumerProofRequiredFieldCount
+  postPublishCleanConsumerProofRejectedSubstituteCount = $postPublishCleanConsumerProofRejectedSubstituteCount
+  postPublishCleanConsumerProofBlockedRealInputCount = $postPublishCleanConsumerProofBlockedRealInputCount
+  postPublishCleanConsumerProofSourceReadinessSignalCount = $postPublishCleanConsumerProofSourceReadinessSignalCount
+  postPublishCleanConsumerProofCandidateReady = $postPublishCleanConsumerProofCandidateReady
+  postPublishCleanConsumerProofSourceProofLinkageReady = $postPublishCleanConsumerProofSourceProofLinkageReady
+  postPublishCleanConsumerProofSourceGitHubActionsRunEvidenceReady = $postPublishCleanConsumerProofSourceGitHubActionsRunEvidenceReady
+  postPublishCleanConsumerProofSourceOwnerPublicPublishResultReady = $postPublishCleanConsumerProofSourceOwnerPublicPublishResultReady
+  postPublishCleanConsumerProofSourcePublicPackageDownloadProofReady = $postPublishCleanConsumerProofSourcePublicPackageDownloadProofReady
   dualPackageRouteCount = [int](Get-PropertyOrDefault -Object $dualPackagePublishPreflightMatrixValidation -Name "routeCount" -DefaultValue 0)
   dualPackageFinalCloseBlockedLaneCount = [int](Get-PropertyOrDefault -Object $finalCloseGateConvergenceValidation -Name "dualPackageBlockedLaneCount" -DefaultValue 0)
   dualPackageAcceptsSubstituteProof = [bool](Get-PropertyOrDefault -Object $finalCloseGateConvergenceValidation -Name "dualPackageAcceptsSubstituteProof" -DefaultValue $true)
@@ -566,6 +698,9 @@ $finalPublicProofRows = foreach ($step in $finalPublicProofPath) {
 $ownerSequenceRows = foreach ($step in $ownerExecutionSequence) {
   "| ``$(ConvertTo-MarkdownCell $step.id)`` | ``$($step.order)`` | $(ConvertTo-MarkdownCell $step.title) | $(ConvertTo-MarkdownCell $step.requiredEvidence) | ``$(ConvertTo-MarkdownCell $step.strictValidator)`` | $(ConvertTo-MarkdownCell $step.ownerAction) |"
 }
+$releaseCloseRealInputRows = foreach ($step in $releaseCloseRealInputChain) {
+  "| ``$(ConvertTo-MarkdownCell $step.id)`` | ``$($step.order)`` | $(ConvertTo-MarkdownCell $step.currentState) | ``$($step.requiredFieldCount)`` | ``$($step.rejectedSubstituteCount)`` | ``$($step.sourceReadinessSignalCount)`` | ``$($step.blockedRealInputCount)`` | ``$($step.proofCandidateReady)`` | ``$($step.sourceLinkageReady)`` | $(ConvertTo-MarkdownCell $step.blockedReason) |"
+}
 $sourceRows = foreach ($artifact in $sourceArtifacts) {
   "- ``$artifact``"
 }
@@ -588,6 +723,13 @@ $markdown = @"
 | finalPublicProofPathCount | ``$($record.finalPublicProofPathCount)`` |
 | blockedFinalPublicProofPathCount | ``$($record.blockedFinalPublicProofPathCount)`` |
 | ownerExecutionSequenceCount | ``$($record.ownerExecutionSequenceCount)`` |
+| releaseCloseRealInputChainCount | ``$($record.releaseCloseRealInputChainCount)`` |
+| releaseCloseRealInputChainRequiredFieldCount | ``$($record.releaseCloseRealInputChainRequiredFieldCount)`` |
+| releaseCloseRealInputChainRejectedSubstituteCount | ``$($record.releaseCloseRealInputChainRejectedSubstituteCount)`` |
+| releaseCloseRealInputChainSourceReadinessSignalCount | ``$($record.releaseCloseRealInputChainSourceReadinessSignalCount)`` |
+| releaseCloseRealInputChainBlockedRealInputCount | ``$($record.releaseCloseRealInputChainBlockedRealInputCount)`` |
+| releaseEvidenceBundleSha256 | ``$($record.releaseEvidenceBundleSha256)`` |
+| finalCloseStrictValidatorOutputState | ``$($record.finalCloseStrictValidatorOutputState)`` |
 | finalCloseProofAdmissionLaneCount | ``$($record.finalCloseProofAdmissionLaneCount)`` |
 | finalCloseProofAdmissionRequiredFieldCount | ``$($record.finalCloseProofAdmissionRequiredFieldCount)`` |
 | finalCloseRejectedNonProofStateCount | ``$($record.finalCloseRejectedNonProofStateCount)`` |
@@ -620,6 +762,12 @@ $($finalPublicProofRows -join "`r`n")
 | Step | Order | Title | Required Evidence | Strict Validator | Owner Action |
 |---|---:|---|---|---|---|
 $($ownerSequenceRows -join "`r`n")
+
+## Release Close Real Input Chain
+
+| Step | Order | Current State | Fields | Rejected Substitutes | Source Signals | Blocked Inputs | Proof Ready | Source Linkage Ready | Blocked Reason |
+|---|---:|---|---:|---:|---:|---:|---:|---:|---|
+$($releaseCloseRealInputRows -join "`r`n")
 
 ## FinalClose Admission Contract
 
