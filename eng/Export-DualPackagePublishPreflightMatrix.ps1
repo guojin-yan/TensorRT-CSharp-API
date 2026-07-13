@@ -59,7 +59,10 @@ function New-EvidenceRequirement {
     [string]$Label,
     [bool]$Satisfied,
     [string]$Source,
-    [string]$BlockingReason
+    [string]$BlockingReason,
+    [string]$MissingProofKind = "owner-external-proof",
+    [string]$OwnerAction = "owner must import real external proof before publish or close",
+    [bool]$ExternalProofRequired = $true
   )
 
   [pscustomobject]@{
@@ -68,6 +71,10 @@ function New-EvidenceRequirement {
     satisfied = $Satisfied
     source = $Source
     blockingReason = $BlockingReason
+    missingProofKind = $MissingProofKind
+    ownerAction = $OwnerAction
+    externalProofRequired = $ExternalProofRequired
+    acceptsSubstituteProof = $false
   }
 }
 
@@ -82,6 +89,9 @@ function New-PackageRoute {
     [bool]$PackageDryRunPackSatisfied,
     [object[]]$AdditionalRequirements,
     [string[]]$BlockedReasons,
+    [string]$NextOwnerAction,
+    [string]$ExternalProofMissingReason,
+    [string]$PostPublishProofMissingReason,
     [string]$ProofBoundary
   )
 
@@ -110,6 +120,13 @@ function New-PackageRoute {
     isRuntimeExecutionProof = $false
     isPackageConsumerRuntimeProof = $false
     isPostPublishProof = $false
+    ownerActionRequired = $true
+    nextOwnerAction = $NextOwnerAction
+    externalProofRequired = $true
+    externalProofMissingReason = $ExternalProofMissingReason
+    postPublishProofRequired = $true
+    postPublishProofMissingReason = $PostPublishProofMissingReason
+    acceptsSubstituteProof = $false
     proofBoundary = $ProofBoundary
   }
 }
@@ -142,12 +159,15 @@ $routes = @(
     -DependencyStrategy "The consumer installs CUDA, TensorRT, and cuDNN separately and exposes them through standard probing paths or environment variables." `
     -PackageDryRunPackSatisfied $canClaimDryRunPack `
     -AdditionalRequirements @(
-      New-EvidenceRequirement -Id "public-package-metadata-ready" -Label "nuget.org public package metadata" -Satisfied $false -Source "owner public publish result input" -BlockingReason "public-package-metadata-missing"
-      New-EvidenceRequirement -Id "public-package-download-proof" -Label "downloaded public nupkg path and SHA256" -Satisfied $false -Source "owner package consumer proof input" -BlockingReason "public-package-download-proof-missing"
-      New-EvidenceRequirement -Id "clean-consumer-restore-build-smoke" -Label "clean external consumer restore/build/runtime smoke" -Satisfied $false -Source "owner package consumer proof input" -BlockingReason "clean-consumer-runtime-proof-missing"
-      New-EvidenceRequirement -Id "post-publish-proof" -Label "post-publish restore/build/smoke proof" -Satisfied $false -Source "post-publish owner proof input" -BlockingReason "post-publish-proof-missing"
+      New-EvidenceRequirement -Id "public-package-metadata-ready" -Label "nuget.org public package metadata" -Satisfied $false -Source "owner public publish result input" -BlockingReason "public-package-metadata-missing" -MissingProofKind "owner-publish-authorization" -OwnerAction "owner must approve public package metadata and publish lane before any push"
+      New-EvidenceRequirement -Id "public-package-download-proof" -Label "downloaded public nupkg path and SHA256" -Satisfied $false -Source "owner package consumer proof input" -BlockingReason "public-package-download-proof-missing" -MissingProofKind "public-package-download-proof" -OwnerAction "owner must import public nupkg download URL path and SHA256 from nuget.org"
+      New-EvidenceRequirement -Id "clean-consumer-restore-build-smoke" -Label "clean external consumer restore/build/runtime smoke" -Satisfied $false -Source "owner package consumer proof input" -BlockingReason "clean-consumer-runtime-proof-missing" -MissingProofKind "package-consumer-runtime-proof" -OwnerAction "owner must run clean external consumer restore build and runtime smoke without local feed or ProjectReference"
+      New-EvidenceRequirement -Id "post-publish-proof" -Label "post-publish restore/build/smoke proof" -Satisfied $false -Source "post-publish owner proof input" -BlockingReason "post-publish-proof-missing" -MissingProofKind "post-publish-proof" -OwnerAction "owner must import post-publish restore build smoke logs hashes and host metadata"
     ) `
     -BlockedReasons $commonBlockedReasons `
+    -NextOwnerAction "owner-authorize-public-nuget-publish-and-import-clean-external-consumer-proof" `
+    -ExternalProofMissingReason "public-package-download-and-clean-consumer-runtime-proof-missing" `
+    -PostPublishProofMissingReason "post-publish-clean-consumer-proof-missing" `
     -ProofBoundary "NuGet small bridge/core route preflight does not execute dotnet nuget push, does not use a publish token, does not bundle or claim full NVIDIA runtime, and is not package-consumer runtime proof."
   New-PackageRoute `
     -Id "github-packages-full-runtime" `
@@ -158,13 +178,16 @@ $routes = @(
     -DependencyStrategy "The consumer restores from GitHub Packages with credentials and validates runtime DLL resolution plus clean external runtime smoke." `
     -PackageDryRunPackSatisfied $canClaimDryRunPack `
     -AdditionalRequirements @(
-      New-EvidenceRequirement -Id "runtime-package-split-pack-success" -Label "runtime split package pack success" -Satisfied $false -Source "runtime package workflow artifact" -BlockingReason "runtime-package-split-pack-proof-missing"
-      New-EvidenceRequirement -Id "github-packages-restore-source-ready" -Label "GitHub Packages restore source and permission evidence" -Satisfied $false -Source "owner publish and consumer input" -BlockingReason "github-packages-restore-source-proof-missing"
-      New-EvidenceRequirement -Id "runtime-dll-resolution-report" -Label "runtime DLL resolution report" -Satisfied $false -Source "clean external consumer runtime proof" -BlockingReason "runtime-dll-resolution-proof-missing"
-      New-EvidenceRequirement -Id "clean-consumer-runtime-smoke" -Label "clean external runtime smoke" -Satisfied $false -Source "owner package consumer proof input" -BlockingReason "clean-consumer-runtime-proof-missing"
-      New-EvidenceRequirement -Id "post-publish-proof" -Label "post-publish restore/build/smoke proof" -Satisfied $false -Source "post-publish owner proof input" -BlockingReason "post-publish-proof-missing"
+      New-EvidenceRequirement -Id "runtime-package-split-pack-success" -Label "runtime split package pack success" -Satisfied $false -Source "runtime package workflow artifact" -BlockingReason "runtime-package-split-pack-proof-missing" -MissingProofKind "runtime-package-pack-proof" -OwnerAction "owner must import successful runtime split package pack artifact and SHA256"
+      New-EvidenceRequirement -Id "github-packages-restore-source-ready" -Label "GitHub Packages restore source and permission evidence" -Satisfied $false -Source "owner publish and consumer input" -BlockingReason "github-packages-restore-source-proof-missing" -MissingProofKind "github-packages-restore-source-proof" -OwnerAction "owner must import GitHub Packages restore source and credentialed restore evidence"
+      New-EvidenceRequirement -Id "runtime-dll-resolution-report" -Label "runtime DLL resolution report" -Satisfied $false -Source "clean external consumer runtime proof" -BlockingReason "runtime-dll-resolution-proof-missing" -MissingProofKind "runtime-dll-resolution-proof" -OwnerAction "owner must import external runtime DLL resolution report for the restored runtime package"
+      New-EvidenceRequirement -Id "clean-consumer-runtime-smoke" -Label "clean external runtime smoke" -Satisfied $false -Source "owner package consumer proof input" -BlockingReason "clean-consumer-runtime-proof-missing" -MissingProofKind "package-consumer-runtime-proof" -OwnerAction "owner must run clean external runtime smoke from GitHub Packages without local feed or ProjectReference"
+      New-EvidenceRequirement -Id "post-publish-proof" -Label "post-publish restore/build/smoke proof" -Satisfied $false -Source "post-publish owner proof input" -BlockingReason "post-publish-proof-missing" -MissingProofKind "post-publish-proof" -OwnerAction "owner must import post-publish restore build smoke logs hashes and host metadata"
     ) `
     -BlockedReasons (@("owner-authorization-required", "github-packages-restore-source-proof-missing", "runtime-package-split-pack-proof-missing", "clean-consumer-runtime-proof-missing", "post-publish-proof-missing")) `
+    -NextOwnerAction "owner-authorize-github-packages-publish-and-import-credentialed-clean-runtime-proof" `
+    -ExternalProofMissingReason "github-packages-restore-source-runtime-dll-resolution-clean-smoke-missing" `
+    -PostPublishProofMissingReason "post-publish-github-packages-clean-consumer-proof-missing" `
     -ProofBoundary "GitHub Packages full runtime route preflight does not publish packages, does not use a publish token, does not prove public NuGet publication, and is not runtime execution proof until Owner-provided restore, DLL resolution, and smoke evidence are accepted."
 )
 
@@ -187,6 +210,13 @@ $matrix = [pscustomobject]@{
   canCloseReleaseIssue = $false
   canClaimRuntimeProof = $false
   canClaimPackageConsumerRuntimeProof = $false
+  ownerActionRequired = $true
+  nextOwnerAction = "collect-owner-authorization-external-consumer-and-post-publish-proof-before-any-publish-or-close"
+  externalProofRequired = $true
+  externalProofMissingReason = "clean-external-package-consumer-runtime-proof-missing"
+  postPublishProofRequired = $true
+  postPublishProofMissingReason = "post-publish-restore-build-smoke-proof-missing"
+  acceptsSubstituteProof = $false
   proofBoundary = "Preflight matrix only. It can carry package dry-run pack evidence as an input signal, but it does not publish NuGet, does not publish GitHub Packages, does not execute dotnet nuget push, and is not package-consumer runtime proof or post-publish proof."
 }
 
@@ -196,13 +226,13 @@ $markdownPath = Join-Path $artifactRoot "dual-package-publish-preflight-matrix.m
 $matrix | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $jsonPath -Encoding utf8
 
 $routeRows = $matrix.routes | ForEach-Object {
-  "| ``$($_.id)`` | ``$($_.distributionChannel)`` | ``$($_.packageId)`` | ``$($_.canPublishPublicly)`` | ``$($_.canPublishGitHubPackages)`` | ``$($_.canClaimPackageConsumerRuntimeProof)`` | ``$(($_.blockedReasons -join ', '))`` |"
+  "| ``$($_.id)`` | ``$($_.distributionChannel)`` | ``$($_.packageId)`` | ``$($_.canPublishPublicly)`` | ``$($_.canPublishGitHubPackages)`` | ``$($_.canClaimPackageConsumerRuntimeProof)`` | ``$($_.externalProofMissingReason)`` | ``$($_.postPublishProofMissingReason)`` | ``$($_.nextOwnerAction)`` | ``$(($_.blockedReasons -join ', '))`` |"
 }
 
 $requirementRows = $matrix.routes | ForEach-Object {
   $route = $_
   $route.evidenceRequirements | ForEach-Object {
-    "| ``$($route.id)`` | ``$($_.id)`` | ``$($_.satisfied)`` | $($_.label.Replace('|', '\|')) | ``$($_.blockingReason)`` |"
+    "| ``$($route.id)`` | ``$($_.id)`` | ``$($_.satisfied)`` | $($_.label.Replace('|', '\|')) | ``$($_.missingProofKind)`` | ``$($_.blockingReason)`` | ``$($_.ownerAction)`` | ``$($_.acceptsSubstituteProof)`` |"
   }
 }
 
@@ -227,17 +257,22 @@ $markdown = @"
 | canPublishPublicly | ``$($matrix.canPublishPublicly)`` |
 | canPublishGitHubPackages | ``$($matrix.canPublishGitHubPackages)`` |
 | canCloseReleaseIssue | ``$($matrix.canCloseReleaseIssue)`` |
+| ownerActionRequired | ``$($matrix.ownerActionRequired)`` |
+| nextOwnerAction | ``$($matrix.nextOwnerAction)`` |
+| externalProofMissingReason | ``$($matrix.externalProofMissingReason)`` |
+| postPublishProofMissingReason | ``$($matrix.postPublishProofMissingReason)`` |
+| acceptsSubstituteProof | ``$($matrix.acceptsSubstituteProof)`` |
 
 ## Routes
 
-| Route | Channel | Package ID | Can Publish Publicly | Can Publish GitHub Packages | Can Claim Package Consumer Runtime Proof | Blocked Reasons |
-|---|---|---|---|---|---|---|
+| Route | Channel | Package ID | Can Publish Publicly | Can Publish GitHub Packages | Can Claim Package Consumer Runtime Proof | External Proof Missing Reason | Post-Publish Proof Missing Reason | Next Owner Action | Blocked Reasons |
+|---|---|---|---|---|---|---|---|---|---|
 $($routeRows -join "`r`n")
 
 ## Evidence Requirements
 
-| Route | Requirement | Satisfied | Label | Blocking Reason |
-|---|---|---|---|---|
+| Route | Requirement | Satisfied | Label | Missing Proof Kind | Blocking Reason | Owner Action | Accepts Substitute Proof |
+|---|---|---|---|---|---|---|---|
 $($requirementRows -join "`r`n")
 
 ## Boundary
