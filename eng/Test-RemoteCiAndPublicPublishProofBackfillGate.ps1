@@ -46,6 +46,9 @@ $requiredLaneIds = @(
   "final-prepublish-freeze"
 )
 $missingLaneIds = @($requiredLaneIds | Where-Object { $laneIds -notcontains $_ })
+$githubActionsRunProofRequiredFieldCount = [int](Get-PropertyOrDefault -Object $record -Name "githubActionsRunProofRequiredFieldCount" -DefaultValue 0)
+$githubActionsRunProofRejectedStateCount = [int](Get-PropertyOrDefault -Object $record -Name "githubActionsRunProofRejectedStateCount" -DefaultValue 0)
+$githubActionsRunProofRejectedSubstituteCount = [int](Get-PropertyOrDefault -Object $record -Name "githubActionsRunProofRejectedSubstituteCount" -DefaultValue 0)
 $postPublishLane = $lanes | Where-Object { [string](Get-PropertyOrDefault -Object $_ -Name "id" -DefaultValue "") -eq "post-publish-clean-consumer-proof" } | Select-Object -First 1
 $postPublishLaneRequiresRealProof = $null -ne $postPublishLane -and
   [bool](Get-PropertyOrDefault -Object $postPublishLane -Name "requireProofReady" -DefaultValue $false) -and
@@ -58,6 +61,7 @@ $items = New-Object System.Collections.Generic.List[object]
 $items.Add((New-ValidationItem -Id "record-kind" -Passed ([string](Get-PropertyOrDefault -Object $record -Name "recordKind" -DefaultValue "") -eq "remote-ci-and-public-publish-proof-backfill-gate") -Severity "blocker" -Detail "recordKind must match.")) | Out-Null
 $items.Add((New-ValidationItem -Id "state" -Passed (@("blocked-remote-ci-and-public-publish-proof-backfill-required", "remote-ci-and-public-publish-proof-backfill-ready-for-owner-review") -contains [string](Get-PropertyOrDefault -Object $record -Name "gateState" -DefaultValue "")) -Severity "blocker" -Detail "gateState must be blocked or owner-review ready.")) | Out-Null
 $items.Add((New-ValidationItem -Id "required-lanes" -Passed ($missingLaneIds.Count -eq 0) -Severity "blocker" -Detail ("Missing lanes: " + ($missingLaneIds -join ", ")))) | Out-Null
+$items.Add((New-ValidationItem -Id "github-actions-run-proof-contract-counts" -Passed ($githubActionsRunProofRequiredFieldCount -eq 13 -and $githubActionsRunProofRejectedStateCount -eq 12 -and $githubActionsRunProofRejectedSubstituteCount -eq 10) -Severity "blocker" -Detail "Remote proof backfill gate must carry GitHub Actions run proof contract counts from Test-GitHubActionsRunEvidenceImport.ps1.")) | Out-Null
 $items.Add((New-ValidationItem -Id "post-publish-proof-lane-requires-real-proof" -Passed $postPublishLaneRequiresRealProof -Severity "blocker" -Detail "Post-publish clean consumer lane must not become ready from validation-ready alone; proofCandidateReady must be true.")) | Out-Null
 $items.Add((New-ValidationItem -Id "blocked-until-real-proof" -Passed (-not [bool](Get-PropertyOrDefault -Object $record -Name "readyForOwnerReview" -DefaultValue $true)) -Severity "action-required" -Detail "Gate must remain blocked until real GitHub Actions, publish result, public download, and post-publish clean consumer proof exist.")) | Out-Null
 $items.Add((New-ValidationItem -Id "non-proof-flags" -Passed ([bool](Get-PropertyOrDefault -Object $record -Name "notExecutedByAutomation" -DefaultValue $false) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "performsPublish" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canPromoteRuntimeProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canPublishPublicly" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canCloseReleaseIssue" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isRuntimeExecutionProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isPostPublishProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isReleaseCloseProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isGitHubActionsProof" -DefaultValue $true)) -Severity "blocker" -Detail "Gate must not publish, close, promote proof, or claim GitHub Actions proof.")) | Out-Null
@@ -80,6 +84,9 @@ $validation = [pscustomobject]@{
   laneCount = $lanes.Count
   blockedLaneCount = [int](Get-PropertyOrDefault -Object $record -Name "blockedLaneCount" -DefaultValue 0)
   boundaryFailureCount = [int](Get-PropertyOrDefault -Object $record -Name "boundaryFailureCount" -DefaultValue 0)
+  githubActionsRunProofRequiredFieldCount = $githubActionsRunProofRequiredFieldCount
+  githubActionsRunProofRejectedStateCount = $githubActionsRunProofRejectedStateCount
+  githubActionsRunProofRejectedSubstituteCount = $githubActionsRunProofRejectedSubstituteCount
   failedBlockerCount = $failedBlockers.Count
   failedActionRequiredCount = $failedActionRequired.Count
   sourceHeadPresentOnRemote = [bool](Get-PropertyOrDefault -Object $record -Name "sourceHeadPresentOnRemote" -DefaultValue $false)
@@ -111,6 +118,9 @@ $markdown = @"
 | laneCount | ``$($validation.laneCount)`` |
 | blockedLaneCount | ``$($validation.blockedLaneCount)`` |
 | boundaryFailureCount | ``$($validation.boundaryFailureCount)`` |
+| githubActionsRunProofRequiredFieldCount | ``$($validation.githubActionsRunProofRequiredFieldCount)`` |
+| githubActionsRunProofRejectedStateCount | ``$($validation.githubActionsRunProofRejectedStateCount)`` |
+| githubActionsRunProofRejectedSubstituteCount | ``$($validation.githubActionsRunProofRejectedSubstituteCount)`` |
 | failedBlockerCount | ``$($validation.failedBlockerCount)`` |
 | failedActionRequiredCount | ``$($validation.failedActionRequiredCount)`` |
 | sourceHeadPresentOnRemote | ``$($validation.sourceHeadPresentOnRemote)`` |

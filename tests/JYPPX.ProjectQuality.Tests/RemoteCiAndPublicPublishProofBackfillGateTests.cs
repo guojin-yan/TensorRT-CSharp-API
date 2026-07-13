@@ -19,6 +19,9 @@ public sealed class RemoteCiAndPublicPublishProofBackfillGateTests
         Assert.True(gate.GetProperty("blockedLaneCount").GetInt32() > 0);
         Assert.Equal(0, gate.GetProperty("boundaryFailureCount").GetInt32());
         Assert.Equal(0, gate.GetProperty("failedBlockerCount").GetInt32());
+        Assert.Equal(13, gate.GetProperty("githubActionsRunProofRequiredFieldCount").GetInt32());
+        Assert.Equal(12, gate.GetProperty("githubActionsRunProofRejectedStateCount").GetInt32());
+        Assert.Equal(10, gate.GetProperty("githubActionsRunProofRejectedSubstituteCount").GetInt32());
         Assert.False(gate.GetProperty("readyForOwnerReview").GetBoolean());
         AssertFlagsStayNonProof(gate);
         AssertContainsRequiredLanes(gate);
@@ -34,6 +37,9 @@ public sealed class RemoteCiAndPublicPublishProofBackfillGateTests
         Assert.True(validation.GetProperty("blockedLaneCount").GetInt32() > 0);
         Assert.Equal(0, validation.GetProperty("boundaryFailureCount").GetInt32());
         Assert.Equal(0, validation.GetProperty("failedBlockerCount").GetInt32());
+        Assert.Equal(13, validation.GetProperty("githubActionsRunProofRequiredFieldCount").GetInt32());
+        Assert.Equal(12, validation.GetProperty("githubActionsRunProofRejectedStateCount").GetInt32());
+        Assert.Equal(10, validation.GetProperty("githubActionsRunProofRejectedSubstituteCount").GetInt32());
         AssertFlagsStayNonProof(validation);
 
         using JsonDocument evidenceDocument = ReadFinalReleaseJson("release-evidence-bundle.json");
@@ -43,12 +49,16 @@ public sealed class RemoteCiAndPublicPublishProofBackfillGateTests
         Assert.True(evidence.GetProperty("remoteCiAndPublicPublishProofBackfillGateBlockedLaneCount").GetInt32() > 0);
         Assert.Equal(0, evidence.GetProperty("remoteCiAndPublicPublishProofBackfillGateBoundaryFailureCount").GetInt32());
         Assert.Equal(0, evidence.GetProperty("remoteCiAndPublicPublishProofBackfillGateFailedBlockerCount").GetInt32());
+        Assert.Equal(13, evidence.GetProperty("remoteCiAndPublicPublishProofBackfillGateGitHubActionsRunProofRequiredFieldCount").GetInt32());
+        Assert.Equal(12, evidence.GetProperty("remoteCiAndPublicPublishProofBackfillGateGitHubActionsRunProofRejectedStateCount").GetInt32());
+        Assert.Equal(10, evidence.GetProperty("remoteCiAndPublicPublishProofBackfillGateGitHubActionsRunProofRejectedSubstituteCount").GetInt32());
         Assert.False(evidence.GetProperty("remoteCiAndPublicPublishProofBackfillGateCanPromoteRuntimeProof").GetBoolean());
         Assert.False(evidence.GetProperty("remoteCiAndPublicPublishProofBackfillGateCanPublishPublicly").GetBoolean());
         Assert.False(evidence.GetProperty("remoteCiAndPublicPublishProofBackfillGateCanCloseReleaseIssue").GetBoolean());
         Assert.False(evidence.GetProperty("remoteCiAndPublicPublishProofBackfillGateIsGitHubActionsProof").GetBoolean());
 
         AssertBlockedEvidenceItem(evidence, "remote-ci-and-public-publish-proof-backfill-gate", "not GitHub Actions proof");
+        AssertRemoteCiEvidenceItemCarriesRunProofContract(evidence);
         AssertRequiredSourceArtifacts(evidence);
 
         using JsonDocument auditDocument = ReadFinalReleaseJson("release-evidence-classification-audit.json");
@@ -168,6 +178,18 @@ public sealed class RemoteCiAndPublicPublishProofBackfillGateTests
 
         Assert.False(item.GetProperty("passed").GetBoolean());
         Assert.Contains(boundaryText, item.GetProperty("boundary").GetString(), StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static void AssertRemoteCiEvidenceItemCarriesRunProofContract(JsonElement evidence)
+    {
+        JsonElement item = evidence.GetProperty("evidenceItems")
+            .EnumerateArray()
+            .Single(item => item.GetProperty("id").GetString() == "remote-ci-and-public-publish-proof-backfill-gate");
+
+        string state = item.GetProperty("state").GetString()!;
+        Assert.Contains("githubActionsRunProofRequiredFields=13", state, StringComparison.Ordinal);
+        Assert.Contains("githubActionsRunProofRejectedStates=12", state, StringComparison.Ordinal);
+        Assert.Contains("githubActionsRunProofRejectedSubstitutes=10", state, StringComparison.Ordinal);
     }
 
     private static void AssertAuditedNonProofItem(JsonElement audit, string id)

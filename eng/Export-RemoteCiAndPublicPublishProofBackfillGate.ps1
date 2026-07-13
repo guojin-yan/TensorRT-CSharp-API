@@ -117,6 +117,10 @@ $postPublishCleanConsumerProofResultCandidate = Read-JsonOrNull "artifacts\final
 $postPublishCleanConsumerProofResultValidation = Read-JsonOrNull "artifacts\final-release\post-publish-clean-consumer-proof-result-validation.json"
 $finalPrepublishQualityFreezeValidation = Read-JsonOrNull "artifacts\final-release\final-prepublish-quality-freeze-dashboard-validation.json"
 
+$githubActionsRunProofRequiredFieldCount = [int](Get-PropertyOrDefault -Object $githubActionsRunEvidenceValidation -Name "githubActionsRunProofRequiredFieldCount" -DefaultValue 0)
+$githubActionsRunProofRejectedStateCount = [int](Get-PropertyOrDefault -Object $githubActionsRunEvidenceValidation -Name "githubActionsRunProofRejectedStateCount" -DefaultValue 0)
+$githubActionsRunProofRejectedSubstituteCount = [int](Get-PropertyOrDefault -Object $githubActionsRunEvidenceValidation -Name "githubActionsRunProofRejectedSubstituteCount" -DefaultValue 0)
+
 $lanes = @(
   New-BackfillLane -Id "github-source-head-status" -Artifact "artifacts/final-release/github-publish-and-ci-status-snapshot-validation.json" -Record $githubStatusValidation -StateProperty "validationState" -DefaultState "missing-github-publish-and-ci-status-snapshot-validation" -ReadyStates @("blocked-github-actions-and-public-publish-proof-required") -RequiredEvidence "Read-only remote HEAD containment snapshot plus explicit missing CI/publish proof classification." -RequireProofReady $false
   New-BackfillLane -Id "github-actions-run-proof" -Artifact "artifacts/final-release/github-actions-run-evidence-import-validation.json" -Record $githubActionsRunEvidenceValidation -StateProperty "validationState" -DefaultState "missing-github-actions-run-evidence-import-validation" -ReadyStates @("github-actions-run-evidence-ready") -RequiredEvidence "Real GitHub Actions workflow run URL, run id, head SHA, conclusion, log hash, and artifact hash validated by Test-GitHubActionsRunEvidenceImport.ps1." -RequireProofReady $false
@@ -150,6 +154,9 @@ $record = [pscustomobject]@{
   boundaryFailureCount = $boundaryFailures.Count
   failedBlockerCount = $failedBlockers.Count
   failedActionRequiredCount = [int]$failedActionRequiredCount
+  githubActionsRunProofRequiredFieldCount = $githubActionsRunProofRequiredFieldCount
+  githubActionsRunProofRejectedStateCount = $githubActionsRunProofRejectedStateCount
+  githubActionsRunProofRejectedSubstituteCount = $githubActionsRunProofRejectedSubstituteCount
   sourceHeadPresentOnRemote = $sourceHeadPresentOnRemote
   remoteHeadMatchesCurrentHead = $remoteHeadMatchesCurrentHead
   readyForOwnerReview = $gateState -eq "remote-ci-and-public-publish-proof-backfill-ready-for-owner-review"
@@ -186,6 +193,9 @@ $markdown = @"
 | boundaryFailureCount | ``$($record.boundaryFailureCount)`` |
 | failedBlockerCount | ``$($record.failedBlockerCount)`` |
 | failedActionRequiredCount | ``$($record.failedActionRequiredCount)`` |
+| githubActionsRunProofRequiredFieldCount | ``$($record.githubActionsRunProofRequiredFieldCount)`` |
+| githubActionsRunProofRejectedStateCount | ``$($record.githubActionsRunProofRejectedStateCount)`` |
+| githubActionsRunProofRejectedSubstituteCount | ``$($record.githubActionsRunProofRejectedSubstituteCount)`` |
 | sourceHeadPresentOnRemote | ``$($record.sourceHeadPresentOnRemote)`` |
 | remoteHeadMatchesCurrentHead | ``$($record.remoteHeadMatchesCurrentHead)`` |
 | performsPublish | ``$($record.performsPublish)`` |

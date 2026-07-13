@@ -36,8 +36,17 @@ public sealed class GitHubActionsRunEvidenceImportTests
             Assert.True(root.GetProperty("failedActionRequiredCount").GetInt32() > 0);
             Assert.False(root.GetProperty("isGitHubActionsProof").GetBoolean());
             Assert.False(root.GetProperty("canPublishPublicly").GetBoolean());
+            Assert.Equal(13, root.GetProperty("githubActionsRunProofRequiredFieldCount").GetInt32());
+            Assert.Equal(12, root.GetProperty("githubActionsRunProofRejectedStateCount").GetInt32());
+            Assert.Equal(10, root.GetProperty("githubActionsRunProofRejectedSubstituteCount").GetInt32());
             AssertValidationItem(root, "input-present", passed: false);
+            AssertValidationItem(root, "proof-required-fields-contract", passed: true);
+            AssertValidationItem(root, "proof-rejected-states-contract", passed: true);
+            AssertValidationItem(root, "proof-rejected-substitutes-contract", passed: true);
             AssertValidationItem(root, "forbidden-substitutes-absent", passed: true);
+            AssertStringArrayContains(root, "githubActionsRunProofRequiredFields", "githubRunId", "githubRunUrl", "runnerOs", "artifactSha256");
+            AssertStringArrayContains(root, "githubActionsRunProofRejectedStates", "queued", "in_progress", "dashboard-only", "dry-run-only");
+            AssertStringArrayContains(root, "githubActionsRunProofRejectedSubstitutes", "local feed", "ProjectReference", "manual approval", "missing runner");
         }
         finally
         {
@@ -117,6 +126,7 @@ public sealed class GitHubActionsRunEvidenceImportTests
                   "event": "push",
                   "headBranch": "TensorRtSharp4.0",
                   "ref": "refs/heads/TensorRtSharp4.0",
+                  "runnerOs": "ubuntu-latest",
                   "startedAtUtc": "2026-07-13T06:30:00Z",
                   "completedAtUtc": "2026-07-13T06:45:12Z",
                   "jobs": [
@@ -187,6 +197,7 @@ public sealed class GitHubActionsRunEvidenceImportTests
             Assert.False(importRoot.GetProperty("canClaimGitHubActionsPackageDryRunPackForRun").GetBoolean());
             Assert.False(importRoot.GetProperty("canClaimNuGetPublished").GetBoolean());
             Assert.False(importRoot.GetProperty("canClaimGitHubPackagesPublished").GetBoolean());
+            Assert.Equal("ubuntu-latest", importRoot.GetProperty("runnerOs").GetString());
             Assert.Empty(importRoot.GetProperty("nupkgPackages").EnumerateArray());
 
             using JsonDocument validationDocument = ReadJson(Path.Combine(outputRoot, "github-actions-run-evidence-import-validation.json"));
@@ -202,10 +213,18 @@ public sealed class GitHubActionsRunEvidenceImportTests
             Assert.False(validation.GetProperty("performsPublish").GetBoolean());
             Assert.False(validation.GetProperty("isPackageConsumerRuntimeProof").GetBoolean());
             Assert.False(validation.GetProperty("isPostPublishProof").GetBoolean());
+            Assert.Equal(13, validation.GetProperty("githubActionsRunProofRequiredFieldCount").GetInt32());
+            Assert.Equal(12, validation.GetProperty("githubActionsRunProofRejectedStateCount").GetInt32());
+            Assert.Equal(10, validation.GetProperty("githubActionsRunProofRejectedSubstituteCount").GetInt32());
+            Assert.Equal("ubuntu-latest", validation.GetProperty("runnerOs").GetString());
+            Assert.Equal(runId, validation.GetProperty("githubRunId").GetString());
+            Assert.Equal("completed", validation.GetProperty("status").GetString());
+            Assert.Equal("success", validation.GetProperty("conclusion").GetString());
             AssertValidationItem(validation, "source-quality-claim-ready", passed: true);
             AssertValidationItem(validation, "package-dry-run-pack-success", passed: true);
             AssertValidationItem(validation, "nupkg-packages-present", passed: true);
             AssertValidationItem(validation, "dry-run-pack-claim-ready", passed: true);
+            AssertValidationItem(validation, "runner-os-present", passed: true);
         }
         finally
         {
@@ -284,6 +303,7 @@ public sealed class GitHubActionsRunEvidenceImportTests
                   "event": "workflow_dispatch",
                   "headBranch": "TensorRtSharp4.0",
                   "ref": "refs/heads/TensorRtSharp4.0",
+                  "runnerOs": "windows-latest",
                   "startedAtUtc": "2026-07-13T02:00:00Z",
                   "completedAtUtc": "2026-07-13T02:18:00Z",
                   "jobs": [
@@ -357,6 +377,7 @@ public sealed class GitHubActionsRunEvidenceImportTests
             Assert.Equal(Sha256(workflowRunLogPath), importRoot.GetProperty("workflowRunLogSha256").GetString());
             Assert.Equal(Sha256(artifactManifestPath), importRoot.GetProperty("artifactManifestSha256").GetString());
             Assert.Equal("guojin-yan", importRoot.GetProperty("ownerReviewer").GetString());
+            Assert.Equal("windows-latest", importRoot.GetProperty("runnerOs").GetString());
             Assert.False(importRoot.GetProperty("isGitHubActionsProof").GetBoolean());
 
             using JsonDocument validationDocument = ReadJson(Path.Combine(outputRoot, "github-actions-run-evidence-import-validation.json"));
@@ -369,8 +390,21 @@ public sealed class GitHubActionsRunEvidenceImportTests
             Assert.Equal("release-quality-gate", validation.GetProperty("workflowName").GetString());
             Assert.Equal(".github/workflows/release-quality-gate.yml", validation.GetProperty("workflowFile").GetString());
             Assert.Equal("2", validation.GetProperty("runAttempt").GetString());
+            Assert.Equal(13, validation.GetProperty("githubActionsRunProofRequiredFieldCount").GetInt32());
+            Assert.Equal(12, validation.GetProperty("githubActionsRunProofRejectedStateCount").GetInt32());
+            Assert.Equal(10, validation.GetProperty("githubActionsRunProofRejectedSubstituteCount").GetInt32());
+            Assert.Equal("windows-latest", validation.GetProperty("runnerOs").GetString());
+            Assert.Equal(runId, validation.GetProperty("githubRunId").GetString());
+            Assert.Equal("https://github.com/guojin-yan/TensorRT-CSharp-API/actions/runs/29160655818", validation.GetProperty("githubRunUrl").GetString());
+            Assert.Equal("TensorRtSharp4.0", validation.GetProperty("headBranch").GetString());
+            Assert.Equal("completed", validation.GetProperty("status").GetString());
+            Assert.Equal("success", validation.GetProperty("conclusion").GetString());
+            Assert.Equal("2026-07-13T02:00:00Z", validation.GetProperty("createdAtUtc").GetString());
+            Assert.Equal("2026-07-13T02:18:00Z", validation.GetProperty("updatedAtUtc").GetString());
             Assert.Equal(Sha256(workflowRunLogPath), validation.GetProperty("workflowRunLogSha256").GetString());
             Assert.Equal(Sha256(artifactManifestPath), validation.GetProperty("artifactManifestSha256").GetString());
+            Assert.Equal(Sha256(workflowRunLogPath), validation.GetProperty("logSha256").GetString());
+            Assert.Equal(Sha256(artifactManifestPath), validation.GetProperty("artifactSha256").GetString());
             Assert.False(validation.GetProperty("performsPublish").GetBoolean());
             Assert.False(validation.GetProperty("canPromoteRuntimeProof").GetBoolean());
             Assert.False(validation.GetProperty("canPublishPublicly").GetBoolean());
@@ -382,7 +416,9 @@ public sealed class GitHubActionsRunEvidenceImportTests
             Assert.False(validation.GetProperty("isGitHubActionsProof").GetBoolean());
             AssertValidationItem(validation, "workflow-run-log-hash-match", passed: true);
             AssertValidationItem(validation, "artifact-manifest-hash-match", passed: true);
+            AssertValidationItem(validation, "runner-os-present", passed: true);
             AssertValidationItem(validation, "forbidden-substitutes-absent", passed: true);
+            AssertStringArrayContains(validation, "githubActionsRunProofRequiredFields", "githubRunId", "githubRunUrl", "runnerOs", "artifactSha256");
         }
         finally
         {
@@ -464,6 +500,9 @@ public sealed class GitHubActionsRunEvidenceImportTests
             Assert.Equal("invalid-github-actions-run-evidence-import", validation.GetProperty("validationState").GetString());
             Assert.True(validation.GetProperty("failedBlockerCount").GetInt32() > 0);
             AssertValidationItem(validation, "forbidden-substitutes-absent", passed: false);
+            Assert.Equal(13, validation.GetProperty("githubActionsRunProofRequiredFieldCount").GetInt32());
+            Assert.Equal(12, validation.GetProperty("githubActionsRunProofRejectedStateCount").GetInt32());
+            Assert.Equal(10, validation.GetProperty("githubActionsRunProofRejectedSubstituteCount").GetInt32());
 
             string[] findings = validation.GetProperty("forbiddenSubstituteFindings")
                 .EnumerateArray()
@@ -490,6 +529,18 @@ public sealed class GitHubActionsRunEvidenceImportTests
         Assert.Contains(validation.GetProperty("validationItems").EnumerateArray(), item =>
             item.GetProperty("id").GetString() == id &&
             item.GetProperty("passed").GetBoolean() == passed);
+    }
+
+    private static void AssertStringArrayContains(JsonElement root, string propertyName, params string[] expectedValues)
+    {
+        string[] values = root.GetProperty(propertyName)
+            .EnumerateArray()
+            .Select(static item => item.GetString()!)
+            .ToArray();
+        foreach (string expectedValue in expectedValues)
+        {
+            Assert.Contains(expectedValue, values);
+        }
     }
 
     private static string CreateTempRoot()

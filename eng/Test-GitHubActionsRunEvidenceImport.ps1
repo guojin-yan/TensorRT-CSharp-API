@@ -119,6 +119,34 @@ function Test-CompletedAfterStarted {
   return $startedOk -and $completedOk -and $completed -ge $started
 }
 
+function ConvertTo-IsoDateTimeOffsetString {
+  param([AllowNull()][object]$Value)
+
+  if ($null -eq $Value) {
+    return ""
+  }
+
+  if ($Value -is [DateTimeOffset]) {
+    return $Value.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ", [System.Globalization.CultureInfo]::InvariantCulture)
+  }
+
+  if ($Value -is [DateTime]) {
+    return ([DateTimeOffset]$Value).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ", [System.Globalization.CultureInfo]::InvariantCulture)
+  }
+
+  $text = [string]$Value
+  if ([string]::IsNullOrWhiteSpace($text)) {
+    return ""
+  }
+
+  $parsed = [DateTimeOffset]::MinValue
+  if ([DateTimeOffset]::TryParse($text, [System.Globalization.CultureInfo]::InvariantCulture, [System.Globalization.DateTimeStyles]::AssumeUniversal, [ref]$parsed)) {
+    return $parsed.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ", [System.Globalization.CultureInfo]::InvariantCulture)
+  }
+
+  return $text
+}
+
 function Test-ConcreteValue {
   param([string]$Value)
 
@@ -141,6 +169,50 @@ function Test-GitHubActionsRunUrl {
     $Value.StartsWith("https://github.com/", [StringComparison]::OrdinalIgnoreCase) -and
     $Value -match '(?i)/actions/runs/[0-9]+'
 }
+
+$githubActionsRunProofRequiredFields = @(
+  "githubRunId",
+  "githubRunUrl",
+  "workflowName",
+  "headSha",
+  "headBranch",
+  "status",
+  "conclusion",
+  "createdAtUtc",
+  "updatedAtUtc",
+  "logSha256",
+  "artifactSha256",
+  "runnerOs",
+  "ownerReviewer"
+)
+
+$githubActionsRunProofRejectedStates = @(
+  "queued",
+  "waiting",
+  "requested",
+  "pending",
+  "in_progress",
+  "cancelled",
+  "failure",
+  "timed_out",
+  "dashboard-only",
+  "local-build-only",
+  "local-test-only",
+  "dry-run-only"
+)
+
+$githubActionsRunProofRejectedSubstitutes = @(
+  "queued workflow",
+  "dashboard-only",
+  "local dotnet test",
+  "local build",
+  "package-managed-dry-run-only",
+  "local feed",
+  "direct nupkg",
+  "ProjectReference",
+  "manual approval",
+  "missing runner"
+)
 
 function Get-ForbiddenSubstituteFindings {
   param(
@@ -227,8 +299,9 @@ $workflowFile = [string](Get-PropertyOrDefault -Object $record -Name "workflowFi
 $runEvent = [string](Get-PropertyOrDefault -Object $record -Name "runEvent" -DefaultValue "")
 $runBranch = [string](Get-PropertyOrDefault -Object $record -Name "runBranch" -DefaultValue "")
 $runRef = [string](Get-PropertyOrDefault -Object $record -Name "runRef" -DefaultValue "")
-$startedAtUtc = [string](Get-PropertyOrDefault -Object $record -Name "startedAtUtc" -DefaultValue "")
-$completedAtUtc = [string](Get-PropertyOrDefault -Object $record -Name "completedAtUtc" -DefaultValue "")
+$runnerOs = [string](Get-PropertyOrDefault -Object $record -Name "runnerOs" -DefaultValue "")
+$startedAtUtc = ConvertTo-IsoDateTimeOffsetString -Value (Get-PropertyOrDefault -Object $record -Name "startedAtUtc" -DefaultValue "")
+$completedAtUtc = ConvertTo-IsoDateTimeOffsetString -Value (Get-PropertyOrDefault -Object $record -Name "completedAtUtc" -DefaultValue "")
 $headSha = [string](Get-PropertyOrDefault -Object $record -Name "headSha" -DefaultValue "")
 $expectedHeadSha = [string](Get-PropertyOrDefault -Object $record -Name "expectedHeadSha" -DefaultValue "")
 $runHeadMatchesCurrentHead = [bool](Get-PropertyOrDefault -Object $record -Name "runHeadMatchesCurrentHead" -DefaultValue $false)
@@ -245,7 +318,7 @@ $workflowRunLogSha256 = [string](Get-PropertyOrDefault -Object $record -Name "wo
 $artifactManifestPath = [string](Get-PropertyOrDefault -Object $record -Name "artifactManifestPath" -DefaultValue "")
 $artifactManifestSha256 = [string](Get-PropertyOrDefault -Object $record -Name "artifactManifestSha256" -DefaultValue "")
 $ownerReviewer = [string](Get-PropertyOrDefault -Object $record -Name "ownerReviewer" -DefaultValue "")
-$capturedAtUtc = [string](Get-PropertyOrDefault -Object $record -Name "capturedAtUtc" -DefaultValue "")
+$capturedAtUtc = ConvertTo-IsoDateTimeOffsetString -Value (Get-PropertyOrDefault -Object $record -Name "capturedAtUtc" -DefaultValue "")
 $importMode = [string](Get-PropertyOrDefault -Object $record -Name "importMode" -DefaultValue "package-dry-run")
 $evidenceState = [string](Get-PropertyOrDefault -Object $record -Name "evidenceState" -DefaultValue "")
 $canClaimSourceQuality = [bool](Get-PropertyOrDefault -Object $record -Name "canClaimGitHubActionsSourceQualityForRun" -DefaultValue $false)
@@ -278,6 +351,9 @@ $forbiddenFindings = Get-ForbiddenSubstituteFindings `
 
 $items = New-Object System.Collections.Generic.List[object]
 $items.Add((New-ValidationItem -Id "input-present" -Passed ($null -ne $record) -Severity "action-required" -Detail "Owner must import a real GitHub Actions run evidence artifact before this lane can be ready.")) | Out-Null
+$items.Add((New-ValidationItem -Id "proof-required-fields-contract" -Passed ($githubActionsRunProofRequiredFields.Count -eq 13) -Severity "blocker" -Detail "GitHub Actions run proof admission contract must expose the canonical required field list.")) | Out-Null
+$items.Add((New-ValidationItem -Id "proof-rejected-states-contract" -Passed ($githubActionsRunProofRejectedStates.Count -eq 12) -Severity "blocker" -Detail "GitHub Actions run proof admission contract must expose rejected run/non-proof states.")) | Out-Null
+$items.Add((New-ValidationItem -Id "proof-rejected-substitutes-contract" -Passed ($githubActionsRunProofRejectedSubstitutes.Count -eq 10) -Severity "blocker" -Detail "GitHub Actions run proof admission contract must expose rejected substitute evidence sources.")) | Out-Null
 $items.Add((New-ValidationItem -Id "record-kind" -Passed ($null -eq $record -or [string](Get-PropertyOrDefault -Object $record -Name "recordKind" -DefaultValue "") -eq "github-actions-run-evidence-import") -Severity "blocker" -Detail "recordKind must be github-actions-run-evidence-import when input is present.")) | Out-Null
 $items.Add((New-ValidationItem -Id "run-id-present" -Passed (-not [string]::IsNullOrWhiteSpace($runId)) -Severity "action-required" -Detail "runId must identify the GitHub Actions workflow run.")) | Out-Null
 $items.Add((New-ValidationItem -Id "run-url-public-run-detail" -Passed (Test-GitHubActionsRunUrl -Value $runUrl) -Severity "action-required" -Detail "runUrl must be a GitHub workflow run detail URL under /actions/runs/<id>, not a dashboard or placeholder.")) | Out-Null
@@ -288,6 +364,7 @@ $items.Add((New-ValidationItem -Id "workflow-name-present" -Passed (Test-Concret
 $items.Add((New-ValidationItem -Id "workflow-file-present" -Passed (Test-ConcreteValue -Value $workflowFile) -Severity "action-required" -Detail "workflowFile must identify the workflow YAML file.")) | Out-Null
 $items.Add((New-ValidationItem -Id "event-present" -Passed (Test-ConcreteValue -Value $runEvent) -Severity "action-required" -Detail "runEvent must identify the trigger event, such as workflow_dispatch or push.")) | Out-Null
 $items.Add((New-ValidationItem -Id "ref-or-branch-present" -Passed ((Test-ConcreteValue -Value $runRef) -or (Test-ConcreteValue -Value $runBranch)) -Severity "action-required" -Detail "runRef or runBranch must link the run back to the release branch/ref.")) | Out-Null
+$items.Add((New-ValidationItem -Id "runner-os-present" -Passed (Test-ConcreteValue -Value $runnerOs) -Severity "action-required" -Detail "runnerOs must identify the GitHub Actions runner operating system that produced the run evidence.")) | Out-Null
 $items.Add((New-ValidationItem -Id "started-at-utc-parseable" -Passed (Test-DateTimeOffsetFormat -Value $startedAtUtc) -Severity "action-required" -Detail "startedAtUtc must be parseable as a DateTimeOffset.")) | Out-Null
 $items.Add((New-ValidationItem -Id "completed-at-utc-parseable" -Passed (Test-DateTimeOffsetFormat -Value $completedAtUtc) -Severity "action-required" -Detail "completedAtUtc must be parseable as a DateTimeOffset.")) | Out-Null
 $items.Add((New-ValidationItem -Id "completed-at-after-started-at" -Passed (Test-CompletedAfterStarted -StartedAtUtc $startedAtUtc -CompletedAtUtc $completedAtUtc) -Severity "action-required" -Detail "completedAtUtc must be equal to or later than startedAtUtc.")) | Out-Null
@@ -365,6 +442,21 @@ $validation = [pscustomobject]@{
   sourceQualityRunEvidenceReady = $sourceQualityRunEvidenceReady
   packageDryRunEvidenceReady = $packageDryRunEvidenceReady
   githubActionsRunEvidenceReady = $packageDryRunEvidenceReady
+  githubActionsRunProofRequiredFields = @($githubActionsRunProofRequiredFields)
+  githubActionsRunProofRequiredFieldCount = $githubActionsRunProofRequiredFields.Count
+  githubActionsRunProofRejectedStates = @($githubActionsRunProofRejectedStates)
+  githubActionsRunProofRejectedStateCount = $githubActionsRunProofRejectedStates.Count
+  githubActionsRunProofRejectedSubstitutes = @($githubActionsRunProofRejectedSubstitutes)
+  githubActionsRunProofRejectedSubstituteCount = $githubActionsRunProofRejectedSubstitutes.Count
+  githubRunId = $runId
+  githubRunUrl = $runUrl
+  headBranch = $runBranch
+  status = $runStatus
+  conclusion = $runConclusion
+  createdAtUtc = $startedAtUtc
+  updatedAtUtc = $completedAtUtc
+  logSha256 = $workflowRunLogSha256
+  artifactSha256 = $artifactManifestSha256
   canClaimGitHubActionsSourceQualityForRun = $canClaimSourceQuality
   canClaimGitHubActionsPackageDryRunPackForRun = $canClaimDryRunPack
   runId = $runId
@@ -377,6 +469,7 @@ $validation = [pscustomobject]@{
   runEvent = $runEvent
   runBranch = $runBranch
   runRef = $runRef
+  runnerOs = $runnerOs
   startedAtUtc = $startedAtUtc
   completedAtUtc = $completedAtUtc
   headSha = $headSha
@@ -431,6 +524,9 @@ $markdown = @"
 | githubActionsRunEvidenceReady | ``$($validation.githubActionsRunEvidenceReady)`` |
 | sourceQualityRunEvidenceReady | ``$($validation.sourceQualityRunEvidenceReady)`` |
 | packageDryRunEvidenceReady | ``$($validation.packageDryRunEvidenceReady)`` |
+| githubActionsRunProofRequiredFieldCount | ``$($validation.githubActionsRunProofRequiredFieldCount)`` |
+| githubActionsRunProofRejectedStateCount | ``$($validation.githubActionsRunProofRejectedStateCount)`` |
+| githubActionsRunProofRejectedSubstituteCount | ``$($validation.githubActionsRunProofRejectedSubstituteCount)`` |
 | importMode | ``$($validation.importMode)`` |
 | evidenceState | ``$($validation.evidenceState)`` |
 | runId | ``$($validation.runId)`` |
@@ -439,6 +535,7 @@ $markdown = @"
 | workflowName | ``$($validation.workflowName)`` |
 | workflowFile | ``$($validation.workflowFile)`` |
 | runAttempt | ``$($validation.runAttempt)`` |
+| runnerOs | ``$($validation.runnerOs)`` |
 | workflowRunLogSha256 | ``$($validation.workflowRunLogSha256)`` |
 | artifactManifestSha256 | ``$($validation.artifactManifestSha256)`` |
 | ownerReviewer | ``$($validation.ownerReviewer)`` |
@@ -449,6 +546,20 @@ $markdown = @"
 | canCloseReleaseIssue | ``$($validation.canCloseReleaseIssue)`` |
 | isPostPublishProof | ``$($validation.isPostPublishProof)`` |
 | isGitHubActionsProof | ``$($validation.isGitHubActionsProof)`` |
+
+## Proof Admission Contract
+
+### Required Fields
+
+$($githubActionsRunProofRequiredFields | ForEach-Object { "- ``$_``" } | Out-String)
+
+### Rejected States
+
+$($githubActionsRunProofRejectedStates | ForEach-Object { "- ``$_``" } | Out-String)
+
+### Rejected Substitutes
+
+$($githubActionsRunProofRejectedSubstitutes | ForEach-Object { "- ``$_``" } | Out-String)
 
 ## Validation Items
 

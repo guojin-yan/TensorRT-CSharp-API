@@ -266,6 +266,7 @@ $workflowFile = [string](Get-PropertyOrDefault -Object $runMetadata -Name "workf
 $runEvent = [string](Get-PropertyOrDefault -Object $runMetadata -Name "event" -DefaultValue (Get-PropertyOrDefault -Object $runMetadata -Name "eventName" -DefaultValue ""))
 $runBranch = [string](Get-PropertyOrDefault -Object $runMetadata -Name "headBranch" -DefaultValue (Get-PropertyOrDefault -Object $runMetadata -Name "branch" -DefaultValue ""))
 $runRef = [string](Get-PropertyOrDefault -Object $runMetadata -Name "ref" -DefaultValue (Get-PropertyOrDefault -Object $runMetadata -Name "headRefName" -DefaultValue ""))
+$runnerOs = [string](Get-PropertyOrDefault -Object $runMetadata -Name "runnerOs" -DefaultValue (Get-PropertyOrDefault -Object $runMetadata -Name "runnerOS" -DefaultValue ""))
 $startedAtUtc = [string](Get-PropertyOrDefault -Object $runMetadata -Name "startedAtUtc" -DefaultValue (Get-PropertyOrDefault -Object $runMetadata -Name "createdAt" -DefaultValue ""))
 $completedAtUtc = [string](Get-PropertyOrDefault -Object $runMetadata -Name "completedAtUtc" -DefaultValue (Get-PropertyOrDefault -Object $runMetadata -Name "updatedAt" -DefaultValue ""))
 
@@ -375,6 +376,7 @@ $record = [pscustomobject]@{
   runEvent = $runEvent
   runBranch = $runBranch
   runRef = $runRef
+  runnerOs = $runnerOs
   startedAtUtc = $startedAtUtc
   completedAtUtc = $completedAtUtc
   headSha = $runHeadSha
@@ -433,6 +435,7 @@ $lines.Add("- Workflow: ``$workflowName``")
 $lines.Add("- Workflow file: ``$workflowFile``")
 $lines.Add("- Event: ``$runEvent``")
 $lines.Add("- Ref: ``$runRef``")
+$lines.Add("- Runner OS: ``$runnerOs``")
 $lines.Add("- Started at UTC: ``$startedAtUtc``")
 $lines.Add("- Completed at UTC: ``$completedAtUtc``")
 $lines.Add("- Source quality: ``$sourceQualityConclusion``")
