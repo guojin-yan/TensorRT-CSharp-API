@@ -64,7 +64,7 @@ $requiredLaneIds = @(
 $requiredArtifacts = @(
   "artifacts/final-release/owner-publish-authorization-input-validation.json",
   "artifacts/final-release/owner-publish-execution-result-input-validation.json",
-  "artifacts/final-release/public-package-download-proof-input-validation.json",
+  "artifacts/final-release/public-package-download-proof-candidate-validation.json",
   "artifacts/final-release/clean-external-consumer-smoke-input-validation.json",
   "artifacts/final-release/post-publish-proof-input-validation.json",
   "artifacts/final-release/release-issue-close-owner-decision-input-validation.json",

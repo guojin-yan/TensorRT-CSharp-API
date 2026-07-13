@@ -13,6 +13,8 @@ public sealed class PublicPackageDownloadProofInputTests
     {
         RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Export-PublicPackageDownloadProofInputTemplate.ps1"));
         RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Test-PublicPackageDownloadProofInput.ps1"), "-Strict");
+        RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Import-PublicPackageDownloadProofCandidate.ps1"));
+        RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Test-PublicPackageDownloadProofCandidate.ps1"), "-Strict");
 
         using JsonDocument templateDocument = ReadFinalReleaseJson("public-package-download-proof-input.template.json");
         JsonElement template = templateDocument.RootElement;
@@ -43,6 +45,37 @@ public sealed class PublicPackageDownloadProofInputTests
         Assert.False(validation.GetProperty("canClaimPackageConsumerRuntimeProof").GetBoolean());
         Assert.False(validation.GetProperty("isPackageConsumerRuntimeProof").GetBoolean());
         Assert.False(validation.GetProperty("isPostPublishProof").GetBoolean());
+
+        using JsonDocument candidateDocument = ReadFinalReleaseJson("public-package-download-proof-candidate.json");
+        JsonElement candidate = candidateDocument.RootElement;
+        Assert.Equal("public-package-download-proof-candidate", candidate.GetProperty("recordKind").GetString());
+        Assert.Equal("blocked-public-package-download-proof-required", candidate.GetProperty("candidateState").GetString());
+        Assert.Equal("blocked-public-package-download-proof-required", candidate.GetProperty("sourceInputValidationState").GetString());
+        Assert.Equal(0, candidate.GetProperty("readyCandidateCount").GetInt32());
+        Assert.Equal(1, candidate.GetProperty("blockedCandidateCount").GetInt32());
+        Assert.False(candidate.GetProperty("proofCandidateReady").GetBoolean());
+        Assert.False(candidate.GetProperty("performsPublish").GetBoolean());
+        Assert.False(candidate.GetProperty("usesPublishToken").GetBoolean());
+        Assert.False(candidate.GetProperty("canPublishPublicly").GetBoolean());
+        Assert.False(candidate.GetProperty("canCloseReleaseIssue").GetBoolean());
+        Assert.False(candidate.GetProperty("isRuntimeExecutionProof").GetBoolean());
+        Assert.False(candidate.GetProperty("isPostPublishProof").GetBoolean());
+        Assert.False(candidate.GetProperty("isReleaseCloseProof").GetBoolean());
+
+        using JsonDocument candidateValidationDocument = ReadFinalReleaseJson("public-package-download-proof-candidate-validation.json");
+        JsonElement candidateValidation = candidateValidationDocument.RootElement;
+        Assert.Equal("public-package-download-proof-candidate-validation", candidateValidation.GetProperty("recordKind").GetString());
+        Assert.Equal("blocked-public-package-download-proof-required", candidateValidation.GetProperty("validationState").GetString());
+        Assert.Equal(0, candidateValidation.GetProperty("failedBlockerCount").GetInt32());
+        Assert.True(candidateValidation.GetProperty("failedActionRequiredCount").GetInt32() > 0);
+        Assert.False(candidateValidation.GetProperty("proofCandidateReady").GetBoolean());
+        Assert.False(candidateValidation.GetProperty("performsPublish").GetBoolean());
+        Assert.False(candidateValidation.GetProperty("usesPublishToken").GetBoolean());
+        Assert.False(candidateValidation.GetProperty("canPublishPublicly").GetBoolean());
+        Assert.False(candidateValidation.GetProperty("canCloseReleaseIssue").GetBoolean());
+        Assert.False(candidateValidation.GetProperty("isRuntimeExecutionProof").GetBoolean());
+        Assert.False(candidateValidation.GetProperty("isPostPublishProof").GetBoolean());
+        Assert.False(candidateValidation.GetProperty("isReleaseCloseProof").GetBoolean());
 
         string[] validationItemIds = validation.GetProperty("validationItems")
             .EnumerateArray()
@@ -94,6 +127,19 @@ public sealed class PublicPackageDownloadProofInputTests
         Assert.Equal("blocked-public-package-download-proof-required", validation.GetProperty("validationState").GetString());
         Assert.Equal(0, validation.GetProperty("failedBlockerCount").GetInt32());
         Assert.False(validation.GetProperty("publicPackageDownloadProofReady").GetBoolean());
+
+        RunPowerShell(
+            Path.Combine(RepositoryPaths.Root, "eng", "Import-PublicPackageDownloadProofCandidate.ps1"),
+            "-InputPath",
+            "artifacts/final-release/public-package-download-proof-input.misuse.json");
+        RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Test-PublicPackageDownloadProofCandidate.ps1"), "-Strict");
+
+        using JsonDocument candidateValidationDocument = ReadFinalReleaseJson("public-package-download-proof-candidate-validation.json");
+        JsonElement candidateValidation = candidateValidationDocument.RootElement;
+        Assert.Equal("blocked-public-package-download-proof-required", candidateValidation.GetProperty("validationState").GetString());
+        Assert.Equal(0, candidateValidation.GetProperty("failedBlockerCount").GetInt32());
+        Assert.False(candidateValidation.GetProperty("publicPackageDownloadProofCandidateReady").GetBoolean());
+        Assert.False(candidateValidation.GetProperty("proofCandidateReady").GetBoolean());
 
         AssertValidationItemFailed(validation, "source-url-public-not-local");
         AssertValidationItemFailed(validation, "downloaded-managed-path-public-download");
@@ -149,6 +195,40 @@ public sealed class PublicPackageDownloadProofInputTests
             Assert.False(validation.GetProperty("canClaimPackageConsumerRuntimeProof").GetBoolean());
             Assert.False(validation.GetProperty("isPackageConsumerRuntimeProof").GetBoolean());
             Assert.False(validation.GetProperty("isPostPublishProof").GetBoolean());
+
+            RunPowerShell(
+                Path.Combine(RepositoryPaths.Root, "eng", "Import-PublicPackageDownloadProofCandidate.ps1"),
+                "-InputPath",
+                "artifacts/final-release/public-package-download-proof-input.ready.json");
+            RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Test-PublicPackageDownloadProofCandidate.ps1"), "-Strict");
+
+            using JsonDocument candidateDocument = ReadFinalReleaseJson("public-package-download-proof-candidate.json");
+            JsonElement candidate = candidateDocument.RootElement;
+            Assert.Equal("public-package-download-proof-candidate-imported", candidate.GetProperty("candidateState").GetString());
+            Assert.Equal("public-package-download-proof-input-ready", candidate.GetProperty("sourceInputValidationState").GetString());
+            Assert.True(candidate.GetProperty("proofCandidateReady").GetBoolean());
+            Assert.Equal("JYPPX.TensorRT.CSharp.API", candidate.GetProperty("managedPackageId").GetString());
+            Assert.Equal(managedPackagePath, candidate.GetProperty("downloadedManagedNupkgPath").GetString());
+            Assert.Equal(Sha256(managedPackagePath), candidate.GetProperty("downloadedManagedNupkgSha256").GetString());
+            Assert.Equal(runtimePackagePath, candidate.GetProperty("downloadedRuntimeNupkgPath").GetString());
+            Assert.Equal(Sha256(runtimePackagePath), candidate.GetProperty("downloadedRuntimeNupkgSha256").GetString());
+            Assert.False(candidate.GetProperty("performsPublish").GetBoolean());
+            Assert.False(candidate.GetProperty("usesPublishToken").GetBoolean());
+            Assert.False(candidate.GetProperty("canClaimPackageConsumerRuntimeProof").GetBoolean());
+            Assert.False(candidate.GetProperty("isPackageConsumerRuntimeProof").GetBoolean());
+            Assert.False(candidate.GetProperty("isPostPublishProof").GetBoolean());
+            Assert.False(candidate.GetProperty("isReleaseCloseProof").GetBoolean());
+
+            using JsonDocument candidateValidationDocument = ReadFinalReleaseJson("public-package-download-proof-candidate-validation.json");
+            JsonElement candidateValidation = candidateValidationDocument.RootElement;
+            Assert.Equal("public-package-download-proof-candidate-ready", candidateValidation.GetProperty("validationState").GetString());
+            Assert.Equal(0, candidateValidation.GetProperty("failedBlockerCount").GetInt32());
+            Assert.Equal(0, candidateValidation.GetProperty("failedActionRequiredCount").GetInt32());
+            Assert.True(candidateValidation.GetProperty("publicPackageDownloadProofCandidateReady").GetBoolean());
+            Assert.True(candidateValidation.GetProperty("proofCandidateReady").GetBoolean());
+            Assert.False(candidateValidation.GetProperty("isRuntimeExecutionProof").GetBoolean());
+            Assert.False(candidateValidation.GetProperty("isPackageConsumerRuntimeProof").GetBoolean());
+            Assert.False(candidateValidation.GetProperty("isPostPublishProof").GetBoolean());
         }
         finally
         {

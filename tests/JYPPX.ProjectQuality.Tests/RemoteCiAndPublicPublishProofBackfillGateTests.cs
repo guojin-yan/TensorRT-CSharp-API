@@ -23,6 +23,7 @@ public sealed class RemoteCiAndPublicPublishProofBackfillGateTests
         AssertFlagsStayNonProof(gate);
         AssertContainsRequiredLanes(gate);
         AssertGitHubActionsRunLaneUsesValidation(gate);
+        AssertPublicPackageDownloadLaneUsesCandidateValidation(gate);
         AssertPostPublishLaneRequiresRealProof(gate);
 
         using JsonDocument validationDocument = ReadFinalReleaseJson("remote-ci-and-public-publish-proof-backfill-gate-validation.json");
@@ -71,6 +72,8 @@ public sealed class RemoteCiAndPublicPublishProofBackfillGateTests
         RunPowerShell("Test-OwnerPublicPublishExecutionResultCandidate.ps1", "-Strict");
         RunPowerShell("Export-PublicPackageDownloadProofInputTemplate.ps1");
         RunPowerShell("Test-PublicPackageDownloadProofInput.ps1", "-Strict");
+        RunPowerShell("Import-PublicPackageDownloadProofCandidate.ps1");
+        RunPowerShell("Test-PublicPackageDownloadProofCandidate.ps1", "-Strict");
         RunPowerShell("Import-PostPublishCleanConsumerProofResult.ps1");
         RunPowerShell("Test-PostPublishCleanConsumerProofResult.ps1", "-Strict");
         RunPowerShell("Export-RemoteCiAndPublicPublishProofBackfillGate.ps1");
@@ -117,6 +120,18 @@ public sealed class RemoteCiAndPublicPublishProofBackfillGateTests
         Assert.Equal("blocked-github-actions-run-evidence-required", lane.GetProperty("state").GetString());
         Assert.False(lane.GetProperty("ready").GetBoolean());
         Assert.Contains("Test-GitHubActionsRunEvidenceImport.ps1", lane.GetProperty("requiredEvidence").GetString(), StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static void AssertPublicPackageDownloadLaneUsesCandidateValidation(JsonElement gate)
+    {
+        JsonElement lane = gate.GetProperty("lanes")
+            .EnumerateArray()
+            .Single(static lane => lane.GetProperty("id").GetString() == "public-package-download-proof");
+
+        Assert.Equal("artifacts/final-release/public-package-download-proof-candidate-validation.json", lane.GetProperty("artifact").GetString());
+        Assert.Equal("blocked-public-package-download-proof-required", lane.GetProperty("state").GetString());
+        Assert.False(lane.GetProperty("ready").GetBoolean());
+        Assert.Contains("Test-PublicPackageDownloadProofCandidate.ps1", lane.GetProperty("requiredEvidence").GetString(), StringComparison.OrdinalIgnoreCase);
     }
 
     private static void AssertRequiredSourceArtifacts(JsonElement evidence)
@@ -196,5 +211,9 @@ public sealed class RemoteCiAndPublicPublishProofBackfillGateTests
         "artifacts/final-release/remote-ci-and-public-publish-proof-backfill-gate-validation.md",
         "artifacts/final-release/github-actions-run-evidence-import-validation.json",
         "artifacts/final-release/github-actions-run-evidence-import-validation.md",
+        "artifacts/final-release/public-package-download-proof-candidate.json",
+        "artifacts/final-release/public-package-download-proof-candidate.md",
+        "artifacts/final-release/public-package-download-proof-candidate-validation.json",
+        "artifacts/final-release/public-package-download-proof-candidate-validation.md",
     ];
 }

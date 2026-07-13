@@ -81,7 +81,7 @@ function New-ClosureLane {
 
 $ownerAuthorization = Read-JsonOrNull "artifacts\final-release\owner-publish-authorization-input-validation.json"
 $ownerPublishExecutionResult = Read-JsonOrNull "artifacts\final-release\owner-publish-execution-result-input-validation.json"
-$publicDownload = Read-JsonOrNull "artifacts\final-release\public-package-download-proof-input-validation.json"
+$publicDownload = Read-JsonOrNull "artifacts\final-release\public-package-download-proof-candidate-validation.json"
 $cleanConsumerSmoke = Read-JsonOrNull "artifacts\final-release\clean-external-consumer-smoke-input-validation.json"
 $postPublishProof = Read-JsonOrNull "artifacts\final-release\post-publish-proof-input-validation.json"
 $releaseCloseDecision = Read-JsonOrNull "artifacts\final-release\release-issue-close-owner-decision-input-validation.json"
@@ -110,12 +110,12 @@ $lanes = @(
     -Boundary "Owner publish execution result validation does not publish, use tokens, prove clean consumer runtime smoke, prove post-publish verification, or close the release issue."
   New-ClosureLane `
     -Id "public-package-download-proof" `
-    -Title "Public package download proof input" `
-    -Artifact "artifacts/final-release/public-package-download-proof-input-validation.json" `
+    -Title "Public package download proof candidate" `
+    -Artifact "artifacts/final-release/public-package-download-proof-candidate-validation.json" `
     -Record $publicDownload `
     -StateProperty "validationState" `
-    -RequiredState "public-package-download-proof-input-ready" `
-    -OwnerAction "Download managed/runtime packages from public package sources and backfill URLs, paths, and SHA256 values." `
+    -RequiredState "public-package-download-proof-candidate-ready" `
+    -OwnerAction "Validate the imported public package download candidate after downloading managed/runtime packages from public package sources and backfilling URLs, paths, and SHA256 values." `
     -RequiredBeforeClose @("public managed package URL", "public runtime package URL", "downloaded managed SHA256", "downloaded runtime SHA256") `
     -Boundary "Public download proof is not a local feed, direct nupkg, dry-run artifact, or GitHub Actions artifact substitute."
   New-ClosureLane `

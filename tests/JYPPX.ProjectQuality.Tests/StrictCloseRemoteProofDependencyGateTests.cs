@@ -130,6 +130,8 @@ public sealed class StrictCloseRemoteProofDependencyGateTests
         RunPowerShell("Test-OwnerPublicPublishExecutionResultCandidate.ps1", "-Strict");
         RunPowerShell("Export-PublicPackageDownloadProofInputTemplate.ps1");
         RunPowerShell("Test-PublicPackageDownloadProofInput.ps1", "-Strict");
+        RunPowerShell("Import-PublicPackageDownloadProofCandidate.ps1");
+        RunPowerShell("Test-PublicPackageDownloadProofCandidate.ps1", "-Strict");
         RunPowerShell("Import-PostPublishCleanConsumerProofResult.ps1");
         RunPowerShell("Test-PostPublishCleanConsumerProofResult.ps1", "-Strict");
         RunPowerShell("Export-RemoteCiAndPublicPublishProofBackfillGate.ps1");
