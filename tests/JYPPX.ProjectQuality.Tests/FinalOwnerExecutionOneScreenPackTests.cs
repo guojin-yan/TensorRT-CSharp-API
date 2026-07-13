@@ -32,6 +32,11 @@ public sealed class FinalOwnerExecutionOneScreenPackTests
         Assert.True(pack.GetProperty("ownerInputGapCount").GetInt32() >= 17);
         Assert.Equal(9, pack.GetProperty("finalPublicProofPathCount").GetInt32());
         Assert.Equal(9, pack.GetProperty("blockedFinalPublicProofPathCount").GetInt32());
+        Assert.Equal(7, pack.GetProperty("ownerExecutionSequenceCount").GetInt32());
+        Assert.Equal(7, pack.GetProperty("blockedOwnerExecutionSequenceCount").GetInt32());
+        Assert.Equal(5, pack.GetProperty("finalCloseProofAdmissionLaneCount").GetInt32());
+        Assert.Equal(20, pack.GetProperty("finalCloseProofAdmissionRequiredFieldCount").GetInt32());
+        Assert.Equal(10, pack.GetProperty("finalCloseRejectedNonProofStateCount").GetInt32());
         Assert.Equal(pack.GetProperty("laneCount").GetInt32(), pack.GetProperty("blockedLaneCount").GetInt32());
         Assert.Equal(pack.GetProperty("ownerInputGapCount").GetInt32(), pack.GetProperty("blockedOwnerInputGapCount").GetInt32());
         Assert.Equal(2, pack.GetProperty("dualPackageRouteCount").GetInt32());
@@ -78,6 +83,60 @@ public sealed class FinalOwnerExecutionOneScreenPackTests
             "final-public-release-closure-bridge",
             "release-issue-close-owner-decision-input",
             "dual-package-final-close-lanes"
+        });
+        AssertIds(pack, "ownerExecutionSequence", new[]
+        {
+            "remote-ci-github-actions-run-proof",
+            "public-publish-owner-result",
+            "public-package-download-proof",
+            "clean-external-consumer-smoke-proof",
+            "post-publish-verification-proof",
+            "rollback-review",
+            "final-close-decision"
+        });
+        AssertStringArray(pack, "finalCloseProofAdmissionLaneIds", new[]
+        {
+            "github-actions-run-proof",
+            "owner-public-publish-result",
+            "public-package-download-proof",
+            "post-publish-clean-consumer-proof",
+            "release-issue-close-record-strict-validation"
+        });
+        AssertStringArray(pack, "finalCloseProofAdmissionRequiredFields", new[]
+        {
+            "publicPackageSourceUrl",
+            "publicPackageDownloadUrl",
+            "managedNupkgSha256",
+            "runtimeNupkgSha256",
+            "externalCleanConsumerProjectIdentity",
+            "smokeCommandRuntimePackageKey",
+            "hostCudaVersion",
+            "hostTensorRtVersion",
+            "hostCudnnVersion",
+            "stdoutSha256",
+            "stderrSha256",
+            "mergedTranscriptSha256",
+            "githubRunId",
+            "githubHeadSha",
+            "githubLogSha256",
+            "githubArtifactSha256",
+            "ownerReviewer",
+            "ownerAuthorizationLink",
+            "rollbackReview",
+            "finalCloseDecision"
+        });
+        AssertStringArray(pack, "finalCloseRejectedNonProofStates", new[]
+        {
+            "template-only",
+            "candidate-only",
+            "draft-rich-but-not-proof",
+            "draft-blocked-by-cuda-driver",
+            "not-requested",
+            "validation-ready-without-proof-candidate",
+            "dashboard-only",
+            "runbook-only",
+            "local-feed-only",
+            "project-reference-only"
         });
 
         JsonElement[] lanes = pack.GetProperty("lanes").EnumerateArray().ToArray();
@@ -145,6 +204,8 @@ public sealed class FinalOwnerExecutionOneScreenPackTests
         Assert.Contains("dual-package-final-close-lanes", packText, StringComparison.Ordinal);
         Assert.Contains("owner input gap table", packText, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("final public proof path", packText, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("ownerExecutionSequence", packText, StringComparison.Ordinal);
+        Assert.Contains("finalCloseProofAdmissionLaneIds", packText, StringComparison.Ordinal);
 
         using JsonDocument validationDocument = ReadFinalReleaseJson("final-owner-execution-one-screen-pack-validation.json");
         JsonElement validation = validationDocument.RootElement;
@@ -152,6 +213,10 @@ public sealed class FinalOwnerExecutionOneScreenPackTests
         Assert.Equal("blocked-final-owner-execution-one-screen-real-owner-input-required", validation.GetProperty("validationState").GetString());
         Assert.Equal(0, validation.GetProperty("failedBlockerCount").GetInt32());
         Assert.Equal(9, validation.GetProperty("finalPublicProofPathCount").GetInt32());
+        Assert.Equal(7, validation.GetProperty("ownerExecutionSequenceCount").GetInt32());
+        Assert.Equal(5, validation.GetProperty("finalCloseProofAdmissionLaneCount").GetInt32());
+        Assert.Equal(20, validation.GetProperty("finalCloseProofAdmissionRequiredFieldCount").GetInt32());
+        Assert.Equal(10, validation.GetProperty("finalCloseRejectedNonProofStateCount").GetInt32());
         Assert.Equal(2, validation.GetProperty("dualPackageRouteCount").GetInt32());
         Assert.Equal(2, validation.GetProperty("dualPackageFinalCloseBlockedLaneCount").GetInt32());
         Assert.False(validation.GetProperty("dualPackageAcceptsSubstituteProof").GetBoolean());
@@ -172,6 +237,10 @@ public sealed class FinalOwnerExecutionOneScreenPackTests
 
         using JsonDocument evidenceDocument = ReadFinalReleaseJson("release-evidence-bundle.json");
         JsonElement evidence = evidenceDocument.RootElement;
+        Assert.Equal(7, evidence.GetProperty("finalOwnerExecutionOneScreenPackOwnerExecutionSequenceCount").GetInt32());
+        Assert.Equal(5, evidence.GetProperty("finalOwnerExecutionOneScreenPackFinalCloseProofAdmissionLaneCount").GetInt32());
+        Assert.Equal(20, evidence.GetProperty("finalOwnerExecutionOneScreenPackFinalCloseProofAdmissionRequiredFieldCount").GetInt32());
+        Assert.Equal(10, evidence.GetProperty("finalOwnerExecutionOneScreenPackFinalCloseRejectedNonProofStateCount").GetInt32());
 
         JsonElement item = evidence.GetProperty("evidenceItems")
             .EnumerateArray()
@@ -179,6 +248,10 @@ public sealed class FinalOwnerExecutionOneScreenPackTests
         Assert.False(item.GetProperty("passed").GetBoolean());
         AssertBoundary(item.GetProperty("boundary").GetString()!);
         Assert.Contains("ownerInputGaps=", item.GetProperty("state").GetString(), StringComparison.Ordinal);
+        Assert.Contains("ownerExecutionSequence=7", item.GetProperty("state").GetString(), StringComparison.Ordinal);
+        Assert.Contains("finalCloseAdmissionLanes=5", item.GetProperty("state").GetString(), StringComparison.Ordinal);
+        Assert.Contains("finalCloseAdmissionFields=20", item.GetProperty("state").GetString(), StringComparison.Ordinal);
+        Assert.Contains("finalCloseRejectedNonProofStates=10", item.GetProperty("state").GetString(), StringComparison.Ordinal);
 
         Assert.Contains(evidence.GetProperty("nonSubstituteProofKinds").EnumerateArray(), static marker =>
             marker.GetString() == "final owner execution one-screen pack");
@@ -203,6 +276,15 @@ public sealed class FinalOwnerExecutionOneScreenPackTests
         foreach (string expectedId in expectedIds)
         {
             Assert.Contains(expectedId, ids);
+        }
+    }
+
+    private static void AssertStringArray(JsonElement root, string propertyName, string[] expectedValues)
+    {
+        string[] values = root.GetProperty(propertyName).EnumerateArray().Select(static item => item.GetString()!).ToArray();
+        foreach (string expectedValue in expectedValues)
+        {
+            Assert.Contains(expectedValue, values);
         }
     }
 

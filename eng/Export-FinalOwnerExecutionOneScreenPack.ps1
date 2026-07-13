@@ -406,6 +406,76 @@ $finalPublicProofPath = @(
   New-PublicProofStep -Order 9 -Id "dual-package-final-close-lanes" -Title "Dual-package final close route lanes" -SourceArtifact "artifacts/final-release/final-close-gate-convergence-validation.json" -ValidationArtifact "artifacts/final-release/final-close-gate-convergence-validation.json" -CurrentState $sourceStates.finalCloseGateConvergenceValidation -RequiredReadyState "dualPackageRouteCount=2, dualPackageBlockedLaneCount=0, acceptsSubstituteProof=false, and all route owner proofs accepted" -OwnerAction "Owner must satisfy both NuGet small bridge/core and GitHub Packages full runtime route lanes with real publish/download/consumer/post-publish proof before final close." -StrictValidator "eng\Test-FinalCloseGateConvergence.ps1 -Strict" -BlockedReason "Dual-package final close lanes remain blocked until both route-specific Owner proof sets are real and accepted."
 )
 
+$ownerExecutionSequence = @(
+  [pscustomobject]@{
+    order = 1
+    id = "remote-ci-github-actions-run-proof"
+    title = "Remote CI / GitHub Actions run proof"
+    requiredEvidence = "Real successful GitHub Actions run URL, run id, head SHA, conclusion, workflow log SHA256, and artifact SHA256."
+    strictValidator = "eng\Test-GitHubActionsRunEvidenceImport.ps1 -Strict"
+    ownerAction = "Import a real GitHub Actions run proof for the pushed commit; queued workflow and local tests remain substitutes."
+    blocked = $true
+  }
+  [pscustomobject]@{
+    order = 2
+    id = "public-publish-owner-result"
+    title = "Public publish Owner result"
+    requiredEvidence = "Owner public publish result with public package URLs, identities, nupkg SHA256 values, transcript hashes, reviewer, authorization link, and rollback review."
+    strictValidator = "eng\Test-OwnerPublicPublishExecutionResultCandidate.ps1 -Strict"
+    ownerAction = "Backfill the actual public NuGet/GitHub package publish result after Owner execution."
+    blocked = $true
+  }
+  [pscustomobject]@{
+    order = 3
+    id = "public-package-download-proof"
+    title = "Public package download proof"
+    requiredEvidence = "Managed/runtime packages downloaded from public sources with package identities, URLs, timestamps, and SHA256 hashes."
+    strictValidator = "eng\Test-PublicPackageDownloadProofCandidate.ps1 -Strict"
+    ownerAction = "Download the public packages from their public source and import hash proof."
+    blocked = $true
+  }
+  [pscustomobject]@{
+    order = 4
+    id = "clean-external-consumer-smoke-proof"
+    title = "Clean external consumer restore/build/smoke proof"
+    requiredEvidence = "Repository-external clean consumer project, restore/build/runtime logs, stdout/stderr/transcript SHA256 values, host CUDA/TensorRT/cuDNN metadata, and owner review."
+    strictValidator = "eng\Test-PackageConsumerRuntimeProofRecord.ps1 -Strict -RequireExistingLog -FailOnNotProof"
+    ownerAction = "Run a clean external consumer against packages, not ProjectReference, local feed, or direct nupkg substitutes."
+    blocked = $true
+  }
+  [pscustomobject]@{
+    order = 5
+    id = "post-publish-verification-proof"
+    title = "Post-publish verification proof"
+    requiredEvidence = "Post-publish clean consumer restore/build/runtime smoke from public packages with upstream public proof linkage."
+    strictValidator = "eng\Test-PostPublishCleanConsumerProofResult.ps1 -Strict -RequireExistingFiles -RequireHashMatch -FailOnNotProof"
+    ownerAction = "Run post-publish verification only after public package download proof exists."
+    blocked = $true
+  }
+  [pscustomobject]@{
+    order = 6
+    id = "rollback-review"
+    title = "Rollback review"
+    requiredEvidence = "Rollback review, rollback owner decision, and release evidence bundle hash review."
+    strictValidator = "eng\Test-FinalReleaseCloseOwnerApprovalContract.ps1 -Strict"
+    ownerAction = "Review rollback readiness after all proof validators pass."
+    blocked = $true
+  }
+  [pscustomobject]@{
+    order = 7
+    id = "final-close-decision"
+    title = "Final close decision"
+    requiredEvidence = "Explicit Owner final close decision after all accepted proof admission lanes pass strict validation."
+    strictValidator = "eng\Test-ReleaseIssueCloseRecord.ps1 -FailOnNotCloseReady"
+    ownerAction = "Record final close decision only after real proof lanes, rollback review, and strict close validation are accepted."
+    blocked = $true
+  }
+)
+
+$finalCloseProofAdmissionLaneIds = @(Convert-ToArray (Get-PropertyOrDefault -Object $finalCloseGateConvergence -Name "acceptedProofAdmissionContractLaneIds" -DefaultValue @()) | ForEach-Object { [string]$_ })
+$finalCloseProofAdmissionRequiredFields = @(Convert-ToArray (Get-PropertyOrDefault -Object $finalCloseGateConvergence -Name "finalCloseProofAdmissionRequiredFields" -DefaultValue @()) | ForEach-Object { [string]$_ })
+$finalCloseRejectedNonProofStates = @(Convert-ToArray (Get-PropertyOrDefault -Object $finalCloseGateConvergence -Name "rejectedNonProofStates" -DefaultValue @()) | ForEach-Object { [string]$_ })
+
 $forbiddenSubstitutes = @(
   "Skipped=True",
   "local smoke",
@@ -453,9 +523,18 @@ $record = [pscustomobject]@{
   blockedFinalPublicProofPathCount = $finalPublicProofPath.Count
   finalPublicProofPath = @($finalPublicProofPath)
   finalPublicProofSourceArtifacts = @($finalPublicProofPath | ForEach-Object { $_.validationArtifact })
+  ownerExecutionSequenceCount = $ownerExecutionSequence.Count
+  blockedOwnerExecutionSequenceCount = $ownerExecutionSequence.Count
+  ownerExecutionSequence = @($ownerExecutionSequence)
   dualPackageRouteCount = [int](Get-PropertyOrDefault -Object $dualPackagePublishPreflightMatrixValidation -Name "routeCount" -DefaultValue 0)
   dualPackageFinalCloseBlockedLaneCount = [int](Get-PropertyOrDefault -Object $finalCloseGateConvergenceValidation -Name "dualPackageBlockedLaneCount" -DefaultValue 0)
   dualPackageAcceptsSubstituteProof = [bool](Get-PropertyOrDefault -Object $finalCloseGateConvergenceValidation -Name "dualPackageAcceptsSubstituteProof" -DefaultValue $true)
+  finalCloseProofAdmissionLaneIds = $finalCloseProofAdmissionLaneIds
+  finalCloseProofAdmissionLaneCount = $finalCloseProofAdmissionLaneIds.Count
+  finalCloseProofAdmissionRequiredFields = $finalCloseProofAdmissionRequiredFields
+  finalCloseProofAdmissionRequiredFieldCount = $finalCloseProofAdmissionRequiredFields.Count
+  finalCloseRejectedNonProofStates = $finalCloseRejectedNonProofStates
+  finalCloseRejectedNonProofStateCount = $finalCloseRejectedNonProofStates.Count
   forbiddenSubstitutes = @($forbiddenSubstitutes)
   ownerActionRequired = $true
   performsPublish = $false
@@ -484,9 +563,15 @@ $gapRows = foreach ($field in $gapFields) {
 $finalPublicProofRows = foreach ($step in $finalPublicProofPath) {
   "| ``$(ConvertTo-MarkdownCell $step.id)`` | ``$($step.order)`` | $(ConvertTo-MarkdownCell $step.currentState) | $(ConvertTo-MarkdownCell $step.requiredReadyState) | $(ConvertTo-MarkdownCell $step.ownerAction) | $(ConvertTo-MarkdownCell $step.boundary) |"
 }
+$ownerSequenceRows = foreach ($step in $ownerExecutionSequence) {
+  "| ``$(ConvertTo-MarkdownCell $step.id)`` | ``$($step.order)`` | $(ConvertTo-MarkdownCell $step.title) | $(ConvertTo-MarkdownCell $step.requiredEvidence) | ``$(ConvertTo-MarkdownCell $step.strictValidator)`` | $(ConvertTo-MarkdownCell $step.ownerAction) |"
+}
 $sourceRows = foreach ($artifact in $sourceArtifacts) {
   "- ``$artifact``"
 }
+$admissionLaneLines = $finalCloseProofAdmissionLaneIds | ForEach-Object { "- ``$_``" }
+$requiredFieldLines = $finalCloseProofAdmissionRequiredFields | ForEach-Object { "- ``$_``" }
+$rejectedStateLines = $finalCloseRejectedNonProofStates | ForEach-Object { "- ``$_``" }
 
 $markdown = @"
 # Final Owner Execution One-Screen Pack
@@ -502,6 +587,10 @@ $markdown = @"
 | blockedOwnerInputGapCount | ``$($record.blockedOwnerInputGapCount)`` |
 | finalPublicProofPathCount | ``$($record.finalPublicProofPathCount)`` |
 | blockedFinalPublicProofPathCount | ``$($record.blockedFinalPublicProofPathCount)`` |
+| ownerExecutionSequenceCount | ``$($record.ownerExecutionSequenceCount)`` |
+| finalCloseProofAdmissionLaneCount | ``$($record.finalCloseProofAdmissionLaneCount)`` |
+| finalCloseProofAdmissionRequiredFieldCount | ``$($record.finalCloseProofAdmissionRequiredFieldCount)`` |
+| finalCloseRejectedNonProofStateCount | ``$($record.finalCloseRejectedNonProofStateCount)`` |
 | ownerActionRequired | ``$($record.ownerActionRequired)`` |
 | performsPublish | ``$($record.performsPublish)`` |
 | canPromoteRuntimeProof | ``$($record.canPromoteRuntimeProof)`` |
@@ -525,6 +614,26 @@ $($gapRows -join "`r`n")
 | Step | Order | Current State | Required Ready State | Owner Action | Boundary |
 |---|---:|---|---|---|---|
 $($finalPublicProofRows -join "`r`n")
+
+## Owner Execution Sequence
+
+| Step | Order | Title | Required Evidence | Strict Validator | Owner Action |
+|---|---:|---|---|---|---|
+$($ownerSequenceRows -join "`r`n")
+
+## FinalClose Admission Contract
+
+### Admission Lanes
+
+$($admissionLaneLines -join "`r`n")
+
+### Required Fields
+
+$($requiredFieldLines -join "`r`n")
+
+### Rejected Non-Proof States
+
+$($rejectedStateLines -join "`r`n")
 
 ## Source Artifacts
 

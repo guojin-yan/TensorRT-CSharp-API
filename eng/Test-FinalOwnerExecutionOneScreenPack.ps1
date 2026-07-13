@@ -62,8 +62,12 @@ $record = Get-Content -LiteralPath $resolvedInputPath -Raw -Encoding utf8 | Conv
 $lanes = Convert-ToArray (Get-PropertyOrDefault -Object $record -Name "lanes" -DefaultValue @())
 $gaps = Convert-ToArray (Get-PropertyOrDefault -Object $record -Name "ownerInputGapTable" -DefaultValue @())
 $finalPublicProofPath = Convert-ToArray (Get-PropertyOrDefault -Object $record -Name "finalPublicProofPath" -DefaultValue @())
+$ownerExecutionSequence = Convert-ToArray (Get-PropertyOrDefault -Object $record -Name "ownerExecutionSequence" -DefaultValue @())
 $sourceArtifacts = @(Convert-ToArray (Get-PropertyOrDefault -Object $record -Name "sourceArtifacts" -DefaultValue @()) | ForEach-Object { [string]$_ })
 $nonSubstitutes = @(Convert-ToArray (Get-PropertyOrDefault -Object $record -Name "nonSubstituteProofKinds" -DefaultValue @()) | ForEach-Object { [string]$_ })
+$finalCloseProofAdmissionLaneIds = @(Convert-ToArray (Get-PropertyOrDefault -Object $record -Name "finalCloseProofAdmissionLaneIds" -DefaultValue @()) | ForEach-Object { [string]$_ })
+$finalCloseProofAdmissionRequiredFields = @(Convert-ToArray (Get-PropertyOrDefault -Object $record -Name "finalCloseProofAdmissionRequiredFields" -DefaultValue @()) | ForEach-Object { [string]$_ })
+$finalCloseRejectedNonProofStates = @(Convert-ToArray (Get-PropertyOrDefault -Object $record -Name "finalCloseRejectedNonProofStates" -DefaultValue @()) | ForEach-Object { [string]$_ })
 $boundary = [string](Get-PropertyOrDefault -Object $record -Name "boundary" -DefaultValue "")
 $allText = $record | ConvertTo-Json -Depth 22
 
@@ -110,6 +114,65 @@ $requiredFinalPublicProofStepIds = @(
   "dual-package-final-close-lanes"
 )
 $finalPublicProofStepIds = @($finalPublicProofPath | ForEach-Object { [string](Get-PropertyOrDefault -Object $_ -Name "id" -DefaultValue "") })
+
+$requiredOwnerExecutionStepIds = @(
+  "remote-ci-github-actions-run-proof",
+  "public-publish-owner-result",
+  "public-package-download-proof",
+  "clean-external-consumer-smoke-proof",
+  "post-publish-verification-proof",
+  "rollback-review",
+  "final-close-decision"
+)
+$ownerExecutionStepIds = @($ownerExecutionSequence | ForEach-Object { [string](Get-PropertyOrDefault -Object $_ -Name "id" -DefaultValue "") })
+$invalidOwnerExecutionSteps = @($ownerExecutionSequence | Where-Object {
+  -not [bool](Get-PropertyOrDefault -Object $_ -Name "blocked" -DefaultValue $false) -or
+    [string]::IsNullOrWhiteSpace([string](Get-PropertyOrDefault -Object $_ -Name "strictValidator" -DefaultValue "")) -or
+    [string]::IsNullOrWhiteSpace([string](Get-PropertyOrDefault -Object $_ -Name "requiredEvidence" -DefaultValue "")) -or
+    [string]::IsNullOrWhiteSpace([string](Get-PropertyOrDefault -Object $_ -Name "ownerAction" -DefaultValue ""))
+})
+
+$requiredAdmissionLaneIds = @(
+  "github-actions-run-proof",
+  "owner-public-publish-result",
+  "public-package-download-proof",
+  "post-publish-clean-consumer-proof",
+  "release-issue-close-record-strict-validation"
+)
+$requiredAdmissionFields = @(
+  "publicPackageSourceUrl",
+  "publicPackageDownloadUrl",
+  "managedNupkgSha256",
+  "runtimeNupkgSha256",
+  "externalCleanConsumerProjectIdentity",
+  "smokeCommandRuntimePackageKey",
+  "hostCudaVersion",
+  "hostTensorRtVersion",
+  "hostCudnnVersion",
+  "stdoutSha256",
+  "stderrSha256",
+  "mergedTranscriptSha256",
+  "githubRunId",
+  "githubHeadSha",
+  "githubLogSha256",
+  "githubArtifactSha256",
+  "ownerReviewer",
+  "ownerAuthorizationLink",
+  "rollbackReview",
+  "finalCloseDecision"
+)
+$requiredRejectedStates = @(
+  "template-only",
+  "candidate-only",
+  "draft-rich-but-not-proof",
+  "draft-blocked-by-cuda-driver",
+  "not-requested",
+  "validation-ready-without-proof-candidate",
+  "dashboard-only",
+  "runbook-only",
+  "local-feed-only",
+  "project-reference-only"
+)
 
 $requiredSources = @(
   "artifacts/final-release/clean-external-package-consumer-owner-runbook.json",
@@ -162,6 +225,8 @@ $items.Add((New-ValidationItem -Id "blocked-state" -Passed ([string](Get-Propert
 $items.Add((New-ValidationItem -Id "required-lanes" -Passed (@($requiredLaneIds | Where-Object { $laneIds -notcontains $_ }).Count -eq 0 -and $lanes.Count -ge 6) -Severity "blocker" -Detail "Pack must include all final Owner execution lanes.")) | Out-Null
 $items.Add((New-ValidationItem -Id "required-owner-gap-table" -Passed (@($requiredGapIds | Where-Object { $gapIds -notcontains $_ }).Count -eq 0 -and $gaps.Count -ge 17) -Severity "blocker" -Detail "Pack must include a real Owner input gap table covering logs, hashes, timestamps, host metadata, post-publish evidence, dual-package route proof, rollback, and final close.")) | Out-Null
 $items.Add((New-ValidationItem -Id "required-final-public-proof-path" -Passed (@($requiredFinalPublicProofStepIds | Where-Object { $finalPublicProofStepIds -notcontains $_ }).Count -eq 0 -and $finalPublicProofPath.Count -ge 9) -Severity "blocker" -Detail "Pack must include the final public proof path: GitHub Actions, Owner publish result, public download, owner download execution pack, post-publish clean consumer, post-publish user verification pack, final bridge, release issue close decision, and dual-package final close lanes.")) | Out-Null
+$items.Add((New-ValidationItem -Id "owner-execution-sequence" -Passed (@($requiredOwnerExecutionStepIds | Where-Object { $ownerExecutionStepIds -notcontains $_ }).Count -eq 0 -and $ownerExecutionSequence.Count -eq 7 -and $invalidOwnerExecutionSteps.Count -eq 0) -Severity "blocker" -Detail "Pack must expose the seven-step Owner execution sequence: remote CI, public publish result, public download proof, clean external consumer proof, post-publish proof, rollback review, and final close decision.")) | Out-Null
+$items.Add((New-ValidationItem -Id "final-close-admission-contract-surface" -Passed (@($requiredAdmissionLaneIds | Where-Object { $finalCloseProofAdmissionLaneIds -notcontains $_ }).Count -eq 0 -and @($requiredAdmissionFields | Where-Object { $finalCloseProofAdmissionRequiredFields -notcontains $_ }).Count -eq 0 -and @($requiredRejectedStates | Where-Object { $finalCloseRejectedNonProofStates -notcontains $_ }).Count -eq 0) -Severity "blocker" -Detail "Pack must surface FinalClose admission lanes, required proof fields, and rejected non-proof states from final-close-gate-convergence.")) | Out-Null
 $items.Add((New-ValidationItem -Id "all-lanes-blocked-non-proof" -Passed (@($lanes | Where-Object { -not [bool](Get-PropertyOrDefault -Object $_ -Name "blocked" -DefaultValue $false) -or [bool](Get-PropertyOrDefault -Object $_ -Name "performsPublish" -DefaultValue $true) -or [bool](Get-PropertyOrDefault -Object $_ -Name "canPromoteRuntimeProof" -DefaultValue $true) -or [bool](Get-PropertyOrDefault -Object $_ -Name "canPublishPublicly" -DefaultValue $true) -or [bool](Get-PropertyOrDefault -Object $_ -Name "canCloseReleaseIssue" -DefaultValue $true) }).Count -eq 0) -Severity "blocker" -Detail "Every lane must remain blocked, non-publish, non-promoting, and non-closing.")) | Out-Null
 $items.Add((New-ValidationItem -Id "final-public-proof-path-blocked-non-proof" -Passed (@($finalPublicProofPath | Where-Object { -not [bool](Get-PropertyOrDefault -Object $_ -Name "blocked" -DefaultValue $false) -or [bool](Get-PropertyOrDefault -Object $_ -Name "performsPublish" -DefaultValue $true) -or [bool](Get-PropertyOrDefault -Object $_ -Name "canPromoteRuntimeProof" -DefaultValue $true) -or [bool](Get-PropertyOrDefault -Object $_ -Name "canPublishPublicly" -DefaultValue $true) -or [bool](Get-PropertyOrDefault -Object $_ -Name "canCloseReleaseIssue" -DefaultValue $true) -or [bool](Get-PropertyOrDefault -Object $_ -Name "isRuntimeExecutionProof" -DefaultValue $true) -or [bool](Get-PropertyOrDefault -Object $_ -Name "isPostPublishProof" -DefaultValue $true) -or [bool](Get-PropertyOrDefault -Object $_ -Name "isReleaseCloseProof" -DefaultValue $true) }).Count -eq 0) -Severity "blocker" -Detail "Every final public proof path step must remain blocked and non-proof until real owner evidence is accepted.")) | Out-Null
 $items.Add((New-ValidationItem -Id "source-artifacts" -Passed (@($requiredSources | Where-Object { $sourceArtifacts -notcontains $_ }).Count -eq 0) -Severity "blocker" -Detail "Pack must source upstream owner runbooks/contracts, release evidence, public docs freeze, and closure pack.")) | Out-Null
@@ -183,6 +248,10 @@ $validation = [pscustomobject]@{
   laneCount = $lanes.Count
   ownerInputGapCount = $gaps.Count
   finalPublicProofPathCount = $finalPublicProofPath.Count
+  ownerExecutionSequenceCount = $ownerExecutionSequence.Count
+  finalCloseProofAdmissionLaneCount = $finalCloseProofAdmissionLaneIds.Count
+  finalCloseProofAdmissionRequiredFieldCount = $finalCloseProofAdmissionRequiredFields.Count
+  finalCloseRejectedNonProofStateCount = $finalCloseRejectedNonProofStates.Count
   dualPackageRouteCount = [int](Get-PropertyOrDefault -Object $record -Name "dualPackageRouteCount" -DefaultValue 0)
   dualPackageFinalCloseBlockedLaneCount = [int](Get-PropertyOrDefault -Object $record -Name "dualPackageFinalCloseBlockedLaneCount" -DefaultValue 0)
   dualPackageAcceptsSubstituteProof = [bool](Get-PropertyOrDefault -Object $record -Name "dualPackageAcceptsSubstituteProof" -DefaultValue $true)
@@ -217,6 +286,10 @@ $markdown = @"
 | laneCount | ``$($validation.laneCount)`` |
 | ownerInputGapCount | ``$($validation.ownerInputGapCount)`` |
 | finalPublicProofPathCount | ``$($validation.finalPublicProofPathCount)`` |
+| ownerExecutionSequenceCount | ``$($validation.ownerExecutionSequenceCount)`` |
+| finalCloseProofAdmissionLaneCount | ``$($validation.finalCloseProofAdmissionLaneCount)`` |
+| finalCloseProofAdmissionRequiredFieldCount | ``$($validation.finalCloseProofAdmissionRequiredFieldCount)`` |
+| finalCloseRejectedNonProofStateCount | ``$($validation.finalCloseRejectedNonProofStateCount)`` |
 | dualPackageRouteCount | ``$($validation.dualPackageRouteCount)`` |
 | dualPackageFinalCloseBlockedLaneCount | ``$($validation.dualPackageFinalCloseBlockedLaneCount)`` |
 | dualPackageAcceptsSubstituteProof | ``$($validation.dualPackageAcceptsSubstituteProof)`` |

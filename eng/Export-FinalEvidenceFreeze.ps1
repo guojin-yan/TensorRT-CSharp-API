@@ -78,6 +78,24 @@ function New-FreezeArtifact {
   }
 }
 
+function New-PackageEvidenceClass {
+  param(
+    [string]$Id,
+    [string]$EvidenceKind,
+    [bool]$AcceptedAsPublicProof,
+    [string]$RequiredValidator,
+    [string]$Reason
+  )
+
+  [pscustomobject]@{
+    id = $Id
+    evidenceKind = $EvidenceKind
+    acceptedAsPublicProof = $AcceptedAsPublicProof
+    requiredValidator = $RequiredValidator
+    reason = $Reason
+  }
+}
+
 $releaseEvidenceBundle = Read-JsonOrNull "artifacts\final-release\release-evidence-bundle.json"
 $postPublishOwnerInputValidation = Read-JsonOrNull "artifacts\final-release\post-publish-verification-owner-input-validation.json"
 $postPublishVerificationValidation = Read-JsonOrNull "artifacts\final-release\post-publish-verification-validation.json"
@@ -98,6 +116,16 @@ $releaseCloseCandidateState = [string](Get-PropertyOrDefault -Object $releaseIss
 $ownerExecutionState = [string](Get-PropertyOrDefault -Object $ownerExecutionPackage -Name "packageState" -DefaultValue "missing-owner-release-execution-package")
 $ownerExecutionValidationState = [string](Get-PropertyOrDefault -Object $ownerExecutionPackageValidation -Name "validationState" -DefaultValue "missing-owner-release-execution-package-validation")
 $finalCloseDecisionState = [string](Get-PropertyOrDefault -Object $releaseIssueFinalCloseDecisionValidation -Name "validationState" -DefaultValue "missing-release-issue-final-close-decision-validation")
+
+$packageEvidenceClassificationContract = @(
+  New-PackageEvidenceClass -Id "local-feed-proof" -EvidenceKind "local feed restore/build/smoke" -AcceptedAsPublicProof $false -RequiredValidator "blocked-by-public-package-download-proof" -Reason "Local feed is useful package assembly evidence, but it is not public package download proof and cannot clear post-publish public proof."
+  New-PackageEvidenceClass -Id "direct-nupkg-proof" -EvidenceKind "direct .nupkg reference or local package path" -AcceptedAsPublicProof $false -RequiredValidator "blocked-by-clean-external-consumer-public-source" -Reason "Direct nupkg references bypass the public package source and cannot prove public restore/download behavior."
+  New-PackageEvidenceClass -Id "project-reference-proof" -EvidenceKind "ProjectReference consumer" -AcceptedAsPublicProof $false -RequiredValidator "blocked-by-package-consumer-runtime-proof-forbidden-substitute-scan" -Reason "ProjectReference proves source-tree integration only; package consumers must restore packages without project references."
+  New-PackageEvidenceClass -Id "public-package-download-proof" -EvidenceKind "public package URL download plus managed/runtime nupkg SHA256" -AcceptedAsPublicProof $true -RequiredValidator "eng\Test-PublicPackageDownloadProofCandidate.ps1 -Strict" -Reason "Accepted only after Owner supplies public URLs, package identities, hashes, and strict validator acceptance."
+  New-PackageEvidenceClass -Id "post-publish-clean-consumer-proof" -EvidenceKind "repository-external clean consumer restore/build/runtime smoke from public packages" -AcceptedAsPublicProof $true -RequiredValidator "eng\Test-PostPublishCleanConsumerProofResult.ps1 -Strict -RequireExistingFiles -RequireHashMatch -FailOnNotProof" -Reason "Accepted only after real logs, hashes, host metadata, and upstream public proof linkage pass strict validation."
+)
+$rejectedPackageEvidenceKindIds = @($packageEvidenceClassificationContract | Where-Object { -not $_.acceptedAsPublicProof } | ForEach-Object { $_.id })
+$acceptedPackageEvidenceKindIds = @($packageEvidenceClassificationContract | Where-Object { $_.acceptedAsPublicProof } | ForEach-Object { $_.id })
 
 $freezeArtifacts = @(
   (New-FreezeArtifact -Id "release-evidence-bundle" -RelativePath "artifacts/final-release/release-evidence-bundle.json" -State $bundleState -Boundary "Evidence bundle aggregation is not owner approval or publish proof.")
@@ -136,6 +164,12 @@ $record = [pscustomobject]@{
   sourceArtifactCount = $freezeArtifacts.Count
   missingSourceArtifactCount = $missingArtifacts.Count
   missingHashCount = $missingHashes.Count
+  packageEvidenceClassificationContract = $packageEvidenceClassificationContract
+  packageEvidenceClassificationContractCount = $packageEvidenceClassificationContract.Count
+  rejectedPackageEvidenceKindIds = $rejectedPackageEvidenceKindIds
+  rejectedPackageEvidenceKindCount = $rejectedPackageEvidenceKindIds.Count
+  acceptedPublicPackageEvidenceKindIds = $acceptedPackageEvidenceKindIds
+  acceptedPublicPackageEvidenceKindCount = $acceptedPackageEvidenceKindIds.Count
   performsPublish = $false
   canPublishPublicly = $false
   canCloseReleaseIssue = $false
@@ -163,6 +197,9 @@ $record | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $jsonPath -Encodin
 $artifactRows = $freezeArtifacts | ForEach-Object {
   "| ``$($_.id)`` | ``$($_.exists)`` | ``$($_.state)`` | ``$($_.sha256)`` | $($_.boundary.Replace("|", "\|")) |"
 }
+$classificationRows = $packageEvidenceClassificationContract | ForEach-Object {
+  "| ``$($_.id)`` | $($_.evidenceKind.Replace("|", "\|")) | ``$($_.acceptedAsPublicProof)`` | ``$($_.requiredValidator)`` | $($_.reason.Replace("|", "\|")) |"
+}
 $blockerLines = $record.remainingBlockers | ForEach-Object { "- $_" }
 
 $markdown = @"
@@ -183,6 +220,9 @@ $markdown = @"
 | sourceArtifactCount | ``$($record.sourceArtifactCount)`` |
 | missingSourceArtifactCount | ``$($record.missingSourceArtifactCount)`` |
 | missingHashCount | ``$($record.missingHashCount)`` |
+| packageEvidenceClassificationContractCount | ``$($record.packageEvidenceClassificationContractCount)`` |
+| rejectedPackageEvidenceKindCount | ``$($record.rejectedPackageEvidenceKindCount)`` |
+| acceptedPublicPackageEvidenceKindCount | ``$($record.acceptedPublicPackageEvidenceKindCount)`` |
 | performsPublish | ``$($record.performsPublish)`` |
 | canPublishPublicly | ``$($record.canPublishPublicly)`` |
 | canCloseReleaseIssue | ``$($record.canCloseReleaseIssue)`` |
@@ -192,6 +232,12 @@ $markdown = @"
 | ID | Exists | State | SHA256 | Boundary |
 |---|---:|---|---|---|
 $($artifactRows -join "`r`n")
+
+## Package Evidence Classification Contract
+
+| ID | Evidence Kind | Accepted As Public Proof | Required Validator | Reason |
+|---|---|---:|---|---|
+$($classificationRows -join "`r`n")
 
 ## Remaining Blockers
 

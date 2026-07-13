@@ -47,6 +47,14 @@ function Get-PropertyOrDefault {
   return $DefaultValue
 }
 
+function Convert-ToArray {
+  param([AllowNull()][object]$Value)
+
+  if ($null -eq $Value) { return @() }
+  if ($Value -is [System.Array]) { return @($Value) }
+  return @($Value)
+}
+
 function New-ValidationItem {
   param([string]$Id, [bool]$Passed, [string]$Severity, [string]$Detail)
 
@@ -76,6 +84,23 @@ $bundleCanClose = [bool](Get-PropertyOrDefault -Object $record -Name "bundleCanC
 $freezeArtifacts = @((Get-PropertyOrDefault -Object $record -Name "freezeArtifacts" -DefaultValue @()))
 $missingSourceArtifactCount = [int](Get-PropertyOrDefault -Object $record -Name "missingSourceArtifactCount" -DefaultValue -1)
 $missingHashCount = [int](Get-PropertyOrDefault -Object $record -Name "missingHashCount" -DefaultValue -1)
+$packageEvidenceClassificationContract = @(Convert-ToArray (Get-PropertyOrDefault -Object $record -Name "packageEvidenceClassificationContract" -DefaultValue @()))
+$classificationIds = @($packageEvidenceClassificationContract | ForEach-Object { [string](Get-PropertyOrDefault -Object $_ -Name "id" -DefaultValue "") })
+$acceptedPublicPackageEvidenceKindIds = @(Convert-ToArray (Get-PropertyOrDefault -Object $record -Name "acceptedPublicPackageEvidenceKindIds" -DefaultValue @()) | ForEach-Object { [string]$_ })
+$rejectedPackageEvidenceKindIds = @(Convert-ToArray (Get-PropertyOrDefault -Object $record -Name "rejectedPackageEvidenceKindIds" -DefaultValue @()) | ForEach-Object { [string]$_ })
+$requiredAcceptedKinds = @("public-package-download-proof", "post-publish-clean-consumer-proof")
+$requiredRejectedKinds = @("local-feed-proof", "direct-nupkg-proof", "project-reference-proof")
+$missingAcceptedKinds = @($requiredAcceptedKinds | Where-Object { $acceptedPublicPackageEvidenceKindIds -notcontains $_ -or $classificationIds -notcontains $_ })
+$missingRejectedKinds = @($requiredRejectedKinds | Where-Object { $rejectedPackageEvidenceKindIds -notcontains $_ -or $classificationIds -notcontains $_ })
+$invalidClassificationRows = @($packageEvidenceClassificationContract | Where-Object {
+  $id = [string](Get-PropertyOrDefault -Object $_ -Name "id" -DefaultValue "")
+  $validator = [string](Get-PropertyOrDefault -Object $_ -Name "requiredValidator" -DefaultValue "")
+  $accepted = [bool](Get-PropertyOrDefault -Object $_ -Name "acceptedAsPublicProof" -DefaultValue $false)
+  [string]::IsNullOrWhiteSpace($id) -or
+    [string]::IsNullOrWhiteSpace($validator) -or
+    ($requiredRejectedKinds -contains $id -and $accepted) -or
+    ($requiredAcceptedKinds -contains $id -and -not $accepted)
+})
 
 $items.Add((New-ValidationItem -Id "record-kind" -Passed ($recordKind -eq "final-evidence-freeze") -Severity "blocker" -Detail "recordKind must be final-evidence-freeze.")) | Out-Null
 $items.Add((New-ValidationItem -Id "no-side-effects" -Passed (-not $performsPublish -and -not $canPublishPublicly -and -not $canCloseReleaseIssue) -Severity "blocker" -Detail "Final evidence freeze must not publish, approve publication, or close the release issue.")) | Out-Null
@@ -83,6 +108,9 @@ $items.Add((New-ValidationItem -Id "bundle-side-effects-still-false" -Passed (-n
 $items.Add((New-ValidationItem -Id "freeze-artifacts-present" -Passed ($freezeArtifacts.Count -ge 8) -Severity "blocker" -Detail "Freeze must include all required source artifact hashes.")) | Out-Null
 $items.Add((New-ValidationItem -Id "no-missing-source-artifacts" -Passed ($missingSourceArtifactCount -eq 0) -Severity "blocker" -Detail "All freeze source artifacts must exist.")) | Out-Null
 $items.Add((New-ValidationItem -Id "no-missing-hashes" -Passed ($missingHashCount -eq 0) -Severity "blocker" -Detail "All freeze source artifacts must have SHA256 values.")) | Out-Null
+$items.Add((New-ValidationItem -Id "package-evidence-classification-contract" -Passed ($packageEvidenceClassificationContract.Count -ge 5 -and $invalidClassificationRows.Count -eq 0) -Severity "blocker" -Detail "Freeze must classify local feed, direct nupkg, ProjectReference, public download proof, and post-publish clean consumer proof with strict validators.")) | Out-Null
+$items.Add((New-ValidationItem -Id "rejected-package-substitutes" -Passed ($missingRejectedKinds.Count -eq 0 -and [int](Get-PropertyOrDefault -Object $record -Name "rejectedPackageEvidenceKindCount" -DefaultValue 0) -ge 3) -Severity "blocker" -Detail "Freeze must reject local feed, direct nupkg, and ProjectReference as public/package-consumer proof substitutes.")) | Out-Null
+$items.Add((New-ValidationItem -Id "accepted-public-package-proof-kinds" -Passed ($missingAcceptedKinds.Count -eq 0 -and [int](Get-PropertyOrDefault -Object $record -Name "acceptedPublicPackageEvidenceKindCount" -DefaultValue 0) -ge 2) -Severity "blocker" -Detail "Freeze must identify public package download proof and post-publish clean consumer proof as the only accepted public package proof categories.")) | Out-Null
 
 foreach ($artifact in $freezeArtifacts) {
   $id = [string](Get-PropertyOrDefault -Object $artifact -Name "id" -DefaultValue "unknown")
@@ -119,6 +147,9 @@ $validation = [pscustomobject]@{
   sourceArtifactCount = $freezeArtifacts.Count
   missingSourceArtifactCount = $missingSourceArtifactCount
   missingHashCount = $missingHashCount
+  packageEvidenceClassificationContractCount = $packageEvidenceClassificationContract.Count
+  rejectedPackageEvidenceKindCount = $rejectedPackageEvidenceKindIds.Count
+  acceptedPublicPackageEvidenceKindCount = $acceptedPublicPackageEvidenceKindIds.Count
   performsPublish = $false
   canPublishPublicly = $false
   canCloseReleaseIssue = $false
@@ -147,6 +178,9 @@ $markdown = @"
 | failedBlockerCount | ``$($validation.failedBlockerCount)`` |
 | failedActionRequiredCount | ``$($validation.failedActionRequiredCount)`` |
 | sourceArtifactCount | ``$($validation.sourceArtifactCount)`` |
+| packageEvidenceClassificationContractCount | ``$($validation.packageEvidenceClassificationContractCount)`` |
+| rejectedPackageEvidenceKindCount | ``$($validation.rejectedPackageEvidenceKindCount)`` |
+| acceptedPublicPackageEvidenceKindCount | ``$($validation.acceptedPublicPackageEvidenceKindCount)`` |
 | performsPublish | ``$($validation.performsPublish)`` |
 | canPublishPublicly | ``$($validation.canPublishPublicly)`` |
 | canCloseReleaseIssue | ``$($validation.canCloseReleaseIssue)`` |
