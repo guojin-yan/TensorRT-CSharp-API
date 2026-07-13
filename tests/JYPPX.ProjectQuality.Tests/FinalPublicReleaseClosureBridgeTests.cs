@@ -20,8 +20,8 @@ public sealed class FinalPublicReleaseClosureBridgeTests
         RunPowerShell("Test-OwnerPublishAuthorizationInput.ps1", "-Strict");
         RunPowerShell("Export-OwnerPublishExecutionResultInputTemplate.ps1");
         RunPowerShell("Test-OwnerPublishExecutionResultInput.ps1", "-Strict");
-        RunPowerShell("Export-PostPublishProofInputTemplate.ps1");
-        RunPowerShell("Test-PostPublishProofInput.ps1", "-Strict");
+        RunPowerShell("Import-PostPublishCleanConsumerProofResult.ps1");
+        RunPowerShell("Test-PostPublishCleanConsumerProofResult.ps1", "-Strict");
         RunPowerShell("Export-ReleaseIssueCloseOwnerDecisionInput.ps1");
         RunPowerShell("Test-ReleaseIssueCloseOwnerDecisionInput.ps1", "-Strict");
         RunPowerShell("Export-StrictCloseReadyConvergenceDashboard.ps1");
@@ -67,7 +67,7 @@ public sealed class FinalPublicReleaseClosureBridgeTests
         Assert.Contains("artifacts/final-release/owner-publish-execution-result-input-validation.json", sourceArtifacts);
         Assert.Contains("artifacts/final-release/public-package-download-proof-candidate-validation.json", sourceArtifacts);
         Assert.Contains("artifacts/final-release/clean-external-consumer-smoke-input-validation.json", sourceArtifacts);
-        Assert.Contains("artifacts/final-release/post-publish-proof-input-validation.json", sourceArtifacts);
+        Assert.Contains("artifacts/final-release/post-publish-clean-consumer-proof-result-validation.json", sourceArtifacts);
         Assert.Contains("artifacts/final-release/release-issue-close-owner-decision-input-validation.json", sourceArtifacts);
         Assert.Contains("artifacts/final-release/strict-close-ready-convergence-dashboard-validation.json", sourceArtifacts);
 

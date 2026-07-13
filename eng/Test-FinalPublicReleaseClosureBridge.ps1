@@ -66,7 +66,7 @@ $requiredArtifacts = @(
   "artifacts/final-release/owner-publish-execution-result-input-validation.json",
   "artifacts/final-release/public-package-download-proof-candidate-validation.json",
   "artifacts/final-release/clean-external-consumer-smoke-input-validation.json",
-  "artifacts/final-release/post-publish-proof-input-validation.json",
+  "artifacts/final-release/post-publish-clean-consumer-proof-result-validation.json",
   "artifacts/final-release/release-issue-close-owner-decision-input-validation.json",
   "artifacts/final-release/strict-close-ready-convergence-dashboard-validation.json"
 )

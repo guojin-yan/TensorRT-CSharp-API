@@ -51,11 +51,15 @@ function New-ClosureLane {
     [string]$RequiredState,
     [string]$OwnerAction,
     [string]$Boundary,
-    [string[]]$RequiredBeforeClose
+    [string[]]$RequiredBeforeClose,
+    [bool]$RequireProofReady = $false,
+    [string]$ProofReadyProperty = "proofCandidateReady"
   )
 
   $state = [string](Get-PropertyOrDefault -Object $Record -Name $StateProperty -DefaultValue "missing-$Id")
-  $ready = $state -eq $RequiredState
+  $proofReady = [bool](Get-PropertyOrDefault -Object $Record -Name $ProofReadyProperty -DefaultValue $false)
+  $stateReady = $state -eq $RequiredState
+  $ready = if ($RequireProofReady) { $stateReady -and $proofReady } else { $stateReady }
   $exists = $null -ne $Record
   return [pscustomobject]@{
     laneId = $Id
@@ -64,6 +68,10 @@ function New-ClosureLane {
     artifactExists = $exists
     state = $state
     requiredState = $RequiredState
+    stateReady = $stateReady
+    requireProofReady = $RequireProofReady
+    proofReadyProperty = $ProofReadyProperty
+    proofReady = $proofReady
     ready = $ready
     ownerAction = $OwnerAction
     requiredBeforeClose = @($RequiredBeforeClose)
@@ -83,7 +91,7 @@ $ownerAuthorization = Read-JsonOrNull "artifacts\final-release\owner-publish-aut
 $ownerPublishExecutionResult = Read-JsonOrNull "artifacts\final-release\owner-publish-execution-result-input-validation.json"
 $publicDownload = Read-JsonOrNull "artifacts\final-release\public-package-download-proof-candidate-validation.json"
 $cleanConsumerSmoke = Read-JsonOrNull "artifacts\final-release\clean-external-consumer-smoke-input-validation.json"
-$postPublishProof = Read-JsonOrNull "artifacts\final-release\post-publish-proof-input-validation.json"
+$postPublishProof = Read-JsonOrNull "artifacts\final-release\post-publish-clean-consumer-proof-result-validation.json"
 $releaseCloseDecision = Read-JsonOrNull "artifacts\final-release\release-issue-close-owner-decision-input-validation.json"
 $strictCloseDashboard = Read-JsonOrNull "artifacts\final-release\strict-close-ready-convergence-dashboard-validation.json"
 
@@ -130,14 +138,16 @@ $lanes = @(
     -Boundary "A sample, ProjectReference, local RestoreSources, direct nupkg, build-only run, or dependency-probe-only run cannot replace smoke proof."
   New-ClosureLane `
     -Id "post-publish-proof" `
-    -Title "Post-publish proof input" `
-    -Artifact "artifacts/final-release/post-publish-proof-input-validation.json" `
+    -Title "Post-publish clean consumer proof result" `
+    -Artifact "artifacts/final-release/post-publish-clean-consumer-proof-result-validation.json" `
     -Record $postPublishProof `
     -StateProperty "validationState" `
-    -RequiredState "post-publish-proof-input-ready" `
-    -OwnerAction "After public publish, repeat public package download and clean external consumer smoke and validate all hashes and host metadata." `
+    -RequiredState "post-publish-clean-consumer-proof-result-validation-ready" `
+    -OwnerAction "After public publish, import and validate repository-external clean consumer restore/build/run logs, public package hashes, host metadata, and proofCandidateReady=true." `
     -RequiredBeforeClose @("HTTPS public package metadata", "downloaded public package hashes", "external consumer smoke logs", "host/runtime metadata") `
-    -Boundary "Post-publish proof may become proof when ready, but it still does not automatically close the release issue."
+    -Boundary "Validation-ready alone cannot close this lane; proofCandidateReady must be true, and the bridge itself is not runtime proof, not post-publish proof, not publish approval, and not release close approval." `
+    -RequireProofReady $true `
+    -ProofReadyProperty "proofCandidateReady"
   New-ClosureLane `
     -Id "release-issue-close-owner-decision" `
     -Title "Release issue close owner decision input" `

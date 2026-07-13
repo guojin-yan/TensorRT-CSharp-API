@@ -80,22 +80,31 @@ $proofReady = [bool](Get-PropertyOrDefault -Object $import -Name "proofCandidate
 
 $recordKindOk = [string](Get-PropertyOrDefault $import "recordKind" "") -eq "post-publish-clean-consumer-proof-result-import" -and [string](Get-PropertyOrDefault $candidate "recordKind" "") -eq "post-publish-clean-consumer-proof-result-candidate"
 $defaultBlockedOk = ([string](Get-PropertyOrDefault $import "importState" "")).Contains("blocked", [StringComparison]::OrdinalIgnoreCase) -or $proofReady
-$nonProofDefaultOk = -not $proofReady -and -not [bool](Get-PropertyOrDefault $import "isPostPublishProof" $true) -and [bool](Get-PropertyOrDefault $import "ownerActionRequired" $false)
+$nonProofFlagsOk = -not [bool](Get-PropertyOrDefault $import "canPromoteRuntimeProof" $true) -and
+  -not [bool](Get-PropertyOrDefault $import "isRuntimeExecutionProof" $true) -and
+  -not [bool](Get-PropertyOrDefault $import "isPackageConsumerRuntimeProof" $true) -and
+  -not [bool](Get-PropertyOrDefault $import "isPostPublishProof" $true) -and
+  -not [bool](Get-PropertyOrDefault $candidate "canPromoteRuntimeProof" $true) -and
+  -not [bool](Get-PropertyOrDefault $candidate "isRuntimeExecutionProof" $true) -and
+  -not [bool](Get-PropertyOrDefault $candidate "isPackageConsumerRuntimeProof" $true) -and
+  -not [bool](Get-PropertyOrDefault $candidate "isPostPublishProof" $true)
 $noPublishCloseOk = -not [bool](Get-PropertyOrDefault $import "performsPublish" $true) -and -not [bool](Get-PropertyOrDefault $import "canPublishPublicly" $true) -and -not [bool](Get-PropertyOrDefault $import "canCloseReleaseIssue" $true)
-$findingsPresentByDefaultOk = [int](Get-PropertyOrDefault $import "failedActionRequiredCount" 0) -gt 0 -or $proofReady
+$findingsPresentOk = [int](Get-PropertyOrDefault $import "failedActionRequiredCount" 0) -gt 0 -or [int](Get-PropertyOrDefault $import "failedBlockerCount" 0) -gt 0 -or $proofReady
 $boundary = [string](Get-PropertyOrDefault $import "boundary" "")
-$boundaryOk = $boundary.Contains("not publish approval", [StringComparison]::OrdinalIgnoreCase) -and $boundary.Contains("not package push", [StringComparison]::OrdinalIgnoreCase)
+$boundaryOk = $boundary.Contains("not runtime proof", [StringComparison]::OrdinalIgnoreCase) -and $boundary.Contains("not post-publish proof", [StringComparison]::OrdinalIgnoreCase) -and $boundary.Contains("not publish approval", [StringComparison]::OrdinalIgnoreCase) -and $boundary.Contains("not package push", [StringComparison]::OrdinalIgnoreCase)
 
 $items = New-Object System.Collections.Generic.List[object]
 $items.Add((New-ValidationItem -Id "record-kind" -Passed $recordKindOk -Severity "blocker" -Detail "Import and candidate recordKind values must match.")) | Out-Null
 $items.Add((New-ValidationItem -Id "default-blocked" -Passed $defaultBlockedOk -Severity "blocker" -Detail "Default post-publish import must remain blocked unless real proof is supplied.")) | Out-Null
-$items.Add((New-ValidationItem -Id "non-proof-default" -Passed $nonProofDefaultOk -Severity "blocker" -Detail "Default import must be owner-action-required and non-proof.")) | Out-Null
+$items.Add((New-ValidationItem -Id "non-proof-flags" -Passed $nonProofFlagsOk -Severity "blocker" -Detail "Import and candidate must keep runtime/post-publish proof classification flags false even when proofCandidateReady is true.")) | Out-Null
 $items.Add((New-ValidationItem -Id "no-publish-close" -Passed $noPublishCloseOk -Severity "blocker" -Detail "Import must never publish or close.")) | Out-Null
-$items.Add((New-ValidationItem -Id "findings-present-by-default" -Passed $findingsPresentByDefaultOk -Severity "blocker" -Detail "Default/template import must report action-required findings.")) | Out-Null
+$items.Add((New-ValidationItem -Id "owner-evidence-findings-present" -Passed $findingsPresentOk -Severity "blocker" -Detail "Blocked imports must report blocker or action-required owner evidence findings.")) | Out-Null
 $items.Add((New-ValidationItem -Id "boundary" -Passed $boundaryOk -Severity "blocker" -Detail "Boundary must preserve non-proof classification.")) | Out-Null
+$items.Add((New-ValidationItem -Id "proof-candidate-ready" -Passed $proofReady -Severity "action-required" -Detail "Real owner evidence must make proofCandidateReady true before the remote proof lane can become ready.")) | Out-Null
 
 $validationItems = @($items.ToArray())
 $failedBlockers = @($validationItems | Where-Object { -not [bool]$_.passed -and [string]$_.severity -eq "blocker" })
+$failedActionRequired = @($validationItems | Where-Object { -not [bool]$_.passed -and [string]$_.severity -eq "action-required" })
 $validationState = if ($failedBlockers.Count -eq 0) { "post-publish-clean-consumer-proof-result-validation-ready" } else { "blocked-post-publish-clean-consumer-proof-result-validation-invalid" }
 
 $validation = [pscustomobject]@{
@@ -104,19 +113,20 @@ $validation = [pscustomobject]@{
   validationState = $validationState
   validationItemCount = $validationItems.Count
   failedBlockerCount = $failedBlockers.Count
+  failedActionRequiredCount = $failedActionRequired.Count
   proofCandidateReady = $proofReady
   ownerActionRequired = -not $proofReady
   performsPublish = $false
   performsRuntimeExecution = $false
-  canPromoteRuntimeProof = $proofReady
+  canPromoteRuntimeProof = $false
   canPublishPublicly = $false
   canCloseReleaseIssue = $false
-  isRuntimeExecutionProof = $proofReady
-  isPackageConsumerRuntimeProof = $proofReady
-  isPostPublishProof = $proofReady
+  isRuntimeExecutionProof = $false
+  isPackageConsumerRuntimeProof = $false
+  isPostPublishProof = $false
   isReleaseCloseProof = $false
   validationItems = @($validationItems)
-  boundary = "Validation checks post-publish CleanConsumer proof import only. Default/template state is blocked and non-proof; it is not publish approval, not release close approval, and not package push."
+  boundary = "Validation checks post-publish CleanConsumer proof import only. proofCandidateReady=true means the owner evidence can satisfy the remote lane, but this validation record is not runtime proof, not post-publish proof, not publish approval, not release close approval, not package push, and cannot close the release."
 }
 
 $jsonPath = Join-Path $OutputRoot "post-publish-clean-consumer-proof-result-validation.json"
@@ -131,6 +141,7 @@ Write-Utf8File -LiteralPath $markdownPath -InputObject @(
   "",
   "- validationState: ``$validationState``",
   "- failedBlockerCount: ``$($failedBlockers.Count)``",
+  "- failedActionRequiredCount: ``$($failedActionRequired.Count)``",
   "- proofCandidateReady: ``$proofReady``",
   "",
   "| ID | Passed | Severity | Detail |",

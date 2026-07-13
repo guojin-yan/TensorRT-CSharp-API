@@ -81,6 +81,50 @@ function Test-Sha256 {
   return [System.Text.RegularExpressions.Regex]::IsMatch([string]$Value, "^[0-9a-fA-F]{64}$")
 }
 
+function Test-PublicHttpsSource {
+  param([AllowNull()][object]$Value)
+
+  $text = ([string]$Value).Trim()
+  if (Test-Placeholder -Value $text) { return $false }
+  if (-not $text.StartsWith("https://", [StringComparison]::OrdinalIgnoreCase)) { return $false }
+  foreach ($forbidden in @("local", "file:", "artifacts", ".nupkg", "package-managed-dry-run", "github-actions-runs")) {
+    if ($text.IndexOf($forbidden, [StringComparison]::OrdinalIgnoreCase) -ge 0) { return $false }
+  }
+
+  return $true
+}
+
+function Test-PublicDownloadedPackagePath {
+  param([AllowNull()][object]$Value)
+
+  $text = [string]$Value
+  if (Test-Placeholder -Value $text) { return $false }
+  foreach ($forbidden in @("package-managed-dry-run", "github-actions-runs", "\artifacts\", "/artifacts/")) {
+    if ($text.IndexOf($forbidden, [StringComparison]::OrdinalIgnoreCase) -ge 0) { return $false }
+  }
+
+  return $text.EndsWith(".nupkg", [StringComparison]::OrdinalIgnoreCase)
+}
+
+function Test-CleanConsumerRootOutsideRepository {
+  param([AllowNull()][object]$Value)
+
+  $text = [string]$Value
+  if (Test-Placeholder -Value $text) { return $false }
+  foreach ($forbidden in @("ProjectReference", "local-feed", "localfeed", "direct-nupkg", "samples", "smoke", "TensorRtExec")) {
+    if ($text.IndexOf($forbidden, [StringComparison]::OrdinalIgnoreCase) -ge 0) { return $false }
+  }
+
+  try {
+    $candidateFullPath = [System.IO.Path]::GetFullPath((Resolve-InputPath $text))
+    $repositoryFullPath = [System.IO.Path]::GetFullPath($RepositoryRoot)
+    return -not $candidateFullPath.StartsWith($repositoryFullPath, [StringComparison]::OrdinalIgnoreCase)
+  }
+  catch {
+    return $false
+  }
+}
+
 function ConvertTo-MarkdownCell {
   param([AllowNull()][object]$Value)
   if ($null -eq $Value) { return "" }
@@ -98,6 +142,7 @@ function New-TemplateRecord {
     ownerInputState = "blocked-post-publish-clean-consumer-proof-result-required"
     publicPackageSourceUrl = "<owner-public-package-source-url>"
     publicPackageUrl = "<owner-public-package-url>"
+    publicPackageSourceKind = "<owner-nuget.org-or-github-packages>"
     managedPackageId = "JYPPX.TensorRtSharp"
     managedPackageVersion = "<owner-package-version>"
     runtimePackageId = "JYPPX.TensorRtSharp.Native.<runtime-key>"
@@ -107,6 +152,11 @@ function New-TemplateRecord {
     downloadedManagedPackageSha256 = "<owner-downloaded-managed-package-sha256>"
     downloadedRuntimePackagePath = "<owner-downloaded-runtime-package-path>"
     downloadedRuntimePackageSha256 = "<owner-downloaded-runtime-package-sha256>"
+    cleanConsumerRoot = "<owner-repository-external-clean-consumer-root>"
+    consumerProjectPath = "<owner-clean-consumer-csproj-path>"
+    restoreCommand = "<owner-restore-command>"
+    buildCommand = "<owner-build-command>"
+    runCommand = "<owner-run-command>"
     installLogPath = "<owner-install-log-path>"
     installLogSha256 = "<owner-install-log-sha256>"
     restoreLogPath = "<owner-restore-log-path>"
@@ -121,6 +171,8 @@ function New-TemplateRecord {
     smokeStderrSha256 = "<owner-smoke-stderr-sha256>"
     nativeAssetListingPath = "<owner-native-asset-listing-path>"
     nativeAssetListingSha256 = "<owner-native-asset-listing-sha256>"
+    dotnetInfoPath = "<owner-dotnet-info-path>"
+    dotnetInfoSha256 = "<owner-dotnet-info-sha256>"
     exitCode = $null
     confirmsPostPublish = $false
     confirmsNotPrePublishSmoke = $false
@@ -161,13 +213,21 @@ $findings = New-Object System.Collections.Generic.List[object]
 $requiredTextFields = @(
   "publicPackageSourceUrl",
   "publicPackageUrl",
+  "publicPackageSourceKind",
   "managedPackageId",
   "managedPackageVersion",
   "runtimePackageId",
   "runtimePackageVersion",
   "runtimePackageKey",
+  "downloadedManagedPackagePath",
   "downloadedManagedPackageSha256",
+  "downloadedRuntimePackagePath",
   "downloadedRuntimePackageSha256",
+  "cleanConsumerRoot",
+  "consumerProjectPath",
+  "restoreCommand",
+  "buildCommand",
+  "runCommand",
   "installLogPath",
   "installLogSha256",
   "restoreLogPath",
@@ -182,6 +242,8 @@ $requiredTextFields = @(
   "smokeStderrSha256",
   "nativeAssetListingPath",
   "nativeAssetListingSha256",
+  "dotnetInfoPath",
+  "dotnetInfoSha256",
   "ownerReviewer",
   "ownerReviewedAtUtc"
 )
@@ -193,7 +255,7 @@ foreach ($field in $requiredTextFields) {
   }
 }
 
-foreach ($field in @("downloadedManagedPackageSha256", "downloadedRuntimePackageSha256", "installLogSha256", "restoreLogSha256", "buildLogSha256", "runLogSha256", "smokeStdoutSha256", "smokeStderrSha256", "nativeAssetListingSha256")) {
+foreach ($field in @("downloadedManagedPackageSha256", "downloadedRuntimePackageSha256", "installLogSha256", "restoreLogSha256", "buildLogSha256", "runLogSha256", "smokeStdoutSha256", "smokeStderrSha256", "nativeAssetListingSha256", "dotnetInfoSha256")) {
   if (-not (Test-Sha256 -Value (Get-PropertyOrDefault -Object $input -Name $field -DefaultValue ""))) {
     $findings.Add((New-Finding "$field-format" "action-required" "sha256" "SHA256 must be 64 hexadecimal characters.")) | Out-Null
   }
@@ -209,6 +271,7 @@ foreach ($entry in @{
   smokeStdoutPath = "smokeStdoutSha256"
   smokeStderrPath = "smokeStderrSha256"
   nativeAssetListingPath = "nativeAssetListingSha256"
+  dotnetInfoPath = "dotnetInfoSha256"
 }.GetEnumerator()) {
   $pathValue = [string](Get-PropertyOrDefault -Object $input -Name $entry.Key -DefaultValue "")
   if (Test-Placeholder -Value $pathValue) { continue }
@@ -227,8 +290,37 @@ foreach ($entry in @{
 }
 
 $sourceUrl = [string](Get-PropertyOrDefault -Object $input -Name "publicPackageSourceUrl" -DefaultValue "")
-if ($sourceUrl.IndexOf("local", [StringComparison]::OrdinalIgnoreCase) -ge 0 -or $sourceUrl.IndexOf("file:", [StringComparison]::OrdinalIgnoreCase) -ge 0) {
-  $findings.Add((New-Finding "public-package-source-local" "blocker" "forbidden substitute" "Public package source appears to be local feed or file source.")) | Out-Null
+if (-not (Test-Placeholder -Value $sourceUrl) -and -not (Test-PublicHttpsSource -Value $sourceUrl)) {
+  $findings.Add((New-Finding "public-package-source-public-https" "blocker" "forbidden substitute" "Public package source must be HTTPS package source and not local feed, direct nupkg, artifacts path, dry-run artifact, or GitHub Actions artifact.")) | Out-Null
+}
+
+$publicPackageUrl = [string](Get-PropertyOrDefault -Object $input -Name "publicPackageUrl" -DefaultValue "")
+if (-not (Test-Placeholder -Value $publicPackageUrl) -and -not (Test-PublicHttpsSource -Value $publicPackageUrl)) {
+  $findings.Add((New-Finding "public-package-url-public-https" "blocker" "forbidden substitute" "Public package URL must be HTTPS package metadata/source and not local feed, direct nupkg, artifacts path, dry-run artifact, or GitHub Actions artifact.")) | Out-Null
+}
+
+foreach ($entry in @{
+  downloadedManagedPackagePath = "downloaded managed package"
+  downloadedRuntimePackagePath = "downloaded runtime package"
+}.GetEnumerator()) {
+  $packagePath = [string](Get-PropertyOrDefault -Object $input -Name $entry.Key -DefaultValue "")
+  if (-not (Test-Placeholder -Value $packagePath) -and -not (Test-PublicDownloadedPackagePath -Value $packagePath)) {
+    $findings.Add((New-Finding "$($entry.Key)-public-download-path" "blocker" "forbidden substitute" "$($entry.Value) path must be a downloaded .nupkg and not artifacts, dry-run, or GitHub Actions path.")) | Out-Null
+  }
+}
+
+$cleanConsumerRoot = [string](Get-PropertyOrDefault -Object $input -Name "cleanConsumerRoot" -DefaultValue "")
+if (-not (Test-Placeholder -Value $cleanConsumerRoot) -and -not (Test-CleanConsumerRootOutsideRepository -Value $cleanConsumerRoot)) {
+  $findings.Add((New-Finding "clean-consumer-root-outside-repository" "blocker" "forbidden substitute" "cleanConsumerRoot must be outside the source repository and not a sample/smoke/local substitute path.")) | Out-Null
+}
+
+foreach ($field in @("restoreCommand", "buildCommand", "runCommand")) {
+  $commandText = [string](Get-PropertyOrDefault -Object $input -Name $field -DefaultValue "")
+  foreach ($forbidden in @("ProjectReference", "local feed", "local-feed", "direct .nupkg", "package-managed-dry-run", "github-actions-runs")) {
+    if ($commandText.IndexOf($forbidden, [StringComparison]::OrdinalIgnoreCase) -ge 0) {
+      $findings.Add((New-Finding "$field-forbidden-substitute" "blocker" "forbidden substitute" "$field must not reference forbidden substitute: $forbidden.")) | Out-Null
+    }
+  }
 }
 
 if (-not [bool](Get-PropertyOrDefault -Object $input -Name "confirmsPostPublish" -DefaultValue $false)) {
@@ -265,18 +357,20 @@ $candidate = [pscustomobject]@{
   failedBlockerCount = $failedBlockers.Count
   failedActionRequiredCount = $failedActionRequired.Count
   publicPackageSourceUrl = $sourceUrl
+  publicPackageUrl = $publicPackageUrl
+  cleanConsumerRoot = $cleanConsumerRoot
   exitCode = $exitCode
   ownerActionRequired = -not $proofReady
   performsPublish = $false
   performsRuntimeExecution = $false
-  canPromoteRuntimeProof = $proofReady
+  canPromoteRuntimeProof = $false
   canPublishPublicly = $false
   canCloseReleaseIssue = $false
-  isRuntimeExecutionProof = $proofReady
-  isPackageConsumerRuntimeProof = $proofReady
-  isPostPublishProof = $proofReady
+  isRuntimeExecutionProof = $false
+  isPackageConsumerRuntimeProof = $false
+  isPostPublishProof = $false
   isReleaseCloseProof = $false
-  boundary = "Post-publish CleanConsumer proof candidate only. It cannot publish packages, cannot close the release issue, and cannot substitute Owner final close approval or package push."
+  boundary = "Post-publish CleanConsumer proof candidate only. proofCandidateReady=true means the owner evidence can satisfy the remote lane, but the import record itself is not runtime proof, not post-publish proof, not publish approval, not release close approval, not package push, and cannot close the release."
 }
 
 $import = [pscustomobject]@{
@@ -296,14 +390,14 @@ $import = [pscustomobject]@{
   ownerActionRequired = -not $proofReady
   performsPublish = $false
   performsRuntimeExecution = $false
-  canPromoteRuntimeProof = $proofReady
+  canPromoteRuntimeProof = $false
   canPublishPublicly = $false
   canCloseReleaseIssue = $false
-  isRuntimeExecutionProof = $proofReady
-  isPackageConsumerRuntimeProof = $proofReady
-  isPostPublishProof = $proofReady
+  isRuntimeExecutionProof = $false
+  isPackageConsumerRuntimeProof = $false
+  isPostPublishProof = $false
   isReleaseCloseProof = $false
-  boundary = "Post-publish CleanConsumer proof import validates real post-publication owner evidence only. Default/template input remains blocked and non-proof; it is not publish approval, not release close approval, and not package push."
+  boundary = "Post-publish CleanConsumer proof import validates real post-publication owner evidence only. proofCandidateReady=true means the owner evidence can satisfy the remote lane, but this local import record remains not runtime proof, not post-publish proof, not publish approval, not release close approval, not package push, and cannot close the release."
 }
 
 $importPath = Join-Path $OutputRoot "post-publish-clean-consumer-proof-result-import.json"
