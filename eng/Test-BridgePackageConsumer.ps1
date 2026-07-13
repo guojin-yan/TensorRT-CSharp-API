@@ -912,6 +912,10 @@ static class HighLevelWrapperSurfaceProbe
             static inventory => inventory.GetCreatorSummaries();
         Func<TensorRtPluginRegistryInventory, int, IReadOnlyList<TensorRtPluginCreatorSummary>> limitedCreatorSummaries =
             static (inventory, maxCreators) => inventory.GetCreatorSummaries(maxCreators);
+        Func<TensorRtPluginRegistryInventory, IReadOnlyList<TensorRtPluginFieldSummary>> fieldSummaries =
+            static inventory => inventory.GetFieldSummaries();
+        Func<TensorRtPluginRegistryInventory, int, int, IReadOnlyList<TensorRtPluginFieldSummary>> limitedFieldSummaries =
+            static (inventory, maxCreators, maxFieldsPerCreator) => inventory.GetFieldSummaries(maxCreators, maxFieldsPerCreator);
         Func<TensorRtPluginRegistryInventory, TensorRtPluginRegistryInventoryDiagnostics> pluginInventoryDiagnostics =
             static inventory => inventory.GetDiagnostics();
         Func<TensorRtPluginRegistryInventoryDiagnostics, string> pluginInventoryDiagnosticsText =
@@ -923,6 +927,9 @@ static class HighLevelWrapperSurfaceProbe
                 diagnostics.NegativeFieldLengthCount;
         Func<TensorRtPluginCreatorSummary, string> creatorSummaryIdentity =
             static summary => summary.Name + ":" + summary.Version + ":" + summary.Namespace + ":" + summary.FieldCount;
+        Func<TensorRtPluginFieldSummary, string> fieldSummaryIdentity =
+            static summary => summary.CreatorName + ":" + summary.CreatorVersion + ":" + summary.CreatorNamespace + ":" +
+                summary.FieldIndex + ":" + summary.FieldName + ":" + summary.FieldType + ":" + summary.Length + ":" + summary.HasData;
         Func<TensorRtPluginCreatorInfo, string> creatorIdentity =
             static creator => creator.Name + ":" + creator.Version + ":" + creator.Namespace;
         Func<TensorRtPluginCreatorInfo, int> creatorFieldCount = static creator => creator.Fields.Count;
@@ -2418,7 +2425,10 @@ static class HighLevelWrapperSurfaceProbe
         _ = snapshotTryFindCreator;
         _ = creatorSummaries;
         _ = limitedCreatorSummaries;
+        _ = fieldSummaries;
+        _ = limitedFieldSummaries;
         _ = creatorSummaryIdentity;
+        _ = fieldSummaryIdentity;
         _ = creatorIdentity;
         _ = creatorFieldCount;
         _ = fieldMetadata;
@@ -2618,6 +2628,7 @@ static class HighLevelWrapperSurfaceProbe
 
         return string.Join(";",
             "compiled:plugin-inventory",
+            "plugin-inventory-field-metadata",
             "engine-rnn-readonly-diagnostics",
             "managed-callbacks",
             "callback-diagnostics",
@@ -2736,12 +2747,19 @@ static class HighLevelWrapperSurfaceProbe
             nameof(TensorRtPluginRegistryInventory.FindCreator),
             nameof(TensorRtPluginRegistryInventory.TryFindCreator),
             nameof(TensorRtPluginRegistryInventory.GetCreatorSummaries),
+            nameof(TensorRtPluginRegistryInventory.GetFieldSummaries),
             nameof(TensorRtPluginRegistryInventory.GetDiagnostics),
             nameof(TensorRtPluginRegistryInventoryDiagnostics),
             nameof(TensorRtPluginRegistryInventoryDiagnostics.IsConsistent),
             nameof(TensorRtPluginRegistryInventoryDiagnostics.TotalFieldCount),
+            nameof(TensorRtPluginRegistryInventoryDiagnostics.EmptyFieldNameCount),
+            nameof(TensorRtPluginRegistryInventoryDiagnostics.NegativeFieldLengthCount),
             nameof(TensorRtPluginCreatorSummary),
             nameof(TensorRtPluginCreatorSummary.FieldCount),
+            nameof(TensorRtPluginFieldSummary),
+            nameof(TensorRtPluginFieldSummary.FieldName),
+            nameof(TensorRtPluginFieldSummary.FieldType),
+            nameof(TensorRtPluginFieldSummary.HasData),
             nameof(TensorRtEnvironmentProbe.IsGlobalPluginRegistryAvailable),
             nameof(TensorRtEnvironmentProbe.TryIsGlobalPluginRegistryAvailable),
             nameof(TensorRtBuilder.GetPluginRegistryInventory),
@@ -4045,7 +4063,7 @@ static class HighLevelWrapperSurfaceProbe
 
     $timer.Stop()
     $elapsedSeconds = [Math]::Round($timer.Elapsed.TotalSeconds, 2)
-    $wrapperSurfaceProbe = "compiled:plugin-inventory;engine-rnn-readonly-diagnostics;rnnv2-borrowed-state-design-gate;rnnv2-owner-bound-tensors;rnnv2-copied-gate-weights;managed-callbacks;callback-diagnostics;callback-api-language-safe-controls;error-recorder-snapshot;logger-presence-safe-controls;allocator-debug-listener-safe-controls;callback-interface-info-safe-controls;execution-context-callback-state-snapshot;execution-context-callback-allocator-safe-control-summary;allocator-owner-dry-run-diagnostics;allocator-owner-native-dry-run-controls;allocator-owner-state-ledger-dry-run-controls;allocator-owner-ledger-safety-gate;output-allocator-callback-owner-design;output-allocator-attach-detach-design-gate;output-allocator-runtime-proof-precheck;debug-listener-callback-owner-design;debug-listener-attach-detach-design-gate;debug-listener-borrowed-tensor-safety-gate;debug-listener-attach-vtable-safety-gate;debug-listener-native-attach-nothrow-preflight;debug-listener-native-owner-address-design-gate;debug-listener-native-nothrow-vtable-design-gate;debug-listener-native-attach-entry-design-gate;debug-listener-native-detach-before-release-design-gate;debug-listener-native-owner-lifecycle-dry-run;debug-listener-native-attach-entry-runtime-scaffold;debug-listener-native-attach-entry-minimal-safety;debug-listener-native-owner-stable-identity;debug-listener-native-owner-noncopyable-storage;debug-listener-native-nothrow-destructor;debug-listener-native-owner-lifecycle-gate;debug-listener-native-attach-bridge-shape-gate;debug-listener-exception-status-mapping-gate;debug-listener-inflight-accounting-gate;debug-listener-native-nothrow-vtable-scaffold-gate;debug-listener-nothrow-vtable-callback-stub;callback-stub-gate;debug-listener-borrowed-debug-tensor-metadata-runtime-gate;borrowed-debug-tensor-metadata-gate;debug-listener-native-vtable-install-preflight;native-vtable-install-preflight;debug-listener-native-owner-vtable-install-experiment;native-owner-vtable-install-experiment;debug-listener-runtime-proof-precheck;debug-listener-runtime-proof-attempt-preflight;debug-listener-real-non-null-attach-runtime-smoke;runtime-smoke-skipped;runtime-smoke-blocked;runtime-smoke-attempted;debug-listener-process-debug-tensor-callback-trampoline;callback-trampoline-shape;onnx-parser-diagnostic-snapshot;onnx-parser-diagnostic-summary;onnx-parser-refitter-diagnostic-snapshot;onnx-parser-refitter-diagnostic-summary;profiler-safe-controls;progress-monitor-safe-controls;cuda-memory-range;HasImplicitBatchDimensionCompatibility;SerializedPluginPathCountCompatibility;GetRnnV2LayerCount;GetRnnV2HiddenSize;GetRnnV2DataLength;GetRnnV2MaxSequenceLength;GetRnnV2Operation;GetRnnV2Direction;GetRnnV2InputMode;GetRnnV2CellState;GetRnnV2HiddenState;GetRnnV2SequenceLengths;GetRnnV2WeightsForGate;GetRnnV2BiasForGate;TensorRtRnnV2GateWeightsSnapshot;TensorRtRnnOperation;TensorRtRnnDirection;TensorRtRnnInputMode;TensorRtRnnGateType"
+    $wrapperSurfaceProbe = "compiled:plugin-inventory;plugin-inventory-field-metadata;engine-rnn-readonly-diagnostics;rnnv2-borrowed-state-design-gate;rnnv2-owner-bound-tensors;rnnv2-copied-gate-weights;managed-callbacks;callback-diagnostics;callback-api-language-safe-controls;error-recorder-snapshot;logger-presence-safe-controls;allocator-debug-listener-safe-controls;callback-interface-info-safe-controls;execution-context-callback-state-snapshot;execution-context-callback-allocator-safe-control-summary;allocator-owner-dry-run-diagnostics;allocator-owner-native-dry-run-controls;allocator-owner-state-ledger-dry-run-controls;allocator-owner-ledger-safety-gate;output-allocator-callback-owner-design;output-allocator-attach-detach-design-gate;output-allocator-runtime-proof-precheck;debug-listener-callback-owner-design;debug-listener-attach-detach-design-gate;debug-listener-borrowed-tensor-safety-gate;debug-listener-attach-vtable-safety-gate;debug-listener-native-attach-nothrow-preflight;debug-listener-native-owner-address-design-gate;debug-listener-native-nothrow-vtable-design-gate;debug-listener-native-attach-entry-design-gate;debug-listener-native-detach-before-release-design-gate;debug-listener-native-owner-lifecycle-dry-run;debug-listener-native-attach-entry-runtime-scaffold;debug-listener-native-attach-entry-minimal-safety;debug-listener-native-owner-stable-identity;debug-listener-native-owner-noncopyable-storage;debug-listener-native-nothrow-destructor;debug-listener-native-owner-lifecycle-gate;debug-listener-native-attach-bridge-shape-gate;debug-listener-exception-status-mapping-gate;debug-listener-inflight-accounting-gate;debug-listener-native-nothrow-vtable-scaffold-gate;debug-listener-nothrow-vtable-callback-stub;callback-stub-gate;debug-listener-borrowed-debug-tensor-metadata-runtime-gate;borrowed-debug-tensor-metadata-gate;debug-listener-native-vtable-install-preflight;native-vtable-install-preflight;debug-listener-native-owner-vtable-install-experiment;native-owner-vtable-install-experiment;debug-listener-runtime-proof-precheck;debug-listener-runtime-proof-attempt-preflight;debug-listener-real-non-null-attach-runtime-smoke;runtime-smoke-skipped;runtime-smoke-blocked;runtime-smoke-attempted;debug-listener-process-debug-tensor-callback-trampoline;callback-trampoline-shape;onnx-parser-diagnostic-snapshot;onnx-parser-diagnostic-summary;onnx-parser-refitter-diagnostic-snapshot;onnx-parser-refitter-diagnostic-summary;profiler-safe-controls;progress-monitor-safe-controls;cuda-memory-range;HasImplicitBatchDimensionCompatibility;SerializedPluginPathCountCompatibility;GetRnnV2LayerCount;GetRnnV2HiddenSize;GetRnnV2DataLength;GetRnnV2MaxSequenceLength;GetRnnV2Operation;GetRnnV2Direction;GetRnnV2InputMode;GetRnnV2CellState;GetRnnV2HiddenState;GetRnnV2SequenceLengths;GetRnnV2WeightsForGate;GetRnnV2BiasForGate;TensorRtRnnV2GateWeightsSnapshot;TensorRtRnnOperation;TensorRtRnnDirection;TensorRtRnnInputMode;TensorRtRnnGateType"
     $wrapperSurfaceEvidenceKind = "compile-surface-proof"
     $isRuntimeExecutionProof = $false
     $runtimeProofBoundary = "bridge-only consumer validates package layout, high-level wrapper compile surface, and dependency diagnostics; it is not clean package-consumer runtime proof."

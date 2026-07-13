@@ -269,6 +269,19 @@ function New-WrapperSurfaceCapabilityEvidence {
       requiredMarkers = @("TensorRtPluginRegistryInventory", "FindCreator", "TryFindCreator", "GetPluginRegistryInventory", "IsPluginCreatorRegistered", "TryIsPluginCreatorRegistered")
     },
     [pscustomobject]@{
+      name = "plugin-inventory-field-metadata"
+      categoryMarkers = @("plugin-inventory-field-metadata")
+      requiredMarkers = @(
+        "TensorRtPluginRegistryInventory.GetFieldSummaries",
+        "TensorRtPluginFieldSummary",
+        "TensorRtPluginFieldSummary.FieldName",
+        "TensorRtPluginFieldSummary.FieldType",
+        "TensorRtPluginFieldSummary.HasData",
+        "TensorRtPluginRegistryInventoryDiagnostics.EmptyFieldNameCount",
+        "TensorRtPluginRegistryInventoryDiagnostics.NegativeFieldLengthCount"
+      )
+    },
+    [pscustomobject]@{
       name = "engine-rnn-readonly-diagnostics"
       categoryMarkers = @("engine-rnn-readonly-diagnostics")
       requiredMarkers = @(
@@ -665,6 +678,7 @@ function New-WrapperSurfaceCapabilityEvidence {
     groups = @($groups)
     missingGroups = @($missingGroups)
     hasPluginInventory = [bool]$groupStatus["plugin-inventory"]
+    hasPluginInventoryFieldMetadata = [bool]$groupStatus["plugin-inventory-field-metadata"]
     hasEngineRnnReadonlyDiagnostics = [bool]$groupStatus["engine-rnn-readonly-diagnostics"]
     hasManagedCallbacks = [bool]$groupStatus["managed-callbacks"]
     hasCallbackDiagnostics = [bool]$groupStatus["callback-diagnostics"]
@@ -8012,6 +8026,7 @@ function Write-ReadinessReports {
     $readyWrapperGroups = @($result.bridgeConsumer.wrapperSurfaceCapabilities.groups | Where-Object { [string]$_.status -eq "ready" } | ForEach-Object { [string]$_.name }) -join ", "
     $missingWrapperGroups = @($result.bridgeConsumer.wrapperSurfaceCapabilities.missingGroups) -join ", "
     $lines.Add("- bridge consumer wrapper capability status: $($result.bridgeConsumer.wrapperSurfaceCapabilities.status); ready=``$readyWrapperGroups``; missing=``$missingWrapperGroups``")
+    $lines.Add("- bridge consumer plugin inventory field metadata: $($result.bridgeConsumer.wrapperSurfaceCapabilities.hasPluginInventoryFieldMetadata); marker=``plugin-inventory-field-metadata``; evidence-kind=compile-surface-proof; runtime-evidence=copied-plugin-field-metadata; proof=false")
     $lines.Add("- bridge consumer callback api-language safe controls: $($result.bridgeConsumer.wrapperSurfaceCapabilities.hasCallbackApiLanguageSafeControls); marker=``callback-api-language-safe-controls``; evidence-kind=compile-surface-proof; runtime-evidence=scalar-copy-api-language; proof=false")
     $lines.Add("- bridge consumer callback allocator safe-control summary: $($result.bridgeConsumer.wrapperSurfaceCapabilities.hasExecutionContextCallbackAllocatorSafeControlSummary); marker=``execution-context-callback-allocator-safe-control-summary``; evidence-kind=compile-surface-proof; runtime-evidence=copied-interface-info-safe-controls; proof=false")
     $lines.Add("- error recorder diagnostics design gate: $($result.errorRecorderDiagnosticsDesignGate.status); marker=``$($result.errorRecorderDiagnosticsDesignGate.marker)``; evidence-kind=$($result.errorRecorderDiagnosticsDesignGate.evidenceKind); runtime-evidence=$($result.errorRecorderDiagnosticsDesignGate.runtimeEvidenceKind); runtime-execution=$($result.errorRecorderDiagnosticsDesignGate.isRuntimeExecutionEvidence); proof=$($result.errorRecorderDiagnosticsDesignGate.isRuntimeExecutionProof); runtime-blocked=$($result.errorRecorderDiagnosticsDesignGate.runtimeProofBlocked); deferred-rows=$($result.errorRecorderDiagnosticsDesignGate.hasDeferredRowEvidence)")

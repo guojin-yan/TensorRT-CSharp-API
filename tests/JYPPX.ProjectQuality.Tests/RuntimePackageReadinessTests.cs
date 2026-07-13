@@ -378,6 +378,15 @@ public sealed class RuntimePackageReadinessTests
         Assert.Contains("runtime-smoke-driver-blocked", script);
         Assert.Contains("dependency-probe-only", script);
         Assert.Contains("HighLevelWrapperSurface", script);
+        Assert.Contains("hasPluginInventoryFieldMetadata", script);
+        Assert.Contains("plugin-inventory-field-metadata", script);
+        Assert.Contains("TensorRtPluginRegistryInventory.GetFieldSummaries", script);
+        Assert.Contains("TensorRtPluginFieldSummary", script);
+        Assert.Contains("TensorRtPluginFieldSummary.FieldName", script);
+        Assert.Contains("TensorRtPluginFieldSummary.FieldType", script);
+        Assert.Contains("TensorRtPluginFieldSummary.HasData", script);
+        Assert.Contains("TensorRtPluginRegistryInventoryDiagnostics.EmptyFieldNameCount", script);
+        Assert.Contains("TensorRtPluginRegistryInventoryDiagnostics.NegativeFieldLengthCount", script);
         Assert.Contains("hasErrorRecorderSnapshots", script);
         Assert.Contains("hasLoggerPresenceSafeControls", script);
         Assert.Contains("hasAllocatorDebugListenerSafeControls", script);
@@ -465,6 +474,8 @@ public sealed class RuntimePackageReadinessTests
         Assert.Contains("bridge consumer evidence scope", script);
         Assert.Contains("bridge consumer wrapper surface", script);
         Assert.Contains("bridge consumer wrapper capability status", script);
+        Assert.Contains("bridge consumer plugin inventory field metadata", script);
+        Assert.Contains("runtime-evidence=copied-plugin-field-metadata", script);
         Assert.Contains("bridge consumer callback api-language safe controls", script);
         Assert.Contains("runtime-evidence=scalar-copy-api-language", script);
         Assert.Contains("allocator owner ledger design gate:", script);

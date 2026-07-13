@@ -55,6 +55,14 @@ public sealed class BridgePackageConsumerTests
         Assert.Contains("TensorRtBuilder.TryIsPluginCreatorRegistered", script);
         Assert.Contains("TensorRtPluginRegistryInventory.FindCreator", script);
         Assert.Contains("TensorRtPluginRegistryInventory.TryFindCreator", script);
+        Assert.Contains("TensorRtPluginRegistryInventory.GetFieldSummaries", script);
+        Assert.Contains("TensorRtPluginFieldSummary", script);
+        Assert.Contains("TensorRtPluginFieldSummary.FieldName", script);
+        Assert.Contains("TensorRtPluginFieldSummary.FieldType", script);
+        Assert.Contains("TensorRtPluginFieldSummary.HasData", script);
+        Assert.Contains("TensorRtPluginRegistryInventoryDiagnostics.EmptyFieldNameCount", script);
+        Assert.Contains("TensorRtPluginRegistryInventoryDiagnostics.NegativeFieldLengthCount", script);
+        Assert.Contains("plugin-inventory-field-metadata", script);
         Assert.Contains("TensorRtEnvironmentProbe.IsGlobalPluginRegistryAvailable", script);
         Assert.Contains("TensorRtEnvironmentProbe.TryIsGlobalPluginRegistryAvailable", script);
         Assert.Contains("TensorRtEngine.HasImplicitBatchDimensionCompatibility", script);
