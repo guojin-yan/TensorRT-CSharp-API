@@ -3,6 +3,7 @@ param(
   [string]$RuntimePackageKey = "win-x64-trt11.0-cuda13.2-cudnn9.22",
   [string]$SourceQualityRunEvidenceImportPath = "artifacts\final-release\github-actions-source-quality-run-evidence-import.json",
   [string]$PackageDryRunEvidenceImportPath = "artifacts\final-release\github-actions-run-evidence-import.json",
+  [string]$CurrentHeadPackageDryRunPreflightPath = "artifacts\final-release\current-head-package-dry-run-preflight.json",
   [string]$GitHubActionsRunEvidenceImportPath = "",
   [string]$CurrentHead,
   [string]$RepositoryRoot
@@ -126,6 +127,7 @@ if (-not [string]::IsNullOrWhiteSpace($GitHubActionsRunEvidenceImportPath)) {
 $currentHeadValue = Get-GitHeadOrEmpty
 $sourceQualityEvidence = Read-JsonOrNull -Path $SourceQualityRunEvidenceImportPath
 $packageDryRunEvidence = Read-JsonOrNull -Path $PackageDryRunEvidenceImportPath
+$currentHeadPackageDryRunPreflight = Read-JsonOrNull -Path $CurrentHeadPackageDryRunPreflightPath
 
 $sourceQualityRunId = if ($null -eq $sourceQualityEvidence) { "<no-source-quality-run-evidence-import>" } else { [string](Get-PropertyOrDefault -Object $sourceQualityEvidence -Name "runId" -DefaultValue "<missing-source-quality-run-id>") }
 $sourceQualityRunUrl = if ($null -eq $sourceQualityEvidence) { "<no-source-quality-run-evidence-import>" } else { [string](Get-PropertyOrDefault -Object $sourceQualityEvidence -Name "runUrl" -DefaultValue "<missing-source-quality-run-url>") }
@@ -160,6 +162,14 @@ $packageDryRunCanClaimCurrentHeadPack = $packageDryRunCanClaimPack -and $package
 $packageDryRunRequiresOwnerAuthorization = -not $packageDryRunCanClaimCurrentHeadPack
 $packageDryRunArtifactPath = if ($dryRunManagedPackage.Count -eq 0) { "<no-package-managed-dry-run-artifact>" } else { [string](Get-PropertyOrDefault -Object $dryRunManagedPackage[0] -Name "fullPath" -DefaultValue "<missing-dry-run-package-path>") }
 $packageDryRunManagedNupkgSha256 = if ($dryRunManagedPackage.Count -eq 0) { "<no-package-managed-dry-run-sha256>" } else { [string](Get-PropertyOrDefault -Object $dryRunManagedPackage[0] -Name "sha256" -DefaultValue "<missing-dry-run-package-sha256>") }
+$currentHeadPackageDryRunPreflightPresent = $null -ne $currentHeadPackageDryRunPreflight -and
+  ([string](Get-PropertyOrDefault -Object $currentHeadPackageDryRunPreflight -Name "recordKind" -DefaultValue "")).Equals("current-head-package-dry-run-preflight", [StringComparison]::Ordinal)
+$currentHeadPackageDryRunPreflightState = if ($currentHeadPackageDryRunPreflightPresent) { [string](Get-PropertyOrDefault -Object $currentHeadPackageDryRunPreflight -Name "state" -DefaultValue "missing-state") } else { "missing-current-head-package-dry-run-preflight" }
+$currentHeadPackageDryRunReady = $currentHeadPackageDryRunPreflightPresent -and (Get-BoolPropertyOrDefault -Object $currentHeadPackageDryRunPreflight -Name "canClaimGitHubActionsPackageDryRunPackForCurrentHead" -DefaultValue $false)
+$currentHeadPackageDryRunBlockedReason = if ($currentHeadPackageDryRunPreflightPresent) { [string](Get-PropertyOrDefault -Object $currentHeadPackageDryRunPreflight -Name "blockedReason" -DefaultValue "Current HEAD package dry-run proof is not ready.") } else { "Current HEAD package dry-run preflight is missing." }
+$currentHeadPackageDryRunOwnerAuthorizationRequired = if ($currentHeadPackageDryRunPreflightPresent) { Get-BoolPropertyOrDefault -Object $currentHeadPackageDryRunPreflight -Name "packageDryRunRequiresOwnerAuthorization" -DefaultValue (-not $currentHeadPackageDryRunReady) } else { $true }
+$packageDryRunCanClaimCurrentHeadPack = $packageDryRunCanClaimCurrentHeadPack -and $currentHeadPackageDryRunReady
+$packageDryRunRequiresOwnerAuthorization = $packageDryRunRequiresOwnerAuthorization -or $currentHeadPackageDryRunOwnerAuthorizationRequired
 
 $template = [pscustomobject]@{
   recordKind = "package-consumer-runtime-proof-owner-input"
@@ -167,6 +177,13 @@ $template = [pscustomobject]@{
   ownerInputState = "template-owner-input-required"
   proofLineId = "package-consumer-runtime"
   currentHead = $currentHeadValue
+  currentHeadPackageDryRunPreflightPath = $CurrentHeadPackageDryRunPreflightPath
+  currentHeadPackageDryRunPreflightPresent = $currentHeadPackageDryRunPreflightPresent
+  currentHeadPackageDryRunPreflightState = $currentHeadPackageDryRunPreflightState
+  currentHeadPackageDryRunReady = $currentHeadPackageDryRunReady
+  currentHeadPackageDryRunOwnerAuthorizationRequired = $currentHeadPackageDryRunOwnerAuthorizationRequired
+  currentHeadPackageDryRunBlockedReason = $currentHeadPackageDryRunBlockedReason
+  currentHeadPackageDryRunOwnerAction = if ($currentHeadPackageDryRunReady) { "current-head-package-dry-run-context-available" } else { "owner-authorize-non-publish-workflow-dispatch-and-import-current-head-dry-run-evidence" }
   sourceQualityRunEvidenceImportPath = $SourceQualityRunEvidenceImportPath
   sourceQualityRunId = $sourceQualityRunId
   sourceQualityRunUrl = $sourceQualityRunUrl
@@ -252,7 +269,7 @@ $template = [pscustomobject]@{
     "template",
     "skipped run"
   )
-  safetyBoundary = "Owner input template only. It records source-quality run evidence separately from package-managed dry-run evidence. Source-quality evidence cannot fill packageDryRunArtifactPath or packageDryRunManagedNupkgSha256. Package dry-run context may reduce manual copying only when it is imported separately, but it is not published package proof and is not package-consumer runtime proof. It does not publish packages, close the release issue, or promote package-consumer runtime proof. local feed, ProjectReference, direct .nupkg, build-only, dry-run, queued GitHub Actions run, missing self-hosted runner, dashboard, template, and skipped run cannot be used as public package proof."
+  safetyBoundary = "Owner input template only. It records source-quality run evidence, package-managed dry-run evidence, and current-head dry-run preflight separately. Source-quality evidence and current-head preflight cannot fill public package proof fields. Package dry-run context may reduce manual copying only when it is imported separately and matches currentHead, but it is not published package proof and is not package-consumer runtime proof. It does not publish packages, close the release issue, or promote package-consumer runtime proof. local feed, ProjectReference, direct .nupkg, build-only, dry-run, queued GitHub Actions run, missing self-hosted runner, dashboard, template, and skipped run cannot be used as public package proof."
 }
 
 $jsonPath = Join-Path $artifactRoot "package-consumer-runtime-proof-owner-input.template.json"
@@ -276,6 +293,11 @@ $markdown = @"
 | 字段 | 当前值 |
 |---|---|
 | currentHead | ``$($template.currentHead)`` |
+| currentHeadPackageDryRunPreflightState | ``$($template.currentHeadPackageDryRunPreflightState)`` |
+| currentHeadPackageDryRunReady | ``$($template.currentHeadPackageDryRunReady)`` |
+| currentHeadPackageDryRunOwnerAuthorizationRequired | ``$($template.currentHeadPackageDryRunOwnerAuthorizationRequired)`` |
+| currentHeadPackageDryRunOwnerAction | ``$($template.currentHeadPackageDryRunOwnerAction)`` |
+| currentHeadPackageDryRunBlockedReason | ``$($template.currentHeadPackageDryRunBlockedReason)`` |
 | sourceQualityRunId | ``$($template.sourceQualityRunId)`` |
 | sourceQualityHeadSha | ``$($template.sourceQualityHeadSha)`` |
 | sourceQualityRunEvidenceReady | ``$($template.sourceQualityRunEvidenceReady)`` |

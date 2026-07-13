@@ -56,6 +56,13 @@ public sealed class PackageConsumerRuntimeProofOwnerInputSchemaTests
         string[] dryRunContextFields =
         [
             "currentHead",
+            "currentHeadPackageDryRunPreflightPath",
+            "currentHeadPackageDryRunPreflightPresent",
+            "currentHeadPackageDryRunPreflightState",
+            "currentHeadPackageDryRunReady",
+            "currentHeadPackageDryRunOwnerAuthorizationRequired",
+            "currentHeadPackageDryRunBlockedReason",
+            "currentHeadPackageDryRunOwnerAction",
             "sourceQualityRunEvidenceImportPath",
             "sourceQualityRunId",
             "sourceQualityRunUrl",
@@ -130,6 +137,8 @@ public sealed class PackageConsumerRuntimeProofOwnerInputSchemaTests
         Assert.Contains("Forbidden Substitutes", markdown, StringComparison.Ordinal);
         Assert.Contains("TensorRtExec build report", markdown, StringComparison.Ordinal);
         Assert.Contains("sourceQualityRunEvidenceImportPath", markdown, StringComparison.Ordinal);
+        Assert.Contains("currentHeadPackageDryRunPreflightState", markdown, StringComparison.Ordinal);
+        Assert.Contains("currentHeadPackageDryRunOwnerAction", markdown, StringComparison.Ordinal);
         Assert.Contains("packageDryRunEvidenceImportPath", markdown, StringComparison.Ordinal);
         Assert.Contains("packageDryRunCanClaimCurrentHeadPack", markdown, StringComparison.Ordinal);
         Assert.Contains("source-quality run 不能填充 dry-run package artifact", markdown, StringComparison.Ordinal);

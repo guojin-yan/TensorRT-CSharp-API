@@ -12,14 +12,27 @@ public sealed class PackageConsumerRuntimeProofOwnerInputTests
     public void PackageConsumerRuntimeProofOwnerInputExportsBlockedOverlaySurface()
     {
         const string sourceQualityContextPath = "artifacts/final-release/package-consumer-runtime-proof-owner-input.source-quality-context.json";
+        const string currentHeadPreflightPath = "artifacts/final-release/package-consumer-runtime-proof-owner-input.current-head-preflight.json";
         string sourceFixtureRoot = PrepareSourceQualityRunEvidenceImportFixture(out string sourceRunId, out string sourceHeadSha, "package-consumer-runtime-proof-owner-input.source-quality-context.json");
         string fixtureRoot = PrepareGitHubActionsRunEvidenceImportFixture(out string runId, out string headSha);
         try
         {
             RunPowerShell(
+                Path.Combine(RepositoryPaths.Root, "eng", "Export-CurrentHeadPackageDryRunPreflight.ps1"),
+                "-SourceQualityRunEvidenceImportPath",
+                sourceQualityContextPath,
+                "-PackageDryRunEvidenceImportPath",
+                "artifacts/final-release/github-actions-run-evidence-import.json",
+                "-OutputPath",
+                currentHeadPreflightPath,
+                "-MarkdownOutputPath",
+                "artifacts/final-release/package-consumer-runtime-proof-owner-input.current-head-preflight.md");
+            RunPowerShell(
                 Path.Combine(RepositoryPaths.Root, "eng", "Export-PackageConsumerRuntimeProofOwnerInputTemplate.ps1"),
                 "-SourceQualityRunEvidenceImportPath",
-                sourceQualityContextPath);
+                sourceQualityContextPath,
+                "-CurrentHeadPackageDryRunPreflightPath",
+                currentHeadPreflightPath);
             RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Test-PackageConsumerRuntimeProofOwnerInput.ps1"), "-Strict");
         }
         finally
@@ -41,6 +54,12 @@ public sealed class PackageConsumerRuntimeProofOwnerInputTests
         Assert.Equal("template-owner-input-required", template.GetProperty("ownerInputState").GetString());
         Assert.Equal("package-consumer-runtime", template.GetProperty("proofLineId").GetString());
         Assert.Equal(ReadGitHead(), template.GetProperty("currentHead").GetString());
+        Assert.True(template.GetProperty("currentHeadPackageDryRunPreflightPresent").GetBoolean());
+        Assert.Equal("blocked-owner-authorization-required", template.GetProperty("currentHeadPackageDryRunPreflightState").GetString());
+        Assert.False(template.GetProperty("currentHeadPackageDryRunReady").GetBoolean());
+        Assert.True(template.GetProperty("currentHeadPackageDryRunOwnerAuthorizationRequired").GetBoolean());
+        Assert.Equal("owner-authorize-non-publish-workflow-dispatch-and-import-current-head-dry-run-evidence", template.GetProperty("currentHeadPackageDryRunOwnerAction").GetString());
+        Assert.Contains("Owner must explicitly authorize", template.GetProperty("currentHeadPackageDryRunBlockedReason").GetString(), StringComparison.Ordinal);
         Assert.Equal(sourceRunId, template.GetProperty("sourceQualityRunId").GetString());
         Assert.Equal(sourceHeadSha, template.GetProperty("sourceQualityHeadSha").GetString());
         Assert.True(template.GetProperty("sourceQualityRunEvidenceReady").GetBoolean());
