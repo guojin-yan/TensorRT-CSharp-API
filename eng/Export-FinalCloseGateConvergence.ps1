@@ -224,10 +224,94 @@ $strictValidatorSourceArtifacts = @(
   "artifacts/final-release/owner-external-proof-execution-result-import-validation.json",
   "artifacts/final-release/real-external-proof-record-import-validator-validation.json",
   "artifacts/final-release/real-proof-record-candidate-from-owner-result-import-validation.json",
-    "artifacts/final-release/release-close-real-proof-import-bridge-validation.json",
-    "artifacts/final-release/release-issue-close-record-validation.json"
-    "artifacts/final-release/dual-package-publish-preflight-matrix-validation.json"
-  )
+  "artifacts/final-release/release-close-real-proof-import-bridge-validation.json",
+  "artifacts/final-release/release-issue-close-record-validation.json",
+  "artifacts/final-release/dual-package-publish-preflight-matrix-validation.json"
+)
+
+$finalCloseProofAdmissionRequiredFields = @(
+  "publicPackageSourceUrl",
+  "publicPackageDownloadUrl",
+  "managedNupkgSha256",
+  "runtimeNupkgSha256",
+  "externalCleanConsumerProjectIdentity",
+  "smokeCommandRuntimePackageKey",
+  "hostCudaVersion",
+  "hostTensorRtVersion",
+  "hostCudnnVersion",
+  "stdoutSha256",
+  "stderrSha256",
+  "mergedTranscriptSha256",
+  "githubRunId",
+  "githubHeadSha",
+  "githubLogSha256",
+  "githubArtifactSha256",
+  "ownerReviewer",
+  "ownerAuthorizationLink",
+  "rollbackReview",
+  "finalCloseDecision"
+)
+
+$rejectedNonProofStates = @(
+  "template-only",
+  "candidate-only",
+  "draft-rich-but-not-proof",
+  "draft-blocked-by-cuda-driver",
+  "not-requested",
+  "validation-ready-without-proof-candidate",
+  "dashboard-only",
+  "runbook-only",
+  "local-feed-only",
+  "project-reference-only"
+)
+
+$acceptedProofAdmissionContract = @(
+  [pscustomobject]@{
+    laneId = "github-actions-run-proof"
+    requiredAcceptedState = "accepted-github-actions-run-proof"
+    strictValidator = "eng\Test-GitHubActionsRunEvidenceImport.ps1 -Strict"
+    requiredEvidenceFields = @("githubRunId", "githubHeadSha", "githubLogSha256", "githubArtifactSha256", "ownerReviewer")
+    acceptedOnlyAfterStrictValidator = $true
+    rejectsNonProofStates = $rejectedNonProofStates
+    canPromoteRuntimeProof = $false
+  },
+  [pscustomobject]@{
+    laneId = "owner-public-publish-result"
+    requiredAcceptedState = "accepted-owner-public-publish-result"
+    strictValidator = "eng\Test-OwnerPublicPublishExecutionResultCandidate.ps1 -Strict"
+    requiredEvidenceFields = @("publicPackageSourceUrl", "publicPackageDownloadUrl", "managedNupkgSha256", "runtimeNupkgSha256", "ownerAuthorizationLink", "ownerReviewer", "mergedTranscriptSha256")
+    acceptedOnlyAfterStrictValidator = $true
+    rejectsNonProofStates = $rejectedNonProofStates
+    canPromoteRuntimeProof = $false
+  },
+  [pscustomobject]@{
+    laneId = "public-package-download-proof"
+    requiredAcceptedState = "accepted-public-package-download-proof"
+    strictValidator = "eng\Test-PublicPackageDownloadProofCandidate.ps1 -Strict"
+    requiredEvidenceFields = @("publicPackageSourceUrl", "publicPackageDownloadUrl", "managedNupkgSha256", "runtimeNupkgSha256", "ownerReviewer")
+    acceptedOnlyAfterStrictValidator = $true
+    rejectsNonProofStates = $rejectedNonProofStates
+    canPromoteRuntimeProof = $false
+  },
+  [pscustomobject]@{
+    laneId = "post-publish-clean-consumer-proof"
+    requiredAcceptedState = "accepted-post-publish-clean-consumer-proof"
+    strictValidator = "eng\Test-PostPublishCleanConsumerProofResult.ps1 -Strict -RequireExistingFiles -RequireHashMatch -FailOnNotProof"
+    requiredEvidenceFields = @("externalCleanConsumerProjectIdentity", "smokeCommandRuntimePackageKey", "hostCudaVersion", "hostTensorRtVersion", "hostCudnnVersion", "stdoutSha256", "stderrSha256", "mergedTranscriptSha256", "ownerReviewer")
+    acceptedOnlyAfterStrictValidator = $true
+    rejectsNonProofStates = $rejectedNonProofStates
+    canPromoteRuntimeProof = $false
+  },
+  [pscustomobject]@{
+    laneId = "release-issue-close-record-strict-validation"
+    requiredAcceptedState = "accepted-release-issue-close-record"
+    strictValidator = "eng\Test-ReleaseIssueCloseRecord.ps1 -FailOnNotCloseReady"
+    requiredEvidenceFields = @("rollbackReview", "finalCloseDecision", "ownerReviewer", "ownerAuthorizationLink", "mergedTranscriptSha256")
+    acceptedOnlyAfterStrictValidator = $true
+    rejectsNonProofStates = $rejectedNonProofStates
+    canPromoteRuntimeProof = $false
+  }
+)
 
 $record = [pscustomobject]@{
   recordKind = "final-close-gate-convergence"
@@ -265,6 +349,11 @@ $record = [pscustomobject]@{
   )
   strictValidatorSourceArtifacts = $strictValidatorSourceArtifacts
   forbiddenSubstituteMarkers = $forbiddenSubstituteMarkers
+  finalCloseProofAdmissionRequiredFields = $finalCloseProofAdmissionRequiredFields
+  rejectedNonProofStates = $rejectedNonProofStates
+  acceptedProofAdmissionContract = $acceptedProofAdmissionContract
+  acceptedProofAdmissionContractLaneIds = @($acceptedProofAdmissionContract | ForEach-Object { $_.laneId })
+  acceptedProofAdmissionContractCount = $acceptedProofAdmissionContract.Count
   finalCloseAcceptedProofSources = @(
     "strict-validator-accepted-real-external-proof-record",
     "strict-release-issue-close-record-validation"
@@ -291,6 +380,7 @@ $record = [pscustomobject]@{
   }
   notExecutedByAutomation = $true
   ownerExecutionOnly = $true
+  proofAdmissionRule = "Final close may only proceed after every required lane has strict-validator accepted real evidence with required hashes, public package URLs, owner authorization, rollback review, and final close decision. Template, draft, candidate, dashboard, runbook, local feed, ProjectReference, direct nupkg, build-only, and driver-blocked records are rejected."
   performsPublish = $false
   approvesPublicRelease = $false
   canPromoteRuntimeProof = $false
@@ -314,7 +404,20 @@ $markdown = @(
   "| convergenceState | ``$($record.convergenceState)`` |",
   "| laneCount | ``$($record.laneCount)`` |",
   "| blockedLaneCount | ``$($record.blockedLaneCount)`` |",
+  "| acceptedProofAdmissionContractCount | ``$($record.acceptedProofAdmissionContractCount)`` |",
   "| canCloseReleaseIssue | ``$($record.canCloseReleaseIssue)`` |",
+  "",
+  "## Proof Admission Contract",
+  "",
+  "| Lane | Accepted State | Strict Validator | Required Fields |",
+  "| --- | --- | --- | --- |"
+)
+
+foreach ($admission in $acceptedProofAdmissionContract) {
+  $markdown += "| $($admission.laneId) | ``$($admission.requiredAcceptedState)`` | ``$($admission.strictValidator)`` | $($admission.requiredEvidenceFields -join ', ') |"
+}
+
+$markdown += @(
   "",
   "## Gate Lanes",
   "",
