@@ -13,6 +13,7 @@ public sealed class PublicPackageDownloadProofInputTests
     {
         RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Export-PublicPackageDownloadProofInputTemplate.ps1"));
         RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Test-PublicPackageDownloadProofInput.ps1"), "-Strict");
+        WritePublicDownloadReadinessMatrix(canPromotePublicProof: false);
         RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Import-PublicPackageDownloadProofCandidate.ps1"));
         RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Test-PublicPackageDownloadProofCandidate.ps1"), "-Strict");
 
@@ -54,6 +55,8 @@ public sealed class PublicPackageDownloadProofInputTests
         Assert.Equal(0, candidate.GetProperty("readyCandidateCount").GetInt32());
         Assert.Equal(1, candidate.GetProperty("blockedCandidateCount").GetInt32());
         Assert.False(candidate.GetProperty("proofCandidateReady").GetBoolean());
+        Assert.False(candidate.GetProperty("preReleasePublicPackageDownloadLaneReady").GetBoolean());
+        Assert.False(candidate.GetProperty("preReleaseCanPromotePublicProof").GetBoolean());
         Assert.False(candidate.GetProperty("performsPublish").GetBoolean());
         Assert.False(candidate.GetProperty("usesPublishToken").GetBoolean());
         Assert.False(candidate.GetProperty("canPublishPublicly").GetBoolean());
@@ -69,6 +72,8 @@ public sealed class PublicPackageDownloadProofInputTests
         Assert.Equal(0, candidateValidation.GetProperty("failedBlockerCount").GetInt32());
         Assert.True(candidateValidation.GetProperty("failedActionRequiredCount").GetInt32() > 0);
         Assert.False(candidateValidation.GetProperty("proofCandidateReady").GetBoolean());
+        Assert.False(candidateValidation.GetProperty("preReleasePublicPackageDownloadLaneReady").GetBoolean());
+        Assert.False(candidateValidation.GetProperty("preReleaseCanPromotePublicProof").GetBoolean());
         Assert.False(candidateValidation.GetProperty("performsPublish").GetBoolean());
         Assert.False(candidateValidation.GetProperty("usesPublishToken").GetBoolean());
         Assert.False(candidateValidation.GetProperty("canPublishPublicly").GetBoolean());
@@ -127,6 +132,7 @@ public sealed class PublicPackageDownloadProofInputTests
         Assert.True(validation.GetProperty("failedBlockerCount").GetInt32() > 0);
         Assert.False(validation.GetProperty("publicPackageDownloadProofReady").GetBoolean());
 
+        WritePublicDownloadReadinessMatrix(canPromotePublicProof: false);
         RunPowerShell(
             Path.Combine(RepositoryPaths.Root, "eng", "Import-PublicPackageDownloadProofCandidate.ps1"),
             "-InputPath",
@@ -216,6 +222,7 @@ public sealed class PublicPackageDownloadProofInputTests
             Assert.False(validation.GetProperty("isPackageConsumerRuntimeProof").GetBoolean());
             Assert.False(validation.GetProperty("isPostPublishProof").GetBoolean());
 
+            WritePublicDownloadReadinessMatrix(canPromotePublicProof: true);
             RunPowerShell(
                 Path.Combine(RepositoryPaths.Root, "eng", "Import-PublicPackageDownloadProofCandidate.ps1"),
                 "-InputPath",
@@ -236,6 +243,8 @@ public sealed class PublicPackageDownloadProofInputTests
             Assert.Equal(runtimePackageHash, candidate.GetProperty("downloadedRuntimeNupkgSha256").GetString());
             Assert.True(candidate.GetProperty("sourceGitHubActionsRunEvidenceReady").GetBoolean());
             Assert.True(candidate.GetProperty("sourceOwnerPublicPublishResultReady").GetBoolean());
+            Assert.True(candidate.GetProperty("preReleasePublicPackageDownloadLaneReady").GetBoolean());
+            Assert.True(candidate.GetProperty("preReleaseCanPromotePublicProof").GetBoolean());
             Assert.False(candidate.GetProperty("performsPublish").GetBoolean());
             Assert.False(candidate.GetProperty("usesPublishToken").GetBoolean());
             Assert.False(candidate.GetProperty("canClaimPackageConsumerRuntimeProof").GetBoolean());
@@ -252,6 +261,8 @@ public sealed class PublicPackageDownloadProofInputTests
             Assert.True(candidateValidation.GetProperty("proofCandidateReady").GetBoolean());
             Assert.True(candidateValidation.GetProperty("sourceGitHubActionsRunEvidenceReady").GetBoolean());
             Assert.True(candidateValidation.GetProperty("sourceOwnerPublicPublishResultReady").GetBoolean());
+            Assert.True(candidateValidation.GetProperty("preReleasePublicPackageDownloadLaneReady").GetBoolean());
+            Assert.True(candidateValidation.GetProperty("preReleaseCanPromotePublicProof").GetBoolean());
             Assert.Equal(managedPackagePageUrl, candidateValidation.GetProperty("sourceOwnerPublicPackageUrl").GetString());
             Assert.False(candidateValidation.GetProperty("isRuntimeExecutionProof").GetBoolean());
             Assert.False(candidateValidation.GetProperty("isPackageConsumerRuntimeProof").GetBoolean());
@@ -330,6 +341,75 @@ public sealed class PublicPackageDownloadProofInputTests
                     ["publicPackageSha256"] = publicPackageSha256
                 },
                 new JsonSerializerOptions { WriteIndented = true }));
+    }
+
+    private static void WritePublicDownloadReadinessMatrix(bool canPromotePublicProof)
+    {
+        string outputRoot = Path.Combine(RepositoryPaths.Root, "artifacts", "final-release");
+        Directory.CreateDirectory(outputRoot);
+
+        List<Dictionary<string, object?>> lanes =
+        [
+            ReadinessLane("source-quality-ci", ready: true, canPromotePublicProof: false),
+            ReadinessLane("current-head-package-dry-run", ready: false, canPromotePublicProof: false),
+            ReadinessLane("owner-dispatch-pack", ready: true, canPromotePublicProof: false),
+            ReadinessLane("public-package-download", ready: canPromotePublicProof, canPromotePublicProof: canPromotePublicProof),
+            ReadinessLane("clean-external-package-consumer-runtime", ready: false, canPromotePublicProof: false),
+            ReadinessLane("post-publish-clean-consumer-proof", ready: false, canPromotePublicProof: false),
+        ];
+        int readyLaneCount = lanes.Count(static lane => (bool)lane["ready"]!);
+
+        File.WriteAllText(
+            Path.Combine(outputRoot, "pre-release-package-proof-readiness-matrix.json"),
+            JsonSerializer.Serialize(
+                new Dictionary<string, object?>
+                {
+                    ["recordKind"] = "pre-release-package-proof-readiness-matrix",
+                    ["generatedAtUtc"] = DateTimeOffset.UtcNow.ToString("O"),
+                    ["matrixState"] = "blocked-real-public-package-and-runtime-proof-required",
+                    ["currentHead"] = "8065fa6e8adb66177522cb535f981c80d5f793d4",
+                    ["sourceQualityRunId"] = "29235831169",
+                    ["readyLaneCount"] = readyLaneCount,
+                    ["blockedLaneCount"] = lanes.Count - readyLaneCount,
+                    ["publicPackageDownloadProofReady"] = canPromotePublicProof,
+                    ["packageConsumerRuntimeProofReady"] = false,
+                    ["postPublishProofReady"] = false,
+                    ["performsPublish"] = false,
+                    ["usesPublishToken"] = false,
+                    ["canPublishPublicly"] = false,
+                    ["canCloseReleaseIssue"] = false,
+                    ["canPromoteProof"] = false,
+                    ["lanes"] = lanes,
+                    ["safetyBoundary"] = "Test fixture only; public proof promotion is explicit and still not runtime/post-publish/release-close proof.",
+                },
+                new JsonSerializerOptions { WriteIndented = true }));
+    }
+
+    private static Dictionary<string, object?> ReadinessLane(string id, bool ready, bool canPromotePublicProof)
+    {
+        return new Dictionary<string, object?>
+        {
+            ["id"] = id,
+            ["title"] = id,
+            ["state"] = ready ? "ready" : "blocked-fixture-proof-required",
+            ["ready"] = ready,
+            ["sourceArtifact"] = $"artifacts/final-release/{id}.json",
+            ["requiredEvidence"] = $"Fixture required evidence for {id}.",
+            ["requiredProof"] = $"Fixture required evidence for {id}.",
+            ["blockedReason"] = ready ? "none" : "fixture blocked until real proof exists",
+            ["validatorPath"] = $"eng\\Test-{id}.ps1 -Strict",
+            ["failedBlockerCount"] = 0,
+            ["failedActionRequiredCount"] = ready ? 0 : 1,
+            ["performsPublish"] = false,
+            ["canPromotePublicProof"] = canPromotePublicProof,
+            ["canPromoteRuntimeProof"] = false,
+            ["canPromotePostPublishProof"] = false,
+            ["canPromoteProof"] = canPromotePublicProof,
+            ["canPublishPublicly"] = false,
+            ["canCloseReleaseIssue"] = false,
+            ["isPackageConsumerRuntimeProof"] = false,
+            ["isPostPublishProof"] = false,
+        };
     }
 
     private static void CreateMinimalNupkg(string path, string packageId)

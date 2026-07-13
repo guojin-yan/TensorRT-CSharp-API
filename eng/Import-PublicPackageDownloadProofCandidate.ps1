@@ -4,6 +4,7 @@ param(
   [string]$InputValidationPath = "artifacts\final-release\public-package-download-proof-input-validation.json",
   [string]$GitHubActionsRunEvidenceValidationPath = "artifacts\final-release\github-actions-run-evidence-import-validation.json",
   [string]$OwnerPublicPublishResultValidationPath = "artifacts\final-release\owner-public-publish-execution-result-candidate-validation.json",
+  [string]$PreReleaseReadinessMatrixPath = "artifacts\final-release\pre-release-package-proof-readiness-matrix.json",
   [string]$OutputRoot,
   [string]$RepositoryRoot
 )
@@ -55,6 +56,30 @@ function Get-PropertyOrDefault {
   return $DefaultValue
 }
 
+function Get-BoolPropertyOrDefault {
+  param(
+    [AllowNull()][object]$Object,
+    [string]$Name,
+    [bool]$DefaultValue
+  )
+
+  $value = Get-PropertyOrDefault -Object $Object -Name $Name -DefaultValue $DefaultValue
+  if ($value -is [bool]) { return [bool]$value }
+
+  $parsed = $false
+  if ([bool]::TryParse(([string]$value).Trim(), [ref]$parsed)) { return $parsed }
+
+  return $DefaultValue
+}
+
+function Read-JsonOrNull {
+  param([string]$Path)
+
+  $resolved = Resolve-RepositoryPath -Path $Path
+  if (-not (Test-Path -LiteralPath $resolved -PathType Leaf)) { return $null }
+  return Get-Content -LiteralPath $resolved -Raw -Encoding utf8 | ConvertFrom-Json
+}
+
 $resolvedInputPath = Resolve-RepositoryPath -Path $InputPath
 if (-not (Test-Path -LiteralPath $resolvedInputPath -PathType Leaf)) {
   & (Join-Path $RepositoryRoot "eng\Export-PublicPackageDownloadProofInputTemplate.ps1") -RepositoryRoot $RepositoryRoot
@@ -81,6 +106,23 @@ $ownerPublicPublishResultValidation = if (Test-Path -LiteralPath $resolvedOwnerP
 else {
   $null
 }
+$preReleaseReadinessMatrix = Read-JsonOrNull -Path $PreReleaseReadinessMatrixPath
+$preReleaseReadinessMatrixState = [string](Get-PropertyOrDefault -Object $preReleaseReadinessMatrix -Name "matrixState" -DefaultValue "missing-pre-release-package-proof-readiness-matrix")
+$preReleaseReadinessBlockedLaneCount = [int](Get-PropertyOrDefault -Object $preReleaseReadinessMatrix -Name "blockedLaneCount" -DefaultValue 999)
+$preReleaseReadinessLanes = @((Get-PropertyOrDefault -Object $preReleaseReadinessMatrix -Name "lanes" -DefaultValue @()))
+$preReleasePublicPackageDownloadLane = @($preReleaseReadinessLanes | Where-Object { ([string](Get-PropertyOrDefault -Object $_ -Name "id" -DefaultValue "")).Equals("public-package-download", [StringComparison]::OrdinalIgnoreCase) } | Select-Object -First 1)
+$preReleasePublicPackageDownloadLaneReady = if ($preReleasePublicPackageDownloadLane.Count -gt 0) {
+  Get-BoolPropertyOrDefault -Object $preReleasePublicPackageDownloadLane[0] -Name "ready" -DefaultValue $false
+}
+else {
+  $false
+}
+$preReleaseCanPromotePublicProof = if ($preReleasePublicPackageDownloadLane.Count -gt 0) {
+  Get-BoolPropertyOrDefault -Object $preReleasePublicPackageDownloadLane[0] -Name "canPromotePublicProof" -DefaultValue $false
+}
+else {
+  $false
+}
 
 $inputValidationState = [string](Get-PropertyOrDefault -Object $inputValidation -Name "validationState" -DefaultValue "missing-public-package-download-proof-input-validation")
 $inputValidationInputPath = [string](Get-PropertyOrDefault -Object $inputValidation -Name "inputPath" -DefaultValue "")
@@ -98,6 +140,7 @@ if (-not [string]::IsNullOrWhiteSpace($inputValidationInputPath)) {
 $sourceReady = $inputValidationState -eq "public-package-download-proof-input-ready" -and
   [bool](Get-PropertyOrDefault -Object $inputValidation -Name "publicPackageDownloadProofReady" -DefaultValue $false) -and
   $inputValidationMatchesInput
+$candidateReady = $sourceReady -and $preReleaseCanPromotePublicProof
 
 $sourceGitHubActionsRunEvidenceReady = if ($null -eq $githubActionsRunEvidenceValidation) {
   [bool](Get-PropertyOrDefault -Object $inputRecord -Name "sourceGitHubActionsRunEvidenceReady" -DefaultValue $false)
@@ -181,11 +224,16 @@ $projection = [ordered]@{
   sourceOwnerPublicPackageUrl = $sourceOwnerPublicPackageUrl
   sourceOwnerPublicPackageVersion = $sourceOwnerPublicPackageVersion
   sourceOwnerPublicPackageSha256 = $sourceOwnerPublicPackageSha256
+  preReleaseReadinessMatrixPath = $PreReleaseReadinessMatrixPath
+  preReleaseReadinessMatrixState = $preReleaseReadinessMatrixState
+  preReleaseReadinessBlockedLaneCount = $preReleaseReadinessBlockedLaneCount
+  preReleasePublicPackageDownloadLaneReady = $preReleasePublicPackageDownloadLaneReady
+  preReleaseCanPromotePublicProof = $preReleaseCanPromotePublicProof
   forbiddenSubstituteFindings = @($forbiddenSubstituteFindings)
 }
 
 $candidateItems = @()
-if ($sourceReady) {
+if ($candidateReady) {
   $candidate = [ordered]@{
     candidateId = "public-package-download-proof-candidate-001"
     candidateState = "public-package-download-proof-candidate-imported"
@@ -198,18 +246,23 @@ if ($sourceReady) {
 $record = [ordered]@{
   recordKind = "public-package-download-proof-candidate"
   generatedAtUtc = [DateTimeOffset]::UtcNow.ToString("O")
-  candidateState = if ($sourceReady) { "public-package-download-proof-candidate-imported" } else { "blocked-public-package-download-proof-required" }
+  candidateState = if ($candidateReady) { "public-package-download-proof-candidate-imported" } else { "blocked-public-package-download-proof-required" }
   sourceInputPath = $resolvedInputPath
   sourceInputValidationPath = $resolvedInputValidationPath
   sourceInputValidationState = $inputValidationState
   sourceInputValidationInputPath = $inputValidationInputPath
   sourceInputValidationMatchesInput = $inputValidationMatchesInput
   sourcePublicPackageDownloadProofReady = $sourceReady
+  preReleaseReadinessMatrixPath = $PreReleaseReadinessMatrixPath
+  preReleaseReadinessMatrixState = $preReleaseReadinessMatrixState
+  preReleaseReadinessBlockedLaneCount = $preReleaseReadinessBlockedLaneCount
+  preReleasePublicPackageDownloadLaneReady = $preReleasePublicPackageDownloadLaneReady
+  preReleaseCanPromotePublicProof = $preReleaseCanPromotePublicProof
   candidateItemCount = $candidateItems.Count
-  readyCandidateCount = if ($sourceReady) { 1 } else { 0 }
-  blockedCandidateCount = if ($sourceReady) { 0 } else { 1 }
-  publicPackageDownloadProofCandidateReady = $sourceReady
-  proofCandidateReady = $sourceReady
+  readyCandidateCount = if ($candidateReady) { 1 } else { 0 }
+  blockedCandidateCount = if ($candidateReady) { 0 } else { 1 }
+  publicPackageDownloadProofCandidateReady = $candidateReady
+  proofCandidateReady = $candidateReady
   candidateItems = @($candidateItems)
   performsPublish = $false
   usesPublishToken = $false
@@ -250,6 +303,9 @@ $markdown = @"
 | sourceInputValidationMatchesInput | ``$($record.sourceInputValidationMatchesInput)`` |
 | sourceGitHubActionsRunEvidenceReady | ``$($record.sourceGitHubActionsRunEvidenceReady)`` |
 | sourceOwnerPublicPublishResultReady | ``$($record.sourceOwnerPublicPublishResultReady)`` |
+| preReleaseReadinessMatrixState | ``$($record.preReleaseReadinessMatrixState)`` |
+| preReleasePublicPackageDownloadLaneReady | ``$($record.preReleasePublicPackageDownloadLaneReady)`` |
+| preReleaseCanPromotePublicProof | ``$($record.preReleaseCanPromotePublicProof)`` |
 | managedPackagePageUrl | ``$($record.managedPackagePageUrl)`` |
 | managedPackageDownloadUrl | ``$($record.managedPackageDownloadUrl)`` |
 | runtimePackagePageUrl | ``$($record.runtimePackagePageUrl)`` |

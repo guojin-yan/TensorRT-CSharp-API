@@ -1,6 +1,7 @@
 [CmdletBinding()]
 param(
   [string]$RuntimePackageKey = "win-x64-trt11.0-cuda13.2-cudnn9.22",
+  [string]$PreReleaseReadinessMatrixPath = "artifacts\final-release\pre-release-package-proof-readiness-matrix.json",
   [string]$RepositoryRoot
 )
 
@@ -23,6 +24,62 @@ $OutputEncoding = $utf8
 
 $artifactRoot = Join-Path $RepositoryRoot "artifacts\final-release"
 New-Item -ItemType Directory -Force -Path $artifactRoot | Out-Null
+
+function Resolve-RepositoryPath {
+  param([string]$Path)
+  if ([string]::IsNullOrWhiteSpace($Path)) { return $Path }
+  if ([System.IO.Path]::IsPathRooted($Path)) { return $Path }
+  return Join-Path $RepositoryRoot $Path
+}
+
+function Read-JsonOrNull {
+  param([string]$Path)
+  $resolved = Resolve-RepositoryPath -Path $Path
+  if (-not (Test-Path -LiteralPath $resolved -PathType Leaf)) { return $null }
+  return Get-Content -LiteralPath $resolved -Raw -Encoding utf8 | ConvertFrom-Json
+}
+
+function Get-PropertyOrDefault {
+  param([AllowNull()][object]$Object, [string]$Name, [AllowNull()][object]$DefaultValue)
+  if ($null -eq $Object) { return $DefaultValue }
+  if ($Object.PSObject.Properties.Name -contains $Name) { return $Object.PSObject.Properties[$Name].Value }
+  return $DefaultValue
+}
+
+function Get-BoolPropertyOrDefault {
+  param([AllowNull()][object]$Object, [string]$Name, [bool]$DefaultValue)
+  $value = Get-PropertyOrDefault -Object $Object -Name $Name -DefaultValue $DefaultValue
+  if ($value -is [bool]) { return [bool]$value }
+  $parsed = $false
+  if ([bool]::TryParse(([string]$value).Trim(), [ref]$parsed)) { return $parsed }
+  return $DefaultValue
+}
+
+function ConvertTo-MarkdownCell {
+  param([AllowNull()][object]$Value)
+  if ($null -eq $Value) { return "" }
+  return ([string]$Value).Replace("|", "\|").Replace("`r", " ").Replace("`n", " ")
+}
+
+$preReleaseReadinessMatrix = Read-JsonOrNull -Path $PreReleaseReadinessMatrixPath
+$preReleaseReadinessMatrixState = [string](Get-PropertyOrDefault -Object $preReleaseReadinessMatrix -Name "matrixState" -DefaultValue "missing-pre-release-package-proof-readiness-matrix")
+$preReleaseReadinessMatrixReady = $preReleaseReadinessMatrixState.Equals("pre-release-package-proof-ready", [StringComparison]::OrdinalIgnoreCase)
+$preReleaseReadyLaneCount = [int](Get-PropertyOrDefault -Object $preReleaseReadinessMatrix -Name "readyLaneCount" -DefaultValue 0)
+$preReleaseBlockedLaneCount = [int](Get-PropertyOrDefault -Object $preReleaseReadinessMatrix -Name "blockedLaneCount" -DefaultValue 0)
+$preReleaseCurrentHead = [string](Get-PropertyOrDefault -Object $preReleaseReadinessMatrix -Name "currentHead" -DefaultValue "")
+$preReleaseSourceQualityRunId = [string](Get-PropertyOrDefault -Object $preReleaseReadinessMatrix -Name "sourceQualityRunId" -DefaultValue "")
+$preReleaseLanes = @((Get-PropertyOrDefault -Object $preReleaseReadinessMatrix -Name "lanes" -DefaultValue @()))
+$blockedReadinessLanes = @($preReleaseLanes | Where-Object { -not (Get-BoolPropertyOrDefault -Object $_ -Name "ready" -DefaultValue $false) } | ForEach-Object {
+    [pscustomobject]@{
+      id = [string](Get-PropertyOrDefault -Object $_ -Name "id" -DefaultValue "")
+      state = [string](Get-PropertyOrDefault -Object $_ -Name "state" -DefaultValue "")
+      requiredEvidence = [string](Get-PropertyOrDefault -Object $_ -Name "requiredEvidence" -DefaultValue "")
+      validatorPath = [string](Get-PropertyOrDefault -Object $_ -Name "validatorPath" -DefaultValue "")
+      blockedReason = [string](Get-PropertyOrDefault -Object $_ -Name "blockedReason" -DefaultValue "")
+    }
+  })
+$readinessRequiredEvidence = @($preReleaseLanes | ForEach-Object { [string](Get-PropertyOrDefault -Object $_ -Name "requiredEvidence" -DefaultValue "") } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)
+$readinessValidatorPaths = @($preReleaseLanes | ForEach-Object { [string](Get-PropertyOrDefault -Object $_ -Name "validatorPath" -DefaultValue "") } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)
 
 $template = [pscustomobject]@{
   recordKind = "owner-publish-authorization-input"
@@ -60,6 +117,17 @@ $template = [pscustomobject]@{
   sourceRunnerQueueStatus = "<owner-fill-completed-not-queued>"
   sourceRunnerInfrastructureStatus = "<owner-fill-available-not-missing-self-hosted-runner>"
   sourceRunnerOwnerAction = "owner-infra-action-required-until-runner-completed-and-available"
+  preReleaseReadinessMatrixPath = $PreReleaseReadinessMatrixPath
+  preReleaseReadinessMatrixState = $preReleaseReadinessMatrixState
+  preReleaseReadinessMatrixReady = $preReleaseReadinessMatrixReady
+  preReleaseReadinessCurrentHead = $preReleaseCurrentHead
+  preReleaseReadinessSourceQualityRunId = $preReleaseSourceQualityRunId
+  preReleaseReadyLaneCount = $preReleaseReadyLaneCount
+  preReleaseBlockedLaneCount = $preReleaseBlockedLaneCount
+  preReleaseBlockedLanes = @($blockedReadinessLanes)
+  preReleaseRequiredEvidence = @($readinessRequiredEvidence)
+  preReleaseValidatorPaths = @($readinessValidatorPaths)
+  confirmsPreReleaseReadinessMatrixReviewed = "<owner-fill-true>"
   confirmsNoTokenPersisted = "<owner-fill-true>"
   confirmsNoDryRunArtifactSubstitution = "<owner-fill-true>"
   confirmsPackageHashesReviewed = "<owner-fill-true>"
@@ -80,6 +148,7 @@ $template = [pscustomobject]@{
   blockedReasons = @(
     "owner-authorization-required",
     "publish-command-owner-review-required",
+    "pre-release-readiness-matrix-not-ready",
     "public-package-download-proof-still-required",
     "post-publish-proof-required"
   )
@@ -133,6 +202,9 @@ $markdown = @"
 | publishCommandPlanPath | ``$($template.publishCommandPlanPath)`` |
 | sourceRunnerQueueStatus | ``$($template.sourceRunnerQueueStatus)`` |
 | sourceRunnerInfrastructureStatus | ``$($template.sourceRunnerInfrastructureStatus)`` |
+| preReleaseReadinessMatrixState | ``$($template.preReleaseReadinessMatrixState)`` |
+| preReleaseReadinessMatrixReady | ``$($template.preReleaseReadinessMatrixReady)`` |
+| preReleaseBlockedLaneCount | ``$($template.preReleaseBlockedLaneCount)`` |
 | performsPublish | ``$($template.performsPublish)`` |
 | usesPublishToken | ``$($template.usesPublishToken)`` |
 | requiresOwnerAuthorization | ``$($template.requiresOwnerAuthorization)`` |
@@ -147,6 +219,12 @@ $($commandRows -join "`r`n")
 ## Blocked Reasons
 
 $($blockedRows -join "`r`n")
+
+## Pre-Release Readiness Blocked Lanes
+
+| Lane | State | Validator | Required Evidence |
+|---|---|---|---|
+$(@($template.preReleaseBlockedLanes | ForEach-Object { "| ``$(ConvertTo-MarkdownCell $_.id)`` | ``$(ConvertTo-MarkdownCell $_.state)`` | ``$(ConvertTo-MarkdownCell $_.validatorPath)`` | $(ConvertTo-MarkdownCell $_.requiredEvidence) |" }) -join "`r`n")
 
 ## Forbidden Substitutes
 

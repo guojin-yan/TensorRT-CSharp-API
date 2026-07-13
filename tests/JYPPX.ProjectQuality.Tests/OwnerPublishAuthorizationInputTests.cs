@@ -11,51 +11,82 @@ public sealed class OwnerPublishAuthorizationInputTests
     [Fact]
     public void OwnerPublishAuthorizationTemplateExportsBlockedNonPublishingSurface()
     {
-        RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Export-OwnerPublishAuthorizationInputTemplate.ps1"));
-        RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Test-OwnerPublishAuthorizationInput.ps1"), "-Strict");
+        string tempRoot = Path.Combine(Path.GetTempPath(), "trtsharp-owner-auth-blocked-" + Guid.NewGuid().ToString("N"));
+        string blockedReadinessMatrixPath = Path.Combine(tempRoot, "pre-release-package-proof-readiness-matrix.blocked.json");
 
-        using JsonDocument templateDocument = ReadFinalReleaseJson("owner-publish-authorization-input.template.json");
-        JsonElement template = templateDocument.RootElement;
-        Assert.Equal("owner-publish-authorization-input", template.GetProperty("recordKind").GetString());
-        Assert.Equal("blocked-owner-publish-authorization-required", template.GetProperty("validationState").GetString());
-        Assert.Equal("owner-authorization-required", template.GetProperty("authorizationDecision").GetString());
-        Assert.Equal("manual-owner-run-only", template.GetProperty("ownerAuthorizationScope").GetString());
-        Assert.True(template.GetProperty("publishTargetChannels").GetArrayLength() >= 2);
-        Assert.True(template.TryGetProperty("ownerAuthorizationId", out _));
-        Assert.True(template.TryGetProperty("publishCommandPlanSha256", out _));
-        Assert.True(template.TryGetProperty("managedPublishCommandSha256", out _));
-        Assert.True(template.TryGetProperty("runtimePublishCommandSha256", out _));
-        Assert.True(template.TryGetProperty("sourceRunnerQueueStatus", out _));
-        Assert.True(template.TryGetProperty("sourceRunnerInfrastructureStatus", out _));
-        Assert.True(template.TryGetProperty("sourceRunnerOwnerAction", out _));
-        Assert.False(template.GetProperty("performsPublish").GetBoolean());
-        Assert.False(template.GetProperty("usesPublishToken").GetBoolean());
-        Assert.True(template.GetProperty("requiresOwnerAuthorization").GetBoolean());
-        Assert.False(template.GetProperty("canPublishPublicly").GetBoolean());
-        Assert.False(template.GetProperty("canCloseReleaseIssue").GetBoolean());
-        Assert.False(template.GetProperty("isPostPublishProof").GetBoolean());
-        Assert.Contains("dotnet nuget push", template.GetProperty("publishCommandTemplates").EnumerateArray().First().GetString(), StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("does not execute dotnet nuget push", template.GetProperty("proofBoundary").GetString(), StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("queued GitHub Actions run", template.GetProperty("proofBoundary").GetString(), StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("missing self-hosted runner", template.GetProperty("proofBoundary").GetString(), StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("--force publish", template.GetProperty("forbiddenSubstitutes").EnumerateArray().Select(static item => item.GetString()), StringComparer.OrdinalIgnoreCase);
+        try
+        {
+            Directory.CreateDirectory(tempRoot);
+            WriteReadinessMatrix(blockedReadinessMatrixPath, ready: false);
 
-        using JsonDocument validationDocument = ReadFinalReleaseJson("owner-publish-authorization-input-validation.json");
-        JsonElement validation = validationDocument.RootElement;
-        Assert.Equal("owner-publish-authorization-input-validation", validation.GetProperty("recordKind").GetString());
-        Assert.Equal("blocked-owner-publish-authorization-required", validation.GetProperty("validationState").GetString());
-        Assert.Equal(0, validation.GetProperty("failedBlockerCount").GetInt32());
-        Assert.True(validation.GetProperty("failedActionRequiredCount").GetInt32() > 0);
-        Assert.False(validation.GetProperty("ownerPublishAuthorizationReady").GetBoolean());
-        Assert.Equal("manual-owner-run-only", validation.GetProperty("ownerAuthorizationScope").GetString());
-        Assert.Equal(2, validation.GetProperty("publishTargetChannelCount").GetInt32());
-        AssertValidationItemFailed(validation, "source-runner-not-queued");
-        AssertValidationItemFailed(validation, "source-runner-infrastructure-ready");
-        Assert.False(validation.GetProperty("performsPublish").GetBoolean());
-        Assert.False(validation.GetProperty("usesPublishToken").GetBoolean());
-        Assert.False(validation.GetProperty("canPublishPublicly").GetBoolean());
-        Assert.False(validation.GetProperty("canCloseReleaseIssue").GetBoolean());
-        Assert.False(validation.GetProperty("isPostPublishProof").GetBoolean());
+            RunPowerShell(
+                Path.Combine(RepositoryPaths.Root, "eng", "Export-OwnerPublishAuthorizationInputTemplate.ps1"),
+                "-PreReleaseReadinessMatrixPath",
+                blockedReadinessMatrixPath);
+            RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Test-OwnerPublishAuthorizationInput.ps1"), "-Strict");
+
+            using JsonDocument templateDocument = ReadFinalReleaseJson("owner-publish-authorization-input.template.json");
+            JsonElement template = templateDocument.RootElement;
+            Assert.Equal("owner-publish-authorization-input", template.GetProperty("recordKind").GetString());
+            Assert.Equal("blocked-owner-publish-authorization-required", template.GetProperty("validationState").GetString());
+            Assert.Equal("owner-authorization-required", template.GetProperty("authorizationDecision").GetString());
+            Assert.Equal("manual-owner-run-only", template.GetProperty("ownerAuthorizationScope").GetString());
+            Assert.True(template.GetProperty("publishTargetChannels").GetArrayLength() >= 2);
+            Assert.True(template.TryGetProperty("ownerAuthorizationId", out _));
+            Assert.True(template.TryGetProperty("publishCommandPlanSha256", out _));
+            Assert.True(template.TryGetProperty("managedPublishCommandSha256", out _));
+            Assert.True(template.TryGetProperty("runtimePublishCommandSha256", out _));
+            Assert.True(template.TryGetProperty("sourceRunnerQueueStatus", out _));
+            Assert.True(template.TryGetProperty("sourceRunnerInfrastructureStatus", out _));
+            Assert.True(template.TryGetProperty("sourceRunnerOwnerAction", out _));
+            Assert.Equal("blocked-real-public-package-and-runtime-proof-required", template.GetProperty("preReleaseReadinessMatrixState").GetString());
+            Assert.False(template.GetProperty("preReleaseReadinessMatrixReady").GetBoolean());
+            Assert.Equal(4, template.GetProperty("preReleaseBlockedLaneCount").GetInt32());
+            Assert.Equal(4, template.GetProperty("preReleaseBlockedLanes").GetArrayLength());
+            Assert.True(template.TryGetProperty("confirmsPreReleaseReadinessMatrixReviewed", out _));
+            Assert.False(template.GetProperty("performsPublish").GetBoolean());
+            Assert.False(template.GetProperty("usesPublishToken").GetBoolean());
+            Assert.True(template.GetProperty("requiresOwnerAuthorization").GetBoolean());
+            Assert.False(template.GetProperty("canPublishPublicly").GetBoolean());
+            Assert.False(template.GetProperty("canCloseReleaseIssue").GetBoolean());
+            Assert.False(template.GetProperty("isPostPublishProof").GetBoolean());
+            Assert.Contains("dotnet nuget push", template.GetProperty("publishCommandTemplates").EnumerateArray().First().GetString(), StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("does not execute dotnet nuget push", template.GetProperty("proofBoundary").GetString(), StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("queued GitHub Actions run", template.GetProperty("proofBoundary").GetString(), StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("missing self-hosted runner", template.GetProperty("proofBoundary").GetString(), StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("--force publish", template.GetProperty("forbiddenSubstitutes").EnumerateArray().Select(static item => item.GetString()), StringComparer.OrdinalIgnoreCase);
+
+            using JsonDocument validationDocument = ReadFinalReleaseJson("owner-publish-authorization-input-validation.json");
+            JsonElement validation = validationDocument.RootElement;
+            Assert.Equal("owner-publish-authorization-input-validation", validation.GetProperty("recordKind").GetString());
+            Assert.Equal("blocked-owner-publish-authorization-required", validation.GetProperty("validationState").GetString());
+            Assert.Equal(0, validation.GetProperty("failedBlockerCount").GetInt32());
+            Assert.True(validation.GetProperty("failedActionRequiredCount").GetInt32() > 0);
+            Assert.False(validation.GetProperty("ownerPublishAuthorizationReady").GetBoolean());
+            Assert.Equal("manual-owner-run-only", validation.GetProperty("ownerAuthorizationScope").GetString());
+            Assert.Equal(2, validation.GetProperty("publishTargetChannelCount").GetInt32());
+            Assert.Equal("blocked-real-public-package-and-runtime-proof-required", validation.GetProperty("preReleaseReadinessMatrixState").GetString());
+            Assert.False(validation.GetProperty("preReleaseReadinessMatrixReady").GetBoolean());
+            Assert.Equal(4, validation.GetProperty("preReleaseReadinessBlockedLaneCount").GetInt32());
+            Assert.Empty(validation.GetProperty("preReleaseMissingLaneIds").EnumerateArray());
+            Assert.Empty(validation.GetProperty("preReleaseMetadataMissingLaneIds").EnumerateArray());
+            Assert.Empty(validation.GetProperty("preReleasePrematurePromoteFindings").EnumerateArray());
+            AssertValidationItemFailed(validation, "source-runner-not-queued");
+            AssertValidationItemFailed(validation, "source-runner-infrastructure-ready");
+            AssertValidationItemFailed(validation, "pre-release-readiness-ready-for-publish-authorization");
+            Assert.False(validation.GetProperty("performsPublish").GetBoolean());
+            Assert.False(validation.GetProperty("usesPublishToken").GetBoolean());
+            Assert.False(validation.GetProperty("canPublishPublicly").GetBoolean());
+            Assert.False(validation.GetProperty("canCloseReleaseIssue").GetBoolean());
+            Assert.False(validation.GetProperty("isPostPublishProof").GetBoolean());
+        }
+        finally
+        {
+            if (Directory.Exists(tempRoot))
+            {
+                Directory.Delete(tempRoot, recursive: true);
+            }
+        }
     }
 
     [Fact]
@@ -88,6 +119,7 @@ public sealed class OwnerPublishAuthorizationInputTests
         values["managedPackageVersion"] = "4.0.0";
         values["runtimePackageVersion"] = "4.0.0";
         values["confirmsNoTokenPersisted"] = "true";
+        values["confirmsPreReleaseReadinessMatrixReviewed"] = "true";
         values["confirmsNoDryRunArtifactSubstitution"] = "true";
         values["confirmsPackageHashesReviewed"] = "true";
         values["confirmsPublishCommandReviewed"] = "true";
@@ -125,6 +157,7 @@ public sealed class OwnerPublishAuthorizationInputTests
         string runtimePath = Path.Combine(tempRoot, "JYPPX.TensorRT.CSharp.API.runtime.win-x64-trt11.0-cuda13.2-cudnn9.22.4.0.0.nupkg");
         string releaseNotesPath = Path.Combine(tempRoot, "release-notes.md");
         string rollbackPlanPath = Path.Combine(tempRoot, "rollback.md");
+        string readinessMatrixPath = Path.Combine(tempRoot, "pre-release-package-proof-readiness-matrix.ready.json");
 
         try
         {
@@ -132,8 +165,12 @@ public sealed class OwnerPublishAuthorizationInputTests
             CreateMinimalNupkg(runtimePath, "JYPPX.TensorRT.CSharp.API.runtime.win-x64-trt11.0-cuda13.2-cudnn9.22");
             File.WriteAllText(releaseNotesPath, "# Release notes");
             File.WriteAllText(rollbackPlanPath, "# Rollback plan");
+            WriteReadinessMatrix(readinessMatrixPath, ready: true);
 
-            RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Export-OwnerPublishAuthorizationInputTemplate.ps1"));
+            RunPowerShell(
+                Path.Combine(RepositoryPaths.Root, "eng", "Export-OwnerPublishAuthorizationInputTemplate.ps1"),
+                "-PreReleaseReadinessMatrixPath",
+                readinessMatrixPath);
             using JsonDocument templateDocument = ReadFinalReleaseJson("owner-publish-authorization-input.template.json");
             Dictionary<string, object?> values = ToDictionary(templateDocument.RootElement);
             values["ownerName"] = "Release Owner";
@@ -160,6 +197,7 @@ public sealed class OwnerPublishAuthorizationInputTests
             values["sourceRunnerQueueStatus"] = "completed";
             values["sourceRunnerInfrastructureStatus"] = "available";
             values["sourceRunnerOwnerAction"] = "owner-infra-action-reviewed-and-clear";
+            values["confirmsPreReleaseReadinessMatrixReviewed"] = "true";
             values["confirmsNoTokenPersisted"] = "true";
             values["confirmsNoDryRunArtifactSubstitution"] = "true";
             values["confirmsPackageHashesReviewed"] = "true";
@@ -189,6 +227,9 @@ public sealed class OwnerPublishAuthorizationInputTests
             Assert.Equal(2, validation.GetProperty("authorizedRouteCount").GetInt32());
             Assert.Equal("completed", validation.GetProperty("sourceRunnerQueueStatus").GetString());
             Assert.Equal("available", validation.GetProperty("sourceRunnerInfrastructureStatus").GetString());
+            Assert.Equal("pre-release-package-proof-ready", validation.GetProperty("preReleaseReadinessMatrixState").GetString());
+            Assert.True(validation.GetProperty("preReleaseReadinessMatrixReady").GetBoolean());
+            Assert.Equal(0, validation.GetProperty("preReleaseReadinessBlockedLaneCount").GetInt32());
             Assert.False(validation.GetProperty("performsPublish").GetBoolean());
             Assert.False(validation.GetProperty("usesPublishToken").GetBoolean());
             Assert.False(validation.GetProperty("canPublishPublicly").GetBoolean());
@@ -216,13 +257,24 @@ public sealed class OwnerPublishAuthorizationInputTests
     {
         return element.EnumerateObject().ToDictionary(
             static property => property.Name,
-            static property => property.Value.ValueKind switch
-            {
-                JsonValueKind.True => (object?)true,
-                JsonValueKind.False => false,
-                JsonValueKind.Array => property.Value.EnumerateArray().Select(static item => item.GetString()).ToArray(),
-                _ => property.Value.GetString()
-            });
+            static property => ToObject(property.Value));
+    }
+
+    private static object? ToObject(JsonElement element)
+    {
+        return element.ValueKind switch
+        {
+            JsonValueKind.Object => element.EnumerateObject().ToDictionary(
+                static property => property.Name,
+                static property => ToObject(property.Value)),
+            JsonValueKind.Array => element.EnumerateArray().Select(static item => ToObject(item)).ToArray(),
+            JsonValueKind.String => element.GetString(),
+            JsonValueKind.Number => element.TryGetInt64(out long longValue) ? longValue : element.GetDouble(),
+            JsonValueKind.True => true,
+            JsonValueKind.False => false,
+            JsonValueKind.Null => null,
+            _ => element.ToString()
+        };
     }
 
     private static JsonDocument ReadFinalReleaseJson(string fileName)
@@ -255,6 +307,73 @@ public sealed class OwnerPublishAuthorizationInputTests
     private static string SixtyFour(string value)
     {
         return string.Concat(Enumerable.Repeat(value, 64));
+    }
+
+    private static void WriteReadinessMatrix(string path, bool ready)
+    {
+        List<Dictionary<string, object?>> lanes =
+        [
+            ReadinessLane("source-quality-ci", ready),
+            ReadinessLane("current-head-package-dry-run", ready),
+            ReadinessLane("owner-dispatch-pack", ready),
+            ReadinessLane("public-package-download", ready),
+            ReadinessLane("clean-external-package-consumer-runtime", ready),
+            ReadinessLane("post-publish-clean-consumer-proof", ready),
+        ];
+
+        int readyLaneCount = lanes.Count(static lane => (bool)lane["ready"]!);
+        var matrix = new Dictionary<string, object?>
+        {
+            ["recordKind"] = "pre-release-package-proof-readiness-matrix",
+            ["generatedAtUtc"] = DateTimeOffset.UtcNow.ToString("O"),
+            ["matrixState"] = ready ? "pre-release-package-proof-ready" : "blocked-real-public-package-and-runtime-proof-required",
+            ["currentHead"] = "8065fa6e8adb66177522cb535f981c80d5f793d4",
+            ["sourceQualityRunId"] = "29235831169",
+            ["readyLaneCount"] = readyLaneCount,
+            ["blockedLaneCount"] = lanes.Count - readyLaneCount,
+            ["currentHeadPackageDryRunReady"] = ready,
+            ["ownerDispatchPackReadyForOwner"] = ready,
+            ["publicPackageDownloadProofReady"] = ready,
+            ["packageConsumerRuntimeProofReady"] = ready,
+            ["postPublishProofReady"] = ready,
+            ["performsPublish"] = false,
+            ["usesPublishToken"] = false,
+            ["canPublishPublicly"] = false,
+            ["canCloseReleaseIssue"] = false,
+            ["canPromoteProof"] = false,
+            ["lanes"] = lanes,
+            ["safetyBoundary"] = "Test fixture only; no publish, no token use, and no release close side effects.",
+        };
+
+        File.WriteAllText(path, JsonSerializer.Serialize(matrix, new JsonSerializerOptions { WriteIndented = true }));
+    }
+
+    private static Dictionary<string, object?> ReadinessLane(string id, bool ready)
+    {
+        bool laneReady = ready || id is "source-quality-ci" or "owner-dispatch-pack";
+        return new Dictionary<string, object?>
+        {
+            ["id"] = id,
+            ["title"] = id,
+            ["state"] = laneReady ? "ready" : "blocked-fixture-proof-required",
+            ["ready"] = laneReady,
+            ["sourceArtifact"] = $"artifacts/final-release/{id}.json",
+            ["requiredEvidence"] = $"Fixture required evidence for {id}.",
+            ["requiredProof"] = $"Fixture required evidence for {id}.",
+            ["blockedReason"] = laneReady ? "none" : "fixture blocked until real public package/runtime/post-publish proof exists",
+            ["validatorPath"] = $"eng\\Test-{id}.ps1 -Strict",
+            ["failedBlockerCount"] = 0,
+            ["failedActionRequiredCount"] = laneReady ? 0 : 1,
+            ["performsPublish"] = false,
+            ["canPromotePublicProof"] = false,
+            ["canPromoteRuntimeProof"] = false,
+            ["canPromotePostPublishProof"] = false,
+            ["canPromoteProof"] = false,
+            ["canPublishPublicly"] = false,
+            ["canCloseReleaseIssue"] = false,
+            ["isPackageConsumerRuntimeProof"] = false,
+            ["isPostPublishProof"] = false,
+        };
     }
 
     private static string RunPowerShell(string scriptPath, params string[] arguments)

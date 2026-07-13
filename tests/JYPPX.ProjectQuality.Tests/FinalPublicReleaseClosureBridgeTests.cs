@@ -18,12 +18,14 @@ public sealed class FinalPublicReleaseClosureBridgeTests
     [Fact]
     public void FinalPublicReleaseClosureBridgeKeepsRealOwnerProofBlockedAndSideEffectFree()
     {
+        WriteBlockedSourceProofValidations();
         RunPowerShell("Export-PublicPackageDownloadProofInputTemplate.ps1");
         RunPowerShell("Test-PublicPackageDownloadProofInput.ps1", "-Strict");
         RunPowerShell("Import-PublicPackageDownloadProofCandidate.ps1");
         RunPowerShell("Test-PublicPackageDownloadProofCandidate.ps1", "-Strict");
         RunPowerShell("Export-CleanExternalConsumerSmokeInputTemplate.ps1");
         RunPowerShell("Test-CleanExternalConsumerSmokeInput.ps1", "-Strict");
+        RunPowerShell("Export-PreReleasePackageProofReadinessMatrix.ps1");
         RunPowerShell("Export-OwnerPublishAuthorizationInputTemplate.ps1");
         RunPowerShell("Test-OwnerPublishAuthorizationInput.ps1", "-Strict");
         RunPowerShell("Export-OwnerPublishExecutionResultInputTemplate.ps1");
@@ -330,6 +332,44 @@ public sealed class FinalPublicReleaseClosureBridgeTests
             "artifacts",
             "final-release",
             fileName)));
+    }
+
+    private static void WriteBlockedSourceProofValidations()
+    {
+        string outputRoot = Path.Combine(RepositoryPaths.Root, "artifacts", "final-release");
+        Directory.CreateDirectory(outputRoot);
+
+        File.WriteAllText(
+            Path.Combine(outputRoot, "github-actions-run-evidence-import-validation.json"),
+            JsonSerializer.Serialize(
+                new Dictionary<string, object?>
+                {
+                    ["recordKind"] = "github-actions-run-evidence-import-validation",
+                    ["validationState"] = "blocked-github-actions-run-evidence-required",
+                    ["githubActionsRunEvidenceReady"] = false,
+                    ["sourceQualityRunEvidenceReady"] = false,
+                    ["packageDryRunEvidenceReady"] = false,
+                    ["failedBlockerCount"] = 0,
+                    ["failedActionRequiredCount"] = 1,
+                },
+                IndentedJsonOptions));
+
+        File.WriteAllText(
+            Path.Combine(outputRoot, "owner-public-publish-execution-result-candidate-validation.json"),
+            JsonSerializer.Serialize(
+                new Dictionary<string, object?>
+                {
+                    ["recordKind"] = "owner-public-publish-execution-result-candidate-validation",
+                    ["validationState"] = "blocked-owner-public-publish-execution-result-required",
+                    ["proofCandidateReady"] = false,
+                    ["ownerPublicPublishResultReady"] = false,
+                    ["publicPackageUrl"] = string.Empty,
+                    ["publicPackageVersion"] = string.Empty,
+                    ["publicPackageSha256"] = string.Empty,
+                    ["failedBlockerCount"] = 0,
+                    ["failedActionRequiredCount"] = 1,
+                },
+                IndentedJsonOptions));
     }
 
     private static void AssertFalseProofPublishCloseFlags(JsonElement element)

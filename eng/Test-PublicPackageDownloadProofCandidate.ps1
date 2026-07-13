@@ -314,6 +314,11 @@ $sourceArtifactManifestSha256 = [string](Get-PropertyOrDefault -Object $record -
 $sourceOwnerPublicPackageUrl = [string](Get-PropertyOrDefault -Object $record -Name "sourceOwnerPublicPackageUrl" -DefaultValue "")
 $sourceOwnerPublicPackageVersion = [string](Get-PropertyOrDefault -Object $record -Name "sourceOwnerPublicPackageVersion" -DefaultValue "")
 $sourceOwnerPublicPackageSha256 = [string](Get-PropertyOrDefault -Object $record -Name "sourceOwnerPublicPackageSha256" -DefaultValue "")
+$preReleaseReadinessMatrixPath = [string](Get-PropertyOrDefault -Object $record -Name "preReleaseReadinessMatrixPath" -DefaultValue "artifacts\final-release\pre-release-package-proof-readiness-matrix.json")
+$preReleaseReadinessMatrixState = [string](Get-PropertyOrDefault -Object $record -Name "preReleaseReadinessMatrixState" -DefaultValue "missing-pre-release-package-proof-readiness-matrix")
+$preReleaseReadinessBlockedLaneCount = [int](Get-PropertyOrDefault -Object $record -Name "preReleaseReadinessBlockedLaneCount" -DefaultValue 999)
+$preReleasePublicPackageDownloadLaneReady = Get-BoolPropertyOrDefault -Object $record -Name "preReleasePublicPackageDownloadLaneReady" -DefaultValue $false
+$preReleaseCanPromotePublicProof = Get-BoolPropertyOrDefault -Object $record -Name "preReleaseCanPromotePublicProof" -DefaultValue $false
 $projectionForbiddenFindings = @((Get-PropertyOrDefault -Object $record -Name "forbiddenSubstituteFindings" -DefaultValue @()))
 $forbiddenFindings = Get-ForbiddenSubstituteFindings -Values @(
   $sourceKind, $sourceUrl, $managedPageUrl, $managedDownloadUrl, $runtimePageUrl, $runtimeDownloadUrl,
@@ -336,7 +341,8 @@ $isReleaseCloseProof = Get-BoolPropertyOrDefault -Object $record -Name "isReleas
 $isGitHubActionsProof = Get-BoolPropertyOrDefault -Object $record -Name "isGitHubActionsProof" -DefaultValue $true
 
 $sourceReady = $sourceInputValidationState -eq "public-package-download-proof-input-ready" -and $sourcePublicPackageDownloadProofReady
-$candidateCountsConsistent = if ($sourceReady) {
+$candidatePromotionGateReady = $sourceReady -and $preReleaseCanPromotePublicProof
+$candidateCountsConsistent = if ($candidatePromotionGateReady) {
   $candidateReady -and $proofCandidateReady -and $candidateItemCount -eq 1 -and $readyCandidateCount -eq 1 -and $blockedCandidateCount -eq 0
 }
 else {
@@ -350,6 +356,8 @@ $items.Add((New-ValidationItem -Id "no-side-effects" -Passed (-not $performsPubl
 $items.Add((New-ValidationItem -Id "proof-claims-false" -Passed (-not $canClaimRuntimeProof -and -not $canClaimPackageConsumerRuntimeProof -and -not $canPromoteRuntimeProof -and -not $isRuntimeExecutionProof -and -not $isPackageConsumerRuntimeProof -and -not $isPostPublishProof -and -not $isReleaseCloseProof -and -not $isGitHubActionsProof) -Severity "blocker" -Detail "Candidate is not runtime proof, package-consumer runtime proof, post-publish proof, release close proof, or GitHub Actions proof.")) | Out-Null
 $items.Add((New-ValidationItem -Id "boundary" -Passed ($raw.IndexOf("not runtime proof", [StringComparison]::OrdinalIgnoreCase) -ge 0 -and $raw.IndexOf("not package push", [StringComparison]::OrdinalIgnoreCase) -ge 0 -and $raw.IndexOf("cannot close", [StringComparison]::OrdinalIgnoreCase) -ge 0) -Severity "blocker" -Detail "Candidate must document non-proof/non-side-effect boundary.")) | Out-Null
 $items.Add((New-ValidationItem -Id "source-input-ready" -Passed $sourceReady -Severity "action-required" -Detail "Source public package download input validation must be public-package-download-proof-input-ready.")) | Out-Null
+$items.Add((New-ValidationItem -Id "pre-release-public-package-download-lane-ready" -Passed $preReleasePublicPackageDownloadLaneReady -Severity "action-required" -Detail "Pre-release readiness matrix public-package-download lane must be ready before candidate can promote public proof.")) | Out-Null
+$items.Add((New-ValidationItem -Id "pre-release-can-promote-public-proof" -Passed $preReleaseCanPromotePublicProof -Severity "action-required" -Detail "Pre-release readiness matrix must explicitly set canPromotePublicProof for the public-package-download lane.")) | Out-Null
 $items.Add((New-ValidationItem -Id "managed-package-id-present" -Passed ($managedPackageId -eq "JYPPX.TensorRT.CSharp.API") -Severity "action-required" -Detail "Managed package id must match the public managed package.")) | Out-Null
 $items.Add((New-ValidationItem -Id "managed-package-version-present" -Passed (-not (Test-IsPlaceholder -Value $managedPackageVersion)) -Severity "action-required" -Detail "managedPackageVersion must be real.")) | Out-Null
 $items.Add((New-ValidationItem -Id "runtime-package-id-present" -Passed ($runtimePackageId.StartsWith("JYPPX.TensorRT.CSharp.API.runtime.", [StringComparison]::Ordinal)) -Severity "action-required" -Detail "Runtime package id must be a public runtime package id.")) | Out-Null
@@ -417,6 +425,11 @@ $validation = [pscustomobject]@{
   sourceOwnerPublicPackageUrl = $sourceOwnerPublicPackageUrl
   sourceOwnerPublicPackageVersion = $sourceOwnerPublicPackageVersion
   sourceOwnerPublicPackageSha256 = $sourceOwnerPublicPackageSha256
+  preReleaseReadinessMatrixPath = $preReleaseReadinessMatrixPath
+  preReleaseReadinessMatrixState = $preReleaseReadinessMatrixState
+  preReleaseReadinessBlockedLaneCount = $preReleaseReadinessBlockedLaneCount
+  preReleasePublicPackageDownloadLaneReady = $preReleasePublicPackageDownloadLaneReady
+  preReleaseCanPromotePublicProof = $preReleaseCanPromotePublicProof
   managedPackagePageUrl = $managedPageUrl
   managedPackageDownloadUrl = $managedDownloadUrl
   runtimePackagePageUrl = $runtimePageUrl
@@ -469,6 +482,11 @@ $markdown = @"
 | sourceInputValidationState | ``$($validation.sourceInputValidationState)`` |
 | sourceGitHubActionsRunEvidenceReady | ``$($validation.sourceGitHubActionsRunEvidenceReady)`` |
 | sourceOwnerPublicPublishResultReady | ``$($validation.sourceOwnerPublicPublishResultReady)`` |
+| preReleaseReadinessMatrixPath | ``$($validation.preReleaseReadinessMatrixPath)`` |
+| preReleaseReadinessMatrixState | ``$($validation.preReleaseReadinessMatrixState)`` |
+| preReleaseReadinessBlockedLaneCount | ``$($validation.preReleaseReadinessBlockedLaneCount)`` |
+| preReleasePublicPackageDownloadLaneReady | ``$($validation.preReleasePublicPackageDownloadLaneReady)`` |
+| preReleaseCanPromotePublicProof | ``$($validation.preReleaseCanPromotePublicProof)`` |
 | managedPackagePageUrl | ``$($validation.managedPackagePageUrl)`` |
 | managedPackageDownloadUrl | ``$($validation.managedPackageDownloadUrl)`` |
 | runtimePackagePageUrl | ``$($validation.runtimePackagePageUrl)`` |

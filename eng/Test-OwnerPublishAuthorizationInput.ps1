@@ -158,6 +158,41 @@ if (-not (Test-Path -LiteralPath $resolvedInputPath -PathType Leaf)) {
 $record = Get-Content -LiteralPath $resolvedInputPath -Raw -Encoding utf8 | ConvertFrom-Json
 $items = New-Object System.Collections.Generic.List[object]
 
+$preReleaseReadinessMatrixPath = [string](Get-PropertyOrDefault -Object $record -Name "preReleaseReadinessMatrixPath" -DefaultValue "artifacts\final-release\pre-release-package-proof-readiness-matrix.json")
+$resolvedPreReleaseReadinessMatrixPath = Resolve-InputPath -Path $preReleaseReadinessMatrixPath
+$preReleaseReadinessMatrix = if (Test-Path -LiteralPath $resolvedPreReleaseReadinessMatrixPath -PathType Leaf) {
+  Get-Content -LiteralPath $resolvedPreReleaseReadinessMatrixPath -Raw -Encoding utf8 | ConvertFrom-Json
+}
+else {
+  $null
+}
+$preReleaseReadinessMatrixState = [string](Get-PropertyOrDefault -Object $preReleaseReadinessMatrix -Name "matrixState" -DefaultValue "missing-pre-release-package-proof-readiness-matrix")
+$preReleaseReadinessMatrixReady = $preReleaseReadinessMatrixState.Equals("pre-release-package-proof-ready", [StringComparison]::OrdinalIgnoreCase)
+$preReleaseReadinessBlockedLaneCount = [int](Get-PropertyOrDefault -Object $preReleaseReadinessMatrix -Name "blockedLaneCount" -DefaultValue 999)
+$preReleaseReadinessLanes = @((Get-PropertyOrDefault -Object $preReleaseReadinessMatrix -Name "lanes" -DefaultValue @()))
+$preReleaseRequiredLaneIds = @(
+  "source-quality-ci",
+  "current-head-package-dry-run",
+  "owner-dispatch-pack",
+  "public-package-download",
+  "clean-external-package-consumer-runtime",
+  "post-publish-clean-consumer-proof"
+)
+$preReleaseLaneIds = @($preReleaseReadinessLanes | ForEach-Object { [string](Get-PropertyOrDefault -Object $_ -Name "id" -DefaultValue "") })
+$preReleaseMissingLaneIds = @($preReleaseRequiredLaneIds | Where-Object { $preReleaseLaneIds -notcontains $_ })
+$preReleaseMetadataMissing = @($preReleaseReadinessLanes | Where-Object {
+    [string]::IsNullOrWhiteSpace([string](Get-PropertyOrDefault -Object $_ -Name "requiredEvidence" -DefaultValue "")) -or
+    [string]::IsNullOrWhiteSpace([string](Get-PropertyOrDefault -Object $_ -Name "validatorPath" -DefaultValue ""))
+  } | ForEach-Object { [string](Get-PropertyOrDefault -Object $_ -Name "id" -DefaultValue "") })
+$preReleasePrematurePromoteFindings = @($preReleaseReadinessLanes | Where-Object {
+    $ready = Get-BoolPropertyOrDefault -Object $_ -Name "ready" -DefaultValue $false
+    $canPromotePublic = Get-BoolPropertyOrDefault -Object $_ -Name "canPromotePublicProof" -DefaultValue $false
+    $canPromoteRuntime = Get-BoolPropertyOrDefault -Object $_ -Name "canPromoteRuntimeProof" -DefaultValue $false
+    $canPromotePostPublish = Get-BoolPropertyOrDefault -Object $_ -Name "canPromotePostPublishProof" -DefaultValue $false
+    (-not $ready -and ($canPromotePublic -or $canPromoteRuntime -or $canPromotePostPublish)) -or
+    (@("source-quality-ci", "current-head-package-dry-run", "owner-dispatch-pack") -contains [string](Get-PropertyOrDefault -Object $_ -Name "id" -DefaultValue "") -and ($canPromotePublic -or $canPromoteRuntime -or $canPromotePostPublish))
+  } | ForEach-Object { [string](Get-PropertyOrDefault -Object $_ -Name "id" -DefaultValue "") })
+
 $recordKind = [string](Get-PropertyOrDefault -Object $record -Name "recordKind" -DefaultValue "")
 $authorizationDecision = [string](Get-PropertyOrDefault -Object $record -Name "authorizationDecision" -DefaultValue "")
 $authorizedRoutes = @(Get-PropertyOrDefault -Object $record -Name "authorizedRoutes" -DefaultValue @())
@@ -183,6 +218,11 @@ $items.Add((New-ValidationItem -Id "owner-authorization-scope-manual-only" -Pass
 $items.Add((New-ValidationItem -Id "source-runner-not-queued" -Passed (Test-ValueInSet -Value $sourceRunnerQueueStatus -AllowedValues @("completed", "not-queued")) -Severity "action-required" -Detail "sourceRunnerQueueStatus must be completed/not-queued. queued GitHub Actions run is owner-infra-action only.")) | Out-Null
 $items.Add((New-ValidationItem -Id "source-runner-infrastructure-ready" -Passed (Test-ValueInSet -Value $sourceRunnerInfrastructureStatus -AllowedValues @("available", "ready", "not-required")) -Severity "action-required" -Detail "sourceRunnerInfrastructureStatus must be available/ready/not-required. missing self-hosted runner is owner-infra-action only.")) | Out-Null
 $items.Add((New-ValidationItem -Id "source-runner-owner-action-boundary" -Passed ($sourceRunnerOwnerAction.Contains("owner-infra-action", [StringComparison]::OrdinalIgnoreCase)) -Severity "action-required" -Detail "sourceRunnerOwnerAction must keep queued/missing-runner cases as owner-infra-action, not proof.")) | Out-Null
+$items.Add((New-ValidationItem -Id "pre-release-readiness-matrix-present" -Passed ($null -ne $preReleaseReadinessMatrix) -Severity "action-required" -Detail "preReleaseReadinessMatrixPath must point to the generated readiness matrix.")) | Out-Null
+$items.Add((New-ValidationItem -Id "pre-release-readiness-lanes-present" -Passed ($preReleaseMissingLaneIds.Count -eq 0) -Severity "blocker" -Detail $(if ($preReleaseMissingLaneIds.Count -eq 0) { "All required pre-release readiness lanes are present." } else { "Missing pre-release lane(s): $($preReleaseMissingLaneIds -join ', ')" }))) | Out-Null
+$items.Add((New-ValidationItem -Id "pre-release-readiness-lane-metadata-present" -Passed ($preReleaseMetadataMissing.Count -eq 0) -Severity "blocker" -Detail $(if ($preReleaseMetadataMissing.Count -eq 0) { "All pre-release readiness lanes expose requiredEvidence and validatorPath." } else { "Missing lane metadata for: $($preReleaseMetadataMissing -join ', ')" }))) | Out-Null
+$items.Add((New-ValidationItem -Id "pre-release-readiness-no-premature-promote-flags" -Passed ($preReleasePrematurePromoteFindings.Count -eq 0) -Severity "blocker" -Detail $(if ($preReleasePrematurePromoteFindings.Count -eq 0) { "No blocked or non-proof readiness lane exposes promote flags." } else { "Premature promote lane(s): $($preReleasePrematurePromoteFindings -join ', ')" }))) | Out-Null
+$items.Add((New-ValidationItem -Id "pre-release-readiness-ready-for-publish-authorization" -Passed ($preReleaseReadinessMatrixReady -and $preReleaseReadinessBlockedLaneCount -eq 0) -Severity "action-required" -Detail "Owner publish authorization cannot be ready until pre-release package proof readiness matrix is ready and has no blocked lanes.")) | Out-Null
 
 foreach ($field in @("ownerName", "ownerAuthorizationId", "managedPackageVersion", "runtimePackageVersion")) {
   $items.Add((New-ValidationItem -Id "field-$field" -Passed (-not (Test-IsPlaceholder -Value (Get-PropertyOrDefault -Object $record -Name $field -DefaultValue ""))) -Severity "action-required" -Detail "$field must be real owner input.")) | Out-Null
@@ -206,7 +246,7 @@ foreach ($pair in @(
   $items.Add((New-ValidationItem -Id "$($pair.Sha)-hash-match-if-file-exists" -Passed (Test-FileHashMatchesIfExists -Path (Get-PropertyOrDefault -Object $record -Name $pair.Path -DefaultValue "") -Sha256 $shaValue) -Severity "action-required" -Detail "$($pair.Path), when present, must match $($pair.Sha).")) | Out-Null
 }
 
-foreach ($field in @("confirmsNoTokenPersisted", "confirmsNoDryRunArtifactSubstitution", "confirmsPackageHashesReviewed", "confirmsPublishCommandReviewed", "confirmsPublishCommandHashesReviewed", "confirmsNoForcePublish", "confirmsNoQueuedRunOrMissingRunnerSubstitution", "confirmsPublicPackageDownloadProofStillRequired")) {
+foreach ($field in @("confirmsPreReleaseReadinessMatrixReviewed", "confirmsNoTokenPersisted", "confirmsNoDryRunArtifactSubstitution", "confirmsPackageHashesReviewed", "confirmsPublishCommandReviewed", "confirmsPublishCommandHashesReviewed", "confirmsNoForcePublish", "confirmsNoQueuedRunOrMissingRunnerSubstitution", "confirmsPublicPackageDownloadProofStillRequired")) {
   $items.Add((New-ValidationItem -Id "$field-true" -Passed (Test-BoolTrue -Value (Get-PropertyOrDefault -Object $record -Name $field -DefaultValue "")) -Severity "action-required" -Detail "$field must be true.")) | Out-Null
 }
 
@@ -237,6 +277,13 @@ $validation = [pscustomobject]@{
   sourceRunnerQueueStatus = $sourceRunnerQueueStatus
   sourceRunnerInfrastructureStatus = $sourceRunnerInfrastructureStatus
   sourceRunnerOwnerAction = $sourceRunnerOwnerAction
+  preReleaseReadinessMatrixPath = $preReleaseReadinessMatrixPath
+  preReleaseReadinessMatrixState = $preReleaseReadinessMatrixState
+  preReleaseReadinessMatrixReady = $preReleaseReadinessMatrixReady
+  preReleaseReadinessBlockedLaneCount = $preReleaseReadinessBlockedLaneCount
+  preReleaseMissingLaneIds = @($preReleaseMissingLaneIds)
+  preReleaseMetadataMissingLaneIds = @($preReleaseMetadataMissing)
+  preReleasePrematurePromoteFindings = @($preReleasePrematurePromoteFindings)
   performsPublish = $false
   usesPublishToken = $false
   canPublishPublicly = $false
@@ -270,6 +317,14 @@ $markdown = @"
 | authorizedRouteCount | ``$($validation.authorizedRouteCount)`` |
 | sourceRunnerQueueStatus | ``$($validation.sourceRunnerQueueStatus)`` |
 | sourceRunnerInfrastructureStatus | ``$($validation.sourceRunnerInfrastructureStatus)`` |
+| sourceRunnerOwnerAction | ``$($validation.sourceRunnerOwnerAction)`` |
+| preReleaseReadinessMatrixPath | ``$($validation.preReleaseReadinessMatrixPath)`` |
+| preReleaseReadinessMatrixState | ``$($validation.preReleaseReadinessMatrixState)`` |
+| preReleaseReadinessMatrixReady | ``$($validation.preReleaseReadinessMatrixReady)`` |
+| preReleaseReadinessBlockedLaneCount | ``$($validation.preReleaseReadinessBlockedLaneCount)`` |
+| preReleaseMissingLaneIds | ``$($validation.preReleaseMissingLaneIds -join ", ")`` |
+| preReleaseMetadataMissingLaneIds | ``$($validation.preReleaseMetadataMissingLaneIds -join ", ")`` |
+| preReleasePrematurePromoteFindings | ``$($validation.preReleasePrematurePromoteFindings -join ", ")`` |
 | performsPublish | ``$($validation.performsPublish)`` |
 | usesPublishToken | ``$($validation.usesPublishToken)`` |
 | canPublishPublicly | ``$($validation.canPublishPublicly)`` |
