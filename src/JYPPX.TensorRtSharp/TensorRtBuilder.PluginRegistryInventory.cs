@@ -40,6 +40,9 @@ public sealed partial class TensorRtBuilder
             string pluginNamespace = NativeBridgeApi.GetBuilderPluginCreatorNamespace(Line, _handle, creatorIndex);
             string interfaceKind = NativeBridgeApi.GetBuilderPluginCreatorInterfaceKind(Line, _handle, creatorIndex, out int interfaceMajor, out int interfaceMinor);
             TensorRtApiLanguage apiLanguage = NativeBridgeApi.GetBuilderPluginCreatorApiLanguage(Line, _handle, creatorIndex);
+            int? tensorRtVersion = Line == TensorRtApiLine.TensorRt8
+                ? NativeBridgeApi.GetBuilderPluginCreatorTensorRtVersion(Line, _handle, creatorIndex)
+                : null;
             int fieldCount = NativeBridgeApi.GetBuilderPluginCreatorFieldCount(Line, _handle, creatorIndex);
             List<TensorRtPluginFieldInfo> fields = new List<TensorRtPluginFieldInfo>(fieldCount);
 
@@ -59,7 +62,8 @@ public sealed partial class TensorRtBuilder
                 interfaceMajor,
                 interfaceMinor,
                 apiLanguage,
-                fields));
+                fields,
+                tensorRtVersion));
         }
 
         return new TensorRtPluginRegistryInventory(Line, TensorRtPluginRegistrySource.Builder, hasErrorRecorder, parentSearchEnabled, recursiveCreatorCount: recursiveCreatorCount, creators);

@@ -9658,6 +9658,10 @@ JYPPX_StatusCode jyppx_trt8_execution_context_get_shape_binding(
 #include "modules/deployment/legacy_binding_aliases.inc"
 #include "modules/deployment/cross_version_tenth_other_safe.inc"
 #include "modules/plugin/trt8_plugin_registry_inventory.inc"
+
+#define JYPPX_TRT_PLUGIN_V2_LAYER_PREFIX jyppx_trt8_
+#include "../common/plugin_v2_layer_metadata_snapshot.inc"
+#undef JYPPX_TRT_PLUGIN_V2_LAYER_PREFIX
 #include "modules/deferred/twenty_third_batch_deferred.inc"
 #include "modules/deferred/cross_version_seventh_batch_deferred.inc"
 #include "modules/deferred/cross_version_eighth_batch_deferred.inc"

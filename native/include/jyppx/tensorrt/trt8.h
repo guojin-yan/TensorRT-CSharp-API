@@ -6,6 +6,21 @@
 #include "jyppx/cuda/types.h"
 #include "jyppx/tensorrt/types.h"
 
+/* BEGIN TRT8 PLUGIN V2 LAYER METADATA SNAPSHOT DECLARATIONS */
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_plugin_v2_layer_get_plugin_type(JYPPX_TensorRtLayer* layer, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_plugin_v2_layer_get_plugin_version(JYPPX_TensorRtLayer* layer, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_plugin_v2_layer_get_plugin_namespace(JYPPX_TensorRtLayer* layer, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_plugin_v2_layer_get_serialization_size(JYPPX_TensorRtLayer* layer, size_t* out_serialization_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_plugin_v2_layer_get_tensor_rt_version(JYPPX_TensorRtLayer* layer, int32_t* out_tensor_rt_version);
+/* END TRT8 PLUGIN V2 LAYER METADATA SNAPSHOT DECLARATIONS */
+
+/* BEGIN TRT8 PLUGIN CREATOR TENSORRT VERSION DECLARATIONS */
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_plugin_creator_get_tensor_rt_version(JYPPX_TensorRtBuilder* builder, int32_t creator_index, int32_t* out_tensor_rt_version);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_plugin_creator_lookup_get_tensor_rt_version(JYPPX_TensorRtBuilder* builder, const char* plugin_name, const char* plugin_version, const char* plugin_namespace, int32_t* out_tensor_rt_version);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_runtime_plugin_creator_get_tensor_rt_version(JYPPX_TensorRtRuntime* runtime, int32_t creator_index, int32_t* out_tensor_rt_version);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_runtime_plugin_creator_lookup_get_tensor_rt_version(JYPPX_TensorRtRuntime* runtime, const char* plugin_name, const char* plugin_version, const char* plugin_namespace, int32_t* out_tensor_rt_version);
+/* END TRT8 PLUGIN CREATOR TENSORRT VERSION DECLARATIONS */
+
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_query_adapter_info(JYPPX_TensorRtAdapterInfo* out_info);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_logger_create(JYPPX_TensorRtLogger** out_logger);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_logger_create_with_callback(JYPPX_TensorRtLoggerCallback callback, void* user_state, int32_t minimum_severity, JYPPX_TensorRtLogger** out_logger);

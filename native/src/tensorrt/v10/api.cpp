@@ -10654,6 +10654,10 @@ JYPPX_StatusCode jyppx_trt10_resize_layer_set_resize_mode(JYPPX_TensorRtLayer* l
 #define JYPPX_TRT_PLUGIN_PREFIX jyppx_trt10_
 #include "../common/plugin_registry_inventory.inc"
 #undef JYPPX_TRT_PLUGIN_PREFIX
+
+#define JYPPX_TRT_PLUGIN_V2_LAYER_PREFIX jyppx_trt10_
+#include "../common/plugin_v2_layer_metadata_snapshot.inc"
+#undef JYPPX_TRT_PLUGIN_V2_LAYER_PREFIX
 #define JYPPX_TRT_GLOBAL_PLUGIN_PREFIX jyppx_trt10_
 #include "../common/global_runtime_plugin_probe.inc"
 #undef JYPPX_TRT_GLOBAL_PLUGIN_PREFIX

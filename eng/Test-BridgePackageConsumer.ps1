@@ -188,6 +188,9 @@ function Find-Package {
 
 $script:ManagedPackageFreshnessPackCommand = "dotnet pack .\pack\JYPPX.TensorRT.CSharp.API\JYPPX.TensorRT.CSharp.API.csproj -c Debug -o .\artifacts\managed -p:JYPPXPackageVersion=4.0.0 /p:UseSharedCompilation=false"
 $script:ManagedPackageFreshnessRequiredMarkers = @(
+  "TensorRtPluginV2LayerMetadata",
+  "GetPluginV2Metadata",
+  "TryGetPluginV2Metadata",
   "TensorRtDebugListenerNativeAttachBridgeShapeGate",
   "TensorRtDebugListenerExceptionStatusMappingGate",
   "TensorRtDebugListenerInFlightAccountingGate",
@@ -932,9 +935,24 @@ static class HighLevelWrapperSurfaceProbe
                 summary.FieldIndex + ":" + summary.FieldName + ":" + summary.FieldType + ":" + summary.Length + ":" + summary.HasData;
         Func<TensorRtPluginCreatorInfo, string> creatorIdentity =
             static creator => creator.Name + ":" + creator.Version + ":" + creator.Namespace;
+        Func<TensorRtPluginCreatorInfo, int?> creatorTensorRtVersion = static creator => creator.TensorRtVersion;
+        Func<TensorRtPluginCreatorSummary, int?> creatorSummaryTensorRtVersion = static summary => summary.TensorRtVersion;
         Func<TensorRtPluginCreatorInfo, int> creatorFieldCount = static creator => creator.Fields.Count;
         Func<TensorRtPluginFieldInfo, string> fieldMetadata =
             static field => field.Name + ":" + field.FieldType + ":" + field.Length + ":" + field.HasData;
+        Func<TensorRtLayer, TensorRtPluginV2LayerMetadata> pluginV2LayerMetadata =
+            static layer => layer.GetPluginV2Metadata();
+        Func<TensorRtLayer, (bool success, TensorRtPluginV2LayerMetadata? metadata, string diagnostic)> safePluginV2LayerMetadata =
+            static layer =>
+            {
+                bool success = layer.TryGetPluginV2Metadata(out TensorRtPluginV2LayerMetadata? metadata, out string diagnostic);
+                return (success, metadata, diagnostic);
+            };
+        Func<TensorRtPluginV2LayerMetadata, string> pluginV2LayerMetadataSummary =
+            static metadata => metadata.PluginType + ":" + metadata.PluginVersion + ":" + metadata.PluginNamespace + ":" +
+                metadata.SerializationSize + ":" + metadata.PackedTensorRtVersion + ":" + metadata.PluginApiVersionTag + ":" +
+                metadata.TensorRtVersion + ":" + metadata.TensorRtMajor + ":" + metadata.TensorRtMinor + ":" +
+                metadata.TensorRtPatch + ":" + metadata.IsConsistent;
         Func<TensorRtEngine, bool> engineImplicitBatchCompatibility =
             static engine => engine.HasImplicitBatchDimensionCompatibility;
         Func<TensorRtBuilderConfig, int> serializedPluginPathCountCompatibility =
@@ -2430,8 +2448,13 @@ static class HighLevelWrapperSurfaceProbe
         _ = creatorSummaryIdentity;
         _ = fieldSummaryIdentity;
         _ = creatorIdentity;
+        _ = creatorTensorRtVersion;
+        _ = creatorSummaryTensorRtVersion;
         _ = creatorFieldCount;
         _ = fieldMetadata;
+        _ = pluginV2LayerMetadata;
+        _ = safePluginV2LayerMetadata;
+        _ = pluginV2LayerMetadataSummary;
         _ = logHandler;
         _ = profilerHandler;
         _ = progressHandler;
@@ -2756,6 +2779,8 @@ static class HighLevelWrapperSurfaceProbe
             nameof(TensorRtPluginRegistryInventoryDiagnostics.NegativeFieldLengthCount),
             nameof(TensorRtPluginCreatorSummary),
             nameof(TensorRtPluginCreatorSummary.FieldCount),
+            nameof(TensorRtPluginCreatorSummary.TensorRtVersion),
+            nameof(TensorRtPluginCreatorInfo.TensorRtVersion),
             nameof(TensorRtPluginFieldSummary),
             nameof(TensorRtPluginFieldSummary.FieldName),
             nameof(TensorRtPluginFieldSummary.FieldType),
@@ -2765,6 +2790,17 @@ static class HighLevelWrapperSurfaceProbe
             nameof(TensorRtBuilder.GetPluginRegistryInventory),
             nameof(TensorRtBuilder.IsPluginCreatorRegistered),
             nameof(TensorRtBuilder.TryIsPluginCreatorRegistered),
+            nameof(TensorRtPluginV2LayerMetadata),
+            nameof(TensorRtPluginV2LayerMetadata.PluginType),
+            nameof(TensorRtPluginV2LayerMetadata.PluginVersion),
+            nameof(TensorRtPluginV2LayerMetadata.PluginNamespace),
+            nameof(TensorRtPluginV2LayerMetadata.SerializationSize),
+            nameof(TensorRtPluginV2LayerMetadata.PackedTensorRtVersion),
+            nameof(TensorRtPluginV2LayerMetadata.PluginApiVersionTag),
+            nameof(TensorRtPluginV2LayerMetadata.TensorRtVersion),
+            nameof(TensorRtPluginV2LayerMetadata.IsConsistent),
+            nameof(TensorRtLayer.GetPluginV2Metadata),
+            nameof(TensorRtLayer.TryGetPluginV2Metadata),
             nameof(TensorRtLogger),
             nameof(TensorRtLogger.EmitDiagnostic),
             nameof(TensorRtLogger.CallbackFailureCount),

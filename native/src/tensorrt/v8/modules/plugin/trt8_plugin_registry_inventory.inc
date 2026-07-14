@@ -429,6 +429,29 @@ JYPPX_StatusCode jyppx_trt8_get_creator_namespace_with_seh_guard(
 #endif
 }
 
+JYPPX_StatusCode jyppx_trt8_get_creator_tensor_rt_version_with_seh_guard(
+    nvinfer1::IPluginCreator* creator,
+    int32_t* out_tensor_rt_version,
+    const char* feature_name)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        *out_tensor_rt_version = creator != nullptr ? creator->getTensorRTVersion() : 0;
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        *out_tensor_rt_version = 0;
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    *out_tensor_rt_version = creator != nullptr ? creator->getTensorRTVersion() : 0;
+    return JYPPX_STATUS_OK;
+#endif
+}
+
 JYPPX_StatusCode jyppx_trt8_get_creator_field_collection_with_seh_guard(
     nvinfer1::IPluginCreator* creator,
     const nvinfer1::PluginFieldCollection** out_fields,
@@ -502,6 +525,30 @@ JYPPX_StatusCode jyppx_trt8_get_creator_namespace(nvinfer1::IPluginCreator* crea
     catch (...)
     {
         *out_value = "";
+        return jyppx_trt8_report_plugin_inventory_unknown_exception(feature_name);
+    }
+}
+
+JYPPX_StatusCode jyppx_trt8_get_creator_tensor_rt_version(
+    nvinfer1::IPluginCreator* creator,
+    int32_t* out_tensor_rt_version,
+    const char* feature_name)
+{
+    try
+    {
+        return jyppx_trt8_get_creator_tensor_rt_version_with_seh_guard(
+            creator,
+            out_tensor_rt_version,
+            feature_name);
+    }
+    catch (const std::exception& exception)
+    {
+        *out_tensor_rt_version = 0;
+        return jyppx_trt8_report_plugin_inventory_exception(feature_name, exception);
+    }
+    catch (...)
+    {
+        *out_tensor_rt_version = 0;
         return jyppx_trt8_report_plugin_inventory_unknown_exception(feature_name);
     }
 }
@@ -1122,6 +1169,37 @@ JYPPX_StatusCode jyppx_trt8_builder_plugin_creator_get_namespace(
 #endif
 }
 
+JYPPX_StatusCode jyppx_trt8_builder_plugin_creator_get_tensor_rt_version(
+    JYPPX_TensorRtBuilder* builder,
+    int32_t creator_index,
+    int32_t* out_tensor_rt_version)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_tensor_rt_version, "out_tensor_rt_version");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_tensor_rt_version = 0;
+#if JYPPX_TRT8_PLUGIN_REGISTRY_HAS_INVENTORY
+    nvinfer1::IPluginCreator* creator = nullptr;
+    status = jyppx_trt8_get_builder_plugin_creator(builder, creator_index, &creator);
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    return jyppx_trt8_get_creator_tensor_rt_version(
+        creator,
+        out_tensor_rt_version,
+        "TensorRT 8 plugin creator TensorRT version query");
+#else
+    (void)builder;
+    (void)creator_index;
+    return jyppx_trt8_plugin_registry_report_unavailable("TensorRT 8 plugin creator TensorRT version query");
+#endif
+}
+
 JYPPX_StatusCode jyppx_trt8_builder_plugin_creator_get_field_count(
     JYPPX_TensorRtBuilder* builder,
     int32_t creator_index,
@@ -1320,6 +1398,47 @@ JYPPX_StatusCode jyppx_trt8_builder_plugin_creator_lookup(
     (void)plugin_version;
     (void)plugin_namespace;
     return jyppx_trt8_plugin_registry_report_unavailable("TensorRT 8 plugin creator lookup query");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt8_builder_plugin_creator_lookup_get_tensor_rt_version(
+    JYPPX_TensorRtBuilder* builder,
+    const char* plugin_name,
+    const char* plugin_version,
+    const char* plugin_namespace,
+    int32_t* out_tensor_rt_version)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_tensor_rt_version, "out_tensor_rt_version");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_tensor_rt_version = 0;
+#if JYPPX_TRT8_PLUGIN_REGISTRY_HAS_INVENTORY
+    nvinfer1::IPluginCreator* creator = nullptr;
+    status = jyppx_trt8_get_builder_lookup_creator(builder, plugin_name, plugin_version, plugin_namespace, &creator);
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    if (creator == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT 8 builder plugin creator lookup did not find a matching creator.");
+        return JYPPX_STATUS_NOT_FOUND;
+    }
+
+    return jyppx_trt8_get_creator_tensor_rt_version(
+        creator,
+        out_tensor_rt_version,
+        "TensorRT 8 builder plugin creator lookup TensorRT version query");
+#else
+    (void)builder;
+    (void)plugin_name;
+    (void)plugin_version;
+    (void)plugin_namespace;
+    return jyppx_trt8_plugin_registry_report_unavailable("TensorRT 8 plugin creator lookup TensorRT version query");
 #endif
 }
 
@@ -1796,6 +1915,37 @@ JYPPX_StatusCode jyppx_trt8_runtime_plugin_creator_get_namespace(
 #endif
 }
 
+JYPPX_StatusCode jyppx_trt8_runtime_plugin_creator_get_tensor_rt_version(
+    JYPPX_TensorRtRuntime* runtime,
+    int32_t creator_index,
+    int32_t* out_tensor_rt_version)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_tensor_rt_version, "out_tensor_rt_version");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_tensor_rt_version = 0;
+#if JYPPX_TRT8_PLUGIN_REGISTRY_HAS_INVENTORY
+    nvinfer1::IPluginCreator* creator = nullptr;
+    status = jyppx_trt8_get_runtime_plugin_creator(runtime, creator_index, &creator);
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    return jyppx_trt8_get_creator_tensor_rt_version(
+        creator,
+        out_tensor_rt_version,
+        "TensorRT 8 runtime plugin creator TensorRT version query");
+#else
+    (void)runtime;
+    (void)creator_index;
+    return jyppx_trt8_plugin_registry_report_unavailable("TensorRT 8 runtime plugin creator TensorRT version query");
+#endif
+}
+
 JYPPX_StatusCode jyppx_trt8_runtime_plugin_creator_get_field_count(
     JYPPX_TensorRtRuntime* runtime,
     int32_t creator_index,
@@ -1994,6 +2144,47 @@ JYPPX_StatusCode jyppx_trt8_runtime_plugin_creator_lookup(
     (void)plugin_version;
     (void)plugin_namespace;
     return jyppx_trt8_plugin_registry_report_unavailable("TensorRT 8 runtime plugin creator lookup query");
+#endif
+}
+
+JYPPX_StatusCode jyppx_trt8_runtime_plugin_creator_lookup_get_tensor_rt_version(
+    JYPPX_TensorRtRuntime* runtime,
+    const char* plugin_name,
+    const char* plugin_version,
+    const char* plugin_namespace,
+    int32_t* out_tensor_rt_version)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_tensor_rt_version, "out_tensor_rt_version");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    *out_tensor_rt_version = 0;
+#if JYPPX_TRT8_PLUGIN_REGISTRY_HAS_INVENTORY
+    nvinfer1::IPluginCreator* creator = nullptr;
+    status = jyppx_trt8_get_runtime_lookup_creator(runtime, plugin_name, plugin_version, plugin_namespace, &creator);
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    if (creator == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT 8 runtime plugin creator lookup did not find a matching creator.");
+        return JYPPX_STATUS_NOT_FOUND;
+    }
+
+    return jyppx_trt8_get_creator_tensor_rt_version(
+        creator,
+        out_tensor_rt_version,
+        "TensorRT 8 runtime plugin creator lookup TensorRT version query");
+#else
+    (void)runtime;
+    (void)plugin_name;
+    (void)plugin_version;
+    (void)plugin_namespace;
+    return jyppx_trt8_plugin_registry_report_unavailable("TensorRT 8 runtime plugin creator lookup TensorRT version query");
 #endif
 }
 

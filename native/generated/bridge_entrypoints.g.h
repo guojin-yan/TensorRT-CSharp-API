@@ -4114,6 +4114,21 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_io_ext_supports_format_defer
 // generated from manifest id=trt10-plugin-v2-layer-get-plugin-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_layer_get_plugin_deferred(void);
 
+// generated from manifest id=trt10-plugin-v2-layer-get-plugin-namespace
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_layer_get_plugin_namespace(JYPPX_TensorRtLayer* layer, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+
+// generated from manifest id=trt10-plugin-v2-layer-get-plugin-type
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_layer_get_plugin_type(JYPPX_TensorRtLayer* layer, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+
+// generated from manifest id=trt10-plugin-v2-layer-get-plugin-version
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_layer_get_plugin_version(JYPPX_TensorRtLayer* layer, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+
+// generated from manifest id=trt10-plugin-v2-layer-get-serialization-size
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_layer_get_serialization_size(JYPPX_TensorRtLayer* layer, size_t* out_serialization_size);
+
+// generated from manifest id=trt10-plugin-v2-layer-get-tensor-rt-version
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_layer_get_tensor_rt_version(JYPPX_TensorRtLayer* layer, int32_t* out_tensor_rt_version);
+
 // generated from manifest id=trt10-plugin-v2-serialize-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_serialize_deferred(void);
 
@@ -7633,6 +7648,21 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt11_plugin_v2_io_ext_supports_format_defer
 // generated from manifest id=trt11-plugin-v2-layer-get-plugin-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_plugin_v2_layer_get_plugin_deferred(void);
 
+// generated from manifest id=trt11-plugin-v2-layer-get-plugin-namespace
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_plugin_v2_layer_get_plugin_namespace(JYPPX_TensorRtLayer* layer, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+
+// generated from manifest id=trt11-plugin-v2-layer-get-plugin-type
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_plugin_v2_layer_get_plugin_type(JYPPX_TensorRtLayer* layer, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+
+// generated from manifest id=trt11-plugin-v2-layer-get-plugin-version
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_plugin_v2_layer_get_plugin_version(JYPPX_TensorRtLayer* layer, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+
+// generated from manifest id=trt11-plugin-v2-layer-get-serialization-size
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_plugin_v2_layer_get_serialization_size(JYPPX_TensorRtLayer* layer, size_t* out_serialization_size);
+
+// generated from manifest id=trt11-plugin-v2-layer-get-tensor-rt-version
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_plugin_v2_layer_get_tensor_rt_version(JYPPX_TensorRtLayer* layer, int32_t* out_tensor_rt_version);
+
 // generated from manifest id=trt11-plugin-v2-serialize-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_plugin_v2_serialize_deferred(void);
 
@@ -8938,6 +8968,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt8_builder_plugin_creator_get_name(JYPPX_T
 // generated from manifest id=trt8-builder-plugin-creator-get-namespace
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_builder_plugin_creator_get_namespace(JYPPX_TensorRtBuilder* builder, int32_t creator_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
 
+// generated from manifest id=trt8-builder-plugin-creator-get-tensor-rt-version
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_builder_plugin_creator_get_tensor_rt_version(JYPPX_TensorRtBuilder* builder, int32_t creator_index, int32_t* out_tensor_rt_version);
+
 // generated from manifest id=trt8-builder-plugin-creator-get-version
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_builder_plugin_creator_get_version(JYPPX_TensorRtBuilder* builder, int32_t creator_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
 
@@ -8952,6 +8985,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt8_builder_plugin_creator_lookup_get_field
 
 // generated from manifest id=trt8-builder-plugin-creator-lookup-get-field-name
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_builder_plugin_creator_lookup_get_field_name(JYPPX_TensorRtBuilder* builder, const char* plugin_name, const char* plugin_version, const char* plugin_namespace, int32_t field_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+
+// generated from manifest id=trt8-builder-plugin-creator-lookup-get-tensor-rt-version
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_builder_plugin_creator_lookup_get_tensor_rt_version(JYPPX_TensorRtBuilder* builder, const char* plugin_name, const char* plugin_version, const char* plugin_namespace, int32_t* out_tensor_rt_version);
 
 // generated from manifest id=trt8-builder-plugin-registry-exists
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_builder_plugin_registry_exists(JYPPX_TensorRtBuilder* builder, JYPPX_Boolean* out_exists);
@@ -10492,6 +10528,21 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_io_ext_supports_format_deferr
 // generated from manifest id=trt8-plugin-v2-layer-get-plugin-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_layer_get_plugin_deferred(void);
 
+// generated from manifest id=trt8-plugin-v2-layer-get-plugin-namespace
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_layer_get_plugin_namespace(JYPPX_TensorRtLayer* layer, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+
+// generated from manifest id=trt8-plugin-v2-layer-get-plugin-type
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_layer_get_plugin_type(JYPPX_TensorRtLayer* layer, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+
+// generated from manifest id=trt8-plugin-v2-layer-get-plugin-version
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_layer_get_plugin_version(JYPPX_TensorRtLayer* layer, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+
+// generated from manifest id=trt8-plugin-v2-layer-get-serialization-size
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_layer_get_serialization_size(JYPPX_TensorRtLayer* layer, size_t* out_serialization_size);
+
+// generated from manifest id=trt8-plugin-v2-layer-get-tensor-rt-version
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_layer_get_tensor_rt_version(JYPPX_TensorRtLayer* layer, int32_t* out_tensor_rt_version);
+
 // generated from manifest id=trt8-plugin-v2-serialize-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_serialize_deferred(void);
 
@@ -10777,6 +10828,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt8_runtime_plugin_creator_get_name(JYPPX_T
 // generated from manifest id=trt8-runtime-plugin-creator-get-namespace
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_runtime_plugin_creator_get_namespace(JYPPX_TensorRtRuntime* runtime, int32_t creator_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
 
+// generated from manifest id=trt8-runtime-plugin-creator-get-tensor-rt-version
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_runtime_plugin_creator_get_tensor_rt_version(JYPPX_TensorRtRuntime* runtime, int32_t creator_index, int32_t* out_tensor_rt_version);
+
 // generated from manifest id=trt8-runtime-plugin-creator-get-version
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_runtime_plugin_creator_get_version(JYPPX_TensorRtRuntime* runtime, int32_t creator_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
 
@@ -10791,6 +10845,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt8_runtime_plugin_creator_lookup_get_field
 
 // generated from manifest id=trt8-runtime-plugin-creator-lookup-get-field-name
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_runtime_plugin_creator_lookup_get_field_name(JYPPX_TensorRtRuntime* runtime, const char* plugin_name, const char* plugin_version, const char* plugin_namespace, int32_t field_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+
+// generated from manifest id=trt8-runtime-plugin-creator-lookup-get-tensor-rt-version
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_runtime_plugin_creator_lookup_get_tensor_rt_version(JYPPX_TensorRtRuntime* runtime, const char* plugin_name, const char* plugin_version, const char* plugin_namespace, int32_t* out_tensor_rt_version);
 
 // generated from manifest id=trt8-runtime-plugin-registry-exists
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_runtime_plugin_registry_exists(JYPPX_TensorRtRuntime* runtime, JYPPX_Boolean* out_exists);

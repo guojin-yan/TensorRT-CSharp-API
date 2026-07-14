@@ -47,6 +47,9 @@ internal static partial class NativeBridgeApi
             string pluginNamespace = GetRuntimePluginCreatorNamespace(line, runtime, creatorIndex);
             string interfaceKind = GetRuntimePluginCreatorInterfaceKind(line, runtime, creatorIndex, out int interfaceMajor, out int interfaceMinor);
             TensorRtApiLanguage apiLanguage = GetRuntimePluginCreatorApiLanguage(line, runtime, creatorIndex);
+            int? tensorRtVersion = line == TensorRtApiLine.TensorRt8
+                ? GetRuntimePluginCreatorTensorRtVersion(line, runtime, creatorIndex)
+                : null;
             int fieldCount = GetRuntimePluginCreatorFieldCount(line, runtime, creatorIndex);
             List<TensorRtPluginFieldInfo> fields = new List<TensorRtPluginFieldInfo>(fieldCount);
 
@@ -66,7 +69,8 @@ internal static partial class NativeBridgeApi
                 interfaceMajor,
                 interfaceMinor,
                 apiLanguage,
-                fields));
+                fields,
+                tensorRtVersion));
         }
 
         return new TensorRtPluginRegistryInventory(line, TensorRtPluginRegistrySource.Runtime, hasErrorRecorder, parentSearchEnabled, recursiveCreatorCount: recursiveCreatorCount, creators);
@@ -131,6 +135,9 @@ internal static partial class NativeBridgeApi
             out int interfaceMajor,
             out int interfaceMinor);
         TensorRtApiLanguage apiLanguage = GetRuntimeLookupPluginCreatorApiLanguage(line, runtime, normalizedName, normalizedVersion, normalizedNamespace);
+        int? tensorRtVersion = line == TensorRtApiLine.TensorRt8
+            ? GetRuntimeLookupPluginCreatorTensorRtVersion(line, runtime, normalizedName, normalizedVersion, normalizedNamespace)
+            : null;
         int fieldCount = GetRuntimeLookupPluginCreatorFieldCount(line, runtime, normalizedName, normalizedVersion, normalizedNamespace);
         List<TensorRtPluginFieldInfo> fields = new List<TensorRtPluginFieldInfo>(fieldCount);
 
@@ -150,8 +157,52 @@ internal static partial class NativeBridgeApi
             interfaceMajor,
             interfaceMinor,
             apiLanguage,
-            fields);
+            fields,
+            tensorRtVersion);
         return true;
+    }
+
+    private static int GetRuntimePluginCreatorTensorRtVersion(
+        TensorRtApiLine line,
+        SafeTensorRtObjectHandle runtime,
+        int creatorIndex)
+    {
+        if (line != TensorRtApiLine.TensorRt8)
+        {
+            throw UnsupportedRuntimePluginRegistryInventoryLine();
+        }
+
+        BridgeStatusCode status = NativeMethodsTensorRt.jyppx_trt8_runtime_plugin_creator_get_tensor_rt_version(
+            runtime,
+            creatorIndex,
+            out int tensorRtVersion);
+        NativeStatus.ThrowIfFailed(status);
+        return tensorRtVersion;
+    }
+
+    private static int GetRuntimeLookupPluginCreatorTensorRtVersion(
+        TensorRtApiLine line,
+        SafeTensorRtObjectHandle runtime,
+        string pluginName,
+        string pluginVersion,
+        string pluginNamespace)
+    {
+        if (line != TensorRtApiLine.TensorRt8)
+        {
+            throw UnsupportedRuntimePluginRegistryInventoryLine();
+        }
+
+        using Utf8Interop.Utf8StringScope nameUtf8 = Utf8Interop.ToNativeString(pluginName ?? string.Empty);
+        using Utf8Interop.Utf8StringScope versionUtf8 = Utf8Interop.ToNativeString(pluginVersion ?? string.Empty);
+        using Utf8Interop.Utf8StringScope namespaceUtf8 = Utf8Interop.ToNativeString(pluginNamespace ?? string.Empty);
+        BridgeStatusCode status = NativeMethodsTensorRt.jyppx_trt8_runtime_plugin_creator_lookup_get_tensor_rt_version(
+            runtime,
+            nameUtf8.Pointer,
+            versionUtf8.Pointer,
+            namespaceUtf8.Pointer,
+            out int tensorRtVersion);
+        NativeStatus.ThrowIfFailed(status);
+        return tensorRtVersion;
     }
 
     private static int GetRuntimePluginRegistryCreatorCount(TensorRtApiLine line, SafeTensorRtObjectHandle runtime)

@@ -6,6 +6,14 @@
 #include "jyppx/cuda/types.h"
 #include "jyppx/tensorrt/types.h"
 
+/* BEGIN TRT11 PLUGIN V2 LAYER METADATA SNAPSHOT DECLARATIONS */
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_plugin_v2_layer_get_plugin_type(JYPPX_TensorRtLayer* layer, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_plugin_v2_layer_get_plugin_version(JYPPX_TensorRtLayer* layer, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_plugin_v2_layer_get_plugin_namespace(JYPPX_TensorRtLayer* layer, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_plugin_v2_layer_get_serialization_size(JYPPX_TensorRtLayer* layer, size_t* out_serialization_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_plugin_v2_layer_get_tensor_rt_version(JYPPX_TensorRtLayer* layer, int32_t* out_tensor_rt_version);
+/* END TRT11 PLUGIN V2 LAYER METADATA SNAPSHOT DECLARATIONS */
+
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_query_adapter_info(JYPPX_TensorRtAdapterInfo* out_info);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_logger_create(JYPPX_TensorRtLogger** out_logger);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_logger_create_with_callback(JYPPX_TensorRtLoggerCallback callback, void* user_state, int32_t minimum_severity, JYPPX_TensorRtLogger** out_logger);

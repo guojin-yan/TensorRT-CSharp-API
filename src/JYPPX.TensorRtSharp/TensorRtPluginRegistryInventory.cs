@@ -174,7 +174,8 @@ public sealed class TensorRtPluginCreatorInfo
         int interfaceMajor,
         int interfaceMinor,
         TensorRtApiLanguage apiLanguage,
-        IReadOnlyList<TensorRtPluginFieldInfo> fields)
+        IReadOnlyList<TensorRtPluginFieldInfo> fields,
+        int? tensorRtVersion = null)
     {
         Index = index;
         Name = name ?? string.Empty;
@@ -185,6 +186,7 @@ public sealed class TensorRtPluginCreatorInfo
         InterfaceMinor = interfaceMinor;
         ApiLanguage = apiLanguage;
         Fields = fields ?? Array.Empty<TensorRtPluginFieldInfo>();
+        TensorRtVersion = tensorRtVersion;
     }
 
     /// <summary>
@@ -236,6 +238,13 @@ public sealed class TensorRtPluginCreatorInfo
     public TensorRtApiLanguage ApiLanguage { get; }
 
     /// <summary>
+    /// Gets the TensorRT API version used to compile this creator when TensorRT exposes it.
+    /// 当 TensorRT 提供该信息时，获取 creator 编译时使用的 TensorRT API 数字版本。
+    /// </summary>
+    /// <remarks>TensorRT 8 exposes this scalar on <c>IPluginCreator</c>; later API lines return <see langword="null"/>.</remarks>
+    public int? TensorRtVersion { get; }
+
+    /// <summary>
     /// Gets the plugin fields reported by this creator.
     /// 获取该 creator 报告的 plugin 字段。
     /// </summary>
@@ -246,7 +255,7 @@ public sealed class TensorRtPluginCreatorInfo
     /// 返回该 plugin creator 的简短显示字符串。
     /// </summary>
     /// <returns>A display string containing creator identity and field count. 包含 creator 标识和字段数量的显示字符串。</returns>
-    public override string ToString() => $"{Index}:{Name}:{Version}:{Namespace}:{InterfaceKind}:{ApiLanguage}:{Fields.Count}";
+    public override string ToString() => $"{Index}:{Name}:{Version}:{Namespace}:{InterfaceKind}:{ApiLanguage}:trt={TensorRtVersion?.ToString() ?? "n/a"}:{Fields.Count}";
 }
 
 /// <summary>
@@ -264,7 +273,8 @@ public sealed class TensorRtPluginCreatorSummary
         int interfaceMajor,
         int interfaceMinor,
         TensorRtApiLanguage apiLanguage,
-        int fieldCount)
+        int fieldCount,
+        int? tensorRtVersion = null)
     {
         Index = index;
         Name = name ?? string.Empty;
@@ -275,6 +285,7 @@ public sealed class TensorRtPluginCreatorSummary
         InterfaceMinor = interfaceMinor;
         ApiLanguage = apiLanguage;
         FieldCount = fieldCount;
+        TensorRtVersion = tensorRtVersion;
     }
 
     /// <summary>
@@ -325,6 +336,9 @@ public sealed class TensorRtPluginCreatorSummary
     /// </summary>
     public TensorRtApiLanguage ApiLanguage { get; }
 
+    /// <summary>Gets the copied creator TensorRT API version when available. 获取可用时复制出的 creator TensorRT API 版本。</summary>
+    public int? TensorRtVersion { get; }
+
     /// <summary>
     /// Gets the number of plugin fields reported by this creator.
     /// 获取该 creator 报告的 plugin 字段数量。
@@ -336,7 +350,7 @@ public sealed class TensorRtPluginCreatorSummary
     /// 返回该 plugin creator 摘要的简短显示字符串。
     /// </summary>
     /// <returns>A display string containing creator identity and field count. 包含 creator 标识和字段数量的显示字符串。</returns>
-    public override string ToString() => $"{Index}:{Name}:{Version}:{Namespace}:{InterfaceKind}:{ApiLanguage}:fields={FieldCount}";
+    public override string ToString() => $"{Index}:{Name}:{Version}:{Namespace}:{InterfaceKind}:{ApiLanguage}:trt={TensorRtVersion?.ToString() ?? "n/a"}:fields={FieldCount}";
 }
 
 /// <summary>
@@ -733,7 +747,8 @@ public sealed class TensorRtPluginRegistryInventory
                 creator.InterfaceMajor,
                 creator.InterfaceMinor,
                 creator.ApiLanguage,
-                creator.Fields.Count));
+                creator.Fields.Count,
+                creator.TensorRtVersion));
         }
 
         return summaries;

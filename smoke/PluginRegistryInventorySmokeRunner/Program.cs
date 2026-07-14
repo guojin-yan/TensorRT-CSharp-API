@@ -271,9 +271,22 @@ internal static class Program
             !string.Equals(first.Version, firstSummary.Version, StringComparison.Ordinal) ||
             !string.Equals(first.Namespace, firstSummary.Namespace, StringComparison.Ordinal) ||
             first.ApiLanguage != firstSummary.ApiLanguage ||
+            first.TensorRtVersion != firstSummary.TensorRtVersion ||
             first.Fields.Count != firstSummary.FieldCount)
         {
             throw new InvalidOperationException($"{label} first creator summary does not match copied creator metadata.");
+        }
+
+        if (inventory.Line == TensorRtApiLine.TensorRt8)
+        {
+            if (!first.TensorRtVersion.HasValue || first.TensorRtVersion.Value <= 0)
+            {
+                throw new InvalidOperationException($"{label} TensorRT 8 creator did not report its compile-time TensorRT version.");
+            }
+        }
+        else if (first.TensorRtVersion.HasValue)
+        {
+            throw new InvalidOperationException($"{label} reported TensorRT 8-only creator version metadata on TensorRT {(int)inventory.Line}.");
         }
 
         if (first.Fields.Count < 0)
@@ -302,7 +315,7 @@ internal static class Program
             Console.WriteLine($"{label} FieldSummary Creator={firstFieldSummary.CreatorName}/{firstFieldSummary.CreatorVersion}/{firstFieldSummary.CreatorNamespace} Field={firstFieldSummary.FieldName} Type={firstFieldSummary.FieldType} Length={firstFieldSummary.Length} HasData={firstFieldSummary.HasData}");
         }
 
-        Console.WriteLine($"{label} CreatorSummary Name={firstSummary.Name} Version={firstSummary.Version} Namespace={firstSummary.Namespace} Interface={firstSummary.InterfaceKind}/{firstSummary.InterfaceMajor}.{firstSummary.InterfaceMinor} ApiLanguage={firstSummary.ApiLanguage} Fields={firstSummary.FieldCount}");
+        Console.WriteLine($"{label} CreatorSummary Name={firstSummary.Name} Version={firstSummary.Version} Namespace={firstSummary.Namespace} Interface={firstSummary.InterfaceKind}/{firstSummary.InterfaceMajor}.{firstSummary.InterfaceMinor} ApiLanguage={firstSummary.ApiLanguage} TensorRtVersion={firstSummary.TensorRtVersion?.ToString() ?? "n/a"} Fields={firstSummary.FieldCount}");
     }
 
     private static void ValidateLookup(TensorRtApiLine line, TensorRtPluginRegistryInventory inventory, TensorRtEngineCapability capability, bool useBuilderCapability)
@@ -383,7 +396,8 @@ internal static class Program
             {
                 if (!string.Equals(candidate.Name, copiedCreator.Name, StringComparison.Ordinal) ||
                     !string.Equals(candidate.Version, copiedCreator.Version, StringComparison.Ordinal) ||
-                    !string.Equals(candidate.Namespace, copiedCreator.Namespace, StringComparison.Ordinal))
+                    !string.Equals(candidate.Namespace, copiedCreator.Namespace, StringComparison.Ordinal) ||
+                    candidate.TensorRtVersion != copiedCreator.TensorRtVersion)
                 {
                     throw new InvalidOperationException("Plugin creator lookup metadata does not match inventory metadata.");
                 }
@@ -449,7 +463,8 @@ internal static class Program
             Console.WriteLine($"BuilderPluginCreatorLookup Found=True Name={candidate.Name} Version={candidate.Version} Namespace={candidate.Namespace} Diagnostic={copiedDiagnostic}");
             if (!string.Equals(candidate.Name, copiedCreator.Name, StringComparison.Ordinal) ||
                 !string.Equals(candidate.Version, copiedCreator.Version, StringComparison.Ordinal) ||
-                !string.Equals(candidate.Namespace, copiedCreator.Namespace, StringComparison.Ordinal))
+                !string.Equals(candidate.Namespace, copiedCreator.Namespace, StringComparison.Ordinal) ||
+                candidate.TensorRtVersion != copiedCreator.TensorRtVersion)
             {
                 throw new InvalidOperationException("Builder plugin creator lookup metadata does not match inventory metadata.");
             }
@@ -510,7 +525,8 @@ internal static class Program
             Console.WriteLine($"RuntimePluginCreatorLookup Found=True Name={candidate.Name} Version={candidate.Version} Namespace={candidate.Namespace} Diagnostic={copiedDiagnostic}");
             if (!string.Equals(candidate.Name, copiedCreator.Name, StringComparison.Ordinal) ||
                 !string.Equals(candidate.Version, copiedCreator.Version, StringComparison.Ordinal) ||
-                !string.Equals(candidate.Namespace, copiedCreator.Namespace, StringComparison.Ordinal))
+                !string.Equals(candidate.Namespace, copiedCreator.Namespace, StringComparison.Ordinal) ||
+                candidate.TensorRtVersion != copiedCreator.TensorRtVersion)
             {
                 throw new InvalidOperationException("Runtime plugin creator lookup metadata does not match inventory metadata.");
             }
@@ -542,7 +558,7 @@ internal static class Program
     private static string FormatInventory(string label, TensorRtPluginRegistryInventory inventory)
     {
         string first = inventory.CreatorCount > 0
-            ? $"{inventory.Creators[0].Name}/{inventory.Creators[0].Version}/{inventory.Creators[0].Namespace}/api={inventory.Creators[0].ApiLanguage}/fields={inventory.Creators[0].Fields.Count}"
+            ? $"{inventory.Creators[0].Name}/{inventory.Creators[0].Version}/{inventory.Creators[0].Namespace}/api={inventory.Creators[0].ApiLanguage}/trt={inventory.Creators[0].TensorRtVersion?.ToString() ?? "n/a"}/fields={inventory.Creators[0].Fields.Count}"
             : "n/a";
         IReadOnlyList<TensorRtPluginCreatorSummary> summaries = inventory.GetCreatorSummaries(maxCreators: 1);
         string firstSummary = summaries.Count > 0

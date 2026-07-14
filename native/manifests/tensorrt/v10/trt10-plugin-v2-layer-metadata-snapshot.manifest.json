@@ -1,0 +1,76 @@
+{
+  "$schema": "../../bridge-api.schema.json",
+  "module": "tensorrt",
+  "versionLine": "10",
+  "apis": [
+    {
+      "id": "trt10-plugin-v2-layer-get-plugin-type",
+      "entryPoint": "jyppx_trt10_plugin_v2_layer_get_plugin_type",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": true,
+      "manualReason": "Copies PluginV2 type text while the layer owner lease is held; no plugin pointer escapes",
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" }
+      ]
+    },
+    {
+      "id": "trt10-plugin-v2-layer-get-plugin-version",
+      "entryPoint": "jyppx_trt10_plugin_v2_layer_get_plugin_version",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": true,
+      "manualReason": "Copies PluginV2 version text while the layer owner lease is held; no plugin pointer escapes",
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" }
+      ]
+    },
+    {
+      "id": "trt10-plugin-v2-layer-get-plugin-namespace",
+      "entryPoint": "jyppx_trt10_plugin_v2_layer_get_plugin_namespace",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": true,
+      "manualReason": "Copies PluginV2 namespace text while the layer owner lease is held; no plugin pointer escapes",
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" }
+      ]
+    },
+    {
+      "id": "trt10-plugin-v2-layer-get-serialization-size",
+      "entryPoint": "jyppx_trt10_plugin_v2_layer_get_serialization_size",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "out_serialization_size", "type": "size_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" }
+      ]
+    },
+    {
+      "id": "trt10-plugin-v2-layer-get-tensor-rt-version",
+      "entryPoint": "jyppx_trt10_plugin_v2_layer_get_tensor_rt_version",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "out_tensor_rt_version", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    }
+  ]
+}

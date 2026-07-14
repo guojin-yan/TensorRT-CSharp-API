@@ -77,6 +77,13 @@ internal static class Program
         outputTensor.SetDimensionName(0, "batch");
         network.MarkOutput(outputTensor);
 
+        using TensorRtLayer ownerBoundNonPluginLayer = network.GetLayer(network.LayerCount - 1);
+        if (ownerBoundNonPluginLayer.TryGetPluginV2Metadata(out TensorRtPluginV2LayerMetadata? unexpectedPluginMetadata, out string pluginMetadataDiagnostic))
+        {
+            throw new InvalidOperationException($"A non-plugin layer unexpectedly returned PluginV2 metadata: {unexpectedPluginMetadata}");
+        }
+        Console.WriteLine($"PluginV2LayerMetadataRejected=True Layer={ownerBoundNonPluginLayer.Name}:{ownerBoundNonPluginLayer.Type} Diagnostic={pluginMetadataDiagnostic}");
+
         Console.WriteLine($"LayerMetadata Constant={constantLayer.Name}:{constantLayer.Type}:I{constantLayer.InputCount}:O{constantLayer.OutputCount}:{constantLayer.GetMetadata()} Sum={sumLayer.Name}:{sumLayer.Type}:I{sumLayer.InputCount}:O{sumLayer.OutputCount}:{sumLayer.GetMetadata()}");
         Console.WriteLine($"TensorDeploymentMetadata InputRoles={inputTensor.IsNetworkInput}/{inputTensor.IsNetworkOutput} OutputRoles={outputTensor.IsNetworkInput}/{outputTensor.IsNetworkOutput} Dims={inputTensor.GetDimensionName(0)}/{inputTensor.GetDimensionName(1)}->{outputTensor.GetDimensionName(0)} Broadcast={inputTensor.BroadcastAcrossBatch} DynamicRange={dynamicRangeState}");
         Console.WriteLine($"Network Inputs={network.InputCount} Outputs={network.OutputCount} Input={inputTensor.Name}:{inputTensor.Shape} Output={outputTensor.Name}:{outputTensor.Shape}");

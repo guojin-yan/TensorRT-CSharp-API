@@ -160,6 +160,24 @@ internal static partial class NativeBridgeApi
             "Plugin creator namespace is too large for the managed buffer.");
     }
 
+    public static int GetBuilderPluginCreatorTensorRtVersion(
+        TensorRtApiLine line,
+        SafeTensorRtObjectHandle builder,
+        int creatorIndex)
+    {
+        if (line != TensorRtApiLine.TensorRt8)
+        {
+            throw UnsupportedPluginRegistryInventoryLine();
+        }
+
+        BridgeStatusCode status = NativeMethodsTensorRt.jyppx_trt8_builder_plugin_creator_get_tensor_rt_version(
+            builder,
+            creatorIndex,
+            out int tensorRtVersion);
+        NativeStatus.ThrowIfFailed(status);
+        return tensorRtVersion;
+    }
+
     public static string GetBuilderPluginCreatorInterfaceKind(
         TensorRtApiLine line,
         SafeTensorRtObjectHandle builder,
@@ -338,6 +356,9 @@ internal static partial class NativeBridgeApi
             out int interfaceMajor,
             out int interfaceMinor);
         TensorRtApiLanguage apiLanguage = GetBuilderLookupPluginCreatorApiLanguage(line, builder, pluginName, pluginVersion, pluginNamespace);
+        int? tensorRtVersion = line == TensorRtApiLine.TensorRt8
+            ? GetBuilderLookupPluginCreatorTensorRtVersion(line, builder, pluginName, pluginVersion, pluginNamespace)
+            : null;
         int fieldCount = GetBuilderLookupPluginCreatorFieldCount(line, builder, pluginName, pluginVersion, pluginNamespace);
         List<TensorRtPluginFieldInfo> fields = new List<TensorRtPluginFieldInfo>(fieldCount);
 
@@ -357,8 +378,34 @@ internal static partial class NativeBridgeApi
             interfaceMajor,
             interfaceMinor,
             apiLanguage,
-            fields);
+            fields,
+            tensorRtVersion);
         return true;
+    }
+
+    private static int GetBuilderLookupPluginCreatorTensorRtVersion(
+        TensorRtApiLine line,
+        SafeTensorRtObjectHandle builder,
+        string pluginName,
+        string pluginVersion,
+        string pluginNamespace)
+    {
+        if (line != TensorRtApiLine.TensorRt8)
+        {
+            throw UnsupportedPluginRegistryInventoryLine();
+        }
+
+        using Utf8Interop.Utf8StringScope nameUtf8 = Utf8Interop.ToNativeString(pluginName ?? string.Empty);
+        using Utf8Interop.Utf8StringScope versionUtf8 = Utf8Interop.ToNativeString(pluginVersion ?? string.Empty);
+        using Utf8Interop.Utf8StringScope namespaceUtf8 = Utf8Interop.ToNativeString(pluginNamespace ?? string.Empty);
+        BridgeStatusCode status = NativeMethodsTensorRt.jyppx_trt8_builder_plugin_creator_lookup_get_tensor_rt_version(
+            builder,
+            nameUtf8.Pointer,
+            versionUtf8.Pointer,
+            namespaceUtf8.Pointer,
+            out int tensorRtVersion);
+        NativeStatus.ThrowIfFailed(status);
+        return tensorRtVersion;
     }
 
     private static string GetBuilderLookupPluginCreatorInterfaceKind(

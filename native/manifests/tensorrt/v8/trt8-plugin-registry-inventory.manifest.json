@@ -110,6 +110,19 @@
       ]
     },
     {
+      "id": "trt8-builder-plugin-creator-get-tensor-rt-version",
+      "entryPoint": "jyppx_trt8_builder_plugin_creator_get_tensor_rt_version",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "builder", "type": "JYPPX_TensorRtBuilder*", "direction": "in" },
+        { "name": "creator_index", "type": "int32_t", "direction": "in" },
+        { "name": "out_tensor_rt_version", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
       "id": "trt8-builder-plugin-creator-get-field-name",
       "entryPoint": "jyppx_trt8_builder_plugin_creator_get_field_name",
       "returnType": "BridgeStatusCode",
@@ -169,6 +182,22 @@
         { "name": "plugin_version", "type": "const char*", "direction": "in" },
         { "name": "plugin_namespace", "type": "const char*", "direction": "in" },
         { "name": "out_count", "type": "int32_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt8-builder-plugin-creator-lookup-get-tensor-rt-version",
+      "entryPoint": "jyppx_trt8_builder_plugin_creator_lookup_get_tensor_rt_version",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": true,
+      "manualReason": "Copies one scalar from a registry-borrowed creator during the owner-scoped lookup",
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "builder", "type": "JYPPX_TensorRtBuilder*", "direction": "in" },
+        { "name": "plugin_name", "type": "const char*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "plugin_version", "type": "const char*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "plugin_namespace", "type": "const char*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "out_tensor_rt_version", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
       ]
     },
     {
@@ -314,6 +343,19 @@
       ]
     },
     {
+      "id": "trt8-runtime-plugin-creator-get-tensor-rt-version",
+      "entryPoint": "jyppx_trt8_runtime_plugin_creator_get_tensor_rt_version",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "creator_index", "type": "int32_t", "direction": "in" },
+        { "name": "out_tensor_rt_version", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
       "id": "trt8-runtime-plugin-creator-get-field-name",
       "entryPoint": "jyppx_trt8_runtime_plugin_creator_get_field_name",
       "returnType": "BridgeStatusCode",
@@ -374,6 +416,22 @@
         { "name": "plugin_version", "type": "const char*", "direction": "in" },
         { "name": "plugin_namespace", "type": "const char*", "direction": "in" },
         { "name": "out_count", "type": "int32_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt8-runtime-plugin-creator-lookup-get-tensor-rt-version",
+      "entryPoint": "jyppx_trt8_runtime_plugin_creator_lookup_get_tensor_rt_version",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": true,
+      "manualReason": "Copies one scalar from a registry-borrowed creator during the owner-scoped lookup",
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "plugin_name", "type": "const char*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "plugin_version", "type": "const char*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "plugin_namespace", "type": "const char*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "out_tensor_rt_version", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
       ]
     },
     {
