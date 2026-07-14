@@ -91,6 +91,36 @@ function New-OwnerStep {
   }
 }
 
+function New-OwnerInputField {
+  param([string]$Name, [string]$Category, [string]$ExpectedSource)
+
+  [pscustomobject]@{
+    fieldName = $Name
+    category = $Category
+    expectedSource = $ExpectedSource
+    state = "blocked-owner-real-input-required"
+    ownerMustProvide = $true
+    acceptsPlaceholder = $false
+    acceptsLocalFeed = $false
+    acceptsProjectReference = $false
+    acceptsDirectNupkg = $false
+    acceptsDryRun = $false
+    acceptsTemplate = $false
+    performsPublish = $false
+    usesPublishToken = $false
+    canPublishPublicly = $false
+    canCloseReleaseIssue = $false
+    canPromoteRuntimeProof = $false
+    canPromotePublicProof = $false
+    canPromotePostPublishProof = $false
+    isRuntimeExecutionProof = $false
+    isPackageConsumerRuntimeProof = $false
+    isPostPublishProof = $false
+    isReleaseCloseProof = $false
+    boundary = "Owner real public download field only; not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push."
+  }
+}
+
 $docsAuditValidation = Read-JsonOrNull "artifacts\final-release\release-docs-and-nuget-metadata-audit-validation.json"
 $postPublishUserVerificationPackValidation = Read-JsonOrNull "artifacts\final-release\post-publish-user-verification-pack-validation.json"
 $publicDownloadTemplate = Read-JsonOrNull "artifacts\final-release\public-package-download-proof-input.template.json"
@@ -100,6 +130,29 @@ $verificationPackReadyForHandoff = [string](Get-PropertyOrDefault -Object $postP
 $templatePresent = $null -ne $publicDownloadTemplate
 $managedPackageId = [string](Get-PropertyOrDefault -Object $publicDownloadTemplate -Name "managedPackageId" -DefaultValue "JYPPX.TensorRT.CSharp.API")
 $runtimePackageId = [string](Get-PropertyOrDefault -Object $publicDownloadTemplate -Name "runtimePackageId" -DefaultValue "JYPPX.TensorRT.CSharp.API.runtime.$RuntimePackageKey")
+
+$ownerInputFields = @(
+  New-OwnerInputField -Name "publicFeedKind" -Category "public-channel" -ExpectedSource "Owner-selected public NuGet/GitHub Packages/GitHub Release route"
+  New-OwnerInputField -Name "packageSourceUrl" -Category "public-channel" -ExpectedSource "Public package source URL visible after publication"
+  New-OwnerInputField -Name "managedPackageIdentity" -Category "package-identity" -ExpectedSource "Published managed package id/version"
+  New-OwnerInputField -Name "runtimePackageIdentity" -Category "package-identity" -ExpectedSource "Published runtime package id/version"
+  New-OwnerInputField -Name "managedPackageSha256" -Category "package-hash" -ExpectedSource "SHA256 of the downloaded managed .nupkg"
+  New-OwnerInputField -Name "runtimePackageSha256" -Category "package-hash" -ExpectedSource "SHA256 of the downloaded runtime .nupkg or GitHub release asset"
+  New-OwnerInputField -Name "managedPackageDownloadedPath" -Category "download" -ExpectedSource "Repository-local owner-downloads path created from public URL"
+  New-OwnerInputField -Name "runtimePackageDownloadedPath" -Category "download" -ExpectedSource "Repository-local owner-downloads path created from public URL"
+  New-OwnerInputField -Name "downloadedAtUtc" -Category "download" -ExpectedSource "UTC timestamp from the real Owner download session"
+  New-OwnerInputField -Name "cleanTempDirectory" -Category "clean-consumer" -ExpectedSource "Fresh directory used for public restore validation"
+  New-OwnerInputField -Name "restoreSource" -Category "clean-consumer" -ExpectedSource "Public restore source, not local feed or direct nupkg"
+  New-OwnerInputField -Name "consumerProjectPath" -Category "clean-consumer" -ExpectedSource "Repository-external consumer project path"
+  New-OwnerInputField -Name "restoreTranscriptPath" -Category "transcript" -ExpectedSource "dotnet restore transcript from public source"
+  New-OwnerInputField -Name "restoreTranscriptSha256" -Category "transcript" -ExpectedSource "SHA256 of restore transcript"
+  New-OwnerInputField -Name "buildTranscriptPath" -Category "transcript" -ExpectedSource "dotnet build transcript from public package consumer"
+  New-OwnerInputField -Name "buildTranscriptSha256" -Category "transcript" -ExpectedSource "SHA256 of build transcript"
+  New-OwnerInputField -Name "testTranscriptPath" -Category "transcript" -ExpectedSource "dotnet test/smoke transcript from public package consumer"
+  New-OwnerInputField -Name "testTranscriptSha256" -Category "transcript" -ExpectedSource "SHA256 of test/smoke transcript"
+  New-OwnerInputField -Name "reviewer" -Category "owner-review" -ExpectedSource "Owner reviewer identity"
+  New-OwnerInputField -Name "reviewedAtUtc" -Category "owner-review" -ExpectedSource "UTC timestamp of owner review"
+)
 
 $steps = @(
   New-OwnerStep `
@@ -224,6 +277,11 @@ $record = [ordered]@{
   readyOwnerStepCount = $readySteps.Count
   blockedOwnerStepCount = $blockedSteps.Count
   manualCommandCount = $manualCommands.Count
+  requiredOwnerFieldCount = $ownerInputFields.Count
+  blockedRequiredOwnerFieldCount = @($ownerInputFields | Where-Object { [string]$_.state -eq "blocked-owner-real-input-required" }).Count
+  rejectedSubstituteCount = 8
+  sourceReadinessSignalCount = 6
+  ownerInputFields = $ownerInputFields
   ownerSteps = $steps
   manualCommands = $manualCommands
   requiredOwnerActions = @($blockedSteps | ForEach-Object {
@@ -280,6 +338,10 @@ Generated at: ``$($record.generatedAtUtc)``
 - readyOwnerStepCount: ``$($record.readyOwnerStepCount)``
 - blockedOwnerStepCount: ``$($record.blockedOwnerStepCount)``
 - manualCommandCount: ``$($record.manualCommandCount)``
+- requiredOwnerFieldCount: ``$($record.requiredOwnerFieldCount)``
+- blockedRequiredOwnerFieldCount: ``$($record.blockedRequiredOwnerFieldCount)``
+- rejectedSubstituteCount: ``$($record.rejectedSubstituteCount)``
+- sourceReadinessSignalCount: ``$($record.sourceReadinessSignalCount)``
 - performsPublish: ``False``
 - usesPublishToken: ``False``
 - canPublishPublicly: ``False``
@@ -291,6 +353,12 @@ Generated at: ``$($record.generatedAtUtc)``
 | Step | State | Ready | Expected Artifact | Owner Action |
 |---|---:|---:|---|---|
 $($stepRows -join "`r`n")
+
+## Owner Input Fields
+
+| Field | Category | State | Expected Source |
+|---|---|---|---|
+$(@($ownerInputFields | ForEach-Object { "| ``$(ConvertTo-MarkdownCell $_.fieldName)`` | ``$(ConvertTo-MarkdownCell $_.category)`` | ``$(ConvertTo-MarkdownCell $_.state)`` | $(ConvertTo-MarkdownCell $_.expectedSource) |" }) -join "`r`n")
 
 ## Manual Commands
 

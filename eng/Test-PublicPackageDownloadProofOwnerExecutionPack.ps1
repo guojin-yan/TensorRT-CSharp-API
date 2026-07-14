@@ -68,6 +68,8 @@ $steps = @((Get-PropertyOrDefault -Object $record -Name "ownerSteps" -DefaultVal
 $stepIds = @($steps | ForEach-Object { [string](Get-PropertyOrDefault -Object $_ -Name "stepId" -DefaultValue "") })
 $manualCommands = @((Get-PropertyOrDefault -Object $record -Name "manualCommands" -DefaultValue @()) | ForEach-Object { [string]$_ })
 $joinedCommands = $manualCommands -join "`n"
+$ownerInputFields = @((Get-PropertyOrDefault -Object $record -Name "ownerInputFields" -DefaultValue @()))
+$ownerInputFieldNames = @($ownerInputFields | ForEach-Object { [string](Get-PropertyOrDefault -Object $_ -Name "fieldName" -DefaultValue "") })
 
 $requiredStepIds = @(
   "preflight-claim-safety",
@@ -84,6 +86,43 @@ $requiredStepIds = @(
   "refresh-release-evidence"
 )
 $missingStepIds = @($requiredStepIds | Where-Object { $stepIds -notcontains $_ })
+$requiredOwnerInputFields = @(
+  "publicFeedKind",
+  "packageSourceUrl",
+  "managedPackageIdentity",
+  "runtimePackageIdentity",
+  "managedPackageSha256",
+  "runtimePackageSha256",
+  "managedPackageDownloadedPath",
+  "runtimePackageDownloadedPath",
+  "downloadedAtUtc",
+  "cleanTempDirectory",
+  "restoreSource",
+  "consumerProjectPath",
+  "restoreTranscriptPath",
+  "restoreTranscriptSha256",
+  "buildTranscriptPath",
+  "buildTranscriptSha256",
+  "testTranscriptPath",
+  "testTranscriptSha256",
+  "reviewer",
+  "reviewedAtUtc"
+)
+$missingOwnerInputFields = @($requiredOwnerInputFields | Where-Object { $ownerInputFieldNames -notcontains $_ })
+$unsafeOwnerInputFields = @($ownerInputFields | Where-Object {
+  [string](Get-PropertyOrDefault -Object $_ -Name "state" -DefaultValue "") -ne "blocked-owner-real-input-required" -or
+  [bool](Get-PropertyOrDefault -Object $_ -Name "acceptsPlaceholder" -DefaultValue $true) -or
+  [bool](Get-PropertyOrDefault -Object $_ -Name "acceptsLocalFeed" -DefaultValue $true) -or
+  [bool](Get-PropertyOrDefault -Object $_ -Name "acceptsProjectReference" -DefaultValue $true) -or
+  [bool](Get-PropertyOrDefault -Object $_ -Name "acceptsDirectNupkg" -DefaultValue $true) -or
+  [bool](Get-PropertyOrDefault -Object $_ -Name "acceptsDryRun" -DefaultValue $true) -or
+  [bool](Get-PropertyOrDefault -Object $_ -Name "acceptsTemplate" -DefaultValue $true) -or
+  [bool](Get-PropertyOrDefault -Object $_ -Name "performsPublish" -DefaultValue $true) -or
+  [bool](Get-PropertyOrDefault -Object $_ -Name "canPublishPublicly" -DefaultValue $true) -or
+  [bool](Get-PropertyOrDefault -Object $_ -Name "canCloseReleaseIssue" -DefaultValue $true) -or
+  [bool](Get-PropertyOrDefault -Object $_ -Name "canPromoteRuntimeProof" -DefaultValue $true) -or
+  [bool](Get-PropertyOrDefault -Object $_ -Name "isPostPublishProof" -DefaultValue $true)
+})
 
 $requiredCommandMarkers = @(
   "Test-PublicDocsAndPackageMetadataGate.ps1 -Strict",
@@ -135,6 +174,9 @@ $items = New-Object System.Collections.Generic.List[object]
 $items.Add((New-ValidationItem "record-kind" ([string](Get-PropertyOrDefault -Object $record -Name "recordKind" -DefaultValue "") -eq "public-package-download-proof-owner-execution-pack") "blocker" "recordKind must be public-package-download-proof-owner-execution-pack.")) | Out-Null
 $items.Add((New-ValidationItem "required-owner-steps-present" ($missingStepIds.Count -eq 0) "blocker" ("Missing required owner steps: " + ($missingStepIds -join ", ")))) | Out-Null
 $items.Add((New-ValidationItem "minimum-owner-step-count" ($steps.Count -ge 12 -and [int](Get-PropertyOrDefault -Object $record -Name "ownerStepCount" -DefaultValue 0) -eq $steps.Count) "blocker" "Execution pack must cover preflight, publish-result confirmation, downloads, hash capture, input validation, candidate import, post-publish pack refresh, and evidence refresh.")) | Out-Null
+$items.Add((New-ValidationItem "required-owner-input-fields-present" ($missingOwnerInputFields.Count -eq 0) "blocker" ("Missing required owner input fields: " + ($missingOwnerInputFields -join ", ")))) | Out-Null
+$items.Add((New-ValidationItem "owner-input-field-counts" ($ownerInputFields.Count -ge 20 -and [int](Get-PropertyOrDefault -Object $record -Name "requiredOwnerFieldCount" -DefaultValue 0) -eq $ownerInputFields.Count -and [int](Get-PropertyOrDefault -Object $record -Name "blockedRequiredOwnerFieldCount" -DefaultValue 0) -eq $ownerInputFields.Count) "blocker" "Execution pack must expose the public download, package identity, hash, clean consumer, transcript, and owner review input fields as blocked real-owner inputs.")) | Out-Null
+$items.Add((New-ValidationItem "owner-input-fields-safe" ($unsafeOwnerInputFields.Count -eq 0) "blocker" "Owner input fields must reject local/template/dry-run substitutes and keep publish/proof/close flags false.")) | Out-Null
 $items.Add((New-ValidationItem "manual-command-markers-present" ($missingCommandMarkers.Count -eq 0) "blocker" ("Missing required command markers: " + ($missingCommandMarkers -join ", ")))) | Out-Null
 $items.Add((New-ValidationItem "manual-commands-no-publish-side-effects" ($forbiddenCommandHits.Count -eq 0) "blocker" ("Forbidden command markers: " + ($forbiddenCommandHits -join ", ")))) | Out-Null
 $items.Add((New-ValidationItem "blocked-until-owner-download-proof" ([string](Get-PropertyOrDefault -Object $record -Name "packState" -DefaultValue "") -eq "blocked-public-package-download-proof-owner-execution-required" -and $blockedSteps.Count -ge 8) "blocker" "Execution pack must stay blocked until Owner supplies real public download proof.")) | Out-Null
@@ -163,6 +205,10 @@ $validation = [ordered]@{
   readyOwnerStepCount = @($steps | Where-Object { [bool](Get-PropertyOrDefault -Object $_ -Name "ready" -DefaultValue $false) }).Count
   blockedOwnerStepCount = $blockedSteps.Count
   manualCommandCount = $manualCommands.Count
+  requiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $record -Name "requiredOwnerFieldCount" -DefaultValue 0)
+  blockedRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $record -Name "blockedRequiredOwnerFieldCount" -DefaultValue 0)
+  rejectedSubstituteCount = [int](Get-PropertyOrDefault -Object $record -Name "rejectedSubstituteCount" -DefaultValue 0)
+  sourceReadinessSignalCount = [int](Get-PropertyOrDefault -Object $record -Name "sourceReadinessSignalCount" -DefaultValue 0)
   failedBlockerCount = $failedBlockers.Count
   failedActionRequiredCount = $failedActionRequired.Count
   missingStepIds = $missingStepIds
@@ -200,6 +246,10 @@ Generated at: ``$($validation.generatedAtUtc)``
 | readyOwnerStepCount | ``$($validation.readyOwnerStepCount)`` |
 | blockedOwnerStepCount | ``$($validation.blockedOwnerStepCount)`` |
 | manualCommandCount | ``$($validation.manualCommandCount)`` |
+| requiredOwnerFieldCount | ``$($validation.requiredOwnerFieldCount)`` |
+| blockedRequiredOwnerFieldCount | ``$($validation.blockedRequiredOwnerFieldCount)`` |
+| rejectedSubstituteCount | ``$($validation.rejectedSubstituteCount)`` |
+| sourceReadinessSignalCount | ``$($validation.sourceReadinessSignalCount)`` |
 | failedBlockerCount | ``$($validation.failedBlockerCount)`` |
 | failedActionRequiredCount | ``$($validation.failedActionRequiredCount)`` |
 | performsPublish | ``False`` |

@@ -33,14 +33,34 @@ function Get-OwnerPublicReleaseExecutionKitSpec {
       summary = '汇总 NuGet.org、GitHub Packages、GitHub Release、包/hash/release notes 核对等最终人工发布命令面，但不执行任何上传。'
       requiredOwnerFields = @(
         'ownerName',
+        'ownerReviewTimestampUtc',
+        'publicFeedKind',
+        'publicPackageSource',
         'packageId',
         'packageVersion',
         'nugetOrgPackageUrl',
+        'nugetOrgPackageSha256',
         'githubPackagesUrl',
+        'githubPackagesPackageSha256',
+        'githubReleaseUrl',
+        'githubReleaseAssetSha256',
+        'publishedAtUtc',
+        'githubActionsRunId',
+        'githubActionsRunUrl',
+        'githubActionsHeadSha',
+        'publishStdoutPath',
+        'publishStdoutSha256',
+        'publishStderrPath',
+        'publishStderrSha256',
+        'publishTranscriptPath',
+        'publishTranscriptSha256',
+        'publishedPackageIdentity',
         'publishedNupkgSha256',
         'publishedSymbolsSha256',
         'releaseNotesUrl',
+        'releaseNotesSha256',
         'rollbackPlanReviewed',
+        'nonSubstituteConfirmations',
         'ownerPublishDecision'
       )
       items = @(
@@ -185,6 +205,39 @@ function Get-OwnerPublicReleaseExecutionKitSpec {
   return $specs[$ArtifactId]
 }
 
+function New-OwnerRequiredInputField {
+  [CmdletBinding()]
+  param(
+    [Parameter(Mandatory)]
+    [string]$FieldName,
+
+    [Parameter(Mandatory)]
+    [string]$ArtifactId
+  )
+
+  [pscustomobject]@{
+    fieldName = $FieldName
+    artifactId = $ArtifactId
+    state = 'blocked-owner-real-input-required'
+    ownerMustProvide = $true
+    required = $true
+    acceptsPlaceholder = $false
+    acceptsLocalOnly = $false
+    acceptsDryRun = $false
+    acceptsTemplate = $false
+    acceptsCandidate = $false
+    acceptsDashboard = $false
+    performsPublish = $false
+    canPublishPublicly = $false
+    canCloseReleaseIssue = $false
+    canPromoteRuntimeProof = $false
+    isRuntimeExecutionProof = $false
+    isPostPublishProof = $false
+    isReleaseCloseProof = $false
+    boundary = 'Owner real input field only; not runtime proof; not post-publish proof; not publish approval; not release close approval; not package push'
+  }
+}
+
 function New-OwnerPublicReleaseExecutionArtifact {
   [CmdletBinding()]
   param(
@@ -210,6 +263,23 @@ function New-OwnerPublicReleaseExecutionArtifact {
       boundary = $boundary
     }
   }
+  $ownerInputFields = @($spec.requiredOwnerFields | ForEach-Object { New-OwnerRequiredInputField -FieldName ([string]$_) -ArtifactId $ArtifactId })
+  $forbiddenSubstitutes = @(
+    'local .nupkg',
+    'local feed',
+    'ProjectReference',
+    'direct nupkg',
+    'template',
+    'draft',
+    'dry-run',
+    'runbook',
+    'dashboard',
+    'audit pack',
+    'hash slot',
+    'candidate',
+    'local-only scan',
+    'manual handoff'
+  )
 
   $result = [ordered]@{
     artifactId = $spec.artifactId
@@ -228,23 +298,15 @@ function New-OwnerPublicReleaseExecutionArtifact {
     isReleaseCloseProof = $false
     isReleaseCloseRecordProof = $false
     requiredOwnerFields = @($spec.requiredOwnerFields)
+    requiredOwnerFieldCount = @($spec.requiredOwnerFields).Count
+    ownerInputFieldCount = $ownerInputFields.Count
+    blockedRequiredOwnerFieldCount = @($ownerInputFields | Where-Object { [string]$_.state -eq 'blocked-owner-real-input-required' }).Count
+    rejectedSubstituteCount = $forbiddenSubstitutes.Count
+    nonSubstituteConfirmationCount = 8
+    sourceReadinessSignalCount = @($items).Count
+    ownerInputFields = @($ownerInputFields)
     boundary = $boundary
-    forbiddenSubstitutes = @(
-      'local .nupkg',
-      'local feed',
-      'ProjectReference',
-      'direct nupkg',
-      'template',
-      'draft',
-      'dry-run',
-      'runbook',
-      'dashboard',
-      'audit pack',
-      'hash slot',
-      'candidate',
-      'local-only scan',
-      'manual handoff'
-    )
+    forbiddenSubstitutes = $forbiddenSubstitutes
   }
 
   $result[$spec.statePropertyName] = $spec.state
@@ -274,6 +336,8 @@ function New-OwnerPublicReleaseExecutionArtifact {
     ''
   )
   $lines += @($spec.requiredOwnerFields | ForEach-Object { "- ``$_``" })
+  $lines += @('', '## Owner input field surface', '')
+  $lines += @($ownerInputFields | ForEach-Object { "- ``$($_.fieldName)`` - ``$($_.state)`` - $($_.boundary)" })
   $lines += @('', "## $($spec.itemsPropertyName)", '')
   $lines += @($items | ForEach-Object { "- [$($_.status)] $($_.title) - $($_.boundary)" })
   $lines += @('', '## Forbidden substitutes', '')
@@ -311,6 +375,13 @@ function Test-OwnerPublicReleaseExecutionArtifact {
 
   $stateProperty = $artifact.PSObject.Properties[[string]$spec.statePropertyName]
   $countProperty = $artifact.PSObject.Properties[[string]$spec.countPropertyName]
+  $ownerInputFieldProperty = $artifact.PSObject.Properties['ownerInputFields']
+  $ownerInputFields = if ($null -ne $ownerInputFieldProperty) { @($ownerInputFieldProperty.Value) } else { @() }
+  $requiredOwnerFieldCount = [int]($artifact.PSObject.Properties['requiredOwnerFieldCount']?.Value ?? 0)
+  $ownerInputFieldCount = [int]($artifact.PSObject.Properties['ownerInputFieldCount']?.Value ?? 0)
+  $blockedRequiredOwnerFieldCount = [int]($artifact.PSObject.Properties['blockedRequiredOwnerFieldCount']?.Value ?? 0)
+  $rejectedSubstituteCount = [int]($artifact.PSObject.Properties['rejectedSubstituteCount']?.Value ?? 0)
+  $nonSubstituteConfirmationCount = [int]($artifact.PSObject.Properties['nonSubstituteConfirmationCount']?.Value ?? 0)
 
   if ([string]$artifact.artifactId -ne $ArtifactId) { Add-Finding 'artifact-id' 'Unexpected artifact id.' }
   if ($null -eq $stateProperty -or [string]$stateProperty.Value -ne [string]$spec.state) { Add-Finding 'state' 'Unexpected blocked state.' }
@@ -331,6 +402,25 @@ function Test-OwnerPublicReleaseExecutionArtifact {
   if ($null -eq $countProperty -or [int]$countProperty.Value -lt @($spec.items).Count) { Add-Finding 'item-count' 'Expected owner action surface is incomplete.' }
   if ($null -eq $countProperty -or [int]$artifact.blockedCount -ne [int]$countProperty.Value) { Add-Finding 'blocked-count' 'All generated items must remain blocked.' }
   if (@($artifact.requiredOwnerFields).Count -lt @($spec.requiredOwnerFields).Count) { Add-Finding 'required-owner-fields' 'Required owner input fields are incomplete.' }
+  if ($requiredOwnerFieldCount -lt @($spec.requiredOwnerFields).Count) { Add-Finding 'required-owner-field-count' 'Required owner field count is incomplete.' }
+  if ($ownerInputFieldCount -ne $ownerInputFields.Count -or $ownerInputFieldCount -lt @($spec.requiredOwnerFields).Count) { Add-Finding 'owner-input-field-count' 'Owner input field surface count is incomplete.' }
+  if ($blockedRequiredOwnerFieldCount -ne $ownerInputFieldCount) { Add-Finding 'blocked-required-owner-field-count' 'All owner input fields must remain blocked until real Owner evidence is supplied.' }
+  if ($rejectedSubstituteCount -lt 14) { Add-Finding 'rejected-substitute-count' 'Forbidden substitute count must remain visible.' }
+  if ($nonSubstituteConfirmationCount -lt 8) { Add-Finding 'non-substitute-confirmation-count' 'Non-substitute confirmation count must remain visible.' }
+  foreach ($requiredField in @($spec.requiredOwnerFields)) {
+    if (@($ownerInputFields | Where-Object { [string]$_.fieldName -eq [string]$requiredField }).Count -ne 1) {
+      Add-Finding "owner-input-field-$requiredField" "Missing owner input field surface: $requiredField"
+    }
+  }
+  foreach ($field in $ownerInputFields) {
+    if ([string]$field.state -ne 'blocked-owner-real-input-required') { Add-Finding "field-state-$($field.fieldName)" 'Owner input field must stay blocked.' }
+    if ([bool]$field.acceptsPlaceholder -or [bool]$field.acceptsLocalOnly -or [bool]$field.acceptsDryRun -or [bool]$field.acceptsTemplate -or [bool]$field.acceptsCandidate -or [bool]$field.acceptsDashboard) {
+      Add-Finding "field-substitute-$($field.fieldName)" 'Owner input field accepts a forbidden substitute.'
+    }
+    if ([bool]$field.performsPublish -or [bool]$field.canPublishPublicly -or [bool]$field.canCloseReleaseIssue -or [bool]$field.canPromoteRuntimeProof -or [bool]$field.isRuntimeExecutionProof -or [bool]$field.isPostPublishProof -or [bool]$field.isReleaseCloseProof) {
+      Add-Finding "field-proof-boundary-$($field.fieldName)" 'Owner input field has unsafe publish/proof/close flags.'
+    }
+  }
   foreach ($substitute in @('local .nupkg', 'local feed', 'ProjectReference', 'direct nupkg', 'template', 'draft', 'dry-run', 'runbook', 'dashboard', 'audit pack', 'hash slot', 'candidate', 'local-only scan', 'manual handoff')) {
     if (@($artifact.forbiddenSubstitutes) -notcontains $substitute) {
       Add-Finding "forbidden-$substitute" "Missing forbidden substitute: $substitute"
@@ -346,6 +436,11 @@ function Test-OwnerPublicReleaseExecutionArtifact {
     findings = @($findings.ToArray())
     strict = [bool]$Strict
     passed = $false
+    requiredOwnerFieldCount = $requiredOwnerFieldCount
+    ownerInputFieldCount = $ownerInputFieldCount
+    blockedRequiredOwnerFieldCount = $blockedRequiredOwnerFieldCount
+    rejectedSubstituteCount = $rejectedSubstituteCount
+    nonSubstituteConfirmationCount = $nonSubstituteConfirmationCount
     boundary = $script:OwnerPublicReleaseExecutionBoundary
   }
 
@@ -357,6 +452,11 @@ function Test-OwnerPublicReleaseExecutionArtifact {
     '',
     "- State: ``$validationState``",
     "- Findings: ``$($findings.Count)``",
+    "- Required owner fields: ``$requiredOwnerFieldCount``",
+    "- Owner input fields: ``$ownerInputFieldCount``",
+    "- Blocked required owner fields: ``$blockedRequiredOwnerFieldCount``",
+    "- Rejected substitutes: ``$rejectedSubstituteCount``",
+    "- Non-substitute confirmations: ``$nonSubstituteConfirmationCount``",
     '- Passed: `false`',
     "- Boundary: $($script:OwnerPublicReleaseExecutionBoundary)"
   ) | Set-Content -LiteralPath $validationMdPath -Encoding UTF8

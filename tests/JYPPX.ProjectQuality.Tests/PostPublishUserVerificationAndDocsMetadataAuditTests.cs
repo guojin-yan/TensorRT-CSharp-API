@@ -61,6 +61,15 @@ public sealed class PostPublishUserVerificationAndDocsMetadataAuditTests
         Assert.True(pack.GetProperty("readyVerificationLaneCount").GetInt32() >= 2);
         Assert.True(pack.GetProperty("blockedVerificationLaneCount").GetInt32() >= 4);
         AssertFalseProofPublishCloseFlags(pack);
+        Assert.True(pack.GetProperty("requiredOwnerFieldCount").GetInt32() >= 19);
+        Assert.Equal(pack.GetProperty("requiredOwnerFieldCount").GetInt32(), pack.GetProperty("blockedRequiredOwnerFieldCount").GetInt32());
+        Assert.True(pack.GetProperty("rejectedSubstituteCount").GetInt32() >= 8);
+        Assert.True(pack.GetProperty("sourceReadinessSignalCount").GetInt32() >= 9);
+        string[] postPublishOwnerFields = pack.GetProperty("ownerInputFields").EnumerateArray().Select(static item => item.GetProperty("fieldName").GetString()!).ToArray();
+        Assert.Contains("dotnetRestoreTranscriptSha256", postPublishOwnerFields);
+        Assert.Contains("hostMetadataPath", postPublishOwnerFields);
+        Assert.Contains("tensorRtRuntimeMetadata", postPublishOwnerFields);
+        Assert.Contains("resultValidationSha256", postPublishOwnerFields);
 
         JsonElement[] lanes = pack.GetProperty("lanes").EnumerateArray().ToArray();
         AssertLane(lanes, "release-docs-and-nuget-metadata-audit", ready: true);
@@ -123,6 +132,15 @@ public sealed class PostPublishUserVerificationAndDocsMetadataAuditTests
         Assert.True(executionPack.GetProperty("blockedOwnerStepCount").GetInt32() >= 8);
         Assert.True(executionPack.GetProperty("manualCommandCount").GetInt32() >= 10);
         AssertFalseProofPublishCloseFlags(executionPack);
+        Assert.True(executionPack.GetProperty("requiredOwnerFieldCount").GetInt32() >= 20);
+        Assert.Equal(executionPack.GetProperty("requiredOwnerFieldCount").GetInt32(), executionPack.GetProperty("blockedRequiredOwnerFieldCount").GetInt32());
+        Assert.True(executionPack.GetProperty("rejectedSubstituteCount").GetInt32() >= 8);
+        Assert.True(executionPack.GetProperty("sourceReadinessSignalCount").GetInt32() >= 6);
+        string[] downloadOwnerFields = executionPack.GetProperty("ownerInputFields").EnumerateArray().Select(static item => item.GetProperty("fieldName").GetString()!).ToArray();
+        Assert.Contains("packageSourceUrl", downloadOwnerFields);
+        Assert.Contains("managedPackageSha256", downloadOwnerFields);
+        Assert.Contains("restoreSource", downloadOwnerFields);
+        Assert.Contains("consumerProjectPath", downloadOwnerFields);
 
         string executionRaw = executionPack.GetRawText();
         foreach (string marker in new[]
@@ -161,12 +179,24 @@ public sealed class PostPublishUserVerificationAndDocsMetadataAuditTests
         Assert.Equal(0, evidence.GetProperty("releaseDocsAndNuGetMetadataAuditYoloDetBlockedMatchCount").GetInt32());
         Assert.Equal("blocked-post-publish-user-verification-required", evidence.GetProperty("postPublishUserVerificationPackValidationState").GetString());
         Assert.True(evidence.GetProperty("postPublishUserVerificationPackBlockedLaneCount").GetInt32() >= 4);
+        Assert.True(evidence.GetProperty("postPublishUserVerificationPackRequiredOwnerFieldCount").GetInt32() >= 19);
+        Assert.Equal(evidence.GetProperty("postPublishUserVerificationPackRequiredOwnerFieldCount").GetInt32(), evidence.GetProperty("postPublishUserVerificationPackBlockedRequiredOwnerFieldCount").GetInt32());
+        Assert.True(evidence.GetProperty("postPublishUserVerificationPackRejectedSubstituteCount").GetInt32() >= 8);
         Assert.Equal("blocked-public-package-download-proof-owner-execution-required", evidence.GetProperty("publicPackageDownloadProofOwnerExecutionPackValidationState").GetString());
         Assert.True(evidence.GetProperty("publicPackageDownloadProofOwnerExecutionPackBlockedStepCount").GetInt32() >= 8);
+        Assert.True(evidence.GetProperty("publicPackageDownloadProofOwnerExecutionPackRequiredOwnerFieldCount").GetInt32() >= 20);
+        Assert.Equal(evidence.GetProperty("publicPackageDownloadProofOwnerExecutionPackRequiredOwnerFieldCount").GetInt32(), evidence.GetProperty("publicPackageDownloadProofOwnerExecutionPackBlockedRequiredOwnerFieldCount").GetInt32());
+        Assert.True(evidence.GetProperty("publicPackageDownloadProofOwnerExecutionPackRejectedSubstituteCount").GetInt32() >= 8);
 
         AssertBlockedEvidenceItem(evidence, "release-docs-and-nuget-metadata-audit", "not public package download proof");
         AssertBlockedEvidenceItem(evidence, "post-publish-user-verification-pack", "owner action aggregation only");
         AssertBlockedEvidenceItem(evidence, "public-package-download-proof-owner-execution-pack", "manual owner guidance only");
+        string postPublishState = evidence.GetProperty("evidenceItems").EnumerateArray().Single(item => item.GetProperty("id").GetString() == "post-publish-user-verification-pack").GetProperty("state").GetString()!;
+        Assert.Contains("requiredOwnerFields=", postPublishState, StringComparison.Ordinal);
+        Assert.Contains("blockedOwnerFields=", postPublishState, StringComparison.Ordinal);
+        string downloadState = evidence.GetProperty("evidenceItems").EnumerateArray().Single(item => item.GetProperty("id").GetString() == "public-package-download-proof-owner-execution-pack").GetProperty("state").GetString()!;
+        Assert.Contains("requiredOwnerFields=", downloadState, StringComparison.Ordinal);
+        Assert.Contains("blockedOwnerFields=", downloadState, StringComparison.Ordinal);
 
         string[] sourceArtifacts = evidence.GetProperty("sourceArtifacts").EnumerateArray().Select(static item => item.GetString()!).ToArray();
         Assert.Contains("artifacts/final-release/release-docs-and-nuget-metadata-audit-validation.json", sourceArtifacts);

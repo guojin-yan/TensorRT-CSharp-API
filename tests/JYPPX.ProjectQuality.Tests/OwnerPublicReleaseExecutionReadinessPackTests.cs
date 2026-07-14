@@ -60,6 +60,11 @@ public sealed class OwnerPublicReleaseExecutionReadinessPackTests
             Assert.False(root.GetProperty("isReleaseCloseProof").GetBoolean());
             Assert.False(root.GetProperty("isReleaseCloseRecordProof").GetBoolean());
             AssertBoundary(root.GetProperty("boundary").GetString()!);
+            Assert.True(root.GetProperty("requiredOwnerFieldCount").GetInt32() > 0);
+            Assert.Equal(root.GetProperty("requiredOwnerFieldCount").GetInt32(), root.GetProperty("ownerInputFieldCount").GetInt32());
+            Assert.Equal(root.GetProperty("ownerInputFieldCount").GetInt32(), root.GetProperty("blockedRequiredOwnerFieldCount").GetInt32());
+            Assert.True(root.GetProperty("rejectedSubstituteCount").GetInt32() >= 14);
+            Assert.True(root.GetProperty("nonSubstituteConfirmationCount").GetInt32() >= 8);
 
             using JsonDocument validation = ReadFinalReleaseJson(id + "-validation.json");
             JsonElement validationRoot = validation.RootElement;
@@ -67,6 +72,11 @@ public sealed class OwnerPublicReleaseExecutionReadinessPackTests
             Assert.Equal(0, validationRoot.GetProperty("findingCount").GetInt32());
             Assert.False(validationRoot.GetProperty("passed").GetBoolean());
             AssertBoundary(validationRoot.GetProperty("boundary").GetString()!);
+            Assert.True(validationRoot.GetProperty("requiredOwnerFieldCount").GetInt32() > 0);
+            Assert.Equal(validationRoot.GetProperty("requiredOwnerFieldCount").GetInt32(), validationRoot.GetProperty("ownerInputFieldCount").GetInt32());
+            Assert.Equal(validationRoot.GetProperty("ownerInputFieldCount").GetInt32(), validationRoot.GetProperty("blockedRequiredOwnerFieldCount").GetInt32());
+            Assert.True(validationRoot.GetProperty("rejectedSubstituteCount").GetInt32() >= 14);
+            Assert.True(validationRoot.GetProperty("nonSubstituteConfirmationCount").GetInt32() >= 8);
         }
     }
 
@@ -84,6 +94,20 @@ public sealed class OwnerPublicReleaseExecutionReadinessPackTests
         {
             AssertBlockedEvidenceItem(evidence, id);
         }
+
+        Assert.True(evidence.GetProperty("publicReleaseOwnerExecutionPackageRequiredOwnerFieldCount").GetInt32() >= 25);
+        Assert.Equal(
+            evidence.GetProperty("publicReleaseOwnerExecutionPackageRequiredOwnerFieldCount").GetInt32(),
+            evidence.GetProperty("publicReleaseOwnerExecutionPackageOwnerInputFieldCount").GetInt32());
+        Assert.Equal(
+            evidence.GetProperty("publicReleaseOwnerExecutionPackageOwnerInputFieldCount").GetInt32(),
+            evidence.GetProperty("publicReleaseOwnerExecutionPackageBlockedRequiredOwnerFieldCount").GetInt32());
+        Assert.True(evidence.GetProperty("publicReleaseOwnerExecutionPackageRejectedSubstituteCount").GetInt32() >= 14);
+        Assert.True(evidence.GetProperty("publicReleaseOwnerExecutionPackageNonSubstituteConfirmationCount").GetInt32() >= 8);
+        JsonElement publicReleaseItem = evidence.GetProperty("evidenceItems").EnumerateArray().Single(item => item.GetProperty("id").GetString() == "public-release-owner-execution-package");
+        string publicReleaseState = publicReleaseItem.GetProperty("state").GetString()!;
+        Assert.Contains("requiredOwnerFields=", publicReleaseState, StringComparison.Ordinal);
+        Assert.Contains("blockedOwnerFields=", publicReleaseState, StringComparison.Ordinal);
 
         string[] sourceArtifacts = evidence.GetProperty("sourceArtifacts").EnumerateArray().Select(static item => item.GetString()!).ToArray();
         foreach (string sourceArtifact in SourceArtifacts)

@@ -89,6 +89,37 @@ function New-VerificationLane {
   }
 }
 
+function New-OwnerInputField {
+  param([string]$Name, [string]$Category, [string]$ExpectedSource)
+
+  [pscustomobject]@{
+    fieldName = $Name
+    category = $Category
+    expectedSource = $ExpectedSource
+    state = "blocked-post-publish-real-input-required"
+    ownerMustProvide = $true
+    acceptsPlaceholder = $false
+    acceptsLocalFeed = $false
+    acceptsProjectReference = $false
+    acceptsDirectNupkg = $false
+    acceptsDryRun = $false
+    acceptsTemplate = $false
+    acceptsDashboard = $false
+    performsPublish = $false
+    usesPublishToken = $false
+    canPublishPublicly = $false
+    canCloseReleaseIssue = $false
+    canPromoteRuntimeProof = $false
+    canPromotePublicProof = $false
+    canPromotePostPublishProof = $false
+    isRuntimeExecutionProof = $false
+    isPackageConsumerRuntimeProof = $false
+    isPostPublishProof = $false
+    isReleaseCloseProof = $false
+    boundary = "Owner post-publish clean-consumer input field only; not runtime proof, not post-publish proof by itself, not publish approval, not release close approval, and not package push."
+  }
+}
+
 $docsAuditValidation = Read-JsonOrNull "artifacts\final-release\release-docs-and-nuget-metadata-audit-validation.json"
 $publicDocsGate = Read-JsonOrNull "artifacts\final-release\public-docs-package-metadata-gate.json"
 $preReleaseMatrix = Read-JsonOrNull "artifacts\final-release\pre-release-package-proof-readiness-matrix.json"
@@ -106,6 +137,28 @@ $publicDownloadReady = [bool](Get-PropertyOrDefault -Object $publicDownloadCandi
 $cleanConsumerReady = [bool](Get-PropertyOrDefault -Object $cleanConsumer -Name "cleanExternalConsumerSmokeReady" -DefaultValue $false)
 $postPublishProofReady = [bool](Get-PropertyOrDefault -Object $postPublishCleanConsumer -Name "proofCandidateReady" -DefaultValue $false) -and [bool](Get-PropertyOrDefault -Object $postPublishCleanConsumer -Name "sourceProofLinkageReady" -DefaultValue $false)
 $finalPostPublishReady = [string](Get-PropertyOrDefault -Object $finalPostPublishAuditPack -Name "validationState" -DefaultValue "") -eq "final-post-publish-audit-ready"
+
+$ownerInputFields = @(
+  New-OwnerInputField -Name "publicPackageRestoreLogPath" -Category "restore" -ExpectedSource "Repository-external restore log using public package source"
+  New-OwnerInputField -Name "publicPackageRestoreLogSha256" -Category "restore" -ExpectedSource "SHA256 of public package restore log"
+  New-OwnerInputField -Name "dotnetRestoreTranscriptPath" -Category "transcript" -ExpectedSource "dotnet restore transcript from clean workspace"
+  New-OwnerInputField -Name "dotnetRestoreTranscriptSha256" -Category "transcript" -ExpectedSource "SHA256 of restore transcript"
+  New-OwnerInputField -Name "dotnetBuildTranscriptPath" -Category "transcript" -ExpectedSource "dotnet build transcript from clean consumer"
+  New-OwnerInputField -Name "dotnetBuildTranscriptSha256" -Category "transcript" -ExpectedSource "SHA256 of build transcript"
+  New-OwnerInputField -Name "dotnetTestTranscriptPath" -Category "transcript" -ExpectedSource "dotnet test or smoke transcript from clean consumer"
+  New-OwnerInputField -Name "dotnetTestTranscriptSha256" -Category "transcript" -ExpectedSource "SHA256 of test/smoke transcript"
+  New-OwnerInputField -Name "hostMetadataPath" -Category "host-runtime" -ExpectedSource "OS/dotnet/GPU/driver metadata captured from clean consumer host"
+  New-OwnerInputField -Name "cudaRuntimeMetadata" -Category "host-runtime" -ExpectedSource "CUDA runtime/driver metadata from clean consumer host"
+  New-OwnerInputField -Name "tensorRtRuntimeMetadata" -Category "host-runtime" -ExpectedSource "TensorRT runtime metadata and version guard output"
+  New-OwnerInputField -Name "packageIdentity" -Category "package" -ExpectedSource "Public package id/version consumed by clean external project"
+  New-OwnerInputField -Name "packageUrl" -Category "package" -ExpectedSource "Public package URL or GitHub release asset URL"
+  New-OwnerInputField -Name "packageSha256" -Category "package" -ExpectedSource "SHA256 matching the public downloaded package"
+  New-OwnerInputField -Name "cleanWorkspaceProofPath" -Category "clean-consumer" -ExpectedSource "Proof that restore/build/test ran outside this repository"
+  New-OwnerInputField -Name "resultValidationPath" -Category "validator" -ExpectedSource "Strict validator output path for post-publish clean consumer proof"
+  New-OwnerInputField -Name "resultValidationSha256" -Category "validator" -ExpectedSource "SHA256 of strict validator output"
+  New-OwnerInputField -Name "ownerReviewer" -Category "owner-review" -ExpectedSource "Owner reviewer identity"
+  New-OwnerInputField -Name "ownerReviewedAtUtc" -Category "owner-review" -ExpectedSource "UTC timestamp of owner review"
+)
 
 $lanes = @(
   New-VerificationLane `
@@ -215,6 +268,11 @@ $record = [ordered]@{
   verificationLaneCount = $lanes.Count
   readyVerificationLaneCount = $readyLanes.Count
   blockedVerificationLaneCount = $blockedLanes.Count
+  requiredOwnerFieldCount = $ownerInputFields.Count
+  blockedRequiredOwnerFieldCount = @($ownerInputFields | Where-Object { [string]$_.state -eq "blocked-post-publish-real-input-required" }).Count
+  rejectedSubstituteCount = 8
+  sourceReadinessSignalCount = 9
+  ownerInputFields = $ownerInputFields
   lanes = $lanes
   requiredOwnerActions = @($blockedLanes | ForEach-Object { [pscustomobject]@{ laneId = $_.laneId; ownerAction = $_.ownerAction; sourceArtifact = $_.sourceArtifact } })
   performsPublish = $false
@@ -262,6 +320,10 @@ Generated at: ``$($record.generatedAtUtc)``
 - verificationLaneCount: ``$($record.verificationLaneCount)``
 - readyVerificationLaneCount: ``$($record.readyVerificationLaneCount)``
 - blockedVerificationLaneCount: ``$($record.blockedVerificationLaneCount)``
+- requiredOwnerFieldCount: ``$($record.requiredOwnerFieldCount)``
+- blockedRequiredOwnerFieldCount: ``$($record.blockedRequiredOwnerFieldCount)``
+- rejectedSubstituteCount: ``$($record.rejectedSubstituteCount)``
+- sourceReadinessSignalCount: ``$($record.sourceReadinessSignalCount)``
 - performsPublish: ``False``
 - canPublishPublicly: ``False``
 - canCloseReleaseIssue: ``False``
@@ -272,6 +334,12 @@ Generated at: ``$($record.generatedAtUtc)``
 | Lane | State | Required State | Ready | Owner Action |
 | --- | --- | --- | ---: | --- |
 $($laneRows -join "`r`n")
+
+## Owner Input Fields
+
+| Field | Category | State | Expected Source |
+| --- | --- | --- | --- |
+$(@($ownerInputFields | ForEach-Object { "| ``$(ConvertTo-MarkdownCell $_.fieldName)`` | ``$(ConvertTo-MarkdownCell $_.category)`` | ``$(ConvertTo-MarkdownCell $_.state)`` | $(ConvertTo-MarkdownCell $_.expectedSource) |" }) -join "`r`n")
 
 ## Boundary
 

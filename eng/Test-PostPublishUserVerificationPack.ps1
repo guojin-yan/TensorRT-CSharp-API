@@ -63,6 +63,8 @@ if (-not (Test-Path -LiteralPath $resolvedInputPath -PathType Leaf)) {
 $record = Get-Content -LiteralPath $resolvedInputPath -Raw -Encoding utf8 | ConvertFrom-Json
 $lanes = @((Get-PropertyOrDefault -Object $record -Name "lanes" -DefaultValue @()))
 $laneIds = @($lanes | ForEach-Object { [string](Get-PropertyOrDefault -Object $_ -Name "laneId" -DefaultValue "") })
+$ownerInputFields = @((Get-PropertyOrDefault -Object $record -Name "ownerInputFields" -DefaultValue @()))
+$ownerInputFieldNames = @($ownerInputFields | ForEach-Object { [string](Get-PropertyOrDefault -Object $_ -Name "fieldName" -DefaultValue "") })
 $requiredLaneIds = @(
   "release-docs-and-nuget-metadata-audit",
   "public-docs-package-metadata-gate",
@@ -75,6 +77,43 @@ $requiredLaneIds = @(
   "final-post-publish-audit-pack"
 )
 $missingLaneIds = @($requiredLaneIds | Where-Object { $laneIds -notcontains $_ })
+$requiredOwnerInputFields = @(
+  "publicPackageRestoreLogPath",
+  "publicPackageRestoreLogSha256",
+  "dotnetRestoreTranscriptPath",
+  "dotnetRestoreTranscriptSha256",
+  "dotnetBuildTranscriptPath",
+  "dotnetBuildTranscriptSha256",
+  "dotnetTestTranscriptPath",
+  "dotnetTestTranscriptSha256",
+  "hostMetadataPath",
+  "cudaRuntimeMetadata",
+  "tensorRtRuntimeMetadata",
+  "packageIdentity",
+  "packageUrl",
+  "packageSha256",
+  "cleanWorkspaceProofPath",
+  "resultValidationPath",
+  "resultValidationSha256",
+  "ownerReviewer",
+  "ownerReviewedAtUtc"
+)
+$missingOwnerInputFields = @($requiredOwnerInputFields | Where-Object { $ownerInputFieldNames -notcontains $_ })
+$unsafeOwnerInputFields = @($ownerInputFields | Where-Object {
+  [string](Get-PropertyOrDefault -Object $_ -Name "state" -DefaultValue "") -ne "blocked-post-publish-real-input-required" -or
+  [bool](Get-PropertyOrDefault -Object $_ -Name "acceptsPlaceholder" -DefaultValue $true) -or
+  [bool](Get-PropertyOrDefault -Object $_ -Name "acceptsLocalFeed" -DefaultValue $true) -or
+  [bool](Get-PropertyOrDefault -Object $_ -Name "acceptsProjectReference" -DefaultValue $true) -or
+  [bool](Get-PropertyOrDefault -Object $_ -Name "acceptsDirectNupkg" -DefaultValue $true) -or
+  [bool](Get-PropertyOrDefault -Object $_ -Name "acceptsDryRun" -DefaultValue $true) -or
+  [bool](Get-PropertyOrDefault -Object $_ -Name "acceptsTemplate" -DefaultValue $true) -or
+  [bool](Get-PropertyOrDefault -Object $_ -Name "acceptsDashboard" -DefaultValue $true) -or
+  [bool](Get-PropertyOrDefault -Object $_ -Name "performsPublish" -DefaultValue $true) -or
+  [bool](Get-PropertyOrDefault -Object $_ -Name "canPublishPublicly" -DefaultValue $true) -or
+  [bool](Get-PropertyOrDefault -Object $_ -Name "canCloseReleaseIssue" -DefaultValue $true) -or
+  [bool](Get-PropertyOrDefault -Object $_ -Name "canPromoteRuntimeProof" -DefaultValue $true) -or
+  [bool](Get-PropertyOrDefault -Object $_ -Name "isPostPublishProof" -DefaultValue $true)
+})
 $unsafeLanes = @($lanes | Where-Object {
   [bool](Get-PropertyOrDefault -Object $_ -Name "performsPublish" -DefaultValue $true) -or
   [bool](Get-PropertyOrDefault -Object $_ -Name "usesPublishToken" -DefaultValue $true) -or
@@ -92,6 +131,9 @@ $items = New-Object System.Collections.Generic.List[object]
 $items.Add((New-ValidationItem "record-kind" ([string](Get-PropertyOrDefault -Object $record -Name "recordKind" -DefaultValue "") -eq "post-publish-user-verification-pack") "blocker" "recordKind must be post-publish-user-verification-pack.")) | Out-Null
 $items.Add((New-ValidationItem "required-lanes-present" ($missingLaneIds.Count -eq 0) "blocker" ("Missing required lanes: " + ($missingLaneIds -join ", ")))) | Out-Null
 $items.Add((New-ValidationItem "minimum-lane-count" ($lanes.Count -ge 9 -and [int](Get-PropertyOrDefault -Object $record -Name "verificationLaneCount" -DefaultValue 0) -eq $lanes.Count) "blocker" "Pack must include the docs, pre-release, owner publish, public download, clean consumer, post-publish, and final audit lanes.")) | Out-Null
+$items.Add((New-ValidationItem "required-owner-input-fields-present" ($missingOwnerInputFields.Count -eq 0) "blocker" ("Missing required owner input fields: " + ($missingOwnerInputFields -join ", ")))) | Out-Null
+$items.Add((New-ValidationItem "owner-input-field-counts" ($ownerInputFields.Count -ge 19 -and [int](Get-PropertyOrDefault -Object $record -Name "requiredOwnerFieldCount" -DefaultValue 0) -eq $ownerInputFields.Count -and [int](Get-PropertyOrDefault -Object $record -Name "blockedRequiredOwnerFieldCount" -DefaultValue 0) -eq $ownerInputFields.Count) "blocker" "Pack must expose public restore/build/test transcripts, host/runtime metadata, package URL/hash, clean workspace, validation hash, and owner review fields as blocked real-owner inputs.")) | Out-Null
+$items.Add((New-ValidationItem "owner-input-fields-safe" ($unsafeOwnerInputFields.Count -eq 0) "blocker" "Owner input fields must reject local/template/dashboard substitutes and keep publish/proof/close flags false.")) | Out-Null
 $items.Add((New-ValidationItem "blocked-until-real-user-proof" ([string](Get-PropertyOrDefault -Object $record -Name "packState" -DefaultValue "") -eq "blocked-post-publish-user-verification-required") "blocker" "Current pack must stay blocked until real public download, clean consumer, and post-publish evidence exists.")) | Out-Null
 $items.Add((New-ValidationItem "docs-audit-lane-ready" ($docsLane.Count -eq 1 -and [bool](Get-PropertyOrDefault -Object $docsLane[0] -Name "ready" -DefaultValue $false)) "blocker" "Docs/NuGet metadata audit lane should be ready-non-proof before user verification handoff.")) | Out-Null
 $items.Add((New-ValidationItem "real-proof-lanes-still-blocked" ($blockedProofLaneIds.Count -ge 4) "blocker" "Public download, clean external consumer, post-publish proof, and final post-publish audit lanes must stay blocked until real owner evidence exists.")) | Out-Null
@@ -119,6 +161,10 @@ $validation = [ordered]@{
   verificationLaneCount = $lanes.Count
   readyVerificationLaneCount = @($lanes | Where-Object { [bool](Get-PropertyOrDefault -Object $_ -Name "ready" -DefaultValue $false) }).Count
   blockedVerificationLaneCount = @($lanes | Where-Object { -not [bool](Get-PropertyOrDefault -Object $_ -Name "ready" -DefaultValue $false) }).Count
+  requiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $record -Name "requiredOwnerFieldCount" -DefaultValue 0)
+  blockedRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $record -Name "blockedRequiredOwnerFieldCount" -DefaultValue 0)
+  rejectedSubstituteCount = [int](Get-PropertyOrDefault -Object $record -Name "rejectedSubstituteCount" -DefaultValue 0)
+  sourceReadinessSignalCount = [int](Get-PropertyOrDefault -Object $record -Name "sourceReadinessSignalCount" -DefaultValue 0)
   failedBlockerCount = $failedBlockers.Count
   failedActionRequiredCount = $failedActionRequired.Count
   performsPublish = $false
@@ -152,6 +198,10 @@ Generated at: ``$($validation.generatedAtUtc)``
 | verificationLaneCount | ``$($validation.verificationLaneCount)`` |
 | readyVerificationLaneCount | ``$($validation.readyVerificationLaneCount)`` |
 | blockedVerificationLaneCount | ``$($validation.blockedVerificationLaneCount)`` |
+| requiredOwnerFieldCount | ``$($validation.requiredOwnerFieldCount)`` |
+| blockedRequiredOwnerFieldCount | ``$($validation.blockedRequiredOwnerFieldCount)`` |
+| rejectedSubstituteCount | ``$($validation.rejectedSubstituteCount)`` |
+| sourceReadinessSignalCount | ``$($validation.sourceReadinessSignalCount)`` |
 | failedBlockerCount | ``$($validation.failedBlockerCount)`` |
 | failedActionRequiredCount | ``$($validation.failedActionRequiredCount)`` |
 | performsPublish | ``False`` |
