@@ -20,7 +20,11 @@ public sealed class OwnerRealProofStagingWorkspaceContractTests
         Assert.Equal("blocked-owner-real-proof-staging-workspace-contract-required", contract.GetProperty("contractState").GetString());
         Assert.True(contract.GetProperty("ownerActionRequired").GetBoolean());
         Assert.False(contract.GetProperty("passed").GetBoolean());
-        Assert.True(contract.GetProperty("requiredFileCount").GetInt32() >= 12);
+        Assert.True(contract.GetProperty("laneCount").GetInt32() >= 5);
+        Assert.True(contract.GetProperty("requiredFileCount").GetInt32() >= 37);
+        Assert.True(contract.GetProperty("sha256RequiredFileCount").GetInt32() >= 37);
+        Assert.True(contract.GetProperty("forbiddenSubstituteCount").GetInt32() >= 300);
+        Assert.True(contract.GetProperty("externalWorkspaceRequired").GetBoolean());
         AssertNonProof(contract);
 
         string[] paths = contract.GetProperty("requiredFiles")
@@ -30,18 +34,35 @@ public sealed class OwnerRealProofStagingWorkspaceContractTests
 
         foreach (string expected in new[]
         {
+            "public-package/nuget-managed-package.nupkg",
+            "public-package/github-runtime-package.nupkg",
+            "public-package/downloaded-packages.json",
+            "public-package/download-transcript.log",
+            "external-clean-consumer/consumer.csproj",
+            "external-clean-consumer/package-source.json",
+            "external-clean-consumer/resolved-packages.json",
             "external-clean-consumer/restore.log",
             "external-clean-consumer/build.log",
             "external-clean-consumer/smoke.stdout.log",
             "external-clean-consumer/smoke.stderr.log",
+            "external-clean-consumer/merged-transcript.log",
             "external-clean-consumer/native-assets.json",
             "external-clean-consumer/host-metadata.json",
-            "post-publish/downloaded-packages.json",
-            "post-publish/install.log",
-            "post-publish/smoke.stdout.log",
-            "post-publish/smoke.stderr.log",
-            "owner/rollback-review.json",
-            "owner/final-close-decision.json"
+            "external-clean-consumer/no-local-substitute-confirmation.json",
+            "yolovision/model.onnx",
+            "yolovision/asset-manifest.json",
+            "yolovision/output.json",
+            "yolovision/runtime-transcript.log",
+            "yolovision/real-model-execution-confirmation.json",
+            "article-publication/article-proof-records.json",
+            "article-publication/article-proof-manifest.json",
+            "article-publication/screenshots.zip",
+            "release-close/release-evidence-bundle.sha256",
+            "release-close/classification-audit.sha256",
+            "release-close/post-publish-proof.sha256",
+            "release-close/rollback-review.json",
+            "release-close/final-close-decision.json",
+            "release-close/known-limitations.json"
         })
         {
             Assert.Contains(expected, paths);
@@ -51,6 +72,9 @@ public sealed class OwnerRealProofStagingWorkspaceContractTests
         JsonElement validation = validationDocument.RootElement;
         Assert.Equal("owner-real-proof-staging-workspace-contract-ready-non-proof", validation.GetProperty("validationState").GetString());
         Assert.Equal(0, validation.GetProperty("failedBlockerCount").GetInt32());
+        Assert.True(validation.GetProperty("laneCount").GetInt32() >= 5);
+        Assert.True(validation.GetProperty("requiredFileCount").GetInt32() >= 37);
+        Assert.True(validation.GetProperty("sha256RequiredFileCount").GetInt32() >= 37);
         Assert.False(validation.GetProperty("passed").GetBoolean());
         AssertNonProof(validation);
     }

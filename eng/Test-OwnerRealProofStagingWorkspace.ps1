@@ -25,15 +25,20 @@ if (-not (Test-Path -LiteralPath $ImportPath -PathType Leaf) -or -not (Test-Path
 $import = Get-Content -LiteralPath $ImportPath -Raw -Encoding utf8 | ConvertFrom-Json
 $candidate = Get-Content -LiteralPath $CandidatePath -Raw -Encoding utf8 | ConvertFrom-Json
 $boundary = [string](Get-PropertyOrDefault $import "boundary" "")
+$ready = [bool](Get-PropertyOrDefault $import "readyForStrictImport" $false)
+$requireExistingFiles = [bool](Get-PropertyOrDefault $import "requireExistingFiles" $false)
+$requireHashMatch = [bool](Get-PropertyOrDefault $import "requireHashMatch" $false)
+$rootOutsideRepository = [bool](Get-PropertyOrDefault $import "rootOutsideRepository" $false)
 $validationItems = @(
   New-OwnerValidationItem "record-kind" ([string](Get-PropertyOrDefault $import "recordKind" "") -eq "owner-real-proof-staging-workspace-import" -and [string](Get-PropertyOrDefault $candidate "recordKind" "") -eq "owner-real-proof-staging-workspace-candidate") "blocker" "Import and candidate recordKind values must match."
-  New-OwnerValidationItem "default-blocked" (([string](Get-PropertyOrDefault $import "importState" "")).Contains("blocked") -or [bool](Get-PropertyOrDefault $import "readyForStrictImport" $false)) "blocker" "Default import must remain blocked unless Owner staging is supplied."
+  New-OwnerValidationItem "default-blocked-or-ready" (([string](Get-PropertyOrDefault $import "importState" "")).Contains("blocked") -or $ready) "blocker" "Import must remain blocked unless Owner staging is supplied and strict checks pass."
+  New-OwnerValidationItem "strict-surface-counts" ([int](Get-PropertyOrDefault $import "laneCount" 0) -ge 5 -and [int](Get-PropertyOrDefault $import "mappingCount" 0) -ge 37 -and [int](Get-PropertyOrDefault $import "sha256RequiredFileCount" 0) -ge 37) "blocker" "Import must expose the full strict staging surface."
+  New-OwnerValidationItem "strict-readiness-requires-flags" ((-not $ready) -or ($requireExistingFiles -and $requireHashMatch -and $rootOutsideRepository)) "blocker" "Strict readiness requires -RequireExistingFiles, -RequireHashMatch, and an external staging root."
   New-OwnerValidationItem "non-proof" (-not [bool](Get-PropertyOrDefault $import "proofCandidateReady" $true) -and -not [bool](Get-PropertyOrDefault $import "canCloseReleaseIssue" $true) -and -not [bool](Get-PropertyOrDefault $import "isRuntimeExecutionProof" $true)) "blocker" "Staging import must not claim proof."
-  New-OwnerValidationItem "findings" ([int](Get-PropertyOrDefault $import "failedActionRequiredCount" 0) -gt 0 -or [bool](Get-PropertyOrDefault $import "readyForStrictImport" $false)) "blocker" "Default state should report owner action findings."
+  New-OwnerValidationItem "findings" ([int](Get-PropertyOrDefault $import "failedActionRequiredCount" 0) -gt 0 -or $ready) "blocker" "Blocked state should report owner action findings."
   New-OwnerValidationItem "boundary" ($boundary.Contains("not runtime proof") -and $boundary.Contains("not post-publish proof") -and $boundary.Contains("not package push")) "blocker" "Boundary must preserve non-proof status."
 )
 $failed = @($validationItems | Where-Object { -not [bool]$_.passed -and [string]$_.severity -eq "blocker" })
-$ready = [bool](Get-PropertyOrDefault $import "readyForStrictImport" $false)
 $state = if ($failed.Count -eq 0) { "owner-real-proof-staging-workspace-validation-ready" } else { "blocked-owner-real-proof-staging-workspace-validation-invalid" }
 $validation = [pscustomobject]@{
   recordKind = "owner-real-proof-staging-workspace-validation"
@@ -41,6 +46,16 @@ $validation = [pscustomobject]@{
   validationState = $state
   failedBlockerCount = $failed.Count
   readyForStrictImport = $ready
+  laneCount = [int](Get-PropertyOrDefault $import "laneCount" 0)
+  mappingCount = [int](Get-PropertyOrDefault $import "mappingCount" 0)
+  existingFileCount = [int](Get-PropertyOrDefault $import "existingFileCount" 0)
+  sha256RequiredFileCount = [int](Get-PropertyOrDefault $import "sha256RequiredFileCount" 0)
+  sha256ValidFileCount = [int](Get-PropertyOrDefault $import "sha256ValidFileCount" 0)
+  forbiddenPathCount = [int](Get-PropertyOrDefault $import "forbiddenPathCount" 0)
+  failedActionRequiredCount = [int](Get-PropertyOrDefault $import "failedActionRequiredCount" 0)
+  requireExistingFiles = $requireExistingFiles
+  requireHashMatch = $requireHashMatch
+  rootOutsideRepository = $rootOutsideRepository
   proofCandidateReady = $false
   validationItems = @($validationItems)
   ownerActionRequired = -not $ready

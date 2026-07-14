@@ -49,6 +49,34 @@ public sealed class ReleaseEvidenceClassificationAuditTests
         Assert.Contains("Release evidence classification audit written", output, StringComparison.Ordinal);
         Assert.Contains("AuditState=classification-audit-passed-non-proof-boundaries-intact", output, StringComparison.Ordinal);
 
+        using JsonDocument bundleDocument = ReadFinalReleaseJson("release-evidence-bundle.json");
+        JsonElement bundle = bundleDocument.RootElement;
+        Assert.True(bundle.GetProperty("ownerRealProofStagingWorkspaceContractLaneCount").GetInt32() >= 5);
+        Assert.True(bundle.GetProperty("ownerRealProofStagingWorkspaceContractFileCount").GetInt32() >= 37);
+        Assert.True(bundle.GetProperty("ownerRealProofStagingWorkspaceContractSha256RequiredFileCount").GetInt32() >= 37);
+        Assert.True(bundle.GetProperty("ownerRealProofStagingWorkspaceContractForbiddenSubstituteCount").GetInt32() >= 300);
+        Assert.True(bundle.GetProperty("ownerRealProofStagingWorkspaceContractExternalWorkspaceRequired").GetBoolean());
+        Assert.False(bundle.GetProperty("ownerRealProofStagingWorkspaceReadyForStrictImport").GetBoolean());
+        Assert.True(bundle.GetProperty("ownerRealProofStagingWorkspaceImportLaneCount").GetInt32() >= 5);
+        Assert.True(bundle.GetProperty("ownerRealProofStagingWorkspaceMappingCount").GetInt32() >= 37);
+        Assert.Equal(0, bundle.GetProperty("ownerRealProofStagingWorkspaceExistingFileCount").GetInt32());
+        Assert.True(bundle.GetProperty("ownerRealProofStagingWorkspaceImportSha256RequiredFileCount").GetInt32() >= 37);
+        Assert.Equal(0, bundle.GetProperty("ownerRealProofStagingWorkspaceSha256ValidFileCount").GetInt32());
+        Assert.False(bundle.GetProperty("ownerRealProofStagingWorkspaceRootOutsideRepository").GetBoolean());
+        Assert.False(bundle.GetProperty("ownerRealProofStagingWorkspaceRequireExistingFiles").GetBoolean());
+        Assert.False(bundle.GetProperty("ownerRealProofStagingWorkspaceRequireHashMatch").GetBoolean());
+        Assert.True(bundle.GetProperty("ownerRealProofStagingWorkspaceFailedActionRequiredCount").GetInt32() >= 38);
+        JsonElement stagingContractItem = bundle.GetProperty("evidenceItems")
+            .EnumerateArray()
+            .Single(static item => item.GetProperty("id").GetString() == "owner-real-proof-staging-workspace-contract");
+        Assert.Contains("lanes=", stagingContractItem.GetProperty("state").GetString(), StringComparison.Ordinal);
+        Assert.Contains("sha256Required=", stagingContractItem.GetProperty("state").GetString(), StringComparison.Ordinal);
+        JsonElement stagingImportItem = bundle.GetProperty("evidenceItems")
+            .EnumerateArray()
+            .Single(static item => item.GetProperty("id").GetString() == "owner-real-proof-staging-workspace-import");
+        Assert.Contains("mappings=", stagingImportItem.GetProperty("state").GetString(), StringComparison.Ordinal);
+        Assert.Contains("rootOutsideRepository=False", stagingImportItem.GetProperty("state").GetString(), StringComparison.Ordinal);
+
         using JsonDocument audit = ReadFinalReleaseJson("release-evidence-classification-audit.json");
         JsonElement root = audit.RootElement;
 

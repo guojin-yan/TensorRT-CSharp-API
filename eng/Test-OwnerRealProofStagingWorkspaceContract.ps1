@@ -17,10 +17,43 @@ $record = Get-Content -LiteralPath $InputPath -Raw -Encoding utf8 | ConvertFrom-
 $files = @(Convert-ToArray (Get-PropertyOrDefault -Object $record -Name "requiredFiles" -DefaultValue @()))
 $paths = @($files | ForEach-Object { [string](Get-PropertyOrDefault -Object $_ -Name "relativePath" -DefaultValue "") })
 $boundary = [string](Get-PropertyOrDefault $record "boundary" "")
-$required = @("external-clean-consumer/restore.log", "external-clean-consumer/build.log", "external-clean-consumer/smoke.stdout.log", "external-clean-consumer/smoke.stderr.log", "external-clean-consumer/native-assets.json", "external-clean-consumer/host-metadata.json", "post-publish/downloaded-packages.json", "post-publish/install.log", "post-publish/smoke.stdout.log", "post-publish/smoke.stderr.log", "owner/rollback-review.json", "owner/final-close-decision.json")
+$required = @(
+  "public-package/nuget-managed-package.nupkg",
+  "public-package/github-runtime-package.nupkg",
+  "public-package/downloaded-packages.json",
+  "public-package/download-transcript.log",
+  "external-clean-consumer/consumer.csproj",
+  "external-clean-consumer/package-source.json",
+  "external-clean-consumer/resolved-packages.json",
+  "external-clean-consumer/restore.log",
+  "external-clean-consumer/build.log",
+  "external-clean-consumer/smoke.stdout.log",
+  "external-clean-consumer/smoke.stderr.log",
+  "external-clean-consumer/merged-transcript.log",
+  "external-clean-consumer/native-assets.json",
+  "external-clean-consumer/host-metadata.json",
+  "external-clean-consumer/package-metadata.json",
+  "external-clean-consumer/no-local-substitute-confirmation.json",
+  "yolovision/model.onnx",
+  "yolovision/asset-manifest.json",
+  "yolovision/output.json",
+  "yolovision/runtime-transcript.log",
+  "yolovision/real-model-execution-confirmation.json",
+  "article-publication/article-proof-records.json",
+  "article-publication/article-proof-manifest.json",
+  "article-publication/screenshots.zip",
+  "release-close/release-evidence-bundle.sha256",
+  "release-close/classification-audit.sha256",
+  "release-close/post-publish-proof.sha256",
+  "release-close/rollback-review.json",
+  "release-close/final-close-decision.json",
+  "release-close/known-limitations.json"
+)
 $validationItems = @(
   New-OwnerValidationItem "record-kind" ([string](Get-PropertyOrDefault $record "recordKind" "") -eq "owner-real-proof-staging-workspace-contract") "blocker" "recordKind must match."
   New-OwnerValidationItem "required-paths" (@($required | Where-Object { $paths -notcontains $_ }).Count -eq 0) "blocker" "Contract must include all required staging paths."
+  New-OwnerValidationItem "lane-coverage" ([int](Get-PropertyOrDefault -Object $record -Name "laneCount" -DefaultValue 0) -ge 5 -and [int](Get-PropertyOrDefault -Object $record -Name "requiredFileCount" -DefaultValue 0) -ge 37) "blocker" "Contract must cover public package, external consumer, YoloVision, article publication, and release-close lanes."
+  New-OwnerValidationItem "sha-and-substitute-coverage" ([int](Get-PropertyOrDefault -Object $record -Name "sha256RequiredFileCount" -DefaultValue 0) -ge 37 -and [int](Get-PropertyOrDefault -Object $record -Name "forbiddenSubstituteCount" -DefaultValue 0) -ge 300) "blocker" "Contract must require hashes and enumerate forbidden substitutes broadly."
   New-OwnerValidationItem "blocked-non-proof" (-not [bool](Get-PropertyOrDefault $record "passed" $true) -and [bool](Get-PropertyOrDefault $record "ownerActionRequired" $false)) "blocker" "Contract must stay blocked/non-proof."
   New-OwnerValidationItem "non-proof-flags" (-not [bool](Get-PropertyOrDefault $record "isRuntimeExecutionProof" $true) -and -not [bool](Get-PropertyOrDefault $record "canCloseReleaseIssue" $true)) "blocker" "Contract cannot claim proof."
   New-OwnerValidationItem "boundary" ($boundary.Contains("not runtime proof") -and $boundary.Contains("not post-publish proof") -and $boundary.Contains("not package push")) "blocker" "Boundary must preserve non-proof status."
@@ -33,6 +66,9 @@ $validation = [pscustomobject]@{
   validationState = $state
   failedBlockerCount = $failed.Count
   requiredFileCount = $files.Count
+  laneCount = [int](Get-PropertyOrDefault -Object $record -Name "laneCount" -DefaultValue 0)
+  sha256RequiredFileCount = [int](Get-PropertyOrDefault -Object $record -Name "sha256RequiredFileCount" -DefaultValue 0)
+  forbiddenSubstituteCount = [int](Get-PropertyOrDefault -Object $record -Name "forbiddenSubstituteCount" -DefaultValue 0)
   validationItems = @($validationItems)
   ownerActionRequired = $true
   passed = $false

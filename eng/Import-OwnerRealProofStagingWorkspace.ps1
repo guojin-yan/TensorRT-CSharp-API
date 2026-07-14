@@ -14,97 +14,154 @@ $ctx = Initialize-OwnerRealProofScript -RepositoryRoot $RepositoryRoot -OutputRo
 $RepositoryRoot = $ctx.RepositoryRoot
 $OutputRoot = $ctx.OutputRoot
 
-function New-StagingMapping {
-  param([string]$Lane, [string]$SourcePath, [string]$TargetJson, [string]$TargetField, [string]$TargetHashField)
-  [pscustomobject]@{
-    lane = $Lane
-    sourcePath = $SourcePath
-    targetJson = $TargetJson
-    targetField = $TargetField
-    targetHashField = $TargetHashField
-    ownerActionRequired = $true
-    passed = $false
+function Test-OwnerPathInsideRoot {
+  param([string]$CandidatePath, [string]$RootPath)
+  if ([string]::IsNullOrWhiteSpace($CandidatePath) -or [string]::IsNullOrWhiteSpace($RootPath)) { return $false }
+  $candidate = [System.IO.Path]::GetFullPath($CandidatePath).TrimEnd('\', '/')
+  $root = [System.IO.Path]::GetFullPath($RootPath).TrimEnd('\', '/')
+  $rootSlash = $root + [System.IO.Path]::DirectorySeparatorChar
+  $rootAltSlash = $root + [System.IO.Path]::AltDirectorySeparatorChar
+  return $candidate.Equals($root, [StringComparison]::OrdinalIgnoreCase) -or
+    $candidate.StartsWith($rootSlash, [StringComparison]::OrdinalIgnoreCase) -or
+    $candidate.StartsWith($rootAltSlash, [StringComparison]::OrdinalIgnoreCase)
+}
+
+function Test-ForbiddenPathFragment {
+  param(
+    [string]$Path,
+    [switch]$AllowNupkgEvidenceFile
+  )
+
+  foreach ($fragment in @("ProjectReference", "local feed", "local-feed", "localfeed", "\bin\", "\obj\", "artifacts\final-release", "artifacts/final-release", "NuGet.Config")) {
+    if ($Path.IndexOf($fragment, [StringComparison]::OrdinalIgnoreCase) -ge 0) { return $true }
   }
+
+  if (-not $AllowNupkgEvidenceFile.IsPresent -and $Path.IndexOf(".nupkg", [StringComparison]::OrdinalIgnoreCase) -ge 0) {
+    return $true
+  }
+
+  return $false
 }
 
 $contract = Read-JsonOrNull $RepositoryRoot "artifacts\final-release\owner-real-proof-staging-workspace-contract.json"
 if ($null -eq $contract) {
-  & (Join-Path $RepositoryRoot "eng\Export-OwnerRealProofStagingWorkspaceContract.ps1") -RepositoryRoot $RepositoryRoot
+  & (Join-Path $RepositoryRoot "eng\Export-OwnerRealProofStagingWorkspaceContract.ps1") -RepositoryRoot $RepositoryRoot -OutputRoot $OutputRoot
   $contract = Read-JsonOrNull $RepositoryRoot "artifacts\final-release\owner-real-proof-staging-workspace-contract.json"
 }
 
+$requiredFiles = @(Convert-ToArray (Get-PropertyOrDefault -Object $contract -Name "requiredFiles" -DefaultValue @()))
 $findings = New-Object System.Collections.Generic.List[object]
+$mappingResults = New-Object System.Collections.Generic.List[object]
+
 if ([string]::IsNullOrWhiteSpace($OwnerStagingRoot)) {
   $findings.Add((New-OwnerFinding "owner-staging-root-missing" "action-required" "missing-field" "OwnerStagingRoot was not supplied.")) | Out-Null
   $resolvedRoot = ""
-} else {
+  $rootOutsideRepository = $false
+}
+else {
   $resolvedRoot = Resolve-OwnerPath $RepositoryRoot $OwnerStagingRoot
+  $rootOutsideRepository = -not (Test-OwnerPathInsideRoot -CandidatePath $resolvedRoot -RootPath $RepositoryRoot)
+  if (-not $rootOutsideRepository) {
+    $findings.Add((New-OwnerFinding "owner-staging-root-outside-repository" "action-required" "forbidden-path" "Owner staging root must be outside the repository root.")) | Out-Null
+  }
+  if (Test-ForbiddenPathFragment -Path $resolvedRoot) {
+    $findings.Add((New-OwnerFinding "owner-staging-root-forbidden-fragment" "action-required" "forbidden-substitute" "Owner staging root contains a forbidden local substitute fragment.")) | Out-Null
+  }
   if ($RequireExistingFiles.IsPresent -and -not (Test-Path -LiteralPath $resolvedRoot -PathType Container)) {
     $findings.Add((New-OwnerFinding "owner-staging-root-exists" "action-required" "missing-file" "Owner staging root does not exist.")) | Out-Null
   }
 }
 
-$mappings = @(
-  New-StagingMapping "external-clean-consumer" "external-clean-consumer/restore.log" "external-clean-consumer-execution-result.owner.json" "restoreLogPath" "restoreLogSha256"
-  New-StagingMapping "external-clean-consumer" "external-clean-consumer/build.log" "external-clean-consumer-execution-result.owner.json" "buildLogPath" "buildLogSha256"
-  New-StagingMapping "external-clean-consumer" "external-clean-consumer/smoke.stdout.log" "external-clean-consumer-execution-result.owner.json" "smokeStdoutPath" "smokeStdoutSha256"
-  New-StagingMapping "external-clean-consumer" "external-clean-consumer/smoke.stderr.log" "external-clean-consumer-execution-result.owner.json" "smokeStderrPath" "smokeStderrSha256"
-  New-StagingMapping "external-clean-consumer" "external-clean-consumer/native-assets.json" "external-clean-consumer-execution-result.owner.json" "nativeAssetListingPath" "nativeAssetListingSha256"
-  New-StagingMapping "external-clean-consumer" "external-clean-consumer/host-metadata.json" "external-clean-consumer-execution-result.owner.json" "hostMetadataPath" "hostMetadataSha256"
-  New-StagingMapping "external-clean-consumer" "external-clean-consumer/package-metadata.json" "external-clean-consumer-execution-result.owner.json" "packageMetadataPath" "packageMetadataSha256"
-  New-StagingMapping "post-publish" "post-publish/downloaded-packages.json" "post-publish-clean-consumer-proof-result.owner.json" "downloadedPackagesPath" "downloadedPackagesSha256"
-  New-StagingMapping "post-publish" "post-publish/install.log" "post-publish-clean-consumer-proof-result.owner.json" "installLogPath" "installLogSha256"
-  New-StagingMapping "post-publish" "post-publish/smoke.stdout.log" "post-publish-clean-consumer-proof-result.owner.json" "smokeStdoutPath" "smokeStdoutSha256"
-  New-StagingMapping "post-publish" "post-publish/smoke.stderr.log" "post-publish-clean-consumer-proof-result.owner.json" "smokeStderrPath" "smokeStderrSha256"
-  New-StagingMapping "post-publish" "post-publish/host-metadata.json" "post-publish-clean-consumer-proof-result.owner.json" "hostMetadataPath" "hostMetadataSha256"
-  New-StagingMapping "owner" "owner/rollback-review.json" "final-owner-rollback-review.owner.json" "rollbackReviewPath" "rollbackReviewSha256"
-  New-StagingMapping "owner" "owner/final-close-decision.json" "final-owner-close-decision.owner.json" "finalCloseDecisionPath" "finalCloseDecisionSha256"
-  New-StagingMapping "owner" "owner/owner-confirmations.json" "owner-real-proof-confirmations.owner.json" "ownerConfirmationsPath" "ownerConfirmationsSha256"
-)
+foreach ($file in $requiredFiles) {
+  $relativePath = [string](Get-PropertyOrDefault -Object $file -Name "relativePath" -DefaultValue "")
+  $evidenceKind = [string](Get-PropertyOrDefault -Object $file -Name "evidenceKind" -DefaultValue "")
+  $fullPath = if ([string]::IsNullOrWhiteSpace($resolvedRoot) -or [string]::IsNullOrWhiteSpace($relativePath)) { "" } else { Resolve-OwnerPath $resolvedRoot $relativePath }
+  $exists = -not [string]::IsNullOrWhiteSpace($fullPath) -and (Test-Path -LiteralPath $fullPath -PathType Leaf)
+  $requiresSha256 = [bool](Get-PropertyOrDefault -Object $file -Name "requiresSha256" -DefaultValue $false)
+  $computedSha256 = ""
+  $hashValid = $false
+  $allowNupkgEvidenceFile = $evidenceKind -eq "public-package-file" -and $relativePath.StartsWith("public-package/", [StringComparison]::OrdinalIgnoreCase)
+  $forbiddenPath = -not [string]::IsNullOrWhiteSpace($fullPath) -and (Test-ForbiddenPathFragment -Path $fullPath -AllowNupkgEvidenceFile:$allowNupkgEvidenceFile)
 
-foreach ($mapping in $mappings) {
-  $fullPath = if ([string]::IsNullOrWhiteSpace($resolvedRoot)) { "" } else { Resolve-OwnerPath $resolvedRoot $mapping.sourcePath }
   if ([string]::IsNullOrWhiteSpace($fullPath)) {
-    $findings.Add((New-OwnerFinding "$($mapping.targetField)-missing-root" "action-required" "missing-file" "Cannot resolve $($mapping.sourcePath) without OwnerStagingRoot.")) | Out-Null
-    continue
+    $findings.Add((New-OwnerFinding "$relativePath-missing-root" "action-required" "missing-file" "Cannot resolve $relativePath without OwnerStagingRoot.")) | Out-Null
   }
-  if ($RequireExistingFiles.IsPresent -and -not (Test-Path -LiteralPath $fullPath -PathType Leaf)) {
-    $findings.Add((New-OwnerFinding "$($mapping.targetField)-exists" "action-required" "missing-file" "Required staging file is missing: $($mapping.sourcePath)")) | Out-Null
-    continue
+  elseif ($forbiddenPath) {
+    $findings.Add((New-OwnerFinding "$relativePath-forbidden-fragment" "action-required" "forbidden-substitute" "Staging file path contains a forbidden local substitute fragment: $relativePath")) | Out-Null
   }
-  if ($RequireHashMatch.IsPresent -and (Test-Path -LiteralPath $fullPath -PathType Leaf)) {
-    $hash = (Get-FileHash -LiteralPath $fullPath -Algorithm SHA256).Hash
-    if (-not (Test-Sha256Text $hash)) {
-      $findings.Add((New-OwnerFinding "$($mapping.targetHashField)-sha256" "action-required" "missing-sha256" "SHA256 could not be computed for $($mapping.sourcePath).")) | Out-Null
+  elseif ($RequireExistingFiles.IsPresent -and -not $exists) {
+    $findings.Add((New-OwnerFinding "$relativePath-exists" "action-required" "missing-file" "Required staging file is missing: $relativePath")) | Out-Null
+  }
+
+  if ($exists -and $requiresSha256) {
+    $computedSha256 = (Get-FileHash -LiteralPath $fullPath -Algorithm SHA256).Hash.ToLowerInvariant()
+    $hashValid = Test-Sha256Text $computedSha256
+    if ($RequireHashMatch.IsPresent -and -not $hashValid) {
+      $findings.Add((New-OwnerFinding "$relativePath-sha256" "action-required" "missing-sha256" "SHA256 could not be computed for $relativePath.")) | Out-Null
     }
   }
+
+  $mappingResults.Add([pscustomobject]@{
+      lane = [string](Get-PropertyOrDefault -Object $file -Name "lane" -DefaultValue "")
+      evidenceKind = $evidenceKind
+      sourcePath = $relativePath
+      resolvedPath = $fullPath
+      fileExists = $exists
+      requiresSha256 = $requiresSha256
+      computedSha256 = $computedSha256
+      hashValid = $hashValid
+      forbiddenPath = $forbiddenPath
+      targetJson = [string](Get-PropertyOrDefault -Object $file -Name "targetJson" -DefaultValue "")
+      targetField = [string](Get-PropertyOrDefault -Object $file -Name "targetField" -DefaultValue "")
+      targetHashField = [string](Get-PropertyOrDefault -Object $file -Name "targetHashField" -DefaultValue "")
+      ownerActionRequired = (-not $exists) -or ($requiresSha256 -and -not $hashValid) -or $forbiddenPath
+      passed = $exists -and ((-not $requiresSha256) -or $hashValid) -and (-not $forbiddenPath)
+    }) | Out-Null
 }
 
-foreach ($required in @("external-clean-consumer/host-metadata.json", "post-publish/host-metadata.json", "owner/owner-confirmations.json")) {
-  if ([string]::IsNullOrWhiteSpace($resolvedRoot)) { continue }
-  $path = Resolve-OwnerPath $resolvedRoot $required
-  if ($RequireExistingFiles.IsPresent -and -not (Test-Path -LiteralPath $path -PathType Leaf)) {
-    $category = if ($required.Contains("host-metadata")) { "missing-host-metadata" } else { "missing-owner-confirmation" }
-    $findings.Add((New-OwnerFinding ($required.Replace("/", "-") + "-required") "action-required" $category "Required owner staging metadata is missing: $required")) | Out-Null
+$mappingArray = @($mappingResults.ToArray())
+$laneSummaries = foreach ($lane in @($mappingArray | Select-Object -ExpandProperty lane -Unique)) {
+  $laneMappings = @($mappingArray | Where-Object { [string]$_.lane -eq [string]$lane })
+  [pscustomobject]@{
+    lane = [string]$lane
+    requiredFileCount = $laneMappings.Count
+    existingFileCount = @($laneMappings | Where-Object { [bool]$_.fileExists }).Count
+    sha256RequiredFileCount = @($laneMappings | Where-Object { [bool]$_.requiresSha256 }).Count
+    sha256ValidFileCount = @($laneMappings | Where-Object { [bool]$_.requiresSha256 -and [bool]$_.hashValid }).Count
+    forbiddenPathCount = @($laneMappings | Where-Object { [bool]$_.forbiddenPath }).Count
+    laneReadyForStrictImport = ($laneMappings.Count -gt 0 -and @($laneMappings | Where-Object { -not [bool]$_.passed }).Count -eq 0)
   }
 }
 
 $failedBlockers = @($findings | Where-Object { [string]$_.severity -eq "blocker" })
 $failedActionRequired = @($findings | Where-Object { [string]$_.severity -eq "action-required" })
-$proofReady = $failedBlockers.Count -eq 0 -and $failedActionRequired.Count -eq 0 -and -not [string]::IsNullOrWhiteSpace($OwnerStagingRoot)
-$state = if ($proofReady) { "owner-real-proof-staging-workspace-import-ready" } else { "blocked-owner-real-proof-staging-workspace-required" }
+$requiresStrictEvidence = $RequireExistingFiles.IsPresent -and $RequireHashMatch.IsPresent
+if (-not $requiresStrictEvidence) {
+  $findings.Add((New-OwnerFinding "strict-import-flags-required" "action-required" "missing-strictness" "Strict import readiness requires -RequireExistingFiles and -RequireHashMatch.")) | Out-Null
+  $failedActionRequired = @($findings | Where-Object { [string]$_.severity -eq "action-required" })
+}
+
+$readyForStrictImport = $rootOutsideRepository -and $requiresStrictEvidence -and $failedBlockers.Count -eq 0 -and $failedActionRequired.Count -eq 0 -and @($mappingArray | Where-Object { -not [bool]$_.passed }).Count -eq 0
+$state = if ($readyForStrictImport) { "owner-real-proof-staging-workspace-import-ready" } else { "blocked-owner-real-proof-staging-workspace-required" }
 
 $candidate = [pscustomobject]@{
   recordKind = "owner-real-proof-staging-workspace-candidate"
   generatedAtUtc = [DateTimeOffset]::UtcNow.ToString("O")
-  candidateState = if ($proofReady) { "owner-real-proof-staging-workspace-candidate-ready-for-strict-import" } else { "blocked-owner-real-proof-staging-workspace-candidate" }
+  candidateState = if ($readyForStrictImport) { "owner-real-proof-staging-workspace-candidate-ready-for-strict-import" } else { "blocked-owner-real-proof-staging-workspace-candidate" }
   ownerStagingRoot = $OwnerStagingRoot
   resolvedOwnerStagingRoot = $resolvedRoot
-  mappingCount = $mappings.Count
-  mappings = @($mappings)
+  rootOutsideRepository = $rootOutsideRepository
+  laneCount = @($laneSummaries).Count
+  mappingCount = $mappingArray.Count
+  existingFileCount = @($mappingArray | Where-Object { [bool]$_.fileExists }).Count
+  sha256RequiredFileCount = @($mappingArray | Where-Object { [bool]$_.requiresSha256 }).Count
+  sha256ValidFileCount = @($mappingArray | Where-Object { [bool]$_.requiresSha256 -and [bool]$_.hashValid }).Count
+  forbiddenPathCount = @($mappingArray | Where-Object { [bool]$_.forbiddenPath }).Count
+  laneSummaries = @($laneSummaries)
+  mappingResults = @($mappingArray)
   proofCandidateReady = $false
-  readyForStrictImport = $proofReady
-  ownerActionRequired = -not $proofReady
+  readyForStrictImport = $readyForStrictImport
+  ownerActionRequired = -not $readyForStrictImport
   passed = $false
   performsPublish = $false
   performsRuntimeExecution = $false
@@ -124,17 +181,26 @@ $import = [pscustomobject]@{
   importState = $state
   ownerStagingRoot = $OwnerStagingRoot
   resolvedOwnerStagingRoot = $resolvedRoot
+  rootOutsideRepository = $rootOutsideRepository
   requireExistingFiles = $RequireExistingFiles.IsPresent
   requireHashMatch = $RequireHashMatch.IsPresent
   failOnNotProof = $FailOnNotProof.IsPresent
+  laneCount = @($laneSummaries).Count
+  mappingCount = $mappingArray.Count
+  existingFileCount = @($mappingArray | Where-Object { [bool]$_.fileExists }).Count
+  sha256RequiredFileCount = @($mappingArray | Where-Object { [bool]$_.requiresSha256 }).Count
+  sha256ValidFileCount = @($mappingArray | Where-Object { [bool]$_.requiresSha256 -and [bool]$_.hashValid }).Count
+  forbiddenPathCount = @($mappingArray | Where-Object { [bool]$_.forbiddenPath }).Count
+  laneSummaries = @($laneSummaries)
+  mappingResults = @($mappingArray)
   findingCount = $findings.Count
   failedBlockerCount = $failedBlockers.Count
   failedActionRequiredCount = $failedActionRequired.Count
   findings = @($findings.ToArray())
   candidatePath = "artifacts/final-release/owner-real-proof-staging-workspace-candidate.json"
-  readyForStrictImport = $proofReady
+  readyForStrictImport = $readyForStrictImport
   proofCandidateReady = $false
-  ownerActionRequired = -not $proofReady
+  ownerActionRequired = -not $readyForStrictImport
   passed = $false
   performsPublish = $false
   performsRuntimeExecution = $false
@@ -145,21 +211,24 @@ $import = [pscustomobject]@{
   isPackageConsumerRuntimeProof = $false
   isPostPublishProof = $false
   isReleaseCloseProof = $false
-  boundary = "Owner staging workspace import validates local owner file layout only. Strict External CleanConsumer and PostPublish import validators must still accept real evidence; this import is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push."
+  boundary = "Owner staging workspace import validates local owner file layout only. Strict External CleanConsumer, YoloVision, article publication, public package, and release close validators must still accept real evidence; this import is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push."
 }
 
 $importPath = Join-Path $OutputRoot "owner-real-proof-staging-workspace-import.json"
 $importMdPath = Join-Path $OutputRoot "owner-real-proof-staging-workspace-import.md"
 $candidatePath = Join-Path $OutputRoot "owner-real-proof-staging-workspace-candidate.json"
 $candidateMdPath = Join-Path $OutputRoot "owner-real-proof-staging-workspace-candidate.md"
-$import | ConvertTo-Json -Depth 14 | Set-Content -LiteralPath $importPath -Encoding utf8
-$candidate | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $candidatePath -Encoding utf8
+Write-Utf8File -LiteralPath $importPath -InputObject ($import | ConvertTo-Json -Depth 16)
+Write-Utf8File -LiteralPath $candidatePath -InputObject ($candidate | ConvertTo-Json -Depth 16)
 
 $findingRows = foreach ($finding in $findings) {
   "| ``$(ConvertTo-MarkdownCell $finding.id)`` | ``$(ConvertTo-MarkdownCell $finding.severity)`` | ``$(ConvertTo-MarkdownCell $finding.category)`` | $(ConvertTo-MarkdownCell $finding.message) |"
 }
-Write-Utf8File -LiteralPath $importMdPath -InputObject @("# Owner Real Proof Staging Workspace Import", "", "- importState: ``$state``", "- readyForStrictImport: ``$proofReady``", "- failedActionRequiredCount: ``$($failedActionRequired.Count)``", "", "| ID | Severity | Category | Message |", "|---|---|---|---|", @($findingRows), "", "## Boundary", "", $import.boundary)
-Write-Utf8File -LiteralPath $candidateMdPath -InputObject @("# Owner Real Proof Staging Workspace Candidate", "", "- candidateState: ``$($candidate.candidateState)``", "- readyForStrictImport: ``$($candidate.readyForStrictImport)``", "- proofCandidateReady: ``False``", "", "## Boundary", "", $candidate.boundary)
+$laneRows = foreach ($lane in $laneSummaries) {
+  "| ``$($lane.lane)`` | ``$($lane.existingFileCount)/$($lane.requiredFileCount)`` | ``$($lane.sha256ValidFileCount)/$($lane.sha256RequiredFileCount)`` | ``$($lane.forbiddenPathCount)`` | ``$($lane.laneReadyForStrictImport)`` |"
+}
+Write-Utf8File -LiteralPath $importMdPath -InputObject @("# Owner Real Proof Staging Workspace Import", "", "- importState: ``$state``", "- readyForStrictImport: ``$readyForStrictImport``", "- rootOutsideRepository: ``$rootOutsideRepository``", "- mappings: ``$($import.existingFileCount)/$($import.mappingCount)``", "- sha256: ``$($import.sha256ValidFileCount)/$($import.sha256RequiredFileCount)``", "- failedActionRequiredCount: ``$($failedActionRequired.Count)``", "", "| Lane | Files | SHA256 | Forbidden Paths | Ready |", "|---|---:|---:|---:|---:|", @($laneRows), "", "| ID | Severity | Category | Message |", "|---|---|---|---|", @($findingRows), "", "## Boundary", "", $import.boundary)
+Write-Utf8File -LiteralPath $candidateMdPath -InputObject @("# Owner Real Proof Staging Workspace Candidate", "", "- candidateState: ``$($candidate.candidateState)``", "- readyForStrictImport: ``$($candidate.readyForStrictImport)``", "- proofCandidateReady: ``False``", "- laneCount: ``$($candidate.laneCount)``", "- mappingCount: ``$($candidate.mappingCount)``", "", "## Boundary", "", $candidate.boundary)
 
-Write-Host "OwnerRealProofStagingWorkspaceImportState=$state ReadyForStrictImport=$proofReady FailedBlockers=$($failedBlockers.Count) FailedActionRequired=$($failedActionRequired.Count)"
-if ($FailOnNotProof.IsPresent -and -not $proofReady) { throw "Owner real proof staging workspace is not ready for strict import." }
+Write-Host "OwnerRealProofStagingWorkspaceImportState=$state ReadyForStrictImport=$readyForStrictImport Mappings=$($import.existingFileCount)/$($import.mappingCount) Sha256=$($import.sha256ValidFileCount)/$($import.sha256RequiredFileCount) FailedBlockers=$($failedBlockers.Count) FailedActionRequired=$($failedActionRequired.Count)"
+if ($FailOnNotProof.IsPresent -and -not $readyForStrictImport) { throw "Owner real proof staging workspace is not ready for strict import." }
