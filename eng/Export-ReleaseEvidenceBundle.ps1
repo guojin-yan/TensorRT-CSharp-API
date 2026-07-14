@@ -577,6 +577,9 @@ $githubCiEvidenceFromOwnerInputValidation = Read-JsonOrNull "artifacts\final-rel
 $releaseEvidenceBundleHashReviewValidation = Read-JsonOrNull "artifacts\final-release\release-evidence-bundle-hash-review-validation.json"
 $classificationAuditHashReviewValidation = Read-JsonOrNull "artifacts\final-release\classification-audit-hash-review-validation.json"
 $finalOwnerExecutionEvidencePackValidation = Read-JsonOrNull "artifacts\final-release\final-owner-execution-evidence-pack-validation.json"
+$realOwnerProofInputContractsValidation = Read-JsonOrNull "artifacts\final-release\real-owner-proof-input-contracts-validation.json"
+$realOwnerProofAdmissionPreflightValidation = Read-JsonOrNull "artifacts\final-release\real-owner-proof-admission-preflight-validation.json"
+$realOwnerProofConvergenceDashboardValidation = Read-JsonOrNull "artifacts\final-release\real-owner-proof-convergence-dashboard-validation.json"
 $cudaDeviceInitializationLocalSmokeClassification = Read-JsonOrNull "artifacts\final-release\cuda-device-initialization-local-smoke-classification.json"
 $cudaDeviceInitializationLocalSmokeClassificationValidation = Read-JsonOrNull "artifacts\final-release\cuda-device-initialization-local-smoke-classification-validation.json"
 $cleanConsumerProofExecutionBundle = Read-JsonOrNull "artifacts\final-release\clean-consumer-proof-execution-bundle.json"
@@ -2855,6 +2858,26 @@ $finalOwnerExecutionEvidencePackReadyGateCount = [int](Get-PropertyOrDefault -Ob
 $finalOwnerExecutionEvidencePackBlockedGateCount = [int](Get-PropertyOrDefault -Object $finalOwnerExecutionEvidencePackValidation -Name "blockedGateCount" -DefaultValue 0)
 $finalOwnerExecutionEvidencePackRejectedNonProofStateCount = [int](Get-PropertyOrDefault -Object $finalOwnerExecutionEvidencePackValidation -Name "rejectedNonProofStateCount" -DefaultValue 0)
 $finalOwnerExecutionEvidencePackFailedBlockerCount = [int](Get-PropertyOrDefault -Object $finalOwnerExecutionEvidencePackValidation -Name "failedBlockerCount" -DefaultValue 999)
+$realOwnerProofInputContractsValidationState = [string](Get-PropertyOrDefault -Object $realOwnerProofInputContractsValidation -Name "validationState" -DefaultValue "missing-real-owner-proof-input-contracts-validation")
+$realOwnerProofInputContractsLaneCount = [int](Get-PropertyOrDefault -Object $realOwnerProofInputContractsValidation -Name "laneCount" -DefaultValue 0)
+$realOwnerProofInputContractsRequiredFieldCount = [int](Get-PropertyOrDefault -Object $realOwnerProofInputContractsValidation -Name "requiredFieldCount" -DefaultValue 0)
+$realOwnerProofInputContractsFailedBlockerCount = [int](Get-PropertyOrDefault -Object $realOwnerProofInputContractsValidation -Name "failedBlockerCount" -DefaultValue 999)
+$realOwnerProofAdmissionPreflightValidationState = [string](Get-PropertyOrDefault -Object $realOwnerProofAdmissionPreflightValidation -Name "validationState" -DefaultValue "missing-real-owner-proof-admission-preflight-validation")
+$realOwnerProofAdmissionPreflightLaneCount = [int](Get-PropertyOrDefault -Object $realOwnerProofAdmissionPreflightValidation -Name "laneCount" -DefaultValue 0)
+$realOwnerProofAdmissionPreflightStructuralReadyLaneCount = [int](Get-PropertyOrDefault -Object $realOwnerProofAdmissionPreflightValidation -Name "structuralReadyLaneCount" -DefaultValue 0)
+$realOwnerProofAdmissionPreflightAcceptedLaneCount = [int](Get-PropertyOrDefault -Object $realOwnerProofAdmissionPreflightValidation -Name "acceptedLaneCount" -DefaultValue 0)
+$realOwnerProofAdmissionPreflightBlockedLaneCount = [int](Get-PropertyOrDefault -Object $realOwnerProofAdmissionPreflightValidation -Name "blockedLaneCount" -DefaultValue 0)
+$realOwnerProofAdmissionPreflightAllAccepted = [bool](Get-PropertyOrDefault -Object $realOwnerProofAdmissionPreflightValidation -Name "allRealOwnerProofInputsAccepted" -DefaultValue $false)
+$realOwnerProofAdmissionPreflightFailedBlockerCount = [int](Get-PropertyOrDefault -Object $realOwnerProofAdmissionPreflightValidation -Name "failedBlockerCount" -DefaultValue 999)
+$realOwnerProofConvergenceDashboardValidationState = [string](Get-PropertyOrDefault -Object $realOwnerProofConvergenceDashboardValidation -Name "validationState" -DefaultValue "missing-real-owner-proof-convergence-dashboard-validation")
+$realOwnerProofConvergenceDashboardLaneCount = [int](Get-PropertyOrDefault -Object $realOwnerProofConvergenceDashboardValidation -Name "laneCount" -DefaultValue 0)
+$realOwnerProofConvergenceDashboardAcceptedLaneCount = [int](Get-PropertyOrDefault -Object $realOwnerProofConvergenceDashboardValidation -Name "acceptedLaneCount" -DefaultValue 0)
+$realOwnerProofConvergenceDashboardBlockedLaneCount = [int](Get-PropertyOrDefault -Object $realOwnerProofConvergenceDashboardValidation -Name "blockedLaneCount" -DefaultValue 0)
+$realOwnerProofConvergenceDashboardGateCount = [int](Get-PropertyOrDefault -Object $realOwnerProofConvergenceDashboardValidation -Name "gateCount" -DefaultValue 0)
+$realOwnerProofConvergenceDashboardReadyGateCount = [int](Get-PropertyOrDefault -Object $realOwnerProofConvergenceDashboardValidation -Name "readyGateCount" -DefaultValue 0)
+$realOwnerProofConvergenceDashboardBlockedGateCount = [int](Get-PropertyOrDefault -Object $realOwnerProofConvergenceDashboardValidation -Name "blockedGateCount" -DefaultValue 0)
+$realOwnerProofConvergenceDashboardAllAccepted = [bool](Get-PropertyOrDefault -Object $realOwnerProofConvergenceDashboardValidation -Name "allRealOwnerProofInputsAccepted" -DefaultValue $false)
+$realOwnerProofConvergenceDashboardFailedBlockerCount = [int](Get-PropertyOrDefault -Object $realOwnerProofConvergenceDashboardValidation -Name "failedBlockerCount" -DefaultValue 999)
 $cudaDeviceInitializationLocalSmokeClassificationState = [string](Get-PropertyOrDefault -Object $cudaDeviceInitializationLocalSmokeClassification -Name "classificationState" -DefaultValue "missing-cuda-device-initialization-local-smoke-classification")
 $cudaDeviceInitializationLocalSmokeClassificationProofKind = [string](Get-PropertyOrDefault -Object $cudaDeviceInitializationLocalSmokeClassification -Name "proofKind" -DefaultValue "missing-proof-kind")
 $cudaDeviceInitializationLocalSmokeClassificationValidationState = [string](Get-PropertyOrDefault -Object $cudaDeviceInitializationLocalSmokeClassificationValidation -Name "validationState" -DefaultValue "missing-cuda-device-initialization-local-smoke-classification-validation")
@@ -3777,6 +3800,9 @@ $evidenceItems = @(
   New-EvidenceItem -Id "release-evidence-bundle-hash-review" -Title "Release evidence bundle hash review" -Artifact "artifacts/final-release/release-evidence-bundle-hash-review-validation.json" -State "$releaseEvidenceBundleHashReviewValidationState; hashMatches=$releaseEvidenceBundleHashReviewHashMatches; accepted=$releaseEvidenceBundleHashReviewAccepted; failedActionRequired=$releaseEvidenceBundleHashReviewFailedActionRequiredCount; failedBlockers=$releaseEvidenceBundleHashReviewFailedBlockerCount" -Passed $false -Boundary "The release evidence bundle hash review is Owner-reviewed hash traceability only; matching hash is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push."
   New-EvidenceItem -Id "classification-audit-hash-review" -Title "Classification audit hash review" -Artifact "artifacts/final-release/classification-audit-hash-review-validation.json" -State "$classificationAuditHashReviewValidationState; hashMatches=$classificationAuditHashReviewHashMatches; stateMatchesRequired=$classificationAuditHashReviewStateMatchesRequired; accepted=$classificationAuditHashReviewAccepted; failedActionRequired=$classificationAuditHashReviewFailedActionRequiredCount; failedBlockers=$classificationAuditHashReviewFailedBlockerCount" -Passed $false -Boundary "The classification audit hash review is Owner-reviewed audit traceability only; matching hash and passed classification audit state are not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push."
   New-EvidenceItem -Id "final-owner-execution-evidence-pack" -Title "Final Owner execution evidence pack" -Artifact "artifacts/final-release/final-owner-execution-evidence-pack-validation.json" -State "$finalOwnerExecutionEvidencePackValidationState; gates=$finalOwnerExecutionEvidencePackReadyGateCount/$finalOwnerExecutionEvidencePackGateCount ready; blockedGates=$finalOwnerExecutionEvidencePackBlockedGateCount; rejectedNonProofStates=$finalOwnerExecutionEvidencePackRejectedNonProofStateCount; failedBlockers=$finalOwnerExecutionEvidencePackFailedBlockerCount" -Passed $false -Boundary "The final Owner execution evidence pack aggregates final Owner input skeleton, GitHub CI evidence, bundle hash review, classification audit hash review, post-publish bridge, and release-close bridge for Owner review only. It rejects templates, dashboards, dry-runs, local feeds, ProjectReference, direct nupkg, queued workflows, local builds, local tests, hash-only records, validation-ready records, and staging shape-valid-only substitutes. It does not publish, does not use tokens, does not close the release issue, and is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push."
+  New-EvidenceItem -Id "real-owner-proof-input-contracts" -Title "Real Owner proof input contracts" -Artifact "artifacts/final-release/real-owner-proof-input-contracts-validation.json" -State "$realOwnerProofInputContractsValidationState; lanes=$realOwnerProofInputContractsLaneCount; requiredFields=$realOwnerProofInputContractsRequiredFieldCount; failedBlockers=$realOwnerProofInputContractsFailedBlockerCount" -Passed $false -Boundary "The real Owner proof input contracts describe nine lane schemas and script linkage only; contracts and templates are not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push."
+  New-EvidenceItem -Id "real-owner-proof-admission-preflight" -Title "Real Owner proof admission preflight" -Artifact "artifacts/final-release/real-owner-proof-admission-preflight-validation.json" -State "$realOwnerProofAdmissionPreflightValidationState; structural=$realOwnerProofAdmissionPreflightStructuralReadyLaneCount/$realOwnerProofAdmissionPreflightLaneCount; accepted=$realOwnerProofAdmissionPreflightAcceptedLaneCount/$realOwnerProofAdmissionPreflightLaneCount; blocked=$realOwnerProofAdmissionPreflightBlockedLaneCount; allAccepted=$realOwnerProofAdmissionPreflightAllAccepted; failedBlockers=$realOwnerProofAdmissionPreflightFailedBlockerCount" -Passed $false -Boundary "The real Owner proof admission preflight refreshes existing validators and reports lane admission only; structural validity, hashes, CI metadata, templates, sample builds, and mock outputs are not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push."
+  New-EvidenceItem -Id "real-owner-proof-convergence-dashboard" -Title "Real Owner proof convergence dashboard" -Artifact "artifacts/final-release/real-owner-proof-convergence-dashboard-validation.json" -State "$realOwnerProofConvergenceDashboardValidationState; accepted=$realOwnerProofConvergenceDashboardAcceptedLaneCount/$realOwnerProofConvergenceDashboardLaneCount; blocked=$realOwnerProofConvergenceDashboardBlockedLaneCount; gates=$realOwnerProofConvergenceDashboardReadyGateCount/$realOwnerProofConvergenceDashboardGateCount; blockedGates=$realOwnerProofConvergenceDashboardBlockedGateCount; allAccepted=$realOwnerProofConvergenceDashboardAllAccepted; failedBlockers=$realOwnerProofConvergenceDashboardFailedBlockerCount" -Passed $false -Boundary "The real Owner proof convergence dashboard is a read-only nine-lane aggregate; dashboard readiness cannot substitute public package, external CleanConsumer, article, YoloVision, governance, CI, or hash-review evidence. It is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push."
   New-EvidenceItem -Id "cuda-device-initialization-local-smoke-classification" -Title "CUDA device initialization local smoke classification" -Artifact "artifacts/final-release/cuda-device-initialization-local-smoke-classification.json" -State "$cudaDeviceInitializationLocalSmokeClassificationState; validation=$cudaDeviceInitializationLocalSmokeClassificationValidationState; proofKind=$cudaDeviceInitializationLocalSmokeClassificationProofKind; findings=$cudaDeviceInitializationLocalSmokeClassificationFindingCount; preInitCallOrderReady=$cudaDeviceInitializationLocalSmokeClassificationPreInitCallOrderReady; skippedTrueIsForbiddenSubstitute=$cudaDeviceInitializationLocalSmokeClassificationSkippedTrueIsForbiddenSubstitute; canPromoteRuntimeProof=$cudaDeviceInitializationLocalSmokeClassificationCanPromoteRuntimeProof; isPackageConsumerRuntimeProof=$cudaDeviceInitializationLocalSmokeClassificationIsPackageConsumerRuntimeProof; isRuntimeExecutionProof=$cudaDeviceInitializationLocalSmokeClassificationIsRuntimeExecutionProof; performsPublish=$cudaDeviceInitializationLocalSmokeClassificationPerformsPublish; canPublishPublicly=$cudaDeviceInitializationLocalSmokeClassificationCanPublishPublicly; canCloseReleaseIssue=$cudaDeviceInitializationLocalSmokeClassificationCanCloseReleaseIssue" -Passed $false -Boundary "CudaDeviceInitializationProofRunner is local smoke classification only; it is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push. Skipped=True is a forbidden substitute and cannot promote package-consumer-runtime proof."
   New-EvidenceItem -Id "clean-consumer-proof-execution-bundle" -Title "Clean consumer proof execution bundle" -Artifact "artifacts/final-release/clean-consumer-proof-execution-bundle-validation.json" -State "$cleanConsumerProofExecutionBundleValidationState; bundleState=$cleanConsumerProofExecutionBundleState; lanes=$cleanConsumerProofExecutionBundleLaneCount; forbiddenSubstitutes=$cleanConsumerProofExecutionBundleForbiddenSubstituteCount; promotionRequirements=$cleanConsumerProofExecutionBundlePromotionRequirementCount; executionCommands=$cleanConsumerProofExecutionBundleExecutionCommandCount; failedBlockers=$cleanConsumerProofExecutionBundleFailedBlockerCount; ownerActionRequired=$cleanConsumerProofExecutionBundleOwnerActionRequired; performsPublish=$cleanConsumerProofExecutionBundlePerformsPublish; performsRuntimeExecution=$cleanConsumerProofExecutionBundlePerformsRuntimeExecution; canPromoteRuntimeProof=$cleanConsumerProofExecutionBundleCanPromoteRuntimeProof; canPublishPublicly=$cleanConsumerProofExecutionBundleCanPublishPublicly; canCloseReleaseIssue=$cleanConsumerProofExecutionBundleCanCloseReleaseIssue; isRuntimeExecutionProof=$cleanConsumerProofExecutionBundleIsRuntimeExecutionProof; isPackageConsumerRuntimeProof=$cleanConsumerProofExecutionBundleIsPackageConsumerRuntimeProof; isPostPublishProof=$cleanConsumerProofExecutionBundleIsPostPublishProof" -Passed $false -Boundary "The clean consumer proof execution bundle is owner execution mapping and classification only; it is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push. It cannot promote proof without real repository-external clean consumer logs, hashes, package metadata, host metadata, owner review, and strict validators with FailOnNotProof."
   New-EvidenceItem -Id "clean-consumer-external-proof-closure-pack" -Title "Clean consumer external proof closure pack" -Artifact "artifacts/final-release/clean-consumer-external-proof-closure-pack-validation.json" -State "$cleanConsumerExternalProofClosurePackValidationState; closureState=$cleanConsumerExternalProofClosurePackState; lanes=$cleanConsumerExternalProofClosurePackLaneCount; ownerFields=$cleanConsumerExternalProofClosurePackOwnerFieldCount; executionSteps=$cleanConsumerExternalProofClosurePackExecutionStepCount; forbiddenSubstitutes=$cleanConsumerExternalProofClosurePackForbiddenSubstituteCount; failedBlockers=$cleanConsumerExternalProofClosurePackFailedBlockerCount; ownerActionRequired=$cleanConsumerExternalProofClosurePackOwnerActionRequired; performsPublish=$cleanConsumerExternalProofClosurePackPerformsPublish; performsRuntimeExecution=$cleanConsumerExternalProofClosurePackPerformsRuntimeExecution; canPromoteRuntimeProof=$cleanConsumerExternalProofClosurePackCanPromoteRuntimeProof; canPublishPublicly=$cleanConsumerExternalProofClosurePackCanPublishPublicly; canCloseReleaseIssue=$cleanConsumerExternalProofClosurePackCanCloseReleaseIssue; isRuntimeExecutionProof=$cleanConsumerExternalProofClosurePackIsRuntimeExecutionProof; isPackageConsumerRuntimeProof=$cleanConsumerExternalProofClosurePackIsPackageConsumerRuntimeProof; isPostPublishProof=$cleanConsumerExternalProofClosurePackIsPostPublishProof; isReleaseCloseProof=$cleanConsumerExternalProofClosurePackIsReleaseCloseProof" -Passed $false -Boundary "The clean consumer external proof closure pack is a blocked owner-action convergence layer only; it is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push. It cannot promote proof without real external logs, SHA256 values, package metadata, native asset evidence, host metadata, owner review, and strict validators with FailOnNotProof."
@@ -5905,6 +5931,26 @@ $record = [pscustomobject]@{
   finalOwnerExecutionEvidencePackBlockedGateCount = $finalOwnerExecutionEvidencePackBlockedGateCount
   finalOwnerExecutionEvidencePackRejectedNonProofStateCount = $finalOwnerExecutionEvidencePackRejectedNonProofStateCount
   finalOwnerExecutionEvidencePackFailedBlockerCount = $finalOwnerExecutionEvidencePackFailedBlockerCount
+  realOwnerProofInputContractsValidationState = $realOwnerProofInputContractsValidationState
+  realOwnerProofInputContractsLaneCount = $realOwnerProofInputContractsLaneCount
+  realOwnerProofInputContractsRequiredFieldCount = $realOwnerProofInputContractsRequiredFieldCount
+  realOwnerProofInputContractsFailedBlockerCount = $realOwnerProofInputContractsFailedBlockerCount
+  realOwnerProofAdmissionPreflightValidationState = $realOwnerProofAdmissionPreflightValidationState
+  realOwnerProofAdmissionPreflightLaneCount = $realOwnerProofAdmissionPreflightLaneCount
+  realOwnerProofAdmissionPreflightStructuralReadyLaneCount = $realOwnerProofAdmissionPreflightStructuralReadyLaneCount
+  realOwnerProofAdmissionPreflightAcceptedLaneCount = $realOwnerProofAdmissionPreflightAcceptedLaneCount
+  realOwnerProofAdmissionPreflightBlockedLaneCount = $realOwnerProofAdmissionPreflightBlockedLaneCount
+  realOwnerProofAdmissionPreflightAllAccepted = $realOwnerProofAdmissionPreflightAllAccepted
+  realOwnerProofAdmissionPreflightFailedBlockerCount = $realOwnerProofAdmissionPreflightFailedBlockerCount
+  realOwnerProofConvergenceDashboardValidationState = $realOwnerProofConvergenceDashboardValidationState
+  realOwnerProofConvergenceDashboardLaneCount = $realOwnerProofConvergenceDashboardLaneCount
+  realOwnerProofConvergenceDashboardAcceptedLaneCount = $realOwnerProofConvergenceDashboardAcceptedLaneCount
+  realOwnerProofConvergenceDashboardBlockedLaneCount = $realOwnerProofConvergenceDashboardBlockedLaneCount
+  realOwnerProofConvergenceDashboardGateCount = $realOwnerProofConvergenceDashboardGateCount
+  realOwnerProofConvergenceDashboardReadyGateCount = $realOwnerProofConvergenceDashboardReadyGateCount
+  realOwnerProofConvergenceDashboardBlockedGateCount = $realOwnerProofConvergenceDashboardBlockedGateCount
+  realOwnerProofConvergenceDashboardAllAccepted = $realOwnerProofConvergenceDashboardAllAccepted
+  realOwnerProofConvergenceDashboardFailedBlockerCount = $realOwnerProofConvergenceDashboardFailedBlockerCount
   finalOwnerExecutionRealInputStrictPreflightDualPackageRouteProofRouteCount = $finalOwnerExecutionRealInputStrictPreflightDualPackageRouteProofRouteCount
   finalOwnerExecutionRealInputStrictPreflightDualPackageRouteProofFieldCount = $finalOwnerExecutionRealInputStrictPreflightDualPackageRouteProofFieldCount
   finalOwnerExecutionRealInputStrictPreflightDualPackageRouteProofReadyFieldCount = $finalOwnerExecutionRealInputStrictPreflightDualPackageRouteProofReadyFieldCount
@@ -6196,6 +6242,9 @@ $record = [pscustomobject]@{
     "release evidence bundle hash review"
     "classification audit hash review"
     "final owner execution evidence pack"
+    "real owner proof input contracts"
+    "real owner proof admission preflight"
+    "real owner proof convergence dashboard"
     "final owner execution blocker ledger"
     "final owner execution input preflight"
     "external proof closure guidance"
@@ -6619,6 +6668,18 @@ $record = [pscustomobject]@{
     "artifacts/final-release/final-owner-execution-evidence-pack.md",
     "artifacts/final-release/final-owner-execution-evidence-pack-validation.json",
     "artifacts/final-release/final-owner-execution-evidence-pack-validation.md",
+    "artifacts/final-release/real-owner-proof-input-contracts.json",
+    "artifacts/final-release/real-owner-proof-input-contracts.md",
+    "artifacts/final-release/real-owner-proof-input-contracts-validation.json",
+    "artifacts/final-release/real-owner-proof-input-contracts-validation.md",
+    "artifacts/final-release/real-owner-proof-admission-preflight.json",
+    "artifacts/final-release/real-owner-proof-admission-preflight.md",
+    "artifacts/final-release/real-owner-proof-admission-preflight-validation.json",
+    "artifacts/final-release/real-owner-proof-admission-preflight-validation.md",
+    "artifacts/final-release/real-owner-proof-convergence-dashboard.json",
+    "artifacts/final-release/real-owner-proof-convergence-dashboard.md",
+    "artifacts/final-release/real-owner-proof-convergence-dashboard-validation.json",
+    "artifacts/final-release/real-owner-proof-convergence-dashboard-validation.md",
     "artifacts/final-release/post-publish-user-verification-pack.json",
     "artifacts/final-release/post-publish-user-verification-pack.md",
     "artifacts/final-release/post-publish-user-verification-pack-validation.json",
@@ -7567,6 +7628,18 @@ $record = [pscustomobject]@{
     "artifacts/final-release/final-owner-execution-evidence-pack.md",
     "artifacts/final-release/final-owner-execution-evidence-pack-validation.json",
     "artifacts/final-release/final-owner-execution-evidence-pack-validation.md",
+    "artifacts/final-release/real-owner-proof-input-contracts.json",
+    "artifacts/final-release/real-owner-proof-input-contracts.md",
+    "artifacts/final-release/real-owner-proof-input-contracts-validation.json",
+    "artifacts/final-release/real-owner-proof-input-contracts-validation.md",
+    "artifacts/final-release/real-owner-proof-admission-preflight.json",
+    "artifacts/final-release/real-owner-proof-admission-preflight.md",
+    "artifacts/final-release/real-owner-proof-admission-preflight-validation.json",
+    "artifacts/final-release/real-owner-proof-admission-preflight-validation.md",
+    "artifacts/final-release/real-owner-proof-convergence-dashboard.json",
+    "artifacts/final-release/real-owner-proof-convergence-dashboard.md",
+    "artifacts/final-release/real-owner-proof-convergence-dashboard-validation.json",
+    "artifacts/final-release/real-owner-proof-convergence-dashboard-validation.md",
     "artifacts/final-release/post-publish-user-verification-pack.json",
     "artifacts/final-release/post-publish-user-verification-pack.md",
     "artifacts/final-release/post-publish-user-verification-pack-validation.json",
@@ -8504,6 +8577,9 @@ $lines.Add("- final owner execution package source artifact evidence sha256: ``$
 $lines.Add("- post-publish proof validator bridge: ``$postPublishProofValidatorBridgeValidationState`` lanes ``$postPublishProofValidatorBridgeProofReadyLaneCount/$postPublishProofValidatorBridgeLaneCount`` proof-ready")
 $lines.Add("- release close final bridge: ``$releaseCloseFinalBridgeValidationState`` gates ``$releaseCloseFinalBridgeReadyGateCount/$releaseCloseFinalBridgeGateCount`` ready")
 $lines.Add("- final Owner execution evidence pack: ``$finalOwnerExecutionEvidencePackValidationState`` gates ``$finalOwnerExecutionEvidencePackReadyGateCount/$finalOwnerExecutionEvidencePackGateCount`` ready")
+$lines.Add("- real Owner proof input contracts: ``$realOwnerProofInputContractsValidationState`` lanes ``$realOwnerProofInputContractsLaneCount`` fields ``$realOwnerProofInputContractsRequiredFieldCount``")
+$lines.Add("- real Owner proof admission preflight: ``$realOwnerProofAdmissionPreflightValidationState`` structural ``$realOwnerProofAdmissionPreflightStructuralReadyLaneCount/$realOwnerProofAdmissionPreflightLaneCount`` accepted ``$realOwnerProofAdmissionPreflightAcceptedLaneCount``")
+$lines.Add("- real Owner proof convergence dashboard: ``$realOwnerProofConvergenceDashboardValidationState`` lanes ``$realOwnerProofConvergenceDashboardAcceptedLaneCount/$realOwnerProofConvergenceDashboardLaneCount`` accepted gates ``$realOwnerProofConvergenceDashboardReadyGateCount/$realOwnerProofConvergenceDashboardGateCount``")
 $lines.Add("- GitHub CI evidence accepted: ``$githubCiEvidenceFromOwnerInputAccepted``")
 $lines.Add("- release evidence bundle hash review accepted: ``$releaseEvidenceBundleHashReviewAccepted`` hashMatches ``$releaseEvidenceBundleHashReviewHashMatches``")
 $lines.Add("- classification audit hash review accepted: ``$classificationAuditHashReviewAccepted`` hashMatches ``$classificationAuditHashReviewHashMatches`` stateMatches ``$classificationAuditHashReviewStateMatchesRequired``")

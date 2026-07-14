@@ -56,10 +56,6 @@ function New-CloseGate {
 
 Invoke-OwnerScript "Export-PostPublishProofValidatorBridge.ps1"
 Invoke-OwnerScript "Test-PostPublishProofValidatorBridge.ps1" @("-Strict")
-Invoke-OwnerScript "Import-FinalOwnerRollbackReview.ps1"
-Invoke-OwnerScript "Test-FinalOwnerRollbackReview.ps1" @("-Strict")
-Invoke-OwnerScript "Import-FinalOwnerCloseDecision.ps1"
-Invoke-OwnerScript "Test-FinalOwnerCloseDecision.ps1" @("-Strict")
 Invoke-OwnerScript "Import-OwnerRealProofStagingWorkspace.ps1"
 Invoke-OwnerScript "Test-OwnerRealProofStagingWorkspace.ps1" @("-Strict")
 
@@ -71,6 +67,8 @@ $closeDecisionValidation = Read-FinalJsonOrNull "final-owner-close-decision-vali
 $ownerStagingImport = Read-FinalJsonOrNull "owner-real-proof-staging-workspace-import.json"
 $ownerStagingValidation = Read-FinalJsonOrNull "owner-real-proof-staging-workspace-validation.json"
 $classificationAudit = Read-FinalJsonOrNull "release-evidence-classification-audit.json"
+$realOwnerProofConvergence = Read-FinalJsonOrNull "real-owner-proof-convergence-dashboard.json"
+$realOwnerProofConvergenceValidation = Read-FinalJsonOrNull "real-owner-proof-convergence-dashboard-validation.json"
 
 $postPublishReady = [bool](Get-PropertyOrDefault -Object $postPublishBridge -Name "allPostPublishInputsAccepted" -DefaultValue $false)
 $rollbackReady = [bool](Get-PropertyOrDefault -Object $rollbackReview -Name "rollbackReviewReady" -DefaultValue $false) -and [int](Get-PropertyOrDefault -Object $rollbackValidation -Name "failedBlockerCount" -DefaultValue 999) -eq 0
@@ -79,6 +77,7 @@ $ownerStagingReady = [bool](Get-PropertyOrDefault -Object $ownerStagingImport -N
 $releaseEvidenceBundleSha256 = Get-FileSha256OrEmpty "artifacts\final-release\release-evidence-bundle.json"
 $classificationAuditSha256 = Get-FileSha256OrEmpty "artifacts\final-release\release-evidence-classification-audit.json"
 $classificationAuditPassed = [string](Get-PropertyOrDefault -Object $classificationAudit -Name "auditState" -DefaultValue "") -eq "classification-audit-passed-non-proof-boundaries-intact"
+$realOwnerProofConvergenceReady = [bool](Get-PropertyOrDefault -Object $realOwnerProofConvergence -Name "allRealOwnerProofInputsAccepted" -DefaultValue $false) -and [int](Get-PropertyOrDefault -Object $realOwnerProofConvergenceValidation -Name "failedBlockerCount" -DefaultValue 999) -eq 0
 
 $gates = @(
   New-CloseGate -Id "post-publish-proof-validator-bridge" -Title "Post-publish proof validator bridge" -Ready $postPublishReady -BlockedReason "post-publish-proof-validator-bridge-not-accepted" -SourceArtifacts @("artifacts/final-release/post-publish-proof-validator-bridge-validation.json")
@@ -87,6 +86,7 @@ $gates = @(
   New-CloseGate -Id "owner-real-proof-staging-workspace" -Title "Owner real proof staging workspace strict import" -Ready $ownerStagingReady -BlockedReason "owner-real-proof-staging-workspace-not-strict-ready" -SourceArtifacts @("artifacts/final-release/owner-real-proof-staging-workspace-validation.json")
   New-CloseGate -Id "release-evidence-bundle-sha256" -Title "Release evidence bundle SHA256" -Ready (Test-Sha256Text $releaseEvidenceBundleSha256) -BlockedReason "release-evidence-bundle-sha256-missing" -SourceArtifacts @("artifacts/final-release/release-evidence-bundle.json")
   New-CloseGate -Id "classification-audit-sha256" -Title "Classification audit SHA256" -Ready ((Test-Sha256Text $classificationAuditSha256) -and $classificationAuditPassed) -BlockedReason "classification-audit-sha256-or-pass-state-missing" -SourceArtifacts @("artifacts/final-release/release-evidence-classification-audit.json")
+  New-CloseGate -Id "real-owner-proof-convergence" -Title "Real Owner proof nine-lane convergence" -Ready $realOwnerProofConvergenceReady -BlockedReason "real-owner-proof-nine-lane-convergence-not-ready" -SourceArtifacts @("artifacts/final-release/real-owner-proof-convergence-dashboard-validation.json")
 )
 
 $readyGateCount = @($gates | Where-Object { [bool]$_.ready }).Count
@@ -103,7 +103,9 @@ $rejectedNonProofStates = @(
   "queued-workflow",
   "staging-shape-valid-only",
   "public-package-hash-only",
-  "validation-ready-without-owner-proof"
+  "validation-ready-without-owner-proof",
+  "sample-build-only",
+  "mock-output"
 )
 $ownerNextActions = @(
   "import-real-post-publish-clean-consumer-proof",
@@ -147,7 +149,7 @@ $record = [pscustomobject]@{
   isRuntimeExecutionProof = $false
   isPostPublishProof = $false
   isReleaseCloseProof = $false
-  boundary = "Release close final bridge cross-checks post-publish proof admission, final rollback review, final close decision, staging strict import, release evidence bundle hash, and classification audit hash for Owner review only. It does not publish, does not use tokens, does not run dotnet nuget push, does not close the release issue, and rejects template, dashboard, dry-run, local feed, ProjectReference, direct nupkg, queued workflow, staging shape-valid-only, public-package-hash-only, and validation-ready substitutes. It is not runtime proof, not post-publish proof, not release close approval, and not package push."
+  boundary = "Release close final bridge cross-checks post-publish proof admission, final rollback review, final close decision, staging strict import, release evidence bundle hash, classification audit hash, and unified nine-lane Owner proof convergence for Owner review only. It does not publish, does not use tokens, does not run dotnet nuget push, does not close the release issue, and rejects template, dashboard, dry-run, local feed, ProjectReference, direct nupkg, queued workflow, staging shape-valid-only, public-package-hash-only, validation-ready, sample-build-only, and mock-output substitutes. It is not runtime proof, not post-publish proof, not release close approval, and not package push."
 }
 
 Write-Utf8File -LiteralPath (Join-Path $OutputRoot "release-close-final-bridge.json") -InputObject ($record | ConvertTo-Json -Depth 16)

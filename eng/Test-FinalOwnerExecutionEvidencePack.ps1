@@ -16,7 +16,7 @@ if (-not (Test-Path -LiteralPath $resolvedInputPath -PathType Leaf)) { & (Join-P
 $record = Get-Content -LiteralPath $resolvedInputPath -Raw -Encoding utf8 | ConvertFrom-Json
 $gates = @(Convert-ToArray (Get-PropertyOrDefault -Object $record -Name "gates" -DefaultValue @()))
 $gateIds = @($gates | ForEach-Object { [string]$_.id })
-$requiredGateIds = @("final-owner-execution-input-skeleton", "github-ci-evidence-from-owner-input", "release-evidence-bundle-hash-review", "classification-audit-hash-review", "post-publish-proof-validator-bridge", "release-close-final-bridge")
+$requiredGateIds = @("final-owner-execution-input-skeleton", "github-ci-evidence-from-owner-input", "release-evidence-bundle-hash-review", "classification-audit-hash-review", "post-publish-proof-validator-bridge", "release-close-final-bridge", "real-owner-proof-convergence-dashboard")
 $missingGateIds = @($requiredGateIds | Where-Object { $gateIds -notcontains $_ })
 $rejected = @((Convert-ToArray (Get-PropertyOrDefault -Object $record -Name "rejectedNonProofStates" -DefaultValue @())) | ForEach-Object { [string]$_ })
 $requiredRejected = @("template", "dashboard", "dry-run", "local-feed", "ProjectReference", "direct-nupkg", "queued-workflow", "hash-only", "validation-ready-without-owner-proof")
@@ -24,7 +24,7 @@ $missingRejected = @($requiredRejected | Where-Object { $rejected -notcontains $
 $boundary = [string](Get-PropertyOrDefault -Object $record -Name "boundary" -DefaultValue "")
 $items = @(
   New-OwnerValidationItem "record-kind" ([string](Get-PropertyOrDefault -Object $record -Name "recordKind" -DefaultValue "") -eq "final-owner-execution-evidence-pack") "blocker" "recordKind must match."
-  New-OwnerValidationItem "gate-coverage" ($missingGateIds.Count -eq 0 -and $gates.Count -ge 6) "blocker" "Pack must cover skeleton, CI, hash reviews, post-publish bridge, and close bridge."
+  New-OwnerValidationItem "gate-coverage" ($missingGateIds.Count -eq 0 -and $gates.Count -ge 7) "blocker" "Pack must cover skeleton, CI, hash reviews, bridges, and unified Owner proof convergence."
   New-OwnerValidationItem "rejected-non-proof-states" ($missingRejected.Count -eq 0) "blocker" "Pack must reject common non-proof substitutes."
   New-OwnerValidationItem "blocked-or-ready-state" ([string](Get-PropertyOrDefault -Object $record -Name "packState" -DefaultValue "") -in @("blocked-final-owner-execution-evidence-pack-real-owner-proof-required", "final-owner-execution-evidence-pack-ready-for-owner-release-review-non-proof")) "blocker" "Pack state must be explicit."
   New-OwnerValidationItem "non-proof-flags" (-not [bool](Get-PropertyOrDefault -Object $record -Name "performsPublish" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "usesPublishToken" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canPublishPublicly" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canCloseReleaseIssue" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isRuntimeExecutionProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isPostPublishProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isReleaseCloseProof" -DefaultValue $true)) "blocker" "Pack must not publish, use tokens, close, or claim proof."

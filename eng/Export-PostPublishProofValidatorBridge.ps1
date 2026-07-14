@@ -78,14 +78,8 @@ function New-BridgeLane {
   }
 }
 
-Invoke-OwnerScript "Export-PublicPackageUrlHashProofValidator.ps1"
-Invoke-OwnerScript "Test-PublicPackageUrlHashProofValidator.ps1" @("-Strict")
-Invoke-OwnerScript "Export-ExternalCleanConsumerPostPublishProofValidator.ps1"
-Invoke-OwnerScript "Test-ExternalCleanConsumerPostPublishProofValidator.ps1" @("-Strict")
-Invoke-OwnerScript "Export-YoloVisionRealModelPostPublishProofValidator.ps1"
-Invoke-OwnerScript "Test-YoloVisionRealModelPostPublishProofValidator.ps1" @("-Strict")
-Invoke-OwnerScript "Export-ArticlePublicationProofValidator.ps1"
-Invoke-OwnerScript "Test-ArticlePublicationProofValidator.ps1" @("-Strict")
+Invoke-OwnerScript "Export-RealOwnerProofConvergenceDashboard.ps1"
+Invoke-OwnerScript "Test-RealOwnerProofConvergenceDashboard.ps1" @("-Strict")
 Invoke-OwnerScript "Export-ReleaseCloseFinalBridgeProofValidator.ps1"
 Invoke-OwnerScript "Test-ReleaseCloseFinalBridgeProofValidator.ps1" @("-Strict")
 Invoke-OwnerScript "Export-OwnerPostPublishProofAcceptanceManifest.ps1"
@@ -105,6 +99,8 @@ $acceptanceManifest = Read-FinalJsonOrNull "owner-post-publish-proof-acceptance-
 $downloadVerification = Read-FinalJsonOrNull "public-package-url-hash-download-verification-validation.json"
 $articleStaging = Read-FinalJsonOrNull "article-publication-proof-from-staging-workspace-validation.json"
 $yoloStaging = Read-FinalJsonOrNull "yolovision-real-model-proof-from-staging-workspace-validation.json"
+$realOwnerProofConvergence = Read-FinalJsonOrNull "real-owner-proof-convergence-dashboard.json"
+$realOwnerProofConvergenceValidation = Read-FinalJsonOrNull "real-owner-proof-convergence-dashboard-validation.json"
 
 $lanes = @(
   New-BridgeLane -Id "public-package-url-hash" -Title "Public package URL/hash evidence" -Validator $publicPackageValidator -ShapeRecord $downloadVerification -ShapeReadyProperty "downloadVerificationReady" -BlockedReason "public-package-url-hash-owner-proof-required" -SourceArtifacts @("artifacts/final-release/public-package-url-hash-proof-validator-validation.json", "artifacts/final-release/public-package-url-hash-download-verification-validation.json")
@@ -122,11 +118,17 @@ $acceptanceValidatorsAccepted = [bool](Get-PropertyOrDefault -Object $acceptance
 $publicPackageDownloadReady = [bool](Get-PropertyOrDefault -Object $downloadVerification -Name "downloadVerificationReady" -DefaultValue $false)
 $publicPackageHashCannotSubstitutePostPublishProof = $true
 $shapeValidCannotSubstitutePostPublishProof = $true
+$convergencePostPublishSummary = @(Convert-ToArray (Get-PropertyOrDefault -Object $realOwnerProofConvergence -Name "categorySummaries" -DefaultValue @()) | Where-Object { [string]$_.category -eq "post-publish" }) | Select-Object -First 1
+$convergencePostPublishLaneCount = [int](Get-PropertyOrDefault -Object $convergencePostPublishSummary -Name "laneCount" -DefaultValue 0)
+$convergencePostPublishAcceptedLaneCount = [int](Get-PropertyOrDefault -Object $convergencePostPublishSummary -Name "acceptedLaneCount" -DefaultValue 0)
+$convergenceStructurallyReady = [int](Get-PropertyOrDefault -Object $realOwnerProofConvergenceValidation -Name "failedBlockerCount" -DefaultValue 999) -eq 0
 $allPostPublishInputsAccepted = $laneCount -gt 0 -and $proofReadyCount -eq $laneCount -and $acceptanceValidatorsAccepted
 $blockedReasons = New-Object System.Collections.Generic.List[string]
 if (-not $acceptanceValidatorsAccepted) { $blockedReasons.Add("owner-post-publish-proof-acceptance-manifest-not-accepted") | Out-Null }
 if ($blockedLaneCount -gt 0) { $blockedReasons.Add("post-publish-proof-lanes-blocked=$blockedLaneCount/$laneCount") | Out-Null }
 if (-not $publicPackageDownloadReady) { $blockedReasons.Add("public-package-download-hash-verification-not-ready") | Out-Null }
+if (-not $convergenceStructurallyReady) { $blockedReasons.Add("real-owner-proof-convergence-dashboard-invalid") | Out-Null }
+if ($convergencePostPublishLaneCount -ne $laneCount -or $convergencePostPublishAcceptedLaneCount -ne $proofReadyCount) { $blockedReasons.Add("real-owner-proof-convergence-post-publish-count-mismatch") | Out-Null }
 
 $bridgeState = if ($allPostPublishInputsAccepted) { "post-publish-proof-validator-bridge-ready-for-owner-close-review-non-proof" } else { "blocked-post-publish-proof-validator-bridge-real-owner-proof-required" }
 $sourceArtifacts = @(
@@ -137,7 +139,8 @@ $sourceArtifacts = @(
   "artifacts/final-release/owner-post-publish-proof-acceptance-manifest-validation.json",
   "artifacts/final-release/public-package-url-hash-download-verification-validation.json",
   "artifacts/final-release/article-publication-proof-from-staging-workspace-validation.json",
-  "artifacts/final-release/yolovision-real-model-proof-from-staging-workspace-validation.json"
+  "artifacts/final-release/yolovision-real-model-proof-from-staging-workspace-validation.json",
+  "artifacts/final-release/real-owner-proof-convergence-dashboard-validation.json"
 )
 
 $record = [pscustomobject]@{
@@ -154,6 +157,9 @@ $record = [pscustomobject]@{
   publicPackageDownloadReady = $publicPackageDownloadReady
   publicPackageHashCannotSubstitutePostPublishProof = $publicPackageHashCannotSubstitutePostPublishProof
   shapeValidCannotSubstitutePostPublishProof = $shapeValidCannotSubstitutePostPublishProof
+  realOwnerProofConvergenceStructurallyReady = $convergenceStructurallyReady
+  convergencePostPublishLaneCount = $convergencePostPublishLaneCount
+  convergencePostPublishAcceptedLaneCount = $convergencePostPublishAcceptedLaneCount
   lanes = @($lanes)
   blockedReasonCount = $blockedReasons.Count
   blockedReasons = @($blockedReasons.ToArray())
@@ -167,7 +173,7 @@ $record = [pscustomobject]@{
   isRuntimeExecutionProof = $false
   isPostPublishProof = $false
   isReleaseCloseProof = $false
-  boundary = "Post-publish proof validator bridge aggregates public package download/hash, external CleanConsumer, article publication, YoloVision real-model, and staging admission signals for Owner review only. Downloaded hash, validation-ready, staging shape-valid, candidate, dashboard, dry-run, local feed, ProjectReference, and direct nupkg signals cannot substitute post-publish CleanConsumer runtime proof. This bridge does not publish, does not use tokens, does not run inference or CleanConsumer, does not close the release issue, and is not runtime proof, not post-publish proof, not release close approval, and not package push."
+  boundary = "Post-publish proof validator bridge aggregates public package download/hash, external CleanConsumer, article publication, YoloVision real-model, staging admission, and the unified real Owner proof convergence count for Owner review only. Downloaded hash, validation-ready, staging shape-valid, candidate, dashboard, dry-run, local feed, ProjectReference, direct nupkg, sample-build-only, and mock-output signals cannot substitute post-publish CleanConsumer runtime proof. This bridge does not publish, does not use tokens, does not run inference or CleanConsumer, does not close the release issue, and is not runtime proof, not post-publish proof, not release close approval, and not package push."
 }
 
 Write-Utf8File -LiteralPath (Join-Path $OutputRoot "post-publish-proof-validator-bridge.json") -InputObject ($record | ConvertTo-Json -Depth 16)

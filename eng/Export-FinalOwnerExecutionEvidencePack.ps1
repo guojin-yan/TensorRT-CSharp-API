@@ -55,14 +55,6 @@ function New-PackGate {
 
 Invoke-OwnerScript "Export-FinalOwnerExecutionInputSkeleton.ps1"
 Invoke-OwnerScript "Test-FinalOwnerExecutionInputSkeleton.ps1" @("-Strict")
-Invoke-OwnerScript "Import-GitHubCiEvidenceFromOwnerInput.ps1"
-Invoke-OwnerScript "Test-GitHubCiEvidenceFromOwnerInput.ps1" @("-Strict")
-Invoke-OwnerScript "Import-ReleaseEvidenceBundleHashReview.ps1"
-Invoke-OwnerScript "Test-ReleaseEvidenceBundleHashReview.ps1" @("-Strict")
-Invoke-OwnerScript "Import-ClassificationAuditHashReview.ps1"
-Invoke-OwnerScript "Test-ClassificationAuditHashReview.ps1" @("-Strict")
-Invoke-OwnerScript "Export-PostPublishProofValidatorBridge.ps1"
-Invoke-OwnerScript "Test-PostPublishProofValidatorBridge.ps1" @("-Strict")
 Invoke-OwnerScript "Export-ReleaseCloseFinalBridge.ps1"
 Invoke-OwnerScript "Test-ReleaseCloseFinalBridge.ps1" @("-Strict")
 
@@ -72,6 +64,7 @@ $bundleHashValidation = Read-FinalJsonOrNull "release-evidence-bundle-hash-revie
 $classificationHashValidation = Read-FinalJsonOrNull "classification-audit-hash-review-validation.json"
 $postPublishBridgeValidation = Read-FinalJsonOrNull "post-publish-proof-validator-bridge-validation.json"
 $releaseCloseBridgeValidation = Read-FinalJsonOrNull "release-close-final-bridge-validation.json"
+$realOwnerProofConvergenceValidation = Read-FinalJsonOrNull "real-owner-proof-convergence-dashboard-validation.json"
 
 $inputSkeletonReady = [int](Get-PropertyOrDefault -Object $inputSkeletonValidation -Name "failedBlockerCount" -DefaultValue 999) -eq 0
 $githubCiAccepted = [bool](Get-PropertyOrDefault -Object $githubCiValidation -Name "ciEvidenceAccepted" -DefaultValue $false) -and [int](Get-PropertyOrDefault -Object $githubCiValidation -Name "failedBlockerCount" -DefaultValue 999) -eq 0
@@ -79,6 +72,7 @@ $bundleHashAccepted = [bool](Get-PropertyOrDefault -Object $bundleHashValidation
 $classificationHashAccepted = [bool](Get-PropertyOrDefault -Object $classificationHashValidation -Name "reviewAccepted" -DefaultValue $false) -and [int](Get-PropertyOrDefault -Object $classificationHashValidation -Name "failedBlockerCount" -DefaultValue 999) -eq 0
 $postPublishAccepted = [bool](Get-PropertyOrDefault -Object $postPublishBridgeValidation -Name "allPostPublishInputsAccepted" -DefaultValue $false) -and [int](Get-PropertyOrDefault -Object $postPublishBridgeValidation -Name "failedBlockerCount" -DefaultValue 999) -eq 0
 $releaseCloseAccepted = [bool](Get-PropertyOrDefault -Object $releaseCloseBridgeValidation -Name "allCloseInputsReady" -DefaultValue $false) -and [int](Get-PropertyOrDefault -Object $releaseCloseBridgeValidation -Name "failedBlockerCount" -DefaultValue 999) -eq 0
+$realOwnerProofConvergenceAccepted = [bool](Get-PropertyOrDefault -Object $realOwnerProofConvergenceValidation -Name "allRealOwnerProofInputsAccepted" -DefaultValue $false) -and [int](Get-PropertyOrDefault -Object $realOwnerProofConvergenceValidation -Name "failedBlockerCount" -DefaultValue 999) -eq 0
 
 $gates = @(
   New-PackGate -Id "final-owner-execution-input-skeleton" -Title "Final Owner execution input skeleton" -Ready $inputSkeletonReady -BlockedReason "input-skeleton-invalid" -SourceArtifacts @("artifacts/final-release/final-owner-execution-input-skeleton-validation.json")
@@ -87,6 +81,7 @@ $gates = @(
   New-PackGate -Id "classification-audit-hash-review" -Title "Classification audit hash review" -Ready $classificationHashAccepted -BlockedReason "owner-classification-audit-hash-review-required" -SourceArtifacts @("artifacts/final-release/classification-audit-hash-review-validation.json")
   New-PackGate -Id "post-publish-proof-validator-bridge" -Title "Post-publish proof validator bridge" -Ready $postPublishAccepted -BlockedReason "post-publish-proof-validator-bridge-not-accepted" -SourceArtifacts @("artifacts/final-release/post-publish-proof-validator-bridge-validation.json")
   New-PackGate -Id "release-close-final-bridge" -Title "Release close final bridge" -Ready $releaseCloseAccepted -BlockedReason "release-close-final-bridge-not-accepted" -SourceArtifacts @("artifacts/final-release/release-close-final-bridge-validation.json")
+  New-PackGate -Id "real-owner-proof-convergence-dashboard" -Title "Real Owner proof nine-lane convergence dashboard" -Ready $realOwnerProofConvergenceAccepted -BlockedReason "real-owner-proof-nine-lane-convergence-not-ready" -SourceArtifacts @("artifacts/final-release/real-owner-proof-convergence-dashboard-validation.json")
 )
 
 $readyGateCount = @($gates | Where-Object { [bool]$_.ready }).Count
@@ -132,7 +127,7 @@ $record = [pscustomobject]@{
   isRuntimeExecutionProof = $false
   isPostPublishProof = $false
   isReleaseCloseProof = $false
-  boundary = "Final Owner execution evidence pack aggregates final Owner input skeleton, GitHub CI evidence, bundle hash review, classification audit hash review, post-publish bridge, and release-close bridge for Owner review only. It rejects templates, dashboards, dry-runs, local feeds, ProjectReference, direct nupkg, queued workflows, local builds, local tests, hash-only records, validation-ready records, and staging shape-valid-only substitutes. It does not publish, does not use tokens, does not close the release issue, and is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push."
+  boundary = "Final Owner execution evidence pack aggregates final Owner input skeleton, GitHub CI evidence, bundle hash review, classification audit hash review, post-publish bridge, release-close bridge, and unified nine-lane real Owner proof convergence for Owner review only. It rejects templates, dashboards, dry-runs, local feeds, ProjectReference, direct nupkg, queued workflows, local builds, local tests, hash-only records, validation-ready records, staging shape-valid-only, sample-build-only, and mock-output substitutes. It does not publish, does not use tokens, does not close the release issue, and is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push."
 }
 
 Write-Utf8File -LiteralPath (Join-Path $OutputRoot "final-owner-execution-evidence-pack.json") -InputObject ($record | ConvertTo-Json -Depth 14)

@@ -19,7 +19,9 @@ $validationItems = @(
   New-OwnerValidationItem "record-kind" ([string](Get-PropertyOrDefault $record "recordKind" "") -eq "final-owner-close-decision-import") "blocker" "recordKind must match."
   New-OwnerValidationItem "default-blocked" (([string](Get-PropertyOrDefault $record "importState" "")).Contains("blocked") -or [bool](Get-PropertyOrDefault $record "finalCloseDecisionReady" $false)) "blocker" "Default final close decision import must remain blocked."
   New-OwnerValidationItem "non-runtime-proof" (-not [bool](Get-PropertyOrDefault $record "isRuntimeExecutionProof" $true) -and -not [bool](Get-PropertyOrDefault $record "isPostPublishProof" $true)) "blocker" "Final close decision cannot claim runtime/post-publish proof."
-  New-OwnerValidationItem "boundary" ($boundary.Contains("not runtime proof") -and $boundary.Contains("not post-publish proof") -and $boundary.Contains("not package push")) "blocker" "Boundary must preserve non-proof status."
+  New-OwnerValidationItem "no-close-authority" (-not [bool](Get-PropertyOrDefault $record "canCloseReleaseIssue" $true) -and -not [bool](Get-PropertyOrDefault $record "isReleaseCloseProof" $true) -and [bool](Get-PropertyOrDefault $record "issueCloseExecutionForbidden" $false)) "blocker" "Import admission must never execute or authorize release issue close."
+  New-OwnerValidationItem "required-field-contract" (@((Get-PropertyOrDefault $record "requiredFields" @())).Count -ge 20) "blocker" "Final close decision must expose the full Owner input contract."
+  New-OwnerValidationItem "boundary" ($boundary.Contains("not runtime proof") -and $boundary.Contains("not post-publish proof") -and $boundary.Contains("not release close proof") -and $boundary.Contains("does not close the release issue") -and $boundary.Contains("not package push")) "blocker" "Boundary must preserve non-proof and manual-close status."
 )
 $failed = @($validationItems | Where-Object { -not [bool]$_.passed -and [string]$_.severity -eq "blocker" })
 $state = if ($failed.Count -eq 0) { "final-owner-close-decision-validation-ready-non-proof" } else { "blocked-final-owner-close-decision-validation-invalid" }
