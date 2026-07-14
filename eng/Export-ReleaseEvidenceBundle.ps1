@@ -614,6 +614,10 @@ $ownerProofInputReadiness = Read-JsonOrNull "artifacts\final-release\owner-proof
 $ownerProofInputReadinessValidation = Read-JsonOrNull "artifacts\final-release\owner-proof-input-readiness-validation.json"
 $ownerRealPublishEvidenceAvailabilityLedger = Read-JsonOrNull "artifacts\final-release\owner-real-publish-evidence-availability-ledger.json"
 $ownerRealPublishEvidenceAvailabilityLedgerValidation = Read-JsonOrNull "artifacts\final-release\owner-real-publish-evidence-availability-ledger-validation.json"
+$ownerRealPublishEvidenceImportReadinessDashboard = Read-JsonOrNull "artifacts\final-release\owner-real-publish-evidence-import-readiness-dashboard.json"
+$ownerRealPublishEvidenceImportReadinessDashboardValidation = Read-JsonOrNull "artifacts\final-release\owner-real-publish-evidence-import-readiness-dashboard-validation.json"
+$releaseCloseFinalCandidateAuditPack = Read-JsonOrNull "artifacts\final-release\release-close-final-candidate-audit-pack.json"
+$releaseCloseFinalCandidateAuditPackValidation = Read-JsonOrNull "artifacts\final-release\release-close-final-candidate-audit-pack-validation.json"
 $releaseOwnerProofInputRecordValidation = Read-JsonOrNull "artifacts\final-release\release-owner-proof-input-record-validation.json"
 $releaseIssueCloseRecordValidation = Read-JsonOrNull "artifacts\final-release\release-issue-close-record-validation.json"
 $releaseClosePreflight = Read-JsonOrNull "artifacts\final-release\release-close-preflight.json"
@@ -2967,6 +2971,33 @@ $ownerRealPublishEvidenceAvailabilityLedgerOwnerActionRequired = [bool](Get-Prop
 $ownerRealPublishEvidenceAvailabilityLedgerPerformsPublish = [bool](Get-PropertyOrDefault -Object $ownerRealPublishEvidenceAvailabilityLedger -Name "performsPublish" -DefaultValue $false)
 $ownerRealPublishEvidenceAvailabilityLedgerCanPublishPublicly = [bool](Get-PropertyOrDefault -Object $ownerRealPublishEvidenceAvailabilityLedger -Name "canPublishPublicly" -DefaultValue $false)
 $ownerRealPublishEvidenceAvailabilityLedgerCanCloseReleaseIssue = [bool](Get-PropertyOrDefault -Object $ownerRealPublishEvidenceAvailabilityLedger -Name "canCloseReleaseIssue" -DefaultValue $false)
+$ownerRealPublishEvidenceImportReadinessDashboardState = [string](Get-PropertyOrDefault -Object $ownerRealPublishEvidenceImportReadinessDashboard -Name "dashboardState" -DefaultValue "missing-owner-real-publish-evidence-import-readiness-dashboard")
+$ownerRealPublishEvidenceImportReadinessDashboardValidationState = [string](Get-PropertyOrDefault -Object $ownerRealPublishEvidenceImportReadinessDashboardValidation -Name "validationState" -DefaultValue "missing-owner-real-publish-evidence-import-readiness-dashboard-validation")
+$ownerRealPublishEvidenceImportReadinessDashboardSlotCount = [int](Get-PropertyOrDefault -Object $ownerRealPublishEvidenceImportReadinessDashboard -Name "slotCount" -DefaultValue 0)
+$ownerRealPublishEvidenceImportReadinessDashboardBlockedSlotCount = [int](Get-PropertyOrDefault -Object $ownerRealPublishEvidenceImportReadinessDashboard -Name "blockedSlotCount" -DefaultValue 0)
+$ownerRealPublishEvidenceImportReadinessDashboardProofReadySlotCount = [int](Get-PropertyOrDefault -Object $ownerRealPublishEvidenceImportReadinessDashboard -Name "proofReadySlotCount" -DefaultValue 0)
+$ownerRealPublishEvidenceImportReadinessDashboardExpectedEvidenceFieldCount = [int](Get-PropertyOrDefault -Object $ownerRealPublishEvidenceImportReadinessDashboard -Name "expectedEvidenceFieldCount" -DefaultValue 0)
+$ownerRealPublishEvidenceImportReadinessDashboardValidatorScriptCount = [int](Get-PropertyOrDefault -Object $ownerRealPublishEvidenceImportReadinessDashboard -Name "validatorScriptCount" -DefaultValue 0)
+$ownerRealPublishEvidenceImportReadinessDashboardFailedBlockerCount = [int](Get-PropertyOrDefault -Object $ownerRealPublishEvidenceImportReadinessDashboardValidation -Name "failedBlockerCount" -DefaultValue -1)
+$ownerRealPublishEvidenceImportReadinessDashboardPerformsPublish = [bool](Get-PropertyOrDefault -Object $ownerRealPublishEvidenceImportReadinessDashboard -Name "performsPublish" -DefaultValue $false)
+$ownerRealPublishEvidenceImportReadinessDashboardCanPublishPublicly = [bool](Get-PropertyOrDefault -Object $ownerRealPublishEvidenceImportReadinessDashboard -Name "canPublishPublicly" -DefaultValue $false)
+$ownerRealPublishEvidenceImportReadinessDashboardCanCloseReleaseIssue = [bool](Get-PropertyOrDefault -Object $ownerRealPublishEvidenceImportReadinessDashboard -Name "canCloseReleaseIssue" -DefaultValue $false)
+$ownerRealPublishEvidenceImportReadinessDashboardIsRuntimeExecutionProof = [bool](Get-PropertyOrDefault -Object $ownerRealPublishEvidenceImportReadinessDashboard -Name "isRuntimeExecutionProof" -DefaultValue $false)
+$ownerRealPublishEvidenceImportReadinessDashboardIsPostPublishProof = [bool](Get-PropertyOrDefault -Object $ownerRealPublishEvidenceImportReadinessDashboard -Name "isPostPublishProof" -DefaultValue $false)
+$ownerRealPublishEvidenceImportReadinessDashboardIsReleaseCloseProof = [bool](Get-PropertyOrDefault -Object $ownerRealPublishEvidenceImportReadinessDashboard -Name "isReleaseCloseProof" -DefaultValue $false)
+$releaseCloseFinalCandidateAuditPackState = [string](Get-PropertyOrDefault -Object $releaseCloseFinalCandidateAuditPack -Name "auditState" -DefaultValue "missing-release-close-final-candidate-audit-pack")
+$releaseCloseFinalCandidateAuditPackValidationState = [string](Get-PropertyOrDefault -Object $releaseCloseFinalCandidateAuditPackValidation -Name "validationState" -DefaultValue "missing-release-close-final-candidate-audit-pack-validation")
+$releaseCloseFinalCandidateAuditPackCheckCount = [int](Get-PropertyOrDefault -Object $releaseCloseFinalCandidateAuditPack -Name "checkCount" -DefaultValue 0)
+$releaseCloseFinalCandidateAuditPackBlockedCheckCount = [int](Get-PropertyOrDefault -Object $releaseCloseFinalCandidateAuditPack -Name "blockedCheckCount" -DefaultValue 0)
+$releaseCloseFinalCandidateAuditPackPassedCheckCount = [int](Get-PropertyOrDefault -Object $releaseCloseFinalCandidateAuditPack -Name "passedCheckCount" -DefaultValue 0)
+$releaseCloseFinalCandidateAuditPackFailedBlockerCount = [int](Get-PropertyOrDefault -Object $releaseCloseFinalCandidateAuditPackValidation -Name "failedBlockerCount" -DefaultValue -1)
+$releaseCloseFinalCandidateAuditPackPerformsPublish = [bool](Get-PropertyOrDefault -Object $releaseCloseFinalCandidateAuditPack -Name "performsPublish" -DefaultValue $false)
+$releaseCloseFinalCandidateAuditPackCanPublishPublicly = [bool](Get-PropertyOrDefault -Object $releaseCloseFinalCandidateAuditPack -Name "canPublishPublicly" -DefaultValue $false)
+$releaseCloseFinalCandidateAuditPackCanCloseReleaseIssue = [bool](Get-PropertyOrDefault -Object $releaseCloseFinalCandidateAuditPack -Name "canCloseReleaseIssue" -DefaultValue $false)
+$releaseCloseFinalCandidateAuditPackIsRuntimeExecutionProof = [bool](Get-PropertyOrDefault -Object $releaseCloseFinalCandidateAuditPack -Name "isRuntimeExecutionProof" -DefaultValue $false)
+$releaseCloseFinalCandidateAuditPackIsPostPublishProof = [bool](Get-PropertyOrDefault -Object $releaseCloseFinalCandidateAuditPack -Name "isPostPublishProof" -DefaultValue $false)
+$releaseCloseFinalCandidateAuditPackIsReleaseCloseProof = [bool](Get-PropertyOrDefault -Object $releaseCloseFinalCandidateAuditPack -Name "isReleaseCloseProof" -DefaultValue $false)
+$releaseCloseFinalCandidateAuditPackIsReleaseCloseRecordProof = [bool](Get-PropertyOrDefault -Object $releaseCloseFinalCandidateAuditPack -Name "isReleaseCloseRecordProof" -DefaultValue $false)
 $releaseOwnerProofInputRecordValidationState = [string](Get-PropertyOrDefault -Object $releaseOwnerProofInputRecordValidation -Name "validationState" -DefaultValue "missing-release-owner-proof-input-record-validation")
 $releaseOwnerProofInputRecordProofClassification = [string](Get-PropertyOrDefault -Object $releaseOwnerProofInputRecordValidation -Name "proofClassification" -DefaultValue "missing-proof-classification")
 $releaseOwnerProofInputRecordCanPromote = [bool](Get-PropertyOrDefault -Object $releaseOwnerProofInputRecordValidation -Name "canPromoteOwnerProofInput" -DefaultValue $false)
@@ -3444,6 +3475,8 @@ $evidenceItems = @(
   New-EvidenceItem -Id "owner-proof-input-readiness" -Title "Owner proof input readiness" -Artifact "artifacts/final-release/owner-proof-input-readiness.json" -State "$ownerProofInputReadinessState; contractCount=$ownerProofInputReadinessContractCount; readyContractCount=$ownerProofInputReadinessReadyContractCount; blockedContractCount=$ownerProofInputReadinessBlockedContractCount; performsPublish=$ownerProofInputReadinessPerformsPublish; canPublishPublicly=$ownerProofInputReadinessCanPublishPublicly; canCloseReleaseIssue=$ownerProofInputReadinessCanCloseReleaseIssue" -Passed $false -Boundary "The owner proof input readiness artifact makes real owner inputs executable and auditable; it is not proof, publication approval, package push, or release-close approval."
   New-EvidenceItem -Id "owner-proof-input-readiness-validation" -Title "Owner proof input readiness validation" -Artifact "artifacts/final-release/owner-proof-input-readiness-validation.json" -State "$ownerProofInputReadinessValidationState; isValid=$ownerProofInputReadinessIsValid; failedBlockerCount=$ownerProofInputReadinessValidationFailedBlockerCount; performsPublish=$ownerProofInputReadinessValidationPerformsPublish; canPublishPublicly=$ownerProofInputReadinessValidationCanPublishPublicly; canCloseReleaseIssue=$ownerProofInputReadinessValidationCanCloseReleaseIssue" -Passed $ownerProofInputReadinessIsValid -Boundary "The owner proof input readiness validation locks the input contract schema only; it is not runtime proof, owner authorization, package push, or release-close approval."
   New-EvidenceItem -Id "owner-real-publish-evidence-availability-ledger" -Title "Owner real publish evidence availability ledger" -Artifact "artifacts/final-release/owner-real-publish-evidence-availability-ledger-validation.json" -State "$ownerRealPublishEvidenceAvailabilityLedgerValidationState; ledgerState=$ownerRealPublishEvidenceAvailabilityLedgerState; isValid=$ownerRealPublishEvidenceAvailabilityLedgerIsValid; slots=$ownerRealPublishEvidenceAvailabilityLedgerSlotCount; proofReadySlots=$ownerRealPublishEvidenceAvailabilityLedgerProofReadySlotCount; blockedSlots=$ownerRealPublishEvidenceAvailabilityLedgerBlockedSlotCount; missingRealOwnerInputs=$ownerRealPublishEvidenceAvailabilityLedgerMissingRealOwnerInputSlotCount; blockedValidationItems=$ownerRealPublishEvidenceAvailabilityLedgerBlockedValidationItemCount; failedBlockers=$ownerRealPublishEvidenceAvailabilityLedgerFailedBlockerCount; ownerActionRequired=$ownerRealPublishEvidenceAvailabilityLedgerOwnerActionRequired; performsPublish=$ownerRealPublishEvidenceAvailabilityLedgerPerformsPublish; canPublishPublicly=$ownerRealPublishEvidenceAvailabilityLedgerCanPublishPublicly; canCloseReleaseIssue=$ownerRealPublishEvidenceAvailabilityLedgerCanCloseReleaseIssue" -Passed $false -Boundary "The Owner real publish evidence availability ledger inventories missing and available Owner proof input files and validator readiness only; it is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push."
+  New-EvidenceItem -Id "owner-real-publish-evidence-import-readiness-dashboard" -Title "Owner real publish evidence import readiness dashboard" -Artifact "artifacts/final-release/owner-real-publish-evidence-import-readiness-dashboard-validation.json" -State "$ownerRealPublishEvidenceImportReadinessDashboardValidationState; dashboardState=$ownerRealPublishEvidenceImportReadinessDashboardState; slots=$ownerRealPublishEvidenceImportReadinessDashboardSlotCount; blockedSlots=$ownerRealPublishEvidenceImportReadinessDashboardBlockedSlotCount; proofReadySlots=$ownerRealPublishEvidenceImportReadinessDashboardProofReadySlotCount; expectedEvidenceFields=$ownerRealPublishEvidenceImportReadinessDashboardExpectedEvidenceFieldCount; validatorScripts=$ownerRealPublishEvidenceImportReadinessDashboardValidatorScriptCount; failedBlockers=$ownerRealPublishEvidenceImportReadinessDashboardFailedBlockerCount; performsPublish=$ownerRealPublishEvidenceImportReadinessDashboardPerformsPublish; canPublishPublicly=$ownerRealPublishEvidenceImportReadinessDashboardCanPublishPublicly; canCloseReleaseIssue=$ownerRealPublishEvidenceImportReadinessDashboardCanCloseReleaseIssue; isRuntimeExecutionProof=$ownerRealPublishEvidenceImportReadinessDashboardIsRuntimeExecutionProof; isPostPublishProof=$ownerRealPublishEvidenceImportReadinessDashboardIsPostPublishProof; isReleaseCloseProof=$ownerRealPublishEvidenceImportReadinessDashboardIsReleaseCloseProof" -Passed $false -Boundary "The Owner real publish evidence import readiness dashboard maps required Owner real evidence intake slots only; it is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push."
+  New-EvidenceItem -Id "release-close-final-candidate-audit-pack" -Title "Release close final candidate audit pack" -Artifact "artifacts/final-release/release-close-final-candidate-audit-pack-validation.json" -State "$releaseCloseFinalCandidateAuditPackValidationState; auditState=$releaseCloseFinalCandidateAuditPackState; checks=$releaseCloseFinalCandidateAuditPackCheckCount; blockedChecks=$releaseCloseFinalCandidateAuditPackBlockedCheckCount; passedChecks=$releaseCloseFinalCandidateAuditPackPassedCheckCount; failedBlockers=$releaseCloseFinalCandidateAuditPackFailedBlockerCount; performsPublish=$releaseCloseFinalCandidateAuditPackPerformsPublish; canPublishPublicly=$releaseCloseFinalCandidateAuditPackCanPublishPublicly; canCloseReleaseIssue=$releaseCloseFinalCandidateAuditPackCanCloseReleaseIssue; isRuntimeExecutionProof=$releaseCloseFinalCandidateAuditPackIsRuntimeExecutionProof; isPostPublishProof=$releaseCloseFinalCandidateAuditPackIsPostPublishProof; isReleaseCloseProof=$releaseCloseFinalCandidateAuditPackIsReleaseCloseProof; isReleaseCloseRecordProof=$releaseCloseFinalCandidateAuditPackIsReleaseCloseRecordProof" -Passed $false -Boundary "The release close final candidate audit pack is a blocked close-candidate audit over real Owner evidence requirements only; it is not runtime proof, not post-publish proof, not publish approval, not release close approval, not release close record proof, and not package push."
   New-EvidenceItem -Id "release-owner-proof-input-record-validation" -Title "Release owner proof input record validation" -Artifact "artifacts/final-release/release-owner-proof-input-record-validation.json" -State "$releaseOwnerProofInputRecordValidationState; proofClassification=$releaseOwnerProofInputRecordProofClassification; canPromoteOwnerProofInput=$releaseOwnerProofInputRecordCanPromote; failedValidationItemCount=$releaseOwnerProofInputRecordFailedValidationItemCount; performsPublish=$releaseOwnerProofInputRecordPerformsPublish; canPublishPublicly=$releaseOwnerProofInputRecordCanPublishPublicly; canCloseReleaseIssue=$releaseOwnerProofInputRecordCanCloseReleaseIssue" -Passed $releaseOwnerProofInputRecordCanPromote -Boundary "The owner proof input record validator checks concrete owner-filled selected-channel, package hash, clean-consumer, runtime log, and host metadata fields. Template-only, schema-only, managed-readiness, local feed, ProjectReference, and missing-log-hash records remain blocked."
   New-EvidenceItem -Id "release-issue-close-record-validation" -Title "Release issue close record validation" -Artifact "artifacts/final-release/release-issue-close-record-validation.json" -State "$releaseIssueCloseRecordValidationState; proofClassification=$releaseIssueCloseRecordProofClassification; canPromoteReleaseIssueCloseRecord=$releaseIssueCloseRecordCanPromote; failedValidationItemCount=$releaseIssueCloseRecordFailedValidationItemCount; performsPublish=$releaseIssueCloseRecordPerformsPublish; canPublishPublicly=$releaseIssueCloseRecordCanPublishPublicly; canCloseReleaseIssue=$releaseIssueCloseRecordCanCloseReleaseIssue" -Passed $releaseIssueCloseRecordCanPromote -Boundary "The release issue close record validator checks the final owner close decision against real post-publish proof, release close preflight, stale claim audit, evidence bundle hash, and rollback plan. Template-only, schema-only, preflight-only, missing owner decision, and mismatched bundle hash records remain blocked."
   New-EvidenceItem -Id "release-candidate-final-evidence-freeze" -Title "Release candidate final evidence freeze" -Artifact "artifacts/final-release/release-candidate-final-evidence-freeze.json" -State "$releaseCandidateFinalEvidenceFreezeState; blockerCount=$releaseCandidateFinalEvidenceFreezeBlockerCount; performsPublish=$releaseCandidateFinalEvidenceFreezePerformsPublish; canPublishPublicly=$releaseCandidateFinalEvidenceFreezeCanPublishPublicly; canCloseReleaseIssue=$releaseCandidateFinalEvidenceFreezeCanCloseReleaseIssue" -Passed $false -Boundary "The final evidence freeze is a blocked release snapshot only; it cannot substitute owner authorization, package-consumer-runtime, real-model-runtime, Linux runner, or post-publish verification proof."
@@ -5322,6 +5355,33 @@ $record = [pscustomobject]@{
   ownerRealPublishEvidenceAvailabilityLedgerPerformsPublish = $ownerRealPublishEvidenceAvailabilityLedgerPerformsPublish
   ownerRealPublishEvidenceAvailabilityLedgerCanPublishPublicly = $ownerRealPublishEvidenceAvailabilityLedgerCanPublishPublicly
   ownerRealPublishEvidenceAvailabilityLedgerCanCloseReleaseIssue = $ownerRealPublishEvidenceAvailabilityLedgerCanCloseReleaseIssue
+  ownerRealPublishEvidenceImportReadinessDashboardState = $ownerRealPublishEvidenceImportReadinessDashboardState
+  ownerRealPublishEvidenceImportReadinessDashboardValidationState = $ownerRealPublishEvidenceImportReadinessDashboardValidationState
+  ownerRealPublishEvidenceImportReadinessDashboardSlotCount = $ownerRealPublishEvidenceImportReadinessDashboardSlotCount
+  ownerRealPublishEvidenceImportReadinessDashboardBlockedSlotCount = $ownerRealPublishEvidenceImportReadinessDashboardBlockedSlotCount
+  ownerRealPublishEvidenceImportReadinessDashboardProofReadySlotCount = $ownerRealPublishEvidenceImportReadinessDashboardProofReadySlotCount
+  ownerRealPublishEvidenceImportReadinessDashboardExpectedEvidenceFieldCount = $ownerRealPublishEvidenceImportReadinessDashboardExpectedEvidenceFieldCount
+  ownerRealPublishEvidenceImportReadinessDashboardValidatorScriptCount = $ownerRealPublishEvidenceImportReadinessDashboardValidatorScriptCount
+  ownerRealPublishEvidenceImportReadinessDashboardFailedBlockerCount = $ownerRealPublishEvidenceImportReadinessDashboardFailedBlockerCount
+  ownerRealPublishEvidenceImportReadinessDashboardPerformsPublish = $ownerRealPublishEvidenceImportReadinessDashboardPerformsPublish
+  ownerRealPublishEvidenceImportReadinessDashboardCanPublishPublicly = $ownerRealPublishEvidenceImportReadinessDashboardCanPublishPublicly
+  ownerRealPublishEvidenceImportReadinessDashboardCanCloseReleaseIssue = $ownerRealPublishEvidenceImportReadinessDashboardCanCloseReleaseIssue
+  ownerRealPublishEvidenceImportReadinessDashboardIsRuntimeExecutionProof = $ownerRealPublishEvidenceImportReadinessDashboardIsRuntimeExecutionProof
+  ownerRealPublishEvidenceImportReadinessDashboardIsPostPublishProof = $ownerRealPublishEvidenceImportReadinessDashboardIsPostPublishProof
+  ownerRealPublishEvidenceImportReadinessDashboardIsReleaseCloseProof = $ownerRealPublishEvidenceImportReadinessDashboardIsReleaseCloseProof
+  releaseCloseFinalCandidateAuditPackState = $releaseCloseFinalCandidateAuditPackState
+  releaseCloseFinalCandidateAuditPackValidationState = $releaseCloseFinalCandidateAuditPackValidationState
+  releaseCloseFinalCandidateAuditPackCheckCount = $releaseCloseFinalCandidateAuditPackCheckCount
+  releaseCloseFinalCandidateAuditPackBlockedCheckCount = $releaseCloseFinalCandidateAuditPackBlockedCheckCount
+  releaseCloseFinalCandidateAuditPackPassedCheckCount = $releaseCloseFinalCandidateAuditPackPassedCheckCount
+  releaseCloseFinalCandidateAuditPackFailedBlockerCount = $releaseCloseFinalCandidateAuditPackFailedBlockerCount
+  releaseCloseFinalCandidateAuditPackPerformsPublish = $releaseCloseFinalCandidateAuditPackPerformsPublish
+  releaseCloseFinalCandidateAuditPackCanPublishPublicly = $releaseCloseFinalCandidateAuditPackCanPublishPublicly
+  releaseCloseFinalCandidateAuditPackCanCloseReleaseIssue = $releaseCloseFinalCandidateAuditPackCanCloseReleaseIssue
+  releaseCloseFinalCandidateAuditPackIsRuntimeExecutionProof = $releaseCloseFinalCandidateAuditPackIsRuntimeExecutionProof
+  releaseCloseFinalCandidateAuditPackIsPostPublishProof = $releaseCloseFinalCandidateAuditPackIsPostPublishProof
+  releaseCloseFinalCandidateAuditPackIsReleaseCloseProof = $releaseCloseFinalCandidateAuditPackIsReleaseCloseProof
+  releaseCloseFinalCandidateAuditPackIsReleaseCloseRecordProof = $releaseCloseFinalCandidateAuditPackIsReleaseCloseRecordProof
   releaseOwnerProofInputRecordValidationState = $releaseOwnerProofInputRecordValidationState
   releaseOwnerProofInputRecordProofClassification = $releaseOwnerProofInputRecordProofClassification
   releaseOwnerProofInputRecordCanPromote = $releaseOwnerProofInputRecordCanPromote
@@ -5524,6 +5584,8 @@ $record = [pscustomobject]@{
     "owner real evidence final intake checklist"
     "final intake checklist remains blocked until real Owner evidence"
     "post-publish docs and samples final landing pack"
+    "owner real publish evidence import readiness dashboard"
+    "release close final candidate audit pack"
   )
   evidenceItems = $evidenceItems
   sourceEvidence = @(
@@ -6202,6 +6264,14 @@ $record = [pscustomobject]@{
     "artifacts/final-release/owner-real-publish-evidence-availability-ledger.md",
     "artifacts/final-release/owner-real-publish-evidence-availability-ledger-validation.json",
     "artifacts/final-release/owner-real-publish-evidence-availability-ledger-validation.md",
+    "artifacts/final-release/owner-real-publish-evidence-import-readiness-dashboard.json",
+    "artifacts/final-release/owner-real-publish-evidence-import-readiness-dashboard.md",
+    "artifacts/final-release/owner-real-publish-evidence-import-readiness-dashboard-validation.json",
+    "artifacts/final-release/owner-real-publish-evidence-import-readiness-dashboard-validation.md",
+    "artifacts/final-release/release-close-final-candidate-audit-pack.json",
+    "artifacts/final-release/release-close-final-candidate-audit-pack.md",
+    "artifacts/final-release/release-close-final-candidate-audit-pack-validation.json",
+    "artifacts/final-release/release-close-final-candidate-audit-pack-validation.md",
     "artifacts/final-release/release-owner-proof-input-record-template.json",
     "artifacts/final-release/release-owner-proof-input-record-template.md",
     "artifacts/final-release/release-owner-proof-input-record-validation.json",
@@ -6937,6 +7007,14 @@ $record = [pscustomobject]@{
     "artifacts/final-release/owner-real-publish-evidence-availability-ledger.md",
     "artifacts/final-release/owner-real-publish-evidence-availability-ledger-validation.json",
     "artifacts/final-release/owner-real-publish-evidence-availability-ledger-validation.md",
+    "artifacts/final-release/owner-real-publish-evidence-import-readiness-dashboard.json",
+    "artifacts/final-release/owner-real-publish-evidence-import-readiness-dashboard.md",
+    "artifacts/final-release/owner-real-publish-evidence-import-readiness-dashboard-validation.json",
+    "artifacts/final-release/owner-real-publish-evidence-import-readiness-dashboard-validation.md",
+    "artifacts/final-release/release-close-final-candidate-audit-pack.json",
+    "artifacts/final-release/release-close-final-candidate-audit-pack.md",
+    "artifacts/final-release/release-close-final-candidate-audit-pack-validation.json",
+    "artifacts/final-release/release-close-final-candidate-audit-pack-validation.md",
     "artifacts/final-release/release-owner-proof-input-record-template.json",
     "artifacts/final-release/release-owner-proof-input-record-template.md",
     "artifacts/final-release/release-owner-proof-input-record-validation.json",
