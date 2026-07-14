@@ -28,7 +28,7 @@ public sealed class OwnerPostPublishRealInputCandidateTests
         Assert.Equal("owner-post-publish-docs-article-sample-real-input-template", template.GetProperty("recordKind").GetString());
         Assert.Equal("blocked-owner-post-publish-real-input-template", template.GetProperty("templateState").GetString());
         Assert.Equal(5, template.GetProperty("laneCount").GetInt32());
-        Assert.True(template.GetProperty("requiredFieldCount").GetInt32() >= 39);
+        Assert.True(template.GetProperty("requiredFieldCount").GetInt32() >= 52);
         Assert.Equal(template.GetProperty("requiredFieldCount").GetInt32(), template.GetProperty("placeholderFieldCount").GetInt32());
         AssertFalseProofPublishCloseFlags(template);
 
@@ -46,22 +46,50 @@ public sealed class OwnerPostPublishRealInputCandidateTests
         Assert.False(import.GetProperty("realOwnerInputPresent").GetBoolean());
         Assert.False(import.GetProperty("candidateReady").GetBoolean());
         Assert.Equal(0, import.GetProperty("readyFieldCount").GetInt32());
-        Assert.True(import.GetProperty("blockedFieldCount").GetInt32() >= 39);
-        Assert.True(import.GetProperty("placeholderFieldCount").GetInt32() >= 39);
+        Assert.True(import.GetProperty("blockedFieldCount").GetInt32() >= 52);
+        Assert.True(import.GetProperty("placeholderFieldCount").GetInt32() >= 52);
         AssertFalseProofPublishCloseFlags(import);
 
         using JsonDocument importValidationDocument = ReadFinalReleaseJson("owner-post-publish-docs-article-sample-real-input-import-validation.json");
         JsonElement importValidation = importValidationDocument.RootElement;
         Assert.Equal("owner-post-publish-docs-article-sample-real-input-import-ready-non-proof", importValidation.GetProperty("validationState").GetString());
         Assert.Equal(0, importValidation.GetProperty("failedBlockerCount").GetInt32());
-        Assert.True(importValidation.GetProperty("blockedFieldCount").GetInt32() >= 39);
+        Assert.True(importValidation.GetProperty("blockedFieldCount").GetInt32() >= 52);
+        Assert.True(importValidation.GetProperty("articleProofRecordCount").GetInt32() >= 1);
+        Assert.Equal(0, importValidation.GetProperty("articleProofReadyRecordCount").GetInt32());
+        Assert.False(importValidation.GetProperty("articleProofRecordsReady").GetBoolean());
         AssertFalseProofPublishCloseFlags(importValidation);
 
         AssertCandidate("public-package-url-hash-verification-candidate", "blocked-public-package-url-hash-owner-proof-required", 10);
-        AssertCandidate("external-clean-consumer-post-publish-candidate", "blocked-external-clean-consumer-post-publish-owner-proof-required", 6);
-        AssertCandidate("yolovision-real-model-post-publish-candidate", "blocked-yolovision-real-model-owner-proof-required", 9);
-        AssertCandidate("article-publication-proof-candidate", "blocked-article-publication-owner-proof-required", 7);
-        AssertCandidate("release-issue-close-material-candidate", "blocked-release-issue-close-material-owner-proof-required", 7);
+        AssertCandidate("external-clean-consumer-post-publish-candidate", "blocked-external-clean-consumer-post-publish-owner-proof-required", 9);
+        AssertCandidate("yolovision-real-model-post-publish-candidate", "blocked-yolovision-real-model-owner-proof-required", 14);
+        AssertCandidate("article-publication-proof-candidate", "blocked-article-publication-owner-proof-required", 10);
+        AssertCandidate("release-issue-close-material-candidate", "blocked-release-issue-close-material-owner-proof-required", 9);
+
+        using JsonDocument externalCandidateDocument = ReadFinalReleaseJson("external-clean-consumer-post-publish-candidate.json");
+        JsonElement externalCandidate = externalCandidateDocument.RootElement;
+        Assert.True(externalCandidate.GetProperty("rejectsLocalFeedProjectReferenceAndDirectNupkg").GetBoolean());
+        Assert.False(externalCandidate.GetProperty("externalWorkspacePathReady").GetBoolean());
+        Assert.True(externalCandidate.GetProperty("externalWorkspacePathValidationReasons").GetArrayLength() > 0);
+
+        using JsonDocument yoloCandidateDocument = ReadFinalReleaseJson("yolovision-real-model-post-publish-candidate.json");
+        JsonElement yoloCandidate = yoloCandidateDocument.RootElement;
+        Assert.True(yoloCandidate.GetProperty("rejectsReadinessTutorialMatrixArtifacts").GetBoolean());
+        Assert.True(yoloCandidate.GetProperty("yoloVisionHashFieldCount").GetInt32() >= 9);
+        Assert.False(yoloCandidate.GetProperty("realModelExecutionConfirmationReady").GetBoolean());
+
+        using JsonDocument articleCandidateDocument = ReadFinalReleaseJson("article-publication-proof-candidate.json");
+        JsonElement articleCandidate = articleCandidateDocument.RootElement;
+        Assert.True(articleCandidate.GetProperty("supportsMultipleArticleProofRecords").GetBoolean());
+        Assert.True(articleCandidate.GetProperty("minimumArticleProofRecordCount").GetInt32() >= 1);
+        Assert.Equal(0, articleCandidate.GetProperty("articleProofReadyRecordCount").GetInt32());
+        Assert.False(articleCandidate.GetProperty("articleProofRecordsReady").GetBoolean());
+
+        using JsonDocument closeCandidateDocument = ReadFinalReleaseJson("release-issue-close-material-candidate.json");
+        JsonElement closeCandidate = closeCandidateDocument.RootElement;
+        Assert.True(closeCandidate.GetProperty("manualCloseReviewOnly").GetBoolean());
+        Assert.False(closeCandidate.GetProperty("ownerCloseDecisionReady").GetBoolean());
+        Assert.False(closeCandidate.GetProperty("manualCloseReviewConfirmationReady").GetBoolean());
     }
 
     [Fact]
@@ -74,15 +102,21 @@ public sealed class OwnerPostPublishRealInputCandidateTests
         using JsonDocument evidenceDocument = ReadFinalReleaseJson("release-evidence-bundle.json");
         JsonElement evidence = evidenceDocument.RootElement;
         Assert.Equal("owner-post-publish-docs-article-sample-real-input-template-ready-non-proof", evidence.GetProperty("ownerPostPublishRealInputTemplateValidationState").GetString());
-        Assert.True(evidence.GetProperty("ownerPostPublishRealInputTemplateRequiredFieldCount").GetInt32() >= 39);
+        Assert.True(evidence.GetProperty("ownerPostPublishRealInputTemplateRequiredFieldCount").GetInt32() >= 52);
         Assert.Equal("owner-post-publish-docs-article-sample-real-input-import-ready-non-proof", evidence.GetProperty("ownerPostPublishRealInputImportValidationState").GetString());
-        Assert.True(evidence.GetProperty("ownerPostPublishRealInputImportBlockedFieldCount").GetInt32() >= 39);
+        Assert.True(evidence.GetProperty("ownerPostPublishRealInputImportBlockedFieldCount").GetInt32() >= 52);
+        Assert.False(evidence.GetProperty("ownerPostPublishRealInputImportArticleProofRecordsReady").GetBoolean());
         Assert.Equal("public-package-url-hash-verification-candidate-ready-non-proof", evidence.GetProperty("publicPackageUrlHashVerificationCandidateValidationState").GetString());
         Assert.Equal("external-clean-consumer-post-publish-candidate-ready-non-proof", evidence.GetProperty("externalCleanConsumerPostPublishCandidateValidationState").GetString());
+        Assert.True(evidence.GetProperty("externalCleanConsumerPostPublishCandidateRejectsLocalSubstitutes").GetBoolean());
         Assert.Equal("yolovision-real-model-post-publish-candidate-ready-non-proof", evidence.GetProperty("yoloVisionRealModelPostPublishCandidateValidationState").GetString());
+        Assert.True(evidence.GetProperty("yoloVisionRealModelPostPublishCandidateYoloVisionHashFieldCount").GetInt32() >= 9);
         Assert.Equal("article-publication-proof-candidate-ready-non-proof", evidence.GetProperty("articlePublicationProofCandidateValidationState").GetString());
+        Assert.True(evidence.GetProperty("articlePublicationProofCandidateSupportsMultipleArticleProofRecords").GetBoolean());
+        Assert.Equal(0, evidence.GetProperty("articlePublicationProofCandidateArticleProofReadyRecordCount").GetInt32());
         Assert.Equal("release-issue-close-material-candidate-ready-non-proof", evidence.GetProperty("releaseIssueCloseMaterialCandidateValidationState").GetString());
         Assert.False(evidence.GetProperty("releaseIssueCloseMaterialCandidateFinalBridgePassed").GetBoolean());
+        Assert.True(evidence.GetProperty("releaseIssueCloseMaterialCandidateManualCloseReviewOnly").GetBoolean());
 
         string[] sourceArtifacts = evidence.GetProperty("sourceArtifacts").EnumerateArray().Select(static item => item.GetString()!).ToArray();
         foreach (string fileName in new[]

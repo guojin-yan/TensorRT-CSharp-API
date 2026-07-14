@@ -26,6 +26,7 @@ $items.Add((New-OwnerValidationItem "placeholder-tracking" ([int]$record.placeho
 $items.Add((New-OwnerValidationItem "template-rejected" ((-not [bool]$record.realOwnerInputPresent) -or [bool]$record.inputPathForbidden -or [int]$record.placeholderFieldCount -gt 0) "blocker" "Template/missing Owner input must be rejected as proof.")) | Out-Null
 $items.Add((New-OwnerValidationItem "non-proof-flags" (Assert-OwnerPostPublishFalseFlags -Record $record) "blocker" "Import must not publish, close, or promote proof.")) | Out-Null
 $items.Add((New-OwnerValidationItem "analysis-present" ($null -ne $analysis -and [int](Get-PropertyOrDefault -Object $analysis -Name "fieldResultCount" -DefaultValue 0) -eq [int]$record.fieldResultCount) "blocker" "Import must include reusable candidate analysis.")) | Out-Null
+$items.Add((New-OwnerValidationItem "multi-article-proof-analysis" ($null -ne $analysis -and [int](Get-PropertyOrDefault -Object $analysis -Name "articleProofRecordCount" -DefaultValue 0) -ge 1 -and [int](Get-PropertyOrDefault -Object $analysis -Name "articleProofReadyRecordCount" -DefaultValue 0) -eq 0 -and -not [bool](Get-PropertyOrDefault -Object $analysis -Name "articleProofRecordsReady" -DefaultValue $true)) "blocker" "Import must expose multi-article proof analysis and keep template records non-ready.")) | Out-Null
 
 $failedBlockers = @($items.ToArray() | Where-Object { -not [bool]$_.passed -and [string]$_.severity -eq "blocker" })
 $state = if ($failedBlockers.Count -eq 0) { "owner-post-publish-docs-article-sample-real-input-import-ready-non-proof" } else { "invalid-owner-post-publish-docs-article-sample-real-input-import" }
@@ -43,6 +44,10 @@ $validation = [pscustomobject]@{
   placeholderFieldCount = [int]$record.placeholderFieldCount
   invalidFormatFieldCount = [int]$record.invalidFormatFieldCount
   forbiddenSubstituteFieldCount = [int]$record.forbiddenSubstituteFieldCount
+  articleProofRecordCount = [int](Get-PropertyOrDefault -Object $analysis -Name "articleProofRecordCount" -DefaultValue 0)
+  articleProofReadyRecordCount = [int](Get-PropertyOrDefault -Object $analysis -Name "articleProofReadyRecordCount" -DefaultValue 0)
+  articleProofRecordFailedCount = [int](Get-PropertyOrDefault -Object $analysis -Name "articleProofRecordFailedCount" -DefaultValue 0)
+  articleProofRecordsReady = [bool](Get-PropertyOrDefault -Object $analysis -Name "articleProofRecordsReady" -DefaultValue $false)
   failedBlockerCount = $failedBlockers.Count
   validationItems = @($items.ToArray())
   ownerActionRequired = $true
@@ -69,6 +74,7 @@ Write-Utf8File -LiteralPath $mdPath -InputObject @(
   "- fieldResultCount: ``$($validation.fieldResultCount)``",
   "- blockedFieldCount: ``$($validation.blockedFieldCount)``",
   "- placeholderFieldCount: ``$($validation.placeholderFieldCount)``",
+  "- articleProofRecords: ``$($validation.articleProofReadyRecordCount)/$($validation.articleProofRecordCount)``",
   "- failedBlockerCount: ``$($validation.failedBlockerCount)``",
   "- canCloseReleaseIssue: ``False``",
   "",

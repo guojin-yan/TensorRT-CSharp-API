@@ -10,10 +10,10 @@ public sealed class OwnerPostPublishProofValidatorTests
     private static readonly (string Id, string BlockedState, int MinimumFields)[] Validators =
     {
         ("public-package-url-hash-proof-validator", "blocked-public-package-url-hash-real-owner-proof-required", 10),
-        ("external-clean-consumer-post-publish-proof-validator", "blocked-external-clean-consumer-real-owner-proof-required", 6),
-        ("yolovision-real-model-post-publish-proof-validator", "blocked-yolovision-real-model-real-owner-proof-required", 9),
-        ("article-publication-proof-validator", "blocked-article-publication-real-owner-proof-required", 7),
-        ("release-close-final-bridge-proof-validator", "blocked-release-close-final-bridge-real-owner-proof-required", 7),
+        ("external-clean-consumer-post-publish-proof-validator", "blocked-external-clean-consumer-real-owner-proof-required", 9),
+        ("yolovision-real-model-post-publish-proof-validator", "blocked-yolovision-real-model-real-owner-proof-required", 14),
+        ("article-publication-proof-validator", "blocked-article-publication-real-owner-proof-required", 10),
+        ("release-close-final-bridge-proof-validator", "blocked-release-close-final-bridge-real-owner-proof-required", 9),
     };
 
     [Fact]
@@ -52,6 +52,26 @@ public sealed class OwnerPostPublishProofValidatorTests
         JsonElement closeValidator = closeDocument.RootElement;
         Assert.Equal(4, closeValidator.GetProperty("dependencyRequiredCount").GetInt32());
         Assert.Equal(0, closeValidator.GetProperty("dependencyAcceptedCount").GetInt32());
+
+        using JsonDocument externalDocument = ReadFinalReleaseJson("external-clean-consumer-post-publish-proof-validator.json");
+        JsonElement external = externalDocument.RootElement;
+        Assert.True(external.GetProperty("rejectsLocalFeedProjectReferenceAndDirectNupkg").GetBoolean());
+        Assert.False(external.GetProperty("externalWorkspacePathReady").GetBoolean());
+
+        using JsonDocument yoloDocument = ReadFinalReleaseJson("yolovision-real-model-post-publish-proof-validator.json");
+        JsonElement yolo = yoloDocument.RootElement;
+        Assert.True(yolo.GetProperty("rejectsReadinessTutorialMatrixArtifacts").GetBoolean());
+        Assert.True(yolo.GetProperty("yoloVisionHashFieldCount").GetInt32() >= 9);
+        Assert.False(yolo.GetProperty("realModelExecutionConfirmationReady").GetBoolean());
+
+        using JsonDocument articleDocument = ReadFinalReleaseJson("article-publication-proof-validator.json");
+        JsonElement article = articleDocument.RootElement;
+        Assert.True(article.GetProperty("supportsMultipleArticleProofRecords").GetBoolean());
+        Assert.Equal(0, article.GetProperty("articleProofReadyRecordCount").GetInt32());
+        Assert.False(article.GetProperty("articleProofRecordsReady").GetBoolean());
+
+        Assert.True(closeValidator.GetProperty("manualCloseReviewOnly").GetBoolean());
+        Assert.False(closeValidator.GetProperty("ownerCloseDecisionReady").GetBoolean());
     }
 
     [Fact]
