@@ -206,6 +206,7 @@ $mustRemainFailedIds = @(
   "post-publish-clean-consumer-result-convergence",
   "strict-close-ready-convergence-dashboard",
   "public-publish-final-owner-execution-pack",
+  "owner-public-publish-execution-final-intake-pack",
   "owner-public-publish-authorization-input",
   "public-publish-result-authorization-convergence-gate",
   "public-publish-command-cross-check",
@@ -406,6 +407,7 @@ $requiredNonProofIds = @(
   "post-publish-clean-consumer-result-convergence",
   "strict-close-ready-convergence-dashboard",
   "public-publish-final-owner-execution-pack",
+  "owner-public-publish-execution-final-intake-pack",
   "owner-public-publish-authorization-input",
   "public-publish-result-authorization-convergence-gate",
   "public-publish-command-cross-check",
@@ -605,6 +607,7 @@ $requiredNonSubstituteMarkers = @(
   "post-publish docs and samples final landing pack",
   "owner real publish evidence import readiness dashboard",
   "release close final candidate audit pack",
+  "owner public publish execution final intake pack",
   "design-gate-required planning input",
   "keep-deferred boundary disclosure"
 )
