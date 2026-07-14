@@ -41,6 +41,27 @@ function New-ValidationItem {
   [pscustomobject]@{ id = $Id; passed = $Passed; severity = $Severity; detail = $Detail }
 }
 
+function Get-LaneById {
+  param([AllowNull()][object[]]$Lanes, [string]$Id)
+  foreach ($lane in @($Lanes)) {
+    if ([string](Get-PropertyOrDefault -Object $lane -Name "laneId" -DefaultValue "") -eq $Id) {
+      return $lane
+    }
+  }
+
+  return $null
+}
+
+function Sum-IntProperty {
+  param([AllowNull()][object[]]$Items, [string]$Name)
+  $total = 0
+  foreach ($item in @($Items)) {
+    $total += [int](Get-PropertyOrDefault -Object $item -Name $Name -DefaultValue 0)
+  }
+
+  return $total
+}
+
 $resolvedInputPath = Resolve-RepositoryPath -Path $InputPath
 if (-not (Test-Path -LiteralPath $resolvedInputPath -PathType Leaf)) {
   throw "Final public release closure bridge not found: $resolvedInputPath"
@@ -102,6 +123,7 @@ $requiredCheckIds = @(
   "public-download-links-source-proofs",
   "public-package-download-owner-execution-pack-present",
   "public-package-download-owner-execution-pack-blocked",
+  "public-package-download-owner-execution-pack-field-surface-present",
   "public-package-download-owner-execution-pack-safe",
   "owner-and-public-download-package-url-match",
   "owner-and-public-download-version-match",
@@ -113,6 +135,7 @@ $requiredCheckIds = @(
   "post-publish-links-source-proofs",
   "post-publish-user-verification-pack-present",
   "post-publish-user-verification-pack-blocked",
+  "post-publish-user-verification-pack-field-surface-present",
   "post-publish-user-verification-pack-safe",
   "post-publish-owner-package-url-match",
   "post-publish-owner-package-version-match",
@@ -153,6 +176,32 @@ $preReleaseSummaryPresent = $null -ne $closureProofSourceSummary -and
   $closureProofSourceSummary.PSObject.Properties.Name -contains "preReleaseReadinessMatrixState" -and
   $closureProofSourceSummary.PSObject.Properties.Name -contains "preReleaseLaneMetadataReady" -and
   $closureProofSourceSummary.PSObject.Properties.Name -contains "preReleasePromoteFlagsSafe"
+$ownerFieldSurfaceLanes = @($lanes | Where-Object { [int](Get-PropertyOrDefault -Object $_ -Name "requiredOwnerFieldCount" -DefaultValue 0) -gt 0 })
+$requiredOwnerFieldCountFromLanes = Sum-IntProperty -Items $ownerFieldSurfaceLanes -Name "requiredOwnerFieldCount"
+$blockedRequiredOwnerFieldCountFromLanes = Sum-IntProperty -Items $ownerFieldSurfaceLanes -Name "blockedRequiredOwnerFieldCount"
+$readyOwnerFieldCountFromLanes = Sum-IntProperty -Items $ownerFieldSurfaceLanes -Name "readyOwnerFieldCount"
+$rejectedSubstituteCountFromLanes = Sum-IntProperty -Items $ownerFieldSurfaceLanes -Name "rejectedSubstituteCount"
+$sourceReadinessSignalCountFromLanes = Sum-IntProperty -Items $ownerFieldSurfaceLanes -Name "sourceReadinessSignalCount"
+$publicPackageDownloadOwnerExecutionLane = Get-LaneById -Lanes $lanes -Id "public-package-download-owner-execution-pack"
+$postPublishUserVerificationLane = Get-LaneById -Lanes $lanes -Id "post-publish-user-verification-pack"
+$publicPackageDownloadOwnerExecutionLaneFieldSurface =
+  $null -ne $publicPackageDownloadOwnerExecutionLane -and
+  [int](Get-PropertyOrDefault -Object $publicPackageDownloadOwnerExecutionLane -Name "requiredOwnerFieldCount" -DefaultValue 0) -ge 20 -and
+  [int](Get-PropertyOrDefault -Object $publicPackageDownloadOwnerExecutionLane -Name "blockedRequiredOwnerFieldCount" -DefaultValue 0) -eq [int](Get-PropertyOrDefault -Object $publicPackageDownloadOwnerExecutionLane -Name "requiredOwnerFieldCount" -DefaultValue 0) -and
+  [int](Get-PropertyOrDefault -Object $publicPackageDownloadOwnerExecutionLane -Name "rejectedSubstituteCount" -DefaultValue 0) -ge 8 -and
+  [int](Get-PropertyOrDefault -Object $publicPackageDownloadOwnerExecutionLane -Name "sourceReadinessSignalCount" -DefaultValue 0) -ge 6
+$postPublishUserVerificationLaneFieldSurface =
+  $null -ne $postPublishUserVerificationLane -and
+  [int](Get-PropertyOrDefault -Object $postPublishUserVerificationLane -Name "requiredOwnerFieldCount" -DefaultValue 0) -ge 19 -and
+  [int](Get-PropertyOrDefault -Object $postPublishUserVerificationLane -Name "blockedRequiredOwnerFieldCount" -DefaultValue 0) -eq [int](Get-PropertyOrDefault -Object $postPublishUserVerificationLane -Name "requiredOwnerFieldCount" -DefaultValue 0) -and
+  [int](Get-PropertyOrDefault -Object $postPublishUserVerificationLane -Name "rejectedSubstituteCount" -DefaultValue 0) -ge 8 -and
+  [int](Get-PropertyOrDefault -Object $postPublishUserVerificationLane -Name "sourceReadinessSignalCount" -DefaultValue 0) -ge 9
+$topLevelOwnerFieldSurfaceConsistent =
+  [int](Get-PropertyOrDefault -Object $record -Name "requiredOwnerFieldCount" -DefaultValue -1) -eq $requiredOwnerFieldCountFromLanes -and
+  [int](Get-PropertyOrDefault -Object $record -Name "blockedRequiredOwnerFieldCount" -DefaultValue -1) -eq $blockedRequiredOwnerFieldCountFromLanes -and
+  [int](Get-PropertyOrDefault -Object $record -Name "readyOwnerFieldCount" -DefaultValue -1) -eq $readyOwnerFieldCountFromLanes -and
+  [int](Get-PropertyOrDefault -Object $record -Name "rejectedSubstituteCount" -DefaultValue -1) -eq $rejectedSubstituteCountFromLanes -and
+  [int](Get-PropertyOrDefault -Object $record -Name "sourceReadinessSignalCount" -DefaultValue -1) -eq $sourceReadinessSignalCountFromLanes
 
 $items.Add((New-ValidationItem -Id "record-kind" -Passed ([string](Get-PropertyOrDefault -Object $record -Name "recordKind" -DefaultValue "") -eq "final-public-release-closure-bridge") -Severity "blocker" -Detail "recordKind must be final-public-release-closure-bridge.")) | Out-Null
 $items.Add((New-ValidationItem -Id "required-lanes-present" -Passed ($missingLaneIds.Count -eq 0) -Severity "blocker" -Detail "Missing required lanes: $($missingLaneIds -join ', ')")) | Out-Null
@@ -163,6 +212,9 @@ $items.Add((New-ValidationItem -Id "lane-count-consistent" -Passed ([int](Get-Pr
 $items.Add((New-ValidationItem -Id "lanes-safe" -Passed $allLanesSafe -Severity "blocker" -Detail "Every lane must keep publish/token/close/proof flags false and include ownerAction plus boundary.")) | Out-Null
 $items.Add((New-ValidationItem -Id "pre-release-readiness-lane-metadata-bridged" -Passed $preReleaseLaneCarriesMatrixMetadata -Severity "blocker" -Detail "Final bridge must carry the pre-release readiness matrix requiredEvidence and validatorPath into a closure lane.")) | Out-Null
 $items.Add((New-ValidationItem -Id "pre-release-readiness-summary-bridged" -Passed $preReleaseSummaryPresent -Severity "blocker" -Detail "Final bridge must expose pre-release readiness matrix state, lane metadata readiness, and promote flag safety in closureProofSourceSummary.")) | Out-Null
+$items.Add((New-ValidationItem -Id "public-package-download-owner-field-surface-bridged" -Passed $publicPackageDownloadOwnerExecutionLaneFieldSurface -Severity "blocker" -Detail "Public package download owner execution lane must carry required/blocked owner fields, rejected substitute count, and source readiness signal count.")) | Out-Null
+$items.Add((New-ValidationItem -Id "post-publish-user-verification-owner-field-surface-bridged" -Passed $postPublishUserVerificationLaneFieldSurface -Severity "blocker" -Detail "Post-publish user verification lane must carry required/blocked owner fields, rejected substitute count, and source readiness signal count.")) | Out-Null
+$items.Add((New-ValidationItem -Id "top-level-owner-field-surface-consistent" -Passed ($topLevelOwnerFieldSurfaceConsistent -and $requiredOwnerFieldCountFromLanes -ge 39 -and $blockedRequiredOwnerFieldCountFromLanes -eq $requiredOwnerFieldCountFromLanes -and $rejectedSubstituteCountFromLanes -ge 16 -and $sourceReadinessSignalCountFromLanes -ge 15) -Severity "blocker" -Detail "Final bridge top-level owner field surface totals must match lane totals and remain fully blocked until real owner proof is supplied.")) | Out-Null
 $items.Add((New-ValidationItem -Id "no-side-effects" -Passed ([bool](Get-PropertyOrDefault -Object $record -Name "notExecutedByAutomation" -DefaultValue $false) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "performsPublish" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "usesPublishToken" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canPromoteRuntimeProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canPublishPublicly" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canCloseReleaseIssue" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isRuntimeExecutionProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isPackageConsumerRuntimeProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isPostPublishProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isReleaseCloseProof" -DefaultValue $true)) -Severity "blocker" -Detail "Bridge must not publish, use tokens, promote proof, or close release issue.")) | Out-Null
 $items.Add((New-ValidationItem -Id "all-close-lanes-ready" -Passed ([int](Get-PropertyOrDefault -Object $record -Name "blockedLaneCount" -DefaultValue 0) -eq 0 -and [string](Get-PropertyOrDefault -Object $record -Name "bridgeState" -DefaultValue "") -eq "final-public-release-closure-bridge-ready-for-owner-close-review") -Severity "action-required" -Detail "Bridge remains blocked until all owner authorization, owner publish execution result, owner download execution guidance, public download, external smoke, post-publish proof, post-publish user verification, close decision, and strict dashboard lanes are ready.")) | Out-Null
 
@@ -191,6 +243,13 @@ $validation = [pscustomobject]@{
   failedConsistencyBlockerCount = $failedConsistencyBlockers.Count
   failedConsistencyActionRequiredCount = $failedConsistencyActionRequired.Count
   forbiddenSubstituteFindingCount = [int](Get-PropertyOrDefault -Object $record -Name "forbiddenSubstituteFindingCount" -DefaultValue 0)
+  requiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $record -Name "requiredOwnerFieldCount" -DefaultValue 0)
+  blockedRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $record -Name "blockedRequiredOwnerFieldCount" -DefaultValue 0)
+  readyOwnerFieldCount = [int](Get-PropertyOrDefault -Object $record -Name "readyOwnerFieldCount" -DefaultValue 0)
+  rejectedSubstituteCount = [int](Get-PropertyOrDefault -Object $record -Name "rejectedSubstituteCount" -DefaultValue 0)
+  sourceReadinessSignalCount = [int](Get-PropertyOrDefault -Object $record -Name "sourceReadinessSignalCount" -DefaultValue 0)
+  ownerFieldSurfaceLaneCount = [int](Get-PropertyOrDefault -Object $record -Name "ownerFieldSurfaceLaneCount" -DefaultValue 0)
+  blockedOwnerFieldSurfaceLaneCount = [int](Get-PropertyOrDefault -Object $record -Name "blockedOwnerFieldSurfaceLaneCount" -DefaultValue 0)
   failedBlockerCount = $failedBlockers.Count
   failedActionRequiredCount = $failedActionRequired.Count
   notExecutedByAutomation = $true
@@ -226,6 +285,13 @@ $markdown = @"
 | missingArtifactCount | ``$($validation.missingArtifactCount)`` |
 | failedBlockerCount | ``$($validation.failedBlockerCount)`` |
 | failedActionRequiredCount | ``$($validation.failedActionRequiredCount)`` |
+| requiredOwnerFieldCount | ``$($validation.requiredOwnerFieldCount)`` |
+| blockedRequiredOwnerFieldCount | ``$($validation.blockedRequiredOwnerFieldCount)`` |
+| readyOwnerFieldCount | ``$($validation.readyOwnerFieldCount)`` |
+| rejectedSubstituteCount | ``$($validation.rejectedSubstituteCount)`` |
+| sourceReadinessSignalCount | ``$($validation.sourceReadinessSignalCount)`` |
+| ownerFieldSurfaceLaneCount | ``$($validation.ownerFieldSurfaceLaneCount)`` |
+| blockedOwnerFieldSurfaceLaneCount | ``$($validation.blockedOwnerFieldSurfaceLaneCount)`` |
 | performsPublish | ``$($validation.performsPublish)`` |
 | usesPublishToken | ``$($validation.usesPublishToken)`` |
 | canPublishPublicly | ``$($validation.canPublishPublicly)`` |

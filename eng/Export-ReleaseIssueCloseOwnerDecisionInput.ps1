@@ -56,6 +56,7 @@ New-Item -ItemType Directory -Force -Path $artifactRoot | Out-Null
 $releaseEvidenceBundlePath = "artifacts/final-release/release-evidence-bundle.json"
 $postPublishValidationPath = "artifacts/final-release/post-publish-verification-validation.json"
 $postPublishProofResultValidationPath = "artifacts/final-release/post-publish-clean-consumer-proof-result-validation.json"
+$publicReleaseOwnerExecutionPackageValidationPath = "artifacts/final-release/public-release-owner-execution-package-validation.json"
 $publicPackageDownloadProofOwnerExecutionPackValidationPath = "artifacts/final-release/public-package-download-proof-owner-execution-pack-validation.json"
 $postPublishUserVerificationPackValidationPath = "artifacts/final-release/post-publish-user-verification-pack-validation.json"
 $strictCloseReadyPath = "artifacts/final-release/strict-close-ready-convergence-dashboard-validation.json"
@@ -66,8 +67,10 @@ $finalPublicReleaseClosureBridgeValidationPath = "artifacts/final-release/final-
 $bridge = Read-JsonOrNull -RelativePath $finalPublicReleaseClosureBridgePath
 $bridgeValidation = Read-JsonOrNull -RelativePath $finalPublicReleaseClosureBridgeValidationPath
 $postPublishProofResultValidation = Read-JsonOrNull -RelativePath $postPublishProofResultValidationPath
+$publicReleaseOwnerExecutionPackageValidation = Read-JsonOrNull -RelativePath $publicReleaseOwnerExecutionPackageValidationPath
 $publicPackageDownloadProofOwnerExecutionPackValidation = Read-JsonOrNull -RelativePath $publicPackageDownloadProofOwnerExecutionPackValidationPath
 $postPublishUserVerificationPackValidation = Read-JsonOrNull -RelativePath $postPublishUserVerificationPackValidationPath
+$strictCloseReadyValidation = Read-JsonOrNull -RelativePath $strictCloseReadyPath
 $summary = Get-PropertyOrDefault -Object $bridge -Name "closureProofSourceSummary" -DefaultValue ([pscustomobject]@{})
 
 $template = [pscustomobject]@{
@@ -94,16 +97,38 @@ $template = [pscustomobject]@{
   closureBlockedLaneCount = [int](Get-PropertyOrDefault -Object $bridge -Name "blockedLaneCount" -DefaultValue 0)
   closureFailedConsistencyBlockerCount = [int](Get-PropertyOrDefault -Object $bridge -Name "failedConsistencyBlockerCount" -DefaultValue 0)
   closureFailedConsistencyActionRequiredCount = [int](Get-PropertyOrDefault -Object $bridge -Name "failedConsistencyActionRequiredCount" -DefaultValue 0)
+  finalPublicReleaseClosureBridgeRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $bridgeValidation -Name "requiredOwnerFieldCount" -DefaultValue 0)
+  finalPublicReleaseClosureBridgeBlockedRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $bridgeValidation -Name "blockedRequiredOwnerFieldCount" -DefaultValue 0)
+  finalPublicReleaseClosureBridgeRejectedSubstituteCount = [int](Get-PropertyOrDefault -Object $bridgeValidation -Name "rejectedSubstituteCount" -DefaultValue 0)
+  finalPublicReleaseClosureBridgeSourceReadinessSignalCount = [int](Get-PropertyOrDefault -Object $bridgeValidation -Name "sourceReadinessSignalCount" -DefaultValue 0)
   postPublishValidationPath = $postPublishValidationPath
   postPublishValidationSha256 = Get-RelativeFileSha256OrPlaceholder -RelativePath $postPublishValidationPath
   postPublishProofResultValidationPath = $postPublishProofResultValidationPath
   postPublishProofResultValidationSha256 = Get-RelativeFileSha256OrPlaceholder -RelativePath $postPublishProofResultValidationPath
+  publicReleaseOwnerExecutionPackageValidationPath = $publicReleaseOwnerExecutionPackageValidationPath
+  publicReleaseOwnerExecutionPackageValidationSha256 = Get-RelativeFileSha256OrPlaceholder -RelativePath $publicReleaseOwnerExecutionPackageValidationPath
+  publicReleaseOwnerExecutionPackageValidationState = [string](Get-PropertyOrDefault -Object $publicReleaseOwnerExecutionPackageValidation -Name "validationState" -DefaultValue "missing-public-release-owner-execution-package-validation")
+  publicReleaseOwnerExecutionPackageRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $publicReleaseOwnerExecutionPackageValidation -Name "requiredOwnerFieldCount" -DefaultValue 0)
+  publicReleaseOwnerExecutionPackageBlockedRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $publicReleaseOwnerExecutionPackageValidation -Name "blockedRequiredOwnerFieldCount" -DefaultValue 0)
+  publicReleaseOwnerExecutionPackageRejectedSubstituteCount = [int](Get-PropertyOrDefault -Object $publicReleaseOwnerExecutionPackageValidation -Name "rejectedSubstituteCount" -DefaultValue 0)
   publicPackageDownloadProofOwnerExecutionPackValidationPath = $publicPackageDownloadProofOwnerExecutionPackValidationPath
   publicPackageDownloadProofOwnerExecutionPackValidationSha256 = Get-RelativeFileSha256OrPlaceholder -RelativePath $publicPackageDownloadProofOwnerExecutionPackValidationPath
   publicPackageDownloadProofOwnerExecutionPackValidationState = [string](Get-PropertyOrDefault -Object $publicPackageDownloadProofOwnerExecutionPackValidation -Name "validationState" -DefaultValue "missing-public-package-download-proof-owner-execution-pack-validation")
+  publicPackageDownloadProofOwnerExecutionPackRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $publicPackageDownloadProofOwnerExecutionPackValidation -Name "requiredOwnerFieldCount" -DefaultValue 0)
+  publicPackageDownloadProofOwnerExecutionPackBlockedRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $publicPackageDownloadProofOwnerExecutionPackValidation -Name "blockedRequiredOwnerFieldCount" -DefaultValue 0)
+  publicPackageDownloadProofOwnerExecutionPackRejectedSubstituteCount = [int](Get-PropertyOrDefault -Object $publicPackageDownloadProofOwnerExecutionPackValidation -Name "rejectedSubstituteCount" -DefaultValue 0)
+  publicPackageDownloadProofOwnerExecutionPackSourceReadinessSignalCount = [int](Get-PropertyOrDefault -Object $publicPackageDownloadProofOwnerExecutionPackValidation -Name "sourceReadinessSignalCount" -DefaultValue 0)
   postPublishUserVerificationPackValidationPath = $postPublishUserVerificationPackValidationPath
   postPublishUserVerificationPackValidationSha256 = Get-RelativeFileSha256OrPlaceholder -RelativePath $postPublishUserVerificationPackValidationPath
   postPublishUserVerificationPackValidationState = [string](Get-PropertyOrDefault -Object $postPublishUserVerificationPackValidation -Name "validationState" -DefaultValue "missing-post-publish-user-verification-pack-validation")
+  postPublishUserVerificationPackRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $postPublishUserVerificationPackValidation -Name "requiredOwnerFieldCount" -DefaultValue 0)
+  postPublishUserVerificationPackBlockedRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $postPublishUserVerificationPackValidation -Name "blockedRequiredOwnerFieldCount" -DefaultValue 0)
+  postPublishUserVerificationPackRejectedSubstituteCount = [int](Get-PropertyOrDefault -Object $postPublishUserVerificationPackValidation -Name "rejectedSubstituteCount" -DefaultValue 0)
+  postPublishUserVerificationPackSourceReadinessSignalCount = [int](Get-PropertyOrDefault -Object $postPublishUserVerificationPackValidation -Name "sourceReadinessSignalCount" -DefaultValue 0)
+  strictCloseReadyRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $strictCloseReadyValidation -Name "requiredOwnerFieldCount" -DefaultValue 0)
+  strictCloseReadyBlockedRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $strictCloseReadyValidation -Name "blockedRequiredOwnerFieldCount" -DefaultValue 0)
+  strictCloseReadyRejectedSubstituteCount = [int](Get-PropertyOrDefault -Object $strictCloseReadyValidation -Name "rejectedSubstituteCount" -DefaultValue 0)
+  strictCloseReadySourceReadinessSignalCount = [int](Get-PropertyOrDefault -Object $strictCloseReadyValidation -Name "sourceReadinessSignalCount" -DefaultValue 0)
   publicPackageDownloadOwnerExecutionPackState = [string](Get-PropertyOrDefault -Object $summary -Name "publicPackageDownloadOwnerExecutionPackState" -DefaultValue "")
   postPublishUserVerificationPackState = [string](Get-PropertyOrDefault -Object $summary -Name "postPublishUserVerificationPackState" -DefaultValue "")
   postPublishProofCandidateReady = [bool](Get-PropertyOrDefault -Object $postPublishProofResultValidation -Name "proofCandidateReady" -DefaultValue $false)
@@ -143,6 +168,7 @@ $template = [pscustomobject]@{
     "approvedPostPublishProofHash",
     "approvedReleaseEvidenceBundleHash",
     "finalPublicReleaseClosureBridgeSha256",
+    "publicReleaseOwnerExecutionPackageValidationSha256",
     "publicPackageDownloadProofOwnerExecutionPackValidationSha256",
     "postPublishUserVerificationPackValidationSha256",
     "publicPackageUrl",
@@ -161,6 +187,7 @@ $template = [pscustomobject]@{
     $finalPublicReleaseClosureBridgePath,
     $finalPublicReleaseClosureBridgeValidationPath,
     $postPublishProofResultValidationPath,
+    $publicReleaseOwnerExecutionPackageValidationPath,
     $publicPackageDownloadProofOwnerExecutionPackValidationPath,
     $postPublishUserVerificationPackValidationPath,
     $postPublishValidationPath,
@@ -203,8 +230,21 @@ $markdown = @"
 | closureBlockedLaneCount | ``$($template.closureBlockedLaneCount)`` |
 | closureFailedConsistencyBlockerCount | ``$($template.closureFailedConsistencyBlockerCount)`` |
 | closureFailedConsistencyActionRequiredCount | ``$($template.closureFailedConsistencyActionRequiredCount)`` |
+| finalPublicReleaseClosureBridgeRequiredOwnerFieldCount | ``$($template.finalPublicReleaseClosureBridgeRequiredOwnerFieldCount)`` |
+| finalPublicReleaseClosureBridgeBlockedRequiredOwnerFieldCount | ``$($template.finalPublicReleaseClosureBridgeBlockedRequiredOwnerFieldCount)`` |
+| finalPublicReleaseClosureBridgeRejectedSubstituteCount | ``$($template.finalPublicReleaseClosureBridgeRejectedSubstituteCount)`` |
+| finalPublicReleaseClosureBridgeSourceReadinessSignalCount | ``$($template.finalPublicReleaseClosureBridgeSourceReadinessSignalCount)`` |
+| publicReleaseOwnerExecutionPackageValidationState | ``$($template.publicReleaseOwnerExecutionPackageValidationState)`` |
+| publicReleaseOwnerExecutionPackageRequiredOwnerFieldCount | ``$($template.publicReleaseOwnerExecutionPackageRequiredOwnerFieldCount)`` |
+| publicReleaseOwnerExecutionPackageBlockedRequiredOwnerFieldCount | ``$($template.publicReleaseOwnerExecutionPackageBlockedRequiredOwnerFieldCount)`` |
 | publicPackageDownloadProofOwnerExecutionPackValidationState | ``$($template.publicPackageDownloadProofOwnerExecutionPackValidationState)`` |
+| publicPackageDownloadProofOwnerExecutionPackRequiredOwnerFieldCount | ``$($template.publicPackageDownloadProofOwnerExecutionPackRequiredOwnerFieldCount)`` |
+| publicPackageDownloadProofOwnerExecutionPackBlockedRequiredOwnerFieldCount | ``$($template.publicPackageDownloadProofOwnerExecutionPackBlockedRequiredOwnerFieldCount)`` |
 | postPublishUserVerificationPackValidationState | ``$($template.postPublishUserVerificationPackValidationState)`` |
+| postPublishUserVerificationPackRequiredOwnerFieldCount | ``$($template.postPublishUserVerificationPackRequiredOwnerFieldCount)`` |
+| postPublishUserVerificationPackBlockedRequiredOwnerFieldCount | ``$($template.postPublishUserVerificationPackBlockedRequiredOwnerFieldCount)`` |
+| strictCloseReadyRequiredOwnerFieldCount | ``$($template.strictCloseReadyRequiredOwnerFieldCount)`` |
+| strictCloseReadyBlockedRequiredOwnerFieldCount | ``$($template.strictCloseReadyBlockedRequiredOwnerFieldCount)`` |
 | publicPackageDownloadOwnerExecutionPackState | ``$($template.publicPackageDownloadOwnerExecutionPackState)`` |
 | postPublishUserVerificationPackState | ``$($template.postPublishUserVerificationPackState)`` |
 | postPublishProofCandidateReady | ``$($template.postPublishProofCandidateReady)`` |

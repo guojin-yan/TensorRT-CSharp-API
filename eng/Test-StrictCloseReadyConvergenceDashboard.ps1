@@ -51,6 +51,16 @@ function Get-LaneById {
   return @($Lanes | Where-Object { [string](Get-PropertyOrDefault -Object $_ -Name "laneId" -DefaultValue "") -eq $Id } | Select-Object -First 1)[0]
 }
 
+function Sum-IntProperty {
+  param([AllowNull()][object[]]$Items, [string]$Name)
+  $total = 0
+  foreach ($item in @($Items)) {
+    $total += [int](Get-PropertyOrDefault -Object $item -Name $Name -DefaultValue 0)
+  }
+
+  return $total
+}
+
 $resolvedInputPath = Resolve-RepositoryPath -Path $InputPath
 if (-not (Test-Path -LiteralPath $resolvedInputPath -PathType Leaf)) {
   throw "Strict close ready convergence dashboard not found: $resolvedInputPath"
@@ -106,7 +116,10 @@ $requiredSourceArtifacts = @(
   "artifacts/final-release/release-issue-close-owner-decision-input-validation.json",
   "artifacts/final-release/release-issue-close-final-owner-decision-audit-validation.json",
   "artifacts/final-release/release-issue-close-record-validation.json",
-  "artifacts/final-release/release-evidence-classification-audit.json"
+  "artifacts/final-release/release-evidence-classification-audit.json",
+  "artifacts/final-release/public-release-owner-execution-package-validation.json",
+  "artifacts/final-release/public-package-download-proof-owner-execution-pack-validation.json",
+  "artifacts/final-release/post-publish-user-verification-pack-validation.json"
 )
 $missingSourceArtifacts = @($requiredSourceArtifacts | Where-Object { $sourceArtifacts -notcontains $_ })
 $items.Add((New-ValidationItem -Id "required-source-artifacts-present" -Passed ($missingSourceArtifacts.Count -eq 0) -Severity "blocker" -Detail "Missing required strict-close source artifacts: $($missingSourceArtifacts -join ', ')")) | Out-Null
@@ -115,7 +128,33 @@ $remoteProofIds = @("github-actions-run-proof", "owner-public-publish-result", "
 $remoteProofLanes = @($remoteProofIds | ForEach-Object { Get-LaneById -Lanes $lanes -Id $_ })
 $remoteProofLanesPresent = @($remoteProofLanes | Where-Object { $null -ne $_ }).Count -eq $remoteProofIds.Count
 $remoteProofLanesBlockClose = $remoteProofLanesPresent -and @($remoteProofLanes | Where-Object { [bool](Get-PropertyOrDefault -Object $_ -Name "ready" -DefaultValue $true) }).Count -eq 0 -and @($remoteProofLanes | Where-Object { -not [bool](Get-PropertyOrDefault -Object $_ -Name "blocksStrictClose" -DefaultValue $false) }).Count -eq 0
+$ownerFieldSurfaceLanes = @($lanes | Where-Object { [int](Get-PropertyOrDefault -Object $_ -Name "requiredOwnerFieldCount" -DefaultValue 0) -gt 0 })
+$requiredOwnerFieldCountFromLanes = Sum-IntProperty -Items $ownerFieldSurfaceLanes -Name "requiredOwnerFieldCount"
+$blockedRequiredOwnerFieldCountFromLanes = Sum-IntProperty -Items $ownerFieldSurfaceLanes -Name "blockedRequiredOwnerFieldCount"
+$readyOwnerFieldCountFromLanes = Sum-IntProperty -Items $ownerFieldSurfaceLanes -Name "readyOwnerFieldCount"
+$rejectedSubstituteCountFromLanes = Sum-IntProperty -Items $ownerFieldSurfaceLanes -Name "rejectedSubstituteCount"
+$sourceReadinessSignalCountFromLanes = Sum-IntProperty -Items $ownerFieldSurfaceLanes -Name "sourceReadinessSignalCount"
+$ownerPublicPublishResultLane = Get-LaneById -Lanes $lanes -Id "owner-public-publish-result"
+$publicPackageDownloadProofLane = Get-LaneById -Lanes $lanes -Id "public-package-download-proof"
 $postPublishProofLane = Get-LaneById -Lanes $lanes -Id "post-publish-clean-consumer-proof"
+$ownerFieldSurfaceReady =
+  $null -ne $ownerPublicPublishResultLane -and
+  $null -ne $publicPackageDownloadProofLane -and
+  $null -ne $postPublishProofLane -and
+  [int](Get-PropertyOrDefault -Object $ownerPublicPublishResultLane -Name "requiredOwnerFieldCount" -DefaultValue 0) -ge 30 -and
+  [int](Get-PropertyOrDefault -Object $publicPackageDownloadProofLane -Name "requiredOwnerFieldCount" -DefaultValue 0) -ge 20 -and
+  [int](Get-PropertyOrDefault -Object $postPublishProofLane -Name "requiredOwnerFieldCount" -DefaultValue 0) -ge 19 -and
+  $requiredOwnerFieldCountFromLanes -ge 69 -and
+  $blockedRequiredOwnerFieldCountFromLanes -eq $requiredOwnerFieldCountFromLanes -and
+  $readyOwnerFieldCountFromLanes -eq 0 -and
+  $rejectedSubstituteCountFromLanes -ge 30 -and
+  $sourceReadinessSignalCountFromLanes -ge 15
+$ownerFieldSurfaceTotalsConsistent =
+  [int](Get-PropertyOrDefault -Object $record -Name "requiredOwnerFieldCount" -DefaultValue -1) -eq $requiredOwnerFieldCountFromLanes -and
+  [int](Get-PropertyOrDefault -Object $record -Name "blockedRequiredOwnerFieldCount" -DefaultValue -1) -eq $blockedRequiredOwnerFieldCountFromLanes -and
+  [int](Get-PropertyOrDefault -Object $record -Name "readyOwnerFieldCount" -DefaultValue -1) -eq $readyOwnerFieldCountFromLanes -and
+  [int](Get-PropertyOrDefault -Object $record -Name "rejectedSubstituteCount" -DefaultValue -1) -eq $rejectedSubstituteCountFromLanes -and
+  [int](Get-PropertyOrDefault -Object $record -Name "sourceReadinessSignalCount" -DefaultValue -1) -eq $sourceReadinessSignalCountFromLanes
 $postPublishProofRequiresCandidate = $null -ne $postPublishProofLane -and
   [bool](Get-PropertyOrDefault -Object $postPublishProofLane -Name "remoteGateStateReady" -DefaultValue $false) -and
   [bool](Get-PropertyOrDefault -Object $postPublishProofLane -Name "requireProofReady" -DefaultValue $false) -and
@@ -125,6 +164,8 @@ $postPublishProofRequiresCandidate = $null -ne $postPublishProofLane -and
 $items.Add((New-ValidationItem -Id "remote-proof-lanes-present" -Passed $remoteProofLanesPresent -Severity "blocker" -Detail "Strict close dashboard must include remote proof dependency lanes from remote-ci-and-public-publish-proof-backfill-gate.")) | Out-Null
 $items.Add((New-ValidationItem -Id "remote-proof-lanes-block-close" -Passed $remoteProofLanesBlockClose -Severity "blocker" -Detail "Missing real GitHub Actions, public publish, public download, and post-publish proof lanes must block strict close.")) | Out-Null
 $items.Add((New-ValidationItem -Id "post-publish-proof-lane-requires-proof-candidate-ready" -Passed $postPublishProofRequiresCandidate -Severity "blocker" -Detail "Post-publish proof lane must stay blocked when validation is ready but proofCandidateReady is false.")) | Out-Null
+$items.Add((New-ValidationItem -Id "owner-field-surface-lanes-present" -Passed $ownerFieldSurfaceReady -Severity "blocker" -Detail "Strict close dashboard must expose public release, public download, and post-publish owner field surfaces, all still blocked until real owner evidence is supplied.")) | Out-Null
+$items.Add((New-ValidationItem -Id "top-level-owner-field-surface-consistent" -Passed $ownerFieldSurfaceTotalsConsistent -Severity "blocker" -Detail "Strict close dashboard top-level owner field counts must match close lane owner field counts.")) | Out-Null
 $items.Add((New-ValidationItem -Id "all-close-lanes-ready" -Passed ([int](Get-PropertyOrDefault -Object $record -Name "blockedLaneCount" -DefaultValue 0) -eq 0 -and [string](Get-PropertyOrDefault -Object $record -Name "dashboardState" -DefaultValue "") -eq "strict-close-ready-convergence-ready") -Severity "action-required" -Detail "Dashboard remains blocked until every strict close lane is backed by real Owner proof.")) | Out-Null
 $items.Add((New-ValidationItem -Id "lanes-safe" -Passed $allLanesSafe -Severity "blocker" -Detail "Every close readiness lane must keep proof/publish/close flags false and include owner action plus validator.")) | Out-Null
 $items.Add((New-ValidationItem -Id "no-side-effects" -Passed ([bool](Get-PropertyOrDefault -Object $record -Name "notExecutedByAutomation" -DefaultValue $false) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "performsPublish" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canPromoteRuntimeProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canPublishPublicly" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canCloseReleaseIssue" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isRuntimeExecutionProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isReleaseCloseProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isPostPublishProof" -DefaultValue $true)) -Severity "blocker" -Detail "Strict close dashboard must not publish, prove runtime/post-publish, or close release issue.")) | Out-Null
@@ -149,6 +190,13 @@ $validation = [pscustomobject]@{
   laneCount = $lanes.Count
   blockedLaneCount = [int](Get-PropertyOrDefault -Object $record -Name "blockedLaneCount" -DefaultValue 0)
   readyLaneCount = [int](Get-PropertyOrDefault -Object $record -Name "readyLaneCount" -DefaultValue 0)
+  requiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $record -Name "requiredOwnerFieldCount" -DefaultValue 0)
+  blockedRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $record -Name "blockedRequiredOwnerFieldCount" -DefaultValue 0)
+  readyOwnerFieldCount = [int](Get-PropertyOrDefault -Object $record -Name "readyOwnerFieldCount" -DefaultValue 0)
+  rejectedSubstituteCount = [int](Get-PropertyOrDefault -Object $record -Name "rejectedSubstituteCount" -DefaultValue 0)
+  sourceReadinessSignalCount = [int](Get-PropertyOrDefault -Object $record -Name "sourceReadinessSignalCount" -DefaultValue 0)
+  ownerFieldSurfaceLaneCount = [int](Get-PropertyOrDefault -Object $record -Name "ownerFieldSurfaceLaneCount" -DefaultValue 0)
+  blockedOwnerFieldSurfaceLaneCount = [int](Get-PropertyOrDefault -Object $record -Name "blockedOwnerFieldSurfaceLaneCount" -DefaultValue 0)
   failedBlockerCount = $failedBlockers.Count
   failedActionRequiredCount = $failedActionRequired.Count
   notExecutedByAutomation = $true
@@ -178,6 +226,13 @@ $markdown = @"
 | laneCount | ``$($validation.laneCount)`` |
 | blockedLaneCount | ``$($validation.blockedLaneCount)`` |
 | readyLaneCount | ``$($validation.readyLaneCount)`` |
+| requiredOwnerFieldCount | ``$($validation.requiredOwnerFieldCount)`` |
+| blockedRequiredOwnerFieldCount | ``$($validation.blockedRequiredOwnerFieldCount)`` |
+| readyOwnerFieldCount | ``$($validation.readyOwnerFieldCount)`` |
+| rejectedSubstituteCount | ``$($validation.rejectedSubstituteCount)`` |
+| sourceReadinessSignalCount | ``$($validation.sourceReadinessSignalCount)`` |
+| ownerFieldSurfaceLaneCount | ``$($validation.ownerFieldSurfaceLaneCount)`` |
+| blockedOwnerFieldSurfaceLaneCount | ``$($validation.blockedOwnerFieldSurfaceLaneCount)`` |
 | failedBlockerCount | ``$($validation.failedBlockerCount)`` |
 | failedActionRequiredCount | ``$($validation.failedActionRequiredCount)`` |
 | performsPublish | ``$($validation.performsPublish)`` |

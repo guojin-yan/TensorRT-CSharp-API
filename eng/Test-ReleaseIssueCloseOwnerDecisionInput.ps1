@@ -117,13 +117,17 @@ $items = New-Object System.Collections.Generic.List[object]
 $bridgePath = [string](Get-PropertyOrDefault -Object $record -Name "finalPublicReleaseClosureBridgePath" -DefaultValue "artifacts/final-release/final-public-release-closure-bridge.json")
 $bridgeValidationPath = [string](Get-PropertyOrDefault -Object $record -Name "finalPublicReleaseClosureBridgeValidationPath" -DefaultValue "artifacts/final-release/final-public-release-closure-bridge-validation.json")
 $postPublishProofResultValidationPath = [string](Get-PropertyOrDefault -Object $record -Name "postPublishProofResultValidationPath" -DefaultValue "artifacts/final-release/post-publish-clean-consumer-proof-result-validation.json")
+$publicReleaseOwnerExecutionPackageValidationPath = [string](Get-PropertyOrDefault -Object $record -Name "publicReleaseOwnerExecutionPackageValidationPath" -DefaultValue "artifacts/final-release/public-release-owner-execution-package-validation.json")
 $publicPackageDownloadProofOwnerExecutionPackValidationPath = [string](Get-PropertyOrDefault -Object $record -Name "publicPackageDownloadProofOwnerExecutionPackValidationPath" -DefaultValue "artifacts/final-release/public-package-download-proof-owner-execution-pack-validation.json")
 $postPublishUserVerificationPackValidationPath = [string](Get-PropertyOrDefault -Object $record -Name "postPublishUserVerificationPackValidationPath" -DefaultValue "artifacts/final-release/post-publish-user-verification-pack-validation.json")
+$strictCloseReadyValidationPath = [string](Get-PropertyOrDefault -Object $record -Name "strictCloseReadyValidationPath" -DefaultValue "artifacts/final-release/strict-close-ready-convergence-dashboard-validation.json")
 $bridge = Read-JsonOrNull -Path $bridgePath
 $bridgeValidation = Read-JsonOrNull -Path $bridgeValidationPath
 $postPublishProofResultValidation = Read-JsonOrNull -Path $postPublishProofResultValidationPath
+$publicReleaseOwnerExecutionPackageValidation = Read-JsonOrNull -Path $publicReleaseOwnerExecutionPackageValidationPath
 $publicPackageDownloadProofOwnerExecutionPackValidation = Read-JsonOrNull -Path $publicPackageDownloadProofOwnerExecutionPackValidationPath
 $postPublishUserVerificationPackValidation = Read-JsonOrNull -Path $postPublishUserVerificationPackValidationPath
+$strictCloseReadyValidation = Read-JsonOrNull -Path $strictCloseReadyValidationPath
 $bridgeSummary = Get-PropertyOrDefault -Object $bridge -Name "closureProofSourceSummary" -DefaultValue ([pscustomobject]@{})
 
 $state = [string](Get-PropertyOrDefault -Object $record -Name "ownerDecisionInputState" -DefaultValue "")
@@ -148,6 +152,7 @@ foreach ($pair in @(
   @("release-evidence-bundle-hash", "releaseEvidenceBundlePath", "releaseEvidenceBundleSha256", "releaseEvidenceBundleSha256 must match releaseEvidenceBundlePath.", "action-required"),
   @("post-publish-validation-hash", "postPublishValidationPath", "postPublishValidationSha256", "postPublishValidationSha256 must match postPublishValidationPath.", "action-required"),
   @("post-publish-proof-result-validation-hash", "postPublishProofResultValidationPath", "postPublishProofResultValidationSha256", "postPublishProofResultValidationSha256 must match postPublishProofResultValidationPath.", "blocker"),
+  @("public-release-owner-execution-package-validation-hash", "publicReleaseOwnerExecutionPackageValidationPath", "publicReleaseOwnerExecutionPackageValidationSha256", "publicReleaseOwnerExecutionPackageValidationSha256 must match publicReleaseOwnerExecutionPackageValidationPath.", "blocker"),
   @("public-package-download-proof-owner-execution-pack-validation-hash", "publicPackageDownloadProofOwnerExecutionPackValidationPath", "publicPackageDownloadProofOwnerExecutionPackValidationSha256", "publicPackageDownloadProofOwnerExecutionPackValidationSha256 must match publicPackageDownloadProofOwnerExecutionPackValidationPath.", "blocker"),
   @("post-publish-user-verification-pack-validation-hash", "postPublishUserVerificationPackValidationPath", "postPublishUserVerificationPackValidationSha256", "postPublishUserVerificationPackValidationSha256 must match postPublishUserVerificationPackValidationPath.", "blocker"),
   @("final-public-release-closure-bridge-hash", "finalPublicReleaseClosureBridgePath", "finalPublicReleaseClosureBridgeSha256", "finalPublicReleaseClosureBridgeSha256 must match finalPublicReleaseClosureBridgePath.", "blocker"),
@@ -162,10 +167,37 @@ $bridgeLaneCount = [int](Get-PropertyOrDefault -Object $bridge -Name "laneCount"
 $bridgeBlockedLaneCount = [int](Get-PropertyOrDefault -Object $bridge -Name "blockedLaneCount" -DefaultValue 0)
 $bridgeFailedConsistencyBlockerCount = [int](Get-PropertyOrDefault -Object $bridge -Name "failedConsistencyBlockerCount" -DefaultValue 0)
 $bridgeFailedConsistencyActionRequiredCount = [int](Get-PropertyOrDefault -Object $bridge -Name "failedConsistencyActionRequiredCount" -DefaultValue 0)
+$bridgeRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $bridgeValidation -Name "requiredOwnerFieldCount" -DefaultValue 0)
+$bridgeBlockedRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $bridgeValidation -Name "blockedRequiredOwnerFieldCount" -DefaultValue 0)
+$bridgeRejectedSubstituteCount = [int](Get-PropertyOrDefault -Object $bridgeValidation -Name "rejectedSubstituteCount" -DefaultValue 0)
+$bridgeSourceReadinessSignalCount = [int](Get-PropertyOrDefault -Object $bridgeValidation -Name "sourceReadinessSignalCount" -DefaultValue 0)
+$publicReleaseOwnerExecutionPackageValidationState = [string](Get-PropertyOrDefault -Object $publicReleaseOwnerExecutionPackageValidation -Name "validationState" -DefaultValue "missing-public-release-owner-execution-package-validation")
+$publicReleaseOwnerExecutionPackageRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $publicReleaseOwnerExecutionPackageValidation -Name "requiredOwnerFieldCount" -DefaultValue 0)
+$publicReleaseOwnerExecutionPackageBlockedRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $publicReleaseOwnerExecutionPackageValidation -Name "blockedRequiredOwnerFieldCount" -DefaultValue 0)
+$publicReleaseOwnerExecutionPackageRejectedSubstituteCount = [int](Get-PropertyOrDefault -Object $publicReleaseOwnerExecutionPackageValidation -Name "rejectedSubstituteCount" -DefaultValue 0)
 $publicPackageDownloadProofOwnerExecutionPackValidationState = [string](Get-PropertyOrDefault -Object $publicPackageDownloadProofOwnerExecutionPackValidation -Name "validationState" -DefaultValue "missing-public-package-download-proof-owner-execution-pack-validation")
+$publicPackageDownloadProofOwnerExecutionPackRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $publicPackageDownloadProofOwnerExecutionPackValidation -Name "requiredOwnerFieldCount" -DefaultValue 0)
+$publicPackageDownloadProofOwnerExecutionPackBlockedRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $publicPackageDownloadProofOwnerExecutionPackValidation -Name "blockedRequiredOwnerFieldCount" -DefaultValue 0)
+$publicPackageDownloadProofOwnerExecutionPackRejectedSubstituteCount = [int](Get-PropertyOrDefault -Object $publicPackageDownloadProofOwnerExecutionPackValidation -Name "rejectedSubstituteCount" -DefaultValue 0)
+$publicPackageDownloadProofOwnerExecutionPackSourceReadinessSignalCount = [int](Get-PropertyOrDefault -Object $publicPackageDownloadProofOwnerExecutionPackValidation -Name "sourceReadinessSignalCount" -DefaultValue 0)
 $postPublishUserVerificationPackValidationState = [string](Get-PropertyOrDefault -Object $postPublishUserVerificationPackValidation -Name "validationState" -DefaultValue "missing-post-publish-user-verification-pack-validation")
+$postPublishUserVerificationPackRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $postPublishUserVerificationPackValidation -Name "requiredOwnerFieldCount" -DefaultValue 0)
+$postPublishUserVerificationPackBlockedRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $postPublishUserVerificationPackValidation -Name "blockedRequiredOwnerFieldCount" -DefaultValue 0)
+$postPublishUserVerificationPackRejectedSubstituteCount = [int](Get-PropertyOrDefault -Object $postPublishUserVerificationPackValidation -Name "rejectedSubstituteCount" -DefaultValue 0)
+$postPublishUserVerificationPackSourceReadinessSignalCount = [int](Get-PropertyOrDefault -Object $postPublishUserVerificationPackValidation -Name "sourceReadinessSignalCount" -DefaultValue 0)
+$strictCloseReadyRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $strictCloseReadyValidation -Name "requiredOwnerFieldCount" -DefaultValue 0)
+$strictCloseReadyBlockedRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $strictCloseReadyValidation -Name "blockedRequiredOwnerFieldCount" -DefaultValue 0)
+$strictCloseReadyRejectedSubstituteCount = [int](Get-PropertyOrDefault -Object $strictCloseReadyValidation -Name "rejectedSubstituteCount" -DefaultValue 0)
+$strictCloseReadySourceReadinessSignalCount = [int](Get-PropertyOrDefault -Object $strictCloseReadyValidation -Name "sourceReadinessSignalCount" -DefaultValue 0)
+$ownerFieldSurfacesStillBlocked =
+  $bridgeBlockedRequiredOwnerFieldCount -gt 0 -or
+  $publicReleaseOwnerExecutionPackageBlockedRequiredOwnerFieldCount -gt 0 -or
+  $publicPackageDownloadProofOwnerExecutionPackBlockedRequiredOwnerFieldCount -gt 0 -or
+  $postPublishUserVerificationPackBlockedRequiredOwnerFieldCount -gt 0 -or
+  $strictCloseReadyBlockedRequiredOwnerFieldCount -gt 0
 
 Compare-StringSnapshot -Id "final-bridge-validation-state-match" -Expected $bridgeValidationState -Actual (Get-PropertyOrDefault -Object $record -Name "finalPublicReleaseClosureBridgeValidationState" -DefaultValue "") -Detail "Owner decision bridge validation state snapshot must match final-public-release-closure-bridge-validation.json."
+Compare-StringSnapshot -Id "public-release-owner-execution-validation-state-match" -Expected $publicReleaseOwnerExecutionPackageValidationState -Actual (Get-PropertyOrDefault -Object $record -Name "publicReleaseOwnerExecutionPackageValidationState" -DefaultValue "") -Detail "Owner decision public release owner execution package validation state snapshot must match its validation artifact."
 Compare-StringSnapshot -Id "public-package-download-owner-execution-validation-state-match" -Expected $publicPackageDownloadProofOwnerExecutionPackValidationState -Actual (Get-PropertyOrDefault -Object $record -Name "publicPackageDownloadProofOwnerExecutionPackValidationState" -DefaultValue "") -Detail "Owner decision public package download owner execution pack validation state snapshot must match its validation artifact."
 Compare-StringSnapshot -Id "post-publish-user-verification-validation-state-match" -Expected $postPublishUserVerificationPackValidationState -Actual (Get-PropertyOrDefault -Object $record -Name "postPublishUserVerificationPackValidationState" -DefaultValue "") -Detail "Owner decision post-publish user verification pack validation state snapshot must match its validation artifact."
 Compare-StringSnapshot -Id "public-package-download-owner-execution-bridge-state-match" -Expected (Get-PropertyOrDefault -Object $bridgeSummary -Name "publicPackageDownloadOwnerExecutionPackState" -DefaultValue "") -Actual (Get-PropertyOrDefault -Object $record -Name "publicPackageDownloadOwnerExecutionPackState" -DefaultValue "") -Detail "Owner decision public package download owner execution pack state snapshot must match final bridge source summary."
@@ -174,11 +206,23 @@ Compare-IntSnapshot -Id "final-bridge-lane-count-match" -Expected $bridgeLaneCou
 Compare-IntSnapshot -Id "final-bridge-blocked-lane-count-match" -Expected $bridgeBlockedLaneCount -Actual (Get-PropertyOrDefault -Object $record -Name "closureBlockedLaneCount" -DefaultValue -1) -Detail "Owner decision closureBlockedLaneCount must match final bridge blockedLaneCount."
 Compare-IntSnapshot -Id "final-bridge-consistency-blocker-count-match" -Expected $bridgeFailedConsistencyBlockerCount -Actual (Get-PropertyOrDefault -Object $record -Name "closureFailedConsistencyBlockerCount" -DefaultValue -1) -Detail "Owner decision closureFailedConsistencyBlockerCount must match final bridge."
 Compare-IntSnapshot -Id "final-bridge-consistency-action-required-count-match" -Expected $bridgeFailedConsistencyActionRequiredCount -Actual (Get-PropertyOrDefault -Object $record -Name "closureFailedConsistencyActionRequiredCount" -DefaultValue -1) -Detail "Owner decision closureFailedConsistencyActionRequiredCount must match final bridge."
+Compare-IntSnapshot -Id "final-bridge-required-owner-field-count-match" -Expected $bridgeRequiredOwnerFieldCount -Actual (Get-PropertyOrDefault -Object $record -Name "finalPublicReleaseClosureBridgeRequiredOwnerFieldCount" -DefaultValue -1) -Detail "Owner decision final bridge required owner field count must match bridge validation."
+Compare-IntSnapshot -Id "final-bridge-blocked-owner-field-count-match" -Expected $bridgeBlockedRequiredOwnerFieldCount -Actual (Get-PropertyOrDefault -Object $record -Name "finalPublicReleaseClosureBridgeBlockedRequiredOwnerFieldCount" -DefaultValue -1) -Detail "Owner decision final bridge blocked owner field count must match bridge validation."
+Compare-IntSnapshot -Id "public-release-owner-required-owner-field-count-match" -Expected $publicReleaseOwnerExecutionPackageRequiredOwnerFieldCount -Actual (Get-PropertyOrDefault -Object $record -Name "publicReleaseOwnerExecutionPackageRequiredOwnerFieldCount" -DefaultValue -1) -Detail "Owner decision public release owner execution required owner field count must match validation artifact."
+Compare-IntSnapshot -Id "public-release-owner-blocked-owner-field-count-match" -Expected $publicReleaseOwnerExecutionPackageBlockedRequiredOwnerFieldCount -Actual (Get-PropertyOrDefault -Object $record -Name "publicReleaseOwnerExecutionPackageBlockedRequiredOwnerFieldCount" -DefaultValue -1) -Detail "Owner decision public release owner execution blocked owner field count must match validation artifact."
+Compare-IntSnapshot -Id "public-download-owner-required-owner-field-count-match" -Expected $publicPackageDownloadProofOwnerExecutionPackRequiredOwnerFieldCount -Actual (Get-PropertyOrDefault -Object $record -Name "publicPackageDownloadProofOwnerExecutionPackRequiredOwnerFieldCount" -DefaultValue -1) -Detail "Owner decision public download owner execution required owner field count must match validation artifact."
+Compare-IntSnapshot -Id "public-download-owner-blocked-owner-field-count-match" -Expected $publicPackageDownloadProofOwnerExecutionPackBlockedRequiredOwnerFieldCount -Actual (Get-PropertyOrDefault -Object $record -Name "publicPackageDownloadProofOwnerExecutionPackBlockedRequiredOwnerFieldCount" -DefaultValue -1) -Detail "Owner decision public download owner execution blocked owner field count must match validation artifact."
+Compare-IntSnapshot -Id "post-publish-user-required-owner-field-count-match" -Expected $postPublishUserVerificationPackRequiredOwnerFieldCount -Actual (Get-PropertyOrDefault -Object $record -Name "postPublishUserVerificationPackRequiredOwnerFieldCount" -DefaultValue -1) -Detail "Owner decision post-publish user verification required owner field count must match validation artifact."
+Compare-IntSnapshot -Id "post-publish-user-blocked-owner-field-count-match" -Expected $postPublishUserVerificationPackBlockedRequiredOwnerFieldCount -Actual (Get-PropertyOrDefault -Object $record -Name "postPublishUserVerificationPackBlockedRequiredOwnerFieldCount" -DefaultValue -1) -Detail "Owner decision post-publish user verification blocked owner field count must match validation artifact."
+Compare-IntSnapshot -Id "strict-close-required-owner-field-count-match" -Expected $strictCloseReadyRequiredOwnerFieldCount -Actual (Get-PropertyOrDefault -Object $record -Name "strictCloseReadyRequiredOwnerFieldCount" -DefaultValue -1) -Detail "Owner decision strict close required owner field count must match strict close dashboard validation."
+Compare-IntSnapshot -Id "strict-close-blocked-owner-field-count-match" -Expected $strictCloseReadyBlockedRequiredOwnerFieldCount -Actual (Get-PropertyOrDefault -Object $record -Name "strictCloseReadyBlockedRequiredOwnerFieldCount" -DefaultValue -1) -Detail "Owner decision strict close blocked owner field count must match strict close dashboard validation."
 
 $postPublishProofCandidateReady = [bool](Get-PropertyOrDefault -Object $postPublishProofResultValidation -Name "proofCandidateReady" -DefaultValue $false)
 $postPublishSourceLinkageReady = [bool](Get-PropertyOrDefault -Object $postPublishProofResultValidation -Name "sourceProofLinkageReady" -DefaultValue $false)
 Add-Item -Id "final-bridge-ready-before-close" -Passed $bridgeReady -Severity "action-required" -Detail "Final public release closure bridge must be ready before owner close decision can become ready."
 Add-Item -Id "approved-close-requires-ready-final-bridge" -Passed (-not $approvedClose -or $bridgeReady) -Severity "blocker" -Detail "Owner cannot approve release issue close while final public release closure bridge remains blocked."
+Add-Item -Id "owner-field-surfaces-unblocked-before-close" -Passed (-not $ownerFieldSurfacesStillBlocked) -Severity "action-required" -Detail "Owner field surfaces across final bridge, public release, public download, post-publish verification, and strict close dashboard must be unblocked before close readiness."
+Add-Item -Id "approved-close-requires-owner-field-surfaces-unblocked" -Passed (-not $approvedClose -or -not $ownerFieldSurfacesStillBlocked) -Severity "blocker" -Detail "Owner cannot approve release issue close while any required Owner field surface remains blocked."
 Add-Item -Id "post-publish-proof-candidate-ready" -Passed $postPublishProofCandidateReady -Severity "action-required" -Detail "Post-publish clean consumer proof result must have proofCandidateReady=true."
 Add-Item -Id "post-publish-source-proof-linkage-ready" -Passed $postPublishSourceLinkageReady -Severity "action-required" -Detail "Post-publish clean consumer proof result must link ready GitHub Actions, Owner public publish, and public download proofs."
 Add-Item -Id "approved-close-requires-post-publish-source-linkage" -Passed (-not $approvedClose -or $postPublishSourceLinkageReady) -Severity "blocker" -Detail "Owner cannot approve release issue close without post-publish source proof linkage."
@@ -223,8 +267,29 @@ $validation = [pscustomobject]@{
   closureBlockedLaneCount = $bridgeBlockedLaneCount
   closureFailedConsistencyBlockerCount = $bridgeFailedConsistencyBlockerCount
   closureFailedConsistencyActionRequiredCount = $bridgeFailedConsistencyActionRequiredCount
+  finalPublicReleaseClosureBridgeRequiredOwnerFieldCount = $bridgeRequiredOwnerFieldCount
+  finalPublicReleaseClosureBridgeBlockedRequiredOwnerFieldCount = $bridgeBlockedRequiredOwnerFieldCount
+  finalPublicReleaseClosureBridgeRejectedSubstituteCount = $bridgeRejectedSubstituteCount
+  finalPublicReleaseClosureBridgeSourceReadinessSignalCount = $bridgeSourceReadinessSignalCount
+  publicReleaseOwnerExecutionPackageValidationState = $publicReleaseOwnerExecutionPackageValidationState
+  publicReleaseOwnerExecutionPackageRequiredOwnerFieldCount = $publicReleaseOwnerExecutionPackageRequiredOwnerFieldCount
+  publicReleaseOwnerExecutionPackageBlockedRequiredOwnerFieldCount = $publicReleaseOwnerExecutionPackageBlockedRequiredOwnerFieldCount
+  publicReleaseOwnerExecutionPackageRejectedSubstituteCount = $publicReleaseOwnerExecutionPackageRejectedSubstituteCount
   publicPackageDownloadProofOwnerExecutionPackValidationState = $publicPackageDownloadProofOwnerExecutionPackValidationState
+  publicPackageDownloadProofOwnerExecutionPackRequiredOwnerFieldCount = $publicPackageDownloadProofOwnerExecutionPackRequiredOwnerFieldCount
+  publicPackageDownloadProofOwnerExecutionPackBlockedRequiredOwnerFieldCount = $publicPackageDownloadProofOwnerExecutionPackBlockedRequiredOwnerFieldCount
+  publicPackageDownloadProofOwnerExecutionPackRejectedSubstituteCount = $publicPackageDownloadProofOwnerExecutionPackRejectedSubstituteCount
+  publicPackageDownloadProofOwnerExecutionPackSourceReadinessSignalCount = $publicPackageDownloadProofOwnerExecutionPackSourceReadinessSignalCount
   postPublishUserVerificationPackValidationState = $postPublishUserVerificationPackValidationState
+  postPublishUserVerificationPackRequiredOwnerFieldCount = $postPublishUserVerificationPackRequiredOwnerFieldCount
+  postPublishUserVerificationPackBlockedRequiredOwnerFieldCount = $postPublishUserVerificationPackBlockedRequiredOwnerFieldCount
+  postPublishUserVerificationPackRejectedSubstituteCount = $postPublishUserVerificationPackRejectedSubstituteCount
+  postPublishUserVerificationPackSourceReadinessSignalCount = $postPublishUserVerificationPackSourceReadinessSignalCount
+  strictCloseReadyRequiredOwnerFieldCount = $strictCloseReadyRequiredOwnerFieldCount
+  strictCloseReadyBlockedRequiredOwnerFieldCount = $strictCloseReadyBlockedRequiredOwnerFieldCount
+  strictCloseReadyRejectedSubstituteCount = $strictCloseReadyRejectedSubstituteCount
+  strictCloseReadySourceReadinessSignalCount = $strictCloseReadySourceReadinessSignalCount
+  ownerFieldSurfacesStillBlocked = $ownerFieldSurfacesStillBlocked
   publicPackageDownloadOwnerExecutionPackState = [string](Get-PropertyOrDefault -Object $record -Name "publicPackageDownloadOwnerExecutionPackState" -DefaultValue "")
   postPublishUserVerificationPackState = [string](Get-PropertyOrDefault -Object $record -Name "postPublishUserVerificationPackState" -DefaultValue "")
   postPublishProofCandidateReady = $postPublishProofCandidateReady
@@ -264,8 +329,20 @@ $markdown = @"
 | finalPublicReleaseClosureBridgeValidationState | ``$($validation.finalPublicReleaseClosureBridgeValidationState)`` |
 | closureLaneCount | ``$($validation.closureLaneCount)`` |
 | closureBlockedLaneCount | ``$($validation.closureBlockedLaneCount)`` |
+| finalPublicReleaseClosureBridgeRequiredOwnerFieldCount | ``$($validation.finalPublicReleaseClosureBridgeRequiredOwnerFieldCount)`` |
+| finalPublicReleaseClosureBridgeBlockedRequiredOwnerFieldCount | ``$($validation.finalPublicReleaseClosureBridgeBlockedRequiredOwnerFieldCount)`` |
+| publicReleaseOwnerExecutionPackageValidationState | ``$($validation.publicReleaseOwnerExecutionPackageValidationState)`` |
+| publicReleaseOwnerExecutionPackageRequiredOwnerFieldCount | ``$($validation.publicReleaseOwnerExecutionPackageRequiredOwnerFieldCount)`` |
+| publicReleaseOwnerExecutionPackageBlockedRequiredOwnerFieldCount | ``$($validation.publicReleaseOwnerExecutionPackageBlockedRequiredOwnerFieldCount)`` |
 | publicPackageDownloadProofOwnerExecutionPackValidationState | ``$($validation.publicPackageDownloadProofOwnerExecutionPackValidationState)`` |
+| publicPackageDownloadProofOwnerExecutionPackRequiredOwnerFieldCount | ``$($validation.publicPackageDownloadProofOwnerExecutionPackRequiredOwnerFieldCount)`` |
+| publicPackageDownloadProofOwnerExecutionPackBlockedRequiredOwnerFieldCount | ``$($validation.publicPackageDownloadProofOwnerExecutionPackBlockedRequiredOwnerFieldCount)`` |
 | postPublishUserVerificationPackValidationState | ``$($validation.postPublishUserVerificationPackValidationState)`` |
+| postPublishUserVerificationPackRequiredOwnerFieldCount | ``$($validation.postPublishUserVerificationPackRequiredOwnerFieldCount)`` |
+| postPublishUserVerificationPackBlockedRequiredOwnerFieldCount | ``$($validation.postPublishUserVerificationPackBlockedRequiredOwnerFieldCount)`` |
+| strictCloseReadyRequiredOwnerFieldCount | ``$($validation.strictCloseReadyRequiredOwnerFieldCount)`` |
+| strictCloseReadyBlockedRequiredOwnerFieldCount | ``$($validation.strictCloseReadyBlockedRequiredOwnerFieldCount)`` |
+| ownerFieldSurfacesStillBlocked | ``$($validation.ownerFieldSurfacesStillBlocked)`` |
 | publicPackageDownloadOwnerExecutionPackState | ``$($validation.publicPackageDownloadOwnerExecutionPackState)`` |
 | postPublishUserVerificationPackState | ``$($validation.postPublishUserVerificationPackState)`` |
 | postPublishProofSourceLinkageReady | ``$($validation.postPublishProofSourceLinkageReady)`` |

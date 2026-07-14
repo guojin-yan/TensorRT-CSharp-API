@@ -58,6 +58,16 @@ function Get-StringArrayProperty {
   return @($value | ForEach-Object { [string]$_ } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
 }
 
+function Sum-IntProperty {
+  param([AllowNull()][object[]]$Items, [string]$Name)
+  $total = 0
+  foreach ($item in @($Items)) {
+    $total += [int](Get-PropertyOrDefault -Object $item -Name $Name -DefaultValue 0)
+  }
+
+  return $total
+}
+
 function New-ClosureConsistencyCheck {
   param([string]$Id, [bool]$Passed, [string]$Severity, [string]$Detail)
   [pscustomobject]@{
@@ -82,7 +92,12 @@ function New-ClosureLane {
     [bool]$RequireProofReady = $false,
     [string]$ProofReadyProperty = "proofCandidateReady",
     [string]$ValidatorPath = "",
-    [string]$RequiredEvidence = ""
+    [string]$RequiredEvidence = "",
+    [int]$RequiredOwnerFieldCount = 0,
+    [int]$BlockedRequiredOwnerFieldCount = 0,
+    [int]$ReadyOwnerFieldCount = 0,
+    [int]$RejectedSubstituteCount = 0,
+    [int]$SourceReadinessSignalCount = 0
   )
 
   $state = [string](Get-PropertyOrDefault -Object $Record -Name $StateProperty -DefaultValue "missing-$Id")
@@ -106,6 +121,11 @@ function New-ClosureLane {
     ownerAction = $OwnerAction
     requiredEvidence = $evidence
     validatorPath = $ValidatorPath
+    requiredOwnerFieldCount = $RequiredOwnerFieldCount
+    blockedRequiredOwnerFieldCount = $BlockedRequiredOwnerFieldCount
+    readyOwnerFieldCount = $ReadyOwnerFieldCount
+    rejectedSubstituteCount = $RejectedSubstituteCount
+    sourceReadinessSignalCount = $SourceReadinessSignalCount
     requiredBeforeClose = @($RequiredBeforeClose)
     performsPublish = $false
     usesPublishToken = $false
@@ -186,6 +206,17 @@ foreach ($lane in $preReleaseMatrixLanes) {
 $preReleaseLaneMetadataReady = $null -ne $preReleaseReadinessMatrix -and $preReleaseMissingLaneIds.Count -eq 0 -and $preReleaseLaneMetadataFindings.Count -eq 0
 $preReleasePromoteFlagsSafe = $preReleasePrematurePromoteFindings.Count -eq 0
 
+$publicPackageDownloadOwnerExecutionRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $publicPackageDownloadOwnerExecutionPack -Name "requiredOwnerFieldCount" -DefaultValue 0)
+$publicPackageDownloadOwnerExecutionBlockedRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $publicPackageDownloadOwnerExecutionPack -Name "blockedRequiredOwnerFieldCount" -DefaultValue 0)
+$publicPackageDownloadOwnerExecutionReadyOwnerFieldCount = [Math]::Max(0, $publicPackageDownloadOwnerExecutionRequiredOwnerFieldCount - $publicPackageDownloadOwnerExecutionBlockedRequiredOwnerFieldCount)
+$publicPackageDownloadOwnerExecutionRejectedSubstituteCount = [int](Get-PropertyOrDefault -Object $publicPackageDownloadOwnerExecutionPack -Name "rejectedSubstituteCount" -DefaultValue 0)
+$publicPackageDownloadOwnerExecutionSourceReadinessSignalCount = [int](Get-PropertyOrDefault -Object $publicPackageDownloadOwnerExecutionPack -Name "sourceReadinessSignalCount" -DefaultValue 0)
+$postPublishUserVerificationRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $postPublishUserVerificationPack -Name "requiredOwnerFieldCount" -DefaultValue 0)
+$postPublishUserVerificationBlockedRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $postPublishUserVerificationPack -Name "blockedRequiredOwnerFieldCount" -DefaultValue 0)
+$postPublishUserVerificationReadyOwnerFieldCount = [Math]::Max(0, $postPublishUserVerificationRequiredOwnerFieldCount - $postPublishUserVerificationBlockedRequiredOwnerFieldCount)
+$postPublishUserVerificationRejectedSubstituteCount = [int](Get-PropertyOrDefault -Object $postPublishUserVerificationPack -Name "rejectedSubstituteCount" -DefaultValue 0)
+$postPublishUserVerificationSourceReadinessSignalCount = [int](Get-PropertyOrDefault -Object $postPublishUserVerificationPack -Name "sourceReadinessSignalCount" -DefaultValue 0)
+
 $lanes = @(
   New-ClosureLane `
     -Id "pre-release-package-proof-readiness" `
@@ -264,7 +295,12 @@ $lanes = @(
     -RequiredBeforeClose @("owner download commands reviewed", "public URLs captured", "downloaded package hashes captured", "candidate validator run", "post-publish verification pack refreshed") `
     -Boundary "The Owner execution pack is manual guidance only; it is not public package download proof by itself, not runtime proof, not post-publish proof, not publish approval, not package push, and cannot close the release issue." `
     -ValidatorPath "eng\Test-PublicPackageDownloadProofOwnerExecutionPack.ps1 -Strict" `
-    -RequiredEvidence "A completed owner-filled public-package-download-proof-input plus public-package-download-proof-candidate-validation.json, not this guidance pack alone."
+    -RequiredEvidence "A completed owner-filled public-package-download-proof-input plus public-package-download-proof-candidate-validation.json, not this guidance pack alone." `
+    -RequiredOwnerFieldCount $publicPackageDownloadOwnerExecutionRequiredOwnerFieldCount `
+    -BlockedRequiredOwnerFieldCount $publicPackageDownloadOwnerExecutionBlockedRequiredOwnerFieldCount `
+    -ReadyOwnerFieldCount $publicPackageDownloadOwnerExecutionReadyOwnerFieldCount `
+    -RejectedSubstituteCount $publicPackageDownloadOwnerExecutionRejectedSubstituteCount `
+    -SourceReadinessSignalCount $publicPackageDownloadOwnerExecutionSourceReadinessSignalCount
   New-ClosureLane `
     -Id "clean-external-consumer-smoke" `
     -Title "Clean external consumer smoke input" `
@@ -298,7 +334,12 @@ $lanes = @(
     -RequiredBeforeClose @("public download lane ready", "clean external consumer lane ready", "post-publish proof lane ready", "final post-publish audit ready", "strict close dashboard ready") `
     -Boundary "The post-publish user verification pack is owner action aggregation only; it is not runtime proof, not post-publish proof, not publish approval, not release close approval, not package push, and cannot close release issue." `
     -ValidatorPath "eng\Test-PostPublishUserVerificationPack.ps1 -Strict" `
-    -RequiredEvidence "All post-publish user verification lanes ready with real public download and clean external consumer evidence."
+    -RequiredEvidence "All post-publish user verification lanes ready with real public download and clean external consumer evidence." `
+    -RequiredOwnerFieldCount $postPublishUserVerificationRequiredOwnerFieldCount `
+    -BlockedRequiredOwnerFieldCount $postPublishUserVerificationBlockedRequiredOwnerFieldCount `
+    -ReadyOwnerFieldCount $postPublishUserVerificationReadyOwnerFieldCount `
+    -RejectedSubstituteCount $postPublishUserVerificationRejectedSubstituteCount `
+    -SourceReadinessSignalCount $postPublishUserVerificationSourceReadinessSignalCount
   New-ClosureLane `
     -Id "release-issue-close-owner-decision" `
     -Title "Release issue close owner decision input" `
@@ -356,6 +397,16 @@ $publicDownloadGitHubReleaseAssetUrl = [string](Get-PropertyOrDefault -Object $p
 $publicDownloadGitHubReleaseAssetSha256 = [string](Get-PropertyOrDefault -Object $publicDownload -Name "githubReleaseAssetSha256" -DefaultValue "")
 $publicPackageDownloadOwnerExecutionState = [string](Get-PropertyOrDefault -Object $publicPackageDownloadOwnerExecutionPack -Name "validationState" -DefaultValue "missing-public-package-download-proof-owner-execution-pack-validation")
 $publicPackageDownloadOwnerExecutionBlocked = $publicPackageDownloadOwnerExecutionState -eq "blocked-public-package-download-proof-owner-execution-required"
+$publicPackageDownloadOwnerExecutionRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $publicPackageDownloadOwnerExecutionPack -Name "requiredOwnerFieldCount" -DefaultValue 0)
+$publicPackageDownloadOwnerExecutionBlockedRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $publicPackageDownloadOwnerExecutionPack -Name "blockedRequiredOwnerFieldCount" -DefaultValue 0)
+$publicPackageDownloadOwnerExecutionReadyOwnerFieldCount = [Math]::Max(0, $publicPackageDownloadOwnerExecutionRequiredOwnerFieldCount - $publicPackageDownloadOwnerExecutionBlockedRequiredOwnerFieldCount)
+$publicPackageDownloadOwnerExecutionRejectedSubstituteCount = [int](Get-PropertyOrDefault -Object $publicPackageDownloadOwnerExecutionPack -Name "rejectedSubstituteCount" -DefaultValue 0)
+$publicPackageDownloadOwnerExecutionSourceReadinessSignalCount = [int](Get-PropertyOrDefault -Object $publicPackageDownloadOwnerExecutionPack -Name "sourceReadinessSignalCount" -DefaultValue 0)
+$publicPackageDownloadOwnerExecutionFieldSurfaceReady =
+  $publicPackageDownloadOwnerExecutionRequiredOwnerFieldCount -ge 20 -and
+  $publicPackageDownloadOwnerExecutionBlockedRequiredOwnerFieldCount -eq $publicPackageDownloadOwnerExecutionRequiredOwnerFieldCount -and
+  $publicPackageDownloadOwnerExecutionRejectedSubstituteCount -ge 8 -and
+  $publicPackageDownloadOwnerExecutionSourceReadinessSignalCount -ge 6
 $publicPackageDownloadOwnerExecutionSafe =
   $null -eq $publicPackageDownloadOwnerExecutionPack -or (
   -not [bool](Get-PropertyOrDefault -Object $publicPackageDownloadOwnerExecutionPack -Name "performsPublish" -DefaultValue $true) -and
@@ -376,6 +427,16 @@ $postPublishSourceOwnerPackageVersion = [string](Get-PropertyOrDefault -Object $
 $postPublishSourceOwnerPackageSha256 = [string](Get-PropertyOrDefault -Object $postPublishProof -Name "sourceOwnerPublicPackageSha256" -DefaultValue "")
 $postPublishUserVerificationState = [string](Get-PropertyOrDefault -Object $postPublishUserVerificationPack -Name "validationState" -DefaultValue "missing-post-publish-user-verification-pack-validation")
 $postPublishUserVerificationBlocked = $postPublishUserVerificationState -eq "blocked-post-publish-user-verification-required"
+$postPublishUserVerificationRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $postPublishUserVerificationPack -Name "requiredOwnerFieldCount" -DefaultValue 0)
+$postPublishUserVerificationBlockedRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $postPublishUserVerificationPack -Name "blockedRequiredOwnerFieldCount" -DefaultValue 0)
+$postPublishUserVerificationReadyOwnerFieldCount = [Math]::Max(0, $postPublishUserVerificationRequiredOwnerFieldCount - $postPublishUserVerificationBlockedRequiredOwnerFieldCount)
+$postPublishUserVerificationRejectedSubstituteCount = [int](Get-PropertyOrDefault -Object $postPublishUserVerificationPack -Name "rejectedSubstituteCount" -DefaultValue 0)
+$postPublishUserVerificationSourceReadinessSignalCount = [int](Get-PropertyOrDefault -Object $postPublishUserVerificationPack -Name "sourceReadinessSignalCount" -DefaultValue 0)
+$postPublishUserVerificationFieldSurfaceReady =
+  $postPublishUserVerificationRequiredOwnerFieldCount -ge 19 -and
+  $postPublishUserVerificationBlockedRequiredOwnerFieldCount -eq $postPublishUserVerificationRequiredOwnerFieldCount -and
+  $postPublishUserVerificationRejectedSubstituteCount -ge 8 -and
+  $postPublishUserVerificationSourceReadinessSignalCount -ge 9
 $postPublishUserVerificationSafe =
   $null -eq $postPublishUserVerificationPack -or (
   -not [bool](Get-PropertyOrDefault -Object $postPublishUserVerificationPack -Name "performsPublish" -DefaultValue $true) -and
@@ -405,6 +466,7 @@ $crossLaneConsistencyChecks = @(
   New-ClosureConsistencyCheck -Id "public-download-links-source-proofs" -Passed ($publicDownloadSourceGitHubActionsReady -and $publicDownloadSourceOwnerReady) -Severity "action-required" -Detail "Public download proof must link to ready GitHub Actions and Owner public publish result."
   New-ClosureConsistencyCheck -Id "public-package-download-owner-execution-pack-present" -Passed ($null -ne $publicPackageDownloadOwnerExecutionPack) -Severity "action-required" -Detail "Owner public package download execution pack validation must be present before final closure review."
   New-ClosureConsistencyCheck -Id "public-package-download-owner-execution-pack-blocked" -Passed $publicPackageDownloadOwnerExecutionBlocked -Severity "action-required" -Detail "Owner execution pack must remain blocked until real owner public package download evidence is supplied; it is guidance only and not proof."
+  New-ClosureConsistencyCheck -Id "public-package-download-owner-execution-pack-field-surface-present" -Passed $publicPackageDownloadOwnerExecutionFieldSurfaceReady -Severity "blocker" -Detail "Owner public package download execution pack must project required/blocked owner fields, rejected substitute count, and source readiness signal count."
   New-ClosureConsistencyCheck -Id "public-package-download-owner-execution-pack-safe" -Passed $publicPackageDownloadOwnerExecutionSafe -Severity "blocker" -Detail "Owner execution pack must keep publish/token/proof/close flags false."
   New-ClosureConsistencyCheck -Id "owner-and-public-download-package-url-match" -Passed (-not [string]::IsNullOrWhiteSpace($ownerPublicPackageUrl) -and $ownerPublicPackageUrl.Equals($publicDownloadSourceOwnerPackageUrl, [StringComparison]::OrdinalIgnoreCase) -and $ownerPublicPackageUrl.Equals($publicDownloadManagedPackageUrl, [StringComparison]::OrdinalIgnoreCase)) -Severity "action-required" -Detail "Owner public package URL must match the public download candidate managed package page URL."
   New-ClosureConsistencyCheck -Id "owner-and-public-download-version-match" -Passed (-not [string]::IsNullOrWhiteSpace($ownerPublicPackageVersion) -and $ownerPublicPackageVersion.Equals($publicDownloadSourceOwnerPackageVersion, [StringComparison]::OrdinalIgnoreCase)) -Severity "action-required" -Detail "Owner public package version must match the public download candidate source version."
@@ -416,6 +478,7 @@ $crossLaneConsistencyChecks = @(
   New-ClosureConsistencyCheck -Id "post-publish-links-source-proofs" -Passed ($postPublishSourceProofLinkageReady -and $postPublishSourceGitHubActionsReady -and $postPublishSourceOwnerReady -and $postPublishSourcePublicDownloadReady) -Severity "action-required" -Detail "Post-publish proof must link to ready GitHub Actions, Owner public publish, and public package download proofs."
   New-ClosureConsistencyCheck -Id "post-publish-user-verification-pack-present" -Passed ($null -ne $postPublishUserVerificationPack) -Severity "action-required" -Detail "Post-publish user verification pack validation must be present before final closure review."
   New-ClosureConsistencyCheck -Id "post-publish-user-verification-pack-blocked" -Passed $postPublishUserVerificationBlocked -Severity "action-required" -Detail "Post-publish user verification pack must remain blocked until real public download, clean consumer, post-publish proof, and final audit lanes are ready."
+  New-ClosureConsistencyCheck -Id "post-publish-user-verification-pack-field-surface-present" -Passed $postPublishUserVerificationFieldSurfaceReady -Severity "blocker" -Detail "Post-publish user verification pack must project required/blocked owner fields, rejected substitute count, and source readiness signal count."
   New-ClosureConsistencyCheck -Id "post-publish-user-verification-pack-safe" -Passed $postPublishUserVerificationSafe -Severity "blocker" -Detail "Post-publish user verification pack must keep publish/token/proof/close flags false."
   New-ClosureConsistencyCheck -Id "post-publish-owner-package-url-match" -Passed (-not [string]::IsNullOrWhiteSpace($postPublishPublicPackageUrl) -and $postPublishPublicPackageUrl.Equals($ownerPublicPackageUrl, [StringComparison]::OrdinalIgnoreCase) -and $postPublishPublicPackageUrl.Equals($postPublishSourceOwnerPackageUrl, [StringComparison]::OrdinalIgnoreCase)) -Severity "action-required" -Detail "Post-publish public package URL must match Owner public publish URL."
   New-ClosureConsistencyCheck -Id "post-publish-owner-package-version-match" -Passed (-not [string]::IsNullOrWhiteSpace($postPublishPublicPackageVersion) -and $postPublishPublicPackageVersion.Equals($ownerPublicPackageVersion, [StringComparison]::OrdinalIgnoreCase) -and $postPublishPublicPackageVersion.Equals($postPublishSourceOwnerPackageVersion, [StringComparison]::OrdinalIgnoreCase)) -Severity "action-required" -Detail "Post-publish package version must match Owner public publish version."
@@ -425,6 +488,13 @@ $crossLaneConsistencyChecks = @(
 
 $blockedLanes = @($lanes | Where-Object { -not $_.ready })
 $readyLanes = @($lanes | Where-Object { $_.ready })
+$ownerFieldSurfaceLanes = @($lanes | Where-Object { [int](Get-PropertyOrDefault -Object $_ -Name "requiredOwnerFieldCount" -DefaultValue 0) -gt 0 })
+$blockedOwnerFieldSurfaceLanes = @($ownerFieldSurfaceLanes | Where-Object { [int](Get-PropertyOrDefault -Object $_ -Name "blockedRequiredOwnerFieldCount" -DefaultValue 0) -gt 0 })
+$requiredOwnerFieldCount = Sum-IntProperty -Items $ownerFieldSurfaceLanes -Name "requiredOwnerFieldCount"
+$blockedRequiredOwnerFieldCount = Sum-IntProperty -Items $ownerFieldSurfaceLanes -Name "blockedRequiredOwnerFieldCount"
+$readyOwnerFieldCount = Sum-IntProperty -Items $ownerFieldSurfaceLanes -Name "readyOwnerFieldCount"
+$rejectedSubstituteCount = Sum-IntProperty -Items $ownerFieldSurfaceLanes -Name "rejectedSubstituteCount"
+$sourceReadinessSignalCount = Sum-IntProperty -Items $ownerFieldSurfaceLanes -Name "sourceReadinessSignalCount"
 $failedConsistencyBlockers = @($crossLaneConsistencyChecks | Where-Object { -not $_.passed -and $_.severity -eq "blocker" })
 $failedConsistencyActionRequired = @($crossLaneConsistencyChecks | Where-Object { -not $_.passed -and $_.severity -eq "action-required" })
 $allSafe = $true
@@ -458,6 +528,13 @@ $record = [pscustomobject]@{
   failedConsistencyBlockerCount = $failedConsistencyBlockers.Count
   failedConsistencyActionRequiredCount = $failedConsistencyActionRequired.Count
   forbiddenSubstituteFindingCount = $forbiddenFindingCount
+  requiredOwnerFieldCount = $requiredOwnerFieldCount
+  blockedRequiredOwnerFieldCount = $blockedRequiredOwnerFieldCount
+  readyOwnerFieldCount = $readyOwnerFieldCount
+  rejectedSubstituteCount = $rejectedSubstituteCount
+  sourceReadinessSignalCount = $sourceReadinessSignalCount
+  ownerFieldSurfaceLaneCount = $ownerFieldSurfaceLanes.Count
+  blockedOwnerFieldSurfaceLaneCount = $blockedOwnerFieldSurfaceLanes.Count
   notExecutedByAutomation = $true
   performsPublish = $false
   usesPublishToken = $false
@@ -517,6 +594,11 @@ $record = [pscustomobject]@{
     publicPackageDownloadOwnerExecutionPackState = $publicPackageDownloadOwnerExecutionState
     publicPackageDownloadOwnerExecutionPackBlocked = $publicPackageDownloadOwnerExecutionBlocked
     publicPackageDownloadOwnerExecutionPackSafe = $publicPackageDownloadOwnerExecutionSafe
+    publicPackageDownloadOwnerExecutionPackRequiredOwnerFieldCount = $publicPackageDownloadOwnerExecutionRequiredOwnerFieldCount
+    publicPackageDownloadOwnerExecutionPackBlockedRequiredOwnerFieldCount = $publicPackageDownloadOwnerExecutionBlockedRequiredOwnerFieldCount
+    publicPackageDownloadOwnerExecutionPackReadyOwnerFieldCount = $publicPackageDownloadOwnerExecutionReadyOwnerFieldCount
+    publicPackageDownloadOwnerExecutionPackRejectedSubstituteCount = $publicPackageDownloadOwnerExecutionRejectedSubstituteCount
+    publicPackageDownloadOwnerExecutionPackSourceReadinessSignalCount = $publicPackageDownloadOwnerExecutionSourceReadinessSignalCount
     postPublishProofReady = $postPublishProofReady
     postPublishSourceProofLinkageReady = $postPublishSourceProofLinkageReady
     postPublishSourceGitHubActionsReady = $postPublishSourceGitHubActionsReady
@@ -531,6 +613,18 @@ $record = [pscustomobject]@{
     postPublishUserVerificationPackState = $postPublishUserVerificationState
     postPublishUserVerificationPackBlocked = $postPublishUserVerificationBlocked
     postPublishUserVerificationPackSafe = $postPublishUserVerificationSafe
+    postPublishUserVerificationPackRequiredOwnerFieldCount = $postPublishUserVerificationRequiredOwnerFieldCount
+    postPublishUserVerificationPackBlockedRequiredOwnerFieldCount = $postPublishUserVerificationBlockedRequiredOwnerFieldCount
+    postPublishUserVerificationPackReadyOwnerFieldCount = $postPublishUserVerificationReadyOwnerFieldCount
+    postPublishUserVerificationPackRejectedSubstituteCount = $postPublishUserVerificationRejectedSubstituteCount
+    postPublishUserVerificationPackSourceReadinessSignalCount = $postPublishUserVerificationSourceReadinessSignalCount
+    requiredOwnerFieldCount = $requiredOwnerFieldCount
+    blockedRequiredOwnerFieldCount = $blockedRequiredOwnerFieldCount
+    readyOwnerFieldCount = $readyOwnerFieldCount
+    rejectedSubstituteCount = $rejectedSubstituteCount
+    sourceReadinessSignalCount = $sourceReadinessSignalCount
+    ownerFieldSurfaceLaneCount = $ownerFieldSurfaceLanes.Count
+    blockedOwnerFieldSurfaceLaneCount = $blockedOwnerFieldSurfaceLanes.Count
   }
   sourceArtifacts = @($lanes | ForEach-Object { $_.artifact })
   nextOwnerActions = @($blockedLanes | ForEach-Object { [pscustomobject]@{ laneId = $_.laneId; state = $_.state; ownerAction = $_.ownerAction; requiredBeforeClose = $_.requiredBeforeClose } })
@@ -560,6 +654,13 @@ $markdown = @"
 | failedConsistencyBlockerCount | ``$($record.failedConsistencyBlockerCount)`` |
 | failedConsistencyActionRequiredCount | ``$($record.failedConsistencyActionRequiredCount)`` |
 | forbiddenSubstituteFindingCount | ``$($record.forbiddenSubstituteFindingCount)`` |
+| requiredOwnerFieldCount | ``$($record.requiredOwnerFieldCount)`` |
+| blockedRequiredOwnerFieldCount | ``$($record.blockedRequiredOwnerFieldCount)`` |
+| readyOwnerFieldCount | ``$($record.readyOwnerFieldCount)`` |
+| rejectedSubstituteCount | ``$($record.rejectedSubstituteCount)`` |
+| sourceReadinessSignalCount | ``$($record.sourceReadinessSignalCount)`` |
+| ownerFieldSurfaceLaneCount | ``$($record.ownerFieldSurfaceLaneCount)`` |
+| blockedOwnerFieldSurfaceLaneCount | ``$($record.blockedOwnerFieldSurfaceLaneCount)`` |
 | performsPublish | ``$($record.performsPublish)`` |
 | usesPublishToken | ``$($record.usesPublishToken)`` |
 | canPublishPublicly | ``$($record.canPublishPublicly)`` |

@@ -33,6 +33,16 @@ function ConvertTo-MarkdownCell {
   return ([string]$Value).Replace("|", "\|").Replace("`r", " ").Replace("`n", " ")
 }
 
+function Sum-IntProperty {
+  param([AllowNull()][object[]]$Items, [string]$Name)
+  $total = 0
+  foreach ($item in @($Items)) {
+    $total += [int](Get-PropertyOrDefault -Object $item -Name $Name -DefaultValue 0)
+  }
+
+  return $total
+}
+
 function New-CloseLane {
   param(
     [string]$Id,
@@ -42,7 +52,12 @@ function New-CloseLane {
     [string[]]$MissingRealProof,
     [string]$OwnerNextAction,
     [string]$Validator,
-    [string]$SourceArtifact
+    [string]$SourceArtifact,
+    [int]$RequiredOwnerFieldCount = 0,
+    [int]$BlockedRequiredOwnerFieldCount = 0,
+    [int]$ReadyOwnerFieldCount = 0,
+    [int]$RejectedSubstituteCount = 0,
+    [int]$SourceReadinessSignalCount = 0
   )
 
   $ready = [string]::Equals($State, $RequiredState, [StringComparison]::OrdinalIgnoreCase) -and @($MissingOwnerInput).Count -eq 0 -and @($MissingRealProof).Count -eq 0
@@ -57,6 +72,11 @@ function New-CloseLane {
     ownerNextAction = $OwnerNextAction
     validator = $Validator
     sourceArtifact = $SourceArtifact
+    requiredOwnerFieldCount = $RequiredOwnerFieldCount
+    blockedRequiredOwnerFieldCount = $BlockedRequiredOwnerFieldCount
+    readyOwnerFieldCount = $ReadyOwnerFieldCount
+    rejectedSubstituteCount = $RejectedSubstituteCount
+    sourceReadinessSignalCount = $SourceReadinessSignalCount
     performsPublish = $false
     canPromoteRuntimeProof = $false
     canPublishPublicly = $false
@@ -78,7 +98,12 @@ function New-RemoteProofCloseLane {
     [AllowNull()][object]$RemoteLane,
     [string]$OwnerNextAction,
     [string]$Validator,
-    [string]$MissingRealProof
+    [string]$MissingRealProof,
+    [int]$RequiredOwnerFieldCount = 0,
+    [int]$BlockedRequiredOwnerFieldCount = 0,
+    [int]$ReadyOwnerFieldCount = 0,
+    [int]$RejectedSubstituteCount = 0,
+    [int]$SourceReadinessSignalCount = 0
   )
 
   $state = [string](Get-PropertyOrDefault -Object $RemoteLane -Name "state" -DefaultValue "missing-remote-proof-lane")
@@ -108,6 +133,11 @@ function New-RemoteProofCloseLane {
     proofReadyProperty = $proofReadyProperty
     proofReady = $proofReady
     requiredEvidence = $requiredEvidence
+    requiredOwnerFieldCount = $RequiredOwnerFieldCount
+    blockedRequiredOwnerFieldCount = $BlockedRequiredOwnerFieldCount
+    readyOwnerFieldCount = $ReadyOwnerFieldCount
+    rejectedSubstituteCount = $RejectedSubstituteCount
+    sourceReadinessSignalCount = $SourceReadinessSignalCount
     performsPublish = $false
     canPromoteRuntimeProof = $false
     canPublishPublicly = $false
@@ -132,6 +162,9 @@ $classificationAudit = Read-JsonOrNull "artifacts\final-release\release-evidence
 $releaseEvidence = Read-JsonOrNull "artifacts\final-release\release-evidence-bundle.json"
 $remoteProofBackfillGate = Read-JsonOrNull "artifacts\final-release\remote-ci-and-public-publish-proof-backfill-gate.json"
 $remoteProofBackfillGateValidation = Read-JsonOrNull "artifacts\final-release\remote-ci-and-public-publish-proof-backfill-gate-validation.json"
+$publicReleaseOwnerExecutionPackageValidation = Read-JsonOrNull "artifacts\final-release\public-release-owner-execution-package-validation.json"
+$publicPackageDownloadProofOwnerExecutionPackValidation = Read-JsonOrNull "artifacts\final-release\public-package-download-proof-owner-execution-pack-validation.json"
+$postPublishUserVerificationPackValidation = Read-JsonOrNull "artifacts\final-release\post-publish-user-verification-pack-validation.json"
 
 $finalBlockerState = [string](Get-PropertyOrDefault -Object $finalBlockerDashboardValidation -Name "validationState" -DefaultValue "missing-final-release-close-blocker-dashboard-validation")
 $publicPublishOwnerInputState = [string](Get-PropertyOrDefault -Object $publicPublishOwnerInputValidation -Name "validationState" -DefaultValue "missing-public-publish-result-owner-input-validation")
@@ -145,12 +178,27 @@ $classificationState = [string](Get-PropertyOrDefault -Object $classificationAud
 $releaseEvidenceState = [string](Get-PropertyOrDefault -Object $releaseEvidence -Name "bundleState" -DefaultValue "missing-release-evidence-bundle")
 $remoteProofBackfillGateState = [string](Get-PropertyOrDefault -Object $remoteProofBackfillGateValidation -Name "validationState" -DefaultValue "missing-remote-ci-and-public-publish-proof-backfill-gate-validation")
 $remoteProofLanes = @((Get-PropertyOrDefault -Object $remoteProofBackfillGate -Name "lanes" -DefaultValue @()))
+$publicReleaseOwnerExecutionRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $publicReleaseOwnerExecutionPackageValidation -Name "requiredOwnerFieldCount" -DefaultValue 0)
+$publicReleaseOwnerExecutionBlockedRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $publicReleaseOwnerExecutionPackageValidation -Name "blockedRequiredOwnerFieldCount" -DefaultValue 0)
+$publicReleaseOwnerExecutionReadyOwnerFieldCount = [Math]::Max(0, $publicReleaseOwnerExecutionRequiredOwnerFieldCount - $publicReleaseOwnerExecutionBlockedRequiredOwnerFieldCount)
+$publicReleaseOwnerExecutionRejectedSubstituteCount = [int](Get-PropertyOrDefault -Object $publicReleaseOwnerExecutionPackageValidation -Name "rejectedSubstituteCount" -DefaultValue 0)
+$publicReleaseOwnerExecutionSourceReadinessSignalCount = [int](Get-PropertyOrDefault -Object $publicReleaseOwnerExecutionPackageValidation -Name "sourceReadinessSignalCount" -DefaultValue 0)
+$publicPackageDownloadOwnerExecutionRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $publicPackageDownloadProofOwnerExecutionPackValidation -Name "requiredOwnerFieldCount" -DefaultValue 0)
+$publicPackageDownloadOwnerExecutionBlockedRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $publicPackageDownloadProofOwnerExecutionPackValidation -Name "blockedRequiredOwnerFieldCount" -DefaultValue 0)
+$publicPackageDownloadOwnerExecutionReadyOwnerFieldCount = [Math]::Max(0, $publicPackageDownloadOwnerExecutionRequiredOwnerFieldCount - $publicPackageDownloadOwnerExecutionBlockedRequiredOwnerFieldCount)
+$publicPackageDownloadOwnerExecutionRejectedSubstituteCount = [int](Get-PropertyOrDefault -Object $publicPackageDownloadProofOwnerExecutionPackValidation -Name "rejectedSubstituteCount" -DefaultValue 0)
+$publicPackageDownloadOwnerExecutionSourceReadinessSignalCount = [int](Get-PropertyOrDefault -Object $publicPackageDownloadProofOwnerExecutionPackValidation -Name "sourceReadinessSignalCount" -DefaultValue 0)
+$postPublishUserVerificationRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $postPublishUserVerificationPackValidation -Name "requiredOwnerFieldCount" -DefaultValue 0)
+$postPublishUserVerificationBlockedRequiredOwnerFieldCount = [int](Get-PropertyOrDefault -Object $postPublishUserVerificationPackValidation -Name "blockedRequiredOwnerFieldCount" -DefaultValue 0)
+$postPublishUserVerificationReadyOwnerFieldCount = [Math]::Max(0, $postPublishUserVerificationRequiredOwnerFieldCount - $postPublishUserVerificationBlockedRequiredOwnerFieldCount)
+$postPublishUserVerificationRejectedSubstituteCount = [int](Get-PropertyOrDefault -Object $postPublishUserVerificationPackValidation -Name "rejectedSubstituteCount" -DefaultValue 0)
+$postPublishUserVerificationSourceReadinessSignalCount = [int](Get-PropertyOrDefault -Object $postPublishUserVerificationPackValidation -Name "sourceReadinessSignalCount" -DefaultValue 0)
 
 $lanes = @(
   New-RemoteProofCloseLane -Id "github-actions-run-proof" -RemoteLane (Get-LaneById -Lanes $remoteProofLanes -Id "github-actions-run-proof") -MissingRealProof "real GitHub Actions run URL, run id, head SHA, conclusion, log hash, and artifact hash" -OwnerNextAction "Owner imports real GitHub Actions run evidence; queued workflow, missing runner, local test, or dashboard output remain blocked." -Validator "Test-RemoteCiAndPublicPublishProofBackfillGate.ps1 -Strict"
-  New-RemoteProofCloseLane -Id "owner-public-publish-result" -RemoteLane (Get-LaneById -Lanes $remoteProofLanes -Id "owner-public-publish-result") -MissingRealProof "owner public publish result with public NuGet/GitHub package URLs, hashes, transcript hashes, reviewer, and authorization linkage" -OwnerNextAction "Owner supplies real public publish result after actual package publication; dry run and command plan are not proof." -Validator "Test-RemoteCiAndPublicPublishProofBackfillGate.ps1 -Strict"
-  New-RemoteProofCloseLane -Id "public-package-download-proof" -RemoteLane (Get-LaneById -Lanes $remoteProofLanes -Id "public-package-download-proof") -MissingRealProof "public package download URL/source, package identity, SHA256, timestamp, and non-local source proof" -OwnerNextAction "Owner downloads the public package from the public source and imports SHA256 evidence." -Validator "Test-RemoteCiAndPublicPublishProofBackfillGate.ps1 -Strict"
-  New-RemoteProofCloseLane -Id "post-publish-clean-consumer-proof" -RemoteLane (Get-LaneById -Lanes $remoteProofLanes -Id "post-publish-clean-consumer-proof") -MissingRealProof "post-publication repository-external clean consumer restore/build/smoke proof with proofCandidateReady=true" -OwnerNextAction "Owner provides repository-external clean consumer proof from public packages; validation-ready alone must remain blocked until proofCandidateReady is true." -Validator "Test-RemoteCiAndPublicPublishProofBackfillGate.ps1 -Strict"
+  New-RemoteProofCloseLane -Id "owner-public-publish-result" -RemoteLane (Get-LaneById -Lanes $remoteProofLanes -Id "owner-public-publish-result") -MissingRealProof "owner public publish result with public NuGet/GitHub package URLs, hashes, transcript hashes, reviewer, and authorization linkage" -OwnerNextAction "Owner supplies real public publish result after actual package publication; dry run and command plan are not proof." -Validator "Test-RemoteCiAndPublicPublishProofBackfillGate.ps1 -Strict" -RequiredOwnerFieldCount $publicReleaseOwnerExecutionRequiredOwnerFieldCount -BlockedRequiredOwnerFieldCount $publicReleaseOwnerExecutionBlockedRequiredOwnerFieldCount -ReadyOwnerFieldCount $publicReleaseOwnerExecutionReadyOwnerFieldCount -RejectedSubstituteCount $publicReleaseOwnerExecutionRejectedSubstituteCount -SourceReadinessSignalCount $publicReleaseOwnerExecutionSourceReadinessSignalCount
+  New-RemoteProofCloseLane -Id "public-package-download-proof" -RemoteLane (Get-LaneById -Lanes $remoteProofLanes -Id "public-package-download-proof") -MissingRealProof "public package download URL/source, package identity, SHA256, timestamp, and non-local source proof" -OwnerNextAction "Owner downloads the public package from the public source and imports SHA256 evidence." -Validator "Test-RemoteCiAndPublicPublishProofBackfillGate.ps1 -Strict" -RequiredOwnerFieldCount $publicPackageDownloadOwnerExecutionRequiredOwnerFieldCount -BlockedRequiredOwnerFieldCount $publicPackageDownloadOwnerExecutionBlockedRequiredOwnerFieldCount -ReadyOwnerFieldCount $publicPackageDownloadOwnerExecutionReadyOwnerFieldCount -RejectedSubstituteCount $publicPackageDownloadOwnerExecutionRejectedSubstituteCount -SourceReadinessSignalCount $publicPackageDownloadOwnerExecutionSourceReadinessSignalCount
+  New-RemoteProofCloseLane -Id "post-publish-clean-consumer-proof" -RemoteLane (Get-LaneById -Lanes $remoteProofLanes -Id "post-publish-clean-consumer-proof") -MissingRealProof "post-publication repository-external clean consumer restore/build/smoke proof with proofCandidateReady=true" -OwnerNextAction "Owner provides repository-external clean consumer proof from public packages; validation-ready alone must remain blocked until proofCandidateReady is true." -Validator "Test-RemoteCiAndPublicPublishProofBackfillGate.ps1 -Strict" -RequiredOwnerFieldCount $postPublishUserVerificationRequiredOwnerFieldCount -BlockedRequiredOwnerFieldCount $postPublishUserVerificationBlockedRequiredOwnerFieldCount -ReadyOwnerFieldCount $postPublishUserVerificationReadyOwnerFieldCount -RejectedSubstituteCount $postPublishUserVerificationRejectedSubstituteCount -SourceReadinessSignalCount $postPublishUserVerificationSourceReadinessSignalCount
   New-CloseLane -Id "final-release-close-blocker-dashboard" -State $finalBlockerState -RequiredState "final-release-close-blocker-dashboard-ready" -MissingOwnerInput @("remaining close blockers resolved by Owner") -MissingRealProof @("public package proof", "post-publish proof") -OwnerNextAction "Owner resolves every final release close blocker after real public publish and clean consumer proof." -Validator "Test-FinalReleaseCloseBlockerDashboard.ps1 -Strict" -SourceArtifact "artifacts/final-release/final-release-close-blocker-dashboard-validation.json"
   New-CloseLane -Id "public-publish-result-owner-input" -State $publicPublishOwnerInputState -RequiredState "public-publish-result-owner-input-ready" -MissingOwnerInput @("owner-filled public publish result input") -MissingRealProof @("NuGet/GitHub public URLs, download hashes, release transcript, rollback review, final close decision fields") -OwnerNextAction "Owner fills real public publish result metadata; templates, dry runs, local feeds, and command plans remain non-proof." -Validator "Test-PublicPublishResultOwnerInput.ps1 -Strict" -SourceArtifact "artifacts/final-release/public-publish-result-owner-input-validation.json"
   New-CloseLane -Id "public-publish-result-import" -State $publicPublishState -RequiredState "public-publish-result-import-ready" -MissingOwnerInput @("public publish result owner input") -MissingRealProof @("public package URL/hash/timestamp/transcript") -OwnerNextAction "Owner imports real public publish metadata and runs the strict import validator." -Validator "Test-PublicPublishResultImport.ps1 -Strict" -SourceArtifact "artifacts/final-release/public-publish-result-import-validation.json"
@@ -164,6 +212,13 @@ $lanes = @(
 
 $blocked = @($lanes | Where-Object { -not [bool]$_.ready })
 $ready = @($lanes | Where-Object { [bool]$_.ready })
+$ownerFieldSurfaceLanes = @($lanes | Where-Object { [int](Get-PropertyOrDefault -Object $_ -Name "requiredOwnerFieldCount" -DefaultValue 0) -gt 0 })
+$blockedOwnerFieldSurfaceLanes = @($ownerFieldSurfaceLanes | Where-Object { [int](Get-PropertyOrDefault -Object $_ -Name "blockedRequiredOwnerFieldCount" -DefaultValue 0) -gt 0 })
+$requiredOwnerFieldCount = Sum-IntProperty -Items $ownerFieldSurfaceLanes -Name "requiredOwnerFieldCount"
+$blockedRequiredOwnerFieldCount = Sum-IntProperty -Items $ownerFieldSurfaceLanes -Name "blockedRequiredOwnerFieldCount"
+$readyOwnerFieldCount = Sum-IntProperty -Items $ownerFieldSurfaceLanes -Name "readyOwnerFieldCount"
+$rejectedSubstituteCount = Sum-IntProperty -Items $ownerFieldSurfaceLanes -Name "rejectedSubstituteCount"
+$sourceReadinessSignalCount = Sum-IntProperty -Items $ownerFieldSurfaceLanes -Name "sourceReadinessSignalCount"
 
 $record = [pscustomobject]@{
   recordKind = "strict-close-ready-convergence-dashboard"
@@ -174,6 +229,13 @@ $record = [pscustomobject]@{
   readyLaneCount = $ready.Count
   releaseEvidenceBundleState = $releaseEvidenceState
   remoteCiAndPublicPublishProofBackfillGateState = $remoteProofBackfillGateState
+  requiredOwnerFieldCount = $requiredOwnerFieldCount
+  blockedRequiredOwnerFieldCount = $blockedRequiredOwnerFieldCount
+  readyOwnerFieldCount = $readyOwnerFieldCount
+  rejectedSubstituteCount = $rejectedSubstituteCount
+  sourceReadinessSignalCount = $sourceReadinessSignalCount
+  ownerFieldSurfaceLaneCount = $ownerFieldSurfaceLanes.Count
+  blockedOwnerFieldSurfaceLaneCount = $blockedOwnerFieldSurfaceLanes.Count
   remoteProofRequiredLaneIds = @("github-actions-run-proof", "owner-public-publish-result", "public-package-download-proof", "post-publish-clean-consumer-proof")
   closeReadinessLanes = $lanes
   sourceArtifacts = @(
@@ -190,7 +252,10 @@ $record = [pscustomobject]@{
     "artifacts/final-release/release-issue-close-final-owner-decision-audit-validation.json",
     "artifacts/final-release/release-issue-close-record-validation.json",
     "artifacts/final-release/release-evidence-classification-audit.json",
-    "artifacts/final-release/release-evidence-bundle.json"
+    "artifacts/final-release/release-evidence-bundle.json",
+    "artifacts/final-release/public-release-owner-execution-package-validation.json",
+    "artifacts/final-release/public-package-download-proof-owner-execution-pack-validation.json",
+    "artifacts/final-release/post-publish-user-verification-pack-validation.json"
   )
   notExecutedByAutomation = $true
   performsPublish = $false
@@ -210,7 +275,7 @@ $markdownPath = Join-Path $artifactRoot "strict-close-ready-convergence-dashboar
 $record | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $jsonPath -Encoding utf8
 
 $rows = $record.closeReadinessLanes | ForEach-Object {
-  "| $(ConvertTo-MarkdownCell $_.laneId) | $(ConvertTo-MarkdownCell $_.state) | $(ConvertTo-MarkdownCell $_.requiredState) | ``$($_.ready)`` | $(ConvertTo-MarkdownCell ($_.missingOwnerInput -join ', ')) | $(ConvertTo-MarkdownCell ($_.missingRealProof -join ', ')) | $(ConvertTo-MarkdownCell $_.validator) |"
+  "| $(ConvertTo-MarkdownCell $_.laneId) | $(ConvertTo-MarkdownCell $_.state) | $(ConvertTo-MarkdownCell $_.requiredState) | ``$($_.ready)`` | ``$($_.requiredOwnerFieldCount)`` | ``$($_.blockedRequiredOwnerFieldCount)`` | ``$($_.rejectedSubstituteCount)`` | ``$($_.sourceReadinessSignalCount)`` | $(ConvertTo-MarkdownCell ($_.missingOwnerInput -join ', ')) | $(ConvertTo-MarkdownCell ($_.missingRealProof -join ', ')) | $(ConvertTo-MarkdownCell $_.validator) |"
 }
 
 $markdown = @"
@@ -225,14 +290,21 @@ $markdown = @"
 | blockedLaneCount | ``$($record.blockedLaneCount)`` |
 | readyLaneCount | ``$($record.readyLaneCount)`` |
 | releaseEvidenceBundleState | ``$($record.releaseEvidenceBundleState)`` |
+| requiredOwnerFieldCount | ``$($record.requiredOwnerFieldCount)`` |
+| blockedRequiredOwnerFieldCount | ``$($record.blockedRequiredOwnerFieldCount)`` |
+| readyOwnerFieldCount | ``$($record.readyOwnerFieldCount)`` |
+| rejectedSubstituteCount | ``$($record.rejectedSubstituteCount)`` |
+| sourceReadinessSignalCount | ``$($record.sourceReadinessSignalCount)`` |
+| ownerFieldSurfaceLaneCount | ``$($record.ownerFieldSurfaceLaneCount)`` |
+| blockedOwnerFieldSurfaceLaneCount | ``$($record.blockedOwnerFieldSurfaceLaneCount)`` |
 | performsPublish | ``$($record.performsPublish)`` |
 | canPublishPublicly | ``$($record.canPublishPublicly)`` |
 | canCloseReleaseIssue | ``$($record.canCloseReleaseIssue)`` |
 
 ## Close Readiness Lanes
 
-| Lane | Current State | Required State | Ready | Missing Owner Input | Missing Real Proof | Validator |
-|---|---|---|---:|---|---|---|
+| Lane | Current State | Required State | Ready | Owner Fields | Blocked Owner Fields | Rejected Substitutes | Source Signals | Missing Owner Input | Missing Real Proof | Validator |
+|---|---|---|---:|---:|---:|---:|---:|---|---|---|
 $($rows -join "`r`n")
 
 ## Boundary
