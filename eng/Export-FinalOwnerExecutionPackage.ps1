@@ -76,6 +76,59 @@ function ConvertTo-MarkdownCell {
   return ([string]$Value).Replace("|", "\|").Replace("`r", " ").Replace("`n", " ")
 }
 
+function Get-ArtifactSha256OrEmpty {
+  param([string]$RelativePath)
+
+  $path = Join-Path $RepositoryRoot $RelativePath
+  if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+    return ""
+  }
+
+  return (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
+}
+
+function Get-RecordState {
+  param([AllowNull()][object]$Record)
+
+  foreach ($name in @("validationState", "packageState", "packState", "candidateState", "convergenceState", "bundleState", "worklistState", "alignmentState")) {
+    $value = [string](Get-PropertyOrDefault -Object $Record -Name $name -DefaultValue "")
+    if (-not [string]::IsNullOrWhiteSpace($value)) {
+      return $value
+    }
+  }
+
+  return "missing-state"
+}
+
+function New-SourceArtifactEvidence {
+  param([string]$Id, [string]$RelativePath, [AllowNull()][object]$Record)
+
+  $path = Join-Path $RepositoryRoot $RelativePath
+  $exists = Test-Path -LiteralPath $path -PathType Leaf
+
+  [pscustomobject]@{
+    id = $Id
+    artifactPath = $RelativePath
+    exists = $exists
+    sha256 = if ($exists) { Get-ArtifactSha256OrEmpty -RelativePath $RelativePath } else { "" }
+    recordKind = [string](Get-PropertyOrDefault -Object $Record -Name "recordKind" -DefaultValue "missing")
+    state = Get-RecordState -Record $Record
+    proofCandidateReady = [bool](Get-PropertyOrDefault -Object $Record -Name "proofCandidateReady" -DefaultValue $false)
+    sourceProofLinkageReady = [bool](Get-PropertyOrDefault -Object $Record -Name "sourceProofLinkageReady" -DefaultValue $false)
+    ownerActionRequired = [bool](Get-PropertyOrDefault -Object $Record -Name "ownerActionRequired" -DefaultValue $true)
+    failedBlockerCount = [int](Get-PropertyOrDefault -Object $Record -Name "failedBlockerCount" -DefaultValue 0)
+    failedActionRequiredCount = [int](Get-PropertyOrDefault -Object $Record -Name "failedActionRequiredCount" -DefaultValue 0)
+    performsPublish = [bool](Get-PropertyOrDefault -Object $Record -Name "performsPublish" -DefaultValue $false)
+    canPromoteRuntimeProof = [bool](Get-PropertyOrDefault -Object $Record -Name "canPromoteRuntimeProof" -DefaultValue $false)
+    canPublishPublicly = [bool](Get-PropertyOrDefault -Object $Record -Name "canPublishPublicly" -DefaultValue $false)
+    canCloseReleaseIssue = [bool](Get-PropertyOrDefault -Object $Record -Name "canCloseReleaseIssue" -DefaultValue $false)
+    isRuntimeExecutionProof = [bool](Get-PropertyOrDefault -Object $Record -Name "isRuntimeExecutionProof" -DefaultValue $false)
+    isPostPublishProof = [bool](Get-PropertyOrDefault -Object $Record -Name "isPostPublishProof" -DefaultValue $false)
+    isReleaseCloseProof = [bool](Get-PropertyOrDefault -Object $Record -Name "isReleaseCloseProof" -DefaultValue $false)
+    boundary = "Source artifact evidence is local path/hash/state traceability only. Hash presence cannot substitute real Owner proof, post-publish CleanConsumer proof, publish approval, final close decision, or release issue close."
+  }
+}
+
 function Get-ResultArtifactForAction {
   param([string]$ActionId)
 
@@ -327,6 +380,34 @@ $sourceArtifacts = @(
   "artifacts/final-release/final-close-gate-convergence-validation.json"
 )
 
+$sourceArtifactEvidence = @(
+  New-SourceArtifactEvidence -Id "final-owner-proof-action-worklist" -RelativePath "artifacts/final-release/final-owner-proof-action-worklist.json" -Record $worklist
+  New-SourceArtifactEvidence -Id "final-owner-proof-action-worklist-validation" -RelativePath "artifacts/final-release/final-owner-proof-action-worklist-validation.json" -Record $worklistValidation
+  New-SourceArtifactEvidence -Id "final-owner-execution-one-screen-pack" -RelativePath "artifacts/final-release/final-owner-execution-one-screen-pack.json" -Record $finalOwnerExecutionOneScreenPack
+  New-SourceArtifactEvidence -Id "final-owner-execution-one-screen-pack-validation" -RelativePath "artifacts/final-release/final-owner-execution-one-screen-pack-validation.json" -Record $finalOwnerExecutionOneScreenPackValidation
+  New-SourceArtifactEvidence -Id "final-owner-strict-close-execution-order-validation" -RelativePath "artifacts/final-release/final-owner-strict-close-execution-order-validation.json" -Record $finalOwnerStrictCloseExecutionOrderValidation
+  New-SourceArtifactEvidence -Id "owner-public-publish-execution-result-candidate-validation" -RelativePath "artifacts/final-release/owner-public-publish-execution-result-candidate-validation.json" -Record $ownerPublicPublishExecutionResultCandidateValidation
+  New-SourceArtifactEvidence -Id "public-package-download-proof-candidate-validation" -RelativePath "artifacts/final-release/public-package-download-proof-candidate-validation.json" -Record $publicPackageDownloadProofCandidateValidation
+  New-SourceArtifactEvidence -Id "post-publish-clean-consumer-proof-result-validation" -RelativePath "artifacts/final-release/post-publish-clean-consumer-proof-result-validation.json" -Record $postPublishCleanConsumerProofResultValidation
+  New-SourceArtifactEvidence -Id "release-issue-close-owner-decision-input-validation" -RelativePath "artifacts/final-release/release-issue-close-owner-decision-input-validation.json" -Record $releaseIssueCloseOwnerDecisionInputValidation
+  New-SourceArtifactEvidence -Id "final-close-gate-convergence-validation" -RelativePath "artifacts/final-release/final-close-gate-convergence-validation.json" -Record $finalCloseGateConvergenceValidation
+  New-SourceArtifactEvidence -Id "release-evidence-bundle" -RelativePath "artifacts/final-release/release-evidence-bundle.json" -Record $releaseEvidenceBundle
+  New-SourceArtifactEvidence -Id "release-publish-readiness-evidence-pack" -RelativePath "artifacts/final-release/release-publish-readiness-evidence-pack.json" -Record $readinessPack
+  New-SourceArtifactEvidence -Id "package-consumer-owner-runtime-smoke-field-alignment" -RelativePath "artifacts/final-release/package-consumer-owner-runtime-smoke-field-alignment.json" -Record $ownerRuntimeSmokeFieldAlignment
+  New-SourceArtifactEvidence -Id "package-consumer-owner-runtime-smoke-field-alignment-validation" -RelativePath "artifacts/final-release/package-consumer-owner-runtime-smoke-field-alignment-validation.json" -Record $ownerRuntimeSmokeFieldAlignmentValidation
+)
+$sourceArtifactEvidenceMissingCount = @($sourceArtifactEvidence | Where-Object { -not $_.exists }).Count
+$sourceArtifactEvidenceSha256Count = @($sourceArtifactEvidence | Where-Object { [System.Text.RegularExpressions.Regex]::IsMatch([string]$_.sha256, "^[0-9a-f]{64}$") }).Count
+$sourceArtifactEvidenceNonProofBoundaryCount = @($sourceArtifactEvidence | Where-Object {
+    -not $_.performsPublish -and
+    -not $_.canPromoteRuntimeProof -and
+    -not $_.canPublishPublicly -and
+    -not $_.canCloseReleaseIssue -and
+    -not $_.isRuntimeExecutionProof -and
+    -not $_.isPostPublishProof -and
+    -not $_.isReleaseCloseProof
+  }).Count
+
 $record = [ordered]@{
   recordKind = "final-owner-execution-package"
   generatedAtUtc = (Get-Date).ToUniversalTime().ToString("o")
@@ -390,6 +471,11 @@ $record = [ordered]@{
   bundleHashCannotSubstituteFinalCloseDecision = $true
   strictCloseOutputCannotCloseIssue = $true
   sourceArtifacts = @($sourceArtifacts)
+  sourceArtifactEvidenceCount = $sourceArtifactEvidence.Count
+  sourceArtifactEvidenceMissingCount = $sourceArtifactEvidenceMissingCount
+  sourceArtifactEvidenceSha256Count = $sourceArtifactEvidenceSha256Count
+  sourceArtifactEvidenceNonProofBoundaryCount = $sourceArtifactEvidenceNonProofBoundaryCount
+  sourceArtifactEvidence = @($sourceArtifactEvidence)
   boundary = "Final owner execution package maps owner actions plus the eight-step release-close real input chain to commands, input contracts, hard gates, expected result artifacts, and validators. It is owner handoff only; public package download proof alone is not post-publish CleanConsumer proof, post-publish validation-ready without proofCandidateReady is not proof, release evidence bundle hash only is not final close decision, strict close validator output alone cannot close the issue, and this package does not publish, does not promote runtime proof, does not verify post-publish proof, cannot close the release issue, and is not package push."
 }
 
@@ -403,6 +489,10 @@ $rows = foreach ($step in $executionSteps) {
 
 $hardGateRows = foreach ($gate in $ownerReleaseCloseHardGates) {
   "| ``$(ConvertTo-MarkdownCell $gate.id)`` | ``$($gate.order)`` | $(ConvertTo-MarkdownCell $gate.currentState) | $(ConvertTo-MarkdownCell $gate.requiredReadyState) | ``$($gate.requiredFieldCount)`` | ``$($gate.rejectedSubstituteCount)`` | ``$($gate.sourceReadinessSignalCount)`` | ``$($gate.blockedRealInputCount)`` | ``$($gate.proofCandidateReady)`` | ``$($gate.sourceLinkageReady)`` | $(ConvertTo-MarkdownCell $gate.blockedReason) |"
+}
+
+$sourceArtifactEvidenceRows = foreach ($artifact in $sourceArtifactEvidence) {
+  "| ``$(ConvertTo-MarkdownCell $artifact.id)`` | ``$(ConvertTo-MarkdownCell $artifact.artifactPath)`` | ``$($artifact.exists)`` | ``$(ConvertTo-MarkdownCell $artifact.sha256)`` | ``$(ConvertTo-MarkdownCell $artifact.state)`` | ``$($artifact.proofCandidateReady)`` | ``$($artifact.sourceProofLinkageReady)`` | ``$($artifact.canCloseReleaseIssue)`` |"
 }
 
 $sections = foreach ($step in $executionSteps) {
@@ -465,10 +555,20 @@ Generated at: ``$($record.generatedAtUtc)``
 - postPublishValidationReadyCannotSubstituteProofCandidateReady: ``True``
 - bundleHashCannotSubstituteFinalCloseDecision: ``True``
 - strictCloseOutputCannotCloseIssue: ``True``
+- sourceArtifactEvidenceCount: ``$($record.sourceArtifactEvidenceCount)``
+- sourceArtifactEvidenceMissingCount: ``$($record.sourceArtifactEvidenceMissingCount)``
+- sourceArtifactEvidenceSha256Count: ``$($record.sourceArtifactEvidenceSha256Count)``
+- sourceArtifactEvidenceNonProofBoundaryCount: ``$($record.sourceArtifactEvidenceNonProofBoundaryCount)``
 - performsPublish: ``False``
 - canPromoteRuntimeProof: ``False``
 - canPublishPublicly: ``False``
 - canCloseReleaseIssue: ``False``
+
+## Source Artifact Evidence
+
+| ID | Artifact | Exists | SHA256 | State | Proof Candidate Ready | Source Linkage Ready | Can Close |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+$($sourceArtifactEvidenceRows -join "`r`n")
 
 ## Release Close Hard Gates
 

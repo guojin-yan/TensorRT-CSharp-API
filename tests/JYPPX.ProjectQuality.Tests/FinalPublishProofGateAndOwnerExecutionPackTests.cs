@@ -373,6 +373,45 @@ public sealed class FinalPublishProofGateAndOwnerExecutionPackTests
         Assert.Contains("artifacts/final-release/release-issue-close-owner-decision-input-validation.json", packageSources);
         Assert.Contains("artifacts/final-release/final-close-gate-convergence-validation.json", packageSources);
 
+        JsonElement[] sourceArtifactEvidence = package.GetProperty("sourceArtifactEvidence").EnumerateArray().ToArray();
+        Assert.True(sourceArtifactEvidence.Length >= 14);
+        Assert.Equal(sourceArtifactEvidence.Length, package.GetProperty("sourceArtifactEvidenceCount").GetInt32());
+        Assert.Equal(0, package.GetProperty("sourceArtifactEvidenceMissingCount").GetInt32());
+        Assert.Equal(sourceArtifactEvidence.Length, package.GetProperty("sourceArtifactEvidenceSha256Count").GetInt32());
+        Assert.Equal(sourceArtifactEvidence.Length, package.GetProperty("sourceArtifactEvidenceNonProofBoundaryCount").GetInt32());
+        string[] sourceArtifactEvidenceIds = sourceArtifactEvidence.Select(static item => item.GetProperty("id").GetString()!).ToArray();
+        foreach (string expectedId in new[]
+        {
+            "owner-public-publish-execution-result-candidate-validation",
+            "public-package-download-proof-candidate-validation",
+            "post-publish-clean-consumer-proof-result-validation",
+            "release-issue-close-owner-decision-input-validation",
+            "final-close-gate-convergence-validation",
+            "release-evidence-bundle"
+        })
+        {
+            Assert.Contains(expectedId, sourceArtifactEvidenceIds);
+        }
+
+        Assert.All(sourceArtifactEvidence, artifact =>
+        {
+            Assert.True(artifact.GetProperty("exists").GetBoolean());
+            Assert.Matches("^[0-9a-f]{64}$", artifact.GetProperty("sha256").GetString()!);
+            Assert.False(artifact.GetProperty("performsPublish").GetBoolean());
+            Assert.False(artifact.GetProperty("canPromoteRuntimeProof").GetBoolean());
+            Assert.False(artifact.GetProperty("canPublishPublicly").GetBoolean());
+            Assert.False(artifact.GetProperty("canCloseReleaseIssue").GetBoolean());
+            Assert.False(artifact.GetProperty("isRuntimeExecutionProof").GetBoolean());
+            Assert.False(artifact.GetProperty("isPostPublishProof").GetBoolean());
+            Assert.False(artifact.GetProperty("isReleaseCloseProof").GetBoolean());
+            string boundary = artifact.GetProperty("boundary").GetString()!;
+            Assert.Contains("cannot substitute real Owner proof", boundary, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("post-publish CleanConsumer proof", boundary, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("final close decision", boundary, StringComparison.OrdinalIgnoreCase);
+        });
+        JsonElement releaseEvidenceBundleArtifact = sourceArtifactEvidence.Single(static artifact => artifact.GetProperty("id").GetString() == "release-evidence-bundle");
+        Assert.Equal(package.GetProperty("releaseEvidenceBundleSha256").GetString(), releaseEvidenceBundleArtifact.GetProperty("sha256").GetString());
+
         JsonElement[] hardGates = package.GetProperty("ownerReleaseCloseHardGates").EnumerateArray().ToArray();
         Assert.Equal(8, hardGates.Length);
         string[] hardGateIds = hardGates.Select(static gate => gate.GetProperty("id").GetString()!).ToArray();
@@ -499,6 +538,10 @@ public sealed class FinalPublishProofGateAndOwnerExecutionPackTests
         Assert.NotEmpty(validation.GetProperty("releaseEvidenceBundleSha256").GetString());
         Assert.Equal("blocked-release-issue-close-owner-decision-input-required", validation.GetProperty("releaseIssueCloseOwnerDecisionValidationState").GetString());
         Assert.Equal("blocked-final-close-gate-owner-proof-required", validation.GetProperty("finalCloseStrictValidatorOutputState").GetString());
+        Assert.True(validation.GetProperty("sourceArtifactEvidenceCount").GetInt32() >= 14);
+        Assert.Equal(0, validation.GetProperty("sourceArtifactEvidenceMissingCount").GetInt32());
+        Assert.Equal(validation.GetProperty("sourceArtifactEvidenceCount").GetInt32(), validation.GetProperty("sourceArtifactEvidenceSha256Count").GetInt32());
+        Assert.Equal(validation.GetProperty("sourceArtifactEvidenceCount").GetInt32(), validation.GetProperty("sourceArtifactEvidenceNonProofBoundaryCount").GetInt32());
         Assert.True(validation.GetProperty("publicDownloadCannotSubstitutePostPublishProof").GetBoolean());
         Assert.True(validation.GetProperty("bundleHashCannotSubstituteFinalCloseDecision").GetBoolean());
         Assert.True(validation.GetProperty("strictCloseOutputCannotCloseIssue").GetBoolean());

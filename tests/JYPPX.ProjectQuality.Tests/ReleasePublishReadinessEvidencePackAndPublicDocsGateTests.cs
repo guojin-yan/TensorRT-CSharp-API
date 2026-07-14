@@ -218,6 +218,14 @@ public sealed class ReleasePublishReadinessEvidencePackAndPublicDocsGateTests
         Assert.True(bundle.GetProperty("finalOwnerExecutionPackageReleaseCloseRealInputChainBlockedRealInputCount").GetInt32() > 0);
         Assert.Equal(8, bundle.GetProperty("finalOwnerExecutionPackageOwnerReleaseCloseHardGateCount").GetInt32());
         Assert.Equal(8, bundle.GetProperty("finalOwnerExecutionPackageBlockedOwnerReleaseCloseHardGateCount").GetInt32());
+        Assert.True(bundle.GetProperty("finalOwnerExecutionPackageSourceArtifactEvidenceCount").GetInt32() >= 14);
+        Assert.Equal(0, bundle.GetProperty("finalOwnerExecutionPackageSourceArtifactEvidenceMissingCount").GetInt32());
+        Assert.Equal(
+            bundle.GetProperty("finalOwnerExecutionPackageSourceArtifactEvidenceCount").GetInt32(),
+            bundle.GetProperty("finalOwnerExecutionPackageSourceArtifactEvidenceSha256Count").GetInt32());
+        Assert.Equal(
+            bundle.GetProperty("finalOwnerExecutionPackageSourceArtifactEvidenceCount").GetInt32(),
+            bundle.GetProperty("finalOwnerExecutionPackageSourceArtifactEvidenceNonProofBoundaryCount").GetInt32());
         Assert.False(bundle.GetProperty("finalOwnerExecutionPackagePublicPackageDownloadProofCandidateReady").GetBoolean());
         Assert.False(bundle.GetProperty("finalOwnerExecutionPackagePostPublishProofCandidateReady").GetBoolean());
         Assert.False(bundle.GetProperty("finalOwnerExecutionPackagePostPublishProofSourceLinkageReady").GetBoolean());
@@ -280,6 +288,10 @@ public sealed class ReleasePublishReadinessEvidencePackAndPublicDocsGateTests
         Assert.False(executionItem.GetProperty("passed").GetBoolean());
         string executionItemState = executionItem.GetProperty("state").GetString()!;
         Assert.Contains("hardGates=8", executionItemState, StringComparison.Ordinal);
+        Assert.Contains("sourceArtifactEvidence=", executionItemState, StringComparison.Ordinal);
+        Assert.Contains("sourceArtifactMissing=0", executionItemState, StringComparison.Ordinal);
+        Assert.Contains("sourceArtifactSha256=", executionItemState, StringComparison.Ordinal);
+        Assert.Contains("sourceArtifactNonProofBoundary=", executionItemState, StringComparison.Ordinal);
         Assert.Contains("publicDownloadCannotSubstitutePostPublish=True", executionItemState, StringComparison.Ordinal);
         Assert.Contains("bundleHashCannotSubstituteFinalCloseDecision=True", executionItemState, StringComparison.Ordinal);
         Assert.Contains("strictCloseOutputCannotCloseIssue=True", executionItemState, StringComparison.Ordinal);

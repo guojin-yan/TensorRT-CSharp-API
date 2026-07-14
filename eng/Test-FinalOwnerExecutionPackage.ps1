@@ -83,6 +83,12 @@ $validatorCommands = Convert-ToStringArray (Get-PropertyOrDefault -Object $recor
 $ownerCommands = Convert-ToStringArray (Get-PropertyOrDefault -Object $record -Name "ownerCommandSequence" -DefaultValue @())
 $expectedResultArtifacts = Convert-ToStringArray (Get-PropertyOrDefault -Object $record -Name "expectedResultArtifacts" -DefaultValue @())
 $sourceArtifacts = Convert-ToStringArray (Get-PropertyOrDefault -Object $record -Name "sourceArtifacts" -DefaultValue @())
+$sourceArtifactEvidence = @((Get-PropertyOrDefault -Object $record -Name "sourceArtifactEvidence" -DefaultValue @()))
+$sourceArtifactEvidenceCount = [int](Get-PropertyOrDefault -Object $record -Name "sourceArtifactEvidenceCount" -DefaultValue 0)
+$sourceArtifactEvidenceMissingCount = [int](Get-PropertyOrDefault -Object $record -Name "sourceArtifactEvidenceMissingCount" -DefaultValue -1)
+$sourceArtifactEvidenceSha256Count = [int](Get-PropertyOrDefault -Object $record -Name "sourceArtifactEvidenceSha256Count" -DefaultValue 0)
+$sourceArtifactEvidenceNonProofBoundaryCount = [int](Get-PropertyOrDefault -Object $record -Name "sourceArtifactEvidenceNonProofBoundaryCount" -DefaultValue 0)
+$sourceArtifactEvidenceIds = Convert-ToStringArray ($sourceArtifactEvidence | ForEach-Object { Get-PropertyOrDefault -Object $_ -Name "id" -DefaultValue "" })
 $releaseCloseRealInputChain = @((Get-PropertyOrDefault -Object $record -Name "releaseCloseRealInputChain" -DefaultValue @()))
 $ownerReleaseCloseHardGates = @((Get-PropertyOrDefault -Object $record -Name "ownerReleaseCloseHardGates" -DefaultValue @()))
 $releaseCloseRealInputChainRequiredFieldCount = [int](Get-PropertyOrDefault -Object $record -Name "releaseCloseRealInputChainRequiredFieldCount" -DefaultValue 0)
@@ -100,6 +106,21 @@ $items.Add((New-ValidationItem -Id "release-close-real-input-chain-projected" -P
 $items.Add((New-ValidationItem -Id "owner-release-close-hard-gates" -Passed ($ownerReleaseCloseHardGates.Count -eq 8 -and [int](Get-PropertyOrDefault -Object $record -Name "ownerReleaseCloseHardGateCount" -DefaultValue 0) -eq 8 -and [int](Get-PropertyOrDefault -Object $record -Name "blockedOwnerReleaseCloseHardGateCount" -DefaultValue 0) -eq 8) -Severity "blocker" -Detail "Package must expose the eight blocked owner release-close hard gates.")) | Out-Null
 $items.Add((New-ValidationItem -Id "hard-gate-readiness-flags" -Passed ((-not [bool](Get-PropertyOrDefault -Object $record -Name "publicPackageDownloadProofCandidateReady" -DefaultValue $true)) -and (-not [bool](Get-PropertyOrDefault -Object $record -Name "postPublishProofCandidateReady" -DefaultValue $true)) -and (-not [bool](Get-PropertyOrDefault -Object $record -Name "postPublishProofSourceLinkageReady" -DefaultValue $true)) -and [bool](Get-PropertyOrDefault -Object $record -Name "publicDownloadCannotSubstitutePostPublishProof" -DefaultValue $false) -and [bool](Get-PropertyOrDefault -Object $record -Name "postPublishValidationReadyCannotSubstituteProofCandidateReady" -DefaultValue $false) -and [bool](Get-PropertyOrDefault -Object $record -Name "bundleHashCannotSubstituteFinalCloseDecision" -DefaultValue $false) -and [bool](Get-PropertyOrDefault -Object $record -Name "strictCloseOutputCannotCloseIssue" -DefaultValue $false)) -Severity "blocker" -Detail "Public download, validation-ready, bundle hash, and strict validator output must remain non-substitutes for real post-publish/final-close proof.")) | Out-Null
 $items.Add((New-ValidationItem -Id "hard-gate-source-states" -Passed (-not [string]::IsNullOrWhiteSpace([string](Get-PropertyOrDefault -Object $record -Name "releaseEvidenceBundleSha256" -DefaultValue "")) -and [string](Get-PropertyOrDefault -Object $record -Name "finalCloseStrictValidatorOutputState" -DefaultValue "") -eq "blocked-final-close-gate-owner-proof-required" -and [string](Get-PropertyOrDefault -Object $record -Name "releaseIssueCloseOwnerDecisionValidationState" -DefaultValue "") -eq "blocked-release-issue-close-owner-decision-input-required" -and [int](Get-PropertyOrDefault -Object $record -Name "finalCloseProofAdmissionRequiredFieldCount" -DefaultValue 0) -ge 20 -and [int](Get-PropertyOrDefault -Object $record -Name "finalCloseRejectedNonProofStateCount" -DefaultValue 0) -ge 10) -Severity "blocker" -Detail "Package must carry bundle SHA, strict close output state, final close decision state, and final close admission contract counts without approving close.")) | Out-Null
+$items.Add((New-ValidationItem -Id "source-artifact-evidence-counts" -Passed ($sourceArtifactEvidence.Count -ge 14 -and $sourceArtifactEvidenceCount -eq $sourceArtifactEvidence.Count -and $sourceArtifactEvidenceMissingCount -eq 0 -and $sourceArtifactEvidenceSha256Count -eq $sourceArtifactEvidence.Count -and $sourceArtifactEvidenceNonProofBoundaryCount -eq $sourceArtifactEvidence.Count) -Severity "blocker" -Detail "Source artifact evidence must cover all key source artifacts with existing files, SHA256 hashes, and non-proof boundaries.")) | Out-Null
+$items.Add((New-ValidationItem -Id "source-artifact-evidence-shape" -Passed (@($sourceArtifactEvidence | Where-Object {
+        [bool](Get-PropertyOrDefault -Object $_ -Name "exists" -DefaultValue $false) -and
+        [System.Text.RegularExpressions.Regex]::IsMatch([string](Get-PropertyOrDefault -Object $_ -Name "sha256" -DefaultValue ""), "^[0-9a-f]{64}$") -and
+        -not [bool](Get-PropertyOrDefault -Object $_ -Name "performsPublish" -DefaultValue $true) -and
+        -not [bool](Get-PropertyOrDefault -Object $_ -Name "canPromoteRuntimeProof" -DefaultValue $true) -and
+        -not [bool](Get-PropertyOrDefault -Object $_ -Name "canPublishPublicly" -DefaultValue $true) -and
+        -not [bool](Get-PropertyOrDefault -Object $_ -Name "canCloseReleaseIssue" -DefaultValue $true) -and
+        -not [bool](Get-PropertyOrDefault -Object $_ -Name "isRuntimeExecutionProof" -DefaultValue $true) -and
+        -not [bool](Get-PropertyOrDefault -Object $_ -Name "isPostPublishProof" -DefaultValue $true) -and
+        -not [bool](Get-PropertyOrDefault -Object $_ -Name "isReleaseCloseProof" -DefaultValue $true) -and
+        ([string](Get-PropertyOrDefault -Object $_ -Name "boundary" -DefaultValue "")).Contains("cannot substitute real Owner proof", [StringComparison]::OrdinalIgnoreCase) -and
+        ([string](Get-PropertyOrDefault -Object $_ -Name "boundary" -DefaultValue "")).Contains("post-publish CleanConsumer proof", [StringComparison]::OrdinalIgnoreCase) -and
+        ([string](Get-PropertyOrDefault -Object $_ -Name "boundary" -DefaultValue "")).Contains("final close decision", [StringComparison]::OrdinalIgnoreCase)
+      }).Count -eq $sourceArtifactEvidence.Count) -Severity "blocker" -Detail "Every source artifact evidence item must remain hash-only traceability and not proof, publish, or close authority.")) | Out-Null
 
 foreach ($expectedGate in @(
   "github-actions-run-evidence",
@@ -206,6 +227,25 @@ foreach ($needle in @(
   $items.Add((New-ValidationItem -Id "source-artifact-$($needle.Replace('artifacts/final-release/','').Replace('.json',''))-present" -Passed ($sourceArtifacts -contains $needle) -Severity "blocker" -Detail "Source artifact $needle must be listed.")) | Out-Null
 }
 
+foreach ($expectedEvidenceId in @(
+  "final-owner-proof-action-worklist",
+  "final-owner-proof-action-worklist-validation",
+  "final-owner-execution-one-screen-pack",
+  "final-owner-execution-one-screen-pack-validation",
+  "final-owner-strict-close-execution-order-validation",
+  "owner-public-publish-execution-result-candidate-validation",
+  "public-package-download-proof-candidate-validation",
+  "post-publish-clean-consumer-proof-result-validation",
+  "release-issue-close-owner-decision-input-validation",
+  "final-close-gate-convergence-validation",
+  "release-evidence-bundle",
+  "release-publish-readiness-evidence-pack",
+  "package-consumer-owner-runtime-smoke-field-alignment",
+  "package-consumer-owner-runtime-smoke-field-alignment-validation"
+)) {
+  $items.Add((New-ValidationItem -Id "source-artifact-evidence-$expectedEvidenceId-present" -Passed ($sourceArtifactEvidenceIds -contains $expectedEvidenceId) -Severity "blocker" -Detail "Source artifact evidence $expectedEvidenceId must be present.")) | Out-Null
+}
+
 $failedBlockers = @($items | Where-Object { -not $_.passed -and $_.severity -eq "blocker" })
 $validationState = if ($failedBlockers.Count -gt 0) { "invalid-final-owner-execution-package" } else { "blocked-final-owner-execution-required" }
 $blockedExecutionStepCount = @($steps | Where-Object {
@@ -240,6 +280,10 @@ $validation = [pscustomobject]@{
   releaseEvidenceBundleSha256 = [string](Get-PropertyOrDefault -Object $record -Name "releaseEvidenceBundleSha256" -DefaultValue "")
   releaseIssueCloseOwnerDecisionValidationState = [string](Get-PropertyOrDefault -Object $record -Name "releaseIssueCloseOwnerDecisionValidationState" -DefaultValue "")
   finalCloseStrictValidatorOutputState = [string](Get-PropertyOrDefault -Object $record -Name "finalCloseStrictValidatorOutputState" -DefaultValue "")
+  sourceArtifactEvidenceCount = $sourceArtifactEvidenceCount
+  sourceArtifactEvidenceMissingCount = $sourceArtifactEvidenceMissingCount
+  sourceArtifactEvidenceSha256Count = $sourceArtifactEvidenceSha256Count
+  sourceArtifactEvidenceNonProofBoundaryCount = $sourceArtifactEvidenceNonProofBoundaryCount
   publicDownloadCannotSubstitutePostPublishProof = [bool](Get-PropertyOrDefault -Object $record -Name "publicDownloadCannotSubstitutePostPublishProof" -DefaultValue $false)
   bundleHashCannotSubstituteFinalCloseDecision = [bool](Get-PropertyOrDefault -Object $record -Name "bundleHashCannotSubstituteFinalCloseDecision" -DefaultValue $false)
   strictCloseOutputCannotCloseIssue = [bool](Get-PropertyOrDefault -Object $record -Name "strictCloseOutputCannotCloseIssue" -DefaultValue $false)
@@ -290,6 +334,10 @@ Generated at: ``$($validation.generatedAtUtc)``
 - releaseEvidenceBundleSha256: ``$($validation.releaseEvidenceBundleSha256)``
 - releaseIssueCloseOwnerDecisionValidationState: ``$($validation.releaseIssueCloseOwnerDecisionValidationState)``
 - finalCloseStrictValidatorOutputState: ``$($validation.finalCloseStrictValidatorOutputState)``
+- sourceArtifactEvidenceCount: ``$($validation.sourceArtifactEvidenceCount)``
+- sourceArtifactEvidenceMissingCount: ``$($validation.sourceArtifactEvidenceMissingCount)``
+- sourceArtifactEvidenceSha256Count: ``$($validation.sourceArtifactEvidenceSha256Count)``
+- sourceArtifactEvidenceNonProofBoundaryCount: ``$($validation.sourceArtifactEvidenceNonProofBoundaryCount)``
 - publicDownloadCannotSubstitutePostPublishProof: ``$($validation.publicDownloadCannotSubstitutePostPublishProof)``
 - bundleHashCannotSubstituteFinalCloseDecision: ``$($validation.bundleHashCannotSubstituteFinalCloseDecision)``
 - strictCloseOutputCannotCloseIssue: ``$($validation.strictCloseOutputCannotCloseIssue)``
