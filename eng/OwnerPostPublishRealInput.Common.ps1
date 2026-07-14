@@ -667,3 +667,161 @@ function Test-OwnerPostPublishProofValidatorArtifact {
   return @($items.ToArray())
 }
 
+function Get-OwnerPostPublishProofValidatorValidationResults {
+  param([string]$OutputRoot)
+
+  foreach ($spec in Get-OwnerPostPublishProofValidatorSpecs) {
+    $recordPath = Join-Path $OutputRoot "$($spec.fileStem).json"
+    $validationPath = Join-Path $OutputRoot "$($spec.fileStem)-validation.json"
+    $record = $null
+    $validation = $null
+    if (Test-Path -LiteralPath $recordPath -PathType Leaf) {
+      $record = Get-Content -LiteralPath $recordPath -Raw -Encoding utf8 | ConvertFrom-Json
+    }
+    if (Test-Path -LiteralPath $validationPath -PathType Leaf) {
+      $validation = Get-Content -LiteralPath $validationPath -Raw -Encoding utf8 | ConvertFrom-Json
+    }
+
+    [pscustomobject]@{
+      recordKind = [string]$spec.recordKind
+      proofKind = [string]$spec.proofKind
+      laneId = [string]$spec.laneId
+      isFinalBridge = [bool]$spec.isFinalBridge
+      recordPath = $recordPath
+      validationPath = $validationPath
+      recordPresent = $null -ne $record
+      validationPresent = $null -ne $validation
+      validatorState = [string](Get-PropertyOrDefault -Object $record -Name "validatorState" -DefaultValue "missing-validator-record")
+      validationState = [string](Get-PropertyOrDefault -Object $validation -Name "validationState" -DefaultValue "missing-validator-validation")
+      ownerEvidenceAccepted = [bool](Get-PropertyOrDefault -Object $validation -Name "ownerEvidenceAccepted" -DefaultValue $false)
+      requiredFieldCount = [int](Get-PropertyOrDefault -Object $validation -Name "requiredFieldCount" -DefaultValue 0)
+      readyFieldCount = [int](Get-PropertyOrDefault -Object $validation -Name "readyFieldCount" -DefaultValue 0)
+      blockedFieldCount = [int](Get-PropertyOrDefault -Object $validation -Name "blockedFieldCount" -DefaultValue 0)
+      blockedReasonCount = [int](Get-PropertyOrDefault -Object $validation -Name "blockedReasonCount" -DefaultValue 0)
+      failedBlockerCount = [int](Get-PropertyOrDefault -Object $validation -Name "failedBlockerCount" -DefaultValue 999)
+    }
+  }
+}
+
+function Export-OwnerPostPublishProofAcceptanceManifestArtifact {
+  param(
+    [string]$OutputRoot,
+    [string]$RepositoryRoot
+  )
+
+  $results = @(Get-OwnerPostPublishProofValidatorValidationResults -OutputRoot $OutputRoot)
+  $validatorCount = $results.Count
+  $acceptedValidatorCount = @($results | Where-Object { [bool]$_.ownerEvidenceAccepted -and [int]$_.failedBlockerCount -eq 0 }).Count
+  $blockedValidatorCount = $validatorCount - $acceptedValidatorCount
+  $missingValidationCount = @($results | Where-Object { -not [bool]$_.validationPresent }).Count
+  $failedBlockerCount = @($results | Where-Object { [int]$_.failedBlockerCount -gt 0 }).Count
+  $allValidatorsAccepted = $validatorCount -gt 0 -and $acceptedValidatorCount -eq $validatorCount -and $failedBlockerCount -eq 0
+
+  $blockedReasons = New-Object System.Collections.Generic.List[string]
+  if ($missingValidationCount -gt 0) { $blockedReasons.Add("validator-validation-missing=$missingValidationCount") | Out-Null }
+  if ($blockedValidatorCount -gt 0) { $blockedReasons.Add("validator-owner-evidence-not-accepted=$blockedValidatorCount/$validatorCount") | Out-Null }
+  if ($failedBlockerCount -gt 0) { $blockedReasons.Add("validator-failed-blockers=$failedBlockerCount") | Out-Null }
+  if (-not $allValidatorsAccepted) { $blockedReasons.Add("real-owner-post-publish-evidence-incomplete") | Out-Null }
+
+  $manifestState = if ($allValidatorsAccepted) { "owner-post-publish-proof-acceptance-ready-for-manual-close-review" } else { "blocked-owner-post-publish-proof-acceptance-real-evidence-required" }
+  $record = [pscustomobject]@{
+    recordKind = "owner-post-publish-proof-acceptance-manifest"
+    generatedAtUtc = [DateTimeOffset]::UtcNow.ToString("O")
+    manifestState = $manifestState
+    validatorCount = $validatorCount
+    acceptedValidatorCount = $acceptedValidatorCount
+    blockedValidatorCount = $blockedValidatorCount
+    missingValidationCount = $missingValidationCount
+    validatorFailedBlockerCount = $failedBlockerCount
+    allValidatorsAccepted = $allValidatorsAccepted
+    readyForManualReleaseCloseReview = $allValidatorsAccepted
+    releaseCloseReady = $false
+    closeIssueCommandReady = $false
+    validatorResults = @($results)
+    blockedReasonCount = $blockedReasons.Count
+    blockedReasons = @($blockedReasons.ToArray())
+    ownerActionRequired = -not $allValidatorsAccepted
+    performsPublish = $false
+    usesPublishToken = $false
+    canPublishPublicly = $false
+    canCloseReleaseIssue = $false
+    canPromoteRuntimeProof = $false
+    isRuntimeExecutionProof = $false
+    isPostPublishProof = $false
+    isReleaseCloseProof = $false
+    sourceArtifacts = @($results | ForEach-Object { "artifacts/final-release/$([System.IO.Path]::GetFileName($_.validationPath))" })
+    boundary = "Owner post-publish proof acceptance manifest aggregates strict validators only. It does not download packages, run external consumers, run YoloVision, publish articles, execute dotnet nuget push, approve public release, close the release issue, or become proof by itself; it is not runtime proof, not post-publish proof, not release close approval, and not package push."
+  }
+
+  $jsonPath = Join-Path $OutputRoot "owner-post-publish-proof-acceptance-manifest.json"
+  $mdPath = Join-Path $OutputRoot "owner-post-publish-proof-acceptance-manifest.md"
+  Write-Utf8File -LiteralPath $jsonPath -InputObject ($record | ConvertTo-Json -Depth 16)
+  Write-Utf8File -LiteralPath $mdPath -InputObject @(
+    "# Owner Post-Publish Proof Acceptance Manifest",
+    "",
+    "- manifestState: ``$($record.manifestState)``",
+    "- validators: ``$acceptedValidatorCount/$validatorCount``",
+    "- blockedValidatorCount: ``$blockedValidatorCount``",
+    "- readyForManualReleaseCloseReview: ``$($record.readyForManualReleaseCloseReview)``",
+    "- releaseCloseReady: ``False``",
+    "- canCloseReleaseIssue: ``False``",
+    "",
+    $record.boundary
+  )
+
+  return $record
+}
+
+function Test-OwnerPostPublishProofAcceptanceManifestArtifact {
+  param([object]$Record)
+
+  $items = New-Object System.Collections.Generic.List[object]
+  $items.Add((New-OwnerValidationItem "record-kind" ([string]$Record.recordKind -eq "owner-post-publish-proof-acceptance-manifest") "blocker" "Acceptance manifest recordKind must match.")) | Out-Null
+  $items.Add((New-OwnerValidationItem "validator-count" ([int]$Record.validatorCount -ge 5) "blocker" "Acceptance manifest must inspect all Owner post-publish proof validators.")) | Out-Null
+  $items.Add((New-OwnerValidationItem "blocked-or-accepted-state" ([string]$Record.manifestState -in @("blocked-owner-post-publish-proof-acceptance-real-evidence-required", "owner-post-publish-proof-acceptance-ready-for-manual-close-review")) "blocker" "Acceptance manifest state must be explicit.")) | Out-Null
+  $items.Add((New-OwnerValidationItem "no-auto-close" ((-not [bool](Get-PropertyOrDefault -Object $Record -Name "releaseCloseReady" -DefaultValue $true)) -and (-not [bool](Get-PropertyOrDefault -Object $Record -Name "closeIssueCommandReady" -DefaultValue $true)) -and (-not [bool](Get-PropertyOrDefault -Object $Record -Name "canCloseReleaseIssue" -DefaultValue $true))) "blocker" "Acceptance manifest must not close the release issue automatically.")) | Out-Null
+  $items.Add((New-OwnerValidationItem "non-proof-flags" (Assert-OwnerPostPublishFalseFlags -Record $Record) "blocker" "Acceptance manifest must not publish, close, or promote proof by itself.")) | Out-Null
+  $items.Add((New-OwnerValidationItem "boundary" ([string]$Record.boundary -like "*not post-publish proof*" -and [string]$Record.boundary -like "*not package push*") "blocker" "Acceptance manifest boundary must explicitly reject proof substitution.")) | Out-Null
+  if (-not [bool](Get-PropertyOrDefault -Object $Record -Name "allValidatorsAccepted" -DefaultValue $false)) {
+    $items.Add((New-OwnerValidationItem "blocked-reasons" ([int](Get-PropertyOrDefault -Object $Record -Name "blockedReasonCount" -DefaultValue 0) -gt 0) "blocker" "Blocked acceptance manifest must include blocked reasons.")) | Out-Null
+  }
+
+  return @($items.ToArray())
+}
+
+function Get-OwnerPostPublishImportFieldResult {
+  param([object]$ImportRecord, [string]$LaneId, [string]$FieldName)
+  $analysis = Get-PropertyOrDefault -Object $ImportRecord -Name "analysis" -DefaultValue $null
+  foreach ($field in @(Convert-ToArray (Get-PropertyOrDefault -Object $analysis -Name "fieldResults" -DefaultValue @()))) {
+    if ([string]$field.laneId -eq $LaneId -and [string]$field.fieldName -eq $FieldName) {
+      return $field
+    }
+  }
+
+  return $null
+}
+
+function Get-OwnerPostPublishImportFieldValue {
+  param([object]$ImportRecord, [string]$LaneId, [string]$FieldName)
+  $result = Get-OwnerPostPublishImportFieldResult -ImportRecord $ImportRecord -LaneId $LaneId -FieldName $FieldName
+  return [string](Get-PropertyOrDefault -Object $result -Name "suppliedValue" -DefaultValue "")
+}
+
+function Get-FileSha256Text {
+  param([string]$Path)
+  $sha = [System.Security.Cryptography.SHA256]::Create()
+  try {
+    $stream = [System.IO.File]::OpenRead($Path)
+    try {
+      $hash = $sha.ComputeHash($stream)
+      return -join ($hash | ForEach-Object { $_.ToString("x2") })
+    }
+    finally {
+      $stream.Dispose()
+    }
+  }
+  finally {
+    $sha.Dispose()
+  }
+}
+
