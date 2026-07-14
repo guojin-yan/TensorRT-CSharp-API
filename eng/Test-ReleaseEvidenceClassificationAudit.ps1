@@ -252,6 +252,7 @@ $mustRemainFailedIds = @(
   "final-quality-freeze-dashboard",
   "public-proof-claim-boundary-audit",
   "article-roadmap-30plus",
+  "post-publish-docs-and-samples-final-landing-pack",
   "cuda-device-initialization-local-smoke-classification",
   "clean-consumer-proof-execution-bundle",
   "clean-consumer-external-proof-closure-pack",
@@ -449,6 +450,7 @@ $requiredNonProofIds = @(
   "final-quality-freeze-dashboard",
   "public-proof-claim-boundary-audit",
   "article-roadmap-30plus",
+  "post-publish-docs-and-samples-final-landing-pack",
   "cuda-device-initialization-local-smoke-classification",
   "clean-consumer-proof-execution-bundle",
   "clean-consumer-external-proof-closure-pack",
@@ -596,6 +598,7 @@ $requiredNonSubstituteMarkers = @(
   "end-to-end release gate remains blocked until real Owner evidence",
   "owner real evidence final intake checklist",
   "final intake checklist remains blocked until real Owner evidence",
+  "post-publish docs and samples final landing pack",
   "design-gate-required planning input",
   "keep-deferred boundary disclosure"
 )
