@@ -238,6 +238,8 @@ function Update-OwnerRealProofStagingWorkspaceArtifacts {
   & (Join-Path $scriptDir "Test-YoloVisionRealModelProofFromStagingWorkspace.ps1") -RepositoryRoot $RepositoryRoot -Strict | Out-Null
   & (Join-Path $scriptDir "Export-ReleaseCloseFinalBridge.ps1") -RepositoryRoot $RepositoryRoot | Out-Null
   & (Join-Path $scriptDir "Test-ReleaseCloseFinalBridge.ps1") -RepositoryRoot $RepositoryRoot -Strict | Out-Null
+  & (Join-Path $scriptDir "Export-FinalOwnerExecutionEvidencePack.ps1") -RepositoryRoot $RepositoryRoot | Out-Null
+  & (Join-Path $scriptDir "Test-FinalOwnerExecutionEvidencePack.ps1") -RepositoryRoot $RepositoryRoot -Strict | Out-Null
 }
 
 Update-OwnerRealProofStagingWorkspaceArtifacts
@@ -570,6 +572,11 @@ $ownerPostPublishProofAcceptanceManifestValidation = Read-JsonOrNull "artifacts\
 $publicPackageUrlHashDownloadVerificationValidation = Read-JsonOrNull "artifacts\final-release\public-package-url-hash-download-verification-validation.json"
 $postPublishProofValidatorBridgeValidation = Read-JsonOrNull "artifacts\final-release\post-publish-proof-validator-bridge-validation.json"
 $releaseCloseFinalBridgeValidation = Read-JsonOrNull "artifacts\final-release\release-close-final-bridge-validation.json"
+$finalOwnerExecutionInputSkeletonValidation = Read-JsonOrNull "artifacts\final-release\final-owner-execution-input-skeleton-validation.json"
+$githubCiEvidenceFromOwnerInputValidation = Read-JsonOrNull "artifacts\final-release\github-ci-evidence-from-owner-input-validation.json"
+$releaseEvidenceBundleHashReviewValidation = Read-JsonOrNull "artifacts\final-release\release-evidence-bundle-hash-review-validation.json"
+$classificationAuditHashReviewValidation = Read-JsonOrNull "artifacts\final-release\classification-audit-hash-review-validation.json"
+$finalOwnerExecutionEvidencePackValidation = Read-JsonOrNull "artifacts\final-release\final-owner-execution-evidence-pack-validation.json"
 $cudaDeviceInitializationLocalSmokeClassification = Read-JsonOrNull "artifacts\final-release\cuda-device-initialization-local-smoke-classification.json"
 $cudaDeviceInitializationLocalSmokeClassificationValidation = Read-JsonOrNull "artifacts\final-release\cuda-device-initialization-local-smoke-classification-validation.json"
 $cleanConsumerProofExecutionBundle = Read-JsonOrNull "artifacts\final-release\clean-consumer-proof-execution-bundle.json"
@@ -2823,6 +2830,31 @@ $releaseCloseFinalBridgeAllCloseInputsReady = [bool](Get-PropertyOrDefault -Obje
 $releaseCloseFinalBridgeAcceptedRealInputCount = [int](Get-PropertyOrDefault -Object $releaseCloseFinalBridgeValidation -Name "acceptedRealInputCount" -DefaultValue 0)
 $releaseCloseFinalBridgeRejectedNonProofStateCount = [int](Get-PropertyOrDefault -Object $releaseCloseFinalBridgeValidation -Name "rejectedNonProofStateCount" -DefaultValue 0)
 $releaseCloseFinalBridgeFailedBlockerCount = [int](Get-PropertyOrDefault -Object $releaseCloseFinalBridgeValidation -Name "failedBlockerCount" -DefaultValue 999)
+$finalOwnerExecutionInputSkeletonValidationState = [string](Get-PropertyOrDefault -Object $finalOwnerExecutionInputSkeletonValidation -Name "validationState" -DefaultValue "missing-final-owner-execution-input-skeleton-validation")
+$finalOwnerExecutionInputSkeletonLaneCount = [int](Get-PropertyOrDefault -Object $finalOwnerExecutionInputSkeletonValidation -Name "laneCount" -DefaultValue 0)
+$finalOwnerExecutionInputSkeletonRequiredFieldCount = [int](Get-PropertyOrDefault -Object $finalOwnerExecutionInputSkeletonValidation -Name "requiredFieldCount" -DefaultValue 0)
+$finalOwnerExecutionInputSkeletonFailedBlockerCount = [int](Get-PropertyOrDefault -Object $finalOwnerExecutionInputSkeletonValidation -Name "failedBlockerCount" -DefaultValue 999)
+$githubCiEvidenceFromOwnerInputValidationState = [string](Get-PropertyOrDefault -Object $githubCiEvidenceFromOwnerInputValidation -Name "validationState" -DefaultValue "missing-github-ci-evidence-from-owner-input-validation")
+$githubCiEvidenceFromOwnerInputAccepted = [bool](Get-PropertyOrDefault -Object $githubCiEvidenceFromOwnerInputValidation -Name "ciEvidenceAccepted" -DefaultValue $false)
+$githubCiEvidenceFromOwnerInputFailedActionRequiredCount = [int](Get-PropertyOrDefault -Object $githubCiEvidenceFromOwnerInputValidation -Name "failedActionRequiredCount" -DefaultValue 0)
+$githubCiEvidenceFromOwnerInputFailedBlockerCount = [int](Get-PropertyOrDefault -Object $githubCiEvidenceFromOwnerInputValidation -Name "failedBlockerCount" -DefaultValue 999)
+$releaseEvidenceBundleHashReviewValidationState = [string](Get-PropertyOrDefault -Object $releaseEvidenceBundleHashReviewValidation -Name "validationState" -DefaultValue "missing-release-evidence-bundle-hash-review-validation")
+$releaseEvidenceBundleHashReviewHashMatches = [bool](Get-PropertyOrDefault -Object $releaseEvidenceBundleHashReviewValidation -Name "hashMatches" -DefaultValue $false)
+$releaseEvidenceBundleHashReviewAccepted = [bool](Get-PropertyOrDefault -Object $releaseEvidenceBundleHashReviewValidation -Name "reviewAccepted" -DefaultValue $false)
+$releaseEvidenceBundleHashReviewFailedActionRequiredCount = [int](Get-PropertyOrDefault -Object $releaseEvidenceBundleHashReviewValidation -Name "failedActionRequiredCount" -DefaultValue 0)
+$releaseEvidenceBundleHashReviewFailedBlockerCount = [int](Get-PropertyOrDefault -Object $releaseEvidenceBundleHashReviewValidation -Name "failedBlockerCount" -DefaultValue 999)
+$classificationAuditHashReviewValidationState = [string](Get-PropertyOrDefault -Object $classificationAuditHashReviewValidation -Name "validationState" -DefaultValue "missing-classification-audit-hash-review-validation")
+$classificationAuditHashReviewHashMatches = [bool](Get-PropertyOrDefault -Object $classificationAuditHashReviewValidation -Name "hashMatches" -DefaultValue $false)
+$classificationAuditHashReviewStateMatchesRequired = [bool](Get-PropertyOrDefault -Object $classificationAuditHashReviewValidation -Name "stateMatchesRequired" -DefaultValue $false)
+$classificationAuditHashReviewAccepted = [bool](Get-PropertyOrDefault -Object $classificationAuditHashReviewValidation -Name "reviewAccepted" -DefaultValue $false)
+$classificationAuditHashReviewFailedActionRequiredCount = [int](Get-PropertyOrDefault -Object $classificationAuditHashReviewValidation -Name "failedActionRequiredCount" -DefaultValue 0)
+$classificationAuditHashReviewFailedBlockerCount = [int](Get-PropertyOrDefault -Object $classificationAuditHashReviewValidation -Name "failedBlockerCount" -DefaultValue 999)
+$finalOwnerExecutionEvidencePackValidationState = [string](Get-PropertyOrDefault -Object $finalOwnerExecutionEvidencePackValidation -Name "validationState" -DefaultValue "missing-final-owner-execution-evidence-pack-validation")
+$finalOwnerExecutionEvidencePackGateCount = [int](Get-PropertyOrDefault -Object $finalOwnerExecutionEvidencePackValidation -Name "gateCount" -DefaultValue 0)
+$finalOwnerExecutionEvidencePackReadyGateCount = [int](Get-PropertyOrDefault -Object $finalOwnerExecutionEvidencePackValidation -Name "readyGateCount" -DefaultValue 0)
+$finalOwnerExecutionEvidencePackBlockedGateCount = [int](Get-PropertyOrDefault -Object $finalOwnerExecutionEvidencePackValidation -Name "blockedGateCount" -DefaultValue 0)
+$finalOwnerExecutionEvidencePackRejectedNonProofStateCount = [int](Get-PropertyOrDefault -Object $finalOwnerExecutionEvidencePackValidation -Name "rejectedNonProofStateCount" -DefaultValue 0)
+$finalOwnerExecutionEvidencePackFailedBlockerCount = [int](Get-PropertyOrDefault -Object $finalOwnerExecutionEvidencePackValidation -Name "failedBlockerCount" -DefaultValue 999)
 $cudaDeviceInitializationLocalSmokeClassificationState = [string](Get-PropertyOrDefault -Object $cudaDeviceInitializationLocalSmokeClassification -Name "classificationState" -DefaultValue "missing-cuda-device-initialization-local-smoke-classification")
 $cudaDeviceInitializationLocalSmokeClassificationProofKind = [string](Get-PropertyOrDefault -Object $cudaDeviceInitializationLocalSmokeClassification -Name "proofKind" -DefaultValue "missing-proof-kind")
 $cudaDeviceInitializationLocalSmokeClassificationValidationState = [string](Get-PropertyOrDefault -Object $cudaDeviceInitializationLocalSmokeClassificationValidation -Name "validationState" -DefaultValue "missing-cuda-device-initialization-local-smoke-classification-validation")
@@ -3740,6 +3772,11 @@ $evidenceItems = @(
   New-EvidenceItem -Id "public-package-url-hash-download-verification" -Title "Public package URL/hash download verification" -Artifact "artifacts/final-release/public-package-url-hash-download-verification-validation.json" -State "$publicPackageUrlHashDownloadVerificationValidationState; downloadAllowed=$publicPackageUrlHashDownloadVerificationDownloadAllowed; attempted=$publicPackageUrlHashDownloadVerificationDownloadAttemptedCount; hashMatched=$publicPackageUrlHashDownloadVerificationHashMatchedCount; failedBlockers=$publicPackageUrlHashDownloadVerificationFailedBlockerCount" -Passed $false -Boundary "The public package URL/hash download verification is guarded Owner-input verification only; it does not publish, does not use tokens, is not post-publish proof by itself, not release close approval, and not package push."
   New-EvidenceItem -Id "post-publish-proof-validator-bridge" -Title "Post-publish proof validator bridge" -Artifact "artifacts/final-release/post-publish-proof-validator-bridge-validation.json" -State "$postPublishProofValidatorBridgeValidationState; lanes=$postPublishProofValidatorBridgeInputShapeReadyLaneCount/$postPublishProofValidatorBridgeLaneCount inputShapeReady; proofReady=$postPublishProofValidatorBridgeProofReadyLaneCount/$postPublishProofValidatorBridgeLaneCount; blockedLanes=$postPublishProofValidatorBridgeBlockedLaneCount; allAccepted=$postPublishProofValidatorBridgeAllPostPublishInputsAccepted; publicHashCannotSubstitute=$postPublishProofValidatorBridgePublicPackageHashCannotSubstitutePostPublishProof; shapeValidCannotSubstitute=$postPublishProofValidatorBridgeShapeValidCannotSubstitutePostPublishProof; failedBlockers=$postPublishProofValidatorBridgeFailedBlockerCount" -Passed $false -Boundary "The post-publish proof validator bridge aggregates strict Owner validators and staging admission status only; public package hash/download verification, staging shape-valid records, validation-ready states, local feeds, ProjectReference, direct nupkg, dashboard, and dry-run signals cannot substitute post-publish CleanConsumer runtime proof. It does not publish, use tokens, close the release issue, claim runtime/post-publish/release-close proof, and is not package push."
   New-EvidenceItem -Id "release-close-final-bridge" -Title "Release close final bridge" -Artifact "artifacts/final-release/release-close-final-bridge-validation.json" -State "$releaseCloseFinalBridgeValidationState; gates=$releaseCloseFinalBridgeReadyGateCount/$releaseCloseFinalBridgeGateCount ready; blockedGates=$releaseCloseFinalBridgeBlockedGateCount; acceptedRealInputs=$releaseCloseFinalBridgeAcceptedRealInputCount; rejectedNonProofStates=$releaseCloseFinalBridgeRejectedNonProofStateCount; allCloseInputsReady=$releaseCloseFinalBridgeAllCloseInputsReady; failedBlockers=$releaseCloseFinalBridgeFailedBlockerCount" -Passed $false -Boundary "The release close final bridge cross-checks post-publish admission, final Owner rollback review, final Owner close decision, staging strict import, release evidence bundle hash, and classification audit hash for Owner review only. It rejects templates, dashboards, dry-runs, local feeds, ProjectReference, direct nupkg, queued workflows, staging shape-valid-only, public-package-hash-only, and validation-ready substitutes; it does not publish, use tokens, close the release issue, claim release close proof, and is not package push."
+  New-EvidenceItem -Id "final-owner-execution-input-skeleton" -Title "Final Owner execution input skeleton" -Artifact "artifacts/final-release/final-owner-execution-input-skeleton-validation.json" -State "$finalOwnerExecutionInputSkeletonValidationState; lanes=$finalOwnerExecutionInputSkeletonLaneCount; requiredFields=$finalOwnerExecutionInputSkeletonRequiredFieldCount; failedBlockers=$finalOwnerExecutionInputSkeletonFailedBlockerCount" -Passed $false -Boundary "The final Owner execution input skeleton is fillable guidance and schema shape only; it does not publish, does not use tokens, does not close the release issue, and is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push."
+  New-EvidenceItem -Id "github-ci-evidence-from-owner-input" -Title "GitHub CI evidence from Owner input" -Artifact "artifacts/final-release/github-ci-evidence-from-owner-input-validation.json" -State "$githubCiEvidenceFromOwnerInputValidationState; accepted=$githubCiEvidenceFromOwnerInputAccepted; failedActionRequired=$githubCiEvidenceFromOwnerInputFailedActionRequiredCount; failedBlockers=$githubCiEvidenceFromOwnerInputFailedBlockerCount" -Passed $false -Boundary "The GitHub CI evidence import records Owner-reviewed completed CI metadata only; queued, in-progress, local build, local test, dashboard, dry-run, local feed, ProjectReference, and direct nupkg signals are not proof. It does not publish, does not use tokens, does not close the release issue, and is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push."
+  New-EvidenceItem -Id "release-evidence-bundle-hash-review" -Title "Release evidence bundle hash review" -Artifact "artifacts/final-release/release-evidence-bundle-hash-review-validation.json" -State "$releaseEvidenceBundleHashReviewValidationState; hashMatches=$releaseEvidenceBundleHashReviewHashMatches; accepted=$releaseEvidenceBundleHashReviewAccepted; failedActionRequired=$releaseEvidenceBundleHashReviewFailedActionRequiredCount; failedBlockers=$releaseEvidenceBundleHashReviewFailedBlockerCount" -Passed $false -Boundary "The release evidence bundle hash review is Owner-reviewed hash traceability only; matching hash is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push."
+  New-EvidenceItem -Id "classification-audit-hash-review" -Title "Classification audit hash review" -Artifact "artifacts/final-release/classification-audit-hash-review-validation.json" -State "$classificationAuditHashReviewValidationState; hashMatches=$classificationAuditHashReviewHashMatches; stateMatchesRequired=$classificationAuditHashReviewStateMatchesRequired; accepted=$classificationAuditHashReviewAccepted; failedActionRequired=$classificationAuditHashReviewFailedActionRequiredCount; failedBlockers=$classificationAuditHashReviewFailedBlockerCount" -Passed $false -Boundary "The classification audit hash review is Owner-reviewed audit traceability only; matching hash and passed classification audit state are not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push."
+  New-EvidenceItem -Id "final-owner-execution-evidence-pack" -Title "Final Owner execution evidence pack" -Artifact "artifacts/final-release/final-owner-execution-evidence-pack-validation.json" -State "$finalOwnerExecutionEvidencePackValidationState; gates=$finalOwnerExecutionEvidencePackReadyGateCount/$finalOwnerExecutionEvidencePackGateCount ready; blockedGates=$finalOwnerExecutionEvidencePackBlockedGateCount; rejectedNonProofStates=$finalOwnerExecutionEvidencePackRejectedNonProofStateCount; failedBlockers=$finalOwnerExecutionEvidencePackFailedBlockerCount" -Passed $false -Boundary "The final Owner execution evidence pack aggregates final Owner input skeleton, GitHub CI evidence, bundle hash review, classification audit hash review, post-publish bridge, and release-close bridge for Owner review only. It rejects templates, dashboards, dry-runs, local feeds, ProjectReference, direct nupkg, queued workflows, local builds, local tests, hash-only records, validation-ready records, and staging shape-valid-only substitutes. It does not publish, does not use tokens, does not close the release issue, and is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push."
   New-EvidenceItem -Id "cuda-device-initialization-local-smoke-classification" -Title "CUDA device initialization local smoke classification" -Artifact "artifacts/final-release/cuda-device-initialization-local-smoke-classification.json" -State "$cudaDeviceInitializationLocalSmokeClassificationState; validation=$cudaDeviceInitializationLocalSmokeClassificationValidationState; proofKind=$cudaDeviceInitializationLocalSmokeClassificationProofKind; findings=$cudaDeviceInitializationLocalSmokeClassificationFindingCount; preInitCallOrderReady=$cudaDeviceInitializationLocalSmokeClassificationPreInitCallOrderReady; skippedTrueIsForbiddenSubstitute=$cudaDeviceInitializationLocalSmokeClassificationSkippedTrueIsForbiddenSubstitute; canPromoteRuntimeProof=$cudaDeviceInitializationLocalSmokeClassificationCanPromoteRuntimeProof; isPackageConsumerRuntimeProof=$cudaDeviceInitializationLocalSmokeClassificationIsPackageConsumerRuntimeProof; isRuntimeExecutionProof=$cudaDeviceInitializationLocalSmokeClassificationIsRuntimeExecutionProof; performsPublish=$cudaDeviceInitializationLocalSmokeClassificationPerformsPublish; canPublishPublicly=$cudaDeviceInitializationLocalSmokeClassificationCanPublishPublicly; canCloseReleaseIssue=$cudaDeviceInitializationLocalSmokeClassificationCanCloseReleaseIssue" -Passed $false -Boundary "CudaDeviceInitializationProofRunner is local smoke classification only; it is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push. Skipped=True is a forbidden substitute and cannot promote package-consumer-runtime proof."
   New-EvidenceItem -Id "clean-consumer-proof-execution-bundle" -Title "Clean consumer proof execution bundle" -Artifact "artifacts/final-release/clean-consumer-proof-execution-bundle-validation.json" -State "$cleanConsumerProofExecutionBundleValidationState; bundleState=$cleanConsumerProofExecutionBundleState; lanes=$cleanConsumerProofExecutionBundleLaneCount; forbiddenSubstitutes=$cleanConsumerProofExecutionBundleForbiddenSubstituteCount; promotionRequirements=$cleanConsumerProofExecutionBundlePromotionRequirementCount; executionCommands=$cleanConsumerProofExecutionBundleExecutionCommandCount; failedBlockers=$cleanConsumerProofExecutionBundleFailedBlockerCount; ownerActionRequired=$cleanConsumerProofExecutionBundleOwnerActionRequired; performsPublish=$cleanConsumerProofExecutionBundlePerformsPublish; performsRuntimeExecution=$cleanConsumerProofExecutionBundlePerformsRuntimeExecution; canPromoteRuntimeProof=$cleanConsumerProofExecutionBundleCanPromoteRuntimeProof; canPublishPublicly=$cleanConsumerProofExecutionBundleCanPublishPublicly; canCloseReleaseIssue=$cleanConsumerProofExecutionBundleCanCloseReleaseIssue; isRuntimeExecutionProof=$cleanConsumerProofExecutionBundleIsRuntimeExecutionProof; isPackageConsumerRuntimeProof=$cleanConsumerProofExecutionBundleIsPackageConsumerRuntimeProof; isPostPublishProof=$cleanConsumerProofExecutionBundleIsPostPublishProof" -Passed $false -Boundary "The clean consumer proof execution bundle is owner execution mapping and classification only; it is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push. It cannot promote proof without real repository-external clean consumer logs, hashes, package metadata, host metadata, owner review, and strict validators with FailOnNotProof."
   New-EvidenceItem -Id "clean-consumer-external-proof-closure-pack" -Title "Clean consumer external proof closure pack" -Artifact "artifacts/final-release/clean-consumer-external-proof-closure-pack-validation.json" -State "$cleanConsumerExternalProofClosurePackValidationState; closureState=$cleanConsumerExternalProofClosurePackState; lanes=$cleanConsumerExternalProofClosurePackLaneCount; ownerFields=$cleanConsumerExternalProofClosurePackOwnerFieldCount; executionSteps=$cleanConsumerExternalProofClosurePackExecutionStepCount; forbiddenSubstitutes=$cleanConsumerExternalProofClosurePackForbiddenSubstituteCount; failedBlockers=$cleanConsumerExternalProofClosurePackFailedBlockerCount; ownerActionRequired=$cleanConsumerExternalProofClosurePackOwnerActionRequired; performsPublish=$cleanConsumerExternalProofClosurePackPerformsPublish; performsRuntimeExecution=$cleanConsumerExternalProofClosurePackPerformsRuntimeExecution; canPromoteRuntimeProof=$cleanConsumerExternalProofClosurePackCanPromoteRuntimeProof; canPublishPublicly=$cleanConsumerExternalProofClosurePackCanPublishPublicly; canCloseReleaseIssue=$cleanConsumerExternalProofClosurePackCanCloseReleaseIssue; isRuntimeExecutionProof=$cleanConsumerExternalProofClosurePackIsRuntimeExecutionProof; isPackageConsumerRuntimeProof=$cleanConsumerExternalProofClosurePackIsPackageConsumerRuntimeProof; isPostPublishProof=$cleanConsumerExternalProofClosurePackIsPostPublishProof; isReleaseCloseProof=$cleanConsumerExternalProofClosurePackIsReleaseCloseProof" -Passed $false -Boundary "The clean consumer external proof closure pack is a blocked owner-action convergence layer only; it is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push. It cannot promote proof without real external logs, SHA256 values, package metadata, native asset evidence, host metadata, owner review, and strict validators with FailOnNotProof."
@@ -5843,6 +5880,31 @@ $record = [pscustomobject]@{
   releaseCloseFinalBridgeAcceptedRealInputCount = $releaseCloseFinalBridgeAcceptedRealInputCount
   releaseCloseFinalBridgeRejectedNonProofStateCount = $releaseCloseFinalBridgeRejectedNonProofStateCount
   releaseCloseFinalBridgeFailedBlockerCount = $releaseCloseFinalBridgeFailedBlockerCount
+  finalOwnerExecutionInputSkeletonValidationState = $finalOwnerExecutionInputSkeletonValidationState
+  finalOwnerExecutionInputSkeletonLaneCount = $finalOwnerExecutionInputSkeletonLaneCount
+  finalOwnerExecutionInputSkeletonRequiredFieldCount = $finalOwnerExecutionInputSkeletonRequiredFieldCount
+  finalOwnerExecutionInputSkeletonFailedBlockerCount = $finalOwnerExecutionInputSkeletonFailedBlockerCount
+  githubCiEvidenceFromOwnerInputValidationState = $githubCiEvidenceFromOwnerInputValidationState
+  githubCiEvidenceFromOwnerInputAccepted = $githubCiEvidenceFromOwnerInputAccepted
+  githubCiEvidenceFromOwnerInputFailedActionRequiredCount = $githubCiEvidenceFromOwnerInputFailedActionRequiredCount
+  githubCiEvidenceFromOwnerInputFailedBlockerCount = $githubCiEvidenceFromOwnerInputFailedBlockerCount
+  releaseEvidenceBundleHashReviewValidationState = $releaseEvidenceBundleHashReviewValidationState
+  releaseEvidenceBundleHashReviewHashMatches = $releaseEvidenceBundleHashReviewHashMatches
+  releaseEvidenceBundleHashReviewAccepted = $releaseEvidenceBundleHashReviewAccepted
+  releaseEvidenceBundleHashReviewFailedActionRequiredCount = $releaseEvidenceBundleHashReviewFailedActionRequiredCount
+  releaseEvidenceBundleHashReviewFailedBlockerCount = $releaseEvidenceBundleHashReviewFailedBlockerCount
+  classificationAuditHashReviewValidationState = $classificationAuditHashReviewValidationState
+  classificationAuditHashReviewHashMatches = $classificationAuditHashReviewHashMatches
+  classificationAuditHashReviewStateMatchesRequired = $classificationAuditHashReviewStateMatchesRequired
+  classificationAuditHashReviewAccepted = $classificationAuditHashReviewAccepted
+  classificationAuditHashReviewFailedActionRequiredCount = $classificationAuditHashReviewFailedActionRequiredCount
+  classificationAuditHashReviewFailedBlockerCount = $classificationAuditHashReviewFailedBlockerCount
+  finalOwnerExecutionEvidencePackValidationState = $finalOwnerExecutionEvidencePackValidationState
+  finalOwnerExecutionEvidencePackGateCount = $finalOwnerExecutionEvidencePackGateCount
+  finalOwnerExecutionEvidencePackReadyGateCount = $finalOwnerExecutionEvidencePackReadyGateCount
+  finalOwnerExecutionEvidencePackBlockedGateCount = $finalOwnerExecutionEvidencePackBlockedGateCount
+  finalOwnerExecutionEvidencePackRejectedNonProofStateCount = $finalOwnerExecutionEvidencePackRejectedNonProofStateCount
+  finalOwnerExecutionEvidencePackFailedBlockerCount = $finalOwnerExecutionEvidencePackFailedBlockerCount
   finalOwnerExecutionRealInputStrictPreflightDualPackageRouteProofRouteCount = $finalOwnerExecutionRealInputStrictPreflightDualPackageRouteProofRouteCount
   finalOwnerExecutionRealInputStrictPreflightDualPackageRouteProofFieldCount = $finalOwnerExecutionRealInputStrictPreflightDualPackageRouteProofFieldCount
   finalOwnerExecutionRealInputStrictPreflightDualPackageRouteProofReadyFieldCount = $finalOwnerExecutionRealInputStrictPreflightDualPackageRouteProofReadyFieldCount
@@ -6130,6 +6192,10 @@ $record = [pscustomobject]@{
     "final public proof path"
     "release candidate public proof final audit"
     "final owner execution input skeleton"
+    "github ci evidence from owner input"
+    "release evidence bundle hash review"
+    "classification audit hash review"
+    "final owner execution evidence pack"
     "final owner execution blocker ledger"
     "final owner execution input preflight"
     "external proof closure guidance"
@@ -6532,6 +6598,27 @@ $record = [pscustomobject]@{
     "artifacts/final-release/release-close-final-bridge.md",
     "artifacts/final-release/release-close-final-bridge-validation.json",
     "artifacts/final-release/release-close-final-bridge-validation.md",
+    "artifacts/final-release/final-owner-execution-input-skeleton.json",
+    "artifacts/final-release/final-owner-execution-input-skeleton.md",
+    "artifacts/final-release/final-owner-execution-input-skeleton.template.json",
+    "artifacts/final-release/final-owner-execution-input-skeleton-validation.json",
+    "artifacts/final-release/final-owner-execution-input-skeleton-validation.md",
+    "artifacts/final-release/github-ci-evidence-from-owner-input.json",
+    "artifacts/final-release/github-ci-evidence-from-owner-input.md",
+    "artifacts/final-release/github-ci-evidence-from-owner-input-validation.json",
+    "artifacts/final-release/github-ci-evidence-from-owner-input-validation.md",
+    "artifacts/final-release/release-evidence-bundle-hash-review.json",
+    "artifacts/final-release/release-evidence-bundle-hash-review.md",
+    "artifacts/final-release/release-evidence-bundle-hash-review-validation.json",
+    "artifacts/final-release/release-evidence-bundle-hash-review-validation.md",
+    "artifacts/final-release/classification-audit-hash-review.json",
+    "artifacts/final-release/classification-audit-hash-review.md",
+    "artifacts/final-release/classification-audit-hash-review-validation.json",
+    "artifacts/final-release/classification-audit-hash-review-validation.md",
+    "artifacts/final-release/final-owner-execution-evidence-pack.json",
+    "artifacts/final-release/final-owner-execution-evidence-pack.md",
+    "artifacts/final-release/final-owner-execution-evidence-pack-validation.json",
+    "artifacts/final-release/final-owner-execution-evidence-pack-validation.md",
     "artifacts/final-release/post-publish-user-verification-pack.json",
     "artifacts/final-release/post-publish-user-verification-pack.md",
     "artifacts/final-release/post-publish-user-verification-pack-validation.json",
@@ -7459,6 +7546,27 @@ $record = [pscustomobject]@{
     "artifacts/final-release/release-close-final-bridge.md",
     "artifacts/final-release/release-close-final-bridge-validation.json",
     "artifacts/final-release/release-close-final-bridge-validation.md",
+    "artifacts/final-release/final-owner-execution-input-skeleton.json",
+    "artifacts/final-release/final-owner-execution-input-skeleton.md",
+    "artifacts/final-release/final-owner-execution-input-skeleton.template.json",
+    "artifacts/final-release/final-owner-execution-input-skeleton-validation.json",
+    "artifacts/final-release/final-owner-execution-input-skeleton-validation.md",
+    "artifacts/final-release/github-ci-evidence-from-owner-input.json",
+    "artifacts/final-release/github-ci-evidence-from-owner-input.md",
+    "artifacts/final-release/github-ci-evidence-from-owner-input-validation.json",
+    "artifacts/final-release/github-ci-evidence-from-owner-input-validation.md",
+    "artifacts/final-release/release-evidence-bundle-hash-review.json",
+    "artifacts/final-release/release-evidence-bundle-hash-review.md",
+    "artifacts/final-release/release-evidence-bundle-hash-review-validation.json",
+    "artifacts/final-release/release-evidence-bundle-hash-review-validation.md",
+    "artifacts/final-release/classification-audit-hash-review.json",
+    "artifacts/final-release/classification-audit-hash-review.md",
+    "artifacts/final-release/classification-audit-hash-review-validation.json",
+    "artifacts/final-release/classification-audit-hash-review-validation.md",
+    "artifacts/final-release/final-owner-execution-evidence-pack.json",
+    "artifacts/final-release/final-owner-execution-evidence-pack.md",
+    "artifacts/final-release/final-owner-execution-evidence-pack-validation.json",
+    "artifacts/final-release/final-owner-execution-evidence-pack-validation.md",
     "artifacts/final-release/post-publish-user-verification-pack.json",
     "artifacts/final-release/post-publish-user-verification-pack.md",
     "artifacts/final-release/post-publish-user-verification-pack-validation.json",
@@ -8395,6 +8503,10 @@ $lines.Add("- final owner execution package source artifact evidence missing: ``
 $lines.Add("- final owner execution package source artifact evidence sha256: ``$finalOwnerExecutionPackageSourceArtifactEvidenceSha256Count``")
 $lines.Add("- post-publish proof validator bridge: ``$postPublishProofValidatorBridgeValidationState`` lanes ``$postPublishProofValidatorBridgeProofReadyLaneCount/$postPublishProofValidatorBridgeLaneCount`` proof-ready")
 $lines.Add("- release close final bridge: ``$releaseCloseFinalBridgeValidationState`` gates ``$releaseCloseFinalBridgeReadyGateCount/$releaseCloseFinalBridgeGateCount`` ready")
+$lines.Add("- final Owner execution evidence pack: ``$finalOwnerExecutionEvidencePackValidationState`` gates ``$finalOwnerExecutionEvidencePackReadyGateCount/$finalOwnerExecutionEvidencePackGateCount`` ready")
+$lines.Add("- GitHub CI evidence accepted: ``$githubCiEvidenceFromOwnerInputAccepted``")
+$lines.Add("- release evidence bundle hash review accepted: ``$releaseEvidenceBundleHashReviewAccepted`` hashMatches ``$releaseEvidenceBundleHashReviewHashMatches``")
+$lines.Add("- classification audit hash review accepted: ``$classificationAuditHashReviewAccepted`` hashMatches ``$classificationAuditHashReviewHashMatches`` stateMatches ``$classificationAuditHashReviewStateMatchesRequired``")
 $lines.Add("- final owner execution repair checklist validation: ``$finalOwnerExecutionRepairChecklistValidationState``")
 $lines.Add("- final owner execution repair checklist blocked items: ``$finalOwnerExecutionRepairChecklistBlockedItemCount``")
 $lines.Add("- final owner execution repair checklist failed blockers: ``$finalOwnerExecutionRepairChecklistFailedBlockerCount``")
