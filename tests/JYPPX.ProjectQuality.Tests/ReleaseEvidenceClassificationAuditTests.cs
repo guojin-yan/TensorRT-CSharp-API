@@ -4,6 +4,7 @@ using Xunit;
 
 namespace JYPPX.ProjectQuality.Tests;
 
+[Collection("ReleaseCloseProofArtifacts")]
 public sealed class ReleaseEvidenceClassificationAuditTests
 {
     [Fact]
@@ -66,6 +67,13 @@ public sealed class ReleaseEvidenceClassificationAuditTests
         Assert.False(bundle.GetProperty("ownerRealProofStagingWorkspaceRequireExistingFiles").GetBoolean());
         Assert.False(bundle.GetProperty("ownerRealProofStagingWorkspaceRequireHashMatch").GetBoolean());
         Assert.True(bundle.GetProperty("ownerRealProofStagingWorkspaceFailedActionRequiredCount").GetInt32() >= 38);
+        Assert.False(bundle.GetProperty("articlePublicationProofFromStagingWorkspaceShapeValid").GetBoolean());
+        Assert.Equal(0, bundle.GetProperty("articlePublicationProofFromStagingWorkspaceRecordCount").GetInt32());
+        Assert.True(bundle.GetProperty("articlePublicationProofFromStagingWorkspaceFailedActionRequiredCount").GetInt32() >= 3);
+        Assert.False(bundle.GetProperty("yoloVisionRealModelProofFromStagingWorkspaceShapeValid").GetBoolean());
+        Assert.Equal(12, bundle.GetProperty("yoloVisionRealModelProofFromStagingWorkspaceAssetFileCount").GetInt32());
+        Assert.Equal(0, bundle.GetProperty("yoloVisionRealModelProofFromStagingWorkspaceExistingAssetFileCount").GetInt32());
+        Assert.True(bundle.GetProperty("yoloVisionRealModelProofFromStagingWorkspaceFailedActionRequiredCount").GetInt32() >= 12);
         JsonElement stagingContractItem = bundle.GetProperty("evidenceItems")
             .EnumerateArray()
             .Single(static item => item.GetProperty("id").GetString() == "owner-real-proof-staging-workspace-contract");
@@ -133,6 +141,8 @@ public sealed class ReleaseEvidenceClassificationAuditTests
             "owner-real-proof-evidence-backfill-package",
             "owner-real-proof-staging-workspace-contract",
             "owner-real-proof-staging-workspace-import",
+            "article-publication-proof-from-staging-workspace",
+            "yolovision-real-model-proof-from-staging-workspace",
             "final-owner-rollback-review-import",
             "final-owner-close-decision-import"
         })
@@ -163,6 +173,10 @@ public sealed class ReleaseEvidenceClassificationAuditTests
         Assert.Contains(root.GetProperty("requiredNonSubstituteMarkers").EnumerateArray(), static marker =>
             marker.GetString() == "owner real proof staging workspace import");
         Assert.Contains(root.GetProperty("requiredNonSubstituteMarkers").EnumerateArray(), static marker =>
+            marker.GetString() == "article publication proof from staging workspace");
+        Assert.Contains(root.GetProperty("requiredNonSubstituteMarkers").EnumerateArray(), static marker =>
+            marker.GetString() == "yolovision real model proof from staging workspace");
+        Assert.Contains(root.GetProperty("requiredNonSubstituteMarkers").EnumerateArray(), static marker =>
             marker.GetString() == "final owner rollback review import");
         Assert.Contains(root.GetProperty("requiredNonSubstituteMarkers").EnumerateArray(), static marker =>
             marker.GetString() == "final owner close decision import");
@@ -185,6 +199,8 @@ public sealed class ReleaseEvidenceClassificationAuditTests
         Assert.Contains("owner-real-proof-evidence-backfill-package", markdown, StringComparison.Ordinal);
         Assert.Contains("owner-real-proof-staging-workspace-contract", markdown, StringComparison.Ordinal);
         Assert.Contains("owner-real-proof-staging-workspace-import", markdown, StringComparison.Ordinal);
+        Assert.Contains("article-publication-proof-from-staging-workspace", markdown, StringComparison.Ordinal);
+        Assert.Contains("yolovision-real-model-proof-from-staging-workspace", markdown, StringComparison.Ordinal);
         Assert.Contains("final-owner-rollback-review-import", markdown, StringComparison.Ordinal);
         Assert.Contains("final-owner-close-decision-import", markdown, StringComparison.Ordinal);
     }
