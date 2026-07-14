@@ -545,6 +545,11 @@ $externalCleanConsumerPostPublishCandidateValidation = Read-JsonOrNull "artifact
 $yoloVisionRealModelPostPublishCandidateValidation = Read-JsonOrNull "artifacts\final-release\yolovision-real-model-post-publish-candidate-validation.json"
 $articlePublicationProofCandidateValidation = Read-JsonOrNull "artifacts\final-release\article-publication-proof-candidate-validation.json"
 $releaseIssueCloseMaterialCandidateValidation = Read-JsonOrNull "artifacts\final-release\release-issue-close-material-candidate-validation.json"
+$publicPackageUrlHashProofValidatorValidation = Read-JsonOrNull "artifacts\final-release\public-package-url-hash-proof-validator-validation.json"
+$externalCleanConsumerPostPublishProofValidatorValidation = Read-JsonOrNull "artifacts\final-release\external-clean-consumer-post-publish-proof-validator-validation.json"
+$yoloVisionRealModelPostPublishProofValidatorValidation = Read-JsonOrNull "artifacts\final-release\yolovision-real-model-post-publish-proof-validator-validation.json"
+$articlePublicationProofValidatorValidation = Read-JsonOrNull "artifacts\final-release\article-publication-proof-validator-validation.json"
+$releaseCloseFinalBridgeProofValidatorValidation = Read-JsonOrNull "artifacts\final-release\release-close-final-bridge-proof-validator-validation.json"
 $cudaDeviceInitializationLocalSmokeClassification = Read-JsonOrNull "artifacts\final-release\cuda-device-initialization-local-smoke-classification.json"
 $cudaDeviceInitializationLocalSmokeClassificationValidation = Read-JsonOrNull "artifacts\final-release\cuda-device-initialization-local-smoke-classification-validation.json"
 $cleanConsumerProofExecutionBundle = Read-JsonOrNull "artifacts\final-release\clean-consumer-proof-execution-bundle.json"
@@ -2729,6 +2734,28 @@ $releaseIssueCloseMaterialCandidateBlockedFieldCount = [int](Get-PropertyOrDefau
 $releaseIssueCloseMaterialCandidateDependencyCandidateCount = [int](Get-PropertyOrDefault -Object $releaseIssueCloseMaterialCandidateValidation -Name "dependencyCandidateCount" -DefaultValue 0)
 $releaseIssueCloseMaterialCandidateFinalBridgePassed = [bool](Get-PropertyOrDefault -Object $releaseIssueCloseMaterialCandidateValidation -Name "finalBridgePassed" -DefaultValue $false)
 $releaseIssueCloseMaterialCandidateFailedBlockerCount = [int](Get-PropertyOrDefault -Object $releaseIssueCloseMaterialCandidateValidation -Name "failedBlockerCount" -DefaultValue 999)
+$publicPackageUrlHashProofValidatorValidationState = [string](Get-PropertyOrDefault -Object $publicPackageUrlHashProofValidatorValidation -Name "validationState" -DefaultValue "missing-public-package-url-hash-proof-validator-validation")
+$publicPackageUrlHashProofValidatorOwnerEvidenceAccepted = [bool](Get-PropertyOrDefault -Object $publicPackageUrlHashProofValidatorValidation -Name "ownerEvidenceAccepted" -DefaultValue $false)
+$publicPackageUrlHashProofValidatorBlockedReasonCount = [int](Get-PropertyOrDefault -Object $publicPackageUrlHashProofValidatorValidation -Name "blockedReasonCount" -DefaultValue 0)
+$publicPackageUrlHashProofValidatorFailedBlockerCount = [int](Get-PropertyOrDefault -Object $publicPackageUrlHashProofValidatorValidation -Name "failedBlockerCount" -DefaultValue 999)
+$externalCleanConsumerPostPublishProofValidatorValidationState = [string](Get-PropertyOrDefault -Object $externalCleanConsumerPostPublishProofValidatorValidation -Name "validationState" -DefaultValue "missing-external-clean-consumer-post-publish-proof-validator-validation")
+$externalCleanConsumerPostPublishProofValidatorOwnerEvidenceAccepted = [bool](Get-PropertyOrDefault -Object $externalCleanConsumerPostPublishProofValidatorValidation -Name "ownerEvidenceAccepted" -DefaultValue $false)
+$externalCleanConsumerPostPublishProofValidatorBlockedReasonCount = [int](Get-PropertyOrDefault -Object $externalCleanConsumerPostPublishProofValidatorValidation -Name "blockedReasonCount" -DefaultValue 0)
+$externalCleanConsumerPostPublishProofValidatorFailedBlockerCount = [int](Get-PropertyOrDefault -Object $externalCleanConsumerPostPublishProofValidatorValidation -Name "failedBlockerCount" -DefaultValue 999)
+$yoloVisionRealModelPostPublishProofValidatorValidationState = [string](Get-PropertyOrDefault -Object $yoloVisionRealModelPostPublishProofValidatorValidation -Name "validationState" -DefaultValue "missing-yolovision-real-model-post-publish-proof-validator-validation")
+$yoloVisionRealModelPostPublishProofValidatorOwnerEvidenceAccepted = [bool](Get-PropertyOrDefault -Object $yoloVisionRealModelPostPublishProofValidatorValidation -Name "ownerEvidenceAccepted" -DefaultValue $false)
+$yoloVisionRealModelPostPublishProofValidatorBlockedReasonCount = [int](Get-PropertyOrDefault -Object $yoloVisionRealModelPostPublishProofValidatorValidation -Name "blockedReasonCount" -DefaultValue 0)
+$yoloVisionRealModelPostPublishProofValidatorFailedBlockerCount = [int](Get-PropertyOrDefault -Object $yoloVisionRealModelPostPublishProofValidatorValidation -Name "failedBlockerCount" -DefaultValue 999)
+$articlePublicationProofValidatorValidationState = [string](Get-PropertyOrDefault -Object $articlePublicationProofValidatorValidation -Name "validationState" -DefaultValue "missing-article-publication-proof-validator-validation")
+$articlePublicationProofValidatorOwnerEvidenceAccepted = [bool](Get-PropertyOrDefault -Object $articlePublicationProofValidatorValidation -Name "ownerEvidenceAccepted" -DefaultValue $false)
+$articlePublicationProofValidatorBlockedReasonCount = [int](Get-PropertyOrDefault -Object $articlePublicationProofValidatorValidation -Name "blockedReasonCount" -DefaultValue 0)
+$articlePublicationProofValidatorFailedBlockerCount = [int](Get-PropertyOrDefault -Object $articlePublicationProofValidatorValidation -Name "failedBlockerCount" -DefaultValue 999)
+$releaseCloseFinalBridgeProofValidatorValidationState = [string](Get-PropertyOrDefault -Object $releaseCloseFinalBridgeProofValidatorValidation -Name "validationState" -DefaultValue "missing-release-close-final-bridge-proof-validator-validation")
+$releaseCloseFinalBridgeProofValidatorOwnerEvidenceAccepted = [bool](Get-PropertyOrDefault -Object $releaseCloseFinalBridgeProofValidatorValidation -Name "ownerEvidenceAccepted" -DefaultValue $false)
+$releaseCloseFinalBridgeProofValidatorBlockedReasonCount = [int](Get-PropertyOrDefault -Object $releaseCloseFinalBridgeProofValidatorValidation -Name "blockedReasonCount" -DefaultValue 0)
+$releaseCloseFinalBridgeProofValidatorDependencyAcceptedCount = [int](Get-PropertyOrDefault -Object $releaseCloseFinalBridgeProofValidatorValidation -Name "dependencyAcceptedCount" -DefaultValue 0)
+$releaseCloseFinalBridgeProofValidatorDependencyRequiredCount = [int](Get-PropertyOrDefault -Object $releaseCloseFinalBridgeProofValidatorValidation -Name "dependencyRequiredCount" -DefaultValue 0)
+$releaseCloseFinalBridgeProofValidatorFailedBlockerCount = [int](Get-PropertyOrDefault -Object $releaseCloseFinalBridgeProofValidatorValidation -Name "failedBlockerCount" -DefaultValue 999)
 $cudaDeviceInitializationLocalSmokeClassificationState = [string](Get-PropertyOrDefault -Object $cudaDeviceInitializationLocalSmokeClassification -Name "classificationState" -DefaultValue "missing-cuda-device-initialization-local-smoke-classification")
 $cudaDeviceInitializationLocalSmokeClassificationProofKind = [string](Get-PropertyOrDefault -Object $cudaDeviceInitializationLocalSmokeClassification -Name "proofKind" -DefaultValue "missing-proof-kind")
 $cudaDeviceInitializationLocalSmokeClassificationValidationState = [string](Get-PropertyOrDefault -Object $cudaDeviceInitializationLocalSmokeClassificationValidation -Name "validationState" -DefaultValue "missing-cuda-device-initialization-local-smoke-classification-validation")
@@ -3601,6 +3628,11 @@ $evidenceItems = @(
   New-EvidenceItem -Id "yolovision-real-model-post-publish-candidate" -Title "YoloVision real model post-publish candidate" -Artifact "artifacts/final-release/yolovision-real-model-post-publish-candidate-validation.json" -State "$yoloVisionRealModelPostPublishCandidateValidationState; requiredFields=$yoloVisionRealModelPostPublishCandidateRequiredFieldCount; blockedFields=$yoloVisionRealModelPostPublishCandidateBlockedFieldCount; failedBlockers=$yoloVisionRealModelPostPublishCandidateFailedBlockerCount" -Passed $false -Boundary "The YoloVision real model post-publish candidate checks Owner-supplied model/log/hash fields only; it is not real-model-runtime proof, not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push."
   New-EvidenceItem -Id "article-publication-proof-candidate" -Title "Article publication proof candidate" -Artifact "artifacts/final-release/article-publication-proof-candidate-validation.json" -State "$articlePublicationProofCandidateValidationState; requiredFields=$articlePublicationProofCandidateRequiredFieldCount; blockedFields=$articlePublicationProofCandidateBlockedFieldCount; failedBlockers=$articlePublicationProofCandidateFailedBlockerCount" -Passed $false -Boundary "The article publication proof candidate checks Owner-supplied public article URL and hash fields only; it is not post-publish proof, not runtime proof, not publish approval, not release close approval, and not package push."
   New-EvidenceItem -Id "release-issue-close-material-candidate" -Title "Release Issue close material candidate" -Artifact "artifacts/final-release/release-issue-close-material-candidate-validation.json" -State "$releaseIssueCloseMaterialCandidateValidationState; requiredFields=$releaseIssueCloseMaterialCandidateRequiredFieldCount; blockedFields=$releaseIssueCloseMaterialCandidateBlockedFieldCount; dependencies=$releaseIssueCloseMaterialCandidateDependencyCandidateCount; finalBridgePassed=$releaseIssueCloseMaterialCandidateFinalBridgePassed; failedBlockers=$releaseIssueCloseMaterialCandidateFailedBlockerCount" -Passed $false -Boundary "The Release Issue close material candidate summarizes Owner close materials only; final bridge remains required. It is not release close approval, not post-publish proof, not runtime proof, not publish approval, and not package push."
+  New-EvidenceItem -Id "public-package-url-hash-proof-validator" -Title "Public package URL/hash proof validator" -Artifact "artifacts/final-release/public-package-url-hash-proof-validator-validation.json" -State "$publicPackageUrlHashProofValidatorValidationState; ownerEvidenceAccepted=$publicPackageUrlHashProofValidatorOwnerEvidenceAccepted; blockedReasons=$publicPackageUrlHashProofValidatorBlockedReasonCount; failedBlockers=$publicPackageUrlHashProofValidatorFailedBlockerCount" -Passed $false -Boundary "The public package URL/hash proof validator is strict Owner evidence admission only; it is not public package proof by itself, not post-publish proof, not publish approval, not release close approval, and not package push."
+  New-EvidenceItem -Id "external-clean-consumer-post-publish-proof-validator" -Title "External clean consumer post-publish proof validator" -Artifact "artifacts/final-release/external-clean-consumer-post-publish-proof-validator-validation.json" -State "$externalCleanConsumerPostPublishProofValidatorValidationState; ownerEvidenceAccepted=$externalCleanConsumerPostPublishProofValidatorOwnerEvidenceAccepted; blockedReasons=$externalCleanConsumerPostPublishProofValidatorBlockedReasonCount; failedBlockers=$externalCleanConsumerPostPublishProofValidatorFailedBlockerCount" -Passed $false -Boundary "The external clean consumer post-publish proof validator is strict Owner evidence admission only; it is not runtime proof by itself, not post-publish proof, not publish approval, not release close approval, and not package push."
+  New-EvidenceItem -Id "yolovision-real-model-post-publish-proof-validator" -Title "YoloVision real model post-publish proof validator" -Artifact "artifacts/final-release/yolovision-real-model-post-publish-proof-validator-validation.json" -State "$yoloVisionRealModelPostPublishProofValidatorValidationState; ownerEvidenceAccepted=$yoloVisionRealModelPostPublishProofValidatorOwnerEvidenceAccepted; blockedReasons=$yoloVisionRealModelPostPublishProofValidatorBlockedReasonCount; failedBlockers=$yoloVisionRealModelPostPublishProofValidatorFailedBlockerCount" -Passed $false -Boundary "The YoloVision real model post-publish proof validator is strict Owner evidence admission only; it is not real-model-runtime proof by itself, not post-publish proof, not publish approval, not release close approval, and not package push."
+  New-EvidenceItem -Id "article-publication-proof-validator" -Title "Article publication proof validator" -Artifact "artifacts/final-release/article-publication-proof-validator-validation.json" -State "$articlePublicationProofValidatorValidationState; ownerEvidenceAccepted=$articlePublicationProofValidatorOwnerEvidenceAccepted; blockedReasons=$articlePublicationProofValidatorBlockedReasonCount; failedBlockers=$articlePublicationProofValidatorFailedBlockerCount" -Passed $false -Boundary "The article publication proof validator is strict Owner evidence admission only; it is not article publication proof by itself, not post-publish proof, not publish approval, not release close approval, and not package push."
+  New-EvidenceItem -Id "release-close-final-bridge-proof-validator" -Title "Release close final bridge proof validator" -Artifact "artifacts/final-release/release-close-final-bridge-proof-validator-validation.json" -State "$releaseCloseFinalBridgeProofValidatorValidationState; ownerEvidenceAccepted=$releaseCloseFinalBridgeProofValidatorOwnerEvidenceAccepted; dependencies=$releaseCloseFinalBridgeProofValidatorDependencyAcceptedCount/$releaseCloseFinalBridgeProofValidatorDependencyRequiredCount; blockedReasons=$releaseCloseFinalBridgeProofValidatorBlockedReasonCount; failedBlockers=$releaseCloseFinalBridgeProofValidatorFailedBlockerCount" -Passed $false -Boundary "The release close final bridge proof validator is strict Owner evidence admission only; it is not release close approval by itself, not post-publish proof, not publish approval, cannot close the release issue, and not package push."
   New-EvidenceItem -Id "cuda-device-initialization-local-smoke-classification" -Title "CUDA device initialization local smoke classification" -Artifact "artifacts/final-release/cuda-device-initialization-local-smoke-classification.json" -State "$cudaDeviceInitializationLocalSmokeClassificationState; validation=$cudaDeviceInitializationLocalSmokeClassificationValidationState; proofKind=$cudaDeviceInitializationLocalSmokeClassificationProofKind; findings=$cudaDeviceInitializationLocalSmokeClassificationFindingCount; preInitCallOrderReady=$cudaDeviceInitializationLocalSmokeClassificationPreInitCallOrderReady; skippedTrueIsForbiddenSubstitute=$cudaDeviceInitializationLocalSmokeClassificationSkippedTrueIsForbiddenSubstitute; canPromoteRuntimeProof=$cudaDeviceInitializationLocalSmokeClassificationCanPromoteRuntimeProof; isPackageConsumerRuntimeProof=$cudaDeviceInitializationLocalSmokeClassificationIsPackageConsumerRuntimeProof; isRuntimeExecutionProof=$cudaDeviceInitializationLocalSmokeClassificationIsRuntimeExecutionProof; performsPublish=$cudaDeviceInitializationLocalSmokeClassificationPerformsPublish; canPublishPublicly=$cudaDeviceInitializationLocalSmokeClassificationCanPublishPublicly; canCloseReleaseIssue=$cudaDeviceInitializationLocalSmokeClassificationCanCloseReleaseIssue" -Passed $false -Boundary "CudaDeviceInitializationProofRunner is local smoke classification only; it is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push. Skipped=True is a forbidden substitute and cannot promote package-consumer-runtime proof."
   New-EvidenceItem -Id "clean-consumer-proof-execution-bundle" -Title "Clean consumer proof execution bundle" -Artifact "artifacts/final-release/clean-consumer-proof-execution-bundle-validation.json" -State "$cleanConsumerProofExecutionBundleValidationState; bundleState=$cleanConsumerProofExecutionBundleState; lanes=$cleanConsumerProofExecutionBundleLaneCount; forbiddenSubstitutes=$cleanConsumerProofExecutionBundleForbiddenSubstituteCount; promotionRequirements=$cleanConsumerProofExecutionBundlePromotionRequirementCount; executionCommands=$cleanConsumerProofExecutionBundleExecutionCommandCount; failedBlockers=$cleanConsumerProofExecutionBundleFailedBlockerCount; ownerActionRequired=$cleanConsumerProofExecutionBundleOwnerActionRequired; performsPublish=$cleanConsumerProofExecutionBundlePerformsPublish; performsRuntimeExecution=$cleanConsumerProofExecutionBundlePerformsRuntimeExecution; canPromoteRuntimeProof=$cleanConsumerProofExecutionBundleCanPromoteRuntimeProof; canPublishPublicly=$cleanConsumerProofExecutionBundleCanPublishPublicly; canCloseReleaseIssue=$cleanConsumerProofExecutionBundleCanCloseReleaseIssue; isRuntimeExecutionProof=$cleanConsumerProofExecutionBundleIsRuntimeExecutionProof; isPackageConsumerRuntimeProof=$cleanConsumerProofExecutionBundleIsPackageConsumerRuntimeProof; isPostPublishProof=$cleanConsumerProofExecutionBundleIsPostPublishProof" -Passed $false -Boundary "The clean consumer proof execution bundle is owner execution mapping and classification only; it is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push. It cannot promote proof without real repository-external clean consumer logs, hashes, package metadata, host metadata, owner review, and strict validators with FailOnNotProof."
   New-EvidenceItem -Id "clean-consumer-external-proof-closure-pack" -Title "Clean consumer external proof closure pack" -Artifact "artifacts/final-release/clean-consumer-external-proof-closure-pack-validation.json" -State "$cleanConsumerExternalProofClosurePackValidationState; closureState=$cleanConsumerExternalProofClosurePackState; lanes=$cleanConsumerExternalProofClosurePackLaneCount; ownerFields=$cleanConsumerExternalProofClosurePackOwnerFieldCount; executionSteps=$cleanConsumerExternalProofClosurePackExecutionStepCount; forbiddenSubstitutes=$cleanConsumerExternalProofClosurePackForbiddenSubstituteCount; failedBlockers=$cleanConsumerExternalProofClosurePackFailedBlockerCount; ownerActionRequired=$cleanConsumerExternalProofClosurePackOwnerActionRequired; performsPublish=$cleanConsumerExternalProofClosurePackPerformsPublish; performsRuntimeExecution=$cleanConsumerExternalProofClosurePackPerformsRuntimeExecution; canPromoteRuntimeProof=$cleanConsumerExternalProofClosurePackCanPromoteRuntimeProof; canPublishPublicly=$cleanConsumerExternalProofClosurePackCanPublishPublicly; canCloseReleaseIssue=$cleanConsumerExternalProofClosurePackCanCloseReleaseIssue; isRuntimeExecutionProof=$cleanConsumerExternalProofClosurePackIsRuntimeExecutionProof; isPackageConsumerRuntimeProof=$cleanConsumerExternalProofClosurePackIsPackageConsumerRuntimeProof; isPostPublishProof=$cleanConsumerExternalProofClosurePackIsPostPublishProof; isReleaseCloseProof=$cleanConsumerExternalProofClosurePackIsReleaseCloseProof" -Passed $false -Boundary "The clean consumer external proof closure pack is a blocked owner-action convergence layer only; it is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push. It cannot promote proof without real external logs, SHA256 values, package metadata, native asset evidence, host metadata, owner review, and strict validators with FailOnNotProof."
@@ -5595,6 +5627,28 @@ $record = [pscustomobject]@{
   releaseIssueCloseMaterialCandidateDependencyCandidateCount = $releaseIssueCloseMaterialCandidateDependencyCandidateCount
   releaseIssueCloseMaterialCandidateFinalBridgePassed = $releaseIssueCloseMaterialCandidateFinalBridgePassed
   releaseIssueCloseMaterialCandidateFailedBlockerCount = $releaseIssueCloseMaterialCandidateFailedBlockerCount
+  publicPackageUrlHashProofValidatorValidationState = $publicPackageUrlHashProofValidatorValidationState
+  publicPackageUrlHashProofValidatorOwnerEvidenceAccepted = $publicPackageUrlHashProofValidatorOwnerEvidenceAccepted
+  publicPackageUrlHashProofValidatorBlockedReasonCount = $publicPackageUrlHashProofValidatorBlockedReasonCount
+  publicPackageUrlHashProofValidatorFailedBlockerCount = $publicPackageUrlHashProofValidatorFailedBlockerCount
+  externalCleanConsumerPostPublishProofValidatorValidationState = $externalCleanConsumerPostPublishProofValidatorValidationState
+  externalCleanConsumerPostPublishProofValidatorOwnerEvidenceAccepted = $externalCleanConsumerPostPublishProofValidatorOwnerEvidenceAccepted
+  externalCleanConsumerPostPublishProofValidatorBlockedReasonCount = $externalCleanConsumerPostPublishProofValidatorBlockedReasonCount
+  externalCleanConsumerPostPublishProofValidatorFailedBlockerCount = $externalCleanConsumerPostPublishProofValidatorFailedBlockerCount
+  yoloVisionRealModelPostPublishProofValidatorValidationState = $yoloVisionRealModelPostPublishProofValidatorValidationState
+  yoloVisionRealModelPostPublishProofValidatorOwnerEvidenceAccepted = $yoloVisionRealModelPostPublishProofValidatorOwnerEvidenceAccepted
+  yoloVisionRealModelPostPublishProofValidatorBlockedReasonCount = $yoloVisionRealModelPostPublishProofValidatorBlockedReasonCount
+  yoloVisionRealModelPostPublishProofValidatorFailedBlockerCount = $yoloVisionRealModelPostPublishProofValidatorFailedBlockerCount
+  articlePublicationProofValidatorValidationState = $articlePublicationProofValidatorValidationState
+  articlePublicationProofValidatorOwnerEvidenceAccepted = $articlePublicationProofValidatorOwnerEvidenceAccepted
+  articlePublicationProofValidatorBlockedReasonCount = $articlePublicationProofValidatorBlockedReasonCount
+  articlePublicationProofValidatorFailedBlockerCount = $articlePublicationProofValidatorFailedBlockerCount
+  releaseCloseFinalBridgeProofValidatorValidationState = $releaseCloseFinalBridgeProofValidatorValidationState
+  releaseCloseFinalBridgeProofValidatorOwnerEvidenceAccepted = $releaseCloseFinalBridgeProofValidatorOwnerEvidenceAccepted
+  releaseCloseFinalBridgeProofValidatorBlockedReasonCount = $releaseCloseFinalBridgeProofValidatorBlockedReasonCount
+  releaseCloseFinalBridgeProofValidatorDependencyAcceptedCount = $releaseCloseFinalBridgeProofValidatorDependencyAcceptedCount
+  releaseCloseFinalBridgeProofValidatorDependencyRequiredCount = $releaseCloseFinalBridgeProofValidatorDependencyRequiredCount
+  releaseCloseFinalBridgeProofValidatorFailedBlockerCount = $releaseCloseFinalBridgeProofValidatorFailedBlockerCount
   finalOwnerExecutionRealInputStrictPreflightDualPackageRouteProofRouteCount = $finalOwnerExecutionRealInputStrictPreflightDualPackageRouteProofRouteCount
   finalOwnerExecutionRealInputStrictPreflightDualPackageRouteProofFieldCount = $finalOwnerExecutionRealInputStrictPreflightDualPackageRouteProofFieldCount
   finalOwnerExecutionRealInputStrictPreflightDualPackageRouteProofReadyFieldCount = $finalOwnerExecutionRealInputStrictPreflightDualPackageRouteProofReadyFieldCount
@@ -5906,6 +5960,11 @@ $record = [pscustomobject]@{
     "YoloVision real model post-publish candidate"
     "article publication proof candidate"
     "release issue close material candidate"
+    "public package URL hash proof validator"
+    "external clean consumer post-publish proof validator"
+    "YoloVision real model post-publish proof validator"
+    "article publication proof validator"
+    "release close final bridge proof validator"
     "owner real publish evidence import readiness dashboard"
     "release close final candidate audit pack"
     "owner public publish execution final intake pack"
@@ -6237,6 +6296,26 @@ $record = [pscustomobject]@{
     "artifacts/final-release/release-issue-close-material-candidate.md",
     "artifacts/final-release/release-issue-close-material-candidate-validation.json",
     "artifacts/final-release/release-issue-close-material-candidate-validation.md",
+    "artifacts/final-release/public-package-url-hash-proof-validator.json",
+    "artifacts/final-release/public-package-url-hash-proof-validator.md",
+    "artifacts/final-release/public-package-url-hash-proof-validator-validation.json",
+    "artifacts/final-release/public-package-url-hash-proof-validator-validation.md",
+    "artifacts/final-release/external-clean-consumer-post-publish-proof-validator.json",
+    "artifacts/final-release/external-clean-consumer-post-publish-proof-validator.md",
+    "artifacts/final-release/external-clean-consumer-post-publish-proof-validator-validation.json",
+    "artifacts/final-release/external-clean-consumer-post-publish-proof-validator-validation.md",
+    "artifacts/final-release/yolovision-real-model-post-publish-proof-validator.json",
+    "artifacts/final-release/yolovision-real-model-post-publish-proof-validator.md",
+    "artifacts/final-release/yolovision-real-model-post-publish-proof-validator-validation.json",
+    "artifacts/final-release/yolovision-real-model-post-publish-proof-validator-validation.md",
+    "artifacts/final-release/article-publication-proof-validator.json",
+    "artifacts/final-release/article-publication-proof-validator.md",
+    "artifacts/final-release/article-publication-proof-validator-validation.json",
+    "artifacts/final-release/article-publication-proof-validator-validation.md",
+    "artifacts/final-release/release-close-final-bridge-proof-validator.json",
+    "artifacts/final-release/release-close-final-bridge-proof-validator.md",
+    "artifacts/final-release/release-close-final-bridge-proof-validator-validation.json",
+    "artifacts/final-release/release-close-final-bridge-proof-validator-validation.md",
     "artifacts/final-release/post-publish-user-verification-pack.json",
     "artifacts/final-release/post-publish-user-verification-pack.md",
     "artifacts/final-release/post-publish-user-verification-pack-validation.json",
@@ -7120,6 +7199,26 @@ $record = [pscustomobject]@{
     "artifacts/final-release/release-issue-close-material-candidate.md",
     "artifacts/final-release/release-issue-close-material-candidate-validation.json",
     "artifacts/final-release/release-issue-close-material-candidate-validation.md",
+    "artifacts/final-release/public-package-url-hash-proof-validator.json",
+    "artifacts/final-release/public-package-url-hash-proof-validator.md",
+    "artifacts/final-release/public-package-url-hash-proof-validator-validation.json",
+    "artifacts/final-release/public-package-url-hash-proof-validator-validation.md",
+    "artifacts/final-release/external-clean-consumer-post-publish-proof-validator.json",
+    "artifacts/final-release/external-clean-consumer-post-publish-proof-validator.md",
+    "artifacts/final-release/external-clean-consumer-post-publish-proof-validator-validation.json",
+    "artifacts/final-release/external-clean-consumer-post-publish-proof-validator-validation.md",
+    "artifacts/final-release/yolovision-real-model-post-publish-proof-validator.json",
+    "artifacts/final-release/yolovision-real-model-post-publish-proof-validator.md",
+    "artifacts/final-release/yolovision-real-model-post-publish-proof-validator-validation.json",
+    "artifacts/final-release/yolovision-real-model-post-publish-proof-validator-validation.md",
+    "artifacts/final-release/article-publication-proof-validator.json",
+    "artifacts/final-release/article-publication-proof-validator.md",
+    "artifacts/final-release/article-publication-proof-validator-validation.json",
+    "artifacts/final-release/article-publication-proof-validator-validation.md",
+    "artifacts/final-release/release-close-final-bridge-proof-validator.json",
+    "artifacts/final-release/release-close-final-bridge-proof-validator.md",
+    "artifacts/final-release/release-close-final-bridge-proof-validator-validation.json",
+    "artifacts/final-release/release-close-final-bridge-proof-validator-validation.md",
     "artifacts/final-release/post-publish-user-verification-pack.json",
     "artifacts/final-release/post-publish-user-verification-pack.md",
     "artifacts/final-release/post-publish-user-verification-pack-validation.json",
