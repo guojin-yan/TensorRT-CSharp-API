@@ -142,6 +142,86 @@ public sealed class ReleaseCloseStrictProofAndArticlePublishingReadinessTests
     }
 
     [Fact]
+    public void PostPublishDocsArticleAndSampleAssetPlanAggregatesYoloVisionAndOwnerProofBoundaries()
+    {
+        RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Export-ArticleRoadmap30Plus.ps1"));
+        RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Test-ArticleRoadmap30Plus.ps1"), "-Strict");
+        RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Export-TechnicalArticlePublicationMatrix.ps1"));
+        RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Export-ReleaseCloseStrictProofExecutionOrder.ps1"));
+        RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Export-ArticlePublishingReadinessMap.ps1"));
+        RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Test-ArticlePublishingReadinessMap.ps1"), "-Strict");
+        RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Export-PublicArticleReadinessMatrix.ps1"));
+        RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Test-PublicArticleReadinessMatrix.ps1"), "-Strict");
+        RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Export-ReleaseDocsAndNuGetMetadataAudit.ps1"));
+        RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Test-ReleaseDocsAndNuGetMetadataAudit.ps1"), "-Strict");
+        RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Export-PostPublishDocsArticleAndSampleAssetPlan.ps1"));
+        RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Test-PostPublishDocsArticleAndSampleAssetPlan.ps1"), "-Strict");
+        RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Export-ReleaseEvidenceBundle.ps1"));
+        RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Test-ReleaseEvidenceClassificationAudit.ps1"), "-Strict");
+
+        using JsonDocument planDocument = ReadFinalReleaseJson("post-publish-docs-article-and-sample-asset-plan.json");
+        JsonElement plan = planDocument.RootElement;
+
+        Assert.Equal("post-publish-docs-article-and-sample-asset-plan", plan.GetProperty("recordKind").GetString());
+        Assert.Equal("blocked-owner-proof-required-non-proof-planning-ready", plan.GetProperty("planState").GetString());
+        Assert.True(plan.GetProperty("assetLaneCount").GetInt32() >= 7);
+        Assert.True(plan.GetProperty("blockedAssetLaneCount").GetInt32() >= 6);
+        Assert.Equal("YoloVision", plan.GetProperty("allowedSampleName").GetString());
+        Assert.Equal("YoloDet", plan.GetProperty("forbiddenLegacySampleName").GetString());
+        Assert.Equal(0, plan.GetProperty("legacyYoloDetReferenceCount").GetInt32());
+        AssertFalsePublishAndCloseFlags(plan);
+        Assert.False(plan.GetProperty("canPromoteRuntimeProof").GetBoolean());
+        Assert.False(plan.GetProperty("canPromotePackageConsumerRuntime").GetBoolean());
+        Assert.False(plan.GetProperty("isRuntimeExecutionProof").GetBoolean());
+        Assert.False(plan.GetProperty("isPostPublishProof").GetBoolean());
+        Assert.False(plan.GetProperty("isReleaseCloseProof").GetBoolean());
+
+        JsonElement sampleReadiness = plan.GetProperty("sampleRenameReadiness");
+        Assert.True(sampleReadiness.GetProperty("ready").GetBoolean());
+        Assert.True(sampleReadiness.GetProperty("sampleDirectoryExists").GetBoolean());
+        Assert.True(sampleReadiness.GetProperty("sampleProjectExists").GetBoolean());
+        Assert.False(sampleReadiness.GetProperty("legacyDirectoryExists").GetBoolean());
+
+        string raw = plan.GetRawText();
+        foreach (string marker in new[] { "Owner public publish result", "Public package download proof", "Repository-external clean consumer", "final-public-release-closure-bridge.json", "strict-close-ready-convergence-dashboard.json", "release-issue-close-owner-decision-input.json", "samples/YoloVision/YoloVision.csproj" })
+        {
+            Assert.Contains(marker, raw, StringComparison.Ordinal);
+        }
+
+        foreach (string laneId in new[] { "article-roadmap-30plus", "article-publishing-readiness-map", "public-article-readiness-matrix", "release-docs-nuget-metadata-audit", "sample-yolovision-rename-readiness", "owner-proof-dependent-doc-assets", "post-publish-case-asset-pack" })
+        {
+            Assert.Contains(plan.GetProperty("publicFacingAssetLanes").EnumerateArray(), lane =>
+                lane.GetProperty("id").GetString() == laneId &&
+                !lane.GetProperty("performsPublish").GetBoolean() &&
+                !lane.GetProperty("canPublishPublicly").GetBoolean() &&
+                !lane.GetProperty("canCloseReleaseIssue").GetBoolean());
+        }
+
+        using JsonDocument validationDocument = ReadFinalReleaseJson("post-publish-docs-article-and-sample-asset-plan-validation.json");
+        JsonElement validation = validationDocument.RootElement;
+        Assert.Equal("post-publish-docs-article-and-sample-asset-plan-validation", validation.GetProperty("recordKind").GetString());
+        Assert.Equal("post-publish-docs-article-and-sample-asset-plan-passed-non-proof-boundaries-intact", validation.GetProperty("validationState").GetString());
+        Assert.Equal(0, validation.GetProperty("failedBlockerCount").GetInt32());
+        Assert.Equal(0, validation.GetProperty("legacyYoloDetReferenceCount").GetInt32());
+        Assert.True(validation.GetProperty("sampleRenameReady").GetBoolean());
+        AssertFalsePublishAndCloseFlags(validation);
+
+        using JsonDocument evidenceDocument = ReadFinalReleaseJson("release-evidence-bundle.json");
+        JsonElement evidence = evidenceDocument.RootElement;
+        Assert.Equal("post-publish-docs-article-and-sample-asset-plan-passed-non-proof-boundaries-intact", evidence.GetProperty("postPublishDocsArticleAndSampleAssetPlanValidationState").GetString());
+        Assert.True(evidence.GetProperty("postPublishDocsArticleAndSampleAssetPlanLaneCount").GetInt32() >= 7);
+        Assert.Equal(0, evidence.GetProperty("postPublishDocsArticleAndSampleAssetPlanLegacyYoloDetReferenceCount").GetInt32());
+        Assert.False(evidence.GetProperty("postPublishDocsArticleAndSampleAssetPlanCanPublishPublicly").GetBoolean());
+        Assert.False(evidence.GetProperty("postPublishDocsArticleAndSampleAssetPlanCanCloseReleaseIssue").GetBoolean());
+
+        JsonElement evidenceItem = evidence.GetProperty("evidenceItems")
+            .EnumerateArray()
+            .Single(static item => item.GetProperty("id").GetString() == "post-publish-docs-article-and-sample-asset-plan");
+        Assert.False(evidenceItem.GetProperty("passed").GetBoolean());
+        Assert.Contains("not post-publish proof", evidenceItem.GetProperty("boundary").GetString(), StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void PublicDocsGateStillHasNoBlockedPublicationOrProofClaims()
     {
         RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Test-PublicDocsAndPackageMetadataGate.ps1"));
