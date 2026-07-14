@@ -236,6 +236,8 @@ function Update-OwnerRealProofStagingWorkspaceArtifacts {
   & (Join-Path $scriptDir "Test-ArticlePublicationProofFromStagingWorkspace.ps1") -RepositoryRoot $RepositoryRoot -Strict | Out-Null
   & (Join-Path $scriptDir "Import-YoloVisionRealModelProofFromStagingWorkspace.ps1") -RepositoryRoot $RepositoryRoot | Out-Null
   & (Join-Path $scriptDir "Test-YoloVisionRealModelProofFromStagingWorkspace.ps1") -RepositoryRoot $RepositoryRoot -Strict | Out-Null
+  & (Join-Path $scriptDir "Export-ReleaseCloseFinalBridge.ps1") -RepositoryRoot $RepositoryRoot | Out-Null
+  & (Join-Path $scriptDir "Test-ReleaseCloseFinalBridge.ps1") -RepositoryRoot $RepositoryRoot -Strict | Out-Null
 }
 
 Update-OwnerRealProofStagingWorkspaceArtifacts
@@ -566,6 +568,8 @@ $articlePublicationProofValidatorValidation = Read-JsonOrNull "artifacts\final-r
 $releaseCloseFinalBridgeProofValidatorValidation = Read-JsonOrNull "artifacts\final-release\release-close-final-bridge-proof-validator-validation.json"
 $ownerPostPublishProofAcceptanceManifestValidation = Read-JsonOrNull "artifacts\final-release\owner-post-publish-proof-acceptance-manifest-validation.json"
 $publicPackageUrlHashDownloadVerificationValidation = Read-JsonOrNull "artifacts\final-release\public-package-url-hash-download-verification-validation.json"
+$postPublishProofValidatorBridgeValidation = Read-JsonOrNull "artifacts\final-release\post-publish-proof-validator-bridge-validation.json"
+$releaseCloseFinalBridgeValidation = Read-JsonOrNull "artifacts\final-release\release-close-final-bridge-validation.json"
 $cudaDeviceInitializationLocalSmokeClassification = Read-JsonOrNull "artifacts\final-release\cuda-device-initialization-local-smoke-classification.json"
 $cudaDeviceInitializationLocalSmokeClassificationValidation = Read-JsonOrNull "artifacts\final-release\cuda-device-initialization-local-smoke-classification-validation.json"
 $cleanConsumerProofExecutionBundle = Read-JsonOrNull "artifacts\final-release\clean-consumer-proof-execution-bundle.json"
@@ -2802,6 +2806,23 @@ $publicPackageUrlHashDownloadVerificationDownloadAllowed = [bool](Get-PropertyOr
 $publicPackageUrlHashDownloadVerificationDownloadAttemptedCount = [int](Get-PropertyOrDefault -Object $publicPackageUrlHashDownloadVerificationValidation -Name "downloadAttemptedCount" -DefaultValue 0)
 $publicPackageUrlHashDownloadVerificationHashMatchedCount = [int](Get-PropertyOrDefault -Object $publicPackageUrlHashDownloadVerificationValidation -Name "hashMatchedCount" -DefaultValue 0)
 $publicPackageUrlHashDownloadVerificationFailedBlockerCount = [int](Get-PropertyOrDefault -Object $publicPackageUrlHashDownloadVerificationValidation -Name "failedBlockerCount" -DefaultValue 999)
+$postPublishProofValidatorBridgeValidationState = [string](Get-PropertyOrDefault -Object $postPublishProofValidatorBridgeValidation -Name "validationState" -DefaultValue "missing-post-publish-proof-validator-bridge-validation")
+$postPublishProofValidatorBridgeLaneCount = [int](Get-PropertyOrDefault -Object $postPublishProofValidatorBridgeValidation -Name "laneCount" -DefaultValue 0)
+$postPublishProofValidatorBridgeInputShapeReadyLaneCount = [int](Get-PropertyOrDefault -Object $postPublishProofValidatorBridgeValidation -Name "inputShapeReadyLaneCount" -DefaultValue 0)
+$postPublishProofValidatorBridgeProofReadyLaneCount = [int](Get-PropertyOrDefault -Object $postPublishProofValidatorBridgeValidation -Name "proofReadyLaneCount" -DefaultValue 0)
+$postPublishProofValidatorBridgeBlockedLaneCount = [int](Get-PropertyOrDefault -Object $postPublishProofValidatorBridgeValidation -Name "blockedLaneCount" -DefaultValue 0)
+$postPublishProofValidatorBridgeAllPostPublishInputsAccepted = [bool](Get-PropertyOrDefault -Object $postPublishProofValidatorBridgeValidation -Name "allPostPublishInputsAccepted" -DefaultValue $false)
+$postPublishProofValidatorBridgePublicPackageHashCannotSubstitutePostPublishProof = [bool](Get-PropertyOrDefault -Object $postPublishProofValidatorBridgeValidation -Name "publicPackageHashCannotSubstitutePostPublishProof" -DefaultValue $false)
+$postPublishProofValidatorBridgeShapeValidCannotSubstitutePostPublishProof = [bool](Get-PropertyOrDefault -Object $postPublishProofValidatorBridgeValidation -Name "shapeValidCannotSubstitutePostPublishProof" -DefaultValue $false)
+$postPublishProofValidatorBridgeFailedBlockerCount = [int](Get-PropertyOrDefault -Object $postPublishProofValidatorBridgeValidation -Name "failedBlockerCount" -DefaultValue 999)
+$releaseCloseFinalBridgeValidationState = [string](Get-PropertyOrDefault -Object $releaseCloseFinalBridgeValidation -Name "validationState" -DefaultValue "missing-release-close-final-bridge-validation")
+$releaseCloseFinalBridgeGateCount = [int](Get-PropertyOrDefault -Object $releaseCloseFinalBridgeValidation -Name "gateCount" -DefaultValue 0)
+$releaseCloseFinalBridgeReadyGateCount = [int](Get-PropertyOrDefault -Object $releaseCloseFinalBridgeValidation -Name "readyGateCount" -DefaultValue 0)
+$releaseCloseFinalBridgeBlockedGateCount = [int](Get-PropertyOrDefault -Object $releaseCloseFinalBridgeValidation -Name "blockedGateCount" -DefaultValue 0)
+$releaseCloseFinalBridgeAllCloseInputsReady = [bool](Get-PropertyOrDefault -Object $releaseCloseFinalBridgeValidation -Name "allCloseInputsReady" -DefaultValue $false)
+$releaseCloseFinalBridgeAcceptedRealInputCount = [int](Get-PropertyOrDefault -Object $releaseCloseFinalBridgeValidation -Name "acceptedRealInputCount" -DefaultValue 0)
+$releaseCloseFinalBridgeRejectedNonProofStateCount = [int](Get-PropertyOrDefault -Object $releaseCloseFinalBridgeValidation -Name "rejectedNonProofStateCount" -DefaultValue 0)
+$releaseCloseFinalBridgeFailedBlockerCount = [int](Get-PropertyOrDefault -Object $releaseCloseFinalBridgeValidation -Name "failedBlockerCount" -DefaultValue 999)
 $cudaDeviceInitializationLocalSmokeClassificationState = [string](Get-PropertyOrDefault -Object $cudaDeviceInitializationLocalSmokeClassification -Name "classificationState" -DefaultValue "missing-cuda-device-initialization-local-smoke-classification")
 $cudaDeviceInitializationLocalSmokeClassificationProofKind = [string](Get-PropertyOrDefault -Object $cudaDeviceInitializationLocalSmokeClassification -Name "proofKind" -DefaultValue "missing-proof-kind")
 $cudaDeviceInitializationLocalSmokeClassificationValidationState = [string](Get-PropertyOrDefault -Object $cudaDeviceInitializationLocalSmokeClassificationValidation -Name "validationState" -DefaultValue "missing-cuda-device-initialization-local-smoke-classification-validation")
@@ -3717,6 +3738,8 @@ $evidenceItems = @(
   New-EvidenceItem -Id "release-close-final-bridge-proof-validator" -Title "Release close final bridge proof validator" -Artifact "artifacts/final-release/release-close-final-bridge-proof-validator-validation.json" -State "$releaseCloseFinalBridgeProofValidatorValidationState; ownerEvidenceAccepted=$releaseCloseFinalBridgeProofValidatorOwnerEvidenceAccepted; dependencies=$releaseCloseFinalBridgeProofValidatorDependencyAcceptedCount/$releaseCloseFinalBridgeProofValidatorDependencyRequiredCount; blockedReasons=$releaseCloseFinalBridgeProofValidatorBlockedReasonCount; failedBlockers=$releaseCloseFinalBridgeProofValidatorFailedBlockerCount" -Passed $false -Boundary "The release close final bridge proof validator is strict Owner evidence admission only; it is not release close approval by itself, not post-publish proof, not publish approval, cannot close the release issue, and not package push."
   New-EvidenceItem -Id "owner-post-publish-proof-acceptance-manifest" -Title "Owner post-publish proof acceptance manifest" -Artifact "artifacts/final-release/owner-post-publish-proof-acceptance-manifest-validation.json" -State "$ownerPostPublishProofAcceptanceManifestValidationState; validators=$ownerPostPublishProofAcceptanceManifestAcceptedValidatorCount/$ownerPostPublishProofAcceptanceManifestValidatorCount; releaseCloseReady=$ownerPostPublishProofAcceptanceManifestReleaseCloseReady; failedBlockers=$ownerPostPublishProofAcceptanceManifestFailedBlockerCount" -Passed $false -Boundary "The Owner post-publish proof acceptance manifest aggregates strict validators only; it is not post-publish proof, not publish approval, not release close approval, cannot close the release issue, and not package push."
   New-EvidenceItem -Id "public-package-url-hash-download-verification" -Title "Public package URL/hash download verification" -Artifact "artifacts/final-release/public-package-url-hash-download-verification-validation.json" -State "$publicPackageUrlHashDownloadVerificationValidationState; downloadAllowed=$publicPackageUrlHashDownloadVerificationDownloadAllowed; attempted=$publicPackageUrlHashDownloadVerificationDownloadAttemptedCount; hashMatched=$publicPackageUrlHashDownloadVerificationHashMatchedCount; failedBlockers=$publicPackageUrlHashDownloadVerificationFailedBlockerCount" -Passed $false -Boundary "The public package URL/hash download verification is guarded Owner-input verification only; it does not publish, does not use tokens, is not post-publish proof by itself, not release close approval, and not package push."
+  New-EvidenceItem -Id "post-publish-proof-validator-bridge" -Title "Post-publish proof validator bridge" -Artifact "artifacts/final-release/post-publish-proof-validator-bridge-validation.json" -State "$postPublishProofValidatorBridgeValidationState; lanes=$postPublishProofValidatorBridgeInputShapeReadyLaneCount/$postPublishProofValidatorBridgeLaneCount inputShapeReady; proofReady=$postPublishProofValidatorBridgeProofReadyLaneCount/$postPublishProofValidatorBridgeLaneCount; blockedLanes=$postPublishProofValidatorBridgeBlockedLaneCount; allAccepted=$postPublishProofValidatorBridgeAllPostPublishInputsAccepted; publicHashCannotSubstitute=$postPublishProofValidatorBridgePublicPackageHashCannotSubstitutePostPublishProof; shapeValidCannotSubstitute=$postPublishProofValidatorBridgeShapeValidCannotSubstitutePostPublishProof; failedBlockers=$postPublishProofValidatorBridgeFailedBlockerCount" -Passed $false -Boundary "The post-publish proof validator bridge aggregates strict Owner validators and staging admission status only; public package hash/download verification, staging shape-valid records, validation-ready states, local feeds, ProjectReference, direct nupkg, dashboard, and dry-run signals cannot substitute post-publish CleanConsumer runtime proof. It does not publish, use tokens, close the release issue, claim runtime/post-publish/release-close proof, and is not package push."
+  New-EvidenceItem -Id "release-close-final-bridge" -Title "Release close final bridge" -Artifact "artifacts/final-release/release-close-final-bridge-validation.json" -State "$releaseCloseFinalBridgeValidationState; gates=$releaseCloseFinalBridgeReadyGateCount/$releaseCloseFinalBridgeGateCount ready; blockedGates=$releaseCloseFinalBridgeBlockedGateCount; acceptedRealInputs=$releaseCloseFinalBridgeAcceptedRealInputCount; rejectedNonProofStates=$releaseCloseFinalBridgeRejectedNonProofStateCount; allCloseInputsReady=$releaseCloseFinalBridgeAllCloseInputsReady; failedBlockers=$releaseCloseFinalBridgeFailedBlockerCount" -Passed $false -Boundary "The release close final bridge cross-checks post-publish admission, final Owner rollback review, final Owner close decision, staging strict import, release evidence bundle hash, and classification audit hash for Owner review only. It rejects templates, dashboards, dry-runs, local feeds, ProjectReference, direct nupkg, queued workflows, staging shape-valid-only, public-package-hash-only, and validation-ready substitutes; it does not publish, use tokens, close the release issue, claim release close proof, and is not package push."
   New-EvidenceItem -Id "cuda-device-initialization-local-smoke-classification" -Title "CUDA device initialization local smoke classification" -Artifact "artifacts/final-release/cuda-device-initialization-local-smoke-classification.json" -State "$cudaDeviceInitializationLocalSmokeClassificationState; validation=$cudaDeviceInitializationLocalSmokeClassificationValidationState; proofKind=$cudaDeviceInitializationLocalSmokeClassificationProofKind; findings=$cudaDeviceInitializationLocalSmokeClassificationFindingCount; preInitCallOrderReady=$cudaDeviceInitializationLocalSmokeClassificationPreInitCallOrderReady; skippedTrueIsForbiddenSubstitute=$cudaDeviceInitializationLocalSmokeClassificationSkippedTrueIsForbiddenSubstitute; canPromoteRuntimeProof=$cudaDeviceInitializationLocalSmokeClassificationCanPromoteRuntimeProof; isPackageConsumerRuntimeProof=$cudaDeviceInitializationLocalSmokeClassificationIsPackageConsumerRuntimeProof; isRuntimeExecutionProof=$cudaDeviceInitializationLocalSmokeClassificationIsRuntimeExecutionProof; performsPublish=$cudaDeviceInitializationLocalSmokeClassificationPerformsPublish; canPublishPublicly=$cudaDeviceInitializationLocalSmokeClassificationCanPublishPublicly; canCloseReleaseIssue=$cudaDeviceInitializationLocalSmokeClassificationCanCloseReleaseIssue" -Passed $false -Boundary "CudaDeviceInitializationProofRunner is local smoke classification only; it is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push. Skipped=True is a forbidden substitute and cannot promote package-consumer-runtime proof."
   New-EvidenceItem -Id "clean-consumer-proof-execution-bundle" -Title "Clean consumer proof execution bundle" -Artifact "artifacts/final-release/clean-consumer-proof-execution-bundle-validation.json" -State "$cleanConsumerProofExecutionBundleValidationState; bundleState=$cleanConsumerProofExecutionBundleState; lanes=$cleanConsumerProofExecutionBundleLaneCount; forbiddenSubstitutes=$cleanConsumerProofExecutionBundleForbiddenSubstituteCount; promotionRequirements=$cleanConsumerProofExecutionBundlePromotionRequirementCount; executionCommands=$cleanConsumerProofExecutionBundleExecutionCommandCount; failedBlockers=$cleanConsumerProofExecutionBundleFailedBlockerCount; ownerActionRequired=$cleanConsumerProofExecutionBundleOwnerActionRequired; performsPublish=$cleanConsumerProofExecutionBundlePerformsPublish; performsRuntimeExecution=$cleanConsumerProofExecutionBundlePerformsRuntimeExecution; canPromoteRuntimeProof=$cleanConsumerProofExecutionBundleCanPromoteRuntimeProof; canPublishPublicly=$cleanConsumerProofExecutionBundleCanPublishPublicly; canCloseReleaseIssue=$cleanConsumerProofExecutionBundleCanCloseReleaseIssue; isRuntimeExecutionProof=$cleanConsumerProofExecutionBundleIsRuntimeExecutionProof; isPackageConsumerRuntimeProof=$cleanConsumerProofExecutionBundleIsPackageConsumerRuntimeProof; isPostPublishProof=$cleanConsumerProofExecutionBundleIsPostPublishProof" -Passed $false -Boundary "The clean consumer proof execution bundle is owner execution mapping and classification only; it is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push. It cannot promote proof without real repository-external clean consumer logs, hashes, package metadata, host metadata, owner review, and strict validators with FailOnNotProof."
   New-EvidenceItem -Id "clean-consumer-external-proof-closure-pack" -Title "Clean consumer external proof closure pack" -Artifact "artifacts/final-release/clean-consumer-external-proof-closure-pack-validation.json" -State "$cleanConsumerExternalProofClosurePackValidationState; closureState=$cleanConsumerExternalProofClosurePackState; lanes=$cleanConsumerExternalProofClosurePackLaneCount; ownerFields=$cleanConsumerExternalProofClosurePackOwnerFieldCount; executionSteps=$cleanConsumerExternalProofClosurePackExecutionStepCount; forbiddenSubstitutes=$cleanConsumerExternalProofClosurePackForbiddenSubstituteCount; failedBlockers=$cleanConsumerExternalProofClosurePackFailedBlockerCount; ownerActionRequired=$cleanConsumerExternalProofClosurePackOwnerActionRequired; performsPublish=$cleanConsumerExternalProofClosurePackPerformsPublish; performsRuntimeExecution=$cleanConsumerExternalProofClosurePackPerformsRuntimeExecution; canPromoteRuntimeProof=$cleanConsumerExternalProofClosurePackCanPromoteRuntimeProof; canPublishPublicly=$cleanConsumerExternalProofClosurePackCanPublishPublicly; canCloseReleaseIssue=$cleanConsumerExternalProofClosurePackCanCloseReleaseIssue; isRuntimeExecutionProof=$cleanConsumerExternalProofClosurePackIsRuntimeExecutionProof; isPackageConsumerRuntimeProof=$cleanConsumerExternalProofClosurePackIsPackageConsumerRuntimeProof; isPostPublishProof=$cleanConsumerExternalProofClosurePackIsPostPublishProof; isReleaseCloseProof=$cleanConsumerExternalProofClosurePackIsReleaseCloseProof" -Passed $false -Boundary "The clean consumer external proof closure pack is a blocked owner-action convergence layer only; it is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push. It cannot promote proof without real external logs, SHA256 values, package metadata, native asset evidence, host metadata, owner review, and strict validators with FailOnNotProof."
@@ -5803,6 +5826,23 @@ $record = [pscustomobject]@{
   publicPackageUrlHashDownloadVerificationDownloadAttemptedCount = $publicPackageUrlHashDownloadVerificationDownloadAttemptedCount
   publicPackageUrlHashDownloadVerificationHashMatchedCount = $publicPackageUrlHashDownloadVerificationHashMatchedCount
   publicPackageUrlHashDownloadVerificationFailedBlockerCount = $publicPackageUrlHashDownloadVerificationFailedBlockerCount
+  postPublishProofValidatorBridgeValidationState = $postPublishProofValidatorBridgeValidationState
+  postPublishProofValidatorBridgeLaneCount = $postPublishProofValidatorBridgeLaneCount
+  postPublishProofValidatorBridgeInputShapeReadyLaneCount = $postPublishProofValidatorBridgeInputShapeReadyLaneCount
+  postPublishProofValidatorBridgeProofReadyLaneCount = $postPublishProofValidatorBridgeProofReadyLaneCount
+  postPublishProofValidatorBridgeBlockedLaneCount = $postPublishProofValidatorBridgeBlockedLaneCount
+  postPublishProofValidatorBridgeAllPostPublishInputsAccepted = $postPublishProofValidatorBridgeAllPostPublishInputsAccepted
+  postPublishProofValidatorBridgePublicPackageHashCannotSubstitutePostPublishProof = $postPublishProofValidatorBridgePublicPackageHashCannotSubstitutePostPublishProof
+  postPublishProofValidatorBridgeShapeValidCannotSubstitutePostPublishProof = $postPublishProofValidatorBridgeShapeValidCannotSubstitutePostPublishProof
+  postPublishProofValidatorBridgeFailedBlockerCount = $postPublishProofValidatorBridgeFailedBlockerCount
+  releaseCloseFinalBridgeValidationState = $releaseCloseFinalBridgeValidationState
+  releaseCloseFinalBridgeGateCount = $releaseCloseFinalBridgeGateCount
+  releaseCloseFinalBridgeReadyGateCount = $releaseCloseFinalBridgeReadyGateCount
+  releaseCloseFinalBridgeBlockedGateCount = $releaseCloseFinalBridgeBlockedGateCount
+  releaseCloseFinalBridgeAllCloseInputsReady = $releaseCloseFinalBridgeAllCloseInputsReady
+  releaseCloseFinalBridgeAcceptedRealInputCount = $releaseCloseFinalBridgeAcceptedRealInputCount
+  releaseCloseFinalBridgeRejectedNonProofStateCount = $releaseCloseFinalBridgeRejectedNonProofStateCount
+  releaseCloseFinalBridgeFailedBlockerCount = $releaseCloseFinalBridgeFailedBlockerCount
   finalOwnerExecutionRealInputStrictPreflightDualPackageRouteProofRouteCount = $finalOwnerExecutionRealInputStrictPreflightDualPackageRouteProofRouteCount
   finalOwnerExecutionRealInputStrictPreflightDualPackageRouteProofFieldCount = $finalOwnerExecutionRealInputStrictPreflightDualPackageRouteProofFieldCount
   finalOwnerExecutionRealInputStrictPreflightDualPackageRouteProofReadyFieldCount = $finalOwnerExecutionRealInputStrictPreflightDualPackageRouteProofReadyFieldCount
@@ -6123,6 +6163,8 @@ $record = [pscustomobject]@{
     "release close final bridge proof validator"
     "owner post-publish proof acceptance manifest"
     "public package URL hash download verification"
+    "post publish proof validator bridge"
+    "release close final bridge"
     "owner real publish evidence import readiness dashboard"
     "release close final candidate audit pack"
     "owner public publish execution final intake pack"
@@ -6482,6 +6524,14 @@ $record = [pscustomobject]@{
     "artifacts/final-release/public-package-url-hash-download-verification.md",
     "artifacts/final-release/public-package-url-hash-download-verification-validation.json",
     "artifacts/final-release/public-package-url-hash-download-verification-validation.md",
+    "artifacts/final-release/post-publish-proof-validator-bridge.json",
+    "artifacts/final-release/post-publish-proof-validator-bridge.md",
+    "artifacts/final-release/post-publish-proof-validator-bridge-validation.json",
+    "artifacts/final-release/post-publish-proof-validator-bridge-validation.md",
+    "artifacts/final-release/release-close-final-bridge.json",
+    "artifacts/final-release/release-close-final-bridge.md",
+    "artifacts/final-release/release-close-final-bridge-validation.json",
+    "artifacts/final-release/release-close-final-bridge-validation.md",
     "artifacts/final-release/post-publish-user-verification-pack.json",
     "artifacts/final-release/post-publish-user-verification-pack.md",
     "artifacts/final-release/post-publish-user-verification-pack-validation.json",
@@ -7401,6 +7451,14 @@ $record = [pscustomobject]@{
     "artifacts/final-release/public-package-url-hash-download-verification.md",
     "artifacts/final-release/public-package-url-hash-download-verification-validation.json",
     "artifacts/final-release/public-package-url-hash-download-verification-validation.md",
+    "artifacts/final-release/post-publish-proof-validator-bridge.json",
+    "artifacts/final-release/post-publish-proof-validator-bridge.md",
+    "artifacts/final-release/post-publish-proof-validator-bridge-validation.json",
+    "artifacts/final-release/post-publish-proof-validator-bridge-validation.md",
+    "artifacts/final-release/release-close-final-bridge.json",
+    "artifacts/final-release/release-close-final-bridge.md",
+    "artifacts/final-release/release-close-final-bridge-validation.json",
+    "artifacts/final-release/release-close-final-bridge-validation.md",
     "artifacts/final-release/post-publish-user-verification-pack.json",
     "artifacts/final-release/post-publish-user-verification-pack.md",
     "artifacts/final-release/post-publish-user-verification-pack-validation.json",
@@ -8335,6 +8393,8 @@ $lines.Add("- final owner execution package failed blockers: ``$finalOwnerExecut
 $lines.Add("- final owner execution package source artifact evidence: ``$finalOwnerExecutionPackageSourceArtifactEvidenceCount``")
 $lines.Add("- final owner execution package source artifact evidence missing: ``$finalOwnerExecutionPackageSourceArtifactEvidenceMissingCount``")
 $lines.Add("- final owner execution package source artifact evidence sha256: ``$finalOwnerExecutionPackageSourceArtifactEvidenceSha256Count``")
+$lines.Add("- post-publish proof validator bridge: ``$postPublishProofValidatorBridgeValidationState`` lanes ``$postPublishProofValidatorBridgeProofReadyLaneCount/$postPublishProofValidatorBridgeLaneCount`` proof-ready")
+$lines.Add("- release close final bridge: ``$releaseCloseFinalBridgeValidationState`` gates ``$releaseCloseFinalBridgeReadyGateCount/$releaseCloseFinalBridgeGateCount`` ready")
 $lines.Add("- final owner execution repair checklist validation: ``$finalOwnerExecutionRepairChecklistValidationState``")
 $lines.Add("- final owner execution repair checklist blocked items: ``$finalOwnerExecutionRepairChecklistBlockedItemCount``")
 $lines.Add("- final owner execution repair checklist failed blockers: ``$finalOwnerExecutionRepairChecklistFailedBlockerCount``")
