@@ -194,9 +194,9 @@
       "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
       "parameters": [
         { "name": "builder", "type": "JYPPX_TensorRtBuilder*", "direction": "in" },
-        { "name": "plugin_name", "type": "const char*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
-        { "name": "plugin_version", "type": "const char*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
-        { "name": "plugin_namespace", "type": "const char*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "plugin_name", "type": "const char*", "direction": "in" },
+        { "name": "plugin_version", "type": "const char*", "direction": "in" },
+        { "name": "plugin_namespace", "type": "const char*", "direction": "in" },
         { "name": "out_tensor_rt_version", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
       ]
     },
@@ -428,9 +428,9 @@
       "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
       "parameters": [
         { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
-        { "name": "plugin_name", "type": "const char*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
-        { "name": "plugin_version", "type": "const char*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
-        { "name": "plugin_namespace", "type": "const char*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "plugin_name", "type": "const char*", "direction": "in" },
+        { "name": "plugin_version", "type": "const char*", "direction": "in" },
+        { "name": "plugin_namespace", "type": "const char*", "direction": "in" },
         { "name": "out_tensor_rt_version", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
       ]
     },
