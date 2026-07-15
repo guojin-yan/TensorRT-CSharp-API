@@ -20,7 +20,7 @@ public static class TensorRtErrorRecorderDiagnosticsDesignGate
     /// Evaluates the known public ErrorRecorder diagnostics surface for a TensorRT API line.
     /// 基于已知 public ErrorRecorder 诊断边界评估指定 TensorRT API line。
     /// </summary>
-    /// <param name="line">The TensorRT API line. TensorRT API line。</param>
+    /// <param name="line">The TensorRT API line. TensorRT API 版本线。</param>
     /// <returns>A pointer-free diagnostics design gate result. 无裸指针诊断设计门结果。</returns>
     public static TensorRtErrorRecorderDiagnosticsDesignGateResult EvaluateKnownSurface(TensorRtApiLine line)
     {

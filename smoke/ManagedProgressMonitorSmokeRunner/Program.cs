@@ -133,6 +133,14 @@ internal static class Program
             using TensorRtBuilderConfig config = builder.CreateBuilderConfig();
             config.SetProgressMonitor(monitor);
             bool attached = config.HasProgressMonitor && monitor.IsAttached;
+            bool metadataAvailable = config.TryGetProgressMonitorVersionedMetadata(
+                out TensorRtVersionedInterfaceMetadata metadata,
+                out string metadataDiagnostic);
+            Console.WriteLine($"ManagedProgressMonitorOwnerScopedMetadata Available={metadataAvailable} Metadata={metadata} Diagnostic={metadataDiagnostic}");
+            if (!metadataAvailable || string.IsNullOrWhiteSpace(metadata.InterfaceInfo.Kind) || metadata.ApiLanguage == TensorRtApiLanguage.Unknown)
+            {
+                throw new InvalidOperationException("Attached progress monitor did not expose copied owner-scoped versioned metadata.");
+            }
             config.ClearProgressMonitor();
             bool cleared = !config.HasProgressMonitor && !monitor.IsAttached;
 

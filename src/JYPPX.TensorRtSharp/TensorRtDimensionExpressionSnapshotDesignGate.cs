@@ -20,7 +20,7 @@ public static class TensorRtDimensionExpressionSnapshotDesignGate
     /// Evaluates the known public dimension expression design surface for a TensorRT API line.
     /// 基于已知 public dimension expression 设计边界评估指定 TensorRT API line。
     /// </summary>
-    /// <param name="line">The TensorRT API line. TensorRT API line。</param>
+    /// <param name="line">The TensorRT API line. TensorRT API 版本线。</param>
     /// <returns>A pointer-free dimension expression design gate result. 无裸指针 dimension expression 设计门结果。</returns>
     public static TensorRtDimensionExpressionSnapshotDesignGateResult EvaluateKnownSurface(TensorRtApiLine line)
     {
@@ -37,7 +37,7 @@ public static class TensorRtDimensionExpressionSnapshotDesignGate
     /// Evaluates the dimension expression snapshot design gate from explicit capability flags.
     /// 根据显式能力标记评估 dimension expression snapshot 设计门。
     /// </summary>
-    /// <param name="line">The TensorRT API line. TensorRT API line。</param>
+    /// <param name="line">The TensorRT API line. TensorRT API 版本线。</param>
     /// <param name="ownerLifetimeKnown">Whether a safe owner lifetime has been proven. 是否已证明安全 owner lifetime。</param>
     /// <param name="constantSnapshotCopyReady">Whether copied constant metadata shape is ready. copied constant metadata 形态是否就绪。</param>
     /// <param name="sizeTensorMetadataCopyReady">Whether copied size-tensor metadata shape is ready where available. 可用时 copied size-tensor metadata 形态是否就绪。</param>

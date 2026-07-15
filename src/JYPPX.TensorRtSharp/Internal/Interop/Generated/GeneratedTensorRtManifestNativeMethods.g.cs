@@ -510,6 +510,9 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
     internal static extern BridgeStatusCode jyppx_trt10_builder_config_get_progress_monitor_deferred();
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt10_builder_config_get_progress_monitor_versioned_metadata(SafeTensorRtObjectHandle config, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size, out int out_major, out int out_minor, out int out_api_language);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt10_builder_config_get_quantization_flag_deferred();
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -652,6 +655,9 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt10_builder_get_error_recorder_deferred();
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt10_builder_get_error_recorder_versioned_metadata(SafeTensorRtObjectHandle builder, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size, out int out_major, out int out_minor, out int out_api_language);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt10_builder_get_logger_deferred();
@@ -1014,6 +1020,9 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
     internal static extern BridgeStatusCode jyppx_trt10_engine_get_engine_capability(SafeTensorRtObjectHandle engine, out int out_capability);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt10_engine_get_error_recorder_versioned_metadata(SafeTensorRtObjectHandle engine, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size, out int out_major, out int out_minor, out int out_api_language);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt10_engine_get_hardware_compatibility_level(SafeTensorRtObjectHandle engine, out int out_level);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -1116,6 +1125,9 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
     internal static extern BridgeStatusCode jyppx_trt10_engine_inspector_get_error_recorder_deferred();
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt10_engine_inspector_get_error_recorder_versioned_metadata(SafeTensorRtObjectHandle inspector, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size, out int out_major, out int out_minor, out int out_api_language);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt10_engine_inspector_get_layer_information(SafeTensorRtObjectHandle inspector, int layer_index, int format, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -1176,6 +1188,9 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
     internal static extern BridgeStatusCode jyppx_trt10_execution_context_clear_profiler(SafeTensorRtObjectHandle context);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt10_execution_context_get_debug_listener_api_language(SafeTensorRtObjectHandle context, out int out_api_language);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt10_execution_context_get_debug_listener_interface_info(SafeTensorRtObjectHandle context, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size, out int out_major, out int out_minor);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -1198,6 +1213,9 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt10_execution_context_get_error_recorder_deferred();
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt10_execution_context_get_error_recorder_versioned_metadata(SafeTensorRtObjectHandle context, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size, out int out_major, out int out_minor, out int out_api_language);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt10_execution_context_get_max_output_size(SafeTensorRtObjectHandle context, IntPtr tensor_name, out long out_size);
@@ -1240,6 +1258,9 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt10_execution_context_no_copy_deferred();
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt10_execution_context_get_output_allocator_api_language(SafeTensorRtObjectHandle context, IntPtr tensor_name, out int out_api_language);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt10_execution_context_get_output_allocator_interface_info(SafeTensorRtObjectHandle context, IntPtr tensor_name, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size, out int out_major, out int out_minor);
@@ -1309,6 +1330,9 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt10_execution_context_set_tensor_debug_state(SafeTensorRtObjectHandle context, IntPtr tensor_name, int debug_state);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt10_execution_context_get_temporary_storage_allocator_api_language(SafeTensorRtObjectHandle context, out int out_api_language);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt10_execution_context_get_temporary_storage_allocator_interface_info(SafeTensorRtObjectHandle context, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size, out int out_major, out int out_minor);
@@ -1873,6 +1897,9 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt10_network_get_error_recorder_deferred();
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt10_network_get_error_recorder_versioned_metadata(SafeTensorRtObjectHandle network, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size, out int out_major, out int out_minor, out int out_api_language);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt10_network_get_flag(SafeTensorRtObjectHandle network, int flag, out int out_enabled);
@@ -2703,6 +2730,9 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
     internal static extern BridgeStatusCode jyppx_trt10_refitter_get_all_entries(SafeTensorRtObjectHandle refitter, [Out] NativeTensorRtRefitEntryInfo[] output_entries, int output_count, out int out_count);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt10_refitter_get_error_recorder_versioned_metadata(SafeTensorRtObjectHandle refitter, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size, out int out_major, out int out_minor, out int out_api_language);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt10_refitter_get_missing_count(SafeTensorRtObjectHandle refitter, out int out_count);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -2800,6 +2830,9 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt10_runtime_deserialize_host_memory(SafeTensorRtObjectHandle runtime, SafeTensorRtObjectHandle host_memory, out SafeTensorRtObjectHandle out_engine);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt10_runtime_get_error_recorder_versioned_metadata(SafeTensorRtObjectHandle runtime, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size, out int out_major, out int out_minor, out int out_api_language);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt10_runtime_get_logger_deferred();
@@ -4422,6 +4455,9 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
     internal static extern BridgeStatusCode jyppx_trt11_builder_config_get_nb_plugins_to_serialize_deferred();
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt11_builder_config_get_progress_monitor_versioned_metadata(SafeTensorRtObjectHandle config, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size, out int out_major, out int out_minor, out int out_api_language);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt11_builder_config_has_calibration_profile(SafeTensorRtObjectHandle config, out int out_has_profile);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -4456,6 +4492,9 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt11_builder_get_dla_core_count(SafeTensorRtObjectHandle builder, out int out_count);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt11_builder_get_error_recorder_versioned_metadata(SafeTensorRtObjectHandle builder, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size, out int out_major, out int out_minor, out int out_api_language);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt11_builder_get_logger_deferred();
@@ -4785,6 +4824,9 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
     internal static extern BridgeStatusCode jyppx_trt11_engine_get_engine_capability(SafeTensorRtObjectHandle engine, out int out_capability);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt11_engine_get_error_recorder_versioned_metadata(SafeTensorRtObjectHandle engine, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size, out int out_major, out int out_minor, out int out_api_language);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt11_engine_get_io_tensor_count(SafeTensorRtObjectHandle engine, out int out_count);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -4842,6 +4884,9 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
     internal static extern BridgeStatusCode jyppx_trt11_engine_get_tensor_vectorized_dim_for_profile(SafeTensorRtObjectHandle engine, IntPtr tensor_name, int profile_index, out int out_dim);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt11_engine_inspector_get_error_recorder_versioned_metadata(SafeTensorRtObjectHandle inspector, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size, out int out_major, out int out_minor, out int out_api_language);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt11_engine_is_debug_tensor(SafeTensorRtObjectHandle engine, IntPtr tensor_name, out int out_is_debug_tensor);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -4881,6 +4926,9 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
     internal static extern BridgeStatusCode jyppx_trt11_execution_context_all_input_shapes_specified(SafeTensorRtObjectHandle context, out int out_specified);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt11_execution_context_get_debug_listener_api_language(SafeTensorRtObjectHandle context, out int out_api_language);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt11_execution_context_get_debug_listener_interface_info(SafeTensorRtObjectHandle context, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size, out int out_major, out int out_minor);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -4896,6 +4944,9 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
     internal static extern BridgeStatusCode jyppx_trt11_execution_context_get_enqueue_emits_profile(SafeTensorRtObjectHandle context, out int out_enqueue_emits_profile);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt11_execution_context_get_error_recorder_versioned_metadata(SafeTensorRtObjectHandle context, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size, out int out_major, out int out_minor, out int out_api_language);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt11_execution_context_get_name(SafeTensorRtObjectHandle context, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -4906,6 +4957,9 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt11_execution_context_no_copy_deferred();
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt11_execution_context_get_output_allocator_api_language(SafeTensorRtObjectHandle context, IntPtr tensor_name, out int out_api_language);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt11_execution_context_get_output_allocator_interface_info(SafeTensorRtObjectHandle context, IntPtr tensor_name, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size, out int out_major, out int out_minor);
@@ -4942,6 +4996,9 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt11_execution_context_set_tensor_debug_state(SafeTensorRtObjectHandle context, IntPtr tensor_name, int debug_state);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt11_execution_context_get_temporary_storage_allocator_api_language(SafeTensorRtObjectHandle context, out int out_api_language);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt11_execution_context_get_temporary_storage_allocator_interface_info(SafeTensorRtObjectHandle context, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size, out int out_major, out int out_minor);
@@ -5476,6 +5533,9 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt11_network_are_weights_marked_refittable(SafeTensorRtObjectHandle network, IntPtr weights_name, out int out_marked);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt11_network_get_error_recorder_versioned_metadata(SafeTensorRtObjectHandle network, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size, out int out_major, out int out_minor, out int out_api_language);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt11_network_has_implicit_batch_dimension(SafeTensorRtObjectHandle network, out int out_has_implicit_batch_dimension);
@@ -6291,6 +6351,9 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
     internal static extern BridgeStatusCode jyppx_trt11_refitter_get_all_entries(SafeTensorRtObjectHandle refitter, [Out] NativeTensorRtRefitEntryInfo[] output_entries, int output_count, out int out_count);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt11_refitter_get_error_recorder_versioned_metadata(SafeTensorRtObjectHandle refitter, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size, out int out_major, out int out_minor, out int out_api_language);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt11_refitter_get_logger_deferred();
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -6397,6 +6460,9 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt11_runtime_deserialize_host_memory(SafeTensorRtObjectHandle runtime, SafeTensorRtObjectHandle host_memory, out SafeTensorRtObjectHandle out_engine);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt11_runtime_get_error_recorder_versioned_metadata(SafeTensorRtObjectHandle runtime, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size, out int out_major, out int out_minor, out int out_api_language);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt11_runtime_get_logger_deferred();

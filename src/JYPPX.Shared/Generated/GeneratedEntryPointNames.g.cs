@@ -744,6 +744,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt10BuilderConfigGetPreviewFeature = "jyppx_trt10_builder_config_get_preview_feature";
     public const string Trt10BuilderConfigGetProfilingVerbosity = "jyppx_trt10_builder_config_get_profiling_verbosity";
     public const string Trt10BuilderConfigGetProgressMonitorDeferred = "jyppx_trt10_builder_config_get_progress_monitor_deferred";
+    public const string Trt10BuilderConfigGetProgressMonitorVersionedMetadata = "jyppx_trt10_builder_config_get_progress_monitor_versioned_metadata";
     public const string Trt10BuilderConfigGetQuantizationFlagDeferred = "jyppx_trt10_builder_config_get_quantization_flag_deferred";
     public const string Trt10BuilderConfigGetQuantizationFlagsDeferred = "jyppx_trt10_builder_config_get_quantization_flags_deferred";
     public const string Trt10BuilderConfigGetRuntimePlatform = "jyppx_trt10_builder_config_get_runtime_platform";
@@ -792,6 +793,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt10BuilderCreateOptimizationProfile = "jyppx_trt10_builder_create_optimization_profile";
     public const string Trt10BuilderGetDlaCoreCount = "jyppx_trt10_builder_get_dla_core_count";
     public const string Trt10BuilderGetErrorRecorderDeferred = "jyppx_trt10_builder_get_error_recorder_deferred";
+    public const string Trt10BuilderGetErrorRecorderVersionedMetadata = "jyppx_trt10_builder_get_error_recorder_versioned_metadata";
     public const string Trt10BuilderGetLoggerDeferred = "jyppx_trt10_builder_get_logger_deferred";
     public const string Trt10BuilderGetMaxDlaBatchSizeDeferred = "jyppx_trt10_builder_get_max_dla_batch_size_deferred";
     public const string Trt10BuilderGetMaxThreadsDeferred = "jyppx_trt10_builder_get_max_threads_deferred";
@@ -912,6 +914,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt10EngineGetDeviceMemorySizeForProfileV2 = "jyppx_trt10_engine_get_device_memory_size_for_profile_v2";
     public const string Trt10EngineGetDeviceMemorySizeV2 = "jyppx_trt10_engine_get_device_memory_size_v2";
     public const string Trt10EngineGetEngineCapability = "jyppx_trt10_engine_get_engine_capability";
+    public const string Trt10EngineGetErrorRecorderVersionedMetadata = "jyppx_trt10_engine_get_error_recorder_versioned_metadata";
     public const string Trt10EngineGetHardwareCompatibilityLevel = "jyppx_trt10_engine_get_hardware_compatibility_level";
     public const string Trt10EngineGetIoTensorCount = "jyppx_trt10_engine_get_io_tensor_count";
     public const string Trt10EngineGetIoTensorInfo = "jyppx_trt10_engine_get_io_tensor_info";
@@ -946,6 +949,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt10EngineGetWeightStreamingScratchMemorySize = "jyppx_trt10_engine_get_weight_streaming_scratch_memory_size";
     public const string Trt10EngineInspectorGetEngineInformation = "jyppx_trt10_engine_inspector_get_engine_information";
     public const string Trt10EngineInspectorGetErrorRecorderDeferred = "jyppx_trt10_engine_inspector_get_error_recorder_deferred";
+    public const string Trt10EngineInspectorGetErrorRecorderVersionedMetadata = "jyppx_trt10_engine_inspector_get_error_recorder_versioned_metadata";
     public const string Trt10EngineInspectorGetLayerInformation = "jyppx_trt10_engine_inspector_get_layer_information";
     public const string Trt10EngineInspectorSetErrorRecorderDeferred = "jyppx_trt10_engine_inspector_set_error_recorder_deferred";
     public const string Trt10EngineInspectorSetExecutionContext = "jyppx_trt10_engine_inspector_set_execution_context";
@@ -966,6 +970,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt10ExecutionContextAllInputDimensionsSpecified = "jyppx_trt10_execution_context_all_input_dimensions_specified";
     public const string Trt10ExecutionContextAllInputShapesSpecified = "jyppx_trt10_execution_context_all_input_shapes_specified";
     public const string Trt10ExecutionContextClearProfiler = "jyppx_trt10_execution_context_clear_profiler";
+    public const string Trt10ExecutionContextDebugListenerGetApiLanguage = "jyppx_trt10_execution_context_get_debug_listener_api_language";
     public const string Trt10ExecutionContextDebugListenerGetInterfaceInfo = "jyppx_trt10_execution_context_get_debug_listener_interface_info";
     public const string Trt10ExecutionContextEnqueueAsync = "jyppx_trt10_execution_context_enqueue_async";
     public const string Trt10ExecutionContextExecuteV2Deferred = "jyppx_trt10_execution_context_execute_v2_deferred";
@@ -974,6 +979,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt10ExecutionContextGetDeviceMemorySize = "jyppx_trt10_execution_context_get_device_memory_size";
     public const string Trt10ExecutionContextGetEnqueueEmitsProfile = "jyppx_trt10_execution_context_get_enqueue_emits_profile";
     public const string Trt10ExecutionContextGetErrorRecorderDeferred = "jyppx_trt10_execution_context_get_error_recorder_deferred";
+    public const string Trt10ExecutionContextGetErrorRecorderVersionedMetadata = "jyppx_trt10_execution_context_get_error_recorder_versioned_metadata";
     public const string Trt10ExecutionContextGetMaxOutputSize = "jyppx_trt10_execution_context_get_max_output_size";
     public const string Trt10ExecutionContextGetName = "jyppx_trt10_execution_context_get_name";
     public const string Trt10ExecutionContextGetNvtxVerbosityDeferred = "jyppx_trt10_execution_context_get_nvtx_verbosity_deferred";
@@ -988,6 +994,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt10ExecutionContextInferShapes = "jyppx_trt10_execution_context_infer_shapes";
     public const string Trt10ExecutionContextIsTensorAddressBound = "jyppx_trt10_execution_context_is_tensor_address_bound";
     public const string Trt10ExecutionContextNoCopyDeferred = "jyppx_trt10_execution_context_no_copy_deferred";
+    public const string Trt10ExecutionContextOutputAllocatorGetApiLanguage = "jyppx_trt10_execution_context_get_output_allocator_api_language";
     public const string Trt10ExecutionContextOutputAllocatorGetInterfaceInfo = "jyppx_trt10_execution_context_get_output_allocator_interface_info";
     public const string Trt10ExecutionContextReportToProfiler = "jyppx_trt10_execution_context_report_to_profiler";
     public const string Trt10ExecutionContextSetAllTensorsDebugState = "jyppx_trt10_execution_context_set_all_tensors_debug_state";
@@ -1011,6 +1018,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt10ExecutionContextSetTemporaryStorageAllocatorDeferred = "jyppx_trt10_execution_context_set_temporary_storage_allocator_deferred";
     public const string Trt10ExecutionContextSetTensorAddress = "jyppx_trt10_execution_context_set_tensor_address";
     public const string Trt10ExecutionContextSetTensorDebugState = "jyppx_trt10_execution_context_set_tensor_debug_state";
+    public const string Trt10ExecutionContextTemporaryStorageAllocatorGetApiLanguage = "jyppx_trt10_execution_context_get_temporary_storage_allocator_api_language";
     public const string Trt10ExecutionContextTemporaryStorageAllocatorGetInterfaceInfo = "jyppx_trt10_execution_context_get_temporary_storage_allocator_interface_info";
     public const string Trt10ExecutionContextUpdateDeviceMemorySizeForShapes = "jyppx_trt10_execution_context_update_device_memory_size_for_shapes";
     public const string Trt10ExprBuilderConstantDeferred = "jyppx_trt10_expr_builder_constant_deferred";
@@ -1199,6 +1207,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt10NetworkAddUnsqueeze = "jyppx_trt10_network_add_unsqueeze";
     public const string Trt10NetworkAreWeightsMarkedRefittable = "jyppx_trt10_network_are_weights_marked_refittable";
     public const string Trt10NetworkGetErrorRecorderDeferred = "jyppx_trt10_network_get_error_recorder_deferred";
+    public const string Trt10NetworkGetErrorRecorderVersionedMetadata = "jyppx_trt10_network_get_error_recorder_versioned_metadata";
     public const string Trt10NetworkGetFlag = "jyppx_trt10_network_get_flag";
     public const string Trt10NetworkGetFlags = "jyppx_trt10_network_get_flags";
     public const string Trt10NetworkGetInput = "jyppx_trt10_network_get_input";
@@ -1475,6 +1484,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt10ReduceLayerSetOperation = "jyppx_trt10_reduce_layer_set_operation";
     public const string Trt10RefitterGetAllCount = "jyppx_trt10_refitter_get_all_count";
     public const string Trt10RefitterGetAllEntries = "jyppx_trt10_refitter_get_all_entries";
+    public const string Trt10RefitterGetErrorRecorderVersionedMetadata = "jyppx_trt10_refitter_get_error_recorder_versioned_metadata";
     public const string Trt10RefitterGetMissingCount = "jyppx_trt10_refitter_get_missing_count";
     public const string Trt10RefitterGetMissingEntries = "jyppx_trt10_refitter_get_missing_entries";
     public const string Trt10RefitterRefitCudaEngine = "jyppx_trt10_refitter_refit_cuda_engine";
@@ -1508,6 +1518,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt10RuntimeDeserializeCudaEngineV2Deferred = "jyppx_trt10_runtime_deserialize_cuda_engine_v2_deferred";
     public const string Trt10RuntimeDeserializeEngine = "jyppx_trt10_runtime_deserialize_engine";
     public const string Trt10RuntimeDeserializeHostMemory = "jyppx_trt10_runtime_deserialize_host_memory";
+    public const string Trt10RuntimeGetErrorRecorderVersionedMetadata = "jyppx_trt10_runtime_get_error_recorder_versioned_metadata";
     public const string Trt10RuntimeGetLoggerDeferred = "jyppx_trt10_runtime_get_logger_deferred";
     public const string Trt10RuntimeGetPluginRegistryDeferred = "jyppx_trt10_runtime_get_plugin_registry_deferred";
     public const string Trt10RuntimeLoadRuntimeDeferred = "jyppx_trt10_runtime_load_runtime_deferred";
@@ -2048,6 +2059,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt11BuilderConfigGetBuilderOptimizationLevelDeferred = "jyppx_trt11_builder_config_get_builder_optimization_level_deferred";
     public const string Trt11BuilderConfigGetLayerDeviceType = "jyppx_trt11_builder_config_get_layer_device_type";
     public const string Trt11BuilderConfigGetNbPluginsToSerializeDeferred = "jyppx_trt11_builder_config_get_nb_plugins_to_serialize_deferred";
+    public const string Trt11BuilderConfigGetProgressMonitorVersionedMetadata = "jyppx_trt11_builder_config_get_progress_monitor_versioned_metadata";
     public const string Trt11BuilderConfigHasCalibrationProfile = "jyppx_trt11_builder_config_has_calibration_profile";
     public const string Trt11BuilderConfigIsLayerDeviceTypeSet = "jyppx_trt11_builder_config_is_layer_device_type_set";
     public const string Trt11BuilderConfigResetLayerDeviceType = "jyppx_trt11_builder_config_reset_layer_device_type";
@@ -2060,6 +2072,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt11BuilderCreateConfig = "jyppx_trt11_builder_create_config";
     public const string Trt11BuilderCreateNetwork = "jyppx_trt11_builder_create_network";
     public const string Trt11BuilderGetDlaCoreCount = "jyppx_trt11_builder_get_dla_core_count";
+    public const string Trt11BuilderGetErrorRecorderVersionedMetadata = "jyppx_trt11_builder_get_error_recorder_versioned_metadata";
     public const string Trt11BuilderGetLoggerDeferred = "jyppx_trt11_builder_get_logger_deferred";
     public const string Trt11BuilderGetPluginRegistryDeferred = "jyppx_trt11_builder_get_plugin_registry_deferred";
     public const string Trt11BuilderPlatformHasFastFp16 = "jyppx_trt11_builder_platform_has_fast_fp16";
@@ -2169,6 +2182,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt11EngineGetDeviceMemorySizeForProfileV2 = "jyppx_trt11_engine_get_device_memory_size_for_profile_v2";
     public const string Trt11EngineGetDeviceMemorySizeV2 = "jyppx_trt11_engine_get_device_memory_size_v2";
     public const string Trt11EngineGetEngineCapability = "jyppx_trt11_engine_get_engine_capability";
+    public const string Trt11EngineGetErrorRecorderVersionedMetadata = "jyppx_trt11_engine_get_error_recorder_versioned_metadata";
     public const string Trt11EngineGetIoTensorCount = "jyppx_trt11_engine_get_io_tensor_count";
     public const string Trt11EngineGetIoTensorInfo = "jyppx_trt11_engine_get_io_tensor_info";
     public const string Trt11EngineGetIoTensorName = "jyppx_trt11_engine_get_io_tensor_name";
@@ -2188,6 +2202,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt11EngineGetTensorIndex = "jyppx_trt11_engine_get_tensor_index";
     public const string Trt11EngineGetTensorVectorizedDim = "jyppx_trt11_engine_get_tensor_vectorized_dim";
     public const string Trt11EngineGetTensorVectorizedDimForProfile = "jyppx_trt11_engine_get_tensor_vectorized_dim_for_profile";
+    public const string Trt11EngineInspectorGetErrorRecorderVersionedMetadata = "jyppx_trt11_engine_inspector_get_error_recorder_versioned_metadata";
     public const string Trt11EngineIsDebugTensor = "jyppx_trt11_engine_is_debug_tensor";
     public const string Trt11EngineIsRefittable = "jyppx_trt11_engine_is_refittable";
     public const string Trt11EngineIsShapeInferenceIo = "jyppx_trt11_engine_is_shape_inference_io";
@@ -2201,15 +2216,18 @@ internal static class GeneratedEntryPointNames
     public const string Trt11ErrorRecorderIncRefCountDeferred = "jyppx_trt11_error_recorder_inc_ref_count_deferred";
     public const string Trt11ExecutionContextAllInputDimensionsSpecified = "jyppx_trt11_execution_context_all_input_dimensions_specified";
     public const string Trt11ExecutionContextAllInputShapesSpecified = "jyppx_trt11_execution_context_all_input_shapes_specified";
+    public const string Trt11ExecutionContextDebugListenerGetApiLanguage = "jyppx_trt11_execution_context_get_debug_listener_api_language";
     public const string Trt11ExecutionContextDebugListenerGetInterfaceInfo = "jyppx_trt11_execution_context_get_debug_listener_interface_info";
     public const string Trt11ExecutionContextExecuteV2Deferred = "jyppx_trt11_execution_context_execute_v2_deferred";
     public const string Trt11ExecutionContextGetDebugSync = "jyppx_trt11_execution_context_get_debug_sync";
     public const string Trt11ExecutionContextGetDeviceMemorySize = "jyppx_trt11_execution_context_get_device_memory_size";
     public const string Trt11ExecutionContextGetEnqueueEmitsProfile = "jyppx_trt11_execution_context_get_enqueue_emits_profile";
+    public const string Trt11ExecutionContextGetErrorRecorderVersionedMetadata = "jyppx_trt11_execution_context_get_error_recorder_versioned_metadata";
     public const string Trt11ExecutionContextGetName = "jyppx_trt11_execution_context_get_name";
     public const string Trt11ExecutionContextGetTensorDebugState = "jyppx_trt11_execution_context_get_tensor_debug_state";
     public const string Trt11ExecutionContextIsTensorAddressBound = "jyppx_trt11_execution_context_is_tensor_address_bound";
     public const string Trt11ExecutionContextNoCopyDeferred = "jyppx_trt11_execution_context_no_copy_deferred";
+    public const string Trt11ExecutionContextOutputAllocatorGetApiLanguage = "jyppx_trt11_execution_context_get_output_allocator_api_language";
     public const string Trt11ExecutionContextOutputAllocatorGetInterfaceInfo = "jyppx_trt11_execution_context_get_output_allocator_interface_info";
     public const string Trt11ExecutionContextReportToProfiler = "jyppx_trt11_execution_context_report_to_profiler";
     public const string Trt11ExecutionContextSetAllTensorsDebugState = "jyppx_trt11_execution_context_set_all_tensors_debug_state";
@@ -2222,6 +2240,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt11ExecutionContextSetName = "jyppx_trt11_execution_context_set_name";
     public const string Trt11ExecutionContextSetProfiler = "jyppx_trt11_execution_context_set_profiler";
     public const string Trt11ExecutionContextSetTensorDebugState = "jyppx_trt11_execution_context_set_tensor_debug_state";
+    public const string Trt11ExecutionContextTemporaryStorageAllocatorGetApiLanguage = "jyppx_trt11_execution_context_get_temporary_storage_allocator_api_language";
     public const string Trt11ExecutionContextTemporaryStorageAllocatorGetInterfaceInfo = "jyppx_trt11_execution_context_get_temporary_storage_allocator_interface_info";
     public const string Trt11ExprBuilderConstantDeferred = "jyppx_trt11_expr_builder_constant_deferred";
     public const string Trt11ExprBuilderDeclareSizeTensorDeferred = "jyppx_trt11_expr_builder_declare_size_tensor_deferred";
@@ -2400,6 +2419,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt11NetworkAddUnary = "jyppx_trt11_network_add_unary";
     public const string Trt11NetworkAddUnsqueeze = "jyppx_trt11_network_add_unsqueeze";
     public const string Trt11NetworkAreWeightsMarkedRefittable = "jyppx_trt11_network_are_weights_marked_refittable";
+    public const string Trt11NetworkGetErrorRecorderVersionedMetadata = "jyppx_trt11_network_get_error_recorder_versioned_metadata";
     public const string Trt11NetworkHasImplicitBatchDimension = "jyppx_trt11_network_has_implicit_batch_dimension";
     public const string Trt11NetworkMarkWeightsRefittable = "jyppx_trt11_network_mark_weights_refittable";
     public const string Trt11NetworkSetWeightsName = "jyppx_trt11_network_set_weights_name";
@@ -2671,6 +2691,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt11ReduceLayerSetOperation = "jyppx_trt11_reduce_layer_set_operation";
     public const string Trt11RefitterGetAllCount = "jyppx_trt11_refitter_get_all_count";
     public const string Trt11RefitterGetAllEntries = "jyppx_trt11_refitter_get_all_entries";
+    public const string Trt11RefitterGetErrorRecorderVersionedMetadata = "jyppx_trt11_refitter_get_error_recorder_versioned_metadata";
     public const string Trt11RefitterGetLoggerDeferred = "jyppx_trt11_refitter_get_logger_deferred";
     public const string Trt11RefitterGetMissingCount = "jyppx_trt11_refitter_get_missing_count";
     public const string Trt11RefitterGetMissingEntries = "jyppx_trt11_refitter_get_missing_entries";
@@ -2707,6 +2728,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt11RuntimeDeserializeCudaEngineV2Deferred = "jyppx_trt11_runtime_deserialize_cuda_engine_v2_deferred";
     public const string Trt11RuntimeDeserializeEngine = "jyppx_trt11_runtime_deserialize_engine";
     public const string Trt11RuntimeDeserializeHostMemory = "jyppx_trt11_runtime_deserialize_host_memory";
+    public const string Trt11RuntimeGetErrorRecorderVersionedMetadata = "jyppx_trt11_runtime_get_error_recorder_versioned_metadata";
     public const string Trt11RuntimeGetLoggerDeferred = "jyppx_trt11_runtime_get_logger_deferred";
     public const string Trt11RuntimeGetPluginRegistryDeferred = "jyppx_trt11_runtime_get_plugin_registry_deferred";
     public const string Trt11RuntimeLoadRuntimeDeferred = "jyppx_trt11_runtime_load_runtime_deferred";

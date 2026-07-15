@@ -118,21 +118,27 @@ internal static class Program
         bool hasErrorRecorderBefore = runtime.HasErrorRecorder;
         bool hasLogger = runtime.HasLogger;
         bool snapshotAvailable = runtime.TryGetErrorRecorderSnapshot(out TensorRtErrorRecorderSnapshot snapshot);
+        bool metadataAvailable = runtime.TryGetErrorRecorderVersionedMetadata(
+            out TensorRtVersionedInterfaceMetadata metadata,
+            out string metadataDiagnostic);
         TensorRtErrorRecorderSummary errorRecorderSummary = snapshot.ToSummary();
         runtime.ClearErrorRecorder();
         bool hasErrorRecorderAfter = runtime.HasErrorRecorder;
         runtime.ClearGpuAllocator();
-        return $"Logger={hasLogger} ErrorRecorder={hasErrorRecorderBefore}->{hasErrorRecorderAfter} Snapshot={snapshotAvailable}/{snapshot.ErrorCount}/{snapshot.Records.Count}/Overflow={snapshot.HasOverflowed} ErrorRecorderSummary={errorRecorderSummary.HasRecorder}/{errorRecorderSummary.ErrorCount}/{errorRecorderSummary.CopiedErrorRecordCount}/{errorRecorderSummary.InterfaceInfoAvailable}/{errorRecorderSummary.CopiedRecordCountMatchesErrorCount} RuntimeDiagnosticSnapshot={diagnosticSnapshot.HasLogger}/{diagnosticSnapshot.HasErrorRecorder}/{diagnosticSnapshot.ErrorRecorder.ErrorCount}/{diagnosticSnapshot.Diagnostics.Count} RuntimeDiagnosticSummary={diagnosticSummary.HasLogger}/{diagnosticSummary.HasErrorRecorder}/{diagnosticSummary.ErrorCount}/{diagnosticSummary.CopiedErrorRecordCount}/{diagnosticSummary.DiagnosticCount}/RuntimeProof={diagnosticSummary.CanPromoteRuntimeProof} PluginCreatorV3MetadataDesignGate={pluginCreatorV3MetadataGate.DesignGateReady}/{pluginCreatorV3MetadataGate.CandidateMethodCount}/RuntimeProof={pluginCreatorV3MetadataGate.CanPromoteRuntimeProof} ClearGpuAllocator=True";
+        return $"Logger={hasLogger} ErrorRecorder={hasErrorRecorderBefore}->{hasErrorRecorderAfter} Snapshot={snapshotAvailable}/{snapshot.ErrorCount}/{snapshot.Records.Count}/Overflow={snapshot.HasOverflowed} VersionedMetadata={FormatVersionedMetadata(metadataAvailable, metadata, metadataDiagnostic)} ErrorRecorderSummary={errorRecorderSummary.HasRecorder}/{errorRecorderSummary.ErrorCount}/{errorRecorderSummary.CopiedErrorRecordCount}/{errorRecorderSummary.InterfaceInfoAvailable}/{errorRecorderSummary.CopiedRecordCountMatchesErrorCount} RuntimeDiagnosticSnapshot={diagnosticSnapshot.HasLogger}/{diagnosticSnapshot.HasErrorRecorder}/{diagnosticSnapshot.ErrorRecorder.ErrorCount}/{diagnosticSnapshot.Diagnostics.Count} RuntimeDiagnosticSummary={diagnosticSummary.HasLogger}/{diagnosticSummary.HasErrorRecorder}/{diagnosticSummary.ErrorCount}/{diagnosticSummary.CopiedErrorRecordCount}/{diagnosticSummary.DiagnosticCount}/RuntimeProof={diagnosticSummary.CanPromoteRuntimeProof} PluginCreatorV3MetadataDesignGate={pluginCreatorV3MetadataGate.DesignGateReady}/{pluginCreatorV3MetadataGate.CandidateMethodCount}/RuntimeProof={pluginCreatorV3MetadataGate.CanPromoteRuntimeProof} ClearGpuAllocator=True";
     }
 
     private static string ProbeBuilder(TensorRtBuilder builder)
     {
         bool hasErrorRecorderBefore = builder.HasErrorRecorder;
         bool hasLogger = builder.HasLogger;
+        bool metadataAvailable = builder.TryGetErrorRecorderVersionedMetadata(
+            out TensorRtVersionedInterfaceMetadata metadata,
+            out string metadataDiagnostic);
         builder.ClearErrorRecorder();
         bool hasErrorRecorderAfter = builder.HasErrorRecorder;
         builder.ClearGpuAllocator();
-        return $"Logger={hasLogger} ErrorRecorder={hasErrorRecorderBefore}->{hasErrorRecorderAfter} ClearGpuAllocator=True";
+        return $"Logger={hasLogger} ErrorRecorder={hasErrorRecorderBefore}->{hasErrorRecorderAfter} VersionedMetadata={FormatVersionedMetadata(metadataAvailable, metadata, metadataDiagnostic)} ClearGpuAllocator=True";
     }
 
     private static string ProbeBuilderConfig(TensorRtApiLine line, TensorRtBuilderConfig config)
@@ -143,38 +149,53 @@ internal static class Program
         }
 
         bool hasProgressMonitorBefore = config.HasProgressMonitor;
+        bool metadataAvailable = config.TryGetProgressMonitorVersionedMetadata(
+            out TensorRtVersionedInterfaceMetadata metadata,
+            out string metadataDiagnostic);
         config.ClearProgressMonitor();
         bool hasProgressMonitorAfter = config.HasProgressMonitor;
-        return $"ProgressMonitor={hasProgressMonitorBefore}->{hasProgressMonitorAfter}";
+        return $"ProgressMonitor={hasProgressMonitorBefore}->{hasProgressMonitorAfter}/VersionedMetadata={FormatVersionedMetadata(metadataAvailable, metadata, metadataDiagnostic)}";
     }
 
     private static string ProbeNetwork(TensorRtNetworkDefinition network)
     {
         bool hasErrorRecorderBefore = network.HasErrorRecorder;
+        bool metadataAvailable = network.TryGetErrorRecorderVersionedMetadata(
+            out TensorRtVersionedInterfaceMetadata metadata,
+            out string metadataDiagnostic);
         network.ClearErrorRecorder();
         bool hasErrorRecorderAfter = network.HasErrorRecorder;
-        return $"ErrorRecorder={hasErrorRecorderBefore}->{hasErrorRecorderAfter}";
+        return $"ErrorRecorder={hasErrorRecorderBefore}->{hasErrorRecorderAfter}/VersionedMetadata={FormatVersionedMetadata(metadataAvailable, metadata, metadataDiagnostic)}";
     }
 
     private static string ProbeEngine(TensorRtEngine engine)
     {
         bool hasErrorRecorderBefore = engine.HasErrorRecorder;
+        bool metadataAvailable = engine.TryGetErrorRecorderVersionedMetadata(
+            out TensorRtVersionedInterfaceMetadata metadata,
+            out string metadataDiagnostic);
         engine.ClearErrorRecorder();
         bool hasErrorRecorderAfter = engine.HasErrorRecorder;
-        return $"ErrorRecorder={hasErrorRecorderBefore}->{hasErrorRecorderAfter}";
+        return $"ErrorRecorder={hasErrorRecorderBefore}->{hasErrorRecorderAfter}/VersionedMetadata={FormatVersionedMetadata(metadataAvailable, metadata, metadataDiagnostic)}";
     }
 
     private static string ProbeInspector(TensorRtEngineInspector inspector)
     {
         bool hasErrorRecorderBefore = inspector.HasErrorRecorder;
+        bool metadataAvailable = inspector.TryGetErrorRecorderVersionedMetadata(
+            out TensorRtVersionedInterfaceMetadata metadata,
+            out string metadataDiagnostic);
         inspector.ClearErrorRecorder();
         bool hasErrorRecorderAfter = inspector.HasErrorRecorder;
-        return $"ErrorRecorder={hasErrorRecorderBefore}->{hasErrorRecorderAfter}";
+        return $"ErrorRecorder={hasErrorRecorderBefore}->{hasErrorRecorderAfter}/VersionedMetadata={FormatVersionedMetadata(metadataAvailable, metadata, metadataDiagnostic)}";
     }
 
     private static string ProbeContext(TensorRtExecutionContext context, string outputTensorName)
     {
         bool hasErrorRecorderBefore = context.HasErrorRecorder;
+        bool errorRecorderMetadataAvailable = context.TryGetErrorRecorderVersionedMetadata(
+            out TensorRtVersionedInterfaceMetadata errorRecorderMetadata,
+            out string errorRecorderMetadataDiagnostic);
         context.ClearErrorRecorder();
         bool hasErrorRecorderAfter = context.HasErrorRecorder;
 
@@ -185,6 +206,10 @@ internal static class Program
         bool hasOutputAllocatorBefore = context.HasOutputAllocator(outputTensorName);
         TensorRtExecutionContextCallbackStateSnapshot callbackSnapshot = context.GetCallbackStateSnapshot(outputTensorName);
         bool outputAllocatorInfoAvailable = context.TryGetOutputAllocatorInterfaceInfo(outputTensorName, out TensorRtInterfaceInfo outputAllocatorInfo, out string outputAllocatorInfoDiagnostic);
+        bool outputAllocatorMetadataAvailable = context.TryGetOutputAllocatorVersionedMetadata(
+            outputTensorName,
+            out TensorRtVersionedInterfaceMetadata outputAllocatorMetadata,
+            out string outputAllocatorMetadataDiagnostic);
         TensorRtExecutionContextCallbackStateSnapshot clearedCallbackSnapshot = context.ClearCallbackState(outputTensorName);
         bool outputAllocatorCleared = clearedCallbackSnapshot.OutputAllocatorCleared;
         bool directOutputAllocatorCleared = context.ClearOutputAllocator(outputTensorName);
@@ -192,12 +217,18 @@ internal static class Program
 
         bool hasTemporaryAllocatorBefore = context.HasTemporaryStorageAllocator;
         bool temporaryAllocatorInfoAvailable = context.TryGetTemporaryStorageAllocatorInterfaceInfo(out TensorRtInterfaceInfo temporaryAllocatorInfo, out string temporaryAllocatorInfoDiagnostic);
+        bool temporaryAllocatorMetadataAvailable = context.TryGetTemporaryStorageAllocatorVersionedMetadata(
+            out TensorRtVersionedInterfaceMetadata temporaryAllocatorMetadata,
+            out string temporaryAllocatorMetadataDiagnostic);
         bool temporaryAllocatorCleared = clearedCallbackSnapshot.TemporaryStorageAllocatorCleared;
         bool directTemporaryAllocatorCleared = context.ClearTemporaryStorageAllocator();
         bool hasTemporaryAllocatorAfter = context.HasTemporaryStorageAllocator;
 
         bool hasDebugListenerBefore = context.HasDebugListener;
         bool debugListenerInfoAvailable = context.TryGetDebugListenerInterfaceInfo(out TensorRtInterfaceInfo debugListenerInfo, out string debugListenerInfoDiagnostic);
+        bool debugListenerMetadataAvailable = context.TryGetDebugListenerVersionedMetadata(
+            out TensorRtVersionedInterfaceMetadata debugListenerMetadata,
+            out string debugListenerMetadataDiagnostic);
         bool debugListenerCleared = clearedCallbackSnapshot.DebugListenerCleared;
         bool directDebugListenerCleared = context.ClearDebugListener();
         bool hasDebugListenerAfter = context.HasDebugListener;
@@ -207,10 +238,10 @@ internal static class Program
         bool hasProfilerAfter = context.HasNativeProfiler;
         bool hasManagedProfilerAfter = context.HasProfiler;
 
-        return $"ErrorRecorder={hasErrorRecorderBefore}->{hasErrorRecorderAfter} " +
-            $"OutputAllocator={hasOutputAllocatorBefore}->{hasOutputAllocatorAfter}/Cleared={outputAllocatorCleared}/DirectClear={directOutputAllocatorCleared}/Info={outputAllocatorInfoAvailable}:{FormatInterfaceInfo(outputAllocatorInfo, outputAllocatorInfoDiagnostic)} " +
-            $"TemporaryStorageAllocator={hasTemporaryAllocatorBefore}->{hasTemporaryAllocatorAfter}/Cleared={temporaryAllocatorCleared}/DirectClear={directTemporaryAllocatorCleared}/Info={temporaryAllocatorInfoAvailable}:{FormatInterfaceInfo(temporaryAllocatorInfo, temporaryAllocatorInfoDiagnostic)} " +
-            $"DebugListener={hasDebugListenerBefore}->{hasDebugListenerAfter}/Cleared={debugListenerCleared}/DirectClear={directDebugListenerCleared}/Info={debugListenerInfoAvailable}:{FormatInterfaceInfo(debugListenerInfo, debugListenerInfoDiagnostic)} " +
+        return $"ErrorRecorder={hasErrorRecorderBefore}->{hasErrorRecorderAfter}/VersionedMetadata={FormatVersionedMetadata(errorRecorderMetadataAvailable, errorRecorderMetadata, errorRecorderMetadataDiagnostic)} " +
+            $"OutputAllocator={hasOutputAllocatorBefore}->{hasOutputAllocatorAfter}/Cleared={outputAllocatorCleared}/DirectClear={directOutputAllocatorCleared}/Info={outputAllocatorInfoAvailable}:{FormatInterfaceInfo(outputAllocatorInfo, outputAllocatorInfoDiagnostic)}/VersionedMetadata={FormatVersionedMetadata(outputAllocatorMetadataAvailable, outputAllocatorMetadata, outputAllocatorMetadataDiagnostic)} " +
+            $"TemporaryStorageAllocator={hasTemporaryAllocatorBefore}->{hasTemporaryAllocatorAfter}/Cleared={temporaryAllocatorCleared}/DirectClear={directTemporaryAllocatorCleared}/Info={temporaryAllocatorInfoAvailable}:{FormatInterfaceInfo(temporaryAllocatorInfo, temporaryAllocatorInfoDiagnostic)}/VersionedMetadata={FormatVersionedMetadata(temporaryAllocatorMetadataAvailable, temporaryAllocatorMetadata, temporaryAllocatorMetadataDiagnostic)} " +
+            $"DebugListener={hasDebugListenerBefore}->{hasDebugListenerAfter}/Cleared={debugListenerCleared}/DirectClear={directDebugListenerCleared}/Info={debugListenerInfoAvailable}:{FormatInterfaceInfo(debugListenerInfo, debugListenerInfoDiagnostic)}/VersionedMetadata={FormatVersionedMetadata(debugListenerMetadataAvailable, debugListenerMetadata, debugListenerMetadataDiagnostic)} " +
             $"CallbackStateSnapshot={callbackSnapshot.LastOperation}->{clearedCallbackSnapshot.LastOperation}/OutputInfo={callbackSnapshot.OutputAllocatorInterfaceInfoAvailable}/TempInfo={callbackSnapshot.TemporaryStorageAllocatorInterfaceInfoAvailable}/DebugInfo={callbackSnapshot.DebugListenerInterfaceInfoAvailable} " +
             $"CallbackAllocatorSafeControlSummary={FormatCallbackAllocatorSafeControlSummary(safeControlSummary)} " +
             $"RuntimeDiagnosticSnapshot={runtimeSnapshot.OutputTensorName}/{runtimeSnapshot.HasErrorRecorder}/{runtimeSnapshot.HasOutputAllocator}/{runtimeSnapshot.IsOutputTensorAddressSet}/{runtimeSnapshot.HasTemporaryStorageAllocator}/{runtimeSnapshot.HasDebugListener}/{runtimeSnapshot.HasNativeProfiler}/{runtimeSnapshot.CallbackState.LastOperation}/{runtimeSnapshot.Diagnostics.Count} " +
@@ -249,6 +280,16 @@ internal static class Program
         return string.IsNullOrEmpty(interfaceInfo.Kind)
             ? diagnostic.Replace(' ', '_')
             : interfaceInfo.ToString();
+    }
+
+    private static string FormatVersionedMetadata(
+        bool available,
+        TensorRtVersionedInterfaceMetadata metadata,
+        string diagnostic)
+    {
+        return available
+            ? metadata.InterfaceInfo + ":" + metadata.ApiLanguage
+            : "Unavailable:" + diagnostic.Replace(' ', '_');
     }
 
     private static void PrintDependencyProbe(TensorRtApiLine line)

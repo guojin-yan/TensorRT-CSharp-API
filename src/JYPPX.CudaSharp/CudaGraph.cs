@@ -521,7 +521,7 @@ public sealed class CudaGraph : IDisposable
     /// Gets a copied topology snapshot for a CUDA graph node token.
     /// 获取 CUDA graph node token 的复制型拓扑快照。
     /// </summary>
-    /// <param name="node">The graph node token. graph node token。</param>
+    /// <param name="node">The graph node token. 图节点令牌。 </param>
     /// <returns>A snapshot containing node-level topology counters. 包含 node 级拓扑计数的快照。</returns>
     /// <remarks>
     /// The node token remains graph-owned; this API only copies scalar diagnostics from CUDA.
@@ -541,7 +541,7 @@ public sealed class CudaGraph : IDisposable
     /// Gets copied snapshots for node dependencies.
     /// 获取指定 node 依赖项的复制型快照列表。
     /// </summary>
-    /// <param name="node">The graph node token. graph node token。</param>
+    /// <param name="node">The graph node token. 图节点令牌。 </param>
     /// <param name="includeEdgeData">Whether to prefer CUDA edge-data queries. 是否优先使用 CUDA edge-data 查询。</param>
     /// <param name="maxDependencies">The maximum number of dependencies to copy. 要复制的最大依赖数量。</param>
     /// <returns>Bounded dependency snapshots. 有界依赖快照列表。</returns>
@@ -577,7 +577,7 @@ public sealed class CudaGraph : IDisposable
     /// Gets copied snapshots for node dependents.
     /// 获取依赖指定 node 的节点复制型快照列表。
     /// </summary>
-    /// <param name="node">The graph node token. graph node token。</param>
+    /// <param name="node">The graph node token. 图节点令牌。 </param>
     /// <param name="includeEdgeData">Whether to prefer CUDA edge-data queries. 是否优先使用 CUDA edge-data 查询。</param>
     /// <param name="maxDependents">The maximum number of dependents to copy. 要复制的最大 dependent 数量。</param>
     /// <returns>Bounded dependent snapshots. 有界 dependent 快照列表。</returns>

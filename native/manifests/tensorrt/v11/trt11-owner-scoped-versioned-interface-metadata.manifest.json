@@ -1,0 +1,180 @@
+{
+  "$schema": "../../bridge-api.schema.json",
+  "module": "tensorrt",
+  "versionLine": "11",
+  "apis": [
+    {
+      "id": "trt11-runtime-get-error-recorder-versioned-metadata",
+      "entryPoint": "jyppx_trt11_runtime_get_error_recorder_versioned_metadata",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" },
+        { "name": "out_major", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" },
+        { "name": "out_minor", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" },
+        { "name": "out_api_language", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-refitter-get-error-recorder-versioned-metadata",
+      "entryPoint": "jyppx_trt11_refitter_get_error_recorder_versioned_metadata",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "refitter", "type": "JYPPX_TensorRtRefitter*", "direction": "in" },
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" },
+        { "name": "out_major", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" },
+        { "name": "out_minor", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" },
+        { "name": "out_api_language", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-engine-get-error-recorder-versioned-metadata",
+      "entryPoint": "jyppx_trt11_engine_get_error_recorder_versioned_metadata",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "engine", "type": "JYPPX_TensorRtCudaEngine*", "direction": "in" },
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" },
+        { "name": "out_major", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" },
+        { "name": "out_minor", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" },
+        { "name": "out_api_language", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-execution-context-get-error-recorder-versioned-metadata",
+      "entryPoint": "jyppx_trt11_execution_context_get_error_recorder_versioned_metadata",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "context", "type": "JYPPX_TensorRtExecutionContext*", "direction": "in" },
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" },
+        { "name": "out_major", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" },
+        { "name": "out_minor", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" },
+        { "name": "out_api_language", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-builder-get-error-recorder-versioned-metadata",
+      "entryPoint": "jyppx_trt11_builder_get_error_recorder_versioned_metadata",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "builder", "type": "JYPPX_TensorRtBuilder*", "direction": "in" },
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" },
+        { "name": "out_major", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" },
+        { "name": "out_minor", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" },
+        { "name": "out_api_language", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-network-get-error-recorder-versioned-metadata",
+      "entryPoint": "jyppx_trt11_network_get_error_recorder_versioned_metadata",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "network", "type": "JYPPX_TensorRtNetworkDefinition*", "direction": "in" },
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" },
+        { "name": "out_major", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" },
+        { "name": "out_minor", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" },
+        { "name": "out_api_language", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-engine-inspector-get-error-recorder-versioned-metadata",
+      "entryPoint": "jyppx_trt11_engine_inspector_get_error_recorder_versioned_metadata",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "inspector", "type": "JYPPX_TensorRtEngineInspector*", "direction": "in" },
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" },
+        { "name": "out_major", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" },
+        { "name": "out_minor", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" },
+        { "name": "out_api_language", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-execution-context-output-allocator-get-api-language",
+      "entryPoint": "jyppx_trt11_execution_context_get_output_allocator_api_language",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "context", "type": "JYPPX_TensorRtExecutionContext*", "direction": "in" },
+        { "name": "tensor_name", "type": "const char*", "direction": "in" },
+        { "name": "out_api_language", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-execution-context-temporary-storage-allocator-get-api-language",
+      "entryPoint": "jyppx_trt11_execution_context_get_temporary_storage_allocator_api_language",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "context", "type": "JYPPX_TensorRtExecutionContext*", "direction": "in" },
+        { "name": "out_api_language", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-execution-context-debug-listener-get-api-language",
+      "entryPoint": "jyppx_trt11_execution_context_get_debug_listener_api_language",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "context", "type": "JYPPX_TensorRtExecutionContext*", "direction": "in" },
+        { "name": "out_api_language", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-builder-config-get-progress-monitor-versioned-metadata",
+      "entryPoint": "jyppx_trt11_builder_config_get_progress_monitor_versioned_metadata",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "config", "type": "JYPPX_TensorRtBuilderConfig*", "direction": "in" },
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" },
+        { "name": "out_major", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" },
+        { "name": "out_minor", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" },
+        { "name": "out_api_language", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    }
+  ]
+}

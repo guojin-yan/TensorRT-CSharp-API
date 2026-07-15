@@ -10614,6 +10614,10 @@ JYPPX_StatusCode jyppx_trt10_resize_layer_set_resize_mode(JYPPX_TensorRtLayer* l
 #include "../common/execution_context_callback_interface_info.inc"
 #undef JYPPX_TRT_EXECUTION_CONTEXT_CALLBACK_INTERFACE_INFO_API
 
+#define JYPPX_TRT_OWNER_SCOPED_VERSIONED_METADATA_API(name) jyppx_trt10_##name
+#include "../common/owner_scoped_versioned_interface_metadata.inc"
+#undef JYPPX_TRT_OWNER_SCOPED_VERSIONED_METADATA_API
+
 #define JYPPX_TRT_ALLOCATOR_OWNER_DRY_RUN_API(name) jyppx_trt10_##name
 #include "../common/allocator_owner_dry_run.inc"
 #undef JYPPX_TRT_ALLOCATOR_OWNER_DRY_RUN_API

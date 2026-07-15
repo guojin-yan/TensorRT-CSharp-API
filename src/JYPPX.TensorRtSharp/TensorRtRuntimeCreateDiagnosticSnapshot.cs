@@ -182,6 +182,11 @@ public sealed class TensorRtRuntimeCreateDiagnosticSnapshot
     /// </summary>
     public bool ExposesNativePointer => false;
 
+    /// <summary>
+    /// Converts the snapshot to a compact diagnostic string.
+    /// 将快照转换为简短诊断字符串。
+    /// </summary>
+    /// <returns>A compact diagnostic string. 简短诊断字符串。</returns>
     public override string ToString()
     {
         return $"{Line}:available={DiagnosticAvailable}:attempted={Attempted}:returnedNull={CreateInferRuntimeReturnedNull}:status={LastStatus}:version={DetectedVersion}";

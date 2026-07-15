@@ -21,7 +21,7 @@ public static class TensorRtRuntimeDeserializationBoundaryPrecheck
     /// Evaluates the known public runtime deserialization surface for a TensorRT API line.
     /// 基于已知 public runtime deserialization 边界评估指定 TensorRT API line。
     /// </summary>
-    /// <param name="line">The TensorRT API line. TensorRT API line。</param>
+    /// <param name="line">The TensorRT API line. TensorRT API 版本线。</param>
     /// <returns>A pointer-free runtime deserialization precheck result. 无裸指针 runtime deserialization 预检结果。</returns>
     public static TensorRtRuntimeDeserializationBoundaryPrecheckResult EvaluateKnownSurface(TensorRtApiLine line)
     {
@@ -45,7 +45,7 @@ public static class TensorRtRuntimeDeserializationBoundaryPrecheck
     /// Evaluates the runtime deserialization boundary from explicit capability flags.
     /// 根据显式能力标记评估 runtime deserialization 边界。
     /// </summary>
-    /// <param name="line">The TensorRT API line. TensorRT API line。</param>
+    /// <param name="line">The TensorRT API line. TensorRT API 版本线。</param>
     /// <param name="managedByteArrayDeserializeReady">Whether byte-array deserialization is available. byte[] 反序列化是否可用。</param>
     /// <param name="managedArraySegmentDeserializeReady">Whether ArraySegment deserialization copies into an exact array. ArraySegment 反序列化是否复制为精确数组。</param>
     /// <param name="managedReadOnlySpanDeserializeReady">Whether ReadOnlySpan deserialization copies into managed memory. ReadOnlySpan 反序列化是否复制到托管内存。</param>

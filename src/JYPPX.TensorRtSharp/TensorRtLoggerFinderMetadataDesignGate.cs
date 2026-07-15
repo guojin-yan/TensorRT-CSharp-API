@@ -21,7 +21,7 @@ public static class TensorRtLoggerFinderMetadataDesignGate
     /// Evaluates the known public ILoggerFinder metadata design surface for a TensorRT API line.
     /// 基于已知 public ILoggerFinder metadata 设计边界评估指定 TensorRT API line。
     /// </summary>
-    /// <param name="line">The TensorRT API line. TensorRT API line。</param>
+    /// <param name="line">The TensorRT API line. TensorRT API 版本线。</param>
     /// <returns>A pointer-free ILoggerFinder metadata design gate result. 无裸指针 ILoggerFinder metadata 设计门结果。</returns>
     public static TensorRtLoggerFinderMetadataDesignGateResult EvaluateKnownSurface(TensorRtApiLine line)
     {
@@ -36,7 +36,7 @@ public static class TensorRtLoggerFinderMetadataDesignGate
     /// Evaluates ILoggerFinder metadata readiness from explicit capability flags.
     /// 根据显式能力标记评估 ILoggerFinder metadata 就绪状态。
     /// </summary>
-    /// <param name="line">The TensorRT API line. TensorRT API line。</param>
+    /// <param name="line">The TensorRT API line. TensorRT API 版本线。</param>
     /// <param name="copiedInterfaceInfoMetadataReady">Whether copied interface-info metadata shape is ready. copied interface-info metadata 形态是否就绪。</param>
     /// <param name="finderOwnerLifetimeModeled">Whether finder owner lifetime has been modeled. finder owner lifetime 是否已建模。</param>
     /// <param name="loggerCallbackOwnershipModeled">Whether logger callback ownership has been modeled. logger callback ownership 是否已建模。</param>

@@ -2218,6 +2218,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt10_builder_config_get_profiling_verbosity
 // generated from manifest id=trt10-builder-config-get-progress-monitor-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_builder_config_get_progress_monitor_deferred(void);
 
+// generated from manifest id=trt10-builder-config-get-progress-monitor-versioned-metadata
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_builder_config_get_progress_monitor_versioned_metadata(JYPPX_TensorRtBuilderConfig* config, char* output_buffer, size_t output_buffer_size, size_t* out_required_size, int32_t* out_major, int32_t* out_minor, int32_t* out_api_language);
+
 // generated from manifest id=trt10-builder-config-get-quantization-flag-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_builder_config_get_quantization_flag_deferred(void);
 
@@ -2361,6 +2364,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt10_builder_get_dla_core_count(JYPPX_Tenso
 
 // generated from manifest id=trt10-builder-get-error-recorder-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_builder_get_error_recorder_deferred(void);
+
+// generated from manifest id=trt10-builder-get-error-recorder-versioned-metadata
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_builder_get_error_recorder_versioned_metadata(JYPPX_TensorRtBuilder* builder, char* output_buffer, size_t output_buffer_size, size_t* out_required_size, int32_t* out_major, int32_t* out_minor, int32_t* out_api_language);
 
 // generated from manifest id=trt10-builder-get-logger-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_builder_get_logger_deferred(void);
@@ -2722,6 +2728,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt10_engine_get_device_memory_size_v2(JYPPX
 // generated from manifest id=trt10-engine-get-engine-capability
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_engine_get_engine_capability(JYPPX_TensorRtCudaEngine* engine, int32_t* out_capability);
 
+// generated from manifest id=trt10-engine-get-error-recorder-versioned-metadata
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_engine_get_error_recorder_versioned_metadata(JYPPX_TensorRtCudaEngine* engine, char* output_buffer, size_t output_buffer_size, size_t* out_required_size, int32_t* out_major, int32_t* out_minor, int32_t* out_api_language);
+
 // generated from manifest id=trt10-engine-get-hardware-compatibility-level
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_engine_get_hardware_compatibility_level(JYPPX_TensorRtCudaEngine* engine, int32_t* out_level);
 
@@ -2824,6 +2833,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt10_engine_inspector_get_engine_informatio
 // generated from manifest id=trt10-engine-inspector-get-error-recorder-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_engine_inspector_get_error_recorder_deferred(void);
 
+// generated from manifest id=trt10-engine-inspector-get-error-recorder-versioned-metadata
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_engine_inspector_get_error_recorder_versioned_metadata(JYPPX_TensorRtEngineInspector* inspector, char* output_buffer, size_t output_buffer_size, size_t* out_required_size, int32_t* out_major, int32_t* out_minor, int32_t* out_api_language);
+
 // generated from manifest id=trt10-engine-inspector-get-layer-information
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_engine_inspector_get_layer_information(JYPPX_TensorRtEngineInspector* inspector, int32_t layer_index, int32_t format, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
 
@@ -2884,6 +2896,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_all_input_shapes_spe
 // generated from manifest id=trt10-execution-context-clear-profiler
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_clear_profiler(JYPPX_TensorRtExecutionContext* context);
 
+// generated from manifest id=trt10-execution-context-debug-listener-get-api-language
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_get_debug_listener_api_language(JYPPX_TensorRtExecutionContext* context, int32_t* out_api_language);
+
 // generated from manifest id=trt10-execution-context-debug-listener-get-interface-info
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_get_debug_listener_interface_info(JYPPX_TensorRtExecutionContext* context, char* output_buffer, size_t output_buffer_size, size_t* out_required_size, int32_t* out_major, int32_t* out_minor);
 
@@ -2907,6 +2922,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_get_enqueue_emits_pr
 
 // generated from manifest id=trt10-execution-context-get-error-recorder-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_get_error_recorder_deferred(void);
+
+// generated from manifest id=trt10-execution-context-get-error-recorder-versioned-metadata
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_get_error_recorder_versioned_metadata(JYPPX_TensorRtExecutionContext* context, char* output_buffer, size_t output_buffer_size, size_t* out_required_size, int32_t* out_major, int32_t* out_minor, int32_t* out_api_language);
 
 // generated from manifest id=trt10-execution-context-get-max-output-size
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_get_max_output_size(JYPPX_TensorRtExecutionContext* context, const char* tensor_name, int64_t* out_size);
@@ -2949,6 +2967,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_is_tensor_address_bo
 
 // generated from manifest id=trt10-execution-context-no-copy-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_no_copy_deferred(void);
+
+// generated from manifest id=trt10-execution-context-output-allocator-get-api-language
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_get_output_allocator_api_language(JYPPX_TensorRtExecutionContext* context, const char* tensor_name, int32_t* out_api_language);
 
 // generated from manifest id=trt10-execution-context-output-allocator-get-interface-info
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_get_output_allocator_interface_info(JYPPX_TensorRtExecutionContext* context, const char* tensor_name, char* output_buffer, size_t output_buffer_size, size_t* out_required_size, int32_t* out_major, int32_t* out_minor);
@@ -3018,6 +3039,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_set_tensor_address(J
 
 // generated from manifest id=trt10-execution-context-set-tensor-debug-state
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_set_tensor_debug_state(JYPPX_TensorRtExecutionContext* context, const char* tensor_name, JYPPX_Boolean debug_state);
+
+// generated from manifest id=trt10-execution-context-temporary-storage-allocator-get-api-language
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_get_temporary_storage_allocator_api_language(JYPPX_TensorRtExecutionContext* context, int32_t* out_api_language);
 
 // generated from manifest id=trt10-execution-context-temporary-storage-allocator-get-interface-info
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_get_temporary_storage_allocator_interface_info(JYPPX_TensorRtExecutionContext* context, char* output_buffer, size_t output_buffer_size, size_t* out_required_size, int32_t* out_major, int32_t* out_minor);
@@ -3582,6 +3606,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt10_network_are_weights_marked_refittable(
 
 // generated from manifest id=trt10-network-get-error-recorder-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_network_get_error_recorder_deferred(void);
+
+// generated from manifest id=trt10-network-get-error-recorder-versioned-metadata
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_network_get_error_recorder_versioned_metadata(JYPPX_TensorRtNetworkDefinition* network, char* output_buffer, size_t output_buffer_size, size_t* out_required_size, int32_t* out_major, int32_t* out_minor, int32_t* out_api_language);
 
 // generated from manifest id=trt10-network-get-flag
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_network_get_flag(JYPPX_TensorRtNetworkDefinition* network, int32_t flag, JYPPX_Boolean* out_enabled);
@@ -4411,6 +4438,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt10_refitter_get_all_count(JYPPX_TensorRtR
 // generated from manifest id=trt10-refitter-get-all-entries
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_refitter_get_all_entries(JYPPX_TensorRtRefitter* refitter, JYPPX_TensorRtRefitEntryInfo* output_entries, int32_t output_count, int32_t* out_count);
 
+// generated from manifest id=trt10-refitter-get-error-recorder-versioned-metadata
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_refitter_get_error_recorder_versioned_metadata(JYPPX_TensorRtRefitter* refitter, char* output_buffer, size_t output_buffer_size, size_t* out_required_size, int32_t* out_major, int32_t* out_minor, int32_t* out_api_language);
+
 // generated from manifest id=trt10-refitter-get-missing-count
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_refitter_get_missing_count(JYPPX_TensorRtRefitter* refitter, int32_t* out_count);
 
@@ -4509,6 +4539,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt10_runtime_deserialize_engine(JYPPX_Tenso
 
 // generated from manifest id=trt10-runtime-deserialize-host-memory
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_runtime_deserialize_host_memory(JYPPX_TensorRtRuntime* runtime, JYPPX_TensorRtHostMemory* host_memory, JYPPX_TensorRtCudaEngine** out_engine);
+
+// generated from manifest id=trt10-runtime-get-error-recorder-versioned-metadata
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_runtime_get_error_recorder_versioned_metadata(JYPPX_TensorRtRuntime* runtime, char* output_buffer, size_t output_buffer_size, size_t* out_required_size, int32_t* out_major, int32_t* out_minor, int32_t* out_api_language);
 
 // generated from manifest id=trt10-runtime-get-logger-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_runtime_get_logger_deferred(void);
@@ -6130,6 +6163,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt11_builder_config_get_layer_device_type(J
 // generated from manifest id=trt11-builder-config-get-nb-plugins-to-serialize-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_builder_config_get_nb_plugins_to_serialize_deferred(void);
 
+// generated from manifest id=trt11-builder-config-get-progress-monitor-versioned-metadata
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_builder_config_get_progress_monitor_versioned_metadata(JYPPX_TensorRtBuilderConfig* config, char* output_buffer, size_t output_buffer_size, size_t* out_required_size, int32_t* out_major, int32_t* out_minor, int32_t* out_api_language);
+
 // generated from manifest id=trt11-builder-config-has-calibration-profile
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_builder_config_has_calibration_profile(JYPPX_TensorRtBuilderConfig* config, JYPPX_Boolean* out_has_profile);
 
@@ -6165,6 +6201,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt11_builder_create_network(JYPPX_TensorRtB
 
 // generated from manifest id=trt11-builder-get-dla-core-count
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_builder_get_dla_core_count(JYPPX_TensorRtBuilder* builder, int32_t* out_count);
+
+// generated from manifest id=trt11-builder-get-error-recorder-versioned-metadata
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_builder_get_error_recorder_versioned_metadata(JYPPX_TensorRtBuilder* builder, char* output_buffer, size_t output_buffer_size, size_t* out_required_size, int32_t* out_major, int32_t* out_minor, int32_t* out_api_language);
 
 // generated from manifest id=trt11-builder-get-logger-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_builder_get_logger_deferred(void);
@@ -6493,6 +6532,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt11_engine_get_device_memory_size_v2(JYPPX
 // generated from manifest id=trt11-engine-get-engine-capability
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_engine_get_engine_capability(JYPPX_TensorRtCudaEngine* engine, int32_t* out_capability);
 
+// generated from manifest id=trt11-engine-get-error-recorder-versioned-metadata
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_engine_get_error_recorder_versioned_metadata(JYPPX_TensorRtCudaEngine* engine, char* output_buffer, size_t output_buffer_size, size_t* out_required_size, int32_t* out_major, int32_t* out_minor, int32_t* out_api_language);
+
 // generated from manifest id=trt11-engine-get-io-tensor-count
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_engine_get_io_tensor_count(JYPPX_TensorRtCudaEngine* engine, int32_t* out_count);
 
@@ -6550,6 +6592,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt11_engine_get_tensor_vectorized_dim(JYPPX
 // generated from manifest id=trt11-engine-get-tensor-vectorized-dim-for-profile
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_engine_get_tensor_vectorized_dim_for_profile(JYPPX_TensorRtCudaEngine* engine, const char* tensor_name, int32_t profile_index, int32_t* out_dim);
 
+// generated from manifest id=trt11-engine-inspector-get-error-recorder-versioned-metadata
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_engine_inspector_get_error_recorder_versioned_metadata(JYPPX_TensorRtEngineInspector* inspector, char* output_buffer, size_t output_buffer_size, size_t* out_required_size, int32_t* out_major, int32_t* out_minor, int32_t* out_api_language);
+
 // generated from manifest id=trt11-engine-is-debug-tensor
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_engine_is_debug_tensor(JYPPX_TensorRtCudaEngine* engine, const char* tensor_name, JYPPX_Boolean* out_is_debug_tensor);
 
@@ -6589,6 +6634,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt11_execution_context_all_input_dimensions
 // generated from manifest id=trt11-execution-context-all-input-shapes-specified
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_execution_context_all_input_shapes_specified(JYPPX_TensorRtExecutionContext* context, JYPPX_Boolean* out_specified);
 
+// generated from manifest id=trt11-execution-context-debug-listener-get-api-language
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_execution_context_get_debug_listener_api_language(JYPPX_TensorRtExecutionContext* context, int32_t* out_api_language);
+
 // generated from manifest id=trt11-execution-context-debug-listener-get-interface-info
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_execution_context_get_debug_listener_interface_info(JYPPX_TensorRtExecutionContext* context, char* output_buffer, size_t output_buffer_size, size_t* out_required_size, int32_t* out_major, int32_t* out_minor);
 
@@ -6604,6 +6652,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt11_execution_context_get_device_memory_si
 // generated from manifest id=trt11-execution-context-get-enqueue-emits-profile
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_execution_context_get_enqueue_emits_profile(JYPPX_TensorRtExecutionContext* context, JYPPX_Boolean* out_enqueue_emits_profile);
 
+// generated from manifest id=trt11-execution-context-get-error-recorder-versioned-metadata
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_execution_context_get_error_recorder_versioned_metadata(JYPPX_TensorRtExecutionContext* context, char* output_buffer, size_t output_buffer_size, size_t* out_required_size, int32_t* out_major, int32_t* out_minor, int32_t* out_api_language);
+
 // generated from manifest id=trt11-execution-context-get-name
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_execution_context_get_name(JYPPX_TensorRtExecutionContext* context, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
 
@@ -6615,6 +6666,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt11_execution_context_is_tensor_address_bo
 
 // generated from manifest id=trt11-execution-context-no-copy-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_execution_context_no_copy_deferred(void);
+
+// generated from manifest id=trt11-execution-context-output-allocator-get-api-language
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_execution_context_get_output_allocator_api_language(JYPPX_TensorRtExecutionContext* context, const char* tensor_name, int32_t* out_api_language);
 
 // generated from manifest id=trt11-execution-context-output-allocator-get-interface-info
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_execution_context_get_output_allocator_interface_info(JYPPX_TensorRtExecutionContext* context, const char* tensor_name, char* output_buffer, size_t output_buffer_size, size_t* out_required_size, int32_t* out_major, int32_t* out_minor);
@@ -6651,6 +6705,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt11_execution_context_set_profiler(JYPPX_T
 
 // generated from manifest id=trt11-execution-context-set-tensor-debug-state
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_execution_context_set_tensor_debug_state(JYPPX_TensorRtExecutionContext* context, const char* tensor_name, JYPPX_Boolean debug_state);
+
+// generated from manifest id=trt11-execution-context-temporary-storage-allocator-get-api-language
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_execution_context_get_temporary_storage_allocator_api_language(JYPPX_TensorRtExecutionContext* context, int32_t* out_api_language);
 
 // generated from manifest id=trt11-execution-context-temporary-storage-allocator-get-interface-info
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_execution_context_get_temporary_storage_allocator_interface_info(JYPPX_TensorRtExecutionContext* context, char* output_buffer, size_t output_buffer_size, size_t* out_required_size, int32_t* out_major, int32_t* out_minor);
@@ -7185,6 +7242,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt11_network_add_unsqueeze(JYPPX_TensorRtNe
 
 // generated from manifest id=trt11-network-are-weights-marked-refittable
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_network_are_weights_marked_refittable(JYPPX_TensorRtNetworkDefinition* network, const char* weights_name, JYPPX_Boolean* out_marked);
+
+// generated from manifest id=trt11-network-get-error-recorder-versioned-metadata
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_network_get_error_recorder_versioned_metadata(JYPPX_TensorRtNetworkDefinition* network, char* output_buffer, size_t output_buffer_size, size_t* out_required_size, int32_t* out_major, int32_t* out_minor, int32_t* out_api_language);
 
 // generated from manifest id=trt11-network-has-implicit-batch-dimension
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_network_has_implicit_batch_dimension(JYPPX_TensorRtNetworkDefinition* network, JYPPX_Boolean* out_has_implicit_batch_dimension);
@@ -7999,6 +8059,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt11_refitter_get_all_count(JYPPX_TensorRtR
 // generated from manifest id=trt11-refitter-get-all-entries
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_refitter_get_all_entries(JYPPX_TensorRtRefitter* refitter, JYPPX_TensorRtRefitEntryInfo* output_entries, int32_t output_count, int32_t* out_count);
 
+// generated from manifest id=trt11-refitter-get-error-recorder-versioned-metadata
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_refitter_get_error_recorder_versioned_metadata(JYPPX_TensorRtRefitter* refitter, char* output_buffer, size_t output_buffer_size, size_t* out_required_size, int32_t* out_major, int32_t* out_minor, int32_t* out_api_language);
+
 // generated from manifest id=trt11-refitter-get-logger-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_refitter_get_logger_deferred(void);
 
@@ -8106,6 +8169,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt11_runtime_deserialize_engine(JYPPX_Tenso
 
 // generated from manifest id=trt11-runtime-deserialize-host-memory
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_runtime_deserialize_host_memory(JYPPX_TensorRtRuntime* runtime, JYPPX_TensorRtHostMemory* host_memory, JYPPX_TensorRtCudaEngine** out_engine);
+
+// generated from manifest id=trt11-runtime-get-error-recorder-versioned-metadata
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_runtime_get_error_recorder_versioned_metadata(JYPPX_TensorRtRuntime* runtime, char* output_buffer, size_t output_buffer_size, size_t* out_required_size, int32_t* out_major, int32_t* out_minor, int32_t* out_api_language);
 
 // generated from manifest id=trt11-runtime-get-logger-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_runtime_get_logger_deferred(void);

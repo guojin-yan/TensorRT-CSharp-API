@@ -241,7 +241,7 @@ public sealed class TensorRtPluginCreatorInfo
     /// Gets the TensorRT API version used to compile this creator when TensorRT exposes it.
     /// 当 TensorRT 提供该信息时，获取 creator 编译时使用的 TensorRT API 数字版本。
     /// </summary>
-    /// <remarks>TensorRT 8 exposes this scalar on <c>IPluginCreator</c>; later API lines return <see langword="null"/>.</remarks>
+    /// <remarks>TensorRT 8 exposes this scalar on <c>IPluginCreator</c>; later API lines return <see langword="null"/>. TensorRT 8 在 <c>IPluginCreator</c> 上公开该标量；后续 API 版本线返回 <see langword="null"/>。</remarks>
     public int? TensorRtVersion { get; }
 
     /// <summary>

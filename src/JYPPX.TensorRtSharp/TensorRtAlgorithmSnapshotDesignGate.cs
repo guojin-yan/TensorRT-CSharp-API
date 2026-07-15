@@ -22,7 +22,7 @@ public static class TensorRtAlgorithmSnapshotDesignGate
     /// Evaluates the known public algorithm snapshot design surface for a TensorRT API line.
     /// 基于已知 public algorithm snapshot 设计边界评估指定 TensorRT API line。
     /// </summary>
-    /// <param name="line">The TensorRT API line. TensorRT API line。</param>
+    /// <param name="line">The TensorRT API line. TensorRT API 版本线。</param>
     /// <returns>A pointer-free algorithm snapshot design gate result. 无裸指针 algorithm snapshot 设计门结果。</returns>
     public static TensorRtAlgorithmSnapshotDesignGateResult EvaluateKnownSurface(TensorRtApiLine line)
     {
@@ -40,7 +40,7 @@ public static class TensorRtAlgorithmSnapshotDesignGate
     /// Evaluates algorithm snapshot readiness from explicit capability flags.
     /// 根据显式能力标记评估 algorithm snapshot 就绪状态。
     /// </summary>
-    /// <param name="line">The TensorRT API line. TensorRT API line。</param>
+    /// <param name="line">The TensorRT API line. TensorRT API 版本线。</param>
     /// <param name="selectorCallbackOwnerModeled">Whether selector callback owner lifetime has been modeled. selector callback owner lifetime 是否已建模。</param>
     /// <param name="algorithmResultLifetimeModeled">Whether algorithm result lifetime has been modeled. algorithm result lifetime 是否已建模。</param>
     /// <param name="copiedTimingWorkspaceShapeReady">Whether timing/workspace copied shape is ready. timing/workspace copied 形态是否就绪。</param>

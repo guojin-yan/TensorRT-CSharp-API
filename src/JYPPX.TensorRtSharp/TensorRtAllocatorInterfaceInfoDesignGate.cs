@@ -21,7 +21,7 @@ public static class TensorRtAllocatorInterfaceInfoDesignGate
     /// Evaluates the known public allocator interface-info design surface for a TensorRT API line.
     /// 基于已知 public allocator interface-info 设计边界评估指定 TensorRT API line。
     /// </summary>
-    /// <param name="line">The TensorRT API line. TensorRT API line。</param>
+    /// <param name="line">The TensorRT API line. TensorRT API 版本线。</param>
     /// <returns>A pointer-free allocator interface-info design gate result. 无裸指针 allocator interface-info 设计门结果。</returns>
     public static TensorRtAllocatorInterfaceInfoDesignGateResult EvaluateKnownSurface(TensorRtApiLine line)
     {
@@ -39,7 +39,7 @@ public static class TensorRtAllocatorInterfaceInfoDesignGate
     /// Evaluates allocator interface-info readiness from explicit capability flags.
     /// 根据显式能力标记评估 allocator interface-info 就绪状态。
     /// </summary>
-    /// <param name="line">The TensorRT API line. TensorRT API line。</param>
+    /// <param name="line">The TensorRT API line. TensorRT API 版本线。</param>
     /// <param name="copiedInterfaceInfoMetadataReady">Whether copied interface-info metadata shape is ready. copied interface-info metadata 形态是否就绪。</param>
     /// <param name="temporaryStorageAllocatorSnapshotAvailable">Whether temporary-storage allocator copied metadata exists. temporary-storage allocator copied metadata 是否存在。</param>
     /// <param name="outputAllocatorSnapshotAvailable">Whether output allocator copied metadata exists. output allocator copied metadata 是否存在。</param>

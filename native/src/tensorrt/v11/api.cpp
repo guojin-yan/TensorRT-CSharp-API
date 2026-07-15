@@ -8266,6 +8266,9 @@ JYPPX_StatusCode jyppx_trt11_tensor_reset_dynamic_range(JYPPX_TensorRtTensor*)
 #define JYPPX_TRT_EXECUTION_CONTEXT_CALLBACK_INTERFACE_INFO_API(name) jyppx_trt11_##name
 #include "../common/execution_context_callback_interface_info.inc"
 #undef JYPPX_TRT_EXECUTION_CONTEXT_CALLBACK_INTERFACE_INFO_API
+#define JYPPX_TRT_OWNER_SCOPED_VERSIONED_METADATA_API(name) jyppx_trt11_##name
+#include "../common/owner_scoped_versioned_interface_metadata.inc"
+#undef JYPPX_TRT_OWNER_SCOPED_VERSIONED_METADATA_API
 #define JYPPX_TRT_EXECUTION_CONTEXT_CALLBACK_STATE_API(name) jyppx_trt11_##name
 #include "../common/execution_context_callback_state_snapshot.inc"
 #undef JYPPX_TRT_EXECUTION_CONTEXT_CALLBACK_STATE_API

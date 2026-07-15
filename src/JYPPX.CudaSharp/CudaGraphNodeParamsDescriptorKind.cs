@@ -14,31 +14,31 @@ public enum CudaGraphNodeParamsDescriptorKind
 
     /// <summary>
     /// Empty node descriptor.
-    /// Empty node descriptor。
+    /// 空节点描述符。
     /// </summary>
     Empty = 1,
 
     /// <summary>
     /// Memset node descriptor.
-    /// Memset node descriptor。
+    /// Memset 节点描述符。
     /// </summary>
     Memset = 2,
 
     /// <summary>
     /// Memcpy node descriptor.
-    /// Memcpy node descriptor。
+    /// Memcpy 节点描述符。
     /// </summary>
     Memcpy = 3,
 
     /// <summary>
     /// Event-record node descriptor.
-    /// Event-record node descriptor。
+    /// 事件记录节点描述符。
     /// </summary>
     EventRecord = 4,
 
     /// <summary>
     /// Event-wait node descriptor.
-    /// Event-wait node descriptor。
+    /// 事件等待节点描述符。
     /// </summary>
     EventWait = 5
 }

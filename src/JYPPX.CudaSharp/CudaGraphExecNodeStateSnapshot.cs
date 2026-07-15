@@ -11,7 +11,7 @@ public sealed class CudaGraphExecNodeStateSnapshot
     /// 初始化 CUDA graph executable node 状态快照。
     /// </summary>
     /// <param name="enabled">Whether the node is enabled in the executable graph. executable graph 中该节点是否启用。</param>
-    /// <param name="flags">The executable graph flags. executable graph flags。</param>
+    /// <param name="flags">The executable graph flags. 可执行图标志。</param>
     public CudaGraphExecNodeStateSnapshot(bool enabled, ulong flags)
         : this(0, default, enabled, flags, hasNode: false)
     {
@@ -24,7 +24,7 @@ public sealed class CudaGraphExecNodeStateSnapshot
     /// <param name="index">The zero-based node index within the queried list. 查询列表中的从零开始节点索引。</param>
     /// <param name="node">The graph-owned node value token. graph 拥有的 node 值 token。</param>
     /// <param name="enabled">Whether the node is enabled in the executable graph. executable graph 中该节点是否启用。</param>
-    /// <param name="flags">The executable graph flags. executable graph flags。</param>
+    /// <param name="flags">The executable graph flags. 可执行图标志。</param>
     public CudaGraphExecNodeStateSnapshot(ulong index, CudaGraphNode node, bool enabled, ulong flags)
         : this(index, node, enabled, flags, hasNode: true)
     {

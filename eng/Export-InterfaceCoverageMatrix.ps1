@@ -476,6 +476,10 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
     "IMoELayer::setInput" = @("id:*layer-set-input")
     "IRefitter::getTensorsWithDynamicRange" = @("id:*refitter-get-dynamic-range-tensor-count", "id:*refitter-get-dynamic-range-tensor-entries")
     "IPluginRegistry::getBuilderSafePluginRegistry" = @("id:*builder-safe-plugin-registry-exists", "id:*builder-capability-plugin-registry-exists")
+    "IPluginV2Ext::getTensorRTVersion" = @("id:*plugin-v2-layer-get-tensor-rt-version")
+    "IPluginV2IOExt::getTensorRTVersion" = @("id:*plugin-v2-layer-get-tensor-rt-version")
+    "IVersionedInterface::getAPILanguage" = @("id:*versioned-metadata", "id:*get-api-language")
+    "IVersionedInterface::getInterfaceInfo" = @("id:*versioned-metadata", "id:*get-interface-info")
     "IPluginCreator::getPluginName" = @("id:*builder-capability-plugin-creator-get-name", "id:*builder-plugin-creator-get-name", "id:*global-plugin-creator-get-name", "id:*runtime-plugin-creator-get-name")
     "IPluginCreator::getPluginVersion" = @("id:*builder-capability-plugin-creator-get-version", "id:*builder-plugin-creator-get-version", "id:*global-plugin-creator-get-version", "id:*runtime-plugin-creator-get-version")
     "IPluginCreator::getPluginNamespace" = @("id:*builder-capability-plugin-creator-get-namespace", "id:*builder-plugin-creator-get-namespace", "id:*global-plugin-creator-get-namespace", "id:*runtime-plugin-creator-get-namespace")
@@ -495,6 +499,10 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
   $deferredHistoryAliasMap = @{
     "Global::getBuilderPluginRegistry" = @("id:*global-get-builder-plugin-registry-deferred")
     "IPluginRegistry::getBuilderSafePluginRegistry" = @("id:*plugin-registry-get-builder-safe-plugin-registry-deferred")
+    "IPluginV2Ext::getTensorRTVersion" = @("id:*plugin-v2-ext-get-tensor-rt-version-deferred")
+    "IPluginV2IOExt::getTensorRTVersion" = @("id:*plugin-v2-io-ext-get-tensor-rt-version-deferred")
+    "IVersionedInterface::getAPILanguage" = @("id:*versioned-interface-get-api-language-deferred")
+    "IVersionedInterface::getInterfaceInfo" = @("id:*versioned-interface-get-interface-info-deferred")
   }
 
   if (-not $aliasMap.ContainsKey($InterfaceKey)) {
@@ -579,6 +587,10 @@ function Find-MatchedManifestApis {
     "INetworkDefinition::setErrorRecorder",
     "IPluginRegistry::getErrorRecorder",
     "IPluginRegistry::getBuilderSafePluginRegistry",
+    "IPluginV2Ext::getTensorRTVersion",
+    "IPluginV2IOExt::getTensorRTVersion",
+    "IVersionedInterface::getAPILanguage",
+    "IVersionedInterface::getInterfaceInfo",
     "IErrorRecorder::getNbErrors",
     "IErrorRecorder::getErrorCode",
     "IErrorRecorder::getErrorDesc",

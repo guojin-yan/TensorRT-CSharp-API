@@ -21,7 +21,7 @@ public static class TensorRtPluginCreatorV3MetadataDesignGate
     /// Evaluates the known public PluginCreatorV3 metadata surface for a TensorRT API line.
     /// 基于已知 public PluginCreatorV3 metadata 边界评估指定 TensorRT API line。
     /// </summary>
-    /// <param name="line">The TensorRT API line. TensorRT API line。</param>
+    /// <param name="line">The TensorRT API line. TensorRT API 版本线。</param>
     /// <returns>A pointer-free PluginCreatorV3 metadata design gate result. 无裸指针 PluginCreatorV3 metadata 设计门结果。</returns>
     public static TensorRtPluginCreatorV3MetadataDesignGateResult EvaluateKnownSurface(TensorRtApiLine line)
     {
@@ -39,7 +39,7 @@ public static class TensorRtPluginCreatorV3MetadataDesignGate
     /// Evaluates PluginCreatorV3 metadata readiness from explicit capability flags.
     /// 根据显式能力标记评估 PluginCreatorV3 metadata 就绪状态。
     /// </summary>
-    /// <param name="line">The TensorRT API line. TensorRT API line。</param>
+    /// <param name="line">The TensorRT API line. TensorRT API 版本线。</param>
     /// <param name="registryInventorySnapshotReady">Whether copied registry inventory snapshots are ready. copied registry inventory snapshot 是否就绪。</param>
     /// <param name="copiedIdentityReady">Whether creator name/version/namespace copies are ready. creator name/version/namespace copied 输出是否就绪。</param>
     /// <param name="copiedFieldMetadataReady">Whether plugin field metadata copies are ready. plugin field metadata copied 输出是否就绪。</param>

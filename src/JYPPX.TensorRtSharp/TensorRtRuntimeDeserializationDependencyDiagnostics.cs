@@ -22,7 +22,7 @@ public static class TensorRtRuntimeDeserializationDependencyDiagnostics
     /// Evaluates the known dependency diagnostic shape for a TensorRT API line.
     /// 基于已知 public surface 评估指定 TensorRT API line 的依赖诊断形态。
     /// </summary>
-    /// <param name="line">The TensorRT API line. TensorRT API line。</param>
+    /// <param name="line">The TensorRT API line. TensorRT API 版本线。</param>
     /// <returns>A pointer-free dependency diagnostics result. 无裸指针依赖诊断结果。</returns>
     public static TensorRtRuntimeDeserializationDependencyDiagnosticsResult EvaluateKnownSurface(TensorRtApiLine line)
     {

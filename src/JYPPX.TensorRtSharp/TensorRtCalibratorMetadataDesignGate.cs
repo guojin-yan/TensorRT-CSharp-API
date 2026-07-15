@@ -20,7 +20,7 @@ public static class TensorRtCalibratorMetadataDesignGate
     /// Evaluates the known public calibrator metadata surface for a TensorRT API line.
     /// 基于已知 public calibrator metadata 边界评估指定 TensorRT API line。
     /// </summary>
-    /// <param name="line">The TensorRT API line. TensorRT API line。</param>
+    /// <param name="line">The TensorRT API line. TensorRT API 版本线。</param>
     /// <returns>A pointer-free calibrator metadata design gate result. 无裸指针 calibrator metadata 设计门结果。</returns>
     public static TensorRtCalibratorMetadataDesignGateResult EvaluateKnownSurface(TensorRtApiLine line)
     {
@@ -37,7 +37,7 @@ public static class TensorRtCalibratorMetadataDesignGate
     /// Evaluates the calibrator metadata design gate from explicit capability flags.
     /// 根据显式能力标记评估 calibrator metadata 设计门。
     /// </summary>
-    /// <param name="line">The TensorRT API line. TensorRT API line。</param>
+    /// <param name="line">The TensorRT API line. TensorRT API 版本线。</param>
     /// <param name="presenceProbeAvailable">Whether safe calibrator presence probe is available. 是否已有安全 calibrator presence 查询。</param>
     /// <param name="copiedAlgorithmMetadataReady">Whether copied algorithm metadata shape is ready. copied algorithm metadata 形态是否就绪。</param>
     /// <param name="copiedInterfaceInfoMetadataReady">Whether copied interface-info metadata shape is ready where available. 可用时 copied interface-info metadata 形态是否就绪。</param>

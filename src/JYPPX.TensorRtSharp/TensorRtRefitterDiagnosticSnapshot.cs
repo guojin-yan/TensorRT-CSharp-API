@@ -40,30 +40,82 @@ public sealed class TensorRtRefitterDiagnosticSnapshot
         Diagnostics = diagnostics ?? Array.Empty<string>();
     }
 
+    /// <summary>
+    /// Gets the TensorRT API line used to collect this snapshot.
+    /// 获取采集该快照的 TensorRT API line。
+    /// </summary>
     public TensorRtApiLine Line { get; }
 
+    /// <summary>
+    /// Gets the maximum thread count copied from the refitter.
+    /// 获取从 refitter 复制出的最大线程数。
+    /// </summary>
     public int MaxThreads { get; }
 
+    /// <summary>
+    /// Gets whether weight validation was enabled on the refitter.
+    /// 获取 refitter 是否启用了权重验证。
+    /// </summary>
     public bool WeightsValidation { get; }
 
+    /// <summary>
+    /// Gets whether the refitter reported an associated logger.
+    /// 获取 refitter 是否报告关联的 logger。
+    /// </summary>
     public bool HasLogger { get; }
 
+    /// <summary>
+    /// Gets whether the refitter reported an associated error recorder.
+    /// 获取 refitter 是否报告关联的 error recorder。
+    /// </summary>
     public bool HasErrorRecorder { get; }
 
+    /// <summary>
+    /// Gets the copied error-recorder snapshot.
+    /// 获取复制出的 error recorder 快照。
+    /// </summary>
     public TensorRtErrorRecorderSnapshot ErrorRecorder { get; }
 
+    /// <summary>
+    /// Gets the dynamic-range tensor count reported by the refitter.
+    /// 获取 refitter 报告的 dynamic range tensor 数量。
+    /// </summary>
     public int DynamicRangeTensorCount { get; }
 
+    /// <summary>
+    /// Gets the missing named-weight count reported by the refitter.
+    /// 获取 refitter 报告的 missing named weight 数量。
+    /// </summary>
     public int MissingNamedWeightCount { get; }
 
+    /// <summary>
+    /// Gets the total named-weight count reported by the refitter.
+    /// 获取 refitter 报告的全部 named weight 数量。
+    /// </summary>
     public int AllNamedWeightCount { get; }
 
+    /// <summary>
+    /// Gets the copied dynamic-range tensor names.
+    /// 获取复制出的 dynamic range tensor 名称。
+    /// </summary>
     public IReadOnlyList<string> DynamicRangeTensorNames { get; }
 
+    /// <summary>
+    /// Gets the copied missing named-weight names.
+    /// 获取复制出的 missing named weight 名称。
+    /// </summary>
     public IReadOnlyList<string> MissingNamedWeights { get; }
 
+    /// <summary>
+    /// Gets all copied named-weight names.
+    /// 获取复制出的全部 named weight 名称。
+    /// </summary>
     public IReadOnlyList<string> AllNamedWeights { get; }
 
+    /// <summary>
+    /// Gets diagnostics collected while creating the snapshot.
+    /// 获取创建快照时收集的诊断信息。
+    /// </summary>
     public IReadOnlyList<string> Diagnostics { get; }
 
     /// <summary>
@@ -95,6 +147,11 @@ public sealed class TensorRtRefitterDiagnosticSnapshot
             Diagnostics.Count);
     }
 
+    /// <summary>
+    /// Converts the snapshot to a compact diagnostic string.
+    /// 将快照转换为简短诊断字符串。
+    /// </summary>
+    /// <returns>A compact diagnostic string. 简短诊断字符串。</returns>
     public override string ToString()
     {
         return $"Line={(int)Line} MaxThreads={MaxThreads} WeightsValidation={WeightsValidation} Logger={HasLogger} ErrorRecorder={HasErrorRecorder}/{ErrorRecorder.ErrorCount} MissingWeights={MissingNamedWeightCount}/{MissingNamedWeights.Count} AllWeights={AllNamedWeightCount}/{AllNamedWeights.Count} DynamicRanges={DynamicRangeTensorCount}/{DynamicRangeTensorNames.Count} diagnostics={Diagnostics.Count}";

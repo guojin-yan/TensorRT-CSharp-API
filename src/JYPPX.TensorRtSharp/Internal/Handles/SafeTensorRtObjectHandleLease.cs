@@ -5,6 +5,7 @@ namespace JYPPX.TensorRtSharp.Internal.Handles;
 
 /// <summary>
 /// Keeps a TensorRT SafeHandle alive while borrowed child wrappers exist.
+/// 在借用的子包装器存续期间保持 TensorRT SafeHandle 有效。
 /// </summary>
 internal sealed class SafeTensorRtObjectHandleLease : IDisposable
 {

@@ -21,7 +21,7 @@ public static class TensorRtStreamIoInterfaceInfoDesignGate
     /// Evaluates the known public stream IO interface-info design surface for a TensorRT API line.
     /// 基于已知 public stream IO interface-info 设计边界评估指定 TensorRT API line。
     /// </summary>
-    /// <param name="line">The TensorRT API line. TensorRT API line。</param>
+    /// <param name="line">The TensorRT API line. TensorRT API 版本线。</param>
     /// <returns>A pointer-free stream IO interface-info design gate result. 无裸指针 stream IO interface-info 设计门结果。</returns>
     public static TensorRtStreamIoInterfaceInfoDesignGateResult EvaluateKnownSurface(TensorRtApiLine line)
     {
@@ -37,7 +37,7 @@ public static class TensorRtStreamIoInterfaceInfoDesignGate
     /// Evaluates stream IO interface-info readiness from explicit capability flags.
     /// 根据显式能力标记评估 stream IO interface-info 就绪状态。
     /// </summary>
-    /// <param name="line">The TensorRT API line. TensorRT API line。</param>
+    /// <param name="line">The TensorRT API line. TensorRT API 版本线。</param>
     /// <param name="copiedInterfaceInfoMetadataReady">Whether copied interface-info metadata shape is ready. copied interface-info metadata 形态是否就绪。</param>
     /// <param name="streamOwnerLifetimeModeled">Whether stream owner lifetime has been modeled. stream owner lifetime 是否已建模。</param>
     /// <param name="readWriteBufferOwnershipModeled">Whether read/write buffer ownership has been modeled. read/write buffer ownership 是否已建模。</param>
