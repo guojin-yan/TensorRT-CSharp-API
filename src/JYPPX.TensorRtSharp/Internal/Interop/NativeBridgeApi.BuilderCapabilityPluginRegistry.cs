@@ -12,6 +12,9 @@ internal static partial class NativeBridgeApi
         BridgeStatusCode status;
         switch (line)
         {
+            case TensorRtApiLine.TensorRt8:
+                status = NativeMethodsTensorRt.jyppx_trt8_builder_capability_plugin_registry_exists((int)capability, out exists);
+                break;
             case TensorRtApiLine.TensorRt10:
                 status = NativeMethodsTensorRt.jyppx_trt10_builder_capability_plugin_registry_exists((int)capability, out exists);
                 break;
@@ -32,6 +35,9 @@ internal static partial class NativeBridgeApi
         BridgeStatusCode status;
         switch (line)
         {
+            case TensorRtApiLine.TensorRt8:
+                status = NativeMethodsTensorRt.jyppx_trt8_builder_safe_plugin_registry_exists((int)capability, out exists);
+                break;
             case TensorRtApiLine.TensorRt11:
                 status = NativeMethodsTensorRt.jyppx_trt11_builder_safe_plugin_registry_exists((int)capability, out exists);
                 break;
@@ -46,7 +52,9 @@ internal static partial class NativeBridgeApi
     public static TensorRtPluginRegistryInventory GetBuilderCapabilityPluginRegistryInventory(TensorRtApiLine line, TensorRtEngineCapability capability)
     {
         int creatorCount = GetBuilderCapabilityPluginRegistryCreatorCount(line, capability);
-        int recursiveCreatorCount = GetBuilderCapabilityPluginRegistryRecursiveCreatorCount(line, capability);
+        int? recursiveCreatorCount = line == TensorRtApiLine.TensorRt8
+            ? null
+            : GetBuilderCapabilityPluginRegistryRecursiveCreatorCount(line, capability);
         bool hasErrorRecorder = HasBuilderCapabilityPluginRegistryErrorRecorder(line, capability);
         bool parentSearchEnabled = IsBuilderCapabilityPluginRegistryParentSearchEnabled(line, capability);
         List<TensorRtPluginCreatorInfo> creators = new List<TensorRtPluginCreatorInfo>(creatorCount);
@@ -58,6 +66,9 @@ internal static partial class NativeBridgeApi
             string pluginNamespace = GetBuilderCapabilityPluginCreatorNamespace(line, capability, creatorIndex);
             string interfaceKind = GetBuilderCapabilityPluginCreatorInterfaceKind(line, capability, creatorIndex, out int interfaceMajor, out int interfaceMinor);
             TensorRtApiLanguage apiLanguage = GetBuilderCapabilityPluginCreatorApiLanguage(line, capability, creatorIndex);
+            int? tensorRtVersion = line == TensorRtApiLine.TensorRt8
+                ? GetBuilderCapabilityPluginCreatorTensorRtVersion(line, capability, creatorIndex)
+                : null;
             int fieldCount = GetBuilderCapabilityPluginCreatorFieldCount(line, capability, creatorIndex);
             List<TensorRtPluginFieldInfo> fields = new List<TensorRtPluginFieldInfo>(fieldCount);
 
@@ -77,7 +88,8 @@ internal static partial class NativeBridgeApi
                 interfaceMajor,
                 interfaceMinor,
                 apiLanguage,
-                fields));
+                fields,
+                tensorRtVersion));
         }
 
         return new TensorRtPluginRegistryInventory(line, TensorRtPluginRegistrySource.BuilderCapability, hasErrorRecorder, parentSearchEnabled, recursiveCreatorCount, creators);
@@ -93,6 +105,9 @@ internal static partial class NativeBridgeApi
         BridgeStatusCode status;
         switch (line)
         {
+            case TensorRtApiLine.TensorRt8:
+                status = NativeMethodsTensorRt.jyppx_trt8_builder_capability_plugin_creator_lookup((int)capability, nameUtf8.Pointer, versionUtf8.Pointer, namespaceUtf8.Pointer, out found);
+                break;
             case TensorRtApiLine.TensorRt10:
                 status = NativeMethodsTensorRt.jyppx_trt10_builder_capability_plugin_creator_lookup((int)capability, nameUtf8.Pointer, versionUtf8.Pointer, namespaceUtf8.Pointer, out found);
                 break;
@@ -130,6 +145,9 @@ internal static partial class NativeBridgeApi
             out int interfaceMajor,
             out int interfaceMinor);
         TensorRtApiLanguage apiLanguage = GetBuilderCapabilityLookupPluginCreatorApiLanguage(line, capability, pluginName, pluginVersion, pluginNamespace);
+        int? tensorRtVersion = line == TensorRtApiLine.TensorRt8
+            ? GetBuilderCapabilityLookupPluginCreatorTensorRtVersion(line, capability, pluginName, pluginVersion, pluginNamespace)
+            : null;
         int fieldCount = GetBuilderCapabilityLookupPluginCreatorFieldCount(line, capability, pluginName, pluginVersion, pluginNamespace);
         List<TensorRtPluginFieldInfo> fields = new List<TensorRtPluginFieldInfo>(fieldCount);
 
@@ -149,7 +167,8 @@ internal static partial class NativeBridgeApi
             interfaceMajor,
             interfaceMinor,
             apiLanguage,
-            fields);
+            fields,
+            tensorRtVersion);
         return true;
     }
 
@@ -159,6 +178,9 @@ internal static partial class NativeBridgeApi
         BridgeStatusCode status;
         switch (line)
         {
+            case TensorRtApiLine.TensorRt8:
+                status = NativeMethodsTensorRt.jyppx_trt8_builder_capability_plugin_registry_get_creator_count((int)capability, out count);
+                break;
             case TensorRtApiLine.TensorRt10:
                 status = NativeMethodsTensorRt.jyppx_trt10_builder_capability_plugin_registry_get_creator_count((int)capability, out count);
                 break;
@@ -199,6 +221,9 @@ internal static partial class NativeBridgeApi
         BridgeStatusCode status;
         switch (line)
         {
+            case TensorRtApiLine.TensorRt8:
+                status = NativeMethodsTensorRt.jyppx_trt8_builder_capability_plugin_registry_has_error_recorder((int)capability, out hasRecorder);
+                break;
             case TensorRtApiLine.TensorRt10:
                 status = NativeMethodsTensorRt.jyppx_trt10_builder_capability_plugin_registry_has_error_recorder((int)capability, out hasRecorder);
                 break;
@@ -219,6 +244,9 @@ internal static partial class NativeBridgeApi
         BridgeStatusCode status;
         switch (line)
         {
+            case TensorRtApiLine.TensorRt8:
+                status = NativeMethodsTensorRt.jyppx_trt8_builder_capability_plugin_registry_is_parent_search_enabled((int)capability, out enabled);
+                break;
             case TensorRtApiLine.TensorRt10:
                 status = NativeMethodsTensorRt.jyppx_trt10_builder_capability_plugin_registry_is_parent_search_enabled((int)capability, out enabled);
                 break;
@@ -238,6 +266,7 @@ internal static partial class NativeBridgeApi
         return ReadUtf8Buffer(
             (byte[] buffer, UIntPtr size, out UIntPtr required) => line switch
             {
+                TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_builder_capability_plugin_creator_get_name((int)capability, creatorIndex, buffer, size, out required),
                 TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_capability_plugin_creator_get_name((int)capability, creatorIndex, buffer, size, out required),
                 TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_builder_capability_plugin_creator_get_name((int)capability, creatorIndex, buffer, size, out required),
                 _ => throw UnsupportedBuilderCapabilityPluginRegistryLine()
@@ -250,6 +279,7 @@ internal static partial class NativeBridgeApi
         return ReadUtf8Buffer(
             (byte[] buffer, UIntPtr size, out UIntPtr required) => line switch
             {
+                TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_builder_capability_plugin_creator_get_version((int)capability, creatorIndex, buffer, size, out required),
                 TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_capability_plugin_creator_get_version((int)capability, creatorIndex, buffer, size, out required),
                 TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_builder_capability_plugin_creator_get_version((int)capability, creatorIndex, buffer, size, out required),
                 _ => throw UnsupportedBuilderCapabilityPluginRegistryLine()
@@ -262,6 +292,7 @@ internal static partial class NativeBridgeApi
         return ReadUtf8Buffer(
             (byte[] buffer, UIntPtr size, out UIntPtr required) => line switch
             {
+                TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_builder_capability_plugin_creator_get_namespace((int)capability, creatorIndex, buffer, size, out required),
                 TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_capability_plugin_creator_get_namespace((int)capability, creatorIndex, buffer, size, out required),
                 TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_builder_capability_plugin_creator_get_namespace((int)capability, creatorIndex, buffer, size, out required),
                 _ => throw UnsupportedBuilderCapabilityPluginRegistryLine()
@@ -276,6 +307,13 @@ internal static partial class NativeBridgeApi
         out int interfaceMajor,
         out int interfaceMinor)
     {
+        if (line == TensorRtApiLine.TensorRt8)
+        {
+            interfaceMajor = 8;
+            interfaceMinor = 0;
+            return "IPluginCreator";
+        }
+
         int major = 0;
         int minor = 0;
         string result = ReadUtf8Buffer(
@@ -302,6 +340,9 @@ internal static partial class NativeBridgeApi
         BridgeStatusCode status;
         switch (line)
         {
+            case TensorRtApiLine.TensorRt8:
+                status = NativeMethodsTensorRt.jyppx_trt8_builder_capability_plugin_creator_get_field_count((int)capability, creatorIndex, out count);
+                break;
             case TensorRtApiLine.TensorRt10:
                 status = NativeMethodsTensorRt.jyppx_trt10_builder_capability_plugin_creator_get_field_count((int)capability, creatorIndex, out count);
                 break;
@@ -318,6 +359,11 @@ internal static partial class NativeBridgeApi
 
     private static TensorRtApiLanguage GetBuilderCapabilityPluginCreatorApiLanguage(TensorRtApiLine line, TensorRtEngineCapability capability, int creatorIndex)
     {
+        if (line == TensorRtApiLine.TensorRt8)
+        {
+            return TensorRtApiLanguage.Unknown;
+        }
+
         int apiLanguage = (int)TensorRtApiLanguage.Unknown;
         BridgeStatusCode status = line switch
         {
@@ -335,6 +381,7 @@ internal static partial class NativeBridgeApi
         return ReadUtf8Buffer(
             (byte[] buffer, UIntPtr size, out UIntPtr required) => line switch
             {
+                TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_builder_capability_plugin_creator_get_field_name((int)capability, creatorIndex, fieldIndex, buffer, size, out required),
                 TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_capability_plugin_creator_get_field_name((int)capability, creatorIndex, fieldIndex, buffer, size, out required),
                 TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_builder_capability_plugin_creator_get_field_name((int)capability, creatorIndex, fieldIndex, buffer, size, out required),
                 _ => throw UnsupportedBuilderCapabilityPluginRegistryLine()
@@ -357,6 +404,9 @@ internal static partial class NativeBridgeApi
         BridgeStatusCode status;
         switch (line)
         {
+            case TensorRtApiLine.TensorRt8:
+                status = NativeMethodsTensorRt.jyppx_trt8_builder_capability_plugin_creator_get_field_metadata((int)capability, creatorIndex, fieldIndex, out typeValue, out lengthValue, out hasDataValue);
+                break;
             case TensorRtApiLine.TensorRt10:
                 status = NativeMethodsTensorRt.jyppx_trt10_builder_capability_plugin_creator_get_field_metadata((int)capability, creatorIndex, fieldIndex, out typeValue, out lengthValue, out hasDataValue);
                 break;
@@ -382,6 +432,13 @@ internal static partial class NativeBridgeApi
         out int interfaceMajor,
         out int interfaceMinor)
     {
+        if (line == TensorRtApiLine.TensorRt8)
+        {
+            interfaceMajor = 8;
+            interfaceMinor = 0;
+            return "IPluginCreator";
+        }
+
         using Utf8Interop.Utf8StringScope nameUtf8 = Utf8Interop.ToNativeString(pluginName ?? string.Empty);
         using Utf8Interop.Utf8StringScope versionUtf8 = Utf8Interop.ToNativeString(pluginVersion ?? string.Empty);
         using Utf8Interop.Utf8StringScope namespaceUtf8 = Utf8Interop.ToNativeString(pluginNamespace ?? string.Empty);
@@ -416,6 +473,9 @@ internal static partial class NativeBridgeApi
         BridgeStatusCode status;
         switch (line)
         {
+            case TensorRtApiLine.TensorRt8:
+                status = NativeMethodsTensorRt.jyppx_trt8_builder_capability_plugin_creator_lookup_get_field_count((int)capability, nameUtf8.Pointer, versionUtf8.Pointer, namespaceUtf8.Pointer, out count);
+                break;
             case TensorRtApiLine.TensorRt10:
                 status = NativeMethodsTensorRt.jyppx_trt10_builder_capability_plugin_creator_lookup_get_field_count((int)capability, nameUtf8.Pointer, versionUtf8.Pointer, namespaceUtf8.Pointer, out count);
                 break;
@@ -432,6 +492,11 @@ internal static partial class NativeBridgeApi
 
     private static TensorRtApiLanguage GetBuilderCapabilityLookupPluginCreatorApiLanguage(TensorRtApiLine line, TensorRtEngineCapability capability, string pluginName, string pluginVersion, string pluginNamespace)
     {
+        if (line == TensorRtApiLine.TensorRt8)
+        {
+            return TensorRtApiLanguage.Unknown;
+        }
+
         using Utf8Interop.Utf8StringScope nameUtf8 = Utf8Interop.ToNativeString(pluginName ?? string.Empty);
         using Utf8Interop.Utf8StringScope versionUtf8 = Utf8Interop.ToNativeString(pluginVersion ?? string.Empty);
         using Utf8Interop.Utf8StringScope namespaceUtf8 = Utf8Interop.ToNativeString(pluginNamespace ?? string.Empty);
@@ -463,6 +528,7 @@ internal static partial class NativeBridgeApi
         return ReadUtf8Buffer(
             (byte[] buffer, UIntPtr size, out UIntPtr required) => line switch
             {
+                TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_builder_capability_plugin_creator_lookup_get_field_name((int)capability, nameUtf8.Pointer, versionUtf8.Pointer, namespaceUtf8.Pointer, fieldIndex, buffer, size, out required),
                 TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_capability_plugin_creator_lookup_get_field_name((int)capability, nameUtf8.Pointer, versionUtf8.Pointer, namespaceUtf8.Pointer, fieldIndex, buffer, size, out required),
                 TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_builder_capability_plugin_creator_lookup_get_field_name((int)capability, nameUtf8.Pointer, versionUtf8.Pointer, namespaceUtf8.Pointer, fieldIndex, buffer, size, out required),
                 _ => throw UnsupportedBuilderCapabilityPluginRegistryLine()
@@ -491,6 +557,9 @@ internal static partial class NativeBridgeApi
         BridgeStatusCode status;
         switch (line)
         {
+            case TensorRtApiLine.TensorRt8:
+                status = NativeMethodsTensorRt.jyppx_trt8_builder_capability_plugin_creator_lookup_get_field_metadata((int)capability, nameUtf8.Pointer, versionUtf8.Pointer, namespaceUtf8.Pointer, fieldIndex, out typeValue, out lengthValue, out hasDataValue);
+                break;
             case TensorRtApiLine.TensorRt10:
                 status = NativeMethodsTensorRt.jyppx_trt10_builder_capability_plugin_creator_lookup_get_field_metadata((int)capability, nameUtf8.Pointer, versionUtf8.Pointer, namespaceUtf8.Pointer, fieldIndex, out typeValue, out lengthValue, out hasDataValue);
                 break;
@@ -507,12 +576,55 @@ internal static partial class NativeBridgeApi
         hasData = hasDataValue != 0;
     }
 
+    private static int GetBuilderCapabilityPluginCreatorTensorRtVersion(
+        TensorRtApiLine line,
+        TensorRtEngineCapability capability,
+        int creatorIndex)
+    {
+        if (line != TensorRtApiLine.TensorRt8)
+        {
+            throw UnsupportedBuilderCapabilityPluginRegistryLine();
+        }
+
+        BridgeStatusCode status = NativeMethodsTensorRt.jyppx_trt8_builder_capability_plugin_creator_get_tensor_rt_version(
+            (int)capability,
+            creatorIndex,
+            out int tensorRtVersion);
+        NativeStatus.ThrowIfFailed(status);
+        return tensorRtVersion;
+    }
+
+    private static int GetBuilderCapabilityLookupPluginCreatorTensorRtVersion(
+        TensorRtApiLine line,
+        TensorRtEngineCapability capability,
+        string pluginName,
+        string pluginVersion,
+        string pluginNamespace)
+    {
+        if (line != TensorRtApiLine.TensorRt8)
+        {
+            throw UnsupportedBuilderCapabilityPluginRegistryLine();
+        }
+
+        using Utf8Interop.Utf8StringScope nameUtf8 = Utf8Interop.ToNativeString(pluginName ?? string.Empty);
+        using Utf8Interop.Utf8StringScope versionUtf8 = Utf8Interop.ToNativeString(pluginVersion ?? string.Empty);
+        using Utf8Interop.Utf8StringScope namespaceUtf8 = Utf8Interop.ToNativeString(pluginNamespace ?? string.Empty);
+        BridgeStatusCode status = NativeMethodsTensorRt.jyppx_trt8_builder_capability_plugin_creator_lookup_get_tensor_rt_version(
+            (int)capability,
+            nameUtf8.Pointer,
+            versionUtf8.Pointer,
+            namespaceUtf8.Pointer,
+            out int tensorRtVersion);
+        NativeStatus.ThrowIfFailed(status);
+        return tensorRtVersion;
+    }
+
     private static BridgeProbeException UnsupportedBuilderCapabilityPluginRegistryLine()
     {
         return new BridgeProbeException(
             BridgeStatusCode.NotSupported,
             BridgeErrorCategory.TensorRt,
-            "Builder capability plugin registry probes are exposed by this bridge for TensorRT 10 and 11.");
+            "Builder capability plugin registry probes are exposed by this bridge for TensorRT 8, 10, and 11.");
     }
 
     private static BridgeProbeException UnsupportedBuilderSafePluginRegistryLine()
@@ -520,6 +632,6 @@ internal static partial class NativeBridgeApi
         return new BridgeProbeException(
             BridgeStatusCode.NotSupported,
             BridgeErrorCategory.TensorRt,
-            "Builder safe plugin registry probes are exposed by this bridge for TensorRT 11.");
+            "Builder safe plugin registry existence probes are exposed by this bridge for TensorRT 8 and 11.");
     }
 }

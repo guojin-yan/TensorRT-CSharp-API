@@ -394,7 +394,7 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
     "Global::createONNXConfig" = @("id:*onnx-config-create-deferred")
     "Global::initLibNvInferPlugins" = @("id:*global-init-lib-nvinfer-plugins-deferred")
     "Global::setInternalLibraryPath" = @("id:*global-set-internal-library-path-deferred")
-    "Global::getBuilderPluginRegistry" = @("builder-capability-plugin-registry")
+    "Global::getBuilderPluginRegistry" = @("id:*builder-capability-plugin-registry-exists")
     "IBuilder::getPluginRegistry" = @("id:*builder-plugin-registry-exists", "id:*builder-plugin-registry-get-creator-count", "id:*builder-plugin-registry-get-recursive-creator-count", "id:*builder-plugin-registry-has-error-recorder", "id:*builder-plugin-registry-is-parent-search-enabled", "id:*builder-plugin-creator-get-name", "id:*builder-plugin-creator-get-version", "id:*builder-plugin-creator-get-namespace", "id:*builder-plugin-creator-get-interface-info", "id:*builder-plugin-creator-get-field-count", "id:*builder-plugin-creator-get-field-name", "id:*builder-plugin-creator-get-field-metadata", "id:*builder-plugin-creator-lookup", "id:*builder-get-plugin-registry-deferred")
     "IRuntime::getPluginRegistry" = @("id:*runtime-plugin-registry-exists", "id:*runtime-plugin-registry-get-creator-count", "id:*runtime-plugin-registry-has-error-recorder", "id:*runtime-plugin-registry-is-parent-search-enabled", "id:*runtime-plugin-creator-get-name", "id:*runtime-plugin-creator-get-version", "id:*runtime-plugin-creator-get-namespace", "id:*runtime-plugin-creator-get-interface-info", "id:*runtime-plugin-creator-get-field-count", "id:*runtime-plugin-creator-get-field-name", "id:*runtime-plugin-creator-get-field-metadata", "id:*runtime-plugin-creator-lookup", "id:*runtime-get-plugin-registry-deferred")
     "IRuntime::destroy" = @("id:*trt-object-destroy")
@@ -492,8 +492,18 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
     "IPluginRegistry::getAllCreatorsRecursive" = @("id:*plugin-registry-get-recursive-creator-count")
   }
 
+  $deferredHistoryAliasMap = @{
+    "Global::getBuilderPluginRegistry" = @("id:*global-get-builder-plugin-registry-deferred")
+    "IPluginRegistry::getBuilderSafePluginRegistry" = @("id:*plugin-registry-get-builder-safe-plugin-registry-deferred")
+  }
+
   if (-not $aliasMap.ContainsKey($InterfaceKey)) {
     return @()
+  }
+
+  $aliases = @($aliasMap[$InterfaceKey])
+  if ($deferredHistoryAliasMap.ContainsKey($InterfaceKey)) {
+    $aliases += @($deferredHistoryAliasMap[$InterfaceKey])
   }
 
   $versionCandidates = @($VersionLine, "common", "")
@@ -502,7 +512,7 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
     if ($api.Module -ne $Module) { continue }
     if ($versionCandidates -notcontains $api.VersionLine) { continue }
 
-    foreach ($alias in $aliasMap[$InterfaceKey]) {
+    foreach ($alias in $aliases) {
       if ($alias.StartsWith("id:")) {
         $idPattern = $alias.Substring(3)
         if ($api.Id -like $idPattern) {
@@ -553,6 +563,7 @@ function Find-MatchedManifestApis {
   )
 
   if ($interfaceKey -in @(
+    "Global::getBuilderPluginRegistry",
     "IBuilder::getPluginRegistry",
     "IBuilder::getErrorRecorder",
     "IBuilder::getLogger",
@@ -567,6 +578,7 @@ function Find-MatchedManifestApis {
     "INetworkDefinition::getErrorRecorder",
     "INetworkDefinition::setErrorRecorder",
     "IPluginRegistry::getErrorRecorder",
+    "IPluginRegistry::getBuilderSafePluginRegistry",
     "IErrorRecorder::getNbErrors",
     "IErrorRecorder::getErrorCode",
     "IErrorRecorder::getErrorDesc",

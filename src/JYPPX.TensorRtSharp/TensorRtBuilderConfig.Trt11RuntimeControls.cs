@@ -5,8 +5,8 @@ namespace JYPPX.TensorRtSharp;
 public sealed partial class TensorRtBuilderConfig
 {
     /// <summary>
-    /// Sets the complete TensorRT 11 builder flag bitmask.
-    /// 设置完整的 TensorRT 11 builder flag 位掩码。
+    /// Sets the complete TensorRT 8 or 11 builder flag bitmask.
+    /// 设置完整的 TensorRT 8 或 11 builder flag 位掩码。
     /// </summary>
     /// <param name="flags">The full builder flag bitmask. / 完整 builder flag 位掩码。</param>
     public void SetFlags(TensorRtBuilderFlags flags)

@@ -61,39 +61,38 @@ internal static class Program
     {
         if (line == TensorRtApiLine.TensorRt8)
         {
-            Console.WriteLine("TensorRt8GlobalAndCapabilityPluginRegistriesSkipped=True Reason=GlobalRuntimeAndCapabilityRegistriesRemainDeferred");
-            RunRuntimeLocalPluginRegistrySmoke(line);
-            RunBuilderOwnedPluginRegistrySmoke(line);
-            return;
-        }
-
-        if (!TensorRtEnvironmentProbe.TryIsGlobalPluginRegistryAvailable(line, out bool globalExists, out string globalExistsDiagnostic))
-        {
-            Console.WriteLine($"GlobalPluginRegistry Skipped=True Reason={globalExistsDiagnostic}");
+            Console.WriteLine("TensorRt8GlobalPluginRegistrySkipped=True Reason=GlobalRegistryRemainsDeferred");
         }
         else
         {
-            Console.WriteLine($"GlobalPluginRegistry Exists={globalExists}");
-        }
+            if (!TensorRtEnvironmentProbe.TryIsGlobalPluginRegistryAvailable(line, out bool globalExists, out string globalExistsDiagnostic))
+            {
+                Console.WriteLine($"GlobalPluginRegistry Skipped=True Reason={globalExistsDiagnostic}");
+            }
+            else
+            {
+                Console.WriteLine($"GlobalPluginRegistry Exists={globalExists}");
+            }
 
-        TensorRtPluginRegistryInventory? globalInventory = null;
-        string globalDiagnostic = string.Empty;
-        bool globalInventoryRead = globalExists &&
-            TensorRtEnvironmentProbe.TryGetGlobalPluginRegistryInventory(line, out globalInventory, out globalDiagnostic);
+            TensorRtPluginRegistryInventory? globalInventory = null;
+            string globalDiagnostic = string.Empty;
+            bool globalInventoryRead = globalExists &&
+                TensorRtEnvironmentProbe.TryGetGlobalPluginRegistryInventory(line, out globalInventory, out globalDiagnostic);
 
-        if (globalInventoryRead)
-        {
-            ValidateInventory(globalInventory!, "GlobalPluginRegistry");
-            Console.WriteLine(FormatInventory("GlobalPluginRegistry", globalInventory!));
-            ValidateLookup(line, globalInventory!, TensorRtEngineCapability.Standard, useBuilderCapability: false);
-        }
-        else if (!globalExists)
-        {
-            Console.WriteLine("GlobalPluginRegistry Skipped=True Reason=RegistryUnavailable");
-        }
-        else
-        {
-            Console.WriteLine($"GlobalPluginRegistry Skipped=True Reason={globalDiagnostic}");
+            if (globalInventoryRead)
+            {
+                ValidateInventory(globalInventory!, "GlobalPluginRegistry");
+                Console.WriteLine(FormatInventory("GlobalPluginRegistry", globalInventory!));
+                ValidateLookup(line, globalInventory!, TensorRtEngineCapability.Standard, useBuilderCapability: false);
+            }
+            else if (!globalExists)
+            {
+                Console.WriteLine("GlobalPluginRegistry Skipped=True Reason=RegistryUnavailable");
+            }
+            else
+            {
+                Console.WriteLine($"GlobalPluginRegistry Skipped=True Reason={globalDiagnostic}");
+            }
         }
 
         if (!TensorRtEnvironmentProbe.TryIsBuilderCapabilityPluginRegistryAvailable(line, TensorRtEngineCapability.Standard, out bool exists, out string existsDiagnostic))

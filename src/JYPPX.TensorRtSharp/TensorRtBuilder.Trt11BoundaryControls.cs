@@ -26,6 +26,20 @@ public sealed partial class TensorRtBuilder
     public int MaxBatchSizeCompatibility => NativeBridgeApi.GetBuilderMaxBatchSizeCompatibility(Line, _handle);
 
     /// <summary>
+    /// Sets the deprecated TensorRT 8 implicit-batch maximum.
+    /// 设置已弃用的 TensorRT 8 implicit-batch 最大值。
+    /// </summary>
+    /// <remarks>
+    /// Modern TensorRT code should use explicit-batch networks and optimization profiles. TensorRT 10 and 11 report this control as unsupported.
+    /// 现代 TensorRT 代码应使用 explicit-batch network 与 optimization profile；TensorRT 10/11 会将此控制报告为不支持。
+    /// </remarks>
+    /// <param name="maxBatchSize">A positive legacy maximum batch size. 大于零的 legacy 最大 batch size。</param>
+    public void SetMaxBatchSizeCompatibility(int maxBatchSize)
+    {
+        NativeBridgeApi.SetBuilderMaxBatchSizeCompatibility(Line, _handle, maxBatchSize);
+    }
+
+    /// <summary>
     /// Gets TensorRT's current builder worker-thread limit.
     /// 获取 TensorRT 当前 builder 工作线程上限。
     /// </summary>

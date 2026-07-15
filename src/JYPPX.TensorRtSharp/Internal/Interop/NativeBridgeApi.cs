@@ -1070,6 +1070,22 @@ internal static partial class NativeBridgeApi
         return workspaceSize.ToUInt64();
     }
 
+    public static void SetMaxWorkspaceSizeCompatibility(TensorRtApiLine line, SafeTensorRtObjectHandle config, ulong workspaceSize)
+    {
+        if (line != TensorRtApiLine.TensorRt8)
+        {
+            throw new BridgeProbeException(BridgeStatusCode.NotSupported, BridgeErrorCategory.TensorRt, "IBuilderConfig::setMaxWorkspaceSize is a TensorRT 8 legacy compatibility API. Use SetMemoryPoolLimit(Workspace) for portable TensorRT 8/10/11 configuration.");
+        }
+
+        if (UIntPtr.Size == 4 && workspaceSize > uint.MaxValue)
+        {
+            throw new ArgumentOutOfRangeException(nameof(workspaceSize), "Workspace size exceeds the native size_t range.");
+        }
+
+        BridgeStatusCode status = NativeMethodsTensorRt.jyppx_trt8_builder_config_set_max_workspace_size(config, (UIntPtr)workspaceSize);
+        NativeStatus.ThrowIfFailed(status);
+    }
+
     public static int GetMinTimingIterationsCompatibility(TensorRtApiLine line, SafeTensorRtObjectHandle config)
     {
         if (line != TensorRtApiLine.TensorRt8)
@@ -1080,6 +1096,17 @@ internal static partial class NativeBridgeApi
         BridgeStatusCode status = NativeMethodsTensorRt.jyppx_trt8_builder_config_get_min_timing_iterations(config, out int iterations);
         NativeStatus.ThrowIfFailed(status);
         return iterations;
+    }
+
+    public static void SetMinTimingIterationsCompatibility(TensorRtApiLine line, SafeTensorRtObjectHandle config, int iterations)
+    {
+        if (line != TensorRtApiLine.TensorRt8)
+        {
+            throw new BridgeProbeException(BridgeStatusCode.NotSupported, BridgeErrorCategory.TensorRt, "IBuilderConfig::setMinTimingIterations is a TensorRT 8 legacy compatibility API. Use SetAverageTimingIterations for portable TensorRT 8/10/11 configuration.");
+        }
+
+        BridgeStatusCode status = NativeMethodsTensorRt.jyppx_trt8_builder_config_set_min_timing_iterations(config, iterations);
+        NativeStatus.ThrowIfFailed(status);
     }
 
     public static void SetTacticSources(TensorRtApiLine line, SafeTensorRtObjectHandle config, TensorRtTacticSources sources)

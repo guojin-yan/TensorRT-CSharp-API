@@ -72,6 +72,58 @@ public sealed partial class TensorRtLayer
         return NativeBridgeApi.GetRnnV2InputMode(Line, _handle);
     }
 
+    /// <summary>Sets the TensorRT 8 RNNv2 operation kind. 设置 TensorRT 8 RNNv2 运算类型。</summary>
+    public void SetRnnV2Operation(TensorRtRnnOperation operation)
+    {
+        NativeBridgeApi.SetRnnV2Operation(Line, _handle, operation);
+    }
+
+    /// <summary>Sets the TensorRT 8 RNNv2 direction. 设置 TensorRT 8 RNNv2 方向。</summary>
+    public void SetRnnV2Direction(TensorRtRnnDirection direction)
+    {
+        NativeBridgeApi.SetRnnV2Direction(Line, _handle, direction);
+    }
+
+    /// <summary>Sets the TensorRT 8 RNNv2 input mode. 设置 TensorRT 8 RNNv2 输入模式。</summary>
+    public void SetRnnV2InputMode(TensorRtRnnInputMode inputMode)
+    {
+        NativeBridgeApi.SetRnnV2InputMode(Line, _handle, inputMode);
+    }
+
+    /// <summary>Sets the TensorRT 8 RNNv2 initial cell-state tensor. 设置 TensorRT 8 RNNv2 初始 cell-state tensor。</summary>
+    public void SetRnnV2CellState(TensorRtTensor tensor)
+    {
+        ValidateRnnV2Tensor(tensor, nameof(tensor));
+        NativeBridgeApi.SetRnnV2CellState(Line, _handle, tensor.Handle);
+    }
+
+    /// <summary>Sets the TensorRT 8 RNNv2 initial hidden-state tensor. 设置 TensorRT 8 RNNv2 初始 hidden-state tensor。</summary>
+    public void SetRnnV2HiddenState(TensorRtTensor tensor)
+    {
+        ValidateRnnV2Tensor(tensor, nameof(tensor));
+        NativeBridgeApi.SetRnnV2HiddenState(Line, _handle, tensor.Handle);
+    }
+
+    /// <summary>Sets the TensorRT 8 RNNv2 sequence-length tensor. 设置 TensorRT 8 RNNv2 sequence-length tensor。</summary>
+    public void SetRnnV2SequenceLengths(TensorRtTensor tensor)
+    {
+        ValidateRnnV2Tensor(tensor, nameof(tensor));
+        NativeBridgeApi.SetRnnV2SequenceLengths(Line, _handle, tensor.Handle);
+    }
+
+    private void ValidateRnnV2Tensor(TensorRtTensor tensor, string parameterName)
+    {
+        if (tensor == null)
+        {
+            throw new System.ArgumentNullException(parameterName);
+        }
+
+        if (tensor.Line != Line)
+        {
+            throw new System.ArgumentException("RNNv2 layer and tensor must use the same TensorRT API line.", parameterName);
+        }
+    }
+
     /// <summary>
     /// Gets the optional TensorRT 8 RNNv2 initial cell state.
     /// 获取可选的 TensorRT 8 RNNv2 初始 cell state。

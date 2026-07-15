@@ -34,6 +34,17 @@ internal static partial class NativeBridgeApi
         return maxBatchSize;
     }
 
+    public static void SetBuilderMaxBatchSizeCompatibility(TensorRtApiLine line, SafeTensorRtObjectHandle builder, int maxBatchSize)
+    {
+        if (line != TensorRtApiLine.TensorRt8)
+        {
+            throw new BridgeProbeException(BridgeStatusCode.NotSupported, BridgeErrorCategory.TensorRt, "Builder max batch size is a legacy TensorRT 8 compatibility control.");
+        }
+
+        BridgeStatusCode status = NativeMethodsTensorRt.jyppx_trt8_builder_set_max_batch_size(builder, maxBatchSize);
+        NativeStatus.ThrowIfFailed(status);
+    }
+
     public static bool SetBuilderMaxThreads(TensorRtApiLine line, SafeTensorRtObjectHandle builder, int maxThreads)
     {
         int set;

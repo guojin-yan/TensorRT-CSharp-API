@@ -422,6 +422,19 @@ public sealed partial class TensorRtBuilderConfig : IDisposable
     public ulong MaxWorkspaceSizeCompatibilityInBytes => NativeBridgeApi.GetMaxWorkspaceSizeCompatibility(Line, _handle);
 
     /// <summary>
+    /// Sets the deprecated TensorRT 8 workspace limit in bytes.
+    /// 设置已弃用的 TensorRT 8 workspace 字节上限。
+    /// </summary>
+    /// <remarks>
+    /// Prefer <see cref="SetMemoryPoolLimit"/> with <see cref="TensorRtMemoryPoolType.Workspace"/> in portable code.
+    /// 跨版本代码请优先使用 <see cref="SetMemoryPoolLimit"/> 与 <see cref="TensorRtMemoryPoolType.Workspace"/>。
+    /// </remarks>
+    public void SetMaxWorkspaceSizeCompatibility(ulong workspaceSizeInBytes)
+    {
+        NativeBridgeApi.SetMaxWorkspaceSizeCompatibility(Line, _handle, workspaceSizeInBytes);
+    }
+
+    /// <summary>
     /// Gets TensorRT 8's legacy minimum timing-iteration count.
     /// 获取 TensorRT 8 legacy 最小 timing 迭代次数。
     /// </summary>
@@ -432,6 +445,19 @@ public sealed partial class TensorRtBuilderConfig : IDisposable
     /// <see cref="GetAverageTimingIterations"/>。
     /// </remarks>
     public int MinTimingIterationsCompatibility => NativeBridgeApi.GetMinTimingIterationsCompatibility(Line, _handle);
+
+    /// <summary>
+    /// Sets the deprecated TensorRT 8 minimum timing iteration count.
+    /// 设置已弃用的 TensorRT 8 minimum timing iteration 次数。
+    /// </summary>
+    /// <remarks>
+    /// Prefer <see cref="SetAverageTimingIterations"/> in portable code. TensorRT 10 and 11 report this method as unsupported.
+    /// 跨版本代码请优先使用 <see cref="SetAverageTimingIterations"/>；TensorRT 10/11 会将此方法报告为不支持。
+    /// </remarks>
+    public void SetMinTimingIterationsCompatibility(int iterations)
+    {
+        NativeBridgeApi.SetMinTimingIterationsCompatibility(Line, _handle, iterations);
+    }
 
     /// <summary>
     /// Sets the TensorRT tactic-source mask.

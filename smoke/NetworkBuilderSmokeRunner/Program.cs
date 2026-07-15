@@ -188,7 +188,10 @@ internal static class Program
 
         try
         {
-            return $"MaxBatchCompatibility={builder.MaxBatchSizeCompatibility}";
+            int before = builder.MaxBatchSizeCompatibility;
+            builder.SetMaxBatchSizeCompatibility(before);
+            int after = builder.MaxBatchSizeCompatibility;
+            return $"MaxBatchCompatibility={before}->{after}:Set=True";
         }
         catch (Exception exception) when (exception is BridgeProbeException || exception is NotSupportedException || exception is InvalidOperationException)
         {
@@ -234,7 +237,14 @@ internal static class Program
 
         try
         {
-            return $"LegacyConfigCompatibility=Workspace:{config.MaxWorkspaceSizeCompatibilityInBytes};MinTiming:{config.MinTimingIterationsCompatibility}";
+            ulong workspaceBefore = config.MaxWorkspaceSizeCompatibilityInBytes;
+            int minTimingBefore = config.MinTimingIterationsCompatibility;
+            config.SetMaxWorkspaceSizeCompatibility(workspaceBefore);
+            config.SetMinTimingIterationsCompatibility(minTimingBefore);
+            ulong workspaceAfter = config.MaxWorkspaceSizeCompatibilityInBytes;
+            int minTimingAfter = config.MinTimingIterationsCompatibility;
+            config.SetFlags(config.GetFlags());
+            return $"LegacyConfigCompatibility=Workspace:{workspaceBefore}->{workspaceAfter};MinTiming:{minTimingBefore}->{minTimingAfter};FlagsSet=True";
         }
         catch (Exception exception) when (exception is BridgeProbeException || exception is NotSupportedException || exception is InvalidOperationException)
         {

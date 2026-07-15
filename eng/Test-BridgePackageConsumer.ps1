@@ -995,8 +995,14 @@ static class HighLevelWrapperSurfaceProbe
                 metadata.HasRuntimeCapability + ":" + metadata.Runtime?.InterfaceMetadata + ":" + metadata.IsConsistent;
         Func<TensorRtEngine, bool> engineImplicitBatchCompatibility =
             static engine => engine.HasImplicitBatchDimensionCompatibility;
+        Action<TensorRtBuilder, int> setBuilderMaxBatchCompatibility =
+            static (builder, value) => builder.SetMaxBatchSizeCompatibility(value);
         Func<TensorRtBuilderConfig, int> serializedPluginPathCountCompatibility =
             static config => config.SerializedPluginPathCountCompatibility;
+        Action<TensorRtBuilderConfig, ulong> setMaxWorkspaceSizeCompatibility =
+            static (config, value) => config.SetMaxWorkspaceSizeCompatibility(value);
+        Action<TensorRtBuilderConfig, int> setMinTimingIterationsCompatibility =
+            static (config, value) => config.SetMinTimingIterationsCompatibility(value);
         Func<TensorRtLayer, int> rnnV2LayerCount = static layer => layer.GetRnnV2LayerCount();
         Func<TensorRtLayer, int> rnnV2HiddenSize = static layer => layer.GetRnnV2HiddenSize();
         Func<TensorRtLayer, int> rnnV2DataLength = static layer => layer.GetRnnV2DataLength();
@@ -1007,6 +1013,12 @@ static class HighLevelWrapperSurfaceProbe
         Func<TensorRtLayer, TensorRtTensor?> rnnV2CellState = static layer => layer.GetRnnV2CellState();
         Func<TensorRtLayer, TensorRtTensor?> rnnV2HiddenState = static layer => layer.GetRnnV2HiddenState();
         Func<TensorRtLayer, TensorRtTensor?> rnnV2SequenceLengths = static layer => layer.GetRnnV2SequenceLengths();
+        Action<TensorRtLayer, TensorRtRnnOperation> setRnnV2Operation = static (layer, value) => layer.SetRnnV2Operation(value);
+        Action<TensorRtLayer, TensorRtRnnDirection> setRnnV2Direction = static (layer, value) => layer.SetRnnV2Direction(value);
+        Action<TensorRtLayer, TensorRtRnnInputMode> setRnnV2InputMode = static (layer, value) => layer.SetRnnV2InputMode(value);
+        Action<TensorRtLayer, TensorRtTensor> setRnnV2CellState = static (layer, tensor) => layer.SetRnnV2CellState(tensor);
+        Action<TensorRtLayer, TensorRtTensor> setRnnV2HiddenState = static (layer, tensor) => layer.SetRnnV2HiddenState(tensor);
+        Action<TensorRtLayer, TensorRtTensor> setRnnV2SequenceLengths = static (layer, tensor) => layer.SetRnnV2SequenceLengths(tensor);
         Func<TensorRtLayer, int, TensorRtRnnGateType, bool, TensorRtRnnV2GateWeightsSnapshot> rnnV2WeightsForGate =
             static (layer, layerIndex, gate, inputWeights) => layer.GetRnnV2WeightsForGate(layerIndex, gate, inputWeights);
         Func<TensorRtLayer, int, TensorRtRnnGateType, bool, TensorRtRnnV2GateWeightsSnapshot> rnnV2BiasForGate =
@@ -2773,6 +2785,9 @@ static class HighLevelWrapperSurfaceProbe
             "cuda-memory-range",
             nameof(TensorRtEngine.HasImplicitBatchDimensionCompatibility),
             nameof(TensorRtBuilderConfig.SerializedPluginPathCountCompatibility),
+            nameof(TensorRtBuilder.SetMaxBatchSizeCompatibility),
+            nameof(TensorRtBuilderConfig.SetMaxWorkspaceSizeCompatibility),
+            nameof(TensorRtBuilderConfig.SetMinTimingIterationsCompatibility),
             nameof(TensorRtCallbackAllocatorReadiness),
             nameof(TensorRtCallbackAllocatorReadiness.Evaluate),
             nameof(TensorRtCallbackAllocatorReadinessSnapshot),
@@ -2800,6 +2815,12 @@ static class HighLevelWrapperSurfaceProbe
             nameof(TensorRtLayer.GetRnnV2CellState),
             nameof(TensorRtLayer.GetRnnV2HiddenState),
             nameof(TensorRtLayer.GetRnnV2SequenceLengths),
+            nameof(TensorRtLayer.SetRnnV2Operation),
+            nameof(TensorRtLayer.SetRnnV2Direction),
+            nameof(TensorRtLayer.SetRnnV2InputMode),
+            nameof(TensorRtLayer.SetRnnV2CellState),
+            nameof(TensorRtLayer.SetRnnV2HiddenState),
+            nameof(TensorRtLayer.SetRnnV2SequenceLengths),
             nameof(TensorRtLayer.GetRnnV2WeightsForGate),
             nameof(TensorRtLayer.GetRnnV2BiasForGate),
             nameof(TensorRtTensor.IsOwnerLifetimeBound),

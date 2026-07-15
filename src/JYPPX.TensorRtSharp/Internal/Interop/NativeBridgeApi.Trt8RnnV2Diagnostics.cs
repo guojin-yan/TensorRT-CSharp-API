@@ -41,6 +41,36 @@ internal static partial class NativeBridgeApi
         return (TensorRtRnnInputMode)GetRnnV2Int(line, layer, NativeMethodsTensorRt.jyppx_trt8_rnn_v2_layer_get_input_mode, nameof(GetRnnV2InputMode));
     }
 
+    public static void SetRnnV2Operation(TensorRtApiLine line, SafeTensorRtObjectHandle layer, TensorRtRnnOperation operation)
+    {
+        SetRnnV2Int(line, layer, (int)operation, NativeMethodsTensorRt.jyppx_trt8_rnn_v2_layer_set_operation, nameof(SetRnnV2Operation));
+    }
+
+    public static void SetRnnV2Direction(TensorRtApiLine line, SafeTensorRtObjectHandle layer, TensorRtRnnDirection direction)
+    {
+        SetRnnV2Int(line, layer, (int)direction, NativeMethodsTensorRt.jyppx_trt8_rnn_v2_layer_set_direction, nameof(SetRnnV2Direction));
+    }
+
+    public static void SetRnnV2InputMode(TensorRtApiLine line, SafeTensorRtObjectHandle layer, TensorRtRnnInputMode inputMode)
+    {
+        SetRnnV2Int(line, layer, (int)inputMode, NativeMethodsTensorRt.jyppx_trt8_rnn_v2_layer_set_input_mode, nameof(SetRnnV2InputMode));
+    }
+
+    public static void SetRnnV2CellState(TensorRtApiLine line, SafeTensorRtObjectHandle layer, SafeTensorRtObjectHandle tensor)
+    {
+        SetRnnV2Tensor(line, layer, tensor, NativeMethodsTensorRt.jyppx_trt8_rnn_v2_layer_set_cell_state, nameof(SetRnnV2CellState));
+    }
+
+    public static void SetRnnV2HiddenState(TensorRtApiLine line, SafeTensorRtObjectHandle layer, SafeTensorRtObjectHandle tensor)
+    {
+        SetRnnV2Tensor(line, layer, tensor, NativeMethodsTensorRt.jyppx_trt8_rnn_v2_layer_set_hidden_state, nameof(SetRnnV2HiddenState));
+    }
+
+    public static void SetRnnV2SequenceLengths(TensorRtApiLine line, SafeTensorRtObjectHandle layer, SafeTensorRtObjectHandle tensor)
+    {
+        SetRnnV2Tensor(line, layer, tensor, NativeMethodsTensorRt.jyppx_trt8_rnn_v2_layer_set_sequence_lengths, nameof(SetRnnV2SequenceLengths));
+    }
+
     public static SafeTensorRtObjectHandle? GetRnnV2CellState(TensorRtApiLine line, SafeTensorRtObjectHandle layer)
     {
         return GetRnnV2OptionalTensor(
@@ -114,6 +144,20 @@ internal static partial class NativeBridgeApi
         BridgeStatusCode status = trt8(layer, out int value);
         NativeStatus.ThrowIfFailed(status);
         return value;
+    }
+
+    private static void SetRnnV2Int(TensorRtApiLine line, SafeTensorRtObjectHandle layer, int value, LayerIntSetter trt8, string apiName)
+    {
+        EnsureTensorRt8RnnV2(line, apiName);
+        BridgeStatusCode status = trt8(layer, value);
+        NativeStatus.ThrowIfFailed(status);
+    }
+
+    private static void SetRnnV2Tensor(TensorRtApiLine line, SafeTensorRtObjectHandle layer, SafeTensorRtObjectHandle tensor, LayerTensorSetter trt8, string apiName)
+    {
+        EnsureTensorRt8RnnV2(line, apiName);
+        BridgeStatusCode status = trt8(layer, tensor);
+        NativeStatus.ThrowIfFailed(status);
     }
 
     private static SafeTensorRtObjectHandle? GetRnnV2OptionalTensor(
@@ -219,6 +263,8 @@ internal static partial class NativeBridgeApi
     private delegate BridgeStatusCode LayerTensorGetter(
         SafeTensorRtObjectHandle layer,
         out SafeTensorRtObjectHandle outTensor);
+
+    private delegate BridgeStatusCode LayerTensorSetter(SafeTensorRtObjectHandle layer, SafeTensorRtObjectHandle tensor);
 
     private delegate BridgeStatusCode RnnV2GateWeightsGetter(
         SafeTensorRtObjectHandle layer,

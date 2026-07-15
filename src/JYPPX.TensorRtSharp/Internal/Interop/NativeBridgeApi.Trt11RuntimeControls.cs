@@ -170,8 +170,13 @@ internal static partial class NativeBridgeApi
 
     public static void SetBuilderConfigFlags(TensorRtApiLine line, SafeTensorRtObjectHandle config, TensorRtBuilderFlags flags)
     {
-        EnsureTensorRt11DeploymentApi(line, nameof(SetBuilderConfigFlags));
-        BridgeStatusCode status = NativeMethodsTensorRt.jyppx_trt11_builder_config_set_flags(config, (uint)flags);
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_builder_config_set_flags(config, (uint)flags),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_builder_config_set_flags(config, (uint)flags),
+            TensorRtApiLine.TensorRt10 => throw new BridgeProbeException(BridgeStatusCode.NotSupported, BridgeErrorCategory.TensorRt, "IBuilderConfig::setFlags is exposed by this bridge for TensorRT 8 and 11; TensorRT 10 does not provide this builder-config API."),
+            _ => throw UnsupportedLine()
+        };
         NativeStatus.ThrowIfFailed(status);
     }
 

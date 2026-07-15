@@ -17,7 +17,8 @@ public sealed class PluginRegistryInventoryTests
         Assert.Contains("GetBuilderCapabilityPluginCreatorFieldName(line, capability, creatorIndex, fieldIndex)", inventoryMethod);
         Assert.Contains("GetBuilderCapabilityPluginCreatorFieldMetadata(line, capability, creatorIndex, fieldIndex", inventoryMethod);
         Assert.Contains("fields.Add(new TensorRtPluginFieldInfo(fieldName, fieldType, length, hasData));", inventoryMethod);
-        Assert.Contains("fields));", inventoryMethod);
+        Assert.Contains("fields,", inventoryMethod);
+        Assert.Contains("tensorRtVersion));", inventoryMethod);
         Assert.DoesNotContain("Array.Empty<TensorRtPluginFieldInfo>()", inventoryMethod);
     }
 
@@ -163,7 +164,8 @@ public sealed class PluginRegistryInventoryTests
         Assert.Contains("return \"IPluginCreator\";", interopSource);
         Assert.Contains("public bool IsPluginRegistryAvailable", builderSource);
         Assert.Contains("TryIsPluginRegistryAvailable", builderSource);
-        Assert.Contains("TensorRt8GlobalAndCapabilityPluginRegistriesSkipped=True", smokeProgram);
+        Assert.Contains("TensorRt8GlobalPluginRegistrySkipped=True", smokeProgram);
+        Assert.DoesNotContain("TensorRt8GlobalAndCapabilityPluginRegistriesSkipped", smokeProgram);
         Assert.DoesNotContain("PluginRegistryInventoryRequiresTensorRt10Or11", smokeProgram);
 
         Assert.Contains("trt8-plugin-creator-get-plugin-name-deferred", deferred8);
@@ -287,7 +289,8 @@ public sealed class PluginRegistryInventoryTests
         Assert.Contains("trt11-runtime-get-plugin-registry-deferred", deferred11);
 
         Assert.Contains("RuntimePluginRegistry", smokeProgram);
-        Assert.Contains("TensorRt8GlobalAndCapabilityPluginRegistriesSkipped=True", smokeProgram);
+        Assert.Contains("TensorRt8GlobalPluginRegistrySkipped=True", smokeProgram);
+        Assert.DoesNotContain("TensorRt8GlobalAndCapabilityPluginRegistriesSkipped", smokeProgram);
         Assert.Contains("ValidateRuntimeLocalLookup", smokeProgram);
         Assert.Contains("TryIsPluginRegistryAvailable", smokeProgram);
         Assert.Contains("TryGetPluginRegistryInventory", smokeProgram);

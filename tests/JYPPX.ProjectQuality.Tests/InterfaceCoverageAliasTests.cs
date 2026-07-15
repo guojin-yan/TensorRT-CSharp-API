@@ -128,7 +128,7 @@ public sealed class InterfaceCoverageAliasTests
         string script = ReadCoverageScript();
 
         Assert.Contains("\"Global::getNvOnnxParserVersion\" = @(\"global-get-onnx-parser-version\")", script);
-        Assert.Contains("\"Global::getBuilderPluginRegistry\" = @(\"builder-capability-plugin-registry\")", script);
+        Assert.Contains("\"Global::getBuilderPluginRegistry\" = @(\"id:*builder-capability-plugin-registry-exists\")", script);
         Assert.Contains("\"IBuilder::getPluginRegistry\" = @(\"id:*builder-plugin-registry-exists\", \"id:*builder-plugin-registry-get-creator-count\"", script);
         Assert.Contains("\"IRuntime::getPluginRegistry\" = @(\"id:*runtime-plugin-registry-exists\", \"id:*runtime-plugin-registry-get-creator-count\"", script);
         Assert.Contains("function Find-ExplicitTensorRtInterfaceAliasApis", script);
