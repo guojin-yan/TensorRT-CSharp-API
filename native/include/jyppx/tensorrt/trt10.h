@@ -12,6 +12,14 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_plugin_v2_layer_get_plugin_version(JYP
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_plugin_v2_layer_get_plugin_namespace(JYPPX_TensorRtLayer* layer, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_plugin_v2_layer_get_serialization_size(JYPPX_TensorRtLayer* layer, size_t* out_serialization_size);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_plugin_v2_layer_get_tensor_rt_version(JYPPX_TensorRtLayer* layer, int32_t* out_tensor_rt_version);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_plugin_v2_layer_get_plugin_output_count(JYPPX_TensorRtLayer* layer, int32_t* out_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_plugin_v2_layer_get_capability_presence(JYPPX_TensorRtLayer* layer, JYPPX_Boolean* out_has_ext, JYPPX_Boolean* out_has_io_ext, JYPPX_Boolean* out_has_dynamic_ext);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_plugin_v2_layer_get_legacy_output_dimensions(JYPPX_TensorRtLayer* layer, int32_t output_index, JYPPX_TensorRtDims* out_dimensions);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_plugin_v2_layer_get_legacy_workspace_size(JYPPX_TensorRtLayer* layer, int32_t max_batch_size, size_t* out_workspace_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_plugin_v2_layer_supports_legacy_format(JYPPX_TensorRtLayer* layer, int32_t data_type, int32_t tensor_format, JYPPX_Boolean* out_supported);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_plugin_v2_layer_get_output_data_type(JYPPX_TensorRtLayer* layer, int32_t output_index, int32_t* out_data_type);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_plugin_v2_layer_can_broadcast_input_across_batch(JYPPX_TensorRtLayer* layer, int32_t input_index, JYPPX_Boolean* out_can_broadcast);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_plugin_v2_layer_is_output_broadcast_across_batch(JYPPX_TensorRtLayer* layer, int32_t output_index, const uint8_t* input_is_broadcasted, size_t input_count, JYPPX_Boolean* out_is_broadcast);
 /* END TRT10 PLUGIN V2 LAYER METADATA SNAPSHOT DECLARATIONS */
 
 /* BEGIN TRT10 PLUGIN V3 LAYER METADATA SNAPSHOT DECLARATIONS */

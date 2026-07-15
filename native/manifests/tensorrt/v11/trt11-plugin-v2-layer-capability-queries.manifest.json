@@ -1,0 +1,80 @@
+{
+  "$schema": "../../bridge-api.schema.json",
+  "module": "tensorrt",
+  "versionLine": "11",
+  "apis": [
+    {
+      "id": "trt11-plugin-v2-get-nb-outputs-owner-scoped",
+      "entryPoint": "jyppx_trt11_plugin_v2_layer_get_plugin_output_count",
+      "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": false,
+      "manualReason": "Copies IPluginV2 output count while the network owner lease is held",
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "out_count", "type": "int32_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt11-plugin-v2-layer-get-capability-presence",
+      "entryPoint": "jyppx_trt11_plugin_v2_layer_get_capability_presence",
+      "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": true,
+      "manualReason": "Reports Ext, IOExt, and DynamicExt presence without exposing borrowed plugin pointers",
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "out_has_ext", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" },
+        { "name": "out_has_io_ext", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" },
+        { "name": "out_has_dynamic_ext", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-plugin-v2-get-output-dimensions-owner-scoped",
+      "entryPoint": "jyppx_trt11_plugin_v2_layer_get_legacy_output_dimensions",
+      "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": true,
+      "manualReason": "Copies legacy IPluginV2 output dimensions using dimensions copied from owner-held layer inputs",
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "output_index", "type": "int32_t", "direction": "in" },
+        { "name": "out_dimensions", "type": "JYPPX_TensorRtDims*", "direction": "out", "managedType": "out NativeTensorRtDims", "moduleManagedType": "out NativeTensorRtDims" }
+      ]
+    },
+    {
+      "id": "trt11-plugin-v2-get-workspace-size-owner-scoped",
+      "entryPoint": "jyppx_trt11_plugin_v2_layer_get_legacy_workspace_size",
+      "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": true,
+      "manualReason": "Copies legacy IPluginV2 workspace size without exposing device memory",
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "max_batch_size", "type": "int32_t", "direction": "in" },
+        { "name": "out_workspace_size", "type": "size_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" }
+      ]
+    },
+    {
+      "id": "trt11-plugin-v2-supports-format-owner-scoped",
+      "entryPoint": "jyppx_trt11_plugin_v2_layer_supports_legacy_format",
+      "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": true,
+      "manualReason": "Copies the legacy IPluginV2 type-format support result",
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "data_type", "type": "int32_t", "direction": "in" },
+        { "name": "tensor_format", "type": "int32_t", "direction": "in" },
+        { "name": "out_supported", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt11-plugin-v2-ext-get-output-data-type-owner-scoped",
+      "entryPoint": "jyppx_trt11_plugin_v2_layer_get_output_data_type",
+      "returnType": "BridgeStatusCode", "ownership": "caller-owned", "manualOverride": true,
+      "manualReason": "Copies IPluginV2Ext output type using data types copied from owner-held layer inputs",
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "output_index", "type": "int32_t", "direction": "in" },
+        { "name": "out_data_type", "type": "int32_t*", "direction": "out" }
+      ]
+    }
+  ]
+}

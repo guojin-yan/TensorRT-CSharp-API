@@ -84,6 +84,35 @@ internal static class Program
         }
         Console.WriteLine($"PluginV2LayerMetadataRejected=True Layer={ownerBoundNonPluginLayer.Name}:{ownerBoundNonPluginLayer.Type} Diagnostic={pluginMetadataDiagnostic}");
 
+        string pluginV2CapabilityDiagnostic;
+        try
+        {
+            _ = ownerBoundNonPluginLayer.SupportsPluginV2LegacyFormat(
+                TensorRtDataType.Float,
+                TensorRtTensorFormat.Linear);
+            throw new InvalidOperationException(
+                "A non-plugin layer unexpectedly accepted the PluginV2 capability query.");
+        }
+        catch (BridgeProbeException exception)
+        {
+            pluginV2CapabilityDiagnostic = exception.Message;
+        }
+        Console.WriteLine($"PluginV2CapabilityQueryRejected=True Layer={ownerBoundNonPluginLayer.Name}:{ownerBoundNonPluginLayer.Type} Diagnostic={pluginV2CapabilityDiagnostic}");
+
+        if (line == TensorRtApiLine.TensorRt11)
+        {
+            try
+            {
+                _ = ownerBoundNonPluginLayer.CanPluginV2BroadcastInputAcrossBatch(0);
+                throw new InvalidOperationException(
+                    "TensorRT 11 unexpectedly exposed the removed PluginV2 broadcast query.");
+            }
+            catch (BridgeProbeException exception) when (exception.StatusCode == BridgeStatusCode.NotSupported)
+            {
+                Console.WriteLine($"PluginV2BroadcastQueryUnsupported=True Diagnostic={exception.Message}");
+            }
+        }
+
         if (ownerBoundNonPluginLayer.TryGetPluginV3Metadata(out TensorRtPluginV3LayerMetadata? unexpectedPluginV3Metadata, out string pluginV3MetadataDiagnostic))
         {
             throw new InvalidOperationException($"A non-plugin layer unexpectedly returned PluginV3 metadata: {unexpectedPluginV3Metadata}");

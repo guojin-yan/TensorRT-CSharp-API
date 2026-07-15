@@ -2,6 +2,7 @@
 
 #include <cstring>
 #include <exception>
+#include <memory>
 #include <new>
 #include <sstream>
 #include <string>
@@ -9660,7 +9661,9 @@ JYPPX_StatusCode jyppx_trt8_execution_context_get_shape_binding(
 #include "modules/plugin/trt8_plugin_registry_inventory.inc"
 
 #define JYPPX_TRT_PLUGIN_V2_LAYER_PREFIX jyppx_trt8_
+#define JYPPX_TRT_PLUGIN_V2_LAYER_ENABLE_BROADCAST_EXPORTS 1
 #include "../common/plugin_v2_layer_metadata_snapshot.inc"
+#undef JYPPX_TRT_PLUGIN_V2_LAYER_ENABLE_BROADCAST_EXPORTS
 #undef JYPPX_TRT_PLUGIN_V2_LAYER_PREFIX
 #include "modules/deferred/twenty_third_batch_deferred.inc"
 #include "modules/deferred/cross_version_seventh_batch_deferred.inc"

@@ -3,6 +3,7 @@
 #include <cstring>
 #include <exception>
 #include <limits>
+#include <memory>
 #include <mutex>
 #include <new>
 #include <sstream>

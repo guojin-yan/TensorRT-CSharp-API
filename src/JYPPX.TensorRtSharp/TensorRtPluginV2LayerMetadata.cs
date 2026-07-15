@@ -23,7 +23,11 @@ public sealed class TensorRtPluginV2LayerMetadata
         string pluginVersion,
         string pluginNamespace,
         ulong serializationSize,
-        int packedTensorRtVersion)
+        int packedTensorRtVersion,
+        int outputCount,
+        bool hasExtCapability,
+        bool hasIoExtCapability,
+        bool hasDynamicExtCapability)
     {
         Line = line;
         PluginType = pluginType ?? string.Empty;
@@ -31,6 +35,10 @@ public sealed class TensorRtPluginV2LayerMetadata
         PluginNamespace = pluginNamespace ?? string.Empty;
         SerializationSize = serializationSize;
         PackedTensorRtVersion = packedTensorRtVersion;
+        OutputCount = outputCount;
+        HasExtCapability = hasExtCapability;
+        HasIoExtCapability = hasIoExtCapability;
+        HasDynamicExtCapability = hasDynamicExtCapability;
     }
 
     /// <summary>Gets the TensorRT API line used for the query. 获取查询使用的 TensorRT API line。</summary>
@@ -54,6 +62,18 @@ public sealed class TensorRtPluginV2LayerMetadata
     /// </summary>
     public int PackedTensorRtVersion { get; }
 
+    /// <summary>Gets the output count reported by <c>IPluginV2::getNbOutputs</c>. 获取 plugin 报告的输出数量。</summary>
+    public int OutputCount { get; }
+
+    /// <summary>Gets whether the plugin implements <c>IPluginV2Ext</c>. 获取 plugin 是否实现 IPluginV2Ext。</summary>
+    public bool HasExtCapability { get; }
+
+    /// <summary>Gets whether the plugin implements <c>IPluginV2IOExt</c>. 获取 plugin 是否实现 IPluginV2IOExt。</summary>
+    public bool HasIoExtCapability { get; }
+
+    /// <summary>Gets whether the plugin implements <c>IPluginV2DynamicExt</c>. 获取 plugin 是否实现 IPluginV2DynamicExt。</summary>
+    public bool HasDynamicExtCapability { get; }
+
     /// <summary>Gets the PluginV2 API tag stored in the upper byte. 获取高字节中的 PluginV2 API tag。</summary>
     public byte PluginApiVersionTag => (byte)((uint)PackedTensorRtVersion >> 24);
 
@@ -73,11 +93,14 @@ public sealed class TensorRtPluginV2LayerMetadata
     public bool IsConsistent =>
         !string.IsNullOrWhiteSpace(PluginType) &&
         !string.IsNullOrWhiteSpace(PluginVersion) &&
-        TensorRtVersion > 0;
+        TensorRtVersion > 0 &&
+        OutputCount > 0 &&
+        (!HasIoExtCapability || HasExtCapability) &&
+        (!HasDynamicExtCapability || HasExtCapability);
 
     /// <summary>Returns a compact pointer-free diagnostic string. 返回简短的无指针诊断字符串。</summary>
     public override string ToString() =>
-        $"{PluginType}:{PluginVersion}:{PluginNamespace}:bytes={SerializationSize}:trt={TensorRtMajor}.{TensorRtMinor}.{TensorRtPatch}:tag={PluginApiVersionTag}";
+        $"{PluginType}:{PluginVersion}:{PluginNamespace}:outputs={OutputCount}:ext={HasExtCapability}/{HasIoExtCapability}/{HasDynamicExtCapability}:bytes={SerializationSize}:trt={TensorRtMajor}.{TensorRtMinor}.{TensorRtPatch}:tag={PluginApiVersionTag}";
 }
 
 public sealed partial class TensorRtLayer
@@ -95,13 +118,81 @@ public sealed partial class TensorRtLayer
     /// <returns>Copied PluginV2 metadata. 已复制的 PluginV2 元数据。</returns>
     public TensorRtPluginV2LayerMetadata GetPluginV2Metadata()
     {
-        if (_ownerLease == null)
-        {
-            throw new InvalidOperationException(
-                "PluginV2 metadata requires a network-owned layer. Retrieve the layer through TensorRtNetworkDefinition.GetLayer.");
-        }
-
+        EnsurePluginV2OwnerLease();
         return NativeBridgeApi.GetPluginV2LayerMetadata(Line, _handle);
+    }
+
+    /// <summary>
+    /// Evaluates the legacy <c>IPluginV2::getOutputDimensions</c> callback using dimensions copied from this layer's inputs.
+    /// 使用当前 layer 输入维度副本执行旧版 IPluginV2::getOutputDimensions 查询。
+    /// </summary>
+    public TensorRtDims GetPluginV2LegacyOutputDimensions(int outputIndex)
+    {
+        EnsurePluginV2OwnerLease();
+        if (outputIndex < 0) { throw new ArgumentOutOfRangeException(nameof(outputIndex)); }
+        return NativeBridgeApi.GetPluginV2LegacyOutputDimensions(Line, _handle, outputIndex);
+    }
+
+    /// <summary>
+    /// Gets the legacy workspace-size requirement for a positive maximum batch size without exposing device memory.
+    /// 获取给定正数最大 batch size 的旧版 workspace 字节数，不暴露设备内存。
+    /// </summary>
+    public ulong GetPluginV2LegacyWorkspaceSize(int maxBatchSize)
+    {
+        EnsurePluginV2OwnerLease();
+        if (maxBatchSize <= 0) { throw new ArgumentOutOfRangeException(nameof(maxBatchSize)); }
+        return NativeBridgeApi.GetPluginV2LegacyWorkspaceSize(Line, _handle, maxBatchSize);
+    }
+
+    /// <summary>
+    /// Evaluates legacy <c>IPluginV2::supportsFormat</c> for a copied data type and tensor format.
+    /// 使用复制的 data type 与 tensor format 执行旧版 IPluginV2::supportsFormat 查询。
+    /// </summary>
+    public bool SupportsPluginV2LegacyFormat(TensorRtDataType dataType, TensorRtTensorFormat tensorFormat)
+    {
+        EnsurePluginV2OwnerLease();
+        if (!Enum.IsDefined(typeof(TensorRtDataType), dataType)) { throw new ArgumentOutOfRangeException(nameof(dataType)); }
+        if (!Enum.IsDefined(typeof(TensorRtTensorFormat), tensorFormat) || tensorFormat == TensorRtTensorFormat.Unknown)
+        {
+            throw new ArgumentOutOfRangeException(nameof(tensorFormat));
+        }
+        return NativeBridgeApi.SupportsPluginV2LegacyFormat(Line, _handle, dataType, tensorFormat);
+    }
+
+    /// <summary>
+    /// Gets the output data type reported by <c>IPluginV2Ext</c> using types copied from this layer's inputs.
+    /// 使用当前 layer 输入类型副本获取 IPluginV2Ext 报告的输出类型。
+    /// </summary>
+    public TensorRtDataType GetPluginV2OutputDataType(int outputIndex)
+    {
+        EnsurePluginV2OwnerLease();
+        if (outputIndex < 0) { throw new ArgumentOutOfRangeException(nameof(outputIndex)); }
+        return NativeBridgeApi.GetPluginV2OutputDataType(Line, _handle, outputIndex);
+    }
+
+    /// <summary>
+    /// Queries the deprecated implicit-batch input broadcast capability available on TensorRT 8 and 10.
+    /// 查询 TensorRT 8/10 提供的旧版 implicit-batch 输入广播能力。
+    /// </summary>
+    public bool CanPluginV2BroadcastInputAcrossBatch(int inputIndex)
+    {
+        EnsurePluginV2OwnerLease();
+        if (inputIndex < 0) { throw new ArgumentOutOfRangeException(nameof(inputIndex)); }
+        return NativeBridgeApi.CanPluginV2BroadcastInputAcrossBatch(Line, _handle, inputIndex);
+    }
+
+    /// <summary>
+    /// Queries deprecated implicit-batch output broadcasting from caller-owned input broadcast flags on TensorRT 8 and 10.
+    /// 使用 caller-owned 输入广播标志查询 TensorRT 8/10 的旧版输出广播行为。
+    /// </summary>
+    public bool IsPluginV2OutputBroadcastAcrossBatch(int outputIndex, System.Collections.Generic.IReadOnlyList<bool> inputIsBroadcasted)
+    {
+        EnsurePluginV2OwnerLease();
+        if (outputIndex < 0) { throw new ArgumentOutOfRangeException(nameof(outputIndex)); }
+        if (inputIsBroadcasted == null) { throw new ArgumentNullException(nameof(inputIsBroadcasted)); }
+        byte[] flags = new byte[inputIsBroadcasted.Count];
+        for (int index = 0; index < flags.Length; ++index) { flags[index] = inputIsBroadcasted[index] ? (byte)1 : (byte)0; }
+        return NativeBridgeApi.IsPluginV2OutputBroadcastAcrossBatch(Line, _handle, outputIndex, flags);
     }
 
     /// <summary>
@@ -138,5 +229,14 @@ public sealed partial class TensorRtLayer
                exception is EntryPointNotFoundException ||
                exception is SEHException ||
                exception is AccessViolationException;
+    }
+
+    private void EnsurePluginV2OwnerLease()
+    {
+        if (_ownerLease == null)
+        {
+            throw new InvalidOperationException(
+                "PluginV2 queries require a network-owned layer. Retrieve the layer through TensorRtNetworkDefinition.GetLayer.");
+        }
     }
 }

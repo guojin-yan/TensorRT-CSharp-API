@@ -2,6 +2,7 @@
 
 #include <cstring>
 #include <exception>
+#include <memory>
 #include <mutex>
 #include <new>
 #include <sstream>
@@ -10656,7 +10657,9 @@ JYPPX_StatusCode jyppx_trt10_resize_layer_set_resize_mode(JYPPX_TensorRtLayer* l
 #undef JYPPX_TRT_PLUGIN_PREFIX
 
 #define JYPPX_TRT_PLUGIN_V2_LAYER_PREFIX jyppx_trt10_
+#define JYPPX_TRT_PLUGIN_V2_LAYER_ENABLE_BROADCAST_EXPORTS 1
 #include "../common/plugin_v2_layer_metadata_snapshot.inc"
+#undef JYPPX_TRT_PLUGIN_V2_LAYER_ENABLE_BROADCAST_EXPORTS
 #undef JYPPX_TRT_PLUGIN_V2_LAYER_PREFIX
 #define JYPPX_TRT_PLUGIN_V3_LAYER_PREFIX jyppx_trt10_
 #include "../common/plugin_v3_layer_metadata_snapshot.inc"

@@ -4057,6 +4057,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_enqueue_deferred(void);
 // generated from manifest id=trt10-plugin-v2-ext-can-broadcast-input-across-batch-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_ext_can_broadcast_input_across_batch_deferred(void);
 
+// generated from manifest id=trt10-plugin-v2-ext-can-broadcast-input-across-batch-owner-scoped
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_layer_can_broadcast_input_across_batch(JYPPX_TensorRtLayer* layer, int32_t input_index, JYPPX_Boolean* out_can_broadcast);
+
 // generated from manifest id=trt10-plugin-v2-ext-clone-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_ext_clone_deferred(void);
 
@@ -4066,17 +4069,29 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_ext_configure_plugin_deferre
 // generated from manifest id=trt10-plugin-v2-ext-get-output-data-type-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_ext_get_output_data_type_deferred(void);
 
+// generated from manifest id=trt10-plugin-v2-ext-get-output-data-type-owner-scoped
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_layer_get_output_data_type(JYPPX_TensorRtLayer* layer, int32_t output_index, int32_t* out_data_type);
+
 // generated from manifest id=trt10-plugin-v2-ext-get-tensor-rt-version-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_ext_get_tensor_rt_version_deferred(void);
 
 // generated from manifest id=trt10-plugin-v2-ext-is-output-broadcast-across-batch-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_ext_is_output_broadcast_across_batch_deferred(void);
 
+// generated from manifest id=trt10-plugin-v2-ext-is-output-broadcast-across-batch-owner-scoped
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_layer_is_output_broadcast_across_batch(JYPPX_TensorRtLayer* layer, int32_t output_index, const uint8_t* input_is_broadcasted, size_t input_count, JYPPX_Boolean* out_is_broadcast);
+
 // generated from manifest id=trt10-plugin-v2-get-nb-outputs-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_get_nb_outputs_deferred(void);
 
+// generated from manifest id=trt10-plugin-v2-get-nb-outputs-owner-scoped
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_layer_get_plugin_output_count(JYPPX_TensorRtLayer* layer, int32_t* out_count);
+
 // generated from manifest id=trt10-plugin-v2-get-output-dimensions-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_get_output_dimensions_deferred(void);
+
+// generated from manifest id=trt10-plugin-v2-get-output-dimensions-owner-scoped
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_layer_get_legacy_output_dimensions(JYPPX_TensorRtLayer* layer, int32_t output_index, JYPPX_TensorRtDims* out_dimensions);
 
 // generated from manifest id=trt10-plugin-v2-get-plugin-namespace-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_get_plugin_namespace_deferred(void);
@@ -4096,6 +4111,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_get_tensor_rt_version_deferr
 // generated from manifest id=trt10-plugin-v2-get-workspace-size-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_get_workspace_size_deferred(void);
 
+// generated from manifest id=trt10-plugin-v2-get-workspace-size-owner-scoped
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_layer_get_legacy_workspace_size(JYPPX_TensorRtLayer* layer, int32_t max_batch_size, size_t* out_workspace_size);
+
 // generated from manifest id=trt10-plugin-v2-initialize-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_initialize_deferred(void);
 
@@ -4110,6 +4128,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_io_ext_supports_format_combi
 
 // generated from manifest id=trt10-plugin-v2-io-ext-supports-format-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_io_ext_supports_format_deferred(void);
+
+// generated from manifest id=trt10-plugin-v2-layer-get-capability-presence
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_layer_get_capability_presence(JYPPX_TensorRtLayer* layer, JYPPX_Boolean* out_has_ext, JYPPX_Boolean* out_has_io_ext, JYPPX_Boolean* out_has_dynamic_ext);
 
 // generated from manifest id=trt10-plugin-v2-layer-get-plugin-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_layer_get_plugin_deferred(void);
@@ -4137,6 +4158,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_set_plugin_namespace_deferre
 
 // generated from manifest id=trt10-plugin-v2-supports-format-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_supports_format_deferred(void);
+
+// generated from manifest id=trt10-plugin-v2-supports-format-owner-scoped
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_layer_supports_legacy_format(JYPPX_TensorRtLayer* layer, int32_t data_type, int32_t tensor_format, JYPPX_Boolean* out_supported);
 
 // generated from manifest id=trt10-plugin-v2-terminate-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_plugin_v2_terminate_deferred(void);
@@ -7642,14 +7666,23 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt11_plugin_v2_ext_configure_plugin_deferre
 // generated from manifest id=trt11-plugin-v2-ext-get-output-data-type-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_plugin_v2_ext_get_output_data_type_deferred(void);
 
+// generated from manifest id=trt11-plugin-v2-ext-get-output-data-type-owner-scoped
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_plugin_v2_layer_get_output_data_type(JYPPX_TensorRtLayer* layer, int32_t output_index, int32_t* out_data_type);
+
 // generated from manifest id=trt11-plugin-v2-ext-get-tensor-rt-version-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_plugin_v2_ext_get_tensor_rt_version_deferred(void);
 
 // generated from manifest id=trt11-plugin-v2-get-nb-outputs-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_plugin_v2_get_nb_outputs_deferred(void);
 
+// generated from manifest id=trt11-plugin-v2-get-nb-outputs-owner-scoped
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_plugin_v2_layer_get_plugin_output_count(JYPPX_TensorRtLayer* layer, int32_t* out_count);
+
 // generated from manifest id=trt11-plugin-v2-get-output-dimensions-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_plugin_v2_get_output_dimensions_deferred(void);
+
+// generated from manifest id=trt11-plugin-v2-get-output-dimensions-owner-scoped
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_plugin_v2_layer_get_legacy_output_dimensions(JYPPX_TensorRtLayer* layer, int32_t output_index, JYPPX_TensorRtDims* out_dimensions);
 
 // generated from manifest id=trt11-plugin-v2-get-plugin-namespace-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_plugin_v2_get_plugin_namespace_deferred(void);
@@ -7669,6 +7702,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt11_plugin_v2_get_tensor_rt_version_deferr
 // generated from manifest id=trt11-plugin-v2-get-workspace-size-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_plugin_v2_get_workspace_size_deferred(void);
 
+// generated from manifest id=trt11-plugin-v2-get-workspace-size-owner-scoped
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_plugin_v2_layer_get_legacy_workspace_size(JYPPX_TensorRtLayer* layer, int32_t max_batch_size, size_t* out_workspace_size);
+
 // generated from manifest id=trt11-plugin-v2-initialize-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_plugin_v2_initialize_deferred(void);
 
@@ -7683,6 +7719,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt11_plugin_v2_io_ext_supports_format_combi
 
 // generated from manifest id=trt11-plugin-v2-io-ext-supports-format-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_plugin_v2_io_ext_supports_format_deferred(void);
+
+// generated from manifest id=trt11-plugin-v2-layer-get-capability-presence
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_plugin_v2_layer_get_capability_presence(JYPPX_TensorRtLayer* layer, JYPPX_Boolean* out_has_ext, JYPPX_Boolean* out_has_io_ext, JYPPX_Boolean* out_has_dynamic_ext);
 
 // generated from manifest id=trt11-plugin-v2-layer-get-plugin-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_plugin_v2_layer_get_plugin_deferred(void);
@@ -7710,6 +7749,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt11_plugin_v2_set_plugin_namespace_deferre
 
 // generated from manifest id=trt11-plugin-v2-supports-format-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_plugin_v2_supports_format_deferred(void);
+
+// generated from manifest id=trt11-plugin-v2-supports-format-owner-scoped
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_plugin_v2_layer_supports_legacy_format(JYPPX_TensorRtLayer* layer, int32_t data_type, int32_t tensor_format, JYPPX_Boolean* out_supported);
 
 // generated from manifest id=trt11-plugin-v2-terminate-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_plugin_v2_terminate_deferred(void);
@@ -10549,6 +10591,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_enqueue_deferred(void);
 // generated from manifest id=trt8-plugin-v2-ext-can-broadcast-input-across-batch-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_ext_can_broadcast_input_across_batch_deferred(void);
 
+// generated from manifest id=trt8-plugin-v2-ext-can-broadcast-input-across-batch-owner-scoped
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_layer_can_broadcast_input_across_batch(JYPPX_TensorRtLayer* layer, int32_t input_index, JYPPX_Boolean* out_can_broadcast);
+
 // generated from manifest id=trt8-plugin-v2-ext-clone-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_ext_clone_deferred(void);
 
@@ -10558,17 +10603,29 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_ext_configure_plugin_deferred
 // generated from manifest id=trt8-plugin-v2-ext-get-output-data-type-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_ext_get_output_data_type_deferred(void);
 
+// generated from manifest id=trt8-plugin-v2-ext-get-output-data-type-owner-scoped
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_layer_get_output_data_type(JYPPX_TensorRtLayer* layer, int32_t output_index, int32_t* out_data_type);
+
 // generated from manifest id=trt8-plugin-v2-ext-get-tensor-rt-version-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_ext_get_tensor_rt_version_deferred(void);
 
 // generated from manifest id=trt8-plugin-v2-ext-is-output-broadcast-across-batch-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_ext_is_output_broadcast_across_batch_deferred(void);
 
+// generated from manifest id=trt8-plugin-v2-ext-is-output-broadcast-across-batch-owner-scoped
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_layer_is_output_broadcast_across_batch(JYPPX_TensorRtLayer* layer, int32_t output_index, const uint8_t* input_is_broadcasted, size_t input_count, JYPPX_Boolean* out_is_broadcast);
+
 // generated from manifest id=trt8-plugin-v2-get-nb-outputs-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_get_nb_outputs_deferred(void);
 
+// generated from manifest id=trt8-plugin-v2-get-nb-outputs-owner-scoped
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_layer_get_plugin_output_count(JYPPX_TensorRtLayer* layer, int32_t* out_count);
+
 // generated from manifest id=trt8-plugin-v2-get-output-dimensions-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_get_output_dimensions_deferred(void);
+
+// generated from manifest id=trt8-plugin-v2-get-output-dimensions-owner-scoped
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_layer_get_legacy_output_dimensions(JYPPX_TensorRtLayer* layer, int32_t output_index, JYPPX_TensorRtDims* out_dimensions);
 
 // generated from manifest id=trt8-plugin-v2-get-plugin-namespace-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_get_plugin_namespace_deferred(void);
@@ -10588,6 +10645,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_get_tensor_rt_version_deferre
 // generated from manifest id=trt8-plugin-v2-get-workspace-size-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_get_workspace_size_deferred(void);
 
+// generated from manifest id=trt8-plugin-v2-get-workspace-size-owner-scoped
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_layer_get_legacy_workspace_size(JYPPX_TensorRtLayer* layer, int32_t max_batch_size, size_t* out_workspace_size);
+
 // generated from manifest id=trt8-plugin-v2-initialize-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_initialize_deferred(void);
 
@@ -10602,6 +10662,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_io_ext_supports_format_combin
 
 // generated from manifest id=trt8-plugin-v2-io-ext-supports-format-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_io_ext_supports_format_deferred(void);
+
+// generated from manifest id=trt8-plugin-v2-layer-get-capability-presence
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_layer_get_capability_presence(JYPPX_TensorRtLayer* layer, JYPPX_Boolean* out_has_ext, JYPPX_Boolean* out_has_io_ext, JYPPX_Boolean* out_has_dynamic_ext);
 
 // generated from manifest id=trt8-plugin-v2-layer-get-plugin-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_layer_get_plugin_deferred(void);
@@ -10629,6 +10692,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_set_plugin_namespace_deferred
 
 // generated from manifest id=trt8-plugin-v2-supports-format-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_supports_format_deferred(void);
+
+// generated from manifest id=trt8-plugin-v2-supports-format-owner-scoped
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_layer_supports_legacy_format(JYPPX_TensorRtLayer* layer, int32_t data_type, int32_t tensor_format, JYPPX_Boolean* out_supported);
 
 // generated from manifest id=trt8-plugin-v2-terminate-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_plugin_v2_terminate_deferred(void);

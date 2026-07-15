@@ -191,6 +191,16 @@ $script:ManagedPackageFreshnessRequiredMarkers = @(
   "TensorRtPluginV2LayerMetadata",
   "GetPluginV2Metadata",
   "TryGetPluginV2Metadata",
+  "OutputCount",
+  "HasExtCapability",
+  "HasIoExtCapability",
+  "HasDynamicExtCapability",
+  "GetPluginV2LegacyOutputDimensions",
+  "GetPluginV2LegacyWorkspaceSize",
+  "SupportsPluginV2LegacyFormat",
+  "GetPluginV2OutputDataType",
+  "CanPluginV2BroadcastInputAcrossBatch",
+  "IsPluginV2OutputBroadcastAcrossBatch",
   "TensorRtPluginV3LayerMetadata",
   "GetPluginV3Metadata",
   "TryGetPluginV3Metadata",
@@ -955,7 +965,20 @@ static class HighLevelWrapperSurfaceProbe
             static metadata => metadata.PluginType + ":" + metadata.PluginVersion + ":" + metadata.PluginNamespace + ":" +
                 metadata.SerializationSize + ":" + metadata.PackedTensorRtVersion + ":" + metadata.PluginApiVersionTag + ":" +
                 metadata.TensorRtVersion + ":" + metadata.TensorRtMajor + ":" + metadata.TensorRtMinor + ":" +
-                metadata.TensorRtPatch + ":" + metadata.IsConsistent;
+                metadata.TensorRtPatch + ":" + metadata.OutputCount + ":" + metadata.HasExtCapability + ":" +
+                metadata.HasIoExtCapability + ":" + metadata.HasDynamicExtCapability + ":" + metadata.IsConsistent;
+        Func<TensorRtLayer, int, TensorRtDims> pluginV2LegacyOutputDimensions =
+            static (layer, outputIndex) => layer.GetPluginV2LegacyOutputDimensions(outputIndex);
+        Func<TensorRtLayer, int, ulong> pluginV2LegacyWorkspaceSize =
+            static (layer, maxBatchSize) => layer.GetPluginV2LegacyWorkspaceSize(maxBatchSize);
+        Func<TensorRtLayer, TensorRtDataType, TensorRtTensorFormat, bool> pluginV2LegacyFormat =
+            static (layer, dataType, tensorFormat) => layer.SupportsPluginV2LegacyFormat(dataType, tensorFormat);
+        Func<TensorRtLayer, int, TensorRtDataType> pluginV2OutputDataType =
+            static (layer, outputIndex) => layer.GetPluginV2OutputDataType(outputIndex);
+        Func<TensorRtLayer, int, bool> pluginV2InputBroadcast =
+            static (layer, inputIndex) => layer.CanPluginV2BroadcastInputAcrossBatch(inputIndex);
+        Func<TensorRtLayer, int, bool[], bool> pluginV2OutputBroadcast =
+            static (layer, outputIndex, inputFlags) => layer.IsPluginV2OutputBroadcastAcrossBatch(outputIndex, inputFlags);
         Func<TensorRtLayer, TensorRtPluginV3LayerMetadata> pluginV3LayerMetadata =
             static layer => layer.GetPluginV3Metadata();
         Func<TensorRtLayer, (bool success, TensorRtPluginV3LayerMetadata? metadata, string diagnostic)> safePluginV3LayerMetadata =
@@ -2472,6 +2495,12 @@ static class HighLevelWrapperSurfaceProbe
         _ = pluginV2LayerMetadata;
         _ = safePluginV2LayerMetadata;
         _ = pluginV2LayerMetadataSummary;
+        _ = pluginV2LegacyOutputDimensions;
+        _ = pluginV2LegacyWorkspaceSize;
+        _ = pluginV2LegacyFormat;
+        _ = pluginV2OutputDataType;
+        _ = pluginV2InputBroadcast;
+        _ = pluginV2OutputBroadcast;
         _ = pluginV3LayerMetadata;
         _ = safePluginV3LayerMetadata;
         _ = pluginV3LayerMetadataSummary;
@@ -2818,9 +2847,19 @@ static class HighLevelWrapperSurfaceProbe
             nameof(TensorRtPluginV2LayerMetadata.PackedTensorRtVersion),
             nameof(TensorRtPluginV2LayerMetadata.PluginApiVersionTag),
             nameof(TensorRtPluginV2LayerMetadata.TensorRtVersion),
+            nameof(TensorRtPluginV2LayerMetadata.OutputCount),
+            nameof(TensorRtPluginV2LayerMetadata.HasExtCapability),
+            nameof(TensorRtPluginV2LayerMetadata.HasIoExtCapability),
+            nameof(TensorRtPluginV2LayerMetadata.HasDynamicExtCapability),
             nameof(TensorRtPluginV2LayerMetadata.IsConsistent),
             nameof(TensorRtLayer.GetPluginV2Metadata),
             nameof(TensorRtLayer.TryGetPluginV2Metadata),
+            nameof(TensorRtLayer.GetPluginV2LegacyOutputDimensions),
+            nameof(TensorRtLayer.GetPluginV2LegacyWorkspaceSize),
+            nameof(TensorRtLayer.SupportsPluginV2LegacyFormat),
+            nameof(TensorRtLayer.GetPluginV2OutputDataType),
+            nameof(TensorRtLayer.CanPluginV2BroadcastInputAcrossBatch),
+            nameof(TensorRtLayer.IsPluginV2OutputBroadcastAcrossBatch),
             nameof(TensorRtPluginV3InterfaceMetadata),
             nameof(TensorRtPluginV3InterfaceMetadata.InterfaceInfo),
             nameof(TensorRtPluginV3InterfaceMetadata.ApiLanguage),
