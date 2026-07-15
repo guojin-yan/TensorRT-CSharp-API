@@ -191,6 +191,9 @@ $script:ManagedPackageFreshnessRequiredMarkers = @(
   "TensorRtPluginV2LayerMetadata",
   "GetPluginV2Metadata",
   "TryGetPluginV2Metadata",
+  "TensorRtPluginV3LayerMetadata",
+  "GetPluginV3Metadata",
+  "TryGetPluginV3Metadata",
   "TensorRtDebugListenerNativeAttachBridgeShapeGate",
   "TensorRtDebugListenerExceptionStatusMappingGate",
   "TensorRtDebugListenerInFlightAccountingGate",
@@ -953,6 +956,20 @@ static class HighLevelWrapperSurfaceProbe
                 metadata.SerializationSize + ":" + metadata.PackedTensorRtVersion + ":" + metadata.PluginApiVersionTag + ":" +
                 metadata.TensorRtVersion + ":" + metadata.TensorRtMajor + ":" + metadata.TensorRtMinor + ":" +
                 metadata.TensorRtPatch + ":" + metadata.IsConsistent;
+        Func<TensorRtLayer, TensorRtPluginV3LayerMetadata> pluginV3LayerMetadata =
+            static layer => layer.GetPluginV3Metadata();
+        Func<TensorRtLayer, (bool success, TensorRtPluginV3LayerMetadata? metadata, string diagnostic)> safePluginV3LayerMetadata =
+            static layer =>
+            {
+                bool success = layer.TryGetPluginV3Metadata(out TensorRtPluginV3LayerMetadata? metadata, out string diagnostic);
+                return (success, metadata, diagnostic);
+            };
+        Func<TensorRtPluginV3LayerMetadata, string> pluginV3LayerMetadataSummary =
+            static metadata => metadata.Line + ":" + metadata.PluginInterface + ":" + metadata.HasCoreCapability + ":" +
+                metadata.Core.PluginName + ":" + metadata.Core.PluginVersion + ":" + metadata.Core.PluginNamespace + ":" +
+                metadata.HasBuildCapability + ":" + metadata.Build?.OutputCount + ":" + metadata.Build?.TacticCount + ":" +
+                metadata.Build?.FormatCombinationLimit + ":" + metadata.Build?.TimingCacheId + ":" + metadata.Build?.MetadataString + ":" +
+                metadata.HasRuntimeCapability + ":" + metadata.Runtime?.InterfaceMetadata + ":" + metadata.IsConsistent;
         Func<TensorRtEngine, bool> engineImplicitBatchCompatibility =
             static engine => engine.HasImplicitBatchDimensionCompatibility;
         Func<TensorRtBuilderConfig, int> serializedPluginPathCountCompatibility =
@@ -2455,6 +2472,9 @@ static class HighLevelWrapperSurfaceProbe
         _ = pluginV2LayerMetadata;
         _ = safePluginV2LayerMetadata;
         _ = pluginV2LayerMetadataSummary;
+        _ = pluginV3LayerMetadata;
+        _ = safePluginV3LayerMetadata;
+        _ = pluginV3LayerMetadataSummary;
         _ = logHandler;
         _ = profilerHandler;
         _ = progressHandler;
@@ -2801,6 +2821,28 @@ static class HighLevelWrapperSurfaceProbe
             nameof(TensorRtPluginV2LayerMetadata.IsConsistent),
             nameof(TensorRtLayer.GetPluginV2Metadata),
             nameof(TensorRtLayer.TryGetPluginV2Metadata),
+            nameof(TensorRtPluginV3InterfaceMetadata),
+            nameof(TensorRtPluginV3InterfaceMetadata.InterfaceInfo),
+            nameof(TensorRtPluginV3InterfaceMetadata.ApiLanguage),
+            nameof(TensorRtPluginV3CoreMetadata),
+            nameof(TensorRtPluginV3CoreMetadata.PluginName),
+            nameof(TensorRtPluginV3CoreMetadata.PluginVersion),
+            nameof(TensorRtPluginV3CoreMetadata.PluginNamespace),
+            nameof(TensorRtPluginV3BuildMetadata),
+            nameof(TensorRtPluginV3BuildMetadata.OutputCount),
+            nameof(TensorRtPluginV3BuildMetadata.TacticCount),
+            nameof(TensorRtPluginV3BuildMetadata.FormatCombinationLimit),
+            nameof(TensorRtPluginV3BuildMetadata.TimingCacheId),
+            nameof(TensorRtPluginV3BuildMetadata.MetadataString),
+            nameof(TensorRtPluginV3RuntimeMetadata),
+            nameof(TensorRtPluginV3LayerMetadata),
+            nameof(TensorRtPluginV3LayerMetadata.PluginInterface),
+            nameof(TensorRtPluginV3LayerMetadata.Core),
+            nameof(TensorRtPluginV3LayerMetadata.Build),
+            nameof(TensorRtPluginV3LayerMetadata.Runtime),
+            nameof(TensorRtPluginV3LayerMetadata.IsConsistent),
+            nameof(TensorRtLayer.GetPluginV3Metadata),
+            nameof(TensorRtLayer.TryGetPluginV3Metadata),
             nameof(TensorRtLogger),
             nameof(TensorRtLogger.EmitDiagnostic),
             nameof(TensorRtLogger.CallbackFailureCount),

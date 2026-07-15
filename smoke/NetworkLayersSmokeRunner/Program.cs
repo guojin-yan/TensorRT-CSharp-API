@@ -84,6 +84,12 @@ internal static class Program
         }
         Console.WriteLine($"PluginV2LayerMetadataRejected=True Layer={ownerBoundNonPluginLayer.Name}:{ownerBoundNonPluginLayer.Type} Diagnostic={pluginMetadataDiagnostic}");
 
+        if (ownerBoundNonPluginLayer.TryGetPluginV3Metadata(out TensorRtPluginV3LayerMetadata? unexpectedPluginV3Metadata, out string pluginV3MetadataDiagnostic))
+        {
+            throw new InvalidOperationException($"A non-plugin layer unexpectedly returned PluginV3 metadata: {unexpectedPluginV3Metadata}");
+        }
+        Console.WriteLine($"PluginV3LayerMetadataRejected=True Layer={ownerBoundNonPluginLayer.Name}:{ownerBoundNonPluginLayer.Type} Diagnostic={pluginV3MetadataDiagnostic}");
+
         Console.WriteLine($"LayerMetadata Constant={constantLayer.Name}:{constantLayer.Type}:I{constantLayer.InputCount}:O{constantLayer.OutputCount}:{constantLayer.GetMetadata()} Sum={sumLayer.Name}:{sumLayer.Type}:I{sumLayer.InputCount}:O{sumLayer.OutputCount}:{sumLayer.GetMetadata()}");
         Console.WriteLine($"TensorDeploymentMetadata InputRoles={inputTensor.IsNetworkInput}/{inputTensor.IsNetworkOutput} OutputRoles={outputTensor.IsNetworkInput}/{outputTensor.IsNetworkOutput} Dims={inputTensor.GetDimensionName(0)}/{inputTensor.GetDimensionName(1)}->{outputTensor.GetDimensionName(0)} Broadcast={inputTensor.BroadcastAcrossBatch} DynamicRange={dynamicRangeState}");
         Console.WriteLine($"Network Inputs={network.InputCount} Outputs={network.OutputCount} Input={inputTensor.Name}:{inputTensor.Shape} Output={outputTensor.Name}:{outputTensor.Shape}");

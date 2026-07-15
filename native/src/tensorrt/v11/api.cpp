@@ -8277,6 +8277,9 @@ JYPPX_StatusCode jyppx_trt11_tensor_reset_dynamic_range(JYPPX_TensorRtTensor*)
 #define JYPPX_TRT_PLUGIN_V2_LAYER_PREFIX jyppx_trt11_
 #include "../common/plugin_v2_layer_metadata_snapshot.inc"
 #undef JYPPX_TRT_PLUGIN_V2_LAYER_PREFIX
+#define JYPPX_TRT_PLUGIN_V3_LAYER_PREFIX jyppx_trt11_
+#include "../common/plugin_v3_layer_metadata_snapshot.inc"
+#undef JYPPX_TRT_PLUGIN_V3_LAYER_PREFIX
 #define JYPPX_TRT_GLOBAL_PLUGIN_PREFIX jyppx_trt11_
 #include "../common/global_runtime_plugin_probe.inc"
 #undef JYPPX_TRT_GLOBAL_PLUGIN_PREFIX
