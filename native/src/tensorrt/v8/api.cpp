@@ -9668,6 +9668,11 @@ JYPPX_StatusCode jyppx_trt8_execution_context_get_shape_binding(
 #include "../common/plugin_v2_layer_metadata_snapshot.inc"
 #undef JYPPX_TRT_PLUGIN_V2_LAYER_ENABLE_BROADCAST_EXPORTS
 #undef JYPPX_TRT_PLUGIN_V2_LAYER_PREFIX
+#define JYPPX_TRT_PLUGIN_OWNER_QUERY_PREFIX jyppx_trt8_
+#define JYPPX_TRT_PLUGIN_OWNER_QUERY_ENABLE_V3 0
+#include "../common/plugin_layer_owner_scoped_query_snapshots.inc"
+#undef JYPPX_TRT_PLUGIN_OWNER_QUERY_ENABLE_V3
+#undef JYPPX_TRT_PLUGIN_OWNER_QUERY_PREFIX
 #include "modules/deferred/twenty_third_batch_deferred.inc"
 #include "modules/deferred/cross_version_seventh_batch_deferred.inc"
 #include "modules/deferred/cross_version_eighth_batch_deferred.inc"

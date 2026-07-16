@@ -84,6 +84,20 @@ internal static class Program
         }
         Console.WriteLine($"PluginV2LayerMetadataRejected=True Layer={ownerBoundNonPluginLayer.Name}:{ownerBoundNonPluginLayer.Type} Diagnostic={pluginMetadataDiagnostic}");
 
+        if (ownerBoundNonPluginLayer.TryGetPluginV2DynamicFormatSupportSnapshot(
+                out TensorRtPluginFormatSupportSnapshot? unexpectedDynamicFormatSupport,
+                out string dynamicFormatDiagnostic))
+        {
+            throw new InvalidOperationException($"A non-plugin layer unexpectedly returned PluginV2 DynamicExt format support: {unexpectedDynamicFormatSupport}");
+        }
+        if (ownerBoundNonPluginLayer.TryGetPluginV2IoExtFormatSupportSnapshot(
+                out TensorRtPluginFormatSupportSnapshot? unexpectedIoFormatSupport,
+                out string ioFormatDiagnostic))
+        {
+            throw new InvalidOperationException($"A non-plugin layer unexpectedly returned PluginV2 IOExt format support: {unexpectedIoFormatSupport}");
+        }
+        Console.WriteLine($"PluginV2OwnerScopedFormatQueriesRejected=True Dynamic={dynamicFormatDiagnostic} IOExt={ioFormatDiagnostic}");
+
         string pluginV2CapabilityDiagnostic;
         try
         {
@@ -118,6 +132,20 @@ internal static class Program
             throw new InvalidOperationException($"A non-plugin layer unexpectedly returned PluginV3 metadata: {unexpectedPluginV3Metadata}");
         }
         Console.WriteLine($"PluginV3LayerMetadataRejected=True Layer={ownerBoundNonPluginLayer.Name}:{ownerBoundNonPluginLayer.Type} Diagnostic={pluginV3MetadataDiagnostic}");
+
+        if (ownerBoundNonPluginLayer.TryGetPluginV3BuildIoSnapshot(
+                out TensorRtPluginV3BuildIoSnapshot? unexpectedBuildIo,
+                out string buildIoDiagnostic))
+        {
+            throw new InvalidOperationException($"A non-plugin layer unexpectedly returned PluginV3 build IO metadata: {unexpectedBuildIo}");
+        }
+        if (ownerBoundNonPluginLayer.TryGetPluginV3RuntimeSerializationFields(
+                out TensorRtPluginV3SerializationFieldInventory? unexpectedSerializationFields,
+                out string serializationFieldDiagnostic))
+        {
+            throw new InvalidOperationException($"A non-plugin layer unexpectedly returned PluginV3 serialization fields: {unexpectedSerializationFields}");
+        }
+        Console.WriteLine($"PluginV3OwnerScopedQuerySnapshotsRejected=True BuildIO={buildIoDiagnostic} Fields={serializationFieldDiagnostic}");
 
         Console.WriteLine($"LayerMetadata Constant={constantLayer.Name}:{constantLayer.Type}:I{constantLayer.InputCount}:O{constantLayer.OutputCount}:{constantLayer.GetMetadata()} Sum={sumLayer.Name}:{sumLayer.Type}:I{sumLayer.InputCount}:O{sumLayer.OutputCount}:{sumLayer.GetMetadata()}");
         Console.WriteLine($"TensorDeploymentMetadata InputRoles={inputTensor.IsNetworkInput}/{inputTensor.IsNetworkOutput} OutputRoles={outputTensor.IsNetworkInput}/{outputTensor.IsNetworkOutput} Dims={inputTensor.GetDimensionName(0)}/{inputTensor.GetDimensionName(1)}->{outputTensor.GetDimensionName(0)} Broadcast={inputTensor.BroadcastAcrossBatch} DynamicRange={dynamicRangeState}");

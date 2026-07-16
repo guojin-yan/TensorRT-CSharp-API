@@ -1,0 +1,141 @@
+{
+  "$schema": "../../bridge-api.schema.json",
+  "module": "tensorrt",
+  "versionLine": "10",
+  "apis": [
+    {
+      "id": "trt10-plugin-v2-dynamic-ext-supports-format-combination-owner-scoped",
+      "entryPoint": "jyppx_trt10_plugin_v2_layer_copy_dynamic_format_support",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": true,
+      "manualReason": "Copies current DynamicExt format-combination decisions while the network-owned layer keeps the borrowed plugin alive",
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "output_support", "type": "uint8_t*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_capacity", "type": "size_t", "direction": "in" },
+        { "name": "out_required_count", "type": "size_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt10-plugin-v2-io-ext-supports-format-combination-owner-scoped",
+      "entryPoint": "jyppx_trt10_plugin_v2_layer_copy_io_ext_format_support",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": true,
+      "manualReason": "Copies current IOExt format-combination decisions without exposing plugin or tensor pointers",
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "output_support", "type": "uint8_t*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_capacity", "type": "size_t", "direction": "in" },
+        { "name": "out_required_count", "type": "size_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt10-plugin-v3-layer-get-build-io-counts-owner-scoped",
+      "entryPoint": "jyppx_trt10_plugin_v3_layer_get_build_io_counts",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": true,
+      "manualReason": "Copies PluginV3 build input and output counts while the network owner lease is held",
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "out_input_count", "type": "int32_t*", "direction": "out" },
+        { "name": "out_output_count", "type": "int32_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt10-plugin-v3-one-build-get-output-data-types-owner-scoped",
+      "entryPoint": "jyppx_trt10_plugin_v3_layer_copy_build_output_data_types",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": true,
+      "manualReason": "Copies output data-type enums derived from network-owned input tensor metadata",
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "output_types", "type": "int32_t*", "direction": "out", "managedType": "int[]", "moduleManagedType": "int[]" },
+        { "name": "output_capacity", "type": "size_t", "direction": "in" },
+        { "name": "out_required_count", "type": "size_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt10-plugin-v3-one-build-get-aliased-input-owner-scoped",
+      "entryPoint": "jyppx_trt10_plugin_v3_layer_copy_build_aliased_inputs",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": true,
+      "manualReason": "Copies bounded aliased-input indices from IPluginV3OneBuildV2 without exposing the capability pointer",
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "output_aliases", "type": "int32_t*", "direction": "out", "managedType": "int[]", "moduleManagedType": "int[]" },
+        { "name": "output_capacity", "type": "size_t", "direction": "in" },
+        { "name": "out_required_count", "type": "size_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt10-plugin-v3-one-build-supports-format-combination-owner-scoped",
+      "entryPoint": "jyppx_trt10_plugin_v3_layer_copy_build_current_format_support",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": true,
+      "manualReason": "Copies current declared-format decisions using temporary descriptors built from network-owned tensors",
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "output_support", "type": "uint8_t*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_capacity", "type": "size_t", "direction": "in" },
+        { "name": "out_required_count", "type": "size_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt10-plugin-v3-one-runtime-get-fields-to-serialize-count-owner-scoped",
+      "entryPoint": "jyppx_trt10_plugin_v3_layer_get_runtime_serialization_field_count",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": true,
+      "manualReason": "Copies the serialization field count while the borrowed field collection remains inside the owner call",
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "out_count", "type": "int32_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt10-plugin-v3-one-runtime-get-fields-to-serialize-name-owner-scoped",
+      "entryPoint": "jyppx_trt10_plugin_v3_layer_get_runtime_serialization_field_name",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": true,
+      "manualReason": "Copies a serialization field name through caller-buffer semantics without retaining field pointers",
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "field_index", "type": "int32_t", "direction": "in" },
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt10-plugin-v3-one-runtime-get-fields-to-serialize-metadata-owner-scoped",
+      "entryPoint": "jyppx_trt10_plugin_v3_layer_get_runtime_serialization_field_metadata",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": true,
+      "manualReason": "Copies field type, length, and data presence without dereferencing or exposing the field data pointer",
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "field_index", "type": "int32_t", "direction": "in" },
+        { "name": "out_field_type", "type": "int32_t*", "direction": "out" },
+        { "name": "out_length", "type": "int32_t*", "direction": "out" },
+        { "name": "out_has_data", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    }
+  ]
+}

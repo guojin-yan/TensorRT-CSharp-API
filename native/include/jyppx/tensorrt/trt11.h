@@ -34,6 +34,15 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_plugin_v3_layer_get_build_format_combi
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_plugin_v3_layer_get_build_timing_cache_id(JYPPX_TensorRtLayer* layer, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_plugin_v3_layer_get_build_metadata_string(JYPPX_TensorRtLayer* layer, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_plugin_v3_layer_get_runtime_interface_info(JYPPX_TensorRtLayer* layer, char* output_buffer, size_t output_buffer_size, size_t* out_required_size, int32_t* out_major, int32_t* out_minor, int32_t* out_api_language);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_plugin_v2_layer_copy_dynamic_format_support(JYPPX_TensorRtLayer* layer, uint8_t* output_support, size_t output_capacity, size_t* out_required_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_plugin_v2_layer_copy_io_ext_format_support(JYPPX_TensorRtLayer* layer, uint8_t* output_support, size_t output_capacity, size_t* out_required_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_plugin_v3_layer_get_build_io_counts(JYPPX_TensorRtLayer* layer, int32_t* out_input_count, int32_t* out_output_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_plugin_v3_layer_copy_build_output_data_types(JYPPX_TensorRtLayer* layer, int32_t* output_types, size_t output_capacity, size_t* out_required_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_plugin_v3_layer_copy_build_aliased_inputs(JYPPX_TensorRtLayer* layer, int32_t* output_aliases, size_t output_capacity, size_t* out_required_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_plugin_v3_layer_copy_build_current_format_support(JYPPX_TensorRtLayer* layer, uint8_t* output_support, size_t output_capacity, size_t* out_required_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_plugin_v3_layer_get_runtime_serialization_field_count(JYPPX_TensorRtLayer* layer, int32_t* out_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_plugin_v3_layer_get_runtime_serialization_field_name(JYPPX_TensorRtLayer* layer, int32_t field_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_plugin_v3_layer_get_runtime_serialization_field_metadata(JYPPX_TensorRtLayer* layer, int32_t field_index, int32_t* out_field_type, int32_t* out_length, JYPPX_Boolean* out_has_data);
 /* END TRT11 PLUGIN V3 LAYER METADATA SNAPSHOT DECLARATIONS */
 
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_query_adapter_info(JYPPX_TensorRtAdapterInfo* out_info);

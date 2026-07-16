@@ -1,0 +1,37 @@
+{
+  "$schema": "../../bridge-api.schema.json",
+  "module": "tensorrt",
+  "versionLine": "8",
+  "apis": [
+    {
+      "id": "trt8-plugin-v2-dynamic-ext-supports-format-combination-owner-scoped",
+      "entryPoint": "jyppx_trt8_plugin_v2_layer_copy_dynamic_format_support",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": true,
+      "manualReason": "Copies current layer format-combination decisions while the network-owned layer keeps the borrowed plugin alive",
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "output_support", "type": "uint8_t*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_capacity", "type": "size_t", "direction": "in" },
+        { "name": "out_required_count", "type": "size_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "trt8-plugin-v2-io-ext-supports-format-combination-owner-scoped",
+      "entryPoint": "jyppx_trt8_plugin_v2_layer_copy_io_ext_format_support",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": true,
+      "manualReason": "Copies current IOExt format-combination decisions without exposing plugin or tensor pointers",
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "layer", "type": "JYPPX_TensorRtLayer*", "direction": "in" },
+        { "name": "output_support", "type": "uint8_t*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_capacity", "type": "size_t", "direction": "in" },
+        { "name": "out_required_count", "type": "size_t*", "direction": "out" }
+      ]
+    }
+  ]
+}

@@ -20,6 +20,8 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_plugin_v2_layer_supports_legacy_format(
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_plugin_v2_layer_get_output_data_type(JYPPX_TensorRtLayer* layer, int32_t output_index, int32_t* out_data_type);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_plugin_v2_layer_can_broadcast_input_across_batch(JYPPX_TensorRtLayer* layer, int32_t input_index, JYPPX_Boolean* out_can_broadcast);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_plugin_v2_layer_is_output_broadcast_across_batch(JYPPX_TensorRtLayer* layer, int32_t output_index, const uint8_t* input_is_broadcasted, size_t input_count, JYPPX_Boolean* out_is_broadcast);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_plugin_v2_layer_copy_dynamic_format_support(JYPPX_TensorRtLayer* layer, uint8_t* output_support, size_t output_capacity, size_t* out_required_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_plugin_v2_layer_copy_io_ext_format_support(JYPPX_TensorRtLayer* layer, uint8_t* output_support, size_t output_capacity, size_t* out_required_count);
 /* END TRT8 PLUGIN V2 LAYER METADATA SNAPSHOT DECLARATIONS */
 
 /* BEGIN TRT8 PLUGIN CREATOR TENSORRT VERSION DECLARATIONS */

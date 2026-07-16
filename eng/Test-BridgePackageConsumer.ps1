@@ -201,6 +201,13 @@ $script:ManagedPackageFreshnessRequiredMarkers = @(
   "GetPluginV2OutputDataType",
   "CanPluginV2BroadcastInputAcrossBatch",
   "IsPluginV2OutputBroadcastAcrossBatch",
+  "TensorRtPluginFormatSupportSnapshot",
+  "GetPluginV2DynamicFormatSupportSnapshot",
+  "GetPluginV2IoExtFormatSupportSnapshot",
+  "TensorRtPluginV3BuildIoSnapshot",
+  "GetPluginV3BuildIoSnapshot",
+  "TensorRtPluginV3SerializationFieldInventory",
+  "GetPluginV3RuntimeSerializationFields",
   "TensorRtPluginV3LayerMetadata",
   "GetPluginV3Metadata",
   "TryGetPluginV3Metadata",
@@ -979,6 +986,13 @@ static class HighLevelWrapperSurfaceProbe
             static (layer, inputIndex) => layer.CanPluginV2BroadcastInputAcrossBatch(inputIndex);
         Func<TensorRtLayer, int, bool[], bool> pluginV2OutputBroadcast =
             static (layer, outputIndex, inputFlags) => layer.IsPluginV2OutputBroadcastAcrossBatch(outputIndex, inputFlags);
+        Func<TensorRtLayer, TensorRtPluginFormatSupportSnapshot> pluginV2DynamicFormatSupport =
+            static layer => layer.GetPluginV2DynamicFormatSupportSnapshot();
+        Func<TensorRtLayer, TensorRtPluginFormatSupportSnapshot> pluginV2IoExtFormatSupport =
+            static layer => layer.GetPluginV2IoExtFormatSupportSnapshot();
+        Func<TensorRtPluginFormatSupportSnapshot, string> pluginFormatSupportSummary =
+            static snapshot => snapshot.Capability + ":" + snapshot.InputCount + ":" + snapshot.OutputCount + ":" +
+                snapshot.Support.Count + ":" + snapshot.AllSupported + ":" + snapshot.IsConsistent;
         Func<TensorRtLayer, TensorRtPluginV3LayerMetadata> pluginV3LayerMetadata =
             static layer => layer.GetPluginV3Metadata();
         Func<TensorRtLayer, (bool success, TensorRtPluginV3LayerMetadata? metadata, string diagnostic)> safePluginV3LayerMetadata =
@@ -993,6 +1007,15 @@ static class HighLevelWrapperSurfaceProbe
                 metadata.HasBuildCapability + ":" + metadata.Build?.OutputCount + ":" + metadata.Build?.TacticCount + ":" +
                 metadata.Build?.FormatCombinationLimit + ":" + metadata.Build?.TimingCacheId + ":" + metadata.Build?.MetadataString + ":" +
                 metadata.HasRuntimeCapability + ":" + metadata.Runtime?.InterfaceMetadata + ":" + metadata.IsConsistent;
+        Func<TensorRtLayer, TensorRtPluginV3BuildIoSnapshot> pluginV3BuildIoSnapshot =
+            static layer => layer.GetPluginV3BuildIoSnapshot();
+        Func<TensorRtPluginV3BuildIoSnapshot, string> pluginV3BuildIoSummary =
+            static snapshot => snapshot.InputCount + ":" + snapshot.OutputCount + ":" + snapshot.OutputDataTypes.Count + ":" +
+                snapshot.AliasedInputIndices.Count + ":" + snapshot.AliasMetadataAvailable + ":" + snapshot.FormatSupport + ":" + snapshot.IsConsistent;
+        Func<TensorRtLayer, TensorRtPluginV3SerializationFieldInventory> pluginV3SerializationFields =
+            static layer => layer.GetPluginV3RuntimeSerializationFields();
+        Func<TensorRtPluginV3SerializationFieldInventory, string> pluginV3SerializationFieldSummary =
+            static inventory => inventory.Line + ":" + inventory.Fields.Count + ":" + inventory.PointerFreeCopiedInventory + ":" + inventory.IsConsistent;
         Func<TensorRtEngine, bool> engineImplicitBatchCompatibility =
             static engine => engine.HasImplicitBatchDimensionCompatibility;
         Action<TensorRtBuilder, int> setBuilderMaxBatchCompatibility =
@@ -2881,6 +2904,16 @@ static class HighLevelWrapperSurfaceProbe
             nameof(TensorRtLayer.GetPluginV2OutputDataType),
             nameof(TensorRtLayer.CanPluginV2BroadcastInputAcrossBatch),
             nameof(TensorRtLayer.IsPluginV2OutputBroadcastAcrossBatch),
+            nameof(TensorRtPluginFormatCapabilityKind),
+            nameof(TensorRtPluginFormatSupportSnapshot),
+            nameof(TensorRtPluginFormatSupportSnapshot.Support),
+            nameof(TensorRtPluginFormatSupportSnapshot.AllSupported),
+            nameof(TensorRtPluginFormatSupportSnapshot.IsInputSupported),
+            nameof(TensorRtPluginFormatSupportSnapshot.IsOutputSupported),
+            nameof(TensorRtLayer.GetPluginV2DynamicFormatSupportSnapshot),
+            nameof(TensorRtLayer.GetPluginV2IoExtFormatSupportSnapshot),
+            nameof(TensorRtLayer.TryGetPluginV2DynamicFormatSupportSnapshot),
+            nameof(TensorRtLayer.TryGetPluginV2IoExtFormatSupportSnapshot),
             nameof(TensorRtPluginV3InterfaceMetadata),
             nameof(TensorRtPluginV3InterfaceMetadata.InterfaceInfo),
             nameof(TensorRtPluginV3InterfaceMetadata.ApiLanguage),
@@ -2903,6 +2936,17 @@ static class HighLevelWrapperSurfaceProbe
             nameof(TensorRtPluginV3LayerMetadata.IsConsistent),
             nameof(TensorRtLayer.GetPluginV3Metadata),
             nameof(TensorRtLayer.TryGetPluginV3Metadata),
+            nameof(TensorRtPluginV3BuildIoSnapshot),
+            nameof(TensorRtPluginV3BuildIoSnapshot.OutputDataTypes),
+            nameof(TensorRtPluginV3BuildIoSnapshot.AliasedInputIndices),
+            nameof(TensorRtPluginV3BuildIoSnapshot.FormatSupport),
+            nameof(TensorRtPluginV3SerializationFieldInventory),
+            nameof(TensorRtPluginV3SerializationFieldInventory.Fields),
+            nameof(TensorRtPluginV3SerializationFieldInventory.PointerFreeCopiedInventory),
+            nameof(TensorRtLayer.GetPluginV3BuildIoSnapshot),
+            nameof(TensorRtLayer.TryGetPluginV3BuildIoSnapshot),
+            nameof(TensorRtLayer.GetPluginV3RuntimeSerializationFields),
+            nameof(TensorRtLayer.TryGetPluginV3RuntimeSerializationFields),
             nameof(TensorRtLogger),
             nameof(TensorRtLogger.EmitDiagnostic),
             nameof(TensorRtLogger.CallbackFailureCount),

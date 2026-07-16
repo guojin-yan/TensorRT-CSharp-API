@@ -478,6 +478,12 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
     "IPluginRegistry::getBuilderSafePluginRegistry" = @("id:*builder-safe-plugin-registry-exists", "id:*builder-capability-plugin-registry-exists")
     "IPluginV2Ext::getTensorRTVersion" = @("id:*plugin-v2-layer-get-tensor-rt-version")
     "IPluginV2IOExt::getTensorRTVersion" = @("id:*plugin-v2-layer-get-tensor-rt-version")
+    "IPluginV2DynamicExt::supportsFormatCombination" = @("id:*plugin-v2-dynamic-ext-supports-format-combination-owner-scoped")
+    "IPluginV2IOExt::supportsFormatCombination" = @("id:*plugin-v2-io-ext-supports-format-combination-owner-scoped")
+    "IPluginV3OneBuild::getAliasedInput" = @("id:*plugin-v3-one-build-get-aliased-input-owner-scoped")
+    "IPluginV3OneBuild::getOutputDataTypes" = @("id:*plugin-v3-one-build-get-output-data-types-owner-scoped")
+    "IPluginV3OneBuild::supportsFormatCombination" = @("id:*plugin-v3-one-build-supports-format-combination-owner-scoped")
+    "IPluginV3OneRuntime::getFieldsToSerialize" = @("id:*plugin-v3-one-runtime-get-fields-to-serialize-*-owner-scoped")
     "IVersionedInterface::getAPILanguage" = @("id:*versioned-metadata", "id:*get-api-language")
     "IVersionedInterface::getInterfaceInfo" = @("id:*versioned-metadata", "id:*get-interface-info")
     "IPluginCreator::getPluginName" = @("id:*builder-capability-plugin-creator-get-name", "id:*builder-plugin-creator-get-name", "id:*global-plugin-creator-get-name", "id:*runtime-plugin-creator-get-name")
@@ -501,6 +507,12 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
     "IPluginRegistry::getBuilderSafePluginRegistry" = @("id:*plugin-registry-get-builder-safe-plugin-registry-deferred")
     "IPluginV2Ext::getTensorRTVersion" = @("id:*plugin-v2-ext-get-tensor-rt-version-deferred")
     "IPluginV2IOExt::getTensorRTVersion" = @("id:*plugin-v2-io-ext-get-tensor-rt-version-deferred")
+    "IPluginV2DynamicExt::supportsFormatCombination" = @("id:*plugin-v2-dynamic-ext-supports-format-combination-deferred")
+    "IPluginV2IOExt::supportsFormatCombination" = @("id:*plugin-v2-io-ext-supports-format-combination-deferred")
+    "IPluginV3OneBuild::getAliasedInput" = @("id:*plugin-v3-one-build-get-aliased-input-deferred")
+    "IPluginV3OneBuild::getOutputDataTypes" = @("id:*plugin-v3-one-build-get-output-data-types-deferred")
+    "IPluginV3OneBuild::supportsFormatCombination" = @("id:*plugin-v3-one-build-supports-format-combination-deferred")
+    "IPluginV3OneRuntime::getFieldsToSerialize" = @("id:*plugin-v3-one-runtime-get-fields-to-serialize-deferred")
     "IVersionedInterface::getAPILanguage" = @("id:*versioned-interface-get-api-language-deferred")
     "IVersionedInterface::getInterfaceInfo" = @("id:*versioned-interface-get-interface-info-deferred")
   }
@@ -589,6 +601,12 @@ function Find-MatchedManifestApis {
     "IPluginRegistry::getBuilderSafePluginRegistry",
     "IPluginV2Ext::getTensorRTVersion",
     "IPluginV2IOExt::getTensorRTVersion",
+    "IPluginV2DynamicExt::supportsFormatCombination",
+    "IPluginV2IOExt::supportsFormatCombination",
+    "IPluginV3OneBuild::getAliasedInput",
+    "IPluginV3OneBuild::getOutputDataTypes",
+    "IPluginV3OneBuild::supportsFormatCombination",
+    "IPluginV3OneRuntime::getFieldsToSerialize",
     "IVersionedInterface::getAPILanguage",
     "IVersionedInterface::getInterfaceInfo",
     "IErrorRecorder::getNbErrors",

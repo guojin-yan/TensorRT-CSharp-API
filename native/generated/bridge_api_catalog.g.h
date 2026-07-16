@@ -1358,6 +1358,7 @@
 #define JYPPX_API_TRT10_PLUGIN_V2_DYNAMIC_EXT_IS_OUTPUT_BROADCAST_ACROSS_BATCH_DEFERRED "jyppx_trt10_plugin_v2_dynamic_ext_is_output_broadcast_across_batch_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_PLUGIN_V2_DYNAMIC_EXT_RETURN_DEFERRED "jyppx_trt10_plugin_v2_dynamic_ext_return_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_PLUGIN_V2_DYNAMIC_EXT_SUPPORTS_FORMAT_COMBINATION_DEFERRED "jyppx_trt10_plugin_v2_dynamic_ext_supports_format_combination_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT10_PLUGIN_V2_DYNAMIC_EXT_SUPPORTS_FORMAT_COMBINATION_OWNER_SCOPED "jyppx_trt10_plugin_v2_layer_copy_dynamic_format_support" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT10_PLUGIN_V2_DYNAMIC_EXT_SUPPORTS_FORMAT_DEFERRED "jyppx_trt10_plugin_v2_dynamic_ext_supports_format_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_PLUGIN_V2_ENQUEUE_DEFERRED "jyppx_trt10_plugin_v2_enqueue_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_PLUGIN_V2_EXT_CAN_BROADCAST_INPUT_ACROSS_BATCH_DEFERRED "jyppx_trt10_plugin_v2_ext_can_broadcast_input_across_batch_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
@@ -1384,6 +1385,7 @@
 #define JYPPX_API_TRT10_PLUGIN_V2_IO_EXT_CONFIGURE_PLUGIN_DEFERRED "jyppx_trt10_plugin_v2_io_ext_configure_plugin_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_PLUGIN_V2_IO_EXT_GET_TENSOR_RT_VERSION_DEFERRED "jyppx_trt10_plugin_v2_io_ext_get_tensor_rt_version_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_PLUGIN_V2_IO_EXT_SUPPORTS_FORMAT_COMBINATION_DEFERRED "jyppx_trt10_plugin_v2_io_ext_supports_format_combination_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT10_PLUGIN_V2_IO_EXT_SUPPORTS_FORMAT_COMBINATION_OWNER_SCOPED "jyppx_trt10_plugin_v2_layer_copy_io_ext_format_support" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT10_PLUGIN_V2_IO_EXT_SUPPORTS_FORMAT_DEFERRED "jyppx_trt10_plugin_v2_io_ext_supports_format_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_PLUGIN_V2_LAYER_GET_CAPABILITY_PRESENCE "jyppx_trt10_plugin_v2_layer_get_capability_presence" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT10_PLUGIN_V2_LAYER_GET_PLUGIN_DEFERRED "jyppx_trt10_plugin_v2_layer_get_plugin_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
@@ -1400,11 +1402,13 @@
 #define JYPPX_API_TRT10_PLUGIN_V3_CLONE_DEFERRED "jyppx_trt10_plugin_v3_clone_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_PLUGIN_V3_GET_CAPABILITY_INTERFACE_DEFERRED "jyppx_trt10_plugin_v3_get_capability_interface_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_PLUGIN_V3_GET_INTERFACE_INFO_DEFERRED "jyppx_trt10_plugin_v3_get_interface_info_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT10_PLUGIN_V3_LAYER_GET_BUILD_IO_COUNTS_OWNER_SCOPED "jyppx_trt10_plugin_v3_layer_get_build_io_counts" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT10_PLUGIN_V3_LAYER_GET_CAPABILITY_INTERFACE_PRESENCE "jyppx_trt10_plugin_v3_layer_get_capability_presence" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT10_PLUGIN_V3_LAYER_GET_PLUGIN_DEFERRED "jyppx_trt10_plugin_v3_layer_get_plugin_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_PLUGIN_V3_LAYER_GET_PLUGIN_INTERFACE_INFO_API_LANGUAGE "jyppx_trt10_plugin_v3_layer_get_plugin_interface_info" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT10_PLUGIN_V3_ONE_BUILD_CONFIGURE_PLUGIN_DEFERRED "jyppx_trt10_plugin_v3_one_build_configure_plugin_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_PLUGIN_V3_ONE_BUILD_GET_ALIASED_INPUT_DEFERRED "jyppx_trt10_plugin_v3_one_build_get_aliased_input_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT10_PLUGIN_V3_ONE_BUILD_GET_ALIASED_INPUT_OWNER_SCOPED "jyppx_trt10_plugin_v3_layer_copy_build_aliased_inputs" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT10_PLUGIN_V3_ONE_BUILD_GET_FORMAT_COMBINATION_LIMIT_DEFERRED "jyppx_trt10_plugin_v3_one_build_get_format_combination_limit_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_PLUGIN_V3_ONE_BUILD_GET_FORMAT_COMBINATION_LIMIT_OWNER_SCOPED "jyppx_trt10_plugin_v3_layer_get_build_format_combination_limit" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT10_PLUGIN_V3_ONE_BUILD_GET_INTERFACE_INFO_API_LANGUAGE_OWNER_SCOPED "jyppx_trt10_plugin_v3_layer_get_build_interface_info" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=true
@@ -1416,12 +1420,14 @@
 #define JYPPX_API_TRT10_PLUGIN_V3_ONE_BUILD_GET_NB_TACTICS_DEFERRED "jyppx_trt10_plugin_v3_one_build_get_nb_tactics_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_PLUGIN_V3_ONE_BUILD_GET_NB_TACTICS_OWNER_SCOPED "jyppx_trt10_plugin_v3_layer_get_build_nb_tactics" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT10_PLUGIN_V3_ONE_BUILD_GET_OUTPUT_DATA_TYPES_DEFERRED "jyppx_trt10_plugin_v3_one_build_get_output_data_types_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT10_PLUGIN_V3_ONE_BUILD_GET_OUTPUT_DATA_TYPES_OWNER_SCOPED "jyppx_trt10_plugin_v3_layer_copy_build_output_data_types" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT10_PLUGIN_V3_ONE_BUILD_GET_OUTPUT_SHAPES_DEFERRED "jyppx_trt10_plugin_v3_one_build_get_output_shapes_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_PLUGIN_V3_ONE_BUILD_GET_TIMING_CACHE_ID_DEFERRED "jyppx_trt10_plugin_v3_one_build_get_timing_cache_id_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_PLUGIN_V3_ONE_BUILD_GET_TIMING_CACHE_ID_OWNER_SCOPED "jyppx_trt10_plugin_v3_layer_get_build_timing_cache_id" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT10_PLUGIN_V3_ONE_BUILD_GET_VALID_TACTICS_DEFERRED "jyppx_trt10_plugin_v3_one_build_get_valid_tactics_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_PLUGIN_V3_ONE_BUILD_GET_WORKSPACE_SIZE_DEFERRED "jyppx_trt10_plugin_v3_one_build_get_workspace_size_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_PLUGIN_V3_ONE_BUILD_SUPPORTS_FORMAT_COMBINATION_DEFERRED "jyppx_trt10_plugin_v3_one_build_supports_format_combination_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT10_PLUGIN_V3_ONE_BUILD_SUPPORTS_FORMAT_COMBINATION_OWNER_SCOPED "jyppx_trt10_plugin_v3_layer_copy_build_current_format_support" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT10_PLUGIN_V3_ONE_CORE_GET_INTERFACE_INFO_API_LANGUAGE_OWNER_SCOPED "jyppx_trt10_plugin_v3_layer_get_core_interface_info" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT10_PLUGIN_V3_ONE_CORE_GET_INTERFACE_INFO_DEFERRED "jyppx_trt10_plugin_v3_one_core_get_interface_info_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_PLUGIN_V3_ONE_CORE_GET_PLUGIN_NAME_DEFERRED "jyppx_trt10_plugin_v3_one_core_get_plugin_name_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
@@ -1432,7 +1438,10 @@
 #define JYPPX_API_TRT10_PLUGIN_V3_ONE_CORE_GET_PLUGIN_VERSION_OWNER_SCOPED "jyppx_trt10_plugin_v3_layer_get_core_plugin_version" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT10_PLUGIN_V3_ONE_RUNTIME_ATTACH_TO_CONTEXT_DEFERRED "jyppx_trt10_plugin_v3_one_runtime_attach_to_context_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_PLUGIN_V3_ONE_RUNTIME_ENQUEUE_DEFERRED "jyppx_trt10_plugin_v3_one_runtime_enqueue_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT10_PLUGIN_V3_ONE_RUNTIME_GET_FIELDS_TO_SERIALIZE_COUNT_OWNER_SCOPED "jyppx_trt10_plugin_v3_layer_get_runtime_serialization_field_count" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT10_PLUGIN_V3_ONE_RUNTIME_GET_FIELDS_TO_SERIALIZE_DEFERRED "jyppx_trt10_plugin_v3_one_runtime_get_fields_to_serialize_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT10_PLUGIN_V3_ONE_RUNTIME_GET_FIELDS_TO_SERIALIZE_METADATA_OWNER_SCOPED "jyppx_trt10_plugin_v3_layer_get_runtime_serialization_field_metadata" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=true
+#define JYPPX_API_TRT10_PLUGIN_V3_ONE_RUNTIME_GET_FIELDS_TO_SERIALIZE_NAME_OWNER_SCOPED "jyppx_trt10_plugin_v3_layer_get_runtime_serialization_field_name" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT10_PLUGIN_V3_ONE_RUNTIME_GET_INTERFACE_INFO_API_LANGUAGE_OWNER_SCOPED "jyppx_trt10_plugin_v3_layer_get_runtime_interface_info" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT10_PLUGIN_V3_ONE_RUNTIME_GET_INTERFACE_INFO_DEFERRED "jyppx_trt10_plugin_v3_one_runtime_get_interface_info_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_PLUGIN_V3_ONE_RUNTIME_ON_SHAPE_CHANGE_DEFERRED "jyppx_trt10_plugin_v3_one_runtime_on_shape_change_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
@@ -2570,6 +2579,7 @@
 #define JYPPX_API_TRT11_PLUGIN_V2_DYNAMIC_EXT_GET_WORKSPACE_SIZE_DEFERRED "jyppx_trt11_plugin_v2_dynamic_ext_get_workspace_size_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_PLUGIN_V2_DYNAMIC_EXT_RETURN_DEFERRED "jyppx_trt11_plugin_v2_dynamic_ext_return_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_PLUGIN_V2_DYNAMIC_EXT_SUPPORTS_FORMAT_COMBINATION_DEFERRED "jyppx_trt11_plugin_v2_dynamic_ext_supports_format_combination_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT11_PLUGIN_V2_DYNAMIC_EXT_SUPPORTS_FORMAT_COMBINATION_OWNER_SCOPED "jyppx_trt11_plugin_v2_layer_copy_dynamic_format_support" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT11_PLUGIN_V2_DYNAMIC_EXT_SUPPORTS_FORMAT_DEFERRED "jyppx_trt11_plugin_v2_dynamic_ext_supports_format_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_PLUGIN_V2_ENQUEUE_DEFERRED "jyppx_trt11_plugin_v2_enqueue_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_PLUGIN_V2_EXT_CLONE_DEFERRED "jyppx_trt11_plugin_v2_ext_clone_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
@@ -2592,6 +2602,7 @@
 #define JYPPX_API_TRT11_PLUGIN_V2_IO_EXT_CONFIGURE_PLUGIN_DEFERRED "jyppx_trt11_plugin_v2_io_ext_configure_plugin_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_PLUGIN_V2_IO_EXT_GET_TENSOR_RT_VERSION_DEFERRED "jyppx_trt11_plugin_v2_io_ext_get_tensor_rt_version_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_PLUGIN_V2_IO_EXT_SUPPORTS_FORMAT_COMBINATION_DEFERRED "jyppx_trt11_plugin_v2_io_ext_supports_format_combination_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT11_PLUGIN_V2_IO_EXT_SUPPORTS_FORMAT_COMBINATION_OWNER_SCOPED "jyppx_trt11_plugin_v2_layer_copy_io_ext_format_support" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT11_PLUGIN_V2_IO_EXT_SUPPORTS_FORMAT_DEFERRED "jyppx_trt11_plugin_v2_io_ext_supports_format_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_PLUGIN_V2_LAYER_GET_CAPABILITY_PRESENCE "jyppx_trt11_plugin_v2_layer_get_capability_presence" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT11_PLUGIN_V2_LAYER_GET_PLUGIN_DEFERRED "jyppx_trt11_plugin_v2_layer_get_plugin_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
@@ -2607,10 +2618,12 @@
 #define JYPPX_API_TRT11_PLUGIN_V2_TERMINATE_DEFERRED "jyppx_trt11_plugin_v2_terminate_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_PLUGIN_V3_CLONE_DEFERRED "jyppx_trt11_plugin_v3_clone_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_PLUGIN_V3_GET_CAPABILITY_INTERFACE_DEFERRED "jyppx_trt11_plugin_v3_get_capability_interface_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT11_PLUGIN_V3_LAYER_GET_BUILD_IO_COUNTS_OWNER_SCOPED "jyppx_trt11_plugin_v3_layer_get_build_io_counts" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT11_PLUGIN_V3_LAYER_GET_CAPABILITY_INTERFACE_PRESENCE "jyppx_trt11_plugin_v3_layer_get_capability_presence" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT11_PLUGIN_V3_LAYER_GET_PLUGIN_INTERFACE_INFO_API_LANGUAGE "jyppx_trt11_plugin_v3_layer_get_plugin_interface_info" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT11_PLUGIN_V3_ONE_BUILD_CONFIGURE_PLUGIN_DEFERRED "jyppx_trt11_plugin_v3_one_build_configure_plugin_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_PLUGIN_V3_ONE_BUILD_GET_ALIASED_INPUT_DEFERRED "jyppx_trt11_plugin_v3_one_build_get_aliased_input_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT11_PLUGIN_V3_ONE_BUILD_GET_ALIASED_INPUT_OWNER_SCOPED "jyppx_trt11_plugin_v3_layer_copy_build_aliased_inputs" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT11_PLUGIN_V3_ONE_BUILD_GET_FORMAT_COMBINATION_LIMIT_DEFERRED "jyppx_trt11_plugin_v3_one_build_get_format_combination_limit_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_PLUGIN_V3_ONE_BUILD_GET_FORMAT_COMBINATION_LIMIT_OWNER_SCOPED "jyppx_trt11_plugin_v3_layer_get_build_format_combination_limit" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT11_PLUGIN_V3_ONE_BUILD_GET_INTERFACE_INFO_API_LANGUAGE_OWNER_SCOPED "jyppx_trt11_plugin_v3_layer_get_build_interface_info" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=true
@@ -2622,12 +2635,14 @@
 #define JYPPX_API_TRT11_PLUGIN_V3_ONE_BUILD_GET_NB_TACTICS_DEFERRED "jyppx_trt11_plugin_v3_one_build_get_nb_tactics_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_PLUGIN_V3_ONE_BUILD_GET_NB_TACTICS_OWNER_SCOPED "jyppx_trt11_plugin_v3_layer_get_build_nb_tactics" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT11_PLUGIN_V3_ONE_BUILD_GET_OUTPUT_DATA_TYPES_DEFERRED "jyppx_trt11_plugin_v3_one_build_get_output_data_types_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT11_PLUGIN_V3_ONE_BUILD_GET_OUTPUT_DATA_TYPES_OWNER_SCOPED "jyppx_trt11_plugin_v3_layer_copy_build_output_data_types" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT11_PLUGIN_V3_ONE_BUILD_GET_OUTPUT_SHAPES_DEFERRED "jyppx_trt11_plugin_v3_one_build_get_output_shapes_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_PLUGIN_V3_ONE_BUILD_GET_TIMING_CACHE_ID_DEFERRED "jyppx_trt11_plugin_v3_one_build_get_timing_cache_id_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_PLUGIN_V3_ONE_BUILD_GET_TIMING_CACHE_ID_OWNER_SCOPED "jyppx_trt11_plugin_v3_layer_get_build_timing_cache_id" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT11_PLUGIN_V3_ONE_BUILD_GET_VALID_TACTICS_DEFERRED "jyppx_trt11_plugin_v3_one_build_get_valid_tactics_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_PLUGIN_V3_ONE_BUILD_GET_WORKSPACE_SIZE_DEFERRED "jyppx_trt11_plugin_v3_one_build_get_workspace_size_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_PLUGIN_V3_ONE_BUILD_SUPPORTS_FORMAT_COMBINATION_DEFERRED "jyppx_trt11_plugin_v3_one_build_supports_format_combination_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT11_PLUGIN_V3_ONE_BUILD_SUPPORTS_FORMAT_COMBINATION_OWNER_SCOPED "jyppx_trt11_plugin_v3_layer_copy_build_current_format_support" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT11_PLUGIN_V3_ONE_CORE_GET_INTERFACE_INFO_API_LANGUAGE_OWNER_SCOPED "jyppx_trt11_plugin_v3_layer_get_core_interface_info" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT11_PLUGIN_V3_ONE_CORE_GET_INTERFACE_INFO_DEFERRED "jyppx_trt11_plugin_v3_one_core_get_interface_info_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_PLUGIN_V3_ONE_CORE_GET_PLUGIN_NAME_DEFERRED "jyppx_trt11_plugin_v3_one_core_get_plugin_name_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
@@ -2638,7 +2653,10 @@
 #define JYPPX_API_TRT11_PLUGIN_V3_ONE_CORE_GET_PLUGIN_VERSION_OWNER_SCOPED "jyppx_trt11_plugin_v3_layer_get_core_plugin_version" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT11_PLUGIN_V3_ONE_RUNTIME_ATTACH_TO_CONTEXT_DEFERRED "jyppx_trt11_plugin_v3_one_runtime_attach_to_context_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_PLUGIN_V3_ONE_RUNTIME_ENQUEUE_DEFERRED "jyppx_trt11_plugin_v3_one_runtime_enqueue_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT11_PLUGIN_V3_ONE_RUNTIME_GET_FIELDS_TO_SERIALIZE_COUNT_OWNER_SCOPED "jyppx_trt11_plugin_v3_layer_get_runtime_serialization_field_count" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT11_PLUGIN_V3_ONE_RUNTIME_GET_FIELDS_TO_SERIALIZE_DEFERRED "jyppx_trt11_plugin_v3_one_runtime_get_fields_to_serialize_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT11_PLUGIN_V3_ONE_RUNTIME_GET_FIELDS_TO_SERIALIZE_METADATA_OWNER_SCOPED "jyppx_trt11_plugin_v3_layer_get_runtime_serialization_field_metadata" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=true
+#define JYPPX_API_TRT11_PLUGIN_V3_ONE_RUNTIME_GET_FIELDS_TO_SERIALIZE_NAME_OWNER_SCOPED "jyppx_trt11_plugin_v3_layer_get_runtime_serialization_field_name" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT11_PLUGIN_V3_ONE_RUNTIME_GET_INTERFACE_INFO_API_LANGUAGE_OWNER_SCOPED "jyppx_trt11_plugin_v3_layer_get_runtime_interface_info" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT11_PLUGIN_V3_ONE_RUNTIME_GET_INTERFACE_INFO_DEFERRED "jyppx_trt11_plugin_v3_one_runtime_get_interface_info_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_PLUGIN_V3_ONE_RUNTIME_ON_SHAPE_CHANGE_DEFERRED "jyppx_trt11_plugin_v3_one_runtime_on_shape_change_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
@@ -3570,6 +3588,7 @@
 #define JYPPX_API_TRT8_PLUGIN_V2_DYNAMIC_EXT_IS_OUTPUT_BROADCAST_ACROSS_BATCH_DEFERRED "jyppx_trt8_plugin_v2_dynamic_ext_is_output_broadcast_across_batch_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_PLUGIN_V2_DYNAMIC_EXT_RETURN_DEFERRED "jyppx_trt8_plugin_v2_dynamic_ext_return_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_PLUGIN_V2_DYNAMIC_EXT_SUPPORTS_FORMAT_COMBINATION_DEFERRED "jyppx_trt8_plugin_v2_dynamic_ext_supports_format_combination_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT8_PLUGIN_V2_DYNAMIC_EXT_SUPPORTS_FORMAT_COMBINATION_OWNER_SCOPED "jyppx_trt8_plugin_v2_layer_copy_dynamic_format_support" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT8_PLUGIN_V2_DYNAMIC_EXT_SUPPORTS_FORMAT_DEFERRED "jyppx_trt8_plugin_v2_dynamic_ext_supports_format_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_PLUGIN_V2_ENQUEUE_DEFERRED "jyppx_trt8_plugin_v2_enqueue_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_PLUGIN_V2_EXT_CAN_BROADCAST_INPUT_ACROSS_BATCH_DEFERRED "jyppx_trt8_plugin_v2_ext_can_broadcast_input_across_batch_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
@@ -3596,6 +3615,7 @@
 #define JYPPX_API_TRT8_PLUGIN_V2_IO_EXT_CONFIGURE_PLUGIN_DEFERRED "jyppx_trt8_plugin_v2_io_ext_configure_plugin_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_PLUGIN_V2_IO_EXT_GET_TENSOR_RT_VERSION_DEFERRED "jyppx_trt8_plugin_v2_io_ext_get_tensor_rt_version_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_PLUGIN_V2_IO_EXT_SUPPORTS_FORMAT_COMBINATION_DEFERRED "jyppx_trt8_plugin_v2_io_ext_supports_format_combination_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT8_PLUGIN_V2_IO_EXT_SUPPORTS_FORMAT_COMBINATION_OWNER_SCOPED "jyppx_trt8_plugin_v2_layer_copy_io_ext_format_support" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT8_PLUGIN_V2_IO_EXT_SUPPORTS_FORMAT_DEFERRED "jyppx_trt8_plugin_v2_io_ext_supports_format_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_PLUGIN_V2_LAYER_GET_CAPABILITY_PRESENCE "jyppx_trt8_plugin_v2_layer_get_capability_presence" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT8_PLUGIN_V2_LAYER_GET_PLUGIN_DEFERRED "jyppx_trt8_plugin_v2_layer_get_plugin_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false

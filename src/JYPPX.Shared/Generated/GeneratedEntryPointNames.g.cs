@@ -1363,6 +1363,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt10PluginV2DynamicExtIsOutputBroadcastAcrossBatchDeferred = "jyppx_trt10_plugin_v2_dynamic_ext_is_output_broadcast_across_batch_deferred";
     public const string Trt10PluginV2DynamicExtReturnDeferred = "jyppx_trt10_plugin_v2_dynamic_ext_return_deferred";
     public const string Trt10PluginV2DynamicExtSupportsFormatCombinationDeferred = "jyppx_trt10_plugin_v2_dynamic_ext_supports_format_combination_deferred";
+    public const string Trt10PluginV2DynamicExtSupportsFormatCombinationOwnerScoped = "jyppx_trt10_plugin_v2_layer_copy_dynamic_format_support";
     public const string Trt10PluginV2DynamicExtSupportsFormatDeferred = "jyppx_trt10_plugin_v2_dynamic_ext_supports_format_deferred";
     public const string Trt10PluginV2EnqueueDeferred = "jyppx_trt10_plugin_v2_enqueue_deferred";
     public const string Trt10PluginV2ExtCanBroadcastInputAcrossBatchDeferred = "jyppx_trt10_plugin_v2_ext_can_broadcast_input_across_batch_deferred";
@@ -1389,6 +1390,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt10PluginV2IoExtConfigurePluginDeferred = "jyppx_trt10_plugin_v2_io_ext_configure_plugin_deferred";
     public const string Trt10PluginV2IoExtGetTensorRtVersionDeferred = "jyppx_trt10_plugin_v2_io_ext_get_tensor_rt_version_deferred";
     public const string Trt10PluginV2IoExtSupportsFormatCombinationDeferred = "jyppx_trt10_plugin_v2_io_ext_supports_format_combination_deferred";
+    public const string Trt10PluginV2IoExtSupportsFormatCombinationOwnerScoped = "jyppx_trt10_plugin_v2_layer_copy_io_ext_format_support";
     public const string Trt10PluginV2IoExtSupportsFormatDeferred = "jyppx_trt10_plugin_v2_io_ext_supports_format_deferred";
     public const string Trt10PluginV2LayerGetCapabilityPresence = "jyppx_trt10_plugin_v2_layer_get_capability_presence";
     public const string Trt10PluginV2LayerGetPluginDeferred = "jyppx_trt10_plugin_v2_layer_get_plugin_deferred";
@@ -1405,11 +1407,13 @@ internal static class GeneratedEntryPointNames
     public const string Trt10PluginV3CloneDeferred = "jyppx_trt10_plugin_v3_clone_deferred";
     public const string Trt10PluginV3GetCapabilityInterfaceDeferred = "jyppx_trt10_plugin_v3_get_capability_interface_deferred";
     public const string Trt10PluginV3GetInterfaceInfoDeferred = "jyppx_trt10_plugin_v3_get_interface_info_deferred";
+    public const string Trt10PluginV3LayerGetBuildIoCountsOwnerScoped = "jyppx_trt10_plugin_v3_layer_get_build_io_counts";
     public const string Trt10PluginV3LayerGetCapabilityInterfacePresence = "jyppx_trt10_plugin_v3_layer_get_capability_presence";
     public const string Trt10PluginV3LayerGetPluginDeferred = "jyppx_trt10_plugin_v3_layer_get_plugin_deferred";
     public const string Trt10PluginV3LayerGetPluginInterfaceInfoApiLanguage = "jyppx_trt10_plugin_v3_layer_get_plugin_interface_info";
     public const string Trt10PluginV3OneBuildConfigurePluginDeferred = "jyppx_trt10_plugin_v3_one_build_configure_plugin_deferred";
     public const string Trt10PluginV3OneBuildGetAliasedInputDeferred = "jyppx_trt10_plugin_v3_one_build_get_aliased_input_deferred";
+    public const string Trt10PluginV3OneBuildGetAliasedInputOwnerScoped = "jyppx_trt10_plugin_v3_layer_copy_build_aliased_inputs";
     public const string Trt10PluginV3OneBuildGetFormatCombinationLimitDeferred = "jyppx_trt10_plugin_v3_one_build_get_format_combination_limit_deferred";
     public const string Trt10PluginV3OneBuildGetFormatCombinationLimitOwnerScoped = "jyppx_trt10_plugin_v3_layer_get_build_format_combination_limit";
     public const string Trt10PluginV3OneBuildGetInterfaceInfoApiLanguageOwnerScoped = "jyppx_trt10_plugin_v3_layer_get_build_interface_info";
@@ -1421,12 +1425,14 @@ internal static class GeneratedEntryPointNames
     public const string Trt10PluginV3OneBuildGetNbTacticsDeferred = "jyppx_trt10_plugin_v3_one_build_get_nb_tactics_deferred";
     public const string Trt10PluginV3OneBuildGetNbTacticsOwnerScoped = "jyppx_trt10_plugin_v3_layer_get_build_nb_tactics";
     public const string Trt10PluginV3OneBuildGetOutputDataTypesDeferred = "jyppx_trt10_plugin_v3_one_build_get_output_data_types_deferred";
+    public const string Trt10PluginV3OneBuildGetOutputDataTypesOwnerScoped = "jyppx_trt10_plugin_v3_layer_copy_build_output_data_types";
     public const string Trt10PluginV3OneBuildGetOutputShapesDeferred = "jyppx_trt10_plugin_v3_one_build_get_output_shapes_deferred";
     public const string Trt10PluginV3OneBuildGetTimingCacheIdDeferred = "jyppx_trt10_plugin_v3_one_build_get_timing_cache_id_deferred";
     public const string Trt10PluginV3OneBuildGetTimingCacheIdOwnerScoped = "jyppx_trt10_plugin_v3_layer_get_build_timing_cache_id";
     public const string Trt10PluginV3OneBuildGetValidTacticsDeferred = "jyppx_trt10_plugin_v3_one_build_get_valid_tactics_deferred";
     public const string Trt10PluginV3OneBuildGetWorkspaceSizeDeferred = "jyppx_trt10_plugin_v3_one_build_get_workspace_size_deferred";
     public const string Trt10PluginV3OneBuildSupportsFormatCombinationDeferred = "jyppx_trt10_plugin_v3_one_build_supports_format_combination_deferred";
+    public const string Trt10PluginV3OneBuildSupportsFormatCombinationOwnerScoped = "jyppx_trt10_plugin_v3_layer_copy_build_current_format_support";
     public const string Trt10PluginV3OneCoreGetInterfaceInfoApiLanguageOwnerScoped = "jyppx_trt10_plugin_v3_layer_get_core_interface_info";
     public const string Trt10PluginV3OneCoreGetInterfaceInfoDeferred = "jyppx_trt10_plugin_v3_one_core_get_interface_info_deferred";
     public const string Trt10PluginV3OneCoreGetPluginNameDeferred = "jyppx_trt10_plugin_v3_one_core_get_plugin_name_deferred";
@@ -1437,7 +1443,10 @@ internal static class GeneratedEntryPointNames
     public const string Trt10PluginV3OneCoreGetPluginVersionOwnerScoped = "jyppx_trt10_plugin_v3_layer_get_core_plugin_version";
     public const string Trt10PluginV3OneRuntimeAttachToContextDeferred = "jyppx_trt10_plugin_v3_one_runtime_attach_to_context_deferred";
     public const string Trt10PluginV3OneRuntimeEnqueueDeferred = "jyppx_trt10_plugin_v3_one_runtime_enqueue_deferred";
+    public const string Trt10PluginV3OneRuntimeGetFieldsToSerializeCountOwnerScoped = "jyppx_trt10_plugin_v3_layer_get_runtime_serialization_field_count";
     public const string Trt10PluginV3OneRuntimeGetFieldsToSerializeDeferred = "jyppx_trt10_plugin_v3_one_runtime_get_fields_to_serialize_deferred";
+    public const string Trt10PluginV3OneRuntimeGetFieldsToSerializeMetadataOwnerScoped = "jyppx_trt10_plugin_v3_layer_get_runtime_serialization_field_metadata";
+    public const string Trt10PluginV3OneRuntimeGetFieldsToSerializeNameOwnerScoped = "jyppx_trt10_plugin_v3_layer_get_runtime_serialization_field_name";
     public const string Trt10PluginV3OneRuntimeGetInterfaceInfoApiLanguageOwnerScoped = "jyppx_trt10_plugin_v3_layer_get_runtime_interface_info";
     public const string Trt10PluginV3OneRuntimeGetInterfaceInfoDeferred = "jyppx_trt10_plugin_v3_one_runtime_get_interface_info_deferred";
     public const string Trt10PluginV3OneRuntimeOnShapeChangeDeferred = "jyppx_trt10_plugin_v3_one_runtime_on_shape_change_deferred";
@@ -2575,6 +2584,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt11PluginV2DynamicExtGetWorkspaceSizeDeferred = "jyppx_trt11_plugin_v2_dynamic_ext_get_workspace_size_deferred";
     public const string Trt11PluginV2DynamicExtReturnDeferred = "jyppx_trt11_plugin_v2_dynamic_ext_return_deferred";
     public const string Trt11PluginV2DynamicExtSupportsFormatCombinationDeferred = "jyppx_trt11_plugin_v2_dynamic_ext_supports_format_combination_deferred";
+    public const string Trt11PluginV2DynamicExtSupportsFormatCombinationOwnerScoped = "jyppx_trt11_plugin_v2_layer_copy_dynamic_format_support";
     public const string Trt11PluginV2DynamicExtSupportsFormatDeferred = "jyppx_trt11_plugin_v2_dynamic_ext_supports_format_deferred";
     public const string Trt11PluginV2EnqueueDeferred = "jyppx_trt11_plugin_v2_enqueue_deferred";
     public const string Trt11PluginV2ExtCloneDeferred = "jyppx_trt11_plugin_v2_ext_clone_deferred";
@@ -2597,6 +2607,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt11PluginV2IoExtConfigurePluginDeferred = "jyppx_trt11_plugin_v2_io_ext_configure_plugin_deferred";
     public const string Trt11PluginV2IoExtGetTensorRtVersionDeferred = "jyppx_trt11_plugin_v2_io_ext_get_tensor_rt_version_deferred";
     public const string Trt11PluginV2IoExtSupportsFormatCombinationDeferred = "jyppx_trt11_plugin_v2_io_ext_supports_format_combination_deferred";
+    public const string Trt11PluginV2IoExtSupportsFormatCombinationOwnerScoped = "jyppx_trt11_plugin_v2_layer_copy_io_ext_format_support";
     public const string Trt11PluginV2IoExtSupportsFormatDeferred = "jyppx_trt11_plugin_v2_io_ext_supports_format_deferred";
     public const string Trt11PluginV2LayerGetCapabilityPresence = "jyppx_trt11_plugin_v2_layer_get_capability_presence";
     public const string Trt11PluginV2LayerGetPluginDeferred = "jyppx_trt11_plugin_v2_layer_get_plugin_deferred";
@@ -2612,10 +2623,12 @@ internal static class GeneratedEntryPointNames
     public const string Trt11PluginV2TerminateDeferred = "jyppx_trt11_plugin_v2_terminate_deferred";
     public const string Trt11PluginV3CloneDeferred = "jyppx_trt11_plugin_v3_clone_deferred";
     public const string Trt11PluginV3GetCapabilityInterfaceDeferred = "jyppx_trt11_plugin_v3_get_capability_interface_deferred";
+    public const string Trt11PluginV3LayerGetBuildIoCountsOwnerScoped = "jyppx_trt11_plugin_v3_layer_get_build_io_counts";
     public const string Trt11PluginV3LayerGetCapabilityInterfacePresence = "jyppx_trt11_plugin_v3_layer_get_capability_presence";
     public const string Trt11PluginV3LayerGetPluginInterfaceInfoApiLanguage = "jyppx_trt11_plugin_v3_layer_get_plugin_interface_info";
     public const string Trt11PluginV3OneBuildConfigurePluginDeferred = "jyppx_trt11_plugin_v3_one_build_configure_plugin_deferred";
     public const string Trt11PluginV3OneBuildGetAliasedInputDeferred = "jyppx_trt11_plugin_v3_one_build_get_aliased_input_deferred";
+    public const string Trt11PluginV3OneBuildGetAliasedInputOwnerScoped = "jyppx_trt11_plugin_v3_layer_copy_build_aliased_inputs";
     public const string Trt11PluginV3OneBuildGetFormatCombinationLimitDeferred = "jyppx_trt11_plugin_v3_one_build_get_format_combination_limit_deferred";
     public const string Trt11PluginV3OneBuildGetFormatCombinationLimitOwnerScoped = "jyppx_trt11_plugin_v3_layer_get_build_format_combination_limit";
     public const string Trt11PluginV3OneBuildGetInterfaceInfoApiLanguageOwnerScoped = "jyppx_trt11_plugin_v3_layer_get_build_interface_info";
@@ -2627,12 +2640,14 @@ internal static class GeneratedEntryPointNames
     public const string Trt11PluginV3OneBuildGetNbTacticsDeferred = "jyppx_trt11_plugin_v3_one_build_get_nb_tactics_deferred";
     public const string Trt11PluginV3OneBuildGetNbTacticsOwnerScoped = "jyppx_trt11_plugin_v3_layer_get_build_nb_tactics";
     public const string Trt11PluginV3OneBuildGetOutputDataTypesDeferred = "jyppx_trt11_plugin_v3_one_build_get_output_data_types_deferred";
+    public const string Trt11PluginV3OneBuildGetOutputDataTypesOwnerScoped = "jyppx_trt11_plugin_v3_layer_copy_build_output_data_types";
     public const string Trt11PluginV3OneBuildGetOutputShapesDeferred = "jyppx_trt11_plugin_v3_one_build_get_output_shapes_deferred";
     public const string Trt11PluginV3OneBuildGetTimingCacheIdDeferred = "jyppx_trt11_plugin_v3_one_build_get_timing_cache_id_deferred";
     public const string Trt11PluginV3OneBuildGetTimingCacheIdOwnerScoped = "jyppx_trt11_plugin_v3_layer_get_build_timing_cache_id";
     public const string Trt11PluginV3OneBuildGetValidTacticsDeferred = "jyppx_trt11_plugin_v3_one_build_get_valid_tactics_deferred";
     public const string Trt11PluginV3OneBuildGetWorkspaceSizeDeferred = "jyppx_trt11_plugin_v3_one_build_get_workspace_size_deferred";
     public const string Trt11PluginV3OneBuildSupportsFormatCombinationDeferred = "jyppx_trt11_plugin_v3_one_build_supports_format_combination_deferred";
+    public const string Trt11PluginV3OneBuildSupportsFormatCombinationOwnerScoped = "jyppx_trt11_plugin_v3_layer_copy_build_current_format_support";
     public const string Trt11PluginV3OneCoreGetInterfaceInfoApiLanguageOwnerScoped = "jyppx_trt11_plugin_v3_layer_get_core_interface_info";
     public const string Trt11PluginV3OneCoreGetInterfaceInfoDeferred = "jyppx_trt11_plugin_v3_one_core_get_interface_info_deferred";
     public const string Trt11PluginV3OneCoreGetPluginNameDeferred = "jyppx_trt11_plugin_v3_one_core_get_plugin_name_deferred";
@@ -2643,7 +2658,10 @@ internal static class GeneratedEntryPointNames
     public const string Trt11PluginV3OneCoreGetPluginVersionOwnerScoped = "jyppx_trt11_plugin_v3_layer_get_core_plugin_version";
     public const string Trt11PluginV3OneRuntimeAttachToContextDeferred = "jyppx_trt11_plugin_v3_one_runtime_attach_to_context_deferred";
     public const string Trt11PluginV3OneRuntimeEnqueueDeferred = "jyppx_trt11_plugin_v3_one_runtime_enqueue_deferred";
+    public const string Trt11PluginV3OneRuntimeGetFieldsToSerializeCountOwnerScoped = "jyppx_trt11_plugin_v3_layer_get_runtime_serialization_field_count";
     public const string Trt11PluginV3OneRuntimeGetFieldsToSerializeDeferred = "jyppx_trt11_plugin_v3_one_runtime_get_fields_to_serialize_deferred";
+    public const string Trt11PluginV3OneRuntimeGetFieldsToSerializeMetadataOwnerScoped = "jyppx_trt11_plugin_v3_layer_get_runtime_serialization_field_metadata";
+    public const string Trt11PluginV3OneRuntimeGetFieldsToSerializeNameOwnerScoped = "jyppx_trt11_plugin_v3_layer_get_runtime_serialization_field_name";
     public const string Trt11PluginV3OneRuntimeGetInterfaceInfoApiLanguageOwnerScoped = "jyppx_trt11_plugin_v3_layer_get_runtime_interface_info";
     public const string Trt11PluginV3OneRuntimeGetInterfaceInfoDeferred = "jyppx_trt11_plugin_v3_one_runtime_get_interface_info_deferred";
     public const string Trt11PluginV3OneRuntimeOnShapeChangeDeferred = "jyppx_trt11_plugin_v3_one_runtime_on_shape_change_deferred";
@@ -3575,6 +3593,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt8PluginV2DynamicExtIsOutputBroadcastAcrossBatchDeferred = "jyppx_trt8_plugin_v2_dynamic_ext_is_output_broadcast_across_batch_deferred";
     public const string Trt8PluginV2DynamicExtReturnDeferred = "jyppx_trt8_plugin_v2_dynamic_ext_return_deferred";
     public const string Trt8PluginV2DynamicExtSupportsFormatCombinationDeferred = "jyppx_trt8_plugin_v2_dynamic_ext_supports_format_combination_deferred";
+    public const string Trt8PluginV2DynamicExtSupportsFormatCombinationOwnerScoped = "jyppx_trt8_plugin_v2_layer_copy_dynamic_format_support";
     public const string Trt8PluginV2DynamicExtSupportsFormatDeferred = "jyppx_trt8_plugin_v2_dynamic_ext_supports_format_deferred";
     public const string Trt8PluginV2EnqueueDeferred = "jyppx_trt8_plugin_v2_enqueue_deferred";
     public const string Trt8PluginV2ExtCanBroadcastInputAcrossBatchDeferred = "jyppx_trt8_plugin_v2_ext_can_broadcast_input_across_batch_deferred";
@@ -3601,6 +3620,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt8PluginV2IoExtConfigurePluginDeferred = "jyppx_trt8_plugin_v2_io_ext_configure_plugin_deferred";
     public const string Trt8PluginV2IoExtGetTensorRtVersionDeferred = "jyppx_trt8_plugin_v2_io_ext_get_tensor_rt_version_deferred";
     public const string Trt8PluginV2IoExtSupportsFormatCombinationDeferred = "jyppx_trt8_plugin_v2_io_ext_supports_format_combination_deferred";
+    public const string Trt8PluginV2IoExtSupportsFormatCombinationOwnerScoped = "jyppx_trt8_plugin_v2_layer_copy_io_ext_format_support";
     public const string Trt8PluginV2IoExtSupportsFormatDeferred = "jyppx_trt8_plugin_v2_io_ext_supports_format_deferred";
     public const string Trt8PluginV2LayerGetCapabilityPresence = "jyppx_trt8_plugin_v2_layer_get_capability_presence";
     public const string Trt8PluginV2LayerGetPluginDeferred = "jyppx_trt8_plugin_v2_layer_get_plugin_deferred";
