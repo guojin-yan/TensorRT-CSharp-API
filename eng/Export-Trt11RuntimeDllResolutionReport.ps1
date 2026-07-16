@@ -76,12 +76,14 @@ function Get-FileEvidence {
     [AllowNull()][object]$NativeAsset
   )
 
-  $exists = -not [string]::IsNullOrWhiteSpace($Path) -and (Test-Path -LiteralPath $Path -PathType Leaf)
+  $currentPathExists = -not [string]::IsNullOrWhiteSpace($Path) -and (Test-Path -LiteralPath $Path -PathType Leaf)
   $length = [int64](Get-PropertyOrDefault -Object $NativeAsset -Name "length" -DefaultValue 0)
   $sha256 = [string](Get-PropertyOrDefault -Object $NativeAsset -Name "sha256" -DefaultValue "")
   $fileVersion = [string](Get-PropertyOrDefault -Object $NativeAsset -Name "fileVersion" -DefaultValue "")
+  $presentAtCapture = $null -ne $NativeAsset -and $length -gt 0 -and -not [string]::IsNullOrWhiteSpace($sha256)
+  $exists = $currentPathExists -or $presentAtCapture
 
-  if ($exists) {
+  if ($currentPathExists) {
     $item = Get-Item -LiteralPath $Path
     $length = [int64]$item.Length
     if ([string]::IsNullOrWhiteSpace($sha256)) {
@@ -96,6 +98,8 @@ function Get-FileEvidence {
     name = $Name
     path = $Path
     exists = $exists
+    presentAtCapture = $presentAtCapture
+    currentPathExists = $currentPathExists
     length = $length
     sha256 = $sha256
     fileVersion = $fileVersion
@@ -210,6 +214,8 @@ $dllResolution = foreach ($group in $requiredDllGroups) {
     required = [bool]$group.required
     resolvedPath = $resolvedPath
     found = [bool]$fileEvidence.exists
+    presentAtCapture = [bool]$fileEvidence.presentAtCapture
+    currentPathExists = [bool]$fileEvidence.currentPathExists
     length = [int64]$fileEvidence.length
     sha256 = [string]$fileEvidence.sha256
     fileVersion = [string]$fileEvidence.fileVersion
@@ -221,7 +227,8 @@ $dllResolution = foreach ($group in $requiredDllGroups) {
 
 $missingRequired = @($dllResolution | Where-Object { $_.required -and -not $_.found })
 $duplicateGroups = @($dllResolution | Where-Object { $_.duplicateAcrossSearchOrPath })
-$nativeBridgePresent = -not [string]::IsNullOrWhiteSpace($bridgePath) -and (Test-Path -LiteralPath $bridgePath -PathType Leaf)
+$bridgeResolution = $dllResolution | Where-Object { $_.key -eq "bridge" } | Select-Object -First 1
+$nativeBridgePresent = $null -ne $bridgeResolution -and [bool]$bridgeResolution.found
 $cudnnAssetCount = @($nativeAssets | Where-Object { ([string](Get-PropertyOrDefault -Object $_ -Name "name" -DefaultValue "")).StartsWith("cudnn", [StringComparison]::OrdinalIgnoreCase) }).Count
 $tensorRtAvailable = ([string](Get-PropertyOrDefault -Object $hostRecord -Name "runtimeEnvironmentLine" -DefaultValue "")).Contains("TensorRtAvailable=True", [StringComparison]::OrdinalIgnoreCase)
 $cudaAvailable = ([string](Get-PropertyOrDefault -Object $hostRecord -Name "runtimeEnvironmentLine" -DefaultValue "")).Contains("CudaAvailable=True", [StringComparison]::OrdinalIgnoreCase)
@@ -284,7 +291,7 @@ $classificationRationale = @(
 
 $recommendedNextActions = @(
   "Review dllResolution rows with missingRequired=true or duplicateAcrossSearchOrPath=true before rerunning TRT11 smoke.",
-  "Prefer the TRT11 TensorRT lib/bin and CUDA 13.2 bin directories ahead of stale TensorRT/CUDA/cuDNN PATH entries.",
+  "Prefer the TRT11 TensorRT bin/lib and CUDA 13.2 bin/x64 directory ahead of stale TensorRT/CUDA/cuDNN PATH entries.",
   "Rerun eng/Test-BridgePackageRuntimeConsumer.ps1 for win-x64-trt11.0-cuda13.2-cudnn9.22 without AllowRuntimeSmokeFailure after DLL order cleanup.",
   "Use NativeCreateRuntimeDiagnostic* markers from the bridge runtime consumer proof to separate DLL-order issues from createInferRuntime null-return context and logger/vendor-message context."
 )

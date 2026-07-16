@@ -150,6 +150,9 @@ else {
 $hasNativeCudaRuntimeLoggerError =
   $nativeCreateRuntimeLastLoggerMessage.Contains("Cuda Runtime", [StringComparison]::OrdinalIgnoreCase) -or
   $nativeCreateRuntimeLastLoggerMessage.Contains("catchCudaError", [StringComparison]::OrdinalIgnoreCase)
+$cudaPreflightDriverInsufficient =
+  $cudaPreflightLastErrorMessage.Contains("CUDA error 35", [StringComparison]::OrdinalIgnoreCase) -or
+  $cudaPreflightLastErrorMessage.Contains("insufficient driver", [StringComparison]::OrdinalIgnoreCase)
 
 $rootCauseCategory = if ($failureSignature -eq "createInferRuntime-null" -and $tensorRtAvailable -and $cudaAvailable -and $hasNativeCudaRuntimeLoggerError) {
   "trt11-create-runtime-null-cuda-runtime-error"
@@ -172,6 +175,9 @@ $rootCauseSubcategory = if ($rootCauseCategory -ne "trt11-create-runtime-null-cu
 }
 elseif (-not $cudaPreflightAttempted) {
   "cuda-preflight-unavailable"
+}
+elseif ($cudaPreflightDriverInsufficient) {
+  "cuda-driver-insufficient-for-runtime"
 }
 elseif ($cudaPreflightGetDeviceCountStatus -eq "Failed" -or $cudaPreflightInitStatus -eq "CudaPreflightFailed") {
   "cuda-preflight-failed"
@@ -203,7 +209,7 @@ $classificationRationale = @(
   "TRT11 bridge package restore/build reached runtime smoke and exited with code $exitCode."
   "Dependency preflight reported TensorRtAvailable=$tensorRtAvailable and CudaAvailable=$cudaAvailable via runtimeEnvironmentLine."
   "Native bridge asset present=$nativeBridgePresent; cuDNN 9 asset count=$cudnnAssetCount; search directory count=$($searchDirectories.Count)."
-  "CUDA preflight available=$cudaPreflightAvailable; attempted=$cudaPreflightAttempted; driverVersion=$cudaPreflightDriverVersion; runtimeVersion=$cudaPreflightRuntimeVersion; deviceCount=$cudaPreflightDeviceCount; selectedDevice=$cudaPreflightSelectedDevice; initStatus=$cudaPreflightInitStatus; canAttemptTensorRtRuntimeCreate=$cudaPreflightCanAttemptTensorRtRuntimeCreate."
+  "CUDA preflight available=$cudaPreflightAvailable; attempted=$cudaPreflightAttempted; driverVersion=$cudaPreflightDriverVersion; runtimeVersion=$cudaPreflightRuntimeVersion; deviceCount=$cudaPreflightDeviceCount; selectedDevice=$cudaPreflightSelectedDevice; initStatus=$cudaPreflightInitStatus; driverInsufficient=$cudaPreflightDriverInsufficient; canAttemptTensorRtRuntimeCreate=$cudaPreflightCanAttemptTensorRtRuntimeCreate."
   "The failing stack terminates at NativeBridgeApi.CreateRuntime/TensorRtRuntime constructor with createInferRuntime returning null."
   "Native create-runtime diagnostic available=$nativeCreateRuntimeDiagnosticAvailable; attempted=$nativeCreateRuntimeAttempted; returnedNull=$nativeCreateRuntimeReturnedNull; lastStatus=$nativeCreateRuntimeLastStatus."
   "Native create-runtime phase=$nativeCreateRuntimePhase; loggerCallbackAvailable=$nativeCreateRuntimeLoggerCallbackAvailable; loggerMessageCount=$nativeCreateRuntimeLoggerMessageCount; lastLoggerSeverity=$nativeCreateRuntimeLastLoggerSeverity."
@@ -212,7 +218,7 @@ $classificationRationale = @(
 )
 
 $recommendedNextActions = @(
-  "Run the TRT11 bridge smoke without AllowRuntimeSmokeFailure on the same host after checking CUDA runtime/device/driver initialization state.",
+  "Upgrade to an NVIDIA driver compatible with the selected CUDA 13.2 runtime before rerunning TRT11 runtime smoke when rootCauseSubcategory is cuda-driver-insufficient-for-runtime.",
   "Use NativeCreateRuntimeDiagnostic* stdout markers to distinguish logger validation, logger callback/vendor messages, TensorRT availability, guarded native status, and null runtime return.",
   "Add or run a package-consumer preflight that captures cudaGetDeviceCount/cudaFree(0) status before TensorRT createInferRuntime.",
   "Capture loader diagnostics for TensorRT 11, CUDA 13.2, cuDNN 9.22, and any plugin DLLs resolved before createInferRuntime.",
@@ -250,6 +256,7 @@ $record = [pscustomobject]@{
   cudaPreflightInitStatus = $cudaPreflightInitStatus
   cudaPreflightLastErrorName = $cudaPreflightLastErrorName
   cudaPreflightLastErrorMessage = $cudaPreflightLastErrorMessage
+  cudaPreflightDriverInsufficient = $cudaPreflightDriverInsufficient
   cudaPreflightCanAttemptTensorRtRuntimeCreate = $cudaPreflightCanAttemptTensorRtRuntimeCreate
   runtimeCreateDiagnostic = $runtimeCreateDiagnostic
   nativeCreateRuntimeDiagnosticAvailable = $nativeCreateRuntimeDiagnosticAvailable
@@ -315,6 +322,8 @@ $lines.Add("| CUDA preflight attempted | ``$($record.cudaPreflightAttempted)`` |
 $lines.Add("| CUDA preflight driver/runtime | ``$(ConvertTo-MarkdownCell $record.cudaPreflightDriverVersion)/$(ConvertTo-MarkdownCell $record.cudaPreflightRuntimeVersion)`` |")
 $lines.Add("| CUDA preflight device | ``count=$(ConvertTo-MarkdownCell $record.cudaPreflightDeviceCount); selected=$(ConvertTo-MarkdownCell $record.cudaPreflightSelectedDevice); name=$(ConvertTo-MarkdownCell $record.cudaPreflightDeviceName)`` |")
 $lines.Add("| CUDA preflight status | ``getDeviceCount=$(ConvertTo-MarkdownCell $record.cudaPreflightGetDeviceCountStatus); init=$(ConvertTo-MarkdownCell $record.cudaPreflightInitStatus); canAttemptTensorRT=$(ConvertTo-MarkdownCell $record.cudaPreflightCanAttemptTensorRtRuntimeCreate)`` |")
+$lines.Add("| CUDA driver insufficient | ``$($record.cudaPreflightDriverInsufficient)`` |")
+$lines.Add("| CUDA preflight error | ``$(ConvertTo-MarkdownCell $record.cudaPreflightLastErrorName):$(ConvertTo-MarkdownCell $record.cudaPreflightLastErrorMessage)`` |")
 $lines.Add("| native create-runtime diagnostic available | ``$($record.nativeCreateRuntimeDiagnosticAvailable)`` |")
 $lines.Add("| native create-runtime attempted | ``$($record.nativeCreateRuntimeAttempted)`` |")
 $lines.Add("| native create-runtime returned null | ``$($record.nativeCreateRuntimeReturnedNull)`` |")

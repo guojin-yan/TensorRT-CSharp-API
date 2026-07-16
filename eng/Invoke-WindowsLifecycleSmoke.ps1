@@ -73,9 +73,13 @@ try {
     $pathEntries.Add($tensorRtLibPath)
   }
 
-  $cudaBinPath = Join-Path $env:JYPPX_CUDA_ROOT "bin"
-  if (Test-Path -LiteralPath $cudaBinPath -PathType Container) {
-    $pathEntries.Add($cudaBinPath)
+  foreach ($cudaBinPath in @(
+      (Join-Path $env:JYPPX_CUDA_ROOT "bin\x64"),
+      (Join-Path $env:JYPPX_CUDA_ROOT "bin")
+    )) {
+    if (Test-Path -LiteralPath $cudaBinPath -PathType Container) {
+      $pathEntries.Add($cudaBinPath)
+    }
   }
 
   if (-not [string]::IsNullOrWhiteSpace($env:JYPPX_CUDNN_ROOT)) {

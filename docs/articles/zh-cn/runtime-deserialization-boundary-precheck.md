@@ -1,6 +1,6 @@
 # Runtime Deserialization Boundary Precheck
 
-`runtime-deserialization-boundary-precheck` 用来收口 `IRuntime::deserializeCudaEngine`、`IRuntime::deserializeCudaEngineV2` 和 `IRuntime::loadRuntime` 周围的安全边界。它不是新的 native ABI 实现，也不是 runtime execution proof；它记录的是当前 C# 高层 `TensorRtRuntime.Deserialize(...)` 已经具备的安全形态，以及 direct TensorRT runtime serialization 行为什么仍然 deferred。
+`runtime-deserialization-boundary-precheck` 用来收口 `IRuntime::deserializeCudaEngine`、`IRuntime::deserializeCudaEngineV2` 和 `IRuntime::loadRuntime` 周围的安全边界。它不是 runtime execution proof；它记录当前 C# 高层 `TensorRtRuntime.Deserialize(...)` 的安全形态，并区分已经由 scoped-buffer native bridge 覆盖的 `deserializeCudaEngine` 与仍需 callback/ownership 设计的 V2、`loadRuntime` 行。
 
 ## 当前可用边界
 
@@ -11,7 +11,7 @@
 - `TensorRtRuntime.DeserializeFromFile(string)` 读取托管字节后复用 byte-array 入口。
 - `TensorRtRuntime.Deserialize(TensorRtHostMemory)` 使用 bridge-owned host memory handle，不向 public API 暴露 `IHostMemory*`。
 
-预检输出 `RuntimeEvidenceKind=runtime-precheck`、`ManagedByteArrayDeserializeReady=True`、`ManagedStreamDeserializeReady=True`、`HostMemoryDeserializeReady=True`、`SerializedBufferCopiedBeforeInterop=True`、`PinnedBufferScopedToInteropCall=True`、`BorrowedSerializedBufferEscaped=False`、`EngineHandleOwnedByWrapper=True`、`EnginePointerExposed=False`、`DirectDeserializeCudaEngineRowsDeferred=True`、`DirectDeserializeCudaEngineV2RowsDeferred=True`、`LoadRuntimeDeferred=True` 和 `RuntimeProofBlocked=True`。
+预检输出 `RuntimeEvidenceKind=runtime-precheck`、`ManagedByteArrayDeserializeReady=True`、`ManagedStreamDeserializeReady=True`、`HostMemoryDeserializeReady=True`、`SerializedBufferCopiedBeforeInterop=True`、`PinnedBufferScopedToInteropCall=True`、`BorrowedSerializedBufferEscaped=False`、`EngineHandleOwnedByWrapper=True`、`EnginePointerExposed=False`、`DirectDeserializeCudaEngineRowsDeferred=False`、`DirectDeserializeCudaEngineRowsImplemented=True`、`DirectDeserializeCudaEngineV2RowsDeferred=True`、`LoadRuntimeDeferred=True` 和 `RuntimeProofBlocked=True`。
 
 ## 为什么仍是 not proof
 
@@ -19,6 +19,7 @@
 
 因此：
 
+- direct `IRuntime::deserializeCudaEngine` 由调用期间 pinned buffer 和 bridge-owned engine handle 覆盖，不再是 deferred-only。
 - direct `IRuntime::deserializeCudaEngineV2` 仍保留 deferred 行。
 - direct `IRuntime::loadRuntime` 仍保留 deferred 行。
 - package-consumer runtime proof 仍必须来自真实 full runtime consumer smoke。

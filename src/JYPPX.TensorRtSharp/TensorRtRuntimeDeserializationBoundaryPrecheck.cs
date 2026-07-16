@@ -148,7 +148,6 @@ public static class TensorRtRuntimeDeserializationBoundaryPrecheck
             blockers.Add("full package consumer runtime execution proof is not ready.");
         }
 
-        blockers.Add("direct IRuntime::deserializeCudaEngine rows remain deferred by design.");
         if (lineSupportsDeserializeCudaEngineV2)
         {
             blockers.Add("direct IRuntime::deserializeCudaEngineV2 rows remain deferred by design.");
@@ -291,7 +290,10 @@ public readonly struct TensorRtRuntimeDeserializationBoundaryPrecheckResult
     public bool EnginePointerProduced => false;
 
     /// <summary>Gets whether direct IRuntime::deserializeCudaEngine rows intentionally remain deferred. 获取 direct IRuntime::deserializeCudaEngine 行是否继续 deferred。</summary>
-    public bool DirectDeserializeCudaEngineRowsDeferred => true;
+    public bool DirectDeserializeCudaEngineRowsDeferred => false;
+
+    /// <summary>Gets whether direct IRuntime::deserializeCudaEngine is covered by the scoped-buffer bridge. 获取 direct IRuntime::deserializeCudaEngine 是否已由调用期 buffer bridge 覆盖。</summary>
+    public bool DirectDeserializeCudaEngineRowsImplemented => SafeDeserializeBridgeReady;
 
     /// <summary>Gets whether direct IRuntime::deserializeCudaEngineV2 rows intentionally remain deferred where present. 获取存在时 direct IRuntime::deserializeCudaEngineV2 行是否继续 deferred。</summary>
     public bool DirectDeserializeCudaEngineV2RowsDeferred => LineSupportsDeserializeCudaEngineV2;
@@ -370,7 +372,8 @@ public readonly struct TensorRtRuntimeDeserializationBoundaryPrecheckResult
         "BorrowedSerializedBufferEscaped=False; " +
         "EngineHandleOwnedByWrapper=" + EngineHandleOwnedByWrapper + "; " +
         "EnginePointerExposed=False; " +
-        "DirectDeserializeCudaEngineRowsDeferred=True; " +
+        "DirectDeserializeCudaEngineRowsDeferred=False; " +
+        "DirectDeserializeCudaEngineRowsImplemented=" + DirectDeserializeCudaEngineRowsImplemented + "; " +
         "DirectDeserializeCudaEngineV2RowsDeferred=" + DirectDeserializeCudaEngineV2RowsDeferred + "; " +
         "LoadRuntimeDeferred=True; CanAttemptRuntimeProof=False; " +
         "CanPromoteWithoutRuntimeProof=False; RuntimeProofBlocked=True; " +

@@ -28,6 +28,8 @@ public sealed class Trt11RuntimeSmokeRootCauseReportTests
         Assert.Equal(1, root.GetProperty("exitCode").GetInt32());
         Assert.Equal("createInferRuntime-null", root.GetProperty("failureSignature").GetString());
         Assert.Equal("trt11-create-runtime-null-cuda-runtime-error", root.GetProperty("rootCauseCategory").GetString());
+        Assert.Equal("cuda-driver-insufficient-for-runtime", root.GetProperty("rootCauseSubcategory").GetString());
+        Assert.True(root.GetProperty("cudaPreflightDriverInsufficient").GetBoolean());
         Assert.True(root.GetProperty("tensorRtAvailable").GetBoolean());
         Assert.True(root.GetProperty("cudaAvailable").GetBoolean());
         Assert.True(root.GetProperty("nativeBridgePresent").GetBoolean());

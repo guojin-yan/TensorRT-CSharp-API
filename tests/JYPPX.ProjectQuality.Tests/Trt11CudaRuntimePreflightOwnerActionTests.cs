@@ -31,25 +31,26 @@ public sealed class Trt11CudaRuntimePreflightOwnerActionTests
         using JsonDocument rootCause = ReadJson("artifacts", "final-release", "trt11-runtime-smoke-root-cause-report.json");
         JsonElement rootCauseRoot = rootCause.RootElement;
         Assert.Equal("trt11-create-runtime-null-cuda-runtime-error", rootCauseRoot.GetProperty("rootCauseCategory").GetString());
-        Assert.Equal("cuda-preflight-failed", rootCauseRoot.GetProperty("rootCauseSubcategory").GetString());
+        Assert.Equal("cuda-driver-insufficient-for-runtime", rootCauseRoot.GetProperty("rootCauseSubcategory").GetString());
         Assert.True(rootCauseRoot.GetProperty("cudaPreflightAttempted").GetBoolean());
         Assert.Equal("Failed", rootCauseRoot.GetProperty("cudaPreflightGetDeviceCountStatus").GetString());
         Assert.Equal("CudaPreflightFailed", rootCauseRoot.GetProperty("cudaPreflightInitStatus").GetString());
         Assert.Equal("CudaException", rootCauseRoot.GetProperty("cudaPreflightLastErrorName").GetString());
         Assert.Contains("CUDA error 35", rootCauseRoot.GetProperty("cudaPreflightLastErrorMessage").GetString(), StringComparison.OrdinalIgnoreCase);
+        Assert.True(rootCauseRoot.GetProperty("cudaPreflightDriverInsufficient").GetBoolean());
         Assert.False(rootCauseRoot.GetProperty("cudaPreflightCanAttemptTensorRtRuntimeCreate").GetBoolean());
         Assert.False(rootCauseRoot.GetProperty("canPromoteRuntimeProof").GetBoolean());
 
         using JsonDocument dllResolution = ReadJson("artifacts", "final-release", "trt11-runtime-dll-resolution-report.json");
         JsonElement dllRoot = dllResolution.RootElement;
-        Assert.Equal("cuda-preflight-failed", dllRoot.GetProperty("rootCauseSubcategory").GetString());
+        Assert.Equal("cuda-driver-insufficient-for-runtime", dllRoot.GetProperty("rootCauseSubcategory").GetString());
         Assert.True(dllRoot.GetProperty("cudaPreflightAttempted").GetBoolean());
         Assert.Equal("CudaPreflightFailed", dllRoot.GetProperty("cudaPreflightInitStatus").GetString());
         Assert.False(dllRoot.GetProperty("canPromoteRuntimeProof").GetBoolean());
 
         using JsonDocument diff = ReadJson("artifacts", "final-release", "trt10-vs-trt11-bridge-runtime-diagnostic-diff.json");
         JsonElement diffRoot = diff.RootElement;
-        Assert.Equal("cuda-preflight-failed", diffRoot.GetProperty("trt11RootCauseSubcategory").GetString());
+        Assert.Equal("cuda-driver-insufficient-for-runtime", diffRoot.GetProperty("trt11RootCauseSubcategory").GetString());
         Assert.True(diffRoot.GetProperty("trt11CudaPreflightAttempted").GetBoolean());
         Assert.Equal("CudaPreflightFailed", diffRoot.GetProperty("trt11CudaPreflightInitStatus").GetString());
         string[] diffFields = diffRoot.GetProperty("diffItems").EnumerateArray().Select(static item => item.GetProperty("field").GetString()!).ToArray();
@@ -59,7 +60,7 @@ public sealed class Trt11CudaRuntimePreflightOwnerActionTests
 
         using JsonDocument dashboard = ReadJson("artifacts", "final-release", "final-proof-readiness-blocker-dashboard.json");
         JsonElement sourceStates = dashboard.RootElement.GetProperty("sourceStates");
-        Assert.Equal("cuda-preflight-failed", sourceStates.GetProperty("trt11RootCauseSubcategory").GetString());
+        Assert.Equal("cuda-driver-insufficient-for-runtime", sourceStates.GetProperty("trt11RootCauseSubcategory").GetString());
         Assert.True(sourceStates.GetProperty("trt11RootCauseCudaPreflightAttempted").GetBoolean());
         Assert.Equal("CudaPreflightFailed", sourceStates.GetProperty("trt11RootCauseCudaPreflightInitStatus").GetString());
         Assert.False(sourceStates.GetProperty("trt11RootCauseCudaPreflightCanAttemptTensorRtRuntimeCreate").GetBoolean());
@@ -67,7 +68,7 @@ public sealed class Trt11CudaRuntimePreflightOwnerActionTests
 
         using JsonDocument releaseBundle = ReadJson("artifacts", "final-release", "release-evidence-bundle.json");
         JsonElement bundleRoot = releaseBundle.RootElement;
-        Assert.Equal("cuda-preflight-failed", bundleRoot.GetProperty("trt11RootCauseSubcategory").GetString());
+        Assert.Equal("cuda-driver-insufficient-for-runtime", bundleRoot.GetProperty("trt11RootCauseSubcategory").GetString());
         Assert.True(bundleRoot.GetProperty("trt11BridgeRuntimeConsumerCudaPreflightAttempted").GetBoolean());
         Assert.True(bundleRoot.GetProperty("trt11RootCauseCudaPreflightAttempted").GetBoolean());
         Assert.Equal("CudaPreflightFailed", bundleRoot.GetProperty("trt11RootCauseCudaPreflightInitStatus").GetString());
@@ -95,6 +96,7 @@ public sealed class Trt11CudaRuntimePreflightOwnerActionTests
         Assert.Contains("CudaPreflightLastErrorName=", script, StringComparison.Ordinal);
         Assert.Contains("CudaPreflightLastErrorMessage=", script, StringComparison.Ordinal);
         Assert.Contains("CudaPreflightCanAttemptTensorRtRuntimeCreate=", script, StringComparison.Ordinal);
+        Assert.Contains("Join-Path $Roots.CudaRoot \"bin\\x64\"", script, StringComparison.Ordinal);
         Assert.Contains("cudaPreflight = [ordered]@", script, StringComparison.Ordinal);
         Assert.Contains("cannot promote runtime proof by itself", script, StringComparison.Ordinal);
     }

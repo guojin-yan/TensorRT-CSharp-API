@@ -228,8 +228,9 @@ function Get-RuntimeSearchDirectories {
   param([Parameter(Mandatory = $true)][object]$Roots)
 
   $candidates = @(
-    (Join-Path $Roots.TensorRtRoot "lib"),
     (Join-Path $Roots.TensorRtRoot "bin"),
+    (Join-Path $Roots.TensorRtRoot "lib"),
+    (Join-Path $Roots.CudaRoot "bin\x64"),
     (Join-Path $Roots.CudaRoot "bin")
   )
   if (-not [string]::IsNullOrWhiteSpace($Roots.CudnnRoot)) {
@@ -253,8 +254,11 @@ function Get-NativeAssetEvidence {
   $candidates.Add($BridgeOutputPath)
 
   foreach ($directoryAndPattern in @(
+      [pscustomobject]@{ Directory = (Join-Path $Roots.TensorRtRoot "bin"); Pattern = "nvinfer*.dll" },
+      [pscustomobject]@{ Directory = (Join-Path $Roots.TensorRtRoot "bin"); Pattern = "nvonnxparser*.dll" },
       [pscustomobject]@{ Directory = (Join-Path $Roots.TensorRtRoot "lib"); Pattern = "nvinfer*.dll" },
       [pscustomobject]@{ Directory = (Join-Path $Roots.TensorRtRoot "lib"); Pattern = "nvonnxparser*.dll" },
+      [pscustomobject]@{ Directory = (Join-Path $Roots.CudaRoot "bin\x64"); Pattern = "cudart64*.dll" },
       [pscustomobject]@{ Directory = (Join-Path $Roots.CudaRoot "bin"); Pattern = "cudart64*.dll" },
       [pscustomobject]@{ Directory = (Join-Path $Roots.CudnnRoot "bin"); Pattern = "cudnn*64_9.dll" }
     )) {

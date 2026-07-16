@@ -34,7 +34,8 @@ public sealed class RuntimeDeserializationBoundaryPrecheckTests
         Assert.True(precheck.EngineHandleOwnedByWrapper);
         Assert.False(precheck.EnginePointerExposed);
         Assert.False(precheck.EnginePointerProduced);
-        Assert.True(precheck.DirectDeserializeCudaEngineRowsDeferred);
+        Assert.False(precheck.DirectDeserializeCudaEngineRowsDeferred);
+        Assert.True(precheck.DirectDeserializeCudaEngineRowsImplemented);
         Assert.True(precheck.DirectDeserializeCudaEngineV2RowsDeferred);
         Assert.True(precheck.LoadRuntimeDeferred);
         Assert.False(precheck.PluginLibraryDependencyDiagnosticsReady);
@@ -49,7 +50,7 @@ public sealed class RuntimeDeserializationBoundaryPrecheckTests
         Assert.True(precheck.RuntimeProofBlocked);
         Assert.True(precheck.DeferredRowsStillRequired);
         Assert.Equal("precheck-ready", precheck.Status);
-        Assert.True(precheck.BlockedPrerequisiteCount >= 5);
+        Assert.True(precheck.BlockedPrerequisiteCount >= 4);
         Assert.Contains(precheck.BlockedPrerequisites, item => item.Contains("plugin/library dependency diagnostics", StringComparison.Ordinal));
         Assert.Contains(precheck.BlockedPrerequisites, item => item.Contains("runtime execution proof", StringComparison.Ordinal));
         Assert.Contains(precheck.BlockedPrerequisites, item => item.Contains("deserializeCudaEngineV2", StringComparison.Ordinal));
@@ -70,7 +71,8 @@ public sealed class RuntimeDeserializationBoundaryPrecheckTests
         Assert.True(precheck.LineSupportsRuntimeDeserialization);
         Assert.False(precheck.LineSupportsDeserializeCudaEngineV2);
         Assert.False(precheck.DirectDeserializeCudaEngineV2RowsDeferred);
-        Assert.True(precheck.DirectDeserializeCudaEngineRowsDeferred);
+        Assert.False(precheck.DirectDeserializeCudaEngineRowsDeferred);
+        Assert.True(precheck.DirectDeserializeCudaEngineRowsImplemented);
         Assert.True(precheck.LoadRuntimeDeferred);
         Assert.True(precheck.PrecheckReady);
         Assert.True(precheck.RuntimeProofBlocked);
@@ -114,7 +116,7 @@ public sealed class RuntimeDeserializationBoundaryPrecheckTests
         Assert.Equal("runtime-smoke-driver-blocked", diagnostics.PackageConsumerEvidenceClassification);
         Assert.False(diagnostics.PluginLibraryDependencyDiagnosticsComplete);
         Assert.False(diagnostics.LoadRuntimeOwnershipModeled);
-        Assert.True(diagnostics.DirectDeserializeCudaEngineRowsDeferred);
+        Assert.False(diagnostics.DirectDeserializeCudaEngineRowsDeferred);
         Assert.True(diagnostics.DirectDeserializeCudaEngineV2RowsDeferred);
         Assert.True(diagnostics.LoadRuntimeDeferred);
         Assert.True(diagnostics.PointerFreeSurfaceReady);
@@ -214,7 +216,8 @@ public sealed class RuntimeDeserializationBoundaryPrecheckTests
         Assert.Contains("BorrowedSerializedBufferEscaped => false", precheckSource);
         Assert.Contains("EngineHandleOwnedByWrapper", precheckSource);
         Assert.Contains("EnginePointerExposed => false", precheckSource);
-        Assert.Contains("DirectDeserializeCudaEngineRowsDeferred => true", precheckSource);
+        Assert.Contains("DirectDeserializeCudaEngineRowsDeferred => false", precheckSource);
+        Assert.Contains("DirectDeserializeCudaEngineRowsImplemented => SafeDeserializeBridgeReady", precheckSource);
         Assert.Contains("LoadRuntimeDeferred => true", precheckSource);
         Assert.Contains("CanAttemptRuntimeProof => false", precheckSource);
         Assert.Contains("DeferredRowsStillRequired => true", precheckSource);
@@ -288,6 +291,8 @@ public sealed class RuntimeDeserializationBoundaryPrecheckTests
         Assert.Contains("HostMemoryDeserializeReady=True", designDoc);
         Assert.Contains("SerializedBufferCopiedBeforeInterop=True", designDoc);
         Assert.Contains("EngineHandleOwnedByWrapper=True", designDoc);
+        Assert.Contains("DirectDeserializeCudaEngineRowsDeferred=False", designDoc);
+        Assert.Contains("DirectDeserializeCudaEngineRowsImplemented=True", designDoc);
         Assert.Contains("DirectDeserializeCudaEngineV2RowsDeferred=True", designDoc);
         Assert.Contains("LoadRuntimeDeferred=True", designDoc);
         Assert.Contains("not proof", designDoc);

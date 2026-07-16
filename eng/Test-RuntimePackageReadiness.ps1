@@ -1627,7 +1627,8 @@ function New-RuntimeDeserializationBoundaryPrecheckEvidence {
     "BorrowedSerializedBufferEscaped=False",
     "EngineHandleOwnedByWrapper=True",
     "EnginePointerExposed=False",
-    "DirectDeserializeCudaEngineRowsDeferred=True",
+    "DirectDeserializeCudaEngineRowsDeferred=False",
+    "DirectDeserializeCudaEngineRowsImplemented=True",
     "DirectDeserializeCudaEngineV2RowsDeferred=True",
     "LoadRuntimeDeferred=True",
     "CanAttemptRuntimeProof=False",
@@ -1669,7 +1670,7 @@ function New-RuntimeDeserializationBoundaryPrecheckEvidence {
     ) `
     -RequiredMarkers $requiredMarkers `
     -RequiredDeferredRows $requiredDeferredRows `
-    -ReadyDiagnostic "runtime deserialization boundary precheck documents the safe managed Deserialize surface, keeps direct runtime serialization rows deferred, and is explicitly not runtime execution proof." `
+    -ReadyDiagnostic "runtime deserialization boundary precheck documents the implemented scoped-buffer deserializeCudaEngine path, keeps deserializeCudaEngineV2/loadRuntime deferred, and is explicitly not runtime execution proof." `
     -IncompleteDiagnostic "runtime deserialization boundary precheck evidence is incomplete; inspect source/smoke/doc markers and deferred row evidence." `
     -ReadyProperties @{
       managedByteArrayDeserializeReady = $true
@@ -1679,6 +1680,7 @@ function New-RuntimeDeserializationBoundaryPrecheckEvidence {
       borrowedSerializedBufferEscaped = $false
       engineHandleOwnedByWrapper = $true
       enginePointerExposed = $false
+      directDeserializeCudaEngineRowsImplemented = $true
       loadRuntimeDeferred = $true
       pointerFreeSurfaceReady = $true
       safeDeserializeBridgeReady = $true
@@ -1691,6 +1693,7 @@ function New-RuntimeDeserializationBoundaryPrecheckEvidence {
       borrowedSerializedBufferEscaped = $false
       engineHandleOwnedByWrapper = $false
       enginePointerExposed = $false
+      directDeserializeCudaEngineRowsImplemented = $false
       loadRuntimeDeferred = $true
       pointerFreeSurfaceReady = $false
       safeDeserializeBridgeReady = $false

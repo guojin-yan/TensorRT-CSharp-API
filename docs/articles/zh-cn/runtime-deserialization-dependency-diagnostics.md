@@ -51,7 +51,7 @@
 
 `runtime-deserialization-boundary-precheck` 证明的是 C# public surface 不暴露 serialized buffer、engine pointer 或 borrowed native pointer。`runtime-deserialization-dependency-diagnostics` 进一步把 full package consumer smoke 分类接进来，但仍不调用 `IRuntime::loadRuntime`，也不加载 plugin host code。
 
-因此 direct `IRuntime::deserializeCudaEngineV2` 和 `IRuntime::loadRuntime` 行仍然保留 deferred。`PluginLibraryDependencyDiagnosticsComplete=False` 和 `LoadRuntimeOwnershipModeled=False` 是有意保留的发布边界。
+因此 direct `IRuntime::deserializeCudaEngine` 已由 scoped-buffer bridge 覆盖；`IRuntime::deserializeCudaEngineV2` 和 `IRuntime::loadRuntime` 行仍然保留 deferred。`PluginLibraryDependencyDiagnosticsComplete=False` 和 `LoadRuntimeOwnershipModeled=False` 是有意保留的发布边界。
 
 ## blocked-by-cuda-driver 怎么读
 

@@ -266,7 +266,7 @@ function Get-MethodCandidates {
     "IBuilder::createNetworkV2" = @("create-network", "network-create")
     "IBuilder::createOptimizationProfile" = @("create-optimization-profile")
     "IBuilder::buildSerializedNetwork" = @("build-serialized-network", "serialized-build")
-    "IRuntime::deserializeCudaEngine" = @("deserialize-engine", "runtime-deserialize-engine")
+    "IRuntime::deserializeCudaEngine" = @("runtime-deserialize-engine")
     "IParser::parse" = @("parse-from-memory", "parse-memory")
     "IParser::parseFromFile" = @("parse-from-file")
     "IParser::getNbErrors" = @("error-count", "get-error-count")
@@ -318,7 +318,7 @@ function Get-MethodCandidates {
     "IExecutionContext::setTensorAddress" = @("set-tensor-address", "tensor-address")
     "IExecutionContext::setInputTensorAddress" = @("set-input-tensor-address")
     "IExecutionContext::setOutputTensorAddress" = @("set-output-tensor-address")
-    "IExecutionContext::enqueueV3" = @("enqueue-async", "enqueue-v3")
+    "IExecutionContext::enqueueV3" = @("execution-context-enqueue-async")
     "IExecutionContext::setOptimizationProfileAsync" = @("set-optimization-profile-async", "optimization-profile-async")
     "IExecutionContext::getOptimizationProfile" = @("optimization-profile")
     "IExecutionContext::inferShapes" = @("infer-shapes")
@@ -397,6 +397,7 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
     "Global::getBuilderPluginRegistry" = @("id:*builder-capability-plugin-registry-exists")
     "IBuilder::getPluginRegistry" = @("id:*builder-plugin-registry-exists", "id:*builder-plugin-registry-get-creator-count", "id:*builder-plugin-registry-get-recursive-creator-count", "id:*builder-plugin-registry-has-error-recorder", "id:*builder-plugin-registry-is-parent-search-enabled", "id:*builder-plugin-creator-get-name", "id:*builder-plugin-creator-get-version", "id:*builder-plugin-creator-get-namespace", "id:*builder-plugin-creator-get-interface-info", "id:*builder-plugin-creator-get-field-count", "id:*builder-plugin-creator-get-field-name", "id:*builder-plugin-creator-get-field-metadata", "id:*builder-plugin-creator-lookup", "id:*builder-get-plugin-registry-deferred")
     "IRuntime::getPluginRegistry" = @("id:*runtime-plugin-registry-exists", "id:*runtime-plugin-registry-get-creator-count", "id:*runtime-plugin-registry-has-error-recorder", "id:*runtime-plugin-registry-is-parent-search-enabled", "id:*runtime-plugin-creator-get-name", "id:*runtime-plugin-creator-get-version", "id:*runtime-plugin-creator-get-namespace", "id:*runtime-plugin-creator-get-interface-info", "id:*runtime-plugin-creator-get-field-count", "id:*runtime-plugin-creator-get-field-name", "id:*runtime-plugin-creator-get-field-metadata", "id:*runtime-plugin-creator-lookup", "id:*runtime-get-plugin-registry-deferred")
+    "IRuntime::deserializeCudaEngine" = @("id:*runtime-deserialize-engine")
     "IRuntime::destroy" = @("id:*trt-object-destroy")
     "IRefitter::destroy" = @("id:*trt-object-destroy")
     "IParser::destroy" = @("id:*trt-object-destroy")
@@ -451,6 +452,7 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
     "IExecutionContext::getDebugListener" = @("id:*execution-context-has-debug-listener", "id:*execution-context-clear-debug-listener")
     "IExecutionContext::setDebugListener" = @("id:*execution-context-has-debug-listener", "id:*execution-context-clear-debug-listener")
     "IExecutionContext::setInputShapeBinding" = @("id:*execution-context-set-input-shape-binding-copied-values", "id:*execution-context-set-input-shape-binding-deferred")
+    "IExecutionContext::enqueueV3" = @("id:*execution-context-enqueue-async")
     "IBuilderConfig::getProgressMonitor" = @("id:*builder-config-has-progress-monitor", "id:*builder-config-clear-progress-monitor", "id:*builder-config-set-progress-monitor")
     "IBuilderConfig::setProgressMonitor" = @("id:*builder-config-has-progress-monitor", "id:*builder-config-clear-progress-monitor", "id:*builder-config-set-progress-monitor")
     "IDebugListener::getInterfaceInfo" = @("id:*execution-context-debug-listener-get-interface-info", "id:*debug-listener-get-interface-info-deferred")
@@ -643,6 +645,7 @@ function Find-MatchedManifestApis {
     "IBuilderConfig::setPluginsToSerialize",
     "IRuntime::getPluginRegistry",
     "IRuntime::getLogger",
+    "IRuntime::deserializeCudaEngine",
     "IRefitter::getLogger",
     "IParser::getNbErrors",
     "IParser::getNbSubgraphs",
@@ -657,6 +660,7 @@ function Find-MatchedManifestApis {
     "IExecutionContext::getDebugListener",
     "IExecutionContext::setDebugListener",
     "IExecutionContext::setInputShapeBinding",
+    "IExecutionContext::enqueueV3",
     "IBuilderConfig::getAlgorithmSelector",
     "IBuilderConfig::getInt8Calibrator",
     "IBuilderConfig::getProgressMonitor",

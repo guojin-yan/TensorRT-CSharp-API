@@ -49,10 +49,18 @@ public sealed class Trt11RuntimeDllResolutionReportTests
         Assert.False(root.GetProperty("isPackageConsumerRuntimeProof").GetBoolean());
 
         JsonElement[] resolutionRows = root.GetProperty("dllResolution").EnumerateArray().ToArray();
-        Assert.Contains(resolutionRows, item => item.GetProperty("key").GetString() == "bridge" && item.GetProperty("found").GetBoolean());
+        Assert.Contains(resolutionRows, item =>
+            item.GetProperty("key").GetString() == "bridge" &&
+            item.GetProperty("found").GetBoolean() &&
+            item.GetProperty("presentAtCapture").GetBoolean());
         Assert.Contains(resolutionRows, item => item.GetProperty("key").GetString() == "tensorrt-runtime");
-        Assert.Contains(resolutionRows, item => item.GetProperty("key").GetString() == "cuda-runtime");
+        Assert.Contains(resolutionRows, item =>
+            item.GetProperty("key").GetString() == "cuda-runtime" &&
+            item.GetProperty("resolvedPath").GetString()!.EndsWith("CUDA\\v13.2\\bin\\x64\\cudart64_13.dll", StringComparison.OrdinalIgnoreCase));
         Assert.Contains(resolutionRows, item => item.GetProperty("key").GetString() == "cudnn-runtime");
+
+        string[] searchDirectories = root.GetProperty("searchDirectories").EnumerateArray().Select(static item => item.GetString()!).ToArray();
+        Assert.Contains(searchDirectories, item => item.EndsWith("CUDA\\v13.2\\bin\\x64", StringComparison.OrdinalIgnoreCase));
 
         string[] sourceArtifacts = root.GetProperty("sourceArtifacts").EnumerateArray().Select(static item => item.GetString()!).ToArray();
         Assert.Contains("artifacts/package-consumer/bridge-runtime/win-x64-trt11.0-cuda13.2-cudnn9.22/bridge-package-runtime-consumer-proof.json", sourceArtifacts);

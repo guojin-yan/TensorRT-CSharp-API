@@ -80,7 +80,6 @@ public static class TensorRtRuntimeDeserializationDependencyDiagnostics
 
         AddBlocker(blockers, "plugin library dependency diagnostics are not complete.");
         AddBlocker(blockers, "IRuntime::loadRuntime returned runtime ownership is not modeled.");
-        AddBlocker(blockers, "direct IRuntime::deserializeCudaEngine rows remain deferred by design.");
         if (precheck.LineSupportsDeserializeCudaEngineV2)
         {
             AddBlocker(blockers, "direct IRuntime::deserializeCudaEngineV2 rows remain deferred by design.");
