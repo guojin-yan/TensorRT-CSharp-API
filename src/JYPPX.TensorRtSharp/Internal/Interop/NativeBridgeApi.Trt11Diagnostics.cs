@@ -38,9 +38,9 @@ internal static partial class NativeBridgeApi
     {
         BridgeStatusCode status = line switch
         {
+            TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_builder_config_set_plugins_to_serialize(config, IntPtr.Zero, 0, out int _),
             TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_config_clear_plugins_to_serialize(config),
             TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_builder_config_clear_plugins_to_serialize(config),
-            TensorRtApiLine.TensorRt8 => throw new BridgeProbeException(BridgeStatusCode.NotSupported, BridgeErrorCategory.TensorRt, $"{nameof(ClearBuilderConfigPluginsToSerialize)} is available for TensorRT 10 and TensorRT 11 adapters."),
             _ => throw UnsupportedLine()
         };
 
@@ -64,10 +64,10 @@ internal static partial class NativeBridgeApi
 
     public static string GetBuilderConfigPluginToSerialize(TensorRtApiLine line, SafeTensorRtObjectHandle config, int index)
     {
-        EnsureTensorRt10Or11(line, nameof(GetBuilderConfigPluginToSerialize));
         return ReadUtf8Buffer(
             (byte[] buffer, UIntPtr size, out UIntPtr required) => line switch
             {
+                TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_builder_config_get_plugin_to_serialize(config, index, buffer, size, out required),
                 TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_config_get_plugin_to_serialize(config, index, buffer, size, out required),
                 TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_builder_config_get_plugin_to_serialize(config, index, buffer, size, out required),
                 _ => throw UnsupportedLine()

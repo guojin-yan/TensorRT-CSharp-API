@@ -688,6 +688,7 @@
 #define JYPPX_API_TRT10_ASSERTION_LAYER_GET_MESSAGE "jyppx_trt10_assertion_layer_get_message" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT10_ASSERTION_LAYER_SET_MESSAGE "jyppx_trt10_assertion_layer_set_message" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_BUILDER_BUILD_ENGINE_WITH_CONFIG_DEFERRED "jyppx_trt10_builder_build_engine_with_config_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT10_BUILDER_BUILD_ENGINE_WITH_CONFIG_OWNER_SAFE "jyppx_trt10_builder_build_engine_with_config" // module=tensorrt; line=10; ownership=caller-destroys; manualOverride=false
 #define JYPPX_API_TRT10_BUILDER_BUILD_SERIALIZED_NETWORK "jyppx_trt10_builder_build_serialized_network" // module=tensorrt; line=10; ownership=caller-destroys; manualOverride=true
 #define JYPPX_API_TRT10_BUILDER_CAPABILITY_PLUGIN_CREATOR_GET_API_LANGUAGE "jyppx_trt10_builder_capability_plugin_creator_get_api_language" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_BUILDER_CAPABILITY_PLUGIN_CREATOR_GET_FIELD_COUNT "jyppx_trt10_builder_capability_plugin_creator_get_field_count" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
@@ -954,6 +955,7 @@
 #define JYPPX_API_TRT10_ENGINE_SERIALIZE "jyppx_trt10_engine_serialize" // module=tensorrt; line=10; ownership=caller-destroys; manualOverride=false
 #define JYPPX_API_TRT10_ENGINE_SERIALIZE_WITH_CONFIG "jyppx_trt10_engine_serialize_with_config" // module=tensorrt; line=10; ownership=caller-destroys; manualOverride=false
 #define JYPPX_API_TRT10_ENGINE_SET_WEIGHT_STREAMING_BUDGET_V2 "jyppx_trt10_engine_set_weight_streaming_budget_v2" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT10_ERROR_CODE_ENUM_MAX_METADATA "jyppx_trt10_error_code_get_exclusive_upper_bound" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_ERROR_RECORDER_DEC_REF_COUNT_DEFERRED "jyppx_trt10_error_recorder_dec_ref_count_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_ERROR_RECORDER_ENUM_MAX_DEFERRED "jyppx_trt10_error_recorder_enum_max_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_ERROR_RECORDER_GET_ERROR_CODE_DEFERRED "jyppx_trt10_error_recorder_get_error_code_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
@@ -2210,6 +2212,7 @@
 #define JYPPX_API_TRT11_ENGINE_IS_DEBUG_TENSOR "jyppx_trt11_engine_is_debug_tensor" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_ENGINE_IS_REFITTABLE "jyppx_trt11_engine_is_refittable" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_ENGINE_IS_SHAPE_INFERENCE_IO "jyppx_trt11_engine_is_shape_inference_io" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT11_ERROR_CODE_ENUM_MAX_METADATA "jyppx_trt11_error_code_get_exclusive_upper_bound" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_ERROR_RECORDER_DEC_REF_COUNT_DEFERRED "jyppx_trt11_error_recorder_dec_ref_count_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_ERROR_RECORDER_ENUM_MAX_DEFERRED "jyppx_trt11_error_recorder_enum_max_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_ERROR_RECORDER_GET_ERROR_CODE_DEFERRED "jyppx_trt11_error_recorder_get_error_code_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
@@ -2708,6 +2711,7 @@
 #define JYPPX_API_TRT11_REFITTER_GET_LOGGER_DEFERRED "jyppx_trt11_refitter_get_logger_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_REFITTER_GET_MISSING_COUNT "jyppx_trt11_refitter_get_missing_count" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_REFITTER_GET_MISSING_ENTRIES "jyppx_trt11_refitter_get_missing_entries" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT11_REFITTER_HAS_LOGGER_OWNER_SCOPED "jyppx_trt11_refitter_has_logger" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_REFITTER_REFIT_CUDA_ENGINE "jyppx_trt11_refitter_refit_cuda_engine" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_REFITTER_SET_NAMED_WEIGHTS_WITH_LOCATION_DEFERRED "jyppx_trt11_refitter_set_named_weights_with_location_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_REFITTER_SET_WEIGHTS "jyppx_trt11_refitter_set_weights" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=true
@@ -2983,6 +2987,7 @@
 #define JYPPX_API_TRT8_BINARY_PROTO_BLOB_GET_DIMENSIONS_DEFERRED "jyppx_trt8_binary_proto_blob_get_dimensions_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_BLOB_NAME_TO_TENSOR_FIND_DEFERRED "jyppx_trt8_blob_name_to_tensor_find_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_BUILDER_BUILD_ENGINE_WITH_CONFIG_DEFERRED "jyppx_trt8_builder_build_engine_with_config_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT8_BUILDER_BUILD_ENGINE_WITH_CONFIG_OWNER_SAFE "jyppx_trt8_builder_build_engine_with_config" // module=tensorrt; line=8; ownership=caller-destroys; manualOverride=false
 #define JYPPX_API_TRT8_BUILDER_BUILD_SERIALIZED_NETWORK "jyppx_trt8_builder_build_serialized_network" // module=tensorrt; line=8; ownership=caller-destroys; manualOverride=true
 #define JYPPX_API_TRT8_BUILDER_CAPABILITY_PLUGIN_CREATOR_GET_FIELD_COUNT "jyppx_trt8_builder_capability_plugin_creator_get_field_count" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_BUILDER_CAPABILITY_PLUGIN_CREATOR_GET_FIELD_METADATA "jyppx_trt8_builder_capability_plugin_creator_get_field_metadata" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
@@ -3024,6 +3029,7 @@
 #define JYPPX_API_TRT8_BUILDER_CONFIG_GET_NB_PLUGINS_TO_SERIALIZE_DEFERRED "jyppx_trt8_builder_config_get_nb_plugins_to_serialize_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_BUILDER_CONFIG_GET_OPTIMIZATION_LEVEL "jyppx_trt8_builder_config_get_optimization_level" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_BUILDER_CONFIG_GET_OPTIMIZATION_PROFILE_COUNT "jyppx_trt8_builder_config_get_optimization_profile_count" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT8_BUILDER_CONFIG_GET_PLUGIN_TO_SERIALIZE_CALLER_BUFFER "jyppx_trt8_builder_config_get_plugin_to_serialize" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_BUILDER_CONFIG_GET_PLUGIN_TO_SERIALIZE_DEFERRED "jyppx_trt8_builder_config_get_plugin_to_serialize_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_BUILDER_CONFIG_GET_PREVIEW_FEATURE "jyppx_trt8_builder_config_get_preview_feature" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_BUILDER_CONFIG_GET_PROFILING_VERBOSITY "jyppx_trt8_builder_config_get_profiling_verbosity" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
@@ -3058,6 +3064,7 @@
 #define JYPPX_API_TRT8_BUILDER_CONFIG_SET_MIN_TIMING_ITERATIONS "jyppx_trt8_builder_config_set_min_timing_iterations" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_BUILDER_CONFIG_SET_MIN_TIMING_ITERATIONS_DEFERRED "jyppx_trt8_builder_config_set_min_timing_iterations_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_BUILDER_CONFIG_SET_OPTIMIZATION_LEVEL "jyppx_trt8_builder_config_set_optimization_level" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT8_BUILDER_CONFIG_SET_PLUGINS_TO_SERIALIZE_COPIED_PATHS "jyppx_trt8_builder_config_set_plugins_to_serialize" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_BUILDER_CONFIG_SET_PLUGINS_TO_SERIALIZE_DEFERRED "jyppx_trt8_builder_config_set_plugins_to_serialize_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_BUILDER_CONFIG_SET_PREVIEW_FEATURE "jyppx_trt8_builder_config_set_preview_feature" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_BUILDER_CONFIG_SET_PROFILE_STREAM "jyppx_trt8_builder_config_set_profile_stream" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
@@ -3232,6 +3239,7 @@
 #define JYPPX_API_TRT8_ENGINE_IS_REFITTABLE "jyppx_trt8_engine_is_refittable" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_ENGINE_IS_SHAPE_INFERENCE_IO "jyppx_trt8_engine_is_shape_inference_io" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_ENGINE_SERIALIZE "jyppx_trt8_engine_serialize" // module=tensorrt; line=8; ownership=caller-destroys; manualOverride=false
+#define JYPPX_API_TRT8_ERROR_CODE_ENUM_MAX_METADATA "jyppx_trt8_error_code_get_exclusive_upper_bound" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_ERROR_RECORDER_DEC_REF_COUNT_DEFERRED "jyppx_trt8_error_recorder_dec_ref_count_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_ERROR_RECORDER_ENUM_MAX_DEFERRED "jyppx_trt8_error_recorder_enum_max_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_ERROR_RECORDER_GET_ERROR_CODE_DEFERRED "jyppx_trt8_error_recorder_get_error_code_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
@@ -3279,6 +3287,7 @@
 #define JYPPX_API_TRT8_EXECUTION_CONTEXT_SET_ERROR_RECORDER_DEFERRED "jyppx_trt8_execution_context_set_error_recorder_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_EXECUTION_CONTEXT_SET_INPUT_CONSUMED_EVENT "jyppx_trt8_execution_context_set_input_consumed_event" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_EXECUTION_CONTEXT_SET_INPUT_SHAPE "jyppx_trt8_execution_context_set_input_shape" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT8_EXECUTION_CONTEXT_SET_INPUT_SHAPE_BINDING_COPIED_VALUES "jyppx_trt8_execution_context_set_input_shape_binding" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_EXECUTION_CONTEXT_SET_INPUT_SHAPE_BINDING_DEFERRED "jyppx_trt8_execution_context_set_input_shape_binding_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_EXECUTION_CONTEXT_SET_INPUT_TENSOR_ADDRESS "jyppx_trt8_execution_context_set_input_tensor_address" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_EXECUTION_CONTEXT_SET_NAME "jyppx_trt8_execution_context_set_name" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=true

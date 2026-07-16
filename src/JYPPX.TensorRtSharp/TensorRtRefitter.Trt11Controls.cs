@@ -85,7 +85,7 @@ public sealed partial class TensorRtRefitter
 
     /// <summary>
     /// Gets whether this refitter has a TensorRT logger associated with it.
-    /// 获取当前 refitter 是否关联了 TensorRT logger；只返回布尔值，不跨 ABI 暴露借用的 logger 指针。适用于 TensorRT 8/10。
+    /// 获取当前 refitter 是否关联了 TensorRT logger；只返回布尔值，不跨 ABI 暴露借用的 logger 指针。适用于 TensorRT 8/10/11。
     /// </summary>
     public bool HasLogger => NativeBridgeApi.HasRefitterLogger(Line, _handle);
 

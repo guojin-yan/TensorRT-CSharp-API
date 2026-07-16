@@ -628,7 +628,8 @@ internal static partial class NativeBridgeApi
         {
             TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_refitter_has_logger(refitter, out hasLogger),
             TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_refitter_has_logger(refitter, out hasLogger),
-            _ => throw UnsupportedRefitterFeature(nameof(HasRefitterLogger), "TensorRT 8 and 10")
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_refitter_has_logger(refitter, out hasLogger),
+            _ => throw UnsupportedLine()
         };
         NativeStatus.ThrowIfFailed(status);
         return hasLogger != 0;

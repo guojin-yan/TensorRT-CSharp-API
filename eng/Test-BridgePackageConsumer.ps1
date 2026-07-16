@@ -1090,6 +1090,17 @@ static class HighLevelWrapperSurfaceProbe
             static (line, handler) => new TensorRtProgressMonitor(line, handler);
         Func<TensorRtAllocatorDryRunHandler, TensorRtAllocatorCallbackOwner> allocatorOwnerFactory =
             static handler => new TensorRtAllocatorCallbackOwner(handler);
+        Func<TensorRtApiLine, int> errorCodeExclusiveUpperBound =
+            static line => TensorRtErrorCodeMetadata.GetExclusiveUpperBound(line);
+        Func<TensorRtBuilder, TensorRtNetworkDefinition, TensorRtBuilderConfig, TensorRtEngine> directEngineBuild =
+            static (builder, network, config) => builder.BuildEngineWithConfig(network, config);
+        Func<TensorRtBuilderConfig, IReadOnlyList<string>, bool> serializedPluginPathSet =
+            static (config, paths) => config.SetPluginsToSerialize(paths);
+        Func<TensorRtBuilderConfig, IReadOnlyList<string>> serializedPluginPathCopy =
+            static config => config.GetPluginsToSerialize();
+        Func<TensorRtExecutionContext, int, IReadOnlyList<int>, bool> legacyShapeBindingSet =
+            static (context, bindingIndex, values) => context.SetInputShapeBinding(bindingIndex, values);
+        Func<TensorRtRefitter, bool> refitterHasLogger = static refitter => refitter.HasLogger;
         Func<TensorRtRuntime, string> runtimeErrorRecorderSnapshot =
             static runtime => runtime.TryGetErrorRecorderSnapshot(out TensorRtErrorRecorderSnapshot snapshot)
                 ? snapshot.ErrorCount + ":" + snapshot.Records.Count + ":" + snapshot.HasOverflowed
@@ -2547,6 +2558,12 @@ static class HighLevelWrapperSurfaceProbe
         _ = profilerFactory;
         _ = progressFactory;
         _ = allocatorOwnerFactory;
+        _ = errorCodeExclusiveUpperBound;
+        _ = directEngineBuild;
+        _ = serializedPluginPathSet;
+        _ = serializedPluginPathCopy;
+        _ = legacyShapeBindingSet;
+        _ = refitterHasLogger;
         _ = runtimeErrorRecorderSnapshot;
         _ = runtimeDiagnosticSnapshot;
         _ = runtimeDiagnosticSummary;
@@ -3101,6 +3118,14 @@ static class HighLevelWrapperSurfaceProbe
             nameof(TensorRtRefitter.TryGetErrorRecorderSnapshot),
             nameof(TensorRtRefitter.GetDiagnosticSnapshot),
             nameof(TensorRtRefitter.ClearErrorRecorder),
+            nameof(TensorRtRefitter.HasLogger),
+            nameof(TensorRtErrorCodeMetadata),
+            nameof(TensorRtErrorCodeMetadata.GetExclusiveUpperBound),
+            nameof(TensorRtErrorCodeMetadata.IsDefinedRangeValue),
+            nameof(TensorRtBuilder.BuildEngineWithConfig),
+            nameof(TensorRtBuilderConfig.SetPluginsToSerialize),
+            nameof(TensorRtBuilderConfig.GetPluginToSerialize),
+            nameof(TensorRtBuilderConfig.GetPluginsToSerialize),
             "TensorRtBuilder.HasLogger",
             nameof(TensorRtBuilder.HasErrorRecorder),
             nameof(TensorRtBuilder.ClearErrorRecorder),
@@ -3111,6 +3136,7 @@ static class HighLevelWrapperSurfaceProbe
             nameof(TensorRtExecutionContext.HasProfiler),
             nameof(TensorRtExecutionContext.HasErrorRecorder),
             nameof(TensorRtExecutionContext.ClearErrorRecorder),
+            nameof(TensorRtExecutionContext.SetInputShapeBinding),
             nameof(TensorRtExecutionContext.HasOutputAllocator),
             nameof(TensorRtExecutionContext.ClearOutputAllocator),
             nameof(TensorRtExecutionContext.HasTemporaryStorageAllocator),

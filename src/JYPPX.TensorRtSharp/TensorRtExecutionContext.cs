@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using JYPPX.CudaSharp;
 using JYPPX.Shared.Interop;
 using JYPPX.TensorRtSharp.Internal.Handles;
@@ -209,6 +210,28 @@ public sealed partial class TensorRtExecutionContext : IDisposable
     public int[] GetShapeBinding(int bindingIndex)
     {
         return NativeBridgeApi.GetExecutionContextShapeBinding(Line, _handle, bindingIndex);
+    }
+
+    /// <summary>
+    /// Sets copied values for a TensorRT 8 legacy input shape binding.
+    /// 为 TensorRT 8 legacy input shape binding 设置复制后的值。
+    /// </summary>
+    /// <param name="bindingIndex">The legacy input shape-binding index. legacy input shape-binding 索引。</param>
+    /// <param name="values">Caller-owned shape values copied for the native call. 调用方拥有且会被复制用于原生调用的 shape 值。</param>
+    /// <returns><see langword="true"/> when TensorRT accepts the values. TensorRT 接受这些值时返回 <see langword="true"/>。</returns>
+    public bool SetInputShapeBinding(int bindingIndex, IReadOnlyList<int> values)
+    {
+        return NativeBridgeApi.SetExecutionContextInputShapeBinding(Line, _handle, bindingIndex, values);
+    }
+
+    /// <summary>Sets copied TensorRT 8 legacy input shape-binding values. 设置复制后的 TensorRT 8 legacy input shape-binding 值。</summary>
+    /// <param name="bindingIndex">The legacy input shape-binding index. legacy input shape-binding 索引。</param>
+    /// <param name="values">Caller-owned shape values. 调用方拥有的 shape 值。</param>
+    /// <returns><see langword="true"/> when TensorRT accepts the values. TensorRT 接受这些值时返回 <see langword="true"/>。</returns>
+    public bool SetInputShapeBinding(int bindingIndex, params int[] values)
+    {
+        if (values == null) { throw new ArgumentNullException(nameof(values)); }
+        return SetInputShapeBinding(bindingIndex, (IReadOnlyList<int>)values);
     }
 
     /// <summary>

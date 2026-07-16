@@ -35,7 +35,7 @@ internal static class Program
         TensorRtApiLine? line = ResolveTensorRtLine(snapshot, requestedLine);
         if (line == null)
         {
-            Console.WriteLine("Skipped=True Reason=NoRequestedTensorRt10Or11BuilderAvailable");
+            Console.WriteLine("Skipped=True Reason=NoRequestedTensorRtBuilderAvailable");
             return;
         }
 
@@ -58,12 +58,6 @@ internal static class Program
 
     private static void RunPluginSerializationPathsSmoke(TensorRtApiLine line)
     {
-        if (line == TensorRtApiLine.TensorRt8)
-        {
-            Console.WriteLine("Skipped=True Reason=PluginSerializationPathsRequireTensorRt10Or11");
-            return;
-        }
-
         if (!TensorRtEnvironmentProbe.TryCreateBuilder(line, out string builderProbeMessage))
         {
             Console.WriteLine($"Skipped=True Reason=BuilderUnavailable:{builderProbeMessage}");
@@ -144,15 +138,15 @@ internal static class Program
                 return TensorRtApiLine.TensorRt10;
             }
 
+            if (snapshot.TensorRt8.RuntimeCreationSupported && snapshot.TensorRt8.BuilderCreationSupported)
+            {
+                return TensorRtApiLine.TensorRt8;
+            }
+
             return null;
         }
 
         TensorRtApiLine? line = ResolveTensorRtLineWithoutSnapshot(requestedLine);
-        if (line == TensorRtApiLine.TensorRt8)
-        {
-            return null;
-        }
-
         TensorRtAdapterInfo adapter = GetAdapter(snapshot, line!.Value);
         return adapter.RuntimeCreationSupported && adapter.BuilderCreationSupported ? line : null;
     }

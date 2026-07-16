@@ -7,8 +7,8 @@ namespace JYPPX.TensorRtSharp;
 public sealed partial class TensorRtBuilderConfig
 {
     /// <summary>
-    /// Sets the plugin library paths that TensorRT 10/11 should serialize with the generated engine plan.
-    /// 设置 TensorRT 10/11 在生成 engine plan 时需要一并序列化的插件库路径。
+    /// Sets the plugin library paths that TensorRT 8/10/11 should serialize with the generated engine plan.
+    /// 设置 TensorRT 8/10/11 在生成 engine plan 时需要一并序列化的插件库路径。
     /// </summary>
     /// <param name="pluginLibraryPaths">
     /// Plugin library paths visible to TensorRT during build and deployment.
@@ -29,8 +29,8 @@ public sealed partial class TensorRtBuilderConfig
     }
 
     /// <summary>
-    /// Sets the plugin library paths that TensorRT 10/11 should serialize with the generated engine plan.
-    /// 设置 TensorRT 10/11 在生成 engine plan 时需要一并序列化的插件库路径。
+    /// Sets the plugin library paths that TensorRT 8/10/11 should serialize with the generated engine plan.
+    /// 设置 TensorRT 8/10/11 在生成 engine plan 时需要一并序列化的插件库路径。
     /// </summary>
     /// <param name="pluginLibraryPaths">
     /// Plugin library paths visible to TensorRT during build and deployment.

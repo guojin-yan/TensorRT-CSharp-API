@@ -125,7 +125,8 @@ public sealed class EngineBuilderReadonlyCandidateImplementationEvidenceTests
         Assert.Contains("inspector.GetLayerInformation", smokeTensorRt);
         Assert.Contains("config.GetDeploymentSnapshot()", smokeNetworkBuilder + smokeTensorRt);
         Assert.Contains("BuilderConfigDeploymentSummary=", smokeTensorRt);
-        Assert.Contains("config.SerializedPluginPathCountCompatibility", smokeNetworkBuilder);
+        Assert.Contains("config.SetPluginsToSerialize", smokeNetworkBuilder);
+        Assert.Contains("config.GetSerializedPluginSnapshot", smokeNetworkBuilder);
         Assert.Contains("config.GetMemoryPoolLimit(TensorRtMemoryPoolType.Workspace)", smokeNetworkBuilder + smokeTensorRt);
 
         Assert.Contains("ManagedInteropAndPublicApiExposeCompatibilityQueriesWithoutRawPointers", engineTests);

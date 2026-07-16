@@ -36,7 +36,7 @@ public sealed class RuntimeSerializationPluginPathsTests
     }
 
     [Fact]
-    public void ManagedPluginSerializationPathsAreTensorRt10AndTensorRt11Only()
+    public void ManagedPluginSerializationPathsAreAvailableAcrossAllSupportedLines()
     {
         string diagnostics = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11Diagnostics.cs");
         string fourteenthBatch = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11FourteenthBatch.cs");
@@ -48,15 +48,15 @@ public sealed class RuntimeSerializationPluginPathsTests
         Assert.Contains("TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_config_get_nb_plugins_to_serialize", diagnostics);
         Assert.Contains("TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_builder_config_get_nb_plugins_to_serialize", diagnostics);
         Assert.Contains("TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_config_get_plugin_to_serialize", diagnostics);
-        Assert.Contains("TensorRtApiLine.TensorRt8 => throw new BridgeProbeException(BridgeStatusCode.NotSupported", diagnostics);
-        Assert.Contains("EnsureTensorRt10Or11(line, nameof(GetBuilderConfigPluginToSerialize))", diagnostics);
+        Assert.Contains("TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_builder_config_get_plugin_to_serialize", diagnostics);
+        Assert.Contains("TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_builder_config_set_plugins_to_serialize", diagnostics);
 
-        Assert.Contains("EnsureTensorRt10Or11(line, nameof(SetBuilderConfigPluginsToSerialize))", fourteenthBatch);
+        Assert.Contains("TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_builder_config_set_plugins_to_serialize", fourteenthBatch);
         Assert.Contains("TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_config_set_plugins_to_serialize", fourteenthBatch);
         Assert.Contains("TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_builder_config_set_plugins_to_serialize", fourteenthBatch);
 
-        Assert.Contains("TensorRT 10/11", publicDiagnostics);
-        Assert.Contains("TensorRT 10/11", publicSerialization);
+        Assert.Contains("TensorRT 8/10/11", publicDiagnostics);
+        Assert.Contains("TensorRT 8/10/11", publicSerialization);
         Assert.Contains("public sealed class TensorRtBuilderConfigSerializedPluginSnapshot", snapshot);
         Assert.Contains("public TensorRtBuilderConfigSerializedPluginSnapshot GetSerializedPluginSnapshot()", publicDiagnostics);
         Assert.Contains("public bool TryGetSerializedPluginSnapshot(out TensorRtBuilderConfigSerializedPluginSnapshot snapshot, out string diagnostic)", publicDiagnostics);
@@ -73,6 +73,7 @@ public sealed class RuntimeSerializationPluginPathsTests
     [Fact]
     public void PluginSerializationPathApisAreDeclaredInPublicNativeHeaders()
     {
+        AssertPluginSerializationHeaderDeclarations("8", hasDedicatedClear: false);
         AssertPluginSerializationHeaderDeclarations("10");
         AssertPluginSerializationHeaderDeclarations("11");
     }
@@ -105,13 +106,19 @@ public sealed class RuntimeSerializationPluginPathsTests
         return File.ReadAllText(path);
     }
 
-    private static void AssertPluginSerializationHeaderDeclarations(string line)
+    private static void AssertPluginSerializationHeaderDeclarations(string line, bool hasDedicatedClear = true)
     {
         string header = ReadSource("native", "include", "jyppx", "tensorrt", $"trt{line}.h");
 
-        Assert.Contains($"JYPPX_C_API(JYPPX_StatusCode) jyppx_trt{line}_builder_config_clear_plugins_to_serialize", header);
+        if (hasDedicatedClear)
+        {
+            Assert.Contains($"JYPPX_C_API(JYPPX_StatusCode) jyppx_trt{line}_builder_config_clear_plugins_to_serialize", header);
+        }
         Assert.Contains($"JYPPX_C_API(JYPPX_StatusCode) jyppx_trt{line}_builder_config_set_plugins_to_serialize", header);
-        Assert.Contains($"JYPPX_C_API(JYPPX_StatusCode) jyppx_trt{line}_builder_config_get_plugin_to_serialize_count", header);
+        if (line != "8")
+        {
+            Assert.Contains($"JYPPX_C_API(JYPPX_StatusCode) jyppx_trt{line}_builder_config_get_plugin_to_serialize_count", header);
+        }
         Assert.Contains($"JYPPX_C_API(JYPPX_StatusCode) jyppx_trt{line}_builder_config_get_nb_plugins_to_serialize", header);
         Assert.Contains($"JYPPX_C_API(JYPPX_StatusCode) jyppx_trt{line}_builder_config_get_plugin_to_serialize", header);
     }

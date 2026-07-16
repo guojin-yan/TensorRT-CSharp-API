@@ -28,8 +28,14 @@ internal static partial class NativeBridgeApi
         SafeTensorRtObjectHandle network,
         SafeTensorRtObjectHandle config)
     {
-        EnsureTensorRt11DeploymentApi(line, nameof(BuildEngineWithConfig));
-        BridgeStatusCode status = NativeMethodsTensorRt.jyppx_trt11_builder_build_engine_with_config(builder, network, config, out SafeTensorRtObjectHandle engine);
+        SafeTensorRtObjectHandle engine;
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_builder_build_engine_with_config(builder, network, config, out engine),
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_build_engine_with_config(builder, network, config, out engine),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_builder_build_engine_with_config(builder, network, config, out engine),
+            _ => throw UnsupportedLine()
+        };
         NativeStatus.ThrowIfFailed(status);
         return engine;
     }
@@ -174,7 +180,6 @@ internal static partial class NativeBridgeApi
 
     public static bool SetBuilderConfigPluginsToSerialize(TensorRtApiLine line, SafeTensorRtObjectHandle config, IReadOnlyList<string> pluginLibraryPaths)
     {
-        EnsureTensorRt10Or11(line, nameof(SetBuilderConfigPluginsToSerialize));
         if (pluginLibraryPaths == null)
         {
             throw new ArgumentNullException(nameof(pluginLibraryPaths));
@@ -185,6 +190,7 @@ internal static partial class NativeBridgeApi
             int cleared;
             BridgeStatusCode clearStatus = line switch
             {
+                TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_builder_config_set_plugins_to_serialize(config, IntPtr.Zero, 0, out cleared),
                 TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_config_set_plugins_to_serialize(config, IntPtr.Zero, 0, out cleared),
                 TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_builder_config_set_plugins_to_serialize(config, IntPtr.Zero, 0, out cleared),
                 _ => throw UnsupportedLine()
@@ -215,6 +221,7 @@ internal static partial class NativeBridgeApi
                 int set;
                 BridgeStatusCode status = line switch
                 {
+                    TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_builder_config_set_plugins_to_serialize(config, pinned.AddrOfPinnedObject(), pointers.Length, out set),
                     TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_config_set_plugins_to_serialize(config, pinned.AddrOfPinnedObject(), pointers.Length, out set),
                     TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_builder_config_set_plugins_to_serialize(config, pinned.AddrOfPinnedObject(), pointers.Length, out set),
                     _ => throw UnsupportedLine()

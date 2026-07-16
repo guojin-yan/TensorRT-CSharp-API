@@ -39,8 +39,8 @@ public sealed partial class TensorRtBuilderConfig
     }
 
     /// <summary>
-    /// Clears the plugin-library path list serialized into TensorRT 10/11 version-compatible engines.
-    /// 清空会被序列化进 TensorRT 10/11 version-compatible engine 的插件库路径列表。
+    /// Clears the plugin-library path list serialized into TensorRT 8/10/11 version-compatible engines.
+    /// 清空会被序列化进 TensorRT 8/10/11 version-compatible engine 的插件库路径列表。
     /// </summary>
     public void ClearPluginsToSerialize()
     {
@@ -51,10 +51,6 @@ public sealed partial class TensorRtBuilderConfig
     /// Gets the number of plugin-library paths that TensorRT reports for version-compatible serialization.
     /// 获取 TensorRT 报告的 version-compatible 序列化插件库路径数量。
     /// </summary>
-    /// <remarks>
-    /// TensorRT 8 is supported for count-only compatibility. Path copying remains supported only for TensorRT 10/11.
-    /// TensorRT 8 仅支持数量查询；路径复制仍仅支持 TensorRT 10/11。
-    /// </remarks>
     public int PluginToSerializeCount => NativeBridgeApi.GetBuilderConfigPluginToSerializeCount(Line, _handle);
 
     /// <summary>
@@ -127,9 +123,9 @@ public sealed partial class TensorRtBuilderConfig
     /// </summary>
     /// <returns>A copied snapshot containing count, optional copied paths, and diagnostics. 包含数量、可选路径副本和诊断信息的复制型快照。</returns>
     /// <remarks>
-    /// TensorRT 8 supports count-only compatibility through this bridge. TensorRT 10/11 additionally support copied path inventory.
+    /// TensorRT 8/10/11 support caller-buffer path copying through this bridge.
     /// This method does not load plugin libraries, create plugins, deserialize plugins, or expose TensorRT-owned pointers.
-    /// TensorRT 8 通过该桥接层支持仅数量兼容查询；TensorRT 10/11 额外支持复制 path inventory。
+    /// TensorRT 8/10/11 均通过该桥接层支持 caller-buffer path 复制。
     /// 该方法不会加载插件库、创建插件、反序列化插件或暴露 TensorRT 拥有的指针。
     /// </remarks>
     public TensorRtBuilderConfigSerializedPluginSnapshot GetSerializedPluginSnapshot()

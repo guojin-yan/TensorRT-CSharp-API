@@ -9661,7 +9661,19 @@ JYPPX_StatusCode jyppx_trt8_execution_context_get_shape_binding(
 #include "modules/plugin/trt8_plugin_registry_inventory.inc"
 #include "modules/plugin/trt8_builder_capability_plugin_registry.inc"
 #include "modules/builder/legacy_scalar_setters.inc"
+#include "modules/builder/safe_plugin_serialization_paths.inc"
+#include "modules/context/legacy_shape_binding_setter.inc"
 #include "modules/layers/rnn_v2_setters.inc"
+
+#define JYPPX_TRT_DIRECT_ENGINE_BUILD_API jyppx_trt8_builder_build_engine_with_config
+#define JYPPX_TRT_DIRECT_ENGINE_DESTROY destroy_engine_payload
+#include "../common/direct_engine_build.inc"
+#undef JYPPX_TRT_DIRECT_ENGINE_DESTROY
+#undef JYPPX_TRT_DIRECT_ENGINE_BUILD_API
+
+#define JYPPX_TRT_ERROR_CODE_METADATA_API jyppx_trt8_error_code_get_exclusive_upper_bound
+#include "../common/error_code_metadata.inc"
+#undef JYPPX_TRT_ERROR_CODE_METADATA_API
 
 #define JYPPX_TRT_PLUGIN_V2_LAYER_PREFIX jyppx_trt8_
 #define JYPPX_TRT_PLUGIN_V2_LAYER_ENABLE_BROADCAST_EXPORTS 1

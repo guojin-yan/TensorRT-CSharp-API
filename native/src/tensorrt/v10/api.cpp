@@ -10660,6 +10660,16 @@ JYPPX_StatusCode jyppx_trt10_resize_layer_set_resize_mode(JYPPX_TensorRtLayer* l
 #include "../common/plugin_registry_inventory.inc"
 #undef JYPPX_TRT_PLUGIN_PREFIX
 
+#define JYPPX_TRT_DIRECT_ENGINE_BUILD_API jyppx_trt10_builder_build_engine_with_config
+#define JYPPX_TRT_DIRECT_ENGINE_DESTROY destroy_payload<nvinfer1::ICudaEngine>
+#include "../common/direct_engine_build.inc"
+#undef JYPPX_TRT_DIRECT_ENGINE_DESTROY
+#undef JYPPX_TRT_DIRECT_ENGINE_BUILD_API
+
+#define JYPPX_TRT_ERROR_CODE_METADATA_API jyppx_trt10_error_code_get_exclusive_upper_bound
+#include "../common/error_code_metadata.inc"
+#undef JYPPX_TRT_ERROR_CODE_METADATA_API
+
 #define JYPPX_TRT_PLUGIN_V2_LAYER_PREFIX jyppx_trt10_
 #define JYPPX_TRT_PLUGIN_V2_LAYER_ENABLE_BROADCAST_EXPORTS 1
 #include "../common/plugin_v2_layer_metadata_snapshot.inc"

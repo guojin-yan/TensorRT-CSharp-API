@@ -6,6 +6,14 @@
 #include "jyppx/cuda/types.h"
 #include "jyppx/tensorrt/types.h"
 
+/* BEGIN TRT8 SAFE LIFECYCLE, SHAPE, SERIALIZATION, AND ERROR METADATA DECLARATIONS */
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_build_engine_with_config(JYPPX_TensorRtBuilder* builder, JYPPX_TensorRtNetworkDefinition* network, JYPPX_TensorRtBuilderConfig* config, JYPPX_TensorRtCudaEngine** out_engine);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_get_plugin_to_serialize(JYPPX_TensorRtBuilderConfig* config, int32_t index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_set_plugins_to_serialize(JYPPX_TensorRtBuilderConfig* config, const char** paths, int32_t path_count, JYPPX_Boolean* out_set);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_set_input_shape_binding(JYPPX_TensorRtExecutionContext* context, int32_t binding_index, const int32_t* values, int32_t value_count, JYPPX_Boolean* out_set);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_error_code_get_exclusive_upper_bound(int32_t* out_exclusive_upper_bound);
+/* END TRT8 SAFE LIFECYCLE, SHAPE, SERIALIZATION, AND ERROR METADATA DECLARATIONS */
+
 /* BEGIN TRT8 PLUGIN V2 LAYER METADATA SNAPSHOT DECLARATIONS */
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_plugin_v2_layer_get_plugin_type(JYPPX_TensorRtLayer* layer, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_plugin_v2_layer_get_plugin_version(JYPPX_TensorRtLayer* layer, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);

@@ -60,7 +60,8 @@ internal static class Program
         bool profileStreamSet = config.IsProfileStreamSet;
         string builderScalarControlState = ProbeBuilderScalarControls(builder, config);
         string builderConfigDeploymentState = ProbeBuilderConfigDeploymentState(config, line);
-        string pluginSerializeCountState = ProbeSerializedPluginPathCount(config);
+        string pluginSerializationState = ProbeSerializedPluginPaths(config);
+        int errorCodeUpperBound = TensorRtErrorCodeMetadata.GetExclusiveUpperBound(line);
 
         using TensorRtNetworkDefinition network = builder.CreateNetwork(TensorRtNetworkDefinitionCreationFlags.ExplicitBatch);
         using TensorRtTensor inputTensor = network.AddInput("input", TensorRtDataType.Float, new TensorRtDims(new[] { -1, 4 }));
@@ -87,7 +88,13 @@ internal static class Program
         int configProfileCount = config.OptimizationProfileCount;
 
         using TensorRtHostMemory hostMemory = builder.BuildSerializedNetwork(network, config);
+        int directEngineIoTensorCount;
+        using (TensorRtEngine directEngine = builder.BuildEngineWithConfig(network, config))
+        {
+            directEngineIoTensorCount = directEngine.IOTensorCount;
+        }
         using TensorRtEngine engine = runtime.Deserialize(hostMemory);
+        string refitterLoggerState = ProbeRefitterLoggerPresence(engine, logger);
         string engineImplicitBatchState = ProbeEngineImplicitBatchCompatibility(engine);
         using TensorRtEngineInspector inspector = engine.CreateInspector();
         using TensorRtExecutionContext context = engine.CreateExecutionContext();
@@ -120,13 +127,27 @@ internal static class Program
         string inspectorText = inspector.GetEngineInformation(TensorRtLayerInformationFormat.Oneline);
         ulong profileMemory = line == TensorRtApiLine.TensorRt10 ? engine.GetDeviceMemorySizeForProfileV2(profileIndex) : engine.DeviceMemorySizeInBytes;
         Console.WriteLine($"ProfileIndex={profileIndex} HostMemory={hostMemory.SizeInBytes} EngineIOTensors={engine.IOTensorCount}");
-        Console.WriteLine($"BuilderConfig OptLevel={config.GetOptimizationLevel()} AuxStreams={config.GetMaxAuxStreams()} Profiling={config.GetProfilingVerbosity()} WorkspaceMemoryPoolLimit={configuredWorkspaceMemoryPoolLimit} ProfileStream={profileStreamSet} ProfileCount={configProfileCount} CalibrationProfile={calibrationProfileState} PluginSerializeCount={pluginSerializeCountState} {builderScalarControlState} {layerDlaCapabilityState} {builderConfigDeploymentState}");
+        Console.WriteLine($"BuilderConfig OptLevel={config.GetOptimizationLevel()} AuxStreams={config.GetMaxAuxStreams()} Profiling={config.GetProfilingVerbosity()} WorkspaceMemoryPoolLimit={configuredWorkspaceMemoryPoolLimit} ProfileStream={profileStreamSet} ProfileCount={configProfileCount} CalibrationProfile={calibrationProfileState} PluginSerialization={pluginSerializationState} {builderScalarControlState} {layerDlaCapabilityState} {builderConfigDeploymentState}");
         Console.WriteLine($"EngineMemory Device={engine.DeviceMemorySizeInBytes} Profile={profileMemory} AuxStreams={engine.AuxiliaryStreamCount} ImplicitBatch={engineImplicitBatchState}");
+        Console.WriteLine($"DirectEngineBuild=True IOTensors={directEngineIoTensorCount} RefitterHasLogger={refitterLoggerState} ErrorCodeUpperBound={errorCodeUpperBound}");
         Console.WriteLine($"ProfileConfigured Min={configuredProfileRange.Min} Opt={configuredProfileRange.Opt} Max={configuredProfileRange.Max} Valid={configuredProfileValid} ExtraMemoryTarget={profileExtraMemoryTarget} ShapeValueCount={inputShapeValueCount}");
         Console.WriteLine($"Readiness Ready={readiness.IsReadyForEnqueue} Bound={readiness.AllTensorAddressesBound} Missing={readiness.ShapeInferenceMissingTensorCount?.ToString() ?? "n/a"} ActiveProfile={readiness.ActiveOptimizationProfile} Tensors={readiness.Tensors.Count}");
         Console.WriteLine($"BindingReport Ready={bindingReport.IsReadyForEnqueue} Profile={bindingReport.ProfileIndex} Inputs={bindingReport.GetInputs().Count} Outputs={bindingReport.GetOutputs().Count} Tensors={bindingReport.Tensors.Count} Formats=[{bindingSummary}]");
         Console.WriteLine($"IOTensors=[{tensorSummary}] InspectorBytes={inspectorText.Length} Enqueue=True OutputMatch=True");
 
+    }
+
+    static string ProbeRefitterLoggerPresence(TensorRtEngine engine, TensorRtLogger logger)
+    {
+        try
+        {
+            using TensorRtRefitter refitter = engine.CreateRefitter(logger);
+            return refitter.HasLogger.ToString();
+        }
+        catch (Exception exception) when (exception is BridgeProbeException || exception is NotSupportedException || exception is InvalidOperationException)
+        {
+            return $"Skipped:{exception.GetType().Name}";
+        }
     }
 
     static TensorRtApiLine ResolveLine(string value)
@@ -199,11 +220,13 @@ internal static class Program
         }
     }
 
-    static string ProbeSerializedPluginPathCount(TensorRtBuilderConfig config)
+    static string ProbeSerializedPluginPaths(TensorRtBuilderConfig config)
     {
         try
         {
-            return config.SerializedPluginPathCountCompatibility.ToString();
+            bool set = config.SetPluginsToSerialize(Array.Empty<string>());
+            TensorRtBuilderConfigSerializedPluginSnapshot snapshot = config.GetSerializedPluginSnapshot();
+            return $"Set={set}:Count={snapshot.Count}:Copied={snapshot.PluginLibraryPaths.Count}:Available={snapshot.HasPathInventory}";
         }
         catch (Exception exception) when (exception is BridgeProbeException || exception is NotSupportedException || exception is InvalidOperationException)
         {

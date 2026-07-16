@@ -191,6 +191,8 @@ public sealed class PluginV2LayerCapabilityReadonlyUpliftTests
         Assert.Contains("\"IPluginV2Ext\",\"getOutputDataType\",\"IPluginV2Ext::getOutputDataType\",\"plugin\",\"implemented-with-deferred-history\"", comparison);
         Assert.Contains("\"IPluginV2Ext\",\"canBroadcastInputAcrossBatch\",\"IPluginV2Ext::canBroadcastInputAcrossBatch\",\"plugin\",\"implemented-with-deferred-history\"", comparison);
         Assert.Contains("\"IPluginV2Ext\",\"isOutputBroadcastAcrossBatch\",\"IPluginV2Ext::isOutputBroadcastAcrossBatch\",\"plugin\",\"implemented-with-deferred-history\"", comparison);
+        Assert.Contains("\"IPluginV2DynamicExt\",\"canBroadcastInputAcrossBatch\",\"IPluginV2DynamicExt::canBroadcastInputAcrossBatch\",\"plugin\",\"implemented-with-deferred-history\"", comparison);
+        Assert.Contains("\"IPluginV2DynamicExt\",\"isOutputBroadcastAcrossBatch\",\"IPluginV2DynamicExt::isOutputBroadcastAcrossBatch\",\"plugin\",\"implemented-with-deferred-history\"", comparison);
     }
 
     private static string ReadSource(params string[] pathParts) =>

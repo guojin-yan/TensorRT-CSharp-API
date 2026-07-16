@@ -6,6 +6,11 @@
 #include "jyppx/cuda/types.h"
 #include "jyppx/tensorrt/types.h"
 
+/* BEGIN TRT10 SAFE LIFECYCLE AND ERROR METADATA DECLARATIONS */
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_builder_build_engine_with_config(JYPPX_TensorRtBuilder* builder, JYPPX_TensorRtNetworkDefinition* network, JYPPX_TensorRtBuilderConfig* config, JYPPX_TensorRtCudaEngine** out_engine);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_error_code_get_exclusive_upper_bound(int32_t* out_exclusive_upper_bound);
+/* END TRT10 SAFE LIFECYCLE AND ERROR METADATA DECLARATIONS */
+
 /* BEGIN TRT10 PLUGIN V2 LAYER METADATA SNAPSHOT DECLARATIONS */
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_plugin_v2_layer_get_plugin_type(JYPPX_TensorRtLayer* layer, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_plugin_v2_layer_get_plugin_version(JYPPX_TensorRtLayer* layer, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);

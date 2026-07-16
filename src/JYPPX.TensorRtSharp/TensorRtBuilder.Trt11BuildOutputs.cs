@@ -6,8 +6,8 @@ namespace JYPPX.TensorRtSharp;
 public sealed partial class TensorRtBuilder
 {
     /// <summary>
-    /// Builds a TensorRT 11 CUDA engine directly from a network and builder configuration.
-    /// 直接从 network 和 builder config 构建 TensorRT 11 CUDA engine。
+    /// Builds a TensorRT 8, 10, or 11 CUDA engine directly from a network and builder configuration.
+    /// 直接从 network 和 builder config 构建 TensorRT 8、10 或 11 CUDA engine。
     /// </summary>
     /// <param name="network">The TensorRT network definition to build. 要构建的 TensorRT network definition。</param>
     /// <param name="config">The TensorRT builder configuration. TensorRT 构建配置。</param>

@@ -6,6 +6,11 @@
 #include "jyppx/cuda/types.h"
 #include "jyppx/tensorrt/types.h"
 
+/* BEGIN TRT11 REFITTER LOGGER AND ERROR METADATA DECLARATIONS */
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_refitter_has_logger(JYPPX_TensorRtRefitter* refitter, JYPPX_Boolean* out_has_logger);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_error_code_get_exclusive_upper_bound(int32_t* out_exclusive_upper_bound);
+/* END TRT11 REFITTER LOGGER AND ERROR METADATA DECLARATIONS */
+
 /* BEGIN TRT11 PLUGIN V2 LAYER METADATA SNAPSHOT DECLARATIONS */
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_plugin_v2_layer_get_plugin_type(JYPPX_TensorRtLayer* layer, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_plugin_v2_layer_get_plugin_version(JYPPX_TensorRtLayer* layer, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);

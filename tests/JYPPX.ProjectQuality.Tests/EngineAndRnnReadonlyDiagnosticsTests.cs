@@ -143,7 +143,7 @@ public sealed class EngineAndRnnReadonlyDiagnosticsTests
         Assert.Contains("HasEngineImplicitBatchDimensionCompatibility", runtimeInterop);
         Assert.Contains("TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_builder_config_get_nb_plugins_to_serialize", diagnosticsInterop);
         Assert.Contains("SerializedPluginPathCountCompatibility", builderConfigApi);
-        Assert.Contains("Path copying remains supported only for TensorRT 10/11", builderConfigApi);
+        Assert.Contains("TensorRT 8/10/11 support caller-buffer path copying", builderConfigApi);
 
         Assert.Contains("GetRnnV2LayerCount", rnnInterop);
         Assert.Contains("jyppx_trt8_rnn_v2_layer_get_layer_count", rnnInterop);
@@ -169,6 +169,7 @@ public sealed class EngineAndRnnReadonlyDiagnosticsTests
         Assert.Contains("public bool HasImplicitBatchDimensionCompatibility", engineApi);
         Assert.Contains("public int[] GetProfileShapeValues(int bindingIndex, int profileIndex, TensorRtOptimizationProfileSelector selector)", engineApi);
         Assert.Contains("public int[] GetShapeBinding(int bindingIndex)", contextApi);
+        Assert.Contains("public bool SetInputShapeBinding(int bindingIndex, IReadOnlyList<int> values)", contextApi);
         Assert.Contains("GetEngineProfileShapeValues", deploymentInterop);
         Assert.Contains("GetExecutionContextShapeBinding", deploymentInterop);
         Assert.Contains("jyppx_trt8_cuda_engine_get_profile_shape_values", deploymentInterop);
@@ -205,7 +206,8 @@ public sealed class EngineAndRnnReadonlyDiagnosticsTests
         Assert.Contains("public enum TensorRtRnnInputMode", enums);
         Assert.Contains("public enum TensorRtRnnGateType", enums);
 
-        Assert.Contains("config.SerializedPluginPathCountCompatibility", smoke);
+        Assert.Contains("ProbeSerializedPluginPaths(config)", smoke);
+        Assert.Contains("config.GetSerializedPluginSnapshot()", smoke);
         Assert.Contains("engine.HasImplicitBatchDimensionCompatibility", smoke);
         Assert.Contains("engine.GetProfileTensorValuesSnapshot", tensorRtSmoke);
         Assert.Contains("ProbeTrt8LegacyShapeBindingBoundary", tensorRtSmoke);

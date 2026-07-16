@@ -693,6 +693,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt10AssertionLayerGetMessage = "jyppx_trt10_assertion_layer_get_message";
     public const string Trt10AssertionLayerSetMessage = "jyppx_trt10_assertion_layer_set_message";
     public const string Trt10BuilderBuildEngineWithConfigDeferred = "jyppx_trt10_builder_build_engine_with_config_deferred";
+    public const string Trt10BuilderBuildEngineWithConfigOwnerSafe = "jyppx_trt10_builder_build_engine_with_config";
     public const string Trt10BuilderBuildSerializedNetwork = "jyppx_trt10_builder_build_serialized_network";
     public const string Trt10BuilderCapabilityPluginCreatorGetApiLanguage = "jyppx_trt10_builder_capability_plugin_creator_get_api_language";
     public const string Trt10BuilderCapabilityPluginCreatorGetFieldCount = "jyppx_trt10_builder_capability_plugin_creator_get_field_count";
@@ -959,6 +960,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt10EngineSerialize = "jyppx_trt10_engine_serialize";
     public const string Trt10EngineSerializeWithConfig = "jyppx_trt10_engine_serialize_with_config";
     public const string Trt10EngineSetWeightStreamingBudgetV2 = "jyppx_trt10_engine_set_weight_streaming_budget_v2";
+    public const string Trt10ErrorCodeEnumMaxMetadata = "jyppx_trt10_error_code_get_exclusive_upper_bound";
     public const string Trt10ErrorRecorderDecRefCountDeferred = "jyppx_trt10_error_recorder_dec_ref_count_deferred";
     public const string Trt10ErrorRecorderEnumMaxDeferred = "jyppx_trt10_error_recorder_enum_max_deferred";
     public const string Trt10ErrorRecorderGetErrorCodeDeferred = "jyppx_trt10_error_recorder_get_error_code_deferred";
@@ -2215,6 +2217,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt11EngineIsDebugTensor = "jyppx_trt11_engine_is_debug_tensor";
     public const string Trt11EngineIsRefittable = "jyppx_trt11_engine_is_refittable";
     public const string Trt11EngineIsShapeInferenceIo = "jyppx_trt11_engine_is_shape_inference_io";
+    public const string Trt11ErrorCodeEnumMaxMetadata = "jyppx_trt11_error_code_get_exclusive_upper_bound";
     public const string Trt11ErrorRecorderDecRefCountDeferred = "jyppx_trt11_error_recorder_dec_ref_count_deferred";
     public const string Trt11ErrorRecorderEnumMaxDeferred = "jyppx_trt11_error_recorder_enum_max_deferred";
     public const string Trt11ErrorRecorderGetErrorCodeDeferred = "jyppx_trt11_error_recorder_get_error_code_deferred";
@@ -2713,6 +2716,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt11RefitterGetLoggerDeferred = "jyppx_trt11_refitter_get_logger_deferred";
     public const string Trt11RefitterGetMissingCount = "jyppx_trt11_refitter_get_missing_count";
     public const string Trt11RefitterGetMissingEntries = "jyppx_trt11_refitter_get_missing_entries";
+    public const string Trt11RefitterHasLoggerOwnerScoped = "jyppx_trt11_refitter_has_logger";
     public const string Trt11RefitterRefitCudaEngine = "jyppx_trt11_refitter_refit_cuda_engine";
     public const string Trt11RefitterSetNamedWeightsWithLocationDeferred = "jyppx_trt11_refitter_set_named_weights_with_location_deferred";
     public const string Trt11RefitterSetWeights = "jyppx_trt11_refitter_set_weights";
@@ -2988,6 +2992,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt8BinaryProtoBlobGetDimensionsDeferred = "jyppx_trt8_binary_proto_blob_get_dimensions_deferred";
     public const string Trt8BlobNameToTensorFindDeferred = "jyppx_trt8_blob_name_to_tensor_find_deferred";
     public const string Trt8BuilderBuildEngineWithConfigDeferred = "jyppx_trt8_builder_build_engine_with_config_deferred";
+    public const string Trt8BuilderBuildEngineWithConfigOwnerSafe = "jyppx_trt8_builder_build_engine_with_config";
     public const string Trt8BuilderBuildSerializedNetwork = "jyppx_trt8_builder_build_serialized_network";
     public const string Trt8BuilderCapabilityPluginCreatorGetFieldCount = "jyppx_trt8_builder_capability_plugin_creator_get_field_count";
     public const string Trt8BuilderCapabilityPluginCreatorGetFieldMetadata = "jyppx_trt8_builder_capability_plugin_creator_get_field_metadata";
@@ -3029,6 +3034,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt8BuilderConfigGetNbPluginsToSerializeDeferred = "jyppx_trt8_builder_config_get_nb_plugins_to_serialize_deferred";
     public const string Trt8BuilderConfigGetOptimizationLevel = "jyppx_trt8_builder_config_get_optimization_level";
     public const string Trt8BuilderConfigGetOptimizationProfileCount = "jyppx_trt8_builder_config_get_optimization_profile_count";
+    public const string Trt8BuilderConfigGetPluginToSerializeCallerBuffer = "jyppx_trt8_builder_config_get_plugin_to_serialize";
     public const string Trt8BuilderConfigGetPluginToSerializeDeferred = "jyppx_trt8_builder_config_get_plugin_to_serialize_deferred";
     public const string Trt8BuilderConfigGetPreviewFeature = "jyppx_trt8_builder_config_get_preview_feature";
     public const string Trt8BuilderConfigGetProfilingVerbosity = "jyppx_trt8_builder_config_get_profiling_verbosity";
@@ -3063,6 +3069,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt8BuilderConfigSetMinTimingIterations = "jyppx_trt8_builder_config_set_min_timing_iterations";
     public const string Trt8BuilderConfigSetMinTimingIterationsDeferred = "jyppx_trt8_builder_config_set_min_timing_iterations_deferred";
     public const string Trt8BuilderConfigSetOptimizationLevel = "jyppx_trt8_builder_config_set_optimization_level";
+    public const string Trt8BuilderConfigSetPluginsToSerializeCopiedPaths = "jyppx_trt8_builder_config_set_plugins_to_serialize";
     public const string Trt8BuilderConfigSetPluginsToSerializeDeferred = "jyppx_trt8_builder_config_set_plugins_to_serialize_deferred";
     public const string Trt8BuilderConfigSetPreviewFeature = "jyppx_trt8_builder_config_set_preview_feature";
     public const string Trt8BuilderConfigSetProfileStream = "jyppx_trt8_builder_config_set_profile_stream";
@@ -3237,6 +3244,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt8EngineIsRefittable = "jyppx_trt8_engine_is_refittable";
     public const string Trt8EngineIsShapeInferenceIo = "jyppx_trt8_engine_is_shape_inference_io";
     public const string Trt8EngineSerialize = "jyppx_trt8_engine_serialize";
+    public const string Trt8ErrorCodeEnumMaxMetadata = "jyppx_trt8_error_code_get_exclusive_upper_bound";
     public const string Trt8ErrorRecorderDecRefCountDeferred = "jyppx_trt8_error_recorder_dec_ref_count_deferred";
     public const string Trt8ErrorRecorderEnumMaxDeferred = "jyppx_trt8_error_recorder_enum_max_deferred";
     public const string Trt8ErrorRecorderGetErrorCodeDeferred = "jyppx_trt8_error_recorder_get_error_code_deferred";
@@ -3284,6 +3292,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt8ExecutionContextSetErrorRecorderDeferred = "jyppx_trt8_execution_context_set_error_recorder_deferred";
     public const string Trt8ExecutionContextSetInputConsumedEvent = "jyppx_trt8_execution_context_set_input_consumed_event";
     public const string Trt8ExecutionContextSetInputShape = "jyppx_trt8_execution_context_set_input_shape";
+    public const string Trt8ExecutionContextSetInputShapeBindingCopiedValues = "jyppx_trt8_execution_context_set_input_shape_binding";
     public const string Trt8ExecutionContextSetInputShapeBindingDeferred = "jyppx_trt8_execution_context_set_input_shape_binding_deferred";
     public const string Trt8ExecutionContextSetInputTensorAddress = "jyppx_trt8_execution_context_set_input_tensor_address";
     public const string Trt8ExecutionContextSetName = "jyppx_trt8_execution_context_set_name";

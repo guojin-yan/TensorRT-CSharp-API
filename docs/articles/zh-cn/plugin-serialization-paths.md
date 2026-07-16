@@ -1,6 +1,6 @@
 # Plugin Serialization Paths
 
-本文说明 TensorRT 10/11 中 plugin serialization path 的托管封装和验证方式。这个功能主要用于 engine 序列化部署时记录需要随 engine 一起处理的 plugin library 路径，适合发布前检查 builder config 是否正确保存、读取和清理路径列表。
+本文说明 TensorRT 8/10/11 中 plugin serialization path 的托管封装和验证方式。这个功能主要用于 engine 序列化部署时记录需要随 engine 一起处理的 plugin library 路径，适合发布前检查 builder config 是否正确保存、读取和清理路径列表。
 
 ## 使用场景
 
@@ -9,7 +9,7 @@
 - build config 中记录了哪些 plugin library 路径。
 - 路径列表是否能被复制回 C# 侧。
 - clear 后是否真的为空。
-- TRT8 是否被正确跳过。
+- 三个版本线是否都能完成 caller-buffer 路径 round-trip。
 
 `TensorRtBuilderConfig.SetPluginsToSerialize` 和 `GetPluginsToSerialize` 使用字符串复制语义，避免把 native 内部数组或字符串指针暴露给用户。
 
@@ -48,13 +48,13 @@ PluginSerializationPaths Set=True Count=2 FirstMatches=True ClearedCount=0 TryGe
 PluginSerializationPathsSmokeRunner Passed=True
 ```
 
-TRT8 会输出：
+TRT8 使用相同的 count/caller-buffer/set 边界，可直接运行：
 
-```text
-Skipped=True Reason=PluginSerializationPathsRequireTensorRt10Or11
+```powershell
+dotnet run --project .\smoke\PluginSerializationPathsSmokeRunner\PluginSerializationPathsSmokeRunner.csproj -- --tensor-rt-line 8
 ```
 
-这是正确的 version guard，不是失败。
+该 smoke 不加载路径指向的 plugin library，只验证 TensorRT builder config 对字符串列表的复制、读取和清理。
 
 ## 发布边界
 

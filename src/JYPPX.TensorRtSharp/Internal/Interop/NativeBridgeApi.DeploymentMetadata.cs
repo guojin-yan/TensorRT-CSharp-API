@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 using JYPPX.CudaSharp.Internal.Handles;
@@ -338,6 +339,43 @@ internal static partial class NativeBridgeApi
             bindingIndex,
             0,
             0);
+    }
+
+    public static bool SetExecutionContextInputShapeBinding(
+        TensorRtApiLine line,
+        SafeTensorRtObjectHandle context,
+        int bindingIndex,
+        IReadOnlyList<int> values)
+    {
+        EnsureTensorRt8Only(line, nameof(SetExecutionContextInputShapeBinding));
+        if (bindingIndex < 0) { throw new ArgumentOutOfRangeException(nameof(bindingIndex)); }
+        if (values == null) { throw new ArgumentNullException(nameof(values)); }
+        if (values.Count <= 0 || values.Count > 1_000_000)
+        {
+            throw new ArgumentOutOfRangeException(nameof(values), "Shape binding values must contain 1 to 1000000 elements.");
+        }
+
+        int[] copiedValues = new int[values.Count];
+        for (int index = 0; index < values.Count; ++index)
+        {
+            copiedValues[index] = values[index];
+        }
+        GCHandle pinned = GCHandle.Alloc(copiedValues, GCHandleType.Pinned);
+        try
+        {
+            BridgeStatusCode status = NativeMethodsTensorRt.jyppx_trt8_execution_context_set_input_shape_binding(
+                context,
+                bindingIndex,
+                pinned.AddrOfPinnedObject(),
+                copiedValues.Length,
+                out int set);
+            NativeStatus.ThrowIfFailed(status);
+            return set != 0;
+        }
+        finally
+        {
+            pinned.Free();
+        }
     }
 
     public static TensorRtDims GetExecutionContextTensorStrides(TensorRtApiLine line, SafeTensorRtObjectHandle context, string tensorName)

@@ -402,6 +402,11 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
     "IParser::destroy" = @("id:*trt-object-destroy")
     "INetworkDefinition::destroy" = @("id:*trt-object-destroy")
     "IHostMemory::destroy" = @("id:*trt-object-destroy")
+    "IBuilder::destroy" = @("id:*trt-object-destroy", "id:*builder-destroy-deferred")
+    "IBuilderConfig::destroy" = @("id:*trt-object-destroy", "id:*builder-config-destroy-deferred")
+    "ICudaEngine::destroy" = @("id:*trt-object-destroy", "id:*cuda-engine-destroy-deferred")
+    "IExecutionContext::destroy" = @("id:*trt-object-destroy", "id:*execution-context-destroy-deferred")
+    "IBuilder::buildEngineWithConfig" = @("id:*builder-build-engine-with-config-owner-safe", "id:*builder-build-engine-with-config", "id:*builder-build-engine-with-config-deferred")
     "IGpuAllocator::free" = @("id:*gpu-allocator-free*")
     "IAlgorithm::getTimingMSec" = @("id:*algorithm-get-timing-msec*")
     "IBuilder::getErrorRecorder" = @("id:*builder-has-error-recorder", "id:*builder-clear-error-recorder")
@@ -422,6 +427,7 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
     "IErrorRecorder::getErrorDesc" = @("id:*runtime-get-error-recorder-error", "id:*refitter-get-error-recorder-error", "id:*error-recorder-get-error-desc-deferred")
     "IErrorRecorder::getInterfaceInfo" = @("id:*runtime-get-error-recorder-snapshot-info", "id:*refitter-get-error-recorder-snapshot-info", "id:*engine-get-error-recorder-snapshot-info", "id:*execution-context-get-error-recorder-snapshot-info", "id:*error-recorder-get-interface-info-deferred")
     "IErrorRecorder::hasOverflowed" = @("id:*runtime-get-error-recorder-snapshot-info", "id:*refitter-get-error-recorder-snapshot-info", "id:*error-recorder-has-overflowed-deferred")
+    "IErrorRecorder::EnumMax" = @("id:*error-code-enum-max-metadata", "id:*error-recorder-enum-max-deferred")
     "IBuilderConfig::getAvgTimingIterations" = @("id:*builder-config-get-average-timing-iterations", "id:*builder-config-get-avg-timing-iterations-deferred")
     "IBuilderConfig::setAvgTimingIterations" = @("id:*builder-config-set-average-timing-iterations", "id:*builder-config-set-avg-timing-iterations-deferred")
     "IBuilderConfig::getBuilderOptimizationLevel" = @("id:*builder-config-get-optimization-level", "id:*builder-config-get-builder-optimization-level-deferred")
@@ -429,6 +435,8 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
     "IBuilderConfig::getFlags" = @("id:*builder-config-get-flags", "id:*builder-config-get-flags-deferred")
     "IBuilderConfig::getAlgorithmSelector" = @("id:*builder-config-has-algorithm-selector", "id:*builder-config-get-algorithm-selector-deferred")
     "IBuilderConfig::getInt8Calibrator" = @("id:*builder-config-has-int8-calibrator", "id:*builder-config-get-int8-calibrator-deferred")
+    "IBuilderConfig::getPluginToSerialize" = @("id:*builder-config-get-plugin-to-serialize-caller-buffer", "id:*builder-config-get-plugin-to-serialize", "id:*builder-config-get-plugin-to-serialize-v2", "id:*builder-config-get-plugin-to-serialize-deferred")
+    "IBuilderConfig::setPluginsToSerialize" = @("id:*builder-config-set-plugins-to-serialize-copied-paths", "id:*builder-config-set-plugins-to-serialize", "id:*builder-config-set-plugins-to-serialize-v2", "id:*builder-config-set-plugins-to-serialize-deferred")
     "IRuntime::getLogger" = @("id:*runtime-has-logger", "id:*runtime-get-logger-deferred")
     "IParser::getNbErrors" = @("id:*onnx-parser-get-error-count", "id:*parser-get-nb-errors")
     "IParser::getNbSubgraphs" = @("id:*onnx-parser-get-subgraph-count")
@@ -442,6 +450,7 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
     "IExecutionContext::setTemporaryStorageAllocator" = @("id:*execution-context-has-temporary-storage-allocator", "id:*execution-context-clear-temporary-storage-allocator")
     "IExecutionContext::getDebugListener" = @("id:*execution-context-has-debug-listener", "id:*execution-context-clear-debug-listener")
     "IExecutionContext::setDebugListener" = @("id:*execution-context-has-debug-listener", "id:*execution-context-clear-debug-listener")
+    "IExecutionContext::setInputShapeBinding" = @("id:*execution-context-set-input-shape-binding-copied-values", "id:*execution-context-set-input-shape-binding-deferred")
     "IBuilderConfig::getProgressMonitor" = @("id:*builder-config-has-progress-monitor", "id:*builder-config-clear-progress-monitor", "id:*builder-config-set-progress-monitor")
     "IBuilderConfig::setProgressMonitor" = @("id:*builder-config-has-progress-monitor", "id:*builder-config-clear-progress-monitor", "id:*builder-config-set-progress-monitor")
     "IDebugListener::getInterfaceInfo" = @("id:*execution-context-debug-listener-get-interface-info", "id:*debug-listener-get-interface-info-deferred")
@@ -475,10 +484,13 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
     "IRNNv2Layer::setWeightsForGate" = @("id:*rnnv2-layer-set-weights-for-gate*", "id:*rnn-v2-layer-set-weights-for-gate*")
     "IMoELayer::setInput" = @("id:*layer-set-input")
     "IRefitter::getTensorsWithDynamicRange" = @("id:*refitter-get-dynamic-range-tensor-count", "id:*refitter-get-dynamic-range-tensor-entries")
+    "IRefitter::getLogger" = @("id:*refitter-has-logger*", "id:*refitter-get-logger-deferred")
     "IPluginRegistry::getBuilderSafePluginRegistry" = @("id:*builder-safe-plugin-registry-exists", "id:*builder-capability-plugin-registry-exists")
     "IPluginV2Ext::getTensorRTVersion" = @("id:*plugin-v2-layer-get-tensor-rt-version")
     "IPluginV2IOExt::getTensorRTVersion" = @("id:*plugin-v2-layer-get-tensor-rt-version")
     "IPluginV2DynamicExt::supportsFormatCombination" = @("id:*plugin-v2-dynamic-ext-supports-format-combination-owner-scoped")
+    "IPluginV2DynamicExt::canBroadcastInputAcrossBatch" = @("id:*plugin-v2-ext-can-broadcast-input-across-batch-owner-scoped", "id:*plugin-v2-dynamic-ext-can-broadcast-input-across-batch-deferred")
+    "IPluginV2DynamicExt::isOutputBroadcastAcrossBatch" = @("id:*plugin-v2-ext-is-output-broadcast-across-batch-owner-scoped", "id:*plugin-v2-dynamic-ext-is-output-broadcast-across-batch-deferred")
     "IPluginV2IOExt::supportsFormatCombination" = @("id:*plugin-v2-io-ext-supports-format-combination-owner-scoped")
     "IPluginV3OneBuild::getAliasedInput" = @("id:*plugin-v3-one-build-get-aliased-input-owner-scoped")
     "IPluginV3OneBuild::getOutputDataTypes" = @("id:*plugin-v3-one-build-get-output-data-types-owner-scoped")
@@ -584,16 +596,20 @@ function Find-MatchedManifestApis {
 
   if ($interfaceKey -in @(
     "Global::getBuilderPluginRegistry",
+    "IBuilder::buildEngineWithConfig",
+    "IBuilder::destroy",
     "IBuilder::getPluginRegistry",
     "IBuilder::getErrorRecorder",
     "IBuilder::getLogger",
     "IBuilder::setErrorRecorder",
     "IBuilder::setGpuAllocator",
     "ICudaEngine::getErrorRecorder",
+    "ICudaEngine::destroy",
     "ICudaEngine::setErrorRecorder",
     "IEngineInspector::getErrorRecorder",
     "IEngineInspector::setErrorRecorder",
     "IExecutionContext::getErrorRecorder",
+    "IExecutionContext::destroy",
     "IExecutionContext::setErrorRecorder",
     "INetworkDefinition::getErrorRecorder",
     "INetworkDefinition::setErrorRecorder",
@@ -602,6 +618,8 @@ function Find-MatchedManifestApis {
     "IPluginV2Ext::getTensorRTVersion",
     "IPluginV2IOExt::getTensorRTVersion",
     "IPluginV2DynamicExt::supportsFormatCombination",
+    "IPluginV2DynamicExt::canBroadcastInputAcrossBatch",
+    "IPluginV2DynamicExt::isOutputBroadcastAcrossBatch",
     "IPluginV2IOExt::supportsFormatCombination",
     "IPluginV3OneBuild::getAliasedInput",
     "IPluginV3OneBuild::getOutputDataTypes",
@@ -614,13 +632,18 @@ function Find-MatchedManifestApis {
     "IErrorRecorder::getErrorDesc",
     "IErrorRecorder::getInterfaceInfo",
     "IErrorRecorder::hasOverflowed",
+    "IErrorRecorder::EnumMax",
     "IBuilderConfig::getAvgTimingIterations",
     "IBuilderConfig::setAvgTimingIterations",
     "IBuilderConfig::getBuilderOptimizationLevel",
     "IBuilderConfig::setBuilderOptimizationLevel",
     "IBuilderConfig::getFlags",
+    "IBuilderConfig::destroy",
+    "IBuilderConfig::getPluginToSerialize",
+    "IBuilderConfig::setPluginsToSerialize",
     "IRuntime::getPluginRegistry",
     "IRuntime::getLogger",
+    "IRefitter::getLogger",
     "IParser::getNbErrors",
     "IParser::getNbSubgraphs",
     "IParser::getLayerOutputTensor",
@@ -633,6 +656,7 @@ function Find-MatchedManifestApis {
     "IExecutionContext::setTemporaryStorageAllocator",
     "IExecutionContext::getDebugListener",
     "IExecutionContext::setDebugListener",
+    "IExecutionContext::setInputShapeBinding",
     "IBuilderConfig::getAlgorithmSelector",
     "IBuilderConfig::getInt8Calibrator",
     "IBuilderConfig::getProgressMonitor",

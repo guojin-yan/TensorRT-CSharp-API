@@ -543,6 +543,10 @@ public sealed class InterfaceCoverageAliasTests
         Assert.Contains("\"IParser::destroy\" = @(\"id:*trt-object-destroy\")", script);
         Assert.Contains("\"INetworkDefinition::destroy\" = @(\"id:*trt-object-destroy\")", script);
         Assert.Contains("\"IHostMemory::destroy\" = @(\"id:*trt-object-destroy\")", script);
+        Assert.Contains("\"IBuilder::destroy\" = @(\"id:*trt-object-destroy\", \"id:*builder-destroy-deferred\")", script);
+        Assert.Contains("\"IBuilderConfig::destroy\" = @(\"id:*trt-object-destroy\", \"id:*builder-config-destroy-deferred\")", script);
+        Assert.Contains("\"ICudaEngine::destroy\" = @(\"id:*trt-object-destroy\", \"id:*cuda-engine-destroy-deferred\")", script);
+        Assert.Contains("\"IExecutionContext::destroy\" = @(\"id:*trt-object-destroy\", \"id:*execution-context-destroy-deferred\")", script);
     }
 
     [Fact]

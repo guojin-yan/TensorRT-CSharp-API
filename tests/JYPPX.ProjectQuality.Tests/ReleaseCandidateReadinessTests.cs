@@ -1492,7 +1492,8 @@ public sealed class ReleaseCandidateReadinessTests
         Assert.Contains("不暴露 `public IntPtr` / `public nint` plugin creator", pluginOwnershipBoundary, StringComparison.Ordinal);
         Assert.Contains("real runtime smoke", pluginOwnershipBoundary, StringComparison.Ordinal);
         Assert.Contains("PluginSerializationPathsSmokeRunner", pluginSerialization, StringComparison.Ordinal);
-        Assert.Contains("PluginSerializationPathsRequireTensorRt10Or11", pluginSerialization, StringComparison.Ordinal);
+        Assert.Contains("TensorRT 8/10/11", pluginSerialization, StringComparison.Ordinal);
+        Assert.DoesNotContain("PluginSerializationPathsRequireTensorRt10Or11", pluginSerialization, StringComparison.Ordinal);
         Assert.Contains("CudaGraphSmokeRunner", cudaGraphArticle, StringComparison.Ordinal);
         Assert.Contains("CudaGraphCaptureRoundTrip=True", cudaGraphArticle, StringComparison.Ordinal);
         Assert.Contains("IGpuAllocator", cudaMemoryWrapper, StringComparison.Ordinal);
@@ -4212,12 +4213,12 @@ public sealed class ReleaseCandidateReadinessTests
         Assert.Contains(tierSummaries, static tier =>
             tier.GetProperty("safetyTier").GetString() == "B - safe-alternative-or-alias" &&
             tier.GetProperty("candidateCount").GetInt32() > 0 &&
-            tier.GetProperty("recommendedAction").GetString() == "alias-or-proof-safe-alternative");
+            tier.GetProperty("recommendedAction").GetString() == "alias-or-proof-safe-alternative" &&
+            tier.GetProperty("designGroups").EnumerateArray().Any(group => group.GetString() == "error-recorder-diagnostics-design"));
         Assert.Contains(tierSummaries, static tier =>
             tier.GetProperty("safetyTier").GetString() == "C - design-gate-required" &&
             tier.GetProperty("candidateCount").GetInt32() > 0 &&
             tier.GetProperty("recommendedAction").GetString() == "design-gate-required" &&
-            tier.GetProperty("designGroups").EnumerateArray().Any(group => group.GetString() == "error-recorder-diagnostics-design") &&
             tier.GetProperty("designGroups").EnumerateArray().Any(group => group.GetString() == "algorithm-selector-ownership-boundary") &&
             tier.GetProperty("designGroups").EnumerateArray().Any(group => group.GetString() == "plugin-ownership-boundary"));
         Assert.Contains(tierSummaries, static tier =>

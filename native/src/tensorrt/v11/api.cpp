@@ -8260,6 +8260,7 @@ JYPPX_StatusCode jyppx_trt11_tensor_reset_dynamic_range(JYPPX_TensorRtTensor*)
 #include "modules/layers/control_flow.inc"
 #include "modules/layers/advanced_layers.inc"
 #include "modules/deployment/runtime_serialization_refit.inc"
+#include "modules/deployment/refitter_logger_presence.inc"
 #include "modules/deployment/runtime_controls.inc"
 #include "modules/deployment/diagnostics.inc"
 #include "modules/deployment/boundary_controls.inc"
@@ -8447,4 +8448,9 @@ JYPPX_StatusCode jyppx_trt11_tensor_reset_dynamic_range(JYPPX_TensorRtTensor*)
 #undef jyppx_trt10_dequantize_layer_get_axis
 #undef jyppx_trt10_dequantize_layer_set_axis
 #include "modules/deployment/twenty_fourth_batch_aliases.inc"
+
+#define JYPPX_TRT_ERROR_CODE_METADATA_API jyppx_trt11_error_code_get_exclusive_upper_bound
+#include "../common/error_code_metadata.inc"
+#undef JYPPX_TRT_ERROR_CODE_METADATA_API
+
 #include "modules/deferred/twenty_third_batch_deferred.inc"
