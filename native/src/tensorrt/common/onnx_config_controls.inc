@@ -6,7 +6,7 @@
 #error "JYPPX_TRT_EXPECTED_MAJOR must be defined before including onnx_config_controls.inc."
 #endif
 
-#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNX_CONFIG
 class BridgeOwnedOnnxConfig final : public nvonnxparser::IOnnxConfig
 {
 public:
@@ -441,7 +441,7 @@ JYPPX_StatusCode JYPPX_TRT_ONNX_CONFIG_API(create)(JYPPX_TensorRtOnnxConfig** ou
 
     *out_config = nullptr;
 
-#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNX_CONFIG
     if (JYPPX_TENSORRT_VERSION_MAJOR_NUM != JYPPX_TRT_EXPECTED_MAJOR)
     {
         return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "ONNX config creation");
@@ -462,13 +462,20 @@ JYPPX_StatusCode JYPPX_TRT_ONNX_CONFIG_API(create)(JYPPX_TensorRtOnnxConfig** ou
             return JYPPX_STATUS_INVALID_STATE;
         }
 
+        std::unique_ptr<BridgeOwnedOnnxConfig> config_owner(
+            static_cast<BridgeOwnedOnnxConfig*>(config));
         JYPPX_TensorRtObjectBase* handle = nullptr;
-        status = create_handle_with_payload(&handle, JYPPX_TENSORRT_OBJECT_KIND_ONNX_CONFIG, config, &destroy_onnx_config_payload);
+        status = create_handle_with_payload(
+            &handle,
+            JYPPX_TENSORRT_OBJECT_KIND_ONNX_CONFIG,
+            config_owner.get(),
+            &destroy_onnx_config_payload);
         if (status != JYPPX_STATUS_OK)
         {
             return status;
         }
 
+        config_owner.release();
         *out_config = reinterpret_cast<JYPPX_TensorRtOnnxConfig*>(handle);
         return JYPPX_STATUS_OK;
     }
@@ -483,7 +490,7 @@ JYPPX_StatusCode JYPPX_TRT_ONNX_CONFIG_API(create)(JYPPX_TensorRtOnnxConfig** ou
         return jyppx::tensorrt::report_vendor_exception(kLine, "ONNX config creation", "unknown native exception");
     }
 #elif JYPPX_HAS_TENSORRT
-    jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT ONNX parser library was not found at build time.");
+    jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT ONNX config header support was not available at build time.");
     return JYPPX_STATUS_DEPENDENCY_MISSING;
 #else
     return jyppx::tensorrt::report_vendor_missing(kLine, "ONNX config creation");
@@ -500,7 +507,7 @@ JYPPX_StatusCode JYPPX_TRT_ONNX_CONFIG_API(get_model_dtype)(JYPPX_TensorRtOnnxCo
 
     *out_data_type = 0;
 
-#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNX_CONFIG
     nvonnxparser::IOnnxConfig* config_payload = nullptr;
     status = get_onnx_config_payload_for_controls(config, &config_payload, "ONNX config model dtype query");
     if (status != JYPPX_STATUS_OK)
@@ -524,7 +531,7 @@ JYPPX_StatusCode JYPPX_TRT_ONNX_CONFIG_API(get_model_dtype)(JYPPX_TensorRtOnnxCo
     }
 #elif JYPPX_HAS_TENSORRT
     (void)config;
-    jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT ONNX parser library was not found at build time.");
+    jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT ONNX config header support was not available at build time.");
     return JYPPX_STATUS_DEPENDENCY_MISSING;
 #else
     (void)config;
@@ -540,7 +547,7 @@ JYPPX_StatusCode JYPPX_TRT_ONNX_CONFIG_API(set_model_dtype)(JYPPX_TensorRtOnnxCo
         return JYPPX_STATUS_INVALID_ARGUMENT;
     }
 
-#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNX_CONFIG
     nvonnxparser::IOnnxConfig* config_payload = nullptr;
     auto status = get_onnx_config_payload_for_controls(config, &config_payload, "ONNX config model dtype set");
     if (status != JYPPX_STATUS_OK)
@@ -562,7 +569,7 @@ JYPPX_StatusCode JYPPX_TRT_ONNX_CONFIG_API(set_model_dtype)(JYPPX_TensorRtOnnxCo
     }
 #elif JYPPX_HAS_TENSORRT
     (void)config;
-    jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT ONNX parser library was not found at build time.");
+    jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT ONNX config header support was not available at build time.");
     return JYPPX_STATUS_DEPENDENCY_MISSING;
 #else
     (void)config;
@@ -580,7 +587,7 @@ JYPPX_StatusCode JYPPX_TRT_ONNX_CONFIG_API(get_verbosity_level)(JYPPX_TensorRtOn
 
     *out_verbosity = 0;
 
-#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNX_CONFIG
     nvonnxparser::IOnnxConfig* config_payload = nullptr;
     status = get_onnx_config_payload_for_controls(config, &config_payload, "ONNX config verbosity query");
     if (status != JYPPX_STATUS_OK)
@@ -604,7 +611,7 @@ JYPPX_StatusCode JYPPX_TRT_ONNX_CONFIG_API(get_verbosity_level)(JYPPX_TensorRtOn
     }
 #elif JYPPX_HAS_TENSORRT
     (void)config;
-    jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT ONNX parser library was not found at build time.");
+    jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT ONNX config header support was not available at build time.");
     return JYPPX_STATUS_DEPENDENCY_MISSING;
 #else
     (void)config;
@@ -620,7 +627,7 @@ JYPPX_StatusCode JYPPX_TRT_ONNX_CONFIG_API(set_verbosity_level)(JYPPX_TensorRtOn
         return JYPPX_STATUS_INVALID_ARGUMENT;
     }
 
-#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNX_CONFIG
     nvonnxparser::IOnnxConfig* config_payload = nullptr;
     auto status = get_onnx_config_payload_for_controls(config, &config_payload, "ONNX config verbosity set");
     if (status != JYPPX_STATUS_OK)
@@ -642,7 +649,7 @@ JYPPX_StatusCode JYPPX_TRT_ONNX_CONFIG_API(set_verbosity_level)(JYPPX_TensorRtOn
     }
 #elif JYPPX_HAS_TENSORRT
     (void)config;
-    jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT ONNX parser library was not found at build time.");
+    jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT ONNX config header support was not available at build time.");
     return JYPPX_STATUS_DEPENDENCY_MISSING;
 #else
     (void)config;
@@ -652,7 +659,7 @@ JYPPX_StatusCode JYPPX_TRT_ONNX_CONFIG_API(set_verbosity_level)(JYPPX_TensorRtOn
 
 JYPPX_StatusCode JYPPX_TRT_ONNX_CONFIG_API(add_verbosity)(JYPPX_TensorRtOnnxConfig* config)
 {
-#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNX_CONFIG
     nvonnxparser::IOnnxConfig* config_payload = nullptr;
     auto status = get_onnx_config_payload_for_controls(config, &config_payload, "ONNX config add verbosity");
     if (status != JYPPX_STATUS_OK)
@@ -674,7 +681,7 @@ JYPPX_StatusCode JYPPX_TRT_ONNX_CONFIG_API(add_verbosity)(JYPPX_TensorRtOnnxConf
     }
 #elif JYPPX_HAS_TENSORRT
     (void)config;
-    jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT ONNX parser library was not found at build time.");
+    jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT ONNX config header support was not available at build time.");
     return JYPPX_STATUS_DEPENDENCY_MISSING;
 #else
     (void)config;
@@ -684,7 +691,7 @@ JYPPX_StatusCode JYPPX_TRT_ONNX_CONFIG_API(add_verbosity)(JYPPX_TensorRtOnnxConf
 
 JYPPX_StatusCode JYPPX_TRT_ONNX_CONFIG_API(reduce_verbosity)(JYPPX_TensorRtOnnxConfig* config)
 {
-#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNX_CONFIG
     nvonnxparser::IOnnxConfig* config_payload = nullptr;
     auto status = get_onnx_config_payload_for_controls(config, &config_payload, "ONNX config reduce verbosity");
     if (status != JYPPX_STATUS_OK)
@@ -706,7 +713,7 @@ JYPPX_StatusCode JYPPX_TRT_ONNX_CONFIG_API(reduce_verbosity)(JYPPX_TensorRtOnnxC
     }
 #elif JYPPX_HAS_TENSORRT
     (void)config;
-    jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT ONNX parser library was not found at build time.");
+    jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT ONNX config header support was not available at build time.");
     return JYPPX_STATUS_DEPENDENCY_MISSING;
 #else
     (void)config;
@@ -729,7 +736,7 @@ static JYPPX_StatusCode get_onnx_config_string(
     }
 
     *out_required_size = 0;
-#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNX_CONFIG
     nvonnxparser::IOnnxConfig* config_payload = nullptr;
     status = get_onnx_config_payload_for_controls(config, &config_payload, feature_name);
     if (status != JYPPX_STATUS_OK)
@@ -763,7 +770,7 @@ static JYPPX_StatusCode get_onnx_config_string(
     (void)selector;
     (void)output_buffer;
     (void)output_buffer_size;
-    jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT ONNX parser library was not found at build time.");
+    jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT ONNX config header support was not available at build time.");
     return JYPPX_STATUS_DEPENDENCY_MISSING;
 #else
     (void)config;
@@ -780,7 +787,7 @@ static JYPPX_StatusCode set_onnx_config_string(
     const char* value,
     const char* feature_name)
 {
-#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNX_CONFIG
     nvonnxparser::IOnnxConfig* config_payload = nullptr;
     auto status = get_onnx_config_payload_for_controls(config, &config_payload, feature_name);
     if (status != JYPPX_STATUS_OK)
@@ -804,7 +811,7 @@ static JYPPX_StatusCode set_onnx_config_string(
     (void)config;
     (void)selector;
     (void)value;
-    jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT ONNX parser library was not found at build time.");
+    jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT ONNX config header support was not available at build time.");
     return JYPPX_STATUS_DEPENDENCY_MISSING;
 #else
     (void)config;
@@ -854,7 +861,7 @@ JYPPX_StatusCode JYPPX_TRT_ONNX_CONFIG_API(get_print_layer_info)(JYPPX_TensorRtO
 
     *out_enabled = JYPPX_FALSE;
 
-#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNX_CONFIG
     nvonnxparser::IOnnxConfig* config_payload = nullptr;
     status = get_onnx_config_payload_for_controls(config, &config_payload, "ONNX config print layer info query");
     if (status != JYPPX_STATUS_OK)
@@ -878,7 +885,7 @@ JYPPX_StatusCode JYPPX_TRT_ONNX_CONFIG_API(get_print_layer_info)(JYPPX_TensorRtO
     }
 #elif JYPPX_HAS_TENSORRT
     (void)config;
-    jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT ONNX parser library was not found at build time.");
+    jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT ONNX config header support was not available at build time.");
     return JYPPX_STATUS_DEPENDENCY_MISSING;
 #else
     (void)config;
@@ -888,7 +895,7 @@ JYPPX_StatusCode JYPPX_TRT_ONNX_CONFIG_API(get_print_layer_info)(JYPPX_TensorRtO
 
 JYPPX_StatusCode JYPPX_TRT_ONNX_CONFIG_API(set_print_layer_info)(JYPPX_TensorRtOnnxConfig* config, JYPPX_Boolean enabled)
 {
-#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNX_CONFIG
     nvonnxparser::IOnnxConfig* config_payload = nullptr;
     auto status = get_onnx_config_payload_for_controls(config, &config_payload, "ONNX config print layer info set");
     if (status != JYPPX_STATUS_OK)
@@ -910,7 +917,7 @@ JYPPX_StatusCode JYPPX_TRT_ONNX_CONFIG_API(set_print_layer_info)(JYPPX_TensorRtO
     }
 #elif JYPPX_HAS_TENSORRT
     (void)config;
-    jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT ONNX parser library was not found at build time.");
+    jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT ONNX config header support was not available at build time.");
     return JYPPX_STATUS_DEPENDENCY_MISSING;
 #else
     (void)config;

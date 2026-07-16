@@ -144,7 +144,7 @@ public sealed class InterfaceCoverageAliasTests
         Assert.Contains("\"Global::createInferRefitter_INTERNAL\" = @(\"id:*engine-create-refitter\")", script);
         Assert.Contains("\"Global::createNvOnnxParser_INTERNAL\" = @(\"id:*onnx-parser-create\")", script);
         Assert.Contains("\"Global::createNvOnnxParserRefitter_INTERNAL\" = @(\"id:*parser-refitter-create\", \"id:*parser-refitter-create-deferred\")", script);
-        Assert.Contains("\"Global::createONNXConfig\" = @(\"id:*onnx-config-create-deferred\")", script);
+        Assert.Contains("\"Global::createONNXConfig\" = @(\"id:*onnx-config-create\")", script);
         Assert.Contains("\"Global::initLibNvInferPlugins\" = @(\"id:*global-init-lib-nvinfer-plugins-deferred\")", script);
         Assert.Contains("\"Global::setInternalLibraryPath\" = @(\"id:*global-set-internal-library-path-deferred\")", script);
     }

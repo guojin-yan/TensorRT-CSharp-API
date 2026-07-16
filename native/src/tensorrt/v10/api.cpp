@@ -20,8 +20,11 @@
 #include <NvInferRuntime.h>
 #endif
 
-#if JYPPX_HAS_TENSORRT_ONNXPARSER
+#if JYPPX_HAS_TENSORRT_ONNX_CONFIG
 #include <NvOnnxConfig.h>
+#endif
+
+#if JYPPX_HAS_TENSORRT_ONNXPARSER
 #include <NvOnnxParser.h>
 #endif
 
@@ -31,6 +34,10 @@
 
 #ifndef JYPPX_HAS_TENSORRT_ONNXPARSER
 #define JYPPX_HAS_TENSORRT_ONNXPARSER 0
+#endif
+
+#ifndef JYPPX_HAS_TENSORRT_ONNX_CONFIG
+#define JYPPX_HAS_TENSORRT_ONNX_CONFIG 0
 #endif
 
 namespace
@@ -366,7 +373,7 @@ void destroy_if_conditional_reference_payload(void* payload)
     delete static_cast<IfConditionalReferencePayload*>(payload);
 }
 
-#if JYPPX_HAS_TENSORRT_ONNXPARSER
+#if JYPPX_HAS_TENSORRT_ONNX_CONFIG
 void destroy_onnx_config_payload(void* payload)
 {
     delete static_cast<nvonnxparser::IOnnxConfig*>(payload);

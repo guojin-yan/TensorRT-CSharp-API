@@ -1,6 +1,6 @@
 # TensorRtSharp4.0 完成情况审查
 
-生成日期：2026-07-16
+生成日期：2026-07-17
 
 ## 审查范围
 
@@ -18,6 +18,58 @@
 - `artifacts/interop-comparison/generated-api-coverage.md`
 - `artifacts/real-case/multi-version-onnx-runtime/multi-version-runtime-evidence-matrix.json`
 - `artifacts/test-analysis/project-quality-test-inventory.json`
+
+## 2026-07-17 ONNX Config 生命周期与 Coverage 收敛复审
+
+本阶段基于提交 `ec4a2976d6c017353034140f514c45f0db9819c2`，完成三版本 `Global::createONNXConfig` 真实实现优先收敛，并将 TRT8 `IOnnxConfig::destroy` 映射到通用 bridge-owned object destroy。旧 deferred manifest 全部保留，coverage 通过显式 alias 优先选择真实 entry，再合并 deferred history，不以删除历史记录改变统计。
+
+### 实现与安全边界
+
+- `JYPPX_HAS_TENSORRT_ONNX_CONFIG` 与 `JYPPX_HAS_TENSORRT_ONNXPARSER` 已拆分。ONNX Config 是 bridge-owned、header-only 对象，不再错误依赖 parser runtime；TRT8 本机可保持 `ONNXPARSER=0 / ONNX_CONFIG=1`。
+- ONNX Config 创建后先由 `std::unique_ptr` 接管，bridge handle 分配成功后才释放所有权，修复 handle 分配失败时的原生对象泄漏。
+- TRT8/TRT10/TRT11 include site 各自声明 expected-major guard；配置对象创建、标量和 caller-buffer 字符串控制继续位于 C++ exception 与 Windows SEH 边界内。
+- public API 只暴露 `TensorRtOnnxConfig`、copied snapshot/summary 与 `Dispose`，不暴露 `IntPtr`、`nint`、`SafeHandle` 或 parser/plugin/tensor/device pointer。
+- RNNv2 gate weights/bias setter、callback trampoline、plugin create/register/deregister/load library、allocator/resource acquire/release 与 ownership 不明确的 pointer 继续 deferred。
+
+### Coverage、构建与测试
+
+generator 为 172 manifests / 3859 records。最终 coverage：
+
+| TensorRT 版本线 | 官方接口 | manifest/source 已匹配 | 非 deferred 实现 | deferred-only |
+| --- | ---: | ---: | ---: | ---: |
+| TRT8 8.6.1.6 | 847 | 847 | 751 | 96 |
+| TRT10 10.11.0.33 | 879 | 879 | 759 | 120 |
+| TRT11 11.0.0.114 | 901 | 901 | 812 | 89 |
+
+六个包变体的 `Global::createONNXConfig` 均为 `implemented-with-deferred-history`；两个 TRT8 包变体的 `IOnnxConfig::destroy` 同样为该状态。TRT8 `Global::getBuilderPluginRegistry` 与 `IPluginRegistry::getBuilderSafePluginRegistry` 继续正确命中真实 capability/safe registry entry 并合并旧 deferred history。
+
+- bindings 生成与幂等通过：172 manifests / 3859 records。
+- 最终源码状态下完整 solution Release build：0 warning / 0 error。
+- native Release：TRT8/CUDA12.1、TRT10/CUDA12.9、TRT11/CUDA13.2 全部成功；TRT8 已验证 `ONNXPARSER=0 / ONNX_CONFIG=1`。
+- ONNX Config、coverage alias、Plugin Registry、BuilderConfig、RNNv2、consumer 与 version guard 受影响分片：92/92；最终 public handle/ONNX Config 复核另为 11/11。
+- DocFX：0 warning / 0 error。
+- 完整 ProjectQuality 使用串行 xUnit 配置尝试执行，在 4m46s 和 6m09s 复现两个既有 owner canonical artifact/fixture 失败：`FinalOwnerExecutionBlockerLedgerTests` 仍要求历史 `blockerCount >= 90`，当前 fail-closed 产物为 2；`FinalOwnerExecutionCloseReadinessFromRealInputTests` 的 owner template validator 保持 2 个 blocker。该尝试未记为完整通过，也未弱化门禁。
+
+### Runtime Smoke 与 Package Consumer
+
+- ONNX Config runtime smoke 在 TRT8/CUDA12.1、TRT10/CUDA12.9、TRT11/CUDA13.2 三版本全部通过；该路径不需要 GPU enqueue。
+- TRT8/TRT10 Plugin Registry、NetworkBuilder 与 InferenceBindings 已通过；identity build/serialize/deserialize/enqueue/output compare 均成功。
+- TRT11 GPU enqueue 仍受本机 driver 576.02 / CUDA error 35 限制，不记为 runtime proof。
+- managed NuGet 与 TRT8/TRT10/TRT11 三个 bridge-only 4.0.0 本地包已重打。三个 baseline consumer 均为无 `ProjectReference` 的纯 `PackageReference` restore/build，新增 ONNX Config owned lifecycle、snapshot、summary 与 `Dispose` 编译可见。
+- TRT8/TRT10 仓库外 bridge package runtime consumer 均为 `smokeStatus=passed`、`EnqueueCompleted=True`、`IdentityOutputMatch=True`；本地 feed 证据不冒充 public clean package-consumer proof。
+
+| 包 | 大小 | SHA256 |
+| --- | ---: | --- |
+| managed `JYPPX.TensorRT.CSharp.API.4.0.0.nupkg` | 14,239,095 bytes | `9C6B739DB5A326F7A08DCC8B64CC4036B6A0FB00B89DC0E9F2F15A63399D2C04` |
+| TRT8/CUDA12.1 bridge-only | 290,765 bytes | `D85EC4E11BC064F5926782E865E23F45E9B8574C5238E70F2B6A8BFC7152AE7C` |
+| TRT10/CUDA12.9 bridge-only | 315,019 bytes | `3065C5BADACA580724822BE2049537C79C49828199C521D750E4C3139F8EA326` |
+| TRT11/CUDA13.2 bridge-only | 256,270 bytes | `D9860BCCDD4D92A7A2391FB37EA612C06B44988E7E1FF536B14B65BBCF79E237` |
+
+### Gate 与发布边界
+
+strict classification、public proof claim boundary、real-proof import boundary 与 stale release claims finding 均为 0；strict release quality gate 为 `release-quality-gate-passed`、required failure 0。Owner convergence 继续为 accepted 0/9、gates 2/3、validation failed blockers 0，`canPublishPublicly=false`、`canCloseReleaseIssue=false`。`git diff --check` 通过，仅有既有 CRLF/LF 转换提示。
+
+本阶段未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
 
 ## 2026-07-17 Synchronous Inference 与 Global Plugin Registry Control 复审
 

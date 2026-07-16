@@ -391,7 +391,7 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
     "Global::createInferRefitter_INTERNAL" = @("id:*engine-create-refitter")
     "Global::createNvOnnxParser_INTERNAL" = @("id:*onnx-parser-create")
     "Global::createNvOnnxParserRefitter_INTERNAL" = @("id:*parser-refitter-create", "id:*parser-refitter-create-deferred")
-    "Global::createONNXConfig" = @("id:*onnx-config-create-deferred")
+    "Global::createONNXConfig" = @("id:*onnx-config-create")
     "Global::initLibNvInferPlugins" = @("id:*global-init-lib-nvinfer-plugins-deferred")
     "Global::setInternalLibraryPath" = @("id:*global-set-internal-library-path-deferred")
     "Global::getBuilderPluginRegistry" = @("id:*builder-capability-plugin-registry-exists")
@@ -402,6 +402,7 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
     "IRuntime::destroy" = @("id:*trt-object-destroy")
     "IRefitter::destroy" = @("id:*trt-object-destroy")
     "IParser::destroy" = @("id:*trt-object-destroy")
+    "IOnnxConfig::destroy" = @("id:*trt-object-destroy")
     "INetworkDefinition::destroy" = @("id:*trt-object-destroy")
     "IHostMemory::destroy" = @("id:*trt-object-destroy")
     "IBuilder::destroy" = @("id:*trt-object-destroy", "id:*builder-destroy-deferred")
@@ -523,6 +524,7 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
   }
 
   $deferredHistoryAliasMap = @{
+    "Global::createONNXConfig" = @("id:*onnx-config-create-deferred", "id:*global-create-onnx-config-deferred")
     "Global::getBuilderPluginRegistry" = @("id:*global-get-builder-plugin-registry-deferred")
     "Global::getPluginRegistry" = @("id:*global-get-plugin-registry-deferred")
     "IExecutionContext::execute" = @("id:*execution-context-execute-deferred")
@@ -539,6 +541,7 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
     "IPluginV3OneBuild::getOutputDataTypes" = @("id:*plugin-v3-one-build-get-output-data-types-deferred")
     "IPluginV3OneBuild::supportsFormatCombination" = @("id:*plugin-v3-one-build-supports-format-combination-deferred")
     "IPluginV3OneRuntime::getFieldsToSerialize" = @("id:*plugin-v3-one-runtime-get-fields-to-serialize-deferred")
+    "IOnnxConfig::destroy" = @("id:*onnx-config-destroy-deferred")
     "IVersionedInterface::getAPILanguage" = @("id:*versioned-interface-get-api-language-deferred")
     "IVersionedInterface::getInterfaceInfo" = @("id:*versioned-interface-get-interface-info-deferred")
   }
@@ -609,6 +612,7 @@ function Find-MatchedManifestApis {
   )
 
   if ($interfaceKey -in @(
+    "Global::createONNXConfig",
     "Global::getBuilderPluginRegistry",
     "Global::getPluginRegistry",
     "IBuilder::buildEngineWithConfig",
@@ -632,6 +636,7 @@ function Find-MatchedManifestApis {
     "IExecutionContext::setErrorRecorder",
     "INetworkDefinition::getErrorRecorder",
     "INetworkDefinition::setErrorRecorder",
+    "IOnnxConfig::destroy",
     "IPluginRegistry::getErrorRecorder",
     "IPluginRegistry::getBuilderSafePluginRegistry",
     "IPluginRegistry::setParentSearchEnabled",

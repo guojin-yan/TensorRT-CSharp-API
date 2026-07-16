@@ -212,6 +212,10 @@ $script:ManagedPackageFreshnessRequiredMarkers = @(
   "GetPluginV3BuildIoSnapshot",
   "TensorRtPluginV3SerializationFieldInventory",
   "GetPluginV3RuntimeSerializationFields",
+  "TensorRtOnnxConfig",
+  "TensorRtOnnxConfigSnapshot",
+  "TensorRtOnnxConfigSummary",
+  "ToSnapshot",
   "TensorRtPluginV3LayerMetadata",
   "GetPluginV3Metadata",
   "TryGetPluginV3Metadata",
@@ -912,6 +916,13 @@ static class HighLevelWrapperSurfaceProbe
 {
     public static string CreateSummary()
     {
+        Func<TensorRtApiLine, TensorRtOnnxConfig> onnxConfigFactory =
+            static line => new TensorRtOnnxConfig(line);
+        Func<TensorRtOnnxConfig, TensorRtOnnxConfigSnapshot> onnxConfigSnapshot =
+            static config => config.ToSnapshot();
+        Func<TensorRtOnnxConfigSnapshot, TensorRtOnnxConfigSummary> onnxConfigSummary =
+            static snapshot => snapshot.ToSummary();
+        Action<TensorRtOnnxConfig> disposeOnnxConfig = static config => config.Dispose();
         Func<TensorRtBuilder, TensorRtPluginRegistryInventory> pluginInventory =
             static builder => builder.GetPluginRegistryInventory();
         Func<TensorRtBuilder, string, string, string, bool> pluginCreatorLookup =
@@ -2797,8 +2808,13 @@ static class HighLevelWrapperSurfaceProbe
         _ = clearExecutionContextAuxiliaryStreams;
         _ = contextAuxiliaryStreamAssignmentSnapshot;
         _ = contextAuxiliaryStreamAssignmentSummary;
+        _ = onnxConfigFactory;
+        _ = onnxConfigSnapshot;
+        _ = onnxConfigSummary;
+        _ = disposeOnnxConfig;
 
         return string.Join(";",
+            "onnx-config-owned-lifecycle",
             "compiled:plugin-inventory",
             "plugin-inventory-field-metadata",
             "engine-rnn-readonly-diagnostics",
@@ -2873,6 +2889,12 @@ static class HighLevelWrapperSurfaceProbe
             "progress-monitor-safe-controls",
             "cuda-memory-range",
             nameof(TensorRtEngine.HasImplicitBatchDimensionCompatibility),
+            nameof(TensorRtOnnxConfig),
+            nameof(TensorRtOnnxConfig.ToSnapshot),
+            nameof(TensorRtOnnxConfig.Dispose),
+            nameof(TensorRtOnnxConfigSnapshot),
+            nameof(TensorRtOnnxConfigSnapshot.ToSummary),
+            nameof(TensorRtOnnxConfigSummary),
             nameof(TensorRtBuilderConfig.SerializedPluginPathCountCompatibility),
             nameof(TensorRtBuilder.SetMaxBatchSizeCompatibility),
             nameof(TensorRtBuilderConfig.SetMaxWorkspaceSizeCompatibility),

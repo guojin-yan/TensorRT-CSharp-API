@@ -103,7 +103,10 @@ public sealed class OnnxConfigScalarControlsTests
         Assert.Contains("copy_string_to_buffer(value, output_buffer, output_buffer_size, out_required_size)", controls);
         Assert.Contains("ONNX config model dtype must be Float, Half, or Int8.", controls);
         Assert.Contains("ONNX config verbosity must be greater than or equal to zero.", controls);
-        Assert.Contains("create_handle_with_payload(&handle, JYPPX_TENSORRT_OBJECT_KIND_ONNX_CONFIG, config, &destroy_onnx_config_payload)", controls);
+        Assert.Contains("std::unique_ptr<BridgeOwnedOnnxConfig> config_owner", controls);
+        Assert.Contains("config_owner.get()", controls);
+        Assert.Contains("config_owner.release();", controls);
+        Assert.DoesNotContain("create_handle_with_payload(&handle, JYPPX_TENSORRT_OBJECT_KIND_ONNX_CONFIG, config, &destroy_onnx_config_payload)", controls);
         Assert.Contains("char const* getModelFileName() const noexcept override", controls);
         Assert.Contains("char const* getTextFileName() const noexcept override", controls);
         Assert.Contains("char const* getFullTextFileName() const noexcept override", controls);
