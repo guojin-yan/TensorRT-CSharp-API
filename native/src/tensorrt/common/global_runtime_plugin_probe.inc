@@ -54,6 +54,40 @@ JYPPX_StatusCode jyppx_trt_get_global_plugin_registry_with_seh_guard(nvinfer1::I
 #endif
 }
 
+struct GlobalPluginRegistryParentSearchState
+{
+    nvinfer1::IPluginRegistry* registry;
+    bool enabled;
+};
+
+JYPPX_StatusCode jyppx_trt_set_global_plugin_registry_parent_search_body(void* raw_state)
+{
+    auto* state = static_cast<GlobalPluginRegistryParentSearchState*>(raw_state);
+    state->registry->setParentSearchEnabled(state->enabled);
+    return JYPPX_STATUS_OK;
+}
+
+JYPPX_StatusCode jyppx_trt_set_global_plugin_registry_parent_search_with_seh_guard(
+    GlobalPluginRegistryParentSearchState* state)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        return jyppx_trt_set_global_plugin_registry_parent_search_body(state);
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        return jyppx::tensorrt::report_vendor_seh_exception(
+            kLine,
+            "global plugin registry parent search set",
+            seh_exception_code);
+    }
+#else
+    return jyppx_trt_set_global_plugin_registry_parent_search_body(state);
+#endif
+}
+
 JYPPX_StatusCode jyppx_trt_get_builder_capability_plugin_registry_with_seh_guard(
     int32_t capability,
     nvinfer1::IPluginRegistry** out_registry)
@@ -875,6 +909,35 @@ JYPPX_StatusCode JYPPX_TRT_GLOBAL_PLUGIN_FN(global_plugin_registry_is_parent_sea
         "global plugin registry parent search query");
 #else
     return jyppx_trt_global_probe_report_unavailable("TensorRT global plugin registry parent search query");
+#endif
+}
+
+JYPPX_StatusCode JYPPX_TRT_GLOBAL_PLUGIN_FN(global_plugin_registry_set_parent_search_enabled)(JYPPX_Boolean enabled)
+{
+#if JYPPX_TRT_GLOBAL_HAS_READONLY_PROBE
+    nvinfer1::IPluginRegistry* registry = nullptr;
+    auto status = jyppx_trt_get_global_plugin_registry(&registry);
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    GlobalPluginRegistryParentSearchState state{registry, enabled != JYPPX_FALSE};
+    try
+    {
+        return jyppx_trt_set_global_plugin_registry_parent_search_with_seh_guard(&state);
+    }
+    catch (const std::exception& exception)
+    {
+        return jyppx_trt_report_readonly_probe_exception("global plugin registry parent search set", exception);
+    }
+    catch (...)
+    {
+        return jyppx_trt_report_readonly_probe_unknown_exception("global plugin registry parent search set");
+    }
+#else
+    (void)enabled;
+    return jyppx_trt_global_probe_report_unavailable("TensorRT global plugin registry parent search set");
 #endif
 }
 

@@ -9659,6 +9659,7 @@ JYPPX_StatusCode jyppx_trt8_execution_context_get_shape_binding(
 #include "modules/deployment/legacy_binding_aliases.inc"
 #include "modules/deployment/cross_version_tenth_other_safe.inc"
 #include "modules/plugin/trt8_plugin_registry_inventory.inc"
+#include "modules/plugin/trt8_global_plugin_registry_inventory.inc"
 #include "modules/plugin/trt8_builder_capability_plugin_registry.inc"
 #include "modules/builder/legacy_scalar_setters.inc"
 #include "modules/builder/safe_plugin_serialization_paths.inc"
@@ -9670,6 +9671,16 @@ JYPPX_StatusCode jyppx_trt8_execution_context_get_shape_binding(
 #include "../common/execution_context_auxiliary_streams.inc"
 #undef JYPPX_TRT_EXECUTION_CONTEXT_CLEAR_AUX_STREAMS_API
 #undef JYPPX_TRT_EXECUTION_CONTEXT_SET_AUX_STREAMS_API
+
+#define JYPPX_TRT_EXECUTION_CONTEXT_EXECUTE_V2_API jyppx_trt8_execution_context_execute_v2_safe
+#define JYPPX_TRT_EXECUTION_CONTEXT_EXECUTE_LEGACY_API jyppx_trt8_execution_context_execute_legacy_safe
+#define JYPPX_TRT_EXECUTION_CONTEXT_ENQUEUE_V2_API jyppx_trt8_execution_context_enqueue_v2_safe
+#define JYPPX_TRT_EXECUTION_CONTEXT_EXPECTED_MAJOR 8
+#include "../common/execution_context_synchronous_inference.inc"
+#undef JYPPX_TRT_EXECUTION_CONTEXT_EXPECTED_MAJOR
+#undef JYPPX_TRT_EXECUTION_CONTEXT_ENQUEUE_V2_API
+#undef JYPPX_TRT_EXECUTION_CONTEXT_EXECUTE_LEGACY_API
+#undef JYPPX_TRT_EXECUTION_CONTEXT_EXECUTE_V2_API
 
 #define JYPPX_TRT_DIRECT_ENGINE_BUILD_API jyppx_trt8_builder_build_engine_with_config
 #define JYPPX_TRT_DIRECT_ENGINE_DESTROY destroy_engine_payload

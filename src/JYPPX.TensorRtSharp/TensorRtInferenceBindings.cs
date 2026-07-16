@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using JYPPX.CudaSharp;
+using JYPPX.Shared.Interop;
 
 namespace JYPPX.TensorRtSharp;
 
@@ -287,12 +288,7 @@ public sealed class TensorRtInferenceBindings : IDisposable
             throw new ArgumentNullException(nameof(stream));
         }
 
-        BindAll();
-        TensorRtExecutionContextReadiness readiness = GetReadiness(runShapeInference);
-        if (!readiness.IsReadyForEnqueue)
-        {
-            throw new InvalidOperationException("TensorRT execution context is not ready for enqueue: " + readiness);
-        }
+        TensorRtExecutionContextReadiness readiness = PrepareForExecution(runShapeInference);
 
         _context.EnqueueAsync(stream);
         if (synchronize)
@@ -301,6 +297,82 @@ public sealed class TensorRtInferenceBindings : IDisposable
         }
 
         return new TensorRtInferenceExecutionSummary(ProfileIndex, _buffers.Count, synchronize, readiness);
+    }
+
+    /// <summary>
+    /// Executes an explicit-batch network synchronously through TensorRT <c>executeV2</c>.
+    /// 通过 TensorRT <c>executeV2</c> 同步执行 explicit-batch 网络。
+    /// </summary>
+    /// <param name="runShapeInference">Whether to run shape inference during readiness validation. 是否在就绪校验时执行 shape inference。</param>
+    /// <returns>An execution summary. 执行摘要。</returns>
+    public TensorRtInferenceExecutionSummary ExecuteV2(bool runShapeInference = true)
+    {
+        ThrowIfDisposed();
+        if (_engine.Line == TensorRtApiLine.TensorRt8 && _engine.HasImplicitBatchDimensionCompatibility)
+        {
+            throw new InvalidOperationException("TensorRT 8 implicit-batch engines must use ExecuteLegacy.");
+        }
+
+        TensorRtExecutionContextReadiness readiness = PrepareForExecution(runShapeInference);
+        _context.ExecuteV2();
+        return new TensorRtInferenceExecutionSummary(ProfileIndex, _buffers.Count, synchronized: true, readiness: readiness);
+    }
+
+    /// <summary>
+    /// Executes a TensorRT 8 implicit-batch network synchronously through legacy <c>execute</c>.
+    /// 通过 legacy <c>execute</c> 同步执行 TensorRT 8 implicit-batch 网络。
+    /// </summary>
+    /// <param name="batchSize">The positive legacy batch size. 正数 legacy batch size。</param>
+    /// <param name="runShapeInference">Whether to run shape inference during readiness validation. 是否在就绪校验时执行 shape inference。</param>
+    /// <returns>An execution summary. 执行摘要。</returns>
+    public TensorRtInferenceExecutionSummary ExecuteLegacy(int batchSize, bool runShapeInference = true)
+    {
+        ThrowIfDisposed();
+        if (_engine.Line != TensorRtApiLine.TensorRt8)
+        {
+            throw new NotSupportedException("Legacy implicit-batch execution is available only for TensorRT 8.");
+        }
+        if (!_engine.HasImplicitBatchDimensionCompatibility)
+        {
+            throw new InvalidOperationException("Legacy Execute requires a TensorRT 8 implicit-batch engine.");
+        }
+        if (batchSize <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(batchSize), "Legacy execution batch size must be positive.");
+        }
+
+        TensorRtExecutionContextReadiness readiness = PrepareForExecution(runShapeInference);
+        _context.ExecuteLegacy(batchSize);
+        return new TensorRtInferenceExecutionSummary(ProfileIndex, _buffers.Count, synchronized: true, readiness: readiness);
+    }
+
+    /// <summary>
+    /// Enqueues a TensorRT 8 explicit-batch network through <c>enqueueV2</c> and synchronizes before returning.
+    /// 通过 <c>enqueueV2</c> 提交 TensorRT 8 explicit-batch 网络，并在返回前完成同步。
+    /// </summary>
+    /// <param name="stream">The caller-owned CUDA stream. 调用方拥有的 CUDA stream。</param>
+    /// <param name="runShapeInference">Whether to run shape inference during readiness validation. 是否在就绪校验时执行 shape inference。</param>
+    /// <returns>An execution summary whose synchronized flag is always true. synchronized 恒为 true 的执行摘要。</returns>
+    public TensorRtInferenceExecutionSummary EnqueueV2AndSynchronize(CudaStream stream, bool runShapeInference = true)
+    {
+        ThrowIfDisposed();
+        if (stream == null)
+        {
+            throw new ArgumentNullException(nameof(stream));
+        }
+        if (_engine.Line != TensorRtApiLine.TensorRt8)
+        {
+            throw new NotSupportedException("enqueueV2 compatibility execution is available only for TensorRT 8.");
+        }
+        if (_engine.HasImplicitBatchDimensionCompatibility)
+        {
+            throw new InvalidOperationException("enqueueV2 compatibility execution requires an explicit-batch engine.");
+        }
+
+        TensorRtExecutionContextReadiness readiness = PrepareForExecution(runShapeInference);
+        _context.EnqueueV2(stream);
+        stream.Synchronize();
+        return new TensorRtInferenceExecutionSummary(ProfileIndex, _buffers.Count, synchronized: true, readiness: readiness);
     }
 
     /// <summary>
@@ -482,6 +554,18 @@ public sealed class TensorRtInferenceBindings : IDisposable
     private void RefreshReport(bool runShapeInference)
     {
         Report = _engine.GetBindingReport(_context, ProfileIndex, runShapeInference);
+    }
+
+    private TensorRtExecutionContextReadiness PrepareForExecution(bool runShapeInference)
+    {
+        BindAll();
+        TensorRtExecutionContextReadiness readiness = GetReadiness(runShapeInference);
+        if (!readiness.IsReadyForEnqueue)
+        {
+            throw new InvalidOperationException("TensorRT execution context is not ready for inference: " + readiness);
+        }
+
+        return readiness;
     }
 
     private void RemoveOwnedBuffer(string tensorName)

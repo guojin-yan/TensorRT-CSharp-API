@@ -35,7 +35,7 @@ public sealed class RuntimeAliasAndCuda13SearchUpliftTests
         Assert.Contains(rows, row => row.Contains("\"IRuntime\",\"deserializeCudaEngine\",\"IRuntime::deserializeCudaEngine\",\"runtime-serialization\",\"implemented\"", StringComparison.Ordinal));
         Assert.Contains(rows, row => row.Contains("\"IExecutionContext\",\"enqueueV3\",\"IExecutionContext::enqueueV3\",\"engine-context\",\"implemented\"", StringComparison.Ordinal));
         Assert.Contains(rows, row => row.Contains("\"IRuntime\",\"deserializeCudaEngineV2\",\"IRuntime::deserializeCudaEngineV2\",\"runtime-serialization\",\"deferred-only\"", StringComparison.Ordinal));
-        Assert.Contains(rows, row => row.Contains("\"IExecutionContext\",\"enqueueV2\",\"IExecutionContext::enqueueV2\",\"engine-context\",\"deferred-only\"", StringComparison.Ordinal));
+        Assert.Contains(rows, row => row.Contains("\"IExecutionContext\",\"enqueueV2\",\"IExecutionContext::enqueueV2\",\"engine-context\",\"implemented-with-deferred-history\"", StringComparison.Ordinal));
     }
 
     [Fact]

@@ -164,7 +164,8 @@ public sealed class PluginRegistryInventoryTests
         Assert.Contains("return \"IPluginCreator\";", interopSource);
         Assert.Contains("public bool IsPluginRegistryAvailable", builderSource);
         Assert.Contains("TryIsPluginRegistryAvailable", builderSource);
-        Assert.Contains("TensorRt8GlobalPluginRegistrySkipped=True", smokeProgram);
+        Assert.Contains("ValidateGlobalParentSearchRoundTrip", smokeProgram);
+        Assert.DoesNotContain("TensorRt8GlobalPluginRegistrySkipped=True", smokeProgram);
         Assert.DoesNotContain("TensorRt8GlobalAndCapabilityPluginRegistriesSkipped", smokeProgram);
         Assert.DoesNotContain("PluginRegistryInventoryRequiresTensorRt10Or11", smokeProgram);
 
@@ -289,7 +290,8 @@ public sealed class PluginRegistryInventoryTests
         Assert.Contains("trt11-runtime-get-plugin-registry-deferred", deferred11);
 
         Assert.Contains("RuntimePluginRegistry", smokeProgram);
-        Assert.Contains("TensorRt8GlobalPluginRegistrySkipped=True", smokeProgram);
+        Assert.Contains("ValidateGlobalParentSearchRoundTrip", smokeProgram);
+        Assert.DoesNotContain("TensorRt8GlobalPluginRegistrySkipped=True", smokeProgram);
         Assert.DoesNotContain("TensorRt8GlobalAndCapabilityPluginRegistriesSkipped", smokeProgram);
         Assert.Contains("ValidateRuntimeLocalLookup", smokeProgram);
         Assert.Contains("TryIsPluginRegistryAvailable", smokeProgram);

@@ -8282,6 +8282,12 @@ JYPPX_StatusCode jyppx_trt11_tensor_reset_dynamic_range(JYPPX_TensorRtTensor*)
 #undef JYPPX_TRT_EXECUTION_CONTEXT_CLEAR_AUX_STREAMS_API
 #undef JYPPX_TRT_EXECUTION_CONTEXT_SET_AUX_STREAMS_API
 
+#define JYPPX_TRT_EXECUTION_CONTEXT_EXECUTE_V2_API jyppx_trt11_execution_context_execute_v2_safe
+#define JYPPX_TRT_EXECUTION_CONTEXT_EXPECTED_MAJOR 11
+#include "../common/execution_context_synchronous_inference.inc"
+#undef JYPPX_TRT_EXECUTION_CONTEXT_EXPECTED_MAJOR
+#undef JYPPX_TRT_EXECUTION_CONTEXT_EXECUTE_V2_API
+
 #define JYPPX_TRT_PLUGIN_PREFIX jyppx_trt11_
 #include "../common/plugin_registry_inventory.inc"
 #undef JYPPX_TRT_PLUGIN_PREFIX

@@ -4,7 +4,7 @@ using Xunit;
 
 namespace JYPPX.ProjectQuality.Tests;
 
-public sealed class Trt8CapabilityRegistryAndLegacySetterUpliftTests
+public sealed partial class Trt8CapabilityRegistryAndLegacySetterUpliftTests
 {
     [Fact]
     public void ManifestsDeclareTwentySevenPointerFreeEntriesAndKeepDeferredHistory()
@@ -79,7 +79,8 @@ public sealed class Trt8CapabilityRegistryAndLegacySetterUpliftTests
         Assert.Contains("SetMaxWorkspaceSizeCompatibility", builderSmoke, StringComparison.Ordinal);
         Assert.Contains("SetMinTimingIterationsCompatibility", builderSmoke, StringComparison.Ordinal);
         Assert.Contains("TryGetBuilderCapabilityPluginRegistryInventory", registrySmoke, StringComparison.Ordinal);
-        Assert.Contains("TensorRt8GlobalPluginRegistrySkipped=True", registrySmoke, StringComparison.Ordinal);
+        Assert.Contains("ValidateGlobalParentSearchRoundTrip", registrySmoke, StringComparison.Ordinal);
+        Assert.DoesNotContain("TensorRt8GlobalPluginRegistrySkipped=True", registrySmoke, StringComparison.Ordinal);
         Assert.DoesNotContain("TensorRt8GlobalAndCapabilityPluginRegistriesSkipped", registrySmoke, StringComparison.Ordinal);
         Assert.Contains("SetRnnV2Operation", packageConsumer, StringComparison.Ordinal);
         Assert.Contains("SetMaxBatchSizeCompatibility", packageConsumer, StringComparison.Ordinal);

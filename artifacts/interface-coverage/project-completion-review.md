@@ -19,6 +19,60 @@
 - `artifacts/real-case/multi-version-onnx-runtime/multi-version-runtime-evidence-matrix.json`
 - `artifacts/test-analysis/project-quality-test-inventory.json`
 
+## 2026-07-17 Synchronous Inference 与 Global Plugin Registry Control 复审
+
+本阶段基于提交 `e4ac4edca685ef6cbbcd6225a886f4743eccf2b1`，新增 18 个安全 bridge entry：TRT8 的 `execute`、`executeV2`、`enqueueV2`，TRT10/TRT11 各一个 `executeV2`，TRT8 global Plugin Registry copied inventory/control 11 个，以及 TRT10/TRT11 global registry parent-search setter 各 1 个。旧 deferred manifest 全部保留，coverage 通过显式 alias 优先匹配真实实现并合并 deferred history，不以删除历史记录改变统计。
+
+### ABI、生命周期与降级边界
+
+- 同步推理 native 实现只收集 execution context 已绑定的 tensor/binding address，在调用栈内构造临时数组；public API 不暴露 `IntPtr`、`nint`、`SafeHandle` 或 device/tensor pointer。
+- `TensorRtInferenceBindings.ExecuteV2` 与 TRT8 `ExecuteLegacy` 为同步调用；`EnqueueV2AndSynchronize` 在返回前强制 `CudaStream.Synchronize()`，不会把异步 device work 生命周期转嫁给调用方。
+- TRT8 global creator inventory 只复制 name/version/namespace/field metadata。`getFieldNames()`、集合指针、count 与 storage 校验位于同一 Windows SEH guard；单个 vendor creator 返回 `RuntimeError`、`InvalidState`、`NotSupported` 或 `NotImplemented` 时只将该 creator 的字段列表降级为空，creator 身份仍保留。
+- TRT8 global registry 没有独立 recursive creator count，因此 managed `RecursiveCreatorCount` 为 `null`，不伪造为 0。真实 smoke 中 inventory 为 2 creators、`Recursive=n/a`、诊断一致。
+- global parent-search setter 返回前读回校验；Plugin Registry smoke 在 `finally` 恢复原值。TRT8 creator lookup 基于 copied inventory，不返回 creator pointer。
+- 字符串继续使用 caller-buffer，数组继续使用 count/copy；C++ exception 和 Windows SEH 不跨 ABI。TRT8/TRT10/TRT11 include site 各自声明 expected major，不匹配 translation unit 只生成 vendor-missing stub。
+- RNNv2 `setWeightsForGate` / `setBiasForGate`、callback trampoline、plugin create/register/deregister/load library、allocator/resource acquire/release 及 ownership 不明确的 pointer 继续 deferred。
+
+### Coverage、构建与测试
+
+generator 最终为 172 manifests / 3859 records。2026-07-17 重导 coverage：
+
+| TensorRT 版本线 | 官方接口 | manifest/source 已匹配 | 非 deferred 实现 | deferred-only |
+| --- | ---: | ---: | ---: | ---: |
+| TRT8 8.6.1.6 | 847 | 847 | 749 | 98 |
+| TRT10 10.11.0.33 | 879 | 879 | 758 | 121 |
+| TRT11 11.0.0.114 | 901 | 901 | 811 | 90 |
+
+TRT8 `Global::getBuilderPluginRegistry`、`IPluginRegistry::getBuilderSafePluginRegistry`、`Global::getPluginRegistry`、`IPluginRegistry::setParentSearchEnabled`、`IExecutionContext::execute`、`executeV2` 与 `enqueueV2` 均核对为真实实现或 `implemented-with-deferred-history`。两条最初错误显示 deferred-only 的 builder registry 行已通过显式 alias 优先规则修复，并有 matcher 顺序防回归断言。
+
+- bindings 生成与幂等：通过，172 manifests / 3859 records。
+- 完整 solution Release：0 warning / 0 error。
+- native Release：TRT8/CUDA12.1、TRT10/CUDA12.9、TRT11/CUDA13.2 全部成功；TRT10 跨版本 translation unit 保留既有 MSVC warning，但无编译或链接错误。
+- 新专项以及 Plugin Registry、BuilderConfig、RNNv2、coverage alias、consumer 与 vendor guard 相关测试：85/85；仓库 shard runner 的 A-F/G-M/N-S/T-Z 受影响分片同样为 85/85。
+- DocFX：0 warning / 0 error。
+- 完整 ProjectQuality 本阶段已尝试，但多个测试并行改写相同 canonical `artifacts/final-release` 文件，出现 Windows 文件占用与状态串线，testhost 随后长时间无 CPU/子进程，未形成可靠全绿结果。直接相关类已全部串行通过；既有累计 shard 缺口不包含本阶段专项类。门禁未被弱化。
+
+### Runtime Smoke 与 Package Consumer
+
+- TRT8/CUDA12.1：Plugin Registry、NetworkBuilder、InferenceBindings、TensorRtSmoke、Lifecycle 全部通过。`executeV2`、enqueueV3、同步 `enqueueV2` 均输出一致；global parent-search 修改与恢复成功。
+- TRT10/CUDA12.9：global/capability registry inventory、parent-search 往返、NetworkBuilder、InferenceBindings、TensorRtSmoke、Lifecycle 全部通过；`executeV2` 与 enqueueV3 输出一致。runtime-local/builder-owned inventory 在当前本地 bridge 缺旧 entry 时按既有可跳过策略记录，不冒充覆盖。
+- TRT11/CUDA13.2：bridge、global/capability inventory 与 parent-search 往返可执行；CUDA runtime 报 error 35，`createInferRuntime` 返回 null，NetworkBuilder/InferenceBindings/runtime smoke 均不记为通过。
+- managed NuGet 与三个 bridge-only 包已重打。三个 baseline consumer 都是仓库外纯 `PackageReference`，无 `ProjectReference`，restore/build 为 0 warning / 0 error，并编译新增 global registry 与同步推理高层 API。
+- TRT8/TRT10 bridge package runtime consumer 均完成 identity engine build/serialize/deserialize/enqueue/output compare，`RuntimeSmoke=Passed`、`IdentityOutputMatch=True`。TRT11 package compile 通过，runtime 证据严格记录为 `compatible-host-bridge-package-runtime-failed`、CUDA error 35、`isRuntimeExecutionProof=false`。
+
+| 包 | 大小 | SHA256 |
+| --- | ---: | --- |
+| managed `JYPPX.TensorRT.CSharp.API.4.0.0.nupkg` | 13,959,148 bytes | `6E6D264EBA2316177ADA2978C034713B68E4DE13678BC9472D043F08F65B71AB` |
+| TRT8/CUDA12.1 bridge-only | 286,583 bytes | `6FA307EC55DFBAE60ECA8149F723715FA5BF5AC07F9522B15D3B1536184FEA8E` |
+| TRT10/CUDA12.9 bridge-only | 314,904 bytes | `0F3637728A77DA4B06F8A42AC9FE0CCAACF53A766E4C4AD67931ADAE9909051F` |
+| TRT11/CUDA13.2 bridge-only | 256,054 bytes | `AB6DEADCB8B564043DFB80B5817235F3886F40EBE2B3E2EF58706E818120A715` |
+
+### Gate 与发布边界
+
+strict classification、public proof claim boundary 与 real-proof import boundary finding 均为 0；stale release claims finding 为 0；strict release quality gate 为 `release-quality-gate-passed`、required failure 0。Owner convergence 继续为 accepted 0/9、gates 2/3、validation failed blockers 0，`canPublishPublicly=false`、`canCloseReleaseIssue=false`。`git diff --check` 通过，仅有既有 CRLF/LF 转换提示。
+
+本阶段未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
+
 ## 2026-07-16 Execution Context Auxiliary Stream 三版本生命周期复审
 
 本阶段基于提交 `747b44ac8b1dbfe8b1060a78c0f7068c9315450f`，将 `IExecutionContext::setAuxStreams` 从仅 TRT11 可用扩展为 TRT8/TRT10/TRT11 三版本安全能力。TRT8 与 TRT10 各新增 set/clear 两个正式 entry；TRT11 既有 entry 迁移到共享 native 实现。TRT8/TRT10 旧 deferred manifest 全部保留，coverage 通过显式 alias 优先合并 deferred history，不以删除历史记录改变统计。

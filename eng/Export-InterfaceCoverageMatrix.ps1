@@ -395,6 +395,7 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
     "Global::initLibNvInferPlugins" = @("id:*global-init-lib-nvinfer-plugins-deferred")
     "Global::setInternalLibraryPath" = @("id:*global-set-internal-library-path-deferred")
     "Global::getBuilderPluginRegistry" = @("id:*builder-capability-plugin-registry-exists")
+    "Global::getPluginRegistry" = @("id:*global-plugin-registry-exists")
     "IBuilder::getPluginRegistry" = @("id:*builder-plugin-registry-exists", "id:*builder-plugin-registry-get-creator-count", "id:*builder-plugin-registry-get-recursive-creator-count", "id:*builder-plugin-registry-has-error-recorder", "id:*builder-plugin-registry-is-parent-search-enabled", "id:*builder-plugin-creator-get-name", "id:*builder-plugin-creator-get-version", "id:*builder-plugin-creator-get-namespace", "id:*builder-plugin-creator-get-interface-info", "id:*builder-plugin-creator-get-field-count", "id:*builder-plugin-creator-get-field-name", "id:*builder-plugin-creator-get-field-metadata", "id:*builder-plugin-creator-lookup", "id:*builder-get-plugin-registry-deferred")
     "IRuntime::getPluginRegistry" = @("id:*runtime-plugin-registry-exists", "id:*runtime-plugin-registry-get-creator-count", "id:*runtime-plugin-registry-has-error-recorder", "id:*runtime-plugin-registry-is-parent-search-enabled", "id:*runtime-plugin-creator-get-name", "id:*runtime-plugin-creator-get-version", "id:*runtime-plugin-creator-get-namespace", "id:*runtime-plugin-creator-get-interface-info", "id:*runtime-plugin-creator-get-field-count", "id:*runtime-plugin-creator-get-field-name", "id:*runtime-plugin-creator-get-field-metadata", "id:*runtime-plugin-creator-lookup", "id:*runtime-get-plugin-registry-deferred")
     "IRuntime::deserializeCudaEngine" = @("id:*runtime-deserialize-engine")
@@ -453,6 +454,9 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
     "IExecutionContext::getDebugListener" = @("id:*execution-context-has-debug-listener", "id:*execution-context-clear-debug-listener")
     "IExecutionContext::setDebugListener" = @("id:*execution-context-has-debug-listener", "id:*execution-context-clear-debug-listener")
     "IExecutionContext::setInputShapeBinding" = @("id:*execution-context-set-input-shape-binding-copied-values", "id:*execution-context-set-input-shape-binding-deferred")
+    "IExecutionContext::execute" = @("id:*execution-context-execute-legacy-safe")
+    "IExecutionContext::executeV2" = @("id:*execution-context-execute-v2-safe")
+    "IExecutionContext::enqueueV2" = @("id:*execution-context-enqueue-v2-safe")
     "IExecutionContext::enqueueV3" = @("id:*execution-context-enqueue-async")
     "IBuilderConfig::getProgressMonitor" = @("id:*builder-config-has-progress-monitor", "id:*builder-config-clear-progress-monitor", "id:*builder-config-set-progress-monitor")
     "IBuilderConfig::setProgressMonitor" = @("id:*builder-config-has-progress-monitor", "id:*builder-config-clear-progress-monitor", "id:*builder-config-set-progress-monitor")
@@ -489,6 +493,7 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
     "IRefitter::getTensorsWithDynamicRange" = @("id:*refitter-get-dynamic-range-tensor-count", "id:*refitter-get-dynamic-range-tensor-entries")
     "IRefitter::getLogger" = @("id:*refitter-has-logger*", "id:*refitter-get-logger-deferred")
     "IPluginRegistry::getBuilderSafePluginRegistry" = @("id:*builder-safe-plugin-registry-exists", "id:*builder-capability-plugin-registry-exists")
+    "IPluginRegistry::setParentSearchEnabled" = @("id:*global-plugin-registry-set-parent-search-enabled")
     "IPluginV2Ext::getTensorRTVersion" = @("id:*plugin-v2-layer-get-tensor-rt-version")
     "IPluginV2IOExt::getTensorRTVersion" = @("id:*plugin-v2-layer-get-tensor-rt-version")
     "IPluginV2DynamicExt::supportsFormatCombination" = @("id:*plugin-v2-dynamic-ext-supports-format-combination-owner-scoped")
@@ -519,8 +524,13 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
 
   $deferredHistoryAliasMap = @{
     "Global::getBuilderPluginRegistry" = @("id:*global-get-builder-plugin-registry-deferred")
+    "Global::getPluginRegistry" = @("id:*global-get-plugin-registry-deferred")
+    "IExecutionContext::execute" = @("id:*execution-context-execute-deferred")
+    "IExecutionContext::executeV2" = @("id:*execution-context-execute-v2-deferred")
+    "IExecutionContext::enqueueV2" = @("id:*execution-context-enqueue-v2-deferred")
     "IExecutionContext::setAuxStreams" = @("id:*execution-context-set-aux-streams-deferred")
     "IPluginRegistry::getBuilderSafePluginRegistry" = @("id:*plugin-registry-get-builder-safe-plugin-registry-deferred")
+    "IPluginRegistry::setParentSearchEnabled" = @("id:*plugin-registry-set-parent-search-enabled-deferred")
     "IPluginV2Ext::getTensorRTVersion" = @("id:*plugin-v2-ext-get-tensor-rt-version-deferred")
     "IPluginV2IOExt::getTensorRTVersion" = @("id:*plugin-v2-io-ext-get-tensor-rt-version-deferred")
     "IPluginV2DynamicExt::supportsFormatCombination" = @("id:*plugin-v2-dynamic-ext-supports-format-combination-deferred")
@@ -600,6 +610,7 @@ function Find-MatchedManifestApis {
 
   if ($interfaceKey -in @(
     "Global::getBuilderPluginRegistry",
+    "Global::getPluginRegistry",
     "IBuilder::buildEngineWithConfig",
     "IBuilder::destroy",
     "IBuilder::getPluginRegistry",
@@ -614,12 +625,16 @@ function Find-MatchedManifestApis {
     "IEngineInspector::setErrorRecorder",
     "IExecutionContext::getErrorRecorder",
     "IExecutionContext::destroy",
+    "IExecutionContext::execute",
+    "IExecutionContext::executeV2",
+    "IExecutionContext::enqueueV2",
     "IExecutionContext::setAuxStreams",
     "IExecutionContext::setErrorRecorder",
     "INetworkDefinition::getErrorRecorder",
     "INetworkDefinition::setErrorRecorder",
     "IPluginRegistry::getErrorRecorder",
     "IPluginRegistry::getBuilderSafePluginRegistry",
+    "IPluginRegistry::setParentSearchEnabled",
     "IPluginV2Ext::getTensorRTVersion",
     "IPluginV2IOExt::getTensorRTVersion",
     "IPluginV2DynamicExt::supportsFormatCombination",

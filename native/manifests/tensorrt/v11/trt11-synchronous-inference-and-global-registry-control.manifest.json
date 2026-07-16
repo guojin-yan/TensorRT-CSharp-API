@@ -1,0 +1,29 @@
+{
+  "$schema": "../../bridge-api.schema.json",
+  "module": "tensorrt",
+  "versionLine": "11",
+  "apis": [
+    {
+      "id": "trt11-execution-context-execute-v2-safe",
+      "entryPoint": "jyppx_trt11_execution_context_execute_v2_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "context-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "context", "type": "JYPPX_TensorRtExecutionContext*", "direction": "in" }
+      ]
+    },
+    {
+      "id": "trt11-global-plugin-registry-set-parent-search-enabled",
+      "entryPoint": "jyppx_trt11_global_plugin_registry_set_parent_search_enabled",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "parameters": [
+        { "name": "enabled", "type": "JYPPX_Boolean", "direction": "in", "managedType": "int", "moduleManagedType": "int" }
+      ]
+    }
+  ]
+}

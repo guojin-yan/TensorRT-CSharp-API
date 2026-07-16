@@ -930,6 +930,18 @@ static class HighLevelWrapperSurfaceProbe
                 bool success = TensorRtEnvironmentProbe.TryIsGlobalPluginRegistryAvailable(line, out bool available, out string diagnostic);
                 return (success, available, diagnostic);
             };
+        Func<TensorRtApiLine, TensorRtPluginRegistryInventory> globalPluginRegistryInventory =
+            static line => TensorRtEnvironmentProbe.GetGlobalPluginRegistryInventory(line);
+        Func<TensorRtApiLine, bool> globalPluginRegistryParentSearch =
+            static line => TensorRtEnvironmentProbe.IsGlobalPluginRegistryParentSearchEnabled(line);
+        Action<TensorRtApiLine, bool> setGlobalPluginRegistryParentSearch =
+            static (line, enabled) => TensorRtEnvironmentProbe.SetGlobalPluginRegistryParentSearchEnabled(line, enabled);
+        Func<TensorRtApiLine, bool, (bool success, bool actual, string diagnostic)> trySetGlobalPluginRegistryParentSearch =
+            static (line, enabled) =>
+            {
+                bool success = TensorRtEnvironmentProbe.TrySetGlobalPluginRegistryParentSearchEnabled(line, enabled, out bool actual, out string diagnostic);
+                return (success, actual, diagnostic);
+            };
         Func<TensorRtPluginRegistryInventory, int> creatorCount = static inventory => inventory.Creators.Count;
         Func<TensorRtPluginRegistryInventory, string, string, string, TensorRtPluginCreatorInfo?> snapshotFindCreator =
             static (inventory, name, version, pluginNamespace) => inventory.FindCreator(name, version, pluginNamespace);
@@ -1030,6 +1042,12 @@ static class HighLevelWrapperSurfaceProbe
             static (config, value) => config.SetMaxWorkspaceSizeCompatibility(value);
         Action<TensorRtBuilderConfig, int> setMinTimingIterationsCompatibility =
             static (config, value) => config.SetMinTimingIterationsCompatibility(value);
+        Func<TensorRtInferenceBindings, TensorRtInferenceExecutionSummary> executeV2 =
+            static bindings => bindings.ExecuteV2(runShapeInference: false);
+        Func<TensorRtInferenceBindings, int, TensorRtInferenceExecutionSummary> executeLegacy =
+            static (bindings, batchSize) => bindings.ExecuteLegacy(batchSize, runShapeInference: false);
+        Func<TensorRtInferenceBindings, CudaStream, TensorRtInferenceExecutionSummary> enqueueV2AndSynchronize =
+            static (bindings, stream) => bindings.EnqueueV2AndSynchronize(stream, runShapeInference: false);
         Func<TensorRtLayer, int> rnnV2LayerCount = static layer => layer.GetRnnV2LayerCount();
         Func<TensorRtLayer, int> rnnV2HiddenSize = static layer => layer.GetRnnV2HiddenSize();
         Func<TensorRtLayer, int> rnnV2DataLength = static layer => layer.GetRnnV2DataLength();
@@ -2543,6 +2561,10 @@ static class HighLevelWrapperSurfaceProbe
         _ = safePluginCreatorLookup;
         _ = globalPluginRegistryAvailable;
         _ = safeGlobalPluginRegistryAvailable;
+        _ = globalPluginRegistryInventory;
+        _ = globalPluginRegistryParentSearch;
+        _ = setGlobalPluginRegistryParentSearch;
+        _ = trySetGlobalPluginRegistryParentSearch;
         _ = creatorCount;
         _ = snapshotFindCreator;
         _ = snapshotTryFindCreator;
@@ -2756,6 +2778,9 @@ static class HighLevelWrapperSurfaceProbe
         _ = currentDeviceGraphMemorySummary;
         _ = adviseRange;
         _ = prefetchRange;
+        _ = executeV2;
+        _ = executeLegacy;
+        _ = enqueueV2AndSynchronize;
         _ = engineImplicitBatchCompatibility;
         _ = serializedPluginPathCountCompatibility;
         _ = pluginInventoryDiagnostics;
@@ -2921,6 +2946,14 @@ static class HighLevelWrapperSurfaceProbe
             nameof(TensorRtPluginFieldSummary.HasData),
             nameof(TensorRtEnvironmentProbe.IsGlobalPluginRegistryAvailable),
             nameof(TensorRtEnvironmentProbe.TryIsGlobalPluginRegistryAvailable),
+            nameof(TensorRtEnvironmentProbe.GetGlobalPluginRegistryInventory),
+            nameof(TensorRtEnvironmentProbe.IsGlobalPluginRegistryParentSearchEnabled),
+            nameof(TensorRtEnvironmentProbe.SetGlobalPluginRegistryParentSearchEnabled),
+            nameof(TensorRtEnvironmentProbe.TrySetGlobalPluginRegistryParentSearchEnabled),
+            nameof(TensorRtInferenceBindings.ExecuteV2),
+            nameof(TensorRtInferenceBindings.ExecuteLegacy),
+            nameof(TensorRtInferenceBindings.EnqueueV2AndSynchronize),
+            nameof(TensorRtInferenceExecutionSummary.Synchronized),
             nameof(TensorRtBuilder.GetPluginRegistryInventory),
             nameof(TensorRtBuilder.IsPluginCreatorRegistered),
             nameof(TensorRtBuilder.TryIsPluginCreatorRegistered),

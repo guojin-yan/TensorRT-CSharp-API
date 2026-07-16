@@ -691,6 +691,9 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_cuda_engine_set_gpu_allocator_deferred(
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_engine_inspector_get_error_recorder_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_engine_inspector_set_error_recorder_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_destroy_deferred(void);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_execute_legacy_safe(JYPPX_TensorRtExecutionContext* context, int32_t batch_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_execute_v2_safe(JYPPX_TensorRtExecutionContext* context);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_enqueue_v2_safe(JYPPX_TensorRtExecutionContext* context, JYPPX_CudaStream* stream);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_enqueue_v2_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_execute_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_execute_v2_deferred(void);
@@ -779,6 +782,17 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_global_create_nv_uff_parser_internal_de
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_global_create_onnx_config_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_global_create_uff_parser_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_global_get_builder_plugin_registry_deferred(void);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_global_plugin_registry_exists(JYPPX_Boolean* out_exists);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_global_plugin_registry_get_creator_count(int32_t* out_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_global_plugin_registry_has_error_recorder(JYPPX_Boolean* out_has_recorder);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_global_plugin_registry_is_parent_search_enabled(JYPPX_Boolean* out_enabled);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_global_plugin_registry_set_parent_search_enabled(JYPPX_Boolean enabled);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_global_plugin_creator_get_name(int32_t creator_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_global_plugin_creator_get_version(int32_t creator_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_global_plugin_creator_get_namespace(int32_t creator_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_global_plugin_creator_get_field_count(int32_t creator_index, int32_t* out_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_global_plugin_creator_get_field_name(int32_t creator_index, int32_t field_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_global_plugin_creator_get_field_metadata(int32_t creator_index, int32_t field_index, int32_t* out_field_type, int32_t* out_length, JYPPX_Boolean* out_has_data);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_global_get_plugin_registry_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_global_get_safe_plugin_registry_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_global_init_lib_nvinfer_plugins_deferred(void);

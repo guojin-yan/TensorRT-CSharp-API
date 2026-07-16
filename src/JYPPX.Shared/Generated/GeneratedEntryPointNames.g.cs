@@ -977,6 +977,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt10ExecutionContextDebugListenerGetInterfaceInfo = "jyppx_trt10_execution_context_get_debug_listener_interface_info";
     public const string Trt10ExecutionContextEnqueueAsync = "jyppx_trt10_execution_context_enqueue_async";
     public const string Trt10ExecutionContextExecuteV2Deferred = "jyppx_trt10_execution_context_execute_v2_deferred";
+    public const string Trt10ExecutionContextExecuteV2Safe = "jyppx_trt10_execution_context_execute_v2_safe";
     public const string Trt10ExecutionContextGetDebugListenerDeferred = "jyppx_trt10_execution_context_get_debug_listener_deferred";
     public const string Trt10ExecutionContextGetDebugSync = "jyppx_trt10_execution_context_get_debug_sync";
     public const string Trt10ExecutionContextGetDeviceMemorySize = "jyppx_trt10_execution_context_get_device_memory_size";
@@ -1076,6 +1077,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt10GlobalPluginRegistryGetRecursiveCreatorCount = "jyppx_trt10_global_plugin_registry_get_recursive_creator_count";
     public const string Trt10GlobalPluginRegistryHasErrorRecorder = "jyppx_trt10_global_plugin_registry_has_error_recorder";
     public const string Trt10GlobalPluginRegistryIsParentSearchEnabled = "jyppx_trt10_global_plugin_registry_is_parent_search_enabled";
+    public const string Trt10GlobalPluginRegistrySetParentSearchEnabled = "jyppx_trt10_global_plugin_registry_set_parent_search_enabled";
     public const string Trt10GpuAllocatorAllocateDeferred = "jyppx_trt10_gpu_allocator_allocate_deferred";
     public const string Trt10GpuAllocatorDeallocateDeferred = "jyppx_trt10_gpu_allocator_deallocate_deferred";
     public const string Trt10GpuAllocatorGetInterfaceInfoDeferred = "jyppx_trt10_gpu_allocator_get_interface_info_deferred";
@@ -2233,6 +2235,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt11ExecutionContextDebugListenerGetApiLanguage = "jyppx_trt11_execution_context_get_debug_listener_api_language";
     public const string Trt11ExecutionContextDebugListenerGetInterfaceInfo = "jyppx_trt11_execution_context_get_debug_listener_interface_info";
     public const string Trt11ExecutionContextExecuteV2Deferred = "jyppx_trt11_execution_context_execute_v2_deferred";
+    public const string Trt11ExecutionContextExecuteV2Safe = "jyppx_trt11_execution_context_execute_v2_safe";
     public const string Trt11ExecutionContextGetDebugSync = "jyppx_trt11_execution_context_get_debug_sync";
     public const string Trt11ExecutionContextGetDeviceMemorySize = "jyppx_trt11_execution_context_get_device_memory_size";
     public const string Trt11ExecutionContextGetEnqueueEmitsProfile = "jyppx_trt11_execution_context_get_enqueue_emits_profile";
@@ -2302,6 +2305,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt11GlobalPluginRegistryGetRecursiveCreatorCount = "jyppx_trt11_global_plugin_registry_get_recursive_creator_count";
     public const string Trt11GlobalPluginRegistryHasErrorRecorder = "jyppx_trt11_global_plugin_registry_has_error_recorder";
     public const string Trt11GlobalPluginRegistryIsParentSearchEnabled = "jyppx_trt11_global_plugin_registry_is_parent_search_enabled";
+    public const string Trt11GlobalPluginRegistrySetParentSearchEnabled = "jyppx_trt11_global_plugin_registry_set_parent_search_enabled";
     public const string Trt11GlobalSetInternalLibraryPathDeferred = "jyppx_trt11_global_set_internal_library_path_deferred";
     public const string Trt11GpuAllocatorAllocateDeferred = "jyppx_trt11_gpu_allocator_allocate_deferred";
     public const string Trt11GpuAllocatorDeallocateDeferred = "jyppx_trt11_gpu_allocator_deallocate_deferred";
@@ -3261,8 +3265,11 @@ internal static class GeneratedEntryPointNames
     public const string Trt8ExecutionContextDestroyDeferred = "jyppx_trt8_execution_context_destroy_deferred";
     public const string Trt8ExecutionContextEnqueueAsync = "jyppx_trt8_execution_context_enqueue_async";
     public const string Trt8ExecutionContextEnqueueV2Deferred = "jyppx_trt8_execution_context_enqueue_v2_deferred";
+    public const string Trt8ExecutionContextEnqueueV2Safe = "jyppx_trt8_execution_context_enqueue_v2_safe";
     public const string Trt8ExecutionContextExecuteDeferred = "jyppx_trt8_execution_context_execute_deferred";
+    public const string Trt8ExecutionContextExecuteLegacySafe = "jyppx_trt8_execution_context_execute_legacy_safe";
     public const string Trt8ExecutionContextExecuteV2Deferred = "jyppx_trt8_execution_context_execute_v2_deferred";
+    public const string Trt8ExecutionContextExecuteV2Safe = "jyppx_trt8_execution_context_execute_v2_safe";
     public const string Trt8ExecutionContextGetDebugSync = "jyppx_trt8_execution_context_get_debug_sync";
     public const string Trt8ExecutionContextGetDeviceMemorySize = "jyppx_trt8_execution_context_get_device_memory_size";
     public const string Trt8ExecutionContextGetEnqueueEmitsProfile = "jyppx_trt8_execution_context_get_enqueue_emits_profile";
@@ -3345,6 +3352,17 @@ internal static class GeneratedEntryPointNames
     public const string Trt8GlobalGetSafePluginRegistryDeferred = "jyppx_trt8_global_get_safe_plugin_registry_deferred";
     public const string Trt8GlobalHasLogger = "jyppx_trt8_global_has_logger";
     public const string Trt8GlobalInitLibNvinferPluginsDeferred = "jyppx_trt8_global_init_lib_nvinfer_plugins_deferred";
+    public const string Trt8GlobalPluginCreatorGetFieldCount = "jyppx_trt8_global_plugin_creator_get_field_count";
+    public const string Trt8GlobalPluginCreatorGetFieldMetadata = "jyppx_trt8_global_plugin_creator_get_field_metadata";
+    public const string Trt8GlobalPluginCreatorGetFieldName = "jyppx_trt8_global_plugin_creator_get_field_name";
+    public const string Trt8GlobalPluginCreatorGetName = "jyppx_trt8_global_plugin_creator_get_name";
+    public const string Trt8GlobalPluginCreatorGetNamespace = "jyppx_trt8_global_plugin_creator_get_namespace";
+    public const string Trt8GlobalPluginCreatorGetVersion = "jyppx_trt8_global_plugin_creator_get_version";
+    public const string Trt8GlobalPluginRegistryExists = "jyppx_trt8_global_plugin_registry_exists";
+    public const string Trt8GlobalPluginRegistryGetCreatorCount = "jyppx_trt8_global_plugin_registry_get_creator_count";
+    public const string Trt8GlobalPluginRegistryHasErrorRecorder = "jyppx_trt8_global_plugin_registry_has_error_recorder";
+    public const string Trt8GlobalPluginRegistryIsParentSearchEnabled = "jyppx_trt8_global_plugin_registry_is_parent_search_enabled";
+    public const string Trt8GlobalPluginRegistrySetParentSearchEnabled = "jyppx_trt8_global_plugin_registry_set_parent_search_enabled";
     public const string Trt8GlobalReorderSubBuffersDeferred = "jyppx_trt8_global_reorder_sub_buffers_deferred";
     public const string Trt8GlobalReshapeWeightsDeferred = "jyppx_trt8_global_reshape_weights_deferred";
     public const string Trt8GlobalShutdownProtobufLibraryDeferred = "jyppx_trt8_global_shutdown_protobuf_library_deferred";

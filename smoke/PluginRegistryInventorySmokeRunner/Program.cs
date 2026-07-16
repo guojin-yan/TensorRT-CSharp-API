@@ -59,20 +59,13 @@ internal static class Program
 
     private static void RunPluginRegistryInventorySmoke(TensorRtApiLine line)
     {
-        if (line == TensorRtApiLine.TensorRt8)
+        if (!TensorRtEnvironmentProbe.TryIsGlobalPluginRegistryAvailable(line, out bool globalExists, out string globalExistsDiagnostic))
         {
-            Console.WriteLine("TensorRt8GlobalPluginRegistrySkipped=True Reason=GlobalRegistryRemainsDeferred");
+            Console.WriteLine($"GlobalPluginRegistry Skipped=True Reason={globalExistsDiagnostic}");
         }
         else
         {
-            if (!TensorRtEnvironmentProbe.TryIsGlobalPluginRegistryAvailable(line, out bool globalExists, out string globalExistsDiagnostic))
-            {
-                Console.WriteLine($"GlobalPluginRegistry Skipped=True Reason={globalExistsDiagnostic}");
-            }
-            else
-            {
-                Console.WriteLine($"GlobalPluginRegistry Exists={globalExists}");
-            }
+            Console.WriteLine($"GlobalPluginRegistry Exists={globalExists}");
 
             TensorRtPluginRegistryInventory? globalInventory = null;
             string globalDiagnostic = string.Empty;
@@ -84,6 +77,7 @@ internal static class Program
                 ValidateInventory(globalInventory!, "GlobalPluginRegistry");
                 Console.WriteLine(FormatInventory("GlobalPluginRegistry", globalInventory!));
                 ValidateLookup(line, globalInventory!, TensorRtEngineCapability.Standard, useBuilderCapability: false);
+                ValidateGlobalParentSearchRoundTrip(line);
             }
             else if (!globalExists)
             {
@@ -132,6 +126,37 @@ internal static class Program
 
         RunRuntimeLocalPluginRegistrySmoke(line);
         RunBuilderOwnedPluginRegistrySmoke(line);
+    }
+
+    private static void ValidateGlobalParentSearchRoundTrip(TensorRtApiLine line)
+    {
+        bool original = TensorRtEnvironmentProbe.IsGlobalPluginRegistryParentSearchEnabled(line);
+        bool requested = !original;
+        bool restored = false;
+
+        try
+        {
+            TensorRtEnvironmentProbe.SetGlobalPluginRegistryParentSearchEnabled(line, requested);
+            bool readback = TensorRtEnvironmentProbe.IsGlobalPluginRegistryParentSearchEnabled(line);
+            if (readback != requested)
+            {
+                throw new InvalidOperationException(
+                    $"Global plugin registry parent-search readback mismatch. Requested={requested} Actual={readback}.");
+            }
+
+            Console.WriteLine($"GlobalPluginRegistryParentSearch Original={original} Requested={requested} Readback={readback}");
+        }
+        finally
+        {
+            TensorRtEnvironmentProbe.SetGlobalPluginRegistryParentSearchEnabled(line, original);
+            restored = TensorRtEnvironmentProbe.IsGlobalPluginRegistryParentSearchEnabled(line) == original;
+            Console.WriteLine($"GlobalPluginRegistryParentSearch Restored={restored} Value={original}");
+        }
+
+        if (!restored)
+        {
+            throw new InvalidOperationException("Global plugin registry parent-search state was not restored.");
+        }
     }
 
     private static void RunRuntimeLocalPluginRegistrySmoke(TensorRtApiLine line)
@@ -276,14 +301,14 @@ internal static class Program
             throw new InvalidOperationException($"{label} first creator summary does not match copied creator metadata.");
         }
 
-        if (inventory.Line == TensorRtApiLine.TensorRt8)
+        if (inventory.Line == TensorRtApiLine.TensorRt8 && inventory.Source != TensorRtPluginRegistrySource.Global)
         {
             if (!first.TensorRtVersion.HasValue || first.TensorRtVersion.Value <= 0)
             {
                 throw new InvalidOperationException($"{label} TensorRT 8 creator did not report its compile-time TensorRT version.");
             }
         }
-        else if (first.TensorRtVersion.HasValue)
+        else if (inventory.Line != TensorRtApiLine.TensorRt8 && first.TensorRtVersion.HasValue)
         {
             throw new InvalidOperationException($"{label} reported TensorRT 8-only creator version metadata on TensorRT {(int)inventory.Line}.");
         }

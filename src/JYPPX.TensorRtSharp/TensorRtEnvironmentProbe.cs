@@ -112,6 +112,90 @@ public static class TensorRtEnvironmentProbe
     }
 
     /// <summary>
+    /// Gets whether TensorRT's global plugin registry searches its parent registry.
+    /// 获取 TensorRT 全局 plugin registry 是否搜索 parent registry。
+    /// </summary>
+    /// <param name="line">The TensorRT API line to query. 要查询的 TensorRT API line。</param>
+    /// <returns><see langword="true"/> when parent search is enabled. parent search 已启用时返回 <see langword="true"/>。</returns>
+    public static bool IsGlobalPluginRegistryParentSearchEnabled(TensorRtApiLine line)
+    {
+        NativeBridgeLoader.EnsureInitialized();
+        return NativeBridgeApi.IsGlobalPluginRegistryParentSearchEnabled(line);
+    }
+
+    /// <summary>
+    /// Tries to get the global plugin registry parent-search state.
+    /// 尝试获取全局 plugin registry 的 parent-search 状态。
+    /// </summary>
+    /// <param name="line">The TensorRT API line to query. 要查询的 TensorRT API line。</param>
+    /// <param name="enabled">The copied parent-search state. 复制出的 parent-search 状态。</param>
+    /// <param name="diagnostic">A diagnostic string describing success or failure. 描述成功或失败原因的诊断字符串。</param>
+    /// <returns><see langword="true"/> when the query completed successfully. 查询成功完成时返回 <see langword="true"/>。</returns>
+    public static bool TryIsGlobalPluginRegistryParentSearchEnabled(TensorRtApiLine line, out bool enabled, out string diagnostic)
+    {
+        try
+        {
+            enabled = IsGlobalPluginRegistryParentSearchEnabled(line);
+            diagnostic = "OK";
+            return true;
+        }
+        catch (Exception exception) when (IsProbeException(exception))
+        {
+            enabled = false;
+            diagnostic = FormatProbeException("Global plugin registry parent-search query", exception);
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Sets the global plugin registry parent-search state and verifies the value by reading it back.
+    /// 设置全局 plugin registry 的 parent-search 状态，并通过读回进行校验。
+    /// </summary>
+    /// <param name="line">The TensorRT API line to update. 要更新的 TensorRT API line。</param>
+    /// <param name="enabled">The requested parent-search state. 请求的 parent-search 状态。</param>
+    public static void SetGlobalPluginRegistryParentSearchEnabled(TensorRtApiLine line, bool enabled)
+    {
+        NativeBridgeLoader.EnsureInitialized();
+        NativeBridgeApi.SetGlobalPluginRegistryParentSearchEnabled(line, enabled);
+        bool actual = NativeBridgeApi.IsGlobalPluginRegistryParentSearchEnabled(line);
+        if (actual != enabled)
+        {
+            throw new InvalidOperationException(
+                $"TensorRT global plugin registry parent-search readback mismatch: requested={enabled}, actual={actual}.");
+        }
+    }
+
+    /// <summary>
+    /// Tries to set and read back the global plugin registry parent-search state.
+    /// 尝试设置并读回全局 plugin registry 的 parent-search 状态。
+    /// </summary>
+    /// <param name="line">The TensorRT API line to update. 要更新的 TensorRT API line。</param>
+    /// <param name="enabled">The requested parent-search state. 请求的 parent-search 状态。</param>
+    /// <param name="actualEnabled">The read-back state when the update succeeds. 更新成功时读回的状态。</param>
+    /// <param name="diagnostic">A diagnostic string describing success or failure. 描述成功或失败原因的诊断字符串。</param>
+    /// <returns><see langword="true"/> when the update and readback both succeed. 更新及读回均成功时返回 <see langword="true"/>。</returns>
+    public static bool TrySetGlobalPluginRegistryParentSearchEnabled(
+        TensorRtApiLine line,
+        bool enabled,
+        out bool actualEnabled,
+        out string diagnostic)
+    {
+        try
+        {
+            SetGlobalPluginRegistryParentSearchEnabled(line, enabled);
+            actualEnabled = enabled;
+            diagnostic = "OK";
+            return true;
+        }
+        catch (Exception exception) when (IsProbeException(exception))
+        {
+            actualEnabled = false;
+            diagnostic = FormatProbeException("Global plugin registry parent-search update", exception);
+            return false;
+        }
+    }
+
+    /// <summary>
     /// Checks whether TensorRT exposes a non-null global plugin registry.
     /// 检查 TensorRT 是否暴露非空全局 plugin registry。
     /// </summary>

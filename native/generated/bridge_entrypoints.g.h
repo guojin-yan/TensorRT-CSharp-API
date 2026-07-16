@@ -2917,6 +2917,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_enqueue_async(JYPPX_
 // generated from manifest id=trt10-execution-context-execute-v2-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_execute_v2_deferred(void);
 
+// generated from manifest id=trt10-execution-context-execute-v2-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_execute_v2_safe(JYPPX_TensorRtExecutionContext* context);
+
 // generated from manifest id=trt10-execution-context-get-debug-listener-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_get_debug_listener_deferred(void);
 
@@ -3213,6 +3216,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt10_global_plugin_registry_has_error_recor
 
 // generated from manifest id=trt10-global-plugin-registry-is-parent-search-enabled
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_global_plugin_registry_is_parent_search_enabled(JYPPX_Boolean* out_enabled);
+
+// generated from manifest id=trt10-global-plugin-registry-set-parent-search-enabled
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_global_plugin_registry_set_parent_search_enabled(JYPPX_Boolean enabled);
 
 // generated from manifest id=trt10-gpu-allocator-allocate-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_gpu_allocator_allocate_deferred(void);
@@ -6685,6 +6691,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt11_execution_context_get_debug_listener_i
 // generated from manifest id=trt11-execution-context-execute-v2-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_execution_context_execute_v2_deferred(void);
 
+// generated from manifest id=trt11-execution-context-execute-v2-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_execution_context_execute_v2_safe(JYPPX_TensorRtExecutionContext* context);
+
 // generated from manifest id=trt11-execution-context-get-debug-sync
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_execution_context_get_debug_sync(JYPPX_TensorRtExecutionContext* context, JYPPX_Boolean* out_debug_sync);
 
@@ -6891,6 +6900,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt11_global_plugin_registry_has_error_recor
 
 // generated from manifest id=trt11-global-plugin-registry-is-parent-search-enabled
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_global_plugin_registry_is_parent_search_enabled(JYPPX_Boolean* out_enabled);
+
+// generated from manifest id=trt11-global-plugin-registry-set-parent-search-enabled
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_global_plugin_registry_set_parent_search_enabled(JYPPX_Boolean enabled);
 
 // generated from manifest id=trt11-global-set-internal-library-path-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_global_set_internal_library_path_deferred(void);
@@ -9769,11 +9781,20 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt8_execution_context_enqueue_async(JYPPX_T
 // generated from manifest id=trt8-execution-context-enqueue-v2-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_execution_context_enqueue_v2_deferred(void);
 
+// generated from manifest id=trt8-execution-context-enqueue-v2-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_execution_context_enqueue_v2_safe(JYPPX_TensorRtExecutionContext* context, JYPPX_CudaStream* stream);
+
 // generated from manifest id=trt8-execution-context-execute-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_execution_context_execute_deferred(void);
 
+// generated from manifest id=trt8-execution-context-execute-legacy-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_execution_context_execute_legacy_safe(JYPPX_TensorRtExecutionContext* context, int32_t batch_size);
+
 // generated from manifest id=trt8-execution-context-execute-v2-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_execution_context_execute_v2_deferred(void);
+
+// generated from manifest id=trt8-execution-context-execute-v2-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_execution_context_execute_v2_safe(JYPPX_TensorRtExecutionContext* context);
 
 // generated from manifest id=trt8-execution-context-get-debug-sync
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_execution_context_get_debug_sync(JYPPX_TensorRtExecutionContext* context, JYPPX_Boolean* out_debug_sync);
@@ -10020,6 +10041,39 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt8_global_has_logger(JYPPX_Boolean* out_ha
 
 // generated from manifest id=trt8-global-init-lib-nvinfer-plugins-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_global_init_lib_nvinfer_plugins_deferred(void);
+
+// generated from manifest id=trt8-global-plugin-creator-get-field-count
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_global_plugin_creator_get_field_count(int32_t creator_index, int32_t* out_count);
+
+// generated from manifest id=trt8-global-plugin-creator-get-field-metadata
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_global_plugin_creator_get_field_metadata(int32_t creator_index, int32_t field_index, int32_t* out_field_type, int32_t* out_length, JYPPX_Boolean* out_has_data);
+
+// generated from manifest id=trt8-global-plugin-creator-get-field-name
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_global_plugin_creator_get_field_name(int32_t creator_index, int32_t field_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+
+// generated from manifest id=trt8-global-plugin-creator-get-name
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_global_plugin_creator_get_name(int32_t creator_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+
+// generated from manifest id=trt8-global-plugin-creator-get-namespace
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_global_plugin_creator_get_namespace(int32_t creator_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+
+// generated from manifest id=trt8-global-plugin-creator-get-version
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_global_plugin_creator_get_version(int32_t creator_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+
+// generated from manifest id=trt8-global-plugin-registry-exists
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_global_plugin_registry_exists(JYPPX_Boolean* out_exists);
+
+// generated from manifest id=trt8-global-plugin-registry-get-creator-count
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_global_plugin_registry_get_creator_count(int32_t* out_count);
+
+// generated from manifest id=trt8-global-plugin-registry-has-error-recorder
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_global_plugin_registry_has_error_recorder(JYPPX_Boolean* out_has_recorder);
+
+// generated from manifest id=trt8-global-plugin-registry-is-parent-search-enabled
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_global_plugin_registry_is_parent_search_enabled(JYPPX_Boolean* out_enabled);
+
+// generated from manifest id=trt8-global-plugin-registry-set-parent-search-enabled
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_global_plugin_registry_set_parent_search_enabled(JYPPX_Boolean enabled);
 
 // generated from manifest id=trt8-global-reorder-sub-buffers-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_global_reorder_sub_buffers_deferred(void);

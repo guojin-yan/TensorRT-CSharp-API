@@ -73,26 +73,53 @@ internal static class Program
             throw new InvalidOperationException("Inference bindings are not ready: " + readiness);
         }
 
-        TensorRtInferenceExecutionSummary executionSummary = null!;
+        TensorRtInferenceExecutionSummary executeV2Summary = bindings.ExecuteV2(runShapeInference: false);
+        float[] executeV2Output = bindings.ReadOutputSingles("output", inputValues.Length);
+        EnsureOutputMatches("executeV2", inputValues, executeV2Output);
+
+        TensorRtInferenceExecutionSummary enqueueSummary = null!;
         float elapsedMilliseconds = stream.MeasureElapsedTime(cudaStream =>
         {
-            executionSummary = bindings.EnqueueAsync(cudaStream, synchronize: false, runShapeInference: false);
+            enqueueSummary = bindings.EnqueueAsync(cudaStream, synchronize: false, runShapeInference: false);
         });
 
         float[] outputValues = bindings.ReadOutputSingles("output", inputValues.Length);
-        bool outputMatch = inputValues.SequenceEqual(outputValues);
-        if (!outputMatch)
+        EnsureOutputMatches("enqueueV3", inputValues, outputValues);
+
+        TensorRtInferenceExecutionSummary? enqueueV2Summary = null;
+        float enqueueV2ElapsedMilliseconds = 0;
+        if (line == TensorRtApiLine.TensorRt8)
         {
-            throw new InvalidOperationException($"Inference binding output mismatch. Input=[{string.Join(", ", inputValues)}] Output=[{string.Join(", ", outputValues)}]");
+            enqueueV2ElapsedMilliseconds = stream.MeasureElapsedTime(cudaStream =>
+            {
+                enqueueV2Summary = bindings.EnqueueV2AndSynchronize(cudaStream, runShapeInference: false);
+            });
+            float[] enqueueV2Output = bindings.ReadOutputSingles("output", inputValues.Length);
+            EnsureOutputMatches("enqueueV2", inputValues, enqueueV2Output);
+            Console.WriteLine($"LegacyExecute Skipped=True Reason=ExplicitBatchIdentityEngine");
         }
 
         ulong profileMemory = line == TensorRtApiLine.TensorRt10 ? engine.GetDeviceMemorySizeForProfileV2(profileIndex) : engine.DeviceMemorySizeInBytes;
         Console.WriteLine($"BindingReport {bindings.Report} Inputs={bindings.Report.GetInputs().Count} Outputs={bindings.Report.GetOutputs().Count}");
         Console.WriteLine($"EngineMemory Device={engine.DeviceMemorySizeInBytes} Profile={profileMemory} AuxStreams={engine.AuxiliaryStreamCount}");
         Console.WriteLine($"Readiness Ready={readiness.IsReadyForEnqueue} Bound={readiness.AllTensorAddressesBound} ActiveProfile={readiness.ActiveOptimizationProfile}");
-        Console.WriteLine($"Execution {executionSummary} ElapsedMs={elapsedMilliseconds:0.###} OutputMatch=True");
+        Console.WriteLine($"ExecuteV2 {executeV2Summary} OutputMatch=True");
+        Console.WriteLine($"EnqueueV3 {enqueueSummary} ElapsedMs={elapsedMilliseconds:0.###} OutputMatch=True");
+        if (enqueueV2Summary != null)
+        {
+            Console.WriteLine($"EnqueueV2 {enqueueV2Summary} ElapsedMs={enqueueV2ElapsedMilliseconds:0.###} Synchronized={enqueueV2Summary.Synchronized} OutputMatch=True");
+        }
         Console.WriteLine(bindings.Describe());
 
+    }
+
+    private static void EnsureOutputMatches(string operation, float[] inputValues, float[] outputValues)
+    {
+        if (!inputValues.SequenceEqual(outputValues))
+        {
+            throw new InvalidOperationException(
+                $"Inference binding {operation} output mismatch. Input=[{string.Join(", ", inputValues)}] Output=[{string.Join(", ", outputValues)}]");
+        }
     }
 
     static TensorRtApiLine ResolveLine(string value)

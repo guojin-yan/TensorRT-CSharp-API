@@ -188,6 +188,7 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_global_plugin_registry_get_creator_cou
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_global_plugin_registry_get_recursive_creator_count(int32_t* out_count);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_global_plugin_registry_has_error_recorder(JYPPX_Boolean* out_has_recorder);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_global_plugin_registry_is_parent_search_enabled(JYPPX_Boolean* out_enabled);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_global_plugin_registry_set_parent_search_enabled(JYPPX_Boolean enabled);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_global_plugin_creator_get_name(int32_t creator_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_global_plugin_creator_get_version(int32_t creator_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_global_plugin_creator_get_namespace(int32_t creator_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
@@ -1025,6 +1026,7 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_refitter_has_error_recorder(JYPPX_Tens
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_refitter_clear_error_recorder(JYPPX_TensorRtRefitter* refitter);
 
 /* BEGIN TRT11 TWENTY-THIRD BATCH GENERATED DECLARATIONS */
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_execution_context_execute_v2_safe(JYPPX_TensorRtExecutionContext* context);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_execution_context_execute_v2_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_execution_context_no_copy_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_execution_context_set_communicator_deferred(void);
