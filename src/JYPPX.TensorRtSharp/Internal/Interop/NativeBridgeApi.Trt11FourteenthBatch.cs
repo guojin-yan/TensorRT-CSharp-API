@@ -290,7 +290,6 @@ internal static partial class NativeBridgeApi
 
     public static void SetExecutionContextAuxStreams(TensorRtApiLine line, SafeTensorRtObjectHandle context, IReadOnlyList<SafeCudaStreamHandle> streams)
     {
-        EnsureTensorRt11DeploymentApi(line, nameof(SetExecutionContextAuxStreams));
         if (streams == null)
         {
             throw new ArgumentNullException(nameof(streams));
@@ -298,7 +297,7 @@ internal static partial class NativeBridgeApi
 
         if (streams.Count == 0)
         {
-            NativeStatus.ThrowIfFailed(NativeMethodsTensorRt.jyppx_trt11_execution_context_set_aux_streams(context, IntPtr.Zero, 0));
+            NativeStatus.ThrowIfFailed(InvokeExecutionContextAuxStreams(line, context, IntPtr.Zero, 0));
             return;
         }
 
@@ -316,11 +315,26 @@ internal static partial class NativeBridgeApi
         GCHandle pinned = GCHandle.Alloc(streamPointers, GCHandleType.Pinned);
         try
         {
-            NativeStatus.ThrowIfFailed(NativeMethodsTensorRt.jyppx_trt11_execution_context_set_aux_streams(context, pinned.AddrOfPinnedObject(), streamPointers.Length));
+            NativeStatus.ThrowIfFailed(InvokeExecutionContextAuxStreams(line, context, pinned.AddrOfPinnedObject(), streamPointers.Length));
         }
         finally
         {
             pinned.Free();
         }
+    }
+
+    private static BridgeStatusCode InvokeExecutionContextAuxStreams(
+        TensorRtApiLine line,
+        SafeTensorRtObjectHandle context,
+        IntPtr streams,
+        int streamCount)
+    {
+        return line switch
+        {
+            TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_execution_context_set_aux_streams(context, streams, streamCount),
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_execution_context_set_aux_streams(context, streams, streamCount),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_execution_context_set_aux_streams(context, streams, streamCount),
+            _ => throw UnsupportedLine()
+        };
     }
 }

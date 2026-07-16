@@ -971,6 +971,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt10ErrorRecorderIncRefCountDeferred = "jyppx_trt10_error_recorder_inc_ref_count_deferred";
     public const string Trt10ExecutionContextAllInputDimensionsSpecified = "jyppx_trt10_execution_context_all_input_dimensions_specified";
     public const string Trt10ExecutionContextAllInputShapesSpecified = "jyppx_trt10_execution_context_all_input_shapes_specified";
+    public const string Trt10ExecutionContextClearAuxStreams = "jyppx_trt10_execution_context_clear_aux_streams";
     public const string Trt10ExecutionContextClearProfiler = "jyppx_trt10_execution_context_clear_profiler";
     public const string Trt10ExecutionContextDebugListenerGetApiLanguage = "jyppx_trt10_execution_context_get_debug_listener_api_language";
     public const string Trt10ExecutionContextDebugListenerGetInterfaceInfo = "jyppx_trt10_execution_context_get_debug_listener_interface_info";
@@ -1000,6 +1001,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt10ExecutionContextOutputAllocatorGetInterfaceInfo = "jyppx_trt10_execution_context_get_output_allocator_interface_info";
     public const string Trt10ExecutionContextReportToProfiler = "jyppx_trt10_execution_context_report_to_profiler";
     public const string Trt10ExecutionContextSetAllTensorsDebugState = "jyppx_trt10_execution_context_set_all_tensors_debug_state";
+    public const string Trt10ExecutionContextSetAuxStreams = "jyppx_trt10_execution_context_set_aux_streams";
     public const string Trt10ExecutionContextSetAuxStreamsDeferred = "jyppx_trt10_execution_context_set_aux_streams_deferred";
     public const string Trt10ExecutionContextSetDebugListenerDeferred = "jyppx_trt10_execution_context_set_debug_listener_deferred";
     public const string Trt10ExecutionContextSetDebugSync = "jyppx_trt10_execution_context_set_debug_sync";
@@ -3254,6 +3256,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt8ErrorRecorderIncRefCountDeferred = "jyppx_trt8_error_recorder_inc_ref_count_deferred";
     public const string Trt8ExecutionContextAllInputDimensionsSpecified = "jyppx_trt8_execution_context_all_input_dimensions_specified";
     public const string Trt8ExecutionContextAllInputShapesSpecified = "jyppx_trt8_execution_context_all_input_shapes_specified";
+    public const string Trt8ExecutionContextClearAuxStreams = "jyppx_trt8_execution_context_clear_aux_streams";
     public const string Trt8ExecutionContextClearProfiler = "jyppx_trt8_execution_context_clear_profiler";
     public const string Trt8ExecutionContextDestroyDeferred = "jyppx_trt8_execution_context_destroy_deferred";
     public const string Trt8ExecutionContextEnqueueAsync = "jyppx_trt8_execution_context_enqueue_async";
@@ -3283,6 +3286,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt8ExecutionContextNoCopyDeferred = "jyppx_trt8_execution_context_no_copy_deferred";
     public const string Trt8ExecutionContextReportToProfiler = "jyppx_trt8_execution_context_report_to_profiler";
     public const string Trt8ExecutionContextSetAllTensorsDebugState = "jyppx_trt8_execution_context_set_all_tensors_debug_state";
+    public const string Trt8ExecutionContextSetAuxStreams = "jyppx_trt8_execution_context_set_aux_streams";
     public const string Trt8ExecutionContextSetAuxStreamsDeferred = "jyppx_trt8_execution_context_set_aux_streams_deferred";
     public const string Trt8ExecutionContextSetBindingDimensions = "jyppx_trt8_execution_context_set_binding_dimensions";
     public const string Trt8ExecutionContextSetDebugSync = "jyppx_trt8_execution_context_set_debug_sync";

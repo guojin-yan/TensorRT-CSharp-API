@@ -98,6 +98,8 @@ internal static class Program
         string engineImplicitBatchState = ProbeEngineImplicitBatchCompatibility(engine);
         using TensorRtEngineInspector inspector = engine.CreateInspector();
         using TensorRtExecutionContext context = engine.CreateExecutionContext();
+        context.ClearAuxStreams();
+        TensorRtAuxiliaryStreamAssignmentSnapshot auxiliaryStreamSnapshot = context.GetAuxiliaryStreamAssignmentSnapshot();
 
         context.SetInputShape("input", new TensorRtDims(new[] { batch, 4 }));
 
@@ -133,6 +135,7 @@ internal static class Program
         Console.WriteLine($"ProfileConfigured Min={configuredProfileRange.Min} Opt={configuredProfileRange.Opt} Max={configuredProfileRange.Max} Valid={configuredProfileValid} ExtraMemoryTarget={profileExtraMemoryTarget} ShapeValueCount={inputShapeValueCount}");
         Console.WriteLine($"Readiness Ready={readiness.IsReadyForEnqueue} Bound={readiness.AllTensorAddressesBound} Missing={readiness.ShapeInferenceMissingTensorCount?.ToString() ?? "n/a"} ActiveProfile={readiness.ActiveOptimizationProfile} Tensors={readiness.Tensors.Count}");
         Console.WriteLine($"BindingReport Ready={bindingReport.IsReadyForEnqueue} Profile={bindingReport.ProfileIndex} Inputs={bindingReport.GetInputs().Count} Outputs={bindingReport.GetOutputs().Count} Tensors={bindingReport.Tensors.Count} Formats=[{bindingSummary}]");
+        Console.WriteLine($"AuxiliaryStreams=Line:{(int)auxiliaryStreamSnapshot.Line};Assigned:{auxiliaryStreamSnapshot.AssignedStreamCount};Cleared:{auxiliaryStreamSnapshot.IsCleared};Lease:{auxiliaryStreamSnapshot.ManagedHandleLeaseActive}");
         Console.WriteLine($"IOTensors=[{tensorSummary}] InspectorBytes={inspectorText.Length} Enqueue=True OutputMatch=True");
 
     }

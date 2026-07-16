@@ -394,8 +394,14 @@ internal static partial class NativeBridgeApi
 
     public static void ClearExecutionContextAuxStreams(TensorRtApiLine line, SafeTensorRtObjectHandle context)
     {
-        EnsureTensorRt11DeploymentApi(line, nameof(ClearExecutionContextAuxStreams));
-        NativeStatus.ThrowIfFailed(NativeMethodsTensorRt.jyppx_trt11_execution_context_clear_aux_streams(context));
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_execution_context_clear_aux_streams(context),
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_execution_context_clear_aux_streams(context),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_execution_context_clear_aux_streams(context),
+            _ => throw UnsupportedLine()
+        };
+        NativeStatus.ThrowIfFailed(status);
     }
 
     public static bool SetExecutionContextUnfusedTensorsDebugState(TensorRtApiLine line, SafeTensorRtObjectHandle context, bool enabled)

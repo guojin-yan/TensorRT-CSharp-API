@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using JYPPX.Shared.Interop;
 using JYPPX.TensorRtSharp.Internal;
+using JYPPX.TensorRtSharp.Internal.Handles;
 using JYPPX.TensorRtSharp.Internal.Interop;
 
 namespace JYPPX.TensorRtSharp;
@@ -415,7 +416,18 @@ public sealed partial class TensorRtExecutionContext
     /// </summary>
     public void ClearAuxStreams()
     {
-        NativeBridgeApi.ClearExecutionContextAuxStreams(Line, _handle);
+        lock (_auxiliaryStreamLeaseLock)
+        {
+            ThrowIfAuxiliaryStreamContextDisposed();
+            NativeBridgeApi.ClearExecutionContextAuxStreams(Line, _handle);
+
+            TensorRtAuxiliaryStreamHandleLease? previousLease = _auxiliaryStreamLease;
+            _auxiliaryStreamLease = null;
+            _auxiliaryStreamAssignedCount = 0;
+            _auxiliaryStreamsCleared = true;
+            _auxiliaryStreamDiagnostic = "Caller-provided auxiliary CUDA streams are cleared; no managed handle lease is active.";
+            previousLease?.Dispose();
+        }
     }
 
     /// <summary>

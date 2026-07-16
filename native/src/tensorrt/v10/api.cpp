@@ -10656,6 +10656,13 @@ JYPPX_StatusCode jyppx_trt10_resize_layer_set_resize_mode(JYPPX_TensorRtLayer* l
 #include "modules/deployment/host_memory_metadata.inc"
 #include "modules/deployment/engine_profile_tensor_values.inc"
 #include "modules/context/deployment_context.inc"
+
+#define JYPPX_TRT_EXECUTION_CONTEXT_SET_AUX_STREAMS_API jyppx_trt10_execution_context_set_aux_streams
+#define JYPPX_TRT_EXECUTION_CONTEXT_CLEAR_AUX_STREAMS_API jyppx_trt10_execution_context_clear_aux_streams
+#include "../common/execution_context_auxiliary_streams.inc"
+#undef JYPPX_TRT_EXECUTION_CONTEXT_CLEAR_AUX_STREAMS_API
+#undef JYPPX_TRT_EXECUTION_CONTEXT_SET_AUX_STREAMS_API
+
 #define JYPPX_TRT_PLUGIN_PREFIX jyppx_trt10_
 #include "../common/plugin_registry_inventory.inc"
 #undef JYPPX_TRT_PLUGIN_PREFIX

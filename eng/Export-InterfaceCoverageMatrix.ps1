@@ -407,6 +407,7 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
     "IBuilderConfig::destroy" = @("id:*trt-object-destroy", "id:*builder-config-destroy-deferred")
     "ICudaEngine::destroy" = @("id:*trt-object-destroy", "id:*cuda-engine-destroy-deferred")
     "IExecutionContext::destroy" = @("id:*trt-object-destroy", "id:*execution-context-destroy-deferred")
+    "IExecutionContext::setAuxStreams" = @("id:*execution-context-set-aux-streams")
     "IBuilder::buildEngineWithConfig" = @("id:*builder-build-engine-with-config-owner-safe", "id:*builder-build-engine-with-config", "id:*builder-build-engine-with-config-deferred")
     "IGpuAllocator::free" = @("id:*gpu-allocator-free*")
     "IAlgorithm::getTimingMSec" = @("id:*algorithm-get-timing-msec*")
@@ -518,6 +519,7 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
 
   $deferredHistoryAliasMap = @{
     "Global::getBuilderPluginRegistry" = @("id:*global-get-builder-plugin-registry-deferred")
+    "IExecutionContext::setAuxStreams" = @("id:*execution-context-set-aux-streams-deferred")
     "IPluginRegistry::getBuilderSafePluginRegistry" = @("id:*plugin-registry-get-builder-safe-plugin-registry-deferred")
     "IPluginV2Ext::getTensorRTVersion" = @("id:*plugin-v2-ext-get-tensor-rt-version-deferred")
     "IPluginV2IOExt::getTensorRTVersion" = @("id:*plugin-v2-io-ext-get-tensor-rt-version-deferred")
@@ -612,6 +614,7 @@ function Find-MatchedManifestApis {
     "IEngineInspector::setErrorRecorder",
     "IExecutionContext::getErrorRecorder",
     "IExecutionContext::destroy",
+    "IExecutionContext::setAuxStreams",
     "IExecutionContext::setErrorRecorder",
     "INetworkDefinition::getErrorRecorder",
     "INetworkDefinition::setErrorRecorder",

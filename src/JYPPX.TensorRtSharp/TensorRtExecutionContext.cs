@@ -15,6 +15,12 @@ public sealed partial class TensorRtExecutionContext : IDisposable
 {
     private readonly SafeTensorRtObjectHandle _handle;
     private TensorRtProfiler? _profilerKeepAlive;
+    private readonly object _auxiliaryStreamLeaseLock = new object();
+    private TensorRtAuxiliaryStreamHandleLease? _auxiliaryStreamLease;
+    private int _auxiliaryStreamAssignedCount;
+    private bool _auxiliaryStreamsCleared = true;
+    private bool _auxiliaryStreamContextDisposed;
+    private string _auxiliaryStreamDiagnostic = "No caller-provided auxiliary CUDA streams are assigned.";
 
     internal TensorRtExecutionContext(TensorRtApiLine line, SafeTensorRtObjectHandle handle)
     {
@@ -318,16 +324,63 @@ public sealed partial class TensorRtExecutionContext : IDisposable
     /// </summary>
     public void Dispose()
     {
-        TensorRtProfiler? profiler = _profilerKeepAlive;
-        if (profiler != null)
+        TensorRtAuxiliaryStreamHandleLease? auxiliaryStreamLease;
+        lock (_auxiliaryStreamLeaseLock)
         {
-            TryClearProfilerForDispose();
+            if (_auxiliaryStreamContextDisposed)
+            {
+                return;
+            }
+
+            _auxiliaryStreamContextDisposed = true;
+            auxiliaryStreamLease = _auxiliaryStreamLease;
+            TryClearAuxStreamsForDispose();
+            _auxiliaryStreamLease = null;
+            _auxiliaryStreamAssignedCount = 0;
+            _auxiliaryStreamsCleared = true;
+            _auxiliaryStreamDiagnostic = "Execution context disposed; auxiliary stream leases were released after native context teardown.";
         }
 
-        _handle.Dispose();
-        GC.KeepAlive(profiler);
-        DetachProfiler();
-        GC.SuppressFinalize(this);
+        TensorRtProfiler? profiler = _profilerKeepAlive;
+        try
+        {
+            if (profiler != null)
+            {
+                TryClearProfilerForDispose();
+            }
+        }
+        finally
+        {
+            try
+            {
+                _handle.Dispose();
+                GC.KeepAlive(profiler);
+            }
+            finally
+            {
+                auxiliaryStreamLease?.Dispose();
+                DetachProfiler();
+                GC.SuppressFinalize(this);
+            }
+        }
+    }
+
+    private void TryClearAuxStreamsForDispose()
+    {
+        try
+        {
+            NativeBridgeApi.ClearExecutionContextAuxStreams(Line, _handle);
+        }
+        catch (Exception exception) when (
+            exception is BridgeProbeException ||
+            exception is TensorRtException ||
+            exception is EntryPointNotFoundException ||
+            exception is DllNotFoundException ||
+            exception is BadImageFormatException ||
+            exception is ObjectDisposedException)
+        {
+            // Keep any stream lease until after context teardown even when native clear is unavailable.
+        }
     }
 
     private void TryClearProfilerForDispose()

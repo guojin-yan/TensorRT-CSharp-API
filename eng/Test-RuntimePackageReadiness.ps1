@@ -346,6 +346,21 @@ function New-WrapperSurfaceCapabilityEvidence {
       )
     },
     [pscustomobject]@{
+      name = "execution-context-auxiliary-stream-lifetime"
+      categoryMarkers = @("execution-context-auxiliary-stream-lifetime")
+      requiredMarkers = @(
+        "TensorRtExecutionContext.SetAuxStreams",
+        "TensorRtExecutionContext.ClearAuxStreams",
+        "TensorRtExecutionContext.GetAuxiliaryStreamAssignmentSnapshot",
+        "TensorRtAuxiliaryStreamAssignmentSnapshot",
+        "TensorRtAuxiliaryStreamAssignmentSnapshot.AssignedStreamCount",
+        "TensorRtAuxiliaryStreamAssignmentSnapshot.IsCleared",
+        "TensorRtAuxiliaryStreamAssignmentSnapshot.ManagedHandleLeaseActive",
+        "TensorRtAuxiliaryStreamAssignmentSnapshot.NativeStreamPointerExposed",
+        "TensorRtAuxiliaryStreamAssignmentSnapshot.BorrowedHandleEscaped"
+      )
+    },
+    [pscustomobject]@{
       name = "rnnv2-borrowed-state-design-gate"
       categoryMarkers = @("rnnv2-borrowed-state-design-gate")
       requiredMarkers = @(
@@ -721,6 +736,7 @@ function New-WrapperSurfaceCapabilityEvidence {
     hasOnnxParserDiagnosticReadiness = [bool]$groupStatus["onnx-parser-diagnostic-readiness"]
     hasOnnxParserRefitterDiagnosticReadiness = [bool]$groupStatus["onnx-parser-refitter-diagnostic-readiness"]
     hasEngineRnnReadonlyDiagnostics = [bool]$groupStatus["engine-rnn-readonly-diagnostics"]
+    hasExecutionContextAuxiliaryStreamLifetime = [bool]$groupStatus["execution-context-auxiliary-stream-lifetime"]
     hasManagedCallbacks = [bool]$groupStatus["managed-callbacks"]
     hasCallbackDiagnostics = [bool]$groupStatus["callback-diagnostics"]
     hasCallbackApiLanguageSafeControls = [bool]$groupStatus["callback-api-language-safe-controls"]
@@ -8073,6 +8089,7 @@ function Write-ReadinessReports {
     $lines.Add("- bridge consumer plugin inventory field metadata: $($result.bridgeConsumer.wrapperSurfaceCapabilities.hasPluginInventoryFieldMetadata); marker=``plugin-inventory-field-metadata``; evidence-kind=compile-surface-proof; runtime-evidence=copied-plugin-field-metadata; proof=false")
     $lines.Add("- bridge consumer onnx parser diagnostics: $($result.bridgeConsumer.wrapperSurfaceCapabilities.hasOnnxParserDiagnosticReadiness); marker=``onnx-parser-diagnostic-readiness``; evidence-kind=compile-surface-proof; runtime-evidence=copied-parser-diagnostics; proof=false")
     $lines.Add("- bridge consumer onnx parser-refitter diagnostics: $($result.bridgeConsumer.wrapperSurfaceCapabilities.hasOnnxParserRefitterDiagnosticReadiness); marker=``onnx-parser-refitter-diagnostic-readiness``; evidence-kind=compile-surface-proof; runtime-evidence=copied-parser-refitter-diagnostics; proof=false")
+    $lines.Add("- bridge consumer execution-context auxiliary stream lifetime: $($result.bridgeConsumer.wrapperSurfaceCapabilities.hasExecutionContextAuxiliaryStreamLifetime); marker=``execution-context-auxiliary-stream-lifetime``; evidence-kind=compile-surface-proof; runtime-evidence=managed-safehandle-lease; proof=false")
     $lines.Add("- bridge consumer callback api-language safe controls: $($result.bridgeConsumer.wrapperSurfaceCapabilities.hasCallbackApiLanguageSafeControls); marker=``callback-api-language-safe-controls``; evidence-kind=compile-surface-proof; runtime-evidence=scalar-copy-api-language; proof=false")
     $lines.Add("- bridge consumer callback allocator safe-control summary: $($result.bridgeConsumer.wrapperSurfaceCapabilities.hasExecutionContextCallbackAllocatorSafeControlSummary); marker=``execution-context-callback-allocator-safe-control-summary``; evidence-kind=compile-surface-proof; runtime-evidence=copied-interface-info-safe-controls; proof=false")
     $lines.Add("- error recorder diagnostics design gate: $($result.errorRecorderDiagnosticsDesignGate.status); marker=``$($result.errorRecorderDiagnosticsDesignGate.marker)``; evidence-kind=$($result.errorRecorderDiagnosticsDesignGate.evidenceKind); runtime-evidence=$($result.errorRecorderDiagnosticsDesignGate.runtimeEvidenceKind); runtime-execution=$($result.errorRecorderDiagnosticsDesignGate.isRuntimeExecutionEvidence); proof=$($result.errorRecorderDiagnosticsDesignGate.isRuntimeExecutionProof); runtime-blocked=$($result.errorRecorderDiagnosticsDesignGate.runtimeProofBlocked); deferred-rows=$($result.errorRecorderDiagnosticsDesignGate.hasDeferredRowEvidence)")

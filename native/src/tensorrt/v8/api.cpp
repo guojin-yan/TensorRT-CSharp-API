@@ -9665,6 +9665,12 @@ JYPPX_StatusCode jyppx_trt8_execution_context_get_shape_binding(
 #include "modules/context/legacy_shape_binding_setter.inc"
 #include "modules/layers/rnn_v2_setters.inc"
 
+#define JYPPX_TRT_EXECUTION_CONTEXT_SET_AUX_STREAMS_API jyppx_trt8_execution_context_set_aux_streams
+#define JYPPX_TRT_EXECUTION_CONTEXT_CLEAR_AUX_STREAMS_API jyppx_trt8_execution_context_clear_aux_streams
+#include "../common/execution_context_auxiliary_streams.inc"
+#undef JYPPX_TRT_EXECUTION_CONTEXT_CLEAR_AUX_STREAMS_API
+#undef JYPPX_TRT_EXECUTION_CONTEXT_SET_AUX_STREAMS_API
+
 #define JYPPX_TRT_DIRECT_ENGINE_BUILD_API jyppx_trt8_builder_build_engine_with_config
 #define JYPPX_TRT_DIRECT_ENGINE_DESTROY destroy_engine_payload
 #include "../common/direct_engine_build.inc"

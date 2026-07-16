@@ -2,6 +2,8 @@
   href: index.md
 - name: Latest Windows API Status
   href: articles/zh-cn/windows-api-completion-latest.md
+- name: Execution Context Auxiliary Stream Lifetime
+  href: articles/zh-cn/execution-context-auxiliary-stream-lifetime.md
 # Release proof boundary: canPublishPublicly=false; canCloseReleaseIssue=false; navigation entries are not proof.
 # DebugListener runtime proof attempt marker index:
 # debug-listener-runtime-proof-attempt-preflight
@@ -210,12 +212,12 @@
     href: articles/zh-cn/external-model-evidence-case-study.md
   - name: Sample Evidence Ladder
     href: articles/zh-cn/sample-evidence-ladder.md
-- name: OnnxToEngine And TensorRtExec Boundary
-  href: articles/zh-cn/onnxtoengine-and-tensorrtexec-boundary.md
-- name: OnnxToEngine Trtexec Proof Boundary
-  href: articles/zh-cn/onnx-to-engine-trtexec-proof-boundary.md
-- name: Tool Report To Release Proof Record
-  href: articles/zh-cn/tool-report-to-release-proof-record.md
+  - name: OnnxToEngine And TensorRtExec Boundary
+    href: articles/zh-cn/onnxtoengine-and-tensorrtexec-boundary.md
+  - name: OnnxToEngine Trtexec Proof Boundary
+    href: articles/zh-cn/onnx-to-engine-trtexec-proof-boundary.md
+  - name: Tool Report To Release Proof Record
+    href: articles/zh-cn/tool-report-to-release-proof-record.md
   - name: Stale Claim Prepublish Audit
     href: articles/zh-cn/stale-claim-prepublish-audit.md
   - name: Publish Final Mile Checklist
@@ -248,21 +250,21 @@
     href: articles/zh-cn/yolovision-obb-angle-output-guide.md
   - name: TensorRtExec WinForms Screenshot Walkthrough
     href: articles/zh-cn/tensorrtexec-winforms-screenshot-walkthrough.md
-- name: TensorRtExec Report Schema Guide
-  href: articles/zh-cn/tensorrtexec-report-schema-guide.md
-- name: TensorRtExec Report Proof Boundary
-  href: articles/zh-cn/tensorrtexec-report-proof-boundary.md
-- name: Runtime Package Windows Linux Install FAQ
+  - name: TensorRtExec Report Schema Guide
+    href: articles/zh-cn/tensorrtexec-report-schema-guide.md
+  - name: TensorRtExec Report Proof Boundary
+    href: articles/zh-cn/tensorrtexec-report-proof-boundary.md
+  - name: Runtime Package Windows Linux Install FAQ
     href: articles/zh-cn/runtime-package-windows-linux-install-faq.md
   - name: Plugin Registry Inventory User Guide
     href: articles/zh-cn/plugin-registry-inventory-user-guide.md
   - name: Deferred Readonly API Upgrade Playbook
     href: articles/zh-cn/deferred-readonly-api-upgrade-playbook.md
-- name: CSharp Wrapper Lifetime Design
-  href: articles/zh-cn/csharp-wrapper-lifetime-design.md
-- name: Callback Allocator Listener Readonly Safety Gates
-  href: articles/zh-cn/callback-allocator-listener-readonly-safety-gates.md
-- name: Release Evidence Non Substitute Guide
+  - name: CSharp Wrapper Lifetime Design
+    href: articles/zh-cn/csharp-wrapper-lifetime-design.md
+  - name: Callback Allocator Listener Readonly Safety Gates
+    href: articles/zh-cn/callback-allocator-listener-readonly-safety-gates.md
+  - name: Release Evidence Non Substitute Guide
     href: articles/zh-cn/release-evidence-non-substitute-guide.md
   - name: Project Roadmap To Public Release
     href: articles/zh-cn/project-roadmap-to-public-release.md

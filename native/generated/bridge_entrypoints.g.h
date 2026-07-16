@@ -2899,6 +2899,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_all_input_dimensions
 // generated from manifest id=trt10-execution-context-all-input-shapes-specified
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_all_input_shapes_specified(JYPPX_TensorRtExecutionContext* context, JYPPX_Boolean* out_specified);
 
+// generated from manifest id=trt10-execution-context-clear-aux-streams
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_clear_aux_streams(JYPPX_TensorRtExecutionContext* context);
+
 // generated from manifest id=trt10-execution-context-clear-profiler
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_clear_profiler(JYPPX_TensorRtExecutionContext* context);
 
@@ -2985,6 +2988,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_report_to_profiler(J
 
 // generated from manifest id=trt10-execution-context-set-all-tensors-debug-state
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_set_all_tensors_debug_state(JYPPX_TensorRtExecutionContext* context, JYPPX_Boolean debug_state);
+
+// generated from manifest id=trt10-execution-context-set-aux-streams
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_set_aux_streams(JYPPX_TensorRtExecutionContext* context, JYPPX_CudaStream** streams, int32_t stream_count);
 
 // generated from manifest id=trt10-execution-context-set-aux-streams-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_set_aux_streams_deferred(void);
@@ -9748,6 +9754,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt8_execution_context_all_input_dimensions_
 // generated from manifest id=trt8-execution-context-all-input-shapes-specified
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_execution_context_all_input_shapes_specified(JYPPX_TensorRtExecutionContext* context, JYPPX_Boolean* out_specified);
 
+// generated from manifest id=trt8-execution-context-clear-aux-streams
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_execution_context_clear_aux_streams(JYPPX_TensorRtExecutionContext* context);
+
 // generated from manifest id=trt8-execution-context-clear-profiler
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_execution_context_clear_profiler(JYPPX_TensorRtExecutionContext* context);
 
@@ -9834,6 +9843,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt8_execution_context_report_to_profiler(JY
 
 // generated from manifest id=trt8-execution-context-set-all-tensors-debug-state
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_execution_context_set_all_tensors_debug_state(JYPPX_TensorRtExecutionContext* context, JYPPX_Boolean debug_state);
+
+// generated from manifest id=trt8-execution-context-set-aux-streams
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_execution_context_set_aux_streams(JYPPX_TensorRtExecutionContext* context, JYPPX_CudaStream** streams, int32_t stream_count);
 
 // generated from manifest id=trt8-execution-context-set-aux-streams-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_execution_context_set_aux_streams_deferred(void);

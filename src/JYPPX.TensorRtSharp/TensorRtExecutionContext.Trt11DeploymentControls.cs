@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using JYPPX.CudaSharp;
 using JYPPX.CudaSharp.Internal.Handles;
+using JYPPX.TensorRtSharp.Internal.Handles;
 using JYPPX.TensorRtSharp.Internal.Interop;
 
 namespace JYPPX.TensorRtSharp;
@@ -81,12 +82,12 @@ public sealed partial class TensorRtExecutionContext
     }
 
     /// <summary>
-    /// Sets auxiliary CUDA streams used by TensorRT 11 during inference.
-    /// 设置 TensorRT 11 推理阶段使用的辅助 CUDA stream。
+    /// Sets auxiliary CUDA streams used by TensorRT 8, 10, or 11 during inference.
+    /// 设置 TensorRT 8、10 或 11 推理阶段使用的辅助 CUDA stream。
     /// </summary>
     /// <param name="streams">
-    /// Auxiliary streams that must remain alive while the context may use them.
-    /// 在 context 可能使用期间必须保持存活的辅助 stream。
+    /// Caller-owned auxiliary streams. The context keeps their native handles alive while TensorRT may borrow them.
+    /// 调用方拥有的辅助 stream；在 TensorRT 可能借用期间，context 会保持其 native handle 存活。
     /// </param>
     /// <remarks>
     /// Passing an empty collection clears user-provided auxiliary streams. TensorRT may still use its default internal behavior.
@@ -97,6 +98,12 @@ public sealed partial class TensorRtExecutionContext
         if (streams == null)
         {
             throw new ArgumentNullException(nameof(streams));
+        }
+
+        if (streams.Count == 0)
+        {
+            ClearAuxStreams();
+            return;
         }
 
         SafeCudaStreamHandle[] handles = new SafeCudaStreamHandle[streams.Count];
@@ -111,12 +118,32 @@ public sealed partial class TensorRtExecutionContext
             handles[i] = stream.Handle;
         }
 
-        NativeBridgeApi.SetExecutionContextAuxStreams(Line, _handle, handles);
+        TensorRtAuxiliaryStreamHandleLease? pendingLease = TensorRtAuxiliaryStreamHandleLease.Create(handles);
+        try
+        {
+            lock (_auxiliaryStreamLeaseLock)
+            {
+                ThrowIfAuxiliaryStreamContextDisposed();
+                NativeBridgeApi.SetExecutionContextAuxStreams(Line, _handle, pendingLease.Handles);
+
+                TensorRtAuxiliaryStreamHandleLease? previousLease = _auxiliaryStreamLease;
+                _auxiliaryStreamLease = pendingLease;
+                pendingLease = null;
+                _auxiliaryStreamAssignedCount = handles.Length;
+                _auxiliaryStreamsCleared = false;
+                _auxiliaryStreamDiagnostic = $"{handles.Length} caller-provided auxiliary CUDA stream handle lease(s) are active.";
+                previousLease?.Dispose();
+            }
+        }
+        finally
+        {
+            pendingLease?.Dispose();
+        }
     }
 
     /// <summary>
-    /// Sets auxiliary CUDA streams used by TensorRT 11 during inference.
-    /// 设置 TensorRT 11 推理阶段使用的辅助 CUDA stream。
+    /// Sets auxiliary CUDA streams used by TensorRT 8, 10, or 11 during inference.
+    /// 设置 TensorRT 8、10 或 11 推理阶段使用的辅助 CUDA stream。
     /// </summary>
     /// <param name="streams">Auxiliary CUDA streams. 辅助 CUDA stream。</param>
     public void SetAuxStreams(params CudaStream[] streams)
@@ -127,5 +154,30 @@ public sealed partial class TensorRtExecutionContext
         }
 
         SetAuxStreams((IReadOnlyList<CudaStream>)streams);
+    }
+
+    /// <summary>
+    /// Gets a pointer-free snapshot of auxiliary-stream assignment and managed handle-lease state.
+    /// 获取不含指针的辅助 stream 分配与托管 handle lease 状态快照。
+    /// </summary>
+    public TensorRtAuxiliaryStreamAssignmentSnapshot GetAuxiliaryStreamAssignmentSnapshot()
+    {
+        lock (_auxiliaryStreamLeaseLock)
+        {
+            return new TensorRtAuxiliaryStreamAssignmentSnapshot(
+                Line,
+                _auxiliaryStreamAssignedCount,
+                _auxiliaryStreamsCleared,
+                _auxiliaryStreamLease != null,
+                _auxiliaryStreamDiagnostic);
+        }
+    }
+
+    private void ThrowIfAuxiliaryStreamContextDisposed()
+    {
+        if (_auxiliaryStreamContextDisposed || _handle.IsClosed || _handle.IsInvalid)
+        {
+            throw new ObjectDisposedException(nameof(TensorRtExecutionContext));
+        }
     }
 }

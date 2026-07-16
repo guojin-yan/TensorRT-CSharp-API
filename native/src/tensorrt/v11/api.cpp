@@ -8275,6 +8275,13 @@ JYPPX_StatusCode jyppx_trt11_tensor_reset_dynamic_range(JYPPX_TensorRtTensor*)
 #undef JYPPX_TRT_EXECUTION_CONTEXT_CALLBACK_STATE_API
 #include "modules/deployment/fourteenth_batch_controls.inc"
 #include "modules/deployment/fifteenth_batch_controls.inc"
+
+#define JYPPX_TRT_EXECUTION_CONTEXT_SET_AUX_STREAMS_API jyppx_trt11_execution_context_set_aux_streams
+#define JYPPX_TRT_EXECUTION_CONTEXT_CLEAR_AUX_STREAMS_API jyppx_trt11_execution_context_clear_aux_streams
+#include "../common/execution_context_auxiliary_streams.inc"
+#undef JYPPX_TRT_EXECUTION_CONTEXT_CLEAR_AUX_STREAMS_API
+#undef JYPPX_TRT_EXECUTION_CONTEXT_SET_AUX_STREAMS_API
+
 #define JYPPX_TRT_PLUGIN_PREFIX jyppx_trt11_
 #include "../common/plugin_registry_inventory.inc"
 #undef JYPPX_TRT_PLUGIN_PREFIX

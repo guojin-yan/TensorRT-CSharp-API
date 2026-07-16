@@ -966,6 +966,7 @@
 #define JYPPX_API_TRT10_ERROR_RECORDER_INC_REF_COUNT_DEFERRED "jyppx_trt10_error_recorder_inc_ref_count_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_EXECUTION_CONTEXT_ALL_INPUT_DIMENSIONS_SPECIFIED "jyppx_trt10_execution_context_all_input_dimensions_specified" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_EXECUTION_CONTEXT_ALL_INPUT_SHAPES_SPECIFIED "jyppx_trt10_execution_context_all_input_shapes_specified" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT10_EXECUTION_CONTEXT_CLEAR_AUX_STREAMS "jyppx_trt10_execution_context_clear_aux_streams" // module=tensorrt; line=10; ownership=context-owned; manualOverride=false
 #define JYPPX_API_TRT10_EXECUTION_CONTEXT_CLEAR_PROFILER "jyppx_trt10_execution_context_clear_profiler" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_EXECUTION_CONTEXT_DEBUG_LISTENER_GET_API_LANGUAGE "jyppx_trt10_execution_context_get_debug_listener_api_language" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_EXECUTION_CONTEXT_DEBUG_LISTENER_GET_INTERFACE_INFO "jyppx_trt10_execution_context_get_debug_listener_interface_info" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
@@ -995,6 +996,7 @@
 #define JYPPX_API_TRT10_EXECUTION_CONTEXT_OUTPUT_ALLOCATOR_GET_INTERFACE_INFO "jyppx_trt10_execution_context_get_output_allocator_interface_info" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_EXECUTION_CONTEXT_REPORT_TO_PROFILER "jyppx_trt10_execution_context_report_to_profiler" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_EXECUTION_CONTEXT_SET_ALL_TENSORS_DEBUG_STATE "jyppx_trt10_execution_context_set_all_tensors_debug_state" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT10_EXECUTION_CONTEXT_SET_AUX_STREAMS "jyppx_trt10_execution_context_set_aux_streams" // module=tensorrt; line=10; ownership=context-owned; manualOverride=false
 #define JYPPX_API_TRT10_EXECUTION_CONTEXT_SET_AUX_STREAMS_DEFERRED "jyppx_trt10_execution_context_set_aux_streams_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_EXECUTION_CONTEXT_SET_DEBUG_LISTENER_DEFERRED "jyppx_trt10_execution_context_set_debug_listener_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_EXECUTION_CONTEXT_SET_DEBUG_SYNC "jyppx_trt10_execution_context_set_debug_sync" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
@@ -3249,6 +3251,7 @@
 #define JYPPX_API_TRT8_ERROR_RECORDER_INC_REF_COUNT_DEFERRED "jyppx_trt8_error_recorder_inc_ref_count_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_EXECUTION_CONTEXT_ALL_INPUT_DIMENSIONS_SPECIFIED "jyppx_trt8_execution_context_all_input_dimensions_specified" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_EXECUTION_CONTEXT_ALL_INPUT_SHAPES_SPECIFIED "jyppx_trt8_execution_context_all_input_shapes_specified" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT8_EXECUTION_CONTEXT_CLEAR_AUX_STREAMS "jyppx_trt8_execution_context_clear_aux_streams" // module=tensorrt; line=8; ownership=context-owned; manualOverride=false
 #define JYPPX_API_TRT8_EXECUTION_CONTEXT_CLEAR_PROFILER "jyppx_trt8_execution_context_clear_profiler" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_EXECUTION_CONTEXT_DESTROY_DEFERRED "jyppx_trt8_execution_context_destroy_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_EXECUTION_CONTEXT_ENQUEUE_ASYNC "jyppx_trt8_execution_context_enqueue_async" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
@@ -3278,6 +3281,7 @@
 #define JYPPX_API_TRT8_EXECUTION_CONTEXT_NO_COPY_DEFERRED "jyppx_trt8_execution_context_no_copy_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_EXECUTION_CONTEXT_REPORT_TO_PROFILER "jyppx_trt8_execution_context_report_to_profiler" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_EXECUTION_CONTEXT_SET_ALL_TENSORS_DEBUG_STATE "jyppx_trt8_execution_context_set_all_tensors_debug_state" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT8_EXECUTION_CONTEXT_SET_AUX_STREAMS "jyppx_trt8_execution_context_set_aux_streams" // module=tensorrt; line=8; ownership=context-owned; manualOverride=false
 #define JYPPX_API_TRT8_EXECUTION_CONTEXT_SET_AUX_STREAMS_DEFERRED "jyppx_trt8_execution_context_set_aux_streams_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_EXECUTION_CONTEXT_SET_BINDING_DIMENSIONS "jyppx_trt8_execution_context_set_binding_dimensions" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_EXECUTION_CONTEXT_SET_DEBUG_SYNC "jyppx_trt8_execution_context_set_debug_sync" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false

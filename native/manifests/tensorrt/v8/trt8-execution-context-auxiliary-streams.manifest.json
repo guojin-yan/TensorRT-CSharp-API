@@ -1,0 +1,31 @@
+{
+  "$schema": "../../bridge-api.schema.json",
+  "module": "tensorrt",
+  "versionLine": "8",
+  "apis": [
+    {
+      "id": "trt8-execution-context-set-aux-streams",
+      "entryPoint": "jyppx_trt8_execution_context_set_aux_streams",
+      "returnType": "BridgeStatusCode",
+      "ownership": "context-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8 && JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "context", "type": "JYPPX_TensorRtExecutionContext*", "direction": "in" },
+        { "name": "streams", "type": "JYPPX_CudaStream**", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "stream_count", "type": "int32_t", "direction": "in" }
+      ]
+    },
+    {
+      "id": "trt8-execution-context-clear-aux-streams",
+      "entryPoint": "jyppx_trt8_execution_context_clear_aux_streams",
+      "returnType": "BridgeStatusCode",
+      "ownership": "context-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "context", "type": "JYPPX_TensorRtExecutionContext*", "direction": "in" }
+      ]
+    }
+  ]
+}

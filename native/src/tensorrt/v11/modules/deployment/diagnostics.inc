@@ -937,20 +937,6 @@ JYPPX_StatusCode jyppx_trt11_execution_context_get_nvtx_verbosity(JYPPX_TensorRt
 #endif
 }
 
-JYPPX_StatusCode jyppx_trt11_execution_context_clear_aux_streams(JYPPX_TensorRtExecutionContext* context)
-{
-#if JYPPX_HAS_TENSORRT
-    nvinfer1::IExecutionContext* context_payload = nullptr;
-    auto status = get_context_payload_ext(context, &context_payload, "execution context auxiliary stream clear");
-    if (status != JYPPX_STATUS_OK) { return status; }
-    context_payload->setAuxStreams(nullptr, 0);
-    return JYPPX_STATUS_OK;
-#else
-    (void)context;
-    return jyppx::tensorrt::report_vendor_missing(kLine, "execution context auxiliary stream clear");
-#endif
-}
-
 JYPPX_StatusCode jyppx_trt11_execution_context_set_unfused_tensors_debug_state(JYPPX_TensorRtExecutionContext* context, JYPPX_Boolean debug_state, JYPPX_Boolean* out_set)
 {
     auto status = jyppx::tensorrt::validate_output_pointer(out_set, "out_set");
