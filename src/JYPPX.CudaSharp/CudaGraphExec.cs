@@ -193,6 +193,38 @@ public sealed class CudaGraphExec : IDisposable
     }
 
     /// <summary>
+    /// Replaces the parameters of a child-graph node using a managed graph owner.
+    /// 使用托管 graph owner 替换 child-graph 节点参数。
+    /// </summary>
+    /// <param name="node">A child-graph node token from the source graph. 源 graph 中的 child-graph 节点 token。</param>
+    /// <param name="childGraph">The graph supplying replacement parameters. 提供替换参数的 graph。</param>
+    public void SetChildGraphNodeParameters(CudaGraphNode node, CudaGraph childGraph)
+    {
+        if (childGraph == null)
+        {
+            throw new ArgumentNullException(nameof(childGraph));
+        }
+
+        NativeCudaApi.SetGraphExecChildGraphNodeParameters(_handle, node, childGraph.Handle);
+    }
+
+    /// <summary>
+    /// Attempts to update this executable graph and returns copied result metadata.
+    /// 尝试更新当前 executable graph，并返回复制出的结果元数据。
+    /// </summary>
+    /// <param name="graph">The graph containing updated parameters. 包含更新参数的 graph。</param>
+    /// <returns>A pointer-free update snapshot. 不含指针的更新快照。</returns>
+    public CudaGraphExecUpdateSnapshot Update(CudaGraph graph)
+    {
+        if (graph == null)
+        {
+            throw new ArgumentNullException(nameof(graph));
+        }
+
+        return NativeCudaApi.UpdateGraphExec(_handle, graph.Handle);
+    }
+
+    /// <summary>
     /// Uploads this executable graph to a CUDA stream before launch.
     /// 在 launch 前将当前可执行 graph 上传到 CUDA stream。
     /// </summary>

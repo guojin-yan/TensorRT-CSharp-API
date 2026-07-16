@@ -1,0 +1,198 @@
+{
+  "$schema": "../bridge-api.schema.json",
+  "module": "cuda",
+  "versionLine": "common",
+  "apis": [
+    {
+      "id": "cuda-graph-add-child-graph-node-safe",
+      "entryPoint": "jyppx_cuda_graph_add_child_graph_node_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "graph", "type": "JYPPX_CudaGraph*", "direction": "in" },
+        { "name": "child_graph", "type": "JYPPX_CudaGraph*", "direction": "in" },
+        { "name": "out_node", "type": "uintptr_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" }
+      ]
+    },
+    {
+      "id": "cuda-graph-add-child-graph-node-after-safe",
+      "entryPoint": "jyppx_cuda_graph_add_child_graph_node_after_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "graph", "type": "JYPPX_CudaGraph*", "direction": "in" },
+        { "name": "dependency_node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "child_graph", "type": "JYPPX_CudaGraph*", "direction": "in" },
+        { "name": "out_node", "type": "uintptr_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" }
+      ]
+    },
+    {
+      "id": "cuda-graph-child-graph-node-has-embedded-graph-safe",
+      "entryPoint": "jyppx_cuda_graph_child_graph_node_has_embedded_graph_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_has_graph", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "cuda-graph-child-graph-node-get-node-count-safe",
+      "entryPoint": "jyppx_cuda_graph_child_graph_node_get_node_count_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_count", "type": "size_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" }
+      ]
+    },
+    {
+      "id": "cuda-graph-child-graph-node-get-root-node-count-safe",
+      "entryPoint": "jyppx_cuda_graph_child_graph_node_get_root_node_count_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_count", "type": "size_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" }
+      ]
+    },
+    {
+      "id": "cuda-graph-child-graph-node-get-edge-count-safe",
+      "entryPoint": "jyppx_cuda_graph_child_graph_node_get_edge_count_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_count", "type": "size_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" }
+      ]
+    },
+    {
+      "id": "cuda-graph-exec-child-graph-node-set-params-safe",
+      "entryPoint": "jyppx_cuda_graph_exec_child_graph_node_set_params_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "graph_exec", "type": "JYPPX_CudaGraphExec*", "direction": "in" },
+        { "name": "node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "child_graph", "type": "JYPPX_CudaGraph*", "direction": "in" }
+      ]
+    },
+    {
+      "id": "cuda-graph-exec-update-copied-metadata-safe",
+      "entryPoint": "jyppx_cuda_graph_exec_update_copied_metadata_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "graph_exec", "type": "JYPPX_CudaGraphExec*", "direction": "in" },
+        { "name": "graph", "type": "JYPPX_CudaGraph*", "direction": "in" },
+        { "name": "out_result", "type": "int32_t*", "direction": "out" },
+        { "name": "out_has_error_node", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" },
+        { "name": "out_error_node_type", "type": "int32_t*", "direction": "out" },
+        { "name": "out_has_error_from_node", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" },
+        { "name": "out_error_from_node_type", "type": "int32_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "cuda-graph-instantiate-with-params-safe",
+      "entryPoint": "jyppx_cuda_graph_instantiate_with_params_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "bridge-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT && CUDART_VERSION >= 12000",
+      "parameters": [
+        { "name": "graph", "type": "JYPPX_CudaGraph*", "direction": "in" },
+        { "name": "flags", "type": "uint64_t", "direction": "in", "managedType": "ulong", "moduleManagedType": "ulong" },
+        { "name": "out_graph_exec", "type": "JYPPX_CudaGraphExec**", "direction": "out" },
+        { "name": "out_result", "type": "int32_t*", "direction": "out" },
+        { "name": "out_has_error_node", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" },
+        { "name": "out_error_node_type", "type": "int32_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "cuda-graph-instantiate-with-params-on-stream-safe",
+      "entryPoint": "jyppx_cuda_graph_instantiate_with_params_on_stream_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "bridge-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT && CUDART_VERSION >= 12000",
+      "parameters": [
+        { "name": "graph", "type": "JYPPX_CudaGraph*", "direction": "in" },
+        { "name": "flags", "type": "uint64_t", "direction": "in", "managedType": "ulong", "moduleManagedType": "ulong" },
+        { "name": "upload_stream", "type": "JYPPX_CudaStream*", "direction": "in" },
+        { "name": "out_graph_exec", "type": "JYPPX_CudaGraphExec**", "direction": "out" },
+        { "name": "out_result", "type": "int32_t*", "direction": "out" },
+        { "name": "out_has_error_node", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" },
+        { "name": "out_error_node_type", "type": "int32_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "cuda-graph-kernel-node-copy-attributes-safe",
+      "entryPoint": "jyppx_cuda_graph_kernel_node_copy_attributes_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "destination_node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "source_node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" }
+      ]
+    },
+    {
+      "id": "cuda-logs-current-cursor-safe",
+      "entryPoint": "jyppx_cuda_logs_get_current_cursor_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT && CUDART_VERSION >= 13020",
+      "parameters": [
+        { "name": "out_iterator", "type": "uint32_t*", "direction": "out", "managedType": "out uint", "moduleManagedType": "out uint" }
+      ]
+    },
+    {
+      "id": "cuda-logs-dump-to-memory-caller-buffer-safe",
+      "entryPoint": "jyppx_cuda_logs_dump_to_memory_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT && CUDART_VERSION >= 13020",
+      "parameters": [
+        { "name": "use_iterator", "type": "JYPPX_Boolean", "direction": "in", "managedType": "int", "moduleManagedType": "int" },
+        { "name": "iterator", "type": "uint32_t", "direction": "in", "managedType": "uint", "moduleManagedType": "uint" },
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_written_size", "type": "size_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" },
+        { "name": "out_next_iterator", "type": "uint32_t*", "direction": "out", "managedType": "out uint", "moduleManagedType": "out uint" }
+      ]
+    },
+    {
+      "id": "cuda-logs-dump-to-file-safe",
+      "entryPoint": "jyppx_cuda_logs_dump_to_file_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT && CUDART_VERSION >= 13020",
+      "parameters": [
+        { "name": "use_iterator", "type": "JYPPX_Boolean", "direction": "in", "managedType": "int", "moduleManagedType": "int" },
+        { "name": "iterator", "type": "uint32_t", "direction": "in", "managedType": "uint", "moduleManagedType": "uint" },
+        { "name": "path", "type": "const char*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "out_next_iterator", "type": "uint32_t*", "direction": "out", "managedType": "out uint", "moduleManagedType": "out uint" }
+      ]
+    }
+  ]
+}

@@ -1160,8 +1160,65 @@ function Get-CudaCandidates {
   return @($candidates | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)
 }
 
+function Find-ExplicitCudaManifestApis {
+  param([object[]]$ManifestApis, [string]$FunctionName)
+
+  $aliasMap = @{
+    "cudaGraphAddChildGraphNode" = @("id:cuda-graph-add-child-graph-node*-safe")
+    "cudaGraphChildGraphNodeGetGraph" = @("id:cuda-graph-child-graph-node-*-safe")
+    "cudaGraphExecChildGraphNodeSetParams" = @("id:cuda-graph-exec-child-graph-node-set-params-safe")
+    "cudaGraphExecUpdate" = @("id:cuda-graph-exec-update-copied-metadata-safe")
+    "cudaGraphInstantiateWithParams" = @("id:cuda-graph-instantiate-with-params*-safe")
+    "cudaGraphKernelNodeCopyAttributes" = @("id:cuda-graph-kernel-node-copy-attributes-safe")
+    "cudaGraphNodeGetContainingGraph" = @("id:*graph-node-is-in-graph-safe")
+    "cudaLogsCurrent" = @("id:cuda-logs-current-cursor-safe")
+    "cudaLogsDumpToMemory" = @("id:cuda-logs-dump-to-memory-caller-buffer-safe")
+    "cudaLogsDumpToFile" = @("id:cuda-logs-dump-to-file-safe")
+  }
+  $deferredHistoryAliasMap = @{
+    "cudaGraphAddChildGraphNode" = @("id:*cuda-graph-add-child-graph-node-deferred")
+    "cudaGraphChildGraphNodeGetGraph" = @("id:*cuda-graph-child-graph-node-get-graph-deferred")
+    "cudaGraphExecChildGraphNodeSetParams" = @("id:*cuda-graph-exec-child-graph-node-set-params-deferred")
+    "cudaGraphExecUpdate" = @("id:*cuda-graph-exec-update-deferred")
+    "cudaGraphInstantiateWithParams" = @("id:*cuda-graph-instantiate-with-params-deferred")
+    "cudaGraphKernelNodeCopyAttributes" = @("id:*cuda-graph-kernel-node-copy-attributes-deferred")
+    "cudaGraphNodeGetContainingGraph" = @("id:*graph-node-get-containing-graph-deferred")
+    "cudaLogsCurrent" = @("id:*logs-current-deferred")
+    "cudaLogsDumpToMemory" = @("id:*logs-dump-to-memory-deferred")
+    "cudaLogsDumpToFile" = @("id:*logs-dump-to-file-deferred")
+  }
+
+  if (-not $aliasMap.ContainsKey($FunctionName)) {
+    return @()
+  }
+
+  $aliases = @($aliasMap[$FunctionName])
+  if ($deferredHistoryAliasMap.ContainsKey($FunctionName)) {
+    $aliases += @($deferredHistoryAliasMap[$FunctionName])
+  }
+
+  $matches = New-Object System.Collections.Generic.List[object]
+  foreach ($api in $ManifestApis) {
+    if ($api.Module -ne "cuda") { continue }
+    foreach ($alias in $aliases) {
+      $idPattern = $alias.Substring(3)
+      if ($api.Id -like $idPattern) {
+        $matches.Add($api) | Out-Null
+        break
+      }
+    }
+  }
+
+  return @($matches | Sort-Object EntryPoint -Unique)
+}
+
 function Find-CudaManifestApis {
   param([object[]]$ManifestApis, [string]$FunctionName)
+
+  $explicitMatches = @(Find-ExplicitCudaManifestApis $ManifestApis $FunctionName)
+  if ($explicitMatches.Count -gt 0) {
+    return $explicitMatches
+  }
 
   $candidates = Get-CudaCandidates $FunctionName
   $matches = New-Object System.Collections.Generic.List[object]

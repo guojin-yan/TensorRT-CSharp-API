@@ -80,6 +80,7 @@ internal static class Program
         string eventNodeState = ProbeGraphEventNodes();
         string memcpy1DNodeState = ProbeGraphMemcpy1D(source, destination, device, ByteCount);
         string typedDescriptorState = ProbeGraphNodeParamsTypedDescriptors(source, destination, device, ByteCount);
+        string childGraphUpdateState = ProbeChildGraphUpdate(stream);
         using CudaGraphExec topologyExec = topologyGraph.Instantiate();
         string topologyNodeEnabledState = "Unsupported";
         string topologyExecNodeSnapshotState = "Unsupported";
@@ -139,7 +140,7 @@ internal static class Program
 
         Console.WriteLine($"CudaGraphCaptureRoundTrip=True Bytes={ByteCount} Capture={captureBefore.Status}->{captureDuring.Status}->{captureAfter.Status} CaptureId={captureDuring.CaptureId} Nodes={graph.NodeCount} Roots={graph.RootNodeCount} Edges={graph.EdgeCount} CloneNodes={graphClone.NodeCount} ExecFlags={graphExecFlagsState} EventElapsedMilliseconds={elapsedMilliseconds:0.###}");
         Console.WriteLine($"CudaGraphCapturedTopology Node0={capturedNode} Root0={capturedRootNode} CloneNode0={capturedCloneNode} NodeType={capturedNodeType} NodeDeps={capturedNodeDependencies} NodeDependents={capturedNodeDependents} MemsetParams={capturedMemsetParamsState} Edge0={capturedEdge?.ToString() ?? "None"}");
-        Console.WriteLine($"CudaGraphManualTopology Nodes={topologyGraph.NodeCount} Roots={topologyGraph.RootNodeCount} Edges={topologyGraph.EdgeCount} ChildDeps={topologyChildDependencyCount} RootDependents={topologyRootDependentCount} EdgeData={topologyEdgeDataState} DebugDot={topologyDebugDotState} EventNodes={eventNodeState} Memcpy1D={memcpy1DNodeState} NodeParamsDescriptor={typedDescriptorState} NodeEnabled={topologyNodeEnabledState} GraphId={topologyGraphIdState} ExecId={topologyExecIdState} NodeIdentity={topologyNodeIdentityState}");
+        Console.WriteLine($"CudaGraphManualTopology Nodes={topologyGraph.NodeCount} Roots={topologyGraph.RootNodeCount} Edges={topologyGraph.EdgeCount} ChildDeps={topologyChildDependencyCount} RootDependents={topologyRootDependentCount} EdgeData={topologyEdgeDataState} DebugDot={topologyDebugDotState} EventNodes={eventNodeState} Memcpy1D={memcpy1DNodeState} NodeParamsDescriptor={typedDescriptorState} ChildGraphUpdate={childGraphUpdateState} NodeEnabled={topologyNodeEnabledState} GraphId={topologyGraphIdState} ExecId={topologyExecIdState} NodeIdentity={topologyNodeIdentityState}");
         Console.WriteLine($"CudaGraphSnapshots GraphSnapshot=[{topologySnapshot}] RootNodeSnapshot=[{topologyRootSnapshot}] ChildNodeSnapshot=[{topologyChildSnapshot}] ExecNodeSnapshot=[{topologyExecNodeSnapshotState}]");
         Console.WriteLine($"CudaGraphSnapshotLists {topologySnapshotListState}");
         Console.WriteLine($"CudaGraphMemory {graphMemoryState}");
@@ -420,6 +421,54 @@ internal static class Program
             }
 
             return $"Kinds={emptyDescriptor.DescriptorKind}/{eventRecordDescriptor.DescriptorKind}/{eventWaitDescriptor.DescriptorKind}/{memcpyDescriptor.DescriptorKind}/{memcpyDeviceDescriptor.MemcpyKind} Bytes={memcpyDescriptor.ByteCount} Borrowed={memcpyDescriptor.HasBorrowedHandleExposure}";
+        }
+        catch (CudaException exception)
+        {
+            return $"Skipped:{exception.Message}";
+        }
+    }
+
+    static string ProbeChildGraphUpdate(CudaStream uploadStream)
+    {
+        try
+        {
+            using CudaGraph childGraph = CudaGraph.Create();
+            CudaGraphNode childRoot = childGraph.AddEmptyNode();
+            childGraph.AddEmptyNodeAfter(childRoot);
+
+            using CudaGraph parentGraph = CudaGraph.Create();
+            CudaGraphNode parentRoot = parentGraph.AddEmptyNode();
+            CudaGraphNode childNode = parentGraph.AddChildGraphNodeAfter(parentRoot, childGraph);
+            CudaGraphChildSnapshot snapshot = parentGraph.GetChildGraphSnapshot(childNode);
+            if (!snapshot.HasEmbeddedGraph || snapshot.NodeCount != 2 || snapshot.RootNodeCount != 1 || snapshot.EdgeCount != 1)
+            {
+                throw new InvalidOperationException("CUDA embedded child graph snapshot returned unexpected topology.");
+            }
+
+            using CudaGraphExec graphExec = parentGraph.Instantiate();
+            using CudaGraph replacementChild = CudaGraph.Create();
+            CudaGraphNode replacementRoot = replacementChild.AddEmptyNode();
+            replacementChild.AddEmptyNodeAfter(replacementRoot);
+            graphExec.SetChildGraphNodeParameters(childNode, replacementChild);
+            CudaGraphExecUpdateSnapshot updateSnapshot = graphExec.Update(parentGraph);
+            if (!updateSnapshot.Succeeded)
+            {
+                throw new InvalidOperationException($"CUDA executable graph update failed: {updateSnapshot}");
+            }
+
+            string parameterizedState;
+            try
+            {
+                using CudaGraphExec parameterized = parentGraph.InstantiateWithParameters();
+                using CudaGraphExec uploaded = parentGraph.InstantiateWithParameters(uploadStream, flags: 2);
+                parameterizedState = $"Default=True Upload=True Flags={uploaded.Flags}";
+            }
+            catch (CudaException exception)
+            {
+                parameterizedState = $"Skipped:{exception.Message}";
+            }
+
+            return $"Snapshot=[{snapshot}] Update=[{updateSnapshot}] Parameterized={parameterizedState}";
         }
         catch (CudaException exception)
         {

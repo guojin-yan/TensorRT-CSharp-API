@@ -65,11 +65,12 @@ public sealed class CudaGraphBorrowedHandleSafetyGateTests
 
         Assert.DoesNotContain("public IntPtr", publicSurface);
         Assert.DoesNotContain("public nint", publicSurface);
-        Assert.DoesNotContain("GetChildGraph", publicSurface);
+        Assert.DoesNotContain("public CudaGraph GetChildGraph", publicSurface);
         Assert.DoesNotContain("GetContainingGraph", publicSurface);
         Assert.DoesNotContain("GetEvent(CudaGraphNode", publicSurface);
         Assert.DoesNotContain("GetParams(CudaGraphNode", publicSurface);
         Assert.Contains("ContainsNode(CudaGraphNode node)", graph);
+        Assert.Contains("GetChildGraphSnapshot(CudaGraphNode node)", graph);
         Assert.Contains("internal UIntPtr Token", graphNode);
     }
 

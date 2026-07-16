@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using JYPPX.CudaSharp;
 
@@ -661,6 +662,7 @@ internal static class Program
         float[] pinnedFloatRoundTrip = pinnedFloatDestination.ToSingleArray(pinnedFloatSourceValues.Length);
         bool pinnedFloatAsyncRoundTripOk = pinnedFloatSourceValues.SequenceEqual(pinnedFloatRoundTrip);
         Console.WriteLine($"PinnedFloatAsyncRoundTrip={pinnedFloatAsyncRoundTripOk}");
+        Console.WriteLine($"CudaRuntimeLogs {ProbeCudaRuntimeLogs()}");
         int finalCudaError = CudaDevice.GetLastErrorCode();
         Console.WriteLine($"CudaGetLastError={finalCudaError}:{CudaDevice.GetErrorName(finalCudaError)}:{CudaDevice.GetErrorString(finalCudaError)}");
         }
@@ -675,6 +677,38 @@ internal static class Program
         catch (BadImageFormatException exception)
         {
             Console.WriteLine($"Skipped=True Reason=BadImageFormatException:{exception.Message}");
+        }
+    }
+
+    private static string ProbeCudaRuntimeLogs()
+    {
+        try
+        {
+            CudaLogCursor cursor = CudaRuntimeLogs.GetCurrentCursor();
+            CudaLogSnapshot allLogs = CudaRuntimeLogs.DumpToMemory();
+            CudaLogSnapshot incrementalLogs = CudaRuntimeLogs.DumpToMemory(cursor);
+            if (!incrementalLogs.NextCursor.HasValue)
+            {
+                throw new InvalidOperationException("CUDA cursor-based log dump did not return an advanced cursor.");
+            }
+
+            string path = Path.Combine(Path.GetTempPath(), $"jyppx-cuda-logs-{Guid.NewGuid():N}.log");
+            try
+            {
+                CudaLogCursor nextCursor = CudaRuntimeLogs.DumpToFile(cursor, path);
+                return $"AllBytes={allLogs.BytesWritten} IncrementalBytes={incrementalLogs.BytesWritten} Cursor={cursor}->{nextCursor} FileExists={File.Exists(path)}";
+            }
+            finally
+            {
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
+            }
+        }
+        catch (CudaException exception)
+        {
+            return $"Skipped:{exception.Message}";
         }
     }
 }

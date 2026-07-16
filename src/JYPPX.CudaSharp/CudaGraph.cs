@@ -67,6 +67,39 @@ public sealed class CudaGraph : IDisposable
     }
 
     /// <summary>
+    /// Adds a child-graph node containing a clone of another managed CUDA graph.
+    /// 添加一个包含另一托管 CUDA graph 克隆的 child-graph 节点。
+    /// </summary>
+    /// <param name="childGraph">The graph copied into the new node. 复制到新节点中的 graph。</param>
+    /// <returns>A graph-owned child node token. 由当前 graph 拥有的 child node token。</returns>
+    public CudaGraphNode AddChildGraphNode(CudaGraph childGraph)
+    {
+        if (childGraph == null)
+        {
+            throw new ArgumentNullException(nameof(childGraph));
+        }
+
+        return NativeCudaApi.AddGraphChildGraphNode(_handle, childGraph.Handle);
+    }
+
+    /// <summary>
+    /// Adds a child-graph node after an existing dependency node.
+    /// 在现有依赖节点之后添加 child-graph 节点。
+    /// </summary>
+    /// <param name="dependencyNode">The dependency node. 依赖节点。</param>
+    /// <param name="childGraph">The graph copied into the new node. 复制到新节点中的 graph。</param>
+    /// <returns>A graph-owned child node token. 由当前 graph 拥有的 child node token。</returns>
+    public CudaGraphNode AddChildGraphNodeAfter(CudaGraphNode dependencyNode, CudaGraph childGraph)
+    {
+        if (childGraph == null)
+        {
+            throw new ArgumentNullException(nameof(childGraph));
+        }
+
+        return NativeCudaApi.AddGraphChildGraphNodeAfter(_handle, dependencyNode, childGraph.Handle);
+    }
+
+    /// <summary>
     /// Adds an empty node to this graph.
     /// 向当前 graph 添加一个空节点。
     /// </summary>
@@ -507,6 +540,17 @@ public sealed class CudaGraph : IDisposable
     }
 
     /// <summary>
+    /// Gets copied topology metadata for the embedded graph of a child-graph node.
+    /// 获取 child-graph 节点中 embedded graph 的复制型拓扑元数据。
+    /// </summary>
+    /// <param name="node">A child-graph node token. Child-graph 节点 token。</param>
+    /// <returns>A scalar-only embedded graph snapshot. 仅包含标量的 embedded graph 快照。</returns>
+    public CudaGraphChildSnapshot GetChildGraphSnapshot(CudaGraphNode node)
+    {
+        return NativeCudaApi.GetGraphChildSnapshot(node);
+    }
+
+    /// <summary>
     /// Gets the CUDA graph node type for a graph-owned node token.
     /// 获取 graph-owned node token 的 CUDA graph node 类型。
     /// </summary>
@@ -678,6 +722,17 @@ public sealed class CudaGraph : IDisposable
     {
         ValidateKernelNodeAttribute(attribute, nameof(attribute));
         return NativeCudaApi.GetGraphKernelNodeAttribute(node, attribute);
+    }
+
+    /// <summary>
+    /// Copies CUDA kernel-node attributes from one graph-owned node to another.
+    /// 将 CUDA kernel node attribute 从一个 graph-owned 节点复制到另一个节点。
+    /// </summary>
+    /// <param name="destinationNode">The destination kernel node. 目标 kernel 节点。</param>
+    /// <param name="sourceNode">The source kernel node. 源 kernel 节点。</param>
+    public static void CopyKernelNodeAttributes(CudaGraphNode destinationNode, CudaGraphNode sourceNode)
+    {
+        NativeCudaApi.CopyGraphKernelNodeAttributes(destinationNode, sourceNode);
     }
 
     /// <summary>
@@ -1062,6 +1117,34 @@ public sealed class CudaGraph : IDisposable
     public CudaGraphExec Instantiate(ulong flags = 0)
     {
         return new CudaGraphExec(NativeCudaApi.InstantiateGraph(_handle, flags));
+    }
+
+    /// <summary>
+    /// Instantiates this graph through CUDA's parameterized instantiation API.
+    /// 通过 CUDA 参数化实例化 API 将当前 graph 实例化。
+    /// </summary>
+    /// <param name="flags">CUDA graph instantiation flags. CUDA graph 实例化标志。</param>
+    /// <returns>A managed executable graph. 托管 executable graph。</returns>
+    public CudaGraphExec InstantiateWithParameters(ulong flags = 0)
+    {
+        return new CudaGraphExec(NativeCudaApi.InstantiateGraphWithParameters(_handle, flags));
+    }
+
+    /// <summary>
+    /// Instantiates and uploads this graph through CUDA's parameterized instantiation API.
+    /// 通过 CUDA 参数化实例化 API 实例化并上传当前 graph。
+    /// </summary>
+    /// <param name="uploadStream">The managed stream used for upload. 用于 upload 的托管 stream。</param>
+    /// <param name="flags">CUDA graph instantiation flags. CUDA graph 实例化标志。</param>
+    /// <returns>A managed executable graph. 托管 executable graph。</returns>
+    public CudaGraphExec InstantiateWithParameters(CudaStream uploadStream, ulong flags = 0)
+    {
+        if (uploadStream == null)
+        {
+            throw new ArgumentNullException(nameof(uploadStream));
+        }
+
+        return new CudaGraphExec(NativeCudaApi.InstantiateGraphWithParameters(_handle, flags, uploadStream.Handle));
     }
 
     internal static void ValidateDeviceMemory(CudaMemory memory, string parameterName)

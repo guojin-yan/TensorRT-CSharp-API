@@ -544,6 +544,12 @@ JYPPX_C_API(BridgeStatusCode) jyppx_cuda_get_texture_object_texture_desc_deferre
 // generated from manifest id=cuda-get-texture-object-texture-desc-v2-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_get_texture_object_texture_desc_v2_deferred(void);
 
+// generated from manifest id=cuda-graph-add-child-graph-node-after-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_add_child_graph_node_after_safe(JYPPX_CudaGraph* graph, uintptr_t dependency_node, JYPPX_CudaGraph* child_graph, uintptr_t* out_node);
+
+// generated from manifest id=cuda-graph-add-child-graph-node-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_add_child_graph_node_safe(JYPPX_CudaGraph* graph, JYPPX_CudaGraph* child_graph, uintptr_t* out_node);
+
 // generated from manifest id=cuda-graph-add-dependency-safe
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_add_dependency_safe(JYPPX_CudaGraph* graph, uintptr_t from_node, uintptr_t to_node);
 
@@ -571,6 +577,18 @@ JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_add_memcpy_node_1d_device_to_host
 // generated from manifest id=cuda-graph-add-memcpy-node-1d-host-to-device-safe
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_add_memcpy_node_1d_host_to_device_safe(JYPPX_CudaGraph* graph, uintptr_t dependency_node, JYPPX_CudaMemory* destination, JYPPX_CudaPinnedMemory* source, size_t count, uintptr_t* out_node);
 
+// generated from manifest id=cuda-graph-child-graph-node-get-edge-count-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_child_graph_node_get_edge_count_safe(uintptr_t node, size_t* out_count);
+
+// generated from manifest id=cuda-graph-child-graph-node-get-node-count-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_child_graph_node_get_node_count_safe(uintptr_t node, size_t* out_count);
+
+// generated from manifest id=cuda-graph-child-graph-node-get-root-node-count-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_child_graph_node_get_root_node_count_safe(uintptr_t node, size_t* out_count);
+
+// generated from manifest id=cuda-graph-child-graph-node-has-embedded-graph-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_child_graph_node_has_embedded_graph_safe(uintptr_t node, JYPPX_Boolean* out_has_graph);
+
 // generated from manifest id=cuda-graph-clone
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_clone(JYPPX_CudaGraph* graph, JYPPX_CudaGraph** out_clone);
 
@@ -594,6 +612,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_event_wait_node_has_event_safe(ui
 
 // generated from manifest id=cuda-graph-event-wait-node-set-event-safe
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_event_wait_node_set_event_safe(uintptr_t node, JYPPX_CudaEvent* event_handle);
+
+// generated from manifest id=cuda-graph-exec-child-graph-node-set-params-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_exec_child_graph_node_set_params_safe(JYPPX_CudaGraphExec* graph_exec, uintptr_t node, JYPPX_CudaGraph* child_graph);
 
 // generated from manifest id=cuda-graph-exec-destroy
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_exec_destroy(JYPPX_CudaGraphExec* graph_exec);
@@ -627,6 +648,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_exec_node_get_enabled_safe(JYPPX_
 
 // generated from manifest id=cuda-graph-exec-node-set-enabled-safe
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_exec_node_set_enabled_safe(JYPPX_CudaGraphExec* graph_exec, uintptr_t node, JYPPX_Boolean enabled);
+
+// generated from manifest id=cuda-graph-exec-update-copied-metadata-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_exec_update_copied_metadata_safe(JYPPX_CudaGraphExec* graph_exec, JYPPX_CudaGraph* graph, int32_t* out_result, JYPPX_Boolean* out_has_error_node, int32_t* out_error_node_type, JYPPX_Boolean* out_has_error_from_node, int32_t* out_error_from_node_type);
 
 // generated from manifest id=cuda-graph-exec-upload
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_exec_upload(JYPPX_CudaGraphExec* graph_exec, JYPPX_CudaStream* stream);
@@ -672,6 +696,15 @@ JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_instantiate(JYPPX_CudaGraph* grap
 
 // generated from manifest id=cuda-graph-instantiate-with-flags-official-token-alias
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_instantiate_with_flags(JYPPX_CudaGraph* graph, uint64_t flags, JYPPX_CudaGraphExec** out_graph_exec);
+
+// generated from manifest id=cuda-graph-instantiate-with-params-on-stream-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_instantiate_with_params_on_stream_safe(JYPPX_CudaGraph* graph, uint64_t flags, JYPPX_CudaStream* upload_stream, JYPPX_CudaGraphExec** out_graph_exec, int32_t* out_result, JYPPX_Boolean* out_has_error_node, int32_t* out_error_node_type);
+
+// generated from manifest id=cuda-graph-instantiate-with-params-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_instantiate_with_params_safe(JYPPX_CudaGraph* graph, uint64_t flags, JYPPX_CudaGraphExec** out_graph_exec, int32_t* out_result, JYPPX_Boolean* out_has_error_node, int32_t* out_error_node_type);
+
+// generated from manifest id=cuda-graph-kernel-node-copy-attributes-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_kernel_node_copy_attributes_safe(uintptr_t destination_node, uintptr_t source_node);
 
 // generated from manifest id=cuda-graph-kernel-node-get-attribute-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_kernel_node_get_attribute_deferred(void);
@@ -883,11 +916,20 @@ JYPPX_C_API(BridgeStatusCode) jyppx_cuda_library_load_from_file_deferred(void);
 // generated from manifest id=cuda-library-unload-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_library_unload_deferred(void);
 
+// generated from manifest id=cuda-logs-current-cursor-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_logs_get_current_cursor_safe(uint32_t* out_iterator);
+
 // generated from manifest id=cuda-logs-current-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_logs_current_deferred(void);
 
 // generated from manifest id=cuda-logs-dump-to-file-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_logs_dump_to_file_deferred(void);
+
+// generated from manifest id=cuda-logs-dump-to-file-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_logs_dump_to_file_safe(JYPPX_Boolean use_iterator, uint32_t iterator, const char* path, uint32_t* out_next_iterator);
+
+// generated from manifest id=cuda-logs-dump-to-memory-caller-buffer-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_logs_dump_to_memory_safe(JYPPX_Boolean use_iterator, uint32_t iterator, char* output_buffer, size_t output_buffer_size, size_t* out_written_size, uint32_t* out_next_iterator);
 
 // generated from manifest id=cuda-logs-dump-to-memory-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_logs_dump_to_memory_deferred(void);

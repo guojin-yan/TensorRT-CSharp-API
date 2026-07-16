@@ -251,6 +251,10 @@ $script:ManagedPackageFreshnessRequiredMarkers = @(
   "CallbackInvocationAttempted",
   "CudaGraphDiagnosticSummary",
   "CudaGraphExecDiagnosticSummary",
+  "CudaGraphChildSnapshot",
+  "CudaGraphExecUpdateSnapshot",
+  "CudaRuntimeLogs",
+  "CudaLogSnapshot",
   "CudaDevice.GetGraphMemorySummary",
   "CudaDevice.CurrentGraphMemorySummary",
   "CudaDeviceGraphMemorySummary",
@@ -2554,6 +2558,26 @@ static class HighLevelWrapperSurfaceProbe
             static snapshot => snapshot.ToSummary();
         Func<CudaGraphExecDiagnosticSummary, string> graphExecDiagnosticSummaryText =
             static summary => summary.CopiedNodeStateCount + ":" + summary.SnapshotsWithNodeTokenCount + ":" + summary.RuntimeEvidenceKind + ":" + summary.IsRuntimeExecutionEvidence + ":" + summary.IsRuntimeExecutionProof + ":" + summary.PointerFreeCopiedSummary + ":" + summary.CanPromoteRuntimeProof + ":" + summary.CanPromoteReleaseProof + ":" + summary.CanDeleteDeferredRecord;
+        Func<CudaGraph, CudaGraph, CudaGraphNode> addChildGraphNode =
+            static (graph, childGraph) => graph.AddChildGraphNode(childGraph);
+        Func<CudaGraph, CudaGraphNode, CudaGraphChildSnapshot> childGraphSnapshot =
+            static (graph, node) => graph.GetChildGraphSnapshot(node);
+        Action<CudaGraphNode, CudaGraphNode> copyKernelNodeAttributes =
+            static (destination, source) => CudaGraph.CopyKernelNodeAttributes(destination, source);
+        Func<CudaGraph, CudaGraphExec> instantiateGraphWithParameters =
+            static graph => graph.InstantiateWithParameters();
+        Func<CudaGraph, CudaStream, CudaGraphExec> instantiateGraphWithParametersOnStream =
+            static (graph, stream) => graph.InstantiateWithParameters(stream, flags: 2);
+        Action<CudaGraphExec, CudaGraphNode, CudaGraph> setChildGraphNodeParameters =
+            static (graphExec, node, childGraph) => graphExec.SetChildGraphNodeParameters(node, childGraph);
+        Func<CudaGraphExec, CudaGraph, CudaGraphExecUpdateSnapshot> updateGraphExec =
+            static (graphExec, graph) => graphExec.Update(graph);
+        Func<CudaLogCursor> currentCudaLogCursor = static () => CudaRuntimeLogs.GetCurrentCursor();
+        Func<CudaLogSnapshot> dumpCudaLogs = static () => CudaRuntimeLogs.DumpToMemory();
+        Func<CudaLogCursor, CudaLogSnapshot> dumpCudaLogsFromCursor =
+            static cursor => CudaRuntimeLogs.DumpToMemory(cursor);
+        Func<CudaLogCursor, string, CudaLogCursor> dumpCudaLogsToFile =
+            static (cursor, path) => CudaRuntimeLogs.DumpToFile(cursor, path);
         Func<CudaDeviceGraphMemoryInfo, CudaDeviceGraphMemorySummary> deviceGraphMemorySummary =
             static info => info.ToSummary();
         Func<CudaDeviceGraphMemorySummary, string> deviceGraphMemorySummaryText =
@@ -2783,6 +2807,17 @@ static class HighLevelWrapperSurfaceProbe
         _ = graphDiagnosticSummaryText;
         _ = graphExecDiagnosticSummary;
         _ = graphExecDiagnosticSummaryText;
+        _ = addChildGraphNode;
+        _ = childGraphSnapshot;
+        _ = copyKernelNodeAttributes;
+        _ = instantiateGraphWithParameters;
+        _ = instantiateGraphWithParametersOnStream;
+        _ = setChildGraphNodeParameters;
+        _ = updateGraphExec;
+        _ = currentCudaLogCursor;
+        _ = dumpCudaLogs;
+        _ = dumpCudaLogsFromCursor;
+        _ = dumpCudaLogsToFile;
         _ = deviceGraphMemorySummary;
         _ = deviceGraphMemorySummaryText;
         _ = getDeviceGraphMemorySummary;
@@ -4280,6 +4315,24 @@ static class HighLevelWrapperSurfaceProbe
             nameof(CudaGraphExecDiagnosticSummary.CanPromoteReleaseProof),
             nameof(CudaGraphExecDiagnosticSummary.CanPromoteRuntimeProof),
             nameof(CudaGraphExecDiagnosticSummary.CanDeleteDeferredRecord),
+            nameof(CudaGraph.AddChildGraphNode),
+            nameof(CudaGraph.AddChildGraphNodeAfter),
+            nameof(CudaGraph.GetChildGraphSnapshot),
+            nameof(CudaGraph.CopyKernelNodeAttributes),
+            nameof(CudaGraph.InstantiateWithParameters),
+            nameof(CudaGraphChildSnapshot),
+            nameof(CudaGraphChildSnapshot.HasEmbeddedGraph),
+            nameof(CudaGraphExec.SetChildGraphNodeParameters),
+            nameof(CudaGraphExec.Update),
+            nameof(CudaGraphExecUpdateSnapshot),
+            nameof(CudaGraphExecUpdateSnapshot.Succeeded),
+            nameof(CudaRuntimeLogs),
+            nameof(CudaRuntimeLogs.GetCurrentCursor),
+            nameof(CudaRuntimeLogs.DumpToMemory),
+            nameof(CudaRuntimeLogs.DumpToFile),
+            nameof(CudaLogCursor),
+            nameof(CudaLogSnapshot),
+            nameof(CudaLogSnapshot.NextCursor),
             nameof(CudaDevice.GetGraphMemorySummary),
             nameof(CudaDevice.CurrentGraphMemorySummary),
             nameof(CudaDeviceGraphMemoryInfo),

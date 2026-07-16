@@ -19,6 +19,63 @@
 - `artifacts/real-case/multi-version-onnx-runtime/multi-version-runtime-evidence-matrix.json`
 - `artifacts/test-analysis/project-quality-test-inventory.json`
 
+## 2026-07-17 CUDA Child Graph、Exec Update 与 Runtime Logs 安全提升复审
+
+本阶段基于起始提交 `2dfab034c9df29567782ddb0fe0500b53f672f28`，新增 14 个 CUDA 安全 entry，覆盖 child graph 创建与 copied topology、graph exec child 参数更新、exec update copied failure metadata、parameterized instantiate、kernel attribute copy 和 CUDA 13.2 runtime logs。旧 deferred manifest 全部保留，coverage 先匹配显式真实 alias，再合并 deferred history，不以删除历史记录改变统计。
+
+### 实现与安全边界
+
+- `CudaGraph.AddChildGraphNode/After` 返回 graph-owned node token；embedded child graph 只在 native 调用栈内读取并复制为 `CudaGraphChildSnapshot`，不会向 public API 逃逸 borrowed graph handle。
+- `CudaGraphExec.Update` 在 `cudaErrorGraphExecUpdateFailure` 下保留 result、error node type 与 error-from node type，返回 `CudaGraphExecUpdateSnapshot`，不丢弃 vendor 失败元数据，也不暴露 node pointer。
+- `CudaGraph.InstantiateWithParameters` 支持默认与 upload stream overload；成功后返回 bridge-owned `CudaGraphExec`，失败路径不泄漏 executable graph。
+- `CopyKernelNodeAttributes` 已按 CUDA ABI 的 source、destination 顺序调用，并以 destination、source 的托管签名保持调用意图清晰。
+- `CudaRuntimeLogs` 使用 typed `CudaLogCursor`、caller-buffer memory dump 与 UTF-8 file path；buffer 上限为 25,600 bytes，返回 `CudaLogSnapshot`，不公开原生 iterator pointer。
+- `get_cuda_child_graph` 整体位于 `JYPPX_HAS_CUDA_TOOLKIT` guard；parameterized instantiate 与 logs 分别使用 CUDA 12.0、13.2 version guard，TRT8/TRT10/TRT11 构建树保持独立。
+- public API 未暴露 `IntPtr`、`nint`、`SafeHandle`、`UIntPtr`、device pointer、plugin pointer、tensor pointer 或 borrowed graph object。callback 注册、device/resource acquire/release 与 ownership 不明确的 pointer 继续 deferred。
+
+### Coverage、构建与测试
+
+generator 最终为 173 manifests / 3873 records。最终 CUDA coverage：
+
+| CUDA Toolkit | 官方函数 | manifest/source 已匹配 | 非 deferred 实现 | deferred-only |
+| --- | ---: | ---: | ---: | ---: |
+| 11.6 | 268 | 268 | 193 | 75 |
+| 11.8 | 273 | 273 | 196 | 77 |
+| 12.1 | 277 | 277 | 200 | 77 |
+| 12.3 | 292 | 292 | 207 | 85 |
+| 12.9 | 307 | 307 | 209 | 98 |
+| 13.2 | 330 | 330 | 218 | 112 |
+
+`cudaGraphAddChildGraphNode`、`cudaGraphChildGraphNodeGetGraph`、`cudaGraphExecChildGraphNodeSetParams`、`cudaGraphExecUpdate`、`cudaGraphInstantiateWithParams`、`cudaGraphKernelNodeCopyAttributes`、`cudaGraphNodeGetContainingGraph`、`cudaLogsCurrent`、`cudaLogsDumpToMemory` 与 `cudaLogsDumpToFile` 均为 `implemented-with-deferred-history`。`Find-ExplicitCudaManifestApis` 的 matcher 顺序与旧 deferred 保留均有防回归断言。
+
+- bindings 生成与幂等：通过，173 manifests / 3873 records。
+- 完整 solution Debug build：0 warning / 0 error。
+- native：TRT8/CUDA11、TRT8/CUDA12.1、TRT10/CUDA12.9、TRT11/CUDA13.2 全部成功。额外 `win-x64-dev` preset 只在既有 TensorRT stub `validate_profile_selector`、`get_payload`、`create_handle_with_payload` 失败，与本批 CUDA 文件无关，未扩散修改。
+- 新增专项：11/11；受影响 ProjectQuality 分片：67/67；release candidate package inventory 独立串行复核：3/3。
+- 完整 ProjectQuality 曾启动，但多个既有测试并行写同一 `artifacts/final-release` canonical 文件，引发 `File.Replace`/`Get-Content` 文件锁和状态串线；进程已终止，该运行不记为完整通过。受影响分片、package inventory 与 strict gate 均已串行通过。
+
+### Runtime Smoke、NuGet 与 Consumer
+
+- TRT10 CUDA graph smoke：child snapshot 为 `Nodes=2 / Roots=1 / Edges=1`，exec update 为 `Success`，parameterized instantiate 默认与 upload stream overload 均成功。
+- CUDA smoke：常规路径成功；CUDA 12.9 logs 按版本 guard 正确记录 `Skipped`，不冒充 CUDA 13.2 runtime log proof。
+- TRT8/TRT10 Plugin Registry 与 NetworkBuilder 全部通过；NetworkBuilder 均为 `Enqueue=True / OutputMatch=True`。
+- TRT8 InferenceBindings 的 ExecuteV2/EnqueueV2/EnqueueV3、TRT10 ExecuteV2/EnqueueV3 均为 `OutputMatch=True`。
+- managed 4.0.0 与 TRT8/TRT10/TRT11 三个 bridge-only 4.0.0 本地包已重打；三个纯 `PackageReference` consumer 均无 `ProjectReference`，restore/build 为 0 warning / 0 error，`RuntimeExecutionProof=False`。
+- 为恢复 release inventory 的完整 split 集合，TRT11/CUDA13.2 额外顺序重打 full runtime 与 Bridge/CudaCudnn/TensorRt/meta 四角色 split 包；这仍是本地 package inventory，不是公开渠道 proof。
+
+| 包 | 大小 | SHA256 |
+| --- | ---: | --- |
+| managed `JYPPX.TensorRT.CSharp.API.4.0.0.nupkg` | 14,323,665 bytes | `6197F92ACFE427A7E7147F2E1D30CD3F10C7046A2433A76ECED9275E455644FB` |
+| TRT8/CUDA12.1 bridge-only | 293,806 bytes | `482779E341F6D081051DCB712A864C93C097F28125037E53E7E12EF1482B70EB` |
+| TRT10/CUDA12.9 bridge-only | 316,932 bytes | `5F009E88D3EEDA6139950C01E930F310F312D5CDA1612567E173E4D6660DF940` |
+| TRT11/CUDA13.2 bridge-only | 259,084 bytes | `CFEA46FD0BB22A52C99D63D66464A0D2F394E946C8979CEFDFC5C76924539C4B` |
+
+### Gate 与发布边界
+
+strict classification audit 为 `FindingCount=0`；strict release quality gate 为 `release-quality-gate-passed`、required failure 0。Owner convergence 继续为 accepted 0/9、gates 2/3、validation failed blockers 0，`canPublishPublicly=false`、`canCloseReleaseIssue=false`。`git diff --check` 通过，仅有既有 CRLF/LF 转换提示。
+
+本阶段未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
+
 ## 2026-07-17 ONNX Config 生命周期与 Coverage 收敛复审
 
 本阶段基于提交 `ec4a2976d6c017353034140f514c45f0db9819c2`，完成三版本 `Global::createONNXConfig` 真实实现优先收敛，并将 TRT8 `IOnnxConfig::destroy` 映射到通用 bridge-owned object destroy。旧 deferred manifest 全部保留，coverage 通过显式 alias 优先选择真实 entry，再合并 deferred history，不以删除历史记录改变统计。
