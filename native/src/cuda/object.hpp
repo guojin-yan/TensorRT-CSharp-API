@@ -26,7 +26,8 @@ enum class ObjectKind : uint32_t
     MipmappedArray = 9,
     TextureObject = 10,
     SurfaceObject = 11,
-    KernelLibrary = 12
+    KernelLibrary = 12,
+    ExecutionContext = 13
 };
 
 struct ObjectBase
@@ -157,6 +158,18 @@ struct KernelLibraryObject
     std::vector<uint8_t> retained_code;
 };
 
+struct ExecutionContextObject
+{
+    ObjectBase base;
+    int32_t device_ordinal;
+    bool is_primary;
+#if JYPPX_HAS_CUDA_TOOLKIT && defined(CUDART_VERSION) && CUDART_VERSION >= 13000
+    cudaExecutionContext_t handle;
+#else
+    void* handle;
+#endif
+};
+
 constexpr uint32_t kObjectMagic = 0x4A595043U;
 
 JYPPX_StatusCode validate_output_pointer(void* pointer, const char* name);
@@ -172,6 +185,7 @@ JYPPX_StatusCode validate_mipmapped_array(const JYPPX_CudaMipmappedArray* array,
 JYPPX_StatusCode validate_texture_object(const JYPPX_CudaTextureObject* texture, const char* name);
 JYPPX_StatusCode validate_surface_object(const JYPPX_CudaSurfaceObject* surface, const char* name);
 JYPPX_StatusCode validate_kernel_library(const JYPPX_CudaKernelLibrary* library, const char* name);
+JYPPX_StatusCode validate_execution_context(const JYPPX_CudaExecutionContext* context, const char* name);
 
 void set_cuda_error(const char* operation, int32_t error_code, const char* error_name, const char* error_message);
 

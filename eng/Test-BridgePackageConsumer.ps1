@@ -2610,6 +2610,15 @@ static class HighLevelWrapperSurfaceProbe
         Func<CudaKernelLibrary, CudaKernelLibraryInventorySnapshot> kernelLibraryInventory = static library => library.Inventory;
         Func<CudaKernelLibrary, string, bool> kernelLibraryContains = static (library, name) => library.ContainsKernel(name);
         Action<CudaKernelLibrary> disposeKernelLibrary = static library => library.Dispose();
+        Func<int, CudaPrimaryExecutionContext> getPrimaryExecutionContext = static device => CudaDevice.GetPrimaryExecutionContext(device);
+        Func<CudaPrimaryExecutionContext, bool> primaryExecutionContextIsPrimary = static context => context.IsPrimary;
+        Func<CudaPrimaryExecutionContext, int> primaryExecutionContextDevice = static context => context.DeviceOrdinal;
+        Func<CudaPrimaryExecutionContext, ulong> primaryExecutionContextId = static context => context.Id;
+        Func<CudaPrimaryExecutionContext, CudaStream> createPrimaryExecutionContextStream = static context => context.CreateStream(CudaStreamCreationFlags.NonBlocking);
+        Action<CudaPrimaryExecutionContext, CudaEvent> recordPrimaryExecutionContextEvent = static (context, cudaEvent) => context.RecordEvent(cudaEvent);
+        Action<CudaPrimaryExecutionContext, CudaEvent> waitPrimaryExecutionContextEvent = static (context, cudaEvent) => context.WaitEvent(cudaEvent);
+        Action<CudaPrimaryExecutionContext> synchronizePrimaryExecutionContext = static context => context.Synchronize();
+        Action<CudaPrimaryExecutionContext> disposePrimaryExecutionContext = static context => context.Dispose();
         Func<CudaLogCursor> currentCudaLogCursor = static () => CudaRuntimeLogs.GetCurrentCursor();
         Func<CudaLogSnapshot> dumpCudaLogs = static () => CudaRuntimeLogs.DumpToMemory();
         Func<CudaLogCursor, CudaLogSnapshot> dumpCudaLogsFromCursor =
@@ -2876,6 +2885,15 @@ static class HighLevelWrapperSurfaceProbe
         _ = kernelLibraryInventory;
         _ = kernelLibraryContains;
         _ = disposeKernelLibrary;
+        _ = getPrimaryExecutionContext;
+        _ = primaryExecutionContextIsPrimary;
+        _ = primaryExecutionContextDevice;
+        _ = primaryExecutionContextId;
+        _ = createPrimaryExecutionContextStream;
+        _ = recordPrimaryExecutionContextEvent;
+        _ = waitPrimaryExecutionContextEvent;
+        _ = synchronizePrimaryExecutionContext;
+        _ = disposePrimaryExecutionContext;
         _ = currentCudaLogCursor;
         _ = dumpCudaLogs;
         _ = dumpCudaLogsFromCursor;
@@ -4437,6 +4455,15 @@ static class HighLevelWrapperSurfaceProbe
             nameof(CudaKernelLibraryInventorySnapshot.EnumeratedKernelCount),
             nameof(CudaKernelLibraryInventorySnapshot.NullKernelCount),
             nameof(CudaKernelLibraryInventorySnapshot.IsComplete),
+            nameof(CudaPrimaryExecutionContext),
+            nameof(CudaDevice.GetPrimaryExecutionContext),
+            nameof(CudaPrimaryExecutionContext.IsPrimary),
+            nameof(CudaPrimaryExecutionContext.DeviceOrdinal),
+            nameof(CudaPrimaryExecutionContext.Id),
+            nameof(CudaPrimaryExecutionContext.CreateStream),
+            nameof(CudaPrimaryExecutionContext.RecordEvent),
+            nameof(CudaPrimaryExecutionContext.WaitEvent),
+            nameof(CudaPrimaryExecutionContext.Synchronize),
             nameof(CudaRuntimeLogs),
             nameof(CudaRuntimeLogs.GetCurrentCursor),
             nameof(CudaRuntimeLogs.DumpToMemory),

@@ -1,0 +1,103 @@
+{
+  "$schema": "../bridge-api.schema.json",
+  "module": "cuda",
+  "versionLine": "common",
+  "apis": [
+    {
+      "id": "cuda-device-get-primary-execution-context-owner-safe",
+      "entryPoint": "jyppx_cuda_primary_execution_context_get_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "device", "type": "int32_t", "direction": "in" },
+        { "name": "out_context", "type": "JYPPX_CudaExecutionContext**", "direction": "out", "ownership": "caller-destroys" }
+      ]
+    },
+    {
+      "id": "cuda-primary-execution-context-wrapper-release-safe",
+      "entryPoint": "jyppx_cuda_primary_execution_context_release_wrapper_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "context", "type": "JYPPX_CudaExecutionContext*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" }
+      ]
+    },
+    {
+      "id": "cuda-execution-context-get-device-copied-scalar-safe",
+      "entryPoint": "jyppx_cuda_execution_context_get_device_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "context", "type": "JYPPX_CudaExecutionContext*", "direction": "in" },
+        { "name": "out_device", "type": "int32_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "cuda-execution-context-get-id-copied-scalar-safe",
+      "entryPoint": "jyppx_cuda_execution_context_get_id_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "context", "type": "JYPPX_CudaExecutionContext*", "direction": "in" },
+        { "name": "out_context_id", "type": "uint64_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "cuda-execution-context-synchronize-owner-safe",
+      "entryPoint": "jyppx_cuda_execution_context_synchronize_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "context", "type": "JYPPX_CudaExecutionContext*", "direction": "in" }
+      ]
+    },
+    {
+      "id": "cuda-execution-context-create-stream-owner-safe",
+      "entryPoint": "jyppx_cuda_execution_context_create_stream_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "context", "type": "JYPPX_CudaExecutionContext*", "direction": "in" },
+        { "name": "flags", "type": "uint32_t", "direction": "in" },
+        { "name": "priority", "type": "int32_t", "direction": "in" },
+        { "name": "out_stream", "type": "JYPPX_CudaStream**", "direction": "out", "ownership": "caller-destroys" }
+      ]
+    },
+    {
+      "id": "cuda-execution-context-record-event-owner-safe",
+      "entryPoint": "jyppx_cuda_execution_context_record_event_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "context", "type": "JYPPX_CudaExecutionContext*", "direction": "in" },
+        { "name": "event_handle", "type": "JYPPX_CudaEvent*", "direction": "in" }
+      ]
+    },
+    {
+      "id": "cuda-execution-context-wait-event-owner-safe",
+      "entryPoint": "jyppx_cuda_execution_context_wait_event_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "context", "type": "JYPPX_CudaExecutionContext*", "direction": "in" },
+        { "name": "event_handle", "type": "JYPPX_CudaEvent*", "direction": "in" }
+      ]
+    }
+  ]
+}

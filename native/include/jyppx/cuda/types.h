@@ -18,6 +18,7 @@ typedef struct JYPPX_CudaMipmappedArray JYPPX_CudaMipmappedArray;
 typedef struct JYPPX_CudaTextureObject JYPPX_CudaTextureObject;
 typedef struct JYPPX_CudaSurfaceObject JYPPX_CudaSurfaceObject;
 typedef struct JYPPX_CudaKernelLibrary JYPPX_CudaKernelLibrary;
+typedef struct JYPPX_CudaExecutionContext JYPPX_CudaExecutionContext;
 
 typedef enum JYPPX_CudaMemcpyKind
 {

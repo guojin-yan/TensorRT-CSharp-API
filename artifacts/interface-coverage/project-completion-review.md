@@ -19,6 +19,43 @@
 - `artifacts/real-case/multi-version-onnx-runtime/multi-version-runtime-evidence-matrix.json`
 - `artifacts/test-analysis/project-quality-test-inventory.json`
 
+## 2026-07-17 CUDA Primary Execution Context Owner-Safe 复审
+
+本阶段基于起始提交 `bfed406d246610046896ed41385f61c043965929`，从 CUDA 13.2 的 execution context、device resource、graph 与 kernel-library 候选中审查 21 条边界，只提升 7 个能够复用稳定 owner 的 primary execution context API：`cudaDeviceGetExecutionCtx`、`cudaExecutionCtxGetDevice`、`cudaExecutionCtxGetId`、`cudaExecutionCtxSynchronize`、`cudaExecutionCtxStreamCreate`、`cudaExecutionCtxRecordEvent` 与 `cudaExecutionCtxWaitEvent`。
+
+### Owner 与 ABI 边界
+
+- native 新增 bridge-owned `ExecutionContextObject`。该对象只包装 `cudaDeviceGetExecutionCtx` 返回的设备主上下文；释放 entry 只删除 bridge wrapper，绝不调用 `cudaExecutionCtxDestroy`。官方头文件明确指出，对该 primary context 调用 destroy 属于未定义行为。
+- managed 新增 internal `SafeCudaExecutionContextHandle` 与 public `CudaPrimaryExecutionContext`。公开面只提供 `IsPrimary`、copied device/id、同步、创建 bridge-owned stream、record/wait 现有 event；不暴露 `cudaExecutionContext_t`、`IntPtr`、`nint`、`SafeHandle`、device pointer 或 plugin/tensor pointer。
+- stream 复用现有 `CudaStream` owner；event 复用现有 SafeHandle 且只在 native 调用栈内借用。native entry 保持 C++ exception containment 与 Windows SEH guard。
+- CUDA 13 使用独立 `CUDART_VERSION >= 13000` guard；CUDA 11/12 明确返回 `NotSupported`。`cudaExecutionCtxDestroy`、green context、device resource、graph generic tagged union、library global/managed/unified pointer 等旧 deferred 全部保留。
+
+### Coverage、构建与测试
+
+generator 最终为 177 manifests / 3909 records。7 条 CUDA 13.2 目标行均为 `implemented-with-deferred-history`：
+
+| CUDA Toolkit | 官方函数 | manifest/source 已匹配 | 非 deferred 实现 | deferred-only |
+| --- | ---: | ---: | ---: | ---: |
+| 11.6 | 268 | 268 | 211 | 57 |
+| 11.8 | 273 | 273 | 216 | 57 |
+| 12.1 | 277 | 277 | 219 | 58 |
+| 12.3 | 292 | 292 | 227 | 65 |
+| 12.9 | 307 | 307 | 235 | 72 |
+| 13.2 | 330 | 330 | 250 | 80 |
+
+- bindings 生成与幂等通过；完整 solution Release build 为 0 warning / 0 error。
+- 受影响专项 87/87 通过，覆盖 owner-safe 专项、coverage alias、public handle exposure、bridge consumer、Plugin Registry、BuilderConfig、RNNv2 与 CUDA 13 version guard。
+- ProjectQuality Debug inventory 为 1251 tests / 376 classes。新增类独立补跑 5/5 通过；累计 hash-verified bounded shard 覆盖为 376/376、169 份有效 TRX、missing 0、invalid evidence 0。该结果是仓库正式 bounded shard 全类覆盖，不冒充会并发改写共享 evidence 且耗时数小时的 one-shot 单进程通过。
+- native 的 TRT8/CUDA11.8、TRT8/CUDA12.1、TRT10/CUDA12.9、TRT11/CUDA13.2 四套预设均重新 configure/build 成功，version guard 彼此独立；保留仓库既有 native warning 边界。
+
+### Runtime、NuGet 与 Consumer
+
+- CUDA 12.9 `CudaSmokeRunner` 真实运行通过，并输出 `CudaPrimaryExecutionContext Skipped=True VersionGuard=NotSupported Runtime=12090`。CUDA 13.2 在当前 CUDA 12.9 driver 主机最早的 `cudaRuntimeGetVersion` 返回 error 35，保持 compatible-host blocked，不伪装为 execution-context runtime proof。
+- TRT8/TRT10 Plugin Registry inventory、NetworkBuilder、InferenceBindings 均完成真实运行。两版本 identity engine build/serialize/deserialize、ExecuteV2/EnqueueV3 与 output compare 成功；TRT8 额外完成 EnqueueV2。TRT11 可读取 global/capability inventory，但 runtime 创建仍因 CUDA 13 compatible-host 条件返回空对象。
+- managed 4.0.0 与 TRT8/TRT10/TRT11 三个 bridge-only 本地包已重打。三个临时 consumer 只使用 `PackageReference`、无 `ProjectReference`，restore/build 均为 0 warning / 0 error，并编译 `CudaPrimaryExecutionContext` 的完整 public surface；`Runtime execution proof=False`。
+- strict classification audit 为 `classification-audit-passed-non-proof-boundaries-intact`、finding 0；strict release quality gate 为 `release-quality-gate-passed`、required failure 0。Owner convergence 保持 accepted 0/9、gates 2/3、validation blocker 0，`canPublishPublicly=false`、`canCloseReleaseIssue=false`。
+- 本阶段未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
+
 ## 2026-07-17 CUDA Kernel Library Metadata 与 ProjectQuality Bounded Shard 复审
 
 本阶段基于起始提交 `5d9aeec2e3369682f3235ac7335857c76dfe595a`，新增 6 个 CUDA Kernel Library owner-safe entry：`cudaLibraryLoadData`、`cudaLibraryLoadFromFile`、`cudaLibraryUnload`、`cudaLibraryGetKernelCount`、`cudaLibraryEnumerateKernels` 与 `cudaLibraryGetKernel`。同时将 ProjectQuality 从依赖数小时 one-shot 套件的状态，收敛为可续跑、可审计的类级 bounded shard 证据。

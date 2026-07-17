@@ -28,6 +28,7 @@ internal static class Program
         Console.WriteLine($"CurrentDevice={CudaDevice.Current}");
         Console.WriteLine($"CudaVersions Runtime={CudaDevice.RuntimeVersion} Driver={CudaDevice.DriverVersion}");
         Console.WriteLine($"CudaKernelLibrary {ProbeCudaKernelLibrary(CudaDevice.RuntimeVersion)}");
+        Console.WriteLine($"CudaPrimaryExecutionContext {ProbeCudaPrimaryExecutionContext(CudaDevice.RuntimeVersion)}");
         try
         {
             CudaDevice.InitDevice(CudaDevice.Current, CudaDevice.RuntimeFlags);
@@ -785,6 +786,33 @@ internal static class Program
             {
                 File.Delete(path);
             }
+        }
+    }
+
+    private static string ProbeCudaPrimaryExecutionContext(int runtimeVersion)
+    {
+        try
+        {
+            using CudaPrimaryExecutionContext context = CudaDevice.GetPrimaryExecutionContext(CudaDevice.Current);
+            if (runtimeVersion < 13000)
+            {
+                throw new InvalidOperationException("CUDA primary execution context unexpectedly succeeded before CUDA 13.0.");
+            }
+
+            using CudaStream stream = context.CreateStream(CudaStreamCreationFlags.NonBlocking);
+            using CudaEvent cudaEvent = new CudaEvent(CudaEventCreationFlags.DisableTiming);
+            context.RecordEvent(cudaEvent);
+            context.WaitEvent(cudaEvent);
+            context.Synchronize();
+            return $"IsPrimary={context.IsPrimary} Device={context.DeviceOrdinal} Id={context.Id} StreamDevice={stream.DeviceOrdinal} StreamFlags={stream.Flags} EventReady={cudaEvent.IsReady()}";
+        }
+        catch (CudaException exception) when (runtimeVersion < 13000 && exception.StatusCode == BridgeStatusCode.NotSupported)
+        {
+            return $"Skipped=True VersionGuard=NotSupported Runtime={runtimeVersion}";
+        }
+        catch (CudaException exception)
+        {
+            return $"Available=False Status={exception.StatusCode} Reason={exception.Message}";
         }
     }
 

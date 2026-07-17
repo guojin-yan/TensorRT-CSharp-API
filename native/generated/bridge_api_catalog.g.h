@@ -117,6 +117,7 @@
 #define JYPPX_API_CUDA_DEVICE_GET_P2P_ATOMIC_CAPABILITIES "jyppx_cuda_device_get_p2p_atomic_capabilities" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_DEVICE_GET_P2P_ATTRIBUTE "jyppx_cuda_device_get_p2p_attribute" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_DEVICE_GET_PCI_BUS_ID "jyppx_cuda_device_get_pci_bus_id" // module=cuda; line=common; ownership=caller-owned; manualOverride=true
+#define JYPPX_API_CUDA_DEVICE_GET_PRIMARY_EXECUTION_CONTEXT_OWNER_SAFE "jyppx_cuda_primary_execution_context_get_safe" // module=cuda; line=common; ownership=caller-destroys; manualOverride=false
 #define JYPPX_API_CUDA_DEVICE_GET_SHARED_MEM_CONFIG_OFFICIAL_TOKEN_ALIAS "jyppx_cuda_device_get_shared_mem_config" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_DEVICE_GET_SHARED_MEMORY_CONFIG "jyppx_cuda_device_get_shared_memory_config" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_DEVICE_GET_STREAM_PRIORITY_RANGE_OFFICIAL_TOKEN_ALIAS "jyppx_cuda_device_get_stream_priority_range" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
@@ -143,6 +144,12 @@
 #define JYPPX_API_CUDA_EVENT_RECORD "jyppx_cuda_event_record" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_EVENT_RECORD_WITH_FLAGS "jyppx_cuda_event_record_with_flags" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_EVENT_SYNCHRONIZE "jyppx_cuda_event_synchronize" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_EXECUTION_CONTEXT_CREATE_STREAM_OWNER_SAFE "jyppx_cuda_execution_context_create_stream_safe" // module=cuda; line=common; ownership=caller-destroys; manualOverride=false
+#define JYPPX_API_CUDA_EXECUTION_CONTEXT_GET_DEVICE_COPIED_SCALAR_SAFE "jyppx_cuda_execution_context_get_device_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_EXECUTION_CONTEXT_GET_ID_COPIED_SCALAR_SAFE "jyppx_cuda_execution_context_get_id_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_EXECUTION_CONTEXT_RECORD_EVENT_OWNER_SAFE "jyppx_cuda_execution_context_record_event_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_EXECUTION_CONTEXT_SYNCHRONIZE_OWNER_SAFE "jyppx_cuda_execution_context_synchronize_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_EXECUTION_CONTEXT_WAIT_EVENT_OWNER_SAFE "jyppx_cuda_execution_context_wait_event_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_EXECUTION_CTX_DESTROY_DEFERRED "jyppx_cuda_execution_ctx_destroy_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_EXECUTION_CTX_GET_DEV_RESOURCE_DEFERRED "jyppx_cuda_execution_ctx_get_dev_resource_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_EXECUTION_CTX_GET_DEVICE_DEFERRED "jyppx_cuda_execution_ctx_get_device_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
@@ -459,6 +466,7 @@
 #define JYPPX_API_CUDA_PITCHED_MEMORY_MEMSET_2D_ASYNC "jyppx_cuda_pitched_memory_memset_2d_async" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_PITCHED_MEMORY_MEMSET_3D "jyppx_cuda_pitched_memory_memset_3d" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_PITCHED_MEMORY_MEMSET_3D_ASYNC "jyppx_cuda_pitched_memory_memset_3d_async" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_PRIMARY_EXECUTION_CONTEXT_WRAPPER_RELEASE_SAFE "jyppx_cuda_primary_execution_context_release_wrapper_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_QUERY_RUNTIME_INFO "jyppx_cuda_query_runtime_info" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_SET_DEVICE "jyppx_cuda_set_device" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_SET_DEVICE_FLAGS "jyppx_cuda_set_device_flags" // module=cuda; line=common; ownership=caller-owned; manualOverride=false

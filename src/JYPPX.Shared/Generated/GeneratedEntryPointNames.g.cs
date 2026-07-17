@@ -122,6 +122,7 @@ internal static class GeneratedEntryPointNames
     public const string CudaDeviceGetP2pAtomicCapabilities = "jyppx_cuda_device_get_p2p_atomic_capabilities";
     public const string CudaDeviceGetP2pAttribute = "jyppx_cuda_device_get_p2p_attribute";
     public const string CudaDeviceGetPciBusId = "jyppx_cuda_device_get_pci_bus_id";
+    public const string CudaDeviceGetPrimaryExecutionContextOwnerSafe = "jyppx_cuda_primary_execution_context_get_safe";
     public const string CudaDeviceGetSharedMemConfigOfficialTokenAlias = "jyppx_cuda_device_get_shared_mem_config";
     public const string CudaDeviceGetSharedMemoryConfig = "jyppx_cuda_device_get_shared_memory_config";
     public const string CudaDeviceGetStreamPriorityRangeOfficialTokenAlias = "jyppx_cuda_device_get_stream_priority_range";
@@ -148,6 +149,12 @@ internal static class GeneratedEntryPointNames
     public const string CudaEventRecord = "jyppx_cuda_event_record";
     public const string CudaEventRecordWithFlags = "jyppx_cuda_event_record_with_flags";
     public const string CudaEventSynchronize = "jyppx_cuda_event_synchronize";
+    public const string CudaExecutionContextCreateStreamOwnerSafe = "jyppx_cuda_execution_context_create_stream_safe";
+    public const string CudaExecutionContextGetDeviceCopiedScalarSafe = "jyppx_cuda_execution_context_get_device_safe";
+    public const string CudaExecutionContextGetIdCopiedScalarSafe = "jyppx_cuda_execution_context_get_id_safe";
+    public const string CudaExecutionContextRecordEventOwnerSafe = "jyppx_cuda_execution_context_record_event_safe";
+    public const string CudaExecutionContextSynchronizeOwnerSafe = "jyppx_cuda_execution_context_synchronize_safe";
+    public const string CudaExecutionContextWaitEventOwnerSafe = "jyppx_cuda_execution_context_wait_event_safe";
     public const string CudaExecutionCtxDestroyDeferred = "jyppx_cuda_execution_ctx_destroy_deferred";
     public const string CudaExecutionCtxGetDevResourceDeferred = "jyppx_cuda_execution_ctx_get_dev_resource_deferred";
     public const string CudaExecutionCtxGetDeviceDeferred = "jyppx_cuda_execution_ctx_get_device_deferred";
@@ -464,6 +471,7 @@ internal static class GeneratedEntryPointNames
     public const string CudaPitchedMemoryMemset2dAsync = "jyppx_cuda_pitched_memory_memset_2d_async";
     public const string CudaPitchedMemoryMemset3d = "jyppx_cuda_pitched_memory_memset_3d";
     public const string CudaPitchedMemoryMemset3dAsync = "jyppx_cuda_pitched_memory_memset_3d_async";
+    public const string CudaPrimaryExecutionContextWrapperReleaseSafe = "jyppx_cuda_primary_execution_context_release_wrapper_safe";
     public const string CudaQueryRuntimeInfo = "jyppx_cuda_query_runtime_info";
     public const string CudaSetDevice = "jyppx_cuda_set_device";
     public const string CudaSetDeviceFlags = "jyppx_cuda_set_device_flags";

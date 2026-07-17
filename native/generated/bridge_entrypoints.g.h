@@ -352,6 +352,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_cuda_device_get_p2p_attribute(int32_t attrib
 // generated from manifest id=cuda-device-get-pci-bus-id
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_device_get_pci_bus_id(int32_t device, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
 
+// generated from manifest id=cuda-device-get-primary-execution-context-owner-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_primary_execution_context_get_safe(int32_t device, JYPPX_CudaExecutionContext** out_context);
+
 // generated from manifest id=cuda-device-get-shared-mem-config-official-token-alias
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_device_get_shared_mem_config(int32_t* out_config);
 
@@ -429,6 +432,24 @@ JYPPX_C_API(BridgeStatusCode) jyppx_cuda_event_record_with_flags(JYPPX_CudaEvent
 
 // generated from manifest id=cuda-event-synchronize
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_event_synchronize(JYPPX_CudaEvent* event_handle);
+
+// generated from manifest id=cuda-execution-context-create-stream-owner-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_execution_context_create_stream_safe(JYPPX_CudaExecutionContext* context, uint32_t flags, int32_t priority, JYPPX_CudaStream** out_stream);
+
+// generated from manifest id=cuda-execution-context-get-device-copied-scalar-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_execution_context_get_device_safe(JYPPX_CudaExecutionContext* context, int32_t* out_device);
+
+// generated from manifest id=cuda-execution-context-get-id-copied-scalar-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_execution_context_get_id_safe(JYPPX_CudaExecutionContext* context, uint64_t* out_context_id);
+
+// generated from manifest id=cuda-execution-context-record-event-owner-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_execution_context_record_event_safe(JYPPX_CudaExecutionContext* context, JYPPX_CudaEvent* event_handle);
+
+// generated from manifest id=cuda-execution-context-synchronize-owner-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_execution_context_synchronize_safe(JYPPX_CudaExecutionContext* context);
+
+// generated from manifest id=cuda-execution-context-wait-event-owner-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_execution_context_wait_event_safe(JYPPX_CudaExecutionContext* context, JYPPX_CudaEvent* event_handle);
 
 // generated from manifest id=cuda-execution-ctx-destroy-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_execution_ctx_destroy_deferred(void);
@@ -1377,6 +1398,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_cuda_pitched_memory_memset_3d(JYPPX_CudaPitc
 
 // generated from manifest id=cuda-pitched-memory-memset-3d-async
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_pitched_memory_memset_3d_async(JYPPX_CudaPitchedMemory* memory, int32_t value, size_t width_bytes, size_t height, size_t depth, JYPPX_CudaStream* stream);
+
+// generated from manifest id=cuda-primary-execution-context-wrapper-release-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_primary_execution_context_release_wrapper_safe(JYPPX_CudaExecutionContext* context);
 
 // generated from manifest id=cuda-query-runtime-info
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_query_runtime_info(JYPPX_CudaRuntimeInfo* out_info);

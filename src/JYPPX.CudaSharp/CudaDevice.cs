@@ -351,6 +351,23 @@ public static class CudaDevice
     }
 
     /// <summary>
+    /// Gets an owner-safe bridge wrapper for a device primary execution context on CUDA 13.0 or later.
+    /// 在 CUDA 13.0 或更高版本上获取设备主执行上下文的 owner-safe bridge 包装器。
+    /// </summary>
+    /// <param name="ordinal">The CUDA device ordinal. CUDA 设备序号。</param>
+    /// <returns>A non-destroying primary execution-context wrapper. 不会销毁主上下文的执行上下文包装器。</returns>
+    public static CudaPrimaryExecutionContext GetPrimaryExecutionContext(int ordinal)
+    {
+        if (ordinal < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(ordinal), ordinal, "CUDA device ordinal must be greater than or equal to zero.");
+        }
+
+        NativeBridgeLoader.EnsureInitialized();
+        return new CudaPrimaryExecutionContext(NativeCudaApi.GetPrimaryExecutionContext(ordinal));
+    }
+
+    /// <summary>
     /// Restricts CUDA runtime initialization to a caller-owned list of valid device ordinals using <c>cudaSetValidDevices</c>.
     /// 使用 <c>cudaSetValidDevices</c> 和 caller-owned 的设备序号列表限制 CUDA runtime 可初始化的设备集合。
     /// </summary>

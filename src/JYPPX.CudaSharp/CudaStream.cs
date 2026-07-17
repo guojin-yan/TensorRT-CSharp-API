@@ -45,6 +45,11 @@ public sealed class CudaStream : IDisposable
         _handle = NativeCudaApi.CreateStreamWithPriority((uint)flags, priority);
     }
 
+    internal CudaStream(SafeCudaStreamHandle handle)
+    {
+        _handle = handle ?? throw new ArgumentNullException(nameof(handle));
+    }
+
     internal SafeCudaStreamHandle Handle => _handle;
 
     /// <summary>

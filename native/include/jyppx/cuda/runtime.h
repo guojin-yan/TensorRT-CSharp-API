@@ -505,6 +505,17 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_kernel_library_get_inventory_safe(JYPPX
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_kernel_library_contains_kernel_safe(JYPPX_CudaKernelLibrary* library, const char* name, JYPPX_Boolean* out_exists);
 /* END CUDA FIFTY-FIRST BATCH KERNEL LIBRARY METADATA */
 
+/* BEGIN CUDA FIFTY-SECOND BATCH PRIMARY EXECUTION CONTEXT */
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_primary_execution_context_get_safe(int32_t device, JYPPX_CudaExecutionContext** out_context);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_primary_execution_context_release_wrapper_safe(JYPPX_CudaExecutionContext* context);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_execution_context_get_device_safe(JYPPX_CudaExecutionContext* context, int32_t* out_device);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_execution_context_get_id_safe(JYPPX_CudaExecutionContext* context, uint64_t* out_context_id);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_execution_context_synchronize_safe(JYPPX_CudaExecutionContext* context);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_execution_context_create_stream_safe(JYPPX_CudaExecutionContext* context, uint32_t flags, int32_t priority, JYPPX_CudaStream** out_stream);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_execution_context_record_event_safe(JYPPX_CudaExecutionContext* context, JYPPX_CudaEvent* event_handle);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_execution_context_wait_event_safe(JYPPX_CudaExecutionContext* context, JYPPX_CudaEvent* event_handle);
+/* END CUDA FIFTY-SECOND BATCH PRIMARY EXECUTION CONTEXT */
+
 /* BEGIN CUDA FORTY-FOURTH BATCH GRAPH NODE PARAMETER DESCRIPTORS */
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_memset_node_get_params_safe(uintptr_t node, JYPPX_CudaGraphMemsetNodeParams* out_params);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_memset_node_set_params_safe(uintptr_t node, JYPPX_CudaMemory* destination, uint32_t value, size_t count);
