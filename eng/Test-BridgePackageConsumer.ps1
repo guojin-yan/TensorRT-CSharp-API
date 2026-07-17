@@ -2604,6 +2604,12 @@ static class HighLevelWrapperSurfaceProbe
             static snapshot => snapshot.IsSpecified;
         Func<CudaArray, CudaSurfaceObject> createSurfaceObject = static array => new CudaSurfaceObject(array);
         Func<CudaSurfaceObject, CudaResourceDescriptorSnapshot> surfaceResource = static surface => surface.Resource;
+        Func<byte[], CudaKernelLibrary> loadKernelLibraryData = static code => CudaKernelLibrary.Load(code);
+        Func<string, CudaKernelLibrary> loadKernelLibraryFile = static path => CudaKernelLibrary.LoadFromFile(path);
+        Func<CudaKernelLibrary, uint> kernelLibraryCount = static library => library.KernelCount;
+        Func<CudaKernelLibrary, CudaKernelLibraryInventorySnapshot> kernelLibraryInventory = static library => library.Inventory;
+        Func<CudaKernelLibrary, string, bool> kernelLibraryContains = static (library, name) => library.ContainsKernel(name);
+        Action<CudaKernelLibrary> disposeKernelLibrary = static library => library.Dispose();
         Func<CudaLogCursor> currentCudaLogCursor = static () => CudaRuntimeLogs.GetCurrentCursor();
         Func<CudaLogSnapshot> dumpCudaLogs = static () => CudaRuntimeLogs.DumpToMemory();
         Func<CudaLogCursor, CudaLogSnapshot> dumpCudaLogsFromCursor =
@@ -2864,6 +2870,12 @@ static class HighLevelWrapperSurfaceProbe
         _ = textureResourceViewSpecified;
         _ = createSurfaceObject;
         _ = surfaceResource;
+        _ = loadKernelLibraryData;
+        _ = loadKernelLibraryFile;
+        _ = kernelLibraryCount;
+        _ = kernelLibraryInventory;
+        _ = kernelLibraryContains;
+        _ = disposeKernelLibrary;
         _ = currentCudaLogCursor;
         _ = dumpCudaLogs;
         _ = dumpCudaLogsFromCursor;
@@ -4414,6 +4426,17 @@ static class HighLevelWrapperSurfaceProbe
             nameof(CudaTextureResourceViewSnapshot),
             nameof(CudaTextureResourceViewSnapshot.IsSpecified),
             nameof(CudaTextureResourceViewFormat),
+            nameof(CudaKernelLibrary),
+            nameof(CudaKernelLibrary.Load),
+            nameof(CudaKernelLibrary.LoadFromFile),
+            nameof(CudaKernelLibrary.KernelCount),
+            nameof(CudaKernelLibrary.Inventory),
+            nameof(CudaKernelLibrary.ContainsKernel),
+            nameof(CudaKernelLibraryInventorySnapshot),
+            nameof(CudaKernelLibraryInventorySnapshot.ReportedKernelCount),
+            nameof(CudaKernelLibraryInventorySnapshot.EnumeratedKernelCount),
+            nameof(CudaKernelLibraryInventorySnapshot.NullKernelCount),
+            nameof(CudaKernelLibraryInventorySnapshot.IsComplete),
             nameof(CudaRuntimeLogs),
             nameof(CudaRuntimeLogs.GetCurrentCursor),
             nameof(CudaRuntimeLogs.DumpToMemory),

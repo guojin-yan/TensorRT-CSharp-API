@@ -5,6 +5,15 @@ using JYPPX.Shared.Interop;
 namespace JYPPX.CudaSharp.Internal.Interop;
 
 [StructLayout(LayoutKind.Sequential)]
+internal struct NativeCudaKernelLibraryInventory
+{
+    public uint ReportedKernelCount;
+    public uint EnumeratedKernelCount;
+    public uint NullKernelCount;
+    public int IsComplete;
+}
+
+[StructLayout(LayoutKind.Sequential)]
 internal struct NativeBuildInfo
 {
     public uint AbiVersion;

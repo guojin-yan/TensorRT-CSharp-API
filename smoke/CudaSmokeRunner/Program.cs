@@ -1,7 +1,9 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using JYPPX.CudaSharp;
+using JYPPX.Shared.Interop;
 
 internal static class Program
 {
@@ -25,6 +27,7 @@ internal static class Program
 
         Console.WriteLine($"CurrentDevice={CudaDevice.Current}");
         Console.WriteLine($"CudaVersions Runtime={CudaDevice.RuntimeVersion} Driver={CudaDevice.DriverVersion}");
+        Console.WriteLine($"CudaKernelLibrary {ProbeCudaKernelLibrary(CudaDevice.RuntimeVersion)}");
         try
         {
             CudaDevice.InitDevice(CudaDevice.Current, CudaDevice.RuntimeFlags);
@@ -724,6 +727,64 @@ internal static class Program
         catch (BadImageFormatException exception)
         {
             Console.WriteLine($"Skipped=True Reason=BadImageFormatException:{exception.Message}");
+        }
+    }
+
+    private static string ProbeCudaKernelLibrary(int runtimeVersion)
+    {
+        const string kernelName = "jyppx_kernel_library_smoke";
+        const string ptx = ".version 8.0\n.target sm_52\n.address_size 64\n.visible .entry " + kernelName + "()\n{\n    ret;\n}\n";
+        byte[] code = Encoding.ASCII.GetBytes(ptx);
+
+        if (runtimeVersion < 12090)
+        {
+            try
+            {
+                using CudaKernelLibrary unexpected = CudaKernelLibrary.Load(code);
+                throw new InvalidOperationException("CUDA kernel library unexpectedly succeeded before CUDA 12.9.");
+            }
+            catch (CudaException exception) when (exception.StatusCode == BridgeStatusCode.NotSupported)
+            {
+                return $"Skipped=True VersionGuard=NotSupported Runtime={runtimeVersion}";
+            }
+        }
+
+        using CudaKernelLibrary dataLibrary = CudaKernelLibrary.Load(code);
+        CudaKernelLibraryInventorySnapshot dataInventory = dataLibrary.Inventory;
+        bool dataContains = dataLibrary.ContainsKernel(kernelName);
+        bool dataMissing = dataLibrary.ContainsKernel("jyppx_missing_kernel");
+        int lookupLastError = CudaDevice.PeekAtLastErrorCode();
+        if (dataLibrary.KernelCount != 1 ||
+            dataInventory.ReportedKernelCount != 1 ||
+            dataInventory.EnumeratedKernelCount != 1 ||
+            dataInventory.NullKernelCount != 0 ||
+            !dataInventory.IsComplete ||
+            !dataContains ||
+            dataMissing ||
+            lookupLastError != 0)
+        {
+            throw new InvalidOperationException($"CUDA copied-data kernel library inventory was inconsistent: {dataInventory}.");
+        }
+
+        string path = Path.Combine(Path.GetTempPath(), $"jyppx-kernel-library-{Guid.NewGuid():N}.ptx");
+        try
+        {
+            File.WriteAllBytes(path, code);
+            using CudaKernelLibrary fileLibrary = CudaKernelLibrary.LoadFromFile(path);
+            CudaKernelLibraryInventorySnapshot fileInventory = fileLibrary.Inventory;
+            if (fileLibrary.KernelCount != 1 || !fileInventory.IsComplete || !fileLibrary.ContainsKernel(kernelName))
+            {
+                throw new InvalidOperationException($"CUDA file kernel library inventory was inconsistent: {fileInventory}.");
+            }
+
+            return $"DataCount={dataInventory.ReportedKernelCount} DataComplete={dataInventory.IsComplete} Named={dataContains} Missing={dataMissing} LastError={lookupLastError} FileCount={fileInventory.ReportedKernelCount} FileComplete={fileInventory.IsComplete}";
+        }
+        finally
+        {
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
         }
     }
 

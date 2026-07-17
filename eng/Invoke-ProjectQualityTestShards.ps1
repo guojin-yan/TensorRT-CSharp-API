@@ -6,12 +6,16 @@ param(
   [string]$Configuration = "Debug",
   [string]$TestProject = "",
   [string]$InventoryPath = "",
+  [string]$CoveragePath = "",
   [string]$OutputRoot = "",
   [string]$RunId = "",
   [ValidateRange(0, 1000)]
   [int]$BatchSize = 0,
   [int[]]$Batch = @(),
   [string]$ClassNamePattern = "",
+  [switch]$MissingOnly,
+  [ValidateRange(1, 100)]
+  [int]$DurationRankingCount = 20,
   [switch]$RefreshInventory,
   [switch]$PreviewOnly,
   [switch]$ContinueOnFailure
@@ -40,6 +44,15 @@ if ([string]::IsNullOrWhiteSpace($OutputRoot)) {
 }
 elseif (-not [IO.Path]::IsPathRooted($OutputRoot)) {
   $OutputRoot = Join-Path $repositoryRoot $OutputRoot
+}
+
+if ($MissingOnly) {
+  if ([string]::IsNullOrWhiteSpace($CoveragePath)) {
+    $CoveragePath = Join-Path $repositoryRoot "artifacts\test-analysis\project-quality-shard-class-coverage.json"
+  }
+  elseif (-not [IO.Path]::IsPathRooted($CoveragePath)) {
+    $CoveragePath = Join-Path $repositoryRoot $CoveragePath
+  }
 }
 
 if ($RefreshInventory -or -not (Test-Path -LiteralPath $InventoryPath -PathType Leaf)) {
@@ -155,6 +168,31 @@ function Get-TrxCounters {
 }
 
 $inventory = Get-Content -LiteralPath $InventoryPath -Raw | ConvertFrom-Json
+$inventorySha256 = (Get-FileHash -LiteralPath $InventoryPath -Algorithm SHA256).Hash.ToLowerInvariant()
+$coverage = $null
+$coverageSha256 = ""
+$missingClassSet = $null
+$requestedMissingClasses = @()
+if ($MissingOnly) {
+  if (-not (Test-Path -LiteralPath $CoveragePath -PathType Leaf)) {
+    throw "ProjectQuality shard coverage not found: $CoveragePath"
+  }
+
+  $coverage = Get-Content -LiteralPath $CoveragePath -Raw | ConvertFrom-Json
+  if ([string]$coverage.recordKind -ne "project-quality-shard-class-coverage") {
+    throw "Unexpected ProjectQuality coverage record kind in '$CoveragePath'."
+  }
+  if (([string]$coverage.inventorySha256).ToLowerInvariant() -ne $inventorySha256) {
+    throw "ProjectQuality coverage inventory SHA256 does not match '$InventoryPath'. Refresh shard coverage before using -MissingOnly."
+  }
+
+  $coverageSha256 = (Get-FileHash -LiteralPath $CoveragePath -Algorithm SHA256).Hash.ToLowerInvariant()
+  $requestedMissingClasses = @($coverage.missingClasses | ForEach-Object { [string]$_ } | Sort-Object -Unique)
+  $missingClassSet = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+  foreach ($className in $requestedMissingClasses) {
+    [void]$missingClassSet.Add($className)
+  }
+}
 $knownShards = @($inventory.shards | ForEach-Object id)
 $requestedShards = @(
   $Shard |
@@ -202,11 +240,18 @@ foreach ($shardDefinition in $selectedShards) {
   if ($null -ne $classNameRegex) {
     $classes = @($classes | Where-Object { $classNameRegex.IsMatch($_) })
   }
+  if ($MissingOnly) {
+    $classes = @($classes | Where-Object { $missingClassSet.Contains($_) })
+  }
   if ($classes.Count -eq 0) {
+    if ($MissingOnly) {
+      Write-Host "Shard $shardId skipped: no missing classes selected."
+      continue
+    }
     throw "Shard '$shardId' has no classes after applying ClassNamePattern '$ClassNamePattern'."
   }
 
-  $effectiveBatchSize = if ($BatchSize -gt 0) { $BatchSize } else { $classes.Count }
+  $effectiveBatchSize = if ($BatchSize -gt 0) { $BatchSize } elseif ($MissingOnly) { 1 } else { $classes.Count }
   $batchCount = [int][Math]::Ceiling($classes.Count / [double]$effectiveBatchSize)
   for ($batchIndex = 0; $batchIndex -lt $batchCount; $batchIndex++) {
     $batchNumber = $batchIndex + 1
@@ -215,7 +260,7 @@ foreach ($shardDefinition in $selectedShards) {
     }
 
     $batchClasses = @($classes | Select-Object -Skip ($batchIndex * $effectiveBatchSize) -First $effectiveBatchSize)
-    $unitId = if ($BatchSize -gt 0) {
+    $unitId = if ($BatchSize -gt 0 -or $MissingOnly) {
       "$shardId-batch-$($batchNumber.ToString('D2'))-of-$($batchCount.ToString('D2'))"
     }
     else {
@@ -234,7 +279,7 @@ foreach ($shardDefinition in $selectedShards) {
   }
 }
 
-if ($executionUnits.Count -eq 0) {
+if ($executionUnits.Count -eq 0 -and -not $MissingOnly) {
   throw "No execution units were selected. Check -Shard, -BatchSize, -Batch, and -ClassNamePattern."
 }
 
@@ -439,6 +484,26 @@ $passedResults = @($results | Where-Object state -eq "passed")
 $failedResults = @($results | Where-Object state -eq "failed")
 $timedOutResults = @($results | Where-Object state -eq "timed-out")
 $previewResults = @($results | Where-Object state -eq "preview")
+$selectedClassNames = @($executionUnits | ForEach-Object classNames | ForEach-Object { [string]$_ } | Sort-Object -Unique)
+$classLevelExecutionUnitCount = @($results | Where-Object classCount -eq 1).Count
+$slowestExecutionUnits = @(
+  $results |
+    Sort-Object @{ Expression = { [double]$_.durationSeconds }; Descending = $true }, id |
+    Select-Object -First $DurationRankingCount |
+    ForEach-Object {
+      [pscustomobject][ordered]@{
+        id = [string]$_.id
+        state = [string]$_.state
+        classCount = [int]$_.classCount
+        classNames = @($_.classNames)
+        durationSeconds = [double]$_.durationSeconds
+        timedOut = [bool]$_.timedOut
+        processTreeCleanup = $_.processTreeCleanup
+        trxPath = [string]$_.trxPath
+        trxSha256 = [string]$_.trxSha256
+      }
+    }
+)
 $summaryState = if ($PreviewOnly) {
   "preview"
 }
@@ -458,13 +523,22 @@ $summary = [pscustomobject][ordered]@{
   configuration = $Configuration
   testProject = ConvertTo-RelativePath $TestProject
   inventoryPath = ConvertTo-RelativePath $InventoryPath
+  inventorySha256 = $inventorySha256
+  missingOnly = [bool]$MissingOnly
+  coveragePath = if ($MissingOnly) { ConvertTo-RelativePath $CoveragePath } else { "" }
+  coverageSha256 = $coverageSha256
+  requestedMissingClassCount = $requestedMissingClasses.Count
+  selectedMissingClassCount = if ($MissingOnly) { $selectedClassNames.Count } else { 0 }
+  selectedClassNames = @($selectedClassNames)
   timeoutSecondsPerShard = $TimeoutSeconds
   requestedShards = @($requestedShards)
   requestedShardCount = $requestedShards.Count
   batchSize = $BatchSize
   requestedBatches = @($requestedBatches)
   classNamePattern = $ClassNamePattern
+  durationRankingCount = $DurationRankingCount
   executionUnitCount = $results.Count
+  classLevelExecutionUnitCount = $classLevelExecutionUnitCount
   shardCount = $results.Count
   passedShardCount = $passedResults.Count
   failedShardCount = $failedResults.Count
@@ -473,6 +547,7 @@ $summary = [pscustomobject][ordered]@{
   totalExecutedTests = [int](($results | ForEach-Object { $_.counters.executed } | Measure-Object -Sum).Sum)
   totalPassedTests = [int](($results | ForEach-Object { $_.counters.passed } | Measure-Object -Sum).Sum)
   totalFailedTests = [int](($results | ForEach-Object { $_.counters.failed } | Measure-Object -Sum).Sum)
+  slowestExecutionUnits = @($slowestExecutionUnits)
   results = @($results)
   performsPublish = $false
   canPublishPublicly = $false
@@ -498,7 +573,12 @@ $markdown.Add("- 分片：``$($requestedShards -join ', ')``")
 $markdown.Add("- 批次大小：``$BatchSize``（0 表示整个分片）")
 $markdown.Add("- 指定批次：``$(if ($requestedBatches.Count -gt 0) { $requestedBatches -join ', ' } else { '全部' })``")
 $markdown.Add("- 类名筛选：``$(if ([string]::IsNullOrWhiteSpace($ClassNamePattern)) { '无' } else { $ClassNamePattern })``")
+$markdown.Add("- 仅续跑缺失类：``$([bool]$MissingOnly)``")
+$markdown.Add("- coverage：``$(if ($MissingOnly) { ConvertTo-RelativePath $CoveragePath } else { '未使用' })``")
+$markdown.Add("- 请求缺失类：``$($requestedMissingClasses.Count)``")
+$markdown.Add("- 选中缺失类：``$(if ($MissingOnly) { $selectedClassNames.Count } else { 0 })``")
 $markdown.Add("- 执行单元：``$($summary.executionUnitCount)``")
+$markdown.Add("- 单类执行单元：``$($summary.classLevelExecutionUnitCount)``")
 $markdown.Add("- 通过分片：``$($summary.passedShardCount)``")
 $markdown.Add("- 失败分片：``$($summary.failedShardCount)``")
 $markdown.Add("- 超时分片：``$($summary.timedOutShardCount)``")
@@ -510,6 +590,14 @@ $markdown.Add("| 分片 | 状态 | 类 | 时长（秒） | Exit | Total | Passed
 $markdown.Add("| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |")
 foreach ($result in $results) {
   $markdown.Add("| ``$($result.id)`` | ``$($result.state)`` | $($result.classCount) | $($result.durationSeconds) | $($result.exitCode) | $($result.counters.total) | $($result.counters.passed) | $($result.counters.failed) | ``$($result.logPath)`` |")
+}
+$markdown.Add("")
+$markdown.Add("## 耗时排名")
+$markdown.Add("")
+$markdown.Add("| 执行单元 | 状态 | 类 | 时长（秒） | 超时 | kill-tree |")
+$markdown.Add("| --- | --- | ---: | ---: | --- | --- |")
+foreach ($result in $slowestExecutionUnits) {
+  $markdown.Add("| ``$($result.id)`` | ``$($result.state)`` | $($result.classCount) | $($result.durationSeconds) | $($result.timedOut) | $($result.processTreeCleanup.attempted) |")
 }
 $markdown.Add("")
 $markdown.Add("## 边界")

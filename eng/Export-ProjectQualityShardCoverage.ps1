@@ -74,6 +74,7 @@ $inventoryClasses = @(
 $coveredClasses = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
 $evidenceUnits = [Collections.Generic.List[object]]::new()
 $invalidEvidence = [Collections.Generic.List[object]]::new()
+$nonPassingEvidence = [Collections.Generic.List[object]]::new()
 $summaryFiles = @(Get-ChildItem -LiteralPath $ShardRoot -Recurse -File -Filter "summary.json" | Sort-Object FullName)
 $passingExecutionUnitCount = 0
 
@@ -93,7 +94,21 @@ foreach ($summaryFile in $summaryFiles) {
 
   $runId = [string](Get-OptionalProperty -Object $summary -Name "runId" -DefaultValue $summaryFile.Directory.Name)
   foreach ($result in @($summary.results)) {
-    if ([string](Get-OptionalProperty -Object $result -Name "state" -DefaultValue "") -ne "passed") {
+    $resultState = [string](Get-OptionalProperty -Object $result -Name "state" -DefaultValue "")
+    if ($resultState -ne "passed") {
+      if ($resultState -in @("failed", "timed-out")) {
+        $nonPassingEvidence.Add([pscustomobject][ordered]@{
+            runId = $runId
+            unitId = [string](Get-OptionalProperty -Object $result -Name "id" -DefaultValue "")
+            state = $resultState
+            classNames = @((Get-OptionalProperty -Object $result -Name "classNames" -DefaultValue @()) | ForEach-Object { [string]$_ })
+            durationSeconds = [double](Get-OptionalProperty -Object $result -Name "durationSeconds" -DefaultValue 0)
+            timedOut = [bool](Get-OptionalProperty -Object $result -Name "timedOut" -DefaultValue $false)
+            processTreeCleanup = Get-OptionalProperty -Object $result -Name "processTreeCleanup" -DefaultValue $null
+            lastOutputLines = @((Get-OptionalProperty -Object $result -Name "lastOutputLines" -DefaultValue @()) | ForEach-Object { [string]$_ })
+            summaryPath = ConvertTo-RelativePath $summaryFile.FullName
+          })
+      }
       continue
     }
 
@@ -168,11 +183,39 @@ foreach ($summaryFile in $summaryFiles) {
       continue
     }
 
+    $counters = Get-OptionalProperty -Object $result -Name "counters" -DefaultValue $null
+    if ($null -eq $counters -or
+        -not [bool](Get-OptionalProperty -Object $counters -Name "available" -DefaultValue $false) -or
+        [int](Get-OptionalProperty -Object $counters -Name "passed" -DefaultValue 0) -le 0 -or
+        [int](Get-OptionalProperty -Object $counters -Name "failed" -DefaultValue 0) -ne 0 -or
+        [int](Get-OptionalProperty -Object $counters -Name "error" -DefaultValue 0) -ne 0 -or
+        [int](Get-OptionalProperty -Object $counters -Name "timeout" -DefaultValue 0) -ne 0 -or
+        [int](Get-OptionalProperty -Object $counters -Name "aborted" -DefaultValue 0) -ne 0) {
+      $invalidEvidence.Add([pscustomobject][ordered]@{
+          summaryPath = ConvertTo-RelativePath $summaryFile.FullName
+          unitId = $unitId
+          reason = "trx-passed-counters-invalid"
+          detail = "A passed execution unit must have available counters, at least one passed test, and zero failed/error/timeout/aborted tests."
+        })
+      continue
+    }
+
+    $declaredClasses = @((Get-OptionalProperty -Object $result -Name "classNames" -DefaultValue @()) | ForEach-Object { [string]$_ } | Sort-Object -Unique)
+    $missingDeclaredClasses = @($declaredClasses | Where-Object { $_ -notin $trxClasses })
+    if ($missingDeclaredClasses.Count -gt 0) {
+      $invalidEvidence.Add([pscustomobject][ordered]@{
+          summaryPath = ConvertTo-RelativePath $summaryFile.FullName
+          unitId = $unitId
+          reason = "trx-declared-class-coverage-missing"
+          detail = $missingDeclaredClasses -join ";"
+        })
+      continue
+    }
+
     foreach ($className in $trxClasses) {
       [void]$coveredClasses.Add($className)
     }
 
-    $counters = Get-OptionalProperty -Object $result -Name "counters" -DefaultValue $null
     $evidenceUnits.Add([pscustomobject][ordered]@{
         runId = $runId
         unitId = $unitId
@@ -181,6 +224,7 @@ foreach ($summaryFile in $summaryFiles) {
         classNames = @($trxClasses)
         passedTestCount = if ($null -eq $counters) { 0 } else { [int](Get-OptionalProperty -Object $counters -Name "passed" -DefaultValue 0) }
         durationSeconds = [double](Get-OptionalProperty -Object $result -Name "durationSeconds" -DefaultValue 0)
+        endedAtUtc = [string](Get-OptionalProperty -Object $result -Name "endedAtUtc" -DefaultValue "")
         trxPath = ConvertTo-RelativePath $trxPath
         trxSha256 = $actualTrxHash
         summaryPath = ConvertTo-RelativePath $summaryFile.FullName
@@ -206,6 +250,17 @@ $shardCoverage = @(
 )
 
 $allClassesCovered = $missingClasses.Count -eq 0
+$singleClassEvidence = @($evidenceUnits | Where-Object classCount -eq 1)
+$singleClassInventoryEvidence = @($singleClassEvidence | Where-Object { [string]$_.classNames[0] -in $inventoryClasses })
+$slowestSingleClassEvidence = @(
+  $singleClassInventoryEvidence |
+    Group-Object { [string]$_.classNames[0] } |
+    ForEach-Object { $_.Group | Sort-Object @{ Expression = { [double]$_.durationSeconds }; Descending = $true } | Select-Object -First 1 } |
+    Sort-Object @{ Expression = { [double]$_.durationSeconds }; Descending = $true } |
+    Select-Object -First 20
+)
+$timedOutEvidence = @($nonPassingEvidence | Where-Object state -eq "timed-out")
+$failedEvidence = @($nonPassingEvidence | Where-Object state -eq "failed")
 $coverageState = if ($allClassesCovered -and $invalidEvidence.Count -eq 0) {
   "complete-class-coverage"
 }
@@ -221,16 +276,22 @@ $record = [pscustomobject][ordered]@{
   inventorySha256 = $inventoryHash
   inventoryTestCount = [int]$inventory.testCount
   inventoryClassCount = $inventoryClasses.Count
-  coveredClassCount = $coveredClasses.Count
+  coveredClassCount = $inventoryClasses.Count - $missingClasses.Count
   missingClassCount = $missingClasses.Count
   allClassesCovered = $allClassesCovered
   sourceSummaryCount = $summaryFiles.Count
   passingExecutionUnitCount = $passingExecutionUnitCount
   strictPassedTrxCount = $evidenceUnits.Count
+  singleClassPassedTrxCount = $singleClassEvidence.Count
+  singleClassCoveredClassCount = @($singleClassInventoryEvidence | ForEach-Object classNames | Sort-Object -Unique).Count
+  timedOutExecutionUnitCount = $timedOutEvidence.Count
+  failedExecutionUnitCount = $failedEvidence.Count
   invalidEvidenceCount = $invalidEvidence.Count
   shardCoverage = @($shardCoverage)
   missingClasses = @($missingClasses)
   invalidEvidence = @($invalidEvidence)
+  nonPassingEvidence = @($nonPassingEvidence)
+  slowestSingleClassPassedEvidence = @($slowestSingleClassEvidence)
   evidenceUnits = @($evidenceUnits)
   performsPublish = $false
   canPublishPublicly = $false
@@ -250,6 +311,10 @@ $markdown.Add("- Inventory: ``$($record.inventoryTestCount)`` tests / ``$($recor
 $markdown.Add("- Covered classes: ``$($record.coveredClassCount)``")
 $markdown.Add("- Missing classes: ``$($record.missingClassCount)``")
 $markdown.Add("- Hash-verified passed TRX files: ``$($record.strictPassedTrxCount)``")
+$markdown.Add("- Single-class passed TRX files: ``$($record.singleClassPassedTrxCount)``")
+$markdown.Add("- Classes with single-class duration evidence: ``$($record.singleClassCoveredClassCount)``")
+$markdown.Add("- Historical timed-out execution units: ``$($record.timedOutExecutionUnitCount)``")
+$markdown.Add("- Historical failed execution units: ``$($record.failedExecutionUnitCount)``")
 $markdown.Add("- Invalid evidence records: ``$($record.invalidEvidenceCount)``")
 $markdown.Add("- Performs publish: ``False``")
 $markdown.Add("- Can publish publicly: ``False``")
@@ -265,6 +330,14 @@ $markdown.Add("| Shard | Inventory classes | Covered | Missing | Coverage |")
 $markdown.Add("| --- | ---: | ---: | ---: | ---: |")
 foreach ($shard in $shardCoverage) {
   $markdown.Add("| $($shard.id) | $($shard.inventoryClassCount) | $($shard.coveredClassCount) | $($shard.missingClassCount) | $($shard.coveragePercent)% |")
+}
+$markdown.Add("")
+$markdown.Add("## Slowest Single-Class Passed Evidence")
+$markdown.Add("")
+$markdown.Add("| Class | Duration (seconds) | Tests | Run | TRX SHA256 |")
+$markdown.Add("| --- | ---: | ---: | --- | --- |")
+foreach ($evidence in $slowestSingleClassEvidence) {
+  $markdown.Add("| ``$([string]$evidence.classNames[0])`` | $($evidence.durationSeconds) | $($evidence.passedTestCount) | ``$($evidence.runId)`` | ``$($evidence.trxSha256)`` |")
 }
 $markdown.Add("")
 $markdown.Add("## Evidence")

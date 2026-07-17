@@ -19,6 +19,59 @@
 - `artifacts/real-case/multi-version-onnx-runtime/multi-version-runtime-evidence-matrix.json`
 - `artifacts/test-analysis/project-quality-test-inventory.json`
 
+## 2026-07-17 CUDA Kernel Library Metadata 与 ProjectQuality Bounded Shard 复审
+
+本阶段基于起始提交 `5d9aeec2e3369682f3235ac7335857c76dfe595a`，新增 6 个 CUDA Kernel Library owner-safe entry：`cudaLibraryLoadData`、`cudaLibraryLoadFromFile`、`cudaLibraryUnload`、`cudaLibraryGetKernelCount`、`cudaLibraryEnumerateKernels` 与 `cudaLibraryGetKernel`。同时将 ProjectQuality 从依赖数小时 one-shot 套件的状态，收敛为可续跑、可审计的类级 bounded shard 证据。
+
+### 实现与生命周期边界
+
+- native 新增 bridge-owned `JYPPX_CudaKernelLibrary`。内存加载会在 owner 中保留 code 副本，文件加载和 unload 均由 SafeHandle 生命周期控制；`cudaKernel_t` 只在 native 调用栈内用于存在性查询，不逃逸到 managed。
+- managed 新增 `SafeCudaKernelLibraryHandle`、`CudaKernelLibrary.Load(byte[])`、`LoadFromFile(string)`、`KernelCount`、copied `CudaKernelLibraryInventorySnapshot` 与 `ContainsKernel(string)`。
+- public API 不暴露 `IntPtr`、`nint`、`SafeHandle`、`UIntPtr`、device/function/plugin/tensor pointer。inventory 使用 count/copy，文件名使用 UTF-8 caller-owned string 输入；native entry 保持 C++ exception 与 Windows SEH containment。
+- CUDA 12.9/13.2 调用真实 vendor library API；CUDA 11.6/11.8/12.1/12.3 明确返回 `NotSupported`。missing kernel 被转换为 `false` 后调用 `cudaGetLastError()` 清除已消费的 error 500，避免污染后续 last-error。
+- library global、managed/unified function pointer、kernel mutation/raw symbol、execution-context/resource/green-context ownership 链继续 deferred。旧 deferred manifest 全部保留。
+
+### Coverage 与 ProjectQuality
+
+generator 最终为 176 manifests / 3901 records。6 个目标函数在 CUDA 12.9 与 13.2 的 12 个可用版本行全部为 `implemented-with-deferred-history`：
+
+| CUDA Toolkit | 官方函数 | manifest/source 已匹配 | 非 deferred 实现 | deferred-only |
+| --- | ---: | ---: | ---: | ---: |
+| 11.6 | 268 | 268 | 211 | 57 |
+| 11.8 | 273 | 273 | 216 | 57 |
+| 12.1 | 277 | 277 | 219 | 58 |
+| 12.3 | 292 | 292 | 227 | 65 |
+| 12.9 | 307 | 307 | 235 | 72 |
+| 13.2 | 330 | 330 | 243 | 87 |
+
+- shard runner 新增 `-MissingOnly` 与 coverage/inventory SHA256 校验；缺口模式默认每类独立 testhost，保留 timeout、process-tree cleanup、TRX counters、声明类覆盖和 TRX SHA256 的 fail-closed 审计。
+- coverage exporter 仅接受 `state=passed`、hash 匹配、passed>0 且 failed/error/timeout/aborted 全为 0 的 TRX，并输出单类耗时排名与历史 failed/timed-out 执行单元。
+- 正式 Release inventory 为 1246 tests / 375 classes；累计类级证据最终为 375/375、168 份有效 TRX、missing 0、invalid evidence 0。该结论是跨 bounded runs 的 hash-verified class coverage，不冒充一次性 one-shot 全套通过。
+- `ProjectQualityShardRunnerTests` 使用隔离的两类/TRX 夹具验证 `2/2 complete`，随后篡改一份 TRX 必须降为 `1/2 incomplete` 且产生 SHA256 mismatch；3/3 通过。
+- CUDA/TRT8 alias/Plugin Registry/BuilderConfig/RNNv2/coverage 专项最终 84 项中先暴露 1 个配置 inventory 错配；按 Debug 配置重建后 shard runner 3/3，通过项未发现实现回归。Release evidence 的剩余 6 类独立续跑为 8/8。
+
+### 构建、Smoke、NuGet 与 Consumer
+
+- bindings 生成与幂等通过：176 manifests / 3901 records。
+- 完整 solution Release build 成功，0 error；保留 5 条既有 nullable warning，位于两个 release-proof 测试文件，本阶段未扩大。
+- native：TRT8/CUDA11.8、TRT8/CUDA12.1、TRT10/CUDA12.9、TRT11/CUDA13.2 全部构建成功，CUDA/TensorRT version guard 独立。
+- CUDA 12.9 真实 kernel library smoke：内存与文件加载均为 count 1、inventory complete、named lookup true、missing lookup false、`LastError=0`；CUDA 11.8 明确 `VersionGuard=NotSupported`。
+- TRT8 与 TRT10 的 Plugin Registry、NetworkBuilder、ExecuteV2/EnqueueV2/EnqueueV3 与 output compare 全部成功。TRT11 Plugin Registry/NetworkBuilder 安全记录 vendor structured exception `3228369022`；Inference runner同样在 runtime 创建处受 compatible-host 条件阻塞，不晋级 runtime proof。
+- managed 4.0.0 与 TRT8/TRT10/TRT11 三个 bridge-only 本地包已重打。三个纯 `PackageReference` consumer 均无 `ProjectReference`，restore/build 为 0 warning / 0 error，并编译 `CudaKernelLibrary` 的 load/count/inventory/contains/dispose surface；`IsRuntimeExecutionProof=false`。
+
+| 包 | 大小 | SHA256 |
+| --- | ---: | --- |
+| managed `JYPPX.TensorRT.CSharp.API.4.0.0.nupkg` | 14,253,134 bytes | `86A40EE80E785E8791BA31E3B65A4328619DA97A6D7BA23BF6E5117D487F051B` |
+| TRT8/CUDA12.1 bridge-only | 303,108 bytes | `55A59C0E8EA874E83EDC4B9F8A477E9B5B300EFCBAB709CF6C0948A90E648FAB` |
+| TRT10/CUDA12.9 bridge-only | 326,898 bytes | `49635F52A7E555FEE0883013477C6CC9192B5BDA2EACFF11939BE2D147D4C3C2` |
+| TRT11/CUDA13.2 bridge-only | 268,946 bytes | `B2CB0C8069351DDD8CA78843280870017C527D1E9375F45DA76FCFCF353FBF4B` |
+
+### Gate 与发布边界
+
+strict release quality gate 为 `release-quality-gate-passed`、required failure 0；classification audit 为 `classification-audit-passed-non-proof-boundaries-intact`、finding 0。Owner convergence 继续为 accepted 0/9、gates 2/3、validation failed blockers 0，`canPublishPublicly=false`、`canCloseReleaseIssue=false`。
+
+本阶段未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
+
 ## 2026-07-17 CUDA Texture/Surface Owner 与 ProjectQuality 隔离复审
 
 本阶段基于起始提交 `f4e882494d62aa53123a48766a9bd3b4c9b76be4`，新增 10 个 CUDA texture/surface 安全 entry，覆盖 `cudaCreate/DestroySurfaceObject`、`cudaGetSurfaceObjectResourceDesc`、`cudaCreate/DestroyTextureObject`、CUDA 11.8 `_v2` create/get descriptor，以及 texture resource、texture descriptor 和 resource-view copied query。旧 deferred manifest 全部保留，coverage 通过显式 real alias 优先并合并 deferred history。

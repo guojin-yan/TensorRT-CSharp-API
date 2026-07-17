@@ -949,17 +949,26 @@ JYPPX_C_API(BridgeStatusCode) jyppx_cuda_launch_kernel(const void* function, JYP
 // generated from manifest id=cuda-launch-kernel-ex-c
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_launch_kernel_ex(const JYPPX_CudaLaunchConfig* config, const void* function, void** arguments);
 
+// generated from manifest id=cuda-library-enumerate-kernels-copied-inventory-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_kernel_library_get_inventory_safe(JYPPX_CudaKernelLibrary* library, JYPPX_CudaKernelLibraryInventory* out_inventory);
+
 // generated from manifest id=cuda-library-enumerate-kernels-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_library_enumerate_kernels_deferred(void);
 
 // generated from manifest id=cuda-library-get-global-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_library_get_global_deferred(void);
 
+// generated from manifest id=cuda-library-get-kernel-count-copied-scalar-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_kernel_library_get_count_safe(JYPPX_CudaKernelLibrary* library, uint32_t* out_count);
+
 // generated from manifest id=cuda-library-get-kernel-count-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_library_get_kernel_count_deferred(void);
 
 // generated from manifest id=cuda-library-get-kernel-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_library_get_kernel_deferred(void);
+
+// generated from manifest id=cuda-library-get-kernel-exists-by-name-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_kernel_library_contains_kernel_safe(JYPPX_CudaKernelLibrary* library, const char* name, JYPPX_Boolean* out_exists);
 
 // generated from manifest id=cuda-library-get-managed-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_library_get_managed_deferred(void);
@@ -970,8 +979,17 @@ JYPPX_C_API(BridgeStatusCode) jyppx_cuda_library_get_unified_function_deferred(v
 // generated from manifest id=cuda-library-load-data-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_library_load_data_deferred(void);
 
+// generated from manifest id=cuda-library-load-data-retained-copy-owner-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_kernel_library_load_data_copy_safe(const uint8_t* code, size_t code_size, JYPPX_CudaKernelLibrary** out_library);
+
+// generated from manifest id=cuda-library-load-from-file-bridge-owned-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_kernel_library_load_file_safe(const char* path, JYPPX_CudaKernelLibrary** out_library);
+
 // generated from manifest id=cuda-library-load-from-file-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_library_load_from_file_deferred(void);
+
+// generated from manifest id=cuda-library-unload-bridge-owned-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_kernel_library_destroy_safe(JYPPX_CudaKernelLibrary* library);
 
 // generated from manifest id=cuda-library-unload-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_library_unload_deferred(void);

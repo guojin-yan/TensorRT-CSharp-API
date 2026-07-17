@@ -107,6 +107,11 @@ JYPPX_StatusCode validate_surface_object(const JYPPX_CudaSurfaceObject* surface,
     return validate_handle(reinterpret_cast<const SurfaceObject*>(surface), ObjectKind::SurfaceObject, name);
 }
 
+JYPPX_StatusCode validate_kernel_library(const JYPPX_CudaKernelLibrary* library, const char* name)
+{
+    return validate_handle(reinterpret_cast<const KernelLibraryObject*>(library), ObjectKind::KernelLibrary, name);
+}
+
 void set_cuda_error(const char* operation, const int32_t error_code, const char* error_name, const char* error_message)
 {
     std::ostringstream builder;

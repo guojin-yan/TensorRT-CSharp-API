@@ -17,6 +17,7 @@ typedef struct JYPPX_CudaArray JYPPX_CudaArray;
 typedef struct JYPPX_CudaMipmappedArray JYPPX_CudaMipmappedArray;
 typedef struct JYPPX_CudaTextureObject JYPPX_CudaTextureObject;
 typedef struct JYPPX_CudaSurfaceObject JYPPX_CudaSurfaceObject;
+typedef struct JYPPX_CudaKernelLibrary JYPPX_CudaKernelLibrary;
 
 typedef enum JYPPX_CudaMemcpyKind
 {
@@ -68,6 +69,14 @@ typedef struct JYPPX_CudaMemoryInfo
     uint64_t free_bytes;
     uint64_t total_bytes;
 } JYPPX_CudaMemoryInfo;
+
+typedef struct JYPPX_CudaKernelLibraryInventory
+{
+    uint32_t reported_kernel_count;
+    uint32_t enumerated_kernel_count;
+    uint32_t null_kernel_count;
+    JYPPX_Boolean is_complete;
+} JYPPX_CudaKernelLibraryInventory;
 
 typedef struct JYPPX_CudaPointerAttributes
 {

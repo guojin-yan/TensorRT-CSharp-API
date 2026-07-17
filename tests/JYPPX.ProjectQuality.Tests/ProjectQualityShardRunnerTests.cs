@@ -90,6 +90,9 @@ public sealed class ProjectQualityShardRunnerTests
         Assert.Contains("trxSha256", runnerSource, StringComparison.Ordinal);
         Assert.Contains("BatchSize", runnerSource, StringComparison.Ordinal);
         Assert.Contains("ClassNamePattern", runnerSource, StringComparison.Ordinal);
+        Assert.Contains("MissingOnly", runnerSource, StringComparison.Ordinal);
+        Assert.Contains("coverage inventory SHA256", runnerSource, StringComparison.Ordinal);
+        Assert.Contains("slowestExecutionUnits", runnerSource, StringComparison.Ordinal);
         Assert.Contains("classNames", runnerSource, StringComparison.Ordinal);
         Assert.Contains("DOTNET_CLI_USE_MSBUILD_SERVER", runnerSource, StringComparison.Ordinal);
         Assert.Contains("MSBUILDDISABLENODEREUSE", runnerSource, StringComparison.Ordinal);
@@ -131,59 +134,171 @@ public sealed class ProjectQualityShardRunnerTests
     }
 
     [Fact]
-    public void ShardCoverageExporterRequiresHashVerifiedPassedTrxForEveryInventoryClass()
+    public void MissingOnlyPreviewUsesExactClassesAndFailsClosedOnStaleInventory()
     {
         string inventoryOutput = RunPowerShell(
             Path.Combine(RepositoryPaths.Root, "eng", "Export-ProjectQualityTestInventory.ps1"));
         Assert.Contains("ProjectQuality test inventory written.", inventoryOutput, StringComparison.Ordinal);
 
-        string shardOutput = RunPowerShell(
-            Path.Combine(RepositoryPaths.Root, "eng", "Invoke-ProjectQualityTestShards.ps1"),
-            "-Shard",
-            "G-M,T-Z",
-            "-TimeoutSeconds",
-            "120",
-            "-RunId",
-            "project-quality-shard-coverage-self-check",
-            "-ContinueOnFailure");
-        Assert.Contains("ProjectQuality shard summary written.", shardOutput, StringComparison.Ordinal);
-
-        string output = RunPowerShell(
-            Path.Combine(RepositoryPaths.Root, "eng", "Export-ProjectQualityShardCoverage.ps1"));
-        Assert.Contains("ProjectQuality shard coverage written.", output, StringComparison.Ordinal);
-        Assert.Contains("CoverageState=complete-class-coverage", output, StringComparison.Ordinal);
-
-        string coveragePath = Path.Combine(
+        string inventoryPath = Path.Combine(
             RepositoryPaths.Root,
             "artifacts",
             "test-analysis",
-            "project-quality-shard-class-coverage.json");
-        using JsonDocument coverageDocument = JsonDocument.Parse(File.ReadAllText(coveragePath));
-        JsonElement coverage = coverageDocument.RootElement;
+            "project-quality-test-inventory.json");
+        using JsonDocument inventoryDocument = JsonDocument.Parse(File.ReadAllText(inventoryPath));
+        JsonElement shard = inventoryDocument.RootElement.GetProperty("shards")[0];
+        string shardId = shard.GetProperty("id").GetString()!;
+        string missingClass = shard.GetProperty("classes")[0].GetString()!;
+        string inventorySha256 = Convert.ToHexString(
+            System.Security.Cryptography.SHA256.HashData(File.ReadAllBytes(inventoryPath))).ToLowerInvariant();
+        string coveragePath = Path.Combine(Path.GetTempPath(), $"project-quality-coverage-{Guid.NewGuid():N}.json");
 
-        Assert.Equal("project-quality-shard-class-coverage", coverage.GetProperty("recordKind").GetString());
-        Assert.Equal("complete-class-coverage", coverage.GetProperty("coverageState").GetString());
-        Assert.True(coverage.GetProperty("inventoryTestCount").GetInt32() >= 1000);
-        Assert.True(coverage.GetProperty("inventoryClassCount").GetInt32() >= 300);
-        Assert.Equal(
-            coverage.GetProperty("inventoryClassCount").GetInt32(),
-            coverage.GetProperty("coveredClassCount").GetInt32());
-        Assert.Equal(0, coverage.GetProperty("missingClassCount").GetInt32());
-        Assert.True(coverage.GetProperty("allClassesCovered").GetBoolean());
-        Assert.True(coverage.GetProperty("strictPassedTrxCount").GetInt32() > 0);
-        Assert.Equal(0, coverage.GetProperty("invalidEvidenceCount").GetInt32());
-        Assert.Equal(4, coverage.GetProperty("shardCoverage").GetArrayLength());
-        Assert.All(coverage.GetProperty("shardCoverage").EnumerateArray(), static shard =>
+        try
         {
-            Assert.Equal(
-                shard.GetProperty("inventoryClassCount").GetInt32(),
-                shard.GetProperty("coveredClassCount").GetInt32());
-            Assert.Equal(0, shard.GetProperty("missingClassCount").GetInt32());
-        });
-        Assert.False(coverage.GetProperty("performsPublish").GetBoolean());
-        Assert.False(coverage.GetProperty("canPublishPublicly").GetBoolean());
-        Assert.False(coverage.GetProperty("canCloseReleaseIssue").GetBoolean());
-        Assert.Contains("not a one-shot whole-suite run", coverage.GetProperty("boundary").GetString(), StringComparison.Ordinal);
+            File.WriteAllText(coveragePath, JsonSerializer.Serialize(new
+            {
+                recordKind = "project-quality-shard-class-coverage",
+                inventorySha256,
+                missingClasses = new[] { missingClass },
+            }));
+
+            string previewOutput = RunPowerShell(
+                Path.Combine(RepositoryPaths.Root, "eng", "Invoke-ProjectQualityTestShards.ps1"),
+                "-Shard",
+                shardId,
+                "-CoveragePath",
+                coveragePath,
+                "-MissingOnly",
+                "-TimeoutSeconds",
+                "120",
+                "-RunId",
+                "project-quality-missing-only-preview",
+                "-PreviewOnly");
+            Assert.Contains("RunState=preview Shards=1", previewOutput, StringComparison.Ordinal);
+
+            string summaryPath = Path.Combine(
+                RepositoryPaths.Root,
+                "artifacts",
+                "test-analysis",
+                "project-quality-shards",
+                "project-quality-missing-only-preview",
+                "summary.json");
+            using JsonDocument summaryDocument = JsonDocument.Parse(File.ReadAllText(summaryPath));
+            JsonElement summary = summaryDocument.RootElement;
+            Assert.True(summary.GetProperty("missingOnly").GetBoolean());
+            Assert.Equal(inventorySha256, summary.GetProperty("inventorySha256").GetString());
+            Assert.Equal(1, summary.GetProperty("requestedMissingClassCount").GetInt32());
+            Assert.Equal(1, summary.GetProperty("selectedMissingClassCount").GetInt32());
+            Assert.Equal(1, summary.GetProperty("classLevelExecutionUnitCount").GetInt32());
+            Assert.Equal(missingClass, summary.GetProperty("selectedClassNames")[0].GetString());
+            Assert.Equal(1, summary.GetProperty("slowestExecutionUnits").GetArrayLength());
+
+            File.WriteAllText(coveragePath, JsonSerializer.Serialize(new
+            {
+                recordKind = "project-quality-shard-class-coverage",
+                inventorySha256 = new string('0', 64),
+                missingClasses = new[] { missingClass },
+            }));
+            string failure = RunPowerShellExpectFailure(
+                Path.Combine(RepositoryPaths.Root, "eng", "Invoke-ProjectQualityTestShards.ps1"),
+                "-Shard",
+                shardId,
+                "-CoveragePath",
+                coveragePath,
+                "-MissingOnly",
+                "-TimeoutSeconds",
+                "120",
+                "-RunId",
+                "project-quality-missing-only-stale-preview",
+                "-PreviewOnly");
+            Assert.Contains("coverage inventory SHA256 does not match", failure, StringComparison.Ordinal);
+        }
+        finally
+        {
+            File.Delete(coveragePath);
+        }
+    }
+
+    [Fact]
+    public void ShardCoverageExporterRequiresHashVerifiedPassedTrxForEveryInventoryClass()
+    {
+        string fixtureRoot = Path.Combine(Path.GetTempPath(), $"project-quality-shard-coverage-{Guid.NewGuid():N}");
+        string shardRoot = Path.Combine(fixtureRoot, "shards", "fixture-run");
+        string outputDirectory = Path.Combine(fixtureRoot, "output");
+        Directory.CreateDirectory(shardRoot);
+
+        try
+        {
+            string firstClass = "JYPPX.ProjectQuality.Tests.AlphaFixtureTests";
+            string secondClass = "JYPPX.ProjectQuality.Tests.ZuluFixtureTests";
+            string historicalClass = "JYPPX.ProjectQuality.Tests.HistoricalFixtureTests";
+            string inventoryPath = Path.Combine(fixtureRoot, "inventory.json");
+            File.WriteAllText(inventoryPath, JsonSerializer.Serialize(new
+            {
+                recordKind = "project-quality-test-inventory",
+                testCount = 2,
+                classCount = 2,
+                shards = new object[]
+                {
+                    new { id = "A-F", classes = new[] { firstClass } },
+                    new { id = "G-M", classes = Array.Empty<string>() },
+                    new { id = "N-S", classes = Array.Empty<string>() },
+                    new { id = "T-Z", classes = new[] { secondClass } },
+                },
+            }));
+
+            string firstTrxPath = Path.Combine(shardRoot, "first.trx");
+            string secondTrxPath = Path.Combine(shardRoot, "second.trx");
+            string historicalTrxPath = Path.Combine(shardRoot, "historical.trx");
+            File.WriteAllText(firstTrxPath, $"<TestRun><TestDefinitions><UnitTest><TestMethod className=\"{firstClass}\" name=\"Pass\" /></UnitTest></TestDefinitions></TestRun>");
+            File.WriteAllText(secondTrxPath, $"<TestRun><TestDefinitions><UnitTest><TestMethod className=\"{secondClass}\" name=\"Pass\" /></UnitTest></TestDefinitions></TestRun>");
+            File.WriteAllText(historicalTrxPath, $"<TestRun><TestDefinitions><UnitTest><TestMethod className=\"{historicalClass}\" name=\"Pass\" /></UnitTest></TestDefinitions></TestRun>");
+
+            static string Sha256(string path) => Convert.ToHexString(
+                System.Security.Cryptography.SHA256.HashData(File.ReadAllBytes(path))).ToLowerInvariant();
+            object Counters() => new { available = true, total = 1, executed = 1, passed = 1, failed = 0, error = 0, timeout = 0, aborted = 0 };
+            File.WriteAllText(Path.Combine(shardRoot, "summary.json"), JsonSerializer.Serialize(new
+            {
+                runId = "fixture-run",
+                results = new object[]
+                {
+                    new { id = "A-F", parentShardId = "A-F", state = "passed", classCount = 1, classNames = new[] { firstClass }, durationSeconds = 1.25, endedAtUtc = "2026-07-17T00:00:01Z", trxPath = firstTrxPath, trxSha256 = Sha256(firstTrxPath), counters = Counters() },
+                    new { id = "T-Z", parentShardId = "T-Z", state = "passed", classCount = 1, classNames = new[] { secondClass }, durationSeconds = 2.5, endedAtUtc = "2026-07-17T00:00:02Z", trxPath = secondTrxPath, trxSha256 = Sha256(secondTrxPath), counters = Counters() },
+                    new { id = "historical", parentShardId = "", state = "passed", classCount = 1, classNames = new[] { historicalClass }, durationSeconds = 99.0, endedAtUtc = "2026-07-16T00:00:00Z", trxPath = historicalTrxPath, trxSha256 = Sha256(historicalTrxPath), counters = Counters() },
+                },
+            }));
+
+            string exporterPath = Path.Combine(RepositoryPaths.Root, "eng", "Export-ProjectQualityShardCoverage.ps1");
+            string output = RunPowerShell(exporterPath, "-InventoryPath", inventoryPath, "-ShardRoot", Path.GetDirectoryName(shardRoot)!, "-OutputDirectory", outputDirectory);
+            Assert.Contains("CoverageState=complete-class-coverage Classes=2/2 Missing=0 ValidTrx=3 InvalidEvidence=0", output, StringComparison.Ordinal);
+
+            string coveragePath = Path.Combine(outputDirectory, "project-quality-shard-class-coverage.json");
+            using (JsonDocument coverageDocument = JsonDocument.Parse(File.ReadAllText(coveragePath)))
+            {
+                JsonElement coverage = coverageDocument.RootElement;
+                Assert.Equal("complete-class-coverage", coverage.GetProperty("coverageState").GetString());
+                Assert.Equal(2, coverage.GetProperty("coveredClassCount").GetInt32());
+                Assert.Equal(3, coverage.GetProperty("singleClassPassedTrxCount").GetInt32());
+                Assert.Equal(2, coverage.GetProperty("singleClassCoveredClassCount").GetInt32());
+                Assert.Equal(0, coverage.GetProperty("invalidEvidenceCount").GetInt32());
+                Assert.False(coverage.GetProperty("canPublishPublicly").GetBoolean());
+                Assert.False(coverage.GetProperty("canCloseReleaseIssue").GetBoolean());
+            }
+
+            File.AppendAllText(secondTrxPath, "<!-- tampered -->");
+            string tamperedOutput = RunPowerShell(exporterPath, "-InventoryPath", inventoryPath, "-ShardRoot", Path.GetDirectoryName(shardRoot)!, "-OutputDirectory", outputDirectory);
+            Assert.Contains("CoverageState=incomplete-class-coverage Classes=1/2 Missing=1 ValidTrx=2 InvalidEvidence=1", tamperedOutput, StringComparison.Ordinal);
+
+            using JsonDocument tamperedDocument = JsonDocument.Parse(File.ReadAllText(coveragePath));
+            JsonElement tamperedCoverage = tamperedDocument.RootElement;
+            Assert.Equal("incomplete-class-coverage", tamperedCoverage.GetProperty("coverageState").GetString());
+            Assert.Equal(secondClass, tamperedCoverage.GetProperty("missingClasses")[0].GetString());
+            Assert.Equal("trx-sha256-mismatch", tamperedCoverage.GetProperty("invalidEvidence")[0].GetProperty("reason").GetString());
+        }
+        finally
+        {
+            Directory.Delete(fixtureRoot, recursive: true);
+        }
     }
 
     private static string RunPowerShell(string scriptPath, params string[] arguments)
@@ -215,5 +330,35 @@ public sealed class ProjectQualityShardRunnerTests
         Assert.Equal(0, process.ExitCode);
         Assert.True(string.IsNullOrWhiteSpace(stderr), stderr);
         return stdout;
+    }
+
+    private static string RunPowerShellExpectFailure(string scriptPath, params string[] arguments)
+    {
+        ProcessStartInfo startInfo = new()
+        {
+            FileName = "pwsh",
+            WorkingDirectory = RepositoryPaths.Root,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+        };
+        startInfo.ArgumentList.Add("-NoProfile");
+        startInfo.ArgumentList.Add("-ExecutionPolicy");
+        startInfo.ArgumentList.Add("Bypass");
+        startInfo.ArgumentList.Add("-File");
+        startInfo.ArgumentList.Add(scriptPath);
+        foreach (string argument in arguments)
+        {
+            startInfo.ArgumentList.Add(argument);
+        }
+
+        using Process process = Process.Start(startInfo)
+            ?? throw new InvalidOperationException("Failed to start PowerShell.");
+        string stdout = process.StandardOutput.ReadToEnd();
+        string stderr = process.StandardError.ReadToEnd();
+        Assert.True(process.WaitForExit(180_000), $"PowerShell timed out.{Environment.NewLine}{stdout}{Environment.NewLine}{stderr}");
+        Assert.NotEqual(0, process.ExitCode);
+        return stdout + Environment.NewLine + stderr;
     }
 }

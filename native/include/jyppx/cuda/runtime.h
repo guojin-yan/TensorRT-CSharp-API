@@ -496,6 +496,15 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_texture_object_get_descriptor_v2_safe(J
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_texture_object_get_resource_view_snapshot_safe(JYPPX_CudaTextureObject* texture, JYPPX_CudaTextureResourceViewSnapshot* out_snapshot);
 /* END CUDA FIFTIETH BATCH TEXTURE AND SURFACE ARRAY OWNERS */
 
+/* BEGIN CUDA FIFTY-FIRST BATCH KERNEL LIBRARY METADATA */
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_kernel_library_load_data_copy_safe(const uint8_t* code, size_t code_size, JYPPX_CudaKernelLibrary** out_library);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_kernel_library_load_file_safe(const char* path, JYPPX_CudaKernelLibrary** out_library);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_kernel_library_destroy_safe(JYPPX_CudaKernelLibrary* library);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_kernel_library_get_count_safe(JYPPX_CudaKernelLibrary* library, uint32_t* out_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_kernel_library_get_inventory_safe(JYPPX_CudaKernelLibrary* library, JYPPX_CudaKernelLibraryInventory* out_inventory);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_kernel_library_contains_kernel_safe(JYPPX_CudaKernelLibrary* library, const char* name, JYPPX_Boolean* out_exists);
+/* END CUDA FIFTY-FIRST BATCH KERNEL LIBRARY METADATA */
+
 /* BEGIN CUDA FORTY-FOURTH BATCH GRAPH NODE PARAMETER DESCRIPTORS */
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_memset_node_get_params_safe(uintptr_t node, JYPPX_CudaGraphMemsetNodeParams* out_params);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_memset_node_set_params_safe(uintptr_t node, JYPPX_CudaMemory* destination, uint32_t value, size_t count);

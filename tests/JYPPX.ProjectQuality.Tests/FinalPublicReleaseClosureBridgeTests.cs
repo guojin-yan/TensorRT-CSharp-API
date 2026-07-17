@@ -292,7 +292,7 @@ public sealed class FinalPublicReleaseClosureBridgeTests
                 ["ownerAction"] = "Ready-shaped fixture action only.",
                 ["boundary"] = "Fixture cannot publish, cannot use tokens, cannot promote proof, and cannot close a release issue.",
                 ["requiredEvidence"] = "Ready-shaped fixture required evidence.",
-                ["validatorPath"] = "eng\\ReadyFixtureValidator.ps1 -Strict",
+                ["validatorPath"] = "eng\\Test-FinalPublicReleaseClosureBridge.ps1 -Strict",
                 ["requiredOwnerFieldCount"] = laneId == "public-package-download-owner-execution-pack" ? 20 : laneId == "post-publish-user-verification-pack" ? 19 : 0,
                 ["blockedRequiredOwnerFieldCount"] = laneId == "public-package-download-owner-execution-pack" ? 20 : laneId == "post-publish-user-verification-pack" ? 19 : 0,
                 ["readyOwnerFieldCount"] = 0,
