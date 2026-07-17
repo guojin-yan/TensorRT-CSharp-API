@@ -127,9 +127,26 @@ internal static partial class NativeBridgeApi
         string pluginNamespace,
         out TensorRtPluginCreatorInfo? creator)
     {
+        return TryGetGlobalPluginCreator(
+            line,
+            pluginName,
+            pluginVersion,
+            pluginNamespace,
+            includeCreatorFields: true,
+            out creator);
+    }
+
+    public static bool TryGetGlobalPluginCreator(
+        TensorRtApiLine line,
+        string pluginName,
+        string pluginVersion,
+        string pluginNamespace,
+        bool includeCreatorFields,
+        out TensorRtPluginCreatorInfo? creator)
+    {
         if (line == TensorRtApiLine.TensorRt8)
         {
-            TensorRtPluginRegistryInventory inventory = GetGlobalPluginRegistryInventory(line, includeCreatorFields: true);
+            TensorRtPluginRegistryInventory inventory = GetGlobalPluginRegistryInventory(line, includeCreatorFields);
             foreach (TensorRtPluginCreatorInfo candidate in inventory.Creators)
             {
                 if (StringComparer.Ordinal.Equals(candidate.Name, pluginName ?? string.Empty) &&
@@ -159,14 +176,20 @@ internal static partial class NativeBridgeApi
             out int interfaceMajor,
             out int interfaceMinor);
         TensorRtApiLanguage apiLanguage = GetGlobalLookupPluginCreatorApiLanguage(line, pluginName, pluginVersion, pluginNamespace);
-        int fieldCount = GetGlobalLookupPluginCreatorFieldCount(line, pluginName, pluginVersion, pluginNamespace);
-        List<TensorRtPluginFieldInfo> fields = new List<TensorRtPluginFieldInfo>(fieldCount);
-
-        for (int fieldIndex = 0; fieldIndex < fieldCount; fieldIndex++)
+        IReadOnlyList<TensorRtPluginFieldInfo> fields = Array.Empty<TensorRtPluginFieldInfo>();
+        if (includeCreatorFields)
         {
-            string fieldName = GetGlobalLookupPluginCreatorFieldName(line, pluginName, pluginVersion, pluginNamespace, fieldIndex);
-            GetGlobalLookupPluginCreatorFieldMetadata(line, pluginName, pluginVersion, pluginNamespace, fieldIndex, out TensorRtPluginFieldType fieldType, out int length, out bool hasData);
-            fields.Add(new TensorRtPluginFieldInfo(fieldName, fieldType, length, hasData));
+            int fieldCount = GetGlobalLookupPluginCreatorFieldCount(line, pluginName, pluginVersion, pluginNamespace);
+            List<TensorRtPluginFieldInfo> fieldList = new List<TensorRtPluginFieldInfo>(fieldCount);
+
+            for (int fieldIndex = 0; fieldIndex < fieldCount; fieldIndex++)
+            {
+                string fieldName = GetGlobalLookupPluginCreatorFieldName(line, pluginName, pluginVersion, pluginNamespace, fieldIndex);
+                GetGlobalLookupPluginCreatorFieldMetadata(line, pluginName, pluginVersion, pluginNamespace, fieldIndex, out TensorRtPluginFieldType fieldType, out int length, out bool hasData);
+                fieldList.Add(new TensorRtPluginFieldInfo(fieldName, fieldType, length, hasData));
+            }
+
+            fields = fieldList;
         }
 
         creator = new TensorRtPluginCreatorInfo(

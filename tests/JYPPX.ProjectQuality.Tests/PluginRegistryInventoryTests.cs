@@ -5,7 +5,7 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class PluginRegistryInventoryTests
 {
     [Fact]
-    public void BuilderCapabilityInventoryCopiesCreatorFieldsIntoManagedSnapshot()
+    public void BuilderCapabilityInventoryCopiesCreatorFieldsByDefaultAndSupportsIdentityOnlySnapshots()
     {
         string source = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.BuilderCapabilityPluginRegistry.cs");
         string inventoryMethod = ExtractBetween(
@@ -13,13 +13,15 @@ public sealed class PluginRegistryInventoryTests
             "public static TensorRtPluginRegistryInventory GetBuilderCapabilityPluginRegistryInventory",
             "public static bool IsBuilderCapabilityPluginCreatorRegistered");
 
+        Assert.Contains("return GetBuilderCapabilityPluginRegistryInventory(line, capability, includeCreatorFields: true);", inventoryMethod);
+        Assert.Contains("if (includeCreatorFields)", inventoryMethod);
         Assert.Contains("int fieldCount = GetBuilderCapabilityPluginCreatorFieldCount(line, capability, creatorIndex);", inventoryMethod);
         Assert.Contains("GetBuilderCapabilityPluginCreatorFieldName(line, capability, creatorIndex, fieldIndex)", inventoryMethod);
         Assert.Contains("GetBuilderCapabilityPluginCreatorFieldMetadata(line, capability, creatorIndex, fieldIndex", inventoryMethod);
-        Assert.Contains("fields.Add(new TensorRtPluginFieldInfo(fieldName, fieldType, length, hasData));", inventoryMethod);
+        Assert.Contains("fieldList.Add(new TensorRtPluginFieldInfo(fieldName, fieldType, length, hasData));", inventoryMethod);
         Assert.Contains("fields,", inventoryMethod);
         Assert.Contains("tensorRtVersion));", inventoryMethod);
-        Assert.DoesNotContain("Array.Empty<TensorRtPluginFieldInfo>()", inventoryMethod);
+        Assert.Contains("Array.Empty<TensorRtPluginFieldInfo>()", inventoryMethod);
     }
 
     [Fact]

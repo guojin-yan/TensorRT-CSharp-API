@@ -953,6 +953,34 @@ static class HighLevelWrapperSurfaceProbe
             };
         Func<TensorRtApiLine, TensorRtPluginRegistryInventory> globalPluginRegistryInventory =
             static line => TensorRtEnvironmentProbe.GetGlobalPluginRegistryInventory(line);
+        Func<TensorRtApiLine, bool, TensorRtPluginRegistryInventory> globalPluginRegistryInventoryWithFieldPolicy =
+            static (line, includeCreatorFields) => TensorRtEnvironmentProbe.GetGlobalPluginRegistryInventory(line, includeCreatorFields);
+        Func<TensorRtApiLine, bool, (bool success, TensorRtPluginRegistryInventory? inventory, string diagnostic)> safeGlobalPluginRegistryInventoryWithFieldPolicy =
+            static (line, includeCreatorFields) =>
+            {
+                bool success = TensorRtEnvironmentProbe.TryGetGlobalPluginRegistryInventory(line, includeCreatorFields, out TensorRtPluginRegistryInventory? inventory, out string diagnostic);
+                return (success, inventory, diagnostic);
+            };
+        Func<TensorRtApiLine, string, string, string, bool, (bool success, TensorRtPluginCreatorInfo? creator, string diagnostic)> globalPluginCreatorWithFieldPolicy =
+            static (line, name, version, pluginNamespace, includeCreatorFields) =>
+            {
+                bool success = TensorRtEnvironmentProbe.TryGetGlobalPluginCreator(line, name, version, pluginNamespace, includeCreatorFields, out TensorRtPluginCreatorInfo? creator, out string diagnostic);
+                return (success, creator, diagnostic);
+            };
+        Func<TensorRtApiLine, TensorRtEngineCapability, bool, TensorRtPluginRegistryInventory> builderCapabilityPluginRegistryInventoryWithFieldPolicy =
+            static (line, capability, includeCreatorFields) => TensorRtEnvironmentProbe.GetBuilderCapabilityPluginRegistryInventory(line, capability, includeCreatorFields);
+        Func<TensorRtApiLine, TensorRtEngineCapability, bool, (bool success, TensorRtPluginRegistryInventory? inventory, string diagnostic)> safeBuilderCapabilityPluginRegistryInventoryWithFieldPolicy =
+            static (line, capability, includeCreatorFields) =>
+            {
+                bool success = TensorRtEnvironmentProbe.TryGetBuilderCapabilityPluginRegistryInventory(line, capability, includeCreatorFields, out TensorRtPluginRegistryInventory? inventory, out string diagnostic);
+                return (success, inventory, diagnostic);
+            };
+        Func<TensorRtApiLine, TensorRtEngineCapability, string, string, string, bool, (bool success, TensorRtPluginCreatorInfo? creator, string diagnostic)> builderCapabilityPluginCreatorWithFieldPolicy =
+            static (line, capability, name, version, pluginNamespace, includeCreatorFields) =>
+            {
+                bool success = TensorRtEnvironmentProbe.TryGetBuilderCapabilityPluginCreator(line, capability, name, version, pluginNamespace, includeCreatorFields, out TensorRtPluginCreatorInfo? creator, out string diagnostic);
+                return (success, creator, diagnostic);
+            };
         Func<TensorRtApiLine, bool> globalPluginRegistryParentSearch =
             static line => TensorRtEnvironmentProbe.IsGlobalPluginRegistryParentSearchEnabled(line);
         Action<TensorRtApiLine, bool> setGlobalPluginRegistryParentSearch =
@@ -2677,6 +2705,12 @@ static class HighLevelWrapperSurfaceProbe
         _ = globalPluginRegistryAvailable;
         _ = safeGlobalPluginRegistryAvailable;
         _ = globalPluginRegistryInventory;
+        _ = globalPluginRegistryInventoryWithFieldPolicy;
+        _ = safeGlobalPluginRegistryInventoryWithFieldPolicy;
+        _ = globalPluginCreatorWithFieldPolicy;
+        _ = builderCapabilityPluginRegistryInventoryWithFieldPolicy;
+        _ = safeBuilderCapabilityPluginRegistryInventoryWithFieldPolicy;
+        _ = builderCapabilityPluginCreatorWithFieldPolicy;
         _ = globalPluginRegistryParentSearch;
         _ = setGlobalPluginRegistryParentSearch;
         _ = trySetGlobalPluginRegistryParentSearch;

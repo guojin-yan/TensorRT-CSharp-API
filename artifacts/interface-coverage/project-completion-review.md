@@ -19,6 +19,59 @@
 - `artifacts/real-case/multi-version-onnx-runtime/multi-version-runtime-evidence-matrix.json`
 - `artifacts/test-analysis/project-quality-test-inventory.json`
 
+## 2026-07-18 TRT11 / CUDA 12.9 Compatible-Host Runtime Proof 复审
+
+本阶段基于起始提交 `6fb1833e21e2d62f96f45467b23316b3334f718a`，使用既有 GitHub Release `v4.0.6156` 的 TRT11/CUDA12.9 vendor 组件和当前源码构建的 bridge，完成 TRT11 真实 builder、parser、engine round-trip、enqueue 与 package runtime consumer 证明。Release 资产只读下载和校验；没有执行 package push、Release upload 或 issue close。
+
+### Plugin Registry 与 ONNX 兼容处理
+
+- `TensorRtEnvironmentProbe` 的 global/capability registry inventory 与 creator lookup 新增 `includeCreatorFields` overload；旧 overload 固定转发 `true`，保持既有完整 inventory 行为。
+- TRT11 内置 V3 creator 的 field hook 仅供 parser 使用，直接枚举会输出 vendor `Unexpected Internal Error`。TRT11 Plugin Registry smoke 现在传入 `false`，只复制 creator identity、interface 与 API language；显式字段 API、TRT8/TRT10 完整字段路径继续保留。
+- `OnnxToEngineSmokeRunner` 对 TRT11 已移除的 `PlatformHasFastFp16`、`PlatformHasFastInt8`、`PlatformHasTf32` 查询单独捕获 `BridgeStatusCode.NotSupported`，输出 `Unavailable:NotSupported` 后继续 parse/build，而不是把版本差异误判为 runtime 失败。
+- public surface 仍只返回 copied managed snapshot，不公开 `IntPtr`、`nint`、`SafeHandle`、device/plugin/tensor pointer；plugin create/register/deregister/load、callback、allocator/resource 与 borrowed pointer 继续 deferred。
+
+### Release 资产与真实运行
+
+三个既有 Release 包的本地 SHA256 与 GitHub Release digest 完全一致：
+
+| 角色 | 大小 | SHA256 |
+| --- | ---: | --- |
+| base | 3,923 bytes | `F1E1E896B5066472DD900CBD830950781E2215D967BA47BC97B3D103377FD0F3` |
+| TensorRtRuntime | 258,004,802 bytes | `93E8CA4FD0B95CFB49C3E2CDC6BB94AFA8126853BE66D0B5013D60875C325A2C` |
+| TensorRtBuilder.Sm75Sm86 | 449,336,913 bytes | `FE26D320160AF0B8CCD76F044429CE106DF8D89FE89B62859693FBC80FCD79CB` |
+
+- `PluginRegistryInventorySmokeRunner`：通过，`CreatorFieldCollection Included=False`，日志不含 `Unexpected Internal Error`。
+- `NetworkBuilderSmokeRunner`：通过，identity engine build/serialize、`Enqueue=True`、`OutputMatch=True`。
+- `OnnxToEngineSmokeRunner`：通过，parser/config owner lease、engine 文件/流 round-trip、refitter diagnostics、enqueue 与 output compare 均成功。
+- `InferenceBindingsSmokeRunner`：`ExecuteV2` 与 `EnqueueV3` 均 `OutputMatch=True`。
+- 仓库外纯 `PackageReference` consumer 使用本轮 managed + TRT11 bridge-only 包：`createInferRuntime` 返回非空、engine 2,580 bytes、enqueue 完成、identity output match。bridge DLL 为 777,728 bytes，SHA256 `7B8C4311A68CF8A4D2C81F4F9EE8A7381D8F4178F29DD71FB3064A1FF5EFD4EE`。
+
+机器可读证明由 `eng/Export-Trt11Cuda129CompatibleHostProof.ps1` 生成：
+
+- `artifacts/real-case/trt11-cuda12-compatible-host-proof/trt11-cuda12.9-compatible-host-proof.json`
+- `artifacts/real-case/trt11-cuda12-compatible-host-proof/trt11-cuda12.9-compatible-host-proof.md`
+- `artifacts/package-consumer/bridge-runtime/win-x64-trt11.0-cuda12.9-cudnn9.22/bridge-package-runtime-consumer-proof.json`
+
+状态为 `passed-compatible-host-engineering-proof` / `compatible-host-bridge-package-runtime`，`isRuntimeExecutionProof=true`。由于 managed/bridge 均来自本地 feed，`isPackageConsumerRuntimeProof=false`、`canPromoteRuntimeProof=false`、`canPublishPublicly=false`、`canCloseReleaseIssue=false`；该证明不能替代 public clean consumer 或 post-publish proof。
+
+### Coverage、构建、测试与包
+
+- bindings 生成与幂等验证保持 181 manifests / 3919 records；coverage 为 TRT8 `751/96`、TRT10 `759/120`、TRT11 `813/88`，CUDA 六个版本行为 `211/57`、`216/57`、`219/58`、`229/63`、`241/66`、`257/73`。
+- 完整 `TensorRtSharp.sln` Release build 为 0 warning / 0 error。TRT8/CUDA11.8、TRT8/CUDA12.1、TRT10/CUDA12.9、TRT11/CUDA12.9、TRT11/CUDA13.2 五套 native 和 TensorRT ABI parity 6/6 全部通过。
+- Plugin Registry、BuilderConfig、RNNv2、ONNX、consumer、ABI 受影响分片 83/83；ProjectQuality inventory 为 1284 tests / 382 classes / unassigned 0，新增类 4/4，累计 hash-verified coverage 为 382/382、185 份有效 TRX、missing 0、invalid evidence 0。既有 one-shot 已知超过命令上限，本阶段不冒充 one-shot pass。
+- managed 包和 TRT8/TRT10/TRT11 bridge-only 包均重新打包；三个临时 consumer 只使用 `PackageReference`、无 `ProjectReference`，restore/build 为 0 warning / 0 error，并编译所有 `includeCreatorFields` overload。
+
+| 包 | 大小 | SHA256 |
+| --- | ---: | --- |
+| managed `JYPPX.TensorRT.CSharp.API.4.0.0.nupkg` | 14,410,847 bytes | `5A198037FFD1E5B767D423EF8B11048923D63FA05C07CC7E0707BC82B4B117DB` |
+| TRT8/CUDA12.1 bridge-only | 313,595 bytes | `52D3F21AF80B3B09196E93517E3C53E3BDDB7E8D03CCD68CF1F62805E0655625` |
+| TRT10/CUDA12.9 bridge-only | 339,346 bytes | `7577B4CA333AD18A6E3D2EE8025BFCDE09785ADC5541A1AB70D066D1F040011E` |
+| TRT11/CUDA12.9 bridge-only | 268,768 bytes | `9670AEF311BB97024B4FFDBD424E56D31879829B3C04F1D23C4B20AF6EE17513` |
+
+### Gate 与发布边界
+
+strict classification 为 `classification-audit-passed-non-proof-boundaries-intact`、finding 0；要求 classification 的 strict release gate 为 `release-quality-gate-passed`、required failure 0。Owner convergence 保持 structural 9/9、accepted 0/9、gates 2/3、validation blocker 0；所有 publish/upload/close 标志继续为 false。
+
 ## 2026-07-18 CUDA Managed-Memory Location V2 复审
 
 本阶段基于起始提交 `ca0d5907e7e864433888e756ee00645faf735a53`，提升 CUDA 12.3/12.9 的 `cudaMemAdvise_v2` 与 `cudaMemPrefetchAsync_v2`。CUDA 13.2 已将相同 location 语义迁移到非 `_v2` 名称，因此 bridge 保持统一 owner-safe ABI，在 native 内按 Toolkit 版本独立选择 vendor 调用。旧 deferred manifest 全部保留。

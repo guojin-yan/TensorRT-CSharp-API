@@ -59,6 +59,9 @@ internal static class Program
 
     private static void RunPluginRegistryInventorySmoke(TensorRtApiLine line)
     {
+        bool includeCreatorFields = line != TensorRtApiLine.TensorRt11;
+        Console.WriteLine($"CreatorFieldCollection Included={includeCreatorFields} Reason={(includeCreatorFields ? "FullInventory" : "Trt11InternalCreatorsExposeParserOnlyFieldHooks")}");
+
         if (!TensorRtEnvironmentProbe.TryIsGlobalPluginRegistryAvailable(line, out bool globalExists, out string globalExistsDiagnostic))
         {
             Console.WriteLine($"GlobalPluginRegistry Skipped=True Reason={globalExistsDiagnostic}");
@@ -70,7 +73,11 @@ internal static class Program
             TensorRtPluginRegistryInventory? globalInventory = null;
             string globalDiagnostic = string.Empty;
             bool globalInventoryRead = globalExists &&
-                TensorRtEnvironmentProbe.TryGetGlobalPluginRegistryInventory(line, out globalInventory, out globalDiagnostic);
+                TensorRtEnvironmentProbe.TryGetGlobalPluginRegistryInventory(
+                    line,
+                    includeCreatorFields,
+                    out globalInventory,
+                    out globalDiagnostic);
 
             if (globalInventoryRead)
             {
@@ -111,7 +118,12 @@ internal static class Program
                     Console.WriteLine($"BuilderSafePluginRegistry Skipped=True Reason={safeDiagnostic}");
                 }
 
-                if (!TensorRtEnvironmentProbe.TryGetBuilderCapabilityPluginRegistryInventory(line, TensorRtEngineCapability.Standard, out TensorRtPluginRegistryInventory? builderInventory, out string builderDiagnostic))
+                if (!TensorRtEnvironmentProbe.TryGetBuilderCapabilityPluginRegistryInventory(
+                    line,
+                    TensorRtEngineCapability.Standard,
+                    includeCreatorFields,
+                    out TensorRtPluginRegistryInventory? builderInventory,
+                    out string builderDiagnostic))
                 {
                     Console.WriteLine($"BuilderCapabilityPluginRegistry Skipped=True Reason={builderDiagnostic}");
                 }
@@ -383,6 +395,7 @@ internal static class Program
                     candidate.Name,
                     candidate.Version,
                     candidate.Namespace,
+                    includeCreatorFields: line != TensorRtApiLine.TensorRt11,
                     out copiedCreator,
                     out diagnostic);
             }
@@ -405,6 +418,7 @@ internal static class Program
                     candidate.Name,
                     candidate.Version,
                     candidate.Namespace,
+                    includeCreatorFields: line != TensorRtApiLine.TensorRt11,
                     out copiedCreator,
                     out diagnostic);
             }

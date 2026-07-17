@@ -83,8 +83,21 @@ public static class TensorRtEnvironmentProbe
     /// <returns>A global plugin registry inventory snapshot. 全局 plugin registry inventory 快照。</returns>
     public static TensorRtPluginRegistryInventory GetGlobalPluginRegistryInventory(TensorRtApiLine line)
     {
+        return GetGlobalPluginRegistryInventory(line, includeCreatorFields: true);
+    }
+
+    /// <summary>
+    /// Gets a read-only global plugin registry snapshot with optional creator-field collection.
+    /// 获取全局 plugin registry 只读快照，并可选择是否采集 creator 字段。
+    /// </summary>
+    /// <param name="line">The TensorRT API line to query. 要查询的 TensorRT API line。</param>
+    /// <param name="includeCreatorFields">Whether to invoke creator field metadata APIs. 是否调用 creator 字段元数据 API。</param>
+    public static TensorRtPluginRegistryInventory GetGlobalPluginRegistryInventory(
+        TensorRtApiLine line,
+        bool includeCreatorFields)
+    {
         NativeBridgeLoader.EnsureInitialized();
-        return NativeBridgeApi.GetGlobalPluginRegistryInventory(line);
+        return NativeBridgeApi.GetGlobalPluginRegistryInventory(line, includeCreatorFields);
     }
 
     /// <summary>
@@ -97,9 +110,22 @@ public static class TensorRtEnvironmentProbe
     /// <returns><see langword="true"/> when the inventory was collected successfully. 成功采集 inventory 时返回 <see langword="true"/>。</returns>
     public static bool TryGetGlobalPluginRegistryInventory(TensorRtApiLine line, out TensorRtPluginRegistryInventory? inventory, out string diagnostic)
     {
+        return TryGetGlobalPluginRegistryInventory(line, includeCreatorFields: true, out inventory, out diagnostic);
+    }
+
+    /// <summary>
+    /// Tries to copy global plugin registry metadata with optional creator-field collection.
+    /// 尝试复制全局 plugin registry 元数据，并可选择是否采集 creator 字段。
+    /// </summary>
+    public static bool TryGetGlobalPluginRegistryInventory(
+        TensorRtApiLine line,
+        bool includeCreatorFields,
+        out TensorRtPluginRegistryInventory? inventory,
+        out string diagnostic)
+    {
         try
         {
-            inventory = GetGlobalPluginRegistryInventory(line);
+            inventory = GetGlobalPluginRegistryInventory(line, includeCreatorFields);
             diagnostic = "OK";
             return true;
         }
@@ -321,10 +347,39 @@ public static class TensorRtEnvironmentProbe
         out TensorRtPluginCreatorInfo? creator,
         out string diagnostic)
     {
+        return TryGetGlobalPluginCreator(
+            line,
+            pluginName,
+            pluginVersion,
+            pluginNamespace,
+            includeCreatorFields: true,
+            out creator,
+            out diagnostic);
+    }
+
+    /// <summary>
+    /// Tries to copy global plugin creator metadata with optional field collection.
+    /// 尝试复制全局 plugin creator 元数据，并可选择是否采集字段。
+    /// </summary>
+    public static bool TryGetGlobalPluginCreator(
+        TensorRtApiLine line,
+        string pluginName,
+        string pluginVersion,
+        string pluginNamespace,
+        bool includeCreatorFields,
+        out TensorRtPluginCreatorInfo? creator,
+        out string diagnostic)
+    {
         try
         {
             NativeBridgeLoader.EnsureInitialized();
-            bool found = NativeBridgeApi.TryGetGlobalPluginCreator(line, pluginName, pluginVersion, pluginNamespace, out creator);
+            bool found = NativeBridgeApi.TryGetGlobalPluginCreator(
+                line,
+                pluginName,
+                pluginVersion,
+                pluginNamespace,
+                includeCreatorFields,
+                out creator);
             diagnostic = found ? "OK" : "Plugin creator was not found.";
             return found;
         }
@@ -456,8 +511,20 @@ public static class TensorRtEnvironmentProbe
     /// <returns>A builder capability plugin registry inventory snapshot. builder capability plugin registry inventory 快照。</returns>
     public static TensorRtPluginRegistryInventory GetBuilderCapabilityPluginRegistryInventory(TensorRtApiLine line, TensorRtEngineCapability capability)
     {
+        return GetBuilderCapabilityPluginRegistryInventory(line, capability, includeCreatorFields: true);
+    }
+
+    /// <summary>
+    /// Gets a builder capability plugin registry snapshot with optional creator-field collection.
+    /// 获取 builder capability plugin registry 快照，并可选择是否采集 creator 字段。
+    /// </summary>
+    public static TensorRtPluginRegistryInventory GetBuilderCapabilityPluginRegistryInventory(
+        TensorRtApiLine line,
+        TensorRtEngineCapability capability,
+        bool includeCreatorFields)
+    {
         NativeBridgeLoader.EnsureInitialized();
-        return NativeBridgeApi.GetBuilderCapabilityPluginRegistryInventory(line, capability);
+        return NativeBridgeApi.GetBuilderCapabilityPluginRegistryInventory(line, capability, includeCreatorFields);
     }
 
     /// <summary>
@@ -475,9 +542,28 @@ public static class TensorRtEnvironmentProbe
         out TensorRtPluginRegistryInventory? inventory,
         out string diagnostic)
     {
+        return TryGetBuilderCapabilityPluginRegistryInventory(
+            line,
+            capability,
+            includeCreatorFields: true,
+            out inventory,
+            out diagnostic);
+    }
+
+    /// <summary>
+    /// Tries to copy builder capability registry metadata with optional creator-field collection.
+    /// 尝试复制 builder capability registry 元数据，并可选择是否采集 creator 字段。
+    /// </summary>
+    public static bool TryGetBuilderCapabilityPluginRegistryInventory(
+        TensorRtApiLine line,
+        TensorRtEngineCapability capability,
+        bool includeCreatorFields,
+        out TensorRtPluginRegistryInventory? inventory,
+        out string diagnostic)
+    {
         try
         {
-            inventory = GetBuilderCapabilityPluginRegistryInventory(line, capability);
+            inventory = GetBuilderCapabilityPluginRegistryInventory(line, capability, includeCreatorFields);
             diagnostic = "OK";
             return true;
         }
@@ -578,10 +664,42 @@ public static class TensorRtEnvironmentProbe
         out TensorRtPluginCreatorInfo? creator,
         out string diagnostic)
     {
+        return TryGetBuilderCapabilityPluginCreator(
+            line,
+            capability,
+            pluginName,
+            pluginVersion,
+            pluginNamespace,
+            includeCreatorFields: true,
+            out creator,
+            out diagnostic);
+    }
+
+    /// <summary>
+    /// Tries to copy builder capability plugin creator metadata with optional field collection.
+    /// 尝试复制 builder capability plugin creator 元数据，并可选择是否采集字段。
+    /// </summary>
+    public static bool TryGetBuilderCapabilityPluginCreator(
+        TensorRtApiLine line,
+        TensorRtEngineCapability capability,
+        string pluginName,
+        string pluginVersion,
+        string pluginNamespace,
+        bool includeCreatorFields,
+        out TensorRtPluginCreatorInfo? creator,
+        out string diagnostic)
+    {
         try
         {
             NativeBridgeLoader.EnsureInitialized();
-            bool found = NativeBridgeApi.TryGetBuilderCapabilityPluginCreator(line, capability, pluginName, pluginVersion, pluginNamespace, out creator);
+            bool found = NativeBridgeApi.TryGetBuilderCapabilityPluginCreator(
+                line,
+                capability,
+                pluginName,
+                pluginVersion,
+                pluginNamespace,
+                includeCreatorFields,
+                out creator);
             diagnostic = found ? "OK" : "Plugin creator was not found.";
             return found;
         }
@@ -688,26 +806,6 @@ public static class TensorRtEnvironmentProbe
         stages.Add(new TensorRtRuntimeProbeStage("RuntimeCreate", runtimeOk, runtimeMessage));
 
         return new TensorRtRuntimeProbeReport(line, version, globalRegistry, stages);
-    }
-
-    private static bool TryGetGlobalPluginRegistryInventory(
-        TensorRtApiLine line,
-        bool includeCreatorFields,
-        out TensorRtPluginRegistryInventory? inventory,
-        out string diagnostic)
-    {
-        try
-        {
-            inventory = NativeBridgeApi.GetGlobalPluginRegistryInventory(line, includeCreatorFields);
-            diagnostic = "OK";
-            return true;
-        }
-        catch (Exception exception) when (IsProbeException(exception))
-        {
-            inventory = null;
-            diagnostic = FormatProbeException("Global plugin registry inventory query", exception);
-            return false;
-        }
     }
 
     private static IReadOnlyList<TensorRtNativeDependencyInfo> EnumerateNativeBridgeCandidates(List<string> diagnostics)

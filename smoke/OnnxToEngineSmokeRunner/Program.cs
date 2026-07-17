@@ -55,7 +55,7 @@ internal static class Program
         using TensorRtLogger logger = new TensorRtLogger(line);
         using TensorRtRuntime runtime = new TensorRtRuntime(logger);
         using TensorRtBuilder builder = new TensorRtBuilder(logger);
-        string builderCaps = $"FastFp16={builder.PlatformHasFastFp16} FastInt8={builder.PlatformHasFastInt8} Tf32={builder.PlatformHasTf32} DlaCores={builder.DlaCoreCount}";
+        string builderCaps = ProbeBuilderCapabilities(builder);
         string runtimeControls = ProbeRuntimeControls(runtime);
         using TensorRtBuilderConfig config = builder.CreateBuilderConfig();
         using TensorRtOnnxConfig onnxConfig = new TensorRtOnnxConfig(line);
@@ -260,6 +260,29 @@ internal static class Program
     }
 
     File.Delete(engineFile);
+    }
+
+    static string ProbeBuilderCapabilities(TensorRtBuilder builder)
+    {
+        return string.Join(" ", new[]
+        {
+            ProbeBuilderCapability("FastFp16", () => builder.PlatformHasFastFp16),
+            ProbeBuilderCapability("FastInt8", () => builder.PlatformHasFastInt8),
+            ProbeBuilderCapability("Tf32", () => builder.PlatformHasTf32),
+            ProbeBuilderCapability("DlaCores", () => builder.DlaCoreCount)
+        });
+    }
+
+    static string ProbeBuilderCapability<T>(string name, Func<T> query)
+    {
+        try
+        {
+            return $"{name}={query()}";
+        }
+        catch (BridgeProbeException exception) when (exception.StatusCode == BridgeStatusCode.NotSupported)
+        {
+            return $"{name}=Unavailable:{exception.StatusCode}";
+        }
     }
 
     static TensorRtApiLine ResolveLine(string value)

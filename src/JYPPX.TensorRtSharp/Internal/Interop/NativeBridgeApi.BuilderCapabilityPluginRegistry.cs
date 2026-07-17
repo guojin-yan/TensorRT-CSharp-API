@@ -51,6 +51,14 @@ internal static partial class NativeBridgeApi
 
     public static TensorRtPluginRegistryInventory GetBuilderCapabilityPluginRegistryInventory(TensorRtApiLine line, TensorRtEngineCapability capability)
     {
+        return GetBuilderCapabilityPluginRegistryInventory(line, capability, includeCreatorFields: true);
+    }
+
+    public static TensorRtPluginRegistryInventory GetBuilderCapabilityPluginRegistryInventory(
+        TensorRtApiLine line,
+        TensorRtEngineCapability capability,
+        bool includeCreatorFields)
+    {
         int creatorCount = GetBuilderCapabilityPluginRegistryCreatorCount(line, capability);
         int? recursiveCreatorCount = line == TensorRtApiLine.TensorRt8
             ? null
@@ -69,14 +77,20 @@ internal static partial class NativeBridgeApi
             int? tensorRtVersion = line == TensorRtApiLine.TensorRt8
                 ? GetBuilderCapabilityPluginCreatorTensorRtVersion(line, capability, creatorIndex)
                 : null;
-            int fieldCount = GetBuilderCapabilityPluginCreatorFieldCount(line, capability, creatorIndex);
-            List<TensorRtPluginFieldInfo> fields = new List<TensorRtPluginFieldInfo>(fieldCount);
-
-            for (int fieldIndex = 0; fieldIndex < fieldCount; fieldIndex++)
+            IReadOnlyList<TensorRtPluginFieldInfo> fields = Array.Empty<TensorRtPluginFieldInfo>();
+            if (includeCreatorFields)
             {
-                string fieldName = GetBuilderCapabilityPluginCreatorFieldName(line, capability, creatorIndex, fieldIndex);
-                GetBuilderCapabilityPluginCreatorFieldMetadata(line, capability, creatorIndex, fieldIndex, out TensorRtPluginFieldType fieldType, out int length, out bool hasData);
-                fields.Add(new TensorRtPluginFieldInfo(fieldName, fieldType, length, hasData));
+                int fieldCount = GetBuilderCapabilityPluginCreatorFieldCount(line, capability, creatorIndex);
+                List<TensorRtPluginFieldInfo> fieldList = new List<TensorRtPluginFieldInfo>(fieldCount);
+
+                for (int fieldIndex = 0; fieldIndex < fieldCount; fieldIndex++)
+                {
+                    string fieldName = GetBuilderCapabilityPluginCreatorFieldName(line, capability, creatorIndex, fieldIndex);
+                    GetBuilderCapabilityPluginCreatorFieldMetadata(line, capability, creatorIndex, fieldIndex, out TensorRtPluginFieldType fieldType, out int length, out bool hasData);
+                    fieldList.Add(new TensorRtPluginFieldInfo(fieldName, fieldType, length, hasData));
+                }
+
+                fields = fieldList;
             }
 
             creators.Add(new TensorRtPluginCreatorInfo(
@@ -130,6 +144,25 @@ internal static partial class NativeBridgeApi
         string pluginNamespace,
         out TensorRtPluginCreatorInfo? creator)
     {
+        return TryGetBuilderCapabilityPluginCreator(
+            line,
+            capability,
+            pluginName,
+            pluginVersion,
+            pluginNamespace,
+            includeCreatorFields: true,
+            out creator);
+    }
+
+    public static bool TryGetBuilderCapabilityPluginCreator(
+        TensorRtApiLine line,
+        TensorRtEngineCapability capability,
+        string pluginName,
+        string pluginVersion,
+        string pluginNamespace,
+        bool includeCreatorFields,
+        out TensorRtPluginCreatorInfo? creator)
+    {
         if (!IsBuilderCapabilityPluginCreatorRegistered(line, capability, pluginName, pluginVersion, pluginNamespace))
         {
             creator = null;
@@ -148,14 +181,20 @@ internal static partial class NativeBridgeApi
         int? tensorRtVersion = line == TensorRtApiLine.TensorRt8
             ? GetBuilderCapabilityLookupPluginCreatorTensorRtVersion(line, capability, pluginName, pluginVersion, pluginNamespace)
             : null;
-        int fieldCount = GetBuilderCapabilityLookupPluginCreatorFieldCount(line, capability, pluginName, pluginVersion, pluginNamespace);
-        List<TensorRtPluginFieldInfo> fields = new List<TensorRtPluginFieldInfo>(fieldCount);
-
-        for (int fieldIndex = 0; fieldIndex < fieldCount; fieldIndex++)
+        IReadOnlyList<TensorRtPluginFieldInfo> fields = Array.Empty<TensorRtPluginFieldInfo>();
+        if (includeCreatorFields)
         {
-            string fieldName = GetBuilderCapabilityLookupPluginCreatorFieldName(line, capability, pluginName, pluginVersion, pluginNamespace, fieldIndex);
-            GetBuilderCapabilityLookupPluginCreatorFieldMetadata(line, capability, pluginName, pluginVersion, pluginNamespace, fieldIndex, out TensorRtPluginFieldType fieldType, out int length, out bool hasData);
-            fields.Add(new TensorRtPluginFieldInfo(fieldName, fieldType, length, hasData));
+            int fieldCount = GetBuilderCapabilityLookupPluginCreatorFieldCount(line, capability, pluginName, pluginVersion, pluginNamespace);
+            List<TensorRtPluginFieldInfo> fieldList = new List<TensorRtPluginFieldInfo>(fieldCount);
+
+            for (int fieldIndex = 0; fieldIndex < fieldCount; fieldIndex++)
+            {
+                string fieldName = GetBuilderCapabilityLookupPluginCreatorFieldName(line, capability, pluginName, pluginVersion, pluginNamespace, fieldIndex);
+                GetBuilderCapabilityLookupPluginCreatorFieldMetadata(line, capability, pluginName, pluginVersion, pluginNamespace, fieldIndex, out TensorRtPluginFieldType fieldType, out int length, out bool hasData);
+                fieldList.Add(new TensorRtPluginFieldInfo(fieldName, fieldType, length, hasData));
+            }
+
+            fields = fieldList;
         }
 
         creator = new TensorRtPluginCreatorInfo(
