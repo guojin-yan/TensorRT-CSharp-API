@@ -1,0 +1,46 @@
+{
+  "$schema": "../bridge-api.schema.json",
+  "module": "cuda",
+  "versionLine": "common",
+  "apis": [
+    {
+      "id": "cuda-managed-memory-prefetch-batch-owner-array-safe",
+      "entryPoint": "jyppx_cuda_managed_memory_prefetch_batch_async_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "ranges", "type": "const JYPPX_CudaManagedMemoryBatchRange*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "range_count", "type": "size_t", "direction": "in" },
+        { "name": "stream", "type": "JYPPX_CudaStream*", "direction": "in" }
+      ]
+    },
+    {
+      "id": "cuda-managed-memory-discard-batch-owner-array-safe",
+      "entryPoint": "jyppx_cuda_managed_memory_discard_batch_async_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "ranges", "type": "const JYPPX_CudaManagedMemoryBatchRange*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "range_count", "type": "size_t", "direction": "in" },
+        { "name": "stream", "type": "JYPPX_CudaStream*", "direction": "in" }
+      ]
+    },
+    {
+      "id": "cuda-managed-memory-discard-and-prefetch-batch-owner-array-safe",
+      "entryPoint": "jyppx_cuda_managed_memory_discard_and_prefetch_batch_async_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "ranges", "type": "const JYPPX_CudaManagedMemoryBatchRange*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "range_count", "type": "size_t", "direction": "in" },
+        { "name": "stream", "type": "JYPPX_CudaStream*", "direction": "in" }
+      ]
+    }
+  ]
+}

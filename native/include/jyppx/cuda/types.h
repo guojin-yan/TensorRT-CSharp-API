@@ -93,6 +93,14 @@ typedef struct JYPPX_CudaMemRangeAttributeValue
     int32_t value;
 } JYPPX_CudaMemRangeAttributeValue;
 
+typedef struct JYPPX_CudaManagedMemoryBatchRange
+{
+    JYPPX_CudaMemory* memory;
+    size_t offset;
+    size_t size;
+    int32_t destination_device;
+} JYPPX_CudaManagedMemoryBatchRange;
+
 typedef struct JYPPX_CudaPitchedMemoryInfo
 {
     uint64_t pitch_bytes;

@@ -351,6 +351,9 @@
 #define JYPPX_API_CUDA_MALLOC_ARRAY "jyppx_cuda_malloc_array" // module=cuda; line=common; ownership=caller-destroys; manualOverride=false
 #define JYPPX_API_CUDA_MALLOC_HOST "jyppx_cuda_malloc_host" // module=cuda; line=common; ownership=caller-destroys; manualOverride=false
 #define JYPPX_API_CUDA_MALLOC_MIPMAPPED_ARRAY "jyppx_cuda_malloc_mipmapped_array" // module=cuda; line=common; ownership=caller-destroys; manualOverride=false
+#define JYPPX_API_CUDA_MANAGED_MEMORY_DISCARD_AND_PREFETCH_BATCH_OWNER_ARRAY_SAFE "jyppx_cuda_managed_memory_discard_and_prefetch_batch_async_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_MANAGED_MEMORY_DISCARD_BATCH_OWNER_ARRAY_SAFE "jyppx_cuda_managed_memory_discard_batch_async_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_MANAGED_MEMORY_PREFETCH_BATCH_OWNER_ARRAY_SAFE "jyppx_cuda_managed_memory_prefetch_batch_async_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_MEM_ADVISE_V2_DEFERRED "jyppx_cuda_mem_advise_v2_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_MEM_DISCARD_AND_PREFETCH_BATCH_ASYNC_DEFERRED "jyppx_cuda_mem_discard_and_prefetch_batch_async_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_MEM_DISCARD_BATCH_ASYNC_DEFERRED "jyppx_cuda_mem_discard_batch_async_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false

@@ -63,6 +63,7 @@ struct MemoryObject
     ObjectBase base;
     void* pointer;
     size_t size;
+    bool is_managed;
 };
 
 struct PinnedMemoryObject

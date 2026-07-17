@@ -2637,6 +2637,16 @@ static class HighLevelWrapperSurfaceProbe
             static (memory, offset, count, advice, device) => memory.Advise(offset, count, advice, device);
         Action<CudaMemory, int, int, int, CudaStream> prefetchRange =
             static (memory, offset, count, destinationDevice, stream) => memory.PrefetchAsync(offset, count, destinationDevice, stream);
+        Func<CudaManagedMemory, int, int, CudaManagedMemoryRange> managedMemoryRange =
+            static (memory, offset, count) => new CudaManagedMemoryRange(memory, offset, count);
+        Func<CudaManagedMemory, int, CudaManagedMemoryPrefetchRange> managedMemoryPrefetchRange =
+            static (memory, destinationDevice) => new CudaManagedMemoryPrefetchRange(memory, destinationDevice);
+        Action<CudaManagedMemoryPrefetchRange[], CudaStream> prefetchManagedMemoryBatch =
+            static (ranges, stream) => CudaManagedMemoryBatch.PrefetchAsync(ranges, stream);
+        Action<CudaManagedMemoryRange[], CudaStream> discardManagedMemoryBatch =
+            static (ranges, stream) => CudaManagedMemoryBatch.DiscardAsync(ranges, stream);
+        Action<CudaManagedMemoryPrefetchRange[], CudaStream> discardAndPrefetchManagedMemoryBatch =
+            static (ranges, stream) => CudaManagedMemoryBatch.DiscardAndPrefetchAsync(ranges, stream);
 
         _ = pluginInventory;
         _ = pluginCreatorLookup;
@@ -2904,6 +2914,11 @@ static class HighLevelWrapperSurfaceProbe
         _ = currentDeviceGraphMemorySummary;
         _ = adviseRange;
         _ = prefetchRange;
+        _ = managedMemoryRange;
+        _ = managedMemoryPrefetchRange;
+        _ = prefetchManagedMemoryBatch;
+        _ = discardManagedMemoryBatch;
+        _ = discardAndPrefetchManagedMemoryBatch;
         _ = executeV2;
         _ = executeLegacy;
         _ = enqueueV2AndSynchronize;
@@ -4485,7 +4500,20 @@ static class HighLevelWrapperSurfaceProbe
             nameof(CudaDeviceGraphMemorySummary.CanPromoteRuntimeProof),
             nameof(CudaDeviceGraphMemorySummary.CanDeleteDeferredRecord),
             nameof(CudaMemory.Advise),
-            nameof(CudaMemory.PrefetchAsync));
+            nameof(CudaMemory.PrefetchAsync),
+            nameof(CudaManagedMemoryRange),
+            nameof(CudaManagedMemoryRange.Memory),
+            nameof(CudaManagedMemoryRange.Offset),
+            nameof(CudaManagedMemoryRange.Count),
+            nameof(CudaManagedMemoryPrefetchRange),
+            nameof(CudaManagedMemoryPrefetchRange.Memory),
+            nameof(CudaManagedMemoryPrefetchRange.Offset),
+            nameof(CudaManagedMemoryPrefetchRange.Count),
+            nameof(CudaManagedMemoryPrefetchRange.DestinationDevice),
+            nameof(CudaManagedMemoryBatch),
+            nameof(CudaManagedMemoryBatch.PrefetchAsync),
+            nameof(CudaManagedMemoryBatch.DiscardAsync),
+            nameof(CudaManagedMemoryBatch.DiscardAndPrefetchAsync));
     }
 }
 '@

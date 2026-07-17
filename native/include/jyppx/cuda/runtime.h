@@ -163,6 +163,9 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_memory_range_get_attribute(JYPPX_CudaMe
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_memory_range_get_attributes(JYPPX_CudaMemory* memory, size_t offset, size_t count, const int32_t* attributes, size_t attribute_count, JYPPX_CudaMemRangeAttributeValue* out_values);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_memory_range_get_accessed_by_count(JYPPX_CudaMemory* memory, size_t offset, size_t count, size_t* out_device_count);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_memory_range_copy_accessed_by_devices(JYPPX_CudaMemory* memory, size_t offset, size_t count, int32_t* output_devices, size_t output_device_count, size_t* out_required_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_managed_memory_prefetch_batch_async_safe(const JYPPX_CudaManagedMemoryBatchRange* ranges, size_t range_count, JYPPX_CudaStream* stream);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_managed_memory_discard_batch_async_safe(const JYPPX_CudaManagedMemoryBatchRange* ranges, size_t range_count, JYPPX_CudaStream* stream);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_managed_memory_discard_and_prefetch_batch_async_safe(const JYPPX_CudaManagedMemoryBatchRange* ranges, size_t range_count, JYPPX_CudaStream* stream);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_memory_free_async(JYPPX_CudaMemory* memory, JYPPX_CudaStream* stream);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_memory_free(JYPPX_CudaMemory* memory);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_malloc_host(size_t size, JYPPX_CudaPinnedMemory** out_memory);

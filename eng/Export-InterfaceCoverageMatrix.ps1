@@ -1208,6 +1208,9 @@ function Find-ExplicitCudaManifestApis {
     "cudaLogsCurrent" = @("id:cuda-logs-current-cursor-safe")
     "cudaLogsDumpToMemory" = @("id:cuda-logs-dump-to-memory-caller-buffer-safe")
     "cudaLogsDumpToFile" = @("id:cuda-logs-dump-to-file-safe")
+    "cudaMemPrefetchBatchAsync" = @("id:cuda-managed-memory-prefetch-batch-owner-array-safe")
+    "cudaMemDiscardBatchAsync" = @("id:cuda-managed-memory-discard-batch-owner-array-safe")
+    "cudaMemDiscardAndPrefetchBatchAsync" = @("id:cuda-managed-memory-discard-and-prefetch-batch-owner-array-safe")
   }
   $deferredHistoryAliasMap = @{
     "cudaCreateSurfaceObject" = @("id:cuda-create-surface-object-deferred")
@@ -1254,6 +1257,9 @@ function Find-ExplicitCudaManifestApis {
     "cudaLogsCurrent" = @("id:*logs-current-deferred")
     "cudaLogsDumpToMemory" = @("id:*logs-dump-to-memory-deferred")
     "cudaLogsDumpToFile" = @("id:*logs-dump-to-file-deferred")
+    "cudaMemPrefetchBatchAsync" = @("id:cuda-mem-prefetch-batch-async-deferred")
+    "cudaMemDiscardBatchAsync" = @("id:cuda-mem-discard-batch-async-deferred")
+    "cudaMemDiscardAndPrefetchBatchAsync" = @("id:cuda-mem-discard-and-prefetch-batch-async-deferred")
   }
 
   if (-not $aliasMap.ContainsKey($FunctionName)) {

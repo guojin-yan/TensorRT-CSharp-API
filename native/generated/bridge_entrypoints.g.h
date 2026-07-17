@@ -1054,6 +1054,15 @@ JYPPX_C_API(BridgeStatusCode) jyppx_cuda_malloc_host(size_t size, JYPPX_CudaPinn
 // generated from manifest id=cuda-malloc-mipmapped-array
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_malloc_mipmapped_array(const JYPPX_CudaChannelFormatDesc* descriptor, const JYPPX_CudaArrayExtent* extent, uint32_t level_count, uint32_t flags, JYPPX_CudaMipmappedArray** out_array);
 
+// generated from manifest id=cuda-managed-memory-discard-and-prefetch-batch-owner-array-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_managed_memory_discard_and_prefetch_batch_async_safe(const JYPPX_CudaManagedMemoryBatchRange* ranges, size_t range_count, JYPPX_CudaStream* stream);
+
+// generated from manifest id=cuda-managed-memory-discard-batch-owner-array-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_managed_memory_discard_batch_async_safe(const JYPPX_CudaManagedMemoryBatchRange* ranges, size_t range_count, JYPPX_CudaStream* stream);
+
+// generated from manifest id=cuda-managed-memory-prefetch-batch-owner-array-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_managed_memory_prefetch_batch_async_safe(const JYPPX_CudaManagedMemoryBatchRange* ranges, size_t range_count, JYPPX_CudaStream* stream);
+
 // generated from manifest id=cuda-mem-advise-v2-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_mem_advise_v2_deferred(void);
 

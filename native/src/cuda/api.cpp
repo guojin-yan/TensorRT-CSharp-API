@@ -1708,6 +1708,7 @@ JYPPX_StatusCode jyppx_cuda_memory_alloc(size_t size, JYPPX_CudaMemory** out_mem
     memory->base.kind = ObjectKind::Memory;
     memory->pointer = nullptr;
     memory->size = size;
+    memory->is_managed = false;
 
     status = jyppx::cuda::map_cuda_status(cudaMalloc(&memory->pointer, size), "cudaMalloc");
     if (status != JYPPX_STATUS_OK)
@@ -1745,6 +1746,7 @@ JYPPX_StatusCode jyppx_cuda_memory_alloc_managed(size_t size, uint32_t flags, JY
     memory->base.kind = ObjectKind::Memory;
     memory->pointer = nullptr;
     memory->size = size;
+    memory->is_managed = true;
 
     status = jyppx::cuda::map_cuda_status(cudaMallocManaged(&memory->pointer, size, flags), "cudaMallocManaged");
     if (status != JYPPX_STATUS_OK)
@@ -2581,6 +2583,7 @@ JYPPX_StatusCode jyppx_cuda_memory_free(JYPPX_CudaMemory* memory)
 #include "modules/memory/array_memory.inc"
 #include "modules/memory/texture_surface_objects.inc"
 #include "modules/memory/raw_memory_operations.inc"
+#include "modules/memory/managed_memory_batch.inc"
 #include "modules/deployment/kernel_library_metadata.inc"
 #include "modules/deployment/primary_execution_context.inc"
 #include "modules/deployment/official_token_aliases.inc"

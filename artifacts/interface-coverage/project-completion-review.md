@@ -19,6 +19,57 @@
 - `artifacts/real-case/multi-version-onnx-runtime/multi-version-runtime-evidence-matrix.json`
 - `artifacts/test-analysis/project-quality-test-inventory.json`
 
+## 2026-07-17 CUDA Managed-Memory Batch Owner-Safe 复审
+
+本阶段基于起始提交 `e97a29f57c1e7c20539ce46b28ed97f51d6d119f`，提升 CUDA 13 新增的 `cudaMemPrefetchBatchAsync`、`cudaMemDiscardBatchAsync` 与 `cudaMemDiscardAndPrefetchBatchAsync`。三条接口复用现有 `CudaManagedMemory` 和 `CudaStream` owner，不暴露 device pointer，并保留全部旧 deferred manifest。
+
+### Owner、ABI 与版本边界
+
+- native 新增 `JYPPX_CudaManagedMemoryBatchRange` caller array。bridge 在调用栈内校验 owner、managed allocation 类型、offset/count、目标设备和 stream，再临时构造 pointer/size/location/location-index 数组；flags 固定为 `0ULL`。
+- `MemoryObject::is_managed` 区分 `cudaMallocManaged` 与普通、async、memory-pool device allocation，三条 batch entry 会拒绝非 managed owner。
+- managed 新增 `CudaManagedMemoryRange`、`CudaManagedMemoryPrefetchRange` 与 `CudaManagedMemoryBatch`。internal interop 对每个 `SafeCudaMemoryHandle` 建立调用期 lease，固定 descriptor array，并在 finally 中逆序释放；异步提交后由公开文档要求调用方保持 memory owner 与 stream 存活到同步完成。
+- public API 不含 `IntPtr`、`nint`、`SafeHandle`、`UIntPtr`、device/plugin/tensor pointer。native 将 `std::bad_alloc`、其他 C++ exception 与 Windows SEH 转换为 bridge status，不允许异常跨 C ABI。
+- 真实 vendor 调用仅在 `CUDART_VERSION >= 13000` 编译；CUDA 11/12 明确返回 `NotSupported`。callback、external/resource pointer、allocator acquire/release、generic tagged union 与 ownership 不明确的 handle 继续 deferred。
+
+### Coverage、构建与测试
+
+generator 最终为 178 manifests / 3912 records。三条 CUDA 13.2 行均为 `implemented-with-deferred-history`，旧 CUDA 版本不生成伪匹配：
+
+| CUDA Toolkit | 官方函数 | manifest/source 已匹配 | 非 deferred 实现 | deferred-only |
+| --- | ---: | ---: | ---: | ---: |
+| 11.6 | 268 | 268 | 211 | 57 |
+| 11.8 | 273 | 273 | 216 | 57 |
+| 12.1 | 277 | 277 | 219 | 58 |
+| 12.3 | 292 | 292 | 227 | 65 |
+| 12.9 | 307 | 307 | 235 | 72 |
+| 13.2 | 330 | 330 | 253 | 77 |
+
+- bindings 生成与幂等通过；完整 solution Release build 成功，0 error，保留 5 条仓库既有 nullable warning。
+- API inventory 的三条新 entry 均为 manifest/source 双向缺口 0。全仓 inventory 仍报告 224 条历史 deferred/声明型 manifest 无 source，属于既有口径，未将其误记为本批回归。
+- 受影响 ProjectQuality 分片 40/40 通过，覆盖新 batch、memory range、Plugin Registry、BuilderConfig、TRT8 setter 与 RNNv2。正式 inventory 为 1251 tests / 376 classes；累计 hash-verified 类覆盖 376/376，`-MissingOnly` 四分片均为空集。
+- one-shot 完整 ProjectQuality 运行约 55 分钟后出现共享 `artifacts/final-release` 的长尾竞态并被终止，已观察的 9 个失败均位于 owner/final-release evidence 竞态或真实 owner blocker；本轮不宣称 one-shot 完整套件通过。
+- native 的 TRT8/CUDA11.8、TRT8/CUDA12.1、TRT10/CUDA12.9、TRT11/CUDA13.2 与额外 TRT11/CUDA12.9 均构建成功，CUDA 13 batch symbol 未泄漏到旧 header/version guard。
+
+### Runtime、NuGet 与 Consumer
+
+- CUDA 12.9 smoke 实际调用 typed batch surface并得到 `VersionGuard=NotSupported Runtime=12090`。CUDA 13.2 bridge 在当前仅支持 CUDA 12.9 的驱动主机上于 `cudaRuntimeGetVersion` 返回 error 35，保持 compatible-host blocked。
+- TRT8/CUDA12.1 与 TRT10/CUDA12.9 的 Plugin Registry、NetworkBuilder、InferenceBindings 均通过，identity build/serialize/deserialize/enqueue/output compare 匹配。TRT11/CUDA13 runtime 创建返回空对象；TRT11/CUDA12.9 受控记录 Windows SEH `3228369022`，均不伪造 runtime proof。
+- managed 4.0.0 与 TRT8/TRT10/TRT11 三个 bridge-only 本地包已重打。三个纯 `PackageReference` consumer 均无 `ProjectReference`，restore/build 为 0 warning / 0 error，编译两个 typed range 与三个 batch 方法；proof 分类保持 `compile-surface-proof`、`Runtime execution proof=False`。
+- 为完整 strict package inventory 恢复了 TRT11/CUDA13.2 四角色本地 split set；最终从当前源码重新构建 TRT11 bridge 后覆盖 bridge 角色，避免旧 full-runtime nupkg 中的 bridge 资产回流。`packageSetReady=true`、`missingSplitRoles=[]`、`sha256Ready=true`。
+
+| 包 | 大小 | SHA256 |
+| --- | ---: | --- |
+| managed `JYPPX.TensorRT.CSharp.API.4.0.0.nupkg` | 14,317,043 bytes | `85F1C0DD0638523380B6B23FE0318C6B125AB093A2CFEDD32BE1FC664216AD3E` |
+| TRT8/CUDA12.1 bridge-only | 305,544 bytes | `D128F0B2DBA8ED321A12C89848955FBCE57CA19C279CE3427556B7C8D4335500` |
+| TRT10/CUDA12.9 bridge-only | 329,492 bytes | `BCA75FE283819D76E7B5CA4BF56CF1E453CF76BCED6C1C4AE3501FDCA04C919A` |
+| TRT11/CUDA13.2 bridge-only | 272,826 bytes | `CBA3848FCF0260A8199FDCE4874A2FC736CC35AFFD9C81EB17D8B509B9B22209` |
+
+### Gate 与发布边界
+
+strict release quality gate 在 `-RequirePackageInventory -RequireClassificationAudit` 下为 `release-quality-gate-passed`、required failure 0；classification audit 为 `classification-audit-passed-non-proof-boundaries-intact`、finding 0。Owner convergence 保持 structural 9/9、accepted 0/9、gates 2/3、validation blocker 0，`canPublishPublicly=false`、`canCloseReleaseIssue=false`。
+
+本阶段未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
+
 ## 2026-07-17 CUDA Primary Execution Context Owner-Safe 复审
 
 本阶段基于起始提交 `bfed406d246610046896ed41385f61c043965929`，从 CUDA 13.2 的 execution context、device resource、graph 与 kernel-library 候选中审查 21 条边界，只提升 7 个能够复用稳定 owner 的 primary execution context API：`cudaDeviceGetExecutionCtx`、`cudaExecutionCtxGetDevice`、`cudaExecutionCtxGetId`、`cudaExecutionCtxSynchronize`、`cudaExecutionCtxStreamCreate`、`cudaExecutionCtxRecordEvent` 与 `cudaExecutionCtxWaitEvent`。

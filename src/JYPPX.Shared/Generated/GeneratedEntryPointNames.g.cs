@@ -356,6 +356,9 @@ internal static class GeneratedEntryPointNames
     public const string CudaMallocArray = "jyppx_cuda_malloc_array";
     public const string CudaMallocHost = "jyppx_cuda_malloc_host";
     public const string CudaMallocMipmappedArray = "jyppx_cuda_malloc_mipmapped_array";
+    public const string CudaManagedMemoryDiscardAndPrefetchBatchOwnerArraySafe = "jyppx_cuda_managed_memory_discard_and_prefetch_batch_async_safe";
+    public const string CudaManagedMemoryDiscardBatchOwnerArraySafe = "jyppx_cuda_managed_memory_discard_batch_async_safe";
+    public const string CudaManagedMemoryPrefetchBatchOwnerArraySafe = "jyppx_cuda_managed_memory_prefetch_batch_async_safe";
     public const string CudaMemAdviseV2Deferred = "jyppx_cuda_mem_advise_v2_deferred";
     public const string CudaMemDiscardAndPrefetchBatchAsyncDeferred = "jyppx_cuda_mem_discard_and_prefetch_batch_async_deferred";
     public const string CudaMemDiscardBatchAsyncDeferred = "jyppx_cuda_mem_discard_batch_async_deferred";

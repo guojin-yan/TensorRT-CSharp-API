@@ -127,6 +127,15 @@ internal struct NativeCudaMemRangeAttributeValue
 }
 
 [StructLayout(LayoutKind.Sequential)]
+internal struct NativeCudaManagedMemoryBatchRange
+{
+    public IntPtr Memory;
+    public UIntPtr Offset;
+    public UIntPtr Size;
+    public int DestinationDevice;
+}
+
+[StructLayout(LayoutKind.Sequential)]
 internal struct NativeCudaPitchedMemoryInfo
 {
     public ulong PitchBytes;

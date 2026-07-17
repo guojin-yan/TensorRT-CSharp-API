@@ -282,6 +282,7 @@ internal static class Program
             float[] managedRoundTrip = managedMemory.ToSingleArray(floatSource.Length);
             bool managedRoundTripOk = floatSource.SequenceEqual(managedRoundTrip);
             Console.WriteLine($"ManagedMemoryRoundTrip={managedRoundTripOk} Attachment={managedMemory.AttachmentFlags}");
+            Console.WriteLine($"CudaManagedMemoryBatch {ProbeCudaManagedMemoryBatch(CudaDevice.RuntimeVersion, snapshot.CudaRuntimeInfo.DeviceCount)}");
         }
         else
         {
@@ -813,6 +814,60 @@ internal static class Program
         catch (CudaException exception)
         {
             return $"Available=False Status={exception.StatusCode} Reason={exception.Message}";
+        }
+    }
+
+    private static string ProbeCudaManagedMemoryBatch(int runtimeVersion, int deviceCount)
+    {
+        try
+        {
+            using CudaStream stream = new CudaStream(CudaStreamCreationFlags.NonBlocking);
+            using CudaManagedMemory first = new CudaManagedMemory(64);
+            using CudaManagedMemory second = new CudaManagedMemory(64);
+            CudaManagedMemoryPrefetchRange[] prefetchRanges =
+            {
+                new CudaManagedMemoryPrefetchRange(first, 0, 32, CudaDevice.Current),
+                new CudaManagedMemoryPrefetchRange(second, CudaDevice.Current)
+            };
+
+            if (runtimeVersion < 13000)
+            {
+                try
+                {
+                    CudaManagedMemoryBatch.PrefetchAsync(prefetchRanges, stream);
+                    throw new InvalidOperationException("CUDA managed-memory batch prefetch unexpectedly succeeded before CUDA 13.0.");
+                }
+                catch (CudaException exception) when (exception.StatusCode == BridgeStatusCode.NotSupported)
+                {
+                    return $"Skipped=True VersionGuard=NotSupported Runtime={runtimeVersion}";
+                }
+            }
+
+            bool allDevicesSupportConcurrentManagedAccess = Enumerable.Range(0, deviceCount).All(
+                static ordinal => CudaDevice.GetBooleanAttribute(ordinal, CudaDeviceAttribute.ConcurrentManagedAccess));
+            if (!allDevicesSupportConcurrentManagedAccess)
+            {
+                return "Skipped=True Reason=ConcurrentManagedAccessNotSupportedByAllDevices";
+            }
+
+            CudaManagedMemoryBatch.PrefetchAsync(prefetchRanges, stream);
+            stream.Synchronize();
+
+            CudaManagedMemoryRange[] discardRanges =
+            {
+                new CudaManagedMemoryRange(first, 0, 32),
+                new CudaManagedMemoryRange(second)
+            };
+            CudaManagedMemoryBatch.DiscardAsync(discardRanges, stream);
+            stream.Synchronize();
+
+            CudaManagedMemoryBatch.DiscardAndPrefetchAsync(prefetchRanges, stream);
+            stream.Synchronize();
+            return $"Prefetch=True Discard=True DiscardAndPrefetch=True RangeCount={prefetchRanges.Length} Runtime={runtimeVersion}";
+        }
+        catch (CudaException exception)
+        {
+            return $"Skipped=True Status={exception.StatusCode} Reason={exception.Message}";
         }
     }
 
