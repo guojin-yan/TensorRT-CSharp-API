@@ -1040,6 +1040,9 @@ internal static partial class NativeMethodsCuda
     internal static extern BridgeStatusCode jyppx_cuda_malloc_mipmapped_array(ref NativeCudaChannelFormatDesc descriptor, ref NativeCudaArrayExtent extent, uint level_count, uint flags, out SafeCudaMipmappedArrayHandle out_array);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_managed_memory_advise_location_range_safe(SafeCudaMemoryHandle memory, UIntPtr offset, UIntPtr count, int advice, int location_type, int location_id);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_cuda_managed_memory_discard_and_prefetch_batch_async_safe(IntPtr ranges, UIntPtr range_count, SafeCudaStreamHandle stream);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -1047,6 +1050,9 @@ internal static partial class NativeMethodsCuda
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_cuda_managed_memory_prefetch_batch_async_safe(IntPtr ranges, UIntPtr range_count, SafeCudaStreamHandle stream);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_managed_memory_prefetch_location_range_async_safe(SafeCudaMemoryHandle memory, UIntPtr offset, UIntPtr count, int location_type, int location_id, SafeCudaStreamHandle stream);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_cuda_mem_advise_v2_deferred();

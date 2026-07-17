@@ -235,6 +235,12 @@ internal static class Program
                 _ = CudaDevice.GetLastErrorCode();
             }
 
+            Console.WriteLine($"ManagedMemoryLocationV2 {ProbeCudaManagedMemoryLocationV2(
+                managedMemory,
+                stream,
+                CudaDevice.RuntimeVersion,
+                CudaDevice.GetBooleanAttribute(CudaDevice.Current, CudaDeviceAttribute.ConcurrentManagedAccess))}");
+
             try
             {
                 CudaMemoryRangeAttributeValue preferredLocation = managedMemory.GetRangeAttribute(CudaMemoryRangeAttribute.PreferredLocation);
@@ -906,6 +912,59 @@ internal static class Program
         catch (CudaException exception)
         {
             return $"Skipped=True Status={exception.StatusCode} Reason={exception.Message}";
+        }
+    }
+
+    private static string ProbeCudaManagedMemoryLocationV2(
+        CudaManagedMemory memory,
+        CudaStream stream,
+        int runtimeVersion,
+        bool concurrentManagedAccess)
+    {
+        CudaMemoryLocation device = CudaMemoryLocation.Device(CudaDevice.Current);
+        CudaMemoryLocation host = CudaMemoryLocation.Host;
+        CudaMemoryLocation hostNuma = CudaMemoryLocation.HostNuma(0);
+        CudaMemoryLocation currentHostNuma = CudaMemoryLocation.CurrentHostNuma;
+
+        try
+        {
+            if (runtimeVersion < 12030)
+            {
+                try
+                {
+                    memory.PrefetchAsync(device, stream);
+                    throw new InvalidOperationException("CUDA location-based managed-memory prefetch unexpectedly succeeded before CUDA 12.3.");
+                }
+                catch (CudaException exception) when (exception.StatusCode == BridgeStatusCode.NotSupported)
+                {
+                    return $"Skipped=True VersionGuard=NotSupported Runtime={runtimeVersion}";
+                }
+            }
+
+            memory.Advise(CudaMemoryAdvice.SetPreferredLocation, host);
+            try
+            {
+                memory.PrefetchAsync(host, stream);
+            }
+            catch (CudaException exception) when (
+                !concurrentManagedAccess &&
+                exception.StatusCode == BridgeStatusCode.InvalidArgument)
+            {
+                _ = CudaDevice.GetLastErrorCode();
+                memory.Advise(CudaMemoryAdvice.UnsetPreferredLocation, host);
+                return $"Advise=True PrefetchAttempted=True Prefetch=False Constraint=ConcurrentManagedAccessFalse Status={exception.StatusCode} Device={device} Host={host} HostNuma={hostNuma} CurrentHostNuma={currentHostNuma} Runtime={runtimeVersion}";
+            }
+
+            stream.Synchronize();
+            memory.Advise(CudaMemoryAdvice.SetPreferredLocation, device);
+            memory.PrefetchAsync(device, stream);
+            stream.Synchronize();
+            return $"Advise=True Prefetch=True Device={device} Host={host} HostNuma={hostNuma} CurrentHostNuma={currentHostNuma} Runtime={runtimeVersion}";
+        }
+        catch (CudaException exception)
+        {
+            _ = CudaDevice.GetLastErrorCode();
+            return $"Available=False Status={exception.StatusCode} Reason={exception.Message}";
         }
     }
 

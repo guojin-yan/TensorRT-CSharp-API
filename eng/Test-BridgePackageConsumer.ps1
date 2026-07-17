@@ -2648,6 +2648,18 @@ static class HighLevelWrapperSurfaceProbe
             static (memory, offset, count, advice, device) => memory.Advise(offset, count, advice, device);
         Action<CudaMemory, int, int, int, CudaStream> prefetchRange =
             static (memory, offset, count, destinationDevice, stream) => memory.PrefetchAsync(offset, count, destinationDevice, stream);
+        Func<int, CudaMemoryLocation> cudaDeviceMemoryLocation =
+            static device => CudaMemoryLocation.Device(device);
+        Func<CudaMemoryLocation> cudaHostMemoryLocation =
+            static () => CudaMemoryLocation.Host;
+        Func<int, CudaMemoryLocation> cudaHostNumaMemoryLocation =
+            static node => CudaMemoryLocation.HostNuma(node);
+        Func<CudaMemoryLocation> cudaCurrentHostNumaMemoryLocation =
+            static () => CudaMemoryLocation.CurrentHostNuma;
+        Action<CudaManagedMemory, int, int, CudaMemoryAdvice, CudaMemoryLocation> adviseManagedMemoryLocation =
+            static (memory, offset, count, advice, location) => memory.Advise(offset, count, advice, location);
+        Action<CudaManagedMemory, int, int, CudaMemoryLocation, CudaStream> prefetchManagedMemoryLocation =
+            static (memory, offset, count, location, stream) => memory.PrefetchAsync(offset, count, location, stream);
         Func<CudaManagedMemory, int, int, CudaManagedMemoryRange> managedMemoryRange =
             static (memory, offset, count) => new CudaManagedMemoryRange(memory, offset, count);
         Func<CudaManagedMemory, int, CudaManagedMemoryPrefetchRange> managedMemoryPrefetchRange =
@@ -2929,6 +2941,12 @@ static class HighLevelWrapperSurfaceProbe
         _ = currentDeviceGraphMemorySummary;
         _ = adviseRange;
         _ = prefetchRange;
+        _ = cudaDeviceMemoryLocation;
+        _ = cudaHostMemoryLocation;
+        _ = cudaHostNumaMemoryLocation;
+        _ = cudaCurrentHostNumaMemoryLocation;
+        _ = adviseManagedMemoryLocation;
+        _ = prefetchManagedMemoryLocation;
         _ = managedMemoryRange;
         _ = managedMemoryPrefetchRange;
         _ = prefetchManagedMemoryBatch;
@@ -4534,6 +4552,16 @@ static class HighLevelWrapperSurfaceProbe
             nameof(CudaDeviceGraphMemorySummary.CanDeleteDeferredRecord),
             nameof(CudaMemory.Advise),
             nameof(CudaMemory.PrefetchAsync),
+            nameof(CudaMemoryLocation),
+            nameof(CudaMemoryLocation.Kind),
+            nameof(CudaMemoryLocation.Id),
+            nameof(CudaMemoryLocation.Device),
+            nameof(CudaMemoryLocation.Host),
+            nameof(CudaMemoryLocation.HostNuma),
+            nameof(CudaMemoryLocation.CurrentHostNuma),
+            nameof(CudaMemoryLocationKind),
+            nameof(CudaManagedMemory.Advise),
+            nameof(CudaManagedMemory.PrefetchAsync),
             nameof(CudaManagedMemoryRange),
             nameof(CudaManagedMemoryRange.Memory),
             nameof(CudaManagedMemoryRange.Offset),

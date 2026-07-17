@@ -807,7 +807,7 @@ public partial class CudaMemory : IDisposable
         }
     }
 
-    private void ValidateRange(int offset, int count, string offsetParameterName, string countParameterName)
+    protected void ValidateRange(int offset, int count, string offsetParameterName, string countParameterName)
     {
         if (offset < 0 || offset > SizeInBytes)
         {
@@ -833,7 +833,7 @@ public partial class CudaMemory : IDisposable
         }
     }
 
-    private static void ValidateMemoryAdvice(CudaMemoryAdvice advice, string parameterName)
+    protected static void ValidateMemoryAdvice(CudaMemoryAdvice advice, string parameterName)
     {
         if (!Enum.IsDefined(typeof(CudaMemoryAdvice), advice))
         {

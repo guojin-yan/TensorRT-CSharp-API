@@ -17,6 +17,42 @@ internal static partial class NativeCudaApi
         CudaNativeStatus.ThrowIfFailed(NativeMethodsCuda.jyppx_cuda_memory_advise_range(memory, (UIntPtr)offset, (UIntPtr)count, advice, device));
     }
 
+    public static void PrefetchManagedMemoryLocationRangeAsync(
+        SafeCudaMemoryHandle memory,
+        int offset,
+        int count,
+        int locationType,
+        int locationId,
+        SafeCudaStreamHandle stream)
+    {
+        CudaNativeStatus.ThrowIfFailed(
+            NativeMethodsCuda.jyppx_cuda_managed_memory_prefetch_location_range_async_safe(
+                memory,
+                (UIntPtr)offset,
+                (UIntPtr)count,
+                locationType,
+                locationId,
+                stream));
+    }
+
+    public static void AdviseManagedMemoryLocationRange(
+        SafeCudaMemoryHandle memory,
+        int offset,
+        int count,
+        int advice,
+        int locationType,
+        int locationId)
+    {
+        CudaNativeStatus.ThrowIfFailed(
+            NativeMethodsCuda.jyppx_cuda_managed_memory_advise_location_range_safe(
+                memory,
+                (UIntPtr)offset,
+                (UIntPtr)count,
+                advice,
+                locationType,
+                locationId));
+    }
+
     public static int GetMemoryRangeAttribute(SafeCudaMemoryHandle memory, int offset, int count, int attribute)
     {
         CudaNativeStatus.ThrowIfFailed(NativeMethodsCuda.jyppx_cuda_memory_range_get_attribute(memory, (UIntPtr)offset, (UIntPtr)count, attribute, out int value));

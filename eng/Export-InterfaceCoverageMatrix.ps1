@@ -1218,6 +1218,8 @@ function Find-ExplicitCudaManifestApis {
     "cudaMemPrefetchBatchAsync" = @("id:cuda-managed-memory-prefetch-batch-owner-array-safe")
     "cudaMemDiscardBatchAsync" = @("id:cuda-managed-memory-discard-batch-owner-array-safe")
     "cudaMemDiscardAndPrefetchBatchAsync" = @("id:cuda-managed-memory-discard-and-prefetch-batch-owner-array-safe")
+    "cudaMemPrefetchAsync_v2" = @("id:cuda-managed-memory-prefetch-location-range-async-safe")
+    "cudaMemAdvise_v2" = @("id:cuda-managed-memory-advise-location-range-safe")
   }
   $deferredHistoryAliasMap = @{
     "cudaCreateSurfaceObject" = @("id:cuda-create-surface-object-deferred")
@@ -1271,6 +1273,8 @@ function Find-ExplicitCudaManifestApis {
     "cudaMemPrefetchBatchAsync" = @("id:cuda-mem-prefetch-batch-async-deferred")
     "cudaMemDiscardBatchAsync" = @("id:cuda-mem-discard-batch-async-deferred")
     "cudaMemDiscardAndPrefetchBatchAsync" = @("id:cuda-mem-discard-and-prefetch-batch-async-deferred")
+    "cudaMemPrefetchAsync_v2" = @("id:cuda-mem-prefetch-async-v2-deferred")
+    "cudaMemAdvise_v2" = @("id:cuda-mem-advise-v2-deferred")
   }
 
   if (-not $aliasMap.ContainsKey($FunctionName)) {

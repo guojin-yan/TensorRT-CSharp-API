@@ -1,6 +1,6 @@
 # TensorRtSharp4.0 完成情况审查
 
-生成日期：2026-07-17
+生成日期：2026-07-18
 
 ## 审查范围
 
@@ -18,6 +18,54 @@
 - `artifacts/interop-comparison/generated-api-coverage.md`
 - `artifacts/real-case/multi-version-onnx-runtime/multi-version-runtime-evidence-matrix.json`
 - `artifacts/test-analysis/project-quality-test-inventory.json`
+
+## 2026-07-18 CUDA Managed-Memory Location V2 复审
+
+本阶段基于起始提交 `ca0d5907e7e864433888e756ee00645faf735a53`，提升 CUDA 12.3/12.9 的 `cudaMemAdvise_v2` 与 `cudaMemPrefetchAsync_v2`。CUDA 13.2 已将相同 location 语义迁移到非 `_v2` 名称，因此 bridge 保持统一 owner-safe ABI，在 native 内按 Toolkit 版本独立选择 vendor 调用。旧 deferred manifest 全部保留。
+
+### Owner、Location 与版本边界
+
+- 新增 `CudaMemoryLocationKind` 与不可变 `CudaMemoryLocation`，只允许 `Device`、`Host`、`HostNuma`、`CurrentHostNuma` 四类规范位置。device/NUMA id 必须非负，忽略 id 的位置固定为 0；默认无效 struct 会在调用前被拒绝。
+- 两个公开 overload 只位于 `CudaManagedMemory`，接受现有 managed-memory owner、offset/count 与 `CudaStream` owner，不公开 `IntPtr`、`nint`、`SafeHandle`、`UIntPtr` 或 device pointer。异步 prefetch 文档要求 memory/stream 保持存活到同步完成。
+- native 会校验 handle kind、`MemoryObject::is_managed`、range、location、advice 与 accessed-by/location 组合；flags 固定为 `0U`。C++ exception 和 Windows SEH 均转换为 bridge status。
+- CUDA 12.3-12.9 调用 `cudaMemAdvise_v2` / `cudaMemPrefetchAsync_v2`；CUDA 13.x 调用 location 形态的 `cudaMemAdvise` / `cudaMemPrefetchAsync`；CUDA 11.8/12.1 明确返回 `NotSupported`。callback、allocator/resource、plugin mutation、裸/borrowed pointer 继续 deferred。
+
+### Coverage、构建与测试
+
+generator 为 181 manifests / 3919 records，bindings 生成和幂等验证通过。两条接口在 CUDA 12.3 与 12.9 的四个版本行均为 `implemented-with-deferred-history`，匹配 real safe entry 与原 deferred entry：
+
+| CUDA Toolkit | 扫描接口 | 非 deferred 实现 | deferred-only |
+| --- | ---: | ---: | ---: |
+| 11.6 | 268 | 211 | 57 |
+| 11.8 | 273 | 216 | 57 |
+| 12.1 | 277 | 219 | 58 |
+| 12.3 | 292 | 229 | 63 |
+| 12.9 | 307 | 241 | 66 |
+| 13.2 | 330 | 257 | 73 |
+
+- `JYPPX.CudaSharp` 全目标框架 Release build 与完整 `TensorRtSharp.sln` Release build 均为 0 warning / 0 error。
+- 新专项、相邻 memory-range/batch 与 package-consumer 分片 16/16。正式 ProjectQuality inventory 为 1280 tests / 381 classes / unassigned 0；本轮 bounded shard 16/16，累计 hash-verified coverage 为 381/381、184 份有效 TRX、missing 0、invalid evidence 0。
+- one-shot 完整 ProjectQuality Tests 在 604 秒命令上限内未返回最终结果，因此不记为通过；可审计结论使用 bounded shard 与累计类覆盖。
+- TRT8/CUDA11.8、TRT8/CUDA12.1、TRT10/CUDA12.9、TRT11/CUDA12.9、TRT11/CUDA13.2 五套 native 均成功。TensorRT 静态声明与三条主 DLL 的 PE export parity 继续为 missing declaration 0、missing export 0。
+
+### Runtime、NuGet 与 Consumer
+
+- CUDA 12.9 真实 smoke 加载新 entry 并完成 `cudaMemAdvise_v2`。本机 RTX 3060 Laptop GPU 为 `ConcurrentManagedAccess=False`，location prefetch 已进入 NVIDIA runtime 后受控返回 `cudaErrorInvalidDevice(101)`；输出明确记录 `Advise=True`、`PrefetchAttempted=True`、能力约束与 sticky error 清零，不冒充 prefetch success。
+- TRT10/CUDA12.9 Plugin Registry inventory/lookup/parent-search、NetworkBuilder 和 InferenceBindings 真实通过；identity engine 的 ExecuteV2、EnqueueV3 与 output compare 匹配。
+- managed 4.0.0 与 TRT8/TRT10/TRT11 三个 bridge-only 包已重打。三个无 ProjectReference、纯 PackageReference consumer restore/build/validation 全部通过，新 location 类型与 overload 已进入 compile surface。
+
+| 包 | 大小 | SHA256 |
+| --- | ---: | --- |
+| managed `JYPPX.TensorRT.CSharp.API.4.0.0.nupkg` | 14,403,087 bytes | `BB3712F0D961BAECCB9CE859D6CFB806F49AB0E35BEFAD749B533EC88000E285` |
+| TRT8/CUDA12.1 bridge-only | 313,595 bytes | `1E4F73C3C5EB41C3EEDA2D8323CB8DA9A930B96311BA265FEF9C2DA09D19CE93` |
+| TRT10/CUDA12.9 bridge-only | 339,345 bytes | `BA41765A70196BB87FE8288EA1F936147C094E065D7B6D39936C9C8DA45EB37C` |
+| TRT11/CUDA13.2 bridge-only | 276,838 bytes | `2AADE3A2822BABD84761CB152968164B787A954F12E1956EF831426157008D48` |
+
+### Gate 与发布边界
+
+strict classification 为 `classification-audit-passed-non-proof-boundaries-intact`、finding 0；strict release gate 为 `release-quality-gate-passed`、required failure 0。Owner convergence 保持 structural 9/9、accepted 0/9、gates 2/3、validation blocker 0；`canPublishPublicly=false`、`canCloseReleaseIssue=false`。
+
+本阶段未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
 
 ## 2026-07-18 TensorRT Native ABI Export Parity 复审
 
