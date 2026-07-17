@@ -19,6 +19,47 @@
 - `artifacts/real-case/multi-version-onnx-runtime/multi-version-runtime-evidence-matrix.json`
 - `artifacts/test-analysis/project-quality-test-inventory.json`
 
+## 2026-07-18 TensorRT Native ABI Export Parity 复审
+
+本阶段基于起始提交 `b991f6419aca394159292c3bfc39b960bd88abbf`，收敛 manifest、公共 C 头声明与 Windows PE export 三者的一致性。修复范围只覆盖已有安全实现和 managed wrapper、但公共头缺少 `JYPPX_C_API` 声明的入口；没有扩展 callback、plugin mutation、allocator/resource acquire/release 或 pointer-bearing public API。
+
+### ABI 与实现收敛
+
+- TRT8、TRT10、TRT11 公共头分别补齐 17、31、14 个声明，共 62 个。新增 `eng/Test-TensorRtNativeAbiSurface.ps1`，默认验证三版本全部 manifest entry；可选 `-BridgePath` 后通过 `dumpbin /exports` 逐项校验真实 DLL export。
+- 门禁使用严格 token 匹配，并兼容既有 `*_DECL(entry)` 声明宏，避免把 `lookup` 与 `lookup_get_*` 等子串误判为同一入口。GitHub workflow 已接入静态 ABI validation 并上传 `artifacts/native-abi/**`。
+- PE 检查暴露 TRT11 refitter 两个 copied diagnostics entry 虽有 manifest/wrapper、却未进入 source 编译。现已补齐 `get_error_recorder_snapshot_info` 与 `get_error_recorder_error`：校验 refitter owner，复制 count/interface/error code/description，校验 index，并包含 C++ exception 与 Windows SEH containment；不暴露 recorder pointer。
+- TRT11 Plugin Registry runner 只把 `BridgeProbeException` 的 `RuntimeError + "returned a null TensorRT object."` 明确签名视为 compatible-host skip。`EntryPointNotFoundException` 等 ABI 回归仍会失败，防回归测试已锁定该边界。
+
+### Coverage、构建与测试
+
+generator 保持 180 manifests / 3917 records，bindings 生成和幂等检查通过。coverage 分类未被 ABI 声明修复错误改变：TRT8 为 751/96、TRT10 为 759/120、TRT11 为 813/88；TRT8 两条 builder registry alias 仍为 `implemented-with-deferred-history`。
+
+- 完整 `TensorRtSharp.sln` Release build 为 0 warning / 0 error。
+- ABI、Plugin Registry、BuilderConfig、RNNv2、Refitter、workflow、public handle exposure 等受影响合并分片 68/68 通过。
+- 正式 ProjectQuality inventory 为 1275 tests / 380 classes / unassigned 0；11 个受影响类逐类 bounded run 全部通过，累计 hash-verified coverage 为 380/380、183 份有效 TRX、missing 0、invalid evidence 0。既有 one-shot 会被共享 evidence 长尾与文件竞争影响，本阶段不冒充 one-shot pass。
+- TRT8/CUDA11.8、TRT8/CUDA12.1、TRT10/CUDA12.9、TRT11/CUDA12.9、TRT11/CUDA13.2 五套 native 均构建成功；最终三条主 DLL 的 manifest export parity 为 TRT8 983/983、TRT10 1078/1078、TRT11 1226/1226。旧 TRT10 DLL 的 1047/1078 与 31 项缺口证据保留在 `artifacts/native-abi/trt10-before-rebuild.json`。
+
+### Runtime、NuGet 与 Consumer
+
+- TRT8/CUDA12.1 与 TRT10/CUDA12.9 的 Plugin Registry、NetworkBuilder、InferenceBindings 已真实通过；TRT10 OnnxToEngine 原 `jyppx_trt10_builder_plugin_registry_exists` 缺失导出已消失，parse/build/serialize/deserialize/refitter diagnostics/enqueue/output compare 完成。
+- TRT11/CUDA13.2 可读取 global/capability plugin inventory；runtime 与 builder 创建因本机 CUDA error 35 返回 null，runner 分别输出精确 `Skipped=True`。NetworkBuilder 记录受控失败，OnnxToEngine 记录受控 skip；不晋级 TRT11 runtime proof。
+- managed 4.0.0 与 TRT8/TRT10/TRT11 三个 bridge-only 包已重打；三个纯 `PackageReference` consumer 无 `ProjectReference`，restore/build/validation 全部通过，分类保持 `compile-surface-proof`。
+- TRT10 bridge package runtime consumer 真实完成 CUDA preflight、8652-byte identity engine、enqueue 与 output compare，`IdentityOutputMatch=True`。该本地 compatible-host runtime evidence 仍不能替代公开包或 post-publish proof。
+- TRT11/CUDA13.2 split bridge/CudaCudnn/TensorRt/meta 四角色齐全，package inventory 为 `packageSetReady=true`、`missingSplitRoles=[]`、`sha256Ready=true`。
+
+| 包 | 大小 | SHA256 |
+| --- | ---: | --- |
+| managed `JYPPX.TensorRT.CSharp.API.4.0.0.nupkg` | 14,376,358 bytes | `4BEE8ADB329CC9AF502BECA143D994ADED4FA8461980D34E225EA6EF2C631C30` |
+| TRT8/CUDA12.1 bridge-only | 312,356 bytes | `D5190A5E3F8FC937BDE22FD83E99A6B20EDE72662DF46B893D67E03B95BAF307` |
+| TRT10/CUDA12.9 bridge-only | 338,407 bytes | `0CA750BA128946BAFE4222CEC25594E4BDC02301FF2CBCBEA06C97A34B489886` |
+| TRT11/CUDA13.2 bridge-only | 276,098 bytes | `CBAC36D30FC47082478E31EA6FF4684831D0ECEDC4915E7EA14CD734304043C9` |
+
+### Gate 与发布边界
+
+strict classification 为 `classification-audit-passed-non-proof-boundaries-intact`、finding 0；要求 package inventory/classification 的 strict release gate 为 `release-quality-gate-passed`、required failure 0。Owner convergence 保持 structural 9/9、accepted 0/9、gates 2/3；`canPublishPublicly=false`、`canCloseReleaseIssue=false`。
+
+本阶段未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
+
 ## 2026-07-18 TRT11 ONNX Parser Builder-Config Attachment 复审
 
 本阶段基于起始提交 `4531b04a49a8a9e11171aefb82b6f0c350229465`，提升 TRT11 `IParser::setBuilderConfig`，并补齐官方 `REPORT_CAPABILITY_DLA=2`、`ENABLE_PLUGIN_OVERRIDE=3`、`ADJUST_FOR_DLA=4` parser flag。旧 `parser-set-builder-config-deferred` manifest 保留，coverage 通过显式 real/deferred-history alias 归并，不以删除历史 deferred 改变统计。

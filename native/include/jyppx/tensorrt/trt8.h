@@ -6,6 +6,26 @@
 #include "jyppx/cuda/types.h"
 #include "jyppx/tensorrt/types.h"
 
+/* BEGIN TRT8 MANIFEST EXPORT PARITY DECLARATIONS */
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_clear_error_recorder(JYPPX_TensorRtBuilder* builder);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_clear_gpu_allocator(JYPPX_TensorRtBuilder* builder);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_has_error_recorder(JYPPX_TensorRtBuilder* builder, JYPPX_Boolean* out_has_recorder);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_engine_clear_error_recorder(JYPPX_TensorRtCudaEngine* engine);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_engine_has_error_recorder(JYPPX_TensorRtCudaEngine* engine, JYPPX_Boolean* out_has_recorder);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_engine_inspector_clear_error_recorder(JYPPX_TensorRtEngineInspector* inspector);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_engine_inspector_has_error_recorder(JYPPX_TensorRtEngineInspector* inspector, JYPPX_Boolean* out_has_recorder);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_clear_error_recorder(JYPPX_TensorRtExecutionContext* context);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_clear_output_allocator(JYPPX_TensorRtExecutionContext* context, const char* tensor_name, JYPPX_Boolean* out_cleared);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_clear_temporary_storage_allocator(JYPPX_TensorRtExecutionContext* context, JYPPX_Boolean* out_cleared);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_has_error_recorder(JYPPX_TensorRtExecutionContext* context, JYPPX_Boolean* out_has_recorder);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_has_output_allocator(JYPPX_TensorRtExecutionContext* context, const char* tensor_name, JYPPX_Boolean* out_has_allocator);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_has_temporary_storage_allocator(JYPPX_TensorRtExecutionContext* context, JYPPX_Boolean* out_has_allocator);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_network_clear_error_recorder(JYPPX_TensorRtNetworkDefinition* network);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_network_has_error_recorder(JYPPX_TensorRtNetworkDefinition* network, JYPPX_Boolean* out_has_recorder);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_refitter_get_error_recorder_error(JYPPX_TensorRtRefitter* refitter, int32_t index, JYPPX_TensorRtErrorRecordInfo* out_error);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_refitter_get_error_recorder_snapshot_info(JYPPX_TensorRtRefitter* refitter, JYPPX_TensorRtErrorRecorderSnapshotInfo* out_info);
+/* END TRT8 MANIFEST EXPORT PARITY DECLARATIONS */
+
 /* BEGIN TRT8 SAFE LIFECYCLE, SHAPE, SERIALIZATION, AND ERROR METADATA DECLARATIONS */
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_build_engine_with_config(JYPPX_TensorRtBuilder* builder, JYPPX_TensorRtNetworkDefinition* network, JYPPX_TensorRtBuilderConfig* config, JYPPX_TensorRtCudaEngine** out_engine);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_config_get_plugin_to_serialize(JYPPX_TensorRtBuilderConfig* config, int32_t index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);

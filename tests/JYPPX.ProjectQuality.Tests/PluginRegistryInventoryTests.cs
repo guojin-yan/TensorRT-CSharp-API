@@ -412,6 +412,19 @@ public sealed class PluginRegistryInventoryTests
     }
 
     [Fact]
+    public void PluginInventorySmokeOnlySkipsTheExplicitCompatibleHostNullRuntimeFailure()
+    {
+        string program = ReadSource("smoke", "PluginRegistryInventorySmokeRunner", "Program.cs");
+
+        Assert.Contains("IsCompatibleHostNullTensorRtObjectException(bridgeProbe)", program, StringComparison.Ordinal);
+        Assert.Contains("exception.StatusCode == BridgeStatusCode.RuntimeError", program, StringComparison.Ordinal);
+        Assert.Contains("returned a null TensorRT object.", program, StringComparison.Ordinal);
+        Assert.Contains("StringComparison.Ordinal", program, StringComparison.Ordinal);
+        Assert.DoesNotContain("exception is EntryPointNotFoundException", program, StringComparison.Ordinal);
+        Assert.DoesNotContain("bridgeProbe.InnerException is EntryPointNotFoundException", program, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void PluginInstanceAndResourceBoundariesRemainDeferred()
     {
         string pluginOwnershipBoundary = ReadSource("docs", "articles", "zh-cn", "plugin-ownership-boundary.md");

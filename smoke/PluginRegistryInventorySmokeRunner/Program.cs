@@ -684,10 +684,17 @@ internal static class Program
             return bridgeProbe.StatusCode == BridgeStatusCode.DependencyMissing ||
                 bridgeProbe.StatusCode == BridgeStatusCode.NotSupported ||
                 bridgeProbe.StatusCode == BridgeStatusCode.InvalidState ||
+                IsCompatibleHostNullTensorRtObjectException(bridgeProbe) ||
                 IsDelayLoadDependencyException(bridgeProbe);
         }
 
         return false;
+    }
+
+    private static bool IsCompatibleHostNullTensorRtObjectException(BridgeProbeException exception)
+    {
+        return exception.StatusCode == BridgeStatusCode.RuntimeError &&
+            exception.Message.Contains("returned a null TensorRT object.", StringComparison.Ordinal);
     }
 
     private static bool IsDelayLoadDependencyException(BridgeProbeException exception)

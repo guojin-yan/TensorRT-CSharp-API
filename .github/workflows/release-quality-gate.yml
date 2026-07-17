@@ -87,6 +87,10 @@ jobs:
         shell: pwsh
         run: pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-BindingGeneratorOutputs.ps1
 
+      - name: Validate TensorRT native ABI declarations
+        shell: pwsh
+        run: pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-TensorRtNativeAbiSurface.ps1
+
       - name: Refresh interface coverage
         shell: pwsh
         run: |
@@ -144,6 +148,7 @@ jobs:
             artifacts/runner-availability/**
             artifacts/test-analysis/project-quality-test-inventory.*
             artifacts/test-analysis/project-quality-shards/**
+            artifacts/native-abi/**
             artifacts/interface-coverage/tensorrt-interface-comparison.csv
             artifacts/interface-coverage/deferred-candidate-safety-triage.json
             artifacts/final-release/github-actions-package-validation-audit.*

@@ -6,6 +6,23 @@
 #include "jyppx/cuda/types.h"
 #include "jyppx/tensorrt/types.h"
 
+/* BEGIN TRT11 MANIFEST EXPORT PARITY DECLARATIONS */
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_builder_plugin_creator_lookup_get_field_count(JYPPX_TensorRtBuilder* builder, const char* plugin_name, const char* plugin_version, const char* plugin_namespace, int32_t* out_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_builder_plugin_creator_lookup_get_field_metadata(JYPPX_TensorRtBuilder* builder, const char* plugin_name, const char* plugin_version, const char* plugin_namespace, int32_t field_index, int32_t* out_field_type, int32_t* out_length, JYPPX_Boolean* out_has_data);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_builder_plugin_creator_lookup_get_field_name(JYPPX_TensorRtBuilder* builder, const char* plugin_name, const char* plugin_version, const char* plugin_namespace, int32_t field_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_builder_plugin_creator_lookup_get_interface_info(JYPPX_TensorRtBuilder* builder, const char* plugin_name, const char* plugin_version, const char* plugin_namespace, char* output_buffer, size_t output_buffer_size, size_t* out_required_size, int32_t* out_major, int32_t* out_minor);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_builder_plugin_creator_lookup(JYPPX_TensorRtBuilder* builder, const char* plugin_name, const char* plugin_version, const char* plugin_namespace, JYPPX_Boolean* out_found);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_builder_plugin_registry_exists(JYPPX_TensorRtBuilder* builder, JYPPX_Boolean* out_exists);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_builder_plugin_registry_get_recursive_creator_count(JYPPX_TensorRtBuilder* builder, int32_t* out_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_refitter_get_error_recorder_error(JYPPX_TensorRtRefitter* refitter, int32_t index, JYPPX_TensorRtErrorRecordInfo* out_error);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_refitter_get_error_recorder_snapshot_info(JYPPX_TensorRtRefitter* refitter, JYPPX_TensorRtErrorRecorderSnapshotInfo* out_info);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_runtime_plugin_creator_lookup_get_field_count(JYPPX_TensorRtRuntime* runtime, const char* plugin_name, const char* plugin_version, const char* plugin_namespace, int32_t* out_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_runtime_plugin_creator_lookup_get_field_metadata(JYPPX_TensorRtRuntime* runtime, const char* plugin_name, const char* plugin_version, const char* plugin_namespace, int32_t field_index, int32_t* out_field_type, int32_t* out_length, JYPPX_Boolean* out_has_data);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_runtime_plugin_creator_lookup_get_field_name(JYPPX_TensorRtRuntime* runtime, const char* plugin_name, const char* plugin_version, const char* plugin_namespace, int32_t field_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_runtime_plugin_creator_lookup_get_interface_info(JYPPX_TensorRtRuntime* runtime, const char* plugin_name, const char* plugin_version, const char* plugin_namespace, char* output_buffer, size_t output_buffer_size, size_t* out_required_size, int32_t* out_major, int32_t* out_minor);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_runtime_plugin_registry_get_recursive_creator_count(JYPPX_TensorRtRuntime* runtime, int32_t* out_count);
+/* END TRT11 MANIFEST EXPORT PARITY DECLARATIONS */
+
 /* BEGIN TRT11 REFITTER LOGGER AND ERROR METADATA DECLARATIONS */
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_refitter_has_logger(JYPPX_TensorRtRefitter* refitter, JYPPX_Boolean* out_has_logger);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_error_code_get_exclusive_upper_bound(int32_t* out_exclusive_upper_bound);
