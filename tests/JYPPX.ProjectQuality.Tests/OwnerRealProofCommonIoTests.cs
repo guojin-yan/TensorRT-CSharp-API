@@ -5,6 +5,24 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class OwnerRealProofCommonIoTests
 {
     [Fact]
+    public void ProjectQualitySerializesCanonicalArtifactWritersWithinThisAssembly()
+    {
+        string assemblyInfoPath = Path.Combine(
+            RepositoryPaths.Root,
+            "tests",
+            "JYPPX.ProjectQuality.Tests",
+            "ProjectQualityAssemblyInfo.cs");
+        string assemblyInfo = File.ReadAllText(assemblyInfoPath);
+        string common = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "OwnerRealProofCommon.ps1"));
+
+        Assert.Contains("[assembly: CollectionBehavior(DisableTestParallelization = true)]", assemblyInfo, StringComparison.Ordinal);
+        Assert.Contains("canonical release-evidence graph", assemblyInfo, StringComparison.Ordinal);
+        Assert.Contains("function Write-Utf8FileAtomic", common, StringComparison.Ordinal);
+        Assert.Contains("[System.IO.File]::Replace", common, StringComparison.Ordinal);
+        Assert.Contains("for ($attempt = 1; $attempt -le 10; $attempt++)", common, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void OwnerRealProofCommonUsesAtomicWritesAndRetryReads()
     {
         string commonPath = Path.Combine(RepositoryPaths.Root, "eng", "OwnerRealProofCommon.ps1");

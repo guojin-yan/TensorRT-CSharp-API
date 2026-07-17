@@ -2579,6 +2579,7 @@ JYPPX_StatusCode jyppx_cuda_memory_free(JYPPX_CudaMemory* memory)
 
 #include "modules/memory/pitched_memory.inc"
 #include "modules/memory/array_memory.inc"
+#include "modules/memory/texture_surface_objects.inc"
 #include "modules/memory/raw_memory_operations.inc"
 #include "modules/deployment/official_token_aliases.inc"
 #include "modules/deferred/twenty_third_batch_deferred.inc"

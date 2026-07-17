@@ -22,7 +22,9 @@ enum class ObjectKind : uint32_t
     Graph = 6,
     GraphExec = 7,
     Array = 8,
-    MipmappedArray = 9
+    MipmappedArray = 9,
+    TextureObject = 10,
+    SurfaceObject = 11
 };
 
 struct ObjectBase
@@ -121,6 +123,27 @@ struct MipmappedArrayObject
 #endif
 };
 
+struct TextureObject
+{
+    ObjectBase base;
+    bool has_resource_view;
+#if JYPPX_HAS_CUDA_TOOLKIT
+    cudaTextureObject_t handle;
+#else
+    uint64_t handle;
+#endif
+};
+
+struct SurfaceObject
+{
+    ObjectBase base;
+#if JYPPX_HAS_CUDA_TOOLKIT
+    cudaSurfaceObject_t handle;
+#else
+    uint64_t handle;
+#endif
+};
+
 constexpr uint32_t kObjectMagic = 0x4A595043U;
 
 JYPPX_StatusCode validate_output_pointer(void* pointer, const char* name);
@@ -133,6 +156,8 @@ JYPPX_StatusCode validate_graph(const JYPPX_CudaGraph* graph, const char* name);
 JYPPX_StatusCode validate_graph_exec(const JYPPX_CudaGraphExec* graph_exec, const char* name);
 JYPPX_StatusCode validate_array(const JYPPX_CudaArray* array, const char* name);
 JYPPX_StatusCode validate_mipmapped_array(const JYPPX_CudaMipmappedArray* array, const char* name);
+JYPPX_StatusCode validate_texture_object(const JYPPX_CudaTextureObject* texture, const char* name);
+JYPPX_StatusCode validate_surface_object(const JYPPX_CudaSurfaceObject* surface, const char* name);
 
 void set_cuda_error(const char* operation, int32_t error_code, const char* error_name, const char* error_message);
 

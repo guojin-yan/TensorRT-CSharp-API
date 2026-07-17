@@ -19,6 +19,58 @@
 - `artifacts/real-case/multi-version-onnx-runtime/multi-version-runtime-evidence-matrix.json`
 - `artifacts/test-analysis/project-quality-test-inventory.json`
 
+## 2026-07-17 CUDA Texture/Surface Owner 与 ProjectQuality 隔离复审
+
+本阶段基于起始提交 `f4e882494d62aa53123a48766a9bd3b4c9b76be4`，新增 10 个 CUDA texture/surface 安全 entry，覆盖 `cudaCreate/DestroySurfaceObject`、`cudaGetSurfaceObjectResourceDesc`、`cudaCreate/DestroyTextureObject`、CUDA 11.8 `_v2` create/get descriptor，以及 texture resource、texture descriptor 和 resource-view copied query。旧 deferred manifest 全部保留，coverage 通过显式 real alias 优先并合并 deferred history。
+
+### 实现与生命周期边界
+
+- `CudaTextureObject` 与 `CudaSurfaceObject` 只接受 `CudaArray` owner；创建前对 `SafeCudaArrayHandle` 建立 `DangerousAddRef` lease，对象销毁后才 `DangerousRelease`。即使调用方先显式 `Dispose` array，底层 CUDA array 仍保持有效直到 texture/surface 销毁。
+- native 只保存 bridge-owned `cudaTextureObject_t` / `cudaSurfaceObject_t` 值，不向 managed public API 返回 array、device pointer 或 vendor object pointer；资源查询只复制 enum、尺寸、pitch、size 和 pointer-presence bool。
+- `cudaCreateTextureObject_v2` 与 `cudaGetTextureObjectTextureDesc_v2` 仅在 CUDA 11.8 descriptor ABI 路径调用真实 `_v2` vendor API，CUDA 12/13 返回带诊断的 `NotSupported`，不跨版本误绑定。
+- 真实 CUDA 11.8 smoke 发现：创建时传入 null resource-view 后，vendor query 返回 success 但输出字段未定义。bridge 现记录创建时是否提供 view，并把该情况归一化为 `CudaTextureResourceViewSnapshot.IsSpecified=false` 的零快照；不再把垃圾字段包装成有效 descriptor。
+- native entry 使用 `noexcept` exception containment 与 Windows SEH guard。public API 未暴露 `IntPtr`、`nint`、`SafeHandle`、`UIntPtr`、device/plugin/tensor pointer。
+- linear/pitch2D texture、mipmapped texture、custom resource view、external memory/semaphore、graphics interop、callback、library/kernel handle 与 ownership 不明确的 pointer 继续 deferred。
+
+### Coverage、构建与测试
+
+generator 最终为 175 manifests / 3895 records。10 个函数在可用版本上的 50 行全部为 `implemented-with-deferred-history`：
+
+| CUDA Toolkit | 官方函数 | manifest/source 已匹配 | 非 deferred 实现 | deferred-only |
+| --- | ---: | ---: | ---: | ---: |
+| 11.6 | 268 | 268 | 211 | 57 |
+| 11.8 | 273 | 273 | 216 | 57 |
+| 12.1 | 277 | 277 | 218 | 59 |
+| 12.3 | 292 | 292 | 226 | 66 |
+| 12.9 | 307 | 307 | 228 | 79 |
+| 13.2 | 330 | 330 | 236 | 94 |
+
+- bindings 生成与两次幂等校验通过，175 manifests / 3895 records。
+- 完整 solution Release build 通过，0 warning / 0 error。
+- native：TRT8/CUDA11.8、TRT8/CUDA12.1、TRT10/CUDA12.9、TRT11/CUDA13.2 全部成功。
+- texture/surface、coverage alias、public API、consumer 与既有 owner-scoped 受影响分片最终 70/70；`RealProofCandidatePromotionGuardTests` 独立 2/2。
+- ProjectQuality 新增程序集级串行边界，完整套件三小时内未重现 canonical artifact 文件锁，但因串行累计耗时超过三小时被 bounded timeout 终止，未生成最终 TRX，因此不记为完整通过。超时时正在执行 promotion guard pipeline；该类独立复跑通过，没有证据表明单项死锁。
+
+### Runtime Smoke、NuGet 与 Consumer
+
+- CUDA 11.8 与 CUDA 12.1 smoke 均真实得到 `OwnerDisposedBeforeQuery=True`、`Lease=True`、Array resource、`HasDevicePointer=False` 和 `IsSpecified=False` 零 view；CUDA 11.8 `_v2` create/query 成功，CUDA 12.1 `_v2` 明确 `NotSupported`。CUDA 13.2 在当前 driver 12.9 主机以 error 35 明确跳过。
+- TRT8/CUDA12.1 与 TRT10/CUDA12.9 的 Plugin Registry、NetworkBuilder、InferenceBindings 全部通过；TRT8 `ExecuteV2/EnqueueV2/EnqueueV3`、TRT10 `ExecuteV2/EnqueueV3` 输出匹配。
+- TRT11/CUDA13.2 可读取 global/capability copied inventory，但 runtime 创建受当前 driver 12.9 阻塞；不将 native build、inventory 或 compile consumer 冒充 runtime proof。
+- managed 4.0.0 与三个 Bridge-only 4.0.0 本地包已重打并校验。三个纯 `PackageReference` consumer 均无 `ProjectReference`，restore/build 为 0 warning / 0 error，`RuntimeExecutionProof=False`。
+
+| 包 | 大小 | SHA256 |
+| --- | ---: | --- |
+| managed `JYPPX.TensorRT.CSharp.API.4.0.0.nupkg` | 14,221,437 bytes | `9EE86496E5147586A7CF31718A89129894C916910B02D2E03588AA3A3714B2A2` |
+| TRT8/CUDA12.1 bridge-only | 301,869 bytes | `46E1EF97ED95CFF265E3CF4A7C6D00A2B6E21CF1ECA1BF76B61151C54800C24A` |
+| TRT10/CUDA12.9 bridge-only | 323,800 bytes | `6C5BC50388A7B445565E342A3AEA300AD821BB93E0045852517060DC6D562DE4` |
+| TRT11/CUDA13.2 bridge-only | 266,128 bytes | `6A6DBD72477865D0907DDFAF2FEE0EAB76EA705AB2765027FD34E212E7B30BD5` |
+
+### Gate 与发布边界
+
+strict classification audit 为 `classification-audit-passed-non-proof-boundaries-intact`、finding 0；strict release quality gate 为 `release-quality-gate-passed`、required failure 0。Owner convergence 继续为 accepted 0/9、gates 2/3、validation failed blockers 0，`canPublishPublicly=false`、`canCloseReleaseIssue=false`。
+
+本阶段未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
+
 ## 2026-07-17 CUDA Owner-Scoped Graph Diagnostics 安全提升复审
 
 本阶段基于起始提交 `b9bc959af6939bb003cf1f7aeda2f5305f645540`，从 CUDA graph/stream deferred-only 清单中提升 12 个安全 entry，覆盖 11 个官方函数：memset node 默认/after 创建、graph exec memset 参数更新、owner-scoped node 删除、kernel/host/memalloc/memfree 参数 copied snapshot、external semaphore signal/wait copied snapshot、stream capture copied summary 与 capture dependency token array 更新。旧 deferred manifest 全部保留，coverage 通过显式真实 alias 优先并合并 deferred history，不以删除历史记录改变统计。

@@ -1164,6 +1164,16 @@ function Find-ExplicitCudaManifestApis {
   param([object[]]$ManifestApis, [string]$FunctionName)
 
   $aliasMap = @{
+    "cudaCreateSurfaceObject" = @("id:cuda-create-surface-object-array-owner-safe")
+    "cudaDestroySurfaceObject" = @("id:cuda-destroy-surface-object-bridge-owned-safe")
+    "cudaGetSurfaceObjectResourceDesc" = @("id:cuda-get-surface-object-resource-desc-copied-snapshot-safe")
+    "cudaCreateTextureObject" = @("id:cuda-create-texture-object-array-owner-safe")
+    "cudaCreateTextureObject_v2" = @("id:cuda-create-texture-object-v2-array-owner-safe")
+    "cudaDestroyTextureObject" = @("id:cuda-destroy-texture-object-bridge-owned-safe")
+    "cudaGetTextureObjectResourceDesc" = @("id:cuda-get-texture-object-resource-desc-copied-snapshot-safe")
+    "cudaGetTextureObjectResourceViewDesc" = @("id:cuda-get-texture-object-resource-view-desc-copied-snapshot-safe")
+    "cudaGetTextureObjectTextureDesc" = @("id:cuda-get-texture-object-texture-desc-copied-snapshot-safe")
+    "cudaGetTextureObjectTextureDesc_v2" = @("id:cuda-get-texture-object-texture-desc-v2-copied-snapshot-safe")
     "cudaGraphAddMemsetNode" = @("id:cuda-graph-add-memset-node*-safe")
     "cudaGraphAddChildGraphNode" = @("id:cuda-graph-add-child-graph-node*-safe")
     "cudaGraphChildGraphNodeGetGraph" = @("id:cuda-graph-child-graph-node-*-safe")
@@ -1187,6 +1197,16 @@ function Find-ExplicitCudaManifestApis {
     "cudaLogsDumpToFile" = @("id:cuda-logs-dump-to-file-safe")
   }
   $deferredHistoryAliasMap = @{
+    "cudaCreateSurfaceObject" = @("id:cuda-create-surface-object-deferred")
+    "cudaDestroySurfaceObject" = @("id:cuda-destroy-surface-object-deferred")
+    "cudaGetSurfaceObjectResourceDesc" = @("id:cuda-get-surface-object-resource-desc-deferred")
+    "cudaCreateTextureObject" = @("id:cuda-create-texture-object-deferred")
+    "cudaCreateTextureObject_v2" = @("id:cuda-create-texture-object-v2-deferred")
+    "cudaDestroyTextureObject" = @("id:cuda-destroy-texture-object-deferred")
+    "cudaGetTextureObjectResourceDesc" = @("id:cuda-get-texture-object-resource-desc-deferred")
+    "cudaGetTextureObjectResourceViewDesc" = @("id:cuda-get-texture-object-resource-view-desc-deferred")
+    "cudaGetTextureObjectTextureDesc" = @("id:cuda-get-texture-object-texture-desc-deferred")
+    "cudaGetTextureObjectTextureDesc_v2" = @("id:cuda-get-texture-object-texture-desc-v2-deferred")
     "cudaGraphAddMemsetNode" = @("id:*cuda-graph-add-memset-node-deferred")
     "cudaGraphAddChildGraphNode" = @("id:*cuda-graph-add-child-graph-node-deferred")
     "cudaGraphChildGraphNodeGetGraph" = @("id:*cuda-graph-child-graph-node-get-graph-deferred")

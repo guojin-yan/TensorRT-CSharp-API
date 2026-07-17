@@ -1,0 +1,127 @@
+{
+  "$schema": "../bridge-api.schema.json",
+  "module": "cuda",
+  "versionLine": "common",
+  "apis": [
+    {
+      "id": "cuda-create-surface-object-array-owner-safe",
+      "entryPoint": "jyppx_cuda_surface_object_create_array_owner_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "array", "type": "JYPPX_CudaArray*", "direction": "in" },
+        { "name": "out_surface", "type": "JYPPX_CudaSurfaceObject**", "direction": "out", "ownership": "caller-destroys" }
+      ]
+    },
+    {
+      "id": "cuda-destroy-surface-object-bridge-owned-safe",
+      "entryPoint": "jyppx_cuda_surface_object_destroy_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "surface", "type": "JYPPX_CudaSurfaceObject*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" }
+      ]
+    },
+    {
+      "id": "cuda-get-surface-object-resource-desc-copied-snapshot-safe",
+      "entryPoint": "jyppx_cuda_surface_object_get_resource_snapshot_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "surface", "type": "JYPPX_CudaSurfaceObject*", "direction": "in" },
+        { "name": "out_snapshot", "type": "JYPPX_CudaResourceDescriptorSnapshot*", "direction": "out", "moduleManagedType": "out NativeCudaResourceDescriptorSnapshot" }
+      ]
+    },
+    {
+      "id": "cuda-create-texture-object-array-owner-safe",
+      "entryPoint": "jyppx_cuda_texture_object_create_array_owner_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "array", "type": "JYPPX_CudaArray*", "direction": "in" },
+        { "name": "descriptor", "type": "const JYPPX_CudaTextureDescriptor*", "direction": "in", "moduleManagedType": "ref NativeCudaTextureDescriptor" },
+        { "name": "out_texture", "type": "JYPPX_CudaTextureObject**", "direction": "out", "ownership": "caller-destroys" }
+      ]
+    },
+    {
+      "id": "cuda-create-texture-object-v2-array-owner-safe",
+      "entryPoint": "jyppx_cuda_texture_object_create_array_owner_v2_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "array", "type": "JYPPX_CudaArray*", "direction": "in" },
+        { "name": "descriptor", "type": "const JYPPX_CudaTextureDescriptor*", "direction": "in", "moduleManagedType": "ref NativeCudaTextureDescriptor" },
+        { "name": "out_texture", "type": "JYPPX_CudaTextureObject**", "direction": "out", "ownership": "caller-destroys" }
+      ]
+    },
+    {
+      "id": "cuda-destroy-texture-object-bridge-owned-safe",
+      "entryPoint": "jyppx_cuda_texture_object_destroy_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "texture", "type": "JYPPX_CudaTextureObject*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" }
+      ]
+    },
+    {
+      "id": "cuda-get-texture-object-resource-desc-copied-snapshot-safe",
+      "entryPoint": "jyppx_cuda_texture_object_get_resource_snapshot_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "texture", "type": "JYPPX_CudaTextureObject*", "direction": "in" },
+        { "name": "out_snapshot", "type": "JYPPX_CudaResourceDescriptorSnapshot*", "direction": "out", "moduleManagedType": "out NativeCudaResourceDescriptorSnapshot" }
+      ]
+    },
+    {
+      "id": "cuda-get-texture-object-texture-desc-copied-snapshot-safe",
+      "entryPoint": "jyppx_cuda_texture_object_get_descriptor_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "texture", "type": "JYPPX_CudaTextureObject*", "direction": "in" },
+        { "name": "out_descriptor", "type": "JYPPX_CudaTextureDescriptor*", "direction": "out", "moduleManagedType": "out NativeCudaTextureDescriptor" }
+      ]
+    },
+    {
+      "id": "cuda-get-texture-object-texture-desc-v2-copied-snapshot-safe",
+      "entryPoint": "jyppx_cuda_texture_object_get_descriptor_v2_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "texture", "type": "JYPPX_CudaTextureObject*", "direction": "in" },
+        { "name": "out_descriptor", "type": "JYPPX_CudaTextureDescriptor*", "direction": "out", "moduleManagedType": "out NativeCudaTextureDescriptor" }
+      ]
+    },
+    {
+      "id": "cuda-get-texture-object-resource-view-desc-copied-snapshot-safe",
+      "entryPoint": "jyppx_cuda_texture_object_get_resource_view_snapshot_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "texture", "type": "JYPPX_CudaTextureObject*", "direction": "in" },
+        { "name": "out_snapshot", "type": "JYPPX_CudaTextureResourceViewSnapshot*", "direction": "out", "moduleManagedType": "out NativeCudaTextureResourceViewSnapshot" }
+      ]
+    }
+  ]
+}

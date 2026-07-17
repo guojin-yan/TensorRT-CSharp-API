@@ -15,6 +15,8 @@ typedef struct JYPPX_CudaGraph JYPPX_CudaGraph;
 typedef struct JYPPX_CudaGraphExec JYPPX_CudaGraphExec;
 typedef struct JYPPX_CudaArray JYPPX_CudaArray;
 typedef struct JYPPX_CudaMipmappedArray JYPPX_CudaMipmappedArray;
+typedef struct JYPPX_CudaTextureObject JYPPX_CudaTextureObject;
+typedef struct JYPPX_CudaSurfaceObject JYPPX_CudaSurfaceObject;
 
 typedef enum JYPPX_CudaMemcpyKind
 {
@@ -126,6 +128,53 @@ typedef struct JYPPX_CudaArraySparseProperties
     uint64_t mip_tail_size;
     uint32_t flags;
 } JYPPX_CudaArraySparseProperties;
+
+typedef struct JYPPX_CudaResourceDescriptorSnapshot
+{
+    int32_t resource_type;
+    JYPPX_Boolean has_array;
+    JYPPX_Boolean has_mipmapped_array;
+    JYPPX_Boolean has_device_pointer;
+    uint64_t size_in_bytes;
+    uint64_t width;
+    uint64_t height;
+    uint64_t pitch_in_bytes;
+} JYPPX_CudaResourceDescriptorSnapshot;
+
+typedef struct JYPPX_CudaTextureDescriptor
+{
+    int32_t address_mode_x;
+    int32_t address_mode_y;
+    int32_t address_mode_z;
+    int32_t filter_mode;
+    int32_t read_mode;
+    JYPPX_Boolean srgb;
+    float border_color_r;
+    float border_color_g;
+    float border_color_b;
+    float border_color_a;
+    JYPPX_Boolean normalized_coordinates;
+    uint32_t max_anisotropy;
+    int32_t mipmap_filter_mode;
+    float mipmap_level_bias;
+    float min_mipmap_level_clamp;
+    float max_mipmap_level_clamp;
+    JYPPX_Boolean disable_trilinear_optimization;
+    JYPPX_Boolean seamless_cubemap;
+} JYPPX_CudaTextureDescriptor;
+
+typedef struct JYPPX_CudaTextureResourceViewSnapshot
+{
+    JYPPX_Boolean is_specified;
+    int32_t format;
+    uint64_t width;
+    uint64_t height;
+    uint64_t depth;
+    uint32_t first_mipmap_level;
+    uint32_t last_mipmap_level;
+    uint32_t first_layer;
+    uint32_t last_layer;
+} JYPPX_CudaTextureResourceViewSnapshot;
 
 typedef struct JYPPX_CudaMemLocation
 {

@@ -97,6 +97,16 @@ JYPPX_StatusCode validate_mipmapped_array(const JYPPX_CudaMipmappedArray* array,
     return validate_handle(reinterpret_cast<const MipmappedArrayObject*>(array), ObjectKind::MipmappedArray, name);
 }
 
+JYPPX_StatusCode validate_texture_object(const JYPPX_CudaTextureObject* texture, const char* name)
+{
+    return validate_handle(reinterpret_cast<const TextureObject*>(texture), ObjectKind::TextureObject, name);
+}
+
+JYPPX_StatusCode validate_surface_object(const JYPPX_CudaSurfaceObject* surface, const char* name)
+{
+    return validate_handle(reinterpret_cast<const SurfaceObject*>(surface), ObjectKind::SurfaceObject, name);
+}
+
 void set_cuda_error(const char* operation, const int32_t error_code, const char* error_name, const char* error_message)
 {
     std::ostringstream builder;

@@ -378,6 +378,56 @@ internal struct NativeCudaGraphExternalSemaphoreNodeParamsSnapshot
 }
 
 [StructLayout(LayoutKind.Sequential)]
+internal struct NativeCudaResourceDescriptorSnapshot
+{
+    public int ResourceType;
+    public int HasArray;
+    public int HasMipmappedArray;
+    public int HasDevicePointer;
+    public ulong SizeInBytes;
+    public ulong Width;
+    public ulong Height;
+    public ulong PitchInBytes;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+internal struct NativeCudaTextureDescriptor
+{
+    public int AddressModeX;
+    public int AddressModeY;
+    public int AddressModeZ;
+    public int FilterMode;
+    public int ReadMode;
+    public int Srgb;
+    public float BorderColorR;
+    public float BorderColorG;
+    public float BorderColorB;
+    public float BorderColorA;
+    public int NormalizedCoordinates;
+    public uint MaxAnisotropy;
+    public int MipmapFilterMode;
+    public float MipmapLevelBias;
+    public float MinMipmapLevelClamp;
+    public float MaxMipmapLevelClamp;
+    public int DisableTrilinearOptimization;
+    public int SeamlessCubemap;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+internal struct NativeCudaTextureResourceViewSnapshot
+{
+    public int IsSpecified;
+    public int Format;
+    public ulong Width;
+    public ulong Height;
+    public ulong Depth;
+    public uint FirstMipmapLevel;
+    public uint LastMipmapLevel;
+    public uint FirstLayer;
+    public uint LastLayer;
+}
+
+[StructLayout(LayoutKind.Sequential)]
 internal struct NativeCudaDim3
 {
     public uint X;

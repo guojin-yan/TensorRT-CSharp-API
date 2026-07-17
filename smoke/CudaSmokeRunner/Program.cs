@@ -515,6 +515,53 @@ internal static class Program
 
         Console.WriteLine($"CudaArray RoundTrip={arrayRoundTripOk} ArrayToArray={arrayToArrayOk} AsyncRoundTrip={arrayAsyncRoundTripOk} Info={arrayInfo.Extent} Channel={channelDescriptor} MemReq={arrayMemoryRequirementsOk}:{arrayRequirements.SizeBytes}/{arrayRequirements.AlignmentBytes}:{arrayMemoryRequirementsDiagnostic} Sparse={arraySparseOk}:{arraySparseProperties.Flags}:{arraySparseDiagnostic} Texture1DMax={textureLinearMaxWidth}");
 
+        CudaArray textureOwner = new CudaArray(CudaChannelFormatDescriptor.UInt8, arrayWidth, arrayHeight);
+        using CudaTextureObject textureObject = new CudaTextureObject(
+            textureOwner,
+            new CudaTextureDescriptor(
+                CudaTextureAddressMode.Clamp,
+                filterMode: CudaTextureFilterMode.Point,
+                readMode: CudaTextureReadMode.ElementType));
+        using CudaSurfaceObject surfaceObject = new CudaSurfaceObject(textureOwner);
+        textureOwner.Dispose();
+        CudaResourceDescriptorSnapshot textureResource = textureObject.Resource;
+        CudaTextureDescriptor textureDescriptor = textureObject.Descriptor;
+        CudaTextureResourceViewSnapshot textureView = textureObject.ResourceView;
+        CudaResourceDescriptorSnapshot surfaceResource = surfaceObject.Resource;
+        bool textureSurfaceOwnerLeaseOk =
+            textureResource.ResourceType == CudaResourceType.Array &&
+            textureResource.HasArray &&
+            !textureResource.HasDevicePointer &&
+            !textureView.IsSpecified &&
+            textureView.Format == CudaTextureResourceViewFormat.None &&
+            textureView.Width == 0 &&
+            textureView.Height == 0 &&
+            textureView.Depth == 0 &&
+            surfaceResource.ResourceType == CudaResourceType.Array &&
+            surfaceResource.HasArray &&
+            !surfaceResource.HasDevicePointer &&
+            ReferenceEquals(textureObject.OwnerArray, textureOwner) &&
+            ReferenceEquals(surfaceObject.OwnerArray, textureOwner);
+        if (!textureSurfaceOwnerLeaseOk)
+        {
+            throw new InvalidOperationException("CUDA texture/surface array-owner lease or copied resource descriptor validation failed.");
+        }
+        Console.WriteLine($"CudaTextureSurface OwnerDisposedBeforeQuery=True Lease={textureSurfaceOwnerLeaseOk} Texture={textureResource} Descriptor={textureDescriptor} View={textureView} Surface={surfaceResource}");
+
+        try
+        {
+            using CudaArray cuda11V2Owner = new CudaArray(CudaChannelFormatDescriptor.UInt8, arrayWidth, arrayHeight);
+            using CudaTextureObject cuda11V2Texture = CudaTextureObject.CreateCuda11Version2(
+                cuda11V2Owner,
+                new CudaTextureDescriptor(CudaTextureAddressMode.Clamp, seamlessCubemap: false));
+            Console.WriteLine($"CudaTextureV2 Descriptor={cuda11V2Texture.GetCuda11Version2Descriptor()}");
+        }
+        catch (CudaException exception)
+        {
+            Console.WriteLine($"CudaTextureV2=Skipped Reason={exception.Message}");
+            _ = CudaDevice.GetLastErrorCode();
+        }
+
         using CudaArray cudaArray3D = CudaArray.Create3D(CudaChannelFormatDescriptor.UInt8, new CudaArrayExtent(4, 2, 2));
         byte[] array3DSource = Enumerable.Range(0, 4 * 2 * 2).Select(static value => (byte)(value + 71)).ToArray();
         cudaArray3D.CopyFrom3D(array3DSource, 4, 4, 2, 4, 2, 2);

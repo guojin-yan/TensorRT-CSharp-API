@@ -55,11 +55,20 @@ JYPPX_C_API(BridgeStatusCode) jyppx_cuda_array_get_sparse_properties(JYPPX_CudaA
 // generated from manifest id=cuda-choose-device
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_choose_device(const JYPPX_CudaDeviceSelectionRequirements* requirements, int32_t* out_device);
 
+// generated from manifest id=cuda-create-surface-object-array-owner-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_surface_object_create_array_owner_safe(JYPPX_CudaArray* array, JYPPX_CudaSurfaceObject** out_surface);
+
 // generated from manifest id=cuda-create-surface-object-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_create_surface_object_deferred(void);
 
+// generated from manifest id=cuda-create-texture-object-array-owner-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_texture_object_create_array_owner_safe(JYPPX_CudaArray* array, const JYPPX_CudaTextureDescriptor* descriptor, JYPPX_CudaTextureObject** out_texture);
+
 // generated from manifest id=cuda-create-texture-object-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_create_texture_object_deferred(void);
+
+// generated from manifest id=cuda-create-texture-object-v2-array-owner-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_texture_object_create_array_owner_v2_safe(JYPPX_CudaArray* array, const JYPPX_CudaTextureDescriptor* descriptor, JYPPX_CudaTextureObject** out_texture);
 
 // generated from manifest id=cuda-create-texture-object-v2-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_create_texture_object_v2_deferred(void);
@@ -253,8 +262,14 @@ JYPPX_C_API(BridgeStatusCode) jyppx_cuda_destroy_external_memory_deferred(void);
 // generated from manifest id=cuda-destroy-external-semaphore-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_destroy_external_semaphore_deferred(void);
 
+// generated from manifest id=cuda-destroy-surface-object-bridge-owned-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_surface_object_destroy_safe(JYPPX_CudaSurfaceObject* surface);
+
 // generated from manifest id=cuda-destroy-surface-object-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_destroy_surface_object_deferred(void);
+
+// generated from manifest id=cuda-destroy-texture-object-bridge-owned-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_texture_object_destroy_safe(JYPPX_CudaTextureObject* texture);
 
 // generated from manifest id=cuda-destroy-texture-object-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_destroy_texture_object_deferred(void);
@@ -523,6 +538,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_cuda_get_mipmapped_array_level_info(JYPPX_Cu
 // generated from manifest id=cuda-get-runtime-version
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_get_runtime_version(int32_t* out_version);
 
+// generated from manifest id=cuda-get-surface-object-resource-desc-copied-snapshot-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_surface_object_get_resource_snapshot_safe(JYPPX_CudaSurfaceObject* surface, JYPPX_CudaResourceDescriptorSnapshot* out_snapshot);
+
 // generated from manifest id=cuda-get-surface-object-resource-desc-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_get_surface_object_resource_desc_deferred(void);
 
@@ -532,14 +550,26 @@ JYPPX_C_API(BridgeStatusCode) jyppx_cuda_get_symbol_address_deferred(void);
 // generated from manifest id=cuda-get-symbol-size-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_get_symbol_size_deferred(void);
 
+// generated from manifest id=cuda-get-texture-object-resource-desc-copied-snapshot-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_texture_object_get_resource_snapshot_safe(JYPPX_CudaTextureObject* texture, JYPPX_CudaResourceDescriptorSnapshot* out_snapshot);
+
 // generated from manifest id=cuda-get-texture-object-resource-desc-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_get_texture_object_resource_desc_deferred(void);
+
+// generated from manifest id=cuda-get-texture-object-resource-view-desc-copied-snapshot-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_texture_object_get_resource_view_snapshot_safe(JYPPX_CudaTextureObject* texture, JYPPX_CudaTextureResourceViewSnapshot* out_snapshot);
 
 // generated from manifest id=cuda-get-texture-object-resource-view-desc-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_get_texture_object_resource_view_desc_deferred(void);
 
+// generated from manifest id=cuda-get-texture-object-texture-desc-copied-snapshot-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_texture_object_get_descriptor_safe(JYPPX_CudaTextureObject* texture, JYPPX_CudaTextureDescriptor* out_descriptor);
+
 // generated from manifest id=cuda-get-texture-object-texture-desc-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_get_texture_object_texture_desc_deferred(void);
+
+// generated from manifest id=cuda-get-texture-object-texture-desc-v2-copied-snapshot-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_texture_object_get_descriptor_v2_safe(JYPPX_CudaTextureObject* texture, JYPPX_CudaTextureDescriptor* out_descriptor);
 
 // generated from manifest id=cuda-get-texture-object-texture-desc-v2-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_get_texture_object_texture_desc_v2_deferred(void);

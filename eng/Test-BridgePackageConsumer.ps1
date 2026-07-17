@@ -2590,6 +2590,20 @@ static class HighLevelWrapperSurfaceProbe
         Func<CudaStream, CudaStreamCaptureInfo> captureSummary = static stream => stream.GetCaptureInfo();
         Action<CudaStream> clearCaptureDependencies =
             static stream => stream.UpdateCaptureDependencies(Array.Empty<CudaGraphNode>(), CudaStreamCaptureDependencyMode.Replace);
+        Func<CudaArray, CudaTextureObject> createTextureObject =
+            static array => new CudaTextureObject(array, CudaTextureDescriptor.Default);
+        Func<CudaArray, CudaTextureObject> createCuda11TextureObjectV2 =
+            static array => CudaTextureObject.CreateCuda11Version2(array, CudaTextureDescriptor.Default);
+        Func<CudaTextureObject, CudaResourceDescriptorSnapshot> textureResource =
+            static texture => texture.Resource;
+        Func<CudaTextureObject, CudaTextureDescriptor> textureDescriptor =
+            static texture => texture.GetStandardDescriptor();
+        Func<CudaTextureObject, CudaTextureResourceViewSnapshot> textureResourceView =
+            static texture => texture.ResourceView;
+        Func<CudaTextureResourceViewSnapshot, bool> textureResourceViewSpecified =
+            static snapshot => snapshot.IsSpecified;
+        Func<CudaArray, CudaSurfaceObject> createSurfaceObject = static array => new CudaSurfaceObject(array);
+        Func<CudaSurfaceObject, CudaResourceDescriptorSnapshot> surfaceResource = static surface => surface.Resource;
         Func<CudaLogCursor> currentCudaLogCursor = static () => CudaRuntimeLogs.GetCurrentCursor();
         Func<CudaLogSnapshot> dumpCudaLogs = static () => CudaRuntimeLogs.DumpToMemory();
         Func<CudaLogCursor, CudaLogSnapshot> dumpCudaLogsFromCursor =
@@ -2842,6 +2856,14 @@ static class HighLevelWrapperSurfaceProbe
         _ = externalSemaphoreSignalNode;
         _ = captureSummary;
         _ = clearCaptureDependencies;
+        _ = createTextureObject;
+        _ = createCuda11TextureObjectV2;
+        _ = textureResource;
+        _ = textureDescriptor;
+        _ = textureResourceView;
+        _ = textureResourceViewSpecified;
+        _ = createSurfaceObject;
+        _ = surfaceResource;
         _ = currentCudaLogCursor;
         _ = dumpCudaLogs;
         _ = dumpCudaLogsFromCursor;
@@ -4374,6 +4396,24 @@ static class HighLevelWrapperSurfaceProbe
             nameof(CudaStreamCaptureInfo.DependencyCount),
             nameof(CudaStreamCaptureInfo.HasDependencyEdgeData),
             nameof(CudaStreamCaptureDependencyMode),
+            nameof(CudaTextureObject),
+            nameof(CudaTextureObject.CreateCuda11Version2),
+            nameof(CudaTextureObject.GetStandardDescriptor),
+            nameof(CudaTextureObject.GetCuda11Version2Descriptor),
+            nameof(CudaTextureObject.Resource),
+            nameof(CudaTextureObject.ResourceView),
+            nameof(CudaSurfaceObject),
+            nameof(CudaSurfaceObject.Resource),
+            nameof(CudaTextureDescriptor),
+            nameof(CudaTextureDescriptor.Default),
+            nameof(CudaTextureAddressMode),
+            nameof(CudaTextureFilterMode),
+            nameof(CudaTextureReadMode),
+            nameof(CudaResourceDescriptorSnapshot),
+            nameof(CudaResourceDescriptorSnapshot.HasDevicePointer),
+            nameof(CudaTextureResourceViewSnapshot),
+            nameof(CudaTextureResourceViewSnapshot.IsSpecified),
+            nameof(CudaTextureResourceViewFormat),
             nameof(CudaRuntimeLogs),
             nameof(CudaRuntimeLogs.GetCurrentCursor),
             nameof(CudaRuntimeLogs.DumpToMemory),

@@ -483,6 +483,19 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_get_id_safe(JYPPX_CudaGraph* grap
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_exec_get_id_safe(JYPPX_CudaGraphExec* graph_exec, uint32_t* out_id);
 /* END CUDA TWENTY-FIFTH BATCH GRAPH TOPOLOGY DECLARATIONS */
 
+/* BEGIN CUDA FIFTIETH BATCH TEXTURE AND SURFACE ARRAY OWNERS */
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_surface_object_create_array_owner_safe(JYPPX_CudaArray* array, JYPPX_CudaSurfaceObject** out_surface);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_surface_object_destroy_safe(JYPPX_CudaSurfaceObject* surface);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_surface_object_get_resource_snapshot_safe(JYPPX_CudaSurfaceObject* surface, JYPPX_CudaResourceDescriptorSnapshot* out_snapshot);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_texture_object_create_array_owner_safe(JYPPX_CudaArray* array, const JYPPX_CudaTextureDescriptor* descriptor, JYPPX_CudaTextureObject** out_texture);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_texture_object_create_array_owner_v2_safe(JYPPX_CudaArray* array, const JYPPX_CudaTextureDescriptor* descriptor, JYPPX_CudaTextureObject** out_texture);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_texture_object_destroy_safe(JYPPX_CudaTextureObject* texture);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_texture_object_get_resource_snapshot_safe(JYPPX_CudaTextureObject* texture, JYPPX_CudaResourceDescriptorSnapshot* out_snapshot);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_texture_object_get_descriptor_safe(JYPPX_CudaTextureObject* texture, JYPPX_CudaTextureDescriptor* out_descriptor);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_texture_object_get_descriptor_v2_safe(JYPPX_CudaTextureObject* texture, JYPPX_CudaTextureDescriptor* out_descriptor);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_texture_object_get_resource_view_snapshot_safe(JYPPX_CudaTextureObject* texture, JYPPX_CudaTextureResourceViewSnapshot* out_snapshot);
+/* END CUDA FIFTIETH BATCH TEXTURE AND SURFACE ARRAY OWNERS */
+
 /* BEGIN CUDA FORTY-FOURTH BATCH GRAPH NODE PARAMETER DESCRIPTORS */
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_memset_node_get_params_safe(uintptr_t node, JYPPX_CudaGraphMemsetNodeParams* out_params);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_memset_node_set_params_safe(uintptr_t node, JYPPX_CudaMemory* destination, uint32_t value, size_t count);
