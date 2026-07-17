@@ -563,13 +563,21 @@ public sealed partial class TensorRtOnnxParser : IDisposable
     /// </summary>
     public void Dispose()
     {
-        if (_disposed)
+        SafeTensorRtObjectHandleLease? builderConfigLease;
+        lock (_builderConfigAttachmentLock)
         {
-            return;
+            if (_disposed)
+            {
+                return;
+            }
+
+            _disposed = true;
+            _handle.Dispose();
+            builderConfigLease = _builderConfigLease;
+            _builderConfigLease = null;
         }
 
-        _disposed = true;
-        _handle.Dispose();
+        builderConfigLease?.Dispose();
         _initializerPins.Dispose();
         GC.KeepAlive(_loggerKeepAlive);
         _loggerKeepAlive?.DetachBorrower();
@@ -578,18 +586,46 @@ public sealed partial class TensorRtOnnxParser : IDisposable
 
     private void ValidateParserFlags(TensorRtOnnxParserFlags flags)
     {
+        TensorRtOnnxParserFlags trt11OnlyFlags =
+            TensorRtOnnxParserFlags.ReportCapabilityDla |
+            TensorRtOnnxParserFlags.EnablePluginOverride |
+            TensorRtOnnxParserFlags.AdjustForDla;
+        TensorRtOnnxParserFlags knownFlags =
+            TensorRtOnnxParserFlags.NativeInstanceNormalization |
+            TensorRtOnnxParserFlags.EnableUInt8AndAsymmetricQuantizationDla |
+            trt11OnlyFlags;
+        if ((flags & ~knownFlags) != 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(flags), flags, "Unknown ONNX parser flag bits were specified.");
+        }
+
         if (Line == TensorRtApiLine.TensorRt8 &&
             (flags & TensorRtOnnxParserFlags.EnableUInt8AndAsymmetricQuantizationDla) != 0)
         {
             throw new NotSupportedException("TensorRT 8 ONNX parser does not expose EnableUInt8AndAsymmetricQuantizationDla.");
         }
+
+        if (Line != TensorRtApiLine.TensorRt11 && (flags & trt11OnlyFlags) != 0)
+        {
+            throw new NotSupportedException("ReportCapabilityDla, EnablePluginOverride, and AdjustForDla require TensorRT 11.");
+        }
     }
 
     private void ValidateParserFlag(TensorRtOnnxParserFlag flag)
     {
+        if (flag < TensorRtOnnxParserFlag.NativeInstanceNormalization || flag > TensorRtOnnxParserFlag.AdjustForDla)
+        {
+            throw new ArgumentOutOfRangeException(nameof(flag), flag, "Unknown ONNX parser flag was specified.");
+        }
+
         if (Line == TensorRtApiLine.TensorRt8 && flag == TensorRtOnnxParserFlag.EnableUInt8AndAsymmetricQuantizationDla)
         {
             throw new NotSupportedException("TensorRT 8 ONNX parser does not expose EnableUInt8AndAsymmetricQuantizationDla.");
+        }
+
+        if (Line != TensorRtApiLine.TensorRt11 && flag >= TensorRtOnnxParserFlag.ReportCapabilityDla)
+        {
+            throw new NotSupportedException("ReportCapabilityDla, EnablePluginOverride, and AdjustForDla require TensorRT 11.");
         }
     }
 

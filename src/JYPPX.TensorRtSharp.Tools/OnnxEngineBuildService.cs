@@ -154,6 +154,23 @@ public sealed class OnnxEngineBuildService
 
         using TensorRtNetworkDefinition network = builder.CreateNetwork(TensorRtNetworkDefinitionCreationFlags.ExplicitBatch);
         using TensorRtOnnxParser parser = new TensorRtOnnxParser(logger, network);
+        bool parserBuilderConfigAttached = false;
+        if (options.TensorRtLine == TensorRtApiLine.TensorRt11)
+        {
+            parserBuilderConfigAttached = parser.SetBuilderConfig(config);
+            if (!parserBuilderConfigAttached)
+            {
+                throw new InvalidOperationException("TensorRT 11 ONNX parser rejected the deployment builder configuration.");
+            }
+
+            if (options.DeploymentOptions.DlaCore.HasValue)
+            {
+                parser.SetFlag(TensorRtOnnxParserFlag.ReportCapabilityDla);
+                parser.SetFlag(TensorRtOnnxParserFlag.AdjustForDla);
+            }
+        }
+
+        log.Add($"ParserBuilderConfig Supported={options.TensorRtLine == TensorRtApiLine.TensorRt11} Attached={parserBuilderConfigAttached} ManagedLease={parser.HasBuilderConfigAttached} DlaCapabilityValidation={options.TensorRtLine == TensorRtApiLine.TensorRt11 && options.DeploymentOptions.DlaCore.HasValue}");
         if (!parser.Parse(model, options.UsesExternalOnnx ? Path.GetFileName(options.OnnxPath) : "sample-dynamic-identity.onnx"))
         {
             throw new InvalidOperationException(parser.GetErrorSummary());
@@ -1054,6 +1071,17 @@ public sealed class OnnxEngineBuildService
         if (!string.IsNullOrWhiteSpace(options.ProfilingVerbosity))
         {
             config.SetProfilingVerbosity(ParseProfilingVerbosity(options.ProfilingVerbosity));
+        }
+
+        if (options.TensorRtLine == TensorRtApiLine.TensorRt11 && options.DeploymentOptions.DlaCore.HasValue)
+        {
+            config.SetDefaultDeviceType(TensorRtDeviceType.Dla);
+            config.SetDlaCore(options.DeploymentOptions.DlaCore.Value);
+        }
+
+        if (options.TensorRtLine == TensorRtApiLine.TensorRt11 && options.DeploymentOptions.AllowGpuFallback)
+        {
+            config.SetFlag(TensorRtBuilderFlag.GpuFallback, true);
         }
     }
 

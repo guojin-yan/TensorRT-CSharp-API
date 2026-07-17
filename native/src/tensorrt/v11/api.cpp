@@ -8268,6 +8268,7 @@ JYPPX_StatusCode jyppx_trt11_tensor_reset_dynamic_range(JYPPX_TensorRtTensor*)
 #include "modules/layers/advanced_layers.inc"
 #include "modules/deployment/runtime_serialization_refit.inc"
 #include "modules/deployment/refitter_logger_presence.inc"
+#include "modules/deployment/onnx_parser_builder_config_attachment.inc"
 #include "modules/deployment/runtime_controls.inc"
 #include "modules/deployment/diagnostics.inc"
 #include "modules/deployment/boundary_controls.inc"

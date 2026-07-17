@@ -254,7 +254,7 @@ public sealed class TrtexecLikeDeploymentOptions
 
         if (DlaCore.HasValue || AllowGpuFallback)
         {
-            diagnostics.Add("DLA options are parsed for deployment diagnostics; layer device placement and DLA memory pools require a model-specific runtime stage.");
+            diagnostics.Add("DLA options are parsed for deployment diagnostics; the TensorRT 11 build path applies parser capability validation and builder-config device placement, while older adapters still require a model-specific runtime stage.");
             if (DlaCore.HasValue)
             {
                 diagnostics.Add("UseDLACore=" + DlaCore.Value);

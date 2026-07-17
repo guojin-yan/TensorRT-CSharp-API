@@ -98,9 +98,23 @@ internal static class Program
         string engineFile;
         using (parser)
         {
+        bool parserBuilderConfigSupported = line == TensorRtApiLine.TensorRt11;
+        bool parserBuilderConfigAttached = false;
+        if (parserBuilderConfigSupported)
+        {
+            parserBuilderConfigAttached = parser.SetBuilderConfig(config);
+            if (!parserBuilderConfigAttached)
+            {
+                throw new InvalidOperationException("TensorRT 11 ONNX parser rejected the builder configuration.");
+            }
+        }
+
         uint parserFlagsBefore = (uint)parser.Flags;
         bool parserSupportsIdentity = parser.SupportsOperator("Identity");
         bool nativeInstanceNormalizationFlag = parser.GetFlag(TensorRtOnnxParserFlag.NativeInstanceNormalization);
+        bool reportCapabilityDla = parserBuilderConfigSupported && parser.GetFlag(TensorRtOnnxParserFlag.ReportCapabilityDla);
+        bool enablePluginOverride = parserBuilderConfigSupported && parser.GetFlag(TensorRtOnnxParserFlag.EnablePluginOverride);
+        bool adjustForDla = parserBuilderConfigSupported && parser.GetFlag(TensorRtOnnxParserFlag.AdjustForDla);
         parser.SetFlag(TensorRtOnnxParserFlag.NativeInstanceNormalization);
         bool nativeInstanceNormalizationAfterSet = parser.GetFlag(TensorRtOnnxParserFlag.NativeInstanceNormalization);
 
@@ -227,6 +241,7 @@ internal static class Program
         Console.WriteLine($"EngineFileRoundTrip=True EngineBytes={engineBytes.Length} EngineFileBytes={new FileInfo(engineFile).Length} StreamRoundTrip=True StreamBytes={streamEngineBytes.Length}");
         Console.WriteLine($"ProfileShapes ConfiguredMin={configuredProfileRange.Min} ConfiguredOpt={configuredProfileRange.Opt} ConfiguredMax={configuredProfileRange.Max} Valid={configuredProfileValid} ExtraMemoryTarget={profileExtraMemoryTarget} ShapeValueCount={inputShapeValueCount} Min={minShape} Opt={optShape} Max={maxShape} ActiveBefore={activeProfileBefore} ActiveAfter={activeProfileAfter} EnqueueEmitsProfileToggle={enqueueEmitsProfileAfterToggle}");
         Console.WriteLine($"ParserFlags Before={parserFlagsBefore} NativeInstanceNorm={nativeInstanceNormalizationFlag}->{nativeInstanceNormalizationAfterSet} SupportsIdentity={parserSupportsIdentity} ParseStream={parsed}");
+        Console.WriteLine($"ParserBuilderConfig Supported={parserBuilderConfigSupported} Attached={parserBuilderConfigAttached} ManagedLease={parser.HasBuilderConfigAttached} ReportCapabilityDla={reportCapabilityDla} EnablePluginOverride={enablePluginOverride} AdjustForDla={adjustForDla}");
         Console.WriteLine($"ParserModelSupport {parserModelSupport} FirstSubgraph={parserModelSupportFirstSubgraph}");
         Console.WriteLine($"ParserModelSupportSummary={parserModelSupportSummary} RuntimeEvidenceKind={parserModelSupportSummary.RuntimeEvidenceKind} RuntimeProof={parserModelSupportSummary.IsRuntimeExecutionProof} ReleaseProof={parserModelSupportSummary.CanPromoteReleaseProof} DeleteDeferred={parserModelSupportSummary.CanDeleteDeferredRecord}");
         Console.WriteLine($"ParserUsedVCPluginLibraries Count={parserUsedVCPluginLibraries.Count} First={FormatFirst(parserUsedVCPluginLibraries)} LayerOutputIdentity={parserLayerOutputState}");

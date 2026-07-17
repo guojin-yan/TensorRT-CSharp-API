@@ -19,6 +19,54 @@
 - `artifacts/real-case/multi-version-onnx-runtime/multi-version-runtime-evidence-matrix.json`
 - `artifacts/test-analysis/project-quality-test-inventory.json`
 
+## 2026-07-18 TRT11 ONNX Parser Builder-Config Attachment 复审
+
+本阶段基于起始提交 `4531b04a49a8a9e11171aefb82b6f0c350229465`，提升 TRT11 `IParser::setBuilderConfig`，并补齐官方 `REPORT_CAPABILITY_DLA=2`、`ENABLE_PLUGIN_OVERRIDE=3`、`ADJUST_FOR_DLA=4` parser flag。旧 `parser-set-builder-config-deferred` manifest 保留，coverage 通过显式 real/deferred-history alias 归并，不以删除历史 deferred 改变统计。
+
+### Owner、ABI 与部署路径
+
+- public `TensorRtOnnxParser.SetBuilderConfig(TensorRtBuilderConfig)` 只接受现有 owner。调用前创建 `SafeTensorRtObjectHandleLease`；vendor 返回 `true` 后才替换旧 lease，返回 `false` 或抛错时释放新 lease 并保留旧关联。
+- parser 释放顺序为 native parser、builder-config lease、initializer pins；同一把锁串行化 attachment 与 dispose。parser/config 版本线不一致时 fail closed，TRT8/TRT10 明确 `NotSupported`。
+- native 同时校验 parser/config handle kind 与 TRT11 line；vendor 调用被 C++ exception 和 Windows SEH containment 包围。public API 不暴露 `IntPtr`、`nint`、`SafeHandle`、device/plugin/tensor pointer。
+- `OnnxEngineBuildService` 的 TRT11 DLA 路径先设置 default device/DLA core/GPU fallback，再把 config 关联到 parser，并启用 capability report 与 DLA adjustment；ONNX smoke 和纯 package consumer 同步覆盖该强类型 surface。
+- callback trampoline、plugin create/register/deregister/load、allocator/resource acquire/release、裸 pointer、borrowed plugin/tensor 与 ownership 不明确的 handle 继续 deferred。
+
+### Coverage、构建与测试
+
+generator 最终为 180 manifests / 3917 records。`IParser::setBuilderConfig` 在 TRT11/CUDA12.9 与 TRT11/CUDA13.2 两行均为 `implemented-with-deferred-history`：
+
+| TensorRT line | 官方接口 | manifest/source 已匹配 | 非 deferred 实现 | deferred-only |
+| --- | ---: | ---: | ---: | ---: |
+| TRT8 | 847 | 847 | 751 | 96 |
+| TRT10 | 879 | 879 | 759 | 120 |
+| TRT11 | 901 | 901 | 813 | 88 |
+
+- bindings 生成与幂等检查通过；完整 `TensorRtSharp.sln` Release build 为 0 warning / 0 error。
+- 新专项 7/7，通过 ONNX/parser/coverage/tool/package-consumer 相关分片 97/97。正式 ProjectQuality inventory 为 1268 tests / 379 classes；受影响 bounded shard 7/7，累计 hash-verified coverage 为 379/379、missing 0、invalid evidence 0。
+- one-shot 完整 ProjectQuality Tests 运行 3600 秒后超时，没有最终计数；残留 testhost/dotnet 已清理。本审查只声明可审计的 bounded shard 全类覆盖，不把 one-shot 尝试写成通过。
+- TRT8/CUDA11.8、TRT8/CUDA12.1、TRT10/CUDA12.9、TRT11/CUDA12.9、TRT11/CUDA13.2 五套 native 均基于最终生成物构建成功，version guard 独立。
+
+### Runtime、NuGet 与 Consumer
+
+- TRT8 与 TRT10 Plugin Registry、NetworkBuilder、InferenceBindings 真实运行通过；identity engine 的 `ExecuteV2`、`EnqueueV3` 和 output compare 匹配，TRT8 额外完成 `EnqueueV2`。
+- TRT11 Plugin Registry runner 安全完成，但 vendor SEH `3228369022` 使 inventory 受控 skip；NetworkBuilder 与 OnnxToEngine 在相同 runtime/builder preflight 阻断。因此本机没有把新 attachment 晋级为 TRT11 runtime proof。
+- TRT10 OnnxToEngine 被既有缺失导出 `jyppx_trt10_builder_plugin_registry_exists` 阻断；其他 TRT10 registry/network/inference smoke 已通过，该问题不属于本批 attachment。
+- managed 4.0.0 与 TRT8/TRT10/TRT11 bridge 包已重打。三个纯 `PackageReference` consumer 无 `ProjectReference`，restore/build 为 0 warning / 0 error，编译 attachment 与 parser flags；分类保持 `compile-surface-proof`、`Runtime execution proof=False`。
+- TRT11/CUDA13.2 bridge、CudaCudnn、TensorRt、meta 四角色已恢复，package inventory 为 `packageSetReady=true`、`missingSplitRoles=[]`、`sha256Ready=true`。
+
+| 包 | 大小 | SHA256 |
+| --- | ---: | --- |
+| managed `JYPPX.TensorRT.CSharp.API.4.0.0.nupkg` | 14,376,700 bytes | `30BE9A82AE44D9619FA1999DB1577F56AD22134C658FEA16040909DB84606B18` |
+| TRT8/CUDA12.1 bridge-only | 306,080 bytes | `FB27BD71C1ABCB96475CB2A689AC2ED7736D30DDE5B91BCA82711F3C3932901E` |
+| TRT10/CUDA12.9 bridge-only | 330,494 bytes | `373F428BF2299D091AA816392C958BB49EAAE2660DEB61243A60ADAB6B21091D` |
+| TRT11/CUDA13.2 bridge-only | 274,146 bytes | `3C5E806E9FFC73D3E05D5949914665F14D23184D41823D0F1E9164DAACFB9046` |
+
+### Gate 与发布边界
+
+strict classification audit 为 `classification-audit-passed-non-proof-boundaries-intact`、finding 0；要求 package inventory/classification 的 strict release gate 为 `release-quality-gate-passed`、required failure 0。Owner convergence 保持 structural 9/9、accepted 0/9、gates 2/3、validation blocker 0，`canPublishPublicly=false`、`canCloseReleaseIssue=false`。
+
+本阶段未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
+
 ## 2026-07-18 CUDA Kernel Library Symbol 与 Attribute Owner-Safe 复审
 
 本阶段基于提交 `1261c080b8a6af34e141b4dfea923519f89acd4c`，提升 CUDA 12.9/13.2 的 `cudaLibraryGetGlobal`、`cudaLibraryGetManaged`、`cudaLibraryGetUnifiedFunction` 与 `cudaKernelSetAttributeForDevice`。实现复用现有 bridge-owned `CudaKernelLibrary`，只公开 copied size、存在性与 owner-bound setter；旧 deferred manifest 全部保留。

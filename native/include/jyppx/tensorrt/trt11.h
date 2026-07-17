@@ -947,6 +947,7 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_onnx_parser_get_error_count(JYPPX_Tens
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_onnx_parser_clear_errors(JYPPX_TensorRtOnnxParser* parser);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_onnx_parser_get_flags(JYPPX_TensorRtOnnxParser* parser, uint32_t* out_flags);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_onnx_parser_set_flags(JYPPX_TensorRtOnnxParser* parser, uint32_t flags);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_onnx_parser_set_builder_config_safe(JYPPX_TensorRtOnnxParser* parser, JYPPX_TensorRtBuilderConfig* config, JYPPX_Boolean* out_set);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_onnx_parser_get_flag(JYPPX_TensorRtOnnxParser* parser, int32_t flag, JYPPX_Boolean* out_enabled);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_onnx_parser_set_flag(JYPPX_TensorRtOnnxParser* parser, int32_t flag);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_onnx_parser_clear_flag(JYPPX_TensorRtOnnxParser* parser, int32_t flag);

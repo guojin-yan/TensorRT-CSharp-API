@@ -402,6 +402,7 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
     "IRuntime::destroy" = @("id:*trt-object-destroy")
     "IRefitter::destroy" = @("id:*trt-object-destroy")
     "IParser::destroy" = @("id:*trt-object-destroy")
+    "IParser::setBuilderConfig" = @("id:*onnx-parser-set-builder-config-safe")
     "IOnnxConfig::destroy" = @("id:*trt-object-destroy")
     "INetworkDefinition::destroy" = @("id:*trt-object-destroy")
     "IHostMemory::destroy" = @("id:*trt-object-destroy")
@@ -542,6 +543,7 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
     "IPluginV3OneBuild::supportsFormatCombination" = @("id:*plugin-v3-one-build-supports-format-combination-deferred")
     "IPluginV3OneRuntime::getFieldsToSerialize" = @("id:*plugin-v3-one-runtime-get-fields-to-serialize-deferred")
     "IOnnxConfig::destroy" = @("id:*onnx-config-destroy-deferred")
+    "IParser::setBuilderConfig" = @("id:*parser-set-builder-config-deferred")
     "IVersionedInterface::getAPILanguage" = @("id:*versioned-interface-get-api-language-deferred")
     "IVersionedInterface::getInterfaceInfo" = @("id:*versioned-interface-get-interface-info-deferred")
   }
@@ -637,6 +639,7 @@ function Find-MatchedManifestApis {
     "INetworkDefinition::getErrorRecorder",
     "INetworkDefinition::setErrorRecorder",
     "IOnnxConfig::destroy",
+    "IParser::setBuilderConfig",
     "IPluginRegistry::getErrorRecorder",
     "IPluginRegistry::getBuilderSafePluginRegistry",
     "IPluginRegistry::setParentSearchEnabled",

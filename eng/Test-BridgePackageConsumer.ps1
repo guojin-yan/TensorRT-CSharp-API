@@ -927,6 +927,12 @@ static class HighLevelWrapperSurfaceProbe
         Func<TensorRtOnnxConfigSnapshot, TensorRtOnnxConfigSummary> onnxConfigSummary =
             static snapshot => snapshot.ToSummary();
         Action<TensorRtOnnxConfig> disposeOnnxConfig = static config => config.Dispose();
+        Func<TensorRtOnnxParser, TensorRtBuilderConfig, bool> attachParserBuilderConfig =
+            static (parser, config) => parser.SetBuilderConfig(config);
+        Func<TensorRtOnnxParser, bool> parserHasBuilderConfigAttached =
+            static parser => parser.HasBuilderConfigAttached;
+        Func<TensorRtOnnxParserFlag, int> onnxParserFlagValue = static flag => (int)flag;
+        Func<TensorRtOnnxParserFlags, uint> onnxParserFlagsValue = static flags => (uint)flags;
         Func<TensorRtBuilder, TensorRtPluginRegistryInventory> pluginInventory =
             static builder => builder.GetPluginRegistryInventory();
         Func<TensorRtBuilder, string, string, string, bool> pluginCreatorLookup =
@@ -2951,9 +2957,15 @@ static class HighLevelWrapperSurfaceProbe
         _ = onnxConfigSnapshot;
         _ = onnxConfigSummary;
         _ = disposeOnnxConfig;
+        _ = attachParserBuilderConfig;
+        _ = parserHasBuilderConfigAttached;
+        _ = onnxParserFlagValue;
+        _ = onnxParserFlagsValue;
 
         return string.Join(";",
             "onnx-config-owned-lifecycle",
+            "onnx-parser-builder-config-owner-lease",
+            "onnx-parser-trt11-dla-flags",
             "compiled:plugin-inventory",
             "plugin-inventory-field-metadata",
             "engine-rnn-readonly-diagnostics",

@@ -5826,6 +5826,9 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
     internal static extern BridgeStatusCode jyppx_trt11_onnx_parser_parse_model_proto(SafeTensorRtObjectHandle parser, out int out_parsed);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt11_onnx_parser_set_builder_config_safe(SafeTensorRtObjectHandle parser, SafeTensorRtObjectHandle config, out int out_set);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt11_onnx_parser_set_flag(SafeTensorRtObjectHandle parser, int flag);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]

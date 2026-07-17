@@ -7705,6 +7705,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt11_onnx_parser_load_model_proto(JYPPX_Ten
 // generated from manifest id=trt11-onnx-parser-parse-model-proto
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_onnx_parser_parse_model_proto(JYPPX_TensorRtOnnxParser* parser, JYPPX_Boolean* out_parsed);
 
+// generated from manifest id=trt11-onnx-parser-set-builder-config-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_onnx_parser_set_builder_config_safe(JYPPX_TensorRtOnnxParser* parser, JYPPX_TensorRtBuilderConfig* config, JYPPX_Boolean* out_set);
+
 // generated from manifest id=trt11-onnx-parser-set-flag
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_onnx_parser_set_flag(JYPPX_TensorRtOnnxParser* parser, int32_t flag);
 

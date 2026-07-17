@@ -2573,6 +2573,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt11OnnxParserLoadInitializer = "jyppx_trt11_onnx_parser_load_initializer";
     public const string Trt11OnnxParserLoadModelProto = "jyppx_trt11_onnx_parser_load_model_proto";
     public const string Trt11OnnxParserParseModelProto = "jyppx_trt11_onnx_parser_parse_model_proto";
+    public const string Trt11OnnxParserSetBuilderConfigSafe = "jyppx_trt11_onnx_parser_set_builder_config_safe";
     public const string Trt11OnnxParserSetFlag = "jyppx_trt11_onnx_parser_set_flag";
     public const string Trt11OnnxParserSupportsModelV2 = "jyppx_trt11_onnx_parser_supports_model_v2";
     public const string Trt11OutputAllocatorGetInterfaceInfoDeferred = "jyppx_trt11_output_allocator_get_interface_info_deferred";

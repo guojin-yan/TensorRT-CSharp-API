@@ -2568,6 +2568,7 @@
 #define JYPPX_API_TRT11_ONNX_PARSER_LOAD_INITIALIZER "jyppx_trt11_onnx_parser_load_initializer" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_ONNX_PARSER_LOAD_MODEL_PROTO "jyppx_trt11_onnx_parser_load_model_proto" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_ONNX_PARSER_PARSE_MODEL_PROTO "jyppx_trt11_onnx_parser_parse_model_proto" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT11_ONNX_PARSER_SET_BUILDER_CONFIG_SAFE "jyppx_trt11_onnx_parser_set_builder_config_safe" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_ONNX_PARSER_SET_FLAG "jyppx_trt11_onnx_parser_set_flag" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_ONNX_PARSER_SUPPORTS_MODEL_V2 "jyppx_trt11_onnx_parser_supports_model_v2" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT11_OUTPUT_ALLOCATOR_GET_INTERFACE_INFO_DEFERRED "jyppx_trt11_output_allocator_get_interface_info_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
