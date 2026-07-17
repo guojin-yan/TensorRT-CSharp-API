@@ -19,6 +19,61 @@
 - `artifacts/real-case/multi-version-onnx-runtime/multi-version-runtime-evidence-matrix.json`
 - `artifacts/test-analysis/project-quality-test-inventory.json`
 
+## 2026-07-17 CUDA Owner-Scoped Graph Diagnostics 安全提升复审
+
+本阶段基于起始提交 `b9bc959af6939bb003cf1f7aeda2f5305f645540`，从 CUDA graph/stream deferred-only 清单中提升 12 个安全 entry，覆盖 11 个官方函数：memset node 默认/after 创建、graph exec memset 参数更新、owner-scoped node 删除、kernel/host/memalloc/memfree 参数 copied snapshot、external semaphore signal/wait copied snapshot、stream capture copied summary 与 capture dependency token array 更新。旧 deferred manifest 全部保留，coverage 通过显式真实 alias 优先并合并 deferred history，不以删除历史记录改变统计。
+
+### 实现与安全边界
+
+- memset node 创建与 exec 更新均要求托管 `CudaMemory` owner，native 校验 destination owner 和 graph/exec 生命周期；node 返回 graph-owned token，不暴露 `cudaGraphNode_t`。
+- `CudaGraph.RemoveNode` 在 native 删除前核对 node 属于指定 graph；成功后同步使 owner-bound token 失效，避免跨 graph 删除与悬空复用。
+- kernel/host/memalloc/memfree 与 external semaphore 查询只复制 dimensions、count、scalar 和 pointer-presence bool，不返回 function、callback、user data、device pointer、semaphore 或参数数组。
+- capture summary 按 CUDA ABI 分线：CUDA 13+ 使用无后缀七参数 ABI，CUDA 12.3-12.x 使用 `_v3`，CUDA 11.3-12.2 使用 `_v2`，更旧版本使用基础三参数；各版本 guard 独立。
+- capture dependency 更新只接受同一 active capture graph 的 owner-bound node token 数组，在调用栈内完成验证与复制。CUDA 13 路径传空 edge-data，保持旧 API 语义；`_v2` edge-data 的公开建模继续 deferred。
+- native entry 捕获 C++ exception 与 Windows SEH；public API 未暴露 `IntPtr`、`nint`、`SafeHandle`、`UIntPtr`、device pointer、callback pointer、external resource handle 或 borrowed vendor object。
+- `cudaStreamBeginCaptureToGraph`、kernel/host/memalloc/memfree 创建、external resource mutation、callback/user object、library/kernel/resource handle 与 ownership 不明确的 pointer 继续 deferred。
+
+### Coverage、构建与测试
+
+generator 最终为 174 manifests / 3885 records。最终 CUDA coverage：
+
+| CUDA Toolkit | 官方函数 | manifest/source 已匹配 | 非 deferred 实现 | deferred-only |
+| --- | ---: | ---: | ---: | ---: |
+| 11.6 | 268 | 268 | 203 | 65 |
+| 11.8 | 273 | 273 | 206 | 67 |
+| 12.1 | 277 | 277 | 210 | 67 |
+| 12.3 | 292 | 292 | 218 | 74 |
+| 12.9 | 307 | 307 | 220 | 87 |
+| 13.2 | 330 | 330 | 228 | 102 |
+
+目标 62 个版本行全部为 `implemented-with-deferred-history`。`Find-ExplicitCudaManifestApis` 为 11 个函数建立真实 alias 和 deferred-history alias；专项测试同时约束 matcher 优先顺序与旧 deferred 保留。
+
+- bindings 生成与幂等：通过，174 manifests / 3885 records。
+- 完整 solution Debug build：0 warning / 0 error。
+- native：TRT8/CUDA11.8、TRT8/CUDA12.1、TRT10/CUDA12.9、TRT11/CUDA13.2 全部成功，CUDA 11.8 编译实际验证了 capture info ABI 分线。
+- 新专项：6/6；CUDA/coverage/public API/consumer 受影响分片：106/107。唯一失败是 canonical artifact 并发文件锁，独立串行复跑通过；两个过时的 owner/release readiness 断言清理后为 2/2。
+- 完整 ProjectQuality 运行超过 100 分钟，多个测试并行改写 `artifacts/final-release` canonical 文件，产生文件锁和状态串线，未形成可信总结果，不记为完整通过；未发现本批 CUDA 实现相关失败。
+
+### Runtime Smoke、NuGet 与 Consumer
+
+- CUDA graph smoke 真实验证 active capture graph、空 dependency replace、memset output、owner-scoped remove，以及 memalloc/memfree copied snapshot；全部通过。
+- TRT8/TRT10 Plugin Registry、NetworkBuilder 与 InferenceBindings 全部通过，ExecuteV2/EnqueueV2/EnqueueV3 输出匹配；TRT11 保持当前 compatible-host/runtime 边界，不将 build 或 dependency probe 冒充 enqueue proof。
+- managed 4.0.0 与 TRT8/TRT10/TRT11 三个 bridge-only 4.0.0 本地包已重打。三个纯 `PackageReference` consumer 均无 `ProjectReference`，restore/build 为 0 warning / 0 error，`RuntimeExecutionProof=False`。
+- TRT11 bridge-only 重打后，已从 `artifacts/pack-current/trt11-cuda13-preserved-full` 恢复 CudaCudnn、TensorRt 与 meta 包，同时保留最新 Bridge 包，release candidate inventory 为 3/3。
+
+| 包 | 大小 | SHA256 |
+| --- | ---: | --- |
+| managed `JYPPX.TensorRT.CSharp.API.4.0.0.nupkg` | 14,121,698 bytes | `A06558A4F729DBC180F24AE84B7382CDED79D21494F80CDFE9118CA7C54B93DE` |
+| TRT8/CUDA12.1 bridge-only | 298,341 bytes | `A9E401652C552059B59C5D75238322AF6AE914AE48AA9450F2A46391CFC7E38C` |
+| TRT10/CUDA12.9 bridge-only | 320,394 bytes | `D4B75BBA305124C8D3C283B00E724F8EBA8EB93924714000D0000715564D8256` |
+| TRT11/CUDA13.2 bridge-only | 262,689 bytes | `5CDFCF6E43E34EB36EAA0073D2E7C13FF32EE07026AF5FE7B1A292FC4000B70C` |
+
+### Gate 与发布边界
+
+strict classification audit 为 `classification-audit-passed-non-proof-boundaries-intact`、finding 0；strict release quality gate 为 `release-quality-gate-passed`、required failure 0。Owner convergence 继续为 accepted 0/9、gates 2/3、validation failed blockers 0，`canPublishPublicly=false`、`canCloseReleaseIssue=false`。`git diff --check` 通过，仅有既有 CRLF/LF 转换提示。
+
+本阶段未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
+
 ## 2026-07-17 CUDA Child Graph、Exec Update 与 Runtime Logs 安全提升复审
 
 本阶段基于起始提交 `2dfab034c9df29567782ddb0fe0500b53f672f28`，新增 14 个 CUDA 安全 entry，覆盖 child graph 创建与 copied topology、graph exec child 参数更新、exec update copied failure metadata、parameterized instantiate、kernel attribute copy 和 CUDA 13.2 runtime logs。旧 deferred manifest 全部保留，coverage 先匹配显式真实 alias，再合并 deferred history，不以删除历史记录改变统计。

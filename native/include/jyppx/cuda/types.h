@@ -269,6 +269,51 @@ typedef struct JYPPX_CudaGraphKernelNodeAttributeValue
     uint32_t reserved2;
 } JYPPX_CudaGraphKernelNodeAttributeValue;
 
+typedef struct JYPPX_CudaGraphKernelNodeParamsSnapshot
+{
+    uint32_t grid_x;
+    uint32_t grid_y;
+    uint32_t grid_z;
+    uint32_t block_x;
+    uint32_t block_y;
+    uint32_t block_z;
+    uint32_t shared_memory_bytes;
+    JYPPX_Boolean has_function;
+    JYPPX_Boolean has_kernel_params;
+    JYPPX_Boolean has_extra;
+} JYPPX_CudaGraphKernelNodeParamsSnapshot;
+
+typedef struct JYPPX_CudaGraphHostNodeParamsSnapshot
+{
+    JYPPX_Boolean has_callback;
+    JYPPX_Boolean has_user_data;
+} JYPPX_CudaGraphHostNodeParamsSnapshot;
+
+typedef struct JYPPX_CudaGraphMemAllocNodeParamsSnapshot
+{
+    uint64_t byte_count;
+    uint64_t access_descriptor_count;
+    int32_t allocation_type;
+    uint64_t handle_types;
+    int32_t location_type;
+    int32_t location_id;
+    JYPPX_Boolean has_access_descriptors;
+    JYPPX_Boolean has_device_pointer;
+    JYPPX_Boolean has_security_attributes;
+} JYPPX_CudaGraphMemAllocNodeParamsSnapshot;
+
+typedef struct JYPPX_CudaGraphMemFreeNodeParamsSnapshot
+{
+    JYPPX_Boolean has_device_pointer;
+} JYPPX_CudaGraphMemFreeNodeParamsSnapshot;
+
+typedef struct JYPPX_CudaGraphExternalSemaphoreNodeParamsSnapshot
+{
+    uint32_t semaphore_count;
+    JYPPX_Boolean has_semaphore_array;
+    JYPPX_Boolean has_parameter_array;
+} JYPPX_CudaGraphExternalSemaphoreNodeParamsSnapshot;
+
 typedef struct JYPPX_CudaDim3
 {
     uint32_t x;

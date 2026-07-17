@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using JYPPX.CudaSharp.Internal.Handles;
 using JYPPX.CudaSharp.Internal.Interop;
 
@@ -141,6 +142,27 @@ public sealed class CudaStream : IDisposable
             diagnostic = exception.Message;
             return false;
         }
+    }
+
+    /// <summary>
+    /// Adds or replaces the dependency set used by the next operation in an active stream capture.
+    /// 在 active stream capture 中追加或替换下一项操作使用的 dependency set。
+    /// </summary>
+    public void UpdateCaptureDependencies(
+        IReadOnlyList<CudaGraphNode> dependencies,
+        CudaStreamCaptureDependencyMode mode = CudaStreamCaptureDependencyMode.Add)
+    {
+        if (dependencies == null)
+        {
+            throw new ArgumentNullException(nameof(dependencies));
+        }
+
+        if (mode != CudaStreamCaptureDependencyMode.Add && mode != CudaStreamCaptureDependencyMode.Replace)
+        {
+            throw new ArgumentOutOfRangeException(nameof(mode));
+        }
+
+        NativeCudaApi.UpdateStreamCaptureDependencies(_handle, dependencies, mode);
     }
 
     /// <summary>

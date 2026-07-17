@@ -124,6 +124,12 @@ public sealed class OwnerRealProofCommonIoTests
     [Fact]
     public void FinalOwnerExecutionAndCloseProofScriptsUseAtomicLocalWritersForJson()
     {
+        string commonPath = Path.Combine(RepositoryPaths.Root, "eng", "OwnerRealProofCommon.ps1");
+        string common = File.ReadAllText(commonPath);
+        Assert.Contains("function Write-Utf8File", common, StringComparison.Ordinal);
+        Assert.Contains("[System.IO.File]::Replace", common, StringComparison.Ordinal);
+        Assert.Contains("for ($attempt = 1; $attempt -le 10; $attempt++)", common, StringComparison.Ordinal);
+
         foreach (string scriptName in new[]
         {
             "Export-FinalOwnerExecutionBlockerLedger.ps1",
@@ -170,9 +176,16 @@ public sealed class OwnerRealProofCommonIoTests
             string scriptPath = Path.Combine(RepositoryPaths.Root, "eng", scriptName);
             string script = File.ReadAllText(scriptPath);
 
-            Assert.Contains("function Write-Utf8File", script, StringComparison.Ordinal);
-            Assert.Contains("[System.IO.File]::Replace", script, StringComparison.Ordinal);
-            Assert.Contains("for ($attempt = 1; $attempt -le 10; $attempt++)", script, StringComparison.Ordinal);
+            if (script.Contains("function Write-Utf8File", StringComparison.Ordinal))
+            {
+                Assert.Contains("[System.IO.File]::Replace", script, StringComparison.Ordinal);
+                Assert.Contains("for ($attempt = 1; $attempt -le 10; $attempt++)", script, StringComparison.Ordinal);
+            }
+            else
+            {
+                Assert.Contains(". (Join-Path $PSScriptRoot \"OwnerRealProofCommon.ps1\")", script, StringComparison.Ordinal);
+                Assert.Contains("Write-Utf8File", script, StringComparison.Ordinal);
+            }
             Assert.DoesNotContain("WriteAllText($LiteralPath", script, StringComparison.Ordinal);
             Assert.DoesNotContain("Set-Content -LiteralPath $jsonPath", script, StringComparison.Ordinal);
             Assert.DoesNotContain("Set-Content -LiteralPath $templateJsonPath", script, StringComparison.Ordinal);

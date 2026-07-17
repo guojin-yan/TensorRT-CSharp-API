@@ -121,6 +121,30 @@ public sealed class CudaGraph : IDisposable
     }
 
     /// <summary>
+    /// Adds a one-dimensional byte memset node backed by a managed device-memory owner.
+    /// 添加由托管设备内存 owner 支撑的一维 byte memset 节点。
+    /// </summary>
+    /// <remarks>The destination must remain alive while this graph or an executable graph may use the node. 当 graph 或 executable graph 可能使用该节点时，destination 必须保持存活。</remarks>
+    public CudaGraphNode AddMemsetNode(CudaMemory destination, byte value, int count)
+    {
+        ValidateDeviceMemory(destination, nameof(destination));
+        ValidateMemsetCount(count, destination.SizeInBytes, nameof(count));
+        return NativeCudaApi.AddGraphMemsetNode(_handle, destination.Handle, value, count);
+    }
+
+    /// <summary>
+    /// Adds a one-dimensional byte memset node after an existing dependency.
+    /// 在现有 dependency 之后添加一维 byte memset 节点。
+    /// </summary>
+    /// <remarks>The destination must remain alive while this graph or an executable graph may use the node. 当 graph 或 executable graph 可能使用该节点时，destination 必须保持存活。</remarks>
+    public CudaGraphNode AddMemsetNodeAfter(CudaGraphNode dependencyNode, CudaMemory destination, byte value, int count)
+    {
+        ValidateDeviceMemory(destination, nameof(destination));
+        ValidateMemsetCount(count, destination.SizeInBytes, nameof(count));
+        return NativeCudaApi.AddGraphMemsetNodeAfter(_handle, dependencyNode, destination.Handle, value, count);
+    }
+
+    /// <summary>
     /// Adds an event-record node to this graph.
     /// 向当前 graph 添加 event-record 节点。
     /// </summary>
@@ -330,6 +354,15 @@ public sealed class CudaGraph : IDisposable
     public void RemoveDependency(CudaGraphNode fromNode, CudaGraphNode toNode)
     {
         NativeCudaApi.RemoveGraphDependency(_handle, fromNode, toNode);
+    }
+
+    /// <summary>
+    /// Removes a node after verifying that it belongs to this graph.
+    /// 在确认节点属于当前 graph 后将其删除。
+    /// </summary>
+    public void RemoveNode(CudaGraphNode node)
+    {
+        NativeCudaApi.RemoveGraphNode(_handle, node);
     }
 
     /// <summary>
@@ -722,6 +755,42 @@ public sealed class CudaGraph : IDisposable
     {
         ValidateKernelNodeAttribute(attribute, nameof(attribute));
         return NativeCudaApi.GetGraphKernelNodeAttribute(node, attribute);
+    }
+
+    /// <summary>Gets copied scalar parameters for a kernel node without exposing function or argument pointers. 获取 kernel 节点的复制型标量参数，不暴露 function 或 argument pointer。</summary>
+    public static CudaGraphKernelNodeParametersSnapshot GetKernelNodeParametersSnapshot(CudaGraphNode node)
+    {
+        return NativeCudaApi.GetGraphKernelNodeParametersSnapshot(node);
+    }
+
+    /// <summary>Gets callback-presence metadata for a host node without exposing callback pointers. 获取 host 节点的 callback 存在性元数据，不暴露 callback pointer。</summary>
+    public static CudaGraphHostNodeParametersSnapshot GetHostNodeParametersSnapshot(CudaGraphNode node)
+    {
+        return NativeCudaApi.GetGraphHostNodeParametersSnapshot(node);
+    }
+
+    /// <summary>Gets copied scalar metadata for a graph memory-allocation node. 获取 graph memory-allocation 节点的复制型标量元数据。</summary>
+    public static CudaGraphMemoryAllocationNodeSnapshot GetMemoryAllocationNodeSnapshot(CudaGraphNode node)
+    {
+        return NativeCudaApi.GetGraphMemoryAllocationNodeSnapshot(node);
+    }
+
+    /// <summary>Gets pointer-presence metadata for a graph memory-free node. 获取 graph memory-free 节点的 pointer 存在性元数据。</summary>
+    public static CudaGraphMemoryFreeNodeSnapshot GetMemoryFreeNodeSnapshot(CudaGraphNode node)
+    {
+        return NativeCudaApi.GetGraphMemoryFreeNodeSnapshot(node);
+    }
+
+    /// <summary>Gets copied count metadata for an external-semaphore signal node. 获取 external-semaphore signal 节点的复制型 count 元数据。</summary>
+    public static CudaGraphExternalSemaphoreNodeSnapshot GetExternalSemaphoreSignalNodeSnapshot(CudaGraphNode node)
+    {
+        return NativeCudaApi.GetGraphExternalSemaphoreSignalNodeSnapshot(node);
+    }
+
+    /// <summary>Gets copied count metadata for an external-semaphore wait node. 获取 external-semaphore wait 节点的复制型 count 元数据。</summary>
+    public static CudaGraphExternalSemaphoreNodeSnapshot GetExternalSemaphoreWaitNodeSnapshot(CudaGraphNode node)
+    {
+        return NativeCudaApi.GetGraphExternalSemaphoreWaitNodeSnapshot(node);
     }
 
     /// <summary>
@@ -1166,6 +1235,14 @@ public sealed class CudaGraph : IDisposable
     internal static void ValidateMemcpyCount(int count, int destinationSize, int sourceSize, string parameterName)
     {
         if (count <= 0 || count > destinationSize || count > sourceSize)
+        {
+            throw new ArgumentOutOfRangeException(parameterName);
+        }
+    }
+
+    internal static void ValidateMemsetCount(int count, int destinationSize, string parameterName)
+    {
+        if (count <= 0 || count > destinationSize)
         {
             throw new ArgumentOutOfRangeException(parameterName);
         }

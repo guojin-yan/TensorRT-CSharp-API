@@ -2572,6 +2572,24 @@ static class HighLevelWrapperSurfaceProbe
             static (graphExec, node, childGraph) => graphExec.SetChildGraphNodeParameters(node, childGraph);
         Func<CudaGraphExec, CudaGraph, CudaGraphExecUpdateSnapshot> updateGraphExec =
             static (graphExec, graph) => graphExec.Update(graph);
+        Func<CudaGraph, CudaMemory, CudaGraphNode> addMemsetNode =
+            static (graph, memory) => graph.AddMemsetNode(memory, 0, 1);
+        Action<CudaGraph, CudaGraphNode> removeGraphNode = static (graph, node) => graph.RemoveNode(node);
+        Action<CudaGraphExec, CudaGraphNode, CudaMemory> setExecMemsetNode =
+            static (graphExec, node, memory) => graphExec.SetMemsetNodeParameters(node, memory, 0, 1);
+        Func<CudaGraphNode, CudaGraphKernelNodeParametersSnapshot> kernelNodeParameters =
+            static node => CudaGraph.GetKernelNodeParametersSnapshot(node);
+        Func<CudaGraphNode, CudaGraphHostNodeParametersSnapshot> hostNodeParameters =
+            static node => CudaGraph.GetHostNodeParametersSnapshot(node);
+        Func<CudaGraphNode, CudaGraphMemoryAllocationNodeSnapshot> memoryAllocationNode =
+            static node => CudaGraph.GetMemoryAllocationNodeSnapshot(node);
+        Func<CudaGraphNode, CudaGraphMemoryFreeNodeSnapshot> memoryFreeNode =
+            static node => CudaGraph.GetMemoryFreeNodeSnapshot(node);
+        Func<CudaGraphNode, CudaGraphExternalSemaphoreNodeSnapshot> externalSemaphoreSignalNode =
+            static node => CudaGraph.GetExternalSemaphoreSignalNodeSnapshot(node);
+        Func<CudaStream, CudaStreamCaptureInfo> captureSummary = static stream => stream.GetCaptureInfo();
+        Action<CudaStream> clearCaptureDependencies =
+            static stream => stream.UpdateCaptureDependencies(Array.Empty<CudaGraphNode>(), CudaStreamCaptureDependencyMode.Replace);
         Func<CudaLogCursor> currentCudaLogCursor = static () => CudaRuntimeLogs.GetCurrentCursor();
         Func<CudaLogSnapshot> dumpCudaLogs = static () => CudaRuntimeLogs.DumpToMemory();
         Func<CudaLogCursor, CudaLogSnapshot> dumpCudaLogsFromCursor =
@@ -2814,6 +2832,16 @@ static class HighLevelWrapperSurfaceProbe
         _ = instantiateGraphWithParametersOnStream;
         _ = setChildGraphNodeParameters;
         _ = updateGraphExec;
+        _ = addMemsetNode;
+        _ = removeGraphNode;
+        _ = setExecMemsetNode;
+        _ = kernelNodeParameters;
+        _ = hostNodeParameters;
+        _ = memoryAllocationNode;
+        _ = memoryFreeNode;
+        _ = externalSemaphoreSignalNode;
+        _ = captureSummary;
+        _ = clearCaptureDependencies;
         _ = currentCudaLogCursor;
         _ = dumpCudaLogs;
         _ = dumpCudaLogsFromCursor;
@@ -4326,6 +4354,26 @@ static class HighLevelWrapperSurfaceProbe
             nameof(CudaGraphExec.Update),
             nameof(CudaGraphExecUpdateSnapshot),
             nameof(CudaGraphExecUpdateSnapshot.Succeeded),
+            nameof(CudaGraph.AddMemsetNode),
+            nameof(CudaGraph.AddMemsetNodeAfter),
+            nameof(CudaGraph.RemoveNode),
+            nameof(CudaGraph.GetKernelNodeParametersSnapshot),
+            nameof(CudaGraph.GetHostNodeParametersSnapshot),
+            nameof(CudaGraph.GetMemoryAllocationNodeSnapshot),
+            nameof(CudaGraph.GetMemoryFreeNodeSnapshot),
+            nameof(CudaGraph.GetExternalSemaphoreSignalNodeSnapshot),
+            nameof(CudaGraph.GetExternalSemaphoreWaitNodeSnapshot),
+            nameof(CudaGraphExec.SetMemsetNodeParameters),
+            nameof(CudaGraphKernelNodeParametersSnapshot),
+            nameof(CudaGraphHostNodeParametersSnapshot),
+            nameof(CudaGraphMemoryAllocationNodeSnapshot),
+            nameof(CudaGraphMemoryFreeNodeSnapshot),
+            nameof(CudaGraphExternalSemaphoreNodeSnapshot),
+            nameof(CudaStream.UpdateCaptureDependencies),
+            nameof(CudaStreamCaptureInfo.HasCapturedGraph),
+            nameof(CudaStreamCaptureInfo.DependencyCount),
+            nameof(CudaStreamCaptureInfo.HasDependencyEdgeData),
+            nameof(CudaStreamCaptureDependencyMode),
             nameof(CudaRuntimeLogs),
             nameof(CudaRuntimeLogs.GetCurrentCursor),
             nameof(CudaRuntimeLogs.DumpToMemory),

@@ -197,6 +197,8 @@ internal static class GeneratedEntryPointNames
     public const string CudaGraphAddMemcpyNode1dDeviceToDeviceSafe = "jyppx_cuda_graph_add_memcpy_node_1d_device_to_device_safe";
     public const string CudaGraphAddMemcpyNode1dDeviceToHostSafe = "jyppx_cuda_graph_add_memcpy_node_1d_device_to_host_safe";
     public const string CudaGraphAddMemcpyNode1dHostToDeviceSafe = "jyppx_cuda_graph_add_memcpy_node_1d_host_to_device_safe";
+    public const string CudaGraphAddMemsetNodeAfterOwnerSafe = "jyppx_cuda_graph_add_memset_node_after_safe";
+    public const string CudaGraphAddMemsetNodeOwnerSafe = "jyppx_cuda_graph_add_memset_node_safe";
     public const string CudaGraphChildGraphNodeGetEdgeCountSafe = "jyppx_cuda_graph_child_graph_node_get_edge_count_safe";
     public const string CudaGraphChildGraphNodeGetNodeCountSafe = "jyppx_cuda_graph_child_graph_node_get_node_count_safe";
     public const string CudaGraphChildGraphNodeGetRootNodeCountSafe = "jyppx_cuda_graph_child_graph_node_get_root_node_count_safe";
@@ -205,6 +207,7 @@ internal static class GeneratedEntryPointNames
     public const string CudaGraphCreate = "jyppx_cuda_graph_create";
     public const string CudaGraphDebugDotPrintSafe = "jyppx_cuda_graph_debug_dot_print_safe";
     public const string CudaGraphDestroy = "jyppx_cuda_graph_destroy";
+    public const string CudaGraphDestroyNodeOwnerScopedSafe = "jyppx_cuda_graph_destroy_node_owner_scoped_safe";
     public const string CudaGraphEventRecordNodeHasEventSafe = "jyppx_cuda_graph_event_record_node_has_event_safe";
     public const string CudaGraphEventRecordNodeSetEventSafe = "jyppx_cuda_graph_event_record_node_set_event_safe";
     public const string CudaGraphEventWaitNodeHasEventSafe = "jyppx_cuda_graph_event_wait_node_has_event_safe";
@@ -219,10 +222,13 @@ internal static class GeneratedEntryPointNames
     public const string CudaGraphExecMemcpyNodeSetParams1dDeviceToDeviceSafe = "jyppx_cuda_graph_exec_memcpy_node_set_params_1d_device_to_device_safe";
     public const string CudaGraphExecMemcpyNodeSetParams1dDeviceToHostSafe = "jyppx_cuda_graph_exec_memcpy_node_set_params_1d_device_to_host_safe";
     public const string CudaGraphExecMemcpyNodeSetParams1dHostToDeviceSafe = "jyppx_cuda_graph_exec_memcpy_node_set_params_1d_host_to_device_safe";
+    public const string CudaGraphExecMemsetNodeSetParamsOwnerSafe = "jyppx_cuda_graph_exec_memset_node_set_params_safe";
     public const string CudaGraphExecNodeGetEnabledSafe = "jyppx_cuda_graph_exec_node_get_enabled_safe";
     public const string CudaGraphExecNodeSetEnabledSafe = "jyppx_cuda_graph_exec_node_set_enabled_safe";
     public const string CudaGraphExecUpdateCopiedMetadataSafe = "jyppx_cuda_graph_exec_update_copied_metadata_safe";
     public const string CudaGraphExecUpload = "jyppx_cuda_graph_exec_upload";
+    public const string CudaGraphExternalSemaphoreSignalNodeGetParamsCopiedSnapshotSafe = "jyppx_cuda_graph_external_semaphore_signal_node_get_params_snapshot_safe";
+    public const string CudaGraphExternalSemaphoreWaitNodeGetParamsCopiedSnapshotSafe = "jyppx_cuda_graph_external_semaphore_wait_node_get_params_snapshot_safe";
     public const string CudaGraphGetEdgeCount = "jyppx_cuda_graph_get_edge_count";
     public const string CudaGraphGetEdgeHandlePair = "jyppx_cuda_graph_get_edge_handle_pair";
     public const string CudaGraphGetEdgeV2Safe = "jyppx_cuda_graph_get_edge_v2_safe";
@@ -235,6 +241,7 @@ internal static class GeneratedEntryPointNames
     public const string CudaGraphGetRootNodeCount = "jyppx_cuda_graph_get_root_node_count";
     public const string CudaGraphGetRootNodeHandle = "jyppx_cuda_graph_get_root_node_handle";
     public const string CudaGraphGetRootNodesOfficialTokenAlias = "jyppx_cuda_graph_get_root_nodes";
+    public const string CudaGraphHostNodeGetParamsCopiedSnapshotSafe = "jyppx_cuda_graph_host_node_get_params_snapshot_safe";
     public const string CudaGraphInstantiate = "jyppx_cuda_graph_instantiate";
     public const string CudaGraphInstantiateWithFlagsOfficialTokenAlias = "jyppx_cuda_graph_instantiate_with_flags";
     public const string CudaGraphInstantiateWithParamsOnStreamSafe = "jyppx_cuda_graph_instantiate_with_params_on_stream_safe";
@@ -242,12 +249,15 @@ internal static class GeneratedEntryPointNames
     public const string CudaGraphKernelNodeCopyAttributesSafe = "jyppx_cuda_graph_kernel_node_copy_attributes_safe";
     public const string CudaGraphKernelNodeGetAttributeDeferred = "jyppx_cuda_graph_kernel_node_get_attribute_deferred";
     public const string CudaGraphKernelNodeGetAttributeScalarSafe = "jyppx_cuda_graph_kernel_node_get_attribute_scalar_safe";
+    public const string CudaGraphKernelNodeGetParamsCopiedSnapshotSafe = "jyppx_cuda_graph_kernel_node_get_params_snapshot_safe";
     public const string CudaGraphKernelNodeGetParamsDeferred = "jyppx_cuda_graph_kernel_node_get_params_deferred";
     public const string CudaGraphKernelNodeSetAttributeDeferred = "jyppx_cuda_graph_kernel_node_set_attribute_deferred";
     public const string CudaGraphKernelNodeSetAttributeScalarSafe = "jyppx_cuda_graph_kernel_node_set_attribute_scalar_safe";
     public const string CudaGraphKernelNodeSetParamsDeferred = "jyppx_cuda_graph_kernel_node_set_params_deferred";
     public const string CudaGraphLaunchOfficialTokenAlias = "jyppx_cuda_graph_launch";
+    public const string CudaGraphMemAllocNodeGetParamsCopiedSnapshotSafe = "jyppx_cuda_graph_mem_alloc_node_get_params_snapshot_safe";
     public const string CudaGraphMemAllocNodeGetParamsDeferred = "jyppx_cuda_graph_mem_alloc_node_get_params_deferred";
+    public const string CudaGraphMemFreeNodeGetParamsCopiedSnapshotSafe = "jyppx_cuda_graph_mem_free_node_get_params_snapshot_safe";
     public const string CudaGraphMemFreeNodeGetParamsDeferred = "jyppx_cuda_graph_mem_free_node_get_params_deferred";
     public const string CudaGraphMemcpyNodeGetParamsDeferred = "jyppx_cuda_graph_memcpy_node_get_params_deferred";
     public const string CudaGraphMemcpyNodeGetParamsSafe = "jyppx_cuda_graph_memcpy_node_get_params_safe";
@@ -456,6 +466,7 @@ internal static class GeneratedEntryPointNames
     public const string CudaStreamEndCapture = "jyppx_cuda_stream_end_capture";
     public const string CudaStreamGetAttribute = "jyppx_cuda_stream_get_attribute";
     public const string CudaStreamGetCaptureInfo = "jyppx_cuda_stream_get_capture_info";
+    public const string CudaStreamGetCaptureInfoCopiedSummarySafe = "jyppx_cuda_stream_get_capture_summary_safe";
     public const string CudaStreamGetCaptureInfoPtszDeferred = "jyppx_cuda_stream_get_capture_info_ptsz_deferred";
     public const string CudaStreamGetCaptureInfoV3Deferred = "jyppx_cuda_stream_get_capture_info_v3_deferred";
     public const string CudaStreamGetDevResourceDeferred = "jyppx_cuda_stream_get_dev_resource_deferred";
@@ -469,6 +480,7 @@ internal static class GeneratedEntryPointNames
     public const string CudaStreamSetAttribute = "jyppx_cuda_stream_set_attribute";
     public const string CudaStreamSynchronize = "jyppx_cuda_stream_synchronize";
     public const string CudaStreamUpdateCaptureDependenciesDeferred = "jyppx_cuda_stream_update_capture_dependencies_deferred";
+    public const string CudaStreamUpdateCaptureDependenciesOwnerTokenArraySafe = "jyppx_cuda_stream_update_capture_dependencies_safe";
     public const string CudaStreamUpdateCaptureDependenciesPtszDeferred = "jyppx_cuda_stream_update_capture_dependencies_ptsz_deferred";
     public const string CudaStreamUpdateCaptureDependenciesV2Deferred = "jyppx_cuda_stream_update_capture_dependencies_v2_deferred";
     public const string CudaStreamWaitEvent = "jyppx_cuda_stream_wait_event";

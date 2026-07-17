@@ -434,6 +434,18 @@ public enum CudaStreamCaptureMode
 }
 
 /// <summary>
+/// Controls whether stream-capture dependencies are added or replaced.
+/// 控制 stream capture dependencies 是追加还是替换。
+/// </summary>
+public enum CudaStreamCaptureDependencyMode
+{
+    /// <summary>Adds nodes to the current dependency set. 向当前 dependency set 追加节点。</summary>
+    Add = 0,
+    /// <summary>Replaces the current dependency set. 替换当前 dependency set。</summary>
+    Replace = 1
+}
+
+/// <summary>
 /// Channel-format kinds supported by CUDA arrays and textures.
 /// CUDA array 与 texture 支持的通道格式类型。
 /// </summary>

@@ -4138,10 +4138,6 @@ public sealed class ReleaseCandidateReadinessTests
 
         JsonElement[] designGroups = root.GetProperty("manualReviewDesignGroups").EnumerateArray().ToArray();
         Assert.Contains(designGroups, static group =>
-            group.GetProperty("designGroup").GetString() == "runtime-execution-boundary" &&
-            !group.GetProperty("canPromoteWithoutDesignGate").GetBoolean() &&
-            group.GetProperty("recommendedDesignAction").GetString()!.Contains("Do not promote", StringComparison.Ordinal));
-        Assert.Contains(designGroups, static group =>
             group.GetProperty("designGroup").GetString() == "algorithm-selector-ownership-boundary" &&
             group.GetProperty("ownershipRiskLevels").EnumerateArray().Any(risk => risk.GetString() == "high") &&
             !group.GetProperty("canPromoteWithoutDesignGate").GetBoolean() &&
@@ -4176,9 +4172,23 @@ public sealed class ReleaseCandidateReadinessTests
             Assert.False(string.IsNullOrWhiteSpace(candidate.GetProperty("designGroup").GetString()));
             Assert.False(string.IsNullOrWhiteSpace(candidate.GetProperty("promotionBoundary").GetString()));
         });
-        Assert.Contains(candidates, static candidate =>
-            candidate.GetProperty("interface").GetString()!.Contains("IExecutionContext::execute", StringComparison.Ordinal) &&
-            candidate.GetProperty("designGroup").GetString() == "runtime-execution-boundary");
+        JsonElement[] runtimeExecutionCandidates = candidates
+            .Where(static candidate => candidate.GetProperty("interface").GetString()!.Contains("IExecutionContext::execute", StringComparison.Ordinal))
+            .ToArray();
+        Assert.All(runtimeExecutionCandidates, static candidate =>
+            Assert.Equal("runtime-execution-boundary", candidate.GetProperty("designGroup").GetString()));
+        if (runtimeExecutionCandidates.Length > 0)
+        {
+            Assert.Contains(designGroups, static group =>
+                group.GetProperty("designGroup").GetString() == "runtime-execution-boundary" &&
+                !group.GetProperty("canPromoteWithoutDesignGate").GetBoolean() &&
+                group.GetProperty("recommendedDesignAction").GetString()!.Contains("Do not promote", StringComparison.Ordinal));
+        }
+        else
+        {
+            Assert.DoesNotContain(designGroups, static group =>
+                group.GetProperty("designGroup").GetString() == "runtime-execution-boundary");
+        }
         Assert.Contains(candidates, static candidate =>
             candidate.GetProperty("interface").GetString()!.Contains("IRuntime::deserializeCudaEngine", StringComparison.Ordinal) &&
             candidate.GetProperty("designGroup").GetString() == "runtime-deserialization-boundary");

@@ -209,6 +209,18 @@ public sealed class CudaGraphExec : IDisposable
     }
 
     /// <summary>
+    /// Replaces a one-dimensional memset node using a managed device-memory owner.
+    /// 使用托管设备内存 owner 替换一维 memset 节点参数。
+    /// </summary>
+    /// <remarks>The destination must remain alive while this executable graph may use the node. 当 executable graph 可能使用该节点时，destination 必须保持存活。</remarks>
+    public void SetMemsetNodeParameters(CudaGraphNode node, CudaMemory destination, byte value, int count)
+    {
+        CudaGraph.ValidateDeviceMemory(destination, nameof(destination));
+        CudaGraph.ValidateMemsetCount(count, destination.SizeInBytes, nameof(count));
+        NativeCudaApi.SetGraphExecMemsetNodeParameters(_handle, node, destination.Handle, value, count);
+    }
+
+    /// <summary>
     /// Attempts to update this executable graph and returns copied result metadata.
     /// 尝试更新当前 executable graph，并返回复制出的结果元数据。
     /// </summary>

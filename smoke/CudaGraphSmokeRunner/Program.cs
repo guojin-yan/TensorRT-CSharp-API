@@ -29,6 +29,11 @@ internal static class Program
         CudaStreamCaptureInfo captureBefore = stream.GetCaptureInfo();
         stream.BeginCapture(CudaStreamCaptureMode.Relaxed);
         CudaStreamCaptureInfo captureDuring = stream.GetCaptureInfo();
+        stream.UpdateCaptureDependencies(Array.Empty<CudaGraphNode>(), CudaStreamCaptureDependencyMode.Replace);
+        if (!captureDuring.HasCapturedGraph)
+        {
+            throw new InvalidOperationException("CUDA active capture summary did not report a capture graph.");
+        }
         device.FillAsync(0, ByteCount, stream);
         device.CopyFromAsync(source, ByteCount, stream);
         device.CopyToAsync(destination, ByteCount, stream);
@@ -81,6 +86,7 @@ internal static class Program
         string memcpy1DNodeState = ProbeGraphMemcpy1D(source, destination, device, ByteCount);
         string typedDescriptorState = ProbeGraphNodeParamsTypedDescriptors(source, destination, device, ByteCount);
         string childGraphUpdateState = ProbeChildGraphUpdate(stream);
+        string ownerScopedDiagnosticsState = ProbeOwnerScopedGraphDiagnostics(stream, ByteCount);
         using CudaGraphExec topologyExec = topologyGraph.Instantiate();
         string topologyNodeEnabledState = "Unsupported";
         string topologyExecNodeSnapshotState = "Unsupported";
@@ -138,9 +144,9 @@ internal static class Program
             throw new InvalidOperationException($"CUDA graph copy round trip failed. Expected=[{string.Join(", ", input)}] Actual=[{string.Join(", ", output)}]");
         }
 
-        Console.WriteLine($"CudaGraphCaptureRoundTrip=True Bytes={ByteCount} Capture={captureBefore.Status}->{captureDuring.Status}->{captureAfter.Status} CaptureId={captureDuring.CaptureId} Nodes={graph.NodeCount} Roots={graph.RootNodeCount} Edges={graph.EdgeCount} CloneNodes={graphClone.NodeCount} ExecFlags={graphExecFlagsState} EventElapsedMilliseconds={elapsedMilliseconds:0.###}");
+        Console.WriteLine($"CudaGraphCaptureRoundTrip=True Bytes={ByteCount} Capture={captureBefore.Status}->{captureDuring.Status}->{captureAfter.Status} CaptureId={captureDuring.CaptureId} CaptureGraph={captureDuring.HasCapturedGraph} CaptureDependencies={captureDuring.DependencyCount} CaptureEdgeData={captureDuring.HasDependencyEdgeData} Nodes={graph.NodeCount} Roots={graph.RootNodeCount} Edges={graph.EdgeCount} CloneNodes={graphClone.NodeCount} ExecFlags={graphExecFlagsState} EventElapsedMilliseconds={elapsedMilliseconds:0.###}");
         Console.WriteLine($"CudaGraphCapturedTopology Node0={capturedNode} Root0={capturedRootNode} CloneNode0={capturedCloneNode} NodeType={capturedNodeType} NodeDeps={capturedNodeDependencies} NodeDependents={capturedNodeDependents} MemsetParams={capturedMemsetParamsState} Edge0={capturedEdge?.ToString() ?? "None"}");
-        Console.WriteLine($"CudaGraphManualTopology Nodes={topologyGraph.NodeCount} Roots={topologyGraph.RootNodeCount} Edges={topologyGraph.EdgeCount} ChildDeps={topologyChildDependencyCount} RootDependents={topologyRootDependentCount} EdgeData={topologyEdgeDataState} DebugDot={topologyDebugDotState} EventNodes={eventNodeState} Memcpy1D={memcpy1DNodeState} NodeParamsDescriptor={typedDescriptorState} ChildGraphUpdate={childGraphUpdateState} NodeEnabled={topologyNodeEnabledState} GraphId={topologyGraphIdState} ExecId={topologyExecIdState} NodeIdentity={topologyNodeIdentityState}");
+        Console.WriteLine($"CudaGraphManualTopology Nodes={topologyGraph.NodeCount} Roots={topologyGraph.RootNodeCount} Edges={topologyGraph.EdgeCount} ChildDeps={topologyChildDependencyCount} RootDependents={topologyRootDependentCount} EdgeData={topologyEdgeDataState} DebugDot={topologyDebugDotState} EventNodes={eventNodeState} Memcpy1D={memcpy1DNodeState} NodeParamsDescriptor={typedDescriptorState} ChildGraphUpdate={childGraphUpdateState} OwnerScopedDiagnostics={ownerScopedDiagnosticsState} NodeEnabled={topologyNodeEnabledState} GraphId={topologyGraphIdState} ExecId={topologyExecIdState} NodeIdentity={topologyNodeIdentityState}");
         Console.WriteLine($"CudaGraphSnapshots GraphSnapshot=[{topologySnapshot}] RootNodeSnapshot=[{topologyRootSnapshot}] ChildNodeSnapshot=[{topologyChildSnapshot}] ExecNodeSnapshot=[{topologyExecNodeSnapshotState}]");
         Console.WriteLine($"CudaGraphSnapshotLists {topologySnapshotListState}");
         Console.WriteLine($"CudaGraphMemory {graphMemoryState}");
@@ -469,6 +475,72 @@ internal static class Program
             }
 
             return $"Snapshot=[{snapshot}] Update=[{updateSnapshot}] Parameterized={parameterizedState}";
+        }
+        catch (CudaException exception)
+        {
+            return $"Skipped:{exception.Message}";
+        }
+    }
+
+    static string ProbeOwnerScopedGraphDiagnostics(CudaStream stream, int byteCount)
+    {
+        try
+        {
+            using CudaMemory destination = new CudaMemory(byteCount);
+            using CudaGraph graph = CudaGraph.Create();
+            CudaGraphNode root = graph.AddEmptyNode();
+            CudaGraphNode removable = graph.AddEmptyNode();
+            ulong nodeCountBeforeRemoval = graph.NodeCount;
+            graph.RemoveNode(removable);
+            if (graph.NodeCount + 1 != nodeCountBeforeRemoval)
+            {
+                throw new InvalidOperationException("CUDA owner-scoped graph node removal did not reduce the node count.");
+            }
+
+            CudaGraphNode memset = graph.AddMemsetNodeAfter(root, destination, 0x11, byteCount);
+            using (CudaGraphExec graphExec = graph.Instantiate())
+            {
+                graphExec.SetMemsetNodeParameters(memset, destination, 0x5A, byteCount);
+                graphExec.Launch(stream);
+                stream.Synchronize();
+            }
+
+            byte[] output = destination.ToArray(byteCount);
+            if (output.Any(static value => value != 0x5A))
+            {
+                throw new InvalidOperationException("CUDA executable memset node did not produce the expected byte pattern.");
+            }
+
+            CudaGraphMemoryAllocationNodeSnapshot? allocationSnapshot = null;
+            CudaGraphMemoryFreeNodeSnapshot? freeSnapshot = null;
+            using (CudaStream captureStream = new CudaStream(CudaStreamCreationFlags.NonBlocking))
+            {
+                captureStream.BeginCapture(CudaStreamCaptureMode.Relaxed);
+                using CudaMemory capturedAllocation = CudaMemory.AllocateAsync(byteCount, captureStream);
+                capturedAllocation.FreeAsync(captureStream);
+                using CudaGraph memoryGraph = captureStream.EndCapture();
+                for (ulong index = 0; index < memoryGraph.NodeCount; index++)
+                {
+                    CudaGraphNode node = memoryGraph.GetNode(index);
+                    CudaGraphNodeType type = CudaGraph.GetNodeType(node);
+                    if (type == CudaGraphNodeType.MemoryAlloc)
+                    {
+                        allocationSnapshot = CudaGraph.GetMemoryAllocationNodeSnapshot(node);
+                    }
+                    else if (type == CudaGraphNodeType.MemoryFree)
+                    {
+                        freeSnapshot = CudaGraph.GetMemoryFreeNodeSnapshot(node);
+                    }
+                }
+            }
+
+            if (allocationSnapshot == null || allocationSnapshot.ByteCount != (ulong)byteCount || !allocationSnapshot.HasDevicePointer ||
+                freeSnapshot == null || !freeSnapshot.HasDevicePointer)
+            {
+                throw new InvalidOperationException("CUDA graph memory allocation/free snapshots were incomplete.");
+            }
+
+            return $"Removed=True MemsetOutput=True Allocation=[{allocationSnapshot}] Free=[{freeSnapshot}]";
         }
         catch (CudaException exception)
         {

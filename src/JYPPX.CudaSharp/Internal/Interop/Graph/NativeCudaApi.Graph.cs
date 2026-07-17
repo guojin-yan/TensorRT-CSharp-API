@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using JYPPX.CudaSharp.Internal.Handles;
 
 namespace JYPPX.CudaSharp.Internal.Interop;
@@ -24,8 +25,42 @@ internal static partial class NativeCudaApi
 
     public static CudaStreamCaptureInfo GetStreamCaptureInfo(SafeCudaStreamHandle stream)
     {
-        CudaNativeStatus.ThrowIfFailed(NativeMethodsCuda.jyppx_cuda_stream_get_capture_info(stream, out int status, out ulong captureId));
-        return new CudaStreamCaptureInfo((CudaStreamCaptureStatus)status, captureId);
+        CudaNativeStatus.ThrowIfFailed(NativeMethodsCuda.jyppx_cuda_stream_get_capture_summary_safe(
+            stream,
+            out int status,
+            out ulong captureId,
+            out int hasGraph,
+            out UIntPtr dependencyCount,
+            out int hasEdgeData));
+        return new CudaStreamCaptureInfo(
+            (CudaStreamCaptureStatus)status,
+            captureId,
+            hasGraph != 0,
+            dependencyCount.ToUInt64(),
+            hasEdgeData != 0);
+    }
+
+    public static void UpdateStreamCaptureDependencies(
+        SafeCudaStreamHandle stream,
+        IReadOnlyList<CudaGraphNode> dependencies,
+        CudaStreamCaptureDependencyMode mode)
+    {
+        if (dependencies.Count > 1000000)
+        {
+            throw new ArgumentOutOfRangeException(nameof(dependencies));
+        }
+
+        UIntPtr[] tokens = new UIntPtr[dependencies.Count];
+        for (int index = 0; index < dependencies.Count; index++)
+        {
+            tokens[index] = dependencies[index].Token;
+        }
+
+        CudaNativeStatus.ThrowIfFailed(NativeMethodsCuda.jyppx_cuda_stream_update_capture_dependencies_safe(
+            stream,
+            tokens,
+            new UIntPtr((uint)tokens.Length),
+            (uint)mode));
     }
 
     public static SafeCudaGraphHandle CreateGraph(uint flags)
@@ -96,6 +131,29 @@ internal static partial class NativeCudaApi
         return new CudaGraphNode(node);
     }
 
+    public static CudaGraphNode AddGraphMemsetNode(SafeCudaGraphHandle graph, SafeCudaMemoryHandle destination, byte value, int count)
+    {
+        CudaNativeStatus.ThrowIfFailed(NativeMethodsCuda.jyppx_cuda_graph_add_memset_node_safe(
+            graph,
+            destination,
+            value,
+            new UIntPtr((uint)count),
+            out UIntPtr node));
+        return new CudaGraphNode(node);
+    }
+
+    public static CudaGraphNode AddGraphMemsetNodeAfter(SafeCudaGraphHandle graph, CudaGraphNode dependencyNode, SafeCudaMemoryHandle destination, byte value, int count)
+    {
+        CudaNativeStatus.ThrowIfFailed(NativeMethodsCuda.jyppx_cuda_graph_add_memset_node_after_safe(
+            graph,
+            dependencyNode.Token,
+            destination,
+            value,
+            new UIntPtr((uint)count),
+            out UIntPtr node));
+        return new CudaGraphNode(node);
+    }
+
     public static CudaGraphNode AddGraphEventRecordNode(SafeCudaGraphHandle graph, CudaGraphNode dependencyNode, SafeCudaEventHandle eventHandle)
     {
         CudaNativeStatus.ThrowIfFailed(NativeMethodsCuda.jyppx_cuda_graph_add_event_record_node_safe(graph, dependencyNode.Token, eventHandle, out UIntPtr node));
@@ -140,6 +198,11 @@ internal static partial class NativeCudaApi
     public static void RemoveGraphDependency(SafeCudaGraphHandle graph, CudaGraphNode fromNode, CudaGraphNode toNode)
     {
         CudaNativeStatus.ThrowIfFailed(NativeMethodsCuda.jyppx_cuda_graph_remove_dependency_safe(graph, fromNode.Token, toNode.Token));
+    }
+
+    public static void RemoveGraphNode(SafeCudaGraphHandle graph, CudaGraphNode node)
+    {
+        CudaNativeStatus.ThrowIfFailed(NativeMethodsCuda.jyppx_cuda_graph_destroy_node_owner_scoped_safe(graph, node.Token));
     }
 
     public static CudaGraphNode GetGraphNode(SafeCudaGraphHandle graph, ulong index)
@@ -216,6 +279,54 @@ internal static partial class NativeCudaApi
     {
         CudaNativeStatus.ThrowIfFailed(NativeMethodsCuda.jyppx_cuda_graph_kernel_node_get_attribute_scalar_safe(node.Token, (int)attribute, out NativeCudaGraphKernelNodeAttributeValue value));
         return new CudaGraphKernelNodeAttributeValue(value);
+    }
+
+    public static CudaGraphKernelNodeParametersSnapshot GetGraphKernelNodeParametersSnapshot(CudaGraphNode node)
+    {
+        CudaNativeStatus.ThrowIfFailed(NativeMethodsCuda.jyppx_cuda_graph_kernel_node_get_params_snapshot_safe(
+            node.Token,
+            out NativeCudaGraphKernelNodeParamsSnapshot snapshot));
+        return new CudaGraphKernelNodeParametersSnapshot(snapshot);
+    }
+
+    public static CudaGraphHostNodeParametersSnapshot GetGraphHostNodeParametersSnapshot(CudaGraphNode node)
+    {
+        CudaNativeStatus.ThrowIfFailed(NativeMethodsCuda.jyppx_cuda_graph_host_node_get_params_snapshot_safe(
+            node.Token,
+            out NativeCudaGraphHostNodeParamsSnapshot snapshot));
+        return new CudaGraphHostNodeParametersSnapshot(snapshot);
+    }
+
+    public static CudaGraphMemoryAllocationNodeSnapshot GetGraphMemoryAllocationNodeSnapshot(CudaGraphNode node)
+    {
+        CudaNativeStatus.ThrowIfFailed(NativeMethodsCuda.jyppx_cuda_graph_mem_alloc_node_get_params_snapshot_safe(
+            node.Token,
+            out NativeCudaGraphMemAllocNodeParamsSnapshot snapshot));
+        return new CudaGraphMemoryAllocationNodeSnapshot(snapshot);
+    }
+
+    public static CudaGraphMemoryFreeNodeSnapshot GetGraphMemoryFreeNodeSnapshot(CudaGraphNode node)
+    {
+        CudaNativeStatus.ThrowIfFailed(NativeMethodsCuda.jyppx_cuda_graph_mem_free_node_get_params_snapshot_safe(
+            node.Token,
+            out NativeCudaGraphMemFreeNodeParamsSnapshot snapshot));
+        return new CudaGraphMemoryFreeNodeSnapshot(snapshot);
+    }
+
+    public static CudaGraphExternalSemaphoreNodeSnapshot GetGraphExternalSemaphoreSignalNodeSnapshot(CudaGraphNode node)
+    {
+        CudaNativeStatus.ThrowIfFailed(NativeMethodsCuda.jyppx_cuda_graph_external_semaphore_signal_node_get_params_snapshot_safe(
+            node.Token,
+            out NativeCudaGraphExternalSemaphoreNodeParamsSnapshot snapshot));
+        return new CudaGraphExternalSemaphoreNodeSnapshot(CudaGraphNodeType.ExternalSemaphoreSignal, snapshot);
+    }
+
+    public static CudaGraphExternalSemaphoreNodeSnapshot GetGraphExternalSemaphoreWaitNodeSnapshot(CudaGraphNode node)
+    {
+        CudaNativeStatus.ThrowIfFailed(NativeMethodsCuda.jyppx_cuda_graph_external_semaphore_wait_node_get_params_snapshot_safe(
+            node.Token,
+            out NativeCudaGraphExternalSemaphoreNodeParamsSnapshot snapshot));
+        return new CudaGraphExternalSemaphoreNodeSnapshot(CudaGraphNodeType.ExternalSemaphoreWait, snapshot);
     }
 
     public static void SetGraphMemsetNodeParameters(CudaGraphNode node, SafeCudaMemoryHandle destination, byte value, int count)
@@ -408,6 +519,16 @@ internal static partial class NativeCudaApi
     public static void SetGraphExecChildGraphNodeParameters(SafeCudaGraphExecHandle graphExec, CudaGraphNode node, SafeCudaGraphHandle childGraph)
     {
         CudaNativeStatus.ThrowIfFailed(NativeMethodsCuda.jyppx_cuda_graph_exec_child_graph_node_set_params_safe(graphExec, node.Token, childGraph));
+    }
+
+    public static void SetGraphExecMemsetNodeParameters(SafeCudaGraphExecHandle graphExec, CudaGraphNode node, SafeCudaMemoryHandle destination, byte value, int count)
+    {
+        CudaNativeStatus.ThrowIfFailed(NativeMethodsCuda.jyppx_cuda_graph_exec_memset_node_set_params_safe(
+            graphExec,
+            node.Token,
+            destination,
+            value,
+            new UIntPtr((uint)count)));
     }
 
     public static CudaGraphExecUpdateSnapshot UpdateGraphExec(SafeCudaGraphExecHandle graphExec, SafeCudaGraphHandle graph)

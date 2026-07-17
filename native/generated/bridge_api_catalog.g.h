@@ -192,6 +192,8 @@
 #define JYPPX_API_CUDA_GRAPH_ADD_MEMCPY_NODE_1D_DEVICE_TO_DEVICE_SAFE "jyppx_cuda_graph_add_memcpy_node_1d_device_to_device_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_ADD_MEMCPY_NODE_1D_DEVICE_TO_HOST_SAFE "jyppx_cuda_graph_add_memcpy_node_1d_device_to_host_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_ADD_MEMCPY_NODE_1D_HOST_TO_DEVICE_SAFE "jyppx_cuda_graph_add_memcpy_node_1d_host_to_device_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_GRAPH_ADD_MEMSET_NODE_AFTER_OWNER_SAFE "jyppx_cuda_graph_add_memset_node_after_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_GRAPH_ADD_MEMSET_NODE_OWNER_SAFE "jyppx_cuda_graph_add_memset_node_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_CHILD_GRAPH_NODE_GET_EDGE_COUNT_SAFE "jyppx_cuda_graph_child_graph_node_get_edge_count_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_CHILD_GRAPH_NODE_GET_NODE_COUNT_SAFE "jyppx_cuda_graph_child_graph_node_get_node_count_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_CHILD_GRAPH_NODE_GET_ROOT_NODE_COUNT_SAFE "jyppx_cuda_graph_child_graph_node_get_root_node_count_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
@@ -200,6 +202,7 @@
 #define JYPPX_API_CUDA_GRAPH_CREATE "jyppx_cuda_graph_create" // module=cuda; line=common; ownership=caller-destroys; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_DEBUG_DOT_PRINT_SAFE "jyppx_cuda_graph_debug_dot_print_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_DESTROY "jyppx_cuda_graph_destroy" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_GRAPH_DESTROY_NODE_OWNER_SCOPED_SAFE "jyppx_cuda_graph_destroy_node_owner_scoped_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_EVENT_RECORD_NODE_HAS_EVENT_SAFE "jyppx_cuda_graph_event_record_node_has_event_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_EVENT_RECORD_NODE_SET_EVENT_SAFE "jyppx_cuda_graph_event_record_node_set_event_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_EVENT_WAIT_NODE_HAS_EVENT_SAFE "jyppx_cuda_graph_event_wait_node_has_event_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
@@ -214,10 +217,13 @@
 #define JYPPX_API_CUDA_GRAPH_EXEC_MEMCPY_NODE_SET_PARAMS_1D_DEVICE_TO_DEVICE_SAFE "jyppx_cuda_graph_exec_memcpy_node_set_params_1d_device_to_device_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_EXEC_MEMCPY_NODE_SET_PARAMS_1D_DEVICE_TO_HOST_SAFE "jyppx_cuda_graph_exec_memcpy_node_set_params_1d_device_to_host_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_EXEC_MEMCPY_NODE_SET_PARAMS_1D_HOST_TO_DEVICE_SAFE "jyppx_cuda_graph_exec_memcpy_node_set_params_1d_host_to_device_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_GRAPH_EXEC_MEMSET_NODE_SET_PARAMS_OWNER_SAFE "jyppx_cuda_graph_exec_memset_node_set_params_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_EXEC_NODE_GET_ENABLED_SAFE "jyppx_cuda_graph_exec_node_get_enabled_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_EXEC_NODE_SET_ENABLED_SAFE "jyppx_cuda_graph_exec_node_set_enabled_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_EXEC_UPDATE_COPIED_METADATA_SAFE "jyppx_cuda_graph_exec_update_copied_metadata_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_EXEC_UPLOAD "jyppx_cuda_graph_exec_upload" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_GRAPH_EXTERNAL_SEMAPHORE_SIGNAL_NODE_GET_PARAMS_COPIED_SNAPSHOT_SAFE "jyppx_cuda_graph_external_semaphore_signal_node_get_params_snapshot_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_GRAPH_EXTERNAL_SEMAPHORE_WAIT_NODE_GET_PARAMS_COPIED_SNAPSHOT_SAFE "jyppx_cuda_graph_external_semaphore_wait_node_get_params_snapshot_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_GET_EDGE_COUNT "jyppx_cuda_graph_get_edge_count" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_GET_EDGE_HANDLE_PAIR "jyppx_cuda_graph_get_edge_handle_pair" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_GET_EDGE_V2_SAFE "jyppx_cuda_graph_get_edge_v2_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
@@ -230,6 +236,7 @@
 #define JYPPX_API_CUDA_GRAPH_GET_ROOT_NODE_COUNT "jyppx_cuda_graph_get_root_node_count" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_GET_ROOT_NODE_HANDLE "jyppx_cuda_graph_get_root_node_handle" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_GET_ROOT_NODES_OFFICIAL_TOKEN_ALIAS "jyppx_cuda_graph_get_root_nodes" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_GRAPH_HOST_NODE_GET_PARAMS_COPIED_SNAPSHOT_SAFE "jyppx_cuda_graph_host_node_get_params_snapshot_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_INSTANTIATE "jyppx_cuda_graph_instantiate" // module=cuda; line=common; ownership=caller-destroys; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_INSTANTIATE_WITH_FLAGS_OFFICIAL_TOKEN_ALIAS "jyppx_cuda_graph_instantiate_with_flags" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_INSTANTIATE_WITH_PARAMS_ON_STREAM_SAFE "jyppx_cuda_graph_instantiate_with_params_on_stream_safe" // module=cuda; line=common; ownership=bridge-owned; manualOverride=false
@@ -237,12 +244,15 @@
 #define JYPPX_API_CUDA_GRAPH_KERNEL_NODE_COPY_ATTRIBUTES_SAFE "jyppx_cuda_graph_kernel_node_copy_attributes_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_KERNEL_NODE_GET_ATTRIBUTE_DEFERRED "jyppx_cuda_graph_kernel_node_get_attribute_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_KERNEL_NODE_GET_ATTRIBUTE_SCALAR_SAFE "jyppx_cuda_graph_kernel_node_get_attribute_scalar_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_GRAPH_KERNEL_NODE_GET_PARAMS_COPIED_SNAPSHOT_SAFE "jyppx_cuda_graph_kernel_node_get_params_snapshot_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_KERNEL_NODE_GET_PARAMS_DEFERRED "jyppx_cuda_graph_kernel_node_get_params_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_KERNEL_NODE_SET_ATTRIBUTE_DEFERRED "jyppx_cuda_graph_kernel_node_set_attribute_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_KERNEL_NODE_SET_ATTRIBUTE_SCALAR_SAFE "jyppx_cuda_graph_kernel_node_set_attribute_scalar_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_KERNEL_NODE_SET_PARAMS_DEFERRED "jyppx_cuda_graph_kernel_node_set_params_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_LAUNCH_OFFICIAL_TOKEN_ALIAS "jyppx_cuda_graph_launch" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_GRAPH_MEM_ALLOC_NODE_GET_PARAMS_COPIED_SNAPSHOT_SAFE "jyppx_cuda_graph_mem_alloc_node_get_params_snapshot_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_MEM_ALLOC_NODE_GET_PARAMS_DEFERRED "jyppx_cuda_graph_mem_alloc_node_get_params_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_GRAPH_MEM_FREE_NODE_GET_PARAMS_COPIED_SNAPSHOT_SAFE "jyppx_cuda_graph_mem_free_node_get_params_snapshot_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_MEM_FREE_NODE_GET_PARAMS_DEFERRED "jyppx_cuda_graph_mem_free_node_get_params_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_MEMCPY_NODE_GET_PARAMS_DEFERRED "jyppx_cuda_graph_memcpy_node_get_params_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_MEMCPY_NODE_GET_PARAMS_SAFE "jyppx_cuda_graph_memcpy_node_get_params_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
@@ -451,6 +461,7 @@
 #define JYPPX_API_CUDA_STREAM_END_CAPTURE "jyppx_cuda_stream_end_capture" // module=cuda; line=common; ownership=caller-destroys; manualOverride=false
 #define JYPPX_API_CUDA_STREAM_GET_ATTRIBUTE "jyppx_cuda_stream_get_attribute" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_STREAM_GET_CAPTURE_INFO "jyppx_cuda_stream_get_capture_info" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_STREAM_GET_CAPTURE_INFO_COPIED_SUMMARY_SAFE "jyppx_cuda_stream_get_capture_summary_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_STREAM_GET_CAPTURE_INFO_PTSZ_DEFERRED "jyppx_cuda_stream_get_capture_info_ptsz_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_STREAM_GET_CAPTURE_INFO_V3_DEFERRED "jyppx_cuda_stream_get_capture_info_v3_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_STREAM_GET_DEV_RESOURCE_DEFERRED "jyppx_cuda_stream_get_dev_resource_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
@@ -464,6 +475,7 @@
 #define JYPPX_API_CUDA_STREAM_SET_ATTRIBUTE "jyppx_cuda_stream_set_attribute" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_STREAM_SYNCHRONIZE "jyppx_cuda_stream_synchronize" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_STREAM_UPDATE_CAPTURE_DEPENDENCIES_DEFERRED "jyppx_cuda_stream_update_capture_dependencies_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_STREAM_UPDATE_CAPTURE_DEPENDENCIES_OWNER_TOKEN_ARRAY_SAFE "jyppx_cuda_stream_update_capture_dependencies_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_STREAM_UPDATE_CAPTURE_DEPENDENCIES_PTSZ_DEFERRED "jyppx_cuda_stream_update_capture_dependencies_ptsz_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_STREAM_UPDATE_CAPTURE_DEPENDENCIES_V2_DEFERRED "jyppx_cuda_stream_update_capture_dependencies_v2_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_STREAM_WAIT_EVENT "jyppx_cuda_stream_wait_event" // module=cuda; line=common; ownership=caller-owned; manualOverride=false

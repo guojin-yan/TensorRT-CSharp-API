@@ -328,6 +328,56 @@ internal struct NativeCudaGraphKernelNodeAttributeValue
 }
 
 [StructLayout(LayoutKind.Sequential)]
+internal struct NativeCudaGraphKernelNodeParamsSnapshot
+{
+    public uint GridX;
+    public uint GridY;
+    public uint GridZ;
+    public uint BlockX;
+    public uint BlockY;
+    public uint BlockZ;
+    public uint SharedMemoryBytes;
+    public int HasFunction;
+    public int HasKernelParams;
+    public int HasExtra;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+internal struct NativeCudaGraphHostNodeParamsSnapshot
+{
+    public int HasCallback;
+    public int HasUserData;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+internal struct NativeCudaGraphMemAllocNodeParamsSnapshot
+{
+    public ulong ByteCount;
+    public ulong AccessDescriptorCount;
+    public int AllocationType;
+    public ulong HandleTypes;
+    public int LocationType;
+    public int LocationId;
+    public int HasAccessDescriptors;
+    public int HasDevicePointer;
+    public int HasSecurityAttributes;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+internal struct NativeCudaGraphMemFreeNodeParamsSnapshot
+{
+    public int HasDevicePointer;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+internal struct NativeCudaGraphExternalSemaphoreNodeParamsSnapshot
+{
+    public uint SemaphoreCount;
+    public int HasSemaphoreArray;
+    public int HasParameterArray;
+}
+
+[StructLayout(LayoutKind.Sequential)]
 internal struct NativeCudaDim3
 {
     public uint X;
