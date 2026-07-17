@@ -318,6 +318,7 @@
 #define JYPPX_API_CUDA_IPC_OPEN_EVENT_HANDLE_DEFERRED "jyppx_cuda_ipc_open_event_handle_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_IPC_OPEN_MEM_HANDLE_DEFERRED "jyppx_cuda_ipc_open_mem_handle_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_KERNEL_SET_ATTRIBUTE_FOR_DEVICE_DEFERRED "jyppx_cuda_kernel_set_attribute_for_device_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_KERNEL_SET_ATTRIBUTE_FOR_DEVICE_LIBRARY_OWNER_NAME_SAFE "jyppx_cuda_kernel_library_set_kernel_attribute_for_device_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_LAUNCH_COOPERATIVE_KERNEL "jyppx_cuda_launch_cooperative_kernel" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_LAUNCH_HOST_FUNC_DEFERRED "jyppx_cuda_launch_host_func_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_LAUNCH_HOST_FUNC_V2_DEFERRED "jyppx_cuda_launch_host_func_v2_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
@@ -326,12 +327,15 @@
 #define JYPPX_API_CUDA_LIBRARY_ENUMERATE_KERNELS_COPIED_INVENTORY_SAFE "jyppx_cuda_kernel_library_get_inventory_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_LIBRARY_ENUMERATE_KERNELS_DEFERRED "jyppx_cuda_library_enumerate_kernels_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_LIBRARY_GET_GLOBAL_DEFERRED "jyppx_cuda_library_get_global_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_LIBRARY_GET_GLOBAL_SIZE_BY_NAME_COPIED_SCALAR_SAFE "jyppx_cuda_kernel_library_try_get_global_size_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_LIBRARY_GET_KERNEL_COUNT_COPIED_SCALAR_SAFE "jyppx_cuda_kernel_library_get_count_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_LIBRARY_GET_KERNEL_COUNT_DEFERRED "jyppx_cuda_library_get_kernel_count_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_LIBRARY_GET_KERNEL_DEFERRED "jyppx_cuda_library_get_kernel_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_LIBRARY_GET_KERNEL_EXISTS_BY_NAME_SAFE "jyppx_cuda_kernel_library_contains_kernel_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_LIBRARY_GET_MANAGED_DEFERRED "jyppx_cuda_library_get_managed_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_LIBRARY_GET_MANAGED_SIZE_BY_NAME_COPIED_SCALAR_SAFE "jyppx_cuda_kernel_library_try_get_managed_size_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_LIBRARY_GET_UNIFIED_FUNCTION_DEFERRED "jyppx_cuda_library_get_unified_function_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_LIBRARY_GET_UNIFIED_FUNCTION_EXISTS_BY_NAME_SAFE "jyppx_cuda_kernel_library_contains_unified_function_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_LIBRARY_LOAD_DATA_DEFERRED "jyppx_cuda_library_load_data_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_LIBRARY_LOAD_DATA_RETAINED_COPY_OWNER_SAFE "jyppx_cuda_kernel_library_load_data_copy_safe" // module=cuda; line=common; ownership=caller-destroys; manualOverride=false
 #define JYPPX_API_CUDA_LIBRARY_LOAD_FROM_FILE_BRIDGE_OWNED_SAFE "jyppx_cuda_kernel_library_load_file_safe" // module=cuda; line=common; ownership=caller-destroys; manualOverride=false

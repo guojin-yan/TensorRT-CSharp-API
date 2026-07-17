@@ -2609,6 +2609,11 @@ static class HighLevelWrapperSurfaceProbe
         Func<CudaKernelLibrary, uint> kernelLibraryCount = static library => library.KernelCount;
         Func<CudaKernelLibrary, CudaKernelLibraryInventorySnapshot> kernelLibraryInventory = static library => library.Inventory;
         Func<CudaKernelLibrary, string, bool> kernelLibraryContains = static (library, name) => library.ContainsKernel(name);
+        Func<CudaKernelLibrary, string, bool> kernelLibraryGlobalSize = static (library, name) => library.TryGetGlobalSymbolSize(name, out _);
+        Func<CudaKernelLibrary, string, bool> kernelLibraryManagedSize = static (library, name) => library.TryGetManagedSymbolSize(name, out _);
+        Func<CudaKernelLibrary, string, bool> kernelLibraryUnifiedFunction = static (library, name) => library.ContainsUnifiedFunction(name);
+        Action<CudaKernelLibrary, string, CudaKernelAttribute, int, int> setKernelLibraryAttribute =
+            static (library, name, attribute, value, device) => library.SetAttributeForDevice(name, attribute, value, device);
         Action<CudaKernelLibrary> disposeKernelLibrary = static library => library.Dispose();
         Func<int, CudaPrimaryExecutionContext> getPrimaryExecutionContext = static device => CudaDevice.GetPrimaryExecutionContext(device);
         Func<CudaPrimaryExecutionContext, bool> primaryExecutionContextIsPrimary = static context => context.IsPrimary;
@@ -2894,6 +2899,10 @@ static class HighLevelWrapperSurfaceProbe
         _ = kernelLibraryCount;
         _ = kernelLibraryInventory;
         _ = kernelLibraryContains;
+        _ = kernelLibraryGlobalSize;
+        _ = kernelLibraryManagedSize;
+        _ = kernelLibraryUnifiedFunction;
+        _ = setKernelLibraryAttribute;
         _ = disposeKernelLibrary;
         _ = getPrimaryExecutionContext;
         _ = primaryExecutionContextIsPrimary;
@@ -4465,6 +4474,18 @@ static class HighLevelWrapperSurfaceProbe
             nameof(CudaKernelLibrary.KernelCount),
             nameof(CudaKernelLibrary.Inventory),
             nameof(CudaKernelLibrary.ContainsKernel),
+            nameof(CudaKernelLibrary.TryGetGlobalSymbolSize),
+            nameof(CudaKernelLibrary.TryGetManagedSymbolSize),
+            nameof(CudaKernelLibrary.ContainsUnifiedFunction),
+            nameof(CudaKernelLibrary.SetAttributeForDevice),
+            nameof(CudaKernelAttribute),
+            nameof(CudaKernelAttribute.MaxDynamicSharedMemorySize),
+            nameof(CudaKernelAttribute.PreferredSharedMemoryCarveout),
+            nameof(CudaKernelAttribute.RequiredClusterWidth),
+            nameof(CudaKernelAttribute.RequiredClusterHeight),
+            nameof(CudaKernelAttribute.RequiredClusterDepth),
+            nameof(CudaKernelAttribute.NonPortableClusterSizeAllowed),
+            nameof(CudaKernelAttribute.ClusterSchedulingPolicyPreference),
             nameof(CudaKernelLibraryInventorySnapshot),
             nameof(CudaKernelLibraryInventorySnapshot.ReportedKernelCount),
             nameof(CudaKernelLibraryInventorySnapshot.EnumeratedKernelCount),
@@ -4597,7 +4618,7 @@ static class HighLevelWrapperSurfaceProbe
     $timer.Stop()
     $elapsedSeconds = [Math]::Round($timer.Elapsed.TotalSeconds, 2)
     $wrapperSurfaceProbe = "compiled:plugin-inventory;plugin-inventory-field-metadata;engine-rnn-readonly-diagnostics;rnnv2-borrowed-state-design-gate;rnnv2-owner-bound-tensors;rnnv2-copied-gate-weights;managed-callbacks;callback-diagnostics;callback-api-language-safe-controls;error-recorder-snapshot;logger-presence-safe-controls;allocator-debug-listener-safe-controls;callback-interface-info-safe-controls;execution-context-callback-state-snapshot;execution-context-callback-allocator-safe-control-summary;allocator-owner-dry-run-diagnostics;allocator-owner-native-dry-run-controls;allocator-owner-state-ledger-dry-run-controls;allocator-owner-ledger-safety-gate;output-allocator-callback-owner-design;output-allocator-attach-detach-design-gate;output-allocator-runtime-proof-precheck;debug-listener-callback-owner-design;debug-listener-attach-detach-design-gate;debug-listener-borrowed-tensor-safety-gate;debug-listener-attach-vtable-safety-gate;debug-listener-native-attach-nothrow-preflight;debug-listener-native-owner-address-design-gate;debug-listener-native-nothrow-vtable-design-gate;debug-listener-native-attach-entry-design-gate;debug-listener-native-detach-before-release-design-gate;debug-listener-native-owner-lifecycle-dry-run;debug-listener-native-attach-entry-runtime-scaffold;debug-listener-native-attach-entry-minimal-safety;debug-listener-native-owner-stable-identity;debug-listener-native-owner-noncopyable-storage;debug-listener-native-nothrow-destructor;debug-listener-native-owner-lifecycle-gate;debug-listener-native-attach-bridge-shape-gate;debug-listener-exception-status-mapping-gate;debug-listener-inflight-accounting-gate;debug-listener-native-nothrow-vtable-scaffold-gate;debug-listener-nothrow-vtable-callback-stub;callback-stub-gate;debug-listener-borrowed-debug-tensor-metadata-runtime-gate;borrowed-debug-tensor-metadata-gate;debug-listener-native-vtable-install-preflight;native-vtable-install-preflight;debug-listener-native-owner-vtable-install-experiment;native-owner-vtable-install-experiment;debug-listener-runtime-proof-precheck;debug-listener-runtime-proof-attempt-preflight;debug-listener-real-non-null-attach-runtime-smoke;runtime-smoke-skipped;runtime-smoke-blocked;runtime-smoke-attempted;debug-listener-process-debug-tensor-callback-trampoline;callback-trampoline-shape;onnx-parser-diagnostic-snapshot;onnx-parser-diagnostic-summary;onnx-parser-refitter-diagnostic-snapshot;onnx-parser-refitter-diagnostic-summary;profiler-safe-controls;progress-monitor-safe-controls;cuda-memory-range;HasImplicitBatchDimensionCompatibility;SerializedPluginPathCountCompatibility;GetRnnV2LayerCount;GetRnnV2HiddenSize;GetRnnV2DataLength;GetRnnV2MaxSequenceLength;GetRnnV2Operation;GetRnnV2Direction;GetRnnV2InputMode;GetRnnV2CellState;GetRnnV2HiddenState;GetRnnV2SequenceLengths;GetRnnV2WeightsForGate;GetRnnV2BiasForGate;TensorRtRnnV2GateWeightsSnapshot;TensorRtRnnOperation;TensorRtRnnDirection;TensorRtRnnInputMode;TensorRtRnnGateType"
-    $wrapperSurfaceProbe = "$wrapperSurfaceProbe;execution-context-auxiliary-stream-lifetime"
+    $wrapperSurfaceProbe = "$wrapperSurfaceProbe;execution-context-auxiliary-stream-lifetime;cuda-kernel-library-symbol-and-attribute"
     $wrapperSurfaceEvidenceKind = "compile-surface-proof"
     $isRuntimeExecutionProof = $false
     $runtimeProofBoundary = "bridge-only consumer validates package layout, high-level wrapper compile surface, and dependency diagnostics; it is not clean package-consumer runtime proof."

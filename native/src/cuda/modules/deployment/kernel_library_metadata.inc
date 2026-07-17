@@ -246,6 +246,167 @@ JYPPX_StatusCode contains_kernel_library_kernel_impl(
 #endif
     });
 }
+
+enum class KernelLibrarySymbolKind
+{
+    Global,
+    Managed
+};
+
+JYPPX_StatusCode try_get_kernel_library_symbol_size_impl(
+    JYPPX_CudaKernelLibrary* library_handle,
+    const char* name,
+    const KernelLibrarySymbolKind kind,
+    JYPPX_Boolean* out_exists,
+    uint64_t* out_size) noexcept
+{
+    const char* operation = kind == KernelLibrarySymbolKind::Global
+        ? "cudaLibraryGetGlobal"
+        : "cudaLibraryGetManaged";
+    return run_kernel_library_noexcept(operation, [&]() {
+        auto status = jyppx::cuda::validate_output_pointer(out_exists, "out_exists");
+        if (status != JYPPX_STATUS_OK) return status;
+        status = jyppx::cuda::validate_output_pointer(out_size, "out_size");
+        if (status != JYPPX_STATUS_OK) return status;
+        *out_exists = JYPPX_FALSE;
+        *out_size = 0;
+        status = jyppx::cuda::validate_kernel_library(library_handle, "library");
+        if (status != JYPPX_STATUS_OK) return status;
+        if (name == nullptr || name[0] == '\0')
+        {
+            jyppx::cuda::set_cuda_error(operation, 0, "invalid-symbol-name", "The CUDA kernel-library symbol name must not be null or empty.");
+            return JYPPX_STATUS_INVALID_ARGUMENT;
+        }
+#if JYPPX_HAS_CUDA_TOOLKIT && defined(CUDART_VERSION) && CUDART_VERSION >= 12090
+        auto* library = reinterpret_cast<jyppx::cuda::KernelLibraryObject*>(library_handle);
+        size_t symbol_size = 0;
+        const cudaError_t error = kind == KernelLibrarySymbolKind::Global
+            ? cudaLibraryGetGlobal(nullptr, &symbol_size, library->handle, name)
+            : cudaLibraryGetManaged(nullptr, &symbol_size, library->handle, name);
+        if (error == cudaErrorSymbolNotFound)
+        {
+            (void)cudaGetLastError();
+            return JYPPX_STATUS_OK;
+        }
+        status = jyppx::cuda::map_cuda_status(error, operation);
+        if (status != JYPPX_STATUS_OK) return status;
+        *out_exists = JYPPX_TRUE;
+        *out_size = static_cast<uint64_t>(symbol_size);
+        return JYPPX_STATUS_OK;
+#elif JYPPX_HAS_CUDA_TOOLKIT
+        return kernel_library_not_supported(operation);
+#else
+        return jyppx::cuda::report_cuda_dependency_missing("CUDA kernel library copied symbol-size query");
+#endif
+    });
+}
+
+JYPPX_StatusCode contains_kernel_library_unified_function_impl(
+    JYPPX_CudaKernelLibrary* library_handle,
+    const char* name,
+    JYPPX_Boolean* out_exists) noexcept
+{
+    return run_kernel_library_noexcept("cudaLibraryGetUnifiedFunction", [&]() {
+        auto status = jyppx::cuda::validate_output_pointer(out_exists, "out_exists");
+        if (status != JYPPX_STATUS_OK) return status;
+        *out_exists = JYPPX_FALSE;
+        status = jyppx::cuda::validate_kernel_library(library_handle, "library");
+        if (status != JYPPX_STATUS_OK) return status;
+        if (name == nullptr || name[0] == '\0')
+        {
+            jyppx::cuda::set_cuda_error("cudaLibraryGetUnifiedFunction", 0, "invalid-unified-function-name", "The CUDA unified-function name must not be null or empty.");
+            return JYPPX_STATUS_INVALID_ARGUMENT;
+        }
+#if JYPPX_HAS_CUDA_TOOLKIT && defined(CUDART_VERSION) && CUDART_VERSION >= 12090
+        auto* library = reinterpret_cast<jyppx::cuda::KernelLibraryObject*>(library_handle);
+        void* function_pointer = nullptr;
+        const cudaError_t error = cudaLibraryGetUnifiedFunction(&function_pointer, library->handle, name);
+        if (error == cudaErrorSymbolNotFound)
+        {
+            (void)cudaGetLastError();
+            return JYPPX_STATUS_OK;
+        }
+        status = jyppx::cuda::map_cuda_status(error, "cudaLibraryGetUnifiedFunction");
+        if (status != JYPPX_STATUS_OK) return status;
+        if (function_pointer == nullptr)
+        {
+            jyppx::cuda::set_cuda_error("cudaLibraryGetUnifiedFunction", 0, "invalid-unified-function-pointer", "CUDA reported success but returned a null unified-function pointer.");
+            return JYPPX_STATUS_INVALID_STATE;
+        }
+        *out_exists = JYPPX_TRUE;
+        return JYPPX_STATUS_OK;
+#elif JYPPX_HAS_CUDA_TOOLKIT
+        return kernel_library_not_supported("cudaLibraryGetUnifiedFunction");
+#else
+        return jyppx::cuda::report_cuda_dependency_missing("CUDA kernel library unified-function existence query");
+#endif
+    });
+}
+
+bool is_mutable_kernel_library_attribute(const int32_t attribute) noexcept
+{
+    switch (attribute)
+    {
+    case 8:  // cudaFuncAttributeMaxDynamicSharedMemorySize
+    case 9:  // cudaFuncAttributePreferredSharedMemoryCarveout
+    case 11: // cudaFuncAttributeRequiredClusterWidth
+    case 12: // cudaFuncAttributeRequiredClusterHeight
+    case 13: // cudaFuncAttributeRequiredClusterDepth
+    case 14: // cudaFuncAttributeNonPortableClusterSizeAllowed
+    case 15: // cudaFuncAttributeClusterSchedulingPolicyPreference
+        return true;
+    default:
+        return false;
+    }
+}
+
+JYPPX_StatusCode set_kernel_library_kernel_attribute_impl(
+    JYPPX_CudaKernelLibrary* library_handle,
+    const char* kernel_name,
+    const int32_t attribute,
+    const int32_t value,
+    const int32_t device) noexcept
+{
+    return run_kernel_library_noexcept("cudaKernelSetAttributeForDevice", [&]() {
+        auto status = jyppx::cuda::validate_kernel_library(library_handle, "library");
+        if (status != JYPPX_STATUS_OK) return status;
+        if (kernel_name == nullptr || kernel_name[0] == '\0')
+        {
+            jyppx::cuda::set_cuda_error("cudaKernelSetAttributeForDevice", 0, "invalid-kernel-name", "The CUDA kernel name must not be null or empty.");
+            return JYPPX_STATUS_INVALID_ARGUMENT;
+        }
+        if (!is_mutable_kernel_library_attribute(attribute))
+        {
+            jyppx::cuda::set_cuda_error("cudaKernelSetAttributeForDevice", 0, "invalid-kernel-attribute", "Only CUDA attributes documented as mutable by cudaKernelSetAttributeForDevice are accepted.");
+            return JYPPX_STATUS_INVALID_ARGUMENT;
+        }
+        if (device < 0)
+        {
+            jyppx::cuda::set_cuda_error("cudaKernelSetAttributeForDevice", 0, "invalid-device", "The CUDA device ordinal must be greater than or equal to zero.");
+            return JYPPX_STATUS_INVALID_ARGUMENT;
+        }
+#if JYPPX_HAS_CUDA_TOOLKIT && defined(CUDART_VERSION) && CUDART_VERSION >= 12090
+        auto* library = reinterpret_cast<jyppx::cuda::KernelLibraryObject*>(library_handle);
+        cudaKernel_t kernel = nullptr;
+        status = jyppx::cuda::map_cuda_status(
+            cudaLibraryGetKernel(&kernel, library->handle, kernel_name),
+            "cudaLibraryGetKernel");
+        if (status != JYPPX_STATUS_OK) return status;
+        if (kernel == nullptr)
+        {
+            jyppx::cuda::set_cuda_error("cudaKernelSetAttributeForDevice", 0, "invalid-kernel-handle", "CUDA reported success but returned a null borrowed kernel handle.");
+            return JYPPX_STATUS_INVALID_STATE;
+        }
+        return jyppx::cuda::map_cuda_status(
+            cudaKernelSetAttributeForDevice(kernel, static_cast<cudaFuncAttribute>(attribute), value, device),
+            "cudaKernelSetAttributeForDevice");
+#elif JYPPX_HAS_CUDA_TOOLKIT
+        return kernel_library_not_supported("cudaKernelSetAttributeForDevice");
+#else
+        return jyppx::cuda::report_cuda_dependency_missing("CUDA owner-bound kernel attribute set");
+#endif
+    });
+}
 }
 
 #if defined(_MSC_VER) && defined(_WIN32)
@@ -284,6 +445,26 @@ JYPPX_StatusCode jyppx_cuda_kernel_library_get_inventory_safe(JYPPX_CudaKernelLi
 JYPPX_StatusCode jyppx_cuda_kernel_library_contains_kernel_safe(JYPPX_CudaKernelLibrary* library, const char* name, JYPPX_Boolean* out_exists)
 {
     JYPPX_CUDA_KERNEL_LIBRARY_GUARD("cudaLibraryGetKernel", contains_kernel_library_kernel_impl(library, name, out_exists));
+}
+
+JYPPX_StatusCode jyppx_cuda_kernel_library_try_get_global_size_safe(JYPPX_CudaKernelLibrary* library, const char* name, JYPPX_Boolean* out_exists, uint64_t* out_size)
+{
+    JYPPX_CUDA_KERNEL_LIBRARY_GUARD("cudaLibraryGetGlobal", try_get_kernel_library_symbol_size_impl(library, name, KernelLibrarySymbolKind::Global, out_exists, out_size));
+}
+
+JYPPX_StatusCode jyppx_cuda_kernel_library_try_get_managed_size_safe(JYPPX_CudaKernelLibrary* library, const char* name, JYPPX_Boolean* out_exists, uint64_t* out_size)
+{
+    JYPPX_CUDA_KERNEL_LIBRARY_GUARD("cudaLibraryGetManaged", try_get_kernel_library_symbol_size_impl(library, name, KernelLibrarySymbolKind::Managed, out_exists, out_size));
+}
+
+JYPPX_StatusCode jyppx_cuda_kernel_library_contains_unified_function_safe(JYPPX_CudaKernelLibrary* library, const char* name, JYPPX_Boolean* out_exists)
+{
+    JYPPX_CUDA_KERNEL_LIBRARY_GUARD("cudaLibraryGetUnifiedFunction", contains_kernel_library_unified_function_impl(library, name, out_exists));
+}
+
+JYPPX_StatusCode jyppx_cuda_kernel_library_set_kernel_attribute_for_device_safe(JYPPX_CudaKernelLibrary* library, const char* kernel_name, int32_t attribute, int32_t value, int32_t device)
+{
+    JYPPX_CUDA_KERNEL_LIBRARY_GUARD("cudaKernelSetAttributeForDevice", set_kernel_library_kernel_attribute_impl(library, kernel_name, attribute, value, device));
 }
 
 #undef JYPPX_CUDA_KERNEL_LIBRARY_GUARD

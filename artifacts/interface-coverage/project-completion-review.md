@@ -19,6 +19,56 @@
 - `artifacts/real-case/multi-version-onnx-runtime/multi-version-runtime-evidence-matrix.json`
 - `artifacts/test-analysis/project-quality-test-inventory.json`
 
+## 2026-07-18 CUDA Kernel Library Symbol 与 Attribute Owner-Safe 复审
+
+本阶段基于提交 `1261c080b8a6af34e141b4dfea923519f89acd4c`，提升 CUDA 12.9/13.2 的 `cudaLibraryGetGlobal`、`cudaLibraryGetManaged`、`cudaLibraryGetUnifiedFunction` 与 `cudaKernelSetAttributeForDevice`。实现复用现有 bridge-owned `CudaKernelLibrary`，只公开 copied size、存在性与 owner-bound setter；旧 deferred manifest 全部保留。
+
+### Pointer、错误与版本边界
+
+- `TryGetGlobalSymbolSize` 与 `TryGetManagedSymbolSize` 让 native 将 vendor `dptr` 参数设为 null，只复制 `size_t`；公开面只返回 `bool` 与 `ulong`。
+- `ContainsUnifiedFunction` 仅在 native 调用栈内检查 function pointer 是否非空，不保存、不调用、不跨 ABI。CUDA 12.9 对 raw PTX library 的 missing unified function 实际返回 `cudaErrorInvalidValue`；高层保留异常，smoke 受控消费 sticky error 后确认 `AfterClear=0`，不伪造 `false`。
+- `SetAttributeForDevice` 接受 library owner、kernel name、7 个允许修改的 `CudaKernelAttribute`、value 与 device ordinal。native 临时调用 `cudaLibraryGetKernel`，setter 返回后立即丢弃 borrowed kernel。
+- public API 不暴露 `IntPtr`、`nint`、`SafeHandle`、`UIntPtr`、device/plugin/tensor/function pointer；字符串使用调用期 UTF-8 buffer。C++ exception 与 Windows SEH 均在 C ABI 内转换。
+- 真实 vendor 调用只在 `CUDART_VERSION >= 12090` 编译；CUDA 11.8 smoke 明确得到 `CudaKernelLibrary Skipped=True VersionGuard=NotSupported Runtime=11080`。callback、resource acquire/release、raw pointer 与 ownership 不明确的 handle 继续 deferred。
+
+### Coverage、构建与测试
+
+generator 最终为 179 manifests / 3916 records。四个目标函数在 CUDA 12.9/13.2 的 8 行全部为 `implemented-with-deferred-history`：
+
+| CUDA Toolkit | 官方函数 | manifest/source 已匹配 | 非 deferred 实现 | deferred-only |
+| --- | ---: | ---: | ---: | ---: |
+| 11.6 | 268 | 268 | 211 | 57 |
+| 11.8 | 273 | 273 | 216 | 57 |
+| 12.1 | 277 | 277 | 219 | 58 |
+| 12.3 | 292 | 292 | 227 | 65 |
+| 12.9 | 307 | 307 | 239 | 68 |
+| 13.2 | 330 | 330 | 257 | 73 |
+
+- bindings 连续生成与幂等检查通过；完整 `TensorRtSharp.sln` Release build 为 0 warning / 0 error。
+- API inventory 中四个新 safe entry 的 manifest/source 双向缺口均为 0。全仓仍有 224 条历史 deferred/声明型 manifest 无 source，未删除或误记为本批回归。
+- 受影响 ProjectQuality 最终分片 65/65 通过。正式 inventory 为 1261 tests / 378 classes；累计 hash-verified 类覆盖 378/378、missing 0。上一阶段 one-shot 已证明共享 final-release evidence 长尾会互相干扰，本轮不把该不稳定路径写成完整套件通过。
+- TRT8/CUDA11.8、TRT8/CUDA12.1、TRT10/CUDA12.9、TRT11/CUDA12.9 与 TRT11/CUDA13.2 五套 native 均基于最终生成物构建成功。
+
+### Runtime、NuGet 与 Consumer
+
+- CUDA 12.9 raw PTX/data 与 file library 均真实查询 global size `4`；missing global/managed 为 false，attribute setter 成功，最终 last error 为 0。
+- TRT8/CUDA12.1 与 TRT10/CUDA12.9 的 Plugin Registry、NetworkBuilder、InferenceBindings 均通过；identity engine 的 build/serialize/deserialize、`ExecuteV2`、`EnqueueV2`/`EnqueueV3` 与 output compare 匹配。
+- managed 4.0.0 与 TRT8/TRT10/TRT11 三个 bridge-only 包已重打。三个纯 `PackageReference` consumer 无 `ProjectReference`，restore/build 为 0 warning / 0 error，强类型编译四个新方法与 7 个 enum 值；分类保持 `compile-surface-proof`、`Runtime execution proof=False`。
+- TRT11/CUDA13.2 的 CUDA/cuDNN、TensorRT 与 meta 三角色从保留的 full-runtime nupkg 恢复，bridge 角色保留本阶段当前 build-out 产物；package inventory 为 `packageSetReady=true`、`missingSplitRoles=[]`。
+
+| 包 | 大小 | SHA256 |
+| --- | ---: | --- |
+| managed `JYPPX.TensorRT.CSharp.API.4.0.0.nupkg` | 14,356,996 bytes | `1BBD555C4D7336DA81CA4C3A77A66A4344BBF37645B19674928EC1B581DDDB6D` |
+| TRT8/CUDA12.1 bridge-only | 306,080 bytes | `4AD06C17AA7F23FF00E745B1714EBB02A6A7DC2DA96C1203A980EBF2A3108489` |
+| TRT10/CUDA12.9 bridge-only | 330,492 bytes | `3441B0BF4A96B5EB36396088D945C752C3B17428AC78F6E971BB0A98E70DDE68` |
+| TRT11/CUDA13.2 bridge-only | 273,892 bytes | `56EDA4CD1DCD645651A27CECBBE2CB355663E1B1F0A718DA99A1F4EACA880885` |
+
+### Gate 与发布边界
+
+strict classification audit 为 `classification-audit-passed-non-proof-boundaries-intact`、finding 0；带 package inventory/classification 要求的 strict release quality gate 为 `release-quality-gate-passed`、required failure 0。Owner convergence 保持 structural 9/9、accepted 0/9、gates 2/3、validation blocker 0，`canPublishPublicly=false`、`canCloseReleaseIssue=false`。
+
+本阶段未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
+
 ## 2026-07-17 CUDA Managed-Memory Batch Owner-Safe 复审
 
 本阶段基于起始提交 `e97a29f57c1e7c20539ce46b28ed97f51d6d119f`，提升 CUDA 13 新增的 `cudaMemPrefetchBatchAsync`、`cudaMemDiscardBatchAsync` 与 `cudaMemDiscardAndPrefetchBatchAsync`。三条接口复用现有 `CudaManagedMemory` 和 `CudaStream` owner，不暴露 device pointer，并保留全部旧 deferred manifest。

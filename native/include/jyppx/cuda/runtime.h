@@ -506,6 +506,10 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_kernel_library_destroy_safe(JYPPX_CudaK
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_kernel_library_get_count_safe(JYPPX_CudaKernelLibrary* library, uint32_t* out_count);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_kernel_library_get_inventory_safe(JYPPX_CudaKernelLibrary* library, JYPPX_CudaKernelLibraryInventory* out_inventory);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_kernel_library_contains_kernel_safe(JYPPX_CudaKernelLibrary* library, const char* name, JYPPX_Boolean* out_exists);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_kernel_library_try_get_global_size_safe(JYPPX_CudaKernelLibrary* library, const char* name, JYPPX_Boolean* out_exists, uint64_t* out_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_kernel_library_try_get_managed_size_safe(JYPPX_CudaKernelLibrary* library, const char* name, JYPPX_Boolean* out_exists, uint64_t* out_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_kernel_library_contains_unified_function_safe(JYPPX_CudaKernelLibrary* library, const char* name, JYPPX_Boolean* out_exists);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_kernel_library_set_kernel_attribute_for_device_safe(JYPPX_CudaKernelLibrary* library, const char* kernel_name, int32_t attribute, int32_t value, int32_t device);
 /* END CUDA FIFTY-FIRST BATCH KERNEL LIBRARY METADATA */
 
 /* BEGIN CUDA FIFTY-SECOND BATCH PRIMARY EXECUTION CONTEXT */

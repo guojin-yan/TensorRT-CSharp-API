@@ -735,7 +735,8 @@ internal static class Program
     private static string ProbeCudaKernelLibrary(int runtimeVersion)
     {
         const string kernelName = "jyppx_kernel_library_smoke";
-        const string ptx = ".version 8.0\n.target sm_52\n.address_size 64\n.visible .entry " + kernelName + "()\n{\n    ret;\n}\n";
+        const string globalName = "jyppx_kernel_library_global";
+        const string ptx = ".version 8.0\n.target sm_52\n.address_size 64\n.visible .global .align 4 .u32 " + globalName + ";\n.visible .entry " + kernelName + "()\n{\n    ret;\n}\n";
         byte[] code = Encoding.ASCII.GetBytes(ptx);
 
         if (runtimeVersion < 12090)
@@ -755,6 +756,11 @@ internal static class Program
         CudaKernelLibraryInventorySnapshot dataInventory = dataLibrary.Inventory;
         bool dataContains = dataLibrary.ContainsKernel(kernelName);
         bool dataMissing = dataLibrary.ContainsKernel("jyppx_missing_kernel");
+        bool globalFound = dataLibrary.TryGetGlobalSymbolSize(globalName, out ulong globalSize);
+        bool globalMissing = dataLibrary.TryGetGlobalSymbolSize("jyppx_missing_global", out ulong missingGlobalSize);
+        bool managedMissing = dataLibrary.TryGetManagedSymbolSize("jyppx_missing_managed", out ulong missingManagedSize);
+        string unifiedProbe = ProbeMissingUnifiedFunction(dataLibrary);
+        dataLibrary.SetAttributeForDevice(kernelName, CudaKernelAttribute.MaxDynamicSharedMemorySize, 0, CudaDevice.Current);
         int lookupLastError = CudaDevice.PeekAtLastErrorCode();
         if (dataLibrary.KernelCount != 1 ||
             dataInventory.ReportedKernelCount != 1 ||
@@ -763,6 +769,12 @@ internal static class Program
             !dataInventory.IsComplete ||
             !dataContains ||
             dataMissing ||
+            !globalFound ||
+            globalSize != 4 ||
+            globalMissing ||
+            missingGlobalSize != 0 ||
+            managedMissing ||
+            missingManagedSize != 0 ||
             lookupLastError != 0)
         {
             throw new InvalidOperationException($"CUDA copied-data kernel library inventory was inconsistent: {dataInventory}.");
@@ -774,12 +786,13 @@ internal static class Program
             File.WriteAllBytes(path, code);
             using CudaKernelLibrary fileLibrary = CudaKernelLibrary.LoadFromFile(path);
             CudaKernelLibraryInventorySnapshot fileInventory = fileLibrary.Inventory;
-            if (fileLibrary.KernelCount != 1 || !fileInventory.IsComplete || !fileLibrary.ContainsKernel(kernelName))
+            bool fileGlobalFound = fileLibrary.TryGetGlobalSymbolSize(globalName, out ulong fileGlobalSize);
+            if (fileLibrary.KernelCount != 1 || !fileInventory.IsComplete || !fileLibrary.ContainsKernel(kernelName) || !fileGlobalFound || fileGlobalSize != 4)
             {
                 throw new InvalidOperationException($"CUDA file kernel library inventory was inconsistent: {fileInventory}.");
             }
 
-            return $"DataCount={dataInventory.ReportedKernelCount} DataComplete={dataInventory.IsComplete} Named={dataContains} Missing={dataMissing} LastError={lookupLastError} FileCount={fileInventory.ReportedKernelCount} FileComplete={fileInventory.IsComplete}";
+            return $"DataCount={dataInventory.ReportedKernelCount} DataComplete={dataInventory.IsComplete} Named={dataContains} Global={globalFound}:{globalSize} GlobalMissing={globalMissing} ManagedMissing={managedMissing} UnifiedProbe={unifiedProbe} AttributeSet=True LastError={lookupLastError} FileCount={fileInventory.ReportedKernelCount} FileComplete={fileInventory.IsComplete} FileGlobal={fileGlobalFound}:{fileGlobalSize}";
         }
         finally
         {
@@ -787,6 +800,31 @@ internal static class Program
             {
                 File.Delete(path);
             }
+        }
+    }
+
+    private static string ProbeMissingUnifiedFunction(CudaKernelLibrary library)
+    {
+        try
+        {
+            bool exists = library.ContainsUnifiedFunction("jyppx_missing_unified_function");
+            if (exists)
+            {
+                throw new InvalidOperationException("CUDA unexpectedly found the missing unified function.");
+            }
+
+            return "Missing";
+        }
+        catch (CudaException exception) when (exception.StatusCode == BridgeStatusCode.InvalidArgument)
+        {
+            int consumedError = CudaDevice.GetLastErrorCode();
+            int errorAfterClear = CudaDevice.PeekAtLastErrorCode();
+            if (errorAfterClear != 0)
+            {
+                throw new InvalidOperationException($"CUDA unified-function diagnostic left sticky error {errorAfterClear}.", exception);
+            }
+
+            return $"VendorInvalidArgument:Consumed={consumedError}:AfterClear={errorAfterClear}";
         }
     }
 

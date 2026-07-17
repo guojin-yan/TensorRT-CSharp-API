@@ -323,6 +323,7 @@ internal static class GeneratedEntryPointNames
     public const string CudaIpcOpenEventHandleDeferred = "jyppx_cuda_ipc_open_event_handle_deferred";
     public const string CudaIpcOpenMemHandleDeferred = "jyppx_cuda_ipc_open_mem_handle_deferred";
     public const string CudaKernelSetAttributeForDeviceDeferred = "jyppx_cuda_kernel_set_attribute_for_device_deferred";
+    public const string CudaKernelSetAttributeForDeviceLibraryOwnerNameSafe = "jyppx_cuda_kernel_library_set_kernel_attribute_for_device_safe";
     public const string CudaLaunchCooperativeKernel = "jyppx_cuda_launch_cooperative_kernel";
     public const string CudaLaunchHostFuncDeferred = "jyppx_cuda_launch_host_func_deferred";
     public const string CudaLaunchHostFuncV2Deferred = "jyppx_cuda_launch_host_func_v2_deferred";
@@ -331,12 +332,15 @@ internal static class GeneratedEntryPointNames
     public const string CudaLibraryEnumerateKernelsCopiedInventorySafe = "jyppx_cuda_kernel_library_get_inventory_safe";
     public const string CudaLibraryEnumerateKernelsDeferred = "jyppx_cuda_library_enumerate_kernels_deferred";
     public const string CudaLibraryGetGlobalDeferred = "jyppx_cuda_library_get_global_deferred";
+    public const string CudaLibraryGetGlobalSizeByNameCopiedScalarSafe = "jyppx_cuda_kernel_library_try_get_global_size_safe";
     public const string CudaLibraryGetKernelCountCopiedScalarSafe = "jyppx_cuda_kernel_library_get_count_safe";
     public const string CudaLibraryGetKernelCountDeferred = "jyppx_cuda_library_get_kernel_count_deferred";
     public const string CudaLibraryGetKernelDeferred = "jyppx_cuda_library_get_kernel_deferred";
     public const string CudaLibraryGetKernelExistsByNameSafe = "jyppx_cuda_kernel_library_contains_kernel_safe";
     public const string CudaLibraryGetManagedDeferred = "jyppx_cuda_library_get_managed_deferred";
+    public const string CudaLibraryGetManagedSizeByNameCopiedScalarSafe = "jyppx_cuda_kernel_library_try_get_managed_size_safe";
     public const string CudaLibraryGetUnifiedFunctionDeferred = "jyppx_cuda_library_get_unified_function_deferred";
+    public const string CudaLibraryGetUnifiedFunctionExistsByNameSafe = "jyppx_cuda_kernel_library_contains_unified_function_safe";
     public const string CudaLibraryLoadDataDeferred = "jyppx_cuda_library_load_data_deferred";
     public const string CudaLibraryLoadDataRetainedCopyOwnerSafe = "jyppx_cuda_kernel_library_load_data_copy_safe";
     public const string CudaLibraryLoadFromFileBridgeOwnedSafe = "jyppx_cuda_kernel_library_load_file_safe";

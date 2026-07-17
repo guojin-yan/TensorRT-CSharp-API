@@ -59,17 +59,70 @@ public sealed class CudaKernelLibrary : IDisposable
     /// <summary>Determines whether the library contains a named kernel without exposing its borrowed handle. 判断 library 是否包含指定 kernel，不暴露 borrowed handle。</summary>
     public bool ContainsKernel(string name)
     {
-        if (string.IsNullOrEmpty(name))
+        ValidateName(name, nameof(name), "CUDA kernel name must not be null or empty.");
+        return NativeCudaApi.KernelLibraryContains(_handle, name);
+    }
+
+    /// <summary>
+    /// Tries to copy the size of a named global symbol without retrieving its device pointer.
+    /// 尝试复制指定 global symbol 的大小，不获取其 device pointer。
+    /// </summary>
+    public bool TryGetGlobalSymbolSize(string name, out ulong sizeInBytes)
+    {
+        ValidateName(name, nameof(name), "CUDA global symbol name must not be null or empty.");
+        return NativeCudaApi.TryGetKernelLibraryGlobalSize(_handle, name, out sizeInBytes);
+    }
+
+    /// <summary>
+    /// Tries to copy the size of a named managed symbol without retrieving its pointer.
+    /// 尝试复制指定 managed symbol 的大小，不获取其 pointer。
+    /// </summary>
+    public bool TryGetManagedSymbolSize(string name, out ulong sizeInBytes)
+    {
+        ValidateName(name, nameof(name), "CUDA managed symbol name must not be null or empty.");
+        return NativeCudaApi.TryGetKernelLibraryManagedSize(_handle, name, out sizeInBytes);
+    }
+
+    /// <summary>
+    /// Determines whether a named unified function exists without exposing its function pointer.
+    /// 判断指定 unified function 是否存在，不暴露其 function pointer。
+    /// </summary>
+    public bool ContainsUnifiedFunction(string name)
+    {
+        ValidateName(name, nameof(name), "CUDA unified-function name must not be null or empty.");
+        return NativeCudaApi.KernelLibraryContainsUnifiedFunction(_handle, name);
+    }
+
+    /// <summary>
+    /// Sets a mutable attribute on a named kernel for one device without exposing the borrowed kernel handle.
+    /// 为指定设备上的 named kernel 设置可变属性，不暴露 borrowed kernel handle。
+    /// </summary>
+    public void SetAttributeForDevice(string kernelName, CudaKernelAttribute attribute, int value, int deviceOrdinal)
+    {
+        ValidateName(kernelName, nameof(kernelName), "CUDA kernel name must not be null or empty.");
+        if (!Enum.IsDefined(typeof(CudaKernelAttribute), attribute))
         {
-            throw new ArgumentException("CUDA kernel name must not be null or empty.", nameof(name));
+            throw new ArgumentOutOfRangeException(nameof(attribute));
+        }
+        if (deviceOrdinal < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(deviceOrdinal));
         }
 
-        return NativeCudaApi.KernelLibraryContains(_handle, name);
+        NativeCudaApi.SetKernelLibraryKernelAttributeForDevice(_handle, kernelName, attribute, value, deviceOrdinal);
     }
 
     /// <inheritdoc />
     public void Dispose()
     {
         _handle.Dispose();
+    }
+
+    private static void ValidateName(string name, string parameterName, string message)
+    {
+        if (string.IsNullOrEmpty(name))
+        {
+            throw new ArgumentException(message, parameterName);
+        }
     }
 }
