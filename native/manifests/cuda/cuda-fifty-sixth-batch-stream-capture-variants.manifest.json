@@ -1,0 +1,49 @@
+{
+  "$schema": "../bridge-api.schema.json",
+  "module": "cuda",
+  "versionLine": "common",
+  "apis": [
+    {
+      "id": "cuda-stream-get-capture-info-ptsz-copied-scalars-safe",
+      "entryPoint": "jyppx_cuda_stream_get_capture_info_ptsz_copied_scalars_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT && CUDART_VERSION >= 12000 && CUDART_VERSION < 13000",
+      "parameters": [
+        { "name": "stream", "type": "JYPPX_CudaStream*", "direction": "in" },
+        { "name": "out_capture_status", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" },
+        { "name": "out_capture_id", "type": "uint64_t*", "direction": "out", "managedType": "out ulong", "moduleManagedType": "out ulong" }
+      ]
+    },
+    {
+      "id": "cuda-stream-update-capture-dependencies-ptsz-owner-token-array-safe",
+      "entryPoint": "jyppx_cuda_stream_update_capture_dependencies_ptsz_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT && CUDART_VERSION >= 11030 && CUDART_VERSION < 12030",
+      "parameters": [
+        { "name": "stream", "type": "JYPPX_CudaStream*", "direction": "in" },
+        { "name": "dependencies", "type": "const uintptr_t*", "direction": "in", "managedType": "UIntPtr[]", "moduleManagedType": "UIntPtr[]" },
+        { "name": "dependency_count", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "mode", "type": "uint32_t", "direction": "in", "managedType": "uint", "moduleManagedType": "uint" }
+      ]
+    },
+    {
+      "id": "cuda-stream-update-capture-dependencies-v2-owner-token-edge-data-safe",
+      "entryPoint": "jyppx_cuda_stream_update_capture_dependencies_v2_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT && CUDART_VERSION >= 12030 && CUDART_VERSION < 13000",
+      "parameters": [
+        { "name": "stream", "type": "JYPPX_CudaStream*", "direction": "in" },
+        { "name": "dependencies", "type": "const uintptr_t*", "direction": "in", "managedType": "UIntPtr[]", "moduleManagedType": "UIntPtr[]" },
+        { "name": "edge_data", "type": "const JYPPX_CudaGraphEdgeData*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "dependency_count", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "mode", "type": "uint32_t", "direction": "in", "managedType": "uint", "moduleManagedType": "uint" }
+      ]
+    }
+  ]
+}

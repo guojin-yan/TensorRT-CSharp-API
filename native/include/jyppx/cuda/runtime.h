@@ -55,6 +55,9 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_stream_is_capturing(JYPPX_CudaStream* s
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_stream_get_capture_info(JYPPX_CudaStream* stream, int32_t* out_capture_status, uint64_t* out_capture_id);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_stream_get_capture_summary_safe(JYPPX_CudaStream* stream, int32_t* out_capture_status, uint64_t* out_capture_id, JYPPX_Boolean* out_has_graph, size_t* out_dependency_count, JYPPX_Boolean* out_has_edge_data);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_stream_update_capture_dependencies_safe(JYPPX_CudaStream* stream, const uintptr_t* dependencies, size_t dependency_count, uint32_t mode);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_stream_get_capture_info_ptsz_copied_scalars_safe(JYPPX_CudaStream* stream, int32_t* out_capture_status, uint64_t* out_capture_id);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_stream_update_capture_dependencies_ptsz_safe(JYPPX_CudaStream* stream, const uintptr_t* dependencies, size_t dependency_count, uint32_t mode);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_stream_update_capture_dependencies_v2_safe(JYPPX_CudaStream* stream, const uintptr_t* dependencies, const JYPPX_CudaGraphEdgeData* edge_data, size_t dependency_count, uint32_t mode);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_stream_attach_mem_async(JYPPX_CudaStream* stream, void* pointer, size_t length, uint32_t flags);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_stream_get_attribute(JYPPX_CudaStream* stream, int32_t attribute, void* value);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_stream_set_attribute(JYPPX_CudaStream* stream, int32_t attribute, const void* value);

@@ -150,6 +150,81 @@ public sealed class CudaStream : IDisposable
     }
 
     /// <summary>
+    /// Gets the scalar capture metadata from CUDA's per-thread stream variant.
+    /// 获取 CUDA per-thread stream 变体返回的标量 capture 元数据。
+    /// </summary>
+    /// <remarks>
+    /// The vendor ptsz entry point reports only status and id; graph and dependency outputs are not part of this API.
+    /// vendor ptsz 入口只报告 status 和 id；graph 与 dependency 输出不属于该 API。
+    /// </remarks>
+    public CudaStreamCaptureScalarInfo GetCaptureInfoPtzs()
+    {
+        return NativeCudaApi.GetStreamCaptureInfoPtzs(_handle);
+    }
+
+    /// <summary>
+    /// Tries to read scalar capture metadata from CUDA's per-thread stream variant.
+    /// 尝试读取 CUDA per-thread stream 变体返回的标量 capture 元数据。
+    /// </summary>
+    public bool TryGetCaptureInfoPtzs(out CudaStreamCaptureScalarInfo captureInfo, out string diagnostic)
+    {
+        try
+        {
+            captureInfo = GetCaptureInfoPtzs();
+            diagnostic = string.Empty;
+            return true;
+        }
+        catch (CudaException exception)
+        {
+            captureInfo = default;
+            diagnostic = exception.Message;
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Adds or replaces dependencies through CUDA's per-thread stream variant.
+    /// 通过 CUDA per-thread stream 变体追加或替换依赖。
+    /// </summary>
+    public void UpdateCaptureDependenciesPtzs(
+        IReadOnlyList<CudaGraphNode> dependencies,
+        CudaStreamCaptureDependencyMode mode = CudaStreamCaptureDependencyMode.Add)
+    {
+        if (dependencies == null)
+        {
+            throw new ArgumentNullException(nameof(dependencies));
+        }
+
+        if (mode != CudaStreamCaptureDependencyMode.Add && mode != CudaStreamCaptureDependencyMode.Replace)
+        {
+            throw new ArgumentOutOfRangeException(nameof(mode));
+        }
+
+        NativeCudaApi.UpdateStreamCaptureDependenciesPtzs(_handle, dependencies, mode);
+    }
+
+    /// <summary>
+    /// Adds or replaces dependencies with copied CUDA graph edge data.
+    /// 使用复制型 CUDA graph edge data 追加或替换依赖。
+    /// </summary>
+    public void UpdateCaptureDependenciesV2(
+        IReadOnlyList<CudaGraphNodeDependency> dependencies,
+        CudaStreamCaptureDependencyMode mode = CudaStreamCaptureDependencyMode.Add)
+    {
+        if (dependencies == null)
+        {
+            throw new ArgumentNullException(nameof(dependencies));
+        }
+
+        if (mode != CudaStreamCaptureDependencyMode.Add && mode != CudaStreamCaptureDependencyMode.Replace)
+        {
+            throw new ArgumentOutOfRangeException(nameof(mode));
+        }
+
+        NativeCudaApi.UpdateStreamCaptureDependenciesV2(_handle, dependencies, mode);
+    }
+
+    /// <summary>
     /// Adds or replaces the dependency set used by the next operation in an active stream capture.
     /// 在 active stream capture 中追加或替换下一项操作使用的 dependency set。
     /// </summary>

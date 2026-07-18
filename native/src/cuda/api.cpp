@@ -1494,6 +1494,7 @@ JYPPX_StatusCode jyppx_cuda_stream_destroy(JYPPX_CudaStream* stream)
 #include "modules/graph/device_graph_memory.inc"
 #include "modules/graph/child_graph_update.inc"
 #include "modules/graph/owner_scoped_diagnostics.inc"
+#include "modules/graph/stream_capture_variants.inc"
 #include "modules/cuda_logs.inc"
 #include "modules/stream_advanced.inc"
 #include "modules/device_atomic_capabilities.inc"

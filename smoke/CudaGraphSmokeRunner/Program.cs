@@ -30,6 +30,7 @@ internal static class Program
         stream.BeginCapture(CudaStreamCaptureMode.Relaxed);
         CudaStreamCaptureInfo captureDuring = stream.GetCaptureInfo();
         stream.UpdateCaptureDependencies(Array.Empty<CudaGraphNode>(), CudaStreamCaptureDependencyMode.Replace);
+        string streamCaptureVariantsState = ProbeStreamCaptureVariants(stream);
         if (!captureDuring.HasCapturedGraph)
         {
             throw new InvalidOperationException("CUDA active capture summary did not report a capture graph.");
@@ -144,7 +145,7 @@ internal static class Program
             throw new InvalidOperationException($"CUDA graph copy round trip failed. Expected=[{string.Join(", ", input)}] Actual=[{string.Join(", ", output)}]");
         }
 
-        Console.WriteLine($"CudaGraphCaptureRoundTrip=True Bytes={ByteCount} Capture={captureBefore.Status}->{captureDuring.Status}->{captureAfter.Status} CaptureId={captureDuring.CaptureId} CaptureGraph={captureDuring.HasCapturedGraph} CaptureDependencies={captureDuring.DependencyCount} CaptureEdgeData={captureDuring.HasDependencyEdgeData} Nodes={graph.NodeCount} Roots={graph.RootNodeCount} Edges={graph.EdgeCount} CloneNodes={graphClone.NodeCount} ExecFlags={graphExecFlagsState} EventElapsedMilliseconds={elapsedMilliseconds:0.###}");
+        Console.WriteLine($"CudaGraphCaptureRoundTrip=True Bytes={ByteCount} Capture={captureBefore.Status}->{captureDuring.Status}->{captureAfter.Status} CaptureId={captureDuring.CaptureId} CaptureGraph={captureDuring.HasCapturedGraph} CaptureDependencies={captureDuring.DependencyCount} CaptureEdgeData={captureDuring.HasDependencyEdgeData} StreamVariants={streamCaptureVariantsState} Nodes={graph.NodeCount} Roots={graph.RootNodeCount} Edges={graph.EdgeCount} CloneNodes={graphClone.NodeCount} ExecFlags={graphExecFlagsState} EventElapsedMilliseconds={elapsedMilliseconds:0.###}");
         Console.WriteLine($"CudaGraphCapturedTopology Node0={capturedNode} Root0={capturedRootNode} CloneNode0={capturedCloneNode} NodeType={capturedNodeType} NodeDeps={capturedNodeDependencies} NodeDependents={capturedNodeDependents} MemsetParams={capturedMemsetParamsState} Edge0={capturedEdge?.ToString() ?? "None"}");
         Console.WriteLine($"CudaGraphManualTopology Nodes={topologyGraph.NodeCount} Roots={topologyGraph.RootNodeCount} Edges={topologyGraph.EdgeCount} ChildDeps={topologyChildDependencyCount} RootDependents={topologyRootDependentCount} EdgeData={topologyEdgeDataState} DebugDot={topologyDebugDotState} EventNodes={eventNodeState} Memcpy1D={memcpy1DNodeState} NodeParamsDescriptor={typedDescriptorState} ChildGraphUpdate={childGraphUpdateState} OwnerScopedDiagnostics={ownerScopedDiagnosticsState} NodeEnabled={topologyNodeEnabledState} GraphId={topologyGraphIdState} ExecId={topologyExecIdState} NodeIdentity={topologyNodeIdentityState}");
         Console.WriteLine($"CudaGraphSnapshots GraphSnapshot=[{topologySnapshot}] RootNodeSnapshot=[{topologyRootSnapshot}] ChildNodeSnapshot=[{topologyChildSnapshot}] ExecNodeSnapshot=[{topologyExecNodeSnapshotState}]");
@@ -163,6 +164,44 @@ internal static class Program
         {
             Console.WriteLine($"Skipped=True Reason=BadImageFormatException:{exception.Message}");
         }
+    }
+
+    private static string ProbeStreamCaptureVariants(CudaStream stream)
+    {
+        string scalarState = "Unsupported";
+        try
+        {
+            bool tryOk = stream.TryGetCaptureInfoPtzs(out CudaStreamCaptureScalarInfo scalarInfo, out string diagnostic);
+            scalarState = $"PtzsTry={tryOk} Info={scalarInfo} Diagnostic={diagnostic}";
+        }
+        catch (CudaException exception)
+        {
+            scalarState = $"PtzsSkipped:{exception.Message}";
+        }
+
+        string ptszUpdateState = "Unsupported";
+        try
+        {
+            stream.UpdateCaptureDependenciesPtzs(Array.Empty<CudaGraphNode>(), CudaStreamCaptureDependencyMode.Replace);
+            ptszUpdateState = "PtzsUpdate=True";
+        }
+        catch (CudaException exception)
+        {
+            ptszUpdateState = $"PtzsUpdateSkipped:{exception.Message}";
+        }
+
+        string v2UpdateState = "Unsupported";
+        try
+        {
+            stream.UpdateCaptureDependenciesV2(Array.Empty<CudaGraphNodeDependency>(), CudaStreamCaptureDependencyMode.Replace);
+            v2UpdateState = "V2Update=True";
+        }
+        catch (CudaException exception)
+        {
+            v2UpdateState = $"V2UpdateSkipped:{exception.Message}";
+        }
+
+        return $"{scalarState}; {ptszUpdateState}; {v2UpdateState}";
     }
 
     static string ProbeGraphEdgeData(CudaGraph graph, CudaGraphNode root, CudaGraphNode child)

@@ -1486,6 +1486,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_cuda_stream_get_capture_info(JYPPX_CudaStrea
 // generated from manifest id=cuda-stream-get-capture-info-copied-summary-safe
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_stream_get_capture_summary_safe(JYPPX_CudaStream* stream, int32_t* out_capture_status, uint64_t* out_capture_id, JYPPX_Boolean* out_has_graph, size_t* out_dependency_count, JYPPX_Boolean* out_has_edge_data);
 
+// generated from manifest id=cuda-stream-get-capture-info-ptsz-copied-scalars-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_stream_get_capture_info_ptsz_copied_scalars_safe(JYPPX_CudaStream* stream, int32_t* out_capture_status, uint64_t* out_capture_id);
+
 // generated from manifest id=cuda-stream-get-capture-info-ptsz-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_stream_get_capture_info_ptsz_deferred(void);
 
@@ -1531,8 +1534,14 @@ JYPPX_C_API(BridgeStatusCode) jyppx_cuda_stream_update_capture_dependencies_safe
 // generated from manifest id=cuda-stream-update-capture-dependencies-ptsz-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_stream_update_capture_dependencies_ptsz_deferred(void);
 
+// generated from manifest id=cuda-stream-update-capture-dependencies-ptsz-owner-token-array-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_stream_update_capture_dependencies_ptsz_safe(JYPPX_CudaStream* stream, const uintptr_t* dependencies, size_t dependency_count, uint32_t mode);
+
 // generated from manifest id=cuda-stream-update-capture-dependencies-v2-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_stream_update_capture_dependencies_v2_deferred(void);
+
+// generated from manifest id=cuda-stream-update-capture-dependencies-v2-owner-token-edge-data-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_stream_update_capture_dependencies_v2_safe(JYPPX_CudaStream* stream, const uintptr_t* dependencies, const JYPPX_CudaGraphEdgeData* edge_data, size_t dependency_count, uint32_t mode);
 
 // generated from manifest id=cuda-stream-wait-event
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_stream_wait_event(JYPPX_CudaStream* stream, JYPPX_CudaEvent* event_handle, uint32_t flags);

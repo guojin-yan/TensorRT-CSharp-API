@@ -1520,3 +1520,24 @@ artifacts/trtexec-bounded-runtime/identity
 - Coverage exporter 重跑成功；四个接口在 TRT8/10/11 的 24 行均为 `implemented-with-deferred-history`，每行同时匹配 real entry 与 deferred history entry。
 - `BuilderConfigScalarControlsTests` 专项为 `5/5` 通过；测试锁定 real/history alias 分离、TRT8/10/11 manifest、版本 guard、审计证据、scalar wrapper/smoke 和无裸指针 public surface。
 - 本轮未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close；owner convergence、runtime proof 与公开发布边界保持不变。
+
+## 2026-07-19 CUDA Stream-Capture Variant Safe-Deferred Uplift
+
+本批在 CUDA runtime deferred inventory 中先核对了本机 CUDA 头文件、运行时导入库、跨版本 guard 和 native link 结果，再选择三个没有 callback、device pointer 或外部资源 ownership 的 stream-capture variant：`cudaStreamGetCaptureInfo_ptsz`、`cudaStreamUpdateCaptureDependencies_ptsz` 和 `cudaStreamUpdateCaptureDependencies_v2`。候选审计记录位于 `artifacts/interface-coverage/cuda-stream-capture-variants-candidate-audit.md` 与 `.json`。
+
+### Promotion 结果
+
+- 新增 3 个非 deferred CUDA manifest entry；原有 stream-device-boundary deferred records 保留，通过 explicit alias/history 归并为 `implemented-with-deferred-history`。
+- `cudaStreamGetCaptureInfo_ptsz` 只返回 copied capture status/id；dependency variants 只接受 managed graph-node token，并在同步 vendor call 内 pinned/copy edge data。
+- CUDA 11.x、12.x、13.x 分别使用独立 guard；CUDA 11.8 头文件未声明的 `cudaStreamUpdateCaptureDependencies_ptsz` 通过受 guard 保护的 vendor declaration 处理，没有对 CUDA 13.2 伪造 12.x API。
+- public C# surface 不暴露 `IntPtr`、`nint`、`UIntPtr`、`SafeHandle`、device pointer 或 borrowed vendor pointer。
+
+### Verification
+
+- binding generator/output validation：`188 manifests / 3945 records`，幂等通过。
+- coverage export 重跑成功；三个函数的适用 toolkit rows 均为 `implemented-with-deferred-history`。
+- 新增 `CudaStreamCaptureVariantsUpliftTests`：`4/4`；相关 CUDA graph/stream tests：`30/30`。
+- 四套 native configuration 成功：TRT8/CUDA11.8、TRT8/CUDA12.1、TRT10/CUDA12.9、TRT11/CUDA13.2；ABI declaration/export parity 均为 `MissingDeclarations=0 MissingExports=0`。
+- C 盘审查未发现本批下载的 CUDA、TensorRT、cuDNN 或模型；构建输出位于 E 盘 `build-out`，C:\Users\guoji\AppData\Local\Temp 下无本批同名构建目录。用户已有 Downloads、NuGet 和工具缓存未删除。
+
+本批仍不改变长期安全边界：callback trampoline、allocator/resource、borrowed/device pointer、plugin lifecycle、RNNv2 setter 和 consistency checker 继续 deferred；未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。

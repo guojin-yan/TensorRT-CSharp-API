@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "candidate": "CUDA stream-capture variants",
+  "decision": "promote-by-explicit-alias-history",
+  "sourceCommit": "dc79d09",
+  "interfaces": [
+    "cudaStreamGetCaptureInfo_ptsz",
+    "cudaStreamUpdateCaptureDependencies_ptsz",
+    "cudaStreamUpdateCaptureDependencies_v2"
+  ],
+  "toolkitGuards": [
+    "CUDA 12.1/12.3/12.9 for cudaStreamGetCaptureInfo_ptsz",
+    "CUDA 11.6/11.8/12.1 for cudaStreamUpdateCaptureDependencies_ptsz",
+    "CUDA 12.3/12.9 for cudaStreamUpdateCaptureDependencies_v2"
+  ],
+  "realManifestFile": "native/manifests/cuda/cuda-fifty-sixth-batch-stream-capture-variants.manifest.json",
+  "deferredHistoryManifestFile": "native/manifests/cuda/cuda-thirty-fifth-batch-stream-device-boundaries.manifest.json",
+  "nativeImplementationFile": "native/src/cuda/modules/graph/stream_capture_variants.inc",
+  "headerEvidence": "third_party/nvidia/cuda*/include/cuda_runtime_api.h",
+  "importLibraryEvidence": "CUDAToolkit runtime import libraries for CUDA 11.8/12.1/12.9/13.2",
+  "runtimeDllEvidence": "native cross-version build link proof; no new runtime download",
+  "ownership": {
+    "stream": "typed opaque CudaStream owner",
+    "graphNodes": "managed CudaGraphNode tokens borrowed only during the synchronous call",
+    "edgeData": "copied CudaGraphEdgeData pinned only during the synchronous call",
+    "scalars": "copied primitive values",
+    "returnedPointers": false,
+    "callbacks": false,
+    "externalResources": false
+  },
+  "crossVersionNotes": [
+    "cudaStreamGetCaptureInfo_ptsz is guarded to CUDA 12.x.",
+    "cudaStreamUpdateCaptureDependencies_ptsz is guarded to CUDA 11.6 through 12.1 and has an explicit declaration for headers that omit the vendor prototype.",
+    "cudaStreamUpdateCaptureDependencies_v2 is guarded to CUDA 12.3 through 12.9.",
+    "CUDA 13.2 does not expose these 12.x-only entry points through this bridge."
+  ],
+  "managedRoute": [
+    "src/JYPPX.CudaSharp/CudaStream.cs",
+    "src/JYPPX.CudaSharp/CudaStreamCaptureScalarInfo.cs",
+    "src/JYPPX.CudaSharp/Internal/Interop/Graph/NativeCudaApi.StreamCaptureVariants.cs"
+  ],
+  "verification": [
+    "binding generator validation passed for 3945 records across 188 manifests",
+    "focused ProjectQuality passed 4/4 and related CUDA graph tests passed 30/30",
+    "native ABI declaration and export parity reported zero missing entries",
+    "coverage rows are implemented-with-deferred-history",
+    "public wrapper scan rejects raw pointer and SafeHandle exposure"
+  ]
+}

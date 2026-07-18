@@ -500,6 +500,7 @@ internal static class GeneratedEntryPointNames
     public const string CudaStreamGetAttribute = "jyppx_cuda_stream_get_attribute";
     public const string CudaStreamGetCaptureInfo = "jyppx_cuda_stream_get_capture_info";
     public const string CudaStreamGetCaptureInfoCopiedSummarySafe = "jyppx_cuda_stream_get_capture_summary_safe";
+    public const string CudaStreamGetCaptureInfoPtszCopiedScalarsSafe = "jyppx_cuda_stream_get_capture_info_ptsz_copied_scalars_safe";
     public const string CudaStreamGetCaptureInfoPtszDeferred = "jyppx_cuda_stream_get_capture_info_ptsz_deferred";
     public const string CudaStreamGetCaptureInfoV3Deferred = "jyppx_cuda_stream_get_capture_info_v3_deferred";
     public const string CudaStreamGetDevResourceDeferred = "jyppx_cuda_stream_get_dev_resource_deferred";
@@ -515,7 +516,9 @@ internal static class GeneratedEntryPointNames
     public const string CudaStreamUpdateCaptureDependenciesDeferred = "jyppx_cuda_stream_update_capture_dependencies_deferred";
     public const string CudaStreamUpdateCaptureDependenciesOwnerTokenArraySafe = "jyppx_cuda_stream_update_capture_dependencies_safe";
     public const string CudaStreamUpdateCaptureDependenciesPtszDeferred = "jyppx_cuda_stream_update_capture_dependencies_ptsz_deferred";
+    public const string CudaStreamUpdateCaptureDependenciesPtszOwnerTokenArraySafe = "jyppx_cuda_stream_update_capture_dependencies_ptsz_safe";
     public const string CudaStreamUpdateCaptureDependenciesV2Deferred = "jyppx_cuda_stream_update_capture_dependencies_v2_deferred";
+    public const string CudaStreamUpdateCaptureDependenciesV2OwnerTokenEdgeDataSafe = "jyppx_cuda_stream_update_capture_dependencies_v2_safe";
     public const string CudaStreamWaitEvent = "jyppx_cuda_stream_wait_event";
     public const string CudaThreadExchangeStreamCaptureMode = "jyppx_cuda_thread_exchange_stream_capture_mode";
     public const string CudaTwentyFourthBatchRuntimeTokenAliasCudaDeviceCanAccessPeerV2 = "jyppx_cuda_device_can_access_peer_v2";
