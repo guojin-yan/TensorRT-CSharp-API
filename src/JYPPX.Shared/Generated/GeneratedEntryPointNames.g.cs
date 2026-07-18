@@ -657,6 +657,8 @@ internal static class GeneratedEntryPointNames
     public const string JyppxTrt10BuilderConfigSetQuantizationFlag = "jyppx_trt10_builder_config_set_quantization_flag";
     public const string JyppxTrt10BuilderConfigSetQuantizationFlags = "jyppx_trt10_builder_config_set_quantization_flags";
     public const string JyppxTrt10BuilderConfigSetTilingOptimizationLevel = "jyppx_trt10_builder_config_set_tiling_optimization_level";
+    public const string JyppxTrt10BuilderGetErrorRecorderError = "jyppx_trt10_builder_get_error_recorder_error";
+    public const string JyppxTrt10BuilderGetErrorRecorderSnapshotInfo = "jyppx_trt10_builder_get_error_recorder_snapshot_info";
     public const string JyppxTrt10BuilderGetMaxDlaBatchSize = "jyppx_trt10_builder_get_max_dla_batch_size";
     public const string JyppxTrt10BuilderGetMaxThreads = "jyppx_trt10_builder_get_max_threads";
     public const string JyppxTrt10BuilderHasErrorRecorder = "jyppx_trt10_builder_has_error_recorder";
@@ -671,6 +673,8 @@ internal static class GeneratedEntryPointNames
     public const string JyppxTrt10EngineGetProfileTensorValuesV2 = "jyppx_trt10_engine_get_profile_tensor_values_v2";
     public const string JyppxTrt10EngineHasErrorRecorder = "jyppx_trt10_engine_has_error_recorder";
     public const string JyppxTrt10EngineInspectorClearErrorRecorder = "jyppx_trt10_engine_inspector_clear_error_recorder";
+    public const string JyppxTrt10EngineInspectorGetErrorRecorderError = "jyppx_trt10_engine_inspector_get_error_recorder_error";
+    public const string JyppxTrt10EngineInspectorGetErrorRecorderSnapshotInfo = "jyppx_trt10_engine_inspector_get_error_recorder_snapshot_info";
     public const string JyppxTrt10EngineInspectorHasErrorRecorder = "jyppx_trt10_engine_inspector_has_error_recorder";
     public const string JyppxTrt10ExecutionContextClearCallbackState = "jyppx_trt10_execution_context_clear_callback_state";
     public const string JyppxTrt10ExecutionContextClearDebugListener = "jyppx_trt10_execution_context_clear_debug_listener";
@@ -688,6 +692,8 @@ internal static class GeneratedEntryPointNames
     public const string JyppxTrt10ExecutionContextSetNvtxVerbosity = "jyppx_trt10_execution_context_set_nvtx_verbosity";
     public const string JyppxTrt10HostMemoryGetType = "jyppx_trt10_host_memory_get_type";
     public const string JyppxTrt10NetworkClearErrorRecorder = "jyppx_trt10_network_clear_error_recorder";
+    public const string JyppxTrt10NetworkGetErrorRecorderError = "jyppx_trt10_network_get_error_recorder_error";
+    public const string JyppxTrt10NetworkGetErrorRecorderSnapshotInfo = "jyppx_trt10_network_get_error_recorder_snapshot_info";
     public const string JyppxTrt10NetworkHasErrorRecorder = "jyppx_trt10_network_has_error_recorder";
     public const string JyppxTrt10OptimizationProfileGetShapeValueCountV2 = "jyppx_trt10_optimization_profile_get_shape_value_count_v2";
     public const string JyppxTrt10OptimizationProfileGetShapeValuesV2 = "jyppx_trt10_optimization_profile_get_shape_values_v2";
@@ -1775,6 +1781,8 @@ internal static class GeneratedEntryPointNames
     public const string JyppxTrt11BuilderConfigSetTilingOptimizationLevel = "jyppx_trt11_builder_config_set_tiling_optimization_level";
     public const string JyppxTrt11BuilderConfigSetTimingCache = "jyppx_trt11_builder_config_set_timing_cache";
     public const string JyppxTrt11BuilderCreateOptimizationProfile = "jyppx_trt11_builder_create_optimization_profile";
+    public const string JyppxTrt11BuilderGetErrorRecorderError = "jyppx_trt11_builder_get_error_recorder_error";
+    public const string JyppxTrt11BuilderGetErrorRecorderSnapshotInfo = "jyppx_trt11_builder_get_error_recorder_snapshot_info";
     public const string JyppxTrt11BuilderGetMaxDlaBatchSize = "jyppx_trt11_builder_get_max_dla_batch_size";
     public const string JyppxTrt11BuilderGetMaxThreads = "jyppx_trt11_builder_get_max_threads";
     public const string JyppxTrt11BuilderHasErrorRecorder = "jyppx_trt11_builder_has_error_recorder";
@@ -1824,6 +1832,8 @@ internal static class GeneratedEntryPointNames
     public const string JyppxTrt11EngineInspectorClearErrorRecorder = "jyppx_trt11_engine_inspector_clear_error_recorder";
     public const string JyppxTrt11EngineInspectorClearExecutionContext = "jyppx_trt11_engine_inspector_clear_execution_context";
     public const string JyppxTrt11EngineInspectorGetEngineInformation = "jyppx_trt11_engine_inspector_get_engine_information";
+    public const string JyppxTrt11EngineInspectorGetErrorRecorderError = "jyppx_trt11_engine_inspector_get_error_recorder_error";
+    public const string JyppxTrt11EngineInspectorGetErrorRecorderSnapshotInfo = "jyppx_trt11_engine_inspector_get_error_recorder_snapshot_info";
     public const string JyppxTrt11EngineInspectorGetLayerInformation = "jyppx_trt11_engine_inspector_get_layer_information";
     public const string JyppxTrt11EngineInspectorHasErrorRecorder = "jyppx_trt11_engine_inspector_has_error_recorder";
     public const string JyppxTrt11EngineInspectorHasExecutionContext = "jyppx_trt11_engine_inspector_has_execution_context";
@@ -1954,6 +1964,8 @@ internal static class GeneratedEntryPointNames
     public const string JyppxTrt11NetworkAddLoop = "jyppx_trt11_network_add_loop";
     public const string JyppxTrt11NetworkAddTopkV2 = "jyppx_trt11_network_add_topk_v2";
     public const string JyppxTrt11NetworkClearErrorRecorder = "jyppx_trt11_network_clear_error_recorder";
+    public const string JyppxTrt11NetworkGetErrorRecorderError = "jyppx_trt11_network_get_error_recorder_error";
+    public const string JyppxTrt11NetworkGetErrorRecorderSnapshotInfo = "jyppx_trt11_network_get_error_recorder_snapshot_info";
     public const string JyppxTrt11NetworkGetFlag = "jyppx_trt11_network_get_flag";
     public const string JyppxTrt11NetworkGetFlags = "jyppx_trt11_network_get_flags";
     public const string JyppxTrt11NetworkGetInput = "jyppx_trt11_network_get_input";
@@ -2961,6 +2973,8 @@ internal static class GeneratedEntryPointNames
     public const string JyppxTrt8BuilderConfigSetDlaCore = "jyppx_trt8_builder_config_set_dla_core";
     public const string JyppxTrt8BuilderConfigSetQuantizationFlag = "jyppx_trt8_builder_config_set_quantization_flag";
     public const string JyppxTrt8BuilderConfigSetQuantizationFlags = "jyppx_trt8_builder_config_set_quantization_flags";
+    public const string JyppxTrt8BuilderGetErrorRecorderError = "jyppx_trt8_builder_get_error_recorder_error";
+    public const string JyppxTrt8BuilderGetErrorRecorderSnapshotInfo = "jyppx_trt8_builder_get_error_recorder_snapshot_info";
     public const string JyppxTrt8BuilderGetMaxBatchSize = "jyppx_trt8_builder_get_max_batch_size";
     public const string JyppxTrt8BuilderGetMaxDlaBatchSize = "jyppx_trt8_builder_get_max_dla_batch_size";
     public const string JyppxTrt8BuilderGetMaxThreads = "jyppx_trt8_builder_get_max_threads";
@@ -2974,6 +2988,8 @@ internal static class GeneratedEntryPointNames
     public const string JyppxTrt8EngineGetHardwareCompatibilityLevel = "jyppx_trt8_engine_get_hardware_compatibility_level";
     public const string JyppxTrt8EngineHasErrorRecorder = "jyppx_trt8_engine_has_error_recorder";
     public const string JyppxTrt8EngineInspectorClearErrorRecorder = "jyppx_trt8_engine_inspector_clear_error_recorder";
+    public const string JyppxTrt8EngineInspectorGetErrorRecorderError = "jyppx_trt8_engine_inspector_get_error_recorder_error";
+    public const string JyppxTrt8EngineInspectorGetErrorRecorderSnapshotInfo = "jyppx_trt8_engine_inspector_get_error_recorder_snapshot_info";
     public const string JyppxTrt8EngineInspectorHasErrorRecorder = "jyppx_trt8_engine_inspector_has_error_recorder";
     public const string JyppxTrt8ExecutionContextClearCallbackState = "jyppx_trt8_execution_context_clear_callback_state";
     public const string JyppxTrt8ExecutionContextClearErrorRecorder = "jyppx_trt8_execution_context_clear_error_recorder";
@@ -2988,6 +3004,8 @@ internal static class GeneratedEntryPointNames
     public const string JyppxTrt8ExecutionContextHasTemporaryStorageAllocator = "jyppx_trt8_execution_context_has_temporary_storage_allocator";
     public const string JyppxTrt8ExecutionContextSetNvtxVerbosity = "jyppx_trt8_execution_context_set_nvtx_verbosity";
     public const string JyppxTrt8NetworkClearErrorRecorder = "jyppx_trt8_network_clear_error_recorder";
+    public const string JyppxTrt8NetworkGetErrorRecorderError = "jyppx_trt8_network_get_error_recorder_error";
+    public const string JyppxTrt8NetworkGetErrorRecorderSnapshotInfo = "jyppx_trt8_network_get_error_recorder_snapshot_info";
     public const string JyppxTrt8NetworkHasErrorRecorder = "jyppx_trt8_network_has_error_recorder";
     public const string JyppxTrt8RefitterGetErrorRecorderError = "jyppx_trt8_refitter_get_error_recorder_error";
     public const string JyppxTrt8RefitterGetErrorRecorderSnapshotInfo = "jyppx_trt8_refitter_get_error_recorder_snapshot_info";

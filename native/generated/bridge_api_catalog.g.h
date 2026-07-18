@@ -652,6 +652,8 @@
 #define JYPPX_API_JYPPX_TRT10_BUILDER_CONFIG_SET_QUANTIZATION_FLAG "jyppx_trt10_builder_config_set_quantization_flag" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT10_BUILDER_CONFIG_SET_QUANTIZATION_FLAGS "jyppx_trt10_builder_config_set_quantization_flags" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT10_BUILDER_CONFIG_SET_TILING_OPTIMIZATION_LEVEL "jyppx_trt10_builder_config_set_tiling_optimization_level" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_JYPPX_TRT10_BUILDER_GET_ERROR_RECORDER_ERROR "jyppx_trt10_builder_get_error_recorder_error" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_JYPPX_TRT10_BUILDER_GET_ERROR_RECORDER_SNAPSHOT_INFO "jyppx_trt10_builder_get_error_recorder_snapshot_info" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT10_BUILDER_GET_MAX_DLA_BATCH_SIZE "jyppx_trt10_builder_get_max_dla_batch_size" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT10_BUILDER_GET_MAX_THREADS "jyppx_trt10_builder_get_max_threads" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT10_BUILDER_HAS_ERROR_RECORDER "jyppx_trt10_builder_has_error_recorder" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
@@ -666,6 +668,8 @@
 #define JYPPX_API_JYPPX_TRT10_ENGINE_GET_PROFILE_TENSOR_VALUES_V2 "jyppx_trt10_engine_get_profile_tensor_values_v2" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT10_ENGINE_HAS_ERROR_RECORDER "jyppx_trt10_engine_has_error_recorder" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT10_ENGINE_INSPECTOR_CLEAR_ERROR_RECORDER "jyppx_trt10_engine_inspector_clear_error_recorder" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_JYPPX_TRT10_ENGINE_INSPECTOR_GET_ERROR_RECORDER_ERROR "jyppx_trt10_engine_inspector_get_error_recorder_error" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_JYPPX_TRT10_ENGINE_INSPECTOR_GET_ERROR_RECORDER_SNAPSHOT_INFO "jyppx_trt10_engine_inspector_get_error_recorder_snapshot_info" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT10_ENGINE_INSPECTOR_HAS_ERROR_RECORDER "jyppx_trt10_engine_inspector_has_error_recorder" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT10_EXECUTION_CONTEXT_CLEAR_CALLBACK_STATE "jyppx_trt10_execution_context_clear_callback_state" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT10_EXECUTION_CONTEXT_CLEAR_DEBUG_LISTENER "jyppx_trt10_execution_context_clear_debug_listener" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
@@ -683,6 +687,8 @@
 #define JYPPX_API_JYPPX_TRT10_EXECUTION_CONTEXT_SET_NVTX_VERBOSITY "jyppx_trt10_execution_context_set_nvtx_verbosity" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT10_HOST_MEMORY_GET_TYPE "jyppx_trt10_host_memory_get_type" // module=tensorrt; line=10; ownership=host-memory-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT10_NETWORK_CLEAR_ERROR_RECORDER "jyppx_trt10_network_clear_error_recorder" // module=tensorrt; line=10; ownership=network-owned; manualOverride=false
+#define JYPPX_API_JYPPX_TRT10_NETWORK_GET_ERROR_RECORDER_ERROR "jyppx_trt10_network_get_error_recorder_error" // module=tensorrt; line=10; ownership=network-owned; manualOverride=false
+#define JYPPX_API_JYPPX_TRT10_NETWORK_GET_ERROR_RECORDER_SNAPSHOT_INFO "jyppx_trt10_network_get_error_recorder_snapshot_info" // module=tensorrt; line=10; ownership=network-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT10_NETWORK_HAS_ERROR_RECORDER "jyppx_trt10_network_has_error_recorder" // module=tensorrt; line=10; ownership=network-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT10_OPTIMIZATION_PROFILE_GET_SHAPE_VALUE_COUNT_V2 "jyppx_trt10_optimization_profile_get_shape_value_count_v2" // module=tensorrt; line=10; ownership=profile-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT10_OPTIMIZATION_PROFILE_GET_SHAPE_VALUES_V2 "jyppx_trt10_optimization_profile_get_shape_values_v2" // module=tensorrt; line=10; ownership=profile-owned; manualOverride=false
@@ -1770,6 +1776,8 @@
 #define JYPPX_API_JYPPX_TRT11_BUILDER_CONFIG_SET_TILING_OPTIMIZATION_LEVEL "jyppx_trt11_builder_config_set_tiling_optimization_level" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT11_BUILDER_CONFIG_SET_TIMING_CACHE "jyppx_trt11_builder_config_set_timing_cache" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT11_BUILDER_CREATE_OPTIMIZATION_PROFILE "jyppx_trt11_builder_create_optimization_profile" // module=tensorrt; line=11; ownership=caller-destroys; manualOverride=false
+#define JYPPX_API_JYPPX_TRT11_BUILDER_GET_ERROR_RECORDER_ERROR "jyppx_trt11_builder_get_error_recorder_error" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_JYPPX_TRT11_BUILDER_GET_ERROR_RECORDER_SNAPSHOT_INFO "jyppx_trt11_builder_get_error_recorder_snapshot_info" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT11_BUILDER_GET_MAX_DLA_BATCH_SIZE "jyppx_trt11_builder_get_max_dla_batch_size" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT11_BUILDER_GET_MAX_THREADS "jyppx_trt11_builder_get_max_threads" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT11_BUILDER_HAS_ERROR_RECORDER "jyppx_trt11_builder_has_error_recorder" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
@@ -1819,6 +1827,8 @@
 #define JYPPX_API_JYPPX_TRT11_ENGINE_INSPECTOR_CLEAR_ERROR_RECORDER "jyppx_trt11_engine_inspector_clear_error_recorder" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT11_ENGINE_INSPECTOR_CLEAR_EXECUTION_CONTEXT "jyppx_trt11_engine_inspector_clear_execution_context" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT11_ENGINE_INSPECTOR_GET_ENGINE_INFORMATION "jyppx_trt11_engine_inspector_get_engine_information" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=true
+#define JYPPX_API_JYPPX_TRT11_ENGINE_INSPECTOR_GET_ERROR_RECORDER_ERROR "jyppx_trt11_engine_inspector_get_error_recorder_error" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_JYPPX_TRT11_ENGINE_INSPECTOR_GET_ERROR_RECORDER_SNAPSHOT_INFO "jyppx_trt11_engine_inspector_get_error_recorder_snapshot_info" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT11_ENGINE_INSPECTOR_GET_LAYER_INFORMATION "jyppx_trt11_engine_inspector_get_layer_information" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT11_ENGINE_INSPECTOR_HAS_ERROR_RECORDER "jyppx_trt11_engine_inspector_has_error_recorder" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT11_ENGINE_INSPECTOR_HAS_EXECUTION_CONTEXT "jyppx_trt11_engine_inspector_has_execution_context" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
@@ -1949,6 +1959,8 @@
 #define JYPPX_API_JYPPX_TRT11_NETWORK_ADD_LOOP "jyppx_trt11_network_add_loop" // module=tensorrt; line=11; ownership=network-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT11_NETWORK_ADD_TOPK_V2 "jyppx_trt11_network_add_topk_v2" // module=tensorrt; line=11; ownership=caller-destroys; manualOverride=false
 #define JYPPX_API_JYPPX_TRT11_NETWORK_CLEAR_ERROR_RECORDER "jyppx_trt11_network_clear_error_recorder" // module=tensorrt; line=11; ownership=network-owned; manualOverride=false
+#define JYPPX_API_JYPPX_TRT11_NETWORK_GET_ERROR_RECORDER_ERROR "jyppx_trt11_network_get_error_recorder_error" // module=tensorrt; line=11; ownership=network-owned; manualOverride=false
+#define JYPPX_API_JYPPX_TRT11_NETWORK_GET_ERROR_RECORDER_SNAPSHOT_INFO "jyppx_trt11_network_get_error_recorder_snapshot_info" // module=tensorrt; line=11; ownership=network-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT11_NETWORK_GET_FLAG "jyppx_trt11_network_get_flag" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT11_NETWORK_GET_FLAGS "jyppx_trt11_network_get_flags" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT11_NETWORK_GET_INPUT "jyppx_trt11_network_get_input" // module=tensorrt; line=11; ownership=caller-destroys; manualOverride=false
@@ -2956,6 +2968,8 @@
 #define JYPPX_API_JYPPX_TRT8_BUILDER_CONFIG_SET_DLA_CORE "jyppx_trt8_builder_config_set_dla_core" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT8_BUILDER_CONFIG_SET_QUANTIZATION_FLAG "jyppx_trt8_builder_config_set_quantization_flag" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT8_BUILDER_CONFIG_SET_QUANTIZATION_FLAGS "jyppx_trt8_builder_config_set_quantization_flags" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_JYPPX_TRT8_BUILDER_GET_ERROR_RECORDER_ERROR "jyppx_trt8_builder_get_error_recorder_error" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_JYPPX_TRT8_BUILDER_GET_ERROR_RECORDER_SNAPSHOT_INFO "jyppx_trt8_builder_get_error_recorder_snapshot_info" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT8_BUILDER_GET_MAX_BATCH_SIZE "jyppx_trt8_builder_get_max_batch_size" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT8_BUILDER_GET_MAX_DLA_BATCH_SIZE "jyppx_trt8_builder_get_max_dla_batch_size" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT8_BUILDER_GET_MAX_THREADS "jyppx_trt8_builder_get_max_threads" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
@@ -2969,6 +2983,8 @@
 #define JYPPX_API_JYPPX_TRT8_ENGINE_GET_HARDWARE_COMPATIBILITY_LEVEL "jyppx_trt8_engine_get_hardware_compatibility_level" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT8_ENGINE_HAS_ERROR_RECORDER "jyppx_trt8_engine_has_error_recorder" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT8_ENGINE_INSPECTOR_CLEAR_ERROR_RECORDER "jyppx_trt8_engine_inspector_clear_error_recorder" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_JYPPX_TRT8_ENGINE_INSPECTOR_GET_ERROR_RECORDER_ERROR "jyppx_trt8_engine_inspector_get_error_recorder_error" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_JYPPX_TRT8_ENGINE_INSPECTOR_GET_ERROR_RECORDER_SNAPSHOT_INFO "jyppx_trt8_engine_inspector_get_error_recorder_snapshot_info" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT8_ENGINE_INSPECTOR_HAS_ERROR_RECORDER "jyppx_trt8_engine_inspector_has_error_recorder" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT8_EXECUTION_CONTEXT_CLEAR_CALLBACK_STATE "jyppx_trt8_execution_context_clear_callback_state" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT8_EXECUTION_CONTEXT_CLEAR_ERROR_RECORDER "jyppx_trt8_execution_context_clear_error_recorder" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
@@ -2983,6 +2999,8 @@
 #define JYPPX_API_JYPPX_TRT8_EXECUTION_CONTEXT_HAS_TEMPORARY_STORAGE_ALLOCATOR "jyppx_trt8_execution_context_has_temporary_storage_allocator" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT8_EXECUTION_CONTEXT_SET_NVTX_VERBOSITY "jyppx_trt8_execution_context_set_nvtx_verbosity" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT8_NETWORK_CLEAR_ERROR_RECORDER "jyppx_trt8_network_clear_error_recorder" // module=tensorrt; line=8; ownership=network-owned; manualOverride=false
+#define JYPPX_API_JYPPX_TRT8_NETWORK_GET_ERROR_RECORDER_ERROR "jyppx_trt8_network_get_error_recorder_error" // module=tensorrt; line=8; ownership=network-owned; manualOverride=false
+#define JYPPX_API_JYPPX_TRT8_NETWORK_GET_ERROR_RECORDER_SNAPSHOT_INFO "jyppx_trt8_network_get_error_recorder_snapshot_info" // module=tensorrt; line=8; ownership=network-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT8_NETWORK_HAS_ERROR_RECORDER "jyppx_trt8_network_has_error_recorder" // module=tensorrt; line=8; ownership=network-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT8_REFITTER_GET_ERROR_RECORDER_ERROR "jyppx_trt8_refitter_get_error_recorder_error" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_JYPPX_TRT8_REFITTER_GET_ERROR_RECORDER_SNAPSHOT_INFO "jyppx_trt8_refitter_get_error_recorder_snapshot_info" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false

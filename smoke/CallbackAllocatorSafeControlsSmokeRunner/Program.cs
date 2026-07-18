@@ -132,13 +132,15 @@ internal static class Program
     {
         bool hasErrorRecorderBefore = builder.HasErrorRecorder;
         bool hasLogger = builder.HasLogger;
+        bool snapshotAvailable = builder.TryGetErrorRecorderSnapshot(out TensorRtErrorRecorderSnapshot snapshot);
+        TensorRtErrorRecorderSummary errorRecorderSummary = snapshot.ToSummary();
         bool metadataAvailable = builder.TryGetErrorRecorderVersionedMetadata(
             out TensorRtVersionedInterfaceMetadata metadata,
             out string metadataDiagnostic);
         builder.ClearErrorRecorder();
         bool hasErrorRecorderAfter = builder.HasErrorRecorder;
         builder.ClearGpuAllocator();
-        return $"Logger={hasLogger} ErrorRecorder={hasErrorRecorderBefore}->{hasErrorRecorderAfter} VersionedMetadata={FormatVersionedMetadata(metadataAvailable, metadata, metadataDiagnostic)} ClearGpuAllocator=True";
+        return $"Logger={hasLogger} ErrorRecorder={hasErrorRecorderBefore}->{hasErrorRecorderAfter} Snapshot={snapshotAvailable}/{snapshot.ErrorCount}/{snapshot.Records.Count}/Overflow={snapshot.HasOverflowed} ErrorRecorderSummary={errorRecorderSummary.HasRecorder}/{errorRecorderSummary.ErrorCount}/{errorRecorderSummary.CopiedErrorRecordCount}/{errorRecorderSummary.CopiedRecordCountMatchesErrorCount} VersionedMetadata={FormatVersionedMetadata(metadataAvailable, metadata, metadataDiagnostic)} ClearGpuAllocator=True";
     }
 
     private static string ProbeBuilderConfig(TensorRtApiLine line, TensorRtBuilderConfig config)
@@ -160,12 +162,14 @@ internal static class Program
     private static string ProbeNetwork(TensorRtNetworkDefinition network)
     {
         bool hasErrorRecorderBefore = network.HasErrorRecorder;
+        bool snapshotAvailable = network.TryGetErrorRecorderSnapshot(out TensorRtErrorRecorderSnapshot snapshot);
+        TensorRtErrorRecorderSummary errorRecorderSummary = snapshot.ToSummary();
         bool metadataAvailable = network.TryGetErrorRecorderVersionedMetadata(
             out TensorRtVersionedInterfaceMetadata metadata,
             out string metadataDiagnostic);
         network.ClearErrorRecorder();
         bool hasErrorRecorderAfter = network.HasErrorRecorder;
-        return $"ErrorRecorder={hasErrorRecorderBefore}->{hasErrorRecorderAfter}/VersionedMetadata={FormatVersionedMetadata(metadataAvailable, metadata, metadataDiagnostic)}";
+        return $"ErrorRecorder={hasErrorRecorderBefore}->{hasErrorRecorderAfter}/Snapshot={snapshotAvailable}/{snapshot.ErrorCount}/{snapshot.Records.Count}/Overflow={snapshot.HasOverflowed}/ErrorRecorderSummary={errorRecorderSummary.HasRecorder}/{errorRecorderSummary.ErrorCount}/{errorRecorderSummary.CopiedErrorRecordCount}/{errorRecorderSummary.CopiedRecordCountMatchesErrorCount}/VersionedMetadata={FormatVersionedMetadata(metadataAvailable, metadata, metadataDiagnostic)}";
     }
 
     private static string ProbeEngine(TensorRtEngine engine)
@@ -182,12 +186,14 @@ internal static class Program
     private static string ProbeInspector(TensorRtEngineInspector inspector)
     {
         bool hasErrorRecorderBefore = inspector.HasErrorRecorder;
+        bool snapshotAvailable = inspector.TryGetErrorRecorderSnapshot(out TensorRtErrorRecorderSnapshot snapshot);
+        TensorRtErrorRecorderSummary errorRecorderSummary = snapshot.ToSummary();
         bool metadataAvailable = inspector.TryGetErrorRecorderVersionedMetadata(
             out TensorRtVersionedInterfaceMetadata metadata,
             out string metadataDiagnostic);
         inspector.ClearErrorRecorder();
         bool hasErrorRecorderAfter = inspector.HasErrorRecorder;
-        return $"ErrorRecorder={hasErrorRecorderBefore}->{hasErrorRecorderAfter}/VersionedMetadata={FormatVersionedMetadata(metadataAvailable, metadata, metadataDiagnostic)}";
+        return $"ErrorRecorder={hasErrorRecorderBefore}->{hasErrorRecorderAfter}/Snapshot={snapshotAvailable}/{snapshot.ErrorCount}/{snapshot.Records.Count}/Overflow={snapshot.HasOverflowed}/ErrorRecorderSummary={errorRecorderSummary.HasRecorder}/{errorRecorderSummary.ErrorCount}/{errorRecorderSummary.CopiedErrorRecordCount}/{errorRecorderSummary.CopiedRecordCountMatchesErrorCount}/VersionedMetadata={FormatVersionedMetadata(metadataAvailable, metadata, metadataDiagnostic)}";
     }
 
     private static string ProbeContext(TensorRtExecutionContext context, string outputTensorName)

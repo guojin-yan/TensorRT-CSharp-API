@@ -42,6 +42,22 @@ public sealed partial class TensorRtEngineInspector
     public bool HasErrorRecorder => NativeBridgeApi.HasEngineInspectorErrorRecorder(Line, _handle);
 
     /// <summary>
+    /// Attempts to collect a copied read-only snapshot from this inspector's error recorder.
+    /// 尝试从当前 inspector 的 error recorder 采集只读托管快照。
+    /// </summary>
+    /// <param name="snapshot">The copied snapshot. 已复制到托管内存的快照。</param>
+    /// <returns><see langword="true"/> when a recorder is attached. / 当前附加 recorder 时返回 <see langword="true"/>。</returns>
+    /// <remarks>
+    /// The snapshot does not expose a borrowed recorder pointer or change recorder ownership.
+    /// 该快照不暴露 borrowed recorder 指针，也不改变 recorder ownership。
+    /// </remarks>
+    public bool TryGetErrorRecorderSnapshot(out TensorRtErrorRecorderSnapshot snapshot)
+    {
+        snapshot = NativeBridgeApi.GetEngineInspectorErrorRecorderSnapshot(Line, _handle);
+        return snapshot.HasRecorder;
+    }
+
+    /// <summary>
     /// Clears the error recorder attached to this engine inspector.
     /// 清除绑定到该 engine inspector 的 error recorder。
     /// </summary>

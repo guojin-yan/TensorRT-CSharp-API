@@ -99,6 +99,36 @@ internal static partial class NativeBridgeApi
         return hasRecorder != 0;
     }
 
+    public static TensorRtErrorRecorderSnapshot GetBuilderErrorRecorderSnapshot(TensorRtApiLine line, SafeTensorRtObjectHandle builder)
+    {
+        NativeTensorRtErrorRecorderSnapshotInfo info;
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_builder_get_error_recorder_snapshot_info(builder, out info),
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_get_error_recorder_snapshot_info(builder, out info),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_builder_get_error_recorder_snapshot_info(builder, out info),
+            _ => throw UnsupportedLine()
+        };
+        NativeStatus.ThrowIfFailed(status);
+
+        return ReadOwnerErrorRecorderSnapshot(
+            line,
+            info,
+            index =>
+            {
+                NativeTensorRtErrorRecordInfo error;
+                BridgeStatusCode errorStatus = line switch
+                {
+                    TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_builder_get_error_recorder_error(builder, index, out error),
+                    TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_get_error_recorder_error(builder, index, out error),
+                    TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_builder_get_error_recorder_error(builder, index, out error),
+                    _ => throw UnsupportedLine()
+                };
+                NativeStatus.ThrowIfFailed(errorStatus);
+                return error;
+            });
+    }
+
     public static bool HasBuilderLogger(TensorRtApiLine line, SafeTensorRtObjectHandle builder)
     {
         int hasLogger;
@@ -307,6 +337,66 @@ internal static partial class NativeBridgeApi
         NativeStatus.ThrowIfFailed(status);
     }
 
+    public static TensorRtErrorRecorderSnapshot GetNetworkErrorRecorderSnapshot(TensorRtApiLine line, SafeTensorRtObjectHandle network)
+    {
+        NativeTensorRtErrorRecorderSnapshotInfo info;
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_network_get_error_recorder_snapshot_info(network, out info),
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_network_get_error_recorder_snapshot_info(network, out info),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_network_get_error_recorder_snapshot_info(network, out info),
+            _ => throw UnsupportedLine()
+        };
+        NativeStatus.ThrowIfFailed(status);
+
+        return ReadOwnerErrorRecorderSnapshot(
+            line,
+            info,
+            index =>
+            {
+                NativeTensorRtErrorRecordInfo error;
+                BridgeStatusCode errorStatus = line switch
+                {
+                    TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_network_get_error_recorder_error(network, index, out error),
+                    TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_network_get_error_recorder_error(network, index, out error),
+                    TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_network_get_error_recorder_error(network, index, out error),
+                    _ => throw UnsupportedLine()
+                };
+                NativeStatus.ThrowIfFailed(errorStatus);
+                return error;
+            });
+    }
+
+    public static TensorRtErrorRecorderSnapshot GetEngineInspectorErrorRecorderSnapshot(TensorRtApiLine line, SafeTensorRtObjectHandle inspector)
+    {
+        NativeTensorRtErrorRecorderSnapshotInfo info;
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_engine_inspector_get_error_recorder_snapshot_info(inspector, out info),
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_engine_inspector_get_error_recorder_snapshot_info(inspector, out info),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_engine_inspector_get_error_recorder_snapshot_info(inspector, out info),
+            _ => throw UnsupportedLine()
+        };
+        NativeStatus.ThrowIfFailed(status);
+
+        return ReadOwnerErrorRecorderSnapshot(
+            line,
+            info,
+            index =>
+            {
+                NativeTensorRtErrorRecordInfo error;
+                BridgeStatusCode errorStatus = line switch
+                {
+                    TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_engine_inspector_get_error_recorder_error(inspector, index, out error),
+                    TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_engine_inspector_get_error_recorder_error(inspector, index, out error),
+                    TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_engine_inspector_get_error_recorder_error(inspector, index, out error),
+                    _ => throw UnsupportedLine()
+                };
+                NativeStatus.ThrowIfFailed(errorStatus);
+                return error;
+            });
+    }
+
     public static void RemoveNetworkTensor(TensorRtApiLine line, SafeTensorRtObjectHandle network, SafeTensorRtObjectHandle tensor)
     {
         EnsureTensorRt11DeploymentApi(line, nameof(RemoveNetworkTensor));
@@ -326,5 +416,26 @@ internal static partial class NativeBridgeApi
         BridgeStatusCode status = NativeMethodsTensorRt.jyppx_trt11_network_add_topk_v2(network, input, (int)operation, k, axes, (int)indicesType, out SafeTensorRtObjectHandle layer);
         NativeStatus.ThrowIfFailed(status);
         return layer;
+    }
+
+    private static TensorRtErrorRecorderSnapshot ReadOwnerErrorRecorderSnapshot(
+        TensorRtApiLine line,
+        NativeTensorRtErrorRecorderSnapshotInfo info,
+        Func<int, NativeTensorRtErrorRecordInfo> readError)
+    {
+        bool hasRecorder = info.HasRecorder != 0;
+        int errorCount = Math.Max(0, info.ErrorCount);
+        if (!hasRecorder || errorCount == 0)
+        {
+            return BridgeInfoMapper.ToManaged(line, info, Array.Empty<TensorRtErrorRecord>());
+        }
+
+        List<TensorRtErrorRecord> records = new List<TensorRtErrorRecord>(errorCount);
+        for (int index = 0; index < errorCount; index++)
+        {
+            records.Add(BridgeInfoMapper.ToManaged(readError(index)));
+        }
+
+        return BridgeInfoMapper.ToManaged(line, info, records);
     }
 }

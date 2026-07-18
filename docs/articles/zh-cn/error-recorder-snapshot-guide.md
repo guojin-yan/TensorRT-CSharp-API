@@ -4,13 +4,13 @@ ErrorRecorder snapshot 的目标是把 TensorRT 内部错误信息复制到托�
 
 ## 当前覆盖
 
-- Runtime 和 Refitter 已提供 copied snapshot API。
-- Builder、Engine、ExecutionContext、NetworkDefinition、EngineInspector 已提供 `HasErrorRecorder` / `ClearErrorRecorder` 安全边界，不暴露 recorder 指针。
+- Runtime、Refitter、Builder、Engine、ExecutionContext、NetworkDefinition、EngineInspector 已提供 copied snapshot API。
+- 这些 owner 的 snapshot 都只复制错误记录，不暴露 recorder 指针；`HasErrorRecorder` / `ClearErrorRecorder` 仍保持独立的安全边界。
 - Direct `IErrorRecorder*` ownership、引用计数和 interface info 仍保持 deferred。
 
 ## Snapshot 内容
 
-Runtime 和 Refitter snapshot 会复制：
+各 owner snapshot 会复制：
 
 - error code。
 - error description。
@@ -19,7 +19,7 @@ Runtime 和 Refitter snapshot 会复制：
 
 如果 TensorRT 返回的字符串生命周期不由调用方持有，native bridge 必须使用 caller buffer 或复制模式，不能直接返回悬空指针。
 
-覆盖矩阵把 `IErrorRecorder::getNbErrors`、`getErrorCode`、`getErrorDesc`、`hasOverflowed` 归并到 runtime/refitter snapshot 的安全替代实现；这只是表示只读诊断语义已通过 owner 对象复制出来，不表示 public API 可以取得或持有裸 `IErrorRecorder*`。
+覆盖矩阵把 `IErrorRecorder::getNbErrors`、`getErrorCode`、`getErrorDesc`、`hasOverflowed` 和 TRT10+ 的 copied interface metadata 归并到各 owner snapshot 的安全替代实现；这只是表示只读诊断语义已通过 owner 对象复制出来，不表示 public API 可以取得或持有裸 `IErrorRecorder*`。
 
 ## 质量门禁
 

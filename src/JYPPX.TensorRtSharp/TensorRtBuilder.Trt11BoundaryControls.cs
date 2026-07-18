@@ -52,6 +52,22 @@ public sealed partial class TensorRtBuilder
     public bool HasErrorRecorder => NativeBridgeApi.HasBuilderErrorRecorder(Line, _handle);
 
     /// <summary>
+    /// Attempts to collect a copied read-only snapshot from this builder's error recorder.
+    /// 尝试从当前 builder 的 error recorder 采集只读托管快照。
+    /// </summary>
+    /// <param name="snapshot">The copied snapshot. 已复制到托管内存的快照。</param>
+    /// <returns><see langword="true"/> when a recorder is attached. / 当前附加 recorder 时返回 <see langword="true"/>。</returns>
+    /// <remarks>
+    /// The snapshot copies counts, overflow state, interface metadata when available, and error descriptions. It never exposes or retains an <c>IErrorRecorder*</c>.
+    /// 该快照复制数量、溢出状态、可用时的 interface 元数据和错误描述；不会暴露或持有 <c>IErrorRecorder*</c>。
+    /// </remarks>
+    public bool TryGetErrorRecorderSnapshot(out TensorRtErrorRecorderSnapshot snapshot)
+    {
+        snapshot = NativeBridgeApi.GetBuilderErrorRecorderSnapshot(Line, _handle);
+        return snapshot.HasRecorder;
+    }
+
+    /// <summary>
     /// Gets whether this builder still has a native TensorRT logger attached.
     /// 获取当前 builder 是否仍附加 TensorRT 原生 logger；不会暴露 logger 指针或接管其生命周期。
     /// </summary>

@@ -63,6 +63,30 @@ static void error_recorder_boundary_copy_interface_info(
 #endif
 }
 
+static JYPPX_StatusCode get_builder_payload_for_error_recorder_boundary(
+    JYPPX_TensorRtBuilder* builder,
+    nvinfer1::IBuilder** out_payload,
+    const char* feature_name)
+{
+    auto status = jyppx::tensorrt::validate_handle(builder, kLine, JYPPX_TENSORRT_OBJECT_KIND_BUILDER, "builder");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    auto* builder_payload = get_payload<nvinfer1::IBuilder>(builder);
+    if (builder_payload == nullptr)
+    {
+        std::ostringstream message;
+        message << "Builder handle does not carry the expected TensorRT payload for " << feature_name << ".";
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, message.str().c_str());
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    *out_payload = builder_payload;
+    return JYPPX_STATUS_OK;
+}
+
 static JYPPX_StatusCode get_engine_payload_for_error_recorder_boundary(
     JYPPX_TensorRtCudaEngine* engine,
     nvinfer1::ICudaEngine** out_payload,
@@ -157,6 +181,107 @@ static JYPPX_StatusCode get_engine_inspector_payload_for_error_recorder_boundary
 
     *out_payload = inspector_payload;
     return JYPPX_STATUS_OK;
+}
+
+template <typename OwnerPayload>
+static JYPPX_StatusCode owner_get_error_recorder_snapshot_info_with_seh_guard(
+    OwnerPayload* owner_payload,
+    JYPPX_TensorRtErrorRecorderSnapshotInfo* out_info,
+    const char* feature_name)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        auto* recorder = owner_payload->getErrorRecorder();
+        if (recorder == nullptr)
+        {
+            return JYPPX_STATUS_OK;
+        }
+
+        out_info->has_recorder = JYPPX_TRUE;
+        const int32_t error_count = recorder->getNbErrors();
+        out_info->error_count = error_count > 0 ? error_count : 0;
+        out_info->has_overflowed = recorder->hasOverflowed() ? JYPPX_TRUE : JYPPX_FALSE;
+        error_recorder_boundary_copy_interface_info(recorder, out_info);
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        error_recorder_boundary_reset_error_recorder_snapshot_info(out_info);
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    auto* recorder = owner_payload->getErrorRecorder();
+    if (recorder == nullptr)
+    {
+        return JYPPX_STATUS_OK;
+    }
+
+    out_info->has_recorder = JYPPX_TRUE;
+    const int32_t error_count = recorder->getNbErrors();
+    out_info->error_count = error_count > 0 ? error_count : 0;
+    out_info->has_overflowed = recorder->hasOverflowed() ? JYPPX_TRUE : JYPPX_FALSE;
+    error_recorder_boundary_copy_interface_info(recorder, out_info);
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+template <typename OwnerPayload>
+static JYPPX_StatusCode owner_get_error_recorder_error_with_seh_guard(
+    OwnerPayload* owner_payload,
+    const int32_t index,
+    JYPPX_TensorRtErrorRecordInfo* out_error,
+    const char* feature_name)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        auto* recorder = owner_payload->getErrorRecorder();
+        if (recorder == nullptr)
+        {
+            jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Owner error recorder snapshot is unavailable because no recorder is attached.");
+            return JYPPX_STATUS_INVALID_STATE;
+        }
+
+        const int32_t error_count = recorder->getNbErrors();
+        if (index < 0 || index >= error_count)
+        {
+            jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Owner error recorder error index is out of range.");
+            return JYPPX_STATUS_INVALID_ARGUMENT;
+        }
+
+        out_error->index = index;
+        out_error->code = static_cast<int32_t>(recorder->getErrorCode(index));
+        copy_c_string(recorder->getErrorDesc(index), out_error->description, sizeof(out_error->description));
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        error_recorder_boundary_reset_error_record_info(out_error);
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    auto* recorder = owner_payload->getErrorRecorder();
+    if (recorder == nullptr)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Owner error recorder snapshot is unavailable because no recorder is attached.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    const int32_t error_count = recorder->getNbErrors();
+    if (index < 0 || index >= error_count)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "Owner error recorder error index is out of range.");
+        return JYPPX_STATUS_INVALID_ARGUMENT;
+    }
+
+    out_error->index = index;
+    out_error->code = static_cast<int32_t>(recorder->getErrorCode(index));
+    copy_c_string(recorder->getErrorDesc(index), out_error->description, sizeof(out_error->description));
+    return JYPPX_STATUS_OK;
+#endif
 }
 
 static JYPPX_StatusCode engine_has_error_recorder_with_seh_guard(
@@ -993,5 +1118,266 @@ JYPPX_StatusCode JYPPX_TRT_ERROR_RECORDER_BOUNDARY_API(engine_inspector_clear_er
 #else
     (void)inspector;
     return jyppx::tensorrt::report_vendor_missing(kLine, "engine inspector error recorder clear");
+#endif
+}
+
+JYPPX_StatusCode JYPPX_TRT_ERROR_RECORDER_BOUNDARY_API(builder_get_error_recorder_snapshot_info)(
+    JYPPX_TensorRtBuilder* builder,
+    JYPPX_TensorRtErrorRecorderSnapshotInfo* out_info)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_info, "out_info");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    error_recorder_boundary_reset_error_recorder_snapshot_info(out_info);
+#if JYPPX_HAS_TENSORRT
+    nvinfer1::IBuilder* builder_payload = nullptr;
+    status = get_builder_payload_for_error_recorder_boundary(builder, &builder_payload, "builder error recorder snapshot query");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    try
+    {
+        return owner_get_error_recorder_snapshot_info_with_seh_guard(
+            builder_payload,
+            out_info,
+            "builder error recorder snapshot query");
+    }
+    catch (const std::exception& exception)
+    {
+        error_recorder_boundary_reset_error_recorder_snapshot_info(out_info);
+        return error_recorder_boundary_control_exception("builder error recorder snapshot query", exception);
+    }
+    catch (...)
+    {
+        error_recorder_boundary_reset_error_recorder_snapshot_info(out_info);
+        return error_recorder_boundary_control_unknown_exception("builder error recorder snapshot query");
+    }
+#else
+    (void)builder;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "builder error recorder snapshot query");
+#endif
+}
+
+JYPPX_StatusCode JYPPX_TRT_ERROR_RECORDER_BOUNDARY_API(builder_get_error_recorder_error)(
+    JYPPX_TensorRtBuilder* builder,
+    int32_t index,
+    JYPPX_TensorRtErrorRecordInfo* out_error)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_error, "out_error");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    error_recorder_boundary_reset_error_record_info(out_error);
+#if JYPPX_HAS_TENSORRT
+    nvinfer1::IBuilder* builder_payload = nullptr;
+    status = get_builder_payload_for_error_recorder_boundary(builder, &builder_payload, "builder error recorder error copy");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    try
+    {
+        return owner_get_error_recorder_error_with_seh_guard(
+            builder_payload,
+            index,
+            out_error,
+            "builder error recorder error copy");
+    }
+    catch (const std::exception& exception)
+    {
+        error_recorder_boundary_reset_error_record_info(out_error);
+        return error_recorder_boundary_control_exception("builder error recorder error copy", exception);
+    }
+    catch (...)
+    {
+        error_recorder_boundary_reset_error_record_info(out_error);
+        return error_recorder_boundary_control_unknown_exception("builder error recorder error copy");
+    }
+#else
+    (void)builder;
+    (void)index;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "builder error recorder error copy");
+#endif
+}
+
+JYPPX_StatusCode JYPPX_TRT_ERROR_RECORDER_BOUNDARY_API(network_get_error_recorder_snapshot_info)(
+    JYPPX_TensorRtNetworkDefinition* network,
+    JYPPX_TensorRtErrorRecorderSnapshotInfo* out_info)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_info, "out_info");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    error_recorder_boundary_reset_error_recorder_snapshot_info(out_info);
+#if JYPPX_HAS_TENSORRT
+    nvinfer1::INetworkDefinition* network_payload = nullptr;
+    status = get_network_payload_for_error_recorder_boundary(network, &network_payload, "network error recorder snapshot query");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    try
+    {
+        return owner_get_error_recorder_snapshot_info_with_seh_guard(
+            network_payload,
+            out_info,
+            "network error recorder snapshot query");
+    }
+    catch (const std::exception& exception)
+    {
+        error_recorder_boundary_reset_error_recorder_snapshot_info(out_info);
+        return error_recorder_boundary_control_exception("network error recorder snapshot query", exception);
+    }
+    catch (...)
+    {
+        error_recorder_boundary_reset_error_recorder_snapshot_info(out_info);
+        return error_recorder_boundary_control_unknown_exception("network error recorder snapshot query");
+    }
+#else
+    (void)network;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "network error recorder snapshot query");
+#endif
+}
+
+JYPPX_StatusCode JYPPX_TRT_ERROR_RECORDER_BOUNDARY_API(network_get_error_recorder_error)(
+    JYPPX_TensorRtNetworkDefinition* network,
+    int32_t index,
+    JYPPX_TensorRtErrorRecordInfo* out_error)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_error, "out_error");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    error_recorder_boundary_reset_error_record_info(out_error);
+#if JYPPX_HAS_TENSORRT
+    nvinfer1::INetworkDefinition* network_payload = nullptr;
+    status = get_network_payload_for_error_recorder_boundary(network, &network_payload, "network error recorder error copy");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    try
+    {
+        return owner_get_error_recorder_error_with_seh_guard(
+            network_payload,
+            index,
+            out_error,
+            "network error recorder error copy");
+    }
+    catch (const std::exception& exception)
+    {
+        error_recorder_boundary_reset_error_record_info(out_error);
+        return error_recorder_boundary_control_exception("network error recorder error copy", exception);
+    }
+    catch (...)
+    {
+        error_recorder_boundary_reset_error_record_info(out_error);
+        return error_recorder_boundary_control_unknown_exception("network error recorder error copy");
+    }
+#else
+    (void)network;
+    (void)index;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "network error recorder error copy");
+#endif
+}
+
+JYPPX_StatusCode JYPPX_TRT_ERROR_RECORDER_BOUNDARY_API(engine_inspector_get_error_recorder_snapshot_info)(
+    JYPPX_TensorRtEngineInspector* inspector,
+    JYPPX_TensorRtErrorRecorderSnapshotInfo* out_info)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_info, "out_info");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    error_recorder_boundary_reset_error_recorder_snapshot_info(out_info);
+#if JYPPX_HAS_TENSORRT
+    nvinfer1::IEngineInspector* inspector_payload = nullptr;
+    status = get_engine_inspector_payload_for_error_recorder_boundary(inspector, &inspector_payload, "engine inspector error recorder snapshot query");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    try
+    {
+        return owner_get_error_recorder_snapshot_info_with_seh_guard(
+            inspector_payload,
+            out_info,
+            "engine inspector error recorder snapshot query");
+    }
+    catch (const std::exception& exception)
+    {
+        error_recorder_boundary_reset_error_recorder_snapshot_info(out_info);
+        return error_recorder_boundary_control_exception("engine inspector error recorder snapshot query", exception);
+    }
+    catch (...)
+    {
+        error_recorder_boundary_reset_error_recorder_snapshot_info(out_info);
+        return error_recorder_boundary_control_unknown_exception("engine inspector error recorder snapshot query");
+    }
+#else
+    (void)inspector;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "engine inspector error recorder snapshot query");
+#endif
+}
+
+JYPPX_StatusCode JYPPX_TRT_ERROR_RECORDER_BOUNDARY_API(engine_inspector_get_error_recorder_error)(
+    JYPPX_TensorRtEngineInspector* inspector,
+    int32_t index,
+    JYPPX_TensorRtErrorRecordInfo* out_error)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_error, "out_error");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    error_recorder_boundary_reset_error_record_info(out_error);
+#if JYPPX_HAS_TENSORRT
+    nvinfer1::IEngineInspector* inspector_payload = nullptr;
+    status = get_engine_inspector_payload_for_error_recorder_boundary(inspector, &inspector_payload, "engine inspector error recorder error copy");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+    try
+    {
+        return owner_get_error_recorder_error_with_seh_guard(
+            inspector_payload,
+            index,
+            out_error,
+            "engine inspector error recorder error copy");
+    }
+    catch (const std::exception& exception)
+    {
+        error_recorder_boundary_reset_error_record_info(out_error);
+        return error_recorder_boundary_control_exception("engine inspector error recorder error copy", exception);
+    }
+    catch (...)
+    {
+        error_recorder_boundary_reset_error_record_info(out_error);
+        return error_recorder_boundary_control_unknown_exception("engine inspector error recorder error copy");
+    }
+#else
+    (void)inspector;
+    (void)index;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "engine inspector error recorder error copy");
 #endif
 }

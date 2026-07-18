@@ -12,6 +12,22 @@ public sealed partial class TensorRtNetworkDefinition
     public bool HasErrorRecorder => NativeBridgeApi.HasNetworkErrorRecorder(Line, _handle);
 
     /// <summary>
+    /// Attempts to collect a copied read-only snapshot from this network's error recorder.
+    /// 尝试从当前 network 的 error recorder 采集只读托管快照。
+    /// </summary>
+    /// <param name="snapshot">The copied snapshot. 已复制到托管内存的快照。</param>
+    /// <returns><see langword="true"/> when a recorder is attached. / 当前附加 recorder 时返回 <see langword="true"/>。</returns>
+    /// <remarks>
+    /// The snapshot is pointer-free and does not change the network-owned recorder or its lifetime.
+    /// 该快照不含裸指针，不改变 network-owned recorder，也不接管其生命周期。
+    /// </remarks>
+    public bool TryGetErrorRecorderSnapshot(out TensorRtErrorRecorderSnapshot snapshot)
+    {
+        snapshot = NativeBridgeApi.GetNetworkErrorRecorderSnapshot(Line, _handle);
+        return snapshot.HasRecorder;
+    }
+
+    /// <summary>
     /// Clears the native TensorRT error recorder attached to this network definition.
     /// 清除当前 network definition 上绑定的 TensorRT 原生 error recorder；支持 TensorRT 8/10/11，不会销毁 recorder 或接管其生命周期。
     /// </summary>

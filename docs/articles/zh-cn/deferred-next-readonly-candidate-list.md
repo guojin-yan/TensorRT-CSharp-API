@@ -37,7 +37,7 @@ Deferred API 升级容易在 callback、allocator、borrowed pointer 和 plugin 
 
 1. **ONNX parser copied diagnostics / layer-output presence**：优先补强已存在的 `LayerOutputTensorExists`、subgraph count/copy、parser error copied diagnostics 和 sample/smoke 证据；继续避免返回 parser-owned `ITensor*`。
 2. **IAlgorithm 结果快照设计**：仅做设计门禁和 copied snapshot 草图，暂不把 `IAlgorithm*`、`IAlgorithmContext*`、`IAlgorithmIOInfo*` 作为 public handle 暴露。
-3. **IErrorRecorder interface info**：优先复用现有 `TensorRtErrorRecorderSnapshot` 与 interface metadata copied 结构，继续禁止 ref-count ownership API 晋级。
+3. **IErrorRecorder owner snapshot**：本批已把 `TensorRtErrorRecorderSnapshot` 扩展到 Builder、NetworkDefinition、EngineInspector，并同步 TRT8/TRT10/TRT11 native/manifest/interop；继续禁止 ref-count ownership API 晋级。
 4. **IPluginCreatorV3One / IVersionedInterface metadata**：只允许 copied interface info、name/version/namespace 快照；不进入 plugin create/clone/enqueue/resource。
 5. **IStreamReader/IStreamWriter readonly diagnostics**：先形成 design gate，确认 buffer/ownership 语义后再决定是否实现。
 6. **CUDA graph / memory range copied query**：只选择 count/copy、scalar attribute、caller-owned output struct 的查询路径；不处理 user object、external memory、IPC、callback destructor 或跨进程 ownership。

@@ -5,7 +5,7 @@
 ## 当前结论
 
 - `RuntimeEvidenceKind=design-gate`。
-- `CopiedDiagnosticsReady=True`，Runtime 和 Refitter 可以通过 `TensorRtErrorRecorderSnapshot` 读取 copied diagnostics。
+- `CopiedDiagnosticsReady=True`，Runtime、Refitter、Builder、Engine、ExecutionContext、NetworkDefinition 和 EngineInspector 可以通过 `TensorRtErrorRecorderSnapshot` 读取 copied diagnostics。
 - `RequiredOutputMode=owner-scoped copied diagnostics and interface metadata snapshot`。
 - `CandidateMethods=IErrorRecorder::getInterfaceInfo, IErrorRecorder::getNbErrors, IErrorRecorder::getErrorCode, IErrorRecorder::getErrorDesc, IErrorRecorder::hasOverflowed, IErrorRecorder::incRefCount, IErrorRecorder::decRefCount`。
 - `PointerFreeSurfaceReady=True`，public API 不暴露、返回或保存 recorder pointer。
@@ -16,13 +16,18 @@
 
 ## 已允许的 public 边界
 
-Runtime 和 Refitter 使用 copied snapshot：
+所有已支持 owner 使用 copied snapshot：
 
 - `TensorRtRuntime.TryGetErrorRecorderSnapshot(out TensorRtErrorRecorderSnapshot snapshot)`。
 - `TensorRtRefitter.TryGetErrorRecorderSnapshot(out TensorRtErrorRecorderSnapshot snapshot)`。
+- `TensorRtBuilder.TryGetErrorRecorderSnapshot(out TensorRtErrorRecorderSnapshot snapshot)`。
+- `TensorRtEngine.TryGetErrorRecorderSnapshot(out TensorRtErrorRecorderSnapshot snapshot)`。
+- `TensorRtExecutionContext.TryGetErrorRecorderSnapshot(out TensorRtErrorRecorderSnapshot snapshot)`。
+- `TensorRtNetworkDefinition.TryGetErrorRecorderSnapshot(out TensorRtErrorRecorderSnapshot snapshot)`。
+- `TensorRtEngineInspector.TryGetErrorRecorderSnapshot(out TensorRtErrorRecorderSnapshot snapshot)`。
 - `TensorRtErrorRecorderSnapshot.Records` 是托管集合，记录项为 `TensorRtErrorRecord`。
 
-Builder、Engine、ExecutionContext、NetworkDefinition、EngineInspector 使用 presence / clear 边界：
+所有 owner 同时使用 presence / clear 边界：
 
 - `HasErrorRecorder` 只返回是否附加 recorder。
 - `ClearErrorRecorder()` 只清除 owner 上的外部 recorder 绑定，不销毁 recorder，不接管生命周期。

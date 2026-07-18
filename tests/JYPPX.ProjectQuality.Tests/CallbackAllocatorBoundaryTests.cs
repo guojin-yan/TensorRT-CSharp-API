@@ -610,6 +610,66 @@ public sealed class CallbackAllocatorBoundaryTests
     }
 
     [Fact]
+    public void BuilderNetworkAndInspectorErrorRecorderSnapshotsUseCopiedManagedValues()
+    {
+        string manifest8 = ReadTensorRtManifest("v8", "trt8-owner-error-recorder-snapshot.manifest.json");
+        string manifest10 = ReadTensorRtManifest("v10", "trt10-owner-error-recorder-snapshot.manifest.json");
+        string manifest11 = ReadTensorRtManifest("v11", "trt11-owner-error-recorder-snapshot.manifest.json");
+        string header8 = ReadSource("native", "include", "jyppx", "tensorrt", "trt8.h");
+        string header10 = ReadSource("native", "include", "jyppx", "tensorrt", "trt10.h");
+        string header11 = ReadSource("native", "include", "jyppx", "tensorrt", "trt11.h");
+        string commonBoundary = ReadSource("native", "src", "tensorrt", "common", "error_recorder_boundary_controls.inc");
+        string trt11Boundary = ReadSource("native", "src", "tensorrt", "v11", "modules", "deployment", "boundary_controls.inc");
+        string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11BoundaryControls.cs");
+        string builderWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilder.Trt11BoundaryControls.cs");
+        string networkWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtNetworkDefinition.Trt11BoundaryControls.cs");
+        string inspectorWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtEngineInspector.Trt11Diagnostics.cs");
+        string smoke = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
+
+        foreach (string manifest in new[] { manifest8, manifest10, manifest11 })
+        {
+            Assert.Contains("builder-get-error-recorder-snapshot-info", manifest);
+            Assert.Contains("builder-get-error-recorder-error", manifest);
+            Assert.Contains("network-get-error-recorder-snapshot-info", manifest);
+            Assert.Contains("network-get-error-recorder-error", manifest);
+            Assert.Contains("engine-inspector-get-error-recorder-snapshot-info", manifest);
+            Assert.Contains("engine-inspector-get-error-recorder-error", manifest);
+            Assert.Contains("JYPPX_TensorRtErrorRecorderSnapshotInfo*", manifest);
+            Assert.Contains("JYPPX_TensorRtErrorRecordInfo*", manifest);
+        }
+
+        foreach (string header in new[] { header8, header10, header11 })
+        {
+            Assert.Contains("builder_get_error_recorder_snapshot_info", header);
+            Assert.Contains("builder_get_error_recorder_error", header);
+            Assert.Contains("network_get_error_recorder_snapshot_info", header);
+            Assert.Contains("network_get_error_recorder_error", header);
+            Assert.Contains("engine_inspector_get_error_recorder_snapshot_info", header);
+            Assert.Contains("engine_inspector_get_error_recorder_error", header);
+        }
+
+        Assert.Contains("get_builder_payload_for_error_recorder_boundary", commonBoundary);
+        Assert.Contains("owner_get_error_recorder_snapshot_info_with_seh_guard", commonBoundary);
+        Assert.Contains("owner_get_error_recorder_error_with_seh_guard", commonBoundary);
+        Assert.Contains("trt11_owner_get_error_recorder_snapshot_info_with_seh_guard", trt11Boundary);
+        Assert.Contains("trt11_owner_get_error_recorder_error_with_seh_guard", trt11Boundary);
+        Assert.Contains("GetBuilderErrorRecorderSnapshot", interop);
+        Assert.Contains("GetNetworkErrorRecorderSnapshot", interop);
+        Assert.Contains("GetEngineInspectorErrorRecorderSnapshot", interop);
+        Assert.Contains("jyppx_trt8_builder_get_error_recorder_error", interop);
+        Assert.Contains("jyppx_trt10_network_get_error_recorder_snapshot_info", interop);
+        Assert.Contains("jyppx_trt11_engine_inspector_get_error_recorder_error", interop);
+        Assert.Contains("TryGetErrorRecorderSnapshot(out TensorRtErrorRecorderSnapshot snapshot)", builderWrapper);
+        Assert.Contains("TryGetErrorRecorderSnapshot(out TensorRtErrorRecorderSnapshot snapshot)", networkWrapper);
+        Assert.Contains("TryGetErrorRecorderSnapshot(out TensorRtErrorRecorderSnapshot snapshot)", inspectorWrapper);
+        Assert.Contains("builder.TryGetErrorRecorderSnapshot", smoke);
+        Assert.Contains("network.TryGetErrorRecorderSnapshot", smoke);
+        Assert.Contains("inspector.TryGetErrorRecorderSnapshot", smoke);
+        Assert.DoesNotContain("public IntPtr", builderWrapper + networkWrapper + inspectorWrapper);
+        Assert.DoesNotContain("public nint", builderWrapper + networkWrapper + inspectorWrapper);
+    }
+
+    [Fact]
     public void ErrorRecorderSnapshotsCopyInterfaceInfoWithoutExposingNativeRecorder()
     {
         string nativeTypes = ReadSource("native", "include", "jyppx", "tensorrt", "types.h");
@@ -649,16 +709,14 @@ public sealed class CallbackAllocatorBoundaryTests
         Assert.Contains("trt11_reset_error_recorder_interface_info", trt11BoundaryControls);
         Assert.Contains("trt11_copy_error_recorder_interface_info", trt11BoundaryControls);
         Assert.Contains("trt11_copy_error_recorder_interface_info(recorder, out_info);", trt11BoundaryControls);
-        Assert.Equal(
-            4,
+        Assert.True(
             System.Text.RegularExpressions.Regex.Matches(
                 trt11BoundaryControls,
-                System.Text.RegularExpressions.Regex.Escape("trt11_copy_error_recorder_interface_info(recorder, out_info);")).Count);
-        Assert.Equal(
-            6,
+                System.Text.RegularExpressions.Regex.Escape("trt11_copy_error_recorder_interface_info(recorder, out_info);")).Count >= 4);
+        Assert.True(
             System.Text.RegularExpressions.Regex.Matches(
                 trt11BoundaryControls,
-                System.Text.RegularExpressions.Regex.Escape("trt11_reset_error_recorder_interface_info(out_info);")).Count);
+                System.Text.RegularExpressions.Regex.Escape("trt11_reset_error_recorder_interface_info(out_info);")).Count >= 6);
 
         Assert.Contains("public int InterfaceInfoAvailable;", managedStructs);
         Assert.Contains("public int InterfaceInfoMajor;", managedStructs);

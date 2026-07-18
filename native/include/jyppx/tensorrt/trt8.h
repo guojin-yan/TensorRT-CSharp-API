@@ -9,10 +9,14 @@
 /* BEGIN TRT8 MANIFEST EXPORT PARITY DECLARATIONS */
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_clear_error_recorder(JYPPX_TensorRtBuilder* builder);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_clear_gpu_allocator(JYPPX_TensorRtBuilder* builder);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_get_error_recorder_error(JYPPX_TensorRtBuilder* builder, int32_t index, JYPPX_TensorRtErrorRecordInfo* out_error);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_get_error_recorder_snapshot_info(JYPPX_TensorRtBuilder* builder, JYPPX_TensorRtErrorRecorderSnapshotInfo* out_info);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_builder_has_error_recorder(JYPPX_TensorRtBuilder* builder, JYPPX_Boolean* out_has_recorder);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_engine_clear_error_recorder(JYPPX_TensorRtCudaEngine* engine);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_engine_has_error_recorder(JYPPX_TensorRtCudaEngine* engine, JYPPX_Boolean* out_has_recorder);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_engine_inspector_clear_error_recorder(JYPPX_TensorRtEngineInspector* inspector);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_engine_inspector_get_error_recorder_error(JYPPX_TensorRtEngineInspector* inspector, int32_t index, JYPPX_TensorRtErrorRecordInfo* out_error);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_engine_inspector_get_error_recorder_snapshot_info(JYPPX_TensorRtEngineInspector* inspector, JYPPX_TensorRtErrorRecorderSnapshotInfo* out_info);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_engine_inspector_has_error_recorder(JYPPX_TensorRtEngineInspector* inspector, JYPPX_Boolean* out_has_recorder);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_clear_error_recorder(JYPPX_TensorRtExecutionContext* context);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_clear_output_allocator(JYPPX_TensorRtExecutionContext* context, const char* tensor_name, JYPPX_Boolean* out_cleared);
@@ -21,6 +25,8 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_has_error_recorder(JY
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_has_output_allocator(JYPPX_TensorRtExecutionContext* context, const char* tensor_name, JYPPX_Boolean* out_has_allocator);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_has_temporary_storage_allocator(JYPPX_TensorRtExecutionContext* context, JYPPX_Boolean* out_has_allocator);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_network_clear_error_recorder(JYPPX_TensorRtNetworkDefinition* network);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_network_get_error_recorder_error(JYPPX_TensorRtNetworkDefinition* network, int32_t index, JYPPX_TensorRtErrorRecordInfo* out_error);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_network_get_error_recorder_snapshot_info(JYPPX_TensorRtNetworkDefinition* network, JYPPX_TensorRtErrorRecorderSnapshotInfo* out_info);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_network_has_error_recorder(JYPPX_TensorRtNetworkDefinition* network, JYPPX_Boolean* out_has_recorder);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_refitter_get_error_recorder_error(JYPPX_TensorRtRefitter* refitter, int32_t index, JYPPX_TensorRtErrorRecordInfo* out_error);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_refitter_get_error_recorder_snapshot_info(JYPPX_TensorRtRefitter* refitter, JYPPX_TensorRtErrorRecorderSnapshotInfo* out_info);
