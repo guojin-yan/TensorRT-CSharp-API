@@ -141,6 +141,10 @@ public sealed class YoloVisionRealAssetCandidateValidatorTests
         Assert.Equal("samples/YoloVision/yolovision-task-output-contract.json", root.GetProperty("contractPath").GetString());
         Assert.Equal(6, root.GetProperty("contractTaskCount").GetInt32());
         Assert.Equal(6, root.GetProperty("articleCaseTaskCount").GetInt32());
+        foreach (string family in new[] { "yolov5", "yolov6", "yolov7", "yolov8", "yolov9", "yolov10", "yolov11", "yolov26", "custom" })
+        {
+            AssertValidationContains(root, "contract-family-" + family, passed: true);
+        }
 
         JsonElement[] records = root.GetProperty("records").EnumerateArray().ToArray();
         Assert.Equal(6, records.Length);
@@ -148,12 +152,21 @@ public sealed class YoloVisionRealAssetCandidateValidatorTests
 
         foreach (JsonElement record in records)
         {
+            string task = record.GetProperty("task").GetString()!;
             Assert.Equal("owner-action-required", record.GetProperty("validationState").GetString());
             Assert.False(record.GetProperty("canPromoteRealModelRuntime").GetBoolean());
             Assert.False(record.GetProperty("canPromotePackageConsumerRuntime").GetBoolean());
             AssertValidationContains(record, "case-no-real-promotion", passed: true);
             AssertValidationContains(record, "case-no-package-promotion", passed: true);
             AssertValidationContains(record, "case-task-in-contract", passed: true);
+            Assert.Equal(task == "sem" ? "custom" : "v8", record.GetProperty("family").GetString());
+            Assert.Equal(task == "sem" ? "custom" : "yolov8", record.GetProperty("normalizedFamily").GetString());
+            AssertValidationContains(record, "case-family-in-contract", passed: true);
+            AssertValidationContains(record, "case-family-command-match", passed: true);
+            AssertValidationContains(record, "case-preflight-family-match", passed: true);
+            AssertValidationContains(record, "article-file-exists", passed: true);
+            AssertValidationContains(record, "article-entrypoint-in-contract", passed: true);
+            AssertValidationContains(record, "article-case-family-task-match", passed: true);
             AssertValidationContains(record, "contract-required-metadata-present", passed: true);
             AssertValidationContains(record, "contract-profile-hint-present", passed: true);
             AssertValidationContains(record, "tensorrtexec-profile-hint-aligned", passed: true);
@@ -197,6 +210,10 @@ public sealed class YoloVisionRealAssetCandidateValidatorTests
         Assert.Contains("function Test-Sha256", script, StringComparison.Ordinal);
         Assert.Contains("yolovision-task-output-contract.json", script, StringComparison.Ordinal);
         Assert.Contains("case-task-in-contract", script, StringComparison.Ordinal);
+        Assert.Contains("Normalize-YoloFamilyAlias", script, StringComparison.Ordinal);
+        Assert.Contains("Add-ValidationItem $items (\"contract-family-\" + $family)", script, StringComparison.Ordinal);
+        Assert.Contains("article-entrypoint-in-contract", script, StringComparison.Ordinal);
+        Assert.Contains("case-preflight-family-match", script, StringComparison.Ordinal);
         Assert.Contains("contract-required-metadata-", script, StringComparison.Ordinal);
         Assert.Contains("tensorrtexec-profile-hint-aligned", script, StringComparison.Ordinal);
         Assert.Contains("preflight-report-schema", script, StringComparison.Ordinal);

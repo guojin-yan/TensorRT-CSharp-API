@@ -257,6 +257,7 @@ public sealed class YoloVisionRealAssetCandidatePackTests
             Assert.Contains("--buildOnly", caseEntry.GetProperty("tensorRtExecBuildCommand").GetString(), StringComparison.Ordinal);
             Assert.Contains("samples\\YoloVision", caseEntry.GetProperty("yoloVisionRunCommand").GetString(), StringComparison.Ordinal);
             Assert.Contains("--task " + task, caseEntry.GetProperty("yoloVisionRunCommand").GetString(), StringComparison.Ordinal);
+            Assert.Equal(task == "sem" ? "custom" : "v8", caseEntry.GetProperty("family").GetString());
             Assert.Contains("--preflight", caseEntry.GetProperty("yoloVisionPreflightCommand").GetString(), StringComparison.Ordinal);
             Assert.Contains("--preflight-report", caseEntry.GetProperty("yoloVisionPreflightCommand").GetString(), StringComparison.Ordinal);
             Assert.Equal("yolovision-preflight.v1", root.GetProperty("preflightSchemaVersion").GetString());

@@ -19,6 +19,8 @@
 
 每个 case 都保留对应文章路径、ONNX 导出命令、YoloVision preflight 命令、TensorRtExec build-only 命令和 YoloVision run 命令。这样 owner 不需要重复翻找文章，只要按 JSON 字段补真实证据即可。
 
+`family` 由 contract 统一约束。当前 det/cls/seg/obb/pose 文章样例使用 `v8`，语义分割使用 `custom`（contract 目前为 `yolov26/custom`）；validator 会把版本别名归一化，并同时检查 run/preflight 命令、task contract、文章 entrypoint 是否一致。该规则覆盖 YOLOv5/v6/v7/v8/v9/v10/v11/v26/custom 的声明。
+
 ## Owner 必填字段
 
 每个 case 至少需要回填：

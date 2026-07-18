@@ -49,6 +49,7 @@
     {
       "id": "yolov8n-det",
       "task": "det",
+      "family": "v8",
       "article": "docs/articles/zh-cn/yolovision-detection-yolov8n-download-export-run.md",
       "title": "YoloVision YOLOv8n Detection 下载、导出与运行",
       "modelHint": "yolov8n.pt",
@@ -65,6 +66,7 @@
     {
       "id": "yolov8n-seg",
       "task": "seg",
+      "family": "v8",
       "article": "docs/articles/zh-cn/yolovision-segmentation-mask-postprocess-guide.md",
       "title": "YoloVision YOLOv8n Segmentation Mask 后处理指南",
       "modelHint": "yolov8n-seg.pt",
@@ -81,6 +83,7 @@
     {
       "id": "yolov8n-pose",
       "task": "pose",
+      "family": "v8",
       "article": "docs/articles/zh-cn/yolovision-pose-keypoint-output-guide.md",
       "title": "YoloVision YOLOv8n Pose Keypoint 输出指南",
       "modelHint": "yolov8n-pose.pt",
@@ -97,6 +100,7 @@
     {
       "id": "yolov8n-obb",
       "task": "obb",
+      "family": "v8",
       "article": "docs/articles/zh-cn/yolovision-obb-angle-output-guide.md",
       "title": "YoloVision YOLOv8n OBB Angle 输出指南",
       "modelHint": "yolov8n-obb.pt",
@@ -113,6 +117,7 @@
     {
       "id": "yolov8n-cls",
       "task": "cls",
+      "family": "v8",
       "article": "docs/articles/zh-cn/yolovision-classification-yolov8n-labels-topk-guide.md",
       "title": "YoloVision YOLOv8n Classification Labels 与 Top-K 指南",
       "modelHint": "yolov8n-cls.pt",
@@ -129,17 +134,18 @@
     {
       "id": "yolov8n-sem",
       "task": "sem",
+      "family": "custom",
       "article": "docs/articles/zh-cn/yolovision-semantic-segmentation-map-guide.md",
       "title": "YoloVision YOLOv8n Semantic Segmentation Map 输出指南",
       "modelHint": "owner-provided-yolov8n-sem.pt-or-compatible",
       "inputShape": "1x3x512x512",
       "exportCommand": "yolo export model=.\\models\\yolov8n-sem.pt format=onnx opset=12 dynamic=True simplify=True imgsz=512",
       "tensorRtExecBuildCommand": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\yolov8n-sem.onnx --saveEngine .\\models\\yolov8n-sem.plan --minShapes images:1x3x512x512 --optShapes images:1x3x512x512 --maxShapes images:2x3x512x512 --fp16 --buildOnly --exportReport .\\models\\yolov8n-sem-build-report.json",
-      "yoloVisionRunCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-sem.onnx --labels .\\models\\semantic-classes.names --input-data .\\models\\yolov8n-sem-fp32.bin --input-shape 1x3x512x512 --family v8 --task sem --semantic-output semantic --class-count owner-required --semantic-map-shape owner-required --class-map-layout NCHW-logits-or-NHW-class-index-owner-confirmed --palette .\\models\\semantic-palette.json",
+      "yoloVisionRunCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-sem.onnx --labels .\\models\\semantic-classes.names --input-data .\\models\\yolov8n-sem-fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count owner-required --semantic-map-shape owner-required --class-map-layout NCHW-logits-or-NHW-class-index-owner-confirmed --palette .\\models\\semantic-palette.json",
       "yoloVisionPreflightReportPath": "models/yolov8n-sem-preflight.json",
-      "yoloVisionPreflightCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-sem.onnx --labels .\\models\\semantic-classes.names --input-data .\\models\\yolov8n-sem-fp32.bin --input-shape 1x3x512x512 --family v8 --task sem --semantic-output semantic --class-count owner-required --semantic-map-shape owner-required --class-map-layout NCHW-logits-or-NHW-class-index-owner-confirmed --palette .\\models\\semantic-palette.json --preflight --preflight-report .\\models\\yolov8n-sem-preflight.json",
+      "yoloVisionPreflightCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-sem.onnx --labels .\\models\\semantic-classes.names --input-data .\\models\\yolov8n-sem-fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count owner-required --semantic-map-shape owner-required --class-map-layout NCHW-logits-or-NHW-class-index-owner-confirmed --palette .\\models\\semantic-palette.json --preflight --preflight-report .\\models\\yolov8n-sem-preflight.json",
       "requiredOutputMetadata": ["classCount", "semanticOutput", "semanticOutputRole", "semanticMapShape", "mapWidth", "mapHeight", "classMapLayout", "argmaxRule", "paletteSha256", "voidClassPolicy"],
-      "expectedEvidenceLines": ["Profile Family=v8 Task=sem", "SemanticMap Classes=", "YoloVision Passed=True"],
+      "expectedEvidenceLines": ["Profile Family=custom Task=sem", "SemanticMap Classes=", "YoloVision Passed=True"],
       "canPromoteRealModelRuntime": false
     }
   ]

@@ -117,6 +117,29 @@ function ConvertTo-StringArray {
     return @($Value | ForEach-Object { [string]$_ })
 }
 
+function Get-CommandArgumentValue {
+    param(
+        [AllowNull()][string] $Command,
+        [Parameter(Mandatory = $true)][string] $ArgumentName
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Command)) { return $null }
+    $match = [regex]::Match($Command, ("--" + [regex]::Escape($ArgumentName) + "\s+(?<value>\S+)"))
+    if ($match.Success) { return $match.Groups["value"].Value.Trim() }
+    return $null
+}
+
+function Normalize-YoloFamilyAlias {
+    param([AllowNull()][string] $Family)
+
+    if ([string]::IsNullOrWhiteSpace($Family)) { return "" }
+    $value = $Family.Trim().ToLowerInvariant()
+    if ($value -match "^v(?<number>5|6|7|8|9|10|11|26)$") {
+        return "yolov" + $Matches["number"]
+    }
+    return $value
+}
+
 $resolvedInput = Resolve-RepoPath $InputPath
 $resolvedContract = Resolve-RepoPath $ContractPath
 $resolvedArticleCasePack = Resolve-RepoPath $ArticleCasePackPath
@@ -144,6 +167,7 @@ $articleCasePack = Get-Content -LiteralPath $resolvedArticleCasePack -Raw | Conv
 
 $contractTasks = @($contract.tasks)
 $contractTaskNames = @($contractTasks | ForEach-Object { [string]$_.task })
+$contractFamilyNames = @($contractTasks | ForEach-Object { ConvertTo-StringArray $_.families } | ForEach-Object { [string]$_ })
 $articleCaseArray = @($articleCasePack.cases)
 $articleCaseTasks = @($articleCaseArray | ForEach-Object { [string]$_.task })
 $contractTaskMap = @{}
@@ -159,6 +183,9 @@ Add-ValidationItem $items "contract-boundary-package" ((Get-JsonString $contract
 Add-ValidationItem $items "contract-task-count-six" ($contractTaskNames.Count -eq 6) "blocker" "Contract must cover six YoloVision tasks."
 foreach ($task in @("det", "cls", "seg", "obb", "pose", "sem")) {
     Add-ValidationItem $items ("contract-task-" + $task) ($contractTaskNames -contains $task) "blocker" "Contract must include $task."
+}
+foreach ($family in @("yolov5", "yolov6", "yolov7", "yolov8", "yolov9", "yolov10", "yolov11", "yolov26", "custom")) {
+    Add-ValidationItem $items ("contract-family-" + $family) ($contractFamilyNames -contains $family) "blocker" "Contract must include family $family."
 }
 Add-ValidationItem $items "pack-state" ((Get-JsonString $pack "packState") -eq "owner-action-required") "required" "Template pack must stay owner-action-required until real owner proof is imported."
 Add-ValidationItem $items "does-not-publish" (-not [bool]$pack.performsPublish) "blocker" "Validator pack must not perform publish."
@@ -210,15 +237,33 @@ foreach ($case in $caseArray) {
     $contractTask = $contractTaskMap[$task]
     $contractRequiredMetadata = ConvertTo-StringArray $contractTask.requiredMetadata
     $contractProfileHint = Get-JsonString $contractTask "tensorRtExecProfileHint"
+    $articleCase = @($articleCaseArray | Where-Object { [string]$_.id -eq $id }) | Select-Object -First 1
+    $caseFamily = Get-JsonString $case "family"
+    $runCommand = Get-JsonString $case.yoloVision "runCommand"
+    $preflightCommand = Get-JsonString $case.yoloVisionPreflight "command"
+    $runFamilyToken = Get-CommandArgumentValue -Command $runCommand -ArgumentName "family"
+    $preflightFamilyToken = Get-CommandArgumentValue -Command $preflightCommand -ArgumentName "family"
+    $normalizedFamily = Normalize-YoloFamilyAlias $caseFamily
+    $allowedFamilies = ConvertTo-StringArray $contractTask.families
+    $contractArticleEntrypoints = ConvertTo-StringArray $contractTask.articleEntrypoints
+    $articlePath = Get-JsonString $case "article"
 
     Add-ValidationItem $caseItems "case-id-present" (-not [string]::IsNullOrWhiteSpace($id)) "blocker" "Case id is required."
     Add-ValidationItem $caseItems "case-task-in-contract" ($contractTaskMap.ContainsKey($task)) "blocker" "Case task must exist in yolovision-task-output-contract.json."
+    Add-ValidationItem $caseItems "case-family-present" (-not [string]::IsNullOrWhiteSpace($caseFamily)) "blocker" "Case family is required."
+    Add-ValidationItem $caseItems "case-family-in-contract" ($allowedFamilies -contains $normalizedFamily) "blocker" "Case family must be declared for task $task in yolovision-task-output-contract.json."
+    Add-ValidationItem $caseItems "case-family-command-match" ((Normalize-YoloFamilyAlias $runFamilyToken) -eq $normalizedFamily) "blocker" "YoloVision run command family must match the case family."
+    Add-ValidationItem $caseItems "case-preflight-family-match" ((Normalize-YoloFamilyAlias $preflightFamilyToken) -eq $normalizedFamily) "blocker" "YoloVision preflight command family must match the case family."
     Add-ValidationItem $caseItems "contract-required-metadata-present" ($contractRequiredMetadata.Count -ge 4) "blocker" "Contract requiredMetadata must be present for task $task."
     Add-ValidationItem $caseItems "contract-profile-hint-present" (-not [string]::IsNullOrWhiteSpace($contractProfileHint) -and $contractProfileHint.Contains("--minShapes")) "blocker" "Contract must provide TensorRtExec profile hint for task $task."
     Add-ValidationItem $caseItems "case-state-owner-action" ((Get-JsonString $case "state") -eq "owner-action-required") "required" "Template case must remain owner-action-required."
     Add-ValidationItem $caseItems "case-no-real-promotion" (-not [bool]$case.canPromoteRealModelRuntime) "blocker" "Template case cannot promote real-model-runtime."
     Add-ValidationItem $caseItems "case-no-package-promotion" (-not [bool]$case.canPromotePackageConsumerRuntime) "blocker" "Template case cannot promote package-consumer-runtime."
-    Add-ValidationItem $caseItems "article-path-present" (-not [string]::IsNullOrWhiteSpace((Get-JsonString $case "article"))) "required" "Case must link an article."
+    Add-ValidationItem $caseItems "article-path-present" (-not [string]::IsNullOrWhiteSpace($articlePath)) "required" "Case must link an article."
+    Add-ValidationItem $caseItems "article-file-exists" (-not [string]::IsNullOrWhiteSpace($articlePath) -and (Test-Path -LiteralPath (Resolve-RepoPath $articlePath) -PathType Leaf)) "blocker" "Case article path must exist in the repository."
+    Add-ValidationItem $caseItems "article-entrypoint-in-contract" ($contractArticleEntrypoints -contains $articlePath) "blocker" "Case article must be listed in the task contract articleEntrypoints."
+    Add-ValidationItem $caseItems "article-case-present" ($null -ne $articleCase) "blocker" "Owner case id must exist in the article case pack."
+    Add-ValidationItem $caseItems "article-case-family-task-match" ($null -ne $articleCase -and [string]$articleCase.task -eq $task -and (Normalize-YoloFamilyAlias ([string]$articleCase.family)) -eq $normalizedFamily) "blocker" "Article case task and family must match the owner case and contract."
 
     Add-ValidationItem $caseItems "model-source-url-present" (-not [string]::IsNullOrWhiteSpace((Get-JsonString $case.model "sourceUrl"))) "blocker" "model.sourceUrl is required."
     Add-ValidationItem $caseItems "model-license-present" (-not [string]::IsNullOrWhiteSpace((Get-JsonString $case.model "license"))) "blocker" "model.license is required."
@@ -330,6 +375,9 @@ foreach ($case in $caseArray) {
     $records.Add([ordered]@{
         id = $id
         task = $task
+        family = $caseFamily
+        normalizedFamily = $normalizedFamily
+        article = $articlePath
         contractPath = $ContractPath
         contractRequiredMetadata = [object[]]@($contractRequiredMetadata)
         tensorRtExecProfileHint = $contractProfileHint

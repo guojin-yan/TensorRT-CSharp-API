@@ -47,7 +47,7 @@ dotnet run --project .\applications\TensorRtExec -- --onnx .\models\yolov8n-sem.
 语义分割的 class map、palette 和输出 shape 需要 owner 确认；先生成离线预检报告：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --model .\models\yolov8n-sem.onnx --labels .\models\semantic-classes.names --input-data .\models\yolov8n-sem-fp32.bin --input-shape 1x3x512x512 --family v8 --task sem --semantic-output semantic --class-count owner-required --semantic-map-shape owner-required --class-map-layout NCHW-logits-or-NHW-class-index-owner-confirmed --palette .\models\semantic-palette.json --preflight --preflight-report .\models\yolov8n-sem-preflight.json
+dotnet run --project .\samples\YoloVision -- --model .\models\yolov8n-sem.onnx --labels .\models\semantic-classes.names --input-data .\models\yolov8n-sem-fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count owner-required --semantic-map-shape owner-required --class-map-layout NCHW-logits-or-NHW-class-index-owner-confirmed --palette .\models\semantic-palette.json --preflight --preflight-report .\models\yolov8n-sem-preflight.json
 ```
 
 该报告只允许 `yolovision-preflight.v1`/`proofClassification=precheck`，并要求所有 execution 与 promotion flag 为 `false`；它不能替代真实 semantic map 输出和 owner review。
@@ -57,13 +57,13 @@ dotnet run --project .\samples\YoloVision -- --model .\models\yolov8n-sem.onnx -
 示例命令：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --model .\models\yolov8n-sem.onnx --labels .\models\semantic-classes.names --input-data .\models\yolov8n-sem-fp32.bin --input-shape 1x3x640x640 --family v8 --task sem --semantic-output semantic --class-count owner-required --semantic-map-shape owner-required --class-map-layout NCHW-logits-or-NHW-class-index-owner-confirmed --palette .\models\semantic-palette.json
+dotnet run --project .\samples\YoloVision -- --model .\models\yolov8n-sem.onnx --labels .\models\semantic-classes.names --input-data .\models\yolov8n-sem-fp32.bin --input-shape 1x3x640x640 --family custom --task sem --semantic-output semantic --class-count owner-required --semantic-map-shape owner-required --class-map-layout NCHW-logits-or-NHW-class-index-owner-confirmed --palette .\models\semantic-palette.json
 ```
 
 真实 owner 回填日志中至少应出现以下 expected evidence lines；在日志、hash、host metadata 和 owner review 完成前，这些行只是待采集证据，不是当前 runtime proof：
 
 ```text
-Profile Family=v8 Task=sem
+Profile Family=custom Task=sem
 SemanticMap Classes=...
 YoloVision Passed=<owner-confirmed-true>
 ```

@@ -99,6 +99,7 @@
     {
       "id": "yolov8n-det",
       "task": "det",
+      "family": "v8",
       "state": "owner-action-required",
       "article": "docs/articles/zh-cn/yolovision-detection-yolov8n-download-export-run.md",
       "model": {
@@ -216,6 +217,7 @@
     {
       "id": "yolov8n-seg",
       "task": "seg",
+      "family": "v8",
       "state": "owner-action-required",
       "article": "docs/articles/zh-cn/yolovision-segmentation-mask-postprocess-guide.md",
       "model": {
@@ -332,6 +334,7 @@
     {
       "id": "yolov8n-pose",
       "task": "pose",
+      "family": "v8",
       "state": "owner-action-required",
       "article": "docs/articles/zh-cn/yolovision-pose-keypoint-output-guide.md",
       "model": {
@@ -449,6 +452,7 @@
     {
       "id": "yolov8n-obb",
       "task": "obb",
+      "family": "v8",
       "state": "owner-action-required",
       "article": "docs/articles/zh-cn/yolovision-obb-angle-output-guide.md",
       "model": {
@@ -565,6 +569,7 @@
     {
       "id": "yolov8n-cls",
       "task": "cls",
+      "family": "v8",
       "state": "owner-action-required",
       "article": "docs/articles/zh-cn/yolovision-classification-yolov8n-labels-topk-guide.md",
       "model": {
@@ -679,6 +684,7 @@
     {
       "id": "yolov8n-sem",
       "task": "sem",
+      "family": "custom",
       "state": "owner-action-required",
       "article": "docs/articles/zh-cn/yolovision-semantic-segmentation-map-guide.md",
       "model": {
@@ -717,9 +723,9 @@
         "proofBoundary": "TensorRtExec build report, command transcript, stdout/stderr logs, and engine hash are build evidence only; they are not real-model-runtime proof and never package-consumer-runtime proof."
       },
       "yoloVision": {
-        "runCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-sem.onnx --labels .\\models\\semantic-classes.names --input-data .\\models\\yolov8n-sem-fp32.bin --input-shape 1x3x512x512 --family v8 --task sem --semantic-output semantic --class-count owner-required --semantic-map-shape owner-required --class-map-layout NCHW-logits-or-NHW-class-index-owner-confirmed --palette .\\models\\semantic-palette.json",
+        "runCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-sem.onnx --labels .\\models\\semantic-classes.names --input-data .\\models\\yolov8n-sem-fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count owner-required --semantic-map-shape owner-required --class-map-layout NCHW-logits-or-NHW-class-index-owner-confirmed --palette .\\models\\semantic-palette.json",
         "expectedEvidenceLines": [
-          "Profile Family=v8 Task=sem",
+          "Profile Family=custom Task=sem",
           "SemanticMap Classes=",
           "YoloVision Passed=True"
         ],
@@ -735,7 +741,7 @@
         "outputJsonSha256": "owner-required"
       },
       "yoloVisionPreflight": {
-        "command": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-sem.onnx --labels .\\models\\semantic-classes.names --input-data .\\models\\yolov8n-sem-fp32.bin --input-shape 1x3x512x512 --family v8 --task sem --semantic-output semantic --class-count owner-required --semantic-map-shape owner-required --class-map-layout NCHW-logits-or-NHW-class-index-owner-confirmed --palette .\\models\\semantic-palette.json --preflight --preflight-report .\\models\\yolov8n-sem-preflight.json",
+        "command": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-sem.onnx --labels .\\models\\semantic-classes.names --input-data .\\models\\yolov8n-sem-fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count owner-required --semantic-map-shape owner-required --class-map-layout NCHW-logits-or-NHW-class-index-owner-confirmed --palette .\\models\\semantic-palette.json --preflight --preflight-report .\\models\\yolov8n-sem-preflight.json",
         "reportPath": "models/yolov8n-sem-preflight.json",
         "reportSha256": "owner-required",
         "schemaPath": "samples/YoloVision/yolovision-preflight.schema.json",

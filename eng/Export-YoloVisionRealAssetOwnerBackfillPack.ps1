@@ -155,6 +155,32 @@ function Get-InputTensorPathFromCommand {
   return $Fallback
 }
 
+function Get-CommandArgumentValue {
+  param(
+    [string]$Command,
+    [string]$ArgumentName,
+    [string]$Fallback
+  )
+
+  $match = [regex]::Match($Command, ("--" + [regex]::Escape($ArgumentName) + "\s+(?<value>\S+)"))
+  if ($match.Success) {
+    return $match.Groups["value"].Value.Trim()
+  }
+
+  return $Fallback
+}
+
+function Normalize-YoloFamilyAlias {
+  param([string]$Family)
+
+  $value = $Family.Trim().ToLowerInvariant()
+  if ($value -match "^v(?<number>5|6|7|8|9|10|11|26)$") {
+    return "yolov" + $Matches["number"]
+  }
+
+  return $value
+}
+
 function Get-PreflightReportPathFromCommand {
   param(
     [string]$PreflightCommand,
@@ -325,6 +351,7 @@ function Convert-ArticleCaseToOwnerCase {
   $inputShape = [string](Get-RequiredProperty $Case "inputShape" $id)
   $buildCommand = [string](Get-RequiredProperty $Case "tensorRtExecBuildCommand" $id)
   $runCommand = [string](Get-RequiredProperty $Case "yoloVisionRunCommand" $id)
+  $family = if ($Case.PSObject.Properties.Name -contains "family" -and -not [string]::IsNullOrWhiteSpace([string]$Case.family)) { [string]$Case.family } else { Get-CommandArgumentValue -Command $runCommand -ArgumentName "family" -Fallback "custom" }
   $modelOnnxPath = Get-OnnxPathFromCommand -RunCommand $runCommand -BuildCommand $buildCommand -Fallback ("models/" + $id + ".onnx")
   $labelsPath = Get-LabelsPathFromCommand -RunCommand $runCommand -Fallback "models/coco.names"
   $inputTensorPath = Get-InputTensorPathFromCommand -RunCommand $runCommand -Fallback ("models/" + $id + "-fp32.bin")
@@ -339,6 +366,7 @@ function Convert-ArticleCaseToOwnerCase {
   [pscustomobject]@{
     id = $id
     task = $task
+    family = $family
     state = "owner-action-required"
     article = [string](Get-RequiredProperty $Case "article" $id)
     model = [pscustomobject]@{
@@ -525,6 +553,7 @@ function New-EvidenceCaseFromOwnerCase {
   [pscustomobject]@{
     caseId = [string]$Case.id
     task = [string]$Case.task
+    family = [string]$Case.family
     state = "owner-action-required"
     proofClassification = "template-only"
     templateOnly = $true
@@ -683,6 +712,8 @@ function Compare-Projection {
     }
 
     Add-Item "case-$id-task-match" ([string]$ownerCase.task -eq [string]$articleCase.task -and [string]$evidenceCase.task -eq [string]$articleCase.task) "Task must match article, owner pack, and evidence template."
+    $articleFamily = if ($articleCase.PSObject.Properties.Name -contains "family" -and -not [string]::IsNullOrWhiteSpace([string]$articleCase.family)) { [string]$articleCase.family } else { Get-CommandArgumentValue -Command ([string]$articleCase.yoloVisionRunCommand) -ArgumentName "family" -Fallback "custom" }
+    Add-Item "case-$id-family-match" ([string]$ownerCase.family -eq $articleFamily -and [string]$evidenceCase.family -eq [string]$ownerCase.family) "Family must match article, owner pack, and evidence template."
     Add-Item "case-$id-input-shape-match" ([string]$ownerCase.input.inputShape -eq [string]$articleCase.inputShape -and [string]$evidenceCase.input.inputShape -eq [string]$articleCase.inputShape) "Input shape must match article, owner pack, and evidence template."
     Add-Item "case-$id-export-command-match" ([string]$ownerCase.model.exportCommand -eq [string]$articleCase.exportCommand) "Export command must match article case pack."
     Add-Item "case-$id-tensorrtexec-command-match" ([string]$ownerCase.tensorRtExec.buildCommand -eq [string]$articleCase.tensorRtExecBuildCommand -and [string]$evidenceCase.tensorRtExec.buildCommand -eq [string]$ownerCase.tensorRtExec.buildCommand) "TensorRtExec command must match article, owner pack, and evidence template."
