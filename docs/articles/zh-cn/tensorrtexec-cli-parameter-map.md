@@ -54,7 +54,7 @@ dotnet run --project .\applications\TensorRtExec -- `
 | `--calib` | calibration cache path | diagnostic |
 | `--builderOptimizationLevel` | builder optimization level | implemented |
 | `--maxAuxStreams` | auxiliary streams | implemented |
-| `--memPoolSize` | memory pool intent | diagnostic |
+| `--memPoolSize` | typed builder memory-pool limit plus requested/readback diagnostics | applied-build-readback; dry-run/load-engine parse-only |
 | `--tacticSources` | tactic source intent | diagnostic |
 | `--plugins` | plugin path list | diagnostic; no load/register |
 

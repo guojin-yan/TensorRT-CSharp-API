@@ -63,7 +63,7 @@ dotnet run --project .\applications\TensorRtExec -- `
 | Profiling verbosity | `--profilingVerbosity detailed` | `--verbose` | 归一化为 `none` / `layer_names_only` / `detailed` |
 | Plugin libraries | `--plugins` | `--plugin`、`--dynamicPlugins`、`--setPluginsToSerialize` | 路径会去重并归一化到共享 command；不执行 load/register/deregister，也不证明 plugin 运行 |
 | Workspace | `--workspace 512MiB` | 无后缀默认 MiB；支持 `GiB/GB`、`MiB/MB`、`KiB/KB`、`B` | active builder workspace limit |
-| Memory pools | `--memPoolSize workspace:512MiB,tacticDram:1GiB` | 无后缀默认 MiB | 记录诊断；要求每项换算后是整 MiB |
+| Memory pools | `--memPoolSize workspace:512MiB,tacticDram:1GiB` | 无后缀默认 MiB；支持 `workspace`、`dlaSRAM`、`dlaLocalDRAM`、`dlaGlobalDRAM`、`tacticDRAM`、`tacticSharedMem` | 真实 build 时设置并 read back；dry-run/load-engine 仍是 parse-only |
 | Runtime timing | `--iterations --warmUp --duration --streams --useCudaGraph` | 无 | 进入报告和 GUI 参数预览；CUDA graph 仍是边界诊断 |
 | Advanced timing | `--minTiming --avgTiming --infStreams --sleepTime --idleTime` | 无 | parse/report-only；用于和官方 trtexec 配置对齐，不声明 tactic timing、等待策略或并发推理已经真实执行 |
 | Precision constraints | `--precisionConstraints --layerPrecisions --layerOutputTypes` | 无 | parse/report-only；进入 normalized command、report 和 GUI，不做模型专属 layer precision 路由 |

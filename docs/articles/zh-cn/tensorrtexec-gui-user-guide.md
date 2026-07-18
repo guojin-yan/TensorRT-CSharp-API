@@ -51,7 +51,7 @@ dotnet run --project .\applications\TensorRtExec -- `
 | DLA Core | `--useDLACore` | 当前记录诊断，不做 layer device placement |
 | Deployment | `--allowGPUFallback --directIO --stronglyTyped` | 当前记录诊断 |
 | Tactics | `--tacticSources` | 当前记录诊断 |
-| Mem Pools | `--memPoolSize` | 当前记录诊断；实际 workspace 仍由 `--workspace` 设置 |
+| Mem Pools | `--memPoolSize` | 真实 build 设置并 read back 已知 pool；dry-run/load-engine 仍为 parse-only |
 | Input IO | `--inputIOFormats` | 当前记录诊断 |
 | Output IO | `--outputIOFormats` | 当前记录诊断 |
 | Calib Cache | `--calib` | 当前记录诊断，不启用 calibrator callback |

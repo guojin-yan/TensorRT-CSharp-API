@@ -266,6 +266,12 @@ public sealed class OnnxToEngineTrtexecLikeTests
                 Assert.Equal(1024UL, item.SizeMiB);
                 Assert.Equal(1024UL * 1024UL * 1024UL, item.SizeBytes);
             });
+        Assert.Equal(JYPPX.TensorRtSharp.TensorRtMemoryPoolType.Workspace, options.DeploymentOptions.MemoryPoolSizes[0].ToTensorRtMemoryPoolType());
+        Assert.Equal(JYPPX.TensorRtSharp.TensorRtMemoryPoolType.TacticDram, options.DeploymentOptions.MemoryPoolSizes[1].ToTensorRtMemoryPoolType());
+        Assert.Equal(
+            JYPPX.TensorRtSharp.TensorRtMemoryPoolType.DlaManagedSram,
+            new TrtexecLikeMemoryPoolSize("dlaSRAM", 1).ToTensorRtMemoryPoolType());
+        Assert.Throws<ArgumentException>(() => new TrtexecLikeMemoryPoolSize("unknownPool", 1).ToTensorRtMemoryPoolType());
 
         string argumentLine = options.ToArgumentLine();
         Assert.Contains("--saveEngine", argumentLine, StringComparison.Ordinal);
@@ -787,12 +793,29 @@ public sealed class OnnxToEngineTrtexecLikeTests
     }
 
     [Fact]
+    public void MemoryPoolOptionsUseTypedBuilderSetAndReadbackOnlyDuringBuild()
+    {
+        string service = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "OnnxEngineBuildService.cs"));
+        string diagnostics = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "OnnxEngineBuildDiagnostics.cs"));
+        string deployment = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "TrtexecLikeDeploymentOptions.cs"));
+
+        Assert.Contains("memoryPool.ToTensorRtMemoryPoolType()", service, StringComparison.Ordinal);
+        Assert.Contains("config.SetMemoryPoolLimit(pool, memoryPool.SizeBytes)", service, StringComparison.Ordinal);
+        Assert.Contains("config.GetMemoryPoolLimit(pool)", service, StringComparison.Ordinal);
+        Assert.Contains("ToTensorRtMemoryPoolType", deployment, StringComparison.Ordinal);
+        Assert.Contains("result.Parsed || result.EngineSaved", diagnostics, StringComparison.Ordinal);
+        Assert.Contains("!(result.Parsed || result.EngineSaved)", diagnostics, StringComparison.Ordinal);
+        Assert.DoesNotContain("result.InferenceRan));", diagnostics, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void BuildReportIncludesNormalizedCommandAndEvidenceBoundary()
     {
         TrtexecLikeOptions options = TrtexecLikeParser.Parse(new[]
         {
             "--tensor-rt-line", "10",
             "--workspace", "128",
+            "--memPoolSize", "workspace:64,tacticDram:128",
             "--minTiming", "2",
             "--avgTiming", "4",
             "--precisionConstraints", "prefer",
@@ -900,6 +923,7 @@ public sealed class OnnxToEngineTrtexecLikeTests
         Assert.Contains(optionStatus.GetProperty("ParsedOptions").EnumerateArray(), static item => item.GetString() == "--dumpProfile");
         Assert.Contains(optionStatus.GetProperty("ParsedOptions").EnumerateArray(), static item => item.GetString() == "--separateProfileRun");
         Assert.Contains(optionStatus.GetProperty("AppliedOptions").EnumerateArray(), static item => item.GetString() == "--builderOptimizationLevel");
+        Assert.Contains(optionStatus.GetProperty("AppliedOptions").EnumerateArray(), static item => item.GetString() == "--memPoolSize");
         Assert.Contains(optionStatus.GetProperty("ParseOnlyOptions").EnumerateArray(), static item => item.GetString() == "--minTiming");
         Assert.Contains(optionStatus.GetProperty("ParseOnlyOptions").EnumerateArray(), static item => item.GetString() == "--precisionConstraints");
         Assert.Contains(optionStatus.GetProperty("ParseOnlyOptions").EnumerateArray(), static item => item.GetString() == "--fp8");

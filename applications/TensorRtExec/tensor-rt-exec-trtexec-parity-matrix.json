@@ -109,12 +109,12 @@
     {
       "id": "workspace-memory-pool",
       "trtexecOption": "--workspace --memPoolSize",
-      "tensorRtExecStatus": "implemented-report",
-      "entryPoints": ["WorkspaceBytes", "MemoryPoolSizes", "WinForms Mem Pools"],
-      "proofBoundary": "Recorded memory settings are build/report evidence only.",
+      "tensorRtExecStatus": "implemented-build-readback",
+      "entryPoints": ["WorkspaceBytes", "MemoryPoolSizes", "TrtexecLikeMemoryPoolSize.ToTensorRtMemoryPoolType", "TensorRtBuilderConfig.SetMemoryPoolLimit", "TensorRtBuilderConfig.GetMemoryPoolLimit", "WinForms Mem Pools"],
+      "proofBoundary": "Memory pool set/get readback proves builder-config acceptance only; it is not runtime output, model accuracy, or package-consumer proof.",
       "isRuntimeProof": false,
-      "gap": "Need builder config readback or smoke confirming applied memory policy.",
-      "nextStep": "Add read-only builder config diagnostics where ABI-safe."
+      "gap": "A compatible-host build log is still required for owner evidence; dry-run and load-engine intentionally remain parse-only.",
+      "nextStep": "Capture TrtexecMemoryPool RequestedBytes/ReadbackBytes/ReadbackMatch in a compatible-host build record without promoting runtime proof."
     },
     {
       "id": "timing-cache",

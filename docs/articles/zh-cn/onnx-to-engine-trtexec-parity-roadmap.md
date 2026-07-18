@@ -17,7 +17,7 @@
 | min/opt/max shapes | 已支持 | 多 profile 更完整 |
 | fp16 | 已解析并在可用时应用 | 增加更多 precision 诊断 |
 | int8/calib | report/diagnostic 边界 | owner-provided calibration 真实路径 |
-| workspace/memory | 已支持部分 builder config | 对齐 memPoolSize/MemoryPoolType |
+| workspace/memory | `--workspace` 与已知 `--memPoolSize` pool 已在真实 build 中应用并 read back | 继续补 compatible-host owner build record；不把 builder-config readback 晋级为 runtime proof |
 | timing cache | 路径、导入/导出和 report 边界 | 在兼容主机补真实构建日志、owner review 和模型级输出校验 |
 | plugin library | 当前谨慎处理 | 等待 load/register/deregister ownership 设计 |
 | dumpLayerInfo/exportLayerInfo | report 边界 | 与 TensorRT inspector readback 更深集成 |

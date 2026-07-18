@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using JYPPX.TensorRtSharp;
 
 namespace JYPPX.TensorRtSharp.Tools;
 
@@ -273,7 +274,7 @@ public sealed class TrtexecLikeDeploymentOptions
 
         if (MemoryPoolSizes.Count > 0)
         {
-            diagnostics.Add("MemPoolSize=" + MemoryPoolSizesToArgument() + " is recorded; workspace still uses --workspace for the active builder limit in this stage.");
+            diagnostics.Add("MemPoolSize=" + MemoryPoolSizesToArgument() + " is applied during a real build through TensorRtBuilderConfig.SetMemoryPoolLimit and read back through GetMemoryPoolLimit; dry-run and load-engine remain parse-only.");
         }
 
         if (!string.IsNullOrWhiteSpace(InputIOFormats) || !string.IsNullOrWhiteSpace(OutputIOFormats) || DirectIO)
@@ -489,6 +490,32 @@ public sealed class TrtexecLikeMemoryPoolSize
     public ulong SizeMiB { get; }
 
     public ulong SizeBytes { get; }
+
+    /// <summary>
+    /// Resolves the trtexec pool token to the typed TensorRT memory-pool enum.
+    /// 将 trtexec memory-pool token 解析为强类型 TensorRT memory-pool 枚举。
+    /// </summary>
+    public TensorRtMemoryPoolType ToTensorRtMemoryPoolType()
+    {
+        string normalized = Name
+            .Replace("-", string.Empty, StringComparison.Ordinal)
+            .Replace("_", string.Empty, StringComparison.Ordinal)
+            .Replace(" ", string.Empty, StringComparison.Ordinal)
+            .ToLowerInvariant();
+
+        return normalized switch
+        {
+            "workspace" => TensorRtMemoryPoolType.Workspace,
+            "dlasram" or "dlamanagedsram" => TensorRtMemoryPoolType.DlaManagedSram,
+            "dlalocaldram" => TensorRtMemoryPoolType.DlaLocalDram,
+            "dlaglobaldram" => TensorRtMemoryPoolType.DlaGlobalDram,
+            "tacticdram" => TensorRtMemoryPoolType.TacticDram,
+            "tacticsharedmem" or "tacticsharedmemory" => TensorRtMemoryPoolType.TacticSharedMemory,
+            _ => throw new ArgumentException(
+                $"Unsupported TensorRT memory pool '{Name}'. Supported pools: workspace, dlaSRAM, dlaLocalDRAM, dlaGlobalDRAM, tacticDRAM, tacticSharedMem.",
+                nameof(Name))
+        };
+    }
 
     public string ToArgumentSegment()
     {

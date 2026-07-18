@@ -7,7 +7,7 @@
 - Model paths: `--onnx`, `--saveEngine`, `--loadEngine`; `--loadEngine` now combines readonly readback with bounded one-float-input runtime output when shapes are concrete.
 - Dynamic shapes: `--minShapes`, `--optShapes`, `--maxShapes`, `--shapes`, `--inputShapes`.
 - Precision: `--fp16` implemented; `--fp8`, `--best`, `--int8`, and calibration remain parse/report-only or ownership-blocked until capability and model proof exist.
-- Memory and builder diagnostics: `--workspace`, `--memPoolSize`, `--tacticSources`, `--timingCacheFile`, `--timingCache`, `--exportTimingCache`; successful builds use the typed timing-cache owner and record cache byte counts/SHA256 in the build report.
+- Memory and builder controls: `--workspace` and known `--memPoolSize` pools are applied through `TensorRtBuilderConfig.SetMemoryPoolLimit` and immediately read back through `GetMemoryPoolLimit`; `--tacticSources` remains diagnostic. Timing cache uses the typed owner and records cache byte counts/SHA256 in the build report.
 - Plugin diagnostics: `--plugins`, `--plugin`, `--dynamicPlugins`, and `--setPluginsToSerialize` are accepted as aliases/repeated lists and normalized into `Plugins`; they remain diagnostics and do not load, register, deregister, or serialize plugin libraries.
 - Diagnostics and preflight: `--profilingVerbosity`, `--verbose`, `--previewOnly`, `--dryRun`.
 - Runtime-shaped artifact switches: `--loadInputs`, `--dumpOutput`, `--dumpRawBindingsToFile`, `--exportOutput`, `--exportTimes`, `--exportProfile`, and `--saveProfile` are recorded as bounded artifacts. `--loadInputs` can feed bounded generic runtime, but it is not tensor correctness, raw binding, real-model-runtime, or package-consumer-runtime proof without expected output, real runner logs, and hashes.

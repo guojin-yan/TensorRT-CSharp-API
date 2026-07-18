@@ -370,6 +370,7 @@ public static class OnnxEngineBuildDiagnostics
 
         AddIf(options, "--loadEngine", result.LoadedEngineDiagnostics.Attempted);
         AddIf(options, "--maxAuxStreams", deploymentOptions.MaxAuxStreams.HasValue);
+        AddIf(options, "--memPoolSize", deploymentOptions.MemoryPoolSizes.Count > 0 && (result.Parsed || result.EngineSaved));
         AddIf(options, "--fp16/--bf16/--noTF32", result.Parsed || result.EngineSaved || result.InferenceRan);
         AddIf(options, "--minShapes/--optShapes/--maxShapes", result.Parsed || result.EngineSaved || result.InferenceRan);
         AddIf(options, "--saveEngine", result.EngineSaved);
@@ -393,7 +394,7 @@ public static class OnnxEngineBuildDiagnostics
         AddIf(options, "--useDLACore", deploymentOptions.DlaCore.HasValue);
         AddIf(options, "--allowGPUFallback", deploymentOptions.AllowGpuFallback);
         AddIf(options, "--tacticSources", !string.IsNullOrWhiteSpace(deploymentOptions.TacticSources));
-        AddIf(options, "--memPoolSize", deploymentOptions.MemoryPoolSizes.Count > 0);
+        AddIf(options, "--memPoolSize", deploymentOptions.MemoryPoolSizes.Count > 0 && !(result.Parsed || result.EngineSaved));
         AddIf(options, "--inputIOFormats", !string.IsNullOrWhiteSpace(deploymentOptions.InputIOFormats));
         AddIf(options, "--outputIOFormats", !string.IsNullOrWhiteSpace(deploymentOptions.OutputIOFormats));
         AddIf(options, "--calib", !string.IsNullOrWhiteSpace(deploymentOptions.CalibrationCacheFile));

@@ -111,7 +111,7 @@ dotnet run --project .\applications\TensorRtExec -- `
 | Plugin | `--plugins` / `--plugin` / `--dynamicPlugins` / `--setPluginsToSerialize` | 当前记录诊断，支持重复参数和逗号/分号列表，不加载 plugin library |
 | DLA | `--useDLACore --allowGPUFallback` | 当前记录诊断，不做 layer device placement |
 | Tactic sources | `--tacticSources` | 当前记录诊断 |
-| Memory pools | `--memPoolSize workspace:512MiB,tacticDram:1GiB` | 当前记录诊断；每项必须换算为整 MiB；实际 workspace 仍由 `--workspace` 设置 |
+| Memory pools | `--memPoolSize workspace:512MiB,tacticDram:1GiB` | 真实 build 时映射到 `TensorRtMemoryPoolType`，调用 `SetMemoryPoolLimit` 后用 `GetMemoryPoolLimit` read back；每项必须换算为整 MiB；dry-run/load-engine 仍为 parse-only |
 | IO formats | `--inputIOFormats --outputIOFormats --directIO` | 当前记录诊断，真实绑定语义由具体 sample 负责 |
 | Calibration cache | `--calib` | 当前记录诊断，不启用 calibrator callback |
 | Sparsity/strong type | `--sparsity --stronglyTyped` | 当前记录诊断 |

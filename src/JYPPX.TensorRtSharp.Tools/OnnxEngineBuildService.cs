@@ -152,7 +152,7 @@ public sealed class OnnxEngineBuildService
         config.SetProfileStream(stream);
         config.SetOptimizationLevel(options.DeploymentOptions.BuilderOptimizationLevel);
         config.SetEngineCapability(TensorRtEngineCapability.Standard);
-        ApplyDeploymentOptions(config, options);
+        ApplyDeploymentOptions(config, options, log);
         ApplyPrecisionFlags(config, options);
         using TimingCacheLease timingCache = CreateTimingCacheLease(config, options, log);
 
@@ -1240,8 +1240,19 @@ public sealed class OnnxEngineBuildService
         public float[] Values { get; }
     }
 
-    private static void ApplyDeploymentOptions(TensorRtBuilderConfig config, OnnxEngineBuildOptions options)
+    private static void ApplyDeploymentOptions(TensorRtBuilderConfig config, OnnxEngineBuildOptions options, List<string> log)
     {
+        foreach (TrtexecLikeMemoryPoolSize memoryPool in options.DeploymentOptions.MemoryPoolSizes)
+        {
+            TensorRtMemoryPoolType pool = memoryPool.ToTensorRtMemoryPoolType();
+            config.SetMemoryPoolLimit(pool, memoryPool.SizeBytes);
+            ulong readbackBytes = config.GetMemoryPoolLimit(pool);
+            log.Add(
+                $"TrtexecMemoryPool Applied=True Name={memoryPool.Name} Pool={pool} " +
+                $"RequestedBytes={memoryPool.SizeBytes} ReadbackBytes={readbackBytes} " +
+                $"ReadbackMatch={readbackBytes == memoryPool.SizeBytes}");
+        }
+
         if (options.DeploymentOptions.MaxAuxStreams.HasValue)
         {
             config.SetMaxAuxStreams(options.DeploymentOptions.MaxAuxStreams.Value);
