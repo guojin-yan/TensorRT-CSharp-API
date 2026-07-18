@@ -205,6 +205,7 @@ foreach ($case in $cases) {
   $input = Get-PropertyOrDefault -Object $case -Name "input" -DefaultValue $null
   $tensorRtExec = Get-PropertyOrDefault -Object $case -Name "tensorRtExec" -DefaultValue $null
   $yoloVision = Get-PropertyOrDefault -Object $case -Name "yoloVision" -DefaultValue $null
+  $yoloVisionPreflight = Get-PropertyOrDefault -Object $case -Name "yoloVisionPreflight" -DefaultValue $null
   $articleEvidence = Get-PropertyOrDefault -Object $case -Name "articleEvidence" -DefaultValue $null
   $ownerReview = Get-PropertyOrDefault -Object $case -Name "ownerReview" -DefaultValue $null
   $expectedLines = @(ConvertTo-Array (Get-PropertyOrDefault -Object $yoloVision -Name "expectedEvidenceLines" -DefaultValue @()))
@@ -212,6 +213,23 @@ foreach ($case in $cases) {
   Add-ValidationItem $items "case-$caseId-task-supported" ($task -in @("det", "seg", "pose", "obb", "cls", "sem")) "blocker" "$caseId task must be one of det, seg, pose, obb, cls, or sem."
   Add-ValidationItem $items "case-$caseId-no-package-promotion" (-not [bool](Get-PropertyOrDefault -Object $case -Name "canPromotePackageConsumerRuntime" -DefaultValue $true)) "blocker" "$caseId must not promote package-consumer-runtime."
   Add-ValidationItem $items "case-$caseId-expected-passed" (@($expectedLines | Where-Object { ([string]$_).Contains("YoloVision Passed=True", [StringComparison]::Ordinal) }).Count -gt 0) "blocker" "$caseId expectedEvidenceLines must contain YoloVision Passed=True."
+  Add-ValidationItem $items "case-$caseId-preflight-schema-version" (([string](Get-PropertyOrDefault -Object $yoloVisionPreflight -Name "schemaVersion" -DefaultValue "")) -eq "yolovision-preflight.v1") "blocker" "$caseId preflight must declare schemaVersion=yolovision-preflight.v1."
+  Add-ValidationItem $items "case-$caseId-preflight-proof-classification" (([string](Get-PropertyOrDefault -Object $yoloVisionPreflight -Name "proofClassification" -DefaultValue "")) -eq "precheck") "blocker" "$caseId preflight must remain proofClassification=precheck."
+  Add-ValidationItem $items "case-$caseId-preflight-execution-disabled" (
+    -not [bool](Get-PropertyOrDefault -Object (Get-PropertyOrDefault -Object $yoloVisionPreflight -Name "execution" -DefaultValue $null) -Name "tensorRtRuntimeProbed" -DefaultValue $true) -and
+    -not [bool](Get-PropertyOrDefault -Object (Get-PropertyOrDefault -Object $yoloVisionPreflight -Name "execution" -DefaultValue $null) -Name "onnxParserInvoked" -DefaultValue $true) -and
+    -not [bool](Get-PropertyOrDefault -Object (Get-PropertyOrDefault -Object $yoloVisionPreflight -Name "execution" -DefaultValue $null) -Name "engineBuildInvoked" -DefaultValue $true) -and
+    -not [bool](Get-PropertyOrDefault -Object (Get-PropertyOrDefault -Object $yoloVisionPreflight -Name "execution" -DefaultValue $null) -Name "inferenceInvoked" -DefaultValue $true)
+  ) "blocker" "$caseId preflight execution flags must all be false."
+  $preflightBoundary = Get-PropertyOrDefault -Object $yoloVisionPreflight -Name "boundary" -DefaultValue $null
+  Add-ValidationItem $items "case-$caseId-preflight-boundary-disabled" (
+    ([string](Get-PropertyOrDefault -Object $preflightBoundary -Name "proofClassification" -DefaultValue "")) -eq "precheck" -and
+    -not [bool](Get-PropertyOrDefault -Object $preflightBoundary -Name "isRuntimeProof" -DefaultValue $true) -and
+    -not [bool](Get-PropertyOrDefault -Object $preflightBoundary -Name "isRealModelRuntimeProof" -DefaultValue $true) -and
+    -not [bool](Get-PropertyOrDefault -Object $preflightBoundary -Name "isPackageConsumerRuntimeProof" -DefaultValue $true) -and
+    -not [bool](Get-PropertyOrDefault -Object $preflightBoundary -Name "canPromoteRealModelRuntime" -DefaultValue $true) -and
+    -not [bool](Get-PropertyOrDefault -Object $preflightBoundary -Name "canPromotePackageConsumerRuntime" -DefaultValue $true)
+  ) "blocker" "$caseId preflight boundary must remain non-promotable."
 
   foreach ($entry in @(
       @{ id = "model-source-url"; object = $model; name = "sourceUrl" },
@@ -238,6 +256,9 @@ foreach ($case in $cases) {
       @{ id = "yolovision-output-json-path"; object = $yoloVision; name = "outputJsonPath" },
       @{ id = "stdout-summary"; object = $yoloVision; name = "stdoutSummary" },
       @{ id = "stderr-summary"; object = $yoloVision; name = "stderrSummary" },
+      @{ id = "preflight-command"; object = $yoloVisionPreflight; name = "command" },
+      @{ id = "preflight-report-path"; object = $yoloVisionPreflight; name = "reportPath" },
+      @{ id = "preflight-schema-path"; object = $yoloVisionPreflight; name = "schemaPath" },
       @{ id = "article-readiness"; object = $articleEvidence; name = "readiness" },
       @{ id = "article-status"; object = $articleEvidence; name = "articleStatus" },
       @{ id = "article-proof-boundary"; object = $articleEvidence; name = "proofBoundary" },
@@ -262,7 +283,8 @@ foreach ($case in $cases) {
       @{ id = "run-log-sha256"; object = $yoloVision; name = "runLogSha256" },
       @{ id = "yolovision-stdout-log-sha256"; object = $yoloVision; name = "stdoutLogSha256" },
       @{ id = "yolovision-stderr-log-sha256"; object = $yoloVision; name = "stderrLogSha256" },
-      @{ id = "output-json-sha256"; object = $yoloVision; name = "outputJsonSha256" }
+      @{ id = "output-json-sha256"; object = $yoloVision; name = "outputJsonSha256" },
+      @{ id = "preflight-report-sha256"; object = $yoloVisionPreflight; name = "reportSha256" }
     )) {
     $value = Get-PropertyOrDefault -Object $entry.object -Name $entry.name -DefaultValue ""
     $hashReady = if ([string]$entry.name -like "stderr*") {
@@ -288,6 +310,7 @@ foreach ($case in $cases) {
       @{ id = "trtexec-stdout-log-file-exists"; object = $tensorRtExec; name = "stdoutLogPath" },
       @{ id = "trtexec-stderr-log-file-exists"; object = $tensorRtExec; name = "stderrLogPath" },
       @{ id = "engine-file-exists"; object = $tensorRtExec; name = "enginePath" },
+      @{ id = "preflight-report-file-exists"; object = $yoloVisionPreflight; name = "reportPath" },
       @{ id = "run-log-file-exists"; object = $yoloVision; name = "runLogPath" },
       @{ id = "yolovision-stdout-log-file-exists"; object = $yoloVision; name = "stdoutLogPath" },
       @{ id = "yolovision-stderr-log-file-exists"; object = $yoloVision; name = "stderrLogPath" },

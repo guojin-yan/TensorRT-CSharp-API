@@ -195,7 +195,7 @@ public sealed class YoloVisionRealAssetCandidatePackTests
     }
 
     [Fact]
-    public void YoloVisionArticleCasePackCoversFivePublishableYoloV8nCasesWithoutPromotingProof()
+    public void YoloVisionArticleCasePackCoversSixPublishableYoloV8nCasesWithoutPromotingProof()
     {
         string packPath = Path.Combine(RepositoryPaths.Root, "samples", "assets", "yolovision-article-case-pack.json");
         string assetsReadme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "assets", "README.md"));
@@ -217,12 +217,16 @@ public sealed class YoloVisionRealAssetCandidatePackTests
         Assert.False(root.GetProperty("canPromoteRealModelRuntime").GetBoolean());
         Assert.False(root.GetProperty("canPromotePackageConsumerRuntime").GetBoolean());
         Assert.Contains("not real-model-runtime proof", root.GetProperty("proofBoundary").GetString(), StringComparison.Ordinal);
+        Assert.Equal("samples/YoloVision/yolovision-preflight.schema.json", root.GetProperty("preflightSchema").GetString());
+        Assert.Equal("yolovision-preflight.v1", root.GetProperty("preflightSchemaVersion").GetString());
+        Assert.Equal("precheck", root.GetProperty("preflightProofClassification").GetString());
 
         string[] requiredOwnerEvidence = root.GetProperty("requiredOwnerEvidence").EnumerateArray().Select(static item => item.GetString()!).ToArray();
         Assert.Contains("modelSha256", requiredOwnerEvidence);
         Assert.Contains("labelsSha256", requiredOwnerEvidence);
         Assert.Contains("imageSha256", requiredOwnerEvidence);
         Assert.Contains("preprocessedTensorSha256", requiredOwnerEvidence);
+        Assert.Contains(requiredOwnerEvidence, static item => item.Contains("offline preflight", StringComparison.OrdinalIgnoreCase));
         Assert.Contains("runLogSha256", requiredOwnerEvidence);
         Assert.Contains(requiredOwnerEvidence, static item => item.Contains("YoloVision Passed=True", StringComparison.Ordinal));
 
@@ -253,6 +257,10 @@ public sealed class YoloVisionRealAssetCandidatePackTests
             Assert.Contains("--buildOnly", caseEntry.GetProperty("tensorRtExecBuildCommand").GetString(), StringComparison.Ordinal);
             Assert.Contains("samples\\YoloVision", caseEntry.GetProperty("yoloVisionRunCommand").GetString(), StringComparison.Ordinal);
             Assert.Contains("--task " + task, caseEntry.GetProperty("yoloVisionRunCommand").GetString(), StringComparison.Ordinal);
+            Assert.Contains("--preflight", caseEntry.GetProperty("yoloVisionPreflightCommand").GetString(), StringComparison.Ordinal);
+            Assert.Contains("--preflight-report", caseEntry.GetProperty("yoloVisionPreflightCommand").GetString(), StringComparison.Ordinal);
+            Assert.Equal("yolovision-preflight.v1", root.GetProperty("preflightSchemaVersion").GetString());
+            Assert.Equal("models/yolov8n-" + task + "-preflight.json", caseEntry.GetProperty("yoloVisionPreflightReportPath").GetString());
             Assert.False(caseEntry.GetProperty("canPromoteRealModelRuntime").GetBoolean());
             Assert.True(caseEntry.GetProperty("requiredOutputMetadata").GetArrayLength() >= 5);
 

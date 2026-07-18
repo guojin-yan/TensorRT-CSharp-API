@@ -87,6 +87,18 @@ function New-OwnerInputCase {
       stderrSummary = "owner-required-or-no-stderr"
       expectedEvidenceLines = @($Case.yoloVision.expectedEvidenceLines)
     }
+    yoloVisionPreflight = [pscustomobject]@{
+      command = [string]$Case.yoloVisionPreflight.command
+      reportPath = [string]$Case.yoloVisionPreflight.reportPath
+      reportSha256 = "owner-required"
+      schemaPath = [string]$Case.yoloVisionPreflight.schemaPath
+      schemaVersion = [string]$Case.yoloVisionPreflight.schemaVersion
+      expectedState = "owner-action-required"
+      proofClassification = [string]$Case.yoloVisionPreflight.proofClassification
+      execution = $Case.yoloVisionPreflight.execution
+      boundary = $Case.yoloVisionPreflight.boundary
+      proofBoundary = [string]$Case.yoloVisionPreflight.proofBoundary
+    }
     outputMetadata = $Case.outputMetadata
     articleEvidence = $Case.articleEvidence
     ownerReview = [pscustomobject]@{
@@ -131,11 +143,12 @@ $template = [pscustomobject]@{
   canPromotePackageConsumerRuntime = $false
   canCloseReleaseIssue = $false
   requiredGlobalEvidence = $ownerBackfillPack.requiredOwnerEvidence
+  requiredPreflightEvidence = @($ownerBackfillPack.requiredPreflightEvidence)
   forbiddenSubstitutes = @($ownerBackfillPack.forbiddenSubstitutes)
   validationRules = @(
     "All hashes must be 64-character SHA256 strings before any real-model-runtime candidate can be projected.",
     "owner-required placeholders, empty strings, build-only reports, command transcript logs, dry-runs, sidecars, screenshots, GUI checklists, local feeds, ProjectReference consumers, direct .nupkg references, and TensorRtExec reports cannot promote proof.",
-    "Every case must preserve the source TensorRtExec build command, YoloVision run command, input shape, and expected evidence lines from the owner backfill pack.",
+    "Every case must preserve the source TensorRtExec build command, YoloVision preflight command/report/schema/boundary, YoloVision run command, input shape, and expected evidence lines from the owner backfill pack.",
     "Owner must fill host metadata, package metadata, TensorRtExec stdout/stderr transcript hashes, YoloVision stdout/stderr transcript hashes, article readiness, and owner acceptance decision before validation can become a real-model-runtime candidate.",
     "YoloVision sample evidence can only become real-model-runtime after real logs and hashes pass Test-SampleRunEvidenceRecord.ps1 -RequireExistingLog.",
     "Package-consumer-runtime belongs to release proof records and is forbidden in this owner proof input."
@@ -175,6 +188,12 @@ foreach ($section in $template.requiredGlobalEvidence.PSObject.Properties) {
   foreach ($property in $section.Value.PSObject.Properties) {
     $lines.Add("  - ``$($property.Name)``")
   }
+}
+$lines.Add("")
+$lines.Add("## Required Preflight Evidence")
+$lines.Add("")
+foreach ($field in $template.requiredPreflightEvidence) {
+  $lines.Add("- ``$field``")
 }
 $lines.Add("")
 $lines.Add("## Validation Rules")

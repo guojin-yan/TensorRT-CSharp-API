@@ -82,6 +82,16 @@ dotnet run --project .\applications\TensorRtExec -- `
 
 这一步用于确认 engine build 和 output binding。它不是 pose runtime proof，因为它没有证明关键点 decode、坐标还原和可视化输出正确。
 
+## YoloVision 离线 Preflight
+
+在真实 keypoint 运行前，先写出离线预检报告：
+
+```powershell
+dotnet run --project .\samples\YoloVision -- --model .\models\yolov8n-pose.onnx --labels .\models\coco.names --input-data .\models\yolov8n-pose-fp32.bin --input-shape 1x3x640x640 --family v8 --task pose --output-role-map boxes:det,keypoints:pose-keypoints --pose-keypoint-count 17 --preflight --preflight-report .\models\yolov8n-pose-preflight.json
+```
+
+只有 `yolovision-preflight.v1`、`proofClassification=precheck` 且 execution flags 全为 `false` 的报告才符合模板；它不会证明 pose decode、坐标还原或模型质量。
+
 ## YoloVision 运行
 
 ```powershell

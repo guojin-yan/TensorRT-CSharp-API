@@ -155,6 +155,49 @@ function Get-InputTensorPathFromCommand {
   return $Fallback
 }
 
+function Get-PreflightReportPathFromCommand {
+  param(
+    [string]$PreflightCommand,
+    [string]$Fallback
+  )
+
+  $match = [regex]::Match($PreflightCommand, "--preflight-report\s+(?<path>\S+)")
+  if ($match.Success) {
+    return $match.Groups["path"].Value.Trim()
+  }
+
+  return $Fallback
+}
+
+function Get-PreflightCommand {
+  param(
+    [object]$Case,
+    [string]$RunCommand,
+    [string]$FallbackReportPath
+  )
+
+  $caseProperty = $Case.PSObject.Properties | Where-Object { $_.Name -eq "yoloVisionPreflightCommand" } | Select-Object -First 1
+  if ($null -ne $caseProperty -and -not [string]::IsNullOrWhiteSpace([string]$caseProperty.Value)) {
+    return [string]$caseProperty.Value
+  }
+
+  return ($RunCommand.Trim() + " --preflight --preflight-report " + (ConvertTo-LocalPath -Path $FallbackReportPath))
+}
+
+function Test-Sha256 {
+  param([AllowNull()][string]$Value)
+
+  return -not [string]::IsNullOrWhiteSpace($Value) -and $Value -cmatch "^[0-9a-fA-F]{64}$"
+}
+
+function Test-RequiredOrHash {
+  param([AllowNull()][string]$Value)
+
+  return [string]::IsNullOrWhiteSpace($Value) -or
+    $Value -match "owner-required|owner-action-required|template-only|owner-required-or-no-stderr" -or
+    (Test-Sha256 $Value)
+}
+
 function New-OwnerRequiredEvidenceObject {
   [pscustomobject]@{
     hostMetadata = [pscustomobject]@{
@@ -289,6 +332,9 @@ function Convert-ArticleCaseToOwnerCase {
   $enginePath = Get-SaveEnginePathFromCommand -BuildCommand $buildCommand -Fallback ("models/" + $id + ".plan")
   $runLogPath = "models/$id-run.log"
   $outputJsonPath = Get-OutputJsonPathFromCommand -RunCommand $runCommand -Fallback ("models/$id-output.json")
+  $preflightReportFallback = "models/$id-preflight.json"
+  $preflightCommand = Get-PreflightCommand -Case $Case -RunCommand $runCommand -FallbackReportPath $preflightReportFallback
+  $preflightReportPath = Get-PreflightReportPathFromCommand -PreflightCommand $preflightCommand -Fallback $preflightReportFallback
 
   [pscustomobject]@{
     id = $id
@@ -344,6 +390,31 @@ function Convert-ArticleCaseToOwnerCase {
       outputJsonPath = $outputJsonPath
       outputJsonSha256 = "owner-required"
     }
+    yoloVisionPreflight = [pscustomobject]@{
+      command = $preflightCommand
+      reportPath = $preflightReportPath.TrimStart(".\").Replace("\", "/")
+      reportSha256 = "owner-required"
+      schemaPath = "samples/YoloVision/yolovision-preflight.schema.json"
+      schemaVersion = "yolovision-preflight.v1"
+      expectedState = "owner-action-required"
+      proofClassification = "precheck"
+      execution = [pscustomobject]@{
+        tensorRtRuntimeProbed = $false
+        onnxParserInvoked = $false
+        engineBuildInvoked = $false
+        inferenceInvoked = $false
+      }
+      boundary = [pscustomobject]@{
+        proofClassification = "precheck"
+        isRuntimeProof = $false
+        isRealModelRuntimeProof = $false
+        isPackageConsumerRuntimeProof = $false
+        canPromoteRealModelRuntime = $false
+        canPromotePackageConsumerRuntime = $false
+        note = "Offline YoloVision configuration and asset preflight only; it is not runtime proof."
+      }
+      proofBoundary = "YoloVision preflight is offline configuration/asset evidence only; it is not real-model-runtime proof and never package-consumer-runtime proof."
+    }
     outputMetadata = New-OutputMetadataObject -Task $task -Case $Case
     articleEvidence = [pscustomobject]@{
       readiness = "owner-action-required"
@@ -382,6 +453,13 @@ function New-OwnerBackfillPackProjection {
     samplePath = "samples/YoloVision"
     sourcePack = "samples/assets/yolovision-article-case-pack.json"
     taskOutputContract = "samples/YoloVision/yolovision-task-output-contract.json"
+    preflightContract = [pscustomobject]@{
+      schemaPath = "samples/YoloVision/yolovision-preflight.schema.json"
+      schemaVersion = "yolovision-preflight.v1"
+      proofClassification = "precheck"
+      canPromoteRealModelRuntime = $false
+      canPromotePackageConsumerRuntime = $false
+    }
     packState = "owner-action-required"
     proofBoundary = "owner backfill contract only; not real-model-runtime proof; not package-consumer-runtime proof; not post-publish proof"
     performsPublish = $false
@@ -411,6 +489,15 @@ function New-OwnerBackfillPackProjection {
       "ownerReviewer",
       "ownerReviewedAtUtc",
       "ownerAcceptanceDecision"
+    )
+    requiredPreflightEvidence = @(
+      "yoloVisionPreflight.command",
+      "yoloVisionPreflight.reportPath",
+      "yoloVisionPreflight.reportSha256",
+      "yoloVisionPreflight.schemaVersion=yolovision-preflight.v1",
+      "yoloVisionPreflight.proofClassification=precheck",
+      "yoloVisionPreflight.execution.*=false",
+      "yoloVisionPreflight.boundary.canPromote*=false"
     )
     forbiddenSubstitutes = @(
       "build-only",
@@ -478,6 +565,18 @@ function New-EvidenceCaseFromOwnerCase {
       engineSha256 = [string]$Case.tensorRtExec.engineSha256
       proofBoundary = "TensorRtExec report is build/report evidence only and is not runtime proof."
     }
+    yoloVisionPreflight = [pscustomobject]@{
+      command = [string]$Case.yoloVisionPreflight.command
+      reportPath = [string]$Case.yoloVisionPreflight.reportPath
+      reportSha256 = [string]$Case.yoloVisionPreflight.reportSha256
+      schemaPath = [string]$Case.yoloVisionPreflight.schemaPath
+      schemaVersion = [string]$Case.yoloVisionPreflight.schemaVersion
+      expectedState = [string]$Case.yoloVisionPreflight.expectedState
+      proofClassification = [string]$Case.yoloVisionPreflight.proofClassification
+      execution = $Case.yoloVisionPreflight.execution
+      boundary = $Case.yoloVisionPreflight.boundary
+      proofBoundary = [string]$Case.yoloVisionPreflight.proofBoundary
+    }
     sampleRunCommand = [string]$Case.yoloVision.runCommand
     sampleRunLogPath = [string]$Case.yoloVision.runLogPath
     sampleRunLogSha256 = [string]$Case.yoloVision.runLogSha256
@@ -523,11 +622,13 @@ function New-EvidenceTemplate {
     canPromotePackageConsumerRuntime = $false
     requiredOwnerEvidence = $OwnerPack.requiredOwnerEvidence
     requiredGlobalEvidence = @($OwnerPack.requiredGlobalEvidence)
+    requiredPreflightEvidence = @($OwnerPack.requiredPreflightEvidence)
+    preflightContract = $OwnerPack.preflightContract
     forbiddenSubstitutes = @($OwnerPack.forbiddenSubstitutes)
     validator = "eng/Test-SampleRunEvidenceRecord.ps1 -RequireExistingLog"
     cases = @($OwnerPack.cases | ForEach-Object { New-EvidenceCaseFromOwnerCase -Case $_ })
     validationRules = @(
-      "Each case must preserve case id, task, model source/license/hash fields, labels hash, input image hash, preprocessed tensor hash, TensorRtExec report hash, TensorRtExec stdout/stderr transcript hashes, engine hash, YoloVision run command, expected evidence lines, run log hash, YoloVision stdout/stderr transcript hashes, output JSON hash, stdout/stderr summaries, article readiness, and owner review.",
+      "Each case must preserve case id, task, model source/license/hash fields, labels hash, input image hash, preprocessed tensor hash, TensorRtExec report hash, TensorRtExec stdout/stderr transcript hashes, engine hash, YoloVision preflight command/report/schema/hash/boundary, YoloVision run command, expected evidence lines, run log hash, YoloVision stdout/stderr transcript hashes, output JSON hash, stdout/stderr summaries, article readiness, and owner review.",
       "Template cases remain owner-action-required until real owner evidence replaces owner-required placeholders.",
       "TensorRtExec report, profile dump, matrix, sidecar, screenshot, dry-run, build-only, and local package output cannot promote proof.",
       "Sample run evidence can promote only real-model-runtime after Test-SampleRunEvidenceRecord.ps1 -RequireExistingLog succeeds on a real record.",
@@ -586,6 +687,17 @@ function Compare-Projection {
     Add-Item "case-$id-export-command-match" ([string]$ownerCase.model.exportCommand -eq [string]$articleCase.exportCommand) "Export command must match article case pack."
     Add-Item "case-$id-tensorrtexec-command-match" ([string]$ownerCase.tensorRtExec.buildCommand -eq [string]$articleCase.tensorRtExecBuildCommand -and [string]$evidenceCase.tensorRtExec.buildCommand -eq [string]$ownerCase.tensorRtExec.buildCommand) "TensorRtExec command must match article, owner pack, and evidence template."
     Add-Item "case-$id-yolovision-command-match" ([string]$ownerCase.yoloVision.runCommand -eq [string]$articleCase.yoloVisionRunCommand -and [string]$evidenceCase.sampleRunCommand -eq [string]$ownerCase.yoloVision.runCommand) "YoloVision run command must match article, owner pack, and evidence template."
+    $articlePreflightCommand = if ($articleCase.PSObject.Properties.Name -contains "yoloVisionPreflightCommand") { [string]$articleCase.yoloVisionPreflightCommand } else { "" }
+    $articlePreflightReportPath = if ($articleCase.PSObject.Properties.Name -contains "yoloVisionPreflightReportPath") { [string]$articleCase.yoloVisionPreflightReportPath } else { "" }
+    Add-Item "case-$id-preflight-command-match" (
+      [string]$ownerCase.yoloVisionPreflight.command -match "samples\\YoloVision" -and
+      [string]$ownerCase.yoloVisionPreflight.command -match "--preflight" -and
+      ([string]::IsNullOrWhiteSpace($articlePreflightCommand) -or [string]$ownerCase.yoloVisionPreflight.command -eq $articlePreflightCommand)
+    ) "YoloVision preflight command must be present and match the article case when declared."
+    Add-Item "case-$id-preflight-report-path-match" (
+      -not [string]::IsNullOrWhiteSpace([string]$ownerCase.yoloVisionPreflight.reportPath) -and
+      ([string]::IsNullOrWhiteSpace($articlePreflightReportPath) -or [string]$ownerCase.yoloVisionPreflight.reportPath -eq $articlePreflightReportPath.TrimStart(".\"))
+    ) "YoloVision preflight report path must be present and match the article case when declared."
     Add-Item "case-$id-expected-passed" (@($evidenceCase.expectedEvidenceLines | Where-Object { ([string]$_).Contains("YoloVision Passed=True", [System.StringComparison]::Ordinal) }).Count -eq 1) "Evidence template must include YoloVision Passed=True."
     Add-Item "case-$id-owner-required-hashes" (
       [string]$evidenceCase.model.sha256 -eq "owner-required" -and
@@ -602,11 +714,33 @@ function Compare-Projection {
       [string]$evidenceCase.sampleRunStderrLogSha256 -eq "owner-required-or-no-stderr" -and
       [string]$evidenceCase.outputJsonSha256 -eq "owner-required"
     ) "Evidence template must preserve owner-required hash fields."
+    Add-Item "case-$id-preflight-contract" (
+      [string]$ownerCase.yoloVisionPreflight.schemaVersion -eq "yolovision-preflight.v1" -and
+      [string]$ownerCase.yoloVisionPreflight.proofClassification -eq "precheck" -and
+      [string]$evidenceCase.yoloVisionPreflight.schemaVersion -eq "yolovision-preflight.v1" -and
+      [string]$evidenceCase.yoloVisionPreflight.proofClassification -eq "precheck"
+    ) "Owner and evidence cases must preserve the YoloVision preflight schema and precheck classification."
+    Add-Item "case-$id-preflight-owner-required-hash" (
+      (Test-RequiredOrHash ([string]$ownerCase.yoloVisionPreflight.reportSha256)) -and
+      (Test-RequiredOrHash ([string]$evidenceCase.yoloVisionPreflight.reportSha256))
+    ) "YoloVision preflight reportSha256 must be owner-required or a real SHA256."
+    Add-Item "case-$id-preflight-execution-disabled" (
+      -not [bool]$ownerCase.yoloVisionPreflight.execution.tensorRtRuntimeProbed -and
+      -not [bool]$ownerCase.yoloVisionPreflight.execution.onnxParserInvoked -and
+      -not [bool]$ownerCase.yoloVisionPreflight.execution.engineBuildInvoked -and
+      -not [bool]$ownerCase.yoloVisionPreflight.execution.inferenceInvoked -and
+      -not [bool]$ownerCase.yoloVisionPreflight.boundary.isRuntimeProof -and
+      -not [bool]$ownerCase.yoloVisionPreflight.boundary.isRealModelRuntimeProof -and
+      -not [bool]$ownerCase.yoloVisionPreflight.boundary.isPackageConsumerRuntimeProof -and
+      -not [bool]$ownerCase.yoloVisionPreflight.boundary.canPromoteRealModelRuntime -and
+      -not [bool]$ownerCase.yoloVisionPreflight.boundary.canPromotePackageConsumerRuntime
+    ) "YoloVision preflight must keep runtime execution and promotion flags false."
     Add-Item "case-$id-enhanced-evidence-fields" (
       -not [string]::IsNullOrWhiteSpace([string]$ownerCase.articleEvidence.articleStatus) -and
       -not [string]::IsNullOrWhiteSpace([string]$evidenceCase.articleEvidence.proofBoundary) -and
       -not [string]::IsNullOrWhiteSpace([string]$evidenceCase.tensorRtExec.stdoutLogPath) -and
-      -not [string]::IsNullOrWhiteSpace([string]$evidenceCase.sampleRunStdoutLogPath)
+      -not [string]::IsNullOrWhiteSpace([string]$evidenceCase.sampleRunStdoutLogPath) -and
+      -not [string]::IsNullOrWhiteSpace([string]$evidenceCase.yoloVisionPreflight.reportPath)
     ) "Owner/evidence cases must carry article readiness and command transcript fields."
     Add-Item "case-$id-no-proof-promotion" (-not [bool]$evidenceCase.canPromoteRealModelRuntime -and -not [bool]$evidenceCase.canPromotePackageConsumerRuntime -and -not [bool]$evidenceCase.isSmokePassed) "Template case must not promote proof."
   }

@@ -92,6 +92,16 @@ dotnet run --project .\applications\TensorRtExec -- `
 
 这一步可以验证 ONNX parser、profile shape、precision flag、engine serialization 和 report schema。它仍然只是 build-only evidence。即使 report 中记录了 TensorRT 版本、CUDA 版本、engine 路径和 hash，也不能替代 YoloVision 真实输入运行日志。
 
+## YoloVision 离线 Preflight
+
+在准备真实运行前，先生成离线配置和资产预检报告：
+
+```powershell
+dotnet run --project .\samples\YoloVision -- --model .\models\yolov8n.onnx --labels .\models\coco.names --input-data .\models\yolov8n-det-fp32.bin --input-shape 1x3x640x640 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware --preflight --preflight-report .\models\yolov8n-det-preflight.json
+```
+
+报告必须标记为 `yolovision-preflight.v1` 和 `proofClassification=precheck`，并明确 `TensorRT/ONNX parser/engine/inference` 均未执行。它只帮助 owner 发现路径、SHA256 和输出 metadata 缺口，不能替代后面的 `YoloVision Passed=True` 真实运行日志。
+
 ## YoloVision 运行
 
 准备一个真实图片，预处理成 NCHW float32 tensor 后运行：

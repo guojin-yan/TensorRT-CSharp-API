@@ -4,6 +4,13 @@
   "samplePath": "samples/YoloVision",
   "sourcePack": "samples/assets/yolovision-article-case-pack.json",
   "taskOutputContract": "samples/YoloVision/yolovision-task-output-contract.json",
+  "preflightContract": {
+    "schemaPath": "samples/YoloVision/yolovision-preflight.schema.json",
+    "schemaVersion": "yolovision-preflight.v1",
+    "proofClassification": "precheck",
+    "canPromoteRealModelRuntime": false,
+    "canPromotePackageConsumerRuntime": false
+  },
   "packState": "owner-action-required",
   "proofBoundary": "owner backfill contract only; not real-model-runtime proof; not package-consumer-runtime proof; not post-publish proof",
   "performsPublish": false,
@@ -62,6 +69,15 @@
     "ownerReviewer",
     "ownerReviewedAtUtc",
     "ownerAcceptanceDecision"
+  ],
+  "requiredPreflightEvidence": [
+    "yoloVisionPreflight.command",
+    "yoloVisionPreflight.reportPath",
+    "yoloVisionPreflight.reportSha256",
+    "yoloVisionPreflight.schemaVersion=yolovision-preflight.v1",
+    "yoloVisionPreflight.proofClassification=precheck",
+    "yoloVisionPreflight.execution.*=false",
+    "yoloVisionPreflight.boundary.canPromote*=false"
   ],
   "forbiddenSubstitutes": [
     "build-only",
@@ -137,6 +153,31 @@
         "stderrSummary": "owner-required-or-no-stderr",
         "outputJsonPath": "models/yolov8n-det-output.json",
         "outputJsonSha256": "owner-required"
+      },
+      "yoloVisionPreflight": {
+        "command": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n.onnx --labels .\\models\\coco.names --input-data .\\models\\yolov8n-det-fp32.bin --input-shape 1x3x640x640 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware --preflight --preflight-report .\\models\\yolov8n-det-preflight.json",
+        "reportPath": "models/yolov8n-det-preflight.json",
+        "reportSha256": "owner-required",
+        "schemaPath": "samples/YoloVision/yolovision-preflight.schema.json",
+        "schemaVersion": "yolovision-preflight.v1",
+        "expectedState": "owner-action-required",
+        "proofClassification": "precheck",
+        "execution": {
+          "tensorRtRuntimeProbed": false,
+          "onnxParserInvoked": false,
+          "engineBuildInvoked": false,
+          "inferenceInvoked": false
+        },
+        "boundary": {
+          "proofClassification": "precheck",
+          "isRuntimeProof": false,
+          "isRealModelRuntimeProof": false,
+          "isPackageConsumerRuntimeProof": false,
+          "canPromoteRealModelRuntime": false,
+          "canPromotePackageConsumerRuntime": false,
+          "note": "Offline YoloVision configuration and asset preflight only; it is not runtime proof."
+        },
+        "proofBoundary": "YoloVision preflight is offline configuration/asset evidence only; it is not real-model-runtime proof and never package-consumer-runtime proof."
       },
       "outputMetadata": {
         "classCount": "owner-required",
@@ -230,6 +271,31 @@
         "outputJsonPath": "models/yolov8n-seg-output.json",
         "outputJsonSha256": "owner-required"
       },
+      "yoloVisionPreflight": {
+        "command": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-seg.onnx --labels .\\models\\coco.names --input-data .\\models\\yolov8n-seg-fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map boxes:det,proto:mask-prototypes --mask-coefficient-count 32 --preflight --preflight-report .\\models\\yolov8n-seg-preflight.json",
+        "reportPath": "models/yolov8n-seg-preflight.json",
+        "reportSha256": "owner-required",
+        "schemaPath": "samples/YoloVision/yolovision-preflight.schema.json",
+        "schemaVersion": "yolovision-preflight.v1",
+        "expectedState": "owner-action-required",
+        "proofClassification": "precheck",
+        "execution": {
+          "tensorRtRuntimeProbed": false,
+          "onnxParserInvoked": false,
+          "engineBuildInvoked": false,
+          "inferenceInvoked": false
+        },
+        "boundary": {
+          "proofClassification": "precheck",
+          "isRuntimeProof": false,
+          "isRealModelRuntimeProof": false,
+          "isPackageConsumerRuntimeProof": false,
+          "canPromoteRealModelRuntime": false,
+          "canPromotePackageConsumerRuntime": false,
+          "note": "Offline YoloVision configuration and asset preflight only; it is not runtime proof."
+        },
+        "proofBoundary": "YoloVision preflight is offline configuration/asset evidence only; it is not real-model-runtime proof and never package-consumer-runtime proof."
+      },
       "outputMetadata": {
         "classCount": "owner-required",
         "outputRoleMap": "boxes:det,proto:mask-prototypes",
@@ -320,6 +386,31 @@
         "stderrSummary": "owner-required-or-no-stderr",
         "outputJsonPath": "models/yolov8n-pose-output.json",
         "outputJsonSha256": "owner-required"
+      },
+      "yoloVisionPreflight": {
+        "command": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-pose.onnx --labels .\\models\\coco.names --input-data .\\models\\yolov8n-pose-fp32.bin --input-shape 1x3x640x640 --family v8 --task pose --output-role-map boxes:det,keypoints:pose-keypoints --pose-keypoint-count 17 --preflight --preflight-report .\\models\\yolov8n-pose-preflight.json",
+        "reportPath": "models/yolov8n-pose-preflight.json",
+        "reportSha256": "owner-required",
+        "schemaPath": "samples/YoloVision/yolovision-preflight.schema.json",
+        "schemaVersion": "yolovision-preflight.v1",
+        "expectedState": "owner-action-required",
+        "proofClassification": "precheck",
+        "execution": {
+          "tensorRtRuntimeProbed": false,
+          "onnxParserInvoked": false,
+          "engineBuildInvoked": false,
+          "inferenceInvoked": false
+        },
+        "boundary": {
+          "proofClassification": "precheck",
+          "isRuntimeProof": false,
+          "isRealModelRuntimeProof": false,
+          "isPackageConsumerRuntimeProof": false,
+          "canPromoteRealModelRuntime": false,
+          "canPromotePackageConsumerRuntime": false,
+          "note": "Offline YoloVision configuration and asset preflight only; it is not runtime proof."
+        },
+        "proofBoundary": "YoloVision preflight is offline configuration/asset evidence only; it is not real-model-runtime proof and never package-consumer-runtime proof."
       },
       "outputMetadata": {
         "classCount": "owner-required",
@@ -413,6 +504,31 @@
         "outputJsonPath": "models/yolov8n-obb-output.json",
         "outputJsonSha256": "owner-required"
       },
+      "yoloVisionPreflight": {
+        "command": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-obb.onnx --labels .\\models\\dota.names --input-data .\\models\\yolov8n-obb-fp32.bin --input-shape 1x3x1024x1024 --family v8 --task obb --output-role-map boxes:det,angles:obb-angle --obb-angle-output angles --preflight --preflight-report .\\models\\yolov8n-obb-preflight.json",
+        "reportPath": "models/yolov8n-obb-preflight.json",
+        "reportSha256": "owner-required",
+        "schemaPath": "samples/YoloVision/yolovision-preflight.schema.json",
+        "schemaVersion": "yolovision-preflight.v1",
+        "expectedState": "owner-action-required",
+        "proofClassification": "precheck",
+        "execution": {
+          "tensorRtRuntimeProbed": false,
+          "onnxParserInvoked": false,
+          "engineBuildInvoked": false,
+          "inferenceInvoked": false
+        },
+        "boundary": {
+          "proofClassification": "precheck",
+          "isRuntimeProof": false,
+          "isRealModelRuntimeProof": false,
+          "isPackageConsumerRuntimeProof": false,
+          "canPromoteRealModelRuntime": false,
+          "canPromotePackageConsumerRuntime": false,
+          "note": "Offline YoloVision configuration and asset preflight only; it is not runtime proof."
+        },
+        "proofBoundary": "YoloVision preflight is offline configuration/asset evidence only; it is not real-model-runtime proof and never package-consumer-runtime proof."
+      },
       "outputMetadata": {
         "classCount": "owner-required",
         "boxFormat": "owner-required",
@@ -504,6 +620,31 @@
         "outputJsonPath": "models/yolov8n-cls-output.json",
         "outputJsonSha256": "owner-required"
       },
+      "yoloVisionPreflight": {
+        "command": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-cls.onnx --labels .\\models\\imagenet.names --input-data .\\models\\yolov8n-cls-fp32.bin --input-shape 1x3x224x224 --family v8 --task cls --classification-output logits --preflight --preflight-report .\\models\\yolov8n-cls-preflight.json",
+        "reportPath": "models/yolov8n-cls-preflight.json",
+        "reportSha256": "owner-required",
+        "schemaPath": "samples/YoloVision/yolovision-preflight.schema.json",
+        "schemaVersion": "yolovision-preflight.v1",
+        "expectedState": "owner-action-required",
+        "proofClassification": "precheck",
+        "execution": {
+          "tensorRtRuntimeProbed": false,
+          "onnxParserInvoked": false,
+          "engineBuildInvoked": false,
+          "inferenceInvoked": false
+        },
+        "boundary": {
+          "proofClassification": "precheck",
+          "isRuntimeProof": false,
+          "isRealModelRuntimeProof": false,
+          "isPackageConsumerRuntimeProof": false,
+          "canPromoteRealModelRuntime": false,
+          "canPromotePackageConsumerRuntime": false,
+          "note": "Offline YoloVision configuration and asset preflight only; it is not runtime proof."
+        },
+        "proofBoundary": "YoloVision preflight is offline configuration/asset evidence only; it is not real-model-runtime proof and never package-consumer-runtime proof."
+      },
       "outputMetadata": {
         "classCount": "owner-required",
         "labelsSha256": "owner-required",
@@ -592,6 +733,31 @@
         "stderrSummary": "owner-required-or-no-stderr",
         "outputJsonPath": "models/yolov8n-sem-output.json",
         "outputJsonSha256": "owner-required"
+      },
+      "yoloVisionPreflight": {
+        "command": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-sem.onnx --labels .\\models\\semantic-classes.names --input-data .\\models\\yolov8n-sem-fp32.bin --input-shape 1x3x512x512 --family v8 --task sem --semantic-output semantic --class-count owner-required --semantic-map-shape owner-required --class-map-layout NCHW-logits-or-NHW-class-index-owner-confirmed --palette .\\models\\semantic-palette.json --preflight --preflight-report .\\models\\yolov8n-sem-preflight.json",
+        "reportPath": "models/yolov8n-sem-preflight.json",
+        "reportSha256": "owner-required",
+        "schemaPath": "samples/YoloVision/yolovision-preflight.schema.json",
+        "schemaVersion": "yolovision-preflight.v1",
+        "expectedState": "owner-action-required",
+        "proofClassification": "precheck",
+        "execution": {
+          "tensorRtRuntimeProbed": false,
+          "onnxParserInvoked": false,
+          "engineBuildInvoked": false,
+          "inferenceInvoked": false
+        },
+        "boundary": {
+          "proofClassification": "precheck",
+          "isRuntimeProof": false,
+          "isRealModelRuntimeProof": false,
+          "isPackageConsumerRuntimeProof": false,
+          "canPromoteRealModelRuntime": false,
+          "canPromotePackageConsumerRuntime": false,
+          "note": "Offline YoloVision configuration and asset preflight only; it is not runtime proof."
+        },
+        "proofBoundary": "YoloVision preflight is offline configuration/asset evidence only; it is not real-model-runtime proof and never package-consumer-runtime proof."
       },
       "outputMetadata": {
         "classCount": "owner-required",

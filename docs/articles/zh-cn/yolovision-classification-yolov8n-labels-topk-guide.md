@@ -55,6 +55,16 @@ dotnet run --project .\applications\TensorRtExec -- `
 
 这一步验证 ONNX parser、profile 和 engine serialization。它不能证明分类结果可信，因为它不包含真实输入运行、labels 对齐和 Top-K 输出 review。
 
+## YoloVision 离线 Preflight
+
+真实运行前先生成配置预检报告：
+
+```powershell
+dotnet run --project .\samples\YoloVision -- --model .\models\yolov8n-cls.onnx --labels .\models\imagenet.names --input-data .\models\yolov8n-cls-fp32.bin --input-shape 1x3x224x224 --family v8 --task cls --classification-output logits --preflight --preflight-report .\models\yolov8n-cls-preflight.json
+```
+
+报告的 schema 必须是 `yolovision-preflight.v1`，分类必须是 `precheck`；它只检查资产、profile 和分类输出配置，不是 labels/top-k 的 runtime proof。
+
 ## YoloVision 运行
 
 ```powershell

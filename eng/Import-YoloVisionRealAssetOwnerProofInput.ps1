@@ -95,6 +95,7 @@ function New-CandidateRecord {
     $input = Get-PropertyOrDefault -Object $case -Name "input" -DefaultValue $null
     $tensorRtExec = Get-PropertyOrDefault -Object $case -Name "tensorRtExec" -DefaultValue $null
     $yoloVision = Get-PropertyOrDefault -Object $case -Name "yoloVision" -DefaultValue $null
+    $yoloVisionPreflight = Get-PropertyOrDefault -Object $case -Name "yoloVisionPreflight" -DefaultValue $null
     $ownerReview = Get-PropertyOrDefault -Object $case -Name "ownerReview" -DefaultValue $null
 
     $caseRecords.Add([pscustomobject]@{
@@ -133,6 +134,16 @@ function New-CandidateRecord {
         tensorRtExecReportSha256 = [string](Get-PropertyOrDefault -Object $tensorRtExec -Name "reportSha256" -DefaultValue "")
         tensorRtEnginePath = [string](Get-PropertyOrDefault -Object $tensorRtExec -Name "enginePath" -DefaultValue "")
         tensorRtEngineSha256 = [string](Get-PropertyOrDefault -Object $tensorRtExec -Name "engineSha256" -DefaultValue "")
+        yoloVisionPreflight = [pscustomobject]@{
+          command = [string](Get-PropertyOrDefault -Object $yoloVisionPreflight -Name "command" -DefaultValue "")
+          reportPath = [string](Get-PropertyOrDefault -Object $yoloVisionPreflight -Name "reportPath" -DefaultValue "")
+          reportSha256 = [string](Get-PropertyOrDefault -Object $yoloVisionPreflight -Name "reportSha256" -DefaultValue "")
+          schemaPath = [string](Get-PropertyOrDefault -Object $yoloVisionPreflight -Name "schemaPath" -DefaultValue "")
+          schemaVersion = [string](Get-PropertyOrDefault -Object $yoloVisionPreflight -Name "schemaVersion" -DefaultValue "")
+          proofClassification = [string](Get-PropertyOrDefault -Object $yoloVisionPreflight -Name "proofClassification" -DefaultValue "")
+          execution = Get-PropertyOrDefault -Object $yoloVisionPreflight -Name "execution" -DefaultValue $null
+          boundary = Get-PropertyOrDefault -Object $yoloVisionPreflight -Name "boundary" -DefaultValue $null
+        }
         ownerReview = $ownerReview
         hostEvidence = $globalEvidence
         proofBoundary = "sample-run evidence candidate only; never package-consumer-runtime proof"

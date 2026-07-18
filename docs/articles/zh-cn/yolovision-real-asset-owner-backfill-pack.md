@@ -2,21 +2,22 @@
 
 ## 文章定位
 
-`samples/assets/yolovision-real-asset-owner-backfill-pack.json` 是给 release owner 使用的真实资产回填合同。上一轮的 `yolovision-article-case-pack.json` 解决“文章怎么写、命令怎么给、输出怎么解释”，本包进一步要求 owner 把模型来源、许可证、SHA256、TensorRtExec build-only report、YoloVision run log、stdout/stderr 摘要和 owner review 填完整。
+`samples/assets/yolovision-real-asset-owner-backfill-pack.json` 是给 release owner 使用的真实资产回填合同。上一轮的 `yolovision-article-case-pack.json` 解决“文章怎么写、命令怎么给、输出怎么解释”，本包进一步要求 owner 把模型来源、许可证、SHA256、YoloVision 离线 preflight report、TensorRtExec build-only report、YoloVision run log、stdout/stderr 摘要和 owner review 填完整。
 
 它仍然是 `owner-action-required` 模板，不是 runtime proof。只有真实字段被 owner 回填，并通过 `eng/Test-YoloVisionRealAssetOwnerBackfillPack.ps1 -Strict` 等校验后，才可能作为 `real-model-runtime` 候选进入后续 release proof 流程。
 
 ## 覆盖范围
 
-本包覆盖五个高价值 YOLOv8n case：
+本包覆盖六个高价值 YOLOv8n case：
 
 - detection：`yolov8n-det`
 - segmentation：`yolov8n-seg`
 - pose：`yolov8n-pose`
 - oriented bounding box：`yolov8n-obb`
 - classification：`yolov8n-cls`
+- semantic segmentation：`yolov8n-sem`
 
-每个 case 都保留对应文章路径、ONNX 导出命令、TensorRtExec build-only 命令和 YoloVision run 命令。这样 owner 不需要重复翻找文章，只要按 JSON 字段补真实证据即可。
+每个 case 都保留对应文章路径、ONNX 导出命令、YoloVision preflight 命令、TensorRtExec build-only 命令和 YoloVision run 命令。这样 owner 不需要重复翻找文章，只要按 JSON 字段补真实证据即可。
 
 ## Owner 必填字段
 
@@ -33,6 +34,11 @@
 - `input.imageSha256`
 - `input.preprocessedTensorSha256`
 - `input.preprocessContract`
+- `yoloVisionPreflight.reportSha256`
+- `yoloVisionPreflight.schemaVersion`（必须是 `yolovision-preflight.v1`）
+- `yoloVisionPreflight.proofClassification`（必须是 `precheck`）
+- `yoloVisionPreflight.execution.*`（必须全部为 `false`）
+- `yoloVisionPreflight.boundary.*`（必须保持不可晋级）
 - `tensorRtExec.reportSha256`
 - `tensorRtExec.engineSha256`
 - `yoloVision.runLogSha256`
@@ -49,11 +55,12 @@ SHA256 必须是 64 位十六进制字符串。模板中的 `owner-required`、`
 
 1. 下载或导出模型，记录模型来源和许可证。
 2. 计算权重、ONNX、labels、输入图片和预处理 tensor 的 SHA256。
-3. 执行 TensorRtExec build-only 命令并保存 report、engine 和对应 SHA256。
-4. 执行 YoloVision run 命令，确保日志中出现 `YoloVision Passed=True`。
-5. 保存 stdout/stderr 摘要、run log、output JSON 和 SHA256。
-6. 由 owner review 输出结果是否符合模型任务语义。
-7. 运行 `eng/Test-YoloVisionRealAssetOwnerBackfillPack.ps1 -Strict`。
+3. 先执行每个 case 的 YoloVision `--preflight` 命令，保存 `yolovision-preflight.v1` report 和 SHA256；确认 `proofClassification=precheck` 且没有 runtime 执行。
+4. 执行 TensorRtExec build-only 命令并保存 report、engine 和对应 SHA256。
+5. 执行 YoloVision run 命令，确保日志中出现 `YoloVision Passed=True`。
+6. 保存 stdout/stderr 摘要、run log、output JSON 和 SHA256。
+7. 由 owner review 输出结果是否符合模型任务语义。
+8. 运行 `eng/Test-YoloVisionRealAssetOwnerBackfillPack.ps1 -Strict`。
 
 ## 校验器
 
@@ -76,7 +83,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-YoloVisionRealAssetOwne
 
 ## Proof Boundary
 
-本包、五篇文章、TensorRtExec report、YoloVision matrix、OnnxToEngine report、sidecar-only report、screenshot、template、dry-run、build-only、local feed、ProjectReference、direct `.nupkg`、readonly diagnostics 都不是 runtime proof。
+本包、六篇文章、YoloVision preflight report、TensorRtExec report、YoloVision matrix、OnnxToEngine report、sidecar-only report、screenshot、template、dry-run、build-only、local feed、ProjectReference、direct `.nupkg`、readonly diagnostics 都不是 runtime proof。
 
 `real-model-runtime` 只属于真实模型、真实输入、真实 YoloVision run log、完整 SHA256、host metadata 和 owner review 都齐全后的候选状态。`package-consumer-runtime`、public package proof 和 post-publish verification proof 仍然属于独立 release close lane，不能由本包替代。
 

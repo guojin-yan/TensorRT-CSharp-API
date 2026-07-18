@@ -42,6 +42,16 @@ dotnet run --project .\applications\TensorRtExec -- --onnx .\models\yolov8n-sem.
 
 这个报告只说明构建意图、shape profile、precision intent 和输出 artifact 路径。它不是 runtime proof，也不是 package-consumer-runtime proof。
 
+## YoloVision 离线 Preflight
+
+语义分割的 class map、palette 和输出 shape 需要 owner 确认；先生成离线预检报告：
+
+```powershell
+dotnet run --project .\samples\YoloVision -- --model .\models\yolov8n-sem.onnx --labels .\models\semantic-classes.names --input-data .\models\yolov8n-sem-fp32.bin --input-shape 1x3x512x512 --family v8 --task sem --semantic-output semantic --class-count owner-required --semantic-map-shape owner-required --class-map-layout NCHW-logits-or-NHW-class-index-owner-confirmed --palette .\models\semantic-palette.json --preflight --preflight-report .\models\yolov8n-sem-preflight.json
+```
+
+该报告只允许 `yolovision-preflight.v1`/`proofClassification=precheck`，并要求所有 execution 与 promotion flag 为 `false`；它不能替代真实 semantic map 输出和 owner review。
+
 ## 运行 YoloVision
 
 示例命令：

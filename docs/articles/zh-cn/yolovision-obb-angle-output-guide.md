@@ -84,6 +84,16 @@ dotnet run --project .\applications\TensorRtExec -- `
 
 build-only report 可以证明 engine 构建参数和输出 binding，但不能证明 angle decode 或 rotated NMS 正确。
 
+## YoloVision 离线 Preflight
+
+先检查 OBB 的输出角色和输入资产，再进行真实运行：
+
+```powershell
+dotnet run --project .\samples\YoloVision -- --model .\models\yolov8n-obb.onnx --labels .\models\dota.names --input-data .\models\yolov8n-obb-fp32.bin --input-shape 1x3x1024x1024 --family v8 --task obb --output-role-map boxes:det,angles:obb-angle --obb-angle-output angles --preflight --preflight-report .\models\yolov8n-obb-preflight.json
+```
+
+预检报告必须保持 `yolovision-preflight.v1`/`precheck` 边界，且不执行 TensorRT、parser、engine build 或 inference；它不能替代 angle metadata 和真实 OBB 运行证据。
+
 ## YoloVision 运行
 
 ```powershell

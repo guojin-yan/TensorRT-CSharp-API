@@ -160,6 +160,14 @@ public sealed class YoloVisionRealAssetCandidateValidatorTests
             AssertValidationContains(record, "tensorrtexec-build-command", passed: true);
             AssertValidationContains(record, "tensorrtexec-build-only", passed: true);
             AssertValidationContains(record, "yolovision-run-command", passed: true);
+            AssertValidationContains(record, "preflight-command", passed: true);
+            AssertValidationContains(record, "preflight-schema-version", passed: true);
+            AssertValidationContains(record, "preflight-proof-classification", passed: true);
+            AssertValidationContains(record, "preflight-execution-disabled", passed: true);
+            AssertValidationContains(record, "preflight-boundary-disabled", passed: true);
+            AssertValidationContains(record, "preflight-report-schema", passed: true);
+            AssertValidationContains(record, "preflight-report-execution-disabled", passed: true);
+            AssertValidationContains(record, "preflight-report-boundary-disabled", passed: true);
             AssertValidationContains(record, "expected-yolovision-passed", passed: true);
             AssertValidationContains(record, "run-log-sha256-required-or-real", passed: true);
             AssertValidationContains(record, "output-json-sha256-required-or-real", passed: true);
@@ -191,6 +199,8 @@ public sealed class YoloVisionRealAssetCandidateValidatorTests
         Assert.Contains("case-task-in-contract", script, StringComparison.Ordinal);
         Assert.Contains("contract-required-metadata-", script, StringComparison.Ordinal);
         Assert.Contains("tensorrtexec-profile-hint-aligned", script, StringComparison.Ordinal);
+        Assert.Contains("preflight-report-schema", script, StringComparison.Ordinal);
+        Assert.Contains("preflight-report-boundary-disabled", script, StringComparison.Ordinal);
         Assert.Contains("owner-review-does-not-accept-template", script, StringComparison.Ordinal);
         Assert.Contains("canPromotePackageConsumerRuntime = $false", script, StringComparison.Ordinal);
         Assert.Contains("yolovision-real-asset-owner-backfill-sample-run-evidence.template.json", exporter, StringComparison.Ordinal);
@@ -248,6 +258,9 @@ public sealed class YoloVisionRealAssetCandidateValidatorTests
         Assert.False(template.GetProperty("canPromotePackageConsumerRuntime").GetBoolean());
         Assert.Contains("not real-model-runtime proof", template.GetProperty("proofBoundary").GetString(), StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Test-SampleRunEvidenceRecord.ps1 -RequireExistingLog", template.GetProperty("validator").GetString(), StringComparison.Ordinal);
+        Assert.Equal("yolovision-preflight.v1", template.GetProperty("preflightContract").GetProperty("schemaVersion").GetString());
+        Assert.Equal("precheck", template.GetProperty("preflightContract").GetProperty("proofClassification").GetString());
+        Assert.Equal(7, template.GetProperty("requiredPreflightEvidence").GetArrayLength());
 
         JsonElement[] cases = template.GetProperty("cases").EnumerateArray().ToArray();
         Assert.Equal(6, cases.Length);
@@ -271,6 +284,11 @@ public sealed class YoloVisionRealAssetCandidateValidatorTests
             Assert.Equal("owner-required", item.GetProperty("input").GetProperty("preprocessedTensorSha256").GetString());
             Assert.Equal("owner-required", item.GetProperty("tensorRtExec").GetProperty("reportSha256").GetString());
             Assert.Equal("owner-required", item.GetProperty("tensorRtExec").GetProperty("engineSha256").GetString());
+            Assert.Equal("owner-required", item.GetProperty("yoloVisionPreflight").GetProperty("reportSha256").GetString());
+            Assert.Equal("yolovision-preflight.v1", item.GetProperty("yoloVisionPreflight").GetProperty("schemaVersion").GetString());
+            Assert.Equal("precheck", item.GetProperty("yoloVisionPreflight").GetProperty("proofClassification").GetString());
+            Assert.False(item.GetProperty("yoloVisionPreflight").GetProperty("execution").GetProperty("engineBuildInvoked").GetBoolean());
+            Assert.False(item.GetProperty("yoloVisionPreflight").GetProperty("boundary").GetProperty("canPromoteRealModelRuntime").GetBoolean());
             Assert.Equal("owner-required", item.GetProperty("sampleRunLogSha256").GetString());
             Assert.Equal("owner-required", item.GetProperty("outputJsonSha256").GetString());
             Assert.Contains("TensorRtExec report is build/report evidence only", item.GetProperty("tensorRtExec").GetProperty("proofBoundary").GetString(), StringComparison.Ordinal);

@@ -75,6 +75,42 @@ function Test-RequiredOrHash {
     return (Test-Placeholder $Value) -or (Test-Sha256 $Value)
 }
 
+function Test-FileHashMatches {
+    param(
+        [Parameter(Mandatory = $true)][string] $Path,
+        [AllowNull()][string] $ExpectedHash
+    )
+
+    if (-not (Test-Sha256 $ExpectedHash)) { return $true }
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { return $false }
+    return [string]::Equals(
+        (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash,
+        $ExpectedHash,
+        [System.StringComparison]::OrdinalIgnoreCase)
+}
+
+function Test-PreflightExecutionDisabled {
+    param([AllowNull()] $Execution)
+
+    return $null -ne $Execution -and
+        -not [bool]$Execution.tensorRtRuntimeProbed -and
+        -not [bool]$Execution.onnxParserInvoked -and
+        -not [bool]$Execution.engineBuildInvoked -and
+        -not [bool]$Execution.inferenceInvoked
+}
+
+function Test-PreflightBoundaryDisabled {
+    param([AllowNull()] $Boundary)
+
+    return $null -ne $Boundary -and
+        (Get-JsonString $Boundary "proofClassification") -eq "precheck" -and
+        -not [bool]$Boundary.isRuntimeProof -and
+        -not [bool]$Boundary.isRealModelRuntimeProof -and
+        -not [bool]$Boundary.isPackageConsumerRuntimeProof -and
+        -not [bool]$Boundary.canPromoteRealModelRuntime -and
+        -not [bool]$Boundary.canPromotePackageConsumerRuntime
+}
+
 function ConvertTo-StringArray {
     param([AllowNull()] $Value)
     if ($null -eq $Value) { return @() }
@@ -130,10 +166,30 @@ Add-ValidationItem $items "no-package-consumer-promotion" (-not [bool]$pack.canP
 Add-ValidationItem $items "no-public-publish" (-not [bool]$pack.canPublishPublicly) "blocker" "Template pack cannot publish publicly."
 Add-ValidationItem $items "no-template-real-promotion" (-not [bool]$pack.canPromoteRealModelRuntime) "blocker" "Template pack cannot promote real-model-runtime."
 Add-ValidationItem $items "proof-boundary-real-model" ((Get-JsonString $pack "proofBoundary").Contains("not real-model-runtime proof")) "blocker" "proofBoundary must state it is not real-model-runtime proof."
+$preflightContract = $pack.preflightContract
+$preflightSchemaPath = Get-JsonString $preflightContract "schemaPath"
+$preflightSchemaExists = -not [string]::IsNullOrWhiteSpace($preflightSchemaPath) -and (Test-Path -LiteralPath (Resolve-RepoPath $preflightSchemaPath) -PathType Leaf)
+Add-ValidationItem $items "preflight-schema-version" ((Get-JsonString $preflightContract "schemaVersion") -eq "yolovision-preflight.v1") "blocker" "Pack preflightContract must declare yolovision-preflight.v1."
+Add-ValidationItem $items "preflight-schema-file" $preflightSchemaExists "blocker" "Pack preflightContract schemaPath must point to the checked-in preflight schema."
+Add-ValidationItem $items "preflight-proof-classification" ((Get-JsonString $preflightContract "proofClassification") -eq "precheck") "blocker" "Pack preflightContract must remain proofClassification=precheck."
+Add-ValidationItem $items "preflight-no-runtime-promotion" (-not [bool]$preflightContract.canPromoteRealModelRuntime -and -not [bool]$preflightContract.canPromotePackageConsumerRuntime) "blocker" "Pack preflightContract cannot promote runtime proof."
 
 $forbidden = @($pack.forbiddenSubstitutes | ForEach-Object { [string]$_ })
 foreach ($forbiddenName in @("build-only", "dry-run", "template", "ProjectReference", "TensorRtExec report", "YoloVision matrix", "sidecar-only report", "blocked-by-cuda-driver")) {
     Add-ValidationItem $items ("forbidden-substitute-" + ($forbiddenName -replace "[^A-Za-z0-9]+", "-").Trim("-")) ($forbidden -contains $forbiddenName) "required" "forbiddenSubstitutes must include $forbiddenName."
+}
+
+$requiredPreflightEvidence = ConvertTo-StringArray $pack.requiredPreflightEvidence
+foreach ($requiredPreflightField in @(
+        "yoloVisionPreflight.command",
+        "yoloVisionPreflight.reportPath",
+        "yoloVisionPreflight.reportSha256",
+        "yoloVisionPreflight.schemaVersion=yolovision-preflight.v1",
+        "yoloVisionPreflight.proofClassification=precheck",
+        "yoloVisionPreflight.execution.*=false",
+        "yoloVisionPreflight.boundary.canPromote*=false"
+    )) {
+    Add-ValidationItem $items ("required-preflight-" + ($requiredPreflightField -replace "[^A-Za-z0-9]+", "-").Trim("-")) ($requiredPreflightEvidence -contains $requiredPreflightField) "blocker" "requiredPreflightEvidence must include $requiredPreflightField."
 }
 
 $caseArray = @($pack.cases)
@@ -190,6 +246,44 @@ foreach ($case in $caseArray) {
     Add-ValidationItem $caseItems "output-json-sha256-required-or-real" (Test-RequiredOrHash (Get-JsonString $case.yoloVision "outputJsonSha256")) "blocker" "outputJsonSha256 must be owner-required or a real SHA256."
     Add-ValidationItem $caseItems "stdout-summary-present" (-not [string]::IsNullOrWhiteSpace((Get-JsonString $case.yoloVision "stdoutSummary"))) "required" "stdoutSummary must be present."
     Add-ValidationItem $caseItems "stderr-summary-present" (-not [string]::IsNullOrWhiteSpace((Get-JsonString $case.yoloVision "stderrSummary"))) "required" "stderrSummary must be present."
+
+    $preflight = $case.yoloVisionPreflight
+    $preflightCommand = Get-JsonString $preflight "command"
+    $preflightReportPath = Get-JsonString $preflight "reportPath"
+    $preflightReportSha256 = Get-JsonString $preflight "reportSha256"
+    $preflightSchemaPath = Get-JsonString $preflight "schemaPath"
+    Add-ValidationItem $caseItems "preflight-present" ($null -ne $preflight) "blocker" "yoloVisionPreflight is required for every owner case."
+    Add-ValidationItem $caseItems "preflight-command" (-not [string]::IsNullOrWhiteSpace($preflightCommand) -and $preflightCommand.Contains("samples\YoloVision") -and $preflightCommand.Contains("--preflight")) "blocker" "YoloVision preflight command must be present and non-executing."
+    Add-ValidationItem $caseItems "preflight-report-path" (-not [string]::IsNullOrWhiteSpace($preflightReportPath)) "blocker" "YoloVision preflight reportPath is required."
+    Add-ValidationItem $caseItems "preflight-report-sha256-required-or-real" (Test-RequiredOrHash $preflightReportSha256) "blocker" "YoloVision preflight reportSha256 must be owner-required or a real SHA256."
+    Add-ValidationItem $caseItems "preflight-schema-version" ((Get-JsonString $preflight "schemaVersion") -eq "yolovision-preflight.v1") "blocker" "YoloVision preflight must declare schemaVersion=yolovision-preflight.v1."
+    Add-ValidationItem $caseItems "preflight-schema-path" (-not [string]::IsNullOrWhiteSpace($preflightSchemaPath) -and (Test-Path -LiteralPath (Resolve-RepoPath $preflightSchemaPath) -PathType Leaf)) "blocker" "YoloVision preflight schemaPath must point to the checked-in schema."
+    Add-ValidationItem $caseItems "preflight-proof-classification" ((Get-JsonString $preflight "proofClassification") -eq "precheck") "blocker" "YoloVision preflight must remain proofClassification=precheck."
+    Add-ValidationItem $caseItems "preflight-expected-state" ((Get-JsonString $preflight "expectedState") -eq "owner-action-required") "required" "Template preflight evidence must remain owner-action-required."
+    Add-ValidationItem $caseItems "preflight-execution-disabled" (Test-PreflightExecutionDisabled $preflight.execution) "blocker" "YoloVision preflight execution flags must all be false."
+    Add-ValidationItem $caseItems "preflight-boundary-disabled" (Test-PreflightBoundaryDisabled $preflight.boundary) "blocker" "YoloVision preflight boundary must remain precheck and non-promotable."
+
+    $preflightReport = $null
+    $preflightReportExists = $false
+    $preflightReportParsed = $false
+    if (-not [string]::IsNullOrWhiteSpace($preflightReportPath)) {
+        $resolvedPreflightReportPath = Resolve-RepoPath $preflightReportPath
+        $preflightReportExists = Test-Path -LiteralPath $resolvedPreflightReportPath -PathType Leaf
+        if ($preflightReportExists) {
+            try {
+                $preflightReport = Get-Content -LiteralPath $resolvedPreflightReportPath -Raw | ConvertFrom-Json -Depth 64
+                $preflightReportParsed = $true
+            }
+            catch {
+                $preflightReportParsed = $false
+            }
+        }
+    }
+    $preflightHashPath = if ($preflightReportExists) { $resolvedPreflightReportPath } else { [IO.Path]::GetFullPath((Join-Path $repoRoot "__missing-preflight-report__")) }
+    Add-ValidationItem $caseItems "preflight-report-hash" (Test-FileHashMatches -Path $preflightHashPath -ExpectedHash $preflightReportSha256) "blocker" "A real preflight reportSha256 must match the report file."
+    Add-ValidationItem $caseItems "preflight-report-schema" (-not $preflightReportExists -or ($preflightReportParsed -and (Get-JsonString $preflightReport "schemaVersion") -eq "yolovision-preflight.v1")) "blocker" "An existing preflight report must be valid JSON with schemaVersion=yolovision-preflight.v1."
+    Add-ValidationItem $caseItems "preflight-report-execution-disabled" (-not $preflightReportExists -or ($preflightReportParsed -and (Test-PreflightExecutionDisabled $preflightReport.execution))) "blocker" "An existing preflight report must show no TensorRT, parser, engine, or inference execution."
+    Add-ValidationItem $caseItems "preflight-report-boundary-disabled" (-not $preflightReportExists -or ($preflightReportParsed -and (Test-PreflightBoundaryDisabled $preflightReport.boundary))) "blocker" "An existing preflight report must show proofClassification=precheck and all promotion flags false."
 
     $caseMetadataKeys = @()
     if ($null -ne $case.outputMetadata) {

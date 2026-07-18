@@ -87,6 +87,16 @@ dotnet run --project .\applications\TensorRtExec -- `
 
 build report 可以帮助定位 parser、profile、precision 和 output binding，但仍是 build-only evidence。它不能证明 mask 后处理正确，也不能替代真实 YoloVision run log。
 
+## YoloVision 离线 Preflight
+
+先运行不加载 TensorRT 的配置预检，记录多输出角色和资产状态：
+
+```powershell
+dotnet run --project .\samples\YoloVision -- --model .\models\yolov8n-seg.onnx --labels .\models\coco.names --input-data .\models\yolov8n-seg-fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map boxes:det,proto:mask-prototypes --mask-coefficient-count 32 --preflight --preflight-report .\models\yolov8n-seg-preflight.json
+```
+
+`yolovision-preflight.v1` 报告的 `proofClassification` 必须是 `precheck`，四个 runtime execution flag 必须为 `false`；它是 owner 配置检查，不是 mask runtime proof。
+
 ## YoloVision 运行
 
 ```powershell
