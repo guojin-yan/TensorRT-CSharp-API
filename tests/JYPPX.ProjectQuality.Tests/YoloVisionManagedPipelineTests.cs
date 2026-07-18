@@ -394,6 +394,134 @@ public sealed class YoloVisionManagedPipelineTests
         Assert.Contains("--preprocess-only", program, StringComparison.Ordinal);
         Assert.Contains("YoloVision PreprocessOnly=True", program, StringComparison.Ordinal);
         Assert.Contains("ImagePreprocessConfig", program, StringComparison.Ordinal);
+        Assert.Contains("--preflight", program, StringComparison.Ordinal);
+        Assert.Contains("YoloVisionPreflightReport.Create", program, StringComparison.Ordinal);
+        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "README.md"));
+        string schema = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "yolovision-preflight.schema.json"));
+        Assert.Contains("yolovision-preflight.v1", readme, StringComparison.Ordinal);
+        Assert.Contains("isRuntimeProof=false", readme, StringComparison.Ordinal);
+        Assert.Contains("\"schemaVersion\": { \"const\": \"yolovision-preflight.v1\" }", schema, StringComparison.Ordinal);
+        Assert.Contains("\"tensorRtRuntimeProbed\": { \"const\": false }", schema, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void PreflightReportCapturesAssetHashesAndNeverClaimsRuntimeProof()
+    {
+        string directory = Path.Combine(Path.GetTempPath(), "jyppx-yolovision-preflight", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+        string modelPath = Path.Combine(directory, "model.onnx");
+        string labelsPath = Path.Combine(directory, "labels.txt");
+        string inputPath = Path.Combine(directory, "input.fp32.bin");
+        try
+        {
+            File.WriteAllBytes(modelPath, new byte[] { 1, 2, 3, 4 });
+            File.WriteAllLines(labelsPath, new[] { "person", "car" });
+            File.WriteAllBytes(inputPath, new byte[4 * sizeof(float)]);
+            string[] args =
+            {
+                "--preflight",
+                "--model", modelPath,
+                "--labels", labelsPath,
+                "--input-data", inputPath,
+                "--family", "v8",
+                "--task", "seg",
+                "--input-shape", "1x3x640x640",
+                "--output-role-map", "boxes:det,proto:mask-prototypes",
+                "--mask-coefficient-count", "32"
+            };
+            IReadOnlyList<string> labels = File.ReadAllLines(labelsPath);
+            YoloModelProfile profile = YoloModelProfile.FromArgs(args, labels.Count);
+            YoloVisionPreflightResult result = YoloVisionPreflightReport.Create(
+                args,
+                profile,
+                modelPath,
+                labelsPath,
+                string.Empty,
+                inputPath,
+                string.Empty,
+                labels,
+                YoloRuntimeOutputRoleResolver.CreateMetadata(args, profile.TaskType));
+
+            using JsonDocument document = JsonDocument.Parse(result.Json);
+            JsonElement root = document.RootElement;
+            Assert.Equal("yolovision-preflight.v1", root.GetProperty("schemaVersion").GetString());
+            Assert.Equal("ready-for-runtime-precheck", result.State);
+            Assert.False(result.HasBlockers);
+            Assert.Equal(64, result.NormalizedCommandSha256.Length);
+            Assert.Equal(64, root.GetProperty("assets").GetProperty("model").GetProperty("sha256").GetString()!.Length);
+            Assert.True(root.GetProperty("assets").GetProperty("model").GetProperty("exists").GetBoolean());
+            Assert.True(root.GetProperty("output").GetProperty("metadataDeclared").GetBoolean());
+            Assert.False(root.GetProperty("execution").GetProperty("tensorRtRuntimeProbed").GetBoolean());
+            Assert.False(root.GetProperty("execution").GetProperty("onnxParserInvoked").GetBoolean());
+            Assert.False(root.GetProperty("boundary").GetProperty("isRuntimeProof").GetBoolean());
+            Assert.False(root.GetProperty("boundary").GetProperty("canPromoteRealModelRuntime").GetBoolean());
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void StrictPreflightTurnsMissingAssetsIntoBlockersWithoutExecutingAnything()
+    {
+        string modelPath = Path.Combine(Path.GetTempPath(), "missing-yolovision-model.onnx");
+        string[] args =
+        {
+            "--preflight",
+            "--strict-preflight",
+            "--model", modelPath,
+            "--family", "v11",
+            "--task", "pose",
+            "--input-shape", "1x3x640x640"
+        };
+        YoloModelProfile profile = YoloModelProfile.FromArgs(args, labelCount: 0);
+        YoloVisionPreflightResult result = YoloVisionPreflightReport.Create(
+            args,
+            profile,
+            modelPath,
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            Array.Empty<string>(),
+            metadata: null);
+
+        Assert.Equal("invalid", result.State);
+        Assert.True(result.HasBlockers);
+        Assert.Contains("precheck", result.Json, StringComparison.Ordinal);
+        Assert.Contains("tensorRtRuntimeProbed", result.Json, StringComparison.Ordinal);
+        Assert.Contains("blocker", result.Json, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void PreflightRejectsConflictingInputSources()
+    {
+        string[] args =
+        {
+            "--preflight",
+            "--model", "model.onnx",
+            "--image", "image.ppm",
+            "--input-data", "input.bin",
+            "--family", "v8",
+            "--task", "det"
+        };
+        YoloModelProfile profile = YoloModelProfile.FromArgs(args, labelCount: 1);
+        YoloVisionPreflightResult result = YoloVisionPreflightReport.Create(
+            args,
+            profile,
+            "model.onnx",
+            string.Empty,
+            string.Empty,
+            "input.bin",
+            "image.ppm",
+            new[] { "person" },
+            metadata: null);
+
+        Assert.Equal("invalid", result.State);
+        Assert.True(result.HasBlockers);
+        Assert.Contains("Choose exactly one input source", result.Json, StringComparison.Ordinal);
+        Assert.False(result.Json.Contains("engineBuildInvoked\": true", StringComparison.Ordinal));
     }
 
     [Fact]

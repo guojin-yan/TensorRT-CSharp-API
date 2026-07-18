@@ -11,6 +11,26 @@ This sample runs a user-provided single-input float YOLO-family ONNX model throu
 
 `YoloVision` is the unified YOLO-family sample for detection, classification, segmentation, OBB, pose, and semantic segmentation. It is intentionally broader than detection: the same sample documents family/task selection, multi-output metadata, managed postprocess helpers, and real-asset evidence requirements across the supported YOLO-family tasks.
 
+## Offline Preflight
+
+Use `--preflight` when preparing an owner handoff or article case and the TensorRT runtime is not available yet. It parses the family/task/profile and output metadata, records model/labels/input existence and SHA256 values when files are present, and writes a `yolovision-preflight.v1` report. It does not open TensorRT, parse ONNX, build an engine, load plugins, or enqueue inference.
+
+```powershell
+dotnet run --project .\samples\YoloVision -- `
+  --preflight `
+  --family v8 `
+  --task seg `
+  --model .\models\yolov8n-seg.onnx `
+  --labels .\models\coco.names `
+  --input-data .\models\yolov8n-seg-fp32.bin `
+  --input-shape 1x3x640x640 `
+  --output-role-map boxes:det,proto:mask-prototypes `
+  --mask-coefficient-count 32 `
+  --preflight-report .\artifacts\yolovision\yolov8n-seg-preflight.json
+```
+
+`state=ready-for-runtime-precheck` means the supplied preflight inputs and metadata are present; `owner-action-required` means the command is syntactically usable but an owner still needs to supply model assets, labels, input tensors, or task metadata; `invalid` is reserved for `--strict-preflight` blockers. `--dryRun` and `--previewOnly` are aliases. The report's execution flags remain false and its boundary is always `proofClassification=precheck`, `isRuntimeProof=false`, and `canPromoteRealModelRuntime=false`. The schema is `samples/YoloVision/yolovision-preflight.schema.json`.
+
 The repository does not bundle detector models, label files, or images because those assets have separate licensing and size constraints. The sample uses a synthetic input tensor by default, so detections are useful as pipeline evidence rather than as image-quality evidence.
 
 For real image evidence, either preprocess the image outside the runner into the model's exact tensor layout and pass the tensor with `--input-data`, or use `--image` for the built-in `.bmp` / `.ppm` preprocessing path. The built-in path decodes the image, applies stretch or letterbox resize, RGB/BGR channel order, optional normalization, NCHW/NHWC layout, writes a float32 tensor to `--preprocessed-output`, and feeds that tensor through the same `--input-data` runtime path. The runner accepts float32 `.bin`/`.raw` files or comma/space/newline separated text with exactly `N*C*H*W` values. `--input` is intentionally narrower: it accepts a raw byte tensor with the same element count and normalizes bytes to `[0,1]`.

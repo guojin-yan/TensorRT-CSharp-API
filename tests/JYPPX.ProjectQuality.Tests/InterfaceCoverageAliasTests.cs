@@ -145,7 +145,7 @@ public sealed class InterfaceCoverageAliasTests
         Assert.Contains("\"Global::createNvOnnxParser_INTERNAL\" = @(\"id:*onnx-parser-create\")", script);
         Assert.Contains("\"Global::createNvOnnxParserRefitter_INTERNAL\" = @(\"id:*parser-refitter-create\", \"id:*parser-refitter-create-deferred\")", script);
         Assert.Contains("\"Global::createONNXConfig\" = @(\"id:*onnx-config-create\")", script);
-        Assert.Contains("\"Global::initLibNvInferPlugins\" = @(\"id:*global-init-lib-nvinfer-plugins-deferred\")", script);
+        Assert.Contains("\"Global::initLibNvInferPlugins\" = @(\"id:*global-init-lib-nvinfer-plugins\", \"id:*global-init-lib-nvinfer-plugins-deferred\")", script);
         Assert.Contains("\"Global::setInternalLibraryPath\" = @(\"id:*global-set-internal-library-path-deferred\")", script);
     }
 
@@ -432,8 +432,10 @@ public sealed class InterfaceCoverageAliasTests
     {
         string script = ReadCoverageScript();
 
-        Assert.Contains("\"IBuilderConfig::getAvgTimingIterations\" = @(\"id:*builder-config-get-average-timing-iterations\", \"id:*builder-config-get-avg-timing-iterations-deferred\")", script);
-        Assert.Contains("\"IBuilderConfig::getBuilderOptimizationLevel\" = @(\"id:*builder-config-get-optimization-level\", \"id:*builder-config-get-builder-optimization-level-deferred\")", script);
+        Assert.Contains("\"IBuilderConfig::getAvgTimingIterations\" = @(\"id:*builder-config-get-average-timing-iterations\")", script);
+        Assert.Contains("\"IBuilderConfig::getAvgTimingIterations\" = @(\"id:*builder-config-get-avg-timing-iterations-deferred\")", script);
+        Assert.Contains("\"IBuilderConfig::getBuilderOptimizationLevel\" = @(\"id:*builder-config-get-optimization-level\")", script);
+        Assert.Contains("\"IBuilderConfig::getBuilderOptimizationLevel\" = @(\"id:*builder-config-get-builder-optimization-level-deferred\")", script);
         Assert.Contains("\"IBuilderConfig::getFlags\" = @(\"id:*builder-config-get-flags\", \"id:*builder-config-get-flags-deferred\")", script);
         Assert.Contains("\"IBuilderConfig::getFlags\"", script);
     }

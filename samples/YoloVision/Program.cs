@@ -31,8 +31,50 @@ internal static class Program
         try
         {
             string labelsPath = ResolveOptionalFullPath(SampleCommandLine.GetStringArgument(args, "--labels", string.Empty));
-            IReadOnlyList<string> labels = TensorRtOnnxSample.ReadLabels(labelsPath);
+            bool preflight = SampleCommandLine.HasSwitch(args, "--preflight") ||
+                             SampleCommandLine.HasSwitch(args, "--dryRun") ||
+                             SampleCommandLine.HasSwitch(args, "--previewOnly");
+            if (preflight && SampleCommandLine.HasSwitch(args, "--preprocess-only"))
+            {
+                throw new ArgumentException("--preflight cannot be combined with --preprocess-only. Use --preprocess-only when you want to write a tensor.");
+            }
+
+            IReadOnlyList<string> labels = preflight
+                ? ReadLabelsForPreflight(labelsPath)
+                : TensorRtOnnxSample.ReadLabels(labelsPath);
             YoloModelProfile profile = YoloModelProfile.FromArgs(args, labels.Count);
+            if (preflight)
+            {
+                string modelPath = ResolveOptionalFullPath(GetFirstStringArgument(args, string.Empty, "--model", "--onnx", "--onnxFile"));
+                string inputPath = ResolveOptionalFullPath(SampleCommandLine.GetStringArgument(args, "--input", string.Empty));
+                string inputDataPath = ResolveOptionalFullPath(SampleCommandLine.GetStringArgument(args, "--input-data", string.Empty));
+                string imagePath = ResolveOptionalFullPath(SampleCommandLine.GetStringArgument(args, "--image", string.Empty));
+                YoloMultiOutputMetadata? preflightMetadata = YoloRuntimeOutputRoleResolver.CreateMetadata(args, profile.TaskType);
+                YoloVisionPreflightResult preflightResult = YoloVisionPreflightReport.Create(
+                    args,
+                    profile,
+                    modelPath,
+                    labelsPath,
+                    inputPath,
+                    inputDataPath,
+                    imagePath,
+                    labels,
+                    preflightMetadata);
+                string reportPath = ResolveOptionalFullPath(GetFirstStringArgument(args, string.Empty, "--preflight-report", "--preflight-output"));
+                if (!string.IsNullOrWhiteSpace(reportPath))
+                {
+                    YoloVisionPreflightReport.Write(reportPath, preflightResult);
+                    Console.WriteLine($"YoloVision PreflightReport={reportPath}");
+                }
+                else
+                {
+                    Console.WriteLine(preflightResult.Json);
+                }
+
+                Console.WriteLine($"YoloVision PreflightOnly=True State={preflightResult.State} OwnerAction={preflightResult.HasOwnerAction} NormalizedCommandSha256={preflightResult.NormalizedCommandSha256}");
+                return preflightResult.HasBlockers ? 2 : 0;
+            }
+
             if (SampleCommandLine.HasSwitch(args, "--preprocess-only"))
             {
                 YoloImagePreprocessResult? preprocessOnlyResult = TryPreprocessImageInput(args, profile);
@@ -231,6 +273,27 @@ internal static class Program
         return string.IsNullOrWhiteSpace(path) ? string.Empty : Path.GetFullPath(path);
     }
 
+    private static IReadOnlyList<string> ReadLabelsForPreflight(string labelsPath)
+    {
+        return string.IsNullOrWhiteSpace(labelsPath) || !File.Exists(labelsPath)
+            ? Array.Empty<string>()
+            : TensorRtOnnxSample.ReadLabels(labelsPath);
+    }
+
+    private static string GetFirstStringArgument(string[] args, string defaultValue, params string[] names)
+    {
+        foreach (string name in names)
+        {
+            string value = SampleCommandLine.GetStringArgument(args, name, string.Empty);
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                return value;
+            }
+        }
+
+        return defaultValue;
+    }
+
     private static void PrintImagePreprocess(YoloImagePreprocessResult result)
     {
         Console.WriteLine(
@@ -372,5 +435,7 @@ internal static class Program
         Console.WriteLine("  --input-image <path>     Alias for --image.");
         Console.WriteLine("  --preprocessed-output <path>  Optional fp32 tensor path written by --image preprocessing.");
         Console.WriteLine("  --preprocess-only        Write the preprocessed tensor and hashes without requiring an ONNX model or TensorRT runtime.");
+        Console.WriteLine("  --preflight|--dryRun|--previewOnly  Validate profile, asset paths/hashes, and output metadata without TensorRT or ONNX execution.");
+        Console.WriteLine("  --preflight-report <path>  Write a yolovision-preflight.v1 JSON report; --strict-preflight returns exit code 2 for missing owner assets.");
     }
 }

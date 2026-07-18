@@ -126,8 +126,7 @@ internal static class Program
         }
         else
         {
-            using MemoryStream parserModelStream = new MemoryStream(model, writable: false);
-            parsed = parser.Parse(parserModelStream, "generated-dynamic-identity.onnx");
+            parsed = ParseManagedParserStream(parser, model);
             Console.WriteLine($"LegacyWeightDescriptorParse Attempted=False Reason=RemovedByVendor TensorRtLine={(int)line}");
         }
         if (!parsed)
@@ -316,6 +315,13 @@ internal static class Program
         }
 
         throw new ArgumentException("TensorRT line must be 8, 10, or 11.", nameof(value));
+    }
+
+    static bool ParseManagedParserStream(TensorRtOnnxParser parser, byte[] model)
+    {
+        using MemoryStream parserModelStream = new MemoryStream(model, writable: false);
+        bool parsed = parser.Parse(parserModelStream, "generated-dynamic-identity.onnx");
+        return parsed;
     }
 
     static TensorRtAdapterInfo GetAdapterInfo(TensorRtEnvironmentSnapshot environment, TensorRtApiLine line)

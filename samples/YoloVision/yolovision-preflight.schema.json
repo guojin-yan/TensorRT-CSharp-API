@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:jyppx:tensorrtsharp:yolovision-preflight:v1",
+  "title": "YoloVision offline preflight report",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "sample",
+    "state",
+    "normalizedCommandLine",
+    "normalizedCommandSha256",
+    "profile",
+    "assets",
+    "output",
+    "checks",
+    "execution",
+    "boundary"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "yolovision-preflight.v1" },
+    "sample": { "const": "YoloVision" },
+    "state": { "enum": ["ready-for-runtime-precheck", "owner-action-required", "invalid"] },
+    "strict": { "type": "boolean" },
+    "normalizedCommandLine": { "type": "string" },
+    "normalizedCommandSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "profile": { "type": "object" },
+    "assets": { "type": "object" },
+    "output": { "type": "object" },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "severity", "passed", "message"],
+        "properties": {
+          "id": { "type": "string" },
+          "severity": { "type": "string" },
+          "passed": { "type": "boolean" },
+          "message": { "type": "string" }
+        }
+      }
+    },
+    "execution": {
+      "type": "object",
+      "properties": {
+        "tensorRtRuntimeProbed": { "const": false },
+        "onnxParserInvoked": { "const": false },
+        "engineBuildInvoked": { "const": false },
+        "inferenceInvoked": { "const": false }
+      }
+    },
+    "boundary": {
+      "type": "object",
+      "required": [
+        "proofClassification",
+        "isRuntimeProof",
+        "isRealModelRuntimeProof",
+        "isPackageConsumerRuntimeProof",
+        "canPromoteRealModelRuntime",
+        "canPromotePackageConsumerRuntime"
+      ],
+      "properties": {
+        "proofClassification": { "const": "precheck" },
+        "isRuntimeProof": { "const": false },
+        "isRealModelRuntimeProof": { "const": false },
+        "isPackageConsumerRuntimeProof": { "const": false },
+        "canPromoteRealModelRuntime": { "const": false },
+        "canPromotePackageConsumerRuntime": { "const": false }
+      }
+    }
+  }
+}

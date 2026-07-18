@@ -28,6 +28,24 @@ dotnet run --project .\samples\YoloVision -- --list-capabilities
 
 该命令不需要 CUDA、TensorRT、ONNX、labels 或图片。它只说明当前样例层支持哪些 family/task/postprocess 组合，不证明真实模型已经运行。
 
+准备 owner 资产时，可以先运行离线 preflight：
+
+```powershell
+dotnet run --project .\samples\YoloVision -- `
+  --preflight `
+  --family v8 `
+  --task seg `
+  --model .\models\yolovision\yolov8n-seg.onnx `
+  --labels .\models\yolovision\coco.names `
+  --input-data .\models\yolovision\yolov8n-seg-fp32.bin `
+  --input-shape 1x3x640x640 `
+  --output-role-map boxes:det,proto:mask-prototypes `
+  --mask-coefficient-count 32 `
+  --preflight-report .\artifacts\yolovision\yolov8n-seg-preflight.json
+```
+
+该报告是 `yolovision-preflight.v1` 的 `precheck` 证据：会记录 profile、资产存在性和 SHA256、输出 metadata 与规范化命令 hash，但不会调用 TensorRT、ONNX parser、engine build 或 inference。`owner-action-required` 不是失败通过；只有真实模型、真实输入、运行日志、hash、输出 JSON 和 owner review 都回填后，才可以进入 `real-model-runtime` 候选。
+
 ## 可复制命令
 
 真实模型的典型命令如下：

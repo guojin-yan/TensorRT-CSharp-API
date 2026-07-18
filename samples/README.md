@@ -30,6 +30,8 @@ dotnet run --project .\samples\YoloVision -- --list-capabilities
 
 This command does not require CUDA, TensorRT, ONNX models, labels, or images. It lists the supported family/task matrix for `custom`, YOLOv5/v6/v7/v8/v9/v10/v11/v26 and `det`/`cls`/`seg`/`obb`/`pose`/`sem`, including each task's managed decode path, auxiliary metadata boundary, and evidence level.
 
+For an owner-ready asset/configuration checklist without invoking TensorRT, use `samples/YoloVision --preflight`. The resulting `yolovision-preflight.v1` report records profile values, asset existence/SHA256, output metadata, normalized command hash, and an explicit `precheck` boundary. It never replaces a real `YoloVision Passed=True` run log or `real-model-runtime` evidence.
+
 Recommended YoloVision documentation starts at `docs/articles/zh-cn/yolovision-sample-overview.md`, then continues through preprocess/postprocess, engine build/run, and troubleshooting. These articles keep the old detection-only naming out of the user-facing path and treat all asset-dependent runs as sample evidence until real owner logs and hashes are supplied.
 
 For the broader publishable article route, use `docs/articles/zh-cn/yolovision-series-roadmap.md`. That roadmap is the owner-facing checklist for YOLOv5/v6/v7/v8/v9/v10/v11/v26/custom and `det`/`cls`/`seg`/`obb`/`pose`/`sem`. It intentionally keeps TensorRtExec build reports, screenshots, templates, sidecars, local package-feed results, project-reference runs, and direct `.nupkg` runs out of runtime evidence promotion.
