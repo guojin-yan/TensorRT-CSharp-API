@@ -601,6 +601,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_add_child_graph_node_after_safe(J
 // generated from manifest id=cuda-graph-add-child-graph-node-safe
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_add_child_graph_node_safe(JYPPX_CudaGraph* graph, JYPPX_CudaGraph* child_graph, uintptr_t* out_node);
 
+// generated from manifest id=cuda-graph-add-conditional-node-owner-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_add_conditional_node_safe(JYPPX_CudaGraph* graph, JYPPX_CudaGraphConditionalHandle* handle, uint32_t node_type, uint32_t body_count, uintptr_t dependency_node, JYPPX_CudaGraphConditionalNode** out_node);
+
 // generated from manifest id=cuda-graph-add-dependency-safe
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_add_dependency_safe(JYPPX_CudaGraph* graph, uintptr_t from_node, uintptr_t to_node);
 
@@ -648,6 +651,36 @@ JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_child_graph_node_has_embedded_gra
 
 // generated from manifest id=cuda-graph-clone
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_clone(JYPPX_CudaGraph* graph, JYPPX_CudaGraph** out_clone);
+
+// generated from manifest id=cuda-graph-conditional-body-add-empty-node-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_conditional_body_add_empty_node_safe(JYPPX_CudaGraphConditionalNode* node, uint32_t body_index, uintptr_t dependency_node, uintptr_t* out_body_node);
+
+// generated from manifest id=cuda-graph-conditional-body-get-edge-count-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_conditional_body_get_edge_count_safe(JYPPX_CudaGraphConditionalNode* node, uint32_t body_index, size_t* out_count);
+
+// generated from manifest id=cuda-graph-conditional-body-get-node-count-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_conditional_body_get_node_count_safe(JYPPX_CudaGraphConditionalNode* node, uint32_t body_index, size_t* out_count);
+
+// generated from manifest id=cuda-graph-conditional-body-get-root-node-count-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_conditional_body_get_root_node_count_safe(JYPPX_CudaGraphConditionalNode* node, uint32_t body_index, size_t* out_count);
+
+// generated from manifest id=cuda-graph-conditional-handle-create-owner-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_conditional_handle_create_safe(JYPPX_CudaGraph* graph, uint32_t default_launch_value, uint32_t flags, JYPPX_CudaGraphConditionalHandle** out_handle);
+
+// generated from manifest id=cuda-graph-conditional-handle-create-v2-owner-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_conditional_handle_create_v2_safe(JYPPX_CudaGraph* graph, JYPPX_CudaExecutionContext* context, uint32_t default_launch_value, uint32_t flags, JYPPX_CudaGraphConditionalHandle** out_handle);
+
+// generated from manifest id=cuda-graph-conditional-handle-destroy-owner-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_conditional_handle_destroy_safe(JYPPX_CudaGraphConditionalHandle* handle);
+
+// generated from manifest id=cuda-graph-conditional-node-destroy-owner-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_conditional_node_destroy_safe(JYPPX_CudaGraphConditionalNode* node);
+
+// generated from manifest id=cuda-graph-conditional-node-get-body-count-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_conditional_node_get_body_count_safe(JYPPX_CudaGraphConditionalNode* node, uint32_t* out_body_count);
+
+// generated from manifest id=cuda-graph-conditional-node-get-node-token-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_conditional_node_get_node_token_safe(JYPPX_CudaGraphConditionalNode* node, uintptr_t* out_node);
 
 // generated from manifest id=cuda-graph-create
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_create(uint32_t flags, JYPPX_CudaGraph** out_graph);

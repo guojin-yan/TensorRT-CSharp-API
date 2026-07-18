@@ -1595,3 +1595,49 @@ deferred。候选审计记录在
   安装目录均未删除。
 
 本批仍不改变长期安全边界：callback trampoline、allocator/resource、borrowed/device pointer、plugin lifecycle、RNNv2 setter 和 consistency checker 继续 deferred；未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。上述 smoke/build/package consumer 结果不等于 clean public package-consumer runtime proof、post-publish proof 或 release-close approval。
+
+## 2026-07-19 CUDA Conditional Graph Owner-Safe Uplift
+
+本批从 CUDA conditional graph deferred inventory 选择 v1/v2 handle、conditional
+node 与 body topology 查询，先完成 CUDA 12.3、12.9、13.2 header、import
+library、DLL export 和版本 guard 核对，再实现 bridge-owned metadata。审计记录位于
+`artifacts/interface-coverage/cuda-conditional-graph-candidate-audit.md` 与
+`.json`。
+
+### Promotion 结果
+
+- 新增 v1 handle、CUDA 13.2 v2 handle、conditional node、body count/topology
+  查询和 body-local empty-node 插入；原 deferred manifest 保留，并通过 real
+  alias/history 归并为 `implemented-with-deferred-history`。
+- child/body graph 句柄不离开 native bridge；`CudaGraphConditionalHandle` 与
+  `CudaGraphConditionalNode` 只持有 bridge metadata。parent graph 在 metadata
+  wrapper 活跃时拒绝 Dispose，generic owner-scoped node destroy 不会误接管
+  conditional node。
+- public C# surface 未暴露 `IntPtr`、`nint`、`UIntPtr`、`SafeHandle`、device
+  pointer、callback 或 borrowed child graph。body capture、kernel/raw-pointer
+  node、外部资源和 callback ownership 继续 deferred。
+
+### Verification
+
+- binding generator/output validation：`190 manifests / 3958 API records`，幂等
+  通过；coverage export 在 CUDA 12.3/12.9/13.2 目标行保持
+  `implemented-with-deferred-history`。
+- native build 通过：TRT8/CUDA11.8、TRT8/CUDA12.1、TRT10/CUDA12.9、
+  TRT11/CUDA12.9、TRT11/CUDA13.2；ABI declaration/PE export parity 未新增
+  missing。
+- CUDA 12.9 conditional smoke 通过 IF node、两个 body、body topology、default
+  value、instantiate/launch 和 active-owner dispose rejection；CUDA 13.2 本机
+  smoke 在 CUDA error 35 处受 driver/runtime 边界阻断，未冒充 13.2 runtime proof。
+- `CudaConditionalGraphUpliftTests` `4/4` 通过；与 ABI/coverage/相邻 graph
+  专项组合为 `59/59` 通过；binding output validation 通过。
+
+### C/E 盘清理与发布边界
+
+- 删除本批 E 盘 `build-out` 和 `artifacts/test-temp-cuda-conditional-build.log`。
+- 删除本批 .NET 临时文件：`C:\Users\guoji\AppData\Local\Temp` 下 9 个
+  可明确归属本轮的随机占位/`Microsoft.NET.Workload_*.log` 文件。
+- 未发现本批下载到 C 盘的 CUDA、TensorRT、cuDNN、模型或 nupkg；用户
+  Downloads、NuGet、Codex、工具缓存和系统 CUDA 安装目录均未删除。
+- 未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue
+  close；上述 native/build/smoke/compile-surface 结果不等于 clean public
+  package-consumer runtime proof、post-publish proof 或 release-close approval。

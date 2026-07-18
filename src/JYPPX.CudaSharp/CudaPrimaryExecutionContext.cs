@@ -23,6 +23,8 @@ public sealed class CudaPrimaryExecutionContext : IDisposable
         _handle = handle ?? throw new ArgumentNullException(nameof(handle));
     }
 
+    internal SafeCudaExecutionContextHandle Handle => _handle;
+
     /// <summary>Gets whether this wrapper represents the device primary context. 获取此包装器是否表示设备主上下文。</summary>
     public bool IsPrimary => true;
 

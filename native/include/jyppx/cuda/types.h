@@ -13,6 +13,8 @@ typedef struct JYPPX_CudaPinnedMemory JYPPX_CudaPinnedMemory;
 typedef struct JYPPX_CudaPitchedMemory JYPPX_CudaPitchedMemory;
 typedef struct JYPPX_CudaGraph JYPPX_CudaGraph;
 typedef struct JYPPX_CudaGraphExec JYPPX_CudaGraphExec;
+typedef struct JYPPX_CudaGraphConditionalHandle JYPPX_CudaGraphConditionalHandle;
+typedef struct JYPPX_CudaGraphConditionalNode JYPPX_CudaGraphConditionalNode;
 typedef struct JYPPX_CudaArray JYPPX_CudaArray;
 typedef struct JYPPX_CudaMipmappedArray JYPPX_CudaMipmappedArray;
 typedef struct JYPPX_CudaTextureObject JYPPX_CudaTextureObject;

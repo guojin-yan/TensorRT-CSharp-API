@@ -205,6 +205,7 @@ internal static class GeneratedEntryPointNames
     public const string CudaGetTextureObjectTextureDescV2Deferred = "jyppx_cuda_get_texture_object_texture_desc_v2_deferred";
     public const string CudaGraphAddChildGraphNodeAfterSafe = "jyppx_cuda_graph_add_child_graph_node_after_safe";
     public const string CudaGraphAddChildGraphNodeSafe = "jyppx_cuda_graph_add_child_graph_node_safe";
+    public const string CudaGraphAddConditionalNodeOwnerSafe = "jyppx_cuda_graph_add_conditional_node_safe";
     public const string CudaGraphAddDependencySafe = "jyppx_cuda_graph_add_dependency_safe";
     public const string CudaGraphAddDependencyV2Safe = "jyppx_cuda_graph_add_dependency_v2_safe";
     public const string CudaGraphAddEmptyNodeAfterSafe = "jyppx_cuda_graph_add_empty_node_after_safe";
@@ -221,6 +222,16 @@ internal static class GeneratedEntryPointNames
     public const string CudaGraphChildGraphNodeGetRootNodeCountSafe = "jyppx_cuda_graph_child_graph_node_get_root_node_count_safe";
     public const string CudaGraphChildGraphNodeHasEmbeddedGraphSafe = "jyppx_cuda_graph_child_graph_node_has_embedded_graph_safe";
     public const string CudaGraphClone = "jyppx_cuda_graph_clone";
+    public const string CudaGraphConditionalBodyAddEmptyNodeSafe = "jyppx_cuda_graph_conditional_body_add_empty_node_safe";
+    public const string CudaGraphConditionalBodyGetEdgeCountSafe = "jyppx_cuda_graph_conditional_body_get_edge_count_safe";
+    public const string CudaGraphConditionalBodyGetNodeCountSafe = "jyppx_cuda_graph_conditional_body_get_node_count_safe";
+    public const string CudaGraphConditionalBodyGetRootNodeCountSafe = "jyppx_cuda_graph_conditional_body_get_root_node_count_safe";
+    public const string CudaGraphConditionalHandleCreateOwnerSafe = "jyppx_cuda_graph_conditional_handle_create_safe";
+    public const string CudaGraphConditionalHandleCreateV2OwnerSafe = "jyppx_cuda_graph_conditional_handle_create_v2_safe";
+    public const string CudaGraphConditionalHandleDestroyOwnerSafe = "jyppx_cuda_graph_conditional_handle_destroy_safe";
+    public const string CudaGraphConditionalNodeDestroyOwnerSafe = "jyppx_cuda_graph_conditional_node_destroy_safe";
+    public const string CudaGraphConditionalNodeGetBodyCountSafe = "jyppx_cuda_graph_conditional_node_get_body_count_safe";
+    public const string CudaGraphConditionalNodeGetNodeTokenSafe = "jyppx_cuda_graph_conditional_node_get_node_token_safe";
     public const string CudaGraphCreate = "jyppx_cuda_graph_create";
     public const string CudaGraphDebugDotPrintSafe = "jyppx_cuda_graph_debug_dot_print_safe";
     public const string CudaGraphDestroy = "jyppx_cuda_graph_destroy";

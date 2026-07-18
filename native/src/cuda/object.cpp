@@ -87,6 +87,16 @@ JYPPX_StatusCode validate_graph_exec(const JYPPX_CudaGraphExec* graph_exec, cons
     return validate_handle(reinterpret_cast<const GraphExecObject*>(graph_exec), ObjectKind::GraphExec, name);
 }
 
+JYPPX_StatusCode validate_graph_conditional_handle(const JYPPX_CudaGraphConditionalHandle* handle, const char* name)
+{
+    return validate_handle(reinterpret_cast<const GraphConditionalHandleObject*>(handle), ObjectKind::GraphConditionalHandle, name);
+}
+
+JYPPX_StatusCode validate_graph_conditional_node(const JYPPX_CudaGraphConditionalNode* node, const char* name)
+{
+    return validate_handle(reinterpret_cast<const GraphConditionalNodeObject*>(node), ObjectKind::GraphConditionalNode, name);
+}
+
 JYPPX_StatusCode validate_array(const JYPPX_CudaArray* array, const char* name)
 {
     return validate_handle(reinterpret_cast<const ArrayObject*>(array), ObjectKind::Array, name);

@@ -40,3 +40,17 @@ proof，也不是 post-publish proof 或 release close approval。
 
 对应候选审计见
 `artifacts/interface-coverage/cuda-stream-capture-to-graph-candidate-audit.md`。
+
+## 相邻的 Conditional Graph 边界
+
+后续 conditional graph uplift 使用同一套 owner-first 原则，但不把 CUDA body
+graph 句柄公开给托管层。`CudaGraphConditionalHandle` 和
+`CudaGraphConditionalNode` 是 bridge-owned metadata wrapper；C# 只读取 body
+数量、root/edge topology，并能向指定 body 添加 bridge-owned empty node。父图在
+handle 或 node metadata wrapper 存活时拒绝 Dispose，generic node destroy 也不会
+误接管 conditional node。
+
+CUDA 12.9 smoke 已完成 IF 条件节点、两个 body、default value、instantiate/launch
+和主动 owner 释放拒绝。CUDA 13.2 的本机 runtime smoke 在 CUDA error 35 处停止，
+所以当前结果仍属于 source-tree/compatible-host 边界；body capture、kernel/raw
+pointer node、callback 和外部资源 ownership 继续 deferred。

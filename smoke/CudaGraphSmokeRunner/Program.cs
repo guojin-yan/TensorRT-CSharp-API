@@ -88,6 +88,7 @@ internal static class Program
         string typedDescriptorState = ProbeGraphNodeParamsTypedDescriptors(source, destination, device, ByteCount);
         string childGraphUpdateState = ProbeChildGraphUpdate(stream);
         string ownerScopedDiagnosticsState = ProbeOwnerScopedGraphDiagnostics(stream, ByteCount);
+        string conditionalGraphState = ProbeConditionalGraph(stream);
         using CudaGraphExec topologyExec = topologyGraph.Instantiate();
         string topologyNodeEnabledState = "Unsupported";
         string topologyExecNodeSnapshotState = "Unsupported";
@@ -147,7 +148,7 @@ internal static class Program
 
         Console.WriteLine($"CudaGraphCaptureRoundTrip=True Bytes={ByteCount} Capture={captureBefore.Status}->{captureDuring.Status}->{captureAfter.Status} CaptureId={captureDuring.CaptureId} CaptureGraph={captureDuring.HasCapturedGraph} CaptureDependencies={captureDuring.DependencyCount} CaptureEdgeData={captureDuring.HasDependencyEdgeData} StreamVariants={streamCaptureVariantsState} Nodes={graph.NodeCount} Roots={graph.RootNodeCount} Edges={graph.EdgeCount} CloneNodes={graphClone.NodeCount} ExecFlags={graphExecFlagsState} EventElapsedMilliseconds={elapsedMilliseconds:0.###}");
         Console.WriteLine($"CudaGraphCapturedTopology Node0={capturedNode} Root0={capturedRootNode} CloneNode0={capturedCloneNode} NodeType={capturedNodeType} NodeDeps={capturedNodeDependencies} NodeDependents={capturedNodeDependents} MemsetParams={capturedMemsetParamsState} Edge0={capturedEdge?.ToString() ?? "None"}");
-        Console.WriteLine($"CudaGraphManualTopology Nodes={topologyGraph.NodeCount} Roots={topologyGraph.RootNodeCount} Edges={topologyGraph.EdgeCount} ChildDeps={topologyChildDependencyCount} RootDependents={topologyRootDependentCount} EdgeData={topologyEdgeDataState} DebugDot={topologyDebugDotState} EventNodes={eventNodeState} Memcpy1D={memcpy1DNodeState} NodeParamsDescriptor={typedDescriptorState} ChildGraphUpdate={childGraphUpdateState} OwnerScopedDiagnostics={ownerScopedDiagnosticsState} NodeEnabled={topologyNodeEnabledState} GraphId={topologyGraphIdState} ExecId={topologyExecIdState} NodeIdentity={topologyNodeIdentityState}");
+        Console.WriteLine($"CudaGraphManualTopology Nodes={topologyGraph.NodeCount} Roots={topologyGraph.RootNodeCount} Edges={topologyGraph.EdgeCount} ChildDeps={topologyChildDependencyCount} RootDependents={topologyRootDependentCount} EdgeData={topologyEdgeDataState} DebugDot={topologyDebugDotState} EventNodes={eventNodeState} Memcpy1D={memcpy1DNodeState} NodeParamsDescriptor={typedDescriptorState} ChildGraphUpdate={childGraphUpdateState} OwnerScopedDiagnostics={ownerScopedDiagnosticsState} ConditionalGraph={conditionalGraphState} NodeEnabled={topologyNodeEnabledState} GraphId={topologyGraphIdState} ExecId={topologyExecIdState} NodeIdentity={topologyNodeIdentityState}");
         Console.WriteLine($"CudaGraphSnapshots GraphSnapshot=[{topologySnapshot}] RootNodeSnapshot=[{topologyRootSnapshot}] ChildNodeSnapshot=[{topologyChildSnapshot}] ExecNodeSnapshot=[{topologyExecNodeSnapshotState}]");
         Console.WriteLine($"CudaGraphSnapshotLists {topologySnapshotListState}");
         Console.WriteLine($"CudaGraphMemory {graphMemoryState}");
@@ -276,6 +277,57 @@ internal static class Program
         }
     }
 
+    static string ProbeConditionalGraph(CudaStream stream)
+    {
+        try
+        {
+            using CudaGraph graph = CudaGraph.Create();
+            using CudaGraphConditionalHandle handle = graph.CreateConditionalHandle(
+                defaultLaunchValue: 1,
+                flags: CudaGraphConditionalHandleFlags.AssignDefault);
+            using CudaGraphConditionalNode conditional = graph.AddConditionalNode(
+                handle,
+                CudaGraphConditionalNodeType.If,
+                bodyCount: 2);
+
+            CudaGraphNode ifRoot = conditional.AddEmptyNode(0);
+            CudaGraphNode ifChild = conditional.AddEmptyNodeAfter(0, ifRoot);
+            CudaGraphNode elseRoot = conditional.AddEmptyNode(1);
+            bool disposeRejected = false;
+            try
+            {
+                graph.Dispose();
+            }
+            catch (InvalidOperationException)
+            {
+                disposeRejected = true;
+            }
+
+            if (conditional.BodyCount != 2 ||
+                conditional.GetBodyNodeCount(0) != 2 ||
+                conditional.GetBodyRootNodeCount(0) != 1 ||
+                conditional.GetBodyEdgeCount(0) != 1 ||
+                conditional.GetBodyNodeCount(1) != 1 ||
+                conditional.GetBodyRootNodeCount(1) != 1 ||
+                CudaGraph.GetDependencyCount(ifChild) != 1 ||
+                CudaGraph.GetDependency(ifChild, 0) != ifRoot ||
+                elseRoot.IsNull ||
+                !disposeRejected)
+            {
+                throw new InvalidOperationException("CUDA conditional graph ownership or body topology returned unexpected values.");
+            }
+
+            using CudaGraphExec graphExec = graph.Instantiate();
+            graphExec.Launch(stream);
+            stream.Synchronize();
+            return $"Created=True Type={conditional.Type} Node={conditional.Node} Bodies={conditional.BodyCount} IfNodes={conditional.GetBodyNodeCount(0)} IfRoots={conditional.GetBodyRootNodeCount(0)} IfEdges={conditional.GetBodyEdgeCount(0)} ElseNodes={conditional.GetBodyNodeCount(1)} Default={handle.DefaultLaunchValue} Instantiated=True DisposeRejected={disposeRejected}";
+        }
+        catch (CudaException exception)
+        {
+            return $"Skipped:{exception.Message}";
+        }
+    }
+
     static string ProbeGraphSnapshotLists(CudaGraph graph, CudaGraphNode root, CudaGraphNode child)
     {
         try
@@ -380,9 +432,12 @@ internal static class Program
 
     static string ProbeGraphDebugDot(CudaGraph graph)
     {
+        string? directory = null;
         try
         {
-            string directory = Path.Combine(Path.GetTempPath(), "jyppx-cuda-graph-smoke", Guid.NewGuid().ToString("N"));
+            string temporaryRoot = Environment.GetEnvironmentVariable("JYPPX_TEST_TEMP_ROOT") ??
+                Path.Combine(Directory.GetCurrentDirectory(), "artifacts", "test-temp");
+            directory = Path.Combine(temporaryRoot, "cuda-graph-smoke", Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(directory);
             string path = Path.Combine(directory, "graph.dot");
             graph.ExportDebugDot(path);
@@ -399,11 +454,24 @@ internal static class Program
                 throw new InvalidOperationException("CUDA graph debug DOT export did not contain a digraph marker.");
             }
 
-            return $"Path={path} Bytes={file.Length} ContainsDigraph={containsDigraph}";
+            return $"Bytes={file.Length} ContainsDigraph={containsDigraph}";
         }
         catch (CudaException exception)
         {
             return $"Skipped:{exception.Message}";
+        }
+        finally
+        {
+            if (!string.IsNullOrWhiteSpace(directory))
+            {
+                try
+                {
+                    Directory.Delete(directory, recursive: true);
+                }
+                catch (DirectoryNotFoundException)
+                {
+                }
+            }
         }
     }
 

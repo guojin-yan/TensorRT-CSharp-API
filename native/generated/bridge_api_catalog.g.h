@@ -200,6 +200,7 @@
 #define JYPPX_API_CUDA_GET_TEXTURE_OBJECT_TEXTURE_DESC_V2_DEFERRED "jyppx_cuda_get_texture_object_texture_desc_v2_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_ADD_CHILD_GRAPH_NODE_AFTER_SAFE "jyppx_cuda_graph_add_child_graph_node_after_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_ADD_CHILD_GRAPH_NODE_SAFE "jyppx_cuda_graph_add_child_graph_node_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_GRAPH_ADD_CONDITIONAL_NODE_OWNER_SAFE "jyppx_cuda_graph_add_conditional_node_safe" // module=cuda; line=common; ownership=caller-destroys; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_ADD_DEPENDENCY_SAFE "jyppx_cuda_graph_add_dependency_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_ADD_DEPENDENCY_V2_SAFE "jyppx_cuda_graph_add_dependency_v2_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_ADD_EMPTY_NODE_AFTER_SAFE "jyppx_cuda_graph_add_empty_node_after_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
@@ -216,6 +217,16 @@
 #define JYPPX_API_CUDA_GRAPH_CHILD_GRAPH_NODE_GET_ROOT_NODE_COUNT_SAFE "jyppx_cuda_graph_child_graph_node_get_root_node_count_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_CHILD_GRAPH_NODE_HAS_EMBEDDED_GRAPH_SAFE "jyppx_cuda_graph_child_graph_node_has_embedded_graph_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_CLONE "jyppx_cuda_graph_clone" // module=cuda; line=common; ownership=caller-destroys; manualOverride=false
+#define JYPPX_API_CUDA_GRAPH_CONDITIONAL_BODY_ADD_EMPTY_NODE_SAFE "jyppx_cuda_graph_conditional_body_add_empty_node_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_GRAPH_CONDITIONAL_BODY_GET_EDGE_COUNT_SAFE "jyppx_cuda_graph_conditional_body_get_edge_count_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_GRAPH_CONDITIONAL_BODY_GET_NODE_COUNT_SAFE "jyppx_cuda_graph_conditional_body_get_node_count_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_GRAPH_CONDITIONAL_BODY_GET_ROOT_NODE_COUNT_SAFE "jyppx_cuda_graph_conditional_body_get_root_node_count_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_GRAPH_CONDITIONAL_HANDLE_CREATE_OWNER_SAFE "jyppx_cuda_graph_conditional_handle_create_safe" // module=cuda; line=common; ownership=caller-destroys; manualOverride=false
+#define JYPPX_API_CUDA_GRAPH_CONDITIONAL_HANDLE_CREATE_V2_OWNER_SAFE "jyppx_cuda_graph_conditional_handle_create_v2_safe" // module=cuda; line=common; ownership=caller-destroys; manualOverride=false
+#define JYPPX_API_CUDA_GRAPH_CONDITIONAL_HANDLE_DESTROY_OWNER_SAFE "jyppx_cuda_graph_conditional_handle_destroy_safe" // module=cuda; line=common; ownership=caller-destroys; manualOverride=false
+#define JYPPX_API_CUDA_GRAPH_CONDITIONAL_NODE_DESTROY_OWNER_SAFE "jyppx_cuda_graph_conditional_node_destroy_safe" // module=cuda; line=common; ownership=caller-destroys; manualOverride=false
+#define JYPPX_API_CUDA_GRAPH_CONDITIONAL_NODE_GET_BODY_COUNT_SAFE "jyppx_cuda_graph_conditional_node_get_body_count_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_GRAPH_CONDITIONAL_NODE_GET_NODE_TOKEN_SAFE "jyppx_cuda_graph_conditional_node_get_node_token_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_CREATE "jyppx_cuda_graph_create" // module=cuda; line=common; ownership=caller-destroys; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_DEBUG_DOT_PRINT_SAFE "jyppx_cuda_graph_debug_dot_print_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_GRAPH_DESTROY "jyppx_cuda_graph_destroy" // module=cuda; line=common; ownership=caller-owned; manualOverride=false

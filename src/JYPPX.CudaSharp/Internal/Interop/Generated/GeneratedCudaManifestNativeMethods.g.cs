@@ -575,6 +575,9 @@ internal static partial class GeneratedCudaManifestNativeMethods
     internal static extern BridgeStatusCode jyppx_cuda_graph_add_child_graph_node_safe(SafeCudaGraphHandle graph, SafeCudaGraphHandle child_graph, out UIntPtr out_node);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_graph_add_conditional_node_safe(SafeCudaGraphHandle graph, SafeCudaGraphConditionalHandleHandle handle, uint node_type, uint body_count, UIntPtr dependency_node, out SafeCudaGraphConditionalNodeHandle out_node);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_cuda_graph_add_dependency_safe(SafeCudaGraphHandle graph, UIntPtr from_node, UIntPtr to_node);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -621,6 +624,36 @@ internal static partial class GeneratedCudaManifestNativeMethods
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_cuda_graph_clone(SafeCudaGraphHandle graph, out SafeCudaGraphHandle out_clone);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_graph_conditional_body_add_empty_node_safe(SafeCudaGraphConditionalNodeHandle node, uint body_index, UIntPtr dependency_node, out UIntPtr out_body_node);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_graph_conditional_body_get_edge_count_safe(SafeCudaGraphConditionalNodeHandle node, uint body_index, out UIntPtr out_count);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_graph_conditional_body_get_node_count_safe(SafeCudaGraphConditionalNodeHandle node, uint body_index, out UIntPtr out_count);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_graph_conditional_body_get_root_node_count_safe(SafeCudaGraphConditionalNodeHandle node, uint body_index, out UIntPtr out_count);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_graph_conditional_handle_create_safe(SafeCudaGraphHandle graph, uint default_launch_value, uint flags, out SafeCudaGraphConditionalHandleHandle out_handle);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_graph_conditional_handle_create_v2_safe(SafeCudaGraphHandle graph, SafeCudaExecutionContextHandle context, uint default_launch_value, uint flags, out SafeCudaGraphConditionalHandleHandle out_handle);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_graph_conditional_handle_destroy_safe(IntPtr handle);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_graph_conditional_node_destroy_safe(IntPtr node);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_graph_conditional_node_get_body_count_safe(SafeCudaGraphConditionalNodeHandle node, out uint out_body_count);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_graph_conditional_node_get_node_token_safe(SafeCudaGraphConditionalNodeHandle node, out UIntPtr out_node);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_cuda_graph_create(uint flags, out SafeCudaGraphHandle out_graph);

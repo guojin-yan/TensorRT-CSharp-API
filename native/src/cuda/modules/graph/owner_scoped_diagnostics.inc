@@ -198,6 +198,16 @@ JYPPX_StatusCode jyppx_cuda_graph_destroy_node_owner_scoped_safe(JYPPX_CudaGraph
             jyppx::cuda::set_cuda_error("cudaGraphDestroyNode", 0, "node-owner-mismatch", "The graph node token is not owned by the supplied CUDA graph.");
             return JYPPX_STATUS_INVALID_ARGUMENT;
         }
+#if defined(CUDART_VERSION) && CUDART_VERSION >= 12030
+        cudaGraphNodeType node_type{};
+        status = jyppx::cuda::map_cuda_status(cudaGraphNodeGetType(target, &node_type), "cudaGraphNodeGetType(node removal membership)");
+        if (status != JYPPX_STATUS_OK) { return status; }
+        if (node_type == cudaGraphNodeTypeConditional)
+        {
+            jyppx::cuda::set_cuda_error("cudaGraphDestroyNode", 0, "conditional-node-owner-active", "Conditional graph nodes are bridge-owned and cannot be destroyed through the generic node removal API.");
+            return JYPPX_STATUS_INVALID_STATE;
+        }
+#endif
         return jyppx::cuda::map_cuda_status(cudaGraphDestroyNode(target), "cudaGraphDestroyNode");
     }
     catch (const std::bad_alloc&)

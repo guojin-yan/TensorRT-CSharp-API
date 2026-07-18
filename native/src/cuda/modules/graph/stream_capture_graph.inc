@@ -489,6 +489,15 @@ JYPPX_StatusCode jyppx_cuda_graph_destroy(JYPPX_CudaGraph* graph)
     }
 
     auto* graph_object = reinterpret_cast<GraphObject*>(graph);
+    if (graph_object->active_conditional_handles != 0 || graph_object->active_conditional_nodes != 0)
+    {
+        jyppx::cuda::set_cuda_error(
+            "cudaGraphDestroy",
+            0,
+            "conditional-owner-active",
+            "The CUDA graph cannot be destroyed while a conditional handle or node wrapper is active.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
 #if JYPPX_HAS_CUDA_TOOLKIT
     status = jyppx::cuda::map_cuda_status(cudaGraphDestroy(graph_object->handle), "cudaGraphDestroy");
 #else

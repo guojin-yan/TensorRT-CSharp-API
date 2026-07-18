@@ -20,6 +20,10 @@
 - memset node 参数读取和更新。
 - graph memory info、trim 和 high watermark reset。
 - device graph memory summary：`CudaDevice.GetGraphMemorySummary(int)`、`CudaDevice.CurrentGraphMemorySummary` 与 `CudaDeviceGraphMemoryInfo.ToSummary()` 将 `UsedMemoryCurrent`、`UsedMemoryHigh`、`ReservedMemoryCurrent`、`ReservedMemoryHigh` 四个 `cudaDeviceGetGraphMemAttribute` copied scalar 统一为 `CudaDeviceGraphMemorySummary`。
+- conditional graph：`CudaGraph.AddConditionalNode` 可创建 IF/WHILE/IF_CASE 条件节点；
+  `CudaGraphConditionalHandle` 与 `CudaGraphConditionalNode` 由 bridge 维护关联
+  metadata，并提供 body topology 查询和 body-local empty-node 插入，不把 child
+  graph 裸句柄交给 C#。
 
 这些 API 的核心目标是让用户能在 C# 中描述、检查和执行常见 graph 拓扑，而不需要直接处理 CUDA driver/runtime 的裸句柄。
 
@@ -58,7 +62,24 @@ flowchart TD
   D --> E["Clone / Query Nodes / Query Edges"]
   D --> F["Instantiate"]
   F --> G["Upload + Launch"]
-  G --> H["Pinned destination round-trip check"]
+G --> H["Pinned destination round-trip check"]
+```
+
+条件节点使用独立的 owner 约束路径：
+
+```mermaid
+sequenceDiagram
+  participant G as CudaGraph
+  participant H as ConditionalHandle
+  participant N as ConditionalNode
+  participant B as BodyGraph
+  G->>H: Create v1/v2 handle
+  G->>N: AddConditionalNode(handle)
+  N->>B: Query body count/topology
+  B->>B: Add empty node to body
+  Note over G,N: Dispose parent graph is rejected while metadata is active
+  N-->>G: Dispose node metadata
+  H-->>G: Dispose handle metadata
 ```
 
 已有 graph 的 capture 使用另一条生命周期路径：
@@ -96,6 +117,15 @@ dot -Tpng graph.dot -o graph.png
 - `BeginCaptureToGraph` 只在 `CUDART_VERSION >= 12030` 映射到 vendor API；CUDA
   11.x/12.1 不会伪造该入口。`ToGraph=True` 是当前兼容主机上的 source-tree
   smoke 结果，不是 clean package-consumer runtime proof。
+- conditional graph 的 v1 handle 在 CUDA 12.3/12.9/13.2 可用，v2 handle
+  需要 CUDA 13.2；CUDA 12.9 smoke 已覆盖 IF node、两个 body、body topology、
+  default value、instantiate/launch 和 active-owner dispose rejection。CUDA
+  13.2 本机 smoke 在 `cudaRuntimeGetVersion` 处受 driver/runtime error 35
+  阻断，因此只记录 native build/host boundary，不宣称 13.2 runtime proof。
+- conditional body graph 仍是 bridge-internal metadata；body capture、kernel/raw
+  pointer node、外部资源和 callback 继续 deferred。generic owner-scoped node
+  destroy 不接管 conditional node，parent graph 也不能在 metadata wrapper 存活
+  时释放。
 - `CudaDeviceGraphMemorySummary` 是 pointer-free copied readonly summary，`RuntimeEvidenceKind=copied-readonly-summary`，不能晋级 runtime proof，也不能删除 deferred history。
 - 它不替代 package consumer 的 native asset copy 证据。
 

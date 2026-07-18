@@ -14,6 +14,7 @@ public sealed class CudaGraph : IDisposable
     private readonly SafeCudaGraphHandle _handle;
     private readonly object _captureLifecycleGate = new object();
     private int _activeCaptureToGraphSessions;
+    private int _activeConditionalOwners;
     private bool _disposed;
 
     internal CudaGraph(SafeCudaGraphHandle handle)
@@ -33,6 +34,39 @@ public sealed class CudaGraph : IDisposable
     {
         NativeBridgeLoader.EnsureInitialized();
         return new CudaGraph(NativeCudaApi.CreateGraph(flags));
+    }
+
+    /// <summary>
+    /// Creates a CUDA conditional handle associated with this graph.
+    /// 创建一个与当前 graph 关联的 CUDA conditional handle。
+    /// </summary>
+    public CudaGraphConditionalHandle CreateConditionalHandle(
+        uint defaultLaunchValue = 0,
+        CudaGraphConditionalHandleFlags flags = CudaGraphConditionalHandleFlags.None)
+    {
+        ThrowIfDisposed();
+        return new CudaGraphConditionalHandle(
+            this,
+            NativeCudaApi.CreateConditionalHandle(_handle, defaultLaunchValue, flags),
+            defaultLaunchValue,
+            flags);
+    }
+
+    /// <summary>
+    /// Creates a CUDA 13 conditional handle, optionally bound to a primary execution context.
+    /// 创建 CUDA 13 conditional handle，可选绑定到主 execution context。
+    /// </summary>
+    public CudaGraphConditionalHandle CreateConditionalHandleV2(
+        CudaPrimaryExecutionContext? context = null,
+        uint defaultLaunchValue = 0,
+        CudaGraphConditionalHandleFlags flags = CudaGraphConditionalHandleFlags.None)
+    {
+        ThrowIfDisposed();
+        return new CudaGraphConditionalHandle(
+            this,
+            NativeCudaApi.CreateConditionalHandleV2(_handle, context?.Handle, defaultLaunchValue, flags),
+            defaultLaunchValue,
+            flags);
     }
 
     /// <summary>
@@ -100,6 +134,71 @@ public sealed class CudaGraph : IDisposable
         }
 
         return NativeCudaApi.AddGraphChildGraphNodeAfter(_handle, dependencyNode, childGraph.Handle);
+    }
+
+    /// <summary>
+    /// Adds a CUDA conditional node with no parent dependency.
+    /// 添加一个没有 parent dependency 的 CUDA conditional node。
+    /// </summary>
+    public CudaGraphConditionalNode AddConditionalNode(
+        CudaGraphConditionalHandle handle,
+        CudaGraphConditionalNodeType nodeType,
+        uint bodyCount)
+    {
+        return AddConditionalNodeAfter(handle, nodeType, bodyCount, default);
+    }
+
+    /// <summary>
+    /// Adds a CUDA conditional node after a parent graph dependency.
+    /// 在 parent graph dependency 之后添加 CUDA conditional node。
+    /// </summary>
+    public CudaGraphConditionalNode AddConditionalNodeAfter(
+        CudaGraphConditionalHandle handle,
+        CudaGraphConditionalNodeType nodeType,
+        uint bodyCount,
+        CudaGraphNode dependencyNode)
+    {
+        ThrowIfDisposed();
+        if (handle == null)
+        {
+            throw new ArgumentNullException(nameof(handle));
+        }
+
+        if (!ReferenceEquals(handle.Owner, this))
+        {
+            throw new ArgumentException("The conditional handle belongs to a different CUDA graph.", nameof(handle));
+        }
+
+        if (handle.IsDisposed)
+        {
+            throw new ObjectDisposedException(nameof(handle));
+        }
+
+        if (bodyCount == 0 || (nodeType == CudaGraphConditionalNodeType.If && bodyCount > 2) ||
+            (nodeType == CudaGraphConditionalNodeType.While && bodyCount != 1))
+        {
+            throw new ArgumentOutOfRangeException(nameof(bodyCount));
+        }
+
+        SafeCudaGraphConditionalNodeHandle nativeNode = NativeCudaApi.AddConditionalNode(
+            _handle,
+            handle.Handle,
+            nodeType,
+            bodyCount,
+            dependencyNode);
+        try
+        {
+            return new CudaGraphConditionalNode(
+                this,
+                nativeNode,
+                NativeCudaApi.GetConditionalNodeToken(nativeNode),
+                nodeType);
+        }
+        catch
+        {
+            nativeNode.Dispose();
+            throw;
+        }
     }
 
     /// <summary>
@@ -1283,6 +1382,11 @@ public sealed class CudaGraph : IDisposable
                 throw new InvalidOperationException("The CUDA graph cannot be disposed while a stream-to-graph capture session is active.");
             }
 
+            if (_activeConditionalOwners != 0)
+            {
+                throw new InvalidOperationException("The CUDA graph cannot be disposed while a conditional handle or node wrapper is active.");
+            }
+
             if (_disposed)
             {
                 return;
@@ -1315,6 +1419,41 @@ public sealed class CudaGraph : IDisposable
             if (_activeCaptureToGraphSessions > 0)
             {
                 _activeCaptureToGraphSessions--;
+            }
+        }
+    }
+
+    internal void EnterConditionalOwner()
+    {
+        lock (_captureLifecycleGate)
+        {
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(nameof(CudaGraph));
+            }
+
+            _activeConditionalOwners++;
+        }
+    }
+
+    internal void ExitConditionalOwner()
+    {
+        lock (_captureLifecycleGate)
+        {
+            if (_activeConditionalOwners > 0)
+            {
+                _activeConditionalOwners--;
+            }
+        }
+    }
+
+    private void ThrowIfDisposed()
+    {
+        lock (_captureLifecycleGate)
+        {
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(nameof(CudaGraph));
             }
         }
     }

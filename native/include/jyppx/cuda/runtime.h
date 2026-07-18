@@ -97,6 +97,17 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_occupancy_max_active_clusters(int32_t* 
 
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_create(uint32_t flags, JYPPX_CudaGraph** out_graph);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_clone(JYPPX_CudaGraph* graph, JYPPX_CudaGraph** out_clone);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_conditional_handle_create_safe(JYPPX_CudaGraph* graph, uint32_t default_launch_value, uint32_t flags, JYPPX_CudaGraphConditionalHandle** out_handle);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_conditional_handle_create_v2_safe(JYPPX_CudaGraph* graph, JYPPX_CudaExecutionContext* context, uint32_t default_launch_value, uint32_t flags, JYPPX_CudaGraphConditionalHandle** out_handle);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_conditional_handle_destroy_safe(JYPPX_CudaGraphConditionalHandle* handle);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_add_conditional_node_safe(JYPPX_CudaGraph* graph, JYPPX_CudaGraphConditionalHandle* handle, uint32_t node_type, uint32_t body_count, uintptr_t dependency_node, JYPPX_CudaGraphConditionalNode** out_node);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_conditional_node_destroy_safe(JYPPX_CudaGraphConditionalNode* node);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_conditional_node_get_node_token_safe(JYPPX_CudaGraphConditionalNode* node, uintptr_t* out_node);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_conditional_node_get_body_count_safe(JYPPX_CudaGraphConditionalNode* node, uint32_t* out_body_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_conditional_body_get_node_count_safe(JYPPX_CudaGraphConditionalNode* node, uint32_t body_index, size_t* out_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_conditional_body_get_root_node_count_safe(JYPPX_CudaGraphConditionalNode* node, uint32_t body_index, size_t* out_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_conditional_body_get_edge_count_safe(JYPPX_CudaGraphConditionalNode* node, uint32_t body_index, size_t* out_count);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_conditional_body_add_empty_node_safe(JYPPX_CudaGraphConditionalNode* node, uint32_t body_index, uintptr_t dependency_node, uintptr_t* out_body_node);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_add_child_graph_node_safe(JYPPX_CudaGraph* graph, JYPPX_CudaGraph* child_graph, uintptr_t* out_node);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_add_child_graph_node_after_safe(JYPPX_CudaGraph* graph, uintptr_t dependency_node, JYPPX_CudaGraph* child_graph, uintptr_t* out_node);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_child_graph_node_has_embedded_graph_safe(uintptr_t node, JYPPX_Boolean* out_has_graph);

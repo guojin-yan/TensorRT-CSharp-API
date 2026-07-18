@@ -27,7 +27,9 @@ enum class ObjectKind : uint32_t
     TextureObject = 10,
     SurfaceObject = 11,
     KernelLibrary = 12,
-    ExecutionContext = 13
+    ExecutionContext = 13,
+    GraphConditionalHandle = 14,
+    GraphConditionalNode = 15
 };
 
 struct ObjectBase
@@ -88,10 +90,36 @@ struct PitchedMemoryObject
 struct GraphObject
 {
     ObjectBase base;
+    size_t active_conditional_handles;
+    size_t active_conditional_nodes;
 #if JYPPX_HAS_CUDA_TOOLKIT
     cudaGraph_t handle;
 #else
     void* handle;
+#endif
+};
+
+struct GraphConditionalHandleObject
+{
+    ObjectBase base;
+    GraphObject* owner;
+    uint64_t handle;
+    uint32_t default_launch_value;
+    uint32_t flags;
+};
+
+struct GraphConditionalNodeObject
+{
+    ObjectBase base;
+    GraphObject* owner;
+    uint32_t node_type;
+    uint32_t body_count;
+#if JYPPX_HAS_CUDA_TOOLKIT
+    cudaGraphNode_t node;
+    cudaGraph_t* body_graphs;
+#else
+    void* node;
+    void* body_graphs;
 #endif
 };
 
@@ -181,6 +209,8 @@ JYPPX_StatusCode validate_pinned_memory(const JYPPX_CudaPinnedMemory* memory, co
 JYPPX_StatusCode validate_pitched_memory(const JYPPX_CudaPitchedMemory* memory, const char* name);
 JYPPX_StatusCode validate_graph(const JYPPX_CudaGraph* graph, const char* name);
 JYPPX_StatusCode validate_graph_exec(const JYPPX_CudaGraphExec* graph_exec, const char* name);
+JYPPX_StatusCode validate_graph_conditional_handle(const JYPPX_CudaGraphConditionalHandle* handle, const char* name);
+JYPPX_StatusCode validate_graph_conditional_node(const JYPPX_CudaGraphConditionalNode* node, const char* name);
 JYPPX_StatusCode validate_array(const JYPPX_CudaArray* array, const char* name);
 JYPPX_StatusCode validate_mipmapped_array(const JYPPX_CudaMipmappedArray* array, const char* name);
 JYPPX_StatusCode validate_texture_object(const JYPPX_CudaTextureObject* texture, const char* name);
