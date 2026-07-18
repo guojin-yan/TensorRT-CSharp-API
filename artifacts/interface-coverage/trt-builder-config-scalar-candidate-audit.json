@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "candidate": "IBuilderConfig scalar controls",
+  "decision": "promote-by-explicit-alias-history",
+  "sourceCommit": "6f700f1",
+  "interfaces": [
+    "IBuilderConfig::getAvgTimingIterations",
+    "IBuilderConfig::setAvgTimingIterations",
+    "IBuilderConfig::getBuilderOptimizationLevel",
+    "IBuilderConfig::setBuilderOptimizationLevel"
+  ],
+  "versionLines": ["TRT8", "TRT10", "TRT11"],
+  "realManifestFiles": [
+    "native/manifests/tensorrt/v8/trt8-minimal.manifest.json",
+    "native/manifests/tensorrt/v10/trt10-minimal.manifest.json",
+    "native/manifests/tensorrt/v11/trt11-deployment.manifest.json"
+  ],
+  "deferredHistoryManifestFiles": [
+    "native/manifests/tensorrt/v8/trt8-twenty-third-batch-deferred-coverage.manifest.json",
+    "native/manifests/tensorrt/v10/trt10-twenty-third-batch-deferred-coverage.manifest.json",
+    "native/manifests/tensorrt/v11/trt11-twenty-third-batch-deferred-coverage.manifest.json"
+  ],
+  "nativeImplementationFiles": [
+    "native/src/tensorrt/v8/modules/builder/builder_config.inc",
+    "native/src/tensorrt/v10/modules/builder/builder_config.inc",
+    "native/src/tensorrt/v11/api.cpp"
+  ],
+  "header": "third_party/nvidia/*/include/NvInfer.h",
+  "importLibraries": ["nvinfer.lib", "nvinfer_10.lib", "nvinfer_11.lib"],
+  "runtimeDllEvidence": ["nvinfer.dll", "nvinfer_10.dll", "nvinfer_11.dll"],
+  "ownership": {
+    "configHandle": "borrowed typed opaque handle owned by TensorRtBuilderConfig",
+    "scalarInputsAndOutputs": "primitive values only",
+    "returnedPointers": false,
+    "callbacks": false,
+    "externalResources": false
+  },
+  "crossVersionNotes": [
+    "TRT8, TRT10, and TRT11 expose the four scalar controls in NvInfer.h.",
+    "TRT8 and TRT10 use builder_config.inc; TRT11 uses api.cpp.",
+    "TRT11 real entries use optimization-level and average-timing-iterations names while the old deferred records retain their historical builder_ and avg_ names.",
+    "The TRT11 CUDA 12.9 checkout has import-library/header evidence but no nvinfer_11.dll; the CUDA 13.2 sibling supplies DLL-backed runtime evidence."
+  ],
+  "managedRoute": [
+    "src/JYPPX.TensorRtSharp/Internal/Interop/NativeBridgeApi.cs",
+    "src/JYPPX.TensorRtSharp/TensorRtBuilderConfig.cs",
+    "src/JYPPX.TensorRtSharp/Internal/Interop/Generated/GeneratedTensorRtManifestNativeMethods.g.cs"
+  ],
+  "verification": [
+    "coverage status is implemented-with-deferred-history",
+    "real and deferred alias maps are explicit and separate",
+    "deferred manifests and diagnostic stubs remain present",
+    "scalar round-trip is exercised by NetworkBuilderSmokeRunner",
+    "ProjectQuality rejects public raw pointer exposure"
+  ]
+}

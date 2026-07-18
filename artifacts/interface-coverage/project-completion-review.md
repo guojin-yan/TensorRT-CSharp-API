@@ -1503,3 +1503,20 @@ artifacts/trtexec-bounded-runtime/identity
 - owner convergence：structural `9/9`、accepted `0/9`、gates `2/3`、validation blocker `0`，仍是 owner-action blocked；`canPublishPublicly=false`、`canCloseReleaseIssue=false`。
 - 带 `-RequirePackageInventory` 的额外 gate 仍报告本地 split package inventory 缺少 3 个角色包；这是当前本地资产门禁的独立阻塞，不改变标准 strict gate 结果，也不构成公开发布许可。
 - 本轮未执行 NuGet push、GitHub Packages publish、GitHub Release upload、issue close 或其它公开发布副作用；commit `5d63087` 已通过 SSH 推送，GitHub Actions run `29647634173` 已 `completed/success`（source-quality 及 bounded ProjectQuality shard smoke 通过，条件大任务 skipped）。
+
+## 2026-07-18 IBuilderConfig Scalar Alias-History Promotion Review
+
+本次继续审计上一批已经存在真实实现、但 deferred inventory 仍保留占位入口的四个 scalar controls：`getAvgTimingIterations`、`setAvgTimingIterations`、`getBuilderOptimizationLevel` 和 `setBuilderOptimizationLevel`。审计记录位于 `artifacts/interface-coverage/trt-builder-config-scalar-candidate-audit.md` 与 `.json`。
+
+### Promotion decision
+
+- TRT8、TRT10、TRT11 的 `NvInfer.h` 均有对应 scalar vtable method；现有 native implementation、version guard、manifest 和 C# wrapper 已完整存在，不重复添加第二套 ABI。
+- `eng/Export-InterfaceCoverageMatrix.ps1` 现在把真实 manifest IDs 放在 explicit alias map，把 `*-deferred` IDs 单独放在 `deferredHistoryAliasMap`；两者同时命中时状态仍为 `implemented-with-deferred-history`。
+- TRT8/10/11 的旧 twenty-third-batch deferred manifest 与 diagnostic stub 均保留；未把 deferred stub 误报为正式支持路径，也没有删除历史记录。
+- scalar 输入/输出只经过 typed opaque builder-config owner 和 primitive integer；无 callback、borrowed pointer、数组、外部资源或 ownership transfer。
+
+### Verification
+
+- Coverage exporter 重跑成功；四个接口在 TRT8/10/11 的 24 行均为 `implemented-with-deferred-history`，每行同时匹配 real entry 与 deferred history entry。
+- `BuilderConfigScalarControlsTests` 专项为 `5/5` 通过；测试锁定 real/history alias 分离、TRT8/10/11 manifest、版本 guard、审计证据、scalar wrapper/smoke 和无裸指针 public surface。
+- 本轮未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close；owner convergence、runtime proof 与公开发布边界保持不变。

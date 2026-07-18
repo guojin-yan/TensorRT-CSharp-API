@@ -264,10 +264,27 @@ public sealed class BuilderConfigScalarControlsTests
         Assert.Contains("function Get-ResolvedImplementationStatus", script);
         Assert.Contains("implemented-with-deferred-history", script);
         Assert.Contains("deferred-only", script);
-        Assert.Contains("\"IBuilderConfig::setAvgTimingIterations\" = @(\"id:*builder-config-set-average-timing-iterations\", \"id:*builder-config-set-avg-timing-iterations-deferred\")", script);
-        Assert.Contains("\"IBuilderConfig::setBuilderOptimizationLevel\" = @(\"id:*builder-config-set-optimization-level\", \"id:*builder-config-set-builder-optimization-level-deferred\")", script);
+        Assert.Contains("\"IBuilderConfig::getAvgTimingIterations\" = @(\"id:*builder-config-get-average-timing-iterations\")", script);
+        Assert.Contains("\"IBuilderConfig::setAvgTimingIterations\" = @(\"id:*builder-config-set-average-timing-iterations\")", script);
+        Assert.Contains("\"IBuilderConfig::getBuilderOptimizationLevel\" = @(\"id:*builder-config-get-optimization-level\")", script);
+        Assert.Contains("\"IBuilderConfig::setBuilderOptimizationLevel\" = @(\"id:*builder-config-set-optimization-level\")", script);
+        Assert.Contains("\"IBuilderConfig::getAvgTimingIterations\" = @(\"id:*builder-config-get-avg-timing-iterations-deferred\")", script);
+        Assert.Contains("\"IBuilderConfig::setAvgTimingIterations\" = @(\"id:*builder-config-set-avg-timing-iterations-deferred\")", script);
+        Assert.Contains("\"IBuilderConfig::getBuilderOptimizationLevel\" = @(\"id:*builder-config-get-builder-optimization-level-deferred\")", script);
+        Assert.Contains("\"IBuilderConfig::setBuilderOptimizationLevel\" = @(\"id:*builder-config-set-builder-optimization-level-deferred\")", script);
         Assert.Contains("tensorrt-interface-comparison.csv", script);
         Assert.Contains("cuda-runtime-interface-comparison.csv", script);
+
+        string audit = ReadSource("artifacts", "interface-coverage", "trt-builder-config-scalar-candidate-audit.md");
+        string auditJson = ReadSource("artifacts", "interface-coverage", "trt-builder-config-scalar-candidate-audit.json");
+        Assert.Contains("promote-by-explicit-alias-history", audit);
+        Assert.Contains("TRT8", audit);
+        Assert.Contains("TRT10", audit);
+        Assert.Contains("TRT11", audit);
+        Assert.Contains("deferred records remain", audit);
+        Assert.Contains("\"decision\": \"promote-by-explicit-alias-history\"", auditJson);
+        Assert.Contains("IBuilderConfig::getAvgTimingIterations", auditJson);
+        Assert.Contains("IBuilderConfig::setBuilderOptimizationLevel", auditJson);
 
         string coverage = ReadSource("artifacts", "interface-coverage", "tensorrt-interface-coverage.csv");
         Assert.Contains("\"ImplementationStatus\"", coverage);
