@@ -369,7 +369,7 @@ public sealed class TrtexecLikeDeploymentOptions
 
         if (!string.IsNullOrWhiteSpace(ExportTimingCachePath))
         {
-            diagnostics.Add("ExportTimingCache=" + ExportTimingCachePath + " is parse/report-only; timing cache export lifecycle is not promoted by this stage.");
+            diagnostics.Add("ExportTimingCache=" + ExportTimingCachePath + " is written after a successful TensorRT build through the typed timing-cache owner; the artifact remains build-cache evidence only.");
         }
 
         if (Safe || Consistency)

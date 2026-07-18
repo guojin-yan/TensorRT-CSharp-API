@@ -43,7 +43,7 @@ dotnet run --project .\applications\TensorRtExec -- `
 | Opt Shapes | `--optShapes` | dynamic shape profile 最优形状 |
 | Max Shapes | `--maxShapes` | dynamic shape profile 最大形状 |
 | Plugins | `--plugins` | 当前记录诊断，不加载 library |
-| Timing Cache | `--timingCacheFile` | 当前记录诊断，不导入/导出 cache |
+| Timing Cache | `--timingCacheFile` / `--exportTimingCache` | 成功构建时导入/导出 cache；报告记录 `TimingCacheArtifact`，仍不是 runtime proof |
 | Profiling | `--profilingVerbosity` | 记录 profiling verbosity |
 | Opt Level | `--builderOptimizationLevel` | 应用到 builder config |
 | Aux Streams | `--maxAuxStreams` | 应用到 builder config |
@@ -131,7 +131,7 @@ GUI 面向用户，但不能替用户猜模型语义。外部 ONNX 的输入名�
 
 - `Opt Level`、`Aux Streams` 和 `Profiling`：会在 build 阶段应用到 builder config。
 - `Plugins`：不主动加载 plugin library。
-- `Timing Cache`：不导入/导出 cache。
+- `Timing Cache`：成功构建时导入/导出 cache；dry-run、load-engine 和依赖不可用路径显示为未应用。
 - `DLA`、`Tactics`、`Mem Pools`、`Input IO`、`Output IO`、`Calib Cache`、`Sparsity`、`Strongly typed`：记录到 diagnostics 和 report，等待模型级 runtime 与 callback/lifecycle 阶段补足。
 - `Layer Info`：记录 layer-info 请求，完整导出取决于后续 TensorRT runtime 支持。
 

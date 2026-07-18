@@ -30,7 +30,13 @@ public sealed class TensorRtExecReportSchemaTests
                      "DeploymentOptions",
                      "RuntimeOptions",
                      "PreflightMetadata",
-                     "LoadedEngineDiagnostics",
+                      "LoadedEngineDiagnostics",
+                      "TimingCacheArtifact",
+                      "InputRequested",
+                      "InputApplied",
+                      "OutputRequested",
+                      "OutputWritten",
+                      "EvidenceBoundary",
                      "ReadbackFingerprint",
                      "ReadbackSha256",
                      "CapabilityProbe",
@@ -158,6 +164,11 @@ public sealed class TensorRtExecReportSchemaTests
         Assert.True(reportRoot.GetProperty("LoadedEngineDiagnostics").TryGetProperty("EvidenceBoundary", out _));
         Assert.True(reportRoot.GetProperty("LoadedEngineDiagnostics").TryGetProperty("ReadbackFingerprint", out _));
         Assert.True(reportRoot.GetProperty("LoadedEngineDiagnostics").TryGetProperty("ReadbackSha256", out _));
+        JsonElement timingCacheArtifact = reportRoot.GetProperty("TimingCacheArtifact");
+        Assert.False(timingCacheArtifact.GetProperty("InputRequested").GetBoolean());
+        Assert.False(timingCacheArtifact.GetProperty("OutputRequested").GetBoolean());
+        Assert.False(timingCacheArtifact.GetProperty("OutputWritten").GetBoolean());
+        Assert.True(timingCacheArtifact.GetProperty("EvidenceBoundary").GetString()!.Contains("build-cache lifecycle", StringComparison.Ordinal));
         Assert.True(reportRoot.GetProperty("CapabilityProbe").TryGetProperty("EvidenceBoundary", out _));
         Assert.False(reportRoot.GetProperty("CapabilityProbe").GetProperty("Attempted").GetBoolean());
         Assert.Contains("capability-probe-only", reportRoot.GetProperty("OptionImplementationStatus").GetProperty("EvidenceBoundary").GetString(), StringComparison.Ordinal);

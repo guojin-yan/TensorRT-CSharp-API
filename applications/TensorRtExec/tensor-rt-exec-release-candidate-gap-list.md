@@ -20,7 +20,7 @@
 | fp16 | wrapper-ready | 是 | 是 | 记录 owner host/model FP16 evidence |
 | int8 | parse-report-only-calibration-boundary | 是 | 是 | CLI/WinForms 已暴露 INT8 与校准缓存意图，仍等待 calibration/cache ownership 设计 |
 | workspace-memory-pool | implemented-readback-report | 是 | 是 | 继续把真实模型/运行证明交给 proof records |
-| timing-cache | parse-report-only-gui-cli | 是 | 是 | GUI/CLI 已共享 timing cache import/export 字段，仍等待 timing cache lifecycle proof |
+| timing-cache | implemented-build-cache-lifecycle | 是 | 是 | 成功构建会导入/导出 cache 并记录 `TimingCacheArtifact` 大小与 SHA256；仍需 owner 将 cache 文件与真实模型 build 记录一起归档 |
 | plugin-library-boundary | diagnostic-gui-cli | 是 | 是 | GUI/CLI 已共享 plugin path 字段，保持 register/load-library deferred |
 | profiling | implemented-report | 是 | 是 | 真实 enqueue log 后才能晋级 |
 | layer-dump | implemented-report | 是 | 是 | 继续作为 diagnostic metadata |

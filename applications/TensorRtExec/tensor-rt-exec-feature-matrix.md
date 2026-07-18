@@ -16,7 +16,7 @@
 | Report alias compatibility | CLI | implemented-report |
 | Refit, weight streaming, and debug tensor diagnostics | CLI, WinForms | parse-report-only |
 | DLA/device options | CLI, WinForms | diagnostic |
-| Timing cache lifecycle | CLI, WinForms | parse-report-only |
+| Timing cache lifecycle | CLI, WinForms | implemented-build-cache-lifecycle |
 | Full trtexec parity | CLI, WinForms | planned |
 | Release proof promotion | CLI, WinForms | blocked by runtime proof |
 

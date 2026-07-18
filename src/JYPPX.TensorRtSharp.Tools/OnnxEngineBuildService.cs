@@ -54,7 +54,8 @@ public sealed class OnnxEngineBuildService
                 elapsedMilliseconds: null,
                 skipReason: string.Empty,
                 log,
-                evidenceSidecar);
+                evidenceSidecar,
+                timingCacheArtifact: CreateTimingCacheBoundaryArtifact(options, "precheck-not-executed"));
             OnnxEngineBuildDiagnostics.WriteReport(dryRun, options.ExportReportPath);
             OnnxEngineRuntimeArtifactWriter.WriteArtifacts(dryRun);
             return dryRun;
@@ -96,7 +97,8 @@ public sealed class OnnxEngineBuildService
                 evidenceSidecar,
                 benchmarkSummary: runtimeExecution?.BenchmarkSummary,
                 preflightMetadata: preflightMetadata,
-                loadedEngineDiagnostics: loadedEngineDiagnostics);
+                loadedEngineDiagnostics: loadedEngineDiagnostics,
+                timingCacheArtifact: CreateTimingCacheBoundaryArtifact(options, "not-applied-to-load-engine"));
             OnnxEngineBuildDiagnostics.WriteReport(loadResult, options.ExportReportPath);
             OnnxEngineRuntimeArtifactWriter.WriteArtifacts(loadResult, runtimeExecution?.ArtifactData);
             return loadResult;
@@ -133,7 +135,8 @@ public sealed class OnnxEngineBuildService
                 elapsedMilliseconds: null,
                 skipReason: adapter.StatusMessage,
                 log,
-                evidenceSidecar);
+                evidenceSidecar,
+                timingCacheArtifact: CreateTimingCacheBoundaryArtifact(options, "dependency-unavailable"));
             OnnxEngineBuildDiagnostics.WriteReport(skipped, options.ExportReportPath);
             OnnxEngineRuntimeArtifactWriter.WriteArtifacts(skipped);
             return skipped;
@@ -151,6 +154,7 @@ public sealed class OnnxEngineBuildService
         config.SetEngineCapability(TensorRtEngineCapability.Standard);
         ApplyDeploymentOptions(config, options);
         ApplyPrecisionFlags(config, options);
+        using TimingCacheLease timingCache = CreateTimingCacheLease(config, options, log);
 
         using TensorRtNetworkDefinition network = builder.CreateNetwork(TensorRtNetworkDefinitionCreationFlags.ExplicitBatch);
         using TensorRtOnnxParser parser = new TensorRtOnnxParser(logger, network);
@@ -186,6 +190,7 @@ public sealed class OnnxEngineBuildService
         {
             using TensorRtHostMemory hostMemory = builder.BuildSerializedNetwork(network, config);
             hostMemory.SaveToFile(enginePath);
+            timingCache.Artifact = ExportTimingCache(timingCache, options, log);
 
             bool externalRuntimeRequested = options.UsesExternalOnnx && CanAttemptGenericExternalRuntime(options);
             if (options.BuildOnly || options.SkipInference || (options.UsesExternalOnnx && !externalRuntimeRequested))
@@ -211,7 +216,8 @@ public sealed class OnnxEngineBuildService
                     elapsedMilliseconds: null,
                     skipReason: string.Empty,
                     log,
-                    evidenceSidecar);
+                    evidenceSidecar,
+                    timingCacheArtifact: timingCache.Artifact);
                 OnnxEngineBuildDiagnostics.WriteReport(buildOnly, options.ExportReportPath);
                 OnnxEngineRuntimeArtifactWriter.WriteArtifacts(buildOnly);
                 return buildOnly;
@@ -241,7 +247,8 @@ public sealed class OnnxEngineBuildService
                     log,
                     evidenceSidecar,
                     benchmarkSummary: runtimeExecution?.BenchmarkSummary,
-                    loadedEngineDiagnostics: ProbeLoadedEngineDiagnostics(options, OnnxEnginePreflightMetadata.FromExistingEngine(enginePath), log));
+                    loadedEngineDiagnostics: ProbeLoadedEngineDiagnostics(options, OnnxEnginePreflightMetadata.FromExistingEngine(enginePath), log),
+                    timingCacheArtifact: timingCache.Artifact);
                 OnnxEngineBuildDiagnostics.WriteReport(externalRuntime, options.ExportReportPath);
                 OnnxEngineRuntimeArtifactWriter.WriteArtifacts(externalRuntime, runtimeExecution?.ArtifactData);
                 return externalRuntime;
@@ -310,7 +317,8 @@ public sealed class OnnxEngineBuildService
                     timingSamplesMilliseconds,
                     options.RuntimeOptions,
                     inferenceRan: true,
-                    outputMatch: true));
+                    outputMatch: true),
+                timingCacheArtifact: timingCache.Artifact);
             OnnxEngineBuildDiagnostics.WriteReport(roundTrip, options.ExportReportPath);
             OnnxEngineRuntimeArtifactWriter.WriteArtifacts(
                 roundTrip,
@@ -405,6 +413,157 @@ public sealed class OnnxEngineBuildService
         }
     }
 
+    private const long MaxTimingCacheBytes = 512L * 1024L * 1024L;
+
+    private static TimingCacheLease CreateTimingCacheLease(
+        TensorRtBuilderConfig config,
+        OnnxEngineBuildOptions options,
+        List<string> log)
+    {
+        string inputPath = options.TimingCacheFile;
+        string outputPath = options.DeploymentOptions.ExportTimingCachePath;
+        bool inputRequested = !string.IsNullOrWhiteSpace(inputPath);
+        bool outputRequested = !string.IsNullOrWhiteSpace(outputPath);
+        if (!inputRequested && !outputRequested)
+        {
+            return new TimingCacheLease(null, OnnxEngineTimingCacheArtifact.Empty);
+        }
+
+        byte[]? inputBytes = null;
+        long inputLengthBytes = 0;
+        string inputSha256 = string.Empty;
+        if (inputRequested)
+        {
+            FileInfo inputFile = new FileInfo(inputPath);
+            if (!inputFile.Exists)
+            {
+                throw new FileNotFoundException("Timing cache file was not found.", inputPath);
+            }
+
+            if (inputFile.Length > MaxTimingCacheBytes)
+            {
+                throw new InvalidDataException($"Timing cache file exceeds the {MaxTimingCacheBytes} byte safety limit.");
+            }
+
+            inputBytes = File.ReadAllBytes(inputFile.FullName);
+            inputLengthBytes = inputBytes.LongLength;
+            inputSha256 = ComputeSha256(inputBytes);
+        }
+
+        TensorRtTimingCache cache = config.CreateTimingCache(inputBytes);
+        try
+        {
+            config.SetTimingCache(cache, ignoreMismatch: false);
+        }
+        catch
+        {
+            cache.Dispose();
+            throw;
+        }
+
+        log.Add($"TimingCache ImportRequested={inputRequested} Applied=True Path={inputPath} LengthBytes={inputLengthBytes} Sha256={inputSha256}");
+        return new TimingCacheLease(
+            cache,
+            new OnnxEngineTimingCacheArtifact(
+                inputRequested,
+                inputApplied: true,
+                inputPath,
+                inputLengthBytes,
+                inputSha256,
+                outputRequested,
+                outputWritten: false,
+                outputPath,
+                outputLengthBytes: 0,
+                outputSha256: string.Empty,
+                state: outputRequested ? "imported-export-pending" : "imported",
+                evidenceBoundary: TimingCacheEvidenceBoundary));
+    }
+
+    private static OnnxEngineTimingCacheArtifact ExportTimingCache(
+        TimingCacheLease lease,
+        OnnxEngineBuildOptions options,
+        List<string> log)
+    {
+        string outputPath = options.DeploymentOptions.ExportTimingCachePath;
+        if (string.IsNullOrWhiteSpace(outputPath))
+        {
+            return lease.Artifact;
+        }
+
+        if (lease.Cache == null)
+        {
+            log.Add("TimingCache ExportRequested=True Written=False Reason=timing cache owner was not created.");
+            return CreateTimingCacheBoundaryArtifact(options, "export-not-applied");
+        }
+
+        using TensorRtHostMemory hostMemory = lease.Cache.Serialize();
+        byte[] bytes = hostMemory.ToArray();
+        string fullPath = Path.GetFullPath(outputPath);
+        string? directory = Path.GetDirectoryName(fullPath);
+        if (!string.IsNullOrWhiteSpace(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        File.WriteAllBytes(fullPath, bytes);
+        string outputSha256 = ComputeSha256(bytes);
+        log.Add($"TimingCache ExportRequested=True Written=True Path={fullPath} LengthBytes={bytes.LongLength} Sha256={outputSha256}");
+        return new OnnxEngineTimingCacheArtifact(
+            lease.Artifact.InputRequested,
+            lease.Artifact.InputApplied,
+            lease.Artifact.InputPath,
+            lease.Artifact.InputLengthBytes,
+            lease.Artifact.InputSha256,
+            outputRequested: true,
+            outputWritten: true,
+            fullPath,
+            bytes.LongLength,
+            outputSha256,
+            state: lease.Artifact.InputApplied ? "imported-and-exported" : "exported",
+            evidenceBoundary: TimingCacheEvidenceBoundary);
+    }
+
+    private static OnnxEngineTimingCacheArtifact CreateTimingCacheBoundaryArtifact(
+        OnnxEngineBuildOptions options,
+        string state)
+    {
+        bool inputRequested = !string.IsNullOrWhiteSpace(options.TimingCacheFile);
+        bool outputRequested = !string.IsNullOrWhiteSpace(options.DeploymentOptions.ExportTimingCachePath);
+        if (!inputRequested && !outputRequested)
+        {
+            return OnnxEngineTimingCacheArtifact.Empty;
+        }
+
+        return new OnnxEngineTimingCacheArtifact(
+            inputRequested,
+            inputApplied: false,
+            options.TimingCacheFile,
+            inputLengthBytes: 0,
+            inputSha256: string.Empty,
+            outputRequested,
+            outputWritten: false,
+            options.DeploymentOptions.ExportTimingCachePath,
+            outputLengthBytes: 0,
+            outputSha256: string.Empty,
+            state,
+            TimingCacheEvidenceBoundary);
+    }
+
+    private const string TimingCacheEvidenceBoundary = "timing-cache import/export evidence is build-cache lifecycle metadata only; it is not model accuracy, runtime execution, real-model-runtime, or package-consumer-runtime proof.";
+
+    private static string ComputeSha256(byte[] bytes)
+    {
+        using SHA256 sha256 = SHA256.Create();
+        byte[] hash = sha256.ComputeHash(bytes ?? Array.Empty<byte>());
+        StringBuilder builder = new StringBuilder(hash.Length * 2);
+        foreach (byte item in hash)
+        {
+            builder.Append(item.ToString("x2"));
+        }
+
+        return builder.ToString();
+    }
+
     private static OnnxEngineBuildResult CreateResult(
         bool success,
         bool skipped,
@@ -424,7 +583,8 @@ public sealed class OnnxEngineBuildService
         OnnxEngineBuildEvidenceSidecar evidenceSidecar,
         OnnxEngineBenchmarkSummary? benchmarkSummary = null,
         OnnxEnginePreflightMetadata? preflightMetadata = null,
-        OnnxLoadedEngineDiagnostics? loadedEngineDiagnostics = null)
+        OnnxLoadedEngineDiagnostics? loadedEngineDiagnostics = null,
+        OnnxEngineTimingCacheArtifact? timingCacheArtifact = null)
     {
         OnnxEngineCapabilityProbe capabilityProbe = ProbeCapabilities(options);
         logLines = AppendCapabilityProbeLog(logLines, capabilityProbe);
@@ -453,8 +613,9 @@ public sealed class OnnxEngineBuildService
             benchmarkSummary,
             preflightMetadata,
             loadedEngineDiagnostics,
-            capabilityProbe,
-            options.WorkspaceBytes);
+            timingCacheArtifact: timingCacheArtifact,
+            capabilityProbe: capabilityProbe,
+            workspaceBytes: options.WorkspaceBytes);
     }
 
     private static IReadOnlyList<string> AppendCapabilityProbeLog(IReadOnlyList<string> logLines, OnnxEngineCapabilityProbe capabilityProbe)
@@ -1012,6 +1173,24 @@ public sealed class OnnxEngineBuildService
     private static string FormatShape(IReadOnlyList<int> values)
     {
         return string.Join("x", values);
+    }
+
+    private sealed class TimingCacheLease : IDisposable
+    {
+        public TimingCacheLease(TensorRtTimingCache? cache, OnnxEngineTimingCacheArtifact artifact)
+        {
+            Cache = cache;
+            Artifact = artifact ?? OnnxEngineTimingCacheArtifact.Empty;
+        }
+
+        public TensorRtTimingCache? Cache { get; }
+
+        public OnnxEngineTimingCacheArtifact Artifact { get; set; }
+
+        public void Dispose()
+        {
+            Cache?.Dispose();
+        }
     }
 
     private sealed class OnnxEngineRuntimeExecution

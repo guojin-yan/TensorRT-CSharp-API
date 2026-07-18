@@ -70,7 +70,7 @@ WinForms 界面提供以下字段：
 
 界面默认启用 build-only/skip-inference，避免用户在没有模型绑定语义时误把任意外部 ONNX 当作已经完成推理验证。UI 运行后输出的日志和 CLI 来自同一个 `TensorRtExecService`。
 
-其中 advanced timing、precision policy、engine packaging/refit、weight-streaming 和 timing cache export 当前是 parse/report-only 能力。它们会进入命令预览、报告和 diagnostics，但不会被写成已经真实应用的 TensorRT 行为；报告会用 `TrtexecAlignmentStatus=parse-only` 明确标注边界。
+其中 advanced timing、precision policy、engine packaging/refit 和 weight-streaming 当前是 parse/report-only 能力；timing cache export 在成功构建时通过 typed owner 写出 cache 并进入 `TimingCacheArtifact`。这些能力仍不会被写成 runtime proof；未执行的路径会用明确的未应用状态记录边界。
 
 ## 报告语义
 
@@ -116,7 +116,7 @@ This report is build/sample evidence only. build-only and dependency-probe-only 
 
 ## 参数边界
 
-`--plugins` 和 `--timingCacheFile` 已被应用层解析并写入诊断记录，但当前安全阶段不会加载 plugin library，也不会导入或导出 timing cache。原因是 plugin registry 的 register/deregister/load library 仍属于生命周期和 ABI 风险更高的边界；下一阶段应先补安全设计和 smoke，再决定是否开放。
+`--plugins` 和 `--timingCacheFile` 已被应用层解析并写入诊断记录。应用不会加载 plugin library；成功 TensorRT build 会通过 typed timing-cache owner 导入/导出 cache，dry-run、load-engine 和依赖不可用路径明确标为未应用。plugin registry 的 register/deregister/load library 仍属于生命周期和 ABI 风险更高的边界。
 
 `--int8` 可以被解析并记录，但 calibrator 与 calibration cache 尚未在这个工具阶段实现。用户需要把 INT8 视为构建参数探索，而不是完整量化工作流。
 

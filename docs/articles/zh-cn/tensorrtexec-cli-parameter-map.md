@@ -90,7 +90,7 @@ dotnet run --project .\applications\TensorRtExec -- `
 
 `TrtexecAlignmentStatus=parse-only` 表示参数进入 parser/report，不表示官方 `trtexec` 同等行为已经完全实现。CLI report 不执行发布、不上传包、不批准 public release、不关闭 release issue。build-only/precheck output cannot be promoted to package-consumer-runtime proof。Boundary keywords: not public package proof, not post-publish proof, not package push, not release close approval.
 
-CLI 与 WinForms 都应继续走 `TensorRtExecOptions` 和 `TensorRtExecService`，避免出现一条路径支持参数、另一条路径只展示控件的分裂。`--int8/--calib`、timing cache、refit、DLA、plugin library 等能力在没有真实 runtime proof 前只能保持 diagnostic、parse-only、planned 或 blocked 状态。
+CLI 与 WinForms 都应继续走 `TensorRtExecOptions` 和 `TensorRtExecService`，避免出现一条路径支持参数、另一条路径只展示控件的分裂。`--int8/--calib`、refit、DLA、plugin library 等能力在没有真实 runtime proof 前只能保持 diagnostic、parse-only、planned 或 blocked 状态；timing cache 已完成 build-cache lifecycle，但仍不等于 runtime proof。
 
 本参数表也是 not runtime proof、not real-model-runtime proof。要证明真实模型推理，需要样例 runner 输出真实日志、hash、stdout/stderr summary 和 validator 结果。
 

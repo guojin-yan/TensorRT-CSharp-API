@@ -160,6 +160,7 @@ public sealed class OnnxToEngineTrtexecLikeTests
         string argumentLine = options.ToArgumentLine();
         OnnxEngineBuildOptions buildOptions = OnnxEngineBuildOptions.FromTrtexecLikeOptions(options);
 
+        Assert.Equal(options.TimingCacheFile, buildOptions.TimingCacheFile);
         Assert.Contains("--infStreams 2", argumentLine, StringComparison.Ordinal);
         Assert.Contains("--exportTimes", argumentLine, StringComparison.Ordinal);
         Assert.Contains("--exportProfile", argumentLine, StringComparison.Ordinal);
@@ -758,7 +759,7 @@ public sealed class OnnxToEngineTrtexecLikeTests
         Assert.Equal(4, buildOptions.DeploymentOptions.BuilderOptimizationLevel);
         Assert.Equal(2, buildOptions.DeploymentOptions.MaxAuxStreams);
         Assert.Contains("does not load plugin libraries", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
-        Assert.Contains("Timing cache argument is recorded", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
+        Assert.Contains("Timing cache input is imported", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
         Assert.Contains("ProfilingVerbosity=detailed", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
         Assert.Contains("BuilderOptimizationLevel=4 is applied", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
         Assert.Contains("MaxAuxStreams=2 is applied", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
@@ -964,8 +965,13 @@ public sealed class OnnxToEngineTrtexecLikeTests
     [Fact]
     public void DryRunReportDoesNotRequireModelFileOrPromoteRuntimeProof()
     {
-        string reportPath = Path.Combine(Path.GetTempPath(), $"jyppx-dry-run-{Guid.NewGuid():N}.json");
-        string missingOnnx = Path.Combine(Path.GetTempPath(), $"missing-{Guid.NewGuid():N}.onnx");
+        string artifactRoot = Path.Combine(RepositoryPaths.Root, "artifacts", "test-temp", $"jyppx-dry-run-{Guid.NewGuid():N}");
+        string reportPath = Path.Combine(artifactRoot, "report.json");
+        string timingCachePath = Path.Combine(artifactRoot, "input.cache");
+        string exportedTimingCachePath = Path.Combine(artifactRoot, "output.cache");
+        string missingOnnx = Path.Combine(artifactRoot, "missing.onnx");
+        Directory.CreateDirectory(artifactRoot);
+        File.WriteAllBytes(timingCachePath, new byte[] { 0x54, 0x49, 0x4D, 0x45 });
         TrtexecLikeOptions options = TrtexecLikeParser.Parse(new[]
         {
             "--tensor-rt-line", "10",
@@ -976,6 +982,8 @@ public sealed class OnnxToEngineTrtexecLikeTests
             "--maxShapes", "images:4x3x640x640",
             "--builderOptimizationLevel", "4",
             "--maxAuxStreams", "2",
+            "--timingCacheFile", timingCachePath,
+            "--exportTimingCache", exportedTimingCachePath,
             "--exportReport", reportPath,
             "--previewOnly"
         });
@@ -1004,6 +1012,13 @@ public sealed class OnnxToEngineTrtexecLikeTests
             Assert.False(result.IsPackageConsumerRuntimeProof);
             Assert.Equal(missingOnnx, result.ModelSource);
             Assert.Equal(64, result.NormalizedCommandSha256.Length);
+            Assert.True(result.TimingCacheArtifact.InputRequested);
+            Assert.False(result.TimingCacheArtifact.InputApplied);
+            Assert.Equal(0, result.TimingCacheArtifact.InputLengthBytes);
+            Assert.True(result.TimingCacheArtifact.OutputRequested);
+            Assert.False(result.TimingCacheArtifact.OutputWritten);
+            Assert.Equal("precheck-not-executed", result.TimingCacheArtifact.State);
+            Assert.False(File.Exists(exportedTimingCachePath));
             Assert.True(root.GetProperty("DryRun").GetBoolean());
             Assert.Equal("precheck", root.GetProperty("ProofClassification").GetString());
             Assert.Equal(result.NormalizedCommandSha256, root.GetProperty("NormalizedCommandSha256").GetString());
@@ -1020,6 +1035,11 @@ public sealed class OnnxToEngineTrtexecLikeTests
             if (File.Exists(reportPath))
             {
                 File.Delete(reportPath);
+            }
+
+            if (Directory.Exists(artifactRoot))
+            {
+                Directory.Delete(artifactRoot, recursive: true);
             }
         }
     }

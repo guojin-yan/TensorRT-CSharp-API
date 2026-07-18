@@ -10,7 +10,7 @@
 | build report | `--exportReport` | JSON/Markdown 诊断 | build-only/precheck |
 | evidence sidecar | `--evidenceSidecar` | 资产桥接记录 | sidecar-only |
 | layer info | `--exportLayerInfo` | layer 诊断 | diagnostic |
-| timing cache | `--timingCacheFile` / `--exportTimingCache` | cache 路径记录 | parse/report-only |
+| timing cache | `--timingCacheFile` / `--exportTimingCache` | 成功构建时导入/导出 cache，并记录 `TimingCacheArtifact` 大小与 SHA256 | build-cache lifecycle evidence，不是 runtime proof |
 | output summary | `--exportOutput` | runtime 输出摘要 | 仅在真实 runtime 时有效 |
 | raw bindings | `--dumpRawBindingsToFile` | binding dump | 需要输入输出语义 |
 | profile/times | `--exportProfile` / `--exportTimes` | timing/profile 数据 | 不自动等于 release proof |

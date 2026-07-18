@@ -119,12 +119,12 @@
     {
       "id": "timing-cache",
       "trtexecOption": "--timingCacheFile --exportTimingCache",
-      "tensorRtExecStatus": "parse-report-only",
-      "entryPoints": ["TimingCacheFile", "ExportTimingCachePath", "OnnxEngineBuildDiagnostics.OptionImplementationStatus", "WinForms Timing Cache Fields"],
-      "proofBoundary": "Timing cache path capture, normalized command output, and ParseOnlyOptions entries are not cache import/export lifecycle proof.",
+      "tensorRtExecStatus": "implemented-build-cache-lifecycle",
+      "entryPoints": ["OnnxEngineBuildOptions.TimingCacheFile", "TrtexecLikeDeploymentOptions.ExportTimingCachePath", "OnnxEngineBuildService", "OnnxEngineBuildResult.TimingCacheArtifact", "WinForms Timing Cache Fields"],
+      "proofBoundary": "Timing cache import/export lifecycle proof and SHA256 metadata are build-cache evidence only; they are not model accuracy, runtime execution, real-model-runtime, or package-consumer-runtime proof.",
       "isRuntimeProof": false,
-      "gap": "No cache lifecycle ownership model, cache content hash contract, or native import/export smoke is promoted yet.",
-      "nextStep": "Keep as parse/report-only until safe native cache lifecycle tests and owner hash evidence exist."
+      "gap": "Owner still needs to retain the input/output cache files and hashes alongside a real model build record; load-engine and dry-run modes intentionally do not apply cache lifecycle.",
+      "nextStep": "Use TimingCacheArtifact input/output paths, byte counts, and SHA256 in owner build evidence while keeping runtime proof separate."
     },
     {
       "id": "gui-cli-field-map",

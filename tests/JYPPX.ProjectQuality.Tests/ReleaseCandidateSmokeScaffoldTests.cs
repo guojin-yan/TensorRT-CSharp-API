@@ -176,7 +176,7 @@ public sealed class ReleaseCandidateSmokeScaffoldTests
         });
         Assert.Contains(entries, entry => entry.GetProperty("implementationClass").GetString() == "parse-only");
         Assert.Contains(entries, entry => entry.GetProperty("implementationClass").GetString() == "build-only" || entry.GetProperty("implementationClass").GetString() == "preflight-only");
-        Assert.Contains(entries, entry => entry.GetProperty("option").GetString() == "--exportTimingCache" && entry.GetProperty("implementationClass").GetString() == "parse-only");
+        Assert.Contains(entries, entry => entry.GetProperty("option").GetString() == "--exportTimingCache" && entry.GetProperty("implementationClass").GetString() == "applied-build-cache-lifecycle");
         Assert.Contains(entries, entry => entry.GetProperty("option").GetString() == "--loadInputs" && entry.GetProperty("implementationClass").GetString() == "bounded-artifact");
         Assert.Contains(entries, entry => entry.GetProperty("option").GetString() == "--dumpOutput" && entry.GetProperty("implementationClass").GetString() == "bounded-artifact");
         Assert.Contains(entries, entry => entry.GetProperty("option").GetString() == "--dumpRawBindingsToFile" && entry.GetProperty("implementationClass").GetString() == "bounded-artifact");

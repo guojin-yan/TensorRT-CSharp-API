@@ -117,9 +117,9 @@ JSON 报告包含这些关键字段：
 - ONNX parser 至少尝试解析了指定模型。
 - TensorRT builder 尝试生成 serialized engine。
 - precision、workspace、shape profile 参数被记录。
-- advanced timing、precision constraints、engine packaging/refit、weight-streaming 和 timing cache export 参数会进入 `DeploymentOptions` / `RuntimeOptions` / `NormalizedCommandLine`。
+- advanced timing、precision constraints、engine packaging/refit、weight-streaming 和 timing cache 参数会进入 `DeploymentOptions` / `RuntimeOptions` / `NormalizedCommandLine`；成功构建时 timing cache 导入/导出还会进入 `TimingCacheArtifact`，记录文件大小和 SHA256。
 - `OptionImplementationStatus` 会把 `ParsedOptions`、`AppliedOptions`、`ParseOnlyOptions` 写进 JSON 和 Markdown，便于 review 时直接看出 parse-only 边界。
-- 当报告包含 `--minTiming`、`--avgTiming`、`--infStreams`、`--precisionConstraints`、`--layerPrecisions`、`--layerOutputTypes`、`--versionCompatible`、`--excludeLeanRuntime`、`--stripWeights`、`--refit`、`--weightStreamingBudget` 或 `--exportTimingCache` 时，diagnostics 与 `OptionImplementationStatus.ParseOnlyOptions` 必须保留 parse-only 语义。
+- 当报告包含 `--minTiming`、`--avgTiming`、`--infStreams`、`--precisionConstraints`、`--layerPrecisions`、`--layerOutputTypes`、`--versionCompatible`、`--excludeLeanRuntime`、`--stripWeights`、`--refit` 或 `--weightStreamingBudget` 时，diagnostics 与 `OptionImplementationStatus.ParseOnlyOptions` 必须保留 parse-only 语义；timing cache 成功构建时进入 `AppliedOptions`，dry-run、load-engine 和依赖不可用路径则保留为未应用。
 - `ProofClassification=precheck`、`build-only` 或 `dependency-probe-only` 明确了这份证据不能直接提升为 runtime proof。
 
 不能从 build-only 报告得出的结论：
@@ -140,7 +140,7 @@ JSON 报告包含这些关键字段：
 --plugins .\plugins\custom.dll --timingCacheFile .\models\model.cache
 ```
 
-现阶段不会加载 plugin library，也不会导入或导出 timing cache。plugin registry mutation、外部资源加载和 plugin instance 生命周期仍属于高风险边界，需要单独设计和 smoke 验证。
+现阶段不会加载 plugin library。成功 TensorRT build 会导入/导出 timing cache，并在 `TimingCacheArtifact` 记录 lifecycle 状态、文件大小和 SHA256；dry-run、load-engine 和依赖不可用路径不会执行 cache 操作。plugin registry mutation、外部资源加载和 plugin instance 生命周期仍属于高风险边界，需要单独设计和 smoke 验证。
 
 ## Markdown 报告
 

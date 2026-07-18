@@ -42,7 +42,7 @@ dotnet run --project .\applications\TensorRtExec -- --ui
 | 7 | FP16 | `--fp16` | wrapper-ready / applied when supported | `TensorRtExecOptions.Fp16` | host GPU、TensorRT line、模型 layer 支持需要真实 smoke | 在 compatible host proof 中记录 FP16 host/model 结果 | 仅凭开关否 |
 | 8 | INT8 | `--int8`、`--calib` | diagnostic / boundary | `TensorRtExecOptions.Int8`、`CalibrationCacheFile` | calibrator/cache ownership 仍需更严格桥接和真实校准 evidence | 先做 INT8 field guide，再做 owner-provided calibrator proof | 否 |
 | 9 | workspace / memory pool | `--workspace`、`--memPoolSize` | implemented-report | `WorkspaceBytes`、`MemoryPoolSizes` | memory pool 是否被 TensorRT 完整应用需 native/runtime proof | 增加 builder config readback 或 report 对照 smoke | 否 |
-| 10 | timing cache | `--timingCacheFile`、`--exportTimingCache` | parse/report-only | `TimingCacheFile`、`ExportTimingCachePath` | cache import/export 生命周期尚未提升为真实实现 | 增加只读 cache diagnostics 或 explicit owner file hash evidence | 否 |
+| 10 | timing cache | `--timingCacheFile`、`--exportTimingCache` | implemented-build-cache-lifecycle | `TimingCacheFile`、`ExportTimingCachePath`、`OnnxEngineBuildResult.TimingCacheArtifact` | 成功构建时通过 typed timing-cache owner 导入/导出并记录大小与 SHA256；仍不是 runtime proof | 在兼容主机补真实构建日志、owner review 和模型级输出校验 | 否 |
 | 11 | plugin library 参数边界 | `--plugins`、`--plugin`、`--dynamicPlugins`、`--setPluginsToSerialize` | diagnostic-alias-compatible / boundary | `TrtexecLikeParser.ParsePluginLibraries`、`Plugins`、Plugin Inventory 只读 API | register/load/deregister library 和 serialized plugin ownership 暂不处理，避免 ownership 风险 | 仅做 plugin path normalization 和 plugin inventory copied metadata appendix，不做 load library | 否 |
 | 12 | profiling | `--profilingVerbosity`、`--dumpProfile`、`--exportProfile` | implemented-report / parse-only mixed | `ProfilingVerbosity`、`ExportProfilePath`、`SaveProfilePath` | layer runtime timing 需要真实 enqueue 与 profile log | 先补 profile artifact schema，再做 real model smoke | 否 |
 | 13 | wait / idle benchmark controls | `--sleepTime`、`--idleTime` | parse-report-only | `TrtexecLikeRuntimeOptions`、`RuntimeOptions`、`OptionImplementationStatus.ParseOnlyOptions` | 等待/空闲调度只被记录，尚未证明官方 benchmark scheduler 语义和性能影响 | 收集真实 benchmark stdout/stderr、host metadata、timing artifact hash 后再评估 | 否 |
@@ -65,7 +65,7 @@ dotnet run --project .\applications\TensorRtExec -- --ui
 - `capability-probe-only`：只读探测 runtime/builder/API 可见性和高级参数 intent，不声明模型构建行为、enqueue、输出校验或发布包消费已完成。
 - `planned`：文档化下一步，不作为当前能力。
 
-这些状态是故意保守的。它们防止把 `--batch`、`--minTiming`、`--avgTiming`、`--infStreams`、`--sleepTime`、`--idleTime`、`--precisionConstraints`、`--layerPrecisions`、`--layerOutputTypes`、`--versionCompatible`、`--excludeLeanRuntime`、`--stripWeights`、`--refit`、`--weightStreamingBudget`、`--safe`、`--consistency`、`--builderCache`、`--noBuilderCache`、`--exportTimingCache` 写成已经完成的 native runtime 行为。
+这些状态是故意保守的。它们防止把 `--batch`、`--minTiming`、`--avgTiming`、`--infStreams`、`--sleepTime`、`--idleTime`、`--precisionConstraints`、`--layerPrecisions`、`--layerOutputTypes`、`--versionCompatible`、`--excludeLeanRuntime`、`--stripWeights`、`--refit`、`--weightStreamingBudget`、`--safe`、`--consistency`、`--builderCache`、`--noBuilderCache` 写成已经完成的 native runtime 行为；timing-cache lifecycle 也只代表构建缓存证据，不代表 runtime proof。
 
 ## 与 OnnxToEngine 的关系
 

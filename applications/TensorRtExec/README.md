@@ -59,7 +59,7 @@ dotnet run --project .\applications\TensorRtExec -- `
 | 保存 engine | `--saveEngine` | `--save-engine`、`--engine`、`--plan`、`--engineFile` | 写出 serialized engine 或 dry-run 预检；当同时存在 ONNX/build-only 意图时，engine 文件别名归一化为 `--saveEngine` |
 | 加载 engine | `--loadEngine` | `--load-engine`、无 ONNX/build-only 时的 `--engine` / `--plan` / `--engineFile` | load-engine readonly diagnostics；在 one-float-input / float-output / concrete-shape 条件满足时执行 bounded enqueue/readback；report 输出 `PreflightMetadata`、`LoadedEngineDiagnostics`、文件长度、SHA256、engine/tensor metadata、ReadbackFingerprint、ReadbackSha256 和 proof 边界 |
 | Shape alias / batch | `--minShapes --optShapes --maxShapes --batch` | `--shapes`、`--inputShapes` | `--shapes` / `--inputShapes` 会复制到 min/opt/max profile；`--batch` 只进入 normalized command 与报告，不替代 explicit shape profile proof |
-| Timing cache | `--timingCacheFile` | `--timingCache` | 记录诊断；当前不导入/导出 cache 生命周期 |
+| Timing cache | `--timingCacheFile` | `--timingCache` | 成功构建时通过 `TensorRtTimingCache` 导入 caller 文件，并在报告中记录输入大小/SHA256 |
 | Profiling verbosity | `--profilingVerbosity detailed` | `--verbose` | 归一化为 `none` / `layer_names_only` / `detailed` |
 | Plugin libraries | `--plugins` | `--plugin`、`--dynamicPlugins`、`--setPluginsToSerialize` | 路径会去重并归一化到共享 command；不执行 load/register/deregister，也不证明 plugin 运行 |
 | Workspace | `--workspace 512MiB` | 无后缀默认 MiB；支持 `GiB/GB`、`MiB/MB`、`KiB/KB`、`B` | active builder workspace limit |
@@ -72,7 +72,7 @@ dotnet run --project .\applications\TensorRtExec -- `
 | Output artifacts | `--loadInputs --dumpOutput --dumpRawBindingsToFile --exportOutput --exportTimes --exportProfile --saveProfile` | 无 | build-only 只写边界占位；synthetic runtime 可写最小输出证据 |
 | Diagnostic reports | `--dumpLayerInfo --exportLayerInfo --dumpProfile --separateProfileRun` | 无 | CLI、WinForms 和 normalized command 已贯通；仍是 diagnostics/report evidence，不是 runtime proof |
 | Build report export | `--exportReport` | `--report` | JSON/Markdown report 输出；别名会归一化回 `--exportReport`，报告仍是 build/report evidence，不是 runtime proof |
-| Timing cache export | `--exportTimingCache` | 无 | parse/report-only；timing cache 生命周期仍未在本应用阶段提升 |
+| Timing cache export | `--exportTimingCache` | 无 | 成功构建后序列化并写出 cache，报告记录输出大小/SHA256；仍不是 runtime proof |
 
 WinForms 入口现在也暴露上述 runtime timing、advanced timing、precision policy、packaging/refit、safety/consistency、builder cache、weight budget、timing cache export、layer/profile diagnostics 和 output 字段，GUI 与 CLI 都通过 `TensorRtExecOptions` 生成同一条归一化参数线，避免界面入口与命令行入口出现不同语义。`--dumpLayerInfo`、`--dumpProfile` 和 `--separateProfileRun` 已经进入 CLI/GUI 共享参数模型，但仍只代表报告/诊断 intent；没有真实 enqueue、输入资产、输出校验、日志 hash 和 owner review 时，不能晋级为 runtime proof。
 
@@ -96,7 +96,7 @@ Precision/debug parse-report-only boundary：`--fp8`、`--best`、`--dumpRefit`�
 | Refit / weight streaming | `--refit`、`--weightStreamingBudget` | parse-only | 真实 refit 和 weight streaming 仍由底层 API smoke 与模型证据单独证明 |
 | Safety / consistency | `--safe`、`--consistency` | parse-only | 记录安全 runtime / consistency check 意图，不声明安全 runtime 已真实覆盖 |
 | Builder cache policy | `--builderCache`、`--noBuilderCache` | parse-only | 两者互斥；当前只记录 builder cache 策略意图，不声明 cache lifecycle 已提升 |
-| Timing cache lifecycle | `--timingCacheFile`、`--exportTimingCache` | parse/report-only | 当前记录路径和诊断，不声明导入/导出 cache 生命周期已完成 |
+| Timing cache lifecycle | `--timingCacheFile`、`--exportTimingCache` | applied-build-cache-lifecycle | 成功构建时导入/导出并记录 `TimingCacheArtifact` 的大小与 SHA256；cache 证据不等于 runtime 或 package-consumer proof |
 
 启动桌面界面：
 
@@ -141,7 +141,7 @@ Raw bindings 只有在 embedded identity synthetic runtime 已真实执行、输
 
 `--loadEngine` 现在分两层执行。第一层是 readonly diagnostics/report：报告会记录 engine path、文件是否存在、length bytes、SHA256、preflight state、proof classification 和 evidence boundary；在 TensorRT runtime 可用时，会反序列化 engine 并复制 engine name、I/O tensor、layer count、profile count、device memory、aux stream、capability、profiling verbosity、inspector 文本长度、ReadbackFingerprint 和 ReadbackSha256 等只读 metadata。第二层是 bounded runtime：当 engine 只有一个 float input、float outputs，且 runtime shape 可由 engine/profile 或 `--optShapes` 推断时，工具会创建 execution context、绑定输入输出、enqueue 并导出 output/timing summary。只有 identity output 与输入完全匹配时才保持 `synthetic-input-runtime`；否则输出会写成 `runtime-output-captured-unverified`，不能晋级为 `real-model-runtime` 或 `package-consumer-runtime`。
 
-`OptionImplementationStatus` 会把参数拆成 `ParsedOptions`、`AppliedOptions` 和 `ParseOnlyOptions`。这不是另一套完成度口径，而是防越级证据边界：`--builderOptimizationLevel`、workspace、shape profile 等可在 build/report 服务中标为 applied；`--batch`、`--minTiming`、`--avgTiming`、`--infStreams`、`--sleepTime`、`--idleTime`、`--precisionConstraints`、`--layerPrecisions`、`--layerOutputTypes`、`--fp8`、`--best`、`--dumpRefit`、`--allowWeightStreaming`、`--markDebug`、`--dumpDebugTensors`、`--versionCompatible`、`--excludeLeanRuntime`、`--stripWeights`、`--refit`、`--weightStreamingBudget`、`--safe`、`--consistency`、`--builderCache`、`--noBuilderCache`、`--exportTimingCache` 和 `capability-probe-only` 只能保持 parse-only / probe-only，直到 native TensorRT 行为和模型级 smoke 同时证明其真实效果。
+`OptionImplementationStatus` 会把参数拆成 `ParsedOptions`、`AppliedOptions` 和 `ParseOnlyOptions`。这不是另一套完成度口径，而是防越级证据边界：`--builderOptimizationLevel`、workspace、shape profile 和成功构建时的 timing-cache import/export 可在 build/report 服务中标为 applied；`--batch`、`--minTiming`、`--avgTiming`、`--infStreams`、`--sleepTime`、`--idleTime`、`--precisionConstraints`、`--layerPrecisions`、`--layerOutputTypes`、`--fp8`、`--best`、`--dumpRefit`、`--allowWeightStreaming`、`--markDebug`、`--dumpDebugTensors`、`--versionCompatible`、`--excludeLeanRuntime`、`--stripWeights`、`--refit`、`--weightStreamingBudget`、`--safe`、`--consistency`、`--builderCache`、`--noBuilderCache` 和 `capability-probe-only` 只能保持 parse-only / probe-only，直到 native TensorRT 行为和模型级 smoke 同时证明其真实效果。Timing-cache artifact 仍只是 build-cache lifecycle evidence，不是 runtime proof。
 
 `GUI/CLI field map` 由 `eng/Export-TensorRtExecGuiCliParityChecklist.ps1` 和 `eng/Test-TensorRtExecGuiCliParityChecklist.ps1` 维护。它记录 CLI token、WinForms 字段、command preview、状态和下一步，但只是 surface parity 证据；GUI 截图、dry-run、build report、timing cache 路径、INT8 calibration cache 路径和 command preview 都不是 runtime proof，也不是 package-consumer-runtime proof。
 

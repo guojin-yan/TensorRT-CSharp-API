@@ -93,13 +93,13 @@
     {
       "id": "timing-cache",
       "officialTrtexecParity": "--timingCacheFile --exportTimingCache",
-      "currentStatus": "parse-report-only-gui-cli",
+      "currentStatus": "implemented-build-cache-lifecycle",
       "isRuntimeProof": false,
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": true,
       "winFormsSupported": true,
       "nextImplementationPaths": ["applications/TensorRtExec", "native/src/tensorrt"],
-      "nextStep": "GUI and CLI now share timing-cache import/export fields; do not promote timing cache lifecycle until ownership and import/export smoke are available."
+      "nextStep": "Use TimingCacheArtifact input/output size and SHA256 in owner build evidence; keep cache lifecycle evidence separate from runtime and package-consumer proof."
     },
     {
       "id": "plugin-library-boundary",

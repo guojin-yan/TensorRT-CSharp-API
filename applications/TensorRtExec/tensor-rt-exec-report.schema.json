@@ -26,6 +26,7 @@
     "RuntimeOptions",
     "PreflightMetadata",
     "LoadedEngineDiagnostics",
+    "TimingCacheArtifact",
     "CapabilityProbe",
     "WorkspaceBytes",
     "OptionImplementationStatus",
@@ -133,6 +134,38 @@
         "ReadbackSha256",
         "EvidenceBoundary"
       ]
+    },
+    "TimingCacheArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "InputRequested",
+        "InputApplied",
+        "InputPath",
+        "InputLengthBytes",
+        "InputSha256",
+        "OutputRequested",
+        "OutputWritten",
+        "OutputPath",
+        "OutputLengthBytes",
+        "OutputSha256",
+        "State",
+        "EvidenceBoundary"
+      ],
+      "properties": {
+        "InputRequested": { "type": "boolean" },
+        "InputApplied": { "type": "boolean" },
+        "InputPath": { "type": "string" },
+        "InputLengthBytes": { "type": "integer", "minimum": 0 },
+        "InputSha256": { "type": "string" },
+        "OutputRequested": { "type": "boolean" },
+        "OutputWritten": { "type": "boolean" },
+        "OutputPath": { "type": "string" },
+        "OutputLengthBytes": { "type": "integer", "minimum": 0 },
+        "OutputSha256": { "type": "string" },
+        "State": { "type": "string" },
+        "EvidenceBoundary": { "type": "string", "minLength": 1 }
+      }
     },
     "CapabilityProbe": {
       "type": "object",

@@ -18,7 +18,7 @@
 | fp16 | 已解析并在可用时应用 | 增加更多 precision 诊断 |
 | int8/calib | report/diagnostic 边界 | owner-provided calibration 真实路径 |
 | workspace/memory | 已支持部分 builder config | 对齐 memPoolSize/MemoryPoolType |
-| timing cache | 路径和 report 边界 | 导入/导出真实 timing cache lifecycle |
+| timing cache | 路径、导入/导出和 report 边界 | 在兼容主机补真实构建日志、owner review 和模型级输出校验 |
 | plugin library | 当前谨慎处理 | 等待 load/register/deregister ownership 设计 |
 | dumpLayerInfo/exportLayerInfo | report 边界 | 与 TensorRT inspector readback 更深集成 |
 | exportTimes/exportProfile/exportOutput | artifact proof-boundary 字段 | 真实 runtime 输出需 sample runner 证明 |

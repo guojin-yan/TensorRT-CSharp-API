@@ -15,6 +15,7 @@ public sealed class OnnxEngineBuildOptions
         bool bf16,
         bool tf32,
         ulong workspaceBytes,
+        string timingCacheFile,
         bool buildOnly,
         bool skipInference,
         bool dryRun,
@@ -37,6 +38,7 @@ public sealed class OnnxEngineBuildOptions
         Bf16 = bf16;
         Tf32 = tf32;
         WorkspaceBytes = workspaceBytes;
+        TimingCacheFile = timingCacheFile ?? string.Empty;
         BuildOnly = buildOnly;
         SkipInference = skipInference;
         DryRun = dryRun;
@@ -68,6 +70,8 @@ public sealed class OnnxEngineBuildOptions
     public bool Tf32 { get; }
 
     public ulong WorkspaceBytes { get; }
+
+    public string TimingCacheFile { get; }
 
     public bool BuildOnly { get; }
 
@@ -116,6 +120,7 @@ public sealed class OnnxEngineBuildOptions
             options.Bf16,
             options.Tf32,
             options.WorkspaceBytes,
+            options.TimingCacheFile,
             options.BuildOnly,
             options.SkipInference,
             options.DryRun,
@@ -143,7 +148,7 @@ public sealed class OnnxEngineBuildOptions
 
         if (!string.IsNullOrWhiteSpace(options.TimingCacheFile))
         {
-            diagnostics.Add("Timing cache argument is recorded for diagnostics; timing cache import/export is not implemented by this application stage.");
+            diagnostics.Add("Timing cache input is imported into the typed TensorRT builder-config timing-cache owner during a real build.");
             diagnostics.Add("TimingCacheFile=" + options.TimingCacheFile);
         }
 
@@ -182,7 +187,6 @@ public sealed class OnnxEngineBuildOptions
             options.DeploymentOptions.StripWeights ||
             options.DeploymentOptions.Refit ||
             options.DeploymentOptions.WeightStreamingBudgetBytes.HasValue ||
-            !string.IsNullOrWhiteSpace(options.DeploymentOptions.ExportTimingCachePath) ||
             options.DeploymentOptions.Safe ||
             options.DeploymentOptions.Consistency ||
             options.DeploymentOptions.BuilderCache ||

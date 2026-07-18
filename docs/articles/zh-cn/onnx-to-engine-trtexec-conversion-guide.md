@@ -107,7 +107,7 @@ dotnet run --project .\applications\TensorRtExec -- `
 | Builder optimization | `--builderOptimizationLevel <0..5>` | 应用到 builder config |
 | Aux streams | `--maxAuxStreams <n>` | 应用到 builder config |
 | Dynamic shapes | `--minShapes --optShapes --maxShapes` | optimization profile |
-| Timing cache | `--timingCacheFile` / `--timingCache` | 当前记录诊断，不导入/导出 cache |
+| Timing cache | `--timingCacheFile` / `--timingCache` | 成功构建时导入 cache；配合 `--exportTimingCache` 写出并记录大小/SHA256 |
 | Plugin | `--plugins` / `--plugin` / `--dynamicPlugins` / `--setPluginsToSerialize` | 当前记录诊断，支持重复参数和逗号/分号列表，不加载 plugin library |
 | DLA | `--useDLACore --allowGPUFallback` | 当前记录诊断，不做 layer device placement |
 | Tactic sources | `--tacticSources` | 当前记录诊断 |
@@ -217,7 +217,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-SampleRunEvidenceRecord
 
 ## Plugin 和 Timing Cache 的当前边界
 
-`--plugins`、`--plugin`、`--dynamicPlugins`、`--setPluginsToSerialize` 与 `--timingCacheFile` 已经被 parser 和 application 接受，并写入 diagnostics。plugin 参数可以重复出现，也可以使用逗号或分号列表；parser 会归一化成 `Plugins`。当前阶段不会加载 plugin library，也不会导入/导出 timing cache。原因是 plugin register/load/deregister、serialized plugin ownership 和 cache 生命周期都需要更清晰的 ABI 与 ownership 设计。
+`--plugins`、`--plugin`、`--dynamicPlugins`、`--setPluginsToSerialize` 与 `--timingCacheFile` 已经被 parser 和 application 接受，并写入 diagnostics。plugin 参数可以重复出现，也可以使用逗号或分号列表；parser 会归一化成 `Plugins`。当前阶段不会加载 plugin library；成功 TensorRT build 会通过 typed `TensorRtTimingCache` owner 导入/导出 timing cache，并记录 build-cache lifecycle metadata。plugin register/load/deregister、serialized plugin ownership 和 runtime proof 仍需要单独的 ABI、ownership 与模型级 smoke 证据。
 
 如果模型依赖自定义 plugin，推荐先记录：
 

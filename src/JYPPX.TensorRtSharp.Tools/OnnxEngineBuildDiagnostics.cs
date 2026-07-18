@@ -58,6 +58,7 @@ public static class OnnxEngineBuildDiagnostics
             result.RuntimeOptions,
             result.PreflightMetadata,
             result.LoadedEngineDiagnostics,
+            result.TimingCacheArtifact,
             result.CapabilityProbe,
             result.WorkspaceBytes,
             OptionImplementationStatus = CreateOptionImplementationStatus(result),
@@ -124,6 +125,18 @@ public static class OnnxEngineBuildDiagnostics
             $"Loaded engine readback SHA256: `{result.LoadedEngineDiagnostics.ReadbackSha256}`",
             $"Loaded engine evidence boundary: `{result.LoadedEngineDiagnostics.EvidenceBoundary}`",
             $"Loaded engine IO tensors: `{string.Join("; ", result.LoadedEngineDiagnostics.IOTensorSummaries)}`",
+            $"Timing cache state: `{result.TimingCacheArtifact.State}`",
+            $"Timing cache input requested: `{result.TimingCacheArtifact.InputRequested}`",
+            $"Timing cache input applied: `{result.TimingCacheArtifact.InputApplied}`",
+            $"Timing cache input path: `{result.TimingCacheArtifact.InputPath}`",
+            $"Timing cache input length bytes: `{result.TimingCacheArtifact.InputLengthBytes}`",
+            $"Timing cache input SHA256: `{result.TimingCacheArtifact.InputSha256}`",
+            $"Timing cache output requested: `{result.TimingCacheArtifact.OutputRequested}`",
+            $"Timing cache output written: `{result.TimingCacheArtifact.OutputWritten}`",
+            $"Timing cache output path: `{result.TimingCacheArtifact.OutputPath}`",
+            $"Timing cache output length bytes: `{result.TimingCacheArtifact.OutputLengthBytes}`",
+            $"Timing cache output SHA256: `{result.TimingCacheArtifact.OutputSha256}`",
+            $"Timing cache evidence boundary: `{result.TimingCacheArtifact.EvidenceBoundary}`",
             $"Capability probe attempted: `{result.CapabilityProbe.Attempted}`",
             $"Capability probe state: `{result.CapabilityProbe.ProbeState}`",
             $"Capability probe TensorRT line: `{(int)result.CapabilityProbe.TensorRtLine}`",
@@ -288,6 +301,7 @@ public static class OnnxEngineBuildDiagnostics
         AddIf(options, "--loadEngine", result.State.Contains("load-engine", StringComparison.OrdinalIgnoreCase));
         AddIf(options, "--profilingVerbosity", result.NormalizedCommandLine.Contains("--profilingVerbosity", StringComparison.Ordinal));
         AddIf(options, "--dumpLayerInfo", result.NormalizedCommandLine.Contains("--dumpLayerInfo", StringComparison.Ordinal));
+        AddIf(options, "--timingCacheFile", result.TimingCacheArtifact.InputRequested);
         AddIf(options, "--builderOptimizationLevel", true);
         AddIf(options, "--maxAuxStreams", deploymentOptions.MaxAuxStreams.HasValue);
         AddIf(options, "--device", deploymentOptions.DeviceOrdinal.HasValue);
@@ -359,6 +373,8 @@ public static class OnnxEngineBuildDiagnostics
         AddIf(options, "--fp16/--bf16/--noTF32", result.Parsed || result.EngineSaved || result.InferenceRan);
         AddIf(options, "--minShapes/--optShapes/--maxShapes", result.Parsed || result.EngineSaved || result.InferenceRan);
         AddIf(options, "--saveEngine", result.EngineSaved);
+        AddIf(options, "--timingCacheFile", result.TimingCacheArtifact.InputApplied);
+        AddIf(options, "--exportTimingCache", result.TimingCacheArtifact.OutputWritten);
         AddIf(options, "--exportTimes", !string.IsNullOrWhiteSpace(runtimeOptions.ExportTimesPath));
         AddIf(options, "--exportProfile", !string.IsNullOrWhiteSpace(runtimeOptions.ExportProfilePath));
         AddIf(options, "--exportOutput", !string.IsNullOrWhiteSpace(runtimeOptions.ExportOutputPath) && result.InferenceRan);
@@ -400,7 +416,8 @@ public static class OnnxEngineBuildDiagnostics
         AddIf(options, "--stripWeights", deploymentOptions.StripWeights);
         AddIf(options, "--refit", deploymentOptions.Refit);
         AddIf(options, "--weightStreamingBudget", deploymentOptions.WeightStreamingBudgetBytes.HasValue);
-        AddIf(options, "--exportTimingCache", !string.IsNullOrWhiteSpace(deploymentOptions.ExportTimingCachePath));
+        AddIf(options, "--timingCacheFile", result.TimingCacheArtifact.InputRequested && !result.TimingCacheArtifact.InputApplied);
+        AddIf(options, "--exportTimingCache", !string.IsNullOrWhiteSpace(deploymentOptions.ExportTimingCachePath) && !result.TimingCacheArtifact.OutputWritten);
         AddIf(options, "--safe", deploymentOptions.Safe);
         AddIf(options, "--consistency", deploymentOptions.Consistency);
         AddIf(options, "--builderCache", deploymentOptions.BuilderCache);
