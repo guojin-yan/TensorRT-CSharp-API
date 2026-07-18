@@ -1449,6 +1449,9 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
     internal static extern BridgeStatusCode jyppx_trt10_global_has_logger(out int out_has_logger);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt10_global_init_lib_nvinfer_plugins(SafeTensorRtObjectHandle logger, IntPtr lib_namespace, out int out_initialized);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt10_global_init_lib_nvinfer_plugins_deferred();
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -2185,6 +2188,9 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt10_onnx_parser_parse_from_memory(SafeTensorRtObjectHandle parser, IntPtr model_data, UIntPtr model_size, IntPtr model_path, out int out_parsed);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt10_onnx_parser_parse_with_weight_descriptors(SafeTensorRtObjectHandle parser, IntPtr model_data, UIntPtr model_size, out int out_parsed);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt10_onnx_parser_set_flag(SafeTensorRtObjectHandle parser, int flag);
@@ -5131,6 +5137,9 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt11_global_has_logger(out int out_has_logger);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt11_global_init_lib_nvinfer_plugins(SafeTensorRtObjectHandle logger, IntPtr lib_namespace, out int out_initialized);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt11_global_init_lib_nvinfer_plugins_deferred();
@@ -8334,6 +8343,9 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
     internal static extern BridgeStatusCode jyppx_trt8_global_has_logger(out int out_has_logger);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt8_global_init_lib_nvinfer_plugins(SafeTensorRtObjectHandle logger, IntPtr lib_namespace, out int out_initialized);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt8_global_init_lib_nvinfer_plugins_deferred();
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -8992,6 +9004,9 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt8_onnx_parser_parse_from_memory(SafeTensorRtObjectHandle parser, IntPtr model_data, UIntPtr model_size, IntPtr model_path, out int out_parsed);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt8_onnx_parser_parse_with_weight_descriptors(SafeTensorRtObjectHandle parser, IntPtr model_data, UIntPtr model_size, out int out_parsed);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt8_onnx_parser_set_flag(SafeTensorRtObjectHandle parser, int flag);

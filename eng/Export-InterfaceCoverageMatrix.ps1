@@ -392,7 +392,7 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
     "Global::createNvOnnxParser_INTERNAL" = @("id:*onnx-parser-create")
     "Global::createNvOnnxParserRefitter_INTERNAL" = @("id:*parser-refitter-create", "id:*parser-refitter-create-deferred")
     "Global::createONNXConfig" = @("id:*onnx-config-create")
-    "Global::initLibNvInferPlugins" = @("id:*global-init-lib-nvinfer-plugins-deferred")
+    "Global::initLibNvInferPlugins" = @("id:*global-init-lib-nvinfer-plugins", "id:*global-init-lib-nvinfer-plugins-deferred")
     "Global::setInternalLibraryPath" = @("id:*global-set-internal-library-path-deferred")
     "Global::getBuilderPluginRegistry" = @("id:*builder-capability-plugin-registry-exists")
     "Global::getPluginRegistry" = @("id:*global-plugin-registry-exists")
@@ -448,6 +448,7 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
     "IParser::getLayerOutputTensor" = @("id:*onnx-parser-layer-output-tensor-exists", "id:*parser-get-layer-output-tensor-deferred")
     "IParser::getSubgraphNodes" = @("id:*onnx-parser-get-subgraph-node-count", "id:*onnx-parser-get-subgraph-node")
     "IParser::getUsedVCPluginLibraries" = @("id:*onnx-parser-get-used-vc-plugin-library-count", "id:*onnx-parser-get-used-vc-plugin-library")
+    "IParser::parseWithWeightDescriptors" = @("id:*onnx-parser-parse-with-weight-descriptors", "id:*parser-parse-with-weight-descriptors-deferred")
     "IParserRefitter::getNbErrors" = @("id:*parser-refitter-get-error-count")
     "IExecutionContext::getOutputAllocator" = @("id:*execution-context-has-output-allocator", "id:*execution-context-clear-output-allocator")
     "IExecutionContext::setOutputAllocator" = @("id:*execution-context-has-output-allocator", "id:*execution-context-clear-output-allocator")
@@ -615,6 +616,7 @@ function Find-MatchedManifestApis {
 
   if ($interfaceKey -in @(
     "Global::createONNXConfig",
+    "Global::initLibNvInferPlugins",
     "Global::getBuilderPluginRegistry",
     "Global::getPluginRegistry",
     "IBuilder::buildEngineWithConfig",
@@ -678,6 +680,7 @@ function Find-MatchedManifestApis {
     "IParser::getLayerOutputTensor",
     "IParser::getSubgraphNodes",
     "IParser::getUsedVCPluginLibraries",
+    "IParser::parseWithWeightDescriptors",
     "IParserRefitter::getNbErrors",
     "IExecutionContext::getOutputAllocator",
     "IExecutionContext::setOutputAllocator",

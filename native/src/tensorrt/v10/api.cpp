@@ -17,6 +17,7 @@
 
 #if JYPPX_HAS_TENSORRT
 #include <NvInfer.h>
+#include <NvInferPlugin.h>
 #include <NvInferRuntime.h>
 #endif
 
@@ -10663,6 +10664,16 @@ JYPPX_StatusCode jyppx_trt10_resize_layer_set_resize_mode(JYPPX_TensorRtLayer* l
 #include "modules/deployment/host_memory_metadata.inc"
 #include "modules/deployment/engine_profile_tensor_values.inc"
 #include "modules/context/deployment_context.inc"
+#define JYPPX_TRT_SAFE_PLUGIN_PREFIX jyppx_trt10_
+#define JYPPX_TRT_SAFE_PLUGIN_EXPECTED_MAJOR 10
+#include "../common/safe_deferred_plugin_initialization.inc"
+#undef JYPPX_TRT_SAFE_PLUGIN_EXPECTED_MAJOR
+#undef JYPPX_TRT_SAFE_PLUGIN_PREFIX
+#define JYPPX_TRT_SAFE_ONNX_PREFIX jyppx_trt10_
+#define JYPPX_TRT_SAFE_ONNX_EXPECTED_MAJOR 10
+#include "../common/safe_deferred_onnx_parse.inc"
+#undef JYPPX_TRT_SAFE_ONNX_EXPECTED_MAJOR
+#undef JYPPX_TRT_SAFE_ONNX_PREFIX
 
 #define JYPPX_TRT_EXECUTION_CONTEXT_SET_AUX_STREAMS_API jyppx_trt10_execution_context_set_aux_streams
 #define JYPPX_TRT_EXECUTION_CONTEXT_CLEAR_AUX_STREAMS_API jyppx_trt10_execution_context_clear_aux_streams

@@ -17,6 +17,53 @@ namespace JYPPX.TensorRtSharp;
 public static class TensorRtEnvironmentProbe
 {
     /// <summary>
+    /// Initializes and registers TensorRT built-in plugins for the logger's API line.
+    /// 使用 logger 所属版本线初始化并注册 TensorRT 内置 plugin。
+    /// </summary>
+    /// <param name="logger">The logger used synchronously by vendor plugin initialization. vendor 初始化期间同步使用的 logger。</param>
+    /// <param name="libNamespace">Optional namespace for the built-in plugin registrations. 内置 plugin 注册使用的可选 namespace。</param>
+    /// <returns><see langword="true"/> when the vendor reports successful initialization. vendor 报告初始化成功时返回 <see langword="true"/>。</returns>
+    /// <remarks>
+    /// This is an explicit process-global registration operation. It does not create, return, or own plugin objects,
+    /// and the logger is borrowed only for the synchronous vendor call.
+    /// 这是显式的进程级注册操作；不会创建、返回或接管 plugin 对象，logger 只在同步 vendor 调用期间被借用。
+    /// </remarks>
+    public static bool InitializeBuiltInPlugins(TensorRtLogger logger, string? libNamespace = null)
+    {
+        if (logger == null)
+        {
+            throw new ArgumentNullException(nameof(logger));
+        }
+
+        NativeBridgeLoader.EnsureInitialized();
+        return NativeBridgeApi.InitializeLibNvInferPlugins(logger.Line, logger.Handle, libNamespace);
+    }
+
+    /// <summary>
+    /// Tries to initialize TensorRT built-in plugins and returns a bounded diagnostic.
+    /// 尝试初始化 TensorRT 内置 plugin，并返回受控诊断。
+    /// </summary>
+    public static bool TryInitializeBuiltInPlugins(
+        TensorRtLogger logger,
+        string? libNamespace,
+        out bool initialized,
+        out string diagnostic)
+    {
+        try
+        {
+            initialized = InitializeBuiltInPlugins(logger, libNamespace);
+            diagnostic = initialized ? "OK" : "TensorRT vendor reported plugin initialization failure.";
+            return initialized;
+        }
+        catch (Exception exception) when (IsProbeException(exception))
+        {
+            initialized = false;
+            diagnostic = FormatProbeException("TensorRT built-in plugin initialization", exception);
+            return false;
+        }
+    }
+
+    /// <summary>
     /// Gets the current high-level bridge environment snapshot.
     /// 获取当前高层 bridge 环境快照。
     /// </summary>

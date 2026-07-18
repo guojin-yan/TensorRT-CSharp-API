@@ -89,6 +89,7 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_plugin_v3_layer_get_runtime_serializat
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_query_adapter_info(JYPPX_TensorRtAdapterInfo* out_info);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_logger_create(JYPPX_TensorRtLogger** out_logger);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_logger_create_with_callback(JYPPX_TensorRtLoggerCallback callback, void* user_state, int32_t minimum_severity, JYPPX_TensorRtLogger** out_logger);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_global_init_lib_nvinfer_plugins(JYPPX_TensorRtLogger* logger, const char* lib_namespace, JYPPX_Boolean* out_initialized);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_logger_emit_diagnostic(JYPPX_TensorRtLogger* logger, int32_t severity, const char* message, JYPPX_Boolean* out_callback_failed);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_progress_monitor_create_with_callback(JYPPX_TensorRtProgressMonitorCallback callback, void* user_state, JYPPX_TensorRtProgressMonitor** out_monitor);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_progress_monitor_emit_diagnostic(JYPPX_TensorRtProgressMonitor* monitor, int32_t event_kind, const char* phase_name, const char* parent_phase, int32_t step, int32_t nb_steps, JYPPX_Boolean* out_should_continue, JYPPX_Boolean* out_callback_failed);
@@ -581,6 +582,7 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_iterator_layer_get_reverse(JYPPX_Tenso
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_onnx_parser_create(JYPPX_TensorRtLogger* logger, JYPPX_TensorRtNetworkDefinition* network, JYPPX_TensorRtOnnxParser** out_parser);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_onnx_parser_parse_from_file(JYPPX_TensorRtOnnxParser* parser, const char* file_path, int32_t verbosity, JYPPX_Boolean* out_parsed);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_onnx_parser_parse_from_memory(JYPPX_TensorRtOnnxParser* parser, const void* model_data, size_t model_size, const char* model_path, JYPPX_Boolean* out_parsed);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_onnx_parser_parse_with_weight_descriptors(JYPPX_TensorRtOnnxParser* parser, const void* model_data, size_t model_size, JYPPX_Boolean* out_parsed);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_onnx_parser_get_error_count(JYPPX_TensorRtOnnxParser* parser, int32_t* out_count);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_onnx_parser_get_error(JYPPX_TensorRtOnnxParser* parser, int32_t index, JYPPX_TensorRtParserErrorInfo* out_error);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_onnx_parser_error_get_code(JYPPX_TensorRtOnnxParser* parser, int32_t index, int32_t* out_code);

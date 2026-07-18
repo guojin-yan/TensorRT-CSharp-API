@@ -236,9 +236,11 @@ function(jyppx_configure_local_tensorrt_fallback)
 
   set(_jyppx_nvinfer_names nvinfer)
   set(_jyppx_nvonnxparser_names nvonnxparser)
+  set(_jyppx_nvinfer_plugin_names nvinfer_plugin)
   if(WIN32 AND DEFINED JYPPX_TENSORRT_LINE AND NOT JYPPX_TENSORRT_LINE STREQUAL "8")
     list(INSERT _jyppx_nvinfer_names 0 "nvinfer_${JYPPX_TENSORRT_LINE}")
     list(INSERT _jyppx_nvonnxparser_names 0 "nvonnxparser_${JYPPX_TENSORRT_LINE}")
+    list(INSERT _jyppx_nvinfer_plugin_names 0 "nvinfer_plugin_${JYPPX_TENSORRT_LINE}")
   endif()
 
   find_library(TensorRT_NVINFER_LIBRARY
@@ -257,6 +259,19 @@ function(jyppx_configure_local_tensorrt_fallback)
     IMPORTED_LOCATION "${TensorRT_NVINFER_LIBRARY}"
     INTERFACE_INCLUDE_DIRECTORIES "${_jyppx_tensorrt_include}"
   )
+
+  find_library(TensorRT_NVINFER_PLUGIN_LIBRARY
+    NAMES ${_jyppx_nvinfer_plugin_names}
+    HINTS ${_jyppx_tensorrt_lib_dirs}
+    NO_DEFAULT_PATH
+  )
+  if(TensorRT_NVINFER_PLUGIN_LIBRARY AND NOT TARGET TensorRT::nvinfer_plugin)
+    add_library(TensorRT::nvinfer_plugin UNKNOWN IMPORTED GLOBAL)
+    set_target_properties(TensorRT::nvinfer_plugin PROPERTIES
+      IMPORTED_LOCATION "${TensorRT_NVINFER_PLUGIN_LIBRARY}"
+      INTERFACE_INCLUDE_DIRECTORIES "${_jyppx_tensorrt_include}"
+    )
+  endif()
 
   find_library(TensorRT_NVONNXPARSER_LIBRARY
     NAMES ${_jyppx_nvonnxparser_names}
@@ -293,6 +308,7 @@ function(jyppx_configure_local_tensorrt_fallback)
   set(TensorRT_FOUND TRUE PARENT_SCOPE)
   set(TensorRT_INCLUDE_DIRS "${_jyppx_tensorrt_include}" PARENT_SCOPE)
   set(TensorRT_NVINFER_LIBRARY "${TensorRT_NVINFER_LIBRARY}" PARENT_SCOPE)
+  set(TensorRT_NVINFER_PLUGIN_LIBRARY "${TensorRT_NVINFER_PLUGIN_LIBRARY}" PARENT_SCOPE)
   set(TensorRT_NVONNXPARSER_LIBRARY "${TensorRT_NVONNXPARSER_LIBRARY}" PARENT_SCOPE)
 endfunction()
 
@@ -424,6 +440,9 @@ endif()
 if(TensorRT_FOUND)
   target_include_directories(jyppxtrtbridge PRIVATE "${TensorRT_INCLUDE_DIRS}")
   target_link_libraries(jyppxtrtbridge PRIVATE TensorRT::nvinfer)
+  if(TARGET TensorRT::nvinfer_plugin)
+    target_link_libraries(jyppxtrtbridge PRIVATE TensorRT::nvinfer_plugin)
+  endif()
   if(JYPPX_HAS_TENSORRT_ONNXPARSER_VALUE AND TensorRT_NVONNXPARSER_LIBRARY AND TARGET TensorRT::nvonnxparser)
     target_link_libraries(jyppxtrtbridge PRIVATE TensorRT::nvonnxparser)
   endif()
@@ -444,16 +463,19 @@ if(WIN32 AND MSVC)
   if(TensorRT_FOUND)
     if(JYPPX_TENSORRT_VERSION_MAJOR_NUM EQUAL 10)
       list(APPEND _jyppx_windows_delay_load_dlls "nvinfer_10.dll")
+      list(APPEND _jyppx_windows_delay_load_dlls "nvinfer_plugin_10.dll")
       if(JYPPX_HAS_TENSORRT_ONNXPARSER_VALUE)
         list(APPEND _jyppx_windows_delay_load_dlls "nvonnxparser_10.dll")
       endif()
     elseif(JYPPX_TENSORRT_VERSION_MAJOR_NUM EQUAL 11)
       list(APPEND _jyppx_windows_delay_load_dlls "nvinfer_11.dll")
+      list(APPEND _jyppx_windows_delay_load_dlls "nvinfer_plugin_11.dll")
       if(JYPPX_HAS_TENSORRT_ONNXPARSER_VALUE)
         list(APPEND _jyppx_windows_delay_load_dlls "nvonnxparser_11.dll")
       endif()
     elseif(JYPPX_TENSORRT_VERSION_MAJOR_NUM EQUAL 8)
       list(APPEND _jyppx_windows_delay_load_dlls "nvinfer.dll")
+      list(APPEND _jyppx_windows_delay_load_dlls "nvinfer_plugin.dll")
       if(JYPPX_HAS_TENSORRT_ONNXPARSER_VALUE)
         list(APPEND _jyppx_windows_delay_load_dlls "nvonnxparser.dll")
       endif()

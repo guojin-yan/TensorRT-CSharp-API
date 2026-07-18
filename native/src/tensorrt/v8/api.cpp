@@ -15,6 +15,7 @@
 
 #if JYPPX_HAS_TENSORRT && JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8
 #include <NvInfer.h>
+#include <NvInferPlugin.h>
 #include <NvInferRuntime.h>
 #endif
 
@@ -9668,6 +9669,16 @@ JYPPX_StatusCode jyppx_trt8_execution_context_get_shape_binding(
 #include "modules/plugin/trt8_plugin_registry_inventory.inc"
 #include "modules/plugin/trt8_global_plugin_registry_inventory.inc"
 #include "modules/plugin/trt8_builder_capability_plugin_registry.inc"
+#define JYPPX_TRT_SAFE_PLUGIN_PREFIX jyppx_trt8_
+#define JYPPX_TRT_SAFE_PLUGIN_EXPECTED_MAJOR 8
+#include "../common/safe_deferred_plugin_initialization.inc"
+#undef JYPPX_TRT_SAFE_PLUGIN_EXPECTED_MAJOR
+#undef JYPPX_TRT_SAFE_PLUGIN_PREFIX
+#define JYPPX_TRT_SAFE_ONNX_PREFIX jyppx_trt8_
+#define JYPPX_TRT_SAFE_ONNX_EXPECTED_MAJOR 8
+#include "../common/safe_deferred_onnx_parse.inc"
+#undef JYPPX_TRT_SAFE_ONNX_EXPECTED_MAJOR
+#undef JYPPX_TRT_SAFE_ONNX_PREFIX
 #include "modules/builder/legacy_scalar_setters.inc"
 #include "modules/builder/safe_plugin_serialization_paths.inc"
 #include "modules/context/legacy_shape_binding_setter.inc"

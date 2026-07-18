@@ -1468,3 +1468,38 @@ artifacts/trtexec-bounded-runtime/identity
 4. 收口 TensorRtExec CLI/WinForms 与 OnnxToEngine 的 trtexec-like 参数、engine load/readback、报告 schema、动态 shape/profile 和 runtime 路径一致性。
 5. 扩展 RNNv2 setter、algorithm selector、calibrator、allocator/output allocator 等剩余 C-tier 时，必须先完成 owner/lifetime/callback 设计门禁，不允许公开裸 pointer。
 6. 后续代码变化只补跑受影响类并刷新 308 类覆盖汇总；compatible-host proof、owner authorization、Linux runner proof 和 post-publish proof 未全部完成前，保持 `canPublishPublicly=false`、`canCloseReleaseIssue=false`，继续禁止自动 publish。
+
+## 2026-07-18 实际 Vendor Symbol Safe-Deferred Uplift
+
+本阶段从 deferred inventory 先完成 vendor 头文件、import library/DLL 和跨版本差异审计，再选择两个内聚模块：built-in plugin 初始化（TRT8/10/11）与 legacy ONNX `parseWithWeightDescriptors`（TRT8/10；TRT11 已移除）。候选审计记录在 `artifacts/interface-coverage/trt8-safe-deferred-candidate-audit.md` 与 `.json`。
+
+### Promotion 结果
+
+- 新增 5 个非 deferred manifest entry；原有 5 个 deferred entry 全部保留，通过 `Global::initLibNvInferPlugins` 和 `IParser::parseWithWeightDescriptors` 显式 alias 归并为 `implemented-with-deferred-history`。
+- native ABI 使用 caller-buffer 字符串和 pinned/caller-buffer 模型字节；plugin 初始化只在同步 vendor 调用期间借用 logger，不创建、返回或接管 plugin 对象。
+- C++ exception 与 Windows SEH 均在 native helper 内转换为 bridge status；TRT8、TRT10、TRT11 translation unit 各自保留独立 version guard。
+- TRT11 不新增已经被 vendor 删除的 parser 方法，继续使用已有 model-proto 生命周期路径。
+- public C# surface 只暴露 `InitializeBuiltInPlugins`、`TryInitializeBuiltInPlugins`、`ParseWithWeightDescriptors` 和 copied diagnostics，不公开裸 `IntPtr`、`nint`、`UIntPtr`、SafeHandle 或 vendor pointer。
+
+### Verification
+
+- binding generator 幂等验证：`184 manifests / 3924 records`。
+- interface coverage：TRT8 `753 implemented / 94 deferred-only`，TRT10 `761 / 118`，TRT11 `814 / 87`。
+- native build：TRT8/CUDA12.1、TRT10/CUDA12.9、TRT11/CUDA13.2 通过；TRT8 parser 因本机缺 `cudnn64_8.dll` 由既有 CMake 条件禁用，但 plugin entry 完成真实 vendor link。
+- ABI declaration/export parity：TRT8、TRT10、TRT11 均 `MissingDeclarations=0 MissingExports=0`。
+- `TrtSafeDeferredUpliftTests`：3/3；TRT10/CUDA12.9 PluginRegistry smoke 真实初始化 built-in plugins；OnnxToEngine smoke 真实完成 legacy weight-descriptor parse、engine round-trip、enqueue 与 output match。
+- bridge-only package consumer 的 `PackageReference` compile surface 新增验证两个公开 wrapper；分类仍为 `compile-surface-proof`，不是 package-consumer runtime proof。
+
+本阶段不改变长期安全边界：callback trampoline、plugin create/register/deregister/load、allocator/resource acquire/release、device/borrowed pointer、RNNv2 setter 和 consistency checker 继续 deferred。未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
+
+### 本阶段收尾复核（2026-07-18）
+
+- Release solution build：成功，0 error；输出保留 5 个既有 nullable warning，未新增本阶段 warning。
+- native rebuild：六套配置全部成功：TRT8/CUDA11.8、TRT8/CUDA12.1、TRT10/CUDA11.8、TRT10/CUDA12.9、TRT11/CUDA12.9、TRT11/CUDA13.2。
+- ABI declaration/export parity：上述六套配置均 `MissingDeclarations=0 MissingExports=0`。
+- package：`JYPPX.TensorRT.CSharp.API 4.0.0` managed pack 成功；TRT8/CUDA12.1、TRT10/CUDA12.9、TRT11/CUDA13.2 三个 bridge-only `PackageReference` consumer 均 restore/build 成功，0 warning / 0 error，分类保持 `compile-surface-proof`。
+- focused ProjectQuality：`TrtSafeDeferredUpliftTests` 与 `BridgePackageConsumerTests` 共 7/7 通过；bindings 重新生成并幂等校验为 `184 manifests / 3924 records`。
+- strict classification：`classification-audit-passed-non-proof-boundaries-intact`，`FindingCount=0`；标准 strict release quality gate：`release-quality-gate-passed`，`RequiredFailureCount=0`。
+- owner convergence：structural `9/9`、accepted `0/9`、gates `2/3`、validation blocker `0`，仍是 owner-action blocked；`canPublishPublicly=false`、`canCloseReleaseIssue=false`。
+- 带 `-RequirePackageInventory` 的额外 gate 仍报告本地 split package inventory 缺少 3 个角色包；这是当前本地资产门禁的独立阻塞，不改变标准 strict gate 结果，也不构成公开发布许可。
+- 本轮未执行 NuGet push、GitHub Packages publish、GitHub Release upload、issue close 或其它公开发布副作用；提交后仅等待新 commit 对应的 GitHub Actions 结果。

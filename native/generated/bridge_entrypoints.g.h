@@ -3334,6 +3334,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt10_global_get_onnx_parser_version(int32_t
 // generated from manifest id=trt10-global-has-logger
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_global_has_logger(JYPPX_Boolean* out_has_logger);
 
+// generated from manifest id=trt10-global-init-lib-nvinfer-plugins
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_global_init_lib_nvinfer_plugins(JYPPX_TensorRtLogger* logger, const char* lib_namespace, JYPPX_Boolean* out_initialized);
+
 // generated from manifest id=trt10-global-init-lib-nvinfer-plugins-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_global_init_lib_nvinfer_plugins_deferred(void);
 
@@ -4071,6 +4074,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt10_onnx_parser_parse_from_file(JYPPX_Tens
 
 // generated from manifest id=trt10-onnx-parser-parse-from-memory
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_onnx_parser_parse_from_memory(JYPPX_TensorRtOnnxParser* parser, const void* model_data, size_t model_size, const char* model_path, JYPPX_Boolean* out_parsed);
+
+// generated from manifest id=trt10-onnx-parser-parse-with-weight-descriptors
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_onnx_parser_parse_with_weight_descriptors(JYPPX_TensorRtOnnxParser* parser, const void* model_data, size_t model_size, JYPPX_Boolean* out_parsed);
 
 // generated from manifest id=trt10-onnx-parser-set-flag
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_onnx_parser_set_flag(JYPPX_TensorRtOnnxParser* parser, int32_t flag);
@@ -7017,6 +7023,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt11_global_get_onnx_parser_version(int32_t
 
 // generated from manifest id=trt11-global-has-logger
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_global_has_logger(JYPPX_Boolean* out_has_logger);
+
+// generated from manifest id=trt11-global-init-lib-nvinfer-plugins
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_global_init_lib_nvinfer_plugins(JYPPX_TensorRtLogger* logger, const char* lib_namespace, JYPPX_Boolean* out_initialized);
 
 // generated from manifest id=trt11-global-init-lib-nvinfer-plugins-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_global_init_lib_nvinfer_plugins_deferred(void);
@@ -10219,6 +10228,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt8_global_get_safe_plugin_registry_deferre
 // generated from manifest id=trt8-global-has-logger
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_global_has_logger(JYPPX_Boolean* out_has_logger);
 
+// generated from manifest id=trt8-global-init-lib-nvinfer-plugins
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_global_init_lib_nvinfer_plugins(JYPPX_TensorRtLogger* logger, const char* lib_namespace, JYPPX_Boolean* out_initialized);
+
 // generated from manifest id=trt8-global-init-lib-nvinfer-plugins-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_global_init_lib_nvinfer_plugins_deferred(void);
 
@@ -10878,6 +10890,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt8_onnx_parser_parse_from_file(JYPPX_Tenso
 
 // generated from manifest id=trt8-onnx-parser-parse-from-memory
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_onnx_parser_parse_from_memory(JYPPX_TensorRtOnnxParser* parser, const void* model_data, size_t model_size, const char* model_path, JYPPX_Boolean* out_parsed);
+
+// generated from manifest id=trt8-onnx-parser-parse-with-weight-descriptors
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_onnx_parser_parse_with_weight_descriptors(JYPPX_TensorRtOnnxParser* parser, const void* model_data, size_t model_size, JYPPX_Boolean* out_parsed);
 
 // generated from manifest id=trt8-onnx-parser-set-flag
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_onnx_parser_set_flag(JYPPX_TensorRtOnnxParser* parser, int32_t flag);

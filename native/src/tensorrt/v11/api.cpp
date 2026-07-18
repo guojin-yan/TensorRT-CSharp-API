@@ -18,6 +18,7 @@
 
 #if JYPPX_HAS_TENSORRT
 #include <NvInfer.h>
+#include <NvInferPlugin.h>
 #include <NvInferRuntime.h>
 #endif
 
@@ -8270,6 +8271,11 @@ JYPPX_StatusCode jyppx_trt11_tensor_reset_dynamic_range(JYPPX_TensorRtTensor*)
 #include "modules/deployment/refitter_logger_presence.inc"
 #include "modules/deployment/onnx_parser_builder_config_attachment.inc"
 #include "modules/deployment/runtime_controls.inc"
+#define JYPPX_TRT_SAFE_PLUGIN_PREFIX jyppx_trt11_
+#define JYPPX_TRT_SAFE_PLUGIN_EXPECTED_MAJOR 11
+#include "../common/safe_deferred_plugin_initialization.inc"
+#undef JYPPX_TRT_SAFE_PLUGIN_EXPECTED_MAJOR
+#undef JYPPX_TRT_SAFE_PLUGIN_PREFIX
 #include "modules/deployment/diagnostics.inc"
 #include "modules/deployment/boundary_controls.inc"
 #define JYPPX_TRT_EXECUTION_CONTEXT_CALLBACK_INTERFACE_INFO_API(name) jyppx_trt11_##name

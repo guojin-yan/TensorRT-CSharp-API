@@ -59,6 +59,16 @@ internal static class Program
 
     private static void RunPluginRegistryInventorySmoke(TensorRtApiLine line)
     {
+        using (TensorRtLogger initializationLogger = new TensorRtLogger(line))
+        {
+            bool initialized = TensorRtEnvironmentProbe.InitializeBuiltInPlugins(initializationLogger, "");
+            Console.WriteLine($"BuiltInPluginInitialization Initialized={initialized} Namespace=<default> SynchronousLoggerBorrow=True");
+            if (!initialized)
+            {
+                throw new InvalidOperationException("TensorRT built-in plugin initialization returned false.");
+            }
+        }
+
         bool includeCreatorFields = line != TensorRtApiLine.TensorRt11;
         Console.WriteLine($"CreatorFieldCollection Included={includeCreatorFields} Reason={(includeCreatorFields ? "FullInventory" : "Trt11InternalCreatorsExposeParserOnlyFieldHooks")}");
 

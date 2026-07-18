@@ -70,6 +70,7 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_plugin_v3_layer_get_runtime_serializat
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_query_adapter_info(JYPPX_TensorRtAdapterInfo* out_info);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_logger_create(JYPPX_TensorRtLogger** out_logger);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_logger_create_with_callback(JYPPX_TensorRtLoggerCallback callback, void* user_state, int32_t minimum_severity, JYPPX_TensorRtLogger** out_logger);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_global_init_lib_nvinfer_plugins(JYPPX_TensorRtLogger* logger, const char* lib_namespace, JYPPX_Boolean* out_initialized);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_logger_emit_diagnostic(JYPPX_TensorRtLogger* logger, int32_t severity, const char* message, JYPPX_Boolean* out_callback_failed);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_logger_get_interface_info(JYPPX_TensorRtLogger* logger, char* output_buffer, size_t output_buffer_size, size_t* out_required_size, int32_t* out_major, int32_t* out_minor);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_logger_get_api_language(JYPPX_TensorRtLogger* logger, int32_t* out_api_language);

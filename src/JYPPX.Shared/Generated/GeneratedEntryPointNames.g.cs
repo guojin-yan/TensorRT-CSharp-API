@@ -1116,6 +1116,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt10GlobalGetInferLibVersion = "jyppx_trt10_global_get_infer_lib_version";
     public const string Trt10GlobalGetOnnxParserVersion = "jyppx_trt10_global_get_onnx_parser_version";
     public const string Trt10GlobalHasLogger = "jyppx_trt10_global_has_logger";
+    public const string Trt10GlobalInitLibNvinferPlugins = "jyppx_trt10_global_init_lib_nvinfer_plugins";
     public const string Trt10GlobalInitLibNvinferPluginsDeferred = "jyppx_trt10_global_init_lib_nvinfer_plugins_deferred";
     public const string Trt10GlobalPluginCreatorGetApiLanguage = "jyppx_trt10_global_plugin_creator_get_api_language";
     public const string Trt10GlobalPluginCreatorGetFieldCount = "jyppx_trt10_global_plugin_creator_get_field_count";
@@ -1362,6 +1363,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt10OnnxParserLayerOutputTensorExists = "jyppx_trt10_onnx_parser_layer_output_tensor_exists";
     public const string Trt10OnnxParserParseFromFile = "jyppx_trt10_onnx_parser_parse_from_file";
     public const string Trt10OnnxParserParseFromMemory = "jyppx_trt10_onnx_parser_parse_from_memory";
+    public const string Trt10OnnxParserParseWithWeightDescriptors = "jyppx_trt10_onnx_parser_parse_with_weight_descriptors";
     public const string Trt10OnnxParserSetFlag = "jyppx_trt10_onnx_parser_set_flag";
     public const string Trt10OnnxParserSetFlags = "jyppx_trt10_onnx_parser_set_flags";
     public const string Trt10OnnxParserSupportsModelV2 = "jyppx_trt10_onnx_parser_supports_model_v2";
@@ -2344,6 +2346,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt11GlobalGetInferLibVersion = "jyppx_trt11_global_get_infer_lib_version";
     public const string Trt11GlobalGetOnnxParserVersion = "jyppx_trt11_global_get_onnx_parser_version";
     public const string Trt11GlobalHasLogger = "jyppx_trt11_global_has_logger";
+    public const string Trt11GlobalInitLibNvinferPlugins = "jyppx_trt11_global_init_lib_nvinfer_plugins";
     public const string Trt11GlobalInitLibNvinferPluginsDeferred = "jyppx_trt11_global_init_lib_nvinfer_plugins_deferred";
     public const string Trt11GlobalPluginCreatorGetApiLanguage = "jyppx_trt11_global_plugin_creator_get_api_language";
     public const string Trt11GlobalPluginCreatorGetFieldCount = "jyppx_trt11_global_plugin_creator_get_field_count";
@@ -3411,6 +3414,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt8GlobalGetPluginRegistryDeferred = "jyppx_trt8_global_get_plugin_registry_deferred";
     public const string Trt8GlobalGetSafePluginRegistryDeferred = "jyppx_trt8_global_get_safe_plugin_registry_deferred";
     public const string Trt8GlobalHasLogger = "jyppx_trt8_global_has_logger";
+    public const string Trt8GlobalInitLibNvinferPlugins = "jyppx_trt8_global_init_lib_nvinfer_plugins";
     public const string Trt8GlobalInitLibNvinferPluginsDeferred = "jyppx_trt8_global_init_lib_nvinfer_plugins_deferred";
     public const string Trt8GlobalPluginCreatorGetFieldCount = "jyppx_trt8_global_plugin_creator_get_field_count";
     public const string Trt8GlobalPluginCreatorGetFieldMetadata = "jyppx_trt8_global_plugin_creator_get_field_metadata";
@@ -3631,6 +3635,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt8OnnxParserGetUsedVcPluginLibraryCount = "jyppx_trt8_onnx_parser_get_used_vc_plugin_library_count";
     public const string Trt8OnnxParserParseFromFile = "jyppx_trt8_onnx_parser_parse_from_file";
     public const string Trt8OnnxParserParseFromMemory = "jyppx_trt8_onnx_parser_parse_from_memory";
+    public const string Trt8OnnxParserParseWithWeightDescriptors = "jyppx_trt8_onnx_parser_parse_with_weight_descriptors";
     public const string Trt8OnnxParserSetFlag = "jyppx_trt8_onnx_parser_set_flag";
     public const string Trt8OnnxParserSetFlags = "jyppx_trt8_onnx_parser_set_flags";
     public const string Trt8OnnxParserSupportsModel = "jyppx_trt8_onnx_parser_supports_model";

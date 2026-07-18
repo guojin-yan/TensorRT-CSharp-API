@@ -65,6 +65,10 @@ public sealed class BridgePackageConsumerTests
         Assert.Contains("plugin-inventory-field-metadata", script);
         Assert.Contains("TensorRtEnvironmentProbe.IsGlobalPluginRegistryAvailable", script);
         Assert.Contains("TensorRtEnvironmentProbe.TryIsGlobalPluginRegistryAvailable", script);
+        Assert.Contains("TensorRtEnvironmentProbe.InitializeBuiltInPlugins", script);
+        Assert.Contains("TensorRtOnnxParser.ParseWithWeightDescriptors", script);
+        Assert.Contains("initializeBuiltInPlugins", script);
+        Assert.Contains("parseWithWeightDescriptors", script);
         Assert.Contains("TensorRtEngine.HasImplicitBatchDimensionCompatibility", script);
         Assert.Contains("TensorRtBuilderConfig.SerializedPluginPathCountCompatibility", script);
         Assert.Contains("TensorRtLayer.GetRnnV2LayerCount", script);

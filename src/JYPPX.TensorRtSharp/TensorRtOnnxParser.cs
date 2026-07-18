@@ -125,6 +125,18 @@ public sealed partial class TensorRtOnnxParser : IDisposable
     }
 
     /// <summary>
+    /// Parses serialized ONNX model bytes through TensorRT's legacy weight-descriptor entry.
+    /// 通过 TensorRT legacy weight-descriptor 入口解析已序列化 ONNX 模型字节。
+    /// </summary>
+    /// <param name="modelData">Serialized ONNX model bytes copied and pinned only for the vendor call. 仅在 vendor 调用期间复制并 pin 的 ONNX 模型字节。</param>
+    /// <returns><see langword="true"/> when TensorRT reports a successful parse. TensorRT 报告解析成功时返回 <see langword="true"/>。</returns>
+    /// <exception cref="BridgeProbeException">Thrown for TensorRT 11, where this vendor method was removed. TensorRT 11 已移除该 vendor 方法。</exception>
+    public bool ParseWithWeightDescriptors(byte[] modelData)
+    {
+        return NativeBridgeApi.ParseOnnxWithWeightDescriptors(Line, _handle, modelData);
+    }
+
+    /// <summary>
     /// Parses ONNX model bytes from a managed byte-array segment into the target network.
     /// 将托管字节数组片段中的 ONNX 模型解析到目标 network。
     /// </summary>
@@ -318,6 +330,19 @@ public sealed partial class TensorRtOnnxParser : IDisposable
     public bool TryParse(byte[] modelData, string? modelPath, out IReadOnlyList<TensorRtOnnxParserDiagnostic> diagnostics)
     {
         bool parsed = Parse(modelData, modelPath);
+        diagnostics = GetDiagnostics();
+        return parsed;
+    }
+
+    /// <summary>
+    /// Attempts the legacy weight-descriptor parse and returns copied diagnostics.
+    /// 尝试 legacy weight-descriptor 解析并返回已复制诊断。
+    /// </summary>
+    public bool TryParseWithWeightDescriptors(
+        byte[] modelData,
+        out IReadOnlyList<TensorRtOnnxParserDiagnostic> diagnostics)
+    {
+        bool parsed = ParseWithWeightDescriptors(modelData);
         diagnostics = GetDiagnostics();
         return parsed;
     }

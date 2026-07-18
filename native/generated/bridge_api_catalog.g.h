@@ -1111,6 +1111,7 @@
 #define JYPPX_API_TRT10_GLOBAL_GET_INFER_LIB_VERSION "jyppx_trt10_global_get_infer_lib_version" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_GLOBAL_GET_ONNX_PARSER_VERSION "jyppx_trt10_global_get_onnx_parser_version" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_GLOBAL_HAS_LOGGER "jyppx_trt10_global_has_logger" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT10_GLOBAL_INIT_LIB_NVINFER_PLUGINS "jyppx_trt10_global_init_lib_nvinfer_plugins" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_GLOBAL_INIT_LIB_NVINFER_PLUGINS_DEFERRED "jyppx_trt10_global_init_lib_nvinfer_plugins_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_GLOBAL_PLUGIN_CREATOR_GET_API_LANGUAGE "jyppx_trt10_global_plugin_creator_get_api_language" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_GLOBAL_PLUGIN_CREATOR_GET_FIELD_COUNT "jyppx_trt10_global_plugin_creator_get_field_count" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
@@ -1357,6 +1358,7 @@
 #define JYPPX_API_TRT10_ONNX_PARSER_LAYER_OUTPUT_TENSOR_EXISTS "jyppx_trt10_onnx_parser_layer_output_tensor_exists" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_ONNX_PARSER_PARSE_FROM_FILE "jyppx_trt10_onnx_parser_parse_from_file" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_ONNX_PARSER_PARSE_FROM_MEMORY "jyppx_trt10_onnx_parser_parse_from_memory" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=true
+#define JYPPX_API_TRT10_ONNX_PARSER_PARSE_WITH_WEIGHT_DESCRIPTORS "jyppx_trt10_onnx_parser_parse_with_weight_descriptors" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_ONNX_PARSER_SET_FLAG "jyppx_trt10_onnx_parser_set_flag" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_ONNX_PARSER_SET_FLAGS "jyppx_trt10_onnx_parser_set_flags" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_ONNX_PARSER_SUPPORTS_MODEL_V2 "jyppx_trt10_onnx_parser_supports_model_v2" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=true
@@ -2339,6 +2341,7 @@
 #define JYPPX_API_TRT11_GLOBAL_GET_INFER_LIB_VERSION "jyppx_trt11_global_get_infer_lib_version" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_GLOBAL_GET_ONNX_PARSER_VERSION "jyppx_trt11_global_get_onnx_parser_version" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_GLOBAL_HAS_LOGGER "jyppx_trt11_global_has_logger" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT11_GLOBAL_INIT_LIB_NVINFER_PLUGINS "jyppx_trt11_global_init_lib_nvinfer_plugins" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_GLOBAL_INIT_LIB_NVINFER_PLUGINS_DEFERRED "jyppx_trt11_global_init_lib_nvinfer_plugins_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_GLOBAL_PLUGIN_CREATOR_GET_API_LANGUAGE "jyppx_trt11_global_plugin_creator_get_api_language" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_GLOBAL_PLUGIN_CREATOR_GET_FIELD_COUNT "jyppx_trt11_global_plugin_creator_get_field_count" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
@@ -3406,6 +3409,7 @@
 #define JYPPX_API_TRT8_GLOBAL_GET_PLUGIN_REGISTRY_DEFERRED "jyppx_trt8_global_get_plugin_registry_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_GLOBAL_GET_SAFE_PLUGIN_REGISTRY_DEFERRED "jyppx_trt8_global_get_safe_plugin_registry_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_GLOBAL_HAS_LOGGER "jyppx_trt8_global_has_logger" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT8_GLOBAL_INIT_LIB_NVINFER_PLUGINS "jyppx_trt8_global_init_lib_nvinfer_plugins" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_GLOBAL_INIT_LIB_NVINFER_PLUGINS_DEFERRED "jyppx_trt8_global_init_lib_nvinfer_plugins_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_GLOBAL_PLUGIN_CREATOR_GET_FIELD_COUNT "jyppx_trt8_global_plugin_creator_get_field_count" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_GLOBAL_PLUGIN_CREATOR_GET_FIELD_METADATA "jyppx_trt8_global_plugin_creator_get_field_metadata" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
@@ -3626,6 +3630,7 @@
 #define JYPPX_API_TRT8_ONNX_PARSER_GET_USED_VC_PLUGIN_LIBRARY_COUNT "jyppx_trt8_onnx_parser_get_used_vc_plugin_library_count" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_ONNX_PARSER_PARSE_FROM_FILE "jyppx_trt8_onnx_parser_parse_from_file" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_ONNX_PARSER_PARSE_FROM_MEMORY "jyppx_trt8_onnx_parser_parse_from_memory" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=true
+#define JYPPX_API_TRT8_ONNX_PARSER_PARSE_WITH_WEIGHT_DESCRIPTORS "jyppx_trt8_onnx_parser_parse_with_weight_descriptors" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_ONNX_PARSER_SET_FLAG "jyppx_trt8_onnx_parser_set_flag" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_ONNX_PARSER_SET_FLAGS "jyppx_trt8_onnx_parser_set_flags" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_ONNX_PARSER_SUPPORTS_MODEL "jyppx_trt8_onnx_parser_supports_model" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=true

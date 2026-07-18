@@ -929,6 +929,10 @@ static class HighLevelWrapperSurfaceProbe
         Action<TensorRtOnnxConfig> disposeOnnxConfig = static config => config.Dispose();
         Func<TensorRtOnnxParser, TensorRtBuilderConfig, bool> attachParserBuilderConfig =
             static (parser, config) => parser.SetBuilderConfig(config);
+        Func<TensorRtLogger, string?, bool> initializeBuiltInPlugins =
+            static (logger, libNamespace) => TensorRtEnvironmentProbe.InitializeBuiltInPlugins(logger, libNamespace);
+        Func<TensorRtOnnxParser, byte[], bool> parseWithWeightDescriptors =
+            static (parser, modelData) => parser.ParseWithWeightDescriptors(modelData);
         Func<TensorRtOnnxParser, bool> parserHasBuilderConfigAttached =
             static parser => parser.HasBuilderConfigAttached;
         Func<TensorRtOnnxParserFlag, int> onnxParserFlagValue = static flag => (int)flag;
@@ -3010,6 +3014,8 @@ static class HighLevelWrapperSurfaceProbe
         _ = onnxConfigSummary;
         _ = disposeOnnxConfig;
         _ = attachParserBuilderConfig;
+        _ = initializeBuiltInPlugins;
+        _ = parseWithWeightDescriptors;
         _ = parserHasBuilderConfigAttached;
         _ = onnxParserFlagValue;
         _ = onnxParserFlagsValue;
@@ -3371,6 +3377,8 @@ static class HighLevelWrapperSurfaceProbe
             nameof(TensorRtOnnxModelSupportSummary.CanPromoteReleaseProof),
             nameof(TensorRtOnnxModelSupportSummary.CanDeleteDeferredRecord),
             nameof(TensorRtOnnxParser.GetDiagnosticSnapshot),
+            nameof(TensorRtEnvironmentProbe.InitializeBuiltInPlugins),
+            nameof(TensorRtOnnxParser.ParseWithWeightDescriptors),
             nameof(TensorRtOnnxParserRefitterDiagnosticSnapshot),
             nameof(TensorRtOnnxParserRefitterDiagnosticSnapshot.Line),
             nameof(TensorRtOnnxParserRefitterDiagnosticSnapshot.ErrorCount),

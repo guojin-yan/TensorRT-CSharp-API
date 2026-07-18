@@ -118,8 +118,18 @@ internal static class Program
         parser.SetFlag(TensorRtOnnxParserFlag.NativeInstanceNormalization);
         bool nativeInstanceNormalizationAfterSet = parser.GetFlag(TensorRtOnnxParserFlag.NativeInstanceNormalization);
 
-        using MemoryStream parserModelStream = new MemoryStream(model, writable: false);
-        bool parsed = parser.Parse(parserModelStream, "generated-dynamic-identity.onnx");
+        bool parsed;
+        if (line == TensorRtApiLine.TensorRt8 || line == TensorRtApiLine.TensorRt10)
+        {
+            parsed = parser.ParseWithWeightDescriptors(model);
+            Console.WriteLine($"LegacyWeightDescriptorParse Attempted=True Parsed={parsed} TensorRtLine={(int)line}");
+        }
+        else
+        {
+            using MemoryStream parserModelStream = new MemoryStream(model, writable: false);
+            parsed = parser.Parse(parserModelStream, "generated-dynamic-identity.onnx");
+            Console.WriteLine($"LegacyWeightDescriptorParse Attempted=False Reason=RemovedByVendor TensorRtLine={(int)line}");
+        }
         if (!parsed)
         {
             throw new InvalidOperationException($"ONNX parser failed. {parser.GetErrorSummary()}");
