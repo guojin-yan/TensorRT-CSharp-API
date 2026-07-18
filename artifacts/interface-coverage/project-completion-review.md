@@ -19,6 +19,35 @@
 - `artifacts/real-case/multi-version-onnx-runtime/multi-version-runtime-evidence-matrix.json`
 - `artifacts/test-analysis/project-quality-test-inventory.json`
 
+## 2026-07-18 TRT8 Consistency Checker Vendor Symbol 审查
+
+本轮针对 TRT8 官方 `NvInferConsistency.h` 中的 `Global::createConsistencyChecker_INTERNAL` 与 `IConsistencyChecker::validate` 做了安全提升设计审查。设计要求是 native 复制完整 engine blob、checker handle 拥有 blob、logger 在 checker 生命周期内保持 owner attachment，并以 `implemented-with-deferred-history` 记录旧 deferred manifest。
+
+### 结论：继续 deferred
+
+在实现进入 native build 后，TRT8 CUDA 11.8 与 CUDA 12.1 的实际 `nvinfer.lib` 均无法解析 `createConsistencyChecker_INTERNAL`。进一步使用 Visual Studio `dumpbin /symbols` 检查两套 TensorRT 8.6.1.6 import library，并使用 `dumpbin /exports` 检查对应 TensorRT DLL，均没有 `createConsistencyChecker_INTERNAL`、`Consistency` 或 `consistency` 导出。链接错误为：
+
+```text
+unresolved external symbol createConsistencyChecker_INTERNAL
+```
+
+因此本轮没有保留一个只能编译 manifest、却无法链接或无法证明真实 vendor 调用的假实现；本轮临时 manifest、native payload、托管 wrapper、smoke 与 consumer marker 均已撤回。原有 `trt8-global-create-consistency-checker-internal-deferred` 与 `trt8-consistency-checker-validate-deferred` manifest 未删除，coverage 统计保持 TRT8 `751 implemented / 96 deferred-only`，TRT10 `759 / 120`，TRT11 `813 / 88`。
+
+### 本轮收尾验证
+
+- Generate-Bindings 恢复为 `181 manifests / 3919 records`，生成器幂等验证通过。
+- TRT8/CUDA11.8、TRT8/CUDA12.1、TRT10/CUDA11.8、TRT10/CUDA12.9、TRT11/CUDA12.9、TRT11/CUDA13.2 native rebuild 全部通过；version guard 未被临时 candidate 改变。
+- 完整 `TensorRtSharp.sln` Debug build 通过，0 warning / 0 error；`Start-Process -Wait` 捕获的退出码为 0。
+- 恢复后的 TRT8 capability/BuilderConfig/RNNv2/plugin 专项与 coverage alias 防回归分片为 `80/80` 通过；完整 ProjectQuality 分片 run `vendor-symbol-final-20260718` 运行 `382 classes / 1284 tests`，G-M `72/72`、T-Z `167/167` 通过，A-F 与 N-S 因既有 owner/evidence artifact 生成链超过 900 秒而超时，summary 记录 `239` 条已执行且通过、`2` 个 timed-out 分片，不冒充完整 suite pass。
+- coverage 显式 alias 已验证 `Global::getBuilderPluginRegistry` 与 `IPluginRegistry::getBuilderSafePluginRegistry` 为 `implemented-with-deferred-history`；TRT8/TRT10/TRT11 native ABI source declaration parity 分别为 `983/983`、`1078/1078`、`1226/1226`，三份主 bridge PE export parity missing 均为 0。
+- Plugin Registry、NetworkBuilder、InferenceBindings smoke：TRT8/TRT10 全部通过；TRT11 Plugin Registry 通过、NetworkBuilder 按 vendor structured exception 受控跳过，InferenceBindings 同一 vendor runtime creation exception 退出，未被标记为通过。
+- 三个 bridge-only `PackageReference` consumer restore/build 均为 0 warning / 0 error，`ProjectReference=False`，证据分类保持 `compile-surface-proof`，不提升为 runtime proof。
+- 未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
+
+### 下一阶段入口
+
+下一阶段只应从实际存在于目标 TensorRT import library 的 deferred entry 中选择候选。任何新的 consistency checker 设计必须先在所有目标 TRT8 vendor package 上完成 PE/import-library symbol proof，再进入 manifest/native/wrapper；在 symbol proof 通过前不得重新提升该接口。
+
 ## 2026-07-18 TRT11 / CUDA 12.9 Compatible-Host Runtime Proof 复审
 
 本阶段基于起始提交 `6fb1833e21e2d62f96f45467b23316b3334f718a`，使用既有 GitHub Release `v4.0.6156` 的 TRT11/CUDA12.9 vendor 组件和当前源码构建的 bridge，完成 TRT11 真实 builder、parser、engine round-trip、enqueue 与 package runtime consumer 证明。Release 资产只读下载和校验；没有执行 package push、Release upload 或 issue close。
@@ -63,10 +92,10 @@
 
 | 包 | 大小 | SHA256 |
 | --- | ---: | --- |
-| managed `JYPPX.TensorRT.CSharp.API.4.0.0.nupkg` | 14,410,847 bytes | `5A198037FFD1E5B767D423EF8B11048923D63FA05C07CC7E0707BC82B4B117DB` |
-| TRT8/CUDA12.1 bridge-only | 313,595 bytes | `52D3F21AF80B3B09196E93517E3C53E3BDDB7E8D03CCD68CF1F62805E0655625` |
-| TRT10/CUDA12.9 bridge-only | 339,346 bytes | `7577B4CA333AD18A6E3D2EE8025BFCDE09785ADC5541A1AB70D066D1F040011E` |
-| TRT11/CUDA12.9 bridge-only | 268,768 bytes | `9670AEF311BB97024B4FFDBD424E56D31879829B3C04F1D23C4B20AF6EE17513` |
+| managed `JYPPX.TensorRT.CSharp.API.4.0.0.nupkg` | 14,697,081 bytes | `86165D8EA577BD6BC662246591540B3FC19255EB67668BDF8060F0A51FE79755` |
+| TRT8/CUDA12.1 bridge-only | 313,595 bytes | `704A23DF72455E2FC24C0656918E39150E8C9622ACD7BC2D1E8DA24081B8500F` |
+| TRT10/CUDA12.9 bridge-only | 339,349 bytes | `54B5377746582B1EEF591CF5735D30DCA9060DD7C984D681D1399DDB462C83BE` |
+| TRT11/CUDA12.9 bridge-only | 268,769 bytes | `EC5371BDB0CD47CE938E232F0139975C13848A66F5D99CE5C4ECB1AE44A24B26` |
 
 ### Gate 与发布边界
 
