@@ -176,6 +176,18 @@ $articles = Add-OrReplaceArticle $articles (New-RoadmapArticle `
     -TargetPath "docs/articles/zh-cn/publishing/onnx-parser-parserrefitter-诊断-copied-diagnostics-release-gate.md" `
     -SourceArtifacts @("src/JYPPX.TensorRtSharp/TensorRtOnnxParserDiagnosticSnapshot.cs", "eng/Test-BridgePackageConsumer.ps1", "eng/Test-RuntimePackageReadiness.ps1"))
 
+$articles = Add-OrReplaceArticle $articles (New-RoadmapArticle `
+    -Id 42 `
+    -Title "CUDA Stream Capture To Graph：owner-safe session 与跨版本 guard" `
+    -Audience "CUDA wrapper 维护者、C# 生命周期评审者、发布负责人" `
+    -Type "安全边界说明" `
+    -Outline @("CUDA 12.3+ vendor symbol audit", "stream and graph owner counts", "same-graph End validation", "deferred-history coverage", "compatible-host smoke boundary") `
+    -SampleOrCodePath "docs/articles/zh-cn/cuda-stream-capture-to-graph-owner-safety.md" `
+    -VisualAssets @("stream-to-existing-graph session 生命周期图") `
+    -Status "ready" `
+    -TargetPath "docs/articles/zh-cn/publishing/cuda-stream-capture-to-graph-owner-safe-session.md" `
+    -SourceArtifacts @("artifacts/interface-coverage/cuda-stream-capture-to-graph-candidate-audit.md", "src/JYPPX.CudaSharp/CudaStreamCaptureToGraphSession.cs", "smoke/CudaGraphSmokeRunner/Program.cs"))
+
 $enhancedArticles = New-Object System.Collections.Generic.List[object]
 
 foreach ($article in $articles) {

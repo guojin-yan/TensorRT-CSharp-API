@@ -112,6 +112,7 @@ Chinese articles:
 - [CUDA Stream Event MultiStream Tutorial](articles/zh-cn/cuda-stream-event-multistream-tutorial.md)
 - [Blog MultiStream CUDA Stream Event](articles/zh-cn/blog-multistream-cuda-stream-event.md)
 - [CUDA Graph Capabilities And Boundary](articles/zh-cn/cuda-graph-capabilities-boundary.md)
+- [CUDA Stream Capture To Graph Owner Safety](articles/zh-cn/cuda-stream-capture-to-graph-owner-safety.md)
 - [CUDA Memory Wrapper](articles/zh-cn/cuda-memory-wrapper.md)
 - [Blog CUDA Memory Wrapper](articles/zh-cn/blog-cuda-memory-wrapper.md)
 - [CUDA Memory Range APIs](articles/zh-cn/cuda-memory-range-apis.md)

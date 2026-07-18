@@ -228,6 +228,8 @@
     href: articles/zh-cn/blog-multistream-cuda-stream-event.md
   - name: CUDA Graph Capabilities And Boundary
     href: articles/zh-cn/cuda-graph-capabilities-boundary.md
+  - name: CUDA Stream Capture To Graph Owner Safety
+    href: articles/zh-cn/cuda-stream-capture-to-graph-owner-safety.md
   - name: CUDA Graph Borrowed Handle Safety Gate
     href: articles/zh-cn/cuda-graph-borrowed-handle-safety-gate.md
   - name: CUDA Memory Wrapper

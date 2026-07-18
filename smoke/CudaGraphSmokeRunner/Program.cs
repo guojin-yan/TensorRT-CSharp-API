@@ -26,11 +26,11 @@ internal static class Program
         source.CopyFrom(input);
         destination.CopyFrom(new byte[ByteCount]);
 
+        string streamCaptureVariantsState = ProbeStreamCaptureVariants(stream, device, ByteCount);
         CudaStreamCaptureInfo captureBefore = stream.GetCaptureInfo();
         stream.BeginCapture(CudaStreamCaptureMode.Relaxed);
         CudaStreamCaptureInfo captureDuring = stream.GetCaptureInfo();
         stream.UpdateCaptureDependencies(Array.Empty<CudaGraphNode>(), CudaStreamCaptureDependencyMode.Replace);
-        string streamCaptureVariantsState = ProbeStreamCaptureVariants(stream);
         if (!captureDuring.HasCapturedGraph)
         {
             throw new InvalidOperationException("CUDA active capture summary did not report a capture graph.");
@@ -166,8 +166,25 @@ internal static class Program
         }
     }
 
-    private static string ProbeStreamCaptureVariants(CudaStream stream)
+    private static string ProbeStreamCaptureVariants(CudaStream stream, CudaMemory device, int byteCount)
     {
+        string toGraphState = "Unsupported";
+        try
+        {
+            using CudaGraph targetGraph = CudaGraph.Create();
+            using CudaStreamCaptureToGraphSession session = stream.BeginCaptureToGraph(
+                targetGraph,
+                Array.Empty<CudaGraphNodeDependency>(),
+                CudaStreamCaptureMode.Relaxed);
+            device.FillAsync(0, byteCount, stream);
+            session.End();
+            toGraphState = $"ToGraph=True Nodes={targetGraph.NodeCount} Edges={targetGraph.EdgeCount}";
+        }
+        catch (CudaException exception)
+        {
+            toGraphState = $"ToGraphSkipped:{exception.Message}";
+        }
+
         string scalarState = "Unsupported";
         try
         {
@@ -201,7 +218,7 @@ internal static class Program
             v2UpdateState = $"V2UpdateSkipped:{exception.Message}";
         }
 
-        return $"{scalarState}; {ptszUpdateState}; {v2UpdateState}";
+        return $"{toGraphState}; {scalarState}; {ptszUpdateState}; {v2UpdateState}";
     }
 
     static string ProbeGraphEdgeData(CudaGraph graph, CudaGraphNode root, CudaGraphNode child)

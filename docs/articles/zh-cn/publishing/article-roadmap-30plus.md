@@ -7,7 +7,7 @@
 | Field | Value |
 | --- | --- |
 | roadmapState | `release-readiness-planning` |
-| articleCount | `41` |
+| articleCount | `42` |
 | minimumArticleCount | `30` |
 | canPublishPublicly | `False` |
 | canCloseReleaseIssue | `False` |
@@ -63,6 +63,7 @@ Rows marked `near-ready-owner-proof-input` are article-body and owner proof inpu
 | `39` | Package Consumer Proof 分层边界：local smoke、package-feed substitute 与 clean external evidence | 发布负责人、包验证维护者 | `ready` | docs/articles/zh-cn/publishing/package-consumer-分层边界-local-smoke-package-feed-substitute-clean-external-evidence.md |
 | `40` | YoloVision 真实资产证据链：从样例矩阵到 owner proof | 视觉样例维护者、发布负责人 | `near-ready-owner-proof-input` | docs/articles/zh-cn/publishing/yolovision-真实资产证据链-从样例矩阵到-owner-proof.md |
 | `41` | ONNX Parser 与 ParserRefitter 诊断：copied diagnostics 到 release gate | 模型转换维护者、发布负责人 | `ready` | docs/articles/zh-cn/publishing/onnx-parser-parserrefitter-诊断-copied-diagnostics-release-gate.md |
+| `42` | CUDA Stream Capture To Graph：owner-safe session 与跨版本 guard | CUDA wrapper 维护者、C# 生命周期评审者、发布负责人 | `ready` | docs/articles/zh-cn/publishing/cuda-stream-capture-to-graph-owner-safe-session.md |
 
 ## Must Avoid Claims
 

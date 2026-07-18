@@ -1462,6 +1462,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_cuda_stream_begin_capture(JYPPX_CudaStream* 
 // generated from manifest id=cuda-stream-begin-capture-to-graph-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_stream_begin_capture_to_graph_deferred(void);
 
+// generated from manifest id=cuda-stream-begin-capture-to-graph-owner-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_stream_begin_capture_to_graph_safe(JYPPX_CudaStream* stream, JYPPX_CudaGraph* graph, const uintptr_t* dependencies, const JYPPX_CudaGraphEdgeData* edge_data, size_t dependency_count, int32_t mode);
+
 // generated from manifest id=cuda-stream-copy-attributes
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_stream_copy_attributes(JYPPX_CudaStream* destination, JYPPX_CudaStream* source);
 
@@ -1476,6 +1479,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_cuda_stream_destroy(JYPPX_CudaStream* stream
 
 // generated from manifest id=cuda-stream-end-capture
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_stream_end_capture(JYPPX_CudaStream* stream, JYPPX_CudaGraph** out_graph);
+
+// generated from manifest id=cuda-stream-end-capture-into-existing-graph-owner-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_stream_end_capture_into_graph_safe(JYPPX_CudaStream* stream, JYPPX_CudaGraph* graph);
 
 // generated from manifest id=cuda-stream-get-attribute
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_stream_get_attribute(JYPPX_CudaStream* stream, int32_t attribute, void* value);

@@ -91,11 +91,11 @@ public sealed class CudaOwnerScopedGraphDiagnosticsUpliftTests
     }
 
     [Fact]
-    public void CandidateReviewKeepsUnsafeOwnershipApisDeferred()
+    public void CandidateReviewKeepsUnsafeOwnershipApisDeferredAndRecordsResolvedCaptureOwnership()
     {
         string review = ReadSource("artifacts", "interface-coverage", "cuda-owner-scoped-candidate-review.md");
 
-        Assert.Contains("`cudaStreamBeginCaptureToGraph` | existing end-capture ownership would double-own", review, StringComparison.Ordinal);
+        Assert.Contains("`cudaStreamBeginCaptureToGraph` | implement | owner-scoped session retains stream/graph wrappers", review, StringComparison.Ordinal);
         Assert.Contains("`cudaGraphAddKernelNode` | requires kernel function and argument pointers", review, StringComparison.Ordinal);
         Assert.Contains("CUDA graph user-object APIs | require release callbacks", review, StringComparison.Ordinal);
         Assert.Contains("Old deferred manifests remain in place", review, StringComparison.Ordinal);

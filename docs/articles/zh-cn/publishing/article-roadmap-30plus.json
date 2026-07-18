@@ -2,7 +2,7 @@
   "roadmapId": "article-roadmap-30plus",
   "roadmapState": "release-readiness-planning",
   "minimumArticleCount": 30,
-  "articleCount": 41,
+  "articleCount": 42,
   "performsPublish": false,
   "canPublishPublicly": false,
   "canCloseReleaseIssue": false,
@@ -1309,6 +1309,40 @@
         "src/JYPPX.TensorRtSharp/TensorRtOnnxParserDiagnosticSnapshot.cs",
         "eng/Test-BridgePackageConsumer.ps1",
         "eng/Test-RuntimePackageReadiness.ps1"
+      ],
+      "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 42,
+      "title": "CUDA Stream Capture To Graph：owner-safe session 与跨版本 guard",
+      "audience": "CUDA wrapper 维护者、C# 生命周期评审者、发布负责人",
+      "type": "安全边界说明",
+      "outline": [
+        "CUDA 12.3+ vendor symbol audit",
+        "stream and graph owner counts",
+        "same-graph End validation",
+        "deferred-history coverage",
+        "compatible-host smoke boundary"
+      ],
+      "sampleOrCodePath": "docs/articles/zh-cn/cuda-stream-capture-to-graph-owner-safety.md",
+      "visualAssets": [
+        "stream-to-existing-graph session 生命周期图"
+      ],
+      "status": "ready",
+      "targetPath": "docs/articles/zh-cn/publishing/cuda-stream-capture-to-graph-owner-safe-session.md",
+      "sourceArtifacts": [
+        "artifacts/interface-coverage/cuda-stream-capture-to-graph-candidate-audit.md",
+        "src/JYPPX.CudaSharp/CudaStreamCaptureToGraphSession.cs",
+        "smoke/CudaGraphSmokeRunner/Program.cs"
       ],
       "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
       "mustAvoidClaims": [

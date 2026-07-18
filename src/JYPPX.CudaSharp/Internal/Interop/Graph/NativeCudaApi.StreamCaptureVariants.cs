@@ -73,6 +73,57 @@ internal static partial class NativeCudaApi
         }
     }
 
+    public static void BeginStreamCaptureToGraph(
+        SafeCudaStreamHandle stream,
+        SafeCudaGraphHandle graph,
+        IReadOnlyList<CudaGraphNodeDependency> dependencies,
+        CudaStreamCaptureMode mode)
+    {
+        if (dependencies.Count > 1000000)
+        {
+            throw new ArgumentOutOfRangeException(nameof(dependencies));
+        }
+
+        UIntPtr[] tokens = new UIntPtr[dependencies.Count];
+        NativeCudaGraphEdgeData[] edgeData = new NativeCudaGraphEdgeData[dependencies.Count];
+        for (int index = 0; index < dependencies.Count; index++)
+        {
+            tokens[index] = dependencies[index].Node.Token;
+            edgeData[index] = dependencies[index].EdgeData.ToNative();
+        }
+
+        GCHandle edgeDataHandle = default;
+        try
+        {
+            IntPtr edgeDataPointer = IntPtr.Zero;
+            if (edgeData.Length != 0)
+            {
+                edgeDataHandle = GCHandle.Alloc(edgeData, GCHandleType.Pinned);
+                edgeDataPointer = edgeDataHandle.AddrOfPinnedObject();
+            }
+
+            CudaNativeStatus.ThrowIfFailed(NativeMethodsCuda.jyppx_cuda_stream_begin_capture_to_graph_safe(
+                stream,
+                graph,
+                tokens,
+                edgeDataPointer,
+                new UIntPtr((uint)tokens.Length),
+                (int)mode));
+        }
+        finally
+        {
+            if (edgeDataHandle.IsAllocated)
+            {
+                edgeDataHandle.Free();
+            }
+        }
+    }
+
+    public static void EndStreamCaptureIntoGraph(SafeCudaStreamHandle stream, SafeCudaGraphHandle graph)
+    {
+        CudaNativeStatus.ThrowIfFailed(NativeMethodsCuda.jyppx_cuda_stream_end_capture_into_graph_safe(stream, graph));
+    }
+
     private static UIntPtr[] ToDependencyTokens(IReadOnlyList<CudaGraphNode> dependencies)
     {
         if (dependencies == null)

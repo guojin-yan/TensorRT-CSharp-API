@@ -1,0 +1,40 @@
+{
+  "recordKind": "cuda-stream-capture-to-graph-candidate-audit",
+  "decision": "promote-by-explicit-alias-history",
+  "candidates": [
+    {
+      "function": "cudaStreamBeginCaptureToGraph",
+      "headers": ["CUDA 12.3", "CUDA 12.9", "CUDA 13.2"],
+      "importLibraryAndDll": "linked by CUDA 12.9 and 13.2 native presets; TRT10/CUDA12.9 smoke succeeded",
+      "guard": "JYPPX_HAS_CUDA_TOOLKIT && CUDART_VERSION >= 12030",
+      "ownership": "owner-scoped-session-retains-stream-and-graph",
+      "decision": "promote"
+    },
+    {
+      "function": "cudaStreamEndCapture",
+      "headers": ["supported CUDA runtime headers"],
+      "importLibraryAndDll": "existing bridge route and native link",
+      "guard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "ownership": "session-end-verifies-same-graph-handle",
+      "decision": "reuse-as-session-terminator"
+    }
+  ],
+  "deferredHistoryManifest": "native/manifests/cuda/cuda-thirty-fifth-batch-stream-device-boundaries.manifest.json",
+  "realManifest": "native/manifests/cuda/cuda-fifty-seventh-batch-stream-capture-to-graph.manifest.json",
+  "publicPointerExposure": false,
+  "callbackTrampoline": false,
+  "devicePointerExposure": false,
+  "externalResourceOwnership": false,
+  "verification": {
+    "manifestCount": 189,
+    "apiRecordCount": 3947,
+    "focusedProjectQuality": "13/13",
+    "cudaGraphSmoke": "ToGraph=True Nodes=1",
+    "abiMissingDeclarations": 0,
+    "abiMissingExports": 0,
+    "classification": "source/build/compatible-host smoke evidence; not clean package-consumer runtime proof"
+  },
+  "performsPublish": false,
+  "canPublishPublicly": false,
+  "canCloseReleaseIssue": false
+}

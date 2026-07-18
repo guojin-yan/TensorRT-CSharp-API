@@ -1541,3 +1541,57 @@ artifacts/trtexec-bounded-runtime/identity
 - C 盘审查未发现本批下载的 CUDA、TensorRT、cuDNN 或模型；构建输出位于 E 盘 `build-out`，C:\Users\guoji\AppData\Local\Temp 下无本批同名构建目录。用户已有 Downloads、NuGet 和工具缓存未删除。
 
 本批仍不改变长期安全边界：callback trampoline、allocator/resource、borrowed/device pointer、plugin lifecycle、RNNv2 setter 和 consistency checker 继续 deferred；未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
+
+## 2026-07-19 CUDA Stream-Capture-To-Graph Owner-Safe Uplift
+
+本批继续从 CUDA deferred inventory 做 vendor-first 审计，核对
+`cudaStreamBeginCaptureToGraph` 在 CUDA 12.3、12.9、13.2 的
+`cuda_runtime_api.h`、import library、runtime DLL symbol 和独立
+`CUDART_VERSION >= 12030` guard；CUDA 11.x/12.1 没有该入口，继续保持
+deferred。候选审计记录在
+`artifacts/interface-coverage/cuda-stream-capture-to-graph-candidate-audit.md`
+及 `.json`。
+
+### Promotion 结果
+
+- 新增 `cudaStreamBeginCaptureToGraph` 的 owner-safe begin entry，并复用
+  `cudaStreamEndCapture` 作为 session terminator；旧 deferred manifest 没有删除。
+- `CudaStreamCaptureToGraphSession` 在 capture 期间保留 stream/graph owner，
+  两个 wrapper 的 `Dispose()` 会阻止提前释放；End 验证 CUDA 返回的是同一
+  graph handle，不创建第二个 managed graph owner。
+- dependency token 和 `CudaGraphEdgeData` 只在同步 native call 内复制/pin；
+  C++ exception、分配失败与 Windows SEH 在 bridge 内转换为 status。
+- public C# surface 仅公开 typed `CudaStream`、`CudaGraph` 和 session，未暴露
+  `IntPtr`、`nint`、`UIntPtr`、`SafeHandle`、device pointer 或 borrowed pointer。
+
+### Verification
+
+- binding generator/output validation：`189 manifests / 3947 API records`，
+  第二次生成幂等通过；coverage export 的 CUDA 12.3/12.9/13.2 行均为
+  `implemented-with-deferred-history`。
+- TRT8、TRT10、TRT11 ABI declaration/PE export parity 均为
+  `MissingDeclarations=0 MissingExports=0`；四套 native Release preset
+  TRT8/CUDA11.8、TRT8/CUDA12.1、TRT10/CUDA12.9、TRT11/CUDA13.2 成功。
+- `CudaStreamCaptureToGraphUpliftTests`、相邻 stream/graph 专项共 `13/13`；
+  managed Release solution 为 `0 errors`，保留既有 `5` 个 nullable warnings。
+- managed pack 成功；TRT8/CUDA12.1、TRT10/CUDA12.9、TRT11/CUDA13.2
+  bridge-only consumer 均 restore/build `0 warning / 0 error`，分类仍为
+  `compile-surface-proof`。
+- TRT10/CUDA12.9 `CudaGraphSmokeRunner` 完成 graph round trip，并输出
+  `ToGraph=True Nodes=1`；`ptsz`/CUDA13-only 路径按版本能力记录受控 skip。
+- strict classification audit：`classification-audit-passed-non-proof-boundaries-intact`
+  且 `FindingCount=0`；标准 strict release quality gate：
+  `release-quality-gate-passed` 且 `RequiredFailureCount=0`。
+
+### C/E 盘清理
+
+- 构建与 package consumer 输出均位于 E 盘仓库；本批删除了
+  `E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0\build-out`。
+- smoke 产生的唯一可归因 C 盘目录
+  `C:\Users\guoji\AppData\Local\Temp\jyppx-cuda-graph-smoke\48a961776a64499fbd34c9ba34026d86`
+  已删除；`C:\jyppx-pkgcache\...` package restore 临时目录由脚本自动删除。
+- 未在 C 盘下载或保留 CUDA、TensorRT、cuDNN、模型或 nupkg；
+  `C:\Users\guoji\Downloads`、用户 NuGet 缓存、Codex/工具缓存及系统 CUDA
+  安装目录均未删除。
+
+本批仍不改变长期安全边界：callback trampoline、allocator/resource、borrowed/device pointer、plugin lifecycle、RNNv2 setter 和 consistency checker 继续 deferred；未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。上述 smoke/build/package consumer 结果不等于 clean public package-consumer runtime proof、post-publish proof 或 release-close approval。

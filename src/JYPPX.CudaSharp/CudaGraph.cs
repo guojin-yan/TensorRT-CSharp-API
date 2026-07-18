@@ -12,6 +12,9 @@ namespace JYPPX.CudaSharp;
 public sealed class CudaGraph : IDisposable
 {
     private readonly SafeCudaGraphHandle _handle;
+    private readonly object _captureLifecycleGate = new object();
+    private int _activeCaptureToGraphSessions;
+    private bool _disposed;
 
     internal CudaGraph(SafeCudaGraphHandle handle)
     {
@@ -1273,7 +1276,46 @@ public sealed class CudaGraph : IDisposable
     /// </summary>
     public void Dispose()
     {
+        lock (_captureLifecycleGate)
+        {
+            if (_activeCaptureToGraphSessions != 0)
+            {
+                throw new InvalidOperationException("The CUDA graph cannot be disposed while a stream-to-graph capture session is active.");
+            }
+
+            if (_disposed)
+            {
+                return;
+            }
+
+            _disposed = true;
+        }
+
         _handle.Dispose();
         GC.SuppressFinalize(this);
+    }
+
+    internal void EnterCaptureToGraphSession()
+    {
+        lock (_captureLifecycleGate)
+        {
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(nameof(CudaGraph));
+            }
+
+            _activeCaptureToGraphSessions++;
+        }
+    }
+
+    internal void ExitCaptureToGraphSession()
+    {
+        lock (_captureLifecycleGate)
+        {
+            if (_activeCaptureToGraphSessions > 0)
+            {
+                _activeCaptureToGraphSessions--;
+            }
+        }
     }
 }

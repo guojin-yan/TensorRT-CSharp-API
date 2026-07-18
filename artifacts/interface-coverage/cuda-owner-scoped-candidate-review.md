@@ -17,12 +17,12 @@ Generated: 2026-07-17
 | `cudaGraphExternalSemaphoresWaitNodeGetParams` | implement | copy count and array-presence booleans only |
 | `cudaStreamGetCaptureInfo_v3` | implement | copy status/id/graph-presence/dependency-count/edge-data-presence |
 | `cudaStreamUpdateCaptureDependencies` | implement | immediate validated node-token array; no borrowed array escape |
+| `cudaStreamBeginCaptureToGraph` | implement | owner-scoped session retains stream/graph wrappers and End validates the same graph handle |
 
 ## Continue Deferred
 
 | Candidate | Reason |
 | --- | --- |
-| `cudaStreamBeginCaptureToGraph` | existing end-capture ownership would double-own a caller graph |
 | `cudaStreamUpdateCaptureDependencies_v2` | edge-data ABI/version path still needs a complete CUDA 12.3/12.9/13 model |
 | `cudaGraphAddKernelNode` | requires kernel function and argument pointers |
 | `cudaGraphAddHostNode` | requires a managed callback trampoline and user-data lifetime |

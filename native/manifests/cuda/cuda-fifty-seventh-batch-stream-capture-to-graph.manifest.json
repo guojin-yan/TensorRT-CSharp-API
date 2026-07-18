@@ -1,0 +1,35 @@
+{
+  "$schema": "../bridge-api.schema.json",
+  "module": "cuda",
+  "versionLine": "common",
+  "apis": [
+    {
+      "id": "cuda-stream-begin-capture-to-graph-owner-safe",
+      "entryPoint": "jyppx_cuda_stream_begin_capture_to_graph_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "owner-scoped-session",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT && CUDART_VERSION >= 12030",
+      "parameters": [
+        { "name": "stream", "type": "JYPPX_CudaStream*", "direction": "in" },
+        { "name": "graph", "type": "JYPPX_CudaGraph*", "direction": "in" },
+        { "name": "dependencies", "type": "const uintptr_t*", "direction": "in", "managedType": "UIntPtr[]", "moduleManagedType": "UIntPtr[]" },
+        { "name": "edge_data", "type": "const JYPPX_CudaGraphEdgeData*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "dependency_count", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "mode", "type": "int32_t", "direction": "in", "managedType": "int", "moduleManagedType": "int" }
+      ]
+    },
+    {
+      "id": "cuda-stream-end-capture-into-existing-graph-owner-safe",
+      "entryPoint": "jyppx_cuda_stream_end_capture_into_graph_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "owner-scoped-session",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "stream", "type": "JYPPX_CudaStream*", "direction": "in" },
+        { "name": "graph", "type": "JYPPX_CudaGraph*", "direction": "in" }
+      ]
+    }
+  ]
+}

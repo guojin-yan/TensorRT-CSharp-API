@@ -487,11 +487,13 @@
 #define JYPPX_API_CUDA_STREAM_ATTACH_MEM_ASYNC "jyppx_cuda_stream_attach_mem_async" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_STREAM_BEGIN_CAPTURE "jyppx_cuda_stream_begin_capture" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_STREAM_BEGIN_CAPTURE_TO_GRAPH_DEFERRED "jyppx_cuda_stream_begin_capture_to_graph_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_STREAM_BEGIN_CAPTURE_TO_GRAPH_OWNER_SAFE "jyppx_cuda_stream_begin_capture_to_graph_safe" // module=cuda; line=common; ownership=owner-scoped-session; manualOverride=false
 #define JYPPX_API_CUDA_STREAM_COPY_ATTRIBUTES "jyppx_cuda_stream_copy_attributes" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_STREAM_CREATE "jyppx_cuda_stream_create" // module=cuda; line=common; ownership=caller-destroys; manualOverride=true
 #define JYPPX_API_CUDA_STREAM_CREATE_WITH_PRIORITY "jyppx_cuda_stream_create_with_priority" // module=cuda; line=common; ownership=caller-destroys; manualOverride=false
 #define JYPPX_API_CUDA_STREAM_DESTROY "jyppx_cuda_stream_destroy" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_STREAM_END_CAPTURE "jyppx_cuda_stream_end_capture" // module=cuda; line=common; ownership=caller-destroys; manualOverride=false
+#define JYPPX_API_CUDA_STREAM_END_CAPTURE_INTO_EXISTING_GRAPH_OWNER_SAFE "jyppx_cuda_stream_end_capture_into_graph_safe" // module=cuda; line=common; ownership=owner-scoped-session; manualOverride=false
 #define JYPPX_API_CUDA_STREAM_GET_ATTRIBUTE "jyppx_cuda_stream_get_attribute" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_STREAM_GET_CAPTURE_INFO "jyppx_cuda_stream_get_capture_info" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_STREAM_GET_CAPTURE_INFO_COPIED_SUMMARY_SAFE "jyppx_cuda_stream_get_capture_summary_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false

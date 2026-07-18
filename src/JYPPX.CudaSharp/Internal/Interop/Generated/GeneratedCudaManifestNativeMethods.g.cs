@@ -1436,6 +1436,9 @@ internal static partial class GeneratedCudaManifestNativeMethods
     internal static extern BridgeStatusCode jyppx_cuda_stream_begin_capture_to_graph_deferred();
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_stream_begin_capture_to_graph_safe(SafeCudaStreamHandle stream, SafeCudaGraphHandle graph, UIntPtr[] dependencies, IntPtr edge_data, UIntPtr dependency_count, int mode);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_cuda_stream_copy_attributes(SafeCudaStreamHandle destination, SafeCudaStreamHandle source);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -1449,6 +1452,9 @@ internal static partial class GeneratedCudaManifestNativeMethods
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_cuda_stream_end_capture(SafeCudaStreamHandle stream, out SafeCudaGraphHandle out_graph);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_stream_end_capture_into_graph_safe(SafeCudaStreamHandle stream, SafeCudaGraphHandle graph);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_cuda_stream_get_attribute(SafeCudaStreamHandle stream, int attribute, IntPtr value);
