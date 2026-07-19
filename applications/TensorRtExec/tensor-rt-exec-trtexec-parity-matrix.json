@@ -209,12 +209,12 @@
     {
       "id": "binding-metadata",
       "trtexecOption": "--loadInputs --dumpOutput --dumpRawBindingsToFile --exportOutput",
-      "tensorRtExecStatus": "synthetic-runtime-ready-external-guarded",
-      "entryPoints": ["RuntimeOptions", "YoloRuntimeOutputTensor", "OnnxSampleMultiOutputResult"],
-      "proofBoundary": "Synthetic runtime may prove a tiny pipeline; bounded external/load-engine output can prove enqueue/readback only; external ONNX binding metadata still requires real model evidence.",
+      "tensorRtExecStatus": "implemented-pointer-free-binding-report",
+      "entryPoints": ["RuntimeOptions", "YoloRuntimeOutputTensor", "OnnxSampleMultiOutputResult", "YoloVisionOutputReport.bindingMetadata", "TensorRtEngineBindingReport"],
+      "proofBoundary": "YoloVision runtime reports copy TensorRtEngineBindingReport metadata and semantic output roles without native pointers; synthetic/bounded output remains non-proof and external ONNX correctness still requires real model evidence.",
       "isRuntimeProof": false,
       "gap": "Real model input/output tensor roles, hashes, and expected evidence lines must be owner-filled.",
-      "nextStep": "Use YoloVision real asset candidate packs to collect binding metadata."
+      "nextStep": "Align bindingMetadata with YoloVision task/output contracts and owner-filled model, input, engine, output, log, and review hashes."
     },
     {
       "id": "package-consumer-runtime-proof-boundary",

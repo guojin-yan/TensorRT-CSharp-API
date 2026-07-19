@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using JYPPX.SampleSupport;
+using JYPPX.TensorRtSharp;
 
 namespace YoloVisionSample;
 
@@ -100,7 +101,8 @@ public static class YoloVisionOutputReport
         YoloRuntimeOutputSet outputs,
         YoloModelProfile profile,
         YoloVisionResult result,
-        IReadOnlyList<string> labels)
+        IReadOnlyList<string> labels,
+        TensorRtEngineBindingReport? bindingReport = null)
     {
         if (context == null)
         {
@@ -125,7 +127,7 @@ public static class YoloVisionOutputReport
         using MemoryStream stream = new MemoryStream();
         using (Utf8JsonWriter writer = new Utf8JsonWriter(stream, WriterOptions))
         {
-            WriteReport(writer, context, outputs, profile, result, labels ?? Array.Empty<string>());
+            WriteReport(writer, context, outputs, profile, result, labels ?? Array.Empty<string>(), bindingReport);
         }
 
         return Encoding.UTF8.GetString(stream.ToArray());
@@ -141,7 +143,8 @@ public static class YoloVisionOutputReport
         YoloRuntimeOutputSet outputs,
         YoloModelProfile profile,
         YoloVisionResult result,
-        IReadOnlyList<string> labels)
+        IReadOnlyList<string> labels,
+        TensorRtEngineBindingReport? bindingReport = null)
     {
         if (string.IsNullOrWhiteSpace(outputPath))
         {
@@ -155,7 +158,7 @@ public static class YoloVisionOutputReport
             Directory.CreateDirectory(directory);
         }
 
-        File.WriteAllText(fullPath, ToJson(context, outputs, profile, result, labels), Encoding.UTF8);
+        File.WriteAllText(fullPath, ToJson(context, outputs, profile, result, labels, bindingReport), Encoding.UTF8);
     }
 
     internal static void Write(
@@ -196,7 +199,8 @@ public static class YoloVisionOutputReport
             outputs,
             profile,
             result,
-            labels);
+            labels,
+            run.Report);
     }
 
     private static void WriteReport(
@@ -205,7 +209,8 @@ public static class YoloVisionOutputReport
         YoloRuntimeOutputSet outputs,
         YoloModelProfile profile,
         YoloVisionResult result,
-        IReadOnlyList<string> labels)
+        IReadOnlyList<string> labels,
+        TensorRtEngineBindingReport? bindingReport)
     {
         writer.WriteStartObject();
         writer.WriteString("schemaVersion", SchemaVersion);
@@ -216,6 +221,10 @@ public static class YoloVisionOutputReport
         WriteEngine(writer, context);
         WriteRuntime(writer, context);
         WriteOutputs(writer, outputs);
+        if (bindingReport != null)
+        {
+            WriteBindingMetadata(writer, bindingReport, outputs);
+        }
         WritePostprocess(writer, profile);
         WritePredictions(writer, result, labels);
         WriteBoundary(writer);
@@ -345,6 +354,93 @@ public static class YoloVisionOutputReport
         }
 
         writer.WriteEndArray();
+    }
+
+    private static void WriteBindingMetadata(
+        Utf8JsonWriter writer,
+        TensorRtEngineBindingReport bindingReport,
+        YoloRuntimeOutputSet outputs)
+    {
+        writer.WritePropertyName("bindingMetadata");
+        writer.WriteStartObject();
+        writer.WriteString("engineName", bindingReport.EngineName);
+        writer.WriteNumber("profileIndex", bindingReport.ProfileIndex);
+        writer.WriteBoolean("isReadyForEnqueue", bindingReport.IsReadyForEnqueue);
+        writer.WriteString("evidenceKind", "copied-pointer-free-TensorRtEngineBindingReport; not runtime proof");
+        writer.WriteBoolean("isRuntimeProof", false);
+        writer.WritePropertyName("tensors");
+        writer.WriteStartArray();
+        foreach (TensorRtEngineTensorBinding binding in bindingReport.Tensors)
+        {
+            YoloRuntimeOutputTensor? runtimeOutput = outputs.Outputs.FirstOrDefault(
+                item => string.Equals(item.Name, binding.Name, StringComparison.Ordinal));
+            string semanticRole = runtimeOutput != null
+                ? ToSchemaRole(runtimeOutput.Role)
+                : binding.IOMode == TensorRtIOMode.Input ? "input" : "unassigned";
+            writer.WriteStartObject();
+            writer.WriteNumber("index", binding.Index);
+            writer.WriteString("name", binding.Name);
+            writer.WriteString("ioMode", binding.IOMode.ToString());
+            writer.WriteString("semanticRole", semanticRole);
+            writer.WriteString("dataType", binding.DataType.ToString());
+            WriteDimsProperty(writer, "engineShape", binding.EngineShape);
+            writer.WriteString("location", binding.Location.ToString());
+            writer.WriteBoolean("isShapeInferenceIO", binding.IsShapeInferenceIO);
+            writer.WriteNumber("bytesPerComponent", binding.BytesPerComponent);
+            writer.WriteNumber("componentsPerElement", binding.ComponentsPerElement);
+            writer.WriteNumber("effectiveBytesPerComponent", binding.EffectiveBytesPerComponent);
+            writer.WriteNumber("effectiveComponentsPerElement", binding.EffectiveComponentsPerElement);
+            writer.WriteBoolean("usesDataTypeSizeFallback", binding.UsesDataTypeSizeFallback);
+            writer.WriteString("format", binding.Format.ToString());
+            writer.WriteString("formatDescription", binding.FormatDescription);
+            writer.WriteNumber("vectorizedDimension", binding.VectorizedDimension);
+            writer.WriteNumber("profileIndex", binding.ProfileIndex);
+            WriteOptionalDimsProperty(writer, "profileMinShape", binding.ProfileMinShape);
+            WriteOptionalDimsProperty(writer, "profileOptShape", binding.ProfileOptShape);
+            WriteOptionalDimsProperty(writer, "profileMaxShape", binding.ProfileMaxShape);
+            writer.WriteBoolean("valueCaptured", runtimeOutput != null);
+            if (runtimeOutput != null)
+            {
+                WriteIntArrayProperty(writer, "runtimeShape", runtimeOutput.Shape);
+            }
+
+            writer.WritePropertyName("diagnostics");
+            writer.WriteStartArray();
+            foreach (string diagnostic in binding.Diagnostics ?? Array.Empty<string>())
+            {
+                writer.WriteStringValue(diagnostic);
+            }
+
+            writer.WriteEndArray();
+            writer.WriteEndObject();
+        }
+
+        writer.WriteEndArray();
+        writer.WriteEndObject();
+    }
+
+    private static void WriteDimsProperty(Utf8JsonWriter writer, string propertyName, TensorRtDims dims)
+    {
+        writer.WritePropertyName(propertyName);
+        WriteIntArray(writer, dims.Values);
+    }
+
+    private static void WriteOptionalDimsProperty(Utf8JsonWriter writer, string propertyName, TensorRtDims? dims)
+    {
+        writer.WritePropertyName(propertyName);
+        if (dims == null)
+        {
+            writer.WriteNullValue();
+            return;
+        }
+
+        WriteIntArray(writer, dims.Values);
+    }
+
+    private static void WriteIntArrayProperty(Utf8JsonWriter writer, string propertyName, IReadOnlyList<int> values)
+    {
+        writer.WritePropertyName(propertyName);
+        WriteIntArray(writer, values);
     }
 
     private static void WritePostprocess(Utf8JsonWriter writer, YoloModelProfile profile)

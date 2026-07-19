@@ -159,13 +159,13 @@
     {
       "id": "binding-metadata",
       "officialTrtexecParity": "--loadInputs --dumpOutput --dumpRawBindingsToFile --exportOutput",
-      "currentStatus": "bounded-artifact-gui-cli",
+      "currentStatus": "implemented-pointer-free-binding-report",
       "isRuntimeProof": false,
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": true,
       "winFormsSupported": true,
       "nextImplementationPaths": ["samples/YoloVision", "samples/YoloVision/yolovision-task-output-contract.json", "eng/Test-YoloVisionRealAssetCandidate.ps1", "eng/Test-YoloVisionRealAssetOwnerBackfillPack.ps1"],
-      "nextStep": "GUI and CLI expose bounded input/output artifact fields; use yolovision-task-output-contract.json plus YoloVision real cases to capture task-specific output roles, required metadata, and hashes."
+      "nextStep": "Use bindingMetadata plus YoloVision real asset candidate packs to capture task-specific output roles, required metadata, hashes, and owner review; keep proof promotion external."
     },
     {
       "id": "winforms-command-surface",

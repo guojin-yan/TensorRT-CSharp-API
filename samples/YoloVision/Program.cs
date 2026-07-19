@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using JYPPX.SampleSupport;
+using JYPPX.TensorRtSharp;
 
 namespace YoloVisionSample;
 
@@ -104,6 +105,7 @@ internal static class Program
 
             Console.WriteLine($"Input={result.InputName}:{result.InputShape} Output={primaryOutput.Name}:{primaryOutput.Shape} Outputs={result.Outputs.Count}");
             Console.WriteLine($"ProfileIndex={result.ProfileIndex} EngineDeviceMemory={result.EngineDeviceMemoryBytes}");
+            PrintBindingReport(result.Report);
             Console.WriteLine($"Execution {result.ExecutionSummary} ElapsedMs={result.ElapsedMilliseconds:0.###}");
 
             YoloRuntimeOutputSet runtimeOutputs = new YoloRuntimeOutputSet(result.Outputs.Select(output =>
@@ -250,6 +252,21 @@ internal static class Program
             Console.WriteLine(
                 $"Detection Class={TensorRtOnnxSample.LabelOrIndex(labels, detection.ClassIndex)} Score={detection.Score:0.######} " +
                 $"BoxCxCyWh={detection.CenterX:0.###},{detection.CenterY:0.###},{detection.Width:0.###},{detection.Height:0.###}");
+        }
+    }
+
+    private static void PrintBindingReport(TensorRtEngineBindingReport report)
+    {
+        Console.WriteLine(
+            $"BindingReport Ready={report.IsReadyForEnqueue} Profile={report.ProfileIndex} " +
+            $"Tensors={report.Tensors.Count} Inputs={report.GetInputs().Count} Outputs={report.GetOutputs().Count}");
+        foreach (TensorRtEngineTensorBinding binding in report.Tensors)
+        {
+            Console.WriteLine(
+                $"BindingMetadata Index={binding.Index} Name={binding.Name} Mode={binding.IOMode} " +
+                $"DataType={binding.DataType} Shape={binding.EngineShape} Location={binding.Location} " +
+                $"Format={binding.Format} VectorizedDimension={binding.VectorizedDimension} " +
+                $"Profile={binding.ProfileIndex}");
         }
     }
 

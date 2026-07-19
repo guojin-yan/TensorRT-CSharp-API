@@ -26,7 +26,7 @@
 | profiling | implemented-report | 是 | 是 | 真实 enqueue log 后才能晋级 |
 | layer-dump | implemented-inspector-readback | 是 | 是 | 真实 build/load-engine 会复制 inspector layer text 并可导出文件；仍是 diagnostic metadata |
 | verbose-logging | implemented-report | 是 | 是 | hash owner stdout/stderr/log |
-| binding-metadata | bounded-artifact-gui-cli | 是 | 是 | GUI/CLI 已暴露 load/dump/export 字段，使用 YoloVision 六任务模板补真实输出角色 |
+| binding-metadata | implemented-pointer-free-binding-report | 是 | 是 | YoloVision 输出 JSON/控制台复制 `TensorRtEngineBindingReport` 的 role、dtype、shape、format、profile 和 diagnostics；仍需真实模型 owner 证据 |
 | winforms-command-surface | checklist-backed-command-preview | 否 | 是 | 继续用 GUI/CLI 字段映射和命令预览锁定非 proof 边界 |
 | package-consumer-runtime-proof-boundary | owner-action-required | 否 | 否 | 等待公开包外部 consumer proof |
 

@@ -1,5 +1,7 @@
 using System.Reflection;
 using System.Text.Json;
+using System.IO;
+using JYPPX.TensorRtSharp;
 using Xunit;
 using YoloVisionSample;
 
@@ -7,6 +9,16 @@ namespace JYPPX.ProjectQuality.Tests;
 
 public sealed class YoloVisionManagedPipelineTests
 {
+    [Fact]
+    public void ProgramEmitsPointerFreeBindingMetadataSummary()
+    {
+        string program = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "Program.cs"));
+        Assert.Contains("BindingReport Ready=", program, StringComparison.Ordinal);
+        Assert.Contains("BindingMetadata Index=", program, StringComparison.Ordinal);
+        Assert.Contains("TensorRtEngineBindingReport", program, StringComparison.Ordinal);
+        Assert.DoesNotContain("IntPtr", program, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void OnnxSampleSupportLoadsExternalRawAndFloatTensorInputs()
     {
@@ -245,6 +257,99 @@ public sealed class YoloVisionManagedPipelineTests
         {
             Directory.Delete(directory, recursive: true);
         }
+    }
+
+    [Fact]
+    public void OutputReportIncludesPointerFreeBindingMetadataAndSemanticRoleMapping()
+    {
+        YoloModelProfile profile = YoloModelProfile.FromArgs(new[]
+        {
+            "--family", "v8",
+            "--task", "det",
+            "--layout", "boxes-first",
+            "--class-count", "2"
+        }, labelCount: 2);
+        YoloRuntimeOutputSet outputs = new YoloRuntimeOutputSet(new[]
+        {
+            new YoloRuntimeOutputTensor(
+                "boxes",
+                YoloOutputTensorRole.Detection,
+                new[] { 10.0f, 10.0f, 2.0f, 2.0f, 0.9f, 0.8f, 0.1f },
+                new[] { 1, 1, 7 })
+        });
+        YoloVisionResult result = YoloSampleRunner.DecodeRuntimeOutputs(outputs, profile);
+        TensorRtEngineBindingReport bindingReport = new TensorRtEngineBindingReport(
+            "binding-fixture",
+            profileIndex: 0,
+            new[]
+            {
+                new TensorRtEngineTensorBinding(
+                    index: 0,
+                    name: "images",
+                    TensorRtDataType.Float,
+                    TensorRtIOMode.Input,
+                    new TensorRtDims(new[] { -1, 3, 640, 640 }),
+                    TensorRtTensorLocation.Device,
+                    isShapeInferenceIO: false,
+                    bytesPerComponent: 4,
+                    componentsPerElement: 1,
+                    TensorRtTensorFormat.Linear,
+                    formatDescription: "Linear",
+                    vectorizedDimension: -1,
+                    profileIndex: 0,
+                    profileMinShape: new TensorRtDims(new[] { 1, 3, 640, 640 }),
+                    profileOptShape: new TensorRtDims(new[] { 1, 3, 640, 640 }),
+                    profileMaxShape: new TensorRtDims(new[] { 4, 3, 640, 640 }),
+                    diagnostics: Array.Empty<string>()),
+                new TensorRtEngineTensorBinding(
+                    index: 1,
+                    name: "boxes",
+                    TensorRtDataType.Float,
+                    TensorRtIOMode.Output,
+                    new TensorRtDims(new[] { 1, 1, 7 }),
+                    TensorRtTensorLocation.Device,
+                    isShapeInferenceIO: false,
+                    bytesPerComponent: 4,
+                    componentsPerElement: 1,
+                    TensorRtTensorFormat.Linear,
+                    formatDescription: "Linear",
+                    vectorizedDimension: -1,
+                    profileIndex: 0,
+                    profileMinShape: null,
+                    profileOptShape: null,
+                    profileMaxShape: null,
+                    diagnostics: new[] { "fixture-diagnostic" })
+            },
+            readiness: null);
+
+        using JsonDocument document = JsonDocument.Parse(YoloVisionOutputReport.ToJson(
+            new YoloVisionOutputReportContext(
+                "model.onnx",
+                string.Empty,
+                string.Empty,
+                "ramp",
+                new[] { 1, 3, 640, 640 },
+                tensorRtLine: 10,
+                profileIndex: 0,
+                engineDeviceMemoryBytes: 1024,
+                elapsedMilliseconds: 1.0),
+            outputs,
+            profile,
+            result,
+            new[] { "person", "car" },
+            bindingReport));
+
+        JsonElement bindingMetadata = document.RootElement.GetProperty("bindingMetadata");
+        Assert.Equal("binding-fixture", bindingMetadata.GetProperty("engineName").GetString());
+        Assert.False(bindingMetadata.GetProperty("isRuntimeProof").GetBoolean());
+        JsonElement[] tensors = bindingMetadata.GetProperty("tensors").EnumerateArray().ToArray();
+        Assert.Equal(2, tensors.Length);
+        Assert.Equal("input", tensors[0].GetProperty("semanticRole").GetString());
+        Assert.False(tensors[0].GetProperty("valueCaptured").GetBoolean());
+        Assert.Equal("boxes", tensors[1].GetProperty("semanticRole").GetString());
+        Assert.True(tensors[1].GetProperty("valueCaptured").GetBoolean());
+        Assert.Equal(3, tensors[1].GetProperty("runtimeShape").GetArrayLength());
+        Assert.Contains("fixture-diagnostic", tensors[1].GetProperty("diagnostics").EnumerateArray().Select(static item => item.GetString()), StringComparer.Ordinal);
     }
 
     [Fact]

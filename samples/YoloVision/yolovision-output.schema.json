@@ -343,6 +343,109 @@
         }
       }
     },
+    "bindingMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "engineName",
+        "profileIndex",
+        "isReadyForEnqueue",
+        "evidenceKind",
+        "isRuntimeProof",
+        "tensors"
+      ],
+      "properties": {
+        "engineName": {
+          "type": "string"
+        },
+        "profileIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "isReadyForEnqueue": {
+          "type": "boolean"
+        },
+        "evidenceKind": {
+          "type": "string",
+          "const": "copied-pointer-free-TensorRtEngineBindingReport; not runtime proof"
+        },
+        "isRuntimeProof": {
+          "type": "boolean",
+          "const": false
+        },
+        "tensors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "index",
+              "name",
+              "ioMode",
+              "semanticRole",
+              "dataType",
+              "engineShape",
+              "location",
+              "isShapeInferenceIO",
+              "bytesPerComponent",
+              "componentsPerElement",
+              "effectiveBytesPerComponent",
+              "effectiveComponentsPerElement",
+              "usesDataTypeSizeFallback",
+              "format",
+              "formatDescription",
+              "vectorizedDimension",
+              "profileIndex",
+              "profileMinShape",
+              "profileOptShape",
+              "profileMaxShape",
+              "valueCaptured",
+              "diagnostics"
+            ],
+            "properties": {
+              "index": { "type": "integer", "minimum": 0 },
+              "name": { "type": "string" },
+              "ioMode": { "type": "string", "enum": ["Unknown", "Input", "Output"] },
+              "semanticRole": { "type": "string" },
+              "dataType": { "type": "string" },
+              "engineShape": { "type": "array", "items": { "type": "integer" } },
+              "location": { "type": "string", "enum": ["Device", "Host"] },
+              "isShapeInferenceIO": { "type": "boolean" },
+              "bytesPerComponent": { "type": "integer" },
+              "componentsPerElement": { "type": "integer" },
+              "effectiveBytesPerComponent": { "type": "integer", "minimum": 0 },
+              "effectiveComponentsPerElement": { "type": "integer", "minimum": 0 },
+              "usesDataTypeSizeFallback": { "type": "boolean" },
+              "format": { "type": "string" },
+              "formatDescription": { "type": "string" },
+              "vectorizedDimension": { "type": "integer" },
+              "profileIndex": { "type": "integer", "minimum": 0 },
+              "profileMinShape": {
+                "oneOf": [
+                  { "type": "null" },
+                  { "type": "array", "items": { "type": "integer" } }
+                ]
+              },
+              "profileOptShape": {
+                "oneOf": [
+                  { "type": "null" },
+                  { "type": "array", "items": { "type": "integer" } }
+                ]
+              },
+              "profileMaxShape": {
+                "oneOf": [
+                  { "type": "null" },
+                  { "type": "array", "items": { "type": "integer" } }
+                ]
+              },
+              "valueCaptured": { "type": "boolean" },
+              "runtimeShape": { "type": "array", "items": { "type": "integer" } },
+              "diagnostics": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        }
+      }
+    },
     "postprocess": {
       "type": "object",
       "additionalProperties": true,

@@ -45,6 +45,17 @@ TensorRtOnnxSample.RunSingleFloatInputOutputs(...)
 
 `YoloVision` 在此基础上用 `YoloRuntimeOutputTensor` 标记输出角色，例如 `Detection`、`MaskPrototypes`、`PoseKeypoints`、`ObbAngles`。这样后续真实 runtime 多输出模型接入时，不需要重写 seg/pose/obb 的托管后处理，只要把 runtime 输出按角色放进 `YoloRuntimeOutputSet`。
 
+## Runtime Binding Metadata：先确认绑定，再解释输出
+
+真实运行路径现在还会把已有 `TensorRtEngineBindingReport` 复制到输出 JSON 的 `bindingMetadata` 节点，并在控制台打印 `BindingReport` / `BindingMetadata` 摘要。每个 tensor 会记录：
+
+- `index`、`name`、`ioMode`、`semanticRole`、`dataType`、`engineShape`；
+- `location`、`format`、`formatDescription`、`vectorizedDimension`；
+- `profileMinShape`、`profileOptShape`、`profileMaxShape`；
+- `bytesPerComponent`、`componentsPerElement`、数据类型大小回退状态和非致命 diagnostics。
+
+这条路径只复制 managed binding snapshot，不返回 native pointer，也不改变 engine/context ownership。`bindingMetadata.isRuntimeProof` 固定为 `false`：它证明的是绑定元数据已被读取和归档，不证明模型输出语义、图片质量、真实模型正确性或 package-consumer-runtime。
+
 ## Detection：先确定 box 输出
 
 检测输出常见两种布局：
