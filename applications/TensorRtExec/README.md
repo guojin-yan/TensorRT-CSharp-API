@@ -106,7 +106,7 @@ dotnet run --project .\applications\TensorRtExec -- --ui
 
 ## 报告与证据边界
 
-报告可导出为 `.json` 或 `.md`，推荐参数是 `--exportReport`，同时兼容 `--report` 并在 normalized command 中归一化为 `--exportReport`。JSON schema 位于 `applications/TensorRtExec/tensor-rt-exec-report.schema.json`，并与 `OnnxEngineBuildDiagnostics.ToJson` 的真实输出对齐。核心字段包括 `ProofClassification`、`BuildEvidenceOnly`、`DryRun`、`NormalizedCommandLine`、`NormalizedCommandSha256`、`DeploymentOptions`、`RuntimeOptions`、`InferenceRan`、`OutputMatch`、`IsRuntimeExecutionProof`、`IsRealModelRuntimeProof`、`IsPackageConsumerRuntimeProof`、`PreflightMetadata`、`LoadedEngineDiagnostics`、`CapabilityProbe`、`WorkspaceBytes`、`OptionImplementationStatus` 和 `ReportBoundary`。
+报告可导出为 `.json` 或 `.md`，推荐参数是 `--exportReport`，同时兼容 `--report` 并在 normalized command 中归一化为 `--exportReport`。JSON schema 位于 `applications/TensorRtExec/tensor-rt-exec-report.schema.json`，并与 `OnnxEngineBuildDiagnostics.ToJson` 的真实输出对齐。核心字段包括 `ProofClassification`、`BuildEvidenceOnly`、`DryRun`、`NormalizedCommandLine`、`NormalizedCommandSha256`、`DeploymentOptions`、`BuilderConfigDeploymentSnapshot`、`RuntimeOptions`、`InferenceRan`、`OutputMatch`、`IsRuntimeExecutionProof`、`IsRealModelRuntimeProof`、`IsPackageConsumerRuntimeProof`、`PreflightMetadata`、`LoadedEngineDiagnostics`、`CapabilityProbe`、`WorkspaceBytes`、`OptionImplementationStatus` 和 `ReportBoundary`。`DeploymentOptions` 记录请求值，`BuilderConfigDeploymentSnapshot` 记录成功创建 builder config 后的 pointer-free copied readback；两者可用于检查 timing、workspace、device/DLA、flags、tactic 和版本差异，但仍只是 build/deployment diagnostics。
 
 报告 JSON 可用下面的 validator 做发布前边界检查：
 

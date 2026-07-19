@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "builder-config-deployment-readback-proof.v1",
+  "recordKind": "cross-version-builder-config-copied-readback",
+  "generatedAtUtc": "2026-07-19T00:00:00Z",
+  "scope": "OnnxToEngine and TensorRtExec build/report path",
+  "versionMatrix": [
+    { "tensorRtLine": "8", "nativeRoute": "jyppx_trt8_builder_config_*", "readback": "available-when-vendor-runtime-is-loaded" },
+    { "tensorRtLine": "10", "nativeRoute": "jyppx_trt10_builder_config_*", "readback": "available-when-vendor-runtime-is-loaded" },
+    { "tensorRtLine": "11", "nativeRoute": "jyppx_trt11_builder_config_*", "readback": "available-when-vendor-runtime-is-loaded" }
+  ],
+  "capturedFields": [
+    "OptimizationProfileCount",
+    "Flags",
+    "WorkspaceMemoryPoolLimitInBytes",
+    "OptimizationLevel",
+    "ProfilingVerbosity",
+    "MaxAuxStreams",
+    "AverageTimingIterations",
+    "TacticSources",
+    "DefaultDeviceType",
+    "DlaCore",
+    "TilingOptimizationLevel",
+    "L2LimitForTilingInBytes",
+    "MaxTactics",
+    "HasTimingCache",
+    "SerializedPluginSnapshot",
+    "Diagnostics"
+  ],
+  "managedSurface": "OnnxEngineBuildResult.BuilderConfigDeploymentSnapshot",
+  "reportSurface": "OnnxEngineBuildDiagnostics.ToJson and ToMarkdown",
+  "copyMode": "managed snapshot after deployment options and optimization profile application",
+  "pointerFree": true,
+  "isRuntimeExecutionProof": false,
+  "isRealModelRuntimeProof": false,
+  "isPackageConsumerRuntimeProof": false,
+  "dependencyProbeObservedThisRun": true,
+  "dependencyProbeBoundary": "TRT8/CUDA12.1 bridge loaded and reported runtime/builder availability, but vendor runtime creation raised structured exception 3228369022 before builder-config creation; no copied readback result is claimed.",
+  "deferredHistoryRetained": true,
+  "forbiddenSubstitutes": [
+    "dry-run",
+    "command preview",
+    "ProjectReference",
+    "direct .nupkg",
+    "local feed",
+    "TensorRtExec report as runtime proof"
+  ]
+}

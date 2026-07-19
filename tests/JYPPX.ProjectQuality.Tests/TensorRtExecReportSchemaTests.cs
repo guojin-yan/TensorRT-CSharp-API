@@ -50,6 +50,8 @@ public sealed class TensorRtExecReportSchemaTests
                      "WeightStreamingRequested",
                      "capability-probe-only",
                      "WorkspaceBytes",
+                     "BuilderConfigDeploymentSnapshot",
+                     "Copied builder-config readback",
                      "OptionImplementationStatus",
                      "ParsedOptions",
                      "AppliedOptions",
@@ -172,6 +174,24 @@ public sealed class TensorRtExecReportSchemaTests
         Assert.True(reportRoot.GetProperty("CapabilityProbe").TryGetProperty("EvidenceBoundary", out _));
         Assert.False(reportRoot.GetProperty("CapabilityProbe").GetProperty("Attempted").GetBoolean());
         Assert.Contains("capability-probe-only", reportRoot.GetProperty("OptionImplementationStatus").GetProperty("EvidenceBoundary").GetString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void BuilderConfigReadbackProofArtifactMatchesReportBoundary()
+    {
+        string artifactPath = Path.Combine(RepositoryPaths.Root, "artifacts", "interface-coverage", "builder-config-deployment-readback-proof.json");
+        string markdownPath = Path.Combine(RepositoryPaths.Root, "artifacts", "interface-coverage", "builder-config-deployment-readback-proof.md");
+        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(artifactPath));
+        JsonElement root = document.RootElement;
+
+        Assert.Equal("cross-version-builder-config-copied-readback", root.GetProperty("recordKind").GetString());
+        Assert.True(root.GetProperty("pointerFree").GetBoolean());
+        Assert.False(root.GetProperty("isRuntimeExecutionProof").GetBoolean());
+        Assert.False(root.GetProperty("isRealModelRuntimeProof").GetBoolean());
+        Assert.False(root.GetProperty("isPackageConsumerRuntimeProof").GetBoolean());
+        Assert.True(root.GetProperty("deferredHistoryRetained").GetBoolean());
+        Assert.Contains("BuilderConfigDeploymentSnapshot", File.ReadAllText(markdownPath), StringComparison.Ordinal);
+        Assert.Contains("dependency-probe-only", File.ReadAllText(markdownPath), StringComparison.Ordinal);
     }
 
     [Fact]

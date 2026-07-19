@@ -44,6 +44,7 @@ public static class TensorRtExecCommand
             }
 
             System.Console.WriteLine("TensorRtExec WorkspaceBytes=" + report.WorkspaceBytes);
+            System.Console.WriteLine("TensorRtExec BuilderConfigDeploymentSnapshot=" + report.BuilderConfigDeploymentSnapshotState + " Diagnostics=" + report.BuilderConfigDeploymentDiagnosticCount);
             System.Console.WriteLine("TensorRtExec State=" + report.State + " Success=" + report.Success);
             return report.Success ? 0 : 2;
         }

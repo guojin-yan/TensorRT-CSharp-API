@@ -220,6 +220,7 @@ public sealed class OnnxEngineBuildService
         }
 
         int profileIndex = AddOptimizationProfile(builder, config, options);
+        TensorRtBuilderConfigDeploymentSnapshot? builderConfigDeploymentSnapshot = TryGetBuilderConfigDeploymentSnapshot(config, log);
         string enginePath = string.IsNullOrWhiteSpace(options.SaveEnginePath)
             ? Path.Combine(Path.GetTempPath(), $"jyppx-onnx-to-engine-{Guid.NewGuid():N}.plan")
             : options.SaveEnginePath;
@@ -257,7 +258,8 @@ public sealed class OnnxEngineBuildService
                     skipReason: string.Empty,
                     log,
                     evidenceSidecar,
-                    timingCacheArtifact: timingCache.Artifact);
+                    timingCacheArtifact: timingCache.Artifact,
+                    builderConfigDeploymentSnapshot: builderConfigDeploymentSnapshot);
                 OnnxEngineBuildDiagnostics.WriteReport(buildOnly, options.ExportReportPath);
                 OnnxEngineRuntimeArtifactWriter.WriteArtifacts(buildOnly);
                 return buildOnly;
@@ -288,7 +290,8 @@ public sealed class OnnxEngineBuildService
                     evidenceSidecar,
                     benchmarkSummary: runtimeExecution?.BenchmarkSummary,
                     loadedEngineDiagnostics: ProbeLoadedEngineDiagnostics(options, OnnxEnginePreflightMetadata.FromExistingEngine(enginePath), log),
-                    timingCacheArtifact: timingCache.Artifact);
+                    timingCacheArtifact: timingCache.Artifact,
+                    builderConfigDeploymentSnapshot: builderConfigDeploymentSnapshot);
                 OnnxEngineBuildDiagnostics.WriteReport(externalRuntime, options.ExportReportPath);
                 OnnxEngineRuntimeArtifactWriter.WriteArtifacts(externalRuntime, runtimeExecution?.ArtifactData);
                 return externalRuntime;
@@ -358,7 +361,8 @@ public sealed class OnnxEngineBuildService
                     options.RuntimeOptions,
                     inferenceRan: true,
                     outputMatch: true),
-                timingCacheArtifact: timingCache.Artifact);
+                timingCacheArtifact: timingCache.Artifact,
+                builderConfigDeploymentSnapshot: builderConfigDeploymentSnapshot);
             OnnxEngineBuildDiagnostics.WriteReport(roundTrip, options.ExportReportPath);
             OnnxEngineRuntimeArtifactWriter.WriteArtifacts(
                 roundTrip,
@@ -655,7 +659,8 @@ public sealed class OnnxEngineBuildService
         OnnxEngineBenchmarkSummary? benchmarkSummary = null,
         OnnxEnginePreflightMetadata? preflightMetadata = null,
         OnnxLoadedEngineDiagnostics? loadedEngineDiagnostics = null,
-        OnnxEngineTimingCacheArtifact? timingCacheArtifact = null)
+        OnnxEngineTimingCacheArtifact? timingCacheArtifact = null,
+        TensorRtBuilderConfigDeploymentSnapshot? builderConfigDeploymentSnapshot = null)
     {
         OnnxEngineCapabilityProbe capabilityProbe = ProbeCapabilities(options);
         logLines = AppendCapabilityProbeLog(logLines, capabilityProbe);
@@ -686,7 +691,25 @@ public sealed class OnnxEngineBuildService
             loadedEngineDiagnostics,
             timingCacheArtifact: timingCacheArtifact,
             capabilityProbe: capabilityProbe,
-            workspaceBytes: options.WorkspaceBytes);
+            workspaceBytes: options.WorkspaceBytes,
+            builderConfigDeploymentSnapshot: builderConfigDeploymentSnapshot);
+    }
+
+    private static TensorRtBuilderConfigDeploymentSnapshot? TryGetBuilderConfigDeploymentSnapshot(
+        TensorRtBuilderConfig config,
+        List<string> log)
+    {
+        try
+        {
+            TensorRtBuilderConfigDeploymentSnapshot snapshot = config.GetDeploymentSnapshot();
+            log.Add($"BuilderConfigDeploymentSnapshot State=copied-readback Diagnostics={snapshot.Diagnostics.Count} Summary={snapshot}");
+            return snapshot;
+        }
+        catch (Exception exception) when (exception is BridgeProbeException || exception is NotSupportedException || exception is InvalidOperationException)
+        {
+            log.Add($"BuilderConfigDeploymentSnapshot State=unavailable Reason={exception.GetType().Name}:{exception.Message}");
+            return null;
+        }
     }
 
     private static IReadOnlyList<string> AppendCapabilityProbeLog(IReadOnlyList<string> logLines, OnnxEngineCapabilityProbe capabilityProbe)

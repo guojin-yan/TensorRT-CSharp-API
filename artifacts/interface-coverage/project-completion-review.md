@@ -1,5 +1,11 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-19 BuilderConfig Deployment Readback 收口
+
+本批将已有 `TensorRtBuilderConfig.GetDeploymentSnapshot()` 接入 `OnnxEngineBuildService`、`OnnxEngineBuildResult`、TensorRtExec CLI/WinForms 与报告 schema。`DeploymentOptions` 记录请求值，`BuilderConfigDeploymentSnapshot` 记录 builder config 成功创建后复制读回的 timing、workspace、device/DLA、flags、tactic、plugin path 和 diagnostics。该字段保持 pointer-free，不新增 native ownership API，也不删除 deferred history。
+
+本机 dry-run 保持 `precheck`；TRT8/CUDA12.1 bridge 加载后在 vendor runtime creation 触发 structured exception `3228369022`，因此本批没有伪造真实 readback。证据分类仍为 `build-only`/`dependency-probe-only`，`isRuntimeExecutionProof=false`、`isRealModelRuntimeProof=false`、`isPackageConsumerRuntimeProof=false`。详见 `artifacts/interface-coverage/builder-config-deployment-readback-proof.{json,md}`。
+
 生成日期：2026-07-18
 
 ## 审查范围

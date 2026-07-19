@@ -38,7 +38,9 @@ public sealed class TensorRtExecService
             result.LoadedEngineDiagnostics.Attempted,
             result.LoadedEngineDiagnostics.Succeeded,
             result.LoadedEngineDiagnostics.EvidenceBoundary,
-            result.WorkspaceBytes);
+            result.WorkspaceBytes,
+            result.BuilderConfigDeploymentSnapshot == null ? "unavailable" : "copied-readback",
+            result.BuilderConfigDeploymentSnapshot?.Diagnostics.Count ?? 0);
     }
 
 }

@@ -29,6 +29,7 @@
     "TimingCacheArtifact",
     "CapabilityProbe",
     "WorkspaceBytes",
+    "BuilderConfigDeploymentSnapshot",
     "OptionImplementationStatus",
     "BenchmarkSummary",
     "ProofClassification",
@@ -215,6 +216,11 @@
       }
     },
     "WorkspaceBytes": { "type": "integer" },
+    "BuilderConfigDeploymentSnapshot": {
+      "type": [ "object", "null" ],
+      "description": "Copied builder-config readback after applying deployment options. This is build/deployment diagnostics only, not runtime proof.",
+      "additionalProperties": true
+    },
     "OptionImplementationStatus": {
       "type": "object",
       "additionalProperties": false,

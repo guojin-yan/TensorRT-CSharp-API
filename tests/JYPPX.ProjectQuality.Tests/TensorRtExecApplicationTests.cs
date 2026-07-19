@@ -81,6 +81,7 @@ public sealed class TensorRtExecApplicationTests
         Assert.Contains("public string NormalizedCommandSha256", File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "TensorRtExec", "Core", "TensorRtExecReport.cs")), StringComparison.Ordinal);
         Assert.Contains("public string LoadEngineDiagnosticsState", File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "TensorRtExec", "Core", "TensorRtExecReport.cs")), StringComparison.Ordinal);
         Assert.Contains("public ulong WorkspaceBytes", File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "TensorRtExec", "Core", "TensorRtExecReport.cs")), StringComparison.Ordinal);
+        Assert.Contains("BuilderConfigDeploymentSnapshotState", File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "TensorRtExec", "Core", "TensorRtExecReport.cs")), StringComparison.Ordinal);
         Assert.Contains("DeploymentOptions", toolsOptionsSource, StringComparison.Ordinal);
         Assert.Contains("RuntimeOptions", toolsOptionsSource, StringComparison.Ordinal);
         Assert.Contains("PreflightMetadata", File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "OnnxEngineBuildDiagnostics.cs")), StringComparison.Ordinal);
@@ -378,6 +379,7 @@ public sealed class TensorRtExecApplicationTests
         Assert.Contains("TensorRtExec NormalizedCommandSha256=", commandSource, StringComparison.Ordinal);
         Assert.Contains("TensorRtExec LoadEngineDiagnosticsState=", commandSource, StringComparison.Ordinal);
         Assert.Contains("TensorRtExec WorkspaceBytes=", commandSource, StringComparison.Ordinal);
+        Assert.Contains("TensorRtExec BuilderConfigDeploymentSnapshot=", commandSource, StringComparison.Ordinal);
         Assert.Contains("TensorRtExec ReportPath=", commandSource, StringComparison.Ordinal);
         Assert.Contains("--evidenceSidecar <evidence.json>", commandSource, StringComparison.Ordinal);
         Assert.Contains("PreflightMetadata", File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "TensorRtExec", "README.md")), StringComparison.Ordinal);
@@ -398,6 +400,7 @@ public sealed class TensorRtExecApplicationTests
         Assert.Contains("TensorRtExec NormalizedCommandSha256=", formSource, StringComparison.Ordinal);
         Assert.Contains("TensorRtExec LoadEngineDiagnosticsState=", formSource, StringComparison.Ordinal);
         Assert.Contains("TensorRtExec WorkspaceBytes=", formSource, StringComparison.Ordinal);
+        Assert.Contains("TensorRtExec BuilderConfigDeploymentSnapshot=", formSource, StringComparison.Ordinal);
         Assert.Contains("_reportPath", formSource, StringComparison.Ordinal);
         Assert.Contains("_evidenceSidecarPath", formSource, StringComparison.Ordinal);
         Assert.Contains("OnBrowseEvidenceSidecar", formSource, StringComparison.Ordinal);

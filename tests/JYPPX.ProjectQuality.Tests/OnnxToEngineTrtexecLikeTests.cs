@@ -1301,6 +1301,7 @@ public sealed class OnnxToEngineTrtexecLikeTests
             Assert.Contains("ReadbackFingerprint", OnnxEngineBuildDiagnostics.ToJson(result), StringComparison.Ordinal);
             Assert.Contains("ReadbackSha256", OnnxEngineBuildDiagnostics.ToJson(result), StringComparison.Ordinal);
             Assert.Contains("WorkspaceBytes", OnnxEngineBuildDiagnostics.ToJson(result), StringComparison.Ordinal);
+            Assert.Contains("BuilderConfigDeploymentSnapshot", OnnxEngineBuildDiagnostics.ToJson(result), StringComparison.Ordinal);
         }
         finally
         {
@@ -1309,6 +1310,44 @@ public sealed class OnnxToEngineTrtexecLikeTests
                 Directory.Delete(artifactRoot, recursive: true);
             }
         }
+    }
+
+    [Fact]
+    public void BuildReportCarriesCopiedBuilderConfigReadbackWithoutPromotingProof()
+    {
+        OnnxEngineBuildResult result = new OnnxEngineBuildResult(
+            success: true,
+            skipped: false,
+            state: "build-only",
+            tensorRtLine: JYPPX.Shared.Interop.TensorRtApiLine.TensorRt10,
+            modelSource: "embedded-dynamic-identity",
+            enginePath: "model.plan",
+            parsed: true,
+            engineSaved: true,
+            engineFileRoundTrip: false,
+            inferenceRan: false,
+            outputMatch: false,
+            profileIndex: 0,
+            elapsedMilliseconds: null,
+            skipReason: string.Empty,
+            normalizedCommandLine: "--buildOnly --avgTiming 2",
+            deploymentOptions: TrtexecLikeDeploymentOptions.Default,
+            diagnostics: Array.Empty<string>(),
+            logLines: new[] { "BuilderConfigDeploymentSnapshot State=copied-readback" });
+
+        string json = OnnxEngineBuildDiagnostics.ToJson(result);
+        string markdown = OnnxEngineBuildDiagnostics.ToMarkdown(result);
+
+        using JsonDocument document = JsonDocument.Parse(json);
+        Assert.Equal(JsonValueKind.Null, document.RootElement.GetProperty("BuilderConfigDeploymentSnapshot").ValueKind);
+        Assert.Contains("Builder config deployment snapshot: `unavailable`", markdown, StringComparison.Ordinal);
+        Assert.False(result.IsRuntimeExecutionProof);
+        Assert.False(result.IsPackageConsumerRuntimeProof);
+
+        string service = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "OnnxEngineBuildService.cs"));
+        Assert.Contains("config.GetDeploymentSnapshot()", service, StringComparison.Ordinal);
+        Assert.Contains("BuilderConfigDeploymentSnapshot State=copied-readback", service, StringComparison.Ordinal);
+        Assert.Contains("builderConfigDeploymentSnapshot: builderConfigDeploymentSnapshot", service, StringComparison.Ordinal);
     }
 
     [Fact]

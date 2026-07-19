@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using JYPPX.Shared.Interop;
+using JYPPX.TensorRtSharp;
 
 namespace JYPPX.TensorRtSharp.Tools;
 
@@ -35,7 +36,8 @@ public sealed class OnnxEngineBuildResult
         OnnxLoadedEngineDiagnostics? loadedEngineDiagnostics = null,
         OnnxEngineTimingCacheArtifact? timingCacheArtifact = null,
         OnnxEngineCapabilityProbe? capabilityProbe = null,
-        ulong workspaceBytes = 0)
+        ulong workspaceBytes = 0,
+        TensorRtBuilderConfigDeploymentSnapshot? builderConfigDeploymentSnapshot = null)
         : this(
             success,
             skipped,
@@ -62,7 +64,8 @@ public sealed class OnnxEngineBuildResult
             loadedEngineDiagnostics,
             timingCacheArtifact,
             capabilityProbe,
-            workspaceBytes)
+            workspaceBytes,
+            builderConfigDeploymentSnapshot)
     {
     }
 
@@ -92,7 +95,8 @@ public sealed class OnnxEngineBuildResult
         OnnxLoadedEngineDiagnostics? loadedEngineDiagnostics = null,
         OnnxEngineTimingCacheArtifact? timingCacheArtifact = null,
         OnnxEngineCapabilityProbe? capabilityProbe = null,
-        ulong workspaceBytes = 0)
+        ulong workspaceBytes = 0,
+        TensorRtBuilderConfigDeploymentSnapshot? builderConfigDeploymentSnapshot = null)
     {
         Success = success;
         Skipped = skipped;
@@ -117,6 +121,7 @@ public sealed class OnnxEngineBuildResult
         TimingCacheArtifact = timingCacheArtifact ?? OnnxEngineTimingCacheArtifact.Empty;
         CapabilityProbe = capabilityProbe ?? OnnxEngineCapabilityProbe.Empty;
         WorkspaceBytes = workspaceBytes;
+        BuilderConfigDeploymentSnapshot = builderConfigDeploymentSnapshot;
         Diagnostics = diagnostics ?? Array.Empty<string>();
         LogLines = logLines ?? Array.Empty<string>();
         EvidenceSidecar = evidenceSidecar ?? OnnxEngineBuildEvidenceSidecarReader.Empty;
@@ -169,6 +174,16 @@ public sealed class OnnxEngineBuildResult
     public OnnxEngineCapabilityProbe CapabilityProbe { get; }
 
     public ulong WorkspaceBytes { get; }
+
+    /// <summary>
+    /// Gets builder-config values copied after deployment options were applied.
+    /// 获取应用部署选项后复制读回的 builder-config 实际值。
+    /// </summary>
+    /// <remarks>
+    /// This is build/deployment diagnostics only. It is not model runtime or package-consumer proof.
+    /// 该数据只属于 build/deployment 诊断，不是模型 runtime 或 package-consumer proof。
+    /// </remarks>
+    public TensorRtBuilderConfigDeploymentSnapshot? BuilderConfigDeploymentSnapshot { get; }
 
     public bool IsRuntimeExecutionProof => InferenceRan && OutputMatch;
 

@@ -6,12 +6,12 @@ namespace TensorRtExecApp.Core;
 public sealed class TensorRtExecReport
 {
     public TensorRtExecReport(bool success, string state, string summary, IReadOnlyList<string> logLines)
-        : this(success, state, summary, logLines, string.Empty, false, false, string.Empty, string.Empty, string.Empty, false, false, string.Empty, false, false, string.Empty, 0)
+        : this(success, state, summary, logLines, string.Empty, false, false, string.Empty, string.Empty, string.Empty, false, false, string.Empty, false, false, string.Empty, 0, "unavailable", 0)
     {
     }
 
     public TensorRtExecReport(bool success, string state, string summary, IReadOnlyList<string> logLines, string enginePath, bool parsed, bool inferenceRan)
-        : this(success, state, summary, logLines, enginePath, parsed, inferenceRan, string.Empty, string.Empty, string.Empty, false, false, string.Empty, false, false, string.Empty, 0)
+        : this(success, state, summary, logLines, enginePath, parsed, inferenceRan, string.Empty, string.Empty, string.Empty, false, false, string.Empty, false, false, string.Empty, 0, "unavailable", 0)
     {
     }
 
@@ -32,7 +32,9 @@ public sealed class TensorRtExecReport
         bool loadEngineDiagnosticsAttempted,
         bool loadEngineDiagnosticsSucceeded,
         string loadEngineDiagnosticsBoundary,
-        ulong workspaceBytes)
+        ulong workspaceBytes,
+        string builderConfigDeploymentSnapshotState,
+        int builderConfigDeploymentDiagnosticCount)
     {
         Success = success;
         State = state ?? string.Empty;
@@ -51,6 +53,8 @@ public sealed class TensorRtExecReport
         LoadEngineDiagnosticsSucceeded = loadEngineDiagnosticsSucceeded;
         LoadEngineDiagnosticsBoundary = loadEngineDiagnosticsBoundary ?? string.Empty;
         WorkspaceBytes = workspaceBytes;
+        BuilderConfigDeploymentSnapshotState = builderConfigDeploymentSnapshotState ?? "unavailable";
+        BuilderConfigDeploymentDiagnosticCount = builderConfigDeploymentDiagnosticCount < 0 ? 0 : builderConfigDeploymentDiagnosticCount;
     }
 
     public bool Success { get; }
@@ -86,4 +90,8 @@ public sealed class TensorRtExecReport
     public string LoadEngineDiagnosticsBoundary { get; }
 
     public ulong WorkspaceBytes { get; }
+
+    public string BuilderConfigDeploymentSnapshotState { get; }
+
+    public int BuilderConfigDeploymentDiagnosticCount { get; }
 }
