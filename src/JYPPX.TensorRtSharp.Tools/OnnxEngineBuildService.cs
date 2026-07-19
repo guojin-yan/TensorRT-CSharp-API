@@ -710,7 +710,15 @@ public sealed class OnnxEngineBuildService
         bool parsed,
         List<string> log)
     {
-        TensorRtOnnxParserDiagnosticSnapshot diagnostics = parser.GetDiagnosticSnapshot();
+        TensorRtOnnxParserDiagnosticSnapshot? diagnostics = null;
+        try
+        {
+            diagnostics = parser.GetDiagnosticSnapshot();
+        }
+        catch (Exception exception) when (exception is TensorRtException || exception is BridgeProbeException || exception is NotSupportedException || exception is InvalidOperationException)
+        {
+            log.Add($"ParserDiagnostics State=unavailable Reason={exception.GetType().Name}:{exception.Message}");
+        }
         bool modelSupportAttempted = false;
         string modelSupportState = "not-attempted";
         bool modelSupported = false;
@@ -741,11 +749,11 @@ public sealed class OnnxEngineBuildService
         }
 
         OnnxEngineParserPreflightSnapshot snapshot = new OnnxEngineParserPreflightSnapshot(
-            parser.Line, true, parsed, "copied-readback", diagnostics.ErrorCount, diagnostics.Diagnostics.Count,
-            diagnostics.DiagnosticSummary, diagnostics.IdentityOperatorSupported, modelSupportAttempted,
+            parser.Line, true, parsed, diagnostics == null ? "unavailable" : "copied-readback", diagnostics?.ErrorCount ?? 0, diagnostics?.Diagnostics.Count ?? 0,
+            diagnostics?.DiagnosticSummary ?? string.Empty, diagnostics?.IdentityOperatorSupported ?? false, modelSupportAttempted,
             modelSupportState, modelSupported, supportedSubgraphCount, unsupportedSubgraphCount,
             copiedSubgraphCount, copiedSupportedSubgraphCount, copiedUnsupportedSubgraphCount, copiedNodeCount);
-        log.Add($"ParserPreflightSnapshot State=copied-readback Errors={snapshot.ErrorCount} Diagnostics={snapshot.CopiedDiagnosticCount} Identity={snapshot.IdentityOperatorSupported} ModelSupport={snapshot.ModelSupportState}:{snapshot.ModelSupported} Subgraphs={snapshot.CopiedSubgraphCount}");
+        log.Add($"ParserPreflightSnapshot State={snapshot.DiagnosticsState} Errors={snapshot.ErrorCount} Diagnostics={snapshot.CopiedDiagnosticCount} Identity={snapshot.IdentityOperatorSupported} ModelSupport={snapshot.ModelSupportState}:{snapshot.ModelSupported} Subgraphs={snapshot.CopiedSubgraphCount}");
         return snapshot;
     }
 
