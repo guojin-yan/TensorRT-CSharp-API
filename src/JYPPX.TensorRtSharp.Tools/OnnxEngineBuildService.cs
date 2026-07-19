@@ -113,7 +113,44 @@ public sealed class OnnxEngineBuildService
         log.Insert(2, $"TrtexecDeployment BuilderOptimizationLevel={options.DeploymentOptions.BuilderOptimizationLevel} MaxAuxStreams={options.DeploymentOptions.MaxAuxStreams?.ToString() ?? ""} Device={options.DeploymentOptions.DeviceOrdinal?.ToString() ?? ""} DlaCore={options.DeploymentOptions.DlaCore?.ToString() ?? ""} DirectIO={options.DeploymentOptions.DirectIO} StronglyTyped={options.DeploymentOptions.StronglyTyped}");
         log.Insert(3, RuntimeOptionsLogLine(options));
 
-        TensorRtEnvironmentSnapshot snapshot = TensorRtEnvironmentProbe.GetCurrent();
+        TensorRtEnvironmentSnapshot snapshot;
+        try
+        {
+            snapshot = TensorRtEnvironmentProbe.GetCurrent();
+        }
+        catch (Exception exception) when (exception is TensorRtException ||
+                                          exception is BridgeProbeException ||
+                                          exception is InvalidOperationException ||
+                                          exception is FileNotFoundException ||
+                                          exception is CudaException ||
+                                          exception is DllNotFoundException ||
+                                          exception is BadImageFormatException)
+        {
+            string reason = "TensorRT native bridge dependency is unavailable: " + exception.Message;
+            log.Add("OnnxToEngine=Skipped Reason=" + reason);
+            OnnxEngineBuildResult dependencySkipped = CreateResult(
+                success: true,
+                skipped: true,
+                state: "dependency-probe-only",
+                options,
+                modelSource,
+                enginePath: string.Empty,
+                parsed: false,
+                engineSaved: false,
+                engineFileRoundTrip: false,
+                inferenceRan: false,
+                outputMatch: false,
+                profileIndex: -1,
+                elapsedMilliseconds: null,
+                skipReason: reason,
+                log,
+                evidenceSidecar,
+                timingCacheArtifact: CreateTimingCacheBoundaryArtifact(options, "dependency-unavailable"));
+            OnnxEngineBuildDiagnostics.WriteReport(dependencySkipped, options.ExportReportPath);
+            OnnxEngineRuntimeArtifactWriter.WriteArtifacts(dependencySkipped);
+            return dependencySkipped;
+        }
+
         TensorRtAdapterInfo adapter = TensorRtToolSupport.SelectAdapter(snapshot, options.TensorRtLine);
         log.Add($"Preflight TRT={snapshot.BuildInfo.TensorRtVersion} CUDA={snapshot.BuildInfo.CudaToolkitVersion} Runtime={adapter.RuntimeCreationSupported} Builder={adapter.BuilderCreationSupported}");
         if (!adapter.RuntimeCreationSupported || !adapter.BuilderCreationSupported)
@@ -142,11 +179,13 @@ public sealed class OnnxEngineBuildService
             return skipped;
         }
 
-        using TensorRtLogger logger = new TensorRtLogger(options.TensorRtLine);
-        using TensorRtRuntime runtime = new TensorRtRuntime(logger);
-        using TensorRtBuilder builder = new TensorRtBuilder(logger);
-        using TensorRtBuilderConfig config = builder.CreateBuilderConfig();
-        using CudaStream stream = new CudaStream();
+        try
+        {
+            using TensorRtLogger logger = new TensorRtLogger(options.TensorRtLine);
+            using TensorRtRuntime runtime = new TensorRtRuntime(logger);
+            using TensorRtBuilder builder = new TensorRtBuilder(logger);
+            using TensorRtBuilderConfig config = builder.CreateBuilderConfig();
+            using CudaStream stream = new CudaStream();
 
         config.SetMemoryPoolLimit(TensorRtMemoryPoolType.Workspace, options.WorkspaceBytes);
         config.SetProfileStream(stream);
@@ -337,6 +376,37 @@ public sealed class OnnxEngineBuildService
             {
                 File.Delete(enginePath);
             }
+        }
+        }
+        catch (Exception exception) when (exception is TensorRtException ||
+                                          exception is BridgeProbeException ||
+                                          exception is CudaException ||
+                                          exception is DllNotFoundException ||
+                                          exception is BadImageFormatException)
+        {
+            string reason = "TensorRT native build dependency or runtime is unavailable: " + exception.Message;
+            log.Add("OnnxToEngine=Skipped Reason=" + reason);
+            OnnxEngineBuildResult nativeSkipped = CreateResult(
+                success: true,
+                skipped: true,
+                state: "dependency-probe-only",
+                options,
+                modelSource,
+                enginePath: string.Empty,
+                parsed: false,
+                engineSaved: false,
+                engineFileRoundTrip: false,
+                inferenceRan: false,
+                outputMatch: false,
+                profileIndex: -1,
+                elapsedMilliseconds: null,
+                skipReason: reason,
+                log,
+                evidenceSidecar,
+                timingCacheArtifact: CreateTimingCacheBoundaryArtifact(options, "dependency-unavailable"));
+            OnnxEngineBuildDiagnostics.WriteReport(nativeSkipped, options.ExportReportPath);
+            OnnxEngineRuntimeArtifactWriter.WriteArtifacts(nativeSkipped);
+            return nativeSkipped;
         }
     }
 
@@ -1256,6 +1326,37 @@ public sealed class OnnxEngineBuildService
         if (options.DeploymentOptions.MaxAuxStreams.HasValue)
         {
             config.SetMaxAuxStreams(options.DeploymentOptions.MaxAuxStreams.Value);
+        }
+
+        if (options.DeploymentOptions.AvgTiming.HasValue)
+        {
+            int requestedIterations = options.DeploymentOptions.AvgTiming.Value;
+            config.SetAverageTimingIterations(requestedIterations);
+            int readbackIterations = config.GetAverageTimingIterations();
+            log.Add(
+                $"TrtexecTiming AverageApplied=True RequestedIterations={requestedIterations} " +
+                $"ReadbackIterations={readbackIterations} ReadbackMatch={readbackIterations == requestedIterations} " +
+                "EvidenceBoundary=builder-config-readback-only");
+        }
+
+        if (options.DeploymentOptions.MinTiming.HasValue)
+        {
+            if (options.TensorRtLine == TensorRtApiLine.TensorRt8)
+            {
+                int requestedIterations = options.DeploymentOptions.MinTiming.Value;
+                config.SetMinTimingIterationsCompatibility(requestedIterations);
+                int readbackIterations = config.MinTimingIterationsCompatibility;
+                log.Add(
+                    $"TrtexecTiming MinimumApplied=True VersionGuard=TRT8 RequestedIterations={requestedIterations} " +
+                    $"ReadbackIterations={readbackIterations} ReadbackMatch={readbackIterations == requestedIterations} " +
+                    "EvidenceBoundary=builder-config-readback-only");
+            }
+            else
+            {
+                log.Add(
+                    $"TrtexecTiming MinimumApplied=False VersionGuard=TRT8 RequestedIterations={options.DeploymentOptions.MinTiming.Value} " +
+                    "Reason=TensorRT 10/11 use average timing iterations; legacy minimum setter is not available on this API line.");
+            }
         }
 
         if (!string.IsNullOrWhiteSpace(options.ProfilingVerbosity))

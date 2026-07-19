@@ -809,6 +809,28 @@ public sealed class OnnxToEngineTrtexecLikeTests
     }
 
     [Fact]
+    public void TimingIterationOptionsUseVersionGuardedBuilderSettersAndReadback()
+    {
+        string service = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "OnnxEngineBuildService.cs"));
+        string options = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "OnnxEngineBuildOptions.cs"));
+        string diagnostics = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "OnnxEngineBuildDiagnostics.cs"));
+
+        Assert.Contains("config.SetAverageTimingIterations(requestedIterations)", service, StringComparison.Ordinal);
+        Assert.Contains("config.GetAverageTimingIterations()", service, StringComparison.Ordinal);
+        Assert.Contains("config.SetMinTimingIterationsCompatibility(requestedIterations)", service, StringComparison.Ordinal);
+        Assert.Contains("config.MinTimingIterationsCompatibility", service, StringComparison.Ordinal);
+        Assert.Contains("options.TensorRtLine == TensorRtApiLine.TensorRt8", service, StringComparison.Ordinal);
+        Assert.Contains("AverageApplied=True", service, StringComparison.Ordinal);
+        Assert.Contains("ReadbackMatch={readbackIterations == requestedIterations}", service, StringComparison.Ordinal);
+        Assert.Contains("TensorRT native bridge dependency is unavailable", service, StringComparison.Ordinal);
+        Assert.Contains("exception is CudaException", service, StringComparison.Ordinal);
+        Assert.Contains("state: \"dependency-probe-only\"", service, StringComparison.Ordinal);
+        Assert.Contains("TensorRT 10/11 keep this option parse-only", options, StringComparison.Ordinal);
+        Assert.Contains("--avgTiming", diagnostics, StringComparison.Ordinal);
+        Assert.Contains("TensorRtApiLine.TensorRt8", diagnostics, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void BuildReportIncludesNormalizedCommandAndEvidenceBoundary()
     {
         TrtexecLikeOptions options = TrtexecLikeParser.Parse(new[]
@@ -960,6 +982,7 @@ public sealed class OnnxToEngineTrtexecLikeTests
         Assert.Contains("\"IsRuntimeProof\": false", json, StringComparison.Ordinal);
         Assert.Contains("\"TensorRtExec report\"", json, StringComparison.Ordinal);
         Assert.Contains("--workspace 128", json, StringComparison.Ordinal);
+        Assert.Contains(optionStatus.GetProperty("AppliedOptions").EnumerateArray(), static item => item.GetString() == "--avgTiming");
         Assert.Contains("Normalized command line", markdown, StringComparison.Ordinal);
         Assert.Contains("Normalized command SHA256", markdown, StringComparison.Ordinal);
         Assert.Contains("Option Implementation Status", markdown, StringComparison.Ordinal);

@@ -171,8 +171,8 @@ public sealed class OnnxEngineBuildOptions
             diagnostics.Add("Profiling run arguments are parsed; benchmark/profile execution remains separate from build-only conversion proof.");
         }
 
-        if (options.DeploymentOptions.MinTiming.HasValue ||
-            options.DeploymentOptions.AvgTiming.HasValue ||
+        bool parseOnlyAdvancedOptions =
+            (options.DeploymentOptions.MinTiming.HasValue && options.TensorRtLine != TensorRtApiLine.TensorRt8) ||
             !string.IsNullOrWhiteSpace(options.DeploymentOptions.PrecisionConstraints) ||
             !string.IsNullOrWhiteSpace(options.DeploymentOptions.LayerPrecisions) ||
             !string.IsNullOrWhiteSpace(options.DeploymentOptions.LayerOutputTypes) ||
@@ -191,9 +191,28 @@ public sealed class OnnxEngineBuildOptions
             options.DeploymentOptions.Consistency ||
             options.DeploymentOptions.BuilderCache ||
             options.DeploymentOptions.NoBuilderCache ||
-            options.RuntimeOptions.InfStreams.HasValue)
+            options.RuntimeOptions.InfStreams.HasValue;
+
+        if (options.DeploymentOptions.MinTiming.HasValue ||
+            options.DeploymentOptions.AvgTiming.HasValue ||
+            parseOnlyAdvancedOptions)
         {
-            diagnostics.Add("TrtexecAlignmentStatus=parse-only for advanced timing, precision, runtime stream, debug tensor, safety/consistency, engine packaging, builder cache, refit, and weight-streaming options in this stage.");
+            if (options.DeploymentOptions.AvgTiming.HasValue)
+            {
+                diagnostics.Add("Average timing iterations are applied through TensorRtBuilderConfig and read back during a real build; the result remains builder-config evidence, not runtime proof.");
+            }
+
+            if (options.DeploymentOptions.MinTiming.HasValue)
+            {
+                diagnostics.Add(options.TensorRtLine == TensorRtApiLine.TensorRt8
+                    ? "Minimum timing iterations use the TensorRT 8 legacy compatibility setter and are read back during a real build; TensorRT 10/11 keep this option parse-only."
+                    : "Minimum timing iterations remain parse-only on TensorRT 10/11 because the legacy minimum setter is not available on those API lines.");
+            }
+
+            if (parseOnlyAdvancedOptions)
+            {
+                diagnostics.Add("TrtexecAlignmentStatus=parse-only for advanced precision, runtime stream, debug tensor, safety/consistency, engine packaging, builder cache, refit, and weight-streaming options in this stage.");
+            }
         }
 
         if (!string.IsNullOrWhiteSpace(options.EvidenceSidecarPath))

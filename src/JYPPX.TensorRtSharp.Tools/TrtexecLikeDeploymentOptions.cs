@@ -306,7 +306,7 @@ public sealed class TrtexecLikeDeploymentOptions
 
         if (MinTiming.HasValue || AvgTiming.HasValue)
         {
-            diagnostics.Add("Timing iteration controls are parsed for trtexec alignment; tactic timing policy is not fully applied by this generic build-report stage.");
+            diagnostics.Add("Timing iteration controls are parsed for trtexec alignment; --avgTiming and TRT8 --minTiming are applied/read back during a real build, while TRT10/11 --minTiming and full tactic timing policy remain parse-only.");
             AddDiagnostic(diagnostics, "MinTiming", MinTiming);
             AddDiagnostic(diagnostics, "AvgTiming", AvgTiming);
         }

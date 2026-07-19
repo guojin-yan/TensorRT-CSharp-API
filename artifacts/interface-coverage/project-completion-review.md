@@ -1682,3 +1682,51 @@ workqueue 存在性和 `HasNextResource` 标记，绝不把链指针或 union pa
   安装；只核查并清理本轮明确可归因的临时文件。
 - 未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
   native/build/compile-surface 结果不等于 clean package-consumer runtime proof。
+
+## 2026-07-19 TensorRtExec Timing-Iteration Builder Readback Uplift
+
+本阶段从应用层高价值 parity 缺口选择 `--avgTiming` / `--minTiming`，复用已经
+存在且跨 TRT8/10/11 可用的 `TensorRtBuilderConfig` timing setter/getter。该批不改变
+TensorRT/CUDA manifest 或 ABI surface，而是让 TensorRtExec 的 CLI、WinForms 共享
+build service 真正应用并回读 builder 配置，同时修复 native bridge/vendor runtime
+缺失时未处理异常的问题。
+
+### Promotion 与边界
+
+- `--avgTiming` 在 TRT8、TRT10、TRT11 真实 build 中调用
+  `SetAverageTimingIterations` / `GetAverageTimingIterations`，日志记录
+  `RequestedIterations`、`ReadbackIterations`、`ReadbackMatch` 和
+  `EvidenceBoundary=builder-config-readback-only`。
+- `--minTiming` 只在 TRT8 使用 legacy compatibility setter/getter；TRT10/11 保持
+  parse-only，并在 diagnostics 中明确版本原因。两者都不能证明 tactic quality、benchmark
+  performance、模型正确性或 package-consumer-runtime。
+- 无法加载 `jyppxtrtbridge`，或 bridge 能加载但 vendor runtime 创建失败时，
+  TensorRtExec 现在生成 `dependency-probe-only` report/sidecar，而不是抛出未处理的
+  `DllNotFoundException` 或结构化 TensorRT runtime exception。
+- parity matrix、feature matrix、release gap list、外部 ONNX report、option layering
+  和 getting-started 文档已同步；没有新增裸指针、callback、borrowed handle 或 ownership
+  surface。
+
+### Verification
+
+- binding generator/output validation：`191 manifests / 3961 API records`，重复生成幂等通过；
+  本批没有 manifest 改动。
+- 完整 solution Debug build：`0 warnings / 0 errors`。
+- TensorRtExec/OnnxToEngine/文档/质量定向集合：`41/41` 通过。
+- CLI no-bridge smoke：生成 `dependency-probe-only` report，exit code 0，未崩溃；
+  TRT8 bridge-only smoke：在 vendor runtime 创建结构化异常处生成同类 skip report，
+  保留 `TrtexecTiming` diagnostics。两次均把 engine/report 路径放在 E 盘。
+- 全量 ProjectQuality 曾启动并暴露现有 release-package inventory 与 owner-input
+  artifact 断言失败；该套件执行大量共享发布脚本后已停止，不能报告为全量通过。失败集中在
+  `ReleaseCandidatePackageInventoryTests` 与 `FinalOwnerExecution*`，与本批定向测试和
+  managed build 无关，仍需独立 release-artifact 环境收口。
+
+### C/E 盘与发布边界
+
+- 本批 smoke 临时目录 `artifacts/test-temp/timing-iterations` 只位于 E 盘，完成后删除；
+  不使用 C 盘作为 engine/report 输出路径。
+- 本批没有下载 CUDA、TensorRT、cuDNN、模型或 nupkg 到 C 盘；不删除用户 Downloads、
+  NuGet/Codex/工具缓存、历史 CI runner 或系统 CUDA 安装。
+- 未执行 NuGet push、GitHub Packages/Release 上传或 issue close；builder readback、
+  dependency skip、managed build 和定向质量门禁均不等于 clean public package-consumer
+  runtime proof、post-publish proof 或 release-close approval。

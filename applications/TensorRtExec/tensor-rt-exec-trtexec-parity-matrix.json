@@ -66,6 +66,16 @@
       "nextStep": "Keep aliases in help/parity artifacts and require sample-run evidence before proof promotion."
     },
     {
+      "id": "timing-iterations",
+      "trtexecOption": "--avgTiming / --minTiming",
+      "tensorRtExecStatus": "implemented-builder-config-readback",
+      "entryPoints": ["OnnxEngineBuildService.ApplyDeploymentOptions", "TensorRtBuilderConfig.SetAverageTimingIterations", "TensorRtBuilderConfig.GetAverageTimingIterations", "TensorRtBuilderConfig.SetMinTimingIterationsCompatibility"],
+      "proofBoundary": "Timing-iteration setter/readback proves builder configuration only; it does not prove tactic quality, benchmark performance, model correctness, or package-consumer runtime.",
+      "isRuntimeProof": false,
+      "gap": "TRT10/11 retain the legacy --minTiming option as parse-only; compatible-host build logs are still needed for applied readback evidence.",
+      "nextStep": "Collect versioned TRT8/10/11 build logs with TrtexecTiming ReadbackMatch=True while keeping runtime proof separate."
+    },
+    {
       "id": "yolovision-owner-backfill-shape-profiles",
       "trtexecOption": "--minShapes/--optShapes/--maxShapes per YOLOv8n task",
       "tensorRtExecStatus": "documented-report",

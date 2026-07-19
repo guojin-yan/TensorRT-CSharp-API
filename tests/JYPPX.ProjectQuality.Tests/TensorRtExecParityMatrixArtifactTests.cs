@@ -33,6 +33,7 @@ public sealed class TensorRtExecParityMatrixArtifactTests
             "dynamic-shape",
             "shape-profile",
             "shape-alias-batch",
+            "timing-iterations",
             "yolovision-owner-backfill-shape-profiles",
             "fp16",
             "int8",

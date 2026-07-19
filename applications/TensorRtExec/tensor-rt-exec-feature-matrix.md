@@ -9,6 +9,7 @@
 | ONNX build-only report | CLI, WinForms | implemented |
 | Dry-run/precheck report | CLI, WinForms | implemented |
 | Shape profile configuration | CLI, WinForms | implemented |
+| Timing iteration builder readback | CLI, WinForms | implemented-builder-config-readback |
 | Precision switches | CLI, WinForms | wrapper-ready-plus-parse-report-only |
 | Timing and profiling options | CLI, WinForms | implemented-report |
 | Load-engine bounded runtime | CLI, WinForms | bounded-runtime-output |

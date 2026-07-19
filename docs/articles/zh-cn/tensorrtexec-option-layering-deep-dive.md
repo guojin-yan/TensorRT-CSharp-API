@@ -11,7 +11,8 @@ TensorRtExec 当前可以作为 CLI/WinForms 双入口接收 trtexec-like 参数
 | 层级 | 含义 | 例子 | 证据 |
 | --- | --- | --- | --- |
 | implemented | 参数真实进入当前 build/report 工作流 | ONNX、engine、workspace、shape profile、precision flags 中已落地部分 | build report、diagnostics |
-| parse/report-only | 参数被 CLI/GUI/parser/report 接收，但 native TensorRT 行为未完整提升 | `--infStreams`、advanced timing、layer precision routing、weight streaming | `OptionImplementationStatus.ParseOnlyOptions` |
+| parse/report-only | 参数被 CLI/GUI/parser/report 接收，但 native TensorRT 行为未完整提升 | TRT10/11 `--minTiming`、`--infStreams`、layer precision routing、weight streaming | `OptionImplementationStatus.ParseOnlyOptions` |
+| implemented-builder-config-readback | 真实 build 调用 typed builder-config setter 并回读请求值；只覆盖 builder evidence | `--avgTiming`（TRT8/10/11）、TRT8 legacy `--minTiming` | `TrtexecTiming` log 与 `OptionImplementationStatus.AppliedOptions` |
 | build-only | 能证明 engine 构建或报告生成，不证明推理输出正确 | TensorRtExec build report、OnnxToEngine report | build-only evidence |
 | release proof | 只能来自 clean consumer 或真实发布后验证 | package-consumer-runtime、post publish verification | release proof record |
 

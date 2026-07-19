@@ -27,6 +27,7 @@ public sealed class TensorRtExecParityDocumentationTests
             "engine 加载",
             "dynamic shape",
             "min/opt/max shape profile",
+            "timing iterations",
             "FP16",
             "INT8",
             "workspace / memory pool",

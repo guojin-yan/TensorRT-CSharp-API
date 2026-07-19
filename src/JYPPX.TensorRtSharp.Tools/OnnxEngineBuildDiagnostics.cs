@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using JYPPX.Shared.Interop;
 
 namespace JYPPX.TensorRtSharp.Tools;
 
@@ -373,6 +374,8 @@ public static class OnnxEngineBuildDiagnostics
         AddIf(options, "--memPoolSize", deploymentOptions.MemoryPoolSizes.Count > 0 && (result.Parsed || result.EngineSaved));
         AddIf(options, "--fp16/--bf16/--noTF32", result.Parsed || result.EngineSaved || result.InferenceRan);
         AddIf(options, "--minShapes/--optShapes/--maxShapes", result.Parsed || result.EngineSaved || result.InferenceRan);
+        AddIf(options, "--avgTiming", deploymentOptions.AvgTiming.HasValue && (result.Parsed || result.EngineSaved));
+        AddIf(options, "--minTiming", deploymentOptions.MinTiming.HasValue && result.TensorRtLine == TensorRtApiLine.TensorRt8 && (result.Parsed || result.EngineSaved));
         AddIf(options, "--saveEngine", result.EngineSaved);
         AddIf(options, "--timingCacheFile", result.TimingCacheArtifact.InputApplied);
         AddIf(options, "--exportTimingCache", result.TimingCacheArtifact.OutputWritten);
@@ -401,8 +404,8 @@ public static class OnnxEngineBuildDiagnostics
         AddIf(options, "--directIO", deploymentOptions.DirectIO);
         AddIf(options, "--sparsity", !string.IsNullOrWhiteSpace(deploymentOptions.Sparsity));
         AddIf(options, "--stronglyTyped", deploymentOptions.StronglyTyped);
-        AddIf(options, "--minTiming", deploymentOptions.MinTiming.HasValue);
-        AddIf(options, "--avgTiming", deploymentOptions.AvgTiming.HasValue);
+        AddIf(options, "--minTiming", deploymentOptions.MinTiming.HasValue && (result.TensorRtLine != TensorRtApiLine.TensorRt8 || !(result.Parsed || result.EngineSaved)));
+        AddIf(options, "--avgTiming", deploymentOptions.AvgTiming.HasValue && !(result.Parsed || result.EngineSaved));
         AddIf(options, "--precisionConstraints", !string.IsNullOrWhiteSpace(deploymentOptions.PrecisionConstraints));
         AddIf(options, "--layerPrecisions", !string.IsNullOrWhiteSpace(deploymentOptions.LayerPrecisions));
         AddIf(options, "--layerOutputTypes", !string.IsNullOrWhiteSpace(deploymentOptions.LayerOutputTypes));

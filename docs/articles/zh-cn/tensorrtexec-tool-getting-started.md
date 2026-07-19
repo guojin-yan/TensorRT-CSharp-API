@@ -70,7 +70,7 @@ WinForms 界面提供以下字段：
 
 界面默认启用 build-only/skip-inference，避免用户在没有模型绑定语义时误把任意外部 ONNX 当作已经完成推理验证。UI 运行后输出的日志和 CLI 来自同一个 `TensorRtExecService`。
 
-其中 advanced timing、precision policy、engine packaging/refit 和 weight-streaming 当前是 parse/report-only 能力；timing cache export 在成功构建时通过 typed owner 写出 cache 并进入 `TimingCacheArtifact`。这些能力仍不会被写成 runtime proof；未执行的路径会用明确的未应用状态记录边界。
+其中 `--avgTiming` 在真实构建时通过 typed builder-config setter/readback 记录配置证据，TRT8 的 `--minTiming` 使用 legacy compatibility setter，TRT10/11 的 `--minTiming`、`--infStreams`、precision policy、engine packaging/refit 和 weight-streaming 仍是 parse/report-only 能力；timing cache export 在成功构建时通过 typed owner 写出 cache 并进入 `TimingCacheArtifact`。这些能力仍不会被写成 runtime proof；未执行的路径会用明确的未应用状态记录边界。
 
 ## 报告语义
 

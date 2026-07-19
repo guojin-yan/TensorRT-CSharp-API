@@ -5,8 +5,8 @@
   "state": "release-candidate-gap-planning",
   "proofBoundary": "This gap list is planning evidence only. CLI reports, WinForms screenshots, dry-run output, build-only reports, templates, local feeds, ProjectReference, and direct .nupkg references are not package-consumer-runtime proof.",
   "summary": {
-    "totalItems": 15,
-    "implementedOrReportReady": 8,
+    "totalItems": 16,
+    "implementedOrReportReady": 9,
     "partialOrDiagnostic": 5,
     "releaseProofRecordsOnly": 1,
     "runtimeProofItems": 0,
@@ -89,6 +89,17 @@
       "winFormsSupported": true,
       "nextImplementationPaths": ["src/JYPPX.TensorRtSharp/TensorRtBuilderConfig.cs", "native/src/tensorrt"],
       "nextStep": "Workspace bytes and builder config readback are reported; keep model/runtime proof gated behind real execution logs."
+    },
+    {
+      "id": "timing-iterations",
+      "officialTrtexecParity": "--avgTiming --minTiming",
+      "currentStatus": "implemented-builder-config-readback",
+      "isRuntimeProof": false,
+      "isPackageConsumerRuntimeProof": false,
+      "cliSupported": true,
+      "winFormsSupported": true,
+      "nextImplementationPaths": ["applications/TensorRtExec", "src/JYPPX.TensorRtSharp/TensorRtBuilderConfig.cs"],
+      "nextStep": "Collect compatible-host TRT8/10/11 build logs with requested/readback timing iteration values; keep builder evidence separate from runtime and package-consumer proof."
     },
     {
       "id": "timing-cache",

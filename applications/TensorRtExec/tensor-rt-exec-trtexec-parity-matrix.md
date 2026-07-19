@@ -10,6 +10,7 @@ This file mirrors `tensor-rt-exec-trtexec-parity-matrix.json` for quick review. 
 | `dynamic-shape` | `--minShapes/--optShapes/--maxShapes` | implemented-report | Shape profiles in reports do not prove every dynamic shape ran correctly. |
 | `shape-profile` | `--minShapes input:... --optShapes input:... --maxShapes input:...` | implemented-report | Profile configuration is not output correctness proof. |
 | `shape-alias-batch` | `--shapes --inputShapes --batch` | implemented-report | Shape aliases and batch values are normalized/reportable migration aids; they do not prove binding coverage, dynamic profile execution, or output correctness. |
+| `timing-iterations` | `--avgTiming / --minTiming` | implemented-builder-config-readback | `--avgTiming` uses the cross-version builder-config setter/readback; `--minTiming` uses the TRT8 legacy compatibility setter and remains parse-only on TRT10/11. This is builder evidence, not runtime proof. |
 | `yolovision-owner-backfill-shape-profiles` | `--minShapes/--optShapes/--maxShapes per YOLOv8n task` | documented-report | Task-specific shape profiles are build/report evidence only; real-model-runtime requires YoloVision run log, output JSON, hashes, and owner review. |
 | `fp16` | `--fp16` | wrapper-ready | The switch can be represented; GPU/model support must be proven by smoke. |
 | `int8` | `--int8 --calib` | parse-report-only-calibration-boundary | INT8 and calibration cache paths are CLI/GUI/report fields only; calibrator ownership and cache validity are not promoted by this application matrix. |

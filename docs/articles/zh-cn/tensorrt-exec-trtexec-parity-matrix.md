@@ -43,6 +43,7 @@ dotnet run --project .\applications\TensorRtExec -- --ui
 | 8 | INT8 | `--int8`、`--calib` | diagnostic / boundary | `TensorRtExecOptions.Int8`、`CalibrationCacheFile` | calibrator/cache ownership 仍需更严格桥接和真实校准 evidence | 先做 INT8 field guide，再做 owner-provided calibrator proof | 否 |
 | 9 | workspace / memory pool | `--workspace`、`--memPoolSize` | implemented-build-readback | `WorkspaceBytes`、`MemoryPoolSizes`、`SetMemoryPoolLimit`、`GetMemoryPoolLimit`、`TrtexecMemoryPool` log | readback 只证明 builder config 接收请求，不证明 runtime 输出、模型准确率或 package consumer | 在 compatible host 记录 requested/readback bytes 与 owner hash | 否 |
 | 10 | timing cache | `--timingCacheFile`、`--exportTimingCache` | implemented-build-cache-lifecycle | `TimingCacheFile`、`ExportTimingCachePath`、`OnnxEngineBuildResult.TimingCacheArtifact` | 成功构建时通过 typed timing-cache owner 导入/导出并记录大小与 SHA256；仍不是 runtime proof | 在兼容主机补真实构建日志、owner review 和模型级输出校验 | 否 |
+| 10a | timing iterations | `--avgTiming`、`--minTiming` | implemented-builder-config-readback | `SetAverageTimingIterations` / `GetAverageTimingIterations`；TRT8 `SetMinTimingIterationsCompatibility`；`TrtexecTiming` log | `--avgTiming` 的 setter/readback 只证明 builder config；TRT10/11 的 legacy `--minTiming` 保持 parse-only | 收集 TRT8/10/11 compatible-host build log，并保持 tactic quality、benchmark performance 和 runtime proof 分离 | 否 |
 | 11 | plugin library 参数边界 | `--plugins`、`--plugin`、`--dynamicPlugins`、`--setPluginsToSerialize` | diagnostic-alias-compatible / boundary | `TrtexecLikeParser.ParsePluginLibraries`、`Plugins`、Plugin Inventory 只读 API | register/load/deregister library 和 serialized plugin ownership 暂不处理，避免 ownership 风险 | 仅做 plugin path normalization 和 plugin inventory copied metadata appendix，不做 load library | 否 |
 | 12 | profiling | `--profilingVerbosity`、`--dumpProfile`、`--exportProfile` | implemented-report / parse-only mixed | `ProfilingVerbosity`、`ExportProfilePath`、`SaveProfilePath` | layer runtime timing 需要真实 enqueue 与 profile log | 先补 profile artifact schema，再做 real model smoke | 否 |
 | 13 | wait / idle benchmark controls | `--sleepTime`、`--idleTime` | parse-report-only | `TrtexecLikeRuntimeOptions`、`RuntimeOptions`、`OptionImplementationStatus.ParseOnlyOptions` | 等待/空闲调度只被记录，尚未证明官方 benchmark scheduler 语义和性能影响 | 收集真实 benchmark stdout/stderr、host metadata、timing artifact hash 后再评估 | 否 |
@@ -59,13 +60,14 @@ dotnet run --project .\applications\TensorRtExec -- --ui
 
 - `implemented`：工具链已经能解析、传递并在 build/report 服务中产生明确效果。
 - `implemented-report`：能进入报告或 artifact，但报告不等于 runtime proof。
+- `implemented-builder-config-readback`：真实 build 会调用 typed builder-config setter 并回读请求值；这仍是 builder evidence，不是 runtime proof。
 - `wrapper-ready`：C# wrapper 已有表达形态，真实硬件/模型效果需要 smoke。
 - `diagnostic`：只记录边界和意图，不声明 TensorRT 行为已执行。
 - `parse-only`：CLI/GUI/parser/report 接住参数，但不能宣称官方 `trtexec` 对应行为已经完整实现。
 - `capability-probe-only`：只读探测 runtime/builder/API 可见性和高级参数 intent，不声明模型构建行为、enqueue、输出校验或发布包消费已完成。
 - `planned`：文档化下一步，不作为当前能力。
 
-这些状态是故意保守的。它们防止把 `--batch`、`--minTiming`、`--avgTiming`、`--infStreams`、`--sleepTime`、`--idleTime`、`--precisionConstraints`、`--layerPrecisions`、`--layerOutputTypes`、`--versionCompatible`、`--excludeLeanRuntime`、`--stripWeights`、`--refit`、`--weightStreamingBudget`、`--safe`、`--consistency`、`--builderCache`、`--noBuilderCache` 写成已经完成的 native runtime 行为；timing-cache lifecycle 也只代表构建缓存证据，不代表 runtime proof。
+这些状态是故意保守的。它们防止把 `--batch`、TRT10/11 的 `--minTiming`、`--infStreams`、`--sleepTime`、`--idleTime`、`--precisionConstraints`、`--layerPrecisions`、`--layerOutputTypes`、`--versionCompatible`、`--excludeLeanRuntime`、`--stripWeights`、`--refit`、`--weightStreamingBudget`、`--safe`、`--consistency`、`--builderCache`、`--noBuilderCache` 写成已经完成的 native runtime 行为；`--avgTiming` 和 TRT8 legacy `--minTiming` 也只代表 builder-config readback，timing-cache lifecycle 仍只代表构建缓存证据，不代表 runtime proof。
 
 ## 与 OnnxToEngine 的关系
 

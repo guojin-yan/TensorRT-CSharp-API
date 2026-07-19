@@ -30,7 +30,7 @@ applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.md
 
 第一类是安全反序列化和 binding diagnostics。`--loadEngine` 目前不能被宣传成真实运行证明；它需要先有 read-only deserialize、binding metadata、error diagnostics，再考虑 enqueue。
 
-第二类是 builder config readback。`--workspace` 与已知 `--memPoolSize` pool 现在会在真实 build 中调用 typed setter 并用 getter read back；dynamic profile 等仍需要报告和真实模型证据。readback 只说明 TensorRT 接收了 builder 配置，不是 runtime 输出或 package-consumer proof。
+第二类是 builder config readback。`--workspace`、已知 `--memPoolSize` pool 和 `--avgTiming` 现在会在真实 build 中调用 typed setter 并用 getter read back；TRT8 的 `--minTiming` 使用 legacy compatibility setter，TRT10/11 保持 parse-only；dynamic profile 等仍需要报告和真实模型证据。readback 只说明 TensorRT 接收了 builder 配置，不是 runtime 输出或 package-consumer proof。
 
 第三类是 WinForms parity。GUI 不应该只是“能打开页面”，而是要能覆盖 CLI 的主要参数、生成可复制命令、展示 report 摘要和错误诊断。
 
@@ -44,4 +44,4 @@ applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.md
 
 ## 下一步
 
-下一阶段优先把 `load-engine`、`binding-metadata` 和 `winforms-command-surface` 三项拆成实现任务；`workspace-memory-pool` 转入 compatible-host owner build record。所有实现都需要同步更新 CLI、WinForms、文档、测试和 proof 边界说明。
+下一阶段优先把 `load-engine`、`binding-metadata` 和 `winforms-command-surface` 三项拆成实现任务；`workspace-memory-pool` 与 `timing-iterations` 转入 compatible-host owner build record。所有实现都需要同步更新 CLI、WinForms、文档、测试和 proof 边界说明。
