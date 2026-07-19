@@ -24,7 +24,7 @@ $repoRoot = Split-Path -Parent $scriptRoot
 Set-Location $repoRoot
 
 $supportedTasks = @("det", "cls", "seg", "obb", "pose", "sem")
-$supportedFamilies = @("yolov5", "yolov6", "yolov7", "yolov8", "yolov9", "yolov10", "yolov11", "yolov26", "custom")
+$supportedFamilies = @("yolov5", "yolov6", "yolov7", "yolov8", "yolov9", "yolov10", "yolov11", "yolov26", "yolox", "custom")
 $supportedInputSourceKinds = @("external-tensor", "synthetic-pattern", "preprocessed-image-tensor")
 $sha256Pattern = "^[a-fA-F0-9]{64}$"
 $forbiddenSubstitutes = @(

@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "yolovision-yolox-official-asset-acquisition-manifest",
+  "assetSetId": "yolox-s-0.1.1rc0-apache-2.0-detection",
+  "sampleName": "YoloVision",
+  "upstreamRepository": "https://github.com/Megvii-BaseDetection/YOLOX",
+  "upstreamRevision": "e1052df71842031413f6030723c3607b839c80ce",
+  "upstreamTag": "0.1.1rc0",
+  "license": {
+    "name": "Apache-2.0",
+    "spdxId": "Apache-2.0",
+    "sourceAssetId": "yolox-license",
+    "provenanceState": "upstream-repository-license-hash-pinned",
+    "publicRedistributionOwnerApproval": false
+  },
+  "assets": [
+    {
+      "id": "yolox-s-onnx",
+      "role": "model",
+      "fileName": "yolox_s.onnx",
+      "url": "https://github.com/Megvii-BaseDetection/YOLOX/releases/download/0.1.1rc0/yolox_s.onnx",
+      "expectedLength": 35858002,
+      "expectedSha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063"
+    },
+    {
+      "id": "yolox-license",
+      "role": "license",
+      "fileName": "LICENSE",
+      "url": "https://raw.githubusercontent.com/Megvii-BaseDetection/YOLOX/e1052df71842031413f6030723c3607b839c80ce/LICENSE",
+      "expectedLength": 11352,
+      "expectedSha256": "577c03d505ec80f667ebf96ebd0cc4f6825c817ca1088ee348c48aaabd51bd92"
+    },
+    {
+      "id": "yolox-dog-jpg",
+      "role": "input-image",
+      "fileName": "dog.jpg",
+      "url": "https://raw.githubusercontent.com/Megvii-BaseDetection/YOLOX/e1052df71842031413f6030723c3607b839c80ce/assets/dog.jpg",
+      "expectedLength": 163759,
+      "expectedSha256": "5a9522051c3cec2bbd2f6323fccba32e8fbf3ddcc2b3e2fd46b04c720bc6f866"
+    },
+    {
+      "id": "yolox-coco-classes-source",
+      "role": "labels-source",
+      "fileName": "coco_classes.py",
+      "url": "https://raw.githubusercontent.com/Megvii-BaseDetection/YOLOX/e1052df71842031413f6030723c3607b839c80ce/yolox/data/datasets/coco_classes.py",
+      "expectedLength": 1296,
+      "expectedSha256": "b38193c481a73f1f674cedab9e551b15b39b1a7aaed3e09e16505362cc54ad51"
+    },
+    {
+      "id": "yolox-onnx-inference-reference",
+      "role": "runtime-reference",
+      "fileName": "onnx_inference.py",
+      "url": "https://raw.githubusercontent.com/Megvii-BaseDetection/YOLOX/e1052df71842031413f6030723c3607b839c80ce/demo/ONNXRuntime/onnx_inference.py",
+      "expectedLength": 2786,
+      "expectedSha256": "73174d11ad89a57ad11a60506bb9ac5e99be8b7930820281f8dc0fa3d80aec09"
+    },
+    {
+      "id": "yolox-preprocess-reference",
+      "role": "preprocess-reference",
+      "fileName": "data_augment.py",
+      "url": "https://raw.githubusercontent.com/Megvii-BaseDetection/YOLOX/e1052df71842031413f6030723c3607b839c80ce/yolox/data/data_augment.py",
+      "expectedLength": 8986,
+      "expectedSha256": "4993d8859926503d39af8a34963d842d35e36462f87d3caa54fe4cc2bbbddec7"
+    }
+  ],
+  "derivedAssets": {
+    "image": {
+      "sourceAssetId": "yolox-dog-jpg",
+      "fileName": "dog.ppm",
+      "format": "P6 RGB PPM",
+      "expectedSha256": "6cb94c9cd0781412598fe179246b09041af4303d388a5ba3c55f760dff11ec2c"
+    },
+    "labels": {
+      "sourceAssetId": "yolox-coco-classes-source",
+      "fileName": "coco.names",
+      "classCount": 80,
+      "expectedSha256": "4d4aaea7bee6be2f675d9b53a9195ca36dfe6429f7479f29155da522a6c85930"
+    }
+  },
+  "proofBoundary": {
+    "canProceedToSourceTreeRuntime": true,
+    "canPromotePackageConsumerRuntime": false,
+    "canPublishPublicly": false,
+    "performsPublish": false,
+    "notes": [
+      "Hash-pinned upstream provenance and local acquisition do not constitute owner approval for repository redistribution.",
+      "The model, image, labels, and generated tensor remain in the E-drive download workspace.",
+      "A real YoloVision run log and strict evidence validation are still required for source-tree real-model-runtime proof."
+    ]
+  }
+}

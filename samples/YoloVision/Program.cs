@@ -320,7 +320,7 @@ internal static class Program
         Console.WriteLine(
             $"ImagePreprocessConfig Mode={result.ResizeMode} Layout={result.TensorLayout} Color={result.ColorOrder} " +
             $"Target={result.TargetWidth}x{result.TargetHeight} Resized={result.ResizedWidth}x{result.ResizedHeight} " +
-            $"Pad={result.PadX},{result.PadY} Scale={result.ResizeScaleX:0.######},{result.ResizeScaleY:0.######} " +
+            $"Pad={result.PadX},{result.PadY} Alignment={result.LetterboxAlignment} Scale={result.ResizeScaleX:0.######},{result.ResizeScaleY:0.######} " +
             $"Normalize={result.Normalized} ValueScale={result.Scale:0.########} Fill={result.FillValue}");
     }
 
@@ -423,7 +423,7 @@ internal static class Program
         Console.WriteLine("Options:");
         Console.WriteLine("  --list-capabilities      Print the offline YOLO family/task capability matrix without TensorRT runtime or model assets.");
         Console.WriteLine("  --list-capabilities --json  Print the same capability matrix as machine-readable JSON.");
-        Console.WriteLine("  --family custom|v5|v6|v7|v8|v9|v10|v11|v26");
+        Console.WriteLine("  --family custom|v5|v6|v7|v8|v9|v10|v11|v26|yolox");
         Console.WriteLine("  --task det|cls|seg|obb|pose|sem");
         Console.WriteLine("  --layout auto|channels-first|boxes-first");
         Console.WriteLine("  --has-objectness auto|true|false");
@@ -433,6 +433,9 @@ internal static class Program
         Console.WriteLine("  --top-k <count>           Default: 10");
         Console.WriteLine("  --nms-mode class-aware|class-agnostic|none");
         Console.WriteLine("  --no-nms                  Keep score filtering only.");
+        Console.WriteLine("  --tensor-layout NCHW|NHWC --color-order RGB|BGR --resize letterbox|stretch");
+        Console.WriteLine("  --letterbox-alignment center|top-left  YOLOX defaults to top-left; other families default to center.");
+        Console.WriteLine("  --normalize|--no-normalize  YOLOX defaults to raw 0..255 values; other families default to 1/255 normalization.");
         Console.WriteLine("  --output-role-map <map>   Example: boxes:det,proto:mask-prototypes,kpts:pose-keypoints,angle:obb-angles.");
         Console.WriteLine("  --mask-prototypes-output <name>  Segmentation prototype tensor name.");
         Console.WriteLine("  --mask-coefficient-count <count> Segmentation mask coefficient count.");

@@ -99,6 +99,54 @@ public sealed class YoloVisionManagedPipelineTests
     }
 
     [Fact]
+    public void YoloXProfileUsesOfficialPreprocessDefaultsAndTopLeftLetterbox()
+    {
+        string directory = Path.Combine(Path.GetTempPath(), "jyppx-yolox-preprocess-tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+        string imagePath = Path.Combine(directory, "input.ppm");
+        string tensorPath = Path.Combine(directory, "input.fp32.bin");
+        try
+        {
+            File.WriteAllText(imagePath, "P3\n2 1\n255\n255 0 0 0 255 0\n");
+            YoloModelProfile profile = YoloModelProfile.FromArgs(new[]
+            {
+                "--family", "yolox",
+                "--task", "det",
+                "--input-shape", "1x3x4x4"
+            }, labelCount: 80);
+
+            Assert.Equal("NCHW", profile.Preprocess.TensorLayout);
+            Assert.Equal("BGR", profile.Preprocess.ColorOrder);
+            Assert.False(profile.Preprocess.Normalize);
+            Assert.Equal(1.0f, profile.Preprocess.Scale);
+            Assert.Equal("top-left", profile.Preprocess.LetterboxAlignment);
+
+            YoloImagePreprocessResult result = YoloImagePreprocessor.Preprocess(
+                imagePath,
+                tensorPath,
+                profile.InputShape,
+                profile.Preprocess);
+
+            Assert.Equal("top-left", result.LetterboxAlignment);
+            Assert.Equal(0, result.PadX);
+            Assert.Equal(0, result.PadY);
+            Assert.Equal(4, result.ResizedWidth);
+            Assert.Equal(2, result.ResizedHeight);
+            byte[] bytes = File.ReadAllBytes(tensorPath);
+            float[] tensor = new float[bytes.Length / sizeof(float)];
+            Buffer.BlockCopy(bytes, 0, tensor, 0, bytes.Length);
+            Assert.Equal(0.0f, tensor[0]);
+            Assert.Equal(0.0f, tensor[16]);
+            Assert.Equal(255.0f, tensor[32]);
+            Assert.Equal(114.0f, tensor[12]);
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    [Fact]
     public void DetectionDecoderAppliesScoreFilteringAndClassAwareNms()
     {
         float[] values =
@@ -122,6 +170,59 @@ public sealed class YoloVisionManagedPipelineTests
         Assert.Contains(detections, detection => detection.ClassIndex == 0);
         Assert.Contains(detections, detection => detection.ClassIndex == 1);
         Assert.All(detections, detection => Assert.InRange(detection.SourceIndex, 0, 2));
+    }
+
+    [Fact]
+    public void YoloXDecoderTransformsRawGridAndStrideCoordinatesBeforeNms()
+    {
+        YoloModelProfile profile = YoloModelProfile.FromArgs(new[]
+        {
+            "--family", "yolox",
+            "--task", "det",
+            "--input-shape", "1x3x32x32",
+            "--class-count", "2",
+            "--confidence", "0.5",
+            "--no-nms"
+        }, labelCount: 0);
+        float[] values = new float[21 * 7];
+        int offset = 6 * 7;
+        values[offset] = 0.5f;
+        values[offset + 1] = 0.25f;
+        values[offset + 2] = MathF.Log(2.0f);
+        values[offset + 3] = MathF.Log(0.5f);
+        values[offset + 4] = 0.9f;
+        values[offset + 5] = 0.8f;
+        values[offset + 6] = 0.1f;
+
+        IReadOnlyList<YoloDetection> detections = YoloSampleRunner.DecodeDetections(values, new[] { 1, 21, 7 }, profile);
+
+        YoloDetection detection = Assert.Single(detections);
+        Assert.Equal(0, detection.ClassIndex);
+        Assert.Equal(0.72f, detection.Score, 5);
+        Assert.Equal(20.0f, detection.CenterX, 5);
+        Assert.Equal(10.0f, detection.CenterY, 5);
+        Assert.Equal(16.0f, detection.Width, 5);
+        Assert.Equal(4.0f, detection.Height, 5);
+        Assert.Equal(6, detection.SourceIndex);
+    }
+
+    [Fact]
+    public void YoloXProfileRejectsUnsupportedTasksAndOutputContracts()
+    {
+        Assert.Throws<NotSupportedException>(() => YoloModelProfile.FromArgs(
+            new[] { "--family", "yolox", "--task", "cls" },
+            labelCount: 0));
+
+        YoloModelProfile profile = YoloModelProfile.FromArgs(new[]
+        {
+            "--family", "x",
+            "--task", "det",
+            "--input-shape", "1x3x32x32",
+            "--layout", "channels-first",
+            "--class-count", "2"
+        }, labelCount: 0);
+
+        Assert.Throws<NotSupportedException>(() => YoloSampleRunner.DecodeDetections(new float[21 * 7], new[] { 1, 7, 21 }, profile));
     }
 
     [Fact]
@@ -442,7 +543,9 @@ public sealed class YoloVisionManagedPipelineTests
             ("v9", YoloModelFamily.YoloV9),
             ("v10", YoloModelFamily.YoloV10),
             ("v11", YoloModelFamily.YoloV11),
-            ("v26", YoloModelFamily.YoloV26)
+            ("v26", YoloModelFamily.YoloV26),
+            ("yolox", YoloModelFamily.YoloX),
+            ("x", YoloModelFamily.YoloX)
         };
         foreach ((string alias, YoloModelFamily expectedFamily) in families)
         {
@@ -471,7 +574,7 @@ public sealed class YoloVisionManagedPipelineTests
     [Fact]
     public void CapabilityMatrixCoversPromisedFamiliesTasksAndOfflineCliSurface()
     {
-        Assert.Equal(54, YoloCapabilityMatrix.Entries.Count);
+        Assert.Equal(60, YoloCapabilityMatrix.Entries.Count);
 
         foreach (YoloModelFamily family in Enum.GetValues<YoloModelFamily>())
         {
@@ -491,6 +594,8 @@ public sealed class YoloVisionManagedPipelineTests
         Assert.Contains("YoloVision Capability Matrix", table, StringComparison.Ordinal);
         Assert.Contains("v5 | det | Detection", table, StringComparison.Ordinal);
         Assert.Contains("v26 | pose | Pose", table, StringComparison.Ordinal);
+        Assert.Contains("yolox | det | Detection | supported", table, StringComparison.Ordinal);
+        Assert.Contains("yolox | cls | Classification | unsupported-family-task", table, StringComparison.Ordinal);
         Assert.Contains("managed-metadata-ready", table, StringComparison.Ordinal);
 
         string program = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "Program.cs"));
@@ -507,6 +612,43 @@ public sealed class YoloVisionManagedPipelineTests
         Assert.Contains("isRuntimeProof=false", readme, StringComparison.Ordinal);
         Assert.Contains("\"schemaVersion\": { \"const\": \"yolovision-preflight.v1\" }", schema, StringComparison.Ordinal);
         Assert.Contains("\"tensorRtRuntimeProbed\": { \"const\": false }", schema, StringComparison.Ordinal);
+        string outputValidator = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Test-YoloVisionOutputReport.ps1"));
+        Assert.Contains("\"yolox\"", outputValidator, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void OfficialYoloXAcquisitionPinsUpstreamAssetsToEDriveAndPreservesPublishBoundary()
+    {
+        string manifestPath = Path.Combine(RepositoryPaths.Root, "samples", "assets", "yolovision-yolox-official-assets.json");
+        using JsonDocument manifest = JsonDocument.Parse(File.ReadAllText(manifestPath));
+        JsonElement root = manifest.RootElement;
+
+        Assert.Equal("e1052df71842031413f6030723c3607b839c80ce", root.GetProperty("upstreamRevision").GetString());
+        Assert.Equal("0.1.1rc0", root.GetProperty("upstreamTag").GetString());
+        Assert.Equal(6, root.GetProperty("assets").GetArrayLength());
+        JsonElement model = root.GetProperty("assets").EnumerateArray().Single(static item => item.GetProperty("id").GetString() == "yolox-s-onnx");
+        Assert.Equal(35858002, model.GetProperty("expectedLength").GetInt64());
+        Assert.Equal("c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063", model.GetProperty("expectedSha256").GetString());
+        Assert.False(root.GetProperty("proofBoundary").GetProperty("canPublishPublicly").GetBoolean());
+
+        string acquisitionScript = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Acquire-YoloXOfficialAssets.ps1"));
+        Assert.Contains("downloads\\yolox-apache", acquisitionScript, StringComparison.Ordinal);
+        Assert.Contains("YOLOX assets must not be downloaded to the C drive", acquisitionScript, StringComparison.Ordinal);
+        Assert.Contains("Write-P6Ppm", acquisitionScript, StringComparison.Ordinal);
+        Assert.Contains("Write-CocoLabels", acquisitionScript, StringComparison.Ordinal);
+        string manifestValidator = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Test-SampleAssetManifest.ps1"));
+        Assert.Contains("-example.json", manifestValidator, StringComparison.Ordinal);
+
+        using JsonDocument example = JsonDocument.Parse(File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "assets", "yolovision-yolox-s-example.json")));
+        Assert.Equal("real-model-runtime", example.RootElement.GetProperty("proofClassification").GetString());
+        Assert.True(example.RootElement.GetProperty("isSmokePassed").GetBoolean());
+        Assert.False(example.RootElement.GetProperty("boundary").GetProperty("isPackageConsumerRuntime").GetBoolean());
+        Assert.False(example.RootElement.GetProperty("boundary").GetProperty("canPublishPublicly").GetBoolean());
+        string proofPath = Path.Combine(RepositoryPaths.Root, "artifacts", "interface-coverage", "yolox-official-runtime-proof-closure.json");
+        using JsonDocument proof = JsonDocument.Parse(File.ReadAllText(proofPath));
+        Assert.True(proof.RootElement.GetProperty("boundary").GetProperty("isRealModelRuntimeProof").GetBoolean());
+        Assert.False(proof.RootElement.GetProperty("boundary").GetProperty("isPackageConsumerRuntimeProof").GetBoolean());
+        Assert.False(proof.RootElement.GetProperty("boundary").GetProperty("canPublishPublicly").GetBoolean());
     }
 
     [Fact]

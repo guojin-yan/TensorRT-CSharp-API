@@ -156,7 +156,7 @@ public sealed class SampleLayoutTests
     }
 
     [Fact]
-    public void YoloVisionAssetEvidenceManifestsStayNonPromotableUntilRealRunProofExists()
+    public void YoloVisionAssetEvidencePreservesTemplateBoundaryAndAcceptsStrictYoloXRuntimeProof()
     {
         string root = RepositoryPaths.Root;
         string templatePath = Path.Combine(root, "samples", "assets", "yolovision-assets.template.json");
@@ -164,14 +164,21 @@ public sealed class SampleLayoutTests
         using JsonDocument template = JsonDocument.Parse(File.ReadAllText(templatePath));
         using JsonDocument example = JsonDocument.Parse(File.ReadAllText(examplePath));
 
-        AssertYoloVisionManifestBoundary(
+        AssertYoloVisionTemplateManifestBoundary(
             template.RootElement,
             expectedProofClassification: "template-only",
             expectedRecord: "models/yolovision-sample-run-evidence.json");
-        AssertYoloVisionManifestBoundary(
-            example.RootElement,
-            expectedProofClassification: "build-only",
-            expectedRecord: "models/yolox_s-sample-run-evidence.json");
+        Assert.Equal("YoloVision", example.RootElement.GetProperty("sampleName").GetString());
+        Assert.Equal("real-model-runtime", example.RootElement.GetProperty("proofClassification").GetString());
+        Assert.True(example.RootElement.GetProperty("isSmokePassed").GetBoolean());
+        Assert.False(example.RootElement.GetProperty("isRedistributableInRepository").GetBoolean());
+        Assert.Equal("yolox", example.RootElement.GetProperty("model").GetProperty("family").GetString());
+        Assert.Equal("upstream-repository-license-hash-pinned", example.RootElement.GetProperty("model").GetProperty("licenseEvidence").GetString());
+        JsonElement exampleEvidence = example.RootElement.GetProperty("evidence");
+        Assert.Equal("real-model-runtime", exampleEvidence.GetProperty("sampleRunEvidenceValidatorState").GetString());
+        Assert.True(exampleEvidence.GetProperty("sampleRunEvidenceCanPromoteRealModelRuntime").GetBoolean());
+        Assert.Equal("passed", exampleEvidence.GetProperty("lastRunStatus").GetString());
+        Assert.False(example.RootElement.GetProperty("boundary").GetProperty("isPackageConsumerRuntime").GetBoolean());
 
         string templateText = File.ReadAllText(templatePath);
         string exampleText = File.ReadAllText(examplePath);
@@ -199,7 +206,7 @@ public sealed class SampleLayoutTests
             "--task obb",
             "--task pose",
             "--task sem",
-            "YOLO v5/v6/v7/v8/v9/v10/v11/v26/custom",
+            "YOLO v5/v6/v7/v8/v9/v10/v11/v26/YOLOX/custom",
             "model SHA256",
             "labels SHA256",
             "image SHA256",
@@ -300,7 +307,7 @@ public sealed class SampleLayoutTests
             .Single();
     }
 
-    private static void AssertYoloVisionManifestBoundary(JsonElement root, string expectedProofClassification, string expectedRecord)
+    private static void AssertYoloVisionTemplateManifestBoundary(JsonElement root, string expectedProofClassification, string expectedRecord)
     {
         Assert.Equal("YoloVision", root.GetProperty("sampleName").GetString());
         Assert.Equal(expectedProofClassification, root.GetProperty("proofClassification").GetString());

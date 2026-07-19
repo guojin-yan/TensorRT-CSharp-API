@@ -1,5 +1,7 @@
 # YoloVision 真实资产接入教程
 
+> 2026-07-19 状态更新：官方 YOLOX-S 0.1.1rc0 已完成 E 盘 hash 固定获取、内置预处理、TRT10 build、真实图片 enqueue、raw grid/stride 解码和严格 `real-model-runtime` 校验。当前可直接复现的完整流程见 [YoloVision 官方 YOLOX-S 下载、构建与真实图片运行教程](yolovision-yolox-official-runtime-tutorial.md)。本文后续内容继续保留为其他 YOLO family、自定义模型和 owner 自备资产的通用回填方法。
+
 本文把 `samples/YoloVision` 从“synthetic input 管线样例”推进到“可接真实模型的操作流程”。仓库不会直接打包 YOLO 权重、COCO labels 或测试图片；这些资产有独立许可证、体积和再分发要求。正确做法是把资产选择、下载、hash、转换、构建和运行日志全部记录在 manifest 和报告里。
 
 读完本文后，你应该能得到三类材料：
@@ -8,7 +10,7 @@
 - 一份 TensorRtExec build-only 报告，说明 ONNX parser/builder 是否能处理该模型。
 - 一组证据记录，包括 asset manifest、evidence sidecar 和 sample run evidence record，说明哪些证据已齐全、哪些仍是 owner action。
 
-本文不会假设仓库已经内置 YOLOX-S 权重，也不会给出伪造的 SHA256 或 `YoloVision Passed=True`。如果你在自己的机器上完成了真实资产准备，可以按本文的记录格式回填。
+仓库仍不会提交 YOLOX-S 权重、engine 或图片；这些大文件保留在外层 E 盘下载工作区。但官方链的真实 SHA256、`YoloVision Passed=True` 日志、JSON/SVG 和严格 validator 已记录在 `artifacts/yolovision/yolox-official-runtime`。其他模型不得照抄这些值，仍应按本文格式产生自己的真实记录。
 
 ## 环境准备
 

@@ -10,5 +10,6 @@ public enum YoloModelFamily
     YoloV9,
     YoloV10,
     YoloV11,
-    YoloV26
+    YoloV26,
+    YoloX
 }

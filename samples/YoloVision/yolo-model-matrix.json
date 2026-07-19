@@ -12,6 +12,7 @@
     "yolov10",
     "yolov11",
     "yolov26",
+    "yolox",
     "custom"
   ],
   "tasks": [
@@ -94,6 +95,14 @@
       "modelSourceHint": "Treat as forward-compatible/custom family until a concrete owner-approved implementation and model source are supplied.",
       "onnxExportNotes": "Require explicit tensor names, shapes, task, and output roles.",
       "postprocessNotes": "Use custom metadata; never claim real runtime proof from matrix presence."
+    },
+    {
+      "family": "yolox",
+      "supportedTasks": ["det"],
+      "status": "official YOLOX-S source-tree real-model runtime; detection-only design boundary",
+      "modelSourceHint": "Use the hash-pinned YOLOX 0.1.1rc0 release asset and Apache-2.0 repository provenance in samples/assets/yolovision-yolox-official-assets.json.",
+      "onnxExportNotes": "The official static model uses images [1,3,640,640] and raw output [1,8400,85].",
+      "postprocessNotes": "Apply (xy + grid) * stride and exp(wh) * stride for strides 8/16/32 before objectness scoring and application-side NMS; non-detection tasks are unsupported."
     },
     {
       "family": "custom",

@@ -31,7 +31,7 @@
     {
       "task": "det",
       "displayName": "Detection",
-      "families": ["yolov5", "yolov6", "yolov7", "yolov8", "yolov9", "yolov10", "yolov11", "yolov26", "custom"],
+      "families": ["yolov5", "yolov6", "yolov7", "yolov8", "yolov9", "yolov10", "yolov11", "yolov26", "yolox", "custom"],
       "primaryOutputRoles": ["boxes", "scores", "classes"],
       "requiredMetadata": ["inputShape", "outputLayout", "classCount", "boxFormat", "scoreRule", "nmsMode"],
       "optionalMetadata": ["objectnessChannel", "graphIncludesNms", "confidenceThreshold", "iouThreshold"],

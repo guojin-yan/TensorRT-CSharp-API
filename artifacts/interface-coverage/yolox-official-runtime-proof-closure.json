@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "yolox-official-source-tree-runtime-proof-closure",
+  "proofClassification": "source-tree-real-model-runtime",
+  "sample": "samples/YoloVision",
+  "family": "yolox",
+  "task": "det",
+  "upstream": {
+    "repository": "https://github.com/Megvii-BaseDetection/YOLOX",
+    "tag": "0.1.1rc0",
+    "revision": "e1052df71842031413f6030723c3607b839c80ce",
+    "license": "Apache-2.0",
+    "licenseSha256": "577c03d505ec80f667ebf96ebd0cc4f6825c817ca1088ee348c48aaabd51bd92"
+  },
+  "assets": {
+    "modelSha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+    "modelLength": 35858002,
+    "sourceImageSha256": "5a9522051c3cec2bbd2f6323fccba32e8fbf3ddcc2b3e2fd46b04c720bc6f866",
+    "derivedPpmSha256": "6cb94c9cd0781412598fe179246b09041af4303d388a5ba3c55f760dff11ec2c",
+    "labelsSha256": "4d4aaea7bee6be2f675d9b53a9195ca36dfe6429f7479f29155da522a6c85930",
+    "preprocessedTensorSha256": "ca4e22bc6d8ebfe70f5aefeae8957d9ad15eb8d3bf99b6a42e016436dcbf1528",
+    "preprocessedTensorElementCount": 1228800,
+    "downloadWorkspaceDrive": "E:",
+    "largeAssetsCommitted": false
+  },
+  "implementation": {
+    "rawDecode": "xy=(raw+grid)*stride; wh=exp(raw)*stride; strides=8,16,32",
+    "preprocess": "NCHW BGR float32 0..255, top-left letterbox, fill 114",
+    "detectionOnly": true,
+    "capabilityFamilyCount": 10,
+    "capabilityEntryCount": 60,
+    "unsupportedTaskCount": 5
+  },
+  "engineBuild": {
+    "tensorRtVersion": "10.11.0.33",
+    "precision": "fp32",
+    "opset": 11,
+    "inputName": "images",
+    "inputShape": [1, 3, 640, 640],
+    "outputName": "output",
+    "outputShape": [1, 8400, 85],
+    "engineLength": 48241100,
+    "engineSha256": "9b31390a786e8f520d4f3f78fbb0444eb7563c4bc8c2dddd5d7861c5c69524b1",
+    "status": "passed"
+  },
+  "runtime": {
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02",
+    "cudaToolkitVersion": "12.9",
+    "tensorRtLine": 10,
+    "elapsedMilliseconds": 10.012255668640137,
+    "predictionCount": 5,
+    "topPrediction": "bicycle",
+    "topScore": 0.95484126,
+    "dogScore": 0.913382,
+    "outputValueSha256": "ad516a1aabdd165ac20328e72f19027ccf574a2d30980ac683ac4e01597c78e7",
+    "passedMarker": "YoloVision Passed=True",
+    "status": "passed"
+  },
+  "validation": {
+    "bindingManifestCount": 191,
+    "bindingRecordCount": 3961,
+    "yoloVisionProjectQualityPassed": 88,
+    "yoloVisionProjectQualityFailed": 0,
+    "sampleAssetManifestCount": 9,
+    "sampleAssetManifestFindingCount": 0,
+    "sampleManifestSidecarCrossCheck": "checked",
+    "sampleManifestRunEvidenceCrossCheck": "checked",
+    "outputReportStrictFailedBlockers": 0,
+    "sampleRunValidationState": "real-model-runtime",
+    "sampleRunCanPromoteRealModelRuntime": true,
+    "sampleRunOwnerActionRequiredCount": 0,
+    "nativeBuildPresetsPassed": 4,
+    "abiParity": {
+      "trt8": "991/991",
+      "trt10": "1086/1086",
+      "trt11": "1233/1233",
+      "missingDeclarationCount": 0,
+      "missingExportCount": 0
+    },
+    "classificationFindingCount": 0,
+    "releaseQualityRequiredFailureCount": 0
+  },
+  "localEvidence": {
+    "root": "artifacts/yolovision/yolox-official-runtime",
+    "rawEvidenceCommitted": false,
+    "reason": "Raw logs and reports contain local paths; large model/image/engine/tensor assets remain in the E-drive download workspace."
+  },
+  "cDriveAudit": {
+    "yoloXAssetCount": 0,
+    "removedEmptyTestDirectoryCount": 6,
+    "emptyPackageCacheRootRemoved": true,
+    "unrelatedUserAndSystemFilesRemoved": false
+  },
+  "boundary": {
+    "isRuntimeExecutionProof": true,
+    "isRealModelRuntimeProof": true,
+    "isPackageConsumerRuntimeProof": false,
+    "canPromotePackageConsumerRuntime": false,
+    "publicRedistributionOwnerApproval": false,
+    "canPublishPublicly": false,
+    "isPostPublishProof": false,
+    "canCloseReleaseIssue": false,
+    "performsPublish": false
+  }
+}

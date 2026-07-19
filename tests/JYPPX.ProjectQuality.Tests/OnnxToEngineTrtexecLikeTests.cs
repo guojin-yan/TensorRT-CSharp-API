@@ -1596,8 +1596,9 @@ public sealed class OnnxToEngineTrtexecLikeTests
         Assert.Contains("YoloRuntimeOutputTensor", File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "yolovision-multi-output-metadata-guide.md")), StringComparison.Ordinal);
         Assert.Contains("BuildEvidenceOnly", File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "onnx-to-engine-trtexec-conversion-guide.md")), StringComparison.Ordinal);
         Assert.Contains("NormalizedCommandLine", File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "tensorrtexec-gui-user-guide.md")), StringComparison.Ordinal);
-        Assert.Contains("\"isSmokePassed\": false", yoloExample, StringComparison.Ordinal);
-        Assert.Contains("\"proofClassification\": \"build-only\"", yoloExample, StringComparison.Ordinal);
+        Assert.Contains("\"isSmokePassed\": true", yoloExample, StringComparison.Ordinal);
+        Assert.Contains("\"proofClassification\": \"real-model-runtime\"", yoloExample, StringComparison.Ordinal);
+        Assert.Contains("\"isPackageConsumerRuntime\": false", yoloExample, StringComparison.Ordinal);
         Assert.Contains("\"stdoutSummary\"", yoloExample, StringComparison.Ordinal);
         Assert.Contains("YOLOX", yoloExample, StringComparison.Ordinal);
         Assert.Contains("Manual Review Candidates", candidatePlan, StringComparison.Ordinal);

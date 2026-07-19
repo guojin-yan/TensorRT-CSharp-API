@@ -1,6 +1,6 @@
 # YoloVision Model Matrix
 
-`samples/YoloVision/yolo-model-matrix.json` is the machine-readable support matrix for the unified YOLO sample. It covers YOLOv5, YOLOv6, YOLOv7, YOLOv8, YOLOv9, YOLOv10, YOLOv11, YOLOv26, and custom models across `det`, `cls`, `seg`, `obb`, `pose`, and `sem`.
+`samples/YoloVision/yolo-model-matrix.json` is the machine-readable support matrix for the unified YOLO sample. It covers YOLOv5, YOLOv6, YOLOv7, YOLOv8, YOLOv9, YOLOv10, YOLOv11, YOLOv26, detection-only YOLOX, and custom models across `det`, `cls`, `seg`, `obb`, `pose`, and `sem`.
 
 This matrix is not `real-model-runtime` proof. Real promotion still requires owner-provided ONNX, labels, input assets, license notes, SHA256 values, a TensorRtExec/OnnxToEngine build report, a `YoloVision Passed=True` runner log, and a sample-run-evidence validator result.
 
@@ -17,6 +17,7 @@ This matrix is not `real-model-runtime` proof. Real promotion still requires own
 | YOLOv11 | det, cls, seg, obb, pose | Planned runtime proof; matrix-ready. |
 | YOLOv26 | det, cls, seg, obb, pose, sem | Future-family planning until concrete owner assets exist. |
 | custom | det, cls, seg, obb, pose, sem | Metadata-driven custom path. |
+| yolox | det | Official raw grid/stride decode; non-detection tasks are an explicit unsupported boundary. |
 
 ## Required Evidence
 

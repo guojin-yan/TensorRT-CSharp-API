@@ -23,6 +23,7 @@ public sealed class YoloImagePreprocessResult
         bool normalized,
         float scale,
         bool letterboxEnabled,
+        string letterboxAlignment,
         int resizedWidth,
         int resizedHeight,
         int padX,
@@ -46,6 +47,7 @@ public sealed class YoloImagePreprocessResult
         Normalized = normalized;
         Scale = scale;
         LetterboxEnabled = letterboxEnabled;
+        LetterboxAlignment = letterboxAlignment ?? string.Empty;
         ResizedWidth = resizedWidth;
         ResizedHeight = resizedHeight;
         PadX = padX;
@@ -84,6 +86,8 @@ public sealed class YoloImagePreprocessResult
     public float Scale { get; }
 
     public bool LetterboxEnabled { get; }
+
+    public string LetterboxAlignment { get; }
 
     public int ResizedWidth { get; }
 
@@ -138,6 +142,7 @@ public static class YoloImagePreprocessor
 
         string layout = NormalizeLayout(options.TensorLayout);
         string colorOrder = NormalizeColorOrder(options.ColorOrder);
+        string letterboxAlignment = NormalizeLetterboxAlignment(options.LetterboxAlignment);
         ResolveInputShape(inputShape, layout, out int channelCount, out int targetHeight, out int targetWidth);
         if (channelCount != 3)
         {
@@ -146,7 +151,7 @@ public static class YoloImagePreprocessor
 
         RgbImage image = DecodeRgbImage(fullImagePath);
         bool letterbox = options.PreserveAspectRatio && !string.Equals(options.ResizeMode, "stretch", StringComparison.OrdinalIgnoreCase);
-        ResizePlan plan = CreateResizePlan(image.Width, image.Height, targetWidth, targetHeight, letterbox);
+        ResizePlan plan = CreateResizePlan(image.Width, image.Height, targetWidth, targetHeight, letterbox, letterboxAlignment);
         byte[] targetPixels = ResizeToTarget(image, plan, DefaultLetterboxFill);
         float[] tensor = ToTensor(targetPixels, targetWidth, targetHeight, layout, colorOrder, options.Normalize, options.Scale);
 
@@ -174,6 +179,7 @@ public static class YoloImagePreprocessor
             options.Normalize,
             options.Scale,
             letterbox,
+            letterboxAlignment,
             plan.ResizedWidth,
             plan.ResizedHeight,
             plan.PadX,
@@ -313,7 +319,7 @@ public static class YoloImagePreprocessor
         }
     }
 
-    private static ResizePlan CreateResizePlan(int sourceWidth, int sourceHeight, int targetWidth, int targetHeight, bool letterbox)
+    private static ResizePlan CreateResizePlan(int sourceWidth, int sourceHeight, int targetWidth, int targetHeight, bool letterbox, string letterboxAlignment)
     {
         if (!letterbox)
         {
@@ -321,10 +327,11 @@ public static class YoloImagePreprocessor
         }
 
         float scale = MathF.Min(targetWidth / (float)sourceWidth, targetHeight / (float)sourceHeight);
-        int resizedWidth = Math.Max(1, Math.Min(targetWidth, (int)MathF.Round(sourceWidth * scale)));
-        int resizedHeight = Math.Max(1, Math.Min(targetHeight, (int)MathF.Round(sourceHeight * scale)));
-        int padX = (targetWidth - resizedWidth) / 2;
-        int padY = (targetHeight - resizedHeight) / 2;
+        bool topLeft = string.Equals(letterboxAlignment, "top-left", StringComparison.Ordinal);
+        int resizedWidth = Math.Max(1, Math.Min(targetWidth, topLeft ? (int)(sourceWidth * scale) : (int)MathF.Round(sourceWidth * scale)));
+        int resizedHeight = Math.Max(1, Math.Min(targetHeight, topLeft ? (int)(sourceHeight * scale) : (int)MathF.Round(sourceHeight * scale)));
+        int padX = topLeft ? 0 : (targetWidth - resizedWidth) / 2;
+        int padY = topLeft ? 0 : (targetHeight - resizedHeight) / 2;
         return new ResizePlan(targetWidth, targetHeight, resizedWidth, resizedHeight, padX, padY, scale, scale);
     }
 
@@ -461,6 +468,17 @@ public static class YoloImagePreprocessor
             "" or "RGB" => "RGB",
             "BGR" => "BGR",
             _ => throw new ArgumentException($"Unsupported color order '{value}'. Use RGB or BGR.")
+        };
+    }
+
+    private static string NormalizeLetterboxAlignment(string value)
+    {
+        string normalized = (value ?? string.Empty).Trim().Replace("_", "-", StringComparison.Ordinal).ToLowerInvariant();
+        return normalized switch
+        {
+            "" or "center" or "centered" => "center",
+            "topleft" or "top-left" => "top-left",
+            _ => throw new ArgumentException($"Unsupported letterbox alignment '{value}'. Use center or top-left.")
         };
     }
 

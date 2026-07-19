@@ -14,7 +14,9 @@ public sealed class YoloCapabilityEntry
         string taskAlias,
         string decodePath,
         string auxiliaryMetadata,
-        string evidenceLevel)
+        string evidenceLevel,
+        bool supported,
+        string supportState)
     {
         Family = family;
         TaskType = taskType;
@@ -23,6 +25,8 @@ public sealed class YoloCapabilityEntry
         DecodePath = decodePath ?? throw new ArgumentNullException(nameof(decodePath));
         AuxiliaryMetadata = auxiliaryMetadata ?? throw new ArgumentNullException(nameof(auxiliaryMetadata));
         EvidenceLevel = evidenceLevel ?? throw new ArgumentNullException(nameof(evidenceLevel));
+        Supported = supported;
+        SupportState = supportState ?? throw new ArgumentNullException(nameof(supportState));
     }
 
     public YoloModelFamily Family { get; }
@@ -38,6 +42,10 @@ public sealed class YoloCapabilityEntry
     public string AuxiliaryMetadata { get; }
 
     public string EvidenceLevel { get; }
+
+    public bool Supported { get; }
+
+    public string SupportState { get; }
 }
 
 public static class YoloCapabilityMatrix
@@ -52,7 +60,8 @@ public static class YoloCapabilityMatrix
         (YoloModelFamily.YoloV9, "v9"),
         (YoloModelFamily.YoloV10, "v10"),
         (YoloModelFamily.YoloV11, "v11"),
-        (YoloModelFamily.YoloV26, "v26")
+        (YoloModelFamily.YoloV26, "v26"),
+        (YoloModelFamily.YoloX, "yolox")
     };
 
     private static readonly (YoloTaskType Task, string Alias, string DecodePath, string AuxiliaryMetadata, string EvidenceLevel)[] Tasks =
@@ -66,15 +75,39 @@ public static class YoloCapabilityMatrix
     };
 
     public static IReadOnlyList<YoloCapabilityEntry> Entries { get; } = Families
-        .SelectMany(static family => Tasks.Select(task => new YoloCapabilityEntry(
+        .SelectMany(static family => Tasks.Select(task => CreateEntry(family, task)))
+        .ToArray();
+
+    private static YoloCapabilityEntry CreateEntry(
+        (YoloModelFamily Family, string Alias) family,
+        (YoloTaskType Task, string Alias, string DecodePath, string AuxiliaryMetadata, string EvidenceLevel) task)
+    {
+        if (family.Family == YoloModelFamily.YoloX)
+        {
+            bool supported = task.Task == YoloTaskType.Detection;
+            return new YoloCapabilityEntry(
+                family.Family,
+                task.Task,
+                family.Alias,
+                task.Alias,
+                supported ? "YOLOX raw grid/stride transform plus score filtering and application-side NMS" : "unsupported: built-in YOLOX profile is detection-only",
+                supported ? "strides 8,16,32; boxes-first raw output; objectness channel" : "not applicable",
+                supported ? "source-tree-real-model-runtime-ready" : "unsupported-design-boundary",
+                supported,
+                supported ? "supported" : "unsupported-family-task");
+        }
+
+        return new YoloCapabilityEntry(
             family.Family,
             task.Task,
             family.Alias,
             task.Alias,
             task.DecodePath,
             task.AuxiliaryMetadata,
-            task.EvidenceLevel)))
-        .ToArray();
+            task.EvidenceLevel,
+            supported: true,
+            supportState: "supported");
+    }
 
     public static string FormatConsoleTable()
     {
@@ -85,6 +118,7 @@ public static class YoloCapabilityMatrix
                     entry.FamilyAlias,
                     entry.TaskAlias,
                     entry.TaskType,
+                    entry.SupportState,
                     entry.DecodePath,
                     entry.AuxiliaryMetadata,
                     entry.EvidenceLevel))
@@ -95,7 +129,7 @@ public static class YoloCapabilityMatrix
             new[]
             {
                 "YoloVision Capability Matrix",
-                "family | task | task-name | decode-path | auxiliary-metadata | evidence-level"
+                "family | task | task-name | support-state | decode-path | auxiliary-metadata | evidence-level"
             }.Concat(lines));
     }
 
@@ -144,6 +178,8 @@ public static class YoloCapabilityMatrix
                 decodePath = entry.DecodePath,
                 auxiliaryMetadata = entry.AuxiliaryMetadata,
                 evidenceLevel = entry.EvidenceLevel,
+                supported = entry.Supported,
+                supportState = entry.SupportState,
                 canPromoteRealModelRuntime = false,
                 canPromotePackageConsumerRuntime = false
             }).ToArray()

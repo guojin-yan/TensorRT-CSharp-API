@@ -256,7 +256,11 @@ if (-not (Test-Path -LiteralPath $manifestRoot -PathType Container)) {
   throw "Sample asset manifest folder was not found: $manifestRoot"
 }
 
-$manifestFiles = @(Get-ChildItem -LiteralPath $manifestRoot -Filter "*.template.json" -File | Sort-Object Name)
+$manifestFiles = @(
+  Get-ChildItem -LiteralPath $manifestRoot -File |
+    Where-Object { $_.Name.EndsWith(".template.json", [StringComparison]::OrdinalIgnoreCase) -or $_.Name.EndsWith("-example.json", [StringComparison]::OrdinalIgnoreCase) } |
+    Sort-Object Name
+)
 $findings = New-Object System.Collections.Generic.List[object]
 $items = New-Object System.Collections.Generic.List[object]
 

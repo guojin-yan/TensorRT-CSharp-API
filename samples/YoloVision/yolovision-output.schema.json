@@ -44,6 +44,7 @@
         "yolov10",
         "yolov11",
         "yolov26",
+        "yolox",
         "custom"
       ]
     },
@@ -170,6 +171,13 @@
               "enum": [
                 "letterbox",
                 "stretch"
+              ]
+            },
+            "alignment": {
+              "type": "string",
+              "enum": [
+                "center",
+                "top-left"
               ]
             },
             "targetWidth": {

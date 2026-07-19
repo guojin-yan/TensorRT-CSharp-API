@@ -80,6 +80,7 @@ Chinese articles:
 - [YoloVision OBB Tutorial](articles/zh-cn/yolovision-obb-tutorial.md)
 - [YoloVision Classification And Semantic Tutorial](articles/zh-cn/yolovision-classification-semantic-tutorial.md)
 - [YoloVision Real Asset Walkthrough](articles/zh-cn/yolovision-real-asset-walkthrough.md)
+- [YoloVision Official YOLOX-S Runtime Tutorial](articles/zh-cn/yolovision-yolox-official-runtime-tutorial.md)
 - [TensorRtExec Tool Getting Started](articles/zh-cn/tensorrtexec-tool-getting-started.md)
 - [TensorRtExec Trtexec Parity Matrix](articles/zh-cn/tensorrt-exec-trtexec-parity-matrix.md)
 - [OnnxToEngine TensorRtExec YoloVision Evidence Ladder](articles/zh-cn/onnxtoengine-tensorrtexec-yolovision-evidence-ladder.md)

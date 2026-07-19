@@ -212,7 +212,8 @@ public static class YoloVisionPreflightReport
                     resize = profile.Preprocess.ResizeMode,
                     scale = profile.Preprocess.Scale,
                     normalize = profile.Preprocess.Normalize,
-                    preserveAspectRatio = profile.Preprocess.PreserveAspectRatio
+                    preserveAspectRatio = profile.Preprocess.PreserveAspectRatio,
+                    letterboxAlignment = profile.Preprocess.LetterboxAlignment
                 },
                 postprocess = new
                 {
@@ -441,6 +442,7 @@ public static class YoloVisionPreflightReport
             YoloModelFamily.YoloV10 => "v10",
             YoloModelFamily.YoloV11 => "v11",
             YoloModelFamily.YoloV26 => "v26",
+            YoloModelFamily.YoloX => "yolox",
             _ => family.ToString()
         };
     }

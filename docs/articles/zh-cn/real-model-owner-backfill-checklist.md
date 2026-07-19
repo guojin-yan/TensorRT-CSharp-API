@@ -1,5 +1,7 @@
 # 真实模型 Owner 回填 Checklist：Classification、YoloVision 与 YOLOX-S
 
+> 官方 YOLOX-S 的源码树真实运行链已于 2026-07-19 完成，见 `docs/articles/zh-cn/yolovision-yolox-official-runtime-tutorial.md` 和 `artifacts/yolovision/yolox-official-runtime`。本 checklist 仍用于 Classification、其他 YOLO family、自定义资产、公开再分发审批以及 package consumer 等尚需 owner 输入的路径；不得用已完成的源码树运行替代公开发布审批。
+
 这份 checklist 给 release owner 或样例维护者使用。它不下载模型、不替你确认许可证，也不把候选资产写成已通过；它的作用是把真实模型样例从“模板存在”推进到“证据齐全、可审计、可被 release evidence bundle 聚合”的状态。
 
 适用范围：

@@ -292,6 +292,7 @@ public static class YoloVisionOutputReport
         writer.WriteStartObject();
         writer.WriteBoolean("enabled", imagePreprocess.LetterboxEnabled);
         writer.WriteString("resizeMode", imagePreprocess.ResizeMode);
+        writer.WriteString("alignment", imagePreprocess.LetterboxAlignment);
         writer.WriteNumber("targetWidth", imagePreprocess.TargetWidth);
         writer.WriteNumber("targetHeight", imagePreprocess.TargetHeight);
         writer.WriteNumber("resizedWidth", imagePreprocess.ResizedWidth);
@@ -690,6 +691,7 @@ public static class YoloVisionOutputReport
             YoloModelFamily.YoloV10 => "yolov10",
             YoloModelFamily.YoloV11 => "yolov11",
             YoloModelFamily.YoloV26 => "yolov26",
+            YoloModelFamily.YoloX => "yolox",
             _ => "custom"
         };
     }

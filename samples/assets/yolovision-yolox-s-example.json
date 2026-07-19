@@ -1,119 +1,120 @@
 {
   "schemaVersion": 1,
   "sampleName": "YoloVision",
-  "status": "candidate-not-downloaded",
-  "proofClassification": "build-only",
-  "evidenceClassifications": [
-    "template-only",
-    "build-only",
-    "dependency-probe-only",
-    "synthetic-input-runtime",
-    "real-model-runtime",
-    "package-consumer-runtime"
-  ],
-  "isSmokePassed": false,
+  "status": "smoke-passed",
+  "proofClassification": "real-model-runtime",
+  "isSmokePassed": true,
   "isRedistributableInRepository": false,
   "model": {
-    "name": "YOLOX-S candidate",
-    "family": "custom",
+    "name": "YOLOX-S official 0.1.1rc0",
+    "family": "yolox",
     "task": "det",
-    "sourceUrl": "https://github.com/Megvii-BaseDetection/YOLOX",
-    "documentationUrl": "https://yolox.readthedocs.io/en/latest/demo/onnx_readme.html",
-    "license": "YOLOX source repository is Apache-2.0. Review official weight, label, and image redistribution terms before bundling any assets.",
-    "licenseEvidence": "owner-required",
-    "downloadUrl": "owner-required-from-official-model-zoo",
-    "sha256": "owner-required",
-    "opset": "11-or-owner-selected",
-    "exportCommand": "python3 tools/export_onnx.py --output-name yolox_s.onnx -n yolox-s -c yolox_s.pth",
-    "localPath": "models/yolox_s.onnx"
+    "sourceUrl": "https://github.com/Megvii-BaseDetection/YOLOX/releases/tag/0.1.1rc0",
+    "documentationUrl": "https://github.com/Megvii-BaseDetection/YOLOX/tree/e1052df71842031413f6030723c3607b839c80ce/demo/ONNXRuntime",
+    "license": "Apache-2.0 upstream repository license hash-pinned; public redistribution owner approval not asserted",
+    "licenseEvidence": "upstream-repository-license-hash-pinned",
+    "licenseUrl": "https://raw.githubusercontent.com/Megvii-BaseDetection/YOLOX/e1052df71842031413f6030723c3607b839c80ce/LICENSE",
+    "licenseSha256": "577c03d505ec80f667ebf96ebd0cc4f6825c817ca1088ee348c48aaabd51bd92",
+    "downloadUrl": "https://github.com/Megvii-BaseDetection/YOLOX/releases/download/0.1.1rc0/yolox_s.onnx",
+    "sha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+    "length": 35858002,
+    "opset": 11,
+    "exportCommand": "Official release asset; upstream export command: python3 tools/export_onnx.py --output-name yolox_s.onnx -n yolox-s -c yolox_s.pth",
+    "localPath": "..\\downloads\\yolox-apache\\source\\yolox_s.onnx"
   },
   "labels": {
-    "sourceUrl": "https://cocodataset.org/",
-    "license": "Review COCO label and dataset terms before redistribution.",
-    "licenseEvidence": "owner-required",
-    "sha256": "owner-required",
+    "sourceUrl": "https://raw.githubusercontent.com/Megvii-BaseDetection/YOLOX/e1052df71842031413f6030723c3607b839c80ce/yolox/data/datasets/coco_classes.py",
+    "sourceSha256": "b38193c481a73f1f674cedab9e551b15b39b1a7aaed3e09e16505362cc54ad51",
+    "license": "Apache-2.0 upstream repository license hash-pinned",
+    "licenseEvidence": "upstream-repository-license-hash-pinned",
+    "sha256": "4d4aaea7bee6be2f675d9b53a9195ca36dfe6429f7479f29155da522a6c85930",
     "classCount": 80,
-    "localPath": "models/coco.names"
+    "localPath": "..\\downloads\\yolox-apache\\derived\\coco.names"
   },
   "input": {
-    "sourceUrl": "owner-required-redistributable-test-image",
-    "license": "owner-required",
-    "licenseEvidence": "owner-required",
-    "sha256": "owner-required",
-    "localPath": "models/yolox-test.jpg"
+    "sourceUrl": "https://raw.githubusercontent.com/Megvii-BaseDetection/YOLOX/e1052df71842031413f6030723c3607b839c80ce/assets/dog.jpg",
+    "sourceJpgSha256": "5a9522051c3cec2bbd2f6323fccba32e8fbf3ddcc2b3e2fd46b04c720bc6f866",
+    "license": "Apache-2.0 upstream repository license hash-pinned",
+    "licenseEvidence": "upstream-repository-license-hash-pinned",
+    "sha256": "6cb94c9cd0781412598fe179246b09041af4303d388a5ba3c55f760dff11ec2c",
+    "localPath": "..\\downloads\\yolox-apache\\derived\\dog.ppm",
+    "derivation": "eng/Acquire-YoloXOfficialAssets.ps1 converts the hash-pinned JPG to P6 RGB PPM"
   },
   "inputTensor": {
-    "localPath": "models/yolox_s-preprocessed-fp32.bin",
-    "sourceImagePath": "models/yolox-test.jpg",
-    "sha256": "owner-required",
+    "localPath": "..\\downloads\\yolox-apache\\derived\\dog-yolox-s-1x3x640x640-bgr-top-left.fp32.bin",
+    "sourceImagePath": "..\\downloads\\yolox-apache\\derived\\dog.ppm",
+    "sha256": "ca4e22bc6d8ebfe70f5aefeae8957d9ad15eb8d3bf99b6a42e016436dcbf1528",
     "format": "float32-bin",
     "elementCount": "1228800",
     "elementCountNumeric": 1228800,
-    "command": "owner-required YOLOX preprocessing command that resizes/letterboxes, converts RGB/BGR as required, scales, and writes 1x3x640x640 float32 tensor",
-    "notes": "This file is local owner evidence and is not committed until license and size are approved."
+    "command": "dotnet run --project .\\samples\\YoloVision -- --family yolox --task det --image ..\\downloads\\yolox-apache\\derived\\dog.ppm --preprocessed-output ..\\downloads\\yolox-apache\\derived\\dog-yolox-s-1x3x640x640-bgr-top-left.fp32.bin --input-shape 1x3x640x640 --preprocess-only",
+    "notes": "Generated on E drive by the built-in YOLOX profile; model/image/tensor are not committed."
   },
   "tensor": {
-    "inputName": "images-or-owner-confirmed",
+    "inputName": "images",
     "inputShape": "1x3x640x640",
     "layout": "NCHW",
     "dtype": "float32",
-    "outputName": "output-or-owner-confirmed",
-    "outputShape": "owner-required"
+    "outputName": "output",
+    "outputShape": "1x8400x85"
   },
   "preprocess": {
-    "resize": "letterbox-or-owner-confirmed",
-    "padding": "owner-required",
-    "colorOrder": "RGB",
-    "scale": "1/255-or-owner-confirmed",
-    "mean": "none-or-owner-required",
-    "std": "none-or-owner-required"
+    "resize": "letterbox",
+    "padding": "top-left",
+    "fillValue": 114,
+    "colorOrder": "BGR",
+    "scale": 1,
+    "normalize": false,
+    "mean": "none",
+    "std": "none"
   },
   "postprocess": {
-    "layout": "auto",
-    "hasObjectness": "owner-required",
+    "layout": "boxes-first",
+    "hasObjectness": true,
     "classCount": 80,
-    "confidence": 0.25,
+    "confidence": 0.3,
     "iouThreshold": 0.45,
     "nmsLocation": "application-side",
     "nmsMode": "class-aware",
-    "outputVariants": [
-      "anchor-free",
-      "owner-confirmed-output-shape"
-    ]
+    "rawDecode": "xy=(raw+grid)*stride; wh=exp(raw)*stride; strides=8,16,32"
   },
   "evidence": {
-    "evidenceSidecar": "models/yolox_s-evidence.sidecar.json",
-    "sampleRunEvidenceRecord": "models/yolox_s-sample-run-evidence.json",
-    "sampleRunEvidenceValidation": "artifacts/user-acceptance/sample-run-evidence-record-validation.json",
-    "sampleRunEvidenceValidatorState": "owner-action-required",
-    "sampleRunEvidenceCanPromoteRealModelRuntime": false,
-    "sampleRunEvidenceFailureReasons": [
-      "owner must replace owner-required hashes with real SHA256 values",
-      "owner must capture YoloVision sample run log and SHA256",
-      "validator must pass before real-model-runtime promotion"
-    ],
-    "buildOnlyCommand": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\yolox_s.onnx --saveEngine .\\models\\yolox_s.plan --minShapes images:1x3x640x640 --optShapes images:1x3x640x640 --maxShapes images:1x3x640x640 --fp16 --workspace 512 --buildOnly --exportReport .\\models\\yolox_s-build-report.json --evidenceSidecar .\\models\\yolox_s-evidence.sidecar.json",
-    "runCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolox_s.onnx --labels .\\models\\coco.names --input-data .\\models\\yolox_s-preprocessed-fp32.bin --input-shape 1x3x640x640 --tensor-rt-line 10 --family custom --task det --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45",
-    "sampleRunCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolox_s.onnx --labels .\\models\\coco.names --input-data .\\models\\yolox_s-preprocessed-fp32.bin --input-shape 1x3x640x640 --tensor-rt-line 10 --family custom --task det --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45",
+    "proofClosureRecord": "artifacts/interface-coverage/yolox-official-runtime-proof-closure.json",
+    "acquisitionManifest": "samples/assets/yolovision-yolox-official-assets.json",
+    "evidenceSidecar": "artifacts/yolovision/yolox-official-runtime/yolox-official-runtime-evidence-sidecar.json",
+    "sampleRunEvidenceRecord": "artifacts/yolovision/yolox-official-runtime/sample-run-evidence-record.yolox-official.json",
+    "sampleRunEvidenceValidation": "artifacts/yolovision/yolox-official-runtime/validation/sample-run-evidence-record-validation.json",
+    "sampleRunEvidenceValidatorState": "real-model-runtime",
+    "sampleRunEvidenceCanPromoteRealModelRuntime": true,
+    "sampleRunEvidenceFailureReasons": [],
+    "buildOnlyCommand": "D:\\Program Files\\TensorRT-10.11.0.33-cu12\\bin\\trtexec.exe --onnx=E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolox-apache\\source\\yolox_s.onnx --saveEngine=E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolox-apache\\derived\\yolox_s-trt10.11-fp32.engine --skipInference --memPoolSize=workspace:1024 --profilingVerbosity=detailed",
+    "runCommand": "dotnet run --project .\\samples\\YoloVision -- --model ..\\downloads\\yolox-apache\\source\\yolox_s.onnx --labels ..\\downloads\\yolox-apache\\derived\\coco.names --image ..\\downloads\\yolox-apache\\derived\\dog.ppm --preprocessed-output ..\\downloads\\yolox-apache\\derived\\dog-yolox-s-1x3x640x640-bgr-top-left.fp32.bin --output-json .\\artifacts\\yolovision\\yolox-official-runtime\\yolovision-output.json --visualization .\\artifacts\\yolovision\\yolox-official-runtime\\yolovision-output.svg --input-shape 1x3x640x640 --tensor-rt-line 10 --family yolox --task det --layout boxes-first --has-objectness true --nms-mode class-aware --confidence 0.3 --iou-threshold 0.45 --top-k 20",
+    "sampleRunCommand": "dotnet run --project .\\samples\\YoloVision -- --model ..\\downloads\\yolox-apache\\source\\yolox_s.onnx --labels ..\\downloads\\yolox-apache\\derived\\coco.names --image ..\\downloads\\yolox-apache\\derived\\dog.ppm --input-shape 1x3x640x640 --tensor-rt-line 10 --family yolox --task det --layout boxes-first --has-objectness true --confidence 0.3 --iou-threshold 0.45",
     "expectedEvidenceLines": [
-      "YoloVision TensorRtLine=...",
-      "Profile Family=... Task=Detection Layout=... Nms=... NmsMode=...",
-      "InputSource=external InputFile=...",
-      "Input=... Output=...",
-      "Detection Class=... Score=... BoxCxCyWh=... or Detections=0 ...",
+      "YoloVision TensorRtLine=10",
+      "Profile Family=YoloX Task=Detection Layout=BoxesFirst",
+      "ImagePreprocessConfig Mode=letterbox Layout=NCHW Color=BGR",
+      "Input=images:[1, 3, 640, 640] Output=output:[1, 8400, 85]",
+      "Detection Class=bicycle Score=0.954841",
+      "Detection Class=dog Score=0.913382",
       "YoloVision Passed=True"
     ],
-    "lastRunStatus": "not-run",
-    "stdoutSummary": "",
+    "lastRunStatus": "passed",
+    "stdoutSummary": "TensorRT 10.11 source-tree runtime produced five detections from the official YOLOX dog image and ended with YoloVision Passed=True.",
     "stderrSummary": "",
-    "lastRunLog": "",
-    "lastRunLogSha256": ""
+    "lastRunLog": "artifacts/yolovision/yolox-official-runtime/yolovision-real-image-runtime.log",
+    "lastRunLogSha256": "4b275fe8a02659a1d503f69776dc3f6d0208ba700caf104fd7eff1abc50d4628"
+  },
+  "boundary": {
+    "isSourceTreeRealModelRuntime": true,
+    "isPackageConsumerRuntime": false,
+    "publicRedistributionOwnerApproval": false,
+    "canPublishPublicly": false,
+    "performsPublish": false
   },
   "notes": [
-    "This is an example candidate manifest, not bundled model evidence.",
-    "Do not mark isSmokePassed=true until model, labels, image, hashes, output tensor metadata, and real command output are recorded.",
-    "proofClassification=build-only is non-promotable here; the example does not prove YoloVision runtime or detection quality.",
-    "The evidence sidecar may enrich a TensorRtExec build report, but it cannot promote this sample to package-consumer-runtime.",
-    "Build-only TensorRtExec output is not object-detection quality proof."
+    "The source-tree real-model-runtime result is backed by a real TensorRT enqueue, output readback, grid/stride decode, NMS, JSON/SVG, log hash, and strict validator output.",
+    "Model, image, engine, labels, and tensor remain in the E-drive download workspace and are not committed.",
+    "No owner signature, public redistribution approval, or package-consumer-runtime proof is asserted."
   ]
 }

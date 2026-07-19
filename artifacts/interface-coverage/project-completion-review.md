@@ -1792,3 +1792,60 @@ source-quality proof closure。该状态漂移会让后续开发重复选择 `bt
 - 3 个由正在运行的 Codex/桌面进程锁定的 0 字节 `.tmp` 保留，不强制终止共享进程；
   NuGet、CUDA、.NET、Codex 与系统缓存未触碰。
 - 未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
+
+## 2026-07-19 官方 YOLOX-S 源码树真实运行闭环
+
+本阶段不再复用来源不清的本地 YOLOv8s 资产，而是固定 YOLOX 官方
+`0.1.1rc0` release 与提交 `e1052df71842031413f6030723c3607b839c80ce`，完成
+Apache-2.0 provenance、E 盘 acquisition、官方预处理、TRT10 build、真实图片 enqueue、
+raw grid/stride 解码、NMS、JSON/SVG 与严格 sample-run evidence 的端到端闭环。
+
+### 实现与真实结果
+
+- 新增 `YoloModelFamily.YoloX`，保持旧枚举值稳定；profile 支持 `yolox/x`，并明确
+  限定为 detection-only。
+- `YoloXOutputDecoder` 对 `[1,8400,85]` boxes-first raw output 按 stride
+  `8/16/32` 执行 `(xy+grid)*stride` 与 `exp(wh)*stride`，之后复用 objectness、
+  class-aware NMS 和 top-k；rank、layout、input shape、box count、class count 与非有限值
+  都有显式错误边界。
+- YOLOX profile 默认 `NCHW + BGR + float32 0..255 + fill 114 + top-left
+  letterbox`；普通 family 继续使用既有居中 letterbox。alignment 已进入控制台、output
+  JSON、preflight 和 schema。
+- acquisition manifest 固定 model、LICENSE、dog image、COCO classes 与官方预/后处理
+  参考源码的 URL、length、SHA256；脚本拒绝 C 盘输出，并可离线复核派生 PPM/labels。
+- TRT10.11 FP32 engine build `PASSED`：input `images [1,3,640,640]`，output
+  `output [1,8400,85]`，engine `48,241,100` bytes。
+- YoloVision 真实运行 `Passed=True`，elapsed `10.012 ms`，检测 5 项：最高
+  `bicycle=0.954841`，并命中 `dog=0.913382`。output report strict blocker `0`；
+  sample-run validator 为 `real-model-runtime`、`CanPromoteRealModelRuntime=True`、
+  owner-action `0`。
+
+### Verification
+
+- binding generator/output：`191 manifests / 3961 API records`，重复生成幂等。
+- solution Release build：`0 errors`；保留 5 个既有 test nullable warning。
+- YoloVision 全相关 ProjectQuality：`88/88`；新增合成 grid/stride、官方预处理、
+  unsupported contract、acquisition/publish boundary 防回归门禁。
+- sample asset manifest audit 现在同时扫描 template 与 example：`9` 份 manifest、finding
+  `0`；YOLOX example 的 sidecar/sample-run cross-check 均为 `checked`。
+- native 增量 build：TRT8/CUDA12、TRT10/CUDA12、TRT11/CUDA12、
+  TRT11/CUDA13 全部通过。
+- ABI declaration/PE parity：TRT8 `991/991`、TRT10 `1086/1086`、TRT11
+  `1233/1233`，missing declaration/export 均为 `0`。
+- TRT10 bridge-only PackageReference consumer restore/build/probe：`0 warning / 0 error`，
+  `NativeDependencyStatus=ready`；证据仍是 compile-surface/dependency proof。
+- strict classification audit finding `0`；strict release quality required failure `0`；
+  final dry-run 在 `-AllowRuntimeSmokeBlocked` 边界下通过。未带该开关时继续因真实外部
+  public package runtime proof 缺失而阻断，未把长期 owner blocker 改写成通过。
+
+### C/E 盘与发布边界
+
+- 模型、图片、engine、labels 与 tensor 共约 `90.7 MB`，全部位于外层 E 盘
+  `downloads/yolox-apache`，未提交到仓库。
+- C 盘全用户树/Temp/Downloads 审计未发现 YOLOX 资产；清理 6 个空测试目录与 bridge
+  consumer 用完的空 `C:\jyppx-pkgcache` 根目录。Visual Studio/Tencent 临时文件、
+  CUDA、NuGet、Codex 与用户文件未触碰。
+- `real-model-runtime` 仅描述本次源码树真实 TensorRT 运行。`isPackageConsumerRuntime=false`、
+  `publicRedistributionOwnerApproval=false`、`canPublishPublicly=false`；没有伪造 reviewer、
+  owner signature 或公开发布批准。
+- 未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。

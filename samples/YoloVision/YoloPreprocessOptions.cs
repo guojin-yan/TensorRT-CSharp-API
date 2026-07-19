@@ -10,7 +10,8 @@ public sealed class YoloPreprocessOptions
         string resizeMode,
         float scale,
         bool normalize,
-        bool preserveAspectRatio)
+        bool preserveAspectRatio,
+        string letterboxAlignment)
     {
         TensorLayout = string.IsNullOrWhiteSpace(tensorLayout) ? "NCHW" : tensorLayout;
         ColorOrder = string.IsNullOrWhiteSpace(colorOrder) ? "RGB" : colorOrder;
@@ -18,6 +19,7 @@ public sealed class YoloPreprocessOptions
         Scale = scale > 0 ? scale : throw new ArgumentOutOfRangeException(nameof(scale), "Scale must be positive.");
         Normalize = normalize;
         PreserveAspectRatio = preserveAspectRatio;
+        LetterboxAlignment = string.IsNullOrWhiteSpace(letterboxAlignment) ? "center" : letterboxAlignment;
     }
 
     public string TensorLayout { get; }
@@ -32,11 +34,14 @@ public sealed class YoloPreprocessOptions
 
     public bool PreserveAspectRatio { get; }
 
+    public string LetterboxAlignment { get; }
+
     public static YoloPreprocessOptions Default { get; } = new YoloPreprocessOptions(
         "NCHW",
         "RGB",
         "letterbox",
         1.0f / 255.0f,
         normalize: true,
-        preserveAspectRatio: true);
+        preserveAspectRatio: true,
+        letterboxAlignment: "center");
 }

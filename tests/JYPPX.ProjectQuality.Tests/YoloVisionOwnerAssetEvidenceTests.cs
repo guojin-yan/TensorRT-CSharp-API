@@ -26,7 +26,7 @@ public sealed class YoloVisionOwnerAssetEvidenceTests
         Assert.False(root.GetProperty("canCloseReleaseIssue").GetBoolean());
 
         string[] families = root.GetProperty("allowedFamilies").EnumerateArray().Select(static item => item.GetString()!).ToArray();
-        Assert.Equal(new[] { "yolov5", "yolov6", "yolov7", "yolov8", "yolov9", "yolov10", "yolov11", "yolov26", "custom" }, families);
+        Assert.Equal(new[] { "yolov5", "yolov6", "yolov7", "yolov8", "yolov9", "yolov10", "yolov11", "yolov26", "yolox", "custom" }, families);
 
         string[] tasks = root.GetProperty("allowedTasks").EnumerateArray().Select(static item => item.GetString()!).ToArray();
         Assert.Equal(new[] { "det", "cls", "seg", "obb", "pose", "sem" }, tasks);

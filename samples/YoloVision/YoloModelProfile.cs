@@ -46,6 +46,11 @@ public sealed class YoloModelProfile
 
         YoloModelFamily family = ParseFamily(GetStringArgument(args, "--family", "custom"));
         YoloTaskType taskType = ParseTask(GetStringArgument(args, "--task", "det"));
+        if (family == YoloModelFamily.YoloX && taskType != YoloTaskType.Detection)
+        {
+            throw new NotSupportedException("The built-in YOLOX profile supports detection models only.");
+        }
+
         YoloOutputLayout layout = YoloOutputLayoutInference.Parse(GetStringArgument(args, "--layout", "auto"));
         bool? hasObjectness = ParseOptionalBoolean(GetStringArgument(args, "--has-objectness", "auto"));
         int classCount = GetPositiveIntArgument(args, "--class-count", Math.Max(0, labelCount));
@@ -54,14 +59,24 @@ public sealed class YoloModelProfile
         int topK = GetPositiveIntArgument(args, "--top-k", 10);
         YoloNmsMode nmsMode = ParseNmsMode(GetStringArgument(args, "--nms-mode", "class-aware"));
         bool applyNms = !HasSwitch(args, "--no-nms") && nmsMode != YoloNmsMode.None;
+        bool yoloX = family == YoloModelFamily.YoloX;
+        if (HasSwitch(args, "--normalize") && HasSwitch(args, "--no-normalize"))
+        {
+            throw new ArgumentException("--normalize and --no-normalize cannot be used together.");
+        }
+
+        bool normalize = yoloX
+            ? HasSwitch(args, "--normalize")
+            : !HasSwitch(args, "--no-normalize");
 
         YoloPreprocessOptions preprocess = new YoloPreprocessOptions(
             GetStringArgument(args, "--tensor-layout", "NCHW"),
-            GetStringArgument(args, "--color-order", "RGB"),
+            GetStringArgument(args, "--color-order", yoloX ? "BGR" : "RGB"),
             GetStringArgument(args, "--resize", "letterbox"),
-            GetFloatArgument(args, "--scale", 1.0f / 255.0f),
-            normalize: !HasSwitch(args, "--no-normalize"),
-            preserveAspectRatio: !HasSwitch(args, "--stretch"));
+            GetFloatArgument(args, "--scale", yoloX ? 1.0f : 1.0f / 255.0f),
+            normalize,
+            preserveAspectRatio: !HasSwitch(args, "--stretch"),
+            GetStringArgument(args, "--letterbox-alignment", yoloX ? "top-left" : "center"));
 
         YoloPostprocessOptions postprocess = new YoloPostprocessOptions(
             layout,
@@ -96,6 +111,7 @@ public sealed class YoloModelProfile
             "yolov10" or "v10" or "10" => YoloModelFamily.YoloV10,
             "yolov11" or "v11" or "11" => YoloModelFamily.YoloV11,
             "yolov26" or "v26" or "26" => YoloModelFamily.YoloV26,
+            "yolox" or "x" => YoloModelFamily.YoloX,
             _ => YoloModelFamily.Custom
         };
     }

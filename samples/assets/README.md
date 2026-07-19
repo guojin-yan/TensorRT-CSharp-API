@@ -14,6 +14,17 @@ pwsh -NoProfile -ExecutionPolicy Bypass `
 
 The command verifies file length and SHA256 and can copy the files into a local evidence cache. It intentionally keeps `canPromoteRealModelRuntime=false` while any model, labels, or image license remains `owner-review-required`. Hash verification is not redistribution approval.
 
+## Official YOLOX acquisition
+
+`yolovision-yolox-official-assets.json` pins the official YOLOX-S 0.1.1rc0 ONNX model, Apache-2.0 license, dog image, COCO class source, and official preprocess/postprocess references. The acquisition script rejects C-drive output, defaults to the outer E-drive `downloads\yolox-apache` workspace, creates deterministic PPM/labels derivatives, and writes a machine-readable report:
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-YoloXOfficialAssets.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-YoloXOfficialAssets.ps1 -Offline
+```
+
+The corresponding strict source-tree runtime evidence is under `artifacts/yolovision/yolox-official-runtime`. It proves a real TensorRT enqueue and YOLOX decode, but it does not approve repository redistribution and is not package-consumer-runtime proof.
+
 ## Local Asset Layout
 
 Keep large or license-sensitive files in a local `models\` folder at the repository root, or in another owner-controlled path. Do not commit model weights, downloaded images, `.plan` engines, private build reports, or run logs unless their license and size have been explicitly approved.

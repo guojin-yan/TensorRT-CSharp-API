@@ -76,7 +76,7 @@ Print the offline capability matrix without TensorRT runtime, CUDA, ONNX model a
 dotnet run --project .\samples\YoloVision -- --list-capabilities
 ```
 
-The matrix currently covers `custom`, YOLOv5/v6/v7/v8/v9/v10/v11/v26, and task aliases `det`, `cls`, `seg`, `obb`, `pose`, and `sem`. It records the managed decode path, required auxiliary metadata, and evidence level for each family/task pair:
+The matrix currently covers `custom`, YOLOv5/v6/v7/v8/v9/v10/v11/v26, detection-only YOLOX, and task aliases `det`, `cls`, `seg`, `obb`, `pose`, and `sem`. It records supported and unsupported family/task boundaries, the managed decode path, required auxiliary metadata, and evidence level for each pair:
 
 | Task | Alias | Decode path | Required metadata | Evidence level |
 | --- | --- | --- | --- | --- |
@@ -88,6 +88,8 @@ The matrix currently covers `custom`, YOLOv5/v6/v7/v8/v9/v10/v11/v26, and task a
 | Semantic segmentation | `sem` | Single-output semantic map decoder | class count and semantic tensor role | managed-smoke-ready |
 
 This is a support matrix and smoke surface, not proof that a specific external model has passed real image validation. Real model promotion still requires a model/license manifest, TensorRtExec build sidecar, `YoloVision Passed=True` run log, stdout/stderr summaries, SHA256 values, and owner-reviewed evidence.
+
+The official YOLOX-S path is now backed by source-tree `real-model-runtime` evidence. `--family yolox` is detection-only and defaults to NCHW, BGR, raw `0..255` float values, fill 114, and top-left letterbox. Its `[1,8400,85]` raw output is transformed with `(xy + grid) * stride` and `exp(wh) * stride` for strides 8/16/32 before objectness scoring and NMS. Run `eng/Acquire-YoloXOfficialAssets.ps1` to acquire hash-pinned assets on the E drive, then follow `docs/articles/zh-cn/yolovision-yolox-official-runtime-tutorial.md`. This proof is not package-consumer-runtime and does not approve public asset redistribution.
 
 When a runtime run reaches `YoloVisionOutputReport`, the JSON now includes optional `bindingMetadata` copied from the existing `TensorRtEngineBindingReport`. It records engine/profile identity, enqueue readiness, tensor index/name, input/output mode, semantic output role, data type, engine/profile shapes, location, format, vectorization, byte-size fallback state, and non-fatal diagnostics. The console emits the same pointer-free summary as `BindingReport` and `BindingMetadata` lines. This is deployment metadata and does not promote the run to real-model-runtime or package-consumer-runtime proof.
 
@@ -164,7 +166,7 @@ dotnet run --project .\samples\YoloVision -- `
 Task-specific command skeletons should stay explicit in article drafts and owner proof records. Use the same runner and change only the family/task/output metadata that the selected model actually needs:
 
 ```powershell
-# Detection: YOLO v5/v6/v7/v8/v9/v10/v11/v26/custom
+# Detection: YOLO v5/v6/v7/v8/v9/v10/v11/v26/YOLOX/custom
 dotnet run --project .\samples\YoloVision -- --model .\models\yolo-det.onnx --labels .\models\coco.names --image .\models\det.ppm --preprocessed-output .\models\det-fp32.bin --input-shape 1x3x640x640 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware
 
 # Classification
@@ -201,7 +203,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-RealCaseEvidenceRecord.
 
 `Test-RealCaseEvidenceRecord.ps1` keeps the template at `blocked-owner-action-required` until a real owner supplies the model source, license, ONNX/engine/input/output SHA256 values, stdout/stderr logs, screenshot, host OS, GPU, driver, CUDA, TensorRT, runtime package metadata, and owner review. The sample README, article matrix, sidecar, screenshots, and build-only reports must keep `canPublishPublicly=false` and cannot substitute `real-model-runtime`, `package-consumer-runtime`, Linux runner, owner authorization, or post-publish verification proof.
 
-See `docs/articles/zh-cn/yolovision-model-assets.md`, `docs/articles/zh-cn/yolovision-asset-candidates.md`, `docs/articles/zh-cn/yolovision-real-asset-walkthrough.md`, `samples/assets/yolovision-assets.template.json`, and `samples/assets/yolovision-yolox-s-example.json` for the release-facing asset checklist.
+See `docs/articles/zh-cn/yolovision-model-assets.md`, `docs/articles/zh-cn/yolovision-asset-candidates.md`, `docs/articles/zh-cn/yolovision-real-asset-walkthrough.md`, `docs/articles/zh-cn/yolovision-yolox-official-runtime-tutorial.md`, `samples/assets/yolovision-assets.template.json`, and `samples/assets/yolovision-yolox-s-example.json` for the release-facing asset checklist and the completed official YOLOX-S source-tree runtime path.
 
 ## Real Model Evidence Backfill
 

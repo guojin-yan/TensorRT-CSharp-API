@@ -54,7 +54,10 @@ public static class YoloSampleRunner
             throw new NotSupportedException($"Task {profile.TaskType} does not use detection-style box decoding.");
         }
 
-        return YoloDetectionDecoder.Decode(values, outputShape, profile.Postprocess);
+        float[] detectionValues = profile.Family == YoloModelFamily.YoloX
+            ? YoloXOutputDecoder.TransformRawOutput(values, outputShape, profile.InputShape, profile.Postprocess)
+            : values;
+        return YoloDetectionDecoder.Decode(detectionValues, outputShape, profile.Postprocess);
     }
 
     public static YoloVisionResult DecodeRuntimeOutputs(

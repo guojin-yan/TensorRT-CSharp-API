@@ -29,6 +29,7 @@ public sealed class PostPublishPublicDocsArticleSampleReadinessPackTests
         "yolov10",
         "yolov11",
         "yolov26",
+        "yolox",
         "custom",
     };
 
@@ -58,7 +59,7 @@ public sealed class PostPublishPublicDocsArticleSampleReadinessPackTests
         JsonElement pack = packDocument.RootElement;
         Assert.Equal("post-publish-public-docs-article-sample-readiness-pack", pack.GetProperty("recordKind").GetString());
         Assert.Equal("blocked-owner-public-publish-and-post-publish-proof-required", pack.GetProperty("readinessState").GetString());
-        Assert.Equal(41, pack.GetProperty("articleCount").GetInt32());
+        Assert.Equal(42, pack.GetProperty("articleCount").GetInt32());
         Assert.Equal(8, pack.GetProperty("sampleSurfaceCount").GetInt32());
         Assert.Equal(8, pack.GetProperty("readySampleSurfaceCount").GetInt32());
         Assert.Equal(0, pack.GetProperty("missingSamplePathCount").GetInt32());
@@ -111,7 +112,7 @@ public sealed class PostPublishPublicDocsArticleSampleReadinessPackTests
         JsonElement validation = validationDocument.RootElement;
         Assert.Equal("post-publish-public-docs-article-sample-readiness-pack-ready-non-proof", validation.GetProperty("validationState").GetString());
         Assert.Equal(0, validation.GetProperty("failedBlockerCount").GetInt32());
-        Assert.Equal(41, validation.GetProperty("articleCount").GetInt32());
+        Assert.Equal(42, validation.GetProperty("articleCount").GetInt32());
         Assert.Equal(8, validation.GetProperty("sampleSurfaceCount").GetInt32());
         Assert.Equal(0, validation.GetProperty("missingSamplePathCount").GetInt32());
         Assert.Equal(RequiredYoloFamilies.Length, validation.GetProperty("yoloFamilyCount").GetInt32());
