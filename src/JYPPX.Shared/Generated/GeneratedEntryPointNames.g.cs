@@ -108,6 +108,7 @@ internal static class GeneratedEntryPointNames
     public const string CudaDeviceGetCacheConfig = "jyppx_cuda_device_get_cache_config";
     public const string CudaDeviceGetCurrentMemoryPool = "jyppx_cuda_device_get_current_memory_pool";
     public const string CudaDeviceGetDefaultMemoryPool = "jyppx_cuda_device_get_default_memory_pool";
+    public const string CudaDeviceGetDevResourceCopiedSnapshotSafe = "jyppx_cuda_device_get_dev_resource_snapshot_safe";
     public const string CudaDeviceGetDevResourceDeferred = "jyppx_cuda_device_get_dev_resource_deferred";
     public const string CudaDeviceGetExecutionCtxDeferred = "jyppx_cuda_device_get_execution_ctx_deferred";
     public const string CudaDeviceGetGraphMemoryAttribute = "jyppx_cuda_device_get_graph_memory_attribute";
@@ -150,6 +151,7 @@ internal static class GeneratedEntryPointNames
     public const string CudaEventRecordWithFlags = "jyppx_cuda_event_record_with_flags";
     public const string CudaEventSynchronize = "jyppx_cuda_event_synchronize";
     public const string CudaExecutionContextCreateStreamOwnerSafe = "jyppx_cuda_execution_context_create_stream_safe";
+    public const string CudaExecutionContextGetDevResourceCopiedSnapshotSafe = "jyppx_cuda_execution_context_get_dev_resource_snapshot_safe";
     public const string CudaExecutionContextGetDeviceCopiedScalarSafe = "jyppx_cuda_execution_context_get_device_safe";
     public const string CudaExecutionContextGetIdCopiedScalarSafe = "jyppx_cuda_execution_context_get_id_safe";
     public const string CudaExecutionContextRecordEventOwnerSafe = "jyppx_cuda_execution_context_record_event_safe";
@@ -516,6 +518,7 @@ internal static class GeneratedEntryPointNames
     public const string CudaStreamGetCaptureInfoPtszCopiedScalarsSafe = "jyppx_cuda_stream_get_capture_info_ptsz_copied_scalars_safe";
     public const string CudaStreamGetCaptureInfoPtszDeferred = "jyppx_cuda_stream_get_capture_info_ptsz_deferred";
     public const string CudaStreamGetCaptureInfoV3Deferred = "jyppx_cuda_stream_get_capture_info_v3_deferred";
+    public const string CudaStreamGetDevResourceCopiedSnapshotSafe = "jyppx_cuda_stream_get_dev_resource_snapshot_safe";
     public const string CudaStreamGetDevResourceDeferred = "jyppx_cuda_stream_get_dev_resource_deferred";
     public const string CudaStreamGetDevice = "jyppx_cuda_stream_get_device";
     public const string CudaStreamGetFlags = "jyppx_cuda_stream_get_flags";

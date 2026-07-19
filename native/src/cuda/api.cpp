@@ -16,6 +16,7 @@
 namespace
 {
 using jyppx::cuda::EventObject;
+using jyppx::cuda::ExecutionContextObject;
 using jyppx::cuda::GraphExecObject;
 using jyppx::cuda::GraphObject;
 using jyppx::cuda::MemoryObject;
@@ -1496,6 +1497,7 @@ JYPPX_StatusCode jyppx_cuda_stream_destroy(JYPPX_CudaStream* stream)
 #include "modules/graph/owner_scoped_diagnostics.inc"
 #include "modules/graph/conditional_graph.inc"
 #include "modules/graph/stream_capture_variants.inc"
+#include "modules/deployment/dev_resource_snapshots.inc"
 #include "modules/cuda_logs.inc"
 #include "modules/stream_advanced.inc"
 #include "modules/device_atomic_capabilities.inc"

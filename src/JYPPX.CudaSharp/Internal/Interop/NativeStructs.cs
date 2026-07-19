@@ -409,6 +409,22 @@ internal struct NativeCudaResourceDescriptorSnapshot
 }
 
 [StructLayout(LayoutKind.Sequential)]
+internal struct NativeCudaDevResourceSnapshot
+{
+    public int Type;
+    public int IsValid;
+    public int DeviceOrdinal;
+    public uint SmCount;
+    public uint MinSmPartitionSize;
+    public uint SmCoscheduledAlignment;
+    public uint SmFlags;
+    public uint WorkqueueConcurrencyLimit;
+    public int WorkqueueSharingScope;
+    public int HasOpaqueWorkqueue;
+    public int HasNextResource;
+}
+
+[StructLayout(LayoutKind.Sequential)]
 internal struct NativeCudaTextureDescriptor
 {
     public int AddressModeX;

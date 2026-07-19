@@ -1,0 +1,46 @@
+{
+  "$schema": "../bridge-api.schema.json",
+  "module": "cuda",
+  "versionLine": "common",
+  "apis": [
+    {
+      "id": "cuda-device-get-dev-resource-copied-snapshot-safe",
+      "entryPoint": "jyppx_cuda_device_get_dev_resource_snapshot_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT && CUDART_VERSION >= 13000",
+      "parameters": [
+        { "name": "device", "type": "int32_t", "direction": "in", "managedType": "int", "moduleManagedType": "int" },
+        { "name": "resource_type", "type": "int32_t", "direction": "in", "managedType": "int", "moduleManagedType": "int" },
+        { "name": "out_snapshot", "type": "JYPPX_CudaDevResourceSnapshot*", "direction": "out", "moduleManagedType": "out NativeCudaDevResourceSnapshot" }
+      ]
+    },
+    {
+      "id": "cuda-execution-context-get-dev-resource-copied-snapshot-safe",
+      "entryPoint": "jyppx_cuda_execution_context_get_dev_resource_snapshot_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT && CUDART_VERSION >= 13000",
+      "parameters": [
+        { "name": "context", "type": "JYPPX_CudaExecutionContext*", "direction": "in" },
+        { "name": "resource_type", "type": "int32_t", "direction": "in", "managedType": "int", "moduleManagedType": "int" },
+        { "name": "out_snapshot", "type": "JYPPX_CudaDevResourceSnapshot*", "direction": "out", "moduleManagedType": "out NativeCudaDevResourceSnapshot" }
+      ]
+    },
+    {
+      "id": "cuda-stream-get-dev-resource-copied-snapshot-safe",
+      "entryPoint": "jyppx_cuda_stream_get_dev_resource_snapshot_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT && CUDART_VERSION >= 13000",
+      "parameters": [
+        { "name": "stream", "type": "JYPPX_CudaStream*", "direction": "in" },
+        { "name": "resource_type", "type": "int32_t", "direction": "in", "managedType": "int", "moduleManagedType": "int" },
+        { "name": "out_snapshot", "type": "JYPPX_CudaDevResourceSnapshot*", "direction": "out", "moduleManagedType": "out NativeCudaDevResourceSnapshot" }
+      ]
+    }
+  ]
+}

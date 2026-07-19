@@ -27,6 +27,7 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_device_disable_peer_access(int32_t peer
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_device_get_host_atomic_capabilities(uint32_t* capabilities, const int32_t* operations, uint32_t count, int32_t device);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_device_get_p2p_atomic_capabilities(uint32_t* capabilities, const int32_t* operations, uint32_t count, int32_t source_device, int32_t destination_device);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_choose_device(const JYPPX_CudaDeviceSelectionRequirements* requirements, int32_t* out_device);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_device_get_dev_resource_snapshot_safe(int32_t device, int32_t resource_type, JYPPX_CudaDevResourceSnapshot* out_snapshot);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_device_get_dev_resource_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_device_get_execution_ctx_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_device_get_nv_sci_sync_attributes_deferred(void);
@@ -67,6 +68,7 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_stream_add_callback_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_stream_begin_capture_to_graph_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_stream_get_capture_info_ptsz_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_stream_get_capture_info_v3_deferred(void);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_stream_get_dev_resource_snapshot_safe(JYPPX_CudaStream* stream, int32_t resource_type, JYPPX_CudaDevResourceSnapshot* out_snapshot);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_stream_get_dev_resource_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_stream_update_capture_dependencies_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_stream_update_capture_dependencies_ptsz_deferred(void);
@@ -539,6 +541,7 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_execution_context_synchronize_safe(JYPP
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_execution_context_create_stream_safe(JYPPX_CudaExecutionContext* context, uint32_t flags, int32_t priority, JYPPX_CudaStream** out_stream);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_execution_context_record_event_safe(JYPPX_CudaExecutionContext* context, JYPPX_CudaEvent* event_handle);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_execution_context_wait_event_safe(JYPPX_CudaExecutionContext* context, JYPPX_CudaEvent* event_handle);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_execution_context_get_dev_resource_snapshot_safe(JYPPX_CudaExecutionContext* context, int32_t resource_type, JYPPX_CudaDevResourceSnapshot* out_snapshot);
 /* END CUDA FIFTY-SECOND BATCH PRIMARY EXECUTION CONTEXT */
 
 /* BEGIN CUDA FORTY-FOURTH BATCH GRAPH NODE PARAMETER DESCRIPTORS */

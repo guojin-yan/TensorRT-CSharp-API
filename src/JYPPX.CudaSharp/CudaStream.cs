@@ -166,6 +166,15 @@ public sealed class CudaStream : IDisposable
     }
 
     /// <summary>
+    /// Gets a pointer-free CUDA 13 resource snapshot associated with this stream.
+    /// 获取与此 stream 关联的 CUDA 13 资源无指针快照。
+    /// </summary>
+    public CudaDevResourceSnapshot GetDevResourceSnapshot(CudaDevResourceType resourceType)
+    {
+        return NativeCudaApi.GetStreamDevResourceSnapshot(_handle, resourceType);
+    }
+
+    /// <summary>
     /// Tries to read scalar capture metadata from CUDA's per-thread stream variant.
     /// 尝试读取 CUDA per-thread stream 变体返回的标量 capture 元数据。
     /// </summary>

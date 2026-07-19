@@ -1641,3 +1641,44 @@ library、DLL export 和版本 guard 核对，再实现 bridge-owned metadata。
 - 未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue
   close；上述 native/build/smoke/compile-surface 结果不等于 clean public
   package-consumer runtime proof、post-publish proof 或 release-close approval。
+
+## 2026-07-19 CUDA 13 Device-Resource Pointer-Free Snapshot Uplift
+
+本阶段继续从 CUDA 13 deferred inventory 做 vendor-first 审计，选择
+`cudaDeviceGetDevResource`、`cudaExecutionCtxGetDevResource` 和
+`cudaStreamGetDevResource` 三条查询入口。官方返回值包含 tagged union、opaque
+workqueue 状态和 `nextResource` 链指针；本桥只复制 type、SM/workqueue 标量、opaque
+workqueue 存在性和 `HasNextResource` 标记，绝不把链指针或 union padding 交给托管层。
+
+### Promotion 与边界
+
+- 新增 3 个 CUDA 13 real manifest entry；原有 device/stream/execution-context
+  deferred entries 保留，通过 real alias 与 history alias 归并为
+  `implemented-with-deferred-history`。
+- native 使用独立 `CUDART_VERSION >= 13000` guard；CUDA 11/12 返回
+  `NotSupported`。green context、resource split、descriptor 生成和 opaque
+  workqueue 复用继续 deferred。
+- public C# 只暴露 `CudaDevResourceSnapshot` 值类型和 typed owner 查询；没有
+  `IntPtr`、`nint`、`UIntPtr`、`SafeHandle`、vendor union 或 `nextResource`。
+
+### Verification
+
+- binding generator/output validation：`191 manifests / 3961 API records`，幂等通过。
+- coverage export：CUDA 13.2 三条目标行均为
+  `implemented-with-deferred-history`；旧 deferred manifest 保留。
+- focused `CudaDevResourceSnapshotUpliftTests`：`5/5`；CUDA 相关
+  ProjectQuality 集合：`114/114`。
+- TRT11/CUDA13.2 native configure/build 成功，ABI surface
+  `MissingDeclarations=0 MissingExports=0`；保留既有 vendor deprecation 与
+  constant-condition warnings。
+- CudaSmokeRunner 在本机最早的 `cudaRuntimeGetVersion` 因 CUDA error 35 停止，
+  因此只记录 compatible-host blocker，不声称 device-resource runtime proof。
+
+### C/E 盘与发布边界
+
+- 构建输出位于 E 盘 `build-out`；本次未下载 CUDA、TensorRT、cuDNN、模型或 nupkg
+  到 C 盘。smoke 输出日志位于 E 盘 `artifacts/smoke`。
+- 未删除 `C:\Users\guoji\Downloads`、NuGet 缓存、Codex/工具缓存或系统 CUDA
+  安装；只核查并清理本轮明确可归因的临时文件。
+- 未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
+  native/build/compile-surface 结果不等于 clean package-consumer runtime proof。

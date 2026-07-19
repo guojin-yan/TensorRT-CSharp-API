@@ -34,6 +34,15 @@ public sealed class CudaPrimaryExecutionContext : IDisposable
     /// <summary>Gets the process-unique CUDA execution-context id. 获取进程内唯一的 CUDA 执行上下文 ID。</summary>
     public ulong Id => NativeCudaApi.GetExecutionContextId(_handle);
 
+    /// <summary>
+    /// Gets a pointer-free CUDA 13 resource snapshot associated with this context.
+    /// 获取与此执行上下文关联的 CUDA 13 资源无指针快照。
+    /// </summary>
+    public CudaDevResourceSnapshot GetDevResourceSnapshot(CudaDevResourceType resourceType)
+    {
+        return NativeCudaApi.GetExecutionContextDevResourceSnapshot(_handle, resourceType);
+    }
+
     /// <summary>Blocks until work tracked by this execution context completes. 阻塞直到此执行上下文跟踪的工作完成。</summary>
     public void Synchronize()
     {

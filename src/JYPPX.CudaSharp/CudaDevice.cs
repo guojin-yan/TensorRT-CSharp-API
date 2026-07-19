@@ -197,6 +197,27 @@ public static class CudaDevice
     public static CudaDeviceGraphMemorySummary CurrentGraphMemorySummary => GetGraphMemorySummary(Current);
 
     /// <summary>
+    /// Gets a pointer-free CUDA 13 device-resource snapshot.
+    /// 获取 CUDA 13 设备资源的无指针快照。
+    /// </summary>
+    /// <param name="ordinal">The CUDA device ordinal. CUDA 设备序号。</param>
+    /// <param name="resourceType">The resource union variant to query. 要查询的资源 union 变体。</param>
+    /// <returns>A copied resource snapshot. 复制后的资源快照。</returns>
+    /// <remarks>
+    /// This query does not expose the internal resource chain or enable green-context creation.
+    /// 此查询不暴露内部资源链，也不启用 green context 创建。
+    /// </remarks>
+    public static CudaDevResourceSnapshot GetDevResourceSnapshot(int ordinal, CudaDevResourceType resourceType)
+    {
+        NativeBridgeLoader.EnsureInitialized();
+        return NativeCudaApi.GetDeviceDevResourceSnapshot(ordinal, resourceType);
+    }
+
+    /// <summary>Gets a pointer-free CUDA 13 device-resource snapshot for the current device. 获取当前设备 CUDA 13 设备资源的无指针快照。</summary>
+    public static CudaDevResourceSnapshot CurrentDevResourceSnapshot(CudaDevResourceType resourceType) =>
+        GetDevResourceSnapshot(Current, resourceType);
+
+    /// <summary>
     /// Trims graph-memory allocations cached by CUDA for a device.
     /// 裁剪 CUDA 为指定设备缓存的 graph memory 分配。
     /// </summary>

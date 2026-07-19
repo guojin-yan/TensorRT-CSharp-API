@@ -29,6 +29,7 @@ internal static class Program
         Console.WriteLine($"CudaVersions Runtime={CudaDevice.RuntimeVersion} Driver={CudaDevice.DriverVersion}");
         Console.WriteLine($"CudaKernelLibrary {ProbeCudaKernelLibrary(CudaDevice.RuntimeVersion)}");
         Console.WriteLine($"CudaPrimaryExecutionContext {ProbeCudaPrimaryExecutionContext(CudaDevice.RuntimeVersion)}");
+        Console.WriteLine($"CudaDevResourceSnapshots {ProbeCudaDevResourceSnapshots(CudaDevice.RuntimeVersion)}");
         try
         {
             CudaDevice.InitDevice(CudaDevice.Current, CudaDevice.RuntimeFlags);
@@ -854,6 +855,30 @@ internal static class Program
         catch (CudaException exception) when (runtimeVersion < 13000 && exception.StatusCode == BridgeStatusCode.NotSupported)
         {
             return $"Skipped=True VersionGuard=NotSupported Runtime={runtimeVersion}";
+        }
+        catch (CudaException exception)
+        {
+            return $"Available=False Status={exception.StatusCode} Reason={exception.Message}";
+        }
+    }
+
+    private static string ProbeCudaDevResourceSnapshots(int runtimeVersion)
+    {
+        if (runtimeVersion < 13000)
+        {
+            return $"Skipped=True VersionGuard=NotSupported Runtime={runtimeVersion}";
+        }
+
+        try
+        {
+            CudaDevResourceSnapshot deviceSnapshot = CudaDevice.GetDevResourceSnapshot(
+                CudaDevice.Current,
+                CudaDevResourceType.Sm);
+            using CudaPrimaryExecutionContext context = CudaDevice.GetPrimaryExecutionContext(CudaDevice.Current);
+            using CudaStream stream = new CudaStream(CudaStreamCreationFlags.NonBlocking);
+            CudaDevResourceSnapshot contextSnapshot = context.GetDevResourceSnapshot(CudaDevResourceType.Sm);
+            CudaDevResourceSnapshot streamSnapshot = stream.GetDevResourceSnapshot(CudaDevResourceType.Sm);
+            return $"Device={deviceSnapshot} Context={contextSnapshot} Stream={streamSnapshot} HasNextResource={deviceSnapshot.HasNextResource}/{contextSnapshot.HasNextResource}/{streamSnapshot.HasNextResource}";
         }
         catch (CudaException exception)
         {

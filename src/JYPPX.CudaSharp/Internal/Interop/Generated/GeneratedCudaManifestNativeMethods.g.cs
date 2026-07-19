@@ -284,6 +284,9 @@ internal static partial class GeneratedCudaManifestNativeMethods
     internal static extern BridgeStatusCode jyppx_cuda_device_get_default_memory_pool(int device, out ulong out_pool_handle);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_device_get_dev_resource_snapshot_safe(int device, int resource_type, out NativeCudaDevResourceSnapshot out_snapshot);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_cuda_device_get_dev_resource_deferred();
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -408,6 +411,9 @@ internal static partial class GeneratedCudaManifestNativeMethods
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_cuda_execution_context_create_stream_safe(SafeCudaExecutionContextHandle context, uint flags, int priority, out SafeCudaStreamHandle out_stream);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_execution_context_get_dev_resource_snapshot_safe(SafeCudaExecutionContextHandle context, int resource_type, out NativeCudaDevResourceSnapshot out_snapshot);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_cuda_execution_context_get_device_safe(SafeCudaExecutionContextHandle context, out int out_device);
@@ -1506,6 +1512,9 @@ internal static partial class GeneratedCudaManifestNativeMethods
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_cuda_stream_get_capture_info_v3_deferred();
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_stream_get_dev_resource_snapshot_safe(SafeCudaStreamHandle stream, int resource_type, out NativeCudaDevResourceSnapshot out_snapshot);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_cuda_stream_get_dev_resource_deferred();

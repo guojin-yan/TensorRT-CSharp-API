@@ -310,6 +310,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_cuda_device_get_current_memory_pool(int32_t 
 // generated from manifest id=cuda-device-get-default-memory-pool
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_device_get_default_memory_pool(int32_t device, uint64_t* out_pool_handle);
 
+// generated from manifest id=cuda-device-get-dev-resource-copied-snapshot-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_device_get_dev_resource_snapshot_safe(int32_t device, int32_t resource_type, JYPPX_CudaDevResourceSnapshot* out_snapshot);
+
 // generated from manifest id=cuda-device-get-dev-resource-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_device_get_dev_resource_deferred(void);
 
@@ -435,6 +438,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_cuda_event_synchronize(JYPPX_CudaEvent* even
 
 // generated from manifest id=cuda-execution-context-create-stream-owner-safe
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_execution_context_create_stream_safe(JYPPX_CudaExecutionContext* context, uint32_t flags, int32_t priority, JYPPX_CudaStream** out_stream);
+
+// generated from manifest id=cuda-execution-context-get-dev-resource-copied-snapshot-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_execution_context_get_dev_resource_snapshot_safe(JYPPX_CudaExecutionContext* context, int32_t resource_type, JYPPX_CudaDevResourceSnapshot* out_snapshot);
 
 // generated from manifest id=cuda-execution-context-get-device-copied-scalar-safe
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_execution_context_get_device_safe(JYPPX_CudaExecutionContext* context, int32_t* out_device);
@@ -1533,6 +1539,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_cuda_stream_get_capture_info_ptsz_deferred(v
 
 // generated from manifest id=cuda-stream-get-capture-info-v3-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_stream_get_capture_info_v3_deferred(void);
+
+// generated from manifest id=cuda-stream-get-dev-resource-copied-snapshot-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_stream_get_dev_resource_snapshot_safe(JYPPX_CudaStream* stream, int32_t resource_type, JYPPX_CudaDevResourceSnapshot* out_snapshot);
 
 // generated from manifest id=cuda-stream-get-dev-resource-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_stream_get_dev_resource_deferred(void);

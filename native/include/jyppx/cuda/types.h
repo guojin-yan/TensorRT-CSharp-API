@@ -292,6 +292,21 @@ typedef struct JYPPX_CudaGraphEdgeData
     uint8_t reserved4;
 } JYPPX_CudaGraphEdgeData;
 
+typedef struct JYPPX_CudaDevResourceSnapshot
+{
+    int32_t type;
+    int32_t is_valid;
+    int32_t device_ordinal;
+    uint32_t sm_count;
+    uint32_t min_sm_partition_size;
+    uint32_t sm_coscheduled_alignment;
+    uint32_t sm_flags;
+    uint32_t workqueue_concurrency_limit;
+    int32_t workqueue_sharing_scope;
+    JYPPX_Boolean has_opaque_workqueue;
+    JYPPX_Boolean has_next_resource;
+} JYPPX_CudaDevResourceSnapshot;
+
 typedef struct JYPPX_CudaGraphMemsetNodeParams
 {
     uint64_t destination_address;

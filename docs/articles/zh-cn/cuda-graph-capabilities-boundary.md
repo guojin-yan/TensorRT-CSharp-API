@@ -24,6 +24,12 @@
   `CudaGraphConditionalHandle` 与 `CudaGraphConditionalNode` 由 bridge 维护关联
   metadata，并提供 body topology 查询和 body-local empty-node 插入，不把 child
   graph 裸句柄交给 C#。
+- CUDA 13 device resource：`CudaDevice.GetDevResourceSnapshot`、
+  `CudaPrimaryExecutionContext.GetDevResourceSnapshot` 和
+  `CudaStream.GetDevResourceSnapshot` 只返回 pointer-free 的
+  `CudaDevResourceSnapshot` 值快照。快照保留 type、SM/workqueue 标量和
+  `HasNextResource` 标记，不暴露或复用 `nextResource` 链指针、opaque workqueue
+  内容或 green-context ownership。
 
 这些 API 的核心目标是让用户能在 C# 中描述、检查和执行常见 graph 拓扑，而不需要直接处理 CUDA driver/runtime 的裸句柄。
 
@@ -127,6 +133,9 @@ dot -Tpng graph.dot -o graph.png
   destroy 不接管 conditional node，parent graph 也不能在 metadata wrapper 存活
   时释放。
 - `CudaDeviceGraphMemorySummary` 是 pointer-free copied readonly summary，`RuntimeEvidenceKind=copied-readonly-summary`，不能晋级 runtime proof，也不能删除 deferred history。
+- device-resource 快照只在 CUDA 13+ 映射到 vendor API；CUDA 11/12 返回
+  `NotSupported`。它是诊断/分区规划输入，不是 resource owner，也不替代
+  `cudaDevResourceGenerateDesc`、resource split 或 green context API。
 - 它不替代 package consumer 的 native asset copy 证据。
 
 如果当前机器返回 CUDA error 35，应先处理 driver/runtime 兼容性，不要修改 graph API 来绕过环境问题。
