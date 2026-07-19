@@ -179,9 +179,9 @@
     {
       "id": "layer-dump",
       "trtexecOption": "--dumpLayerInfo --exportLayerInfo",
-      "tensorRtExecStatus": "implemented-report",
+      "tensorRtExecStatus": "implemented-inspector-readback",
       "entryPoints": ["DumpLayerInfo", "ExportLayerInfoPath", "TensorRtEngineInspector", "WinForms Runtime Flags"],
-      "proofBoundary": "Layer info is diagnostic metadata, not output correctness proof.",
+      "proofBoundary": "Real build/load-engine paths copy TensorRtEngineInspector layer text and can export it; dry-run/dependency-unavailable paths remain report-only. Layer info is diagnostic metadata, not output correctness proof.",
       "isRuntimeProof": false,
       "gap": "External ONNX layer semantics require model-specific documentation.",
       "nextStep": "Cross-check EngineInspector read-only APIs in future diagnostics."

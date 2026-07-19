@@ -376,6 +376,12 @@ public static class OnnxEngineBuildDiagnostics
         AddIf(options, "--minShapes/--optShapes/--maxShapes", result.Parsed || result.EngineSaved || result.InferenceRan);
         AddIf(options, "--avgTiming", deploymentOptions.AvgTiming.HasValue && (result.Parsed || result.EngineSaved));
         AddIf(options, "--minTiming", deploymentOptions.MinTiming.HasValue && result.TensorRtLine == TensorRtApiLine.TensorRt8 && (result.Parsed || result.EngineSaved));
+        bool layerInfoRequested = result.NormalizedCommandLine.Contains("--dumpLayerInfo", StringComparison.Ordinal) ||
+            result.NormalizedCommandLine.Contains("--exportLayerInfo", StringComparison.Ordinal);
+        bool layerInfoCollected = result.LogLines.Any(static line => line.StartsWith("LayerInfo Collected=True", StringComparison.Ordinal));
+        bool layerInfoExported = result.LogLines.Any(static line => line.StartsWith("LayerInfo ExportRequested=True Written=True", StringComparison.Ordinal));
+        AddIf(options, "--dumpLayerInfo", layerInfoRequested && layerInfoCollected);
+        AddIf(options, "--exportLayerInfo", layerInfoRequested && layerInfoExported);
         AddIf(options, "--saveEngine", result.EngineSaved);
         AddIf(options, "--timingCacheFile", result.TimingCacheArtifact.InputApplied);
         AddIf(options, "--exportTimingCache", result.TimingCacheArtifact.OutputWritten);
@@ -422,6 +428,12 @@ public static class OnnxEngineBuildDiagnostics
         AddIf(options, "--weightStreamingBudget", deploymentOptions.WeightStreamingBudgetBytes.HasValue);
         AddIf(options, "--timingCacheFile", result.TimingCacheArtifact.InputRequested && !result.TimingCacheArtifact.InputApplied);
         AddIf(options, "--exportTimingCache", !string.IsNullOrWhiteSpace(deploymentOptions.ExportTimingCachePath) && !result.TimingCacheArtifact.OutputWritten);
+        bool layerInfoRequested = result.NormalizedCommandLine.Contains("--dumpLayerInfo", StringComparison.Ordinal) ||
+            result.NormalizedCommandLine.Contains("--exportLayerInfo", StringComparison.Ordinal);
+        bool layerInfoCollected = result.LogLines.Any(static line => line.StartsWith("LayerInfo Collected=True", StringComparison.Ordinal));
+        bool layerInfoExported = result.LogLines.Any(static line => line.StartsWith("LayerInfo ExportRequested=True Written=True", StringComparison.Ordinal));
+        AddIf(options, "--dumpLayerInfo", layerInfoRequested && !layerInfoCollected);
+        AddIf(options, "--exportLayerInfo", layerInfoRequested && !layerInfoExported);
         AddIf(options, "--safe", deploymentOptions.Safe);
         AddIf(options, "--consistency", deploymentOptions.Consistency);
         AddIf(options, "--builderCache", deploymentOptions.BuilderCache);

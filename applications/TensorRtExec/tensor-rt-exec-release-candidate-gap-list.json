@@ -137,13 +137,13 @@
     {
       "id": "layer-dump",
       "officialTrtexecParity": "--dumpLayerInfo --exportLayerInfo",
-      "currentStatus": "implemented-report",
+      "currentStatus": "implemented-inspector-readback",
       "isRuntimeProof": false,
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": true,
       "winFormsSupported": true,
       "nextImplementationPaths": ["src/JYPPX.TensorRtSharp/TensorRtEngineInspector.Trt11Diagnostics.cs", "docs/articles/zh-cn/publishing"],
-      "nextStep": "Treat EngineInspector output as diagnostic metadata, not model correctness proof."
+      "nextStep": "Capture compatible-host TRT8/10/11 copied inspector layer reports while keeping external ONNX semantics as owner-reviewed diagnostic metadata, not model correctness proof."
     },
     {
       "id": "verbose-logging",

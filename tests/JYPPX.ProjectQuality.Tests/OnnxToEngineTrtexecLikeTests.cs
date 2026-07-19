@@ -746,6 +746,8 @@ public sealed class OnnxToEngineTrtexecLikeTests
         Assert.Contains("serialize_b.dll", options.Plugins);
         Assert.Equal("detailed", options.ProfilingVerbosity);
         Assert.True(options.DumpLayerInfo);
+        Assert.True(buildOptions.DumpLayerInfo);
+        Assert.Equal(options.ExportLayerInfoPath, buildOptions.ExportLayerInfoPath);
         Assert.True(options.DumpProfile);
         Assert.True(options.SeparateProfileRun);
         Assert.Equal(4, options.DeploymentOptions.BuilderOptimizationLevel);
@@ -772,7 +774,7 @@ public sealed class OnnxToEngineTrtexecLikeTests
         Assert.Contains("DLA options are parsed", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
         Assert.Contains("MemPoolSize=workspace:512,tacticDram:1024", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
         Assert.Contains("Calibration cache path is recorded", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
-        Assert.Contains("Layer-info export arguments are recorded", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
+        Assert.Contains("copied TensorRT engine-inspector readback", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
         Assert.Contains("--plugins", argumentLine, StringComparison.Ordinal);
         Assert.Contains("custom_a.dll;custom_b.dll;custom_c.dll;custom_d.dll;serialize_a.dll;serialize_b.dll", argumentLine, StringComparison.Ordinal);
         Assert.Contains("--timingCacheFile", argumentLine, StringComparison.Ordinal);
@@ -828,6 +830,25 @@ public sealed class OnnxToEngineTrtexecLikeTests
         Assert.Contains("TensorRT 10/11 keep this option parse-only", options, StringComparison.Ordinal);
         Assert.Contains("--avgTiming", diagnostics, StringComparison.Ordinal);
         Assert.Contains("TensorRtApiLine.TensorRt8", diagnostics, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void LayerInfoOptionsUseCopiedInspectorReadbackAndEvidenceBoundary()
+    {
+        string service = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "OnnxEngineBuildService.cs"));
+        string options = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "OnnxEngineBuildOptions.cs"));
+        string diagnostics = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "OnnxEngineBuildDiagnostics.cs"));
+
+        Assert.Contains("TryCollectLayerInformationFromSerializedEngine", service, StringComparison.Ordinal);
+        Assert.Contains("inspector.GetLayerInformation(index, TensorRtLayerInformationFormat.Oneline)", service, StringComparison.Ordinal);
+        Assert.Contains("LayerInfo Collected=True", service, StringComparison.Ordinal);
+        Assert.Contains("LayerInfo ExportRequested=True Written=True", service, StringComparison.Ordinal);
+        Assert.Contains("new UTF8Encoding(encoderShouldEmitUTF8Identifier: false)", service, StringComparison.Ordinal);
+        Assert.Contains("copied-engine-inspector-diagnostics-only", service, StringComparison.Ordinal);
+        Assert.Contains("public bool DumpLayerInfo", options, StringComparison.Ordinal);
+        Assert.Contains("public string ExportLayerInfoPath", options, StringComparison.Ordinal);
+        Assert.Contains("LayerInfo Collected=True", diagnostics, StringComparison.Ordinal);
+        Assert.Contains("LayerInfo ExportRequested=True Written=True", diagnostics, StringComparison.Ordinal);
     }
 
     [Fact]

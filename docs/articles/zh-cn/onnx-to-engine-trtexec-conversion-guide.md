@@ -116,7 +116,7 @@ dotnet run --project .\applications\TensorRtExec -- `
 | Calibration cache | `--calib` | 当前记录诊断，不启用 calibrator callback |
 | Sparsity/strong type | `--sparsity --stronglyTyped` | 当前记录诊断 |
 | Profiling verbosity | `--profilingVerbosity` / `--verbose` | 归一化为 `none` / `layer_names_only` / `detailed` |
-| Layer info | `--dumpLayerInfo --exportLayerInfo` | 记录到诊断，等待更完整 runtime 支持 |
+| Layer info | `--dumpLayerInfo --exportLayerInfo` | 真实 build/load-engine 会复制 TensorRT engine inspector 的逐层文本；`--dumpLayerInfo` 写入日志，`--exportLayerInfo` 写出 UTF-8 文本；dry-run/依赖不可用仍为 parse/report-only，且不是 runtime proof |
 | Runtime timing | `--iterations --warmUp --duration --streams --useCudaGraph` | 进入报告和 GUI 参数预览；CUDA graph 仍是边界诊断 |
 | Runtime/output artifacts | `--loadInputs --dumpOutput --dumpRawBindingsToFile --exportOutput --exportTimes --exportProfile --saveProfile` | build-only 只写边界占位；synthetic runtime 可写最小输出证据 |
 | Report | `--exportReport` | 输出 JSON 或 Markdown 报告 |

@@ -230,6 +230,7 @@ public sealed class OnnxEngineBuildService
             using TensorRtHostMemory hostMemory = builder.BuildSerializedNetwork(network, config);
             hostMemory.SaveToFile(enginePath);
             timingCache.Artifact = ExportTimingCache(timingCache, options, log);
+            TryCollectLayerInformationFromSerializedEngine(runtime, enginePath, options, log, "Build");
 
             bool externalRuntimeRequested = options.UsesExternalOnnx && CanAttemptGenericExternalRuntime(options);
             if (options.BuildOnly || options.SkipInference || (options.UsesExternalOnnx && !externalRuntimeRequested))
@@ -835,6 +836,7 @@ public sealed class OnnxEngineBuildService
             using TensorRtEngineInspector inspector = engine.CreateInspector();
             IReadOnlyList<TensorRtTensorInfo> tensors = engine.GetIOTensors();
             string inspectorInformation = inspector.GetEngineInformation(TensorRtLayerInformationFormat.Oneline);
+            TryCollectLayerInformation(inspector, engine.LayerCount, options, log, "LoadEngine");
             string[] tensorSummaries = tensors
                 .Select(static tensor => $"{tensor.Index}:{tensor.Name}:{tensor.IOMode}:{tensor.DataType}:{tensor.Shape}")
                 .ToArray();
@@ -904,6 +906,94 @@ public sealed class OnnxEngineBuildService
             "inspectorLength=" + (inspectorInformation ?? string.Empty).Length.ToString(System.Globalization.CultureInfo.InvariantCulture),
             "tensors=" + string.Join(";", tensorSummaries ?? Array.Empty<string>())
         });
+    }
+
+    private static void TryCollectLayerInformationFromSerializedEngine(
+        TensorRtRuntime runtime,
+        string enginePath,
+        OnnxEngineBuildOptions options,
+        List<string> log,
+        string source)
+    {
+        if (!options.DumpLayerInfo && string.IsNullOrWhiteSpace(options.ExportLayerInfoPath))
+        {
+            return;
+        }
+
+        try
+        {
+            using TensorRtEngine engine = runtime.DeserializeFromFile(enginePath);
+            using TensorRtEngineInspector inspector = engine.CreateInspector();
+            TryCollectLayerInformation(inspector, engine.LayerCount, options, log, source);
+        }
+        catch (Exception exception) when (exception is TensorRtException ||
+                                          exception is BridgeProbeException ||
+                                          exception is CudaException ||
+                                          exception is DllNotFoundException ||
+                                          exception is BadImageFormatException ||
+                                          exception is FileNotFoundException)
+        {
+            log.Add($"LayerInfo Collected=False Source={source} Reason={exception.GetType().Name}:{exception.Message} EvidenceBoundary=copied-engine-inspector-diagnostics-only");
+        }
+    }
+
+    private static void TryCollectLayerInformation(
+        TensorRtEngineInspector inspector,
+        int layerCount,
+        OnnxEngineBuildOptions options,
+        List<string> log,
+        string source)
+    {
+        if (!options.DumpLayerInfo && string.IsNullOrWhiteSpace(options.ExportLayerInfoPath))
+        {
+            return;
+        }
+
+        string[] layerInformation;
+        try
+        {
+            layerInformation = Enumerable.Range(0, Math.Max(0, layerCount))
+                .Select(index => $"Layer[{index}] {inspector.GetLayerInformation(index, TensorRtLayerInformationFormat.Oneline)}")
+                .ToArray();
+        }
+        catch (Exception exception) when (exception is TensorRtException ||
+                                          exception is BridgeProbeException ||
+                                          exception is CudaException ||
+                                          exception is DllNotFoundException ||
+                                          exception is BadImageFormatException)
+        {
+            log.Add($"LayerInfo Collected=False Source={source} Reason={exception.GetType().Name}:{exception.Message} EvidenceBoundary=copied-engine-inspector-diagnostics-only");
+            return;
+        }
+
+        string content = layerInformation.Length == 0
+            ? string.Empty
+            : string.Join(Environment.NewLine, layerInformation) + Environment.NewLine;
+        Encoding utf8NoBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+        int byteCount = utf8NoBom.GetByteCount(content);
+        string sha256 = ComputeSha256(content);
+        log.Add($"LayerInfo Collected=True Source={source} Layers={layerInformation.Length} Bytes={byteCount} Sha256={sha256} EvidenceBoundary=copied-engine-inspector-diagnostics-only");
+
+        if (options.DumpLayerInfo)
+        {
+            foreach (string line in layerInformation)
+            {
+                log.Add("LayerInfo " + line);
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(options.ExportLayerInfoPath))
+        {
+            string fullPath = Path.GetFullPath(options.ExportLayerInfoPath);
+            string? directory = Path.GetDirectoryName(fullPath);
+            if (!string.IsNullOrWhiteSpace(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            File.WriteAllText(fullPath, content, utf8NoBom);
+            log.Add($"LayerInfo ExportRequested=True Written=True Path={fullPath} LengthBytes={byteCount} Sha256={sha256} EvidenceBoundary=copied-engine-inspector-diagnostics-only");
+        }
     }
 
     private static string ComputeSha256(string value)

@@ -13,7 +13,7 @@
 | Precision switches | CLI, WinForms | wrapper-ready-plus-parse-report-only |
 | Timing and profiling options | CLI, WinForms | implemented-report |
 | Load-engine bounded runtime | CLI, WinForms | bounded-runtime-output |
-| Layer/profile diagnostic switches | CLI, WinForms | implemented-report |
+| Layer/profile diagnostic switches | CLI, WinForms | implemented-inspector-readback |
 | Report alias compatibility | CLI | implemented-report |
 | Refit, weight streaming, and debug tensor diagnostics | CLI, WinForms | parse-report-only |
 | DLA/device options | CLI, WinForms | diagnostic |

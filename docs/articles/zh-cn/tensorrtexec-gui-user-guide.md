@@ -56,7 +56,7 @@ dotnet run --project .\applications\TensorRtExec -- `
 | Output IO | `--outputIOFormats` | 当前记录诊断 |
 | Calib Cache | `--calib` | 当前记录诊断，不启用 calibrator callback |
 | Sparsity | `--sparsity` | 当前记录诊断 |
-| Layer Info | `--exportLayerInfo` | 当前记录诊断，等待更完整 layer-info 支持 |
+| Layer Info | `--dumpLayerInfo` / `--exportLayerInfo` | 真实 build/load-engine 复制 engine inspector 逐层文本；可写日志或 UTF-8 文件；dry-run/缺依赖仍为 report-only |
 | Report | `--exportReport` | JSON 或 Markdown 报告 |
 | Mode | `--buildOnly --skipInference --dryRun` | 外部模型推荐先 dry-run 预检，再 build-only |
 | Preview | command preview | 展示等价命令行 |
@@ -133,7 +133,7 @@ GUI 面向用户，但不能替用户猜模型语义。外部 ONNX 的输入名�
 - `Plugins`：不主动加载 plugin library。
 - `Timing Cache`：成功构建时导入/导出 cache；dry-run、load-engine 和依赖不可用路径显示为未应用。
 - `DLA`、`Tactics`、`Mem Pools`、`Input IO`、`Output IO`、`Calib Cache`、`Sparsity`、`Strongly typed`：记录到 diagnostics 和 report，等待模型级 runtime 与 callback/lifecycle 阶段补足。
-- `Layer Info`：记录 layer-info 请求，完整导出取决于后续 TensorRT runtime 支持。
+- `Layer Info`：真实 build/load-engine 会读取并复制 `TensorRtEngineInspector` 的逐层文本；`--dumpLayerInfo` 写日志，`--exportLayerInfo` 写 UTF-8 文件。dry-run、load-engine 依赖不可用或 readback 失败时只保留 diagnostics，且该文本不是 runtime/package-consumer proof。
 
 这样设计是为了避免在 GUI 里提前开放 lifecycle 和 ownership 不清楚的功能。
 

@@ -20,7 +20,7 @@
 | workspace/memory | `--workspace` 与已知 `--memPoolSize` pool 已在真实 build 中应用并 read back | 继续补 compatible-host owner build record；不把 builder-config readback 晋级为 runtime proof |
 | timing cache | 路径、导入/导出和 report 边界 | 在兼容主机补真实构建日志、owner review 和模型级输出校验 |
 | plugin library | 当前谨慎处理 | 等待 load/register/deregister ownership 设计 |
-| dumpLayerInfo/exportLayerInfo | report 边界 | 与 TensorRT inspector readback 更深集成 |
+| dumpLayerInfo/exportLayerInfo | implemented-inspector-readback | 真实 build/load-engine 通过 copied `TensorRtEngineInspector` 文本支持日志和 UTF-8 文件导出；dry-run/缺依赖保持 report-only，后续只需补兼容主机和 owner 的真实 engine 证据 |
 | exportTimes/exportProfile/exportOutput | artifact proof-boundary 字段 | 真实 runtime 输出需 sample runner 证明 |
 | loadEngine | readonly diagnostics | 不升级为 enqueue runtime proof |
 

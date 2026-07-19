@@ -24,6 +24,8 @@ public sealed class OnnxEngineBuildOptions
         string exportReportPath,
         string evidenceSidecarPath,
         string profilingVerbosity,
+        bool dumpLayerInfo,
+        string exportLayerInfoPath,
         TrtexecLikeDeploymentOptions deploymentOptions,
         TrtexecLikeRuntimeOptions runtimeOptions,
         string normalizedCommandLine,
@@ -47,6 +49,8 @@ public sealed class OnnxEngineBuildOptions
         ExportReportPath = exportReportPath ?? string.Empty;
         EvidenceSidecarPath = evidenceSidecarPath ?? string.Empty;
         ProfilingVerbosity = profilingVerbosity ?? string.Empty;
+        DumpLayerInfo = dumpLayerInfo;
+        ExportLayerInfoPath = exportLayerInfoPath ?? string.Empty;
         DeploymentOptions = deploymentOptions ?? TrtexecLikeDeploymentOptions.Default;
         RuntimeOptions = runtimeOptions ?? TrtexecLikeRuntimeOptions.Default;
         NormalizedCommandLine = normalizedCommandLine ?? string.Empty;
@@ -89,6 +93,10 @@ public sealed class OnnxEngineBuildOptions
 
     public string ProfilingVerbosity { get; }
 
+    public bool DumpLayerInfo { get; }
+
+    public string ExportLayerInfoPath { get; }
+
     public TrtexecLikeDeploymentOptions DeploymentOptions { get; }
 
     public TrtexecLikeRuntimeOptions RuntimeOptions { get; }
@@ -129,6 +137,8 @@ public sealed class OnnxEngineBuildOptions
             options.ExportReportPath,
             options.EvidenceSidecarPath,
             options.ProfilingVerbosity,
+            options.DumpLayerInfo,
+            options.ExportLayerInfoPath,
             options.DeploymentOptions,
             options.RuntimeOptions,
             options.ToArgumentLine(),
@@ -159,7 +169,7 @@ public sealed class OnnxEngineBuildOptions
 
         if (options.DumpLayerInfo || !string.IsNullOrWhiteSpace(options.ExportLayerInfoPath))
         {
-            diagnostics.Add("Layer-info export arguments are recorded for diagnostics; full layer-info export depends on TensorRT runtime support.");
+            diagnostics.Add("Layer-info export arguments request copied TensorRT engine-inspector readback during a real build/load-engine path; dry-run and unavailable dependencies remain report-only.");
             if (!string.IsNullOrWhiteSpace(options.ExportLayerInfoPath))
             {
                 diagnostics.Add("ExportLayerInfo=" + options.ExportLayerInfoPath);

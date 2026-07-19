@@ -70,7 +70,7 @@ dotnet run --project .\applications\TensorRtExec -- `
 | Engine packaging/refit | `--versionCompatible --excludeLeanRuntime --stripWeights --refit --weightStreamingBudget` | 无 | parse/report-only；不伪造成 lean runtime、weight stripping、refit 或 weight streaming 已真实生效 |
 | Safety / builder cache | `--safe --consistency --builderCache --noBuilderCache` | 无 | parse/report-only；记录 safety/consistency 和 builder cache intent，不声明已执行安全 runtime 或 cache lifecycle |
 | Output artifacts | `--loadInputs --dumpOutput --dumpRawBindingsToFile --exportOutput --exportTimes --exportProfile --saveProfile` | 无 | build-only 只写边界占位；synthetic runtime 可写最小输出证据 |
-| Diagnostic reports | `--dumpLayerInfo --exportLayerInfo --dumpProfile --separateProfileRun` | 无 | CLI、WinForms 和 normalized command 已贯通；仍是 diagnostics/report evidence，不是 runtime proof |
+| Diagnostic reports | `--dumpLayerInfo --exportLayerInfo --dumpProfile --separateProfileRun` | 无 | layer-info 在真实 build/load-engine 中复制 inspector 文本并可导出；profile switches 仍是 intent/report evidence；所有诊断都不是 runtime proof |
 | Build report export | `--exportReport` | `--report` | JSON/Markdown report 输出；别名会归一化回 `--exportReport`，报告仍是 build/report evidence，不是 runtime proof |
 | Timing cache export | `--exportTimingCache` | 无 | 成功构建后序列化并写出 cache，报告记录输出大小/SHA256；仍不是 runtime proof |
 
@@ -121,7 +121,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-TensorRtExecReport.ps1 
 
 Runtime/output artifact 通过 `--exportTimes`、`--exportOutput`、`--exportProfile`、`--saveProfile` 和 `--dumpRawBindingsToFile` 输出。JSON artifact 会显式写入 `ArtifactProofBoundary`、`RuntimeProofClass`、`HasTensorOutputProof`、`HasRawBindingProof`、`IsBuildOnlyEvidence`、`IsDependencyProbeOnly`、`IsSyntheticRuntime`、`ModelSource`、`EnginePath` 和 `PreflightMetadata`。当这些路径存在时，工具还会在相邻位置写出 `*.engine-readback.json`，用于单独保存 `LoadedEngineDiagnostics`、`ReadbackFingerprint`、`ReadbackSha256`、`ReadbackAvailable` 和 skipped reason。这些字段是可审计边界，不是 release proof 替代品：`build-only` artifact 的 tensor/raw proof 必须为 false；`dependency-probe-only` artifact 只能携带 preflight/readback metadata；`runtime-output-captured-unverified` 只代表 bounded enqueue/readback 已完成但没有 reference output；`synthetic-input-runtime is not real-model-runtime`，也不是 `package-consumer-runtime`。
 
-Layer/profile diagnostic switch parity is now explicit: `--dumpLayerInfo` and `--exportLayerInfo` record layer-inspection intent, while `--dumpProfile`、`--separateProfileRun`、`--exportProfile` 和 `--saveProfile` record profiling intent. These options can appear in `NormalizedCommandLine` and diagnostics, but they remain report evidence unless a model-specific runner supplies real runtime execution proof.
+Layer/profile diagnostic switch parity is now explicit: real build/load-engine paths use a copied `TensorRtEngineInspector` readback for `--dumpLayerInfo` and `--exportLayerInfo` (log lines or UTF-8 text file), while dry-run and unavailable dependencies remain parse/report-only. `--dumpProfile`、`--separateProfileRun`、`--exportProfile` 和 `--saveProfile` still record profiling intent. Layer text and profile artifacts remain diagnostics, not runtime proof, unless a model-specific runner supplies real execution evidence.
 
 YoloVision owner backfill profiles should be copied into TensorRtExec commands rather than inferred later. The current release-facing defaults are:
 

@@ -24,7 +24,7 @@
 | timing-cache | implemented-build-cache-lifecycle | 是 | 是 | 成功构建会导入/导出 cache 并记录 `TimingCacheArtifact` 大小与 SHA256；仍需 owner 将 cache 文件与真实模型 build 记录一起归档 |
 | plugin-library-boundary | diagnostic-gui-cli | 是 | 是 | GUI/CLI 已共享 plugin path 字段，保持 register/load-library deferred |
 | profiling | implemented-report | 是 | 是 | 真实 enqueue log 后才能晋级 |
-| layer-dump | implemented-report | 是 | 是 | 继续作为 diagnostic metadata |
+| layer-dump | implemented-inspector-readback | 是 | 是 | 真实 build/load-engine 会复制 inspector layer text 并可导出文件；仍是 diagnostic metadata |
 | verbose-logging | implemented-report | 是 | 是 | hash owner stdout/stderr/log |
 | binding-metadata | bounded-artifact-gui-cli | 是 | 是 | GUI/CLI 已暴露 load/dump/export 字段，使用 YoloVision 六任务模板补真实输出角色 |
 | winforms-command-surface | checklist-backed-command-preview | 否 | 是 | 继续用 GUI/CLI 字段映射和命令预览锁定非 proof 边界 |
