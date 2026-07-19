@@ -65,7 +65,9 @@ public sealed class FinalProofReadinessBlockerDashboardTests
         Assert.False(sourceStates.GetProperty("trt10VsTrt11BridgeRuntimeDiagnosticDiffCanPromoteRuntimeProof").GetBoolean());
         Assert.Equal("owner-action-required", sourceStates.GetProperty("yoloVisionLicenseApprovalState").GetString());
         Assert.Equal(22, sourceStates.GetProperty("yoloVisionLicenseOwnerActionRequiredCount").GetInt32());
-        Assert.Equal("ready-for-next-implementation-batch", sourceStates.GetProperty("deferredBTierWorkPackageState").GetString());
+        Assert.Equal("source-quality-proof-closed", sourceStates.GetProperty("deferredBTierWorkPackageState").GetString());
+        Assert.Equal(45, sourceStates.GetProperty("deferredBTierClosedWorkItemCount").GetInt32());
+        Assert.Equal(0, sourceStates.GetProperty("deferredBTierRemainingWorkItemCount").GetInt32());
         Assert.Equal("runbook-ready-non-proof", sourceStates.GetProperty("projectQualityShardRunbookState").GetString());
         Assert.True(sourceStates.GetProperty("projectQualityShardRunbookReady").GetBoolean());
 
@@ -107,6 +109,13 @@ public sealed class FinalProofReadinessBlockerDashboardTests
         Assert.Contains(
             "TRT11 runtime smoke root-cause report",
             trt11Lane.GetProperty("requiredEvidence").EnumerateArray().Select(static item => item.GetString()!));
+
+        JsonElement deferredLane = root.GetProperty("blockers").EnumerateArray().Single(item => item.GetProperty("id").GetString() == "deferred-readonly-implementation-batch");
+        Assert.Contains("source-quality-proof-closed", deferredLane.GetProperty("currentState").GetString(), StringComparison.Ordinal);
+        Assert.Contains("closed=45", deferredLane.GetProperty("currentState").GetString(), StringComparison.Ordinal);
+        Assert.Contains("remaining=0", deferredLane.GetProperty("currentState").GetString(), StringComparison.Ordinal);
+        Assert.Contains("Do not repeat btier-001 through btier-045", deferredLane.GetProperty("ownerNextAction").GetString(), StringComparison.Ordinal);
+        Assert.Contains("deferred B-tier work-item proof closure ledger", deferredLane.GetProperty("requiredEvidence").EnumerateArray().Select(static item => item.GetString()!));
         Assert.Contains(
             "TRT11 runtime DLL resolution report",
             trt11Lane.GetProperty("requiredEvidence").EnumerateArray().Select(static item => item.GetString()!));
@@ -126,6 +135,7 @@ public sealed class FinalProofReadinessBlockerDashboardTests
         Assert.Contains("artifacts/final-release/trt11-runtime-dll-resolution-report.json", sourceArtifacts);
         Assert.Contains("artifacts/final-release/trt10-vs-trt11-bridge-runtime-diagnostic-diff.json", sourceArtifacts);
         Assert.Contains("artifacts/interface-coverage/deferred-btier-implementation-work-package.json", sourceArtifacts);
+        Assert.Contains("artifacts/interface-coverage/deferred-btier-work-item-proof-closure-ledger.json", sourceArtifacts);
         Assert.Contains("artifacts/test-analysis/project-quality-shard-runbook.md", sourceArtifacts);
         Assert.Contains("docs/articles/zh-cn/project-quality-sharded-gate.md", sourceArtifacts);
 

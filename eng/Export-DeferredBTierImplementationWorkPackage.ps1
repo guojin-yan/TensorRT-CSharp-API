@@ -176,6 +176,23 @@ function Write-TextFileWithRetry {
 
 $aliasRecord = Read-Json "artifacts\interface-coverage\deferred-btier-alias-proof-closure-record.json"
 $dashboard = Read-Json "artifacts\interface-coverage\deferred-btier-proof-closure-dashboard.json"
+$proofClosureLedger = Read-Json "artifacts\interface-coverage\deferred-btier-work-item-proof-closure-ledger.json"
+$closedWorkItemIds = @(
+  Get-ArrayOrEmpty -Object $proofClosureLedger -Name "closedWorkItemIds" |
+    ForEach-Object { [string]$_ }
+)
+$closedWorkItemIdSet = @{}
+foreach ($closedWorkItemId in $closedWorkItemIds) {
+  if ($closedWorkItemIdSet.ContainsKey($closedWorkItemId)) {
+    throw "Duplicate closed work item ID in proof closure ledger: $closedWorkItemId"
+  }
+
+  $closedWorkItemIdSet[$closedWorkItemId] = $true
+}
+$declaredClosedWorkItemCount = [int](Get-PropertyOrDefault -Object $proofClosureLedger -Name "closedWorkItemCount" -DefaultValue -1)
+if ($declaredClosedWorkItemCount -ne $closedWorkItemIds.Count) {
+  throw "Proof closure ledger count mismatch: declared=$declaredClosedWorkItemCount actual=$($closedWorkItemIds.Count)"
+}
 
 $closureCandidates = @(
   Get-ArrayOrEmpty -Object $aliasRecord -Name "closureCandidates" |
@@ -261,9 +278,20 @@ $workItems = @(
       $safeAlternativeManifestIds = Convert-ToStringArray -Values (Get-ArrayOrEmpty -Object $_ -Name "safeAlternativeManifestIds")
       $deferredHistoryManifestIds = Convert-ToStringArray -Values (Get-ArrayOrEmpty -Object $_ -Name "deferredHistoryManifestIds")
       $sourceEvidence = Convert-ToStringArray -Values (Get-ArrayOrEmpty -Object $_ -Name "sourceEvidence")
+      $workItemId = "btier-{0:d3}" -f ($script:workItemIndex += 1)
+      $isProofClosed = $closedWorkItemIdSet.ContainsKey($workItemId)
+      $workItemState = if ($isProofClosed) { "source-quality-proof-closed" } else { "pending-engineering-proof" }
+      $implementationAction = if ($isProofClosed) {
+        "Preserve the verified safe alternative, deferred history, pointer-free wrapper, docs, and quality assertions; do not schedule this item as new implementation work."
+      }
+      else {
+        Resolve-WorkItemAction -Phase $phase
+      }
 
       [pscustomobject]@{
-        workItemId = "btier-{0:d3}" -f ($script:workItemIndex += 1)
+        workItemId = $workItemId
+        workItemState = $workItemState
+        closureProofRecord = if ($isProofClosed) { "artifacts/interface-coverage/deferred-btier-work-item-proof-closure-ledger.json" } else { "" }
         phase = $phase
         interface = [string](Get-PropertyOrDefault -Object $_ -Name "interface" -DefaultValue "")
         version = [string](Get-PropertyOrDefault -Object $_ -Name "version" -DefaultValue "")
@@ -286,7 +314,7 @@ $workItems = @(
             } |
             Select-Object -First 8
         )
-        implementationAction = Resolve-WorkItemAction -Phase $phase
+        implementationAction = $implementationAction
         acceptanceCriteria = @(
           "safe alternative manifest IDs remain present",
           "deferred history manifest IDs remain present",
@@ -311,21 +339,44 @@ $phaseSummaries = @(
       [pscustomobject]@{
         phase = $_.Name
         workItemCount = $_.Count
+        closedWorkItemCount = @($_.Group | Where-Object { $_.workItemState -eq "source-quality-proof-closed" }).Count
+        pendingWorkItemCount = @($_.Group | Where-Object { $_.workItemState -ne "source-quality-proof-closed" }).Count
         representativeInterfaces = @($_.Group | Select-Object -First 8 | ForEach-Object { "$($_.interface) [$($_.version)]" })
         validationCommands = Resolve-ValidationCommands -Phase $_.Name
       }
     }
 )
 
+$closedWorkItemCount = @($workItems | Where-Object { $_.workItemState -eq "source-quality-proof-closed" }).Count
+$remainingWorkItemCount = $workItems.Count - $closedWorkItemCount
+$generatedWorkItemIdSet = @{}
+foreach ($workItem in $workItems) {
+  $generatedWorkItemIdSet[$workItem.workItemId] = $true
+}
+
+$unknownClosedWorkItemIds = @($closedWorkItemIds | Where-Object { -not $generatedWorkItemIdSet.ContainsKey($_) })
+if ($unknownClosedWorkItemIds.Count -gt 0) {
+  throw "Proof closure ledger references work items absent from the generated package: $($unknownClosedWorkItemIds -join ', ')"
+}
+
+$workPackageState = if ($workItems.Count -gt 0 -and $remainingWorkItemCount -eq 0) {
+  "source-quality-proof-closed"
+}
+else {
+  "ready-for-next-implementation-batch"
+}
+
 $record = [ordered]@{
   generatedAtUtc = (Get-Date).ToUniversalTime().ToString("o")
   recordKind = "deferred-btier-implementation-work-package"
-  workPackageState = "ready-for-next-implementation-batch"
+  workPackageState = $workPackageState
   sourceAliasRecord = "artifacts/interface-coverage/deferred-btier-alias-proof-closure-record.json"
   sourceDashboard = "artifacts/interface-coverage/deferred-btier-proof-closure-dashboard.json"
+  sourceProofClosureLedger = "artifacts/interface-coverage/deferred-btier-work-item-proof-closure-ledger.json"
   sourceArtifacts = @(
     "artifacts/interface-coverage/deferred-btier-alias-proof-closure-record.json",
     "artifacts/interface-coverage/deferred-btier-proof-closure-dashboard.json",
+    "artifacts/interface-coverage/deferred-btier-work-item-proof-closure-ledger.json",
     "artifacts/interface-coverage/deferred-candidate-safety-triage.json",
     "artifacts/interface-coverage/tensorrt-interface-comparison.csv"
   )
@@ -335,6 +386,8 @@ $record = [ordered]@{
   stableWorkItemKeyCount = $stableWorkItemCandidateKeys.Count
   workItemTargetCount = $MaxWorkItems
   workItemCount = $workItems.Count
+  closedWorkItemCount = $closedWorkItemCount
+  remainingWorkItemCount = $remainingWorkItemCount
   phaseSummaries = $phaseSummaries
   workItems = $workItems
   performsPublish = $false
@@ -343,11 +396,11 @@ $record = [ordered]@{
   canDeleteDeferredRecords = $false
   isRuntimeExecutionProof = $false
   isPackageConsumerRuntimeProof = $false
-  boundary = "This work package converts selected B-tier alias-proof candidates into ordered engineering tasks. It is not runtime proof, release proof, owner approval, post-publish verification, or permission to delete deferred records."
+  boundary = "This work package projects selected B-tier candidates and their source-quality proof status. Closed items are not new implementation tasks. It is not runtime proof, release proof, owner approval, post-publish verification, or permission to delete deferred records."
   nextBatchPromptFocus = @(
-    "Start from artifacts/interface-coverage/deferred-btier-implementation-work-package.json rather than rescanning broad deferred files.",
-    "Pick the first 12 to 20 workItems in phase order.",
-    "For each item, prove the existing safe alternative through wrapper/docs/tests before touching deferred manifests.",
+    "Do not select workItems whose workItemState is source-quality-proof-closed.",
+    "When remainingWorkItemCount is zero, move to a new candidate audit or a separately evidenced runtime/model gap instead of repeating this package.",
+    "For any future pending item, prove the existing safe alternative through wrapper/docs/tests before touching deferred manifests.",
     "Do not delete deferred history records; they remain audit history until an owner-approved release policy changes.",
     "Run the validationCommands emitted on each workItem and record results in the stage diary."
   )
@@ -364,14 +417,14 @@ Write-TextFileWithRetry -Path $jsonPath -Value $recordJson -Encoding $utf8
 
 $phaseRows = $phaseSummaries | ForEach-Object {
   $representatives = (@($_.representativeInterfaces) -join "<br>").Replace("|", "\|")
-  "| ``$($_.phase)`` | ``$($_.workItemCount)`` | $representatives |"
+  "| ``$($_.phase)`` | ``$($_.workItemCount)`` | ``$($_.closedWorkItemCount)`` | ``$($_.pendingWorkItemCount)`` | $representatives |"
 }
 
 $workItemRows = $workItems | ForEach-Object {
   $safeAlternative = (@($_.safeAlternativeManifestIds) | Select-Object -First 3) -join "<br>"
   $deferredHistory = (@($_.deferredHistoryManifestIds) | Select-Object -First 3) -join "<br>"
   $files = (@($_.requiredFilesToInspect) | Select-Object -First 4) -join "<br>"
-  "| ``$($_.workItemId)`` | ``$($_.phase)`` | ``$($_.version)`` | ``$($_.interface)`` | $($safeAlternative.Replace("|", "\|")) | $($deferredHistory.Replace("|", "\|")) | $($files.Replace("|", "\|")) | $($_.implementationAction.Replace("|", "\|")) |"
+  "| ``$($_.workItemId)`` | ``$($_.workItemState)`` | ``$($_.phase)`` | ``$($_.version)`` | ``$($_.interface)`` | $($safeAlternative.Replace("|", "\|")) | $($deferredHistory.Replace("|", "\|")) | $($files.Replace("|", "\|")) | $($_.implementationAction.Replace("|", "\|")) |"
 }
 
 $markdown = @"
@@ -381,7 +434,7 @@ $markdown = @"
 
 ## 总结
 
-``recordKind=deferred-btier-implementation-work-package``，``workPackageState=ready-for-next-implementation-batch``。该工作包把 B-tier alias-proof 候选整理成下一批工程任务；它不是 runtime proof、release proof、owner approval、post-publish verification，也不是删除 deferred 记录的许可。
+``recordKind=deferred-btier-implementation-work-package``，``workPackageState=$($record.workPackageState)``。该工作包投影 B-tier 候选及其 source-quality proof 状态；已闭环项不是新的实现任务。它不是 runtime proof、release proof、owner approval、post-publish verification，也不是删除 deferred 记录的许可。
 
 | 项目 | 值 |
 |---|---:|
@@ -389,6 +442,8 @@ $markdown = @"
 | dashboard selected candidates | ``$($record.dashboardSelectedCandidateCount)`` |
 | work item target count | ``$($record.workItemTargetCount)`` |
 | work item count | ``$($record.workItemCount)`` |
+| closed work item count | ``$($record.closedWorkItemCount)`` |
+| remaining work item count | ``$($record.remainingWorkItemCount)`` |
 | performsPublish | ``False`` |
 | canPublishPublicly | ``False`` |
 | canCloseReleaseIssue | ``False`` |
@@ -398,14 +453,14 @@ $markdown = @"
 
 ## Phases
 
-| Phase | Work items | Representatives |
-|---|---:|---|
+| Phase | Work items | Closed | Pending | Representatives |
+|---|---:|---:|---:|---|
 $($phaseRows -join "`r`n")
 
 ## Work Items
 
-| ID | Phase | Version | Interface | Safe alternative manifests | Deferred history manifests | Files to inspect first | Action |
-|---|---|---|---|---|---|---|---|
+| ID | State | Phase | Version | Interface | Safe alternative manifests | Deferred history manifests | Files to inspect first | Action |
+|---|---|---|---|---|---|---|---|---|
 $($workItemRows -join "`r`n")
 
 ## Next Batch Prompt Focus
@@ -423,6 +478,8 @@ Write-Output "Deferred B-tier implementation work package written:"
 Write-Output "  Json=$jsonPath"
 Write-Output "  Markdown=$markdownPath"
 Write-Output "WorkItemCount=$($record.workItemCount)"
+Write-Output "ClosedWorkItemCount=$($record.closedWorkItemCount)"
+Write-Output "RemainingWorkItemCount=$($record.remainingWorkItemCount)"
 Write-Output "CanPublishPublicly=False"
 Write-Output "CanCloseReleaseIssue=False"
 Write-Output "CanDeleteDeferredRecords=False"

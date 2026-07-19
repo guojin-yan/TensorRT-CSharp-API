@@ -7,7 +7,7 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class DeferredBTierImplementationWorkPackageTests
 {
     [Fact]
-    public void ImplementationWorkPackageTurnsAliasClosureRecordIntoActionableBatchWithoutPromotingRelease()
+    public void ImplementationWorkPackageProjectsProofClosedItemsWithoutPromotingRelease()
     {
         RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Export-DeferredReadOnlyApiCandidatePlan.ps1"), "-IncludeMediumRisk", "-MaxItems", "60");
         RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Export-DeferredBTierProofClosureDashboard.ps1"));
@@ -30,13 +30,15 @@ public sealed class DeferredBTierImplementationWorkPackageTests
         JsonElement root = package.RootElement;
 
         Assert.Equal("deferred-btier-implementation-work-package", root.GetProperty("recordKind").GetString());
-        Assert.Equal("ready-for-next-implementation-batch", root.GetProperty("workPackageState").GetString());
+        Assert.Equal("source-quality-proof-closed", root.GetProperty("workPackageState").GetString());
         Assert.Equal(aliasRoot.GetProperty("closureCandidateCount").GetInt32(), root.GetProperty("sourceAliasClosureCandidateCount").GetInt32());
         Assert.Equal("stable-v1-existing-40-then-deterministic-append", root.GetProperty("workItemOrderingPolicy").GetString());
         Assert.Equal(40, root.GetProperty("stableWorkItemKeyCount").GetInt32());
         Assert.Equal(60, root.GetProperty("workItemTargetCount").GetInt32());
         Assert.Equal(aliasRoot.GetProperty("closureCandidateCount").GetInt32(), root.GetProperty("workItemCount").GetInt32());
         Assert.Equal(45, root.GetProperty("workItemCount").GetInt32());
+        Assert.Equal(45, root.GetProperty("closedWorkItemCount").GetInt32());
+        Assert.Equal(0, root.GetProperty("remainingWorkItemCount").GetInt32());
         Assert.False(root.GetProperty("performsPublish").GetBoolean());
         Assert.False(root.GetProperty("canPublishPublicly").GetBoolean());
         Assert.False(root.GetProperty("canCloseReleaseIssue").GetBoolean());
@@ -59,6 +61,8 @@ public sealed class DeferredBTierImplementationWorkPackageTests
             foreach (string propertyName in new[]
             {
                 "workItemId",
+                "workItemState",
+                "closureProofRecord",
                 "phase",
                 "interface",
                 "version",
@@ -77,6 +81,8 @@ public sealed class DeferredBTierImplementationWorkPackageTests
             }
 
             Assert.StartsWith("btier-", item.GetProperty("workItemId").GetString(), StringComparison.Ordinal);
+            Assert.Equal("source-quality-proof-closed", item.GetProperty("workItemState").GetString());
+            Assert.Equal("artifacts/interface-coverage/deferred-btier-work-item-proof-closure-ledger.json", item.GetProperty("closureProofRecord").GetString());
             Assert.Equal("B - safe-alternative-or-alias", item.GetProperty("safetyTier").GetString());
             Assert.True(item.GetProperty("safeAlternativeManifestIds").GetArrayLength() > 0);
             Assert.True(item.GetProperty("deferredHistoryManifestIds").GetArrayLength() > 0);
@@ -91,13 +97,15 @@ public sealed class DeferredBTierImplementationWorkPackageTests
         });
 
         Assert.Contains("artifacts/interface-coverage/deferred-btier-alias-proof-closure-record.json", root.GetProperty("sourceArtifacts").EnumerateArray().Select(static item => item.GetString()!));
-        Assert.Contains("Start from artifacts/interface-coverage/deferred-btier-implementation-work-package.json rather than rescanning broad deferred files.", root.GetProperty("nextBatchPromptFocus").EnumerateArray().Select(static item => item.GetString()!));
+        Assert.Contains("artifacts/interface-coverage/deferred-btier-work-item-proof-closure-ledger.json", root.GetProperty("sourceArtifacts").EnumerateArray().Select(static item => item.GetString()!));
+        Assert.Contains("Do not select workItems whose workItemState is source-quality-proof-closed.", root.GetProperty("nextBatchPromptFocus").EnumerateArray().Select(static item => item.GetString()!));
 
         string markdown = File.ReadAllText(markdownPath);
         foreach (string marker in new[]
         {
             "Deferred B-tier Implementation Work Package",
-            "ready-for-next-implementation-batch",
+            "source-quality-proof-closed",
+            "remaining work item count",
             "Work Items",
             "Safe alternative manifests",
             "Deferred history manifests",

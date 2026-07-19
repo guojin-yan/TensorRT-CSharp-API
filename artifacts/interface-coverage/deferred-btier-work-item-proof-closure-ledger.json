@@ -1,0 +1,103 @@
+{
+  "schemaVersion": "deferred-btier-work-item-proof-closure-ledger.v1",
+  "recordKind": "deferred-btier-work-item-proof-closure-ledger",
+  "generatedAtUtc": "2026-07-19T14:00:00Z",
+  "closureState": "source-quality-proof-closed",
+  "closedWorkItemCount": 45,
+  "closedWorkItemIds": [
+    "btier-001",
+    "btier-002",
+    "btier-003",
+    "btier-004",
+    "btier-005",
+    "btier-006",
+    "btier-007",
+    "btier-008",
+    "btier-009",
+    "btier-010",
+    "btier-011",
+    "btier-012",
+    "btier-013",
+    "btier-014",
+    "btier-015",
+    "btier-016",
+    "btier-017",
+    "btier-018",
+    "btier-019",
+    "btier-020",
+    "btier-021",
+    "btier-022",
+    "btier-023",
+    "btier-024",
+    "btier-025",
+    "btier-026",
+    "btier-027",
+    "btier-028",
+    "btier-029",
+    "btier-030",
+    "btier-031",
+    "btier-032",
+    "btier-033",
+    "btier-034",
+    "btier-035",
+    "btier-036",
+    "btier-037",
+    "btier-038",
+    "btier-039",
+    "btier-040",
+    "btier-041",
+    "btier-042",
+    "btier-043",
+    "btier-044",
+    "btier-045"
+  ],
+  "closureBatches": [
+    {
+      "batch": "btier-001-012",
+      "closedWorkItemCount": 12,
+      "evidence": [
+        "tests/JYPPX.ProjectQuality.Tests/DeferredBTierWorkItemProofBatchTests.cs",
+        "docs/articles/zh-cn/deferred-manual-design-groups.md"
+      ]
+    },
+    {
+      "batch": "btier-013-024",
+      "closedWorkItemCount": 12,
+      "evidence": [
+        "tests/JYPPX.ProjectQuality.Tests/DeferredBTierWorkItemProofBatchTests.cs",
+        "docs/articles/zh-cn/deferred-manual-design-groups.md"
+      ]
+    },
+    {
+      "batch": "btier-025-040",
+      "closedWorkItemCount": 16,
+      "evidence": [
+        "tests/JYPPX.ProjectQuality.Tests/DeferredBTierWorkItemProofBatchTests.cs",
+        "docs/articles/zh-cn/deferred-manual-design-groups.md"
+      ]
+    },
+    {
+      "batch": "btier-041-045",
+      "closedWorkItemCount": 5,
+      "evidence": [
+        "tests/JYPPX.ProjectQuality.Tests/DeferredBTier41To45ProofClosureTests.cs",
+        "docs/articles/zh-cn/deferred-btier-41-45-proof-closure.md"
+      ]
+    }
+  ],
+  "proofRequirements": [
+    "safe alternative manifest IDs remain present",
+    "deferred history manifest IDs remain present",
+    "native entrypoints and source implementations remain present",
+    "public managed wrappers remain pointer-free",
+    "XML documentation and ProjectQuality assertions remain present"
+  ],
+  "performsPublish": false,
+  "canPublishPublicly": false,
+  "canCloseReleaseIssue": false,
+  "canDeleteDeferredRecords": false,
+  "isRuntimeExecutionProof": false,
+  "isPackageConsumerRuntimeProof": false,
+  "canPromoteReleaseProof": false,
+  "boundary": "This ledger records source-quality proof closure for btier-001 through btier-045. It does not prove runtime execution, package-consumer runtime, post-publish verification, owner approval, or permission to delete deferred history."
+}

@@ -106,7 +106,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-DeferredReadOnlyApiCa
 | `btier-011` | `IBuilderConfig::getDefaultDeviceType` | TRT10 | 使用 default device type getter/setter safe alternative 证明 wrapper；不删除 getter/setter deferred history。 |
 | `btier-012` | `IBuilderConfig::getDeviceType` | TRT10 | 使用 layer device type get/is-set/reset/set 组合证明 safe alternative；仍按 wrapper/docs/quality proof 处理，不视为 runtime proof。 |
 
-当前 alias-proof-ready 候选已完整展开为 `btier-001` 到 `btier-045`。工作包采用 `stable-v1-existing-40-then-deterministic-append` 排序策略，既有 40 项编号不会因 dashboard 扩容而漂移，新候选只追加到末尾。后续批量推进优先读取 `deferred-btier-implementation-work-package.json`，避免重复扫描全部 deferred manifest；必须同时验证 safe alternative manifest 仍存在、deferred history 仍存在、public API 无裸 `IntPtr`/`nint`、wrapper/doc/test 已覆盖。
+当前 alias-proof-ready 候选已完整展开为 `btier-001` 到 `btier-045`，并由 `deferred-btier-work-item-proof-closure-ledger.json` 标记为 `source-quality-proof-closed`。工作包采用 `stable-v1-existing-40-then-deterministic-append` 排序策略，既有 40 项编号不会因 dashboard 扩容而漂移，新候选只追加到末尾。后续批量推进不得再次选择这 45 项；必须先确认 `remainingWorkItemCount`，再从新 candidate audit 或独立 runtime/model gap 中选择任务。safe alternative manifest、deferred history、public pointer guard 和 wrapper/doc/test 证据仍须持续回归。
 
 ## B-tier 后 12 项 proof 批量收口
 

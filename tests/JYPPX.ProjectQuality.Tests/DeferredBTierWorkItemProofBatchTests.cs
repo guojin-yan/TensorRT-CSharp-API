@@ -19,7 +19,9 @@ public sealed class DeferredBTierWorkItemProofBatchTests
 
         JsonElement root = package.RootElement;
         Assert.Equal("deferred-btier-implementation-work-package", root.GetProperty("recordKind").GetString());
-        Assert.Equal("ready-for-next-implementation-batch", root.GetProperty("workPackageState").GetString());
+        Assert.Equal("source-quality-proof-closed", root.GetProperty("workPackageState").GetString());
+        Assert.Equal(45, root.GetProperty("closedWorkItemCount").GetInt32());
+        Assert.Equal(0, root.GetProperty("remainingWorkItemCount").GetInt32());
         Assert.False(root.GetProperty("canPublishPublicly").GetBoolean());
         Assert.False(root.GetProperty("canCloseReleaseIssue").GetBoolean());
         Assert.False(root.GetProperty("canDeleteDeferredRecords").GetBoolean());
@@ -74,6 +76,8 @@ public sealed class DeferredBTierWorkItemProofBatchTests
         foreach ((string id, JsonElement item) in workItems)
         {
             Assert.Equal("B - safe-alternative-or-alias", item.GetProperty("safetyTier").GetString());
+            Assert.Equal("source-quality-proof-closed", item.GetProperty("workItemState").GetString());
+            Assert.Equal("artifacts/interface-coverage/deferred-btier-work-item-proof-closure-ledger.json", item.GetProperty("closureProofRecord").GetString());
             Assert.False(item.GetProperty("canDeleteDeferredRecord").GetBoolean());
             Assert.False(item.GetProperty("canPromoteReleaseProof").GetBoolean());
             Assert.False(item.GetProperty("isRuntimeExecutionProof").GetBoolean());

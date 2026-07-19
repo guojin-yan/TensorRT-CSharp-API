@@ -1755,3 +1755,40 @@ build service 真正应用并回读 builder 配置，同时修复 native bridge/
 本批将已有 `IParser::getError`、`IParser::getErrorCount` 和 `IParser::isSubgraphSupported` safe wrapper 接入 `OnnxEngineBuildResult`，新增 pointer-free `ParserPreflightSnapshot`。构建 parse 后报告复制的 error count、diagnostic summary、Identity operator support，以及 TRT10/TRT11 模型/子图支持计数；TRT8 在 vendor 未暴露子图查询时保留 controlled `unavailable`。旧 deferred manifest/history 保留，未通过报告字段改变 coverage。
 
 证据 artifact：`artifacts/interface-coverage/parser-preflight-readback-proof.json` 和 `.md`。Tools、TensorRtExec build 通过，TensorRtExec report schema 定向测试 `5/5` 通过。该批 evidence kind 为 `copied-parser-preflight`，`PointerFreeCopiedSnapshot=true`，但 `CanPromoteRuntimeProof=false`、`CanPromoteReleaseProof=false`；不能替代 real-model-runtime、package-consumer-runtime、post-publish 或 release-owner proof。
+
+## 2026-07-19 B-tier Work Package 状态纠偏与 Proof Ledger
+
+本批审计发现 `deferred-btier-implementation-work-package.json` 仍把 `btier-001` 到
+`btier-045` 标成下一批工程任务，但这些项目早已由四批文档与 ProjectQuality 门禁完成
+source-quality proof closure。该状态漂移会让后续开发重复选择 `btier-006` 到
+`btier-021` 等旧任务，因此新增 `deferred-btier-work-item-proof-closure-ledger.json/.md`
+作为可机读事实源，并让 work-package 生成器输出逐项 `workItemState`、
+`closedWorkItemCount=45` 和 `remainingWorkItemCount=0`。
+
+### 状态与边界
+
+- 45 项全部标记为 `source-quality-proof-closed`，每项继续保留 safe alternative manifest、
+  deferred history manifest、native/source、pointer-free managed wrapper、docs 和测试证据。
+- 最终 blocker dashboard 不再提示重复执行 `btier-041..045`，而是要求从新的 candidate
+  audit、真实 external model/runtime gap 或已通过 ownership design gate 的候选中选批。
+- ledger 和 work package 均保持 `canDeleteDeferredRecords=false`、
+  `isRuntimeExecutionProof=false`、`isPackageConsumerRuntimeProof=false`、
+  `canPromoteReleaseProof=false`；源码质量闭环不等于真实运行或公开发布许可。
+
+### Verification
+
+- binding generator/output validation：`191 manifests / 3961 API records`，幂等通过。
+- 完整 solution Debug build：`0 warnings / 0 errors`；定向状态门禁 `5/5`，扩展
+  B-tier/scalar/parser/public-handle/classification 集合 `23/23`。
+- TRT8/CUDA12、TRT10/CUDA12、TRT11/CUDA12、TRT11/CUDA13 native 增量构建通过。
+- ABI declaration/PE export parity：TRT8 `991/991`、TRT10 `1086/1086`、TRT11
+  `1233/1233`，missing declaration/export 均为 `0`。
+- strict classification audit：finding `0`；strict release quality gate：required failure `0`。
+
+### C 盘与发布边界
+
+- 本批没有下载 TensorRT、CUDA、cuDNN、模型或 NuGet 包到 C 盘，Downloads 时间窗新增为
+  `0`。清理本批 dotnet/MSBuild 产生的 9 个 workload 小日志和 19 个空临时目录。
+- 3 个由正在运行的 Codex/桌面进程锁定的 0 字节 `.tmp` 保留，不强制终止共享进程；
+  NuGet、CUDA、.NET、Codex 与系统缓存未触碰。
+- 未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。

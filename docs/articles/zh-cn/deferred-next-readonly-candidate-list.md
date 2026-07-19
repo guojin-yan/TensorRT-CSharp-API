@@ -22,7 +22,7 @@ Deferred API 升级容易在 callback、allocator、borrowed pointer 和 plugin 
 
 ## 已固定的 B-tier 推进队列
 
-后续阶段不要再从全量 deferred 文件重新摸底。当前的执行入口已经固定为 `artifacts/interface-coverage/deferred-btier-implementation-work-package.json`，并且前 40 个 `btier-*` 工作项已经被 `tests/JYPPX.ProjectQuality.Tests/DeferredBTierWorkItemProofBatchTests.cs` 固定为回归门禁。
+后续阶段不要再从全量 deferred 文件重新摸底。`artifacts/interface-coverage/deferred-btier-work-item-proof-closure-ledger.json` 已把 `btier-001` 到 `btier-045` 固定为 `source-quality-proof-closed`，并由 `DeferredBTierWorkItemProofBatchTests` 与 `DeferredBTier41To45ProofClosureTests` 持续回归。
 
 | 批次 | 工作项 | 主题 | 当前处理方式 |
 |---|---|---|---|
@@ -33,7 +33,7 @@ Deferred API 升级容易在 callback、allocator、borrowed pointer 和 plugin 
 
 ## 下一批建议
 
-下一轮应直接从 `deferred-btier-implementation-work-package.json` 之外的新候选里挑选，而不是重复处理 `btier-001` 到 `btier-040`：
+下一轮应直接从新 candidate audit 或独立 runtime/model gap 中挑选，而不是重复处理 `btier-001` 到 `btier-045`：
 
 1. **ONNX parser copied diagnostics / layer-output presence**：优先补强已存在的 `LayerOutputTensorExists`、subgraph count/copy、parser error copied diagnostics 和 sample/smoke 证据；继续避免返回 parser-owned `ITensor*`。
 2. **IAlgorithm 结果快照设计**：仅做设计门禁和 copied snapshot 草图，暂不把 `IAlgorithm*`、`IAlgorithmContext*`、`IAlgorithmIOInfo*` 作为 public handle 暴露。

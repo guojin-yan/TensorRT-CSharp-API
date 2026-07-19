@@ -182,6 +182,8 @@ $sourceStates = [pscustomobject]@{
   deferredBTierWorkPackageState = [string](Get-PropertyOrDefault -Object $deferredBTierWorkPackage -Name "workPackageState" -DefaultValue "missing-deferred-btier-implementation-work-package")
   deferredBTierWorkItemCount = [int](Get-PropertyOrDefault -Object $deferredBTierWorkPackage -Name "workItemCount" -DefaultValue 0)
   deferredBTierWorkItemTargetCount = [int](Get-PropertyOrDefault -Object $deferredBTierWorkPackage -Name "workItemTargetCount" -DefaultValue 0)
+  deferredBTierClosedWorkItemCount = [int](Get-PropertyOrDefault -Object $deferredBTierWorkPackage -Name "closedWorkItemCount" -DefaultValue 0)
+  deferredBTierRemainingWorkItemCount = [int](Get-PropertyOrDefault -Object $deferredBTierWorkPackage -Name "remainingWorkItemCount" -DefaultValue 0)
   deferredSafetyTriageState = [string](Get-PropertyOrDefault -Object $deferredSafetyTriage -Name "recordKind" -DefaultValue "missing-deferred-candidate-safety-triage")
   deferredSafetyTriageTotalRows = [int](Get-PropertyOrDefault -Object $deferredSafetyTriage -Name "totalTriageRowCount" -DefaultValue 0)
   projectQualityShardRunbookState = $projectQualityShardRunbookState
@@ -272,7 +274,8 @@ $blockers = @(
     "build success as runtime proof",
     "dependency probe as smoke pass"
   ) -Boundary "TRT11 failed compatible-host attempt is useful evidence but cannot promote runtime proof until smokeStatus=passed and strict proof conditions hold."
-  New-BlockerLane -Order 5 -Id "deferred-readonly-implementation-batch" -Title "Deferred readonly/API design-gate implementation batch" -CurrentState "$($sourceStates.deferredBTierWorkPackageState); workItems=$($sourceStates.deferredBTierWorkItemCount)/$($sourceStates.deferredBTierWorkItemTargetCount)" -OwnerNextAction "Continue B-tier 41-45 or a C-tier design-gate closure pack with native implementation, generated bindings, high-level wrapper, docs, smoke/quality tests, and version guards." -RequiredEvidence @(
+  New-BlockerLane -Order 5 -Id "deferred-readonly-implementation-batch" -Title "Deferred readonly/API design-gate implementation batch" -CurrentState "$($sourceStates.deferredBTierWorkPackageState); workItems=$($sourceStates.deferredBTierWorkItemCount)/$($sourceStates.deferredBTierWorkItemTargetCount); closed=$($sourceStates.deferredBTierClosedWorkItemCount); remaining=$($sourceStates.deferredBTierRemainingWorkItemCount)" -OwnerNextAction "Do not repeat btier-001 through btier-045. Select a newly audited candidate or a separately evidenced runtime/model gap, then require native implementation, generated bindings, high-level wrapper, docs, smoke/quality tests, and version guards." -RequiredEvidence @(
+    "deferred B-tier work-item proof closure ledger",
     "manifest entry with correct version guard",
     "native implementation",
     "generated interop",
@@ -291,7 +294,7 @@ $blockers = @(
     "public raw IntPtr creator/recorder/allocator",
     "callback trampoline without owner proof",
     "borrowed pointer with unclear lifetime"
-  ) -Boundary "Deferred planning evidence is not release proof; API rows become real only after native/source, wrapper, version guard, docs, and tests agree."
+  ) -Boundary "The 45 ledgered B-tier items have source-quality proof closure, not runtime or release proof. New API rows become real only after native/source, wrapper, version guard, docs, and tests agree."
   New-BlockerLane -Order 6 -Id "project-quality-shard-runbook" -Title "ProjectQuality shard runbook and gate" -CurrentState $projectQualityShardRunbookState -OwnerNextAction "Keep shard runbook and zh-cn article current when new release-heavy tests are added; continue recording passed TRX hashes and refreshing class coverage." -RequiredEvidence @(
     "artifacts/test-analysis/project-quality-shard-runbook.md",
     "docs/articles/zh-cn/project-quality-sharded-gate.md",
@@ -347,6 +350,7 @@ $record = [pscustomobject]@{
     "artifacts/final-release/trt10-vs-trt11-bridge-runtime-diagnostic-diff.json",
     "artifacts/yolovision/reference-assets/asset-license-approval-validation.json",
     "artifacts/interface-coverage/deferred-btier-implementation-work-package.json",
+    "artifacts/interface-coverage/deferred-btier-work-item-proof-closure-ledger.json",
     "artifacts/interface-coverage/deferred-candidate-safety-triage.json",
     "artifacts/test-analysis/project-quality-shard-runbook.md",
     "docs/articles/zh-cn/project-quality-sharded-gate.md"

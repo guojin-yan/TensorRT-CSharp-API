@@ -38,4 +38,4 @@ dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj
 
 ## 下一步
 
-后续阶段应从 `deferred-btier-implementation-work-package.json` 之外的新候选里选择 8 到 15 个低风险 readonly API。优先选择 copied diagnostics、scalar metadata、count/copy field inventory 和 owner 已明确的 snapshot；遇到 callback、allocator、plugin instance、resource acquire/release 或 borrowed pointer lifetime 不明确的接口，立即降级为 design gate。
+`deferred-btier-work-item-proof-closure-ledger.json` 已将 `btier-001` 到 `btier-045` 全部标记为 `source-quality-proof-closed`，work package 的 `remainingWorkItemCount=0`。后续阶段应从新 candidate audit、真实 external model/runtime gap 或已通过 ownership design gate 的候选中选择批次；遇到 callback、allocator、plugin instance、resource acquire/release 或 borrowed pointer lifetime 不明确的接口，立即降级为 design gate。
