@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "trt11-profiler-interface-info-proof-closure.v1",
+  "recordKind": "deferred-safe-alternative-proof-closure",
+  "generatedAtUtc": "2026-07-19T00:00:00Z",
+  "interface": "IProfiler::getInterfaceInfo",
+  "tensorRtLine": "11",
+  "safeAlternative": {
+    "manifestId": "trt11-profiler-get-interface-info",
+    "entryPoint": "jyppx_trt11_profiler_get_interface_info",
+    "managedSurface": "TensorRtProfiler.GetInterfaceMetadataSnapshot",
+    "copyMode": "caller-buffer-and-scalar-out",
+    "pointerFreePublicSurface": true
+  },
+  "versionMatrix": [
+    { "line": "8", "interfaceInfo": "controlled-unsupported", "apiLanguage": "controlled-unsupported" },
+    { "line": "10", "interfaceInfo": "controlled-unsupported", "apiLanguage": "controlled-unsupported" },
+    { "line": "11", "interfaceInfo": "native-copied-readback", "apiLanguage": "native-copied-readback" }
+  ],
+  "deferredHistory": {
+    "manifestId": "trt11-profiler-get-interface-info-deferred",
+    "source": "native/src/tensorrt/v11/modules/deferred/twenty_third_batch_deferred.inc",
+    "retained": true
+  },
+  "evidenceKind": "build-and-source-quality-proof",
+  "isRuntimeExecutionProof": false,
+  "isPackageConsumerRuntimeProof": false,
+  "canPromoteReleaseProof": false,
+  "canDeleteDeferredRecord": false,
+  "sourceEvidence": [
+    "native/manifests/tensorrt/v11/trt11-callback-interface-info.manifest.json",
+    "native/src/tensorrt/v11/api.cpp",
+    "src/JYPPX.TensorRtSharp/TensorRtProfiler.cs",
+    "src/JYPPX.TensorRtSharp/TensorRtProfilerInterfaceMetadataSnapshot.cs",
+    "smoke/ManagedProfilerCallbackSmokeRunner/Program.cs",
+    "tests/JYPPX.ProjectQuality.Tests/ManagedProfilerCallbackBoundaryTests.cs",
+    "tests/JYPPX.ProjectQuality.Tests/DeferredProfilerInterfaceProofClosureTests.cs"
+  ]
+}

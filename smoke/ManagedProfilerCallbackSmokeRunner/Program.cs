@@ -69,6 +69,9 @@ internal static class Program
             line,
             (layerName, milliseconds) => records.Add($"{layerName}:{milliseconds:0.###}"));
 
+        TensorRtProfilerInterfaceMetadataSnapshot metadataSnapshot = profiler.GetInterfaceMetadataSnapshot();
+        Console.WriteLine($"ManagedProfilerInterfaceMetadataSnapshot Line={(int)metadataSnapshot.Line} Complete={metadataSnapshot.IsComplete} RuntimeProof={metadataSnapshot.IsRuntimeProof}");
+
         if (profiler.TryGetInterfaceInfo(out TensorRtInterfaceInfo interfaceInfo, out string diagnostic))
         {
             Console.WriteLine($"ManagedProfilerInterfaceInfo Kind={interfaceInfo.Kind} Version={interfaceInfo.Major}.{interfaceInfo.Minor}");

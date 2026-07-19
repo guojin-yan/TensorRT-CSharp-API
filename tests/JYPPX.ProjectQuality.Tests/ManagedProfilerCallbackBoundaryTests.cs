@@ -59,9 +59,17 @@ public sealed class ManagedProfilerCallbackBoundaryTests
         Assert.Contains("public TensorRtInterfaceInfo InterfaceInfo", profilerSource);
         Assert.Contains("public bool TryGetInterfaceInfo(out TensorRtInterfaceInfo interfaceInfo)", profilerSource);
         Assert.Contains("public bool TryGetInterfaceInfo(out TensorRtInterfaceInfo interfaceInfo, out string diagnostic)", profilerSource);
+        Assert.Contains("TensorRtProfilerInterfaceMetadataSnapshot", profilerSource);
+        Assert.Contains("GetInterfaceMetadataSnapshot", profilerSource);
         Assert.Contains("TensorRT 8 and TensorRT 10 profilers are not versioned interfaces", profilerSource);
         Assert.DoesNotContain("public IntPtr", profilerSource);
         Assert.DoesNotContain("public nint", profilerSource);
+
+        string snapshotSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtProfilerInterfaceMetadataSnapshot.cs");
+        Assert.Contains("public readonly struct TensorRtProfilerInterfaceMetadataSnapshot", snapshotSource);
+        Assert.Contains("public bool IsRuntimeProof => false", snapshotSource);
+        Assert.DoesNotContain("public IntPtr", snapshotSource);
+        Assert.DoesNotContain("public nint", snapshotSource);
     }
 
     [Fact]
@@ -156,6 +164,9 @@ public sealed class ManagedProfilerCallbackBoundaryTests
         Assert.Contains("profiler.TryGetInterfaceInfo(out TensorRtInterfaceInfo interfaceInfo, out string diagnostic)", program);
         Assert.Contains("ManagedProfilerInterfaceInfo Skipped=True Reason={diagnostic}", program);
         Assert.Contains("ManagedProfilerInterfaceInfo", program);
+        Assert.Contains("GetInterfaceMetadataSnapshot", program);
+        Assert.Contains("ManagedProfilerInterfaceMetadataSnapshot", program);
+        Assert.Contains("RuntimeProof={metadataSnapshot.IsRuntimeProof}", program);
         Assert.Contains("ManagedProfilerCallbackException", program);
         Assert.Contains("SetProfiler", program);
         Assert.Contains("ClearProfiler", program);

@@ -1730,3 +1730,6 @@ build service 真正应用并回读 builder 配置，同时修复 native bridge/
 - 未执行 NuGet push、GitHub Packages/Release 上传或 issue close；builder readback、
   dependency skip、managed build 和定向质量门禁均不等于 clean public package-consumer
   runtime proof、post-publish proof 或 release-close approval。
+## 2026-07-19 TRT11 profiler interface-info proof closure
+
+本批收口 `IProfiler::getInterfaceInfo [TRT11]` 的已有 safe alternative：native caller-buffer/scalar copy、managed `TryGet...` 和 pointer-free `GetInterfaceMetadataSnapshot` 已由专项质量门覆盖。TRT8/TRT10 保持 controlled unsupported；`trt11-profiler-get-interface-info-deferred` 与 deferred source 历史记录保留。该批 evidence kind 为 `build-and-source-quality-proof`，`isRuntimeExecutionProof=false`、`isPackageConsumerRuntimeProof=false`，不能替代真实 host、真实模型、package consumer 或公开发布证据。

@@ -232,6 +232,31 @@ public sealed class TensorRtProfiler : IDisposable
     }
 
     /// <summary>
+    /// Gets a pointer-free aggregate of the profiler interface metadata probes.
+    /// 获取 profiler interface metadata 查询的无指针聚合副本。
+    /// </summary>
+    /// <remarks>
+    /// TensorRT 11 performs the native copied-state queries. TensorRT 8 and TensorRT 10 retain controlled
+    /// unsupported diagnostics because their profiler interfaces are not versioned interfaces in this bridge.
+    /// 该快照只聚合 copied state；不代表 real-model-runtime、package-consumer-runtime 或 release proof。
+    /// </remarks>
+    public TensorRtProfilerInterfaceMetadataSnapshot GetInterfaceMetadataSnapshot()
+    {
+        ThrowIfDisposed();
+
+        bool interfaceInfoAvailable = TryGetInterfaceInfo(out TensorRtInterfaceInfo interfaceInfo, out string interfaceInfoDiagnostic);
+        bool apiLanguageAvailable = TryGetApiLanguage(out TensorRtApiLanguage apiLanguage, out string apiLanguageDiagnostic);
+        return new TensorRtProfilerInterfaceMetadataSnapshot(
+            Line,
+            interfaceInfoAvailable,
+            interfaceInfo,
+            interfaceInfoDiagnostic,
+            apiLanguageAvailable,
+            apiLanguage,
+            apiLanguageDiagnostic);
+    }
+
+    /// <summary>
     /// Synchronously emits a diagnostic profiler record through the native profiler object.
     /// 通过 native profiler 对象同步发送一条诊断 profiler 记录。
     /// </summary>
