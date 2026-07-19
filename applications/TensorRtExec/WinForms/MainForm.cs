@@ -458,6 +458,7 @@ public sealed class MainForm : Form
 
         lines.Add("TensorRtExec WorkspaceBytes=" + report.WorkspaceBytes.ToString(CultureInfo.InvariantCulture));
         lines.Add("TensorRtExec BuilderConfigDeploymentSnapshot=" + report.BuilderConfigDeploymentSnapshotState + " Diagnostics=" + report.BuilderConfigDeploymentDiagnosticCount.ToString(CultureInfo.InvariantCulture));
+        lines.Add("TensorRtExec ParserPreflightSnapshot=" + report.ParserPreflightSnapshotState + " Diagnostics=" + report.ParserPreflightDiagnosticCount.ToString(CultureInfo.InvariantCulture));
         lines.Add(report.Summary);
         return string.Join(Environment.NewLine, lines);
     }

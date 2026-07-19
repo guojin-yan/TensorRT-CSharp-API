@@ -40,7 +40,9 @@ public sealed class TensorRtExecService
             result.LoadedEngineDiagnostics.EvidenceBoundary,
             result.WorkspaceBytes,
             result.BuilderConfigDeploymentSnapshot == null ? "unavailable" : "copied-readback",
-            result.BuilderConfigDeploymentSnapshot?.Diagnostics.Count ?? 0);
+            result.BuilderConfigDeploymentSnapshot?.Diagnostics.Count ?? 0,
+            result.ParserPreflightSnapshot.DiagnosticsState,
+            result.ParserPreflightSnapshot.CopiedDiagnosticCount);
     }
 
 }

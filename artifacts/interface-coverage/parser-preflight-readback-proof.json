@@ -1,0 +1,28 @@
+{
+  "recordKind": "cross-version-parser-preflight-copied-readback",
+  "status": "implemented-with-deferred-history",
+  "scope": ["IParser::getError", "IParser::getErrorCount", "IParser::isSubgraphSupported"],
+  "managedSurface": "OnnxEngineParserPreflightSnapshot",
+  "pointerFree": true,
+  "copiedDiagnostics": true,
+  "modelSupportCounters": true,
+  "runtimeEvidenceKind": "copied-parser-preflight",
+  "isRuntimeExecutionProof": false,
+  "isRealModelRuntimeProof": false,
+  "isPackageConsumerRuntimeProof": false,
+  "canPromoteRuntimeProof": false,
+  "canPromoteReleaseProof": false,
+  "deferredHistoryRetained": true,
+  "versionGuards": {
+    "trt8": "parser diagnostics copied; subgraph support reports controlled unavailable when vendor API is not exposed",
+    "trt10": "parser diagnostics and subgraph support copied through existing caller-buffer bridge",
+    "trt11": "parser diagnostics and subgraph support copied through existing caller-buffer bridge"
+  },
+  "verification": {
+    "toolsBuild": "passed",
+    "tensorRtExecBuild": "passed",
+    "reportSchemaTests": "5/5 passed",
+    "cDiskCleanup": "no newly attributable TensorRT/parser temp files found"
+  },
+  "boundary": "TensorRtExec and OnnxToEngine reports remain build/preflight evidence. They do not replace real-model-runtime, package-consumer-runtime, post-publish verification, or release-owner approval."
+}

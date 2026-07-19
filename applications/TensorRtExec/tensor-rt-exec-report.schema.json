@@ -30,6 +30,7 @@
     "CapabilityProbe",
     "WorkspaceBytes",
     "BuilderConfigDeploymentSnapshot",
+    "ParserPreflightSnapshot",
     "OptionImplementationStatus",
     "BenchmarkSummary",
     "ProofClassification",
@@ -220,6 +221,19 @@
       "type": [ "object", "null" ],
       "description": "Copied builder-config readback after applying deployment options. This is build/deployment diagnostics only, not runtime proof.",
       "additionalProperties": true
+    },
+    "ParserPreflightSnapshot": {
+      "type": "object",
+      "description": "Copied ONNX parser diagnostics and model-support counters after parse (evidence kind: copied-parser-preflight). Build/preflight evidence only, not runtime proof.",
+      "additionalProperties": false,
+      "required": ["Line", "ParseAttempted", "ParseSucceeded", "DiagnosticsState", "ErrorCount", "CopiedDiagnosticCount", "DiagnosticSummary", "IdentityOperatorSupported", "ModelSupportAttempted", "ModelSupportState", "ModelSupported", "SupportedSubgraphCount", "UnsupportedSubgraphCount", "CopiedSubgraphCount", "CopiedSupportedSubgraphCount", "CopiedUnsupportedSubgraphCount", "CopiedNodeCount", "EvidenceKind", "EvidenceBoundary", "PointerFreeCopiedSnapshot", "CanPromoteRuntimeProof", "CanPromoteReleaseProof", "CanDeleteDeferredRecord"],
+      "properties": {
+        "Line": { "type": "integer" }, "ParseAttempted": { "type": "boolean" }, "ParseSucceeded": { "type": "boolean" },
+        "DiagnosticsState": { "type": "string" }, "ErrorCount": { "type": "integer", "minimum": 0 }, "CopiedDiagnosticCount": { "type": "integer", "minimum": 0 }, "DiagnosticSummary": { "type": "string" },
+        "IdentityOperatorSupported": { "type": "boolean" }, "ModelSupportAttempted": { "type": "boolean" }, "ModelSupportState": { "type": "string" }, "ModelSupported": { "type": "boolean" },
+        "SupportedSubgraphCount": { "type": "integer", "minimum": 0 }, "UnsupportedSubgraphCount": { "type": "integer", "minimum": 0 }, "CopiedSubgraphCount": { "type": "integer", "minimum": 0 }, "CopiedSupportedSubgraphCount": { "type": "integer", "minimum": 0 }, "CopiedUnsupportedSubgraphCount": { "type": "integer", "minimum": 0 }, "CopiedNodeCount": { "type": "integer", "minimum": 0 },
+        "EvidenceKind": { "type": "string" }, "EvidenceBoundary": { "type": "string" }, "PointerFreeCopiedSnapshot": { "type": "boolean" }, "CanPromoteRuntimeProof": { "type": "boolean" }, "CanPromoteReleaseProof": { "type": "boolean" }, "CanDeleteDeferredRecord": { "type": "boolean" }
+      }
     },
     "OptionImplementationStatus": {
       "type": "object",

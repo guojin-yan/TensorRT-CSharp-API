@@ -1739,3 +1739,9 @@ build service 真正应用并回读 builder 配置，同时修复 native bridge/
 ## 2026-07-19 TRT11 profiler interface-info proof closure
 
 本批收口 `IProfiler::getInterfaceInfo [TRT11]` 的已有 safe alternative：native caller-buffer/scalar copy、managed `TryGet...` 和 pointer-free `GetInterfaceMetadataSnapshot` 已由专项质量门覆盖。TRT8/TRT10 保持 controlled unsupported；`trt11-profiler-get-interface-info-deferred` 与 deferred source 历史记录保留。该批 evidence kind 为 `build-and-source-quality-proof`，`isRuntimeExecutionProof=false`、`isPackageConsumerRuntimeProof=false`，不能替代真实 host、真实模型、package consumer 或公开发布证据。
+
+## 2026-07-19 Parser preflight copied readback
+
+本批将已有 `IParser::getError`、`IParser::getErrorCount` 和 `IParser::isSubgraphSupported` safe wrapper 接入 `OnnxEngineBuildResult`，新增 pointer-free `ParserPreflightSnapshot`。构建 parse 后报告复制的 error count、diagnostic summary、Identity operator support，以及 TRT10/TRT11 模型/子图支持计数；TRT8 在 vendor 未暴露子图查询时保留 controlled `unavailable`。旧 deferred manifest/history 保留，未通过报告字段改变 coverage。
+
+证据 artifact：`artifacts/interface-coverage/parser-preflight-readback-proof.json` 和 `.md`。Tools、TensorRtExec build 通过，TensorRtExec report schema 定向测试 `5/5` 通过。该批 evidence kind 为 `copied-parser-preflight`，`PointerFreeCopiedSnapshot=true`，但 `CanPromoteRuntimeProof=false`、`CanPromoteReleaseProof=false`；不能替代 real-model-runtime、package-consumer-runtime、post-publish 或 release-owner proof。

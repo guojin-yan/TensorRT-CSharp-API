@@ -37,7 +37,8 @@ public sealed class OnnxEngineBuildResult
         OnnxEngineTimingCacheArtifact? timingCacheArtifact = null,
         OnnxEngineCapabilityProbe? capabilityProbe = null,
         ulong workspaceBytes = 0,
-        TensorRtBuilderConfigDeploymentSnapshot? builderConfigDeploymentSnapshot = null)
+        TensorRtBuilderConfigDeploymentSnapshot? builderConfigDeploymentSnapshot = null,
+        OnnxEngineParserPreflightSnapshot? parserPreflightSnapshot = null)
         : this(
             success,
             skipped,
@@ -65,7 +66,8 @@ public sealed class OnnxEngineBuildResult
             timingCacheArtifact,
             capabilityProbe,
             workspaceBytes,
-            builderConfigDeploymentSnapshot)
+            builderConfigDeploymentSnapshot,
+            parserPreflightSnapshot)
     {
     }
 
@@ -96,7 +98,8 @@ public sealed class OnnxEngineBuildResult
         OnnxEngineTimingCacheArtifact? timingCacheArtifact = null,
         OnnxEngineCapabilityProbe? capabilityProbe = null,
         ulong workspaceBytes = 0,
-        TensorRtBuilderConfigDeploymentSnapshot? builderConfigDeploymentSnapshot = null)
+        TensorRtBuilderConfigDeploymentSnapshot? builderConfigDeploymentSnapshot = null,
+        OnnxEngineParserPreflightSnapshot? parserPreflightSnapshot = null)
     {
         Success = success;
         Skipped = skipped;
@@ -122,6 +125,7 @@ public sealed class OnnxEngineBuildResult
         CapabilityProbe = capabilityProbe ?? OnnxEngineCapabilityProbe.Empty;
         WorkspaceBytes = workspaceBytes;
         BuilderConfigDeploymentSnapshot = builderConfigDeploymentSnapshot;
+        ParserPreflightSnapshot = parserPreflightSnapshot ?? OnnxEngineParserPreflightSnapshot.Empty;
         Diagnostics = diagnostics ?? Array.Empty<string>();
         LogLines = logLines ?? Array.Empty<string>();
         EvidenceSidecar = evidenceSidecar ?? OnnxEngineBuildEvidenceSidecarReader.Empty;
@@ -184,6 +188,8 @@ public sealed class OnnxEngineBuildResult
     /// 该数据只属于 build/deployment 诊断，不是模型 runtime 或 package-consumer proof。
     /// </remarks>
     public TensorRtBuilderConfigDeploymentSnapshot? BuilderConfigDeploymentSnapshot { get; }
+
+    public OnnxEngineParserPreflightSnapshot ParserPreflightSnapshot { get; }
 
     public bool IsRuntimeExecutionProof => InferenceRan && OutputMatch;
 

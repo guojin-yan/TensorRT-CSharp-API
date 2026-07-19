@@ -6,12 +6,12 @@ namespace TensorRtExecApp.Core;
 public sealed class TensorRtExecReport
 {
     public TensorRtExecReport(bool success, string state, string summary, IReadOnlyList<string> logLines)
-        : this(success, state, summary, logLines, string.Empty, false, false, string.Empty, string.Empty, string.Empty, false, false, string.Empty, false, false, string.Empty, 0, "unavailable", 0)
+        : this(success, state, summary, logLines, string.Empty, false, false, string.Empty, string.Empty, string.Empty, false, false, string.Empty, false, false, string.Empty, 0, "unavailable", 0, "not-attempted", 0)
     {
     }
 
     public TensorRtExecReport(bool success, string state, string summary, IReadOnlyList<string> logLines, string enginePath, bool parsed, bool inferenceRan)
-        : this(success, state, summary, logLines, enginePath, parsed, inferenceRan, string.Empty, string.Empty, string.Empty, false, false, string.Empty, false, false, string.Empty, 0, "unavailable", 0)
+        : this(success, state, summary, logLines, enginePath, parsed, inferenceRan, string.Empty, string.Empty, string.Empty, false, false, string.Empty, false, false, string.Empty, 0, "unavailable", 0, "not-attempted", 0)
     {
     }
 
@@ -34,7 +34,9 @@ public sealed class TensorRtExecReport
         string loadEngineDiagnosticsBoundary,
         ulong workspaceBytes,
         string builderConfigDeploymentSnapshotState,
-        int builderConfigDeploymentDiagnosticCount)
+        int builderConfigDeploymentDiagnosticCount,
+        string parserPreflightSnapshotState,
+        int parserPreflightDiagnosticCount)
     {
         Success = success;
         State = state ?? string.Empty;
@@ -55,6 +57,8 @@ public sealed class TensorRtExecReport
         WorkspaceBytes = workspaceBytes;
         BuilderConfigDeploymentSnapshotState = builderConfigDeploymentSnapshotState ?? "unavailable";
         BuilderConfigDeploymentDiagnosticCount = builderConfigDeploymentDiagnosticCount < 0 ? 0 : builderConfigDeploymentDiagnosticCount;
+        ParserPreflightSnapshotState = parserPreflightSnapshotState ?? "not-attempted";
+        ParserPreflightDiagnosticCount = parserPreflightDiagnosticCount < 0 ? 0 : parserPreflightDiagnosticCount;
     }
 
     public bool Success { get; }
@@ -94,4 +98,8 @@ public sealed class TensorRtExecReport
     public string BuilderConfigDeploymentSnapshotState { get; }
 
     public int BuilderConfigDeploymentDiagnosticCount { get; }
+
+    public string ParserPreflightSnapshotState { get; }
+
+    public int ParserPreflightDiagnosticCount { get; }
 }

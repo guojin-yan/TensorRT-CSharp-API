@@ -51,6 +51,8 @@ public sealed class TensorRtExecReportSchemaTests
                      "capability-probe-only",
                      "WorkspaceBytes",
                      "BuilderConfigDeploymentSnapshot",
+                     "ParserPreflightSnapshot",
+                     "copied-parser-preflight",
                      "Copied builder-config readback",
                      "OptionImplementationStatus",
                      "ParsedOptions",
@@ -174,6 +176,64 @@ public sealed class TensorRtExecReportSchemaTests
         Assert.True(reportRoot.GetProperty("CapabilityProbe").TryGetProperty("EvidenceBoundary", out _));
         Assert.False(reportRoot.GetProperty("CapabilityProbe").GetProperty("Attempted").GetBoolean());
         Assert.Contains("capability-probe-only", reportRoot.GetProperty("OptionImplementationStatus").GetProperty("EvidenceBoundary").GetString(), StringComparison.Ordinal);
+        JsonElement parserPreflight = reportRoot.GetProperty("ParserPreflightSnapshot");
+        Assert.Equal("not-attempted", parserPreflight.GetProperty("DiagnosticsState").GetString());
+        Assert.True(parserPreflight.GetProperty("PointerFreeCopiedSnapshot").GetBoolean());
+        Assert.False(parserPreflight.GetProperty("CanPromoteRuntimeProof").GetBoolean());
+        Assert.False(parserPreflight.GetProperty("CanPromoteReleaseProof").GetBoolean());
+        Assert.False(parserPreflight.GetProperty("CanDeleteDeferredRecord").GetBoolean());
+    }
+
+    [Fact]
+    public void ParserPreflightSnapshotKeepsCopiedDiagnosticsBoundary()
+    {
+        OnnxEngineParserPreflightSnapshot snapshot = new OnnxEngineParserPreflightSnapshot(
+            TensorRtApiLine.TensorRt11,
+            parseAttempted: true,
+            parseSucceeded: true,
+            diagnosticsState: "copied-readback",
+            errorCount: 0,
+            copiedDiagnosticCount: 0,
+            diagnosticSummary: "ONNX parser reported no errors.",
+            identityOperatorSupported: true,
+            modelSupportAttempted: true,
+            modelSupportState: "copied-readback",
+            modelSupported: true,
+            supportedSubgraphCount: 0,
+            unsupportedSubgraphCount: 0,
+            copiedSubgraphCount: 0,
+            copiedSupportedSubgraphCount: 0,
+            copiedUnsupportedSubgraphCount: 0,
+            copiedNodeCount: 0);
+
+        OnnxEngineBuildResult result = new OnnxEngineBuildResult(
+            success: true,
+            skipped: false,
+            state: "build-only",
+            tensorRtLine: TensorRtApiLine.TensorRt11,
+            modelSource: "embedded-dynamic-identity",
+            enginePath: "model.plan",
+            parsed: true,
+            engineSaved: true,
+            engineFileRoundTrip: false,
+            inferenceRan: false,
+            outputMatch: false,
+            profileIndex: 0,
+            elapsedMilliseconds: null,
+            skipReason: string.Empty,
+            normalizedCommandLine: "--buildOnly",
+            diagnostics: Array.Empty<string>(),
+            logLines: Array.Empty<string>(),
+            parserPreflightSnapshot: snapshot);
+
+        using JsonDocument document = JsonDocument.Parse(OnnxEngineBuildDiagnostics.ToJson(result));
+        JsonElement parser = document.RootElement.GetProperty("ParserPreflightSnapshot");
+        Assert.Equal(11, parser.GetProperty("Line").GetInt32());
+        Assert.True(parser.GetProperty("ParseSucceeded").GetBoolean());
+        Assert.Equal("copied-readback", parser.GetProperty("ModelSupportState").GetString());
+        Assert.Equal("copied-parser-preflight", parser.GetProperty("EvidenceKind").GetString());
+        Assert.Contains("build/preflight evidence only", parser.GetProperty("EvidenceBoundary").GetString(), StringComparison.Ordinal);
+        Assert.False(parser.GetProperty("CanPromoteRuntimeProof").GetBoolean());
     }
 
     [Fact]

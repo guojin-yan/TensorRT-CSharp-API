@@ -214,7 +214,10 @@ public sealed class OnnxEngineBuildService
         }
 
         log.Add($"ParserBuilderConfig Supported={options.TensorRtLine == TensorRtApiLine.TensorRt11} Attached={parserBuilderConfigAttached} ManagedLease={parser.HasBuilderConfigAttached} DlaCapabilityValidation={options.TensorRtLine == TensorRtApiLine.TensorRt11 && options.DeploymentOptions.DlaCore.HasValue}");
-        if (!parser.Parse(model, options.UsesExternalOnnx ? Path.GetFileName(options.OnnxPath) : "sample-dynamic-identity.onnx"))
+        string parserModelPath = options.UsesExternalOnnx ? Path.GetFileName(options.OnnxPath) : "sample-dynamic-identity.onnx";
+        bool parsed = parser.Parse(model, parserModelPath);
+        OnnxEngineParserPreflightSnapshot parserPreflightSnapshot = CaptureParserPreflightSnapshot(parser, model, parserModelPath, parsed, log);
+        if (!parsed)
         {
             throw new InvalidOperationException(parser.GetErrorSummary());
         }
@@ -259,7 +262,8 @@ public sealed class OnnxEngineBuildService
                     log,
                     evidenceSidecar,
                     timingCacheArtifact: timingCache.Artifact,
-                    builderConfigDeploymentSnapshot: builderConfigDeploymentSnapshot);
+                    builderConfigDeploymentSnapshot: builderConfigDeploymentSnapshot,
+                    parserPreflightSnapshot: parserPreflightSnapshot);
                 OnnxEngineBuildDiagnostics.WriteReport(buildOnly, options.ExportReportPath);
                 OnnxEngineRuntimeArtifactWriter.WriteArtifacts(buildOnly);
                 return buildOnly;
@@ -291,7 +295,8 @@ public sealed class OnnxEngineBuildService
                     benchmarkSummary: runtimeExecution?.BenchmarkSummary,
                     loadedEngineDiagnostics: ProbeLoadedEngineDiagnostics(options, OnnxEnginePreflightMetadata.FromExistingEngine(enginePath), log),
                     timingCacheArtifact: timingCache.Artifact,
-                    builderConfigDeploymentSnapshot: builderConfigDeploymentSnapshot);
+                    builderConfigDeploymentSnapshot: builderConfigDeploymentSnapshot,
+                    parserPreflightSnapshot: parserPreflightSnapshot);
                 OnnxEngineBuildDiagnostics.WriteReport(externalRuntime, options.ExportReportPath);
                 OnnxEngineRuntimeArtifactWriter.WriteArtifacts(externalRuntime, runtimeExecution?.ArtifactData);
                 return externalRuntime;
@@ -362,7 +367,8 @@ public sealed class OnnxEngineBuildService
                     inferenceRan: true,
                     outputMatch: true),
                 timingCacheArtifact: timingCache.Artifact,
-                builderConfigDeploymentSnapshot: builderConfigDeploymentSnapshot);
+                builderConfigDeploymentSnapshot: builderConfigDeploymentSnapshot,
+                parserPreflightSnapshot: parserPreflightSnapshot);
             OnnxEngineBuildDiagnostics.WriteReport(roundTrip, options.ExportReportPath);
             OnnxEngineRuntimeArtifactWriter.WriteArtifacts(
                 roundTrip,
@@ -660,7 +666,8 @@ public sealed class OnnxEngineBuildService
         OnnxEnginePreflightMetadata? preflightMetadata = null,
         OnnxLoadedEngineDiagnostics? loadedEngineDiagnostics = null,
         OnnxEngineTimingCacheArtifact? timingCacheArtifact = null,
-        TensorRtBuilderConfigDeploymentSnapshot? builderConfigDeploymentSnapshot = null)
+        TensorRtBuilderConfigDeploymentSnapshot? builderConfigDeploymentSnapshot = null,
+        OnnxEngineParserPreflightSnapshot? parserPreflightSnapshot = null)
     {
         OnnxEngineCapabilityProbe capabilityProbe = ProbeCapabilities(options);
         logLines = AppendCapabilityProbeLog(logLines, capabilityProbe);
@@ -692,7 +699,54 @@ public sealed class OnnxEngineBuildService
             timingCacheArtifact: timingCacheArtifact,
             capabilityProbe: capabilityProbe,
             workspaceBytes: options.WorkspaceBytes,
-            builderConfigDeploymentSnapshot: builderConfigDeploymentSnapshot);
+            builderConfigDeploymentSnapshot: builderConfigDeploymentSnapshot,
+            parserPreflightSnapshot: parserPreflightSnapshot);
+    }
+
+    private static OnnxEngineParserPreflightSnapshot CaptureParserPreflightSnapshot(
+        TensorRtOnnxParser parser,
+        byte[] model,
+        string modelPath,
+        bool parsed,
+        List<string> log)
+    {
+        TensorRtOnnxParserDiagnosticSnapshot diagnostics = parser.GetDiagnosticSnapshot();
+        bool modelSupportAttempted = false;
+        string modelSupportState = "not-attempted";
+        bool modelSupported = false;
+        long supportedSubgraphCount = 0;
+        long unsupportedSubgraphCount = 0;
+        int copiedSubgraphCount = 0;
+        long copiedSupportedSubgraphCount = 0;
+        long copiedUnsupportedSubgraphCount = 0;
+        long copiedNodeCount = 0;
+
+        try
+        {
+            TensorRtOnnxModelSupportSummary summary = parser.CheckModelSupport(model, modelPath).ToSummary();
+            modelSupportAttempted = true;
+            modelSupportState = "copied-readback";
+            modelSupported = summary.IsSupported;
+            supportedSubgraphCount = summary.ReportedSupportedSubgraphCount;
+            unsupportedSubgraphCount = summary.ReportedUnsupportedSubgraphCount;
+            copiedSubgraphCount = summary.CopiedSubgraphCount;
+            copiedSupportedSubgraphCount = summary.CopiedSupportedSubgraphCount;
+            copiedUnsupportedSubgraphCount = summary.CopiedUnsupportedSubgraphCount;
+            copiedNodeCount = summary.CopiedNodeCount;
+        }
+        catch (Exception exception) when (exception is TensorRtException || exception is BridgeProbeException || exception is NotSupportedException || exception is InvalidOperationException)
+        {
+            modelSupportState = "unavailable";
+            log.Add($"ParserModelSupport State=unavailable Reason={exception.GetType().Name}:{exception.Message}");
+        }
+
+        OnnxEngineParserPreflightSnapshot snapshot = new OnnxEngineParserPreflightSnapshot(
+            parser.Line, true, parsed, "copied-readback", diagnostics.ErrorCount, diagnostics.Diagnostics.Count,
+            diagnostics.DiagnosticSummary, diagnostics.IdentityOperatorSupported, modelSupportAttempted,
+            modelSupportState, modelSupported, supportedSubgraphCount, unsupportedSubgraphCount,
+            copiedSubgraphCount, copiedSupportedSubgraphCount, copiedUnsupportedSubgraphCount, copiedNodeCount);
+        log.Add($"ParserPreflightSnapshot State=copied-readback Errors={snapshot.ErrorCount} Diagnostics={snapshot.CopiedDiagnosticCount} Identity={snapshot.IdentityOperatorSupported} ModelSupport={snapshot.ModelSupportState}:{snapshot.ModelSupported} Subgraphs={snapshot.CopiedSubgraphCount}");
+        return snapshot;
     }
 
     private static TensorRtBuilderConfigDeploymentSnapshot? TryGetBuilderConfigDeploymentSnapshot(
