@@ -6,6 +6,8 @@
 
 `AppliedOptions` 只接受日志中明确的 `TrtexecBuilderScalar ... Applied=True`，因此 dry-run、setter 拒绝和版本不支持不会被误报为已应用。定向测试 34/34 通过，Tools/TensorRtExec build 为 0 warning / 0 error，schema 与 `git diff --check` 通过。dry-run artifact `artifacts/interface-coverage/trtexec-builder-scalar-precheck-proof.{json,md}` 的分类为 `precheck`，四个参数均为 parsed + parse-only，未创建 builder config、未执行 runtime，也不能晋级 real-model-runtime、package-consumer-runtime 或 release proof。C 盘本轮未发现可归因的 TensorRT 临时文件；共享 NuGet、CUDA、Codex 和系统缓存保留。
 
+TRT10.11.0/CUDA12.9 compatible host 的真实 build-only 证据位于 `artifacts/real-case/trtexec-builder-scalar-trt10-cuda12/`。max tactics、tiling level、quantization flags 均完成 `Applied=True/ReadbackMatch=True`；L2 请求被 vendor setter 拒绝并读回 `3145728` bytes，因此保留为 parse-only。该记录包含 host metadata、report/stdout/stderr SHA256 和 copied builder snapshot，但 `InferenceRan=False`，不能替代 real-model-runtime、package-consumer-runtime 或 release proof。
+
 ## 2026-07-19 BuilderConfig Deployment Readback 收口
 
 本批将已有 `TensorRtBuilderConfig.GetDeploymentSnapshot()` 接入 `OnnxEngineBuildService`、`OnnxEngineBuildResult`、TensorRtExec CLI/WinForms 与报告 schema。`DeploymentOptions` 记录请求值，`BuilderConfigDeploymentSnapshot` 记录 builder config 成功创建后复制读回的 timing、workspace、device/DLA、flags、tactic、plugin path 和 diagnostics。该字段保持 pointer-free，不新增 native ownership API，也不删除 deferred history。

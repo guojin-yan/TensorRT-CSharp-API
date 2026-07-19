@@ -1,0 +1,88 @@
+{
+  "schemaVersion": "trtexec-builder-scalar-real-readback-proof.v1",
+  "recordKind": "trtexec-like-builder-scalar-real-build-readback",
+  "capturedAtUtc": "2026-07-19T00:00:00Z",
+  "tensorRtLine": 10,
+  "tensorRtVersion": "10.11.0",
+  "cudaToolkitVersion": "12.9.41",
+  "modelSource": "embedded-dynamic-identity",
+  "proofClassification": "build-only",
+  "state": "build-only",
+  "buildEvidenceOnly": true,
+  "parsed": true,
+  "engineSaved": true,
+  "inferenceRan": false,
+  "outputMatch": false,
+  "normalizedCommandSha256": "8c82a46805ccfed333f0c02225c931ae0e168ac9c48008756d6e29a017c87157",
+  "reportSha256": "ef71fe868bf93bc0d819e75643c253b8e928d903e89acff079df35225506f930",
+  "engineSha256": "88f0430c2a71279fc64ff2978056bd0d19dc554c60557ff420bea3824988fe05",
+  "stdoutSha256": "0ae3f036af98584a11566896f6d221ee76d61f5d14b8450697082d220a36dd34",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "reportValidation": {
+    "state": "tensor-rt-exec-report-ready",
+    "failedBlockers": 0,
+    "sha256": "a2e27d88eb98bec2600106e5151765b76fdf744c68e82a03109dcbea0595ed7b"
+  },
+  "builderConfigDeploymentSnapshot": {
+    "state": "copied-readback",
+    "workspaceBytes": 67108864,
+    "optimizationLevel": 4,
+    "tilingOptimizationLevel": "Moderate",
+    "l2LimitForTilingBytes": 3145728,
+    "maxTactics": 32,
+    "diagnosticCount": 2
+  },
+  "scalarResults": [
+    {
+      "name": "MaxNbTactics",
+      "requested": 32,
+      "applied": true,
+      "readback": 32,
+      "readbackMatch": true,
+      "optionStatus": "applied"
+    },
+    {
+      "name": "TilingOptimizationLevel",
+      "requested": "Moderate",
+      "applied": true,
+      "readback": "Moderate",
+      "readbackMatch": true,
+      "optionStatus": "applied"
+    },
+    {
+      "name": "L2LimitForTiling",
+      "requestedBytes": 268435456,
+      "applied": false,
+      "readbackBytes": 3145728,
+      "readbackMatch": false,
+      "optionStatus": "parse-only",
+      "reason": "TensorRT 10.11 vendor setter rejected the requested 256MiB value; report preserves the actual copied readback."
+    },
+    {
+      "name": "QuantizationFlags",
+      "requested": "CalibrateBeforeFusion",
+      "applied": true,
+      "readback": "CalibrateBeforeFusion",
+      "readbackMatch": true,
+      "optionStatus": "applied"
+    }
+  ],
+  "parserPreflight": {
+    "state": "copied-readback",
+    "errors": 0,
+    "diagnostics": 0,
+    "identitySupported": true
+  },
+  "optionImplementationStatus": {
+    "applied": ["--maxNbTactics", "--tilingOptimizationLevel", "--quantizationFlags"],
+    "parseOnly": ["--l2LimitForTiling", "capability-probe-only"]
+  },
+  "runtimeProof": {
+    "isRuntimeExecutionProof": false,
+    "isRealModelRuntimeProof": false,
+    "isPackageConsumerRuntimeProof": false,
+    "canPromoteReleaseProof": false
+  },
+  "deferredHistoryRetained": true,
+  "evidenceBoundary": "This is a local compatible-host TensorRT 10 builder/config copied-readback and build-only report. It does not execute inference, validate model outputs, or prove a clean external package consumer."
+}

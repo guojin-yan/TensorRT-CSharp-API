@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "trtexec-builder-scalar-host-metadata.v1",
+  "capturedAtUtc": "2026-07-19T00:00:00Z",
+  "os": {
+    "caption": "Microsoft Windows 11 家庭版 中文版",
+    "version": "10.0.26200",
+    "buildNumber": "26200",
+    "architecture": "64 位"
+  },
+  "cpu": {
+    "name": "AMD Ryzen 7 5800H with Radeon Graphics",
+    "cores": 8,
+    "logicalProcessors": 16
+  },
+  "gpu": {
+    "name": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "32.0.15.7602"
+  },
+  "toolchain": {
+    "dotnetSdk": "10.0.301",
+    "cmake": "4.3.0-rc1",
+    "tensorRtVersion": "10.11.0",
+    "cudaToolkitVersion": "12.9.41",
+    "tensorRtRoot": "D:\\Program Files\\TensorRT-10.11.0.33-cu12",
+    "cudaRoot": "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.9"
+  },
+  "artifacts": {
+    "bridgePath": "build-out/win-x64-trt10-cuda12-release/bin/Release/jyppxtrtbridge.dll",
+    "bridgeBytes": 1056768,
+    "bridgeSha256": "d9728a0555894ee3afc32f6821dfda17fc7a21195868c3b17867881e5f4fb19c",
+    "nvinferPath": "D:/Program Files/TensorRT-10.11.0.33-cu12/lib/nvinfer_10.dll",
+    "nvinferSha256": "872eb3acdda69d85444c5ac59af0308546a1a41b1857fba547b7cef6cd4f3226",
+    "builderResourceSha256": "cb91f6e7d44c8973265d0968421d8dcad08154aeb106335a070be61ba1aeaa60",
+    "onnxParserSha256": "d23c1c61f37ff0f640ee40bbca8001e0bc3cd3226ef2731b5ffba8059e1950be",
+    "cudartSha256": "cf68ac7d47c621988db3343b8a211188e6f94cccf30dec3b15dd52d69fdcf512"
+  },
+  "evidenceBoundary": "Host metadata identifies the compatible engineering host and local vendor assets. It does not make this build-only report a real-model-runtime or package-consumer-runtime proof."
+}

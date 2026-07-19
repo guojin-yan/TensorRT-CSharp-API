@@ -109,6 +109,8 @@ dotnet run --project .\applications\TensorRtExec -- --ui
 
 报告可导出为 `.json` 或 `.md`，推荐参数是 `--exportReport`，同时兼容 `--report` 并在 normalized command 中归一化为 `--exportReport`。JSON schema 位于 `applications/TensorRtExec/tensor-rt-exec-report.schema.json`，并与 `OnnxEngineBuildDiagnostics.ToJson` 的真实输出对齐。核心字段包括 `ProofClassification`、`BuildEvidenceOnly`、`DryRun`、`NormalizedCommandLine`、`NormalizedCommandSha256`、`DeploymentOptions`、`BuilderConfigDeploymentSnapshot`、`ParserPreflightSnapshot`、`RuntimeOptions`、`InferenceRan`、`OutputMatch`、`IsRuntimeExecutionProof`、`IsRealModelRuntimeProof`、`IsPackageConsumerRuntimeProof`、`PreflightMetadata`、`LoadedEngineDiagnostics`、`CapabilityProbe`、`WorkspaceBytes`、`OptionImplementationStatus` 和 `ReportBoundary`。`DeploymentOptions` 记录请求值，`BuilderConfigDeploymentSnapshot` 记录成功创建 builder config 后的 pointer-free copied readback，`ParserPreflightSnapshot` 记录 parse 后复制的 parser error count、diagnostic summary、Identity 支持和模型/子图支持计数；这些字段都只是 build/deployment/preflight diagnostics。
 
+TRT10.11/CUDA12.9 compatible-host 的 scalar readback 示例见 `artifacts/real-case/trtexec-builder-scalar-trt10-cuda12/`：`--maxNbTactics`、`--tilingOptimizationLevel`、`--quantizationFlags` 成功 read back；`--l2LimitForTiling 256MiB` 被 vendor setter 拒绝并进入 `ParseOnlyOptions`。该目录的报告和 stdout/stderr 带 SHA256，仍属于 build-only evidence，不代表真实模型输出或 package-consumer runtime。
+
 报告 JSON 可用下面的 validator 做发布前边界检查：
 
 ```powershell
