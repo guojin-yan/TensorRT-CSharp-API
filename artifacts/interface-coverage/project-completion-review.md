@@ -8,6 +8,8 @@
 
 TRT10.11.0/CUDA12.9 compatible host 的真实 build-only 证据位于 `artifacts/real-case/trtexec-builder-scalar-trt10-cuda12/`。max tactics、tiling level、quantization flags 均完成 `Applied=True/ReadbackMatch=True`；L2 请求被 vendor setter 拒绝并读回 `3145728` bytes，因此保留为 parse-only。该记录包含 host metadata、report/stdout/stderr SHA256 和 copied builder snapshot，但 `InferenceRan=False`，不能替代 real-model-runtime、package-consumer-runtime 或 release proof。
 
+跨版本补充矩阵位于 `artifacts/real-case/trtexec-builder-scalar-multi-version/`。TRT10/11 对 L2 `3MiB` 的有效值均完成 applied/readback match，同时保留 `256MiB` 受控拒绝证据；TRT8 实际创建 runtime/builder/config 并完成 quantization flags readback，现代 tactics/tiling/L2 API 按版本 guard 保持 unsupported。TRT11 quantization flags 明确记录 `RemovedByTensorRT11`。TRT8 因缺少 `cudnn64_8.dll` 只到 dependency-probe-only，TRT10/11 是 build-only；所有 report strict validator failed blocker 为 0，仍不构成 inference 或 package-consumer proof。
+
 ## 2026-07-19 BuilderConfig Deployment Readback 收口
 
 本批将已有 `TensorRtBuilderConfig.GetDeploymentSnapshot()` 接入 `OnnxEngineBuildService`、`OnnxEngineBuildResult`、TensorRtExec CLI/WinForms 与报告 schema。`DeploymentOptions` 记录请求值，`BuilderConfigDeploymentSnapshot` 记录 builder config 成功创建后复制读回的 timing、workspace、device/DLA、flags、tactic、plugin path 和 diagnostics。该字段保持 pointer-free，不新增 native ownership API，也不删除 deferred history。

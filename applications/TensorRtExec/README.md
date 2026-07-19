@@ -111,6 +111,8 @@ dotnet run --project .\applications\TensorRtExec -- --ui
 
 TRT10.11/CUDA12.9 compatible-host 的 scalar readback 示例见 `artifacts/real-case/trtexec-builder-scalar-trt10-cuda12/`：`--maxNbTactics`、`--tilingOptimizationLevel`、`--quantizationFlags` 成功 read back；`--l2LimitForTiling 256MiB` 被 vendor setter 拒绝并进入 `ParseOnlyOptions`。该目录的报告和 stdout/stderr 带 SHA256，仍属于 build-only evidence，不代表真实模型输出或 package-consumer runtime。
 
+跨版本矩阵见 `artifacts/real-case/trtexec-builder-scalar-multi-version/`。其中 TRT10/11 的 `--l2LimitForTiling 3MiB` 成功 applied/readback match，而 `256MiB` 保留受控拒绝与实际 `3MiB` readback；TRT8 只应用 quantization flags，现代 scalar 明确 unsupported；TRT11 quantization flags 明确 removed-by-vendor。报告分类仍分别是 dependency-probe-only 或 build-only。
+
 报告 JSON 可用下面的 validator 做发布前边界检查：
 
 ```powershell

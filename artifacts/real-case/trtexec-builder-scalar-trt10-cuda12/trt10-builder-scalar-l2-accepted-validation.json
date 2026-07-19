@@ -1,0 +1,282 @@
+{
+  "recordKind": "tensor-rt-exec-report-validation",
+  "inputPath": "artifacts\\real-case\\trtexec-builder-scalar-trt10-cuda12\\trt10-builder-scalar-l2-accepted-report.json",
+  "resolvedInputPath": "E:\\GitSpace\\TensorRT-CSharp-API-4.0\\TensorRtSharp4.0\\artifacts\\real-case\\trtexec-builder-scalar-trt10-cuda12\\trt10-builder-scalar-l2-accepted-report.json",
+  "validationState": "tensor-rt-exec-report-ready",
+  "failedBlockers": 0,
+  "canPromoteRealModelRuntime": false,
+  "canPromotePackageConsumerRuntime": false,
+  "proofBoundary": "TensorRtExec and OnnxToEngine reports are build/report evidence. They do not replace real-model-runtime or package-consumer-runtime proof.",
+  "validationItems": [
+    {
+      "id": "file-exists",
+      "passed": true,
+      "severity": "required",
+      "message": "TensorRtExec report exists."
+    },
+    {
+      "id": "required-Success",
+      "passed": true,
+      "severity": "blocker",
+      "message": "Report must contain top-level property Success."
+    },
+    {
+      "id": "required-Skipped",
+      "passed": true,
+      "severity": "blocker",
+      "message": "Report must contain top-level property Skipped."
+    },
+    {
+      "id": "required-State",
+      "passed": true,
+      "severity": "blocker",
+      "message": "Report must contain top-level property State."
+    },
+    {
+      "id": "required-TensorRtLine",
+      "passed": true,
+      "severity": "blocker",
+      "message": "Report must contain top-level property TensorRtLine."
+    },
+    {
+      "id": "required-ModelSource",
+      "passed": true,
+      "severity": "blocker",
+      "message": "Report must contain top-level property ModelSource."
+    },
+    {
+      "id": "required-EnginePath",
+      "passed": true,
+      "severity": "blocker",
+      "message": "Report must contain top-level property EnginePath."
+    },
+    {
+      "id": "required-Parsed",
+      "passed": true,
+      "severity": "blocker",
+      "message": "Report must contain top-level property Parsed."
+    },
+    {
+      "id": "required-DryRun",
+      "passed": true,
+      "severity": "blocker",
+      "message": "Report must contain top-level property DryRun."
+    },
+    {
+      "id": "required-InferenceRan",
+      "passed": true,
+      "severity": "blocker",
+      "message": "Report must contain top-level property InferenceRan."
+    },
+    {
+      "id": "required-OutputMatch",
+      "passed": true,
+      "severity": "blocker",
+      "message": "Report must contain top-level property OutputMatch."
+    },
+    {
+      "id": "required-NormalizedCommandLine",
+      "passed": true,
+      "severity": "blocker",
+      "message": "Report must contain top-level property NormalizedCommandLine."
+    },
+    {
+      "id": "required-NormalizedCommandSha256",
+      "passed": true,
+      "severity": "blocker",
+      "message": "Report must contain top-level property NormalizedCommandSha256."
+    },
+    {
+      "id": "required-DeploymentOptions",
+      "passed": true,
+      "severity": "blocker",
+      "message": "Report must contain top-level property DeploymentOptions."
+    },
+    {
+      "id": "required-RuntimeOptions",
+      "passed": true,
+      "severity": "blocker",
+      "message": "Report must contain top-level property RuntimeOptions."
+    },
+    {
+      "id": "required-PreflightMetadata",
+      "passed": true,
+      "severity": "blocker",
+      "message": "Report must contain top-level property PreflightMetadata."
+    },
+    {
+      "id": "required-LoadedEngineDiagnostics",
+      "passed": true,
+      "severity": "blocker",
+      "message": "Report must contain top-level property LoadedEngineDiagnostics."
+    },
+    {
+      "id": "required-CapabilityProbe",
+      "passed": true,
+      "severity": "blocker",
+      "message": "Report must contain top-level property CapabilityProbe."
+    },
+    {
+      "id": "required-WorkspaceBytes",
+      "passed": true,
+      "severity": "blocker",
+      "message": "Report must contain top-level property WorkspaceBytes."
+    },
+    {
+      "id": "required-OptionImplementationStatus",
+      "passed": true,
+      "severity": "blocker",
+      "message": "Report must contain top-level property OptionImplementationStatus."
+    },
+    {
+      "id": "required-ProofClassification",
+      "passed": true,
+      "severity": "blocker",
+      "message": "Report must contain top-level property ProofClassification."
+    },
+    {
+      "id": "required-BuildEvidenceOnly",
+      "passed": true,
+      "severity": "blocker",
+      "message": "Report must contain top-level property BuildEvidenceOnly."
+    },
+    {
+      "id": "required-IsRuntimeExecutionProof",
+      "passed": true,
+      "severity": "blocker",
+      "message": "Report must contain top-level property IsRuntimeExecutionProof."
+    },
+    {
+      "id": "required-IsRealModelRuntimeProof",
+      "passed": true,
+      "severity": "blocker",
+      "message": "Report must contain top-level property IsRealModelRuntimeProof."
+    },
+    {
+      "id": "required-IsPackageConsumerRuntimeProof",
+      "passed": true,
+      "severity": "blocker",
+      "message": "Report must contain top-level property IsPackageConsumerRuntimeProof."
+    },
+    {
+      "id": "required-ModelEvidence",
+      "passed": true,
+      "severity": "blocker",
+      "message": "Report must contain top-level property ModelEvidence."
+    },
+    {
+      "id": "required-Diagnostics",
+      "passed": true,
+      "severity": "blocker",
+      "message": "Report must contain top-level property Diagnostics."
+    },
+    {
+      "id": "required-LogLines",
+      "passed": true,
+      "severity": "blocker",
+      "message": "Report must contain top-level property LogLines."
+    },
+    {
+      "id": "required-ReportBoundary",
+      "passed": true,
+      "severity": "blocker",
+      "message": "Report must contain top-level property ReportBoundary."
+    },
+    {
+      "id": "proof-classification-known",
+      "passed": true,
+      "severity": "blocker",
+      "message": "ProofClassification must be known."
+    },
+    {
+      "id": "normalized-command-sha256",
+      "passed": true,
+      "severity": "blocker",
+      "message": "NormalizedCommandSha256 must be a lowercase SHA256 string."
+    },
+    {
+      "id": "report-boundary-present",
+      "passed": true,
+      "severity": "blocker",
+      "message": "ReportBoundary must be present."
+    },
+    {
+      "id": "report-boundary-not-runtime-proof",
+      "passed": true,
+      "severity": "blocker",
+      "message": "ReportBoundary.IsRuntimeProof must be false for build/report evidence."
+    },
+    {
+      "id": "copied-diagnostics-boundary-present",
+      "passed": true,
+      "severity": "blocker",
+      "message": "ReportBoundary.CopiedDiagnosticsBoundary must be present."
+    },
+    {
+      "id": "parser-diagnostics-kind",
+      "passed": true,
+      "severity": "blocker",
+      "message": "ReportBoundary.ParserDiagnosticsEvidenceKind must be copied-parser-diagnostics."
+    },
+    {
+      "id": "parser-refitter-diagnostics-kind",
+      "passed": true,
+      "severity": "blocker",
+      "message": "ReportBoundary.ParserRefitterDiagnosticsEvidenceKind must be copied-parser-refitter-diagnostics."
+    },
+    {
+      "id": "copied-diagnostics-not-runtime-proof",
+      "passed": true,
+      "severity": "blocker",
+      "message": "Copied parser/refitter diagnostics cannot promote runtime proof."
+    },
+    {
+      "id": "parser-diagnostics-owner-action-present",
+      "passed": true,
+      "severity": "blocker",
+      "message": "ReportBoundary.ParserDiagnosticsOwnerAction must be present."
+    },
+    {
+      "id": "forbidden-substitutes-complete",
+      "passed": true,
+      "severity": "blocker",
+      "message": "ReportBoundary.ForbiddenSubstitutes must include every non-proof substitute."
+    },
+    {
+      "id": "option-status-present",
+      "passed": true,
+      "severity": "blocker",
+      "message": "OptionImplementationStatus must split parsed/applied/parse-only options."
+    },
+    {
+      "id": "preflight-boundary-present",
+      "passed": true,
+      "severity": "blocker",
+      "message": "PreflightMetadata.EvidenceBoundary must be present."
+    },
+    {
+      "id": "loaded-engine-boundary-present",
+      "passed": true,
+      "severity": "blocker",
+      "message": "LoadedEngineDiagnostics.EvidenceBoundary must be present."
+    },
+    {
+      "id": "capability-probe-boundary-present",
+      "passed": true,
+      "severity": "blocker",
+      "message": "CapabilityProbe.EvidenceBoundary must be present."
+    },
+    {
+      "id": "non-proof-build-report",
+      "passed": true,
+      "severity": "blocker",
+      "message": "TensorRtExec report cannot by itself promote package-consumer-runtime proof."
+    },
+    {
+      "id": "no-yolodet",
+      "passed": true,
+      "severity": "blocker",
+      "message": "Report must not refer to the retired YoloDet sample name."
+    }
+  ]
+}

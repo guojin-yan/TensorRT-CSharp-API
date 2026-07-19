@@ -1,0 +1,84 @@
+{
+  "schemaVersion": "trtexec-builder-scalar-cross-version-proof.v1",
+  "recordKind": "trtexec-like-builder-scalar-cross-version-compatible-host",
+  "capturedAtUtc": "2026-07-19T00:00:00Z",
+  "hostMetadata": "artifacts/real-case/trtexec-builder-scalar-trt10-cuda12/host-metadata.json",
+  "requestedControls": {
+    "MaxNbTactics": 32,
+    "TilingOptimizationLevel": "Moderate",
+    "L2AcceptedBytes": 3145728,
+    "L2RejectedBytes": 268435456,
+    "QuantizationFlags": "CalibrateBeforeFusion"
+  },
+  "versionMatrix": [
+    {
+      "tensorRtLine": 8,
+      "tensorRtVersion": "8.6.1",
+      "cudaToolkitVersion": "12.1.105",
+      "state": "dependency-probe-only",
+      "proofClassification": "dependency-probe-only",
+      "maxNbTactics": "controlled-unsupported",
+      "tilingOptimizationLevel": "controlled-unsupported",
+      "l2LimitForTiling": "controlled-unsupported",
+      "quantizationFlags": "applied-readback-match",
+      "parserState": "not-built-missing-cudnn64_8",
+      "builderConfigSnapshot": "unavailable-after-parser-dependency-boundary",
+      "normalizedCommandSha256": "8c4d5c1e44d06a8e1e8420d274d61530c0461a5e6cc74bac8708f08b29825163",
+      "reportSha256": "60a219f26463027ad7a0cf38cfa9a38bc1491a9ff7ad877547f7b1ccbe19ddfa",
+      "stdoutSha256": "9409e9717bf7e45d9feae4c8628a1564173a49d85118a265df8b100ee10cf75f",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "validationSha256": "5d605fb2c525221a0534df6e5b9d56fac80af0ca84ff2a97c7e74d4c3ed73b31",
+      "bridgeSha256": "9317f96af0d61fad4da42b4910f29b1eda41c672a5633d58591465be95cd617b"
+    },
+    {
+      "tensorRtLine": 10,
+      "tensorRtVersion": "10.11.0",
+      "cudaToolkitVersion": "12.9.41",
+      "state": "build-only",
+      "proofClassification": "build-only",
+      "maxNbTactics": "applied-readback-match",
+      "tilingOptimizationLevel": "applied-readback-match",
+      "l2LimitForTiling": "3MiB-applied-readback-match;256MiB-controlled-rejected-with-3MiB-readback",
+      "quantizationFlags": "applied-readback-match",
+      "builderConfigSnapshot": "copied-readback",
+      "normalizedCommandSha256": "ade32a072083d446e8d330bfc7730451bce023cdef31326dee9cfa5a2d1e0982",
+      "acceptedReportSha256": "3dd0978ebd246be992b2f94a0fe20fb39fb1689fdd9dc3ac2c04fabfbac13afa",
+      "acceptedStdoutSha256": "661dbd1c44429b67df73bfaad88222f92723a05f155c6a530e0325eee140e324",
+      "acceptedValidationSha256": "bc2eb35e5136160fef8073a8454ac19a61ab3d3a9713310b5d3362c279042773",
+      "rejectedReportSha256": "ef71fe868bf93bc0d819e75643c253b8e928d903e89acff079df35225506f930",
+      "bridgeSha256": "d9728a0555894ee3afc32f6821dfda17fc7a21195868c3b17867881e5f4fb19c"
+    },
+    {
+      "tensorRtLine": 11,
+      "tensorRtVersion": "11.0.0",
+      "cudaToolkitVersion": "12.9.41",
+      "state": "build-only",
+      "proofClassification": "build-only",
+      "maxNbTactics": "applied-readback-match",
+      "tilingOptimizationLevel": "applied-readback-match",
+      "l2LimitForTiling": "3MiB-applied-readback-match;256MiB-controlled-rejected-with-3MiB-readback",
+      "quantizationFlags": "controlled-removed-by-vendor",
+      "builderConfigSnapshot": "copied-readback",
+      "normalizedCommandSha256": "beb253d9fcc38f8ac899ea65628e4e2a454d02d274d73c09e9ad3ebd018fd68a",
+      "acceptedReportSha256": "19836289040ed9564ded0dc069c363348801a5169d5ffc9a36ec5a2334fa7797",
+      "acceptedStdoutSha256": "36e450bec12a0a2904382ff116f1627670f66347fab72e66e19822f6ed3e2637",
+      "acceptedValidationSha256": "348ecb13510461776dea7ef6524f4eec316315b9057cb9e0aeac4b1ec5416aa1",
+      "rejectedReportSha256": "8f7779835da6462524b0c3f8f6b13ef54d084ae3c985d502ca7ffaeef93e605f",
+      "bridgeSha256": "4a4aed6f660d4eaf8d22f9ddf1cae0f4d40d8c07afc51c4d07dce5696b4162ba"
+    }
+  ],
+  "validation": {
+    "allReportsReady": true,
+    "failedBlockers": 0,
+    "l2AcceptedAndRejectedPathsCovered": true,
+    "versionGuardsObservedOnCompatibleHost": true
+  },
+  "runtimeProof": {
+    "isRuntimeExecutionProof": false,
+    "isRealModelRuntimeProof": false,
+    "isPackageConsumerRuntimeProof": false,
+    "canPromoteReleaseProof": false
+  },
+  "deferredHistoryRetained": true,
+  "evidenceBoundary": "TRT10 and TRT11 are compatible-host build-only copied-readback evidence. TRT8 reaches real runtime/builder/config and quantization readback but stops at a missing cuDNN8 ONNX parser dependency. None of these reports execute inference or prove a clean package consumer."
+}

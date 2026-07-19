@@ -1,0 +1,27 @@
+OnnxToEngine TensorRtLine=8 ModelBytes=158 Batch=2 Source=embedded-dynamic-identity
+TrtexecLike BuildOnly=True SkipInference=False Fp16=False Int8=False Bf16=False Tf32=True WorkspaceBytes=67108864
+TrtexecDeployment BuilderOptimizationLevel=4 MaxAuxStreams= Device= DlaCore= DirectIO=False StronglyTyped=False
+TrtexecRuntime NoDataTransfers=False UseSpinWait=False Threads= AvgRuns= Percentile= DumpOutput=False ExportTimes= ExportProfile=
+Diagnostic=BuilderOptimizationLevel=4 is applied to TensorRT builder config.
+Diagnostic=Builder scalar deployment controls are applied/read back during a real build when the selected TensorRT line exposes the corresponding vendor API; unsupported lines remain controlled diagnostics.
+Diagnostic=MaxNbTactics=32
+Diagnostic=TilingOptimizationLevel=Moderate
+Diagnostic=L2LimitForTilingBytes=268435456
+Diagnostic=QuantizationFlags=CalibrateBeforeFusion
+Diagnostic=ProfilingVerbosity=layer_names_only
+Preflight TRT=8.6.1 CUDA=12.1 Runtime=True Builder=True
+TrtexecBuilderScalar Name=MaxNbTactics Applied=False Requested=32 Reason=TensorRT8Unsupported
+TrtexecBuilderScalar Name=TilingOptimizationLevel Applied=False Requested=Moderate Reason=TensorRT8Unsupported
+TrtexecBuilderScalar Name=L2LimitForTiling Applied=False RequestedBytes=268435456 Reason=TensorRT8Unsupported
+TrtexecBuilderScalar Name=QuantizationFlags Applied=True Requested=CalibrateBeforeFusion Readback=CalibrateBeforeFusion ReadbackMatch=True
+OnnxToEngine=Skipped Reason=TensorRT native build dependency or runtime is unavailable: TensorRT ONNX parser library was not found at build time.
+CapabilityProbe State=capability-probe-only Runtime=True Builder=True BuilderConfig=True EngineInspectorApi=False
+CapabilityProbe Items=runtime:create:True; builder:create:True; builder-config:create:True; engine-inspector:managed-api:False; fp8-builder-flag:requested:False:known:False; debug-tensor-options:requested:False:known:False; weight-streaming-options:requested:False:known:False
+CapabilityProbe Boundary=capability-probe-only records host/tool API availability and requested advanced options; it does not build a proof model, enqueue inference, validate outputs, or promote parse-only options to runtime proof.
+TensorRtExec ReportPath=E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0\artifacts\real-case\trtexec-builder-scalar-trt8-cuda12\trt8-builder-scalar-build-report.json
+TensorRtExec ProofClassification=dependency-probe-only BuildEvidenceOnly=True DryRun=False
+TensorRtExec NormalizedCommandSha256=8c4d5c1e44d06a8e1e8420d274d61530c0461a5e6cc74bac8708f08b29825163
+TensorRtExec WorkspaceBytes=67108864
+TensorRtExec BuilderConfigDeploymentSnapshot=unavailable Diagnostics=0
+TensorRtExec ParserPreflightSnapshot=not-attempted Diagnostics=0
+TensorRtExec State=dependency-probe-only Success=True
