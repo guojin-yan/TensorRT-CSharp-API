@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using JYPPX.TensorRtSharp.Tools;
+using JYPPX.TensorRtSharp;
 
 namespace TensorRtExecApp.Core;
 
@@ -90,7 +91,11 @@ public sealed class TensorRtExecOptions
         bool separateProfileRun,
         string exportLayerInfoPath,
         string exportReportPath,
-        string evidenceSidecarPath)
+        string evidenceSidecarPath,
+        int? maxNbTactics = null,
+        string tilingOptimizationLevel = "",
+        ulong? l2LimitForTilingBytes = null,
+        string quantizationFlags = "")
     {
         List<string> args = new List<string>();
         Add(args, "--tensor-rt-line", string.IsNullOrWhiteSpace(tensorRtLine) ? "10" : tensorRtLine);
@@ -135,6 +140,10 @@ public sealed class TensorRtExecOptions
         Add(args, "--exportLayerInfo", exportLayerInfoPath);
         Add(args, "--exportReport", exportReportPath);
         Add(args, "--evidenceSidecar", evidenceSidecarPath);
+        Add(args, "--maxNbTactics", FormatNullable(maxNbTactics));
+        Add(args, "--tilingOptimizationLevel", tilingOptimizationLevel);
+        Add(args, "--l2LimitForTiling", FormatBytes(l2LimitForTilingBytes));
+        Add(args, "--quantizationFlags", quantizationFlags);
         Add(args, "--threads", FormatNullable(threads));
         Add(args, "--avgRuns", FormatNullable(avgRuns));
         Add(args, "--percentile", FormatNullable(percentile));
@@ -300,6 +309,14 @@ public sealed class TensorRtExecOptions
 
     public bool NoBuilderCache => TrtexecOptions.DeploymentOptions.NoBuilderCache;
 
+    public int? MaxNbTactics => TrtexecOptions.DeploymentOptions.MaxNbTactics;
+
+    public TensorRtTilingOptimizationLevel? TilingOptimizationLevel => TrtexecOptions.DeploymentOptions.TilingOptimizationLevel;
+
+    public long? L2LimitForTilingBytes => TrtexecOptions.DeploymentOptions.L2LimitForTilingBytes;
+
+    public TensorRtQuantizationFlags? QuantizationFlags => TrtexecOptions.DeploymentOptions.QuantizationFlags;
+
     public string ExportLayerInfoPath => TrtexecOptions.ExportLayerInfoPath;
 
     public string ExportReportPath => TrtexecOptions.ExportReportPath;
@@ -358,6 +375,11 @@ public sealed class TensorRtExecOptions
         return value.Value % mib == 0
             ? (value.Value / mib).ToString(CultureInfo.InvariantCulture)
             : value.Value.ToString(CultureInfo.InvariantCulture) + "B";
+    }
+
+    private static string FormatBytes(ulong? value)
+    {
+        return value.HasValue ? value.Value.ToString(CultureInfo.InvariantCulture) + "B" : string.Empty;
     }
 
 }

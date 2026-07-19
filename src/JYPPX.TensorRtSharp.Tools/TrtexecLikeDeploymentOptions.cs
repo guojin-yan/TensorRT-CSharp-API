@@ -42,7 +42,11 @@ public sealed class TrtexecLikeDeploymentOptions
         bool safe,
         bool consistency,
         bool builderCache,
-        bool noBuilderCache)
+        bool noBuilderCache,
+        int? maxNbTactics = null,
+        TensorRtTilingOptimizationLevel? tilingOptimizationLevel = null,
+        long? l2LimitForTilingBytes = null,
+        TensorRtQuantizationFlags? quantizationFlags = null)
     {
         DeviceOrdinal = deviceOrdinal;
         BuilderOptimizationLevel = builderOptimizationLevel;
@@ -78,6 +82,10 @@ public sealed class TrtexecLikeDeploymentOptions
         Consistency = consistency;
         BuilderCache = builderCache;
         NoBuilderCache = noBuilderCache;
+        MaxNbTactics = maxNbTactics;
+        TilingOptimizationLevel = tilingOptimizationLevel;
+        L2LimitForTilingBytes = l2LimitForTilingBytes;
+        QuantizationFlags = quantizationFlags;
     }
 
     public static TrtexecLikeDeploymentOptions Default { get; } = new TrtexecLikeDeploymentOptions(
@@ -184,6 +192,14 @@ public sealed class TrtexecLikeDeploymentOptions
 
     public bool NoBuilderCache { get; }
 
+    public int? MaxNbTactics { get; }
+
+    public TensorRtTilingOptimizationLevel? TilingOptimizationLevel { get; }
+
+    public long? L2LimitForTilingBytes { get; }
+
+    public TensorRtQuantizationFlags? QuantizationFlags { get; }
+
     public IReadOnlyList<string> ToArgumentSegments()
     {
         List<string> args = new List<string>();
@@ -233,6 +249,10 @@ public sealed class TrtexecLikeDeploymentOptions
         AddSwitch(args, "--consistency", Consistency);
         AddSwitch(args, "--builderCache", BuilderCache);
         AddSwitch(args, "--noBuilderCache", NoBuilderCache);
+        Add(args, "--maxNbTactics", MaxNbTactics?.ToString(CultureInfo.InvariantCulture) ?? string.Empty);
+        Add(args, "--tilingOptimizationLevel", TilingOptimizationLevel?.ToString() ?? string.Empty);
+        Add(args, "--l2LimitForTiling", FormatBytes(L2LimitForTilingBytes));
+        Add(args, "--quantizationFlags", QuantizationFlags?.ToString() ?? string.Empty);
         return args;
     }
 
@@ -401,8 +421,19 @@ public sealed class TrtexecLikeDeploymentOptions
             }
         }
 
+        if (MaxNbTactics.HasValue || TilingOptimizationLevel.HasValue || L2LimitForTilingBytes.HasValue || QuantizationFlags.HasValue)
+        {
+            diagnostics.Add("Builder scalar deployment controls are applied/read back during a real build when the selected TensorRT line exposes the corresponding vendor API; unsupported lines remain controlled diagnostics.");
+            AddDiagnostic(diagnostics, "MaxNbTactics", MaxNbTactics);
+            AddDiagnostic(diagnostics, "TilingOptimizationLevel", TilingOptimizationLevel?.ToString() ?? string.Empty);
+            AddDiagnostic(diagnostics, "L2LimitForTilingBytes", L2LimitForTilingBytes);
+            AddDiagnostic(diagnostics, "QuantizationFlags", QuantizationFlags?.ToString() ?? string.Empty);
+        }
+
         return diagnostics;
     }
+
+    public string ScalarControlSummary => $"MaxNbTactics={MaxNbTactics?.ToString(CultureInfo.InvariantCulture) ?? string.Empty};TilingOptimizationLevel={TilingOptimizationLevel?.ToString() ?? string.Empty};L2LimitForTilingBytes={L2LimitForTilingBytes?.ToString(CultureInfo.InvariantCulture) ?? string.Empty};QuantizationFlags={QuantizationFlags?.ToString() ?? string.Empty}";
 
     private string MemoryPoolSizesToArgument()
     {
@@ -428,6 +459,14 @@ public sealed class TrtexecLikeDeploymentOptions
     }
 
     private static void AddDiagnostic(List<string> diagnostics, string name, int? value)
+    {
+        if (value.HasValue)
+        {
+            diagnostics.Add(name + "=" + value.Value.ToString(CultureInfo.InvariantCulture));
+        }
+    }
+
+    private static void AddDiagnostic(List<string> diagnostics, string name, long? value)
     {
         if (value.HasValue)
         {
@@ -473,6 +512,13 @@ public sealed class TrtexecLikeDeploymentOptions
         return value.Value % mib == 0
             ? (value.Value / mib).ToString(CultureInfo.InvariantCulture)
             : value.Value.ToString(CultureInfo.InvariantCulture) + "B";
+    }
+
+    private static string FormatBytes(long? value)
+    {
+        return value.HasValue
+            ? value.Value.ToString(CultureInfo.InvariantCulture) + "B"
+            : string.Empty;
     }
 }
 

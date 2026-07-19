@@ -31,6 +31,10 @@ public sealed class MainForm : Form
     private readonly TextBox _deviceOrdinal = new TextBox();
     private readonly TextBox _dlaCore = new TextBox();
     private readonly TextBox _tacticSources = new TextBox();
+    private readonly TextBox _maxNbTactics = new TextBox();
+    private readonly ComboBox _tilingOptimizationLevel = new ComboBox();
+    private readonly TextBox _l2LimitForTiling = new TextBox();
+    private readonly ComboBox _quantizationFlags = new ComboBox();
     private readonly TextBox _memoryPoolSizes = new TextBox();
     private readonly TextBox _inputIoFormats = new TextBox();
     private readonly TextBox _outputIoFormats = new TextBox();
@@ -153,7 +157,17 @@ public sealed class MainForm : Form
         ConfigureCheck(_allowGpuFallback, "GPU fallback");
         ConfigureCheck(_directIo, "Direct IO");
         ConfigureCheck(_stronglyTyped, "Strongly typed");
+        _tilingOptimizationLevel.DropDownStyle = ComboBoxStyle.DropDownList;
+        _tilingOptimizationLevel.Items.AddRange(new object[] { "", "none", "fast", "moderate", "full" });
+        _tilingOptimizationLevel.SelectedItem = "";
+        _quantizationFlags.DropDownStyle = ComboBoxStyle.DropDownList;
+        _quantizationFlags.Items.AddRange(new object[] { "", "none", "calibrateBeforeFusion" });
+        _quantizationFlags.SelectedItem = "";
         deploymentPanel.Controls.AddRange(new Control[] { _allowGpuFallback, _directIo, _stronglyTyped });
+        AddInlineField(deploymentPanel, "Max tactics", _maxNbTactics, 76);
+        AddInlineField(deploymentPanel, "Tiling", _tilingOptimizationLevel, 92);
+        AddInlineField(deploymentPanel, "L2 bytes", _l2LimitForTiling, 92);
+        AddInlineField(deploymentPanel, "Quant", _quantizationFlags, 145);
         AddLabeled(root, 16, "Deployment", deploymentPanel);
 
         AddLabeled(root, 17, "Tactics", _tacticSources);
@@ -259,6 +273,8 @@ public sealed class MainForm : Form
         _deviceOrdinal.PlaceholderText = "0";
         _dlaCore.PlaceholderText = "0";
         _tacticSources.PlaceholderText = "+CUBLAS,-CUDNN";
+        _maxNbTactics.PlaceholderText = "0";
+        _l2LimitForTiling.PlaceholderText = "256MiB";
         _memoryPoolSizes.PlaceholderText = "workspace:512,tacticDram:1024";
         _inputIoFormats.PlaceholderText = "fp16:chw";
         _outputIoFormats.PlaceholderText = "fp32:chw";
@@ -309,6 +325,14 @@ public sealed class MainForm : Form
         panel.Controls.Add(first);
         panel.Controls.Add(second);
         return panel;
+    }
+
+    private static void AddInlineField(FlowLayoutPanel panel, string label, Control control, int width)
+    {
+        panel.Controls.Add(new Label { Text = label, AutoSize = true, Margin = new Padding(0, 8, 4, 0) });
+        control.Width = width;
+        control.Margin = new Padding(0, 3, 12, 0);
+        panel.Controls.Add(control);
     }
 
     private static void AddPathRow(TableLayoutPanel root, int row, string label, TextBox textBox, EventHandler browseHandler)
@@ -555,7 +579,11 @@ public sealed class MainForm : Form
             _separateProfileRun.Checked,
             _layerInfoPath.Text,
             _reportPath.Text,
-            _evidenceSidecarPath.Text);
+            _evidenceSidecarPath.Text,
+            ParseOptionalInt(_maxNbTactics.Text),
+            _tilingOptimizationLevel.SelectedItem?.ToString() ?? string.Empty,
+            ParseOptionalMemoryBytes(_l2LimitForTiling.Text),
+            _quantizationFlags.SelectedItem?.ToString() ?? string.Empty);
     }
 
     private static string[] ParsePlugins(string value)

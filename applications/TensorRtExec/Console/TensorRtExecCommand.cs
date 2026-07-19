@@ -85,6 +85,7 @@ public static class TensorRtExecCommand
         System.Console.WriteLine("  --tensor-rt-line <8|10|11>");
         System.Console.WriteLine("  --fp16 --int8 --bf16 --fp8 --best --noTF32 --workspace <MiB>");
         System.Console.WriteLine("  --builderOptimizationLevel <0..5> --maxAuxStreams <n>");
+        System.Console.WriteLine("  --maxNbTactics <n> --tilingOptimizationLevel <none|fast|moderate|full> --l2LimitForTiling <bytes|MiB> --quantizationFlags <none|calibrateBeforeFusion>");
         System.Console.WriteLine("  --minTiming <n> --avgTiming <n> --precisionConstraints <none|prefer|obey>");
         System.Console.WriteLine("  --layerPrecisions <spec> --layerOutputTypes <spec>");
         System.Console.WriteLine("  --versionCompatible --excludeLeanRuntime --stripWeights --refit --weightStreamingBudget <MiB>");

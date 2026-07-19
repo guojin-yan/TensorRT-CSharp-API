@@ -93,7 +93,11 @@ public static class TrtexecLikeParser
             safe: HasSwitch(args, "--safe"),
             consistency: HasSwitch(args, "--consistency"),
             builderCache: builderCache,
-            noBuilderCache: noBuilderCache);
+            noBuilderCache: noBuilderCache,
+            maxNbTactics: ParseOptionalNonNegativeInt(GetValue(args, "--maxNbTactics", string.Empty), "--maxNbTactics"),
+            tilingOptimizationLevel: ParseOptionalTilingOptimizationLevel(GetValue(args, "--tilingOptimizationLevel", string.Empty)),
+            l2LimitForTilingBytes: ParseOptionalLongMemorySizeBytes(GetValue(args, "--l2LimitForTiling", string.Empty), "--l2LimitForTiling"),
+            quantizationFlags: ParseOptionalQuantizationFlags(GetValue(args, "--quantizationFlags", string.Empty)));
         string shapes = FirstNonEmpty(GetValue(args, "--shapes", string.Empty), GetValue(args, "--inputShapes", string.Empty));
         string minShapes = FirstNonEmpty(GetValue(args, "--minShapes", string.Empty), shapes);
         string optShapes = FirstNonEmpty(GetValue(args, "--optShapes", string.Empty), shapes);
@@ -347,6 +351,62 @@ public static class TrtexecLikeParser
     private static ulong? ParseOptionalMemorySizeBytes(string value, string argumentName)
     {
         return string.IsNullOrWhiteSpace(value) ? null : ParseMemorySizeBytes(value, argumentName);
+    }
+
+    private static long? ParseOptionalLongMemorySizeBytes(string value, string argumentName)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        ulong bytes = ParseMemorySizeBytes(value, argumentName);
+        if (bytes > long.MaxValue)
+        {
+            throw new ArgumentException($"{argumentName} must not exceed {long.MaxValue} bytes.");
+        }
+
+        return (long)bytes;
+    }
+
+    private static TensorRtTilingOptimizationLevel? ParseOptionalTilingOptimizationLevel(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        string normalized = value.Trim().Replace("-", string.Empty).Replace("_", string.Empty).ToLowerInvariant();
+        return normalized switch
+        {
+            "0" or "none" or "off" => TensorRtTilingOptimizationLevel.None,
+            "1" or "fast" => TensorRtTilingOptimizationLevel.Fast,
+            "2" or "moderate" => TensorRtTilingOptimizationLevel.Moderate,
+            "3" or "full" => TensorRtTilingOptimizationLevel.Full,
+            _ => throw new ArgumentException("--tilingOptimizationLevel must be none, fast, moderate, full, or 0..3.")
+        };
+    }
+
+    private static TensorRtQuantizationFlags? ParseOptionalQuantizationFlags(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        TensorRtQuantizationFlags flags = TensorRtQuantizationFlags.None;
+        foreach (string token in value.Split(new[] { ',', '|', ';' }, StringSplitOptions.RemoveEmptyEntries))
+        {
+            string normalized = token.Trim().Replace("-", string.Empty).Replace("_", string.Empty).ToLowerInvariant();
+            flags |= normalized switch
+            {
+                "none" or "0" => TensorRtQuantizationFlags.None,
+                "calibratebeforefusion" => TensorRtQuantizationFlags.CalibrateBeforeFusion,
+                _ => throw new ArgumentException("--quantizationFlags supports none or calibrateBeforeFusion.")
+            };
+        }
+
+        return flags;
     }
 
     private static IReadOnlyList<TrtexecLikeMemoryPoolSize> ParseMemoryPoolSizes(string value)

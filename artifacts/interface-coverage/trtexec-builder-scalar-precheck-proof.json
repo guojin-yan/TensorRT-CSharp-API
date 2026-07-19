@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "trtexec-builder-scalar-precheck-proof.v1",
+  "recordKind": "trtexec-like-builder-scalar-precheck",
+  "generatedAtUtc": "2026-07-19T00:00:00Z",
+  "command": "--tensor-rt-line 11 --onnx <missing.onnx> --saveEngine <preview.plan> --workspace 1GiB --builderOptimizationLevel 4 --maxNbTactics 64 --tilingOptimizationLevel moderate --l2LimitForTiling 256MiB --quantizationFlags calibrateBeforeFusion --dryRun",
+  "normalizedCommandSha256": "2a7a21cb48d8b1985ceb41e4c2d59e9b95743b30a76db6bb3bbed8edbe8767b7",
+  "proofClassification": "precheck",
+  "state": "dry-run-precheck",
+  "buildEvidenceOnly": true,
+  "parsed": false,
+  "engineSaved": false,
+  "inferenceRan": false,
+  "requestedScalars": {
+    "MaxNbTactics": 64,
+    "TilingOptimizationLevel": "Moderate",
+    "L2LimitForTilingBytes": 268435456,
+    "QuantizationFlags": "CalibrateBeforeFusion"
+  },
+  "optionImplementationStatus": {
+    "parsed": ["--maxNbTactics", "--tilingOptimizationLevel", "--l2LimitForTiling", "--quantizationFlags"],
+    "parseOnly": ["--maxNbTactics", "--tilingOptimizationLevel", "--l2LimitForTiling", "--quantizationFlags"],
+    "applied": []
+  },
+  "builderReadback": {
+    "available": false,
+    "reason": "dry-run did not create a TensorRT builder config",
+    "evidenceBoundary": "precheck only; no vendor runtime, parser, builder, engine, or inference was executed"
+  },
+  "runtimeProof": {
+    "isRuntimeExecutionProof": false,
+    "isRealModelRuntimeProof": false,
+    "isPackageConsumerRuntimeProof": false,
+    "canPromoteReleaseProof": false
+  },
+  "deferredHistoryRetained": true
+}

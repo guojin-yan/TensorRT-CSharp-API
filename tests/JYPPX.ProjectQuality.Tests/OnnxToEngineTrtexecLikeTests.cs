@@ -112,6 +112,10 @@ public sealed class OnnxToEngineTrtexecLikeTests
             "--safe",
             "--consistency",
             "--builderCache",
+            "--maxNbTactics", "64",
+            "--tilingOptimizationLevel", "moderate",
+            "--l2LimitForTiling", "256MiB",
+            "--quantizationFlags", "calibrateBeforeFusion",
             "--buildOnly",
             "--skipInference"
         });
@@ -156,6 +160,10 @@ public sealed class OnnxToEngineTrtexecLikeTests
         Assert.True(options.DeploymentOptions.Consistency);
         Assert.True(options.DeploymentOptions.BuilderCache);
         Assert.False(options.DeploymentOptions.NoBuilderCache);
+        Assert.Equal(64, options.DeploymentOptions.MaxNbTactics);
+        Assert.Equal(JYPPX.TensorRtSharp.TensorRtTilingOptimizationLevel.Moderate, options.DeploymentOptions.TilingOptimizationLevel);
+        Assert.Equal(256L * 1024L * 1024L, options.DeploymentOptions.L2LimitForTilingBytes);
+        Assert.Equal(JYPPX.TensorRtSharp.TensorRtQuantizationFlags.CalibrateBeforeFusion, options.DeploymentOptions.QuantizationFlags);
 
         string argumentLine = options.ToArgumentLine();
         OnnxEngineBuildOptions buildOptions = OnnxEngineBuildOptions.FromTrtexecLikeOptions(options);
@@ -184,6 +192,10 @@ public sealed class OnnxToEngineTrtexecLikeTests
         Assert.Contains("--safe", argumentLine, StringComparison.Ordinal);
         Assert.Contains("--consistency", argumentLine, StringComparison.Ordinal);
         Assert.Contains("--builderCache", argumentLine, StringComparison.Ordinal);
+        Assert.Contains("--maxNbTactics 64", argumentLine, StringComparison.Ordinal);
+        Assert.Contains("--tilingOptimizationLevel Moderate", argumentLine, StringComparison.Ordinal);
+        Assert.Contains("--l2LimitForTiling 268435456B", argumentLine, StringComparison.Ordinal);
+        Assert.Contains("--quantizationFlags CalibrateBeforeFusion", argumentLine, StringComparison.Ordinal);
         Assert.Contains("Runtime benchmark/output options", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
         Assert.Contains("shortcut precision arguments are parse/report-only", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
         Assert.Contains("debug tensor diagnostic arguments are parse/report-only", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
@@ -1050,6 +1062,10 @@ public sealed class OnnxToEngineTrtexecLikeTests
             "--maxShapes", "images:4x3x640x640",
             "--builderOptimizationLevel", "4",
             "--maxAuxStreams", "2",
+            "--maxNbTactics", "64",
+            "--tilingOptimizationLevel", "moderate",
+            "--l2LimitForTiling", "256MiB",
+            "--quantizationFlags", "calibrateBeforeFusion",
             "--timingCacheFile", timingCachePath,
             "--exportTimingCache", exportedTimingCachePath,
             "--exportReport", reportPath,
@@ -1091,6 +1107,13 @@ public sealed class OnnxToEngineTrtexecLikeTests
             Assert.Equal("precheck", root.GetProperty("ProofClassification").GetString());
             Assert.Equal(result.NormalizedCommandSha256, root.GetProperty("NormalizedCommandSha256").GetString());
             Assert.Contains("runtime probing, ONNX parsing, engine build", string.Join("\n", result.LogLines), StringComparison.Ordinal);
+            JsonElement status = root.GetProperty("OptionImplementationStatus");
+            foreach (string optionName in new[] { "--maxNbTactics", "--tilingOptimizationLevel", "--l2LimitForTiling", "--quantizationFlags" })
+            {
+                Assert.Contains(status.GetProperty("ParsedOptions").EnumerateArray(), item => item.GetString() == optionName);
+                Assert.Contains(status.GetProperty("ParseOnlyOptions").EnumerateArray(), item => item.GetString() == optionName);
+                Assert.DoesNotContain(status.GetProperty("AppliedOptions").EnumerateArray(), item => item.GetString() == optionName);
+            }
 
             string service = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "OnnxEngineBuildService.cs"));
             int dryRunBranch = service.IndexOf("if (options.DryRun)", StringComparison.Ordinal);

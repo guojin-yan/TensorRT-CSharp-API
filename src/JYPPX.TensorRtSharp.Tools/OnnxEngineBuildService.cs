@@ -1534,6 +1534,8 @@ public sealed class OnnxEngineBuildService
             }
         }
 
+        ApplyBuilderScalarDeploymentControls(config, options, log);
+
         if (!string.IsNullOrWhiteSpace(options.ProfilingVerbosity))
         {
             config.SetProfilingVerbosity(ParseProfilingVerbosity(options.ProfilingVerbosity));
@@ -1548,6 +1550,66 @@ public sealed class OnnxEngineBuildService
         if (options.TensorRtLine == TensorRtApiLine.TensorRt11 && options.DeploymentOptions.AllowGpuFallback)
         {
             config.SetFlag(TensorRtBuilderFlag.GpuFallback, true);
+        }
+    }
+
+    private static void ApplyBuilderScalarDeploymentControls(TensorRtBuilderConfig config, OnnxEngineBuildOptions options, List<string> log)
+    {
+        TrtexecLikeDeploymentOptions deployment = options.DeploymentOptions;
+        if (deployment.MaxNbTactics.HasValue)
+        {
+            if (options.TensorRtLine == TensorRtApiLine.TensorRt8)
+            {
+                log.Add($"TrtexecBuilderScalar Name=MaxNbTactics Applied=False Requested={deployment.MaxNbTactics.Value} Reason=TensorRT8Unsupported");
+            }
+            else
+            {
+                config.SetMaxTactics(deployment.MaxNbTactics.Value);
+                int readback = config.GetMaxTactics();
+                log.Add($"TrtexecBuilderScalar Name=MaxNbTactics Applied=True Requested={deployment.MaxNbTactics.Value} Readback={readback} ReadbackMatch={readback == deployment.MaxNbTactics.Value}");
+            }
+        }
+
+        if (deployment.TilingOptimizationLevel.HasValue)
+        {
+            if (options.TensorRtLine == TensorRtApiLine.TensorRt8)
+            {
+                log.Add($"TrtexecBuilderScalar Name=TilingOptimizationLevel Applied=False Requested={deployment.TilingOptimizationLevel.Value} Reason=TensorRT8Unsupported");
+            }
+            else
+            {
+                bool accepted = config.SetTilingOptimizationLevel(deployment.TilingOptimizationLevel.Value);
+                TensorRtTilingOptimizationLevel readback = config.GetTilingOptimizationLevel();
+                log.Add($"TrtexecBuilderScalar Name=TilingOptimizationLevel Applied={accepted} Requested={deployment.TilingOptimizationLevel.Value} Readback={readback} ReadbackMatch={readback == deployment.TilingOptimizationLevel.Value}");
+            }
+        }
+
+        if (deployment.L2LimitForTilingBytes.HasValue)
+        {
+            if (options.TensorRtLine == TensorRtApiLine.TensorRt8)
+            {
+                log.Add($"TrtexecBuilderScalar Name=L2LimitForTiling Applied=False RequestedBytes={deployment.L2LimitForTilingBytes.Value} Reason=TensorRT8Unsupported");
+            }
+            else
+            {
+                bool accepted = config.SetL2LimitForTiling(deployment.L2LimitForTilingBytes.Value);
+                long readback = config.GetL2LimitForTiling();
+                log.Add($"TrtexecBuilderScalar Name=L2LimitForTiling Applied={accepted} RequestedBytes={deployment.L2LimitForTilingBytes.Value} ReadbackBytes={readback} ReadbackMatch={readback == deployment.L2LimitForTilingBytes.Value}");
+            }
+        }
+
+        if (deployment.QuantizationFlags.HasValue)
+        {
+            if (options.TensorRtLine == TensorRtApiLine.TensorRt11)
+            {
+                log.Add($"TrtexecBuilderScalar Name=QuantizationFlags Applied=False Requested={deployment.QuantizationFlags.Value} Reason=RemovedByTensorRT11");
+            }
+            else
+            {
+                config.SetQuantizationFlags(deployment.QuantizationFlags.Value);
+                TensorRtQuantizationFlags readback = config.GetQuantizationFlags();
+                log.Add($"TrtexecBuilderScalar Name=QuantizationFlags Applied=True Requested={deployment.QuantizationFlags.Value} Readback={readback} ReadbackMatch={readback == deployment.QuantizationFlags.Value}");
+            }
         }
     }
 

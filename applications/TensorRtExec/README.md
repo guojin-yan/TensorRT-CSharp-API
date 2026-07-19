@@ -66,6 +66,7 @@ dotnet run --project .\applications\TensorRtExec -- `
 | Memory pools | `--memPoolSize workspace:512MiB,tacticDram:1GiB` | 无后缀默认 MiB；支持 `workspace`、`dlaSRAM`、`dlaLocalDRAM`、`dlaGlobalDRAM`、`tacticDRAM`、`tacticSharedMem` | 真实 build 时设置并 read back；dry-run/load-engine 仍是 parse-only |
 | Runtime timing | `--iterations --warmUp --duration --streams --useCudaGraph` | 无 | 进入报告和 GUI 参数预览；CUDA graph 仍是边界诊断 |
 | Advanced timing | `--avgTiming --minTiming --infStreams --sleepTime --idleTime` | 无 | `--avgTiming` 在真实 build 中调用 builder-config setter 并 read back；`--minTiming` 只在 TRT8 使用 legacy compatibility setter，TRT10/11 保持 parse-only；其余等待/并发参数仍是 parse/report-only |
+| Builder scalar controls | `--maxNbTactics --tilingOptimizationLevel --l2LimitForTiling --quantizationFlags` | 无 | max tactics/tiling/L2 在 TRT10/11 build 中应用并 read back；quantization flags 在 TRT8/10 应用并 read back；不兼容版本输出 controlled diagnostics |
 | Precision constraints | `--precisionConstraints --layerPrecisions --layerOutputTypes` | 无 | parse/report-only；进入 normalized command、report 和 GUI，不做模型专属 layer precision 路由 |
 | Engine packaging/refit | `--versionCompatible --excludeLeanRuntime --stripWeights --refit --weightStreamingBudget` | 无 | parse/report-only；不伪造成 lean runtime、weight stripping、refit 或 weight streaming 已真实生效 |
 | Safety / builder cache | `--safe --consistency --builderCache --noBuilderCache` | 无 | parse/report-only；记录 safety/consistency 和 builder cache intent，不声明已执行安全 runtime 或 cache lifecycle |

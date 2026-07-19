@@ -113,6 +113,7 @@ public static class OnnxEngineBuildDiagnostics
             $"Workspace bytes: `{result.WorkspaceBytes}`",
             $"Builder config deployment snapshot: `{(result.BuilderConfigDeploymentSnapshot == null ? "unavailable" : "copied-readback")}`",
             $"Builder config deployment values: `{result.BuilderConfigDeploymentSnapshot?.ToString() ?? string.Empty}`",
+            $"Builder scalar controls: `{result.DeploymentOptions.ScalarControlSummary}`",
             $"Parser preflight snapshot: `{result.ParserPreflightSnapshot}`",
             $"Parser preflight diagnostics state: `{result.ParserPreflightSnapshot.DiagnosticsState}`",
             $"Parser preflight errors: `{result.ParserPreflightSnapshot.ErrorCount}`",
@@ -177,6 +178,10 @@ public static class OnnxEngineBuildDiagnostics
             $"Normalized command SHA256: `{result.NormalizedCommandSha256}`",
             $"Builder optimization level: `{result.DeploymentOptions.BuilderOptimizationLevel}`",
             $"Max aux streams: `{result.DeploymentOptions.MaxAuxStreams?.ToString() ?? ""}`",
+            $"Max tactics: `{result.DeploymentOptions.MaxNbTactics?.ToString() ?? ""}`",
+            $"Tiling optimization level: `{result.DeploymentOptions.TilingOptimizationLevel?.ToString() ?? ""}`",
+            $"L2 limit for tiling bytes: `{result.DeploymentOptions.L2LimitForTilingBytes?.ToString() ?? ""}`",
+            $"Quantization flags: `{result.DeploymentOptions.QuantizationFlags?.ToString() ?? ""}`",
             $"Device: `{result.DeploymentOptions.DeviceOrdinal?.ToString() ?? ""}`",
             $"DLA core: `{result.DeploymentOptions.DlaCore?.ToString() ?? ""}`",
             $"Allow GPU fallback: `{result.DeploymentOptions.AllowGpuFallback}`",
@@ -317,6 +322,10 @@ public static class OnnxEngineBuildDiagnostics
         AddIf(options, "--timingCacheFile", result.TimingCacheArtifact.InputRequested);
         AddIf(options, "--builderOptimizationLevel", true);
         AddIf(options, "--maxAuxStreams", deploymentOptions.MaxAuxStreams.HasValue);
+        AddIf(options, "--maxNbTactics", deploymentOptions.MaxNbTactics.HasValue);
+        AddIf(options, "--tilingOptimizationLevel", deploymentOptions.TilingOptimizationLevel.HasValue);
+        AddIf(options, "--l2LimitForTiling", deploymentOptions.L2LimitForTilingBytes.HasValue);
+        AddIf(options, "--quantizationFlags", deploymentOptions.QuantizationFlags.HasValue);
         AddIf(options, "--device", deploymentOptions.DeviceOrdinal.HasValue);
         AddIf(options, "--useDLACore", deploymentOptions.DlaCore.HasValue);
         AddIf(options, "--allowGPUFallback", deploymentOptions.AllowGpuFallback);
@@ -383,6 +392,10 @@ public static class OnnxEngineBuildDiagnostics
 
         AddIf(options, "--loadEngine", result.LoadedEngineDiagnostics.Attempted);
         AddIf(options, "--maxAuxStreams", deploymentOptions.MaxAuxStreams.HasValue);
+        AddIf(options, "--maxNbTactics", HasAppliedBuilderScalar(result, "MaxNbTactics"));
+        AddIf(options, "--tilingOptimizationLevel", HasAppliedBuilderScalar(result, "TilingOptimizationLevel"));
+        AddIf(options, "--l2LimitForTiling", HasAppliedBuilderScalar(result, "L2LimitForTiling"));
+        AddIf(options, "--quantizationFlags", HasAppliedBuilderScalar(result, "QuantizationFlags"));
         AddIf(options, "--memPoolSize", deploymentOptions.MemoryPoolSizes.Count > 0 && (result.Parsed || result.EngineSaved));
         AddIf(options, "--fp16/--bf16/--noTF32", result.Parsed || result.EngineSaved || result.InferenceRan);
         AddIf(options, "--minShapes/--optShapes/--maxShapes", result.Parsed || result.EngineSaved || result.InferenceRan);
@@ -440,6 +453,10 @@ public static class OnnxEngineBuildDiagnostics
         AddIf(options, "--weightStreamingBudget", deploymentOptions.WeightStreamingBudgetBytes.HasValue);
         AddIf(options, "--timingCacheFile", result.TimingCacheArtifact.InputRequested && !result.TimingCacheArtifact.InputApplied);
         AddIf(options, "--exportTimingCache", !string.IsNullOrWhiteSpace(deploymentOptions.ExportTimingCachePath) && !result.TimingCacheArtifact.OutputWritten);
+        AddIf(options, "--maxNbTactics", deploymentOptions.MaxNbTactics.HasValue && !HasAppliedBuilderScalar(result, "MaxNbTactics"));
+        AddIf(options, "--tilingOptimizationLevel", deploymentOptions.TilingOptimizationLevel.HasValue && !HasAppliedBuilderScalar(result, "TilingOptimizationLevel"));
+        AddIf(options, "--l2LimitForTiling", deploymentOptions.L2LimitForTilingBytes.HasValue && !HasAppliedBuilderScalar(result, "L2LimitForTiling"));
+        AddIf(options, "--quantizationFlags", deploymentOptions.QuantizationFlags.HasValue && !HasAppliedBuilderScalar(result, "QuantizationFlags"));
         bool layerInfoRequested = result.NormalizedCommandLine.Contains("--dumpLayerInfo", StringComparison.Ordinal) ||
             result.NormalizedCommandLine.Contains("--exportLayerInfo", StringComparison.Ordinal);
         bool layerInfoCollected = result.LogLines.Any(static line => line.StartsWith("LayerInfo Collected=True", StringComparison.Ordinal));
@@ -464,6 +481,14 @@ public static class OnnxEngineBuildDiagnostics
         AddIf(options, "capability-probe-only", result.CapabilityProbe.Attempted);
 
         return options.Distinct(StringComparer.Ordinal).ToArray();
+    }
+
+    private static bool HasAppliedBuilderScalar(OnnxEngineBuildResult result, string name)
+    {
+        string prefix = $"TrtexecBuilderScalar Name={name} Applied=True";
+        return result.LogLines.Any(line =>
+            line.StartsWith(prefix, StringComparison.Ordinal) &&
+            line.Contains("ReadbackMatch=True", StringComparison.Ordinal));
     }
 
     private static void AddIf(System.Collections.Generic.List<string> options, string option, bool condition)

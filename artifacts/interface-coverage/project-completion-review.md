@@ -1,5 +1,11 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-19 TensorRtExec Builder Scalar 对齐
+
+本轮将 `--maxNbTactics`、`--tilingOptimizationLevel`、`--l2LimitForTiling` 和 `--quantizationFlags` 接入共享 trtexec-like parser、TensorRtExec CLI/WinForms、ONNX build service、JSON/schema 与 OptionImplementationStatus。TRT10/11 的 max tactics、tiling level、L2 tiling limit 使用现有安全 `TensorRtBuilderConfig` wrapper；TRT8 输出 controlled unsupported。quantization flags 在 TRT8/10 应用并 copied readback，TRT11 输出 removed-by-vendor diagnostics。
+
+`AppliedOptions` 只接受日志中明确的 `TrtexecBuilderScalar ... Applied=True`，因此 dry-run、setter 拒绝和版本不支持不会被误报为已应用。定向测试 34/34 通过，Tools/TensorRtExec build 为 0 warning / 0 error，schema 与 `git diff --check` 通过。dry-run artifact `artifacts/interface-coverage/trtexec-builder-scalar-precheck-proof.{json,md}` 的分类为 `precheck`，四个参数均为 parsed + parse-only，未创建 builder config、未执行 runtime，也不能晋级 real-model-runtime、package-consumer-runtime 或 release proof。C 盘本轮未发现可归因的 TensorRT 临时文件；共享 NuGet、CUDA、Codex 和系统缓存保留。
+
 ## 2026-07-19 BuilderConfig Deployment Readback 收口
 
 本批将已有 `TensorRtBuilderConfig.GetDeploymentSnapshot()` 接入 `OnnxEngineBuildService`、`OnnxEngineBuildResult`、TensorRtExec CLI/WinForms 与报告 schema。`DeploymentOptions` 记录请求值，`BuilderConfigDeploymentSnapshot` 记录 builder config 成功创建后复制读回的 timing、workspace、device/DLA、flags、tactic、plugin path 和 diagnostics。该字段保持 pointer-free，不新增 native ownership API，也不删除 deferred history。

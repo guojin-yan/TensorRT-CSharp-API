@@ -75,6 +75,10 @@
       "additionalProperties": true,
       "required": [
         "BuilderOptimizationLevel",
+        "MaxNbTactics",
+        "TilingOptimizationLevel",
+        "L2LimitForTilingBytes",
+        "QuantizationFlags",
         "MemoryPoolSizes",
         "CalibrationCacheFile",
         "VersionCompatible",
@@ -83,7 +87,13 @@
         "Consistency",
         "BuilderCache",
         "NoBuilderCache"
-      ]
+      ],
+      "properties": {
+        "MaxNbTactics": { "type": [ "integer", "null" ], "minimum": 0 },
+        "TilingOptimizationLevel": { "type": [ "string", "null" ] },
+        "L2LimitForTilingBytes": { "type": [ "integer", "null" ], "minimum": 0 },
+        "QuantizationFlags": { "type": [ "string", "null" ] }
+      }
     },
     "RuntimeOptions": {
       "type": "object",
