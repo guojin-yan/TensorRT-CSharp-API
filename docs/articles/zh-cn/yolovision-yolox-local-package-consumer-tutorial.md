@@ -8,11 +8,13 @@
 
 - `JYPPX.TensorRT.CSharp.API`：托管 TensorRT/CUDA API。
 - `JYPPX.TensorRT.CSharp.API.YoloVision`：可复用的 YOLO profile、预处理、后处理和命令入口。
-- `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge`：只包含
-  `jyppxtrtbridge.dll` 的小型 bridge 包。
+- 与 `-RuntimePackageKey` 对应的 TRT8、TRT10 或 TRT11 bridge-only 包：只包含
+  `jyppxtrtbridge.dll`。
 
-TensorRT 10.11 与 CUDA 12.9 由系统安装提供。模型、图片、labels、restore cache 和临时工程
-全部位于 E 盘，没有把下载资产或 package cache 写到 C 盘。
+TensorRT/CUDA/cuDNN 由系统安装或显式选择的本地 runtime 提供。模型、图片、labels、restore
+cache 和临时工程全部位于 E 盘，没有把下载资产或 package cache 写到 C 盘。当前主机的真实
+矩阵结果是 TRT10、TRT11 通过；TRT8 因缺少 `cudnn64_8.dll`，bridge 编译时主动关闭 ONNX
+parser，因此保持受控 blocker。
 
 本次结果是 `local-package-consumer-runtime` 工程证据。它不是从 nuget.org 或 GitHub Packages
 下载公开包得到的 `package-consumer-runtime` proof，也不代表模型资产或包已经获准公开发布。
@@ -23,11 +25,11 @@ TensorRT 10.11 与 CUDA 12.9 由系统安装提供。模型、图片、labels、
 flowchart LR
     A["Clean consumer"] --> B["YoloVision package"]
     A --> C["Managed API package"]
-    A --> D["TRT10 bridge-only package"]
+    A --> D["Runtime-key-selected bridge-only package"]
     B --> C
     D --> E["jyppxtrtbridge.dll"]
-    E --> F["System TensorRT 10.11"]
-    E --> G["System CUDA 12.9"]
+    E --> F["Selected TensorRT runtime"]
+    E --> G["Selected CUDA / cuDNN"]
     A --> H["Official YOLOX assets on E drive"]
 ```
 
@@ -129,10 +131,12 @@ bridge，不需要在消费项目中写本机 DLL 路径。
 samples/YoloVision.PackageConsumer
 ```
 
-核心代码只有两行行为：
+核心代码先记录实际 bridge build identity，再调用复用入口：
 
 ```csharp
 Console.WriteLine($"YoloVisionPackageConsumer ProjectReference=False CoreAssembly={typeof(YoloModelProfile).Assembly.GetName().Name}");
+TensorRtEnvironmentSnapshot snapshot = TensorRtEnvironmentProbe.GetCurrent();
+Console.WriteLine($"YoloVisionPackageConsumer BridgeTensorRt={snapshot.BuildInfo.TensorRtVersion} BridgeCuda={snapshot.BuildInfo.CudaToolkitVersion}");
 return YoloVisionCommand.Run(args);
 ```
 
@@ -146,13 +150,14 @@ return YoloVisionCommand.Run(args);
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass `
   -File .\eng\Test-YoloVisionLocalPackageConsumer.ps1 `
+  -RuntimePackageKey win-x64-trt10.11-cuda12.9-cudnn9.22 `
   -PackageVersion 4.0.0
 ```
 
 默认 clean workspace：
 
 ```text
-E:\GitSpace\TensorRT-CSharp-API-4.0\consumer-workspaces\yolovision-yolox-local-package
+E:\GitSpace\TensorRT-CSharp-API-4.0\consumer-workspaces\yolovision-yolox-local-package-trt10
 ```
 
 脚本会：
@@ -164,7 +169,8 @@ E:\GitSpace\TensorRT-CSharp-API-4.0\consumer-workspaces\yolovision-yolox-local-p
 5. 解析 `project.assets.json`，要求 project library 数为 0。
 6. 要求 consumer 输出中恰好有一个 NuGet 复制的 `jyppxtrtbridge.dll`。
 7. 使用官方 ONNX、dog image 和 labels 执行真实 TensorRT build/enqueue。
-8. 要求日志同时出现 package consumer marker 和 `YoloVision Passed=True`。
+8. 要求日志同时出现 package consumer marker、实际 bridge TensorRT/CUDA build metadata 和
+   `YoloVision Passed=True`，并校验 bridge major 与 runtime key 一致。
 9. 复制 stdout、stderr、JSON 和 SVG 到 ignored evidence 目录，计算 SHA256。
 10. 删除包含 restore cache、临时 csproj、engine build 输出和 tensor 的整个 E 盘 workspace。
 
@@ -174,18 +180,46 @@ E:\GitSpace\TensorRT-CSharp-API-4.0\consumer-workspaces\yolovision-yolox-local-p
 pwsh -NoProfile -ExecutionPolicy Bypass `
   -File .\eng\Test-YoloVisionLocalPackageConsumer.ps1 `
   -TensorRtRoot 'D:\Program Files\TensorRT-10.11.0.33-cu12' `
+  -TensorRtRuntimeRoot 'D:\Program Files\TensorRT-10.11.0.33-cu12' `
+  -CudnnRoot 'D:\Program Files\NVIDIA\CUDNN\v9.22' `
   -CudaRoot 'C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.9'
 ```
 
 这里的 C 盘 CUDA 是用户已有的系统安装，不是脚本下载的临时资产。脚本不会删除 CUDA、
 TensorRT、NuGet 全局缓存、Codex 依赖或用户文件。
 
-## 6. 本次真实结果
+## 6. 三版本矩阵
+
+一次执行全部目标版本：
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass `
+  -File .\eng\Test-YoloVisionLocalPackageConsumerMatrix.ps1
+```
+
+矩阵逐行创建独立 E 盘 workspace/cache，使用 split manifest 推导 bridge package ID 和
+TensorRT line。SDK 根目录与运行时 DLL 根目录分开记录；当默认 SDK 目录只有 headers/import
+libs 时，脚本只会选择满足 full-runtime manifest 全部 DLL pattern 的已有 assembled runtime。
+
+当前真实结果：
+
+| Runtime key | Bridge build | 结果 | 说明 |
+| --- | --- | --- | --- |
+| `win-x64-trt8.6-cuda12.1-cudnn8.9` | TRT 8.6.1 / CUDA 12.1 | blocked | cuDNN 根中没有 `cudnn64_8.dll`，bridge 按 CMake 安全门关闭 ONNX parser |
+| `win-x64-trt10.11-cuda12.9-cudnn9.22` | TRT 10.11.0 / CUDA 12.9 | passed | 5 detections，`14.360 ms` |
+| `win-x64-trt11.0-cuda12.9-cudnn9.22` | TRT 11.0.0 / CUDA 12.9 | passed | 使用 E 盘已校验 assembled runtime，5 detections，`11.679 ms` |
+
+TRT8 行已经完成 PackageReference restore/build、bridge load 和 build identity 查询，但没有
+ONNX parser，不能写成 runtime pass。发布 TRT8 YoloVision consumer 前，必须在具备完整 cuDNN
+8 runtime 的构建环境重新构建 bridge、重打包并重新冻结 SHA256。
+
+## 7. 本次真实结果
 
 clean consumer restore/build 均为 0 warning、0 error。运行输出：
 
 ```text
 YoloVisionPackageConsumer ProjectReference=False CoreAssembly=YoloVision
+YoloVisionPackageConsumer BridgeTensorRt=10.11.0 BridgeCuda=12.9
 Input=images:[1, 3, 640, 640] Output=output:[1, 8400, 85]
 Execution ... ElapsedMs=14.238
 Detection Class=bicycle Score=0.954854 ...
@@ -201,18 +235,20 @@ top-left letterbox / fill 114
 SHA256=ca4e22bc6d8ebfe70f5aefeae8957d9ad15eb8d3bf99b6a42e016436dcbf1528
 ```
 
-## 7. 证据与分类
+## 8. 证据与分类
 
 raw 本机证据位于 ignored 目录：
 
 ```text
 artifacts/yolovision/yolox-local-package-consumer
+artifacts/yolovision/yolox-local-package-consumer-matrix
 ```
 
 可提交的精简记录位于：
 
 ```text
 artifacts/interface-coverage/yolox-local-package-consumer-runtime-proof-closure.json
+artifacts/interface-coverage/yolox-multi-version-local-package-consumer-runtime-proof-closure.json
 ```
 
 证据分层必须保持：
@@ -227,9 +263,31 @@ artifacts/interface-coverage/yolox-local-package-consumer-runtime-proof-closure.
 | 是否批准公开再分发 | 否 |
 | 是否执行 publish | 否 |
 
-因此本批只能写成 `local-package-consumer-runtime`。要晋级公开 package consumer proof，仍需
-在仓库外 clean workspace 中从真实公开 URL 恢复已发布包，固定公开包 hash、下载命令、host
+因此通过行也只能写成 `local-package-consumer-runtime`，失败行只能写成
+`runtime-attempt-blocked`。要晋级公开 package consumer proof，仍需在仓库外 clean workspace
+中从真实公开 URL 恢复已发布包，固定公开包 hash、NuGet `.nupkg.metadata` source、host
 metadata、stdout/stderr，并由 owner 完成发布与证据审核。
+
+## 9. 公开包 owner handoff
+
+只读 handoff 位于：
+
+```text
+artifacts/interface-coverage/yolovision-public-package-owner-handoff.json
+```
+
+其中固定 5 个本地包的 ID、版本、SHA256、未来 nuget.org flat-container URL、GitHub Packages
+源，以及 TRT10/TRT11 clean public consumer 命令。TRT8 被排除在命令之外，直到 bridge 重建并
+重新冻结 hash。
+
+真实发布后，owner 才执行 `Test-YoloVisionPublicPackageConsumer.ps1`。该脚本只允许
+`https://api.nuget.org/v3/index.json`，使用 `<clear />` 和 E 盘隔离 cache，并复制 NuGet
+生成的 `.nupkg.metadata` 与下载 nupkg 作为 proof。随后
+`Test-YoloVisionPublicPackageProof.ps1` 会同时检查 public source、下载文件 SHA、handoff 冻结
+SHA、0 ProjectReference、0 restored project library、runtime marker 和清理状态。
+
+这两个脚本都不包含 package push、Release upload 或 issue close；当前没有执行它们，因为
+`4.0.0` 包尚未公开。
 
 ## 小结
 

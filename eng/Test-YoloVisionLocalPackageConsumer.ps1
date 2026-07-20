@@ -6,11 +6,16 @@ param(
   [string]$ManagedPackageDirectory,
   [string]$YoloVisionPackageDirectory,
   [string]$BridgePackageDirectory,
+  [string]$RuntimePackageKey = "win-x64-trt10.11-cuda12.9-cudnn9.22",
+  [string]$BridgePackageId,
+  [ValidateSet("8", "10", "11")][string]$TensorRtLine,
   [string]$ModelPath,
   [string]$LabelsPath,
   [string]$ImagePath,
   [string]$TensorRtRoot,
+  [string]$TensorRtRuntimeRoot,
   [string]$CudaRoot,
+  [string]$CudnnRoot,
   [string]$PackageVersion = "4.0.0",
   [switch]$KeepWorkspace
 )
@@ -218,16 +223,59 @@ function Invoke-CheckedDotNet {
   return $result
 }
 
-$OutputRoot = Resolve-PathValue -Value $OutputRoot -DefaultValue (Join-Path $outerRoot "consumer-workspaces\yolovision-yolox-local-package") -RelativeRoot $outerRoot
-$ReportDirectory = Resolve-PathValue -Value $ReportDirectory -DefaultValue (Join-Path $RepositoryRoot "artifacts\yolovision\yolox-local-package-consumer") -RelativeRoot $RepositoryRoot
+$splitManifestPath = Join-Path $RepositoryRoot "pack\runtime-split\split-runtime-packages.manifest.json"
+$splitManifest = Get-Content -LiteralPath $splitManifestPath -Raw -Encoding utf8 | ConvertFrom-Json
+$bridgeManifestEntries = @($splitManifest.packages | Where-Object {
+  [string]::Equals([string]$_.sourceRuntimeKey, $RuntimePackageKey, [StringComparison]::OrdinalIgnoreCase) -and
+  [string]::Equals([string]$_.role, "bridge", [StringComparison]::OrdinalIgnoreCase)
+})
+if ($bridgeManifestEntries.Count -ne 1) {
+  throw "Runtime package key '$RuntimePackageKey' must resolve to exactly one bridge package in $splitManifestPath. Found $($bridgeManifestEntries.Count)."
+}
+
+$bridgeManifest = $bridgeManifestEntries[0]
+$expectedBridgePackageId = [string]$bridgeManifest.packageId
+$expectedTensorRtLine = [string]$bridgeManifest.tensorRtLine
+if (-not [string]::Equals([string]$bridgeManifest.platform, "windows", [StringComparison]::OrdinalIgnoreCase)) {
+  throw "YoloVision local package consumer currently requires a Windows runtime package key: $RuntimePackageKey"
+}
+if (-not [string]::IsNullOrWhiteSpace($BridgePackageId) -and
+    -not [string]::Equals($BridgePackageId, $expectedBridgePackageId, [StringComparison]::Ordinal)) {
+  throw "Bridge package id '$BridgePackageId' does not match runtime key '$RuntimePackageKey' manifest id '$expectedBridgePackageId'."
+}
+if (-not [string]::IsNullOrWhiteSpace($TensorRtLine) -and
+    -not [string]::Equals($TensorRtLine, $expectedTensorRtLine, [StringComparison]::Ordinal)) {
+  throw "TensorRT line '$TensorRtLine' does not match runtime key '$RuntimePackageKey' manifest line '$expectedTensorRtLine'."
+}
+$BridgePackageId = $expectedBridgePackageId
+$TensorRtLine = $expectedTensorRtLine
+
+$resolvedRuntimeRoots = $null
+if ([string]::IsNullOrWhiteSpace($TensorRtRoot) -or
+    [string]::IsNullOrWhiteSpace($CudaRoot) -or
+    [string]::IsNullOrWhiteSpace($CudnnRoot)) {
+  $runtimeRootsJson = (& pwsh -NoProfile -ExecutionPolicy Bypass -File (Join-Path $RepositoryRoot "eng\Resolve-RuntimeRoots.ps1") -RuntimePackageKey $RuntimePackageKey -RepositoryRoot $RepositoryRoot | Out-String).Trim()
+  if ($LASTEXITCODE -ne 0) {
+    throw "Failed to resolve vendor roots for runtime package key '$RuntimePackageKey'."
+  }
+  $resolvedRuntimeRoots = $runtimeRootsJson | ConvertFrom-Json
+}
+$defaultTensorRtRoot = if ($null -eq $resolvedRuntimeRoots) { "" } else { [string]$resolvedRuntimeRoots.tensorRtRoot }
+$defaultCudaRoot = if ($null -eq $resolvedRuntimeRoots) { "" } else { [string]$resolvedRuntimeRoots.cudaRoot }
+$defaultCudnnRoot = if ($null -eq $resolvedRuntimeRoots) { "" } else { [string]$resolvedRuntimeRoots.cudnnRoot }
+
+$OutputRoot = Resolve-PathValue -Value $OutputRoot -DefaultValue (Join-Path $outerRoot "consumer-workspaces\yolovision-yolox-local-package-trt$TensorRtLine") -RelativeRoot $outerRoot
+$ReportDirectory = Resolve-PathValue -Value $ReportDirectory -DefaultValue (Join-Path $RepositoryRoot "artifacts\yolovision\yolox-local-package-consumer\$RuntimePackageKey") -RelativeRoot $RepositoryRoot
 $ManagedPackageDirectory = Resolve-PathValue -Value $ManagedPackageDirectory -DefaultValue (Join-Path $RepositoryRoot "artifacts\managed") -RelativeRoot $RepositoryRoot
 $YoloVisionPackageDirectory = Resolve-PathValue -Value $YoloVisionPackageDirectory -DefaultValue (Join-Path $RepositoryRoot "artifacts\yolovision-nupkg") -RelativeRoot $RepositoryRoot
-$BridgePackageDirectory = Resolve-PathValue -Value $BridgePackageDirectory -DefaultValue (Join-Path $RepositoryRoot "artifacts\runtime-split-nupkg\win-x64-trt10.11-cuda12.9-cudnn9.22") -RelativeRoot $RepositoryRoot
+$BridgePackageDirectory = Resolve-PathValue -Value $BridgePackageDirectory -DefaultValue (Join-Path $RepositoryRoot "artifacts\runtime-split-nupkg\$RuntimePackageKey") -RelativeRoot $RepositoryRoot
 $ModelPath = Resolve-PathValue -Value $ModelPath -DefaultValue (Join-Path $outerRoot "downloads\yolox-apache\source\yolox_s.onnx") -RelativeRoot $outerRoot
 $LabelsPath = Resolve-PathValue -Value $LabelsPath -DefaultValue (Join-Path $outerRoot "downloads\yolox-apache\derived\coco.names") -RelativeRoot $outerRoot
 $ImagePath = Resolve-PathValue -Value $ImagePath -DefaultValue (Join-Path $outerRoot "downloads\yolox-apache\derived\dog.ppm") -RelativeRoot $outerRoot
-$TensorRtRoot = Resolve-PathValue -Value $TensorRtRoot -DefaultValue $(if ([string]::IsNullOrWhiteSpace($env:TENSORRT_PATH)) { "D:\Program Files\TensorRT-10.11.0.33-cu12" } else { $env:TENSORRT_PATH }) -RelativeRoot $outerRoot
-$CudaRoot = Resolve-PathValue -Value $CudaRoot -DefaultValue $(if ([string]::IsNullOrWhiteSpace($env:CUDA_PATH)) { "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.9" } else { $env:CUDA_PATH }) -RelativeRoot $outerRoot
+$TensorRtRoot = Resolve-PathValue -Value $TensorRtRoot -DefaultValue $defaultTensorRtRoot -RelativeRoot $outerRoot
+$TensorRtRuntimeRoot = Resolve-PathValue -Value $TensorRtRuntimeRoot -DefaultValue $TensorRtRoot -RelativeRoot $outerRoot
+$CudaRoot = Resolve-PathValue -Value $CudaRoot -DefaultValue $defaultCudaRoot -RelativeRoot $outerRoot
+$CudnnRoot = Resolve-PathValue -Value $CudnnRoot -DefaultValue $defaultCudnnRoot -RelativeRoot $outerRoot
 
 Assert-PathUnderRoot -Path $OutputRoot -Root $outerRoot -Description "Consumer workspace"
 Assert-PathUnderRoot -Path $ReportDirectory -Root $outerRoot -Description "Consumer report directory"
@@ -244,7 +292,7 @@ foreach ($item in @(
   Assert-NonCDrivePath -Path $item.Path -Description $item.Description
 }
 
-foreach ($requiredPath in @($ModelPath, $LabelsPath, $ImagePath, $TensorRtRoot, $CudaRoot)) {
+foreach ($requiredPath in @($ModelPath, $LabelsPath, $ImagePath, $TensorRtRoot, $TensorRtRuntimeRoot, $CudaRoot, $CudnnRoot)) {
   if (-not (Test-Path -LiteralPath $requiredPath)) {
     throw "Required local dependency does not exist: $requiredPath"
   }
@@ -252,8 +300,7 @@ foreach ($requiredPath in @($ModelPath, $LabelsPath, $ImagePath, $TensorRtRoot, 
 
 $managedPackage = Find-Package -Directory $ManagedPackageDirectory -PackageId "JYPPX.TensorRT.CSharp.API" -ExpectedVersion $PackageVersion
 $yoloVisionPackage = Find-Package -Directory $YoloVisionPackageDirectory -PackageId "JYPPX.TensorRT.CSharp.API.YoloVision" -ExpectedVersion $PackageVersion
-$bridgePackageId = "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge"
-$bridgePackage = Find-Package -Directory $BridgePackageDirectory -PackageId $bridgePackageId -ExpectedVersion $PackageVersion
+$bridgePackage = Find-Package -Directory $BridgePackageDirectory -PackageId $BridgePackageId -ExpectedVersion $PackageVersion
 if (-not (Test-PackageEntry -PackagePath $managedPackage.Path -ExpectedEntry "lib/net8.0/JYPPX.TensorRtSharp.dll")) {
   throw "Managed package does not contain the net8.0 TensorRT assembly."
 }
@@ -282,6 +329,7 @@ Copy-Item -LiteralPath (Join-Path $templateRoot "Program.cs") -Destination $cons
 $projectTemplate = Get-Content -LiteralPath (Join-Path $templateRoot "YoloVision.PackageConsumer.csproj.template") -Raw -Encoding utf8
 $projectContent = $projectTemplate.Replace("__MANAGED_PACKAGE_VERSION__", $managedPackage.Version)
 $projectContent = $projectContent.Replace("__YOLOVISION_PACKAGE_VERSION__", $yoloVisionPackage.Version)
+$projectContent = $projectContent.Replace("__BRIDGE_PACKAGE_ID__", $bridgePackage.Id)
 $projectContent = $projectContent.Replace("__BRIDGE_PACKAGE_VERSION__", $bridgePackage.Version)
 [IO.File]::WriteAllText($consumerProjectPath, $projectContent, $utf8)
 if ($projectContent.Contains("ProjectReference", [StringComparison]::OrdinalIgnoreCase)) {
@@ -333,7 +381,7 @@ $runArguments = @(
   "--output-json", $outputJsonPath,
   "--visualization", $visualizationPath,
   "--input-shape", "1x3x640x640",
-  "--tensor-rt-line", "10",
+  "--tensor-rt-line", $TensorRtLine,
   "--family", "yolox",
   "--task", "det",
   "--layout", "boxes-first",
@@ -343,14 +391,19 @@ $runArguments = @(
   "--iou-threshold", "0.45",
   "--top-k", "20"
 )
-$pathEntries = @(
+$nativePathEntries = @(
   $consumerOutputDirectory,
   $nativeBridgePaths[0].DirectoryName,
+  (Join-Path $TensorRtRuntimeRoot "bin"),
+  (Join-Path $TensorRtRuntimeRoot "lib"),
   (Join-Path $TensorRtRoot "bin"),
   (Join-Path $TensorRtRoot "lib"),
   (Join-Path $CudaRoot "bin"),
-  $env:PATH
-)
+  $CudnnRoot,
+  (Join-Path $CudnnRoot "bin")
+) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) -and (Test-Path -LiteralPath $_) }
+$cudnnDllDirectories = @(Get-ChildItem -LiteralPath $CudnnRoot -Recurse -File -Filter *.dll -ErrorAction SilentlyContinue | Select-Object -ExpandProperty DirectoryName -Unique)
+$pathEntries = @($nativePathEntries + $cudnnDllDirectories + $env:PATH)
 $runEnvironment = @{
   PATH = ($pathEntries -join ';')
   NUGET_PACKAGES = $packageCache
@@ -370,6 +423,16 @@ if ($runResult.ExitCode -ne 0) {
 if (-not $runResult.Stdout.Contains("YoloVisionPackageConsumer ProjectReference=False", [StringComparison]::Ordinal) -or
     -not $runResult.Stdout.Contains("YoloVision Passed=True", [StringComparison]::Ordinal)) {
   throw "YoloVision package consumer did not emit the required package/runtime success markers."
+}
+
+if ($runResult.Stdout -notmatch 'YoloVisionPackageConsumer BridgeTensorRt=(?<trt>\S+) BridgeCuda=(?<cuda>\S+)') {
+  throw "YoloVision package consumer did not emit bridge build version metadata."
+}
+$bridgeTensorRtVersion = $Matches.trt
+$bridgeCudaToolkitVersion = $Matches.cuda
+if ($bridgeTensorRtVersion -notmatch '^(?<major>[0-9]+)' -or
+    -not [string]::Equals($Matches.major, $TensorRtLine, [StringComparison]::Ordinal)) {
+  throw "Bridge TensorRT build version '$bridgeTensorRtVersion' does not match requested TensorRT line '$TensorRtLine'."
 }
 
 $predictionLines = @($runResult.Stdout -split "`r?`n" | Where-Object { $_.StartsWith("Detection Class=", [StringComparison]::Ordinal) })
@@ -396,6 +459,10 @@ foreach ($file in @($tensorPath, $outputJsonPath, $visualizationPath)) {
   if (-not (Test-Path -LiteralPath $file -PathType Leaf)) {
     throw "Expected runtime output was not created: $file"
   }
+}
+$yoloOutputReport = Get-Content -LiteralPath $outputJsonPath -Raw -Encoding utf8 | ConvertFrom-Json
+if ([int]$yoloOutputReport.runtime.tensorRtLine -ne [int]$TensorRtLine) {
+  throw "YoloVision output report TensorRT line '$($yoloOutputReport.runtime.tensorRtLine)' does not match requested line '$TensorRtLine'."
 }
 $copiedOutputJson = Join-Path $ReportDirectory "yolovision-output.json"
 $copiedVisualization = Join-Path $ReportDirectory "yolovision-output.svg"
@@ -432,11 +499,13 @@ if (-not $KeepWorkspace.IsPresent) {
 }
 
 $report = [pscustomobject][ordered]@{
-  schemaVersion = 1
+  schemaVersion = 2
   recordKind = "yolovision-yolox-local-package-consumer-runtime"
   generatedAtUtc = [DateTime]::UtcNow.ToString("O")
   validationState = "passed-local-package-consumer-runtime"
   evidenceClassification = "local-package-consumer-runtime"
+  runtimePackageKey = $RuntimePackageKey
+  tensorRtLine = $TensorRtLine
   consumer = [pscustomobject][ordered]@{
     template = "samples/YoloVision.PackageConsumer"
     targetFramework = "net8.0"
@@ -469,8 +538,13 @@ $report = [pscustomobject][ordered]@{
     bridgeLength = $nativeBridgeLength
     bridgeSha256 = $nativeBridgeSha256
     tensorRtRoot = $TensorRtRoot
+    tensorRtRuntimeRoot = $TensorRtRuntimeRoot
     cudaRoot = $CudaRoot
-    tensorRtAndCudaAreSystemDependencies = $true
+    cudnnRoot = $CudnnRoot
+    bridgeBuildTensorRtVersion = $bridgeTensorRtVersion
+    bridgeBuildCudaToolkitVersion = $bridgeCudaToolkitVersion
+    bridgeBuildTensorRtLineMatches = $true
+    tensorRtCudaAndCudnnAreExternalDependencies = $true
   }
   assets = [pscustomobject][ordered]@{
     modelSha256 = (Get-FileHash -LiteralPath $ModelPath -Algorithm SHA256).Hash.ToLowerInvariant()
@@ -483,6 +557,7 @@ $report = [pscustomobject][ordered]@{
   runtime = [pscustomobject][ordered]@{
     passedMarker = "YoloVision Passed=True"
     packageConsumerMarker = "YoloVisionPackageConsumer ProjectReference=False"
+    tensorRtLine = $TensorRtLine
     elapsedMilliseconds = $elapsedMilliseconds
     predictionCount = $predictions.Count
     predictions = $predictions
@@ -521,6 +596,9 @@ $markdown = @(
   "",
   "- state: ``$($report.validationState)``",
   "- classification: ``$($report.evidenceClassification)``",
+  "- runtime package key: ``$RuntimePackageKey``",
+  "- TensorRT line: ``$TensorRtLine``",
+  "- bridge build: TensorRT ``$bridgeTensorRtVersion`` / CUDA ``$bridgeCudaToolkitVersion``",
   "- ProjectReference count: ``0``",
   "- local package count: ``3``",
   "- prediction count: ``$($predictions.Count)``",
@@ -533,6 +611,6 @@ $markdown = @(
 )
 $markdown | Set-Content -LiteralPath $markdownPath -Encoding utf8
 
-Write-Host "ValidationState=$($report.validationState) PredictionCount=$($predictions.Count) ProjectReferenceCount=0"
+Write-Host "ValidationState=$($report.validationState) RuntimePackageKey=$RuntimePackageKey TensorRtLine=$TensorRtLine PredictionCount=$($predictions.Count) ProjectReferenceCount=0"
 Write-Host "EvidenceClassification=$($report.evidenceClassification) IsPackageConsumerRuntimeProof=False CanPublishPublicly=False"
 Write-Host "Report=$reportPath"

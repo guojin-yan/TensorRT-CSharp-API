@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "yolovision-public-package-owner-handoff",
+  "generatedAtUtc": "2026-07-20T04:41:00.3779617Z",
+  "state": "owner-action-required-public-feed-not-executed",
+  "packageVersion": "4.0.0",
+  "packages": [
+    {
+      "id": "JYPPX.TensorRT.CSharp.API",
+      "version": "4.0.0",
+      "length": 14615786,
+      "localSha256": "4bfe3c013ea2de89630b7d91cf471c082f68d1a9fe9c7e1015235a759e21b111",
+      "expectedNuGetFlatContainerUrl": "https://api.nuget.org/v3-flatcontainer/jyppx.tensorrt.csharp.api/4.0.0/jyppx.tensorrt.csharp.api.4.0.0.nupkg",
+      "expectedGitHubPackagesSource": "https://nuget.pkg.github.com/guojin-yan/index.json",
+      "ownerMustConfirmPublicDownload": true,
+      "localYoloVisionRuntimeState": "shared-package",
+      "eligibleForYoloVisionPublicRuntimeHandoff": true,
+      "ownerMustRebuildAndRefreezeBeforeYoloVisionPublish": false
+    },
+    {
+      "id": "JYPPX.TensorRT.CSharp.API.YoloVision",
+      "version": "4.0.0",
+      "length": 77963,
+      "localSha256": "6823e236086dcaaee84f830a6272989a1601b96d1eae8c5e0a1d11370f0d47e0",
+      "expectedNuGetFlatContainerUrl": "https://api.nuget.org/v3-flatcontainer/jyppx.tensorrt.csharp.api.yolovision/4.0.0/jyppx.tensorrt.csharp.api.yolovision.4.0.0.nupkg",
+      "expectedGitHubPackagesSource": "https://nuget.pkg.github.com/guojin-yan/index.json",
+      "ownerMustConfirmPublicDownload": true,
+      "localYoloVisionRuntimeState": "shared-package",
+      "eligibleForYoloVisionPublicRuntimeHandoff": true,
+      "ownerMustRebuildAndRefreezeBeforeYoloVisionPublish": false
+    },
+    {
+      "id": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt8.6.cuda12.1.cudnn8.9.Bridge",
+      "version": "4.0.0",
+      "length": 313595,
+      "localSha256": "704a23df72455e2fc24c0656918e39150e8c9622acd7bc2d1e8da24081b8500f",
+      "expectedNuGetFlatContainerUrl": "https://api.nuget.org/v3-flatcontainer/jyppx.tensorrt.csharp.api.runtime.win-x64.trt8.6.cuda12.1.cudnn8.9.bridge/4.0.0/jyppx.tensorrt.csharp.api.runtime.win-x64.trt8.6.cuda12.1.cudnn8.9.bridge.4.0.0.nupkg",
+      "expectedGitHubPackagesSource": "https://nuget.pkg.github.com/guojin-yan/index.json",
+      "ownerMustConfirmPublicDownload": true,
+      "localYoloVisionRuntimeState": "blocked-runtime-attempt",
+      "eligibleForYoloVisionPublicRuntimeHandoff": false,
+      "ownerMustRebuildAndRefreezeBeforeYoloVisionPublish": true
+    },
+    {
+      "id": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge",
+      "version": "4.0.0",
+      "length": 347493,
+      "localSha256": "13e82c8080a09754979b80108bcbdbadaf47d6f10161f71d59438477e8a13336",
+      "expectedNuGetFlatContainerUrl": "https://api.nuget.org/v3-flatcontainer/jyppx.tensorrt.csharp.api.runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.bridge/4.0.0/jyppx.tensorrt.csharp.api.runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.bridge.4.0.0.nupkg",
+      "expectedGitHubPackagesSource": "https://nuget.pkg.github.com/guojin-yan/index.json",
+      "ownerMustConfirmPublicDownload": true,
+      "localYoloVisionRuntimeState": "passed-local-package-consumer-runtime",
+      "eligibleForYoloVisionPublicRuntimeHandoff": true,
+      "ownerMustRebuildAndRefreezeBeforeYoloVisionPublish": false
+    },
+    {
+      "id": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.Bridge",
+      "version": "4.0.0",
+      "length": 268769,
+      "localSha256": "ec5371bdb0cd47ce938e232f0139975c13848a66f5d99ce5c4ecb1ae44a24b26",
+      "expectedNuGetFlatContainerUrl": "https://api.nuget.org/v3-flatcontainer/jyppx.tensorrt.csharp.api.runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.bridge/4.0.0/jyppx.tensorrt.csharp.api.runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.bridge.4.0.0.nupkg",
+      "expectedGitHubPackagesSource": "https://nuget.pkg.github.com/guojin-yan/index.json",
+      "ownerMustConfirmPublicDownload": true,
+      "localYoloVisionRuntimeState": "passed-local-package-consumer-runtime",
+      "eligibleForYoloVisionPublicRuntimeHandoff": true,
+      "ownerMustRebuildAndRefreezeBeforeYoloVisionPublish": false
+    }
+  ],
+  "runtimePackageKeys": [
+    "win-x64-trt8.6-cuda12.1-cudnn8.9",
+    "win-x64-trt10.11-cuda12.9-cudnn9.22",
+    "win-x64-trt11.0-cuda12.9-cudnn9.22"
+  ],
+  "publicConsumerCandidateRuntimeKeys": [
+    "win-x64-trt10.11-cuda12.9-cudnn9.22",
+    "win-x64-trt11.0-cuda12.9-cudnn9.22"
+  ],
+  "blockedRuntimeKeys": [
+    "win-x64-trt8.6-cuda12.1-cudnn8.9"
+  ],
+  "publicRoutes": [
+    {
+      "name": "nuget-org",
+      "source": "https://api.nuget.org/v3/index.json",
+      "pushCommand": "OWNER ONLY: dotnet nuget push <nupkg> --source https://api.nuget.org/v3/index.json",
+      "executed": false
+    },
+    {
+      "name": "github-packages",
+      "source": "https://nuget.pkg.github.com/guojin-yan/index.json",
+      "pushCommand": "OWNER ONLY: dotnet nuget push <nupkg> --source https://nuget.pkg.github.com/guojin-yan/index.json",
+      "executed": false
+    }
+  ],
+  "cleanExternalCommands": [
+    "pwsh -NoProfile -ExecutionPolicy Bypass -File .\\eng\\Test-YoloVisionPublicPackageConsumer.ps1 -RuntimePackageKey win-x64-trt10.11-cuda12.9-cudnn9.22 -PackageVersion 4.0.0 -PublicFeedUrl https://api.nuget.org/v3/index.json -OutputRoot E:\\\\yolovision-public-consumer\\\\win-x64-trt10.11-cuda12.9-cudnn9.22 -ProofInputPath E:\\\\yolovision-public-proof\\\\win-x64-trt10.11-cuda12.9-cudnn9.22\\\\public-proof-record.json",
+    "pwsh -NoProfile -ExecutionPolicy Bypass -File .\\eng\\Test-YoloVisionPublicPackageConsumer.ps1 -RuntimePackageKey win-x64-trt11.0-cuda12.9-cudnn9.22 -PackageVersion 4.0.0 -PublicFeedUrl https://api.nuget.org/v3/index.json -OutputRoot E:\\\\yolovision-public-consumer\\\\win-x64-trt11.0-cuda12.9-cudnn9.22 -ProofInputPath E:\\\\yolovision-public-proof\\\\win-x64-trt11.0-cuda12.9-cudnn9.22\\\\public-proof-record.json"
+  ],
+  "strictValidatorCommands": [
+    "pwsh -NoProfile -ExecutionPolicy Bypass -File .\\eng\\Test-YoloVisionPublicPackageProof.ps1 -InputPath E:\\\\yolovision-public-proof\\\\win-x64-trt10.11-cuda12.9-cudnn9.22\\\\public-proof-record.json -ExpectedRuntimePackageKey win-x64-trt10.11-cuda12.9-cudnn9.22 -ExpectedPackageVersion 4.0.0",
+    "pwsh -NoProfile -ExecutionPolicy Bypass -File .\\eng\\Test-YoloVisionPublicPackageProof.ps1 -InputPath E:\\\\yolovision-public-proof\\\\win-x64-trt11.0-cuda12.9-cudnn9.22\\\\public-proof-record.json -ExpectedRuntimePackageKey win-x64-trt11.0-cuda12.9-cudnn9.22 -ExpectedPackageVersion 4.0.0"
+  ],
+  "requiredProofFields": [
+    "publicFeedUrl",
+    "packageSourceMode",
+    "runtimePackageKey",
+    "packageVersion",
+    "packages[].sourceUrl",
+    "packages[].downloadedFromPublicFeed",
+    "packages[].downloadedNupkgPath",
+    "packages[].sha256",
+    "packages[].nugetMetadataPath",
+    "packages[].nugetMetadataSha256",
+    "consumer.projectReferenceCount",
+    "consumer.restoredProjectLibraryCount",
+    "consumer.workspaceRemovedAfterValidation",
+    "runtime.passed",
+    "runtime.passedMarker",
+    "runtime.predictionCount",
+    "boundary.isPackageConsumerRuntimeProof",
+    "boundary.packagesDownloadedFromPublicFeed"
+  ],
+  "rejectedSubstitutes": [
+    "local-file-feed",
+    "direct .nupkg reference",
+    "ProjectReference",
+    "bridge-only compile proof",
+    "dependency-probe-only",
+    "owner template without downloaded files",
+    "publish command output without clean consumer runtime"
+  ],
+  "sourceMatrix": "artifacts/yolovision/yolox-local-package-consumer-matrix/yolox-local-package-consumer-runtime-matrix.json",
+  "surfaceAudit": "artifacts/yolovision/package-surface-audit/yolovision-package-surface-audit.json",
+  "performsPublish": false,
+  "canPublishPublicly": false,
+  "canCloseReleaseIssue": false
+}

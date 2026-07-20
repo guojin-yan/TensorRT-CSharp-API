@@ -15,8 +15,18 @@ internal static class Program
     }
 }
 
+/// <summary>
+/// Runs the reusable, pointer-free YoloVision command-line pipeline.
+/// 运行可复用、无指针暴露的 YoloVision 命令行流水线。
+/// </summary>
 public static class YoloVisionCommand
 {
+    /// <summary>
+    /// Parses YoloVision arguments and executes capability, preflight, preprocessing, or TensorRT inference mode.
+    /// 解析 YoloVision 参数，并执行能力查询、预检、预处理或 TensorRT 推理模式。
+    /// </summary>
+    /// <param name="args">Command-line arguments. 命令行参数。</param>
+    /// <returns>Zero on success, or a nonzero argument/output validation code. 成功返回零，参数或输出校验失败时返回非零值。</returns>
     public static int Run(string[] args)
     {
         if (args == null)

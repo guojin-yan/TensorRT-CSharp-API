@@ -1,5 +1,58 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-20 YoloVision TRT8/TRT10/TRT11 本地包消费者矩阵与公开交接
+
+本批把单一 TRT10 consumer 扩展为由 `RuntimePackageKey` 驱动的三版本矩阵。单行脚本从
+`split-runtime-packages.manifest.json` 推导 bridge package ID 与 TensorRT line，显式拒绝
+调用参数和 manifest 不一致；consumer 在运行前输出 bridge 的实际 TensorRT/CUDA build
+identity，脚本要求 build major、请求 line 和 YoloVision output JSON 三者一致。SDK/build root
+与 runtime DLL root 已分离，避免把只有 headers/import libs 的 TensorRT 目录误判为完整运行时。
+
+`Test-YoloVisionLocalPackageConsumerMatrix.ps1` 对 TRT8、TRT10、TRT11 分别创建短路径 E 盘
+workspace 和隔离 NuGet cache，逐行执行无 ProjectReference restore/build、官方 YOLOX-S engine
+build、enqueue、grid/stride decode、NMS、JSON/SVG 与清理。最终矩阵为 2 pass / 1 blocker：
+
+- TRT10/CUDA12.9：bridge `10.11.0/12.9`，5 detections，`14.360 ms`。
+- TRT11/CUDA12.9：bridge `11.0.0/12.9`，使用已由 Release digest 校验的 E 盘 assembled
+  runtime，5 detections，`11.679 ms`。
+- TRT8/CUDA12.1：bridge `8.6.1/12.1` 已加载，但本机 cuDNN 8 developer root 中没有
+  `cudnn64_8.dll`；CMake 安全门因此在 bridge build 时关闭 ONNX parser。该行只记录为
+  `runtime-attempt-blocked`，prediction count 为 0，不冒充 runtime pass。
+
+新 `Test-YoloVisionPackageSurface.ps1` 对实际 nupkg 内 DLL/XML 与 Release build hash 做一致性
+检查，并反射 39 个 exported types / 368 个 public declared members。`IntPtr`、`nint`、
+`UIntPtr`、`SafeHandle`、pointer 和 `JYPPX.SampleSupport.OnnxSampleOptions` 泄漏 finding 均为 0；
+`YoloVisionCommand.Run` 的双语 XML 契约已补齐。YoloVision 包为 77,963 bytes，SHA256
+`6823e236086dcaaee84f830a6272989a1601b96d1eae8c5e0a1d11370f0d47e0`。
+
+路径无关 compact proof 位于
+`artifacts/interface-coverage/yolox-multi-version-local-package-consumer-runtime-proof-closure.{json,md}`。
+raw matrix/log/report 继续位于 ignored `artifacts/yolovision/yolox-local-package-consumer-matrix`。
+proof 同时记录 5 个本地包 hash、逐行 stdout/stderr hash、bridge identity、runtime root 来源、
+TRT8 blocker、surface audit 与 C 盘审计；workspace 全部删除，C 盘测试目录/命名资产匹配均为
+0，已知 `C:\jyppx-pkgcache` / `C:\jyppx-split-packages` 不存在。
+
+公开发布交接新增：
+
+- `yolovision-public-package-owner-handoff.{json,md}`：5 个精确 package ID/version/hash、预期
+  nuget.org URL、GitHub Packages source、TRT10/TRT11 clean command 与 TRT8 rebuild blocker。
+- `Test-YoloVisionPublicPackageConsumer.ps1`：未来发布后使用单一公开 NuGet source、E 盘隔离
+  cache、NuGet `.nupkg.metadata` source、下载 nupkg hash 和真实 YOLOX runtime 生成 proof。
+- `Test-YoloVisionPublicPackageProof.ps1`：要求下载文件 hash 同时匹配 proof 与冻结 handoff，
+  local feed、ProjectReference、缺字段、无 runtime marker 或 workspace 未清理均 fail closed。
+  使用 local handoff 冒充公开 proof 的自测得到 48 个 failure、退出码 1。
+
+最终验证：完整 `TensorRtSharp.sln` Release build 为 0 warning / 0 error；YoloVision consumer、
+pipeline、output/schema、asset 与文档核心集合 49/49，文章/发布材料 readiness 6/6。新增 consumer
+专项单独为 9/9。宽泛 `FullyQualifiedName~YoloVision` 聚合集合曾在 300 秒命令上限超时，未将
+其写成通过。binding 两次生成保持 191 manifests / 3961 records 且幂等；sample asset manifest
+finding 0，strict classification finding 0，strict release quality required failure 0。
+
+本批仍是 `local-package-consumer-runtime-matrix`。成功行不是公开
+`package-consumer-runtime`，TRT8 blocker 不是 runtime proof；所有
+`packagesDownloadedFromPublicFeed`、owner approval、post-publish、publish/close 标志继续为
+false。未执行 NuGet/GitHub Packages push、GitHub Release upload 或 issue close。
+
 ## 2026-07-20 YoloVision YOLOX 本地 PackageReference 消费者闭环
 
 本批把已有官方 YOLOX-S 源码树真实运行推进到无 ProjectReference 的本地 NuGet consumer。

@@ -1,4 +1,8 @@
 using System.Text.Json;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Xml.Linq;
+using YoloVisionSample;
 using Xunit;
 
 namespace JYPPX.ProjectQuality.Tests;
@@ -37,9 +41,13 @@ public sealed class YoloVisionLocalPackageConsumerTests
         Assert.DoesNotContain("ProjectReference", project, StringComparison.Ordinal);
         Assert.Contains("JYPPX.TensorRT.CSharp.API\"", project, StringComparison.Ordinal);
         Assert.Contains("JYPPX.TensorRT.CSharp.API.YoloVision", project, StringComparison.Ordinal);
-        Assert.Contains("JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge", project, StringComparison.Ordinal);
+        Assert.Contains("__BRIDGE_PACKAGE_ID__", project, StringComparison.Ordinal);
+        Assert.DoesNotContain("trt10.11.cuda12.9", project, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("ProjectReference=False", program, StringComparison.Ordinal);
+        Assert.Contains("BridgeTensorRt=", program, StringComparison.Ordinal);
+        Assert.Contains("TensorRtEnvironmentProbe.GetCurrent()", program, StringComparison.Ordinal);
         Assert.Contains("YoloVisionCommand.Run(args)", program, StringComparison.Ordinal);
+        Assert.Contains("TRT8, TRT10, or TRT11", readme, StringComparison.Ordinal);
         Assert.Contains("local-package-consumer-runtime", readme, StringComparison.Ordinal);
         Assert.Contains("not proof", readme, StringComparison.OrdinalIgnoreCase);
     }
@@ -49,7 +57,14 @@ public sealed class YoloVisionLocalPackageConsumerTests
     {
         string script = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Test-YoloVisionLocalPackageConsumer.ps1"));
 
-        Assert.Contains("consumer-workspaces\\yolovision-yolox-local-package", script, StringComparison.Ordinal);
+        Assert.Contains("[string]$RuntimePackageKey", script, StringComparison.Ordinal);
+        Assert.Contains("[ValidateSet(\"8\", \"10\", \"11\")][string]$TensorRtLine", script, StringComparison.Ordinal);
+        Assert.Contains("split-runtime-packages.manifest.json", script, StringComparison.Ordinal);
+        Assert.Contains("sourceRuntimeKey", script, StringComparison.Ordinal);
+        Assert.Contains("__BRIDGE_PACKAGE_ID__", script, StringComparison.Ordinal);
+        Assert.Contains("Bridge TensorRT build version", script, StringComparison.Ordinal);
+        Assert.Contains("bridgeBuildTensorRtLineMatches = $true", script, StringComparison.Ordinal);
+        Assert.Contains("consumer-workspaces\\yolovision-yolox-local-package-trt$TensorRtLine", script, StringComparison.Ordinal);
         Assert.Contains("Assert-NonCDrivePath", script, StringComparison.Ordinal);
         Assert.Contains("<clear />", script, StringComparison.Ordinal);
         Assert.Contains("--packages", script, StringComparison.Ordinal);
@@ -63,6 +78,59 @@ public sealed class YoloVisionLocalPackageConsumerTests
         Assert.Contains("performsPublish = $false", script, StringComparison.Ordinal);
         Assert.DoesNotContain("api.nuget.org", script, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("dotnet nuget push", script, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void MultiVersionMatrixRunsEverySupportedLineAndKeepsBlockedRowsNonProof()
+    {
+        string script = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Test-YoloVisionLocalPackageConsumerMatrix.ps1"));
+
+        Assert.Contains("win-x64-trt8.6-cuda12.1-cudnn8.9", script, StringComparison.Ordinal);
+        Assert.Contains("win-x64-trt10.11-cuda12.9-cudnn9.22", script, StringComparison.Ordinal);
+        Assert.Contains("win-x64-trt11.0-cuda12.9-cudnn9.22", script, StringComparison.Ordinal);
+        Assert.Contains("Resolve-RuntimeRoots.ps1", script, StringComparison.Ordinal);
+        Assert.Contains("runtime-attempt-blocked", script, StringComparison.Ordinal);
+        Assert.Contains("blockedRowsAreRuntimeExecutionProof = $false", script, StringComparison.Ordinal);
+        Assert.Contains("isPackageConsumerRuntimeProof = $false", script, StringComparison.Ordinal);
+        Assert.Contains("packagesDownloadedFromPublicFeed = $false", script, StringComparison.Ordinal);
+        Assert.Contains("canPublishPublicly = $false", script, StringComparison.Ordinal);
+        Assert.Contains("performsPublish = $false", script, StringComparison.Ordinal);
+        Assert.Contains("Remove-DirectoryWithRetry -Path $resolvedLineOutputRoot", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("dotnet nuget push", script, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void ExportedYoloVisionSurfaceAndXmlCommandContractRemainPointerFree()
+    {
+        Assembly assembly = typeof(YoloVisionCommand).Assembly;
+        Type[] exportedTypes = assembly.GetExportedTypes();
+        Assert.NotEmpty(exportedTypes);
+
+        List<string> forbidden = new();
+        List<string> sampleInternalLeaks = new();
+        foreach (Type type in exportedTypes)
+        {
+            InspectType(type, type.FullName ?? type.Name, forbidden, sampleInternalLeaks);
+            foreach (MemberInfo member in type.GetMembers(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly))
+            {
+                foreach (Type signatureType in GetSignatureTypes(member))
+                {
+                    InspectType(signatureType, $"{type.FullName}.{member.Name}", forbidden, sampleInternalLeaks);
+                }
+            }
+        }
+
+        Assert.Empty(forbidden);
+        Assert.Empty(sampleInternalLeaks);
+
+        string xmlPath = Path.ChangeExtension(assembly.Location, ".xml");
+        Assert.True(File.Exists(xmlPath), $"YoloVision XML documentation was not generated at {xmlPath}.");
+        XDocument xml = XDocument.Load(xmlPath);
+        string[] memberNames = xml.Descendants("member")
+            .Select(static member => member.Attribute("name")?.Value ?? string.Empty)
+            .ToArray();
+        Assert.Contains("T:YoloVisionSample.YoloVisionCommand", memberNames);
+        Assert.Contains("M:YoloVisionSample.YoloVisionCommand.Run(System.String[])", memberNames);
     }
 
     [Fact]
@@ -96,5 +164,175 @@ public sealed class YoloVisionLocalPackageConsumerTests
         Assert.False(boundary.GetProperty("packagesDownloadedFromPublicFeed").GetBoolean());
         Assert.False(boundary.GetProperty("canPublishPublicly").GetBoolean());
         Assert.False(boundary.GetProperty("performsPublish").GetBoolean());
+    }
+
+    [Fact]
+    public void MultiVersionCompactProofKeepsTrt8BlockedAndPromotesOnlyLocalTrt10AndTrt11Rows()
+    {
+        string proofPath = Path.Combine(
+            RepositoryPaths.Root,
+            "artifacts",
+            "interface-coverage",
+            "yolox-multi-version-local-package-consumer-runtime-proof-closure.json");
+        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(proofPath));
+        JsonElement root = document.RootElement;
+
+        Assert.Equal("passed-path-free-matrix-proof-closure", root.GetProperty("validationState").GetString());
+        Assert.Equal(3, root.GetProperty("requestedRuntimeCount").GetInt32());
+        Assert.Equal(2, root.GetProperty("passedRuntimeCount").GetInt32());
+        Assert.Equal(1, root.GetProperty("blockedRuntimeCount").GetInt32());
+        Assert.Equal(5, root.GetProperty("packages").GetArrayLength());
+
+        JsonElement[] rows = root.GetProperty("rows").EnumerateArray().ToArray();
+        JsonElement trt8 = rows.Single(static row => row.GetProperty("tensorRtLine").GetString() == "8");
+        JsonElement trt10 = rows.Single(static row => row.GetProperty("tensorRtLine").GetString() == "10");
+        JsonElement trt11 = rows.Single(static row => row.GetProperty("tensorRtLine").GetString() == "11");
+        Assert.False(trt8.GetProperty("runtimePassed").GetBoolean());
+        Assert.Equal("runtime-attempt-blocked", trt8.GetProperty("evidenceClassification").GetString());
+        Assert.Equal(0, trt8.GetProperty("cudnnRuntimeDllCount").GetInt32());
+        Assert.Contains("ONNX parser", trt8.GetProperty("diagnostic").GetString(), StringComparison.Ordinal);
+        Assert.True(trt10.GetProperty("runtimePassed").GetBoolean());
+        Assert.Equal(5, trt10.GetProperty("predictionCount").GetInt32());
+        Assert.True(trt11.GetProperty("runtimePassed").GetBoolean());
+        Assert.Equal(5, trt11.GetProperty("predictionCount").GetInt32());
+        Assert.Equal("existing-assembled-runtime", trt11.GetProperty("tensorRtRuntimeRootSource").GetString());
+        Assert.All(rows, static row => Assert.True(row.GetProperty("bridgeBuildTensorRtLineMatches").GetBoolean()));
+        Assert.All(rows, static row => Assert.True(row.GetProperty("workspaceRemovedAfterValidation").GetBoolean()));
+
+        JsonElement surface = root.GetProperty("packageSurfaceAudit");
+        Assert.True(surface.GetProperty("valid").GetBoolean());
+        Assert.Equal(0, surface.GetProperty("forbiddenPointerOrHandleFindingCount").GetInt32());
+        Assert.Equal(0, surface.GetProperty("sampleInternalTypeLeakFindingCount").GetInt32());
+        Assert.Equal(2, root.GetProperty("ownerHandoff").GetProperty("strictValidatorCommandCount").GetInt32());
+        Assert.Equal(0, root.GetProperty("cDriveAudit").GetProperty("testDirectoryMatchCount").GetInt32());
+        Assert.Equal(0, root.GetProperty("cDriveAudit").GetProperty("yoloXOrConsumerAssetMatchCount").GetInt32());
+
+        JsonElement boundary = root.GetProperty("boundary");
+        Assert.False(boundary.GetProperty("blockedRowsAreRuntimeExecutionProof").GetBoolean());
+        Assert.False(boundary.GetProperty("isPackageConsumerRuntimeProof").GetBoolean());
+        Assert.False(boundary.GetProperty("packagesDownloadedFromPublicFeed").GetBoolean());
+        Assert.False(boundary.GetProperty("canPublishPublicly").GetBoolean());
+        Assert.False(boundary.GetProperty("performsPublish").GetBoolean());
+    }
+
+    [Fact]
+    public void PublicPackageOwnerHandoffListsExactHashesAndExcludesBlockedTrt8FromRuntimeCommands()
+    {
+        string handoffPath = Path.Combine(
+            RepositoryPaths.Root,
+            "artifacts",
+            "interface-coverage",
+            "yolovision-public-package-owner-handoff.json");
+        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(handoffPath));
+        JsonElement root = document.RootElement;
+
+        Assert.Equal("owner-action-required-public-feed-not-executed", root.GetProperty("state").GetString());
+        Assert.Equal(5, root.GetProperty("packages").GetArrayLength());
+        Assert.Equal(2, root.GetProperty("publicConsumerCandidateRuntimeKeys").GetArrayLength());
+        Assert.Equal(1, root.GetProperty("blockedRuntimeKeys").GetArrayLength());
+        Assert.Equal("win-x64-trt8.6-cuda12.1-cudnn8.9", root.GetProperty("blockedRuntimeKeys")[0].GetString());
+        Assert.Equal(2, root.GetProperty("cleanExternalCommands").GetArrayLength());
+        Assert.Equal(2, root.GetProperty("strictValidatorCommands").GetArrayLength());
+        Assert.All(root.GetProperty("cleanExternalCommands").EnumerateArray(), static command =>
+            Assert.DoesNotContain("trt8.6", command.GetString(), StringComparison.Ordinal));
+
+        JsonElement[] packages = root.GetProperty("packages").EnumerateArray().ToArray();
+        Assert.All(packages, static package =>
+        {
+            Assert.Matches("^[0-9a-f]{64}$", package.GetProperty("localSha256").GetString()!);
+            Assert.StartsWith("https://api.nuget.org/v3-flatcontainer/", package.GetProperty("expectedNuGetFlatContainerUrl").GetString(), StringComparison.Ordinal);
+        });
+        JsonElement trt8 = packages.Single(static package => package.GetProperty("id").GetString()!.Contains("trt8.6", StringComparison.Ordinal));
+        Assert.False(trt8.GetProperty("eligibleForYoloVisionPublicRuntimeHandoff").GetBoolean());
+        Assert.True(trt8.GetProperty("ownerMustRebuildAndRefreezeBeforeYoloVisionPublish").GetBoolean());
+        Assert.False(root.GetProperty("performsPublish").GetBoolean());
+        Assert.False(root.GetProperty("canPublishPublicly").GetBoolean());
+        Assert.False(root.GetProperty("canCloseReleaseIssue").GetBoolean());
+    }
+
+    [Fact]
+    public void PublicConsumerAndValidatorRequireNuGetSourceMetadataAndNeverPublish()
+    {
+        string publicConsumer = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Test-YoloVisionPublicPackageConsumer.ps1"));
+        string validator = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Test-YoloVisionPublicPackageProof.ps1"));
+        string surfaceAudit = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Test-YoloVisionPackageSurface.ps1"));
+
+        Assert.Contains("<clear />", publicConsumer, StringComparison.Ordinal);
+        Assert.Contains("https://api.nuget.org/v3/index.json", publicConsumer, StringComparison.Ordinal);
+        Assert.Contains(".nupkg.metadata", publicConsumer, StringComparison.Ordinal);
+        Assert.Contains("downloadedFromPublicFeed = $true", publicConsumer, StringComparison.Ordinal);
+        Assert.Contains("isPackageConsumerRuntimeProof = $true", publicConsumer, StringComparison.Ordinal);
+        Assert.Contains("Test-YoloVisionPublicPackageProof.ps1", publicConsumer, StringComparison.Ordinal);
+        Assert.Contains("ExpectedHandoffPath", validator, StringComparison.Ordinal);
+        Assert.Contains("localSha256", validator, StringComparison.Ordinal);
+        Assert.Contains("package-metadata-source", validator, StringComparison.Ordinal);
+        Assert.Contains("performsPublish = $false", validator, StringComparison.Ordinal);
+        Assert.Contains("GetExportedTypes", surfaceAudit, StringComparison.Ordinal);
+        Assert.Contains("OnnxSampleOptions", surfaceAudit, StringComparison.Ordinal);
+        Assert.Contains("SafeHandle", surfaceAudit, StringComparison.Ordinal);
+        foreach (string script in new[] { publicConsumer, validator, surfaceAudit })
+        {
+            Assert.DoesNotContain("dotnet nuget push", script, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("gh release upload", script, StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    private static IEnumerable<Type> GetSignatureTypes(MemberInfo member)
+    {
+        switch (member)
+        {
+            case MethodInfo method:
+                yield return method.ReturnType;
+                foreach (ParameterInfo parameter in method.GetParameters())
+                {
+                    yield return parameter.ParameterType;
+                }
+                break;
+            case ConstructorInfo constructor:
+                foreach (ParameterInfo parameter in constructor.GetParameters())
+                {
+                    yield return parameter.ParameterType;
+                }
+                break;
+            case PropertyInfo property:
+                yield return property.PropertyType;
+                foreach (ParameterInfo parameter in property.GetIndexParameters())
+                {
+                    yield return parameter.ParameterType;
+                }
+                break;
+            case FieldInfo field:
+                yield return field.FieldType;
+                break;
+            case EventInfo eventInfo when eventInfo.EventHandlerType != null:
+                yield return eventInfo.EventHandlerType;
+                break;
+        }
+    }
+
+    private static void InspectType(Type type, string surface, ICollection<string> forbidden, ICollection<string> sampleInternalLeaks)
+    {
+        Type candidate = type;
+        while (candidate.HasElementType && candidate.GetElementType() != null)
+        {
+            candidate = candidate.GetElementType()!;
+        }
+
+        if (candidate.IsPointer || candidate == typeof(IntPtr) || candidate == typeof(UIntPtr) || typeof(SafeHandle).IsAssignableFrom(candidate))
+        {
+            forbidden.Add($"{surface}: {type}");
+        }
+        if ((candidate.FullName ?? string.Empty).Contains("OnnxSampleOptions", StringComparison.Ordinal) ||
+            string.Equals(candidate.Namespace, "JYPPX.SampleSupport", StringComparison.Ordinal))
+        {
+            sampleInternalLeaks.Add($"{surface}: {type}");
+        }
+        if (candidate.IsGenericType)
+        {
+            foreach (Type argument in candidate.GetGenericArguments())
+            {
+                InspectType(argument, surface, forbidden, sampleInternalLeaks);
+            }
+        }
     }
 }
