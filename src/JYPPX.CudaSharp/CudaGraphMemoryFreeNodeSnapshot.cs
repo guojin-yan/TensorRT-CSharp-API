@@ -13,6 +13,7 @@ public sealed class CudaGraphMemoryFreeNodeSnapshot
         HasDevicePointer = native.HasDevicePointer != 0;
     }
 
+    /// <summary>Gets whether a device pointer was configured without exposing its value. 获取是否配置了 device pointer，但不暴露其值。</summary>
     public bool HasDevicePointer { get; }
 
     /// <inheritdoc />

@@ -840,6 +840,11 @@ public partial class CudaMemory : IDisposable
         }
     }
 
+    /// <summary>Validates a non-empty byte range within this allocation. 验证当前分配内的非空字节范围。</summary>
+    /// <param name="offset">The byte offset to validate. 要验证的字节偏移。</param>
+    /// <param name="count">The byte count to validate. 要验证的字节数。</param>
+    /// <param name="offsetParameterName">The offset parameter name used by exceptions. 异常使用的 offset 参数名。</param>
+    /// <param name="countParameterName">The count parameter name used by exceptions. 异常使用的 count 参数名。</param>
     protected void ValidateRange(int offset, int count, string offsetParameterName, string countParameterName)
     {
         if (offset < 0 || offset > SizeInBytes)
@@ -866,6 +871,9 @@ public partial class CudaMemory : IDisposable
         }
     }
 
+    /// <summary>Validates a CUDA memory-advice value. 验证 CUDA 内存建议值。</summary>
+    /// <param name="advice">The memory advice to validate. 要验证的内存建议。</param>
+    /// <param name="parameterName">The parameter name used by exceptions. 异常使用的参数名。</param>
     protected static void ValidateMemoryAdvice(CudaMemoryAdvice advice, string parameterName)
     {
         if (!Enum.IsDefined(typeof(CudaMemoryAdvice), advice))

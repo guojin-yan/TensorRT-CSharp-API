@@ -73,7 +73,7 @@ public sealed class CudaManagedMemory : CudaMemory
     /// </summary>
     /// <param name="offset">The byte offset within this allocation. 当前分配内的字节偏移。</param>
     /// <param name="count">The number of bytes covered by the advice. advice 覆盖的字节数。</param>
-    /// <param name="advice">The CUDA memory advice. CUDA memory advice。</param>
+    /// <param name="advice">The CUDA memory advice. CUDA 内存建议。</param>
     /// <param name="location">The CUDA memory location associated with the advice. 与 advice 关联的 CUDA memory 位置。</param>
     public void Advise(int offset, int count, CudaMemoryAdvice advice, CudaMemoryLocation location)
     {

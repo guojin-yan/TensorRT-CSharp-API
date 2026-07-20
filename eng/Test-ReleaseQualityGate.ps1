@@ -113,6 +113,11 @@ Add-Check -Id "workflow-build-and-tests" -Passed (
   $workflow.Contains("dotnet build TensorRtSharp.sln", [StringComparison]::Ordinal) -and
   $workflow.Contains("dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj", [StringComparison]::Ordinal)
 ) -Required $true -Detail "Workflow must build the solution and run source-only quality tests."
+Add-Check -Id "workflow-public-api-documentation" -Passed (
+  $workflow.Contains("Enforce public API documentation", [StringComparison]::Ordinal) -and
+  $workflow.Contains("Test-PublicApiBilingualDocumentation.ps1", [StringComparison]::Ordinal) -and
+  -not $workflow.Contains("Test-PublicApiBilingualDocumentation.ps1 -SkipBuild", [StringComparison]::Ordinal)
+) -Required $true -Detail "Workflow must fail on compiler-reported missing XML documentation and non-bilingual public documentation."
 Add-Check -Id "workflow-source-only-test-filter" -Passed (
   $workflow.Contains("Run source-only release quality tests", [StringComparison]::Ordinal) -and
   $workflow.Contains("--filter ""FullyQualifiedName~ReleaseAutomationTests|FullyQualifiedName~ReleaseQualityGateWorkflowTests""", [StringComparison]::Ordinal) -and
@@ -124,7 +129,7 @@ Add-Check -Id "workflow-source-only-test-filter" -Passed (
 Add-Check -Id "workflow-project-quality-shard-smoke" -Passed (
   $workflow.Contains("Invoke-ProjectQualityTestShards.ps1", [StringComparison]::Ordinal) -and
   $workflow.Contains("-Shard N-S", [StringComparison]::Ordinal) -and
-  $workflow.Contains("PluginInventorySourceOnlySmoke|PublicApiHandleExposureAudit|ReleaseQualityGateWorkflow", [StringComparison]::Ordinal) -and
+  $workflow.Contains("PluginInventorySourceOnlySmoke|PublicApiDocumentationClosure|PublicApiHandleExposureAudit|ReleaseQualityGateWorkflow", [StringComparison]::Ordinal) -and
   $workflow.Contains("artifacts/test-analysis/project-quality-shards/**", [StringComparison]::Ordinal)
 ) -Required $true -Detail "Workflow must execute a bounded ProjectQuality shard smoke and archive shard evidence."
 Add-Check -Id "workflow-opt-in-large-jobs" -Passed (

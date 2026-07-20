@@ -27,6 +27,10 @@ public sealed class ReleaseQualityGateWorkflowTests
         Assert.Contains("artifact_name: package-managed-dry-run", workflow, StringComparison.Ordinal);
         Assert.Contains("Export-GitHubActionsPackageValidationAudit.ps1", workflow, StringComparison.Ordinal);
         Assert.Contains("github-actions-package-validation-audit.*", workflow, StringComparison.Ordinal);
+        Assert.Contains("Enforce public API documentation", workflow, StringComparison.Ordinal);
+        Assert.Contains("Test-PublicApiBilingualDocumentation.ps1", workflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("Test-PublicApiBilingualDocumentation.ps1 -SkipBuild", workflow, StringComparison.Ordinal);
+        Assert.Contains("public-api-documentation-closure.*", workflow, StringComparison.Ordinal);
         Assert.Contains("Run source-only release quality tests", workflow, StringComparison.Ordinal);
         Assert.Contains("--filter \"FullyQualifiedName~ReleaseAutomationTests|FullyQualifiedName~ReleaseQualityGateWorkflowTests\"", workflow, StringComparison.Ordinal);
         Assert.DoesNotContain("FinalReleaseMarkdownRenderingTests", workflow, StringComparison.Ordinal);
@@ -36,7 +40,7 @@ public sealed class ReleaseQualityGateWorkflowTests
         Assert.Contains("Run bounded ProjectQuality shard smoke", workflow, StringComparison.Ordinal);
         Assert.Contains("Invoke-ProjectQualityTestShards.ps1", workflow, StringComparison.Ordinal);
         Assert.Contains("-Shard N-S", workflow, StringComparison.Ordinal);
-        Assert.Contains("PluginInventorySourceOnlySmoke|PublicApiHandleExposureAudit|ReleaseQualityGateWorkflow", workflow, StringComparison.Ordinal);
+        Assert.Contains("PluginInventorySourceOnlySmoke|PublicApiDocumentationClosure|PublicApiHandleExposureAudit|ReleaseQualityGateWorkflow", workflow, StringComparison.Ordinal);
         Assert.Contains("artifacts/test-analysis/project-quality-test-inventory.*", workflow, StringComparison.Ordinal);
         Assert.Contains("artifacts/test-analysis/project-quality-shards/**", workflow, StringComparison.Ordinal);
         Assert.Contains("Record split runner availability", workflow, StringComparison.Ordinal);
@@ -134,6 +138,9 @@ public sealed class ReleaseQualityGateWorkflowTests
             check.GetProperty("passed").GetBoolean());
         Assert.Contains(checks, static check =>
             check.GetProperty("id").GetString() == "workflow-project-quality-shard-smoke" &&
+            check.GetProperty("passed").GetBoolean());
+        Assert.Contains(checks, static check =>
+            check.GetProperty("id").GetString() == "workflow-public-api-documentation" &&
             check.GetProperty("passed").GetBoolean());
         Assert.Contains(checks, static check =>
             check.GetProperty("id").GetString() == "workflow-source-only-test-filter" &&

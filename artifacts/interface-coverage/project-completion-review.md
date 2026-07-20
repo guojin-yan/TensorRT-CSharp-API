@@ -1,5 +1,47 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-20 Public API Documentation Zero-Finding Closure
+
+本批把 managed public API documentation 从“已有审计、仍有历史缺口”推进为可持续的
+zero-finding contract。16 个 CUDA/TensorRT source 文件补齐或改为中英双语 XML 注释，未修改
+public signature、枚举值、控制流、native manifest 或 ABI。
+
+### Closure 与持续门禁
+
+- compiler-reported `CS1591` 从 139 条降为 0；三个公共项目以 Release/net8.0 强制重建，均为
+  `0 warning / 0 error`。
+- 非中英双语 XML 元素从 24 条降为 0；重新导出的 bilingual backlog 为
+  `inputFindingCount=0`、`backlogFindingCount=0`。
+- `release-quality-gate.yml` 在 solution build 后运行不带 `-SkipBuild` 的
+  `Test-PublicApiBilingualDocumentation.ps1`；该脚本先执行 compiler documentation audit，再检查
+  XML 中的 `summary`、`param`、`returns` 与 `remarks`。documentation build 任一非零退出也会
+  fail closed，不能借旧 XML 误通过。
+- `Test-ReleaseQualityGate.ps1` 新增 required check
+  `workflow-public-api-documentation`；专项 `PublicApiDocumentationClosureTests` 同时锁定
+  `139 -> 0`、`24 -> 0`、workflow 契约与 proof boundary。
+
+### Verification
+
+- binding generator/output validation：`193 manifests / 3968 API records`，重复生成幂等。
+- focused closure/workflow tests：`8/8`；按 CI 顺序完成 Debug build 后，N-S bounded shard
+  `13/13`。
+- 完整 solution Release build：`0 warning / 0 error`；Debug build：`0 error`，保留 5 条既有
+  test nullable warning。
+- DocFX：`916 model(s)`，`0 warning / 0 error`。
+- strict classification audit finding `0`；public-proof claim boundary finding `0`；strict release
+  quality `RequiredFailureCount=0`。
+- 闭环证据：`public-api-documentation-closure.{json,md}`，明确
+  `isRuntimeExecutionProof=false`、`isPackageConsumerRuntimeProof=false`、
+  `canPublishPublicly=false`。
+
+### C 盘与发布边界
+
+- 未发现本批模型、包、源码副本或项目资产下载到 C 盘。
+- 累计清理了本轮 `dotnet/MSBuild` 留下的 33 个 workload 日志和 30 个空 `MSBuildTemp*` 目录；
+  清理后同一时间窗残留为 0。
+- 保留 NuGet、Codex、CUDA、Downloads、既有 `.jyppx` 配置与 action runner；未执行 NuGet
+  push、GitHub Packages publish、GitHub Release upload 或 issue close。
+
 ## 2026-07-20 CUDA Graph Memory Allocation Owner-Safe Uplift
 
 本批将 `cudaGraphAddMemAllocNode` 与 `cudaGraphAddMemFreeNode` 从 `deferred-only` 提升为

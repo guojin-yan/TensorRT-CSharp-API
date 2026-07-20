@@ -26,25 +26,25 @@ public readonly struct TensorRtProfilerInterfaceMetadataSnapshot
         ApiLanguageDiagnostic = apiLanguageDiagnostic ?? string.Empty;
     }
 
-    /// <summary>Gets the TensorRT API line probed.</summary>
+    /// <summary>Gets the TensorRT API line probed. 获取所探测的 TensorRT API 版本线。</summary>
     public TensorRtApiLine Line { get; }
 
-    /// <summary>Gets whether copied interface info was available.</summary>
+    /// <summary>Gets whether copied interface info was available. 获取复制型 interface info 是否可用。</summary>
     public bool InterfaceInfoAvailable { get; }
 
-    /// <summary>Gets copied interface info when available.</summary>
+    /// <summary>Gets copied interface info when available. 获取可用的复制型 interface info。</summary>
     public TensorRtInterfaceInfo InterfaceInfo { get; }
 
-    /// <summary>Gets the interface-info diagnostic.</summary>
+    /// <summary>Gets the interface-info diagnostic. 获取 interface info 诊断信息。</summary>
     public string InterfaceInfoDiagnostic { get; }
 
-    /// <summary>Gets whether copied API-language metadata was available.</summary>
+    /// <summary>Gets whether copied API-language metadata was available. 获取复制型 API language 元数据是否可用。</summary>
     public bool ApiLanguageAvailable { get; }
 
-    /// <summary>Gets copied API-language metadata when available.</summary>
+    /// <summary>Gets copied API-language metadata when available. 获取可用的复制型 API language 元数据。</summary>
     public TensorRtApiLanguage ApiLanguage { get; }
 
-    /// <summary>Gets the API-language diagnostic.</summary>
+    /// <summary>Gets the API-language diagnostic. 获取 API language 诊断信息。</summary>
     public string ApiLanguageDiagnostic { get; }
 
     /// <summary>

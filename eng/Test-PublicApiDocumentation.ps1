@@ -19,12 +19,17 @@ function Invoke-DocAuditBuild {
   )
 
   $rawOutput = & dotnet build $ProjectPath -c Release -t:Rebuild -p:TargetFramework=net8.0 -p:JYPPXSuppressMissingXmlDocs=false 2>&1
+  $exitCode = $LASTEXITCODE
   $normalizedOutput = New-Object System.Collections.Generic.List[string]
   foreach ($line in @($rawOutput)) {
     $lineText = [string]$line
     $lineText = [System.Text.RegularExpressions.Regex]::Replace($lineText, '\x1B\[[0-9;]*[A-Za-z]', '')
     $normalizedOutput.Add($lineText)
     Write-Host $lineText
+  }
+
+  if ($exitCode -ne 0) {
+    throw "Public API documentation build failed for $ProjectPath with exit code $exitCode."
   }
 
   $warnings = @($normalizedOutput | Where-Object { $_ -match 'warning CS1591:' })

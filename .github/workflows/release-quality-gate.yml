@@ -100,6 +100,10 @@ jobs:
       - name: Build solution
         run: dotnet build TensorRtSharp.sln -c Debug --no-restore
 
+      - name: Enforce public API documentation
+        shell: pwsh
+        run: pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-PublicApiBilingualDocumentation.ps1
+
       - name: Run source-only release quality tests
         shell: pwsh
         run: |
@@ -116,7 +120,7 @@ jobs:
           pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Invoke-ProjectQualityTestShards.ps1 `
             -RefreshInventory `
             -Shard N-S `
-            -ClassNamePattern "PluginInventorySourceOnlySmoke|PublicApiHandleExposureAudit|ReleaseQualityGateWorkflow" `
+            -ClassNamePattern "PluginInventorySourceOnlySmoke|PublicApiDocumentationClosure|PublicApiHandleExposureAudit|ReleaseQualityGateWorkflow" `
             -TimeoutSeconds 300 `
             -RunId ci-release-critical-shard
 
@@ -151,6 +155,7 @@ jobs:
             artifacts/native-abi/**
             artifacts/interface-coverage/tensorrt-interface-comparison.csv
             artifacts/interface-coverage/deferred-candidate-safety-triage.json
+            artifacts/interface-coverage/public-api-documentation-closure.*
             artifacts/final-release/github-actions-package-validation-audit.*
 
   package-managed-dry-run:

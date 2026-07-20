@@ -16,9 +16,13 @@ public sealed class CudaGraphExternalSemaphoreNodeSnapshot
         HasParameterArray = native.HasParameterArray != 0;
     }
 
+    /// <summary>Gets the signal or wait node type. 获取 signal 或 wait 节点类型。</summary>
     public CudaGraphNodeType NodeType { get; }
+    /// <summary>Gets the copied semaphore count. 获取复制的 semaphore 数量。</summary>
     public uint SemaphoreCount { get; }
+    /// <summary>Gets whether the native node had a semaphore array. 获取 native 节点是否包含 semaphore 数组。</summary>
     public bool HasSemaphoreArray { get; }
+    /// <summary>Gets whether the native node had a parameter array. 获取 native 节点是否包含参数数组。</summary>
     public bool HasParameterArray { get; }
 
     /// <inheritdoc />

@@ -27,7 +27,9 @@ public readonly struct CudaLogCursor : IEquatable<CudaLogCursor>
     /// <inheritdoc />
     public override string ToString() => Value.ToString();
 
+    /// <summary>Tests two CUDA log cursors for equality. 测试两个 CUDA log cursor 是否相等。</summary>
     public static bool operator ==(CudaLogCursor left, CudaLogCursor right) => left.Equals(right);
 
+    /// <summary>Tests two CUDA log cursors for inequality. 测试两个 CUDA log cursor 是否不相等。</summary>
     public static bool operator !=(CudaLogCursor left, CudaLogCursor right) => !left.Equals(right);
 }

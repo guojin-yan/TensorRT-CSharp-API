@@ -14,7 +14,9 @@ public sealed class CudaGraphHostNodeParametersSnapshot
         HasUserData = native.HasUserData != 0;
     }
 
+    /// <summary>Gets whether the native host node had a callback. 获取 native host 节点是否包含 callback。</summary>
     public bool HasCallback { get; }
+    /// <summary>Gets whether the native host node had user data. 获取 native host 节点是否包含用户数据。</summary>
     public bool HasUserData { get; }
 
     /// <inheritdoc />

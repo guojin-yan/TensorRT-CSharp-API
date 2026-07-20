@@ -15,7 +15,7 @@ public readonly struct CudaManagedMemoryRange
     /// Creates an owner-bound range covering an entire managed-memory allocation.
     /// 创建覆盖整个 managed memory 分配的 owner-bound 范围。
     /// </summary>
-    /// <param name="memory">The managed-memory owner. managed memory owner。</param>
+    /// <param name="memory">The managed-memory owner. 托管内存 owner。</param>
     public CudaManagedMemoryRange(CudaManagedMemory memory)
         : this(memory, 0, memory == null ? 0 : memory.SizeInBytes)
     {
@@ -25,7 +25,7 @@ public readonly struct CudaManagedMemoryRange
     /// Creates an owner-bound managed-memory subrange.
     /// 创建与 owner 绑定的 managed memory 子范围。
     /// </summary>
-    /// <param name="memory">The managed-memory owner. managed memory owner。</param>
+    /// <param name="memory">The managed-memory owner. 托管内存 owner。</param>
     /// <param name="offset">The byte offset within the allocation. 分配内的字节偏移。</param>
     /// <param name="count">The range length in bytes. 范围长度，单位为字节。</param>
     public CudaManagedMemoryRange(CudaManagedMemory memory, int offset, int count)
@@ -80,7 +80,7 @@ public readonly struct CudaManagedMemoryPrefetchRange
     /// Creates a prefetch range covering an entire managed-memory allocation.
     /// 创建覆盖整个 managed memory 分配的预取范围。
     /// </summary>
-    /// <param name="memory">The managed-memory owner. managed memory owner。</param>
+    /// <param name="memory">The managed-memory owner. 托管内存 owner。</param>
     /// <param name="destinationDevice">The destination CUDA device ordinal. 目标 CUDA 设备序号。</param>
     public CudaManagedMemoryPrefetchRange(CudaManagedMemory memory, int destinationDevice)
         : this(memory, 0, memory == null ? 0 : memory.SizeInBytes, destinationDevice)
@@ -91,7 +91,7 @@ public readonly struct CudaManagedMemoryPrefetchRange
     /// Creates an owner-bound managed-memory prefetch subrange.
     /// 创建与 owner 绑定的 managed memory 预取子范围。
     /// </summary>
-    /// <param name="memory">The managed-memory owner. managed memory owner。</param>
+    /// <param name="memory">The managed-memory owner. 托管内存 owner。</param>
     /// <param name="offset">The byte offset within the allocation. 分配内的字节偏移。</param>
     /// <param name="count">The range length in bytes. 范围长度，单位为字节。</param>
     /// <param name="destinationDevice">The destination CUDA device ordinal. 目标 CUDA 设备序号。</param>

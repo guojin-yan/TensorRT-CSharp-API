@@ -33,10 +33,10 @@ public sealed class CudaGraphConditionalHandle : IDisposable
 
     internal bool IsDisposed => _disposed;
 
-    /// <summary>Gets the default conditional value supplied at creation.</summary>
+    /// <summary>Gets the default conditional value supplied at creation. 获取创建时提供的默认条件值。</summary>
     public uint DefaultLaunchValue { get; }
 
-    /// <summary>Gets the creation flags supplied to CUDA.</summary>
+    /// <summary>Gets the creation flags supplied to CUDA. 获取提供给 CUDA 的创建标志。</summary>
     public CudaGraphConditionalHandleFlags Flags { get; }
 
     /// <summary>
