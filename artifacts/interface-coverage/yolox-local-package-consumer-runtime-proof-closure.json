@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "yolovision-yolox-local-package-consumer-runtime-proof-closure",
+  "evidenceClassification": "local-package-consumer-runtime",
+  "sample": "samples/YoloVision.PackageConsumer",
+  "family": "yolox",
+  "task": "det",
+  "consumer": {
+    "targetFramework": "net8.0",
+    "projectReferenceCount": 0,
+    "restoredProjectLibraryCount": 0,
+    "packageSourceKind": "local-file-feed-only",
+    "packageSourceCount": 3,
+    "packageCacheDrive": "E:",
+    "packageCacheFileCount": 109,
+    "packageCacheBytes": 105810697,
+    "workspaceDrive": "E:",
+    "workspaceRemovedAfterValidation": true,
+    "restoreExitCode": 0,
+    "buildExitCode": 0,
+    "runtimeExitCode": 0
+  },
+  "packages": [
+    {
+      "role": "managed-api",
+      "id": "JYPPX.TensorRT.CSharp.API",
+      "version": "4.0.0",
+      "length": 14615786,
+      "sha256": "4bfe3c013ea2de89630b7d91cf471c082f68d1a9fe9c7e1015235a759e21b111"
+    },
+    {
+      "role": "yolovision",
+      "id": "JYPPX.TensorRT.CSharp.API.YoloVision",
+      "version": "4.0.0",
+      "length": 77621,
+      "sha256": "bb13fc1574b121ab4a304bb0be3abb5efb5c543ac94ebaf791fbbf04a5d36507"
+    },
+    {
+      "role": "bridge-only",
+      "id": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge",
+      "version": "4.0.0",
+      "length": 347493,
+      "sha256": "13e82c8080a09754979b80108bcbdbadaf47d6f10161f71d59438477e8a13336"
+    }
+  ],
+  "nativeDependency": {
+    "bridgeCopiedByNuGet": true,
+    "bridgeLength": 1056768,
+    "bridgeSha256": "d9728a0555894ee3afc32f6821dfda17fc7a21195868c3b17867881e5f4fb19c",
+    "tensorRtVersion": "10.11.0.33",
+    "cudaToolkitVersion": "12.9",
+    "systemDependenciesRequired": true
+  },
+  "assets": {
+    "modelSha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+    "imageSha256": "6cb94c9cd0781412598fe179246b09041af4303d388a5ba3c55f760dff11ec2c",
+    "labelsSha256": "4d4aaea7bee6be2f675d9b53a9195ca36dfe6429f7479f29155da522a6c85930",
+    "tensorSha256": "ca4e22bc6d8ebfe70f5aefeae8957d9ad15eb8d3bf99b6a42e016436dcbf1528",
+    "largeAssetsCommitted": false
+  },
+  "runtime": {
+    "inputShape": [1, 3, 640, 640],
+    "outputShape": [1, 8400, 85],
+    "elapsedMilliseconds": 14.238,
+    "predictionCount": 5,
+    "topPrediction": "bicycle",
+    "topScore": 0.954854,
+    "dogScore": 0.913407,
+    "passedMarker": "YoloVision Passed=True",
+    "packageConsumerMarker": "YoloVisionPackageConsumer ProjectReference=False",
+    "restoreLogSha256": "6320e7f2cebf4c725879ed499b8ebca3197b1e1e87f4f58270c62f62b7f6b058",
+    "buildLogSha256": "b3803bdc6809a0aa3d91e1070ccb7d1e71613837fcca8ee2361eba4f3d643e7e",
+    "stdoutSha256": "c59f0d3921fef14f8fc41f5c007c813abd7a8a614d1aa0ef8cdfa3dd5c86020a",
+    "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "outputJsonSha256": "6873874a603af3bc91ffa58c8aa689f6f3f29c2caa7e9070943c850d0b55515a",
+    "visualizationSha256": "d32a9d22378e3d711620f31cf903c5106625c0415e94303118a47d3512cf7214"
+  },
+  "host": {
+    "os": "Windows",
+    "architecture": "x64",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02"
+  },
+  "localEvidence": {
+    "root": "artifacts/yolovision/yolox-local-package-consumer",
+    "rawEvidenceCommitted": false,
+    "reason": "Raw reports and logs contain local paths; only this compact, path-free closure record is committed."
+  },
+  "cDriveAudit": {
+    "checkedUserRootCount": 4,
+    "yoloXOrConsumerAssetMatchCount": 0,
+    "removedEmptyTestDirectoryCount": 6,
+    "packageCacheRootExists": false,
+    "splitPackageTempRootExists": false,
+    "consumerWorkspaceUsedCDrive": false,
+    "unrelatedUserOrSystemFilesRemoved": false
+  },
+  "boundary": {
+    "isRuntimeExecutionEvidence": true,
+    "isRealModelRuntimeEvidence": true,
+    "isLocalPackageConsumerRuntimeEvidence": true,
+    "isPackageConsumerRuntimeProof": false,
+    "packagesDownloadedFromPublicFeed": false,
+    "publicRedistributionOwnerApproval": false,
+    "canPromotePackageConsumerRuntime": false,
+    "canPublishPublicly": false,
+    "isPostPublishProof": false,
+    "canCloseReleaseIssue": false,
+    "performsPublish": false
+  }
+}

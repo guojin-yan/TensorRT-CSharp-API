@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RestoreIgnoreFailedSources>false</RestoreIgnoreFailedSources>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="JYPPX.TensorRT.CSharp.API" Version="__MANAGED_PACKAGE_VERSION__" />
+    <PackageReference Include="JYPPX.TensorRT.CSharp.API.YoloVision" Version="__YOLOVISION_PACKAGE_VERSION__" />
+    <PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge" Version="__BRIDGE_PACKAGE_VERSION__" />
+  </ItemGroup>
+</Project>

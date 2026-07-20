@@ -2,7 +2,7 @@
   "roadmapId": "article-roadmap-30plus",
   "roadmapState": "release-readiness-planning",
   "minimumArticleCount": 30,
-  "articleCount": 42,
+  "articleCount": 43,
   "performsPublish": false,
   "canPublishPublicly": false,
   "canCloseReleaseIssue": false,
@@ -1352,6 +1352,41 @@
         "must not claim failedBlockerCount=0 means ready",
         "must not claim dashboard/runbook/candidate/draft is publish approval",
         "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 43,
+      "title": "YoloVision YOLOX 本地 PackageReference 消费者实战",
+      "audience": "YOLO 部署用户、NuGet 包维护者、发布负责人",
+      "type": "案例教程",
+      "outline": [
+        "YoloVision reusable package boundary",
+        "three local PackageReference dependencies",
+        "clean E-drive restore and build",
+        "official YOLOX TensorRT runtime",
+        "local-package-consumer-runtime proof boundary"
+      ],
+      "sampleOrCodePath": "samples/YoloVision.PackageConsumer",
+      "visualAssets": [
+        "managed/YoloVision/bridge package dependency diagram",
+        "local package consumer evidence ladder"
+      ],
+      "status": "ready",
+      "targetPath": "docs/articles/zh-cn/yolovision-yolox-local-package-consumer-tutorial.md",
+      "sourceArtifacts": [
+        "samples/YoloVision.PackageConsumer/Program.cs",
+        "eng/Test-YoloVisionLocalPackageConsumer.ps1",
+        "artifacts/interface-coverage/yolox-local-package-consumer-runtime-proof-closure.json"
+      ],
+      "proofBoundary": "A local file-feed PackageReference runtime is local-package-consumer-runtime engineering evidence only. It is not public package-consumer-runtime proof, redistribution approval, post-publish proof, publish approval, release close approval, or package push.",
+      "mustAvoidClaims": [
+        "must not claim local file feed is public package proof",
+        "must not claim a local nupkg hash proves public download",
+        "must not claim ProjectReference-free alone proves public package-consumer-runtime",
+        "must not claim real-model-runtime approves asset redistribution",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
         "must not treat Skipped=True as proof"
       ]
     }

@@ -91,6 +91,16 @@ This is a support matrix and smoke surface, not proof that a specific external m
 
 The official YOLOX-S path is now backed by source-tree `real-model-runtime` evidence. `--family yolox` is detection-only and defaults to NCHW, BGR, raw `0..255` float values, fill 114, and top-left letterbox. Its `[1,8400,85]` raw output is transformed with `(xy + grid) * stride` and `exp(wh) * stride` for strides 8/16/32 before objectness scoring and NMS. Run `eng/Acquire-YoloXOfficialAssets.ps1` to acquire hash-pinned assets on the E drive, then follow `docs/articles/zh-cn/yolovision-yolox-official-runtime-tutorial.md`. This proof is not package-consumer-runtime and does not approve public asset redistribution.
 
+## Local PackageReference Consumer
+
+`YoloVision.csproj` also packs as `JYPPX.TensorRT.CSharp.API.YoloVision`. The package exposes the pointer-free `YoloVisionCommand.Run(string[] args)` entry so a repository-external application can reuse the same CLI, preprocessing, decode, NMS, report, and visualization path without a `ProjectReference`. The committed consumer template is `samples/YoloVision.PackageConsumer`; run the full clean E-drive restore/build/runtime validation with:
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-YoloVisionLocalPackageConsumer.ps1 -PackageVersion 4.0.0
+```
+
+The script uses only local file feeds, puts its isolated NuGet cache and temporary project on the E drive, requires `ProjectReferenceCount=0` and `YoloVision Passed=True`, then removes the workspace. Its result is `local-package-consumer-runtime`, not public `package-consumer-runtime`, public redistribution approval, or post-publish proof. See `docs/articles/zh-cn/yolovision-yolox-local-package-consumer-tutorial.md`.
+
 When a runtime run reaches `YoloVisionOutputReport`, the JSON now includes optional `bindingMetadata` copied from the existing `TensorRtEngineBindingReport`. It records engine/profile identity, enqueue readiness, tensor index/name, input/output mode, semantic output role, data type, engine/profile shapes, location, format, vectorization, byte-size fallback state, and non-fatal diagnostics. The console emits the same pointer-free summary as `BindingReport` and `BindingMetadata` lines. This is deployment metadata and does not promote the run to real-model-runtime or package-consumer-runtime proof.
 
 The machine-readable task/output contract is `samples/YoloVision/yolovision-task-output-contract.json`. It keeps task names, output roles, required metadata, TensorRtExec profile hints, article entrypoints, and promotion boundaries in one place so docs, owner asset packs, and validators do not drift. The contract is still planning evidence only: it is not `real-model-runtime` proof, not `package-consumer-runtime` proof, and not a replacement for owner-filled run logs and hashes.

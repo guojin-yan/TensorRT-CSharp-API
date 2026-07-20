@@ -1,5 +1,50 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-20 YoloVision YOLOX 本地 PackageReference 消费者闭环
+
+本批把已有官方 YOLOX-S 源码树真实运行推进到无 ProjectReference 的本地 NuGet consumer。
+`YoloVision.csproj` 现在可打包为 `JYPPX.TensorRT.CSharp.API.YoloVision`，并公开
+pointer-free 的 `YoloVisionCommand.Run(string[] args)`；原 CLI 只做薄转发，因此 package
+consumer 与源码样例复用完全相同的 profile、BGR/top-left 预处理、YOLOX raw grid/stride
+decoder、NMS、JSON 和 SVG 路径。YoloVision 包只依赖主 managed API，不再直接声明冗余的
+CUDA ProjectReference。
+
+仓库新增 `samples/YoloVision.PackageConsumer` 模板和
+`eng/Test-YoloVisionLocalPackageConsumer.ps1`。脚本把临时工程、隔离 NuGet cache、tensor 和
+运行输出放在外层 E 盘，只启用三个本地 file feed，并检查 `project.assets.json` 中 project
+library 为 0。bridge-only 包通过 `runtimes/win-x64/native` 自动复制
+`jyppxtrtbridge.dll`；TensorRT 10.11/CUDA 12.9 继续由系统安装提供。
+
+最终 clean consumer restore/build 为 0 warning / 0 error，真实 YOLOX run 输出
+`YoloVision Passed=True`、5 个检测、`bicycle=0.954854`、`dog=0.913407`，enqueue elapsed
+为 `14.238 ms`。E 盘 restore cache 共 109 个文件、105,810,697 bytes，运行结束后整个
+workspace 已删除。可提交 proof closure 位于
+`artifacts/interface-coverage/yolox-local-package-consumer-runtime-proof-closure.{json,md}`；
+含本机路径的 stdout/stderr/report 保持 ignored。
+
+C 盘 Temp、Downloads、Documents、Desktop 文件名审计未发现 YOLOX/consumer 的 ONNX、
+engine、tensor、PPM、labels 或 nupkg；最终删除 6 个测试重新创建的空目录，
+`C:\jyppx-pkgcache` 与 `jyppx-split-packages` 均不存在。系统 CUDA、全局 NuGet、Codex 和
+用户文件未删除。
+
+| 包 | 大小 | SHA256 |
+| --- | ---: | --- |
+| managed API 4.0.0 | 14,615,786 | `4bfe3c013ea2de89630b7d91cf471c082f68d1a9fe9c7e1015235a759e21b111` |
+| YoloVision 4.0.0 | 77,621 | `bb13fc1574b121ab4a304bb0be3abb5efb5c543ac94ebaf791fbbf04a5d36507` |
+| TRT10 bridge-only 4.0.0 | 347,493 | `13e82c8080a09754979b80108bcbdbadaf47d6f10161f71d59438477e8a13336` |
+
+完整 solution Release build 为 0 error，保留 5 个既有 nullable warning；YoloVision/new
+consumer/sample layout 专项 47/47，post-publish article/sample readiness 3/3。文章规划从
+42 增到 43，并新增完整中文 PackageReference consumer 教程。bindings 两次生成均保持
+191 manifests / 3961 records 且工作树状态不变；sample manifest audit 为 9 份、finding 0；
+strict classification finding 0，strict release quality required failure 0。
+
+证据分类严格保持 `local-package-consumer-runtime`：本批确实完成真实模型 runtime 和纯
+PackageReference consumer，但包来自本地 file feed，不是公开 URL 下载。因此
+`isPackageConsumerRuntimeProof=false`、`packagesDownloadedFromPublicFeed=false`、
+`publicRedistributionOwnerApproval=false`、`canPublishPublicly=false`。未执行 NuGet push、
+GitHub Packages/Release upload 或 issue close。
+
 ## 2026-07-19 TensorRtExec Builder Scalar 对齐
 
 本轮将 `--maxNbTactics`、`--tilingOptimizationLevel`、`--l2LimitForTiling` 和 `--quantizationFlags` 接入共享 trtexec-like parser、TensorRtExec CLI/WinForms、ONNX build service、JSON/schema 与 OptionImplementationStatus。TRT10/11 的 max tactics、tiling level、L2 tiling limit 使用现有安全 `TensorRtBuilderConfig` wrapper；TRT8 输出 controlled unsupported。quantization flags 在 TRT8/10 应用并 copied readback，TRT11 输出 removed-by-vendor diagnostics。

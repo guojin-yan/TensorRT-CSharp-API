@@ -166,6 +166,8 @@
     href: articles/zh-cn/yolovision-real-asset-walkthrough.md
   - name: YoloVision Official YOLOX-S Runtime Tutorial
     href: articles/zh-cn/yolovision-yolox-official-runtime-tutorial.md
+  - name: YoloVision YOLOX Local Package Consumer Tutorial
+    href: articles/zh-cn/yolovision-yolox-local-package-consumer-tutorial.md
   - name: TensorRtExec Tool Getting Started
     href: articles/zh-cn/tensorrtexec-tool-getting-started.md
   - name: TensorRtExec Trtexec Parity Matrix

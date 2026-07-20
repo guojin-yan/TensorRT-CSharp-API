@@ -11,6 +11,19 @@ internal static class Program
 {
     public static int Main(string[] args)
     {
+        return YoloVisionCommand.Run(args);
+    }
+}
+
+public static class YoloVisionCommand
+{
+    public static int Run(string[] args)
+    {
+        if (args == null)
+        {
+            throw new ArgumentNullException(nameof(args));
+        }
+
         if (SampleCommandLine.HasSwitch(args, "--help"))
         {
             PrintUsage();

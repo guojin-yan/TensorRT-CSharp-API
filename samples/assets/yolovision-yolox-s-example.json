@@ -80,6 +80,7 @@
   },
   "evidence": {
     "proofClosureRecord": "artifacts/interface-coverage/yolox-official-runtime-proof-closure.json",
+    "localPackageConsumerProofClosure": "artifacts/interface-coverage/yolox-local-package-consumer-runtime-proof-closure.json",
     "acquisitionManifest": "samples/assets/yolovision-yolox-official-assets.json",
     "evidenceSidecar": "artifacts/yolovision/yolox-official-runtime/yolox-official-runtime-evidence-sidecar.json",
     "sampleRunEvidenceRecord": "artifacts/yolovision/yolox-official-runtime/sample-run-evidence-record.yolox-official.json",
