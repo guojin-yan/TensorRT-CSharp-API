@@ -1,0 +1,79 @@
+{
+  "$schema": "../bridge-api.schema.json",
+  "module": "cuda",
+  "versionLine": "common",
+  "apis": [
+    {
+      "id": "cuda-graph-add-mem-alloc-node-owner-safe",
+      "entryPoint": "jyppx_cuda_graph_memory_allocation_create_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT && CUDART_VERSION >= 11040",
+      "parameters": [
+        { "name": "graph", "type": "JYPPX_CudaGraph*", "direction": "in" },
+        { "name": "dependency_node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "size", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "device_ordinal", "type": "int32_t", "direction": "in", "managedType": "int", "moduleManagedType": "int" },
+        { "name": "out_allocation", "type": "JYPPX_CudaGraphMemoryAllocation**", "direction": "out" }
+      ]
+    },
+    {
+      "id": "cuda-graph-memory-allocation-wrapper-destroy-safe",
+      "entryPoint": "jyppx_cuda_graph_memory_allocation_destroy_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "allocation", "type": "JYPPX_CudaGraphMemoryAllocation*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" }
+      ]
+    },
+    {
+      "id": "cuda-graph-memory-allocation-add-memset-node-safe",
+      "entryPoint": "jyppx_cuda_graph_memory_allocation_add_memset_node_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT && CUDART_VERSION >= 11040",
+      "parameters": [
+        { "name": "graph", "type": "JYPPX_CudaGraph*", "direction": "in" },
+        { "name": "allocation", "type": "JYPPX_CudaGraphMemoryAllocation*", "direction": "in" },
+        { "name": "dependency_node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "value", "type": "uint32_t", "direction": "in", "managedType": "uint", "moduleManagedType": "uint" },
+        { "name": "count", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_node", "type": "uintptr_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" }
+      ]
+    },
+    {
+      "id": "cuda-graph-memory-allocation-add-device-to-host-node-safe",
+      "entryPoint": "jyppx_cuda_graph_memory_allocation_add_device_to_host_node_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT && CUDART_VERSION >= 11040",
+      "parameters": [
+        { "name": "graph", "type": "JYPPX_CudaGraph*", "direction": "in" },
+        { "name": "allocation", "type": "JYPPX_CudaGraphMemoryAllocation*", "direction": "in" },
+        { "name": "dependency_node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "destination", "type": "JYPPX_CudaPinnedMemory*", "direction": "in" },
+        { "name": "count", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_node", "type": "uintptr_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" }
+      ]
+    },
+    {
+      "id": "cuda-graph-add-mem-free-node-owner-safe",
+      "entryPoint": "jyppx_cuda_graph_memory_allocation_add_free_node_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT && CUDART_VERSION >= 11040",
+      "parameters": [
+        { "name": "graph", "type": "JYPPX_CudaGraph*", "direction": "in" },
+        { "name": "allocation", "type": "JYPPX_CudaGraphMemoryAllocation*", "direction": "in" },
+        { "name": "dependency_node", "type": "uintptr_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_node", "type": "uintptr_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" }
+      ]
+    }
+  ]
+}

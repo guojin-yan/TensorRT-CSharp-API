@@ -2622,6 +2622,16 @@ static class HighLevelWrapperSurfaceProbe
             static (graphExec, graph) => graphExec.Update(graph);
         Func<CudaGraph, CudaMemory, CudaGraphNode> addMemsetNode =
             static (graph, memory) => graph.AddMemsetNode(memory, 0, 1);
+        Func<CudaGraph, CudaGraphMemoryAllocation> addGraphMemoryAllocationNode =
+            static graph => graph.AddMemoryAllocationNode(64, 0);
+        Func<CudaGraph, CudaGraphMemoryAllocation, CudaGraphNode> addGraphAllocationMemsetNode =
+            static (graph, allocation) => graph.AddMemsetNode(allocation, 0x6B, 64);
+        Func<CudaGraph, CudaPinnedMemory, CudaGraphMemoryAllocation, CudaGraphNode> addGraphAllocationCopyNode =
+            static (graph, host, allocation) => graph.AddDeviceToHostMemcpyNode(host, allocation, 64);
+        Func<CudaGraph, CudaGraphMemoryAllocation, CudaGraphNode> addGraphMemoryFreeNode =
+            static (graph, allocation) => graph.AddMemoryFreeNode(allocation);
+        Func<CudaGraphMemoryAllocation, string> graphMemoryAllocationSummary =
+            static allocation => allocation.SizeInBytes + ":" + allocation.DeviceOrdinal + ":" + allocation.IsFreeNodeAdded + ":" + allocation.IsDisposed;
         Action<CudaGraph, CudaGraphNode> removeGraphNode = static (graph, node) => graph.RemoveNode(node);
         Action<CudaGraphExec, CudaGraphNode, CudaMemory> setExecMemsetNode =
             static (graphExec, node, memory) => graphExec.SetMemsetNodeParameters(node, memory, 0, 1);
@@ -4526,6 +4536,16 @@ static class HighLevelWrapperSurfaceProbe
             nameof(CudaGraphExecUpdateSnapshot.Succeeded),
             nameof(CudaGraph.AddMemsetNode),
             nameof(CudaGraph.AddMemsetNodeAfter),
+            nameof(CudaGraph.AddMemoryAllocationNode),
+            nameof(CudaGraph.AddMemoryAllocationNodeAfter),
+            nameof(CudaGraph.AddDeviceToHostMemcpyNode),
+            nameof(CudaGraph.AddDeviceToHostMemcpyNodeAfter),
+            nameof(CudaGraph.AddMemoryFreeNode),
+            nameof(CudaGraphMemoryAllocation),
+            nameof(CudaGraphMemoryAllocation.SizeInBytes),
+            nameof(CudaGraphMemoryAllocation.DeviceOrdinal),
+            nameof(CudaGraphMemoryAllocation.IsFreeNodeAdded),
+            nameof(CudaGraphMemoryAllocation.IsDisposed),
             nameof(CudaGraph.RemoveNode),
             nameof(CudaGraph.GetKernelNodeParametersSnapshot),
             nameof(CudaGraph.GetHostNodeParametersSnapshot),

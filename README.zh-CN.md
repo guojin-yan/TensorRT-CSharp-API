@@ -298,7 +298,7 @@ Owner 真实 Proof 导入审计继续新增：`docs/articles/zh-cn/owner-real-pr
 - DocFX 验证：文档构建为 `0` warning、`0` error。
 - 当前发布 proof 边界：package-consumer runtime proof 仍需要兼容 CUDA host 的真实记录；`blocked-by-cuda-driver`、runbook、collection bundle、dependency probe、local feed、ProjectReference、bridge-only 日志、`Skipped=True`、mismatched log SHA256、sidecar-only report 和 build-only report 都不是 smoke passed evidence。
 
-当前仓库已经为本工作区扫描到的 TensorRT 8/10/11 和 CUDA 11/12/13 头文件建立 manifest/native-source 覆盖。一部分高风险或低频 CUDA runtime API 被明确记录为 deferred boundary，而不是包装成高层托管 API。CUDA library metadata、texture/surface descriptor、primary execution context 以及 IPC event/memory export token 已有 owner-safe copied 或 bridge-owned 路径；callback 生命周期、裸 driver entrypoint、external resource import、IPC open/close ownership、borrowed device pointer 和 user-object destructor ownership 继续 deferred。
+当前仓库已经为本工作区扫描到的 TensorRT 8/10/11 和 CUDA 11/12/13 头文件建立 manifest/native-source 覆盖。一部分高风险或低频 CUDA runtime API 被明确记录为 deferred boundary，而不是包装成高层托管 API。CUDA library metadata、texture/surface descriptor、primary execution context、IPC event/memory export token 以及无指针 graph memory allocation/free 流程已有 owner-safe copied 或 bridge-owned 路径；callback 生命周期、裸 driver entrypoint、external resource import、IPC open/close ownership、borrowed device pointer 和 user-object destructor ownership继续 deferred。
 
 ## 当前阶段
 

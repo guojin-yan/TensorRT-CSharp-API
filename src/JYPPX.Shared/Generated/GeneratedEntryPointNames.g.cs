@@ -214,6 +214,8 @@ internal static class GeneratedEntryPointNames
     public const string CudaGraphAddEmptyNodeSafe = "jyppx_cuda_graph_add_empty_node_safe";
     public const string CudaGraphAddEventRecordNodeSafe = "jyppx_cuda_graph_add_event_record_node_safe";
     public const string CudaGraphAddEventWaitNodeSafe = "jyppx_cuda_graph_add_event_wait_node_safe";
+    public const string CudaGraphAddMemAllocNodeOwnerSafe = "jyppx_cuda_graph_memory_allocation_create_safe";
+    public const string CudaGraphAddMemFreeNodeOwnerSafe = "jyppx_cuda_graph_memory_allocation_add_free_node_safe";
     public const string CudaGraphAddMemcpyNode1dDeviceToDeviceSafe = "jyppx_cuda_graph_add_memcpy_node_1d_device_to_device_safe";
     public const string CudaGraphAddMemcpyNode1dDeviceToHostSafe = "jyppx_cuda_graph_add_memcpy_node_1d_device_to_host_safe";
     public const string CudaGraphAddMemcpyNode1dHostToDeviceSafe = "jyppx_cuda_graph_add_memcpy_node_1d_host_to_device_safe";
@@ -298,6 +300,9 @@ internal static class GeneratedEntryPointNames
     public const string CudaGraphMemcpyNodeSetParamsDeferred = "jyppx_cuda_graph_memcpy_node_set_params_deferred";
     public const string CudaGraphMemcpyNodeSetParamsFromSymbolDeferred = "jyppx_cuda_graph_memcpy_node_set_params_from_symbol_deferred";
     public const string CudaGraphMemcpyNodeSetParamsToSymbolDeferred = "jyppx_cuda_graph_memcpy_node_set_params_to_symbol_deferred";
+    public const string CudaGraphMemoryAllocationAddDeviceToHostNodeSafe = "jyppx_cuda_graph_memory_allocation_add_device_to_host_node_safe";
+    public const string CudaGraphMemoryAllocationAddMemsetNodeSafe = "jyppx_cuda_graph_memory_allocation_add_memset_node_safe";
+    public const string CudaGraphMemoryAllocationWrapperDestroySafe = "jyppx_cuda_graph_memory_allocation_destroy_safe";
     public const string CudaGraphMemsetNodeGetParamsDeferred = "jyppx_cuda_graph_memset_node_get_params_deferred";
     public const string CudaGraphMemsetNodeGetParamsSafe = "jyppx_cuda_graph_memset_node_get_params_safe";
     public const string CudaGraphMemsetNodeSetParamsDeferred = "jyppx_cuda_graph_memset_node_set_params_deferred";

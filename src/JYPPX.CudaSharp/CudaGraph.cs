@@ -15,6 +15,7 @@ public sealed class CudaGraph : IDisposable
     private readonly object _captureLifecycleGate = new object();
     private int _activeCaptureToGraphSessions;
     private int _activeConditionalOwners;
+    private int _activeMemoryAllocationOwners;
     private bool _disposed;
 
     internal CudaGraph(SafeCudaGraphHandle handle)
@@ -223,6 +224,53 @@ public sealed class CudaGraph : IDisposable
     }
 
     /// <summary>
+    /// Adds a pointer-free, graph-owned device-memory allocation node.
+    /// 添加无指针、由 graph 拥有的 device-memory allocation node。
+    /// </summary>
+    public CudaGraphMemoryAllocation AddMemoryAllocationNode(int sizeInBytes, int deviceOrdinal)
+    {
+        return AddMemoryAllocationNodeAfter(default, sizeInBytes, deviceOrdinal);
+    }
+
+    /// <summary>
+    /// Adds a dependent pointer-free graph memory-allocation node.
+    /// 添加带依赖的无指针 graph memory-allocation node。
+    /// </summary>
+    public CudaGraphMemoryAllocation AddMemoryAllocationNodeAfter(
+        CudaGraphNode dependencyNode,
+        int sizeInBytes,
+        int deviceOrdinal)
+    {
+        if (sizeInBytes <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(sizeInBytes));
+        }
+        if (deviceOrdinal < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(deviceOrdinal));
+        }
+
+        lock (_captureLifecycleGate)
+        {
+            ThrowIfDisposedCore();
+            SafeCudaGraphMemoryAllocationHandle handle = NativeCudaApi.AddGraphMemoryAllocationNode(
+                _handle,
+                dependencyNode,
+                sizeInBytes,
+                deviceOrdinal);
+            try
+            {
+                return new CudaGraphMemoryAllocation(this, handle, sizeInBytes, deviceOrdinal);
+            }
+            catch
+            {
+                handle.Dispose();
+                throw;
+            }
+        }
+    }
+
+    /// <summary>
     /// Adds a one-dimensional byte memset node backed by a managed device-memory owner.
     /// 添加由托管设备内存 owner 支撑的一维 byte memset 节点。
     /// </summary>
@@ -244,6 +292,41 @@ public sealed class CudaGraph : IDisposable
         ValidateDeviceMemory(destination, nameof(destination));
         ValidateMemsetCount(count, destination.SizeInBytes, nameof(count));
         return NativeCudaApi.AddGraphMemsetNodeAfter(_handle, dependencyNode, destination.Handle, value, count);
+    }
+
+    /// <summary>
+    /// Adds a memset node for a pointer-free graph allocation and depends on its allocation node.
+    /// 为无指针 graph allocation 添加 memset node，并自动依赖其 allocation node。
+    /// </summary>
+    public CudaGraphNode AddMemsetNode(CudaGraphMemoryAllocation destination, byte value, int count)
+    {
+        return AddMemsetNodeAfter(default, destination, value, count);
+    }
+
+    /// <summary>Adds a dependent memset node for a graph allocation. 为 graph allocation 添加带依赖的 memset node。</summary>
+    public CudaGraphNode AddMemsetNodeAfter(
+        CudaGraphNode dependencyNode,
+        CudaGraphMemoryAllocation destination,
+        byte value,
+        int count)
+    {
+        if (destination == null)
+        {
+            throw new ArgumentNullException(nameof(destination));
+        }
+        if (count <= 0 || count > destination.SizeInBytes)
+        {
+            throw new ArgumentOutOfRangeException(nameof(count));
+        }
+
+        return destination.UseBeforeFree(
+            this,
+            allocation => NativeCudaApi.AddGraphMemoryAllocationMemsetNode(
+                _handle,
+                allocation,
+                dependencyNode,
+                value,
+                count));
     }
 
     /// <summary>
@@ -418,6 +501,63 @@ public sealed class CudaGraph : IDisposable
         ValidateDeviceMemory(source, nameof(source));
         ValidateMemcpyCount(count, destination.SizeInBytes, source.SizeInBytes, nameof(count));
         return NativeCudaApi.AddGraphMemcpyNode1DDeviceToHost(_handle, dependencyNode, destination.Handle, source.Handle, count);
+    }
+
+    /// <summary>
+    /// Adds a graph-allocation-to-pinned-host copy node for runtime verification or output transfer.
+    /// 添加 graph allocation 到 pinned host 的复制节点，用于运行验证或输出传输。
+    /// </summary>
+    public CudaGraphNode AddDeviceToHostMemcpyNode(
+        CudaPinnedMemory destination,
+        CudaGraphMemoryAllocation source,
+        int count)
+    {
+        return AddDeviceToHostMemcpyNodeAfter(default, destination, source, count);
+    }
+
+    /// <summary>Adds a dependent graph-allocation-to-host copy node. 添加带依赖的 graph allocation 到 host 复制节点。</summary>
+    public CudaGraphNode AddDeviceToHostMemcpyNodeAfter(
+        CudaGraphNode dependencyNode,
+        CudaPinnedMemory destination,
+        CudaGraphMemoryAllocation source,
+        int count)
+    {
+        ValidatePinnedMemory(destination, nameof(destination));
+        if (source == null)
+        {
+            throw new ArgumentNullException(nameof(source));
+        }
+        if (count <= 0 || count > source.SizeInBytes || count > destination.SizeInBytes)
+        {
+            throw new ArgumentOutOfRangeException(nameof(count));
+        }
+
+        return source.UseBeforeFree(
+            this,
+            allocation => NativeCudaApi.AddGraphMemoryAllocationDeviceToHostNode(
+                _handle,
+                allocation,
+                dependencyNode,
+                destination.Handle,
+                count));
+    }
+
+    /// <summary>
+    /// Adds the single matching memory-free node for a graph allocation.
+    /// 为 graph allocation 添加唯一匹配的 memory-free node。
+    /// </summary>
+    public CudaGraphNode AddMemoryFreeNode(
+        CudaGraphMemoryAllocation allocation,
+        CudaGraphNode dependencyNode = default)
+    {
+        if (allocation == null)
+        {
+            throw new ArgumentNullException(nameof(allocation));
+        }
+
+        return allocation.AddFreeNode(
+            this,
+            handle => NativeCudaApi.AddGraphMemoryFreeNode(_handle, handle, dependencyNode));
     }
 
     /// <summary>
@@ -1387,6 +1527,11 @@ public sealed class CudaGraph : IDisposable
                 throw new InvalidOperationException("The CUDA graph cannot be disposed while a conditional handle or node wrapper is active.");
             }
 
+            if (_activeMemoryAllocationOwners != 0)
+            {
+                throw new InvalidOperationException("The CUDA graph cannot be disposed while a graph memory-allocation wrapper is active.");
+            }
+
             if (_disposed)
             {
                 return;
@@ -1447,14 +1592,39 @@ public sealed class CudaGraph : IDisposable
         }
     }
 
+    internal void EnterMemoryAllocationOwner()
+    {
+        lock (_captureLifecycleGate)
+        {
+            ThrowIfDisposedCore();
+            _activeMemoryAllocationOwners++;
+        }
+    }
+
+    internal void ExitMemoryAllocationOwner()
+    {
+        lock (_captureLifecycleGate)
+        {
+            if (_activeMemoryAllocationOwners > 0)
+            {
+                _activeMemoryAllocationOwners--;
+            }
+        }
+    }
+
     private void ThrowIfDisposed()
     {
         lock (_captureLifecycleGate)
         {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(nameof(CudaGraph));
-            }
+            ThrowIfDisposedCore();
+        }
+    }
+
+    private void ThrowIfDisposedCore()
+    {
+        if (_disposed)
+        {
+            throw new ObjectDisposedException(nameof(CudaGraph));
         }
     }
 }

@@ -29,7 +29,8 @@ enum class ObjectKind : uint32_t
     KernelLibrary = 12,
     ExecutionContext = 13,
     GraphConditionalHandle = 14,
-    GraphConditionalNode = 15
+    GraphConditionalNode = 15,
+    GraphMemoryAllocation = 16
 };
 
 struct ObjectBase
@@ -93,10 +94,27 @@ struct GraphObject
     ObjectBase base;
     size_t active_conditional_handles;
     size_t active_conditional_nodes;
+    size_t active_memory_allocations;
 #if JYPPX_HAS_CUDA_TOOLKIT
     cudaGraph_t handle;
 #else
     void* handle;
+#endif
+};
+
+struct GraphMemoryAllocationObject
+{
+    ObjectBase base;
+    GraphObject* owner;
+    size_t size;
+    int32_t device_ordinal;
+    bool free_node_added;
+#if JYPPX_HAS_CUDA_TOOLKIT
+    cudaGraphNode_t allocation_node;
+    void* pointer;
+#else
+    void* allocation_node;
+    void* pointer;
 #endif
 };
 
@@ -210,6 +228,7 @@ JYPPX_StatusCode validate_pinned_memory(const JYPPX_CudaPinnedMemory* memory, co
 JYPPX_StatusCode validate_pitched_memory(const JYPPX_CudaPitchedMemory* memory, const char* name);
 JYPPX_StatusCode validate_graph(const JYPPX_CudaGraph* graph, const char* name);
 JYPPX_StatusCode validate_graph_exec(const JYPPX_CudaGraphExec* graph_exec, const char* name);
+JYPPX_StatusCode validate_graph_memory_allocation(const JYPPX_CudaGraphMemoryAllocation* allocation, const char* name);
 JYPPX_StatusCode validate_graph_conditional_handle(const JYPPX_CudaGraphConditionalHandle* handle, const char* name);
 JYPPX_StatusCode validate_graph_conditional_node(const JYPPX_CudaGraphConditionalNode* node, const char* name);
 JYPPX_StatusCode validate_array(const JYPPX_CudaArray* array, const char* name);

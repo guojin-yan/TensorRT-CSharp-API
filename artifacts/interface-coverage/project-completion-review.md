@@ -1,5 +1,58 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-20 CUDA Graph Memory Allocation Owner-Safe Uplift
+
+本批将 `cudaGraphAddMemAllocNode` 与 `cudaGraphAddMemFreeNode` 从 `deferred-only` 提升为
+真实 owner-safe 路径。`CudaGraphMemoryAllocation` 只保存 graph-bound bridge metadata，
+device address、allocation node token、`IntPtr`、`UIntPtr` 和 `SafeHandle` 都不进入 public
+surface；memset、device-to-pinned-host copy 与 free 由所属 `CudaGraph` 代为组合，并自动依赖
+allocation node。跨 graph 使用、二次 free、allocation wrapper 活跃时释放 graph 都 fail
+closed，generic node removal 也拒绝 memory-allocation/free node，防止绕过 wrapper。
+
+### Vendor 与版本证据
+
+- CUDA 11.8、12.1、12.9 的 `cuda_runtime_api.h`、`cudart.lib` 与 runtime DLL 均含
+  `cudaGraphAddMemAllocNode` / `cudaGraphAddMemFreeNode`。
+- CUDA 13.2 header/import archive 含两条 symbol；本机未安装独立 cudart DLL，当前驱动也不
+  支持 CUDA 13.2 runtime，因此只记录 TRT11/CUDA13.2 native build，不冒充 runtime pass。
+- native 使用独立 `CUDART_VERSION >= 11040` guard；旧 deferred manifest 未删除，六套
+  CUDA 11.6/11.8/12.1/12.3/12.9/13.2 coverage 行全部为
+  `implemented-with-deferred-history`。
+
+### Verification
+
+- binding generator/output validation：`193 manifests / 3968 API records`，重复生成幂等。
+- TRT10/CUDA12.9 与 TRT11/CUDA13.2 native Release build 通过；两份 bridge 的 5 条新增
+  export 均为 `5/5`。TRT10/TRT11 既有 ABI surface gate 均为
+  `MissingDeclarations=0 MissingExports=0`。
+- 完整 solution Release build 为 `0 errors`，保留 5 条既有 test nullable warning；新增专项
+  `7/7`，相邻 CUDA graph 集合 `50/50`，handle/coverage/release source 集合 `64/64`，
+  bounded shard `17/17`。
+- TRT10/CUDA12.9 本机真实 smoke 完成 64-byte allocation、`0x6B` memset、D2H copy、free、
+  instantiate/launch/synchronize，64 个字节全部匹配；同时输出
+  `GraphDisposeRejected=True CrossGraphRejected=True SecondFreeRejected=True`。
+- 最终 managed nupkg 与 TRT11/CUDA13 bridge-only nupkg 重打后，无 ProjectReference consumer
+  restore/build 为 `0 warning / 0 error`；probe 未请求，分类保持 `compile-surface-proof`。
+- DocFX build 为 `0 warning / 0 error`；strict classification/public-proof audit finding 均为
+  `0`，strict release quality required failure 为 `0`。
+- 全量 public API documentation audit 仍报告 139 条既有 CUDA CS1591 warning；本批新增
+  `CudaGraphMemoryAllocation` 与 graph methods 不在 finding 中。该历史审计未记为通过。
+- owner input convergence 结构验证 `FailedBlockers=0`，但 5 个真实 owner input surface
+  仍缺外部公开发布证据，状态保持
+  `blocked-owner-input-contract-convergence-real-owner-input-required`。
+
+### 证据与清理边界
+
+候选审计和本地 runtime evidence 位于
+`cuda-graph-memory-allocation-{candidate-audit,local-runtime-evidence}.{json,md}`。证据明确为
+ProjectReference local runtime：`isPackageConsumerRuntimeProof=false`、
+`canPromoteRuntimeProof=false`、`canPublishPublicly=false`，且不记录 device pointer。
+
+本轮没有下载文件到 C 盘，Downloads 时间窗新增为 `0`。清理 66 个本轮 .NET workload
+小日志、16 个空 MSBuild 临时目录、空 `C:\jyppx-pkgcache` 与空
+`Temp\jyppx-split-packages`；复查均不存在。未触碰 NuGet、Codex、CUDA、Downloads 或系统
+缓存；未执行 NuGet/GitHub Packages push、GitHub Release upload 或 issue close。
+
 ## 2026-07-20 YoloVision TRT8/TRT10/TRT11 本地包消费者矩阵与公开交接
 
 本批把单一 TRT10 consumer 扩展为由 `RuntimePackageKey` 驱动的三版本矩阵。单行脚本从

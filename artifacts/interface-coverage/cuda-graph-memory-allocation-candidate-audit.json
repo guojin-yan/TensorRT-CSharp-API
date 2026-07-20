@@ -1,0 +1,97 @@
+{
+  "recordKind": "cuda-graph-memory-allocation-candidate-audit",
+  "generatedAtUtc": "2026-07-20T07:24:37.2488537Z",
+  "sourceHeadBeforeBatch": "df64f206dff9cf6841ffce131d3734e377e85f40",
+  "selectedApis": [
+    {
+      "vendorApi": "cudaGraphAddMemAllocNode",
+      "realManifestId": "cuda-graph-add-mem-alloc-node-owner-safe",
+      "deferredHistoryManifestId": "cuda-cuda-graph-add-mem-alloc-node-deferred",
+      "decision": "promote-with-deferred-history",
+      "ownership": "graph-bound bridge metadata",
+      "publicDevicePointer": false,
+      "runtimeProbe": "allocation -> byte memset -> device-to-pinned-host copy -> free"
+    },
+    {
+      "vendorApi": "cudaGraphAddMemFreeNode",
+      "realManifestId": "cuda-graph-add-mem-free-node-owner-safe",
+      "deferredHistoryManifestId": "cuda-cuda-graph-add-mem-free-node-deferred",
+      "decision": "promote-with-deferred-history",
+      "ownership": "same graph and allocation wrapper; single successful free node",
+      "publicDevicePointer": false,
+      "runtimeProbe": "free node after the final allocation consumer"
+    }
+  ],
+  "vendorMatrix": [
+    {
+      "cudaToolkit": "11.8",
+      "headerDeclarations": true,
+      "importLibrarySymbols": true,
+      "runtimeDllExports": true,
+      "runtimeDll": "cudart64_110.dll",
+      "versionGuardSatisfied": true
+    },
+    {
+      "cudaToolkit": "12.1",
+      "headerDeclarations": true,
+      "importLibrarySymbols": true,
+      "runtimeDllExports": true,
+      "runtimeDll": "cudart64_12.dll",
+      "versionGuardSatisfied": true
+    },
+    {
+      "cudaToolkit": "12.9",
+      "headerDeclarations": true,
+      "importLibrarySymbols": true,
+      "runtimeDllExports": true,
+      "runtimeDll": "cudart64_12.dll",
+      "versionGuardSatisfied": true
+    },
+    {
+      "cudaToolkit": "13.2",
+      "headerDeclarations": true,
+      "importLibrarySymbols": true,
+      "runtimeDllExports": false,
+      "runtimeDll": null,
+      "runtimeDllPresentOnHost": false,
+      "nativeBuildPassed": true,
+      "runtimeBlockedByInstalledDriverBoundary": true,
+      "versionGuardSatisfied": true
+    }
+  ],
+  "versionGuard": "CUDART_VERSION >= 11040",
+  "nearbyCandidates": [
+    {
+      "vendorApi": "cudaGraphMemAllocNodeGetParams",
+      "decision": "already-implemented-with-deferred-history",
+      "reason": "A copied scalar/pointer-presence diagnostic snapshot already exists."
+    },
+    {
+      "vendorApi": "cudaGraphMemFreeNodeGetParams",
+      "decision": "already-implemented-with-deferred-history",
+      "reason": "A pointer-presence diagnostic snapshot already exists."
+    },
+    {
+      "vendorApi": "cudaGraphAddHostNode",
+      "decision": "deferred",
+      "reason": "Requires a callback trampoline and callback lifetime accounting."
+    },
+    {
+      "vendorApi": "cudaGraphAddExternalSemaphoresSignalNode",
+      "decision": "deferred",
+      "reason": "External resource import and lifetime ownership are not established."
+    }
+  ],
+  "safetyInvariants": [
+    "No IntPtr, nint, UIntPtr, SafeHandle, device address, or native node token is public.",
+    "Allocation consumers automatically depend on the allocation node.",
+    "Only the owning graph can consume the allocation wrapper.",
+    "A matching memory-free node can be added successfully only once.",
+    "The graph cannot be destroyed while allocation metadata wrappers remain active.",
+    "Generic graph node removal rejects memory-allocation and memory-free nodes."
+  ],
+  "deferredHistoryRetained": true,
+  "performsPublish": false,
+  "canPublishPublicly": false,
+  "canCloseReleaseIssue": false
+}

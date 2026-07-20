@@ -87,6 +87,11 @@ JYPPX_StatusCode validate_graph_exec(const JYPPX_CudaGraphExec* graph_exec, cons
     return validate_handle(reinterpret_cast<const GraphExecObject*>(graph_exec), ObjectKind::GraphExec, name);
 }
 
+JYPPX_StatusCode validate_graph_memory_allocation(const JYPPX_CudaGraphMemoryAllocation* allocation, const char* name)
+{
+    return validate_handle(reinterpret_cast<const GraphMemoryAllocationObject*>(allocation), ObjectKind::GraphMemoryAllocation, name);
+}
+
 JYPPX_StatusCode validate_graph_conditional_handle(const JYPPX_CudaGraphConditionalHandle* handle, const char* name)
 {
     return validate_handle(reinterpret_cast<const GraphConditionalHandleObject*>(handle), ObjectKind::GraphConditionalHandle, name);

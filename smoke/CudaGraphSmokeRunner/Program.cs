@@ -88,6 +88,7 @@ internal static class Program
         string typedDescriptorState = ProbeGraphNodeParamsTypedDescriptors(source, destination, device, ByteCount);
         string childGraphUpdateState = ProbeChildGraphUpdate(stream);
         string ownerScopedDiagnosticsState = ProbeOwnerScopedGraphDiagnostics(stream, ByteCount);
+        string graphMemoryAllocationState = ProbeGraphMemoryAllocation(stream, ByteCount);
         string conditionalGraphState = ProbeConditionalGraph(stream);
         using CudaGraphExec topologyExec = topologyGraph.Instantiate();
         string topologyNodeEnabledState = "Unsupported";
@@ -151,6 +152,7 @@ internal static class Program
         Console.WriteLine($"CudaGraphManualTopology Nodes={topologyGraph.NodeCount} Roots={topologyGraph.RootNodeCount} Edges={topologyGraph.EdgeCount} ChildDeps={topologyChildDependencyCount} RootDependents={topologyRootDependentCount} EdgeData={topologyEdgeDataState} DebugDot={topologyDebugDotState} EventNodes={eventNodeState} Memcpy1D={memcpy1DNodeState} NodeParamsDescriptor={typedDescriptorState} ChildGraphUpdate={childGraphUpdateState} OwnerScopedDiagnostics={ownerScopedDiagnosticsState} ConditionalGraph={conditionalGraphState} NodeEnabled={topologyNodeEnabledState} GraphId={topologyGraphIdState} ExecId={topologyExecIdState} NodeIdentity={topologyNodeIdentityState}");
         Console.WriteLine($"CudaGraphSnapshots GraphSnapshot=[{topologySnapshot}] RootNodeSnapshot=[{topologyRootSnapshot}] ChildNodeSnapshot=[{topologyChildSnapshot}] ExecNodeSnapshot=[{topologyExecNodeSnapshotState}]");
         Console.WriteLine($"CudaGraphSnapshotLists {topologySnapshotListState}");
+        Console.WriteLine($"CudaGraphMemoryAllocation {graphMemoryAllocationState}");
         Console.WriteLine($"CudaGraphMemory {graphMemoryState}");
         }
         catch (CudaException exception)
@@ -665,6 +667,83 @@ internal static class Program
             }
 
             return $"Removed=True MemsetOutput=True Allocation=[{allocationSnapshot}] Free=[{freeSnapshot}]";
+        }
+        catch (CudaException exception)
+        {
+            return $"Skipped:{exception.Message}";
+        }
+    }
+
+    static string ProbeGraphMemoryAllocation(CudaStream stream, int byteCount)
+    {
+        try
+        {
+            using CudaPinnedMemory destination = new CudaPinnedMemory(byteCount);
+            destination.CopyFrom(new byte[byteCount]);
+
+            CudaGraph graph = CudaGraph.Create();
+            CudaGraphMemoryAllocation? allocation = null;
+            try
+            {
+                allocation = graph.AddMemoryAllocationNode(byteCount, CudaDevice.Current);
+
+                bool graphDisposeRejected = false;
+                try
+                {
+                    graph.Dispose();
+                }
+                catch (InvalidOperationException)
+                {
+                    graphDisposeRejected = true;
+                }
+
+                using CudaGraph otherGraph = CudaGraph.Create();
+                bool crossGraphRejected = false;
+                try
+                {
+                    otherGraph.AddMemsetNode(allocation, 0x6B, byteCount);
+                }
+                catch (ArgumentException)
+                {
+                    crossGraphRejected = true;
+                }
+
+                CudaGraphNode memset = graph.AddMemsetNode(allocation, 0x6B, byteCount);
+                CudaGraphNode copy = graph.AddDeviceToHostMemcpyNodeAfter(memset, destination, allocation, byteCount);
+                graph.AddMemoryFreeNode(allocation, copy);
+
+                bool secondFreeRejected = false;
+                try
+                {
+                    graph.AddMemoryFreeNode(allocation, copy);
+                }
+                catch (InvalidOperationException)
+                {
+                    secondFreeRejected = true;
+                }
+
+                if (!graphDisposeRejected || !crossGraphRejected || !secondFreeRejected)
+                {
+                    throw new InvalidOperationException("CUDA graph memory allocation owner guards did not reject every invalid operation.");
+                }
+
+                using CudaGraphExec graphExec = graph.Instantiate();
+                graphExec.Launch(stream);
+                stream.Synchronize();
+
+                byte[] output = destination.ToArray(byteCount);
+                if (output.Any(static value => value != 0x6B))
+                {
+                    throw new InvalidOperationException("CUDA graph memory allocation round trip did not produce the expected byte pattern.");
+                }
+
+                return $"Bytes={byteCount} Pattern=0x6B GraphDisposeRejected={graphDisposeRejected} CrossGraphRejected={crossGraphRejected} SecondFreeRejected={secondFreeRejected} Nodes={graph.NodeCount}";
+            }
+            finally
+            {
+                allocation?.Dispose();
+                graph.Dispose();
+            }
         }
         catch (CudaException exception)
         {

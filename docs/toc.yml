@@ -34,6 +34,8 @@
     href: articles/en/cuda-kernel-roadmap.md
   - name: CUDA IPC Export Tokens
     href: articles/en/cuda-ipc-export-token.md
+  - name: CUDA Graph Memory Allocation Owner Safety
+    href: articles/en/cuda-graph-memory-allocation-owner-safety.md
   - name: Linux Runner Setup
     href: articles/en/linux-runner-setup.md
   - name: Local GitHub Actions Checks
@@ -236,6 +238,8 @@
     href: articles/zh-cn/cuda-graph-capabilities-boundary.md
   - name: CUDA Stream Capture To Graph Owner Safety
     href: articles/zh-cn/cuda-stream-capture-to-graph-owner-safety.md
+  - name: CUDA Graph Memory Allocation Owner Safety
+    href: articles/zh-cn/cuda-graph-memory-allocation-owner-safety.md
   - name: CUDA Graph Borrowed Handle Safety Gate
     href: articles/zh-cn/cuda-graph-borrowed-handle-safety-gate.md
   - name: CUDA Memory Wrapper

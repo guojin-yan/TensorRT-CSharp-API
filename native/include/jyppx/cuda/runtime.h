@@ -123,6 +123,11 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_instantiate_with_params_on_stream
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_kernel_node_copy_attributes_safe(uintptr_t destination_node, uintptr_t source_node);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_add_memset_node_safe(JYPPX_CudaGraph* graph, JYPPX_CudaMemory* destination, uint32_t value, size_t count, uintptr_t* out_node);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_add_memset_node_after_safe(JYPPX_CudaGraph* graph, uintptr_t dependency_node, JYPPX_CudaMemory* destination, uint32_t value, size_t count, uintptr_t* out_node);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_memory_allocation_create_safe(JYPPX_CudaGraph* graph, uintptr_t dependency_node, size_t size, int32_t device_ordinal, JYPPX_CudaGraphMemoryAllocation** out_allocation);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_memory_allocation_destroy_safe(JYPPX_CudaGraphMemoryAllocation* allocation);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_memory_allocation_add_memset_node_safe(JYPPX_CudaGraph* graph, JYPPX_CudaGraphMemoryAllocation* allocation, uintptr_t dependency_node, uint32_t value, size_t count, uintptr_t* out_node);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_memory_allocation_add_device_to_host_node_safe(JYPPX_CudaGraph* graph, JYPPX_CudaGraphMemoryAllocation* allocation, uintptr_t dependency_node, JYPPX_CudaPinnedMemory* destination, size_t count, uintptr_t* out_node);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_memory_allocation_add_free_node_safe(JYPPX_CudaGraph* graph, JYPPX_CudaGraphMemoryAllocation* allocation, uintptr_t dependency_node, uintptr_t* out_node);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_exec_memset_node_set_params_safe(JYPPX_CudaGraphExec* graph_exec, uintptr_t node, JYPPX_CudaMemory* destination, uint32_t value, size_t count);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_destroy_node_owner_scoped_safe(JYPPX_CudaGraph* graph, uintptr_t node);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_kernel_node_get_params_snapshot_safe(uintptr_t node, JYPPX_CudaGraphKernelNodeParamsSnapshot* out_snapshot);

@@ -628,6 +628,12 @@ JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_add_event_record_node_safe(JYPPX_
 // generated from manifest id=cuda-graph-add-event-wait-node-safe
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_add_event_wait_node_safe(JYPPX_CudaGraph* graph, uintptr_t dependency_node, JYPPX_CudaEvent* event_handle, uintptr_t* out_node);
 
+// generated from manifest id=cuda-graph-add-mem-alloc-node-owner-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_memory_allocation_create_safe(JYPPX_CudaGraph* graph, uintptr_t dependency_node, size_t size, int32_t device_ordinal, JYPPX_CudaGraphMemoryAllocation** out_allocation);
+
+// generated from manifest id=cuda-graph-add-mem-free-node-owner-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_memory_allocation_add_free_node_safe(JYPPX_CudaGraph* graph, JYPPX_CudaGraphMemoryAllocation* allocation, uintptr_t dependency_node, uintptr_t* out_node);
+
 // generated from manifest id=cuda-graph-add-memcpy-node-1d-device-to-device-safe
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_add_memcpy_node_1d_device_to_device_safe(JYPPX_CudaGraph* graph, uintptr_t dependency_node, JYPPX_CudaMemory* destination, JYPPX_CudaMemory* source, size_t count, uintptr_t* out_node);
 
@@ -879,6 +885,15 @@ JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_memcpy_node_set_params_from_symbo
 
 // generated from manifest id=cuda-graph-memcpy-node-set-params-to-symbol-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_memcpy_node_set_params_to_symbol_deferred(void);
+
+// generated from manifest id=cuda-graph-memory-allocation-add-device-to-host-node-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_memory_allocation_add_device_to_host_node_safe(JYPPX_CudaGraph* graph, JYPPX_CudaGraphMemoryAllocation* allocation, uintptr_t dependency_node, JYPPX_CudaPinnedMemory* destination, size_t count, uintptr_t* out_node);
+
+// generated from manifest id=cuda-graph-memory-allocation-add-memset-node-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_memory_allocation_add_memset_node_safe(JYPPX_CudaGraph* graph, JYPPX_CudaGraphMemoryAllocation* allocation, uintptr_t dependency_node, uint32_t value, size_t count, uintptr_t* out_node);
+
+// generated from manifest id=cuda-graph-memory-allocation-wrapper-destroy-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_memory_allocation_destroy_safe(JYPPX_CudaGraphMemoryAllocation* allocation);
 
 // generated from manifest id=cuda-graph-memset-node-get-params-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_graph_memset_node_get_params_deferred(void);

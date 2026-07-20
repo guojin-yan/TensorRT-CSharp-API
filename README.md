@@ -298,7 +298,7 @@ Status as of 2026-06-12:
 - DocFX validation: documentation builds with `0` warnings and `0` errors.
 - Current release-proof boundary: package-consumer runtime proof still requires a compatible CUDA host record; `blocked-by-cuda-driver`, runbooks, collection bundles, dependency probes, local feed, ProjectReference, bridge-only logs, `Skipped=True`, mismatched log SHA256, sidecar-only reports, and build-only reports are not smoke passed evidence.
 
-The project now has manifest/native-source coverage for the scanned TensorRT 8/10/11 and CUDA 11/12/13 headers in this workspace. A subset of unsafe or rarely used CUDA runtime APIs is intentionally recorded as deferred boundaries instead of being exposed as high-level managed APIs. Owner-safe copied or bridge-owned paths now cover CUDA library metadata, texture/surface descriptors, primary execution contexts, and IPC event/memory export tokens. Callback lifetimes, raw driver entrypoints, external resource imports, IPC open/close ownership, borrowed device pointers, and user-object destructor ownership remain deferred.
+The project now has manifest/native-source coverage for the scanned TensorRT 8/10/11 and CUDA 11/12/13 headers in this workspace. A subset of unsafe or rarely used CUDA runtime APIs is intentionally recorded as deferred boundaries instead of being exposed as high-level managed APIs. Owner-safe copied or bridge-owned paths now cover CUDA library metadata, texture/surface descriptors, primary execution contexts, IPC event/memory export tokens, and pointer-free graph memory allocation/free flows. Callback lifetimes, raw driver entrypoints, external resource imports, IPC open/close ownership, borrowed device pointers, and user-object destructor ownership remain deferred.
 
 ## Current Stage
 

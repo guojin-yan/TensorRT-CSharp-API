@@ -18,6 +18,7 @@ namespace
 using jyppx::cuda::EventObject;
 using jyppx::cuda::ExecutionContextObject;
 using jyppx::cuda::GraphExecObject;
+using jyppx::cuda::GraphMemoryAllocationObject;
 using jyppx::cuda::GraphObject;
 using jyppx::cuda::MemoryObject;
 using jyppx::cuda::ObjectBase;
@@ -1492,6 +1493,7 @@ JYPPX_StatusCode jyppx_cuda_stream_destroy(JYPPX_CudaStream* stream)
 
 #include "modules/graph/stream_capture_graph.inc"
 #include "modules/graph/node_topology.inc"
+#include "modules/graph/memory_allocation_owner.inc"
 #include "modules/graph/device_graph_memory.inc"
 #include "modules/graph/child_graph_update.inc"
 #include "modules/graph/owner_scoped_diagnostics.inc"
