@@ -26,6 +26,7 @@ JYPPX_StatusCode jyppx_cuda_memory_alloc_async(size_t size, JYPPX_CudaStream* st
     memory->pointer = nullptr;
     memory->size = size;
     memory->is_managed = false;
+    memory->is_ipc_exportable = false;
 
     auto* stream_object = reinterpret_cast<StreamObject*>(stream);
     status = jyppx::cuda::map_cuda_status(cudaMallocAsync(&memory->pointer, size, stream_object->handle), "cudaMallocAsync");
@@ -107,6 +108,7 @@ JYPPX_StatusCode jyppx_cuda_memory_alloc_from_pool_async(size_t size, uint64_t p
     memory->pointer = nullptr;
     memory->size = size;
     memory->is_managed = false;
+    memory->is_ipc_exportable = false;
 
     auto* stream_object = reinterpret_cast<StreamObject*>(stream);
     cudaMemPool_t pool = reinterpret_cast<cudaMemPool_t>(static_cast<uintptr_t>(pool_handle));

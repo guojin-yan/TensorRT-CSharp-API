@@ -30,6 +30,7 @@ internal static class Program
         Console.WriteLine($"CudaKernelLibrary {ProbeCudaKernelLibrary(CudaDevice.RuntimeVersion)}");
         Console.WriteLine($"CudaPrimaryExecutionContext {ProbeCudaPrimaryExecutionContext(CudaDevice.RuntimeVersion)}");
         Console.WriteLine($"CudaDevResourceSnapshots {ProbeCudaDevResourceSnapshots(CudaDevice.RuntimeVersion)}");
+        Console.WriteLine($"CudaIpcExportTokens {ProbeCudaIpcExportTokens()}");
         try
         {
             CudaDevice.InitDevice(CudaDevice.Current, CudaDevice.RuntimeFlags);
@@ -879,6 +880,47 @@ internal static class Program
             CudaDevResourceSnapshot contextSnapshot = context.GetDevResourceSnapshot(CudaDevResourceType.Sm);
             CudaDevResourceSnapshot streamSnapshot = stream.GetDevResourceSnapshot(CudaDevResourceType.Sm);
             return $"Device={deviceSnapshot} Context={contextSnapshot} Stream={streamSnapshot} HasNextResource={deviceSnapshot.HasNextResource}/{contextSnapshot.HasNextResource}/{streamSnapshot.HasNextResource}";
+        }
+        catch (CudaException exception)
+        {
+            return $"Available=False Status={exception.StatusCode} Reason={exception.Message}";
+        }
+    }
+
+    private static string ProbeCudaIpcExportTokens()
+    {
+        try
+        {
+            using CudaEvent cudaEvent = new CudaEvent(
+                CudaEventCreationFlags.Interprocess | CudaEventCreationFlags.DisableTiming);
+            using CudaMemory memory = new CudaMemory(64);
+            using CudaEvent defaultEvent = new CudaEvent();
+            using CudaManagedMemory managedMemory = new CudaManagedMemory(64);
+            CudaIpcExportToken eventToken = cudaEvent.ExportIpcToken();
+            CudaIpcExportToken memoryToken = memory.ExportIpcToken();
+            bool defaultEventExported = defaultEvent.TryExportIpcToken(out _, out string defaultEventDiagnostic);
+            bool managedMemoryExported = managedMemory.TryExportIpcToken(out _, out string managedMemoryDiagnostic);
+            if (eventToken.Kind != CudaIpcExportTokenKind.Event || eventToken.Length != 64)
+            {
+                throw new InvalidOperationException($"Unexpected CUDA IPC event token: {eventToken}.");
+            }
+
+            if (memoryToken.Kind != CudaIpcExportTokenKind.Memory || memoryToken.Length != 64)
+            {
+                throw new InvalidOperationException($"Unexpected CUDA IPC memory token: {memoryToken}.");
+            }
+
+            if (defaultEventExported || string.IsNullOrWhiteSpace(defaultEventDiagnostic))
+            {
+                throw new InvalidOperationException("CUDA IPC export accepted an event without Interprocess and DisableTiming flags.");
+            }
+
+            if (managedMemoryExported || string.IsNullOrWhiteSpace(managedMemoryDiagnostic))
+            {
+                throw new InvalidOperationException("CUDA IPC export accepted managed memory instead of a synchronous cudaMalloc allocation.");
+            }
+
+            return $"Event={eventToken} Memory={memoryToken} DefaultEventRejected=True ManagedMemoryRejected=True ExportOnly=True";
         }
         catch (CudaException exception)
         {

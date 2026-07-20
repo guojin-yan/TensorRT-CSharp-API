@@ -32,6 +32,8 @@
     href: articles/en/source-organization.md
   - name: CUDA Kernel Roadmap
     href: articles/en/cuda-kernel-roadmap.md
+  - name: CUDA IPC Export Tokens
+    href: articles/en/cuda-ipc-export-token.md
   - name: Linux Runner Setup
     href: articles/en/linux-runner-setup.md
   - name: Local GitHub Actions Checks
@@ -238,6 +240,8 @@
     href: articles/zh-cn/cuda-graph-borrowed-handle-safety-gate.md
   - name: CUDA Memory Wrapper
     href: articles/zh-cn/cuda-memory-wrapper.md
+  - name: CUDA IPC Export Token
+    href: articles/zh-cn/cuda-ipc-export-token.md
   - name: Blog CUDA Memory Wrapper
     href: articles/zh-cn/blog-cuda-memory-wrapper.md
   - name: CUDA Memory Range APIs

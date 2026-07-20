@@ -979,8 +979,14 @@ JYPPX_C_API(BridgeStatusCode) jyppx_cuda_init_device(int32_t device, uint32_t de
 // generated from manifest id=cuda-ipc-close-mem-handle-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_ipc_close_mem_handle_deferred(void);
 
+// generated from manifest id=cuda-ipc-get-event-handle-copied-export-token-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_ipc_export_event_token_safe(JYPPX_CudaEvent* event_handle, uint8_t* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+
 // generated from manifest id=cuda-ipc-get-event-handle-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_ipc_get_event_handle_deferred(void);
+
+// generated from manifest id=cuda-ipc-get-mem-handle-copied-export-token-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_ipc_export_memory_token_safe(JYPPX_CudaMemory* memory, uint8_t* output_buffer, size_t output_buffer_size, size_t* out_required_size);
 
 // generated from manifest id=cuda-ipc-get-mem-handle-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_ipc_get_mem_handle_deferred(void);

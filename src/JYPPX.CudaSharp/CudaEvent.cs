@@ -91,6 +91,37 @@ public sealed class CudaEvent : IDisposable
     }
 
     /// <summary>
+    /// Copies an opaque CUDA IPC export token for this event.
+    /// 复制当前 event 的 opaque CUDA IPC 导出 token。
+    /// </summary>
+    /// <remarks>
+    /// The event must be created with <see cref="CudaEventCreationFlags.Interprocess"/> and
+    /// <see cref="CudaEventCreationFlags.DisableTiming"/>. Keep this event alive while another process uses the token.
+    /// event 必须使用 Interprocess 与 DisableTiming 标志创建；其他进程使用 token 期间必须保持当前 event 存活。
+    /// </remarks>
+    public CudaIpcExportToken ExportIpcToken()
+    {
+        return NativeCudaApi.ExportEventIpcToken(_handle);
+    }
+
+    /// <summary>Tries to copy an IPC export token and returns a diagnostic on failure. 尝试复制 IPC 导出 token，失败时返回诊断。</summary>
+    public bool TryExportIpcToken(out CudaIpcExportToken? token, out string diagnostic)
+    {
+        try
+        {
+            token = ExportIpcToken();
+            diagnostic = string.Empty;
+            return true;
+        }
+        catch (CudaException exception)
+        {
+            token = null;
+            diagnostic = exception.Message;
+            return false;
+        }
+    }
+
+    /// <summary>
     /// Measures elapsed time since a start event.
     /// 计算从起始 event 到当前 event 的耗时。
     /// </summary>

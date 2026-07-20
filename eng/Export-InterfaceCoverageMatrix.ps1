@@ -1240,6 +1240,8 @@ function Find-ExplicitCudaManifestApis {
     "cudaMemDiscardAndPrefetchBatchAsync" = @("id:cuda-managed-memory-discard-and-prefetch-batch-owner-array-safe")
     "cudaMemPrefetchAsync_v2" = @("id:cuda-managed-memory-prefetch-location-range-async-safe")
     "cudaMemAdvise_v2" = @("id:cuda-managed-memory-advise-location-range-safe")
+    "cudaIpcGetEventHandle" = @("id:cuda-ipc-get-event-handle-copied-export-token-safe")
+    "cudaIpcGetMemHandle" = @("id:cuda-ipc-get-mem-handle-copied-export-token-safe")
   }
   $deferredHistoryAliasMap = @{
     "cudaCreateSurfaceObject" = @("id:cuda-create-surface-object-deferred")
@@ -1297,6 +1299,8 @@ function Find-ExplicitCudaManifestApis {
     "cudaStreamUpdateCaptureDependencies_v2" = @("id:*stream-update-capture-dependencies-v2-deferred")
     "cudaStreamBeginCaptureToGraph" = @("id:*stream-begin-capture-to-graph-deferred")
     "cudaStreamGetDevResource" = @("id:*stream-get-dev-resource-deferred")
+    "cudaIpcGetEventHandle" = @("id:cuda-ipc-get-event-handle-deferred")
+    "cudaIpcGetMemHandle" = @("id:cuda-ipc-get-mem-handle-deferred")
     "cudaLogsCurrent" = @("id:*logs-current-deferred")
     "cudaLogsDumpToMemory" = @("id:*logs-dump-to-memory-deferred")
     "cudaLogsDumpToFile" = @("id:*logs-dump-to-file-deferred")

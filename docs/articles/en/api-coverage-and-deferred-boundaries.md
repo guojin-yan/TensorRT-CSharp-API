@@ -33,7 +33,7 @@ Common deferred reasons:
 
 - Callback lifetime or destructor ownership is not modeled.
 - Raw driver entrypoint or export-table pointers would escape the safe API surface.
-- CUDA external memory, semaphore, texture, surface, IPC, or library descriptors need dedicated ownership structs.
+- CUDA external memory/semaphore imports and IPC open/close operations still need dedicated ownership structs. Texture/surface objects, library metadata, and IPC export-only tokens now use copied or bridge-owned safe alternatives.
 - CUDA graph/user-object APIs require non-owning handle semantics that are not yet public.
 - Batch pointer arrays need typed validation before they can be safely passed from .NET.
 

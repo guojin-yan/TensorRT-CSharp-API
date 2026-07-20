@@ -1713,6 +1713,7 @@ JYPPX_StatusCode jyppx_cuda_memory_alloc(size_t size, JYPPX_CudaMemory** out_mem
     memory->pointer = nullptr;
     memory->size = size;
     memory->is_managed = false;
+    memory->is_ipc_exportable = true;
 
     status = jyppx::cuda::map_cuda_status(cudaMalloc(&memory->pointer, size), "cudaMalloc");
     if (status != JYPPX_STATUS_OK)
@@ -1751,6 +1752,7 @@ JYPPX_StatusCode jyppx_cuda_memory_alloc_managed(size_t size, uint32_t flags, JY
     memory->pointer = nullptr;
     memory->size = size;
     memory->is_managed = true;
+    memory->is_ipc_exportable = false;
 
     status = jyppx::cuda::map_cuda_status(cudaMallocManaged(&memory->pointer, size, flags), "cudaMallocManaged");
     if (status != JYPPX_STATUS_OK)
@@ -2591,6 +2593,7 @@ JYPPX_StatusCode jyppx_cuda_memory_free(JYPPX_CudaMemory* memory)
 #include "modules/memory/managed_memory_location_v2.inc"
 #include "modules/deployment/kernel_library_metadata.inc"
 #include "modules/deployment/primary_execution_context.inc"
+#include "modules/deployment/ipc_export_tokens.inc"
 #include "modules/deployment/official_token_aliases.inc"
 #include "modules/deferred/twenty_third_batch_deferred.inc"
 #include "modules/deferred/thirty_fifth_batch_stream_device_deferred.inc"

@@ -544,6 +544,11 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_execution_context_wait_event_safe(JYPPX
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_execution_context_get_dev_resource_snapshot_safe(JYPPX_CudaExecutionContext* context, int32_t resource_type, JYPPX_CudaDevResourceSnapshot* out_snapshot);
 /* END CUDA FIFTY-SECOND BATCH PRIMARY EXECUTION CONTEXT */
 
+/* BEGIN CUDA SIXTIETH BATCH IPC EXPORT TOKENS */
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_ipc_export_event_token_safe(JYPPX_CudaEvent* event_handle, uint8_t* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_ipc_export_memory_token_safe(JYPPX_CudaMemory* memory, uint8_t* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+/* END CUDA SIXTIETH BATCH IPC EXPORT TOKENS */
+
 /* BEGIN CUDA FORTY-FOURTH BATCH GRAPH NODE PARAMETER DESCRIPTORS */
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_memset_node_get_params_safe(uintptr_t node, JYPPX_CudaGraphMemsetNodeParams* out_params);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_graph_memset_node_set_params_safe(uintptr_t node, JYPPX_CudaMemory* destination, uint32_t value, size_t count);

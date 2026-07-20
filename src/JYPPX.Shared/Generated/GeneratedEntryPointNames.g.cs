@@ -331,7 +331,9 @@ internal static class GeneratedEntryPointNames
     public const string CudaImportExternalSemaphoreDeferred = "jyppx_cuda_import_external_semaphore_deferred";
     public const string CudaInitDevice = "jyppx_cuda_init_device";
     public const string CudaIpcCloseMemHandleDeferred = "jyppx_cuda_ipc_close_mem_handle_deferred";
+    public const string CudaIpcGetEventHandleCopiedExportTokenSafe = "jyppx_cuda_ipc_export_event_token_safe";
     public const string CudaIpcGetEventHandleDeferred = "jyppx_cuda_ipc_get_event_handle_deferred";
+    public const string CudaIpcGetMemHandleCopiedExportTokenSafe = "jyppx_cuda_ipc_export_memory_token_safe";
     public const string CudaIpcGetMemHandleDeferred = "jyppx_cuda_ipc_get_mem_handle_deferred";
     public const string CudaIpcOpenEventHandleDeferred = "jyppx_cuda_ipc_open_event_handle_deferred";
     public const string CudaIpcOpenMemHandleDeferred = "jyppx_cuda_ipc_open_mem_handle_deferred";

@@ -158,6 +158,50 @@ unresolved external symbol createConsistencyChecker_INTERNAL
 - 三个 bridge-only `PackageReference` consumer restore/build 均为 0 warning / 0 error，`ProjectReference=False`，证据分类保持 `compile-surface-proof`，不提升为 runtime proof。
 - 未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
 
+## 2026-07-20 CUDA IPC Export-Only Copied Token Uplift
+
+本批将 `cudaIpcGetEventHandle` 与 `cudaIpcGetMemHandle` 提升为 export-only copied token
+安全路径。native 通过 caller-owned 64-byte buffer 复制 opaque token；managed 只返回不可变
+`CudaIpcExportToken` 副本，不公开 event handle、device pointer、`IntPtr`、`UIntPtr` 或
+`SafeHandle`。`cudaIpcOpenEventHandle`、`cudaIpcOpenMemHandle` 与
+`cudaIpcCloseMemHandle` 继续 deferred。
+
+### Owner 与 fail-closed 边界
+
+- event 必须由 `Interprocess | DisableTiming` 创建，否则 native 返回结构化失败。
+- memory 必须是同步 `cudaMalloc` 基址；managed、async 与 pool allocation 都拒绝导出。
+- token 不拥有源资源；其他进程使用 token 期间，源 `CudaEvent` 或 `CudaMemory` 必须保持存活。
+- `ToArray()` 每次返回新副本，`ToString()` 只输出 kind/length；证据文件不记录 token 内容。
+- import/close 涉及跨进程 owner、device affinity、peer access 和恢复策略，不在本批实现。
+
+### Verification
+
+- binding generator/output：`192 manifests / 3963 API records`，两次生成幂等通过。
+- TRT10/CUDA12.9 与 TRT11/CUDA13.2 native build 通过；两份 DLL 均导出 event/memory
+  token entrypoint。ABI declaration/export 检查均为 missing `0`。
+- solution Release build：`0 warning / 0 error`；专项 ProjectQuality 与 shard runner：`7/7`。
+- coverage 在 CUDA 11.6、11.8、12.1、12.3、12.9、13.2 共 6 组头文件中将两个 get
+  接口标为 `implemented-with-deferred-history`；三条 open/close 行保持 `deferred-only`。
+- CUDA 12.9 本机 smoke：event/memory token 均为 64 bytes，默认 event 与 managed memory
+  负路径均被拒绝，`ExportOnly=True`。
+- 重打本地 managed nupkg 后，TRT11/CUDA13 bridge-only package consumer restore/build
+  `0 warning / 0 error`；该结果仅为 `compile-surface-proof`，probe 未请求。
+- strict classification 与 public-proof boundary audit finding 均为 `0`；strict release
+  quality gate required failure 为 `0`。
+
+### 证据与发布边界
+
+- `cuda-ipc-export-token-candidate-audit.{json,md}` 记录候选与 owner 边界；
+  `cuda-ipc-export-token-local-runtime-evidence.{json,md}` 记录本机 smoke、bridge hash 和
+  明确的非 proof 分类。
+- 本机 smoke 是 ProjectReference local runtime evidence：
+  `isCrossProcessRuntimeProof=false`、`isPackageConsumerRuntimeProof=false`、
+  `canPublishPublicly=false`，不能替代第二进程 import/lifetime proof。
+- 本轮没有下载文件到 C 盘；Downloads 时间窗新增为 `0`。package consumer 创建的空
+  `C:\jyppx-pkgcache` 根和 15 个已核实为空的 MSBuild 临时目录已删除。
+- 未触碰 NuGet、Codex、CUDA、Downloads 或系统缓存；未执行 NuGet/GitHub Packages push、
+  GitHub Release upload 或 issue close。
+
 ### 下一阶段入口
 
 下一阶段只应从实际存在于目标 TensorRT import library 的 deferred entry 中选择候选。任何新的 consistency checker 设计必须先在所有目标 TRT8 vendor package 上完成 PE/import-library symbol proof，再进入 manifest/native/wrapper；在 symbol proof 通过前不得重新提升该接口。

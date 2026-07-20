@@ -37,6 +37,39 @@ public partial class CudaMemory : IDisposable
     internal SafeCudaMemoryHandle Handle => _handle;
 
     /// <summary>
+    /// Copies an opaque CUDA IPC export token for this synchronous device allocation.
+    /// 复制当前同步 device allocation 的 opaque CUDA IPC 导出 token。
+    /// </summary>
+    /// <remarks>
+    /// Only allocations created by the public <see cref="CudaMemory(int)"/> constructor are exportable.
+    /// Managed, asynchronous, and pool allocations are rejected. Keep this allocation alive while another
+    /// process uses the token. This method never exposes the device pointer.
+    /// 只有通过公开构造函数创建的同步分配可导出；managed、async 与 pool allocation 会被拒绝。
+    /// 其他进程使用 token 期间必须保持当前分配存活；此方法绝不公开 device pointer。
+    /// </remarks>
+    public CudaIpcExportToken ExportIpcToken()
+    {
+        return NativeCudaApi.ExportMemoryIpcToken(_handle);
+    }
+
+    /// <summary>Tries to copy an IPC export token and returns a diagnostic on failure. 尝试复制 IPC 导出 token，失败时返回诊断。</summary>
+    public bool TryExportIpcToken(out CudaIpcExportToken? token, out string diagnostic)
+    {
+        try
+        {
+            token = ExportIpcToken();
+            diagnostic = string.Empty;
+            return true;
+        }
+        catch (CudaException exception)
+        {
+            token = null;
+            diagnostic = exception.Message;
+            return false;
+        }
+    }
+
+    /// <summary>
     /// Queries CUDA pointer attributes for this device allocation.
     /// 查询当前设备内存分配的 CUDA 指针属性。
     /// </summary>

@@ -1,0 +1,38 @@
+{
+  "generatedAt": "2026-07-20",
+  "auditKind": "cuda-ipc-export-token-owner-safe-candidate-audit",
+  "selectedFunctions": [
+    "cudaIpcGetEventHandle",
+    "cudaIpcGetMemHandle"
+  ],
+  "publicShape": "immutable-copied-export-token",
+  "eventRequirements": [
+    "cudaEventInterprocess",
+    "cudaEventDisableTiming",
+    "source-event-remains-alive"
+  ],
+  "memoryRequirements": [
+    "synchronous-cudaMalloc-base-allocation",
+    "not-managed-memory",
+    "not-async-or-pool-allocation",
+    "source-memory-remains-alive"
+  ],
+  "keptDeferred": [
+    "cudaIpcOpenEventHandle",
+    "cudaIpcOpenMemHandle",
+    "cudaIpcCloseMemHandle"
+  ],
+  "safety": {
+    "publicRawPointer": false,
+    "publicDevicePointer": false,
+    "publicSafeHandle": false,
+    "importsExternalResource": false,
+    "historicalDeferredRecordsDeleted": false
+  },
+  "evidenceBoundary": {
+    "isCrossProcessRuntimeProof": false,
+    "isPackageConsumerRuntimeProof": false,
+    "canPublishPublicly": false,
+    "canCloseReleaseIssue": false
+  }
+}

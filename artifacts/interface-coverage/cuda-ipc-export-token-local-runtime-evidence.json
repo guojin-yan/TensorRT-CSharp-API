@@ -1,0 +1,42 @@
+{
+  "recordKind": "cuda-ipc-export-token-local-runtime-evidence",
+  "generatedAtUtc": "2026-07-20T06:08:04.2218625Z",
+  "sourceHeadBeforeCommit": "f9ef471ec156aff8514964bd6aab960ca2b14673",
+  "runtimeEvidenceKind": "local-project-reference-smoke",
+  "runtime": {
+    "os": "Windows",
+    "architecture": "x64",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "cudaToolkit": "12.9",
+    "cudaRuntimeVersion": 12090,
+    "cudaDriverVersion": 12090,
+    "deviceCount": 1
+  },
+  "inputs": {
+    "bridgePreset": "win-x64-trt10-cuda12-release",
+    "bridgeRelativePath": "build-out/win-x64-trt10-cuda12-release/bin/Release/jyppxtrtbridge.dll",
+    "bridgeSha256": "136a312766f03188d0a7f870eea6624b6b6f014040dddda38e8020600ed7469b",
+    "smokeProject": "smoke/CudaSmokeRunner/CudaSmokeRunner.csproj",
+    "smokeAssemblySha256": "0a7794dc7196e9b3bdebe59956b8c751d8a1131b1451b86f64cfd55d61d4cb37"
+  },
+  "observations": {
+    "eventTokenKind": "Event",
+    "eventTokenLength": 64,
+    "memoryTokenKind": "Memory",
+    "memoryTokenLength": 64,
+    "defaultEventRejected": true,
+    "managedMemoryRejected": true,
+    "exportOnly": true,
+    "tokenContentsRecorded": false
+  },
+  "classification": {
+    "isLocalRuntimeEvidence": true,
+    "isCrossProcessRuntimeProof": false,
+    "isPackageConsumerRuntimeProof": false,
+    "isPostPublishProof": false,
+    "canPromoteRuntimeProof": false,
+    "canPublishPublicly": false,
+    "canCloseReleaseIssue": false
+  },
+  "boundary": "This run proves only local export-token creation and fail-closed validation through repository ProjectReference assemblies. It does not open a token in another process, validate imported-resource lifetime, consume packed NuGet artifacts, approve publication, or close a release issue."
+}

@@ -66,6 +66,7 @@ struct MemoryObject
     void* pointer;
     size_t size;
     bool is_managed;
+    bool is_ipc_exportable;
 };
 
 struct PinnedMemoryObject

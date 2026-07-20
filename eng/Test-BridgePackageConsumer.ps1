@@ -259,6 +259,10 @@ $script:ManagedPackageFreshnessRequiredMarkers = @(
   "CudaDevice.CurrentGraphMemorySummary",
   "CudaDeviceGraphMemorySummary",
   "CudaMemoryRangeDiagnosticSummary",
+  "CudaIpcExportToken",
+  "CudaIpcExportTokenKind",
+  "ExportIpcToken",
+  "TryExportIpcToken",
   "ManagedByteArrayDeserializeReady",
   "ManagedStreamDeserializeReady",
   "HostMemoryDeserializeReady",
@@ -2588,6 +2592,12 @@ static class HighLevelWrapperSurfaceProbe
             static memory => memory.GetRangeDiagnosticSummary(CudaMemoryRangeAttribute.ReadMostly, CudaMemoryRangeAttribute.PreferredLocation);
         Func<CudaMemoryRangeDiagnosticSummary, string> memoryRangeDiagnosticSummaryText =
             static summary => summary.RangeSizeInBytes + ":" + summary.CopiedScalarAttributeCount + ":" + summary.CopiedAccessedByDeviceCount + ":" + summary.RuntimeEvidenceKind + ":" + summary.IsRuntimeExecutionEvidence + ":" + summary.IsRuntimeExecutionProof + ":" + summary.PointerFreeCopiedSummary + ":" + summary.CanPromoteRuntimeProof + ":" + summary.CanPromoteReleaseProof + ":" + summary.CanDeleteDeferredRecord;
+        Func<CudaEvent, CudaIpcExportToken> exportEventIpcToken =
+            static cudaEvent => cudaEvent.ExportIpcToken();
+        Func<CudaMemory, CudaIpcExportToken> exportMemoryIpcToken =
+            static memory => memory.ExportIpcToken();
+        Func<CudaIpcExportToken, string> ipcExportTokenSummary =
+            static token => token.Kind + ":" + token.Length + ":" + token.ToArray().Length + ":" + token.ToHexString().Length;
         Func<CudaGraphDiagnosticSnapshot, CudaGraphDiagnosticSummary> graphDiagnosticSummary =
             static snapshot => snapshot.ToSummary();
         Func<CudaGraphDiagnosticSummary, string> graphDiagnosticSummaryText =
@@ -4469,6 +4479,18 @@ static class HighLevelWrapperSurfaceProbe
             nameof(CudaMemoryRangeDiagnosticSummary.CanPromoteReleaseProof),
             nameof(CudaMemoryRangeDiagnosticSummary.CanPromoteRuntimeProof),
             nameof(CudaMemoryRangeDiagnosticSummary.CanDeleteDeferredRecord),
+            nameof(CudaEvent.ExportIpcToken),
+            nameof(CudaEvent.TryExportIpcToken),
+            nameof(CudaMemory.ExportIpcToken),
+            nameof(CudaMemory.TryExportIpcToken),
+            nameof(CudaIpcExportToken),
+            nameof(CudaIpcExportToken.Kind),
+            nameof(CudaIpcExportToken.Length),
+            nameof(CudaIpcExportToken.ToArray),
+            nameof(CudaIpcExportToken.ToHexString),
+            nameof(CudaIpcExportTokenKind),
+            nameof(CudaIpcExportTokenKind.Event),
+            nameof(CudaIpcExportTokenKind.Memory),
             nameof(CudaGraphDiagnosticSnapshot),
             nameof(CudaGraphDiagnosticSnapshot.ToSummary),
             nameof(CudaGraphDiagnosticSummary),
