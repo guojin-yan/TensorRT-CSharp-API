@@ -11,6 +11,7 @@
 - Plugin diagnostics: `--plugins`, `--plugin`, `--dynamicPlugins`, and `--setPluginsToSerialize` are accepted as aliases/repeated lists and normalized into `Plugins`; they remain diagnostics and do not load, register, deregister, or serialize plugin libraries.
 - Diagnostics and preflight: `--profilingVerbosity`, `--verbose`, `--previewOnly`, `--dryRun`.
 - Runtime-shaped artifact switches: `--loadInputs`, `--dumpOutput`, `--dumpRawBindingsToFile`, `--exportOutput`, `--exportTimes`, `--exportProfile`, and `--saveProfile` are recorded as bounded artifacts. `--loadInputs` can feed bounded generic runtime, but it is not tensor correctness, raw binding, real-model-runtime, or package-consumer-runtime proof without expected output, real runner logs, and hashes.
+- Bounded benchmark scheduler: compatible float engines apply `--iterations`, `--warmUp`, `--duration`, effective `--streams`/`--infStreams`, `--idleTime`, `--avgRuns`, and `--percentile` with independent execution contexts, bindings, CUDA streams, and event timing. `--sleepTime`, `--useSpinWait`, `--threads`, `--useCudaGraph`, and `--noDataTransfers` remain parse-only.
 - Engine packaging and device intent: `--refit`, `--dumpRefit`, `--allowWeightStreaming`, `--markDebug`, `--dumpDebugTensors`, `--versionCompatible`, `--useDLACore`, `--allowGPUFallback`.
 
 Build-only, parse-only, preflight-only, sidecar-only, dependency-probe-only, runtime-output-captured-unverified, and synthetic runtime reports are not real-model-runtime proof and not package-consumer-runtime proof.

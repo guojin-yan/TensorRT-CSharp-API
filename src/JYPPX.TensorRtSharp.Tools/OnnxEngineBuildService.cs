@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using JYPPX.CudaSharp;
 using JYPPX.Shared.Interop;
 using JYPPX.TensorRtSharp;
@@ -187,207 +189,169 @@ public sealed class OnnxEngineBuildService
             using TensorRtBuilderConfig config = builder.CreateBuilderConfig();
             using CudaStream stream = new CudaStream();
 
-        config.SetMemoryPoolLimit(TensorRtMemoryPoolType.Workspace, options.WorkspaceBytes);
-        config.SetProfileStream(stream);
-        config.SetOptimizationLevel(options.DeploymentOptions.BuilderOptimizationLevel);
-        config.SetEngineCapability(TensorRtEngineCapability.Standard);
-        ApplyDeploymentOptions(config, options, log);
-        ApplyPrecisionFlags(config, options);
-        using TimingCacheLease timingCache = CreateTimingCacheLease(config, options, log);
+            config.SetMemoryPoolLimit(TensorRtMemoryPoolType.Workspace, options.WorkspaceBytes);
+            config.SetProfileStream(stream);
+            config.SetOptimizationLevel(options.DeploymentOptions.BuilderOptimizationLevel);
+            config.SetEngineCapability(TensorRtEngineCapability.Standard);
+            ApplyDeploymentOptions(config, options, log);
+            ApplyPrecisionFlags(config, options);
+            using TimingCacheLease timingCache = CreateTimingCacheLease(config, options, log);
 
-        using TensorRtNetworkDefinition network = builder.CreateNetwork(TensorRtNetworkDefinitionCreationFlags.ExplicitBatch);
-        using TensorRtOnnxParser parser = new TensorRtOnnxParser(logger, network);
-        bool parserBuilderConfigAttached = false;
-        if (options.TensorRtLine == TensorRtApiLine.TensorRt11)
-        {
-            parserBuilderConfigAttached = parser.SetBuilderConfig(config);
-            if (!parserBuilderConfigAttached)
+            using TensorRtNetworkDefinition network = builder.CreateNetwork(TensorRtNetworkDefinitionCreationFlags.ExplicitBatch);
+            using TensorRtOnnxParser parser = new TensorRtOnnxParser(logger, network);
+            bool parserBuilderConfigAttached = false;
+            if (options.TensorRtLine == TensorRtApiLine.TensorRt11)
             {
-                throw new InvalidOperationException("TensorRT 11 ONNX parser rejected the deployment builder configuration.");
+                parserBuilderConfigAttached = parser.SetBuilderConfig(config);
+                if (!parserBuilderConfigAttached)
+                {
+                    throw new InvalidOperationException("TensorRT 11 ONNX parser rejected the deployment builder configuration.");
+                }
+
+                if (options.DeploymentOptions.DlaCore.HasValue)
+                {
+                    parser.SetFlag(TensorRtOnnxParserFlag.ReportCapabilityDla);
+                    parser.SetFlag(TensorRtOnnxParserFlag.AdjustForDla);
+                }
             }
 
-            if (options.DeploymentOptions.DlaCore.HasValue)
+            log.Add($"ParserBuilderConfig Supported={options.TensorRtLine == TensorRtApiLine.TensorRt11} Attached={parserBuilderConfigAttached} ManagedLease={parser.HasBuilderConfigAttached} DlaCapabilityValidation={options.TensorRtLine == TensorRtApiLine.TensorRt11 && options.DeploymentOptions.DlaCore.HasValue}");
+            string parserModelPath = options.UsesExternalOnnx ? Path.GetFileName(options.OnnxPath) : "sample-dynamic-identity.onnx";
+            bool parsed = parser.Parse(model, parserModelPath);
+            OnnxEngineParserPreflightSnapshot parserPreflightSnapshot = CaptureParserPreflightSnapshot(parser, model, parserModelPath, parsed, log);
+            if (!parsed)
             {
-                parser.SetFlag(TensorRtOnnxParserFlag.ReportCapabilityDla);
-                parser.SetFlag(TensorRtOnnxParserFlag.AdjustForDla);
+                throw new InvalidOperationException(parser.GetErrorSummary());
             }
-        }
 
-        log.Add($"ParserBuilderConfig Supported={options.TensorRtLine == TensorRtApiLine.TensorRt11} Attached={parserBuilderConfigAttached} ManagedLease={parser.HasBuilderConfigAttached} DlaCapabilityValidation={options.TensorRtLine == TensorRtApiLine.TensorRt11 && options.DeploymentOptions.DlaCore.HasValue}");
-        string parserModelPath = options.UsesExternalOnnx ? Path.GetFileName(options.OnnxPath) : "sample-dynamic-identity.onnx";
-        bool parsed = parser.Parse(model, parserModelPath);
-        OnnxEngineParserPreflightSnapshot parserPreflightSnapshot = CaptureParserPreflightSnapshot(parser, model, parserModelPath, parsed, log);
-        if (!parsed)
-        {
-            throw new InvalidOperationException(parser.GetErrorSummary());
-        }
+            int profileIndex = AddOptimizationProfile(builder, config, options);
+            TensorRtBuilderConfigDeploymentSnapshot? builderConfigDeploymentSnapshot = TryGetBuilderConfigDeploymentSnapshot(config, log);
+            string enginePath = string.IsNullOrWhiteSpace(options.SaveEnginePath)
+                ? Path.Combine(Path.GetTempPath(), $"jyppx-onnx-to-engine-{Guid.NewGuid():N}.plan")
+                : options.SaveEnginePath;
+            bool deleteEnginePath = string.IsNullOrWhiteSpace(options.SaveEnginePath);
 
-        int profileIndex = AddOptimizationProfile(builder, config, options);
-        TensorRtBuilderConfigDeploymentSnapshot? builderConfigDeploymentSnapshot = TryGetBuilderConfigDeploymentSnapshot(config, log);
-        string enginePath = string.IsNullOrWhiteSpace(options.SaveEnginePath)
-            ? Path.Combine(Path.GetTempPath(), $"jyppx-onnx-to-engine-{Guid.NewGuid():N}.plan")
-            : options.SaveEnginePath;
-        bool deleteEnginePath = string.IsNullOrWhiteSpace(options.SaveEnginePath);
-
-        try
-        {
-            using TensorRtHostMemory hostMemory = builder.BuildSerializedNetwork(network, config);
-            hostMemory.SaveToFile(enginePath);
-            timingCache.Artifact = ExportTimingCache(timingCache, options, log);
-            TryCollectLayerInformationFromSerializedEngine(runtime, enginePath, options, log, "Build");
-
-            bool externalRuntimeRequested = options.UsesExternalOnnx && CanAttemptGenericExternalRuntime(options);
-            if (options.BuildOnly || options.SkipInference || (options.UsesExternalOnnx && !externalRuntimeRequested))
+            try
             {
-                log.Add($"Parsed=True ProfileIndex={profileIndex} EngineSaved={enginePath}");
-                log.Add(options.UsesExternalOnnx
-                    ? "OnnxToEngine ExternalOnnx=BuildOnlyOrSkipInference Note=Generic external-model inference requires explicit binding/output semantics. Supply --loadInputs tensor:file plus concrete shape semantics."
-                    : "OnnxToEngine BuildOnly=True");
-                log.Add("OnnxToEngine Passed=True");
-                OnnxEngineBuildResult buildOnly = CreateResult(
-                    success: true,
-                    skipped: false,
-                    state: options.UsesExternalOnnx ? "external-onnx-build-only" : "build-only",
+                using TensorRtHostMemory hostMemory = builder.BuildSerializedNetwork(network, config);
+                hostMemory.SaveToFile(enginePath);
+                timingCache.Artifact = ExportTimingCache(timingCache, options, log);
+                TryCollectLayerInformationFromSerializedEngine(runtime, enginePath, options, log, "Build");
+
+                bool externalRuntimeRequested = options.UsesExternalOnnx && CanAttemptGenericExternalRuntime(options);
+                if (options.BuildOnly || options.SkipInference || (options.UsesExternalOnnx && !externalRuntimeRequested))
+                {
+                    log.Add($"Parsed=True ProfileIndex={profileIndex} EngineSaved={enginePath}");
+                    log.Add(options.UsesExternalOnnx
+                        ? "OnnxToEngine ExternalOnnx=BuildOnlyOrSkipInference Note=Generic external-model inference requires explicit binding/output semantics. Supply --loadInputs tensor:file plus concrete shape semantics."
+                        : "OnnxToEngine BuildOnly=True");
+                    log.Add("OnnxToEngine Passed=True");
+                    OnnxEngineBuildResult buildOnly = CreateResult(
+                        success: true,
+                        skipped: false,
+                        state: options.UsesExternalOnnx ? "external-onnx-build-only" : "build-only",
+                        options,
+                        modelSource,
+                        enginePath,
+                        parsed: true,
+                        engineSaved: true,
+                        engineFileRoundTrip: false,
+                        inferenceRan: false,
+                        outputMatch: false,
+                        profileIndex,
+                        elapsedMilliseconds: null,
+                        skipReason: string.Empty,
+                        log,
+                        evidenceSidecar,
+                        timingCacheArtifact: timingCache.Artifact,
+                        builderConfigDeploymentSnapshot: builderConfigDeploymentSnapshot,
+                        parserPreflightSnapshot: parserPreflightSnapshot);
+                    OnnxEngineBuildDiagnostics.WriteReport(buildOnly, options.ExportReportPath);
+                    OnnxEngineRuntimeArtifactWriter.WriteArtifacts(buildOnly);
+                    return buildOnly;
+                }
+
+                if (externalRuntimeRequested)
+                {
+                    OnnxEngineRuntimeExecution? runtimeExecution = TryRunGenericFloatEngineFromFile(options, enginePath, profileIndex, log, statePrefix: "ExternalOnnx");
+                    log.Add(runtimeExecution == null
+                        ? "OnnxToEngine ExternalOnnx=RuntimeSkipped Note=Generic bounded runtime could not be executed."
+                        : $"OnnxToEngine ExternalOnnx=BoundedRuntime InferenceRan=True OutputMatch={runtimeExecution.OutputMatch}");
+                    OnnxEngineBuildResult externalRuntime = CreateResult(
+                        success: true,
+                        skipped: false,
+                        state: runtimeExecution != null && runtimeExecution.OutputMatch ? "external-onnx-identity-runtime" : "external-onnx-runtime-output-unverified",
+                        options,
+                        modelSource,
+                        enginePath,
+                        parsed: true,
+                        engineSaved: true,
+                        engineFileRoundTrip: true,
+                        inferenceRan: runtimeExecution != null,
+                        outputMatch: runtimeExecution?.OutputMatch ?? false,
+                        profileIndex: runtimeExecution?.ProfileIndex ?? profileIndex,
+                        elapsedMilliseconds: runtimeExecution?.ElapsedMilliseconds,
+                        skipReason: string.Empty,
+                        log,
+                        evidenceSidecar,
+                        benchmarkSummary: runtimeExecution?.BenchmarkSummary,
+                        loadedEngineDiagnostics: ProbeLoadedEngineDiagnostics(options, OnnxEnginePreflightMetadata.FromExistingEngine(enginePath), log),
+                        timingCacheArtifact: timingCache.Artifact,
+                        builderConfigDeploymentSnapshot: builderConfigDeploymentSnapshot,
+                        parserPreflightSnapshot: parserPreflightSnapshot);
+                    OnnxEngineBuildDiagnostics.WriteReport(externalRuntime, options.ExportReportPath);
+                    OnnxEngineRuntimeArtifactWriter.WriteArtifacts(externalRuntime, runtimeExecution?.ArtifactData);
+                    return externalRuntime;
+                }
+
+                using TensorRtEngine engine = runtime.DeserializeFromFile(enginePath);
+                OnnxEngineRuntimeExecution identityRuntimeExecution = TryRunGenericFloatEngine(
+                    engine,
                     options,
-                    modelSource,
-                    enginePath,
-                    parsed: true,
-                    engineSaved: true,
-                    engineFileRoundTrip: false,
-                    inferenceRan: false,
-                    outputMatch: false,
                     profileIndex,
-                    elapsedMilliseconds: null,
-                    skipReason: string.Empty,
                     log,
-                    evidenceSidecar,
-                    timingCacheArtifact: timingCache.Artifact,
-                    builderConfigDeploymentSnapshot: builderConfigDeploymentSnapshot,
-                    parserPreflightSnapshot: parserPreflightSnapshot);
-                OnnxEngineBuildDiagnostics.WriteReport(buildOnly, options.ExportReportPath);
-                OnnxEngineRuntimeArtifactWriter.WriteArtifacts(buildOnly);
-                return buildOnly;
-            }
+                    statePrefix: "Identity");
+                if (!identityRuntimeExecution.OutputMatch)
+                {
+                    throw new InvalidOperationException("Embedded identity runtime output did not match the generated input values.");
+                }
 
-            if (externalRuntimeRequested)
-            {
-                OnnxEngineRuntimeExecution? runtimeExecution = TryRunGenericFloatEngineFromFile(options, enginePath, profileIndex, log, statePrefix: "ExternalOnnx");
-                log.Add(runtimeExecution == null
-                    ? "OnnxToEngine ExternalOnnx=RuntimeSkipped Note=Generic bounded runtime could not be executed."
-                    : $"OnnxToEngine ExternalOnnx=BoundedRuntime InferenceRan=True OutputMatch={runtimeExecution.OutputMatch}");
-                OnnxEngineBuildResult externalRuntime = CreateResult(
+                log.Add($"Parsed=True ProfileIndex={profileIndex} EngineFileRoundTrip=True");
+                log.Add($"Execution ElapsedMs={identityRuntimeExecution.ElapsedMilliseconds:0.###} OutputMatch=True");
+                log.Add("OnnxToEngine Passed=True");
+
+                OnnxEngineBuildResult roundTrip = CreateResult(
                     success: true,
                     skipped: false,
-                    state: runtimeExecution != null && runtimeExecution.OutputMatch ? "external-onnx-identity-runtime" : "external-onnx-runtime-output-unverified",
+                    state: "identity-roundtrip",
                     options,
                     modelSource,
                     enginePath,
                     parsed: true,
                     engineSaved: true,
                     engineFileRoundTrip: true,
-                    inferenceRan: runtimeExecution != null,
-                    outputMatch: runtimeExecution?.OutputMatch ?? false,
-                    profileIndex: runtimeExecution?.ProfileIndex ?? profileIndex,
-                    elapsedMilliseconds: runtimeExecution?.ElapsedMilliseconds,
+                    inferenceRan: true,
+                    outputMatch: true,
+                    profileIndex,
+                    identityRuntimeExecution.ElapsedMilliseconds,
                     skipReason: string.Empty,
                     log,
                     evidenceSidecar,
-                    benchmarkSummary: runtimeExecution?.BenchmarkSummary,
-                    loadedEngineDiagnostics: ProbeLoadedEngineDiagnostics(options, OnnxEnginePreflightMetadata.FromExistingEngine(enginePath), log),
+                    benchmarkSummary: identityRuntimeExecution.BenchmarkSummary,
                     timingCacheArtifact: timingCache.Artifact,
                     builderConfigDeploymentSnapshot: builderConfigDeploymentSnapshot,
                     parserPreflightSnapshot: parserPreflightSnapshot);
-                OnnxEngineBuildDiagnostics.WriteReport(externalRuntime, options.ExportReportPath);
-                OnnxEngineRuntimeArtifactWriter.WriteArtifacts(externalRuntime, runtimeExecution?.ArtifactData);
-                return externalRuntime;
+                OnnxEngineBuildDiagnostics.WriteReport(roundTrip, options.ExportReportPath);
+                OnnxEngineRuntimeArtifactWriter.WriteArtifacts(roundTrip, identityRuntimeExecution.ArtifactData);
+                return roundTrip;
             }
-
-            using TensorRtEngine engine = runtime.DeserializeFromFile(enginePath);
-            using TensorRtExecutionContext context = engine.CreateExecutionContext();
-
-            TensorRtDims runtimeShape = new TensorRtDims(new[] { options.Batch, 4 });
-            float[] inputValues = Enumerable.Range(0, options.Batch * 4).Select(index => index + 0.5f).ToArray();
-            using TensorRtInferenceBindings bindings = new TensorRtInferenceBindings(engine, context, profileIndex);
-            bindings.SetInputShape("input", runtimeShape)
-                    .CopyInputFromHost("input", inputValues, runtimeShape);
-            bindings.AllocateDeviceBuffer("output", runtimeShape, checked(inputValues.Length * sizeof(float)));
-            bindings.BindAll();
-
-            TensorRtInferenceExecutionSummary executionSummary = null!;
-            float elapsedMilliseconds = stream.MeasureElapsedTime(cudaStream =>
+            finally
             {
-                executionSummary = bindings.EnqueueAsync(cudaStream, synchronize: false, runShapeInference: false);
-            });
-            List<float> timingSamplesMilliseconds = new List<float> { elapsedMilliseconds };
-
-            float[] outputValues = bindings.ReadOutputSingles("output", inputValues.Length);
-            if (!inputValues.SequenceEqual(outputValues))
-            {
-                throw new InvalidOperationException($"Output mismatch. Input=[{string.Join(", ", inputValues)}] Output=[{string.Join(", ", outputValues)}]");
-            }
-
-            int avgRuns = options.RuntimeOptions.AvgRuns ?? 1;
-            for (int runIndex = 1; runIndex < avgRuns; runIndex++)
-            {
-                TensorRtInferenceExecutionSummary benchmarkSummary = null!;
-                float benchmarkMilliseconds = stream.MeasureElapsedTime(cudaStream =>
+                if (deleteEnginePath && File.Exists(enginePath))
                 {
-                    benchmarkSummary = bindings.EnqueueAsync(cudaStream, synchronize: false, runShapeInference: false);
-                });
-                executionSummary = benchmarkSummary;
-                timingSamplesMilliseconds.Add(benchmarkMilliseconds);
+                    File.Delete(enginePath);
+                }
             }
-
-            log.Add($"Parsed=True ProfileIndex={profileIndex} EngineFileRoundTrip=True");
-            log.Add($"BindingReport Ready={bindings.Report.IsReadyForEnqueue} Inputs={bindings.Report.GetInputs().Count} Outputs={bindings.Report.GetOutputs().Count}");
-            log.Add($"Execution {executionSummary} ElapsedMs={elapsedMilliseconds:0.###} OutputMatch=True");
-            log.Add($"RuntimeBenchmark Samples={timingSamplesMilliseconds.Count} AvgRunsRequested={options.RuntimeOptions.AvgRuns?.ToString() ?? ""} ThreadsRequested={options.RuntimeOptions.Threads?.ToString() ?? ""} ThreadsExecuted=1 NoDataTransfersRequested={options.RuntimeOptions.NoDataTransfers} NoDataTransfersApplied=False PercentileRequested={options.RuntimeOptions.Percentile?.ToString() ?? ""}");
-            log.Add("OnnxToEngine Passed=True");
-
-            OnnxEngineBuildResult roundTrip = CreateResult(
-                success: true,
-                skipped: false,
-                state: "identity-roundtrip",
-                options,
-                modelSource,
-                enginePath,
-                parsed: true,
-                engineSaved: true,
-                engineFileRoundTrip: true,
-                inferenceRan: true,
-                outputMatch: true,
-                profileIndex,
-                elapsedMilliseconds,
-                skipReason: string.Empty,
-                log,
-                evidenceSidecar,
-                benchmarkSummary: OnnxEngineBenchmarkSummary.Create(
-                    timingSamplesMilliseconds,
-                    options.RuntimeOptions,
-                    inferenceRan: true,
-                    outputMatch: true),
-                timingCacheArtifact: timingCache.Artifact,
-                builderConfigDeploymentSnapshot: builderConfigDeploymentSnapshot,
-                parserPreflightSnapshot: parserPreflightSnapshot);
-            OnnxEngineBuildDiagnostics.WriteReport(roundTrip, options.ExportReportPath);
-            OnnxEngineRuntimeArtifactWriter.WriteArtifacts(
-                roundTrip,
-                OnnxEngineRuntimeArtifactData.CreateIdentityOutput(
-                    "output",
-                    new[] { options.Batch, 4 },
-                    inputValues,
-                    outputValues,
-                    executionSummary.ToString(),
-                    timingSamplesMilliseconds));
-            return roundTrip;
-        }
-        finally
-        {
-            if (deleteEnginePath && File.Exists(enginePath))
-            {
-                File.Delete(enginePath);
-            }
-        }
         }
         catch (Exception exception) when (exception is TensorRtException ||
                                           exception is BridgeProbeException ||
@@ -1128,114 +1092,180 @@ public sealed class OnnxEngineBuildService
         string statePrefix)
     {
         int safeProfileIndex = Math.Max(0, profileIndex);
-        using CudaStream stream = new CudaStream(CudaStreamCreationFlags.NonBlocking);
-        using TensorRtExecutionContext context = engine.CreateExecutionContext();
-        using TensorRtInferenceBindings bindings = new TensorRtInferenceBindings(engine, context, safeProfileIndex);
-
-        IReadOnlyList<TensorRtEngineTensorBinding> inputs = bindings.Report.GetInputs();
-        IReadOnlyList<TensorRtEngineTensorBinding> outputs = bindings.Report.GetOutputs();
-        if (inputs.Count != 1)
+        int executionContextCount = options.RuntimeOptions.InfStreams ?? options.Streams;
+        List<OnnxEngineBenchmarkWorker> workers = new List<OnnxEngineBenchmarkWorker>(executionContextCount);
+        try
         {
-            throw new NotSupportedException($"Generic bounded runtime supports exactly one input tensor. Engine input count: {inputs.Count}.");
-        }
+            OnnxEngineBenchmarkWorker firstWorker = new OnnxEngineBenchmarkWorker(engine, safeProfileIndex);
+            workers.Add(firstWorker);
 
-        if (outputs.Count == 0)
-        {
-            throw new NotSupportedException("Generic bounded runtime requires at least one output tensor.");
-        }
-
-        TensorRtEngineTensorBinding input = inputs[0];
-        if (input.DataType != TensorRtDataType.Float)
-        {
-            throw new NotSupportedException($"Generic bounded runtime supports float input tensors only. Input '{input.Name}' is {input.DataType}.");
-        }
-
-        foreach (TensorRtEngineTensorBinding output in outputs)
-        {
-            if (output.DataType != TensorRtDataType.Float)
+            IReadOnlyList<TensorRtEngineTensorBinding> inputs = firstWorker.Bindings.Report.GetInputs();
+            IReadOnlyList<TensorRtEngineTensorBinding> outputs = firstWorker.Bindings.Report.GetOutputs();
+            if (inputs.Count != 1)
             {
-                throw new NotSupportedException($"Generic bounded runtime supports float output tensors only. Output '{output.Name}' is {output.DataType}.");
+                throw new NotSupportedException($"Generic bounded runtime supports exactly one input tensor. Engine input count: {inputs.Count}.");
+            }
+
+            if (outputs.Count == 0)
+            {
+                throw new NotSupportedException("Generic bounded runtime requires at least one output tensor.");
+            }
+
+            TensorRtEngineTensorBinding input = inputs[0];
+            if (input.DataType != TensorRtDataType.Float)
+            {
+                throw new NotSupportedException($"Generic bounded runtime supports float input tensors only. Input '{input.Name}' is {input.DataType}.");
+            }
+
+            foreach (TensorRtEngineTensorBinding output in outputs)
+            {
+                if (output.DataType != TensorRtDataType.Float)
+                {
+                    throw new NotSupportedException($"Generic bounded runtime supports float output tensors only. Output '{output.Name}' is {output.DataType}.");
+                }
+            }
+
+            TensorRtDims runtimeShape = ResolveRuntimeInputShape(input, options);
+            float[] inputValues = CreateRuntimeInputValues(input.Name, CountElements(runtimeShape), options.RuntimeOptions.LoadInputs);
+            bool setInputShape = ShouldSetInputShape(input, runtimeShape, options);
+            firstWorker.Configure(input, outputs, runtimeShape, inputValues, setInputShape);
+            for (int workerIndex = 1; workerIndex < executionContextCount; workerIndex++)
+            {
+                OnnxEngineBenchmarkWorker worker = new OnnxEngineBenchmarkWorker(engine, safeProfileIndex);
+                workers.Add(worker);
+                worker.Configure(input, outputs, runtimeShape, inputValues, setInputShape);
+            }
+
+            OnnxEngineBenchmarkRun benchmark = RunBoundedBenchmark(workers, options);
+            float elapsedMilliseconds = benchmark.TimingSamplesMilliseconds[0];
+
+            List<OnnxEngineRuntimeOutputTensor> capturedOutputs = new List<OnnxEngineRuntimeOutputTensor>(outputs.Count);
+            foreach (TensorRtEngineTensorBinding output in outputs)
+            {
+                TensorRtInferenceBuffer outputBuffer = firstWorker.Bindings.Buffers[output.Name];
+                TensorRtDims outputShape = outputBuffer.RuntimeShape ?? throw new InvalidOperationException($"Output '{output.Name}' does not have a concrete runtime shape.");
+                int outputElementCount = CountElements(outputShape);
+                float[] outputValues = firstWorker.Bindings.ReadOutputSingles(output.Name, outputElementCount);
+                capturedOutputs.Add(new OnnxEngineRuntimeOutputTensor(output.Name, outputShape.Values, outputValues));
+            }
+
+            OnnxEngineRuntimeOutputTensor primaryOutput = capturedOutputs[0];
+            bool identityOutputMatch = capturedOutputs.Count == 1 &&
+                primaryOutput.Values.Length == inputValues.Length &&
+                ValuesEqual(inputValues, primaryOutput.Values);
+            log.Add($"{statePrefix}BoundedRuntime Attempted=True Succeeded=True Input={input.Name}:{runtimeShape} Outputs={capturedOutputs.Count} PrimaryOutput={primaryOutput.Name}:{FormatShape(primaryOutput.Shape)} ElapsedMs={elapsedMilliseconds:0.###} IdentityOutputMatch={identityOutputMatch}");
+            log.Add($"{statePrefix}BoundedRuntime OutputTensors=" + string.Join("; ", capturedOutputs.Select(static item => $"{item.Name}:{FormatShape(item.Shape)}:{item.Values.Length}")));
+            log.Add(
+                $"RuntimeBenchmark Contexts={workers.Count} MeasurementRounds={benchmark.MeasurementRoundsExecuted} " +
+                $"InferenceIterations={benchmark.TimingSamplesMilliseconds.Count} WarmUpIterations={benchmark.WarmUpIterationsExecuted} " +
+                $"WarmUpElapsedMs={benchmark.WarmUpElapsedMilliseconds:0.###} MeasurementElapsedMs={benchmark.MeasurementElapsedMilliseconds:0.###} " +
+                $"IterationsRequested={options.Iterations} DurationSecondsRequested={options.DurationSeconds} " +
+                $"StreamsRequested={options.Streams} InfStreamsRequested={options.RuntimeOptions.InfStreams?.ToString() ?? ""} " +
+                $"IdleTimeApplied={benchmark.IdleTimeMillisecondsApplied} SleepTimeApplied=0");
+
+            OnnxEngineRuntimeArtifactData artifactData = identityOutputMatch
+                ? OnnxEngineRuntimeArtifactData.CreateIdentityOutput(
+                    primaryOutput.Name,
+                    primaryOutput.Shape,
+                    inputValues,
+                    primaryOutput.Values,
+                    benchmark.LastExecutionSummary.ToString(),
+                    benchmark.TimingSamplesMilliseconds)
+                : OnnxEngineRuntimeArtifactData.CreateOutputSummary(
+                    primaryOutput.Name,
+                    primaryOutput.Shape,
+                    inputValues.Length,
+                    primaryOutput.Values,
+                    benchmark.LastExecutionSummary.ToString(),
+                    benchmark.TimingSamplesMilliseconds);
+
+            return new OnnxEngineRuntimeExecution(
+                inferenceRan: true,
+                outputMatch: identityOutputMatch,
+                safeProfileIndex,
+                elapsedMilliseconds,
+                OnnxEngineBenchmarkSummary.CreateExecuted(
+                    benchmark.TimingSamplesMilliseconds,
+                    options,
+                    benchmark.MeasurementRoundsExecuted,
+                    benchmark.WarmUpIterationsExecuted,
+                    benchmark.WarmUpElapsedMilliseconds,
+                    benchmark.MeasurementElapsedMilliseconds,
+                    workers.Count),
+                artifactData);
+        }
+        finally
+        {
+            for (int index = workers.Count - 1; index >= 0; index--)
+            {
+                workers[index].Dispose();
             }
         }
+    }
 
-        TensorRtDims runtimeShape = ResolveRuntimeInputShape(input, options);
-        if (ShouldSetInputShape(input, runtimeShape, options))
+    private static OnnxEngineBenchmarkRun RunBoundedBenchmark(
+        IReadOnlyList<OnnxEngineBenchmarkWorker> workers,
+        OnnxEngineBuildOptions options)
+    {
+        int warmUpIterations = 0;
+        Stopwatch warmUpStopwatch = Stopwatch.StartNew();
+        while (warmUpStopwatch.ElapsedMilliseconds < options.WarmUpMilliseconds)
         {
-            bindings.SetInputShape(input.Name, runtimeShape);
-        }
-
-        float[] inputValues = CreateRuntimeInputValues(input.Name, CountElements(runtimeShape), options.RuntimeOptions.LoadInputs);
-        bindings.CopyInputFromHost(input.Name, inputValues, runtimeShape);
-        _ = bindings.GetReadiness(runShapeInference: true);
-
-        Dictionary<string, TensorRtInferenceBuffer> outputBuffers = new Dictionary<string, TensorRtInferenceBuffer>(StringComparer.Ordinal);
-        foreach (TensorRtEngineTensorBinding output in outputs)
-        {
-            outputBuffers[output.Name] = bindings.AllocateDeviceBuffer(output.Name);
-        }
-
-        TensorRtInferenceExecutionSummary executionSummary = null!;
-        float elapsedMilliseconds = stream.MeasureElapsedTime(cudaStream =>
-        {
-            executionSummary = bindings.EnqueueAsync(cudaStream, synchronize: false, runShapeInference: true);
-        });
-        List<float> timingSamplesMilliseconds = new List<float> { elapsedMilliseconds };
-        int avgRuns = options.RuntimeOptions.AvgRuns ?? 1;
-        for (int runIndex = 1; runIndex < avgRuns; runIndex++)
-        {
-            TensorRtInferenceExecutionSummary benchmarkSummary = null!;
-            float benchmarkMilliseconds = stream.MeasureElapsedTime(cudaStream =>
+            foreach (OnnxEngineBenchmarkWorker worker in workers)
             {
-                benchmarkSummary = bindings.EnqueueAsync(cudaStream, synchronize: false, runShapeInference: true);
-            });
-            executionSummary = benchmarkSummary;
-            timingSamplesMilliseconds.Add(benchmarkMilliseconds);
-        }
+                worker.Enqueue();
+            }
 
-        List<OnnxEngineRuntimeOutputTensor> capturedOutputs = new List<OnnxEngineRuntimeOutputTensor>(outputs.Count);
-        foreach (TensorRtEngineTensorBinding output in outputs)
+            foreach (OnnxEngineBenchmarkWorker worker in workers)
+            {
+                worker.Stream.Synchronize();
+            }
+
+            warmUpIterations += workers.Count;
+        }
+        warmUpStopwatch.Stop();
+
+        List<float> timingSamples = new List<float>();
+        int measurementRounds = 0;
+        TensorRtInferenceExecutionSummary? lastExecutionSummary = null;
+        Stopwatch measurementStopwatch = Stopwatch.StartNew();
+        TimeSpan minimumDuration = TimeSpan.FromSeconds(options.DurationSeconds);
+        while (measurementRounds < options.Iterations || measurementStopwatch.Elapsed < minimumDuration)
         {
-            TensorRtInferenceBuffer outputBuffer = outputBuffers[output.Name];
-            TensorRtDims outputShape = outputBuffer.RuntimeShape ?? throw new InvalidOperationException($"Output '{output.Name}' does not have a concrete runtime shape.");
-            int outputElementCount = CountElements(outputShape);
-            float[] outputValues = bindings.ReadOutputSingles(output.Name, outputElementCount);
-            capturedOutputs.Add(new OnnxEngineRuntimeOutputTensor(output.Name, outputShape.Values, outputValues));
+            if (measurementRounds > 0 && options.RuntimeOptions.IdleTimeMilliseconds.GetValueOrDefault() > 0)
+            {
+                Thread.Sleep(options.RuntimeOptions.IdleTimeMilliseconds!.Value);
+            }
+
+            foreach (OnnxEngineBenchmarkWorker worker in workers)
+            {
+                worker.StartTiming();
+                lastExecutionSummary = worker.Enqueue();
+                worker.StopTiming();
+            }
+
+            foreach (OnnxEngineBenchmarkWorker worker in workers)
+            {
+                timingSamples.Add(worker.CompleteTiming());
+            }
+
+            measurementRounds++;
+        }
+        measurementStopwatch.Stop();
+
+        if (lastExecutionSummary == null || timingSamples.Count == 0)
+        {
+            throw new InvalidOperationException("Bounded benchmark did not execute any inference iterations.");
         }
 
-        OnnxEngineRuntimeOutputTensor primaryOutput = capturedOutputs[0];
-        bool identityOutputMatch = capturedOutputs.Count == 1 &&
-            primaryOutput.Values.Length == inputValues.Length &&
-            ValuesEqual(inputValues, primaryOutput.Values);
-        log.Add($"{statePrefix}BoundedRuntime Attempted=True Succeeded=True Input={input.Name}:{runtimeShape} Outputs={capturedOutputs.Count} PrimaryOutput={primaryOutput.Name}:{FormatShape(primaryOutput.Shape)} ElapsedMs={elapsedMilliseconds:0.###} IdentityOutputMatch={identityOutputMatch}");
-        log.Add($"{statePrefix}BoundedRuntime OutputTensors=" + string.Join("; ", capturedOutputs.Select(static item => $"{item.Name}:{FormatShape(item.Shape)}:{item.Values.Length}")));
-
-        OnnxEngineRuntimeArtifactData artifactData = identityOutputMatch
-            ? OnnxEngineRuntimeArtifactData.CreateIdentityOutput(
-                primaryOutput.Name,
-                primaryOutput.Shape,
-                inputValues,
-                primaryOutput.Values,
-                executionSummary.ToString(),
-                timingSamplesMilliseconds)
-            : OnnxEngineRuntimeArtifactData.CreateOutputSummary(
-                primaryOutput.Name,
-                primaryOutput.Shape,
-                inputValues.Length,
-                primaryOutput.Values,
-                executionSummary.ToString(),
-                timingSamplesMilliseconds);
-
-        return new OnnxEngineRuntimeExecution(
-            inferenceRan: true,
-            outputMatch: identityOutputMatch,
-            safeProfileIndex,
-            elapsedMilliseconds,
-            OnnxEngineBenchmarkSummary.Create(
-                timingSamplesMilliseconds,
-                options.RuntimeOptions,
-                inferenceRan: true,
-                outputMatch: identityOutputMatch),
-            artifactData);
+        return new OnnxEngineBenchmarkRun(
+            timingSamples,
+            lastExecutionSummary,
+            measurementRounds,
+            warmUpIterations,
+            warmUpStopwatch.Elapsed.TotalMilliseconds,
+            measurementStopwatch.Elapsed.TotalMilliseconds,
+            measurementRounds > 1 ? options.RuntimeOptions.IdleTimeMilliseconds.GetValueOrDefault() : 0);
     }
 
     private static TensorRtDims ResolveRuntimeInputShape(TensorRtEngineTensorBinding input, OnnxEngineBuildOptions options)
@@ -1438,6 +1468,141 @@ public sealed class OnnxEngineBuildService
         }
     }
 
+    private sealed class OnnxEngineBenchmarkWorker : IDisposable
+    {
+        private readonly TensorRtExecutionContext _context;
+        private readonly CudaEvent _startEvent;
+        private readonly CudaEvent _stopEvent;
+
+        public OnnxEngineBenchmarkWorker(TensorRtEngine engine, int profileIndex)
+        {
+            CudaStream? stream = null;
+            TensorRtExecutionContext? context = null;
+            TensorRtInferenceBindings? bindings = null;
+            CudaEvent? startEvent = null;
+            try
+            {
+                stream = new CudaStream(CudaStreamCreationFlags.NonBlocking);
+                context = engine.CreateExecutionContext();
+                bindings = new TensorRtInferenceBindings(engine, context, profileIndex);
+                startEvent = new CudaEvent();
+                CudaEvent stopEvent = new CudaEvent();
+                Stream = stream;
+                _context = context;
+                Bindings = bindings;
+                _startEvent = startEvent;
+                _stopEvent = stopEvent;
+            }
+            catch
+            {
+                startEvent?.Dispose();
+                bindings?.Dispose();
+                context?.Dispose();
+                stream?.Dispose();
+                throw;
+            }
+        }
+
+        public CudaStream Stream { get; }
+
+        public TensorRtInferenceBindings Bindings { get; }
+
+        public void Configure(
+            TensorRtEngineTensorBinding input,
+            IReadOnlyList<TensorRtEngineTensorBinding> outputs,
+            TensorRtDims runtimeShape,
+            float[] inputValues,
+            bool setInputShape)
+        {
+            if (setInputShape)
+            {
+                Bindings.SetInputShape(input.Name, runtimeShape);
+            }
+
+            Bindings.CopyInputFromHost(input.Name, inputValues, runtimeShape);
+            _ = Bindings.GetReadiness(runShapeInference: true);
+            foreach (TensorRtEngineTensorBinding output in outputs)
+            {
+                Bindings.AllocateDeviceBuffer(output.Name);
+            }
+
+            Bindings.BindAll();
+        }
+
+        public TensorRtInferenceExecutionSummary Enqueue()
+        {
+            return Bindings.EnqueueAsync(Stream, synchronize: false, runShapeInference: false);
+        }
+
+        public void StartTiming()
+        {
+            _startEvent.Record(Stream);
+        }
+
+        public void StopTiming()
+        {
+            _stopEvent.Record(Stream);
+        }
+
+        public float CompleteTiming()
+        {
+            _stopEvent.Synchronize();
+            return _stopEvent.ElapsedTimeSince(_startEvent);
+        }
+
+        public void Dispose()
+        {
+            try
+            {
+                Stream.Synchronize();
+            }
+            catch (CudaException)
+            {
+            }
+
+            _stopEvent.Dispose();
+            _startEvent.Dispose();
+            Bindings.Dispose();
+            _context.Dispose();
+            Stream.Dispose();
+        }
+    }
+
+    private sealed class OnnxEngineBenchmarkRun
+    {
+        public OnnxEngineBenchmarkRun(
+            IReadOnlyList<float> timingSamplesMilliseconds,
+            TensorRtInferenceExecutionSummary lastExecutionSummary,
+            int measurementRoundsExecuted,
+            int warmUpIterationsExecuted,
+            double warmUpElapsedMilliseconds,
+            double measurementElapsedMilliseconds,
+            int idleTimeMillisecondsApplied)
+        {
+            TimingSamplesMilliseconds = timingSamplesMilliseconds;
+            LastExecutionSummary = lastExecutionSummary;
+            MeasurementRoundsExecuted = measurementRoundsExecuted;
+            WarmUpIterationsExecuted = warmUpIterationsExecuted;
+            WarmUpElapsedMilliseconds = warmUpElapsedMilliseconds;
+            MeasurementElapsedMilliseconds = measurementElapsedMilliseconds;
+            IdleTimeMillisecondsApplied = idleTimeMillisecondsApplied;
+        }
+
+        public IReadOnlyList<float> TimingSamplesMilliseconds { get; }
+
+        public TensorRtInferenceExecutionSummary LastExecutionSummary { get; }
+
+        public int MeasurementRoundsExecuted { get; }
+
+        public int WarmUpIterationsExecuted { get; }
+
+        public double WarmUpElapsedMilliseconds { get; }
+
+        public double MeasurementElapsedMilliseconds { get; }
+
+        public int IdleTimeMillisecondsApplied { get; }
+    }
+
     private sealed class OnnxEngineRuntimeExecution
     {
         public OnnxEngineRuntimeExecution(
@@ -1630,6 +1795,6 @@ public sealed class OnnxEngineBuildService
 
     private static string RuntimeOptionsLogLine(OnnxEngineBuildOptions options)
     {
-        return $"TrtexecRuntime NoDataTransfers={options.RuntimeOptions.NoDataTransfers} UseSpinWait={options.RuntimeOptions.UseSpinWait} Threads={options.RuntimeOptions.Threads?.ToString() ?? ""} AvgRuns={options.RuntimeOptions.AvgRuns?.ToString() ?? ""} Percentile={options.RuntimeOptions.Percentile?.ToString() ?? ""} DumpOutput={options.RuntimeOptions.DumpOutput} ExportTimes={options.RuntimeOptions.ExportTimesPath} ExportProfile={options.RuntimeOptions.ExportProfilePath}";
+        return $"TrtexecRuntime Iterations={options.Iterations} WarmUpMs={options.WarmUpMilliseconds} DurationSeconds={options.DurationSeconds} Streams={options.Streams} InfStreams={options.RuntimeOptions.InfStreams?.ToString() ?? ""} NoDataTransfers={options.RuntimeOptions.NoDataTransfers} UseSpinWait={options.RuntimeOptions.UseSpinWait} Threads={options.RuntimeOptions.Threads?.ToString() ?? ""} AvgRuns={options.RuntimeOptions.AvgRuns?.ToString() ?? ""} Percentile={options.RuntimeOptions.Percentile?.ToString() ?? ""} IdleTimeMs={options.RuntimeOptions.IdleTimeMilliseconds?.ToString() ?? ""} SleepTimeMs={options.RuntimeOptions.SleepTimeMilliseconds?.ToString() ?? ""} DumpOutput={options.RuntimeOptions.DumpOutput} ExportTimes={options.RuntimeOptions.ExportTimesPath} ExportProfile={options.RuntimeOptions.ExportProfilePath}";
     }
 }

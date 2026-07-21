@@ -28,13 +28,15 @@ applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.md
 
 ## 当前最重要的缺口
 
-第一类是安全反序列化和 binding diagnostics。`--loadEngine` 目前不能被宣传成真实运行证明；它需要先有 read-only deserialize、binding metadata、error diagnostics，再考虑 enqueue。
+第一类是 bounded runtime 与模型正确性的边界。`--loadEngine` 已具备 read-only deserialize、binding metadata，以及 compatible float engine 的 typed enqueue/readback；但没有 expected output、模型来源、输入资产和 owner hash 时，仍不能宣传成模型正确性或 package runtime proof。
 
 第二类是 builder config readback。`--workspace`、已知 `--memPoolSize` pool 和 `--avgTiming` 现在会在真实 build 中调用 typed setter 并用 getter read back；TRT8 的 `--minTiming` 使用 legacy compatibility setter，TRT10/11 保持 parse-only；dynamic profile 等仍需要报告和真实模型证据。readback 只说明 TensorRT 接收了 builder 配置，不是 runtime 输出或 package-consumer proof。
 
-第三类是 WinForms parity。GUI 不应该只是“能打开页面”，而是要能覆盖 CLI 的主要参数、生成可复制命令、展示 report 摘要和错误诊断。
+第三类是 benchmark scheduler 完整度。`--iterations`、`--warmUp`、`--duration`、effective `--streams/--infStreams`、`--idleTime`、`--avgRuns` 和 `--percentile` 已在 bounded runtime 执行；`--sleepTime`、`--threads`、`--useSpinWait`、`--useCudaGraph` 和 `--noDataTransfers` 仍必须保持 parse-only，直到实现官方语义并完成 smoke。
 
-第四类是 proof 边界。TensorRtExec 可以辅助生成 build report 和 sidecar，但不能替代 YoloVision real-model-runtime proof，更不能替代 clean external consumer 的 package-consumer-runtime proof。
+第四类是 WinForms parity。GUI 不应该只是“能打开页面”，而是要能覆盖 CLI 的主要参数、生成可复制命令、展示 report 摘要和错误诊断。
+
+第五类是 proof 边界。TensorRtExec 可以辅助生成 build report 和 sidecar，但不能替代 YoloVision real-model-runtime proof，更不能替代 clean external consumer 的 package-consumer-runtime proof。
 
 ## 配图建议
 
@@ -44,4 +46,4 @@ applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.md
 
 ## 下一步
 
-下一阶段优先把 `load-engine`、`binding-metadata` 和 `winforms-command-surface` 三项拆成实现任务；`workspace-memory-pool` 与 `timing-iterations` 转入 compatible-host owner build record。所有实现都需要同步更新 CLI、WinForms、文档、测试和 proof 边界说明。
+下一阶段优先完成剩余 runtime mechanics、`binding-metadata` 的真实模型 expected-output 证据和 `winforms-command-surface`；`workspace-memory-pool` 与 `timing-iterations` 继续进入 compatible-host owner build record。所有实现都需要同步更新 CLI、WinForms、文档、测试和 proof 边界说明。

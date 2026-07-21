@@ -1,0 +1,98 @@
+{
+  "schemaVersion": "trtexec-bounded-benchmark-scheduler-runtime-evidence.v1",
+  "evidenceKind": "local-project-reference-synthetic-bounded-scheduler-runtime",
+  "generatedAt": "2026-07-21",
+  "sourceState": "working-tree-candidate-after-fde92b480a2f91357104e2d0c3e3e506e0385a09",
+  "host": {
+    "os": "Microsoft Windows NT 10.0.26200.0",
+    "architecture": "X64",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02",
+    "tensorRtVersion": "10.11.0",
+    "cudaToolkitVersion": "12.9",
+    "dotnetSdk": "10.0.301"
+  },
+  "officialReference": {
+    "path": "D:/Program Files/TensorRT-10.11.0.33-cu12/bin/trtexec.exe",
+    "lengthBytes": 980000,
+    "sha256": "8FD805448DA2264E6388B81DDC7F9FF5605081EB65F9D2DB168BC055CF492CBD",
+    "semanticsChecked": [
+      "iterations runs at least N inference iterations",
+      "warmUp runs at least N milliseconds before measurement",
+      "duration measures for at least N wall-clock seconds",
+      "idleTime sleeps between continuous iterations",
+      "infStreams creates N concurrent execution contexts",
+      "avgRuns reports averages over N consecutive iterations"
+    ]
+  },
+  "concurrencyRun": {
+    "exitCode": 0,
+    "state": "identity-roundtrip",
+    "proofClassification": "synthetic-input-runtime",
+    "outputMatch": true,
+    "iterationsRequested": 3,
+    "measurementRoundsExecuted": 3,
+    "inferenceIterationsExecuted": 6,
+    "warmUpMillisecondsRequested": 5,
+    "warmUpElapsedMilliseconds": 5.1009,
+    "warmUpIterationsExecuted": 28,
+    "durationSecondsRequested": 0,
+    "measurementElapsedMilliseconds": 26.5979,
+    "streamsRequested": 1,
+    "infStreamsRequested": 2,
+    "executionContextsCreated": 2,
+    "concurrentStreamsExecuted": 2,
+    "idleTimeMillisecondsRequested": 1,
+    "idleTimeMillisecondsApplied": 1,
+    "avgRunsRequested": 2,
+    "averagedTimingSampleCount": 3,
+    "rawTimingSampleCount": 6,
+    "percentileRequested": 90,
+    "percentileElapsedMilliseconds": 0.319488,
+    "report": {
+      "localPath": "build-out/benchmark-scheduler-smoke/evidence-concurrency-report.json",
+      "lengthBytes": 20042,
+      "sha256": "9C6D5B36A85F033CFFC74439DBA351F0B28A0E45BA8485B23ACF080D5BCE7BB4"
+    },
+    "timesArtifact": {
+      "localPath": "build-out/benchmark-scheduler-smoke/evidence-concurrency-times.json",
+      "lengthBytes": 3635,
+      "sha256": "6A6F8E9BA9D914E0DA6463E859908ADFAA89D705F52F7320BA734224F2B08BF6"
+    }
+  },
+  "durationRun": {
+    "exitCode": 0,
+    "state": "identity-roundtrip",
+    "outputMatch": true,
+    "iterationsRequested": 1,
+    "measurementRoundsExecuted": 6440,
+    "durationSecondsRequested": 1,
+    "measurementElapsedMilliseconds": 1000.1398,
+    "executionContextsCreated": 1,
+    "report": {
+      "localPath": "build-out/benchmark-scheduler-smoke/evidence-duration-report.json",
+      "lengthBytes": 126569,
+      "sha256": "F3C63A9A1BE3767CA60F006830281ECBF6FC82594F4224E0177040A3326BDC87"
+    },
+    "timesArtifact": {
+      "localPath": "build-out/benchmark-scheduler-smoke/evidence-duration-times.json",
+      "lengthBytes": 98475,
+      "sha256": "929DE7D81943569A083F33B9B00726BB8D2A72A7F9584E97A0695674C0F2F3F4"
+    }
+  },
+  "binaryHashes": [
+    { "component": "TRT10/CUDA12.9 bridge", "lengthBytes": 1064960, "sha256": "42F69F3D639E032FA3836FC7F552E4B665FFD073D52DC83CE630A4F04C87CC83" },
+    { "component": "JYPPX.TensorRtSharp.Tools Debug assembly", "lengthBytes": 282112, "sha256": "8DEDF456645FE750E346ED714C812E10C66FDB581BD4AF771AF398D78299BB22" },
+    { "component": "OnnxToEngine Debug assembly", "lengthBytes": 17920, "sha256": "5717F17D763D2AA730C1B9BC021BC0C21227413338B549E7A3EA2CB6FCAFAE37" }
+  ],
+  "unappliedControls": ["sleepTime", "useSpinWait", "threads", "useCudaGraph", "noDataTransfers"],
+  "proofBoundary": {
+    "isBoundedSchedulerRuntimeProof": true,
+    "isSyntheticIdentityOutputProof": true,
+    "isRealModelRuntimeProof": false,
+    "isPackageConsumerRuntimeProof": false,
+    "packagesDownloadedFromPublicFeed": false,
+    "canPromotePublicProof": false,
+    "canPublishPublicly": false
+  }
+}

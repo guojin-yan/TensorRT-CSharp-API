@@ -23,6 +23,30 @@ public sealed class TrtexecLikeRuntimeOptions
         string exportProfilePath,
         string saveProfilePath)
     {
+        if (threads.HasValue && threads.Value <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(threads), "Thread count must be positive.");
+        }
+        if (avgRuns.HasValue && avgRuns.Value <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(avgRuns), "Average-run window must be positive.");
+        }
+        if (percentile.HasValue && (percentile.Value < 0 || percentile.Value > 100))
+        {
+            throw new ArgumentOutOfRangeException(nameof(percentile), "Percentile must be between 0 and 100.");
+        }
+        if (sleepTimeMilliseconds.HasValue && sleepTimeMilliseconds.Value < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(sleepTimeMilliseconds), "Sleep time must be non-negative.");
+        }
+        if (idleTimeMilliseconds.HasValue && idleTimeMilliseconds.Value < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(idleTimeMilliseconds), "Idle time must be non-negative.");
+        }
+        if (infStreams.HasValue && infStreams.Value <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(infStreams), "Inference stream count must be positive.");
+        }
         NoDataTransfers = noDataTransfers;
         UseSpinWait = useSpinWait;
         Threads = threads;

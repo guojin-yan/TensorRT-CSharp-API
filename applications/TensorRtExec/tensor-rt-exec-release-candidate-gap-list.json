@@ -5,8 +5,8 @@
   "state": "release-candidate-gap-planning",
   "proofBoundary": "This gap list is planning evidence only. CLI reports, WinForms screenshots, dry-run output, build-only reports, templates, local feeds, ProjectReference, and direct .nupkg references are not package-consumer-runtime proof.",
   "summary": {
-    "totalItems": 16,
-    "implementedOrReportReady": 9,
+    "totalItems": 17,
+    "implementedOrReportReady": 10,
     "partialOrDiagnostic": 5,
     "releaseProofRecordsOnly": 1,
     "runtimeProofItems": 0,
@@ -38,13 +38,13 @@
     {
       "id": "load-engine",
       "officialTrtexecParity": "--loadEngine",
-      "currentStatus": "implemented-readonly-diagnostics",
+      "currentStatus": "bounded-runtime-output",
       "isRuntimeProof": false,
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": true,
       "winFormsSupported": true,
       "nextImplementationPaths": ["src/JYPPX.TensorRtSharp/TensorRtRuntime.cs", "applications/TensorRtExec"],
-      "nextStep": "Readonly deserialize diagnostics are available. Keep enqueue, binding execution, output validation, and package-consumer-runtime proof gated behind explicit runtime proof records."
+      "nextStep": "Readonly diagnostics plus compatible-float bounded enqueue/readback are available. Keep model correctness and package-consumer-runtime proof gated behind expected outputs and explicit runtime proof records."
     },
     {
       "id": "dynamic-shape",
@@ -100,6 +100,17 @@
       "winFormsSupported": true,
       "nextImplementationPaths": ["applications/TensorRtExec", "src/JYPPX.TensorRtSharp/TensorRtBuilderConfig.cs"],
       "nextStep": "Collect compatible-host TRT8/10/11 build logs with requested/readback timing iteration values; keep builder evidence separate from runtime and package-consumer proof."
+    },
+    {
+      "id": "bounded-benchmark-scheduler",
+      "officialTrtexecParity": "--iterations --warmUp --duration --streams --infStreams --idleTime --avgRuns --percentile",
+      "currentStatus": "implemented-bounded-runtime",
+      "isRuntimeProof": false,
+      "isPackageConsumerRuntimeProof": false,
+      "cliSupported": true,
+      "winFormsSupported": true,
+      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildService.cs", "applications/TensorRtExec", "samples/OnnxToEngine"],
+      "nextStep": "Retain scheduler runtime evidence separately from model correctness; implement --sleepTime, --threads, --useSpinWait, --useCudaGraph, and --noDataTransfers only with faithful mechanics and smoke."
     },
     {
       "id": "timing-cache",

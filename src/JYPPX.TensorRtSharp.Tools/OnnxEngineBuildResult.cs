@@ -656,9 +656,22 @@ public sealed class OnnxEngineBenchmarkSummary
         int sleepTimeMillisecondsApplied,
         int? idleTimeMillisecondsRequested,
         int idleTimeMillisecondsApplied,
-        string benchmarkBoundary)
+        string benchmarkBoundary,
+        int iterationsRequested = 0,
+        int measurementRoundsExecuted = 0,
+        int inferenceIterationsExecuted = 0,
+        int warmUpMillisecondsRequested = 0,
+        double warmUpElapsedMilliseconds = 0,
+        int warmUpIterationsExecuted = 0,
+        int durationSecondsRequested = 0,
+        double measurementElapsedMilliseconds = 0,
+        int streamsRequested = 0,
+        int? infStreamsRequested = null,
+        int executionContextsCreated = 0,
+        int concurrentStreamsExecuted = 0)
     {
         TimingSamplesMilliseconds = timingSamplesMilliseconds ?? Array.Empty<float>();
+        AveragedTimingSamplesMilliseconds = AverageWindows(TimingSamplesMilliseconds, avgRunsRequested);
         AvgRunsRequested = avgRunsRequested;
         AvgRunsExecuted = avgRunsExecuted;
         PercentileRequested = percentileRequested;
@@ -673,6 +686,18 @@ public sealed class OnnxEngineBenchmarkSummary
         IdleTimeMillisecondsRequested = idleTimeMillisecondsRequested;
         IdleTimeMillisecondsApplied = idleTimeMillisecondsApplied;
         BenchmarkBoundary = benchmarkBoundary ?? string.Empty;
+        IterationsRequested = iterationsRequested;
+        MeasurementRoundsExecuted = measurementRoundsExecuted;
+        InferenceIterationsExecuted = inferenceIterationsExecuted;
+        WarmUpMillisecondsRequested = warmUpMillisecondsRequested;
+        WarmUpElapsedMilliseconds = warmUpElapsedMilliseconds;
+        WarmUpIterationsExecuted = warmUpIterationsExecuted;
+        DurationSecondsRequested = durationSecondsRequested;
+        MeasurementElapsedMilliseconds = measurementElapsedMilliseconds;
+        StreamsRequested = streamsRequested;
+        InfStreamsRequested = infStreamsRequested;
+        ExecutionContextsCreated = executionContextsCreated;
+        ConcurrentStreamsExecuted = concurrentStreamsExecuted;
     }
 
     public static OnnxEngineBenchmarkSummary Empty { get; } = new OnnxEngineBenchmarkSummary(
@@ -695,6 +720,10 @@ public sealed class OnnxEngineBenchmarkSummary
     public IReadOnlyList<float> TimingSamplesMilliseconds { get; }
 
     public int TimingSampleCount => TimingSamplesMilliseconds.Count;
+
+    public IReadOnlyList<float> AveragedTimingSamplesMilliseconds { get; }
+
+    public int AveragedTimingSampleCount => AveragedTimingSamplesMilliseconds.Count;
 
     public float? AverageElapsedMilliseconds => TimingSampleCount == 0 ? null : TimingSamplesMilliseconds.Sum() / TimingSampleCount;
 
@@ -730,6 +759,30 @@ public sealed class OnnxEngineBenchmarkSummary
 
     public string BenchmarkBoundary { get; }
 
+    public int IterationsRequested { get; }
+
+    public int MeasurementRoundsExecuted { get; }
+
+    public int InferenceIterationsExecuted { get; }
+
+    public int WarmUpMillisecondsRequested { get; }
+
+    public double WarmUpElapsedMilliseconds { get; }
+
+    public int WarmUpIterationsExecuted { get; }
+
+    public int DurationSecondsRequested { get; }
+
+    public double MeasurementElapsedMilliseconds { get; }
+
+    public int StreamsRequested { get; }
+
+    public int? InfStreamsRequested { get; }
+
+    public int ExecutionContextsCreated { get; }
+
+    public int ConcurrentStreamsExecuted { get; }
+
     public static OnnxEngineBenchmarkSummary Create(
         IReadOnlyList<float> timingSamplesMilliseconds,
         TrtexecLikeRuntimeOptions runtimeOptions,
@@ -761,6 +814,54 @@ public sealed class OnnxEngineBenchmarkSummary
             boundary);
     }
 
+    internal static OnnxEngineBenchmarkSummary CreateExecuted(
+        IReadOnlyList<float> timingSamplesMilliseconds,
+        OnnxEngineBuildOptions options,
+        int measurementRoundsExecuted,
+        int warmUpIterationsExecuted,
+        double warmUpElapsedMilliseconds,
+        double measurementElapsedMilliseconds,
+        int executionContextsCreated)
+    {
+        IReadOnlyList<float> samples = timingSamplesMilliseconds ?? Array.Empty<float>();
+        TrtexecLikeRuntimeOptions runtimeOptions = options.RuntimeOptions;
+        int idleApplied = measurementRoundsExecuted > 1
+            ? runtimeOptions.IdleTimeMilliseconds ?? 0
+            : 0;
+        string boundary =
+            "benchmark-executed-bounded-runtime; iterations, warmUp, duration, streams/infStreams, avgRuns statistics, percentile, and idleTime are backed by actual enqueue measurements; " +
+            "sleepTime, useSpinWait, threads, useCudaGraph, and noDataTransfers remain unapplied; tensor correctness and package-consumer proof require separate model-specific evidence.";
+
+        return new OnnxEngineBenchmarkSummary(
+            samples,
+            runtimeOptions.AvgRuns,
+            runtimeOptions.AvgRuns.HasValue ? Math.Min(runtimeOptions.AvgRuns.Value, samples.Count) : 0,
+            runtimeOptions.Percentile,
+            PercentileOrNull(samples, runtimeOptions.Percentile),
+            runtimeOptions.Threads,
+            threadsExecuted: samples.Count == 0 ? 0 : 1,
+            runtimeOptions.NoDataTransfers,
+            noDataTransfersApplied: false,
+            runtimeOptions.UseSpinWait,
+            runtimeOptions.SleepTimeMilliseconds,
+            sleepTimeMillisecondsApplied: 0,
+            runtimeOptions.IdleTimeMilliseconds,
+            idleTimeMillisecondsApplied: idleApplied,
+            boundary,
+            iterationsRequested: options.Iterations,
+            measurementRoundsExecuted,
+            inferenceIterationsExecuted: samples.Count,
+            warmUpMillisecondsRequested: options.WarmUpMilliseconds,
+            warmUpElapsedMilliseconds,
+            warmUpIterationsExecuted,
+            durationSecondsRequested: options.DurationSeconds,
+            measurementElapsedMilliseconds,
+            streamsRequested: options.Streams,
+            infStreamsRequested: runtimeOptions.InfStreams,
+            executionContextsCreated,
+            concurrentStreamsExecuted: executionContextsCreated);
+    }
+
     private static float? PercentileOrNull(IReadOnlyList<float> values, float? percentile)
     {
         if (values.Count == 0 || !percentile.HasValue)
@@ -772,5 +873,29 @@ public sealed class OnnxEngineBenchmarkSummary
         int index = (int)Math.Ceiling((percentile.Value / 100.0f) * sorted.Length) - 1;
         index = Math.Max(0, Math.Min(sorted.Length - 1, index));
         return sorted[index];
+    }
+
+    private static IReadOnlyList<float> AverageWindows(IReadOnlyList<float> values, int? windowSize)
+    {
+        if (values.Count == 0 || !windowSize.HasValue)
+        {
+            return Array.Empty<float>();
+        }
+
+        int size = Math.Max(1, windowSize.Value);
+        List<float> averages = new List<float>((values.Count + size - 1) / size);
+        for (int start = 0; start < values.Count; start += size)
+        {
+            int count = Math.Min(size, values.Count - start);
+            float total = 0;
+            for (int offset = 0; offset < count; offset++)
+            {
+                total += values[start + offset];
+            }
+
+            averages.Add(total / count);
+        }
+
+        return averages;
     }
 }

@@ -42,6 +42,7 @@ public sealed class TensorRtExecParityMatrixArtifactTests
             "timing-cache",
             "gui-cli-field-map",
             "plugin-library-boundary",
+            "bounded-benchmark-scheduler",
             "profiling",
             "wait-idle-controls",
             "layer-dump",

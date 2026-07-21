@@ -38,12 +38,13 @@ public sealed class TensorRtExecReleaseCandidateGapTests
             Assert.True(item.GetProperty("nextImplementationPaths").GetArrayLength() >= 1);
         }
 
-        Assert.Contains(items, static item => item.GetProperty("id").GetString() == "load-engine" && item.GetProperty("currentStatus").GetString() == "implemented-readonly-diagnostics" && item.GetProperty("winFormsSupported").GetBoolean());
+        Assert.Contains(items, static item => item.GetProperty("id").GetString() == "load-engine" && item.GetProperty("currentStatus").GetString() == "bounded-runtime-output" && item.GetProperty("winFormsSupported").GetBoolean());
+        Assert.Contains(items, static item => item.GetProperty("id").GetString() == "bounded-benchmark-scheduler" && item.GetProperty("currentStatus").GetString() == "implemented-bounded-runtime" && item.GetProperty("winFormsSupported").GetBoolean());
         Assert.Contains(items, static item => item.GetProperty("id").GetString() == "workspace-memory-pool" && item.GetProperty("currentStatus").GetString() == "implemented-readback-report");
         Assert.Contains(items, static item => item.GetProperty("id").GetString() == "int8" && item.GetProperty("currentStatus").GetString() == "parse-report-only-calibration-boundary" && item.GetProperty("winFormsSupported").GetBoolean());
         Assert.Contains(items, static item => item.GetProperty("id").GetString() == "timing-cache" && item.GetProperty("currentStatus").GetString() == "implemented-build-cache-lifecycle" && item.GetProperty("winFormsSupported").GetBoolean());
         Assert.Contains(items, static item => item.GetProperty("id").GetString() == "plugin-library-boundary" && item.GetProperty("currentStatus").GetString() == "diagnostic-gui-cli" && item.GetProperty("winFormsSupported").GetBoolean());
-        Assert.Contains(items, static item => item.GetProperty("id").GetString() == "binding-metadata" && item.GetProperty("currentStatus").GetString() == "bounded-artifact-gui-cli" && item.GetProperty("winFormsSupported").GetBoolean());
+        Assert.Contains(items, static item => item.GetProperty("id").GetString() == "binding-metadata" && item.GetProperty("currentStatus").GetString() == "implemented-pointer-free-binding-report" && item.GetProperty("winFormsSupported").GetBoolean());
         Assert.Contains(items, static item => item.GetProperty("id").GetString() == "winforms-command-surface" && item.GetProperty("currentStatus").GetString() == "checklist-backed-command-preview" && item.GetProperty("winFormsSupported").GetBoolean());
         Assert.Contains(items, static item => item.GetProperty("id").GetString() == "package-consumer-runtime-proof-boundary" && item.GetProperty("currentStatus").GetString() == "owner-action-required");
         Assert.Contains(items, static item => item.GetProperty("id").GetString() == "dynamic-shape" && item.GetProperty("nextImplementationPaths").EnumerateArray().Any(path => path.GetString() == "samples/YoloVision/yolovision-task-output-contract.json"));
@@ -57,12 +58,13 @@ public sealed class TensorRtExecReleaseCandidateGapTests
         Assert.Contains("build-only report 不是 runtime proof", markdown, StringComparison.Ordinal);
         Assert.Contains("local feed、ProjectReference、direct `.nupkg` 不是 package-consumer-runtime proof", markdown, StringComparison.Ordinal);
         Assert.Contains("load-engine", markdown, StringComparison.Ordinal);
-        Assert.Contains("implemented-readonly-diagnostics", markdown, StringComparison.Ordinal);
+        Assert.Contains("bounded-runtime-output", markdown, StringComparison.Ordinal);
+        Assert.Contains("bounded-benchmark-scheduler", markdown, StringComparison.Ordinal);
         Assert.Contains("workspace-memory-pool", markdown, StringComparison.Ordinal);
         Assert.Contains("implemented-readback-report", markdown, StringComparison.Ordinal);
         Assert.Contains("winforms-command-surface", markdown, StringComparison.Ordinal);
         Assert.Contains("checklist-backed-command-preview", markdown, StringComparison.Ordinal);
-        Assert.Contains("bounded-artifact-gui-cli", markdown, StringComparison.Ordinal);
+        Assert.Contains("implemented-pointer-free-binding-report", markdown, StringComparison.Ordinal);
         Assert.Contains("samples/YoloVision/yolovision-task-output-contract.json", markdown, StringComparison.Ordinal);
 
         Assert.Contains("applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.json", article, StringComparison.Ordinal);

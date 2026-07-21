@@ -279,12 +279,41 @@
       "required": [
         "TimingSamplesMilliseconds",
         "TimingSampleCount",
+        "AveragedTimingSamplesMilliseconds",
+        "AveragedTimingSampleCount",
         "AvgRunsExecuted",
         "ThreadsExecuted",
         "NoDataTransfersRequested",
         "NoDataTransfersApplied",
+        "IterationsRequested",
+        "MeasurementRoundsExecuted",
+        "InferenceIterationsExecuted",
+        "WarmUpMillisecondsRequested",
+        "WarmUpElapsedMilliseconds",
+        "WarmUpIterationsExecuted",
+        "DurationSecondsRequested",
+        "MeasurementElapsedMilliseconds",
+        "StreamsRequested",
+        "ExecutionContextsCreated",
+        "ConcurrentStreamsExecuted",
         "BenchmarkBoundary"
-      ]
+      ],
+      "properties": {
+        "AveragedTimingSamplesMilliseconds": { "type": "array", "items": { "type": "number" } },
+        "AveragedTimingSampleCount": { "type": "integer", "minimum": 0 },
+        "IterationsRequested": { "type": "integer", "minimum": 0 },
+        "MeasurementRoundsExecuted": { "type": "integer", "minimum": 0 },
+        "InferenceIterationsExecuted": { "type": "integer", "minimum": 0 },
+        "WarmUpMillisecondsRequested": { "type": "integer", "minimum": 0 },
+        "WarmUpElapsedMilliseconds": { "type": "number", "minimum": 0 },
+        "WarmUpIterationsExecuted": { "type": "integer", "minimum": 0 },
+        "DurationSecondsRequested": { "type": "integer", "minimum": 0 },
+        "MeasurementElapsedMilliseconds": { "type": "number", "minimum": 0 },
+        "StreamsRequested": { "type": "integer", "minimum": 0 },
+        "InfStreamsRequested": { "type": [ "integer", "null" ], "minimum": 1 },
+        "ExecutionContextsCreated": { "type": "integer", "minimum": 0 },
+        "ConcurrentStreamsExecuted": { "type": "integer", "minimum": 0 }
+      }
     },
     "ProofClassification": {
       "type": "string",

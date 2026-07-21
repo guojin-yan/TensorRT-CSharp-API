@@ -252,10 +252,27 @@ public static class OnnxEngineBuildDiagnostics
             $"Benchmark percentile ms: `{result.BenchmarkSummary.PercentileElapsedMilliseconds?.ToString("0.###") ?? ""}`",
             $"Benchmark avg runs requested: `{result.BenchmarkSummary.AvgRunsRequested?.ToString() ?? ""}`",
             $"Benchmark avg runs executed: `{result.BenchmarkSummary.AvgRunsExecuted}`",
+            $"Benchmark averaged timing sample count: `{result.BenchmarkSummary.AveragedTimingSampleCount}`",
             $"Benchmark threads requested: `{result.BenchmarkSummary.ThreadsRequested?.ToString() ?? ""}`",
             $"Benchmark threads executed: `{result.BenchmarkSummary.ThreadsExecuted}`",
             $"Benchmark no data transfers requested: `{result.BenchmarkSummary.NoDataTransfersRequested}`",
             $"Benchmark no data transfers applied: `{result.BenchmarkSummary.NoDataTransfersApplied}`",
+            $"Benchmark iterations requested: `{result.BenchmarkSummary.IterationsRequested}`",
+            $"Benchmark measurement rounds executed: `{result.BenchmarkSummary.MeasurementRoundsExecuted}`",
+            $"Benchmark inference iterations executed: `{result.BenchmarkSummary.InferenceIterationsExecuted}`",
+            $"Benchmark warmup requested ms: `{result.BenchmarkSummary.WarmUpMillisecondsRequested}`",
+            $"Benchmark warmup elapsed ms: `{result.BenchmarkSummary.WarmUpElapsedMilliseconds:0.###}`",
+            $"Benchmark warmup iterations executed: `{result.BenchmarkSummary.WarmUpIterationsExecuted}`",
+            $"Benchmark duration requested seconds: `{result.BenchmarkSummary.DurationSecondsRequested}`",
+            $"Benchmark measurement elapsed ms: `{result.BenchmarkSummary.MeasurementElapsedMilliseconds:0.###}`",
+            $"Benchmark streams requested: `{result.BenchmarkSummary.StreamsRequested}`",
+            $"Benchmark inference streams requested: `{result.BenchmarkSummary.InfStreamsRequested?.ToString() ?? ""}`",
+            $"Benchmark execution contexts created: `{result.BenchmarkSummary.ExecutionContextsCreated}`",
+            $"Benchmark concurrent streams executed: `{result.BenchmarkSummary.ConcurrentStreamsExecuted}`",
+            $"Benchmark idle time requested ms: `{result.BenchmarkSummary.IdleTimeMillisecondsRequested?.ToString() ?? ""}`",
+            $"Benchmark idle time applied ms: `{result.BenchmarkSummary.IdleTimeMillisecondsApplied}`",
+            $"Benchmark sleep time requested ms: `{result.BenchmarkSummary.SleepTimeMillisecondsRequested?.ToString() ?? ""}`",
+            $"Benchmark sleep time applied ms: `{result.BenchmarkSummary.SleepTimeMillisecondsApplied}`",
             $"Benchmark boundary: `{result.BenchmarkSummary.BenchmarkBoundary}`",
             $"Proof classification: `{result.ProofClassification}`",
             $"Build evidence only: `{result.BuildEvidenceOnly}`",
@@ -301,7 +318,7 @@ public static class OnnxEngineBuildDiagnostics
             BuildParsedOptions(result),
             BuildAppliedOptions(result),
             BuildParseOnlyOptions(result),
-            "build reports distinguish parsed, applied, parse-only, and capability-probe-only evidence; parse-only/build-only/capability-probe-only evidence cannot promote real-model-runtime or package-consumer-runtime proof; load-engine readonly diagnostics are metadata-only and cannot promote runtime proof.");
+            "build reports distinguish parsed, applied, parse-only, and capability-probe-only evidence; bounded benchmark execution can apply iterations/warmUp/duration/streams/infStreams/idleTime without promoting tensor correctness or package-consumer proof; parse-only/build-only/capability-probe-only evidence cannot promote real-model-runtime or package-consumer-runtime proof.");
     }
 
     private static string[] BuildParsedOptions(OnnxEngineBuildResult result)
@@ -311,7 +328,11 @@ public static class OnnxEngineBuildDiagnostics
         System.Collections.Generic.List<string> options = new System.Collections.Generic.List<string>
         {
             "--tensor-rt-line",
-            "--workspace"
+            "--workspace",
+            "--iterations",
+            "--warmUp",
+            "--duration",
+            "--streams"
         };
 
         AddIf(options, "--onnx", !string.IsNullOrWhiteSpace(result.ModelSource) && !string.Equals(result.ModelSource, "embedded-dynamic-identity", StringComparison.Ordinal));
@@ -375,6 +396,7 @@ public static class OnnxEngineBuildDiagnostics
         AddIf(options, "--separateProfileRun", result.NormalizedCommandLine.Contains("--separateProfileRun", StringComparison.Ordinal));
         AddIf(options, "--exportProfile", !string.IsNullOrWhiteSpace(runtimeOptions.ExportProfilePath));
         AddIf(options, "--saveProfile", !string.IsNullOrWhiteSpace(runtimeOptions.SaveProfilePath));
+        AddIf(options, "--useCudaGraph", result.NormalizedCommandLine.Contains("--useCudaGraph", StringComparison.Ordinal));
 
         return options.Distinct(StringComparer.Ordinal).ToArray();
     }
@@ -414,6 +436,15 @@ public static class OnnxEngineBuildDiagnostics
         AddIf(options, "--exportProfile", !string.IsNullOrWhiteSpace(runtimeOptions.ExportProfilePath));
         AddIf(options, "--exportOutput", !string.IsNullOrWhiteSpace(runtimeOptions.ExportOutputPath) && result.InferenceRan);
         AddIf(options, "--dumpRawBindingsToFile", !string.IsNullOrWhiteSpace(runtimeOptions.DumpRawBindingsToFile) && result.InferenceRan);
+        bool benchmarkExecuted = result.BenchmarkSummary.TimingSampleCount > 0;
+        AddIf(options, "--iterations", benchmarkExecuted);
+        AddIf(options, "--warmUp", benchmarkExecuted);
+        AddIf(options, "--duration", benchmarkExecuted);
+        AddIf(options, "--streams", benchmarkExecuted && !runtimeOptions.InfStreams.HasValue);
+        AddIf(options, "--infStreams", benchmarkExecuted && runtimeOptions.InfStreams.HasValue && result.BenchmarkSummary.ExecutionContextsCreated == runtimeOptions.InfStreams.Value);
+        AddIf(options, "--idleTime", benchmarkExecuted && runtimeOptions.IdleTimeMilliseconds.HasValue);
+        AddIf(options, "--avgRuns", benchmarkExecuted && runtimeOptions.AvgRuns.HasValue && result.BenchmarkSummary.AveragedTimingSampleCount > 0);
+        AddIf(options, "--percentile", benchmarkExecuted && runtimeOptions.Percentile.HasValue);
 
         return options.Distinct(StringComparer.Ordinal).ToArray();
     }
@@ -467,10 +498,20 @@ public static class OnnxEngineBuildDiagnostics
         AddIf(options, "--consistency", deploymentOptions.Consistency);
         AddIf(options, "--builderCache", deploymentOptions.BuilderCache);
         AddIf(options, "--noBuilderCache", deploymentOptions.NoBuilderCache);
-        AddIf(options, "--infStreams", runtimeOptions.InfStreams.HasValue);
+        bool benchmarkExecuted = result.BenchmarkSummary.TimingSampleCount > 0;
+        AddIf(options, "--iterations", !benchmarkExecuted);
+        AddIf(options, "--warmUp", !benchmarkExecuted);
+        AddIf(options, "--duration", !benchmarkExecuted);
+        AddIf(options, "--streams", !benchmarkExecuted || runtimeOptions.InfStreams.HasValue);
+        AddIf(options, "--infStreams", runtimeOptions.InfStreams.HasValue && !benchmarkExecuted);
         AddIf(options, "--noDataTransfers", runtimeOptions.NoDataTransfers);
         AddIf(options, "--useSpinWait", runtimeOptions.UseSpinWait);
-        AddIf(options, "--threads", runtimeOptions.Threads.HasValue && !result.InferenceRan);
+        AddIf(options, "--threads", runtimeOptions.Threads.HasValue);
+        AddIf(options, "--avgRuns", runtimeOptions.AvgRuns.HasValue && !benchmarkExecuted);
+        AddIf(options, "--percentile", runtimeOptions.Percentile.HasValue && !benchmarkExecuted);
+        AddIf(options, "--sleepTime", runtimeOptions.SleepTimeMilliseconds.HasValue);
+        AddIf(options, "--idleTime", runtimeOptions.IdleTimeMilliseconds.HasValue && !benchmarkExecuted);
+        AddIf(options, "--useCudaGraph", result.NormalizedCommandLine.Contains("--useCudaGraph", StringComparison.Ordinal));
         AddIf(options, "--loadInputs", !string.IsNullOrWhiteSpace(runtimeOptions.LoadInputs) && !result.InferenceRan);
         AddIf(options, "--dumpOutput", runtimeOptions.DumpOutput && !result.InferenceRan);
         AddIf(options, "--dumpRawBindingsToFile", !string.IsNullOrWhiteSpace(runtimeOptions.DumpRawBindingsToFile) && !result.InferenceRan);

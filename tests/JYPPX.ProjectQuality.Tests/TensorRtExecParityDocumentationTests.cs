@@ -34,6 +34,7 @@ public sealed class TensorRtExecParityDocumentationTests
             "timing cache",
             "plugin library 参数边界",
             "profiling",
+            "bounded benchmark scheduler",
             "layer dump",
             "report export alias",
             "verbose logging",

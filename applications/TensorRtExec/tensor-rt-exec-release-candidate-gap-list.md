@@ -15,12 +15,13 @@
 |---|---|---:|---:|---|
 | onnx-input | implemented | 是 | 是 | 关联真实模型 candidate hash/log |
 | save-engine | implemented | 是 | 是 | 增加 engine SHA256 owner overlay |
-| load-engine | implemented-readonly-diagnostics | 是 | 是 | 保持 enqueue/output proof 由 runtime proof records 管理 |
+| load-engine | bounded-runtime-output | 是 | 是 | compatible float engine 可 bounded enqueue/readback；模型正确性仍由 runtime proof records 管理 |
 | dynamic-shape | implemented-report | 是 | 是 | 绑定 profile metadata 与真实运行日志 |
 | fp16 | wrapper-ready | 是 | 是 | 记录 owner host/model FP16 evidence |
 | int8 | parse-report-only-calibration-boundary | 是 | 是 | CLI/WinForms 已暴露 INT8 与校准缓存意图，仍等待 calibration/cache ownership 设计 |
 | workspace-memory-pool | implemented-readback-report | 是 | 是 | 继续把真实模型/运行证明交给 proof records |
 | timing-iterations | implemented-builder-config-readback | 是 | 是 | `--avgTiming` 跨 TRT8/10/11 设置并 read back；TRT8 `--minTiming` 使用 legacy setter，TRT10/11 保持 parse-only |
+| bounded-benchmark-scheduler | implemented-bounded-runtime | 是 | 是 | 独立 context/stream、预热、次数+时长双下限、idle、平均窗口和 percentile 已执行；其余 runtime mechanics 保持 parse-only |
 | timing-cache | implemented-build-cache-lifecycle | 是 | 是 | 成功构建会导入/导出 cache 并记录 `TimingCacheArtifact` 大小与 SHA256；仍需 owner 将 cache 文件与真实模型 build 记录一起归档 |
 | plugin-library-boundary | diagnostic-gui-cli | 是 | 是 | GUI/CLI 已共享 plugin path 字段，保持 register/load-library deferred |
 | profiling | implemented-report | 是 | 是 | 真实 enqueue log 后才能晋级 |
@@ -32,4 +33,4 @@
 
 ## 下一步
 
-`load-engine` 已推进到 readonly diagnostics：可反序列化 engine 并复制 metadata，但不创建 execution bindings、不 enqueue、不验证输出。`workspace-memory-pool` 已进入 readback/report 路径。YoloVision 任务输出角色与 shape profile 现在以 `samples/YoloVision/yolovision-task-output-contract.json` 为机器可读契约，TensorRtExec gap list 只引用该契约做 profile/metadata 对齐，不把 report、截图或 command preview 晋级为 proof。下一步优先补 WinForms parity checklist、owner proof schema 和真实外部 consumer proof；所有 proof 晋级仍必须由外部 proof validator 决定。
+`load-engine` 已推进到 compatible-float bounded runtime：可反序列化 engine、复制 metadata、创建 typed bindings 并 enqueue/readback；bounded benchmark scheduler 同时执行独立 execution context/stream、预热、次数+时长双下限、idle gap、平均窗口和 percentile。YoloVision 的 task/output role 仍以 `samples/YoloVision/yolovision-task-output-contract.json` 为机器契约。它们不替代模型 expected output、owner hash 或 package-consumer proof。下一步继续补 `--sleepTime` 等尚未实现的 runtime mechanics、WinForms parity checklist、owner proof schema 和真实外部 consumer proof；所有 proof 晋级仍必须由外部 proof validator 决定。

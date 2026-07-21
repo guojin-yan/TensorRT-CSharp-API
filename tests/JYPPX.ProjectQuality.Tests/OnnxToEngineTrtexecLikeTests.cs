@@ -264,6 +264,12 @@ public sealed class OnnxToEngineTrtexecLikeTests
         Assert.Equal(7, options.DurationSeconds);
         Assert.Equal(2, options.Streams);
         Assert.True(options.UseCudaGraph);
+        OnnxEngineBuildOptions buildOptions = OnnxEngineBuildOptions.FromTrtexecLikeOptions(options);
+        Assert.Equal(12, buildOptions.Iterations);
+        Assert.Equal(250, buildOptions.WarmUpMilliseconds);
+        Assert.Equal(7, buildOptions.DurationSeconds);
+        Assert.Equal(2, buildOptions.Streams);
+        Assert.True(buildOptions.UseCudaGraph);
         Assert.Collection(
             options.DeploymentOptions.MemoryPoolSizes,
             item =>
@@ -639,6 +645,9 @@ public sealed class OnnxToEngineTrtexecLikeTests
             Assert.Contains("\"ThreadsExecuted\": 1", times, StringComparison.Ordinal);
             Assert.Contains("\"NoDataTransfersRequested\": true", times, StringComparison.Ordinal);
             Assert.Contains("\"NoDataTransfersApplied\": false", times, StringComparison.Ordinal);
+            Assert.Contains("\"AveragedTimingSampleCount\": 1", times, StringComparison.Ordinal);
+            Assert.Contains("\"AveragedTimingSamplesMilliseconds\": [", times, StringComparison.Ordinal);
+            Assert.Contains("2.5", times, StringComparison.Ordinal);
             Assert.Contains("benchmark-executed-synthetic-input", times, StringComparison.Ordinal);
             Assert.Contains("\"TimingSampleCount\": 4", profile, StringComparison.Ordinal);
             Assert.Contains("TimingSampleCount: 4", profileText, StringComparison.Ordinal);

@@ -1,5 +1,49 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-21 TensorRtExec/OnnxToEngine Bounded Benchmark Scheduler
+
+本批在 CUDA deferred candidate safety audit 后没有发现可安全提升的 immediate-safe 函数：311 条
+deferred rows、64 个唯一函数全部仍属于 callback/user object、external/graphics、generic graph
+params、raw symbol/entry point 或 resource/context ownership。没有为了凑接口数量而改变 deferred
+边界，审计记录与旧 deferred history 均保留。
+
+应用层转向 trtexec-like scheduler 完整度：compatible float engine 现在为每个 effective
+`--infStreams`（优先）或 `--streams` 创建独立 execution context、bindings、CUDA stream 与
+start/stop event；`--iterations` 与 `--duration` 是同时满足的双下限，`--warmUp` 以实际 GPU
+enqueue 达到最低时长，`--idleTime` 在 measurement rounds 间生效，`--avgRuns` 产出连续平均窗口，
+`--percentile` 明确基于 raw GPU timing samples。worker 构造失败会回收已创建 owner，dispose 前
+drain stream。`--sleepTime`、`--useSpinWait`、`--threads`、`--useCudaGraph` 和
+`--noDataTransfers` 继续 parse-only；应用状态只在实际执行后标记相应 applied option。
+
+### 验证与证据
+
+- 真实 TRT10.11/CUDA12.9、RTX 3060 Laptop、driver 576.02 bounded smoke：2 contexts、6 raw
+  samples、3 average windows、p90 `0.319488 ms`；duration run 6440 rounds、1000.1398 ms，
+  两次 output match 均为 true。证据为
+  `trtexec-bounded-benchmark-scheduler-runtime-evidence.{json,md}`，严格保持 synthetic/local
+  project-reference boundary：`isRealModelRuntimeProof=false`、`isPackageConsumerRuntimeProof=false`、
+  `canPublishPublicly=false`。
+- CUDA candidate audit 专项 1/1；bounded ProjectQuality 为 3/3 shard、54/54 tests；focused 与
+  相邻 TensorRtExec/OnnxToEngine 测试保持通过。
+- solution Debug 为 0 warning / 0 error；Release 为 0 error，保留 5 条既有 test nullable
+  warnings。TRT10/CUDA12.9 与 TRT11/CUDA12.9 existing native Release build 成功；本批无 native
+  source/ABI contract change。TRT8/10/11 source ABI declarations 为 `MissingDeclarations=0`，
+  TRT10/TRT11 PE export parity 为 `MissingExports=0`。
+- 无 ProjectReference TRT10 bridge consumer restore/build 为 0 warning / 0 error，分类保持
+  `compile-surface-proof`，不提升为 package-consumer runtime proof。Public API bilingual audit、
+  public-proof boundary audit、strict release quality gate 均为 0 findings / 0 required failures；
+  DocFX 为 917 models、0 warning / 0 error。
+
+### C 盘与发布边界
+
+本批没有将 ONNX、engine、模型、nupkg、源码副本或 benchmark 资产下载到 C 盘。审计发现的本轮
+临时项仅为今天生成的 88 个 .NET workload logs（109,635 bytes）、3 个空 Temp 目录
+（`MSBuildTemp`、`MSBuildTempinxxb011.4kd`、`jyppx-split-packages`）与空
+`C:\jyppx-pkgcache`；Downloads、Documents、Desktop 今日相关命名命中均为 0，全局 NuGet、Codex、
+CUDA 与既有用户文件不触碰。标准 `Remove-Item` 清理命令被当前执行策略拦截，未绕过策略，因此这些
+临时痕迹在本地仍需用户/环境策略允许后清理。未执行 NuGet push、GitHub Packages publish、GitHub
+Release upload 或 issue close。
+
 ## 2026-07-21 CUDA IPC Import Owner-Safe Uplift
 
 本批把 `cudaIpcOpenEventHandle`、`cudaIpcOpenMemHandle` 与 `cudaIpcCloseMemHandle` 从

@@ -157,6 +157,16 @@
       "nextStep": "Use parsed plugin paths and copied Plugin Inventory only as diagnostics; promote load/register only after an explicit safe ownership design and smoke proof."
     },
     {
+      "id": "bounded-benchmark-scheduler",
+      "trtexecOption": "--iterations --warmUp --duration --streams --infStreams --idleTime --avgRuns --percentile",
+      "tensorRtExecStatus": "implemented-bounded-runtime",
+      "entryPoints": ["OnnxEngineBuildService.RunBoundedBenchmark", "OnnxEngineBenchmarkSummary", "OnnxEngineRuntimeArtifactWriter", "TensorRtExecOptions", "WinForms Runtime Flags"],
+      "proofBoundary": "Independent execution contexts, bindings, CUDA streams, event timing, warmup, iteration/duration minima, idle gaps, averaging windows, and percentile statistics prove bounded scheduler execution only; they do not prove external model correctness or package-consumer runtime.",
+      "isRuntimeProof": false,
+      "gap": "Official --sleepTime, --useSpinWait, --threads, --useCudaGraph, and --noDataTransfers mechanics remain parse-only; model-specific correctness still requires expected outputs and owner evidence.",
+      "nextStep": "Extend the bounded scheduler only with mechanics that can be backed by typed owners and compatible-host smoke; keep model/release proof external."
+    },
+    {
       "id": "profiling",
       "trtexecOption": "--profilingVerbosity --dumpProfile --exportProfile --saveProfile",
       "tensorRtExecStatus": "implemented-report",
@@ -169,12 +179,12 @@
     {
       "id": "wait-idle-controls",
       "trtexecOption": "--sleepTime --idleTime",
-      "tensorRtExecStatus": "parse-report-only",
-      "entryPoints": ["TrtexecLikeRuntimeOptions.SleepTimeMilliseconds", "TrtexecLikeRuntimeOptions.IdleTimeMilliseconds", "TensorRtExecCommand.PrintUsage", "OnnxEngineBuildDiagnostics.OptionImplementationStatus"],
-      "proofBoundary": "Wait/idle controls are accepted and reported for command parity; they do not prove official benchmark scheduler semantics or runtime performance.",
+      "tensorRtExecStatus": "partial-idle-applied-sleep-parse-only",
+      "entryPoints": ["TrtexecLikeRuntimeOptions.SleepTimeMilliseconds", "TrtexecLikeRuntimeOptions.IdleTimeMilliseconds", "OnnxEngineBuildService.RunBoundedBenchmark", "OnnxEngineBuildDiagnostics.OptionImplementationStatus"],
+      "proofBoundary": "--idleTime is applied between measured rounds and records requested/applied values. --sleepTime launch-to-compute delay remains parse-only. Neither promotes model correctness or package-consumer proof.",
       "isRuntimeProof": false,
-      "gap": "Needs real benchmark execution logs and host metadata before these controls can support performance claims.",
-      "nextStep": "Retain parse/report-only status until package-consumer runtime benchmark evidence is owner-supplied."
+      "gap": "--sleepTime still needs an owner-safe launch-to-compute delay mechanism and compatible-host timing evidence.",
+      "nextStep": "Keep --sleepTime parse-only until its official GPU scheduling semantics can be implemented without fabricating a CPU delay substitute."
     },
     {
       "id": "layer-dump",

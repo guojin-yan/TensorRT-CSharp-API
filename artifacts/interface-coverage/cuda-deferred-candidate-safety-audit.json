@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "cuda-deferred-candidate-safety-audit.v1",
+  "auditKind": "cuda-deferred-candidate-safety-audit",
+  "generatedAt": "2026-07-21",
+  "sourceCoverage": "artifacts/interface-coverage/cuda-runtime-interface-coverage.json",
+  "sourceCoverageSha256": "73FCDA57077991FA6C5334CFB03DFD28D327637409BFDC648C584712A805AC34",
+  "deferredRowCount": 311,
+  "uniqueDeferredFunctionCount": 64,
+  "immediateSafeCandidateCount": 0,
+  "decision": "no-immediate-safe-cuda-candidate; continue application-and-sample-closure",
+  "versionSummary": [
+    { "toolkitVersion": "11.6", "deferredRowCount": 49, "uniqueFunctionCount": 49 },
+    { "toolkitVersion": "11.8", "deferredRowCount": 49, "uniqueFunctionCount": 49 },
+    { "toolkitVersion": "12.1", "deferredRowCount": 49, "uniqueFunctionCount": 49 },
+    { "toolkitVersion": "12.3", "deferredRowCount": 51, "uniqueFunctionCount": 51 },
+    { "toolkitVersion": "12.9", "deferredRowCount": 54, "uniqueFunctionCount": 54 },
+    { "toolkitVersion": "13.2", "deferredRowCount": 59, "uniqueFunctionCount": 59 }
+  ],
+  "categories": [
+    {
+      "id": "callback-or-user-object-lifecycle",
+      "count": 12,
+      "decision": "keep-deferred",
+      "reason": "Requires callback trampoline, callback-thread exception containment, unregister ordering, or graph/user-object retain-release ownership.",
+      "functions": ["cudaDeviceRegisterAsyncNotification", "cudaDeviceUnregisterAsyncNotification", "cudaGraphReleaseUserObject", "cudaGraphRetainUserObject", "cudaLaunchHostFunc", "cudaLaunchHostFunc_v2", "cudaLogsRegisterCallback", "cudaLogsUnregisterCallback", "cudaStreamAddCallback", "cudaUserObjectCreate", "cudaUserObjectRelease", "cudaUserObjectRetain"]
+    },
+    {
+      "id": "external-or-graphics-resource",
+      "count": 26,
+      "decision": "keep-deferred",
+      "reason": "Requires foreign API resource ownership, import/destroy pairing, mapped lifetime state, semaphore payload ownership, or asynchronous external use.",
+      "functions": ["cudaDestroyExternalMemory", "cudaDestroyExternalSemaphore", "cudaDeviceGetNvSciSyncAttributes", "cudaExternalMemoryGetMappedBuffer", "cudaExternalMemoryGetMappedMipmappedArray", "cudaGraphAddExternalSemaphoresSignalNode", "cudaGraphAddExternalSemaphoresWaitNode", "cudaGraphExecExternalSemaphoresSignalNodeSetParams", "cudaGraphExecExternalSemaphoresWaitNodeSetParams", "cudaGraphExternalSemaphoresSignalNodeSetParams", "cudaGraphExternalSemaphoresWaitNodeSetParams", "cudaGraphicsMapResources", "cudaGraphicsResourceGetMappedMipmappedArray", "cudaGraphicsResourceGetMappedPointer", "cudaGraphicsResourceSetMapFlags", "cudaGraphicsSubResourceGetMappedArray", "cudaGraphicsUnmapResources", "cudaGraphicsUnregisterResource", "cudaImportExternalMemory", "cudaImportExternalSemaphore", "cudaSignalExternalSemaphoresAsync", "cudaSignalExternalSemaphoresAsync_ptsz", "cudaSignalExternalSemaphoresAsync_v2", "cudaWaitExternalSemaphoresAsync", "cudaWaitExternalSemaphoresAsync_ptsz", "cudaWaitExternalSemaphoresAsync_v2"]
+    },
+    {
+      "id": "generic-graph-params-or-kernel",
+      "count": 9,
+      "decision": "keep-deferred",
+      "reason": "Requires generic parameter unions, kernel argument/device-pointer ownership, host callback payloads, or node-type-specific owner routing.",
+      "functions": ["cudaGraphAddHostNode", "cudaGraphAddKernelNode", "cudaGraphAddNode_v2", "cudaGraphExecHostNodeSetParams", "cudaGraphExecKernelNodeSetParams", "cudaGraphExecNodeSetParams", "cudaGraphHostNodeSetParams", "cudaGraphKernelNodeSetParams", "cudaGraphNodeGetParams"]
+    },
+    {
+      "id": "raw-symbol-or-entry-point",
+      "count": 12,
+      "decision": "keep-deferred",
+      "reason": "Requires function pointers, export-table pointers, symbol addresses, or symbol identity/lifetime that cannot enter the public pointer-free surface.",
+      "functions": ["cudaGetDriverEntryPoint", "cudaGetDriverEntryPointByVersion", "cudaGetExportTable", "cudaGetFuncBySymbol", "cudaGetSymbolAddress", "cudaGetSymbolSize", "cudaGraphAddMemcpyNodeFromSymbol", "cudaGraphAddMemcpyNodeToSymbol", "cudaGraphExecMemcpyNodeSetParamsFromSymbol", "cudaGraphExecMemcpyNodeSetParamsToSymbol", "cudaGraphMemcpyNodeSetParamsFromSymbol", "cudaGraphMemcpyNodeSetParamsToSymbol"]
+    },
+    {
+      "id": "resource-or-context-ownership",
+      "count": 5,
+      "decision": "keep-deferred",
+      "reason": "Requires device-resource partition ownership or create/get/destroy distinction for execution/green contexts.",
+      "functions": ["cudaDevResourceGenerateDesc", "cudaDevSmResourceSplit", "cudaDevSmResourceSplitByCount", "cudaExecutionCtxDestroy", "cudaGreenCtxCreate"]
+    }
+  ],
+  "publicSurfaceBoundary": {
+    "forbiddenTypes": ["IntPtr", "nint", "UIntPtr", "SafeHandle", "device pointer", "function pointer"],
+    "deferredHistoryRetained": true,
+    "canPromoteRuntimeProof": false,
+    "canPublishPublicly": false
+  }
+}

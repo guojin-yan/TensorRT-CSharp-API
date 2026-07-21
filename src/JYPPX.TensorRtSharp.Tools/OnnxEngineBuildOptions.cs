@@ -29,7 +29,12 @@ public sealed class OnnxEngineBuildOptions
         TrtexecLikeDeploymentOptions deploymentOptions,
         TrtexecLikeRuntimeOptions runtimeOptions,
         string normalizedCommandLine,
-        string[] diagnostics)
+        string[] diagnostics,
+        int iterations = 10,
+        int warmUpMilliseconds = 200,
+        int durationSeconds = 3,
+        int streams = 1,
+        bool useCudaGraph = false)
     {
         TensorRtLine = tensorRtLine;
         OnnxPath = onnxPath ?? string.Empty;
@@ -55,6 +60,27 @@ public sealed class OnnxEngineBuildOptions
         RuntimeOptions = runtimeOptions ?? TrtexecLikeRuntimeOptions.Default;
         NormalizedCommandLine = normalizedCommandLine ?? string.Empty;
         Diagnostics = diagnostics ?? Array.Empty<string>();
+        if (iterations <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(iterations), "Benchmark iterations must be positive.");
+        }
+        if (warmUpMilliseconds < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(warmUpMilliseconds), "Benchmark warmup must be non-negative.");
+        }
+        if (durationSeconds < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(durationSeconds), "Benchmark duration must be non-negative.");
+        }
+        if (streams <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(streams), "Benchmark stream count must be positive.");
+        }
+        Iterations = iterations;
+        WarmUpMilliseconds = warmUpMilliseconds;
+        DurationSeconds = durationSeconds;
+        Streams = streams;
+        UseCudaGraph = useCudaGraph;
     }
 
     public TensorRtApiLine TensorRtLine { get; }
@@ -105,6 +131,16 @@ public sealed class OnnxEngineBuildOptions
 
     public string[] Diagnostics { get; }
 
+    public int Iterations { get; }
+
+    public int WarmUpMilliseconds { get; }
+
+    public int DurationSeconds { get; }
+
+    public int Streams { get; }
+
+    public bool UseCudaGraph { get; }
+
     public bool UsesExternalOnnx => !string.IsNullOrWhiteSpace(OnnxPath);
 
     public bool LoadsExistingEngine => !string.IsNullOrWhiteSpace(LoadEnginePath);
@@ -142,7 +178,12 @@ public sealed class OnnxEngineBuildOptions
             options.DeploymentOptions,
             options.RuntimeOptions,
             options.ToArgumentLine(),
-            diagnostics);
+            diagnostics,
+            options.Iterations,
+            options.WarmUpMilliseconds,
+            options.DurationSeconds,
+            options.Streams,
+            options.UseCudaGraph);
     }
 
     private static string[] CreateDiagnostics(TrtexecLikeOptions options)
