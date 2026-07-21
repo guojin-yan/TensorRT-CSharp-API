@@ -59,6 +59,7 @@ internal static class Program
         config.SetProfileStream(stream);
         bool profileStreamSet = config.IsProfileStreamSet;
         string builderScalarControlState = ProbeBuilderScalarControls(builder, config);
+        string builderFlagMappingState = ProbeVersionedBuilderFlagMapping(config);
         string builderConfigDeploymentState = ProbeBuilderConfigDeploymentState(config, line);
         string pluginSerializationState = ProbeSerializedPluginPaths(config);
         int errorCodeUpperBound = TensorRtErrorCodeMetadata.GetExclusiveUpperBound(line);
@@ -129,7 +130,7 @@ internal static class Program
         string inspectorText = inspector.GetEngineInformation(TensorRtLayerInformationFormat.Oneline);
         ulong profileMemory = line == TensorRtApiLine.TensorRt10 ? engine.GetDeviceMemorySizeForProfileV2(profileIndex) : engine.DeviceMemorySizeInBytes;
         Console.WriteLine($"ProfileIndex={profileIndex} HostMemory={hostMemory.SizeInBytes} EngineIOTensors={engine.IOTensorCount}");
-        Console.WriteLine($"BuilderConfig OptLevel={config.GetOptimizationLevel()} AuxStreams={config.GetMaxAuxStreams()} Profiling={config.GetProfilingVerbosity()} WorkspaceMemoryPoolLimit={configuredWorkspaceMemoryPoolLimit} ProfileStream={profileStreamSet} ProfileCount={configProfileCount} CalibrationProfile={calibrationProfileState} PluginSerialization={pluginSerializationState} {builderScalarControlState} {layerDlaCapabilityState} {builderConfigDeploymentState}");
+        Console.WriteLine($"BuilderConfig OptLevel={config.GetOptimizationLevel()} AuxStreams={config.GetMaxAuxStreams()} Profiling={config.GetProfilingVerbosity()} WorkspaceMemoryPoolLimit={configuredWorkspaceMemoryPoolLimit} ProfileStream={profileStreamSet} ProfileCount={configProfileCount} CalibrationProfile={calibrationProfileState} PluginSerialization={pluginSerializationState} {builderScalarControlState} {builderFlagMappingState} {layerDlaCapabilityState} {builderConfigDeploymentState}");
         Console.WriteLine($"EngineMemory Device={engine.DeviceMemorySizeInBytes} Profile={profileMemory} AuxStreams={engine.AuxiliaryStreamCount} ImplicitBatch={engineImplicitBatchState}");
         Console.WriteLine($"DirectEngineBuild=True IOTensors={directEngineIoTensorCount} RefitterHasLogger={refitterLoggerState} ErrorCodeUpperBound={errorCodeUpperBound}");
         Console.WriteLine($"ProfileConfigured Min={configuredProfileRange.Min} Opt={configuredProfileRange.Opt} Max={configuredProfileRange.Max} Valid={configuredProfileValid} ExtraMemoryTarget={profileExtraMemoryTarget} ShapeValueCount={inputShapeValueCount}");
@@ -349,6 +350,46 @@ internal static class Program
         catch (Exception exception) when (exception is BridgeProbeException || exception is NotSupportedException || exception is InvalidOperationException)
         {
             return $"LayerDla=Skipped:{exception.GetType().Name}:{exception.Message}";
+        }
+    }
+
+    static string ProbeVersionedBuilderFlagMapping(TensorRtBuilderConfig config)
+    {
+        if (config.Line != TensorRtApiLine.TensorRt8)
+        {
+            return "BuilderFlagMapping=NotRequired";
+        }
+
+        bool originalDirectIo = config.GetFlag(TensorRtBuilderFlag.DirectIO);
+        bool originalPrefer = config.GetFlag(TensorRtBuilderFlag.PreferPrecisionConstraints);
+        try
+        {
+            config.SetFlag(TensorRtBuilderFlag.DirectIO, true);
+            bool directAfterSet = config.GetFlag(TensorRtBuilderFlag.DirectIO);
+            bool preferAfterDirect = config.GetFlag(TensorRtBuilderFlag.PreferPrecisionConstraints);
+            TensorRtBuilderFlags flagsAfterDirect = config.GetFlags();
+
+            config.SetFlag(TensorRtBuilderFlag.PreferPrecisionConstraints, true);
+            config.SetFlag(TensorRtBuilderFlag.DirectIO, false);
+            bool directAfterClear = config.GetFlag(TensorRtBuilderFlag.DirectIO);
+            bool preferAfterDirectClear = config.GetFlag(TensorRtBuilderFlag.PreferPrecisionConstraints);
+            bool isolated = directAfterSet &&
+                !preferAfterDirect &&
+                (flagsAfterDirect & TensorRtBuilderFlags.DirectIO) != 0 &&
+                (flagsAfterDirect & TensorRtBuilderFlags.PreferPrecisionConstraints) == 0 &&
+                !directAfterClear &&
+                preferAfterDirectClear;
+            if (!isolated)
+            {
+                throw new InvalidOperationException("TensorRT 8 DirectIO and PreferPrecisionConstraints flag mapping is not isolated.");
+            }
+
+            return $"BuilderFlagMapping=TRT8DirectIORaw12PreferRaw11:Isolated:{isolated}";
+        }
+        finally
+        {
+            config.SetFlag(TensorRtBuilderFlag.DirectIO, originalDirectIo);
+            config.SetFlag(TensorRtBuilderFlag.PreferPrecisionConstraints, originalPrefer);
         }
     }
 

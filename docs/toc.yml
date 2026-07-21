@@ -180,6 +180,8 @@
     href: articles/zh-cn/tensorrtexec-runtime-controls.md
   - name: TensorRtExec Deployment Controls
     href: articles/zh-cn/tensorrtexec-deployment-controls.md
+  - name: TensorRtExec IO 与 Layer Precision Policies
+    href: articles/zh-cn/tensorrtexec-io-layer-precision-policies.md
   - name: OnnxToEngine TensorRtExec YoloVision Evidence Ladder
     href: articles/zh-cn/onnxtoengine-tensorrtexec-yolovision-evidence-ladder.md
   - name: ONNX To Engine Quickstart

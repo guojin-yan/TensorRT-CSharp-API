@@ -36,9 +36,11 @@ applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.md
 
 第四类是 deployment policy 的执行证明。`--device`、DLA/GPU fallback、tactic sources、DirectIO、sparsity enable/disable 和 strongly typed 已接入 typed set/readback 或 version-aware network creation：TRT10 使用 raw bit，TRT11 依赖 always-strongly-typed 契约。TRT10.11 identity smoke 只证明主机配置和 synthetic runtime；TRT8 strongly typed、sparsity force 保持 parse-only，DLA layer 真执行还需要 DLA 主机和真实模型。
 
-第五类是 WinForms parity。GUI 不应该只是“能打开页面”，而是要能覆盖 CLI 的主要参数、生成可复制命令、展示 report 摘要和错误诊断。
+第五类是 I/O 与 layer precision policy。TRT8/10 已完成官方 grammar、IO broadcast/count、exact-before-wildcard、later-rule override、单 output type broadcast 和 typed readback；TRT11 只能在请求 type 与 inferred type 相等时设置 allowed formats，移除的 precision constraint/layer setters 保持 parse-only。identity smoke 证明路由和 readback，但不证明真实模型的 caller layout、tactic 或数值正确性。
 
-第六类是 proof 边界。TensorRtExec 可以辅助生成 build report 和 sidecar，但不能替代 YoloVision real-model-runtime proof，更不能替代 clean external consumer 的 package-consumer-runtime proof。
+第六类是 WinForms parity。GUI 不应该只是“能打开页面”，而是要能覆盖 CLI 的主要参数、生成可复制命令、展示 report 摘要和错误诊断。
+
+第七类是 proof 边界。TensorRtExec 可以辅助生成 build report 和 sidecar，但不能替代 YoloVision real-model-runtime proof，更不能替代 clean external consumer 的 package-consumer-runtime proof。
 
 ## 配图建议
 
@@ -48,4 +50,4 @@ applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.md
 
 ## 下一步
 
-下一阶段优先完成 IO format、剩余 runtime mechanics、`binding-metadata` 的真实模型 expected-output 证据和 `winforms-command-surface`；deployment policy、`workspace-memory-pool` 与 `timing-iterations` 继续进入 compatible-host owner build record。所有实现都需要同步更新 CLI、WinForms、文档、测试和 proof 边界说明。
+下一阶段优先补 I/O format 与 layer policy 的真实外部模型 layout/expected-output 证据、剩余 runtime mechanics、`binding-metadata` 和 `winforms-command-surface`；deployment policy、I/O/layer policy、`workspace-memory-pool` 与 `timing-iterations` 继续进入 compatible-host owner build record。所有实现都需要同步更新 CLI、WinForms、文档、测试和 proof 边界说明。

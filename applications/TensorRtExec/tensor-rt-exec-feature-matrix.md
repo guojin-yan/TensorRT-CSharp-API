@@ -11,12 +11,13 @@
 | Shape profile configuration | CLI, WinForms | implemented |
 | Timing iteration builder readback | CLI, WinForms | implemented-builder-config-readback |
 | Precision switches | CLI, WinForms | wrapper-ready-plus-parse-report-only |
+| I/O format and layer precision policies | CLI, WinForms | implemented-build-readback-with-version-guards |
 | Timing and profiling options | CLI, WinForms | implemented-report |
 | Load-engine bounded runtime | CLI, WinForms | bounded-runtime-output |
 | Layer/profile diagnostic switches | CLI, WinForms | implemented-inspector-readback |
 | Report alias compatibility | CLI | implemented-report |
 | Refit, weight streaming, and debug tensor diagnostics | CLI, WinForms | parse-report-only |
-| DLA/device options | CLI, WinForms | diagnostic |
+| Device and deployment policies | CLI, WinForms | implemented-build-readback-with-version-guards |
 | Timing cache lifecycle | CLI, WinForms | implemented-build-cache-lifecycle |
 | Full trtexec parity | CLI, WinForms | planned |
 | Release proof promotion | CLI, WinForms | blocked by runtime proof |

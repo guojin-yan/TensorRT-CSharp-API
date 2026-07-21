@@ -47,15 +47,16 @@ dotnet run --project .\applications\TensorRtExec -- `
 | Profiling | `--profilingVerbosity` | 记录 profiling verbosity |
 | Opt Level | `--builderOptimizationLevel` | 应用到 builder config |
 | Aux Streams | `--maxAuxStreams` | 应用到 builder config |
-| Device | `--device` | 记录部署目标设备，不切换进程当前 CUDA device |
-| DLA Core | `--useDLACore` | 当前记录诊断，不做 layer device placement |
-| Deployment | `--allowGPUFallback --directIO --stronglyTyped` | 当前记录诊断 |
-| Tactics | `--tacticSources` | 当前记录诊断 |
+| Device | `--device` | 在专用 host thread 设置并 read back CUDA device，随后 build/load/runtime 留在该线程 |
+| DLA Core | `--useDLACore` | 按 builder-reported core count fail closed，并设置/read back DLA config；不是 DLA 模型执行证明 |
+| Deployment | `--allowGPUFallback --directIO --stronglyTyped` | 真实 build 按版本设置/read back；TRT8 strongly typed 保持 guard |
+| Tactics | `--tacticSources` | 相对默认 mask 设置并 read back；不证明最终选中的 tactic |
 | Mem Pools | `--memPoolSize` | 真实 build 设置并 read back 已知 pool；dry-run/load-engine 仍为 parse-only |
-| Input IO | `--inputIOFormats` | 当前记录诊断 |
-| Output IO | `--outputIOFormats` | 当前记录诊断 |
+| Input IO | `--inputIOFormats` | `type:format[+format]` grammar；单 spec broadcast 或与 input 数量一致，真实 build set/readback |
+| Output IO | `--outputIOFormats` | `type:format[+format]` grammar；单 spec broadcast 或与 output 数量一致，真实 build set/readback |
+| Precision Policy | `--precisionConstraints --layerPrecisions --layerOutputTypes` | TRT8/10 应用 exact/wildcard layer rules 并 read back；TRT11 移除的 setters 保持 parse-only |
 | Calib Cache | `--calib` | 当前记录诊断，不启用 calibrator callback |
-| Sparsity | `--sparsity` | 当前记录诊断 |
+| Sparsity | `--sparsity` | enable/disable 设置并 read back；force 因权重重写保持 parse-only |
 | Layer Info | `--dumpLayerInfo` / `--exportLayerInfo` | 真实 build/load-engine 复制 engine inspector 逐层文本；可写日志或 UTF-8 文件；dry-run/缺依赖仍为 report-only |
 | Report | `--exportReport` | JSON 或 Markdown 报告 |
 | Mode | `--buildOnly --skipInference --dryRun` | 外部模型推荐先 dry-run 预检，再 build-only |

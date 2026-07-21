@@ -249,7 +249,7 @@ public sealed class OnnxEngineBuildService
             config.SetOptimizationLevel(options.DeploymentOptions.BuilderOptimizationLevel);
             config.SetEngineCapability(TensorRtEngineCapability.Standard);
             ApplyDeploymentOptions(builder, config, options, log);
-            ApplyPrecisionFlags(config, options);
+            ApplyPrecisionFlags(config, options, log);
             using TimingCacheLease timingCache = CreateTimingCacheLease(config, options, log);
 
             bool stronglyTypedApplied = ShouldCreateStronglyTypedNetwork(options, log);
@@ -289,6 +289,7 @@ public sealed class OnnxEngineBuildService
                 throw new InvalidOperationException(parser.GetErrorSummary());
             }
 
+            TrtexecLikeBuildPolicy.Apply(config, network, options.DeploymentOptions, log);
             int profileIndex = AddOptimizationProfile(builder, config, options);
             TensorRtBuilderConfigDeploymentSnapshot? builderConfigDeploymentSnapshot = TryGetBuilderConfigDeploymentSnapshot(config, log);
             string enginePath = string.IsNullOrWhiteSpace(options.SaveEnginePath)
@@ -496,30 +497,52 @@ public sealed class OnnxEngineBuildService
         return "embedded-dynamic-identity";
     }
 
-    private static void ApplyPrecisionFlags(TensorRtBuilderConfig config, OnnxEngineBuildOptions options)
+    private static void ApplyPrecisionFlags(TensorRtBuilderConfig config, OnnxEngineBuildOptions options, List<string> log)
     {
         if (options.Fp16)
         {
-            config.SetFlag(TensorRtBuilderFlag.Fp16);
+            ApplyGlobalPrecisionFlag(config, TensorRtBuilderFlag.Fp16, "Fp16", options.TensorRtLine != TensorRtApiLine.TensorRt11, log);
         }
 
         if (options.Int8)
         {
-            config.SetFlag(TensorRtBuilderFlag.Int8);
+            ApplyGlobalPrecisionFlag(config, TensorRtBuilderFlag.Int8, "Int8", options.TensorRtLine != TensorRtApiLine.TensorRt11, log);
         }
 
         if (options.Bf16)
         {
-            config.SetFlag(TensorRtBuilderFlag.Bf16);
+            ApplyGlobalPrecisionFlag(config, TensorRtBuilderFlag.Bf16, "Bf16", options.TensorRtLine == TensorRtApiLine.TensorRt10, log);
         }
 
-        if (options.Tf32)
+        config.SetFlag(TensorRtBuilderFlag.Tf32, options.Tf32);
+        bool tf32Readback = config.GetFlag(TensorRtBuilderFlag.Tf32);
+        bool tf32Match = tf32Readback == options.Tf32;
+        log.Add($"TrtexecBuildPolicy Name=Tf32 Applied={tf32Match} Requested={options.Tf32} Readback={tf32Readback} ReadbackMatch={tf32Match}");
+        if (!tf32Match)
         {
-            config.SetFlag(TensorRtBuilderFlag.Tf32);
+            throw new InvalidOperationException("TF32 builder flag did not match TensorRT readback.");
         }
-        else
+    }
+
+    private static void ApplyGlobalPrecisionFlag(
+        TensorRtBuilderConfig config,
+        TensorRtBuilderFlag flag,
+        string name,
+        bool supported,
+        List<string> log)
+    {
+        if (!supported)
         {
-            config.ClearFlag(TensorRtBuilderFlag.Tf32);
+            log.Add($"TrtexecBuildPolicy Name={name} Applied=False Requested=True VersionGuard={config.Line} Reason=builder-precision-flag-not-supported ReadbackMatch=False");
+            return;
+        }
+
+        config.SetFlag(flag, true);
+        bool readback = config.GetFlag(flag);
+        log.Add($"TrtexecBuildPolicy Name={name} Applied={readback} Requested=True Readback={readback} ReadbackMatch={readback}");
+        if (!readback)
+        {
+            throw new InvalidOperationException(name + " builder flag did not match TensorRT readback.");
         }
     }
 

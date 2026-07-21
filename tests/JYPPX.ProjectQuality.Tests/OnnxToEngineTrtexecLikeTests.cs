@@ -199,7 +199,8 @@ public sealed class OnnxToEngineTrtexecLikeTests
         Assert.Contains("--l2LimitForTiling 268435456B", argumentLine, StringComparison.Ordinal);
         Assert.Contains("--quantizationFlags CalibrateBeforeFusion", argumentLine, StringComparison.Ordinal);
         Assert.Contains("Runtime benchmark/output options", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
-        Assert.Contains("shortcut precision arguments are parse/report-only", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
+        Assert.Contains("exact-name precedence", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
+        Assert.Contains("TensorRT 11 keeps removed setters behind explicit version guards", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
         Assert.Contains("debug tensor diagnostic arguments are parse/report-only", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
         Assert.Contains("Safety/consistency arguments are parse/report-only", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
         Assert.Contains("Builder cache policy arguments are parse/report-only", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
@@ -1144,6 +1145,7 @@ public sealed class OnnxToEngineTrtexecLikeTests
         Assert.Contains(optionStatus.GetProperty("ParsedOptions").EnumerateArray(), static item => item.GetString() == "--dumpLayerInfo");
         Assert.Contains(optionStatus.GetProperty("ParsedOptions").EnumerateArray(), static item => item.GetString() == "--dumpProfile");
         Assert.Contains(optionStatus.GetProperty("ParsedOptions").EnumerateArray(), static item => item.GetString() == "--separateProfileRun");
+        Assert.DoesNotContain(optionStatus.GetProperty("ParsedOptions").EnumerateArray(), static item => item.GetString() == "--fp16");
         Assert.Contains(optionStatus.GetProperty("AppliedOptions").EnumerateArray(), static item => item.GetString() == "--builderOptimizationLevel");
         Assert.Contains(optionStatus.GetProperty("AppliedOptions").EnumerateArray(), static item => item.GetString() == "--memPoolSize");
         Assert.Contains(optionStatus.GetProperty("ParseOnlyOptions").EnumerateArray(), static item => item.GetString() == "--minTiming");
@@ -1161,6 +1163,7 @@ public sealed class OnnxToEngineTrtexecLikeTests
         Assert.Contains(optionStatus.GetProperty("ParseOnlyOptions").EnumerateArray(), static item => item.GetString() == "--dumpLayerInfo");
         Assert.Contains(optionStatus.GetProperty("ParseOnlyOptions").EnumerateArray(), static item => item.GetString() == "--dumpProfile");
         Assert.Contains(optionStatus.GetProperty("ParseOnlyOptions").EnumerateArray(), static item => item.GetString() == "--separateProfileRun");
+        Assert.DoesNotContain(optionStatus.GetProperty("ParseOnlyOptions").EnumerateArray(), static item => item.GetString() == "--fp16");
         Assert.Contains(optionStatus.GetProperty("ParsedOptions").EnumerateArray(), static item => item.GetString() == "--profilingVerbosity");
         Assert.Contains("parse-only/build-only/capability-probe-only evidence cannot promote", optionStatus.GetProperty("EvidenceBoundary").GetString(), StringComparison.Ordinal);
         Assert.Contains("capability-probe-only", optionStatus.GetProperty("ParseOnlyOptions").EnumerateArray().Select(static item => item.GetString()));

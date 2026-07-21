@@ -724,11 +724,12 @@ internal static partial class NativeBridgeApi
 
     public static void SetBuilderConfigFlag(TensorRtApiLine line, SafeTensorRtObjectHandle config, TensorRtBuilderFlag flag, bool enabled)
     {
+        int nativeFlag = TensorRtBuilderFlagMapper.ToNativeFlag(line, flag);
         BridgeStatusCode status = line switch
         {
-            TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_builder_config_set_flag(config, (int)flag, enabled ? 1 : 0),
-            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_config_set_flag(config, (int)flag, enabled ? 1 : 0),
-            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_builder_config_set_flag(config, (int)flag, enabled ? 1 : 0),
+            TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_builder_config_set_flag(config, nativeFlag, enabled ? 1 : 0),
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_config_set_flag(config, nativeFlag, enabled ? 1 : 0),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_builder_config_set_flag(config, nativeFlag, enabled ? 1 : 0),
             _ => throw new BridgeProbeException(BridgeStatusCode.InvalidArgument, BridgeErrorCategory.Common, "Unsupported TensorRT API line.")
         };
 
@@ -737,12 +738,13 @@ internal static partial class NativeBridgeApi
 
     public static bool GetBuilderConfigFlag(TensorRtApiLine line, SafeTensorRtObjectHandle config, TensorRtBuilderFlag flag)
     {
+        int nativeFlag = TensorRtBuilderFlagMapper.ToNativeFlag(line, flag);
         int enabled;
         BridgeStatusCode status = line switch
         {
-            TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_builder_config_get_flag(config, (int)flag, out enabled),
-            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_config_get_flag(config, (int)flag, out enabled),
-            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_builder_config_get_flag(config, (int)flag, out enabled),
+            TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_builder_config_get_flag(config, nativeFlag, out enabled),
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_config_get_flag(config, nativeFlag, out enabled),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_builder_config_get_flag(config, nativeFlag, out enabled),
             _ => throw new BridgeProbeException(BridgeStatusCode.InvalidArgument, BridgeErrorCategory.Common, "Unsupported TensorRT API line.")
         };
 

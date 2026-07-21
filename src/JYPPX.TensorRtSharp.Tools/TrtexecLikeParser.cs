@@ -59,6 +59,13 @@ public static class TrtexecLikeParser
             diagnostics.Add("CUDA graph execution is requested; bounded runtime attempts per-context capture, instantiation, and launch, then records a controlled direct-enqueue fallback if capture is unavailable.");
         }
 
+        string inputIOFormats = TrtexecLikeBuildPolicy.NormalizeIoFormats(GetValue(args, "--inputIOFormats", string.Empty), "--inputIOFormats");
+        string outputIOFormats = TrtexecLikeBuildPolicy.NormalizeIoFormats(GetValue(args, "--outputIOFormats", string.Empty), "--outputIOFormats");
+        string precisionConstraints = TrtexecLikeBuildPolicy.NormalizePrecisionConstraints(GetValue(args, "--precisionConstraints", string.Empty));
+        string layerPrecisions = TrtexecLikeBuildPolicy.NormalizeLayerPrecisions(GetValue(args, "--layerPrecisions", string.Empty));
+        string layerOutputTypes = TrtexecLikeBuildPolicy.NormalizeLayerOutputTypes(GetValue(args, "--layerOutputTypes", string.Empty));
+        TrtexecLikeBuildPolicy.ValidatePolicyCombination(precisionConstraints, layerPrecisions, layerOutputTypes);
+
         TrtexecLikeDeploymentOptions deploymentOptions = new TrtexecLikeDeploymentOptions(
             deviceOrdinal: ParseOptionalNonNegativeInt(GetValue(args, "--device", string.Empty), "--device"),
             builderOptimizationLevel: ParseRangeInt(GetValue(args, "--builderOptimizationLevel", "3"), "--builderOptimizationLevel", 0, 5),
@@ -67,17 +74,17 @@ public static class TrtexecLikeParser
             allowGpuFallback: HasSwitch(args, "--allowGPUFallback"),
             tacticSources: NormalizeTacticSources(GetValue(args, "--tacticSources", string.Empty)),
             memoryPoolSizes: ParseMemoryPoolSizes(GetValue(args, "--memPoolSize", string.Empty)),
-            inputIOFormats: GetValue(args, "--inputIOFormats", string.Empty),
-            outputIOFormats: GetValue(args, "--outputIOFormats", string.Empty),
+            inputIOFormats: inputIOFormats,
+            outputIOFormats: outputIOFormats,
             calibrationCacheFile: calibrationCacheFile,
             directIO: HasSwitch(args, "--directIO"),
             sparsity: NormalizeSparsity(GetValue(args, "--sparsity", string.Empty)),
             stronglyTyped: HasSwitch(args, "--stronglyTyped"),
             minTiming: ParseOptionalPositiveInt(GetValue(args, "--minTiming", string.Empty), "--minTiming"),
             avgTiming: ParseOptionalPositiveInt(GetValue(args, "--avgTiming", string.Empty), "--avgTiming"),
-            precisionConstraints: GetValue(args, "--precisionConstraints", string.Empty),
-            layerPrecisions: GetValue(args, "--layerPrecisions", string.Empty),
-            layerOutputTypes: GetValue(args, "--layerOutputTypes", string.Empty),
+            precisionConstraints: precisionConstraints,
+            layerPrecisions: layerPrecisions,
+            layerOutputTypes: layerOutputTypes,
             fp8: HasSwitch(args, "--fp8"),
             best: HasSwitch(args, "--best"),
             dumpRefit: HasSwitch(args, "--dumpRefit"),

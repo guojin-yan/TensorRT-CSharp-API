@@ -1,0 +1,82 @@
+{
+  "schemaVersion": "trtexec-io-layer-precision-runtime-evidence.v1",
+  "generatedAt": "2026-07-21",
+  "sourceState": "working-tree-after-f4c38e74680c02cdb4c1be06ecc8d7347a591159",
+  "evidenceKind": "local-project-reference-synthetic-build-policy-smoke",
+  "host": {
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02",
+    "tensorRt10Version": "10.11.0",
+    "tensorRt8Version": "8.6.1",
+    "tensorRt11Version": "11.0.0",
+    "cuda12Version": "12.9",
+    "cudaTrt8Version": "12.1"
+  },
+  "builderFlagMapping": {
+    "publicEnumValuesChanged": false,
+    "mappingBoundary": "managed interop converts stable logical flags to per-version vendor raw indices",
+    "tensorRt8": {
+      "directIoRawIndex": 12,
+      "preferPrecisionConstraintsRawIndex": 11,
+      "runtimeIsolationReadback": true,
+      "networkBuilderOutputMatch": true
+    },
+    "tensorRt10": "logical indices map to TensorRT 10 vendor indices",
+    "tensorRt11": "removed logical flags fail closed; unknown vendor-only bits are not misreported as logical flags"
+  },
+  "tensorRt10PolicyRun": {
+    "exitCode": 0,
+    "state": "identity-roundtrip",
+    "proofClassification": "synthetic-input-runtime",
+    "outputMatch": true,
+    "engineRoundTrip": true,
+    "policies": {
+      "inputIOFormats": { "requested": "fp32:chw", "applied": true, "readbackMatch": true },
+      "outputIOFormats": { "requested": "fp32:chw", "applied": true, "readbackMatch": true },
+      "precisionConstraints": { "requested": "prefer", "applied": true, "readbackPrefer": true, "readbackObey": false, "readbackMatch": true },
+      "layerPrecisions": { "requested": "*:fp32", "matchedLayers": 1, "applied": true, "readbackMatch": true },
+      "layerOutputTypes": { "requested": "*:fp32", "matchedLayers": 1, "applied": true, "readbackMatch": true }
+    },
+    "appliedOptionsContainAllFivePolicies": true,
+    "parseOnlyOptionsContainAnyFivePolicies": false,
+    "report": { "path": "build-out/io-precision-policy-smoke/trt10-policy-report.json", "lengthBytes": 22703, "sha256": "5AF93D993E5B6A3B0459D495D6607AC948BEF0EB0B126687CCA4FD9A0FE9998A" },
+    "engine": { "path": "build-out/io-precision-policy-smoke/identity.plan", "lengthBytes": 3212, "sha256": "64EC4A51BAF2B22918EED397C3781BD2680D4E466508A92441EBE884E641E23A" },
+    "log": { "path": "build-out/io-precision-policy-smoke/trt10-policy.log", "lengthBytes": 4612, "sha256": "88CB05C43577472F4FF42D9D1B5DE62587CF40EBB26C8077CD87F5AC8358C2B9" }
+  },
+  "tensorRt8FlagRun": {
+    "exitCode": 0,
+    "directIoAndPreferIsolated": true,
+    "engineBuilt": true,
+    "enqueueRan": true,
+    "outputMatch": true,
+    "log": { "path": "build-out/io-precision-policy-smoke/trt8-builder-flag-mapping.log", "lengthBytes": 1751, "sha256": "78EC50628C783AFD2AB5355F6826CD44E875F98340F54E4467A553A3BC256F24" }
+  },
+  "tensorRt11GuardRun": {
+    "exitCode": 0,
+    "state": "dependency-probe-only",
+    "proofClassification": "dependency-probe-only",
+    "knownVendorStructuredExceptionCode": 3228369022,
+    "reachedParsedNetworkPolicyApplication": false,
+    "allFivePoliciesRemainParseOnly": true,
+    "report": { "path": "build-out/io-precision-policy-smoke/trt11-policy-guard-report.json", "lengthBytes": 16749, "sha256": "24C824C069A90C1CA00A5787695C5DDD4FCF1E113B157B826301505550047F1B" },
+    "log": { "path": "build-out/io-precision-policy-smoke/trt11-policy-guard.log", "lengthBytes": 2637, "sha256": "3AA2D4E4015FFCEF5356D158C4B8F3122C08FC86C8166D1E518F20D44E8C1C68" }
+  },
+  "binaryHashes": [
+    { "component": "TRT8/CUDA12.1 bridge", "lengthBytes": 996864, "sha256": "4393067996647F346C2CEBCFFC411967DB8DDFBF1FC7B8FC6B1A8C09975E0498" },
+    { "component": "TRT10/CUDA12.9 bridge", "lengthBytes": 1064960, "sha256": "42F69F3D639E032FA3836FC7F552E4B665FFD073D52DC83CE630A4F04C87CC83" },
+    { "component": "TRT11/CUDA12.9 bridge", "lengthBytes": 802816, "sha256": "4C2D24F8800FE1915C81AFE5257E0470AF8A99B1839884058E8EF479AD27E6D2" },
+    { "component": "JYPPX.TensorRtSharp Debug net8.0", "lengthBytes": 1595392, "sha256": "8A9390897E63624A5DB61EE4BA501DCAE5C1F15FBFA6324CD40DCEBA8447D131" },
+    { "component": "JYPPX.TensorRtSharp.Tools Debug net8.0", "lengthBytes": 326144, "sha256": "7E02F7C27C9587153D6B77456A017F109959334EB4DD33FACDDDB386EB5E1207" }
+  ],
+  "proofBoundary": {
+    "isBuilderPolicyBehaviorEvidence": true,
+    "isSyntheticRuntimeEvidence": true,
+    "isRealModelRuntimeProof": false,
+    "isCallerBindingLayoutProof": false,
+    "isTacticSelectionProof": false,
+    "isNumericalAccuracyProof": false,
+    "isPackageConsumerRuntimeProof": false,
+    "canPublishPublicly": false,
+    "publicReleaseSideEffectsExecuted": false
+  }
+}

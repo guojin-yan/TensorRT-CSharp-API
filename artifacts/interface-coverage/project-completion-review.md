@@ -1,5 +1,60 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-21 TensorRtExec I/O And Layer Precision Policies
+
+本批先审计 598 条 TensorRT deferred rows 与 50 个去重候选：low-risk 为 0，剩余项仍落在 callback、
+borrowed `IDimensionExpr`、error-recorder refcount、plugin ownership、runtime deserialization ownership 或
+TRT8 consistency-checker 缺 symbol 边界，因此没有为了数量删除 deferred history 或暴露 native pointer。
+
+随后修复稳定 public `TensorRtBuilderFlag` 与 vendor raw index 混用的问题。公开 enum 数值保持不变，
+`SetFlag/GetFlag/ClearFlag/SetFlags/GetFlags` 在 managed interop 边界按 TRT8/10/11 双向映射，unsupported
+flag fail closed，vendor-only raw bit 不会误报成别的逻辑 flag。TRT8 `DirectIO` raw 12 与
+`PreferPrecisionConstraints` raw 11 已加入永久 NetworkBuilder smoke 并实跑隔离成功。
+
+应用层实现 `--inputIOFormats`、`--outputIOFormats`、`--precisionConstraints`、`--layerPrecisions` 与
+`--layerOutputTypes`：parser 校验 type/format grammar、IO broadcast/count、pattern 单 wildcard、layer exact
+优先 wildcard、后规则覆盖前规则、output type broadcast/count；ONNX parse 后对 network tensor/layer 使用
+typed set/readback。TRT8/10 支持完整策略；TRT11 仅在 requested type 等于 inferred type 时设置 allowed
+formats，已移除的 tensor type、constraint flags 与 layer setters 明确保持 version guard。
+
+TRT10.11/CUDA12.9 identity smoke 中五项策略全部 `Applied=True`、`ReadbackMatch=True`，进入
+`AppliedOptions`，engine round-trip、两次 measurement enqueue 与 output match 成功。TRT8.6/CUDA12.1
+NetworkBuilder build/enqueue/output match 成功并输出 raw flag isolation true。TRT11/CUDA12.9 在 network
+creation 前遇到已知 vendor structured exception `3228369022`，报告保持 dependency-probe-only，五项策略
+全部留在 parse-only，没有伪造 applied。
+
+### Verification
+
+- binding generator/output validation 连续生成两次一致：`194 manifests / 3971 records`。
+- 完整 solution Debug/Release 均为 `0 error`；Debug 保留 5 条既有 nullable warning，Release 为
+  `0 warning`。
+- TRT8/CUDA12.1、TRT10/CUDA12.9、TRT11/CUDA12.9 native Release build 成功；ABI declaration 为
+  TRT8 `991/991`、TRT10 `1086/1086`、TRT11 `1233/1233`，三份 PE export parity missing 均为 `0`。
+- 受影响 ProjectQuality focused 与 bounded shard 均为 `139/139`；GUI/CLI checklist strict 为
+  `18/18`，runtime-proof item 为 `0`。
+- managed package 为 `14,805,725` bytes，SHA256
+  `B3A8BA1C90DFE4C381716FD3399E6775C591CF76E5492BF68B478A527039C0DA`；TRT10 bridge-only package
+  为 `351,087` bytes，SHA256 `31EDA06CFF2B87F18202D77D758D8E95117F6646F27BEFAEB73786BDF0EF40BB`。
+  无 `ProjectReference` consumer restore/build 为 `0 warning / 0 error`，分类仍是 compile-surface-proof。
+- Public API documentation/bilingual 均通过；DocFX `920 models`、`0 warning / 0 error`。strict
+  classification/public-proof finding 均为 `0`，strict release quality required failure 为 `0`。
+- owner convergence 保持 structural `9/9`、accepted `0/9`、gates `2/3`；final owner gate blocked `5`，
+  没有把本地包、synthetic identity 或 dependency probe 提升为公开 proof。
+
+### C 盘审计
+
+本批没有向 `Downloads`、全局 NuGet package root 或 C 盘其他位置下载 TensorRT、CUDA、cuDNN、模型、
+engine 或 nupkg。bridge consumer 已自动删除本批 `C:\jyppx-pkgcache` 子 cache 与
+`%TEMP%\jyppx-split-packages` 子目录；最终审计发现 71 个 dotnet workload 小日志（合计 91,185 bytes）
+以及 `C:\jyppx-pkgcache`、`%TEMP%\jyppx-split-packages`、`%TEMP%\MSBuildTemp` 三个空目录。
+两次标准 PowerShell `Remove-Item` 都在执行前被工具安全策略拒绝，未换壳绕过；用户 Downloads、NuGet、
+Codex、CUDA 与系统缓存未触碰。
+
+compact evidence 为 `trt-deferred-safe-uplift-candidate-audit.{json,md}` 与
+`trtexec-io-layer-precision-runtime-evidence.{json,md}`。这些结果是本地 ProjectReference、builder policy
+与 synthetic identity 证据，不是 caller binding layout、tactic、数值准确率、真实模型、外部 package
+consumer 或发布证明。未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
+
 ## 2026-07-21 TensorRtExec Deployment Controls
 
 本批把 `--device`、`--useDLACore`、`--allowGPUFallback`、`--tacticSources`、`--directIO`、

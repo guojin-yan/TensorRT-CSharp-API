@@ -175,7 +175,8 @@ internal static partial class NativeBridgeApi
     public static void ClearBuilderConfigFlag(TensorRtApiLine line, SafeTensorRtObjectHandle config, TensorRtBuilderFlag flag)
     {
         EnsureTensorRt11DeploymentApi(line, nameof(ClearBuilderConfigFlag));
-        NativeStatus.ThrowIfFailed(NativeMethodsTensorRt.jyppx_trt11_builder_config_clear_flag(config, (int)flag));
+        int nativeFlag = TensorRtBuilderFlagMapper.ToNativeFlag(line, flag);
+        NativeStatus.ThrowIfFailed(NativeMethodsTensorRt.jyppx_trt11_builder_config_clear_flag(config, nativeFlag));
     }
 
     public static bool SetBuilderConfigPluginsToSerialize(TensorRtApiLine line, SafeTensorRtObjectHandle config, IReadOnlyList<string> pluginLibraryPaths)

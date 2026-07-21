@@ -71,6 +71,8 @@ $requiredIds = @(
   "load-engine",
   "shape-profiles",
   "precision",
+  "io-formats",
+  "layer-precision-policy",
   "int8-calibration",
   "workspace-memory-pool",
   "timing-cache",

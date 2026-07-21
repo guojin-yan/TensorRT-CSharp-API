@@ -403,6 +403,10 @@ public static class OnnxEngineBuildDiagnostics
         AddIf(options, "--exportProfile", !string.IsNullOrWhiteSpace(runtimeOptions.ExportProfilePath));
         AddIf(options, "--saveProfile", !string.IsNullOrWhiteSpace(runtimeOptions.SaveProfilePath));
         AddIf(options, "--useCudaGraph", result.NormalizedCommandLine.Contains("--useCudaGraph", StringComparison.Ordinal));
+        AddIf(options, "--fp16", HasNormalizedOption(result, "--fp16"));
+        AddIf(options, "--int8", HasNormalizedOption(result, "--int8"));
+        AddIf(options, "--bf16", HasNormalizedOption(result, "--bf16"));
+        AddIf(options, "--noTF32", HasNormalizedOption(result, "--noTF32"));
 
         return options.Distinct(StringComparer.Ordinal).ToArray();
     }
@@ -431,8 +435,16 @@ public static class OnnxEngineBuildDiagnostics
         AddIf(options, "--directIO", HasAppliedDeploymentControl(result, "DirectIO"));
         AddIf(options, "--sparsity", HasAppliedDeploymentControl(result, "Sparsity"));
         AddIf(options, "--stronglyTyped", HasAppliedDeploymentControl(result, "StronglyTyped"));
+        AddIf(options, "--inputIOFormats", HasAppliedBuildPolicy(result, "InputIOFormats"));
+        AddIf(options, "--outputIOFormats", HasAppliedBuildPolicy(result, "OutputIOFormats"));
+        AddIf(options, "--precisionConstraints", HasAppliedBuildPolicy(result, "PrecisionConstraints"));
+        AddIf(options, "--layerPrecisions", HasAppliedBuildPolicy(result, "LayerPrecisions"));
+        AddIf(options, "--layerOutputTypes", HasAppliedBuildPolicy(result, "LayerOutputTypes"));
+        AddIf(options, "--fp16", HasAppliedBuildPolicy(result, "Fp16"));
+        AddIf(options, "--int8", HasAppliedBuildPolicy(result, "Int8"));
+        AddIf(options, "--bf16", HasAppliedBuildPolicy(result, "Bf16"));
+        AddIf(options, "--noTF32", HasNormalizedOption(result, "--noTF32") && HasAppliedBuildPolicy(result, "Tf32"));
         AddIf(options, "--memPoolSize", deploymentOptions.MemoryPoolSizes.Count > 0 && (result.Parsed || result.EngineSaved));
-        AddIf(options, "--fp16/--bf16/--noTF32", result.Parsed || result.EngineSaved || result.InferenceRan);
         AddIf(options, "--minShapes/--optShapes/--maxShapes", result.Parsed || result.EngineSaved || result.InferenceRan);
         AddIf(options, "--avgTiming", deploymentOptions.AvgTiming.HasValue && (result.Parsed || result.EngineSaved));
         AddIf(options, "--minTiming", deploymentOptions.MinTiming.HasValue && result.TensorRtLine == TensorRtApiLine.TensorRt8 && (result.Parsed || result.EngineSaved));
@@ -479,17 +491,21 @@ public static class OnnxEngineBuildDiagnostics
         AddIf(options, "--allowGPUFallback", deploymentOptions.AllowGpuFallback && !HasAppliedDeploymentControl(result, "GpuFallback"));
         AddIf(options, "--tacticSources", !string.IsNullOrWhiteSpace(deploymentOptions.TacticSources) && !HasAppliedDeploymentControl(result, "TacticSources"));
         AddIf(options, "--memPoolSize", deploymentOptions.MemoryPoolSizes.Count > 0 && !(result.Parsed || result.EngineSaved));
-        AddIf(options, "--inputIOFormats", !string.IsNullOrWhiteSpace(deploymentOptions.InputIOFormats));
-        AddIf(options, "--outputIOFormats", !string.IsNullOrWhiteSpace(deploymentOptions.OutputIOFormats));
+        AddIf(options, "--inputIOFormats", !string.IsNullOrWhiteSpace(deploymentOptions.InputIOFormats) && !HasAppliedBuildPolicy(result, "InputIOFormats"));
+        AddIf(options, "--outputIOFormats", !string.IsNullOrWhiteSpace(deploymentOptions.OutputIOFormats) && !HasAppliedBuildPolicy(result, "OutputIOFormats"));
         AddIf(options, "--calib", !string.IsNullOrWhiteSpace(deploymentOptions.CalibrationCacheFile));
         AddIf(options, "--directIO", deploymentOptions.DirectIO && !HasAppliedDeploymentControl(result, "DirectIO"));
         AddIf(options, "--sparsity", !string.IsNullOrWhiteSpace(deploymentOptions.Sparsity) && !HasAppliedDeploymentControl(result, "Sparsity"));
         AddIf(options, "--stronglyTyped", deploymentOptions.StronglyTyped && !HasAppliedDeploymentControl(result, "StronglyTyped"));
         AddIf(options, "--minTiming", deploymentOptions.MinTiming.HasValue && (result.TensorRtLine != TensorRtApiLine.TensorRt8 || !(result.Parsed || result.EngineSaved)));
         AddIf(options, "--avgTiming", deploymentOptions.AvgTiming.HasValue && !(result.Parsed || result.EngineSaved));
-        AddIf(options, "--precisionConstraints", !string.IsNullOrWhiteSpace(deploymentOptions.PrecisionConstraints));
-        AddIf(options, "--layerPrecisions", !string.IsNullOrWhiteSpace(deploymentOptions.LayerPrecisions));
-        AddIf(options, "--layerOutputTypes", !string.IsNullOrWhiteSpace(deploymentOptions.LayerOutputTypes));
+        AddIf(options, "--precisionConstraints", !string.IsNullOrWhiteSpace(deploymentOptions.PrecisionConstraints) && !HasAppliedBuildPolicy(result, "PrecisionConstraints"));
+        AddIf(options, "--layerPrecisions", !string.IsNullOrWhiteSpace(deploymentOptions.LayerPrecisions) && !HasAppliedBuildPolicy(result, "LayerPrecisions"));
+        AddIf(options, "--layerOutputTypes", !string.IsNullOrWhiteSpace(deploymentOptions.LayerOutputTypes) && !HasAppliedBuildPolicy(result, "LayerOutputTypes"));
+        AddIf(options, "--fp16", HasNormalizedOption(result, "--fp16") && !HasAppliedBuildPolicy(result, "Fp16"));
+        AddIf(options, "--int8", HasNormalizedOption(result, "--int8") && !HasAppliedBuildPolicy(result, "Int8"));
+        AddIf(options, "--bf16", HasNormalizedOption(result, "--bf16") && !HasAppliedBuildPolicy(result, "Bf16"));
+        AddIf(options, "--noTF32", HasNormalizedOption(result, "--noTF32") && !HasAppliedBuildPolicy(result, "Tf32"));
         AddIf(options, "--fp8", deploymentOptions.Fp8);
         AddIf(options, "--best", deploymentOptions.Best);
         AddIf(options, "--dumpRefit", deploymentOptions.DumpRefit);
@@ -558,6 +574,23 @@ public static class OnnxEngineBuildDiagnostics
         return result.LogLines.Any(line =>
             line.StartsWith(prefix, StringComparison.Ordinal) &&
             line.Contains("ReadbackMatch=True", StringComparison.Ordinal));
+    }
+
+    private static bool HasAppliedBuildPolicy(OnnxEngineBuildResult result, string name)
+    {
+        string prefix = $"TrtexecBuildPolicy Name={name} Applied=True";
+        return result.LogLines.Any(line =>
+            line.StartsWith(prefix, StringComparison.Ordinal) &&
+            line.Contains("ReadbackMatch=True", StringComparison.Ordinal));
+    }
+
+    private static bool HasNormalizedOption(OnnxEngineBuildResult result, string option)
+    {
+        string commandLine = result.NormalizedCommandLine;
+        return string.Equals(commandLine, option, StringComparison.Ordinal) ||
+            commandLine.StartsWith(option + " ", StringComparison.Ordinal) ||
+            commandLine.Contains(" " + option + " ", StringComparison.Ordinal) ||
+            commandLine.EndsWith(" " + option, StringComparison.Ordinal);
     }
 
     private static void AddIf(System.Collections.Generic.List<string> options, string option, bool condition)

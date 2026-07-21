@@ -299,7 +299,7 @@ public sealed class TrtexecLikeDeploymentOptions
 
         if (!string.IsNullOrWhiteSpace(InputIOFormats) || !string.IsNullOrWhiteSpace(OutputIOFormats))
         {
-            diagnostics.Add("IO format options are parsed for diagnostics; generic external-model inference still requires explicit binding semantics.");
+            diagnostics.Add("IO format options are validated against official type:format grammar, applied to parsed network I/O tensors, and read back during a real build; TensorRT 11 can constrain formats only when the requested type already matches the inferred tensor type.");
             AddDiagnostic(diagnostics, "InputIOFormats", InputIOFormats);
             AddDiagnostic(diagnostics, "OutputIOFormats", OutputIOFormats);
         }
@@ -340,7 +340,7 @@ public sealed class TrtexecLikeDeploymentOptions
             Fp8 ||
             Best)
         {
-            diagnostics.Add("Layer precision and shortcut precision arguments are parse/report-only until model-specific precision routing is promoted.");
+            diagnostics.Add("Precision constraints and layer type rules are applied with exact-name precedence, single-wildcard matching, later-rule override, and typed readback on TensorRT 8/10; TensorRT 11 keeps removed setters behind explicit version guards.");
             AddDiagnostic(diagnostics, "PrecisionConstraints", PrecisionConstraints);
             AddDiagnostic(diagnostics, "LayerPrecisions", LayerPrecisions);
             AddDiagnostic(diagnostics, "LayerOutputTypes", LayerOutputTypes);

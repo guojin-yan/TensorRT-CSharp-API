@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "trt-deferred-safe-uplift-candidate-audit.v1",
+  "generatedAt": "2026-07-21",
+  "sourceBaseline": "f4c38e74680c02cdb4c1be06ecc8d7347a591159",
+  "inventory": {
+    "tensorRtDeferredRows": 598,
+    "reviewedUniqueCandidates": 50,
+    "lowRiskRows": 0,
+    "mediumRiskRows": 112,
+    "highRiskRows": 486
+  },
+  "remainingRiskFamilies": [
+    "calibrator callback and callback trampoline",
+    "borrowed IDimensionExpr lifetime",
+    "error recorder reference counting",
+    "plugin create/register/deregister/load ownership",
+    "runtime deserialization ownership",
+    "consistency checker symbol absent from TensorRT 8 import libraries and DLLs"
+  ],
+  "decision": "no-safe-deferred-promotion-in-this-batch",
+  "decisionReason": "No reviewed candidate combines a present vendor entry, owner-safe managed surface, cross-version guard, and real runtime smoke without reopening callback, borrowed-pointer, plugin, refcount, or deserialization ownership risk.",
+  "selectedAlternativeBatch": {
+    "scope": "TensorRtExec I/O and layer precision build policies",
+    "reason": "Existing owner-scoped TensorRtTensor, TensorRtLayer, TensorRtNetworkDefinition, and TensorRtBuilderConfig wrappers provide typed setters/getters without exposing native pointers.",
+    "options": [
+      "--inputIOFormats",
+      "--outputIOFormats",
+      "--precisionConstraints",
+      "--layerPrecisions",
+      "--layerOutputTypes"
+    ]
+  },
+  "safetyBoundary": {
+    "deferredManifestsDeleted": false,
+    "publicNativePointersAdded": false,
+    "callbackOwnershipPromoted": false,
+    "pluginOwnershipPromoted": false,
+    "consistencyCheckerPromoted": false
+  }
+}

@@ -137,6 +137,16 @@
       "nextStep": "Retain TRT10 compatible-host build/enqueue evidence; collect separate DLA-capable owner evidence before claiming DLA model execution."
     },
     {
+      "id": "io-layer-precision-policies",
+      "trtexecOption": "--inputIOFormats --outputIOFormats --precisionConstraints --layerPrecisions --layerOutputTypes",
+      "tensorRtExecStatus": "implemented-build-readback-with-version-guards",
+      "entryPoints": ["TrtexecLikeBuildPolicy", "TensorRtTensor.DataType", "TensorRtTensor.AllowedFormats", "TensorRtLayer.Precision", "TensorRtLayer.SetOutputType", "OnnxEngineBuildDiagnostics.OptionImplementationStatus"],
+      "proofBoundary": "Tensor/layer set-readback proves parsed-network builder policy application only. It does not prove caller memory layout, tactic selection, numerical accuracy, real-model runtime, or package-consumer runtime.",
+      "isRuntimeProof": false,
+      "gap": "TRT11 removed tensor type and layer precision setters; only matching inferred I/O types can receive allowed-format constraints. Real external models still require binding-layout and numerical validation.",
+      "nextStep": "Keep TRT11 removed setters parse-only and pair TRT8/10 policy reports with model-specific input layout, expected output, and owner hashes before any proof promotion."
+    },
+    {
       "id": "timing-cache",
       "trtexecOption": "--timingCacheFile --exportTimingCache",
       "tensorRtExecStatus": "implemented-build-cache-lifecycle",

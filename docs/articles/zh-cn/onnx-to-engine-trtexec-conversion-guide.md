@@ -112,7 +112,7 @@ dotnet run --project .\applications\TensorRtExec -- `
 | DLA | `--useDLACore --allowGPUFallback` | 当前记录诊断，不做 layer device placement |
 | Tactic sources | `--tacticSources` | 当前记录诊断 |
 | Memory pools | `--memPoolSize workspace:512MiB,tacticDram:1GiB` | 真实 build 时映射到 `TensorRtMemoryPoolType`，调用 `SetMemoryPoolLimit` 后用 `GetMemoryPoolLimit` read back；每项必须换算为整 MiB；dry-run/load-engine 仍为 parse-only |
-| IO formats | `--inputIOFormats --outputIOFormats --directIO` | 当前记录诊断，真实绑定语义由具体 sample 负责 |
+| IO / precision policies | `--inputIOFormats --outputIOFormats --directIO --precisionConstraints --layerPrecisions --layerOutputTypes` | TRT8/10 按官方 grammar 设置并 read back tensor/layer policy；TRT11 只对 type 已匹配的 I/O 设置 format，移除的 layer setters 保持 guard；真实 caller layout 与数值正确性仍由具体 sample 证明 |
 | Calibration cache | `--calib` | 当前记录诊断，不启用 calibrator callback |
 | Sparsity/strong type | `--sparsity --stronglyTyped` | 当前记录诊断 |
 | Profiling verbosity | `--profilingVerbosity` / `--verbose` | 归一化为 `none` / `layer_names_only` / `detailed` |
@@ -190,7 +190,7 @@ This report is build/sample evidence only. build-only and dependency-probe-only 
 
 这句话不是“保守措辞”，而是为了防止把构建证据、runtime proof、发布 proof 混为一谈。
 
-`NormalizedCommandLine` 用来记录工具层归一化后的参数，`NormalizedCommandSha256` 用来给这条归一化命令生成稳定摘要，方便 issue、日志和 release evidence 对账。`DryRun=true` 与 `ProofClassification=precheck` 表示这份报告只完成了预检，不包含 runtime probe、ONNX parse、engine build 或 inference。`DeploymentOptions` 用来保存 trtexec-like 部署参数快照。当前 `builderOptimizationLevel`、`maxAuxStreams` 和 `profilingVerbosity` 会进入 builder config；DLA、tactic source、IO format、calibration cache、sparsity、strongly typed 等参数先作为诊断记录进入 report，等待模型级 runtime 阶段补足生命周期与输出语义。`BuildEvidenceOnly=true` 和 `ProofClassification=build-only` 表示这份报告仍然只是构建证据，不是推理输出正确性的证明。`real-model-runtime` 需要具体 sample 的真实输入、labels、hash 和输出日志；`package-consumer-runtime` 只由 release proof record 记录。
+`NormalizedCommandLine` 用来记录工具层归一化后的参数，`NormalizedCommandSha256` 用来给这条归一化命令生成稳定摘要，方便 issue、日志和 release evidence 对账。`DryRun=true` 与 `ProofClassification=precheck` 表示这份报告只完成了预检，不包含 runtime probe、ONNX parse、engine build 或 inference。`DeploymentOptions` 用来保存 trtexec-like 部署参数快照。当前 builder scalar、device、DLA/fallback、tactic、DirectIO、sparsity enable/disable、strongly typed、I/O format 与 TRT8/10 layer precision policy 会在能力允许时进入真实 set/readback；calibration cache、sparsity force 和不兼容版本的 setters 保持诊断或 parse-only。`BuildEvidenceOnly=true` 和 `ProofClassification=build-only` 表示这份报告仍然只是构建证据，不是推理输出正确性的证明。`real-model-runtime` 需要具体 sample 的真实输入、labels、hash 和输出日志；`package-consumer-runtime` 只由 release proof record 记录。
 
 成功创建 builder config 并应用部署选项后，报告还会输出 `BuilderConfigDeploymentSnapshot`。它与 `DeploymentOptions` 的关系是“请求值对实际读回值”：例如 `AvgTiming`、workspace memory pool、optimization level、profiling verbosity、default device、DLA core、tactic sources 和版本专属字段。快照只包含 copied managed values 与 diagnostics，不暴露 config pointer；当某字段在 TRT8/10/11 中不可用时，diagnostics 会记录受控失败。该快照仍是 build/deployment diagnostics，不能替代真实模型输出或 package consumer runtime proof。
 

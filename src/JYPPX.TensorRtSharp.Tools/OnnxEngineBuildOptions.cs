@@ -224,9 +224,6 @@ public sealed class OnnxEngineBuildOptions
 
         bool parseOnlyAdvancedOptions =
             (options.DeploymentOptions.MinTiming.HasValue && options.TensorRtLine != TensorRtApiLine.TensorRt8) ||
-            !string.IsNullOrWhiteSpace(options.DeploymentOptions.PrecisionConstraints) ||
-            !string.IsNullOrWhiteSpace(options.DeploymentOptions.LayerPrecisions) ||
-            !string.IsNullOrWhiteSpace(options.DeploymentOptions.LayerOutputTypes) ||
             options.DeploymentOptions.Fp8 ||
             options.DeploymentOptions.Best ||
             options.DeploymentOptions.DumpRefit ||
