@@ -1,5 +1,63 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-21 TensorRtExec Runtime Controls
+
+本批按 TensorRT 10.11 官方 `trtexec --help` 与 v10.11 `sampleOptions.cpp` / `sampleInference.cpp`
+语义，把上一批仍为 parse-only 的 `--threads`、`--useSpinWait`、`--useCudaGraph` 和
+`--noDataTransfers` 接入真实 bounded runtime。`--threads` 作为布尔开关，每个 effective stream
+使用独立 host driver thread，并在子线程恢复 worker 创建时的 CUDA device；spin wait 通过
+`CudaEvent.IsReady()` 主动查询；graph 持有独立 graph/graph-exec owner，完成 capture、instantiate
+和 launch，捕获失败时安全结束 capture、释放全部 graph owner、统一回退 direct enqueue并记录
+reason；no-transfer 只 allocate/bind device buffer，跳过 input H2D 与 output D2H/readback。
+
+报告新增 `UseSpinWaitApplied`、`UseCudaGraphRequested/Applied/FallbackReason` 与
+`MeasurementRoundsPerContext`。只有真实执行后才将这些 controls 标 applied；graph fallback 的 run
+仍保留 parse-only。no-transfer run 是成功的 scheduler/enqueue 行为证据，但保持
+`OutputMatch=false`，output/raw export options 仍 parse-only，artifact 明确
+`HasBenchmarkExecutionEvidence=true`、`OutputElementCount=0`、`HasRawBindingProof=false`。
+`--sleepTime` 继续 parse-only，因为仓库没有忠实的 device-side launch-to-compute delay 原语，禁止用
+普通 `Thread.Sleep` 冒充。
+
+### 最终验证
+
+- focused TensorRtExec/OnnxToEngine/schema/application tests 为 `49/49`；按仓库 bounded runner 覆盖
+  9 个相关 class、3 个批次，`55/55`，无失败或超时，且未触发递归执行完整门禁的
+  `ReleaseCandidateReadinessTests`。
+- TRT10.11/CUDA12.9 threads+spin+graph smoke：2 contexts / 2 threads，per-context rounds `[3,3]`，
+  6 raw timing samples / 3 averaged samples，spin wait 与 graph 均 applied，fallback reason 为空，
+  output match true。no-transfer smoke 完成 2 次真实 enqueue，H2D/D2H 均为 0，output match false、
+  output count 0、raw proof false；output/raw options 正确保持 parse-only，times artifact 明确
+  `HasBenchmarkExecutionEvidence=true`。
+- solution Debug/Release 均为 0 error；Debug 通过，Release 保留 5 条既有 test nullable warning。
+  bindings 为 `194 manifests / 3971 records`，连续生成两次幂等。TRT10/CUDA12.9 与
+  TRT11/CUDA12.9 native Release 增量构建成功；TRT8/10/11 ABI declarations 分别为
+  `991/991`、`1086/1086`、`1233/1233`，missing 0；TRT10/TRT11 PE exports 分别为
+  `1086/1086`、`1233/1233`，missing 0。
+- managed package `JYPPX.TensorRT.CSharp.API.4.0.0.nupkg` 为 14,786,378 bytes，SHA256
+  `6A0DC0B568A76CC52D6451689BD8D7DE4E0495C570F164402F7E427E80B3BA32`；TRT10.11/CUDA12.9
+  bridge package 为 351,093 bytes，SHA256
+  `9C32942A72385574CA6DF652EA0221758C4A7A5C72DD74C321481B2B95187646`。无 ProjectReference
+  consumer restore/build 均成功，分类严格保持 `compile-surface-proof`。
+- Public API documentation 与 bilingual audit 均通过，三个公共项目均 0 warning / 0 error；
+  DocFX 应用 918 models，`0 warning / 0 error`。strict classification 与 public-proof finding
+  均为 0，strict release quality `RequiredFailureCount=0`。owner convergence 为 structural
+  `9/9`、accepted `0/9`、gates `2/3`；final owner gate 仍明确 blocked，未把本地证据晋级。
+
+### C 盘与证据边界
+
+本批没有把 TensorRT/CUDA/ONNX、模型、源码或项目 nupkg 下载到 C 盘；split package restore cache
+显式位于 `build-out/runtime-controls-pack/nuget-cache`（E 盘）。Downloads、Documents、Desktop
+今日没有本任务相关文件。Temp 仅命中一个由本轮 `dotnet` 调用生成的 33,710-byte workload metadata
+包：`C:\Users\guoji\AppData\Local\Temp\eb0bl5in.vut\microsoft.net.workloads.10.0.300.msi.x64\10.302.0\microsoft.net.workloads.10.0.300.msi.x64.10.302.0.nupkg`；
+目录无占用进程，但标准 `Remove-Item` 被当前工具安全策略拒绝，未换壳或绕过，因此仍待环境策略允许
+后清理。NuGet、Codex、CUDA 用户缓存以及 Downloads 中无关的 Cockpit 安装包、Typora 更新包均未
+触碰。
+
+compact evidence 为 `trtexec-runtime-controls-runtime-evidence.{json,md}`，继续保持
+`isRealModelRuntimeProof=false`、`isPackageConsumerRuntimeProof=false`、
+`canPublishPublicly=false`。未执行 NuGet push、GitHub Packages publish、GitHub Release upload
+或 issue close。
+
 ## 2026-07-21 TensorRtExec/OnnxToEngine Bounded Benchmark Scheduler
 
 本批在 CUDA deferred candidate safety audit 后没有发现可安全提升的 immediate-safe 函数：311 条

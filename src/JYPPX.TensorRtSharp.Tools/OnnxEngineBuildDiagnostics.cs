@@ -257,8 +257,14 @@ public static class OnnxEngineBuildDiagnostics
             $"Benchmark threads executed: `{result.BenchmarkSummary.ThreadsExecuted}`",
             $"Benchmark no data transfers requested: `{result.BenchmarkSummary.NoDataTransfersRequested}`",
             $"Benchmark no data transfers applied: `{result.BenchmarkSummary.NoDataTransfersApplied}`",
+            $"Benchmark spin wait requested: `{result.BenchmarkSummary.UseSpinWaitRequested}`",
+            $"Benchmark spin wait applied: `{result.BenchmarkSummary.UseSpinWaitApplied}`",
+            $"Benchmark CUDA graph requested: `{result.BenchmarkSummary.UseCudaGraphRequested}`",
+            $"Benchmark CUDA graph applied: `{result.BenchmarkSummary.UseCudaGraphApplied}`",
+            $"Benchmark CUDA graph fallback reason: `{result.BenchmarkSummary.UseCudaGraphFallbackReason}`",
             $"Benchmark iterations requested: `{result.BenchmarkSummary.IterationsRequested}`",
             $"Benchmark measurement rounds executed: `{result.BenchmarkSummary.MeasurementRoundsExecuted}`",
+            $"Benchmark measurement rounds per context: `{string.Join(",", result.BenchmarkSummary.MeasurementRoundsPerContext)}`",
             $"Benchmark inference iterations executed: `{result.BenchmarkSummary.InferenceIterationsExecuted}`",
             $"Benchmark warmup requested ms: `{result.BenchmarkSummary.WarmUpMillisecondsRequested}`",
             $"Benchmark warmup elapsed ms: `{result.BenchmarkSummary.WarmUpElapsedMilliseconds:0.###}`",
@@ -434,8 +440,10 @@ public static class OnnxEngineBuildDiagnostics
         AddIf(options, "--exportTimingCache", result.TimingCacheArtifact.OutputWritten);
         AddIf(options, "--exportTimes", !string.IsNullOrWhiteSpace(runtimeOptions.ExportTimesPath));
         AddIf(options, "--exportProfile", !string.IsNullOrWhiteSpace(runtimeOptions.ExportProfilePath));
-        AddIf(options, "--exportOutput", !string.IsNullOrWhiteSpace(runtimeOptions.ExportOutputPath) && result.InferenceRan);
-        AddIf(options, "--dumpRawBindingsToFile", !string.IsNullOrWhiteSpace(runtimeOptions.DumpRawBindingsToFile) && result.InferenceRan);
+        bool outputReadbackAvailable = result.InferenceRan && !result.BenchmarkSummary.NoDataTransfersApplied;
+        AddIf(options, "--dumpOutput", runtimeOptions.DumpOutput && outputReadbackAvailable);
+        AddIf(options, "--exportOutput", !string.IsNullOrWhiteSpace(runtimeOptions.ExportOutputPath) && outputReadbackAvailable);
+        AddIf(options, "--dumpRawBindingsToFile", !string.IsNullOrWhiteSpace(runtimeOptions.DumpRawBindingsToFile) && outputReadbackAvailable && result.OutputMatch);
         bool benchmarkExecuted = result.BenchmarkSummary.TimingSampleCount > 0;
         AddIf(options, "--iterations", benchmarkExecuted);
         AddIf(options, "--warmUp", benchmarkExecuted);
@@ -445,6 +453,10 @@ public static class OnnxEngineBuildDiagnostics
         AddIf(options, "--idleTime", benchmarkExecuted && runtimeOptions.IdleTimeMilliseconds.HasValue);
         AddIf(options, "--avgRuns", benchmarkExecuted && runtimeOptions.AvgRuns.HasValue && result.BenchmarkSummary.AveragedTimingSampleCount > 0);
         AddIf(options, "--percentile", benchmarkExecuted && runtimeOptions.Percentile.HasValue);
+        AddIf(options, "--threads", benchmarkExecuted && runtimeOptions.UseThreads && result.BenchmarkSummary.ThreadsExecuted == result.BenchmarkSummary.ExecutionContextsCreated);
+        AddIf(options, "--useSpinWait", benchmarkExecuted && runtimeOptions.UseSpinWait && result.BenchmarkSummary.UseSpinWaitApplied);
+        AddIf(options, "--noDataTransfers", benchmarkExecuted && runtimeOptions.NoDataTransfers && result.BenchmarkSummary.NoDataTransfersApplied);
+        AddIf(options, "--useCudaGraph", benchmarkExecuted && result.BenchmarkSummary.UseCudaGraphRequested && result.BenchmarkSummary.UseCudaGraphApplied);
 
         return options.Distinct(StringComparer.Ordinal).ToArray();
     }
@@ -504,18 +516,19 @@ public static class OnnxEngineBuildDiagnostics
         AddIf(options, "--duration", !benchmarkExecuted);
         AddIf(options, "--streams", !benchmarkExecuted || runtimeOptions.InfStreams.HasValue);
         AddIf(options, "--infStreams", runtimeOptions.InfStreams.HasValue && !benchmarkExecuted);
-        AddIf(options, "--noDataTransfers", runtimeOptions.NoDataTransfers);
-        AddIf(options, "--useSpinWait", runtimeOptions.UseSpinWait);
-        AddIf(options, "--threads", runtimeOptions.Threads.HasValue);
+        AddIf(options, "--noDataTransfers", runtimeOptions.NoDataTransfers && !result.BenchmarkSummary.NoDataTransfersApplied);
+        AddIf(options, "--useSpinWait", runtimeOptions.UseSpinWait && !result.BenchmarkSummary.UseSpinWaitApplied);
+        AddIf(options, "--threads", runtimeOptions.UseThreads && (!benchmarkExecuted || result.BenchmarkSummary.ThreadsExecuted != result.BenchmarkSummary.ExecutionContextsCreated));
         AddIf(options, "--avgRuns", runtimeOptions.AvgRuns.HasValue && !benchmarkExecuted);
         AddIf(options, "--percentile", runtimeOptions.Percentile.HasValue && !benchmarkExecuted);
         AddIf(options, "--sleepTime", runtimeOptions.SleepTimeMilliseconds.HasValue);
         AddIf(options, "--idleTime", runtimeOptions.IdleTimeMilliseconds.HasValue && !benchmarkExecuted);
-        AddIf(options, "--useCudaGraph", result.NormalizedCommandLine.Contains("--useCudaGraph", StringComparison.Ordinal));
+        AddIf(options, "--useCudaGraph", result.NormalizedCommandLine.Contains("--useCudaGraph", StringComparison.Ordinal) && !result.BenchmarkSummary.UseCudaGraphApplied);
         AddIf(options, "--loadInputs", !string.IsNullOrWhiteSpace(runtimeOptions.LoadInputs) && !result.InferenceRan);
-        AddIf(options, "--dumpOutput", runtimeOptions.DumpOutput && !result.InferenceRan);
-        AddIf(options, "--dumpRawBindingsToFile", !string.IsNullOrWhiteSpace(runtimeOptions.DumpRawBindingsToFile) && !result.InferenceRan);
-        AddIf(options, "--exportOutput", !string.IsNullOrWhiteSpace(runtimeOptions.ExportOutputPath) && !result.InferenceRan);
+        bool outputReadbackUnavailable = !result.InferenceRan || result.BenchmarkSummary.NoDataTransfersApplied;
+        AddIf(options, "--dumpOutput", runtimeOptions.DumpOutput && outputReadbackUnavailable);
+        AddIf(options, "--dumpRawBindingsToFile", !string.IsNullOrWhiteSpace(runtimeOptions.DumpRawBindingsToFile) && (outputReadbackUnavailable || !result.OutputMatch));
+        AddIf(options, "--exportOutput", !string.IsNullOrWhiteSpace(runtimeOptions.ExportOutputPath) && outputReadbackUnavailable);
         AddIf(options, "--dumpLayerInfo", result.NormalizedCommandLine.Contains("--dumpLayerInfo", StringComparison.Ordinal));
         AddIf(options, "--dumpProfile", result.NormalizedCommandLine.Contains("--dumpProfile", StringComparison.Ordinal));
         AddIf(options, "--separateProfileRun", result.NormalizedCommandLine.Contains("--separateProfileRun", StringComparison.Ordinal));

@@ -35,6 +35,39 @@ public sealed class TensorRtExecBoundedBenchmarkSchedulerTests
     }
 
     [Fact]
+    public void RuntimeControlsEvidenceRecordsAppliedMechanicsAndNoTransferBoundary()
+    {
+        string path = Path.Combine(
+            RepositoryPaths.Root,
+            "artifacts",
+            "interface-coverage",
+            "trtexec-runtime-controls-runtime-evidence.json");
+        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(path));
+        JsonElement root = document.RootElement;
+        JsonElement graphRun = root.GetProperty("threadsSpinCudaGraphRun");
+        JsonElement noTransferRun = root.GetProperty("noDataTransfersRun");
+        JsonElement boundary = root.GetProperty("proofBoundary");
+
+        Assert.Equal(2, graphRun.GetProperty("threadsExecuted").GetInt32());
+        Assert.Equal(new[] { 3, 3 }, graphRun.GetProperty("measurementRoundsPerContext").EnumerateArray().Select(static item => item.GetInt32()).ToArray());
+        Assert.True(graphRun.GetProperty("useSpinWaitApplied").GetBoolean());
+        Assert.True(graphRun.GetProperty("useCudaGraphApplied").GetBoolean());
+        Assert.Equal(string.Empty, graphRun.GetProperty("useCudaGraphFallbackReason").GetString());
+        Assert.True(graphRun.GetProperty("outputMatch").GetBoolean());
+        Assert.True(noTransferRun.GetProperty("hasBenchmarkExecutionEvidence").GetBoolean());
+        Assert.True(noTransferRun.GetProperty("noDataTransfersApplied").GetBoolean());
+        Assert.Equal(0, noTransferRun.GetProperty("inputHostToDeviceCopies").GetInt32());
+        Assert.Equal(0, noTransferRun.GetProperty("outputDeviceToHostCopies").GetInt32());
+        Assert.False(noTransferRun.GetProperty("outputMatch").GetBoolean());
+        Assert.False(noTransferRun.GetProperty("hasRawBindingProof").GetBoolean());
+        Assert.Contains(root.GetProperty("unappliedControls").EnumerateArray(), static item => item.GetString() == "sleepTime");
+        Assert.False(boundary.GetProperty("isRealModelRuntimeProof").GetBoolean());
+        Assert.False(boundary.GetProperty("isPackageConsumerRuntimeProof").GetBoolean());
+        Assert.False(boundary.GetProperty("canPublishPublicly").GetBoolean());
+        Assert.All(root.GetProperty("binaryHashes").EnumerateArray(), static item => Assert.Matches("^[A-F0-9]{64}$", item.GetProperty("sha256").GetString()));
+    }
+
+    [Fact]
     public void SchedulerUsesIndependentOwnersAndMinimumIterationDurationContract()
     {
         string service = File.ReadAllText(Path.Combine(
@@ -42,19 +75,38 @@ public sealed class TensorRtExecBoundedBenchmarkSchedulerTests
             "src",
             "JYPPX.TensorRtSharp.Tools",
             "OnnxEngineBuildService.cs"));
+        string artifactWriter = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.TensorRtSharp.Tools",
+            "OnnxEngineRuntimeArtifactWriter.cs"));
 
         Assert.Contains("executionContextCount = options.RuntimeOptions.InfStreams ?? options.Streams", service, StringComparison.Ordinal);
-        Assert.Contains("new OnnxEngineBenchmarkWorker(engine, safeProfileIndex)", service, StringComparison.Ordinal);
+        Assert.Contains("new OnnxEngineBenchmarkWorker(engine, safeProfileIndex, options.RuntimeOptions.UseSpinWait)", service, StringComparison.Ordinal);
         Assert.Contains("context = engine.CreateExecutionContext()", service, StringComparison.Ordinal);
         Assert.Contains("stream = new CudaStream(CudaStreamCreationFlags.NonBlocking)", service, StringComparison.Ordinal);
         Assert.Contains("_context = context", service, StringComparison.Ordinal);
         Assert.Contains("Stream = stream", service, StringComparison.Ordinal);
         Assert.Contains("while (measurementRounds < options.Iterations || measurementStopwatch.Elapsed < minimumDuration)", service, StringComparison.Ordinal);
+        Assert.Contains("while (measurementRounds < options.Iterations || stopwatch.Elapsed < minimumDuration)", service, StringComparison.Ordinal);
         Assert.Contains("while (warmUpStopwatch.ElapsedMilliseconds < options.WarmUpMilliseconds)", service, StringComparison.Ordinal);
         Assert.Contains("Thread.Sleep(options.RuntimeOptions.IdleTimeMilliseconds!.Value)", service, StringComparison.Ordinal);
         Assert.Contains("worker.StartTiming()", service, StringComparison.Ordinal);
-        Assert.Contains("worker.CompleteTiming()", service, StringComparison.Ordinal);
+        Assert.Contains("worker.CompleteTiming(options.RuntimeOptions.UseSpinWait)", service, StringComparison.Ordinal);
+        Assert.Contains("new Thread(() =>", service, StringComparison.Ordinal);
+        Assert.Contains("CudaDevice.SetCurrent(deviceOrdinal)", service, StringComparison.Ordinal);
+        Assert.Contains("measurementStart.Wait()", service, StringComparison.Ordinal);
+        Assert.Contains("while (!_stopEvent.IsReady())", service, StringComparison.Ordinal);
+        Assert.Contains("Thread.SpinWait(64)", service, StringComparison.Ordinal);
+        Assert.Contains("Stream.BeginCapture(CudaStreamCaptureMode.ThreadLocal)", service, StringComparison.Ordinal);
+        Assert.Contains("graphExec = graph.Instantiate()", service, StringComparison.Ordinal);
+        Assert.Contains("_cudaGraphExec.Launch(Stream)", service, StringComparison.Ordinal);
+        Assert.Contains("Bindings.AllocateDeviceBuffer(input.Name, runtimeShape)", service, StringComparison.Ordinal);
+        Assert.Contains("if (!options.RuntimeOptions.NoDataTransfers)", service, StringComparison.Ordinal);
+        Assert.Contains("CreateBenchmarkOnly", service, StringComparison.Ordinal);
         Assert.Contains("OnnxEngineBenchmarkSummary.CreateExecuted", service, StringComparison.Ordinal);
+        Assert.Contains("runtime-benchmark-executed-no-data-transfers", artifactWriter, StringComparison.Ordinal);
+        Assert.Contains("HasBenchmarkExecutionEvidence", artifactWriter, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -71,10 +123,13 @@ public sealed class TensorRtExecBoundedBenchmarkSchedulerTests
             "--percentile", "90",
             "--idleTime", "1",
             "--sleepTime", "3",
-            "--threads", "2",
+            "--threads",
             "--useSpinWait",
             "--noDataTransfers",
-            "--useCudaGraph"
+            "--useCudaGraph",
+            "--dumpOutput",
+            "--exportOutput", "no-transfer-output.json",
+            "--dumpRawBindingsToFile", "no-transfer-output.raw"
         });
         TrtexecLikeRuntimeOptions runtimeOptions = parsed.RuntimeOptions;
         OnnxEngineBenchmarkSummary summary = new OnnxEngineBenchmarkSummary(
@@ -83,10 +138,10 @@ public sealed class TensorRtExecBoundedBenchmarkSchedulerTests
             avgRunsExecuted: 4,
             percentileRequested: 90,
             percentileElapsedMilliseconds: 1.2f,
-            threadsRequested: 2,
-            threadsExecuted: 1,
+            threadsRequested: 1,
+            threadsExecuted: 2,
             noDataTransfersRequested: true,
-            noDataTransfersApplied: false,
+            noDataTransfersApplied: true,
             useSpinWaitRequested: true,
             sleepTimeMillisecondsRequested: 3,
             sleepTimeMillisecondsApplied: 0,
@@ -104,7 +159,12 @@ public sealed class TensorRtExecBoundedBenchmarkSchedulerTests
             streamsRequested: 1,
             infStreamsRequested: 2,
             executionContextsCreated: 2,
-            concurrentStreamsExecuted: 2);
+            concurrentStreamsExecuted: 2,
+            useSpinWaitApplied: true,
+            useCudaGraphRequested: true,
+            useCudaGraphApplied: false,
+            useCudaGraphFallbackReason: "worker-0:CudaException:capture unsupported",
+            measurementRoundsPerContext: new[] { 2, 2 });
         OnnxEngineBuildResult result = new OnnxEngineBuildResult(
             success: true,
             skipped: false,
@@ -136,6 +196,10 @@ public sealed class TensorRtExecBoundedBenchmarkSchedulerTests
         Assert.Equal(4, benchmark.GetProperty("InferenceIterationsExecuted").GetInt32());
         Assert.Equal(2, benchmark.GetProperty("ExecutionContextsCreated").GetInt32());
         Assert.Equal(2, benchmark.GetProperty("AveragedTimingSampleCount").GetInt32());
+        Assert.Equal(new[] { 2, 2 }, benchmark.GetProperty("MeasurementRoundsPerContext").EnumerateArray().Select(static item => item.GetInt32()).ToArray());
+        Assert.True(benchmark.GetProperty("UseSpinWaitApplied").GetBoolean());
+        Assert.False(benchmark.GetProperty("UseCudaGraphApplied").GetBoolean());
+        Assert.Contains("capture unsupported", benchmark.GetProperty("UseCudaGraphFallbackReason").GetString(), StringComparison.Ordinal);
         Assert.Contains("--iterations", applied);
         Assert.Contains("--warmUp", applied);
         Assert.Contains("--duration", applied);
@@ -143,12 +207,21 @@ public sealed class TensorRtExecBoundedBenchmarkSchedulerTests
         Assert.Contains("--idleTime", applied);
         Assert.Contains("--avgRuns", applied);
         Assert.Contains("--percentile", applied);
+        Assert.Contains("--threads", applied);
+        Assert.Contains("--useSpinWait", applied);
+        Assert.Contains("--noDataTransfers", applied);
         Assert.Contains("--streams", parseOnly);
         Assert.Contains("--sleepTime", parseOnly);
-        Assert.Contains("--threads", parseOnly);
-        Assert.Contains("--useSpinWait", parseOnly);
-        Assert.Contains("--noDataTransfers", parseOnly);
         Assert.Contains("--useCudaGraph", parseOnly);
+        Assert.Contains("--dumpOutput", parseOnly);
+        Assert.Contains("--exportOutput", parseOnly);
+        Assert.Contains("--dumpRawBindingsToFile", parseOnly);
+        Assert.DoesNotContain("--threads", parseOnly);
+        Assert.DoesNotContain("--useSpinWait", parseOnly);
+        Assert.DoesNotContain("--noDataTransfers", parseOnly);
+        Assert.DoesNotContain("--dumpOutput", applied);
+        Assert.DoesNotContain("--exportOutput", applied);
+        Assert.DoesNotContain("--dumpRawBindingsToFile", applied);
         Assert.DoesNotContain("--infStreams", parseOnly);
     }
 }

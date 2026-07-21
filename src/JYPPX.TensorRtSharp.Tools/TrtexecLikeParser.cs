@@ -56,7 +56,7 @@ public static class TrtexecLikeParser
 
         if (HasSwitch(args, "--useCudaGraph"))
         {
-            diagnostics.Add("CUDA graph timing is parsed, but the sample keeps the default enqueue path until graph capture policy is promoted.");
+            diagnostics.Add("CUDA graph execution is requested; bounded runtime attempts per-context capture, instantiation, and launch, then records a controlled direct-enqueue fallback if capture is unavailable.");
         }
 
         TrtexecLikeDeploymentOptions deploymentOptions = new TrtexecLikeDeploymentOptions(
@@ -105,7 +105,7 @@ public static class TrtexecLikeParser
         TrtexecLikeRuntimeOptions runtimeOptions = new TrtexecLikeRuntimeOptions(
             noDataTransfers: HasSwitch(args, "--noDataTransfers"),
             useSpinWait: HasSwitch(args, "--useSpinWait"),
-            threads: ParseOptionalPositiveInt(GetValue(args, "--threads", string.Empty), "--threads"),
+            threads: ParseThreadMode(args),
             avgRuns: ParseOptionalPositiveInt(GetValue(args, "--avgRuns", string.Empty), "--avgRuns"),
             percentile: ParseOptionalRangeFloat(GetValue(args, "--percentile", string.Empty), "--percentile", 0.0f, 100.0f),
             sleepTimeMilliseconds: ParseOptionalNonNegativeInt(GetValue(args, "--sleepTime", string.Empty), "--sleepTime"),
@@ -190,6 +190,32 @@ public static class TrtexecLikeParser
     {
         return args.Any(argument => string.Equals(argument, name, StringComparison.OrdinalIgnoreCase) ||
             argument.StartsWith(name + "=", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static int? ParseThreadMode(string[] args)
+    {
+        for (int index = 0; index < args.Length; index++)
+        {
+            string argument = args[index];
+            if (string.Equals(argument, "--threads", StringComparison.OrdinalIgnoreCase))
+            {
+                if (index + 1 < args.Length && !IsOptionName(args[index + 1]))
+                {
+                    return ParsePositiveInt(args[index + 1], "--threads");
+                }
+
+                return 1;
+            }
+
+            const string prefix = "--threads=";
+            if (argument.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            {
+                string value = argument.Substring(prefix.Length);
+                return string.IsNullOrWhiteSpace(value) ? 1 : ParsePositiveInt(value, "--threads");
+            }
+        }
+
+        return null;
     }
 
     private static string FullPathOrEmpty(string path)

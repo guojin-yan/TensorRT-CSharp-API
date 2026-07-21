@@ -78,7 +78,7 @@ public sealed class MainForm : Form
     private readonly CheckBox _useCudaGraph = new CheckBox();
     private readonly CheckBox _noDataTransfers = new CheckBox();
     private readonly CheckBox _useSpinWait = new CheckBox();
-    private readonly TextBox _threads = new TextBox();
+    private readonly CheckBox _threads = new CheckBox();
     private readonly TextBox _avgRuns = new TextBox();
     private readonly TextBox _percentile = new TextBox();
     private readonly TextBox _sleepTime = new TextBox();
@@ -217,14 +217,15 @@ public sealed class MainForm : Form
         ConfigureCheck(_useCudaGraph, "CUDA graph");
         ConfigureCheck(_noDataTransfers, "No transfers");
         ConfigureCheck(_useSpinWait, "Spin wait");
+        ConfigureCheck(_threads, "Threads");
         ConfigureCheck(_dumpOutput, "Dump output");
         ConfigureCheck(_dumpLayerInfo, "Dump layer info");
         ConfigureCheck(_dumpProfile, "Dump profile");
         ConfigureCheck(_separateProfileRun, "Separate profile");
-        runtimeSwitchPanel.Controls.AddRange(new Control[] { _useCudaGraph, _noDataTransfers, _useSpinWait, _dumpOutput, _dumpLayerInfo, _dumpProfile, _separateProfileRun });
+        runtimeSwitchPanel.Controls.AddRange(new Control[] { _useCudaGraph, _noDataTransfers, _useSpinWait, _threads, _dumpOutput, _dumpLayerInfo, _dumpProfile, _separateProfileRun });
         AddLabeled(root, 35, "Runtime Flags", runtimeSwitchPanel);
 
-        AddLabeled(root, 36, "Threads/Inf Streams", CreateTextPair(_threads, _infStreams));
+        AddLabeled(root, 36, "Inf Streams", _infStreams);
         AddLabeled(root, 37, "Avg/Percentile", CreateTextPair(_avgRuns, _percentile));
         AddLabeled(root, 38, "Sleep/Idle ms", CreateTextPair(_sleepTime, _idleTime));
         AddLabeled(root, 39, "Load Inputs", _loadInputs);
@@ -288,7 +289,6 @@ public sealed class MainForm : Form
         _markDebug.PlaceholderText = "tensorA,tensorB";
         _exportTimingCachePath.PlaceholderText = "timing.cache";
         _evidenceSidecarPath.PlaceholderText = "model-evidence.sidecar.json";
-        _threads.PlaceholderText = "1";
         _infStreams.PlaceholderText = "1";
         _avgRuns.PlaceholderText = "10";
         _percentile.PlaceholderText = "99";
@@ -521,7 +521,7 @@ public sealed class MainForm : Form
             _useCudaGraph.Checked,
             _noDataTransfers.Checked,
             _useSpinWait.Checked,
-            ParseOptionalInt(_threads.Text),
+            _threads.Checked ? 1 : (int?)null,
             ParseOptionalInt(_avgRuns.Text),
             ParseOptionalFloat(_percentile.Text),
             ParseOptionalInt(_sleepTime.Text),

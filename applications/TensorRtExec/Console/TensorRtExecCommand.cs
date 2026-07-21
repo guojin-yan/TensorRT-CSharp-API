@@ -96,7 +96,7 @@ public static class TensorRtExecCommand
         System.Console.WriteLine("  --profilingVerbosity <none|layer_names_only|detailed> --verbose");
         System.Console.WriteLine("  --buildOnly --skipInference --dryRun|--previewOnly");
         System.Console.WriteLine("  --iterations <n> --warmUp <ms> --duration <sec> --streams <n> --infStreams <n> --useCudaGraph");
-        System.Console.WriteLine("  --noDataTransfers --useSpinWait --threads <n> --avgRuns <n> --percentile <0..100> --sleepTime <ms> --idleTime <ms>");
+        System.Console.WriteLine("  --noDataTransfers --useSpinWait --threads --avgRuns <n> --percentile <0..100> --sleepTime <ms> --idleTime <ms>");
         System.Console.WriteLine("  --loadInputs input:file --dumpOutput --dumpRawBindingsToFile <path>");
         System.Console.WriteLine("  --exportOutput <path> --exportTimes <path> --exportProfile <path> --saveProfile <path> --exportTimingCache <path>");
         System.Console.WriteLine("Deployment options:");

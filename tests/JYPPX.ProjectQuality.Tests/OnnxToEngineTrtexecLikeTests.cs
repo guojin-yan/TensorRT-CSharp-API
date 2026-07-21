@@ -235,6 +235,24 @@ public sealed class OnnxToEngineTrtexecLikeTests
     }
 
     [Fact]
+    public void TrtexecParserTreatsThreadsAsOfficialBooleanAndNormalizesLegacyValues()
+    {
+        TrtexecLikeOptions official = TrtexecLikeParser.Parse(new[] { "--threads", "--avgRuns", "2" });
+        TrtexecLikeOptions legacySeparated = TrtexecLikeParser.Parse(new[] { "--threads", "3" });
+        TrtexecLikeOptions legacyInline = TrtexecLikeParser.Parse(new[] { "--threads=4" });
+
+        Assert.True(official.RuntimeOptions.UseThreads);
+        Assert.Equal(1, official.RuntimeOptions.Threads);
+        Assert.Equal(3, legacySeparated.RuntimeOptions.Threads);
+        Assert.Equal(4, legacyInline.RuntimeOptions.Threads);
+        Assert.Contains("--threads --avgRuns 2", official.ToArgumentLine(), StringComparison.Ordinal);
+        Assert.Contains("--threads", legacySeparated.ToArgumentLine(), StringComparison.Ordinal);
+        Assert.DoesNotContain("--threads 3", legacySeparated.ToArgumentLine(), StringComparison.Ordinal);
+        Assert.Contains("--threads", legacyInline.ToArgumentLine(), StringComparison.Ordinal);
+        Assert.DoesNotContain("--threads 4", legacyInline.ToArgumentLine(), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void TrtexecParserAcceptsTrtexecAliasesAndMemoryUnits()
     {
         string tempPath = Path.GetTempPath();

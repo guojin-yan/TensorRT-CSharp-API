@@ -83,6 +83,23 @@ public sealed class OnnxEngineRuntimeArtifactData
             timingSamplesMilliseconds ?? Array.Empty<float>());
     }
 
+    internal static OnnxEngineRuntimeArtifactData CreateBenchmarkOnly(
+        int inputElementCount,
+        string executionSummary,
+        IReadOnlyList<float>? timingSamplesMilliseconds = null)
+    {
+        return new OnnxEngineRuntimeArtifactData(
+            string.Empty,
+            Array.Empty<int>(),
+            inputElementCount,
+            0,
+            Array.Empty<float>(),
+            Array.Empty<float>(),
+            executionSummary,
+            Array.Empty<byte>(),
+            timingSamplesMilliseconds ?? Array.Empty<float>());
+    }
+
     public string TensorName { get; }
 
     public IReadOnlyList<int> Shape { get; }
@@ -193,6 +210,7 @@ public static class OnnxEngineRuntimeArtifactWriter
             proofBoundary.IsBuildOnlyEvidence,
             proofBoundary.IsDependencyProbeOnly,
             proofBoundary.IsSyntheticRuntime,
+            proofBoundary.HasBenchmarkExecutionEvidence,
             proofBoundary.ModelSource,
             proofBoundary.EnginePath,
             proofBoundary.PreflightMetadata,
@@ -221,12 +239,17 @@ public static class OnnxEngineRuntimeArtifactWriter
             NoDataTransfersRequested = result.BenchmarkSummary.NoDataTransfersRequested,
             NoDataTransfersApplied = result.BenchmarkSummary.NoDataTransfersApplied,
             UseSpinWaitRequested = result.BenchmarkSummary.UseSpinWaitRequested,
+            UseSpinWaitApplied = result.BenchmarkSummary.UseSpinWaitApplied,
+            UseCudaGraphRequested = result.BenchmarkSummary.UseCudaGraphRequested,
+            UseCudaGraphApplied = result.BenchmarkSummary.UseCudaGraphApplied,
+            UseCudaGraphFallbackReason = result.BenchmarkSummary.UseCudaGraphFallbackReason,
             SleepTimeMillisecondsRequested = result.BenchmarkSummary.SleepTimeMillisecondsRequested,
             SleepTimeMillisecondsApplied = result.BenchmarkSummary.SleepTimeMillisecondsApplied,
             IdleTimeMillisecondsRequested = result.BenchmarkSummary.IdleTimeMillisecondsRequested,
             IdleTimeMillisecondsApplied = result.BenchmarkSummary.IdleTimeMillisecondsApplied,
             IterationsRequested = result.BenchmarkSummary.IterationsRequested,
             MeasurementRoundsExecuted = result.BenchmarkSummary.MeasurementRoundsExecuted,
+            MeasurementRoundsPerContext = result.BenchmarkSummary.MeasurementRoundsPerContext,
             InferenceIterationsExecuted = result.BenchmarkSummary.InferenceIterationsExecuted,
             WarmUpMillisecondsRequested = result.BenchmarkSummary.WarmUpMillisecondsRequested,
             WarmUpElapsedMilliseconds = result.BenchmarkSummary.WarmUpElapsedMilliseconds,
@@ -257,6 +280,7 @@ public static class OnnxEngineRuntimeArtifactWriter
             proofBoundary.IsBuildOnlyEvidence,
             proofBoundary.IsDependencyProbeOnly,
             proofBoundary.IsSyntheticRuntime,
+            proofBoundary.HasBenchmarkExecutionEvidence,
             proofBoundary.ModelSource,
             proofBoundary.EnginePath,
             proofBoundary.PreflightMetadata,
@@ -293,6 +317,7 @@ public static class OnnxEngineRuntimeArtifactWriter
             proofBoundary.IsBuildOnlyEvidence,
             proofBoundary.IsDependencyProbeOnly,
             proofBoundary.IsSyntheticRuntime,
+            proofBoundary.HasBenchmarkExecutionEvidence,
             proofBoundary.ModelSource,
             proofBoundary.EnginePath,
             proofBoundary.PreflightMetadata,
@@ -333,6 +358,7 @@ public static class OnnxEngineRuntimeArtifactWriter
             proofBoundary.IsBuildOnlyEvidence,
             proofBoundary.IsDependencyProbeOnly,
             proofBoundary.IsSyntheticRuntime,
+            proofBoundary.HasBenchmarkExecutionEvidence,
             proofBoundary.ModelSource,
             proofBoundary.EnginePath,
             proofBoundary.PreflightMetadata,
@@ -384,6 +410,7 @@ public static class OnnxEngineRuntimeArtifactWriter
             $"IsBuildOnlyEvidence: {proofBoundary.IsBuildOnlyEvidence}",
             $"IsDependencyProbeOnly: {proofBoundary.IsDependencyProbeOnly}",
             $"IsSyntheticRuntime: {proofBoundary.IsSyntheticRuntime}",
+            $"HasBenchmarkExecutionEvidence: {proofBoundary.HasBenchmarkExecutionEvidence}",
             $"ModelSource: {proofBoundary.ModelSource}",
             $"EnginePath: {proofBoundary.EnginePath}",
             $"PreflightKind: {proofBoundary.PreflightMetadata.Kind}",
@@ -404,12 +431,18 @@ public static class OnnxEngineRuntimeArtifactWriter
             $"PercentileElapsedMilliseconds: {result.BenchmarkSummary.PercentileElapsedMilliseconds?.ToString("0.###", CultureInfo.InvariantCulture) ?? string.Empty}",
             $"IterationsRequested: {result.BenchmarkSummary.IterationsRequested}",
             $"MeasurementRoundsExecuted: {result.BenchmarkSummary.MeasurementRoundsExecuted}",
+            $"MeasurementRoundsPerContext: {string.Join(",", result.BenchmarkSummary.MeasurementRoundsPerContext)}",
             $"InferenceIterationsExecuted: {result.BenchmarkSummary.InferenceIterationsExecuted}",
             $"WarmUpMillisecondsRequested: {result.BenchmarkSummary.WarmUpMillisecondsRequested}",
             $"WarmUpElapsedMilliseconds: {result.BenchmarkSummary.WarmUpElapsedMilliseconds.ToString("0.###", CultureInfo.InvariantCulture)}",
             $"DurationSecondsRequested: {result.BenchmarkSummary.DurationSecondsRequested}",
             $"MeasurementElapsedMilliseconds: {result.BenchmarkSummary.MeasurementElapsedMilliseconds.ToString("0.###", CultureInfo.InvariantCulture)}",
             $"ExecutionContextsCreated: {result.BenchmarkSummary.ExecutionContextsCreated}",
+            $"ThreadsExecuted: {result.BenchmarkSummary.ThreadsExecuted}",
+            $"UseSpinWaitApplied: {result.BenchmarkSummary.UseSpinWaitApplied}",
+            $"UseCudaGraphRequested: {result.BenchmarkSummary.UseCudaGraphRequested}",
+            $"UseCudaGraphApplied: {result.BenchmarkSummary.UseCudaGraphApplied}",
+            $"UseCudaGraphFallbackReason: {result.BenchmarkSummary.UseCudaGraphFallbackReason}",
             $"BenchmarkBoundary: {result.BenchmarkSummary.BenchmarkBoundary}",
             $"ExecutionSummary: {data.ExecutionSummary}",
             "LayerProfileAvailable: False",
@@ -437,6 +470,7 @@ public static class OnnxEngineRuntimeArtifactWriter
             proofBoundary.IsBuildOnlyEvidence,
             proofBoundary.IsDependencyProbeOnly,
             proofBoundary.IsSyntheticRuntime,
+            proofBoundary.HasBenchmarkExecutionEvidence,
             proofBoundary.ModelSource,
             proofBoundary.EnginePath,
             proofBoundary.PreflightMetadata,
@@ -524,6 +558,7 @@ public static class OnnxEngineRuntimeArtifactWriter
             result.BuildEvidenceOnly,
             string.Equals(result.ProofClassification, "dependency-probe-only", StringComparison.Ordinal),
             string.Equals(result.ProofClassification, "synthetic-input-runtime", StringComparison.Ordinal),
+            result.InferenceRan && result.BenchmarkSummary.TimingSampleCount > 0,
             result.ModelSource,
             result.EnginePath,
             result.PreflightMetadata);
@@ -544,6 +579,11 @@ public static class OnnxEngineRuntimeArtifactWriter
         if (result.InferenceRan && data.HasOutput)
         {
             return "runtime-output-captured-unverified; TensorRT enqueue and output readback completed, but no reference output matched, so this is not runtime proof, real-model proof, or package-consumer proof.";
+        }
+
+        if (result.InferenceRan && result.BenchmarkSummary.NoDataTransfersApplied && result.BenchmarkSummary.TimingSampleCount > 0)
+        {
+            return "runtime-benchmark-executed-no-data-transfers; TensorRT enqueue timing is recorded, but input H2D and output D2H/readback were suppressed, so this is not tensor-correctness, real-model, or package-consumer proof.";
         }
 
         if (string.Equals(result.ProofClassification, "precheck", StringComparison.Ordinal))
@@ -603,6 +643,7 @@ public static class OnnxEngineRuntimeArtifactWriter
             bool isBuildOnlyEvidence,
             bool isDependencyProbeOnly,
             bool isSyntheticRuntime,
+            bool hasBenchmarkExecutionEvidence,
             string modelSource,
             string enginePath,
             OnnxEnginePreflightMetadata preflightMetadata)
@@ -614,6 +655,7 @@ public static class OnnxEngineRuntimeArtifactWriter
             IsBuildOnlyEvidence = isBuildOnlyEvidence;
             IsDependencyProbeOnly = isDependencyProbeOnly;
             IsSyntheticRuntime = isSyntheticRuntime;
+            HasBenchmarkExecutionEvidence = hasBenchmarkExecutionEvidence;
             ModelSource = modelSource ?? string.Empty;
             EnginePath = enginePath ?? string.Empty;
             PreflightMetadata = preflightMetadata ?? OnnxEnginePreflightMetadata.Empty;
@@ -632,6 +674,8 @@ public static class OnnxEngineRuntimeArtifactWriter
         public bool IsDependencyProbeOnly { get; }
 
         public bool IsSyntheticRuntime { get; }
+
+        public bool HasBenchmarkExecutionEvidence { get; }
 
         public string ModelSource { get; }
 

@@ -668,7 +668,12 @@ public sealed class OnnxEngineBenchmarkSummary
         int streamsRequested = 0,
         int? infStreamsRequested = null,
         int executionContextsCreated = 0,
-        int concurrentStreamsExecuted = 0)
+        int concurrentStreamsExecuted = 0,
+        bool useSpinWaitApplied = false,
+        bool useCudaGraphRequested = false,
+        bool useCudaGraphApplied = false,
+        string useCudaGraphFallbackReason = "",
+        IReadOnlyList<int>? measurementRoundsPerContext = null)
     {
         TimingSamplesMilliseconds = timingSamplesMilliseconds ?? Array.Empty<float>();
         AveragedTimingSamplesMilliseconds = AverageWindows(TimingSamplesMilliseconds, avgRunsRequested);
@@ -698,6 +703,11 @@ public sealed class OnnxEngineBenchmarkSummary
         InfStreamsRequested = infStreamsRequested;
         ExecutionContextsCreated = executionContextsCreated;
         ConcurrentStreamsExecuted = concurrentStreamsExecuted;
+        UseSpinWaitApplied = useSpinWaitApplied;
+        UseCudaGraphRequested = useCudaGraphRequested;
+        UseCudaGraphApplied = useCudaGraphApplied;
+        UseCudaGraphFallbackReason = useCudaGraphFallbackReason ?? string.Empty;
+        MeasurementRoundsPerContext = measurementRoundsPerContext ?? Array.Empty<int>();
     }
 
     public static OnnxEngineBenchmarkSummary Empty { get; } = new OnnxEngineBenchmarkSummary(
@@ -749,6 +759,18 @@ public sealed class OnnxEngineBenchmarkSummary
 
     public bool UseSpinWaitRequested { get; }
 
+    /// <summary>Gets whether CUDA event polling was applied. 获取是否实际应用了 CUDA event 轮询。</summary>
+    public bool UseSpinWaitApplied { get; }
+
+    /// <summary>Gets whether CUDA graph execution was requested. 获取是否请求了 CUDA graph 执行。</summary>
+    public bool UseCudaGraphRequested { get; }
+
+    /// <summary>Gets whether every worker applied CUDA graph launch. 获取是否所有 worker 都应用了 CUDA graph launch。</summary>
+    public bool UseCudaGraphApplied { get; }
+
+    /// <summary>Gets the controlled CUDA graph fallback diagnostic. 获取 CUDA graph 受控回退诊断。</summary>
+    public string UseCudaGraphFallbackReason { get; }
+
     public int? SleepTimeMillisecondsRequested { get; }
 
     public int SleepTimeMillisecondsApplied { get; }
@@ -782,6 +804,9 @@ public sealed class OnnxEngineBenchmarkSummary
     public int ExecutionContextsCreated { get; }
 
     public int ConcurrentStreamsExecuted { get; }
+
+    /// <summary>Gets executed measurement rounds for each context. 获取每个 context 实际执行的测量轮次。</summary>
+    public IReadOnlyList<int> MeasurementRoundsPerContext { get; }
 
     public static OnnxEngineBenchmarkSummary Create(
         IReadOnlyList<float> timingSamplesMilliseconds,
@@ -821,16 +846,27 @@ public sealed class OnnxEngineBenchmarkSummary
         int warmUpIterationsExecuted,
         double warmUpElapsedMilliseconds,
         double measurementElapsedMilliseconds,
-        int executionContextsCreated)
+        int executionContextsCreated,
+        int threadsExecuted,
+        bool useSpinWaitApplied,
+        bool useCudaGraphApplied,
+        string useCudaGraphFallbackReason,
+        IReadOnlyList<int> measurementRoundsPerContext)
     {
         IReadOnlyList<float> samples = timingSamplesMilliseconds ?? Array.Empty<float>();
         TrtexecLikeRuntimeOptions runtimeOptions = options.RuntimeOptions;
         int idleApplied = measurementRoundsExecuted > 1
             ? runtimeOptions.IdleTimeMilliseconds ?? 0
             : 0;
+        string graphBoundary = options.UseCudaGraph
+            ? (useCudaGraphApplied
+                ? "CUDA graph capture/instantiate/launch was applied."
+                : $"CUDA graph capture fell back to direct enqueue ({useCudaGraphFallbackReason}).")
+            : "CUDA graph was not requested.";
         string boundary =
-            "benchmark-executed-bounded-runtime; iterations, warmUp, duration, streams/infStreams, avgRuns statistics, percentile, and idleTime are backed by actual enqueue measurements; " +
-            "sleepTime, useSpinWait, threads, useCudaGraph, and noDataTransfers remain unapplied; tensor correctness and package-consumer proof require separate model-specific evidence.";
+            "benchmark-executed-bounded-runtime; iterations, warmUp, duration, streams/infStreams, avgRuns statistics, percentile, idleTime, requested host threads, spin-wait completion, and noDataTransfers are backed by actual scheduler behavior; " +
+            graphBoundary +
+            " sleepTime remains unapplied; noDataTransfers suppresses tensor readback and therefore cannot establish output correctness; tensor correctness and package-consumer proof require separate model-specific evidence.";
 
         return new OnnxEngineBenchmarkSummary(
             samples,
@@ -839,9 +875,9 @@ public sealed class OnnxEngineBenchmarkSummary
             runtimeOptions.Percentile,
             PercentileOrNull(samples, runtimeOptions.Percentile),
             runtimeOptions.Threads,
-            threadsExecuted: samples.Count == 0 ? 0 : 1,
+            threadsExecuted,
             runtimeOptions.NoDataTransfers,
-            noDataTransfersApplied: false,
+            noDataTransfersApplied: runtimeOptions.NoDataTransfers,
             runtimeOptions.UseSpinWait,
             runtimeOptions.SleepTimeMilliseconds,
             sleepTimeMillisecondsApplied: 0,
@@ -859,7 +895,12 @@ public sealed class OnnxEngineBenchmarkSummary
             streamsRequested: options.Streams,
             infStreamsRequested: runtimeOptions.InfStreams,
             executionContextsCreated,
-            concurrentStreamsExecuted: executionContextsCreated);
+            concurrentStreamsExecuted: executionContextsCreated,
+            useSpinWaitApplied,
+            useCudaGraphRequested: options.UseCudaGraph,
+            useCudaGraphApplied,
+            useCudaGraphFallbackReason,
+            measurementRoundsPerContext);
     }
 
     private static float? PercentileOrNull(IReadOnlyList<float> values, float? percentile)

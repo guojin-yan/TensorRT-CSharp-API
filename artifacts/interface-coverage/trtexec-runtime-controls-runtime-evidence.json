@@ -1,0 +1,116 @@
+{
+  "schemaVersion": "trtexec-runtime-controls-runtime-evidence.v1",
+  "evidenceKind": "local-project-reference-synthetic-runtime-controls-smoke",
+  "generatedAt": "2026-07-21",
+  "sourceState": "working-tree-candidate-after-8b2bfa0a209d6e9d741dbbbafcc8d4e8553302f6",
+  "host": {
+    "os": "Microsoft Windows NT 10.0.26200.0",
+    "architecture": "X64",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02",
+    "tensorRtVersion": "10.11.0",
+    "cudaToolkitVersion": "12.9"
+  },
+  "officialReference": {
+    "trtexecPath": "D:/Program Files/TensorRT-10.11.0.33-cu12/bin/trtexec.exe",
+    "trtexecLengthBytes": 980000,
+    "trtexecSha256": "8FD805448DA2264E6388B81DDC7F9FF5605081EB65F9D2DB168BC055CF492CBD",
+    "tensorRtSourceTag": "v10.11",
+    "tensorRtSourceCommit": "9255eb39e6642787828a4c1f7fc1d09fe004e7a2",
+    "sourceFiles": ["samples/common/sampleInference.cpp", "samples/common/sampleOptions.cpp"],
+    "semanticsChecked": [
+      "threads is a boolean option and gives each effective inference stream an independent host driver thread",
+      "useSpinWait actively queries CUDA event readiness",
+      "useCudaGraph captures and instantiates enqueue work before graph launch",
+      "noDataTransfers suppresses input H2D and output D2H/readback",
+      "sleepTime is a device-side launch-to-compute delay and is not equivalent to CPU Thread.Sleep"
+    ]
+  },
+  "threadsSpinCudaGraphRun": {
+    "exitCode": 0,
+    "state": "identity-roundtrip",
+    "proofClassification": "synthetic-input-runtime",
+    "outputMatch": true,
+    "executionContextsCreated": 2,
+    "threadsRequestedPresenceMarker": 1,
+    "threadsExecuted": 2,
+    "useSpinWaitApplied": true,
+    "useCudaGraphRequested": true,
+    "useCudaGraphApplied": true,
+    "useCudaGraphFallbackReason": "",
+    "measurementRoundsExecuted": 3,
+    "measurementRoundsPerContext": [3, 3],
+    "inferenceIterationsExecuted": 6,
+    "rawTimingSampleCount": 6,
+    "averagedTimingSampleCount": 3,
+    "warmUpElapsedMilliseconds": 5.0865,
+    "warmUpIterationsExecuted": 63,
+    "measurementElapsedMilliseconds": 1.3034,
+    "percentileRequested": 90,
+    "percentileElapsedMilliseconds": 0.1024,
+    "report": {
+      "localPath": "build-out/runtime-controls-smoke/threads-spin-graph-report.json",
+      "lengthBytes": 21646,
+      "sha256": "800E445D779F531F6B0C24DB405EF6F7E342D8E625A4639DA33F48D5B341477F"
+    },
+    "timesArtifact": {
+      "localPath": "build-out/runtime-controls-smoke/threads-spin-graph-times.json",
+      "lengthBytes": 4031,
+      "sha256": "C0D789A7A7A43A5770EA8E259391928335FEB4FFAA7723A975E4BB27F02F474D"
+    }
+  },
+  "noDataTransfersRun": {
+    "exitCode": 0,
+    "state": "identity-no-data-transfer-benchmark",
+    "proofClassification": "build-only",
+    "hasBenchmarkExecutionEvidence": true,
+    "outputMatch": false,
+    "noDataTransfersApplied": true,
+    "inputHostToDeviceCopies": 0,
+    "outputDeviceToHostCopies": 0,
+    "outputElementCount": 0,
+    "hasRawBindingProof": false,
+    "measurementRoundsExecuted": 2,
+    "measurementRoundsPerContext": [2],
+    "inferenceIterationsExecuted": 2,
+    "timingSampleCount": 2,
+    "outputOptionsRemainParseOnly": ["--dumpOutput", "--exportOutput", "--dumpRawBindingsToFile"],
+    "report": {
+      "localPath": "build-out/runtime-controls-smoke/no-transfer-report.json",
+      "lengthBytes": 21197,
+      "sha256": "50AA3CB9DE648D7B9F44495C295D0BDF8AB1DA73DB1E612CBCEEF97F9EBB564D"
+    },
+    "timesArtifact": {
+      "localPath": "build-out/runtime-controls-smoke/no-transfer-times.json",
+      "lengthBytes": 4326,
+      "sha256": "570FABC5D553D9903F645E41678044C959ED05BDB9AD737A15286DCB84BE48F6"
+    },
+    "outputBoundaryArtifact": {
+      "localPath": "build-out/runtime-controls-smoke/no-transfer-output.json",
+      "lengthBytes": 1786,
+      "sha256": "11A65171D706B549FA30061928230F294979DD5C7AF1B9ACFE8D8C690FBA94C4"
+    },
+    "rawBindingBoundaryArtifact": {
+      "localPath": "build-out/runtime-controls-smoke/no-transfer-output.raw",
+      "lengthBytes": 1539,
+      "sha256": "C359EBF87FD47A2AFF4ACD8A40DFB72D82D635C1E9CAF8029C446028FC726C09"
+    }
+  },
+  "binaryHashes": [
+    {"component": "TRT10/CUDA12.9 bridge", "lengthBytes": 1064960, "sha256": "42F69F3D639E032FA3836FC7F552E4B665FFD073D52DC83CE630A4F04C87CC83"},
+    {"component": "JYPPX.TensorRtSharp.Tools Debug assembly", "lengthBytes": 299008, "sha256": "27378C5098BAC01299F85EC69B120252E7CD2A2FD6313555E9E81EC412B0D816"},
+    {"component": "OnnxToEngine Debug assembly", "lengthBytes": 17920, "sha256": "E8F491A94094F5A7B48AE96D52BD28EBB2D15274FF4B9E3655D24F66C266D939"}
+  ],
+  "unappliedControls": ["sleepTime"],
+  "proofBoundary": {
+    "isBoundedSchedulerRuntimeProof": true,
+    "isRuntimeControlsBehaviorProof": true,
+    "isSyntheticIdentityOutputProof": true,
+    "isNoTransferOutputCorrectnessProof": false,
+    "isRealModelRuntimeProof": false,
+    "isPackageConsumerRuntimeProof": false,
+    "packagesDownloadedFromPublicFeed": false,
+    "canPromotePublicProof": false,
+    "canPublishPublicly": false
+  }
+}

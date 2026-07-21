@@ -176,6 +176,8 @@
     href: articles/zh-cn/tensorrtexec-tool-getting-started.md
   - name: TensorRtExec Trtexec Parity Matrix
     href: articles/zh-cn/tensorrt-exec-trtexec-parity-matrix.md
+  - name: TensorRtExec Runtime Controls
+    href: articles/zh-cn/tensorrtexec-runtime-controls.md
   - name: OnnxToEngine TensorRtExec YoloVision Evidence Ladder
     href: articles/zh-cn/onnxtoengine-tensorrtexec-yolovision-evidence-ladder.md
   - name: ONNX To Engine Quickstart

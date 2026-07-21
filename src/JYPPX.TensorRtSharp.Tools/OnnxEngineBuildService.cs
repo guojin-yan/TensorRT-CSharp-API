@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.ExceptionServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
@@ -311,19 +312,19 @@ public sealed class OnnxEngineBuildService
                     profileIndex,
                     log,
                     statePrefix: "Identity");
-                if (!identityRuntimeExecution.OutputMatch)
+                if (!options.RuntimeOptions.NoDataTransfers && !identityRuntimeExecution.OutputMatch)
                 {
                     throw new InvalidOperationException("Embedded identity runtime output did not match the generated input values.");
                 }
 
                 log.Add($"Parsed=True ProfileIndex={profileIndex} EngineFileRoundTrip=True");
-                log.Add($"Execution ElapsedMs={identityRuntimeExecution.ElapsedMilliseconds:0.###} OutputMatch=True");
+                log.Add($"Execution ElapsedMs={identityRuntimeExecution.ElapsedMilliseconds:0.###} OutputMatch={identityRuntimeExecution.OutputMatch} NoDataTransfers={options.RuntimeOptions.NoDataTransfers}");
                 log.Add("OnnxToEngine Passed=True");
 
                 OnnxEngineBuildResult roundTrip = CreateResult(
                     success: true,
                     skipped: false,
-                    state: "identity-roundtrip",
+                    state: options.RuntimeOptions.NoDataTransfers ? "identity-no-data-transfer-benchmark" : "identity-roundtrip",
                     options,
                     modelSource,
                     enginePath,
@@ -331,7 +332,7 @@ public sealed class OnnxEngineBuildService
                     engineSaved: true,
                     engineFileRoundTrip: true,
                     inferenceRan: true,
-                    outputMatch: true,
+                    outputMatch: identityRuntimeExecution.OutputMatch,
                     profileIndex,
                     identityRuntimeExecution.ElapsedMilliseconds,
                     skipReason: string.Empty,
@@ -1060,7 +1061,8 @@ public sealed class OnnxEngineBuildService
 
     private static bool CanAttemptGenericExternalRuntime(OnnxEngineBuildOptions options)
     {
-        return !string.IsNullOrWhiteSpace(options.RuntimeOptions.LoadInputs);
+        return options.RuntimeOptions.NoDataTransfers ||
+            !string.IsNullOrWhiteSpace(options.RuntimeOptions.LoadInputs);
     }
 
     private static OnnxEngineRuntimeExecution? TryRunGenericFloatEngineFromFile(
@@ -1096,7 +1098,7 @@ public sealed class OnnxEngineBuildService
         List<OnnxEngineBenchmarkWorker> workers = new List<OnnxEngineBenchmarkWorker>(executionContextCount);
         try
         {
-            OnnxEngineBenchmarkWorker firstWorker = new OnnxEngineBenchmarkWorker(engine, safeProfileIndex);
+            OnnxEngineBenchmarkWorker firstWorker = new OnnxEngineBenchmarkWorker(engine, safeProfileIndex, options.RuntimeOptions.UseSpinWait);
             workers.Add(firstWorker);
 
             IReadOnlyList<TensorRtEngineTensorBinding> inputs = firstWorker.Bindings.Report.GetInputs();
@@ -1126,53 +1128,76 @@ public sealed class OnnxEngineBuildService
             }
 
             TensorRtDims runtimeShape = ResolveRuntimeInputShape(input, options);
-            float[] inputValues = CreateRuntimeInputValues(input.Name, CountElements(runtimeShape), options.RuntimeOptions.LoadInputs);
+            int inputElementCount = CountElements(runtimeShape);
+            float[] inputValues = options.RuntimeOptions.NoDataTransfers
+                ? Array.Empty<float>()
+                : CreateRuntimeInputValues(input.Name, inputElementCount, options.RuntimeOptions.LoadInputs);
             bool setInputShape = ShouldSetInputShape(input, runtimeShape, options);
-            firstWorker.Configure(input, outputs, runtimeShape, inputValues, setInputShape);
+            firstWorker.Configure(input, outputs, runtimeShape, inputValues, setInputShape, options.RuntimeOptions.NoDataTransfers);
             for (int workerIndex = 1; workerIndex < executionContextCount; workerIndex++)
             {
-                OnnxEngineBenchmarkWorker worker = new OnnxEngineBenchmarkWorker(engine, safeProfileIndex);
+                OnnxEngineBenchmarkWorker worker = new OnnxEngineBenchmarkWorker(engine, safeProfileIndex, options.RuntimeOptions.UseSpinWait);
                 workers.Add(worker);
-                worker.Configure(input, outputs, runtimeShape, inputValues, setInputShape);
+                worker.Configure(input, outputs, runtimeShape, inputValues, setInputShape, options.RuntimeOptions.NoDataTransfers);
             }
 
             OnnxEngineBenchmarkRun benchmark = RunBoundedBenchmark(workers, options);
             float elapsedMilliseconds = benchmark.TimingSamplesMilliseconds[0];
 
             List<OnnxEngineRuntimeOutputTensor> capturedOutputs = new List<OnnxEngineRuntimeOutputTensor>(outputs.Count);
-            foreach (TensorRtEngineTensorBinding output in outputs)
+            if (!options.RuntimeOptions.NoDataTransfers)
             {
-                TensorRtInferenceBuffer outputBuffer = firstWorker.Bindings.Buffers[output.Name];
-                TensorRtDims outputShape = outputBuffer.RuntimeShape ?? throw new InvalidOperationException($"Output '{output.Name}' does not have a concrete runtime shape.");
-                int outputElementCount = CountElements(outputShape);
-                float[] outputValues = firstWorker.Bindings.ReadOutputSingles(output.Name, outputElementCount);
-                capturedOutputs.Add(new OnnxEngineRuntimeOutputTensor(output.Name, outputShape.Values, outputValues));
+                foreach (TensorRtEngineTensorBinding output in outputs)
+                {
+                    TensorRtInferenceBuffer outputBuffer = firstWorker.Bindings.Buffers[output.Name];
+                    TensorRtDims outputShape = outputBuffer.RuntimeShape ?? throw new InvalidOperationException($"Output '{output.Name}' does not have a concrete runtime shape.");
+                    int outputElementCount = CountElements(outputShape);
+                    float[] outputValues = firstWorker.Bindings.ReadOutputSingles(output.Name, outputElementCount);
+                    capturedOutputs.Add(new OnnxEngineRuntimeOutputTensor(output.Name, outputShape.Values, outputValues));
+                }
             }
 
-            OnnxEngineRuntimeOutputTensor primaryOutput = capturedOutputs[0];
-            bool identityOutputMatch = capturedOutputs.Count == 1 &&
+            OnnxEngineRuntimeOutputTensor? primaryOutput = capturedOutputs.Count == 0 ? null : capturedOutputs[0];
+            bool identityOutputMatch = primaryOutput != null &&
+                capturedOutputs.Count == 1 &&
                 primaryOutput.Values.Length == inputValues.Length &&
                 ValuesEqual(inputValues, primaryOutput.Values);
-            log.Add($"{statePrefix}BoundedRuntime Attempted=True Succeeded=True Input={input.Name}:{runtimeShape} Outputs={capturedOutputs.Count} PrimaryOutput={primaryOutput.Name}:{FormatShape(primaryOutput.Shape)} ElapsedMs={elapsedMilliseconds:0.###} IdentityOutputMatch={identityOutputMatch}");
-            log.Add($"{statePrefix}BoundedRuntime OutputTensors=" + string.Join("; ", capturedOutputs.Select(static item => $"{item.Name}:{FormatShape(item.Shape)}:{item.Values.Length}")));
+            string primaryOutputSummary = primaryOutput == null
+                ? "not-read-back"
+                : $"{primaryOutput.Name}:{FormatShape(primaryOutput.Shape)}";
+            log.Add($"{statePrefix}BoundedRuntime Attempted=True Succeeded=True Input={input.Name}:{runtimeShape} Outputs={capturedOutputs.Count} PrimaryOutput={primaryOutputSummary} ElapsedMs={elapsedMilliseconds:0.###} IdentityOutputMatch={identityOutputMatch} NoDataTransfers={options.RuntimeOptions.NoDataTransfers}");
+            log.Add(options.RuntimeOptions.NoDataTransfers
+                ? $"{statePrefix}BoundedRuntime OutputReadback=False Reason=noDataTransfers"
+                : $"{statePrefix}BoundedRuntime OutputTensors=" + string.Join("; ", capturedOutputs.Select(static item => $"{item.Name}:{FormatShape(item.Shape)}:{item.Values.Length}")));
             log.Add(
                 $"RuntimeBenchmark Contexts={workers.Count} MeasurementRounds={benchmark.MeasurementRoundsExecuted} " +
                 $"InferenceIterations={benchmark.TimingSamplesMilliseconds.Count} WarmUpIterations={benchmark.WarmUpIterationsExecuted} " +
                 $"WarmUpElapsedMs={benchmark.WarmUpElapsedMilliseconds:0.###} MeasurementElapsedMs={benchmark.MeasurementElapsedMilliseconds:0.###} " +
                 $"IterationsRequested={options.Iterations} DurationSecondsRequested={options.DurationSeconds} " +
                 $"StreamsRequested={options.Streams} InfStreamsRequested={options.RuntimeOptions.InfStreams?.ToString() ?? ""} " +
+                $"ThreadsApplied={benchmark.ThreadsExecuted} SpinWaitApplied={benchmark.UseSpinWaitApplied} " +
+                $"NoDataTransfersApplied={options.RuntimeOptions.NoDataTransfers} CudaGraphApplied={benchmark.UseCudaGraphApplied} " +
                 $"IdleTimeApplied={benchmark.IdleTimeMillisecondsApplied} SleepTimeApplied=0");
+            if (!string.IsNullOrWhiteSpace(benchmark.UseCudaGraphFallbackReason))
+            {
+                log.Add($"RuntimeBenchmark CudaGraphFallbackReason={benchmark.UseCudaGraphFallbackReason}");
+            }
 
-            OnnxEngineRuntimeArtifactData artifactData = identityOutputMatch
+            OnnxEngineRuntimeArtifactData artifactData = options.RuntimeOptions.NoDataTransfers
+                ? OnnxEngineRuntimeArtifactData.CreateBenchmarkOnly(
+                    inputElementCount,
+                    benchmark.LastExecutionSummary.ToString(),
+                    benchmark.TimingSamplesMilliseconds)
+                : identityOutputMatch
                 ? OnnxEngineRuntimeArtifactData.CreateIdentityOutput(
-                    primaryOutput.Name,
+                    primaryOutput!.Name,
                     primaryOutput.Shape,
                     inputValues,
                     primaryOutput.Values,
                     benchmark.LastExecutionSummary.ToString(),
                     benchmark.TimingSamplesMilliseconds)
                 : OnnxEngineRuntimeArtifactData.CreateOutputSummary(
-                    primaryOutput.Name,
+                    primaryOutput!.Name,
                     primaryOutput.Shape,
                     inputValues.Length,
                     primaryOutput.Values,
@@ -1191,7 +1216,12 @@ public sealed class OnnxEngineBuildService
                     benchmark.WarmUpIterationsExecuted,
                     benchmark.WarmUpElapsedMilliseconds,
                     benchmark.MeasurementElapsedMilliseconds,
-                    workers.Count),
+                    workers.Count,
+                    benchmark.ThreadsExecuted,
+                    benchmark.UseSpinWaitApplied,
+                    benchmark.UseCudaGraphApplied,
+                    benchmark.UseCudaGraphFallbackReason,
+                    benchmark.MeasurementRoundsPerContext),
                 artifactData);
         }
         finally
@@ -1207,6 +1237,48 @@ public sealed class OnnxEngineBuildService
         IReadOnlyList<OnnxEngineBenchmarkWorker> workers,
         OnnxEngineBuildOptions options)
     {
+        bool useCudaGraphApplied = TryEnableCudaGraphs(workers, options.UseCudaGraph, out string cudaGraphFallbackReason);
+        return options.RuntimeOptions.UseThreads
+            ? RunThreadedBoundedBenchmark(workers, options, useCudaGraphApplied, cudaGraphFallbackReason)
+            : RunSingleThreadBoundedBenchmark(workers, options, useCudaGraphApplied, cudaGraphFallbackReason);
+    }
+
+    private static bool TryEnableCudaGraphs(
+        IReadOnlyList<OnnxEngineBenchmarkWorker> workers,
+        bool requested,
+        out string fallbackReason)
+    {
+        fallbackReason = string.Empty;
+        if (!requested)
+        {
+            return false;
+        }
+
+        for (int index = 0; index < workers.Count; index++)
+        {
+            if (workers[index].TryEnableCudaGraph(out string workerReason))
+            {
+                continue;
+            }
+
+            foreach (OnnxEngineBenchmarkWorker worker in workers)
+            {
+                worker.DisableCudaGraph();
+            }
+
+            fallbackReason = $"worker-{index}:{workerReason}";
+            return false;
+        }
+
+        return true;
+    }
+
+    private static OnnxEngineBenchmarkRun RunSingleThreadBoundedBenchmark(
+        IReadOnlyList<OnnxEngineBenchmarkWorker> workers,
+        OnnxEngineBuildOptions options,
+        bool useCudaGraphApplied,
+        string cudaGraphFallbackReason)
+    {
         int warmUpIterations = 0;
         Stopwatch warmUpStopwatch = Stopwatch.StartNew();
         while (warmUpStopwatch.ElapsedMilliseconds < options.WarmUpMilliseconds)
@@ -1218,7 +1290,12 @@ public sealed class OnnxEngineBuildService
 
             foreach (OnnxEngineBenchmarkWorker worker in workers)
             {
-                worker.Stream.Synchronize();
+                worker.RecordCompletion();
+            }
+
+            foreach (OnnxEngineBenchmarkWorker worker in workers)
+            {
+                worker.WaitForCompletion(options.RuntimeOptions.UseSpinWait);
             }
 
             warmUpIterations += workers.Count;
@@ -1246,7 +1323,7 @@ public sealed class OnnxEngineBuildService
 
             foreach (OnnxEngineBenchmarkWorker worker in workers)
             {
-                timingSamples.Add(worker.CompleteTiming());
+                timingSamples.Add(worker.CompleteTiming(options.RuntimeOptions.UseSpinWait));
             }
 
             measurementRounds++;
@@ -1265,6 +1342,167 @@ public sealed class OnnxEngineBuildService
             warmUpIterations,
             warmUpStopwatch.Elapsed.TotalMilliseconds,
             measurementStopwatch.Elapsed.TotalMilliseconds,
+            measurementRounds > 1 ? options.RuntimeOptions.IdleTimeMilliseconds.GetValueOrDefault() : 0,
+            threadsExecuted: 1,
+            useSpinWaitApplied: options.RuntimeOptions.UseSpinWait,
+            useCudaGraphApplied,
+            cudaGraphFallbackReason,
+            Enumerable.Repeat(measurementRounds, workers.Count).ToArray());
+    }
+
+    private static OnnxEngineBenchmarkRun RunThreadedBoundedBenchmark(
+        IReadOnlyList<OnnxEngineBenchmarkWorker> workers,
+        OnnxEngineBuildOptions options,
+        bool useCudaGraphApplied,
+        string cudaGraphFallbackReason)
+    {
+        int deviceOrdinal = CudaDevice.Current;
+        OnnxEngineWorkerRun?[] runs = new OnnxEngineWorkerRun?[workers.Count];
+        Exception?[] failures = new Exception?[workers.Count];
+        Thread[] threads = new Thread[workers.Count];
+        using CountdownEvent ready = new CountdownEvent(workers.Count);
+        using CountdownEvent warmUpCompleted = new CountdownEvent(workers.Count);
+        using ManualResetEventSlim start = new ManualResetEventSlim(false);
+        using ManualResetEventSlim measurementStart = new ManualResetEventSlim(false);
+
+        for (int index = 0; index < workers.Count; index++)
+        {
+            int workerIndex = index;
+            threads[index] = new Thread(() =>
+            {
+                bool readySignaled = false;
+                bool warmUpSignaled = false;
+                try
+                {
+                    CudaDevice.SetCurrent(deviceOrdinal);
+                    ready.Signal();
+                    readySignaled = true;
+                    start.Wait();
+
+                    OnnxEngineWorkerWarmUp warmUp = RunWorkerWarmUp(workers[workerIndex], options);
+                    warmUpCompleted.Signal();
+                    warmUpSignaled = true;
+                    measurementStart.Wait();
+                    runs[workerIndex] = RunWorkerMeasurement(workers[workerIndex], options, warmUp);
+                }
+                catch (Exception exception)
+                {
+                    failures[workerIndex] = exception;
+                }
+                finally
+                {
+                    if (!readySignaled)
+                    {
+                        ready.Signal();
+                    }
+
+                    if (!warmUpSignaled)
+                    {
+                        warmUpCompleted.Signal();
+                    }
+                }
+            })
+            {
+                IsBackground = true,
+                Name = $"TensorRtExec-worker-{index}"
+            };
+            threads[index].Start();
+        }
+
+        ready.Wait();
+        start.Set();
+        warmUpCompleted.Wait();
+        measurementStart.Set();
+        foreach (Thread thread in threads)
+        {
+            thread.Join();
+        }
+
+        Exception? failure = failures.FirstOrDefault(static item => item != null);
+        if (failure != null)
+        {
+            ExceptionDispatchInfo.Capture(failure).Throw();
+        }
+
+        OnnxEngineWorkerRun[] completedRuns = runs.Select(static item => item ?? throw new InvalidOperationException("A TensorRtExec benchmark worker completed without a result.")).ToArray();
+        float[] timingSamples = completedRuns.SelectMany(static item => item.TimingSamplesMilliseconds).ToArray();
+        if (timingSamples.Length == 0)
+        {
+            throw new InvalidOperationException("Bounded benchmark did not execute any inference iterations.");
+        }
+
+        return new OnnxEngineBenchmarkRun(
+            timingSamples,
+            completedRuns[completedRuns.Length - 1].LastExecutionSummary,
+            completedRuns.Min(static item => item.MeasurementRoundsExecuted),
+            completedRuns.Sum(static item => item.WarmUpIterationsExecuted),
+            completedRuns.Max(static item => item.WarmUpElapsedMilliseconds),
+            completedRuns.Max(static item => item.MeasurementElapsedMilliseconds),
+            completedRuns.Any(static item => item.IdleTimeMillisecondsApplied > 0)
+                ? options.RuntimeOptions.IdleTimeMilliseconds.GetValueOrDefault()
+                : 0,
+            threadsExecuted: workers.Count,
+            useSpinWaitApplied: options.RuntimeOptions.UseSpinWait,
+            useCudaGraphApplied,
+            cudaGraphFallbackReason,
+            completedRuns.Select(static item => item.MeasurementRoundsExecuted).ToArray());
+    }
+
+    private static OnnxEngineWorkerWarmUp RunWorkerWarmUp(
+        OnnxEngineBenchmarkWorker worker,
+        OnnxEngineBuildOptions options)
+    {
+        int iterations = 0;
+        Stopwatch stopwatch = Stopwatch.StartNew();
+        while (stopwatch.ElapsedMilliseconds < options.WarmUpMilliseconds)
+        {
+            worker.Enqueue();
+            worker.RecordCompletion();
+            worker.WaitForCompletion(options.RuntimeOptions.UseSpinWait);
+            iterations++;
+        }
+
+        stopwatch.Stop();
+        return new OnnxEngineWorkerWarmUp(iterations, stopwatch.Elapsed.TotalMilliseconds);
+    }
+
+    private static OnnxEngineWorkerRun RunWorkerMeasurement(
+        OnnxEngineBenchmarkWorker worker,
+        OnnxEngineBuildOptions options,
+        OnnxEngineWorkerWarmUp warmUp)
+    {
+        List<float> timingSamples = new List<float>();
+        int measurementRounds = 0;
+        TensorRtInferenceExecutionSummary? lastExecutionSummary = null;
+        Stopwatch stopwatch = Stopwatch.StartNew();
+        TimeSpan minimumDuration = TimeSpan.FromSeconds(options.DurationSeconds);
+        while (measurementRounds < options.Iterations || stopwatch.Elapsed < minimumDuration)
+        {
+            if (measurementRounds > 0 && options.RuntimeOptions.IdleTimeMilliseconds.GetValueOrDefault() > 0)
+            {
+                Thread.Sleep(options.RuntimeOptions.IdleTimeMilliseconds!.Value);
+            }
+
+            worker.StartTiming();
+            lastExecutionSummary = worker.Enqueue();
+            worker.StopTiming();
+            timingSamples.Add(worker.CompleteTiming(options.RuntimeOptions.UseSpinWait));
+            measurementRounds++;
+        }
+
+        stopwatch.Stop();
+        if (lastExecutionSummary == null || timingSamples.Count == 0)
+        {
+            throw new InvalidOperationException("Bounded benchmark worker did not execute any inference iterations.");
+        }
+
+        return new OnnxEngineWorkerRun(
+            timingSamples,
+            lastExecutionSummary,
+            measurementRounds,
+            warmUp.IterationsExecuted,
+            warmUp.ElapsedMilliseconds,
+            stopwatch.Elapsed.TotalMilliseconds,
             measurementRounds > 1 ? options.RuntimeOptions.IdleTimeMilliseconds.GetValueOrDefault() : 0);
     }
 
@@ -1473,8 +1711,11 @@ public sealed class OnnxEngineBuildService
         private readonly TensorRtExecutionContext _context;
         private readonly CudaEvent _startEvent;
         private readonly CudaEvent _stopEvent;
+        private CudaGraph? _cudaGraph;
+        private CudaGraphExec? _cudaGraphExec;
+        private TensorRtInferenceExecutionSummary? _cudaGraphExecutionSummary;
 
-        public OnnxEngineBenchmarkWorker(TensorRtEngine engine, int profileIndex)
+        public OnnxEngineBenchmarkWorker(TensorRtEngine engine, int profileIndex, bool useSpinWait)
         {
             CudaStream? stream = null;
             TensorRtExecutionContext? context = null;
@@ -1485,8 +1726,11 @@ public sealed class OnnxEngineBuildService
                 stream = new CudaStream(CudaStreamCreationFlags.NonBlocking);
                 context = engine.CreateExecutionContext();
                 bindings = new TensorRtInferenceBindings(engine, context, profileIndex);
-                startEvent = new CudaEvent();
-                CudaEvent stopEvent = new CudaEvent();
+                CudaEventCreationFlags eventFlags = useSpinWait
+                    ? CudaEventCreationFlags.Default
+                    : CudaEventCreationFlags.BlockingSync;
+                startEvent = new CudaEvent(eventFlags);
+                CudaEvent stopEvent = new CudaEvent(eventFlags);
                 Stream = stream;
                 _context = context;
                 Bindings = bindings;
@@ -1512,14 +1756,23 @@ public sealed class OnnxEngineBuildService
             IReadOnlyList<TensorRtEngineTensorBinding> outputs,
             TensorRtDims runtimeShape,
             float[] inputValues,
-            bool setInputShape)
+            bool setInputShape,
+            bool noDataTransfers)
         {
             if (setInputShape)
             {
                 Bindings.SetInputShape(input.Name, runtimeShape);
             }
 
-            Bindings.CopyInputFromHost(input.Name, inputValues, runtimeShape);
+            if (noDataTransfers)
+            {
+                Bindings.AllocateDeviceBuffer(input.Name, runtimeShape);
+            }
+            else
+            {
+                Bindings.CopyInputFromHost(input.Name, inputValues, runtimeShape);
+            }
+
             _ = Bindings.GetReadiness(runShapeInference: true);
             foreach (TensorRtEngineTensorBinding output in outputs)
             {
@@ -1531,7 +1784,70 @@ public sealed class OnnxEngineBuildService
 
         public TensorRtInferenceExecutionSummary Enqueue()
         {
+            if (_cudaGraphExec != null)
+            {
+                _cudaGraphExec.Launch(Stream);
+                return _cudaGraphExecutionSummary ?? throw new InvalidOperationException("CUDA graph execution summary is unavailable.");
+            }
+
             return Bindings.EnqueueAsync(Stream, synchronize: false, runShapeInference: false);
+        }
+
+        public bool TryEnableCudaGraph(out string fallbackReason)
+        {
+            CudaGraph? graph = null;
+            CudaGraphExec? graphExec = null;
+            bool captureActive = false;
+            try
+            {
+                _ = Bindings.EnqueueAsync(Stream, synchronize: false, runShapeInference: false);
+                Stream.Synchronize();
+
+                Stream.BeginCapture(CudaStreamCaptureMode.ThreadLocal);
+                captureActive = true;
+                TensorRtInferenceExecutionSummary executionSummary = Bindings.EnqueueAsync(Stream, synchronize: false, runShapeInference: false);
+                graph = Stream.EndCapture();
+                captureActive = false;
+                graphExec = graph.Instantiate();
+
+                _cudaGraph = graph;
+                _cudaGraphExec = graphExec;
+                _cudaGraphExecutionSummary = executionSummary;
+                fallbackReason = string.Empty;
+                return true;
+            }
+            catch (Exception exception) when (IsCudaGraphFallbackException(exception))
+            {
+                if (captureActive)
+                {
+                    try
+                    {
+                        using CudaGraph abandonedGraph = Stream.EndCapture();
+                    }
+                    catch (Exception cleanupException) when (IsCudaGraphFallbackException(cleanupException))
+                    {
+                    }
+                }
+
+                graphExec?.Dispose();
+                graph?.Dispose();
+                if (Stream.CaptureStatus != CudaStreamCaptureStatus.None)
+                {
+                    throw new InvalidOperationException("CUDA graph capture failed and the worker stream did not return to a reusable state.", exception);
+                }
+
+                fallbackReason = $"{exception.GetType().Name}:{SanitizeDiagnostic(exception.Message)}";
+                return false;
+            }
+        }
+
+        public void DisableCudaGraph()
+        {
+            _cudaGraphExec?.Dispose();
+            _cudaGraphExec = null;
+            _cudaGraph?.Dispose();
+            _cudaGraph = null;
+            _cudaGraphExecutionSummary = null;
         }
 
         public void StartTiming()
@@ -1544,9 +1860,29 @@ public sealed class OnnxEngineBuildService
             _stopEvent.Record(Stream);
         }
 
-        public float CompleteTiming()
+        public void RecordCompletion()
         {
+            _stopEvent.Record(Stream);
+        }
+
+        public void WaitForCompletion(bool useSpinWait)
+        {
+            if (useSpinWait)
+            {
+                while (!_stopEvent.IsReady())
+                {
+                    Thread.SpinWait(64);
+                }
+
+                return;
+            }
+
             _stopEvent.Synchronize();
+        }
+
+        public float CompleteTiming(bool useSpinWait)
+        {
+            WaitForCompletion(useSpinWait);
             return _stopEvent.ElapsedTimeSince(_startEvent);
         }
 
@@ -1560,17 +1896,103 @@ public sealed class OnnxEngineBuildService
             {
             }
 
+            DisableCudaGraph();
             _stopEvent.Dispose();
             _startEvent.Dispose();
             Bindings.Dispose();
             _context.Dispose();
             Stream.Dispose();
         }
+
+        private static bool IsCudaGraphFallbackException(Exception exception)
+        {
+            return exception is CudaException ||
+                exception is TensorRtException ||
+                exception is NotSupportedException ||
+                exception is InvalidOperationException ||
+                exception is BridgeProbeException ||
+                exception is DllNotFoundException ||
+                exception is BadImageFormatException ||
+                exception is FileNotFoundException;
+        }
+
+        private static string SanitizeDiagnostic(string value)
+        {
+            return (value ?? string.Empty).Replace('\r', ' ').Replace('\n', ' ').Trim();
+        }
     }
 
     private sealed class OnnxEngineBenchmarkRun
     {
         public OnnxEngineBenchmarkRun(
+            IReadOnlyList<float> timingSamplesMilliseconds,
+            TensorRtInferenceExecutionSummary lastExecutionSummary,
+            int measurementRoundsExecuted,
+            int warmUpIterationsExecuted,
+            double warmUpElapsedMilliseconds,
+            double measurementElapsedMilliseconds,
+            int idleTimeMillisecondsApplied,
+            int threadsExecuted,
+            bool useSpinWaitApplied,
+            bool useCudaGraphApplied,
+            string useCudaGraphFallbackReason,
+            IReadOnlyList<int> measurementRoundsPerContext)
+        {
+            TimingSamplesMilliseconds = timingSamplesMilliseconds;
+            LastExecutionSummary = lastExecutionSummary;
+            MeasurementRoundsExecuted = measurementRoundsExecuted;
+            WarmUpIterationsExecuted = warmUpIterationsExecuted;
+            WarmUpElapsedMilliseconds = warmUpElapsedMilliseconds;
+            MeasurementElapsedMilliseconds = measurementElapsedMilliseconds;
+            IdleTimeMillisecondsApplied = idleTimeMillisecondsApplied;
+            ThreadsExecuted = threadsExecuted;
+            UseSpinWaitApplied = useSpinWaitApplied;
+            UseCudaGraphApplied = useCudaGraphApplied;
+            UseCudaGraphFallbackReason = useCudaGraphFallbackReason ?? string.Empty;
+            MeasurementRoundsPerContext = measurementRoundsPerContext ?? Array.Empty<int>();
+        }
+
+        public IReadOnlyList<float> TimingSamplesMilliseconds { get; }
+
+        public TensorRtInferenceExecutionSummary LastExecutionSummary { get; }
+
+        public int MeasurementRoundsExecuted { get; }
+
+        public int WarmUpIterationsExecuted { get; }
+
+        public double WarmUpElapsedMilliseconds { get; }
+
+        public double MeasurementElapsedMilliseconds { get; }
+
+        public int IdleTimeMillisecondsApplied { get; }
+
+        public int ThreadsExecuted { get; }
+
+        public bool UseSpinWaitApplied { get; }
+
+        public bool UseCudaGraphApplied { get; }
+
+        public string UseCudaGraphFallbackReason { get; }
+
+        public IReadOnlyList<int> MeasurementRoundsPerContext { get; }
+    }
+
+    private sealed class OnnxEngineWorkerWarmUp
+    {
+        public OnnxEngineWorkerWarmUp(int iterationsExecuted, double elapsedMilliseconds)
+        {
+            IterationsExecuted = iterationsExecuted;
+            ElapsedMilliseconds = elapsedMilliseconds;
+        }
+
+        public int IterationsExecuted { get; }
+
+        public double ElapsedMilliseconds { get; }
+    }
+
+    private sealed class OnnxEngineWorkerRun
+    {
+        public OnnxEngineWorkerRun(
             IReadOnlyList<float> timingSamplesMilliseconds,
             TensorRtInferenceExecutionSummary lastExecutionSummary,
             int measurementRoundsExecuted,

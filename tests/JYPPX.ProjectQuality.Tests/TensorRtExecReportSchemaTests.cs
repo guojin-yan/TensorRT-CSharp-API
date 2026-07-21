@@ -168,6 +168,12 @@ public sealed class TensorRtExecReportSchemaTests
         Assert.True(reportRoot.GetProperty("OptionImplementationStatus").TryGetProperty("ParsedOptions", out _));
         Assert.True(reportRoot.GetProperty("DeploymentOptions").TryGetProperty("BuilderOptimizationLevel", out _));
         Assert.True(reportRoot.GetProperty("RuntimeOptions").TryGetProperty("NoDataTransfers", out _));
+        JsonElement benchmarkSummary = reportRoot.GetProperty("BenchmarkSummary");
+        Assert.True(benchmarkSummary.TryGetProperty("UseSpinWaitApplied", out _));
+        Assert.True(benchmarkSummary.TryGetProperty("UseCudaGraphRequested", out _));
+        Assert.True(benchmarkSummary.TryGetProperty("UseCudaGraphApplied", out _));
+        Assert.True(benchmarkSummary.TryGetProperty("UseCudaGraphFallbackReason", out _));
+        Assert.True(benchmarkSummary.TryGetProperty("MeasurementRoundsPerContext", out _));
         Assert.True(reportRoot.GetProperty("PreflightMetadata").TryGetProperty("EvidenceBoundary", out _));
         Assert.True(reportRoot.GetProperty("LoadedEngineDiagnostics").TryGetProperty("EvidenceBoundary", out _));
         Assert.True(reportRoot.GetProperty("LoadedEngineDiagnostics").TryGetProperty("ReadbackFingerprint", out _));

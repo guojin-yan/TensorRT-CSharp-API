@@ -32,7 +32,7 @@ applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.md
 
 第二类是 builder config readback。`--workspace`、已知 `--memPoolSize` pool 和 `--avgTiming` 现在会在真实 build 中调用 typed setter 并用 getter read back；TRT8 的 `--minTiming` 使用 legacy compatibility setter，TRT10/11 保持 parse-only；dynamic profile 等仍需要报告和真实模型证据。readback 只说明 TensorRT 接收了 builder 配置，不是 runtime 输出或 package-consumer proof。
 
-第三类是 benchmark scheduler 完整度。`--iterations`、`--warmUp`、`--duration`、effective `--streams/--infStreams`、`--idleTime`、`--avgRuns` 和 `--percentile` 已在 bounded runtime 执行；`--sleepTime`、`--threads`、`--useSpinWait`、`--useCudaGraph` 和 `--noDataTransfers` 仍必须保持 parse-only，直到实现官方语义并完成 smoke。
+第三类是 benchmark scheduler 完整度。`--iterations`、`--warmUp`、`--duration`、effective `--streams/--infStreams`、`--idleTime`、`--avgRuns`、`--percentile`、布尔 `--threads`、`--useSpinWait`、`--useCudaGraph` 和 `--noDataTransfers` 已按官方语义接入 bounded runtime，并完成 TRT10/CUDA12.9 smoke。CUDA graph 捕获失败的单次 run 仍保持 parse-only 并记录 fallback；no-transfer run 不读回输出、不声明模型正确性。`--sleepTime` 仍必须保持 parse-only，直到存在忠实的 device-side launch-to-compute gap 实现。
 
 第四类是 WinForms parity。GUI 不应该只是“能打开页面”，而是要能覆盖 CLI 的主要参数、生成可复制命令、展示 report 摘要和错误诊断。
 

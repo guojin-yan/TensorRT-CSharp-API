@@ -87,6 +87,9 @@ public sealed class TrtexecLikeRuntimeOptions
 
     public int? Threads { get; }
 
+    /// <summary>Gets whether official boolean thread mode was requested. 获取是否请求了官方布尔线程模式。</summary>
+    public bool UseThreads => Threads.HasValue;
+
     public int? AvgRuns { get; }
 
     public float? Percentile { get; }
@@ -133,7 +136,7 @@ public sealed class TrtexecLikeRuntimeOptions
         List<string> args = new List<string>();
         AddSwitch(args, "--noDataTransfers", NoDataTransfers);
         AddSwitch(args, "--useSpinWait", UseSpinWait);
-        Add(args, "--threads", FormatNullable(Threads));
+        AddSwitch(args, "--threads", UseThreads);
         Add(args, "--avgRuns", FormatNullable(AvgRuns));
         Add(args, "--percentile", Percentile.HasValue ? Percentile.Value.ToString(CultureInfo.InvariantCulture) : string.Empty);
         Add(args, "--sleepTime", FormatNullable(SleepTimeMilliseconds));
@@ -157,7 +160,7 @@ public sealed class TrtexecLikeRuntimeOptions
             return diagnostics;
         }
 
-        diagnostics.Add("Runtime benchmark/output options are parsed for diagnostics; this generic build service only promotes runtime proof for the embedded identity model or explicit model-specific runners.");
+        diagnostics.Add("Runtime benchmark/output options are recorded and supported controls are conditionally applied by the bounded runtime; tensor correctness still requires output readback plus model-specific validation.");
         AddDiagnostic(diagnostics, "NoDataTransfers", NoDataTransfers);
         AddDiagnostic(diagnostics, "UseSpinWait", UseSpinWait);
         AddDiagnostic(diagnostics, "Threads", Threads);

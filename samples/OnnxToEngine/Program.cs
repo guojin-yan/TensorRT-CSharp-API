@@ -179,7 +179,7 @@ internal static class Program
         Console.WriteLine("  --save-engine <path> --load-engine <path> --timingCache <path> --verbose");
         Console.WriteLine("  Memory values accept MiB by default or suffixes such as 512MiB and 1GiB.");
         Console.WriteLine("  --iterations <n> --warmUp <ms> --duration <sec> --streams <n> --useCudaGraph");
-        Console.WriteLine("  --noDataTransfers --useSpinWait --threads <n> --avgRuns <n> --percentile <0..100>");
+        Console.WriteLine("  --noDataTransfers --useSpinWait --threads --avgRuns <n> --percentile <0..100>");
         Console.WriteLine("  --loadInputs input:file --dumpOutput --dumpRawBindingsToFile <path> --exportOutput <path> --exportTimes <path> --exportProfile <path> --saveProfile <path>");
         Console.WriteLine("  --safe --consistency --builderCache|--noBuilderCache");
         Console.WriteLine("  --buildOnly --skipInference --dryRun|--previewOnly --dumpLayerInfo --exportLayerInfo <path>");

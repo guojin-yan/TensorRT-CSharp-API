@@ -158,13 +158,13 @@
     },
     {
       "id": "bounded-benchmark-scheduler",
-      "trtexecOption": "--iterations --warmUp --duration --streams --infStreams --idleTime --avgRuns --percentile",
+      "trtexecOption": "--iterations --warmUp --duration --streams --infStreams --idleTime --avgRuns --percentile --threads --useSpinWait --useCudaGraph --noDataTransfers",
       "tensorRtExecStatus": "implemented-bounded-runtime",
       "entryPoints": ["OnnxEngineBuildService.RunBoundedBenchmark", "OnnxEngineBenchmarkSummary", "OnnxEngineRuntimeArtifactWriter", "TensorRtExecOptions", "WinForms Runtime Flags"],
-      "proofBoundary": "Independent execution contexts, bindings, CUDA streams, event timing, warmup, iteration/duration minima, idle gaps, averaging windows, and percentile statistics prove bounded scheduler execution only; they do not prove external model correctness or package-consumer runtime.",
+      "proofBoundary": "Independent execution contexts, bindings, CUDA streams, host driver threads, event spin/blocking waits, graph capture/launch, transfer suppression, warmup, iteration/duration minima, idle gaps, averaging windows, and percentile statistics prove bounded scheduler execution only. noDataTransfers deliberately has no output correctness claim; none of these mechanics proves external model correctness or package-consumer runtime.",
       "isRuntimeProof": false,
-      "gap": "Official --sleepTime, --useSpinWait, --threads, --useCudaGraph, and --noDataTransfers mechanics remain parse-only; model-specific correctness still requires expected outputs and owner evidence.",
-      "nextStep": "Extend the bounded scheduler only with mechanics that can be backed by typed owners and compatible-host smoke; keep model/release proof external."
+      "gap": "--sleepTime remains parse-only because the repository has no faithful device-side launch-to-compute delay primitive. CUDA graph capture can fall back to direct enqueue and remains parse-only for that run; model-specific correctness still requires expected outputs and owner evidence.",
+      "nextStep": "Keep --sleepTime parse-only until a faithful GPU scheduling primitive exists; keep model/release proof external."
     },
     {
       "id": "profiling",

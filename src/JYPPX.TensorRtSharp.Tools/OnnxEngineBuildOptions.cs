@@ -262,7 +262,7 @@ public sealed class OnnxEngineBuildOptions
 
             if (parseOnlyAdvancedOptions)
             {
-                diagnostics.Add("TrtexecAlignmentStatus=parse-only for advanced precision, runtime stream, debug tensor, safety/consistency, engine packaging, builder cache, refit, and weight-streaming options in this stage.");
+                diagnostics.Add("TrtexecAlignmentStatus=parse-only for remaining advanced precision, debug tensor, safety/consistency, engine packaging, builder cache, refit, and weight-streaming controls; runtime controls are classified individually after bounded execution.");
             }
         }
 
