@@ -45,7 +45,7 @@ creation 前遇到已知 vendor structured exception `3228369022`，报告保持
 
 本批没有向 `Downloads`、全局 NuGet package root 或 C 盘其他位置下载 TensorRT、CUDA、cuDNN、模型、
 engine 或 nupkg。bridge consumer 已自动删除本批 `C:\jyppx-pkgcache` 子 cache 与
-`%TEMP%\jyppx-split-packages` 子目录；最终审计发现 71 个 dotnet workload 小日志（合计 91,185 bytes）
+`%TEMP%\jyppx-split-packages` 子目录；最终审计发现 81 个 dotnet workload 小日志（合计 105,684 bytes）
 以及 `C:\jyppx-pkgcache`、`%TEMP%\jyppx-split-packages`、`%TEMP%\MSBuildTemp` 三个空目录。
 两次标准 PowerShell `Remove-Item` 都在执行前被工具安全策略拒绝，未换壳绕过；用户 Downloads、NuGet、
 Codex、CUDA 与系统缓存未触碰。
