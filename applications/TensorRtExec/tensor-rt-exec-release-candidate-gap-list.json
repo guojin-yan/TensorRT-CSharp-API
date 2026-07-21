@@ -102,15 +102,26 @@
       "nextStep": "Collect compatible-host TRT8/10/11 build logs with requested/readback timing iteration values; keep builder evidence separate from runtime and package-consumer proof."
     },
     {
+      "id": "deployment-policies",
+      "officialTrtexecParity": "--device --useDLACore --allowGPUFallback --tacticSources --directIO --sparsity --stronglyTyped",
+      "currentStatus": "implemented-build-readback-with-version-guards",
+      "isRuntimeProof": false,
+      "isPackageConsumerRuntimeProof": false,
+      "cliSupported": true,
+      "winFormsSupported": true,
+      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildService.cs", "src/JYPPX.TensorRtSharp/TensorRtEnums.cs", "applications/TensorRtExec"],
+      "nextStep": "Keep sparsity force and TRT8 stronglyTyped parse-only; collect DLA-capable real-model evidence separately from builder readback."
+    },
+    {
       "id": "bounded-benchmark-scheduler",
-      "officialTrtexecParity": "--iterations --warmUp --duration --streams --infStreams --idleTime --avgRuns --percentile",
+      "officialTrtexecParity": "--iterations --warmUp --duration --streams --infStreams --idleTime --avgRuns --percentile --threads --useSpinWait --useCudaGraph --noDataTransfers",
       "currentStatus": "implemented-bounded-runtime",
       "isRuntimeProof": false,
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": true,
       "winFormsSupported": true,
       "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildService.cs", "applications/TensorRtExec", "samples/OnnxToEngine"],
-      "nextStep": "Retain scheduler runtime evidence separately from model correctness; implement --sleepTime, --threads, --useSpinWait, --useCudaGraph, and --noDataTransfers only with faithful mechanics and smoke."
+      "nextStep": "Retain scheduler runtime evidence separately from model correctness; keep --sleepTime parse-only until a faithful device-side launch-gap primitive exists."
     },
     {
       "id": "timing-cache",

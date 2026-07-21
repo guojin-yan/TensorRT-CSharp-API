@@ -34,9 +34,11 @@ applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.md
 
 第三类是 benchmark scheduler 完整度。`--iterations`、`--warmUp`、`--duration`、effective `--streams/--infStreams`、`--idleTime`、`--avgRuns`、`--percentile`、布尔 `--threads`、`--useSpinWait`、`--useCudaGraph` 和 `--noDataTransfers` 已按官方语义接入 bounded runtime，并完成 TRT10/CUDA12.9 smoke。CUDA graph 捕获失败的单次 run 仍保持 parse-only 并记录 fallback；no-transfer run 不读回输出、不声明模型正确性。`--sleepTime` 仍必须保持 parse-only，直到存在忠实的 device-side launch-to-compute gap 实现。
 
-第四类是 WinForms parity。GUI 不应该只是“能打开页面”，而是要能覆盖 CLI 的主要参数、生成可复制命令、展示 report 摘要和错误诊断。
+第四类是 deployment policy 的执行证明。`--device`、DLA/GPU fallback、tactic sources、DirectIO、sparsity enable/disable 和 strongly typed 已接入 typed set/readback 或 version-aware network creation：TRT10 使用 raw bit，TRT11 依赖 always-strongly-typed 契约。TRT10.11 identity smoke 只证明主机配置和 synthetic runtime；TRT8 strongly typed、sparsity force 保持 parse-only，DLA layer 真执行还需要 DLA 主机和真实模型。
 
-第五类是 proof 边界。TensorRtExec 可以辅助生成 build report 和 sidecar，但不能替代 YoloVision real-model-runtime proof，更不能替代 clean external consumer 的 package-consumer-runtime proof。
+第五类是 WinForms parity。GUI 不应该只是“能打开页面”，而是要能覆盖 CLI 的主要参数、生成可复制命令、展示 report 摘要和错误诊断。
+
+第六类是 proof 边界。TensorRtExec 可以辅助生成 build report 和 sidecar，但不能替代 YoloVision real-model-runtime proof，更不能替代 clean external consumer 的 package-consumer-runtime proof。
 
 ## 配图建议
 
@@ -46,4 +48,4 @@ applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.md
 
 ## 下一步
 
-下一阶段优先完成剩余 runtime mechanics、`binding-metadata` 的真实模型 expected-output 证据和 `winforms-command-surface`；`workspace-memory-pool` 与 `timing-iterations` 继续进入 compatible-host owner build record。所有实现都需要同步更新 CLI、WinForms、文档、测试和 proof 边界说明。
+下一阶段优先完成 IO format、剩余 runtime mechanics、`binding-metadata` 的真实模型 expected-output 证据和 `winforms-command-surface`；deployment policy、`workspace-memory-pool` 与 `timing-iterations` 继续进入 compatible-host owner build record。所有实现都需要同步更新 CLI、WinForms、文档、测试和 proof 边界说明。

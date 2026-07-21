@@ -65,13 +65,13 @@ public static class TrtexecLikeParser
             maxAuxStreams: ParseOptionalNonNegativeInt(GetValue(args, "--maxAuxStreams", string.Empty), "--maxAuxStreams"),
             dlaCore: ParseOptionalNonNegativeInt(GetValue(args, "--useDLACore", string.Empty), "--useDLACore"),
             allowGpuFallback: HasSwitch(args, "--allowGPUFallback"),
-            tacticSources: GetValue(args, "--tacticSources", string.Empty),
+            tacticSources: NormalizeTacticSources(GetValue(args, "--tacticSources", string.Empty)),
             memoryPoolSizes: ParseMemoryPoolSizes(GetValue(args, "--memPoolSize", string.Empty)),
             inputIOFormats: GetValue(args, "--inputIOFormats", string.Empty),
             outputIOFormats: GetValue(args, "--outputIOFormats", string.Empty),
             calibrationCacheFile: calibrationCacheFile,
             directIO: HasSwitch(args, "--directIO"),
-            sparsity: GetValue(args, "--sparsity", string.Empty),
+            sparsity: NormalizeSparsity(GetValue(args, "--sparsity", string.Empty)),
             stronglyTyped: HasSwitch(args, "--stronglyTyped"),
             minTiming: ParseOptionalPositiveInt(GetValue(args, "--minTiming", string.Empty), "--minTiming"),
             avgTiming: ParseOptionalPositiveInt(GetValue(args, "--avgTiming", string.Empty), "--avgTiming"),
@@ -475,6 +475,57 @@ public static class TrtexecLikeParser
             "layer_names_only" or "layernamesonly" or "layer_names" or "names" => "layer_names_only",
             "detailed" or "detail" or "verbose" => "detailed",
             _ => throw new ArgumentException("--profilingVerbosity must be none, layer_names_only, or detailed.")
+        };
+    }
+
+    private static string NormalizeTacticSources(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return string.Empty;
+        }
+
+        List<string> normalizedSources = new List<string>();
+        foreach (string item in value.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries))
+        {
+            string trimmed = item.Trim();
+            if (trimmed.Length < 2 || (trimmed[0] != '+' && trimmed[0] != '-'))
+            {
+                throw new ArgumentException("--tacticSources entries must begin with + or -.");
+            }
+
+            string source = trimmed.Substring(1)
+                .Replace("-", string.Empty, StringComparison.Ordinal)
+                .Replace("_", string.Empty, StringComparison.Ordinal)
+                .ToLowerInvariant();
+            string canonicalSource = source switch
+            {
+                "cublas" => "CUBLAS",
+                "cublaslt" => "CUBLAS_LT",
+                "cudnn" => "CUDNN",
+                "edgemaskconvolutions" or "edgemask" => "EDGE_MASK_CONVOLUTIONS",
+                "jitconvolutions" or "jit" => "JIT_CONVOLUTIONS",
+                _ => throw new ArgumentException($"Unsupported --tacticSources entry '{trimmed}'.")
+            };
+            normalizedSources.Add(trimmed[0] + canonicalSource);
+        }
+
+        return string.Join(",", normalizedSources);
+    }
+
+    private static string NormalizeSparsity(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return string.Empty;
+        }
+
+        return value.Trim().ToLowerInvariant() switch
+        {
+            "disable" or "disabled" => "disable",
+            "enable" or "enabled" => "enable",
+            "force" => "force",
+            _ => throw new ArgumentException("--sparsity must be disable, enable, or force.")
         };
     }
 

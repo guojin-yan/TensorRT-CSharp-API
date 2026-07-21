@@ -1,5 +1,62 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-21 TensorRtExec Deployment Controls
+
+本批把 `--device`、`--useDLACore`、`--allowGPUFallback`、`--tacticSources`、`--directIO`、
+`--sparsity` 与 `--stronglyTyped` 从 parser/report 对齐推进到有版本 guard 的真实 build 控制。
+指定 device 时，完整 build/load/bounded-runtime 在专用 host thread 内执行 CUDA device set/readback，
+避免污染调用线程；DLA core 在写 config 前按 `builder.DlaCoreCount` fail closed；fallback、tactic mask、
+DirectIO 与 SparseWeights 均走 typed set/get 并记录 requested/readback/match。
+
+`--sparsity=enable|disable` 已真实应用，`force` 因官方语义还包含权重重写而继续 parse-only。
+strongly typed 的 vendor 位语义按版本拆开：TRT10 使用 raw `1u << 1`；TRT11 不复用该 raw bit，
+而是依赖 vendor 的 always-strongly-typed network 契约；TRT8 继续 parse-only。GUI/CLI field map、
+feature/parity matrix、release gap、用户验收说明与中文部署控制文章已同步，DLA config readback 不会被
+写成 DLA layer/model 执行证明。
+
+### Runtime 与验证
+
+- TRT10.11/CUDA12.9 identity smoke 成功：device `0/0`、GPU fallback、tactic sources、DirectIO、
+  SparseWeights 和 TRT10 strongly typed raw bit 均应用/readback match；engine round-trip、enqueue 与
+  output match 为 true。`sparsity=force` 独立 build 成功，但 `--sparsity` 保持 parse-only，builder
+  snapshot 不含 SparseWeights。
+- 无 DLA 的 RTX 主机报告 0 cores；请求 core 0 实际非零退出 `-532462766`，没有静默 GPU fallback
+  或 DLA engine。TRT8 device applied、strongly typed parse-only，因该 bridge 无 ONNX parser 保持
+  dependency-probe-only。TRT11 在 network creation 前遇到已知 vendor structured exception
+  `3228369022`，因此也只记录 dependency-probe-only，不宣称 strongly typed applied。
+- focused TensorRtExec/OnnxToEngine tests `72/72`；bounded N-S/T-Z 两分片、9 个相关 class 为
+  `62/62`，无失败或超时。GUI/CLI checklist strict 为 `16/16`。
+- bindings 为 `194 manifests / 3971 records`，脚本内连续生成两次幂等。TRT10/CUDA12.9 与
+  TRT11/CUDA12.9 native Release 增量构建成功；TRT8/10/11 ABI declarations 为
+  `991/991`、`1086/1086`、`1233/1233`，TRT10/TRT11 PE exports 为 `1086/1086`、`1233/1233`，
+  missing 均为 0。
+- solution Debug/Release 均为 0 error；最终 Release 为 0 warning，Debug/单独 test build 保留 5 条
+  既有 nullable test warning。Public API documentation/bilingual 均 0 finding；DocFX 应用
+  919 models，`0 warning / 0 error`。
+- managed nupkg 为 14,794,656 bytes，SHA256
+  `11BE575C8DC8CCC9580835C56CFF3A895A1FADD36190867A2F9865351954740F`；TRT10.11/CUDA12.9
+  bridge-only nupkg 为 351,089 bytes，SHA256
+  `889F1FF4A9B19C847E311C022B5FBF4AD2C1CEAE49B70E8585C0672FAD1CF700`。无 ProjectReference
+  consumer restore/build 为 0 warning / 0 error，分类严格保持 `compile-surface-proof`。
+- strict classification/public-proof finding 均为 0，strict release quality
+  `RequiredFailureCount=0`。owner convergence 保持 structural `9/9`、accepted `0/9`、gates `2/3`；
+  final owner gate 仍有 5 个真实外部输入阻塞。
+
+### C 盘与证据边界
+
+本批没有把 TensorRT、CUDA、ONNX、模型、engine、源码或项目 nupkg 下载到 C 盘；
+Downloads/Documents/Desktop 无相关命中，共享 NuGet package 根也无本轮新增 package 目录。本地 pack
+的 NuGet cache 显式使用 E 盘；consumer 临时 `C:\jyppx-pkgcache` 与 Temp split 子目录在脚本内清空。
+精确审计仍发现旧 `eb0bl5in.vut` workload metadata 33,710 bytes、本轮 23 个 workload logs、15 个空
+MSBuildTemp 目录及两个空 task cache 根。标准 `Remove-Item` 在执行前被工具安全策略整体拒绝，未换壳
+或绕过，因此这些目标仍待策略允许后清理。
+
+compact evidence 为 `trtexec-deployment-controls-runtime-evidence.{json,md}`，继续保持
+`isDlaModelExecutionProof=false`、`isSparseTacticSelectionProof=false`、
+`isRealModelRuntimeProof=false`、`isPackageConsumerRuntimeProof=false`、
+`canPublishPublicly=false`。未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或
+issue close。
+
 ## 2026-07-21 TensorRtExec Runtime Controls
 
 本批按 TensorRT 10.11 官方 `trtexec --help` 与 v10.11 `sampleOptions.cpp` / `sampleInference.cpp`

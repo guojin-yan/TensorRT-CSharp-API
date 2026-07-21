@@ -1,0 +1,171 @@
+{
+  "schemaVersion": "trtexec-deployment-controls-runtime-evidence.v1",
+  "evidenceKind": "local-project-reference-synthetic-deployment-controls-smoke",
+  "generatedAt": "2026-07-21",
+  "sourceState": "working-tree-candidate-after-81954a5c23f792ffbadbff53130392d747f2b3e0",
+  "host": {
+    "os": "Microsoft Windows NT 10.0.26200.0",
+    "architecture": "X64",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02",
+    "tensorRtVersion": "10.11.0",
+    "cudaToolkitVersion": "12.9",
+    "reportedCudaDeviceCount": 1,
+    "reportedDlaCoreCount": 0
+  },
+  "officialReference": {
+    "trtexecPath": "D:/Program Files/TensorRT-10.11.0.33-cu12/bin/trtexec.exe",
+    "tensorRtSourceTag": "v10.11",
+    "tensorRtSourceCommit": "9255eb39e6642787828a4c1f7fc1d09fe004e7a2",
+    "semanticsChecked": [
+      "device selects the CUDA device ordinal",
+      "useDLACore selects a DLA core and allowGPUFallback controls fallback",
+      "tacticSources adds or removes sources relative to vendor defaults",
+      "directIO sets the deprecated direct I/O builder policy",
+      "sparsity enable and disable control sparse tactics while force also rewrites weights",
+      "stronglyTyped uses raw bit 1 on TensorRT 10, while TensorRT 11 always creates strongly typed networks"
+    ]
+  },
+  "trt10GpuPolicyRun": {
+    "exitCode": 0,
+    "state": "identity-roundtrip",
+    "proofClassification": "synthetic-input-runtime",
+    "outputMatch": true,
+    "deviceRequested": 0,
+    "deviceReadback": 0,
+    "dedicatedExecutionThread": true,
+    "gpuFallbackReadback": true,
+    "tacticSourcesDefault": "EdgeMaskConvolutions, JitConvolutions",
+    "tacticSourcesReadback": "EdgeMaskConvolutions, JitConvolutions",
+    "directIoReadback": true,
+    "sparseWeightsReadback": true,
+    "stronglyTypedNetworkCreated": true,
+    "stronglyTypedMechanism": "tensor-rt-10-raw-bit-1u-shift-1",
+    "appliedOptions": [
+      "--device",
+      "--allowGPUFallback",
+      "--tacticSources",
+      "--directIO",
+      "--sparsity",
+      "--stronglyTyped"
+    ],
+    "report": {
+      "localPath": "build-out/deployment-controls-smoke/gpu-policy-report.json",
+      "lengthBytes": 22895,
+      "sha256": "101DE1A2599802FACB8F62F5DE373B24509602C8ABA9D62F8FBA2AFB5C1F9023"
+    },
+    "engine": {
+      "localPath": "build-out/deployment-controls-smoke/identity.plan",
+      "lengthBytes": 3212,
+      "sha256": "64EC4A51BAF2B22918EED397C3781BD2680D4E466508A92441EBE884E641E23A"
+    }
+  },
+  "dlaFailClosedRun": {
+    "requestedDlaCore": 0,
+    "reportedDlaCoreCount": 0,
+    "exitCode": -532462766,
+    "failedAsRequired": true,
+    "diagnostic": "--useDLACore requested core 0, but TensorRT reports 0 DLA core(s).",
+    "silentlyFellBackToGpu": false,
+    "log": {
+      "localPath": "build-out/deployment-controls-smoke/dla-fail-closed.log",
+      "lengthBytes": 1457,
+      "sha256": "53A97F1A9E60654EA3973290A381BB0879C9729C93AFFE6E7714991439DF88FD"
+    }
+  },
+  "trt8StronglyTypedGuardRun": {
+    "state": "dependency-probe-only",
+    "proofClassification": "dependency-probe-only",
+    "deviceApplied": true,
+    "stronglyTypedApplied": false,
+    "stronglyTypedRemainedParseOnly": true,
+    "versionGuard": "TRT8",
+    "runtimeBuildBlockedReason": "TensorRT ONNX parser library was not found at build time.",
+    "report": {
+      "localPath": "build-out/deployment-controls-smoke/trt8-strongly-typed-guard-report.json",
+      "lengthBytes": 15797,
+      "sha256": "D640865E4CC9DE5DBB30BD052ADA66764E00356027510716418C214481EBF1E6"
+    }
+  },
+  "trt11StronglyTypedIsolationRun": {
+    "exitCode": 0,
+    "state": "dependency-probe-only",
+    "proofClassification": "dependency-probe-only",
+    "deviceApplied": true,
+    "stronglyTypedApplied": false,
+    "stronglyTypedRemainedParseOnly": true,
+    "expectedMechanism": "tensor-rt-11-always-strongly-typed-contract-without-tensor-rt-10-raw-bit",
+    "runtimeBuildBlockedReason": "TensorRT 11.x runtime creation raised a structured exception with code 3228369022 before network creation.",
+    "report": {
+      "localPath": "build-out/deployment-controls-smoke/trt11-strongly-typed-report.json",
+      "lengthBytes": 15524,
+      "sha256": "04272ED6F65B9BF7DF0879566D340C8FB7864BD1530C16D7008F955A7AC316D6"
+    },
+    "log": {
+      "localPath": "build-out/deployment-controls-smoke/trt11-strongly-typed.log",
+      "lengthBytes": 2411,
+      "sha256": "1215DE13AABF347CDA8FB9266C1D88B4BF9A8919016D642052DE3D55E4C75111"
+    }
+  },
+  "sparsityForceRun": {
+    "exitCode": 0,
+    "state": "build-only",
+    "sparsityRemainedParseOnly": true,
+    "sparseWeightsFlagPresent": false,
+    "diagnostic": "official-force-mode-rewrites-model-weights-and-is-not-implemented",
+    "report": {
+      "localPath": "build-out/deployment-controls-smoke/sparsity-force-report.json",
+      "lengthBytes": 18803,
+      "sha256": "82212C75F476C4C86275AFD614C14F1516BCFED383363156491EDE5B7C200F23"
+    },
+    "engine": {
+      "localPath": "build-out/deployment-controls-smoke/sparsity-force.plan",
+      "lengthBytes": 16108,
+      "sha256": "CDFEE651FC61466AF2B476A8F679FE7F7A63997671EF71AACCED7FECF9295715"
+    }
+  },
+  "binaryHashes": [
+    {
+      "component": "TRT8/CUDA12.1 bridge",
+      "lengthBytes": 988672,
+      "sha256": "9317F96AF0D61FAD4DA42B4910F29B1EDA41C672A5633D58591465BE95CD617B"
+    },
+    {
+      "component": "TRT10/CUDA12.9 bridge",
+      "lengthBytes": 1064960,
+      "sha256": "42F69F3D639E032FA3836FC7F552E4B665FFD073D52DC83CE630A4F04C87CC83"
+    },
+    {
+      "component": "TRT11/CUDA12.9 bridge",
+      "lengthBytes": 802816,
+      "sha256": "4C2D24F8800FE1915C81AFE5257E0470AF8A99B1839884058E8EF479AD27E6D2"
+    },
+    {
+      "component": "JYPPX.TensorRtSharp.Tools Debug assembly",
+      "lengthBytes": 308224,
+      "sha256": "9F88E6C29A968547502654E98F453E983A4EFEDB3F8952E70996F31F51C57021"
+    },
+    {
+      "component": "OnnxToEngine Debug assembly",
+      "lengthBytes": 17920,
+      "sha256": "4401BAB22B37EF369ECF5BA393000C9E9ECD2D1095621A79BAA3EEF2A505859E"
+    }
+  ],
+  "unappliedControls": [
+    "--sparsity=force",
+    "TRT8 --stronglyTyped",
+    "TRT11 --stronglyTyped on this host because vendor runtime creation failed before network creation"
+  ],
+  "proofBoundary": {
+    "isDeploymentControlBehaviorEvidence": true,
+    "isSyntheticIdentityRuntimeProof": true,
+    "isDlaConfigurationSuccessProof": false,
+    "isDlaModelExecutionProof": false,
+    "isSparseTacticSelectionProof": false,
+    "isRealModelRuntimeProof": false,
+    "isPackageConsumerRuntimeProof": false,
+    "packagesDownloadedFromPublicFeed": false,
+    "canPromotePublicProof": false,
+    "canPublishPublicly": false
+  }
+}

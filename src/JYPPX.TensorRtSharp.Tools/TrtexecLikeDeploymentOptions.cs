@@ -270,12 +270,12 @@ public sealed class TrtexecLikeDeploymentOptions
 
         if (DeviceOrdinal.HasValue)
         {
-            diagnostics.Add("Device=" + DeviceOrdinal.Value + " is recorded for deployment diagnostics; this generic build service does not change the process CUDA device.");
+            diagnostics.Add("Device=" + DeviceOrdinal.Value + " is applied on a dedicated host thread and read back before build/load/runtime work; dry-run remains parse-only.");
         }
 
         if (DlaCore.HasValue || AllowGpuFallback)
         {
-            diagnostics.Add("DLA options are parsed for deployment diagnostics; the TensorRT 11 build path applies parser capability validation and builder-config device placement, while older adapters still require a model-specific runtime stage.");
+            diagnostics.Add("DLA core and GPU fallback are applied through typed builder-config controls during a real build; the requested DLA core is validated against builder.DlaCoreCount, while TensorRT 11 additionally enables parser capability validation.");
             if (DlaCore.HasValue)
             {
                 diagnostics.Add("UseDLACore=" + DlaCore.Value);
@@ -289,7 +289,7 @@ public sealed class TrtexecLikeDeploymentOptions
 
         if (!string.IsNullOrWhiteSpace(TacticSources))
         {
-            diagnostics.Add("TacticSources=" + TacticSources + " is recorded; tactic-source enforcement remains a deployment boundary option.");
+            diagnostics.Add("TacticSources=" + TacticSources + " is applied relative to TensorRT's default tactic mask and read back during a real build.");
         }
 
         if (MemoryPoolSizes.Count > 0)
@@ -297,15 +297,16 @@ public sealed class TrtexecLikeDeploymentOptions
             diagnostics.Add("MemPoolSize=" + MemoryPoolSizesToArgument() + " is applied during a real build through TensorRtBuilderConfig.SetMemoryPoolLimit and read back through GetMemoryPoolLimit; dry-run and load-engine remain parse-only.");
         }
 
-        if (!string.IsNullOrWhiteSpace(InputIOFormats) || !string.IsNullOrWhiteSpace(OutputIOFormats) || DirectIO)
+        if (!string.IsNullOrWhiteSpace(InputIOFormats) || !string.IsNullOrWhiteSpace(OutputIOFormats))
         {
             diagnostics.Add("IO format options are parsed for diagnostics; generic external-model inference still requires explicit binding semantics.");
             AddDiagnostic(diagnostics, "InputIOFormats", InputIOFormats);
             AddDiagnostic(diagnostics, "OutputIOFormats", OutputIOFormats);
-            if (DirectIO)
-            {
-                diagnostics.Add("DirectIO=True");
-            }
+        }
+
+        if (DirectIO)
+        {
+            diagnostics.Add("DirectIO=True is applied through the TensorRT DirectIO builder flag and read back during a real build.");
         }
 
         if (!string.IsNullOrWhiteSpace(CalibrationCacheFile))
@@ -316,12 +317,14 @@ public sealed class TrtexecLikeDeploymentOptions
 
         if (!string.IsNullOrWhiteSpace(Sparsity))
         {
-            diagnostics.Add("Sparsity=" + Sparsity + " is parsed for deployment diagnostics.");
+            diagnostics.Add(string.Equals(Sparsity, "force", StringComparison.Ordinal)
+                ? "Sparsity=force remains parse-only because official force mode rewrites model weights in addition to enabling sparse tactics."
+                : "Sparsity=" + Sparsity + " is applied through the SparseWeights builder flag and read back during a real build.");
         }
 
         if (StronglyTyped)
         {
-            diagnostics.Add("StronglyTyped=True is parsed for deployment diagnostics; network creation flags remain explicit-batch in this stage.");
+            diagnostics.Add("StronglyTyped=True uses the TensorRT 10 creation bit or the TensorRT 11 always-strongly-typed contract; TensorRT 8 keeps the option parse-only behind an explicit version guard.");
         }
 
         if (MinTiming.HasValue || AvgTiming.HasValue)
@@ -434,6 +437,42 @@ public sealed class TrtexecLikeDeploymentOptions
     }
 
     public string ScalarControlSummary => $"MaxNbTactics={MaxNbTactics?.ToString(CultureInfo.InvariantCulture) ?? string.Empty};TilingOptimizationLevel={TilingOptimizationLevel?.ToString() ?? string.Empty};L2LimitForTilingBytes={L2LimitForTilingBytes?.ToString(CultureInfo.InvariantCulture) ?? string.Empty};QuantizationFlags={QuantizationFlags?.ToString() ?? string.Empty}";
+
+    /// <summary>
+    /// Applies the normalized trtexec tactic-source additions and removals to a default TensorRT mask.
+    /// 将规范化的 trtexec tactic source 增删项应用到 TensorRT 默认掩码。
+    /// </summary>
+    /// <param name="defaultSources">The default tactic-source mask reported by TensorRT. TensorRT 返回的默认 tactic source 掩码。</param>
+    /// <returns>The requested tactic-source mask. 请求的 tactic source 掩码。</returns>
+    public TensorRtTacticSources ResolveTacticSources(TensorRtTacticSources defaultSources)
+    {
+        TensorRtTacticSources resolved = defaultSources;
+        foreach (string item in TacticSources.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries))
+        {
+            string trimmed = item.Trim();
+            if (trimmed.Length < 2 || (trimmed[0] != '+' && trimmed[0] != '-'))
+            {
+                throw new ArgumentException("Tactic source entries must begin with + or -.", nameof(TacticSources));
+            }
+
+            TensorRtTacticSources source = trimmed.Substring(1)
+                .Replace("-", string.Empty, StringComparison.Ordinal)
+                .Replace("_", string.Empty, StringComparison.Ordinal)
+                .ToLowerInvariant() switch
+            {
+                "cublas" => TensorRtTacticSources.CuBlas,
+                "cublaslt" => TensorRtTacticSources.CuBlasLt,
+                "cudnn" => TensorRtTacticSources.CuDnn,
+                "edgemaskconvolutions" or "edgemask" => TensorRtTacticSources.EdgeMaskConvolutions,
+                "jitconvolutions" or "jit" => TensorRtTacticSources.JitConvolutions,
+                _ => throw new ArgumentException($"Unsupported tactic source '{trimmed}'.", nameof(TacticSources))
+            };
+
+            resolved = trimmed[0] == '+' ? resolved | source : resolved & ~source;
+        }
+
+        return resolved;
+    }
 
     private string MemoryPoolSizesToArgument()
     {

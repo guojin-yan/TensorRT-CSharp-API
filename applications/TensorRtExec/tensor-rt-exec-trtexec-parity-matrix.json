@@ -127,6 +127,16 @@
       "nextStep": "Capture TrtexecMemoryPool RequestedBytes/ReadbackBytes/ReadbackMatch in a compatible-host build record without promoting runtime proof."
     },
     {
+      "id": "deployment-policies",
+      "trtexecOption": "--device --useDLACore --allowGPUFallback --tacticSources --directIO --sparsity --stronglyTyped",
+      "tensorRtExecStatus": "implemented-build-readback-with-version-guards",
+      "entryPoints": ["OnnxEngineBuildService.Execute", "ApplyDeploymentOptions", "ResolveNetworkCreationFlags", "TrtexecLikeDeploymentOptions.ResolveTacticSources", "TensorRtBuilderConfigDeploymentSnapshot", "WinForms Deployment Fields"],
+      "proofBoundary": "CUDA device selection and builder-config/network-creation readback prove that deployment policy was applied on the selected host. They do not prove DLA execution, sparse tactic selection, performance, model accuracy, or package-consumer runtime.",
+      "isRuntimeProof": false,
+      "gap": "--sparsity=force remains parse-only because official force mode rewrites model weights. --stronglyTyped remains parse-only on TRT8. DLA execution still requires a DLA-capable host and model-specific run.",
+      "nextStep": "Retain TRT10 compatible-host build/enqueue evidence; collect separate DLA-capable owner evidence before claiming DLA model execution."
+    },
+    {
       "id": "timing-cache",
       "trtexecOption": "--timingCacheFile --exportTimingCache",
       "tensorRtExecStatus": "implemented-build-cache-lifecycle",

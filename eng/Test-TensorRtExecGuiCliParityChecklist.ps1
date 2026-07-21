@@ -98,7 +98,7 @@ $badProofItems = @($items | Where-Object {
   [bool](Get-PropertyOrDefault -Object $_ -Name "isRuntimeProof" -DefaultValue $true) -or
   [bool](Get-PropertyOrDefault -Object $_ -Name "isPackageConsumerRuntimeProof" -DefaultValue $true)
 })
-$parseOnlyIds = @("timing-cache", "safety-cache-policy")
+$parseOnlyIds = @("safety-cache-policy")
 $parseOnlyItems = @($items | Where-Object { $parseOnlyIds -contains [string](Get-PropertyOrDefault -Object $_ -Name "optionId" -DefaultValue "") })
 
 $validationItems = New-Object System.Collections.Generic.List[object]

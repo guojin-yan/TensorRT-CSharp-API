@@ -18,7 +18,8 @@
 | Shape Profile | `--minShapes`, `--optShapes`, `--maxShapes` | shared normalized command |
 | Plugin Paths | `--plugins` | diagnostic GUI/CLI parity only; load/register remains deferred |
 | Precision | `--fp16`, `--int8`, `--fp8`, `--best` | INT8 and advanced precision remain guarded |
-| Builder | `--workspace`, `--memPoolSize`, `--builderOptimizationLevel` | workspace and known memory pools are applied/read back during real build; remaining advanced deployment fields stay diagnostic |
+| Builder | `--workspace`, `--memPoolSize`, `--builderOptimizationLevel` | workspace and known memory pools are applied/read back during real build |
+| Deployment | `--device`, `--useDLACore`, `--allowGPUFallback`, `--tacticSources`, `--directIO`, `--sparsity`, `--stronglyTyped` | version-guarded device/build readback; not DLA/model/package runtime proof |
 | Timing/Profile | `--timingCacheFile`, `--exportTimingCache`, `--dumpProfile` | diagnostics/report evidence |
 | Output Artifacts | `--loadInputs`, `--dumpOutput`, `--dumpRawBindingsToFile`, `--exportOutput`, `--exportTimes`, `--exportProfile`, `--saveProfile` | bounded artifacts only |
 | Mode | `--buildOnly`, `--skipInference`, `--dryRun` | not runtime proof |

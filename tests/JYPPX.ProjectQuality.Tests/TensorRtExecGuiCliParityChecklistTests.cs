@@ -65,7 +65,12 @@ public sealed class TensorRtExecGuiCliParityChecklistTests
 
         Assert.Contains(items, item =>
             item.GetProperty("optionId").GetString() == "timing-cache" &&
-            item.GetProperty("status").GetString()!.Contains("parse", StringComparison.OrdinalIgnoreCase));
+            item.GetProperty("status").GetString() == "implemented-build-cache-lifecycle");
+        Assert.Contains(items, item =>
+            item.GetProperty("optionId").GetString() == "device-dla" &&
+            item.GetProperty("status").GetString() == "implemented-build-readback-with-version-guards" &&
+            item.GetProperty("officialTrtexecOption").GetString()!.Contains("--tacticSources", StringComparison.Ordinal) &&
+            item.GetProperty("officialTrtexecOption").GetString()!.Contains("--stronglyTyped", StringComparison.Ordinal));
         Assert.Contains(items, item =>
             item.GetProperty("optionId").GetString() == "safety-cache-policy" &&
             item.GetProperty("status").GetString()!.Contains("parse", StringComparison.OrdinalIgnoreCase));

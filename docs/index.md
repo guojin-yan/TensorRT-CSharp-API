@@ -85,6 +85,7 @@ Chinese articles:
 - [TensorRtExec Tool Getting Started](articles/zh-cn/tensorrtexec-tool-getting-started.md)
 - [TensorRtExec Trtexec Parity Matrix](articles/zh-cn/tensorrt-exec-trtexec-parity-matrix.md)
 - [TensorRtExec Runtime Controls](articles/zh-cn/tensorrtexec-runtime-controls.md)
+- [TensorRtExec Deployment Controls](articles/zh-cn/tensorrtexec-deployment-controls.md)
 - [OnnxToEngine TensorRtExec YoloVision Evidence Ladder](articles/zh-cn/onnxtoengine-tensorrtexec-yolovision-evidence-ladder.md)
 - [ONNX To Engine Quickstart](articles/zh-cn/onnx-to-engine-quickstart.md)
 - [ONNX To Engine Dynamic Shape Profile](articles/zh-cn/onnx-to-engine-dynamic-shape-profile.md)

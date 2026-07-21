@@ -109,6 +109,34 @@ public sealed partial class TensorRtBuilder : IDisposable
     }
 
     /// <summary>
+    /// Creates an explicit-batch network and maps strongly typed creation to the selected TensorRT API line.
+    /// 创建 explicit-batch network，并将 strongly typed 创建语义映射到所选 TensorRT API 版本。
+    /// </summary>
+    /// <param name="stronglyTyped">Whether a strongly typed network is required. 是否要求 strongly typed network。</param>
+    /// <returns>A caller-owned TensorRT network definition. 由调用方拥有的 TensorRT network definition。</returns>
+    /// <remarks>
+    /// TensorRT 10 uses bit 1, TensorRT 11 is always strongly typed, and TensorRT 8 does not expose this policy.
+    /// TensorRT 10 使用 bit 1，TensorRT 11 始终为 strongly typed，TensorRT 8 不公开该策略。
+    /// </remarks>
+    public TensorRtNetworkDefinition CreateNetwork(bool stronglyTyped)
+    {
+        if (!stronglyTyped)
+        {
+            return CreateNetwork(TensorRtNetworkDefinitionCreationFlags.ExplicitBatch);
+        }
+
+        return Line switch
+        {
+            TensorRtApiLine.TensorRt8 => throw new NotSupportedException("Strongly typed network creation is not exposed by the TensorRT 8 adapter."),
+            TensorRtApiLine.TensorRt10 => CreateNetwork(
+                TensorRtNetworkDefinitionCreationFlags.ExplicitBatch |
+                TensorRtNetworkDefinitionCreationFlags.StronglyTypedTensorRt10),
+            TensorRtApiLine.TensorRt11 => CreateNetwork(TensorRtNetworkDefinitionCreationFlags.ExplicitBatch),
+            _ => throw new ArgumentOutOfRangeException(nameof(Line), Line, "Unsupported TensorRT API line.")
+        };
+    }
+
+    /// <summary>
     /// Builds a serialized TensorRT engine from a network and configuration.
     /// 使用 network 和配置构建序列化的 TensorRT engine。
     /// </summary>

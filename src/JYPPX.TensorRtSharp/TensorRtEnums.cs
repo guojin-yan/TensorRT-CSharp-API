@@ -6,6 +6,7 @@ namespace JYPPX.TensorRtSharp;
 /// Represents TensorRT TensorRtNetworkDefinitionCreationFlags values.
 /// 表示 TensorRT TensorRtNetworkDefinitionCreationFlags 枚举值。
 /// </summary>
+[Flags]
 public enum TensorRtNetworkDefinitionCreationFlags : uint
 {
     /// <summary>
@@ -17,7 +18,16 @@ public enum TensorRtNetworkDefinitionCreationFlags : uint
     /// Represents the ExplicitBatch value of TensorRtNetworkDefinitionCreationFlags.
     /// 表示 TensorRtNetworkDefinitionCreationFlags 的 ExplicitBatch 取值。
     /// </summary>
-    ExplicitBatch = 1
+    ExplicitBatch = 1u << 0,
+    /// <summary>
+    /// Represents the TensorRT 10 raw strongly-typed creation bit.
+    /// 表示仅适用于 TensorRT 10 的 strongly typed 原始创建位。
+    /// </summary>
+    /// <remarks>
+    /// TensorRT 11 uses a different enum position and always creates strongly typed networks. Prefer <c>TensorRtBuilder.CreateNetwork(bool)</c> for cross-version code.
+    /// TensorRT 11 使用不同的枚举位置且始终创建 strongly typed network；跨版本代码应优先使用 <c>TensorRtBuilder.CreateNetwork(bool)</c>。
+    /// </remarks>
+    StronglyTypedTensorRt10 = 1u << 1
 }
 
 /// <summary>

@@ -22,6 +22,40 @@ public sealed class OnnxEngineBuildService
             throw new ArgumentNullException(nameof(options));
         }
 
+        if (!options.DryRun && options.DeploymentOptions.DeviceOrdinal.HasValue)
+        {
+            OnnxEngineBuildResult? selectedDeviceResult = null;
+            Exception? selectedDeviceFailure = null;
+            Thread executionThread = new Thread(() =>
+            {
+                try
+                {
+                    selectedDeviceResult = ExecuteCore(options);
+                }
+                catch (Exception exception)
+                {
+                    selectedDeviceFailure = exception;
+                }
+            })
+            {
+                IsBackground = true,
+                Name = "TensorRtExec-device-" + options.DeploymentOptions.DeviceOrdinal.Value
+            };
+            executionThread.Start();
+            executionThread.Join();
+            if (selectedDeviceFailure != null)
+            {
+                ExceptionDispatchInfo.Capture(selectedDeviceFailure).Throw();
+            }
+
+            return selectedDeviceResult ?? throw new InvalidOperationException("The selected-device TensorRtExec thread completed without a result.");
+        }
+
+        return ExecuteCore(options);
+    }
+
+    private static OnnxEngineBuildResult ExecuteCore(OnnxEngineBuildOptions options)
+    {
         List<string> log = new List<string>();
         OnnxEngineBuildEvidenceSidecar evidenceSidecar = OnnxEngineBuildEvidenceSidecarReader.Read(options.EvidenceSidecarPath);
         foreach (string diagnostic in options.Diagnostics)
@@ -62,6 +96,26 @@ public sealed class OnnxEngineBuildService
             OnnxEngineBuildDiagnostics.WriteReport(dryRun, options.ExportReportPath);
             OnnxEngineRuntimeArtifactWriter.WriteArtifacts(dryRun);
             return dryRun;
+        }
+
+        if (options.DeploymentOptions.DeviceOrdinal.HasValue)
+        {
+            int requestedDevice = options.DeploymentOptions.DeviceOrdinal.Value;
+            int deviceCount = CudaDevice.Count;
+            if (requestedDevice >= deviceCount)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(options),
+                    requestedDevice,
+                    $"--device requested CUDA device {requestedDevice}, but this host reports {deviceCount} device(s).");
+            }
+
+            CudaDevice.SetCurrent(requestedDevice);
+            int selectedDevice = CudaDevice.Current;
+            log.Add(
+                $"TrtexecDeploymentControl Name=Device Applied=True Requested={requestedDevice} " +
+                $"Readback={selectedDevice} ReadbackMatch={selectedDevice == requestedDevice} " +
+                $"DeviceCount={deviceCount} ExecutionThread={Thread.CurrentThread.ManagedThreadId}");
         }
 
         if (options.LoadsExistingEngine)
@@ -194,11 +248,21 @@ public sealed class OnnxEngineBuildService
             config.SetProfileStream(stream);
             config.SetOptimizationLevel(options.DeploymentOptions.BuilderOptimizationLevel);
             config.SetEngineCapability(TensorRtEngineCapability.Standard);
-            ApplyDeploymentOptions(config, options, log);
+            ApplyDeploymentOptions(builder, config, options, log);
             ApplyPrecisionFlags(config, options);
             using TimingCacheLease timingCache = CreateTimingCacheLease(config, options, log);
 
-            using TensorRtNetworkDefinition network = builder.CreateNetwork(TensorRtNetworkDefinitionCreationFlags.ExplicitBatch);
+            bool stronglyTypedApplied = ShouldCreateStronglyTypedNetwork(options, log);
+            using TensorRtNetworkDefinition network = stronglyTypedApplied
+                ? builder.CreateNetwork(stronglyTyped: true)
+                : builder.CreateNetwork(TensorRtNetworkDefinitionCreationFlags.ExplicitBatch);
+            if (stronglyTypedApplied)
+            {
+                string readback = options.TensorRtLine == TensorRtApiLine.TensorRt11
+                    ? "tensor-rt-11-always-strongly-typed"
+                    : "network-created-with-tensor-rt-10-strongly-typed-flag";
+                log.Add($"TrtexecDeploymentControl Name=StronglyTyped Applied=True Requested=True Readback={readback} ReadbackMatch=True");
+            }
             using TensorRtOnnxParser parser = new TensorRtOnnxParser(logger, network);
             bool parserBuilderConfigAttached = false;
             if (options.TensorRtLine == TensorRtApiLine.TensorRt11)
@@ -2072,7 +2136,7 @@ public sealed class OnnxEngineBuildService
         public float[] Values { get; }
     }
 
-    private static void ApplyDeploymentOptions(TensorRtBuilderConfig config, OnnxEngineBuildOptions options, List<string> log)
+    private static void ApplyDeploymentOptions(TensorRtBuilder builder, TensorRtBuilderConfig config, OnnxEngineBuildOptions options, List<string> log)
     {
         foreach (TrtexecLikeMemoryPoolSize memoryPool in options.DeploymentOptions.MemoryPoolSizes)
         {
@@ -2128,16 +2192,79 @@ public sealed class OnnxEngineBuildService
             config.SetProfilingVerbosity(ParseProfilingVerbosity(options.ProfilingVerbosity));
         }
 
-        if (options.TensorRtLine == TensorRtApiLine.TensorRt11 && options.DeploymentOptions.DlaCore.HasValue)
+        TrtexecLikeDeploymentOptions deployment = options.DeploymentOptions;
+        if (deployment.DlaCore.HasValue)
         {
+            int requestedCore = deployment.DlaCore.Value;
+            int dlaCoreCount = builder.DlaCoreCount;
+            if (requestedCore >= dlaCoreCount)
+            {
+                throw new InvalidOperationException($"--useDLACore requested core {requestedCore}, but TensorRT reports {dlaCoreCount} DLA core(s).");
+            }
+
             config.SetDefaultDeviceType(TensorRtDeviceType.Dla);
-            config.SetDlaCore(options.DeploymentOptions.DlaCore.Value);
+            config.SetDlaCore(requestedCore);
+            TensorRtDeviceType deviceReadback = config.GetDefaultDeviceType();
+            int coreReadback = config.GetDlaCore();
+            log.Add(
+                $"TrtexecDeploymentControl Name=DlaCore Applied=True Requested={requestedCore} " +
+                $"Readback={coreReadback} DeviceReadback={deviceReadback} DlaCoreCount={dlaCoreCount} " +
+                $"ReadbackMatch={coreReadback == requestedCore && deviceReadback == TensorRtDeviceType.Dla}");
         }
 
-        if (options.TensorRtLine == TensorRtApiLine.TensorRt11 && options.DeploymentOptions.AllowGpuFallback)
+        if (deployment.AllowGpuFallback)
         {
             config.SetFlag(TensorRtBuilderFlag.GpuFallback, true);
+            bool readback = config.GetFlag(TensorRtBuilderFlag.GpuFallback);
+            log.Add($"TrtexecDeploymentControl Name=GpuFallback Applied=True Requested=True Readback={readback} ReadbackMatch={readback}");
         }
+
+        if (!string.IsNullOrWhiteSpace(deployment.TacticSources))
+        {
+            TensorRtTacticSources defaultSources = config.GetTacticSources();
+            TensorRtTacticSources requestedSources = deployment.ResolveTacticSources(defaultSources);
+            config.SetTacticSources(requestedSources);
+            TensorRtTacticSources readbackSources = config.GetTacticSources();
+            log.Add(
+                $"TrtexecDeploymentControl Name=TacticSources Applied=True Requested={requestedSources} " +
+                $"Readback={readbackSources} Default={defaultSources} ReadbackMatch={readbackSources == requestedSources}");
+        }
+
+        if (deployment.DirectIO)
+        {
+            config.SetFlag(TensorRtBuilderFlag.DirectIO, true);
+            bool readback = config.GetFlag(TensorRtBuilderFlag.DirectIO);
+            log.Add($"TrtexecDeploymentControl Name=DirectIO Applied=True Requested=True Readback={readback} ReadbackMatch={readback}");
+        }
+
+        if (string.Equals(deployment.Sparsity, "enable", StringComparison.Ordinal) ||
+            string.Equals(deployment.Sparsity, "disable", StringComparison.Ordinal))
+        {
+            bool requested = string.Equals(deployment.Sparsity, "enable", StringComparison.Ordinal);
+            config.SetFlag(TensorRtBuilderFlag.SparseWeights, requested);
+            bool readback = config.GetFlag(TensorRtBuilderFlag.SparseWeights);
+            log.Add($"TrtexecDeploymentControl Name=Sparsity Applied=True Requested={deployment.Sparsity} Readback={readback} ReadbackMatch={readback == requested}");
+        }
+        else if (string.Equals(deployment.Sparsity, "force", StringComparison.Ordinal))
+        {
+            log.Add("TrtexecDeploymentControl Name=Sparsity Applied=False Requested=force Reason=official-force-mode-rewrites-model-weights-and-is-not-implemented");
+        }
+    }
+
+    private static bool ShouldCreateStronglyTypedNetwork(OnnxEngineBuildOptions options, List<string> log)
+    {
+        if (!options.DeploymentOptions.StronglyTyped)
+        {
+            return false;
+        }
+
+        if (options.TensorRtLine == TensorRtApiLine.TensorRt8)
+        {
+            log.Add("TrtexecDeploymentControl Name=StronglyTyped Applied=False Requested=True VersionGuard=TRT8 Reason=strongly-typed-network-creation-is-not-exposed-on-this-api-line");
+            return false;
+        }
+
+        return true;
     }
 
     private static void ApplyBuilderScalarDeploymentControls(TensorRtBuilderConfig config, OnnxEngineBuildOptions options, List<string> log)

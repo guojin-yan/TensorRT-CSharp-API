@@ -1,3 +1,5 @@
+using JYPPX.Shared.Interop;
+using JYPPX.TensorRtSharp;
 using JYPPX.TensorRtSharp.Tools;
 using System.Security.Cryptography;
 using System.Text.Json;
@@ -810,7 +812,7 @@ public sealed class OnnxToEngineTrtexecLikeTests
         Assert.Contains("ProfilingVerbosity=detailed", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
         Assert.Contains("BuilderOptimizationLevel=4 is applied", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
         Assert.Contains("MaxAuxStreams=2 is applied", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
-        Assert.Contains("DLA options are parsed", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
+        Assert.Contains("DLA core and GPU fallback are applied", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
         Assert.Contains("MemPoolSize=workspace:512,tacticDram:1024", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
         Assert.Contains("Calibration cache path is recorded", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
         Assert.Contains("copied TensorRT engine-inspector readback", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
@@ -831,6 +833,144 @@ public sealed class OnnxToEngineTrtexecLikeTests
         Assert.Throws<ArgumentException>(() => TrtexecLikeParser.Parse(new[] { "--plugin" }));
         Assert.Throws<ArgumentException>(() => TrtexecLikeParser.Parse(new[] { "--dynamicPlugins", "--buildOnly" }));
         Assert.Throws<ArgumentException>(() => TrtexecLikeParser.Parse(new[] { "--setPluginsToSerialize=" }));
+    }
+
+    [Fact]
+    public void DeploymentPolicyParserNormalizesTacticsAndSparsity()
+    {
+        TrtexecLikeOptions options = TrtexecLikeParser.Parse(new[]
+        {
+            "--tacticSources", "+cublas_lt,-edge-mask,+jit",
+            "--sparsity", "ENABLED",
+            "--buildOnly"
+        });
+
+        Assert.Equal("+CUBLAS_LT,-EDGE_MASK_CONVOLUTIONS,+JIT_CONVOLUTIONS", options.DeploymentOptions.TacticSources);
+        Assert.Equal("enable", options.DeploymentOptions.Sparsity);
+        TensorRtTacticSources defaults = TensorRtTacticSources.CuBlas | TensorRtTacticSources.EdgeMaskConvolutions;
+        TensorRtTacticSources resolved = options.DeploymentOptions.ResolveTacticSources(defaults);
+        Assert.True((resolved & TensorRtTacticSources.CuBlas) != 0);
+        Assert.True((resolved & TensorRtTacticSources.CuBlasLt) != 0);
+        Assert.True((resolved & TensorRtTacticSources.EdgeMaskConvolutions) == 0);
+        Assert.True((resolved & TensorRtTacticSources.JitConvolutions) != 0);
+    }
+
+    [Theory]
+    [InlineData("--tacticSources", "CUBLAS")]
+    [InlineData("--tacticSources", "+UNKNOWN")]
+    [InlineData("--sparsity", "sometimes")]
+    public void DeploymentPolicyParserRejectsUnsupportedValues(string option, string value)
+    {
+        Assert.Throws<ArgumentException>(() => TrtexecLikeParser.Parse(new[] { option, value, "--buildOnly" }));
+    }
+
+    [Fact]
+    public void DeploymentPoliciesUseTypedSetReadbackAndExplicitVersionGuards()
+    {
+        string service = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "OnnxEngineBuildService.cs"));
+        string diagnostics = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "OnnxEngineBuildDiagnostics.cs"));
+        string enums = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp", "TensorRtEnums.cs"));
+
+        Assert.Contains("CudaDevice.SetCurrent(requestedDevice)", service, StringComparison.Ordinal);
+        Assert.Contains("CudaDevice.Current", service, StringComparison.Ordinal);
+        Assert.Contains("builder.DlaCoreCount", service, StringComparison.Ordinal);
+        Assert.Contains("config.SetDefaultDeviceType(TensorRtDeviceType.Dla)", service, StringComparison.Ordinal);
+        Assert.Contains("config.GetDefaultDeviceType()", service, StringComparison.Ordinal);
+        Assert.Contains("config.SetTacticSources(requestedSources)", service, StringComparison.Ordinal);
+        Assert.Contains("config.GetTacticSources()", service, StringComparison.Ordinal);
+        Assert.Contains("config.SetFlag(TensorRtBuilderFlag.DirectIO, true)", service, StringComparison.Ordinal);
+        Assert.Contains("config.SetFlag(TensorRtBuilderFlag.SparseWeights, requested)", service, StringComparison.Ordinal);
+        Assert.Contains("official-force-mode-rewrites-model-weights-and-is-not-implemented", service, StringComparison.Ordinal);
+        Assert.Contains("options.TensorRtLine == TensorRtApiLine.TensorRt8", service, StringComparison.Ordinal);
+        Assert.Contains("builder.CreateNetwork(stronglyTyped: true)", service, StringComparison.Ordinal);
+        Assert.Contains("StronglyTypedTensorRt10 = 1u << 1", enums, StringComparison.Ordinal);
+        string builder = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp", "TensorRtBuilder.cs"));
+        Assert.Contains("TensorRtApiLine.TensorRt10", builder, StringComparison.Ordinal);
+        Assert.Contains("TensorRtApiLine.TensorRt11", builder, StringComparison.Ordinal);
+        Assert.Contains("StronglyTypedTensorRt10", builder, StringComparison.Ordinal);
+        Assert.Contains("HasAppliedDeploymentControl", diagnostics, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void AppliedDeploymentPoliciesLeaveParseOnlyOptionsAfterReadback()
+    {
+        TrtexecLikeOptions options = TrtexecLikeParser.Parse(new[]
+        {
+            "--device", "0",
+            "--useDLACore", "0",
+            "--allowGPUFallback",
+            "--tacticSources", "-CUDNN",
+            "--directIO",
+            "--sparsity", "enable",
+            "--stronglyTyped",
+            "--buildOnly"
+        });
+        OnnxEngineBuildOptions buildOptions = OnnxEngineBuildOptions.FromTrtexecLikeOptions(options);
+        string[] appliedLogs =
+        {
+            "TrtexecDeploymentControl Name=Device Applied=True Requested=0 Readback=0 ReadbackMatch=True",
+            "TrtexecDeploymentControl Name=DlaCore Applied=True Requested=0 Readback=0 ReadbackMatch=True",
+            "TrtexecDeploymentControl Name=GpuFallback Applied=True Requested=True Readback=True ReadbackMatch=True",
+            "TrtexecDeploymentControl Name=TacticSources Applied=True Requested=None Readback=None ReadbackMatch=True",
+            "TrtexecDeploymentControl Name=DirectIO Applied=True Requested=True Readback=True ReadbackMatch=True",
+            "TrtexecDeploymentControl Name=Sparsity Applied=True Requested=enable Readback=True ReadbackMatch=True",
+            "TrtexecDeploymentControl Name=StronglyTyped Applied=True Requested=True Readback=network-created-with-tensor-rt-10-strongly-typed-flag ReadbackMatch=True"
+        };
+        OnnxEngineBuildResult result = new OnnxEngineBuildResult(
+            success: true,
+            skipped: false,
+            state: "build-only",
+            tensorRtLine: TensorRtApiLine.TensorRt10,
+            modelSource: "embedded-dynamic-identity",
+            enginePath: "model.plan",
+            parsed: true,
+            engineSaved: true,
+            engineFileRoundTrip: false,
+            inferenceRan: false,
+            outputMatch: false,
+            profileIndex: 0,
+            elapsedMilliseconds: null,
+            skipReason: string.Empty,
+            normalizedCommandLine: buildOptions.NormalizedCommandLine,
+            deploymentOptions: buildOptions.DeploymentOptions,
+            diagnostics: buildOptions.Diagnostics,
+            logLines: appliedLogs);
+
+        using JsonDocument document = JsonDocument.Parse(OnnxEngineBuildDiagnostics.ToJson(result));
+        JsonElement status = document.RootElement.GetProperty("OptionImplementationStatus");
+        string[] optionNames = { "--device", "--useDLACore", "--allowGPUFallback", "--tacticSources", "--directIO", "--sparsity", "--stronglyTyped" };
+        foreach (string optionName in optionNames)
+        {
+            Assert.Contains(status.GetProperty("AppliedOptions").EnumerateArray(), item => item.GetString() == optionName);
+            Assert.DoesNotContain(status.GetProperty("ParseOnlyOptions").EnumerateArray(), item => item.GetString() == optionName);
+        }
+    }
+
+    [Fact]
+    public void DeploymentControlsRuntimeEvidenceKeepsExternalProofBoundariesFalse()
+    {
+        string path = Path.Combine(RepositoryPaths.Root, "artifacts", "interface-coverage", "trtexec-deployment-controls-runtime-evidence.json");
+        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(path));
+        JsonElement root = document.RootElement;
+        JsonElement proof = root.GetProperty("proofBoundary");
+
+        Assert.Equal("trtexec-deployment-controls-runtime-evidence.v1", root.GetProperty("schemaVersion").GetString());
+        Assert.True(root.GetProperty("trt10GpuPolicyRun").GetProperty("outputMatch").GetBoolean());
+        Assert.True(root.GetProperty("dlaFailClosedRun").GetProperty("failedAsRequired").GetBoolean());
+        Assert.False(root.GetProperty("dlaFailClosedRun").GetProperty("silentlyFellBackToGpu").GetBoolean());
+        Assert.True(root.GetProperty("trt8StronglyTypedGuardRun").GetProperty("stronglyTypedRemainedParseOnly").GetBoolean());
+        JsonElement trt11 = root.GetProperty("trt11StronglyTypedIsolationRun");
+        Assert.Equal("dependency-probe-only", trt11.GetProperty("proofClassification").GetString());
+        Assert.False(trt11.GetProperty("stronglyTypedApplied").GetBoolean());
+        Assert.True(trt11.GetProperty("stronglyTypedRemainedParseOnly").GetBoolean());
+        JsonElement sparsityForce = root.GetProperty("sparsityForceRun");
+        Assert.True(sparsityForce.GetProperty("sparsityRemainedParseOnly").GetBoolean());
+        Assert.False(sparsityForce.GetProperty("sparseWeightsFlagPresent").GetBoolean());
+        Assert.False(proof.GetProperty("isDlaModelExecutionProof").GetBoolean());
+        Assert.False(proof.GetProperty("isSparseTacticSelectionProof").GetBoolean());
+        Assert.False(proof.GetProperty("isRealModelRuntimeProof").GetBoolean());
+        Assert.False(proof.GetProperty("isPackageConsumerRuntimeProof").GetBoolean());
+        Assert.False(proof.GetProperty("canPublishPublicly").GetBoolean());
     }
 
     [Fact]

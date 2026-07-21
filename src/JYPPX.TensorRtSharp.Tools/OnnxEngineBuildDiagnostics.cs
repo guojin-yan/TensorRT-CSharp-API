@@ -424,6 +424,13 @@ public static class OnnxEngineBuildDiagnostics
         AddIf(options, "--tilingOptimizationLevel", HasAppliedBuilderScalar(result, "TilingOptimizationLevel"));
         AddIf(options, "--l2LimitForTiling", HasAppliedBuilderScalar(result, "L2LimitForTiling"));
         AddIf(options, "--quantizationFlags", HasAppliedBuilderScalar(result, "QuantizationFlags"));
+        AddIf(options, "--device", HasAppliedDeploymentControl(result, "Device"));
+        AddIf(options, "--useDLACore", HasAppliedDeploymentControl(result, "DlaCore"));
+        AddIf(options, "--allowGPUFallback", HasAppliedDeploymentControl(result, "GpuFallback"));
+        AddIf(options, "--tacticSources", HasAppliedDeploymentControl(result, "TacticSources"));
+        AddIf(options, "--directIO", HasAppliedDeploymentControl(result, "DirectIO"));
+        AddIf(options, "--sparsity", HasAppliedDeploymentControl(result, "Sparsity"));
+        AddIf(options, "--stronglyTyped", HasAppliedDeploymentControl(result, "StronglyTyped"));
         AddIf(options, "--memPoolSize", deploymentOptions.MemoryPoolSizes.Count > 0 && (result.Parsed || result.EngineSaved));
         AddIf(options, "--fp16/--bf16/--noTF32", result.Parsed || result.EngineSaved || result.InferenceRan);
         AddIf(options, "--minShapes/--optShapes/--maxShapes", result.Parsed || result.EngineSaved || result.InferenceRan);
@@ -467,17 +474,17 @@ public static class OnnxEngineBuildDiagnostics
         TrtexecLikeRuntimeOptions runtimeOptions = result.RuntimeOptions ?? TrtexecLikeRuntimeOptions.Default;
         System.Collections.Generic.List<string> options = new System.Collections.Generic.List<string>();
 
-        AddIf(options, "--device", deploymentOptions.DeviceOrdinal.HasValue);
-        AddIf(options, "--useDLACore", deploymentOptions.DlaCore.HasValue);
-        AddIf(options, "--allowGPUFallback", deploymentOptions.AllowGpuFallback);
-        AddIf(options, "--tacticSources", !string.IsNullOrWhiteSpace(deploymentOptions.TacticSources));
+        AddIf(options, "--device", deploymentOptions.DeviceOrdinal.HasValue && !HasAppliedDeploymentControl(result, "Device"));
+        AddIf(options, "--useDLACore", deploymentOptions.DlaCore.HasValue && !HasAppliedDeploymentControl(result, "DlaCore"));
+        AddIf(options, "--allowGPUFallback", deploymentOptions.AllowGpuFallback && !HasAppliedDeploymentControl(result, "GpuFallback"));
+        AddIf(options, "--tacticSources", !string.IsNullOrWhiteSpace(deploymentOptions.TacticSources) && !HasAppliedDeploymentControl(result, "TacticSources"));
         AddIf(options, "--memPoolSize", deploymentOptions.MemoryPoolSizes.Count > 0 && !(result.Parsed || result.EngineSaved));
         AddIf(options, "--inputIOFormats", !string.IsNullOrWhiteSpace(deploymentOptions.InputIOFormats));
         AddIf(options, "--outputIOFormats", !string.IsNullOrWhiteSpace(deploymentOptions.OutputIOFormats));
         AddIf(options, "--calib", !string.IsNullOrWhiteSpace(deploymentOptions.CalibrationCacheFile));
-        AddIf(options, "--directIO", deploymentOptions.DirectIO);
-        AddIf(options, "--sparsity", !string.IsNullOrWhiteSpace(deploymentOptions.Sparsity));
-        AddIf(options, "--stronglyTyped", deploymentOptions.StronglyTyped);
+        AddIf(options, "--directIO", deploymentOptions.DirectIO && !HasAppliedDeploymentControl(result, "DirectIO"));
+        AddIf(options, "--sparsity", !string.IsNullOrWhiteSpace(deploymentOptions.Sparsity) && !HasAppliedDeploymentControl(result, "Sparsity"));
+        AddIf(options, "--stronglyTyped", deploymentOptions.StronglyTyped && !HasAppliedDeploymentControl(result, "StronglyTyped"));
         AddIf(options, "--minTiming", deploymentOptions.MinTiming.HasValue && (result.TensorRtLine != TensorRtApiLine.TensorRt8 || !(result.Parsed || result.EngineSaved)));
         AddIf(options, "--avgTiming", deploymentOptions.AvgTiming.HasValue && !(result.Parsed || result.EngineSaved));
         AddIf(options, "--precisionConstraints", !string.IsNullOrWhiteSpace(deploymentOptions.PrecisionConstraints));
@@ -540,6 +547,14 @@ public static class OnnxEngineBuildDiagnostics
     private static bool HasAppliedBuilderScalar(OnnxEngineBuildResult result, string name)
     {
         string prefix = $"TrtexecBuilderScalar Name={name} Applied=True";
+        return result.LogLines.Any(line =>
+            line.StartsWith(prefix, StringComparison.Ordinal) &&
+            line.Contains("ReadbackMatch=True", StringComparison.Ordinal));
+    }
+
+    private static bool HasAppliedDeploymentControl(OnnxEngineBuildResult result, string name)
+    {
+        string prefix = $"TrtexecDeploymentControl Name={name} Applied=True";
         return result.LogLines.Any(line =>
             line.StartsWith(prefix, StringComparison.Ordinal) &&
             line.Contains("ReadbackMatch=True", StringComparison.Ordinal));
