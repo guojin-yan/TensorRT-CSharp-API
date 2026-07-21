@@ -1,5 +1,62 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-21 CUDA IPC Import Owner-Safe Uplift
+
+本批把 `cudaIpcOpenEventHandle`、`cudaIpcOpenMemHandle` 与 `cudaIpcCloseMemHandle` 从
+`deferred-only` 提升为真实 owner-safe 路径，与上一批 export token 组成完整跨进程生命周期。
+event import 返回由 `cudaEventDestroy` 释放的 owner wrapper；memory import 返回带
+`MemoryReleaseMode::IpcClose` 的 `CudaMemory`，只允许 `cudaIpcCloseMemHandle`，普通
+`cudaFree` 与 `cudaFreeAsync` 均 fail closed。public surface 只接收不可变 64-byte token 或
+token+精确 allocation size descriptor，不暴露 `IntPtr`、`UIntPtr`、`SafeHandle` 或 device
+pointer。
+
+### Vendor、coverage 与 runtime
+
+- CUDA 11.6、11.8、12.1、12.3、12.9、13.2 的 header 与 `cudart.lib` 均包含三条 symbol；
+  已安装的 11.6 至 12.9 runtime DLL export 均存在。CUDA 13.2 本机没有独立 runtime DLL，仍只
+  记录 header/import-library/native-build proof。
+- bindings 为 `194 manifests / 3971 API records`，两次生成幂等。六套 CUDA coverage 中三条
+  function 均为 `implemented-with-deferred-history`；旧 deferred manifest 保留。
+- TRT10/CUDA12.9 与 TRT11/CUDA13.2 native Release build 通过；两份 PE 的新增导出均为 `3/3`。
+  TRT8/10/11 ABI source parity 以及 TRT10/TRT11 PE gate 均为
+  `MissingDeclarations=0 MissingExports=0`。
+- TRT10/CUDA12.9 在 RTX 3060 Laptop、driver 576.02、WDDM 上完成真实父子进程 smoke：先建立
+  memory/event share handle，再提交 exporter 写入并 record event；child import、event
+  synchronize、64-byte 读回、反向写入、`FreeAsync` 拒绝与专用 close 均通过，父进程保持源 owner
+  存活并验证 child 写入。token 经 redirected stdin 传输，不进入命令行或日志。
+
+### Managed、package consumer 与质量门禁
+
+- `CudaIpcExportToken.FromBytes` 精确校验 64-byte 并复制输入；
+  `CudaIpcMemoryExportDescriptor` 把 token 与 allocation size 作为一个 transport unit。
+  `CudaEvent` / `CudaMemory` 提供 Import/TryImport 与 `IsIpcImported`，新增
+  `CudaDeviceAttribute.IpcEventSupport`。
+- 最终 managed nupkg 为 14,786,429 bytes，SHA256
+  `AA74FBF8AA06EBFA18A4D41782233676EAC6632891BFE2AAA325F107A3D6B2B3`；TRT10/CUDA12.9
+  bridge-only nupkg 为 351,092 bytes，SHA256
+  `A9B03F40DA2E9350D832352780EA14D1548EA0373256031C15B1644D6291ED8A`。无
+  ProjectReference consumer restore/build 为 `0 warning / 0 error`，分类保持
+  `compile-surface-proof`。
+- 专项 `8/8`；CUDA bounded shard 覆盖 32 个 class、`123/123`。完整 solution Debug/Release
+  均为 `0 error`，保留 5 条既有 test nullable warning。Public API documentation 与 bilingual
+  finding 均为 0；DocFX `917 model(s)`，`0 warning / 0 error`。
+- strict classification 与 public-proof finding 均为 0；strict release quality
+  `RequiredFailureCount=0`。owner convergence 结构验证 `FailedBlockers=0`，5 个真实外部 owner
+  input surface 仍保持 blocked。
+- TRT10 PluginRegistryInventory、NetworkBuilder 与 InferenceBindings net8 smoke 均通过。legacy
+  net48 PowerShell CUDA smoke 因当前进程 DLL 搜索路径报 `0x8007007E`，未计为通过；本批 net8
+  cross-process smoke 已真实覆盖普通 allocation/free 与 imported close 两条释放路由。
+
+### 证据边界
+
+候选与 runtime 证据为
+`cuda-ipc-import-owner-safe-candidate-audit.{json,md}` 和
+`cuda-ipc-import-cross-process-runtime-evidence.{json,md}`。runtime evidence 冻结 bridge、runner
+与 managed CUDA assembly hash，不保存 token/device pointer，并明确
+`isPackageConsumerRuntimeProof=false`、`canPromoteRuntimeProof=false`、
+`canPublishPublicly=false`。未执行 NuGet/GitHub Packages push、GitHub Release upload 或 issue
+close。
+
 ## 2026-07-20 Public API Documentation Zero-Finding Closure
 
 本批把 managed public API documentation 从“已有审计、仍有历史缺口”推进为可持续的

@@ -261,6 +261,11 @@ $script:ManagedPackageFreshnessRequiredMarkers = @(
   "CudaMemoryRangeDiagnosticSummary",
   "CudaIpcExportToken",
   "CudaIpcExportTokenKind",
+  "CudaIpcMemoryExportDescriptor",
+  "ImportIpcToken",
+  "ImportIpcDescriptor",
+  "TryImportIpcToken",
+  "TryImportIpcDescriptor",
   "ExportIpcToken",
   "TryExportIpcToken",
   "ManagedByteArrayDeserializeReady",
@@ -2598,6 +2603,16 @@ static class HighLevelWrapperSurfaceProbe
             static memory => memory.ExportIpcToken();
         Func<CudaIpcExportToken, string> ipcExportTokenSummary =
             static token => token.Kind + ":" + token.Length + ":" + token.ToArray().Length + ":" + token.ToHexString().Length;
+        Func<CudaMemory, CudaIpcMemoryExportDescriptor> exportIpcMemoryDescriptor =
+            static memory => memory.ExportIpcDescriptor();
+        Func<byte[], CudaIpcExportToken> reconstructIpcEventToken =
+            static bytes => CudaIpcExportToken.FromBytes(CudaIpcExportTokenKind.Event, bytes);
+        Func<CudaIpcExportToken, CudaEvent> importIpcEvent =
+            static token => CudaEvent.ImportIpcToken(token);
+        Func<CudaIpcMemoryExportDescriptor, CudaMemory> importIpcMemory =
+            static descriptor => CudaMemory.ImportIpcDescriptor(descriptor);
+        Func<CudaIpcMemoryExportDescriptor, string> ipcMemoryDescriptorSummary =
+            static descriptor => descriptor.Token.Kind + ":" + descriptor.Token.Length + ":" + descriptor.SizeInBytes;
         Func<CudaGraphDiagnosticSnapshot, CudaGraphDiagnosticSummary> graphDiagnosticSummary =
             static snapshot => snapshot.ToSummary();
         Func<CudaGraphDiagnosticSummary, string> graphDiagnosticSummaryText =
@@ -4498,9 +4513,21 @@ static class HighLevelWrapperSurfaceProbe
             nameof(CudaIpcExportToken.Length),
             nameof(CudaIpcExportToken.ToArray),
             nameof(CudaIpcExportToken.ToHexString),
+            nameof(CudaIpcExportToken.FromBytes),
             nameof(CudaIpcExportTokenKind),
             nameof(CudaIpcExportTokenKind.Event),
             nameof(CudaIpcExportTokenKind.Memory),
+            nameof(CudaIpcMemoryExportDescriptor),
+            nameof(CudaIpcMemoryExportDescriptor.Token),
+            nameof(CudaIpcMemoryExportDescriptor.SizeInBytes),
+            nameof(CudaIpcMemoryExportDescriptor.FromBytes),
+            nameof(CudaEvent.ImportIpcToken),
+            nameof(CudaEvent.TryImportIpcToken),
+            nameof(CudaEvent.IsIpcImported),
+            nameof(CudaMemory.ExportIpcDescriptor),
+            nameof(CudaMemory.ImportIpcDescriptor),
+            nameof(CudaMemory.TryImportIpcDescriptor),
+            nameof(CudaMemory.IsIpcImported),
             nameof(CudaGraphDiagnosticSnapshot),
             nameof(CudaGraphDiagnosticSnapshot.ToSummary),
             nameof(CudaGraphDiagnosticSummary),

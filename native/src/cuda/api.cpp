@@ -21,6 +21,7 @@ using jyppx::cuda::GraphExecObject;
 using jyppx::cuda::GraphMemoryAllocationObject;
 using jyppx::cuda::GraphObject;
 using jyppx::cuda::MemoryObject;
+using jyppx::cuda::MemoryReleaseMode;
 using jyppx::cuda::ObjectBase;
 using jyppx::cuda::ObjectKind;
 using jyppx::cuda::PitchedMemoryObject;
@@ -1716,6 +1717,7 @@ JYPPX_StatusCode jyppx_cuda_memory_alloc(size_t size, JYPPX_CudaMemory** out_mem
     memory->size = size;
     memory->is_managed = false;
     memory->is_ipc_exportable = true;
+    memory->release_mode = MemoryReleaseMode::CudaFree;
 
     status = jyppx::cuda::map_cuda_status(cudaMalloc(&memory->pointer, size), "cudaMalloc");
     if (status != JYPPX_STATUS_OK)
@@ -1755,6 +1757,7 @@ JYPPX_StatusCode jyppx_cuda_memory_alloc_managed(size_t size, uint32_t flags, JY
     memory->size = size;
     memory->is_managed = true;
     memory->is_ipc_exportable = false;
+    memory->release_mode = MemoryReleaseMode::CudaFree;
 
     status = jyppx::cuda::map_cuda_status(cudaMallocManaged(&memory->pointer, size, flags), "cudaMallocManaged");
     if (status != JYPPX_STATUS_OK)
@@ -2578,6 +2581,15 @@ JYPPX_StatusCode jyppx_cuda_memory_free(JYPPX_CudaMemory* memory)
     }
 
     auto* memory_object = reinterpret_cast<MemoryObject*>(memory);
+    if (memory_object->release_mode != MemoryReleaseMode::CudaFree)
+    {
+        jyppx::cuda::set_cuda_error(
+            "cudaFree",
+            0,
+            "ipc-memory-close-required",
+            "Imported CUDA IPC memory must be released with cudaIpcCloseMemHandle.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
 #if JYPPX_HAS_CUDA_TOOLKIT
     status = jyppx::cuda::map_cuda_status(cudaFree(memory_object->pointer), "cudaFree");
 #else
@@ -2596,6 +2608,7 @@ JYPPX_StatusCode jyppx_cuda_memory_free(JYPPX_CudaMemory* memory)
 #include "modules/deployment/kernel_library_metadata.inc"
 #include "modules/deployment/primary_execution_context.inc"
 #include "modules/deployment/ipc_export_tokens.inc"
+#include "modules/deployment/ipc_import_owner.inc"
 #include "modules/deployment/official_token_aliases.inc"
 #include "modules/deferred/twenty_third_batch_deferred.inc"
 #include "modules/deferred/thirty_fifth_batch_stream_device_deferred.inc"

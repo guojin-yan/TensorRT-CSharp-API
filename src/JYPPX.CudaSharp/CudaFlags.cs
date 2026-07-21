@@ -906,5 +906,7 @@ public enum CudaDeviceAttribute
     /// <summary>Host-register support. host register 支持。</summary>
     HostRegisterSupported = 99,
     /// <summary>Direct host access to managed memory support. 主机直接访问 managed memory 支持。</summary>
-    DirectManagedMemoryAccessFromHost = 101
+    DirectManagedMemoryAccessFromHost = 101,
+    /// <summary>CUDA IPC event support. CUDA IPC event 支持。</summary>
+    IpcEventSupport = 125
 }

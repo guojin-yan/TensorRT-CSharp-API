@@ -30,6 +30,13 @@ public sealed class CudaEvent : IDisposable
     {
         NativeBridgeLoader.EnsureInitialized();
         _handle = flags == CudaEventCreationFlags.Default ? NativeCudaApi.CreateEvent() : NativeCudaApi.CreateEvent(flags);
+        IsIpcImported = false;
+    }
+
+    private CudaEvent(SafeCudaEventHandle handle, bool isIpcImported)
+    {
+        _handle = handle ?? throw new ArgumentNullException(nameof(handle));
+        IsIpcImported = isIpcImported;
     }
 
     /// <summary>
@@ -37,6 +44,9 @@ public sealed class CudaEvent : IDisposable
     /// 获取实际生效的 CUDA event 标志。
     /// </summary>
     public CudaEventCreationFlags Flags => NativeCudaApi.GetEventFlags(_handle);
+
+    /// <summary>Gets whether this wrapper owns an imported process-local CUDA event. 获取此 wrapper 是否拥有导入的进程内 CUDA event。</summary>
+    public bool IsIpcImported { get; }
 
     /// <summary>
     /// Records this event on a CUDA stream.
@@ -102,6 +112,40 @@ public sealed class CudaEvent : IDisposable
     public CudaIpcExportToken ExportIpcToken()
     {
         return NativeCudaApi.ExportEventIpcToken(_handle);
+    }
+
+    /// <summary>Opens a process-local CUDA event from an export token. 从 export token 打开进程内 CUDA event。</summary>
+    /// <param name="token">The event token transported from another process. 从其他进程传输的 event token。</param>
+    /// <returns>An owner wrapper released with <c>cudaEventDestroy</c>. 使用 <c>cudaEventDestroy</c> 释放的 owner wrapper。</returns>
+    public static CudaEvent ImportIpcToken(CudaIpcExportToken token)
+    {
+        if (token == null)
+        {
+            throw new ArgumentNullException(nameof(token));
+        }
+
+        NativeBridgeLoader.EnsureInitialized();
+        return new CudaEvent(NativeCudaApi.ImportEventIpcToken(token), isIpcImported: true);
+    }
+
+    /// <summary>Tries to import a CUDA IPC event token and returns a diagnostic on CUDA failure. 尝试导入 CUDA IPC event token，并在 CUDA 失败时返回诊断。</summary>
+    public static bool TryImportIpcToken(
+        CudaIpcExportToken token,
+        out CudaEvent? cudaEvent,
+        out string diagnostic)
+    {
+        try
+        {
+            cudaEvent = ImportIpcToken(token);
+            diagnostic = string.Empty;
+            return true;
+        }
+        catch (CudaException exception)
+        {
+            cudaEvent = null;
+            diagnostic = exception.Message;
+            return false;
+        }
     }
 
     /// <summary>Tries to copy an IPC export token and returns a diagnostic on failure. 尝试复制 IPC 导出 token，失败时返回诊断。</summary>

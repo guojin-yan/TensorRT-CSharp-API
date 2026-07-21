@@ -5,6 +5,13 @@ namespace JYPPX.CudaSharp.Internal.Handles;
 
 internal sealed class SafeCudaMemoryHandle : SafeBridgeHandle
 {
+    private bool _isIpcImported;
+
+    internal void MarkIpcImported()
+    {
+        _isIpcImported = true;
+    }
+
     internal void MarkReleased()
     {
         SetHandleAsInvalid();
@@ -12,6 +19,9 @@ internal sealed class SafeCudaMemoryHandle : SafeBridgeHandle
 
     protected override bool ReleaseHandle()
     {
-        return NativeMethodsCuda.jyppx_cuda_memory_free(handle) == BridgeStatusCode.Ok;
+        BridgeStatusCode status = _isIpcImported
+            ? NativeMethodsCuda.jyppx_cuda_ipc_close_imported_memory_safe(handle)
+            : NativeMethodsCuda.jyppx_cuda_memory_free(handle);
+        return status == BridgeStatusCode.Ok;
     }
 }

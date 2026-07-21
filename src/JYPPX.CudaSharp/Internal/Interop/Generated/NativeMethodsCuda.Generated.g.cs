@@ -968,6 +968,9 @@ internal static partial class NativeMethodsCuda
     internal static extern BridgeStatusCode jyppx_cuda_ipc_close_mem_handle_deferred();
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_ipc_close_imported_memory_safe(IntPtr memory);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_cuda_ipc_export_event_token_safe(SafeCudaEventHandle event_handle, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -983,7 +986,13 @@ internal static partial class NativeMethodsCuda
     internal static extern BridgeStatusCode jyppx_cuda_ipc_open_event_handle_deferred();
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_ipc_import_event_safe(byte[] token, UIntPtr token_size, out SafeCudaEventHandle out_event);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_cuda_ipc_open_mem_handle_deferred();
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_ipc_import_memory_safe(byte[] token, UIntPtr token_size, UIntPtr allocation_size, out SafeCudaMemoryHandle out_memory);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_cuda_kernel_set_attribute_for_device_deferred();

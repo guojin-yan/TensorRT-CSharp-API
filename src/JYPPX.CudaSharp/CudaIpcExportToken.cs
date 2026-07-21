@@ -27,6 +27,7 @@ public enum CudaIpcExportTokenKind
 /// </remarks>
 public sealed class CudaIpcExportToken
 {
+    private const int TokenSizeInBytes = 64;
     private readonly byte[] _bytes;
 
     internal CudaIpcExportToken(CudaIpcExportTokenKind kind, byte[] bytes)
@@ -36,9 +37,14 @@ public sealed class CudaIpcExportToken
             throw new ArgumentNullException(nameof(bytes));
         }
 
-        if (bytes.Length == 0)
+        if (bytes.Length != TokenSizeInBytes)
         {
-            throw new ArgumentException("CUDA IPC export token cannot be empty.", nameof(bytes));
+            throw new ArgumentException("CUDA IPC export token must contain exactly 64 bytes.", nameof(bytes));
+        }
+
+        if (!Enum.IsDefined(typeof(CudaIpcExportTokenKind), kind))
+        {
+            throw new ArgumentOutOfRangeException(nameof(kind));
         }
 
         Kind = kind;
@@ -50,6 +56,13 @@ public sealed class CudaIpcExportToken
 
     /// <summary>Gets the copied token length in bytes. 获取复制 token 的字节长度。</summary>
     public int Length => _bytes.Length;
+
+    /// <summary>Creates an immutable token from transported bytes. 从传输后的字节创建不可变 token。</summary>
+    /// <param name="kind">The CUDA resource kind represented by the token. token 表示的 CUDA 资源类型。</param>
+    /// <param name="bytes">The opaque token bytes received from the exporting process. 从导出进程接收的 opaque token 字节。</param>
+    /// <returns>An immutable managed token copy. 不可变的托管 token 副本。</returns>
+    public static CudaIpcExportToken FromBytes(CudaIpcExportTokenKind kind, byte[] bytes) =>
+        new CudaIpcExportToken(kind, bytes);
 
     /// <summary>Returns a new copy of the opaque token bytes. 返回 opaque token 字节的新副本。</summary>
     public byte[] ToArray() => (byte[])_bytes.Clone();
@@ -71,4 +84,56 @@ public sealed class CudaIpcExportToken
 
     /// <summary>Returns a non-secret diagnostic summary. 返回不包含 token 内容的诊断摘要。</summary>
     public override string ToString() => $"Kind={Kind} Length={Length}";
+}
+
+/// <summary>
+/// Immutable transport descriptor for an exported CUDA IPC memory allocation.
+/// 导出 CUDA IPC memory allocation 的不可变传输 descriptor。
+/// </summary>
+/// <remarks>
+/// The size must describe the original base allocation exactly. Treat the descriptor as one authenticated
+/// transport unit and keep the exporting allocation alive until every importer has disposed its mapping.
+/// size 必须精确描述原始 base allocation。应将 descriptor 作为一个整体进行可信传输，并保持导出
+/// allocation 存活，直到所有 importer 都已释放 mapping。
+/// </remarks>
+public sealed class CudaIpcMemoryExportDescriptor
+{
+    internal CudaIpcMemoryExportDescriptor(CudaIpcExportToken token, int sizeInBytes)
+    {
+        if (token == null)
+        {
+            throw new ArgumentNullException(nameof(token));
+        }
+
+        if (token.Kind != CudaIpcExportTokenKind.Memory)
+        {
+            throw new ArgumentException("CUDA IPC memory descriptor requires a memory token.", nameof(token));
+        }
+
+        if (sizeInBytes <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(sizeInBytes));
+        }
+
+        Token = token;
+        SizeInBytes = sizeInBytes;
+    }
+
+    /// <summary>Gets the copied opaque memory token. 获取复制型 opaque memory token。</summary>
+    public CudaIpcExportToken Token { get; }
+
+    /// <summary>Gets the exported base-allocation size. 获取导出的 base allocation 大小。</summary>
+    public int SizeInBytes { get; }
+
+    /// <summary>Creates a descriptor from transported bytes and allocation metadata. 从传输字节和 allocation 元数据创建 descriptor。</summary>
+    /// <param name="tokenBytes">The opaque memory-token bytes. opaque memory token 字节。</param>
+    /// <param name="sizeInBytes">The exact exported allocation size. 导出 allocation 的精确大小。</param>
+    /// <returns>An immutable transport descriptor. 不可变传输 descriptor。</returns>
+    public static CudaIpcMemoryExportDescriptor FromBytes(byte[] tokenBytes, int sizeInBytes) =>
+        new CudaIpcMemoryExportDescriptor(
+            CudaIpcExportToken.FromBytes(CudaIpcExportTokenKind.Memory, tokenBytes),
+            sizeInBytes);
+
+    /// <summary>Returns a diagnostic summary without token contents. 返回不包含 token 内容的诊断摘要。</summary>
+    public override string ToString() => $"Kind={Token.Kind} TokenLength={Token.Length} Size={SizeInBytes}";
 }

@@ -16,6 +16,7 @@ These projects are intentionally different from the user-facing examples under `
 
 - `CudaSmokeRunner`
 - `CudaGraphSmokeRunner`
+- `CudaIpcImportSmokeRunner`
 - `CudaDeviceInitializationProofRunner`
 - `CallbackAllocatorSafeControlsSmokeRunner`
 - `ManagedLoggerCallbackSmokeRunner`

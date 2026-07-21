@@ -61,6 +61,12 @@ struct EventObject
 #endif
 };
 
+enum class MemoryReleaseMode : uint32_t
+{
+    CudaFree = 0,
+    IpcClose = 1
+};
+
 struct MemoryObject
 {
     ObjectBase base;
@@ -68,6 +74,7 @@ struct MemoryObject
     size_t size;
     bool is_managed;
     bool is_ipc_exportable;
+    MemoryReleaseMode release_mode;
 };
 
 struct PinnedMemoryObject

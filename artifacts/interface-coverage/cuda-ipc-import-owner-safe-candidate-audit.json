@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "cuda-ipc-import-owner-safe-candidate-audit.v1",
+  "recordKind": "cuda-ipc-import-owner-safe-candidate-audit",
+  "generatedAtUtc": "2026-07-21T00:00:00Z",
+  "selectedFunctions": [
+    "cudaIpcOpenEventHandle",
+    "cudaIpcOpenMemHandle",
+    "cudaIpcCloseMemHandle"
+  ],
+  "vendorEvidence": {
+    "headerVersions": ["11.6", "11.8", "12.1", "12.3", "12.9", "13.2"],
+    "importLibraryVersions": ["11.6", "11.8", "12.1", "12.3", "12.9", "13.2"],
+    "runtimeDllExportVersions": ["11.6", "11.8", "12.1", "12.3", "12.9"],
+    "cuda132RuntimeDllState": "not-installed-separately",
+    "allSelectedSymbolsPresentInHeadersAndImportLibraries": true,
+    "allInstalledRuntimeDllExportsPresent": true
+  },
+  "ownerModel": {
+    "eventRelease": "cudaEventDestroy",
+    "memoryRelease": "cudaIpcCloseMemHandle",
+    "memoryOpenFlags": "cudaIpcMemLazyEnablePeerAccess",
+    "tokenShape": "immutable-64-byte-copy",
+    "memoryTransportShape": "immutable-token-plus-exact-allocation-size",
+    "normalFreeRejectedForImportedMemory": true,
+    "asyncFreeRejectedForImportedMemory": true,
+    "exporterMustRemainAlive": true
+  },
+  "publicSurface": {
+    "rawPointerExposed": false,
+    "devicePointerExposed": false,
+    "safeHandleExposed": false,
+    "uintptrExposed": false
+  },
+  "historicalDeferredRecordsRetained": true,
+  "runtimeEvidenceState": "passed-real-cross-process-smoke",
+  "runtimeEvidenceRecord": "cuda-ipc-import-cross-process-runtime-evidence.json",
+  "isPackageConsumerRuntimeProof": false,
+  "canPublishPublicly": false,
+  "canCloseReleaseIssue": false
+}

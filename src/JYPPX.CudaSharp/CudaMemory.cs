@@ -23,8 +23,14 @@ public partial class CudaMemory : IDisposable
     }
 
     internal CudaMemory(SafeCudaMemoryHandle handle)
+        : this(handle, isIpcImported: false)
+    {
+    }
+
+    private CudaMemory(SafeCudaMemoryHandle handle, bool isIpcImported)
     {
         _handle = handle ?? throw new ArgumentNullException(nameof(handle));
+        IsIpcImported = isIpcImported;
         SizeInBytes = checked((int)NativeCudaApi.GetMemorySize(_handle));
     }
 
@@ -33,6 +39,9 @@ public partial class CudaMemory : IDisposable
     /// 获取分配大小，单位为字节。
     /// </summary>
     public int SizeInBytes { get; }
+
+    /// <summary>Gets whether this wrapper owns a process-local CUDA IPC mapping. 获取此 wrapper 是否拥有进程内 CUDA IPC mapping。</summary>
+    public bool IsIpcImported { get; }
 
     internal SafeCudaMemoryHandle Handle => _handle;
 
@@ -50,6 +59,47 @@ public partial class CudaMemory : IDisposable
     public CudaIpcExportToken ExportIpcToken()
     {
         return NativeCudaApi.ExportMemoryIpcToken(_handle);
+    }
+
+    /// <summary>Creates a transport descriptor for this synchronous allocation. 为当前同步 allocation 创建传输 descriptor。</summary>
+    /// <returns>The copied token and exact allocation size. 复制型 token 与精确 allocation 大小。</returns>
+    public CudaIpcMemoryExportDescriptor ExportIpcDescriptor()
+    {
+        return new CudaIpcMemoryExportDescriptor(ExportIpcToken(), SizeInBytes);
+    }
+
+    /// <summary>Opens a process-local mapping from an exported CUDA IPC memory descriptor. 从导出的 CUDA IPC memory descriptor 打开进程内 mapping。</summary>
+    /// <param name="descriptor">The token and exact allocation size transported from another process. 从其他进程传输的 token 与精确 allocation 大小。</param>
+    /// <returns>An owner wrapper that closes the mapping with <c>cudaIpcCloseMemHandle</c>. 使用 <c>cudaIpcCloseMemHandle</c> 关闭 mapping 的 owner wrapper。</returns>
+    public static CudaMemory ImportIpcDescriptor(CudaIpcMemoryExportDescriptor descriptor)
+    {
+        if (descriptor == null)
+        {
+            throw new ArgumentNullException(nameof(descriptor));
+        }
+
+        NativeBridgeLoader.EnsureInitialized();
+        return new CudaMemory(NativeCudaApi.ImportMemoryIpcDescriptor(descriptor), isIpcImported: true);
+    }
+
+    /// <summary>Tries to import a CUDA IPC memory descriptor and returns a diagnostic on CUDA failure. 尝试导入 CUDA IPC memory descriptor，并在 CUDA 失败时返回诊断。</summary>
+    public static bool TryImportIpcDescriptor(
+        CudaIpcMemoryExportDescriptor descriptor,
+        out CudaMemory? memory,
+        out string diagnostic)
+    {
+        try
+        {
+            memory = ImportIpcDescriptor(descriptor);
+            diagnostic = string.Empty;
+            return true;
+        }
+        catch (CudaException exception)
+        {
+            memory = null;
+            diagnostic = exception.Message;
+            return false;
+        }
     }
 
     /// <summary>Tries to copy an IPC export token and returns a diagnostic on failure. 尝试复制 IPC 导出 token，失败时返回诊断。</summary>
@@ -778,6 +828,12 @@ public partial class CudaMemory : IDisposable
         if (stream == null)
         {
             throw new ArgumentNullException(nameof(stream));
+        }
+
+        if (IsIpcImported)
+        {
+            throw new InvalidOperationException(
+                "Imported CUDA IPC memory must be disposed synchronously so cudaIpcCloseMemHandle can release the mapping.");
         }
 
         NativeCudaApi.FreeMemoryAsync(_handle, stream.Handle);

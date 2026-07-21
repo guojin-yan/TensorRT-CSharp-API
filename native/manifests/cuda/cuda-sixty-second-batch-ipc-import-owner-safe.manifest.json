@@ -1,0 +1,45 @@
+{
+  "$schema": "../bridge-api.schema.json",
+  "module": "cuda",
+  "versionLine": "common",
+  "apis": [
+    {
+      "id": "cuda-ipc-open-event-handle-owner-safe",
+      "entryPoint": "jyppx_cuda_ipc_import_event_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "token", "type": "const uint8_t*", "direction": "in", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "token_size", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_event", "type": "JYPPX_CudaEvent**", "direction": "out" }
+      ]
+    },
+    {
+      "id": "cuda-ipc-open-mem-handle-owner-safe",
+      "entryPoint": "jyppx_cuda_ipc_import_memory_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "token", "type": "const uint8_t*", "direction": "in", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "token_size", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "allocation_size", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_memory", "type": "JYPPX_CudaMemory**", "direction": "out" }
+      ]
+    },
+    {
+      "id": "cuda-ipc-close-mem-handle-owner-safe",
+      "entryPoint": "jyppx_cuda_ipc_close_imported_memory_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "memory", "type": "JYPPX_CudaMemory*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" }
+      ]
+    }
+  ]
+}

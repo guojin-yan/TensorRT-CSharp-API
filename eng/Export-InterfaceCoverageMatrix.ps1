@@ -1244,6 +1244,9 @@ function Find-ExplicitCudaManifestApis {
     "cudaMemAdvise_v2" = @("id:cuda-managed-memory-advise-location-range-safe")
     "cudaIpcGetEventHandle" = @("id:cuda-ipc-get-event-handle-copied-export-token-safe")
     "cudaIpcGetMemHandle" = @("id:cuda-ipc-get-mem-handle-copied-export-token-safe")
+    "cudaIpcOpenEventHandle" = @("id:cuda-ipc-open-event-handle-owner-safe")
+    "cudaIpcOpenMemHandle" = @("id:cuda-ipc-open-mem-handle-owner-safe")
+    "cudaIpcCloseMemHandle" = @("id:cuda-ipc-close-mem-handle-owner-safe")
   }
   $deferredHistoryAliasMap = @{
     "cudaCreateSurfaceObject" = @("id:cuda-create-surface-object-deferred")
@@ -1305,6 +1308,9 @@ function Find-ExplicitCudaManifestApis {
     "cudaStreamGetDevResource" = @("id:*stream-get-dev-resource-deferred")
     "cudaIpcGetEventHandle" = @("id:cuda-ipc-get-event-handle-deferred")
     "cudaIpcGetMemHandle" = @("id:cuda-ipc-get-mem-handle-deferred")
+    "cudaIpcOpenEventHandle" = @("id:cuda-ipc-open-event-handle-deferred")
+    "cudaIpcOpenMemHandle" = @("id:cuda-ipc-open-mem-handle-deferred")
+    "cudaIpcCloseMemHandle" = @("id:cuda-ipc-close-mem-handle-deferred")
     "cudaLogsCurrent" = @("id:*logs-current-deferred")
     "cudaLogsDumpToMemory" = @("id:*logs-dump-to-memory-deferred")
     "cudaLogsDumpToFile" = @("id:*logs-dump-to-file-deferred")

@@ -27,6 +27,7 @@ JYPPX_StatusCode jyppx_cuda_memory_alloc_async(size_t size, JYPPX_CudaStream* st
     memory->size = size;
     memory->is_managed = false;
     memory->is_ipc_exportable = false;
+    memory->release_mode = MemoryReleaseMode::CudaFree;
 
     auto* stream_object = reinterpret_cast<StreamObject*>(stream);
     status = jyppx::cuda::map_cuda_status(cudaMallocAsync(&memory->pointer, size, stream_object->handle), "cudaMallocAsync");
@@ -65,6 +66,15 @@ JYPPX_StatusCode jyppx_cuda_memory_free_async(JYPPX_CudaMemory* memory, JYPPX_Cu
     }
 
     auto* memory_object = reinterpret_cast<MemoryObject*>(memory);
+    if (memory_object->release_mode != MemoryReleaseMode::CudaFree)
+    {
+        jyppx::cuda::set_cuda_error(
+            "cudaFreeAsync",
+            0,
+            "ipc-memory-close-required",
+            "Imported CUDA IPC memory cannot be released asynchronously and must use cudaIpcCloseMemHandle.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
 #if JYPPX_HAS_CUDA_TOOLKIT
     auto* stream_object = reinterpret_cast<StreamObject*>(stream);
     status = jyppx::cuda::map_cuda_status(cudaFreeAsync(memory_object->pointer, stream_object->handle), "cudaFreeAsync");
@@ -109,6 +119,7 @@ JYPPX_StatusCode jyppx_cuda_memory_alloc_from_pool_async(size_t size, uint64_t p
     memory->size = size;
     memory->is_managed = false;
     memory->is_ipc_exportable = false;
+    memory->release_mode = MemoryReleaseMode::CudaFree;
 
     auto* stream_object = reinterpret_cast<StreamObject*>(stream);
     cudaMemPool_t pool = reinterpret_cast<cudaMemPool_t>(static_cast<uintptr_t>(pool_handle));

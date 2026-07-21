@@ -1,4 +1,4 @@
-# CUDA IPC 导出 Token：只复制，不暴露指针
+# CUDA IPC 导出与 Owner-Safe Import
 
 `CudaEvent.ExportIpcToken()` 与 `CudaMemory.ExportIpcToken()` 会把 CUDA 的 opaque IPC
 导出 handle 复制成不可变托管值。公开 API 不返回 CUDA event handle、device pointer、
@@ -24,23 +24,62 @@ exported event，再操作 imported event，行为未定义。
 
 ```csharp
 using CudaMemory memory = new CudaMemory(4096);
-CudaIpcExportToken token = memory.ExportIpcToken();
-byte[] serialized = token.ToArray();
+CudaIpcMemoryExportDescriptor descriptor = memory.ExportIpcDescriptor();
+byte[] serialized = descriptor.Token.ToArray();
+int allocationSize = descriptor.SizeInBytes;
+
+// 建立 share handle 后，再提交需要由 importer 观察的写入。
+memory.Fill(0x2A);
 ```
 
 只有 `CudaMemory(int)` 同步路径得到的 `cudaMalloc` 基址可以导出。managed memory、
 `cudaMallocAsync` 与 memory-pool allocation 会 fail closed。所有 imported mapping 停止使用前，
 源 `CudaMemory` 必须保持存活。
 
+token 字节与精确 allocation size 必须作为一个整体在可信通道中传输。接收进程重建不可变
+descriptor，并获得明确拥有 mapping 的 wrapper：
+
+```csharp
+CudaIpcMemoryExportDescriptor received =
+    CudaIpcMemoryExportDescriptor.FromBytes(serialized, allocationSize);
+using CudaMemory imported = CudaMemory.ImportIpcDescriptor(received);
+Console.WriteLine($"Imported={imported.IsIpcImported} Size={imported.SizeInBytes}");
+```
+
+imported `CudaMemory.Dispose()` 固定路由到 `cudaIpcCloseMemHandle`。CUDA 没有异步 IPC close，
+所以 `FreeAsync` 会 fail closed。普通 allocation 继续使用 `cudaFree`，两条释放路径不能混用。
+
+## 导入 Event
+
+接收进程从传输字节重建 event token，并拥有进程内 event wrapper：
+
+```csharp
+CudaIpcExportToken received =
+    CudaIpcExportToken.FromBytes(CudaIpcExportTokenKind.Event, serializedEventToken);
+using CudaEvent importedEvent = CudaEvent.ImportIpcToken(received);
+importedEvent.Synchronize();
+```
+
+imported event 使用 `cudaEventDestroy` 释放。其整个生命周期内，导出进程必须保持源 event 存活。
+
+Windows/WDDM 上建议固定采用以下顺序：先导出 memory descriptor 与 event token，再提交 producer
+写入并在写入后 record 已导出的 event，最后由 importer 等待该 event。仓库 smoke 会锁定此顺序，
+因为在已完成写入之后才建立 Windows 兼容 share handle 时，验证机的 imported mapping 无法观察
+此前内容。
+
 `ToArray()` 每次返回新副本。`ToString()` 只显示 kind 与 length；日志中不打印 token
 内容，也不要把 token 当成普通诊断字段上传。
 
-## 有意保留的边界
+## Ownership 与 Proof 边界
 
-本批不实现 `cudaIpcOpenEventHandle`、`cudaIpcOpenMemHandle` 或
-`cudaIpcCloseMemHandle`。import 会创建当前进程内的资源，需要另行设计 device affinity、
-peer access、引用计数、失败恢复和 cleanup。export 成功不等于跨进程 runtime proof，也不等于
-package-consumer proof。
+bridge 现在通过 owner-safe wrapper 实现 `cudaIpcOpenEventHandle`、
+`cudaIpcOpenMemHandle` 与 `cudaIpcCloseMemHandle`。memory open flags 固定为
+`cudaIpcMemLazyEnablePeerAccess`；native 校验 64 字节 token，托管 descriptor 保留精确长度，
+普通 free 路径遇到 imported mapping 会 fail closed。token/size 的传输通道、进程信任、device
+选择和 exporter 生命周期仍由应用负责。
+
+仓库内跨进程 smoke 属于真实本地 runtime evidence，但不是 packed-package consumer proof、
+公开部署证明、发布批准或 post-publish verification。
 
 NVIDIA 将 Windows CUDA IPC 定义为兼容用途支持，但不建议用于性能敏感设计。实际部署前应
 检查设备 IPC 能力，并在目标机器上验证真实多进程流程。

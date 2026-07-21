@@ -336,12 +336,15 @@ internal static class GeneratedEntryPointNames
     public const string CudaImportExternalSemaphoreDeferred = "jyppx_cuda_import_external_semaphore_deferred";
     public const string CudaInitDevice = "jyppx_cuda_init_device";
     public const string CudaIpcCloseMemHandleDeferred = "jyppx_cuda_ipc_close_mem_handle_deferred";
+    public const string CudaIpcCloseMemHandleOwnerSafe = "jyppx_cuda_ipc_close_imported_memory_safe";
     public const string CudaIpcGetEventHandleCopiedExportTokenSafe = "jyppx_cuda_ipc_export_event_token_safe";
     public const string CudaIpcGetEventHandleDeferred = "jyppx_cuda_ipc_get_event_handle_deferred";
     public const string CudaIpcGetMemHandleCopiedExportTokenSafe = "jyppx_cuda_ipc_export_memory_token_safe";
     public const string CudaIpcGetMemHandleDeferred = "jyppx_cuda_ipc_get_mem_handle_deferred";
     public const string CudaIpcOpenEventHandleDeferred = "jyppx_cuda_ipc_open_event_handle_deferred";
+    public const string CudaIpcOpenEventHandleOwnerSafe = "jyppx_cuda_ipc_import_event_safe";
     public const string CudaIpcOpenMemHandleDeferred = "jyppx_cuda_ipc_open_mem_handle_deferred";
+    public const string CudaIpcOpenMemHandleOwnerSafe = "jyppx_cuda_ipc_import_memory_safe";
     public const string CudaKernelSetAttributeForDeviceDeferred = "jyppx_cuda_kernel_set_attribute_for_device_deferred";
     public const string CudaKernelSetAttributeForDeviceLibraryOwnerNameSafe = "jyppx_cuda_kernel_library_set_kernel_attribute_for_device_safe";
     public const string CudaLaunchCooperativeKernel = "jyppx_cuda_launch_cooperative_kernel";
