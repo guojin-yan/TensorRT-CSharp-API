@@ -445,7 +445,7 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
     "IRuntime::getLogger" = @("id:*runtime-has-logger", "id:*runtime-get-logger-deferred")
     "IParser::getNbErrors" = @("id:*onnx-parser-get-error-count", "id:*parser-get-nb-errors")
     "IParser::getNbSubgraphs" = @("id:*onnx-parser-get-subgraph-count")
-    "IParser::getLayerOutputTensor" = @("id:*onnx-parser-layer-output-tensor-exists", "id:*parser-get-layer-output-tensor-deferred")
+    "IParser::getLayerOutputTensor" = @("id:*onnx-parser-get-layer-output-tensor-metadata", "id:*onnx-parser-layer-output-tensor-exists", "id:*parser-get-layer-output-tensor-deferred")
     "IParser::getSubgraphNodes" = @("id:*onnx-parser-get-subgraph-node-count", "id:*onnx-parser-get-subgraph-node")
     "IParser::getUsedVCPluginLibraries" = @("id:*onnx-parser-get-used-vc-plugin-library-count", "id:*onnx-parser-get-used-vc-plugin-library")
     "IParser::parseWithWeightDescriptors" = @("id:*onnx-parser-parse-with-weight-descriptors", "id:*parser-parse-with-weight-descriptors-deferred")

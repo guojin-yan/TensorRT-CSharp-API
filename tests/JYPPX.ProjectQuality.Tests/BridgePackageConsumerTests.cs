@@ -164,7 +164,7 @@ public sealed class BridgePackageConsumerTests
         Assert.Contains("parser.GetDiagnosticSnapshot()", script);
         Assert.Contains("onnx-parser-diagnostic-snapshot", script);
         Assert.Contains("onnx-parser-diagnostic-summary", script);
-        Assert.Contains("onnx-parser-diagnostic-snapshot;onnx-parser-diagnostic-summary;onnx-parser-refitter-diagnostic-snapshot;onnx-parser-refitter-diagnostic-summary", script);
+        Assert.Contains("onnx-parser-diagnostic-snapshot;onnx-parser-diagnostic-summary;onnx-parser-layer-output-copied-metadata;onnx-parser-refitter-diagnostic-snapshot;onnx-parser-refitter-diagnostic-summary", script);
         Assert.Contains("TensorRtOnnxParserRefitterDiagnosticSnapshot", script);
         Assert.Contains("TensorRtOnnxParserRefitterDiagnosticSnapshot.ToSummary", script);
         Assert.Contains("TensorRtOnnxParserRefitterDiagnosticSummary", script);

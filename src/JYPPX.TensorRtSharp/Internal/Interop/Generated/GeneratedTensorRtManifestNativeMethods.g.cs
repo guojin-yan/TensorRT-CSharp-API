@@ -2175,6 +2175,9 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
     internal static extern BridgeStatusCode jyppx_trt10_onnx_parser_get_flags(SafeTensorRtObjectHandle parser, out uint out_flags);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt10_onnx_parser_get_layer_output_tensor_metadata(SafeTensorRtObjectHandle parser, IntPtr layer_name, long output_index, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size, out int out_exists, out NativeTensorRtDims64 out_shape, out int out_data_type, out int out_location, out uint out_allowed_formats, out uint out_flags);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt10_onnx_parser_get_subgraph_count(SafeTensorRtObjectHandle parser, out long out_count);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -5833,6 +5836,9 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt11_onnx_parser_get_flag(SafeTensorRtObjectHandle parser, int flag, out int out_enabled);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt11_onnx_parser_get_layer_output_tensor_metadata(SafeTensorRtObjectHandle parser, IntPtr layer_name, long output_index, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size, out int out_exists, out NativeTensorRtDims64 out_shape, out int out_data_type, out int out_location, out uint out_allowed_formats, out uint out_flags);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt11_onnx_parser_get_subgraph_count(SafeTensorRtObjectHandle parser, out long out_count);

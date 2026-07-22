@@ -419,7 +419,7 @@ public sealed class InterfaceCoverageAliasTests
 
         Assert.Contains("\"IParser::getNbErrors\" = @(\"id:*onnx-parser-get-error-count\", \"id:*parser-get-nb-errors\")", script);
         Assert.Contains("\"IParser::getNbSubgraphs\" = @(\"id:*onnx-parser-get-subgraph-count\")", script);
-        Assert.Contains("\"IParser::getLayerOutputTensor\" = @(\"id:*onnx-parser-layer-output-tensor-exists\", \"id:*parser-get-layer-output-tensor-deferred\")", script);
+        Assert.Contains("\"IParser::getLayerOutputTensor\" = @(\"id:*onnx-parser-get-layer-output-tensor-metadata\", \"id:*onnx-parser-layer-output-tensor-exists\", \"id:*parser-get-layer-output-tensor-deferred\")", script);
         Assert.Contains("\"IParser::getSubgraphNodes\" = @(\"get-subgraph-node-count\", \"get-subgraph-node\", \"subgraph-node\", \"subgraph-nodes\")", script);
         Assert.Contains("\"IParser::getSubgraphNodes\" = @(\"id:*onnx-parser-get-subgraph-node-count\", \"id:*onnx-parser-get-subgraph-node\")", script);
         Assert.Contains("\"IParser::getUsedVCPluginLibraries\" = @(\"get-used-vc-plugin-library-count\", \"get-used-vc-plugin-library\", \"used-vc-plugin-library\", \"used-vc-plugin-libraries\")", script);

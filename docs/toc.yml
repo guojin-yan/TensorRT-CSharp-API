@@ -288,6 +288,8 @@
     href: articles/zh-cn/plugin-registry-inventory-user-guide.md
   - name: Deferred Readonly API Upgrade Playbook
     href: articles/zh-cn/deferred-readonly-api-upgrade-playbook.md
+  - name: ONNX Parser Layer Output Copied Metadata
+    href: articles/zh-cn/onnx-parser-layer-output-copied-metadata.md
   - name: CSharp Wrapper Lifetime Design
     href: articles/zh-cn/csharp-wrapper-lifetime-design.md
   - name: Callback Allocator Listener Readonly Safety Gates

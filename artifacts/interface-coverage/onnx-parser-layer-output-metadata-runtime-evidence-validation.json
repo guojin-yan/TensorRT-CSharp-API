@@ -1,0 +1,86 @@
+{
+  "schemaVersion": "onnx-parser-layer-output-metadata-runtime-evidence-validation.v1",
+  "validationState": "passed",
+  "checkCount": 15,
+  "failureCount": 0,
+  "checks": [
+    {
+      "name": "schema",
+      "passed": true,
+      "detail": "onnx-parser-layer-output-metadata-runtime-evidence.v1"
+    },
+    {
+      "name": "inventory",
+      "passed": true,
+      "detail": "598 deferred rows and no low-risk rows"
+    },
+    {
+      "name": "vendor-version-guards",
+      "passed": true,
+      "detail": "TRT8 absent; TRT10/11 vtable method present"
+    },
+    {
+      "name": "bindings",
+      "passed": true,
+      "detail": "196 manifests / 3973 records"
+    },
+    {
+      "name": "abi-parity",
+      "passed": true,
+      "detail": "TRT8/10/11 missing ABI/export count is zero"
+    },
+    {
+      "name": "trt8-guard",
+      "passed": true,
+      "detail": "TRT8 parser dependency is a controlled skip and the unavailable API is not dispatched"
+    },
+    {
+      "name": "trt10-runtime",
+      "passed": true,
+      "detail": "TRT10 parser metadata smoke passed"
+    },
+    {
+      "name": "trt10-identity-metadata",
+      "passed": true,
+      "detail": "output Float [-1,4]"
+    },
+    {
+      "name": "trt10-copy-semantics",
+      "passed": true,
+      "detail": "Try/Get match; missing false; pointer-free"
+    },
+    {
+      "name": "trt10-enqueue",
+      "passed": true,
+      "detail": "Enclosing identity enqueue/output match passed"
+    },
+    {
+      "name": "trt11-probe-boundary",
+      "passed": true,
+      "detail": "TRT11 metadata not claimed after owner creation failed"
+    },
+    {
+      "name": "package-consumers",
+      "passed": true,
+      "detail": "Three no-ProjectReference restore/build validations"
+    },
+    {
+      "name": "package-classification",
+      "passed": true,
+      "detail": "Compile-surface classification retained"
+    },
+    {
+      "name": "deferred-history",
+      "passed": true,
+      "detail": "Deferred history retained"
+    },
+    {
+      "name": "non-publish-boundary",
+      "passed": true,
+      "detail": "No runtime/release/publication promotion"
+    }
+  ],
+  "performsPublish": false,
+  "canPublishPublicly": false,
+  "canCloseReleaseIssue": false
+}

@@ -1,28 +1,41 @@
 # TensorRT Deferred Safe-Uplift Candidate Audit
 
-- Source baseline: `f4c38e74680c02cdb4c1be06ecc8d7347a591159`
+- Source baseline: `fedf08d6659af1e7e614e3157e7bbe7d2de30cc9`
 - TensorRT deferred rows: `598`
 - Reviewed unique candidates: `50`
 - Risk split: low `0`, medium `112`, high `486`
+- CUDA immediate-safe candidates: `0`
 
 ## Decision
 
-This batch does not promote a deferred TensorRT API. The remaining reviewed candidates still depend on calibrator/callback trampolines, borrowed `IDimensionExpr` lifetime, error-recorder refcounting, plugin ownership, runtime deserialization ownership, or the TensorRT 8 consistency-checker symbol that is absent from the inspected import libraries and DLLs.
+The automatic selector still has no low-risk candidate. Callback trampolines, borrowed expression pointers,
+error-recorder refcounts, plugin mutation, allocator/resource ownership, device pointers, deserialization ownership,
+and the missing TensorRT 8 consistency-checker symbol remain deferred.
 
-Deleting deferred manifests or adding a pointer-shaped managed surface would change coverage numbers without producing an owner-safe runtime API, so the existing history remains intact.
+This batch selects `IParser::getLayerOutputTensor` only as an owner-scoped copied-metadata safe alternative. It does
+not promote the vendor's borrowed `ITensor*`, and it does not delete the original deferred record.
 
-## Selected Alternative
+## Vendor ABI Audit
 
-The implementation batch moves to the existing owner-scoped network surface:
+| Line | Header | LIB/DLL named symbol | Result |
+| --- | --- | --- | --- |
+| TRT8 | method absent | not applicable | controlled `NotSupported` |
+| TRT10 | pure virtual method present | no named symbol expected or found | versioned adapter link plus real runtime smoke required |
+| TRT11 | pure virtual method present | no named symbol expected or found | versioned adapter link plus compatible-host smoke required |
 
-- `--inputIOFormats`
-- `--outputIOFormats`
-- `--precisionConstraints`
-- `--layerPrecisions`
-- `--layerOutputTypes`
+`getLayerOutputTensor` is dispatched through the C++ parser vtable. A `dumpbin` search therefore should not find a
+same-named import-library member or DLL export. Header presence, independent native builds, bridge export parity and
+runtime execution are the relevant checks.
 
-`TensorRtTensor`, `TensorRtLayer`, `TensorRtNetworkDefinition`, and `TensorRtBuilderConfig` already carry managed owner/lifetime rules and typed set/get APIs. This makes the batch useful to `TensorRtExec` without exposing `IntPtr`, `nint`, `UIntPtr`, `SafeHandle`, borrowed tensors, plugin objects, or callback state.
+## Copied Contract
+
+The native bridge reads the parser-owned tensor only while the parser handle is valid and copies tensor name,
+64-bit shape, data type, location, allowed formats, and dynamic/shape/execution/network-input/network-output flags.
+The public surface returns `TensorRtOnnxLayerOutputTensorMetadata`; it creates no tensor handle and exposes no
+`IntPtr`, `nint`, `UIntPtr`, `SafeHandle`, device pointer or borrowed tensor object.
 
 ## Boundary
 
-No callback, plugin lifecycle, refcount, allocator/resource, device pointer, borrowed pointer, runtime deserialization owner, or consistency checker API is promoted by this audit. Old deferred manifests remain present.
+This readonly diagnostic snapshot is not inference proof, external-model proof, package-consumer runtime proof,
+post-publish proof or permission to delete deferred history. TRT11 remains dependency/runtime-probe-only until its
+vendor builder/runtime owner can be created on a compatible host.

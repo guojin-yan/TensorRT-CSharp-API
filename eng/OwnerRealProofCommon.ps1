@@ -154,7 +154,7 @@ function Test-OwnerPlaceholder {
   return [string]::IsNullOrWhiteSpace($text) -or
     $text.StartsWith("<owner-", [StringComparison]::OrdinalIgnoreCase) -or
     $text.StartsWith("<external-", [StringComparison]::OrdinalIgnoreCase) -or
-    $text.Contains("example-not-real-proof", [StringComparison]::OrdinalIgnoreCase)
+    $text.IndexOf("example-not-real-proof", [StringComparison]::OrdinalIgnoreCase) -ge 0
 }
 
 function Test-Sha256Text {

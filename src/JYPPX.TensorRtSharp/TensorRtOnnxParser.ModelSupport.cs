@@ -144,6 +144,47 @@ public sealed partial class TensorRtOnnxParser
         return NativeBridgeApi.OnnxParserLayerOutputTensorExists(Line, _handle, layerName, outputIndex);
     }
 
+    /// <summary>
+    /// Tries to copy metadata for one ONNX layer output tensor without exposing the parser-owned tensor pointer.
+    /// 尝试复制一个 ONNX layer 输出 tensor 的元数据，不暴露 parser 拥有的 tensor 指针。
+    /// </summary>
+    /// <param name="layerName">The ONNX layer name. ONNX layer 名称。</param>
+    /// <param name="outputIndex">The zero-based output index. 从零开始的输出索引。</param>
+    /// <param name="metadata">The copied metadata when found; otherwise <c>null</c>. 找到时返回复制元数据，否则为 <c>null</c>。</param>
+    /// <returns><c>true</c> when the layer output exists. 当 layer 输出存在时返回 <c>true</c>。</returns>
+    /// <remarks>
+    /// TensorRT 10 and 11 are supported. TensorRT 8 does not expose <c>IParser::getLayerOutputTensor</c>.
+    /// 支持 TensorRT 10 和 11；TensorRT 8 未提供 <c>IParser::getLayerOutputTensor</c>。
+    /// </remarks>
+    public bool TryGetLayerOutputTensorMetadata(
+        string layerName,
+        long outputIndex,
+        out TensorRtOnnxLayerOutputTensorMetadata? metadata)
+    {
+        return NativeBridgeApi.TryGetOnnxParserLayerOutputTensorMetadata(
+            Line, _handle, layerName, outputIndex, out metadata);
+    }
+
+    /// <summary>
+    /// Gets copied metadata for one ONNX layer output tensor without exposing the parser-owned tensor pointer.
+    /// 获取一个 ONNX layer 输出 tensor 的复制元数据，不暴露 parser 拥有的 tensor 指针。
+    /// </summary>
+    /// <param name="layerName">The ONNX layer name. ONNX layer 名称。</param>
+    /// <param name="outputIndex">The zero-based output index. 从零开始的输出索引。</param>
+    /// <returns>Pointer-free copied tensor metadata. 无指针逃逸的 tensor 复制元数据。</returns>
+    /// <exception cref="KeyNotFoundException">The layer or output index was not found. 找不到 layer 或输出索引。</exception>
+    public TensorRtOnnxLayerOutputTensorMetadata GetLayerOutputTensorMetadata(
+        string layerName,
+        long outputIndex = 0)
+    {
+        if (TryGetLayerOutputTensorMetadata(layerName, outputIndex, out TensorRtOnnxLayerOutputTensorMetadata? metadata))
+        {
+            return metadata!;
+        }
+
+        throw new KeyNotFoundException($"ONNX layer '{layerName}' does not contain output index {outputIndex}.");
+    }
+
     private IReadOnlyList<long> ReadSubgraphNodes(long subgraphIndex, long nodeCount)
     {
         if (nodeCount <= 0)

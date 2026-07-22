@@ -1387,6 +1387,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt10OnnxParserGetErrorCount = "jyppx_trt10_onnx_parser_get_error_count";
     public const string Trt10OnnxParserGetFlag = "jyppx_trt10_onnx_parser_get_flag";
     public const string Trt10OnnxParserGetFlags = "jyppx_trt10_onnx_parser_get_flags";
+    public const string Trt10OnnxParserGetLayerOutputTensorMetadata = "jyppx_trt10_onnx_parser_get_layer_output_tensor_metadata";
     public const string Trt10OnnxParserGetSubgraphCount = "jyppx_trt10_onnx_parser_get_subgraph_count";
     public const string Trt10OnnxParserGetSubgraphNode = "jyppx_trt10_onnx_parser_get_subgraph_node";
     public const string Trt10OnnxParserGetSubgraphNodeCount = "jyppx_trt10_onnx_parser_get_subgraph_node_count";
@@ -2607,6 +2608,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt11OnnxParserErrorGetNodeOperator = "jyppx_trt11_onnx_parser_error_get_node_operator";
     public const string Trt11OnnxParserGetError = "jyppx_trt11_onnx_parser_get_error";
     public const string Trt11OnnxParserGetFlag = "jyppx_trt11_onnx_parser_get_flag";
+    public const string Trt11OnnxParserGetLayerOutputTensorMetadata = "jyppx_trt11_onnx_parser_get_layer_output_tensor_metadata";
     public const string Trt11OnnxParserGetSubgraphCount = "jyppx_trt11_onnx_parser_get_subgraph_count";
     public const string Trt11OnnxParserGetSubgraphNode = "jyppx_trt11_onnx_parser_get_subgraph_node";
     public const string Trt11OnnxParserGetSubgraphNodeCount = "jyppx_trt11_onnx_parser_get_subgraph_node_count";

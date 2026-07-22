@@ -1,0 +1,150 @@
+{
+  "schemaVersion": "onnx-parser-layer-output-metadata-runtime-evidence.v1",
+  "generatedAtUtc": "2026-07-22T15:34:00.0000000Z",
+  "sourceHeadBeforeBatch": "fedf08d6659af1e7e614e3157e7bbe7d2de30cc9",
+  "evidenceKind": "local-project-reference-copied-readonly-diagnostics",
+  "host": {
+    "os": "Microsoft Windows NT 10.0.26200.0",
+    "architecture": "X64",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02",
+    "dotnetSdk": "10.0.301"
+  },
+  "candidateInventory": {
+    "tensorRtDeferredRows": 598,
+    "lowRiskRows": 0,
+    "mediumRiskRows": 112,
+    "highRiskRows": 486,
+    "cudaImmediateSafeCandidates": 0
+  },
+  "vendorAbi": {
+    "tensorRt8HeaderMethod": "absent",
+    "tensorRt10HeaderMethod": "present-pure-virtual",
+    "tensorRt11HeaderMethod": "present-pure-virtual",
+    "dispatchKind": "C++-vtable",
+    "namedImportLibrarySymbolExpected": false,
+    "namedDllExportExpected": false,
+    "dumpbinNamedSymbolMatches": 0
+  },
+  "bindings": {
+    "manifestCount": 196,
+    "apiRecordCount": 3973,
+    "generatedTwiceIdempotent": true,
+    "outputValidationPassed": true
+  },
+  "nativeAbi": {
+    "tensorRt8": { "declared": 991, "expectedExports": 991, "matchedExports": 991, "missing": 0 },
+    "tensorRt10": { "declared": 1087, "expectedExports": 1087, "matchedExports": 1087, "missing": 0 },
+    "tensorRt11": { "declared": 1234, "expectedExports": 1234, "matchedExports": 1234, "missing": 0 }
+  },
+  "tensorRt8": {
+    "state": "parser-dependency-controlled-skip",
+    "tensorRtVersion": "8.6.1.6",
+    "cudaToolkitVersion": "12.1",
+    "bridgeRelativePath": "build-out/win-x64-trt8-cuda12-release/bin/Release/jyppxtrtbridge.dll",
+    "bridgeLengthBytes": 996864,
+    "bridgeSha256": "AF00FCBF3DDB95E91F248F03811D108C993813D06630DFBE90FFF60A4D38D9BB",
+    "smokeAssemblyRelativePath": "smoke/OnnxToEngineSmokeRunner/bin/Debug/net8.0/OnnxToEngineSmokeRunner.dll",
+    "smokeAssemblyLengthBytes": 47104,
+    "smokeAssemblySha256": "AFCF571530B59B4291B14B663DE42DA1CDECC77FAC8826B57DF5BD7BDED60FDD",
+    "runtimeCreated": true,
+    "builderCreated": true,
+    "parserConstructionAttempted": true,
+    "metadataQueryAttempted": false,
+    "controlledSkip": true,
+    "exitCode": 0,
+    "diagnostic": "TensorRT ONNX parser library was not found at build time.",
+    "nativeEntrypointPresent": false,
+    "managedGuardBeforeNativeDispatch": true,
+    "deferredHistoryRetained": true
+  },
+  "tensorRt10": {
+    "state": "copied-metadata-runtime-passed",
+    "tensorRtVersion": "10.11.0.33",
+    "cudaToolkitVersion": "12.9",
+    "bridgeRelativePath": "build-out/win-x64-trt10-cuda12-release/bin/Release/jyppxtrtbridge.dll",
+    "bridgeLengthBytes": 1067520,
+    "bridgeSha256": "8F3FFE8CF6B31D46E34D8B9321B8FEF19D04889CF087E0C46FFCF5395732CC05",
+    "smokeAssemblyRelativePath": "smoke/OnnxToEngineSmokeRunner/bin/Debug/net8.0/OnnxToEngineSmokeRunner.dll",
+    "smokeAssemblyLengthBytes": 47104,
+    "smokeAssemblySha256": "AFCF571530B59B4291B14B663DE42DA1CDECC77FAC8826B57DF5BD7BDED60FDD",
+    "exitCode": 0,
+    "parsed": true,
+    "presenceQuery": true,
+    "tryGetFound": true,
+    "getMatchesTryGet": true,
+    "missingLayerFound": false,
+    "tensorName": "output",
+    "shape": [-1, 4],
+    "dataType": "Float",
+    "location": "Device",
+    "hasDynamicDimension": true,
+    "isShapeTensor": false,
+    "isExecutionTensor": true,
+    "isNetworkInput": false,
+    "isNetworkOutput": true,
+    "pointerFreeCopiedMetadata": true,
+    "retainsNativeTensor": false,
+    "enqueueSucceeded": true,
+    "outputMatch": true
+  },
+  "tensorRt11": {
+    "state": "dependency-runtime-probe-only",
+    "tensorRtVersion": "11.0.0.114",
+    "cudaToolkitVersion": "12.9",
+    "bridgeAndVendorDllsLoaded": true,
+    "globalVersionAndRegistryRead": true,
+    "builderCreated": false,
+    "runtimeCreated": false,
+    "metadataQueryAttempted": false,
+    "controlledSkip": true,
+    "exitCode": 0,
+    "diagnostic": "createInferBuilder and createInferRuntime returned null TensorRT objects"
+  },
+  "packageConsumer": {
+    "managedPackage": {
+      "path": "build-out/onnx-layer-output-pack/managed/JYPPX.TensorRT.CSharp.API.4.0.0.nupkg",
+      "lengthBytes": 15131642,
+      "sha256": "DD54116C2481255C4073C375AC8E7C4912E3E01704E468559F9A26B4E00A042A"
+    },
+    "lines": [
+      {
+        "runtimeKey": "win-x64-trt8.6-cuda12.1-cudnn8.9",
+        "bridgePackageLengthBytes": 322100,
+        "bridgePackageSha256": "75D7F238833324B0AB0858F61CD35B3BA2B69BE1A4D7D320BAAF458347AF7B03",
+        "restoreSucceeded": true,
+        "buildSucceeded": true
+      },
+      {
+        "runtimeKey": "win-x64-trt10.11-cuda12.9-cudnn9.22",
+        "bridgePackageLengthBytes": 352119,
+        "bridgePackageSha256": "E2DC49C1A40B982B584ABABAB2610877FABDE3E73B9F681AE05CE876F8C950BE",
+        "restoreSucceeded": true,
+        "buildSucceeded": true
+      },
+      {
+        "runtimeKey": "win-x64-trt11.0-cuda12.9-cudnn9.22",
+        "bridgePackageLengthBytes": 278264,
+        "bridgePackageSha256": "7FDDF284AD042FB72F3BA1C7CB82E7BE8FEA22F5E95458D5AA073DE57BAB6724",
+        "restoreSucceeded": true,
+        "buildSucceeded": true
+      }
+    ],
+    "usesProjectReference": false,
+    "wrapperMarker": "onnx-parser-layer-output-copied-metadata",
+    "wrapperSurfaceEvidenceKind": "compile-surface-proof",
+    "isRuntimeExecutionProof": false
+  },
+  "deferredHistoryRetained": true,
+  "publicNativePointerAdded": false,
+  "isRuntimeExecutionProof": false,
+  "isPackageConsumerRuntimeProof": false,
+  "isPostPublishProof": false,
+  "canPromoteRuntimeProof": false,
+  "canPromoteReleaseProof": false,
+  "canDeleteDeferredRecord": false,
+  "canPublishPublicly": false,
+  "canCloseReleaseIssue": false,
+  "performsPublish": false,
+  "boundary": "TRT10 proves a copied pointer-free parser diagnostic snapshot on one local ProjectReference host. TRT8 is a controlled parser-dependency skip and TRT11 remains dependency/runtime-probe-only; neither queried metadata. Bridge-only local package consumer builds are compile-surface proof. None of these results is public clean package, post-publish, release-close, model-accuracy, or publication authorization evidence."
+}

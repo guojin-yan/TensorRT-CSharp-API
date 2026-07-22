@@ -6,6 +6,29 @@
 #error "JYPPX_TRT_EXPECTED_MAJOR must be defined before including onnx_parser_support.inc."
 #endif
 
+#if JYPPX_TENSORRT_VERSION_MAJOR_NUM >= 10
+static void reset_onnx_parser_layer_output_tensor_metadata(
+    JYPPX_Boolean* out_exists,
+    JYPPX_TensorRtDims64* out_shape,
+    int32_t* out_data_type,
+    int32_t* out_location,
+    uint32_t* out_allowed_formats,
+    uint32_t* out_flags)
+{
+    *out_exists = JYPPX_FALSE;
+    out_shape->nb_dims = 0;
+    for (int32_t index = 0; index < 8; ++index)
+    {
+        out_shape->d[index] = 0;
+    }
+
+    *out_data_type = 0;
+    *out_location = 0;
+    *out_allowed_formats = 0;
+    *out_flags = 0;
+}
+#endif
+
 #if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
 static JYPPX_StatusCode get_onnx_parser_payload_for_support(
     JYPPX_TensorRtOnnxParser* parser,
@@ -211,6 +234,95 @@ static JYPPX_StatusCode onnx_parser_layer_output_tensor_exists_with_seh_guard(
     return JYPPX_STATUS_OK;
 #endif
 }
+
+#if JYPPX_TENSORRT_VERSION_MAJOR_NUM >= 10
+static JYPPX_StatusCode copy_onnx_parser_layer_output_tensor_metadata_unprotected(
+    nvonnxparser::IParser* parser,
+    const char* layer_name,
+    const int64_t output_index,
+    char* output_buffer,
+    const size_t output_buffer_size,
+    size_t* out_required_size,
+    JYPPX_Boolean* out_exists,
+    JYPPX_TensorRtDims64* out_shape,
+    int32_t* out_data_type,
+    int32_t* out_location,
+    uint32_t* out_allowed_formats,
+    uint32_t* out_flags)
+{
+    const nvinfer1::ITensor* tensor = parser->getLayerOutputTensor(layer_name, output_index);
+    if (tensor == nullptr)
+    {
+        return copy_string_to_buffer("", output_buffer, output_buffer_size, out_required_size);
+    }
+
+    const auto dimensions = tensor->getDimensions();
+    if (dimensions.nbDims > 8)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "ONNX parser layer output tensor rank exceeds the bridge ABI limit of 8.");
+        return JYPPX_STATUS_INVALID_STATE;
+    }
+
+    *out_exists = JYPPX_TRUE;
+    out_shape->nb_dims = dimensions.nbDims;
+    bool has_dynamic_dimension = dimensions.nbDims < 0;
+    for (int32_t index = 0; index < 8; ++index)
+    {
+        const int64_t extent = index < dimensions.nbDims ? static_cast<int64_t>(dimensions.d[index]) : 0;
+        out_shape->d[index] = extent;
+        has_dynamic_dimension = has_dynamic_dimension || extent < 0;
+    }
+
+    *out_data_type = static_cast<int32_t>(tensor->getType());
+    *out_location = static_cast<int32_t>(tensor->getLocation());
+    *out_allowed_formats = static_cast<uint32_t>(tensor->getAllowedFormats());
+    *out_flags =
+        (has_dynamic_dimension ? 1U : 0U) |
+        (tensor->isShapeTensor() ? 2U : 0U) |
+        (tensor->isExecutionTensor() ? 4U : 0U) |
+        (tensor->isNetworkInput() ? 8U : 0U) |
+        (tensor->isNetworkOutput() ? 16U : 0U);
+
+    return copy_string_to_buffer(tensor->getName(), output_buffer, output_buffer_size, out_required_size);
+}
+
+static JYPPX_StatusCode copy_onnx_parser_layer_output_tensor_metadata_with_seh_guard(
+    nvonnxparser::IParser* parser,
+    const char* layer_name,
+    const int64_t output_index,
+    char* output_buffer,
+    const size_t output_buffer_size,
+    size_t* out_required_size,
+    JYPPX_Boolean* out_exists,
+    JYPPX_TensorRtDims64* out_shape,
+    int32_t* out_data_type,
+    int32_t* out_location,
+    uint32_t* out_allowed_formats,
+    uint32_t* out_flags,
+    const char* feature_name)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        return copy_onnx_parser_layer_output_tensor_metadata_unprotected(
+            parser, layer_name, output_index, output_buffer, output_buffer_size, out_required_size,
+            out_exists, out_shape, out_data_type, out_location, out_allowed_formats, out_flags);
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        *out_required_size = 0;
+        reset_onnx_parser_layer_output_tensor_metadata(
+            out_exists, out_shape, out_data_type, out_location, out_allowed_formats, out_flags);
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    return copy_onnx_parser_layer_output_tensor_metadata_unprotected(
+        parser, layer_name, output_index, output_buffer, output_buffer_size, out_required_size,
+        out_exists, out_shape, out_data_type, out_location, out_allowed_formats, out_flags);
+#endif
+}
+#endif
 #endif
 
 static JYPPX_StatusCode get_onnx_parser_subgraph_nodes_for_support(
@@ -882,6 +994,88 @@ JYPPX_StatusCode JYPPX_TRT_ONNX_PARSER_API(layer_output_tensor_exists)(JYPPX_Ten
     return jyppx::tensorrt::report_vendor_missing(kLine, "ONNX parser layer output tensor existence query");
 #endif
 }
+
+#if JYPPX_TENSORRT_VERSION_MAJOR_NUM >= 10
+JYPPX_StatusCode JYPPX_TRT_ONNX_PARSER_API(get_layer_output_tensor_metadata)(
+    JYPPX_TensorRtOnnxParser* parser,
+    const char* layer_name,
+    int64_t output_index,
+    char* output_buffer,
+    size_t output_buffer_size,
+    size_t* out_required_size,
+    JYPPX_Boolean* out_exists,
+    JYPPX_TensorRtDims64* out_shape,
+    int32_t* out_data_type,
+    int32_t* out_location,
+    uint32_t* out_allowed_formats,
+    uint32_t* out_flags)
+{
+    auto status = jyppx::tensorrt::validate_output_pointer(out_required_size, "out_required_size");
+    if (status != JYPPX_STATUS_OK) { return status; }
+    status = jyppx::tensorrt::validate_output_pointer(out_exists, "out_exists");
+    if (status != JYPPX_STATUS_OK) { return status; }
+    status = jyppx::tensorrt::validate_output_pointer(out_shape, "out_shape");
+    if (status != JYPPX_STATUS_OK) { return status; }
+    status = jyppx::tensorrt::validate_output_pointer(out_data_type, "out_data_type");
+    if (status != JYPPX_STATUS_OK) { return status; }
+    status = jyppx::tensorrt::validate_output_pointer(out_location, "out_location");
+    if (status != JYPPX_STATUS_OK) { return status; }
+    status = jyppx::tensorrt::validate_output_pointer(out_allowed_formats, "out_allowed_formats");
+    if (status != JYPPX_STATUS_OK) { return status; }
+    status = jyppx::tensorrt::validate_output_pointer(out_flags, "out_flags");
+    if (status != JYPPX_STATUS_OK) { return status; }
+    status = validate_c_string(layer_name, "layer_name");
+    if (status != JYPPX_STATUS_OK) { return status; }
+    if (output_index < 0)
+    {
+        jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "ONNX parser layer output index must be greater than or equal to zero.");
+        return JYPPX_STATUS_INVALID_ARGUMENT;
+    }
+
+    *out_required_size = 0;
+    reset_onnx_parser_layer_output_tensor_metadata(
+        out_exists, out_shape, out_data_type, out_location, out_allowed_formats, out_flags);
+
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+    nvonnxparser::IParser* parser_payload = nullptr;
+    status = get_onnx_parser_payload_for_support(parser, &parser_payload, "ONNX parser layer output tensor metadata query");
+    if (status != JYPPX_STATUS_OK) { return status; }
+
+    try
+    {
+        return copy_onnx_parser_layer_output_tensor_metadata_with_seh_guard(
+            parser_payload, layer_name, output_index, output_buffer, output_buffer_size, out_required_size,
+            out_exists, out_shape, out_data_type, out_location, out_allowed_formats, out_flags,
+            "ONNX parser layer output tensor metadata query");
+    }
+    catch (const std::exception& exception)
+    {
+        *out_required_size = 0;
+        reset_onnx_parser_layer_output_tensor_metadata(
+            out_exists, out_shape, out_data_type, out_location, out_allowed_formats, out_flags);
+        return report_onnx_parser_support_exception("ONNX parser layer output tensor metadata query", exception);
+    }
+    catch (...)
+    {
+        *out_required_size = 0;
+        reset_onnx_parser_layer_output_tensor_metadata(
+            out_exists, out_shape, out_data_type, out_location, out_allowed_formats, out_flags);
+        return report_onnx_parser_support_unknown_exception("ONNX parser layer output tensor metadata query");
+    }
+#elif JYPPX_HAS_TENSORRT
+    (void)parser;
+    (void)output_buffer;
+    (void)output_buffer_size;
+    jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT ONNX parser library was not found at build time.");
+    return JYPPX_STATUS_DEPENDENCY_MISSING;
+#else
+    (void)parser;
+    (void)output_buffer;
+    (void)output_buffer_size;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "ONNX parser layer output tensor metadata query");
+#endif
+}
+#endif
 
 JYPPX_StatusCode JYPPX_TRT_ONNX_PARSER_API(get_supported_subgraph_count)(JYPPX_TensorRtOnnxParser* parser, int64_t* out_count)
 {

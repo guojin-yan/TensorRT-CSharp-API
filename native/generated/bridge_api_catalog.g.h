@@ -1382,6 +1382,7 @@
 #define JYPPX_API_TRT10_ONNX_PARSER_GET_ERROR_COUNT "jyppx_trt10_onnx_parser_get_error_count" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_ONNX_PARSER_GET_FLAG "jyppx_trt10_onnx_parser_get_flag" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_ONNX_PARSER_GET_FLAGS "jyppx_trt10_onnx_parser_get_flags" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT10_ONNX_PARSER_GET_LAYER_OUTPUT_TENSOR_METADATA "jyppx_trt10_onnx_parser_get_layer_output_tensor_metadata" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_ONNX_PARSER_GET_SUBGRAPH_COUNT "jyppx_trt10_onnx_parser_get_subgraph_count" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_ONNX_PARSER_GET_SUBGRAPH_NODE "jyppx_trt10_onnx_parser_get_subgraph_node" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_ONNX_PARSER_GET_SUBGRAPH_NODE_COUNT "jyppx_trt10_onnx_parser_get_subgraph_node_count" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
@@ -2602,6 +2603,7 @@
 #define JYPPX_API_TRT11_ONNX_PARSER_ERROR_GET_NODE_OPERATOR "jyppx_trt11_onnx_parser_error_get_node_operator" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT11_ONNX_PARSER_GET_ERROR "jyppx_trt11_onnx_parser_get_error" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_ONNX_PARSER_GET_FLAG "jyppx_trt11_onnx_parser_get_flag" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT11_ONNX_PARSER_GET_LAYER_OUTPUT_TENSOR_METADATA "jyppx_trt11_onnx_parser_get_layer_output_tensor_metadata" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_ONNX_PARSER_GET_SUBGRAPH_COUNT "jyppx_trt11_onnx_parser_get_subgraph_count" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_ONNX_PARSER_GET_SUBGRAPH_NODE "jyppx_trt11_onnx_parser_get_subgraph_node" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_ONNX_PARSER_GET_SUBGRAPH_NODE_COUNT "jyppx_trt11_onnx_parser_get_subgraph_node_count" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false

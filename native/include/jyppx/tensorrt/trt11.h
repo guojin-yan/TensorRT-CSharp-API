@@ -1014,6 +1014,7 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_onnx_parser_is_subgraph_supported(JYPP
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_onnx_parser_get_subgraph_node_count(JYPPX_TensorRtOnnxParser* parser, int64_t index, int64_t* out_count);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_onnx_parser_get_subgraph_node(JYPPX_TensorRtOnnxParser* parser, int64_t subgraph_index, int64_t node_index, int64_t* out_node);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_onnx_parser_layer_output_tensor_exists(JYPPX_TensorRtOnnxParser* parser, const char* layer_name, int64_t output_index, JYPPX_Boolean* out_exists);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_onnx_parser_get_layer_output_tensor_metadata(JYPPX_TensorRtOnnxParser* parser, const char* layer_name, int64_t output_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size, JYPPX_Boolean* out_exists, JYPPX_TensorRtDims64* out_shape, int32_t* out_data_type, int32_t* out_location, uint32_t* out_allowed_formats, uint32_t* out_flags);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_onnx_parser_get_supported_subgraph_count(JYPPX_TensorRtOnnxParser* parser, int64_t* out_count);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_onnx_parser_get_unsupported_subgraph_count(JYPPX_TensorRtOnnxParser* parser, int64_t* out_count);
 /* END TRT11 TWENTY-NINTH BATCH ONNX PARSER SUPPORT DECLARATIONS */

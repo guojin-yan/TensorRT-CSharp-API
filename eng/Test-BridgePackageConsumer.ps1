@@ -234,6 +234,7 @@ $script:ManagedPackageFreshnessRequiredMarkers = @(
   "TensorRtRuntimeDeserializationBoundaryPrecheck",
   "TensorRtRuntimeDeserializationBoundaryPrecheckResult",
   "TensorRtOnnxParserDiagnosticSnapshot",
+  "TensorRtOnnxLayerOutputTensorMetadata",
   "TensorRtOnnxParserRefitterDiagnosticSnapshot",
   "TensorRtOnnxParserDiagnosticSummary",
   "TensorRtOnnxParserRefitterDiagnosticSummary",
@@ -401,7 +402,7 @@ function Get-ManagedPackageXmlSurface {
   try {
     $xmlEntries = @($zip.Entries | Where-Object {
         $_.FullName.EndsWith(".xml", [System.StringComparison]::OrdinalIgnoreCase) -and
-        $_.FullName.Contains("/JYPPX.", [System.StringComparison]::OrdinalIgnoreCase) -and
+        $_.FullName.IndexOf("/JYPPX.", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -and
         $_.FullName.StartsWith("lib/", [System.StringComparison]::OrdinalIgnoreCase)
       })
     if ($xmlEntries.Count -eq 0) {
@@ -1275,6 +1276,17 @@ static class HighLevelWrapperSurfaceProbe
             static snapshot => snapshot.ToSummary();
         Func<TensorRtOnnxParserDiagnosticSummary, string> onnxParserDiagnosticSummaryText =
             static summary => summary.Line + ":" + summary.ErrorCount + ":" + summary.CopiedDiagnosticCount + ":" + summary.UsedVCPluginLibraryCount + ":" + summary.DiagnosticSummaryLength + ":" + summary.IdentityOperatorSupported + ":" + summary.RuntimeEvidenceKind + ":" + summary.IsRuntimeExecutionEvidence + ":" + summary.IsRuntimeExecutionProof + ":" + summary.PointerFreeCopiedSummary + ":" + summary.CanPromoteRuntimeProof + ":" + summary.CanPromoteReleaseProof + ":" + summary.CanDeleteDeferredRecord;
+        Func<TensorRtOnnxParser, string, TensorRtOnnxLayerOutputTensorMetadata> onnxLayerOutputMetadata =
+            static (parser, layerName) => parser.GetLayerOutputTensorMetadata(layerName);
+        Func<TensorRtOnnxParser, string, bool> tryOnnxLayerOutputMetadata =
+            static (parser, layerName) => parser.TryGetLayerOutputTensorMetadata(layerName, 0, out _);
+        Func<TensorRtOnnxLayerOutputTensorMetadata, string> onnxLayerOutputMetadataText =
+            static metadata => metadata.Line + ":" + metadata.LayerName + ":" + metadata.OutputIndex + ":" +
+                metadata.TensorName + ":" + metadata.Shape + ":" + metadata.DataType + ":" + metadata.Location + ":" +
+                metadata.AllowedFormats + ":" + metadata.HasDynamicDimension + ":" + metadata.IsShapeTensor + ":" +
+                metadata.IsExecutionTensor + ":" + metadata.IsNetworkInput + ":" + metadata.IsNetworkOutput + ":" +
+                metadata.PointerFreeCopiedMetadata + ":" + metadata.RetainsNativeTensor + ":" + metadata.EvidenceKind + ":" +
+                metadata.IsRuntimeExecutionProof + ":" + metadata.CanPromoteReleaseProof + ":" + metadata.CanDeleteDeferredRecord;
         Func<TensorRtOnnxModelSupportReport, TensorRtOnnxModelSupportSummary> onnxModelSupportSummary =
             static report => report.ToSummary();
         Func<TensorRtOnnxModelSupportSummary, string> onnxModelSupportSummaryText =
@@ -3072,6 +3084,7 @@ static class HighLevelWrapperSurfaceProbe
             "runtime-deserialization-boundary-precheck",
             "onnx-parser-diagnostic-snapshot",
             "onnx-parser-diagnostic-summary",
+            "onnx-parser-layer-output-copied-metadata",
             "onnx-parser-refitter-diagnostic-snapshot",
             "onnx-parser-refitter-diagnostic-summary",
             "logger-presence-safe-controls",
@@ -3394,6 +3407,26 @@ static class HighLevelWrapperSurfaceProbe
             nameof(TensorRtOnnxParserDiagnosticSummary.CanPromoteRuntimeProof),
             nameof(TensorRtOnnxParserDiagnosticSummary.CanPromoteReleaseProof),
             nameof(TensorRtOnnxParserDiagnosticSummary.CanDeleteDeferredRecord),
+            nameof(TensorRtOnnxLayerOutputTensorMetadata),
+            nameof(TensorRtOnnxLayerOutputTensorMetadata.Line),
+            nameof(TensorRtOnnxLayerOutputTensorMetadata.LayerName),
+            nameof(TensorRtOnnxLayerOutputTensorMetadata.OutputIndex),
+            nameof(TensorRtOnnxLayerOutputTensorMetadata.TensorName),
+            nameof(TensorRtOnnxLayerOutputTensorMetadata.Shape),
+            nameof(TensorRtOnnxLayerOutputTensorMetadata.DataType),
+            nameof(TensorRtOnnxLayerOutputTensorMetadata.Location),
+            nameof(TensorRtOnnxLayerOutputTensorMetadata.AllowedFormats),
+            nameof(TensorRtOnnxLayerOutputTensorMetadata.HasDynamicDimension),
+            nameof(TensorRtOnnxLayerOutputTensorMetadata.IsShapeTensor),
+            nameof(TensorRtOnnxLayerOutputTensorMetadata.IsExecutionTensor),
+            nameof(TensorRtOnnxLayerOutputTensorMetadata.IsNetworkInput),
+            nameof(TensorRtOnnxLayerOutputTensorMetadata.IsNetworkOutput),
+            nameof(TensorRtOnnxLayerOutputTensorMetadata.PointerFreeCopiedMetadata),
+            nameof(TensorRtOnnxLayerOutputTensorMetadata.RetainsNativeTensor),
+            nameof(TensorRtOnnxLayerOutputTensorMetadata.EvidenceKind),
+            nameof(TensorRtOnnxLayerOutputTensorMetadata.IsRuntimeExecutionProof),
+            nameof(TensorRtOnnxLayerOutputTensorMetadata.CanPromoteReleaseProof),
+            nameof(TensorRtOnnxLayerOutputTensorMetadata.CanDeleteDeferredRecord),
             nameof(TensorRtOnnxModelSupportReport),
             nameof(TensorRtOnnxModelSupportReport.ToSummary),
             nameof(TensorRtOnnxModelSupportSummary),
@@ -3412,6 +3445,8 @@ static class HighLevelWrapperSurfaceProbe
             nameof(TensorRtOnnxModelSupportSummary.CanPromoteReleaseProof),
             nameof(TensorRtOnnxModelSupportSummary.CanDeleteDeferredRecord),
             nameof(TensorRtOnnxParser.GetDiagnosticSnapshot),
+            nameof(TensorRtOnnxParser.TryGetLayerOutputTensorMetadata),
+            nameof(TensorRtOnnxParser.GetLayerOutputTensorMetadata),
             nameof(TensorRtEnvironmentProbe.InitializeBuiltInPlugins),
             nameof(TensorRtOnnxParser.ParseWithWeightDescriptors),
             nameof(TensorRtOnnxParserRefitterDiagnosticSnapshot),
@@ -4768,7 +4803,7 @@ static class HighLevelWrapperSurfaceProbe
 
     $timer.Stop()
     $elapsedSeconds = [Math]::Round($timer.Elapsed.TotalSeconds, 2)
-    $wrapperSurfaceProbe = "compiled:plugin-inventory;plugin-inventory-field-metadata;engine-rnn-readonly-diagnostics;rnnv2-borrowed-state-design-gate;rnnv2-owner-bound-tensors;rnnv2-copied-gate-weights;managed-callbacks;callback-diagnostics;callback-api-language-safe-controls;error-recorder-snapshot;logger-presence-safe-controls;allocator-debug-listener-safe-controls;callback-interface-info-safe-controls;execution-context-callback-state-snapshot;execution-context-callback-allocator-safe-control-summary;allocator-owner-dry-run-diagnostics;allocator-owner-native-dry-run-controls;allocator-owner-state-ledger-dry-run-controls;allocator-owner-ledger-safety-gate;output-allocator-callback-owner-design;output-allocator-attach-detach-design-gate;output-allocator-runtime-proof-precheck;debug-listener-callback-owner-design;debug-listener-attach-detach-design-gate;debug-listener-borrowed-tensor-safety-gate;debug-listener-attach-vtable-safety-gate;debug-listener-native-attach-nothrow-preflight;debug-listener-native-owner-address-design-gate;debug-listener-native-nothrow-vtable-design-gate;debug-listener-native-attach-entry-design-gate;debug-listener-native-detach-before-release-design-gate;debug-listener-native-owner-lifecycle-dry-run;debug-listener-native-attach-entry-runtime-scaffold;debug-listener-native-attach-entry-minimal-safety;debug-listener-native-owner-stable-identity;debug-listener-native-owner-noncopyable-storage;debug-listener-native-nothrow-destructor;debug-listener-native-owner-lifecycle-gate;debug-listener-native-attach-bridge-shape-gate;debug-listener-exception-status-mapping-gate;debug-listener-inflight-accounting-gate;debug-listener-native-nothrow-vtable-scaffold-gate;debug-listener-nothrow-vtable-callback-stub;callback-stub-gate;debug-listener-borrowed-debug-tensor-metadata-runtime-gate;borrowed-debug-tensor-metadata-gate;debug-listener-native-vtable-install-preflight;native-vtable-install-preflight;debug-listener-native-owner-vtable-install-experiment;native-owner-vtable-install-experiment;debug-listener-runtime-proof-precheck;debug-listener-runtime-proof-attempt-preflight;debug-listener-real-non-null-attach-runtime-smoke;runtime-smoke-skipped;runtime-smoke-blocked;runtime-smoke-attempted;debug-listener-process-debug-tensor-callback-trampoline;callback-trampoline-shape;onnx-parser-diagnostic-snapshot;onnx-parser-diagnostic-summary;onnx-parser-refitter-diagnostic-snapshot;onnx-parser-refitter-diagnostic-summary;profiler-safe-controls;progress-monitor-safe-controls;cuda-memory-range;HasImplicitBatchDimensionCompatibility;SerializedPluginPathCountCompatibility;GetRnnV2LayerCount;GetRnnV2HiddenSize;GetRnnV2DataLength;GetRnnV2MaxSequenceLength;GetRnnV2Operation;GetRnnV2Direction;GetRnnV2InputMode;GetRnnV2CellState;GetRnnV2HiddenState;GetRnnV2SequenceLengths;GetRnnV2WeightsForGate;GetRnnV2BiasForGate;TensorRtRnnV2GateWeightsSnapshot;TensorRtRnnOperation;TensorRtRnnDirection;TensorRtRnnInputMode;TensorRtRnnGateType"
+    $wrapperSurfaceProbe = "compiled:plugin-inventory;plugin-inventory-field-metadata;engine-rnn-readonly-diagnostics;rnnv2-borrowed-state-design-gate;rnnv2-owner-bound-tensors;rnnv2-copied-gate-weights;managed-callbacks;callback-diagnostics;callback-api-language-safe-controls;error-recorder-snapshot;logger-presence-safe-controls;allocator-debug-listener-safe-controls;callback-interface-info-safe-controls;execution-context-callback-state-snapshot;execution-context-callback-allocator-safe-control-summary;allocator-owner-dry-run-diagnostics;allocator-owner-native-dry-run-controls;allocator-owner-state-ledger-dry-run-controls;allocator-owner-ledger-safety-gate;output-allocator-callback-owner-design;output-allocator-attach-detach-design-gate;output-allocator-runtime-proof-precheck;debug-listener-callback-owner-design;debug-listener-attach-detach-design-gate;debug-listener-borrowed-tensor-safety-gate;debug-listener-attach-vtable-safety-gate;debug-listener-native-attach-nothrow-preflight;debug-listener-native-owner-address-design-gate;debug-listener-native-nothrow-vtable-design-gate;debug-listener-native-attach-entry-design-gate;debug-listener-native-detach-before-release-design-gate;debug-listener-native-owner-lifecycle-dry-run;debug-listener-native-attach-entry-runtime-scaffold;debug-listener-native-attach-entry-minimal-safety;debug-listener-native-owner-stable-identity;debug-listener-native-owner-noncopyable-storage;debug-listener-native-nothrow-destructor;debug-listener-native-owner-lifecycle-gate;debug-listener-native-attach-bridge-shape-gate;debug-listener-exception-status-mapping-gate;debug-listener-inflight-accounting-gate;debug-listener-native-nothrow-vtable-scaffold-gate;debug-listener-nothrow-vtable-callback-stub;callback-stub-gate;debug-listener-borrowed-debug-tensor-metadata-runtime-gate;borrowed-debug-tensor-metadata-gate;debug-listener-native-vtable-install-preflight;native-vtable-install-preflight;debug-listener-native-owner-vtable-install-experiment;native-owner-vtable-install-experiment;debug-listener-runtime-proof-precheck;debug-listener-runtime-proof-attempt-preflight;debug-listener-real-non-null-attach-runtime-smoke;runtime-smoke-skipped;runtime-smoke-blocked;runtime-smoke-attempted;debug-listener-process-debug-tensor-callback-trampoline;callback-trampoline-shape;onnx-parser-diagnostic-snapshot;onnx-parser-diagnostic-summary;onnx-parser-layer-output-copied-metadata;onnx-parser-refitter-diagnostic-snapshot;onnx-parser-refitter-diagnostic-summary;profiler-safe-controls;progress-monitor-safe-controls;cuda-memory-range;HasImplicitBatchDimensionCompatibility;SerializedPluginPathCountCompatibility;GetRnnV2LayerCount;GetRnnV2HiddenSize;GetRnnV2DataLength;GetRnnV2MaxSequenceLength;GetRnnV2Operation;GetRnnV2Direction;GetRnnV2InputMode;GetRnnV2CellState;GetRnnV2HiddenState;GetRnnV2SequenceLengths;GetRnnV2WeightsForGate;GetRnnV2BiasForGate;TensorRtRnnV2GateWeightsSnapshot;TensorRtRnnOperation;TensorRtRnnDirection;TensorRtRnnInputMode;TensorRtRnnGateType"
     $wrapperSurfaceProbe = "$wrapperSurfaceProbe;execution-context-auxiliary-stream-lifetime;cuda-kernel-library-symbol-and-attribute"
     $wrapperSurfaceEvidenceKind = "compile-surface-proof"
     $isRuntimeExecutionProof = $false

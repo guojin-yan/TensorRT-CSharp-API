@@ -89,9 +89,9 @@ internal static class Program
         {
             parser = new TensorRtOnnxParser(logger, network);
         }
-        catch (BridgeProbeException exception) when (exception.StatusCode == BridgeStatusCode.NotSupported)
+        catch (Exception exception) when (IsSkippableEnvironmentException(exception))
         {
-            Console.WriteLine($"Skipped=True Reason={exception.Message}");
+            Console.WriteLine($"Skipped=True Reason=ParserConstruction:{exception.GetType().Name}:{exception.Message}");
             return;
         }
 
@@ -558,7 +558,46 @@ internal static class Program
     {
         try
         {
-            return parser.LayerOutputTensorExists(layerName).ToString();
+            bool presenceQuery = parser.LayerOutputTensorExists(layerName);
+            bool found = parser.TryGetLayerOutputTensorMetadata(
+                layerName,
+                0,
+                out TensorRtOnnxLayerOutputTensorMetadata? metadata);
+            bool missingFound = parser.TryGetLayerOutputTensorMetadata(
+                "jyppx_missing_layer",
+                0,
+                out TensorRtOnnxLayerOutputTensorMetadata? missingMetadata);
+
+            if (!presenceQuery || !found || metadata == null)
+            {
+                throw new InvalidOperationException("TensorRT did not return copied metadata for the identity layer output.");
+            }
+
+            if (missingFound || missingMetadata != null)
+            {
+                throw new InvalidOperationException("TensorRT returned metadata for a missing ONNX layer.");
+            }
+
+            TensorRtOnnxLayerOutputTensorMetadata required = parser.GetLayerOutputTensorMetadata(layerName);
+            bool copiesMatch =
+                metadata.TensorName == required.TensorName &&
+                metadata.Shape.ToString() == required.Shape.ToString() &&
+                metadata.DataType == required.DataType &&
+                metadata.Location == required.Location &&
+                metadata.AllowedFormats == required.AllowedFormats &&
+                metadata.HasDynamicDimension == required.HasDynamicDimension &&
+                metadata.IsShapeTensor == required.IsShapeTensor &&
+                metadata.IsExecutionTensor == required.IsExecutionTensor &&
+                metadata.IsNetworkInput == required.IsNetworkInput &&
+                metadata.IsNetworkOutput == required.IsNetworkOutput;
+            if (!copiesMatch)
+            {
+                throw new InvalidOperationException("TryGet and Get returned different ONNX layer output metadata snapshots.");
+            }
+
+            return $"Presence={presenceQuery} TryGet={found} GetMatch={copiesMatch} " +
+                $"Missing={missingFound} PointerFree={metadata.PointerFreeCopiedMetadata} " +
+                $"RetainsNative={metadata.RetainsNativeTensor} Metadata=({metadata})";
         }
         catch (Exception exception)
         {

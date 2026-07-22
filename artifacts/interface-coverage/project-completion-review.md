@@ -1,5 +1,54 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-22 ONNX Parser Layer Output Copied Metadata
+
+本批重新导出并审计 TensorRT deferred inventory：598 条 deferred rows 中 low risk 为 0、medium 为 112、
+high 为 486，CUDA immediate-safe candidate 为 0。最终没有直接包装 parser-owned `ITensor*`，而是选择
+`IParser::getLayerOutputTensor` 的 owner-scoped copied metadata safe alternative。TRT8 vendor header 没有该
+方法，因此保持无 native entrypoint 和 managed `NotSupported` guard；TRT10/11 通过 parser vtable 调用纯虚
+方法，同名 import-library/DLL symbol 为 0 不构成 ABI 缺失。
+
+native C ABI 在 parser owner 有效期间复制 tensor name、64-bit shape、data type、location、allowed formats、
+dynamic/shape/execution/input/output flags，字符串使用 caller-buffer，所有 output 在失败前重置，并隔离 C++
+exception 与 Windows SEH。公开 C# surface 为 `TryGetLayerOutputTensorMetadata`、
+`GetLayerOutputTensorMetadata` 和 pointer-free `TensorRtOnnxLayerOutputTensorMetadata`，不暴露 `IntPtr`、
+`nint`、`UIntPtr`、`SafeHandle` 或 tensor handle。TRT11 旧 deferred manifest 保留，coverage 通过显式 alias
+记录 implemented-with-deferred-history；没有删除历史记录来改变统计。
+
+### Runtime 与证据
+
+- bindings 为 `196 manifests / 3973 records`，连续生成幂等且输出验证通过；coverage 为 TRT10
+  `761 implemented / 118 deferred-only`、TRT11 `814 / 87`，TRT8 保持受控版本边界。
+- TRT8/CUDA12.1 runtime 与 builder creation 成功，但该 bridge 构建时没有 ONNX parser dependency；parser
+  construction 现在以 exit `0` 和 `Skipped=True Reason=ParserConstruction:...` 受控收敛，metadata 未查询。
+- TRT10.11/CUDA12.9 identity smoke 实际得到 tensor `output`、shape `[-1, 4]`、`Float / Device`；dynamic、
+  execution、network-output 为 true，`TryGet`/`Get` 一致，缺失 layer 返回 false，enqueue/output match 通过。
+- TRT11.0/CUDA12.9 bridge/vendor DLL/version/registry probe 成功，但 vendor builder/runtime creation 返回 null；
+  metadata 未查询，继续分类为 `dependency-runtime-probe-only`。
+- compact evidence 与 validation 位于 `onnx-parser-layer-output-metadata-runtime-evidence*`，strict validator
+  `15/15`。TRT8/10/11 三个无 ProjectReference package consumer restore/build 均成功，但只属于
+  `compile-surface-proof`。
+
+### Verification 与边界
+
+- TRT8/CUDA12、TRT10/CUDA12、TRT11/CUDA12 native build 通过；ABI/PE parity 分别为 TRT8 `991/991`、
+  TRT10 `1087/1087`、TRT11 `1234/1234`，missing 均为 0。
+- solution Debug/Release 均为 0 error；Release 保留 5 条既有 nullable test warning。Public API documentation
+  warning 0、bilingual finding 0，DocFX `926 models / 0 warning / 0 error`。
+- 最终三类受影响测试为 `50/50`，此前 broader affected set 为 `74/74`；一次包含整个
+  `ReleaseCandidateReadinessTests` 的组合在 600 秒超时，不能声明完整 suite pass。
+- classification/public-proof finding 均为 0，strict release required failure 为 0。Owner convergence 保持
+  structural `9/9`、accepted `0/9`、gates `2/3`，final owner gate blocked `5`。
+
+C 盘定向审计未发现 TensorRT、CUDA、cuDNN、ONNX、模型、engine 或 nupkg 下载；Downloads、Desktop、
+Documents 任务命名匹配为 0，全局 NuGet 中的 JYPPX 项均为旧缓存。本轮 `dotnet build-server shutdown` 已
+关闭 MSBuild/VB/C# servers，并清除 15 个空 `MSBuildTemp*` 目录。仍有 230 个当日 workload 小日志
+（441,942 bytes）以及 `C:\jyppx-pkgcache`、`%TEMP%\jyppx-split-packages`、`%TEMP%\MSBuildTemp` 三个
+空目录；标准精确 `Remove-Item` 在执行前被工具策略拦截，未发生部分删除，也未改用绕过方式。
+
+本批不构成公开 package consumer、post-publish、模型准确率或 release-close proof，不允许删除 deferred
+history，也不授权 NuGet/GitHub Packages push、GitHub Release upload 或 issue close。
+
 ## 2026-07-22 TensorRtExec Engine Packaging、Refit 与 Weight Streaming
 
 本批延续 deferred inventory 的安全审计结论：598 条 TensorRT deferred rows 中仍无 low-risk 候选，

@@ -4147,6 +4147,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt10_onnx_parser_get_flag(JYPPX_TensorRtOnn
 // generated from manifest id=trt10-onnx-parser-get-flags
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_onnx_parser_get_flags(JYPPX_TensorRtOnnxParser* parser, uint32_t* out_flags);
 
+// generated from manifest id=trt10-onnx-parser-get-layer-output-tensor-metadata
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_onnx_parser_get_layer_output_tensor_metadata(JYPPX_TensorRtOnnxParser* parser, const char* layer_name, int64_t output_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size, JYPPX_Boolean* out_exists, JYPPX_TensorRtDims64* out_shape, int32_t* out_data_type, int32_t* out_location, uint32_t* out_allowed_formats, uint32_t* out_flags);
+
 // generated from manifest id=trt10-onnx-parser-get-subgraph-count
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_onnx_parser_get_subgraph_count(JYPPX_TensorRtOnnxParser* parser, int64_t* out_count);
 
@@ -7806,6 +7809,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt11_onnx_parser_get_error(JYPPX_TensorRtOn
 
 // generated from manifest id=trt11-onnx-parser-get-flag
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_onnx_parser_get_flag(JYPPX_TensorRtOnnxParser* parser, int32_t flag, JYPPX_Boolean* out_enabled);
+
+// generated from manifest id=trt11-onnx-parser-get-layer-output-tensor-metadata
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_onnx_parser_get_layer_output_tensor_metadata(JYPPX_TensorRtOnnxParser* parser, const char* layer_name, int64_t output_index, char* output_buffer, size_t output_buffer_size, size_t* out_required_size, JYPPX_Boolean* out_exists, JYPPX_TensorRtDims64* out_shape, int32_t* out_data_type, int32_t* out_location, uint32_t* out_allowed_formats, uint32_t* out_flags);
 
 // generated from manifest id=trt11-onnx-parser-get-subgraph-count
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_onnx_parser_get_subgraph_count(JYPPX_TensorRtOnnxParser* parser, int64_t* out_count);
