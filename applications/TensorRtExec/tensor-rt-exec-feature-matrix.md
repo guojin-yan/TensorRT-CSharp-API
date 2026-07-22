@@ -17,7 +17,7 @@
 | Layer/profile diagnostic switches | CLI, WinForms | implemented-inspector-readback |
 | Report alias compatibility | CLI | implemented-report |
 | FP8, best, refit dump, and debug tensor diagnostics | CLI, WinForms | parse-report-only |
-| Engine packaging, refit, and weight streaming | CLI, WinForms | implemented-build-runtime-readback-with-version-guards |
+| Engine packaging, ONNX refit, and weight streaming | CLI, WinForms | implemented-build-refit-runtime-with-version-guards |
 | Device and deployment policies | CLI, WinForms | implemented-build-readback-with-version-guards |
 | Timing cache lifecycle | CLI, WinForms | implemented-build-cache-lifecycle |
 | Full trtexec parity | CLI, WinForms | planned |

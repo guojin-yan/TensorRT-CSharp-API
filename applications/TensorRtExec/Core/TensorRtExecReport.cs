@@ -36,7 +36,10 @@ public sealed class TensorRtExecReport
         string builderConfigDeploymentSnapshotState,
         int builderConfigDeploymentDiagnosticCount,
         string parserPreflightSnapshotState,
-        int parserPreflightDiagnosticCount)
+        int parserPreflightDiagnosticCount,
+        bool refitAttempted = false,
+        bool refitSucceeded = false,
+        string refitState = "")
     {
         Success = success;
         State = state ?? string.Empty;
@@ -59,6 +62,9 @@ public sealed class TensorRtExecReport
         BuilderConfigDeploymentDiagnosticCount = builderConfigDeploymentDiagnosticCount < 0 ? 0 : builderConfigDeploymentDiagnosticCount;
         ParserPreflightSnapshotState = parserPreflightSnapshotState ?? "not-attempted";
         ParserPreflightDiagnosticCount = parserPreflightDiagnosticCount < 0 ? 0 : parserPreflightDiagnosticCount;
+        RefitAttempted = refitAttempted;
+        RefitSucceeded = refitSucceeded;
+        RefitState = refitState ?? string.Empty;
     }
 
     public bool Success { get; }
@@ -102,4 +108,10 @@ public sealed class TensorRtExecReport
     public string ParserPreflightSnapshotState { get; }
 
     public int ParserPreflightDiagnosticCount { get; }
+
+    public bool RefitAttempted { get; }
+
+    public bool RefitSucceeded { get; }
+
+    public string RefitState { get; }
 }

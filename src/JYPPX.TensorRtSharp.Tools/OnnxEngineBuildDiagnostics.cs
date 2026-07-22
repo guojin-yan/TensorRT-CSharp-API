@@ -64,6 +64,7 @@ public static class OnnxEngineBuildDiagnostics
             result.WorkspaceBytes,
             result.BuilderConfigDeploymentSnapshot,
             result.ParserPreflightSnapshot,
+            result.RefitSnapshot,
             OptionImplementationStatus = CreateOptionImplementationStatus(result),
             result.BenchmarkSummary,
             result.ProofClassification,
@@ -122,6 +123,21 @@ public static class OnnxEngineBuildDiagnostics
             $"Parser model support state: `{result.ParserPreflightSnapshot.ModelSupportState}`",
             $"Parser model supported: `{result.ParserPreflightSnapshot.ModelSupported}`",
             $"Parser copied subgraphs: `{result.ParserPreflightSnapshot.CopiedSubgraphCount}`",
+            $"ONNX refit attempted: `{result.RefitSnapshot.Attempted}`",
+            $"ONNX refit succeeded: `{result.RefitSnapshot.Succeeded}`",
+            $"ONNX refit state: `{result.RefitSnapshot.State}`",
+            $"ONNX refit source: `{result.RefitSnapshot.SourcePath}`",
+            $"ONNX refit source length bytes: `{result.RefitSnapshot.SourceLengthBytes}`",
+            $"ONNX refit source SHA256: `{result.RefitSnapshot.SourceSha256}`",
+            $"ONNX refit engine refittable before/after: `{result.RefitSnapshot.EngineRefittableBefore}/{result.RefitSnapshot.EngineRefittableAfter}`",
+            $"ONNX refit parser returned: `{result.RefitSnapshot.ParserRefitReturned}`",
+            $"ONNX refit engine commit returned: `{result.RefitSnapshot.EngineRefitReturned}`",
+            $"ONNX refit missing weights before/after: `{result.RefitSnapshot.MissingWeightsBefore.Count}/{result.RefitSnapshot.MissingWeightsAfter.Count}`",
+            $"ONNX refit all weights before/after: `{result.RefitSnapshot.AllWeightsBefore.Count}/{result.RefitSnapshot.AllWeightsAfter.Count}`",
+            $"ONNX refit parser errors/copied diagnostics: `{result.RefitSnapshot.ParserErrorCount}/{result.RefitSnapshot.CopiedDiagnosticCount}`",
+            $"ONNX refit context creation allowed: `{result.RefitSnapshot.ContextCreationAllowed}`",
+            $"ONNX refit diagnostic summary: `{result.RefitSnapshot.DiagnosticSummary}`",
+            $"ONNX refit evidence boundary: `{result.RefitSnapshot.EvidenceBoundary}`",
             $"Loaded engine diagnostics attempted: `{result.LoadedEngineDiagnostics.Attempted}`",
             $"Loaded engine diagnostics succeeded: `{result.LoadedEngineDiagnostics.Succeeded}`",
             $"Loaded engine diagnostics state: `{result.LoadedEngineDiagnostics.DiagnosticsState}`",
@@ -208,6 +224,7 @@ public static class OnnxEngineBuildDiagnostics
             $"Exclude lean runtime: `{result.DeploymentOptions.ExcludeLeanRuntime}`",
             $"Strip weights: `{result.DeploymentOptions.StripWeights}`",
             $"Refit: `{result.DeploymentOptions.Refit}`",
+            $"Refit from ONNX: `{result.DeploymentOptions.RefitFromOnnxPath}`",
             $"Weight streaming budget bytes: `{result.DeploymentOptions.WeightStreamingBudgetBytes?.ToString() ?? ""}`",
             $"Export timing cache: `{result.DeploymentOptions.ExportTimingCachePath}`",
             $"Safe mode: `{result.DeploymentOptions.Safe}`",
@@ -379,6 +396,7 @@ public static class OnnxEngineBuildDiagnostics
         AddIf(options, "--excludeLeanRuntime", deploymentOptions.ExcludeLeanRuntime);
         AddIf(options, "--stripWeights", deploymentOptions.StripWeights);
         AddIf(options, "--refit", deploymentOptions.Refit);
+        AddIf(options, "--refitFromOnnx", !string.IsNullOrWhiteSpace(deploymentOptions.RefitFromOnnxPath));
         AddIf(options, "--weightStreamingBudget", deploymentOptions.WeightStreamingBudget.IsSpecified);
         AddIf(options, "--exportTimingCache", !string.IsNullOrWhiteSpace(deploymentOptions.ExportTimingCachePath));
         AddIf(options, "--safe", deploymentOptions.Safe);
@@ -439,6 +457,7 @@ public static class OnnxEngineBuildDiagnostics
         AddIf(options, "--excludeLeanRuntime", HasAppliedDeploymentControl(result, "ExcludeLeanRuntime"));
         AddIf(options, "--stripWeights", HasAppliedDeploymentControl(result, "StripWeights"));
         AddIf(options, "--refit", HasAppliedDeploymentControl(result, "Refit"));
+        AddIf(options, "--refitFromOnnx", result.RefitSnapshot.Succeeded && result.RefitSnapshot.ContextCreationAllowed);
         AddIf(options, "--allowWeightStreaming", HasAppliedDeploymentControl(result, "WeightStreaming"));
         AddIf(options, "--weightStreamingBudget", HasAppliedDeploymentControl(result, "WeightStreamingBudget"));
         AddIf(options, "--inputIOFormats", HasAppliedBuildPolicy(result, "InputIOFormats"));
@@ -522,6 +541,7 @@ public static class OnnxEngineBuildDiagnostics
         AddIf(options, "--excludeLeanRuntime", deploymentOptions.ExcludeLeanRuntime && !HasAppliedDeploymentControl(result, "ExcludeLeanRuntime"));
         AddIf(options, "--stripWeights", deploymentOptions.StripWeights && !HasAppliedDeploymentControl(result, "StripWeights"));
         AddIf(options, "--refit", deploymentOptions.Refit && !HasAppliedDeploymentControl(result, "Refit"));
+        AddIf(options, "--refitFromOnnx", !string.IsNullOrWhiteSpace(deploymentOptions.RefitFromOnnxPath) && !result.RefitSnapshot.Succeeded);
         AddIf(options, "--weightStreamingBudget", deploymentOptions.WeightStreamingBudget.IsSpecified && !HasAppliedDeploymentControl(result, "WeightStreamingBudget"));
         AddIf(options, "--timingCacheFile", result.TimingCacheArtifact.InputRequested && !result.TimingCacheArtifact.InputApplied);
         AddIf(options, "--exportTimingCache", !string.IsNullOrWhiteSpace(deploymentOptions.ExportTimingCachePath) && !result.TimingCacheArtifact.OutputWritten);

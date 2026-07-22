@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "trtexec-onnx-refit-lifecycle-evidence.v1",
+  "generatedDate": "2026-07-22",
+  "option": "--refitFromOnnx",
+  "contract": {
+    "requires": ["--onnx", "--stripWeights", "--refit"],
+    "supportedTensorRtLines": [10, 11],
+    "tensorRt8Behavior": "dry-run-parse-only; non-dry rejected before native execution",
+    "loadEngineBehavior": "rejected; the current lifecycle requires an explicit ONNX build source"
+  },
+  "tensorRt10": {
+    "model": "TensorRT MNIST sample ONNX",
+    "modelLengthBytes": 26454,
+    "modelSha256": "2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf",
+    "refitReportPath": "artifacts/real-case/trtexec-onnx-refit-lifecycle/trt10-mnist-refit-enqueue.json",
+    "refitReportSha256": "e4f3b2447fc50687ae52d0263065a056a72bea526c0a1d94ddbc3f7854fc5c1e",
+    "baselineReportPath": "artifacts/real-case/trtexec-onnx-refit-lifecycle/trt10-mnist-full-enqueue.json",
+    "baselineReportSha256": "4c85eeb3dd124c4a43b8ac23716863b9fb22e3d2b1ff65c4bc5b9c1570262f3c",
+    "refitOutputPath": "artifacts/real-case/trtexec-onnx-refit-lifecycle/trt10-mnist-refit-output.json",
+    "refitOutputArtifactSha256": "5828addf969181bc861e39ee483b03a83aa97562c6e3fbebeab6e04ed490b9b4",
+    "baselineOutputPath": "artifacts/real-case/trtexec-onnx-refit-lifecycle/trt10-mnist-full-output.json",
+    "baselineOutputArtifactSha256": "8d93d058fe00b890563e87598cc48f4fddb89ea4fd5eda9dbb25269f7e763898",
+    "stripPlanApplied": true,
+    "explicitRefitApplied": true,
+    "engineRefittableBefore": true,
+    "parserRefitReturned": true,
+    "engineRefitReturned": true,
+    "engineRefittableAfter": true,
+    "missingWeightsBefore": 0,
+    "allWeightsBefore": 6,
+    "missingWeightsAfter": 0,
+    "allWeightsAfter": 6,
+    "parserErrorCount": 0,
+    "copiedDiagnosticCount": 0,
+    "contextCreationAllowed": true,
+    "inferenceRan": true,
+    "outputElementCount": 10,
+    "outputByteLength": 40,
+    "refitOutputSha256": "6f5771d6c5b056406c190a59e725cf9bb13c1f148c1ef06f99ed8acfb11b9041",
+    "baselineOutputSha256": "6f5771d6c5b056406c190a59e725cf9bb13c1f148c1ef06f99ed8acfb11b9041",
+    "outputExactMatch": true,
+    "contextCreatedAfterRefitCommit": true
+  },
+  "tensorRt8": {
+    "reportPath": "artifacts/real-case/trtexec-onnx-refit-lifecycle/trt8-refit-version-guard.json",
+    "state": "dry-run-precheck",
+    "proofClassification": "precheck",
+    "refitFromOnnxParseOnly": true,
+    "nonDryGuard": "TensorRT 8 has no ONNX parser-refitter API"
+  },
+  "tensorRt11": {
+    "reportPath": "artifacts/real-case/trtexec-onnx-refit-lifecycle/trt11-refit-dependency-probe.json",
+    "state": "dependency-probe-only",
+    "proofClassification": "dependency-probe-only",
+    "refitFromOnnxParseOnly": true,
+    "reason": "createInferRuntime returned a null TensorRT object"
+  },
+  "proofBoundary": {
+    "isLocalSourceTreeRefitLifecycleEvidence": true,
+    "isCopiedInventoryAndDiagnosticsEvidence": true,
+    "isBoundedEnqueueAndBaselineComparisonEvidence": true,
+    "isModelAccuracyProof": false,
+    "isRefittedPlanPersistenceProof": false,
+    "isPackageConsumerRuntimeProof": false,
+    "isPublicPackageProof": false,
+    "canPublishPublicly": false,
+    "publicReleaseSideEffectsExecuted": false
+  }
+}

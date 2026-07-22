@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using JYPPX.Shared.Interop;
 
 namespace JYPPX.TensorRtSharp.Tools;
 
@@ -15,6 +16,7 @@ public static class TrtexecLikeParser
             throw new ArgumentNullException(nameof(args));
         }
 
+        TensorRtApiLine tensorRtLine = TensorRtToolSupport.ResolveLine(GetValue(args, "--tensor-rt-line", "10"));
         string onnxPath = FullPathOrEmpty(FirstNonEmpty(GetValue(args, "--onnx", string.Empty), FirstNonEmpty(GetValue(args, "--model", string.Empty), GetValue(args, "--onnxFile", string.Empty))));
         string engineAliasPath = FirstNonEmpty(GetValue(args, "--engine", string.Empty), FirstNonEmpty(GetValue(args, "--plan", string.Empty), GetValue(args, "--engineFile", string.Empty)));
         bool engineAliasIsLoad = ShouldTreatEngineAliasAsLoad(args, engineAliasPath);
@@ -71,10 +73,38 @@ public static class TrtexecLikeParser
         bool versionCompatible = HasSwitch(args, "--versionCompatible");
         bool excludeLeanRuntime = HasSwitch(args, "--excludeLeanRuntime");
         bool stripWeights = HasSwitch(args, "--stripWeights");
+        string refitFromOnnxPath = FullPathOrEmpty(GetValue(args, "--refitFromOnnx", string.Empty));
         TrtexecLikeWeightStreamingBudget weightStreamingBudget =
             TrtexecLikeWeightStreamingBudget.Parse(GetValue(args, "--weightStreamingBudget", string.Empty));
         bool buildsEngine = string.IsNullOrWhiteSpace(loadEnginePath);
         bool stopsAfterBuild = dryRun || HasSwitch(args, "--buildOnly") || HasSwitch(args, "--skipInference");
+        if (!dryRun && !string.IsNullOrWhiteSpace(refitFromOnnxPath) && !File.Exists(refitFromOnnxPath))
+        {
+            throw new FileNotFoundException("ONNX refit source file was not found.", refitFromOnnxPath);
+        }
+
+        if (!string.IsNullOrWhiteSpace(refitFromOnnxPath))
+        {
+            if (!buildsEngine || string.IsNullOrWhiteSpace(onnxPath))
+            {
+                throw new ArgumentException("--refitFromOnnx currently requires an --onnx build source; load-engine refit is not implicit.");
+            }
+
+            if (!stripWeights)
+            {
+                throw new ArgumentException("--refitFromOnnx requires --stripWeights so the lifecycle begins from an explicitly stripped plan.");
+            }
+
+            if (!HasSwitch(args, "--refit"))
+            {
+                throw new ArgumentException("--refitFromOnnx requires --refit so the stripped plan is built with the explicit refittable engine flag.");
+            }
+
+            if (!dryRun && tensorRtLine == TensorRtApiLine.TensorRt8)
+            {
+                throw new ArgumentException("--refitFromOnnx requires TensorRT 10 or TensorRT 11; TensorRT 8 has no ONNX parser-refitter API.");
+            }
+        }
         if (excludeLeanRuntime && !versionCompatible)
         {
             throw new ArgumentException("--excludeLeanRuntime requires --versionCompatible.");
@@ -95,7 +125,7 @@ public static class TrtexecLikeParser
             throw new ArgumentException("--excludeLeanRuntime requires --buildOnly or --skipInference until an external lean runtime path is configured.");
         }
 
-        if (stripWeights && !stopsAfterBuild)
+        if (stripWeights && !stopsAfterBuild && string.IsNullOrWhiteSpace(refitFromOnnxPath))
         {
             throw new ArgumentException("--stripWeights requires --buildOnly or --skipInference because stripped weights must be supplied through a separate refit lifecycle before inference.");
         }
@@ -139,7 +169,8 @@ public static class TrtexecLikeParser
             tilingOptimizationLevel: ParseOptionalTilingOptimizationLevel(GetValue(args, "--tilingOptimizationLevel", string.Empty)),
             l2LimitForTilingBytes: ParseOptionalLongMemorySizeBytes(GetValue(args, "--l2LimitForTiling", string.Empty), "--l2LimitForTiling"),
             quantizationFlags: ParseOptionalQuantizationFlags(GetValue(args, "--quantizationFlags", string.Empty)),
-            weightStreamingBudget: weightStreamingBudget);
+            weightStreamingBudget: weightStreamingBudget,
+            refitFromOnnxPath: refitFromOnnxPath);
         string shapes = FirstNonEmpty(GetValue(args, "--shapes", string.Empty), GetValue(args, "--inputShapes", string.Empty));
         string minShapes = FirstNonEmpty(GetValue(args, "--minShapes", string.Empty), shapes);
         string optShapes = FirstNonEmpty(GetValue(args, "--optShapes", string.Empty), shapes);
@@ -162,7 +193,7 @@ public static class TrtexecLikeParser
             saveProfilePath: FullPathOrEmpty(GetValue(args, "--saveProfile", string.Empty)));
 
         return new TrtexecLikeOptions(
-            TensorRtToolSupport.ResolveLine(GetValue(args, "--tensor-rt-line", "10")),
+            tensorRtLine,
             onnxPath,
             saveEnginePath,
             loadEnginePath,

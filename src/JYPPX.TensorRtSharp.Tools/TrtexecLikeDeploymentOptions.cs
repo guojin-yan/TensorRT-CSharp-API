@@ -47,7 +47,8 @@ public sealed class TrtexecLikeDeploymentOptions
         TensorRtTilingOptimizationLevel? tilingOptimizationLevel = null,
         long? l2LimitForTilingBytes = null,
         TensorRtQuantizationFlags? quantizationFlags = null,
-        TrtexecLikeWeightStreamingBudget? weightStreamingBudget = null)
+        TrtexecLikeWeightStreamingBudget? weightStreamingBudget = null,
+        string refitFromOnnxPath = "")
     {
         DeviceOrdinal = deviceOrdinal;
         BuilderOptimizationLevel = builderOptimizationLevel;
@@ -90,6 +91,7 @@ public sealed class TrtexecLikeDeploymentOptions
         TilingOptimizationLevel = tilingOptimizationLevel;
         L2LimitForTilingBytes = l2LimitForTilingBytes;
         QuantizationFlags = quantizationFlags;
+        RefitFromOnnxPath = refitFromOnnxPath ?? string.Empty;
     }
 
     public static TrtexecLikeDeploymentOptions Default { get; } = new TrtexecLikeDeploymentOptions(
@@ -210,6 +212,12 @@ public sealed class TrtexecLikeDeploymentOptions
 
     public TensorRtQuantizationFlags? QuantizationFlags { get; }
 
+    /// <summary>
+    /// Gets the explicit ONNX weight source used to refit a stripped plan before inference.
+    /// 获取在推理前重整 stripped plan 使用的显式 ONNX 权重源。
+    /// </summary>
+    public string RefitFromOnnxPath { get; }
+
     public IReadOnlyList<string> ToArgumentSegments()
     {
         List<string> args = new List<string>();
@@ -253,6 +261,7 @@ public sealed class TrtexecLikeDeploymentOptions
         AddSwitch(args, "--excludeLeanRuntime", ExcludeLeanRuntime);
         AddSwitch(args, "--stripWeights", StripWeights);
         AddSwitch(args, "--refit", Refit);
+        Add(args, "--refitFromOnnx", RefitFromOnnxPath);
         Add(args, "--weightStreamingBudget", WeightStreamingBudget.ArgumentValue);
         Add(args, "--exportTimingCache", ExportTimingCachePath);
         AddSwitch(args, "--safe", Safe);
@@ -366,7 +375,7 @@ public sealed class TrtexecLikeDeploymentOptions
             AddDiagnostic(diagnostics, "DumpDebugTensors", DumpDebugTensors);
         }
 
-        if (VersionCompatible || ExcludeLeanRuntime || StripWeights || Refit || WeightStreamingBudget.IsSpecified || AllowWeightStreaming)
+        if (VersionCompatible || ExcludeLeanRuntime || StripWeights || Refit || !string.IsNullOrWhiteSpace(RefitFromOnnxPath) || WeightStreamingBudget.IsSpecified || AllowWeightStreaming)
         {
             diagnostics.Add("Advanced engine packaging/refit flags are applied and read back during a real build with TensorRT-line guards; a requested weight-streaming budget is resolved and read back before execution contexts are created.");
             if (VersionCompatible)
@@ -387,6 +396,12 @@ public sealed class TrtexecLikeDeploymentOptions
             if (Refit)
             {
                 diagnostics.Add("Refit=True");
+            }
+
+            if (!string.IsNullOrWhiteSpace(RefitFromOnnxPath))
+            {
+                diagnostics.Add("RefitFromOnnx=" + RefitFromOnnxPath);
+                diagnostics.Add("RefitFromOnnx performs copied missing/all-weight inventory and parser diagnostics before any execution context is created.");
             }
 
             if (AllowWeightStreaming)

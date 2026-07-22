@@ -283,6 +283,43 @@ public sealed class OnnxToEngineTrtexecLikeTests
     }
 
     [Fact]
+    public void OnnxRefitSourceRequiresExplicitStrippedBuildAndModernTensorRtLine()
+    {
+        string modelPath = Path.Combine(RepositoryPaths.Root, "artifacts", "interface-coverage", "project-completion-review.md");
+        TrtexecLikeOptions options = TrtexecLikeParser.Parse(new[]
+        {
+            "--dryRun",
+            "--tensor-rt-line", "10",
+            "--onnx", modelPath,
+            "--stripWeights",
+            "--refit",
+            "--refitFromOnnx", modelPath
+        });
+
+        Assert.True(options.DeploymentOptions.StripWeights);
+        Assert.Equal(Path.GetFullPath(modelPath), options.DeploymentOptions.RefitFromOnnxPath);
+        Assert.Contains("--refitFromOnnx", options.ToArgumentLine(), StringComparison.Ordinal);
+        Assert.Contains("copied missing/all-weight inventory", string.Join("\n", options.DeploymentOptions.ToDiagnostics()), StringComparison.Ordinal);
+
+        Assert.Throws<ArgumentException>(() => TrtexecLikeParser.Parse(new[]
+        {
+            "--dryRun", "--onnx", modelPath, "--refitFromOnnx", modelPath
+        }));
+        Assert.Throws<ArgumentException>(() => TrtexecLikeParser.Parse(new[]
+        {
+            "--dryRun", "--onnx", modelPath, "--stripWeights", "--refitFromOnnx", modelPath
+        }));
+        Assert.Throws<ArgumentException>(() => TrtexecLikeParser.Parse(new[]
+        {
+            "--dryRun", "--loadEngine", modelPath, "--stripWeights", "--refit", "--refitFromOnnx", modelPath
+        }));
+        Assert.Throws<ArgumentException>(() => TrtexecLikeParser.Parse(new[]
+        {
+            "--tensor-rt-line", "8", "--onnx", modelPath, "--stripWeights", "--refit", "--refitFromOnnx", modelPath
+        }));
+    }
+
+    [Fact]
     public void TrtexecParserTreatsThreadsAsOfficialBooleanAndNormalizesLegacyValues()
     {
         TrtexecLikeOptions official = TrtexecLikeParser.Parse(new[] { "--threads", "--avgRuns", "2" });

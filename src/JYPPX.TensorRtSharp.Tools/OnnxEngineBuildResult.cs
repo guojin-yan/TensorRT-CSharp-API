@@ -38,7 +38,8 @@ public sealed class OnnxEngineBuildResult
         OnnxEngineCapabilityProbe? capabilityProbe = null,
         ulong workspaceBytes = 0,
         TensorRtBuilderConfigDeploymentSnapshot? builderConfigDeploymentSnapshot = null,
-        OnnxEngineParserPreflightSnapshot? parserPreflightSnapshot = null)
+        OnnxEngineParserPreflightSnapshot? parserPreflightSnapshot = null,
+        OnnxEngineRefitSnapshot? refitSnapshot = null)
         : this(
             success,
             skipped,
@@ -67,7 +68,8 @@ public sealed class OnnxEngineBuildResult
             capabilityProbe,
             workspaceBytes,
             builderConfigDeploymentSnapshot,
-            parserPreflightSnapshot)
+            parserPreflightSnapshot,
+            refitSnapshot)
     {
     }
 
@@ -99,7 +101,8 @@ public sealed class OnnxEngineBuildResult
         OnnxEngineCapabilityProbe? capabilityProbe = null,
         ulong workspaceBytes = 0,
         TensorRtBuilderConfigDeploymentSnapshot? builderConfigDeploymentSnapshot = null,
-        OnnxEngineParserPreflightSnapshot? parserPreflightSnapshot = null)
+        OnnxEngineParserPreflightSnapshot? parserPreflightSnapshot = null,
+        OnnxEngineRefitSnapshot? refitSnapshot = null)
     {
         Success = success;
         Skipped = skipped;
@@ -126,6 +129,7 @@ public sealed class OnnxEngineBuildResult
         WorkspaceBytes = workspaceBytes;
         BuilderConfigDeploymentSnapshot = builderConfigDeploymentSnapshot;
         ParserPreflightSnapshot = parserPreflightSnapshot ?? OnnxEngineParserPreflightSnapshot.Empty;
+        RefitSnapshot = refitSnapshot ?? OnnxEngineRefitSnapshot.Empty;
         Diagnostics = diagnostics ?? Array.Empty<string>();
         LogLines = logLines ?? Array.Empty<string>();
         EvidenceSidecar = evidenceSidecar ?? OnnxEngineBuildEvidenceSidecarReader.Empty;
@@ -190,6 +194,12 @@ public sealed class OnnxEngineBuildResult
     public TensorRtBuilderConfigDeploymentSnapshot? BuilderConfigDeploymentSnapshot { get; }
 
     public OnnxEngineParserPreflightSnapshot ParserPreflightSnapshot { get; }
+
+    /// <summary>
+    /// Gets copied diagnostics for the optional ONNX stripped-plan refit lifecycle.
+    /// 获取可选 ONNX stripped-plan 重整生命周期的复制诊断。
+    /// </summary>
+    public OnnxEngineRefitSnapshot RefitSnapshot { get; }
 
     public bool IsRuntimeExecutionProof => InferenceRan && OutputMatch;
 

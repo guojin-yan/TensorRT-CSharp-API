@@ -1,0 +1,129 @@
+{
+  "schemaVersion": "trtexec-onnx-refit-lifecycle-validation.v1",
+  "strict": true,
+  "checkCount": 24,
+  "passedCount": 24,
+  "failureCount": 0,
+  "checks": [
+    {
+      "id": "schema",
+      "passed": true,
+      "actual": "trtexec-onnx-refit-lifecycle-evidence.v1"
+    },
+    {
+      "id": "contract-requires-onnx",
+      "passed": true,
+      "actual": "--onnx,--stripWeights,--refit"
+    },
+    {
+      "id": "contract-requires-strip",
+      "passed": true,
+      "actual": "--onnx,--stripWeights,--refit"
+    },
+    {
+      "id": "contract-requires-refit",
+      "passed": true,
+      "actual": "--onnx,--stripWeights,--refit"
+    },
+    {
+      "id": "trt10-strip-applied",
+      "passed": true,
+      "actual": "True"
+    },
+    {
+      "id": "trt10-refit-applied",
+      "passed": true,
+      "actual": "True"
+    },
+    {
+      "id": "trt10-refittable-before",
+      "passed": true,
+      "actual": "True"
+    },
+    {
+      "id": "trt10-parser-refit",
+      "passed": true,
+      "actual": "True"
+    },
+    {
+      "id": "trt10-engine-refit-commit",
+      "passed": true,
+      "actual": "True"
+    },
+    {
+      "id": "trt10-refittable-after",
+      "passed": true,
+      "actual": "True"
+    },
+    {
+      "id": "trt10-all-inventory",
+      "passed": true,
+      "actual": "6/6"
+    },
+    {
+      "id": "trt10-missing-zero",
+      "passed": true,
+      "actual": "0"
+    },
+    {
+      "id": "trt10-parser-errors-zero",
+      "passed": true,
+      "actual": "0"
+    },
+    {
+      "id": "trt10-context-gate",
+      "passed": true,
+      "actual": "True/True"
+    },
+    {
+      "id": "trt10-inference",
+      "passed": true,
+      "actual": "True"
+    },
+    {
+      "id": "trt10-output-shape",
+      "passed": true,
+      "actual": "10/40"
+    },
+    {
+      "id": "trt10-output-match",
+      "passed": true,
+      "actual": "6f5771d6c5b056406c190a59e725cf9bb13c1f148c1ef06f99ed8acfb11b9041"
+    },
+    {
+      "id": "trt8-precheck",
+      "passed": true,
+      "actual": "dry-run-precheck/True"
+    },
+    {
+      "id": "trt11-dependency",
+      "passed": true,
+      "actual": "dependency-probe-only/True"
+    },
+    {
+      "id": "boundary-local",
+      "passed": true,
+      "actual": "True"
+    },
+    {
+      "id": "boundary-no-accuracy",
+      "passed": true,
+      "actual": "False"
+    },
+    {
+      "id": "boundary-no-persistence",
+      "passed": true,
+      "actual": "False"
+    },
+    {
+      "id": "boundary-no-package",
+      "passed": true,
+      "actual": "False"
+    },
+    {
+      "id": "boundary-no-publish",
+      "passed": true,
+      "actual": "False/False"
+    }
+  ]
+}

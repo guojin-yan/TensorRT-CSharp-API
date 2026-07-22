@@ -121,10 +121,20 @@
       "trtexecOption": "--versionCompatible --excludeLeanRuntime --stripWeights --refit --allowWeightStreaming --weightStreamingBudget",
       "tensorRtExecStatus": "implemented-build-runtime-readback-with-version-guards",
       "entryPoints": ["TrtexecLikeWeightStreamingBudget", "OnnxEngineBuildService.ApplyEnginePackagingOptions", "OnnxEngineBuildService.ApplyEngineRuntimePolicies", "TensorRtBuilderConfig.SetFlag/GetFlag", "TensorRtEngine.SetWeightStreamingBudgetV2", "TensorRtExecOptions", "WinForms Packaging fields"],
-      "proofBoundary": "Builder/engine set-readback and a local weighted-model enqueue prove policy routing only. They do not prove cross-version deployment, external lean-runtime loading, stripped-plan refit completion, performance, numerical accuracy, package-consumer runtime, or public release.",
+      "proofBoundary": "Builder/engine set-readback and a local weighted-model enqueue prove policy routing only. The separate --refitFromOnnx extension adds an in-memory lifecycle but does not change official trtexec parity or prove persisted refitted plans, packages, or release.",
       "isRuntimeProof": false,
-      "gap": "TRT8 keeps strip/weight-streaming and version-compatible+refit conflict parse-only; TRT11 remains dependency-probe-only on this host. Cross-version lean runtime and stripped-plan refit workflows need separate assets and owner evidence.",
-      "nextStep": "Retain the version guards and compact runtime evidence; add external lean-runtime loading and stripped-plan refit only after their complete owner-safe lifecycle is implemented."
+      "gap": "TRT8 keeps strip/weight-streaming and version-compatible+refit conflict parse-only; TRT11 remains dependency-probe-only on this host. External lean runtime still needs separate owner evidence.",
+      "nextStep": "Retain the version guards and compact runtime evidence; treat --refitFromOnnx as a managed extension rather than an official trtexec option."
+    },
+    {
+      "id": "onnx-stripped-plan-refit-extension",
+      "trtexecOption": "TensorRtExec extension: --refitFromOnnx",
+      "tensorRtExecStatus": "implemented-trt10-refit-lifecycle-with-version-guards",
+      "entryPoints": ["OnnxEngineBuildService.RefitStrippedEngineFromOnnx", "OnnxEngineRefitSnapshot", "TensorRtRefitter", "TensorRtOnnxParserRefitter", "TensorRtExecOptions", "WinForms Refit ONNX field"],
+      "proofBoundary": "TRT10 local evidence proves stripped-plan deserialize, copied inventory, parser load, engine commit, context ordering, enqueue, and exact baseline output comparison. It does not prove refitted-plan persistence, model accuracy, package-consumer runtime, or public release.",
+      "isRuntimeProof": false,
+      "gap": "TRT8 is explicitly unsupported and TRT11 remains dependency-probe-only on this host. Persisted-refit serialization and package consumption remain external proof gaps.",
+      "nextStep": "Keep the extension owner-safe and add persisted-refit serialization only after its versioned contract is explicit."
     },
     {
       "id": "workspace-memory-pool",

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
@@ -299,8 +300,42 @@ public static class OnnxEngineRuntimeArtifactWriter
             data.OutputElementCount,
             data.InputPreview,
             data.OutputPreview,
-            Note = "Output artifact is a bounded summary; it intentionally avoids large tensor dumps."
+            OutputComparisonSample = ReadFloatSample(data.RawOutputBytes, 64),
+            OutputByteLength = data.RawOutputBytes.LongLength,
+            OutputSha256 = ComputeSha256(data.RawOutputBytes),
+            Note = "Output artifact is a bounded summary; it intentionally avoids large tensor dumps. The output hash is comparison evidence only and does not promote the proof classification."
         };
+    }
+
+    private static string ComputeSha256(byte[] bytes)
+    {
+        if (bytes == null || bytes.Length == 0)
+        {
+            return string.Empty;
+        }
+
+        using SHA256 sha256 = SHA256.Create();
+        byte[] hash = sha256.ComputeHash(bytes);
+        StringBuilder builder = new StringBuilder(hash.Length * 2);
+        foreach (byte item in hash)
+        {
+            builder.Append(item.ToString("x2", CultureInfo.InvariantCulture));
+        }
+
+        return builder.ToString();
+    }
+
+    private static IReadOnlyList<float> ReadFloatSample(byte[] bytes, int maximumValues)
+    {
+        if (bytes == null || bytes.Length == 0 || maximumValues <= 0)
+        {
+            return Array.Empty<float>();
+        }
+
+        int count = Math.Min(bytes.Length / sizeof(float), maximumValues);
+        float[] values = new float[count];
+        Buffer.BlockCopy(bytes, 0, values, 0, count * sizeof(float));
+        return values;
     }
 
     private static object CreateProfileArtifact(OnnxEngineBuildResult result, OnnxEngineRuntimeArtifactData data)

@@ -12,6 +12,7 @@ public sealed class MainForm : Form
     private readonly TextBox _onnxPath = new TextBox();
     private readonly TextBox _enginePath = new TextBox();
     private readonly TextBox _loadEnginePath = new TextBox();
+    private readonly TextBox _refitFromOnnxPath = new TextBox();
     private readonly ComboBox _tensorRtLine = new ComboBox();
     private readonly CheckBox _fp16 = new CheckBox();
     private readonly CheckBox _int8 = new CheckBox();
@@ -106,7 +107,7 @@ public sealed class MainForm : Form
         {
             Dock = DockStyle.Fill,
             ColumnCount = 3,
-            RowCount = 46,
+            RowCount = 48,
             Padding = new Padding(12),
             AutoScroll = true
         };
@@ -199,11 +200,12 @@ public sealed class MainForm : Form
         packagingPanel.Controls.AddRange(new Control[] { _versionCompatible, _excludeLeanRuntime, _stripWeights, _refit, _dumpRefit, _allowWeightStreaming, _dumpDebugTensors, _safe, _consistency, _builderCache, _noBuilderCache });
         AddLabeled(root, 27, "Packaging", packagingPanel);
         AddLabeled(root, 28, "Weight Budget", _weightStreamingBudget);
-        AddPathRow(root, 29, "Timing Export", _exportTimingCachePath, OnBrowseExportTimingCache);
-        AddLabeled(root, 30, "Mark Debug", _markDebug);
-        AddPathRow(root, 31, "Layer Info", _layerInfoPath, OnBrowseLayerInfo);
-        AddPathRow(root, 32, "Report", _reportPath, OnBrowseReport);
-        AddPathRow(root, 33, "Evidence", _evidenceSidecarPath, OnBrowseEvidenceSidecar);
+        AddPathRow(root, 29, "Refit ONNX", _refitFromOnnxPath, OnBrowseRefitOnnx);
+        AddPathRow(root, 30, "Timing Export", _exportTimingCachePath, OnBrowseExportTimingCache);
+        AddLabeled(root, 31, "Mark Debug", _markDebug);
+        AddPathRow(root, 32, "Layer Info", _layerInfoPath, OnBrowseLayerInfo);
+        AddPathRow(root, 33, "Report", _reportPath, OnBrowseReport);
+        AddPathRow(root, 34, "Evidence", _evidenceSidecarPath, OnBrowseEvidenceSidecar);
 
         ConfigureNumeric(_iterations, 1, 100000, 10);
         ConfigureNumeric(_warmUp, 0, 3600000, 200);
@@ -211,7 +213,7 @@ public sealed class MainForm : Form
         ConfigureNumeric(_streams, 1, 1024, 1);
         FlowLayoutPanel timingPanel = new FlowLayoutPanel { Dock = DockStyle.Fill };
         timingPanel.Controls.AddRange(new Control[] { _iterations, _warmUp, _duration, _streams });
-        AddLabeled(root, 34, "Runs/Warm/Duration/Streams", timingPanel);
+        AddLabeled(root, 35, "Runs/Warm/Duration/Streams", timingPanel);
 
         FlowLayoutPanel runtimeSwitchPanel = new FlowLayoutPanel { Dock = DockStyle.Fill };
         ConfigureCheck(_useCudaGraph, "CUDA graph");
@@ -223,16 +225,16 @@ public sealed class MainForm : Form
         ConfigureCheck(_dumpProfile, "Dump profile");
         ConfigureCheck(_separateProfileRun, "Separate profile");
         runtimeSwitchPanel.Controls.AddRange(new Control[] { _useCudaGraph, _noDataTransfers, _useSpinWait, _threads, _dumpOutput, _dumpLayerInfo, _dumpProfile, _separateProfileRun });
-        AddLabeled(root, 35, "Runtime Flags", runtimeSwitchPanel);
+        AddLabeled(root, 36, "Runtime Flags", runtimeSwitchPanel);
 
-        AddLabeled(root, 36, "Inf Streams", _infStreams);
-        AddLabeled(root, 37, "Avg/Percentile", CreateTextPair(_avgRuns, _percentile));
-        AddLabeled(root, 38, "Sleep/Idle ms", CreateTextPair(_sleepTime, _idleTime));
-        AddLabeled(root, 39, "Load Inputs", _loadInputs);
-        AddLabeled(root, 40, "Raw Bindings", _dumpRawBindingsPath);
-        AddLabeled(root, 41, "Output JSON", _exportOutputPath);
-        AddLabeled(root, 42, "Times/Profile", CreateTextPair(_exportTimesPath, _exportProfilePath));
-        AddLabeled(root, 43, "Save Profile", _saveProfilePath);
+        AddLabeled(root, 37, "Inf Streams", _infStreams);
+        AddLabeled(root, 38, "Avg/Percentile", CreateTextPair(_avgRuns, _percentile));
+        AddLabeled(root, 39, "Sleep/Idle ms", CreateTextPair(_sleepTime, _idleTime));
+        AddLabeled(root, 40, "Load Inputs", _loadInputs);
+        AddLabeled(root, 41, "Raw Bindings", _dumpRawBindingsPath);
+        AddLabeled(root, 42, "Output JSON", _exportOutputPath);
+        AddLabeled(root, 43, "Times/Profile", CreateTextPair(_exportTimesPath, _exportProfilePath));
+        AddLabeled(root, 44, "Save Profile", _saveProfilePath);
 
         FlowLayoutPanel modePanel = new FlowLayoutPanel { Dock = DockStyle.Fill };
         ConfigureCheck(_buildOnly, "Build only");
@@ -241,28 +243,28 @@ public sealed class MainForm : Form
         _buildOnly.Checked = true;
         _skipInference.Checked = true;
         modePanel.Controls.AddRange(new Control[] { _buildOnly, _skipInference, _dryRun });
-        AddLabeled(root, 44, "Mode", modePanel);
+        AddLabeled(root, 45, "Mode", modePanel);
 
         Button previewButton = new Button { Text = "Preview", Dock = DockStyle.Fill, Height = 32 };
         previewButton.Click += OnPreview;
-        root.Controls.Add(previewButton, 2, 44);
+        root.Controls.Add(previewButton, 2, 45);
 
         _commandPreview.Dock = DockStyle.Fill;
         _commandPreview.ReadOnly = true;
         _commandPreview.WordWrap = false;
-        root.Controls.Add(_commandPreview, 0, 45);
+        root.Controls.Add(_commandPreview, 0, 46);
         root.SetColumnSpan(_commandPreview, 2);
 
         Button runButton = new Button { Text = "Run", Dock = DockStyle.Fill, Height = 32 };
         runButton.Click += OnRun;
-        root.Controls.Add(runButton, 2, 45);
+        root.Controls.Add(runButton, 2, 46);
 
         _log.Dock = DockStyle.Fill;
         _log.Multiline = true;
         _log.ScrollBars = ScrollBars.Both;
         _log.ReadOnly = true;
         _log.WordWrap = false;
-        root.Controls.Add(_log, 0, 46);
+        root.Controls.Add(_log, 0, 47);
         root.SetColumnSpan(_log, 3);
 
         _minShapes.PlaceholderText = "input:1x3x640x640";
@@ -364,6 +366,15 @@ public sealed class MainForm : Form
         if (dialog.ShowDialog(this) == DialogResult.OK)
         {
             _onnxPath.Text = dialog.FileName;
+        }
+    }
+
+    private void OnBrowseRefitOnnx(object? sender, EventArgs e)
+    {
+        using OpenFileDialog dialog = new OpenFileDialog { Filter = "ONNX models (*.onnx)|*.onnx|All files (*.*)|*.*" };
+        if (dialog.ShowDialog(this) == DialogResult.OK)
+        {
+            _refitFromOnnxPath.Text = dialog.FileName;
         }
     }
 
@@ -584,7 +595,8 @@ public sealed class MainForm : Form
             _tilingOptimizationLevel.SelectedItem?.ToString() ?? string.Empty,
             ParseOptionalMemoryBytes(_l2LimitForTiling.Text),
             _quantizationFlags.SelectedItem?.ToString() ?? string.Empty,
-            _weightStreamingBudget.Text);
+            _weightStreamingBudget.Text,
+            _refitFromOnnxPath.Text);
     }
 
     private static string[] ParsePlugins(string value)

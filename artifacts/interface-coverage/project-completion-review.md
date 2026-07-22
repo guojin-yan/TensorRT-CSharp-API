@@ -593,6 +593,70 @@ unresolved external symbol createConsistencyChecker_INTERNAL
 - 三个 bridge-only `PackageReference` consumer restore/build 均为 0 warning / 0 error，`ProjectReference=False`，证据分类保持 `compile-surface-proof`，不提升为 runtime proof。
 - 未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
 
+## 2026-07-22 TensorRtExec ONNX Stripped-Plan Refit Lifecycle
+
+本阶段补齐 TensorRtExec managed extension `--refitFromOnnx <path>`，复用已有 owner-safe
+`TensorRtEngine`、`TensorRtRefitter` 与 `TensorRtOnnxParserRefitter` surface，把 stripped plan
+从构建、反序列化、ONNX 权重装载、engine refit commit 到 context gate 串成单一生命周期。
+
+### Lifecycle 与安全边界
+
+- 参数必须同时具备 `--onnx --stripWeights --refit`；当前拒绝 `--loadEngine` 组合，避免隐式猜测
+  build/refit source。TRT8 dry-run 可解析为 parse-only，non-dry 在 native 调用前拒绝；TRT10/11
+  才进入 parser-refitter lifecycle。
+- 实际顺序固定为 stripped build、deserialize、`IsRefittable`、copied missing/all inventory、
+  `RefitFromFile`、copied parser diagnostics、`RefitCudaEngine()` commit、再次检查 missing/error/
+  refittable，完整成功后才设置 `ContextCreationAllowed=True` 并允许创建 execution context。
+- snapshot 独立记录 `ParserRefitReturned` 与 `EngineRefitReturned`。实测证明仅 parser load 而不执行
+  engine commit 会令 MNIST 输出全零，因此 `RefitCudaEngine()` 是不可省略的正确性边界。
+- public surface 没有新增 `IntPtr`、`nint`、`UIntPtr`、`SafeHandle`、borrowed pointer 或 native
+  ownership；`OutputSha256` 与最多 64 个 float 的 comparison sample 只用于对照，不提升 generic
+  output 的 proof classification。
+
+### Runtime evidence
+
+- TRT10.11/CUDA12.9 使用仓库已有 TensorRT MNIST ONNX，模型 SHA256
+  `2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf`，没有下载新模型。
+- refit 前后 engine 均 `IsRefittable=True`；parser load 与 engine commit 均返回 true；missing
+  `0 -> 0`、all inventory `6 -> 6`、parser error `0`、copied diagnostic `0`；context gate 通过并
+  完成 `[1,10]` bounded enqueue。
+- refit 输出 10 floats / 40 bytes，SHA256
+  `6f5771d6c5b056406c190a59e725cf9bb13c1f148c1ef06f99ed8acfb11b9041`，与独立 full-weight
+  baseline 完全一致。compact evidence strict 为 `24/24`。
+- TRT8 证据为 `dry-run-precheck`；TRT11 因 `createInferRuntime` 返回 null 保持
+  `dependency-probe-only`。本证据不证明 refitted plan 持久化、模型准确率、package-consumer
+  runtime、public package 或 release readiness。
+
+### Verification
+
+- bindings 保持 `194 manifests / 3971 records`，连续生成和输出验证通过；本批没有 native manifest
+  或 ABI entry 变更。
+- solution Debug 为 `0 warning / 0 error`；Release 为 `0 error`，保留 5 个既有 nullable test
+  warning。先前 focused/application/schema/parity/release 集合为 `42/42` 与 `71/71`；最终相关
+  宽集合再次通过 `56/56`。
+- native TRT8/CUDA12、TRT10/CUDA12、TRT11/CUDA12 增量构建成功；ABI declaration/PE export
+  parity 为 TRT8 `991/991`、TRT10 `1086/1086`、TRT11 `1233/1233`，missing 均为 `0`。
+- GUI/CLI checklist 为 `20/20`；Public API documentation warning `0`、bilingual finding `0`；
+  DocFX `922 models / 0 warning / 0 error`，新文章已生成 HTML。
+- managed nupkg 为 `14,805,698` bytes，SHA256
+  `362FB60971660695659F8D391165A28113D5F6AE191D438973FB12C4819525CA`；TRT10 bridge-only
+  nupkg 为 `351,093` bytes，SHA256
+  `FF029C62AADD96798368EDEF83404895D8FA751F063805F42407EEA858998329`。无 ProjectReference
+  consumer restore/build `0 warning / 0 error`，dependency probe ready，但仍为 compile-surface-proof。
+- strict classification/public-proof finding 均为 `0`，strict release required failure `0`。owner
+  convergence 为 structural `9/9`、accepted `0/9`、gates `2/3`；final owner gate blocked `5`。
+
+### C/E 盘与发布边界
+
+- C 盘 Downloads/Desktop/Documents/Temp 定向审计未发现本批 ONNX、plan、engine、nupkg、TensorRT
+  或 JYPPX 下载资产。consumer 脚本已自动删除本次 restore cache 与 split-package 子目录。
+- C 盘仍有本批 34 个 `.NET workload` 日志，共 `41,141` bytes、15 个空 MSBuild 临时目录，另有
+  空 `C:\jyppx-pkgcache` 与 `%TEMP%\jyppx-split-packages` 根目录。标准删除命令在执行前被工具
+  安全策略拒绝，未发生部分删除，未换壳绕过；NuGet、Codex、CUDA 和系统缓存未触碰。
+- E 盘 real-case 目录仍有 3 个可再生 plan，共 `1,262,292` bytes；精确路径标准删除同样在执行前
+  被策略拒绝。plan 不提交，保留小型 JSON evidence。
+- 未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
+
 ## 2026-07-20 CUDA IPC Export-Only Copied Token Uplift
 
 本批将 `cudaIpcGetEventHandle` 与 `cudaIpcGetMemHandle` 提升为 export-only copied token

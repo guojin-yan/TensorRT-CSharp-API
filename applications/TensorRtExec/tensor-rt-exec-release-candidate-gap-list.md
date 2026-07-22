@@ -21,7 +21,7 @@
 | int8 | parse-report-only-calibration-boundary | 是 | 是 | CLI/WinForms 已暴露 INT8 与校准缓存意图，仍等待 calibration/cache ownership 设计 |
 | workspace-memory-pool | implemented-readback-report | 是 | 是 | 继续把真实模型/运行证明交给 proof records |
 | timing-iterations | implemented-builder-config-readback | 是 | 是 | `--avgTiming` 跨 TRT8/10/11 设置并 read back；TRT8 `--minTiming` 使用 legacy setter，TRT10/11 保持 parse-only |
-| engine-packaging-refit-weight-streaming | implemented-build-runtime-readback-with-version-guards | 是 | 是 | TRT8/10/11 应用可用 packaging/refit flag；TRT10/11 在 context 前设置预算，TRT8 strip/streaming 与 version-compatible+refit 冲突保持 parse-only |
+| engine-packaging-refit-weight-streaming | implemented-build-runtime-readback-with-version-guards | 是 | 是 | 官方 packaging/refit/streaming 参数保持 versioned readback；`--refitFromOnnx` 作为 managed extension 已完成 TRT10 parser load、engine commit、context gate、enqueue 与 baseline match |
 | io-layer-precision-policies | implemented-build-readback-with-version-guards | 是 | 是 | TRT8/10 已完成 I/O 与 layer policy typed set/readback；TRT11 仅应用 type 已匹配的 allowed formats，移除的 precision setters 保持 guard |
 | bounded-benchmark-scheduler | implemented-bounded-runtime | 是 | 是 | 独立 context/stream、预热、次数+时长双下限、idle、平均窗口和 percentile 已执行；其余 runtime mechanics 保持 parse-only |
 | timing-cache | implemented-build-cache-lifecycle | 是 | 是 | 成功构建会导入/导出 cache 并记录 `TimingCacheArtifact` 大小与 SHA256；仍需 owner 将 cache 文件与真实模型 build 记录一起归档 |

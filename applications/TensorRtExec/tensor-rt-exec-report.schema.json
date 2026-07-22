@@ -31,6 +31,7 @@
     "WorkspaceBytes",
     "BuilderConfigDeploymentSnapshot",
     "ParserPreflightSnapshot",
+    "RefitSnapshot",
     "OptionImplementationStatus",
     "BenchmarkSummary",
     "ProofClassification",
@@ -86,7 +87,8 @@
         "Safe",
         "Consistency",
         "BuilderCache",
-        "NoBuilderCache"
+        "NoBuilderCache",
+        "RefitFromOnnxPath"
       ],
       "properties": {
         "MaxNbTactics": { "type": [ "integer", "null" ], "minimum": 0 },
@@ -243,6 +245,21 @@
         "IdentityOperatorSupported": { "type": "boolean" }, "ModelSupportAttempted": { "type": "boolean" }, "ModelSupportState": { "type": "string" }, "ModelSupported": { "type": "boolean" },
         "SupportedSubgraphCount": { "type": "integer", "minimum": 0 }, "UnsupportedSubgraphCount": { "type": "integer", "minimum": 0 }, "CopiedSubgraphCount": { "type": "integer", "minimum": 0 }, "CopiedSupportedSubgraphCount": { "type": "integer", "minimum": 0 }, "CopiedUnsupportedSubgraphCount": { "type": "integer", "minimum": 0 }, "CopiedNodeCount": { "type": "integer", "minimum": 0 },
         "EvidenceKind": { "type": "string" }, "EvidenceBoundary": { "type": "string" }, "PointerFreeCopiedSnapshot": { "type": "boolean" }, "CanPromoteRuntimeProof": { "type": "boolean" }, "CanPromoteReleaseProof": { "type": "boolean" }, "CanDeleteDeferredRecord": { "type": "boolean" }
+      }
+    },
+    "RefitSnapshot": {
+      "type": "object",
+      "description": "Copied ONNX parser-refitter diagnostics and named-weight inventory captured before any execution context is created.",
+      "additionalProperties": false,
+      "required": ["Attempted", "Succeeded", "State", "SourcePath", "SourceLengthBytes", "SourceSha256", "EngineRefittableBefore", "EngineRefittableAfter", "ParserRefitReturned", "EngineRefitReturned", "MissingWeightsBefore", "AllWeightsBefore", "MissingWeightsAfter", "AllWeightsAfter", "ParserErrorCount", "CopiedDiagnosticCount", "DiagnosticSummary", "ContextCreationAllowed", "EvidenceBoundary"],
+      "properties": {
+        "Attempted": { "type": "boolean" }, "Succeeded": { "type": "boolean" }, "State": { "type": "string" }, "SourcePath": { "type": "string" },
+        "SourceLengthBytes": { "type": "integer", "minimum": 0 }, "SourceSha256": { "type": "string" },
+        "EngineRefittableBefore": { "type": "boolean" }, "EngineRefittableAfter": { "type": "boolean" }, "ParserRefitReturned": { "type": "boolean" }, "EngineRefitReturned": { "type": "boolean" },
+        "MissingWeightsBefore": { "type": "array", "items": { "type": "string" } }, "AllWeightsBefore": { "type": "array", "items": { "type": "string" } },
+        "MissingWeightsAfter": { "type": "array", "items": { "type": "string" } }, "AllWeightsAfter": { "type": "array", "items": { "type": "string" } },
+        "ParserErrorCount": { "type": "integer", "minimum": 0 }, "CopiedDiagnosticCount": { "type": "integer", "minimum": 0 }, "DiagnosticSummary": { "type": "string" },
+        "ContextCreationAllowed": { "type": "boolean" }, "EvidenceBoundary": { "type": "string" }
       }
     },
     "OptionImplementationStatus": {
