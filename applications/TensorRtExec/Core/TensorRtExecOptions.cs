@@ -95,7 +95,8 @@ public sealed class TensorRtExecOptions
         int? maxNbTactics = null,
         string tilingOptimizationLevel = "",
         ulong? l2LimitForTilingBytes = null,
-        string quantizationFlags = "")
+        string quantizationFlags = "",
+        string weightStreamingBudget = "")
     {
         List<string> args = new List<string>();
         Add(args, "--tensor-rt-line", string.IsNullOrWhiteSpace(tensorRtLine) ? "10" : tensorRtLine);
@@ -128,7 +129,9 @@ public sealed class TensorRtExecOptions
         Add(args, "--layerPrecisions", layerPrecisions);
         Add(args, "--layerOutputTypes", layerOutputTypes);
         Add(args, "--markDebug", markDebug);
-        Add(args, "--weightStreamingBudget", FormatBytesMiB(weightStreamingBudgetBytes));
+        Add(args, "--weightStreamingBudget", string.IsNullOrWhiteSpace(weightStreamingBudget)
+            ? FormatBytesMiB(weightStreamingBudgetBytes)
+            : weightStreamingBudget);
         Add(args, "--exportTimingCache", exportTimingCachePath);
         AddSwitch(args, "--safe", safe);
         AddSwitch(args, "--consistency", consistency);
@@ -298,6 +301,8 @@ public sealed class TensorRtExecOptions
     public bool Refit => TrtexecOptions.DeploymentOptions.Refit;
 
     public ulong? WeightStreamingBudgetBytes => TrtexecOptions.DeploymentOptions.WeightStreamingBudgetBytes;
+
+    public TrtexecLikeWeightStreamingBudget WeightStreamingBudget => TrtexecOptions.DeploymentOptions.WeightStreamingBudget;
 
     public string ExportTimingCachePath => TrtexecOptions.DeploymentOptions.ExportTimingCachePath;
 

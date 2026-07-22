@@ -254,7 +254,9 @@ public sealed class TensorRtExecApplicationTests
         Assert.Contains("\"DumpLayerInfo\"", parityMatrix, StringComparison.Ordinal);
         Assert.Contains("precision-shortcuts-debug-boundary", parityMatrix, StringComparison.Ordinal);
         Assert.Contains("--fp8 --best", parityMatrix, StringComparison.Ordinal);
-        Assert.Contains("--dumpRefit --allowWeightStreaming --markDebug --dumpDebugTensors", parityMatrix, StringComparison.Ordinal);
+        Assert.Contains("--fp8 --best --dumpRefit --markDebug --dumpDebugTensors", parityMatrix, StringComparison.Ordinal);
+        Assert.Contains("engine-packaging-refit-weight-streaming", parityMatrix, StringComparison.Ordinal);
+        Assert.Contains("--versionCompatible --excludeLeanRuntime --stripWeights --refit --allowWeightStreaming --weightStreamingBudget", parityMatrix, StringComparison.Ordinal);
         Assert.Contains("parse-report-only", featureMatrix + parityMatrix, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("gui-cli-field-map", parityMatrix, StringComparison.Ordinal);
         Assert.Contains("not runtime proof", featureMatrix + parityMatrix, StringComparison.OrdinalIgnoreCase);
@@ -355,12 +357,13 @@ public sealed class TensorRtExecApplicationTests
         Assert.Contains("--builderOptimizationLevel <0..5>", commandSource, StringComparison.Ordinal);
         Assert.Contains("--minTiming <n> --avgTiming <n> --precisionConstraints <none|prefer|obey>", commandSource, StringComparison.Ordinal);
         Assert.Contains("--layerPrecisions <spec> --layerOutputTypes <spec>", commandSource, StringComparison.Ordinal);
-        Assert.Contains("--versionCompatible --excludeLeanRuntime --stripWeights --refit --weightStreamingBudget <MiB>", commandSource, StringComparison.Ordinal);
+        Assert.Contains("--versionCompatible --excludeLeanRuntime --stripWeights --refit", commandSource, StringComparison.Ordinal);
         Assert.Contains("--safe --consistency --builderCache|--noBuilderCache", commandSource, StringComparison.Ordinal);
         Assert.Contains("--memPoolSize workspace:512,tacticDram:1024", commandSource, StringComparison.Ordinal);
         Assert.Contains("--shapes|--inputShapes input:1x3x640x640[,other:...] --batch <n>", commandSource, StringComparison.Ordinal);
         Assert.Contains("--fp16 --int8 --bf16 --fp8 --best --noTF32 --workspace <MiB>", commandSource, StringComparison.Ordinal);
-        Assert.Contains("--dumpRefit --allowWeightStreaming --markDebug <names> --dumpDebugTensors", commandSource, StringComparison.Ordinal);
+        Assert.Contains("--allowWeightStreaming --weightStreamingBudget <-2|-1|0..100%|bytes>", commandSource, StringComparison.Ordinal);
+        Assert.Contains("--dumpRefit --markDebug <names> --dumpDebugTensors", commandSource, StringComparison.Ordinal);
         Assert.Contains("--dryRun|--previewOnly", commandSource, StringComparison.Ordinal);
         Assert.Contains("--plugins|--plugin|--dynamicPlugins|--setPluginsToSerialize", commandSource, StringComparison.Ordinal);
         Assert.Contains("--profilingVerbosity <none|layer_names_only|detailed> --verbose", commandSource, StringComparison.Ordinal);

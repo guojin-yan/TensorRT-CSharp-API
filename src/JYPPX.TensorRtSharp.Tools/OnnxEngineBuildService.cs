@@ -240,6 +240,7 @@ public sealed class OnnxEngineBuildService
         {
             using TensorRtLogger logger = new TensorRtLogger(options.TensorRtLine);
             using TensorRtRuntime runtime = new TensorRtRuntime(logger);
+            ConfigureRuntimeForEnginePolicies(runtime, options, log, "Build");
             using TensorRtBuilder builder = new TensorRtBuilder(logger);
             using TensorRtBuilderConfig config = builder.CreateBuilderConfig();
             using CudaStream stream = new CudaStream();
@@ -845,7 +846,7 @@ public sealed class OnnxEngineBuildService
         TrtexecLikeDeploymentOptions deployment = options.DeploymentOptions ?? TrtexecLikeDeploymentOptions.Default;
         bool fp8Requested = deployment.Fp8 || deployment.Best;
         bool debugRequested = !string.IsNullOrWhiteSpace(deployment.MarkDebug) || deployment.DumpDebugTensors;
-        bool weightStreamingRequested = deployment.AllowWeightStreaming || deployment.WeightStreamingBudgetBytes.HasValue;
+        bool weightStreamingRequested = deployment.AllowWeightStreaming || deployment.WeightStreamingBudget.IsSpecified;
 
         try
         {
@@ -969,7 +970,8 @@ public sealed class OnnxEngineBuildService
 
             using TensorRtLogger logger = new TensorRtLogger(options.TensorRtLine);
             using TensorRtRuntime runtime = new TensorRtRuntime(logger);
-            using TensorRtEngine engine = runtime.DeserializeFromFile(options.LoadEnginePath);
+            ConfigureRuntimeForEnginePolicies(runtime, options, log, "LoadEngineDiagnostics");
+            using TensorRtEngine engine = runtime.DeserializeFromFile(preflightMetadata.Path);
             using TensorRtEngineInspector inspector = engine.CreateInspector();
             IReadOnlyList<TensorRtTensorInfo> tensors = engine.GetIOTensors();
             string inspectorInformation = inspector.GetEngineInformation(TensorRtLayerInformationFormat.Oneline);
@@ -1163,6 +1165,7 @@ public sealed class OnnxEngineBuildService
         {
             using TensorRtLogger logger = new TensorRtLogger(options.TensorRtLine);
             using TensorRtRuntime runtime = new TensorRtRuntime(logger);
+            ConfigureRuntimeForEnginePolicies(runtime, options, log, statePrefix + "Runtime");
             using TensorRtEngine engine = runtime.DeserializeFromFile(enginePath);
             return TryRunGenericFloatEngine(engine, options, profileIndex, log, statePrefix);
         }
@@ -1180,6 +1183,7 @@ public sealed class OnnxEngineBuildService
         List<string> log,
         string statePrefix)
     {
+        ApplyEngineRuntimePolicies(engine, options, log);
         int safeProfileIndex = Math.Max(0, profileIndex);
         int executionContextCount = options.RuntimeOptions.InfStreams ?? options.Streams;
         List<OnnxEngineBenchmarkWorker> workers = new List<OnnxEngineBenchmarkWorker>(executionContextCount);
@@ -1317,6 +1321,76 @@ public sealed class OnnxEngineBuildService
             {
                 workers[index].Dispose();
             }
+        }
+    }
+
+    private static void ApplyEngineRuntimePolicies(
+        TensorRtEngine engine,
+        OnnxEngineBuildOptions options,
+        List<string> log)
+    {
+        TrtexecLikeDeploymentOptions deployment = options.DeploymentOptions;
+        if (deployment.Refit)
+        {
+            bool refittable = engine.IsRefittable;
+            log.Add($"TrtexecEnginePolicy Name=Refit Applied=True Requested=True Readback={refittable} ReadbackMatch={refittable}");
+            if (!refittable)
+            {
+                throw new InvalidOperationException("TensorRT built an engine that is not refittable after --refit was applied.");
+            }
+        }
+
+        if (!deployment.WeightStreamingBudget.IsSpecified)
+        {
+            return;
+        }
+
+        if (options.TensorRtLine == TensorRtApiLine.TensorRt8)
+        {
+            log.Add(
+                $"TrtexecDeploymentControl Name=WeightStreamingBudget Applied=False Requested={deployment.WeightStreamingBudget.ArgumentValue} " +
+                "VersionGuard=TRT8 Reason=weight-streaming-runtime-api-is-not-available");
+            return;
+        }
+
+        long streamableWeights = engine.StreamableWeightsSizeInBytes;
+        long automaticBudget = engine.WeightStreamingAutomaticBudgetInBytes;
+        long requestedBudget = deployment.WeightStreamingBudget.ResolveBytes(streamableWeights, automaticBudget);
+        bool accepted = engine.SetWeightStreamingBudgetV2(requestedBudget);
+        long readbackBudget = engine.WeightStreamingBudgetV2InBytes;
+        long scratchBytes = engine.WeightStreamingScratchMemorySizeInBytes;
+        bool readbackMatch = accepted && readbackBudget == requestedBudget;
+        log.Add(
+            $"TrtexecDeploymentControl Name=WeightStreamingBudget Applied={accepted} " +
+            $"Requested={deployment.WeightStreamingBudget.ArgumentValue} Mode={deployment.WeightStreamingBudget.Kind} " +
+            $"ResolvedBytes={requestedBudget} StreamableWeightsBytes={streamableWeights} AutomaticBudgetBytes={automaticBudget} " +
+            $"Readback={readbackBudget} ScratchBytes={scratchBytes} ReadbackMatch={readbackMatch}");
+        if (!readbackMatch)
+        {
+            throw new InvalidOperationException(
+                $"TensorRT rejected or changed the requested weight-streaming budget. Requested={requestedBudget}, Readback={readbackBudget}.");
+        }
+    }
+
+    private static void ConfigureRuntimeForEnginePolicies(
+        TensorRtRuntime runtime,
+        OnnxEngineBuildOptions options,
+        List<string> log,
+        string source)
+    {
+        if (!options.DeploymentOptions.VersionCompatible)
+        {
+            return;
+        }
+
+        runtime.EngineHostCodeAllowed = true;
+        bool readback = runtime.EngineHostCodeAllowed;
+        log.Add(
+            $"TrtexecRuntimePolicy Name=EngineHostCodeAllowed Applied=True Requested=True " +
+            $"Readback={readback} ReadbackMatch={readback} Source={source}");
+        if (!readback)
+        {
+            throw new InvalidOperationException("TensorRT runtime did not enable host code for a version-compatible engine.");
         }
     }
 
@@ -2272,6 +2346,76 @@ public sealed class OnnxEngineBuildService
         {
             log.Add("TrtexecDeploymentControl Name=Sparsity Applied=False Requested=force Reason=official-force-mode-rewrites-model-weights-and-is-not-implemented");
         }
+
+        ApplyEnginePackagingOptions(config, options, log);
+    }
+
+    private static void ApplyEnginePackagingOptions(
+        TensorRtBuilderConfig config,
+        OnnxEngineBuildOptions options,
+        List<string> log)
+    {
+        TrtexecLikeDeploymentOptions deployment = options.DeploymentOptions;
+        ApplyBuilderFlagWithReadback(config, TensorRtBuilderFlag.VersionCompatible, deployment.VersionCompatible, "VersionCompatible", log);
+        ApplyBuilderFlagWithReadback(config, TensorRtBuilderFlag.ExcludeLeanRuntime, deployment.ExcludeLeanRuntime, "ExcludeLeanRuntime", log);
+        if (deployment.Refit && options.TensorRtLine == TensorRtApiLine.TensorRt8 && deployment.VersionCompatible)
+        {
+            log.Add("TrtexecDeploymentControl Name=Refit Applied=False Requested=True VersionGuard=TRT8 Reason=version-compatible-refit-vendor-readback-conflict");
+        }
+        else
+        {
+            ApplyBuilderFlagWithReadback(config, TensorRtBuilderFlag.Refit, deployment.Refit, "Refit", log);
+        }
+
+        if (deployment.StripWeights)
+        {
+            if (options.TensorRtLine == TensorRtApiLine.TensorRt8)
+            {
+                log.Add("TrtexecDeploymentControl Name=StripWeights Applied=False Requested=True VersionGuard=TRT8 Reason=strip-plan-and-refit-identical-flags-are-not-available");
+            }
+            else
+            {
+                TensorRtBuilderFlag refitMode = deployment.Refit
+                    ? TensorRtBuilderFlag.Refit
+                    : TensorRtBuilderFlag.RefitIdentical;
+                config.SetFlag(refitMode, true);
+                config.SetFlag(TensorRtBuilderFlag.StripPlan, true);
+                bool stripReadback = config.GetFlag(TensorRtBuilderFlag.StripPlan);
+                bool refitReadback = config.GetFlag(refitMode);
+                log.Add(
+                    $"TrtexecDeploymentControl Name=StripWeights Applied=True Requested=True Readback={stripReadback} " +
+                    $"RefitMode={refitMode} RefitReadback={refitReadback} ReadbackMatch={stripReadback && refitReadback}");
+            }
+        }
+
+        if (deployment.AllowWeightStreaming)
+        {
+            if (options.TensorRtLine == TensorRtApiLine.TensorRt8)
+            {
+                log.Add("TrtexecDeploymentControl Name=WeightStreaming Applied=False Requested=True VersionGuard=TRT8 Reason=weight-streaming-builder-flag-is-not-available");
+            }
+            else
+            {
+                ApplyBuilderFlagWithReadback(config, TensorRtBuilderFlag.WeightStreaming, true, "WeightStreaming", log);
+            }
+        }
+    }
+
+    private static void ApplyBuilderFlagWithReadback(
+        TensorRtBuilderConfig config,
+        TensorRtBuilderFlag flag,
+        bool requested,
+        string name,
+        List<string> log)
+    {
+        if (!requested)
+        {
+            return;
+        }
+
+        config.SetFlag(flag, true);
+        bool readback = config.GetFlag(flag);
+        log.Add($"TrtexecDeploymentControl Name={name} Applied={readback} Requested=True Readback={readback} ReadbackMatch={readback}");
     }
 
     private static bool ShouldCreateStronglyTypedNetwork(OnnxEngineBuildOptions options, List<string> log)

@@ -108,13 +108,23 @@
     },
     {
       "id": "precision-shortcuts-debug-boundary",
-      "trtexecOption": "--fp8 --best --dumpRefit --allowWeightStreaming --markDebug --dumpDebugTensors",
+      "trtexecOption": "--fp8 --best --dumpRefit --markDebug --dumpDebugTensors",
       "tensorRtExecStatus": "parse-report-only",
       "entryPoints": ["TrtexecLikeParser", "TrtexecLikeDeploymentOptions", "TensorRtExecOptions", "WinForms Precision and Packaging fields", "OnnxEngineBuildDiagnostics.OptionImplementationStatus"],
-      "proofBoundary": "FP8/best precision shortcuts, refit dumps, weight-streaming intent, and debug tensor names are CLI/GUI/report fields only; they do not prove precision support, refit lifecycle, weight streaming execution, or debug tensor runtime output.",
+      "proofBoundary": "FP8/best precision shortcuts, refit dumps, and debug tensor names are CLI/GUI/report fields only; they do not prove precision support, refit lifecycle, or debug tensor runtime output.",
       "isRuntimeProof": false,
-      "gap": "Needs TensorRT-line-specific capability checks, model-specific debug tensor ownership, runtime artifact hashes, and owner-reviewed logs before promotion.",
+      "gap": "Needs TensorRT-line-specific precision capability checks, model-specific debug tensor ownership, runtime artifact hashes, and owner-reviewed logs before promotion.",
       "nextStep": "Keep as parse/report-only while deferred boundary work promotes safe read-only capability probes and model-specific runtime proofs."
+    },
+    {
+      "id": "engine-packaging-refit-weight-streaming",
+      "trtexecOption": "--versionCompatible --excludeLeanRuntime --stripWeights --refit --allowWeightStreaming --weightStreamingBudget",
+      "tensorRtExecStatus": "implemented-build-runtime-readback-with-version-guards",
+      "entryPoints": ["TrtexecLikeWeightStreamingBudget", "OnnxEngineBuildService.ApplyEnginePackagingOptions", "OnnxEngineBuildService.ApplyEngineRuntimePolicies", "TensorRtBuilderConfig.SetFlag/GetFlag", "TensorRtEngine.SetWeightStreamingBudgetV2", "TensorRtExecOptions", "WinForms Packaging fields"],
+      "proofBoundary": "Builder/engine set-readback and a local weighted-model enqueue prove policy routing only. They do not prove cross-version deployment, external lean-runtime loading, stripped-plan refit completion, performance, numerical accuracy, package-consumer runtime, or public release.",
+      "isRuntimeProof": false,
+      "gap": "TRT8 keeps strip/weight-streaming and version-compatible+refit conflict parse-only; TRT11 remains dependency-probe-only on this host. Cross-version lean runtime and stripped-plan refit workflows need separate assets and owner evidence.",
+      "nextStep": "Retain the version guards and compact runtime evidence; add external lean-runtime loading and stripped-plan refit only after their complete owner-safe lifecycle is implemented."
     },
     {
       "id": "workspace-memory-pool",

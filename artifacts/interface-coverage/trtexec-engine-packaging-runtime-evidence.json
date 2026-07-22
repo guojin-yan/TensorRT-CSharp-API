@@ -1,0 +1,150 @@
+{
+  "schemaVersion": "trtexec-engine-packaging-runtime-evidence.v1",
+  "generatedAt": "2026-07-22",
+  "evidenceKind": "local-project-reference-engine-packaging-and-weight-streaming-policy",
+  "reports": {
+    "trt8": {
+      "path": "artifacts/real-case/trtexec-engine-packaging-policy/trt8-packaging-version-guards.json",
+      "lengthBytes": 19700,
+      "sha256": "bdf5b9042b39a767207457bb907341f262367a78cfed59de984fb889d452dbc8"
+    },
+    "trt10VersionRefit": {
+      "path": "artifacts/real-case/trtexec-engine-packaging-policy/trt10-version-compatible-refit.json",
+      "lengthBytes": 20793,
+      "sha256": "c149df4321f12337084842f43656b4b63c1305771df85145ad4daebdd9f2d03c"
+    },
+    "trt10Strip": {
+      "path": "artifacts/real-case/trtexec-engine-packaging-policy/trt10-strip-weights.json",
+      "lengthBytes": 18520,
+      "sha256": "b6142a31f908c3d9a6210680d43c1aa685c6a25ee6d744104ae2665b7f0746fc"
+    },
+    "trt10WeightStreaming": {
+      "path": "artifacts/real-case/trtexec-engine-packaging-policy/trt10-yolox-weight-streaming-50-percent.json",
+      "lengthBytes": 25166,
+      "sha256": "7fff8c4079d62a3e307269a133b344df9fbc84e4986d04c88515b50bbc2d0032"
+    },
+    "trt10LoadEngine": {
+      "path": "artifacts/real-case/trtexec-engine-packaging-policy/trt10-yolox-load-engine-weight-streaming-auto.json",
+      "lengthBytes": 19601,
+      "sha256": "974cb3d040034c8f440eb833ee0d4b30155b790ca3598437bef8c6b394fbc44e"
+    },
+    "trt11": {
+      "path": "artifacts/real-case/trtexec-engine-packaging-policy/trt11-packaging-dependency-probe.json",
+      "lengthBytes": 17635,
+      "sha256": "c917dd35a12084669f24d05166f43eaa55c4155e4d4650d18cc111c61138f5a9"
+    }
+  },
+  "model": {
+    "path": "../downloads/yolox-apache/source/yolox_s.onnx",
+    "lengthBytes": 35858002,
+    "sha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063"
+  },
+  "inputTensor": {
+    "path": "../downloads/yolox-apache/derived/dog-yolox-s-1x3x640x640-bgr-top-left.fp32.bin",
+    "lengthBytes": 4915200,
+    "sha256": "ca4e22bc6d8ebfe70f5aefeae8957d9ad15eb8d3bf99b6a42e016436dcbf1528"
+  },
+  "tensorRt8": {
+    "state": "dependency-probe-only",
+    "proofClassification": "dependency-probe-only",
+    "versionCompatibleApplied": true,
+    "excludeLeanRuntimeApplied": true,
+    "refitVersionCompatibleConflictGuarded": true,
+    "stripWeightsGuarded": true,
+    "weightStreamingGuarded": true,
+    "stronglyTypedGuarded": true,
+    "logLines": [
+      "TrtexecDeploymentControl Name=VersionCompatible Applied=True Requested=True Readback=True ReadbackMatch=True",
+      "TrtexecDeploymentControl Name=ExcludeLeanRuntime Applied=True Requested=True Readback=True ReadbackMatch=True",
+      "TrtexecDeploymentControl Name=Refit Applied=False Requested=True VersionGuard=TRT8 Reason=version-compatible-refit-vendor-readback-conflict",
+      "TrtexecDeploymentControl Name=StripWeights Applied=False Requested=True VersionGuard=TRT8 Reason=strip-plan-and-refit-identical-flags-are-not-available",
+      "TrtexecDeploymentControl Name=WeightStreaming Applied=False Requested=True VersionGuard=TRT8 Reason=weight-streaming-builder-flag-is-not-available",
+      "TrtexecDeploymentControl Name=StronglyTyped Applied=False Requested=True VersionGuard=TRT8 Reason=strongly-typed-network-creation-is-not-exposed-on-this-api-line"
+    ]
+  },
+  "tensorRt10": {
+    "versionCompatibleRefit": {
+      "state": "identity-roundtrip",
+      "proofClassification": "synthetic-input-runtime",
+      "inferenceRan": true,
+      "outputMatch": true,
+      "versionCompatibleReadbackMatch": true,
+      "refitConfigReadbackMatch": true,
+      "refittableEngineReadbackMatch": true,
+      "runtimeHostCodeReadbackMatch": true,
+      "logLines": [
+        "TrtexecDeploymentControl Name=VersionCompatible Applied=True Requested=True Readback=True ReadbackMatch=True",
+        "TrtexecDeploymentControl Name=Refit Applied=True Requested=True Readback=True ReadbackMatch=True",
+        "TrtexecEnginePolicy Name=Refit Applied=True Requested=True Readback=True ReadbackMatch=True",
+        "TrtexecRuntimePolicy Name=EngineHostCodeAllowed Applied=True Requested=True Readback=True ReadbackMatch=True Source=Build"
+      ]
+    },
+    "stripWeights": {
+      "state": "build-only",
+      "proofClassification": "build-only",
+      "stripPlanReadbackMatch": true,
+      "defaultRefitMode": "RefitIdentical",
+      "logLine": "TrtexecDeploymentControl Name=StripWeights Applied=True Requested=True Readback=True RefitMode=RefitIdentical RefitReadback=True ReadbackMatch=True"
+    },
+    "weightStreaming": {
+      "state": "external-onnx-runtime-output-unverified",
+      "proofClassification": "build-only",
+      "inferenceRan": true,
+      "outputMatch": false,
+      "outputValidationState": "captured-unverified",
+      "stronglyTypedReadbackMatch": true,
+      "builderFlagReadbackMatch": true,
+      "budgetMode": "percentage",
+      "budgetArgument": "50%",
+      "streamableWeightsBytes": 35829504,
+      "automaticBudgetBytes": 35829504,
+      "resolvedBudgetBytes": 17914752,
+      "readbackBudgetBytes": 17914752,
+      "scratchBytes": 5901824,
+      "readbackMatch": true,
+      "contextCreatedAfterBudgetReadback": true,
+      "logLines": [
+        "TrtexecDeploymentControl Name=StronglyTyped Applied=True Requested=True Readback=network-created-with-tensor-rt-10-strongly-typed-flag ReadbackMatch=True",
+        "TrtexecDeploymentControl Name=WeightStreaming Applied=True Requested=True Readback=True ReadbackMatch=True",
+        "TrtexecDeploymentControl Name=WeightStreamingBudget Applied=True Requested=50% Mode=percentage ResolvedBytes=17914752 StreamableWeightsBytes=35829504 AutomaticBudgetBytes=35829504 Readback=17914752 ScratchBytes=5901824 ReadbackMatch=True",
+        "ExternalOnnxBoundedRuntime Attempted=True Succeeded=True Input=images:[1, 3, 640, 640] Outputs=1 PrimaryOutput=output:1x8400x85 ElapsedMs=10.657 IdentityOutputMatch=False NoDataTransfers=False"
+      ]
+    },
+    "loadEngineAutomaticBudget": {
+      "state": "load-engine-runtime-output-unverified",
+      "diagnosticsSucceeded": true,
+      "inferenceRan": true,
+      "budgetMode": "automatic",
+      "streamableWeightsBytes": 35829504,
+      "automaticBudgetBytes": 35829504,
+      "resolvedBudgetBytes": 35829504,
+      "readbackBudgetBytes": 35829504,
+      "scratchBytes": 0,
+      "readbackMatch": true,
+      "logLines": [
+        "LoadEngineReadonlyDiagnostics Attempted=True Succeeded=True IOTensors=2 Layers=206 Profiles=1 InspectorBytes=3923 ReadbackSha256=3298fc407dbec535bd908d8688542ae0372d65b83968023893cfce72cad4d75b",
+        "TrtexecDeploymentControl Name=WeightStreamingBudget Applied=True Requested=-1 Mode=automatic ResolvedBytes=35829504 StreamableWeightsBytes=35829504 AutomaticBudgetBytes=35829504 Readback=35829504 ScratchBytes=0 ReadbackMatch=True",
+        "LoadEngineBoundedRuntime Attempted=True Succeeded=True Input=images:[1, 3, 640, 640] Outputs=1 PrimaryOutput=output:1x8400x85 ElapsedMs=10.862 IdentityOutputMatch=False NoDataTransfers=False"
+      ]
+    }
+  },
+  "tensorRt11": {
+    "state": "dependency-probe-only",
+    "proofClassification": "dependency-probe-only",
+    "knownVendorStructuredExceptionCode": 3228369022,
+    "reachedBuilderPolicyApplication": false,
+    "requestedOptionsRemainParseOnly": true,
+    "skipReason": "TensorRT native build dependency or runtime is unavailable: TensorRT 11.x runtime creation raised a structured exception with code 3228369022."
+  },
+  "proofBoundary": {
+    "isBuilderAndEnginePolicyEvidence": true,
+    "isWeightedModelEnqueueEvidence": true,
+    "isModelAccuracyProof": false,
+    "isCrossVersionLeanRuntimeProof": false,
+    "isStrippedPlanRefitLifecycleProof": false,
+    "isPackageConsumerRuntimeProof": false,
+    "isPostPublishProof": false,
+    "canPublishPublicly": false,
+    "publicReleaseSideEffectsExecuted": false
+  }
+}

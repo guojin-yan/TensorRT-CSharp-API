@@ -39,7 +39,7 @@ public sealed class ReleaseReadinessSamplesAndApplicationsTests
             .Select(static item => item.GetProperty("option").GetString()!)
             .ToArray();
 
-        foreach (string option in new[] { "--onnx", "--saveEngine", "--minShapes/--optShapes/--maxShapes", "--fp16", "--fp8/--best", "--int8/--calib", "--workspace", "--memPoolSize", "--tacticSources", "--timingCacheFile/--timingCache", "--exportTimingCache", "--profilingVerbosity/--verbose", "--previewOnly/--dryRun", "--sparsity", "--refit", "--dumpRefit/--allowWeightStreaming/--markDebug/--dumpDebugTensors", "--device/--useDLACore/--allowGPUFallback", "--loadInputs", "--dumpOutput", "--dumpRawBindingsToFile", "--exportOutput/--exportTimes/--exportProfile/--saveProfile" })
+        foreach (string option in new[] { "--onnx", "--saveEngine", "--minShapes/--optShapes/--maxShapes", "--fp16", "--fp8/--best", "--int8/--calib", "--workspace", "--memPoolSize", "--tacticSources", "--timingCacheFile/--timingCache", "--exportTimingCache", "--profilingVerbosity/--verbose", "--previewOnly/--dryRun", "--sparsity", "--refit", "--dumpRefit/--markDebug/--dumpDebugTensors", "--allowWeightStreaming/--weightStreamingBudget", "--versionCompatible/--excludeLeanRuntime/--stripWeights", "--device/--useDLACore/--allowGPUFallback", "--loadInputs", "--dumpOutput", "--dumpRawBindingsToFile", "--exportOutput/--exportTimes/--exportProfile/--saveProfile" })
         {
             Assert.Contains(option, options);
         }

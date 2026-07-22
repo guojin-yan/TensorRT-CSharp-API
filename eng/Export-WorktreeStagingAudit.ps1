@@ -86,8 +86,16 @@ function Get-StagingBucket {
     return "binary-review"
   }
 
+  if ($p -eq 'artifacts/interface-coverage/project-completion-review.md') {
+    return "documentation"
+  }
+
   if ($p -match '^artifacts/(final-release|interface-coverage|package-consumer)/.+\.(json|md|csv|txt)$') {
     return "evidence-review"
+  }
+
+  if ($p -match '^artifacts/user-acceptance/.+\.(md|json|csv|txt)$') {
+    return "documentation"
   }
 
   if ($p -match '^\.github/workflows/') {

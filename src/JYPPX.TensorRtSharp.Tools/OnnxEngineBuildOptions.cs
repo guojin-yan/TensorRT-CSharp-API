@@ -234,7 +234,7 @@ public sealed class OnnxEngineBuildOptions
             options.DeploymentOptions.ExcludeLeanRuntime ||
             options.DeploymentOptions.StripWeights ||
             options.DeploymentOptions.Refit ||
-            options.DeploymentOptions.WeightStreamingBudgetBytes.HasValue ||
+            options.DeploymentOptions.WeightStreamingBudget.IsSpecified ||
             options.DeploymentOptions.Safe ||
             options.DeploymentOptions.Consistency ||
             options.DeploymentOptions.BuilderCache ||
@@ -259,7 +259,7 @@ public sealed class OnnxEngineBuildOptions
 
             if (parseOnlyAdvancedOptions)
             {
-                diagnostics.Add("TrtexecAlignmentStatus=parse-only for remaining advanced precision, debug tensor, safety/consistency, engine packaging, builder cache, refit, and weight-streaming controls; runtime controls are classified individually after bounded execution.");
+                diagnostics.Add("TrtexecAlignmentStatus=parse-only for remaining advanced precision, debug tensor, safety/consistency, and builder-cache controls; engine packaging, refit, weight streaming, and runtime controls are classified individually from versioned set/readback evidence.");
             }
         }
 

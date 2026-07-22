@@ -102,6 +102,7 @@ public sealed class OnnxToEngineTrtexecLikeTests
             "--fp8",
             "--best",
             "--dumpRefit",
+            "--stronglyTyped",
             "--allowWeightStreaming",
             "--markDebug", "features,boxes",
             "--dumpDebugTensors",
@@ -201,7 +202,7 @@ public sealed class OnnxToEngineTrtexecLikeTests
         Assert.Contains("Runtime benchmark/output options", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
         Assert.Contains("exact-name precedence", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
         Assert.Contains("TensorRT 11 keeps removed setters behind explicit version guards", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
-        Assert.Contains("debug tensor diagnostic arguments are parse/report-only", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
+        Assert.Contains("Refit dump and debug tensor arguments remain parse/report-only", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
         Assert.Contains("Safety/consistency arguments are parse/report-only", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
         Assert.Contains("Builder cache policy arguments are parse/report-only", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
         Assert.Contains("TrtexecAlignmentStatus=parse-only", string.Join("\n", buildOptions.Diagnostics), StringComparison.Ordinal);
@@ -235,6 +236,50 @@ public sealed class OnnxToEngineTrtexecLikeTests
         Assert.Throws<ArgumentException>(() => TrtexecLikeParser.Parse(new[] { "--weightStreamingBudget", "-1MiB" }));
         Assert.Throws<ArgumentException>(() => TrtexecLikeParser.Parse(new[] { "--percentile", "101" }));
         Assert.Throws<ArgumentException>(() => TrtexecLikeParser.Parse(new[] { "--builderCache", "--noBuilderCache" }));
+    }
+
+    [Fact]
+    public void WeightStreamingBudgetSupportsOfficialModesAndEnforcesDependencies()
+    {
+        TrtexecLikeOptions disabled = TrtexecLikeParser.Parse(new[]
+        {
+            "--stronglyTyped", "--allowWeightStreaming", "--weightStreamingBudget", "-2", "--buildOnly"
+        });
+        TrtexecLikeOptions automatic = TrtexecLikeParser.Parse(new[]
+        {
+            "--stronglyTyped", "--allowWeightStreaming", "--weightStreamingBudget", "-1", "--buildOnly"
+        });
+        TrtexecLikeOptions percentage = TrtexecLikeParser.Parse(new[]
+        {
+            "--stronglyTyped", "--allowWeightStreaming", "--weightStreamingBudget", "62.5%", "--buildOnly"
+        });
+        TrtexecLikeOptions bytes = TrtexecLikeParser.Parse(new[]
+        {
+            "--stronglyTyped", "--allowWeightStreaming", "--weightStreamingBudget", "768K", "--buildOnly"
+        });
+
+        Assert.Equal("disabled", disabled.DeploymentOptions.WeightStreamingBudget.Kind);
+        Assert.Equal("-2", disabled.DeploymentOptions.WeightStreamingBudget.ArgumentValue);
+        Assert.Null(disabled.DeploymentOptions.WeightStreamingBudgetBytes);
+        Assert.Equal("automatic", automatic.DeploymentOptions.WeightStreamingBudget.Kind);
+        Assert.Equal("-1", automatic.DeploymentOptions.WeightStreamingBudget.ArgumentValue);
+        Assert.Equal("percentage", percentage.DeploymentOptions.WeightStreamingBudget.Kind);
+        Assert.Equal(62.5m, percentage.DeploymentOptions.WeightStreamingBudget.Percentage);
+        Assert.Equal("62.5%", percentage.DeploymentOptions.WeightStreamingBudget.ArgumentValue);
+        Assert.Equal("bytes", bytes.DeploymentOptions.WeightStreamingBudget.Kind);
+        Assert.Equal(768UL * 1024UL, bytes.DeploymentOptions.WeightStreamingBudgetBytes);
+        Assert.Equal("786432B", bytes.DeploymentOptions.WeightStreamingBudget.ArgumentValue);
+        Assert.Contains("--weightStreamingBudget -2", disabled.ToArgumentLine(), StringComparison.Ordinal);
+        Assert.Contains("--weightStreamingBudget -1", automatic.ToArgumentLine(), StringComparison.Ordinal);
+        Assert.Contains("--weightStreamingBudget 62.5%", percentage.ToArgumentLine(), StringComparison.Ordinal);
+
+        Assert.Throws<ArgumentException>(() => TrtexecLikeParser.Parse(new[] { "--allowWeightStreaming", "--buildOnly" }));
+        Assert.Throws<ArgumentException>(() => TrtexecLikeParser.Parse(new[] { "--stronglyTyped", "--weightStreamingBudget", "50%", "--buildOnly" }));
+        Assert.Throws<ArgumentException>(() => TrtexecLikeParser.Parse(new[] { "--stronglyTyped", "--allowWeightStreaming", "--weightStreamingBudget", "100.1%", "--buildOnly" }));
+        Assert.Throws<ArgumentException>(() => TrtexecLikeParser.Parse(new[] { "--stronglyTyped", "--allowWeightStreaming", "--weightStreamingBudget", "-3", "--buildOnly" }));
+        Assert.Throws<ArgumentException>(() => TrtexecLikeParser.Parse(new[] { "--excludeLeanRuntime", "--buildOnly" }));
+        Assert.Throws<ArgumentException>(() => TrtexecLikeParser.Parse(new[] { "--versionCompatible", "--excludeLeanRuntime" }));
+        Assert.Throws<ArgumentException>(() => TrtexecLikeParser.Parse(new[] { "--stripWeights" }));
     }
 
     [Fact]
@@ -1046,6 +1091,7 @@ public sealed class OnnxToEngineTrtexecLikeTests
             "--fp8",
             "--best",
             "--dumpRefit",
+            "--stronglyTyped",
             "--allowWeightStreaming",
             "--markDebug", "conv1,head",
             "--dumpDebugTensors",

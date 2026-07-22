@@ -16,7 +16,8 @@
 | Load-engine bounded runtime | CLI, WinForms | bounded-runtime-output |
 | Layer/profile diagnostic switches | CLI, WinForms | implemented-inspector-readback |
 | Report alias compatibility | CLI | implemented-report |
-| Refit, weight streaming, and debug tensor diagnostics | CLI, WinForms | parse-report-only |
+| FP8, best, refit dump, and debug tensor diagnostics | CLI, WinForms | parse-report-only |
+| Engine packaging, refit, and weight streaming | CLI, WinForms | implemented-build-runtime-readback-with-version-guards |
 | Device and deployment policies | CLI, WinForms | implemented-build-readback-with-version-guards |
 | Timing cache lifecycle | CLI, WinForms | implemented-build-cache-lifecycle |
 | Full trtexec parity | CLI, WinForms | planned |

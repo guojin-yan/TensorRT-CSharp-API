@@ -117,4 +117,45 @@ public sealed class TrtexecBuildPolicyTests
         Assert.Contains("implemented-build-readback-with-version-guards", parity, StringComparison.Ordinal);
         Assert.Contains("TRT8DirectIORaw12PreferRaw11", article, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void EnginePackagingAndWeightStreamingUseTypedReadbackBeforeContextCreation()
+    {
+        string service = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.TensorRtSharp.Tools",
+            "OnnxEngineBuildService.cs"));
+        string diagnostics = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.TensorRtSharp.Tools",
+            "OnnxEngineBuildDiagnostics.cs"));
+        string parser = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.TensorRtSharp.Tools",
+            "TrtexecLikeParser.cs"));
+
+        Assert.Contains("ApplyEnginePackagingOptions(config, options, log)", service, StringComparison.Ordinal);
+        Assert.Contains("TensorRtBuilderFlag.VersionCompatible", service, StringComparison.Ordinal);
+        Assert.Contains("TensorRtBuilderFlag.ExcludeLeanRuntime", service, StringComparison.Ordinal);
+        Assert.Contains("TensorRtBuilderFlag.StripPlan", service, StringComparison.Ordinal);
+        Assert.Contains("TensorRtBuilderFlag.RefitIdentical", service, StringComparison.Ordinal);
+        Assert.Contains("TensorRtBuilderFlag.WeightStreaming", service, StringComparison.Ordinal);
+        Assert.Contains("version-compatible-refit-vendor-readback-conflict", service, StringComparison.Ordinal);
+        Assert.Contains("ApplyEngineRuntimePolicies(engine, options, log);", service, StringComparison.Ordinal);
+        Assert.Contains("engine.SetWeightStreamingBudgetV2(requestedBudget)", service, StringComparison.Ordinal);
+        Assert.Contains("engine.WeightStreamingBudgetV2InBytes", service, StringComparison.Ordinal);
+        Assert.Contains("engine.WeightStreamingScratchMemorySizeInBytes", service, StringComparison.Ordinal);
+        Assert.True(
+            service.IndexOf("ApplyEngineRuntimePolicies(engine, options, log);", StringComparison.Ordinal) <
+            service.IndexOf("new OnnxEngineBenchmarkWorker", StringComparison.Ordinal));
+
+        Assert.Contains("--excludeLeanRuntime requires --versionCompatible", parser, StringComparison.Ordinal);
+        Assert.Contains("--allowWeightStreaming requires --stronglyTyped", parser, StringComparison.Ordinal);
+        Assert.Contains("--stripWeights requires --buildOnly or --skipInference", parser, StringComparison.Ordinal);
+        Assert.Contains("HasAppliedDeploymentControl(result, \"VersionCompatible\")", diagnostics, StringComparison.Ordinal);
+        Assert.Contains("HasAppliedDeploymentControl(result, \"WeightStreamingBudget\")", diagnostics, StringComparison.Ordinal);
+    }
 }

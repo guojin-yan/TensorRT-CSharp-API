@@ -66,6 +66,40 @@ public static class TrtexecLikeParser
         string layerOutputTypes = TrtexecLikeBuildPolicy.NormalizeLayerOutputTypes(GetValue(args, "--layerOutputTypes", string.Empty));
         TrtexecLikeBuildPolicy.ValidatePolicyCombination(precisionConstraints, layerPrecisions, layerOutputTypes);
 
+        bool stronglyTyped = HasSwitch(args, "--stronglyTyped");
+        bool allowWeightStreaming = HasSwitch(args, "--allowWeightStreaming");
+        bool versionCompatible = HasSwitch(args, "--versionCompatible");
+        bool excludeLeanRuntime = HasSwitch(args, "--excludeLeanRuntime");
+        bool stripWeights = HasSwitch(args, "--stripWeights");
+        TrtexecLikeWeightStreamingBudget weightStreamingBudget =
+            TrtexecLikeWeightStreamingBudget.Parse(GetValue(args, "--weightStreamingBudget", string.Empty));
+        bool buildsEngine = string.IsNullOrWhiteSpace(loadEnginePath);
+        bool stopsAfterBuild = dryRun || HasSwitch(args, "--buildOnly") || HasSwitch(args, "--skipInference");
+        if (excludeLeanRuntime && !versionCompatible)
+        {
+            throw new ArgumentException("--excludeLeanRuntime requires --versionCompatible.");
+        }
+
+        if (buildsEngine && allowWeightStreaming && !stronglyTyped)
+        {
+            throw new ArgumentException("--allowWeightStreaming requires --stronglyTyped when building an engine.");
+        }
+
+        if (buildsEngine && weightStreamingBudget.IsSpecified && !allowWeightStreaming)
+        {
+            throw new ArgumentException("--weightStreamingBudget requires --allowWeightStreaming when building an engine.");
+        }
+
+        if (excludeLeanRuntime && !stopsAfterBuild)
+        {
+            throw new ArgumentException("--excludeLeanRuntime requires --buildOnly or --skipInference until an external lean runtime path is configured.");
+        }
+
+        if (stripWeights && !stopsAfterBuild)
+        {
+            throw new ArgumentException("--stripWeights requires --buildOnly or --skipInference because stripped weights must be supplied through a separate refit lifecycle before inference.");
+        }
+
         TrtexecLikeDeploymentOptions deploymentOptions = new TrtexecLikeDeploymentOptions(
             deviceOrdinal: ParseOptionalNonNegativeInt(GetValue(args, "--device", string.Empty), "--device"),
             builderOptimizationLevel: ParseRangeInt(GetValue(args, "--builderOptimizationLevel", "3"), "--builderOptimizationLevel", 0, 5),
@@ -79,7 +113,7 @@ public static class TrtexecLikeParser
             calibrationCacheFile: calibrationCacheFile,
             directIO: HasSwitch(args, "--directIO"),
             sparsity: NormalizeSparsity(GetValue(args, "--sparsity", string.Empty)),
-            stronglyTyped: HasSwitch(args, "--stronglyTyped"),
+            stronglyTyped: stronglyTyped,
             minTiming: ParseOptionalPositiveInt(GetValue(args, "--minTiming", string.Empty), "--minTiming"),
             avgTiming: ParseOptionalPositiveInt(GetValue(args, "--avgTiming", string.Empty), "--avgTiming"),
             precisionConstraints: precisionConstraints,
@@ -88,14 +122,14 @@ public static class TrtexecLikeParser
             fp8: HasSwitch(args, "--fp8"),
             best: HasSwitch(args, "--best"),
             dumpRefit: HasSwitch(args, "--dumpRefit"),
-            allowWeightStreaming: HasSwitch(args, "--allowWeightStreaming"),
+            allowWeightStreaming: allowWeightStreaming,
             markDebug: GetValue(args, "--markDebug", string.Empty),
             dumpDebugTensors: HasSwitch(args, "--dumpDebugTensors"),
-            versionCompatible: HasSwitch(args, "--versionCompatible"),
-            excludeLeanRuntime: HasSwitch(args, "--excludeLeanRuntime"),
-            stripWeights: HasSwitch(args, "--stripWeights"),
+            versionCompatible: versionCompatible,
+            excludeLeanRuntime: excludeLeanRuntime,
+            stripWeights: stripWeights,
             refit: HasSwitch(args, "--refit"),
-            weightStreamingBudgetBytes: ParseOptionalMemorySizeBytes(GetValue(args, "--weightStreamingBudget", string.Empty), "--weightStreamingBudget"),
+            weightStreamingBudgetBytes: weightStreamingBudget.Bytes,
             exportTimingCachePath: FullPathOrEmpty(GetValue(args, "--exportTimingCache", string.Empty)),
             safe: HasSwitch(args, "--safe"),
             consistency: HasSwitch(args, "--consistency"),
@@ -104,7 +138,8 @@ public static class TrtexecLikeParser
             maxNbTactics: ParseOptionalNonNegativeInt(GetValue(args, "--maxNbTactics", string.Empty), "--maxNbTactics"),
             tilingOptimizationLevel: ParseOptionalTilingOptimizationLevel(GetValue(args, "--tilingOptimizationLevel", string.Empty)),
             l2LimitForTilingBytes: ParseOptionalLongMemorySizeBytes(GetValue(args, "--l2LimitForTiling", string.Empty), "--l2LimitForTiling"),
-            quantizationFlags: ParseOptionalQuantizationFlags(GetValue(args, "--quantizationFlags", string.Empty)));
+            quantizationFlags: ParseOptionalQuantizationFlags(GetValue(args, "--quantizationFlags", string.Empty)),
+            weightStreamingBudget: weightStreamingBudget);
         string shapes = FirstNonEmpty(GetValue(args, "--shapes", string.Empty), GetValue(args, "--inputShapes", string.Empty));
         string minShapes = FirstNonEmpty(GetValue(args, "--minShapes", string.Empty), shapes);
         string optShapes = FirstNonEmpty(GetValue(args, "--optShapes", string.Empty), shapes);

@@ -1,0 +1,108 @@
+{
+  "schemaVersion": "trtexec-engine-packaging-runtime-evidence-validation.v1",
+  "validationState": "passed",
+  "checkCount": 20,
+  "failureCount": 0,
+  "checks": [
+    {
+      "name": "schema",
+      "passed": true,
+      "detail": "trtexec-engine-packaging-runtime-evidence.v1"
+    },
+    {
+      "name": "trt8-version-compatible",
+      "passed": true,
+      "detail": "TRT8 version-compatible flag readback"
+    },
+    {
+      "name": "trt8-exclude-lean",
+      "passed": true,
+      "detail": "TRT8 exclude-lean flag readback"
+    },
+    {
+      "name": "trt8-refit-conflict-guard",
+      "passed": true,
+      "detail": "TRT8 version-compatible+refit remains guarded"
+    },
+    {
+      "name": "trt8-strip-guard",
+      "passed": true,
+      "detail": "TRT8 strip remains guarded"
+    },
+    {
+      "name": "trt8-streaming-guard",
+      "passed": true,
+      "detail": "TRT8 streaming remains guarded"
+    },
+    {
+      "name": "trt10-version-refit-runtime",
+      "passed": true,
+      "detail": "TRT10 version-compatible/refit identity runtime"
+    },
+    {
+      "name": "trt10-refittable-readback",
+      "passed": true,
+      "detail": "Config and engine refit readback"
+    },
+    {
+      "name": "trt10-runtime-host-code",
+      "passed": true,
+      "detail": "Runtime host code enabled for version-compatible plan"
+    },
+    {
+      "name": "trt10-strip-refit-identical",
+      "passed": true,
+      "detail": "StripPlan plus RefitIdentical"
+    },
+    {
+      "name": "trt10-weighted-model",
+      "passed": true,
+      "detail": "Non-zero real model streamable weights"
+    },
+    {
+      "name": "trt10-percentage-budget",
+      "passed": true,
+      "detail": "50 percent budget resolved and read back"
+    },
+    {
+      "name": "trt10-streaming-scratch",
+      "passed": true,
+      "detail": "Non-zero scratch bytes prove active streaming budget"
+    },
+    {
+      "name": "trt10-context-order",
+      "passed": true,
+      "detail": "Budget applied before execution context"
+    },
+    {
+      "name": "trt10-weighted-enqueue",
+      "passed": true,
+      "detail": "Weighted model enqueue with conservative output classification"
+    },
+    {
+      "name": "trt10-load-diagnostics",
+      "passed": true,
+      "detail": "Load-engine readonly diagnostics succeeded"
+    },
+    {
+      "name": "trt10-load-auto-budget",
+      "passed": true,
+      "detail": "Automatic budget resolved and read back"
+    },
+    {
+      "name": "trt10-load-enqueue",
+      "passed": true,
+      "detail": "Load-engine bounded runtime executed"
+    },
+    {
+      "name": "trt11-dependency-boundary",
+      "passed": true,
+      "detail": "TRT11 known structured exception remains dependency-only"
+    },
+    {
+      "name": "proof-boundary",
+      "passed": true,
+      "detail": "No proof or publish promotion"
+    }
+  ]
+}

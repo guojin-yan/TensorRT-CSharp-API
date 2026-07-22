@@ -285,7 +285,7 @@ public sealed class MainForm : Form
         _avgTiming.PlaceholderText = "8";
         _layerPrecisions.PlaceholderText = "conv1:fp16,head:fp32";
         _layerOutputTypes.PlaceholderText = "head:fp32";
-        _weightStreamingBudget.PlaceholderText = "512MiB";
+        _weightStreamingBudget.PlaceholderText = "-2 | -1 | 50% | 512MiB";
         _markDebug.PlaceholderText = "tensorA,tensorB";
         _exportTimingCachePath.PlaceholderText = "timing.cache";
         _evidenceSidecarPath.PlaceholderText = "model-evidence.sidecar.json";
@@ -568,7 +568,7 @@ public sealed class MainForm : Form
             _excludeLeanRuntime.Checked,
             _stripWeights.Checked,
             _refit.Checked,
-            ParseOptionalMemoryBytes(_weightStreamingBudget.Text),
+            null,
             _exportTimingCachePath.Text,
             _safe.Checked,
             _consistency.Checked,
@@ -583,7 +583,8 @@ public sealed class MainForm : Form
             ParseOptionalInt(_maxNbTactics.Text),
             _tilingOptimizationLevel.SelectedItem?.ToString() ?? string.Empty,
             ParseOptionalMemoryBytes(_l2LimitForTiling.Text),
-            _quantizationFlags.SelectedItem?.ToString() ?? string.Empty);
+            _quantizationFlags.SelectedItem?.ToString() ?? string.Empty,
+            _weightStreamingBudget.Text);
     }
 
     private static string[] ParsePlugins(string value)

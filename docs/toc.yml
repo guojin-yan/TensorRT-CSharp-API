@@ -182,6 +182,8 @@
     href: articles/zh-cn/tensorrtexec-deployment-controls.md
   - name: TensorRtExec IO 与 Layer Precision Policies
     href: articles/zh-cn/tensorrtexec-io-layer-precision-policies.md
+  - name: TensorRtExec Engine Packaging 与 Weight Streaming
+    href: articles/zh-cn/tensorrtexec-engine-packaging-weight-streaming.md
   - name: OnnxToEngine TensorRtExec YoloVision Evidence Ladder
     href: articles/zh-cn/onnxtoengine-tensorrtexec-yolovision-evidence-ladder.md
   - name: ONNX To Engine Quickstart

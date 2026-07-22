@@ -88,8 +88,9 @@ public static class TensorRtExecCommand
         System.Console.WriteLine("  --maxNbTactics <n> --tilingOptimizationLevel <none|fast|moderate|full> --l2LimitForTiling <bytes|MiB> --quantizationFlags <none|calibrateBeforeFusion>");
         System.Console.WriteLine("  --minTiming <n> --avgTiming <n> --precisionConstraints <none|prefer|obey>");
         System.Console.WriteLine("  --layerPrecisions <spec> --layerOutputTypes <spec>");
-        System.Console.WriteLine("  --versionCompatible --excludeLeanRuntime --stripWeights --refit --weightStreamingBudget <MiB>");
-        System.Console.WriteLine("  --dumpRefit --allowWeightStreaming --markDebug <names> --dumpDebugTensors");
+        System.Console.WriteLine("  --versionCompatible --excludeLeanRuntime --stripWeights --refit");
+        System.Console.WriteLine("  --allowWeightStreaming --weightStreamingBudget <-2|-1|0..100%|bytes> (requires --stronglyTyped when building)");
+        System.Console.WriteLine("  --dumpRefit --markDebug <names> --dumpDebugTensors");
         System.Console.WriteLine("  --safe --consistency --builderCache|--noBuilderCache");
         System.Console.WriteLine("Runtime options:");
         System.Console.WriteLine("  --plugins|--plugin|--dynamicPlugins|--setPluginsToSerialize <dll1;dll2> --timingCacheFile|--timingCache <path>");

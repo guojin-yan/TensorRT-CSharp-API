@@ -46,7 +46,8 @@ public sealed class TrtexecLikeDeploymentOptions
         int? maxNbTactics = null,
         TensorRtTilingOptimizationLevel? tilingOptimizationLevel = null,
         long? l2LimitForTilingBytes = null,
-        TensorRtQuantizationFlags? quantizationFlags = null)
+        TensorRtQuantizationFlags? quantizationFlags = null,
+        TrtexecLikeWeightStreamingBudget? weightStreamingBudget = null)
     {
         DeviceOrdinal = deviceOrdinal;
         BuilderOptimizationLevel = builderOptimizationLevel;
@@ -76,7 +77,10 @@ public sealed class TrtexecLikeDeploymentOptions
         ExcludeLeanRuntime = excludeLeanRuntime;
         StripWeights = stripWeights;
         Refit = refit;
-        WeightStreamingBudgetBytes = weightStreamingBudgetBytes;
+        WeightStreamingBudget = weightStreamingBudget ?? (weightStreamingBudgetBytes.HasValue
+            ? TrtexecLikeWeightStreamingBudget.FromBytes(weightStreamingBudgetBytes.Value)
+            : TrtexecLikeWeightStreamingBudget.Unspecified);
+        WeightStreamingBudgetBytes = WeightStreamingBudget.Bytes;
         ExportTimingCachePath = exportTimingCachePath ?? string.Empty;
         Safe = safe;
         Consistency = consistency;
@@ -182,6 +186,12 @@ public sealed class TrtexecLikeDeploymentOptions
 
     public ulong? WeightStreamingBudgetBytes { get; }
 
+    /// <summary>
+    /// Gets the normalized trtexec weight-streaming budget specification.
+    /// 获取规范化后的 trtexec 权重流式加载预算规范。
+    /// </summary>
+    public TrtexecLikeWeightStreamingBudget WeightStreamingBudget { get; }
+
     public string ExportTimingCachePath { get; }
 
     public bool Safe { get; }
@@ -243,7 +253,7 @@ public sealed class TrtexecLikeDeploymentOptions
         AddSwitch(args, "--excludeLeanRuntime", ExcludeLeanRuntime);
         AddSwitch(args, "--stripWeights", StripWeights);
         AddSwitch(args, "--refit", Refit);
-        Add(args, "--weightStreamingBudget", FormatBytesMiB(WeightStreamingBudgetBytes));
+        Add(args, "--weightStreamingBudget", WeightStreamingBudget.ArgumentValue);
         Add(args, "--exportTimingCache", ExportTimingCachePath);
         AddSwitch(args, "--safe", Safe);
         AddSwitch(args, "--consistency", Consistency);
@@ -348,18 +358,17 @@ public sealed class TrtexecLikeDeploymentOptions
             AddDiagnostic(diagnostics, "Best", Best);
         }
 
-        if (DumpRefit || AllowWeightStreaming || !string.IsNullOrWhiteSpace(MarkDebug) || DumpDebugTensors)
+        if (DumpRefit || !string.IsNullOrWhiteSpace(MarkDebug) || DumpDebugTensors)
         {
-            diagnostics.Add("Refit, weight-streaming, and debug tensor diagnostic arguments are parse/report-only until model-specific ownership and runtime proof are promoted.");
+            diagnostics.Add("Refit dump and debug tensor arguments remain parse/report-only until model-specific ownership and runtime output proof are promoted.");
             AddDiagnostic(diagnostics, "DumpRefit", DumpRefit);
-            AddDiagnostic(diagnostics, "AllowWeightStreaming", AllowWeightStreaming);
             AddDiagnostic(diagnostics, "MarkDebug", MarkDebug);
             AddDiagnostic(diagnostics, "DumpDebugTensors", DumpDebugTensors);
         }
 
-        if (VersionCompatible || ExcludeLeanRuntime || StripWeights || Refit || WeightStreamingBudgetBytes.HasValue || AllowWeightStreaming)
+        if (VersionCompatible || ExcludeLeanRuntime || StripWeights || Refit || WeightStreamingBudget.IsSpecified || AllowWeightStreaming)
         {
-            diagnostics.Add("Advanced engine packaging/refit/weight-streaming arguments are parse/report-only in this application stage.");
+            diagnostics.Add("Advanced engine packaging/refit flags are applied and read back during a real build with TensorRT-line guards; a requested weight-streaming budget is resolved and read back before execution contexts are created.");
             if (VersionCompatible)
             {
                 diagnostics.Add("VersionCompatible=True");
@@ -385,9 +394,10 @@ public sealed class TrtexecLikeDeploymentOptions
                 diagnostics.Add("AllowWeightStreaming=True");
             }
 
-            if (WeightStreamingBudgetBytes.HasValue)
+            if (WeightStreamingBudget.IsSpecified)
             {
-                diagnostics.Add("WeightStreamingBudgetBytes=" + WeightStreamingBudgetBytes.Value.ToString(CultureInfo.InvariantCulture));
+                diagnostics.Add("WeightStreamingBudget=" + WeightStreamingBudget.ArgumentValue);
+                diagnostics.Add("WeightStreamingBudgetKind=" + WeightStreamingBudget.Kind);
             }
         }
 

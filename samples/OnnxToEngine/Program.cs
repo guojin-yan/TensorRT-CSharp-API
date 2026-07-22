@@ -176,6 +176,8 @@ internal static class Program
         Console.WriteLine("  --device <ordinal> --useDLACore <n> --allowGPUFallback --tacticSources <list> --memPoolSize workspace:512,tacticDram:1024");
         Console.WriteLine("  --inputIOFormats <fmt> --outputIOFormats <fmt> --calib <cache> --directIO --sparsity <mode> --stronglyTyped");
         Console.WriteLine("  --precisionConstraints <none|prefer|obey> --layerPrecisions <pattern:type> --layerOutputTypes <pattern:type[+type]>");
+        Console.WriteLine("  --versionCompatible --excludeLeanRuntime --stripWeights --refit");
+        Console.WriteLine("  --allowWeightStreaming --weightStreamingBudget <-2|-1|0..100%|bytes> (requires --stronglyTyped when building)");
         Console.WriteLine("  --shapes/--inputShapes input:1x3x640x640   Alias used as min/opt/max shapes when no explicit profile triplet is provided.");
         Console.WriteLine("  --save-engine <path> --load-engine <path> --timingCache <path> --verbose");
         Console.WriteLine("  Memory values accept MiB by default or suffixes such as 512MiB and 1GiB.");

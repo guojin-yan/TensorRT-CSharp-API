@@ -1,5 +1,74 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-22 TensorRtExec Engine Packaging、Refit 与 Weight Streaming
+
+本批延续 deferred inventory 的安全审计结论：598 条 TensorRT deferred rows 中仍无 low-risk 候选，
+因此没有删除 deferred history 或引入 pointer-shaped public API。工作重心转向现有 typed owner surface，
+把 `--versionCompatible`、`--excludeLeanRuntime`、`--stripWeights`、`--refit`、
+`--allowWeightStreaming` 和 `--weightStreamingBudget` 从 parse/report-only 推进到真实 builder、runtime
+和 engine set/readback。
+
+Weight streaming budget 现支持 `-2`、`-1`、`0..100%`、bytes/K/M/G/KiB/MiB/GiB；无后缀数字继续按
+MiB 解释以保留已有 managed contract。构建新 engine 时，weight streaming 要求 strongly typed，budget
+要求 builder weight-streaming flag；load-engine 路径允许对已有 weight-streaming plan 单独设置 budget。
+预算在 execution context 创建前解析、设置和读回，并同时记录 streamable weights、automatic budget 和
+scratch bytes。version-compatible plan 在反序列化前设置并读回 `EngineHostCodeAllowed`。
+
+TRT10/11 使用 `StripPlan`；默认配合 `RefitIdentical`，显式 `--refit` 时使用 `Refit`。TRT8 可真实应用
+version-compatible、exclude-lean 与单独 refit，但 strip/weight streaming 保持版本 guard；实测 TRT8 的
+version-compatible + refit vendor readback 冲突已固化为显式 guard。exclude-lean 和 strip weights 要求
+build-only/skip-inference，避免把尚未实现的 external lean runtime 或 stripped-plan refit lifecycle 伪装
+成可推理路径。另修复外部 ONNX build 后 readonly diagnostics 错用空 `LoadEnginePath` 的问题，改为使用
+实际 preflight engine path。
+
+### Runtime 与证据
+
+- TRT10 version-compatible + refit：config flags、runtime host-code 与 engine refittable readback 全部匹配；
+  engine round-trip、enqueue 和 identity output match 成功。
+- TRT10 strip weights：`StripPlan=True`，默认 `RefitMode=RefitIdentical`，两项 readback match。
+- 官方 YOLOX-S：ONNX 35,858,002 bytes，streamable weights 35,829,504 bytes；`50%` 解析和 readback
+  均为 17,914,752 bytes，scratch 为 5,901,824 bytes；`images [1,3,640,640]` 到
+  `output [1,8400,85]` enqueue 成功。通用 runner 未做 decode/NMS，输出严格保持
+  `captured-unverified`。
+- TRT10 load-engine `-1`：readonly diagnostics 得到 2 个 I/O、206 层和 1 个 profile；automatic/readback
+  均为 35,829,504 bytes，随后 bounded enqueue 成功。
+- TRT8 保持 `dependency-probe-only`（当前 bridge 无 ONNX parser build support）；TRT11 runtime creation
+  仍遇到已知 structured exception `3228369022`，同样未提升为 applied/runtime proof。
+- compact evidence 为 `trtexec-engine-packaging-runtime-evidence.{json,md}` 与对应 validation；strict
+  验证 `20/20`，evidence JSON SHA256
+  `AC9C9368C7DE55D43F6A1FEB54B4F68FD3BBE4A50240C36468A8A7A1782A101D`。
+
+### Verification
+
+- bindings 连续生成与验证稳定：`194 manifests / 3971 records`，工作树幂等。
+- solution Debug `0 warning / 0 error`；Release 为 `5` 条既有 ProjectQuality nullable warning、
+  `0 error`。Public API documentation warning `0`，bilingual finding `0`。
+- TRT8/CUDA12、TRT10/CUDA12、TRT11/CUDA12 native Release build 成功；ABI/PE 分别为 TRT8
+  `991/991`、TRT10 `1086/1086`、TRT11 `1233/1233`，missing declaration/export 均为 `0`。
+- 本批 focused tests `74/74`，release workflow contract `22/22`，bounded N-S/T-Z `74/74`，无失败或
+  超时。GUI/CLI checklist strict 为 `19/19`，runtime-proof item `0`。
+- DocFX 应用 `921 models`，`0 warning / 0 error`。managed package 14,805,776 bytes，SHA256
+  `DFB8C921C26159F1B864467D0D8830809590005298AEE716B827FC8329C54029`；TRT10 bridge-only package
+  351,092 bytes，SHA256 `BD5E4B221B2A9FBFA651CF43F3700C54633F74C574640858E4F496C473177A89`。
+  无 ProjectReference consumer restore/build 为 `0 warning / 0 error`，证据仍为 compile-surface-proof。
+- strict classification/public-proof finding 均为 `0`，strict release required failure 为 `0`。owner
+  convergence 保持 structural `9/9`、accepted `0/9`、gates `2/3`，final owner gate blocked `5`。
+- staging audit 补充 `artifacts/user-acceptance` 文档 bucket，避免有意更新的验收文档被误报为
+  `manual-review`；复验 `reviewCandidate=0`。
+
+### C 盘与边界
+
+本批未把 TensorRT、CUDA、ONNX、YOLOX、engine、源码或 nupkg 下载到 C 盘；Downloads、Desktop、
+Documents、Temp 顶层和全局 NuGet package root 的任务相关新增均为 `0`。consumer 清空了自己的 cache
+子目录；当前仅剩 54 个 dotnet workload 小日志（71,194 bytes）及 `C:\jyppx-pkgcache`、
+`%TEMP%\jyppx-split-packages`、`%TEMP%\MSBuildTemp` 三个空目录。标准删除命令被工具安全策略在执行前
+拒绝，未换壳绕过。E 盘 ignored evidence 目录中的 42,007,516-byte YOLOX plan 同样因删除策略拒绝而
+仍待人工清理。
+
+本批没有执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。builder/engine
+readback、真实权重 enqueue、本地 nupkg 与 bridge-only consumer 都不能替代跨版本 lean runtime、完整 refit、
+模型准确率、公开 package consumer 或 post-publish proof。
+
 ## 2026-07-21 TensorRtExec I/O And Layer Precision Policies
 
 本批先审计 598 条 TensorRT deferred rows 与 50 个去重候选：low-risk 为 0，剩余项仍落在 callback、

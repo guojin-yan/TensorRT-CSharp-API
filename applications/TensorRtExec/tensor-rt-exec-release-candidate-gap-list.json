@@ -113,6 +113,17 @@
       "nextStep": "Keep sparsity force and TRT8 stronglyTyped parse-only; collect DLA-capable real-model evidence separately from builder readback."
     },
     {
+      "id": "engine-packaging-refit-weight-streaming",
+      "officialTrtexecParity": "--versionCompatible --excludeLeanRuntime --stripWeights --refit --allowWeightStreaming --weightStreamingBudget",
+      "currentStatus": "implemented-build-runtime-readback-with-version-guards",
+      "isRuntimeProof": false,
+      "isPackageConsumerRuntimeProof": false,
+      "cliSupported": true,
+      "winFormsSupported": true,
+      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/TrtexecLikeWeightStreamingBudget.cs", "src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildService.cs", "applications/TensorRtExec"],
+      "nextStep": "Keep TRT8 strip/streaming and version-compatible+refit conflict parse-only; retain TRT10 weighted-model budget readback and TRT11 dependency-probe boundaries; add external lean-runtime and stripped-plan refit lifecycles separately."
+    },
+    {
       "id": "io-layer-precision-policies",
       "officialTrtexecParity": "--inputIOFormats --outputIOFormats --precisionConstraints --layerPrecisions --layerOutputTypes",
       "currentStatus": "implemented-build-readback-with-version-guards",
