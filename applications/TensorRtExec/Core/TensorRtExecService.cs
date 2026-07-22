@@ -45,7 +45,11 @@ public sealed class TensorRtExecService
             result.ParserPreflightSnapshot.CopiedDiagnosticCount,
             result.RefitSnapshot.Attempted,
             result.RefitSnapshot.Succeeded,
-            result.RefitSnapshot.State);
+            result.RefitSnapshot.State,
+            result.RefitPersistenceSnapshot.Attempted,
+            result.RefitPersistenceSnapshot.Succeeded,
+            result.RefitPersistenceSnapshot.State,
+            result.RefitPersistenceSnapshot.PersistedPlanPath);
     }
 
 }

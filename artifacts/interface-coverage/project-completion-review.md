@@ -593,6 +593,63 @@ unresolved external symbol createConsistencyChecker_INTERNAL
 - 三个 bridge-only `PackageReference` consumer restore/build 均为 0 warning / 0 error，`ProjectReference=False`，证据分类保持 `compile-surface-proof`，不提升为 runtime proof。
 - 未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
 
+## 2026-07-22 TensorRtExec Refitted Plan Persistence 与独立 Reload
+
+本阶段为 managed extension `--saveRefittedEngine <path>` 完成从 ONNX stripped-plan refit commit 到
+持久化 full-weight plan、原 owner 释放、新 owner reload、same-process enqueue 和第二进程
+`--loadEngine` 的闭环。实现复用既有 TRT10/11 owner-safe serialization config/host memory/runtime surface，
+没有新增 native ABI 或 pointer-bearing public API。
+
+### 真实问题与修复
+
+- 首次直接调用默认 `TensorRtEngine.Serialize()` 时，TensorRT 10 生成的 plan 虽与 stripped plan 不同、
+  能独立反序列化且 metadata 正常，但真实 MNIST 输出 10 个 float 全为零。这证明 artifact/hash/metadata
+  gate 本身不足以证明 refitted weights 已持久化。
+- 根因是 stripped engine 的 serialization config 保留 `ExcludeWeights`。最终路径创建
+  `TensorRtSerializationConfig`，显式 `ClearFlag(ExcludeWeights)` 并回读 flags，再调用
+  `Serialize(config)`；真实 flags 为 `3 -> 2`，`RefittableWeightsIncludedInSerialization=true`。
+- 完整权重 plan 在 TRT10 reload 后 `IsRefittable=false`，但 I/O `2`、layers `5`、profiles `1`，可创建
+  context 并正确 enqueue。因此 `ReloadEngineRefittable` 保留为事实诊断字段，不再作为 full-weight
+  reload gate；runtime 也不重复套用 build 阶段的 refittable-state 检查。
+
+### Runtime 与跨版本证据
+
+- stripped plan：`459,764` bytes，SHA256
+  `6f939a9a033b1b2b834362b2d94a80e5ad121cfeb96da6203605bed572d3bb5a`。
+- persisted full-weight plan：`408,876` bytes，SHA256
+  `5594817d8b152a9478a57ae73ec2a8ed19e8c9e0794b448b89bcd738d99441eb`；原 refitted engine 在 reload
+  前释放，reload metadata/context gate 通过。
+- same-process reload、独立第二 TensorRtExec `--loadEngine` 进程和固定 full-weight baseline 三路输出均为
+  40 bytes，SHA256 `6f5771d6c5b056406c190a59e725cf9bb13c1f148c1ef06f99ed8acfb11b9041`。
+- TRT8 dry-run 保持 `--saveRefittedEngine` parse-only 且不写文件；non-dry exit code `2`，在 native 调用前
+  命中 parser-refitter version guard。TRT11 为 `dependency-probe-only`，该选项未进入 AppliedOptions。
+- compact evidence strict validator 为 `35/35`；GUI/CLI checklist 为 `21/21`。本地 persistence/enqueue
+  证据仍不是 model accuracy、package-consumer runtime、public package 或 release-close proof。
+
+### 质量门
+
+- bindings：`194 manifests / 3971 records`，连续生成与幂等验证通过。
+- solution Debug：`0 warning / 0 error`；Release：5 个既有 nullable test warning / `0 error`。
+- refit/persistence focused `44/44`；application/schema/parity `29/29`；文档更新后相关集合 `47/47`。
+- native TRT8/10/11 CUDA12 build 通过；ABI/PE 分别为 `991/991`、`1086/1086`、`1233/1233`，
+  missing declaration/export 为 `0`。
+- Public API warning `0`、bilingual finding `0`；DocFX `923 models / 0 warning / 0 error`。
+- managed nupkg `14,805,622` bytes，SHA256
+  `51A3680B4CF4719F0333B64B4A123849029F2311A3AC01E93E18A0D6746A5C13`；TRT10 bridge-only nupkg
+  `351,088` bytes，SHA256 `09DDF0C225774EB7FAF53BFF32D9D3F3130F5AF01A8C76BACF5A27194C635EDC`。
+- 无 ProjectReference consumer restore/build/probe 通过，分类保持 compile-surface-proof；classification finding
+  `0`、public-proof failed blocker `0`、strict release required failure `0`。
+- owner convergence 保持 structural `9/9`、accepted `0/9`、gates `2/3`，不可公开发布、不可关闭 issue。
+
+### C/E 盘与发布边界
+
+- C 盘 Downloads/Desktop/Documents 在本轮时间窗未发现 MNIST、TensorRT、trtexec、plan、engine 或 nupkg
+  新文件；未触碰 NuGet、Codex、CUDA 或系统缓存。
+- 可明确归因的 C 盘残留仅为空的 `C:\jyppx-pkgcache` 与 `%TEMP%\jyppx-split-packages`。E 盘本轮
+  real-case 目录保留 3 个 ignored plan，共 `1,274,636` bytes，以及可再生 probe/readback JSON。
+- 对上述精确目标执行的标准清理在执行前被工具安全策略整体拒绝；没有部分删除，也没有换壳绕过。
+- 未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
+
 ## 2026-07-22 TensorRtExec ONNX Stripped-Plan Refit Lifecycle
 
 本阶段补齐 TensorRtExec managed extension `--refitFromOnnx <path>`，复用已有 owner-safe

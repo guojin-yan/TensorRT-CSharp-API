@@ -1,0 +1,184 @@
+{
+  "schemaVersion": "trtexec-refitted-plan-persistence-validation.v1",
+  "strict": true,
+  "checkCount": 35,
+  "passedCount": 35,
+  "failureCount": 0,
+  "checks": [
+    {
+      "id": "schema",
+      "passed": true,
+      "actual": "trtexec-refitted-plan-persistence-evidence.v1"
+    },
+    {
+      "id": "contract-requires-refit-source",
+      "passed": true,
+      "actual": "--onnx,--stripWeights,--refit,--refitFromOnnx"
+    },
+    {
+      "id": "trt10-persisted",
+      "passed": true,
+      "actual": "True/True"
+    },
+    {
+      "id": "trt10-artifact-differs",
+      "passed": true,
+      "actual": "5594817d8b152a9478a57ae73ec2a8ed19e8c9e0794b448b89bcd738d99441eb"
+    },
+    {
+      "id": "trt10-exclude-weights-present-before",
+      "passed": true,
+      "actual": "3"
+    },
+    {
+      "id": "trt10-exclude-weights-cleared-after",
+      "passed": true,
+      "actual": "2"
+    },
+    {
+      "id": "trt10-weights-included",
+      "passed": true,
+      "actual": "True/True"
+    },
+    {
+      "id": "trt10-original-disposed",
+      "passed": true,
+      "actual": "True/True"
+    },
+    {
+      "id": "trt10-same-process-reload",
+      "passed": true,
+      "actual": "True/True"
+    },
+    {
+      "id": "trt10-full-plan-refittable-fact",
+      "passed": true,
+      "actual": "False/False"
+    },
+    {
+      "id": "trt10-reload-metadata",
+      "passed": true,
+      "actual": "2/5/1"
+    },
+    {
+      "id": "trt10-context-gate",
+      "passed": true,
+      "actual": "True/True"
+    },
+    {
+      "id": "trt10-runtime-selected",
+      "passed": true,
+      "actual": "True/True"
+    },
+    {
+      "id": "trt10-same-process-inference",
+      "passed": true,
+      "actual": "True/True"
+    },
+    {
+      "id": "trt10-same-report-hash",
+      "passed": true,
+      "actual": "f627e231af9ee570f6a3952d7a6404f9661039fc606e86193d1e70f8b297080d"
+    },
+    {
+      "id": "trt10-same-output-artifact-hash",
+      "passed": true,
+      "actual": "7112daa43f8d3a55a06a5ff1acb6b069e04866ede0203e5c4158fa849d2683d2"
+    },
+    {
+      "id": "trt10-second-report-hash",
+      "passed": true,
+      "actual": "bf65db9e214961cfda37ea1ca314699ed726f8c4499b7a9e09026b59f7c727a0"
+    },
+    {
+      "id": "trt10-second-output-artifact-hash",
+      "passed": true,
+      "actual": "75ae3fc7e1f85f993d57a7b4ea36bf6174beac49be81f6754b16f37748a013fc"
+    },
+    {
+      "id": "trt10-baseline-report-hash",
+      "passed": true,
+      "actual": "cf8a5eb8540ffc850f700bd4a230cb0e18e7da35fa2307d8615ff27af237d04e"
+    },
+    {
+      "id": "trt10-baseline-output-artifact-hash",
+      "passed": true,
+      "actual": "1182eba59e830dffcf81f2db6f1bf0c543fa35afebf7dfccd0f9f6589a5d6500"
+    },
+    {
+      "id": "trt10-second-process-independent-command",
+      "passed": true,
+      "actual": "--tensor-rt-line 10 --loadEngine E:\\GitSpace\\TensorRT-CSharp-API-4.0\\TensorRtSharp4.0\\artifacts\\real-case\\trtexec-refitted-plan-persistence\\mnist-refitted-persisted.plan --workspace 64 --profilingVerbosity layer_names_only --exportReport E:\\GitSpace\\TensorRT-CSharp-API-4.0\\TensorRtSharp4.0\\artifacts\\real-case\\trtexec-refitted-plan-persistence\\trt10-second-process-load-persisted.json --batch 2 --iterations 1 --warmUp 0 --duration 0 --streams 1 --builderOptimizationLevel 3 --loadInputs Input3:E:\\GitSpace\\TensorRT-CSharp-API-4.0\\TensorRtSharp4.0\\artifacts\\real-case\\onnx-to-engine-mnist-trt10-runtime\\digit-7\\mnist-trt10-7-input-f32.bin --exportOutput E:\\GitSpace\\TensorRT-CSharp-API-4.0\\TensorRtSharp4.0\\artifacts\\real-case\\trtexec-refitted-plan-persistence\\trt10-second-process-output.json"
+    },
+    {
+      "id": "trt10-second-process-reload",
+      "passed": true,
+      "actual": "True/True/True"
+    },
+    {
+      "id": "trt10-three-way-output-match",
+      "passed": true,
+      "actual": "6f5771d6c5b056406c190a59e725cf9bb13c1f148c1ef06f99ed8acfb11b9041"
+    },
+    {
+      "id": "trt10-process-exits",
+      "passed": true,
+      "actual": "0/0/0"
+    },
+    {
+      "id": "trt8-report-hash",
+      "passed": true,
+      "actual": "b801bb53913065180e8c82392a638aafa317b5c99cb2deb1d0de1e5cf9175e18"
+    },
+    {
+      "id": "trt8-dry-parse-only",
+      "passed": true,
+      "actual": "dry-run-precheck/True"
+    },
+    {
+      "id": "trt8-nondry-guard",
+      "passed": true,
+      "actual": "2/TensorRT 8 has no ONNX parser-refitter API"
+    },
+    {
+      "id": "trt11-report-hash",
+      "passed": true,
+      "actual": "5c991040999d51403b9646c5610a81bf2a3ee1bb01f0f738f60f826f7b468dda"
+    },
+    {
+      "id": "trt11-dependency-only",
+      "passed": true,
+      "actual": "dependency-probe-only/dependency-probe-only"
+    },
+    {
+      "id": "trt11-not-applied",
+      "passed": true,
+      "actual": "--stripWeights,--refit,--refitFromOnnx,--saveRefittedEngine,--iterations,--warmUp,--duration,--streams,capability-probe-only"
+    },
+    {
+      "id": "boundary-local",
+      "passed": true,
+      "actual": "True"
+    },
+    {
+      "id": "boundary-no-accuracy",
+      "passed": true,
+      "actual": "False"
+    },
+    {
+      "id": "boundary-no-package",
+      "passed": true,
+      "actual": "False/False/False/False"
+    },
+    {
+      "id": "boundary-no-publish",
+      "passed": true,
+      "actual": "False/False"
+    },
+    {
+      "id": "boundary-no-release-close",
+      "passed": true,
+      "actual": "False"
+    }
+  ]
+}

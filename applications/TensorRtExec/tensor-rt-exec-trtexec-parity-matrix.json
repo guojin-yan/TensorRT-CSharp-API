@@ -121,10 +121,10 @@
       "trtexecOption": "--versionCompatible --excludeLeanRuntime --stripWeights --refit --allowWeightStreaming --weightStreamingBudget",
       "tensorRtExecStatus": "implemented-build-runtime-readback-with-version-guards",
       "entryPoints": ["TrtexecLikeWeightStreamingBudget", "OnnxEngineBuildService.ApplyEnginePackagingOptions", "OnnxEngineBuildService.ApplyEngineRuntimePolicies", "TensorRtBuilderConfig.SetFlag/GetFlag", "TensorRtEngine.SetWeightStreamingBudgetV2", "TensorRtExecOptions", "WinForms Packaging fields"],
-      "proofBoundary": "Builder/engine set-readback and a local weighted-model enqueue prove policy routing only. The separate --refitFromOnnx extension adds an in-memory lifecycle but does not change official trtexec parity or prove persisted refitted plans, packages, or release.",
+      "proofBoundary": "Builder/engine set-readback and a local weighted-model enqueue prove policy routing only. The separate --refitFromOnnx/--saveRefittedEngine extensions do not change official trtexec parity or prove package consumption or release.",
       "isRuntimeProof": false,
       "gap": "TRT8 keeps strip/weight-streaming and version-compatible+refit conflict parse-only; TRT11 remains dependency-probe-only on this host. External lean runtime still needs separate owner evidence.",
-      "nextStep": "Retain the version guards and compact runtime evidence; treat --refitFromOnnx as a managed extension rather than an official trtexec option."
+      "nextStep": "Retain the version guards and compact runtime evidence; treat both refit lifecycle switches as managed extensions rather than official trtexec options."
     },
     {
       "id": "onnx-stripped-plan-refit-extension",
@@ -133,8 +133,18 @@
       "entryPoints": ["OnnxEngineBuildService.RefitStrippedEngineFromOnnx", "OnnxEngineRefitSnapshot", "TensorRtRefitter", "TensorRtOnnxParserRefitter", "TensorRtExecOptions", "WinForms Refit ONNX field"],
       "proofBoundary": "TRT10 local evidence proves stripped-plan deserialize, copied inventory, parser load, engine commit, context ordering, enqueue, and exact baseline output comparison. It does not prove refitted-plan persistence, model accuracy, package-consumer runtime, or public release.",
       "isRuntimeProof": false,
-      "gap": "TRT8 is explicitly unsupported and TRT11 remains dependency-probe-only on this host. Persisted-refit serialization and package consumption remain external proof gaps.",
-      "nextStep": "Keep the extension owner-safe and add persisted-refit serialization only after its versioned contract is explicit."
+      "gap": "TRT8 is explicitly unsupported and TRT11 remains dependency-probe-only on this host. Package consumption remains an external proof gap.",
+      "nextStep": "Keep the extension owner-safe and pair it with the separate persisted-plan extension when a durable output is required."
+    },
+    {
+      "id": "refitted-plan-persistence-extension",
+      "trtexecOption": "TensorRtExec extension: --saveRefittedEngine",
+      "tensorRtExecStatus": "implemented-trt10-persist-dispose-independent-reload",
+      "entryPoints": ["OnnxEngineBuildService.PersistAndReloadRefittedEngine", "OnnxEngineRefitPersistenceSnapshot", "TensorRtEngine.CreateSerializationConfig", "TensorRtSerializationConfig.ClearFlag", "TensorRtEngine.Serialize(TensorRtSerializationConfig)", "TensorRtRuntime.DeserializeFromFile", "TensorRtExecOptions", "WinForms Refitted Engine field"],
+      "proofBoundary": "TRT10 local evidence proves ExcludeWeights was cleared, full-weight bytes differ from the stripped plan, the original owner was disposed, independent reload and bounded enqueue succeeded, and output exactly matched the fixed baseline. It is not package-consumer runtime, model accuracy, public package, or release proof.",
+      "isRuntimeProof": false,
+      "gap": "TRT8 cannot enter parser-refitter; TRT11 remains dependency-probe-only on this host. A repository-external package consumer and compatible TRT11 host are still required for broader proof.",
+      "nextStep": "Preserve the overwrite guards and independent-owner ordering; collect clean package-consumer reload evidence separately."
     },
     {
       "id": "workspace-memory-pool",

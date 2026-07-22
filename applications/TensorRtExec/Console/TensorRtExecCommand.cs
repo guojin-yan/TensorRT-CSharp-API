@@ -47,6 +47,7 @@ public static class TensorRtExecCommand
             System.Console.WriteLine("TensorRtExec BuilderConfigDeploymentSnapshot=" + report.BuilderConfigDeploymentSnapshotState + " Diagnostics=" + report.BuilderConfigDeploymentDiagnosticCount);
             System.Console.WriteLine("TensorRtExec ParserPreflightSnapshot=" + report.ParserPreflightSnapshotState + " Diagnostics=" + report.ParserPreflightDiagnosticCount);
             System.Console.WriteLine("TensorRtExec RefitSnapshot=" + report.RefitState + " Attempted=" + report.RefitAttempted + " Succeeded=" + report.RefitSucceeded);
+            System.Console.WriteLine("TensorRtExec RefitPersistence=" + report.RefitPersistenceState + " Attempted=" + report.RefitPersistenceAttempted + " Succeeded=" + report.RefitPersistenceSucceeded + " Plan=" + report.PersistedRefittedEnginePath);
             System.Console.WriteLine("TensorRtExec State=" + report.State + " Success=" + report.Success);
             return report.Success ? 0 : 2;
         }
@@ -91,6 +92,7 @@ public static class TensorRtExecCommand
         System.Console.WriteLine("  --layerPrecisions <spec> --layerOutputTypes <spec>");
         System.Console.WriteLine("  --versionCompatible --excludeLeanRuntime --stripWeights --refit");
         System.Console.WriteLine("  --refitFromOnnx <path> (requires --onnx --stripWeights --refit; TRT10/11)");
+        System.Console.WriteLine("  --saveRefittedEngine <path> (requires --refitFromOnnx; persists, disposes, reloads)");
         System.Console.WriteLine("  --allowWeightStreaming --weightStreamingBudget <-2|-1|0..100%|bytes> (requires --stronglyTyped when building)");
         System.Console.WriteLine("  --dumpRefit --markDebug <names> --dumpDebugTensors");
         System.Console.WriteLine("  --safe --consistency --builderCache|--noBuilderCache");

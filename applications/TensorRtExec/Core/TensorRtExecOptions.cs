@@ -97,7 +97,8 @@ public sealed class TensorRtExecOptions
         ulong? l2LimitForTilingBytes = null,
         string quantizationFlags = "",
         string weightStreamingBudget = "",
-        string refitFromOnnxPath = "")
+        string refitFromOnnxPath = "",
+        string saveRefittedEnginePath = "")
     {
         List<string> args = new List<string>();
         Add(args, "--tensor-rt-line", string.IsNullOrWhiteSpace(tensorRtLine) ? "10" : tensorRtLine);
@@ -134,6 +135,7 @@ public sealed class TensorRtExecOptions
             ? FormatBytesMiB(weightStreamingBudgetBytes)
             : weightStreamingBudget);
         Add(args, "--refitFromOnnx", refitFromOnnxPath);
+        Add(args, "--saveRefittedEngine", saveRefittedEnginePath);
         Add(args, "--exportTimingCache", exportTimingCachePath);
         AddSwitch(args, "--safe", safe);
         AddSwitch(args, "--consistency", consistency);
@@ -307,6 +309,8 @@ public sealed class TensorRtExecOptions
     public TrtexecLikeWeightStreamingBudget WeightStreamingBudget => TrtexecOptions.DeploymentOptions.WeightStreamingBudget;
 
     public string RefitFromOnnxPath => TrtexecOptions.DeploymentOptions.RefitFromOnnxPath;
+
+    public string SaveRefittedEnginePath => TrtexecOptions.DeploymentOptions.SaveRefittedEnginePath;
 
     public string ExportTimingCachePath => TrtexecOptions.DeploymentOptions.ExportTimingCachePath;
 

@@ -65,6 +65,7 @@ public static class OnnxEngineBuildDiagnostics
             result.BuilderConfigDeploymentSnapshot,
             result.ParserPreflightSnapshot,
             result.RefitSnapshot,
+            result.RefitPersistenceSnapshot,
             OptionImplementationStatus = CreateOptionImplementationStatus(result),
             result.BenchmarkSummary,
             result.ProofClassification,
@@ -138,6 +139,23 @@ public static class OnnxEngineBuildDiagnostics
             $"ONNX refit context creation allowed: `{result.RefitSnapshot.ContextCreationAllowed}`",
             $"ONNX refit diagnostic summary: `{result.RefitSnapshot.DiagnosticSummary}`",
             $"ONNX refit evidence boundary: `{result.RefitSnapshot.EvidenceBoundary}`",
+            $"Refitted plan persistence attempted: `{result.RefitPersistenceSnapshot.Attempted}`",
+            $"Refitted plan persistence succeeded: `{result.RefitPersistenceSnapshot.Succeeded}`",
+            $"Refitted plan persistence state: `{result.RefitPersistenceSnapshot.State}`",
+            $"Refitted plan stripped artifact: `{result.RefitPersistenceSnapshot.StrippedPlanPath}`",
+            $"Refitted plan stripped length/SHA256: `{result.RefitPersistenceSnapshot.StrippedPlanLengthBytes}/{result.RefitPersistenceSnapshot.StrippedPlanSha256}`",
+            $"Refitted plan persisted artifact: `{result.RefitPersistenceSnapshot.PersistedPlanPath}`",
+            $"Refitted plan persisted length/SHA256: `{result.RefitPersistenceSnapshot.PersistedPlanLengthBytes}/{result.RefitPersistenceSnapshot.PersistedPlanSha256}`",
+            $"Refitted plan serialization flags before/after: `{result.RefitPersistenceSnapshot.SerializationFlagsBefore}/{result.RefitPersistenceSnapshot.SerializationFlagsAfter}`",
+            $"Refittable weights included in serialization: `{result.RefitPersistenceSnapshot.RefittableWeightsIncludedInSerialization}`",
+            $"Refitted artifact differs from stripped plan: `{result.RefitPersistenceSnapshot.ArtifactDiffersFromStrippedPlan}`",
+            $"Original refitted engine disposed before reload: `{result.RefitPersistenceSnapshot.OriginalRefittedEngineDisposedBeforeReload}`",
+            $"Refitted plan reload attempted/succeeded: `{result.RefitPersistenceSnapshot.ReloadAttempted}/{result.RefitPersistenceSnapshot.ReloadSucceeded}`",
+            $"Reloaded engine refittable: `{result.RefitPersistenceSnapshot.ReloadEngineRefittable}`",
+            $"Reloaded engine IO/layers/profiles: `{result.RefitPersistenceSnapshot.ReloadIOTensorCount}/{result.RefitPersistenceSnapshot.ReloadLayerCount}/{result.RefitPersistenceSnapshot.ReloadOptimizationProfileCount}`",
+            $"Reloaded engine context creation allowed: `{result.RefitPersistenceSnapshot.ReloadContextCreationAllowed}`",
+            $"Reloaded engine selected/inference ran: `{result.RefitPersistenceSnapshot.ReloadEngineSelectedForRuntime}/{result.RefitPersistenceSnapshot.InferenceRanFromReloadedEngine}`",
+            $"Refitted plan persistence boundary: `{result.RefitPersistenceSnapshot.EvidenceBoundary}`",
             $"Loaded engine diagnostics attempted: `{result.LoadedEngineDiagnostics.Attempted}`",
             $"Loaded engine diagnostics succeeded: `{result.LoadedEngineDiagnostics.Succeeded}`",
             $"Loaded engine diagnostics state: `{result.LoadedEngineDiagnostics.DiagnosticsState}`",
@@ -397,6 +415,7 @@ public static class OnnxEngineBuildDiagnostics
         AddIf(options, "--stripWeights", deploymentOptions.StripWeights);
         AddIf(options, "--refit", deploymentOptions.Refit);
         AddIf(options, "--refitFromOnnx", !string.IsNullOrWhiteSpace(deploymentOptions.RefitFromOnnxPath));
+        AddIf(options, "--saveRefittedEngine", !string.IsNullOrWhiteSpace(deploymentOptions.SaveRefittedEnginePath));
         AddIf(options, "--weightStreamingBudget", deploymentOptions.WeightStreamingBudget.IsSpecified);
         AddIf(options, "--exportTimingCache", !string.IsNullOrWhiteSpace(deploymentOptions.ExportTimingCachePath));
         AddIf(options, "--safe", deploymentOptions.Safe);
@@ -458,6 +477,7 @@ public static class OnnxEngineBuildDiagnostics
         AddIf(options, "--stripWeights", HasAppliedDeploymentControl(result, "StripWeights"));
         AddIf(options, "--refit", HasAppliedDeploymentControl(result, "Refit"));
         AddIf(options, "--refitFromOnnx", result.RefitSnapshot.Succeeded && result.RefitSnapshot.ContextCreationAllowed);
+        AddIf(options, "--saveRefittedEngine", result.RefitPersistenceSnapshot.Succeeded && result.RefitPersistenceSnapshot.ReloadContextCreationAllowed);
         AddIf(options, "--allowWeightStreaming", HasAppliedDeploymentControl(result, "WeightStreaming"));
         AddIf(options, "--weightStreamingBudget", HasAppliedDeploymentControl(result, "WeightStreamingBudget"));
         AddIf(options, "--inputIOFormats", HasAppliedBuildPolicy(result, "InputIOFormats"));
@@ -542,6 +562,7 @@ public static class OnnxEngineBuildDiagnostics
         AddIf(options, "--stripWeights", deploymentOptions.StripWeights && !HasAppliedDeploymentControl(result, "StripWeights"));
         AddIf(options, "--refit", deploymentOptions.Refit && !HasAppliedDeploymentControl(result, "Refit"));
         AddIf(options, "--refitFromOnnx", !string.IsNullOrWhiteSpace(deploymentOptions.RefitFromOnnxPath) && !result.RefitSnapshot.Succeeded);
+        AddIf(options, "--saveRefittedEngine", !string.IsNullOrWhiteSpace(deploymentOptions.SaveRefittedEnginePath) && !result.RefitPersistenceSnapshot.Succeeded);
         AddIf(options, "--weightStreamingBudget", deploymentOptions.WeightStreamingBudget.IsSpecified && !HasAppliedDeploymentControl(result, "WeightStreamingBudget"));
         AddIf(options, "--timingCacheFile", result.TimingCacheArtifact.InputRequested && !result.TimingCacheArtifact.InputApplied);
         AddIf(options, "--exportTimingCache", !string.IsNullOrWhiteSpace(deploymentOptions.ExportTimingCachePath) && !result.TimingCacheArtifact.OutputWritten);

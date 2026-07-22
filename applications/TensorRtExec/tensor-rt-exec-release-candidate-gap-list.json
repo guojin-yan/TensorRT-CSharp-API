@@ -115,14 +115,14 @@
     {
       "id": "engine-packaging-refit-weight-streaming",
       "officialTrtexecParity": "--versionCompatible --excludeLeanRuntime --stripWeights --refit --allowWeightStreaming --weightStreamingBudget",
-      "tensorRtExecExtension": "--refitFromOnnx",
-      "currentStatus": "implemented-build-runtime-readback-with-version-guards",
+      "tensorRtExecExtension": "--refitFromOnnx --saveRefittedEngine",
+      "currentStatus": "implemented-build-refit-persist-reload-with-version-guards",
       "isRuntimeProof": false,
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": true,
       "winFormsSupported": true,
       "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/TrtexecLikeWeightStreamingBudget.cs", "src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildService.cs", "applications/TensorRtExec"],
-      "nextStep": "Keep TRT8 guards and TRT11 dependency boundary; retain TRT10 parser-load + engine-commit + baseline comparison evidence; add external lean-runtime and persisted-refit proof separately."
+      "nextStep": "Keep TRT8 guards and TRT11 dependency boundary; retain TRT10 parser-load, engine-commit, persisted reload and baseline comparison evidence; add external lean-runtime and clean package-consumer proof separately."
     },
     {
       "id": "io-layer-precision-policies",

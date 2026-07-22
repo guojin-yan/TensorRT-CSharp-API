@@ -39,7 +39,11 @@ public sealed class TensorRtExecReport
         int parserPreflightDiagnosticCount,
         bool refitAttempted = false,
         bool refitSucceeded = false,
-        string refitState = "")
+        string refitState = "",
+        bool refitPersistenceAttempted = false,
+        bool refitPersistenceSucceeded = false,
+        string refitPersistenceState = "",
+        string persistedRefittedEnginePath = "")
     {
         Success = success;
         State = state ?? string.Empty;
@@ -65,6 +69,10 @@ public sealed class TensorRtExecReport
         RefitAttempted = refitAttempted;
         RefitSucceeded = refitSucceeded;
         RefitState = refitState ?? string.Empty;
+        RefitPersistenceAttempted = refitPersistenceAttempted;
+        RefitPersistenceSucceeded = refitPersistenceSucceeded;
+        RefitPersistenceState = refitPersistenceState ?? string.Empty;
+        PersistedRefittedEnginePath = persistedRefittedEnginePath ?? string.Empty;
     }
 
     public bool Success { get; }
@@ -114,4 +122,12 @@ public sealed class TensorRtExecReport
     public bool RefitSucceeded { get; }
 
     public string RefitState { get; }
+
+    public bool RefitPersistenceAttempted { get; }
+
+    public bool RefitPersistenceSucceeded { get; }
+
+    public string RefitPersistenceState { get; }
+
+    public string PersistedRefittedEnginePath { get; }
 }

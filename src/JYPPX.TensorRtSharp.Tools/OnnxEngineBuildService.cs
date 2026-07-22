@@ -307,6 +307,7 @@ public sealed class OnnxEngineBuildService
                 TryCollectLayerInformationFromSerializedEngine(runtime, enginePath, options, log, "Build");
 
                 OnnxEngineRefitSnapshot refitSnapshot = OnnxEngineRefitSnapshot.Empty;
+                OnnxEngineRefitPersistenceSnapshot refitPersistenceSnapshot = OnnxEngineRefitPersistenceSnapshot.Empty;
                 if (!string.IsNullOrWhiteSpace(options.DeploymentOptions.RefitFromOnnxPath))
                 {
                     refittedEngine = runtime.DeserializeFromFile(enginePath);
@@ -319,6 +320,22 @@ public sealed class OnnxEngineBuildService
                     {
                         throw new InvalidOperationException(
                             "ONNX stripped-plan refit did not reach the context-creation gate: " + refitSnapshot.DiagnosticSummary);
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(options.DeploymentOptions.SaveRefittedEnginePath))
+                    {
+                        TensorRtEngine committedEngine = refittedEngine;
+                        refittedEngine = null;
+                        (refittedEngine, refitPersistenceSnapshot) = PersistAndReloadRefittedEngine(
+                            runtime,
+                            committedEngine,
+                            enginePath,
+                            options.DeploymentOptions.SaveRefittedEnginePath,
+                            log);
+                        if (!refitPersistenceSnapshot.Succeeded || !refitPersistenceSnapshot.ReloadContextCreationAllowed)
+                        {
+                            throw new InvalidOperationException("Refitted-plan persistence did not reach the independent reload gate.");
+                        }
                     }
                 }
 
@@ -333,7 +350,9 @@ public sealed class OnnxEngineBuildService
                     OnnxEngineBuildResult buildOnly = CreateResult(
                         success: true,
                         skipped: false,
-                        state: refitSnapshot.Succeeded
+                        state: refitPersistenceSnapshot.Succeeded
+                            ? "external-onnx-refit-persisted-reload-build-only"
+                            : refitSnapshot.Succeeded
                             ? "external-onnx-refit-complete-build-only"
                             : (options.UsesExternalOnnx ? "external-onnx-build-only" : "build-only"),
                         options,
@@ -352,7 +371,8 @@ public sealed class OnnxEngineBuildService
                         timingCacheArtifact: timingCache.Artifact,
                         builderConfigDeploymentSnapshot: builderConfigDeploymentSnapshot,
                         parserPreflightSnapshot: parserPreflightSnapshot,
-                        refitSnapshot: refitSnapshot);
+                        refitSnapshot: refitSnapshot,
+                        refitPersistenceSnapshot: refitPersistenceSnapshot);
                     OnnxEngineBuildDiagnostics.WriteReport(buildOnly, options.ExportReportPath);
                     OnnxEngineRuntimeArtifactWriter.WriteArtifacts(buildOnly);
                     return buildOnly;
@@ -361,15 +381,29 @@ public sealed class OnnxEngineBuildService
                 if (externalRuntimeRequested)
                 {
                     OnnxEngineRuntimeExecution? runtimeExecution = refittedEngine != null
-                        ? TryRunGenericFloatEngine(refittedEngine, options, profileIndex, log, statePrefix: "ExternalOnnxRefit")
+                        ? TryRunGenericFloatEngine(
+                            refittedEngine,
+                            options,
+                            profileIndex,
+                            log,
+                            statePrefix: refitPersistenceSnapshot.Succeeded ? "ExternalOnnxRefitReload" : "ExternalOnnxRefit",
+                            validateRefittableState: !refitPersistenceSnapshot.Succeeded)
                         : TryRunGenericFloatEngineFromFile(options, enginePath, profileIndex, log, statePrefix: "ExternalOnnx");
+                    if (refitPersistenceSnapshot.Succeeded)
+                    {
+                        refitPersistenceSnapshot = refitPersistenceSnapshot.WithRuntimeOutcome(
+                            selectedForRuntime: true,
+                            inferenceRan: runtimeExecution != null);
+                    }
                     log.Add(runtimeExecution == null
                         ? "OnnxToEngine ExternalOnnx=RuntimeSkipped Note=Generic bounded runtime could not be executed."
                         : $"OnnxToEngine ExternalOnnx=BoundedRuntime InferenceRan=True OutputMatch={runtimeExecution.OutputMatch}");
                     OnnxEngineBuildResult externalRuntime = CreateResult(
                         success: true,
                         skipped: false,
-                        state: refitSnapshot.Succeeded
+                        state: refitPersistenceSnapshot.Succeeded
+                            ? (runtimeExecution != null && runtimeExecution.OutputMatch ? "external-onnx-refit-reload-identity-runtime" : "external-onnx-refit-reload-runtime-output-unverified")
+                            : refitSnapshot.Succeeded
                             ? (runtimeExecution != null && runtimeExecution.OutputMatch ? "external-onnx-refit-identity-runtime" : "external-onnx-refit-runtime-output-unverified")
                             : (runtimeExecution != null && runtimeExecution.OutputMatch ? "external-onnx-identity-runtime" : "external-onnx-runtime-output-unverified"),
                         options,
@@ -386,11 +420,16 @@ public sealed class OnnxEngineBuildService
                         log,
                         evidenceSidecar,
                         benchmarkSummary: runtimeExecution?.BenchmarkSummary,
-                        loadedEngineDiagnostics: ProbeLoadedEngineDiagnostics(options, OnnxEnginePreflightMetadata.FromExistingEngine(enginePath), log),
+                        loadedEngineDiagnostics: ProbeLoadedEngineDiagnostics(
+                            options,
+                            OnnxEnginePreflightMetadata.FromExistingEngine(
+                                refitPersistenceSnapshot.Succeeded ? refitPersistenceSnapshot.PersistedPlanPath : enginePath),
+                            log),
                         timingCacheArtifact: timingCache.Artifact,
                         builderConfigDeploymentSnapshot: builderConfigDeploymentSnapshot,
                         parserPreflightSnapshot: parserPreflightSnapshot,
-                        refitSnapshot: refitSnapshot);
+                        refitSnapshot: refitSnapshot,
+                        refitPersistenceSnapshot: refitPersistenceSnapshot);
                     OnnxEngineBuildDiagnostics.WriteReport(externalRuntime, options.ExportReportPath);
                     OnnxEngineRuntimeArtifactWriter.WriteArtifacts(externalRuntime, runtimeExecution?.ArtifactData);
                     return externalRuntime;
@@ -747,7 +786,8 @@ public sealed class OnnxEngineBuildService
         OnnxEngineTimingCacheArtifact? timingCacheArtifact = null,
         TensorRtBuilderConfigDeploymentSnapshot? builderConfigDeploymentSnapshot = null,
         OnnxEngineParserPreflightSnapshot? parserPreflightSnapshot = null,
-        OnnxEngineRefitSnapshot? refitSnapshot = null)
+        OnnxEngineRefitSnapshot? refitSnapshot = null,
+        OnnxEngineRefitPersistenceSnapshot? refitPersistenceSnapshot = null)
     {
         OnnxEngineCapabilityProbe capabilityProbe = ProbeCapabilities(options);
         logLines = AppendCapabilityProbeLog(logLines, capabilityProbe);
@@ -781,7 +821,114 @@ public sealed class OnnxEngineBuildService
             workspaceBytes: options.WorkspaceBytes,
             builderConfigDeploymentSnapshot: builderConfigDeploymentSnapshot,
             parserPreflightSnapshot: parserPreflightSnapshot,
-            refitSnapshot: refitSnapshot);
+            refitSnapshot: refitSnapshot,
+            refitPersistenceSnapshot: refitPersistenceSnapshot);
+    }
+
+    private static (TensorRtEngine Engine, OnnxEngineRefitPersistenceSnapshot Snapshot) PersistAndReloadRefittedEngine(
+        TensorRtRuntime runtime,
+        TensorRtEngine refittedEngine,
+        string strippedPlanPath,
+        string persistedPlanPath,
+        List<string> log)
+    {
+        const string boundary = "The snapshot proves that this committed engine was serialized, the original engine was disposed, and a distinct managed engine reloaded the persisted bytes. Runtime output still requires an explicit enqueue/baseline comparison and this is not package-consumer or public-release proof.";
+        byte[] strippedPlan = File.ReadAllBytes(strippedPlanPath);
+        byte[] persistedPlan;
+        TensorRtSerializationFlags serializationFlagsBefore = TensorRtSerializationFlags.None;
+        TensorRtSerializationFlags serializationFlagsAfter = TensorRtSerializationFlags.None;
+        bool refittableWeightsIncluded = false;
+        bool originalDisposed = false;
+        try
+        {
+            using TensorRtSerializationConfig serializationConfig = refittedEngine.CreateSerializationConfig();
+            serializationFlagsBefore = serializationConfig.Flags;
+            bool excludeWeightsCleared = serializationConfig.ClearFlag(TensorRtSerializationFlag.ExcludeWeights);
+            serializationFlagsAfter = serializationConfig.Flags;
+            refittableWeightsIncluded = excludeWeightsCleared &&
+                (serializationFlagsAfter & TensorRtSerializationFlags.ExcludeWeights) == 0;
+            if (!refittableWeightsIncluded)
+            {
+                throw new InvalidOperationException("TensorRT did not clear ExcludeWeights before refitted-engine serialization.");
+            }
+
+            using TensorRtHostMemory serialized = refittedEngine.Serialize(serializationConfig);
+            persistedPlan = serialized.ToArray();
+            string? directory = Path.GetDirectoryName(persistedPlanPath);
+            if (!string.IsNullOrWhiteSpace(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            File.WriteAllBytes(persistedPlanPath, persistedPlan);
+        }
+        finally
+        {
+            refittedEngine.Dispose();
+            originalDisposed = true;
+        }
+
+        string strippedSha256 = ComputeSha256(strippedPlan);
+        string persistedSha256 = ComputeSha256(persistedPlan);
+        bool differsFromStripped = strippedPlan.LongLength != persistedPlan.LongLength ||
+            !string.Equals(strippedSha256, persistedSha256, StringComparison.Ordinal);
+        TensorRtEngine? reloadedEngine = null;
+        try
+        {
+            reloadedEngine = runtime.DeserializeFromFile(persistedPlanPath);
+            bool reloadRefittable = reloadedEngine.IsRefittable;
+            int ioTensorCount = reloadedEngine.IOTensorCount;
+            int layerCount = reloadedEngine.LayerCount;
+            int profileCount = reloadedEngine.OptimizationProfileCount;
+            bool reloadGate = ioTensorCount > 0 && layerCount > 0 && profileCount > 0;
+            bool succeeded = persistedPlan.LongLength > 0 &&
+                refittableWeightsIncluded &&
+                originalDisposed &&
+                differsFromStripped &&
+                reloadGate;
+            OnnxEngineRefitPersistenceSnapshot snapshot = new OnnxEngineRefitPersistenceSnapshot(
+                attempted: true,
+                succeeded,
+                state: succeeded ? "refitted-plan-persisted-and-reloaded" : "refitted-plan-persistence-incomplete",
+                strippedPlanPath,
+                strippedPlanLengthBytes: strippedPlan.LongLength,
+                strippedPlanSha256: strippedSha256,
+                persistedPlanPath,
+                persistedPlanLengthBytes: persistedPlan.LongLength,
+                persistedPlanSha256: persistedSha256,
+                serializationFlagsBefore,
+                serializationFlagsAfter,
+                refittableWeightsIncludedInSerialization: refittableWeightsIncluded,
+                artifactDiffersFromStrippedPlan: differsFromStripped,
+                originalRefittedEngineDisposedBeforeReload: originalDisposed,
+                reloadAttempted: true,
+                reloadSucceeded: true,
+                reloadEngineRefittable: reloadRefittable,
+                reloadIoTensorCount: ioTensorCount,
+                reloadLayerCount: layerCount,
+                reloadOptimizationProfileCount: profileCount,
+                reloadContextCreationAllowed: succeeded,
+                reloadEngineSelectedForRuntime: false,
+                inferenceRanFromReloadedEngine: false,
+                evidenceBoundary: boundary);
+            log.Add(
+                $"OnnxRefitPersistence Attempted=True Succeeded={succeeded} StrippedPlan={strippedPlanPath} StrippedLengthBytes={strippedPlan.LongLength} StrippedSha256={strippedSha256} " +
+                $"PersistedPlan={persistedPlanPath} PersistedLengthBytes={persistedPlan.LongLength} PersistedSha256={persistedSha256} ArtifactDiffers={differsFromStripped} " +
+                $"SerializationFlagsBefore={serializationFlagsBefore} SerializationFlagsAfter={serializationFlagsAfter} RefittableWeightsIncluded={refittableWeightsIncluded} " +
+                $"OriginalDisposedBeforeReload={originalDisposed} ReloadSucceeded=True ReloadRefittable={reloadRefittable} IOTensors={ioTensorCount} Layers={layerCount} Profiles={profileCount} ContextCreationAllowed={snapshot.ReloadContextCreationAllowed}");
+            if (!succeeded)
+            {
+                throw new InvalidOperationException("The refitted plan was written but did not pass the independent reload gate.");
+            }
+
+            TensorRtEngine result = reloadedEngine;
+            reloadedEngine = null;
+            return (result, snapshot);
+        }
+        finally
+        {
+            reloadedEngine?.Dispose();
+        }
     }
 
     private static OnnxEngineRefitSnapshot RefitStrippedEngineFromOnnx(
@@ -1285,9 +1432,10 @@ public sealed class OnnxEngineBuildService
         OnnxEngineBuildOptions options,
         int profileIndex,
         List<string> log,
-        string statePrefix)
+        string statePrefix,
+        bool validateRefittableState = true)
     {
-        ApplyEngineRuntimePolicies(engine, options, log);
+        ApplyEngineRuntimePolicies(engine, options, log, validateRefittableState);
         int safeProfileIndex = Math.Max(0, profileIndex);
         int executionContextCount = options.RuntimeOptions.InfStreams ?? options.Streams;
         List<OnnxEngineBenchmarkWorker> workers = new List<OnnxEngineBenchmarkWorker>(executionContextCount);
@@ -1431,10 +1579,11 @@ public sealed class OnnxEngineBuildService
     private static void ApplyEngineRuntimePolicies(
         TensorRtEngine engine,
         OnnxEngineBuildOptions options,
-        List<string> log)
+        List<string> log,
+        bool validateRefittableState)
     {
         TrtexecLikeDeploymentOptions deployment = options.DeploymentOptions;
-        if (deployment.Refit)
+        if (deployment.Refit && validateRefittableState)
         {
             bool refittable = engine.IsRefittable;
             log.Add($"TrtexecEnginePolicy Name=Refit Applied=True Requested=True Readback={refittable} ReadbackMatch={refittable}");
@@ -1442,6 +1591,10 @@ public sealed class OnnxEngineBuildService
             {
                 throw new InvalidOperationException("TensorRT built an engine that is not refittable after --refit was applied.");
             }
+        }
+        else if (deployment.Refit)
+        {
+            log.Add("TrtexecEnginePolicy Name=Refit RuntimeRevalidation=False PersistenceCommitted=True Reason=full-weight-reload-does-not-require-refittable-state");
         }
 
         if (!deployment.WeightStreamingBudget.IsSpecified)

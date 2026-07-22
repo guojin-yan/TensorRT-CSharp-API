@@ -68,7 +68,7 @@ TRT11 当前主机在 runtime creation 返回 null，因此保持 `dependency-pr
 
 ## 证据边界
 
-成功 refit 的对象只存在于当前进程内；`--saveEngine` 指向的文件仍是 stripped plan。本结果不是 refitted-plan persistence、模型准确率、公开包消费或发布证明。完整 compact evidence 位于 `artifacts/interface-coverage/trtexec-onnx-refit-lifecycle-evidence.json`，严格验证命令为：
+只指定 `--refitFromOnnx` 时，成功 refit 的对象只存在于当前进程内，`--saveEngine` 指向的文件仍是 stripped plan。需要 durable artifact 时必须另行指定 `--saveRefittedEngine`，并按“Refitted Plan 持久化与独立 Reload”文章验证新文件。本节原有结果本身不是 persistence、模型准确率、公开包消费或发布证明。完整 compact evidence 位于 `artifacts/interface-coverage/trtexec-onnx-refit-lifecycle-evidence.json`，严格验证命令为：
 
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-TrtexecOnnxRefitLifecycleEvidence.ps1 -Strict

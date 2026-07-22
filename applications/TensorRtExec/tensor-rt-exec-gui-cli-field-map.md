@@ -14,7 +14,7 @@
 
 | Group | Examples | Boundary |
 | --- | --- | --- |
-| Model | `--onnx`, `--saveEngine`, `--loadEngine`, `--refitFromOnnx` | load-engine remains readonly diagnostics; ONNX refit requires build + strip + refit and remains in-memory evidence |
+| Model | `--onnx`, `--saveEngine`, `--loadEngine`, `--refitFromOnnx`, `--saveRefittedEngine` | load-engine remains readonly diagnostics; ONNX refit persistence keeps stripped/refitted artifacts distinct and reloads a new engine owner |
 | Shape Profile | `--minShapes`, `--optShapes`, `--maxShapes` | shared normalized command |
 | Plugin Paths | `--plugins` | diagnostic GUI/CLI parity only; load/register remains deferred |
 | Precision | `--fp16`, `--int8`, `--fp8`, `--best` | INT8 and advanced precision remain guarded |

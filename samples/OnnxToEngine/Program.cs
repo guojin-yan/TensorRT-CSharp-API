@@ -178,6 +178,7 @@ internal static class Program
         Console.WriteLine("  --precisionConstraints <none|prefer|obey> --layerPrecisions <pattern:type> --layerOutputTypes <pattern:type[+type]>");
         Console.WriteLine("  --versionCompatible --excludeLeanRuntime --stripWeights --refit");
         Console.WriteLine("  --refitFromOnnx <path> (requires --onnx --stripWeights --refit; TRT10/11)");
+        Console.WriteLine("  --saveRefittedEngine <path> (requires --refitFromOnnx; persists, disposes, reloads)");
         Console.WriteLine("  --allowWeightStreaming --weightStreamingBudget <-2|-1|0..100%|bytes> (requires --stronglyTyped when building)");
         Console.WriteLine("  --shapes/--inputShapes input:1x3x640x640   Alias used as min/opt/max shapes when no explicit profile triplet is provided.");
         Console.WriteLine("  --save-engine <path> --load-engine <path> --timingCache <path> --verbose");

@@ -74,6 +74,7 @@ public static class TrtexecLikeParser
         bool excludeLeanRuntime = HasSwitch(args, "--excludeLeanRuntime");
         bool stripWeights = HasSwitch(args, "--stripWeights");
         string refitFromOnnxPath = FullPathOrEmpty(GetValue(args, "--refitFromOnnx", string.Empty));
+        string saveRefittedEnginePath = FullPathOrEmpty(GetValue(args, "--saveRefittedEngine", string.Empty));
         TrtexecLikeWeightStreamingBudget weightStreamingBudget =
             TrtexecLikeWeightStreamingBudget.Parse(GetValue(args, "--weightStreamingBudget", string.Empty));
         bool buildsEngine = string.IsNullOrWhiteSpace(loadEnginePath);
@@ -103,6 +104,29 @@ public static class TrtexecLikeParser
             if (!dryRun && tensorRtLine == TensorRtApiLine.TensorRt8)
             {
                 throw new ArgumentException("--refitFromOnnx requires TensorRT 10 or TensorRT 11; TensorRT 8 has no ONNX parser-refitter API.");
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(saveRefittedEnginePath))
+        {
+            if (string.IsNullOrWhiteSpace(refitFromOnnxPath))
+            {
+                throw new ArgumentException("--saveRefittedEngine requires --refitFromOnnx so only a committed refitted engine can be persisted.");
+            }
+
+            if (PathsEqual(saveRefittedEnginePath, saveEnginePath))
+            {
+                throw new ArgumentException("--saveRefittedEngine must differ from --saveEngine so the stripped source plan and refitted output plan remain distinct.");
+            }
+
+            if (PathsEqual(saveRefittedEnginePath, onnxPath) || PathsEqual(saveRefittedEnginePath, refitFromOnnxPath))
+            {
+                throw new ArgumentException("--saveRefittedEngine must not overwrite an ONNX build or refit source.");
+            }
+
+            if (Directory.Exists(saveRefittedEnginePath))
+            {
+                throw new ArgumentException("--saveRefittedEngine must name a file, not a directory.");
             }
         }
         if (excludeLeanRuntime && !versionCompatible)
@@ -170,7 +194,8 @@ public static class TrtexecLikeParser
             l2LimitForTilingBytes: ParseOptionalLongMemorySizeBytes(GetValue(args, "--l2LimitForTiling", string.Empty), "--l2LimitForTiling"),
             quantizationFlags: ParseOptionalQuantizationFlags(GetValue(args, "--quantizationFlags", string.Empty)),
             weightStreamingBudget: weightStreamingBudget,
-            refitFromOnnxPath: refitFromOnnxPath);
+            refitFromOnnxPath: refitFromOnnxPath,
+            saveRefittedEnginePath: saveRefittedEnginePath);
         string shapes = FirstNonEmpty(GetValue(args, "--shapes", string.Empty), GetValue(args, "--inputShapes", string.Empty));
         string minShapes = FirstNonEmpty(GetValue(args, "--minShapes", string.Empty), shapes);
         string optShapes = FirstNonEmpty(GetValue(args, "--optShapes", string.Empty), shapes);
@@ -294,6 +319,13 @@ public static class TrtexecLikeParser
     private static string FullPathOrEmpty(string path)
     {
         return string.IsNullOrWhiteSpace(path) ? string.Empty : Path.GetFullPath(path);
+    }
+
+    private static bool PathsEqual(string left, string right)
+    {
+        return !string.IsNullOrWhiteSpace(left) &&
+            !string.IsNullOrWhiteSpace(right) &&
+            string.Equals(Path.GetFullPath(left), Path.GetFullPath(right), StringComparison.OrdinalIgnoreCase);
     }
 
     private static IReadOnlyList<string> ParseList(string value)

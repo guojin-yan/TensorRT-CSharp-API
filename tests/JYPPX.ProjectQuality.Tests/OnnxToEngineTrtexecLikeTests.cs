@@ -286,20 +286,27 @@ public sealed class OnnxToEngineTrtexecLikeTests
     public void OnnxRefitSourceRequiresExplicitStrippedBuildAndModernTensorRtLine()
     {
         string modelPath = Path.Combine(RepositoryPaths.Root, "artifacts", "interface-coverage", "project-completion-review.md");
+        string strippedPlanPath = Path.Combine(Path.GetTempPath(), "jyppx-parser-stripped.plan");
+        string refittedPlanPath = Path.Combine(Path.GetTempPath(), "jyppx-parser-refitted.plan");
         TrtexecLikeOptions options = TrtexecLikeParser.Parse(new[]
         {
             "--dryRun",
             "--tensor-rt-line", "10",
             "--onnx", modelPath,
+            "--saveEngine", strippedPlanPath,
             "--stripWeights",
             "--refit",
-            "--refitFromOnnx", modelPath
+            "--refitFromOnnx", modelPath,
+            "--saveRefittedEngine", refittedPlanPath
         });
 
         Assert.True(options.DeploymentOptions.StripWeights);
         Assert.Equal(Path.GetFullPath(modelPath), options.DeploymentOptions.RefitFromOnnxPath);
+        Assert.Equal(Path.GetFullPath(refittedPlanPath), options.DeploymentOptions.SaveRefittedEnginePath);
         Assert.Contains("--refitFromOnnx", options.ToArgumentLine(), StringComparison.Ordinal);
+        Assert.Contains("--saveRefittedEngine", options.ToArgumentLine(), StringComparison.Ordinal);
         Assert.Contains("copied missing/all-weight inventory", string.Join("\n", options.DeploymentOptions.ToDiagnostics()), StringComparison.Ordinal);
+        Assert.Contains("independently reloads", string.Join("\n", options.DeploymentOptions.ToDiagnostics()), StringComparison.Ordinal);
 
         Assert.Throws<ArgumentException>(() => TrtexecLikeParser.Parse(new[]
         {
@@ -316,6 +323,20 @@ public sealed class OnnxToEngineTrtexecLikeTests
         Assert.Throws<ArgumentException>(() => TrtexecLikeParser.Parse(new[]
         {
             "--tensor-rt-line", "8", "--onnx", modelPath, "--stripWeights", "--refit", "--refitFromOnnx", modelPath
+        }));
+        Assert.Throws<ArgumentException>(() => TrtexecLikeParser.Parse(new[]
+        {
+            "--dryRun", "--onnx", modelPath, "--saveRefittedEngine", refittedPlanPath
+        }));
+        Assert.Throws<ArgumentException>(() => TrtexecLikeParser.Parse(new[]
+        {
+            "--dryRun", "--onnx", modelPath, "--saveEngine", refittedPlanPath, "--stripWeights", "--refit",
+            "--refitFromOnnx", modelPath, "--saveRefittedEngine", refittedPlanPath
+        }));
+        Assert.Throws<ArgumentException>(() => TrtexecLikeParser.Parse(new[]
+        {
+            "--dryRun", "--onnx", modelPath, "--stripWeights", "--refit", "--refitFromOnnx", modelPath,
+            "--saveRefittedEngine", modelPath
         }));
     }
 

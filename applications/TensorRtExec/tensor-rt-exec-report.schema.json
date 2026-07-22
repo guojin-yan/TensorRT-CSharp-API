@@ -32,6 +32,7 @@
     "BuilderConfigDeploymentSnapshot",
     "ParserPreflightSnapshot",
     "RefitSnapshot",
+    "RefitPersistenceSnapshot",
     "OptionImplementationStatus",
     "BenchmarkSummary",
     "ProofClassification",
@@ -88,7 +89,8 @@
         "Consistency",
         "BuilderCache",
         "NoBuilderCache",
-        "RefitFromOnnxPath"
+        "RefitFromOnnxPath",
+        "SaveRefittedEnginePath"
       ],
       "properties": {
         "MaxNbTactics": { "type": [ "integer", "null" ], "minimum": 0 },
@@ -260,6 +262,23 @@
         "MissingWeightsAfter": { "type": "array", "items": { "type": "string" } }, "AllWeightsAfter": { "type": "array", "items": { "type": "string" } },
         "ParserErrorCount": { "type": "integer", "minimum": 0 }, "CopiedDiagnosticCount": { "type": "integer", "minimum": 0 }, "DiagnosticSummary": { "type": "string" },
         "ContextCreationAllowed": { "type": "boolean" }, "EvidenceBoundary": { "type": "string" }
+      }
+    },
+    "RefitPersistenceSnapshot": {
+      "type": "object",
+      "description": "Copied evidence that the committed refitted engine was persisted, disposed, and independently reloaded before optional runtime execution.",
+      "additionalProperties": false,
+      "required": ["Attempted", "Succeeded", "State", "StrippedPlanPath", "StrippedPlanLengthBytes", "StrippedPlanSha256", "PersistedPlanPath", "PersistedPlanLengthBytes", "PersistedPlanSha256", "SerializationFlagsBefore", "SerializationFlagsAfter", "RefittableWeightsIncludedInSerialization", "ArtifactDiffersFromStrippedPlan", "OriginalRefittedEngineDisposedBeforeReload", "ReloadAttempted", "ReloadSucceeded", "ReloadEngineRefittable", "ReloadIOTensorCount", "ReloadLayerCount", "ReloadOptimizationProfileCount", "ReloadContextCreationAllowed", "ReloadEngineSelectedForRuntime", "InferenceRanFromReloadedEngine", "EvidenceBoundary"],
+      "properties": {
+        "Attempted": { "type": "boolean" }, "Succeeded": { "type": "boolean" }, "State": { "type": "string" },
+        "StrippedPlanPath": { "type": "string" }, "StrippedPlanLengthBytes": { "type": "integer", "minimum": 0 }, "StrippedPlanSha256": { "type": "string" },
+        "PersistedPlanPath": { "type": "string" }, "PersistedPlanLengthBytes": { "type": "integer", "minimum": 0 }, "PersistedPlanSha256": { "type": "string" },
+        "SerializationFlagsBefore": { "type": "integer", "minimum": 0 }, "SerializationFlagsAfter": { "type": "integer", "minimum": 0 }, "RefittableWeightsIncludedInSerialization": { "type": "boolean" },
+        "ArtifactDiffersFromStrippedPlan": { "type": "boolean" }, "OriginalRefittedEngineDisposedBeforeReload": { "type": "boolean" },
+        "ReloadAttempted": { "type": "boolean" }, "ReloadSucceeded": { "type": "boolean" }, "ReloadEngineRefittable": { "type": "boolean" },
+        "ReloadIOTensorCount": { "type": "integer", "minimum": 0 }, "ReloadLayerCount": { "type": "integer", "minimum": 0 }, "ReloadOptimizationProfileCount": { "type": "integer", "minimum": 0 },
+        "ReloadContextCreationAllowed": { "type": "boolean" }, "ReloadEngineSelectedForRuntime": { "type": "boolean" }, "InferenceRanFromReloadedEngine": { "type": "boolean" },
+        "EvidenceBoundary": { "type": "string" }
       }
     },
     "OptionImplementationStatus": {

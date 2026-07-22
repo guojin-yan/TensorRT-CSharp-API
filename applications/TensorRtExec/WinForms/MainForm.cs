@@ -13,6 +13,7 @@ public sealed class MainForm : Form
     private readonly TextBox _enginePath = new TextBox();
     private readonly TextBox _loadEnginePath = new TextBox();
     private readonly TextBox _refitFromOnnxPath = new TextBox();
+    private readonly TextBox _saveRefittedEnginePath = new TextBox();
     private readonly ComboBox _tensorRtLine = new ComboBox();
     private readonly CheckBox _fp16 = new CheckBox();
     private readonly CheckBox _int8 = new CheckBox();
@@ -107,7 +108,7 @@ public sealed class MainForm : Form
         {
             Dock = DockStyle.Fill,
             ColumnCount = 3,
-            RowCount = 48,
+            RowCount = 49,
             Padding = new Padding(12),
             AutoScroll = true
         };
@@ -201,11 +202,12 @@ public sealed class MainForm : Form
         AddLabeled(root, 27, "Packaging", packagingPanel);
         AddLabeled(root, 28, "Weight Budget", _weightStreamingBudget);
         AddPathRow(root, 29, "Refit ONNX", _refitFromOnnxPath, OnBrowseRefitOnnx);
-        AddPathRow(root, 30, "Timing Export", _exportTimingCachePath, OnBrowseExportTimingCache);
-        AddLabeled(root, 31, "Mark Debug", _markDebug);
-        AddPathRow(root, 32, "Layer Info", _layerInfoPath, OnBrowseLayerInfo);
-        AddPathRow(root, 33, "Report", _reportPath, OnBrowseReport);
-        AddPathRow(root, 34, "Evidence", _evidenceSidecarPath, OnBrowseEvidenceSidecar);
+        AddPathRow(root, 30, "Refitted Engine", _saveRefittedEnginePath, OnBrowseSaveRefittedEngine);
+        AddPathRow(root, 31, "Timing Export", _exportTimingCachePath, OnBrowseExportTimingCache);
+        AddLabeled(root, 32, "Mark Debug", _markDebug);
+        AddPathRow(root, 33, "Layer Info", _layerInfoPath, OnBrowseLayerInfo);
+        AddPathRow(root, 34, "Report", _reportPath, OnBrowseReport);
+        AddPathRow(root, 35, "Evidence", _evidenceSidecarPath, OnBrowseEvidenceSidecar);
 
         ConfigureNumeric(_iterations, 1, 100000, 10);
         ConfigureNumeric(_warmUp, 0, 3600000, 200);
@@ -213,7 +215,7 @@ public sealed class MainForm : Form
         ConfigureNumeric(_streams, 1, 1024, 1);
         FlowLayoutPanel timingPanel = new FlowLayoutPanel { Dock = DockStyle.Fill };
         timingPanel.Controls.AddRange(new Control[] { _iterations, _warmUp, _duration, _streams });
-        AddLabeled(root, 35, "Runs/Warm/Duration/Streams", timingPanel);
+        AddLabeled(root, 36, "Runs/Warm/Duration/Streams", timingPanel);
 
         FlowLayoutPanel runtimeSwitchPanel = new FlowLayoutPanel { Dock = DockStyle.Fill };
         ConfigureCheck(_useCudaGraph, "CUDA graph");
@@ -225,16 +227,16 @@ public sealed class MainForm : Form
         ConfigureCheck(_dumpProfile, "Dump profile");
         ConfigureCheck(_separateProfileRun, "Separate profile");
         runtimeSwitchPanel.Controls.AddRange(new Control[] { _useCudaGraph, _noDataTransfers, _useSpinWait, _threads, _dumpOutput, _dumpLayerInfo, _dumpProfile, _separateProfileRun });
-        AddLabeled(root, 36, "Runtime Flags", runtimeSwitchPanel);
+        AddLabeled(root, 37, "Runtime Flags", runtimeSwitchPanel);
 
-        AddLabeled(root, 37, "Inf Streams", _infStreams);
-        AddLabeled(root, 38, "Avg/Percentile", CreateTextPair(_avgRuns, _percentile));
-        AddLabeled(root, 39, "Sleep/Idle ms", CreateTextPair(_sleepTime, _idleTime));
-        AddLabeled(root, 40, "Load Inputs", _loadInputs);
-        AddLabeled(root, 41, "Raw Bindings", _dumpRawBindingsPath);
-        AddLabeled(root, 42, "Output JSON", _exportOutputPath);
-        AddLabeled(root, 43, "Times/Profile", CreateTextPair(_exportTimesPath, _exportProfilePath));
-        AddLabeled(root, 44, "Save Profile", _saveProfilePath);
+        AddLabeled(root, 38, "Inf Streams", _infStreams);
+        AddLabeled(root, 39, "Avg/Percentile", CreateTextPair(_avgRuns, _percentile));
+        AddLabeled(root, 40, "Sleep/Idle ms", CreateTextPair(_sleepTime, _idleTime));
+        AddLabeled(root, 41, "Load Inputs", _loadInputs);
+        AddLabeled(root, 42, "Raw Bindings", _dumpRawBindingsPath);
+        AddLabeled(root, 43, "Output JSON", _exportOutputPath);
+        AddLabeled(root, 44, "Times/Profile", CreateTextPair(_exportTimesPath, _exportProfilePath));
+        AddLabeled(root, 45, "Save Profile", _saveProfilePath);
 
         FlowLayoutPanel modePanel = new FlowLayoutPanel { Dock = DockStyle.Fill };
         ConfigureCheck(_buildOnly, "Build only");
@@ -243,28 +245,28 @@ public sealed class MainForm : Form
         _buildOnly.Checked = true;
         _skipInference.Checked = true;
         modePanel.Controls.AddRange(new Control[] { _buildOnly, _skipInference, _dryRun });
-        AddLabeled(root, 45, "Mode", modePanel);
+        AddLabeled(root, 46, "Mode", modePanel);
 
         Button previewButton = new Button { Text = "Preview", Dock = DockStyle.Fill, Height = 32 };
         previewButton.Click += OnPreview;
-        root.Controls.Add(previewButton, 2, 45);
+        root.Controls.Add(previewButton, 2, 46);
 
         _commandPreview.Dock = DockStyle.Fill;
         _commandPreview.ReadOnly = true;
         _commandPreview.WordWrap = false;
-        root.Controls.Add(_commandPreview, 0, 46);
+        root.Controls.Add(_commandPreview, 0, 47);
         root.SetColumnSpan(_commandPreview, 2);
 
         Button runButton = new Button { Text = "Run", Dock = DockStyle.Fill, Height = 32 };
         runButton.Click += OnRun;
-        root.Controls.Add(runButton, 2, 46);
+        root.Controls.Add(runButton, 2, 47);
 
         _log.Dock = DockStyle.Fill;
         _log.Multiline = true;
         _log.ScrollBars = ScrollBars.Both;
         _log.ReadOnly = true;
         _log.WordWrap = false;
-        root.Controls.Add(_log, 0, 47);
+        root.Controls.Add(_log, 0, 48);
         root.SetColumnSpan(_log, 3);
 
         _minShapes.PlaceholderText = "input:1x3x640x640";
@@ -288,6 +290,7 @@ public sealed class MainForm : Form
         _layerPrecisions.PlaceholderText = "conv1:fp16,head:fp32";
         _layerOutputTypes.PlaceholderText = "head:fp32";
         _weightStreamingBudget.PlaceholderText = "-2 | -1 | 50% | 512MiB";
+        _saveRefittedEnginePath.PlaceholderText = "model.refitted.plan";
         _markDebug.PlaceholderText = "tensorA,tensorB";
         _exportTimingCachePath.PlaceholderText = "timing.cache";
         _evidenceSidecarPath.PlaceholderText = "model-evidence.sidecar.json";
@@ -375,6 +378,15 @@ public sealed class MainForm : Form
         if (dialog.ShowDialog(this) == DialogResult.OK)
         {
             _refitFromOnnxPath.Text = dialog.FileName;
+        }
+    }
+
+    private void OnBrowseSaveRefittedEngine(object? sender, EventArgs e)
+    {
+        using SaveFileDialog dialog = new SaveFileDialog { Filter = "TensorRT engines (*.plan;*.engine)|*.plan;*.engine|All files (*.*)|*.*" };
+        if (dialog.ShowDialog(this) == DialogResult.OK)
+        {
+            _saveRefittedEnginePath.Text = dialog.FileName;
         }
     }
 
@@ -494,6 +506,7 @@ public sealed class MainForm : Form
         lines.Add("TensorRtExec WorkspaceBytes=" + report.WorkspaceBytes.ToString(CultureInfo.InvariantCulture));
         lines.Add("TensorRtExec BuilderConfigDeploymentSnapshot=" + report.BuilderConfigDeploymentSnapshotState + " Diagnostics=" + report.BuilderConfigDeploymentDiagnosticCount.ToString(CultureInfo.InvariantCulture));
         lines.Add("TensorRtExec ParserPreflightSnapshot=" + report.ParserPreflightSnapshotState + " Diagnostics=" + report.ParserPreflightDiagnosticCount.ToString(CultureInfo.InvariantCulture));
+        lines.Add("TensorRtExec RefitPersistence=" + report.RefitPersistenceState + " Attempted=" + report.RefitPersistenceAttempted.ToString(CultureInfo.InvariantCulture) + " Succeeded=" + report.RefitPersistenceSucceeded.ToString(CultureInfo.InvariantCulture) + " Plan=" + report.PersistedRefittedEnginePath);
         lines.Add(report.Summary);
         return string.Join(Environment.NewLine, lines);
     }
@@ -596,7 +609,8 @@ public sealed class MainForm : Form
             ParseOptionalMemoryBytes(_l2LimitForTiling.Text),
             _quantizationFlags.SelectedItem?.ToString() ?? string.Empty,
             _weightStreamingBudget.Text,
-            _refitFromOnnxPath.Text);
+            _refitFromOnnxPath.Text,
+            _saveRefittedEnginePath.Text);
     }
 
     private static string[] ParsePlugins(string value)

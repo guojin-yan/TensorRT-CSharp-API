@@ -39,7 +39,8 @@ public sealed class OnnxEngineBuildResult
         ulong workspaceBytes = 0,
         TensorRtBuilderConfigDeploymentSnapshot? builderConfigDeploymentSnapshot = null,
         OnnxEngineParserPreflightSnapshot? parserPreflightSnapshot = null,
-        OnnxEngineRefitSnapshot? refitSnapshot = null)
+        OnnxEngineRefitSnapshot? refitSnapshot = null,
+        OnnxEngineRefitPersistenceSnapshot? refitPersistenceSnapshot = null)
         : this(
             success,
             skipped,
@@ -69,7 +70,8 @@ public sealed class OnnxEngineBuildResult
             workspaceBytes,
             builderConfigDeploymentSnapshot,
             parserPreflightSnapshot,
-            refitSnapshot)
+            refitSnapshot,
+            refitPersistenceSnapshot)
     {
     }
 
@@ -102,7 +104,8 @@ public sealed class OnnxEngineBuildResult
         ulong workspaceBytes = 0,
         TensorRtBuilderConfigDeploymentSnapshot? builderConfigDeploymentSnapshot = null,
         OnnxEngineParserPreflightSnapshot? parserPreflightSnapshot = null,
-        OnnxEngineRefitSnapshot? refitSnapshot = null)
+        OnnxEngineRefitSnapshot? refitSnapshot = null,
+        OnnxEngineRefitPersistenceSnapshot? refitPersistenceSnapshot = null)
     {
         Success = success;
         Skipped = skipped;
@@ -130,6 +133,7 @@ public sealed class OnnxEngineBuildResult
         BuilderConfigDeploymentSnapshot = builderConfigDeploymentSnapshot;
         ParserPreflightSnapshot = parserPreflightSnapshot ?? OnnxEngineParserPreflightSnapshot.Empty;
         RefitSnapshot = refitSnapshot ?? OnnxEngineRefitSnapshot.Empty;
+        RefitPersistenceSnapshot = refitPersistenceSnapshot ?? OnnxEngineRefitPersistenceSnapshot.Empty;
         Diagnostics = diagnostics ?? Array.Empty<string>();
         LogLines = logLines ?? Array.Empty<string>();
         EvidenceSidecar = evidenceSidecar ?? OnnxEngineBuildEvidenceSidecarReader.Empty;
@@ -200,6 +204,12 @@ public sealed class OnnxEngineBuildResult
     /// 获取可选 ONNX stripped-plan 重整生命周期的复制诊断。
     /// </summary>
     public OnnxEngineRefitSnapshot RefitSnapshot { get; }
+
+    /// <summary>
+    /// Gets copied evidence for the optional persisted-plan independent reload lifecycle.
+    /// 获取可选持久化 plan 独立重新加载生命周期的复制证据。
+    /// </summary>
+    public OnnxEngineRefitPersistenceSnapshot RefitPersistenceSnapshot { get; }
 
     public bool IsRuntimeExecutionProof => InferenceRan && OutputMatch;
 
