@@ -1,0 +1,239 @@
+{
+  "schemaVersion": "trtexec-refitted-plan-package-consumer-validation.v1",
+  "strict": true,
+  "checkCount": 46,
+  "passedCount": 46,
+  "failureCount": 0,
+  "checks": [
+    {
+      "id": "schema",
+      "passed": true,
+      "actual": "trtexec-refitted-plan-package-consumer-evidence.v1"
+    },
+    {
+      "id": "state",
+      "passed": true,
+      "actual": "local-package-consumer-refitted-plan-runtime-passed"
+    },
+    {
+      "id": "classification",
+      "passed": true,
+      "actual": "local-package-consumer-refitted-plan-runtime"
+    },
+    {
+      "id": "trt10-runtime-key",
+      "passed": true,
+      "actual": "win-x64-trt10.11-cuda12.9-cudnn9.22"
+    },
+    {
+      "id": "two-declared-local-sources",
+      "passed": true,
+      "actual": "2"
+    },
+    {
+      "id": "nuget-org-disabled",
+      "passed": true,
+      "actual": "False"
+    },
+    {
+      "id": "package-reference-only",
+      "passed": true,
+      "actual": "True"
+    },
+    {
+      "id": "no-project-reference",
+      "passed": true,
+      "actual": "False"
+    },
+    {
+      "id": "no-manual-managed-load",
+      "passed": true,
+      "actual": "False"
+    },
+    {
+      "id": "isolated-restore-cache",
+      "passed": true,
+      "actual": "True"
+    },
+    {
+      "id": "target-packages-resolved",
+      "passed": true,
+      "actual": "True/True"
+    },
+    {
+      "id": "managed-package-id",
+      "passed": true,
+      "actual": "JYPPX.TensorRT.CSharp.API"
+    },
+    {
+      "id": "bridge-package-id",
+      "passed": true,
+      "actual": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge"
+    },
+    {
+      "id": "package-hashes",
+      "passed": true,
+      "actual": "9afd8486da2094027fc73bc222e61df277e406d295559c136637b5824b6125da/24dfbdb294de81b418f9e72aaa1c265968a2f8d2b2706cd7bd39b623ffb6829d"
+    },
+    {
+      "id": "consumer-outside-repository",
+      "passed": true,
+      "actual": "True"
+    },
+    {
+      "id": "consumer-off-system-drive",
+      "passed": true,
+      "actual": "False"
+    },
+    {
+      "id": "consumer-workspace-removed",
+      "passed": true,
+      "actual": "True/False"
+    },
+    {
+      "id": "managed-assembly-isolated",
+      "passed": true,
+      "actual": "True/True"
+    },
+    {
+      "id": "bridge-isolated",
+      "passed": true,
+      "actual": "True"
+    },
+    {
+      "id": "consumer-source-hashes",
+      "passed": true,
+      "actual": "cdcd409783018b1ffeafeb5408e34b5ee301e18d6f0f71b13fff2529a4c84a41/21d77cd5b5fe7be6e8d00dbfcadf2b95c4398c54c2840438eb6ff644467338c0"
+    },
+    {
+      "id": "relative-source-artifacts",
+      "passed": true,
+      "actual": "artifacts/real-case/trtexec-refitted-plan-persistence/mnist-refitted-persisted.plan/artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/mnist-trt10-7-input-f32.bin"
+    },
+    {
+      "id": "plan-copy-distinct",
+      "passed": true,
+      "actual": "True"
+    },
+    {
+      "id": "plan-length-cross-check",
+      "passed": true,
+      "actual": "408876"
+    },
+    {
+      "id": "plan-hash-cross-check",
+      "passed": true,
+      "actual": "5594817d8b152a9478a57ae73ec2a8ed19e8c9e0794b448b89bcd738d99441eb/5594817d8b152a9478a57ae73ec2a8ed19e8c9e0794b448b89bcd738d99441eb"
+    },
+    {
+      "id": "input-copy-distinct",
+      "passed": true,
+      "actual": "True"
+    },
+    {
+      "id": "input-copy-hash",
+      "passed": true,
+      "actual": "3136/81f2cd7784dca5c8f02a9887ae89a6a3582880a27d2eba95a53f845c63187564"
+    },
+    {
+      "id": "output-length",
+      "passed": true,
+      "actual": "40"
+    },
+    {
+      "id": "output-hash-cross-check",
+      "passed": true,
+      "actual": "6f5771d6c5b056406c190a59e725cf9bb13c1f148c1ef06f99ed8acfb11b9041/6f5771d6c5b056406c190a59e725cf9bb13c1f148c1ef06f99ed8acfb11b9041"
+    },
+    {
+      "id": "output-exact-match",
+      "passed": true,
+      "actual": "True"
+    },
+    {
+      "id": "process-exits",
+      "passed": true,
+      "actual": "0/0/0"
+    },
+    {
+      "id": "runtime-passed",
+      "passed": true,
+      "actual": "True"
+    },
+    {
+      "id": "execution-log-hashes",
+      "passed": true,
+      "actual": "8d08a45c975c757cb69083627f46452df33829db54f1bdfdfd674579cbf05b72/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855/8d08a45c975c757cb69083627f46452df33829db54f1bdfdfd674579cbf05b72"
+    },
+    {
+      "id": "command-shape",
+      "passed": true,
+      "actual": "dotnet run --project <consumer-project> -c Release --no-build -- <copied-plan> <copied-input> <raw-output> <expected-output-sha256>"
+    },
+    {
+      "id": "full-weight-refittable-fact",
+      "passed": true,
+      "actual": "False"
+    },
+    {
+      "id": "engine-metadata",
+      "passed": true,
+      "actual": "2/5/1"
+    },
+    {
+      "id": "input-contract",
+      "passed": true,
+      "actual": "Input3/[1,1,28,28]/784"
+    },
+    {
+      "id": "output-contract",
+      "passed": true,
+      "actual": "Plus214_Output_0/[1,10]/10"
+    },
+    {
+      "id": "enqueue-gates",
+      "passed": true,
+      "actual": "True/True/True/True"
+    },
+    {
+      "id": "mnist-output-index",
+      "passed": true,
+      "actual": "7"
+    },
+    {
+      "id": "host-metadata",
+      "passed": true,
+      "actual": "X64/NVIDIA GeForce RTX 3060 Laptop GPU"
+    },
+    {
+      "id": "native-inventory",
+      "passed": true,
+      "actual": "bridge-package-output,tensor-rt-runtime,cuda-runtime"
+    },
+    {
+      "id": "c-drive-clean",
+      "passed": true,
+      "actual": "False/0"
+    },
+    {
+      "id": "local-runtime-boundary",
+      "passed": true,
+      "actual": "True"
+    },
+    {
+      "id": "no-public-package-proof",
+      "passed": true,
+      "actual": "False/False/False"
+    },
+    {
+      "id": "no-release-side-effect",
+      "passed": true,
+      "actual": "False/False/False"
+    },
+    {
+      "id": "compact-evidence-path-free",
+      "passed": true,
+      "actual": "absolute-windows-path-present=False"
+    }
+  ]
+}

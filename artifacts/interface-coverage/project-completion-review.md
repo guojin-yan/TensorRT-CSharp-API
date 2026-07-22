@@ -593,6 +593,69 @@ unresolved external symbol createConsistencyChecker_INTERNAL
 - 三个 bridge-only `PackageReference` consumer restore/build 均为 0 warning / 0 error，`ProjectReference=False`，证据分类保持 `compile-surface-proof`，不提升为 runtime proof。
 - 未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
 
+## 2026-07-22 TensorRtExec Refitted Plan Local Package Consumer Runtime
+
+本阶段把上一批 persisted full-weight plan 从源码树运行推进到本地 NuGet package consumer。新增
+`samples/RefittedPlan.PackageConsumer` 和 `eng/Test-TrtexecRefittedPlanPackageConsumer.ps1`：consumer
+只引用 managed API 与 TRT10 bridge-only 两个本地包，不使用 `ProjectReference`，不从源码目录手工加载
+managed assembly，也不启用 development probing。
+
+### Package、workspace 与 owner 边界
+
+- `NuGet.config` 只有两个声明的本地 source，nuget.org disabled；consumer 使用仓库外 E 盘工作区和独立
+  `RestorePackagesPath`。`project.assets.json` 验证两个目标包均进入隔离 cache。
+- persisted plan 与 float input 先复制到 consumer 工作区，执行命令只读取副本；managed assembly 与
+  `jyppxtrtbridge.dll` 都必须位于 consumer output，且不位于源码树。
+- consumer 通过 public `TensorRtLogger -> TensorRtRuntime -> TensorRtEngine -> TensorRtExecutionContext ->
+  TensorRtInferenceBindings -> CudaStream` surface 完成 deserialize、binding、enqueue 和 readback，没有
+  `IntPtr/nint/UIntPtr/SafeHandle` 或 borrowed pointer 暴露。只有所有 `using` owner 离开作用域后才输出
+  `OwnerScopeExited=True`。
+- 运行完成后删除整个 E 盘 consumer workspace；compact evidence 只保留 path-free hash/metadata，raw
+  命令、路径和日志保留在 ignored `artifacts/package-consumer/trtexec-refitted-plan/`。
+
+### 真实 package consumer runtime
+
+- managed nupkg：`14,805,837` bytes，SHA256
+  `9afd8486da2094027fc73bc222e61df277e406d295559c136637b5824b6125da`；TRT10 bridge-only nupkg：
+  `351,091` bytes，SHA256 `24dfbdb294de81b418f9e72aaa1c265968a2f8d2b2706cd7bd39b623ffb6829d`。
+- copied plan：`408,876` bytes / `5594817d...99441eb`；copied input：`3,136` bytes /
+  `81f2cd77...187564`；restore/build/runtime exit code 均为 `0`。
+- reload engine `IsRefittable=False`，I/O/layers/profiles 为 `2/5/1`；输入 `Input3 [1,1,28,28] / 784`
+  floats，输出 `Plus214_Output_0 [1,10] / 10` floats。bindings readiness、enqueue、owner scope 和
+  workspace cleanup 全部通过。
+- raw output 为 `40` bytes，SHA256
+  `6f5771d6c5b056406c190a59e725cf9bb13c1f148c1ef06f99ed8acfb11b9041`，与 same-process、第二
+  TensorRtExec 进程和 full-weight baseline 三路完全一致，argmax 为 `7`。
+- compact evidence/validator 为
+  `trtexec-refitted-plan-package-consumer-evidence/validation.{json,md}`，strict `46/46`。分类是
+  `local-package-consumer-refitted-plan-runtime`；`isPackageConsumerRuntimeProof=false` 继续表示没有公开
+  feed/post-publish proof。
+
+### 质量门与 package inventory 事实
+
+- bindings 保持 `194 manifests / 3971 records`，连续生成幂等；solution Debug `0 warning / 0 error`，
+  Release 保留 5 个既有 nullable test warning / `0 error`。
+- native TRT8/10/11 CUDA12 configure/build 通过；ABI declaration/PE export 分别为 `991/991`、
+  `1086/1086`、`1233/1233`，missing declaration/export `0`。
+- 新增测试 `4/4`，refit/persistence/package consumer 相邻集合 `45/45`；正式 shard runner 为 `6/6`，
+  inventory `1460 tests / 402 classes / unassigned 0`；workflow/source-quality 集合 `22/22`。
+- Public API bilingual finding `0`；DocFX `924 models / 0 warning / 0 error`。classification 与 public-proof
+  finding 均为 `0`；标准 strict release gate required failure `0`。
+- Owner convergence 保持 structural `9/9`、accepted `0/9`、gates `2/3`；final owner gate blocked `5`。
+- 额外 `RequirePackageInventory` 强门禁未通过：TRT10 package set 只有 managed/full/bridge，缺
+  `split-cuda-cudnn`、`split-tensorrt`、`split-meta`。补打时确认 CUDA12 cuDNN 9.22 资产只有 headers/
+  import libs，没有所需 runtime DLL；CUDA13 目录中的 DLL 未被替换使用。因此标准 release gate 通过，
+  但不得声明完整 TRT10 split package set ready。
+
+### C/E 盘与发布边界
+
+- C 盘 Downloads/Desktop/Documents 本轮命名匹配为 `0`；E 盘 consumer workspace 与失败 split staging
+  均已删除。没有把 plan、input、output 或 package cache 写入 C 盘 consumer workspace。
+- 通用 bridge consumer 清理了 `C:\jyppx-pkgcache` 子目录；该根仍为空。失败的 full split 尝试在
+  `%TEMP%\jyppx-split-packages` 留下一个 0-byte 空 runtime-key 子目录；标准精确删除在执行前被工具
+  策略拒绝，没有部分删除，也未换壳绕过。`%TEMP%\jybr` 为 7 月 18 日历史空目录，本轮未删除。
+- 未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
+
 ## 2026-07-22 TensorRtExec Refitted Plan Persistence 与独立 Reload
 
 本阶段为 managed extension `--saveRefittedEngine <path>` 完成从 ONNX stripped-plan refit commit 到

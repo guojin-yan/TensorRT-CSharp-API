@@ -144,12 +144,14 @@ public sealed class TrtexecBuildPolicyTests
         Assert.Contains("TensorRtBuilderFlag.RefitIdentical", service, StringComparison.Ordinal);
         Assert.Contains("TensorRtBuilderFlag.WeightStreaming", service, StringComparison.Ordinal);
         Assert.Contains("version-compatible-refit-vendor-readback-conflict", service, StringComparison.Ordinal);
-        Assert.Contains("ApplyEngineRuntimePolicies(engine, options, log);", service, StringComparison.Ordinal);
+        Assert.Contains("ApplyEngineRuntimePolicies(engine, options, log, validateRefittableState);", service, StringComparison.Ordinal);
+        Assert.Contains("validateRefittableState: !refitPersistenceSnapshot.Succeeded", service, StringComparison.Ordinal);
+        Assert.Contains("full-weight-reload-does-not-require-refittable-state", service, StringComparison.Ordinal);
         Assert.Contains("engine.SetWeightStreamingBudgetV2(requestedBudget)", service, StringComparison.Ordinal);
         Assert.Contains("engine.WeightStreamingBudgetV2InBytes", service, StringComparison.Ordinal);
         Assert.Contains("engine.WeightStreamingScratchMemorySizeInBytes", service, StringComparison.Ordinal);
         Assert.True(
-            service.IndexOf("ApplyEngineRuntimePolicies(engine, options, log);", StringComparison.Ordinal) <
+            service.IndexOf("ApplyEngineRuntimePolicies(engine, options, log, validateRefittableState);", StringComparison.Ordinal) <
             service.IndexOf("new OnnxEngineBenchmarkWorker", StringComparison.Ordinal));
 
         Assert.Contains("--excludeLeanRuntime requires --versionCompatible", parser, StringComparison.Ordinal);

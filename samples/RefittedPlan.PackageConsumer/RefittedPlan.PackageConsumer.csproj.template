@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>__TARGET_FRAMEWORK__</TargetFramework>
+    <RuntimeIdentifier>__RUNTIME_IDENTIFIER__</RuntimeIdentifier>
+    <RestorePackagesPath>__RESTORE_PACKAGES_PATH__</RestorePackagesPath>
+    <RestoreNoCache>true</RestoreNoCache>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="__MANAGED_PACKAGE_ID__" Version="__MANAGED_PACKAGE_VERSION__" />
+    <PackageReference Include="__BRIDGE_PACKAGE_ID__" Version="__BRIDGE_PACKAGE_VERSION__" />
+  </ItemGroup>
+</Project>

@@ -46,7 +46,11 @@ public sealed class TensorRtExecReleaseCandidateGapTests
         Assert.Contains(items, static item => item.GetProperty("id").GetString() == "plugin-library-boundary" && item.GetProperty("currentStatus").GetString() == "diagnostic-gui-cli" && item.GetProperty("winFormsSupported").GetBoolean());
         Assert.Contains(items, static item => item.GetProperty("id").GetString() == "binding-metadata" && item.GetProperty("currentStatus").GetString() == "implemented-pointer-free-binding-report" && item.GetProperty("winFormsSupported").GetBoolean());
         Assert.Contains(items, static item => item.GetProperty("id").GetString() == "winforms-command-surface" && item.GetProperty("currentStatus").GetString() == "checklist-backed-command-preview" && item.GetProperty("winFormsSupported").GetBoolean());
-        Assert.Contains(items, static item => item.GetProperty("id").GetString() == "package-consumer-runtime-proof-boundary" && item.GetProperty("currentStatus").GetString() == "owner-action-required");
+        Assert.Contains(items, static item =>
+            item.GetProperty("id").GetString() == "package-consumer-runtime-proof-boundary" &&
+            item.GetProperty("currentStatus").GetString() == "local-refitted-plan-package-consumer-runtime-public-proof-owner-action-required" &&
+            !item.GetProperty("isPackageConsumerRuntimeProof").GetBoolean() &&
+            item.GetProperty("nextImplementationPaths").EnumerateArray().Any(path => path.GetString() == "samples/RefittedPlan.PackageConsumer"));
         Assert.Contains(items, static item => item.GetProperty("id").GetString() == "dynamic-shape" && item.GetProperty("nextImplementationPaths").EnumerateArray().Any(path => path.GetString() == "samples/YoloVision/yolovision-task-output-contract.json"));
         Assert.Contains(items, static item => item.GetProperty("id").GetString() == "binding-metadata" && item.GetProperty("nextImplementationPaths").EnumerateArray().Any(path => path.GetString() == "samples/YoloVision/yolovision-task-output-contract.json"));
 

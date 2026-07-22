@@ -14,7 +14,7 @@
 
 | Group | Examples | Boundary |
 | --- | --- | --- |
-| Model | `--onnx`, `--saveEngine`, `--loadEngine`, `--refitFromOnnx`, `--saveRefittedEngine` | load-engine remains readonly diagnostics; ONNX refit persistence keeps stripped/refitted artifacts distinct and reloads a new engine owner |
+| Model | `--onnx`, `--saveEngine`, `--loadEngine`, `--refitFromOnnx`, `--saveRefittedEngine` | ONNX refit persistence keeps stripped/refitted artifacts distinct, reloads a new engine owner, and has separate local-feed PackageReference output-hash evidence; public package/post-publish proof stays external |
 | Shape Profile | `--minShapes`, `--optShapes`, `--maxShapes` | shared normalized command |
 | Plugin Paths | `--plugins` | diagnostic GUI/CLI parity only; load/register remains deferred |
 | Precision | `--fp16`, `--int8`, `--fp8`, `--best` | INT8 and advanced precision remain guarded |

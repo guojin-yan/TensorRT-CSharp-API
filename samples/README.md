@@ -19,6 +19,7 @@ That split keeps:
 | `DynamicShape` | TensorRT dynamic-shape/profile/binding example | runnable |
 | `InferenceBindings` | TensorRtInferenceBindings host/device workflow example | runnable |
 | `OnnxToEngine` | user-facing ONNX to engine walkthrough with trtexec-like option parsing | runnable |
+| `RefittedPlan.PackageConsumer` | PackageReference-only persisted refitted-plan reload, enqueue, raw output hash, and owner cleanup example | runnable through the local-package proof script |
 | `Classification` | External ONNX classifier inference and Top-K output walkthrough | runnable with user-provided ONNX assets |
 | `YoloVision` | External YOLO-family ONNX vision sample with family/task profiles, raw/preprocessed tensor input, detection/classification/segmentation/pose/OBB/semantic helpers, layout decoding, score filtering, and NMS walkthrough | runnable with user-provided ONNX assets |
 

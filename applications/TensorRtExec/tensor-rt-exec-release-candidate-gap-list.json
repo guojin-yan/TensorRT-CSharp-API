@@ -121,8 +121,8 @@
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": true,
       "winFormsSupported": true,
-      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/TrtexecLikeWeightStreamingBudget.cs", "src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildService.cs", "applications/TensorRtExec"],
-      "nextStep": "Keep TRT8 guards and TRT11 dependency boundary; retain TRT10 parser-load, engine-commit, persisted reload and baseline comparison evidence; add external lean-runtime and clean package-consumer proof separately."
+      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/TrtexecLikeWeightStreamingBudget.cs", "src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildService.cs", "applications/TensorRtExec", "samples/RefittedPlan.PackageConsumer", "eng/Test-TrtexecRefittedPlanPackageConsumer.ps1"],
+      "nextStep": "Keep TRT8 guards and the TRT11 dependency boundary; retain TRT10 parser-load, engine-commit, persisted reload, baseline comparison, and local-feed PackageReference consumer evidence. External lean-runtime, public-feed and post-publish proof remain separate Owner work."
     },
     {
       "id": "io-layer-precision-policies",
@@ -226,13 +226,13 @@
     {
       "id": "package-consumer-runtime-proof-boundary",
       "officialTrtexecParity": "release-proof-validator",
-      "currentStatus": "owner-action-required",
+      "currentStatus": "local-refitted-plan-package-consumer-runtime-public-proof-owner-action-required",
       "isRuntimeProof": false,
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": false,
       "winFormsSupported": false,
-      "nextImplementationPaths": ["eng/Test-PackageConsumerRuntimeProofRecord.ps1", "docs/articles/zh-cn/publishing/package-consumer-proof-public-article.md"],
-      "nextStep": "Wait for clean external consumer proof using public package source and strict validators."
+      "nextImplementationPaths": ["samples/RefittedPlan.PackageConsumer", "eng/Test-TrtexecRefittedPlanPackageConsumer.ps1", "eng/Test-TrtexecRefittedPlanPackageConsumerEvidence.ps1", "eng/Test-PackageConsumerRuntimeProofRecord.ps1", "docs/articles/zh-cn/publishing/package-consumer-proof-public-article.md"],
+      "nextStep": "Retain the completed local-file-feed refitted-plan runtime as local engineering evidence. Wait for an external consumer using a public package source plus post-publish strict validators before setting isPackageConsumerRuntimeProof=true."
     }
   ]
 }

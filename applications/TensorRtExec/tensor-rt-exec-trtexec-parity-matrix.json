@@ -141,10 +141,10 @@
       "trtexecOption": "TensorRtExec extension: --saveRefittedEngine",
       "tensorRtExecStatus": "implemented-trt10-persist-dispose-independent-reload",
       "entryPoints": ["OnnxEngineBuildService.PersistAndReloadRefittedEngine", "OnnxEngineRefitPersistenceSnapshot", "TensorRtEngine.CreateSerializationConfig", "TensorRtSerializationConfig.ClearFlag", "TensorRtEngine.Serialize(TensorRtSerializationConfig)", "TensorRtRuntime.DeserializeFromFile", "TensorRtExecOptions", "WinForms Refitted Engine field"],
-      "proofBoundary": "TRT10 local evidence proves ExcludeWeights was cleared, full-weight bytes differ from the stripped plan, the original owner was disposed, independent reload and bounded enqueue succeeded, and output exactly matched the fixed baseline. It is not package-consumer runtime, model accuracy, public package, or release proof.",
+      "proofBoundary": "TRT10 source-tree evidence proves ExcludeWeights was cleared, full-weight bytes differ from the stripped plan, the original owner was disposed, independent reload and bounded enqueue succeeded, and output exactly matched the fixed baseline. Separate local-feed PackageReference evidence reproduces that hash without source assembly loading; it is still not public package, post-publish, model-accuracy, or release proof.",
       "isRuntimeProof": false,
-      "gap": "TRT8 cannot enter parser-refitter; TRT11 remains dependency-probe-only on this host. A repository-external package consumer and compatible TRT11 host are still required for broader proof.",
-      "nextStep": "Preserve the overwrite guards and independent-owner ordering; collect clean package-consumer reload evidence separately."
+      "gap": "TRT8 cannot enter parser-refitter; TRT11 remains dependency-probe-only on this host. Public-feed post-publish package-consumer evidence and a compatible TRT11 host are still required for broader proof.",
+      "nextStep": "Preserve the overwrite guards and independent-owner ordering; collect public-feed post-publish reload evidence separately."
     },
     {
       "id": "workspace-memory-pool",

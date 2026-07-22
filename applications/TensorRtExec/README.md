@@ -179,6 +179,11 @@ TrtexecAlignmentStatus=parse-only 是当前高级 trtexec-like 参数的默认�
 
 推荐路径是先用 TensorRtExec 做 build-only 报告，再用具体 sample runner 补真实模型运行日志和 sample-run-evidence record。两类证据互相补充，但不能互相替代。
 
+`samples/RefittedPlan.PackageConsumer` 提供更窄但更强的本地包验证：它从两个声明的本地 NuGet source restore
+managed 与 TRT10 bridge 包，复制 `--saveRefittedEngine` 生成的完整权重 plan 和输入到仓库外 E 盘工作区，独立
+deserialize/enqueue/readback，并把 raw output SHA 与 same-process、second-process、baseline 三路证据精确比对。
+该结果分类为 `local-package-consumer-refitted-plan-runtime`，仍不是公开 feed 或 post-publish proof。
+
 ## Real Case Proof Pack
 
 `TensorRtExec` 在 `artifacts/final-release/real-case-proof-execution-pack.json` 中有两个 release-facing case：`tensorrtexec-build-report` 和 `tensorrtexec-gui-workflow`。前者覆盖 CLI build/report、normalized command、report hash 和外部 ONNX 元数据；后者覆盖 WinForms GUI 截图、导出报告和 owner-reviewed command line。两者都默认保持 `blocked-owner-action-required`，因为报告和截图不是 runtime proof。

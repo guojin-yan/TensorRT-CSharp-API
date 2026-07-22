@@ -1,0 +1,129 @@
+{
+  "schemaVersion": "trtexec-refitted-plan-package-consumer-evidence.v1",
+  "generatedDate": "2026-07-22",
+  "state": "local-package-consumer-refitted-plan-runtime-passed",
+  "evidenceClassification": "local-package-consumer-refitted-plan-runtime",
+  "sourceRuntimeKey": "win-x64-trt10.11-cuda12.9-cudnn9.22",
+  "packageContract": {
+    "declaredLocalSourceCount": 2,
+    "nugetOrgEnabled": false,
+    "usesPackageReferenceOnly": true,
+    "usesProjectReference": false,
+    "manualManagedAssemblyLoad": false,
+    "isolatedRestorePathUsed": true,
+    "managedPackageResolved": true,
+    "bridgePackageResolved": true
+  },
+  "packages": {
+    "managed": {
+      "id": "JYPPX.TensorRT.CSharp.API",
+      "version": "4.0.0",
+      "length": 14805837,
+      "sha256": "9afd8486da2094027fc73bc222e61df277e406d295559c136637b5824b6125da"
+    },
+    "bridge": {
+      "id": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge",
+      "version": "4.0.0",
+      "length": 351091,
+      "sha256": "24dfbdb294de81b418f9e72aaa1c265968a2f8d2b2706cd7bd39b623ffb6829d"
+    }
+  },
+  "consumer": {
+    "rootOutsideRepository": true,
+    "workspaceOnSystemDrive": false,
+    "workspaceRemovedAfterValidation": true,
+    "outputPreserved": false,
+    "managedAssemblyOutsideSourceTree": true,
+    "managedAssemblyUnderConsumerRoot": true,
+    "bridgeUnderConsumerRoot": true,
+    "projectSha256": "cdcd409783018b1ffeafeb5408e34b5ee301e18d6f0f71b13fff2529a4c84a41",
+    "programSha256": "21d77cd5b5fe7be6e8d00dbfcadf2b95c4398c54c2840438eb6ff644467338c0"
+  },
+  "artifacts": {
+    "sourcePlan": "artifacts/real-case/trtexec-refitted-plan-persistence/mnist-refitted-persisted.plan",
+    "planCopyPathDistinct": true,
+    "planLengthBytes": 408876,
+    "sourcePlanSha256": "5594817d8b152a9478a57ae73ec2a8ed19e8c9e0794b448b89bcd738d99441eb",
+    "copiedPlanSha256": "5594817d8b152a9478a57ae73ec2a8ed19e8c9e0794b448b89bcd738d99441eb",
+    "sourceInput": "artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/mnist-trt10-7-input-f32.bin",
+    "inputCopyPathDistinct": true,
+    "inputLengthBytes": 3136,
+    "sourceInputSha256": "81f2cd7784dca5c8f02a9887ae89a6a3582880a27d2eba95a53f845c63187564",
+    "copiedInputSha256": "81f2cd7784dca5c8f02a9887ae89a6a3582880a27d2eba95a53f845c63187564",
+    "outputLengthBytes": 40,
+    "outputSha256": "6f5771d6c5b056406c190a59e725cf9bb13c1f148c1ef06f99ed8acfb11b9041",
+    "expectedOutputSha256": "6f5771d6c5b056406c190a59e725cf9bb13c1f148c1ef06f99ed8acfb11b9041",
+    "outputExactMatch": true
+  },
+  "execution": {
+    "commandShape": "dotnet run --project <consumer-project> -c Release --no-build -- <copied-plan> <copied-input> <raw-output> <expected-output-sha256>",
+    "restoreExitCode": 0,
+    "buildExitCode": 0,
+    "runtimeExitCode": 0,
+    "runtimePassed": true,
+    "stdoutSha256": "8d08a45c975c757cb69083627f46452df33829db54f1bdfdfd674579cbf05b72",
+    "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "combinedSha256": "8d08a45c975c757cb69083627f46452df33829db54f1bdfdfd674579cbf05b72"
+  },
+  "runtime": {
+    "environment": "TRT=10.11.0 CUDA=12.9 TensorRtAvailable=True CudaAvailable=True",
+    "engineRefittable": false,
+    "engineIOTensorCount": 2,
+    "engineLayerCount": 5,
+    "engineOptimizationProfileCount": 1,
+    "inputTensor": "Input3",
+    "inputShape": "[1,1,28,28]",
+    "inputElementCount": 784,
+    "outputTensor": "Plus214_Output_0",
+    "outputShape": "[1,10]",
+    "outputElementCount": 10,
+    "bindingsReadyForEnqueue": true,
+    "enqueueCompleted": true,
+    "ownerScopeExited": true,
+    "outputExactMatch": true,
+    "predictedIndex": 7
+  },
+  "host": {
+    "osDescription": "Microsoft Windows 10.0.26200",
+    "processArchitecture": "X64",
+    "gpuName": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02",
+    "nvidiaSmiAvailable": true,
+    "nvidiaSmiDiagnostic": ""
+  },
+  "nativeAssets": [
+    {
+      "role": "bridge-package-output",
+      "name": "jyppxtrtbridge.dll",
+      "length": 1064960,
+      "sha256": "42f69f3d639e032fa3836fc7f552e4b665ffd073d52dc83ce630a4f04c87cc83"
+    },
+    {
+      "role": "tensor-rt-runtime",
+      "name": "nvinfer_10.dll",
+      "length": 476635680,
+      "sha256": "872eb3acdda69d85444c5ac59af0308546a1a41b1857fba547b7cef6cd4f3226"
+    },
+    {
+      "role": "cuda-runtime",
+      "name": "cudart64_12.dll",
+      "length": 580608,
+      "sha256": "cf68ac7d47c621988db3343b8a211188e6f94cccf30dec3b15dd52d69fdcf512"
+    }
+  ],
+  "cDriveAudit": {
+    "consumerWorkspaceUsedSystemDrive": false,
+    "namedConsumerArtifactMatchCount": 0,
+    "unrelatedUserOrSystemCacheTouched": false
+  },
+  "proofBoundary": {
+    "isLocalPackageConsumerRuntimeProof": true,
+    "isPackageConsumerRuntimeProof": false,
+    "packagesDownloadedFromPublicFeed": false,
+    "isPostPublishProof": false,
+    "canPublishPublicly": false,
+    "canCloseReleaseIssue": false,
+    "performsPublish": false,
+    "statement": "This proves a copied full-weight refitted plan can be restored and executed by a PackageReference-only consumer from declared local feeds on one compatible host. It is not public-feed, post-publish, model-accuracy, or release-close proof."
+  }
+}
