@@ -107,6 +107,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CudaDeviceInitializationPro
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CudaIpcImportSmokeRunner", "smoke\CudaIpcImportSmokeRunner\CudaIpcImportSmokeRunner.csproj", "{D2E71192-37E1-4477-BC0F-EB928836DF89}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LegacyParserDiagnosticsSmokeRunner", "smoke\LegacyParserDiagnosticsSmokeRunner\LegacyParserDiagnosticsSmokeRunner.csproj", "{30AD1FB0-B185-459F-9B06-253D86E69700}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -657,6 +659,18 @@ Global
 		{D2E71192-37E1-4477-BC0F-EB928836DF89}.Release|x64.Build.0 = Release|Any CPU
 		{D2E71192-37E1-4477-BC0F-EB928836DF89}.Release|x86.ActiveCfg = Release|Any CPU
 		{D2E71192-37E1-4477-BC0F-EB928836DF89}.Release|x86.Build.0 = Release|Any CPU
+		{30AD1FB0-B185-459F-9B06-253D86E69700}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30AD1FB0-B185-459F-9B06-253D86E69700}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30AD1FB0-B185-459F-9B06-253D86E69700}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{30AD1FB0-B185-459F-9B06-253D86E69700}.Debug|x64.Build.0 = Debug|Any CPU
+		{30AD1FB0-B185-459F-9B06-253D86E69700}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{30AD1FB0-B185-459F-9B06-253D86E69700}.Debug|x86.Build.0 = Debug|Any CPU
+		{30AD1FB0-B185-459F-9B06-253D86E69700}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30AD1FB0-B185-459F-9B06-253D86E69700}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30AD1FB0-B185-459F-9B06-253D86E69700}.Release|x64.ActiveCfg = Release|Any CPU
+		{30AD1FB0-B185-459F-9B06-253D86E69700}.Release|x64.Build.0 = Release|Any CPU
+		{30AD1FB0-B185-459F-9B06-253D86E69700}.Release|x86.ActiveCfg = Release|Any CPU
+		{30AD1FB0-B185-459F-9B06-253D86E69700}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -707,5 +721,6 @@ Global
 		{7290B261-C427-4106-9C66-CE13B028E74C} = {B08B4D4D-59D4-4B2C-AF1F-EEA2D2C2D7B1}
 		{ECEB0AEB-8863-45E5-BBC1-BAA31EBE04C3} = {B08B4D4D-59D4-4B2C-AF1F-EEA2D2C2D7B1}
 		{D2E71192-37E1-4477-BC0F-EB928836DF89} = {B08B4D4D-59D4-4B2C-AF1F-EEA2D2C2D7B1}
+		{30AD1FB0-B185-459F-9B06-253D86E69700} = {B08B4D4D-59D4-4B2C-AF1F-EEA2D2C2D7B1}
 	EndGlobalSection
 EndGlobal

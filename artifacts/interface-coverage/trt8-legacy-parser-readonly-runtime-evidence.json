@@ -1,0 +1,123 @@
+{
+  "schemaVersion": "trt8-legacy-parser-readonly-runtime-evidence.v1",
+  "generatedAtUtc": "2026-07-23T01:56:20.6459948Z",
+  "sourceHeadBeforeBatch": "380fcb374cfb38739c13cf8d8eaf11b335dc0b12",
+  "evidenceKind": "local-project-reference-copied-readonly-diagnostics",
+  "host": {
+    "os": "Microsoft Windows NT 10.0.26200.0",
+    "architecture": "X64",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02",
+    "dotnetSdk": "10.0.301"
+  },
+  "vendorAbi": {
+    "tensorRtVersion": "8.6.1.6",
+    "cudaVariants": ["11.8", "12.1"],
+    "nvparsersImportLibraryPresent": true,
+    "nvparsersRuntimeLibraryPresent": true,
+    "createUffParserSymbolPresent": true,
+    "createCaffeParserSymbolPresent": true,
+    "runtimeDependencies": ["nvinfer.dll", "KERNEL32.dll"],
+    "usesParserVtableForReadonlyQueries": true
+  },
+  "bindings": {
+    "manifestCount": 197,
+    "apiRecordCount": 3975,
+    "generatedTwiceIdempotent": true,
+    "outputValidationPassed": true
+  },
+  "coverage": {
+    "tensorRt8InterfacesScannedPerPackage": 880,
+    "implementedPerPackage": 760,
+    "deferredOnlyPerPackage": 120,
+    "promotedRows": 7,
+    "promotedState": "implemented-with-deferred-history",
+    "legacyHeadersIncluded": ["NvCaffeParser.h", "NvUffParser.h"],
+    "neighboringParseAndDestroyRowsRemainDeferredOnly": true
+  },
+  "nativeAbi": {
+    "tensorRt8": { "declared": 993, "expectedExports": 993, "matchedExports": 993, "missing": 0 },
+    "tensorRt10": { "declared": 1087, "expectedExports": 1087, "matchedExports": 1087, "missing": 0 },
+    "tensorRt11": { "declared": 1234, "expectedExports": 1234, "matchedExports": 1234, "missing": 0 }
+  },
+  "tensorRt8": {
+    "state": "copied-readonly-runtime-passed",
+    "tensorRtVersion": "8.6.1.6",
+    "cudaToolkitVersion": "12.1",
+    "bridgeRelativePath": "build-out/win-x64-trt8-cuda12-release/bin/Release/jyppxtrtbridge.dll",
+    "bridgeLengthBytes": 1000448,
+    "bridgeSha256": "5F3C2280935592EF7069C321637CA1EABC99E490D5F74F8B443A639532E2A614",
+    "smokeAssemblyRelativePath": "smoke/LegacyParserDiagnosticsSmokeRunner/bin/Debug/net8.0/LegacyParserDiagnosticsSmokeRunner.dll",
+    "smokeAssemblyLengthBytes": 10240,
+    "smokeAssemblySha256": "5ACD0E9D3DECDC2281635C23E3F947AEA9B734141C77FD0BC805C3B704CF768F",
+    "exitCode": 0,
+    "bridgeInitialized": true,
+    "uffRequiredVersion": "0.6.9",
+    "pointerFreeUffMetadata": true,
+    "retainsUffParser": false,
+    "binaryProto": {
+      "sourceRelativePath": "third_party/nvidia/TensorRT-8.6.1.6-cuda 12.1/data/mnist/mnist_mean.binaryproto",
+      "sourceLengthBytes": 3147,
+      "sourceSha256": "337CF38DD3A69F25BA7E732D25CA3176576CA8F208B0A916FA3AC2A669A894BE",
+      "shape": [1, 1, 28, 28],
+      "dataType": "Float",
+      "dataLength": 3136,
+      "copiedDataSha256": "DF7D560B482098FAC1C6122C22BD0A54499ED9F8EC3AC6BAE8FC917D3A01774A",
+      "independentManagedCopies": true,
+      "pointerFreeCopiedData": true,
+      "retainsNativeObject": false
+    },
+    "callsProcessGlobalProtobufShutdown": false
+  },
+  "nonTensorRt8GuardPassed": true,
+  "packageConsumer": {
+    "managedPackage": {
+      "path": "artifacts/managed/JYPPX.TensorRT.CSharp.API.4.0.0.nupkg",
+      "lengthBytes": 14878547,
+      "sha256": "2C26112FB1B9A4E12CCF9EC929F0B754A275B99AEB7B5E53FE3610D129C227C1"
+    },
+    "lines": [
+      {
+        "runtimeKey": "win-x64-trt8.6-cuda12.1-cudnn8.9",
+        "bridgePackageLengthBytes": 324029,
+        "bridgePackageSha256": "9EFC93ECEC1AC87DF8133756E18987FAEDB2623EC86C1ADB054A630493E8048F",
+        "restoreSucceeded": true,
+        "buildSucceeded": true
+      },
+      {
+        "runtimeKey": "win-x64-trt10.11-cuda12.9-cudnn9.22",
+        "bridgePackageLengthBytes": 352573,
+        "bridgePackageSha256": "D40BDD02A9A5011AC9B663B7E02F2B3D498E752C42C38A40CB34D61D9225B6B5",
+        "restoreSucceeded": true,
+        "buildSucceeded": true
+      },
+      {
+        "runtimeKey": "win-x64-trt11.0-cuda12.9-cudnn9.22",
+        "bridgePackageLengthBytes": 278264,
+        "bridgePackageSha256": "41EE2E4044CAD5F40A5FDEF7B917E53A6E15B6148A8A210293E276549B5005DD",
+        "restoreSucceeded": true,
+        "buildSucceeded": true
+      }
+    ],
+    "usesProjectReference": false,
+    "compiledSurfaceMarkers": [
+      "TensorRtLegacyParserDiagnostics",
+      "GetUffRequiredVersion",
+      "ReadCaffeBinaryProto",
+      "TensorRtLegacyUffRequiredVersionSnapshot",
+      "TensorRtCaffeBinaryProtoSnapshot"
+    ],
+    "wrapperSurfaceEvidenceKind": "compile-surface-proof",
+    "isRuntimeExecutionProof": false
+  },
+  "deferredHistoryRetained": true,
+  "publicNativePointerAdded": false,
+  "isPackageConsumerRuntimeProof": false,
+  "isPostPublishProof": false,
+  "canPromoteReleaseProof": false,
+  "canDeleteDeferredRecord": false,
+  "canPublishPublicly": false,
+  "canCloseReleaseIssue": false,
+  "performsPublish": false,
+  "boundary": "TRT8 proves local owner-scoped UFF scalar queries and a caller-buffer Caffe binaryproto copy. Bridge-only package consumers prove compile surface only. The evidence is not public clean package runtime, post-publish, model-accuracy, release-close, or publication authorization proof."
+}

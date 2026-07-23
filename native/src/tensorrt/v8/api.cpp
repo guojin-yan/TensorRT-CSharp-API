@@ -27,6 +27,11 @@
 #include <NvOnnxParser.h>
 #endif
 
+#if JYPPX_HAS_TENSORRT_LEGACY_PARSERS && JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8
+#include <NvCaffeParser.h>
+#include <NvUffParser.h>
+#endif
+
 #ifndef JYPPX_TENSORRT_VERSION_MAJOR_NUM
 #define JYPPX_TENSORRT_VERSION_MAJOR_NUM 0
 #endif
@@ -37,6 +42,10 @@
 
 #ifndef JYPPX_HAS_TENSORRT_ONNX_CONFIG
 #define JYPPX_HAS_TENSORRT_ONNX_CONFIG 0
+#endif
+
+#ifndef JYPPX_HAS_TENSORRT_LEGACY_PARSERS
+#define JYPPX_HAS_TENSORRT_LEGACY_PARSERS 0
 #endif
 
 namespace
@@ -9666,6 +9675,7 @@ JYPPX_StatusCode jyppx_trt8_execution_context_get_shape_binding(
 #include "modules/deployment/global_runtime_version_probe.inc"
 #include "modules/deployment/legacy_binding_aliases.inc"
 #include "modules/deployment/cross_version_tenth_other_safe.inc"
+#include "modules/deployment/legacy_parser_readonly_diagnostics.inc"
 #include "modules/plugin/trt8_plugin_registry_inventory.inc"
 #include "modules/plugin/trt8_global_plugin_registry_inventory.inc"
 #include "modules/plugin/trt8_builder_capability_plugin_registry.inc"

@@ -1,5 +1,37 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-23 TRT8 Legacy Parser Copied Readonly Diagnostics
+
+本批完成 TRT8 legacy parser 的 owner-scoped safe alternative：UFF required version 三个标量 getter、
+`ICaffeParser::parseBinaryProto` 以及 `IBinaryProtoBlob` 的 data/type/dimensions 共 7 行。native 在单次调用
+内创建并删除 parser/blob；binaryproto 使用 caller-buffer 复制 shape、data type 和字节，不暴露 parser、blob
+或 data pointer，也不调用进程级 `shutdownProtobufLibrary`。Windows SEH 与 C++ exception 路径均清零输出。
+
+coverage 扫描器现在仅对 TRT8 纳入 `NvCaffeParser.h` 与 `NvUffParser.h`，每套 TRT8 package 为 `880` 行，
+`760 implemented / 120 deferred-only`；7 行均为 `implemented-with-deferred-history`，相邻的 parser/destroy
+仍为 deferred-only。旧 deferred manifests 保留，长期 deferred 边界未缩小。
+
+### Runtime 与证据
+
+- bindings：`197 manifests / 3975 records`，连续生成幂等，输出校验通过。
+- TRT8/CUDA12.1 smoke：UFF `0.6.9`；MNIST binaryproto `[1,1,28,28] / Float / 3136 bytes`；复制 payload
+  SHA256 为 `DF7D560B482098FAC1C6122C22BD0A54499ED9F8EC3AC6BAE8FC917D3A01774A`；独立 managed copies 与
+  TRT10/11 非目标 guard 通过。
+- native ABI/PE：TRT8 `993/993`、TRT10 `1087/1087`、TRT11 `1234/1234`，missing 均为 0。
+- solution Debug：0 warning / 0 error；Release：5 条既有 nullable warning / 0 error。
+- 公共 API 文档、双语文档通过；DocFX `930 models / 0 warning / 0 error`。
+- 受影响专项测试 `52/52`；legacy evidence strict validator `16/16`；classification finding `0`；strict
+  release required failure `0`。
+- TRT8/10/11 bridge-only package consumer 均 restore/build 通过，0 warning / 0 error，证据分类仍为
+  `compile-surface-proof`，不提升为 package-consumer runtime proof。
+
+### 发布与 C 盘边界
+
+本批没有 push、workflow dispatch、NuGet/GitHub Packages publish、GitHub Release upload 或 issue close。
+Owner final gate 仍 blocked，因真实外部 owner evidence 尚未提供。C 盘未发现本批 TensorRT/CUDA/cuDNN/ONNX/
+模型/engine/nupkg 下载；本轮 workload 日志与三个空临时目录的精确删除命令在执行前被工具策略拦截，未发生
+部分删除。Downloads 中的既有用户资产未触碰。
+
 ## 2026-07-22 ONNX Parser Layer Output Copied Metadata
 
 本批重新导出并审计 TensorRT deferred inventory：598 条 deferred rows 中 low risk 为 0、medium 为 112、

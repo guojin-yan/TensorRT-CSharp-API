@@ -167,6 +167,7 @@ function Get-TensorRtCategory {
   param([string]$ClassName, [string]$MethodName, [string]$Header)
 
   if ($Header -like "*NvOnnx*") { return "onnx-parser" }
+  if ($Header -in @("NvCaffeParser.h", "NvUffParser.h")) { return "legacy-parser" }
   switch -Regex ($ClassName) {
     'BuilderConfig|Builder' { return "builder" }
     'Runtime|SerializationConfig|RuntimeConfig' { return "runtime-serialization" }
@@ -443,6 +444,13 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
     "IBuilderConfig::getPluginToSerialize" = @("id:*builder-config-get-plugin-to-serialize-caller-buffer", "id:*builder-config-get-plugin-to-serialize", "id:*builder-config-get-plugin-to-serialize-v2", "id:*builder-config-get-plugin-to-serialize-deferred")
     "IBuilderConfig::setPluginsToSerialize" = @("id:*builder-config-set-plugins-to-serialize-copied-paths", "id:*builder-config-set-plugins-to-serialize", "id:*builder-config-set-plugins-to-serialize-v2", "id:*builder-config-set-plugins-to-serialize-deferred")
     "IRuntime::getLogger" = @("id:*runtime-has-logger", "id:*runtime-get-logger-deferred")
+    "IBinaryProtoBlob::getData" = @("id:*legacy-caffe-binary-proto-copy")
+    "IBinaryProtoBlob::getDataType" = @("id:*legacy-caffe-binary-proto-copy")
+    "IBinaryProtoBlob::getDimensions" = @("id:*legacy-caffe-binary-proto-copy")
+    "ICaffeParser::parseBinaryProto" = @("id:*legacy-caffe-binary-proto-copy")
+    "IUffParser::getUffRequiredVersionMajor" = @("id:*legacy-uff-get-required-version")
+    "IUffParser::getUffRequiredVersionMinor" = @("id:*legacy-uff-get-required-version")
+    "IUffParser::getUffRequiredVersionPatch" = @("id:*legacy-uff-get-required-version")
     "IParser::getNbErrors" = @("id:*onnx-parser-get-error-count", "id:*parser-get-nb-errors")
     "IParser::getNbSubgraphs" = @("id:*onnx-parser-get-subgraph-count")
     "IParser::getLayerOutputTensor" = @("id:*onnx-parser-get-layer-output-tensor-metadata", "id:*onnx-parser-layer-output-tensor-exists", "id:*parser-get-layer-output-tensor-deferred")
@@ -549,6 +557,13 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
     "IBuilderConfig::setAvgTimingIterations" = @("id:*builder-config-set-avg-timing-iterations-deferred")
     "IBuilderConfig::getBuilderOptimizationLevel" = @("id:*builder-config-get-builder-optimization-level-deferred")
     "IBuilderConfig::setBuilderOptimizationLevel" = @("id:*builder-config-set-builder-optimization-level-deferred")
+    "IBinaryProtoBlob::getData" = @("id:*binary-proto-blob-get-data-deferred")
+    "IBinaryProtoBlob::getDataType" = @("id:*binary-proto-blob-get-data-type-deferred")
+    "IBinaryProtoBlob::getDimensions" = @("id:*binary-proto-blob-get-dimensions-deferred")
+    "ICaffeParser::parseBinaryProto" = @("id:*caffe-parser-parse-binary-proto-deferred")
+    "IUffParser::getUffRequiredVersionMajor" = @("id:*uff-parser-get-uff-required-version-major-deferred")
+    "IUffParser::getUffRequiredVersionMinor" = @("id:*uff-parser-get-uff-required-version-minor-deferred")
+    "IUffParser::getUffRequiredVersionPatch" = @("id:*uff-parser-get-uff-required-version-patch-deferred")
     "IVersionedInterface::getAPILanguage" = @("id:*versioned-interface-get-api-language-deferred")
     "IVersionedInterface::getInterfaceInfo" = @("id:*versioned-interface-get-interface-info-deferred")
   }
@@ -679,6 +694,13 @@ function Find-MatchedManifestApis {
     "IRuntime::getLogger",
     "IRuntime::deserializeCudaEngine",
     "IRefitter::getLogger",
+    "IBinaryProtoBlob::getData",
+    "IBinaryProtoBlob::getDataType",
+    "IBinaryProtoBlob::getDimensions",
+    "ICaffeParser::parseBinaryProto",
+    "IUffParser::getUffRequiredVersionMajor",
+    "IUffParser::getUffRequiredVersionMinor",
+    "IUffParser::getUffRequiredVersionPatch",
     "IParser::getNbErrors",
     "IParser::getNbSubgraphs",
     "IParser::getLayerOutputTensor",
@@ -767,7 +789,14 @@ function Get-TensorRtInterfaces {
   param([object]$Package)
 
   $results = New-Object System.Collections.Generic.List[object]
-  $headers = Get-ChildItem -LiteralPath $Package.IncludeRoot -File -Include NvInfer*.h,NvOnnx*.h
+  $headerPatterns = @("NvInfer*.h", "NvOnnx*.h")
+  if ($Package.VersionLine -eq "8") {
+    $headerPatterns += @("NvCaffeParser.h", "NvUffParser.h")
+  }
+  $headers = Get-ChildItem -LiteralPath $Package.IncludeRoot -File | Where-Object {
+    $headerName = $_.Name
+    @($headerPatterns | Where-Object { $headerName -like $_ }).Count -gt 0
+  }
   foreach ($header in $headers) {
     $raw = Get-Content -LiteralPath $header.FullName -Raw -Encoding utf8
     $text = Remove-CxxComments $raw

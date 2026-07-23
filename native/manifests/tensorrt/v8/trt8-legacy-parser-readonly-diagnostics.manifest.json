@@ -1,0 +1,36 @@
+{
+  "$schema": "../../bridge-api.schema.json",
+  "module": "tensorrt",
+  "versionLine": "8",
+  "apis": [
+    {
+      "id": "trt8-legacy-uff-get-required-version",
+      "entryPoint": "jyppx_trt8_legacy_uff_get_required_version",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "out_major", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" },
+        { "name": "out_minor", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" },
+        { "name": "out_patch", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt8-legacy-caffe-binary-proto-copy",
+      "entryPoint": "jyppx_trt8_legacy_caffe_binary_proto_copy",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "parameters": [
+        { "name": "file_path", "type": "const char*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "output_buffer", "type": "uint8_t*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in", "managedType": "UIntPtr", "moduleManagedType": "UIntPtr" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out", "managedType": "out UIntPtr", "moduleManagedType": "out UIntPtr" },
+        { "name": "out_dimensions", "type": "JYPPX_TensorRtDims*", "direction": "out", "managedType": "out NativeTensorRtDims", "moduleManagedType": "out NativeTensorRtDims" },
+        { "name": "out_data_type", "type": "int32_t*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    }
+  ]
+}

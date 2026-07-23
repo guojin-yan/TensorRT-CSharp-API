@@ -40,6 +40,11 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_set_input_shape_bindi
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_error_code_get_exclusive_upper_bound(int32_t* out_exclusive_upper_bound);
 /* END TRT8 SAFE LIFECYCLE, SHAPE, SERIALIZATION, AND ERROR METADATA DECLARATIONS */
 
+/* BEGIN TRT8 LEGACY PARSER READONLY DIAGNOSTIC DECLARATIONS */
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_legacy_uff_get_required_version(int32_t* out_major, int32_t* out_minor, int32_t* out_patch);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_legacy_caffe_binary_proto_copy(const char* file_path, uint8_t* output_buffer, size_t output_buffer_size, size_t* out_required_size, JYPPX_TensorRtDims* out_dimensions, int32_t* out_data_type);
+/* END TRT8 LEGACY PARSER READONLY DIAGNOSTIC DECLARATIONS */
+
 /* BEGIN TRT8 PLUGIN V2 LAYER METADATA SNAPSHOT DECLARATIONS */
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_plugin_v2_layer_get_plugin_type(JYPPX_TensorRtLayer* layer, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_plugin_v2_layer_get_plugin_version(JYPPX_TensorRtLayer* layer, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);

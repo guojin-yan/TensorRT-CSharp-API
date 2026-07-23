@@ -3532,6 +3532,8 @@ internal static class GeneratedEntryPointNames
     public const string Trt8LayerSetName = "jyppx_trt8_layer_set_name";
     public const string Trt8LayerSetOutputType = "jyppx_trt8_layer_set_output_type";
     public const string Trt8LayerSetPrecision = "jyppx_trt8_layer_set_precision";
+    public const string Trt8LegacyCaffeBinaryProtoCopy = "jyppx_trt8_legacy_caffe_binary_proto_copy";
+    public const string Trt8LegacyUffGetRequiredVersion = "jyppx_trt8_legacy_uff_get_required_version";
     public const string Trt8LoggerCreate = "jyppx_trt8_logger_create";
     public const string Trt8LoggerCreateWithCallback = "jyppx_trt8_logger_create_with_callback";
     public const string Trt8LoggerEmitDiagnostic = "jyppx_trt8_logger_emit_diagnostic";

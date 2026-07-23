@@ -236,6 +236,7 @@ function(jyppx_configure_local_tensorrt_fallback)
 
   set(_jyppx_nvinfer_names nvinfer)
   set(_jyppx_nvonnxparser_names nvonnxparser)
+  set(_jyppx_nvparsers_names nvparsers)
   set(_jyppx_nvinfer_plugin_names nvinfer_plugin)
   if(WIN32 AND DEFINED JYPPX_TENSORRT_LINE AND NOT JYPPX_TENSORRT_LINE STREQUAL "8")
     list(INSERT _jyppx_nvinfer_names 0 "nvinfer_${JYPPX_TENSORRT_LINE}")
@@ -286,6 +287,19 @@ function(jyppx_configure_local_tensorrt_fallback)
     )
   endif()
 
+  find_library(TensorRT_NVPARSERS_LIBRARY
+    NAMES ${_jyppx_nvparsers_names}
+    HINTS ${_jyppx_tensorrt_lib_dirs}
+    NO_DEFAULT_PATH
+  )
+  if(TensorRT_NVPARSERS_LIBRARY AND NOT TARGET TensorRT::nvparsers)
+    add_library(TensorRT::nvparsers UNKNOWN IMPORTED GLOBAL)
+    set_target_properties(TensorRT::nvparsers PROPERTIES
+      IMPORTED_LOCATION "${TensorRT_NVPARSERS_LIBRARY}"
+      INTERFACE_INCLUDE_DIRECTORIES "${_jyppx_tensorrt_include}"
+    )
+  endif()
+
   set(_jyppx_tensorrt_version_major "")
   set(_jyppx_tensorrt_version_minor "0")
   set(_jyppx_tensorrt_version_patch "0")
@@ -310,6 +324,7 @@ function(jyppx_configure_local_tensorrt_fallback)
   set(TensorRT_NVINFER_LIBRARY "${TensorRT_NVINFER_LIBRARY}" PARENT_SCOPE)
   set(TensorRT_NVINFER_PLUGIN_LIBRARY "${TensorRT_NVINFER_PLUGIN_LIBRARY}" PARENT_SCOPE)
   set(TensorRT_NVONNXPARSER_LIBRARY "${TensorRT_NVONNXPARSER_LIBRARY}" PARENT_SCOPE)
+  set(TensorRT_NVPARSERS_LIBRARY "${TensorRT_NVPARSERS_LIBRARY}" PARENT_SCOPE)
 endfunction()
 
 jyppx_configure_local_tensorrt_fallback()
@@ -368,6 +383,29 @@ if(TensorRT_FOUND AND DEFINED TensorRT_VERSION_MAJOR)
   set(JYPPX_TENSORRT_VERSION_MAJOR_NUM "${TensorRT_VERSION_MAJOR}")
   set(JYPPX_TENSORRT_VERSION_MINOR_NUM "${TensorRT_VERSION_MINOR}")
   set(JYPPX_TENSORRT_VERSION_PATCH_NUM "${TensorRT_VERSION_PATCH}")
+endif()
+
+set(JYPPX_HAS_TENSORRT_LEGACY_PARSERS_VALUE 0)
+if(TensorRT_FOUND AND JYPPX_TENSORRT_VERSION_MAJOR_NUM EQUAL 8
+    AND EXISTS "${TensorRT_ROOT}/include/NvUffParser.h"
+    AND EXISTS "${TensorRT_ROOT}/include/NvCaffeParser.h")
+  if(NOT TensorRT_NVPARSERS_LIBRARY)
+    find_library(TensorRT_NVPARSERS_LIBRARY
+      NAMES nvparsers
+      HINTS "${TensorRT_ROOT}/lib" "${TensorRT_ROOT}/lib64"
+      NO_DEFAULT_PATH
+    )
+  endif()
+  if(TensorRT_NVPARSERS_LIBRARY AND NOT TARGET TensorRT::nvparsers)
+    add_library(TensorRT::nvparsers UNKNOWN IMPORTED GLOBAL)
+    set_target_properties(TensorRT::nvparsers PROPERTIES
+      IMPORTED_LOCATION "${TensorRT_NVPARSERS_LIBRARY}"
+      INTERFACE_INCLUDE_DIRECTORIES "${TensorRT_INCLUDE_DIRS}"
+    )
+  endif()
+  if(TensorRT_NVPARSERS_LIBRARY AND TARGET TensorRT::nvparsers)
+    set(JYPPX_HAS_TENSORRT_LEGACY_PARSERS_VALUE 1)
+  endif()
 endif()
 
 if(TensorRT_FOUND AND TensorRT_NVONNXPARSER_LIBRARY)
@@ -446,6 +484,9 @@ if(TensorRT_FOUND)
   if(JYPPX_HAS_TENSORRT_ONNXPARSER_VALUE AND TensorRT_NVONNXPARSER_LIBRARY AND TARGET TensorRT::nvonnxparser)
     target_link_libraries(jyppxtrtbridge PRIVATE TensorRT::nvonnxparser)
   endif()
+  if(JYPPX_HAS_TENSORRT_LEGACY_PARSERS_VALUE AND TensorRT_NVPARSERS_LIBRARY AND TARGET TensorRT::nvparsers)
+    target_link_libraries(jyppxtrtbridge PRIVATE TensorRT::nvparsers)
+  endif()
 endif()
 
 set(_jyppx_windows_delay_load_dlls)
@@ -476,6 +517,9 @@ if(WIN32 AND MSVC)
     elseif(JYPPX_TENSORRT_VERSION_MAJOR_NUM EQUAL 8)
       list(APPEND _jyppx_windows_delay_load_dlls "nvinfer.dll")
       list(APPEND _jyppx_windows_delay_load_dlls "nvinfer_plugin.dll")
+      if(JYPPX_HAS_TENSORRT_LEGACY_PARSERS_VALUE)
+        list(APPEND _jyppx_windows_delay_load_dlls "nvparsers.dll")
+      endif()
       if(JYPPX_HAS_TENSORRT_ONNXPARSER_VALUE)
         list(APPEND _jyppx_windows_delay_load_dlls "nvonnxparser.dll")
       endif()
@@ -504,6 +548,7 @@ target_compile_definitions(jyppxtrtbridge
     JYPPX_BUILD_CONFIGURATION="$<CONFIG>"
     JYPPX_HAS_CUDA_TOOLKIT=${JYPPX_HAS_CUDA_TOOLKIT_VALUE}
     JYPPX_HAS_TENSORRT=${JYPPX_HAS_TENSORRT_VALUE}
+    JYPPX_HAS_TENSORRT_LEGACY_PARSERS=${JYPPX_HAS_TENSORRT_LEGACY_PARSERS_VALUE}
     JYPPX_HAS_TENSORRT_ONNXPARSER=${JYPPX_HAS_TENSORRT_ONNXPARSER_VALUE}
     JYPPX_HAS_TENSORRT_ONNX_CONFIG=${JYPPX_HAS_TENSORRT_ONNX_CONFIG_VALUE}
     JYPPX_ENABLE_CUDA_BINDINGS_FLAG=${JYPPX_ENABLE_CUDA_BINDINGS_VALUE}
@@ -536,6 +581,7 @@ if(TensorRT_FOUND)
   message(STATUS "TensorRT_VERSION=${TensorRT_VERSION}")
 endif()
 message(STATUS "JYPPX_HAS_TENSORRT_ONNXPARSER=${JYPPX_HAS_TENSORRT_ONNXPARSER_VALUE}")
+message(STATUS "JYPPX_HAS_TENSORRT_LEGACY_PARSERS=${JYPPX_HAS_TENSORRT_LEGACY_PARSERS_VALUE}")
 message(STATUS "JYPPX_HAS_TENSORRT_ONNX_CONFIG=${JYPPX_HAS_TENSORRT_ONNX_CONFIG_VALUE}")
 if(JYPPX_TENSORRT_ONNXPARSER_BLOCK_REASON)
   message(STATUS "${JYPPX_TENSORRT_ONNXPARSER_BLOCK_REASON}")

@@ -3527,6 +3527,8 @@
 #define JYPPX_API_TRT8_LAYER_SET_NAME "jyppx_trt8_layer_set_name" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_LAYER_SET_OUTPUT_TYPE "jyppx_trt8_layer_set_output_type" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_LAYER_SET_PRECISION "jyppx_trt8_layer_set_precision" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT8_LEGACY_CAFFE_BINARY_PROTO_COPY "jyppx_trt8_legacy_caffe_binary_proto_copy" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT8_LEGACY_UFF_GET_REQUIRED_VERSION "jyppx_trt8_legacy_uff_get_required_version" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_LOGGER_CREATE "jyppx_trt8_logger_create" // module=tensorrt; line=8; ownership=caller-destroys; manualOverride=false
 #define JYPPX_API_TRT8_LOGGER_CREATE_WITH_CALLBACK "jyppx_trt8_logger_create_with_callback" // module=tensorrt; line=8; ownership=caller-destroys; manualOverride=false
 #define JYPPX_API_TRT8_LOGGER_EMIT_DIAGNOSTIC "jyppx_trt8_logger_emit_diagnostic" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false

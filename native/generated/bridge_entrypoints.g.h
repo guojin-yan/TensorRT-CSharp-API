@@ -10582,6 +10582,12 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt8_layer_set_output_type(JYPPX_TensorRtLay
 // generated from manifest id=trt8-layer-set-precision
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_layer_set_precision(JYPPX_TensorRtLayer* layer, int32_t data_type);
 
+// generated from manifest id=trt8-legacy-caffe-binary-proto-copy
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_legacy_caffe_binary_proto_copy(const char* file_path, uint8_t* output_buffer, size_t output_buffer_size, size_t* out_required_size, JYPPX_TensorRtDims* out_dimensions, int32_t* out_data_type);
+
+// generated from manifest id=trt8-legacy-uff-get-required-version
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_legacy_uff_get_required_version(int32_t* out_major, int32_t* out_minor, int32_t* out_patch);
+
 // generated from manifest id=trt8-logger-create
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_logger_create(JYPPX_TensorRtLogger** out_logger);
 

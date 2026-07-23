@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "trt8-legacy-parser-readonly-candidate-audit.v1",
+  "sourceHead": "380fcb374cfb38739c13cf8d8eaf11b335dc0b12",
+  "inventory": {
+    "lowRiskCandidates": 6,
+    "selectedCandidates": 6,
+    "selectedTensorRtLine": 8
+  },
+  "vendorAssets": [
+    {
+      "tensorRtVersion": "8.6.1.6",
+      "cudaToolkitVersion": "11.8",
+      "importLibrary": "third_party/nvidia/TensorRT-8.6.1.6-cuda 11.8/lib/nvparsers.lib",
+      "runtimeLibrary": "third_party/nvidia/TensorRT-8.6.1.6-cuda 11.8/lib/nvparsers.dll",
+      "factorySymbolsPresent": true,
+      "runtimeDependencies": ["nvinfer.dll", "KERNEL32.dll"]
+    },
+    {
+      "tensorRtVersion": "8.6.1.6",
+      "cudaToolkitVersion": "12.1",
+      "importLibrary": "third_party/nvidia/TensorRT-8.6.1.6-cuda 12.1/lib/nvparsers.lib",
+      "runtimeLibrary": "third_party/nvidia/TensorRT-8.6.1.6-cuda 12.1/lib/nvparsers.dll",
+      "factorySymbolsPresent": true,
+      "runtimeDependencies": ["nvinfer.dll", "KERNEL32.dll"]
+    }
+  ],
+  "selectedInterfaces": [
+    "IUffParser::getUffRequiredVersionMajor",
+    "IUffParser::getUffRequiredVersionMinor",
+    "IUffParser::getUffRequiredVersionPatch",
+    "IBinaryProtoBlob::getData",
+    "IBinaryProtoBlob::getDataType",
+    "IBinaryProtoBlob::getDimensions"
+  ],
+  "safeAlternatives": [
+    "TRT8 bridge-scoped UFF parser create/query/delete returning three scalars",
+    "TRT8 bridge-scoped Caffe parser and binaryproto blob create/copy/delete returning caller-owned bytes and metadata"
+  ],
+  "retainedDeferredBoundaries": [
+    "UFF parse/register/plugin namespace and error-recorder mutation",
+    "Caffe network parse, plugin factory, error-recorder mutation and protobuf buffer mutation",
+    "process-global shutdownProtobufLibrary"
+  ],
+  "publicPointerAdded": false,
+  "callsProcessGlobalShutdown": false,
+  "decision": "promote-owner-scoped-copied-readonly-diagnostics"
+}

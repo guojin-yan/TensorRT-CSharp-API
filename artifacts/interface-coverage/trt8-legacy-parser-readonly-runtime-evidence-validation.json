@@ -1,0 +1,91 @@
+{
+  "schemaVersion": "trt8-legacy-parser-readonly-runtime-evidence-validation.v1",
+  "validationState": "passed",
+  "checkCount": 16,
+  "failureCount": 0,
+  "checks": [
+    {
+      "name": "schema",
+      "passed": true,
+      "detail": "trt8-legacy-parser-readonly-runtime-evidence.v1"
+    },
+    {
+      "name": "vendor-assets",
+      "passed": true,
+      "detail": "nvparsers LIB/DLL and both factories are present"
+    },
+    {
+      "name": "vendor-dependencies",
+      "passed": true,
+      "detail": "nvparsers dependency set is bounded"
+    },
+    {
+      "name": "bindings",
+      "passed": true,
+      "detail": "197 manifests / 3975 records"
+    },
+    {
+      "name": "coverage-inventory",
+      "passed": true,
+      "detail": "TRT8 880 scanned, 760 implemented, 120 deferred-only"
+    },
+    {
+      "name": "coverage-history",
+      "passed": true,
+      "detail": "Seven safe rows retain deferred history"
+    },
+    {
+      "name": "abi-parity",
+      "passed": true,
+      "detail": "TRT8/10/11 ABI/export missing counts are zero"
+    },
+    {
+      "name": "trt8-runtime",
+      "passed": true,
+      "detail": "TRT8 runtime and UFF version passed"
+    },
+    {
+      "name": "binaryproto-metadata",
+      "passed": true,
+      "detail": "Float [1,1,28,28], 3136 copied bytes"
+    },
+    {
+      "name": "binaryproto-hashes",
+      "passed": true,
+      "detail": "Container and copied payload hashes match"
+    },
+    {
+      "name": "copy-semantics",
+      "passed": true,
+      "detail": "Copies are independent and pointer-free"
+    },
+    {
+      "name": "protobuf-shutdown",
+      "passed": true,
+      "detail": "Process-global protobuf shutdown is not called"
+    },
+    {
+      "name": "version-guard",
+      "passed": true,
+      "detail": "TRT10/11 managed guard passed"
+    },
+    {
+      "name": "package-consumers",
+      "passed": true,
+      "detail": "Three no-ProjectReference restore/build validations"
+    },
+    {
+      "name": "package-classification",
+      "passed": true,
+      "detail": "Compile-surface classification retained"
+    },
+    {
+      "name": "non-publish-boundary",
+      "passed": true,
+      "detail": "No public pointer, runtime-proof promotion, or publication"
+    }
+  ],
+  "performsPublish": false,
+  "canPublishPublicly": false,
+  "canCloseReleaseIssue": false
+}

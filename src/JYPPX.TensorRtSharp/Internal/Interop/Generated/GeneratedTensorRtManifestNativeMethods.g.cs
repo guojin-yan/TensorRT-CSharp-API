@@ -8610,6 +8610,12 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
     internal static extern BridgeStatusCode jyppx_trt8_layer_set_precision(SafeTensorRtObjectHandle layer, int data_type);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt8_legacy_caffe_binary_proto_copy(IntPtr file_path, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size, out NativeTensorRtDims out_dimensions, out int out_data_type);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt8_legacy_uff_get_required_version(out int out_major, out int out_minor, out int out_patch);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt8_logger_create(out SafeTensorRtObjectHandle out_logger);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
