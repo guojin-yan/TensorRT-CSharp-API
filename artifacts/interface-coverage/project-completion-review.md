@@ -3201,6 +3201,53 @@ report、command preview 和 bounded runtime output 的证据边界写清楚。
 - 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
   GitHub Release upload、issue close 或 push。
 
+## 2026-07-24 TensorRtExec CLI Public Article Expansion
+
+本阶段继续公开文章矩阵质量提升，扩写
+`docs/articles/zh-cn/publishing/tensorrtexec-cli-public-article.md`，把 TensorRtExec CLI、
+WinForms、trtexec-like parser、shared build service、report schema、runtime artifact 和 release proof
+boundary 串成一篇可公开发布的使用与评审文章。文章明确本阶段只是文档和质量门，不是 runtime proof、
+package consumer proof、发布授权或 release close 证据。
+
+### 实现
+
+- 文章补齐 `applications/TensorRtExec/README.md`、`TensorRtExec.csproj`、CLI command、
+  options、service、report、WinForms main form、parity matrix、gap list、GUI/CLI field map 和 report
+  schema 的职责边界。
+- 公开说明 `TrtexecLikeParser`、`TrtexecLikeOptions`、`OnnxEngineBuildOptions`、
+  `OnnxEngineBuildService`、`OnnxEngineBuildDiagnostics` 与
+  `OnnxEngineRuntimeArtifactWriter` 如何支撑 TensorRtExec CLI、GUI 和 shared service 的一致行为。
+- 覆盖 ONNX/engine 输入输出、build-only、dry-run、preview-only、report/evidence sidecar、dynamic
+  shapes、precision、workspace/memory pool、timing、runtime iterations、profile/layer info、plugin、
+  safe/consistency、builder cache、deployment、refit、stripped plan 和 weight streaming 等 trtexec-like
+  参数族。
+- 写清 report 字段、normalized command、deployment snapshot、parser preflight、runtime options、
+  loaded engine diagnostics、capability probe、readback fingerprint、runtime output artifact 和 proof
+  classification 的边界。
+- 明确 TensorRtExec report、GUI screenshot、command preview、synthetic-input runtime、dependency probe、
+  capability probe、build-only evidence、sidecar-only、blocked-by-cuda-driver、Linux runner proof、owner
+  authorization 和 post-publish verification 之间不能互相替代。
+- 补充 TensorRtExec 与 `samples/OnnxToEngine`、`samples/YoloVision`、real-case proof pack、YOLO
+  多系列多任务输出契约、real-model-runtime proof 和 package-consumer-runtime proof 的关系。
+- 为 `PublishingPublicArticleTests` 增加
+  `TensorRtExecCliPublicArticleCoversCliGuiParityReportsRuntimeArtifactsAndProofBoundary` 专项门禁，并将
+  `tensorrtexec-cli-public-article.md` 纳入公开文章基础清单。
+
+### Verification
+
+- `dotnet test tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --filter "FullyQualifiedName~PublishingPublicArticleTests"`：
+  `19/19` 通过。
+
+### C 盘与发布边界
+
+- 本阶段未下载 TensorRT、CUDA、cuDNN、模型、ONNX、engine、Python/pip 资产或 NuGet
+  临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
+  GitHub Release upload、issue close 或 push。
+- 本批没有 owner 真实 runtime proof、package-consumer-runtime proof、Linux runner proof 或
+  post-publish verification，因此不改变 `canPublishPublicly=false`、`canCloseReleaseIssue=false` 或
+  release blocker 状态。
+
 ## 2026-07-24 NuGet Install Runtime Package Public Article Expansion
 
 本阶段继续公开文章矩阵质量提升，扩写

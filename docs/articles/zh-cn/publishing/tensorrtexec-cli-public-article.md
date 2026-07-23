@@ -1,103 +1,446 @@
 # TensorRtExec CLI：用 C# 复刻 trtexec 模型转换体验
 
-TensorRT 用户绕不开 `trtexec`。它是官方最常用的模型转换、engine 构建、profile 配置和快速诊断工具。问题是，当你的主项目是 C#/.NET 时，官方 `trtexec` 往往只是外部命令：参数、日志、报告、错误处理和应用内工作流都要再包一层。
+TensorRT 用户绕不开 `trtexec`。它是官方最常用的模型转换、engine 构建、profile 配置、timing cache、layer info 和快速诊断工具。问题是，当主项目是 C#/.NET 时，官方 `trtexec` 往往只是外部命令：参数、日志、报告、错误处理、GUI 操作和应用内工作流都要再包一层。
 
-TensorRtSharp4.0 中的 `applications/TensorRtExec` 目标就是做一个 C# 版 trtexec-like 应用：既能在控制台里以命令行方式使用，也能逐步扩展到 WinForms 图形界面；既服务 OnnxToEngine 的模型转换，也服务 YoloVision、文章案例和 release evidence ladder。
+TensorRtSharp4.0 中的 `applications/TensorRtExec` 目标就是做一个 C# 版 trtexec-like 应用：既能在控制台里以命令行方式使用，也能用 WinForms 打开页面；既服务 `samples/OnnxToEngine` 的模型转换，也服务 `samples/YoloVision` 的真实模型文章案例和 release evidence ladder。
+
+这篇文章面向公众号、博客和项目主页读者。它可以介绍 TensorRtExec 的 CLI/WinForms 使用方式，但必须保持 proof boundary：TensorRtExec report、sidecar、GUI screenshot、command preview、dry-run、build-only 和 parity matrix 都不是 package-consumer-runtime proof。
 
 ## 适合谁阅读
 
 - 已经熟悉官方 `trtexec`，希望在 .NET 工具链中复用类似能力的用户。
 - 需要把 ONNX -> TensorRT engine 构建流程做进内部平台、桌面软件或 CI 的团队。
-- 想理解 TensorRtSharp4.0 如何区分 build report、sample runtime proof 和 package-consumer-runtime proof 的维护者。
+- 想用 WinForms 页面选择 ONNX、engine、shape profile、精度、timing cache 和 report 的 Windows 用户。
+- 想理解 TensorRtSharp4.0 如何区分 build report、bounded runtime output、real-model-runtime 和 package-consumer-runtime proof 的维护者。
+
+## 应用入口
+
+TensorRtExec 的关键路径：
+
+```text
+applications/TensorRtExec/README.md
+applications/TensorRtExec/TensorRtExec.csproj
+applications/TensorRtExec/Console/TensorRtExecCommand.cs
+applications/TensorRtExec/Core/TensorRtExecOptions.cs
+applications/TensorRtExec/Core/TensorRtExecService.cs
+applications/TensorRtExec/Core/TensorRtExecReport.cs
+applications/TensorRtExec/WinForms/MainForm.cs
+applications/TensorRtExec/tensor-rt-exec-trtexec-parity-matrix.json
+applications/TensorRtExec/tensor-rt-exec-trtexec-parity-matrix.md
+applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.json
+applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.md
+applications/TensorRtExec/tensor-rt-exec-gui-cli-field-map.json
+applications/TensorRtExec/tensor-rt-exec-gui-cli-field-map.md
+applications/TensorRtExec/tensor-rt-exec-report.schema.json
+```
+
+共享工具层：
+
+```text
+src/JYPPX.TensorRtSharp.Tools/TrtexecLikeParser.cs
+src/JYPPX.TensorRtSharp.Tools/TrtexecLikeOptions.cs
+src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildOptions.cs
+src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildService.cs
+src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildDiagnostics.cs
+src/JYPPX.TensorRtSharp.Tools/OnnxEngineRuntimeArtifactWriter.cs
+```
+
+`TensorRtExecCommand` 负责 CLI parse、执行和 console summary；`TensorRtExecOptions` 负责把 trtexec-like 参数归一化为应用配置；`TensorRtExecService` 调用共享 build/report 服务；`TensorRtExecReport` 是面向 CLI/WinForms 的报告摘要；`MainForm` 使用同一套 options/service，避免 GUI 和 CLI 语义漂移。
 
 ## CLI 的定位
 
-TensorRtExec 不是简单的 demo runner。它承担三件事：
+TensorRtExec 不是简单 demo runner。它承担三件事：
 
-1. 把常用 `trtexec` 参数映射到 C# CLI。
-2. 输出机器可读 report 和 evidence sidecar，便于后续审计。
-3. 为 WinForms 页面和更高层样例提供统一的转换后端。
+1. 把常用 `trtexec` 参数映射到 C# CLI 和 WinForms。
+2. 输出机器可读 report、runtime/output artifact 和 evidence sidecar，便于后续审计。
+3. 为 OnnxToEngine、YoloVision、文章案例和 release proof record 提供统一的构建/诊断后端。
 
-仓库中已有 parity matrix：
-
-- `applications/TensorRtExec/tensor-rt-exec-trtexec-parity-matrix.json`
-- `applications/TensorRtExec/tensor-rt-exec-trtexec-parity-matrix.md`
-- `docs/articles/zh-cn/tensorrt-exec-trtexec-parity-matrix.md`
-
-matrix 的意义是说明“哪些官方 trtexec 能力已经映射、哪些仍是后续工作”，它不是 runtime proof。
+parity matrix 的意义是说明“哪些官方 trtexec 能力已经映射，哪些只是 parse/report-only，哪些需要 owner proof”。它不是 runtime proof，也不是 release close approval。
 
 ## 常见命令
 
-最小 ONNX 构建：
+最小 ONNX build-only 转换：
 
 ```powershell
-dotnet run --project .\applications\TensorRtExec -- `
-  --onnx .\models\model.onnx `
-  --saveEngine .\models\model.plan `
-  --buildOnly
-```
-
-带 FP16、workspace 和 report：
-
-```powershell
-dotnet run --project .\applications\TensorRtExec -- `
-  --onnx .\models\yolov8-det.onnx `
-  --saveEngine .\models\yolov8-det.plan `
-  --fp16 `
-  --workspace 1024 `
+dotnet run --project .\applications\TensorRtExec\TensorRtExec.csproj -- `
+  --onnx E:\TensorRtSharpAssets\models\model.onnx `
+  --saveEngine E:\TensorRtSharpAssets\engines\model.plan `
   --buildOnly `
-  --exportReport .\artifacts\yolov8-det-build-report.json `
-  --evidenceSidecar .\artifacts\yolov8-det-evidence.sidecar.json
+  --exportReport E:\TensorRtSharpAssets\reports\model-build-report.json
 ```
 
-动态 shape profile：
+动态 shape、FP16、workspace、memory pool、timing cache 和 layer info：
 
 ```powershell
-dotnet run --project .\applications\TensorRtExec -- `
-  --onnx .\models\dynamic.onnx `
-  --saveEngine .\models\dynamic.plan `
-  --minShapes images:1x3x320x320 `
+dotnet run --project .\applications\TensorRtExec\TensorRtExec.csproj -- `
+  --onnx E:\TensorRtSharpAssets\models\yolov8-det.onnx `
+  --save-engine E:\TensorRtSharpAssets\engines\yolov8-det.plan `
+  --minShapes images:1x3x640x640 `
   --optShapes images:1x3x640x640 `
-  --maxShapes images:4x3x1280x1280 `
+  --maxShapes images:4x3x640x640 `
   --fp16 `
-  --buildOnly
+  --workspace 1GiB `
+  --memPoolSize workspace:512MiB,tacticDram:1GiB `
+  --timingCacheFile E:\TensorRtSharpAssets\cache\yolov8-det.cache `
+  --exportTimingCache E:\TensorRtSharpAssets\cache\yolov8-det-export.cache `
+  --profilingVerbosity detailed `
+  --dumpLayerInfo `
+  --exportLayerInfo E:\TensorRtSharpAssets\reports\yolov8-det-layer-info.txt `
+  --buildOnly `
+  --exportReport E:\TensorRtSharpAssets\reports\yolov8-det-build-report.json
 ```
 
-这些命令适合做模型转换教程、开发调试和内部验证。若要作为 package-consumer-runtime proof，还需要外部干净 consumer 使用公开包执行，不能用本仓库 ProjectReference 或 local feed 替代。
+dry-run / previewOnly 只做参数解析和命令归一化，不读取 ONNX、不构建 engine、不探测 TensorRT runtime：
 
-## 与 OnnxToEngine 的关系
+```powershell
+dotnet run --project .\applications\TensorRtExec\TensorRtExec.csproj -- `
+  --onnx E:\TensorRtSharpAssets\models\model.onnx `
+  --saveEngine E:\TensorRtSharpAssets\engines\model.plan `
+  --minShapes images:1x3x640x640 `
+  --optShapes images:1x3x640x640 `
+  --maxShapes images:4x3x640x640 `
+  --dryRun `
+  --exportReport E:\TensorRtSharpAssets\reports\model-precheck-report.md
+```
 
-`samples/OnnxToEngine` 更像“面向样例读者的模型转换路径”，重点是清晰、易懂、适合教程。`applications/TensorRtExec` 则更像正式工具，目标是覆盖官方 `trtexec` 的主要模型转换功能，并且同时支持 CLI 和 WinForms。
+加载已有 engine 做 readonly diagnostics 和 bounded runtime output：
 
-两者应该共享同一套原则：
+```powershell
+dotnet run --project .\applications\TensorRtExec\TensorRtExec.csproj -- `
+  --loadEngine E:\TensorRtSharpAssets\engines\identity.plan `
+  --optShapes input:1x1x1x1 `
+  --iterations 10 `
+  --warmUp 50 `
+  --duration 1 `
+  --streams 1 `
+  --useCudaGraph `
+  --exportTimes E:\TensorRtSharpAssets\reports\identity-times.json `
+  --exportOutput E:\TensorRtSharpAssets\reports\identity-output.json `
+  --dumpRawBindingsToFile E:\TensorRtSharpAssets\reports\identity-bindings `
+  --exportReport E:\TensorRtSharpAssets\reports\identity-load-report.json
+```
 
-- 参数语义尽量贴近官方 `trtexec`。
-- 输出 report 可被 quality gate 和文章引用。
-- build-only 不冒充 runtime proof。
-- 动态 shape、FP16/INT8、workspace、profile、日志、导出文件都要可追踪。
+启动 WinForms：
 
-## 当前 proof 边界
+```powershell
+dotnet run --project .\applications\TensorRtExec\TensorRtExec.csproj -- --ui
+```
 
-TensorRtExec 可以生成 build report，也可以辅助 YoloVision 真实资产案例，但它不能单独证明下面这些事：
+这些命令适合做模型转换教程、开发调试、文章案例和内部验证。若要作为 package-consumer-runtime proof，还需要仓库外 clean consumer 使用公开包执行，不能用本仓库 ProjectReference、local feed 或 direct `.nupkg` 替代。
 
-- 不能证明模型精度正确。
-- 不能证明 YoloVision 后处理结果正确。
-- 不能证明公开 NuGet 包在外部 consumer 项目可用。
-- 不能证明 package-consumer-runtime。
+## trtexec-like 参数覆盖
 
-它能证明的是：在当前机器和当前依赖下，指定 ONNX build 命令按工具路径执行到了某个结果，并留下 report/evidence sidecar。更高等级的 proof 要继续交给 YoloVision validator、external runtime proof 和 package consumer proof。
+常用模型与 engine 参数：
 
-## WinForms 方向
+```text
+--onnx / --model / --onnxFile
+--saveEngine / --save-engine / --engine / --plan / --engineFile
+--loadEngine / --load-engine
+--buildOnly
+--dryRun / --previewOnly
+--exportReport / --report
+--evidenceSidecar
+```
 
-后续 WinForms 页面应围绕真实使用流设计，而不是只做参数堆叠：
+shape profile：
+
+```text
+--minShapes
+--optShapes
+--maxShapes
+--shapes
+--inputShapes
+--batch
+```
+
+precision、deployment 和 builder config：
+
+```text
+--fp16
+--bf16
+--noTF32
+--int8
+--calib
+--fp8
+--best
+--workspace
+--memPoolSize
+--avgTiming
+--minTiming
+--device
+--useDLACore
+--allowGPUFallback
+--tacticSources
+--directIO
+--sparsity
+--stronglyTyped
+--inputIOFormats
+--outputIOFormats
+--precisionConstraints
+--layerPrecisions
+--layerOutputTypes
+```
+
+engine packaging、refit 和 weight streaming：
+
+```text
+--versionCompatible
+--excludeLeanRuntime
+--stripWeights
+--refit
+--refitFromOnnx
+--saveRefittedEngine
+--allowWeightStreaming
+--weightStreamingBudget
+```
+
+runtime timing 与 output artifacts：
+
+```text
+--iterations
+--warmUp
+--duration
+--streams
+--infStreams
+--avgRuns
+--percentile
+--threads
+--useSpinWait
+--useCudaGraph
+--noDataTransfers
+--loadInputs
+--dumpOutput
+--dumpRawBindingsToFile
+--exportOutput
+--exportTimes
+--sleepTime
+--idleTime
+```
+
+diagnostics 与 profile：
+
+```text
+--timingCacheFile
+--timingCache
+--exportTimingCache
+--profilingVerbosity
+--verbose
+--dumpProfile
+--separateProfileRun
+--exportProfile
+--saveProfile
+--dumpLayerInfo
+--exportLayerInfo
+--plugins / --plugin / --dynamicPlugins / --setPluginsToSerialize
+--safe
+--consistency
+--builderCache
+--noBuilderCache
+```
+
+`OptionImplementationStatus` 会把这些参数拆成 `ParsedOptions`、`AppliedOptions` 和 `ParseOnlyOptions`。能 parse 不等于真实 TensorRT 行为已经执行；真实 applied 需要 native call、readback、version guard 和 report 一致。
+
+## 对齐状态怎么看
+
+`applications/TensorRtExec/tensor-rt-exec-trtexec-parity-matrix.json` 使用以下状态表达当前边界：
+
+```text
+implemented
+implemented-report
+implemented-build-readback
+implemented-bounded-runtime
+parse-report-only
+diagnostic-alias-compatible
+checklist-backed-command-preview
+```
+
+`tensor-rt-exec-release-candidate-gap-list.json` 会把 matrix 转成发布候选 gap list，并保留：
+
+```text
+matrixState = release-readiness-planning
+runtimeProofItems = 0
+packageConsumerRuntimeProofItems = 0
+```
+
+这两个文件是 planning/release-readiness evidence only。它们不能证明 runtime output，不能授权发布，也不能关闭 release issue。
+
+## 报告字段
+
+`--exportReport` 输出 JSON 或 Markdown，JSON schema 位于 `applications/TensorRtExec/tensor-rt-exec-report.schema.json`。核心字段包括：
+
+```text
+ProofClassification
+BuildEvidenceOnly
+DryRun
+NormalizedCommandLine
+NormalizedCommandSha256
+DeploymentOptions
+BuilderConfigDeploymentSnapshot
+ParserPreflightSnapshot
+RuntimeOptions
+InferenceRan
+OutputMatch
+IsRuntimeExecutionProof
+IsRealModelRuntimeProof
+IsPackageConsumerRuntimeProof
+PreflightMetadata
+LoadedEngineDiagnostics
+CapabilityProbe
+WorkspaceBytes
+OptionImplementationStatus
+ReportBoundary
+ReportBoundary.ForbiddenSubstitutes
+ReportBoundary.CopiedDiagnosticsBoundary
+```
+
+`NormalizedCommandSha256` 用来证明命令线未被替换；`BuilderConfigDeploymentSnapshot` 记录 pointer-free copied readback；`ParserPreflightSnapshot` 记录 parser diagnostics 和 model support；`LoadedEngineDiagnostics` 记录 engine readonly metadata；`CapabilityProbe` 记录 host/tool capability visibility；`ReportBoundary.ForbiddenSubstitutes` 明确列出哪些材料不能冒充 proof。
+
+验证 report：
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-TensorRtExecReport.ps1 `
+  -InputPath E:\TensorRtSharpAssets\reports\model-build-report.json `
+  -OutputPath E:\TensorRtSharpAssets\reports\model-build-report-validation.json `
+  -Strict
+```
+
+脚本路径：`eng/Test-TensorRtExecReport.ps1`。
+
+validator 通过只能说明 report 可被机器审查，不能把 TensorRtExec report、OnnxToEngine report、ONNX Parser diagnostic snapshot、ONNX ParserRefitter diagnostic snapshot 或 readonly diagnostics 提升成 `real-model-runtime` 或 `package-consumer-runtime` proof。
+
+## Runtime/output artifact 边界
+
+`--exportTimes`、`--exportOutput`、`--exportProfile`、`--saveProfile` 和 `--dumpRawBindingsToFile` 会输出 runtime/output artifacts。JSON artifact 会写入：
+
+```text
+ArtifactProofBoundary
+RuntimeProofClass
+HasTensorOutputProof
+HasRawBindingProof
+IsBuildOnlyEvidence
+IsDependencyProbeOnly
+IsSyntheticRuntime
+ModelSource
+EnginePath
+PreflightMetadata
+```
+
+当 runtime artifact 存在时，工具还会写相邻 `*.engine-readback.json`，记录：
+
+```text
+LoadedEngineDiagnostics
+ReadbackFingerprint
+ReadbackSha256
+ReadbackAvailable
+skipped reason
+```
+
+`runtime-output-captured-unverified` 只代表 bounded enqueue/readback 已完成但没有 reference output。`synthetic-input-runtime is not real-model-runtime`，也不是 `package-consumer-runtime`。
+
+## WinForms 与 CLI 一致性
+
+WinForms 页面应围绕真实使用流设计，而不是只做参数堆叠：
 
 - 左侧选择 ONNX、engine 输出路径、TensorRT line、精度和 profile。
-- 中间提供参数分组：构建、shape、精度、日志、报告。
-- 右侧显示命令预览、执行日志、report 摘要和错误诊断。
+- 中间提供参数分组：构建、shape、precision、deployment、timing cache、runtime timing、layer/profile diagnostics、output artifacts。
+- 右侧显示 command preview、执行日志、report 摘要、error diagnostics 和 `NormalizedCommandSha256`。
 - 底部保留可复制命令，让 GUI 操作可以回到 CLI 自动化。
 
-配图建议：CLI 输出截图、WinForms 参数页截图、build report JSON 摘要截图、trtexec parity matrix 截图。
+GUI/CLI field map 由：
+
+```text
+eng/Export-TensorRtExecGuiCliParityChecklist.ps1
+eng/Test-TensorRtExecGuiCliParityChecklist.ps1
+applications/TensorRtExec/tensor-rt-exec-gui-cli-field-map.json
+applications/TensorRtExec/tensor-rt-exec-gui-cli-field-map.md
+```
+
+维护。它记录 CLI token、WinForms 字段、command preview、状态和下一步，但只是 surface parity evidence；GUI screenshot、dry-run、build report、timing cache 路径、INT8 calibration cache 路径和 command preview 都不是 runtime proof，也不是 package-consumer-runtime proof。
+
+## 与 OnnxToEngine / YoloVision 的关系
+
+`samples/OnnxToEngine` 更像“面向样例读者的模型转换路径”，重点是清晰、易懂、适合教程；`applications/TensorRtExec` 更像正式工具，目标是覆盖官方 `trtexec` 的主要模型转换能力，并同时支持 CLI 和 WinForms。
+
+`samples/YoloVision` 则负责 model-specific real run：YOLOv5、YOLOv6、YOLOv7、YOLOv8、YOLOv9、YOLOv10、YOLO11、YOLO26、YOLOX 和 custom，det/cls/seg/obb/pose/sem 六任务都需要真实模型、labels、输入资产、output JSON、log SHA256 和 owner review。
+
+推荐证据路径：
+
+```text
+TensorRtExec build-only report
+  -> engine path/hash/readback sidecar
+  -> YoloVision real run log
+  -> yolovision-output.v1 JSON/SVG
+  -> sample-run-evidence record
+  -> owner review
+  -> clean external package consumer
+  -> post-publish verification
+```
+
+`samples/assets/yolovision-real-asset-owner-backfill-pack.json` 和 `samples/YoloVision/yolovision-task-output-contract.json` 会把 TensorRtExec shape profile、task/output metadata 和 sample-run evidence 字段对齐。它们是 owner backfill scaffold，不是 package-consumer-runtime proof。
+
+## Real case proof pack
+
+TensorRtExec 在 `artifacts/final-release/real-case-proof-execution-pack.json` 中有两个 release-facing case：
+
+```text
+tensorrtexec-build-report
+tensorrtexec-gui-workflow
+```
+
+相关脚本：
+
+```text
+eng/Export-RealCaseProofExecutionPack.ps1
+eng/Export-RealCaseEvidenceRecordTemplate.ps1
+eng/Test-RealCaseEvidenceRecord.ps1
+```
+
+`Test-RealCaseEvidenceRecord.ps1` 只有在 owner 回填模型来源、license、ONNX/engine/input/output SHA256、stdout/stderr log、截图、host OS、GPU、driver、CUDA、TensorRT、runtime package metadata 和 owner review 后才允许形成候选 real-case evidence。即便 CLI/GUI report、sidecar 和截图齐全，也必须保持 `canPublishPublicly=false`，不能替代 `real-model-runtime`、`package-consumer-runtime`、Linux runner proof、owner authorization 或 post-publish verification。
+
+## Proof 边界
+
+必须保持以下边界：
+
+- `precheck` / `dryRun` 只证明参数可解析、命令可归一化，不读取模型，不构建 engine。
+- `build-only` 只证明 ONNX parser/builder 走到构建报告边界，不证明推理输出正确。
+- `dependency-probe-only` 只证明依赖探测或 load-engine preflight 结果，不是 runtime execution proof。
+- `capability-probe-only` 只证明只读 API/host capability 可见性，不是 runtime execution proof、real-model-runtime proof 或 package-consumer-runtime proof。
+- `runtime-output-captured-unverified` 只证明 bounded output 被捕获，不能证明模型正确。
+- `synthetic-input-runtime` 可证明最小管线执行，不是用户真实模型质量证明。
+- `real-model-runtime` 需要 Classification / YoloVision 等 sample runner 的真实模型、labels、输入资产、hash、许可证和 sample run evidence。
+- `package-consumer-runtime` belongs to release proof records；TensorRtExec build report、sidecar、样例 manifest 都不能直接声明它。
+- `sidecar-only` 是模型来源、hash、license、stdout/stderr 摘要和 handoff metadata，不是 runtime proof，也不是 release proof。
+- `blocked-by-cuda-driver` 是环境兼容性阻塞，不是 smoke passed，也不是 API 缺口。
+
+一句话边界：TensorRtExec 能把模型转换、参数归一化、builder/readback、diagnostics 和 bounded runtime output 变成可审计材料，但不能单独授权发布、不能关闭 release issue、不能证明 package-consumer-runtime。
+
+## 本地质量检查
+
+推荐本地检查：
+
+```powershell
+dotnet build .\TensorRtSharp.sln -c Debug --no-restore /p:UseSharedCompilation=false /nr:false
+
+dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj `
+  -c Debug --no-build `
+  --filter "FullyQualifiedName~TensorRtExec|FullyQualifiedName~OnnxToEngine|FullyQualifiedName~YoloVision"
+```
+
+文章或 report boundary 改动后，至少跑：
+
+```powershell
+dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj `
+  -c Debug `
+  --filter "FullyQualifiedName~PublishingPublicArticleTests"
+```
+
+## 配图建议
+
+- CLI 命令到 `TensorRtExecReport` 的流程图。
+- WinForms 参数页、command preview、report 摘要和错误诊断截图。
+- trtexec parity matrix 状态表：implemented、implemented-report、implemented-build-readback、parse-report-only。
+- Evidence ladder：TensorRtExec build report -> YoloVision sample run -> package-consumer-runtime -> post-publish verification。
 
 ## 下一步
 
-TensorRtExec 的下一阶段应该继续补齐官方 `trtexec` conversion parity：更多 profile/precision/serialization 参数、错误诊断、report 字段和 GUI 参数同步。同时要让 OnnxToEngine 和 YoloVision 文章直接引用同一套命令，避免样例、工具和文档各自发散。
+TensorRtExec 的下一阶段应该继续补齐官方 `trtexec` conversion parity：更多 profile/precision/serialization 参数、错误诊断、report 字段和 GUI 参数同步。新增高级参数时，先进入 parser/report/`OptionImplementationStatus.ParseOnlyOptions`，再用真实 native readback 或 bounded runtime smoke 提升状态；不要把 callback、allocator、plugin lifecycle、borrowed pointer、external resource 或 runtime deserialization ownership 伪装成低风险实现，也不要把 TensorRtExec report 写成 package-consumer-runtime proof。
