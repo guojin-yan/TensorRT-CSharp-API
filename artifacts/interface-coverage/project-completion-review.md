@@ -3154,3 +3154,49 @@ package-consumer-runtime proof 的边界。
   临时包到 C 盘。
 - 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
   GitHub Release upload 或 issue close。
+
+## 2026-07-23 OnnxToEngine Trtexec Parity Public Article Expansion
+
+本阶段继续公开文章矩阵质量提升，扩写
+`docs/articles/zh-cn/publishing/onnxtoengine-trtexec-parity-public-article.md`，将
+OnnxToEngine 与 TensorRtExec/trtexec parity 从短说明扩展为可审计的教程型文章。文章明确
+CLI、WinForms、YoloVision 与 owner proof input 的关系，并把 parity matrix、gap list、
+report、command preview 和 bounded runtime output 的证据边界写清楚。
+
+### 实现
+
+- 文章补齐 `applications/TensorRtExec/tensor-rt-exec-trtexec-parity-matrix.json`、
+  `applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.json`、
+  `samples/OnnxToEngine/Program.cs`、`TensorRtExecOptions.cs`、
+  `TensorRtExecService.cs`、`TensorRtExecReport.cs`、`TensorRtExecCommand.cs`、
+  `MainForm.cs`、`TrtexecLikeParser`、`TrtexecLikeOptions`、
+  `OnnxEngineBuildOptions.FromTrtexecLikeOptions` 与 `OnnxEngineBuildService` 的证据路径。
+- 公开说明 `implemented`、`implemented-report`、`implemented-build-readback`、
+  `implemented-bounded-runtime`、`parse-report-only`、
+  `diagnostic-alias-compatible` 与 `checklist-backed-command-preview` 等 matrix 状态。
+- 补充 trtexec-like 参数覆盖，包括 ONNX/engine path、dynamic shape、precision、
+  workspace/memory pool、DLA/GPU fallback、tactic source、IO format、precision policy、
+  timing cache、profiling、layer info、runtime loop、CUDA graph、input/output dump 与 timing export。
+- 明确 `runtimeProofItems = 0` 与 `packageConsumerRuntimeProofItems = 0` 的当前发布边界；
+  GUI 截图、command preview、parity matrix、gap list、local feed、ProjectReference consumer、
+  direct `.nupkg` install、GitHub Actions dry-run 和 post-publish verification 都不能替代
+  package-consumer-runtime proof。
+- 将 YoloVision 的 YOLOv5/YOLOv6/YOLOv7/YOLOv8/YOLOv9/YOLOv10/YOLO11/YOLO26 与
+  det/cls/seg/obb/pose/sem real-model-runtime 证据路径写入文章，指向 sample run evidence 与
+  owner backfill pack。
+- 为 `PublishingPublicArticleTests` 增加
+  `OnnxToEngineTrtexecParityPublicArticleCoversMatrixStatusesGuiYoloAndProofBoundary`
+  专项门禁。
+
+### Verification
+
+- `dotnet test tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --filter "FullyQualifiedName~PublishingPublicArticleTests"`：
+  `13/13` 通过。
+- 编译阶段未出现本批新增错误；此前项目存在的 nullable warning 不属于本批改动范围。
+
+### C 盘与发布边界
+
+- 本阶段未下载 TensorRT、CUDA、cuDNN、模型、ONNX、engine、Python/pip 资产或 NuGet
+  临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
+  GitHub Release upload、issue close 或 push。

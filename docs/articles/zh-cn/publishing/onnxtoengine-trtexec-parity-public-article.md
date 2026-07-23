@@ -1,12 +1,15 @@
 # OnnxToEngine 与 trtexec parity：把模型转换做成可审计流程
 
-`samples/OnnxToEngine` 的目标不是做一个最小 demo，而是把 ONNX 到 TensorRT engine 的转换流程做清楚。对于熟悉 NVIDIA 官方工具的用户来说，它应该尽量贴近 `trtexec` 的模型转换能力；对于 .NET 用户来说，它又要比直接调用外部命令更容易集成、记录和排障。
+`samples/OnnxToEngine` 的目标不是做一个最小 demo，而是把 ONNX 到 TensorRT engine 的转换流程做清楚。对于熟悉 NVIDIA 官方 `trtexec` 的用户来说，它应该尽量贴近模型转换、shape profile、精度、timing cache、engine packaging、profiling 和 runtime artifact 的常用工作流；对于 .NET 用户来说，它又要比直接调用外部命令更容易集成、记录和排障。
+
+但 parity 文章不能写成“已经完全复刻官方 trtexec”。当前项目用 `applications/TensorRtExec/tensor-rt-exec-trtexec-parity-matrix.json` 和 `applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.json` 把能力分层：implemented、implemented-report、implemented-build-readback、implemented-bounded-runtime、parse-report-only、diagnostic-alias-compatible、checklist-backed-command-preview。任何 report、dry-run、GUI screenshot、sidecar 或 matrix 都不是 package-consumer-runtime proof。
 
 ## 适合谁阅读
 
 - 正在把 ONNX 模型转换为 TensorRT engine 的 .NET 开发者。
 - 熟悉官方 `trtexec`，希望理解 TensorRtExec / OnnxToEngine 差距的用户。
-- 需要审查 build-only、real-model-runtime、package-consumer-runtime proof 边界的维护者。
+- 需要审查 build-only、bounded-runtime-output、real-model-runtime、package-consumer-runtime proof 边界的维护者。
+- 想把 TensorRtExec CLI、WinForms、YoloVision 和 owner proof input 串成可发布教程的文章作者。
 
 ## 两条路径的关系
 
@@ -15,58 +18,211 @@
 - `samples/OnnxToEngine`：偏教程和样例，适合新用户理解模型转换。
 - `applications/TensorRtExec`：偏正式工具，目标是 CLI + WinForms 复刻官方 `trtexec` 的主要能力。
 
-两者共享同一个原则：build-only 只是构建证据，不是 runtime proof。
+两者共享 `TrtexecLikeParser`、`TrtexecLikeOptions`、`OnnxEngineBuildOptions.FromTrtexecLikeOptions` 和 `OnnxEngineBuildService`。这意味着 CLI、WinForms 和样例入口应该生成同一类 normalized command、report schema 和 proof boundary。
+
+关键代码路径：
+
+```text
+samples/OnnxToEngine/Program.cs
+applications/TensorRtExec/Core/TensorRtExecOptions.cs
+applications/TensorRtExec/Core/TensorRtExecService.cs
+applications/TensorRtExec/Core/TensorRtExecReport.cs
+applications/TensorRtExec/Console/TensorRtExecCommand.cs
+applications/TensorRtExec/WinForms/MainForm.cs
+src/JYPPX.TensorRtSharp.Tools/TrtexecLikeParser.cs
+src/JYPPX.TensorRtSharp.Tools/TrtexecLikeOptions.cs
+src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildService.cs
+src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildDiagnostics.cs
+```
 
 ## 常见转换命令
 
+OnnxToEngine 教程入口：
+
 ```powershell
-dotnet run --project .\samples\OnnxToEngine -- `
-  --onnx .\models\model.onnx `
-  --engine .\models\model.plan `
-  --fp16
+dotnet run --project .\samples\OnnxToEngine\OnnxToEngine.csproj -- `
+  --onnx E:\TensorRtSharpAssets\models\model.onnx `
+  --saveEngine E:\TensorRtSharpAssets\engines\model.plan `
+  --minShapes images:1x3x640x640 `
+  --optShapes images:1x3x640x640 `
+  --maxShapes images:4x3x640x640 `
+  --fp16 `
+  --buildOnly `
+  --exportReport E:\TensorRtSharpAssets\reports\model-build-report.json
 ```
 
 TensorRtExec 的 trtexec-like 形态：
 
 ```powershell
-dotnet run --project .\applications\TensorRtExec -- `
-  --onnx .\models\model.onnx `
-  --saveEngine .\models\model.plan `
+dotnet run --project .\applications\TensorRtExec\TensorRtExec.csproj -- `
+  --onnx E:\TensorRtSharpAssets\models\model.onnx `
+  --saveEngine E:\TensorRtSharpAssets\engines\model.plan `
   --minShapes images:1x3x640x640 `
   --optShapes images:1x3x640x640 `
-  --maxShapes images:1x3x640x640 `
+  --maxShapes images:4x3x640x640 `
   --fp16 `
   --workspace 1024 `
   --buildOnly `
-  --exportReport .\artifacts\model-build-report.json
+  --dumpLayerInfo `
+  --exportLayerInfo E:\TensorRtSharpAssets\reports\model.layers.json `
+  --exportReport E:\TensorRtSharpAssets\reports\model-tensorrtexec-report.json
 ```
 
-## Parity 关注点
+WinForms 入口：
 
-当前重点不是宣称已经复刻所有官方行为，而是把差距透明化：
+```powershell
+dotnet run --project .\applications\TensorRtExec\TensorRtExec.csproj -- --ui
+```
 
-- ONNX 输入和 engine 输出是否完整。
-- dynamic shape profile 是否可表达。
-- FP16/INT8/workspace/timing cache 是否只是参数解析、report，还是有真实生命周期 proof。
-- layer dump、profile、verbose log 是否只是 diagnostic metadata。
-- WinForms 是否与 CLI 选项对齐。
+GUI 的 command preview 来自 `TensorRtExecOptions.ToArgumentLine()`，它只是 surface parity evidence。GUI 截图、command preview 和导出的 report 都不能晋级 runtime proof。
 
-发布候选 gap list 位于：
+## Parity 矩阵怎么读
+
+`tensor-rt-exec-trtexec-parity-matrix.json` 的核心字段包括：
 
 ```text
-applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.json
+matrixId
+application
+modes = CLI / WinForms
+matrixState = release-readiness-planning
+proofBoundary
+entries[].id
+entries[].trtexecOption
+entries[].tensorRtExecStatus
+entries[].entryPoints
+entries[].proofBoundary
+entries[].isRuntimeProof
+entries[].gap
+entries[].nextStep
 ```
 
-## Proof 边界
+`tensor-rt-exec-release-candidate-gap-list.json` 则把 parity matrix 压成发布候选工作清单：
 
-OnnxToEngine 和 TensorRtExec 都不能单独证明模型输出正确。它们能生成 engine、report、sidecar、日志，但 real-model-runtime proof 需要样例 runner 读取真实输入并产生 `Passed=True`，package-consumer-runtime proof 还需要外部 consumer 使用公开包。
+```text
+gapListId
+sourceMatrix
+summary.totalItems
+summary.implementedOrReportReady
+summary.partialOrDiagnostic
+summary.runtimeProofItems = 0
+summary.packageConsumerRuntimeProofItems = 0
+items[].currentStatus
+items[].cliSupported
+items[].winFormsSupported
+items[].nextImplementationPaths
+```
+
+这些矩阵是 planning evidence only。它们能告诉维护者下一步做什么，不能授权发布，也不能关闭 release issue。GUI 截图、command preview、parity matrix 和 gap list 都不能证明 runtime output，也不能替代 package-consumer-runtime proof。
+
+## 已覆盖的高价值能力
+
+当前公开文章可以说这些能力已经有明确 surface 或 report/readback 路径：
+
+```text
+--onnx / --model / --onnxFile
+--saveEngine / --save-engine / --engine / --plan / --engineFile
+--loadEngine
+--minShapes / --optShapes / --maxShapes
+--shapes / --inputShapes / --batch
+--fp16
+--workspace / --memPoolSize
+--avgTiming / --minTiming
+--device / --useDLACore / --allowGPUFallback
+--tacticSources
+--directIO / --sparsity / --stronglyTyped
+--inputIOFormats / --outputIOFormats
+--precisionConstraints / --layerPrecisions / --layerOutputTypes
+--versionCompatible / --excludeLeanRuntime / --stripWeights / --refit
+--refitFromOnnx / --saveRefittedEngine
+--allowWeightStreaming / --weightStreamingBudget
+--timingCacheFile / --exportTimingCache
+--profilingVerbosity / --dumpProfile / --exportProfile / --saveProfile
+--dumpLayerInfo / --exportLayerInfo
+--iterations / --warmUp / --duration / --streams
+--useCudaGraph / --noDataTransfers
+--loadInputs / --dumpOutput / --dumpRawBindingsToFile / --exportOutput / --exportTimes
+```
+
+其中很多能力是 builder/readback/report evidence，不是 runtime proof。例如 workspace/memory pool、timing iterations、deployment policies、IO/layer precision policies 和 timing cache 都能进入 report，但没有真实输入、输出校验、日志 hash 和 owner review 时，不能证明模型正确。
+
+## 需要谨慎呈现的能力
+
+这些能力特别容易被误写成“已完全支持官方 trtexec”，文章必须保守：
+
+- `--int8 --calib`：当前是 parse-report-only-calibration-boundary；calibrator ownership、校准数据来源、cache hash 和 INT8 精度仍需要独立设计与 owner evidence。
+- `--fp8 --best --dumpRefit --markDebug --dumpDebugTensors`：属于 parse-report-only 或 capability probe，不证明 precision support、debug tensor runtime output 或 refit 生命周期。
+- `--plugins/--plugin/--dynamicPlugins/--setPluginsToSerialize`：当前只记录 plugin path 和 copied inventory metadata；register/deregister/load library 仍是 ownership 风险边界。
+- `--sleepTime`：保持 parse-only，因为仓库没有忠实的 device-side launch-gap primitive。
+- `--loadEngine`：可以记录 `PreflightMetadata`、`LoadedEngineDiagnostics`，并在兼容 one-float-input 场景下做 bounded enqueue/readback；没有 reference output 时只是 `runtime-output-captured-unverified`。
+- WinForms：`tensor-rt-exec-gui-cli-field-map.json` 和 `tensor-rt-exec-gui-cli-field-map.md` 证明 GUI/CLI field parity，不证明 runtime output。
+
+## Report 与 proof 边界
+
+TensorRtExec report 会输出：
+
+```text
+ProofClassification
+BuildEvidenceOnly
+DryRun
+NormalizedCommandLine
+NormalizedCommandSha256
+DeploymentOptions
+BuilderConfigDeploymentSnapshot
+ParserPreflightSnapshot
+RuntimeOptions
+InferenceRan
+OutputMatch
+IsRuntimeExecutionProof
+IsRealModelRuntimeProof
+IsPackageConsumerRuntimeProof
+PreflightMetadata
+LoadedEngineDiagnostics
+CapabilityProbe
+WorkspaceBytes
+OptionImplementationStatus
+ReportBoundary
+```
+
+这些字段能让文章、排障和 release candidate review 有证据可查。`NormalizedCommandSha256` 可以证明命令线未被替换；`OptionImplementationStatus` 可以说明哪些选项 applied、parse-only 或 blocked；`ReportBoundary.ForbiddenSubstitutes` 会列出不能冒充 proof 的项目。
+
+禁止把以下内容写成 runtime/package proof：
+
+- TensorRtExec report。
+- OnnxToEngine report。
+- build-only output。
+- dry-run / previewOnly。
+- dependency-probe-only。
+- GUI screenshot。
+- command preview。
+- parity matrix。
+- gap list。
+- local feed package consumer。
+- ProjectReference consumer。
+- direct `.nupkg` install。
+- GitHub Actions dry-run。
+
+## 与 YoloVision 的关系
+
+TensorRtExec/OnnxToEngine 负责 build/report 和通用 bounded runtime，YoloVision 负责 model-specific sample run。对于 YOLOv5、YOLOv6、YOLOv7、YOLOv8、YOLOv9、YOLOv10、YOLO11、YOLO26 以及 det/cls/seg/obb/pose/sem，真正能晋级 real-model-runtime 的证据必须来自：
+
+```text
+samples/YoloVision/yolovision-task-output-contract.json
+samples/assets/yolovision-real-asset-owner-backfill-pack.json
+samples/assets/yolovision-article-case-pack.json
+eng/Test-YoloVisionRealAssetCandidate.ps1
+eng/Test-YoloVisionRealAssetOwnerBackfillPack.ps1
+eng/Test-SampleRunEvidenceRecord.ps1
+```
+
+推荐路径是：TensorRtExec build-only report -> engine/hash/readback sidecar -> YoloVision real run log -> output JSON/hash -> sample-run evidence validator -> owner review -> clean external consumer package proof -> post-publish verification。
 
 ## 配图建议
 
 - 官方 trtexec 参数到 TensorRtExec 参数的对照表。
-- ONNX -> engine -> sample run -> proof validator 的流程图。
-- build report JSON 示例截图。
+- ONNX -> engine -> TensorRtExec report -> YoloVision sample run -> proof validator 的流程图。
+- parity matrix 截图，展示 implemented、implemented-report、parse-report-only、bounded-runtime-output 的状态颜色。
+- build report JSON 示例截图，突出 `ProofClassification`、`BuildEvidenceOnly` 和 `IsPackageConsumerRuntimeProof=false`。
 
 ## 下一步
 
-下一阶段应优先实现 `--loadEngine` 只读诊断、builder config readback 和 WinForms 参数 parity，再把 OnnxToEngine 文档与 TensorRtExec gap list 互相链接。
+下一阶段应继续把 matrix 中 parse/report-only 或 diagnostic-alias-compatible 的项目变成更强的 typed readback、owner-safe lifecycle 或 model-specific evidence。优先级仍然是只读、查询型、部署关键型 API；calibrator、plugin load/register、callback、allocator、borrowed pointer 和 external resource 不要伪装成低风险实现。
