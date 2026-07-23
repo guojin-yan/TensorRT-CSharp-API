@@ -2760,3 +2760,40 @@ raw grid/stride 解码、NMS、JSON/SVG 与严格 sample-run evidence 的端到�
   `publicRedistributionOwnerApproval=false`、`canPublishPublicly=false`；没有伪造 reviewer、
   owner signature 或公开发布批准。
 - 未执行 NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
+
+## 2026-07-23 Dual Package Public Article Expansion
+
+本阶段继续公开文章矩阵收口，扩写 `docs/articles/zh-cn/publishing/package-strategy-public-article.md`，
+把 GitHub full runtime 包与 NuGet small bridge/core 包的双路线、runtime split roles、
+runtime package key、local candidate evidence 和真实 package-consumer-runtime proof 边界写成外部
+读者可直接理解的文章。
+
+### 实现
+
+- 文章明确 `JYPPX.TensorRT.CSharp.API` 托管 API、C++ bridge DLL、`Bridge`、
+  `CudaCudnn`、`TensorRt` split runtime 包，以及 full runtime 包之间的交付关系。
+- 增加 runtime package key 示例：`win-x64-trt10.11-cuda12.9-cudnn9.22`、
+  `win-x64-trt11.0-cuda13.2-cudnn9.22`、`win-x64-trt8.6-cuda11.8-cudnn8.9`。
+- 将 `Export-DualPackagePublishPreflightMatrix.ps1`、
+  `Export-FinalOwnerExecutionChecklist.ps1`、`release-docs-and-nuget-metadata-audit.json`
+  和 `release-candidate-package-inventory.md` 定位为本地 candidate/pre-publish evidence。
+- 明确 local feed、ProjectReference、direct `.nupkg`、build-only、
+  dependency-probe-only、dashboard、dry-run、template JSON 和 `failedBlockerCount=0`
+  都不能替代 package-consumer-runtime proof。
+- 为 `PublishingPublicArticleTests` 增加专项质量门，防止双路线、runtime key 与 proof
+  边界在后续文章维护中丢失。
+
+### Verification
+
+- `dotnet test tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --filter "FullyQualifiedName~PublishingPublicArticleTests"`：
+  `4/4` 通过。
+- 编译阶段仍出现 5 条既有 nullable warning，位置在
+  `FinalPublishProofGateAndOwnerExecutionPackTests.cs` 与
+  `ReleasePublishReadinessEvidencePackAndPublicDocsGateTests.cs`，本批未改动这些文件。
+
+### C 盘与发布边界
+
+- 本阶段未下载 TensorRT、CUDA、cuDNN、模型、ONNX、engine、Python/pip 资产或 NuGet
+  临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
+  GitHub Release upload 或 issue close。

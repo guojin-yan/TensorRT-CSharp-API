@@ -87,6 +87,52 @@ public sealed class PublishingPublicArticleTests
         Assert.Contains("不要把系统目录污染", content, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void PackageStrategyPublicArticleCoversDualRoutesRuntimeKeysAndProofBoundaries()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "publishing",
+            "package-strategy-public-article.md"));
+
+        foreach (string marker in new[]
+        {
+            "GitHub full runtime 包",
+            "NuGet small bridge/core 包",
+            "managed API",
+            "C++ bridge DLL",
+            "Bridge",
+            "CudaCudnn",
+            "TensorRt",
+            "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge",
+            "win-x64-trt11.0-cuda13.2-cudnn9.22",
+            "Export-DualPackagePublishPreflightMatrix.ps1",
+            "Export-FinalOwnerExecutionChecklist.ps1",
+            "release-docs-and-nuget-metadata-audit.json",
+            "release-candidate-package-inventory.md",
+            "clean external consumer",
+            "post-publish verification",
+            "strict validator",
+            "nonSubstituteConfirmations",
+            "local feed consumer",
+            "ProjectReference consumer",
+            "direct `.nupkg` install",
+            "build-only report",
+            "dependency-probe-only report",
+            "failedBlockerCount=0"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("不能作为 package-consumer-runtime proof", content, StringComparison.Ordinal);
+        Assert.Contains("不能说“公开发布已经完成”", content, StringComparison.Ordinal);
+        Assert.Contains("“runtime proof 已完成”", content, StringComparison.Ordinal);
+    }
+
     private static readonly ArticleExpectation[] Articles =
     {
         new(
