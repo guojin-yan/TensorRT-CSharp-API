@@ -133,6 +133,67 @@ public sealed class PublishingPublicArticleTests
         Assert.Contains("“runtime proof 已完成”", content, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void BuilderConfigReadbackPublicArticleCoversTrtexecControlsVersionGuardsAndProofBoundaries()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "publishing",
+            "builder-config-readback-public-article.md"));
+
+        foreach (string marker in new[]
+        {
+            "TensorRtBuilderConfig.cs",
+            "TensorRtBuilderConfig.Trt11Diagnostics.cs",
+            "TrtexecLikeDeploymentOptions.cs",
+            "OnnxEngineBuildService.cs",
+            "OnnxEngineBuildDiagnostics.cs",
+            "tensor-rt-exec-release-candidate-gap-list.json",
+            "TrtexecMemoryPool",
+            "TrtexecTiming",
+            "TrtexecDeploymentControl",
+            "Requested",
+            "Readback",
+            "ReadbackMatch",
+            "EvidenceBoundary=builder-config-readback-only",
+            "--workspace",
+            "--memPoolSize",
+            "--avgTiming",
+            "--minTiming",
+            "--tacticSources",
+            "--profilingVerbosity",
+            "--exportTimingCache",
+            "SetMemoryPoolLimit",
+            "GetMemoryPoolLimit",
+            "SetAverageTimingIterations",
+            "GetAverageTimingIterations",
+            "MaxWorkspaceSizeCompatibilityInBytes",
+            "MinTimingIterationsCompatibility",
+            "TRT8",
+            "TRT10/11",
+            "TRT11",
+            "dependency-probe-only",
+            "build-only report",
+            "parse-only report",
+            "TensorRtExec GUI screenshot",
+            "local feed package consumer",
+            "package-consumer-runtime proof",
+            "clean external consumer",
+            "owner input validator",
+            "post-publish verification"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("不是 runtime proof", content, StringComparison.Ordinal);
+        Assert.Contains("不能单独晋级", content, StringComparison.Ordinal);
+        Assert.Contains("不能用 presence probe 替代生命周期设计", content, StringComparison.Ordinal);
+    }
+
     private static readonly ArticleExpectation[] Articles =
     {
         new(

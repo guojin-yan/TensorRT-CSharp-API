@@ -2797,3 +2797,43 @@ runtime package key、local candidate evidence 和真实 package-consumer-runtim
   临时包到 C 盘。
 - 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
   GitHub Release upload 或 issue close。
+
+## 2026-07-23 Builder Config Readback Public Article Expansion
+
+本阶段继续公开文章矩阵质量提升，扩写
+`docs/articles/zh-cn/publishing/builder-config-readback-public-article.md`，将 builder
+config readback 从短说明扩展为可发布的教程型文章。文章围绕 TensorRtExec/trtexec 对齐场景，
+解释 `Requested`、`Readback`、`ReadbackMatch` 与
+`EvidenceBoundary=builder-config-readback-only` 的意义，并明确 build/report evidence 与
+package-consumer-runtime proof 的边界。
+
+### 实现
+
+- 文章补齐 `TensorRtBuilderConfig.cs`、`TensorRtBuilderConfig.Trt11Diagnostics.cs`、
+  `TrtexecLikeDeploymentOptions.cs`、`OnnxEngineBuildService.cs`、
+  `OnnxEngineBuildDiagnostics.cs` 和
+  `applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.json` 的证据路径。
+- 公开说明 `--workspace`、`--memPoolSize`、`--avgTiming`、`--minTiming`、
+  `--tacticSources`、`--profilingVerbosity`、`--exportTimingCache`、DLA/GPU fallback、
+  DirectIO、sparsity、strongly typed、engine packaging、timing cache 和 scalar controls 的
+  readback 边界。
+- 明确 TRT8 legacy compatibility、TRT10/11 timing 差异、TRT11 removed/changed API、
+  progress monitor/calibrator/algorithm selector presence probe 与 plugin lifecycle 的高风险边界。
+- 为 `PublishingPublicArticleTests` 增加
+  `BuilderConfigReadbackPublicArticleCoversTrtexecControlsVersionGuardsAndProofBoundaries`
+  专项门禁。
+
+### Verification
+
+- `dotnet test tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --filter "FullyQualifiedName~PublishingPublicArticleTests"`：
+  `5/5` 通过。
+- 编译阶段仍出现 5 条既有 nullable warning，位置在
+  `FinalPublishProofGateAndOwnerExecutionPackTests.cs` 与
+  `ReleasePublishReadinessEvidencePackAndPublicDocsGateTests.cs`，本批未改动这些文件。
+
+### C 盘与发布边界
+
+- 本阶段未下载 TensorRT、CUDA、cuDNN、模型、ONNX、engine、Python/pip 资产或 NuGet
+  临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
+  GitHub Release upload 或 issue close。
