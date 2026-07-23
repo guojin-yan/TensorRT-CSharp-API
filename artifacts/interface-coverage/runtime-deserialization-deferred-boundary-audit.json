@@ -1,0 +1,140 @@
+{
+  "schemaVersion": "runtime-deserialization-deferred-boundary-audit.v1",
+  "auditKind": "runtime-deserialization-deferred-boundary-audit",
+  "generatedAtLocal": "2026-07-23T00:00:00+08:00",
+  "sourceMatrix": "artifacts/interface-coverage/tensorrt-interface-comparison.csv",
+  "sourceCandidatePlan": "artifacts/interface-coverage/deferred-readonly-api-candidate-plan.json",
+  "scope": {
+    "designGroup": "runtime-deserialization-boundary",
+    "candidateCount": 5,
+    "canPromoteWithoutDesignGate": false,
+    "canPromoteRuntimeProof": false,
+    "deferredHistoryRetained": true,
+    "nativePromotionAttempted": false,
+    "publicApiPointerFree": true,
+    "githubActionsUsed": false,
+    "publicPublishSideEffects": false
+  },
+  "safeAlternativesAlreadyAvailable": [
+    {
+      "evidenceKind": "runtime-deserialization-boundary-precheck",
+      "publicSurface": "TensorRtRuntimeDeserializationBoundaryPrecheck.EvaluateKnownSurface",
+      "coverage": "direct IRuntime::deserializeCudaEngine is covered by scoped-buffer bridge; deserializeCudaEngineV2 and loadRuntime remain deferred",
+      "runtimeProof": false
+    },
+    {
+      "evidenceKind": "runtime-deserialization-dependency-diagnostics",
+      "publicSurface": "TensorRtRuntimeDeserializationDependencyDiagnostics.EvaluateKnownSurface",
+      "coverage": "classifies dependency-probe-only, CUDA driver/runtime blocker, missing full package consumer runtime proof, and loadRuntime ownership blocker",
+      "runtimeProof": false
+    },
+    {
+      "evidenceKind": "stream-io-interface-info-design-gate",
+      "publicSurface": "TensorRtStreamIoInterfaceInfoDesignGate.EvaluateKnownSurface",
+      "coverage": "keeps IStreamReader/IStreamReaderV2/IStreamWriter callbacks and owner handles out of public API",
+      "runtimeProof": false
+    }
+  ],
+  "promotionPrerequisites": [
+    "bridge-owned returned runtime lifetime for IRuntime::loadRuntime",
+    "plugin host-code and external lean runtime dependency diagnostics",
+    "managed-owned stream reader/writer callback handles with no-throw native vtables",
+    "detach-before-release ordering for any callback-owned serialization object",
+    "serialized buffer copy or pin policy that cannot escape the native call",
+    "full package consumer runtime smoke on a compatible NVIDIA driver/runtime host",
+    "strict classification evidence that no local build-only or dependency-probe-only output is promoted as runtime proof"
+  ],
+  "blockedRows": [
+    {
+      "interface": "IRuntime::deserializeCudaEngineV2",
+      "class": "IRuntime",
+      "method": "deserializeCudaEngineV2",
+      "tensorRtLine": "10",
+      "header": "NvInferRuntime.h",
+      "manifestId": "trt10-runtime-deserialize-cuda-engine-v2-deferred",
+      "entryPoint": "jyppx_trt10_runtime_deserialize_cuda_engine_v2_deferred",
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "implementationStatus": "deferred-only",
+      "candidatePlanRisk": "medium",
+      "symbolExpectation": "vendor vtable method, not a standalone PE export requirement",
+      "ownershipBlocker": "stream reader input and returned engine ownership must be modeled before promotion",
+      "safeAlternative": "TensorRtRuntime.Deserialize(byte[]/ArraySegment/ReadOnlySpan/Stream/File/HostMemory) scoped-buffer bridge",
+      "decision": "keep-deferred"
+    },
+    {
+      "interface": "IRuntime::deserializeCudaEngineV2",
+      "class": "IRuntime",
+      "method": "deserializeCudaEngineV2",
+      "tensorRtLine": "11",
+      "header": "NvInferRuntime.h",
+      "manifestId": "trt11-runtime-deserialize-cuda-engine-v2-deferred",
+      "entryPoint": "jyppx_trt11_runtime_deserialize_cuda_engine_v2_deferred",
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "implementationStatus": "deferred-only",
+      "candidatePlanRisk": "medium",
+      "symbolExpectation": "vendor vtable method, not a standalone PE export requirement",
+      "ownershipBlocker": "stream reader V2 callbacks, seek state, device-aware reads, and returned engine ownership must be modeled before promotion",
+      "safeAlternative": "TensorRtRuntime.Deserialize(byte[]/ArraySegment/ReadOnlySpan/Stream/File/HostMemory) scoped-buffer bridge",
+      "decision": "keep-deferred"
+    },
+    {
+      "interface": "IRuntime::loadRuntime",
+      "class": "IRuntime",
+      "method": "loadRuntime",
+      "tensorRtLine": "8",
+      "header": "NvInferRuntime.h",
+      "manifestId": "trt8-runtime-load-runtime-deferred",
+      "entryPoint": "jyppx_trt8_runtime_load_runtime_deferred",
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+      "implementationStatus": "deferred-only",
+      "candidatePlanRisk": "medium",
+      "symbolExpectation": "vendor runtime method, external runtime/library loading boundary",
+      "ownershipBlocker": "returned runtime owner, library path trust, and plugin host-code lifetime are not modeled",
+      "safeAlternative": "runtime dependency diagnostics and version-compatible host-code policy readback",
+      "decision": "keep-deferred"
+    },
+    {
+      "interface": "IRuntime::loadRuntime",
+      "class": "IRuntime",
+      "method": "loadRuntime",
+      "tensorRtLine": "10",
+      "header": "NvInferRuntime.h",
+      "manifestId": "trt10-runtime-load-runtime-deferred",
+      "entryPoint": "jyppx_trt10_runtime_load_runtime_deferred",
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "implementationStatus": "deferred-only",
+      "candidatePlanRisk": "medium",
+      "symbolExpectation": "vendor runtime method, external runtime/library loading boundary",
+      "ownershipBlocker": "returned runtime owner, lean runtime file provenance, and plugin library dependency diagnostics are not complete",
+      "safeAlternative": "runtime dependency diagnostics and TensorRtExec exclude-lean build-only guard",
+      "decision": "keep-deferred"
+    },
+    {
+      "interface": "IRuntime::loadRuntime",
+      "class": "IRuntime",
+      "method": "loadRuntime",
+      "tensorRtLine": "11",
+      "header": "NvInferRuntime.h",
+      "manifestId": "trt11-runtime-load-runtime-deferred",
+      "entryPoint": "jyppx_trt11_runtime_load_runtime_deferred",
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11",
+      "implementationStatus": "deferred-only",
+      "candidatePlanRisk": "medium",
+      "symbolExpectation": "vendor runtime method, external runtime/library loading boundary",
+      "ownershipBlocker": "returned runtime owner, external lean runtime provenance, and plugin host-code policy are not modeled",
+      "safeAlternative": "runtime dependency diagnostics and TensorRtExec dependency-probe-only classification",
+      "decision": "keep-deferred"
+    }
+  ],
+  "qualityGates": [
+    "tests/JYPPX.ProjectQuality.Tests/RuntimeDeserializationBoundaryPrecheckTests.cs",
+    "tests/JYPPX.ProjectQuality.Tests/RuntimeDeserializationDeferredBoundaryAuditTests.cs",
+    "tests/JYPPX.ProjectQuality.Tests/StreamIoInterfaceInfoDesignGateTests.cs"
+  ],
+  "documentation": [
+    "docs/articles/zh-cn/runtime-deserialization-boundary-precheck.md",
+    "docs/articles/zh-cn/runtime-deserialization-dependency-diagnostics.md",
+    "docs/articles/zh-cn/stream-io-interface-info-design-gate.md",
+    "artifacts/interface-coverage/runtime-deserialization-deferred-boundary-audit.md"
+  ]
+}

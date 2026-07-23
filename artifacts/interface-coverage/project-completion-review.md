@@ -1,5 +1,31 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-23 Runtime Deserialization Deferred Boundary Audit
+
+本批回到 deferred 主线，针对 `runtime-deserialization-boundary` 设计组做集中审计，而不是尝试把
+`IRuntime::deserializeCudaEngineV2` 或 `IRuntime::loadRuntime` 伪装为低风险晋级。审计固定 5 条
+medium-risk deferred-only 行：TRT10/11 `deserializeCudaEngineV2` 与 TRT8/10/11 `loadRuntime`。
+
+新增 `runtime-deserialization-deferred-boundary-audit.json/.md`，记录每条候选的 manifest id、entrypoint、
+version guard、vendor vtable/外部 runtime 边界、ownership blocker、现有 safe alternative 和
+`keep-deferred` 决策。现有 `TensorRtRuntimeDeserializationBoundaryPrecheck` 继续证明 direct
+`IRuntime::deserializeCudaEngine` 已由 scoped-buffer bridge 覆盖；`TensorRtRuntimeDeserializationDependencyDiagnostics`
+继续把 dependency-probe-only、CUDA driver/runtime blocker、full package consumer runtime proof 缺失和
+`loadRuntime` ownership blocker 分类为 non-proof；`TensorRtStreamIoInterfaceInfoDesignGate` 继续锁住
+stream reader/writer callback 与 owner handle 前置条件。
+
+### Verification 与边界
+
+- 新增 `RuntimeDeserializationDeferredBoundaryAuditTests`，验证 5 条 runtime boundary rows 仍为
+  `deferred-only`，deferred history 保留，未尝试 native promotion，GitHub Actions 与发布副作用均为 false。
+- 聚焦测试：
+  `RuntimeDeserializationDeferredBoundaryAuditTests|RuntimeDeserializationBoundaryPrecheckTests|StreamIoInterfaceInfoDesignGateTests`
+  共 `12/12` 通过；仅出现 5 条既有 ProjectQuality nullable warning。
+- 本批不修改 native ABI surface、不新增 entrypoint、不删除 deferred manifest、不运行 GitHub Actions、不 push、
+  不发布 NuGet/GitHub Packages/GitHub Release。
+- 这些审计与 design gate 是 source-quality / non-proof evidence，不是 runtime execution proof、package-consumer-runtime
+  proof、external lean runtime proof 或 release-close proof。
+
 ## 2026-07-23 TRT8 Legacy Parser Copied Readonly Diagnostics
 
 本批完成 TRT8 legacy parser 的 owner-scoped safe alternative：UFF required version 三个标量 getter、
