@@ -1,5 +1,27 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-23 Source Build Public Article Expansion
+
+本批继续补齐二次矫正中的源码 C++ 编译教程与宣传文章要求，将
+`docs/articles/zh-cn/publishing/source-build-windows-public-article.md` 从简短入口扩展为可发布的 Windows
+源码构建文章。文章现在覆盖 C# / C++ bridge / NVIDIA runtime 三层构建路线图、环境清单、推荐目录、
+`CUDA_PATH`、TensorRT/cuDNN 检查、6 个 Windows CMake release preset、生成绑定、managed build、native bridge
+构建后验证、CMake/CUDA/TensorRT/DLL/CUDA error 35 排障，以及 GitHub full runtime 包与 NuGet 小包双路线边界。
+
+同步新增 `PublishingPublicArticleTests.SourceBuildPublicArticleCoversCppBridgeEnvironmentPresetsPackagesAndTroubleshooting`，
+锁定 C++ bridge、CUDA/TensorRT/cuDNN、preset、`Generate-Bindings.ps1`、ABI/public handle quality gate、
+`dumpbin /dependents`、双包路线和 deep-dive article 链接，防止 public article 退化成短清单。
+
+### Verification 与边界
+
+- 定向测试：
+  `PublishingPublicArticleTests|SourceBuildCmakeWindowsGuideTests` 共 `6/6` 通过；编译阶段仅出现 5 条既有
+  ProjectQuality nullable warning。
+- 本批没有执行 native build、没有下载 CUDA/TensorRT/cuDNN/ONNX/engine/nupkg；只更新文章与质量门。
+- 源码构建文章仍明确 build-only 边界，不把 CMake/dotnet build、local feed 或 `Skipped=True` 宣称为
+  package-consumer-runtime、post-publish、publish approval 或 release-close proof。
+- 本批未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages/GitHub Release 发布。
+
 ## 2026-07-23 YOLOv10 Public Article Evidence Backfill
 
 本批转向宣传文章序列的真实内容质量，把 `YoloVision YOLOv10 End-to-End 输出接入：从官方模型到 TensorRT 结果`

@@ -42,6 +42,51 @@ public sealed class PublishingPublicArticleTests
         }
     }
 
+    [Fact]
+    public void SourceBuildPublicArticleCoversCppBridgeEnvironmentPresetsPackagesAndTroubleshooting()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "publishing",
+            "source-build-windows-public-article.md"));
+
+        foreach (string marker in new[]
+        {
+            "C++ bridge DLL",
+            "CUDA_PATH",
+            "NvInfer.h",
+            "NvOnnxParser.h",
+            "cuDNN",
+            "win-x64-trt8-cuda11-release",
+            "win-x64-trt10-cuda12-release",
+            "win-x64-trt11-cuda13-release",
+            "Generate-Bindings.ps1",
+            "Test-BindingGeneratorOutputs.ps1",
+            "Export-InterfaceCoverageMatrix.ps1",
+            "TensorRtNativeAbiSurfaceParityTests",
+            "PublicApiHandleExposureAuditTests",
+            "dumpbin /dependents",
+            "CUDA error 35",
+            "GitHub full runtime 包",
+            "NuGet 小包",
+            "docs/articles/zh-cn/source-build-cmake-windows-guide.md",
+            "docs/articles/zh-cn/tensorrtsharp-source-build-cpp-guide.md",
+            "package-consumer-runtime proof"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("```mermaid", content, StringComparison.Ordinal);
+        Assert.Contains("CMake 找不到 CUDA", content, StringComparison.Ordinal);
+        Assert.Contains("TensorRT 头文件和 lib 不匹配", content, StringComparison.Ordinal);
+        Assert.Contains("DLL 加载失败", content, StringComparison.Ordinal);
+        Assert.Contains("不要把系统目录污染", content, StringComparison.Ordinal);
+    }
+
     private static readonly ArticleExpectation[] Articles =
     {
         new(
