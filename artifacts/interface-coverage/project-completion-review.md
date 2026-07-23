@@ -3244,3 +3244,47 @@ package-consumer-runtime proof，也不能授权发布。
   临时包到 C 盘。
 - 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
   GitHub Release upload、issue close 或 push。
+
+## 2026-07-24 CUDA TensorRT DLL Troubleshooting Public Article Expansion
+
+本阶段继续公开文章矩阵质量提升，扩写
+`docs/articles/zh-cn/publishing/cuda-tensorrt-dll-troubleshooting-public-article.md`，将 Windows
+CUDA/TensorRT DLL 加载排查从短说明扩展为 native load 决策树、采集字段和 proof boundary
+指南。文章明确 troubleshooting guide 不是 package-consumer-runtime proof，也不能授权发布或关闭
+release issue。
+
+### 实现
+
+- 文章补齐 `NativeBridgePathResolver.cs`、`NativeBridgeLibraryLoader.cs`、`BridgeConstants.cs`、
+  `CudaEnvironmentProbe.cs`、`TensorRtEnvironmentProbe.cs`、`TensorRtToolSupport.cs` 与
+  `OnnxEngineBuildService.cs` 的证据路径。
+- 公开说明 `NativeLibrary.SetDllImportResolver`、`NativeLibrary.TryLoad`、
+  `BridgeConstants.NativeBridgeLibraryName`、`jyppxtrtbridge.dll` 以及 TensorRT/CUDA/cuDNN DLL
+  依赖链。
+- 增加 native load 决策树：`dotnet --info`、`nvidia-smi`、进程位数、runtime package manifest、
+  output directory、PATH/current directory、最小 probe、dependency probe 和 runtime smoke。
+- 覆盖 `DllNotFoundException`、`BadImageFormatException`、CUDA error 35、
+  `CUDA driver/runtime mismatch`、`native initialization failed`、blocked-by-cuda-driver、
+  TRT8/TRT10/TRT11 ABI/DLL 命名差异和 cuDNN 8/9 差异。
+- 明确 local feed、ProjectReference、direct `.nupkg` install、GitHub Actions dry-run、
+  dependency-probe-only、build-only TensorRtExec report、OnnxToEngine report、YoloVision matrix、
+  sidecar-only metadata、GUI screenshot、command preview 和无 hash 日志都不是
+  package-consumer-runtime proof。
+- 为 `PublishingPublicArticleTests` 增加
+  `CudaTensorRtDllTroubleshootingPublicArticleCoversNativeLoadDecisionTreeAndProofBoundary`
+  专项门禁。
+
+### Verification
+
+- `dotnet test tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --filter "FullyQualifiedName~PublishingPublicArticleTests"`：
+  `15/15` 通过。
+- 编译阶段仍出现 5 条既有 nullable warning，位置在
+  `FinalPublishProofGateAndOwnerExecutionPackTests.cs` 与
+  `ReleasePublishReadinessEvidencePackAndPublicDocsGateTests.cs`，本批未改动这些文件。
+
+### C 盘与发布边界
+
+- 本阶段未下载 TensorRT、CUDA、cuDNN、模型、ONNX、engine、Python/pip 资产或 NuGet
+  临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
+  GitHub Release upload、issue close 或 push。

@@ -147,6 +147,103 @@ public sealed class PublishingPublicArticleTests
     }
 
     [Fact]
+    public void CudaTensorRtDllTroubleshootingPublicArticleCoversNativeLoadDecisionTreeAndProofBoundary()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "publishing",
+            "cuda-tensorrt-dll-troubleshooting-public-article.md"));
+
+        foreach (string marker in new[]
+        {
+            "DllNotFoundException",
+            "BadImageFormatException",
+            "CUDA error 35",
+            "CUDA driver/runtime mismatch",
+            "native initialization failed",
+            "blocked-by-cuda-driver",
+            "jyppxtrtbridge.dll",
+            "nvinfer_10.dll",
+            "nvinfer_plugin_10.dll",
+            "nvonnxparser_10.dll",
+            "cudart64_12.dll",
+            "cudnn64_9.dll",
+            "src/JYPPX.Shared/Interop/NativeBridgePathResolver.cs",
+            "src/JYPPX.Shared/Interop/NativeBridgeLibraryLoader.cs",
+            "src/JYPPX.Shared/BridgeConstants.cs",
+            "src/JYPPX.CudaSharp/CudaEnvironmentProbe.cs",
+            "src/JYPPX.TensorRtSharp/TensorRtEnvironmentProbe.cs",
+            "src/JYPPX.TensorRtSharp.Tools/TensorRtToolSupport.cs",
+            "src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildService.cs",
+            "NativeLibrary.SetDllImportResolver",
+            "NativeLibrary.TryLoad",
+            "BridgeConstants.NativeBridgeLibraryName",
+            "pack/runtime/runtime-packages.manifest.json",
+            "pack/runtime-split/split-runtime-packages.manifest.json",
+            "docs/articles/zh-cn/runtime-package-native-load-troubleshooting.md",
+            "docs/articles/zh-cn/windows-installation-and-troubleshooting-guide.md",
+            "docs/articles/zh-cn/cuda-error-35-troubleshooting.md",
+            "docs/articles/zh-cn/runtime-package-minimal-smoke-commands.md",
+            "docs/articles/zh-cn/package-consumer-runtime-proof-clean-consumer-guide.md",
+            "dotnet --info",
+            "nvidia-smi",
+            "dotnet list package",
+            "dotnet restore --force-evaluate",
+            "dotnet build -c Release",
+            "Get-ChildItem .\\bin\\Release\\net8.0 -Filter *.dll",
+            "$env:PATH -split ';'",
+            "key",
+            "packageId",
+            "rid",
+            "tensorRtLine",
+            "tensorRtVersion",
+            "cudaLine",
+            "cudaVersion",
+            "cudnnMajor",
+            "cudnnVersion",
+            "bridgeFile",
+            "tensorRtFiles",
+            "cudaFiles",
+            "cudnnFiles",
+            "role = bridge",
+            "role = cuda-cudnn",
+            "role = tensorrt",
+            "native asset listing",
+            "dependency probe log",
+            "runtime smoke log",
+            "stdout/stderr SHA256",
+            "managed/runtime package SHA256",
+            "OS / architecture / GPU / driver / CUDA / TensorRT / cuDNN metadata",
+            "eng/Test-ExternalRuntimeProofRecord.ps1",
+            "eng/Test-PackageConsumerRuntimeProofRecord.ps1",
+            "eng/Test-PostPublishVerificationRecord.ps1",
+            "local feed",
+            "ProjectReference",
+            "direct `.nupkg` install",
+            "GitHub Actions dry-run",
+            "dependency-probe-only log",
+            "build-only 的 TensorRtExec report",
+            "OnnxToEngine report",
+            "YoloVision matrix",
+            "sidecar-only metadata",
+            "GUI screenshot",
+            "command preview"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("不是 package-consumer-runtime proof", content, StringComparison.Ordinal);
+        Assert.Contains("不能授权发布", content, StringComparison.Ordinal);
+        Assert.Contains("不能关闭 release issue", content, StringComparison.Ordinal);
+        Assert.Contains("不要把 runtime deserialization ownership", content, StringComparison.Ordinal);
+        Assert.Contains("伪装成 DLL 加载问题", content, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void SourceBuildPublicArticleCoversCppBridgeEnvironmentPresetsPackagesAndTroubleshooting()
     {
         string content = File.ReadAllText(Path.Combine(
