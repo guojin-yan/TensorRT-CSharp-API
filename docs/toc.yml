@@ -158,6 +158,8 @@
     href: articles/zh-cn/yolovision-all-task-overview.md
   - name: YoloVision Detection Tutorial
     href: articles/zh-cn/yolovision-detection-tutorial.md
+  - name: YoloVision YOLOv10 End-to-End Output Guide
+    href: articles/zh-cn/yolovision-yolov10-end-to-end-output-guide.md
   - name: YoloVision Segmentation Tutorial
     href: articles/zh-cn/yolovision-segmentation-tutorial.md
   - name: YoloVision Pose Tutorial

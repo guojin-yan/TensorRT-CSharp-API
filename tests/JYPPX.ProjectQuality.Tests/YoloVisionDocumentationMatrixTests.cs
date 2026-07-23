@@ -111,4 +111,50 @@ public sealed class YoloVisionDocumentationMatrixTests
             Assert.Contains("\"task\": \"" + taskName + "\"", articleCasePack, StringComparison.Ordinal);
         }
     }
+
+    [Fact]
+    public void YoloV10EndToEndGuideMatchesManagedDecoderAndStaysNonProof()
+    {
+        string relativeArticlePath = "articles/zh-cn/yolovision-yolov10-end-to-end-output-guide.md";
+        string articlePath = Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "yolovision-yolov10-end-to-end-output-guide.md");
+        string article = File.ReadAllText(articlePath);
+        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "README.md"));
+        string decoder = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "YoloDetectionDecoder.cs"));
+        string docsIndex = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "index.md"));
+        string docsToc = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "toc.yml"));
+
+        Assert.True(File.Exists(articlePath));
+        Assert.Contains(relativeArticlePath, docsIndex, StringComparison.Ordinal);
+        Assert.Contains(relativeArticlePath, docsToc, StringComparison.Ordinal);
+        Assert.Contains("yolovision-yolov10-end-to-end-output-guide.md", readme, StringComparison.Ordinal);
+        Assert.Contains("DecodeEndToEnd", decoder, StringComparison.Ordinal);
+
+        string combined = article + Environment.NewLine + readme;
+        foreach (string marker in new[]
+        {
+            "https://github.com/THU-MIG/yolov10",
+            "[1,N,6]",
+            "x1,y1,x2,y2,score,classId",
+            "--layout end2end",
+            "TensorRtExec",
+            "YoloVision Passed=True",
+            "SHA256",
+            "许可证",
+            "no second NMS",
+            "not package-consumer-runtime"
+        })
+        {
+            Assert.Contains(marker, combined, StringComparison.OrdinalIgnoreCase);
+        }
+
+        using JsonDocument matrix = JsonDocument.Parse(File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "samples",
+            "YoloVision",
+            "yolo-model-matrix.json")));
+        JsonElement yoloV10 = matrix.RootElement.GetProperty("entries").EnumerateArray()
+            .Single(static entry => entry.GetProperty("family").GetString() == "yolov10");
+        Assert.Contains("managed-end-to-end-decode-ready", yoloV10.GetProperty("status").GetString(), StringComparison.Ordinal);
+        Assert.Contains("never applies a second NMS", yoloV10.GetProperty("postprocessNotes").GetString(), StringComparison.Ordinal);
+    }
 }

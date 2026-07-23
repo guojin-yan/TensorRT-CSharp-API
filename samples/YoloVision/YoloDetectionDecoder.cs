@@ -18,6 +18,11 @@ public static class YoloDetectionDecoder
             throw new ArgumentNullException(nameof(options));
         }
 
+        if (options.Layout == YoloOutputLayout.EndToEndNms)
+        {
+            return DecodeEndToEnd(values, dims, options);
+        }
+
         YoloOutputLayout resolvedLayout = YoloOutputLayoutInference.InferRank3(dims, options.Layout);
         bool channelsFirst = resolvedLayout == YoloOutputLayout.ChannelsFirst;
         int channelCount = channelsFirst ? dims[1] : dims[2];
@@ -77,6 +82,89 @@ public static class YoloDetectionDecoder
         }
 
         return ranked
+            .OrderByDescending(static item => item.Score)
+            .Take(options.TopK)
+            .ToArray();
+    }
+
+    public static IReadOnlyList<YoloDetection> DecodeEndToEnd(float[] values, int[] dims, YoloPostprocessOptions options)
+    {
+        if (values == null)
+        {
+            throw new ArgumentNullException(nameof(values));
+        }
+
+        if (options == null)
+        {
+            throw new ArgumentNullException(nameof(options));
+        }
+
+        YoloEndToEndOutput output = YoloEndToEndOutput.FromShape(dims);
+        if (values.Length != output.ValueCount)
+        {
+            throw new ArgumentException("End-to-end output value count does not match the tensor shape.", nameof(values));
+        }
+
+        List<YoloDetection> detections = new List<YoloDetection>();
+        for (int row = 0; row < output.DetectionCount; row++)
+        {
+            int offset = row * output.ChannelCount;
+            float score = values[offset + 4];
+            if (!float.IsFinite(score) || score < 0.0f || score > 1.0f)
+            {
+                throw new InvalidOperationException($"End-to-end detection row {row} has an invalid score {score}.");
+            }
+
+            if (score < options.ConfidenceThreshold)
+            {
+                continue;
+            }
+
+            float left = values[offset];
+            float top = values[offset + 1];
+            float right = values[offset + 2];
+            float bottom = values[offset + 3];
+            if (!float.IsFinite(left) || !float.IsFinite(top) || !float.IsFinite(right) || !float.IsFinite(bottom))
+            {
+                throw new InvalidOperationException($"End-to-end detection row {row} contains a non-finite coordinate.");
+            }
+
+            float width = right - left;
+            float height = bottom - top;
+            if (width <= 0.0f || height <= 0.0f)
+            {
+                throw new InvalidOperationException($"End-to-end detection row {row} must satisfy x2 > x1 and y2 > y1.");
+            }
+
+            float classValue = values[offset + 5];
+            if (!float.IsFinite(classValue) || classValue < 0.0f || classValue >= int.MaxValue)
+            {
+                throw new InvalidOperationException($"End-to-end detection row {row} has an invalid class id {classValue}.");
+            }
+
+            float roundedClassValue = MathF.Round(classValue);
+            if (MathF.Abs(classValue - roundedClassValue) > 0.0001f)
+            {
+                throw new InvalidOperationException($"End-to-end detection row {row} class id must be an integer, got {classValue}.");
+            }
+
+            int classIndex = checked((int)roundedClassValue);
+            if (options.ClassCount > 0 && classIndex >= options.ClassCount)
+            {
+                throw new InvalidOperationException($"End-to-end detection row {row} class id {classIndex} is outside class count {options.ClassCount}.");
+            }
+
+            detections.Add(new YoloDetection(
+                classIndex,
+                score,
+                left + width / 2.0f,
+                top + height / 2.0f,
+                width,
+                height,
+                row));
+        }
+
+        return detections
             .OrderByDescending(static item => item.Score)
             .Take(options.TopK)
             .ToArray();

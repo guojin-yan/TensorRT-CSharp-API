@@ -97,6 +97,20 @@ public static class YoloCapabilityMatrix
                 supported ? "supported" : "unsupported-family-task");
         }
 
+        if (family.Family == YoloModelFamily.YoloV10 && task.Task == YoloTaskType.Detection)
+        {
+            return new YoloCapabilityEntry(
+                family.Family,
+                task.Task,
+                family.Alias,
+                task.Alias,
+                "YOLOv10 end-to-end [1,N,6] x1/y1/x2/y2/score/classId decoder without second NMS",
+                "explicit --layout end2end, six-column order, class count, confidence threshold",
+                "managed-end-to-end-smoke-ready",
+                supported: true,
+                supportState: "supported");
+        }
+
         return new YoloCapabilityEntry(
             family.Family,
             task.Task,

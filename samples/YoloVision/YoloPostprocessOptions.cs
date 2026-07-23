@@ -46,7 +46,13 @@ public sealed class YoloPostprocessOptions
             throw new ArgumentOutOfRangeException(nameof(topK), "TopK must be positive.");
         }
 
-        if (nmsMode == YoloNmsMode.None)
+        if (layout == YoloOutputLayout.EndToEndNms)
+        {
+            hasObjectness = false;
+            applyNms = false;
+            nmsMode = YoloNmsMode.None;
+        }
+        else if (nmsMode == YoloNmsMode.None)
         {
             applyNms = false;
         }

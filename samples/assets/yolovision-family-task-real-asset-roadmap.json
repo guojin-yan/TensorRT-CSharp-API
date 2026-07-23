@@ -80,16 +80,16 @@
     },
     {
       "family": "yolov10",
-      "priority": "article-planning",
+      "priority": "managed-end-to-end-decoder-ready",
       "primaryTasks": ["det"],
       "secondaryTasks": [],
       "recommendedModelHints": ["yolov10n", "yolov10s"],
       "inputShapeHints": ["1x3x640x640"],
-      "exportCommandTemplate": "use owner-approved YOLOv10 export; record whether output is NMS-free or end-to-end",
+      "exportCommandTemplate": "use owner-approved YOLOv10 export; verify batch-1 [1,N,6] x1,y1,x2,y2,score,classId output before selecting the built-in end-to-end decoder",
       "tensorRtExecBuildCommandTemplate": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\<model>.onnx --saveEngine .\\models\\<model>.plan --minShapes images:1x3x640x640 --optShapes images:1x3x640x640 --maxShapes images:4x3x640x640 --buildOnly --exportReport .\\models\\<model>-build-report.json",
-      "yoloVisionRunCommandTemplate": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\<model>.onnx --labels .\\models\\labels.txt --input-data .\\models\\<model>-fp32.bin --input-shape 1x3x640x640 --family v10 --task det --layout auto --has-objectness auto",
-      "requiredOutputMetadata": ["nmsFreeOrEndToEnd", "classCount", "outputLayout", "scoreFields"],
-      "articleAngles": ["YOLOv10 end-to-end output boundary", "YOLOv10 detector deployment notes"],
+      "yoloVisionRunCommandTemplate": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\<model>.onnx --labels .\\models\\labels.txt --input-data .\\models\\<model>-fp32.bin --input-shape 1x3x640x640 --family v10 --task det --layout end2end --class-count <owner-filled> --confidence 0.25 --output .\\artifacts\\yolovision\\<model>-output.json",
+      "requiredOutputMetadata": ["batch-1 [1,N,6] shape", "x1,y1,x2,y2,score,classId column order", "classCount", "confidenceThreshold", "noSecondNms"],
+      "articleAngles": ["YOLOv10 end-to-end output boundary", "YOLOv10 detector deployment notes", "official model to TensorRT end-to-end tutorial"],
       "runtimeProofState": "owner-action-required"
     },
     {

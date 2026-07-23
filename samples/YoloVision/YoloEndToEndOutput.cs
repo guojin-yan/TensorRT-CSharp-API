@@ -4,6 +4,8 @@ namespace YoloVisionSample;
 
 public sealed class YoloEndToEndOutput
 {
+    public const int RequiredChannelCount = 6;
+
     public YoloEndToEndOutput(int batch, int detectionCount, int channelCount)
     {
         if (batch <= 0)
@@ -11,14 +13,19 @@ public sealed class YoloEndToEndOutput
             throw new ArgumentOutOfRangeException(nameof(batch));
         }
 
+        if (batch != 1)
+        {
+            throw new NotSupportedException("YoloVision end-to-end decoding currently supports batch size 1 only.");
+        }
+
         if (detectionCount <= 0)
         {
             throw new ArgumentOutOfRangeException(nameof(detectionCount));
         }
 
-        if (channelCount < 6)
+        if (channelCount != RequiredChannelCount)
         {
-            throw new ArgumentException("End-to-end NMS output must contain at least box, score, and class channels.", nameof(channelCount));
+            throw new NotSupportedException("End-to-end YOLO output must use six columns: x1, y1, x2, y2, score, and classId.");
         }
 
         Batch = batch;
@@ -31,6 +38,8 @@ public sealed class YoloEndToEndOutput
     public int DetectionCount { get; }
 
     public int ChannelCount { get; }
+
+    public int ValueCount => checked(Batch * DetectionCount * ChannelCount);
 
     public static YoloEndToEndOutput FromShape(int[] dims)
     {

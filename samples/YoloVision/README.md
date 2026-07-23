@@ -7,11 +7,21 @@ This sample runs a user-provided single-input float YOLO-family ONNX model throu
 - YOLOv5/v6/v7/v8/v9/v10/v11/v26 family labels
 - task labels: `det`, `cls`, `seg`, `obb`, `pose`, `sem`
 - application-side confidence filtering, class-aware/class-agnostic NMS helpers
-- end-to-end NMS output validation, mask coefficient/prototype compose helper, pose keypoint helper, OBB angle helper, semantic map decoder, and multi-output metadata for auxiliary tensors
+- dedicated YOLOv10-style `[1,N,6]` end-to-end `x1,y1,x2,y2,score,classId` decode without a second NMS pass, plus mask coefficient/prototype compose, pose keypoint, OBB angle, semantic map, and multi-output metadata helpers
 
 `YoloVision` is the unified YOLO-family sample for detection, classification, segmentation, OBB, pose, and semantic segmentation. It is intentionally broader than detection: the same sample documents family/task selection, multi-output metadata, managed postprocess helpers, and real-asset evidence requirements across the supported YOLO-family tasks.
 
 ## Offline Preflight
+
+Run the deterministic YOLOv10 six-column managed decoder smoke without CUDA, TensorRT, ONNX, model files, or labels:
+
+```powershell
+dotnet run --project .\samples\YoloVision -- --self-test-end2end
+```
+
+The command must report `ManagedSmoke=YOLOv10EndToEnd Passed=True`, two retained detections, `ApplyNms=False`, and
+`ManagedSmokeBoundary=managed-array-decode-only`. This proves the managed array contract only; it is not TensorRT
+execution, real-model-runtime, or package-consumer-runtime proof.
 
 Use `--preflight` when preparing an owner handoff or article case and the TensorRT runtime is not available yet. It parses the family/task/profile and output metadata, records model/labels/input existence and SHA256 values when files are present, and writes a `yolovision-preflight.v1` report. It does not open TensorRT, parse ONNX, build an engine, load plugins, or enqueue inference.
 
@@ -88,6 +98,8 @@ The matrix currently covers `custom`, YOLOv5/v6/v7/v8/v9/v10/v11/v26, detection-
 | Semantic segmentation | `sem` | Single-output semantic map decoder | class count and semantic tensor role | managed-smoke-ready |
 
 This is a support matrix and smoke surface, not proof that a specific external model has passed real image validation. Real model promotion still requires a model/license manifest, TensorRtExec build sidecar, `YoloVision Passed=True` run log, stdout/stderr summaries, SHA256 values, and owner-reviewed evidence.
+
+For YOLOv10 NMS-free/end-to-end exports, pass `--layout end2end`. The managed decoder requires a batch-1 `[1,N,6]` tensor whose columns are `x1,y1,x2,y2,score,classId`; it validates the six-column contract, converts `xyxy` coordinates to the shared center/width/height representation, filters by confidence, checks class bounds, and deliberately disables application-side NMS. It does not guess that an arbitrary YOLOv10 ONNX uses this contract. Inspect the real ONNX outputs first, and use the generic metadata-driven path when the exporter returns raw heads or a different column order. See `docs/articles/zh-cn/yolovision-yolov10-end-to-end-output-guide.md`.
 
 The official YOLOX-S path is now backed by source-tree `real-model-runtime` evidence. `--family yolox` is detection-only and defaults to NCHW, BGR, raw `0..255` float values, fill 114, and top-left letterbox. Its `[1,8400,85]` raw output is transformed with `(xy + grid) * stride` and `exp(wh) * stride` for strides 8/16/32 before objectness scoring and NMS. Run `eng/Acquire-YoloXOfficialAssets.ps1` to acquire hash-pinned assets on the E drive, then follow `docs/articles/zh-cn/yolovision-yolox-official-runtime-tutorial.md`. This proof is not package-consumer-runtime and does not approve public asset redistribution.
 
@@ -178,6 +190,9 @@ Task-specific command skeletons should stay explicit in article drafts and owner
 ```powershell
 # Detection: YOLO v5/v6/v7/v8/v9/v10/v11/v26/YOLOX/custom
 dotnet run --project .\samples\YoloVision -- --model .\models\yolo-det.onnx --labels .\models\coco.names --image .\models\det.ppm --preprocessed-output .\models\det-fp32.bin --input-shape 1x3x640x640 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware
+
+# YOLOv10 end-to-end detection: [1,N,6] = x1,y1,x2,y2,score,classId; no second NMS
+dotnet run --project .\samples\YoloVision -- --model .\models\yolov10n.onnx --labels .\models\coco.names --image .\models\det.ppm --preprocessed-output .\models\yolov10n-fp32.bin --input-shape 1x3x640x640 --family v10 --task det --layout end2end --class-count 80 --confidence 0.25 --output .\artifacts\yolovision\yolov10n-output.json
 
 # Classification
 dotnet run --project .\samples\YoloVision -- --model .\models\yolo-cls.onnx --labels .\models\labels.txt --input-data .\models\cls-fp32.bin --input-shape 1x3x224x224 --family custom --task cls --classification-output logits

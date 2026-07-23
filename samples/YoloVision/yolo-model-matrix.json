@@ -75,10 +75,10 @@
     {
       "family": "yolov10",
       "supportedTasks": ["det"],
-      "status": "planned-runtime-proof; no bundled model",
+      "status": "managed-end-to-end-decode-ready; requires owner assets and runtime proof",
       "modelSourceHint": "Use owner-approved YOLOv10 export; record NMS-free/end-to-end output semantics.",
-      "onnxExportNotes": "Record whether the model returns pre-NMS or end-to-end boxes.",
-      "postprocessNotes": "Do not reuse YOLOv8 assumptions unless output metadata proves compatibility."
+      "onnxExportNotes": "For the built-in end-to-end path, verify a batch-1 [1,N,6] output with x1,y1,x2,y2,score,classId columns and record the exact exporter/version.",
+      "postprocessNotes": "Use --layout end2end for the six-column decoder. It converts xyxy to the internal box representation, validates score/class/coordinates, and never applies a second NMS pass. Other YOLOv10 output contracts remain metadata-driven."
     },
     {
       "family": "yolov11",

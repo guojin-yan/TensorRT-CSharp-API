@@ -17,7 +17,7 @@
 | YOLOv7 | documented | det / pose variants | WongKinYiu YOLOv7 release 或用户自训模型 | 导出时记录 end-to-end NMS 是否在图内 | not-proof |
 | YOLOv8 | documented | det / cls / seg / obb / pose | Ultralytics YOLOv8 模型或用户自训模型 | `yolo export format=onnx`，记录 imgsz、dynamic、simplify、opset | not-proof |
 | YOLOv9 | documented | det / seg variants | YOLOv9 release 或用户自训模型 | 记录 dual branch/head 输出是否已简化 | not-proof |
-| YOLOv10 | documented | det | THU-MIG YOLOv10 或用户自训模型 | 记录 NMS-free / one-to-one head 输出语义 | not-proof |
+| YOLOv10 | managed end-to-end decoder ready | det | THU-MIG YOLOv10 或用户自训模型 | `[1,N,6]` 使用 `--layout end2end`；其他输出必须记录真实 metadata | managed smoke；real model not-proof |
 | YOLOv11 | documented | det / cls / seg / obb / pose | Ultralytics YOLOv11 模型或用户自训模型 | 与 v8 类似，但必须记录实际导出命令和输出 tensor metadata | not-proof |
 | YOLOv26 | documented | det / cls / seg / obb / pose / sem planned | 用户或上游候选模型 | 先以 custom profile 接入，补 family-specific decode notes | not-proof |
 
@@ -25,7 +25,7 @@
 
 | 任务 | Alias | 当前代码路径 | 输入要求 | 输出 metadata | 后处理边界 | Runtime proof 状态 |
 |---|---|---|---|---|---|---|
-| Detection | `det` | `YoloVisionDetectionDecoder`、`YoloSampleRunner.DecodeOutput` | `NCHW` float32 tensor，典型 `1x3x640x640` | output shape、layout、class count、objectness rule、NMS mode | 应用侧 confidence filtering + class-aware/class-agnostic NMS | synthetic pipeline ready；real model not-proof |
+| Detection | `det` | `DecodeEndToEnd`、`YoloEndToEndOutput`、`YoloSampleRunner.DecodeOutput` | `NCHW` float32 tensor，典型 `1x3x640x640` | output shape、layout、class count、objectness/column rule、NMS mode | raw head 使用应用侧 NMS；end-to-end 六列输出禁止二次 NMS | synthetic/managed pipeline ready；real model not-proof |
 | Classification | `cls` | `YoloVisionResult` classification path | 分类模型输入 tensor，labels 必须匹配 logits | logits tensor name、class count、top-k rule | 单输出 logits/top-k | managed smoke ready；real model not-proof |
 | Segmentation | `seg` | `YoloMaskComposer`、`DecodeSegmentationOutputs` | detection 输入 + mask proto metadata | boxes tensor、mask coefficient count、prototype tensor shape/layout | mask coefficient/prototype compose；crop/resize 由 owner 记录 | managed metadata ready；real model not-proof |
 | Oriented Bounding Box | `obb` | `YoloObbDecoder`、`DecodeObbOutputs` | 检测输入 + angle tensor metadata | angle channel/tensor name、degree/radian flag | box + angle conversion，NMS 策略需记录 | managed metadata ready；real model not-proof |
@@ -164,7 +164,7 @@ dotnet run --project .\samples\YoloVision -- --model .\models\yolo-sem.onnx --la
 4. YOLOv8 Pose 的 keypoint 输出解释。
 5. YOLOv8 OBB 的 angle tensor 与旋转框。
 6. YOLOv5/v7/v9 输出布局差异。
-7. YOLOv10 NMS-free 输出边界。
+7. YOLOv10 NMS-free/end-to-end 六列输出，从官方模型获取、ONNX 检查到 TensorRT 结果。
 8. YOLOv11 与 YOLOv26 的接入计划。
 9. YoloVision 真实资产 manifest 与 proof backfill。
 10. 常见问题：shape、layout、labels、NMS、许可证和 runtime proof。

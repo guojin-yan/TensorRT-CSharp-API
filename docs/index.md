@@ -75,6 +75,7 @@ Chinese articles:
 - [YoloVision Multi-Output Metadata Guide](articles/zh-cn/yolovision-multi-output-metadata-guide.md)
 - [YoloVision All Task Overview](articles/zh-cn/yolovision-all-task-overview.md)
 - [YoloVision Detection Tutorial](articles/zh-cn/yolovision-detection-tutorial.md)
+- [YoloVision YOLOv10 End-to-End Output Guide](articles/zh-cn/yolovision-yolov10-end-to-end-output-guide.md)
 - [YoloVision Segmentation Tutorial](articles/zh-cn/yolovision-segmentation-tutorial.md)
 - [YoloVision Pose Tutorial](articles/zh-cn/yolovision-pose-tutorial.md)
 - [YoloVision OBB Tutorial](articles/zh-cn/yolovision-obb-tutorial.md)

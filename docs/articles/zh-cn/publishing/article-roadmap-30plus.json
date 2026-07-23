@@ -2,7 +2,7 @@
   "roadmapId": "article-roadmap-30plus",
   "roadmapState": "release-readiness-planning",
   "minimumArticleCount": 30,
-  "articleCount": 43,
+  "articleCount": 44,
   "performsPublish": false,
   "canPublishPublicly": false,
   "canCloseReleaseIssue": false,
@@ -1380,6 +1380,44 @@
         "artifacts/interface-coverage/yolox-local-package-consumer-runtime-proof-closure.json"
       ],
       "proofBoundary": "A local file-feed PackageReference runtime is engineering evidence only: not runtime proof, not public package-consumer-runtime proof, not redistribution approval, not post-publish proof, not publish approval, not release close approval, and not package push.",
+      "mustAvoidClaims": [
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
+        "must not claim failedBlockerCount=0 means ready",
+        "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
+        "must not treat Skipped=True as proof"
+      ]
+    },
+    {
+      "id": 44,
+      "title": "YoloVision YOLOv10 End-to-End 输出接入：从官方模型到 TensorRT 结果",
+      "audience": "YOLOv10 部署用户、TensorRT 工程师、技术文章作者",
+      "type": "完整案例教程",
+      "outline": [
+        "official model acquisition and license/hash records",
+        "ONNX export and real output inspection",
+        "TensorRtExec engine build and report",
+        "YoloVision six-column end-to-end decode",
+        "no-second-NMS contract and troubleshooting",
+        "runtime evidence and publication boundary"
+      ],
+      "sampleOrCodePath": "samples/YoloVision/YoloEndToEndOutput.cs",
+      "visualAssets": [
+        "checkpoint-to-owner-evidence Mermaid flow",
+        "end-to-end six-column contract table",
+        "owner-produced output SVG and JSON when real assets are available"
+      ],
+      "status": "ready",
+      "targetPath": "docs/articles/zh-cn/yolovision-yolov10-end-to-end-output-guide.md",
+      "sourceArtifacts": [
+        "samples/YoloVision/YoloEndToEndOutput.cs",
+        "samples/YoloVision/Program.cs",
+        "tests/JYPPX.ProjectQuality.Tests/YoloVisionManagedPipelineTests.cs",
+        "samples/YoloVision/yolo-model-matrix.json"
+      ],
+      "proofBoundary": "Article and managed decoder smoke are guidance and local managed evidence only: not runtime proof, not package-consumer-runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
       "mustAvoidClaims": [
         "must not claim local feed is public package proof",
         "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",

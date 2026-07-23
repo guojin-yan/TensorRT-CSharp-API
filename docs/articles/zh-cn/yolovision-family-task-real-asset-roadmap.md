@@ -24,7 +24,7 @@
 | YOLOv7 | tutorial-candidate | det, pose | `yolov7-tiny`, pose variant | detection export, pose keypoint metadata |
 | YOLOv8 | ready-template-batch | det, cls, seg, obb, pose, sem | `yolov8n`, `yolov8n-seg`, `yolov8n-pose`, `yolov8n-obb`, `yolov8n-cls` | all-task tutorial series |
 | YOLOv9 | article-planning | det, seg | owner-approved YOLOv9 export | export compatibility and segmentation metadata |
-| YOLOv10 | article-planning | det | YOLOv10n/s | end-to-end/NMS-free output boundary |
+| YOLOv10 | managed-end-to-end-decoder-ready | det | YOLOv10n/s | `[1,N,6]` xyxy/score/classId decode, no second NMS, owner runtime proof pending |
 | YOLOv11 | article-planning | det, cls, seg, obb, pose | YOLO11 task variants | output roles and task matrix |
 | YOLOv26 | future-family-planning | det, cls, seg, obb, pose, sem | owner-provided concrete model | future family onboarding checklist |
 | custom | owner-template | det, cls, seg, obb, pose, sem | owner-provided private/public model | custom YOLO onboarding |
@@ -86,7 +86,8 @@ dotnet run --project .\samples\YoloVision -- `
 - YOLOv8n-pose keypoint 输出解析。
 - YOLOv8n-obb angle unit 和 rotated box 输出。
 - YOLOv8n-cls classification 输出和 labels 校验。
-- YOLOv9 / YOLOv10 / YOLOv11 输出差异与 owner evidence checklist。
+- YOLOv9 / YOLOv11 输出差异与 owner evidence checklist。
+- YOLOv10 官方模型到 TensorRT：检查 `[1,N,6]` 输出、专用 decoder 与 no-second-NMS 边界。
 - custom YOLO 模型接入模板。
 
 每篇文章都应该包含：模型来源、license 提醒、导出命令、TensorRtExec 构建命令、YoloVision 运行命令、输出解释、常见问题、proof boundary。

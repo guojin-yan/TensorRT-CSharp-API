@@ -34,8 +34,8 @@
       "families": ["yolov5", "yolov6", "yolov7", "yolov8", "yolov9", "yolov10", "yolov11", "yolov26", "yolox", "custom"],
       "primaryOutputRoles": ["boxes", "scores", "classes"],
       "requiredMetadata": ["inputShape", "outputLayout", "classCount", "boxFormat", "scoreRule", "nmsMode"],
-      "optionalMetadata": ["objectnessChannel", "graphIncludesNms", "confidenceThreshold", "iouThreshold"],
-      "managedSurface": ["YoloDetectionDecoder", "YoloSampleRunner.DecodeOutput", "YoloVisionResult.Detections"],
+      "optionalMetadata": ["objectnessChannel", "graphIncludesNms", "endToEndColumnOrder", "coordinateFormat", "confidenceThreshold", "iouThreshold"],
+      "managedSurface": ["YoloDetectionDecoder", "YoloDetectionDecoder.DecodeEndToEnd", "YoloEndToEndOutput", "YoloSampleRunner.DecodeOutput", "YoloVisionResult.Detections"],
       "tensorRtExecProfileHint": "--minShapes images:1x3x640x640 --optShapes images:1x3x640x640 --maxShapes images:4x3x640x640",
       "articleEntrypoints": [
         "docs/articles/zh-cn/yolovision-detection-real-model-tutorial.md",

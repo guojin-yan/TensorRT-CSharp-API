@@ -52,6 +52,11 @@ public static class YoloVisionCommand
             return 0;
         }
 
+        if (SampleCommandLine.HasSwitch(args, "--self-test-end2end"))
+        {
+            return RunEndToEndManagedSmoke();
+        }
+
         try
         {
             string labelsPath = ResolveOptionalFullPath(SampleCommandLine.GetStringArgument(args, "--labels", string.Empty));
@@ -278,6 +283,40 @@ public static class YoloVisionCommand
         }
     }
 
+    private static int RunEndToEndManagedSmoke()
+    {
+        YoloPostprocessOptions options = new YoloPostprocessOptions(
+            YoloOutputLayout.EndToEndNms,
+            hasObjectness: true,
+            classCount: 3,
+            confidenceThreshold: 0.25f,
+            iouThreshold: 0.45f,
+            topK: 10,
+            applyNms: true);
+        float[] values =
+        {
+            10.0f, 20.0f, 30.0f, 40.0f, 0.90f, 2.0f,
+            10.5f, 20.5f, 30.5f, 40.5f, 0.80f, 2.0f,
+            0.0f, 0.0f, 5.0f, 5.0f, 0.20f, 1.0f
+        };
+
+        IReadOnlyList<YoloDetection> detections = YoloDetectionDecoder.Decode(values, new[] { 1, 3, 6 }, options);
+        bool passed = detections.Count == 2 &&
+                      detections[0].ClassIndex == 2 &&
+                      Math.Abs(detections[0].Score - 0.90f) < 0.00001f &&
+                      detections[0].SourceIndex == 0 &&
+                      detections[1].SourceIndex == 1 &&
+                      !options.ApplyNms &&
+                      options.NmsMode == YoloNmsMode.None;
+        Console.WriteLine(
+            $"YoloVision ManagedSmoke=YOLOv10EndToEnd Passed={passed} Detections={detections.Count} " +
+            $"Layout={options.Layout} ApplyNms={options.ApplyNms} NmsMode={options.NmsMode}");
+        Console.WriteLine(
+            "YoloVision ManagedSmokeBoundary=managed-array-decode-only IsRuntimeProof=False " +
+            "IsRealModelRuntimeProof=False IsPackageConsumerRuntimeProof=False");
+        return passed ? 0 : 2;
+    }
+
     private static void PrintBindingReport(TensorRtEngineBindingReport report)
     {
         Console.WriteLine(
@@ -446,9 +485,10 @@ public static class YoloVisionCommand
         Console.WriteLine("Options:");
         Console.WriteLine("  --list-capabilities      Print the offline YOLO family/task capability matrix without TensorRT runtime or model assets.");
         Console.WriteLine("  --list-capabilities --json  Print the same capability matrix as machine-readable JSON.");
+        Console.WriteLine("  --self-test-end2end     Run the deterministic YOLOv10 six-column managed decoder smoke without CUDA/TensorRT.");
         Console.WriteLine("  --family custom|v5|v6|v7|v8|v9|v10|v11|v26|yolox");
         Console.WriteLine("  --task det|cls|seg|obb|pose|sem");
-        Console.WriteLine("  --layout auto|channels-first|boxes-first");
+        Console.WriteLine("  --layout auto|channels-first|boxes-first|end2end");
         Console.WriteLine("  --has-objectness auto|true|false");
         Console.WriteLine("  --class-count <count>     Defaults to labels count when labels are provided.");
         Console.WriteLine("  --confidence <value>      Default: 0.25");

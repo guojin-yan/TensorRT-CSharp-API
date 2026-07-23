@@ -20,7 +20,7 @@ YoloVision 的目标不是把一个检测 demo 跑通就结束，而是建立一
 | YOLOv7 | planned | planned | planned | planned | planned | planned |
 | YOLOv8 | documented | documented | documented | documented | documented | planned |
 | YOLOv9 | planned | planned | planned | planned | planned | planned |
-| YOLOv10 | planned | planned | planned | planned | planned | planned |
+| YOLOv10 | managed end-to-end decoder | planned | planned | planned | planned | planned |
 | YOLOv11 | planned | planned | planned | planned | planned | planned |
 | YOLOv26 | planned | planned | planned | planned | planned | planned |
 | custom | documented | documented | documented | documented | documented | documented |
@@ -29,6 +29,7 @@ YoloVision 的目标不是把一个检测 demo 跑通就结束，而是建立一
 
 - `planned`：路线已收敛，仍需要 owner 资产。
 - `documented`：README、矩阵或文章已有入口。
+- `managed end-to-end decoder`：`[1,N,6]` xyxy/score/classId 纯托管解码与 smoke 已完成，真实模型 proof 仍需 owner 资产。
 - `runnable with user assets`：用户提供真实 ONNX、labels、图片和 metadata 后可运行。
 - `proof candidate`：真实日志、hash、host metadata 和 validator 通过后才可能进入 sample-level proof。
 
@@ -44,6 +45,7 @@ YoloVision 至少可以支撑以下文章：
 6. YOLO Classification 与 semantic segmentation。
 7. YOLO 模型资产选择：许可证、SHA256、可再分发边界。
 8. YoloVision 真实资产证据链：从矩阵到 owner proof。
+9. YOLOv10 End-to-End 输出：官方模型、ONNX、TensorRtExec 与 no-second-NMS decoder。
 
 ## 与 TensorRtExec 的关系
 

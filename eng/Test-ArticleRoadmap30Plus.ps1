@@ -122,7 +122,7 @@ foreach ($article in $articles) {
   }
 
   $combined = (($article | ConvertTo-Json -Depth 8) -join " ")
-  if ($combined -match "YoloDet|samples[/\\]YoloDet") {
+  if ($combined -match "(?<![A-Za-z0-9_])YoloDet(?![A-Za-z0-9_])" -or $combined -match "YoloDet[.]csproj") {
     Add-Finding $findings "old-yolo-det-reference" "Article roadmap must not expose old YoloDet public entry." $id
   }
 }

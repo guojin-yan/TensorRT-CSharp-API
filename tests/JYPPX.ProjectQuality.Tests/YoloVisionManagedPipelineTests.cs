@@ -593,6 +593,7 @@ public sealed class YoloVisionManagedPipelineTests
         string table = YoloCapabilityMatrix.FormatConsoleTable();
         Assert.Contains("YoloVision Capability Matrix", table, StringComparison.Ordinal);
         Assert.Contains("v5 | det | Detection", table, StringComparison.Ordinal);
+        Assert.Contains("v10 | det | Detection | supported | YOLOv10 end-to-end [1,N,6]", table, StringComparison.Ordinal);
         Assert.Contains("v26 | pose | Pose", table, StringComparison.Ordinal);
         Assert.Contains("yolox | det | Detection | supported", table, StringComparison.Ordinal);
         Assert.Contains("yolox | cls | Classification | unsupported-family-task", table, StringComparison.Ordinal);
@@ -841,7 +842,82 @@ public sealed class YoloVisionManagedPipelineTests
 
         Assert.Equal(300, output.DetectionCount);
         Assert.Equal(6, output.ChannelCount);
+        Assert.Equal(1800, output.ValueCount);
         Assert.Throws<NotSupportedException>(() => YoloEndToEndOutput.FromShape(new[] { 300, 6 }));
+        Assert.Throws<NotSupportedException>(() => YoloEndToEndOutput.FromShape(new[] { 2, 300, 6 }));
+        Assert.Throws<NotSupportedException>(() => YoloEndToEndOutput.FromShape(new[] { 1, 300, 7 }));
+    }
+
+    [Fact]
+    public void YoloV10EndToEndDecoderUsesXyxyScoreClassColumnsWithoutSecondNms()
+    {
+        YoloModelProfile profile = YoloModelProfile.FromArgs(new[]
+        {
+            "--family", "v10",
+            "--task", "det",
+            "--layout", "end2end",
+            "--class-count", "3",
+            "--confidence", "0.25",
+            "--top-k", "10"
+        }, labelCount: 0);
+        float[] values =
+        {
+            10.0f, 20.0f, 30.0f, 40.0f, 0.90f, 2.0f,
+            10.5f, 20.5f, 30.5f, 40.5f, 0.80f, 2.0f,
+            0.0f, 0.0f, 5.0f, 5.0f, 0.20f, 1.0f
+        };
+
+        IReadOnlyList<YoloDetection> detections = YoloSampleRunner.DecodeDetections(values, new[] { 1, 3, 6 }, profile);
+
+        Assert.Equal(YoloOutputLayout.EndToEndNms, profile.Postprocess.Layout);
+        Assert.False(profile.Postprocess.HasObjectness);
+        Assert.False(profile.Postprocess.ApplyNms);
+        Assert.Equal(YoloNmsMode.None, profile.Postprocess.NmsMode);
+        Assert.Equal(2, detections.Count);
+        Assert.Equal(2, detections[0].ClassIndex);
+        Assert.Equal(0.90f, detections[0].Score, 5);
+        Assert.Equal(20.0f, detections[0].CenterX, 5);
+        Assert.Equal(30.0f, detections[0].CenterY, 5);
+        Assert.Equal(20.0f, detections[0].Width, 5);
+        Assert.Equal(20.0f, detections[0].Height, 5);
+        Assert.Equal(0, detections[0].SourceIndex);
+        Assert.Equal(1, detections[1].SourceIndex);
+    }
+
+    [Fact]
+    public void YoloV10EndToEndDecoderRejectsMalformedRows()
+    {
+        YoloPostprocessOptions options = new YoloPostprocessOptions(
+            YoloOutputLayout.EndToEndNms,
+            hasObjectness: true,
+            classCount: 2,
+            confidenceThreshold: 0.25f,
+            iouThreshold: 0.45f,
+            topK: 10,
+            applyNms: true);
+
+        Assert.Throws<ArgumentException>(() => YoloDetectionDecoder.DecodeEndToEnd(
+            new[] { 0.0f, 0.0f, 2.0f, 2.0f, 0.9f },
+            new[] { 1, 1, 6 },
+            options));
+        Assert.Throws<InvalidOperationException>(() => YoloDetectionDecoder.DecodeEndToEnd(
+            new[] { 2.0f, 0.0f, 1.0f, 2.0f, 0.9f, 0.0f },
+            new[] { 1, 1, 6 },
+            options));
+        Assert.Throws<InvalidOperationException>(() => YoloDetectionDecoder.DecodeEndToEnd(
+            new[] { 0.0f, 0.0f, 2.0f, 2.0f, 0.9f, 0.5f },
+            new[] { 1, 1, 6 },
+            options));
+        Assert.Throws<InvalidOperationException>(() => YoloDetectionDecoder.DecodeEndToEnd(
+            new[] { 0.0f, 0.0f, 2.0f, 2.0f, 0.9f, 2.0f },
+            new[] { 1, 1, 6 },
+            options));
+    }
+
+    [Fact]
+    public void YoloV10EndToEndManagedSmokeCommandRunsWithoutRuntimeAssets()
+    {
+        Assert.Equal(0, YoloVisionCommand.Run(new[] { "--self-test-end2end" }));
     }
 
     [Fact]

@@ -33,6 +33,14 @@ public sealed class ArticleRoadmap30PlusTests
             AssertBoundary(article.GetProperty("proofBoundary").GetString()!);
         }
 
+        JsonElement yoloV10Article = roadmap.GetProperty("articles").EnumerateArray()
+            .Single(static article => article.GetProperty("id").GetInt32() == 44);
+        Assert.Equal("ready", yoloV10Article.GetProperty("status").GetString());
+        Assert.Contains("YoloEndToEndOutput.cs", yoloV10Article.GetProperty("sourceArtifacts").GetRawText(), StringComparison.Ordinal);
+        Assert.Equal(
+            "docs/articles/zh-cn/yolovision-yolov10-end-to-end-output-guide.md",
+            yoloV10Article.GetProperty("targetPath").GetString());
+
         using JsonDocument validationDocument = ReadFinalReleaseJson("article-roadmap-30plus-validation.json");
         JsonElement validation = validationDocument.RootElement;
 

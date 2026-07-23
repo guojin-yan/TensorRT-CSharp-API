@@ -7,7 +7,7 @@
 | Field | Value |
 | --- | --- |
 | roadmapState | `release-readiness-planning` |
-| articleCount | `43` |
+| articleCount | `44` |
 | minimumArticleCount | `30` |
 | canPublishPublicly | `False` |
 | canCloseReleaseIssue | `False` |
@@ -65,6 +65,7 @@ Rows marked `near-ready-owner-proof-input` are article-body and owner proof inpu
 | `41` | ONNX Parser 与 ParserRefitter 诊断：copied diagnostics 到 release gate | 模型转换维护者、发布负责人 | `ready` | docs/articles/zh-cn/publishing/onnx-parser-parserrefitter-诊断-copied-diagnostics-release-gate.md |
 | `42` | CUDA Stream Capture To Graph：owner-safe session 与跨版本 guard | CUDA wrapper 维护者、C# 生命周期评审者、发布负责人 | `ready` | docs/articles/zh-cn/publishing/cuda-stream-capture-to-graph-owner-safe-session.md |
 | `43` | YoloVision YOLOX 本地 PackageReference 消费者实战 | YOLO 部署用户、NuGet 包维护者、发布负责人 | `ready` | docs/articles/zh-cn/yolovision-yolox-local-package-consumer-tutorial.md |
+| `44` | YoloVision YOLOv10 End-to-End 输出接入：从官方模型到 TensorRT 结果 | YOLOv10 部署用户、TensorRT 工程师、技术文章作者 | `ready` | docs/articles/zh-cn/yolovision-yolov10-end-to-end-output-guide.md |
 
 ## Must Avoid Claims
 
