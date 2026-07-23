@@ -17,6 +17,29 @@ decoder，框坐标、类别和置信度都会被错误解释。
 `real-model-runtime` closure：`artifacts/interface-coverage/yolov10-official-runtime-proof-closure.json`。
 其他 YOLOv10 模型、其他导出契约、公开包消费和发布仍需使用者提供模型、输入图、GPU 主机、日志和审核记录。
 
+## 本仓库已验证的 YOLOv10n v1.1 闭环
+
+为了避免文章只停留在“应该这样做”，本项目已经把官方 YOLOv10n v1.1 ONNX 走了一遍 source-tree
+runtime proof。核心记录如下：
+
+| 项目 | 值 |
+| --- | --- |
+| 上游仓库 | `https://github.com/THU-MIG/yolov10` |
+| 上游 tag / revision | `v1.1` / `799ff3be47d21173bcf29b351820d4b8e955e0fe` |
+| 许可证 | `AGPL-3.0-only`，公开再分发仍需 owner review |
+| ONNX | `yolov10n.onnx`，`9,386,466` bytes，SHA256 `7025ea1913f9a259cf8a8465ed608e10610d1bb376db2e0348b13e3bd286e0d3` |
+| TensorRT / CUDA | TensorRT `10.11.0`，CUDA Toolkit `12.9` |
+| Engine | `17,365,068` bytes，SHA256 `21891d0dcfb322069f864b5395f1653182251c35e4d822d2cc2c02635a4d2000` |
+| Input / Output | `images:[1,3,640,640]` -> `output0:[1,300,6]` |
+| GPU / Driver | `NVIDIA GeForce RTX 3060 Laptop GPU` / `576.02` |
+| Runtime result | `YoloVision Passed=True`，4 个 detection，top prediction `dog=0.91683036` |
+| Output evidence | output JSON SHA256 `38aaddac4e6f22f6d230d6e36c9e787c4d407508d1cb5dea768d0967827a8c4f`，run log SHA256 `bb2c5958590c4ac074b969d90af87f3aedb38991054588434133a2f620ebc43e` |
+
+这些值来自 `artifacts/interface-coverage/yolov10-official-runtime-proof-closure.json` 和
+`samples/assets/yolovision-yolov10-official-assets.json`。大模型、engine、预处理 tensor 和原始日志仍留在 E 盘
+download workspace，不提交进仓库；文章只引用 hash-pinned evidence。这个记录可以支撑“源码树真实模型运行已经走通”，
+但不能支撑“NuGet 包已经公开可消费”“AGPL 资产可以随包再分发”或“发布 issue 可以关闭”。
+
 ## 1. 先看清数据流
 
 ```mermaid

@@ -139,6 +139,13 @@ public sealed class YoloVisionDocumentationMatrixTests
             "TensorRtExec",
             "YoloVision Passed=True",
             "SHA256",
+            "7025ea1913f9a259cf8a8465ed608e10610d1bb376db2e0348b13e3bd286e0d3",
+            "21891d0dcfb322069f864b5395f1653182251c35e4d822d2cc2c02635a4d2000",
+            "38aaddac4e6f22f6d230d6e36c9e787c4d407508d1cb5dea768d0967827a8c4f",
+            "bb2c5958590c4ac074b969d90af87f3aedb38991054588434133a2f620ebc43e",
+            "dog=0.91683036",
+            "output0:[1,300,6]",
+            "AGPL-3.0-only",
             "许可证",
             "no second NMS",
             "not package-consumer-runtime"

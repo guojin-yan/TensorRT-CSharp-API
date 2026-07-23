@@ -1,5 +1,26 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-23 YOLOv10 Public Article Evidence Backfill
+
+本批转向宣传文章序列的真实内容质量，把 `YoloVision YOLOv10 End-to-End 输出接入：从官方模型到 TensorRT 结果`
+从通用教程增强为带本仓库 source-tree runtime closure 数值的完整技术文章。新增章节
+“本仓库已验证的 YOLOv10n v1.1 闭环”，明确记录官方 YOLOv10 v1.1 revision、AGPL-3.0-only 边界、
+ONNX/engine/output/run-log SHA256、TensorRT/CUDA 版本、GPU/driver、`output0:[1,300,6]` 和
+`dog=0.91683036` 运行结果。
+
+同步更新 `YoloVisionDocumentationMatrixTests`，要求文章持续包含关键 hash、shape、top prediction、
+许可证和 `not package-consumer-runtime` 边界，防止后续宣传材料退化成没有证据的泛泛介绍。
+
+### Verification 与边界
+
+- 定向文档/路线图质量门：
+  `YoloVisionDocumentationMatrixTests|ArticleRoadmap30PlusTests` 共 `5/5` 通过；编译阶段仅出现 5 条既有
+  ProjectQuality nullable warning。
+- 本批没有下载模型、ONNX、engine 或图片；只引用已存在的 hash-pinned closure 与 acquisition manifest。
+- 本批不触发 GitHub Actions、不 push、不执行 NuGet/GitHub Packages/GitHub Release 发布。
+- 文章中的 YOLOv10n 记录仍是 `source-tree-real-model-runtime`；不是 package-consumer-runtime、post-publish、
+  release-close proof，也不是 AGPL 资产公开再分发批准。
+
 ## 2026-07-23 Runtime Deserialization Deferred Boundary Audit
 
 本批回到 deferred 主线，针对 `runtime-deserialization-boundary` 设计组做集中审计，而不是尝试把
