@@ -2798,6 +2798,49 @@ runtime package key、local candidate evidence 和真实 package-consumer-runtim
 - 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
   GitHub Release upload 或 issue close。
 
+## 2026-07-23 Deferred Boundary Public Article Expansion
+
+本阶段继续公开文章矩阵质量提升，扩写
+`docs/articles/zh-cn/publishing/deferred-boundary-public-article.md`，将 deferred boundary
+从短说明扩展为完整的完成度/风险边界文章。文章明确 manifest/source 100% 不等于可发布
+100%，并用 evidence ladder、A/B/C/D 风险层级和 runtime deserialization 案例说明哪些
+API 可以继续提升、哪些必须保留 deferred history。
+
+### 实现
+
+- 文章补齐 `project-completion-review.md`、`tensorrt-interface-comparison.csv`、
+  `deferred-boundary-risk-tier-gate.md`、`deferred-manual-design-groups.md` 与
+  `runtime-deserialization-deferred-boundary-audit.md/json` 的证据路径。
+- 增加 manifest/source match -> non-deferred native bridge -> generated interop/header
+  parity -> typed C# wrapper -> quality test/smoke -> runtime smoke ->
+  package-consumer-runtime proof 的完成度梯子。
+- 明确 A-tier copied value、B-tier safe alternative、C-tier design-gate-required、
+  D-tier keep-deferred 的提升策略，并写入默认低风险 deferred 候选为 `0` 的当前边界。
+- 公开说明 algorithm selector borrowed objects、allocator/output allocator/debug listener
+  callback、plugin lifecycle、execute/enqueue、IDimensionExpr/IExprBuilder 与
+  runtime deserialization ownership 不能机械提升。
+- 以 runtime-deserialization audit 为案例，明确 direct `deserializeCudaEngineV2` 和
+  `loadRuntime` 共 5 条 TRT8/TRT10/TRT11 行继续 `deferred-only`，安全替代面只限
+  pointer-free diagnostics/design gate。
+- 为 `PublishingPublicArticleTests` 增加
+  `DeferredBoundaryPublicArticleCoversRiskTiersRuntimeDeserializationAndNoSubstituteProof`
+  专项门禁。
+
+### Verification
+
+- `dotnet test tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --filter "FullyQualifiedName~PublishingPublicArticleTests"`：
+  `6/6` 通过。
+- 编译阶段仍出现 5 条既有 nullable warning，位置在
+  `FinalPublishProofGateAndOwnerExecutionPackTests.cs` 与
+  `ReleasePublishReadinessEvidencePackAndPublicDocsGateTests.cs`，本批未改动这些文件。
+
+### C 盘与发布边界
+
+- 本阶段未下载 TensorRT、CUDA、cuDNN、模型、ONNX、engine、Python/pip 资产或 NuGet
+  临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
+  GitHub Release upload 或 issue close。
+
 ## 2026-07-23 Builder Config Readback Public Article Expansion
 
 本阶段继续公开文章矩阵质量提升，扩写

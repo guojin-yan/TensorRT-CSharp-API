@@ -194,6 +194,70 @@ public sealed class PublishingPublicArticleTests
         Assert.Contains("不能用 presence probe 替代生命周期设计", content, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void DeferredBoundaryPublicArticleCoversRiskTiersRuntimeDeserializationAndNoSubstituteProof()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "publishing",
+            "deferred-boundary-public-article.md"));
+
+        foreach (string marker in new[]
+        {
+            "manifest/source match",
+            "non-deferred native bridge",
+            "typed C# wrapper",
+            "package-consumer-runtime proof",
+            "deferred-boundary-risk-tier-gate.md",
+            "deferred-manual-design-groups.md",
+            "runtime-deserialization-deferred-boundary-audit.md",
+            "A-tier copied value",
+            "B-tier safe alternative",
+            "C-tier design-gate-required",
+            "D-tier keep-deferred",
+            "默认低风险 deferred 候选已经为 `0`",
+            "algorithm selector borrowed objects",
+            "IGpuAllocator",
+            "IGpuAsyncAllocator",
+            "IOutputAllocator",
+            "IDebugListener",
+            "registerCreator",
+            "deregisterCreator",
+            "loadLibrary",
+            "executeV2",
+            "enqueueV2",
+            "IDimensionExpr",
+            "IExprBuilder",
+            "deserializeCudaEngineV2",
+            "loadRuntime",
+            "TensorRtRuntime.Deserialize(byte[])",
+            "TensorRtRuntimeDeserializationBoundaryPrecheck.EvaluateKnownSurface",
+            "TensorRtRuntimeDeserializationDependencyDiagnostics.EvaluateKnownSurface",
+            "TensorRtStreamIoInterfaceInfoDesignGate.EvaluateKnownSurface",
+            "trt10-runtime-deserialize-cuda-engine-v2-deferred",
+            "trt11-runtime-deserialize-cuda-engine-v2-deferred",
+            "trt8-runtime-load-runtime-deferred",
+            "trt10-runtime-load-runtime-deferred",
+            "trt11-runtime-load-runtime-deferred",
+            "dependency-probe-only",
+            "owner-action-required",
+            "local feed package consumer",
+            "ProjectReference consumer",
+            "direct `.nupkg` install"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("manifest/source 100% 只能证明", content, StringComparison.Ordinal);
+        Assert.Contains("不能证明“用户可以安全调用这个接口”", content, StringComparison.Ordinal);
+        Assert.Contains("不要删除 deferred manifest 来制造完成度", content, StringComparison.Ordinal);
+        Assert.Contains("不暴露 `IRuntime*`、`ICudaEngine*`", content, StringComparison.Ordinal);
+    }
+
     private static readonly ArticleExpectation[] Articles =
     {
         new(
