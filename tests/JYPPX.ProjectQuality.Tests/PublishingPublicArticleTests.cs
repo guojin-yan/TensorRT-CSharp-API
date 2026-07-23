@@ -43,6 +43,110 @@ public sealed class PublishingPublicArticleTests
     }
 
     [Fact]
+    public void NuGetInstallRuntimePackagePublicArticleCoversRuntimeKeysSplitPackagesCleanConsumerAndProofBoundary()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "publishing",
+            "nuget-install-runtime-package-public-article.md"));
+
+        foreach (string marker in new[]
+        {
+            "JYPPX.TensorRT.CSharp.API",
+            "pack/runtime/runtime-packages.manifest.json",
+            "pack/runtime-split/split-runtime-packages.manifest.json",
+            "pack/runtime/runtime-package-smoke-command-template.json",
+            "pack/runtime/README.md",
+            "pack/runtime-split/README.md",
+            "docs/articles/zh-cn/tensorrtsharp-nuget-runtime-package-guide.md",
+            "docs/articles/zh-cn/runtime-package-selection.md",
+            "docs/articles/zh-cn/runtime-package-matrix-reading-guide.md",
+            "docs/articles/zh-cn/runtime-package-installation-deep-dive.md",
+            "docs/articles/zh-cn/package-consumer-runtime-proof-clean-consumer-guide.md",
+            "win-x64-trt8.6-cuda11.8-cudnn8.9",
+            "win-x64-trt10.11-cuda12.9-cudnn9.22",
+            "win-x64-trt11.0-cuda13.2-cudnn9.22",
+            "linux-x64-trt10.11-cuda12.9-cudnn9.22",
+            "role = bridge",
+            "role = cuda-cudnn",
+            "role = tensorrt",
+            "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge",
+            "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.CudaCudnn",
+            "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.TensorRt",
+            "key",
+            "packageId",
+            "rid",
+            "platform",
+            "tensorRtLine",
+            "tensorRtVersion",
+            "cudaLine",
+            "cudaVersion",
+            "cudnnMajor",
+            "cudnnVersion",
+            "distributionTier",
+            "validationState",
+            "buildPreset",
+            "bridgeFile",
+            "tensorRtFiles",
+            "cudaFiles",
+            "cudnnFiles",
+            "dotnet --info",
+            "dotnet restore --force-evaluate",
+            "dotnet build -c Release",
+            "jyppxtrtbridge.dll",
+            "nvinfer_10.dll",
+            "nvonnxparser_10.dll",
+            "cudart64_12.dll",
+            "cudnn64_9.dll",
+            "public package source URL",
+            "managed package id/version",
+            "runtime package id/version/runtime key",
+            "managed nupkg SHA256",
+            "runtime nupkg SHA256",
+            "native asset listing",
+            "dependency probe log",
+            "runtime smoke log",
+            "exitCode = 0",
+            "OS / architecture / GPU / driver",
+            "strict validator result",
+            "eng/Test-ExternalRuntimeProofRecord.ps1",
+            "eng/Test-PackageConsumerRuntimeProofRecord.ps1",
+            "eng/Test-PostPublishVerificationRecord.ps1",
+            "artifacts/final-release/package-consumer-runtime-proof-owner-input.template.json",
+            "artifacts/final-release/package-consumer-runtime-proof-record-validation.md",
+            "artifacts/final-release/post-publish-verification-record.json",
+            "local feed package consumer",
+            "ProjectReference consumer",
+            "direct `.nupkg` install",
+            "GitHub Actions dry-run",
+            "GitHub full runtime collection package",
+            "owner execution package",
+            "package id/version template",
+            "release issue close record template",
+            "post-publish verification input draft",
+            "blocked-by-cuda-driver",
+            "package-consumer-runtime",
+            "Linux runner proof",
+            "real-model-runtime",
+            "owner authorization",
+            "post-publish verification"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("不是 package-consumer-runtime proof", content, StringComparison.Ordinal);
+        Assert.Contains("不能授权发布", content, StringComparison.Ordinal);
+        Assert.Contains("不能发布", content, StringComparison.Ordinal);
+        Assert.Contains("不能关闭 release issue", content, StringComparison.Ordinal);
+        Assert.Contains("不要把 runtime deserialization ownership", content, StringComparison.Ordinal);
+        Assert.Contains("伪装成低风险安装问题", content, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void SourceBuildPublicArticleCoversCppBridgeEnvironmentPresetsPackagesAndTroubleshooting()
     {
         string content = File.ReadAllText(Path.Combine(

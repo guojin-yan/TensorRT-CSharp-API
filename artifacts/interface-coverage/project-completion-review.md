@@ -3200,3 +3200,47 @@ report、command preview 和 bounded runtime output 的证据边界写清楚。
   临时包到 C 盘。
 - 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
   GitHub Release upload、issue close 或 push。
+
+## 2026-07-24 NuGet Install Runtime Package Public Article Expansion
+
+本阶段继续公开文章矩阵质量提升，扩写
+`docs/articles/zh-cn/publishing/nuget-install-runtime-package-public-article.md`，将 NuGet
+安装说明从短骨架扩展为 managed package、runtime package、split runtime package、clean
+consumer proof 和 troubleshooting 边界指南。文章强调 NuGet 安装教程本身不是
+package-consumer-runtime proof，也不能授权发布。
+
+### 实现
+
+- 文章补齐 `pack/runtime/runtime-packages.manifest.json`、
+  `pack/runtime-split/split-runtime-packages.manifest.json`、
+  `pack/runtime/runtime-package-smoke-command-template.json`、`pack/runtime/README.md`、
+  `pack/runtime-split/README.md` 与 runtime package 相关文章的证据路径。
+- 公开说明整包 runtime key 与 split runtime package 的区别，覆盖 `role = bridge`、
+  `role = cuda-cudnn`、`role = tensorrt` 以及典型 Bridge/CudaCudnn/TensorRt package id。
+- 补充 runtime key 选择顺序：RID、TensorRT line、CUDA line、cuDNN major、GPU driver
+  compatibility，并列出 `key`、`packageId`、`rid`、`tensorRtVersion`、`cudaVersion`、
+  `cudnnVersion`、`distributionTier`、`validationState`、`tensorRtFiles`、`cudaFiles`、
+  `cudnnFiles` 等 manifest 字段。
+- 增加 clean consumer proof 最低字段、strict validator 路径、native asset listing、
+  dependency probe、runtime smoke log、nupkg SHA256、host metadata 和 owner review 边界。
+- 明确 local feed、ProjectReference、direct `.nupkg`、GitHub Actions dry-run、collection
+  package、owner execution package、template、input draft、build-only、dependency-probe-only
+  和 blocked-by-cuda-driver 都不是 package-consumer-runtime proof。
+- 为 `PublishingPublicArticleTests` 增加
+  `NuGetInstallRuntimePackagePublicArticleCoversRuntimeKeysSplitPackagesCleanConsumerAndProofBoundary`
+  专项门禁。
+
+### Verification
+
+- `dotnet test tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --filter "FullyQualifiedName~PublishingPublicArticleTests"`：
+  `14/14` 通过。
+- 编译阶段仍出现 5 条既有 nullable warning，位置在
+  `FinalPublishProofGateAndOwnerExecutionPackTests.cs` 与
+  `ReleasePublishReadinessEvidencePackAndPublicDocsGateTests.cs`，本批未改动这些文件。
+
+### C 盘与发布边界
+
+- 本阶段未下载 TensorRT、CUDA、cuDNN、模型、ONNX、engine、Python/pip 资产或 NuGet
+  临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
+  GitHub Release upload、issue close 或 push。
