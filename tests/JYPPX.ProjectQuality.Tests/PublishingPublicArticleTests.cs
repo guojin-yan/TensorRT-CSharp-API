@@ -695,6 +695,103 @@ public sealed class PublishingPublicArticleTests
         Assert.Contains("不要 workflow dispatch", content, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void NativeBridgeBuildPublicArticleCoversAbiGenerationPresetsPackagesAndProofBoundary()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "publishing",
+            "native-bridge-build-public-article.md"));
+
+        foreach (string marker in new[]
+        {
+            "Visual Studio 2022",
+            "CMake >= 3.27",
+            ".NET SDK 8",
+            "CUDA_PATH",
+            "TensorRT include/lib/bin",
+            "cuDNN include/lib/bin",
+            "native/manifests/tensorrt/v8",
+            "native/manifests/tensorrt/v10",
+            "native/manifests/tensorrt/v11",
+            "native/manifests/cuda",
+            "module",
+            "versionLine",
+            "entryPoint",
+            "ownership",
+            "manualOverride",
+            "native/generated/bridge_api_catalog.g.h",
+            "native/generated/bridge_entrypoints.g.h",
+            "GeneratedApiCatalog.g.cs",
+            "GeneratedEntryPointNames.g.cs",
+            "GeneratedNativeMethods.g.cs",
+            "GeneratedTensorRtManifestNativeMethods.g.cs",
+            "GeneratedCudaManifestNativeMethods.g.cs",
+            "NativeMethodsTensorRt.Generated.g.cs",
+            "NativeMethodsCuda.Generated.g.cs",
+            "NativeBridgeApi.TensorRtBindings.Generated.g.cs",
+            "NativeBridgeApi.TensorRtHelpers.Generated.g.cs",
+            "NativeCudaApi.Generated.g.cs",
+            "Generate-Bindings.ps1",
+            "Test-BindingGeneratorOutputs.ps1",
+            "Export-InterfaceCoverageMatrix.ps1",
+            "Export-NativeMethodsComparison.ps1",
+            "Export-WrapperLiftCandidates.ps1",
+            "Export-GeneratedApiCoverage.ps1",
+            "SHA256",
+            "win-x64-dev",
+            "win-x64-trt8-cuda11-release",
+            "win-x64-trt8-cuda12-release",
+            "win-x64-trt10-cuda11-release",
+            "win-x64-trt10-cuda12-release",
+            "win-x64-trt11-cuda12-release",
+            "win-x64-trt11-cuda13-release",
+            "linux-x64-trt8-cuda11-release",
+            "linux-x64-trt8-cuda12-release",
+            "linux-x64-trt10-cuda11-release",
+            "linux-x64-trt10-cuda12-release",
+            "linux-x64-trt11-cuda12-release",
+            "linux-x64-trt11-cuda13-release",
+            "JYPPX_ENABLE_TENSORRT_BINDINGS",
+            "JYPPX_ENABLE_CUDA_BINDINGS",
+            "JYPPX_TENSORRT_LINE",
+            "JYPPX_CUDA_LINE",
+            "JYPPX_CUDA_VERSION",
+            "JYPPX_TENSORRT_CUDA_VERSION",
+            "JYPPX_CUDNN_MAJOR",
+            "JYPPX_StatusCode",
+            "SafeTensorRtObjectHandle",
+            "SafeCudaObjectHandle",
+            "NativeBridgePathResolver",
+            "NativeBridgeLibraryLoader",
+            "TensorRtNativeAbiSurfaceParityTests",
+            "PublicApiHandleExposureAuditTests",
+            "NativeBridgePathResolverTests",
+            "NativeVendorBoundaryGuardTests",
+            "SourceBuildCmakeWindowsGuideTests",
+            "JYPPX.TensorRT.CSharp.API",
+            "JYPPX.TensorRT.CSharp.API.NativeBridge",
+            "dumpbin /dependents",
+            "local feed package consumer",
+            "ProjectReference consumer",
+            "direct `.nupkg` install",
+            "GitHub Actions dry-run",
+            "post-publish verification",
+            "release close"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("不是 package-consumer-runtime proof", content, StringComparison.Ordinal);
+        Assert.Contains("不要把 TensorRT、CUDA、cuDNN、ONNX、engine、runtime package 或 NuGet 临时包下载到 C 盘", content, StringComparison.Ordinal);
+        Assert.Contains("不要混用 TRT10 header 和 TRT11 runtime DLL", content, StringComparison.Ordinal);
+        Assert.Contains("不用删除记录制造完成度", content, StringComparison.Ordinal);
+    }
+
     private static readonly ArticleExpectation[] Articles =
     {
         new(

@@ -1,5 +1,53 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-23 Native Bridge Build Public Article Expansion
+
+本阶段继续公开文章矩阵质量提升，扩写
+`docs/articles/zh-cn/publishing/native-bridge-build-public-article.md`，将 native bridge
+构建文章从短说明扩展为面向外部用户的源码构建与 ABI 审计文章。文章覆盖环境前提、
+manifest/generated interop、CMake preset、ABI 设计规则、质量门、两条 package 路线和
+proof boundary。
+
+### 实现
+
+- 文章补齐 `native/manifests/tensorrt/v8`、`v10`、`v11`、`native/manifests/cuda`、
+  `native/generated/bridge_api_catalog.g.h`、`bridge_entrypoints.g.h` 与 generated C#
+  interop 的证据路径。
+- 公开说明 `Generate-Bindings.ps1`、`Test-BindingGeneratorOutputs.ps1`、
+  `Export-InterfaceCoverageMatrix.ps1`、`Export-NativeMethodsComparison.ps1`、
+  `Export-WrapperLiftCandidates.ps1` 和 `Export-GeneratedApiCoverage.ps1` 的验证用途。
+- 写入 Windows/Linux TRT8/TRT10/TRT11 CMake preset 与
+  `JYPPX_ENABLE_TENSORRT_BINDINGS`、`JYPPX_ENABLE_CUDA_BINDINGS`、
+  `JYPPX_TENSORRT_LINE`、`JYPPX_CUDA_LINE`、`JYPPX_CUDA_VERSION`、
+  `JYPPX_TENSORRT_CUDA_VERSION`、`JYPPX_CUDNN_MAJOR` 的版本线边界。
+- 明确 ABI 规则：C ABI entrypoint 稳定、跨 ABI 不抛 C++ exception、native failure
+  转换为 `JYPPX_StatusCode`、字符串/数组走 count/copy 或 caller buffer、
+  public wrapper 不泄露裸 `IntPtr`。
+- 连接 `TensorRtNativeAbiSurfaceParityTests`、`PublicApiHandleExposureAuditTests`、
+  `NativeBridgePathResolverTests`、`NativeVendorBoundaryGuardTests` 与源码构建/roadmap
+  质量门。
+- 明确 native bridge build、generated interop、readonly diagnostics、local feed、
+  ProjectReference、direct `.nupkg` install 与 GitHub Actions dry-run 都不是
+  package-consumer-runtime proof。
+- 为 `PublishingPublicArticleTests` 增加
+  `NativeBridgeBuildPublicArticleCoversAbiGenerationPresetsPackagesAndProofBoundary`
+  专项门禁。
+
+### Verification
+
+- `dotnet test tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --filter "FullyQualifiedName~PublishingPublicArticleTests"`：
+  `12/12` 通过。
+- 编译阶段仍出现 5 条既有 nullable warning，位置在
+  `FinalPublishProofGateAndOwnerExecutionPackTests.cs` 与
+  `ReleasePublishReadinessEvidencePackAndPublicDocsGateTests.cs`，本批未改动这些文件。
+
+### C 盘与发布边界
+
+- 本阶段未下载 TensorRT、CUDA、cuDNN、模型、ONNX、engine、Python/pip 资产或 NuGet
+  临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
+  GitHub Release upload 或 issue close。
+
 ## 2026-07-23 Parser Refitter Copied Diagnostics Public Article Expansion
 
 本阶段继续公开文章矩阵质量提升，扩写
