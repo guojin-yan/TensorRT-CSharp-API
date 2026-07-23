@@ -1465,6 +1465,61 @@ public sealed class PublishingPublicArticleTests
     }
 
     [Fact]
+    public void PluginInventoryPublicArticleCoversV3MetadataLayerMetadataSourceOnlyReportsAndLifecycleBoundary()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "publishing",
+            "plugin-inventory-public-article.md"));
+
+        foreach (string marker in new[]
+        {
+            "V3 metadata 与 layer metadata",
+            "TensorRtPluginCreatorInfo",
+            "TensorRtPluginCreatorSummary",
+            "TensorRtPluginFieldInfo",
+            "TensorRtPluginFieldSummary",
+            "TensorRtPluginCreatorV3MetadataDesignGate",
+            "TensorRtPluginCreatorV3MetadataDesignGateResult",
+            "TensorRtVersionedInterfaceMetadata",
+            "TensorRtPluginV2LayerMetadata",
+            "TensorRtPluginV3LayerMetadata",
+            "TensorRtPluginV3SerializationFieldInventory",
+            "IVersionedInterface metadata",
+            "getInterfaceInfo",
+            "metadata inspection",
+            "plugin lifecycle",
+            "Source-only smoke 与报告字段",
+            "plugin-inventory-source-only",
+            "sourceOnly=True",
+            "RuntimeEvidenceKind=source-only-readonly-diagnostics",
+            "IsRuntimeExecutionProof=false",
+            "IsPackageConsumerRuntimeProof=false",
+            "CanPromoteRuntimeProof=false",
+            "CanPromoteReleaseProof=false",
+            "CanDeleteDeferredRecord=false",
+            "EvidenceKind = plugin-inventory-readonly-diagnostics",
+            "RuntimeEvidenceKind = readonly-metadata",
+            "PluginLifecycleProof = false",
+            "PluginCreateProof = false",
+            "PluginEnqueueProof = false",
+            "PackageConsumerRuntimeProof = false",
+            "ForbiddenSubstitutes = local-feed, ProjectReference, direct-nupkg, dashboard, dry-run"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("不回答 creator 能否真正创建可 enqueue", content, StringComparison.Ordinal);
+        Assert.Contains("不把 field data pointer 交给 C#", content, StringComparison.Ordinal);
+        Assert.Contains("不是 plugin enqueue proof", content, StringComparison.Ordinal);
+        Assert.Contains("不是 plugin lifecycle 的放行证", content, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void OnnxToEnginePublicArticleCoversSharedParserReportsYoloVisionAndProofBoundary()
     {
         string content = File.ReadAllText(Path.Combine(

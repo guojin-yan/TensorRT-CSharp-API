@@ -3201,6 +3201,54 @@ report、command preview 和 bounded runtime output 的证据边界写清楚。
 - 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
   GitHub Release upload、issue close 或 push。
 
+## 2026-07-24 Plugin Inventory Public Article Expansion
+
+本阶段继续公开文章矩阵质量提升，扩写
+`docs/articles/zh-cn/publishing/plugin-inventory-public-article.md`，将 Plugin Inventory 只读文章从
+registry/source/creator 字段说明扩展为覆盖 PluginCreatorV3 metadata、PluginV2/V3 layer metadata、
+source-only smoke、report 字段和 plugin lifecycle proof boundary 的公开教程。文章明确本阶段只是文档
+和质量门，不是 plugin create/clone/serialize/deserialize/enqueue、runtime smoke、package-consumer-runtime
+proof 或发布授权。
+
+### 实现
+
+- 文章补充 `TensorRtPluginCreatorInfo`、`TensorRtPluginCreatorSummary`、`TensorRtPluginFieldInfo`、
+  `TensorRtPluginFieldSummary`、`TensorRtPluginCreatorV3MetadataDesignGate`、
+  `TensorRtPluginCreatorV3MetadataDesignGateResult` 和 `TensorRtVersionedInterfaceMetadata` 的只读边界。
+- 增加 `TensorRtPluginV2LayerMetadata`、`TensorRtPluginV3LayerMetadata` 和
+  `TensorRtPluginV3SerializationFieldInventory` 说明，强调 layer/serialization metadata 是 pointer-free
+  inspection，不是 plugin lifecycle。
+- 明确 `PluginInventorySourceOnlySmokeTests` 与 source-only evidence 只能证明源码、wrapper、文档和门禁链路存在，
+  不能删除 deferred lifecycle 记录。
+- 增加建议 report 字段：`EvidenceKind = plugin-inventory-readonly-diagnostics`、
+  `RuntimeEvidenceKind = readonly-metadata`、`PluginLifecycleProof = false`、
+  `PluginCreateProof = false`、`PluginEnqueueProof = false`、
+  `PackageConsumerRuntimeProof = false` 和 `ForbiddenSubstitutes`。
+- 明确 registry exists、creator/field metadata、parent-search round-trip、source-only smoke、local feed、
+  ProjectReference、direct `.nupkg`、dashboard、dry-run 和 release checklist 都不能替代真实 plugin enqueue
+  或 package-consumer-runtime proof。
+- 为 `PublishingPublicArticleTests` 增加
+  `PluginInventoryPublicArticleCoversV3MetadataLayerMetadataSourceOnlyReportsAndLifecycleBoundary`
+  专项门禁。
+
+### Verification
+
+- `dotnet test tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --filter "FullyQualifiedName~PublishingPublicArticleTests"`：
+  `23/23` 通过。
+- 编译阶段仍出现 5 条既有 nullable warning，位置在
+  `FinalPublishProofGateAndOwnerExecutionPackTests.cs` 与
+  `ReleasePublishReadinessEvidencePackAndPublicDocsGateTests.cs`，本批未改动这些文件。
+
+### C 盘与发布边界
+
+- 本阶段未下载 TensorRT、CUDA、cuDNN、模型、ONNX、engine、Python/pip 资产或 NuGet
+  临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
+  GitHub Release upload、issue close 或 push。
+- 本批没有 plugin lifecycle proof、plugin enqueue proof、runtime smoke、package-consumer-runtime proof、
+  real-model-runtime proof、Linux runner proof、post-publish verification 或 owner authorization，因此不改变
+  `canPublishPublicly=false`、`canCloseReleaseIssue=false` 或 release blocker 状态。
+
 ## 2026-07-24 Native Bridge Build Public Article Expansion
 
 本阶段继续公开文章矩阵质量提升，扩写

@@ -98,6 +98,70 @@ Builder source 来自 builder-owned registry；Runtime source 来自 runtime-loc
 
 这就是为什么文章只能把它归类为 copied/read-only diagnostics。
 
+## V3 metadata 与 layer metadata
+
+Plugin inventory 文章还应说明几个相关但边界不同的只读对象：
+
+```text
+TensorRtPluginCreatorInfo
+TensorRtPluginCreatorSummary
+TensorRtPluginFieldInfo
+TensorRtPluginFieldSummary
+TensorRtPluginCreatorV3MetadataDesignGate
+TensorRtPluginCreatorV3MetadataDesignGateResult
+TensorRtVersionedInterfaceMetadata
+TensorRtPluginV2LayerMetadata
+TensorRtPluginV3LayerMetadata
+TensorRtPluginV3SerializationFieldInventory
+```
+
+`TensorRtPluginCreatorV3MetadataDesignGate` 是设计门，不是 runtime 创建插件。它只回答“PluginCreatorV3 与
+IVersionedInterface metadata 是否能以 pointer-free copied record 表达”，不回答 creator 能否真正创建可 enqueue
+的 plugin。`TensorRtVersionedInterfaceMetadata` 也只是复制 `getInterfaceInfo` 风格的名称、版本和 capability
+元数据，不持有 native interface pointer。
+
+`TensorRtPluginV2LayerMetadata` 和 `TensorRtPluginV3LayerMetadata` 来自已经存在的 layer 对象，适合解释一个
+engine/network 中 plugin layer 的只读摘要。它们不能证明 plugin library 被正确打包，也不能证明自定义 plugin
+能跨进程 deserialize。`TensorRtPluginV3SerializationFieldInventory` 读取序列化字段 inventory 时，也必须复制
+field name/type/length/hasData，不把 field data pointer 交给 C#。
+
+这几个对象适合进入文章配图：registry/creator 是“环境能看到什么”，layer metadata 是“已构建网络里出现了什么”，
+serialization field inventory 是“可序列化信息暴露了什么”。三者都属于 metadata inspection，不属于 plugin lifecycle。
+
+## Source-only smoke 与报告字段
+
+`PluginInventorySourceOnlySmokeTests` 的价值是让维护者在没有真实 TensorRT runtime 的情况下，也能检查文章、源码和
+report 字段没有把 source-only evidence 写成 runtime proof。建议文章中保留这些 marker：
+
+```text
+plugin-inventory-source-only
+sourceOnly=True
+RuntimeEvidenceKind=source-only-readonly-diagnostics
+IsRuntimeExecutionProof=false
+IsPackageConsumerRuntimeProof=false
+CanPromoteRuntimeProof=false
+CanPromoteReleaseProof=false
+CanDeleteDeferredRecord=false
+```
+
+真实 smoke runner 可以输出 registry exists、creator count、field summary 和 diagnostics；source-only smoke 则只证明
+源文件、wrapper、文档和门禁链路存在。二者都不能删除 deferred lifecycle 记录。只有真实 host 上的 runtime smoke
+能证明当前进程读到了 TensorRT registry；即使如此，它仍不是 plugin enqueue proof。
+
+如果将这些结果写进 `artifacts/interface-coverage` 或 `artifacts/final-release`，推荐字段名直接保留边界：
+
+```text
+EvidenceKind = plugin-inventory-readonly-diagnostics
+RuntimeEvidenceKind = readonly-metadata
+PluginLifecycleProof = false
+PluginCreateProof = false
+PluginEnqueueProof = false
+PackageConsumerRuntimeProof = false
+ForbiddenSubstitutes = local-feed, ProjectReference, direct-nupkg, dashboard, dry-run
+```
+
+这样 release reviewer 能一眼看出：Plugin inventory 是很有价值的诊断能力，但它不是 plugin lifecycle 的放行证。
+
 ## Smoke runner 怎么读
 
 `smoke/PluginRegistryInventorySmokeRunner/Program.cs` 是发布候选里最适合展示 inventory 的入口。它会先做 dependency probe，然后初始化 built-in plugins，再按 line 读取 global、builder capability、runtime-local 和 builder-owned registry：
