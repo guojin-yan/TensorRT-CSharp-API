@@ -3288,3 +3288,48 @@ release issue。
   临时包到 C 盘。
 - 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
   GitHub Release upload、issue close 或 push。
+
+## 2026-07-24 YoloVision Overview Public Article Expansion
+
+本阶段继续公开文章矩阵质量提升，扩写
+`docs/articles/zh-cn/publishing/yolovision-overview-public-article.md`，将 YoloVision 总览从短说明
+扩展为 YOLO 多系列、多任务、preflight、preprocess、output JSON/SVG、官方资产、owner proof 与
+package proof 边界的完整公开文章。
+
+### 实现
+
+- 文章补齐 `samples/YoloVision` 的核心路径：`Program.cs`、`YoloVision.csproj`、
+  `YoloSampleRunner.cs`、`YoloVisionResult.cs`、`YoloVisionOutputReport.cs`、
+  `YoloVisionPreflightReport.cs`、`YoloImagePreprocessor.cs`、runtime output set/tensor/role
+  resolver、multi-output metadata 和 visualization writer。
+- 覆盖 YOLOv5、YOLOv6、YOLOv7、YOLOv8、YOLOv9、YOLOv10、YOLO11、YOLO26、YOLOX、
+  custom，以及 det/cls/seg/obb/pose/sem 六任务。
+- 公开说明 `yolo-model-matrix.json/md`、`yolovision-task-output-contract.json`、
+  `yolovision-output.schema.json`、`yolovision-preflight.schema.json`、
+  `yolovision-family-task-real-asset-roadmap.json`、article case pack 和 real asset owner backfill
+  pack 的证据角色。
+- 增加 `--self-test-end2end`、preflight、preprocess-only、六任务命令骨架、dedicated output role
+  options、`yolovision-output.v1`、`bindingMetadata`、example output JSON、SVG visualization 和
+  `eng/Test-YoloVisionOutputReport.ps1` 验证边界。
+- 补充 YOLOv10n 官方 `[1,300,6]` end-to-end、YOLOX-S `[1,8400,85]` detection-only、
+  YOLOv8n 六任务模板、owner backfill scripts 和 local PackageReference consumer 边界。
+- 明确 support matrix、task contract、preflight report、preprocessing output、output JSON、SVG、
+  local feed、ProjectReference、direct `.nupkg`、GitHub Actions dry-run、TensorRtExec build-only
+  report、OnnxToEngine report、dependency-probe-only、GUI screenshot、command preview 和
+  sample evidence 中的 package-consumer-runtime 字符串都不能替代 package-consumer-runtime proof。
+- 为 `PublishingPublicArticleTests` 增加
+  `YoloVisionOverviewPublicArticleCoversFamiliesTasksReportsOwnerEvidenceAndProofBoundary`
+  专项门禁。
+
+### Verification
+
+- `dotnet test tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --filter "FullyQualifiedName~PublishingPublicArticleTests"`：
+  `16/16` 通过。
+- 编译阶段未出现本批新增错误；此前 nullable warning 不属于本批改动范围。
+
+### C 盘与发布边界
+
+- 本阶段未下载 TensorRT、CUDA、cuDNN、模型、ONNX、engine、Python/pip 资产或 NuGet
+  临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
+  GitHub Release upload、issue close 或 push。
