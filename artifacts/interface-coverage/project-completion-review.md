@@ -1,5 +1,48 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-23 Plugin Inventory Public Article Expansion
+
+本阶段继续公开文章矩阵质量提升，扩写
+`docs/articles/zh-cn/publishing/plugin-inventory-public-article.md`，将 plugin inventory
+从短说明扩展为可发布的 readonly diagnostics 文章。文章解释 builder/global/
+builder-capability/runtime registry source、creator metadata、field metadata、diagnostics
+和 smoke runner 输出，并明确它不能替代 plugin lifecycle、真实 inference 或包消费验证。
+
+### 实现
+
+- 文章补齐 `TensorRtPluginRegistryInventory.cs`、
+  `TensorRtBuilder.PluginRegistryInventory.cs`、`TensorRtRuntime.PluginRegistryInventory.cs`、
+  `TensorRtEnvironmentProbe.PluginRegistryInventory.cs`、`plugin_registry_inventory.inc`、
+  managed interop、`PluginRegistryInventorySmokeRunner` 与 interface coverage matrix 的证据路径。
+- 明确 `TensorRtPluginRegistrySource.Builder`、`Global`、`BuilderCapability`、`Runtime`
+  四类 source，以及 `HasErrorRecorder`、`ParentSearchEnabled`、`CreatorCount`、
+  `RecursiveCreatorCount`、`FindCreator`、`TryFindCreator`、`GetCreatorSummaries`、
+  `GetFieldSummaries` 与 `GetDiagnostics` 的 copied/read-only 边界。
+- 写入 creator/field metadata 字段，包括 `InterfaceKind`、`InterfaceMajor`、
+  `InterfaceMinor`、`ApiLanguage`、`TensorRtVersion`、`FieldType`、`Length` 与
+  `HasData`，并说明 `HasData` 不暴露 field data pointer。
+- 明确 native bridge 的 `getAllCreators` / `getAllCreatorsRecursive`、SEH guard、
+  vendor mismatch/missing 与 probe 异常分类边界。
+- 明确 `createPlugin`、`clone`、`serialize`、`deserializePlugin`、`attachToContext`、
+  `enqueue`、`registerCreator`、`deregisterCreator`、`loadLibrary`、callback trampoline、
+  resource acquire/release 和 borrowed pointer API 仍不能伪装成低风险完成。
+- 为 `PublishingPublicArticleTests` 增加
+  `PluginInventoryPublicArticleCoversSourcesCopiedMetadataSmokeAndProofBoundary`
+  专项门禁。
+
+### Verification
+
+- `dotnet test tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --filter "FullyQualifiedName~PublishingPublicArticleTests"`：
+  `9/9` 通过。
+- 本批未改实现代码，仅更新 public article、ProjectQuality 专项门禁和 review 记录。
+
+### C 盘与发布边界
+
+- 本阶段未下载 TensorRT、CUDA、cuDNN、模型、ONNX、engine、Python/pip 资产或 NuGet
+  临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
+  GitHub Release upload 或 issue close。
+
 ## 2026-07-23 Engine Inspector Public Article Expansion
 
 本阶段继续公开文章矩阵质量提升，扩写

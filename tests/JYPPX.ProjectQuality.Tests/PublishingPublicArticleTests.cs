@@ -400,6 +400,88 @@ public sealed class PublishingPublicArticleTests
         Assert.Contains("GUI 能显示 report", content, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void PluginInventoryPublicArticleCoversSourcesCopiedMetadataSmokeAndProofBoundary()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "publishing",
+            "plugin-inventory-public-article.md"));
+
+        foreach (string marker in new[]
+        {
+            "TensorRtPluginRegistryInventory.cs",
+            "TensorRtBuilder.PluginRegistryInventory.cs",
+            "TensorRtRuntime.PluginRegistryInventory.cs",
+            "TensorRtEnvironmentProbe.PluginRegistryInventory.cs",
+            "plugin_registry_inventory.inc",
+            "NativeBridgeApi.PluginRegistryInventory.cs",
+            "NativeBridgeApi.RuntimePluginRegistryInventory.cs",
+            "PluginRegistryInventorySmokeRunner",
+            "tensorrt-interface-comparison.csv",
+            "PluginRegistryInventoryTests",
+            "PluginInventorySourceOnlySmokeTests",
+            "PluginCreatorApiLanguageReadonlyTests",
+            "PluginCreatorV3MetadataDesignGateTests",
+            "TensorRtPluginRegistrySource.Builder",
+            "TensorRtPluginRegistrySource.Global",
+            "TensorRtPluginRegistrySource.BuilderCapability",
+            "TensorRtPluginRegistrySource.Runtime",
+            "HasErrorRecorder",
+            "ParentSearchEnabled",
+            "CreatorCount",
+            "RecursiveCreatorCount",
+            "FindCreator",
+            "TryFindCreator",
+            "GetCreatorSummaries",
+            "GetFieldSummaries",
+            "GetDiagnostics",
+            "InterfaceKind",
+            "InterfaceMajor",
+            "InterfaceMinor",
+            "ApiLanguage",
+            "TensorRtVersion",
+            "FieldType",
+            "Length",
+            "HasData",
+            "TensorRtPluginRegistryInventoryDiagnostics",
+            "EmptyFieldNameCount",
+            "NegativeFieldLengthCount",
+            "getAllCreators",
+            "SEH guard",
+            "vendor mismatch",
+            "getAllCreatorsRecursive",
+            "createPlugin",
+            "clone",
+            "serialize",
+            "deserializePlugin",
+            "attachToContext",
+            "enqueue",
+            "registerCreator",
+            "deregisterCreator",
+            "loadLibrary",
+            "Skipped=True",
+            "DependencyProbeOnly",
+            "local feed package consumer",
+            "ProjectReference consumer",
+            "direct `.nupkg` install",
+            "clean external consumer",
+            "forbidden substitute scan",
+            "not package-consumer-runtime proof"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("不是 real-model-runtime proof", content, StringComparison.Ordinal);
+        Assert.Contains("不是 package-consumer-runtime proof", content, StringComparison.Ordinal);
+        Assert.Contains("不暴露 borrowed pointer", content, StringComparison.Ordinal);
+        Assert.Contains("不会重新拿 native pointer", content, StringComparison.Ordinal);
+    }
+
     private static readonly ArticleExpectation[] Articles =
     {
         new(
