@@ -3374,3 +3374,47 @@ samples/applications、runtime package 双路线、article matrix 和 release pr
   临时包到 C 盘。
 - 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
   GitHub Release upload、issue close 或 push。
+
+## 2026-07-24 Package Consumer Proof Public Article Expansion
+
+本阶段继续公开文章矩阵质量提升，扩写
+`docs/articles/zh-cn/publishing/package-consumer-proof-public-article.md`，将 package consumer
+runtime proof 从短说明扩展为 release owner 和评审者可执行、可判断的 clean external consumer proof
+文章。文章明确本阶段只是文档与质量门，不是 owner 真实 proof、发布授权或 release close 证据。
+
+### 实现
+
+- 文章补齐 package consumer owner input、record、validation、forbidden substitute scan、execution pack、
+  clean consumer checklist、external runtime proof、post-publish verification、release close preflight 和
+  blocker dashboard 的证据路径。
+- 公开说明 clean consumer 必须包含 public package source、managed/runtime package id/version/key、
+  nupkg SHA256、restore/build/smoke command、exitCode、smokeStatus、nativeAssetsCopied、log SHA256、
+  stdout/stderr summary、host metadata、owner review 和 strict validator。
+- 增加推荐执行顺序：导出/校验 owner execution pack，owner 在仓库外 clean consumer 安装公开包，导入
+  `package-consumer-runtime-proof-owner-input`，再执行 `Test-PackageConsumerRuntimeProofRecord.ps1`
+  与 `Test-ExternalRuntimeProofRecord.ps1 -RequireExistingLog -FailOnNotProof`。
+- 明确 strict validator 必须拒绝仓库内 consumer、ProjectReference、local feed、direct `.nupkg`、
+  dependency-probe-only、build-only、hash mismatch、host metadata 缺失、dry-run、queued Actions、
+  missing runner、dashboard、template 和 skipped run。
+- 写清 YoloVision、TensorRtExec、OnnxToEngine 与 package-consumer-runtime 的边界；real-model-runtime、
+  sample-run evidence、TensorRtExec report 和 OnnxToEngine report 都不能替代 clean external consumer。
+- 明确 release close 仍需要 owner authorization、package-consumer-runtime、Linux runner proof、
+  real-model-runtime、post-publish verification、release close preflight 和 release issue close record。
+- 为 `PublishingPublicArticleTests` 增加
+  `PackageConsumerProofPublicArticleCoversCleanConsumerOwnerInputValidatorsAndForbiddenSubstitutes`
+  专项门禁。
+
+### Verification
+
+- `dotnet test tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --filter "FullyQualifiedName~PublishingPublicArticleTests"`：
+  `18/18` 通过。
+- 编译阶段仍出现 5 条既有 nullable warning，位置在
+  `FinalPublishProofGateAndOwnerExecutionPackTests.cs` 与
+  `ReleasePublishReadinessEvidencePackAndPublicDocsGateTests.cs`，本批未改动这些文件。
+
+### C 盘与发布边界
+
+- 本阶段未下载 TensorRT、CUDA、cuDNN、模型、ONNX、engine、Python/pip 资产或 NuGet
+  临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
+  GitHub Release upload、issue close 或 push。
