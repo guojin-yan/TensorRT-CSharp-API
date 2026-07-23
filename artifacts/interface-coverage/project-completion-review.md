@@ -1,5 +1,50 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-23 Parser Refitter Copied Diagnostics Public Article Expansion
+
+本阶段继续公开文章矩阵质量提升，扩写
+`docs/articles/zh-cn/publishing/onnx-parser-parserrefitter-诊断-copied-diagnostics-release-gate.md`，
+将 ONNX Parser / ParserRefitter copied diagnostics 从短说明扩展为 release gate
+边界文章。文章说明 parser/refitter snapshot、summary、TensorRtExec report projection、
+package consumer surface gate 与 proof boundary 的关系。
+
+### 实现
+
+- 文章补齐 `TensorRtOnnxParser.cs`、`TensorRtOnnxParserDiagnosticSnapshot.cs`、
+  `TensorRtOnnxParserDiagnostic.cs`、`TensorRtOnnxParser.ModelSupport.cs`、
+  `TensorRtOnnxParserRefitter.cs`、`TensorRtOnnxParserRefitterDiagnosticSnapshot.cs`、
+  `NativeBridgeApi.ParserRefitterDiagnostics.cs`、`OnnxEngineBuildDiagnostics.cs`、
+  `OnnxEngineParserPreflightSnapshot.cs` 和 `OnnxEngineBuildService.cs` 的证据路径。
+- 明确 parser/refitter snapshot 复制 `Line`、`ErrorCount`、`Diagnostics`、
+  `DiagnosticSummary`、`UsedVCPluginLibraries`、`IdentityOperatorSupported`、
+  `CopiedDiagnosticCount`、`DiagnosticSummaryLength`、`RuntimeEvidenceKind` 与
+  pointer-free proof boundary。
+- 写入 TensorRtExec report 中的 `ParserPreflightSnapshot`、`DiagnosticsState`、
+  `ModelSupportState`、`CopiedSubgraphCount`、`ParserDiagnosticsEvidenceKind`、
+  `ParserRefitterDiagnosticsEvidenceKind`、`CopiedDiagnosticsBoundary`、
+  `ForbiddenSubstitutes` 与 `CanPromoteCopiedDiagnosticsToRuntimeProof = False`。
+- 明确 `onnx-parser-diagnostic-readiness` 和
+  `onnx-parser-refitter-diagnostic-readiness` 都是 `compile-surface-proof` /
+  `proof=false`，不是 runtime/package/post-publish/release-close proof。
+- 为 `PublishingPublicArticleTests` 增加
+  `OnnxParserParserRefitterCopiedDiagnosticsArticleCoversSnapshotsReportsAndReleaseBoundary`
+  专项门禁。
+
+### Verification
+
+- `dotnet test tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --filter "FullyQualifiedName~PublishingPublicArticleTests"`：
+  `11/11` 通过。
+- 编译阶段仍出现 5 条既有 nullable warning，位置在
+  `FinalPublishProofGateAndOwnerExecutionPackTests.cs` 与
+  `ReleasePublishReadinessEvidencePackAndPublicDocsGateTests.cs`，本批未改动这些文件。
+
+### C 盘与发布边界
+
+- 本阶段未下载 TensorRT、CUDA、cuDNN、模型、ONNX、engine、Python/pip 资产或 NuGet
+  临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
+  GitHub Release upload 或 issue close。
+
 ## 2026-07-23 OnnxToEngine Public Article Expansion
 
 本阶段继续公开文章矩阵质量提升，扩写

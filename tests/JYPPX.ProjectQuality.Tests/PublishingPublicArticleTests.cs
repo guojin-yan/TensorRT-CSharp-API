@@ -603,6 +603,98 @@ public sealed class PublishingPublicArticleTests
         Assert.Contains("不要把模型、engine、runtime package 或 NuGet 临时包下载到 C 盘", content, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void OnnxParserParserRefitterCopiedDiagnosticsArticleCoversSnapshotsReportsAndReleaseBoundary()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "publishing",
+            "onnx-parser-parserrefitter-诊断-copied-diagnostics-release-gate.md"));
+
+        foreach (string marker in new[]
+        {
+            "TensorRtOnnxParser.cs",
+            "TensorRtOnnxParserDiagnosticSnapshot.cs",
+            "TensorRtOnnxParserDiagnostic.cs",
+            "TensorRtOnnxParser.ModelSupport.cs",
+            "TensorRtOnnxParserRefitter.cs",
+            "TensorRtOnnxParserRefitterDiagnosticSnapshot.cs",
+            "NativeBridgeApi.ParserRefitterDiagnostics.cs",
+            "OnnxEngineBuildDiagnostics.cs",
+            "OnnxEngineParserPreflightSnapshot.cs",
+            "OnnxEngineBuildService.cs",
+            "Test-BridgePackageConsumer.ps1",
+            "Test-RuntimePackageReadiness.ps1",
+            "Test-ReleaseQualityGate.ps1",
+            "BridgePackageConsumerTests",
+            "RuntimePackageReadinessTests",
+            "RuntimeSerializationOnnxSupportTests",
+            "ParserRefitterBoundaryTests",
+            "TensorRtExecReportSchemaTests",
+            "TensorRtOnnxParser.GetDiagnosticSnapshot()",
+            "TensorRtOnnxParser.GetDiagnosticSummary()",
+            "TensorRtOnnxParser.GetDiagnostics()",
+            "TensorRtOnnxParser.TryParse",
+            "TensorRtOnnxParser.GetUsedVCPluginLibraries()",
+            "TensorRtOnnxParser.CheckModelSupport",
+            "TensorRtOnnxParserRefitter.GetDiagnosticSnapshot()",
+            "TensorRtOnnxParserRefitter.GetDiagnosticSummary()",
+            "TensorRtOnnxParserRefitter.GetDiagnostics()",
+            "TensorRtOnnxParserRefitter.RefitFromBytes",
+            "TensorRtOnnxParserRefitter.RefitLoadedModel",
+            "hasOnnxParserDiagnosticReadiness",
+            "hasOnnxParserRefitterDiagnosticReadiness",
+            "Line",
+            "ErrorCount",
+            "Diagnostics",
+            "DiagnosticSummary",
+            "UsedVCPluginLibraries",
+            "IdentityOperatorSupported",
+            "CopiedDiagnosticCount",
+            "DiagnosticSummaryLength",
+            "UsedVCPluginLibraryCount",
+            "RuntimeEvidenceKind = copied-readonly-summary",
+            "IsRuntimeExecutionEvidence = false",
+            "IsRuntimeExecutionProof = false",
+            "PointerFreeCopiedSummary = true",
+            "CanPromoteRuntimeProof = false",
+            "CanPromoteReleaseProof = false",
+            "CanDeleteDeferredRecord = false",
+            "ParserPreflightSnapshot",
+            "DiagnosticsState",
+            "ModelSupportState",
+            "ModelSupported",
+            "CopiedSubgraphCount",
+            "CopiedUnsupportedSubgraphCount",
+            "CopiedNodeCount",
+            "ParserDiagnosticsEvidenceKind = copied-parser-diagnostics",
+            "ParserRefitterDiagnosticsEvidenceKind = copied-parser-refitter-diagnostics",
+            "CopiedDiagnosticsBoundary",
+            "ForbiddenSubstitutes",
+            "CanPromoteCopiedDiagnosticsToRuntimeProof = False",
+            "onnx-parser-diagnostic-readiness",
+            "onnx-parser-refitter-diagnostic-readiness",
+            "compile-surface-proof",
+            "proof=false",
+            "local feed package consumer",
+            "ProjectReference consumer",
+            "direct `.nupkg` install",
+            "GitHub Actions dry-run",
+            "failedBlockerCount=0"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("不是 runtime proof", content, StringComparison.Ordinal);
+        Assert.Contains("不是 package-consumer-runtime", content, StringComparison.Ordinal);
+        Assert.Contains("不暴露 native borrowed pointer", content, StringComparison.Ordinal);
+        Assert.Contains("不要 workflow dispatch", content, StringComparison.Ordinal);
+    }
+
     private static readonly ArticleExpectation[] Articles =
     {
         new(
