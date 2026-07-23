@@ -329,6 +329,77 @@ public sealed class PublishingPublicArticleTests
         Assert.Contains("不能推动 release close", content, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void EngineInspectorPublicArticleCoversReadbackArtifactsAndReadonlyProofBoundary()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "publishing",
+            "engine-inspector-public-article.md"));
+
+        foreach (string marker in new[]
+        {
+            "TensorRtEngineInspector.Trt11Diagnostics.cs",
+            "OnnxEngineBuildResult.cs",
+            "OnnxEngineRuntimeArtifactWriter.cs",
+            "OnnxEngineBuildDiagnostics.cs",
+            "TensorRtExecReport.cs",
+            "TensorRtExecCommand.cs",
+            "MainForm.cs",
+            "tensor-rt-exec-trtexec-parity-matrix.json",
+            "GetLayerInformation",
+            "HasExecutionContext",
+            "TryGetErrorRecorderSnapshot",
+            "OnnxLoadedEngineDiagnostics",
+            "EngineName",
+            "IOTensorCount",
+            "LayerCount",
+            "OptimizationProfileCount",
+            "DeviceMemorySizeInBytes",
+            "AuxiliaryStreamCount",
+            "ProfilingVerbosity",
+            "ReadbackFingerprint",
+            "ReadbackSha256",
+            "EvidenceBoundary",
+            "--dumpLayerInfo",
+            "--exportLayerInfo",
+            "--profilingVerbosity",
+            "trtexec-like-engine-readback",
+            "trtexec-like-engine-readback-skipped",
+            "LoadEngineDiagnosticsState",
+            "LoadEngineDiagnosticsAttempted",
+            "LoadEngineDiagnosticsSucceeded",
+            "LoadEngineDiagnosticsBoundary",
+            "ProofClassification",
+            "BuildEvidenceOnly",
+            "InferenceRan",
+            "NormalizedCommandSha256",
+            "IsRuntimeExecutionProof = false",
+            "IsRealModelRuntimeProof = false",
+            "IsPackageConsumerRuntimeProof = false",
+            "load-engine readonly diagnostics",
+            "does not create execution bindings",
+            "enqueue inference",
+            "validate outputs",
+            "local feed package consumer",
+            "ProjectReference consumer",
+            "direct `.nupkg` install",
+            "clean external consumer",
+            "post-publish verification"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("不是 real-model-runtime proof", content, StringComparison.Ordinal);
+        Assert.Contains("不是 package-consumer-runtime proof", content, StringComparison.Ordinal);
+        Assert.Contains("不伪造 per-layer timing", content, StringComparison.Ordinal);
+        Assert.Contains("GUI 能显示 report", content, StringComparison.Ordinal);
+    }
+
     private static readonly ArticleExpectation[] Articles =
     {
         new(

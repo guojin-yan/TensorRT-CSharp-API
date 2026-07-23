@@ -1,5 +1,47 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-23 Engine Inspector Public Article Expansion
+
+本阶段继续公开文章矩阵质量提升，扩写
+`docs/articles/zh-cn/publishing/engine-inspector-public-article.md`，将 Engine Inspector
+从短说明扩展为可发布的 readonly diagnostics 文章。文章解释 engine 名称、IO tensor、
+layer count、profile count、device memory、auxiliary streams、profiling verbosity、
+inspector text 与 readback hash 的用途，并明确这些证据不能替代真实 inference 或包消费验证。
+
+### 实现
+
+- 文章补齐 `TensorRtEngineInspector.Trt11Diagnostics.cs`、`OnnxEngineBuildResult.cs`、
+  `OnnxEngineRuntimeArtifactWriter.cs`、`OnnxEngineBuildDiagnostics.cs`、
+  `TensorRtExecReport.cs`、`TensorRtExecCommand.cs`、`MainForm.cs` 与
+  `tensor-rt-exec-trtexec-parity-matrix.json` 的证据路径。
+- 明确 `GetLayerInformation`、`HasExecutionContext`、`TryGetErrorRecorderSnapshot`、
+  `OnnxLoadedEngineDiagnostics`、`ReadbackFingerprint`、`ReadbackSha256` 与
+  `EvidenceBoundary` 属于 copied/read-only 诊断面。
+- 写入 TensorRtExec build 后 `--dumpLayerInfo` / `--exportLayerInfo` 与 `--loadEngine`
+  readonly diagnostics 示例，并覆盖 `trtexec-like-engine-readback` 与
+  `trtexec-like-engine-readback-skipped` artifact 边界。
+- 明确 Engine Inspector does not create execution bindings，不做 enqueue inference，
+  不 validate outputs，不伪造 per-layer timing；它不是 real-model-runtime proof，也不是
+  package-consumer-runtime proof。
+- 为 `PublishingPublicArticleTests` 增加
+  `EngineInspectorPublicArticleCoversReadbackArtifactsAndReadonlyProofBoundary`
+  专项门禁。
+
+### Verification
+
+- `dotnet test tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --filter "FullyQualifiedName~PublishingPublicArticleTests"`：
+  `8/8` 通过。
+- 编译阶段仍出现 5 条既有 nullable warning，位置在
+  `FinalPublishProofGateAndOwnerExecutionPackTests.cs` 与
+  `ReleasePublishReadinessEvidencePackAndPublicDocsGateTests.cs`，本批未改动这些文件。
+
+### C 盘与发布边界
+
+- 本阶段未下载 TensorRT、CUDA、cuDNN、模型、ONNX、engine、Python/pip 资产或 NuGet
+  临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
+  GitHub Release upload 或 issue close。
+
 ## 2026-07-23 Source Build Public Article Expansion
 
 本批继续补齐二次矫正中的源码 C++ 编译教程与宣传文章要求，将
