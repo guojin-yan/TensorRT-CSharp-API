@@ -3201,6 +3201,58 @@ report、command preview 和 bounded runtime output 的证据边界写清楚。
 - 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
   GitHub Release upload、issue close 或 push。
 
+## 2026-07-24 Native Bridge Build Public Article Expansion
+
+本阶段继续公开文章矩阵质量提升，扩写
+`docs/articles/zh-cn/publishing/native-bridge-build-public-article.md`，将 native bridge 构建文章从
+manifest/generated/CMake 导读扩展为覆盖 deferred uplift 验收、native/source/generated/wrapper 对齐、
+loader 路径解析、package 双路线和 proof boundary 的公开教程。文章明确本阶段只是文档和质量门，不是
+native ABI 实装、CMake release build、runtime smoke、package-consumer-runtime proof 或发布授权。
+
+### 实现
+
+- 文章新增 Bridge 实现验收表，覆盖 `native/manifests/tensorrt/v8/v10/v11`、`native/manifests/cuda`、
+  `native/src/tensorrt/v8/api.cpp`、`native/src/tensorrt/v10/api.cpp`、
+  `native/src/tensorrt/v11/api.cpp`、`native/src/cuda/api.cpp`、generated headers、generated C#
+  interop、high-level wrapper 和质量门。
+- 补充 native 到 wrapper 的提升规则：manifest entry、native implementation、generated interop、
+  `NativeBridgeApi` helper、public wrapper、smoke/quality gate 和 public article 必须成链。
+- 明确只读 copied snapshot 是优先提升路线，覆盖 plugin registry inventory、engine inspector、
+  parser diagnostics、builder config readback、runtime dependency diagnostics 和 CUDA device/memory/stream
+  状态。
+- 强化高风险边界：callback trampoline、allocator ownership、plugin lifecycle、borrowed pointer、
+  external resource 和 runtime deserialization ownership 必须保留 lifecycle/no-throw/in-flight
+  drain/copied-before-interop/loader 证据，不能直接伪装成低风险 API。
+- 增加 loader 与运行时解析说明，覆盖 `NativeBridgePathResolver`、`NativeBridgeLibraryLoader`、
+  `NativeBridgePathResolver.EnumerateCandidatePaths`、`NativeBridgeLoadException`、`runtimes/<rid>/native`、
+  `jyppxtrtbridge.dll`、`jyppxcudabridge.dll`、`nvinfer_plugin.dll`、`nvonnxparser.dll` 和
+  `cudart64_*.dll`。
+- 补充 native bridge 最小验证组合，强调文章测试不能替代 ABI/wrapper 门禁。
+- 写清 split runtime Bridge 组件、本地 bridge consumer、package inventory、runtime readiness、
+  public package download template、queued workflow 和 GitHub Actions dry-run 都不能替代 TensorRT
+  runtime 真实执行或 package-consumer-runtime proof。
+- 为 `PublishingPublicArticleTests` 增加
+  `NativeBridgeBuildPublicArticleCoversImplementationAcceptanceWrapperUpliftLoaderAndNonProofBridgeConsumers`
+  专项门禁。
+
+### Verification
+
+- `dotnet test tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --filter "FullyQualifiedName~PublishingPublicArticleTests"`：
+  `22/22` 通过。
+- 编译阶段仍出现 5 条既有 nullable warning，位置在
+  `FinalPublishProofGateAndOwnerExecutionPackTests.cs` 与
+  `ReleasePublishReadinessEvidencePackAndPublicDocsGateTests.cs`，本批未改动这些文件。
+
+### C 盘与发布边界
+
+- 本阶段未下载 TensorRT、CUDA、cuDNN、模型、ONNX、engine、Python/pip 资产或 NuGet
+  临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
+  GitHub Release upload、issue close 或 push。
+- 本批没有 native ABI 实装、CMake release build、runtime smoke、package-consumer-runtime proof、
+  real-model-runtime proof、Linux runner proof、post-publish verification 或 owner authorization，因此不改变
+  `canPublishPublicly=false`、`canCloseReleaseIssue=false` 或 release blocker 状态。
+
 ## 2026-07-24 Windows Source Build Public Article Expansion
 
 本阶段继续公开文章矩阵质量提升，扩写

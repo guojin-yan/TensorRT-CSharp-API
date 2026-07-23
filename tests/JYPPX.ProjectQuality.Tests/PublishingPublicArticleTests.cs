@@ -1775,6 +1775,87 @@ public sealed class PublishingPublicArticleTests
     }
 
     [Fact]
+    public void NativeBridgeBuildPublicArticleCoversImplementationAcceptanceWrapperUpliftLoaderAndNonProofBridgeConsumers()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "publishing",
+            "native-bridge-build-public-article.md"));
+
+        foreach (string marker in new[]
+        {
+            "Bridge 实现验收表",
+            "native/src/tensorrt/v8/api.cpp",
+            "native/src/tensorrt/v10/api.cpp",
+            "native/src/tensorrt/v11/api.cpp",
+            "native/src/cuda/api.cpp",
+            "NativeBridgeApi helper",
+            "public wrapper",
+            "smoke/quality gate",
+            "plugin registry inventory",
+            "engine inspector layer information",
+            "parser diagnostics",
+            "builder config readback",
+            "runtime dependency diagnostics",
+            "CUDA device/memory/stream 状态",
+            "TensorRtPluginRegistryInventory",
+            "TensorRtEngineInspectorReport",
+            "TensorRtOnnxParserDiagnosticSnapshot",
+            "TensorRtBuilderConfigReadback",
+            "CudaDeviceInfo",
+            "CudaMemoryInfo",
+            "callback trampoline",
+            "exception-to-status",
+            "keep-alive",
+            "in-flight drain",
+            "detach-before-release",
+            "allocator ownership",
+            "owner ledger",
+            "plugin lifecycle",
+            "creator metadata",
+            "field metadata copied snapshot",
+            "runtime deserialization ownership",
+            "serialized buffer copied-before-interop",
+            "Engine handle owned by wrapper",
+            "plugin library dependency diagnostics",
+            "loadRuntime ownership 模型",
+            "Loader 与运行时解析",
+            "NativeBridgePathResolver.EnumerateCandidatePaths",
+            "NativeBridgeLoadException",
+            "runtimes/<rid>/native",
+            "jyppxtrtbridge.dll",
+            "jyppxcudabridge.dll",
+            "nvinfer_plugin.dll",
+            "nvonnxparser.dll",
+            "cudart64_*.dll",
+            "Test-TensorRtNativeAbiSurface.ps1",
+            "FullyQualifiedName~TensorRtNativeAbiSurfaceParityTests",
+            "Bridge 组件成功",
+            "downloaded nupkg SHA256",
+            "native asset copy",
+            "host metadata",
+            "runtime smoke",
+            "queued workflow",
+            "package inventory ready",
+            "runtime readiness ready",
+            "public package download template",
+            "Bridge package local consumer passed"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("没有 public wrapper 的 native entrypoint 仍然只是低层能力", content, StringComparison.Ordinal);
+        Assert.Contains("没有 smoke/quality gate 的 wrapper 只能算实验入口", content, StringComparison.Ordinal);
+        Assert.Contains("没有 release proof 的 runtime path 不能推动发布", content, StringComparison.Ordinal);
+        Assert.Contains("文章测试替代", content, StringComparison.Ordinal);
+        Assert.Contains("Bridge 包通过不能替代 TensorRT runtime 真实执行", content, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void OnnxToEngineTrtexecParityPublicArticleCoversMatrixStatusesGuiYoloAndProofBoundary()
     {
         string content = File.ReadAllText(Path.Combine(

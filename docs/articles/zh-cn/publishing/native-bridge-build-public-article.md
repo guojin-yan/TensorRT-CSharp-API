@@ -125,6 +125,69 @@ native bridge 应优先保守处理 borrowed pointer、字符串、数组和跨 
 
 这也是为什么 readonly diagnostics 可以先推进，而 plugin instance create、callback trampoline、allocator ownership、borrowed pointer、external resource、runtime deserialization ownership 等能力必须继续留在设计门和 deferred 记录中。
 
+## Bridge 实现验收表
+
+每次把一个 deferred entrypoint 提升为真实 native 实现时，都应沿着同一张表检查，而不是只看“函数能不能导出”：
+
+| 层级 | 必查文件 | 需要证明 |
+| --- | --- | --- |
+| manifest | `native/manifests/tensorrt/v8`、`native/manifests/tensorrt/v10`、`native/manifests/tensorrt/v11`、`native/manifests/cuda` | API id、entryPoint、ownership、manualOverride、versionLine 和参数方向一致。 |
+| native source | `native/src/tensorrt/v8/api.cpp`、`native/src/tensorrt/v10/api.cpp`、`native/src/tensorrt/v11/api.cpp`、`native/src/cuda/api.cpp` | 每条 version guard 有对应实现或明确 unsupported status。 |
+| generated headers | `native/generated/bridge_api_catalog.g.h`、`native/generated/bridge_entrypoints.g.h` | C ABI catalog 与 entrypoint 列表稳定、确定性可复现。 |
+| generated C# interop | `NativeMethodsTensorRt.Generated.g.cs`、`NativeMethodsCuda.Generated.g.cs`、`NativeBridgeApi.TensorRtBindings.Generated.g.cs`、`NativeCudaApi.Generated.g.cs` | 托管 P/Invoke 签名与 native ABI 参数宽度、返回码和 string/buffer 约定一致。 |
+| high-level wrapper | `src/JYPPX.TensorRtSharp`、`src/JYPPX.CudaSharp` | 用户看到的是对象、record、snapshot、enum、array、string 或 SafeHandle，不是裸 `IntPtr`。 |
+| tests/evidence | `TensorRtNativeAbiSurfaceParityTests`、`PublicApiHandleExposureAuditTests`、`NativeVendorBoundaryGuardTests` | ABI surface、public API handle 暴露和 vendor boundary 没有回退。 |
+
+如果某项只在 TRT10/11 可用，TRT8 manifest 应明确保持 unsupported 或 parse-only 语义；如果 TRT11 删除了 setter，文章和 wrapper 都应写成 readback、diagnostic 或 rejected request，而不是把旧 raw enum 继续传入新 ABI。
+
+## Native 到 Wrapper 的提升规则
+
+底层 interop 出现并不等于高层 API 完成。一个面向用户的能力至少要完成这几个动作：
+
+```text
+manifest entry -> native implementation -> generated interop -> NativeBridgeApi helper -> public wrapper -> smoke/quality gate -> public article
+```
+
+只读能力可以优先走 copied snapshot 路线，例如 plugin registry inventory、engine inspector layer information、parser diagnostics、builder config readback、runtime dependency diagnostics 和 CUDA device/memory/stream 状态。这类 API 的 wrapper 应返回类似 `TensorRtPluginRegistryInventory`、`TensorRtEngineInspectorReport`、`TensorRtOnnxParserDiagnosticSnapshot`、`TensorRtBuilderConfigReadback`、`CudaDeviceInfo`、`CudaMemoryInfo` 这样的值对象。
+
+高风险能力必须继续拆开：
+
+- callback trampoline：先证明 no-throw、exception-to-status、keep-alive、in-flight drain 和 detach-before-release。
+- allocator ownership：先证明 owner ledger、attach/detach、temporary/output allocator 生命周期和 dispose 顺序。
+- plugin lifecycle：先做 registry inventory、creator metadata、field metadata copied snapshot，再考虑 create/register/deregister。
+- borrowed pointer：必须复制成 stable value，不把 TensorRT 指针地址作为 public API。
+- external resource：必须明确谁创建、谁释放、跨线程和异常时如何回收。
+- runtime deserialization ownership：必须证明 serialized buffer copied-before-interop、Engine handle owned by wrapper、plugin library dependency diagnostics 和 loadRuntime ownership 模型。
+
+这些规则的目的不是拖慢实现，而是让每个 uplift 都可维护。没有 public wrapper 的 native entrypoint 仍然只是低层能力；没有 smoke/quality gate 的 wrapper 只能算实验入口；没有 release proof 的 runtime path 不能推动发布。
+
+## Loader 与运行时解析
+
+源码编译成功后，用户真正踩坑的地方通常是 DLL 搜索。native bridge 相关代码要把搜索路径表达清楚：
+
+```text
+NativeBridgePathResolver
+NativeBridgeLibraryLoader
+NativeBridgePathResolver.EnumerateCandidatePaths
+NativeBridgeLoadException
+```
+
+推荐解析顺序是：应用输出目录、runtime package `runtimes/<rid>/native`、显式配置目录、PATH 中的 CUDA/TensorRT/cuDNN 目录。文章里不要建议用户把 DLL 复制到系统目录，也不要把一个本机 PATH 修好写成“包已经可发布”。
+
+常见要核对的文件包括：
+
+```text
+jyppxtrtbridge.dll
+jyppxcudabridge.dll
+nvinfer.dll
+nvinfer_plugin.dll
+nvonnxparser.dll
+cudart64_*.dll
+cudnn*.dll
+```
+
+`NativeVendorBoundaryGuardTests` 应继续保护 vendor DLL 不被错误塞进 managed-only 包；`NativeBridgePathResolverTests` 应继续保护 resolver 能枚举 package/native/app local 路径而不要求用户写裸路径。
+
 ## 质量门
 
 Native bridge 相关质量门包括：
@@ -142,6 +205,16 @@ TechnicalArticleRoadmapTests
 
 其中 `TensorRtNativeAbiSurfaceParityTests` 和 `PublicApiHandleExposureAuditTests` 很关键：前者保护 ABI surface 和 generated interop 对齐，后者避免 public API 泄露裸 handle / IntPtr。源码编译文章、package strategy 文章和 native bridge 文章都应该继续引用这些门禁，保证公开材料不把 ABI 风险说轻。
 
+如果一批改动触及 native bridge，推荐最小验证组合是：
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-BindingGeneratorOutputs.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-TensorRtNativeAbiSurface.ps1
+dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --filter "FullyQualifiedName~TensorRtNativeAbiSurfaceParityTests|FullyQualifiedName~PublicApiHandleExposureAuditTests|FullyQualifiedName~NativeBridgePathResolverTests|FullyQualifiedName~NativeVendorBoundaryGuardTests"
+```
+
+如果只改公开文章，可以只跑 `PublishingPublicArticleTests`；如果改了 manifest/native/generated/wrapper，则不能用文章测试替代 ABI 和 wrapper 门禁。
+
 ## 与两条 package 路线的关系
 
 Native bridge 是二次矫正里“NuGet 小包路线”的核心之一。完整依赖包可以继续走 GitHub full runtime package；NuGet 小包路线则应发布：
@@ -153,6 +226,8 @@ JYPPX.CudaSharp / JYPPX.TensorRtSharp managed assemblies
 ```
 
 用户自行安装 TensorRT、CUDA 和 cuDNN，并让 `NativeBridgePathResolver` 找到本机 runtime DLL。这个路线适合宣传和轻量安装，但它仍需要 clean external consumer restore/build/smoke 和 owner input validator 才能成为 package-consumer-runtime proof。
+
+split runtime 包里 Bridge 组件成功，只能说明 bridge package 可被消费；CudaCudnn/TensorRt 组件、full runtime package、public package source、downloaded nupkg SHA256、native asset copy、host metadata 和 runtime smoke 仍要各自有证据。Bridge 包通过不能替代 TensorRT runtime 真实执行，也不能替代 YoloVision、OnnxToEngine 或 TensorRtExec 的真实模型 proof。
 
 ## proof 边界
 
@@ -170,7 +245,12 @@ Native bridge build 与 readonly diagnostics 可以证明实现边界更清楚�
 - ProjectReference consumer。
 - direct `.nupkg` install。
 - GitHub Actions dry-run。
+- queued workflow。
 - GUI screenshot。
+- package inventory ready。
+- runtime readiness ready。
+- public package download template。
+- Bridge package local consumer passed。
 
 真实发布 proof 必须来自公开包或候选包、干净外部 consumer、真实 runtime smoke、日志、SHA256、host metadata、owner review、post-publish verification 和 release close 审批。
 
