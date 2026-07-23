@@ -94,6 +94,150 @@ artifacts/final-release/release-candidate-package-inventory.json
 
 它们不能替代公开发布后的下载证据，也不能替代真实 package-consumer-runtime proof。`failedBlockerCount=0` 只能说明该审计门没有 blocker，不等于可以发布、不等于公开包已存在，也不等于 runtime smoke 已通过。
 
+## 仓库中的包入口
+
+如果读者要从源码理解双路线，建议先看这些固定入口，而不是从临时 `bin`、`obj` 或本地 `.nupkg` 反推：
+
+```text
+pack/JYPPX.TensorRT.CSharp.API/JYPPX.TensorRT.CSharp.API.csproj
+pack/JYPPX.TensorRT.CSharp.API/README.md
+pack/runtime/Directory.Build.props
+pack/runtime/README.md
+pack/runtime/runtime-packages.manifest.json
+pack/runtime/linux-runtime-targets.manifest.json
+pack/runtime/runtime-package-smoke-command-template.json
+pack/runtime/runtime-packages.local.example.json
+pack/runtime-split/Directory.Build.props
+pack/runtime-split/README.md
+pack/runtime-split/split-runtime-packages.manifest.json
+```
+
+`pack/JYPPX.TensorRT.CSharp.API/JYPPX.TensorRT.CSharp.API.csproj` 是 managed/core 小包的打包入口，
+它收拢 `JYPPX.Shared`、`JYPPX.TensorRtSharp` 和 `JYPPX.CudaSharp` 的托管产物；README 则说明
+consumer 需要引用的托管 API。`pack/runtime/runtime-packages.manifest.json` 描述 full runtime 候选，
+它按 RID、TensorRT、CUDA、cuDNN、bridge 和 native asset 组合组织。`pack/runtime-split/split-runtime-packages.manifest.json`
+描述 split runtime 组件包，负责把 Bridge、CudaCudnn、TensorRt 以及 TRT11 builder/runtime 分片拆开，
+让包大小和复用关系更可控。
+
+`runtime-packages.local.example.json` 是 owner 本地路径模板；真正机器上的
+`runtime-packages.local.json` 只说明“这台机器如何找到 NVIDIA 资产”，不能写入公开文章作为下载来源，
+也不能当成 public package source。`runtime-package-smoke-command-template.json` 是 smoke 命令模板，
+它能帮助 owner 统一 restore/build/probe/smoke 命令形状，但模板本身不是执行日志。
+
+## Full Runtime 与 Split Runtime 的取舍
+
+full runtime 包把一个 runtime key 下的 bridge、CUDA、cuDNN 和 TensorRT 资产合进单个包。它适合
+GitHub Release asset 或 GitHub Packages 中的“整包下载”路线，优点是 consumer 只需要选中一个 runtime
+key；缺点是包体大、更新粒度粗，并且每条 TRT/CUDA/cuDNN 组合都要重新产生完整证据。
+
+split runtime 包把同一 runtime key 拆成组件：
+
+```text
+JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.Bridge
+JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.CudaCudnn
+JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.TensorRtRuntime
+JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.TensorRtBuilder.Sm75Sm86
+JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.TensorRtBuilder.Sm89Sm90
+JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.TensorRtBuilder.Sm100Sm120Ptx
+```
+
+split meta package 通过 `PackageReference` pin 住同一 runtime key 下的组件版本。这样做的意义是：
+Bridge 包可以跟 managed API 一起快速验证，TensorRT builder kernel 按 SM 分片，runtime-only consumer
+不用下载不需要的 builder 资产。缺点是 release owner 必须记录每个组件 nupkg 的 SHA256、source URL、
+package id、version 和 meta package pin，不能只记录 meta package 名称。
+
+TRT8、TRT10 和 TRT11 的包策略不要混写。TRT8 常见于 CUDA 11.8/12.1 和 cuDNN 8.9；TRT10/11
+常见于 CUDA 12.9/13.2 和 cuDNN 9.22。文章可以解释兼容矩阵，但不能暗示一个 runtime key 能覆盖所有
+driver、GPU 架构或 TensorRT ABI。
+
+## 发布前矩阵与候选审计
+
+维护者可以用这些脚本生成包策略相关的候选证据：
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Invoke-LocalRuntimePackage.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Invoke-LocalSplitRuntimePackage.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Resolve-SplitPackagePins.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Validate-SplitRuntimePackages.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-RuntimePackageReadiness.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-ReleaseCandidatePackageInventory.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-PreReleasePackageProofReadinessMatrix.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-PackageConsumerDualRouteProofPlan.ps1
+```
+
+这些脚本解决的问题不同：
+
+- `Invoke-LocalRuntimePackage.ps1` 和 `Invoke-LocalSplitRuntimePackage.ps1` 生成本地候选包。
+- `Resolve-SplitPackagePins.ps1` 检查 split meta package 的组件 pin。
+- `Validate-SplitRuntimePackages.ps1` 检查 split package manifest、项目和资产布局是否一致。
+- `Test-RuntimePackageReadiness.ps1` 检查 runtime package readiness，不等于 clean consumer proof。
+- `Export-ReleaseCandidatePackageInventory.ps1` 记录候选 `.nupkg` 的路径、大小和 hash。
+- `Export-PreReleasePackageProofReadinessMatrix.ps1` 和 `Export-PackageConsumerDualRouteProofPlan.ps1`
+  把 full runtime、split runtime、managed package、clean consumer、post-publish verification 和 blocker
+  状态放进同一张 release owner 视图。
+
+候选审计输出通常落在 `artifacts/final-release`，例如：
+
+```text
+dual-package-publish-preflight-matrix.json
+dual-package-publish-preflight-matrix.md
+pre-release-package-proof-readiness-matrix.json
+pre-release-package-proof-readiness-matrix.md
+package-consumer-dual-route-proof-plan.json
+package-consumer-dual-route-proof-plan.md
+release-package-proof-bundle.json
+release-package-proof-bundle.md
+public-package-url-hash-verification-candidate.json
+public-package-url-hash-verification-candidate.md
+```
+
+这些文件可以帮助 owner 发现 package id、runtime key、hash、source URL 和 smoke 字段缺口；它们不能
+替代 owner 在公开渠道下载包、计算 hash、创建仓库外 clean consumer 并执行 smoke 的结果。
+
+## Public Package Source 与 Hash
+
+公开渠道 proof 至少要绑定以下字段：
+
+```text
+publicPackageSource
+publicPackageUrl
+packageId
+packageVersion
+runtimePackageKey
+downloadedNupkgSha256
+expectedNupkgSha256
+packageHashMatch
+cleanConsumerRoot
+packageReferenceOnly
+restoreCommand
+buildCommand
+smokeCommand
+smokeExitCode
+nativeAssetsCopied
+mergedTranscriptSha256
+ownerReviewer
+ownerReviewTimestampUtc
+```
+
+`publicPackageUrlHashVerification` 只能证明下载 URL 和 hash 的匹配关系；`publicPackageDownloadProof`
+只能证明公开包可下载。只有当这些下载证据和 clean external consumer restore/build/runtime smoke
+记录合并，并由 strict validator 接受后，才可以讨论 package-consumer-runtime proof。若 `packageHashMatch=false`、
+`packageReferenceOnly=false`、`cleanConsumerRoot` 位于仓库内、`smokeExitCode` 非 0，或 log hash 缺失，
+这条证据必须留在 blocker 状态。
+
+## Release Close 边界
+
+包策略文章能帮助读者理解发布路线，但它本身不能关闭 release。release close 至少还要同时满足：
+
+- public package download proof 已通过，且 managed/runtime nupkg SHA256 与 owner 回填一致。
+- clean external consumer 使用公开包源和 PackageReference-only 项目，restore/build/runtime smoke 均成功。
+- package-consumer-runtime proof record 通过 strict validator。
+- post-publish verification 记录真实 channel URL、下载 hash、consumer log、stdout/stderr summary 和 host metadata。
+- Linux runner proof、real-model-runtime proof、owner authorization 和 release issue close record 按 release gate 要求齐备。
+
+缺少上述任一项时，`canPublishPublicly=false` 或 `canCloseReleaseIssue=false` 不能被文章、README、
+dashboard、matrix ready、candidate inventory ready、`failedBlockerCount=0` 或 dry-run output 覆盖。
+
 ## Clean Consumer Proof
 
 package-consumer-runtime proof 必须来自仓库外部的 clean external consumer，并且使用公开包源。最小闭环应包含：

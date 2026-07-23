@@ -967,6 +967,77 @@ public sealed class PublishingPublicArticleTests
     }
 
     [Fact]
+    public void PackageStrategyPublicArticleCoversRepositoryPackEntrypointsSplitPackagesHashProofAndReleaseCloseBoundary()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "publishing",
+            "package-strategy-public-article.md"));
+
+        foreach (string marker in new[]
+        {
+            "pack/JYPPX.TensorRT.CSharp.API/JYPPX.TensorRT.CSharp.API.csproj",
+            "pack/JYPPX.TensorRT.CSharp.API/README.md",
+            "pack/runtime/Directory.Build.props",
+            "pack/runtime/README.md",
+            "pack/runtime/runtime-packages.manifest.json",
+            "pack/runtime/linux-runtime-targets.manifest.json",
+            "pack/runtime/runtime-package-smoke-command-template.json",
+            "pack/runtime/runtime-packages.local.example.json",
+            "pack/runtime-split/Directory.Build.props",
+            "pack/runtime-split/README.md",
+            "pack/runtime-split/split-runtime-packages.manifest.json",
+            "TensorRtRuntime",
+            "TensorRtBuilder.Sm75Sm86",
+            "TensorRtBuilder.Sm89Sm90",
+            "TensorRtBuilder.Sm100Sm120Ptx",
+            "Invoke-LocalRuntimePackage.ps1",
+            "Invoke-LocalSplitRuntimePackage.ps1",
+            "Resolve-SplitPackagePins.ps1",
+            "Validate-SplitRuntimePackages.ps1",
+            "Test-RuntimePackageReadiness.ps1",
+            "Export-ReleaseCandidatePackageInventory.ps1",
+            "Export-PreReleasePackageProofReadinessMatrix.ps1",
+            "Export-PackageConsumerDualRouteProofPlan.ps1",
+            "dual-package-publish-preflight-matrix.json",
+            "pre-release-package-proof-readiness-matrix.json",
+            "package-consumer-dual-route-proof-plan.json",
+            "release-package-proof-bundle.json",
+            "public-package-url-hash-verification-candidate.json",
+            "publicPackageSource",
+            "publicPackageUrl",
+            "downloadedNupkgSha256",
+            "expectedNupkgSha256",
+            "packageHashMatch",
+            "packageReferenceOnly",
+            "cleanConsumerRoot",
+            "smokeExitCode",
+            "nativeAssetsCopied",
+            "mergedTranscriptSha256",
+            "publicPackageUrlHashVerification",
+            "publicPackageDownloadProof",
+            "Linux runner proof",
+            "real-model-runtime proof",
+            "owner authorization",
+            "release issue close record",
+            "canPublishPublicly=false",
+            "canCloseReleaseIssue=false"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("不能写入公开文章作为下载来源", content, StringComparison.Ordinal);
+        Assert.Contains("模板本身不是执行日志", content, StringComparison.Ordinal);
+        Assert.Contains("不能只记录 meta package 名称", content, StringComparison.Ordinal);
+        Assert.Contains("不等于 clean consumer proof", content, StringComparison.Ordinal);
+        Assert.Contains("不能被文章", content, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void BuilderConfigReadbackPublicArticleCoversTrtexecControlsVersionGuardsAndProofBoundaries()
     {
         string content = File.ReadAllText(Path.Combine(

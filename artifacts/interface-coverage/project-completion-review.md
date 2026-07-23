@@ -3201,6 +3201,57 @@ report、command preview 和 bounded runtime output 的证据边界写清楚。
 - 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
   GitHub Release upload、issue close 或 push。
 
+## 2026-07-24 Package Strategy Public Article Expansion
+
+本阶段继续公开文章矩阵质量提升，扩写
+`docs/articles/zh-cn/publishing/package-strategy-public-article.md`，将 GitHub full runtime 与 NuGet
+small bridge/core 双路线从概念说明扩展为可追踪到 `pack` 入口、runtime manifest、split package、
+hash proof、clean consumer 和 release close boundary 的公开文章。文章明确本阶段只是文档和质量门，
+不是 package build、runtime proof、public package download proof、post-publish verification 或发布授权。
+
+### 实现
+
+- 文章补齐 `pack/JYPPX.TensorRT.CSharp.API`、`pack/runtime`、`pack/runtime-split` 的固定入口，
+  包括 managed/core package、full runtime manifest、Linux runtime targets、smoke command template、
+  local path example、split runtime manifest 和 split README。
+- 公开说明 full runtime 与 split runtime 的取舍，覆盖 Bridge、CudaCudnn、TensorRtRuntime、
+  TensorRtBuilder SM 分片、split meta package pins、TRT8/TRT10/TRT11 runtime key 和组件 hash 记录。
+- 增加本地候选包与矩阵脚本说明：`Invoke-LocalRuntimePackage.ps1`、
+  `Invoke-LocalSplitRuntimePackage.ps1`、`Resolve-SplitPackagePins.ps1`、
+  `Validate-SplitRuntimePackages.ps1`、`Test-RuntimePackageReadiness.ps1`、
+  `Export-ReleaseCandidatePackageInventory.ps1`、`Export-PreReleasePackageProofReadinessMatrix.ps1`
+  和 `Export-PackageConsumerDualRouteProofPlan.ps1`。
+- 补充 `dual-package-publish-preflight-matrix`、`pre-release-package-proof-readiness-matrix`、
+  `package-consumer-dual-route-proof-plan`、`release-package-proof-bundle` 与
+  `public-package-url-hash-verification-candidate` 的证据边界。
+- 写清 public package source/hash proof 字段：publicPackageSource、publicPackageUrl、package id/version、
+  runtimePackageKey、downloaded/expected nupkg SHA256、packageHashMatch、cleanConsumerRoot、
+  packageReferenceOnly、smokeExitCode、nativeAssetsCopied、mergedTranscriptSha256 和 owner review。
+- 明确文章、README、dashboard、matrix ready、candidate inventory ready、`failedBlockerCount=0`、
+  dry-run output、本地 `.nupkg`、local feed、ProjectReference 和 template 都不能覆盖
+  `canPublishPublicly=false` 或 `canCloseReleaseIssue=false`。
+- 为 `PublishingPublicArticleTests` 增加
+  `PackageStrategyPublicArticleCoversRepositoryPackEntrypointsSplitPackagesHashProofAndReleaseCloseBoundary`
+  专项门禁。
+
+### Verification
+
+- `dotnet test tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --filter "FullyQualifiedName~PublishingPublicArticleTests"`：
+  `20/20` 通过。
+- 编译阶段仍出现 5 条既有 nullable warning，位置在
+  `FinalPublishProofGateAndOwnerExecutionPackTests.cs` 与
+  `ReleasePublishReadinessEvidencePackAndPublicDocsGateTests.cs`，本批未改动这些文件。
+
+### C 盘与发布边界
+
+- 本阶段未下载 TensorRT、CUDA、cuDNN、模型、ONNX、engine、Python/pip 资产或 NuGet
+  临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
+  GitHub Release upload、issue close 或 push。
+- 本批没有 public package download proof、package-consumer-runtime proof、post-publish verification、
+  Linux runner proof、real-model-runtime proof 或 owner authorization，因此不改变
+  `canPublishPublicly=false`、`canCloseReleaseIssue=false` 或 release blocker 状态。
+
 ## 2026-07-24 TensorRtExec CLI Public Article Expansion
 
 本阶段继续公开文章矩阵质量提升，扩写
