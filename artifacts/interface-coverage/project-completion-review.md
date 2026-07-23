@@ -3201,6 +3201,57 @@ report、command preview 和 bounded runtime output 的证据边界写清楚。
 - 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
   GitHub Release upload、issue close 或 push。
 
+## 2026-07-24 Windows Source Build Public Article Expansion
+
+本阶段继续公开文章矩阵质量提升，扩写
+`docs/articles/zh-cn/publishing/source-build-windows-public-article.md`，将 Windows 源码构建文章从
+CMake/环境导读扩展为覆盖 Developer PowerShell、C++ bridge、manifest/generated/native ABI、version
+guard、package layout、本地候选检查、DLL loader 排查和 forbidden proof substitute 的公开教程。
+文章明确本阶段只是文档和质量门，不是 native release build、runtime smoke、package consumer proof、
+post-publish verification 或发布授权。
+
+### 实现
+
+- 文章补齐 Developer PowerShell for VS 2022、`where cl/link/cmake/dotnet/pwsh`、
+  VCToolsVersion、WindowsSDKVersion、DOTNET_ROOT、CUDA_PATH、TensorRT include/lib root、
+  cuDNN include/lib/bin root 和多 CUDA 版本对齐要求。
+- 增加 manifest/generated/native ABI 三层核对路径：`native/manifests/tensorrt`、
+  `native/manifests/cuda`、generated C# interop、`native/generated/bridge_api_catalog.g.h` 和
+  `native/generated/bridge_entrypoints.g.h`。
+- 补充 `Test-TensorRtNativeAbiSurface.ps1`、单批 CMake preset 命令、`build-out/<preset>` 输出边界、
+  `Test-ManagedPackageContent.ps1`、`Test-RuntimePackageReadiness.ps1` 与
+  `Validate-SplitRuntimePackages.ps1` 的证据角色。
+- 写清 TRT8/TRT10/TRT11 version guard 核对表，覆盖 legacy parser/network flags、strongly typed
+  network、precision/layer policy、refit/stripped plan 和 debug listener/callback 高风险面。
+- 明确只读 API 要返回 copied data，callback、allocator、plugin lifecycle、borrowed pointer、
+  external resource 和 runtime deserialization ownership 不能在缺少生命周期/smoke 证据时从 deferred
+  伪装成普通低风险 API。
+- 补充 Windows loader 排查和 DLL 来源一致性：`jyppxtrtbridge.dll`、`nvinfer.dll`、
+  `nvinfer_plugin.dll`、`nvonnxparser.dll`、`cudart64_*.dll`、`cudnn*.dll`。
+- 增加 forbidden proof substitutes：CMake 成功、dotnet build、binding/ABI test、`build-out` DLL、
+  `dumpbin`、dependency-probe-only、blocked-by-cuda-driver、local feed、ProjectReference、direct
+  `.nupkg`、package inventory/runtime readiness、public package download template、GitHub Actions
+  dry-run 和 queued workflow 都不能替代 release proof。
+- 为 `PublishingPublicArticleTests` 增加
+  `SourceBuildPublicArticleCoversGeneratedAbiVersionGuardsPackageLayoutAndForbiddenProofSubstitutes`
+  专项门禁。
+
+### Verification
+
+- `dotnet test tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --filter "FullyQualifiedName~PublishingPublicArticleTests"`：
+  `21/21` 通过。
+- 编译阶段未出现本批新增错误；此前 nullable warning 不属于本批改动范围。
+
+### C 盘与发布边界
+
+- 本阶段未下载 TensorRT、CUDA、cuDNN、模型、ONNX、engine、Python/pip 资产或 NuGet
+  临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
+  GitHub Release upload、issue close 或 push。
+- 本批没有 native release build、runtime smoke、package-consumer-runtime proof、real-model-runtime
+  proof、Linux runner proof、post-publish verification 或 owner authorization，因此不改变
+  `canPublishPublicly=false`、`canCloseReleaseIssue=false` 或 release blocker 状态。
+
 ## 2026-07-24 Package Strategy Public Article Expansion
 
 本阶段继续公开文章矩阵质量提升，扩写

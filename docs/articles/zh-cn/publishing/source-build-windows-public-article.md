@@ -75,6 +75,36 @@ where nvcc
 $env:CUDA_PATH
 ```
 
+建议在 Developer PowerShell for VS 2022 中运行这些命令，而不是普通 PowerShell。这样 `cl.exe`、
+MSBuild、Windows SDK 和 CMake 的 Visual Studio generator 更容易落在同一套工具链上。若必须使用普通
+PowerShell，至少先确认：
+
+```powershell
+where cl
+where link
+where cmake
+where dotnet
+where pwsh
+```
+
+环境记录不要只保存“命令成功”四个字。建议把下面这些值写入一次构建记录，后续比对 TRT8/TRT10/TRT11
+问题时非常有用：
+
+```text
+VCToolsVersion
+WindowsSDKVersion
+DOTNET_ROOT
+CUDA_PATH
+PATH 中 nvinfer.dll / cudnn*.dll 所在目录
+TensorRT include root
+TensorRT lib root
+cuDNN include/lib/bin root
+```
+
+如果机器上同时存在 CUDA 11.8、12.1、12.9、13.2，不要依赖 PATH 中“第一个 nvcc”来判断目标版本。
+CMake preset 中的 `JYPPX_CUDA_VERSION` 才是该构建想要的版本，TensorRT SDK 和 cuDNN major 也必须跟
+这个 preset 对齐。
+
 ## 生成绑定与托管构建
 
 在源码目录运行生成和质量检查：
@@ -89,6 +119,34 @@ dotnet build .\TensorRtSharp.sln -c Debug --no-restore
 ```
 
 如果你只改了文章或高层 C# wrapper，可能不需要生成绑定；但只要改了 `native/manifests`、generated interop、native source 或 entrypoint 名称，就必须跑这组命令。否则最容易出现 native bridge 已经变了、C# P/Invoke 仍停在旧签名的问题。
+
+源码构建时有三类文件必须一起看：
+
+```text
+native/manifests/tensorrt
+native/manifests/cuda
+src/JYPPX.TensorRtSharp/Internal/Interop/Generated/GeneratedTensorRtManifestNativeMethods.g.cs
+src/JYPPX.TensorRtSharp/Internal/Interop/Generated/NativeBridgeApi.TensorRtBindings.Generated.g.cs
+src/JYPPX.TensorRtSharp/Internal/Interop/Generated/NativeMethodsTensorRt.Generated.g.cs
+src/JYPPX.CudaSharp/Internal/Interop/Generated/NativeMethodsCuda.Generated.g.cs
+native/generated/bridge_api_catalog.g.h
+native/generated/bridge_entrypoints.g.h
+```
+
+manifest 是契约源，generated C# interop 是托管调用面，`native/generated` 是 C++ bridge 的导出索引。
+如果三者数量、名称或 version guard 不一致，构建即使偶然通过，也不应进入发布候选。常见错误是只修改
+TRT11 native implementation，却忘记 TRT8/TRT10 的 manifest guard；或者只在 generated interop 中出现
+入口，native export 没有实现。
+
+建议针对 manifest/generated 做两层检查：
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-BindingGeneratorOutputs.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-TensorRtNativeAbiSurface.ps1
+```
+
+`Test-TensorRtNativeAbiSurface.ps1` 关注 native ABI surface，能帮助发现 manifest 入口与 C++ export 的错位。
+它是 ABI 一致性门禁，不是 runtime smoke。
 
 ## CMake preset 选择
 
@@ -112,6 +170,44 @@ cmake --build --preset win-x64-trt11-cuda13-release --parallel
 
 这里的关键路径是 `native/CMakeLists.txt`、`native/src/tensorrt/v11/api.cpp`、`native/generated/bridge_api_catalog.g.h` 和 `native/generated/bridge_entrypoints.g.h`。如果这些文件发生变化，必须重新跑绑定生成和 quality gate。
 
+更完整的单批命令可以写成这样：
+
+```powershell
+$preset = "win-x64-trt11-cuda13-release"
+Set-Location E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Generate-Bindings.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-BindingGeneratorOutputs.ps1
+cmake --preset $preset
+cmake --build --preset $preset --parallel
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-TensorRtNativeAbiSurface.ps1
+dotnet build .\TensorRtSharp.sln -c Debug --no-restore
+```
+
+构建输出默认进入：
+
+```text
+build-out/win-x64-trt11-cuda13-release
+```
+
+不要把 `build-out` 复制到 package proof 目录伪装成公开包消费结果。`build-out` 只能证明本地 native build
+有产物，不能说明 nupkg layout、runtime asset copy 或 public source restore 正确。
+
+## Version Guard 核对
+
+源码构建通过后，还要看每个 API 是否只在正确的 TensorRT line 上开放：
+
+| 区域 | TRT8 | TRT10 | TRT11 | 检查重点 |
+| --- | --- | --- | --- | --- |
+| legacy parser / network flags | 可存在 | 部分迁移 | 多数已变更 | 不把 TRT8 raw enum 发送给 TRT11。 |
+| strongly typed network | 不支持或保持 guard | explicit flag | vendor 契约默认 strongly typed | 不复用 TRT10 raw bit。 |
+| precision constraints / layer precision | 支持 set/readback | 支持 set/readback | setter 移除或收窄 | TRT11 保持 parse-only 或类型匹配 readback。 |
+| refit / stripped plan | 能力有限 | 主要实现线 | 主要实现线 | 需要真实 build/readback，不用模板冒充。 |
+| debug listener / callback | 高风险 | 高风险 | 高风险 | 保持 owner lifecycle/no-throw/in-flight drain 证据，不仓促开放。 |
+
+只读、查询型 API 可以优先实现，但也要保证 native 返回的是 copied data，而不是把 TensorRT borrowed pointer
+直接暴露给 C#。callback、allocator、plugin lifecycle、external resource、runtime deserialization ownership
+属于高风险面；没有对象生命周期、异常边界、dispose 顺序和 smoke 证据时，不应从 deferred 直接提升为普通 API。
+
 ## 构建后验证
 
 完成 native bridge 构建后，不建议马上打包。先做三类检查：
@@ -123,6 +219,29 @@ dotnet run --project .\smoke\CallbackAllocatorSafeControlsSmokeRunner\CallbackAl
 ```
 
 如果只想验证某个改动批次，可以跑对应 targeted filter；但最终发布前仍要按 release gate 组合收敛。smoke 输出中出现 `Skipped=True` 时，要记录原因。它可以帮助定位依赖缺失，但不能写成 runtime proof。
+
+如果构建目标涉及 runtime package，还要把 package layout 单独验证：
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-ManagedPackageContent.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-RuntimePackageReadiness.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Validate-SplitRuntimePackages.ps1
+```
+
+这些命令仍然属于本地候选检查。它们可以证明 package nuspec/content/runtimes layout 和 split manifest 更接近
+发布要求，但不能证明包已经从 NuGet.org、GitHub Packages 或 GitHub Release 被外部 consumer 下载并执行。
+
+建议每次源码构建批次保存四类证据：
+
+```text
+cmake configure log
+cmake build log
+binding generator validation log
+targeted dotnet test log
+```
+
+若后续要进入 owner proof，再额外收集 nupkg SHA256、public package URL、clean consumer root、restore/build/smoke
+stdout/stderr、merged transcript SHA256 和 host metadata。
 
 ## 常见排障
 
@@ -162,6 +281,21 @@ $env:PATH -split ';'
 
 先修复缺失依赖，再运行 dependency probe 或 smoke。不要把系统目录污染成“本机刚好能跑”的状态。
 
+Windows loader 排查时优先确认这些 DLL 是否来自同一 runtime key：
+
+```text
+jyppxtrtbridge.dll
+nvinfer.dll
+nvinfer_plugin.dll
+nvonnxparser.dll
+cudart64_*.dll
+cudnn*.dll
+```
+
+如果 `dumpbin /dependents` 只能看到 import dependency，仍需结合实际进程 PATH、应用输出目录和 runtime package
+copy log 判断最终加载来源。把 DLL 临时复制到 `C:\Windows\System32` 或全局 CUDA bin 目录，会污染后续 proof；
+推荐使用应用本地输出目录、明确 PATH 片段或 package runtime assets。
+
 ### CUDA error 35
 
 CUDA error 35 通常是 driver/runtime 不兼容。先看 `nvidia-smi` 的 driver，再看 `nvcc --version` 和实际加载的 runtime package key。CUDA 13 smoke 需要足够新的 NVIDIA driver；driver 不满足时只能记录 dependency/runtime blocker，不能声明通过。
@@ -185,6 +319,30 @@ CUDA error 35 通常是 driver/runtime 不兼容。先看 `nvidia-smi` 的 drive
 | interface coverage matrix | 接口覆盖现状可审计 | release close 可通过 |
 
 真正推动发布的仍然是 `artifacts/final-release/owner-external-proof-execution-result.input.json` 中 owner 回填的真实外部执行结果，并通过严格 validator。
+
+## 不能升级为 Proof 的内容
+
+源码构建文章尤其容易被误读为“我能 build，所以能发包”。以下内容必须保持在非 proof 层级：
+
+- `cmake --preset` 成功。
+- `cmake --build` 成功。
+- `dotnet build` 成功。
+- binding generator 或 ABI surface test 通过。
+- `build-out` 中存在 DLL。
+- `dumpbin /dependents` 能列出依赖。
+- dependency-probe-only。
+- blocked-by-cuda-driver。
+- local feed consumer。
+- ProjectReference consumer。
+- direct `.nupkg` install。
+- package inventory ready。
+- runtime readiness ready。
+- public package download template。
+- GitHub Actions dry-run 或 queued workflow。
+
+这些项目可以进入开发日志、候选审计或排障文章，但不能替代 package-consumer-runtime proof、
+real-model-runtime proof、Linux runner proof、post-publish verification、owner authorization 或
+release issue close record。
 
 更完整的源码编译长文见 `docs/articles/zh-cn/source-build-cmake-windows-guide.md` 和
 `docs/articles/zh-cn/tensorrtsharp-source-build-cpp-guide.md`。本篇 public article 是面向公众号/博客读者的入口，深文负责展开每个命令和排障细节。

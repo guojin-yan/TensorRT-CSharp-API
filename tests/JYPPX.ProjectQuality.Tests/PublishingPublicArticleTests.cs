@@ -921,6 +921,84 @@ public sealed class PublishingPublicArticleTests
     }
 
     [Fact]
+    public void SourceBuildPublicArticleCoversGeneratedAbiVersionGuardsPackageLayoutAndForbiddenProofSubstitutes()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "publishing",
+            "source-build-windows-public-article.md"));
+
+        foreach (string marker in new[]
+        {
+            "Developer PowerShell for VS 2022",
+            "VCToolsVersion",
+            "WindowsSDKVersion",
+            "native/manifests/tensorrt",
+            "native/manifests/cuda",
+            "GeneratedTensorRtManifestNativeMethods.g.cs",
+            "NativeBridgeApi.TensorRtBindings.Generated.g.cs",
+            "NativeMethodsTensorRt.Generated.g.cs",
+            "NativeMethodsCuda.Generated.g.cs",
+            "native/generated/bridge_api_catalog.g.h",
+            "native/generated/bridge_entrypoints.g.h",
+            "Test-TensorRtNativeAbiSurface.ps1",
+            "build-out/win-x64-trt11-cuda13-release",
+            "Version Guard 核对",
+            "legacy parser / network flags",
+            "strongly typed network",
+            "precision constraints / layer precision",
+            "refit / stripped plan",
+            "debug listener / callback",
+            "borrowed pointer",
+            "callback、allocator、plugin lifecycle",
+            "external resource",
+            "runtime deserialization ownership",
+            "Test-ManagedPackageContent.ps1",
+            "Test-RuntimePackageReadiness.ps1",
+            "Validate-SplitRuntimePackages.ps1",
+            "cmake configure log",
+            "cmake build log",
+            "binding generator validation log",
+            "targeted dotnet test log",
+            "jyppxtrtbridge.dll",
+            "nvinfer_plugin.dll",
+            "nvonnxparser.dll",
+            "cudart64_*.dll",
+            "public package URL",
+            "clean consumer root",
+            "merged transcript SHA256",
+            "不能升级为 Proof",
+            "dependency-probe-only",
+            "blocked-by-cuda-driver",
+            "local feed consumer",
+            "ProjectReference consumer",
+            "direct `.nupkg` install",
+            "package inventory ready",
+            "runtime readiness ready",
+            "public package download template",
+            "GitHub Actions dry-run",
+            "queued workflow",
+            "Linux runner proof",
+            "real-model-runtime proof",
+            "post-publish verification",
+            "owner authorization",
+            "release issue close record"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("manifest 是契约源", content, StringComparison.Ordinal);
+        Assert.Contains("构建即使偶然通过，也不应进入发布候选", content, StringComparison.Ordinal);
+        Assert.Contains("不把 TRT8 raw enum 发送给 TRT11", content, StringComparison.Ordinal);
+        Assert.Contains("不能证明包已经从 NuGet.org、GitHub Packages 或 GitHub Release", content, StringComparison.Ordinal);
+        Assert.Contains("不能替代 package-consumer-runtime proof", content, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void PackageStrategyPublicArticleCoversDualRoutesRuntimeKeysAndProofBoundaries()
     {
         string content = File.ReadAllText(Path.Combine(
