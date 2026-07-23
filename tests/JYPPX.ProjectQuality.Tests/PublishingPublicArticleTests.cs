@@ -482,6 +482,127 @@ public sealed class PublishingPublicArticleTests
         Assert.Contains("不会重新拿 native pointer", content, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void OnnxToEnginePublicArticleCoversSharedParserReportsYoloVisionAndProofBoundary()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "publishing",
+            "onnx-to-engine-public-article.md"));
+
+        foreach (string marker in new[]
+        {
+            "samples/OnnxToEngine/Program.cs",
+            "TrtexecLikeParser.cs",
+            "TrtexecLikeOptions.cs",
+            "OnnxEngineBuildOptions.cs",
+            "OnnxEngineBuildService.cs",
+            "OnnxEngineBuildResult.cs",
+            "OnnxEngineBuildDiagnostics.cs",
+            "OnnxEngineBuildReportWriter.cs",
+            "OnnxEngineBuildEvidenceSidecar.cs",
+            "TensorRtExecCommand.cs",
+            "MainForm.cs",
+            "tensor-rt-exec-trtexec-parity-matrix.json",
+            "tensor-rt-exec-release-candidate-gap-list.json",
+            "yolovision-article-case-pack.json",
+            "yolovision-family-task-real-asset-roadmap.json",
+            "--onnx",
+            "--model",
+            "--onnxFile",
+            "--saveEngine",
+            "--loadEngine",
+            "--minShapes",
+            "--optShapes",
+            "--maxShapes",
+            "--fp16",
+            "--int8",
+            "--bf16",
+            "--workspace",
+            "--memPoolSize",
+            "--timingCache",
+            "--exportTimingCache",
+            "--profilingVerbosity",
+            "--dumpLayerInfo",
+            "--exportLayerInfo",
+            "--refitFromOnnx",
+            "--saveRefittedEngine",
+            "--allowWeightStreaming",
+            "--weightStreamingBudget",
+            "--useCudaGraph",
+            "--loadInputs",
+            "--dumpOutput",
+            "--dumpRawBindingsToFile",
+            "--exportOutput",
+            "--exportTimes",
+            "--exportProfile",
+            "--saveProfile",
+            "--dryRun",
+            "--previewOnly",
+            "--buildOnly",
+            "--skipInference",
+            "--exportReport",
+            "--evidenceSidecar",
+            "Success",
+            "Skipped",
+            "State",
+            "ModelSource",
+            "EnginePath",
+            "Parsed",
+            "EngineSaved",
+            "EngineFileRoundTrip",
+            "InferenceRan",
+            "OutputMatch",
+            "ProofClassification",
+            "BuildEvidenceOnly",
+            "IsRuntimeExecutionProof",
+            "IsRealModelRuntimeProof",
+            "IsPackageConsumerRuntimeProof",
+            "NormalizedCommandSha256",
+            "PreflightMetadata",
+            "LoadedEngineDiagnostics",
+            "BuilderConfigDeploymentSnapshot",
+            "ParserPreflightSnapshot",
+            "TimingCacheArtifact",
+            "CapabilityProbe",
+            "EvidenceSidecar",
+            ".engine-readback.json",
+            "MnistOnnxRuntimeService",
+            "Expected",
+            "Predicted",
+            "Confidence",
+            "samples/YoloVision",
+            "YOLOv5",
+            "YOLOv6",
+            "YOLOv7",
+            "YOLOv8",
+            "YOLOv9",
+            "YOLOv10",
+            "YOLO11",
+            "YOLO26",
+            "detection",
+            "classification",
+            "segmentation",
+            "OBB",
+            "pose",
+            "semantic segmentation",
+            "clean external consumer",
+            "post-publish verification",
+            "release close"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("不是 package-consumer-runtime proof", content, StringComparison.Ordinal);
+        Assert.Contains("不能证明公开包可被用户消费", content, StringComparison.Ordinal);
+        Assert.Contains("不要把 dry-run 写成已经构建 engine", content, StringComparison.Ordinal);
+        Assert.Contains("不要把模型、engine、runtime package 或 NuGet 临时包下载到 C 盘", content, StringComparison.Ordinal);
+    }
+
     private static readonly ArticleExpectation[] Articles =
     {
         new(

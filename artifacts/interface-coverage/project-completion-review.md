@@ -1,5 +1,52 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-23 OnnxToEngine Public Article Expansion
+
+本阶段继续公开文章矩阵质量提升，扩写
+`docs/articles/zh-cn/publishing/onnx-to-engine-public-article.md`，将 ONNX 到
+TensorRT engine 的转换文章从短流程扩展为完整可发布教程。文章围绕
+`samples/OnnxToEngine`、TensorRtExec 共享 trtexec-like 参数、report/evidence sidecar、
+MNIST real-model 边界和 YoloVision 关系，明确转换链路的证据价值和 proof 边界。
+
+### 实现
+
+- 文章补齐 `samples/OnnxToEngine/Program.cs`、`TrtexecLikeParser.cs`、
+  `TrtexecLikeOptions.cs`、`OnnxEngineBuildOptions.cs`、`OnnxEngineBuildService.cs`、
+  `OnnxEngineBuildResult.cs`、`OnnxEngineBuildDiagnostics.cs`、
+  `OnnxEngineBuildReportWriter.cs`、`OnnxEngineBuildEvidenceSidecar.cs`、
+  `TensorRtExecCommand.cs`、`MainForm.cs` 与 TensorRtExec parity/gap matrix 的证据路径。
+- 公开说明 `--onnx`、`--saveEngine`、`--loadEngine`、shape profile、precision、
+  memory pool、timing cache、layer info、refit、weight streaming、runtime output、
+  report 和 evidence sidecar 等 trtexec-like 参数面。
+- 写入 `OnnxEngineBuildResult` / diagnostics 核心字段，包括 `ProofClassification`、
+  `BuildEvidenceOnly`、`IsRuntimeExecutionProof`、`IsRealModelRuntimeProof`、
+  `IsPackageConsumerRuntimeProof`、`NormalizedCommandSha256`、`PreflightMetadata`、
+  `LoadedEngineDiagnostics`、`BuilderConfigDeploymentSnapshot`、`ParserPreflightSnapshot`
+  与 `.engine-readback.json`。
+- 明确 `MnistOnnxRuntimeService` 可作为 real-model-runtime 方向的样例，但仍不是
+  package-consumer-runtime proof。
+- 连接 `samples/YoloVision`、`yolovision-article-case-pack.json` 和
+  `yolovision-family-task-real-asset-roadmap.json`，要求公开材料使用 YOLO 系列和
+  det/cls/seg/OBB/pose/semantic segmentation 的广义口径，不退回 `samples/YoloDet`。
+- 为 `PublishingPublicArticleTests` 增加
+  `OnnxToEnginePublicArticleCoversSharedParserReportsYoloVisionAndProofBoundary`
+  专项门禁。
+
+### Verification
+
+- `dotnet test tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --filter "FullyQualifiedName~PublishingPublicArticleTests"`：
+  `10/10` 通过。
+- 编译阶段仍出现 5 条既有 nullable warning，位置在
+  `FinalPublishProofGateAndOwnerExecutionPackTests.cs` 与
+  `ReleasePublishReadinessEvidencePackAndPublicDocsGateTests.cs`，本批未改动这些文件。
+
+### C 盘与发布边界
+
+- 本阶段未下载 TensorRT、CUDA、cuDNN、模型、ONNX、engine、Python/pip 资产或 NuGet
+  临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
+  GitHub Release upload 或 issue close。
+
 ## 2026-07-23 Plugin Inventory Public Article Expansion
 
 本阶段继续公开文章矩阵质量提升，扩写

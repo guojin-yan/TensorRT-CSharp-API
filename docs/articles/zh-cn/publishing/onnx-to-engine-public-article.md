@@ -1,49 +1,198 @@
 # ONNX 到 Engine：把模型转换做成可审计流程
 
-ONNX 到 TensorRT engine 的转换是 TensorRtSharp4.0 最容易被用户感知的能力。`samples/OnnxToEngine/Program.cs` 提供了面向样例的转换入口，`applications/TensorRtExec` 则承担更完整的 trtexec-like 参数、报告和 evidence sidecar。
+ONNX 到 TensorRT engine 的转换是 TensorRtSharp4.0 最容易被用户感知的能力。`samples/OnnxToEngine/Program.cs` 提供了面向样例和文章教程的转换入口，`applications/TensorRtExec` 则承担更完整的 trtexec-like 参数、CLI/WinForms 双入口、报告和 evidence sidecar。
+
+这条链路要说清楚两件事：第一，ONNX parse、builder config、engine serialization、load-engine readonly diagnostics 和 report JSON 都可以做成可审计证据；第二，转换成功不是 package-consumer-runtime proof，也不等于模型语义正确。build-only、dry-run、dependency-probe-only、local feed、ProjectReference 和 direct `.nupkg` install 只能放在证据梯子的低层。
 
 ## 适合
 
 - 想把 ONNX 模型转成 TensorRT engine 的 C# 用户。
-- 需要比较 OnnxToEngine 与官方 `trtexec` 参数覆盖的人。
+- 需要比较 OnnxToEngine 与官方 `trtexec` 转换参数覆盖的人。
 - 准备为 YoloVision 或自有模型生成真实资产 proof 的维护者。
+- 想把 TensorRtExec report、OnnxToEngine report 和 owner proof input 串起来的发布负责人。
+
+## 关键路径
+
+- 样例入口：`samples/OnnxToEngine/Program.cs`。
+- 共享参数解析：`src/JYPPX.TensorRtSharp.Tools/TrtexecLikeParser.cs`。
+- 参数模型：`src/JYPPX.TensorRtSharp.Tools/TrtexecLikeOptions.cs`、`OnnxEngineBuildOptions.cs`。
+- 构建服务：`src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildService.cs`。
+- 构建结果：`src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildResult.cs`。
+- 诊断投影：`src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildDiagnostics.cs`。
+- report writer：`src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildReportWriter.cs`。
+- evidence sidecar：`src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildEvidenceSidecar.cs`。
+- TensorRtExec CLI/GUI：`applications/TensorRtExec/Console/TensorRtExecCommand.cs`、`applications/TensorRtExec/WinForms/MainForm.cs`。
+- parity/gap 证据：`applications/TensorRtExec/tensor-rt-exec-trtexec-parity-matrix.json`、`applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.json`。
+- YoloVision 案例包：`samples/assets/yolovision-article-case-pack.json`、`samples/assets/yolovision-family-task-real-asset-roadmap.json`。
 
 ## 基本流程
 
-推荐先用 TensorRtExec 或 OnnxToEngine 生成 engine 和报告：
+推荐把模型、engine、report 和 sidecar 都放在 E 盘固定 workspace，例如：
 
 ```powershell
-dotnet run --project .\samples\OnnxToEngine\OnnxToEngine.csproj -- --onnx <model.onnx> --engine <model.engine>
-dotnet run --project .\applications\TensorRtExec\TensorRtExec.csproj -- --onnx <model.onnx> --saveEngine <model.engine> --fp16
+$assetRoot = "E:\TensorRtSharpAssets\onnx-to-engine"
+
+dotnet run --project .\samples\OnnxToEngine\OnnxToEngine.csproj -- `
+  --onnx "$assetRoot\models\model.onnx" `
+  --saveEngine "$assetRoot\engines\model.plan" `
+  --minShapes images:1x3x640x640 `
+  --optShapes images:1x3x640x640 `
+  --maxShapes images:4x3x640x640 `
+  --fp16 `
+  --workspace 1024 `
+  --buildOnly `
+  --exportReport "$assetRoot\reports\model-build-report.json" `
+  --evidenceSidecar "$assetRoot\reports\model-evidence.sidecar.json"
 ```
 
-关键产物包括：
+同一套参数也能交给 TensorRtExec：
+
+```powershell
+dotnet run --project .\applications\TensorRtExec\TensorRtExec.csproj -- `
+  --onnx "$assetRoot\models\model.onnx" `
+  --saveEngine "$assetRoot\engines\model.plan" `
+  --minShapes images:1x3x640x640 `
+  --optShapes images:1x3x640x640 `
+  --maxShapes images:4x3x640x640 `
+  --fp16 `
+  --buildOnly `
+  --dumpLayerInfo `
+  --exportLayerInfo "$assetRoot\reports\model.layers.json" `
+  --exportReport "$assetRoot\reports\model-tensorrtexec-report.json"
+```
+
+这两个入口共享 `TrtexecLikeParser` 和 `OnnxEngineBuildService`，所以文章里不要把它们写成两套互相矛盾的转换语义。OnnxToEngine 更像教程入口；TensorRtExec 更像官方 `trtexec` 的扩展复刻入口，适合展示 CLI/GUI parity、report schema 和参数覆盖。
+
+## trtexec-like 参数面
+
+当前 parser 已覆盖或记录大量官方 `trtexec` 风格参数：
 
 ```text
-samples/OnnxToEngine/Program.cs
-applications/TensorRtExec/Core/TensorRtExecReport.cs
-applications/TensorRtExec/tensor-rt-exec-trtexec-parity-matrix.json
-applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.json
+--onnx / --model / --onnxFile
+--saveEngine / --save-engine / --engine / --plan / --engineFile
+--loadEngine / --load-engine
+--minShapes / --optShapes / --maxShapes / --shapes / --inputShapes
+--fp16 / --int8 / --bf16 / --noTF32
+--workspace / --memPoolSize
+--timingCache / --timingCacheFile / --exportTimingCache
+--profilingVerbosity / --verbose
+--dumpLayerInfo / --exportLayerInfo
+--device / --useDLACore / --allowGPUFallback
+--tacticSources
+--inputIOFormats / --outputIOFormats / --directIO
+--sparsity / --stronglyTyped
+--precisionConstraints / --layerPrecisions / --layerOutputTypes
+--versionCompatible / --excludeLeanRuntime
+--stripWeights / --refit / --refitFromOnnx / --saveRefittedEngine
+--allowWeightStreaming / --weightStreamingBudget
+--iterations / --warmUp / --duration / --streams / --useCudaGraph
+--loadInputs / --dumpOutput / --dumpRawBindingsToFile
+--exportOutput / --exportTimes / --exportProfile / --saveProfile
+--safe / --consistency / --builderCache / --noBuilderCache
+--dryRun / --previewOnly / --buildOnly / --skipInference
+--exportReport / --report / --evidenceSidecar
 ```
 
-这些报告适合进入文章、排障和候选矩阵，但它们本身仍然属于 build/report 层。
+文章要把“implemented”和“parsed/diagnostic only”分开说。比如 `--avgTiming` 可以走 builder config readback，`--minTiming` 在 TRT8 有 legacy compatibility，TRT10/11 则保留 parse-only 诊断。`--int8` flag 可以被解析，但 calibrator 与 calibration cache 并不因此自动拥有真实 INT8 calibration proof。`--plugins` 也只记录 plugin library arguments，不在安全阶段加载 plugin library。
+
+## report 能证明什么
+
+`OnnxEngineBuildResult` 和 `OnnxEngineBuildDiagnostics` 会把转换链路写成机器可读字段：
+
+```text
+Success
+Skipped
+State
+TensorRtLine
+ModelSource
+EnginePath
+Parsed
+EngineSaved
+EngineFileRoundTrip
+InferenceRan
+OutputMatch
+ProofClassification
+BuildEvidenceOnly
+IsRuntimeExecutionProof
+IsRealModelRuntimeProof
+IsPackageConsumerRuntimeProof
+NormalizedCommandLine
+NormalizedCommandSha256
+WorkspaceBytes
+PreflightMetadata
+LoadedEngineDiagnostics
+BuilderConfigDeploymentSnapshot
+ParserPreflightSnapshot
+TimingCacheArtifact
+CapabilityProbe
+EvidenceSidecar
+```
+
+这些字段适合进入文章截图、排障记录和候选矩阵。`Parsed=true`、`EngineSaved=true`、`EngineFileRoundTrip=true` 可以证明 parser/build/serialization 路径走通；`NormalizedCommandSha256` 可以证明命令没有被悄悄换掉；`LoadedEngineDiagnostics` 和 `.engine-readback.json` 可以证明 engine metadata 可读取。它们仍然不能单独证明模型输出正确。
+
+## MNIST 路径和真实模型边界
+
+`samples/OnnxToEngine/Program.cs` 还有一个 `--mnist` 路径，走 `MnistOnnxRuntimeService`：
+
+```powershell
+dotnet run --project .\samples\OnnxToEngine\OnnxToEngine.csproj -- `
+  --mnist `
+  --tensor-rt-line 10 `
+  --onnx "$assetRoot\models\mnist.onnx" `
+  --mnistInput "$assetRoot\inputs\7.pgm" `
+  --expectedDigit 7 `
+  --saveEngine "$assetRoot\engines\mnist.plan" `
+  --exportReport "$assetRoot\reports\mnist-report.json" `
+  --exportOutput "$assetRoot\reports\mnist-output.json" `
+  --exportPreprocessedInput "$assetRoot\reports\mnist-input.bin"
+```
+
+这个路径会打印 `MnistOnnxRuntime ProofClassification`、`RealModelRuntime`、`PackageConsumerRuntime`、`Expected`、`Predicted`、`Confidence`、`OutputMatch` 和 `ProofBoundary`。只有当 owner 提供真实 ONNX、输入、expected label、输出日志、SHA256、host metadata，并且 validator 接受时，它才可能接近 real-model-runtime proof。它仍不是 package-consumer-runtime proof，因为它不证明公开包在 clean external consumer 中安装、restore、build 和 smoke 成功。
 
 ## 与 YoloVision 的关系
 
 YoloVision 负责把真实模型资产、输入样例、输出 schema 和任务 metadata 组织起来。OnnxToEngine 负责转换，TensorRtExec 负责更接近 `trtexec` 的参数和报告，YoloVision 则把 detection、classification、segmentation、OBB、pose、semantic segmentation 等任务串成可复核案例。
 
-早期过窄的检测样例命名已不再适合作为项目名称口径；新的公开材料应使用 `samples/YoloVision`，避免把项目误解为只支持 detection。
+公开文章应使用 `samples/YoloVision` 和 `samples/assets/yolovision-article-case-pack.json` 的口径，覆盖 YOLOv5、YOLOv6、YOLOv7、YOLOv8、YOLOv9、YOLOv10、YOLO11、YOLO26 等系列的候选路线，而不是退回早期过窄的 `samples/YoloDet` 检测样例命名。模型获取、license、ONNX export、engine build、YoloVision run、output schema 和 SHA256 都要由 owner evidence 补齐。
 
 ## proof 边界
 
-ONNX 转换成功是必要条件，但不是 package-consumer-runtime proof。build-only、dry-run、template、local feed、ProjectReference 和 direct `.nupkg` 不能证明公开包可被用户消费。真实 proof 需要 owner 提供外部 clean consumer 或真实模型运行日志、SHA256、host metadata、exitCode=0、passed=true 和严格 validator 输出。
+ONNX 转换成功是必要条件，但不是 package-consumer-runtime proof。build-only、dry-run、previewOnly、dependency-probe-only、template、local feed、ProjectReference 和 direct `.nupkg` install 不能证明公开包可被用户消费。真实 package proof 需要 owner 提供外部 clean consumer 或公开包消费日志、SHA256、host metadata、exitCode=0、passed=true 和严格 validator 输出。
+
+禁止把以下内容写成 runtime proof：
+
+- TensorRtExec build-only report。
+- OnnxToEngine report。
+- `ParserPreflightSnapshot`。
+- `BuilderConfigDeploymentSnapshot`。
+- `LoadedEngineDiagnostics`。
+- `.engine-readback.json`。
+- `NormalizedCommandSha256`。
+- `Skipped=True` / `DependencyProbeOnly`。
+- GitHub Actions dry-run。
+- GUI screenshot。
+- owner input template。
+- local feed package consumer、ProjectReference consumer 或 direct `.nupkg` install。
+
+正确的证据梯子应该是：ONNX/source/license -> command normalization -> parser/build report -> engine serialization/hash -> optional load-engine readonly diagnostics -> sample runner real output -> clean external consumer package proof -> post-publish verification -> release close。
+
+## 常见排障
+
+如果 `--onnx` 文件不存在，parser 会在非 dry-run 下抛出 `FileNotFoundException`；dry-run 则只做参数预检。文章示例不要把 dry-run 写成已经构建 engine。
+
+如果出现 CUDA/TensorRT DLL 加载失败，优先检查 `PATH`、CUDA runtime、TensorRT bin/lib、cuDNN 和 adapter line。不要把模型、engine、runtime package 或 NuGet 临时包下载到 C 盘；本项目约定大型资产放 E 盘 workspace。
+
+如果 shape profile 报错，先确认 `--minShapes`、`--optShapes`、`--maxShapes` 的 input name 是否和 ONNX 一致。YOLO 系列常见 input name 是 `images`，但不同 exporter 可能使用 `input` 或其他名字。
+
+如果 `--loadEngine` 只能输出 readonly diagnostics，不要在文章里说它已经验证模型语义。只有执行 enqueue、读取输出、匹配 reference output 并记录 owner evidence，才能往 real-model-runtime proof 走。
 
 ## 配图建议
 
-- 一张 ONNX -> engine -> runtime smoke 的流程图。
-- 一张 TensorRtExec report JSON 摘要截图。
-- 一张 YoloVision matrix 截图，展示模型系列和任务类型。
+- 一张 ONNX -> parser/build -> engine -> readback diagnostics -> sample runtime -> package proof 的证据梯子图。
+- 一张 TensorRtExec report JSON 摘要截图，突出 `ProofClassification`、`BuildEvidenceOnly`、`NormalizedCommandSha256` 和 `LoadedEngineDiagnostics`。
+- 一张 YoloVision matrix 截图，展示 YOLO 系列和 det/cls/seg/obb/pose/sem 任务类型。
+- 一张路径布局图，展示 E 盘 models、engines、reports、logs 的推荐目录。
 
 ## 下一步
 
-继续补齐 TensorRtExec 参数 parity、YoloVision 真实资产候选和 owner result input。转换链路稳定后，把真实运行结果写入 `artifacts/final-release/owner-external-proof-execution-result.input.json`，再通过 import、candidate、strict validator 和 release close bridge 逐级推进。
+继续补齐 TensorRtExec 参数 parity、YoloVision 真实资产候选和 owner result input。转换链路稳定后，把真实运行结果写入 `artifacts/final-release/owner-external-proof-execution-result.input.json`，再通过 import、candidate、strict validator、post-publish verification 和 release close bridge 逐级推进。
