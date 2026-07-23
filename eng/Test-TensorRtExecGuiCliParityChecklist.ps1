@@ -81,6 +81,7 @@ $requiredIds = @(
   "layer-info",
   "report-export",
   "runtime-benchmark",
+  "wait-idle-controls",
   "binding-output",
   "safety-cache-policy",
   "device-dla"
@@ -88,6 +89,7 @@ $requiredIds = @(
 $sourceArtifacts = @((ConvertTo-Array (Get-PropertyOrDefault -Object $record -Name "sourceArtifacts" -DefaultValue @())) | ForEach-Object { [string]$_ })
 $requiredSources = @(
   "applications/TensorRtExec/tensor-rt-exec-feature-matrix.json",
+  "applications/TensorRtExec/tensor-rt-exec-gui-cli-field-map.json",
   "applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.json",
   "applications/TensorRtExec/tensor-rt-exec-trtexec-parity-matrix.json",
   "applications/TensorRtExec/README.md",
@@ -100,12 +102,13 @@ $badProofItems = @($items | Where-Object {
   [bool](Get-PropertyOrDefault -Object $_ -Name "isRuntimeProof" -DefaultValue $true) -or
   [bool](Get-PropertyOrDefault -Object $_ -Name "isPackageConsumerRuntimeProof" -DefaultValue $true)
 })
-$parseOnlyIds = @("safety-cache-policy")
+$parseOnlyIds = @("safety-cache-policy", "wait-idle-controls")
 $parseOnlyItems = @($items | Where-Object { $parseOnlyIds -contains [string](Get-PropertyOrDefault -Object $_ -Name "optionId" -DefaultValue "") })
 
 $validationItems = New-Object System.Collections.Generic.List[object]
 $validationItems.Add((New-ValidationItem -Id "record-kind" -Passed ([string](Get-PropertyOrDefault -Object $record -Name "recordKind" -DefaultValue "") -eq "tensor-rt-exec-gui-cli-parity-checklist") -Severity "blocker" -Detail "recordKind must be tensor-rt-exec-gui-cli-parity-checklist.")) | Out-Null
 $validationItems.Add((New-ValidationItem -Id "checklist-state" -Passed ([string](Get-PropertyOrDefault -Object $record -Name "checklistState" -DefaultValue "") -eq "release-candidate-gui-cli-parity-non-proof") -Severity "blocker" -Detail "Checklist state must remain non-proof.")) | Out-Null
+$validationItems.Add((New-ValidationItem -Id "source-matrices-loaded" -Passed ([bool](Get-PropertyOrDefault -Object $record -Name "featureMatrixPresent" -DefaultValue $false) -and [bool](Get-PropertyOrDefault -Object $record -Name "fieldMapPresent" -DefaultValue $false) -and [bool](Get-PropertyOrDefault -Object $record -Name "gapListPresent" -DefaultValue $false) -and [bool](Get-PropertyOrDefault -Object $record -Name "parityMatrixPresent" -DefaultValue $false)) -Severity "blocker" -Detail "Feature matrix, GUI/CLI field map, gap list, and trtexec parity matrix must all be loaded.")) | Out-Null
 $validationItems.Add((New-ValidationItem -Id "required-options-present" -Passed (@($requiredIds | Where-Object { $ids -notcontains $_ }).Count -eq 0) -Severity "blocker" -Detail "Checklist must cover the core trtexec-like CLI/GUI options.")) | Out-Null
 $validationItems.Add((New-ValidationItem -Id "source-artifacts-present" -Passed (@($requiredSources | Where-Object { $sourceArtifacts -notcontains $_ }).Count -eq 0) -Severity "blocker" -Detail "Checklist must cite TensorRtExec matrices, README, options, CLI, and WinForms source.")) | Out-Null
 $validationItems.Add((New-ValidationItem -Id "no-runtime-proof-items" -Passed ([int](Get-PropertyOrDefault -Object $record -Name "runtimeProofItems" -DefaultValue 1) -eq 0 -and $badProofItems.Count -eq 0) -Severity "blocker" -Detail "Checklist must not mark any option as runtime proof or package-consumer proof.")) | Out-Null

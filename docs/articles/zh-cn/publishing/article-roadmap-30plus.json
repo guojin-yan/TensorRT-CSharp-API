@@ -1379,14 +1379,14 @@
         "eng/Test-YoloVisionLocalPackageConsumer.ps1",
         "artifacts/interface-coverage/yolox-local-package-consumer-runtime-proof-closure.json"
       ],
-      "proofBoundary": "A local file-feed PackageReference runtime is local-package-consumer-runtime engineering evidence only. It is not public package-consumer-runtime proof, redistribution approval, post-publish proof, publish approval, release close approval, or package push.",
+      "proofBoundary": "A local file-feed PackageReference runtime is engineering evidence only: not runtime proof, not public package-consumer-runtime proof, not redistribution approval, not post-publish proof, not publish approval, not release close approval, and not package push.",
       "mustAvoidClaims": [
-        "must not claim local file feed is public package proof",
-        "must not claim a local nupkg hash proves public download",
-        "must not claim ProjectReference-free alone proves public package-consumer-runtime",
-        "must not claim real-model-runtime approves asset redistribution",
+        "must not claim local feed is public package proof",
+        "must not claim ProjectReference/direct nupkg is package-consumer-runtime proof",
+        "must not claim build-only output is runtime proof",
         "must not claim failedBlockerCount=0 means ready",
         "must not claim dashboard/runbook/candidate/draft is publish approval",
+        "must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof",
         "must not treat Skipped=True as proof"
       ]
     }

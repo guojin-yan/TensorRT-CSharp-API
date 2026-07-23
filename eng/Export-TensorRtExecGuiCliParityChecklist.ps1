@@ -106,6 +106,7 @@ function New-ParityItem {
 }
 
 $featureMatrix = Read-JsonOrNull "applications/TensorRtExec/tensor-rt-exec-feature-matrix.json"
+$fieldMap = Read-JsonOrNull "applications/TensorRtExec/tensor-rt-exec-gui-cli-field-map.json"
 $gapList = Read-JsonOrNull "applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.json"
 $parityMatrix = Read-JsonOrNull "applications/TensorRtExec/tensor-rt-exec-trtexec-parity-matrix.json"
 $commandSource = Read-TextOrEmpty "applications/TensorRtExec/Console/TensorRtExecCommand.cs"
@@ -129,6 +130,7 @@ $items = @(
   New-ParityItem -OptionId "layer-info" -OfficialTrtexecOption "--dumpLayerInfo / --exportLayerInfo" -Tokens @("--dumpLayerInfo", "--exportLayerInfo") -WinFormsTokens @("_layerInfoPath", "OnBrowseLayerInfo") -Status "implemented-report" -ProofBoundary "Layer info is diagnostic metadata, not output correctness proof." -NextImplementationPath "src/JYPPX.TensorRtSharp/TensorRtEngineInspector.Trt11Diagnostics.cs" -NextAction "Use inspector output as diagnostics only."
   New-ParityItem -OptionId "report-export" -OfficialTrtexecOption "--exportReport / --report" -Tokens @("--exportReport", "--report") -WinFormsTokens @("_reportPath", "OnBrowseReport") -Status "implemented-report" -ProofBoundary "Report export aliases choose JSON/Markdown output paths only; reports are build/report evidence and not runtime proof." -NextImplementationPath "applications/TensorRtExec; samples/OnnxToEngine; src/JYPPX.TensorRtSharp.Tools" -NextAction "Keep --exportReport canonical while accepting --report for owner-facing commands."
   New-ParityItem -OptionId "runtime-benchmark" -OfficialTrtexecOption "--iterations / --warmUp / --duration / --streams / --infStreams / --avgRuns / --percentile / --threads / --useSpinWait / --useCudaGraph / --noDataTransfers" -Tokens @("--iterations", "--warmUp", "--duration", "--streams", "--infStreams", "--avgRuns", "--percentile", "--threads", "--useSpinWait", "--useCudaGraph", "--noDataTransfers") -WinFormsTokens @("_iterations", "_warmUp", "_duration", "_streams", "_infStreams", "_avgRuns", "_percentile", "_threads", "_useSpinWait", "_useCudaGraph", "_noDataTransfers") -Status "implemented-bounded-runtime" -ProofBoundary "Bounded scheduler execution is not external model correctness or package-consumer proof." -NextImplementationPath "applications/TensorRtExec" -NextAction "Require real model logs and hashes before proof promotion."
+  New-ParityItem -OptionId "wait-idle-controls" -OfficialTrtexecOption "--sleepTime / --idleTime" -Tokens @("--sleepTime", "--idleTime") -WinFormsTokens @("_sleepTime", "_idleTime") -Status "partial-idle-applied-sleep-parse-only" -ProofBoundary "Idle time is applied between measured rounds; sleepTime remains parse-only because CPU sleep cannot substitute for the official device-side launch-to-compute delay." -NextImplementationPath "applications/TensorRtExec; src/JYPPX.TensorRtSharp.Tools" -NextAction "Keep --sleepTime parse-only until an owner-safe GPU scheduling primitive and compatible-host evidence exist."
   New-ParityItem -OptionId "binding-output" -OfficialTrtexecOption "--loadInputs / --dumpOutput / --dumpRawBindingsToFile / --exportOutput / --exportTimes" -Tokens @("--loadInputs", "--dumpOutput", "--dumpRawBindingsToFile", "--exportOutput", "--exportTimes") -WinFormsTokens @("_loadInputs", "_dumpOutput", "_dumpRawBindingsPath", "_exportOutputPath", "_exportTimesPath") -Status "bounded" -ProofBoundary "Build-only artifacts write boundary JSON; external ONNX binding output requires real model evidence." -NextImplementationPath "samples/YoloVision; applications/TensorRtExec" -NextAction "Use YoloVision owner templates to capture tensor role metadata."
   New-ParityItem -OptionId "engine-packaging-refit-weight-streaming" -OfficialTrtexecOption "--versionCompatible / --excludeLeanRuntime / --stripWeights / --refit / --allowWeightStreaming / --weightStreamingBudget" -Tokens @("--versionCompatible", "--excludeLeanRuntime", "--stripWeights", "--refit", "--allowWeightStreaming", "--weightStreamingBudget") -WinFormsTokens @("_versionCompatible", "_excludeLeanRuntime", "_stripWeights", "_refit", "_allowWeightStreaming", "_weightStreamingBudget") -Status "implemented-build-runtime-readback-with-version-guards" -ProofBoundary "Packaging flags and weight-streaming budget readback are local builder/engine policy evidence; they do not prove cross-version lean-runtime deployment, stripped-plan refit completion, model accuracy, package consumption, or release." -NextImplementationPath "src/JYPPX.TensorRtSharp.Tools; applications/TensorRtExec" -NextAction "Preserve TRT8 guards and keep external lean-runtime/refit lifecycles separate from local policy evidence."
   New-ParityItem -OptionId "onnx-stripped-plan-refit" -OfficialTrtexecOption "--refitFromOnnx" -Tokens @("--refitFromOnnx") -WinFormsTokens @("_refitFromOnnxPath", "OnBrowseRefitOnnx") -Status "implemented-trt10-refit-lifecycle-with-version-guards" -ProofBoundary "Copied inventory, parser load, engine commit, context gate, enqueue, and baseline comparison are local source-tree evidence; not refitted-plan persistence or package-consumer proof." -NextImplementationPath "src/JYPPX.TensorRtSharp.Tools; applications/TensorRtExec" -NextAction "Keep TRT8 guarded and TRT11 dependency-probe-only until a compatible host is available."
@@ -148,6 +150,7 @@ $record = [pscustomobject]@{
   checklistState = "release-candidate-gui-cli-parity-non-proof"
   application = "applications/TensorRtExec"
   featureMatrixPresent = ($null -ne $featureMatrix)
+  fieldMapPresent = ($null -ne $fieldMap)
   gapListPresent = ($null -ne $gapList)
   parityMatrixPresent = ($null -ne $parityMatrix)
   itemCount = $items.Count
@@ -159,6 +162,7 @@ $record = [pscustomobject]@{
   items = @($items)
   sourceArtifacts = @(
     "applications/TensorRtExec/tensor-rt-exec-feature-matrix.json",
+    "applications/TensorRtExec/tensor-rt-exec-gui-cli-field-map.json",
     "applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.json",
     "applications/TensorRtExec/tensor-rt-exec-trtexec-parity-matrix.json",
     "applications/TensorRtExec/README.md",

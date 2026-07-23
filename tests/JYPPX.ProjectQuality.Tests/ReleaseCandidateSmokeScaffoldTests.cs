@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Xunit;
 
 namespace JYPPX.ProjectQuality.Tests;
@@ -264,9 +265,30 @@ public sealed class ReleaseCandidateSmokeScaffoldTests
         JsonElement fields = root.GetProperty("fields");
 
         Assert.Equal("tensor-rt-exec-gui-cli-field-map", root.GetProperty("mapId").GetString());
-        Assert.True(fields.GetArrayLength() >= 25);
+        Assert.True(fields.GetArrayLength() >= 85);
         Assert.Contains("not runtime proof", root.GetProperty("proofBoundary").GetString(), StringComparison.OrdinalIgnoreCase);
         Assert.Contains("command preview and screenshots are not proof", root.GetProperty("proofBoundary").GetString(), StringComparison.OrdinalIgnoreCase);
+
+        HashSet<string> normalizedOptions = Regex.Matches(options, @"Add(?:Switch)?\(args,\s*""(?<option>--[A-Za-z0-9-]+)""")
+            .Select(static match => match.Groups["option"].Value)
+            .ToHashSet(StringComparer.Ordinal);
+        HashSet<string> mappedOptions = fields.EnumerateArray()
+            .SelectMany(static field =>
+            {
+                IEnumerable<string> aliases = field.TryGetProperty("aliases", out JsonElement aliasArray)
+                    ? aliasArray.EnumerateArray().Select(static alias => alias.GetString()!)
+                    : Array.Empty<string>();
+                return new[] { field.GetProperty("cliOption").GetString()! }.Concat(aliases);
+            })
+            .ToHashSet(StringComparer.Ordinal);
+        Assert.Empty(normalizedOptions.Except(mappedOptions));
+        Assert.Equal(
+            fields.EnumerateArray().Count(static field => field.GetProperty("cliOption").GetString()!.StartsWith("--", StringComparison.Ordinal)),
+            fields.EnumerateArray()
+                .Select(static field => field.GetProperty("cliOption").GetString()!)
+                .Where(static option => option.StartsWith("--", StringComparison.Ordinal))
+                .Distinct(StringComparer.Ordinal)
+                .Count());
 
         foreach (string option in new[]
         {
@@ -315,12 +337,21 @@ public sealed class ReleaseCandidateSmokeScaffoldTests
 
         Assert.All(fields.EnumerateArray(), field =>
         {
+            Assert.Contains(field.GetProperty("control").GetString()!, form, StringComparison.Ordinal);
             Assert.True(field.TryGetProperty("implementationClass", out _));
             Assert.True(field.TryGetProperty("proofBoundary", out _));
             Assert.True(field.GetProperty("requiresRuntimeProof").GetBoolean());
             Assert.True(field.GetProperty("requiresOwnerEvidence").GetBoolean());
             Assert.False(field.GetProperty("canPromoteRuntimeProof").GetBoolean());
         });
+
+        JsonElement sleepTime = fields.EnumerateArray().Single(static field => field.GetProperty("cliOption").GetString() == "--sleepTime");
+        Assert.Equal("parse-report-only", sleepTime.GetProperty("status").GetString());
+        Assert.Contains("CPU sleep is not an allowed substitute", sleepTime.GetProperty("proofBoundary").GetString(), StringComparison.Ordinal);
+
+        JsonElement idleTime = fields.EnumerateArray().Single(static field => field.GetProperty("cliOption").GetString() == "--idleTime");
+        Assert.Equal("implemented-bounded-runtime", idleTime.GetProperty("status").GetString());
+        Assert.Equal("applied-between-measured-rounds", idleTime.GetProperty("implementationClass").GetString());
     }
 
     private static JsonDocument ReadJson(params string[] pathParts)

@@ -1,6 +1,6 @@
 # TensorRtExec GUI/CLI Field Map
 
-`tensor-rt-exec-gui-cli-field-map.json` records the user-facing parity between the console entry and the WinForms entry. The map is a surface-contract artifact only: it is not runtime proof, not package-consumer-runtime proof, not post-publish proof, and not release approval.
+`tensor-rt-exec-gui-cli-field-map.json` records the user-facing parity between the console entry and the WinForms entry. It covers all 84 normalized options emitted by `TensorRtExecOptions` plus the command-preview row. The map is a surface-contract artifact only: it is not runtime proof, not package-consumer-runtime proof, not post-publish proof, and not release approval.
 
 ## Boundary
 
@@ -17,10 +17,14 @@
 | Model | `--onnx`, `--saveEngine`, `--loadEngine`, `--refitFromOnnx`, `--saveRefittedEngine` | ONNX refit persistence keeps stripped/refitted artifacts distinct, reloads a new engine owner, and has separate local-feed PackageReference output-hash evidence; public package/post-publish proof stays external |
 | Shape Profile | `--minShapes`, `--optShapes`, `--maxShapes` | shared normalized command |
 | Plugin Paths | `--plugins` | diagnostic GUI/CLI parity only; load/register remains deferred |
-| Precision | `--fp16`, `--int8`, `--fp8`, `--best` | INT8 and advanced precision remain guarded |
-| Builder | `--workspace`, `--memPoolSize`, `--builderOptimizationLevel` | workspace and known memory pools are applied/read back during real build |
-| Deployment | `--device`, `--useDLACore`, `--allowGPUFallback`, `--tacticSources`, `--directIO`, `--sparsity`, `--stronglyTyped` | version-guarded device/build readback; not DLA/model/package runtime proof |
-| Timing/Profile | `--timingCacheFile`, `--exportTimingCache`, `--dumpProfile` | diagnostics/report evidence |
+| Precision | `--fp16`, `--bf16`, `--noTF32`, `--int8`, `--calib`, `--fp8`, `--best` | INT8/calibration and advanced precision remain guarded |
+| Builder | `--workspace`, `--memPoolSize`, `--builderOptimizationLevel`, `--maxNbTactics`, `--tilingOptimizationLevel` | scalar settings and known memory pools are version-guarded build/readback evidence |
+| Deployment | `--device`, `--useDLACore`, `--allowGPUFallback`, `--tacticSources`, `--inputIOFormats`, `--layerPrecisions`, `--stronglyTyped` | version-guarded device/build readback; not DLA/model/package runtime proof |
+| Packaging/Debug | `--versionCompatible`, `--stripWeights`, `--refit`, `--allowWeightStreaming`, `--dumpRefit`, `--markDebug` | applied options retain version guards; debug/refit dump intent stays parse-only |
+| Timing/Profile | `--timingCacheFile`, `--exportTimingCache`, `--minTiming`, `--avgTiming`, `--profilingVerbosity` | build-cache, versioned builder readback, or diagnostics evidence only |
+| Bounded Runtime | `--iterations`, `--streams`, `--infStreams`, `--threads`, `--useSpinWait`, `--useCudaGraph`, `--idleTime` | bounded scheduler behavior; not external model correctness or package proof |
+| Device-side Delay | `--sleepTime` | parse/report-only until a faithful launch-to-compute GPU mechanism exists; CPU sleep is not a substitute |
+| Safety/Cache Policy | `--safe`, `--consistency`, `--builderCache`, `--noBuilderCache` | parse/report-only intent |
 | Output Artifacts | `--loadInputs`, `--dumpOutput`, `--dumpRawBindingsToFile`, `--exportOutput`, `--exportTimes`, `--exportProfile`, `--saveProfile` | bounded artifacts only |
 | Mode | `--buildOnly`, `--skipInference`, `--dryRun` | not runtime proof |
 | Report | `--exportReport`, `--report`, `--evidenceSidecar` | report/sidecar only |

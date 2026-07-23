@@ -18,6 +18,7 @@ public sealed class TensorRtExecGuiCliParityChecklistTests
 
         Assert.Equal("tensor-rt-exec-gui-cli-parity-checklist", checklist.GetProperty("recordKind").GetString());
         Assert.Equal("release-candidate-gui-cli-parity-non-proof", checklist.GetProperty("checklistState").GetString());
+        Assert.True(checklist.GetProperty("fieldMapPresent").GetBoolean());
         Assert.True(checklist.GetProperty("itemCount").GetInt32() >= 15);
         Assert.True(checklist.GetProperty("cliSupportedCount").GetInt32() >= 10);
         Assert.True(checklist.GetProperty("winFormsSupportedCount").GetInt32() >= 10);
@@ -33,6 +34,7 @@ public sealed class TensorRtExecGuiCliParityChecklistTests
 
         string[] sourceArtifacts = checklist.GetProperty("sourceArtifacts").EnumerateArray().Select(static item => item.GetString()!).ToArray();
         Assert.Contains("applications/TensorRtExec/tensor-rt-exec-feature-matrix.json", sourceArtifacts);
+        Assert.Contains("applications/TensorRtExec/tensor-rt-exec-gui-cli-field-map.json", sourceArtifacts);
         Assert.Contains("applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.json", sourceArtifacts);
         Assert.Contains("applications/TensorRtExec/tensor-rt-exec-trtexec-parity-matrix.json", sourceArtifacts);
         Assert.Contains("applications/TensorRtExec/Core/TensorRtExecOptions.cs", sourceArtifacts);
@@ -55,6 +57,7 @@ public sealed class TensorRtExecGuiCliParityChecklistTests
             "layer-info",
             "report-export",
             "runtime-benchmark",
+            "wait-idle-controls",
             "binding-output",
             "safety-cache-policy",
             "device-dla"
@@ -74,6 +77,12 @@ public sealed class TensorRtExecGuiCliParityChecklistTests
         Assert.Contains(items, item =>
             item.GetProperty("optionId").GetString() == "safety-cache-policy" &&
             item.GetProperty("status").GetString()!.Contains("parse", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(items, item =>
+            item.GetProperty("optionId").GetString() == "wait-idle-controls" &&
+            item.GetProperty("status").GetString() == "partial-idle-applied-sleep-parse-only" &&
+            item.GetProperty("officialTrtexecOption").GetString()!.Contains("--sleepTime", StringComparison.Ordinal) &&
+            item.GetProperty("officialTrtexecOption").GetString()!.Contains("--idleTime", StringComparison.Ordinal) &&
+            item.GetProperty("proofBoundary").GetString()!.Contains("CPU sleep cannot substitute", StringComparison.Ordinal));
         Assert.All(items, item =>
         {
             Assert.False(item.GetProperty("isRuntimeProof").GetBoolean());
