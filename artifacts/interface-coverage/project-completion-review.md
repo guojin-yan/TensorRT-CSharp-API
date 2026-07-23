@@ -3333,3 +3333,44 @@ package proof 边界的完整公开文章。
   临时包到 C 盘。
 - 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
   GitHub Release upload、issue close 或 push。
+
+## 2026-07-24 Project Overview Public Article Expansion
+
+本阶段继续公开文章矩阵质量提升，扩写
+`docs/articles/zh-cn/publishing/project-overview-public-article.md`，将项目总览从短介绍扩展为面向
+微信公众号、博客和项目主页的入口文章。文章把 native bridge、generated interop、C# wrapper、
+samples/applications、runtime package 双路线、article matrix 和 release proof boundary 串成统一叙事。
+
+### 实现
+
+- 文章补齐 `src/JYPPX.TensorRtSharp`、`src/JYPPX.CudaSharp`、`src/JYPPX.TensorRtSharp.Tools`、
+  `src/JYPPX.Shared`、`native/src/tensorrt`、`native/src/cuda`、TRT8/TRT10/TRT11/CUDA manifest、
+  `samples/OnnxToEngine`、`samples/YoloVision`、`applications/TensorRtExec`、
+  `pack/runtime`、`pack/runtime-split` 和 `artifacts/final-release` 的入口关系。
+- 公开说明 `TensorRtBuilder`、`TensorRtBuilderConfig`、`TensorRtRuntime`、`TensorRtEngine`、
+  `TensorRtExecutionContext`、`TensorRtOnnxParser`、`TensorRtOnnxParserRefitter`、
+  `TensorRtPluginRegistryInventory`、`TensorRtEngineInspector`、CUDA/TensorRT probe 等高层 wrapper
+  价值。
+- 增加 native/generated 与 generated C# interop 证据路径，并强调 manifest/source match 不等于
+  runtime proof，generated interop 不等于 high-level wrapper。
+- 补充 TensorRtExec CLI/WinForms、OnnxToEngine、YoloVision 多系列多任务、runtime package 双路线、
+  30+ 文章矩阵、typical command path 与 owner validator 路径。
+- 明确 build-only、dry-run、template、input draft、local feed、ProjectReference、direct `.nupkg`、
+  GitHub Actions dry-run、dependency-probe-only、GUI screenshot、command preview、TensorRtExec report、
+  OnnxToEngine report、YoloVision matrix、output JSON、SVG、sidecar-only 和 blocked-by-cuda-driver 都不是
+  package-consumer-runtime proof。
+- 将 `project-overview-public-article.md` 纳入 `PublishingPublicArticleTests` 基础文章清单，并新增
+  `ProjectOverviewPublicArticleCoversArchitectureSamplesPackagesArticleMatrixAndReleaseBoundary` 专项门禁。
+
+### Verification
+
+- `dotnet test tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --filter "FullyQualifiedName~PublishingPublicArticleTests"`：
+  `17/17` 通过。
+- 编译阶段未出现本批新增错误；此前 nullable warning 不属于本批改动范围。
+
+### C 盘与发布边界
+
+- 本阶段未下载 TensorRT、CUDA、cuDNN、模型、ONNX、engine、Python/pip 资产或 NuGet
+  临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
+  GitHub Release upload、issue close 或 push。

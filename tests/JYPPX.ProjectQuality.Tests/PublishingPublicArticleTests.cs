@@ -388,6 +388,138 @@ public sealed class PublishingPublicArticleTests
     }
 
     [Fact]
+    public void ProjectOverviewPublicArticleCoversArchitectureSamplesPackagesArticleMatrixAndReleaseBoundary()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "publishing",
+            "project-overview-public-article.md"));
+
+        foreach (string marker in new[]
+        {
+            "src/JYPPX.TensorRtSharp",
+            "src/JYPPX.CudaSharp",
+            "src/JYPPX.TensorRtSharp.Tools",
+            "src/JYPPX.Shared",
+            "native/src/tensorrt",
+            "native/src/cuda",
+            "native/manifests/tensorrt/v8",
+            "native/manifests/tensorrt/v10",
+            "native/manifests/tensorrt/v11",
+            "native/manifests/cuda",
+            "samples/OnnxToEngine",
+            "samples/YoloVision",
+            "applications/TensorRtExec",
+            "pack/runtime",
+            "pack/runtime-split",
+            "artifacts/final-release",
+            "TensorRtBuilder",
+            "TensorRtBuilderConfig",
+            "TensorRtRuntime",
+            "TensorRtEngine",
+            "TensorRtExecutionContext",
+            "TensorRtOnnxParser",
+            "TensorRtOnnxParserRefitter",
+            "TensorRtPluginRegistryInventory",
+            "TensorRtEngineInspector",
+            "CudaDevice",
+            "CudaEnvironmentProbe",
+            "TensorRtEnvironmentProbe",
+            "native/generated/bridge_api_catalog.g.h",
+            "native/generated/bridge_entrypoints.g.h",
+            "GeneratedApiCatalog.g.cs",
+            "GeneratedEntryPointNames.g.cs",
+            "GeneratedNativeMethods.g.cs",
+            "GeneratedTensorRtManifestNativeMethods.g.cs",
+            "GeneratedCudaManifestNativeMethods.g.cs",
+            "artifacts/interface-coverage/tensorrt-interface-comparison.csv",
+            "artifacts/interface-coverage/project-completion-review.md",
+            "TensorRtExecCommand.cs",
+            "TensorRtExecService.cs",
+            "TensorRtExecReport.cs",
+            "MainForm.cs",
+            "TrtexecLikeParser",
+            "TrtexecLikeOptions",
+            "YOLOv5",
+            "YOLOv6",
+            "YOLOv7",
+            "YOLOv8",
+            "YOLOv9",
+            "YOLOv10",
+            "YOLO11",
+            "YOLO26",
+            "YOLOX",
+            "det、cls、seg、obb、pose、sem",
+            "GitHub full runtime packages",
+            "NuGet small managed/core + bridge package route",
+            "pack/runtime/runtime-packages.manifest.json",
+            "pack/runtime-split/split-runtime-packages.manifest.json",
+            "docs/articles/zh-cn/publishing/package-strategy-public-article.md",
+            "docs/articles/zh-cn/publishing/nuget-install-runtime-package-public-article.md",
+            "docs/articles/zh-cn/publishing/native-bridge-build-public-article.md",
+            "docs/articles/zh-cn/publishing/source-build-windows-public-article.md",
+            "docs/articles/zh-cn/publishing/cuda-tensorrt-dll-troubleshooting-public-article.md",
+            "artifacts/final-release/release-evidence-bundle.json",
+            "artifacts/final-release/release-close-preflight.json",
+            "artifacts/final-release/final-release-close-blocker-dashboard.md",
+            "artifacts/final-release/package-consumer-runtime-proof-owner-input.template.json",
+            "artifacts/final-release/post-publish-verification-record.json",
+            "artifacts/final-release/technical-article-publication-matrix.md",
+            "artifacts/final-release/technical-article-campaign-matrix.md",
+            "README.md",
+            "README.zh-CN.md",
+            "docs/index.md",
+            "docs/toc.yml",
+            "docs/articles/zh-cn/project-overview.md",
+            "docs/articles/zh-cn/tensorrtsharp-4-project-overview-campaign.md",
+            "docs/articles/zh-cn/project-release-story-and-boundaries.md",
+            "docs/articles/zh-cn/publishing/onnx-to-engine-public-article.md",
+            "docs/articles/zh-cn/publishing/onnxtoengine-trtexec-parity-public-article.md",
+            "applications/TensorRtExec/tensor-rt-exec-trtexec-parity-matrix.json",
+            "applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.json",
+            "samples/YoloVision/yolo-model-matrix.json",
+            "samples/YoloVision/yolovision-task-output-contract.json",
+            "samples/assets/yolovision-article-case-pack.json",
+            "samples/assets/yolovision-real-asset-owner-backfill-pack.json",
+            "dotnet build .\\TensorRtSharp.sln -c Debug --no-restore",
+            "dotnet run --project .\\applications\\TensorRtExec\\TensorRtExec.csproj -- --help",
+            "dotnet run --project .\\samples\\OnnxToEngine\\OnnxToEngine.csproj -- --help",
+            "dotnet run --project .\\samples\\YoloVision\\YoloVision.csproj -- --help",
+            "eng/Test-YoloVisionRealAssetCandidate.ps1",
+            "eng/Test-SampleRunEvidenceRecord.ps1",
+            "eng/Test-ExternalRuntimeProofRecord.ps1",
+            "technical-and-promo-article-matrix-30plus.md",
+            "article-roadmap-30plus.md",
+            "article-roadmap-30plus.json",
+            "manifest/source match != runtime proof",
+            "generated interop != high-level wrapper",
+            "build-only report != package-consumer-runtime proof",
+            "local feed != public package source",
+            "ProjectReference != package consumer",
+            "direct .nupkg install != post-publish verification",
+            "YoloVision matrix != real-model-runtime proof",
+            "TensorRtExec report != release close approval",
+            "package-consumer-runtime",
+            "Linux runner proof",
+            "real-model-runtime",
+            "owner authorization",
+            "post-publish verification",
+            "blocked-real-proof-required"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("不是 package-consumer-runtime proof", content, StringComparison.Ordinal);
+        Assert.Contains("不能把 guidance 写成发布完成声明", content, StringComparison.Ordinal);
+        Assert.Contains("canPublishPublicly=false", content, StringComparison.Ordinal);
+        Assert.Contains("canCloseReleaseIssue=false", content, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void SourceBuildPublicArticleCoversCppBridgeEnvironmentPresetsPackagesAndTroubleshooting()
     {
         string content = File.ReadAllText(Path.Combine(
@@ -1289,6 +1421,10 @@ public sealed class PublishingPublicArticleTests
             "articles/zh-cn/publishing/yolovision-overview-public-article.md",
             "samples/assets/yolovision-yolov8-det-candidate.template.json",
             "owner-action-required"),
+        new(
+            "articles/zh-cn/publishing/project-overview-public-article.md",
+            "artifacts/interface-coverage/project-completion-review.md",
+            "package-consumer-runtime proof"),
         new(
             "articles/zh-cn/publishing/onnxtoengine-trtexec-parity-public-article.md",
             "applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.json",
