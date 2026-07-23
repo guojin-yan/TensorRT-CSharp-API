@@ -258,6 +258,77 @@ public sealed class PublishingPublicArticleTests
         Assert.Contains("不暴露 `IRuntime*`、`ICudaEngine*`", content, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void ReleaseEvidenceLadderPublicArticleCoversOwnerInputForbiddenSubstitutesAndCloseBoundaries()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "publishing",
+            "release-evidence-ladder-public-article.md"));
+
+        foreach (string marker in new[]
+        {
+            "package-consumer-runtime-proof-owner-input.template.json",
+            "package-consumer-runtime-proof-owner-input.schema.json",
+            "package-consumer-runtime-proof-forbidden-substitute-scan.json",
+            "public-docs-package-metadata-gate.json",
+            "Test-PackageConsumerRuntimeProofOwnerInput.ps1",
+            "Import-PackageConsumerRuntimeProofOwnerInput.ps1",
+            "Test-PackageConsumerRuntimeProofRecord.ps1",
+            "Test-ReleaseIssueCloseRecord.ps1",
+            "final-owner-execution-package.json",
+            "fieldCount=80",
+            "requiredFieldCount=49",
+            "cleanExternalConsumerRoot",
+            "publicPackageSourceKind",
+            "managedNupkgSha256",
+            "runtimePackageKey",
+            "smokeLogSha256",
+            "stdoutSummary",
+            "stderrSummary",
+            "performsPublish=false",
+            "canPublishPublicly=false",
+            "canCloseReleaseIssue=false",
+            "canPromoteProof=false",
+            "blocked-forbidden-substitute-detected",
+            "repository path leakage",
+            "template placeholder",
+            "local feed",
+            "ProjectReference",
+            "direct `.nupkg`",
+            "build-only",
+            "dry-run",
+            "queued GitHub Actions run",
+            "missing self-hosted runner",
+            "GitHub Actions dry-run `.nupkg`",
+            "dashboard",
+            "GUI screenshot",
+            "TensorRtExec build report only",
+            "isDryRunOnly=true",
+            "isPublishedPackageProof=false",
+            "isPackageConsumerRuntimeProof=false",
+            "manualWorkflowDispatchNotPerformed=true",
+            "post-publish verification",
+            "Linux runner proof",
+            "real-model-runtime proof",
+            "rollback review",
+            "final close decision",
+            "blocked-owner-public-postpublish-proof-required",
+            "failedBlockerCount=0"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("不是 ready-to-publish", content, StringComparison.Ordinal);
+        Assert.Contains("不是 release close", content, StringComparison.Ordinal);
+        Assert.Contains("不要 workflow dispatch", content, StringComparison.Ordinal);
+        Assert.Contains("不能推动 release close", content, StringComparison.Ordinal);
+    }
+
     private static readonly ArticleExpectation[] Articles =
     {
         new(

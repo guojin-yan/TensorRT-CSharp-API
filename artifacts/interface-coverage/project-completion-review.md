@@ -2798,6 +2798,55 @@ runtime package key、local candidate evidence 和真实 package-consumer-runtim
 - 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
   GitHub Release upload 或 issue close。
 
+## 2026-07-23 Release Evidence Ladder Public Article Expansion
+
+本阶段继续公开文章矩阵质量提升，扩写
+`docs/articles/zh-cn/publishing/release-evidence-ladder-public-article.md`，将 release evidence
+ladder 从短说明扩展为完整的发布证据分层文章。文章把 template/preflight/build-only/
+readonly diagnostics、real-model runtime、package-consumer runtime、post-publish verification
+和 release close 分层，并明确 forbidden substitute scan 与 owner input 字段的边界。
+
+### 实现
+
+- 文章补齐 `package-consumer-runtime-proof-owner-input.template.json`、
+  `package-consumer-runtime-proof-owner-input.schema.json`、
+  `package-consumer-runtime-proof-forbidden-substitute-scan.json`、
+  `public-docs-package-metadata-gate.json`、`final-owner-execution-package.json` 与
+  `Test-PackageConsumerRuntimeProofRecord.ps1` / `Test-ReleaseIssueCloseRecord.ps1`
+  的证据路径。
+- 写入 owner input schema 当前 `fieldCount=80`、`requiredFieldCount=49`，并列出 clean
+  consumer、公开包源、managed/runtime package、host metadata、commands、runtime result、
+  logs 和 side-effect guards 等关键字段。
+- 公开说明 forbidden substitute scan 当前 `blocked-forbidden-substitute-detected`，其中
+  `repository path leakage` 与 `template placeholder` 是 blocker；local feed、
+  ProjectReference、direct `.nupkg`、build-only、dry-run、queued GitHub Actions run、
+  missing self-hosted runner、GitHub Actions dry-run `.nupkg`、dashboard、GUI screenshot 和
+  TensorRtExec build report only 均不能替代 package-consumer-runtime proof。
+- 明确 GitHub Actions dry-run 只能作为 context evidence：`isDryRunOnly=true`、
+  `isPublishedPackageProof=false`、`isPackageConsumerRuntimeProof=false`、
+  `manualWorkflowDispatchNotPerformed=true`、`performsPublish=false`、
+  `canPublishPublicly=false`、`canCloseReleaseIssue=false`、`canPromoteProof=false`。
+- 明确 `public-docs-package-metadata-gate.json` 的 `failedBlockerCount=0` 只表示文档没有
+  forbidden overclaim，不是 ready-to-publish，也不是 release close。
+- 为 `PublishingPublicArticleTests` 增加
+  `ReleaseEvidenceLadderPublicArticleCoversOwnerInputForbiddenSubstitutesAndCloseBoundaries`
+  专项门禁。
+
+### Verification
+
+- `dotnet test tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --filter "FullyQualifiedName~PublishingPublicArticleTests"`：
+  `7/7` 通过。
+- 编译阶段仍出现 5 条既有 nullable warning，位置在
+  `FinalPublishProofGateAndOwnerExecutionPackTests.cs` 与
+  `ReleasePublishReadinessEvidencePackAndPublicDocsGateTests.cs`，本批未改动这些文件。
+
+### C 盘与发布边界
+
+- 本阶段未下载 TensorRT、CUDA、cuDNN、模型、ONNX、engine、Python/pip 资产或 NuGet
+  临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
+  GitHub Release upload 或 issue close。
+
 ## 2026-07-23 Deferred Boundary Public Article Expansion
 
 本阶段继续公开文章矩阵质量提升，扩写
