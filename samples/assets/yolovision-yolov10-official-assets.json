@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "yolovision-yolov10-official-asset-acquisition-manifest",
+  "assetSetId": "yolov10n-v1.1-agpl-3.0-detection-end2end",
+  "sampleName": "YoloVision",
+  "upstreamRepository": "https://github.com/THU-MIG/yolov10",
+  "upstreamRevision": "799ff3be47d21173bcf29b351820d4b8e955e0fe",
+  "upstreamTag": "v1.1",
+  "releasePublishedUtc": "2024-05-26T00:00:00Z",
+  "license": {
+    "name": "GNU Affero General Public License v3.0",
+    "spdxId": "AGPL-3.0-only",
+    "sourceAssetId": "yolov10-license",
+    "provenanceState": "upstream-repository-license-hash-pinned",
+    "publicRedistributionOwnerApproval": false
+  },
+  "modelContract": {
+    "family": "yolov10",
+    "task": "det",
+    "recommendedLayout": "end2end",
+    "inputNameHint": "images",
+    "inputShapeHint": "1x3x640x640",
+    "outputShapeHint": "1x300x6",
+    "outputColumns": ["x1", "y1", "x2", "y2", "score", "classId"],
+    "classCount": 80,
+    "postprocess": {
+      "hasObjectness": false,
+      "applyNms": false,
+      "nmsMode": "none"
+    }
+  },
+  "assets": [
+    {
+      "id": "yolov10n-onnx",
+      "role": "model",
+      "fileName": "yolov10n.onnx",
+      "url": "https://github.com/THU-MIG/yolov10/releases/download/v1.1/yolov10n.onnx",
+      "expectedLength": 9386466,
+      "expectedSha256": "7025ea1913f9a259cf8a8465ed608e10610d1bb376db2e0348b13e3bd286e0d3"
+    },
+    {
+      "id": "yolov10-license",
+      "role": "license",
+      "fileName": "LICENSE",
+      "url": "https://raw.githubusercontent.com/THU-MIG/yolov10/v1.1/LICENSE",
+      "expectedLength": 34523,
+      "expectedSha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0"
+    }
+  ],
+  "compatibleRuntimeInputs": {
+    "source": "yolovision-yolox-official-assets.json",
+    "labels": {
+      "pathHint": "downloads/yolox-apache/derived/coco.names",
+      "classCount": 80,
+      "expectedSha256": "4d4aaea7bee6be2f675d9b53a9195ca36dfe6429f7479f29155da522a6c85930"
+    },
+    "image": {
+      "pathHint": "downloads/yolox-apache/derived/dog.ppm",
+      "format": "P6 RGB PPM",
+      "expectedSha256": "6cb94c9cd0781412598fe179246b09041af4303d388a5ba3c55f760dff11ec2c"
+    }
+  },
+  "proofBoundary": {
+    "canProceedToSourceTreeRuntime": true,
+    "canPromotePackageConsumerRuntime": false,
+    "canPublishPublicly": false,
+    "performsPublish": false,
+    "notes": [
+      "Hash-pinned upstream provenance and local acquisition do not constitute owner approval for repository redistribution.",
+      "The ONNX model and generated TensorRT engine remain in the E-drive download workspace.",
+      "AGPL-3.0-only licensing requires owner review before any public redistribution decision.",
+      "A real YoloVision run log and strict evidence validation are still required for source-tree real-model-runtime proof."
+    ]
+  }
+}

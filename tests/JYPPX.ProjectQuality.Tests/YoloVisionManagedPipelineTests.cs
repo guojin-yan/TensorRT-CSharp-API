@@ -653,6 +653,43 @@ public sealed class YoloVisionManagedPipelineTests
     }
 
     [Fact]
+    public void OfficialYoloV10AcquisitionPinsAgplReleaseAssetsToEDriveAndKeepsNonProofBoundary()
+    {
+        string manifestPath = Path.Combine(RepositoryPaths.Root, "samples", "assets", "yolovision-yolov10-official-assets.json");
+        using JsonDocument manifest = JsonDocument.Parse(File.ReadAllText(manifestPath));
+        JsonElement root = manifest.RootElement;
+
+        Assert.Equal("yolovision-yolov10-official-asset-acquisition-manifest", root.GetProperty("recordKind").GetString());
+        Assert.Equal("799ff3be47d21173bcf29b351820d4b8e955e0fe", root.GetProperty("upstreamRevision").GetString());
+        Assert.Equal("v1.1", root.GetProperty("upstreamTag").GetString());
+        Assert.Equal("AGPL-3.0-only", root.GetProperty("license").GetProperty("spdxId").GetString());
+        Assert.Equal(2, root.GetProperty("assets").GetArrayLength());
+        JsonElement model = root.GetProperty("assets").EnumerateArray().Single(static item => item.GetProperty("id").GetString() == "yolov10n-onnx");
+        Assert.Equal(9386466, model.GetProperty("expectedLength").GetInt64());
+        Assert.Equal("7025ea1913f9a259cf8a8465ed608e10610d1bb376db2e0348b13e3bd286e0d3", model.GetProperty("expectedSha256").GetString());
+        Assert.Equal("end2end", root.GetProperty("modelContract").GetProperty("recommendedLayout").GetString());
+        Assert.False(root.GetProperty("proofBoundary").GetProperty("canPublishPublicly").GetBoolean());
+        Assert.False(root.GetProperty("proofBoundary").GetProperty("performsPublish").GetBoolean());
+
+        string acquisitionScript = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Acquire-YoloV10OfficialAssets.ps1"));
+        Assert.Contains("downloads\\yolov10-agpl", acquisitionScript, StringComparison.Ordinal);
+        Assert.Contains("YOLOv10 assets must not be downloaded to the C drive", acquisitionScript, StringComparison.Ordinal);
+        Assert.Contains("compatibleRuntimeInputsReady", acquisitionScript, StringComparison.Ordinal);
+        Assert.Contains("canPromotePackageConsumerRuntime = $false", acquisitionScript, StringComparison.Ordinal);
+
+        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "assets", "README.md"));
+        Assert.Contains("Acquire-YoloV10OfficialAssets.ps1", readme, StringComparison.Ordinal);
+        Assert.Contains("AGPL-3.0-only", readme, StringComparison.Ordinal);
+
+        string proofPath = Path.Combine(RepositoryPaths.Root, "artifacts", "interface-coverage", "yolov10-official-runtime-proof-closure.json");
+        using JsonDocument proof = JsonDocument.Parse(File.ReadAllText(proofPath));
+        Assert.Equal("source-tree-real-model-runtime", proof.RootElement.GetProperty("proofClassification").GetString());
+        Assert.True(proof.RootElement.GetProperty("boundary").GetProperty("isRealModelRuntimeProof").GetBoolean());
+        Assert.False(proof.RootElement.GetProperty("boundary").GetProperty("isPackageConsumerRuntimeProof").GetBoolean());
+        Assert.False(proof.RootElement.GetProperty("boundary").GetProperty("canPublishPublicly").GetBoolean());
+    }
+
+    [Fact]
     public void PreflightReportCapturesAssetHashesAndNeverClaimsRuntimeProof()
     {
         string directory = Path.Combine(Path.GetTempPath(), "jyppx-yolovision-preflight", Guid.NewGuid().ToString("N"));

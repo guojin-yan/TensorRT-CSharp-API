@@ -75,10 +75,10 @@
     {
       "family": "yolov10",
       "supportedTasks": ["det"],
-      "status": "managed-end-to-end-decode-ready; requires owner assets and runtime proof",
-      "modelSourceHint": "Use owner-approved YOLOv10 export; record NMS-free/end-to-end output semantics.",
-      "onnxExportNotes": "For the built-in end-to-end path, verify a batch-1 [1,N,6] output with x1,y1,x2,y2,score,classId columns and record the exact exporter/version.",
-      "postprocessNotes": "Use --layout end2end for the six-column decoder. It converts xyxy to the internal box representation, validates score/class/coordinates, and never applies a second NMS pass. Other YOLOv10 output contracts remain metadata-driven."
+      "status": "official YOLOv10n source-tree real-model runtime; end-to-end decode ready",
+      "modelSourceHint": "Use the hash-pinned THU-MIG YOLOv10 v1.1 ONNX asset and AGPL-3.0 repository provenance in samples/assets/yolovision-yolov10-official-assets.json.",
+      "onnxExportNotes": "For the built-in end-to-end path, verify a batch-1 [1,N,6] output with x1,y1,x2,y2,score,classId columns and record the exact exporter/version. The official YOLOv10n v1.1 ONNX proof uses images [1,3,640,640] and output0 [1,300,6].",
+      "postprocessNotes": "Use --layout end2end for the six-column decoder. It converts xyxy to the internal box representation, validates score/class/coordinates, and never applies a second NMS pass. Other YOLOv10 output contracts remain metadata-driven and require separate evidence."
     },
     {
       "family": "yolov11",

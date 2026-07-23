@@ -13,8 +13,9 @@ decoder，框坐标、类别和置信度都会被错误解释。
 4. 使用 YoloVision 的 `--layout end2end` 运行 `[1,N,6]` 输出。
 5. 检查 output JSON、可视化、日志和 proof 边界。
 
-本文中的命令是可复现操作路径，不是仓库内置的真实模型运行证明。模型、输入图、GPU 主机和日志仍需由使用者
-提供并审核。
+本文中的命令是可复现操作路径。仓库当前已为官方 YOLOv10n v1.1 ONNX 留下一条 source-tree
+`real-model-runtime` closure：`artifacts/interface-coverage/yolov10-official-runtime-proof-closure.json`。
+其他 YOLOv10 模型、其他导出契约、公开包消费和发布仍需使用者提供模型、输入图、GPU 主机、日志和审核记录。
 
 ## 1. 先看清数据流
 
@@ -286,9 +287,10 @@ engine 成功构建只证明 build path。还需要真实输入、正确预处�
 
 ## 11. Proof 边界
 
-本仓库已经提供专用 managed decoder 和 managed smoke，证明 `[1,N,6]` 数据能按明确契约被解析、过滤、排序并阻止
-二次 NMS。这不是某个外部 YOLOv10 checkpoint 的 `real-model-runtime` proof，也不是
-`package-consumer-runtime`、公开包、post-publish 或 release-close proof。
+本仓库已经提供专用 managed decoder、managed smoke，以及官方 YOLOv10n v1.1 ONNX 的 source-tree
+`real-model-runtime` closure。该 closure 证明这条本地 source-tree 路径完成了真实 TensorRT enqueue、
+`output0:[1,300,6]` 读取、end-to-end decode 和 `YoloVision Passed=True`。它不是
+`package-consumer-runtime`、公开包、post-publish、release-close proof，也不是 AGPL-3.0-only 资产的公开再分发批准。
 
 只有当真实模型来源/许可证、ONNX/engine/input/labels/output/log hash、兼容主机元数据和 owner review 全部对齐，
 并通过严格 validator 后，才能对那一条具体模型记录做更高层级判断。

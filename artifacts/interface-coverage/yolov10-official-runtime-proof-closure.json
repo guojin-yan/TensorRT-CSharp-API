@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "yolov10-official-source-tree-runtime-proof-closure",
+  "proofClassification": "source-tree-real-model-runtime",
+  "sample": "samples/YoloVision",
+  "family": "yolov10",
+  "task": "det",
+  "upstream": {
+    "repository": "https://github.com/THU-MIG/yolov10",
+    "tag": "v1.1",
+    "revision": "799ff3be47d21173bcf29b351820d4b8e955e0fe",
+    "license": "AGPL-3.0-only",
+    "licenseSha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0"
+  },
+  "assets": {
+    "modelSha256": "7025ea1913f9a259cf8a8465ed608e10610d1bb376db2e0348b13e3bd286e0d3",
+    "modelLength": 9386466,
+    "derivedPpmSha256": "6cb94c9cd0781412598fe179246b09041af4303d388a5ba3c55f760dff11ec2c",
+    "labelsSha256": "4d4aaea7bee6be2f675d9b53a9195ca36dfe6429f7479f29155da522a6c85930",
+    "preprocessedTensorSha256": "3a37e91ca77118ae168b367583faea65f61613ba71a38413f6adf794d88d0488",
+    "preprocessedTensorElementCount": 1228800,
+    "downloadWorkspaceDrive": "E:",
+    "largeAssetsCommitted": false
+  },
+  "implementation": {
+    "decode": "[1,N,6] x1,y1,x2,y2,score,classId",
+    "layout": "EndToEndNms",
+    "preprocess": "NCHW RGB float32 normalized 0..1, centered letterbox, fill 114",
+    "hasObjectness": false,
+    "applyNms": false,
+    "nmsMode": "None",
+    "detectionOnly": true
+  },
+  "engineBuild": {
+    "tensorRtVersion": "10.11.0",
+    "cudaToolkitVersion": "12.9",
+    "precision": "fp32",
+    "inputName": "images",
+    "inputShape": [1, 3, 640, 640],
+    "outputName": "output0",
+    "outputShape": [1, 300, 6],
+    "engineLength": 17365068,
+    "engineSha256": "21891d0dcfb322069f864b5395f1653182251c35e4d822d2cc2c02635a4d2000",
+    "buildReportSha256": "a86a40442a7009d6b1e31be29ddb3e2810ef0cf536a5df90b267c837051142a5",
+    "buildLogSha256": "5b91e6d4fd47ae0d17bb2e5e680cae2ec3f6209bbde6b6175e6df5adf2b66a23",
+    "status": "passed"
+  },
+  "runtime": {
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02",
+    "os": "Microsoft Windows 10.0.26200",
+    "tensorRtLine": 10,
+    "elapsedMilliseconds": 7.3475518226623535,
+    "predictionCount": 4,
+    "topPrediction": "dog",
+    "topScore": 0.91683036,
+    "outputValueSha256": "343af452914a4f3f1f422de61075eaecc042dea69967e4cd17befb45c76e91cf",
+    "outputJsonSha256": "38aaddac4e6f22f6d230d6e36c9e787c4d407508d1cb5dea768d0967827a8c4f",
+    "visualizationSha256": "156c2c30b8e4cbb3c674d3288afecd0a529931018baa811ad13c74c4ea64455a",
+    "runLogSha256": "bb2c5958590c4ac074b969d90af87f3aedb38991054588434133a2f620ebc43e",
+    "passedMarker": "YoloVision Passed=True",
+    "status": "passed"
+  },
+  "localEvidence": {
+    "root": "artifacts/yolovision/yolov10-official-runtime",
+    "acquisitionReport": "artifacts/yolovision/yolov10-official-runtime/acquisition-report.json",
+    "buildReport": "artifacts/yolovision/yolov10-official-runtime/yolov10n-build-report.json",
+    "buildLog": "artifacts/yolovision/yolov10-official-runtime/yolov10n-build.log",
+    "outputJson": "artifacts/yolovision/yolov10-official-runtime/yolov10n-output.json",
+    "visualization": "artifacts/yolovision/yolov10-official-runtime/yolov10n-output.svg",
+    "runLog": "artifacts/yolovision/yolov10-official-runtime/yolov10n-run.log",
+    "rawEvidenceCommitted": false,
+    "reason": "Raw logs and reports contain local paths; model, engine, and preprocessed tensor remain in the E-drive download workspace."
+  },
+  "boundary": {
+    "isRuntimeExecutionProof": true,
+    "isRealModelRuntimeProof": true,
+    "isPackageConsumerRuntimeProof": false,
+    "canPromotePackageConsumerRuntime": false,
+    "publicRedistributionOwnerApproval": false,
+    "canPublishPublicly": false,
+    "isPostPublishProof": false,
+    "canCloseReleaseIssue": false,
+    "performsPublish": false
+  }
+}

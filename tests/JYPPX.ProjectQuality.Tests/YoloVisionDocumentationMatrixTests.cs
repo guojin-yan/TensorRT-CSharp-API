@@ -113,7 +113,7 @@ public sealed class YoloVisionDocumentationMatrixTests
     }
 
     [Fact]
-    public void YoloV10EndToEndGuideMatchesManagedDecoderAndStaysNonProof()
+    public void YoloV10EndToEndGuideMatchesManagedDecoderAndSourceTreeRuntimeProofBoundary()
     {
         string relativeArticlePath = "articles/zh-cn/yolovision-yolov10-end-to-end-output-guide.md";
         string articlePath = Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "yolovision-yolov10-end-to-end-output-guide.md");
@@ -154,7 +154,7 @@ public sealed class YoloVisionDocumentationMatrixTests
             "yolo-model-matrix.json")));
         JsonElement yoloV10 = matrix.RootElement.GetProperty("entries").EnumerateArray()
             .Single(static entry => entry.GetProperty("family").GetString() == "yolov10");
-        Assert.Contains("managed-end-to-end-decode-ready", yoloV10.GetProperty("status").GetString(), StringComparison.Ordinal);
+        Assert.Contains("source-tree real-model runtime", yoloV10.GetProperty("status").GetString(), StringComparison.Ordinal);
         Assert.Contains("never applies a second NMS", yoloV10.GetProperty("postprocessNotes").GetString(), StringComparison.Ordinal);
     }
 }

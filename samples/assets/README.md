@@ -25,6 +25,17 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-YoloXOfficialAssets.
 
 The corresponding strict source-tree runtime evidence is under `artifacts/yolovision/yolox-official-runtime`. It proves a real TensorRT enqueue and YOLOX decode, but it does not approve repository redistribution and is not package-consumer-runtime proof.
 
+## Official YOLOv10 acquisition
+
+`yolovision-yolov10-official-assets.json` pins the official THU-MIG YOLOv10n v1.1 ONNX model and AGPL-3.0 license. The acquisition script rejects C-drive output, defaults to the outer E-drive `downloads\yolov10-agpl` workspace, verifies length and SHA256, and records whether the existing YOLOX-derived COCO labels and PPM input image are available for a source-tree runtime attempt:
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-YoloV10OfficialAssets.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-YoloV10OfficialAssets.ps1 -Offline
+```
+
+This acquisition is not runtime proof, package-consumer-runtime proof, or redistribution approval. AGPL-3.0-only assets require owner review before any public redistribution decision.
+
 ## Local Asset Layout
 
 Keep large or license-sensitive files in a local `models\` folder at the repository root, or in another owner-controlled path. Do not commit model weights, downloaded images, `.plan` engines, private build reports, or run logs unless their license and size have been explicitly approved.
