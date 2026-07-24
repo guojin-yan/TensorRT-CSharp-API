@@ -3667,3 +3667,46 @@ runtime proof 从短说明扩展为 release owner 和评审者可执行、可判
   临时包到 C 盘。
 - 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
   GitHub Release upload、issue close 或 push。
+
+## 2026-07-24 Engine Inspector Public Article Expansion
+
+本阶段继续公开文章矩阵质量提升，扩写
+`docs/articles/zh-cn/publishing/engine-inspector-public-article.md`，将 Engine Inspector 只读文章从
+engine/readback/report 基础说明扩展为覆盖 inspector 边界分层、execution context 关联、error recorder copied
+snapshot、readback artifact 字段、bounded runtime 分界和 proof promotion flags 的公开教程。文章明确本阶段只是文档
+和质量门，不是 engine runtime proof、real-model-runtime proof、package-consumer-runtime proof 或发布授权。
+
+### 实现
+
+- 文章新增 Inspector 边界分层，区分 engine-level metadata、layer-level metadata 和 association state。
+- 补充 `SetEngineInspectorExecutionContext`、binding address、device buffer、stream synchronization、
+  `TensorRtErrorRecorderSnapshot`、`TensorRtErrorRecorderSummary` 和 `TensorRtErrorRecord` 的只读边界。
+- 增加 `.engine-readback.json` 建议字段：ArtifactKind、ArtifactBoundary、EngineInspectorApiAvailable、
+  DiagnosticsState、SkippedReason、InspectorInformationLength、ReadbackFingerprint、ReadbackSha256、
+  RuntimeOutputCaptured 和 OutputValidationPerformed。
+- 明确 `EngineInspectorApiAvailable=True` 可能仍只是 capability-probe-only，`ReadbackSha256` 不是 runtime log hash 或 public package hash。
+- 补充 bounded runtime 与 inspector 的分界，说明 `LoadEngineReadonlyDiagnostics` 成功不等于 `LoadEngineBoundedRuntime` 或 package proof。
+- 增加 promotion flags：EngineInspectorReadonlyMetadata、EngineInspectorCreatedExecutionBindings、
+  EngineInspectorEnqueuedInference、EngineInspectorValidatedOutputs、EngineInspectorCanPromoteRuntimeProof 和
+  EngineInspectorCanPromotePackageConsumerProof。
+- 为 `PublishingPublicArticleTests` 增加
+  `EngineInspectorPublicArticleCoversInspectorBoundaryLevelsArtifactsBoundedRuntimeAndPromotionFlags`
+  专项门禁。
+
+### Verification
+
+- `dotnet test tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --filter "FullyQualifiedName~PublishingPublicArticleTests"`：
+  `24/24` 通过。
+- 编译阶段仍出现 5 条既有 nullable warning，位置在
+  `FinalPublishProofGateAndOwnerExecutionPackTests.cs` 与
+  `ReleasePublishReadinessEvidencePackAndPublicDocsGateTests.cs`，本批未改动这些文件。
+
+### C 盘与发布边界
+
+- 本阶段未下载 TensorRT、CUDA、cuDNN、模型、ONNX、engine、Python/pip 资产或 NuGet
+  临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
+  GitHub Release upload、issue close 或 push。
+- 本批没有 engine runtime proof、real-model-runtime proof、package-consumer-runtime proof、Linux runner proof、
+  post-publish verification 或 owner authorization，因此不改变 `canPublishPublicly=false`、
+  `canCloseReleaseIssue=false` 或 release blocker 状态。

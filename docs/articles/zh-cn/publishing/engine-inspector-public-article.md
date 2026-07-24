@@ -60,6 +60,46 @@ EvidenceBoundary
 
 这些字段适合被写进 report、CLI 输出、WinForms summary 和文章截图。它们解决的是“engine 元数据能不能读出来”，不是“模型输出是否正确”。
 
+## Inspector 边界分层
+
+Engine Inspector 的读取面可以拆成三层，每一层都应该保持 copied/pointer-free：
+
+| 层级 | 典型 API / 字段 | 能证明 | 不能证明 |
+| --- | --- | --- | --- |
+| Engine-level metadata | `GetEngineInformation`、`EngineName`、`IOTensorCount`、`LayerCount`、`OptimizationProfileCount` | engine 结构摘要可读取 | 输入输出绑定正确、模型输出正确 |
+| Layer-level metadata | `GetLayerInformation(layerIndex, format)`、`TensorRtLayerInformationFormat.Oneline`、`TensorRtLayerInformationFormat.Json` | layer text/json 可复制 | per-layer timing 或 layer 执行成功 |
+| Association state | `HasExecutionContext`、`ClearExecutionContext()`、`HasErrorRecorder`、`TryGetErrorRecorderSnapshot`、`ClearErrorRecorder()` | inspector 是否挂过 context/error recorder，且 error snapshot 可复制 | context enqueue、callback 生命周期或错误恢复正确 |
+
+`SetEngineInspectorExecutionContext` 可以让 inspector 读取与 context 相关的 layer 信息，但这仍是 metadata readback。如果没有 binding address、input shape、device buffer、stream synchronization、output tensor copy 和 validator，就不能把它写成 inference proof。
+
+错误记录器也同理。`TensorRtErrorRecorderSnapshot`、`TensorRtErrorRecorderSummary` 和 `TensorRtErrorRecord` 都是 copied diagnostics。它们不能把 native error recorder 指针暴露给 C#，也不能证明用户自定义 recorder callback lifecycle 已经安全。
+
+## Readback artifact 字段
+
+`.engine-readback.json` 建议保留这些字段，方便 reviewer 快速判断边界：
+
+```text
+ArtifactKind
+ArtifactBoundary
+EngineInspectorApiAvailable
+DiagnosticsState
+FailureReason
+SkippedReason
+InspectorInformationLength
+IOTensorSummaries
+ReadbackFingerprint
+ReadbackSha256
+IsRuntimeExecutionProof
+IsRealModelRuntimeProof
+IsPackageConsumerRuntimeProof
+RuntimeOutputCaptured
+OutputValidationPerformed
+```
+
+其中 `EngineInspectorApiAvailable=True` 只说明 managed/native API surface 可用，可能仍然是 capability-probe-only。`InspectorInformationLength > 0` 只说明 TensorRT 返回了 inspector text。`ReadbackSha256` 可以用来比较两次 metadata，但不是 runtime log hash，也不是 public package hash。
+
+如果 artifact kind 是 `trtexec-like-engine-readback-skipped`，应优先看 `SkippedReason` 和 `DiagnosticsState`。跳过 readback 不等于失败，也不能被改写成成功；它只是说明本次没有足够条件读取 engine metadata。
+
 ## TensorRtExec 使用方式
 
 在 TensorRtExec 或 OnnxToEngine 中，常见的 inspect 场景有两种。
@@ -123,6 +163,34 @@ NormalizedCommandSha256
 
 如果 `InferenceRan=True` 但 `OutputMatch=False`，那也只是 `runtime-output-unverified` 或 bounded runtime evidence，仍不能被写成 real-model 或 package-consumer proof。
 
+## Bounded runtime 与 inspector 的分界
+
+TensorRtExec 有时会同时输出 load-engine readonly diagnostics 和 bounded runtime 信息。两者必须分开读：
+
+```text
+LoadEngineReadonlyDiagnostics Attempted=True Succeeded=True
+LoadEngineBoundedRuntime Attempted=True Succeeded=True
+InferenceRan=True
+OutputMatch=True
+```
+
+第一行只能证明 inspector/readback 成功；bounded runtime 行才说明这次工具尝试了受控输入、binding 和 enqueue。即便 bounded runtime 成功，也通常只适用于 embedded identity model 或明确的模型专用 runner；它仍不是任意真实模型 proof，也不是 package-consumer-runtime proof。
+
+如果 report 同时包含 `CapabilityProbe State=capability-probe-only` 和 `EngineInspectorApiAvailable=True`，应按更窄的 evidence kind 解读：capability probe 只能证明 host/tool API 可见，不证明 build、load、enqueue 或 output match。
+
+建议 report 中显式保留这些布尔字段：
+
+```text
+EngineInspectorReadonlyMetadata = true
+EngineInspectorCreatedExecutionBindings = false
+EngineInspectorEnqueuedInference = false
+EngineInspectorValidatedOutputs = false
+EngineInspectorCanPromoteRuntimeProof = false
+EngineInspectorCanPromotePackageConsumerProof = false
+```
+
+这样 WinForms、CLI 和文章截图都能清楚表达：inspector 是排障能力，不是 proof 升级器。
+
 ## Engine Readback Artifact 边界
 
 `OnnxEngineRuntimeArtifactWriter` 的 engine readback artifact 会明确写入：
@@ -184,6 +252,12 @@ Engine inspector 输出属于 readonly diagnostics。以下材料都不能作为
 - stdout/stderr/log path 与 SHA256 对齐。
 - host GPU、driver、CUDA、TensorRT、cuDNN metadata。
 - owner input validator 与 record validator 通过。
+
+特别要避免三种误读：
+
+- `ReadbackSha256` 不是 smoke log SHA256。
+- `InspectorInformationLength` 不是 per-layer timing。
+- `EngineInspectorApiAvailable` 不是 TensorRT runtime 已经执行。
 
 ## 常见排障
 

@@ -1383,6 +1383,64 @@ public sealed class PublishingPublicArticleTests
     }
 
     [Fact]
+    public void EngineInspectorPublicArticleCoversInspectorBoundaryLevelsArtifactsBoundedRuntimeAndPromotionFlags()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "publishing",
+            "engine-inspector-public-article.md"));
+
+        foreach (string marker in new[]
+        {
+            "Inspector 边界分层",
+            "Engine-level metadata",
+            "Layer-level metadata",
+            "Association state",
+            "GetEngineInformation",
+            "TensorRtLayerInformationFormat.Oneline",
+            "TensorRtLayerInformationFormat.Json",
+            "SetEngineInspectorExecutionContext",
+            "binding address",
+            "device buffer",
+            "stream synchronization",
+            "TensorRtErrorRecorderSnapshot",
+            "TensorRtErrorRecorderSummary",
+            "TensorRtErrorRecord",
+            "Readback artifact 字段",
+            "ArtifactKind",
+            "ArtifactBoundary",
+            "EngineInspectorApiAvailable",
+            "SkippedReason",
+            "RuntimeOutputCaptured",
+            "OutputValidationPerformed",
+            "capability-probe-only",
+            "trtexec-like-engine-readback-skipped",
+            "Bounded runtime 与 inspector 的分界",
+            "LoadEngineReadonlyDiagnostics Attempted=True Succeeded=True",
+            "LoadEngineBoundedRuntime Attempted=True Succeeded=True",
+            "CapabilityProbe State=capability-probe-only",
+            "EngineInspectorReadonlyMetadata = true",
+            "EngineInspectorCreatedExecutionBindings = false",
+            "EngineInspectorEnqueuedInference = false",
+            "EngineInspectorValidatedOutputs = false",
+            "EngineInspectorCanPromoteRuntimeProof = false",
+            "EngineInspectorCanPromotePackageConsumerProof = false"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("不是 runtime log hash", content, StringComparison.Ordinal);
+        Assert.Contains("不是 proof 升级器", content, StringComparison.Ordinal);
+        Assert.Contains("ReadbackSha256` 不是 smoke log SHA256", content, StringComparison.Ordinal);
+        Assert.Contains("InspectorInformationLength` 不是 per-layer timing", content, StringComparison.Ordinal);
+        Assert.Contains("EngineInspectorApiAvailable` 不是 TensorRT runtime 已经执行", content, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void PluginInventoryPublicArticleCoversSourcesCopiedMetadataSmokeAndProofBoundary()
     {
         string content = File.ReadAllText(Path.Combine(
