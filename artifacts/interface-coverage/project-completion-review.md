@@ -3247,6 +3247,53 @@ proof 或发布授权。
   post-publish verification 或 owner authorization，因此不改变 `canPublishPublicly=false`、
   `canCloseReleaseIssue=false` 或 release blocker 状态。
 
+## 2026-07-24 NuGet Runtime Install Public Article Expansion
+
+本阶段继续公开文章矩阵质量提升，扩写
+`docs/articles/zh-cn/publishing/nuget-install-runtime-package-public-article.md`，将 NuGet/runtime 安装文章从
+runtime key 和 clean consumer 边界说明扩展为覆盖 package source、NuGet cache、PackageReference-only
+consumer、split/full runtime package、native asset manifest 和 proof boundary 的公开教程。文章明确本阶段只是文档
+和质量门，不是 public package proof、package-consumer-runtime proof、post-publish verification 或发布授权。
+
+### 实现
+
+- 文章新增 package source 与缓存边界，覆盖 `dotnet nuget list source`、`dotnet nuget add source`、
+  `dotnet nuget locals all --list`、NuGet.org、GitHub Packages、GitHub Release asset、企业内网 feed 和
+  public package source 的区别。
+- 明确 NuGet global packages cache 可能落在 C 盘 `%UserProfile%\.nuget\packages`，可用
+  `NUGET_PACKAGES=E:\NuGetPackages` 调整缓存位置，但这只改变缓存位置，不改变 proof 语义。
+- 增加 PackageReference-only consumer 示例，覆盖 `RuntimeIdentifier=win-x64`、`PlatformTarget=x64`、
+  managed package 和 split runtime Bridge/CudaCudnn/TensorRt package references。
+- 写清 full runtime collection package 与 split components 的区别，collection package 不能替代每个组件的
+  nupkg SHA256、native asset listing 和 runtime smoke。
+- 增加 native asset manifest 字段：NativeAssetsCopied、BridgeAssetPresent、CudaCudnnAssetsPresent、
+  TensorRtAssetsPresent、RuntimePackageKey、RestoreSourceMode、PackageReferenceOnly、UsesProjectReference、
+  UsesLocalFeed、UsesDirectNupkg、DependencyProbeOnly、RuntimeSmokeAttempted 和 PackageConsumerRuntimeProof。
+- 明确 NuGet cache 命中、`NUGET_PACKAGES` 改到 E 盘、PackageReference-only 但无 runtime smoke、
+  NativeAssetsCopied=true 但 dependency probe 失败、dependency probe passed 但无 enqueue/output validation
+  都不能替代 package-consumer-runtime proof。
+- 为 `PublishingPublicArticleTests` 增加
+  `NuGetInstallRuntimePackagePublicArticleCoversPackageSourcesCacheBoundariesPackageReferenceOnlyAndNativeAssetManifest`
+  专项门禁。
+
+### Verification
+
+- `dotnet test tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --filter "FullyQualifiedName~PublishingPublicArticleTests"`：
+  `28/28` 通过。
+- 编译阶段仍出现 5 条既有 nullable warning，位置在
+  `FinalPublishProofGateAndOwnerExecutionPackTests.cs` 与
+  `ReleasePublishReadinessEvidencePackAndPublicDocsGateTests.cs`，本批未改动这些文件。
+
+### C 盘与发布边界
+
+- 本阶段未下载 TensorRT、CUDA、cuDNN、模型、ONNX、engine、Python/pip 资产或 NuGet
+  临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
+  GitHub Release upload、issue close 或 push。
+- 本批没有 public package proof、package-consumer-runtime proof、post-publish verification、Linux runner proof、
+  real-model-runtime proof 或 owner authorization，因此不改变 `canPublishPublicly=false`、
+  `canCloseReleaseIssue=false` 或 release blocker 状态。
+
 ## 2026-07-24 Deferred Boundary Public Article Expansion
 
 本阶段继续公开文章矩阵质量提升，扩写

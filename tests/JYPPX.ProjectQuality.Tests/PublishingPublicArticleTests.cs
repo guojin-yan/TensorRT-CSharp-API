@@ -147,6 +147,67 @@ public sealed class PublishingPublicArticleTests
     }
 
     [Fact]
+    public void NuGetInstallRuntimePackagePublicArticleCoversPackageSourcesCacheBoundariesPackageReferenceOnlyAndNativeAssetManifest()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "publishing",
+            "nuget-install-runtime-package-public-article.md"));
+
+        foreach (string marker in new[]
+        {
+            "Package source 与缓存边界",
+            "dotnet nuget list source",
+            "dotnet nuget add source <public-or-owner-approved-source> --name TensorRtSharpPublic",
+            "dotnet nuget locals all --list",
+            "NuGet.org",
+            "GitHub Packages",
+            "GitHub Release asset",
+            "public package source",
+            "%UserProfile%\\\\.nuget\\\\packages",
+            "$env:NUGET_PACKAGES = \"E:\\\\NuGetPackages\"",
+            "E:\\\\TensorRtSharpAssets",
+            "PackageReference-only consumer",
+            "<RuntimeIdentifier>win-x64</RuntimeIdentifier>",
+            "<PlatformTarget>x64</PlatformTarget>",
+            "PackageReference Include=\"JYPPX.TensorRT.CSharp.API\"",
+            "PackageReference Include=\"JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge\"",
+            "PackageReference Include=\"JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.CudaCudnn\"",
+            "PackageReference Include=\"JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.TensorRt\"",
+            "full runtime collection package",
+            "split components",
+            "NativeAssetsCopied=true/false",
+            "BridgeAssetPresent=true/false",
+            "CudaCudnnAssetsPresent=true/false",
+            "TensorRtAssetsPresent=true/false",
+            "RuntimePackageKey=win-x64-trt10.11-cuda12.9-cudnn9.22",
+            "RestoreSourceMode=public-package-source",
+            "PackageReferenceOnly=true",
+            "UsesProjectReference=false",
+            "UsesLocalFeed=false",
+            "UsesDirectNupkg=false",
+            "DependencyProbeOnly=false",
+            "RuntimeSmokeAttempted=false",
+            "PackageConsumerRuntimeProof=false",
+            "NuGet global packages cache 命中",
+            "NUGET_PACKAGES` 改到 E 盘",
+            "PackageReference-only 但没有 runtime smoke",
+            "NativeAssetsCopied=true 但 dependency probe 失败",
+            "dependency probe passed 但没有 enqueue/output validation"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("不能出现在 clean consumer proof 的 package source 字段里", content, StringComparison.Ordinal);
+        Assert.Contains("只是缓存位置调整，不改变 proof 语义", content, StringComparison.Ordinal);
+        Assert.Contains("不能替代每个组件的 nupkg SHA256", content, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void CudaTensorRtDllTroubleshootingPublicArticleCoversNativeLoadDecisionTreeAndProofBoundary()
     {
         string content = File.ReadAllText(Path.Combine(

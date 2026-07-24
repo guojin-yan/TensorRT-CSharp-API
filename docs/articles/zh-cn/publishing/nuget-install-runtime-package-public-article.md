@@ -130,6 +130,50 @@ dotnet build -c Release
 
 实际 package id、版本、渠道和 runtime key 必须以 owner 发布清单为准。本文不会执行 `dotnet nuget push`，也不会暗示 GitHub Actions dry-run 已经产生公开包。
 
+## Package source 与缓存边界
+
+真实用户安装时，首先要确认包源，而不是从本机 `.nupkg` 文件名倒推：
+
+```powershell
+dotnet nuget list source
+dotnet nuget add source <public-or-owner-approved-source> --name TensorRtSharpPublic
+dotnet nuget locals all --list
+```
+
+公开文章应把 NuGet.org、GitHub Packages、GitHub Release asset 和企业内网 feed 分开写。`public package source` 必须是 owner 明确发布的渠道；local folder source 只能用于开发诊断，不能出现在 clean consumer proof 的 package source 字段里。
+
+NuGet 默认全局缓存可能在用户目录的 C 盘，例如 `%UserProfile%\\.nuget\\packages`。如果机器空间紧张，可以在普通用户项目中设置：
+
+```powershell
+$env:NUGET_PACKAGES = "E:\\NuGetPackages"
+dotnet restore --force-evaluate
+```
+
+但这只是缓存位置调整，不改变 proof 语义。不要把 runtime `.nupkg`、TensorRT/CUDA/cuDNN 大文件、ONNX、engine 或 plan 放进 C 盘 Temp/Downloads 作为教程默认路径。文章示例继续使用 `E:\\TensorRtSharpAssets` 或仓库外固定 workspace。
+
+## PackageReference-only consumer
+
+一个干净 consumer 的项目文件应只包含 package 引用，不应出现仓库内 ProjectReference：
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="JYPPX.TensorRT.CSharp.API" Version="<public-version>" />
+    <PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge" Version="<public-version>" />
+    <PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.CudaCudnn" Version="<public-version>" />
+    <PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.TensorRt" Version="<public-version>" />
+  </ItemGroup>
+</Project>
+```
+
+如果使用 full runtime collection package，consumer 可能只引用 managed 包和 collection/runtime 包；如果使用 split components，Bridge、CudaCudnn、TensorRt 组件必须版本一致。collection package 只是引用集合，不能替代每个组件的 nupkg SHA256、native asset listing 和 runtime smoke 结果。
+
 ## 安装后检查什么
 
 最低限度的用户自检可以分三步：
@@ -153,6 +197,26 @@ cudnn64_9.dll / cudnn64_8.dll
 ```
 
 这些检查能定位“包选错”“native assets 没复制”“PATH 污染”“driver/runtime 不兼容”等问题。它们仍只是 user troubleshooting evidence，不是 release proof。真正的 release proof 还需要 clean consumer、public package source、真实日志、SHA256、host metadata 和 strict validator。
+
+建议安装后生成一份最小 native asset manifest：
+
+```text
+NativeAssetsCopied=true/false
+BridgeAssetPresent=true/false
+CudaCudnnAssetsPresent=true/false
+TensorRtAssetsPresent=true/false
+RuntimePackageKey=win-x64-trt10.11-cuda12.9-cudnn9.22
+RestoreSourceMode=public-package-source
+PackageReferenceOnly=true
+UsesProjectReference=false
+UsesLocalFeed=false
+UsesDirectNupkg=false
+DependencyProbeOnly=false
+RuntimeSmokeAttempted=false
+PackageConsumerRuntimeProof=false
+```
+
+这些字段适合进入 issue 或 owner input 草稿；其中 `RuntimeSmokeAttempted=false` 和 `PackageConsumerRuntimeProof=false` 要明确保留，直到真实 smoke 和 validator 通过。
 
 ## Clean consumer proof 的最低字段
 
@@ -204,6 +268,11 @@ artifacts/final-release/post-publish-verification-record.json
 - package id/version template。
 - release issue close record template。
 - post-publish verification input draft。
+- NuGet global packages cache 命中。
+- `NUGET_PACKAGES` 改到 E 盘。
+- PackageReference-only 但没有 runtime smoke。
+- NativeAssetsCopied=true 但 dependency probe 失败。
+- dependency probe passed 但没有 enqueue/output validation。
 - build-only report。
 - dependency-probe-only log。
 - README、截图、GUI screenshot 或 command preview。
