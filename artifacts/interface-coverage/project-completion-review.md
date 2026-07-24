@@ -3201,6 +3201,52 @@ report、command preview 和 bounded runtime output 的证据边界写清楚。
 - 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
   GitHub Release upload、issue close 或 push。
 
+## 2026-07-24 Builder Config Readback Public Article Expansion
+
+本阶段继续公开文章矩阵质量提升，扩写
+`docs/articles/zh-cn/publishing/builder-config-readback-public-article.md`，将 Builder Config Readback
+文章从配置项说明扩展为覆盖 readback 行级 schema、失败分类、report promotion flags 和跨版本分类的公开教程。
+文章明确本阶段只是文档和质量门，不是 engine runtime proof、real-model-runtime proof、package-consumer-runtime
+proof 或发布授权。
+
+### 实现
+
+- 文章新增 readback 行级 schema：OptionName、OptionGroup、TensorRtLine、RequestedValue、
+  NormalizedRequestedValue、Applied、ReadbackValue、ReadbackMatch、UnsupportedReason、DiagnosticCode、
+  EvidenceBoundary、CanPromoteRuntimeProof、CanPromotePackageConsumerProof 和 CanDeleteDeferredRecord。
+- 增加失败分类：unsupported-on-trt-line、removed-in-trt11、legacy-trt8-only、dependency-probe-only、
+  builder-config-unavailable、setter-rejected、readback-mismatch、parse-only 和 dry-run-only。
+- 补充 report promotion flags：BuilderConfigReadbackEvidence、BuilderConfigCreatedEngine、
+  BuilderConfigRanInference、BuilderConfigValidatedOutputs、BuilderConfigIsRealModelRuntimeProof、
+  BuilderConfigIsPackageConsumerRuntimeProof、BuilderConfigCanPromoteRuntimeProof 和
+  BuilderConfigCanPromoteReleaseProof。
+- 明确 ReadbackMatch=True 是构建配置证据，不是模型输出证据；build readback section 不能继承 runtime section 的 proof 状态。
+- 增加跨版本失败分类表，覆盖 trt8-legacy-compatibility、trt10-typed-setter、trt11-removed-setter、
+  always-strongly-typed 和 callback-lifecycle-required。
+- 继续明确 timing cache SHA256、tactic source mask readback、profiling verbosity readback 和
+  BuilderConfigReadbackEvidence=true 不能替代 package-consumer-runtime proof。
+- 为 `PublishingPublicArticleTests` 增加
+  `BuilderConfigReadbackPublicArticleCoversStructuredReadbackRowsPromotionFlagsAndFailureClassification`
+  专项门禁。
+
+### Verification
+
+- `dotnet test tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --filter "FullyQualifiedName~PublishingPublicArticleTests"`：
+  `27/27` 通过。
+- 编译阶段仍出现 5 条既有 nullable warning，位置在
+  `FinalPublishProofGateAndOwnerExecutionPackTests.cs` 与
+  `ReleasePublishReadinessEvidencePackAndPublicDocsGateTests.cs`，本批未改动这些文件。
+
+### C 盘与发布边界
+
+- 本阶段未下载 TensorRT、CUDA、cuDNN、模型、ONNX、engine、Python/pip 资产或 NuGet
+  临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
+  GitHub Release upload、issue close 或 push。
+- 本批没有 engine runtime proof、real-model-runtime proof、package-consumer-runtime proof、Linux runner proof、
+  post-publish verification 或 owner authorization，因此不改变 `canPublishPublicly=false`、
+  `canCloseReleaseIssue=false` 或 release blocker 状态。
+
 ## 2026-07-24 Deferred Boundary Public Article Expansion
 
 本阶段继续公开文章矩阵质量提升，扩写

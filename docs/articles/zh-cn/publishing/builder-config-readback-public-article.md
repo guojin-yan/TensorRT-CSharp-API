@@ -35,6 +35,45 @@ TrtexecDeploymentControl Name=DirectIO Applied=True Requested=True Readback=True
 
 报告里的核心信号不是“某个开关出现过”，而是 `Requested`、`Readback`、`ReadbackMatch` 和 `EvidenceBoundary` 是否同时存在。这样发布负责人可以快速判断问题是参数解析、版本不支持、TensorRT 拒绝，还是后续 runtime proof 缺失。
 
+## Readback 行级 schema
+
+建议每一个可读回的 builder config 选项都形成一条结构化记录，而不是只写一段自然语言日志：
+
+```text
+OptionName
+OptionGroup
+TensorRtLine
+RequestedValue
+NormalizedRequestedValue
+Applied
+ReadbackValue
+ReadbackMatch
+UnsupportedReason
+DiagnosticCode
+EvidenceBoundary
+CanPromoteRuntimeProof
+CanPromotePackageConsumerProof
+CanDeleteDeferredRecord
+```
+
+这些字段的含义要稳定：`RequestedValue` 是用户原始意图，`NormalizedRequestedValue` 是 parser 和 option layering 处理后的值；`Applied=True` 必须意味着 native setter 已被调用且没有被版本 guard 拒绝；`ReadbackMatch=True` 必须来自对应 getter 或等价的 TensorRT readback，不是 CLI echo。`EvidenceBoundary` 对本类记录应保持 `builder-config-readback-only`。
+
+推荐把失败原因也写成枚举或稳定字符串，例如：
+
+```text
+unsupported-on-trt-line
+removed-in-trt11
+legacy-trt8-only
+dependency-probe-only
+builder-config-unavailable
+setter-rejected
+readback-mismatch
+parse-only
+dry-run-only
+```
+
+这样 TensorRtExec、OnnxToEngine、WinForms 和 release reviewer 可以用同一套字段判断问题来自解析、版本、依赖还是 TensorRT readback。
+
 ## 已覆盖的配置面
 
 当前公开文章和 gap list 里，Builder Config Readback 覆盖这些高价值构建面：
@@ -53,6 +92,25 @@ TrtexecDeploymentControl Name=DirectIO Applied=True Requested=True Readback=True
 | scalar controls | `--maxNbTactics`、`--tilingOptimizationLevel`、`--l2LimitForTiling`、`--quantizationFlags` | 支持版本 apply/readback，不支持版本写 controlled diagnostic | 不删除 unsupported guard |
 
 这些字段让报告能解释“为什么选项可用或不可用”。例如 `--minTiming` 在 TRT8 可通过 legacy compatibility API 读回；在 TRT10/11 里则应明确写成不应用，并说明应使用 average timing iterations。这样的差异比默默忽略选项更适合外部用户排障。
+
+## Report promotion flags
+
+Builder config readback 报告应显式带上不能晋级 runtime proof 的布尔字段：
+
+```text
+BuilderConfigReadbackEvidence = true
+BuilderConfigCreatedEngine = false
+BuilderConfigRanInference = false
+BuilderConfigValidatedOutputs = false
+BuilderConfigIsRealModelRuntimeProof = false
+BuilderConfigIsPackageConsumerRuntimeProof = false
+BuilderConfigCanPromoteRuntimeProof = false
+BuilderConfigCanPromoteReleaseProof = false
+```
+
+如果同一个 run 后续又执行了 bounded runtime 或真实模型 runner，应让 runtime section 单独写自己的 `InferenceRan`、`OutputMatch`、stdout/stderr hash 和 validator 结果。不要让 build readback section 继承 runtime section 的 proof 状态。
+
+`ReadbackMatch=True` 是构建配置证据，不是模型输出证据。`BuildEvidenceOnly=True`、`ProofClassification=build-only` 或 `ProofClassification=builder-config-readback-only` 应继续阻止 release close 自动通过。
 
 ## OnnxToEngine 使用示例
 
@@ -113,6 +171,18 @@ Builder config 是跨版本差异最密集的区域之一，文章和测试必�
 - progress monitor、calibrator、algorithm selector 这类 callback/borrowed pointer API 不属于低风险 readback，不能用 presence probe 替代生命周期设计。
 - plugin load/register/deregister 仍是高风险边界；serialized plugin path snapshot 只能作为 copied readonly inventory。
 
+建议把跨版本失败写成明确分类：
+
+| 分类 | 例子 | 报告建议 |
+| --- | --- | --- |
+| `trt8-legacy-compatibility` | `MaxWorkspaceSizeCompatibilityInBytes`、`MinTimingIterationsCompatibility` | 可以 apply/readback，但标记 legacy。 |
+| `trt10-typed-setter` | memory pool、average timing、tactic sources | setter/readback 都要匹配。 |
+| `trt11-removed-setter` | legacy precision constraints、quantization flags | parse/report-only 或 rejected diagnostic。 |
+| `always-strongly-typed` | TRT11 network typing | 不复用 TRT10 creation bit。 |
+| `callback-lifecycle-required` | calibrator、algorithm selector、progress monitor | presence probe 不能替代 owner lifecycle。 |
+
+这张表能避免把 unsupported 选项写成“暂未测试”，也避免把版本差异伪装成成功 readback。
+
 ## proof 边界
 
 Builder Config Readback 是配置确认，不是 runtime proof。以下材料都不能作为 package-consumer-runtime proof：
@@ -127,6 +197,11 @@ Builder Config Readback 是配置确认，不是 runtime proof。以下材料都
 - local feed package consumer。
 - ProjectReference consumer。
 - direct `.nupkg` install。
+- `ReadbackMatch=True` 的 builder config 行。
+- `BuilderConfigReadbackEvidence=true`。
+- timing cache SHA256。
+- tactic source mask readback。
+- profiling verbosity readback。
 
 要证明公开包可用，仍需外部 clean consumer 使用公开包源，执行 restore/build/runtime smoke，记录 stdout/stderr/merged transcript/validator output SHA256、host runtime metadata、package identity 和 owner review。Builder readback 可以作为 proof record 的附属构建证据，但不能单独晋级。
 

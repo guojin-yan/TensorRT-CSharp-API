@@ -1235,6 +1235,69 @@ public sealed class PublishingPublicArticleTests
     }
 
     [Fact]
+    public void BuilderConfigReadbackPublicArticleCoversStructuredReadbackRowsPromotionFlagsAndFailureClassification()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "publishing",
+            "builder-config-readback-public-article.md"));
+
+        foreach (string marker in new[]
+        {
+            "Readback 行级 schema",
+            "OptionName",
+            "OptionGroup",
+            "TensorRtLine",
+            "RequestedValue",
+            "NormalizedRequestedValue",
+            "Applied",
+            "ReadbackValue",
+            "UnsupportedReason",
+            "DiagnosticCode",
+            "CanPromoteRuntimeProof",
+            "CanPromotePackageConsumerProof",
+            "CanDeleteDeferredRecord",
+            "unsupported-on-trt-line",
+            "removed-in-trt11",
+            "legacy-trt8-only",
+            "builder-config-unavailable",
+            "setter-rejected",
+            "readback-mismatch",
+            "dry-run-only",
+            "Report promotion flags",
+            "BuilderConfigReadbackEvidence = true",
+            "BuilderConfigCreatedEngine = false",
+            "BuilderConfigRanInference = false",
+            "BuilderConfigValidatedOutputs = false",
+            "BuilderConfigIsRealModelRuntimeProof = false",
+            "BuilderConfigIsPackageConsumerRuntimeProof = false",
+            "BuilderConfigCanPromoteRuntimeProof = false",
+            "BuilderConfigCanPromoteReleaseProof = false",
+            "builder-config-readback-only",
+            "trt8-legacy-compatibility",
+            "trt10-typed-setter",
+            "trt11-removed-setter",
+            "always-strongly-typed",
+            "callback-lifecycle-required",
+            "ReadbackMatch=True",
+            "BuilderConfigReadbackEvidence=true",
+            "timing cache SHA256",
+            "tactic source mask readback",
+            "profiling verbosity readback"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("不是 CLI echo", content, StringComparison.Ordinal);
+        Assert.Contains("不要让 build readback section 继承 runtime section 的 proof 状态", content, StringComparison.Ordinal);
+        Assert.Contains("不是模型输出证据", content, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void DeferredBoundaryPublicArticleCoversRiskTiersRuntimeDeserializationAndNoSubstituteProof()
     {
         string content = File.ReadAllText(Path.Combine(
