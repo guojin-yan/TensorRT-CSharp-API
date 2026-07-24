@@ -244,6 +244,64 @@ public sealed class PublishingPublicArticleTests
     }
 
     [Fact]
+    public void CudaTensorRtDllTroubleshootingPublicArticleCoversWindowsLoaderResolverPathContaminationAndTemporaryCopyBoundary()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "publishing",
+            "cuda-tensorrt-dll-troubleshooting-public-article.md"));
+
+        foreach (string marker in new[]
+        {
+            "Windows native loader 检查表",
+            "where jyppxtrtbridge.dll",
+            "where nvinfer.dll",
+            "where nvinfer_10.dll",
+            "where nvinfer_plugin.dll",
+            "where nvonnxparser.dll",
+            "where cudart64_12.dll",
+            "where cudnn64_9.dll",
+            "Get-Command jyppxtrtbridge.dll",
+            "dumpbin /dependents .\\\\bin\\\\Release\\\\net8.0\\\\jyppxtrtbridge.dll",
+            "NativeBridgePathResolver candidate paths",
+            "NativeBridgeLibraryLoader load result",
+            "NativeBridgeLoadException message",
+            "NativeDependencyProbeStatus",
+            "ResolvedBridgePath",
+            "ResolvedVendorDllDirectory",
+            "ProcessArchitecture",
+            "RuntimeIdentifier",
+            "VC++ runtime installed",
+            "temporary-local-diagnostic-copy",
+            "PATH 污染与版本漂移",
+            "path-contamination",
+            "MinimalReproProjectOutsideRepository",
+            "PackageReferenceOnly",
+            "UsesLocalFeed",
+            "UsesProjectReference",
+            "UsesDirectNupkg",
+            "NativeAssetsCopied",
+            "DependencyProbeOnly",
+            "RuntimeSmokeAttempted",
+            "RuntimeSmokePassed",
+            "DriverBlocked",
+            "PathContaminationSuspected",
+            "TemporaryLocalDiagnosticCopyUsed",
+            "dependency probe passed 但 runtime smoke 未执行"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("只能说明 bridge import table 需要什么", content, StringComparison.Ordinal);
+        Assert.Contains("不能作为 package content proof", content, StringComparison.Ordinal);
+        Assert.Contains("不是 package bug，也不是 runtime proof", content, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void YoloVisionOverviewPublicArticleCoversFamiliesTasksReportsOwnerEvidenceAndProofBoundary()
     {
         string content = File.ReadAllText(Path.Combine(

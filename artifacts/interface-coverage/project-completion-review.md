@@ -3201,6 +3201,50 @@ report、command preview 和 bounded runtime output 的证据边界写清楚。
 - 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
   GitHub Release upload、issue close 或 push。
 
+## 2026-07-24 CUDA TensorRT DLL Troubleshooting Public Article Expansion
+
+本阶段继续公开文章矩阵质量提升，扩写
+`docs/articles/zh-cn/publishing/cuda-tensorrt-dll-troubleshooting-public-article.md`，将 CUDA/TensorRT DLL
+加载排查文章从基础决策树扩展为覆盖 Windows native loader、resolver 候选路径、PATH 污染、临时本地复制、
+最小复现记录和非 proof 边界的公开教程。文章明确本阶段只是文档和质量门，不是 dependency/runtime smoke、
+package-consumer-runtime proof 或发布授权。
+
+### 实现
+
+- 文章新增 Windows native loader 检查表，覆盖 `where`、`Get-Command`、`dumpbin /dependents`、
+  `jyppxtrtbridge.dll`、`nvinfer.dll`、`nvinfer_10.dll`、`nvinfer_plugin.dll`、`nvonnxparser.dll`、
+  `cudart64_12.dll` 和 `cudnn64_9.dll`。
+- 补充 `NativeBridgePathResolver candidate paths`、`NativeBridgeLibraryLoader load result`、
+  `NativeBridgeLoadException message`、`NativeDependencyProbeStatus`、`ResolvedBridgePath`、
+  `ResolvedVendorDllDirectory`、ProcessArchitecture、RuntimeIdentifier 和 VC++ runtime installed 字段。
+- 写清 bridge DLL 自身找不到与 vendor dependency 找不到的区别。
+- 增加 `temporary-local-diagnostic-copy` 与 `path-contamination` 边界，说明临时复制 DLL 或清理 PATH 后通过
+  不能成为 package content proof 或 runtime proof。
+- 增加最小可复现记录字段：MinimalReproProjectOutsideRepository、PackageReferenceOnly、UsesLocalFeed、
+  UsesProjectReference、UsesDirectNupkg、NativeAssetsCopied、DependencyProbeOnly、RuntimeSmokeAttempted、
+  RuntimeSmokePassed、DriverBlocked、PathContaminationSuspected 和 TemporaryLocalDiagnosticCopyUsed。
+- 为 `PublishingPublicArticleTests` 增加
+  `CudaTensorRtDllTroubleshootingPublicArticleCoversWindowsLoaderResolverPathContaminationAndTemporaryCopyBoundary`
+  专项门禁。
+
+### Verification
+
+- `dotnet test tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --filter "FullyQualifiedName~PublishingPublicArticleTests"`：
+  `25/25` 通过。
+- 编译阶段仍出现 5 条既有 nullable warning，位置在
+  `FinalPublishProofGateAndOwnerExecutionPackTests.cs` 与
+  `ReleasePublishReadinessEvidencePackAndPublicDocsGateTests.cs`，本批未改动这些文件。
+
+### C 盘与发布边界
+
+- 本阶段未下载 TensorRT、CUDA、cuDNN、模型、ONNX、engine、Python/pip 资产或 NuGet
+  临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
+  GitHub Release upload、issue close 或 push。
+- 本批没有 dependency/runtime smoke、package-consumer-runtime proof、real-model-runtime proof、Linux runner proof、
+  post-publish verification 或 owner authorization，因此不改变 `canPublishPublicly=false`、
+  `canCloseReleaseIssue=false` 或 release blocker 状态。
+
 ## 2026-07-24 Plugin Inventory Public Article Expansion
 
 本阶段继续公开文章矩阵质量提升，扩写

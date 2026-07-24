@@ -138,6 +138,57 @@ $env:PATH -split ';'
 
 Windows 搜索路径容易被旧 TensorRT/CUDA 目录污染。若 PATH 中有多个 TensorRT/CUDA/cuDNN 版本，优先移除无关项或启动干净 shell 复测。文章和 issue 中应记录实际 PATH 摘要，但不要上传包含密钥或私人目录的完整日志。
 
+## Windows native loader 检查表
+
+如果前五步仍不能定位问题，继续用 Windows 原生命令把 bridge 和 vendor DLL 分开看：
+
+```powershell
+where jyppxtrtbridge.dll
+where nvinfer.dll
+where nvinfer_10.dll
+where nvinfer_plugin.dll
+where nvonnxparser.dll
+where cudart64_12.dll
+where cudnn64_9.dll
+Get-Command jyppxtrtbridge.dll -ErrorAction SilentlyContinue
+dumpbin /dependents .\\bin\\Release\\net8.0\\jyppxtrtbridge.dll
+```
+
+`where` 和 `Get-Command` 只能说明 PATH 上能看到什么；`dumpbin /dependents` 只能说明 bridge import table 需要什么。真正的加载结果还取决于应用输出目录、runtime package `runtimes/<rid>/native`、当前进程 PATH、Visual C++ runtime 和 Windows loader 缓存。因此 issue 中建议同时记录：
+
+```text
+NativeBridgePathResolver candidate paths
+NativeBridgeLibraryLoader load result
+NativeBridgeLoadException message
+NativeDependencyProbeStatus
+ResolvedBridgePath
+ResolvedVendorDllDirectory
+ProcessArchitecture
+RuntimeIdentifier
+VC++ runtime installed
+```
+
+`NativeBridgePathResolver` 和 `NativeBridgeLibraryLoader` 的日志应该区分两种失败：
+
+- bridge DLL 自身找不到：通常是 Bridge package/RID/output copy 问题。
+- bridge DLL 找到了但 vendor dependency 找不到：通常是 TensorRT/CUDA/cuDNN runtime package、PATH 或 driver/toolkit 组合问题。
+
+如果只是为了临时确认缺哪一个 DLL，可以把 vendor DLL 放进应用输出目录复测；但这种动作必须标记为 `temporary-local-diagnostic-copy`。它不能作为 package content proof，也不能写成 clean external consumer proof。发布前仍要回到 package restore 后的 native asset copy 结果。
+
+## PATH 污染与版本漂移
+
+很多“本机可以、用户不行”的问题来自 PATH 污染。典型情况是：
+
+```text
+PATH 里同时有 TensorRT-8、TensorRT-10、TensorRT-11
+CUDA_PATH 指向 12.9，但 PATH 先命中 CUDA 11.8 bin
+输出目录里是 trt10 runtime package，但 PATH 里先加载 trt11 DLL
+cuDNN 8 和 cuDNN 9 DLL 混在同一目录
+Visual C++ runtime 缺失或版本过旧
+```
+
+建议启动一个干净 shell，只保留目标 runtime key 需要的路径，再复测 dependency probe。若干净 shell 通过、日常 shell 失败，结论应写成 `path-contamination`，不是 package bug，也不是 runtime proof。
+
 第六步：跑最小 probe，再跑模型。
 
 先跑 help、environment probe、dependency probe 或最小 smoke，确认 native load 能完成，再进入 OnnxToEngine、TensorRtExec 或 YoloVision。复杂模型失败可能是 shape、plugin、engine serialization 或 postprocess 问题，不一定是 DLL load 问题。
@@ -194,6 +245,25 @@ eng/Test-PackageConsumerRuntimeProofRecord.ps1
 eng/Test-PostPublishVerificationRecord.ps1
 ```
 
+对普通 issue，推荐同时提供一份“最小可复现记录”：
+
+```text
+MinimalReproProjectOutsideRepository = true/false
+PackageReferenceOnly = true/false
+UsesLocalFeed = true/false
+UsesProjectReference = true/false
+UsesDirectNupkg = true/false
+NativeAssetsCopied = true/false
+DependencyProbeOnly = true/false
+RuntimeSmokeAttempted = true/false
+RuntimeSmokePassed = true/false
+DriverBlocked = true/false
+PathContaminationSuspected = true/false
+TemporaryLocalDiagnosticCopyUsed = true/false
+```
+
+这些字段能让 maintainer 快速判断：这是安装问题、PATH 问题、runtime package 内容问题，还是 owner proof 仍缺真实 clean consumer smoke。
+
 ## 不能作为 proof 的材料
 
 以下材料可以帮助排查，但不是 package-consumer-runtime proof：
@@ -212,6 +282,12 @@ eng/Test-PostPublishVerificationRecord.ps1
 - GUI screenshot 或 command preview。
 - 没有 hash 的日志片段。
 - blocked-by-cuda-driver 诊断。
+- `temporary-local-diagnostic-copy`。
+- `path-contamination` 清理后通过。
+- `NativeBridgePathResolver` 候选路径日志。
+- `dumpbin /dependents` 输出。
+- `where nvinfer.dll` / `where cudnn64_9.dll` 输出。
+- dependency probe passed 但 runtime smoke 未执行。
 
 也不要把 runtime deserialization ownership、plugin lifecycle、callback、allocator、borrowed pointer 或 external resource 伪装成 DLL 加载问题；这些属于更高风险的 owner/lifecycle 设计边界。
 
