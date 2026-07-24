@@ -1568,6 +1568,48 @@ public sealed class PublishingPublicArticleTests
     }
 
     [Fact]
+    public void ReleaseEvidenceLadderPublicArticleCoversCloseLanesPublishFlagsAndNonProofOwnerRunbooks()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "publishing",
+            "release-evidence-ladder-public-article.md"));
+
+        foreach (string marker in new[]
+        {
+            "Release Close Lanes 与 Non-Proof Flags",
+            "package-consumer-runtime proof",
+            "real-model-runtime proof",
+            "Linux runner proof",
+            "public package download proof",
+            "post-publish clean consumer proof",
+            "owner authorization",
+            "final release close decision",
+            "isRuntimeExecutionProof=false",
+            "isPackageConsumerRuntimeProof=false",
+            "isPostPublishProof=false",
+            "isReleaseCloseProof=false",
+            "ownerDecisionRequired=true",
+            "strictValidatorPassed=false",
+            "forbiddenSubstituteScanPassed=false",
+            "releaseCloseBlockedReason=owner-public-postpublish-proof-required",
+            "strictValidatorPassed=true",
+            "owner execution package",
+            "runbook",
+            "模板",
+            "不能公开发布",
+            "不能关闭 issue",
+            "不能把 owner execution package、runbook、模板或 import result 写成 proof"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+    }
+
+    [Fact]
     public void EngineInspectorPublicArticleCoversReadbackArtifactsAndReadonlyProofBoundary()
     {
         string content = File.ReadAllText(Path.Combine(

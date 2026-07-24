@@ -3247,6 +3247,46 @@ proof 或发布授权。
   post-publish verification 或 owner authorization，因此不改变 `canPublishPublicly=false`、
   `canCloseReleaseIssue=false` 或 release blocker 状态。
 
+## 2026-07-24 Release Evidence Ladder Public Article Expansion
+
+本阶段继续公开文章矩阵质量提升，扩写
+docs/articles/zh-cn/publishing/release-evidence-ladder-public-article.md，将 release evidence ladder 从证据
+分层说明扩展为覆盖 release close lanes、non-proof flags、owner decision 和 post-publish hard gate 的公开发布边界文章。
+文章明确本阶段只是文档和质量门，不是 package proof、runtime proof、post-publish proof、owner authorization 或发布动作。
+
+### 实现
+
+- 文章新增 Release Close Lanes 与 Non-Proof Flags 章节，分开说明 package-consumer-runtime proof、
+  real-model-runtime proof、Linux runner proof、public package download proof、post-publish clean consumer proof、
+  owner authorization 和 final release close decision。
+- 增加 non-proof flags：isRuntimeExecutionProof=false、isPackageConsumerRuntimeProof=false、
+  isPostPublishProof=false、isReleaseCloseProof=false、performsPublish=false、canPublishPublicly=false、
+  canCloseReleaseIssue=false、canPromoteProof=false 和 ownerDecisionRequired=true。
+- 明确 strictValidatorPassed=true 只能说明对应 lane 的结构和禁止项通过；如果 ownerDecisionRequired=true 或
+  releaseCloseBlockedReason 仍存在，仍不能公开发布、关闭 issue 或把 owner execution package/runbook/template/import
+  result 写成 proof。
+- 明确 failedBlockerCount=0、public package download hash、dashboard、GUI screenshot、local feed、ProjectReference、
+  direct .nupkg、build-only、dry-run、queued Actions 或 missing self-hosted runner 都不能替代 post-publish clean consumer
+  proof 或 final close decision。
+- 为 PublishingPublicArticleTests 增加
+  ReleaseEvidenceLadderPublicArticleCoversCloseLanesPublishFlagsAndNonProofOwnerRunbooks 专项门禁。
+
+### Verification
+
+- dotnet test tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --filter "FullyQualifiedName~PublishingPublicArticleTests"：29/29 通过。
+- 编译阶段仍有 5 条既有 nullable warning，位置在 FinalPublishProofGateAndOwnerExecutionPackTests.cs 与 ReleasePublishReadinessEvidencePackAndPublicDocsGateTests.cs，非本批引入。
+- git diff --check：通过；仅提示 project-completion-review.md 的既有 CRLF/LF 规范化提示。
+- C 盘关键词审计：C:\Users\guoji\Downloads 与 C:\Users\guoji\AppData\Local\Temp 均无本批关键词命中。
+- 今日 .onnx/.engine/.plan/.nupkg 审计：C:\Users\guoji\Downloads 与 C:\Users\guoji\AppData\Local\Temp 均无命中。
+- dotnet build-server shutdown：已成功关闭 MSBuild 与 VB/C# compiler server。
+
+### C 盘与发布边界
+
+- 本阶段未下载 TensorRT、CUDA、cuDNN、模型、ONNX、engine、Python/pip 资产或 NuGet 临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、GitHub Release upload、issue close 或 push。
+- 本批没有 public package proof、package-consumer-runtime proof、post-publish verification、Linux runner proof、
+  real-model-runtime proof 或 owner authorization，因此不改变 canPublishPublicly=false、canCloseReleaseIssue=false 或 release blocker 状态。
+
 ## 2026-07-24 NuGet Runtime Install Public Article Expansion
 
 本阶段继续公开文章矩阵质量提升，扩写

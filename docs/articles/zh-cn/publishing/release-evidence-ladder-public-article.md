@@ -137,6 +137,37 @@ release close 还需要额外的 owner decision：
 
 `final-owner-execution-package.json` 里大量 lane 都标记为 owner execution step 或 release-close hard gate；这些记录本身不发布、不关闭 issue、不提升 proof。它们是 owner runbook 和输入映射，不是最终批准。
 
+## Release Close Lanes 与 Non-Proof Flags
+
+发布关闭时要把 lane 分开读，不能把一个 lane 的证据挪到另一个 lane 使用：
+
+| Lane | 必须回答的问题 | 不能替代它的材料 |
+| --- | --- | --- |
+| package-consumer-runtime proof | 仓库外 clean consumer 是否从公开包源 restore/build/run，并通过 package/hash/log/host metadata 校验 | local feed、ProjectReference、direct .nupkg、dry-run 包 |
+| real-model-runtime proof | 真实模型是否完成受控 runtime smoke，并保存可复核日志、输入输出摘要和 hash | 只读 engine inspector、build report、GUI screenshot |
+| Linux runner proof | Linux self-hosted/兼容 runner 是否真实执行对应验证 | queued GitHub Actions run、missing self-hosted runner、Windows-only 结果 |
+| public package download proof | 公开包是否可下载，包 id/version/source/SHA256 是否匹配 | 本地 nupkg 文件、GitHub Actions dry-run .nupkg、旧缓存 |
+| post-publish clean consumer proof | 发布后全新 consumer 是否从公开渠道重新安装并运行 | 发布前 owner input、package download hash、metadata gate |
+| owner authorization | owner 是否明确批准继续发布或关闭 release issue | dashboard、runbook、模板、validator 通过 |
+| final release close decision | 是否可以关闭 release issue、记录 rollback/final decision 并通过 strict close gate | failedBlockerCount=0、文档无过度声明、预检全绿 |
+
+建议所有 release-close 记录都显式保留以下布尔或状态字段，避免把“准备好了”误读成“已经证明”：
+
+- isRuntimeExecutionProof=false
+- isPackageConsumerRuntimeProof=false
+- isPostPublishProof=false
+- isReleaseCloseProof=false
+- performsPublish=false
+- canPublishPublicly=false
+- canCloseReleaseIssue=false
+- canPromoteProof=false
+- ownerDecisionRequired=true
+- strictValidatorPassed=false
+- forbiddenSubstituteScanPassed=false
+- releaseCloseBlockedReason=owner-public-postpublish-proof-required
+
+这些字段不是装饰项，而是 release decision 的刹车。strictValidatorPassed=true 只能说明当前 strict validator 对应 lane 的结构和禁止项通过；如果 ownerDecisionRequired=true 或 releaseCloseBlockedReason 仍然存在，就不能公开发布、不能关闭 issue，也不能把 owner execution package、runbook、模板或 import result 写成 proof。
+
 ## 当前 Gate 状态怎么读
 
 `public-docs-package-metadata-gate.json` 当前 `gateState=blocked-owner-public-postpublish-proof-required`，同时 `failedBlockerCount=0`。这两个字段必须一起读：
