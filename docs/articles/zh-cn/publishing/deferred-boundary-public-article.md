@@ -73,6 +73,94 @@ manifest/source match
 
 例如 B-tier proof 批次中，`GetAverageTimingIterations`、`MaxWorkspaceSizeCompatibilityInBytes`、`GetTilingOptimizationLevel`、ONNX parser copied error diagnostics、ParserRefitter copied diagnostics 这类能力，都适合用 wrapper/docs/quality proof 压实。但即使这些 proof 通过，也不代表可以删除 deferred history，更不代表 runtime proof 或公开发布 proof 已完成。
 
+## Uplift 作业单
+
+每一批 deferred uplift 应先从机器可读清单出发，而不是凭直觉判断“像 getter 就能做”。当前推荐入口是：
+
+```text
+artifacts/interface-coverage/deferred-readonly-candidate-list.json
+artifacts/interface-coverage/deferred-candidate-safety-triage.json
+artifacts/interface-coverage/tensorrt-interface-comparison.csv
+artifacts/interface-coverage/tensorrt-interface-coverage.json
+```
+
+一条候选从 planning 进入 implemented-with-deferred-history，至少要留下这些证据：
+
+```text
+candidateId
+apiArea
+riskLevel
+outputMode
+nativeLayerRequired
+managedWrapperRequired
+smokeRequired
+implementationStatus
+nativeSources
+managedSources
+smokeSources
+qualityTests
+publicSurface
+ownershipBoundary
+DeferredRowsStillRequired
+CanDeleteDeferredRecord=false
+```
+
+`implemented-with-deferred-history` 是一个很重要的状态：它说明已有安全替代面或 copied wrapper 可以使用，但旧 deferred row 仍作为边界记录保留。删除 deferred row 只能在真实 API、wrapper、smoke、release proof 都覆盖到对应风险后再讨论，不能用来让矩阵看起来更满。
+
+## 安全正例
+
+下列类型适合作为后续低风险批次的写法参考：
+
+```text
+TensorRtPluginRegistryInventory
+TensorRtPluginCreatorSummary
+TensorRtPluginFieldInfo
+TensorRtEngineInspector
+TensorRtOnnxParserDiagnosticSnapshot
+TensorRtOnnxParserRefitterDiagnosticSnapshot
+TensorRtBuilderConfigReadback
+CudaDeviceInfo
+CudaMemoryInfo
+CudaDeviceGraphMemoryInfo
+CudaDeviceGraphMemorySummary
+OnnxEngineParserPreflightSnapshot
+```
+
+它们的共同点是：返回 copied scalar、caller-buffer string、immutable record、summary 或 pointer-free snapshot；C# public surface 不暴露 `IntPtr`、`nint`、native function pointer、device pointer、borrowed TensorRT object 或 `SafeHandle`。报告字段也应保留非 proof 口径，例如：
+
+```text
+RuntimeEvidenceKind=copied-readonly-summary
+PointerFreeCopiedSummary=true
+IsRuntimeExecutionProof=false
+IsPackageConsumerRuntimeProof=false
+CanPromoteRuntimeProof=false
+CanPromoteReleaseProof=false
+CanDeleteDeferredRecord=false
+```
+
+这类正例能提升用户可诊断性，也能减少直接 P/Invoke 的风险；但它们仍不是 enqueue、plugin lifecycle、allocator callback 或 package-consumer proof。
+
+## 必交质量门
+
+每批至少应按影响范围选择质量门，而不是只跑一个 broad build：
+
+```text
+ReadonlyDiagnosticsCandidateImplementationEvidenceTests
+ReadonlySummaryEvidenceMatrixTests
+PublicApiHandleExposureAuditTests
+TensorRtNativeAbiSurfaceParityTests
+PluginRegistryInventoryTests
+RefitterEngineInspectorDiagnosticsTests
+RuntimeDeserializationBoundaryPrecheckTests
+CallbackAllocatorBoundaryTests
+AllocatorInterfaceInfoDesignGateTests
+AlgorithmSnapshotDesignGateTests
+BuilderConfigScalarControlsTests
+PublishingPublicArticleTests
+```
+
+如果改动触及 manifest/native/generated/wrapper，应跑 ABI 和 public handle 门；如果只改文章，也至少要跑对应 public article gate。quality test 通过只能证明本层行为被固定，不会自动升级为 runtime proof。
+
 ## 什么必须继续 Deferred
 
 以下接口即使名字像 getter，也不能被当成低风险提升：
@@ -83,6 +171,8 @@ manifest/source match
 - execution boundary：`execute`、`executeV2`、`enqueueV2`、binding buffer、stream、profile、device memory 组合。
 - expression/model builder：`IDimensionExpr`、`IExprBuilder` 这类 TensorRT 内部对象。
 - runtime deserialization ownership：`deserializeCudaEngineV2`、`loadRuntime`、stream reader/writer callback、external lean runtime。
+- graph/external resource ownership：CUDA external semaphore、surface/texture object、IPC handle、library/kernel handle 等只能先做 copied token/metadata，不开放 borrowed resource owner。
+- callback proof attempt：debug listener、output allocator、profiler、progress monitor 的 runtime proof attempt preflight 不能代替真实 callback invocation。
 
 这些接口共同的问题不是“有没有参数”，而是对象生命周期、回调异常、device pointer ownership、borrowed pointer 是否逃逸、native owner 是否可释放、plugin/library provenance 是否可信。没有这些设计门，public API 暴露得越早，后续 ABI 和用户代码越难收回。
 
@@ -158,6 +248,8 @@ Public API 必须避免暴露裸 `IntPtr` / `nint` / borrowed object。字符串
 - 是否涉及 callback、allocator、stream、device memory、plugin registry 或 external library。
 - 是否已有 quality test、smoke 或 package-consumer proof 覆盖对应层级。
 - 是否保留 deferred history，避免用删除记录制造完成度。
+- 是否给出 `RuntimeEvidenceKind`、`CanPromoteRuntimeProof`、`CanPromoteReleaseProof` 和 `CanDeleteDeferredRecord` 这类 report 字段。
+- 是否在文章、README、report、dashboard 中明确 forbidden substitutes。
 
 只要其中任一项无法回答，就应该先写 design gate 或 pointer-free diagnostics，而不是直接开放 public API。
 

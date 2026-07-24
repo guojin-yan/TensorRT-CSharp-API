@@ -3201,6 +3201,54 @@ report、command preview 和 bounded runtime output 的证据边界写清楚。
 - 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
   GitHub Release upload、issue close 或 push。
 
+## 2026-07-24 Deferred Boundary Public Article Expansion
+
+本阶段继续公开文章矩阵质量提升，扩写
+`docs/articles/zh-cn/publishing/deferred-boundary-public-article.md`，将 deferred 边界文章从风险分层和
+runtime deserialization 示例扩展为覆盖 uplift 作业单、机器可读候选清单、安全正例、必交质量门和 proof
+promotion flags 的公开教程。文章明确本阶段只是文档和质量门，不是 deferred API 实装、runtime smoke、
+package-consumer-runtime proof 或发布授权。
+
+### 实现
+
+- 文章新增 Uplift 作业单，要求从 `deferred-readonly-candidate-list.json`、
+  `deferred-candidate-safety-triage.json`、`tensorrt-interface-comparison.csv` 和
+  `tensorrt-interface-coverage.json` 出发，而不是凭直觉提升。
+- 明确每条候选应保留 candidateId、apiArea、riskLevel、outputMode、native/managed/smoke required、
+  implementationStatus、nativeSources、managedSources、smokeSources、qualityTests、publicSurface、
+  ownershipBoundary、DeferredRowsStillRequired 和 `CanDeleteDeferredRecord=false`。
+- 补充 `implemented-with-deferred-history` 语义：安全替代面可用，但旧 deferred row 仍作为边界记录保留。
+- 增加安全正例：Plugin Registry、Engine Inspector、ONNX Parser/Refitter diagnostics、BuilderConfig readback、
+  CUDA device/memory/graph-memory summary 和 OnnxEngine parser preflight snapshot。
+- 增加 report flags：`RuntimeEvidenceKind=copied-readonly-summary`、`PointerFreeCopiedSummary=true`、
+  `IsRuntimeExecutionProof=false`、`IsPackageConsumerRuntimeProof=false`、
+  `CanPromoteRuntimeProof=false`、`CanPromoteReleaseProof=false` 和 `CanDeleteDeferredRecord=false`。
+- 补充必交质量门清单，覆盖 readonly diagnostics、public API handle、native ABI parity、plugin inventory、
+  refitter/engine inspector、runtime deserialization、callback/allocator、algorithm snapshot、builder config 和
+  public article gates。
+- 继续明确 graph/external resource ownership 与 callback proof attempt 不能替代真实 owner/lifecycle/runtime proof。
+- 为 `PublishingPublicArticleTests` 增加
+  `DeferredBoundaryPublicArticleCoversUpliftWorkOrderSafeExamplesQualityGatesAndPromotionFlags`
+  专项门禁。
+
+### Verification
+
+- `dotnet test tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --filter "FullyQualifiedName~PublishingPublicArticleTests"`：
+  `26/26` 通过。
+- 编译阶段仍出现 5 条既有 nullable warning，位置在
+  `FinalPublishProofGateAndOwnerExecutionPackTests.cs` 与
+  `ReleasePublishReadinessEvidencePackAndPublicDocsGateTests.cs`，本批未改动这些文件。
+
+### C 盘与发布边界
+
+- 本阶段未下载 TensorRT、CUDA、cuDNN、模型、ONNX、engine、Python/pip 资产或 NuGet
+  临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
+  GitHub Release upload、issue close 或 push。
+- 本批没有 deferred API 实装、runtime smoke、package-consumer-runtime proof、real-model-runtime proof、
+  Linux runner proof、post-publish verification 或 owner authorization，因此不改变
+  `canPublishPublicly=false`、`canCloseReleaseIssue=false` 或 release blocker 状态。
+
 ## 2026-07-24 CUDA TensorRT DLL Troubleshooting Public Article Expansion
 
 本阶段继续公开文章矩阵质量提升，扩写

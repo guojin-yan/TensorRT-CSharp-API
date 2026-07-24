@@ -1299,6 +1299,80 @@ public sealed class PublishingPublicArticleTests
     }
 
     [Fact]
+    public void DeferredBoundaryPublicArticleCoversUpliftWorkOrderSafeExamplesQualityGatesAndPromotionFlags()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "publishing",
+            "deferred-boundary-public-article.md"));
+
+        foreach (string marker in new[]
+        {
+            "Uplift 作业单",
+            "deferred-readonly-candidate-list.json",
+            "deferred-candidate-safety-triage.json",
+            "tensorrt-interface-coverage.json",
+            "candidateId",
+            "apiArea",
+            "riskLevel",
+            "outputMode",
+            "nativeLayerRequired",
+            "managedWrapperRequired",
+            "smokeRequired",
+            "implementationStatus",
+            "nativeSources",
+            "managedSources",
+            "smokeSources",
+            "qualityTests",
+            "publicSurface",
+            "ownershipBoundary",
+            "DeferredRowsStillRequired",
+            "CanDeleteDeferredRecord=false",
+            "implemented-with-deferred-history",
+            "安全正例",
+            "TensorRtPluginCreatorSummary",
+            "TensorRtPluginFieldInfo",
+            "TensorRtEngineInspector",
+            "TensorRtOnnxParserDiagnosticSnapshot",
+            "TensorRtOnnxParserRefitterDiagnosticSnapshot",
+            "TensorRtBuilderConfigReadback",
+            "CudaDeviceGraphMemoryInfo",
+            "CudaDeviceGraphMemorySummary",
+            "OnnxEngineParserPreflightSnapshot",
+            "RuntimeEvidenceKind=copied-readonly-summary",
+            "PointerFreeCopiedSummary=true",
+            "CanPromoteRuntimeProof=false",
+            "CanPromoteReleaseProof=false",
+            "必交质量门",
+            "ReadonlyDiagnosticsCandidateImplementationEvidenceTests",
+            "ReadonlySummaryEvidenceMatrixTests",
+            "TensorRtNativeAbiSurfaceParityTests",
+            "RefitterEngineInspectorDiagnosticsTests",
+            "RuntimeDeserializationBoundaryPrecheckTests",
+            "CallbackAllocatorBoundaryTests",
+            "AllocatorInterfaceInfoDesignGateTests",
+            "AlgorithmSnapshotDesignGateTests",
+            "BuilderConfigScalarControlsTests",
+            "graph/external resource ownership",
+            "callback proof attempt",
+            "RuntimeEvidenceKind",
+            "CanPromoteRuntimeProof",
+            "CanPromoteReleaseProof",
+            "forbidden substitutes"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("像 getter 就能做", content, StringComparison.Ordinal);
+        Assert.Contains("不会自动升级为 runtime proof", content, StringComparison.Ordinal);
+        Assert.Contains("不开放 borrowed resource owner", content, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ReleaseEvidenceLadderPublicArticleCoversOwnerInputForbiddenSubstitutesAndCloseBoundaries()
     {
         string content = File.ReadAllText(Path.Combine(
