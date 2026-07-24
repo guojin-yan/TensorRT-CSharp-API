@@ -3247,6 +3247,33 @@ proof 或发布授权。
   post-publish verification 或 owner authorization，因此不改变 `canPublishPublicly=false`、
   `canCloseReleaseIssue=false` 或 release blocker 状态。
 
+## 2026-07-24 OnnxToEngine Trtexec Parity Public Article Expansion
+
+本阶段继续公开文章矩阵质量提升，扩写 docs/articles/zh-cn/publishing/onnxtoengine-trtexec-parity-public-article.md，将 OnnxToEngine 与 TensorRtExec 的 trtexec-like 对齐文章从参数矩阵说明推进为包含 conversion playbook、shape/profile 归一化、typed readback、artifact hash、runtime candidate 和 proof promotion criteria 的公开教程。文章明确本阶段只是文档和质量门，不是 engine runtime proof、package-consumer-runtime proof、post-publish proof 或发布授权。
+
+### 实现
+
+- 文章新增 Conversion Playbook 与 Parity 晋级标准章节，分层说明 parse-normalized、profile-normalized、builder-applied、builder-readback、artifact-written、bounded-runtime-output、real-model-runtime candidate 和 package-consumer-runtime remains external。
+- 明确 TrtexecLikeParser.Parse、TrtexecLikeOptions.ToArgumentLine、EngineBuildProfile.Parse、EngineBuildShape、TrtexecLikeDeploymentOptions、TrtexecLikeBuildPolicy 和 BuilderConfigDeploymentSnapshot 的证据位置。
+- 补充 AcceptedAlias、ParsedOnlyReason、AppliedByTypedWrapper、VersionGuard、ReadbackMatch、ArtifactWritten、ArtifactSha256、RuntimeExecuted、OutputValidationPerformed、OwnerReviewed 和 ProofClassification 等 promotion 字段。
+- 写清 --mnist、--mnistInput、--expectedDigit、--exportPreprocessedInput、MnistOnnxRuntime、MnistOnnxRuntimeResult 和 OutputMatch 只能进入 real-model-runtime candidate，不能替代 package-consumer-runtime proof。
+- 保持 calibrator-owner-evidence-required、plugin-lifecycle-owner-evidence-required 和 borrowed-pointer-disallowed 的高风险边界。
+- 为 PublishingPublicArticleTests 增加 OnnxToEngineTrtexecParityPublicArticleCoversConversionPlaybookPromotionCriteriaAndMnistRuntimeCandidate 专项门禁。
+
+### Verification
+
+- dotnet test tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --filter FullyQualifiedName~PublishingPublicArticleTests：30/30 通过。
+- 编译阶段仍有 5 条既有 nullable warning，位置在 FinalPublishProofGateAndOwnerExecutionPackTests.cs 与 ReleasePublishReadinessEvidencePackAndPublicDocsGateTests.cs，非本批引入。
+- git diff --check：通过；仅提示 project-completion-review.md 的既有 CRLF/LF 规范化提示。
+- C 盘关键词审计：C:\Users\guoji\Downloads 与 C:\Users\guoji\AppData\Local\Temp 均无本批关键词命中。
+- 今日 .onnx/.engine/.plan/.nupkg 审计：C:\Users\guoji\Downloads 与 C:\Users\guoji\AppData\Local\Temp 均无命中。
+
+### C 盘与发布边界
+
+- 本阶段未下载 TensorRT、CUDA、cuDNN、模型、ONNX、engine、Python/pip 资产或 NuGet 临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、GitHub Release upload、issue close 或 push。
+- 本批没有执行真实模型转换、没有生成 engine/plan/nupkg、没有 public package proof、package-consumer-runtime proof、post-publish verification、Linux runner proof 或 owner authorization。
+
 ## 2026-07-24 Release Evidence Ladder Public Article Expansion
 
 本阶段继续公开文章矩阵质量提升，扩写

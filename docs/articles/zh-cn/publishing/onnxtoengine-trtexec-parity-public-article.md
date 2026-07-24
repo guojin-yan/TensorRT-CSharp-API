@@ -145,6 +145,25 @@ items[].nextImplementationPaths
 
 其中很多能力是 builder/readback/report evidence，不是 runtime proof。例如 workspace/memory pool、timing iterations、deployment policies、IO/layer precision policies 和 timing cache 都能进入 report，但没有真实输入、输出校验、日志 hash 和 owner review 时，不能证明模型正确。
 
+## Conversion Playbook 与 Parity 晋级标准
+
+trtexec parity 不是“参数名字能解析”就结束。建议每个新增或提升的选项都走同一条 playbook：
+
+| 步骤 | 关键代码/证据 | 可以说明什么 | 不能说明什么 |
+| --- | --- | --- | --- |
+| parse-normalized | TrtexecLikeParser.Parse、TrtexecLikeOptions.ToArgumentLine、NormalizedCommandLine、NormalizedCommandSha256 | 命令行可重复、alias 被归一化、preview/dry-run 可审计 | 不能说明 TensorRT 已应用该选项 |
+| profile-normalized | EngineBuildProfile.Parse、EngineBuildShape、shapes/inputShapes fallback、min/opt/max triplet | 动态 shape 和 batch 边界已结构化 | 不能说明 profile 被 builder 接受 |
+| builder-applied | TrtexecLikeDeploymentOptions、TrtexecLikeBuildPolicy、OnnxEngineBuildOptions.FromTrtexecLikeOptions | 选项进入 typed wrapper 或 version-guarded branch | 不能说明 readback 匹配 |
+| builder-readback | BuilderConfigDeploymentSnapshot、OptionImplementationStatus、ReadbackMatch、VersionGuard = TRT8/TRT10/TRT11 | 已设置项被读回，跨版本差异可解释 | 不能说明 inference 正确 |
+| artifact-written | saveEngine、exportTimingCache、exportLayerInfo、exportTimes、exportProfile、ArtifactSha256 | 文件写出、路径/hash 可复核 | 不能替代 runtime output 或 package source proof |
+| bounded-runtime-output | loadEngine、loadInputs、dumpOutput、exportOutput、InferenceRan、OutputValidationPerformed | 可以证明 bounded enqueue/readback 曾发生 | 没有 reference output 时仍不是 real-model-runtime proof |
+| real-model-runtime candidate | --mnist、--mnistInput、--expectedDigit、--exportPreprocessedInput、MnistOnnxRuntime、MnistOnnxRuntimeResult、OutputMatch | 模型特定输入、预处理、输出和期望值开始闭环 | 仍需要 owner review、日志 hash 和样例证据 validator |
+| package-consumer-runtime remains external | clean external consumer、public package source、post-publish verification | 发布证明必须来自仓库外公开包消费 | OnnxToEngine 本仓库样例不能自己证明包发布可用 |
+
+新增 parity 项时，文章和 matrix 至少要写清：AcceptedAlias、ParsedOnlyReason、AppliedByTypedWrapper、VersionGuard、ReadbackMatch、ArtifactWritten、ArtifactSha256、RuntimeExecuted、OutputValidationPerformed、OwnerReviewed 和 ProofClassification。缺少任一 proof-critical 字段时，只能停在 report/readback/candidate lane，不能升级为 package-consumer-runtime。
+
+高风险项要更慢：--int8/--calib 至少需要 calibrator-owner-evidence-required，plugin 相关选项至少需要 plugin-lifecycle-owner-evidence-required；任何 borrowed pointer、外部资源或跨语言 ownership 都应保持 borrowed-pointer-disallowed，直到有 owner-safe wrapper、lifetime smoke 和跨版本质量门。
+
 ## 需要谨慎呈现的能力
 
 这些能力特别容易被误写成“已完全支持官方 trtexec”，文章必须保守：

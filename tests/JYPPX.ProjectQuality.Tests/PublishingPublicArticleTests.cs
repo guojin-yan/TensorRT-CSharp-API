@@ -2408,6 +2408,65 @@ public sealed class PublishingPublicArticleTests
         Assert.Contains("不要伪装成低风险实现", content, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void OnnxToEngineTrtexecParityPublicArticleCoversConversionPlaybookPromotionCriteriaAndMnistRuntimeCandidate()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "publishing",
+            "onnxtoengine-trtexec-parity-public-article.md"));
+
+        foreach (string marker in new[]
+        {
+            "Conversion Playbook 与 Parity 晋级标准",
+            "parse-normalized",
+            "profile-normalized",
+            "builder-applied",
+            "builder-readback",
+            "artifact-written",
+            "bounded-runtime-output",
+            "real-model-runtime candidate",
+            "package-consumer-runtime remains external",
+            "TrtexecLikeParser.Parse",
+            "TrtexecLikeOptions.ToArgumentLine",
+            "EngineBuildProfile.Parse",
+            "EngineBuildShape",
+            "TrtexecLikeDeploymentOptions",
+            "TrtexecLikeBuildPolicy",
+            "BuilderConfigDeploymentSnapshot",
+            "ReadbackMatch",
+            "VersionGuard = TRT8/TRT10/TRT11",
+            "ArtifactSha256",
+            "OutputValidationPerformed",
+            "OwnerReviewed",
+            "AcceptedAlias",
+            "ParsedOnlyReason",
+            "AppliedByTypedWrapper",
+            "ArtifactWritten",
+            "RuntimeExecuted",
+            "ProofClassification",
+            "--mnist",
+            "--mnistInput",
+            "--expectedDigit",
+            "--exportPreprocessedInput",
+            "MnistOnnxRuntime",
+            "MnistOnnxRuntimeResult",
+            "OutputMatch",
+            "calibrator-owner-evidence-required",
+            "plugin-lifecycle-owner-evidence-required",
+            "borrowed-pointer-disallowed"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("不能升级为 package-consumer-runtime", content, StringComparison.Ordinal);
+        Assert.Contains("OnnxToEngine 本仓库样例不能自己证明包发布可用", content, StringComparison.Ordinal);
+    }
+
     private static readonly ArticleExpectation[] Articles =
     {
         new(
