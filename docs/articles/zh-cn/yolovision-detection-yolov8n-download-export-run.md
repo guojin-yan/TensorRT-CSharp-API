@@ -158,6 +158,45 @@ Detection 输出建议按如下字段记录：
 
 文章中的命令应该与这些源码入口保持一致。新增参数时，需要同步更新 CLI、README、文章、JSON schema 和 ProjectQuality 测试。
 
+## 可复用资产目录与完整运行产物
+
+为了让文章命令可以重复执行，建议为 YOLOv8n detection 建立独立的 E 盘 case workspace：
+
+E:\TensorRtSharpAssets\cases\yolov8n-det\models
+E:\TensorRtSharpAssets\cases\yolov8n-det\labels
+E:\TensorRtSharpAssets\cases\yolov8n-det\images
+E:\TensorRtSharpAssets\cases\yolov8n-det\tensors
+E:\TensorRtSharpAssets\cases\yolov8n-det\engines
+E:\TensorRtSharpAssets\cases\yolov8n-det\reports
+E:\TensorRtSharpAssets\cases\yolov8n-det\logs
+
+从 samples/assets/yolovision-yolov8-det-candidate.template.json 复制候选记录后，先回填 model.sourceUrl、model.downloadUrl、model.license、model.licenseEvidence、model.sha256、model.opset 和 model.onnxExportCommand。labels 和 input 也必须分别记录来源、许可证、路径和 SHA256，不能只记录 ONNX。
+
+下载和导出后至少计算这些 hash：
+
+Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-det\models\yolov8n.pt
+Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-det\models\yolov8n.onnx
+Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-det\labels\coco.names
+Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-det\images\dog.ppm
+
+使用真实图片时，先把预处理步骤独立保存：
+
+dotnet run --project .\samples\YoloVision -- --preprocess-only --image E:\TensorRtSharpAssets\cases\yolov8n-det\images\dog.ppm --preprocessed-output E:\TensorRtSharpAssets\cases\yolov8n-det\tensors\dog-fp32.bin --input-shape 1x3x640x640 --tensor-layout NCHW --color-order RGB --resize letterbox
+
+运行 YoloVision 时同时导出结构化结果和可视化：
+
+dotnet run --project .\samples\YoloVision -- --model E:\TensorRtSharpAssets\cases\yolov8n-det\models\yolov8n.onnx --labels E:\TensorRtSharpAssets\cases\yolov8n-det\labels\coco.names --input-data E:\TensorRtSharpAssets\cases\yolov8n-det\tensors\dog-fp32.bin --input-shape 1x3x640x640 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45 --output-json E:\TensorRtSharpAssets\cases\yolov8n-det\reports\yolov8n-det-output.json --visualization-svg E:\TensorRtSharpAssets\cases\yolov8n-det\reports\yolov8n-det-output.svg
+
+运行结束后，应对 preprocessed tensor、engine、build report、output JSON、SVG 和 stdout/stderr log 计算 SHA256。output JSON 至少要能回答 classCount、outputLayout、hasObjectness、scoreThreshold、iouThreshold、nmsMode、modelSha256、labelsSha256、imageSha256 和 preprocessedTensorSha256。
+
+建议按以下顺序验证：
+
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-YoloVisionOutputReport.ps1 -Strict
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-YoloVisionRealAssetCandidate.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-SampleRunEvidenceRecord.ps1
+
+candidate template 中的 proofChecklist.requiredEvidenceLines、proofChecklist.requiredHashes、stdoutSummary、stderrSummary 和 packageConsumerBoundary 都必须由 owner 真实回填。只有 validator 接受 YoloVision Passed=True、真实 hash、日志和 owner review 后，才可以形成 real-model-runtime 候选；E 盘 case workspace、output JSON、SVG 和截图本身仍不是 package-consumer-runtime proof。
+
 ## 图示建议
 
 发布到微信公众号或博客时，建议至少准备六张图：

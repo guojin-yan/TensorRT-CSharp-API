@@ -74,4 +74,51 @@ public sealed class TechnicalArticleCampaignFourthBatchBodyTests
             Assert.Contains(readmePath, zhReadme, StringComparison.Ordinal);
         }
     }
+
+    [Fact]
+    public void YoloVisionYolov8nDetectionArticleCoversAssetWorkspacePreprocessOutputValidationAndCandidateFields()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "yolovision-detection-yolov8n-download-export-run.md"));
+
+        foreach (string marker in new[]
+        {
+            "可复用资产目录与完整运行产物",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-det\\models",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-det\\labels",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-det\\images",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-det\\tensors",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-det\\engines",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-det\\reports",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-det\\logs",
+            "yolovision-yolov8-det-candidate.template.json",
+            "model.sourceUrl",
+            "model.downloadUrl",
+            "model.licenseEvidence",
+            "model.onnxExportCommand",
+            "Get-FileHash -Algorithm SHA256",
+            "--preprocess-only",
+            "--tensor-layout NCHW",
+            "--color-order RGB",
+            "--resize letterbox",
+            "--output-json",
+            "--visualization-svg",
+            "Test-YoloVisionOutputReport.ps1",
+            "Test-YoloVisionRealAssetCandidate.ps1",
+            "Test-SampleRunEvidenceRecord.ps1",
+            "proofChecklist.requiredEvidenceLines",
+            "proofChecklist.requiredHashes",
+            "stdoutSummary",
+            "stderrSummary",
+            "packageConsumerBoundary",
+            "仍不是 package-consumer-runtime proof"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+    }
 }
