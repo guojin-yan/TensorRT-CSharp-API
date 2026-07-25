@@ -3920,6 +3920,32 @@ runtime proof 从短说明扩展为 release owner 和评审者可执行、可判
 - 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
   GitHub Release upload、issue close 或 push。
 
+## 2026-07-25 TensorRtExec CLI WinForms Public Article Expansion
+
+本阶段继续公开文章矩阵质量提升，扩写 docs/articles/zh-cn/publishing/tensorrtexec-cli-public-article.md，新增 CLI/WinForms 操作闭环、共享数据流和 CUDA/TensorRT DLL 排障决策树。文章明确本阶段只是文档与质量门，不是 runtime proof、package-consumer-runtime proof 或发布授权。
+
+### 实现
+
+- 新增准备、构建、诊断/运行、归档四阶段工作流，区分 dry-run、build-only、readonly diagnostics、bounded runtime 和 evidence archive。
+- 明确 WinForms -> TensorRtExecOptions -> ToArgumentLine -> TensorRtExecService -> TensorRtExecReport 的共享数据流，防止 GUI/CLI 参数语义漂移。
+- 新增 jyppxtrt、jyppxcudabridge、nvinfer、nvinfer_plugin、nvonnxparser、cudart64 DLL 排障表。
+- 固定 TRT8/TRT10/TRT11 manifest、native bridge、托管 version guard、架构和 PATH 对齐要求。
+- 更新 PublishingPublicArticleTests，新增 TensorRtExecCliPublicArticleCoversOperationalWorkflowWinFormsDataFlowAndDllTroubleshooting 专项门禁。
+
+### Verification
+
+- PublishingPublicArticleTests 定向测试：32/32 通过。
+- 编译阶段仍有 5 条既有 nullable warning，位置在 FinalPublishProofGateAndOwnerExecutionPackTests.cs 与 ReleasePublishReadinessEvidencePackAndPublicDocsGateTests.cs，非本批引入。
+- git diff --check：通过；仅提示 project-completion-review.md 的既有 CRLF/LF 规范化提示。
+- C 盘关键词审计：C:\Users\guoji\Downloads 与 C:\Users\guoji\AppData\Local\Temp 均无本批关键词命中。
+- 今日 .onnx/.engine/.plan/.nupkg 审计：C:\Users\guoji\Downloads 与 C:\Users\guoji\AppData\Local\Temp 均无命中。
+
+### C 盘与发布边界
+
+- 本阶段未下载 TensorRT、CUDA、cuDNN、模型、ONNX、engine、Python/pip 资产或 NuGet 临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、push、NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
+- 本批没有生成 engine/plan/nupkg，没有 real-model-runtime proof、package-consumer-runtime proof、post-publish verification 或 owner authorization。
+
 ## 2026-07-25 OnnxToEngine Case Tutorial Public Article Expansion
 
 本阶段继续公开文章矩阵质量提升，扩写 docs/articles/zh-cn/publishing/onnx-to-engine-public-article.md，新增从模型获取到可复核案例的完整教程清单。文章明确本阶段只是文档与质量门，不是模型转换执行、runtime proof、package-consumer-runtime proof 或发布授权。

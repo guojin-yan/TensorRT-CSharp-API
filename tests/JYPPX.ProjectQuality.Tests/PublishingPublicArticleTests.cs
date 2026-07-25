@@ -995,6 +995,52 @@ public sealed class PublishingPublicArticleTests
     }
 
     [Fact]
+    public void TensorRtExecCliPublicArticleCoversOperationalWorkflowWinFormsDataFlowAndDllTroubleshooting()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "publishing",
+            "tensorrtexec-cli-public-article.md"));
+
+        foreach (string marker in new[]
+        {
+            "CLI/WinForms 操作闭环与 DLL 排障",
+            "准备阶段",
+            "构建阶段",
+            "诊断/运行阶段",
+            "归档阶段",
+            "TensorRtExecOptions",
+            "ToArgumentLine()",
+            "TensorRtExecService",
+            "TensorRtExecReport",
+            "jyppxtrt*.dll",
+            "jyppxcudabridge.dll",
+            "nvinfer.dll",
+            "nvinfer_plugin.dll",
+            "nvonnxparser.dll",
+            "cudart64_*.dll",
+            "where.exe",
+            "PreflightMetadata",
+            "CapabilityProbe",
+            "LoadedEngineDiagnostics",
+            "blocked-by-cuda-driver",
+            "x64 架构",
+            "TRT8/TRT10/TRT11",
+            "source path",
+            "不同 TRT8/TRT10/TRT11 目录必须与对应 manifest、native bridge 和托管 version guard 保持一致",
+            "不能证明 ONNX 输出正确",
+            "不能证明真实模型 runtime 成功",
+            "不能证明公开 NuGet 包可消费"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+    }
+
+    [Fact]
     public void SourceBuildPublicArticleCoversCppBridgeEnvironmentPresetsPackagesAndTroubleshooting()
     {
         string content = File.ReadAllText(Path.Combine(

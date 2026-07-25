@@ -357,6 +357,31 @@ applications/TensorRtExec/tensor-rt-exec-gui-cli-field-map.md
 
 维护。它记录 CLI token、WinForms 字段、command preview、状态和下一步，但只是 surface parity evidence；GUI screenshot、dry-run、build report、timing cache 路径、INT8 calibration cache 路径和 command preview 都不是 runtime proof，也不是 package-consumer-runtime proof。
 
+## CLI/WinForms 操作闭环与 DLL 排障
+
+一条可复用的 TensorRtExec 操作闭环应当有四个阶段：
+
+1. **准备阶段**：在 E 盘 workspace 中确认 ONNX、输出目录、TensorRT line、CUDA/TensorRT DLL 搜索路径和 shape profile；先执行 --dryRun，保存 normalized command 和 precheck report。
+2. **构建阶段**：执行 --buildOnly --exportReport --evidenceSidecar，确认 OptionImplementationStatus、BuilderConfigDeploymentSnapshot、EngineFileRoundTrip 和 engine SHA256；失败时保留 stdout/stderr，不要只截 GUI 红色提示。
+3. **诊断/运行阶段**：对已有 engine 先做 readonly diagnostics；只有输入 binding、输出语义和 reference output 都明确时，才执行 bounded runtime 或模型特定 runner。
+4. **归档阶段**：把 command、report、sidecar、engine/readback、日志和 host metadata 放入同一个 case workspace，并记录每个文件的 SHA256；这些材料仍然要经过 owner review 才能进入 real-case evidence。
+
+CLI 和 WinForms 应保持同一条数据流：WinForms 控件先写入 TensorRtExecOptions，再调用 ToArgumentLine() 生成 command preview，CLI 与 GUI 最终都进入 TensorRtExecService，由同一份 TensorRtExecReport 输出状态。GUI 不能自己拼接另一套参数，也不能用截图替代 report、日志或 validator。
+
+常见 DLL 问题可以按下面顺序排查：
+
+| 症状 | 先检查 | 文章中的证据分类 |
+| --- | --- | --- |
+| 启动时找不到 jyppxtrt*.dll 或 jyppxcudabridge.dll | 应用输出目录、native bridge 架构、PATH、TensorRT/CUDA bin 目录 | loader/preflight diagnostic，不是 runtime proof |
+| 能加载 bridge 但找不到 nvinfer.dll、nvinfer_plugin.dll 或 nvonnxparser.dll | TensorRT line、x64 架构、对应 bin 目录和版本匹配 | dependency-probe-only 或 blocked-by-cuda-driver |
+| CUDA runtime 找不到 cudart64_*.dll | CUDA toolkit/runtime 版本、PATH 顺序、进程位数 | environment diagnostic |
+| CLI 能运行但 WinForms 失败 | WinForms 输出目录是否复制同一 native assets、GUI 使用的 normalized command 是否一致 | surface parity issue |
+| build report 成功但 engine runtime 失败 | engine 与 host TensorRT line、driver、binding shape、plugin 依赖和 readback metadata | build-only 不自动升级为 runtime proof |
+
+Windows 下建议先用 where.exe 和进程实际工作目录确认 loader 看到的路径，再检查 TensorRtExecReport.PreflightMetadata、CapabilityProbe 和 LoadedEngineDiagnostics。不要通过把多个版本 DLL 混到 PATH 中“碰运气”；不同 TRT8/TRT10/TRT11 目录必须与对应 manifest、native bridge 和托管 version guard 保持一致。若必须临时复制 DLL 做隔离实验，应把复制目录放在 E 盘 case workspace，并在报告中记录 source path、版本和 SHA256。
+
+一个 DLL 加载成功的报告只说明 loader 和依赖探测阶段完成。它不能证明 ONNX 输出正确；不能证明真实模型 runtime 成功；不能证明公开 NuGet 包可消费，也不能关闭 release issue。
+
 ## 与 OnnxToEngine / YoloVision 的关系
 
 `samples/OnnxToEngine` 更像“面向样例读者的模型转换路径”，重点是清晰、易懂、适合教程；`applications/TensorRtExec` 更像正式工具，目标是覆盖官方 `trtexec` 的主要模型转换能力，并同时支持 CLI 和 WinForms。
