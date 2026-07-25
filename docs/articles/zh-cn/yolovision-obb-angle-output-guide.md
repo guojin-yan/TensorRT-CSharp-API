@@ -138,6 +138,53 @@ dotnet run --project .\samples\YoloVision -- `
 
 可视化时建议同时输出四点坐标和中心点加角度两种格式。这样即使不同工具对 angle 方向约定不同，owner 也可以通过四点坐标复核。
 
+## 可复用资产目录与完整验证
+
+建议为 YOLOv8n-obb 建立独立的 E 盘 case workspace，把遥感/工业图片、DOTA 或自定义 labels、预处理 tensor、engine、报告和日志分开保存，避免模型和临时包落到系统盘：
+
+E:\TensorRtSharpAssets\cases\yolov8n-obb\models
+E:\TensorRtSharpAssets\cases\yolov8n-obb\labels
+E:\TensorRtSharpAssets\cases\yolov8n-obb\images
+E:\TensorRtSharpAssets\cases\yolov8n-obb\tensors
+E:\TensorRtSharpAssets\cases\yolov8n-obb\engines
+E:\TensorRtSharpAssets\cases\yolov8n-obb\reports
+E:\TensorRtSharpAssets\cases\yolov8n-obb\logs
+
+从 `samples/assets/yolovision-yolov8-obb-candidate.template.json` 开始回填 `model.sourceUrl`、`model.downloadUrl`、`model.license`、`model.sha256`、`labels.sha256`、`input.imageSha256`、`input.preprocessedTensorSha256`，以及 `outputMetadata.outputRoleMap`、`outputMetadata.boxFormat`、`outputMetadata.rotatedBoxLayout`、`outputMetadata.angleUnit`、`outputMetadata.coordinateSpace` 和 `outputMetadata.postprocessMetadata.angleRange`。`rotatedNmsMode`、顺逆时针方向、宽高交换规则和四点 corner 顺序也要和导出说明、运行日志一起记录。
+
+模型、labels、原图、预处理 tensor、engine、build report、preflight report、output JSON、overlay SVG 和 run log 分别计算 SHA256：
+
+```powershell
+Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-obb\models\yolov8n-obb.onnx
+Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-obb\labels\dota.names
+Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-obb\images\airplane.ppm
+Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-obb\tensors\airplane-fp32.bin
+```
+
+先只做预处理，确认 1024 输入、RGB、NCHW 和 letterbox 记录一致：
+
+```powershell
+dotnet run --project .\samples\YoloVision -- --preprocess-only --image E:\TensorRtSharpAssets\cases\yolov8n-obb\images\airplane.ppm --preprocessed-output E:\TensorRtSharpAssets\cases\yolov8n-obb\tensors\airplane-fp32.bin --input-shape 1x3x1024x1024 --tensor-layout NCHW --color-order RGB --resize letterbox
+```
+
+运行时保留显式 OBB angle role、单位和输出产物：
+
+```powershell
+dotnet run --project .\samples\YoloVision -- --model E:\TensorRtSharpAssets\cases\yolov8n-obb\models\yolov8n-obb.onnx --labels E:\TensorRtSharpAssets\cases\yolov8n-obb\labels\dota.names --input-data E:\TensorRtSharpAssets\cases\yolov8n-obb\tensors\airplane-fp32.bin --input-shape 1x3x1024x1024 --family v8 --task obb --output-role-map boxes:det,angles:obb-angle --obb-angle-output angles --angle-radians --output-json E:\TensorRtSharpAssets\cases\yolov8n-obb\reports\yolov8n-obb-output.json --visualization-svg E:\TensorRtSharpAssets\cases\yolov8n-obb\reports\yolov8n-obb-output.svg
+```
+
+当前 `yolovision-output.v1` 的 OBB prediction 至少记录 `center.x`、`center.y`、`size.width`、`size.height`、`angle`、`angleUnit`、`angleRange`、`classId`、`className` 和 `score`。程序输出的 `angleUnit` 是 `radian`，`angleRange` 仍是 `owner-record-required`；`corners`、旋转方向和 rotated NMS 结果需要 owner 依据模型文档或 golden output 另行回填，不能从一张 SVG 截图推断。输出 JSON 还应关联 `modelSha256`、`imageSha256`、`preprocessedTensorSha256`、run log hash 和坐标空间。
+
+建议按以下顺序验证：
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-YoloVisionOutputReport.ps1 -Strict
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-YoloVisionRealAssetCandidate.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-SampleRunEvidenceRecord.ps1
+```
+
+只有 owner 回填真实模型、labels、输入 hash、angle unit/range、coordinate space、rotated NMS 说明、`YoloVision Passed=True`、stdout/stderr summary、run log hash 并通过 validator 后，才能形成 `real-model-runtime` 候选。TensorRtExec build-only、preflight、rotated overlay、截图、local feed 和 direct `.nupkg` 仍不是 `package-consumer-runtime` proof。
+
 ## 代码与文件入口
 
 - `samples/YoloVision/YoloVisionRuntimePipeline.cs`：OBB output role 路由。

@@ -3920,6 +3920,33 @@ runtime proof 从短说明扩展为 release owner 和评审者可执行、可判
 - 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
   GitHub Release upload、issue close 或 push。
 
+## 2026-07-25 YOLOv8n OBB Case Public Article Expansion
+
+本阶段继续具体模型文章质量提升，扩写 docs/articles/zh-cn/yolovision-obb-angle-output-guide.md，新增可复用 E 盘 case workspace、angle 输出角色、单位/范围/坐标空间 metadata、OBB JSON/SVG 和 owner 验证顺序。文章明确本阶段只是文档与质量门，不是真实模型运行、runtime proof、package-consumer-runtime proof 或发布授权。
+
+### 实现
+
+- 固定 E:\TensorRtSharpAssets\cases\yolov8n-obb 的 models/labels/images/tensors/engines/reports/logs 布局。
+- 补充 candidate template 的 model/labels/input 来源、license、SHA256、outputRoleMap、boxFormat、rotatedBoxLayout、angleUnit、coordinateSpace 和 angleRange 回填字段。
+- 增加 preprocess-only、显式 boxes/angles role map、angle-radians、output JSON、visualization SVG 命令和 OBB 输出必填 metadata。
+- 明确程序输出 `angleUnit=radian`、`angleRange=owner-record-required`，四点坐标、旋转方向和 rotated NMS 仍属于 owner 语义证据，不能从截图推断。
+- 增加 Test-YoloVisionOutputReport.ps1、Test-YoloVisionRealAssetCandidate.ps1、Test-SampleRunEvidenceRecord.ps1 验证顺序。
+- 更新 TechnicalArticleCampaignFourthBatchBodyTests，新增 YoloVisionYolov8nObbArticleCoversAngleWorkspaceRolesHashesAndValidation 专项门禁。
+
+### Verification
+
+- TechnicalArticleCampaignFourthBatchBodyTests 定向测试：5/5 通过。
+- git diff --check：通过；仅提示 project-completion-review.md 的既有 CRLF/LF 规范化提示。
+- C 盘关键词审计：C:\Users\guoji\Downloads 与 C:\Users\guoji\AppData\Local\Temp 均无本批关键词命中。
+- 今日 .onnx/.engine/.plan/.nupkg 审计：C:\Users\guoji\Downloads 与 C:\Users\guoji\AppData\Local\Temp 均无命中。
+- 编译阶段仍有 5 条既有 nullable warning，位置在 FinalPublishProofGateAndOwnerExecutionPackTests.cs 与 ReleasePublishReadinessEvidencePackAndPublicDocsGateTests.cs，非本批引入。
+
+### C 盘与发布边界
+
+- 本阶段未下载模型、ONNX、engine、TensorRT、CUDA、cuDNN、Python/pip 资产或 NuGet 临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、push、NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
+- 本批没有生成 engine/plan/nupkg，没有 real-model-runtime proof、package-consumer-runtime proof、post-publish verification 或 owner authorization。
+
 ## 2026-07-25 YOLOv8n Pose Case Public Article Expansion
 
 本阶段继续具体模型文章质量提升，扩写 docs/articles/zh-cn/yolovision-pose-keypoint-output-guide.md，新增可复用 E 盘 case workspace、keypoint 输出角色、坐标/骨架 metadata、pose JSON/SVG 和 owner 验证顺序。文章明确本阶段只是文档与质量门，不是真实模型运行、runtime proof、package-consumer-runtime proof 或发布授权。

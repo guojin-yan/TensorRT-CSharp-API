@@ -236,4 +236,64 @@ public sealed class TechnicalArticleCampaignFourthBatchBodyTests
             Assert.Contains(marker, content, StringComparison.Ordinal);
         }
     }
+
+    [Fact]
+    public void YoloVisionYolov8nObbArticleCoversAngleWorkspaceRolesHashesAndValidation()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "yolovision-obb-angle-output-guide.md"));
+
+        foreach (string marker in new[]
+        {
+            "可复用资产目录与完整验证",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-obb\\models",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-obb\\labels",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-obb\\images",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-obb\\tensors",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-obb\\engines",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-obb\\reports",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-obb\\logs",
+            "yolovision-yolov8-obb-candidate.template.json",
+            "model.sourceUrl",
+            "model.downloadUrl",
+            "model.license",
+            "model.sha256",
+            "labels.sha256",
+            "input.imageSha256",
+            "input.preprocessedTensorSha256",
+            "outputMetadata.outputRoleMap",
+            "outputMetadata.boxFormat",
+            "outputMetadata.rotatedBoxLayout",
+            "outputMetadata.angleUnit",
+            "outputMetadata.coordinateSpace",
+            "outputMetadata.postprocessMetadata.angleRange",
+            "Get-FileHash -Algorithm SHA256",
+            "--preprocess-only",
+            "--tensor-layout NCHW",
+            "--color-order RGB",
+            "--resize letterbox",
+            "--output-role-map boxes:det,angles:obb-angle",
+            "--obb-angle-output angles",
+            "--angle-radians",
+            "--output-json",
+            "--visualization-svg",
+            "center.x",
+            "size.width",
+            "angleUnit",
+            "angleRange",
+            "rotated NMS",
+            "Test-YoloVisionOutputReport.ps1",
+            "Test-YoloVisionRealAssetCandidate.ps1",
+            "Test-SampleRunEvidenceRecord.ps1",
+            "YoloVision Passed=True",
+            "仍不是 `package-consumer-runtime` proof"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+    }
 }
