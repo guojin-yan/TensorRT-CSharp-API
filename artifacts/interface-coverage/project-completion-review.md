@@ -3920,6 +3920,32 @@ runtime proof 从短说明扩展为 release owner 和评审者可执行、可判
 - 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
   GitHub Release upload、issue close 或 push。
 
+## 2026-07-25 YOLOv8n Segmentation Case Public Article Expansion
+
+本阶段继续具体模型文章质量提升，扩写 docs/articles/zh-cn/yolovision-segmentation-mask-postprocess-guide.md，新增可复用 E 盘 case workspace、prototype 输出角色、mask 后处理证据字段和 owner 验证顺序。文章明确本阶段只是文档与质量门，不是真实模型运行、runtime proof、package-consumer-runtime proof 或发布授权。
+
+### 实现
+
+- 固定 E:\TensorRtSharpAssets\cases\yolov8n-seg 的 models/labels/images/tensors/engines/reports/logs 布局。
+- 补充 candidate template 的 model/labels/input 来源、license、SHA256、outputRoleMap、prototypeShape、maskCoefficientCount 和 maskResizePolicy 回填字段。
+- 增加 preprocess-only、显式 boxes/proto role map、output JSON、visualization SVG 命令和 mask 输出必填 metadata。
+- 增加 Test-YoloVisionOutputReport.ps1、Test-YoloVisionRealAssetCandidate.ps1、Test-SampleRunEvidenceRecord.ps1 验证顺序。
+- 更新 TechnicalArticleCampaignFourthBatchBodyTests，新增 YoloVisionYolov8nSegmentationArticleCoversPrototypeWorkspaceRolesHashesAndValidation 专项门禁。
+
+### Verification
+
+- TechnicalArticleCampaignFourthBatchBodyTests 定向测试：3/3 通过。
+- git diff --check：通过；仅提示 project-completion-review.md 的既有 CRLF/LF 规范化提示。
+- C 盘关键词审计：C:\Users\guoji\Downloads 与 C:\Users\guoji\AppData\Local\Temp 均无本批关键词命中。
+- 今日 .onnx/.engine/.plan/.nupkg 审计：C:\Users\guoji\Downloads 与 C:\Users\guoji\AppData\Local\Temp 均无命中。
+- 编译阶段仍有 5 条既有 nullable warning，位置在 FinalPublishProofGateAndOwnerExecutionPackTests.cs 与 ReleasePublishReadinessEvidencePackAndPublicDocsGateTests.cs，非本批引入。
+
+### C 盘与发布边界
+
+- 本阶段未下载模型、ONNX、engine、TensorRT、CUDA、cuDNN、Python/pip 资产或 NuGet 临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、push、NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
+- 本批没有生成 engine/plan/nupkg，没有 real-model-runtime proof、package-consumer-runtime proof、post-publish verification 或 owner authorization。
+
 ## 2026-07-25 YOLOv8n Detection Case Public Article Expansion
 
 本阶段继续具体模型文章质量提升，扩写 docs/articles/zh-cn/yolovision-detection-yolov8n-download-export-run.md，新增可复用 E 盘 case workspace、真实图片预处理、输出 JSON/SVG 和 owner evidence 验证顺序。文章明确本阶段只是文档与质量门，不是真实模型运行、runtime proof、package-consumer-runtime proof 或发布授权。

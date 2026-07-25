@@ -121,4 +121,62 @@ public sealed class TechnicalArticleCampaignFourthBatchBodyTests
             Assert.Contains(marker, content, StringComparison.Ordinal);
         }
     }
+
+    [Fact]
+    public void YoloVisionYolov8nSegmentationArticleCoversPrototypeWorkspaceRolesHashesAndValidation()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "yolovision-segmentation-mask-postprocess-guide.md"));
+
+        foreach (string marker in new[]
+        {
+            "可复用资产目录与完整验证",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-seg\\models",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-seg\\labels",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-seg\\images",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-seg\\tensors",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-seg\\engines",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-seg\\reports",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-seg\\logs",
+            "yolovision-yolov8-seg-candidate.template.json",
+            "model.sourceUrl",
+            "model.downloadUrl",
+            "model.license",
+            "labels.sha256",
+            "input.imageSha256",
+            "input.preprocessedTensorSha256",
+            "outputMetadata.outputRoleMap",
+            "outputMetadata.prototypeShape",
+            "outputMetadata.maskCoefficientCount",
+            "outputMetadata.maskResizePolicy",
+            "Get-FileHash -Algorithm SHA256",
+            "--preprocess-only",
+            "--tensor-layout NCHW",
+            "--color-order RGB",
+            "--resize letterbox",
+            "--output-role-map boxes:det,proto:mask-prototypes",
+            "--mask-coefficient-count 32",
+            "--output-json",
+            "--visualization-svg",
+            "detection output shape",
+            "prototype shape",
+            "maskThreshold",
+            "letterboxScale",
+            "maskPixelCount",
+            "boxBeforeCrop",
+            "boxAfterResize",
+            "Test-YoloVisionOutputReport.ps1",
+            "Test-YoloVisionRealAssetCandidate.ps1",
+            "Test-SampleRunEvidenceRecord.ps1",
+            "YoloVision Passed=True",
+            "仍不是 package-consumer-runtime proof"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+    }
 }

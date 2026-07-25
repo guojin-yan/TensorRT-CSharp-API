@@ -149,6 +149,42 @@ dotnet run --project .\samples\YoloVision -- `
 - `samples/YoloVision/Program.cs`：`--task seg`、`--output-role-map` 和 mask 参数入口。
 - `eng/Test-YoloVisionRealAssetCandidate.ps1`：模型、图片、labels、日志和 SHA256 校验。
 
+## 可复用资产目录与完整验证
+
+建议为 YOLOv8n-seg 建立独立的 E 盘 case workspace，避免把模型、图片、engine 和临时包落到系统盘：
+
+E:\TensorRtSharpAssets\cases\yolov8n-seg\models
+E:\TensorRtSharpAssets\cases\yolov8n-seg\labels
+E:\TensorRtSharpAssets\cases\yolov8n-seg\images
+E:\TensorRtSharpAssets\cases\yolov8n-seg\tensors
+E:\TensorRtSharpAssets\cases\yolov8n-seg\engines
+E:\TensorRtSharpAssets\cases\yolov8n-seg\reports
+E:\TensorRtSharpAssets\cases\yolov8n-seg\logs
+
+从 samples/assets/yolovision-yolov8-seg-candidate.template.json 开始回填 model.sourceUrl、model.downloadUrl、model.license、model.sha256、labels.sha256、input.imageSha256、input.preprocessedTensorSha256、outputMetadata.outputRoleMap、outputMetadata.prototypeShape、outputMetadata.maskCoefficientCount 和 outputMetadata.maskResizePolicy。不能只记录 ONNX hash，因为 prototype 和预处理规则同样决定最终 mask。
+
+下载、导出和预处理完成后，分别计算模型、labels、原图、预处理 tensor、engine、build report、output JSON、overlay SVG 和 run log 的 SHA256：
+
+Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-seg\models\yolov8n-seg.onnx
+Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-seg\labels\coco.names
+Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-seg\images\dog.ppm
+Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-seg\tensors\dog-fp32.bin
+
+预处理和运行命令应保留显式 layout、颜色顺序和 role map：
+
+dotnet run --project .\samples\YoloVision -- --preprocess-only --image E:\TensorRtSharpAssets\cases\yolov8n-seg\images\dog.ppm --preprocessed-output E:\TensorRtSharpAssets\cases\yolov8n-seg\tensors\dog-fp32.bin --input-shape 1x3x640x640 --tensor-layout NCHW --color-order RGB --resize letterbox
+dotnet run --project .\samples\YoloVision -- --model E:\TensorRtSharpAssets\cases\yolov8n-seg\models\yolov8n-seg.onnx --labels E:\TensorRtSharpAssets\cases\yolov8n-seg\labels\coco.names --input-data E:\TensorRtSharpAssets\cases\yolov8n-seg\tensors\dog-fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map boxes:det,proto:mask-prototypes --mask-coefficient-count 32 --output-json E:\TensorRtSharpAssets\cases\yolov8n-seg\reports\yolov8n-seg-output.json --visualization-svg E:\TensorRtSharpAssets\cases\yolov8n-seg\reports\yolov8n-seg-output.svg
+
+输出 JSON 至少要保留 detection output shape、prototype shape、maskCoefficientCount、maskThreshold、letterboxScale、letterboxPadX、letterboxPadY、maskPixelCount、boxBeforeCrop、boxAfterResize、className、score、modelSha256、imageSha256 和 preprocessedTensorSha256。overlay SVG 是派生证据，必须能追溯到同一份 JSON、输入图和 run log。
+
+建议按以下顺序运行验证：
+
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-YoloVisionOutputReport.ps1 -Strict
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-YoloVisionRealAssetCandidate.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-SampleRunEvidenceRecord.ps1
+
+只有当 owner 回填真实 prototype/output roles、model/labels/input hashes、YoloVision Passed=True、stdout/stderr summary 和 owner review，并且 validator 通过后，才可以形成 real-model-runtime 候选。preflight、build-only、mask overlay、截图、local feed 和 direct nupkg 仍不是 package-consumer-runtime proof。
+
 ## 图示建议
 
 正式发布文章建议包含：
