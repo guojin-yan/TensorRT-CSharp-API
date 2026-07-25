@@ -1997,6 +1997,48 @@ public sealed class PublishingPublicArticleTests
     }
 
     [Fact]
+    public void OnnxToEnginePublicArticleCoversModelAcquisitionHashIsolationAndCaseEvidenceChecklist()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "publishing",
+            "onnx-to-engine-public-article.md"));
+
+        foreach (string marker in new[]
+        {
+            "从模型获取到可复核案例",
+            "确认模型来源与许可",
+            "固定外部 workspace",
+            "E:\\TensorRtSharpAssets\\cases\\<case-id>",
+            "modelSourceUrl",
+            "downloadedAtUtc",
+            "Get-FileHash -Algorithm SHA256",
+            "onnxSha256",
+            "inputSha256",
+            "--previewOnly --exportReport",
+            "--buildOnly --saveEngine --exportReport --evidenceSidecar",
+            "EngineFileRoundTrip",
+            "BuilderConfigDeploymentSnapshot",
+            "ReadbackMatch",
+            "模型特定 runtime",
+            "reference output",
+            "runtimeLogSha256",
+            "outputValidationPerformed",
+            "ownerReviewed",
+            "proofClassification",
+            "不能宣称 real-model-runtime proof",
+            "clean external consumer",
+            "post-publish verification"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+    }
+
+    [Fact]
     public void OnnxParserParserRefitterCopiedDiagnosticsArticleCoversSnapshotsReportsAndReleaseBoundary()
     {
         string content = File.ReadAllText(Path.Combine(

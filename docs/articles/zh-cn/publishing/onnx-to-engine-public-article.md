@@ -186,6 +186,45 @@ ONNX 转换成功是必要条件，但不是 package-consumer-runtime proof。bu
 
 如果 `--loadEngine` 只能输出 readonly diagnostics，不要在文章里说它已经验证模型语义。只有执行 enqueue、读取输出、匹配 reference output 并记录 owner evidence，才能往 real-model-runtime proof 走。
 
+## 从模型获取到可复核案例
+
+一篇面向微信公众号或博客的完整案例，不能只给出一条 dotnet run 命令。建议按下面顺序准备资产和证据：
+
+1. **确认模型来源与许可**：记录模型项目主页、版本、下载地址、许可证、导出工具版本和原始文件名；不要把未经许可的模型或权重提交进仓库。
+2. **把大文件放到固定外部 workspace**：例如 E:\TensorRtSharpAssets\cases\<case-id>，分成 models、inputs、engines、reports、logs 和 packages，不要把 ONNX、engine、模型权重或临时 nupkg 放到 C:\Users\guoji\Downloads 或 Temp。
+3. **计算来源 hash**：对原始 ONNX、输入样例和必要的模型配置执行 Get-FileHash -Algorithm SHA256，把 modelSourceUrl、license、onnxSha256、inputSha256 和 downloadedAtUtc 写入案例记录。
+4. **先做 parser dry-run**：使用 --previewOnly --exportReport 检查 alias、shape profile、precision、输出路径和 NormalizedCommandSha256；此阶段不能创建 engine，也不能写成 build proof。
+5. **再做 build-only**：使用 --buildOnly --saveEngine --exportReport --evidenceSidecar，核对 Parsed、EngineSaved、EngineFileRoundTrip、BuilderConfigDeploymentSnapshot、ReadbackMatch 和 engine SHA256。
+6. **最后做模型特定 runtime**：只有案例能够定义输入预处理、输出 tensor、reference output、容差和失败诊断时，才执行 enqueue/readback；MNIST 使用 --expectedDigit，YOLO 使用 YoloVision 的 task output contract。
+7. **保存可复核日志**：记录完整命令、stdout/stderr、exitCode、host OS、GPU、driver、CUDA、TensorRT line、runtime package key、report SHA256、engine SHA256 和 owner review。
+
+推荐的案例记录字段如下：
+
+caseId
+modelName
+modelVersion
+modelSourceUrl
+license
+downloadedAtUtc
+onnxSha256
+inputSha256
+exporterVersion
+normalizedCommandLine
+normalizedCommandSha256
+buildReportSha256
+engineSha256
+runtimeLogSha256
+hostOs
+gpuName
+cudaDriverVersion
+cudaRuntimeVersion
+tensorRtLine
+outputValidationPerformed
+ownerReviewed
+proofClassification
+
+这套记录把“模型能下载”“engine 能生成”“输出符合预期”和“公开包能被外部用户消费”分成四个问题。缺少 license、来源 hash、reference output、host metadata 或 owner review 时，文章只能展示教程路径，不能宣称 real-model-runtime proof；即使全部齐全，也仍需 clean external consumer 和 post-publish verification 才能进入发布闭环。
+
 ## 配图建议
 
 - 一张 ONNX -> parser/build -> engine -> readback diagnostics -> sample runtime -> package proof 的证据梯子图。

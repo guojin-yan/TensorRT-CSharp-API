@@ -3920,6 +3920,31 @@ runtime proof 从短说明扩展为 release owner 和评审者可执行、可判
 - 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
   GitHub Release upload、issue close 或 push。
 
+## 2026-07-25 OnnxToEngine Case Tutorial Public Article Expansion
+
+本阶段继续公开文章矩阵质量提升，扩写 docs/articles/zh-cn/publishing/onnx-to-engine-public-article.md，新增从模型获取到可复核案例的完整教程清单。文章明确本阶段只是文档与质量门，不是模型转换执行、runtime proof、package-consumer-runtime proof 或发布授权。
+
+### 实现
+
+- 新增模型来源与许可证记录、外部 E:\TensorRtSharpAssets\cases\<case-id> workspace、models/inputs/engines/reports/logs/packages 布局说明。
+- 新增 ONNX/input/build report/engine/runtime log SHA256、modelSourceUrl、license、downloadedAtUtc、host metadata、ownerReviewed 和 proofClassification 字段。
+- 明确 parser dry-run、build-only、模型特定 runtime 和 clean external consumer 四个阶段的证据边界。
+- 更新 PublishingPublicArticleTests，新增 OnnxToEnginePublicArticleCoversModelAcquisitionHashIsolationAndCaseEvidenceChecklist 专项门禁。
+
+### Verification
+
+- PublishingPublicArticleTests 定向测试：31/31 通过。
+- 编译阶段仍有 5 条既有 nullable warning，位置在 FinalPublishProofGateAndOwnerExecutionPackTests.cs 与 ReleasePublishReadinessEvidencePackAndPublicDocsGateTests.cs，非本批引入。
+- git diff --check：通过；仅提示 project-completion-review.md 的既有 CRLF/LF 规范化提示。
+- C 盘关键词审计：C:\Users\guoji\Downloads 与 C:\Users\guoji\AppData\Local\Temp 均无本批关键词命中。
+- 今日 .onnx/.engine/.plan/.nupkg 审计：C:\Users\guoji\Downloads 与 C:\Users\guoji\AppData\Local\Temp 均无命中。
+
+### C 盘与发布边界
+
+- 本阶段未下载模型、ONNX、engine、TensorRT、CUDA、cuDNN、Python/pip 资产或 NuGet 临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、push、NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
+- 本批没有执行真实模型转换、没有生成 engine/plan/nupkg、没有 package-consumer-runtime proof、post-publish verification 或 owner authorization。
+
 ## 2026-07-24 Engine Inspector Public Article Expansion
 
 本阶段继续公开文章矩阵质量提升，扩写
