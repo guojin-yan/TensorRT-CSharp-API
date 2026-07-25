@@ -228,6 +228,33 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-YoloVisionOutputReport.
 
 这个 validator 检查 task-specific prediction metadata、copied output tensor summaries、`boundary.isRuntimeProof=false` 和 forbidden substitute list。它是 owner-review infrastructure，不是 runtime proof。
 
+## 案例矩阵与证据回填顺序
+
+每篇 YOLO 案例都应先从 yolo-model-matrix.json 选择 family/task，再从 yolovision-task-output-contract.json 读取该任务的 requiredMetadata；不要先下载一个模型、跑出一张截图，再倒推输出语义。推荐顺序是：
+
+1. **选择矩阵条目**：记录 family、task、supportedTasks、status、inputShape、output roles 和当前 proof boundary。future-family-planning、planned-runtime-proof 和 managed-postprocess-ready 都表示仍需 owner 资产或真实运行证据。
+2. **获取并固定来源**：优先使用官方或 owner-approved 下载入口，记录 modelSourceUrl、modelVersion、license、checkpoint、exporterVersion 和 modelSha256；模型权重、图片和 labels 留在 E 盘外部 workspace。
+3. **导出并做静态检查**：保存 export command、opset、dynamic/static shape、input/output tensor names、class count 和 graph-side NMS 说明；不把导出成功写成 runtime proof。
+4. **预检输出契约**：用 --preflight 填写 outputRoleMap 和任务专属字段，保存 preflight report；owner-action-required 或 canPromoteRealModelRuntime=false 必须原样保留。
+5. **构建 engine**：用 TensorRtExec 或 OnnxToEngine 执行 build-only，保存 command、report、engine SHA256 和 readback；build-only 只进入 build evidence。
+6. **运行样例并校验输出**：提供真实输入图或 tensor、labels、预处理配置、阈值和 reference output，保存 YoloVision Passed=True、stdout/stderr、output JSON、visualization 和 run log SHA256。
+7. **回填并审查**：运行 sample-run-evidence validator，补 host metadata、owner review 和失败诊断；只有 real-model-runtime evidence 完整后，才可继续讨论外部 clean consumer，不能由本地样例直接晋级 package-consumer-runtime。
+
+六类任务不能省略的字段也不同：
+
+| Task | 必须明确的输出语义 | 常见遗漏 |
+| --- | --- | --- |
+| det | box format、score rule、class count、objectness、NMS mode、end-to-end column order | 把 [1,N,6] 和 raw head 当成同一布局 |
+| cls | logits/topK、labels path、class count、softmaxApplied | 只展示 top-1，不记录 labels 和 score 规则 |
+| seg | boxes、mask coefficients、prototype shape/layout、crop/resize policy、mask threshold | 只画 mask，不保存 prototype 和缩放规则 |
+| obb | angle output、angle unit/range、rotated box format、rotated NMS | 把角度当作普通 box 坐标或忽略单位 |
+| pose | keypoint count、stride、coordinate layout、visibility/score、skeleton metadata | 只画点，不记录 keypoint tensor layout |
+| sem | semantic map shape、class count、argmax rule、palette、ignore/void policy | 把 class-index map 和 logits map 混为一谈 |
+
+当前矩阵中，YOLOv5/v6/v7/v8/v9/v10/YOLO11/YOLO26/YOLOX/custom 的任务覆盖并不相同；例如 YOLOv10 的官方 end-to-end detection 使用 [1,300,6]，YOLOX 是 detection-only 的 [1,8400,85] raw output，YOLO26 仍需 owner-approved output contract。文章必须展示这种差异，而不是用“支持全部 YOLO”替代具体证据。
+
+所有候选模板都应保留 owner-action-required、canPromoteRealModelRuntime=false 和 canPromotePackageConsumerRuntime=false，直到真实模型、真实输入、输出 JSON、日志 hash、许可证和 owner review 全部通过 validator。support matrix、preflight、build report、SVG、GUI screenshot、local feed 和 direct nupkg 都不能改变这些字段。
+
 ## 官方资产与文章案例
 
 仓库不会把大型模型、图片和 label 直接塞进源码，因为这些资产有体积和 license 限制。已有的 acquisition/backfill 入口都要求 owner 明确来源、license、SHA256 和输出日志。

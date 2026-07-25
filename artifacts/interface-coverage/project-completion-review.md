@@ -3920,6 +3920,32 @@ runtime proof 从短说明扩展为 release owner 和评审者可执行、可判
 - 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
   GitHub Release upload、issue close 或 push。
 
+## 2026-07-25 YoloVision Case Matrix Public Article Expansion
+
+本阶段继续公开文章矩阵质量提升，扩写 docs/articles/zh-cn/publishing/yolovision-overview-public-article.md，新增案例矩阵与证据回填顺序章节。文章明确本阶段只是文档与质量门，不是真实模型运行、runtime proof、package-consumer-runtime proof 或发布授权。
+
+### 实现
+
+- 对齐 yolo-model-matrix.json 与 yolovision-task-output-contract.json，说明 family/task 选择、模型来源、license/hash、preflight、build-only、真实运行和 owner review 顺序。
+- 细化 det/cls/seg/obb/pose/sem 六任务必填输出 metadata，保留 box、score、NMS、prototype、angle、keypoint、semantic map 等任务专属字段。
+- 明确 YOLOv10 [1,300,6]、YOLOX [1,8400,85] 和 YOLO26 owner-approved output contract 的差异，不以“支持全部 YOLO”替代具体证据。
+- 固定 owner-action-required、canPromoteRealModelRuntime=false、canPromotePackageConsumerRuntime=false，禁止本地样例直接晋级 package-consumer-runtime。
+- 更新 PublishingPublicArticleTests，新增 YoloVisionOverviewPublicArticleCoversCaseMatrixAcquisitionOrderTaskMetadataAndPromotionBoundaries 专项门禁。
+
+### Verification
+
+- PublishingPublicArticleTests 定向测试：33/33 通过。
+- 编译阶段仍有 5 条既有 nullable warning，位置在 FinalPublishProofGateAndOwnerExecutionPackTests.cs 与 ReleasePublishReadinessEvidencePackAndPublicDocsGateTests.cs，非本批引入。
+- git diff --check：通过；仅提示 project-completion-review.md 的既有 CRLF/LF 规范化提示。
+- C 盘关键词审计：C:\Users\guoji\Downloads 与 C:\Users\guoji\AppData\Local\Temp 均无本批关键词命中。
+- 今日 .onnx/.engine/.plan/.nupkg 审计：C:\Users\guoji\Downloads 与 C:\Users\guoji\AppData\Local\Temp 均无命中。
+
+### C 盘与发布边界
+
+- 本阶段未下载模型、ONNX、engine、TensorRT、CUDA、cuDNN、Python/pip 资产或 NuGet 临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、push、NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
+- 本批没有生成 engine/plan/nupkg，没有 real-model-runtime proof、package-consumer-runtime proof、post-publish verification 或 owner authorization。
+
 ## 2026-07-25 TensorRtExec CLI WinForms Public Article Expansion
 
 本阶段继续公开文章矩阵质量提升，扩写 docs/articles/zh-cn/publishing/tensorrtexec-cli-public-article.md，新增 CLI/WinForms 操作闭环、共享数据流和 CUDA/TensorRT DLL 排障决策树。文章明确本阶段只是文档与质量门，不是 runtime proof、package-consumer-runtime proof 或发布授权。

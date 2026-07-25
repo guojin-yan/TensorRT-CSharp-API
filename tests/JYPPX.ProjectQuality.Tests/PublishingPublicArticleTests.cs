@@ -507,6 +507,61 @@ public sealed class PublishingPublicArticleTests
     }
 
     [Fact]
+    public void YoloVisionOverviewPublicArticleCoversCaseMatrixAcquisitionOrderTaskMetadataAndPromotionBoundaries()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "publishing",
+            "yolovision-overview-public-article.md"));
+
+        foreach (string marker in new[]
+        {
+            "案例矩阵与证据回填顺序",
+            "yolo-model-matrix.json",
+            "yolovision-task-output-contract.json",
+            "requiredMetadata",
+            "supportedTasks",
+            "modelSourceUrl",
+            "modelVersion",
+            "license",
+            "checkpoint",
+            "exporterVersion",
+            "modelSha256",
+            "opset",
+            "dynamic/static shape",
+            "outputRoleMap",
+            "--preflight",
+            "owner-action-required",
+            "canPromoteRealModelRuntime=false",
+            "canPromotePackageConsumerRuntime=false",
+            "TensorRtExec 或 OnnxToEngine",
+            "YoloVision Passed=True",
+            "sample-run-evidence validator",
+            "box format",
+            "score rule",
+            "NMS mode",
+            "logits/topK",
+            "labels path",
+            "mask coefficients",
+            "prototype shape/layout",
+            "angle unit/range",
+            "keypoint count",
+            "semantic map shape",
+            "[1,300,6]",
+            "[1,8400,85]",
+            "YOLO26 仍需 owner-approved output contract",
+            "不能由本地样例直接晋级 package-consumer-runtime",
+            "support matrix、preflight、build report、SVG、GUI screenshot、local feed 和 direct nupkg"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+    }
+
+    [Fact]
     public void ProjectOverviewPublicArticleCoversArchitectureSamplesPackagesArticleMatrixAndReleaseBoundary()
     {
         string content = File.ReadAllText(Path.Combine(
