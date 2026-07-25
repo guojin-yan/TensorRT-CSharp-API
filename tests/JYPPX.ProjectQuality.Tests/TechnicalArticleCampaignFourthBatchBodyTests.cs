@@ -296,4 +296,69 @@ public sealed class TechnicalArticleCampaignFourthBatchBodyTests
             Assert.Contains(marker, content, StringComparison.Ordinal);
         }
     }
+
+    [Fact]
+    public void YoloVisionYolov8nClassificationArticleCoversLabelsTopKWorkspaceHashesAndValidation()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "yolovision-classification-yolov8n-labels-topk-guide.md"));
+
+        foreach (string marker in new[]
+        {
+            "适用读者",
+            "解决问题",
+            "背景与场景",
+            "可复用资产目录与完整验证",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-cls\\models",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-cls\\labels",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-cls\\images",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-cls\\tensors",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-cls\\engines",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-cls\\reports",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-cls\\logs",
+            "yolovision-yolov8-cls-candidate.template.json",
+            "model.sourceUrl",
+            "model.downloadUrl",
+            "model.license",
+            "model.sha256",
+            "labels.sourceUrl",
+            "labels.sha256",
+            "labels.classCount",
+            "input.imageSha256",
+            "input.preprocessedTensorSha256",
+            "outputMetadata.classificationOutput",
+            "outputMetadata.outputShape",
+            "outputMetadata.classCount",
+            "outputMetadata.labelsPath",
+            "outputMetadata.topK",
+            "outputMetadata.classScoreField",
+            "outputMetadata.postprocessMetadata.activation",
+            "Get-FileHash -Algorithm SHA256",
+            "--preprocess-only",
+            "--tensor-layout NCHW",
+            "--color-order RGB",
+            "--resize letterbox",
+            "owner-approved preprocess pipeline",
+            "center crop",
+            "--classification-output logits",
+            "--top-k 5",
+            "--output-json",
+            "--visualization-svg",
+            "postprocess.topK",
+            "className",
+            "softmaxApplied",
+            "Test-YoloVisionOutputReport.ps1",
+            "Test-YoloVisionRealAssetCandidate.ps1",
+            "Test-SampleRunEvidenceRecord.ps1",
+            "YoloVision Passed=True",
+            "仍不是 `package-consumer-runtime` proof"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+    }
 }

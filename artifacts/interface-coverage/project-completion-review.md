@@ -3920,6 +3920,36 @@ runtime proof 从短说明扩展为 release owner 和评审者可执行、可判
 - 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
   GitHub Release upload、issue close 或 push。
 
+## 2026-07-25 YOLOv8n Classification Case Public Article Expansion
+
+本阶段继续具体模型文章质量提升，扩写 docs/articles/zh-cn/yolovision-classification-yolov8n-labels-topk-guide.md，补齐统一文章骨架、可复用 E 盘 case workspace、labels/score 语义、Top-K JSON/SVG 和 owner 验证顺序。文章明确本阶段只是文档与质量门，不是真实模型运行、runtime proof、package-consumer-runtime proof 或发布授权。
+
+### 实现
+
+- 补齐适用读者、解决问题、背景与场景、代码与文件入口、图示建议、边界说明和下一步章节。
+- 固定 E:\TensorRtSharpAssets\cases\yolov8n-cls 的 models/labels/images/tensors/engines/reports/logs 布局。
+- 补充 candidate template 的 model/labels/input 来源、license、SHA256、classCount、classificationOutput、outputShape、labelsPath、topK、classScoreField 和 activation 回填字段。
+- 增加 preprocess-only、显式 `--classification-output logits`、`--top-k 5`、output JSON、visualization SVG 命令。
+- 明确标准 classification 可能需要 resize + center crop，通用 letterbox 命令只有在 owner 确认模型契约一致时才可使用；否则必须回填 owner-approved preprocess pipeline 和 tensor hash。
+- 明确程序输出的 `postprocess.topK`、`classId`、`className`、`score`，以及 owner 必须回填的 logits/probability、softmaxApplied、labels locale 和 score precision 边界。
+- 增加 Test-YoloVisionOutputReport.ps1、Test-YoloVisionRealAssetCandidate.ps1、Test-SampleRunEvidenceRecord.ps1 验证顺序。
+- 更新 TechnicalArticleCampaignFourthBatchBodyTests，新增 YoloVisionYolov8nClassificationArticleCoversLabelsTopKWorkspaceHashesAndValidation 专项门禁。
+
+### Verification
+
+- TechnicalArticleCampaignFourthBatchBodyTests 定向测试：6/6 通过。
+- git diff --check：通过；仅提示 project-completion-review.md 的既有 CRLF/LF 规范化提示。
+- C 盘本批唯一关键词审计：C:\Users\guoji\Downloads 与 C:\Users\guoji\AppData\Local\Temp 均无文章名、批次名或 candidate 名命中。
+- 通用 `top-k` 词命中 C:\Users\guoji\Downloads\PaddleOCR-main 中 3 个 2026-01-20 已有源码文件，确认与本批无关，未删除用户既有下载。
+- 今日 .onnx/.engine/.plan/.nupkg 审计：C:\Users\guoji\Downloads 与 C:\Users\guoji\AppData\Local\Temp 均无命中；本批命名资产也无命中。
+- 编译阶段仍有 5 条既有 nullable warning，位置在 FinalPublishProofGateAndOwnerExecutionPackTests.cs 与 ReleasePublishReadinessEvidencePackAndPublicDocsGateTests.cs，非本批引入。
+
+### C 盘与发布边界
+
+- 本阶段未下载模型、ONNX、engine、TensorRT、CUDA、cuDNN、Python/pip 资产或 NuGet 临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、push、NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
+- 本批没有生成 engine/plan/nupkg，没有 real-model-runtime proof、package-consumer-runtime proof、post-publish verification 或 owner authorization。
+
 ## 2026-07-25 YOLOv8n OBB Case Public Article Expansion
 
 本阶段继续具体模型文章质量提升，扩写 docs/articles/zh-cn/yolovision-obb-angle-output-guide.md，新增可复用 E 盘 case workspace、angle 输出角色、单位/范围/坐标空间 metadata、OBB JSON/SVG 和 owner 验证顺序。文章明确本阶段只是文档与质量门，不是真实模型运行、runtime proof、package-consumer-runtime proof 或发布授权。
