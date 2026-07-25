@@ -179,4 +179,61 @@ public sealed class TechnicalArticleCampaignFourthBatchBodyTests
             Assert.Contains(marker, content, StringComparison.Ordinal);
         }
     }
+
+    [Fact]
+    public void YoloVisionYolov8nPoseArticleCoversKeypointWorkspaceRolesHashesAndValidation()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "yolovision-pose-keypoint-output-guide.md"));
+
+        foreach (string marker in new[]
+        {
+            "可复用资产目录与完整验证",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-pose\\models",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-pose\\labels",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-pose\\images",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-pose\\tensors",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-pose\\engines",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-pose\\reports",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-pose\\logs",
+            "yolovision-yolov8-pose-candidate.template.json",
+            "model.sourceUrl",
+            "model.downloadUrl",
+            "model.license",
+            "labels.sha256",
+            "input.imageSha256",
+            "input.preprocessedTensorSha256",
+            "outputMetadata.outputRoleMap",
+            "outputMetadata.keypointCount",
+            "outputMetadata.keypointStride",
+            "outputMetadata.coordinateLayout",
+            "outputMetadata.keypointLayout",
+            "outputMetadata.keypointScoreField",
+            "Get-FileHash -Algorithm SHA256",
+            "--preprocess-only",
+            "--tensor-layout NCHW",
+            "--color-order RGB",
+            "--resize letterbox",
+            "--output-role-map boxes:det,keypoints:pose-keypoints",
+            "--keypoint-count 17",
+            "--keypoint-stride 3",
+            "--output-json",
+            "--visualization-svg",
+            "keypoints[].index",
+            "keypoints[].score",
+            "skeleton map",
+            "Test-YoloVisionOutputReport.ps1",
+            "Test-YoloVisionRealAssetCandidate.ps1",
+            "Test-SampleRunEvidenceRecord.ps1",
+            "YoloVision Passed=True",
+            "仍不是 `package-consumer-runtime` proof"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+    }
 }

@@ -135,6 +135,53 @@ dotnet run --project .\samples\YoloVision -- `
 
 坐标还原应明确从模型输入空间回到原图空间。可视化 overlay 只能作为人工复核材料，不能替代 run log 和 hash。
 
+## 可复用资产目录与完整验证
+
+建议为 YOLOv8n-pose 建立独立的 E 盘 case workspace，模型、关键点标签、图片、预处理 tensor、engine 和日志都放在同一 case 下，避免把大文件和临时包落到系统盘：
+
+E:\TensorRtSharpAssets\cases\yolov8n-pose\models
+E:\TensorRtSharpAssets\cases\yolov8n-pose\labels
+E:\TensorRtSharpAssets\cases\yolov8n-pose\images
+E:\TensorRtSharpAssets\cases\yolov8n-pose\tensors
+E:\TensorRtSharpAssets\cases\yolov8n-pose\engines
+E:\TensorRtSharpAssets\cases\yolov8n-pose\reports
+E:\TensorRtSharpAssets\cases\yolov8n-pose\logs
+
+从 `samples/assets/yolovision-yolov8-pose-candidate.template.json` 开始回填 `model.sourceUrl`、`model.downloadUrl`、`model.license`、`model.sha256`、`labels.sha256`、`input.imageSha256`、`input.preprocessedTensorSha256`，以及 `outputMetadata.outputRoleMap`、`outputMetadata.keypointCount`、`outputMetadata.keypointStride`、`outputMetadata.coordinateLayout`、`outputMetadata.keypointLayout` 和 `outputMetadata.keypointScoreField`。`skeletonMap`、关键点名称和连接关系属于 owner 的任务语义证据，必须和模型导出说明一起保存，不能只假设 COCO 17 点。
+
+模型、keypoint map、原图、预处理 tensor、engine、build report、preflight report、output JSON、overlay SVG 和 run log 分别计算 SHA256：
+
+```powershell
+Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-pose\models\yolov8n-pose.onnx
+Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-pose\labels\coco-pose.names
+Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-pose\images\person.ppm
+Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-pose\tensors\person-fp32.bin
+```
+
+先只做预处理，确认输入契约和 tensor hash：
+
+```powershell
+dotnet run --project .\samples\YoloVision -- --preprocess-only --image E:\TensorRtSharpAssets\cases\yolov8n-pose\images\person.ppm --preprocessed-output E:\TensorRtSharpAssets\cases\yolov8n-pose\tensors\person-fp32.bin --input-shape 1x3x640x640 --tensor-layout NCHW --color-order RGB --resize letterbox
+```
+
+随后保留显式 pose output role、layout 和输出产物：
+
+```powershell
+dotnet run --project .\samples\YoloVision -- --model E:\TensorRtSharpAssets\cases\yolov8n-pose\models\yolov8n-pose.onnx --labels E:\TensorRtSharpAssets\cases\yolov8n-pose\labels\coco-pose.names --input-data E:\TensorRtSharpAssets\cases\yolov8n-pose\tensors\person-fp32.bin --input-shape 1x3x640x640 --family v8 --task pose --output-role-map boxes:det,keypoints:pose-keypoints --keypoint-count 17 --keypoint-stride 3 --output-json E:\TensorRtSharpAssets\cases\yolov8n-pose\reports\yolov8n-pose-output.json --visualization-svg E:\TensorRtSharpAssets\cases\yolov8n-pose\reports\yolov8n-pose-output.svg
+```
+
+输出 JSON 至少要保存 `box`、`classId`、`className`、`score`、`keypoints[].index`、`keypoints[].x`、`keypoints[].y`、`keypoints[].score`、`keypointCount`、`keypointStride`、`coordinateLayout`、`letterbox`、`modelSha256`、`imageSha256` 和 `preprocessedTensorSha256`。当前输出 schema 中每个 pose keypoint 使用 `index/x/y/score`；名称、visibility 和 skeleton map 要放在 owner metadata 或配套记录中，并与同一 output JSON、输入图和 run log 关联。
+
+建议按以下顺序验证：
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-YoloVisionOutputReport.ps1 -Strict
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-YoloVisionRealAssetCandidate.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-SampleRunEvidenceRecord.ps1
+```
+
+只有 owner 回填真实模型、keypoint map、输入 hash、输出 layout、`YoloVision Passed=True`、stdout/stderr summary、run log hash 并通过 validator 后，才能形成 `real-model-runtime` 候选。TensorRtExec build-only、preflight、keypoint overlay、截图、local feed 和 direct `.nupkg` 仍不是 `package-consumer-runtime` proof。
+
 ## 代码与文件入口
 
 - `samples/YoloVision/YoloVisionRuntimePipeline.cs`：pose output role 路由。
