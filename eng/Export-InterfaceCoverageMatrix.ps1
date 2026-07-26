@@ -541,6 +541,8 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
     "IExecutionContext::executeV2" = @("id:*execution-context-execute-v2-deferred")
     "IExecutionContext::enqueueV2" = @("id:*execution-context-enqueue-v2-deferred")
     "IExecutionContext::setAuxStreams" = @("id:*execution-context-set-aux-streams-deferred")
+    "IExecutionContext::getNvtxVerbosity" = @("id:*execution-context-get-nvtx-verbosity-deferred")
+    "IExecutionContext::setNvtxVerbosity" = @("id:*execution-context-set-nvtx-verbosity-deferred")
     "IPluginRegistry::getBuilderSafePluginRegistry" = @("id:*plugin-registry-get-builder-safe-plugin-registry-deferred")
     "IPluginRegistry::setParentSearchEnabled" = @("id:*plugin-registry-set-parent-search-enabled-deferred")
     "IPluginV2Ext::getTensorRTVersion" = @("id:*plugin-v2-ext-get-tensor-rt-version-deferred")

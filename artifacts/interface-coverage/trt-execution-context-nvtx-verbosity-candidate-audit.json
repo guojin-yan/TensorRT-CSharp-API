@@ -1,0 +1,68 @@
+{
+  "recordKind": "trt-execution-context-nvtx-verbosity-candidate-audit",
+  "generatedOn": "2026-07-26",
+  "module": "tensorrt",
+  "interfaceGroup": "IExecutionContext NVTX verbosity",
+  "versions": ["TRT8", "TRT10", "TRT11"],
+  "candidates": [
+    {
+      "interface": "IExecutionContext::getNvtxVerbosity",
+      "vendorHeader": "NvInferRuntime.h",
+      "realManifestIds": [
+        "jyppx-trt8-execution-context-get-nvtx-verbosity",
+        "jyppx-trt10-execution-context-get-nvtx-verbosity",
+        "jyppx-trt11-execution-context-get-nvtx-verbosity"
+      ],
+      "deferredHistoryManifestIds": [
+        "trt8-execution-context-get-nvtx-verbosity-deferred",
+        "trt10-execution-context-get-nvtx-verbosity-deferred"
+      ],
+      "importLibraryAndDllEvidence": "existing native ABI declaration/export parity records",
+      "ownership": "caller-owned scalar output",
+      "risk": "low",
+      "versionGuards": [
+        "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+        "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+        "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11"
+      ],
+      "publicApiPointerFree": true,
+      "canDeleteDeferredRecords": false,
+      "coverageByVersion": {
+        "TRT8": "implemented-with-deferred-history",
+        "TRT10": "implemented-with-deferred-history",
+        "TRT11": "implemented"
+      }
+    },
+    {
+      "interface": "IExecutionContext::setNvtxVerbosity",
+      "vendorHeader": "NvInferRuntime.h",
+      "realManifestIds": [
+        "jyppx-trt8-execution-context-set-nvtx-verbosity",
+        "jyppx-trt10-execution-context-set-nvtx-verbosity",
+        "jyppx-trt11-execution-context-set-nvtx-verbosity"
+      ],
+      "deferredHistoryManifestIds": [
+        "trt8-execution-context-set-nvtx-verbosity-deferred",
+        "trt10-execution-context-set-nvtx-verbosity-deferred"
+      ],
+      "importLibraryAndDllEvidence": "existing native ABI declaration/export parity records",
+      "ownership": "caller-owned scalar input/output",
+      "risk": "low",
+      "versionGuards": [
+        "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8",
+        "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+        "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11"
+      ],
+      "publicApiPointerFree": true,
+      "canDeleteDeferredRecords": false,
+      "coverageByVersion": {
+        "TRT8": "implemented-with-deferred-history",
+        "TRT10": "implemented-with-deferred-history",
+        "TRT11": "implemented"
+      }
+    }
+  ],
+  "smoke": "TensorRtSmokeRunner performs get -> set(same value) -> get",
+  "canPromoteReleaseProof": false,
+  "canPublishPublicly": false
+}

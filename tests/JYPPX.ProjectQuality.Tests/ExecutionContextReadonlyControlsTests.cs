@@ -173,6 +173,27 @@ public sealed class ExecutionContextReadonlyControlsTests
         }
     }
 
+    [Fact]
+    public void NvtxVerbosityDeferredHistoryUsesExplicitCoverageAliasesAndPointerFreeAudit()
+    {
+        string script = ReadSource("eng", "Export-InterfaceCoverageMatrix.ps1");
+        string audit = ReadSource("artifacts", "interface-coverage", "trt-execution-context-nvtx-verbosity-candidate-audit.md");
+        string auditJson = ReadSource("artifacts", "interface-coverage", "trt-execution-context-nvtx-verbosity-candidate-audit.json");
+
+        Assert.Contains("\"IExecutionContext::getNvtxVerbosity\" = @(\"id:*execution-context-get-nvtx-verbosity-deferred\")", script);
+        Assert.Contains("\"IExecutionContext::setNvtxVerbosity\" = @(\"id:*execution-context-set-nvtx-verbosity-deferred\")", script);
+        Assert.Contains("TRT8", audit);
+        Assert.Contains("TRT10", audit);
+        Assert.Contains("TRT11", audit);
+        Assert.Contains("vendor header", audit);
+        Assert.Contains("import library/DLL", audit);
+        Assert.Contains("retain TRT8/TRT10 deferred history", audit);
+        Assert.Contains("getNvtxVerbosity", auditJson);
+        Assert.Contains("setNvtxVerbosity", auditJson);
+        Assert.Contains("canDeleteDeferredRecords\": false", auditJson);
+        Assert.Contains("publicApiPointerFree\": true", auditJson);
+    }
+
     private static string ReadSource(params string[] pathParts)
     {
         string path = Path.Combine(new[] { RepositoryPaths.Root }.Concat(pathParts).ToArray());

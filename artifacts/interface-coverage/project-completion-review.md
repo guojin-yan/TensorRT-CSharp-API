@@ -3247,6 +3247,42 @@ proof 或发布授权。
   post-publish verification 或 owner authorization，因此不改变 `canPublishPublicly=false`、
   `canCloseReleaseIssue=false` 或 release blocker 状态。
 
+## 2026-07-26 TensorRT Execution Context NVTX Verbosity Deferred Alias Closure
+
+本阶段将 `IExecutionContext::getNvtxVerbosity` 与 `IExecutionContext::setNvtxVerbosity`
+作为成对的 scalar diagnostics 工作包收口。TRT8、TRT10、TRT11 的真实 native
+implementation、version-specific manifest、C# interop、pointer-free wrapper 和
+`TensorRtSmokeRunner` 调用均已存在；本阶段补齐 coverage exporter 的显式 deferred-history
+alias，并新增候选审计记录与回归门禁。旧 deferred manifest 未删除。
+
+### 实现与证据
+
+- `eng/Export-InterfaceCoverageMatrix.ps1` 显式归并
+  `IExecutionContext::getNvtxVerbosity` / `setNvtxVerbosity` 的 TRT8/TRT10 deferred
+  history；TRT11 没有对应历史 deferred record，保持真实 entry 为 `implemented`。
+- 新增 `artifacts/interface-coverage/trt-execution-context-nvtx-verbosity-candidate-audit.md`
+  与 `.json`，记录 `NvInferRuntime.h`、native ABI/export parity、version guards、ownership
+  和 public pointer-free 结论。
+- `ExecutionContextReadonlyControlsTests` 增加 alias、跨版本、审计字段和删除 deferred
+  禁止项的断言。
+
+### Verification
+
+- `Export-InterfaceCoverageMatrix.ps1`：成功；TRT8/10 rows 为
+  `implemented-with-deferred-history`，TRT11 rows 为 `implemented`，所有 package
+  `manifest matched` 与 `native source present` 保持完整。
+- 未删除 TRT8/TRT10 deferred records；未新增 TRT11 虚构 deferred record。
+- 本阶段没有 callback、allocator、plugin lifecycle、borrowed pointer、device pointer
+  或 external resource API uplift。
+
+### C 盘与发布边界
+
+- 未下载模型、ONNX、engine、plan、TensorRT、CUDA、cuDNN 或 NuGet 包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、push、NuGet push、GitHub Packages publish、
+  GitHub Release upload 或 issue close。
+- 本阶段不构成 runtime proof、package-consumer-runtime proof、release proof 或公开发布授权，
+  `canDeleteDeferredRecords=false`、`canPublishPublicly=false` 保持不变。
+
 ## 2026-07-24 OnnxToEngine Trtexec Parity Public Article Expansion
 
 本阶段继续公开文章矩阵质量提升，扩写 docs/articles/zh-cn/publishing/onnxtoengine-trtexec-parity-public-article.md，将 OnnxToEngine 与 TensorRtExec 的 trtexec-like 对齐文章从参数矩阵说明推进为包含 conversion playbook、shape/profile 归一化、typed readback、artifact hash、runtime candidate 和 proof promotion criteria 的公开教程。文章明确本阶段只是文档和质量门，不是 engine runtime proof、package-consumer-runtime proof、post-publish proof 或发布授权。
