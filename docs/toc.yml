@@ -96,6 +96,8 @@
     href: articles/zh-cn/deferred-boundary-risk-tier-gate.md
   - name: Deferred BTier 41 45 Proof Closure
     href: articles/zh-cn/deferred-btier-41-45-proof-closure.md
+  - name: Deferred Compatibility Diagnostics Proof
+    href: articles/zh-cn/deferred-compatibility-diagnostics-proof.md
   - name: TRT Cross-Version Strategy
     href: articles/zh-cn/trt-cross-version-strategy.md
   - name: Getting Started

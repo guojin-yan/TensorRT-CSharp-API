@@ -3283,6 +3283,33 @@ alias，并新增候选审计记录与回归门禁。旧 deferred manifest 未�
 - 本阶段不构成 runtime proof、package-consumer-runtime proof、release proof 或公开发布授权，
   `canDeleteDeferredRecords=false`、`canPublishPublicly=false` 保持不变。
 
+## 2026-07-26 TensorRT Compatibility Diagnostics Candidate Proof Batch
+
+本阶段继续 B-tier safe-alternative 路线，审计并收口以下已有真实 route 的 compatibility/
+diagnostics 接口：`IBuilderConfig::getTilingOptimizationLevel`、
+`ICudaEngine::hasImplicitBatchDimension`、`IUffParser::getUffRequiredVersionPatch`、
+`IParser::getError` 和 `IParserRefitter::getError`。本阶段没有新增 ABI 签名；重点是显式
+deferred-history alias、跨版本差异、pointer-free public surface、既有 smoke 和候选审计。
+
+### 实现与文档
+
+- `Export-InterfaceCoverageMatrix.ps1` 新增 tiling、implicit-batch、parser/refitter 的
+  显式 deferred aliases；UFF patch alias 已有并由本批补齐 tuple proof。
+- 新增 `artifacts/interface-coverage/trt-compatibility-diagnostics-candidate-audit.md/.json`。
+- 新增 `DeferredCompatibilityDiagnosticsProofTests`，锁定 manifest/source/wrapper/smoke、
+  coverage rows、version guards 和 public pointer-free 约束。
+- 新增公开技术文章
+  `docs/articles/zh-cn/deferred-compatibility-diagnostics-proof.md` 并加入 `docs/toc.yml`。
+
+### 跨版本与边界
+
+- TRT10 tiling/implicit-batch rows 为 `implemented-with-deferred-history`；TRT11 tiling
+  为独立 `implemented`，implicit-batch public route 保持 `NotSupported`。
+- TRT8 UFF version tuple 为 copied readonly snapshot；TRT8 engine implicit-batch 是 legacy
+  alias；TRT8/10/11 parser diagnostics 均不暴露 parser/refitter error pointer。
+- 所有 deferred manifest 保留，`canDeleteDeferredRecords=false`；本批不构成 runtime proof、
+  package-consumer runtime proof、release proof 或公开发布授权。
+
 ## 2026-07-24 OnnxToEngine Trtexec Parity Public Article Expansion
 
 本阶段继续公开文章矩阵质量提升，扩写 docs/articles/zh-cn/publishing/onnxtoengine-trtexec-parity-public-article.md，将 OnnxToEngine 与 TensorRtExec 的 trtexec-like 对齐文章从参数矩阵说明推进为包含 conversion playbook、shape/profile 归一化、typed readback、artifact hash、runtime candidate 和 proof promotion criteria 的公开教程。文章明确本阶段只是文档和质量门，不是 engine runtime proof、package-consumer-runtime proof、post-publish proof 或发布授权。

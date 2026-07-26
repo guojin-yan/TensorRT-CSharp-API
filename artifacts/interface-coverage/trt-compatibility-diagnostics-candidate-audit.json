@@ -1,0 +1,76 @@
+{
+  "recordKind": "trt-compatibility-diagnostics-candidate-audit",
+  "generatedOn": "2026-07-26",
+  "module": "tensorrt",
+  "candidates": [
+    {
+      "interface": "IBuilderConfig::getTilingOptimizationLevel",
+      "targetVersions": ["TRT10", "TRT11"],
+      "realManifestIds": ["jyppx-trt10-builder-config-get-tiling-optimization-level", "jyppx-trt11-builder-config-get-tiling-optimization-level"],
+      "deferredHistoryManifestIds": ["trt10-builder-config-get-tiling-optimization-level-deferred"],
+      "vendorHeaders": ["NvInfer.h"],
+      "importLibraryAndDllEvidence": "existing native ABI declaration/export parity records",
+      "ownership": "caller-owned scalar enum output",
+      "versionGuards": ["JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10", "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11"],
+      "publicApiPointerFree": true,
+      "canDeleteDeferredRecords": false,
+      "decision": "implemented-with-deferred-history-for-TRT10; implemented-for-TRT11"
+    },
+    {
+      "interface": "ICudaEngine::hasImplicitBatchDimension",
+      "targetVersions": ["TRT8", "TRT10"],
+      "realManifestIds": ["trt8-cuda-engine-has-implicit-batch-dimension-legacy-alias", "jyppx-trt10-cuda-engine-has-implicit-batch-dimension"],
+      "deferredHistoryManifestIds": ["trt10-cuda-engine-has-implicit-batch-dimension-deferred"],
+      "vendorHeaders": ["NvInferRuntime.h"],
+      "importLibraryAndDllEvidence": "existing native ABI declaration/export parity records",
+      "ownership": "caller-owned copied boolean",
+      "versionGuards": ["JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8", "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10"],
+      "publicApiPointerFree": true,
+      "canDeleteDeferredRecords": false,
+      "decision": "implemented-for-TRT8; implemented-with-deferred-history-for-TRT10"
+    },
+    {
+      "interface": "IUffParser::getUffRequiredVersionPatch",
+      "targetVersions": ["TRT8"],
+      "realManifestIds": ["trt8-legacy-uff-get-required-version"],
+      "deferredHistoryManifestIds": ["trt8-uff-parser-get-uff-required-version-patch-deferred"],
+      "vendorHeaders": ["NvUffParser.h"],
+      "importLibraryAndDllEvidence": "existing TRT8 legacy parser ABI/export records",
+      "ownership": "native temporary unique_ptr; copied Version snapshot",
+      "versionGuards": ["JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8"],
+      "publicApiPointerFree": true,
+      "canDeleteDeferredRecords": false,
+      "decision": "implemented-with-deferred-history"
+    },
+    {
+      "interface": "IParser::getError",
+      "targetVersions": ["TRT8", "TRT10", "TRT11"],
+      "realManifestIds": ["trt8-onnx-parser-get-error", "trt10-onnx-parser-get-error", "trt11-onnx-parser-get-error"],
+      "deferredHistoryManifestIds": ["trt8-caffe-parser-get-error-recorder-deferred", "trt8-uff-parser-get-error-recorder-deferred", "trt10-parser-refitter-get-error-deferred", "trt11-parser-refitter-get-error-deferred"],
+      "vendorHeaders": ["NvOnnxParser.h"],
+      "importLibraryAndDllEvidence": "existing native ABI declaration/export parity records",
+      "ownership": "copied parser error struct and caller-buffer string",
+      "versionGuards": ["JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8", "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10", "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11"],
+      "publicApiPointerFree": true,
+      "canDeleteDeferredRecords": false,
+      "decision": "implemented-with-deferred-history"
+    },
+    {
+      "interface": "IParserRefitter::getError",
+      "targetVersions": ["TRT10", "TRT11"],
+      "realManifestIds": ["trt10-parser-refitter-get-error", "trt11-parser-refitter-get-error"],
+      "deferredHistoryManifestIds": ["trt10-parser-refitter-get-error-deferred", "trt11-parser-refitter-get-error-deferred"],
+      "vendorHeaders": ["NvOnnxParser.h"],
+      "importLibraryAndDllEvidence": "existing native ABI declaration/export parity records",
+      "ownership": "owner-bound refitter handle with copied error struct/string",
+      "versionGuards": ["JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10", "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11"],
+      "publicApiPointerFree": true,
+      "canDeleteDeferredRecords": false,
+      "decision": "implemented-with-deferred-history"
+    }
+  ],
+  "smoke": ["NetworkBuilderSmokeRunner", "LegacyParserDiagnosticsSmokeRunner", "OnnxToEngineSmokeRunner"],
+  "canDeleteDeferredRecords": false,
+  "canPromoteReleaseProof": false,
+  "canPublishPublicly": false
+}
