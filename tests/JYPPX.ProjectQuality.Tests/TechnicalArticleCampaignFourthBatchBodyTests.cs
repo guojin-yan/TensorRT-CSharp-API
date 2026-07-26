@@ -361,4 +361,95 @@ public sealed class TechnicalArticleCampaignFourthBatchBodyTests
             Assert.Contains(marker, content, StringComparison.Ordinal);
         }
     }
+
+    [Fact]
+    public void YoloVisionYolov8nSemanticArticleCoversMapWorkspaceRolesHashesAndValidation()
+    {
+        string content = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "yolovision-semantic-segmentation-map-guide.md"));
+
+        foreach (string marker in new[]
+        {
+            "适用读者",
+            "解决问题",
+            "背景与场景",
+            "操作路径",
+            "可复用资产目录与完整验证",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-sem\\models",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-sem\\labels",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-sem\\images",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-sem\\tensors",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-sem\\engines",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-sem\\reports",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-sem\\logs",
+            "yolovision-yolov8-sem-candidate.template.json",
+            "model.sourceUrl",
+            "model.downloadUrl",
+            "model.license",
+            "model.sha256",
+            "labels.sourceUrl",
+            "labels.sha256",
+            "labels.palettePath",
+            "labels.classCount",
+            "input.imageSha256",
+            "input.preprocessedTensorSha256",
+            "outputMetadata.semanticOutput",
+            "outputMetadata.semanticOutputRole",
+            "outputMetadata.classCount",
+            "outputMetadata.mapWidth",
+            "outputMetadata.mapHeight",
+            "outputMetadata.semanticMapShape",
+            "outputMetadata.classMapLayout",
+            "outputMetadata.argmaxRule",
+            "outputMetadata.postprocessMetadata.resizeBackRule",
+            "outputMetadata.postprocessMetadata.ignoreIndex",
+            "paletteSha256",
+            "Get-FileHash -Algorithm SHA256",
+            "--preprocess-only",
+            "--tensor-layout NCHW",
+            "--color-order RGB",
+            "--resize letterbox",
+            "--semantic-output semantic",
+            "--class-count 21",
+            "--output-json",
+            "--visualization-svg",
+            "[C,H,W]",
+            "[1,C,H,W]",
+            "argmax",
+            "resize-back",
+            "Test-YoloVisionOutputReport.ps1",
+            "Test-YoloVisionRealAssetCandidate.ps1",
+            "Test-SampleRunEvidenceRecord.ps1",
+            "YoloVision Passed=True",
+            "仍不是 `package-consumer-runtime` proof"
+        })
+        {
+            Assert.Contains(marker, content, StringComparison.Ordinal);
+        }
+
+        string articleCasePack = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "samples",
+            "assets",
+            "yolovision-article-case-pack.json"));
+        string candidateTemplate = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "samples",
+            "assets",
+            "yolovision-yolov8-sem-candidate.template.json"));
+
+        foreach (string manifest in new[] { articleCasePack, candidateTemplate })
+        {
+            Assert.Contains("--family custom", manifest, StringComparison.Ordinal);
+            Assert.Contains("--semantic-output semantic", manifest, StringComparison.Ordinal);
+            Assert.Contains("--class-count 21", manifest, StringComparison.Ordinal);
+            Assert.DoesNotContain("--semantic-map-shape", manifest, StringComparison.Ordinal);
+            Assert.DoesNotContain("--class-map-layout", manifest, StringComparison.Ordinal);
+            Assert.DoesNotContain("--palette", manifest, StringComparison.Ordinal);
+        }
+    }
 }

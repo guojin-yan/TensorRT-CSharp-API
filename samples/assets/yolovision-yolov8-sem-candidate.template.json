@@ -11,7 +11,7 @@
   "family": "YOLOv8",
   "task": "sem",
   "model": {
-    "name": "YOLOv8 semantic segmentation candidate",
+    "name": "YOLOv8 article-slot compatible semantic segmentation candidate",
     "sourceUrl": "owner-required semantic segmentation model source compatible with YoloVision sem task",
     "downloadUrl": "owner-required",
     "license": "owner-required",
@@ -61,7 +61,7 @@
   },
   "commands": {
     "tensorRtExecBuildCommand": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\yolov8-sem.onnx --saveEngine .\\models\\yolov8-sem.plan --minShapes images:1x3x512x512 --optShapes images:1x3x512x512 --maxShapes images:2x3x512x512 --fp16 --workspace 1024 --buildOnly --exportReport .\\models\\yolov8-sem-build-report.json --evidenceSidecar .\\models\\yolov8-sem-evidence.sidecar.json",
-    "yoloVisionRunCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8-sem.onnx --labels .\\models\\semantic-classes.names --input-data .\\models\\yolov8-sem-fp32.bin --input-shape 1x3x512x512 --tensor-rt-line 10 --family v8 --task sem --semantic-output semantic --semantic-map-shape owner-required --class-map-layout NCHW-logits-or-NHW-class-index-owner-confirmed --palette .\\models\\semantic-palette.json"
+    "yoloVisionRunCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8-sem.onnx --labels .\\models\\semantic-classes.names --input-data .\\models\\yolov8-sem-fp32.bin --input-shape 1x3x512x512 --tensor-rt-line 10 --family custom --task sem --semantic-output semantic --class-count 21 --output-json .\\models\\yolov8-sem-output.json --visualization-svg .\\models\\yolov8-sem-output.svg"
   },
   "proofChecklist": {
     "requiredEvidenceLines": [

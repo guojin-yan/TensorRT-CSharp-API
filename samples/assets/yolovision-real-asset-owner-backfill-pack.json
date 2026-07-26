@@ -693,7 +693,7 @@
         "sha256": "owner-required",
         "onnxPath": "models\\yolov8n-sem.onnx",
         "onnxSha256": "owner-required",
-        "exportCommand": "yolo export model=.\\models\\yolov8n-sem.pt format=onnx opset=12 dynamic=True simplify=True imgsz=512"
+        "exportCommand": "yolo export model=.\\models\\owner-approved-semantic-model.pt format=onnx opset=17 dynamic=False simplify=True imgsz=512"
       },
       "labels": {
         "path": "models\\semantic-classes.names",
@@ -723,7 +723,7 @@
         "proofBoundary": "TensorRtExec build report, command transcript, stdout/stderr logs, and engine hash are build evidence only; they are not real-model-runtime proof and never package-consumer-runtime proof."
       },
       "yoloVision": {
-        "runCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-sem.onnx --labels .\\models\\semantic-classes.names --input-data .\\models\\yolov8n-sem-fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count owner-required --semantic-map-shape owner-required --class-map-layout NCHW-logits-or-NHW-class-index-owner-confirmed --palette .\\models\\semantic-palette.json",
+        "runCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-sem.onnx --labels .\\models\\semantic-classes.names --input-data .\\models\\yolov8n-sem-fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count 21 --output-json .\\models\\yolov8n-sem-output.json --visualization-svg .\\models\\yolov8n-sem-output.svg",
         "expectedEvidenceLines": [
           "Profile Family=custom Task=sem",
           "SemanticMap Classes=",
@@ -741,7 +741,7 @@
         "outputJsonSha256": "owner-required"
       },
       "yoloVisionPreflight": {
-        "command": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-sem.onnx --labels .\\models\\semantic-classes.names --input-data .\\models\\yolov8n-sem-fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count owner-required --semantic-map-shape owner-required --class-map-layout NCHW-logits-or-NHW-class-index-owner-confirmed --palette .\\models\\semantic-palette.json --preflight --preflight-report .\\models\\yolov8n-sem-preflight.json",
+        "command": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-sem.onnx --labels .\\models\\semantic-classes.names --input-data .\\models\\yolov8n-sem-fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count 21 --preflight --preflight-report .\\models\\yolov8n-sem-preflight.json",
         "reportPath": "models/yolov8n-sem-preflight.json",
         "reportSha256": "owner-required",
         "schemaPath": "samples/YoloVision/yolovision-preflight.schema.json",

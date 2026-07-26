@@ -3920,6 +3920,38 @@ runtime proof 从短说明扩展为 release owner 和评审者可执行、可判
 - 未执行 GitHub Actions、workflow dispatch、NuGet push、GitHub Packages publish、
   GitHub Release upload、issue close 或 push。
 
+## 2026-07-25 YOLOv8n Semantic Segmentation Case Public Article Expansion
+
+本阶段继续具体模型文章质量提升，扩写 docs/articles/zh-cn/yolovision-semantic-segmentation-map-guide.md，补齐统一文章骨架、可复用 E 盘 case workspace、浮点 semantic map 输出契约、argmax/resize-back/palette 证据、JSON/SVG 和 owner 验证顺序。文章明确本阶段只是文档与质量门，不是真实模型运行、runtime proof、package-consumer-runtime proof 或发布授权。
+
+### 实现
+
+- 补齐适用读者、解决问题、背景与场景、操作路径、代码与文件入口、图示建议、边界说明和下一步章节。
+- 将案例明确为 owner-provided、兼容 `YoloVision sem` decoder 的 semantic model，不假设存在官方 `yolov8n-sem.pt`。
+- 固定 E:\TensorRtSharpAssets\cases\yolov8n-sem 的 models/labels/images/tensors/engines/reports/logs 布局。
+- 补充 candidate template 的 model/labels/palette/input 来源、license、SHA256、classCount、map shape/layout、argmax、resize-back、ignoreIndex 和 paletteSha256 回填字段。
+- 使用当前 CLI 实际支持的 `--semantic-output semantic`、`--class-count 21`、`--output-json`、`--visualization-svg` 命令，移除不存在的 map/palette CLI 参数示例。
+- 明确 decoder 支持 `[C,H,W]`、`[1,C,H,W]` 和按 class count 识别的 `[1,H,W,C]` 浮点 map，不把预先 argmax 的整数索引图当作等价输入。
+- 同步修正 `yolovision-article-case-pack.json`、semantic candidate template、owner backfill pack 和 generated projection，移除不存在的 semantic CLI flags；projection gate 达到 `projection-aligned`。
+- 增加 Test-YoloVisionOutputReport.ps1、Test-YoloVisionRealAssetCandidate.ps1、Test-SampleRunEvidenceRecord.ps1 验证顺序。
+- 更新 TechnicalArticleCampaignFourthBatchBodyTests，新增 YoloVisionYolov8nSemanticArticleCoversMapWorkspaceRolesHashesAndValidation 专项门禁。
+
+### Verification
+
+- TechnicalArticleCampaignFourthBatchBodyTests、YoloVisionRealAssetCandidatePackTests、YoloVisionRealAssetCandidateValidatorTests 定向测试合计：17/17 通过。
+- Export-YoloVisionRealAssetOwnerBackfillPack.ps1：`ValidationState=projection-aligned FailedCount=0`。
+- git diff --check：通过；仅提示 project-completion-review.md 与 generated owner pack 的既有 CRLF/LF 规范化提示。
+- C 盘本批唯一关键词审计：C:\Users\guoji\Downloads 与 C:\Users\guoji\AppData\Local\Temp 均无文章名、批次名、candidate 名或 semantic case 命中。
+- 测试期间曾观察到 C:\Users\guoji\AppData\Local\Temp 下短生命周期 OpenCV preflight nupkg；测试自身已清理，最终复查无残留，未删除用户既有缓存。
+- 今日 .onnx/.engine/.plan/.nupkg 审计：最终 C:\Users\guoji\Downloads 与 C:\Users\guoji\AppData\Local\Temp 均无命中。
+- 编译阶段仍有 5 条既有 nullable warning，位置在 FinalPublishProofGateAndOwnerExecutionPackTests.cs 与 ReleasePublishReadinessEvidencePackAndPublicDocsGateTests.cs，非本批引入。
+
+### C 盘与发布边界
+
+- 本阶段未下载模型、ONNX、engine、TensorRT、CUDA、cuDNN、Python/pip 资产或 NuGet 临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、push、NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
+- 本批没有生成 engine/plan/nupkg，没有 real-model-runtime proof、package-consumer-runtime proof、post-publish verification 或 owner authorization。
+
 ## 2026-07-25 YOLOv8n Classification Case Public Article Expansion
 
 本阶段继续具体模型文章质量提升，扩写 docs/articles/zh-cn/yolovision-classification-yolov8n-labels-topk-guide.md，补齐统一文章骨架、可复用 E 盘 case workspace、labels/score 语义、Top-K JSON/SVG 和 owner 验证顺序。文章明确本阶段只是文档与质量门，不是真实模型运行、runtime proof、package-consumer-runtime proof 或发布授权。
