@@ -273,7 +273,7 @@ Get-FileHash "$work\yolov10n-run.log" -Algorithm SHA256
 
 至少人工检查：
 
-- 日志包含 `YoloVision Passed=True`，且进程 exit code 为 0。
+- 真实运行 log/evidence 包含 `YoloVision Passed=True`，且进程 exit code 为 0。
 - output JSON 的 family/task 是 `yolov10/det`，input/model/labels hash 与实际文件一致。
 - detection 的 classId 在 labels 范围内，score、坐标和 source index 合理。
 - SVG 框与原图目标一致，没有系统性偏移、镜像或缩放错误。

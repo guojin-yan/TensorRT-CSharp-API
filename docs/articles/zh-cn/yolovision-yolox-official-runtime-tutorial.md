@@ -10,7 +10,7 @@
 - TensorRT：10.11.0.33，FP32。
 - GPU：NVIDIA GeForce RTX 3060 Laptop GPU。
 - 检测：5 个，其中 `bicycle=0.954841`、`dog=0.913382`。
-- 日志结束标记：`YoloVision Passed=True`。
+- 真实运行日志最后应包含 marker：`YoloVision Passed=True`。
 - 严格 sample-run validator：`real-model-runtime`，owner-action 0。
 
 这里的 `real-model-runtime` 只表示源码树中的真实模型运行。它不是 `package-consumer-runtime`，不代表资产已获准随仓库或 NuGet 公开发布。
@@ -240,7 +240,7 @@ dotnet run --project .\samples\YoloVision -- `
 Input=images:[1, 3, 640, 640] Output=output:[1, 8400, 85]
 Detection Class=bicycle Score=0.954841 ...
 Detection Class=dog Score=0.913382 ...
-YoloVision Passed=True
+Real run log final marker: YoloVision Passed=True
 ```
 
 JSON 和 SVG 分别用于机器审计与人工检查，不能只保留截图而丢掉日志和 hash。

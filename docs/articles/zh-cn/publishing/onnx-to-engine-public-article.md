@@ -153,7 +153,7 @@ dotnet run --project .\samples\OnnxToEngine\OnnxToEngine.csproj -- `
 
 YoloVision 负责把真实模型资产、输入样例、输出 schema 和任务 metadata 组织起来。OnnxToEngine 负责转换，TensorRtExec 负责更接近 `trtexec` 的参数和报告，YoloVision 则把 detection、classification、segmentation、OBB、pose、semantic segmentation 等任务串成可复核案例。
 
-公开文章应使用 `samples/YoloVision` 和 `samples/assets/yolovision-article-case-pack.json` 的口径，覆盖 YOLOv5、YOLOv6、YOLOv7、YOLOv8、YOLOv9、YOLOv10、YOLO11、YOLO26 等系列的候选路线，而不是退回早期过窄的 `samples/YoloDet` 检测样例命名。模型获取、license、ONNX export、engine build、YoloVision run、output schema 和 SHA256 都要由 owner evidence 补齐。
+公开文章应使用 `samples/YoloVision` 和 `samples/assets/yolovision-article-case-pack.json` 的口径，覆盖 YOLOv5、YOLOv6、YOLOv7、YOLOv8、YOLOv9、YOLOv10、YOLO11、YOLO26 等系列的候选路线，不得退回早期过窄的 detection-only 样例命名。模型获取、license、ONNX export、engine build、YoloVision run、output schema 和 SHA256 都要由 owner evidence 补齐。
 
 ## proof 边界
 

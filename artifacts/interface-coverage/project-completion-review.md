@@ -1,5 +1,32 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-27 Source Build/C++ Bridge Guide And Stale Claims Closure
+
+本阶段完成源码构建与 C++ bridge 公开教程的长文收尾，并清理 release-facing 文档中的 stale claim
+命中。该批仍是 source-quality/documentation closure，不是 runtime、package-consumer 或发布证明。
+
+### 实现
+
+- 扩展 `docs/articles/zh-cn/tensorrtsharp-source-build-cpp-guide.md`：构建全景图、E 盘
+  workspace/assets 布局、环境快照、runtime key 决策表、生成物、CMake/build 日志、
+  `dumpbin /dependents`、聚焦测试、本地 package validation、NuGet 小核心/bridge 与 GitHub
+  full-runtime 路线、故障树和配图建议。
+- 新增 `CppBridgeMasterGuideIsPublishableLongFormAndKeepsProofBoundaries` 专项门禁。
+- 修正 5 篇 release-facing 文章中的 marker/retired sample 文案上下文，重新生成
+  `artifacts/final-release/stale-release-claims-audit.json/.md`，`findingCount=0`。
+- 刷新 `release-candidate-final-evidence-freeze.json/.md`；状态仍为
+  `blocked-real-proof-required`，`performsPublish=false`、`canPublishPublicly=false`、
+  `canCloseReleaseIssue=false`。
+
+### Verification
+
+- SourceBuildCmakeWindowsGuideTests：4/4 通过。
+- TechnicalArticleRoadmapTests、PublishingPublicArticleTests、SourceBuildCmakeWindowsGuideTests：
+  81/81 通过。
+- stale release claims audit：0 findings。
+- 未执行 GitHub Actions、push、NuGet/GitHub Packages/Release 发布或 issue close。
+- 未下载模型、ONNX、engine、plan、TensorRT、CUDA、cuDNN 或 NuGet 重资产到 C 盘。
+
 ## 2026-07-27 Tool Capability JSON And YoloVision Offline Contract Self-Test
 
 本阶段进入工具与案例收尾：不触发 GitHub Actions，不发布包，不下载模型或依赖到 C 盘，优先补可离线验证、低 ownership 风险的机器可读能力说明和 self-test。

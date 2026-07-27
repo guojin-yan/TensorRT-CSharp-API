@@ -305,7 +305,7 @@ labels source / license / class count / labels SHA256
 input image or preprocessed tensor source / license / SHA256
 TensorRtExec or OnnxToEngine build-only report path and SHA256
 YoloVision run command
-YoloVision Passed=True
+Expected real run evidence line: YoloVision Passed=True
 output JSON path and SHA256
 stdout/stderr summaries
 run log SHA256

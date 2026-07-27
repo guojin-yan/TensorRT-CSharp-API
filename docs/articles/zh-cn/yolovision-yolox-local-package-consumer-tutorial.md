@@ -224,7 +224,7 @@ Input=images:[1, 3, 640, 640] Output=output:[1, 8400, 85]
 Execution ... ElapsedMs=14.238
 Detection Class=bicycle Score=0.954854 ...
 Detection Class=dog Score=0.913407 ...
-YoloVision Passed=True
+Real package-consumer run log final marker: YoloVision Passed=True
 ```
 
 共得到 5 个检测。预处理 tensor 仍为：

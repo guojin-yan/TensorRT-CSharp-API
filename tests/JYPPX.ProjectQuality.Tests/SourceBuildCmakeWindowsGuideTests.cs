@@ -63,6 +63,78 @@ public sealed class SourceBuildCmakeWindowsGuideTests
         }
     }
 
+    [Fact]
+    public void CppBridgeMasterGuideIsPublishableLongFormAndKeepsProofBoundaries()
+    {
+        string article = ReadSource("docs", "articles", "zh-cn", "tensorrtsharp-source-build-cpp-guide.md");
+
+        foreach (string marker in new[]
+        {
+            "## 构建全景图",
+            "```mermaid",
+            "flowchart LR",
+            "E:\\TensorRtSharpAssets",
+            "build-logs",
+            "proof-inputs",
+            "dotnet --info",
+            "cmake --version",
+            "runtime key",
+            "native/generated/bridge_api_catalog.g.h",
+            "GeneratedEntryPointNames.g.cs",
+            "NativeMethodsTensorRt.Generated.g.cs",
+            "cmake-configure-trt11-cuda13.log",
+            "cmake-build-trt11-cuda13.log",
+            "dumpbin /dependents",
+            "jyppxtrtbridge.dll",
+            "jyppxcudabridge.dll",
+            "nvinfer_10.dll",
+            "nvonnxparser_10.dll",
+            "cudart64_12.dll",
+            "cudnn64_9.dll",
+            "TensorRtNativeAbiSurfaceParityTests",
+            "PublicApiHandleExposureAuditTests",
+            "NativeVendorBoundaryGuardTests",
+            "NativeBridgePathResolverTests",
+            "TechnicalArticleRoadmapTests",
+            "PublishingPublicArticleTests",
+            "SourceBuildCmakeWindowsGuideTests",
+            "PackageConsumerRuntimeProof",
+            "UsesProjectReference",
+            "UsesLocalFeed",
+            "UsesDirectNupkg",
+            "NuGet small core/bridge 包",
+            "GitHub full runtime 包",
+            "CMake 找不到 CUDA/TensorRT/cuDNN",
+            "CUDA error 35",
+            "proof ladder",
+            "## 配图建议",
+            "## 下一步"
+        })
+        {
+            Assert.Contains(marker, article, StringComparison.Ordinal);
+        }
+
+        foreach (string forbiddenSubstitute in new[]
+        {
+            "local build",
+            "local feed",
+            "ProjectReference",
+            "direct `.nupkg`",
+            "dependency probe",
+            "build-only report",
+            "截图"
+        })
+        {
+            Assert.Contains(forbiddenSubstitute, article, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("不是 release proof", article, StringComparison.Ordinal);
+        Assert.Contains("不是 clean public package runtime proof", article, StringComparison.Ordinal);
+        Assert.Contains("不能写成 clean public package runtime proof", article, StringComparison.Ordinal);
+        Assert.DoesNotContain("源码编译完成即可发布", article, StringComparison.Ordinal);
+        Assert.DoesNotContain("local feed 就是 package-consumer-runtime proof", article, StringComparison.Ordinal);
+    }
+
     private static string ReadSource(params string[] pathParts)
     {
         string path = Path.Combine(new[] { RepositoryPaths.Root }.Concat(pathParts).ToArray());
