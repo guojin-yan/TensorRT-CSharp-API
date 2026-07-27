@@ -8163,6 +8163,9 @@ internal static partial class NativeMethodsTensorRt
     internal static extern BridgeStatusCode jyppx_trt8_execution_context_get_enqueue_emits_profile(SafeTensorRtObjectHandle context, out int out_enqueue_emits_profile);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt8_execution_context_get_error_buffer_copy(SafeTensorRtObjectHandle context, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt8_execution_context_get_error_buffer_deferred();
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]

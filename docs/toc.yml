@@ -950,6 +950,8 @@
   href: articles/zh-cn/plugin-inventory-field-metadata-smoke-guide.md
 - name: Deferred Next Readonly Candidate List
   href: articles/zh-cn/deferred-next-readonly-candidate-list.md
+- name: TRT8 Execution Context Error Buffer Copy Proof
+  href: articles/zh-cn/trt8-execution-context-error-buffer-copy-proof.md
 - name: CSharp Public API Handle Exposure Audit
   href: articles/zh-cn/csharp-public-api-handle-exposure-audit.md
 - name: Release Proof Strict Validator Playbook

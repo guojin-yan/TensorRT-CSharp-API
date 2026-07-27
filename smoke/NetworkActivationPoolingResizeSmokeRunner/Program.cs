@@ -149,6 +149,8 @@ internal static class Program
         context.SetTensorAddress("resize_output", outputMemory);
         Console.WriteLine($"EngineMetadata Name={engine.Name} Layers={engine.LayerCount} Refittable={engine.IsRefittable} Capability={engine.Capability} Tactics={engine.TacticSources} Profiling={engine.ProfilingVerbosity} InputFormat={engine.GetTensorFormat("input")} OutputFormat={engine.GetTensorFormat("resize_output")} InputBytes={engine.GetTensorBytesPerComponent("input")} InputComponents={engine.GetTensorComponentsPerElement("input")} InputVectorDim={engine.GetTensorVectorizedDimension("input")} InputLocation={engine.GetTensorLocation("input")} OutputLocation={engine.GetTensorLocation("resize_output")} ShapeIO={engine.IsShapeInferenceIO("input")}");
         Console.WriteLine($"ContextMetadata Name={context.Name} Profile={context.OptimizationProfileIndex} DebugSync={context.DebugSync} EnqueueEmitsProfile={context.EnqueueEmitsProfile} InputBound={context.IsTensorAddressBound("input")} OutputBound={context.IsTensorAddressBound("resize_output")} InputShape={context.GetTensorShape("input")} OutputShape={context.GetTensorShape("resize_output")} InputStrides={context.GetTensorStrides("input")} OutputStrides={context.GetTensorStrides("resize_output")}");
+        bool errorBufferAvailable = context.TryGetErrorBuffer(out string errorBuffer, out string errorBufferDiagnostic);
+        Console.WriteLine($"ExecutionContextErrorBufferCopy Available={errorBufferAvailable} Length={errorBuffer.Length} Diagnostic={errorBufferDiagnostic}");
         context.EnqueueAsync(stream);
         stream.Synchronize();
 

@@ -679,6 +679,7 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_set_nvtx_verbosity(JY
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_get_nvtx_verbosity(JYPPX_TensorRtExecutionContext* context, int32_t* out_verbosity);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_set_name(JYPPX_TensorRtExecutionContext* context, const char* name);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_get_name(JYPPX_TensorRtExecutionContext* context, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_get_error_buffer_copy(JYPPX_TensorRtExecutionContext* context, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_get_optimization_profile(JYPPX_TensorRtExecutionContext* context, int32_t* out_profile_index);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_set_optimization_profile_async(JYPPX_TensorRtExecutionContext* context, int32_t profile_index, JYPPX_CudaStream* stream);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt8_execution_context_all_input_dimensions_specified(JYPPX_TensorRtExecutionContext* context, JYPPX_Boolean* out_specified);

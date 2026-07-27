@@ -10141,6 +10141,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt8_execution_context_get_device_memory_siz
 // generated from manifest id=trt8-execution-context-get-enqueue-emits-profile
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_execution_context_get_enqueue_emits_profile(JYPPX_TensorRtExecutionContext* context, JYPPX_Boolean* out_enqueue_emits_profile);
 
+// generated from manifest id=trt8-execution-context-get-error-buffer-copy
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_execution_context_get_error_buffer_copy(JYPPX_TensorRtExecutionContext* context, char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+
 // generated from manifest id=trt8-execution-context-get-error-buffer-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_execution_context_get_error_buffer_deferred(void);
 

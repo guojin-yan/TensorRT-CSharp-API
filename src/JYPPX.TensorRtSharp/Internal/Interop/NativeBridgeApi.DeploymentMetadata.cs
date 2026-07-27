@@ -472,6 +472,22 @@ internal static partial class NativeBridgeApi
         }, "Execution context name is too large for the managed buffer.");
     }
 
+    public static string GetExecutionContextErrorBuffer(TensorRtApiLine line, SafeTensorRtObjectHandle context)
+    {
+        if (line != TensorRtApiLine.TensorRt8)
+        {
+            throw new BridgeProbeException(
+                BridgeStatusCode.NotSupported,
+                BridgeErrorCategory.TensorRt,
+                "IExecutionContext::getErrorBuffer is available through this bridge for TensorRT 8 only; TensorRT 10 and TensorRT 11 do not expose this legacy vendor query.");
+        }
+
+        return ReadUtf8Buffer(
+            (byte[] buffer, UIntPtr size, out UIntPtr required) =>
+                NativeMethodsTensorRt.jyppx_trt8_execution_context_get_error_buffer_copy(context, buffer, size, out required),
+            "Execution context error buffer is too large for the managed buffer.");
+    }
+
     public static void SetExecutionContextName(TensorRtApiLine line, SafeTensorRtObjectHandle context, string name)
     {
         using Utf8Interop.Utf8StringScope nameUtf8 = Utf8Interop.ToNativeString(name ?? string.Empty);

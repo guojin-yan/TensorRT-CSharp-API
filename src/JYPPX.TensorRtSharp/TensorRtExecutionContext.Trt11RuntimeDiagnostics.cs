@@ -10,6 +10,46 @@ namespace JYPPX.TensorRtSharp;
 public sealed partial class TensorRtExecutionContext
 {
     /// <summary>
+    /// Tries to copy the TensorRT 8 execution-context error buffer into managed memory.
+    /// 尝试将 TensorRT 8 execution context 的 error buffer 复制到托管内存。
+    /// </summary>
+    /// <param name="errorBuffer">The copied error text, or an empty string when unavailable. / 复制出的错误文本；不可用时为空字符串。</param>
+    /// <returns><see langword="true"/> when the vendor query succeeded. / vendor 查询成功时返回 <see langword="true"/>。</returns>
+    /// <remarks>
+    /// TensorRT 8 exposes this legacy query as a borrowed <c>const char*</c>. The bridge copies it during the native call
+    /// and never exposes or retains the vendor-owned pointer. TensorRT 10 and 11 report controlled unsupported diagnostics.
+    /// TensorRT 8 的 vendor API 返回 borrowed <c>const char*</c>；bridge 仅在 native 调用期间复制内容，不暴露或保留 vendor 指针。
+    /// TensorRT 10 和 11 会返回受控的不支持诊断。
+    /// </remarks>
+    public bool TryGetErrorBuffer(out string errorBuffer)
+    {
+        return TryGetErrorBuffer(out errorBuffer, out _);
+    }
+
+    /// <summary>
+    /// Tries to copy the TensorRT 8 execution-context error buffer and returns a diagnostic.
+    /// 尝试复制 TensorRT 8 execution context 的 error buffer，并返回诊断信息。
+    /// </summary>
+    /// <param name="errorBuffer">The copied error text, or an empty string when unavailable. / 复制出的错误文本；不可用时为空字符串。</param>
+    /// <param name="diagnostic">A short diagnostic string describing success or failure. / 描述成功或失败原因的简短诊断。</param>
+    /// <returns><see langword="true"/> when the vendor query succeeded. / vendor 查询成功时返回 <see langword="true"/>。</returns>
+    public bool TryGetErrorBuffer(out string errorBuffer, out string diagnostic)
+    {
+        try
+        {
+            errorBuffer = NativeBridgeApi.GetExecutionContextErrorBuffer(Line, _handle);
+            diagnostic = "OK";
+            return true;
+        }
+        catch (Exception exception) when (exception is BridgeProbeException || exception is NotSupportedException || exception is InvalidOperationException)
+        {
+            errorBuffer = string.Empty;
+            diagnostic = exception.Message;
+            return false;
+        }
+    }
+
+    /// <summary>
     /// Gets the native address value currently bound to a named TensorRT tensor for diagnostics.
     /// 获取当前绑定到指定 TensorRT tensor 的原生地址数值，仅用于诊断。
     /// </summary>
