@@ -11,6 +11,25 @@ public sealed class YoloMultiOutputMetadata
         bool obbAngleInDegrees = false,
         int? auxiliaryChannelStart = null,
         YoloOutputLayout auxiliaryLayout = YoloOutputLayout.Auto)
+        : this(
+            maskCoefficientCount,
+            poseKeypointCount,
+            poseKeypointStride,
+            obbAngleInDegrees,
+            auxiliaryChannelStart,
+            auxiliaryLayout,
+            YoloSegmentationMask.DefaultThreshold)
+    {
+    }
+
+    public YoloMultiOutputMetadata(
+        int maskCoefficientCount,
+        int poseKeypointCount,
+        int poseKeypointStride,
+        bool obbAngleInDegrees,
+        int? auxiliaryChannelStart,
+        YoloOutputLayout auxiliaryLayout,
+        float maskThreshold)
     {
         if (maskCoefficientCount < 0)
         {
@@ -32,12 +51,18 @@ public sealed class YoloMultiOutputMetadata
             throw new ArgumentOutOfRangeException(nameof(auxiliaryChannelStart), "Auxiliary channel start must be zero or positive.");
         }
 
+        if (!float.IsFinite(maskThreshold) || maskThreshold < 0.0f || maskThreshold > 1.0f)
+        {
+            throw new ArgumentOutOfRangeException(nameof(maskThreshold), "Mask threshold must be in [0, 1].");
+        }
+
         MaskCoefficientCount = maskCoefficientCount;
         PoseKeypointCount = poseKeypointCount;
         PoseKeypointStride = poseKeypointStride;
         ObbAngleInDegrees = obbAngleInDegrees;
         AuxiliaryChannelStart = auxiliaryChannelStart;
         AuxiliaryLayout = auxiliaryLayout;
+        MaskThreshold = maskThreshold;
     }
 
     public int MaskCoefficientCount { get; }
@@ -52,9 +77,27 @@ public sealed class YoloMultiOutputMetadata
 
     public YoloOutputLayout AuxiliaryLayout { get; }
 
+    public float MaskThreshold { get; }
+
     public static YoloMultiOutputMetadata ForSegmentation(int maskCoefficientCount, int? auxiliaryChannelStart = null, YoloOutputLayout auxiliaryLayout = YoloOutputLayout.Auto)
     {
         return new YoloMultiOutputMetadata(maskCoefficientCount: maskCoefficientCount, auxiliaryChannelStart: auxiliaryChannelStart, auxiliaryLayout: auxiliaryLayout);
+    }
+
+    public static YoloMultiOutputMetadata ForSegmentation(
+        int maskCoefficientCount,
+        int? auxiliaryChannelStart,
+        YoloOutputLayout auxiliaryLayout,
+        float maskThreshold)
+    {
+        return new YoloMultiOutputMetadata(
+            maskCoefficientCount,
+            poseKeypointCount: 0,
+            poseKeypointStride: 3,
+            obbAngleInDegrees: false,
+            auxiliaryChannelStart,
+            auxiliaryLayout,
+            maskThreshold);
     }
 
     public static YoloMultiOutputMetadata ForPose(int keypointCount, int keypointStride = 3, int? auxiliaryChannelStart = null, YoloOutputLayout auxiliaryLayout = YoloOutputLayout.Auto)

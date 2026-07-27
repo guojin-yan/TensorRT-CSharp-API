@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Xunit;
 
 namespace JYPPX.ProjectQuality.Tests;
@@ -74,5 +76,58 @@ public sealed class YoloVisionOutputReportValidatorTests
         Assert.Contains("--preprocessed-output", readme, StringComparison.Ordinal);
         Assert.Contains("--preprocess-only", readme, StringComparison.Ordinal);
         Assert.Contains("--visualization", readme, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void YoloVisionOutputValidatorRejectsInconsistentSegmentationPixelTotals()
+    {
+        string directory = Path.Combine(
+            RepositoryPaths.Root,
+            "artifacts",
+            "test-temp",
+            "yolovision-invalid-seg-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+        try
+        {
+            string inputPath = Path.Combine(directory, "invalid-seg.json");
+            string outputPath = Path.Combine(directory, "validation.json");
+            JsonNode root = JsonNode.Parse(File.ReadAllText(Path.Combine(
+                RepositoryPaths.Root,
+                "samples",
+                "YoloVision",
+                "examples",
+                "yolovision-output-seg.example.json")))!;
+            root["predictions"]![0]!["maskTotalPixelCount"] = 123;
+            File.WriteAllText(inputPath, root.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
+
+            using Process process = new();
+            process.StartInfo.FileName = "pwsh";
+            process.StartInfo.ArgumentList.Add("-NoProfile");
+            process.StartInfo.ArgumentList.Add("-ExecutionPolicy");
+            process.StartInfo.ArgumentList.Add("Bypass");
+            process.StartInfo.ArgumentList.Add("-File");
+            process.StartInfo.ArgumentList.Add(Path.Combine(RepositoryPaths.Root, "eng", "Test-YoloVisionOutputReport.ps1"));
+            process.StartInfo.ArgumentList.Add("-InputPath");
+            process.StartInfo.ArgumentList.Add(inputPath);
+            process.StartInfo.ArgumentList.Add("-OutputPath");
+            process.StartInfo.ArgumentList.Add(outputPath);
+            process.StartInfo.ArgumentList.Add("-Strict");
+            process.StartInfo.WorkingDirectory = RepositoryPaths.Root;
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.RedirectStandardError = true;
+            process.StartInfo.UseShellExecute = false;
+
+            process.Start();
+            string output = process.StandardOutput.ReadToEnd() + process.StandardError.ReadToEnd();
+            process.WaitForExit();
+
+            Assert.NotEqual(0, process.ExitCode);
+            Assert.Contains("ValidationState=invalid", output, StringComparison.Ordinal);
+            Assert.True(File.Exists(outputPath));
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
     }
 }

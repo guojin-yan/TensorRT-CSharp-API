@@ -8,6 +8,89 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class ToolCapabilityJsonSurfaceTests
 {
     [Fact]
+    public void TensorRtExecOptionLayeringGuideBindsCapabilityFieldMapGapListAndExecutionStages()
+    {
+        string article = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "tensorrtexec-option-layering-deep-dive.md"));
+        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "TensorRtExec", "README.md"));
+        string roadmap = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "technical-article-roadmap.md"));
+
+        Assert.Contains("tensorrtexec-option-layering-deep-dive.md", readme, StringComparison.Ordinal);
+        Assert.Contains("| 72 |", roadmap, StringComparison.Ordinal);
+        Assert.Contains("完整教程已收口", roadmap, StringComparison.Ordinal);
+
+        foreach (string marker in new[]
+        {
+            "## 先读四种事实来源",
+            "31 entries",
+            "26 implemented/bounded",
+            "4 parse-or-diagnostic-only",
+            "1 blocked",
+            "85 fields",
+            "17 items",
+            "E:\\TensorRtSharpAssets\\cases\\tensorrtexec-option-audit",
+            "TrtexecLikeParser",
+            "TensorRtExecOptions",
+            "ToArgumentLine",
+            "OnnxEngineBuildService",
+            "OptionImplementationStatus",
+            "ParsedOptions",
+            "AppliedOptions",
+            "ParseOnlyOptions",
+            "--help-json",
+            "--capabilities-json",
+            "releaseFrozen=true",
+            "canPromoteRuntimeProof=false",
+            "## 第一层：Dry Run / Precheck",
+            "## 第二层：Build-Only",
+            "## 第三层：Readonly Engine Diagnostics",
+            "## 第四层：Bounded Runtime",
+            "--loadInputs images:",
+            "runtime-output-captured-unverified",
+            "tensor-rt-exec-report.schema.json",
+            "Test-TensorRtExecReport.ps1",
+            "Export-TensorRtExecGuiCliParityChecklist.ps1",
+            "Test-TensorRtExecGuiCliParityChecklist.ps1 -Strict",
+            "TRT8/TRT10/TRT11",
+            "TrtexecAlignmentStatus=parse-only",
+            "blocked-calibrator-lifecycle",
+            "## 证据阶梯",
+            "## 收尾检查清单"
+        })
+        {
+            Assert.Contains(marker, article, StringComparison.OrdinalIgnoreCase);
+        }
+
+        using JsonDocument capabilities = JsonDocument.Parse(TrtexecLikeOptionCapabilities.FormatJson("TensorRtExec"));
+        Assert.Equal(31, capabilities.RootElement.GetProperty("entryCount").GetInt32());
+        Assert.Equal(26, capabilities.RootElement.GetProperty("implementedCount").GetInt32());
+        Assert.Equal(4, capabilities.RootElement.GetProperty("parseOrDiagnosticOnlyCount").GetInt32());
+        Assert.Equal(1, capabilities.RootElement.GetProperty("blockedCount").GetInt32());
+
+        using JsonDocument fieldMap = JsonDocument.Parse(File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "applications",
+            "TensorRtExec",
+            "tensor-rt-exec-gui-cli-field-map.json")));
+        Assert.Equal(85, fieldMap.RootElement.GetProperty("fields").GetArrayLength());
+        Assert.Contains("not runtime proof", fieldMap.RootElement.GetProperty("proofBoundary").GetString(), StringComparison.Ordinal);
+
+        using JsonDocument gapList = JsonDocument.Parse(File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "applications",
+            "TensorRtExec",
+            "tensor-rt-exec-release-candidate-gap-list.json")));
+        JsonElement summary = gapList.RootElement.GetProperty("summary");
+        Assert.Equal(17, summary.GetProperty("totalItems").GetInt32());
+        Assert.Equal(0, summary.GetProperty("runtimeProofItems").GetInt32());
+        Assert.Equal(0, summary.GetProperty("packageConsumerRuntimeProofItems").GetInt32());
+    }
+
+    [Fact]
     public void TrtexecLikeHelpJsonDocumentsProofBoundaryAndFrozenReleaseState()
     {
         using JsonDocument document = JsonDocument.Parse(TrtexecLikeOptionCapabilities.FormatJson("OnnxToEngine"));

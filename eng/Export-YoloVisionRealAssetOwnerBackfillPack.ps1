@@ -283,7 +283,9 @@ function New-OutputMetadataObject {
         maskCoefficientCount = 32
         prototypeShape = "owner-required"
         maskResizePolicy = "owner-required"
-        maskThreshold = "owner-required"
+        maskThreshold = 0.5
+        maskValueKind = "probability"
+        maskPixelCountScope = "prototype-grid-before-crop-resize"
         letterboxContract = "owner-required"
       }
     }

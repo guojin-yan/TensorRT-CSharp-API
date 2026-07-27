@@ -125,6 +125,8 @@ The machine-readable task/output contract is `samples/YoloVision/yolovision-task
 
 For the shared classification and semantic-segmentation workflow, including E-drive asset isolation, output-layout decisions, Top-K versus pixel argmax, build/preflight/runtime commands, report validation, and proof boundaries, see `docs/articles/zh-cn/yolovision-classification-semantic-tutorial.md`.
 
+For instance segmentation, see `docs/articles/zh-cn/yolovision-segmentation-tutorial.md`. The managed multi-output path now preserves detection source indices, composes embedded coefficients with `[P,H,W]` / `[1,P,H,W]` prototypes, applies a stable sigmoid, accepts `--mask-threshold`, reports active versus total prototype-grid pixels, and emits a bounded probability-mask SVG preview. Model-specific letterbox crop and resize-back still require an owner adapter and real evidence.
+
 For cross-family case planning, use `samples/assets/yolovision-family-task-real-asset-roadmap.json` and `docs/articles/zh-cn/yolovision-family-task-real-asset-roadmap.md`. That roadmap turns the broad matrix into owner-action candidate rows for YOLOv5/v6/v7/v8/v9/v10/v11/v26/custom, but it remains planning material until real assets and logs are backfilled.
 
 For publishable YOLOv8n article cases, use `samples/assets/yolovision-article-case-pack.json`. The pack covers det, seg, pose, OBB, cls, and sem with export commands, YoloVision offline preflight commands/reports, TensorRtExec build-only commands, YoloVision run commands, required SHA256 fields, and expected evidence lines. A preflight report is `yolovision-preflight.v1`/`precheck` configuration evidence only; the pack remains article/template material until owner-provided assets and a real `YoloVision Passed=True` run log are validated.
@@ -206,7 +208,7 @@ dotnet run --project .\samples\YoloVision -- --model .\models\yolov10n.onnx --la
 dotnet run --project .\samples\YoloVision -- --model .\models\yolo-cls.onnx --labels .\models\labels.txt --input-data .\models\cls-fp32.bin --input-shape 1x3x224x224 --family custom --task cls --classification-output logits
 
 # Segmentation
-dotnet run --project .\samples\YoloVision -- --model .\models\yolo-seg.onnx --labels .\models\coco.names --input-data .\models\seg-fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map boxes:det,proto:mask-prototypes --mask-coefficient-count 32
+dotnet run --project .\samples\YoloVision -- --model .\models\yolo-seg.onnx --labels .\models\coco.names --input-data .\models\seg-fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map boxes:det,proto:mask-prototypes --mask-coefficient-count 32 --mask-threshold 0.5
 
 # Oriented bounding box
 dotnet run --project .\samples\YoloVision -- --model .\models\yolo-obb.onnx --labels .\models\labels.txt --input-data .\models\obb-fp32.bin --input-shape 1x3x1024x1024 --family v8 --task obb --output-role-map boxes:det,angles:obb-angle --obb-angle-output angles

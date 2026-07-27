@@ -43,6 +43,45 @@ public static class YoloMaskComposer
             }
         }
 
-        return new YoloSegmentationMask(width, height, values);
+        return new YoloSegmentationMask(
+            width,
+            height,
+            values,
+            YoloSegmentationMaskValueKind.RawLogits,
+            YoloSegmentationMask.DefaultThreshold);
+    }
+
+    public static YoloSegmentationMask ComposeProbabilityMask(
+        float[] coefficients,
+        float[] prototypes,
+        int prototypeCount,
+        int width,
+        int height,
+        float threshold = YoloSegmentationMask.DefaultThreshold)
+    {
+        YoloSegmentationMask logits = ComposeLinearMask(coefficients, prototypes, prototypeCount, width, height);
+        float[] probabilities = new float[logits.Values.Length];
+        for (int index = 0; index < logits.Values.Length; index++)
+        {
+            probabilities[index] = Sigmoid(logits.Values[index]);
+        }
+
+        return new YoloSegmentationMask(
+            width,
+            height,
+            probabilities,
+            YoloSegmentationMaskValueKind.Probability,
+            threshold);
+    }
+
+    public static float Sigmoid(float value)
+    {
+        if (value >= 0.0f)
+        {
+            return 1.0f / (1.0f + MathF.Exp(-value));
+        }
+
+        float exponential = MathF.Exp(value);
+        return exponential / (1.0f + exponential);
     }
 }

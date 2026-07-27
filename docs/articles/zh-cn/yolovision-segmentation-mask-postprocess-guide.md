@@ -137,14 +137,14 @@ dotnet run --project .\samples\YoloVision -- `
 - `className`
 - `score`
 
-后处理顺序建议为：decode boxes -> score filtering -> NMS -> coefficient 与 prototype 组合 -> sigmoid -> crop -> resize -> threshold。文章中要说明这些步骤和训练/导出预处理必须一致。
+完整的模型特定后处理目标顺序为：decode boxes -> score filtering -> NMS -> coefficient 与 prototype 组合 -> sigmoid -> crop -> resize -> threshold。当前通用 managed path 已实现到稳定 sigmoid、prototype-grid threshold/statistics 和有界 SVG 预览；crop 与原图 resize-back 仍由 owner-approved adapter 实现并记录，不能由通用预览冒充。
 
 ## 代码与文件入口
 
-- `samples/YoloVision/YoloVisionRuntimePipeline.cs`：多输出 runtime 结果路由。
-- `samples/YoloVision/YoloVisionSegmentationDecoder.cs`：box、coefficient 与 prototype 组合。
-- `samples/YoloVision/YoloVisionMaskComposer.cs`：sigmoid、crop、resize 与 threshold。
-- `samples/YoloVision/YoloVisionNms.cs`：保留 detection 与 mask coefficient 的索引一致性。
+- `samples/YoloVision/YoloSampleRunner.cs`：多输出 runtime 路由、box/coefficient source-index 对齐与 prototype shape。
+- `samples/YoloVision/YoloMaskComposer.cs`：线性组合和稳定 sigmoid probability compose。
+- `samples/YoloVision/YoloSegmentationMask.cs`：value kind、threshold 与 active pixel statistics。
+- `samples/YoloVision/YoloSampleRunner.cs`：在 detection decode/NMS 后继续按 source index 关联 coefficients。
 - `samples/YoloVision/yolovision-task-output-contract.json`：segmentation 输出角色契约。
 - `samples/YoloVision/Program.cs`：`--task seg`、`--output-role-map` 和 mask 参数入口。
 - `eng/Test-YoloVisionRealAssetCandidate.ps1`：模型、图片、labels、日志和 SHA256 校验。
@@ -175,7 +175,7 @@ Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-seg\tensors\
 dotnet run --project .\samples\YoloVision -- --preprocess-only --image E:\TensorRtSharpAssets\cases\yolov8n-seg\images\dog.ppm --preprocessed-output E:\TensorRtSharpAssets\cases\yolov8n-seg\tensors\dog-fp32.bin --input-shape 1x3x640x640 --tensor-layout NCHW --color-order RGB --resize letterbox
 dotnet run --project .\samples\YoloVision -- --model E:\TensorRtSharpAssets\cases\yolov8n-seg\models\yolov8n-seg.onnx --labels E:\TensorRtSharpAssets\cases\yolov8n-seg\labels\coco.names --input-data E:\TensorRtSharpAssets\cases\yolov8n-seg\tensors\dog-fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map boxes:det,proto:mask-prototypes --mask-coefficient-count 32 --output-json E:\TensorRtSharpAssets\cases\yolov8n-seg\reports\yolov8n-seg-output.json --visualization-svg E:\TensorRtSharpAssets\cases\yolov8n-seg\reports\yolov8n-seg-output.svg
 
-输出 JSON 至少要保留 detection output shape、prototype shape、maskCoefficientCount、maskThreshold、letterboxScale、letterboxPadX、letterboxPadY、maskPixelCount、boxBeforeCrop、boxAfterResize、className、score、modelSha256、imageSha256 和 preprocessedTensorSha256。overlay SVG 是派生证据，必须能追溯到同一份 JSON、输入图和 run log。
+通用输出 JSON 直接保留 detection output shape、prototype shape、maskThreshold、maskPixelCount、maskTotalPixelCount、maskValueKind、`maskPixelCountScope=prototype-grid-before-crop-resize`、className、score、modelSha256、imageSha256 和 preprocessedTensorSha256。owner 最终 overlay 记录还应补 letterboxScale、letterboxPadX、letterboxPadY、boxBeforeCrop、boxAfterResize 和 adapter hash。SVG 是派生证据，必须能追溯到同一份 JSON、输入图和 run log。
 
 建议按以下顺序运行验证：
 

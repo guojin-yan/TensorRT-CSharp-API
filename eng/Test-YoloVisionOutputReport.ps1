@@ -151,10 +151,23 @@ function Test-TaskPrediction {
                 (Test-NonNegativeNumber $Prediction.score)
         }
         "seg" {
+            $maskShape = @($Prediction.maskShape)
+            $maskPixelCount = if (Test-JsonProperty $Prediction "maskPixelCount") { [long]$Prediction.maskPixelCount } else { -1 }
+            $maskTotalPixelCount = if (Test-JsonProperty $Prediction "maskTotalPixelCount") { [long]$Prediction.maskTotalPixelCount } else { -1 }
+            $maskThreshold = if (Test-JsonProperty $Prediction "maskThreshold") { [double]$Prediction.maskThreshold } else { -1.0 }
+            $shapeMatchesTotal = $maskShape.Count -eq 2 -and
+                [long]$maskShape[0] -gt 0 -and
+                [long]$maskShape[1] -gt 0 -and
+                ([long]$maskShape[0] * [long]$maskShape[1]) -eq $maskTotalPixelCount
+
             return (Test-JsonProperty $Prediction "box") -and
-                (Test-JsonProperty $Prediction "maskShape") -and
-                (Test-JsonProperty $Prediction "maskPixelCount") -and
-                (Test-JsonProperty $Prediction "maskThreshold")
+                $shapeMatchesTotal -and
+                $maskPixelCount -ge 0 -and
+                $maskPixelCount -le $maskTotalPixelCount -and
+                $maskThreshold -ge 0.0 -and
+                $maskThreshold -le 1.0 -and
+                (Get-JsonString $Prediction "maskValueKind") -in @("probability", "raw-logits") -and
+                (Get-JsonString $Prediction "maskPixelCountScope") -eq "prototype-grid-before-crop-resize"
         }
         "obb" {
             return (Test-JsonProperty $Prediction "center") -and

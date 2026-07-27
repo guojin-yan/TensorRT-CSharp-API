@@ -80,8 +80,9 @@ public static class YoloRuntimeOutputRoleResolver
                 maskCoefficientCount = GetPositiveIntArgument(args, "--mask-coefficients", 0);
             }
 
+            float maskThreshold = GetFloatArgument(args, "--mask-threshold", YoloSegmentationMask.DefaultThreshold, 0.0f, 1.0f);
             return maskCoefficientCount > 0
-                ? YoloMultiOutputMetadata.ForSegmentation(maskCoefficientCount, auxiliaryChannelStart, auxiliaryLayout)
+                ? YoloMultiOutputMetadata.ForSegmentation(maskCoefficientCount, auxiliaryChannelStart, auxiliaryLayout, maskThreshold)
                 : null;
         }
 
@@ -268,6 +269,25 @@ public static class YoloRuntimeOutputRoleResolver
         }
 
         throw new ArgumentException($"{name} must be a non-negative integer.");
+    }
+
+    private static float GetFloatArgument(string[] args, string name, float defaultValue, float minimum, float maximum)
+    {
+        string value = GetStringArgument(args, name, string.Empty);
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return defaultValue;
+        }
+
+        if (float.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out float parsed) &&
+            float.IsFinite(parsed) &&
+            parsed >= minimum &&
+            parsed <= maximum)
+        {
+            return parsed;
+        }
+
+        throw new ArgumentException($"{name} must be in [{minimum}, {maximum}].");
     }
 
     private static bool GetBooleanArgument(string[] args, string name, bool defaultValue)

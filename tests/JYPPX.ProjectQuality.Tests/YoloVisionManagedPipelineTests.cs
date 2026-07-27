@@ -475,8 +475,59 @@ public sealed class YoloVisionManagedPipelineTests
         Assert.Contains("<svg", svg, StringComparison.Ordinal);
         Assert.Contains("YoloVision seg", svg, StringComparison.Ordinal);
         Assert.Contains("mask 2x2", svg, StringComparison.Ordinal);
+        Assert.Contains("data-mask-cell=\"true\"", svg, StringComparison.Ordinal);
         Assert.Contains("person", svg, StringComparison.Ordinal);
         Assert.DoesNotContain("YoloDet", svg, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void SegmentationOutputReportDistinguishesActiveAndTotalPrototypePixels()
+    {
+        YoloModelProfile profile = YoloModelProfile.FromArgs(new[]
+        {
+            "--family", "v8",
+            "--task", "seg",
+            "--layout", "boxes-first",
+            "--class-count", "1"
+        }, labelCount: 1);
+        YoloSegmentationMask mask = new YoloSegmentationMask(
+            2,
+            2,
+            new[] { 0.2f, 0.6f, 0.8f, 0.4f },
+            YoloSegmentationMaskValueKind.Probability,
+            threshold: 0.6f);
+        YoloVisionResult result = YoloVisionResult.FromSegmentations(new[]
+        {
+            new YoloSegmentationPrediction(new YoloDetection(0, 0.9f, 0.5f, 0.5f, 0.4f, 0.4f), mask)
+        });
+        YoloRuntimeOutputSet outputs = new YoloRuntimeOutputSet(new[]
+        {
+            new YoloRuntimeOutputTensor("boxes", YoloOutputTensorRole.Detection, new[] { 0.5f }, new[] { 1 }),
+            new YoloRuntimeOutputTensor("proto", YoloOutputTensorRole.MaskPrototypes, new[] { 0.2f, 0.6f, 0.8f, 0.4f }, new[] { 1, 2, 2 })
+        });
+
+        using JsonDocument document = JsonDocument.Parse(YoloVisionOutputReport.ToJson(
+            new YoloVisionOutputReportContext(
+                "model.onnx",
+                string.Empty,
+                string.Empty,
+                "ramp",
+                new[] { 1, 3, 640, 640 },
+                tensorRtLine: 10,
+                profileIndex: 0,
+                engineDeviceMemoryBytes: 0,
+                elapsedMilliseconds: 1.0),
+            outputs,
+            profile,
+            result,
+            new[] { "person" }));
+        JsonElement prediction = document.RootElement.GetProperty("predictions")[0];
+
+        Assert.Equal(2, prediction.GetProperty("maskPixelCount").GetInt32());
+        Assert.Equal(4, prediction.GetProperty("maskTotalPixelCount").GetInt32());
+        Assert.Equal(0.6f, prediction.GetProperty("maskThreshold").GetSingle());
+        Assert.Equal("probability", prediction.GetProperty("maskValueKind").GetString());
+        Assert.Equal("prototype-grid-before-crop-resize", prediction.GetProperty("maskPixelCountScope").GetString());
     }
 
     [Fact]
@@ -816,6 +867,7 @@ public sealed class YoloVisionManagedPipelineTests
         {
             "--output-role-map", "boxes:det,proto:mask-prototypes,kpts:pose-keypoints,theta:obb-angles",
             "--mask-coefficient-count", "32",
+            "--mask-threshold", "0.65",
             "--aux-channel-start", "84",
             "--aux-layout", "boxes-first"
         };
@@ -831,6 +883,7 @@ public sealed class YoloVisionManagedPipelineTests
 
         Assert.NotNull(metadata);
         Assert.Equal(32, metadata!.MaskCoefficientCount);
+        Assert.Equal(0.65f, metadata.MaskThreshold);
         Assert.Equal(84, metadata.AuxiliaryChannelStart);
         Assert.Equal(YoloOutputLayout.BoxesFirst, metadata.AuxiliaryLayout);
         Assert.Null(YoloRuntimeOutputRoleResolver.CreateMetadata(Array.Empty<string>(), YoloTaskType.Segmentation));
@@ -972,6 +1025,31 @@ public sealed class YoloVisionManagedPipelineTests
     }
 
     [Fact]
+    public void MaskComposerProducesStableProbabilitiesAndThresholdedPixelCounts()
+    {
+        YoloSegmentationMask mask = YoloMaskComposer.ComposeProbabilityMask(
+            new[] { 1.0f },
+            new[] { -2.0f, 0.0f, 2.0f },
+            prototypeCount: 1,
+            width: 3,
+            height: 1,
+            threshold: 0.5f);
+
+        Assert.Equal(YoloSegmentationMaskValueKind.Probability, mask.ValueKind);
+        Assert.Equal(0.119203f, mask.Values[0], precision: 5);
+        Assert.Equal(0.5f, mask.Values[1], precision: 5);
+        Assert.Equal(0.880797f, mask.Values[2], precision: 5);
+        Assert.Equal(2, mask.CountPixelsAtOrAboveThreshold());
+        Assert.Equal(0.0f, YoloMaskComposer.Sigmoid(float.NegativeInfinity));
+        Assert.Equal(1.0f, YoloMaskComposer.Sigmoid(float.PositiveInfinity));
+        Assert.Throws<ArgumentOutOfRangeException>(() => new YoloSegmentationMask(1, 1, new[] { 0.5f }, YoloSegmentationMaskValueKind.Probability, float.NaN));
+        Assert.Throws<ArgumentOutOfRangeException>(() => new YoloSegmentationMask(1, 1, new[] { 0.5f }, (YoloSegmentationMaskValueKind)99, 0.5f));
+        YoloSegmentationMask nanMask = new YoloSegmentationMask(1, 1, new[] { float.NaN });
+        Assert.Equal(0.0f, nanMask.GetProbability(0));
+        Assert.Equal(0, nanMask.CountPixelsAtOrAboveThreshold());
+    }
+
+    [Fact]
     public void PoseAndObbHelpersValidateCommonLayouts()
     {
         YoloPoseKeypoint[] keypoints = YoloPoseDecoder.DecodeFlatKeypoints(new[] { 1.0f, 2.0f, 0.9f, 3.0f, 4.0f, 0.8f }, keypointCount: 2);
@@ -1022,9 +1100,12 @@ public sealed class YoloVisionManagedPipelineTests
         Assert.True(result.HasSegmentationMasks);
         Assert.Equal(2, result.Segmentations.Count);
         Assert.Equal(1, result.Segmentations[0].Detection.ClassIndex);
-        Assert.Equal(new[] { 3.5f, 7.0f, 10.5f, 14.0f }, result.Segmentations[0].Mask.Values);
+        Assert.Equal(YoloSegmentationMaskValueKind.Probability, result.Segmentations[0].Mask.ValueKind);
+        Assert.Equal(YoloMaskComposer.Sigmoid(3.5f), result.Segmentations[0].Mask.Values[0], precision: 5);
+        Assert.Equal(YoloMaskComposer.Sigmoid(14.0f), result.Segmentations[0].Mask.Values[3], precision: 5);
         Assert.Equal(0, result.Segmentations[1].Detection.ClassIndex);
-        Assert.Equal(new[] { 20.5f, 41.0f, 61.5f, 82.0f }, result.Segmentations[1].Mask.Values);
+        Assert.Equal(YoloMaskComposer.Sigmoid(20.5f), result.Segmentations[1].Mask.Values[0], precision: 5);
+        Assert.Equal(YoloMaskComposer.Sigmoid(82.0f), result.Segmentations[1].Mask.Values[3], precision: 5);
     }
 
     [Fact]
@@ -1062,7 +1143,9 @@ public sealed class YoloVisionManagedPipelineTests
 
         Assert.True(result.HasSegmentationMasks);
         Assert.Single(result.Segmentations);
-        Assert.Equal(new[] { 20.5f, 41.0f, 61.5f, 82.0f }, result.Segmentations[0].Mask.Values);
+        Assert.Equal(YoloSegmentationMaskValueKind.Probability, result.Segmentations[0].Mask.ValueKind);
+        Assert.Equal(YoloMaskComposer.Sigmoid(20.5f), result.Segmentations[0].Mask.Values[0], precision: 5);
+        Assert.Equal(YoloMaskComposer.Sigmoid(82.0f), result.Segmentations[0].Mask.Values[3], precision: 5);
         Assert.Contains("MaskPrototypes:proto", outputs.ToString(), StringComparison.Ordinal);
     }
 

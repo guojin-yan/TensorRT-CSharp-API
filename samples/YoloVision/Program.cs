@@ -539,6 +539,7 @@ public static class YoloVisionCommand
         Console.WriteLine("  --output-role-map <map>   Example: boxes:det,proto:mask-prototypes,kpts:pose-keypoints,angle:obb-angles.");
         Console.WriteLine("  --mask-prototypes-output <name>  Segmentation prototype tensor name.");
         Console.WriteLine("  --mask-coefficient-count <count> Segmentation mask coefficient count.");
+        Console.WriteLine("  --mask-threshold <value>         Segmentation probability threshold in [0,1]. Default: 0.5.");
         Console.WriteLine("  --pose-keypoints-output <name>   Pose keypoint tensor name.");
         Console.WriteLine("  --keypoint-count <count>         Pose keypoint count; --keypoint-stride defaults to 3.");
         Console.WriteLine("  --obb-angle-output <name>        OBB angle tensor name; --angle-degrees or --angle-radians controls units.");

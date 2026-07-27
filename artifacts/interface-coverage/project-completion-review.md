@@ -1,5 +1,60 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-27 Segmentation Probability Mask And TensorRtExec Option Tutorial Closure
+
+本阶段按“每批做更多”要求同时推进可用能力与宣传文章：补齐 YoloVision segmentation probability
+mask/threshold/report/preview 路径，并将 Segmentation 与 TensorRtExec 参数分层两篇概要扩展为完整教程。
+该批只增加 managed pointer-free 行为和结构化证据，不改变 TensorRT native ABI 或 deferred ownership
+边界。
+
+### Segmentation 实现
+
+- 保留现有 `ComposeLinearMask` API 和 `RawLogits` 语义，新增 `ComposeProbabilityMask` 与数值稳定
+  sigmoid；runtime multi-output decode 改为 probability mask。
+- `YoloMultiOutputMetadata` 以兼容构造函数/重载新增 `MaskThreshold`；CLI 增加
+  `--mask-threshold`，并进入 preflight、runtime decode、report 和 SVG。
+- `YoloSegmentationMask` 新增 value kind、threshold、probability readback 和 active pixel count；不暴露
+  native pointer 或不透明 ownership。
+- output report 将 `maskPixelCount` 明确为 active prototype-grid pixels，并新增
+  `maskTotalPixelCount`、`maskValueKind`、
+  `maskPixelCountScope=prototype-grid-before-crop-resize`。
+- SVG 从整框填色提升为真实 probability 值驱动、最多 24x24 的有界网格预览；仍明确不是
+  model-specific crop/resize-back final overlay。
+- strict output validator 新增 shape product、active<=total、threshold range、value kind/scope 检查，并增加
+  篡改 total pixel count 必须被拒绝的 E 盘负向测试。
+- article case pack、owner backfill pack、candidate template 和 exporter 同步显式
+  `--mask-threshold 0.5` 与新 metadata；生成投影保持 aligned。
+
+### 两篇长文
+
+- `yolovision-segmentation-tutorial.md` 扩展为模型/许可证、E 盘资产、role/coefficient/prototype、
+  SourceIndex、sigmoid/threshold、build/preflight/runtime、JSON/SVG、validator、排障和发布检查完整教程。
+- `tensorrtexec-option-layering-deep-dive.md` 绑定 31 项 capability JSON、85 项 GUI/CLI field map、
+  17 项 gap list，以及 dry-run/build-only/readonly/bounded-runtime 四层命令和 report validator。
+- 修正旧 segmentation 文章中 4 个不存在的代码文件名和过度实现描述；crop/resize-back 回到明确的
+  owner adapter 边界。
+- README 增加两篇入口，technical article roadmap 第 72、75 项更新为“完整教程已收口”。
+- 新增两组长文交叉门禁，验证代码、schema、example、validator、pack、README、roadmap 和
+  machine-readable counts。
+
+### Verification
+
+- 本批定向集合：124/124 通过。
+- segmentation output examples：6 records、0 blockers；篡改 pixel total 的负向样例被 strict 拒绝。
+- owner backfill exporter：`projection-aligned`、0 failures；strict pack validator 通过。
+- `TensorRtExec --help-json`：31 entries、26 implemented/bounded、4 parse/diagnostic、1 blocked。
+- 完整 `TensorRtSharp.sln` Debug build：0 warning、0 error。
+- stale release claims audit：扫描 1117 个文件，`findingCount=0`。
+
+### C 盘与发布边界
+
+- 未下载或生成模型、ONNX、engine、plan、TensorRT、CUDA、cuDNN、nupkg、zip 或 7z 到 C 盘。
+- C 盘 Temp 有两个不属于本批的 0 字节 Docker `save.tar`；本批没有调用 Docker，未删除无法确认
+  所有权的文件。
+- 未执行 GitHub Actions、workflow dispatch、push、NuGet/GitHub Packages/Release 发布或 issue close。
+- `blocked-real-proof-required`、`canPublishPublicly=false`、`canCloseReleaseIssue=false` 不变；
+  通用 prototype-grid preview 不是 owner final overlay 或 real-model/package-consumer proof。
+
 ## 2026-07-27 YoloVision Classification/Semantic Combined Tutorial Closure
 
 本阶段继续案例和文章收尾，把原先只有概要的

@@ -63,7 +63,10 @@
       "score": 0.88,
       "maskShape": [160, 160],
       "maskPixelCount": 4200,
-      "maskThreshold": 0.5
+      "maskTotalPixelCount": 25600,
+      "maskThreshold": 0.5,
+      "maskValueKind": "probability",
+      "maskPixelCountScope": "prototype-grid-before-crop-resize"
     }
   ],
   "boundary": {

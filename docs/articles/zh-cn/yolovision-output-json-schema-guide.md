@@ -16,7 +16,7 @@ YoloVision 可以覆盖 YOLO v5/v6/v7/v8/v9/v10/v11/v26/custom 与 det、cls、s
 
 1. 顶层字段建议包含 `schemaVersion`、`task`、`modelFamily`、`input`、`engine`、`runtime`、`outputs`、`postprocess` 和 `predictions`。
 2. detection prediction 应包含 `box`、`classId`、`className`、`score` 和 `sourceTensor`。
-3. segmentation prediction 应额外包含 `maskShape`、`maskPixelCount`、`maskThreshold` 和可选 mask artifact path。
+3. segmentation prediction 应额外包含 `maskShape`、active `maskPixelCount`、`maskTotalPixelCount`、`maskThreshold`、`maskValueKind`、`maskPixelCountScope=prototype-grid-before-crop-resize` 和可选 final mask artifact path。
 4. pose prediction 应额外包含 `keypoints`，每个 keypoint 包含 `index`、`x`、`y`、`score` 和可选 `visibility`。
 5. OBB prediction 应包含 `center`、`size`、`angle`、`angleUnit`、`angleRange` 和可选四点坐标。
 

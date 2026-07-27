@@ -256,7 +256,7 @@
         "proofBoundary": "TensorRtExec build report, command transcript, stdout/stderr logs, and engine hash are build evidence only; they are not real-model-runtime proof and never package-consumer-runtime proof."
       },
       "yoloVision": {
-        "runCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-seg.onnx --labels .\\models\\coco.names --input-data .\\models\\yolov8n-seg-fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map boxes:det,proto:mask-prototypes --mask-coefficient-count 32",
+        "runCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-seg.onnx --labels .\\models\\coco.names --input-data .\\models\\yolov8n-seg-fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map boxes:det,proto:mask-prototypes --mask-coefficient-count 32 --mask-threshold 0.5",
         "expectedEvidenceLines": [
           "Profile Family=v8 Task=seg",
           "Segmentations=",
@@ -274,7 +274,7 @@
         "outputJsonSha256": "owner-required"
       },
       "yoloVisionPreflight": {
-        "command": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-seg.onnx --labels .\\models\\coco.names --input-data .\\models\\yolov8n-seg-fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map boxes:det,proto:mask-prototypes --mask-coefficient-count 32 --preflight --preflight-report .\\models\\yolov8n-seg-preflight.json",
+        "command": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-seg.onnx --labels .\\models\\coco.names --input-data .\\models\\yolov8n-seg-fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map boxes:det,proto:mask-prototypes --mask-coefficient-count 32 --mask-threshold 0.5 --preflight --preflight-report .\\models\\yolov8n-seg-preflight.json",
         "reportPath": "models/yolov8n-seg-preflight.json",
         "reportSha256": "owner-required",
         "schemaPath": "samples/YoloVision/yolovision-preflight.schema.json",
@@ -304,7 +304,9 @@
         "maskCoefficientCount": 32,
         "prototypeShape": "owner-required",
         "maskResizePolicy": "owner-required",
-        "maskThreshold": "owner-required",
+      "maskThreshold": 0.5,
+      "maskValueKind": "probability",
+      "maskPixelCountScope": "prototype-grid-before-crop-resize",
         "letterboxContract": "owner-required"
       },
       "articleEvidence": {

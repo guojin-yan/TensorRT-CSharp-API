@@ -133,9 +133,33 @@ public static class YoloVisionVisualizationWriter
         {
             BoxRect rect = ResolveBox(segmentation.Detection, width, height);
             string color = Palette[index % Palette.Length];
-            builder.AppendLine($"""  <rect x="{Format(rect.X)}" y="{Format(rect.Y)}" width="{Format(rect.Width)}" height="{Format(rect.Height)}" fill="{color}" opacity="0.16"/>""");
+            AppendSegmentationMaskPreview(builder, segmentation.Mask, rect, color);
             AppendBox(builder, segmentation.Detection, labels, width, height, index, $"mask {segmentation.Mask.Width}x{segmentation.Mask.Height}");
             index++;
+        }
+    }
+
+    private static void AppendSegmentationMaskPreview(StringBuilder builder, YoloSegmentationMask mask, BoxRect rect, string color)
+    {
+        int columns = Math.Max(1, Math.Min(mask.Width, 24));
+        int rows = Math.Max(1, Math.Min(mask.Height, 24));
+        float cellWidth = rect.Width / columns;
+        float cellHeight = rect.Height / rows;
+        for (int row = 0; row < rows; row++)
+        {
+            int sourceY = Math.Min(mask.Height - 1, row * mask.Height / rows);
+            for (int column = 0; column < columns; column++)
+            {
+                int sourceX = Math.Min(mask.Width - 1, column * mask.Width / columns);
+                float probability = mask.GetProbability(sourceY * mask.Width + sourceX);
+                if (probability < mask.Threshold)
+                {
+                    continue;
+                }
+
+                float opacity = 0.12f + probability * 0.46f;
+                builder.AppendLine($"""  <rect data-mask-cell="true" x="{Format(rect.X + column * cellWidth)}" y="{Format(rect.Y + row * cellHeight)}" width="{Format(cellWidth + 0.25f)}" height="{Format(cellHeight + 0.25f)}" fill="{color}" opacity="{Format(opacity)}"/>""");
+            }
         }
     }
 

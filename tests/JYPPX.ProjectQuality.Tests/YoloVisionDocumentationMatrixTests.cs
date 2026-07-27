@@ -6,6 +6,98 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class YoloVisionDocumentationMatrixTests
 {
     [Fact]
+    public void SegmentationTutorialBindsProbabilityMasksReportsValidatorsAndExplicitRemainingBoundary()
+    {
+        string article = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "yolovision-segmentation-tutorial.md"));
+        string detailedGuide = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "yolovision-segmentation-mask-postprocess-guide.md"));
+        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "README.md"));
+        string roadmap = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "technical-article-roadmap.md"));
+        string schema = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "yolovision-output.schema.json"));
+        string example = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "examples", "yolovision-output-seg.example.json"));
+        string validator = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Test-YoloVisionOutputReport.ps1"));
+        string articleCasePack = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "assets", "yolovision-article-case-pack.json"));
+        string ownerBackfillPack = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "assets", "yolovision-real-asset-owner-backfill-pack.json"));
+        string generatedOwnerBackfillPack = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "assets", "yolovision-real-asset-owner-backfill-pack.generated.json"));
+        string candidateTemplate = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "assets", "yolovision-yolov8-seg-candidate.template.json"));
+
+        Assert.Contains("yolovision-segmentation-tutorial.md", readme, StringComparison.Ordinal);
+        Assert.Contains("| 75 |", roadmap, StringComparison.Ordinal);
+        Assert.Contains("完整教程已收口", roadmap, StringComparison.Ordinal);
+
+        foreach (string marker in new[]
+        {
+            "## Seg 与 Sem 不同",
+            "## 当前实现边界",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-seg",
+            "YoloDetection.SourceIndex",
+            "[P,H,W]",
+            "[1,P,H,W]",
+            "ComposeLinearMask",
+            "ComposeProbabilityMask",
+            "稳定 sigmoid",
+            "--mask-threshold 0.5",
+            "--output-role-map boxes:det,proto:mask-prototypes",
+            "--exportReport",
+            "--preflight",
+            "--output-json",
+            "--visualization-svg",
+            "maskTotalPixelCount",
+            "maskValueKind",
+            "maskPixelCountScope=prototype-grid-before-crop-resize",
+            "data-mask-cell=\"true\"",
+            "24x24",
+            "Test-YoloVisionOutputReport.ps1",
+            "Test-YoloVisionRealAssetOwnerProofInput.ps1 -Strict",
+            "Test-SampleRunEvidenceRecord.ps1 -RequireExistingLog",
+            "以下材料不得替代真实模型证明",
+            "package-consumer-runtime",
+            "## 发布前检查清单"
+        })
+        {
+            Assert.Contains(marker, article, StringComparison.OrdinalIgnoreCase);
+        }
+
+        foreach (string marker in new[]
+        {
+            "maskTotalPixelCount",
+            "maskValueKind",
+            "maskPixelCountScope",
+            "prototype-grid-before-crop-resize"
+        })
+        {
+            Assert.Contains(marker, schema, StringComparison.Ordinal);
+            Assert.Contains(marker, example, StringComparison.Ordinal);
+            Assert.Contains(marker, validator, StringComparison.Ordinal);
+        }
+
+        foreach (string pack in new[] { articleCasePack, ownerBackfillPack, generatedOwnerBackfillPack, candidateTemplate })
+        {
+            Assert.Contains("--mask-threshold 0.5", pack, StringComparison.Ordinal);
+            Assert.Contains("maskValueKind", pack, StringComparison.Ordinal);
+            Assert.Contains("probability", pack, StringComparison.Ordinal);
+            Assert.Contains("maskPixelCountScope", pack, StringComparison.Ordinal);
+            Assert.Contains("prototype-grid-before-crop-resize", pack, StringComparison.Ordinal);
+        }
+
+        Assert.DoesNotContain("YoloVisionRuntimePipeline.cs", detailedGuide, StringComparison.Ordinal);
+        Assert.DoesNotContain("YoloVisionSegmentationDecoder.cs", detailedGuide, StringComparison.Ordinal);
+        Assert.DoesNotContain("YoloVisionMaskComposer.cs", detailedGuide, StringComparison.Ordinal);
+        Assert.DoesNotContain("YoloVisionNms.cs", detailedGuide, StringComparison.Ordinal);
+        Assert.Contains("YoloSampleRunner.cs", detailedGuide, StringComparison.Ordinal);
+        Assert.Contains("YoloMaskComposer.cs", detailedGuide, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ClassificationSemanticTutorialBindsCodeCommandsReportsAndProofBoundaries()
     {
         string articlePath = Path.Combine(

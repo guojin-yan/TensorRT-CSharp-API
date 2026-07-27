@@ -76,6 +76,8 @@ dotnet run --project .\applications\TensorRtExec -- `
 | Build report export | `--exportReport` | `--report` | JSON/Markdown report 输出；别名会归一化回 `--exportReport`，报告仍是 build/report evidence，不是 runtime proof |
 
 CLI 还提供 `--help-json` / `--capabilities-json`，用于离线输出共享的 `trtexec-like-option-capabilities.v1` 机器可读能力说明。该 JSON 覆盖 option group、alias、implementation class、parse/report-only 或 blocked 状态、`releaseFrozen=true` 和 `canPromoteRuntimeProof=false`；它不会加载 TensorRT、CUDA、ONNX、plugin 或 engine，只能作为 source-quality capability surface，不能替代 runtime proof、package-consumer-runtime proof 或 release proof。
+
+完整的参数状态判定、31 项 capability surface、85 项 GUI/CLI field map、17 项 gap list、dry-run/build-only/readonly/bounded-runtime 命令和 report validator 流程见 `docs/articles/zh-cn/tensorrtexec-option-layering-deep-dive.md`。
 | Timing cache export | `--exportTimingCache` | 无 | 成功构建后序列化并写出 cache，报告记录输出大小/SHA256；仍不是 runtime proof |
 
 WinForms 入口现在也暴露上述 runtime timing、advanced timing、precision policy、packaging/refit、safety/consistency、builder cache、weight budget、timing cache export、layer/profile diagnostics 和 output 字段，GUI 与 CLI 都通过 `TensorRtExecOptions` 生成同一条归一化参数线，避免界面入口与命令行入口出现不同语义。`--dumpLayerInfo`、`--dumpProfile` 和 `--separateProfileRun` 已经进入 CLI/GUI 共享参数模型，但仍只代表报告/诊断 intent；没有真实 enqueue、输入资产、输出校验、日志 hash 和 owner review 时，不能晋级为 runtime proof。

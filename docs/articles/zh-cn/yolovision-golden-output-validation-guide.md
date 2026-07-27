@@ -17,7 +17,7 @@ TensorRT 版本、精度、shape profile 和后处理阈值都可能导致输出
 1. 为每个真实资产记录输入图片 hash、engine hash、runtime package 和后处理参数。
 2. 运行 YoloVision 生成输出 JSON，并将关键字段保存为 golden baseline。
 3. 对 detection 比较 class、score tolerance、IoU tolerance 和 box count。
-4. 对 segmentation 比较 mask shape、maskPixelCount tolerance 和 box IoU。
+4. 对 segmentation 比较 mask shape、active/total pixel count、threshold、value kind、pixel-count scope、maskPixelCount tolerance 和 box IoU；prototype-grid statistics 不能冒充 crop/resize-back 后的 final mask。
 5. 对 pose/OBB 比较 keypoint count、keypoint score、angleUnit、angleRange 和 rotated box IoU。
 
 ## 代码与文件入口

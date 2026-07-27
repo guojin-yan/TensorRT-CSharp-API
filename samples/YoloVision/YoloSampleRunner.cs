@@ -118,12 +118,13 @@ public static class YoloSampleRunner
                 continue;
             }
 
-            YoloSegmentationMask mask = YoloMaskComposer.ComposeLinearMask(
+            YoloSegmentationMask mask = YoloMaskComposer.ComposeProbabilityMask(
                 coefficients[detection.SourceIndex],
                 prototypes.Values,
                 prototypes.PrototypeCount,
                 prototypes.Width,
-                prototypes.Height);
+                prototypes.Height,
+                metadata.MaskThreshold);
             segmentations.Add(new YoloSegmentationPrediction(detection, mask));
         }
 

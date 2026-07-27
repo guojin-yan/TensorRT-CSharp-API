@@ -642,7 +642,10 @@
         "score",
         "maskShape",
         "maskPixelCount",
-        "maskThreshold"
+        "maskTotalPixelCount",
+        "maskThreshold",
+        "maskValueKind",
+        "maskPixelCountScope"
       ],
       "properties": {
         "task": {
@@ -669,8 +672,19 @@
         "maskPixelCount": {
           "type": "integer"
         },
+        "maskTotalPixelCount": {
+          "type": "integer"
+        },
         "maskThreshold": {
           "type": "number"
+        },
+        "maskValueKind": {
+          "type": "string",
+          "enum": ["probability", "raw-logits"]
+        },
+        "maskPixelCountScope": {
+          "type": "string",
+          "const": "prototype-grid-before-crop-resize"
         }
       }
     },

@@ -501,8 +501,13 @@ public static class YoloVisionOutputReport
             writer.WriteNumber("score", segmentation.Detection.Score);
             writer.WritePropertyName("maskShape");
             WriteIntArray(writer, new[] { segmentation.Mask.Height, segmentation.Mask.Width });
-            writer.WriteNumber("maskPixelCount", segmentation.Mask.Values.Length);
-            writer.WriteNumber("maskThreshold", 0.5);
+            writer.WriteNumber("maskPixelCount", segmentation.Mask.CountPixelsAtOrAboveThreshold());
+            writer.WriteNumber("maskTotalPixelCount", segmentation.Mask.Values.Length);
+            writer.WriteNumber("maskThreshold", segmentation.Mask.Threshold);
+            writer.WriteString(
+                "maskValueKind",
+                segmentation.Mask.ValueKind == YoloSegmentationMaskValueKind.Probability ? "probability" : "raw-logits");
+            writer.WriteString("maskPixelCountScope", "prototype-grid-before-crop-resize");
             writer.WriteEndObject();
         }
 

@@ -249,6 +249,7 @@ public static class YoloVisionPreflightReport
                     : new
                     {
                         maskCoefficientCount = metadata.MaskCoefficientCount,
+                        maskThreshold = metadata.MaskThreshold,
                         poseKeypointCount = metadata.PoseKeypointCount,
                         poseKeypointStride = metadata.PoseKeypointStride,
                         obbAngleInDegrees = metadata.ObbAngleInDegrees,
