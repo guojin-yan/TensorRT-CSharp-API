@@ -112,6 +112,142 @@ public sealed class YoloVisionDocumentationMatrixTests
     }
 
     [Fact]
+    public void AllTaskOverviewAndDetectionTutorialAreLongFormExecutableAndContractAligned()
+    {
+        string overview = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "yolovision-all-task-overview.md"));
+        string detection = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "yolovision-detection-tutorial.md"));
+        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "README.md"));
+        string roadmap = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "technical-article-roadmap.md"));
+        string candidate = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "assets", "yolovision-yolov8-det-candidate.template.json"));
+        string articlePack = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "assets", "yolovision-article-case-pack.json"));
+        string ownerPack = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "assets", "yolovision-real-asset-owner-backfill-pack.json"));
+        string generatedOwnerPack = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "assets", "yolovision-real-asset-owner-backfill-pack.generated.json"));
+        string ownerPackExporter = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Export-YoloVisionRealAssetOwnerBackfillPack.ps1"));
+
+        Assert.True(overview.Length >= 12000, $"All-task overview is too short: {overview.Length} characters.");
+        Assert.True(detection.Length >= 12000, $"Detection tutorial is too short: {detection.Length} characters.");
+        Assert.Contains("yolovision-all-task-overview.md", readme, StringComparison.Ordinal);
+        Assert.Contains("yolovision-detection-tutorial.md", readme, StringComparison.Ordinal);
+        Assert.Contains("| 73 |", roadmap, StringComparison.Ordinal);
+        Assert.Contains("| 74 |", roadmap, StringComparison.Ordinal);
+        Assert.Contains("完整教程已收口", roadmap, StringComparison.Ordinal);
+
+        foreach (string marker in new[]
+        {
+            "## 最重要的概念：三层能力与证据",
+            "YoloCapabilityMatrix.cs",
+            "共生成 60 行",
+            "其中 55 行",
+            "5 行 unsupported",
+            "yolo-model-matrix.json",
+            "yolovision-task-output-contract.json",
+            "YOLOv5",
+            "YOLOv6",
+            "YOLOv7",
+            "YOLOv8",
+            "YOLOv9",
+            "YOLOv10",
+            "YOLOv11",
+            "YOLOv26",
+            "YOLOX",
+            "custom",
+            "det",
+            "cls",
+            "seg",
+            "obb",
+            "pose",
+            "sem",
+            "E:\\TensorRtSharpAssets\\cases",
+            "--list-capabilities --json",
+            "--exportReport",
+            "--image",
+            "--preprocessed-output",
+            "以下材料不得替代真实模型证明",
+            "package-consumer-runtime",
+            "## 发布前检查清单"
+        })
+        {
+            Assert.Contains(marker, overview, StringComparison.OrdinalIgnoreCase);
+        }
+
+        foreach (string marker in new[]
+        {
+            "## 路径一：Generic Raw Head",
+            "## 路径二：YOLOv10 End-to-End",
+            "## 路径三：YOLOX",
+            "[1,C,N]",
+            "[1,N,C]",
+            "[1,N,6]",
+            "score = objectness * max(classScores)",
+            "Fail-Closed 数值检查",
+            "SourceIndex",
+            "--layout end2end",
+            "no second NMS",
+            "[1,8400,85]",
+            "strides：8、16、32",
+            "不会自动把模型输出框逆 letterbox 到 source-image 坐标",
+            "coordinateSpace=model-input-pixels|normalized|source-image-pixels",
+            "--image",
+            "--preprocessed-output",
+            "--output-json",
+            "--visualization-svg",
+            "Test-YoloVisionOutputReport.ps1 -Strict",
+            "Test-YoloVisionRealAssetOwnerProofInput.ps1 -Strict",
+            "Test-SampleRunEvidenceRecord.ps1 -RequireExistingLog",
+            "以下材料不得替代真实模型证明",
+            "package-consumer-runtime",
+            "## 发布前检查清单"
+        })
+        {
+            Assert.Contains(marker, detection, StringComparison.OrdinalIgnoreCase);
+        }
+
+        foreach (string invalidOption in new[]
+        {
+            "--exportProfile",
+            "--engine ",
+            "--output-layout",
+            "--confidence-threshold",
+            ".jpg"
+        })
+        {
+            Assert.DoesNotContain(invalidOption, overview, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain(invalidOption, detection, StringComparison.OrdinalIgnoreCase);
+        }
+
+        foreach (string pack in new[] { candidate, articlePack, ownerPack, generatedOwnerPack })
+        {
+            Assert.Contains(".ppm", pack, StringComparison.Ordinal);
+            Assert.Contains("--preprocessed-output", pack, StringComparison.Ordinal);
+            Assert.Contains("--output-json", pack, StringComparison.Ordinal);
+            Assert.Contains("--visualization-svg", pack, StringComparison.Ordinal);
+            Assert.Contains("coordinateSpace", pack, StringComparison.Ordinal);
+            Assert.Contains("letterboxContract", pack, StringComparison.Ordinal);
+            Assert.Contains("sourceImageInversePolicy", pack, StringComparison.Ordinal);
+            Assert.Contains("not-automatic-owner-transform-required", pack, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("yolov8-det-test.ppm", candidate, StringComparison.Ordinal);
+        foreach (string pack in new[] { articlePack, ownerPack, generatedOwnerPack })
+        {
+            Assert.Contains("yolov8n-det.ppm", pack, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("model-input-pixels-or-owner-confirmed", ownerPackExporter, StringComparison.Ordinal);
+        Assert.Contains("not-automatic-owner-transform-required", ownerPackExporter, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void PoseTutorialIsLongFormAndMatchesManagedKeypointOwnershipBoundary()
     {
         string article = File.ReadAllText(Path.Combine(

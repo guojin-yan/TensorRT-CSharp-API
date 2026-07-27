@@ -11,6 +11,8 @@ This sample runs a user-provided single-input float YOLO-family ONNX model throu
 
 `YoloVision` is the unified YOLO-family sample for detection, classification, segmentation, OBB, pose, and semantic segmentation. It is intentionally broader than detection: the same sample documents family/task selection, multi-output metadata, managed postprocess helpers, and real-asset evidence requirements across the supported YOLO-family tasks.
 
+Start with `docs/articles/zh-cn/yolovision-all-task-overview.md` for the three-layer capability/evidence model and six-task workflow. For detection raw heads, YOLOv10 end-to-end output, YOLOX grid/stride decode, numeric fail-closed behavior, and the current source-image coordinate boundary, use `docs/articles/zh-cn/yolovision-detection-tutorial.md`.
+
 ## Offline Preflight
 
 Run the deterministic YOLOv10 six-column managed decoder smoke without CUDA, TensorRT, ONNX, model files, or labels:

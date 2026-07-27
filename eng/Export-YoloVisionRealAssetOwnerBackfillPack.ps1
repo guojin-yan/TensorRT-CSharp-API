@@ -293,6 +293,9 @@ function New-OutputMetadataObject {
         nmsMode = "class-aware"
         scoreThreshold = "owner-required"
         iouThreshold = "owner-required"
+        coordinateSpace = "model-input-pixels-or-owner-confirmed"
+        letterboxContract = "owner-required"
+        sourceImageInversePolicy = "not-automatic-owner-transform-required"
       }
     }
     "seg" {

@@ -31,14 +31,14 @@ public sealed class YoloPostprocessOptions
             throw new ArgumentOutOfRangeException(nameof(classCount), "Class count must be zero or positive.");
         }
 
-        if (confidenceThreshold < 0 || confidenceThreshold > 1)
+        if (!float.IsFinite(confidenceThreshold) || confidenceThreshold < 0 || confidenceThreshold > 1)
         {
-            throw new ArgumentOutOfRangeException(nameof(confidenceThreshold), "Confidence threshold must be in [0, 1].");
+            throw new ArgumentOutOfRangeException(nameof(confidenceThreshold), "Confidence threshold must be finite and in [0, 1].");
         }
 
-        if (iouThreshold < 0 || iouThreshold > 1)
+        if (!float.IsFinite(iouThreshold) || iouThreshold < 0 || iouThreshold > 1)
         {
-            throw new ArgumentOutOfRangeException(nameof(iouThreshold), "IoU threshold must be in [0, 1].");
+            throw new ArgumentOutOfRangeException(nameof(iouThreshold), "IoU threshold must be finite and in [0, 1].");
         }
 
         if (topK <= 0)

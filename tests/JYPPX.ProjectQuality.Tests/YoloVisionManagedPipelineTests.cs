@@ -173,6 +173,57 @@ public sealed class YoloVisionManagedPipelineTests
     }
 
     [Fact]
+    public void DetectionPostprocessRejectsNonFiniteThresholds()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => new YoloPostprocessOptions(
+            YoloOutputLayout.BoxesFirst,
+            hasObjectness: true,
+            classCount: 2,
+            confidenceThreshold: float.NaN,
+            iouThreshold: 0.45f,
+            topK: 10,
+            applyNms: true));
+        Assert.Throws<ArgumentOutOfRangeException>(() => new YoloPostprocessOptions(
+            YoloOutputLayout.BoxesFirst,
+            hasObjectness: true,
+            classCount: 2,
+            confidenceThreshold: 0.25f,
+            iouThreshold: float.PositiveInfinity,
+            topK: 10,
+            applyNms: true));
+    }
+
+    [Fact]
+    public void DetectionDecoderRejectsMalformedRawHeadRows()
+    {
+        YoloPostprocessOptions options = new YoloPostprocessOptions(
+            YoloOutputLayout.BoxesFirst,
+            hasObjectness: true,
+            classCount: 2,
+            confidenceThreshold: 0.25f,
+            iouThreshold: 0.45f,
+            topK: 10,
+            applyNms: true);
+
+        Assert.Throws<InvalidOperationException>(() => YoloDetectionDecoder.Decode(
+            new[] { float.NaN, 10.0f, 2.0f, 2.0f, 0.9f, 0.8f, 0.1f },
+            new[] { 1, 1, 7 },
+            options));
+        Assert.Throws<InvalidOperationException>(() => YoloDetectionDecoder.Decode(
+            new[] { 10.0f, 10.0f, -2.0f, 2.0f, 0.9f, 0.8f, 0.1f },
+            new[] { 1, 1, 7 },
+            options));
+        Assert.Throws<InvalidOperationException>(() => YoloDetectionDecoder.Decode(
+            new[] { 10.0f, 10.0f, 2.0f, 2.0f, float.PositiveInfinity, 0.8f, 0.1f },
+            new[] { 1, 1, 7 },
+            options));
+        Assert.Throws<InvalidOperationException>(() => YoloDetectionDecoder.Decode(
+            new[] { 10.0f, 10.0f, 2.0f, 2.0f, 0.9f, 0.8f, float.NegativeInfinity },
+            new[] { 1, 1, 7 },
+            options));
+    }
+
+    [Fact]
     public void YoloXDecoderTransformsRawGridAndStrideCoordinatesBeforeNms()
     {
         YoloModelProfile profile = YoloModelProfile.FromArgs(new[]

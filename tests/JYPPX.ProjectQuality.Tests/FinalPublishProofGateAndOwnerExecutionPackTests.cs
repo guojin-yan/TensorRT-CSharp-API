@@ -330,7 +330,7 @@ public sealed class FinalPublishProofGateAndOwnerExecutionPackTests
         Assert.Equal("blocked-final-owner-execution-one-screen-real-owner-input-required", package.GetProperty("finalOwnerExecutionOneScreenPackValidationState").GetString());
         Assert.Equal("blocked-final-close-gate-owner-proof-required", package.GetProperty("finalCloseStrictValidatorOutputState").GetString());
         Assert.Equal("blocked-release-issue-close-owner-decision-input-required", package.GetProperty("releaseIssueCloseOwnerDecisionValidationState").GetString());
-        Assert.NotEmpty(package.GetProperty("releaseEvidenceBundleSha256").GetString());
+        Assert.False(string.IsNullOrWhiteSpace(package.GetProperty("releaseEvidenceBundleSha256").GetString()));
         Assert.Equal(8, package.GetProperty("releaseCloseRealInputChainCount").GetInt32());
         Assert.Equal(8, package.GetProperty("blockedReleaseCloseRealInputChainCount").GetInt32());
         Assert.True(package.GetProperty("releaseCloseRealInputChainRequiredFieldCount").GetInt32() >= 100);
@@ -431,8 +431,8 @@ public sealed class FinalPublishProofGateAndOwnerExecutionPackTests
             Assert.False(gate.GetProperty("canPromoteRuntimeProof").GetBoolean());
             Assert.False(gate.GetProperty("canPublishPublicly").GetBoolean());
             Assert.False(gate.GetProperty("canCloseReleaseIssue").GetBoolean());
-            Assert.NotEmpty(gate.GetProperty("sourceArtifact").GetString());
-            Assert.NotEmpty(gate.GetProperty("strictValidator").GetString());
+            Assert.False(string.IsNullOrWhiteSpace(gate.GetProperty("sourceArtifact").GetString()));
+            Assert.False(string.IsNullOrWhiteSpace(gate.GetProperty("strictValidator").GetString()));
             string boundary = gate.GetProperty("boundary").GetString()!;
             Assert.Contains("not runtime proof", boundary, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("not post-publish proof", boundary, StringComparison.OrdinalIgnoreCase);
@@ -535,7 +535,7 @@ public sealed class FinalPublishProofGateAndOwnerExecutionPackTests
         Assert.False(validation.GetProperty("publicPackageDownloadProofCandidateReady").GetBoolean());
         Assert.False(validation.GetProperty("postPublishProofCandidateReady").GetBoolean());
         Assert.False(validation.GetProperty("postPublishProofSourceLinkageReady").GetBoolean());
-        Assert.NotEmpty(validation.GetProperty("releaseEvidenceBundleSha256").GetString());
+        Assert.False(string.IsNullOrWhiteSpace(validation.GetProperty("releaseEvidenceBundleSha256").GetString()));
         Assert.Equal("blocked-release-issue-close-owner-decision-input-required", validation.GetProperty("releaseIssueCloseOwnerDecisionValidationState").GetString());
         Assert.Equal("blocked-final-close-gate-owner-proof-required", validation.GetProperty("finalCloseStrictValidatorOutputState").GetString());
         Assert.True(validation.GetProperty("sourceArtifactEvidenceCount").GetInt32() >= 14);

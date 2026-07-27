@@ -117,7 +117,7 @@
         "sha256": "owner-required"
       },
       "input": {
-        "imagePath": "models/yolov8n-det.jpg",
+        "imagePath": "models/yolov8n-det.ppm",
         "imageLicense": "owner-required",
         "imageSha256": "owner-required",
         "preprocessedTensorPath": "models\\yolov8n-det-fp32.bin",
@@ -138,7 +138,7 @@
         "proofBoundary": "TensorRtExec build report, command transcript, stdout/stderr logs, and engine hash are build evidence only; they are not real-model-runtime proof and never package-consumer-runtime proof."
       },
       "yoloVision": {
-        "runCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n.onnx --labels .\\models\\coco.names --input-data .\\models\\yolov8n-det-fp32.bin --input-shape 1x3x640x640 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware",
+        "runCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n.onnx --labels .\\models\\coco.names --image .\\models\\yolov8n-det.ppm --preprocessed-output .\\models\\yolov8n-det-fp32.bin --input-shape 1x3x640x640 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45 --output-json .\\models\\yolov8n-det-output.json --visualization-svg .\\models\\yolov8n-det-output.svg",
         "expectedEvidenceLines": [
           "Profile Family=v8 Task=det",
           "Postprocess Task=det",
@@ -156,7 +156,7 @@
         "outputJsonSha256": "owner-required"
       },
       "yoloVisionPreflight": {
-        "command": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n.onnx --labels .\\models\\coco.names --input-data .\\models\\yolov8n-det-fp32.bin --input-shape 1x3x640x640 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware --preflight --preflight-report .\\models\\yolov8n-det-preflight.json",
+        "command": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n.onnx --labels .\\models\\coco.names --image .\\models\\yolov8n-det.ppm --preprocessed-output .\\models\\yolov8n-det-fp32.bin --input-shape 1x3x640x640 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45 --preflight --strict-preflight --preflight-report .\\models\\yolov8n-det-preflight.json",
         "reportPath": "models/yolov8n-det-preflight.json",
         "reportSha256": "owner-required",
         "schemaPath": "samples/YoloVision/yolovision-preflight.schema.json",
@@ -188,7 +188,10 @@
         "hasObjectness": "owner-required",
         "nmsMode": "class-aware",
         "scoreThreshold": "owner-required",
-        "iouThreshold": "owner-required"
+        "iouThreshold": "owner-required",
+        "coordinateSpace": "model-input-pixels-or-owner-confirmed",
+        "letterboxContract": "owner-required",
+        "sourceImageInversePolicy": "not-automatic-owner-transform-required"
       },
       "articleEvidence": {
         "readiness": "owner-action-required",

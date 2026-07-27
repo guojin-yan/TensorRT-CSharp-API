@@ -44,11 +44,21 @@ public static class YoloDetectionDecoder
         for (int box = 0; box < boxCount; box++)
         {
             float objectness = hasObjectness ? Read(values, channelsFirst, channelCount, boxCount, box, 4) : 1.0f;
+            if (!float.IsFinite(objectness))
+            {
+                throw new InvalidOperationException($"Detection row {box} has a non-finite objectness value.");
+            }
+
             int bestClass = 0;
             float bestClassScore = float.NegativeInfinity;
             for (int classIndex = 0; classIndex < classCount; classIndex++)
             {
                 float classScore = Read(values, channelsFirst, channelCount, boxCount, box, classOffset + classIndex);
+                if (!float.IsFinite(classScore))
+                {
+                    throw new InvalidOperationException($"Detection row {box} class {classIndex} has a non-finite score.");
+                }
+
                 if (classScore > bestClassScore)
                 {
                     bestClassScore = classScore;
@@ -57,15 +67,34 @@ public static class YoloDetectionDecoder
             }
 
             float score = objectness * bestClassScore;
+            if (!float.IsFinite(score))
+            {
+                throw new InvalidOperationException($"Detection row {box} has a non-finite computed score.");
+            }
+
+            float centerX = Read(values, channelsFirst, channelCount, boxCount, box, 0);
+            float centerY = Read(values, channelsFirst, channelCount, boxCount, box, 1);
+            float width = Read(values, channelsFirst, channelCount, boxCount, box, 2);
+            float height = Read(values, channelsFirst, channelCount, boxCount, box, 3);
+            if (!float.IsFinite(centerX) || !float.IsFinite(centerY) || !float.IsFinite(width) || !float.IsFinite(height))
+            {
+                throw new InvalidOperationException($"Detection row {box} contains a non-finite box value.");
+            }
+
+            if (width < 0.0f || height < 0.0f)
+            {
+                throw new InvalidOperationException($"Detection row {box} width and height must be zero or positive.");
+            }
+
             if (score >= options.ConfidenceThreshold)
             {
                 candidates.Add(new YoloDetection(
                     bestClass,
                     score,
-                    Read(values, channelsFirst, channelCount, boxCount, box, 0),
-                    Read(values, channelsFirst, channelCount, boxCount, box, 1),
-                    Read(values, channelsFirst, channelCount, boxCount, box, 2),
-                    Read(values, channelsFirst, channelCount, boxCount, box, 3),
+                    centerX,
+                    centerY,
+                    width,
+                    height,
                     box));
             }
         }

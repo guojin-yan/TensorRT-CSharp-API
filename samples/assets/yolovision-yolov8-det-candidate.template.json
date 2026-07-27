@@ -31,11 +31,11 @@
   "input": {
     "imageSourceUrl": "owner-required redistributable test image",
     "imageLicense": "owner-required",
-    "imagePath": "models/yolov8-det-test.jpg",
+    "imagePath": "models/yolov8-det-test.ppm",
     "imageSha256": "owner-required",
     "preprocessedTensorPath": "models/yolov8-det-fp32.bin",
     "preprocessedTensorSha256": "owner-required",
-    "preprocessCommand": "owner-required command that performs resize/letterbox/RGB/normalize/NCHW conversion",
+    "preprocessCommand": "dotnet run --project .\\samples\\YoloVision -- --preprocess-only --image .\\models\\yolov8-det-test.ppm --preprocessed-output .\\models\\yolov8-det-fp32.bin --input-shape 1x3x640x640 --tensor-layout NCHW --color-order RGB --resize letterbox",
     "inputShape": "1x3x640x640"
   },
   "outputMetadata": {
@@ -49,6 +49,9 @@
     "nmsMode": "class-aware",
     "layout": "auto",
     "hasObjectness": "auto",
+    "coordinateSpace": "model-input-pixels-or-owner-confirmed",
+    "letterboxContract": "owner-required",
+    "sourceImageInversePolicy": "not-automatic-owner-transform-required",
     "postprocessMetadata": {
       "confidence": 0.25,
       "iouThreshold": 0.45,
@@ -58,7 +61,13 @@
   },
   "commands": {
     "tensorRtExecBuildCommand": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\yolov8-det.onnx --saveEngine .\\models\\yolov8-det.plan --minShapes images:1x3x640x640 --optShapes images:1x3x640x640 --maxShapes images:4x3x640x640 --fp16 --workspace 1024 --buildOnly --exportReport .\\models\\yolov8-det-build-report.json --evidenceSidecar .\\models\\yolov8-det-evidence.sidecar.json",
-    "yoloVisionRunCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8-det.onnx --labels .\\models\\coco.names --input-data .\\models\\yolov8-det-fp32.bin --input-shape 1x3x640x640 --tensor-rt-line 10 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45"
+    "yoloVisionRunCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8-det.onnx --labels .\\models\\coco.names --image .\\models\\yolov8-det-test.ppm --preprocessed-output .\\models\\yolov8-det-fp32.bin --input-shape 1x3x640x640 --tensor-rt-line 10 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45 --output-json .\\models\\yolov8-det-output.json --visualization-svg .\\models\\yolov8-det-output.svg"
+  },
+  "outputArtifacts": {
+    "outputJsonPath": "models/yolov8-det-output.json",
+    "outputJsonSha256": "owner-required",
+    "visualizationSvgPath": "models/yolov8-det-output.svg",
+    "visualizationSvgSha256": "owner-required"
   },
   "proofChecklist": {
     "requiredEvidenceLines": [
@@ -70,7 +79,7 @@
       "Detection Class=... Score=... BoxCxCyWh=... or Detections=0 ...",
       "YoloVision Passed=True"
     ],
-    "requiredHashes": ["modelSha256", "labelsSha256", "imageSha256", "preprocessedTensorSha256", "runLogSha256"],
+    "requiredHashes": ["modelSha256", "labelsSha256", "imageSha256", "preprocessedTensorSha256", "outputJsonSha256", "visualizationSvgSha256", "runLogSha256"],
     "stdoutSummary": "owner-required",
     "stderrSummary": "owner-required or explicit no-stderr-emitted",
     "notProofUntil": "owner backfills real assets, hashes, run log, stdout/stderr summaries, and validator passes",

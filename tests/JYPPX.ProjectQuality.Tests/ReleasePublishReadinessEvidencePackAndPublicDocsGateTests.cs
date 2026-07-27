@@ -229,7 +229,7 @@ public sealed class ReleasePublishReadinessEvidencePackAndPublicDocsGateTests
         Assert.False(bundle.GetProperty("finalOwnerExecutionPackagePublicPackageDownloadProofCandidateReady").GetBoolean());
         Assert.False(bundle.GetProperty("finalOwnerExecutionPackagePostPublishProofCandidateReady").GetBoolean());
         Assert.False(bundle.GetProperty("finalOwnerExecutionPackagePostPublishProofSourceLinkageReady").GetBoolean());
-        Assert.NotEmpty(bundle.GetProperty("finalOwnerExecutionPackageReleaseEvidenceBundleSha256").GetString());
+        Assert.False(string.IsNullOrWhiteSpace(bundle.GetProperty("finalOwnerExecutionPackageReleaseEvidenceBundleSha256").GetString()));
         Assert.Equal("blocked-release-issue-close-owner-decision-input-required", bundle.GetProperty("finalOwnerExecutionPackageReleaseIssueCloseOwnerDecisionValidationState").GetString());
         Assert.Equal("blocked-final-close-gate-owner-proof-required", bundle.GetProperty("finalOwnerExecutionPackageFinalCloseStrictValidatorOutputState").GetString());
         Assert.True(bundle.GetProperty("finalOwnerExecutionPackagePublicDownloadCannotSubstitutePostPublishProof").GetBoolean());

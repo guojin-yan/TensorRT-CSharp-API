@@ -1,5 +1,66 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-27 YoloVision Detection Hardening And Tutorial Closure
+
+本阶段在 deferred 审计继续确认 immediate-safe 候选为 0 后，完成 YoloVision all-task 与 Detection
+两个路线图条目的大批次收口：一方面加固 generic raw-head 数值校验，另一方面把两篇短草稿扩为
+可执行长教程，并同步 Detection candidate/article/owner/generated packs。没有修改 native ABI、没有
+进入 callback/calibrator/allocator/plugin/runtime ownership，也没有伪造外部模型或包消费证明。
+
+### Detection Managed Hardening
+
+- `YoloPostprocessOptions` 现在拒绝非有限 confidence/IoU threshold，避免 `NaN` 绕过 `[0,1]` 检查。
+- generic `YoloDetectionDecoder` 对每行 box、objectness、所有 class score 与 computed score 执行
+  `float.IsFinite`；负 width/height fail closed，并在异常中保留 row/class 定位。
+- 为兼容既有 generic raw-head 行为，零 width/height 仍允许；YOLOv10 end-to-end 路径继续要求
+  `x2>x1`、`y2>y1` 和正面积。
+- 新增 threshold 与 malformed raw-head focused tests，覆盖 `NaN`、正负 Infinity 和负尺寸。
+
+### All-Task 与 Detection 长教程
+
+- `yolovision-all-task-overview.md` 从 56 行扩为 400+ 行，明确分离 60-row/55-supported
+  `YoloCapabilityMatrix`、10-family 资产规划 matrix 与 6-task owner output contract，避免把托管
+  配置能力写成所有 family/task 都有真实模型证明。
+- 总览补齐 family/task 现实矩阵、E 盘资产隔离、许可证/hash、TensorRtExec build-only、YoloVision
+  preflight/runtime、六任务命令、JSON/SVG、证据阶梯、validator、排障与发布清单。
+- `yolovision-detection-tutorial.md` 从 89 行扩为 500+ 行，分别绑定 generic `[1,C,N]/[1,N,C]`
+  raw head、YOLOv10 `[1,N,6]` end-to-end 与 YOLOX `[1,8400,85]` grid/stride 三条路径。
+- Detection 教程记录 objectness 推断、score 公式、class-aware/class-agnostic/none NMS、Top-K、
+  `SourceIndex`、numeric fail-closed 和 BMP/PPM 预处理，并明确 generic detection 不会自动把
+  model-input boxes 逆 letterbox 到 source-image coordinates。
+- 两篇命令统一使用当前 `--model`、`--layout`、`--confidence`、`--exportReport`、`.ppm + --image +
+  --preprocessed-output`、`--output-json` 和 `--visualization-svg`；禁止旧参数重新出现。
+- README 增加两篇入口，technical article roadmap 第 73/74 项更新为“完整教程已收口”。
+
+### Detection Packs 与 Owner Contract
+
+- Detection article case、candidate 与 owner pack 统一使用 `.ppm` 内置预处理并生成 JSON/SVG。
+- 新增 `coordinateSpace=model-input-pixels-or-owner-confirmed`、`letterboxContract=owner-required`、
+  `sourceImageInversePolicy=not-automatic-owner-transform-required`，不从 image metadata 自动推断 box inverse。
+- owner exporter 与 generated pack 已同步；投影为 `projection-aligned`、0 failures。
+- candidate/owner strict validators 均为 0 blockers，promotion flags 保持 false。
+
+### Verification
+
+- `YoloVisionManagedPipelineTests`：47/47 通过。
+- 新增长教程与 pack contract 专项门禁通过。
+- YoloVision、TechnicalArticleRoadmapTests、PublishingPublicArticleTests 宽口径集合：204/204 通过。
+- output report strict validator：6 records、0 blockers；owner/candidate validators：0 blockers。
+- 顺带修复 5 条既有 ProjectQuality nullable warning，以显式 non-empty string 断言替代 nullable
+  `Assert.NotEmpty` 调用；相关 release-boundary tests 语义不变。
+- 完整 `TensorRtSharp.sln` Debug build：0 warning、0 error。
+- stale release claims audit：扫描 1118 个文件，`findingCount=0`。
+- `git diff --check` 与 build-server shutdown 在本地提交前执行。
+
+### C 盘与发布边界
+
+- 本批没有向 C 盘下载或生成模型、ONNX、engine、plan、TensorRT、CUDA、cuDNN、nupkg、zip 或 7z。
+- 测试留下的 6 个空 `jyppx-yolovision-*`/`jyppx-yolox-*` Temp 父目录已核验为空并删除。
+- 两个早于本批、所有权不明的 Docker 0 字节 `save.tar` 保留。
+- 未执行 GitHub Actions、workflow dispatch、push、NuGet/GitHub Packages/Release 发布或 issue close。
+- 教程、matrix、preflight、build-only、JSON、SVG、synthetic tests 与 local source build 都不是
+  real-model-runtime、package-consumer-runtime 或 post-publish proof；owner authorization 状态未晋级。
+
 ## 2026-07-27 YoloVision Segmentation Spatial Transform And Pose/OBB Tutorial Closure
 
 本阶段在上一批 probability-mask 基线之上完成显式 prototype-to-source-image 空间变换，并同步收口
