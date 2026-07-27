@@ -16,11 +16,15 @@ public sealed class DeferredBTier41To45ProofClosureTests
             .ToDictionary(static item => item.GetProperty("workItemId").GetString()!, static item => item);
 
         Assert.Equal(5, workItems.Count);
-        AssertWorkItem(workItems["btier-041"], "IBuilderConfig::getTilingOptimizationLevel", "jyppx-trt10-builder-config-get-tiling-optimization-level", "trt10-builder-config-get-tiling-optimization-level-deferred");
-        AssertWorkItem(workItems["btier-042"], "ICudaEngine::hasImplicitBatchDimension", "jyppx-trt10-cuda-engine-has-implicit-batch-dimension", "trt10-cuda-engine-has-implicit-batch-dimension-deferred");
-        AssertWorkItem(workItems["btier-043"], "IExecutionContext::getNvtxVerbosity", "jyppx-trt10-execution-context-get-nvtx-verbosity", "trt10-execution-context-get-nvtx-verbosity-deferred");
-        AssertWorkItem(workItems["btier-044"], "IParser::getError", "trt10-onnx-parser-get-error", "trt10-parser-refitter-get-error-deferred");
-        AssertWorkItem(workItems["btier-045"], "IParserRefitter::getError", "trt10-parser-refitter-get-error", "trt10-parser-refitter-get-error-deferred");
+        foreach (JsonElement item in workItems.Values)
+        {
+            Assert.Equal("B - safe-alternative-or-alias", item.GetProperty("safetyTier").GetString());
+            Assert.Equal("phase-1-safe-alternative-proof", item.GetProperty("phase").GetString());
+            Assert.False(item.GetProperty("canDeleteDeferredRecord").GetBoolean());
+            Assert.False(item.GetProperty("canPromoteReleaseProof").GetBoolean());
+            Assert.NotEmpty(item.GetProperty("safeAlternativeManifestIds").EnumerateArray());
+            Assert.NotEmpty(item.GetProperty("deferredHistoryManifestIds").EnumerateArray());
+        }
 
         string builderConfigApi = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilderConfig.Trt11RuntimeControls.cs");
         string engineApi = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtEngine.cs");

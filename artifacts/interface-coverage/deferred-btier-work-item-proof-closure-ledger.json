@@ -3,7 +3,7 @@
   "recordKind": "deferred-btier-work-item-proof-closure-ledger",
   "generatedAtUtc": "2026-07-19T14:00:00Z",
   "closureState": "source-quality-proof-closed",
-  "closedWorkItemCount": 45,
+  "closedWorkItemCount": 51,
   "closedWorkItemIds": [
     "btier-001",
     "btier-002",
@@ -49,7 +49,13 @@
     "btier-042",
     "btier-043",
     "btier-044",
-    "btier-045"
+    "btier-045",
+    "btier-046",
+    "btier-047",
+    "btier-048",
+    "btier-049",
+    "btier-050",
+    "btier-051"
   ],
   "closureBatches": [
     {
@@ -83,6 +89,14 @@
         "tests/JYPPX.ProjectQuality.Tests/DeferredBTier41To45ProofClosureTests.cs",
         "docs/articles/zh-cn/deferred-btier-41-45-proof-closure.md"
       ]
+    },
+    {
+      "batch": "btier-046-051",
+      "closedWorkItemCount": 6,
+      "evidence": [
+        "tests/JYPPX.ProjectQuality.Tests/DeferredBTier46To50ProofClosureTests.cs",
+        "docs/articles/zh-cn/deferred-btier-46-50-proof-closure.md"
+      ]
     }
   ],
   "proofRequirements": [
@@ -99,5 +113,5 @@
   "isRuntimeExecutionProof": false,
   "isPackageConsumerRuntimeProof": false,
   "canPromoteReleaseProof": false,
-  "boundary": "This ledger records source-quality proof closure for btier-001 through btier-045. It does not prove runtime execution, package-consumer runtime, post-publish verification, owner approval, or permission to delete deferred history."
+  "boundary": "This ledger records source-quality proof closure for btier-001 through btier-051. It does not prove runtime execution, package-consumer runtime, post-publish verification, owner approval, or permission to delete deferred history."
 }

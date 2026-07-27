@@ -7,7 +7,7 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class DeferredBTierWorkItemProofBatchTests
 {
     [Fact]
-    public void AllFortyFiveBTierWorkItemsHaveSafeAlternativeProofWithoutDeletingDeferredHistory()
+    public void AllCurrentBTierWorkItemsHaveSafeAlternativeProofWithoutDeletingDeferredHistory()
     {
         RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Export-DeferredReadOnlyApiCandidatePlan.ps1"), "-IncludeMediumRisk", "-MaxItems", "60");
         RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Export-DeferredBTierProofClosureDashboard.ps1"));
@@ -20,7 +20,7 @@ public sealed class DeferredBTierWorkItemProofBatchTests
         JsonElement root = package.RootElement;
         Assert.Equal("deferred-btier-implementation-work-package", root.GetProperty("recordKind").GetString());
         Assert.Equal("source-quality-proof-closed", root.GetProperty("workPackageState").GetString());
-        Assert.Equal(45, root.GetProperty("closedWorkItemCount").GetInt32());
+        Assert.Equal(51, root.GetProperty("closedWorkItemCount").GetInt32());
         Assert.Equal(0, root.GetProperty("remainingWorkItemCount").GetInt32());
         Assert.False(root.GetProperty("canPublishPublicly").GetBoolean());
         Assert.False(root.GetProperty("canCloseReleaseIssue").GetBoolean());
@@ -28,7 +28,6 @@ public sealed class DeferredBTierWorkItemProofBatchTests
 
         Dictionary<string, JsonElement> workItems = root.GetProperty("workItems")
             .EnumerateArray()
-            .Take(45)
             .ToDictionary(static item => item.GetProperty("workItemId").GetString()!, static item => item);
 
         Assert.Equal(ExpectedWorkItemIds, workItems.Keys);
@@ -37,11 +36,17 @@ public sealed class DeferredBTierWorkItemProofBatchTests
         Assert.Equal("IParserRefitter::getError", workItems["btier-021"].GetProperty("interface").GetString());
         Assert.Equal("IBuilder::getMaxBatchSize", workItems["btier-022"].GetProperty("interface").GetString());
         Assert.Equal("IParser::getError", workItems["btier-040"].GetProperty("interface").GetString());
-        Assert.Equal("IBuilderConfig::getTilingOptimizationLevel", workItems["btier-041"].GetProperty("interface").GetString());
-        Assert.Equal("ICudaEngine::hasImplicitBatchDimension", workItems["btier-042"].GetProperty("interface").GetString());
-        Assert.Equal("IExecutionContext::getNvtxVerbosity", workItems["btier-043"].GetProperty("interface").GetString());
-        Assert.Equal("IParser::getError", workItems["btier-044"].GetProperty("interface").GetString());
-        Assert.Equal("IParserRefitter::getError", workItems["btier-045"].GetProperty("interface").GetString());
+        Assert.Equal("IBinaryProtoBlob::getData", workItems["btier-041"].GetProperty("interface").GetString());
+        Assert.Equal("IBinaryProtoBlob::getDataType", workItems["btier-042"].GetProperty("interface").GetString());
+        Assert.Equal("IBinaryProtoBlob::getDimensions", workItems["btier-043"].GetProperty("interface").GetString());
+        Assert.Equal("IUffParser::getUffRequiredVersionMajor", workItems["btier-044"].GetProperty("interface").GetString());
+        Assert.Equal("IUffParser::getUffRequiredVersionMinor", workItems["btier-045"].GetProperty("interface").GetString());
+        Assert.Equal("IUffParser::getUffRequiredVersionPatch", workItems["btier-046"].GetProperty("interface").GetString());
+        Assert.Equal("IBuilderConfig::getTilingOptimizationLevel", workItems["btier-047"].GetProperty("interface").GetString());
+        Assert.Equal("ICudaEngine::hasImplicitBatchDimension", workItems["btier-048"].GetProperty("interface").GetString());
+        Assert.Equal("IExecutionContext::getNvtxVerbosity", workItems["btier-049"].GetProperty("interface").GetString());
+        Assert.Equal("IParser::getError", workItems["btier-050"].GetProperty("interface").GetString());
+        Assert.Equal("IParserRefitter::getError", workItems["btier-051"].GetProperty("interface").GetString());
 
         string manifests = string.Join(
             Environment.NewLine,
@@ -72,6 +77,7 @@ public sealed class DeferredBTierWorkItemProofBatchTests
             ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.ParserRefitterDiagnostics.cs"));
         string projectQualityTests = ReadSources("tests", "JYPPX.ProjectQuality.Tests", "*.cs");
         string manualDesignGroups = ReadSource("docs", "articles", "zh-cn", "deferred-manual-design-groups.md");
+        string latestClosureArticle = ReadSource("docs", "articles", "zh-cn", "deferred-btier-46-50-proof-closure.md");
 
         foreach ((string id, JsonElement item) in workItems)
         {
@@ -101,7 +107,14 @@ public sealed class DeferredBTierWorkItemProofBatchTests
                 Assert.Contains("deferred", manifestId, StringComparison.Ordinal);
             }
 
-            Assert.Contains(id, manualDesignGroups, StringComparison.Ordinal);
+            if (int.Parse(id["btier-".Length..]) <= 45)
+            {
+                Assert.Contains(id, manualDesignGroups, StringComparison.Ordinal);
+            }
+            else
+            {
+                Assert.Contains(id, latestClosureArticle, StringComparison.Ordinal);
+            }
         }
 
         Assert.Contains("\"IExecutionContext\",\"getName\",\"IExecutionContext::getName\",\"engine-context\",\"implemented-with-deferred-history\"", coverage + comparison, StringComparison.Ordinal);
@@ -210,6 +223,12 @@ public sealed class DeferredBTierWorkItemProofBatchTests
         "btier-043",
         "btier-044",
         "btier-045",
+        "btier-046",
+        "btier-047",
+        "btier-048",
+        "btier-049",
+        "btier-050",
+        "btier-051",
     };
 
     private static readonly string[] NativeEntryPoints =
