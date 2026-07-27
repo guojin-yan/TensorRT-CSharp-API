@@ -1,5 +1,30 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-27 Tool Capability JSON And YoloVision Offline Contract Self-Test
+
+本阶段进入工具与案例收尾：不触发 GitHub Actions，不发布包，不下载模型或依赖到 C 盘，优先补可离线验证、低 ownership 风险的机器可读能力说明和 self-test。
+
+### 实现
+
+- 新增 `src/JYPPX.TensorRtSharp.Tools/TrtexecLikeOptionCapabilities.cs`，输出 `trtexec-like-option-capabilities.v1` JSON，覆盖 31 个 trtexec-like option capability rows。
+- `applications/TensorRtExec` 和 `samples/OnnxToEngine` 增加 `--help-json` / `--capabilities-json`，离线输出 option group、alias、implementation class、parse/report-only 或 blocked 状态、`releaseFrozen=true` 和 `canPromoteRuntimeProof=false`。
+- `samples/YoloVision` 增加 `--self-test-capabilities`，离线验证 60 个 family/task rows、55 个 supported rows、5 个 YOLOX unsupported rows 和 `IsRuntimeProof=False` 边界。
+- 更新 `applications/TensorRtExec/README.md`、`samples/OnnxToEngine/README.md`、`samples/YoloVision/README.md` 与外层 plan/diary/prompt。
+- 新增 `ToolCapabilityJsonSurfaceTests`，守住 JSON schema、release freeze、CLI switch 暴露和 YoloVision capability self-test 输出。
+
+### Verification
+
+- `ToolCapabilityJsonSurfaceTests`：3/3 通过。
+- 相关集合 `ToolCapabilityJsonSurfaceTests|OnnxToEngineTrtexecLikeTests|TrtexecBuildPolicyTests|YoloVisionManagedPipelineTests`：93/93 通过。
+- `TensorRtExec`、`OnnxToEngine`、`YoloVision` Debug build：0 warning、0 error。
+- `OnnxToEngine --help-json`、`TensorRtExec --help-json`、`YoloVision --self-test-capabilities` 均可离线执行。
+
+### C 盘与发布边界
+
+- 本阶段未下载 TensorRT、CUDA、cuDNN、模型、ONNX、engine、Python/pip 资产或 NuGet 临时包到 C 盘。
+- 未执行 GitHub Actions、workflow dispatch、push、NuGet push、GitHub Packages publish、GitHub Release upload 或 issue close。
+- 本批是 source-quality capability surface 和 offline matrix contract self-test，不是 runtime proof、real-model-runtime proof、package-consumer-runtime proof、post-publish verification 或 owner authorization。
+
 ## 2026-07-23 Native Bridge Build Public Article Expansion
 
 本阶段继续公开文章矩阵质量提升，扩写

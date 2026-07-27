@@ -1,4 +1,5 @@
 using System;
+using JYPPX.TensorRtSharp.Tools;
 using TensorRtExecApp.Core;
 
 namespace TensorRtExecApp.Console;
@@ -10,6 +11,12 @@ public static class TensorRtExecCommand
         if (HasHelp(args))
         {
             PrintUsage();
+            return 0;
+        }
+
+        if (HasSwitch(args, "--help-json") || HasSwitch(args, "--capabilities-json"))
+        {
+            System.Console.WriteLine(TrtexecLikeOptionCapabilities.FormatJson("TensorRtExec"));
             return 0;
         }
 
@@ -61,10 +68,14 @@ public static class TensorRtExecCommand
 
     private static bool HasHelp(string[] args)
     {
+        return HasSwitch(args, "--help") || HasSwitch(args, "-h");
+    }
+
+    private static bool HasSwitch(string[] args, string name)
+    {
         foreach (string arg in args)
         {
-            if (string.Equals(arg, "--help", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(arg, "-h", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(arg, name, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
@@ -79,6 +90,7 @@ public static class TensorRtExecCommand
         System.Console.WriteLine("Usage:");
         System.Console.WriteLine("  TensorRtExec --onnx model.onnx --saveEngine model.plan --minShapes input:1x3x640x640 --optShapes input:1x3x640x640 --maxShapes input:4x3x640x640 --buildOnly");
         System.Console.WriteLine("  TensorRtExec --ui");
+        System.Console.WriteLine("  TensorRtExec --help-json");
         System.Console.WriteLine("Input options:");
         System.Console.WriteLine("  --onnx|--model|--onnxFile <path> --saveEngine|--save-engine|--plan|--engineFile <path> --loadEngine|--load-engine <path>");
         System.Console.WriteLine("  --minShapes/--optShapes/--maxShapes input:1x3x640x640[,other:...]");
@@ -111,6 +123,7 @@ public static class TensorRtExecCommand
         System.Console.WriteLine("Report options:");
         System.Console.WriteLine("  --dumpLayerInfo --exportLayerInfo <path> --dumpProfile --separateProfileRun");
         System.Console.WriteLine("  --exportReport|--report <path.json|path.md>");
+        System.Console.WriteLine("  --help-json|--capabilities-json (machine-readable option capability surface; not runtime proof)");
         System.Console.WriteLine("Evidence options:");
         System.Console.WriteLine("  --evidenceSidecar <evidence.json>");
     }

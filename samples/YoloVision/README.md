@@ -84,6 +84,8 @@ Print the offline capability matrix without TensorRT runtime, CUDA, ONNX model a
 
 ```powershell
 dotnet run --project .\samples\YoloVision -- --list-capabilities
+dotnet run --project .\samples\YoloVision -- --list-capabilities --json
+dotnet run --project .\samples\YoloVision -- --self-test-capabilities
 ```
 
 The matrix currently covers `custom`, YOLOv5/v6/v7/v8/v9/v10/v11/v26, detection-only YOLOX, and task aliases `det`, `cls`, `seg`, `obb`, `pose`, and `sem`. It records supported and unsupported family/task boundaries, the managed decode path, required auxiliary metadata, and evidence level for each pair:
@@ -98,6 +100,8 @@ The matrix currently covers `custom`, YOLOv5/v6/v7/v8/v9/v10/v11/v26, detection-
 | Semantic segmentation | `sem` | Single-output semantic map decoder | class count and semantic tensor role | managed-smoke-ready |
 
 This is a support matrix and smoke surface, not proof that a specific external model has passed real image validation. Real model promotion still requires a model/license manifest, TensorRtExec build sidecar, `YoloVision Passed=True` run log, stdout/stderr summaries, SHA256 values, and owner-reviewed evidence.
+
+`--self-test-capabilities` validates the matrix JSON/table contract offline: 60 family/task rows, 55 supported rows, 5 explicit YOLOX unsupported task rows, and a proof boundary with `IsRuntimeProof=False`. It is a capability contract self-test only; it does not open TensorRT, build an engine, enqueue inference, or promote real-model/package-consumer runtime proof.
 
 For YOLOv10 NMS-free/end-to-end exports, pass `--layout end2end`. The managed decoder requires a batch-1 `[1,N,6]` tensor whose columns are `x1,y1,x2,y2,score,classId`; it validates the six-column contract, converts `xyxy` coordinates to the shared center/width/height representation, filters by confidence, checks class bounds, and deliberately disables application-side NMS. It does not guess that an arbitrary YOLOv10 ONNX uses this contract. Inspect the real ONNX outputs first, and use the generic metadata-driven path when the exporter returns raw heads or a different column order. See `docs/articles/zh-cn/yolovision-yolov10-end-to-end-output-guide.md`.
 

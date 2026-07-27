@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using JYPPX.SampleSupport;
 using JYPPX.TensorRtSharp;
 
@@ -55,6 +56,11 @@ public static class YoloVisionCommand
         if (SampleCommandLine.HasSwitch(args, "--self-test-end2end"))
         {
             return RunEndToEndManagedSmoke();
+        }
+
+        if (SampleCommandLine.HasSwitch(args, "--self-test-capabilities"))
+        {
+            return RunCapabilitySelfTest();
         }
 
         try
@@ -317,6 +323,36 @@ public static class YoloVisionCommand
         return passed ? 0 : 2;
     }
 
+    private static int RunCapabilitySelfTest()
+    {
+        string json = YoloCapabilityMatrix.FormatJson();
+        using JsonDocument document = JsonDocument.Parse(json);
+        JsonElement root = document.RootElement;
+        JsonElement entries = root.GetProperty("entries");
+        bool passed =
+            root.GetProperty("matrixId").GetString() == "yolovision-capability-matrix" &&
+            root.GetProperty("entryCount").GetInt32() == YoloCapabilityMatrix.Entries.Count &&
+            root.GetProperty("proofBoundary").GetString()!.Contains("not runtime proof", StringComparison.Ordinal) &&
+            entries.GetArrayLength() == 60 &&
+            YoloCapabilityMatrix.Entries.Count(static entry => entry.Supported) == 55 &&
+            YoloCapabilityMatrix.Entries.Any(static entry =>
+                string.Equals(entry.FamilyAlias, "yolox", StringComparison.Ordinal) &&
+                string.Equals(entry.TaskAlias, "det", StringComparison.Ordinal) &&
+                entry.Supported) &&
+            YoloCapabilityMatrix.Entries.Count(static entry =>
+                string.Equals(entry.FamilyAlias, "yolox", StringComparison.Ordinal) &&
+                !entry.Supported) == 5 &&
+            YoloCapabilityMatrix.FormatConsoleTable().Contains("YoloVision Capability Matrix", StringComparison.Ordinal);
+
+        Console.WriteLine(
+            $"YoloVision CapabilitySelfTest Passed={passed} Entries={YoloCapabilityMatrix.Entries.Count} " +
+            $"Supported={YoloCapabilityMatrix.Entries.Count(static entry => entry.Supported)} Unsupported={YoloCapabilityMatrix.Entries.Count(static entry => !entry.Supported)}");
+        Console.WriteLine(
+            "YoloVision CapabilitySelfTestBoundary=offline-matrix-contract-only IsRuntimeProof=False " +
+            "IsRealModelRuntimeProof=False IsPackageConsumerRuntimeProof=False");
+        return passed ? 0 : 2;
+    }
+
     private static void PrintBindingReport(TensorRtEngineBindingReport report)
     {
         Console.WriteLine(
@@ -486,6 +522,7 @@ public static class YoloVisionCommand
         Console.WriteLine("  --list-capabilities      Print the offline YOLO family/task capability matrix without TensorRT runtime or model assets.");
         Console.WriteLine("  --list-capabilities --json  Print the same capability matrix as machine-readable JSON.");
         Console.WriteLine("  --self-test-end2end     Run the deterministic YOLOv10 six-column managed decoder smoke without CUDA/TensorRT.");
+        Console.WriteLine("  --self-test-capabilities  Validate the offline capability matrix JSON/table contract without CUDA/TensorRT.");
         Console.WriteLine("  --family custom|v5|v6|v7|v8|v9|v10|v11|v26|yolox");
         Console.WriteLine("  --task det|cls|seg|obb|pose|sem");
         Console.WriteLine("  --layout auto|channels-first|boxes-first|end2end");

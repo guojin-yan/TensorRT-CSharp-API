@@ -35,6 +35,12 @@ internal static class Program
             return 0;
         }
 
+        if (SampleCommandLine.HasSwitch(args, "--help-json") || SampleCommandLine.HasSwitch(args, "--capabilities-json"))
+        {
+            Console.WriteLine(TrtexecLikeOptionCapabilities.FormatJson("OnnxToEngine"));
+            return 0;
+        }
+
         if (SampleCommandLine.HasSwitch(args, "--mnist"))
         {
             return RunMnist(args);
@@ -160,6 +166,7 @@ internal static class Program
         Console.WriteLine("  dotnet run --project samples/OnnxToEngine -- --tensor-rt-line 10 --batch 2");
         Console.WriteLine("  dotnet run --project samples/OnnxToEngine -- --onnx model.onnx --saveEngine model.plan --minShapes input:1x3x640x640 --optShapes input:1x3x640x640 --maxShapes input:4x3x640x640 --buildOnly");
         Console.WriteLine("  dotnet run --project samples/OnnxToEngine -- --mnist --tensor-rt-line 10 --onnx mnist.onnx --mnistInput 7.pgm --expectedDigit 7 --saveEngine mnist.plan --exportReport mnist-report.json --exportOutput mnist-output.json --exportPreprocessedInput mnist-input.bin");
+        Console.WriteLine("  dotnet run --project samples/OnnxToEngine -- --help-json");
         Console.WriteLine("Options:");
         Console.WriteLine("  --tensor-rt-line <8|10|11>  TensorRT adapter line. Default: 10.");
         Console.WriteLine("  --batch <1..4>              Runtime batch inside the optimization profile. Default: 2.");
@@ -189,5 +196,6 @@ internal static class Program
         Console.WriteLine("  --safe --consistency --builderCache|--noBuilderCache");
         Console.WriteLine("  --buildOnly --skipInference --dryRun|--previewOnly --dumpLayerInfo --exportLayerInfo <path>");
         Console.WriteLine("  --exportReport|--report <path.json|path.md>");
+        Console.WriteLine("  --help-json|--capabilities-json  Print machine-readable option capability metadata; not runtime proof.");
     }
 }
