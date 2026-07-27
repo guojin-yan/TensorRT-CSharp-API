@@ -1,5 +1,43 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-27 YoloVision Classification/Semantic Combined Tutorial Closure
+
+本阶段继续案例和文章收尾，把原先只有概要的
+`yolovision-classification-semantic-tutorial.md` 扩展为 classification 与 semantic
+segmentation 的对照式完整教程。该批绑定现有 pointer-free managed decode、CLI、output report、
+SVG、case pack 和 validator，不新增 native ownership 风险，也不把示例或 build-only 写成真实运行证明。
+
+### 实现
+
+- 教程新增 cls/sem 判断矩阵、Mermaid 全链路、E 盘资产工作区、许可证/hash 清单、预处理边界、
+  两套 TensorRtExec build-only/preflight/runtime 命令和输出报告检查。
+- 明确 classification 支持 `[C]`、`[1,C]`、`[C,1]`，执行 threshold/order/Top-K，当前 decoder
+  不自动 softmax；`--classification-output` 绑定 tensor name/role。
+- 明确 semantic 支持 `[C,H,W]`、`[1,C,H,W]`、受 class count 约束的 `[1,H,W,C]`，归一化为
+  class-major float map；SVG 的逐像素 argmax/32x24 预览不是完整 map proof。
+- 绑定两个 example JSON、task output contract、article/owner case pack、output validator、owner proof
+  validator、sample-run evidence 和发布前检查清单。
+- `samples/YoloVision/README.md` 增加组合教程入口；technical article roadmap 第 78 项更新为
+  “完整教程已收口”。
+- 新增 `ClassificationSemanticTutorialBindsCodeCommandsReportsAndProofBoundaries` 专项质量门。
+
+### Verification
+
+- `YoloVisionDocumentationMatrixTests`：5/5 通过。
+- YoloVision 文档/技术文章组合：56/56 通过。
+- `Test-YoloVisionOutputReport.ps1 -Strict`：6 records，0 blockers。
+- 完整 `TensorRtSharp.sln` Debug build：0 warning、0 error。
+- stale release claims audit：`findingCount=0`；`git diff --check` 通过。
+
+### C 盘与发布边界
+
+- 本批未下载或生成模型、ONNX、engine、plan、TensorRT、CUDA、cuDNN、nupkg、zip 或 7z 到 C 盘。
+- C 盘审计发现一个不属于本任务、0 字节的 Docker Temp `save.tar`；本批没有运行 Docker，未删除
+  无法确认所有权的临时文件。
+- 未执行 GitHub Actions、workflow dispatch、push、NuGet/GitHub Packages/Release 发布或 issue close。
+- 当前仍为 `blocked-real-proof-required`、`canPublishPublicly=false`、
+  `canCloseReleaseIssue=false`；expected real-log success marker 仍需 owner 真实资产回填。
+
 ## 2026-07-27 YOLO Family Multi-Task Tutorial Closure
 
 本阶段在 TensorRT/CUDA deferred 审计确认没有 immediate-safe 候选后，转向用户明确要求的 YOLO

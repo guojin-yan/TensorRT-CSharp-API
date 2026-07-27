@@ -6,6 +6,66 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class YoloVisionDocumentationMatrixTests
 {
     [Fact]
+    public void ClassificationSemanticTutorialBindsCodeCommandsReportsAndProofBoundaries()
+    {
+        string articlePath = Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "yolovision-classification-semantic-tutorial.md");
+        string article = File.ReadAllText(articlePath);
+        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "README.md"));
+        string roadmap = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "technical-article-roadmap.md"));
+
+        Assert.True(File.Exists(articlePath));
+        Assert.Contains("yolovision-classification-semantic-tutorial.md", readme, StringComparison.Ordinal);
+        Assert.Contains("| 78 |", roadmap, StringComparison.Ordinal);
+        Assert.Contains("完整教程已收口", roadmap, StringComparison.Ordinal);
+
+        foreach (string marker in new[]
+        {
+            "## 先判断任务",
+            "## 全链路",
+            "E:\\TensorRtSharpAssets\\cases\\cls-sem",
+            "## Classification 输出契约",
+            "[C,1]",
+            "不自动执行 softmax",
+            "## Semantic 输出契约",
+            "[1,H,W,C]",
+            "class-major",
+            "32 列、24 行",
+            "TensorRtExec build-only",
+            "--exportReport",
+            "--classification-output logits",
+            "--semantic-output semantic",
+            "--output-json",
+            "--visualization-svg",
+            "yolovision-output-cls.example.json",
+            "yolovision-output-sem.example.json",
+            "samples/YoloVision/yolovision-task-output-contract.json",
+            "samples/assets/yolovision-article-case-pack.json",
+            "Test-YoloVisionOutputReport.ps1",
+            "Test-YoloVisionRealAssetOwnerProofInput.ps1 -Strict",
+            "Test-SampleRunEvidenceRecord.ps1 -RequireExistingLog",
+            "YoloVision Passed=True",
+            "以下材料不得替代真实模型证明",
+            "package-consumer-runtime",
+            "blocked-by-cuda-driver",
+            "## 发布前检查清单"
+        })
+        {
+            Assert.Contains(marker, article, StringComparison.OrdinalIgnoreCase);
+        }
+
+        Assert.Contains("YoloSampleRunner.DecodeClassifications", article, StringComparison.Ordinal);
+        Assert.Contains("YoloSampleRunner.DecodeSemanticMap", article, StringComparison.Ordinal);
+        Assert.Contains("YoloVisionVisualizationWriter", article, StringComparison.Ordinal);
+        Assert.DoesNotContain("--semantic-map-shape", article, StringComparison.Ordinal);
+        Assert.DoesNotContain("--palette ", article, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void YoloFamilyProfileGuideIsPublishableLongFormAndBindsEachTaskToEvidence()
     {
         string articlePath = Path.Combine(
