@@ -124,6 +124,7 @@ Chinese articles:
 - [CUDA Memory Range APIs](articles/zh-cn/cuda-memory-range-apis.md)
 - [NuGet Package Consumer Validation Flow](articles/zh-cn/nuget-package-consumer-validation-flow.md)
 - [Package Consumer Runtime Proof Playbook](articles/zh-cn/package-consumer-runtime-proof-playbook.md)
+- [Technical Article Closure Ledger](articles/zh-cn/publishing/technical-article-closure-ledger.md)
 - [Blog Package Consumer Evidence Chain](articles/zh-cn/blog-package-consumer-evidence-chain.md)
 - [Runtime Package Selection](articles/zh-cn/runtime-package-selection.md)
 - [Runtime Package Matrix Reading Guide](articles/zh-cn/runtime-package-matrix-reading-guide.md)

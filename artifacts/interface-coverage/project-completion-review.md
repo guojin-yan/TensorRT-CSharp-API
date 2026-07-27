@@ -1,5 +1,59 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-28 Technical Article Closure Ledger
+
+本阶段以 103 条技术文章路线图为整体建立可机器复算的 closure ledger，并集中收口 63-71/79 的
+重复主题、proof 教程与 callback/allocator 安全边界。ledger 将正文完成度与外部证明状态分开记录，
+避免把 canonical 覆盖、长文完成或 source-quality 验证误写成 runtime/post-publish/release-close proof。
+
+### Closure Ledger
+
+- 新增 `eng/Export-TechnicalArticleClosureLedger.ps1`，从路线图、canonical article、声明引用和文章内容
+  重新计算 JSON/Markdown；输出不写当前时间，连续执行可保持相同 SHA256。
+- 主编号 103/103、补充编号 1（7.1），missing/duplicate article ID 均为 0；10 条重复主题通过显式
+  canonical mapping 收口，所有 canonical article 均存在。
+- 80 条正文已完成：16 条 `complete-long-form`、44 条 `complete-article`、10 条
+  `complete-operational-guide`、10 条 `canonical-covered`；剩余 23 条为 `needs-expansion`。
+- 56 条涉及外部资产或 proof dependency，其中 42 条仍需 owner/runtime proof；这些条目的
+  `proofComplete=false` 不会反向覆盖其独立的 `contentComplete`。
+- ledger 固定 `performsPublish=false`、`canPublishPublicly=false`、`canCloseReleaseIssue=false`，也不是
+  runtime execution、post-publish 或 release-close proof。
+
+### Canonical Long-Form Closure
+
+- `package-consumer-runtime-proof-playbook.md` 扩为 500+ 行完整执行手册，覆盖 E 盘 clean consumer、
+  runtime package key、preflight、scaffold、restore/build、native listing、真实 smoke、owner input 与 strict validator。
+- `post-publish-verification-proof-playbook.md` 扩为 600+ 行完整执行手册，覆盖真实渠道重新下载、hash、
+  clean scan、隔离 restore、runtime smoke、record projection、严格验证与 rollback 边界。
+- `callback-allocator-safety-bridge-roadmap.md` 扩为 690+ 行安全路线，逐项审计 5 个 callback family 的
+  readiness/safe-control/closure；当前 0 个 family closure-ready，14 类 owner 输入仍未到位。
+- 路线图 25/26、34、63-68、71 通过 74、79、81、72、73-78、69、70、80 的 canonical article 显式收口；
+  69、70、79 自身标记完整教程，未改变任何外部 proof 状态。
+
+### Quality Gates And Navigation
+
+- 新增 `TechnicalArticleClosureLedgerTests`，验证编号连续性、canonical mapping、文章指标、引用存在性、
+  内容/proof 状态独立、发布冻结字段、目标长文长度和禁用 marker。
+- README 中英文版、docs index/toc 与路线图增加 ledger 入口，用户可从前台文档直接查看剩余 23 条。
+- 下一内容批次按 ledger 明确分组：先处理 2-6、10、15-16、19，再处理 28-32、38-45、103；
+  每批重新导出 ledger，不以手工改计数代替正文扩写。
+
+### Verification
+
+- `TechnicalArticleClosureLedgerTests`：3/3 通过。
+- ledger、路线图、公开文章、第三批文章、package preflight、callback readiness/closure 宽口径集合：95/95 通过。
+- 完整 `TensorRtSharp.sln` Debug build：0 warning / 0 error。
+- 三篇目标长文的反引号仓库路径均可解析；目标禁用 marker 0 条；连续导出 JSON/Markdown SHA256 保持一致。
+- stale release claims audit：1121 files scanned / 0 findings；`git diff --check` 通过，build server 在提交前关闭。
+
+### C 盘与发布边界
+
+- Downloads/Temp 今日模型、engine、plan、nupkg、压缩重资产与本项目大文件命中均为 0；一个早于本批的
+  空 `jyppx-split-packages` Temp 目录已核验归属和内容后删除，仓库内 TestResults 为 0。
+- 未执行 push、GitHub Actions、workflow dispatch、NuGet/GitHub Packages/GitHub Release 发布或 issue close。
+- closure ledger 和三篇 source article 只是内容/边界证明；真实 package consumer、callback runtime、
+  post-publish、Linux runner、real-model 与 owner authorization 状态未晋级。
+
 ## 2026-07-27 YoloVision Detection Hardening And Tutorial Closure
 
 本阶段在 deferred 审计继续确认 immediate-safe 候选为 0 后，完成 YoloVision all-task 与 Detection

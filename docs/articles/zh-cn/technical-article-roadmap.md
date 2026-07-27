@@ -52,6 +52,21 @@
 | 发布优先级 | 标明低资产依赖优先、外部资产回填、owner proof 或最终发布前审计。 |
 | 完成状态 | 使用正文已起草、待扩写长文、规划稿、需补资产清单、需真实 proof 回填等可执行状态。 |
 
+### 内容收口与 Proof 状态
+
+文章正文完成和外部 proof 完成是两个独立维度；机器 ledger 分别使用 `contentState` 与 `proofState`：
+
+- `完整教程已收口`：canonical 正文已有完整问题背景、代码/工件、可执行命令、输出、排障、proof boundary 和 checklist。
+- `完整教程已由 <ID> 收口`：当前编号保留历史选题，但正文由后续 canonical 编号维护，避免重复文章继续漂移。
+- owner、compatible host、real model、package consumer、Linux runner 或 post-publish 输入未到位时，即使文章完整，proof 状态仍是 blocked。
+- template、draft、runbook、build-only、local feed、ProjectReference、direct nupkg 或文章长度都不能改变 release flag。
+
+机器可读 closure ledger：
+
+- `docs/articles/zh-cn/publishing/technical-article-closure-ledger.json`
+- `docs/articles/zh-cn/publishing/technical-article-closure-ledger.md`
+- exporter：`eng/Export-TechnicalArticleClosureLedger.ps1`
+
 矩阵中已废弃的旧检测专用样例名不得重新作为文章、样例或发布 proof 入口出现；统一入口是 `samples/YoloVision`。`applications/TensorRtExec` 与 `samples/OnnxToEngine` 可以产生 build/report/sidecar 证据，但不能替代 Classification/YoloVision 真实模型 runner，也不能替代 release proof record。
 
 | 编号 | 系列 | 标题 | 主要内容 | 样例/证据 | 资产要求 | 状态 |
@@ -66,31 +81,31 @@
 | 7.1 | 源码编译 | C++ 原生桥接源码编译总教程 | Visual Studio C++、CMake preset、TensorRT/CUDA/cuDNN roots、binding generator、native bridge、managed package consumer、GitHub full runtime 包、NuGet small core/bridge 包和非 proof 边界 | `docs/articles/zh-cn/tensorrtsharp-source-build-cpp-guide.md`、`docs/articles/zh-cn/source-build-windows-cpp-bridge.md`、`docs/articles/zh-cn/source-build-cmake-presets-and-bindings.md`、`docs/articles/zh-cn/nuget-github-dual-package-strategy.md` | 本机 NVIDIA SDK + C++ toolchain | 正文已起草 |
 | 8 | 安装部署 | package readiness summary 怎么读 | `Overall=ready`、split/full、vendor blockers、runtime smoke | `docs/articles/zh-cn/readiness-summary-guide.md` | 无 | 正文已起草 |
 | 9 | 安装部署 | CUDA error 35 与驱动兼容排查 | `blocked-by-cuda-driver`、driver/runtime mismatch、不是 API 缺口 | `docs/articles/zh-cn/cuda-error-35-troubleshooting.md` | 兼容/不兼容驱动对照 | 正文已起草 |
-| 10 | 接口体系 | TensorRT Builder/Runtime/Engine 对象模型 | logger、builder、config、network、runtime、engine、context | `smoke/TensorRtSmokeRunner` | 无 | 可立即撰写 |
+| 10 | 接口体系 | TensorRT Builder/Runtime/Engine 对象模型 | logger、builder、config、network、runtime、engine、context | `docs/articles/zh-cn/tensorrt-object-model.md`、`smoke/TensorRtSmokeRunner` | 无 | 正文已起草 |
 | 11 | 接口体系 | ExecutionContext 与 inference binding | tensor address、shape inference、enqueue、readback | `docs/articles/zh-cn/inference-bindings-tutorial.md` | 无 | 正文已起草 |
 | 12 | 接口体系 | Dynamic Shape 与 Optimization Profile | min/opt/max、profile index、runtime shape | `docs/articles/zh-cn/dynamic-shape-optimization-profile-tutorial.md` | 无 | 正文已起草 |
 | 13 | 接口体系 | ONNX Parser 到 Serialized Engine | parser、profile、host memory、deserialize、round-trip | `docs/articles/zh-cn/onnx-parser-to-serialized-engine-tutorial.md` | 无 | 正文已起草 |
-| 14 | 接口体系 | Plugin Inventory 只读 API | creator count、name/version/namespace、lookup、只读边界 | `smoke/PluginRegistryInventorySmokeRunner` | 无 | 可立即撰写 |
-| 15 | 接口体系 | Plugin Serialization Paths | runtime/plugin path 诊断、序列化部署路径 | `smoke/PluginSerializationPathsSmokeRunner` | 无 | 可立即撰写 |
-| 16 | CUDA | CUDA memory wrapper 入门 | device/pinned/managed/pitched memory、copy、error map | `smoke/CudaSmokeRunner` | CUDA runtime | 可立即撰写 |
+| 14 | 接口体系 | Plugin Inventory 只读 API | creator count、name/version/namespace、lookup、只读边界 | `docs/articles/zh-cn/plugin-inventory-readonly-api.md`、`smoke/PluginRegistryInventorySmokeRunner` | 无 | 正文已起草 |
+| 15 | 接口体系 | Plugin Serialization Paths | runtime/plugin path 诊断、序列化部署路径 | `docs/articles/zh-cn/plugin-serialization-paths.md`、`smoke/PluginSerializationPathsSmokeRunner` | 无 | 正文已起草 |
+| 16 | CUDA | CUDA memory wrapper 入门 | device/pinned/managed/pitched memory、copy、error map | `docs/articles/zh-cn/cuda-memory-wrapper.md`、`smoke/CudaSmokeRunner` | CUDA runtime | 正文已起草 |
 | 17 | CUDA | CUDA stream/event 与跨 stream 同步 | non-blocking stream、event record/wait/synchronize | `docs/articles/zh-cn/cuda-stream-event-multistream-tutorial.md` | CUDA runtime | 正文已起草 |
-| 18 | CUDA | CUDA Graph 当前能力与边界 | graph node、debug dot、event/memcpy nodes、kernel attrs | `smoke/CudaGraphSmokeRunner` | CUDA runtime | 可立即撰写 |
-| 19 | CUDA | CUDA memory range APIs | range attributes、advise、prefetch、accessed-by devices | `src/JYPPX.CudaSharp`、相关 tests | CUDA runtime | 可立即撰写 |
+| 18 | CUDA | CUDA Graph 当前能力与边界 | graph node、debug dot、event/memcpy nodes、kernel attrs | `docs/articles/zh-cn/cuda-graph-capabilities-boundary.md`、`smoke/CudaGraphSmokeRunner` | CUDA runtime | 正文已起草 |
+| 19 | CUDA | CUDA memory range APIs | range attributes、advise、prefetch、accessed-by devices | `docs/articles/zh-cn/cuda-memory-range-apis.md`、`src/JYPPX.CudaSharp`、相关 tests | CUDA runtime | 正文已起草 |
 | 20 | 案例教程 | 最小 identity network 推理 | 不依赖外部模型的端到端 inference | `docs/articles/zh-cn/inference-bindings-tutorial.md` | 无 | 正文已起草 |
 | 21 | 案例教程 | Dynamic batch 推理教程 | batch 1..4、profile 校验、输出一致性 | `docs/articles/zh-cn/dynamic-shape-optimization-profile-tutorial.md` | 无 | 正文已起草 |
 | 22 | 案例教程 | ONNX 转 TensorRT engine 教程 | 内置 identity ONNX、engine file round-trip | `docs/articles/zh-cn/onnx-parser-to-serialized-engine-tutorial.md` | 无 | 正文已起草 |
 | 23 | 案例教程 | 分类模型部署教程 | 模型获取、labels、预处理、Top-K 输出 | `docs/articles/zh-cn/classification-real-asset-walkthrough.md`、`samples/Classification` | 用户自备分类 ONNX/labels/image | 正文已起草 |
 | 24 | 案例教程 | ResNet/MobileNet 分类实战 | 选一个公开模型，说明下载、转换、运行、验证 | `docs/articles/zh-cn/classification-real-asset-walkthrough.md`、`samples/assets/classification-assets.template.json` | 用户自备模型 URL、labels、测试图 | 正文已起草 |
-| 25 | 案例教程 | YOLO 检测部署教程 | YOLO ONNX、COCO labels、layout、confidence、NMS 边界 | `samples/YoloVision` | 需 YOLO-family ONNX 与图片 | 需补资产清单 |
-| 26 | 案例教程 | YOLO 输出布局排查 | `[1,84,8400]` 与 `[1,8400,84]`、objectness、threshold | `samples/YoloVision` | 需示例输出或模型 | 需补验证资产 |
+| 25 | 案例教程 | YOLO 检测部署教程 | YOLO ONNX、COCO labels、layout、confidence、NMS 边界 | `docs/articles/zh-cn/yolovision-detection-tutorial.md`、`samples/YoloVision` | 需 YOLO-family ONNX 与图片 | 完整教程已由 74 收口 |
+| 26 | 案例教程 | YOLO 输出布局排查 | `[1,84,8400]` 与 `[1,8400,84]`、objectness、threshold | `docs/articles/zh-cn/yolovision-detection-tutorial.md`、`samples/YoloVision` | 需示例输出或模型 | 完整教程已由 74 收口 |
 | 27 | 案例教程 | 多 stream 预处理管线雏形 | 使用 CUDA stream/event 支撑未来图像预处理 | `docs/articles/zh-cn/cuda-stream-event-multistream-tutorial.md` | CUDA runtime | 正文已起草 |
-| 28 | 案例教程 | Refit weights 使用场景 | refitter inspector、权重更新、限制 | `smoke/RefitWeightsSmokeRunner` | 无 | 可立即撰写 |
-| 29 | 高级主题 | TensorRT 11 modern layers | TRT11 专属 layer、metadata、guard | `smoke/NetworkTrt11ModernLayersSmokeRunner` | TRT11 | 可立即撰写 |
-| 30 | 高级主题 | Network layer coverage 导览 | convolution、pooling、resize、slice、topk、quantize | `smoke/Network*SmokeRunner` | 无 | 可立即撰写 |
-| 31 | 高级主题 | ErrorRecorder snapshot 与诊断 | runtime/builder/refitter error recorder copied snapshots | docs/tests | 无 | 可立即撰写 |
-| 32 | 高级主题 | Managed logger/profiler/progress monitor | managed callback safe controls 与非 proof 边界 | `smoke/Managed*CallbackSmokeRunner` | 无 | 可立即撰写 |
+| 28 | 案例教程 | Refit weights 使用场景 | refitter inspector、权重更新、限制 | `docs/articles/zh-cn/refit-weights-guide.md`、`docs/articles/zh-cn/blog-refit-weights-guide.md`、`smoke/RefitWeightsSmokeRunner` | 无 | 正文已起草 |
+| 29 | 高级主题 | TensorRT 11 modern layers | TRT11 专属 layer、metadata、guard | `docs/articles/zh-cn/trt11-modern-layers-guide.md`、`smoke/NetworkTrt11ModernLayersSmokeRunner` | TRT11 | 正文已起草 |
+| 30 | 高级主题 | Network layer coverage 导览 | convolution、pooling、resize、slice、topk、quantize | `docs/articles/zh-cn/network-layer-coverage-guide.md`、`docs/articles/zh-cn/blog-network-layer-coverage-guide.md`、`smoke/Network*SmokeRunner` | 无 | 正文已起草 |
+| 31 | 高级主题 | ErrorRecorder snapshot 与诊断 | runtime/builder/refitter error recorder copied snapshots | `docs/articles/zh-cn/error-recorder-snapshot-guide.md`、`docs/articles/zh-cn/error-recorder-diagnostics-design-gate.md`、tests | 无 | 正文已起草 |
+| 32 | 高级主题 | Managed logger/profiler/progress monitor | managed callback safe controls 与非 proof 边界 | `docs/articles/zh-cn/managed-logger-profiler-progress-monitor.md`、`smoke/Managed*CallbackSmokeRunner` | 无 | 正文已起草 |
 | 33 | 边界专题 | Allocator owner ledger safety gate | 为什么不直接开放 allocator callback，当前安全门禁 | `allocator-owner-ledger-safety-gate.md` | 无 | 可立即撰写 |
-| 34 | 边界专题 | OutputAllocator 与 DebugListener 当前边界 | owner design、precheck、borrowed pointer 风险 | output/debug listener docs | 无 | 可立即撰写 |
+| 34 | 边界专题 | OutputAllocator 与 DebugListener 当前边界 | owner design、precheck、borrowed pointer 风险、real callback runtime proof | `docs/articles/zh-cn/callback-allocator-safety-bridge-roadmap.md`、`docs/articles/zh-cn/callback-allocator-listener-readonly-safety-gates.md` | 无 | 完整教程已由 79 收口 |
 | 35 | 边界专题 | Real callback runtime proof 准入条件 | required markers、package consumer smoke、proof 语义 | `real-callback-runtime-evidence-schema.md` | 驱动兼容环境 | 可立即撰写规划，正文待 proof |
 | 36 | 发布排障 | 常见问题排查总表 | DLL missing、PATH、application control、CUDA error 35、NuGet restore | `docs/articles/zh-cn/troubleshooting-index.md` | 无 | 正文已起草 |
 | 37 | 发布证据 | Linux Runner Evidence 回填指南 | handoff/template、record validator、真实 Linux x64 runner proof 晋级条件 | `docs/articles/zh-cn/blog-linux-runner-evidence-guide.md` | Linux runner 回填 JSON | 博客长文初稿已补 |
@@ -119,15 +134,15 @@
 | 60 | 发布专题 | 完整项目发布前最后一公里 | API 完成度、deferred 边界、样例证据、runtime package、release owner approval、post-publish verification 的串联检查 | `docs/articles/zh-cn/publish-final-mile-checklist.md`、`docs/articles/zh-cn/release-publish-execution-checklist.md`、`docs/articles/zh-cn/post-publish-verification-record.md` | owner approval + proof record | 正文已起草 |
 | 61 | 发布交接 | Release Owner Handoff 总入口 | owner action、acceptable proof、non-substitute examples、close preflight、evidence bundle、stale claim audit 的交接闭环 | `docs/articles/zh-cn/release-owner-handoff.md`、`artifacts/final-release/owner-action-required.md`、`docs/articles/zh-cn/release-close-preflight.md` | owner 授权与真实 proof | 正文已起草 |
 | 62 | 发布交接 | Owner Action Required 执行清单 | owner authorization、external runtime proof、post publish verification、real-model-runtime、Linux runner evidence 的执行顺序 | `artifacts/final-release/owner-action-required.md`、`docs/articles/zh-cn/release-owner-handoff.md` | owner 在真实环境执行 | 正文已起草 |
-| 63 | 宣发总览 | 面向博客的项目能力与边界总览 | TensorRT/CUDA bridge、C# wrapper、samples、applications、runtime packages、deferred boundary、release proof record | `docs/articles/zh-cn/project-overview.md`、`docs/articles/zh-cn/blog-project-introduction.md`、`docs/articles/zh-cn/release-owner-handoff.md` | 无 | 待扩写长文 |
-| 64 | 应用教程 | TensorRtExec 参数分层深挖 | implemented、parse/report-only、TrtexecAlignmentStatus=parse-only、OptionImplementationStatus、build-only 报告 | `docs/articles/zh-cn/tensorrtexec-tool-getting-started.md`、`docs/articles/zh-cn/tensorrtexec-external-onnx-build-report.md`、`artifacts/user-acceptance/trtexec-option-coverage.md` | 用户自备 ONNX | 待扩写长文 |
-| 65 | 样例教程 | YoloVision 全任务系列文章合集 | det、cls、seg、obb、pose、sem 的 family/task/profile、metadata、真实资产和 sample-run-evidence 路径 | `docs/articles/zh-cn/yolo-family-profile-and-postprocess-guide.md`、`docs/articles/zh-cn/yolovision-multi-output-metadata-guide.md`、`samples/YoloVision` | 用户自备 YOLO-family ONNX | 待扩写分篇 |
-| 66 | 证据教程 | package-consumer-runtime proof 实操 | clean consumer、no ProjectReference、runtime package key、nupkg SHA256、stdout/stderr、blocked-by-cuda-driver 边界 | `docs/articles/zh-cn/package-consumer-validation.md`、`docs/articles/zh-cn/nuget-package-consumer-validation-flow.md`、`docs/articles/zh-cn/release-owner-handoff.md` | 兼容 CUDA 主机 | 待扩写长文 |
-| 67 | 证据教程 | post publish verification proof 实操 | 真实渠道、package URL、下载后 hash、clean consumer scan、post-publish record validator | `docs/articles/zh-cn/post-publish-verification-record.md`、`docs/articles/zh-cn/post-publish-clean-consumer-project-scan.md`、`docs/articles/zh-cn/release-owner-handoff.md` | owner 完成真实发布后 | 待扩写长文 |
-| 68 | 安全边界 | callback 与 allocator 安全桥接路线 | owner ledger、borrowed pointer、nothrow callback、real callback runtime proof、deferred boundary | `docs/articles/zh-cn/callback-allocator-boundary-guide.md`、`docs/articles/zh-cn/real-callback-runtime-evidence-schema.md`、`docs/articles/zh-cn/allocator-owner-ledger-safety-gate.md` | 真实 callback runtime proof | 待扩写长文 |
-| 69 | 证据教程 | Package Consumer Runtime Proof Playbook | clean consumer、runtime package key、nupkg SHA256、host metadata、stdout/stderr summary、真实 smoke log SHA256 | `docs/articles/zh-cn/package-consumer-runtime-proof-playbook.md`、`docs/articles/zh-cn/external-runtime-proof-record.md`、`artifacts/final-release/owner-action-required.md` | 兼容 CUDA/TensorRT 主机 | 正文已起草 |
-| 70 | 证据教程 | Post Publish Verification Proof Playbook | 真实渠道 package identity、downloaded hash、clean consumer restore/build/smoke、post-publish validator | `docs/articles/zh-cn/post-publish-verification-proof-playbook.md`、`docs/articles/zh-cn/post-publish-verification-record.md`、`docs/articles/zh-cn/post-publish-clean-consumer-project-scan.md` | owner 完成真实渠道发布后 | 正文已起草 |
-| 71 | 样例教程 | Real Model Evidence Backfill Playbook | Classification/YoloVision 模型、labels、input、license、hash、TensorRtExec sidecar、sample-run-evidence | `docs/articles/zh-cn/real-model-evidence-backfill-playbook.md`、`docs/articles/zh-cn/real-model-owner-backfill-checklist.md`、`samples/YoloVision` | owner 提供真实模型资产 | 正文已起草 |
+| 63 | 宣发总览 | 面向博客的项目能力与边界总览 | TensorRT/CUDA bridge、C# wrapper、samples、applications、runtime packages、deferred boundary、release proof record | `docs/articles/zh-cn/project-release-story-and-boundaries.md`、`docs/articles/zh-cn/project-overview.md`、`docs/articles/zh-cn/blog-project-introduction.md` | 无 | 完整教程已由 81 收口 |
+| 64 | 应用教程 | TensorRtExec 参数分层深挖 | implemented、parse/report-only、TrtexecAlignmentStatus=parse-only、OptionImplementationStatus、build-only 报告 | `docs/articles/zh-cn/tensorrtexec-option-layering-deep-dive.md`、`artifacts/user-acceptance/trtexec-option-coverage.md` | 用户自备 ONNX | 完整教程已由 72 收口 |
+| 65 | 样例教程 | YoloVision 全任务系列文章合集 | det、cls、seg、obb、pose、sem 的 family/task/profile、metadata、真实资产和 sample-run-evidence 路径 | `docs/articles/zh-cn/yolovision-all-task-overview.md`、`docs/articles/zh-cn/yolovision-detection-tutorial.md`、`docs/articles/zh-cn/yolovision-segmentation-tutorial.md`、`docs/articles/zh-cn/yolovision-pose-tutorial.md`、`docs/articles/zh-cn/yolovision-obb-tutorial.md`、`docs/articles/zh-cn/yolovision-classification-semantic-tutorial.md` | 用户自备 YOLO-family ONNX | 完整系列已由 73-78 收口 |
+| 66 | 证据教程 | package-consumer-runtime proof 实操 | clean consumer、no ProjectReference、runtime package key、nupkg SHA256、stdout/stderr、blocked-by-cuda-driver 边界 | `docs/articles/zh-cn/package-consumer-runtime-proof-playbook.md`、`docs/articles/zh-cn/external-runtime-proof-record.md` | 兼容 CUDA 主机 | 完整教程已由 69 收口 |
+| 67 | 证据教程 | post publish verification proof 实操 | 真实渠道、package URL、下载后 hash、clean consumer scan、post-publish record validator | `docs/articles/zh-cn/post-publish-verification-proof-playbook.md`、`docs/articles/zh-cn/post-publish-verification-record.md`、`docs/articles/zh-cn/post-publish-clean-consumer-project-scan.md` | owner 完成真实发布后 | 完整教程已由 70 收口 |
+| 68 | 安全边界 | callback 与 allocator 安全桥接路线 | owner ledger、borrowed pointer、nothrow callback、real callback runtime proof、deferred boundary | `docs/articles/zh-cn/callback-allocator-safety-bridge-roadmap.md`、`docs/articles/zh-cn/real-callback-runtime-evidence-schema.md`、`docs/articles/zh-cn/allocator-owner-ledger-safety-gate.md` | 真实 callback runtime proof | 完整教程已由 79 收口 |
+| 69 | 证据教程 | Package Consumer Runtime Proof Playbook | clean consumer、runtime package key、nupkg SHA256、host metadata、stdout/stderr summary、真实 smoke log SHA256 | `docs/articles/zh-cn/package-consumer-runtime-proof-playbook.md`、`docs/articles/zh-cn/external-runtime-proof-record.md`、`artifacts/final-release/owner-action-required.md` | 兼容 CUDA/TensorRT 主机 | 完整教程已收口 |
+| 70 | 证据教程 | Post Publish Verification Proof Playbook | 真实渠道 package identity、downloaded hash、clean consumer restore/build/smoke、post-publish validator | `docs/articles/zh-cn/post-publish-verification-proof-playbook.md`、`docs/articles/zh-cn/post-publish-verification-record.md`、`docs/articles/zh-cn/post-publish-clean-consumer-project-scan.md` | owner 完成真实渠道发布后 | 完整教程已收口 |
+| 71 | 样例教程 | Real Model Evidence Backfill Playbook | Classification/YoloVision 模型、labels、input、license、hash、TensorRtExec sidecar、sample-run-evidence | `docs/articles/zh-cn/external-model-evidence-case-study.md`、`docs/articles/zh-cn/real-model-evidence-backfill-playbook.md`、`docs/articles/zh-cn/real-model-owner-backfill-checklist.md` | owner 提供真实模型资产 | 完整教程已由 80 收口 |
 | 72 | 应用教程 | TensorRtExec 参数分层深挖 | implemented、parse/report-only、OptionImplementationStatus、TrtexecAlignmentStatus=parse-only、build-only/report 边界 | `docs/articles/zh-cn/tensorrtexec-option-layering-deep-dive.md`、`applications/TensorRtExec`、`artifacts/user-acceptance/trtexec-option-coverage.md` | 用户自备 ONNX | 完整教程已收口 |
 | 73 | 样例教程 | YoloVision 全任务系列总览 | v5/v6/v7/v8/v9/v10/v11/v26、custom、det/cls/seg/obb/pose/sem、support matrix 与 real-model-runtime 边界 | `docs/articles/zh-cn/yolovision-all-task-overview.md`、`samples/YoloVision`、`docs/articles/zh-cn/real-model-evidence-backfill-playbook.md` | 用户自备 YOLO-family ONNX | 完整教程已收口 |
 | 74 | 样例教程 | YoloVision Detection 教程 | detection layout、objectness、NMS、TensorRtExec build-only、sample-run-evidence | `docs/articles/zh-cn/yolovision-detection-tutorial.md`、`samples/YoloVision` | 用户自备检测模型 | 完整教程已收口 |
@@ -135,7 +150,7 @@
 | 76 | 样例教程 | YoloVision Pose 教程 | keypoint metadata、SourceIndex、output layout、坐标边界、sample-run-evidence | `docs/articles/zh-cn/yolovision-pose-tutorial.md`、`samples/YoloVision` | 用户自备姿态模型 | 完整教程已收口 |
 | 77 | 样例教程 | YoloVision OBB 教程 | angle unit/range、SourceIndex、axis-aligned 与 rotated NMS 边界、真实 evidence | `docs/articles/zh-cn/yolovision-obb-tutorial.md`、`samples/YoloVision` | 用户自备 OBB 模型 | 完整教程已收口 |
 | 78 | 样例教程 | YoloVision Classification 与 Semantic Segmentation 教程 | labels、Top-K、semantic output layout、argmax、真实资产需求 | `docs/articles/zh-cn/yolovision-classification-semantic-tutorial.md`、`samples/YoloVision` | 用户自备 cls/sem 模型 | 完整教程已收口 |
-| 79 | 安全边界 | Callback 与 Allocator 安全桥接路线 | owner ledger、borrowed pointer、nothrow callback、real callback runtime proof、deferred boundary | `docs/articles/zh-cn/callback-allocator-safety-bridge-roadmap.md`、`docs/articles/zh-cn/real-callback-runtime-evidence-schema.md` | 真实 callback runtime proof | 正文已起草 |
+| 79 | 安全边界 | Callback 与 Allocator 安全桥接路线 | owner ledger、borrowed pointer、nothrow callback、real callback runtime proof、deferred boundary | `docs/articles/zh-cn/callback-allocator-safety-bridge-roadmap.md`、`docs/articles/zh-cn/real-callback-runtime-evidence-schema.md` | 真实 callback runtime proof | 完整教程已收口 |
 | 80 | 证据教程 | 外部模型 Evidence 回填案例总览 | build-only、sidecar-only、sample-run-evidence、real-model-runtime、package-consumer-runtime、post publish verification | `docs/articles/zh-cn/external-model-evidence-case-study.md`、`docs/articles/zh-cn/real-model-evidence-backfill-playbook.md` | owner 提供真实模型和 proof | 完整教程已收口 |
 | 81 | 宣发总览 | TensorRtSharp4.0 项目能力与发布边界 | 项目价值、接口覆盖、C# wrapper、samples、TensorRtExec、YoloVision、release proof 边界 | `docs/articles/zh-cn/project-release-story-and-boundaries.md`、`docs/articles/zh-cn/project-overview.md` | 无 | 完整教程已收口 |
 | 82 | 发布教程 | Owner Release Execution Package | owner 执行顺序、manual publish placeholder、package-consumer-runtime、real-model-runtime、post-publish verification、blocked-by-cuda-driver | `docs/articles/zh-cn/owner-release-execution-package.md`、`artifacts/final-release/owner-release-execution-package.md`、`eng/Export-OwnerReleaseExecutionPackage.ps1` | owner 执行真实 proof 回填 | 正文已起草 |
