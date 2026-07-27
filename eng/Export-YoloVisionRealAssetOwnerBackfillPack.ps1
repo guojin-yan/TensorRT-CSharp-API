@@ -152,6 +152,25 @@ function Get-InputTensorPathFromCommand {
     return $match.Groups["path"].Value.Trim()
   }
 
+  $match = [regex]::Match($RunCommand, "--preprocessed-output\s+(?<path>\S+)")
+  if ($match.Success) {
+    return $match.Groups["path"].Value.Trim()
+  }
+
+  return $Fallback
+}
+
+function Get-ImagePathFromCommand {
+  param(
+    [string]$RunCommand,
+    [string]$Fallback
+  )
+
+  $match = [regex]::Match($RunCommand, "--(?:image|input-image)\s+(?<path>\S+)")
+  if ($match.Success) {
+    return $match.Groups["path"].Value.Trim()
+  }
+
   return $Fallback
 }
 
@@ -287,6 +306,11 @@ function New-OutputMetadataObject {
         maskValueKind = "probability"
         maskPixelCountScope = "prototype-grid-before-crop-resize"
         letterboxContract = "owner-required"
+        maskSpatialTransform = "explicit-preprocess-inverse"
+        maskCoordinateSpace = "model-input-pixels"
+        maskCropToDetection = $true
+        finalMaskScope = "source-image-after-explicit-preprocess-inverse-and-optional-box-crop"
+        spatialTransformBoundary = "owner must validate exporter-specific mask alignment"
       }
     }
     "pose" {
@@ -357,6 +381,7 @@ function Convert-ArticleCaseToOwnerCase {
   $modelOnnxPath = Get-OnnxPathFromCommand -RunCommand $runCommand -BuildCommand $buildCommand -Fallback ("models/" + $id + ".onnx")
   $labelsPath = Get-LabelsPathFromCommand -RunCommand $runCommand -Fallback "models/coco.names"
   $inputTensorPath = Get-InputTensorPathFromCommand -RunCommand $runCommand -Fallback ("models/" + $id + "-fp32.bin")
+  $imagePath = Get-ImagePathFromCommand -RunCommand $runCommand -Fallback ("models/" + $id + ".jpg")
   $reportPath = Get-ReportPathFromCommand -BuildCommand $buildCommand -Fallback ("models/" + $id + "-build-report.json")
   $enginePath = Get-SaveEnginePathFromCommand -BuildCommand $buildCommand -Fallback ("models/" + $id + ".plan")
   $runLogPath = "models/$id-run.log"
@@ -386,7 +411,7 @@ function Convert-ArticleCaseToOwnerCase {
       sha256 = "owner-required"
     }
     input = [pscustomobject]@{
-      imagePath = "models/$id.jpg"
+      imagePath = $imagePath.TrimStart(".\")
       imageLicense = "owner-required"
       imageSha256 = "owner-required"
       preprocessedTensorPath = $inputTensorPath.TrimStart(".\")
@@ -417,7 +442,7 @@ function Convert-ArticleCaseToOwnerCase {
       stderrLogSha256 = "owner-required-or-no-stderr"
       stdoutSummary = "owner-required"
       stderrSummary = "owner-required-or-no-stderr"
-      outputJsonPath = $outputJsonPath
+      outputJsonPath = $outputJsonPath.TrimStart(".\")
       outputJsonSha256 = "owner-required"
     }
     yoloVisionPreflight = [pscustomobject]@{

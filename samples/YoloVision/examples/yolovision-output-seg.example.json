@@ -3,11 +3,40 @@
   "task": "seg",
   "modelFamily": "yolov8",
   "input": {
-    "path": "synthetic-ramp",
+    "path": "owner-seg-input-fp32.bin",
     "sha256": "",
     "width": 640,
     "height": 640,
-    "sourceKind": "synthetic-pattern"
+    "sourceKind": "preprocessed-image-tensor",
+    "image": {
+      "path": "owner-seg-input.ppm",
+      "sha256": "",
+      "width": 1280,
+      "height": 720
+    },
+    "preprocessedTensor": {
+      "path": "owner-seg-input-fp32.bin",
+      "sha256": "",
+      "elementCount": 1228800,
+      "layout": "NCHW",
+      "colorOrder": "RGB",
+      "normalized": true,
+      "scale": 0.00392156862745098
+    },
+    "letterbox": {
+      "enabled": true,
+      "resizeMode": "letterbox",
+      "alignment": "center",
+      "targetWidth": 640,
+      "targetHeight": 640,
+      "resizedWidth": 640,
+      "resizedHeight": 360,
+      "padX": 0,
+      "padY": 140,
+      "scaleX": 0.5,
+      "scaleY": 0.5,
+      "fillValue": 114
+    }
   },
   "engine": {
     "path": "",
@@ -66,7 +95,31 @@
       "maskTotalPixelCount": 25600,
       "maskThreshold": 0.5,
       "maskValueKind": "probability",
-      "maskPixelCountScope": "prototype-grid-before-crop-resize"
+      "maskPixelCountScope": "prototype-grid-before-crop-resize",
+      "spatialTransform": {
+        "applied": true,
+        "coordinateSpace": "model-input-pixels",
+        "cropToDetection": true,
+        "interpolation": "bilinear",
+        "sourceWidth": 1280,
+        "sourceHeight": 720,
+        "targetWidth": 640,
+        "targetHeight": 640,
+        "resizedWidth": 640,
+        "resizedHeight": 360,
+        "padX": 0,
+        "padY": 140,
+        "scaleX": 0.5,
+        "scaleY": 0.5,
+        "finalMaskShape": [720, 1280],
+        "finalMaskPixelCount": 54000,
+        "finalMaskTotalPixelCount": 921600,
+        "finalMaskThreshold": 0.5,
+        "finalMaskValueKind": "probability",
+        "finalMaskScope": "source-image-after-explicit-preprocess-inverse-and-optional-box-crop",
+        "sourceBox": { "x": 576.0, "y": 320.0, "width": 300.0, "height": 180.0 },
+        "boundary": "explicit-preprocess-metadata-transform; owner must validate exporter-specific mask alignment"
+      }
     }
   ],
   "boundary": {

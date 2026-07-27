@@ -33,6 +33,35 @@ public sealed class YoloVisionOutputReportContext
         double elapsedMilliseconds,
         string labelsPath = "",
         YoloImagePreprocessResult? imagePreprocess = null)
+        : this(
+            modelPath,
+            inputPath,
+            inputDataPath,
+            inputPattern,
+            inputShape,
+            tensorRtLine,
+            profileIndex,
+            engineDeviceMemoryBytes,
+            elapsedMilliseconds,
+            labelsPath,
+            imagePreprocess,
+            segmentationSpatialTransform: null)
+    {
+    }
+
+    public YoloVisionOutputReportContext(
+        string modelPath,
+        string inputPath,
+        string inputDataPath,
+        string inputPattern,
+        int[] inputShape,
+        int tensorRtLine,
+        int profileIndex,
+        ulong engineDeviceMemoryBytes,
+        double elapsedMilliseconds,
+        string labelsPath,
+        YoloImagePreprocessResult? imagePreprocess,
+        YoloSegmentationSpatialTransformOptions? segmentationSpatialTransform)
     {
         ModelPath = modelPath ?? string.Empty;
         InputPath = inputPath ?? string.Empty;
@@ -45,6 +74,14 @@ public sealed class YoloVisionOutputReportContext
         ElapsedMilliseconds = elapsedMilliseconds;
         LabelsPath = labelsPath ?? string.Empty;
         ImagePreprocess = imagePreprocess;
+        if (segmentationSpatialTransform != null && imagePreprocess == null)
+        {
+            throw new ArgumentException(
+                "Segmentation spatial transform requires image preprocessing metadata.",
+                nameof(segmentationSpatialTransform));
+        }
+
+        SegmentationSpatialTransform = segmentationSpatialTransform;
     }
 
     /// <summary>Gets the ONNX model path. 获取 ONNX 模型路径。</summary>
@@ -79,6 +116,9 @@ public sealed class YoloVisionOutputReportContext
 
     /// <summary>Gets image preprocessing metadata, when this run used <c>--image</c>. 获取 --image 预处理元数据。</summary>
     public YoloImagePreprocessResult? ImagePreprocess { get; }
+
+    /// <summary>Gets the explicit segmentation spatial-transform options, when requested. 获取显式 segmentation 空间变换选项。</summary>
+    public YoloSegmentationSpatialTransformOptions? SegmentationSpatialTransform { get; }
 }
 
 /// <summary>
@@ -122,6 +162,13 @@ public static class YoloVisionOutputReport
         if (result == null)
         {
             throw new ArgumentNullException(nameof(result));
+        }
+
+        if (context.SegmentationSpatialTransform != null && result.TaskType != YoloTaskType.Segmentation)
+        {
+            throw new ArgumentException(
+                "Segmentation spatial transform can only be written for a segmentation result.",
+                nameof(result));
         }
 
         using MemoryStream stream = new MemoryStream();
@@ -170,7 +217,8 @@ public static class YoloVisionOutputReport
         YoloVisionResult result,
         IReadOnlyList<string> labels,
         string labelsPath = "",
-        YoloImagePreprocessResult? imagePreprocess = null)
+        YoloImagePreprocessResult? imagePreprocess = null,
+        YoloSegmentationSpatialTransformOptions? segmentationSpatialTransform = null)
     {
         if (options == null)
         {
@@ -195,7 +243,8 @@ public static class YoloVisionOutputReport
                 run.EngineDeviceMemoryBytes,
                 run.ElapsedMilliseconds,
                 labelsPath,
-                imagePreprocess),
+                imagePreprocess,
+                segmentationSpatialTransform),
             outputs,
             profile,
             result,
@@ -226,7 +275,7 @@ public static class YoloVisionOutputReport
             WriteBindingMetadata(writer, bindingReport, outputs);
         }
         WritePostprocess(writer, profile);
-        WritePredictions(writer, result, labels);
+        WritePredictions(writer, context, result, labels);
         WriteBoundary(writer);
         writer.WriteEndObject();
     }
@@ -459,7 +508,11 @@ public static class YoloVisionOutputReport
         writer.WriteEndObject();
     }
 
-    private static void WritePredictions(Utf8JsonWriter writer, YoloVisionResult result, IReadOnlyList<string> labels)
+    private static void WritePredictions(
+        Utf8JsonWriter writer,
+        YoloVisionOutputReportContext context,
+        YoloVisionResult result,
+        IReadOnlyList<string> labels)
     {
         writer.WritePropertyName("predictions");
         writer.WriteStartArray();
@@ -508,6 +561,16 @@ public static class YoloVisionOutputReport
                 "maskValueKind",
                 segmentation.Mask.ValueKind == YoloSegmentationMaskValueKind.Probability ? "probability" : "raw-logits");
             writer.WriteString("maskPixelCountScope", "prototype-grid-before-crop-resize");
+            if (context.ImagePreprocess != null && context.SegmentationSpatialTransform != null)
+            {
+                WriteSegmentationSpatialTransform(
+                    writer,
+                    YoloSegmentationSpatialTransform.Apply(
+                        segmentation,
+                        context.ImagePreprocess,
+                        context.SegmentationSpatialTransform));
+            }
+
             writer.WriteEndObject();
         }
 
@@ -573,6 +636,43 @@ public static class YoloVisionOutputReport
         writer.WriteEndArray();
     }
 
+    private static void WriteSegmentationSpatialTransform(
+        Utf8JsonWriter writer,
+        YoloSegmentationSpatialTransformResult transform)
+    {
+        writer.WritePropertyName("spatialTransform");
+        writer.WriteStartObject();
+        writer.WriteBoolean("applied", true);
+        writer.WriteString(
+            "coordinateSpace",
+            transform.Options.CoordinateSpace == YoloSegmentationCoordinateSpace.Normalized
+                ? "normalized"
+                : "model-input-pixels");
+        writer.WriteBoolean("cropToDetection", transform.Options.CropToDetection);
+        writer.WriteString("interpolation", transform.Interpolation);
+        writer.WriteNumber("sourceWidth", transform.Preprocess.SourceWidth);
+        writer.WriteNumber("sourceHeight", transform.Preprocess.SourceHeight);
+        writer.WriteNumber("modelInputWidth", transform.Preprocess.TargetWidth);
+        writer.WriteNumber("modelInputHeight", transform.Preprocess.TargetHeight);
+        writer.WriteNumber("resizedWidth", transform.Preprocess.ResizedWidth);
+        writer.WriteNumber("resizedHeight", transform.Preprocess.ResizedHeight);
+        writer.WriteNumber("padX", transform.Preprocess.PadX);
+        writer.WriteNumber("padY", transform.Preprocess.PadY);
+        writer.WriteNumber("scaleX", transform.EffectiveScaleX);
+        writer.WriteNumber("scaleY", transform.EffectiveScaleY);
+        writer.WritePropertyName("finalMaskShape");
+        WriteIntArray(writer, new[] { transform.Mask.Height, transform.Mask.Width });
+        writer.WriteNumber("finalMaskPixelCount", transform.Mask.CountPixelsAtOrAboveThreshold());
+        writer.WriteNumber("finalMaskTotalPixelCount", transform.Mask.Values.Length);
+        writer.WriteNumber("finalMaskThreshold", transform.Mask.Threshold);
+        writer.WriteString("finalMaskValueKind", "probability");
+        writer.WriteString("finalMaskScope", transform.Scope);
+        writer.WritePropertyName("sourceBox");
+        WriteBoxValue(writer, transform.Detection);
+        writer.WriteString("boundary", transform.Boundary);
+        writer.WriteEndObject();
+    }
+
     private static void WriteBoundary(Utf8JsonWriter writer)
     {
         writer.WritePropertyName("boundary");
@@ -605,6 +705,11 @@ public static class YoloVisionOutputReport
     private static void WriteBox(Utf8JsonWriter writer, YoloDetection detection)
     {
         writer.WritePropertyName("box");
+        WriteBoxValue(writer, detection);
+    }
+
+    private static void WriteBoxValue(Utf8JsonWriter writer, YoloDetection detection)
+    {
         writer.WriteStartObject();
         writer.WriteNumber("x", detection.CenterX);
         writer.WriteNumber("y", detection.CenterY);

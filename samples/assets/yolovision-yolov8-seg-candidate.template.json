@@ -31,7 +31,7 @@
   "input": {
     "imageSourceUrl": "owner-required redistributable test image",
     "imageLicense": "owner-required",
-    "imagePath": "models/yolov8-seg-test.jpg",
+    "imagePath": "models/yolov8-seg-test.ppm",
     "imageSha256": "owner-required",
     "preprocessedTensorPath": "models/yolov8-seg-fp32.bin",
     "preprocessedTensorSha256": "owner-required",
@@ -52,6 +52,11 @@
     "maskThreshold": 0.5,
     "maskValueKind": "probability",
     "maskPixelCountScope": "prototype-grid-before-crop-resize",
+    "maskSpatialTransform": "explicit-preprocess-inverse",
+    "maskCoordinateSpace": "model-input-pixels",
+    "maskCropToDetection": true,
+    "finalMaskScope": "source-image-after-explicit-preprocess-inverse-and-optional-box-crop",
+    "spatialTransformBoundary": "owner must validate exporter-specific mask alignment",
     "auxiliaryLayout": "boxes-first",
     "postprocessMetadata": {
       "confidence": 0.25,
@@ -64,7 +69,7 @@
   },
   "commands": {
     "tensorRtExecBuildCommand": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\yolov8-seg.onnx --saveEngine .\\models\\yolov8-seg.plan --minShapes images:1x3x640x640 --optShapes images:1x3x640x640 --maxShapes images:4x3x640x640 --fp16 --workspace 1024 --buildOnly --exportReport .\\models\\yolov8-seg-build-report.json --evidenceSidecar .\\models\\yolov8-seg-evidence.sidecar.json",
-    "yoloVisionRunCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8-seg.onnx --labels .\\models\\coco.names --input-data .\\models\\yolov8-seg-fp32.bin --input-shape 1x3x640x640 --tensor-rt-line 10 --family v8 --task seg --output-role-map boxes:det,proto:mask-prototypes --mask-coefficient-count 32 --mask-threshold 0.5 --aux-layout boxes-first --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45"
+    "yoloVisionRunCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8-seg.onnx --labels .\\models\\coco.names --image .\\models\\yolov8-seg-test.ppm --preprocessed-output .\\models\\yolov8-seg-fp32.bin --input-shape 1x3x640x640 --tensor-rt-line 10 --family v8 --task seg --output-role-map boxes:det,proto:mask-prototypes --mask-coefficient-count 32 --mask-threshold 0.5 --mask-spatial-transform --mask-coordinate-space model-input --mask-crop-to-box true --aux-layout boxes-first --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45 --output-json .\\models\\yolov8-seg-output.json --visualization-svg .\\models\\yolov8-seg-output.svg"
   },
   "proofChecklist": {
     "requiredEvidenceLines": [

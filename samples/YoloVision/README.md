@@ -125,7 +125,7 @@ The machine-readable task/output contract is `samples/YoloVision/yolovision-task
 
 For the shared classification and semantic-segmentation workflow, including E-drive asset isolation, output-layout decisions, Top-K versus pixel argmax, build/preflight/runtime commands, report validation, and proof boundaries, see `docs/articles/zh-cn/yolovision-classification-semantic-tutorial.md`.
 
-For instance segmentation, see `docs/articles/zh-cn/yolovision-segmentation-tutorial.md`. The managed multi-output path now preserves detection source indices, composes embedded coefficients with `[P,H,W]` / `[1,P,H,W]` prototypes, applies a stable sigmoid, accepts `--mask-threshold`, reports active versus total prototype-grid pixels, and emits a bounded probability-mask SVG preview. Model-specific letterbox crop and resize-back still require an owner adapter and real evidence.
+For instance segmentation, see `docs/articles/zh-cn/yolovision-segmentation-tutorial.md`. The managed multi-output path preserves detection source indices, composes embedded coefficients with `[P,H,W]` / `[1,P,H,W]` prototypes, applies a stable sigmoid, accepts `--mask-threshold`, reports active versus total prototype-grid pixels, and emits a bounded probability-mask SVG preview. The opt-in `--mask-spatial-transform` path additionally requires `--image` and `--mask-coordinate-space model-input|normalized`; it uses the exact preprocessing metadata for bilinear source-image resize-back and optional half-open detection-box crop. It never infers coordinates from an external tensor, and owner validation of exporter-specific mask alignment remains required.
 
 For cross-family case planning, use `samples/assets/yolovision-family-task-real-asset-roadmap.json` and `docs/articles/zh-cn/yolovision-family-task-real-asset-roadmap.md`. That roadmap turns the broad matrix into owner-action candidate rows for YOLOv5/v6/v7/v8/v9/v10/v11/v26/custom, but it remains planning material until real assets and logs are backfilled.
 
@@ -207,8 +207,8 @@ dotnet run --project .\samples\YoloVision -- --model .\models\yolov10n.onnx --la
 # Classification
 dotnet run --project .\samples\YoloVision -- --model .\models\yolo-cls.onnx --labels .\models\labels.txt --input-data .\models\cls-fp32.bin --input-shape 1x3x224x224 --family custom --task cls --classification-output logits
 
-# Segmentation
-dotnet run --project .\samples\YoloVision -- --model .\models\yolo-seg.onnx --labels .\models\coco.names --input-data .\models\seg-fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map boxes:det,proto:mask-prototypes --mask-coefficient-count 32 --mask-threshold 0.5
+# Segmentation with explicit source-image mask mapping
+dotnet run --project .\samples\YoloVision -- --model .\models\yolo-seg.onnx --labels .\models\coco.names --image .\models\seg.ppm --preprocessed-output .\models\seg-fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map boxes:det,proto:mask-prototypes --mask-coefficient-count 32 --mask-threshold 0.5 --mask-spatial-transform --mask-coordinate-space model-input --mask-crop-to-box true
 
 # Oriented bounding box
 dotnet run --project .\samples\YoloVision -- --model .\models\yolo-obb.onnx --labels .\models\labels.txt --input-data .\models\obb-fp32.bin --input-shape 1x3x1024x1024 --family v8 --task obb --output-role-map boxes:det,angles:obb-angle --obb-angle-output angles

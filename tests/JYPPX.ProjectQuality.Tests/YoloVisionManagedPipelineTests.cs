@@ -1328,6 +1328,371 @@ public sealed class YoloVisionManagedPipelineTests
         Assert.Equal(MathF.PI / 4.0f, result.OrientedBoxes[1].AngleRadians, precision: 5);
     }
 
+    [Fact]
+    public void SegmentationSpatialTransformUsesExplicitCoordinatesAndOptionalBoxCrop()
+    {
+        YoloImagePreprocessResult preprocess = CreatePreprocess(
+            sourceWidth: 4,
+            sourceHeight: 4,
+            targetWidth: 4,
+            targetHeight: 4,
+            resizedWidth: 4,
+            resizedHeight: 4,
+            padX: 0,
+            padY: 0,
+            scaleX: 1.0f,
+            scaleY: 1.0f);
+        YoloSegmentationPrediction prediction = new YoloSegmentationPrediction(
+            new YoloDetection(0, 0.9f, 2.0f, 2.0f, 2.0f, 2.0f, sourceIndex: 3),
+            new YoloSegmentationMask(2, 2, new[] { 1.0f, 1.0f, 1.0f, 1.0f }));
+
+        YoloSegmentationSpatialTransformResult cropped = YoloSegmentationSpatialTransform.Apply(
+            prediction,
+            preprocess,
+            new YoloSegmentationSpatialTransformOptions(YoloSegmentationCoordinateSpace.ModelInputPixels, cropToDetection: true));
+        YoloSegmentationSpatialTransformResult uncropped = YoloSegmentationSpatialTransform.Apply(
+            prediction,
+            preprocess,
+            new YoloSegmentationSpatialTransformOptions(YoloSegmentationCoordinateSpace.ModelInputPixels, cropToDetection: false));
+        YoloSegmentationSpatialTransformResult normalized = YoloSegmentationSpatialTransform.Apply(
+            new YoloSegmentationPrediction(
+                new YoloDetection(0, 0.9f, 0.5f, 0.5f, 0.5f, 0.5f, sourceIndex: 3),
+                prediction.Mask),
+            preprocess,
+            new YoloSegmentationSpatialTransformOptions(YoloSegmentationCoordinateSpace.Normalized, cropToDetection: true));
+
+        Assert.Equal(4, cropped.Mask.CountPixelsAtOrAboveThreshold());
+        Assert.Equal(16, uncropped.Mask.CountPixelsAtOrAboveThreshold());
+        Assert.Equal(cropped.Mask.Values, normalized.Mask.Values);
+        Assert.Equal(2.0f, cropped.Detection.CenterX);
+        Assert.Equal(2.0f, cropped.Detection.CenterY);
+        Assert.Equal(2.0f, cropped.Detection.Width);
+        Assert.Equal(2.0f, cropped.Detection.Height);
+        Assert.Equal(3, cropped.Detection.SourceIndex);
+        Assert.Equal("bilinear", cropped.Interpolation);
+        Assert.Contains("explicit-preprocess-metadata-transform", cropped.Boundary, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void SegmentationSpatialTransformRemovesLetterboxPaddingBeforeSourceResize()
+    {
+        YoloImagePreprocessResult preprocess = CreatePreprocess(
+            sourceWidth: 4,
+            sourceHeight: 2,
+            targetWidth: 4,
+            targetHeight: 4,
+            resizedWidth: 4,
+            resizedHeight: 2,
+            padX: 0,
+            padY: 1,
+            scaleX: 1.0f,
+            scaleY: 1.0f);
+        YoloSegmentationMask prototype = new YoloSegmentationMask(
+            4,
+            4,
+            new[]
+            {
+                0.0f, 0.0f, 0.0f, 0.0f,
+                1.0f, 1.0f, 1.0f, 1.0f,
+                1.0f, 1.0f, 1.0f, 1.0f,
+                0.0f, 0.0f, 0.0f, 0.0f
+            });
+        YoloSegmentationPrediction prediction = new YoloSegmentationPrediction(
+            new YoloDetection(0, 0.9f, 2.0f, 2.0f, 4.0f, 4.0f),
+            prototype);
+
+        YoloSegmentationSpatialTransformResult result = YoloSegmentationSpatialTransform.Apply(
+            prediction,
+            preprocess,
+            new YoloSegmentationSpatialTransformOptions(YoloSegmentationCoordinateSpace.ModelInputPixels, cropToDetection: false));
+
+        Assert.Equal(4, result.Mask.Width);
+        Assert.Equal(2, result.Mask.Height);
+        Assert.Equal(8, result.Mask.CountPixelsAtOrAboveThreshold());
+        Assert.All(result.Mask.Values, value => Assert.Equal(1.0f, value, precision: 5));
+        Assert.Equal(1.0f, result.Detection.CenterY);
+        Assert.Equal(2.0f, result.Detection.Height);
+    }
+
+    [Fact]
+    public void SegmentationSpatialTransformOptionsAndMetadataFailClosed()
+    {
+        Assert.Null(YoloSegmentationSpatialTransformOptions.FromArgs(Array.Empty<string>(), YoloTaskType.Segmentation));
+        Assert.Throws<ArgumentException>(() => YoloSegmentationSpatialTransformOptions.FromArgs(
+            new[] { "--mask-spatial-transform" },
+            YoloTaskType.Segmentation));
+        Assert.Throws<ArgumentException>(() => YoloSegmentationSpatialTransformOptions.FromArgs(
+            new[] { "--mask-spatial-transform", "--mask-coordinate-space", "model-input" },
+            YoloTaskType.Detection));
+        Assert.Throws<ArgumentException>(() => YoloSegmentationSpatialTransformOptions.FromArgs(
+            new[]
+            {
+                "--mask-spatial-transform",
+                "--mask-coordinate-space", "model-input",
+                "--mask-crop-to-box"
+            },
+            YoloTaskType.Segmentation));
+        YoloSegmentationSpatialTransformOptions options = YoloSegmentationSpatialTransformOptions.FromArgs(
+            new[]
+            {
+                "--mask-spatial-transform",
+                "--mask-coordinate-space", "normalized",
+                "--mask-crop-to-box", "false"
+            },
+            YoloTaskType.Segmentation)!;
+        Assert.Equal(YoloSegmentationCoordinateSpace.Normalized, options.CoordinateSpace);
+        Assert.False(options.CropToDetection);
+
+        YoloImagePreprocessResult invalid = CreatePreprocess(
+            sourceWidth: 4,
+            sourceHeight: 4,
+            targetWidth: 4,
+            targetHeight: 4,
+            resizedWidth: 4,
+            resizedHeight: 4,
+            padX: 1,
+            padY: 0,
+            scaleX: 1.0f,
+            scaleY: 1.0f);
+        Assert.Throws<ArgumentException>(() => YoloSegmentationSpatialTransform.Apply(
+            new YoloSegmentationPrediction(
+                new YoloDetection(0, 0.9f, 2.0f, 2.0f, 2.0f, 2.0f),
+                new YoloSegmentationMask(1, 1, new[] { 1.0f })),
+            invalid,
+            options));
+
+        Assert.Throws<ArgumentException>(() => new YoloVisionOutputReportContext(
+            "model.onnx",
+            string.Empty,
+            string.Empty,
+            "ramp",
+            new[] { 1, 3, 4, 4 },
+            tensorRtLine: 10,
+            profileIndex: 0,
+            engineDeviceMemoryBytes: 0,
+            elapsedMilliseconds: 1.0,
+            labelsPath: string.Empty,
+            imagePreprocess: null,
+            segmentationSpatialTransform: options));
+
+        YoloVisionResult segmentation = YoloVisionResult.FromSegmentations(new[]
+        {
+            new YoloSegmentationPrediction(
+                new YoloDetection(0, 0.9f, 2.0f, 2.0f, 2.0f, 2.0f),
+                new YoloSegmentationMask(1, 1, new[] { 1.0f }))
+        });
+        YoloModelProfile profile = YoloModelProfile.FromArgs(
+            new[] { "--family", "v8", "--task", "seg", "--class-count", "1" },
+            labelCount: 1);
+        Assert.Throws<ArgumentException>(() => YoloVisionVisualizationWriter.ToSvg(
+            segmentation,
+            new[] { "person" },
+            profile,
+            new[] { 1, 3, 4, 4 },
+            imagePreprocess: null,
+            segmentationSpatialTransform: options));
+    }
+
+    [Fact]
+    public void SegmentationSpatialTransformUsesRoundedResizeDimensionsAsEffectiveScale()
+    {
+        YoloImagePreprocessResult preprocess = CreatePreprocess(
+            sourceWidth: 7,
+            sourceHeight: 5,
+            targetWidth: 4,
+            targetHeight: 4,
+            resizedWidth: 4,
+            resizedHeight: 3,
+            padX: 0,
+            padY: 0,
+            scaleX: 4.0f / 7.0f,
+            scaleY: 4.0f / 7.0f);
+        YoloSegmentationPrediction prediction = new YoloSegmentationPrediction(
+            new YoloDetection(0, 0.9f, 1.0f, 1.0f, 2.0f, 2.0f),
+            new YoloSegmentationMask(1, 1, new[] { 1.0f }));
+
+        YoloSegmentationSpatialTransformResult result = YoloSegmentationSpatialTransform.Apply(
+            prediction,
+            preprocess,
+            new YoloSegmentationSpatialTransformOptions(
+                YoloSegmentationCoordinateSpace.ModelInputPixels,
+                cropToDetection: false));
+
+        Assert.Equal(4.0f / 7.0f, result.EffectiveScaleX, precision: 5);
+        Assert.Equal(3.0f / 5.0f, result.EffectiveScaleY, precision: 5);
+        Assert.Equal(1.75f, result.Detection.CenterX, precision: 5);
+        Assert.Equal(5.0f / 3.0f, result.Detection.CenterY, precision: 5);
+        Assert.Equal(3.5f, result.Detection.Width, precision: 5);
+        Assert.Equal(10.0f / 3.0f, result.Detection.Height, precision: 5);
+    }
+
+    [Fact]
+    public void SegmentationSpatialTransformPreflightRequiresImageAndRecordsExplicitIntent()
+    {
+        string[] missingImageArgs =
+        {
+            "--preflight",
+            "--model", "model.onnx",
+            "--family", "v8",
+            "--task", "seg",
+            "--class-count", "1",
+            "--mask-coefficient-count", "32",
+            "--mask-spatial-transform",
+            "--mask-coordinate-space", "normalized"
+        };
+        YoloModelProfile missingImageProfile = YoloModelProfile.FromArgs(missingImageArgs, labelCount: 1);
+        YoloVisionPreflightResult missingImage = YoloVisionPreflightReport.Create(
+            missingImageArgs,
+            missingImageProfile,
+            "model.onnx",
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            new[] { "person" },
+            YoloRuntimeOutputRoleResolver.CreateMetadata(missingImageArgs, missingImageProfile.TaskType));
+
+        Assert.True(missingImage.HasBlockers);
+        using (JsonDocument missingImageDocument = JsonDocument.Parse(missingImage.Json))
+        {
+            Assert.Contains(missingImageDocument.RootElement.GetProperty("checks").EnumerateArray(), static check =>
+                check.GetProperty("id").GetString() == "segmentation-spatial-transform-image" &&
+                !check.GetProperty("passed").GetBoolean());
+        }
+
+        string[] imageArgs = missingImageArgs.Concat(new[] { "--image", "image.ppm" }).ToArray();
+        YoloModelProfile imageProfile = YoloModelProfile.FromArgs(imageArgs, labelCount: 1);
+        YoloVisionPreflightResult image = YoloVisionPreflightReport.Create(
+            imageArgs,
+            imageProfile,
+            "model.onnx",
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            "image.ppm",
+            new[] { "person" },
+            YoloRuntimeOutputRoleResolver.CreateMetadata(imageArgs, imageProfile.TaskType));
+
+        Assert.False(image.HasBlockers);
+        using JsonDocument imageDocument = JsonDocument.Parse(image.Json);
+        JsonElement spatial = imageDocument.RootElement.GetProperty("output").GetProperty("spatialTransform");
+        Assert.True(spatial.GetProperty("requested").GetBoolean());
+        Assert.Equal("normalized", spatial.GetProperty("coordinateSpace").GetString());
+        Assert.True(spatial.GetProperty("cropToDetection").GetBoolean());
+        Assert.True(spatial.GetProperty("requiresImagePreprocessMetadata").GetBoolean());
+        Assert.Contains(imageDocument.RootElement.GetProperty("checks").EnumerateArray(), static check =>
+            check.GetProperty("id").GetString() == "segmentation-spatial-transform-image" &&
+            check.GetProperty("passed").GetBoolean());
+    }
+
+    [Fact]
+    public void SegmentationSpatialTransformIsWrittenToJsonAndSourceImageSvg()
+    {
+        YoloImagePreprocessResult preprocess = CreatePreprocess(
+            sourceWidth: 4,
+            sourceHeight: 4,
+            targetWidth: 4,
+            targetHeight: 4,
+            resizedWidth: 4,
+            resizedHeight: 4,
+            padX: 0,
+            padY: 0,
+            scaleX: 1.0f,
+            scaleY: 1.0f);
+        YoloSegmentationSpatialTransformOptions spatialOptions = new YoloSegmentationSpatialTransformOptions(
+            YoloSegmentationCoordinateSpace.ModelInputPixels,
+            cropToDetection: true);
+        YoloSegmentationPrediction prediction = new YoloSegmentationPrediction(
+            new YoloDetection(0, 0.9f, 2.0f, 2.0f, 2.0f, 2.0f),
+            new YoloSegmentationMask(2, 2, new[] { 1.0f, 1.0f, 1.0f, 1.0f }));
+        YoloVisionResult result = YoloVisionResult.FromSegmentations(new[] { prediction });
+        YoloModelProfile profile = YoloModelProfile.FromArgs(new[]
+        {
+            "--family", "v8",
+            "--task", "seg",
+            "--layout", "boxes-first",
+            "--class-count", "1"
+        }, labelCount: 1);
+        YoloRuntimeOutputSet outputs = new YoloRuntimeOutputSet(new[]
+        {
+            new YoloRuntimeOutputTensor("boxes", YoloOutputTensorRole.Detection, new[] { 0.5f }, new[] { 1 }),
+            new YoloRuntimeOutputTensor("proto", YoloOutputTensorRole.MaskPrototypes, new[] { 1.0f, 1.0f, 1.0f, 1.0f }, new[] { 1, 2, 2 })
+        });
+
+        using JsonDocument document = JsonDocument.Parse(YoloVisionOutputReport.ToJson(
+            new YoloVisionOutputReportContext(
+                "model.onnx",
+                string.Empty,
+                string.Empty,
+                "ramp",
+                new[] { 1, 3, 4, 4 },
+                tensorRtLine: 10,
+                profileIndex: 0,
+                engineDeviceMemoryBytes: 0,
+                elapsedMilliseconds: 1.0,
+                labelsPath: string.Empty,
+                imagePreprocess: preprocess,
+                segmentationSpatialTransform: spatialOptions),
+            outputs,
+            profile,
+            result,
+            new[] { "person" }));
+        JsonElement spatial = document.RootElement.GetProperty("predictions")[0].GetProperty("spatialTransform");
+        string svg = YoloVisionVisualizationWriter.ToSvg(
+            result,
+            new[] { "person" },
+            profile,
+            new[] { 1, 3, 4, 4 },
+            preprocess,
+            spatialOptions);
+
+        Assert.True(spatial.GetProperty("applied").GetBoolean());
+        Assert.Equal("model-input-pixels", spatial.GetProperty("coordinateSpace").GetString());
+        Assert.Equal(16, spatial.GetProperty("finalMaskTotalPixelCount").GetInt32());
+        Assert.Equal(4, spatial.GetProperty("finalMaskPixelCount").GetInt32());
+        Assert.Equal("source-image-after-explicit-preprocess-inverse-and-optional-box-crop", spatial.GetProperty("finalMaskScope").GetString());
+        Assert.Contains("data-spatial-mask-cell=\"true\"", svg, StringComparison.Ordinal);
+        Assert.Contains("spatial mask: explicit preprocess inverse", svg, StringComparison.Ordinal);
+    }
+
+    private static YoloImagePreprocessResult CreatePreprocess(
+        int sourceWidth,
+        int sourceHeight,
+        int targetWidth,
+        int targetHeight,
+        int resizedWidth,
+        int resizedHeight,
+        int padX,
+        int padY,
+        float scaleX,
+        float scaleY)
+    {
+        return new YoloImagePreprocessResult(
+            sourcePath: "source.ppm",
+            sourceSha256: string.Empty,
+            sourceWidth,
+            sourceHeight,
+            tensorPath: "tensor.bin",
+            tensorSha256: string.Empty,
+            tensorElementCount: checked(targetWidth * targetHeight * 3),
+            targetWidth,
+            targetHeight,
+            tensorLayout: "NCHW",
+            colorOrder: "RGB",
+            resizeMode: padX == 0 && padY == 0 && resizedWidth == targetWidth && resizedHeight == targetHeight ? "stretch" : "letterbox",
+            normalized: true,
+            scale: 1.0f / 255.0f,
+            letterboxEnabled: padX != 0 || padY != 0 || resizedWidth != targetWidth || resizedHeight != targetHeight,
+            letterboxAlignment: "center",
+            resizedWidth,
+            resizedHeight,
+            padX,
+            padY,
+            resizeScaleX: scaleX,
+            resizeScaleY: scaleY,
+            fillValue: 114);
+    }
+
     private static float[] CreateInputValuesForTesting(
         int count,
         string inputPattern,

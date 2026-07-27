@@ -56,6 +56,13 @@ public sealed class YoloVisionDocumentationMatrixTests
             "maskPixelCountScope=prototype-grid-before-crop-resize",
             "data-mask-cell=\"true\"",
             "24x24",
+            "--mask-spatial-transform",
+            "--mask-coordinate-space model-input",
+            "--mask-crop-to-box true",
+            "[left, right) x [top, bottom)",
+            "source-image-after-explicit-preprocess-inverse-and-optional-box-crop",
+            "data-spatial-mask-cell=\"true\"",
+            "YoloSegmentationSpatialTransform.cs",
             "Test-YoloVisionOutputReport.ps1",
             "Test-YoloVisionRealAssetOwnerProofInput.ps1 -Strict",
             "Test-SampleRunEvidenceRecord.ps1 -RequireExistingLog",
@@ -87,6 +94,13 @@ public sealed class YoloVisionDocumentationMatrixTests
             Assert.Contains("probability", pack, StringComparison.Ordinal);
             Assert.Contains("maskPixelCountScope", pack, StringComparison.Ordinal);
             Assert.Contains("prototype-grid-before-crop-resize", pack, StringComparison.Ordinal);
+            Assert.Contains("maskSpatialTransform", pack, StringComparison.Ordinal);
+            Assert.Contains("explicit-preprocess-inverse", pack, StringComparison.Ordinal);
+            Assert.Contains("maskCoordinateSpace", pack, StringComparison.Ordinal);
+            Assert.Contains("model-input-pixels", pack, StringComparison.Ordinal);
+            Assert.Contains("maskCropToDetection", pack, StringComparison.Ordinal);
+            Assert.Contains("source-image-after-explicit-preprocess-inverse-and-optional-box-crop", pack, StringComparison.Ordinal);
+            Assert.Contains("owner must validate exporter-specific mask alignment", pack, StringComparison.Ordinal);
         }
 
         Assert.DoesNotContain("YoloVisionRuntimePipeline.cs", detailedGuide, StringComparison.Ordinal);
@@ -95,6 +109,118 @@ public sealed class YoloVisionDocumentationMatrixTests
         Assert.DoesNotContain("YoloVisionNms.cs", detailedGuide, StringComparison.Ordinal);
         Assert.Contains("YoloSampleRunner.cs", detailedGuide, StringComparison.Ordinal);
         Assert.Contains("YoloMaskComposer.cs", detailedGuide, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void PoseTutorialIsLongFormAndMatchesManagedKeypointOwnershipBoundary()
+    {
+        string article = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "yolovision-pose-tutorial.md"));
+        string roadmap = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "technical-article-roadmap.md"));
+
+        Assert.True(article.Length >= 7000, $"Pose tutorial is too short: {article.Length} characters.");
+        Assert.Contains("| 76 |", roadmap, StringComparison.Ordinal);
+        Assert.Contains("YoloVision Pose 教程", roadmap, StringComparison.Ordinal);
+        Assert.Contains("完整教程已收口", roadmap, StringComparison.Ordinal);
+        foreach (string marker in new[]
+        {
+            "## 当前实现范围",
+            "YoloDetection.SourceIndex",
+            "[1,N,K*stride]",
+            "[1,K*stride,N]",
+            "stride 为 2",
+            "score 设为 `1.0`",
+            "不推断骨架连接",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-pose",
+            "--exportReport",
+            "--output-role-map boxes:det,keypoints:pose-keypoints",
+            "--pose-keypoint-count 17",
+            "--keypoint-stride 3",
+            "--aux-layout boxes-first",
+            "--preflight --strict-preflight",
+            "--preprocessed-output",
+            "--output-json",
+            "--visualization-svg",
+            "Test-YoloVisionOutputReport.ps1",
+            "Test-SampleRunEvidenceRecord.ps1 -RequireExistingLog",
+            "YoloPoseDecoder.cs",
+            "real-model-runtime",
+            "package-consumer-runtime",
+            "blocked-by-cuda-driver",
+            "## 收尾清单"
+        })
+        {
+            Assert.Contains(marker, article, StringComparison.OrdinalIgnoreCase);
+        }
+
+        Assert.DoesNotContain("--exportProfile", article, StringComparison.Ordinal);
+        Assert.DoesNotContain("已经实现人体骨架", article, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ObbTutorialIsLongFormAndDoesNotOverclaimRotatedNms()
+    {
+        string article = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "yolovision-obb-tutorial.md"));
+        string roadmap = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "technical-article-roadmap.md"));
+
+        Assert.True(article.Length >= 7000, $"OBB tutorial is too short: {article.Length} characters.");
+        Assert.Contains("| 77 |", roadmap, StringComparison.Ordinal);
+        Assert.Contains("YoloVision OBB 教程", roadmap, StringComparison.Ordinal);
+        Assert.Contains("完整教程已收口", roadmap, StringComparison.Ordinal);
+        foreach (string marker in new[]
+        {
+            "## 当前实现范围",
+            "没有实现 rotated-IoU NMS",
+            "轴对齐 NMS",
+            "YoloDetection.SourceIndex",
+            "[1,N,1]",
+            "[1,1,N]",
+            "--angle-degrees",
+            "--angle-radians",
+            "AngleRadians",
+            "angleUnit=radian",
+            "angleRange=owner-record-required",
+            "E:\\TensorRtSharpAssets\\cases\\yolov8n-obb",
+            "--exportReport",
+            "--output-role-map boxes:det,angles:obb-angle",
+            "--obb-angle-output angles",
+            "--aux-layout boxes-first",
+            "--preflight --strict-preflight",
+            "--output-json",
+            "--visualization-svg",
+            "Test-YoloVisionOutputReport.ps1",
+            "Test-SampleRunEvidenceRecord.ps1 -RequireExistingLog",
+            "YoloObbDecoder.cs",
+            "real-model-runtime",
+            "package-consumer-runtime",
+            "blocked-by-cuda-driver",
+            "## 收尾清单"
+        })
+        {
+            Assert.Contains(marker, article, StringComparison.OrdinalIgnoreCase);
+        }
+
+        Assert.DoesNotContain("--exportProfile", article, StringComparison.Ordinal);
+        Assert.DoesNotContain("已实现 rotated-IoU NMS", article, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

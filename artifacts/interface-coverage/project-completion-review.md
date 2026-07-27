@@ -1,5 +1,67 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-27 YoloVision Segmentation Spatial Transform And Pose/OBB Tutorial Closure
+
+本阶段在上一批 probability-mask 基线之上完成显式 prototype-to-source-image 空间变换，并同步收口
+Pose/OBB 长教程、output schema/validator、资产包投影与负向质量门。全部行为保持纯 managed、pointer-free；
+没有修改 TensorRT native ABI，也没有把 exporter-specific alignment、真实模型或 package consumer 结果
+写成已证明能力。
+
+### Segmentation Spatial Transform
+
+- 新增 `YoloSegmentationSpatialTransform`、显式 `model-input|normalized` coordinate space、bilinear
+  prototype sampling、source-image resize-back 与可选 detection-box crop。
+- CLI 新增 `--mask-spatial-transform`、`--mask-coordinate-space`、`--mask-crop-to-box`；请求 transform
+  时必须使用 `--task seg` 和 `--image`，外部 tensor 不允许提供推断式 inverse metadata。
+- crop 采用 `[left,right) x [top,bottom)` 半开栅格边界，避免 right/bottom 多覆盖一行或一列。
+- effective scale 从取整后的 `ResizedWidth/SourceWidth`、`ResizedHeight/SourceHeight` 推导，和真实 resize
+  pixel-center 栅格一致，不依赖可能因 letterbox round 产生轻微偏差的理想等比 scale。
+- report/visualization 公共 overload 对缺少 image metadata 或非 segmentation result 的 spatial 请求
+  fail closed；旧 overload 与默认 prototype-grid 行为保持兼容。
+- output JSON 新增可选 `spatialTransform`：applied/coordinate/crop/interpolation、source/target/resized
+  shape、pad/effective scale、final mask shape/count/threshold/scope、source box 和固定 owner boundary。
+- source-image SVG 使用最终 probability mask 的有界 48x48 采样，保留 `data-spatial-mask-cell=true`；
+  默认 prototype preview 仍保持 24x24 与原字段语义。
+
+### Schema、Validator 与资产包
+
+- `yolovision-output.schema.json` 增加完整 `segmentationSpatialTransform` definition。
+- `Test-YoloVisionOutputReport.ps1` 增加 applied、coordinate、bilinear、shape product、active<=total、
+  threshold、source scope/boundary 和 image/letterbox 来源链 blocker。
+- segmentation example 升级为 1280x720 source image、640x640 letterbox、720x1280 final mask 的自洽
+  spatial 正例；负向测试覆盖伪造 coordinate/interpolation/count/threshold/boundary 和不可信 input metadata。
+- article case、owner backfill、generated projection 与 segmentation candidate 同步 `.ppm + --image +
+  --preprocessed-output` 命令及 spatial metadata；exporter 能从命令解析 image/tensor/output 路径。
+- owner projection 保持 `projection-aligned`，strict owner-pack validator 通过；所有 promotion flag 仍为 false。
+
+### Pose 与 OBB 长教程
+
+- `yolovision-pose-tutorial.md` 从 52 行扩为 218 行，绑定独立 keypoint tensor、`SourceIndex`、
+  `[1,N,K*stride]`/`[1,K*stride,N]`、stride/score、坐标与 skeleton owner boundary、E 盘命令和证据链。
+- `yolovision-obb-tutorial.md` 从 50 行扩为 238 行，绑定 angle tensor、degree/radian normalization、
+  `SourceIndex`、angle range/axis/width-height owner contract，并明确当前是 axis-aligned NMS 后附加角度，
+  没有实现 rotated-IoU NMS。
+- 两篇命令统一使用真实 `--exportReport`，路线图第 76/77 项更新为“完整教程已收口”；新增长度、
+  代码路径、命令、proof boundary 和禁止过度声明的专项门禁。
+
+### Verification
+
+- spatial/schema/validator/tutorial 定向集合：58/58 通过。
+- YoloVision、TechnicalArticleRoadmapTests、PublishingPublicArticleTests 宽口径集合：201/201 通过。
+- output examples strict validator：6 records、0 blockers；两类 segmentation 负向报告均被拒绝。
+- owner backfill exporter：`projection-aligned`、0 failures；strict owner-pack validator 通过。
+- 完整 `TensorRtSharp.sln` Debug build：0 warning、0 error。
+- stale release claims audit：扫描 1118 个文件，`findingCount=0`。
+
+### C 盘与发布边界
+
+- 本批没有下载或生成模型、ONNX、engine、plan、TensorRT、CUDA、cuDNN、nupkg、zip 或 7z 到 C 盘。
+- 测试更新的 5 个空 `jyppx-yolovision-*` Temp 目录已确认归属并删除；没有本批 NuGet package cache 目录。
+- 两个 0 字节 Docker Temp `save.tar` 早于本批、所有权不明，未删除。
+- 未执行 GitHub Actions、workflow dispatch、push、NuGet/GitHub Packages/Release 发布或 issue close。
+- spatial report/SVG 是 owner review diagnostic；exporter-specific alignment、real-model-runtime、
+  package-consumer-runtime、post-publish verification 和 owner authorization 状态均未晋级。
+
 ## 2026-07-27 Segmentation Probability Mask And TensorRtExec Option Tutorial Closure
 
 本阶段按“每批做更多”要求同时推进可用能力与宣传文章：补齐 YoloVision segmentation probability

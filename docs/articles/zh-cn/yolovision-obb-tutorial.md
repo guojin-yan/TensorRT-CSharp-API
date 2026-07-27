@@ -1,50 +1,238 @@
-# YoloVision OBB 教程
+# YoloVision OBB 多输出实战教程
 
-OBB（Oriented Bounding Box）任务在普通检测框之外还需要角度。本文说明 angle metadata、oriented box 证据回填和常见 layout 风险。
+OBB（Oriented Bounding Box）在普通 detection 的 center/size/class/score 之外增加旋转角。角度单位、范围、宽高规范化、输出 layout 或 NMS 策略只要有一个与 exporter 不一致，就会出现“中心正确但方向错误”的静默结果。本文绑定 `samples/YoloVision` 当前真实实现，给出从 E 盘资产准备到 JSON/SVG 和 owner evidence 的完整操作路径。
 
-## OBB 与普通检测的差异
+## 当前实现范围
 
-普通 det 通常输出 center x/y、width、height、class score。OBB 还需要 angle，且不同模型可能使用 degrees 或 radians。若 angle unit 写错，结果可能看起来“有框但方向全错”。
+YoloVision 的 managed OBB 路径已经支持：
 
-## 必填 metadata
+1. 将 TensorRT 输出复制为无指针 `YoloRuntimeOutputTensor`。
+2. 显式区分 detection tensor 与 angle tensor。
+3. 对 detection rows 执行 score filtering 和配置的轴对齐 NMS。
+4. 保留 detection `SourceIndex`，从同一原始候选行取 angle。
+5. 接受 `[1,N,1]` 或 `[1,1,N]` 的 rank-3 angle tensor。
+6. 根据 `--angle-degrees` 或 `--angle-radians` 将角度统一为 `AngleRadians`。
+7. 输出 center/size/angle/class/score JSON，并生成旋转矩形 SVG。
 
-| 字段 | 说明 |
+当前路径没有实现 rotated-IoU NMS。它先按普通 detection box 执行轴对齐 NMS，再给保留目标附加角度。如果模型合同要求 rotated NMS、corner polygon decode、宽高交换归一化或特定角度周期折叠，必须使用 owner-approved adapter；不能把当前通用路径描述成完整的模型特定 OBB 后处理。
+
+## 角度合同
+
+| 字段 | 必须明确的内容 |
 | --- | --- |
-| box layout | center/size 或 corner format |
-| angle unit | degrees 或 radians |
-| angle range | 例如 [-90,90] 或 [0,180] |
-| class count | labels 行数一致 |
-| NMS | 是否使用 rotated NMS 或普通 NMS |
+| 原始单位 | degree 或 radian |
+| 原始范围 | 例如 `[-90,90)`、`[0,180)`、`[-pi/2,pi/2)` |
+| 方向 | 顺时针或逆时针 |
+| 起始轴 | x 轴、y 轴或 exporter 特定轴 |
+| width/height 规则 | 是否强制 `width >= height`，交换后是否补偿角度 |
+| NMS | axis-aligned、rotated-IoU 或 graph 内置 |
+| 坐标空间 | normalized、model-input pixels 或 source-image pixels |
 
-## Build-only 与 runner
+`YoloObbDecoder` 只负责 degree 到 radian 的单位转换：
+
+```text
+angleRadians = angleInDegrees ? angle * PI / 180 : angle
+```
+
+它不会自动折叠角度范围，也不会交换 width/height。output prediction 始终写 `angleUnit=radian`，而 `angleRange` 保持 `owner-record-required`，防止报告假装知道 exporter 的周期合同。
+
+## SourceIndex 绑定
+
+OBB 与 Pose、Segmentation 使用相同的所有权原则：NMS 后结果不能按新数组下标读取 auxiliary tensor。`YoloDetection.SourceIndex` 保存原始候选行号，正确关系是：
+
+```text
+kept detection -> detection.SourceIndex -> angleRows[SourceIndex][0]
+```
+
+如果第一个保留目标来自原始第 12 行，angle 也必须取第 12 行。这个绑定受 managed tests 保护，但 owner 仍需确认 exporter 的 detection 与 angle tensor 在候选维上同序。
+
+## E 盘资产目录
+
+```text
+E:\TensorRtSharpAssets\cases\yolov8n-obb
+  models
+  labels
+  images
+  tensors
+  engines
+  reports
+  logs
+  overlays
+```
+
+仓库不自动下载 OBB 权重、DOTA labels 或遥感图片。owner 必须保存：
+
+- 模型主页、直接来源、许可证和再分发结论。
+- 权重与 ONNX 的 SHA256、export 工具版本和完整命令。
+- labels 与输入图的来源、许可证、尺寸和 SHA256。
+- detection/angle tensor 名、shape、dtype、layout。
+- 角度单位、范围、方向、起始轴和 width/height 规范。
+- NMS 所在位置与算法，尤其是否要求 rotated IoU。
+
+## 模型导出与哈希
+
+```powershell
+yolo export `
+  model=E:\TensorRtSharpAssets\cases\yolov8n-obb\models\yolov8n-obb.pt `
+  format=onnx `
+  opset=17 `
+  simplify=True `
+  dynamic=False `
+  imgsz=1024
+
+Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-obb\models\yolov8n-obb.pt
+Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-obb\models\yolov8n-obb.onnx
+Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-obb\labels\dota.names
+Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-obb\images\input.ppm
+```
+
+命令只是 owner 已审核模型的骨架。导出后应使用 Netron、ONNX metadata 或 TensorRtExec binding report 核对真实输入名和输出 shape，不能从 `yolov8n-obb` 文件名推断 angle 合同。
+
+## TensorRtExec build-only
 
 ```powershell
 dotnet run --project .\applications\TensorRtExec -- `
-  --onnx .\models\yolo-obb.onnx `
-  --saveEngine .\models\yolo-obb.engine `
+  --onnx E:\TensorRtSharpAssets\cases\yolov8n-obb\models\yolov8n-obb.onnx `
+  --saveEngine E:\TensorRtSharpAssets\cases\yolov8n-obb\engines\yolov8n-obb.plan `
+  --minShapes images:1x3x1024x1024 `
+  --optShapes images:1x3x1024x1024 `
+  --maxShapes images:2x3x1024x1024 `
+  --fp16 `
   --buildOnly `
-  --exportProfile .\models\yolo-obb-build-report.json
+  --exportReport E:\TensorRtSharpAssets\cases\yolov8n-obb\reports\build-report.json
 ```
 
-该命令只是 build-only。真实 OBB 输出还需要 YoloVision runner log 和 sample-run-evidence。
+`--exportReport` 是当前真实参数。该报告证明构建流程和配置被执行，但不证明 angle 单位、范围、旋转方向或 rotated NMS 正确。
+
+## 显式 output role 与单位
+
+```text
+--output-role-map boxes:det,angles:obb-angle
+--detection-output boxes
+--obb-angle-output angles
+--aux-layout boxes-first
+--angle-radians
+```
+
+如果 angle tensor 是 degree，改为 `--angle-degrees`。专用参数或 role map 至少要保留一个；推荐 evidence 同时记录 tensor 原名和 role。名称启发式可以识别 `angle`、`theta`、`obb`，但不适合作为 owner 合同。
+
+`YoloRuntimeOutputRoleResolver.CreateMetadata` 只有在明确声明 OBB angle role 时才创建 OBB metadata。未声明 angle role 的单输出诊断路径不能冒充完整 OBB 解码。
+
+## 离线 preflight
+
+```powershell
+dotnet run --project .\samples\YoloVision -- `
+  --model E:\TensorRtSharpAssets\cases\yolov8n-obb\models\yolov8n-obb.onnx `
+  --labels E:\TensorRtSharpAssets\cases\yolov8n-obb\labels\dota.names `
+  --image E:\TensorRtSharpAssets\cases\yolov8n-obb\images\input.ppm `
+  --input-shape 1x3x1024x1024 `
+  --family v8 --task obb `
+  --layout auto --has-objectness auto `
+  --nms-mode class-aware `
+  --output-role-map boxes:det,angles:obb-angle `
+  --obb-angle-output angles `
+  --aux-layout boxes-first --angle-radians `
+  --preflight --strict-preflight `
+  --preflight-report E:\TensorRtSharpAssets\cases\yolov8n-obb\reports\preflight.json
+```
+
+检查 `yolovision-preflight.v1`、`proofClassification=precheck`、`obbAngleInDegrees=false`、input source exclusivity、资产 hash 和 owner action。preflight 不打开 TensorRT，不执行 enqueue，也不会验证 rotated geometry。
+
+## 真实运行与输出
+
+```powershell
+dotnet run --project .\samples\YoloVision -- `
+  --model E:\TensorRtSharpAssets\cases\yolov8n-obb\models\yolov8n-obb.onnx `
+  --labels E:\TensorRtSharpAssets\cases\yolov8n-obb\labels\dota.names `
+  --image E:\TensorRtSharpAssets\cases\yolov8n-obb\images\input.ppm `
+  --preprocessed-output E:\TensorRtSharpAssets\cases\yolov8n-obb\tensors\input-fp32.bin `
+  --input-shape 1x3x1024x1024 `
+  --family v8 --task obb `
+  --layout auto --has-objectness auto `
+  --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45 `
+  --output-role-map boxes:det,angles:obb-angle `
+  --obb-angle-output angles `
+  --aux-layout boxes-first --angle-radians `
+  --output-json E:\TensorRtSharpAssets\cases\yolov8n-obb\reports\output.json `
+  --visualization-svg E:\TensorRtSharpAssets\cases\yolov8n-obb\overlays\obb-preview.svg `
+  *> E:\TensorRtSharpAssets\cases\yolov8n-obb\logs\run.log
+```
+
+若实际 tensor 使用 degrees，运行命令、preflight 和 owner manifest 必须同时改为 `--angle-degrees`，不能只在文章文字中改单位。
+
+## JSON 与 SVG 语义
+
+每条 OBB prediction 包含：
+
+- `center.x/y` 与 `size.width/height`，来自保留的 detection box。
+- `angle`，统一为 radians。
+- `angleUnit=radian`。
+- `angleRange=owner-record-required`。
+- `classId/className/score`。
+
+示例位于 `samples/YoloVision/examples/yolovision-output-obb.example.json`。真实 runtime writer 的规范化字段优先于示例中的说明性值，owner 仍应单独记录 exporter 原始角度合同。
+
+SVG 使用 `AngleRadians * 180 / PI` 旋转矩形，适合快速发现 90 度偏差、宽高颠倒和明显坐标错误。它不是 rotated-IoU 评估，也不能证明原图 resize-back 正确。
+
+## 输出校验
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-YoloVisionOutputReport.ps1 `
+  -InputPath E:\TensorRtSharpAssets\cases\yolov8n-obb\reports\output.json `
+  -OutputPath E:\TensorRtSharpAssets\cases\yolov8n-obb\reports\output-validation.json `
+  -Strict
+```
+
+validator 会检查 task、center、size、angle、angleUnit、angleRange、输出摘要与 proof boundary。它不会替 owner 判断 clockwise/counter-clockwise、角度周期、宽高交换规则或 rotated NMS 的正确性。
+
+## 人工几何检查
+
+建议至少选择三类目标：接近 0 度、接近周期边界、明显斜放。对每个目标记录：
+
+1. 原图中长轴方向。
+2. exporter 原始 angle 与单位。
+3. YoloVision 输出 radians。
+4. SVG 显示方向。
+5. width/height 是否发生交换。
+6. 与模型参考实现的 corner coordinates 对比。
+
+仅检查“框覆盖了目标”不够，因为 90 度偏差在近方形目标上很难肉眼发现。
+
+## 常见失败
+
+| 表现 | 首先检查 |
+| --- | --- |
+| 全部旋转约 57.3 倍 | degree/radian 参数写反 |
+| 全部相差 90 度 | 起始轴或 width/height 规范不一致 |
+| 中心正确但长短边颠倒 | exporter 是否交换 width/height 并补偿角度 |
+| 相邻方向目标被错误抑制 | 当前是 axis-aligned NMS，模型可能需要 rotated-IoU NMS |
+| 角度属于另一个目标 | `SourceIndex` 或候选行顺序不一致 |
+| OBB metadata 为 null | 没有显式声明 angle output role |
+| build 成功但没有 OBB proof | 只有 build-only，没有真实图、run log、JSON、SVG 和人工 review |
 
 ## 证据边界
 
-- `TrtexecAlignmentStatus=parse-only` 仍表示高级参数处于 parser/report/GUI 边界。
-- `sidecar-only` 只能桥接模型资产和 build report。
-- `real-model-runtime` 需要真实模型、真实输入、真实日志和 validator。
-- `package-consumer-runtime` 属于 release proof record。
-- `blocked-by-cuda-driver` 需要 owner action。
+真实 OBB 候选至少需要 model/labels/image/preprocessed tensor/engine/output JSON/run log 的 SHA256、TensorRtExec build report、preflight、完整命令、host/runtime metadata、stdout/stderr 摘要、参考实现对照和 owner review。再用 `eng/Test-SampleRunEvidenceRecord.ps1 -RequireExistingLog` 验证真实日志。
 
-## 常见问题
+owner 审核通过后最多形成 `real-model-runtime` 候选。它不是 `package-consumer-runtime`；后者要求仓库外 clean consumer 从目标 package source restore/build/run。`blocked-by-cuda-driver`、template、build-only、sidecar-only、synthetic input、ProjectReference 和本地 `.nupkg` 都不能替代真实 OBB runtime proof。
 
-| 表现 | 可能原因 |
-| --- | --- |
-| 角度全部旋转 90 度 | angle unit 或 range 错 |
-| 框中心正确但宽高颠倒 | layout 与 postprocess 不一致 |
-| 类别正确但 NMS 异常 | rotated NMS 策略未明确 |
-| build 成功但无输出 proof | 只有 build-only，没有 runner evidence |
+## 代码入口
 
-## 推荐写法
+- `samples/YoloVision/YoloRuntimeOutputRoleResolver.cs`：angle role、单位和 auxiliary layout 参数。
+- `samples/YoloVision/YoloSampleRunner.cs`：detection decode、`SourceIndex` 绑定与 angle row 路由。
+- `samples/YoloVision/YoloObbDecoder.cs`：degree 到 radian 的纯托管转换。
+- `samples/YoloVision/YoloVisionOutputReport.cs`：center/size/radian 输出合同。
+- `samples/YoloVision/YoloVisionVisualizationWriter.cs`：旋转矩形 SVG。
+- `eng/Test-YoloVisionOutputReport.ps1`：输出结构与 proof boundary 校验。
 
-对外文章可以说“YoloVision 提供 OBB metadata 和 managed postprocess 底座”。不要写成“真实 OBB 模型已经全部通过”，除非 owner 提供模型、license、hash、runner log 和 sample-run-evidence validator 结果。
+## 收尾清单
+
+- [ ] 模型、labels、图片来源、许可证和再分发结论已审核，资产仅位于 E 盘。
+- [ ] detection/angle tensor 名、shape、dtype、候选维顺序和 layout 已确认。
+- [ ] 原始 angle 单位、范围、方向、起始轴和 width/height 规则已记录。
+- [ ] 已明确 graph、应用层或 adapter 中的 NMS 类型。
+- [ ] NMS 后通过 `SourceIndex` 绑定原始 angle row。
+- [ ] build report 使用 `--exportReport`，preflight/runtime 命令已归档。
+- [ ] output JSON、SVG、参考 corner 对照、run log 和全部 hash 已归档。
+- [ ] 没有把 axis-aligned NMS 路径描述成 rotated-IoU NMS。
+- [ ] 没有把 build-only、precheck 或本地结果写成 package-consumer-runtime 或发布批准。

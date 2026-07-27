@@ -28,8 +28,10 @@ YOLO instance segmentation（`--task seg`）在 detection 的 box/class/score �
 6. 按 `--mask-threshold` 统计 prototype-grid active pixels。
 7. 将概率 mask、active/total pixel count、value kind 和统计范围写入 output JSON。
 8. 生成最多 `24x24` 采样的概率 mask SVG 预览。
+9. 可选使用精确的 `--image` 预处理 metadata，将 prototype probability bilinear 映射到 source-image shape。
+10. 可选按显式 detection coordinate space 执行 box crop，并把 source mask 统计写入嵌套 `spatialTransform`。
 
-当前通用 runner **不会**替模型猜测 letterbox crop、box crop 或 resize-back 到原图的规则。SVG 将 prototype probability grid 映射到 detection box，仅用于 owner 预览，不是模型特定的最终像素级 overlay。真实文章案例必须在 owner-approved adapter 中完成 crop/resize-back，并记录实现版本、参数和 hash。
+默认路径仍不会猜测 letterbox crop、box crop 或 resize-back 规则，SVG 只把 prototype probability grid 映射到 detection box。只有 owner 显式传入 `--mask-spatial-transform`、`--mask-coordinate-space` 和 `--image` 时，runner 才使用本次 `YoloImagePreprocessResult` 做逆变换。该通用映射仍要求 owner 验证 exporter-specific mask alignment；没有这些参数时绝不隐式推断。
 
 ## 全链路
 
@@ -45,9 +47,10 @@ flowchart LR
     G --> I["Coefficient slice after NMS"]
     H --> J["Linear compose + stable sigmoid"]
     I --> J
-    J --> K["Threshold stats + bounded SVG preview"]
-    K --> L["Owner crop / resize-back adapter"]
-    L --> M["JSON + log + hashes + review"]
+    J --> K["Threshold stats + prototype SVG"]
+    K --> L["Explicit preprocess inverse"]
+    L --> M["Optional half-open box crop"]
+    M --> N["Source mask JSON/SVG + owner review"]
 ```
 
 ## E 盘案例目录
@@ -141,6 +144,29 @@ probability[x,y] = sigmoid(logit[x,y])
 
 sigmoid 对正负输入使用分支计算，避免大幅值指数溢出。`--mask-threshold` 取值必须在 `[0,1]`，默认 `0.5`。阈值进入 `YoloMultiOutputMetadata`、preflight、`YoloSegmentationMask`、JSON 和 SVG 预览；无效值受控报错。
 
+## 显式 Source-Image 空间变换
+
+空间变换是 opt-in，不是 segmentation 默认行为：
+
+```text
+--mask-spatial-transform
+--mask-coordinate-space model-input|normalized
+--mask-crop-to-box true|false
+--image <source.bmp|source.ppm>
+```
+
+`model-input` 表示 detection center/width/height 已经是模型输入像素；`normalized` 表示它们位于 normalized coordinate space，变换前会分别乘以 target width/height。不存在 `auto` 值，因为从外部 tensor 猜测坐标空间会产生看似合理但不可审计的 mask。
+
+对每个 source-image pixel center，变换使用本次预处理的 `PadX/PadY` 和 `ResizedWidth/SourceWidth`、`ResizedHeight/SourceHeight` effective scale 映射回 model input，再映射到 prototype grid 并执行 bilinear sampling。effective scale 从真实取整后的 resized dimensions 推导，避免理想等比 scale 与栅格取整产生偏差。最终 mask shape 固定为 `[sourceHeight,sourceWidth]`。启用 crop 时，box 使用半开栅格边界：
+
+```text
+[left, right) x [top, bottom)
+```
+
+因此 width 为 2、高度为 2 的整数像素框最多覆盖 `2*2` 个整数 pixel centers，不会把 right/bottom 再多包含一行或一列。box 在输出 JSON 中同时逆变换为 source-image coordinate。
+
+空间变换拒绝以下输入：缺少 `--image`、缺少 coordinate space、非正 resize scale、padding/resized shape 超出 model input、非有限 detection coordinate 或负 box size。外部 `--input-data` 即使数值来自图片，也不能提供可信的 `YoloImagePreprocessResult`，因此不能启用该路径。
+
 ## 预处理
 
 先固定输入 tensor：
@@ -182,18 +208,21 @@ dotnet run --project .\samples\YoloVision -- `
   --preflight `
   --model E:\TensorRtSharpAssets\cases\yolov8n-seg\models\yolov8n-seg.onnx `
   --labels E:\TensorRtSharpAssets\cases\yolov8n-seg\labels\coco.names `
-  --input-data E:\TensorRtSharpAssets\cases\yolov8n-seg\tensors\input-fp32.bin `
+  --image E:\TensorRtSharpAssets\cases\yolov8n-seg\images\input.ppm `
   --input-shape 1x3x640x640 `
   --family v8 --task seg `
   --class-count 80 `
   --output-role-map boxes:det,proto:mask-prototypes `
   --mask-coefficient-count 32 `
   --mask-threshold 0.5 `
+  --mask-spatial-transform `
+  --mask-coordinate-space model-input `
+  --mask-crop-to-box true `
   --aux-layout boxes-first `
   --preflight-report E:\TensorRtSharpAssets\cases\yolov8n-seg\reports\preflight.json
 ```
 
-检查 `yolovision-preflight.v1`、`proofClassification=precheck`、`metadata.maskCoefficientCount=32`、`metadata.maskThreshold=0.5`，并确认所有 runtime execution/promotion flag 为 false。
+检查 `yolovision-preflight.v1`、`proofClassification=precheck`、`metadata.maskCoefficientCount=32`、`metadata.maskThreshold=0.5`、`spatialTransform.requested=true`、coordinate space 和 `requiresImagePreprocessMetadata=true`，并确认所有 runtime execution/promotion flag 为 false。preflight 只记录 intent，不生成最终 mask。
 
 ## YoloVision Runtime
 
@@ -201,7 +230,8 @@ dotnet run --project .\samples\YoloVision -- `
 dotnet run --project .\samples\YoloVision -- `
   --model E:\TensorRtSharpAssets\cases\yolov8n-seg\models\yolov8n-seg.onnx `
   --labels E:\TensorRtSharpAssets\cases\yolov8n-seg\labels\coco.names `
-  --input-data E:\TensorRtSharpAssets\cases\yolov8n-seg\tensors\input-fp32.bin `
+  --image E:\TensorRtSharpAssets\cases\yolov8n-seg\images\input.ppm `
+  --preprocessed-output E:\TensorRtSharpAssets\cases\yolov8n-seg\tensors\input-fp32.bin `
   --input-shape 1x3x640x640 `
   --family v8 --task seg `
   --class-count 80 `
@@ -209,6 +239,9 @@ dotnet run --project .\samples\YoloVision -- `
   --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45 `
   --output-role-map boxes:det,proto:mask-prototypes `
   --mask-coefficient-count 32 --mask-threshold 0.5 `
+  --mask-spatial-transform `
+  --mask-coordinate-space model-input `
+  --mask-crop-to-box true `
   --aux-layout boxes-first `
   --output-json E:\TensorRtSharpAssets\cases\yolov8n-seg\reports\output.json `
   --visualization-svg E:\TensorRtSharpAssets\cases\yolov8n-seg\overlays\mask-preview.svg
@@ -226,14 +259,17 @@ dotnet run --project .\samples\YoloVision -- `
 - `maskThreshold`：本次 decode 使用的概率阈值。
 - `maskValueKind`：`probability` 或兼容 raw API 的 `raw-logits`。
 - `maskPixelCountScope=prototype-grid-before-crop-resize`：明确统计尚未经过模型特定 crop/resize-back。
+- 可选 `spatialTransform`：记录 applied flag、显式 coordinate space、crop/interpolation、source/target/resized shape、padding、scale、最终 mask shape/count/threshold、source box、固定 scope 和 boundary。
+
+原始 prototype-grid 字段不会被 source-image 字段覆盖。两层统计同时存在，便于定位问题发生在 compose 阶段还是 inverse-transform/crop 阶段。`spatialTransform.finalMaskScope` 固定为 `source-image-after-explicit-preprocess-inverse-and-optional-box-crop`。
 
 示例位于 `samples/YoloVision/examples/yolovision-output-seg.example.json`，schema 位于 `samples/YoloVision/yolovision-output.schema.json`。output report 还复制 output tensor shape/value SHA256 和 pointer-free binding metadata，但示例中的 synthetic input 与空 hash 仍不是 runtime proof。
 
 ## SVG 预览语义
 
-`YoloVisionVisualizationWriter` 读取真实 mask probability，按阈值选择单元格，并限制为最多 `24x24` 采样以控制 SVG 大小。每个单元格带 `data-mask-cell="true"`，opacity 随 probability 变化。
+默认 `YoloVisionVisualizationWriter` 读取真实 prototype mask probability，按阈值选择单元格，并限制为最多 `24x24` 采样以控制 SVG 大小。每个单元格带 `data-mask-cell="true"`，opacity 随 probability 变化。
 
-这个预览证明 managed mask values 被消费，不再只是整框填色；但它仍把 prototype grid 映射到 detection box，没有执行 exporter-specific crop/resize-back。正式文章截图应来自 owner adapter 的最终 overlay，并同时保留通用 SVG 作为 source-tree diagnostic。
+启用显式空间变换后，SVG 使用 source-image width/height，最多采样 `48x48` 的最终 mask，active cell 带 `data-spatial-mask-cell="true"`，并绘制逆变换后的 source box。它证明显式 preprocess inverse 的结果被消费，但仍是 source-tree diagnostic，不会把输入原图像素嵌入 SVG；正式文章仍需 owner 对照原图和 exporter 参考实现。
 
 ## 严格验证
 
@@ -250,6 +286,10 @@ validator 会检查：
 - `0 <= maskPixelCount <= maskTotalPixelCount`。
 - threshold 位于 `[0,1]`。
 - value kind 与 pixel-count scope 合法。
+- 可选 spatial transform 必须 `applied=true`，coordinate space 与 bilinear interpolation 合法。
+- `finalMaskShape` 乘积必须等于 total，且 active 不超过 total、threshold 位于 `[0,1]`。
+- final scope/boundary 必须保持 source-image 与 exporter-validation 语义。
+- 存在 spatial transform 时，input 必须是 `preprocessed-image-tensor`，并携带 `image` 与 `letterbox` metadata。
 - task/output/boundary/hash 字段没有把报告晋级为 proof。
 
 真实候选还需运行 `eng/Test-YoloVisionRealAssetOwnerProofInput.ps1 -Strict`、owner importer 和 `eng/Test-SampleRunEvidenceRecord.ps1 -RequireExistingLog`。
@@ -264,8 +304,10 @@ validator 会检查：
 | prototype shape 拒绝 | 不是 `[P,H,W]` / `[1,P,H,W]` | 转换 exporter output 或新增受控 layout 实现 |
 | mask 全黑/全白 | coefficient、prototype、sigmoid 或 threshold 错 | 对比 raw logits/probability，调整 owner-confirmed threshold |
 | mask 与框不对应 | NMS 后 row index 丢失 | 确认使用 `YoloDetection.SourceIndex` 路径 |
-| SVG 轮廓粗糙 | 有界 `24x24` diagnostic sampling | 用 owner adapter 生成最终分辨率 overlay |
-| 原图 mask 偏移 | 缺少 letterbox crop/resize-back | 使用记录 scale/pad 的模型特定 adapter |
+| SVG 轮廓粗糙 | 有界 `24x24` 或 `48x48` diagnostic sampling | 对 source mask 做原图 overlay 与定量对照 |
+| 空间变换拒绝启动 | 缺少 `--image` 或 coordinate space | 使用真实图片预处理链并显式声明坐标空间 |
+| box 多一行/列 | 外部参考实现使用闭区间 | 对齐 `[left,right) x [top,bottom)` 半开语义 |
+| 原图 mask 偏移 | exporter alignment 与通用 inverse 不一致 | 对比 scale/pad/pixel center，并增加 owner adapter |
 | validator 通过但仍不可晋级 | 只有结构化报告或 synthetic input | 补真实 log/hash/host metadata/owner review |
 
 ## 代码入口
@@ -273,16 +315,17 @@ validator 会检查：
 - `samples/YoloVision/YoloSampleRunner.cs`：runtime role 路由、coefficient slice、prototype shape 与 mask compose。
 - `samples/YoloVision/YoloMaskComposer.cs`：raw linear API、稳定 sigmoid 和 probability compose。
 - `samples/YoloVision/YoloSegmentationMask.cs`：value kind、threshold、active pixel count。
+- `samples/YoloVision/YoloSegmentationSpatialTransform.cs`：显式 coordinate space、bilinear inverse、半开 box crop 和 source mask。
 - `samples/YoloVision/YoloRuntimeOutputRoleResolver.cs`：output role、aux metadata 和 `--mask-threshold`。
-- `samples/YoloVision/YoloVisionOutputReport.cs`：mask report 字段。
-- `samples/YoloVision/YoloVisionVisualizationWriter.cs`：有界概率网格 SVG。
+- `samples/YoloVision/YoloVisionOutputReport.cs`：prototype 与 source-image spatial mask report 字段。
+- `samples/YoloVision/YoloVisionVisualizationWriter.cs`：有界 prototype/source-image 概率网格 SVG。
 - `eng/Test-YoloVisionOutputReport.ps1`：结构和数值一致性 validator。
 
 ## Proof Boundary
 
 以下材料不得替代真实模型证明：build-only、parse-only、preflight、synthetic input、single-output diagnostic、示例 JSON、SVG/screenshot、sidecar-only、TensorRtExec report、OnnxToEngine report、local feed、ProjectReference、direct `.nupkg`、readonly diagnostics 和 `blocked-by-cuda-driver`。
 
-`real-model-runtime` 候选需要 owner-approved 模型/labels/图片、许可证、预处理 tensor、真实两个 output、最终 crop/resize-back 规则、output JSON、run log、全部 SHA256、host metadata 和人工 mask review。它仍不是 `package-consumer-runtime`；后者需要仓库外 clean consumer 从目标包来源 restore/build/run。
+`real-model-runtime` 候选需要 owner-approved 模型/labels/图片、许可证、预处理 tensor、真实两个 output、显式 coordinate space、crop/resize-back 规则、output JSON、run log、全部 SHA256、host metadata 和人工 mask review。通用 spatial transform 仍需验证 exporter-specific alignment。它不是 `package-consumer-runtime`；后者需要仓库外 clean consumer 从目标包来源 restore/build/run。
 
 ## 发布前检查清单
 
@@ -293,7 +336,8 @@ validator 会检查：
 - [ ] `P` 与 coefficient count 一致，prototype shape 合法。
 - [ ] mask threshold 进入 preflight、runtime、JSON 和 review。
 - [ ] active/total pixels 与 shape 数学一致。
-- [ ] owner adapter 完成并记录 crop/resize-back，或明确尚未完成。
+- [ ] source-image transform 明确使用 `--image`、coordinate space、crop flag 和半开边界。
+- [ ] owner 已对照 exporter 参考实现验证 bilinear、pixel center、letterbox inverse 和最终 mask。
 - [ ] build report、preflight、output JSON、SVG、final overlay、run log 和 hash 已归档。
 - [ ] output validator 与 sample-run evidence validator 均通过。
 - [ ] 没有把本地结果写成公开 package、发布批准或 post-publish proof。

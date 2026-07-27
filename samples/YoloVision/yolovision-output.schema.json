@@ -685,6 +685,131 @@
         "maskPixelCountScope": {
           "type": "string",
           "const": "prototype-grid-before-crop-resize"
+        },
+        "spatialTransform": {
+          "$ref": "#/$defs/segmentationSpatialTransform"
+        }
+      }
+    },
+    "segmentationSpatialTransform": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "applied",
+        "coordinateSpace",
+        "cropToDetection",
+        "interpolation",
+        "sourceWidth",
+        "sourceHeight",
+        "targetWidth",
+        "targetHeight",
+        "resizedWidth",
+        "resizedHeight",
+        "padX",
+        "padY",
+        "scaleX",
+        "scaleY",
+        "finalMaskShape",
+        "finalMaskPixelCount",
+        "finalMaskTotalPixelCount",
+        "finalMaskThreshold",
+        "finalMaskValueKind",
+        "finalMaskScope",
+        "sourceBox",
+        "boundary"
+      ],
+      "properties": {
+        "applied": {
+          "type": "boolean",
+          "const": true
+        },
+        "coordinateSpace": {
+          "type": "string",
+          "enum": ["model-input-pixels", "normalized"]
+        },
+        "cropToDetection": {
+          "type": "boolean"
+        },
+        "interpolation": {
+          "type": "string",
+          "const": "bilinear"
+        },
+        "sourceWidth": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sourceHeight": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "targetWidth": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "targetHeight": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "resizedWidth": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "resizedHeight": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "padX": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "padY": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "scaleX": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "scaleY": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "finalMaskShape": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "finalMaskPixelCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "finalMaskTotalPixelCount": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "finalMaskThreshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "finalMaskValueKind": {
+          "type": "string",
+          "const": "probability"
+        },
+        "finalMaskScope": {
+          "type": "string",
+          "const": "source-image-after-explicit-preprocess-inverse-and-optional-box-crop"
+        },
+        "sourceBox": {
+          "$ref": "#/$defs/box"
+        },
+        "boundary": {
+          "type": "string",
+          "const": "explicit-preprocess-metadata-transform; owner must validate exporter-specific mask alignment"
         }
       }
     },

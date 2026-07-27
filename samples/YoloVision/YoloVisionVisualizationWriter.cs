@@ -29,6 +29,18 @@ public static class YoloVisionVisualizationWriter
         YoloModelProfile profile,
         IReadOnlyList<int> inputShape)
     {
+        Write(outputPath, result, labels, profile, inputShape, imagePreprocess: null, segmentationSpatialTransform: null);
+    }
+
+    public static void Write(
+        string outputPath,
+        YoloVisionResult result,
+        IReadOnlyList<string> labels,
+        YoloModelProfile profile,
+        IReadOnlyList<int> inputShape,
+        YoloImagePreprocessResult? imagePreprocess,
+        YoloSegmentationSpatialTransformOptions? segmentationSpatialTransform)
+    {
         if (string.IsNullOrWhiteSpace(outputPath))
         {
             throw new ArgumentException("Visualization path must not be empty.", nameof(outputPath));
@@ -41,7 +53,10 @@ public static class YoloVisionVisualizationWriter
             Directory.CreateDirectory(directory);
         }
 
-        File.WriteAllText(fullPath, ToSvg(result, labels, profile, inputShape), Encoding.UTF8);
+        File.WriteAllText(
+            fullPath,
+            ToSvg(result, labels, profile, inputShape, imagePreprocess, segmentationSpatialTransform),
+            Encoding.UTF8);
     }
 
     public static string ToSvg(
@@ -49,6 +64,17 @@ public static class YoloVisionVisualizationWriter
         IReadOnlyList<string> labels,
         YoloModelProfile profile,
         IReadOnlyList<int> inputShape)
+    {
+        return ToSvg(result, labels, profile, inputShape, imagePreprocess: null, segmentationSpatialTransform: null);
+    }
+
+    public static string ToSvg(
+        YoloVisionResult result,
+        IReadOnlyList<string> labels,
+        YoloModelProfile profile,
+        IReadOnlyList<int> inputShape,
+        YoloImagePreprocessResult? imagePreprocess,
+        YoloSegmentationSpatialTransformOptions? segmentationSpatialTransform)
     {
         if (result == null)
         {
@@ -60,11 +86,28 @@ public static class YoloVisionVisualizationWriter
             throw new ArgumentNullException(nameof(profile));
         }
 
+        if (segmentationSpatialTransform != null && imagePreprocess == null)
+        {
+            throw new ArgumentException(
+                "Segmentation spatial transform requires image preprocessing metadata.",
+                nameof(segmentationSpatialTransform));
+        }
+
+        if (segmentationSpatialTransform != null && result.TaskType != YoloTaskType.Segmentation)
+        {
+            throw new ArgumentException(
+                "Segmentation spatial transform can only visualize a segmentation result.",
+                nameof(result));
+        }
+
         labels ??= Array.Empty<string>();
-        int modelWidth = GetShapeDimension(inputShape, 3, 640);
-        int modelHeight = GetShapeDimension(inputShape, 2, 640);
+        bool useSpatialSegmentation = result.TaskType == YoloTaskType.Segmentation &&
+                                      imagePreprocess != null &&
+                                      segmentationSpatialTransform != null;
+        int modelWidth = useSpatialSegmentation ? imagePreprocess!.SourceWidth : GetShapeDimension(inputShape, 3, 640);
+        int modelHeight = useSpatialSegmentation ? imagePreprocess!.SourceHeight : GetShapeDimension(inputShape, 2, 640);
         int canvasWidth = Math.Max(modelWidth, 360);
-        int canvasHeight = Math.Max(modelHeight, 260);
+        int canvasHeight = Math.Max(modelHeight + (useSpatialSegmentation ? 66 : 0), 260);
 
         StringBuilder builder = new StringBuilder();
         builder.AppendLine($"""<svg xmlns="http://www.w3.org/2000/svg" width="{canvasWidth}" height="{canvasHeight}" viewBox="0 0 {canvasWidth} {canvasHeight}" role="img" aria-label="YoloVision visualization">""");
@@ -82,7 +125,20 @@ public static class YoloVisionVisualizationWriter
                 AppendSemantic(builder, result.SemanticMap, canvasWidth, canvasHeight);
                 break;
             case YoloTaskType.Segmentation:
-                AppendSegmentation(builder, result.Segmentations, labels, modelWidth, modelHeight);
+                if (useSpatialSegmentation)
+                {
+                    AppendSpatialSegmentation(
+                        builder,
+                        result.Segmentations,
+                        labels,
+                        imagePreprocess!,
+                        segmentationSpatialTransform!,
+                        contentTop: 66);
+                }
+                else
+                {
+                    AppendSegmentation(builder, result.Segmentations, labels, modelWidth, modelHeight);
+                }
                 break;
             case YoloTaskType.OrientedBoundingBox:
                 AppendObb(builder, result.OrientedBoxes, labels, modelWidth, modelHeight);
@@ -161,6 +217,88 @@ public static class YoloVisionVisualizationWriter
                 builder.AppendLine($"""  <rect data-mask-cell="true" x="{Format(rect.X + column * cellWidth)}" y="{Format(rect.Y + row * cellHeight)}" width="{Format(cellWidth + 0.25f)}" height="{Format(cellHeight + 0.25f)}" fill="{color}" opacity="{Format(opacity)}"/>""");
             }
         }
+    }
+
+    private static void AppendSpatialSegmentation(
+        StringBuilder builder,
+        IReadOnlyList<YoloSegmentationPrediction> segmentations,
+        IReadOnlyList<string> labels,
+        YoloImagePreprocessResult preprocess,
+        YoloSegmentationSpatialTransformOptions options,
+        int contentTop)
+    {
+        if (segmentations.Count == 0)
+        {
+            AppendEmpty(builder, "No segmentation masks above threshold.");
+            return;
+        }
+
+        int index = 0;
+        foreach (YoloSegmentationPrediction segmentation in segmentations.Take(100))
+        {
+            YoloSegmentationSpatialTransformResult transform =
+                YoloSegmentationSpatialTransform.Apply(segmentation, preprocess, options);
+            string color = Palette[index % Palette.Length];
+            AppendSourceMaskPreview(builder, transform.Mask, preprocess.SourceWidth, preprocess.SourceHeight, contentTop, color);
+            AppendSourceBox(builder, transform.Detection, labels, preprocess.SourceWidth, preprocess.SourceHeight, contentTop, color);
+            index++;
+        }
+
+        builder.AppendLine($"""  <text x="16" y="{contentTop + preprocess.SourceHeight - 8}" font-family="Segoe UI, Arial, sans-serif" font-size="11" fill="#334155">spatial mask: explicit preprocess inverse, crop={options.CropToDetection.ToString().ToLowerInvariant()}</text>""");
+    }
+
+    private static void AppendSourceMaskPreview(
+        StringBuilder builder,
+        YoloSegmentationMask mask,
+        int sourceWidth,
+        int sourceHeight,
+        int contentTop,
+        string color)
+    {
+        int columns = Math.Max(1, Math.Min(mask.Width, 48));
+        int rows = Math.Max(1, Math.Min(mask.Height, 48));
+        float cellWidth = sourceWidth / (float)columns;
+        float cellHeight = sourceHeight / (float)rows;
+        for (int row = 0; row < rows; row++)
+        {
+            int sourceY = Math.Min(mask.Height - 1, row * mask.Height / rows);
+            for (int column = 0; column < columns; column++)
+            {
+                int sourceX = Math.Min(mask.Width - 1, column * mask.Width / columns);
+                float probability = mask.GetProbability(sourceY * mask.Width + sourceX);
+                if (probability < mask.Threshold)
+                {
+                    continue;
+                }
+
+                float opacity = 0.12f + probability * 0.46f;
+                builder.AppendLine($"""  <rect data-spatial-mask-cell="true" x="{Format(column * cellWidth)}" y="{Format(contentTop + row * cellHeight)}" width="{Format(cellWidth + 0.25f)}" height="{Format(cellHeight + 0.25f)}" fill="{color}" opacity="{Format(opacity)}"/>""");
+            }
+        }
+    }
+
+    private static void AppendSourceBox(
+        StringBuilder builder,
+        YoloDetection detection,
+        IReadOnlyList<string> labels,
+        int sourceWidth,
+        int sourceHeight,
+        int contentTop,
+        string color)
+    {
+        float left = Math.Clamp(detection.Left, 0.0f, sourceWidth);
+        float top = Math.Clamp(detection.Top, 0.0f, sourceHeight);
+        float right = Math.Clamp(detection.Right, 0.0f, sourceWidth);
+        float bottom = Math.Clamp(detection.Bottom, 0.0f, sourceHeight);
+        float width = Math.Max(1.0f, right - left);
+        float height = Math.Max(1.0f, bottom - top);
+        builder.AppendLine($"""  <rect x="{Format(left)}" y="{Format(contentTop + top)}" width="{Format(width)}" height="{Format(height)}" fill="none" stroke="{color}" stroke-width="2"/>""");
+        AppendLabel(
+            builder,
+            left,
+            contentTop + top,
+            color,
+            $"mask {LabelOrIndex(labels, detection.ClassIndex)} {detection.Score:0.###}");
     }
 
     private static void AppendObb(StringBuilder builder, IReadOnlyList<YoloObbDetection> boxes, IReadOnlyList<string> labels, int width, int height)

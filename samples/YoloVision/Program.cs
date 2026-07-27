@@ -78,6 +78,8 @@ public static class YoloVisionCommand
                 ? ReadLabelsForPreflight(labelsPath)
                 : TensorRtOnnxSample.ReadLabels(labelsPath);
             YoloModelProfile profile = YoloModelProfile.FromArgs(args, labels.Count);
+            YoloSegmentationSpatialTransformOptions? segmentationSpatialTransform =
+                YoloSegmentationSpatialTransformOptions.FromArgs(args, profile.TaskType);
             if (preflight)
             {
                 string modelPath = ResolveOptionalFullPath(GetFirstStringArgument(args, string.Empty, "--model", "--onnx", "--onnxFile"));
@@ -124,6 +126,11 @@ public static class YoloVisionCommand
             }
 
             YoloImagePreprocessResult? imagePreprocess = TryPreprocessImageInput(args, profile);
+            if (segmentationSpatialTransform != null && imagePreprocess == null)
+            {
+                throw new ArgumentException("--mask-spatial-transform requires --image so the exact preprocessing metadata is available.");
+            }
+
             string[] effectiveArgs = imagePreprocess == null ? args : AddOrReplaceArgument(args, "--input-data", imagePreprocess.TensorPath);
             OnnxSampleOptions options = OnnxSampleOptions.FromArgs(effectiveArgs, "1x3x640x640");
 
@@ -161,7 +168,17 @@ public static class YoloVisionCommand
                 SampleCommandLine.GetStringArgument(args, "--output-json", string.Empty));
             if (!string.IsNullOrWhiteSpace(outputJsonPath))
             {
-                YoloVisionOutputReport.Write(outputJsonPath, options, result, runtimeOutputs, profile, visionResult, labels, labelsPath, imagePreprocess);
+                YoloVisionOutputReport.Write(
+                    outputJsonPath,
+                    options,
+                    result,
+                    runtimeOutputs,
+                    profile,
+                    visionResult,
+                    labels,
+                    labelsPath,
+                    imagePreprocess,
+                    segmentationSpatialTransform);
                 Console.WriteLine($"OutputJson={Path.GetFullPath(outputJsonPath)}");
             }
 
@@ -171,7 +188,14 @@ public static class YoloVisionCommand
                 SampleCommandLine.GetStringArgument(args, "--visualization-svg", string.Empty));
             if (!string.IsNullOrWhiteSpace(visualizationPath))
             {
-                YoloVisionVisualizationWriter.Write(visualizationPath, visionResult, labels, profile, options.InputShape.Values);
+                YoloVisionVisualizationWriter.Write(
+                    visualizationPath,
+                    visionResult,
+                    labels,
+                    profile,
+                    options.InputShape.Values,
+                    imagePreprocess,
+                    segmentationSpatialTransform);
                 Console.WriteLine($"Visualization={Path.GetFullPath(visualizationPath)}");
             }
 
@@ -540,6 +564,9 @@ public static class YoloVisionCommand
         Console.WriteLine("  --mask-prototypes-output <name>  Segmentation prototype tensor name.");
         Console.WriteLine("  --mask-coefficient-count <count> Segmentation mask coefficient count.");
         Console.WriteLine("  --mask-threshold <value>         Segmentation probability threshold in [0,1]. Default: 0.5.");
+        Console.WriteLine("  --mask-spatial-transform        Opt in to explicit prototype-to-source-image mask mapping; requires --image.");
+        Console.WriteLine("  --mask-coordinate-space model-input|normalized  Required with --mask-spatial-transform.");
+        Console.WriteLine("  --mask-crop-to-box true|false   Crop the transformed mask to its detection box. Default: true.");
         Console.WriteLine("  --pose-keypoints-output <name>   Pose keypoint tensor name.");
         Console.WriteLine("  --keypoint-count <count>         Pose keypoint count; --keypoint-stride defaults to 3.");
         Console.WriteLine("  --obb-angle-output <name>        OBB angle tensor name; --angle-degrees or --angle-radians controls units.");

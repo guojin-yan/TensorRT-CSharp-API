@@ -76,6 +76,8 @@ public static class YoloVisionPreflightReport
         labels ??= Array.Empty<string>();
         bool strict = HasSwitch(args, "--strict-preflight");
         List<PreflightCheck> checks = new List<PreflightCheck>();
+        YoloSegmentationSpatialTransformOptions? spatialTransform =
+            YoloSegmentationSpatialTransformOptions.FromArgs(args, profile.TaskType);
 
         AssetSnapshot model = Snapshot(modelPath, required: true);
         AssetSnapshot labelAsset = Snapshot(labelsPath, required: false);
@@ -91,6 +93,18 @@ public static class YoloVisionPreflightReport
             inputSourceCount <= 1
                 ? "At most one of --image, --input-data, and --input is selected."
                 : "Choose exactly one input source: --image, --input-data, or --input."));
+
+        if (spatialTransform != null)
+        {
+            bool hasImage = !string.IsNullOrWhiteSpace(imagePath);
+            checks.Add(new PreflightCheck(
+                "segmentation-spatial-transform-image",
+                hasImage ? "info" : "blocker",
+                hasImage,
+                hasImage
+                    ? "Explicit segmentation spatial transform will use the --image preprocessing metadata."
+                    : "--mask-spatial-transform requires --image; external tensors do not carry a trusted inverse transform."));
+        }
 
         AddAssetCheck(
             checks,
@@ -255,6 +269,19 @@ public static class YoloVisionPreflightReport
                         obbAngleInDegrees = metadata.ObbAngleInDegrees,
                         auxiliaryChannelStart = metadata.AuxiliaryChannelStart,
                         auxiliaryLayout = metadata.AuxiliaryLayout.ToString()
+                    },
+                spatialTransform = spatialTransform == null
+                    ? null
+                    : new
+                    {
+                        requested = true,
+                        coordinateSpace = spatialTransform.CoordinateSpace == YoloSegmentationCoordinateSpace.Normalized
+                            ? "normalized"
+                            : "model-input-pixels",
+                        cropToDetection = spatialTransform.CropToDetection,
+                        interpolation = "bilinear",
+                        requiresImagePreprocessMetadata = true,
+                        boundary = "preflight intent only; no mask spatial transform executed"
                     }
             },
             checks,

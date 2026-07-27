@@ -124,6 +124,50 @@ function Test-OptionalSha256 {
     return [string]::IsNullOrWhiteSpace($text) -or ($text -match $sha256Pattern)
 }
 
+function Test-SegmentationSpatialTransform {
+    param([AllowNull()] $Transform)
+
+    if ($null -eq $Transform) {
+        return $false
+    }
+
+    $finalMaskShape = @($Transform.finalMaskShape)
+    $finalMaskPixelCount = if (Test-JsonProperty $Transform "finalMaskPixelCount") { [long]$Transform.finalMaskPixelCount } else { -1 }
+    $finalMaskTotalPixelCount = if (Test-JsonProperty $Transform "finalMaskTotalPixelCount") { [long]$Transform.finalMaskTotalPixelCount } else { -1 }
+    $finalMaskThreshold = if (Test-JsonProperty $Transform "finalMaskThreshold") { [double]$Transform.finalMaskThreshold } else { -1.0 }
+    $shapeMatchesTotal = $finalMaskShape.Count -eq 2 -and
+        [long]$finalMaskShape[0] -gt 0 -and
+        [long]$finalMaskShape[1] -gt 0 -and
+        ([long]$finalMaskShape[0] * [long]$finalMaskShape[1]) -eq $finalMaskTotalPixelCount
+
+    return (Test-JsonProperty $Transform "applied") -and
+        $Transform.applied -is [bool] -and
+        [bool]$Transform.applied -and
+        (Get-JsonString $Transform "coordinateSpace") -in @("model-input-pixels", "normalized") -and
+        (Test-JsonProperty $Transform "cropToDetection") -and
+        $Transform.cropToDetection -is [bool] -and
+        (Get-JsonString $Transform "interpolation") -eq "bilinear" -and
+        (Test-PositiveNumber $Transform.sourceWidth) -and
+        (Test-PositiveNumber $Transform.sourceHeight) -and
+        (Test-PositiveNumber $Transform.targetWidth) -and
+        (Test-PositiveNumber $Transform.targetHeight) -and
+        (Test-PositiveNumber $Transform.resizedWidth) -and
+        (Test-PositiveNumber $Transform.resizedHeight) -and
+        (Test-NonNegativeNumber $Transform.padX) -and
+        (Test-NonNegativeNumber $Transform.padY) -and
+        (Test-PositiveNumber $Transform.scaleX) -and
+        (Test-PositiveNumber $Transform.scaleY) -and
+        $shapeMatchesTotal -and
+        $finalMaskPixelCount -ge 0 -and
+        $finalMaskPixelCount -le $finalMaskTotalPixelCount -and
+        $finalMaskThreshold -ge 0.0 -and
+        $finalMaskThreshold -le 1.0 -and
+        (Get-JsonString $Transform "finalMaskValueKind") -eq "probability" -and
+        (Get-JsonString $Transform "finalMaskScope") -eq "source-image-after-explicit-preprocess-inverse-and-optional-box-crop" -and
+        (Test-JsonProperty $Transform "sourceBox") -and
+        (Get-JsonString $Transform "boundary") -eq "explicit-preprocess-metadata-transform; owner must validate exporter-specific mask alignment"
+}
+
 function Test-TaskPrediction {
     param(
         [AllowNull()] $Prediction,
@@ -159,6 +203,8 @@ function Test-TaskPrediction {
                 [long]$maskShape[0] -gt 0 -and
                 [long]$maskShape[1] -gt 0 -and
                 ([long]$maskShape[0] * [long]$maskShape[1]) -eq $maskTotalPixelCount
+            $spatialTransformValid = (-not (Test-JsonProperty $Prediction "spatialTransform")) -or
+                (Test-SegmentationSpatialTransform $Prediction.spatialTransform)
 
             return (Test-JsonProperty $Prediction "box") -and
                 $shapeMatchesTotal -and
@@ -167,7 +213,8 @@ function Test-TaskPrediction {
                 $maskThreshold -ge 0.0 -and
                 $maskThreshold -le 1.0 -and
                 (Get-JsonString $Prediction "maskValueKind") -in @("probability", "raw-logits") -and
-                (Get-JsonString $Prediction "maskPixelCountScope") -eq "prototype-grid-before-crop-resize"
+                (Get-JsonString $Prediction "maskPixelCountScope") -eq "prototype-grid-before-crop-resize" -and
+                $spatialTransformValid
         }
         "obb" {
             return (Test-JsonProperty $Prediction "center") -and
@@ -228,6 +275,12 @@ foreach ($path in $InputPath) {
     if (Test-JsonProperty $report "boundary") {
         $forbidden = @($report.boundary.forbiddenSubstitutes | ForEach-Object { [string]$_ })
     }
+    $spatialPredictions = @($predictions | Where-Object { Test-JsonProperty $_ "spatialTransform" })
+    $spatialTransformsValid = @($spatialPredictions | Where-Object { -not (Test-SegmentationSpatialTransform $_.spatialTransform) }).Count -eq 0
+    $spatialImagePreprocessValid = $spatialPredictions.Count -eq 0 -or
+        ((Get-JsonString $report.input "sourceKind") -eq "preprocessed-image-tensor" -and
+        (Test-JsonProperty $report.input "image") -and
+        (Test-JsonProperty $report.input "letterbox"))
 
     Add-ValidationItem $items "file-exists" $true "required" "YoloVision output report exists."
     Add-ValidationItem $items "schema-version" ((Get-JsonString $report "schemaVersion") -eq "yolovision-output.v1") "blocker" "schemaVersion must be yolovision-output.v1."
@@ -251,6 +304,8 @@ foreach ($path in $InputPath) {
     Add-ValidationItem $items "boundary-evidence-kind" ((Get-JsonString $report.boundary "evidenceKind") -eq "YoloVision output schema; readonly diagnostics; not runtime proof") "blocker" "boundary.evidenceKind must keep the non-proof classification."
     Add-ValidationItem $items "forbidden-substitutes-complete" (($forbiddenSubstitutes | Where-Object { $forbidden -notcontains $_ }).Count -eq 0) "blocker" "forbiddenSubstitutes must list every non-proof substitute."
     Add-ValidationItem $items "no-yolodet" (-not $text.Contains("YoloDet", [System.StringComparison]::OrdinalIgnoreCase)) "blocker" "YoloVision output records must not refer to the retired YoloDet sample name."
+    Add-ValidationItem $items "segmentation-spatial-transforms-valid" $spatialTransformsValid "blocker" "Optional segmentation spatialTransform records must be applied, source-image scoped, and numerically self-consistent."
+    Add-ValidationItem $items "segmentation-spatial-transform-image-preprocess" $spatialImagePreprocessValid "blocker" "A segmentation spatialTransform requires preprocessed-image-tensor input plus image and letterbox metadata from --image."
     Add-ValidationItem $items "task-predictions-match" ((@($predictions | Where-Object { -not (Test-TaskPrediction $_ $task) }).Count) -eq 0) "blocker" "Every prediction must match the declared task and required metadata."
 
     $failedBlockers = @($items | Where-Object { -not $_.passed -and $_.severity -eq "blocker" })
