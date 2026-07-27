@@ -476,6 +476,208 @@ public sealed class TechnicalArticleRoadmapTests
     }
 
     [Fact]
+    public void ExternalModelEvidenceCaseStudyIsLongFormAuditableAndProofBounded()
+    {
+        string article = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "external-model-evidence-case-study.md"));
+
+        Assert.True(article.Length >= 12_000, "The external-model evidence case study must remain a complete long-form tutorial.");
+
+        foreach (string marker in new[]
+        {
+            "Acquisition Report",
+            "Build Report / Sidecar",
+            "Sample Run Evidence",
+            "E:\\TensorRtSharpAssets\\cases\\<case-id>",
+            "New-Item -ItemType Directory -Force",
+            "Acquire-YoloXOfficialAssets.ps1 -Offline",
+            "Acquire-YoloV10OfficialAssets.ps1 -Offline",
+            "Test-SampleAssetManifest.ps1",
+            "Test-OnnxEngineBuildEvidenceSidecar.ps1",
+            "Test-YoloVisionOutputReport.ps1 -Strict",
+            "Test-SampleRunEvidenceRecord.ps1",
+            "Test-ExternalRuntimeProofRecord.ps1",
+            "Test-PostPublishVerificationRecord.ps1",
+            "yolovision-real-asset-owner-backfill-pack.json",
+            "packageConsumerRuntimeForbidden=true",
+            "source-tree-real-model-runtime",
+            "不是 package-consumer-runtime proof",
+            "拒绝 C 盘"
+        })
+        {
+            Assert.Contains(marker, article, StringComparison.Ordinal);
+        }
+
+        JsonElement yoloXManifest = ReadJsonRoot(Path.Combine(
+            RepositoryPaths.Root,
+            "samples",
+            "assets",
+            "yolovision-yolox-official-assets.json"));
+        JsonElement yoloXModel = yoloXManifest
+            .GetProperty("assets")
+            .EnumerateArray()
+            .Single(static item => item.GetProperty("role").GetString() == "model");
+        Assert.Contains(yoloXManifest.GetProperty("license").GetProperty("spdxId").GetString()!, article, StringComparison.Ordinal);
+        Assert.Contains(yoloXManifest.GetProperty("upstreamTag").GetString()!, article, StringComparison.Ordinal);
+        Assert.Contains(yoloXModel.GetProperty("expectedSha256").GetString()!, article, StringComparison.Ordinal);
+
+        JsonElement yoloV10Manifest = ReadJsonRoot(Path.Combine(
+            RepositoryPaths.Root,
+            "samples",
+            "assets",
+            "yolovision-yolov10-official-assets.json"));
+        JsonElement yoloV10Model = yoloV10Manifest
+            .GetProperty("assets")
+            .EnumerateArray()
+            .Single(static item => item.GetProperty("role").GetString() == "model");
+        Assert.Contains(yoloV10Manifest.GetProperty("license").GetProperty("spdxId").GetString()!, article, StringComparison.Ordinal);
+        Assert.Contains(yoloV10Model.GetProperty("expectedSha256").GetString()!, article, StringComparison.Ordinal);
+
+        JsonElement yoloV10Closure = ReadJsonRoot(Path.Combine(
+            RepositoryPaths.Root,
+            "artifacts",
+            "interface-coverage",
+            "yolov10-official-runtime-proof-closure.json"));
+        JsonElement runtime = yoloV10Closure.GetProperty("runtime");
+        Assert.Equal("source-tree-real-model-runtime", yoloV10Closure.GetProperty("proofClassification").GetString());
+        Assert.Contains($"{runtime.GetProperty("predictionCount").GetInt32()} 个 predictions", article, StringComparison.Ordinal);
+        Assert.Contains(runtime.GetProperty("topPrediction").GetString()!, article, StringComparison.Ordinal);
+        Assert.Contains(runtime.GetProperty("topScore").GetDouble().ToString("0.########", System.Globalization.CultureInfo.InvariantCulture), article, StringComparison.Ordinal);
+
+        foreach (string forbidden in new[]
+        {
+            "--model-path",
+            "--engine-path",
+            "--image-path",
+            "--labels-path",
+            "--output-path",
+            "-RecordPath",
+            "isPackageConsumerRuntimeProof=true",
+            "canPublishPublicly=true",
+            "performsPublish=true",
+            "canCloseReleaseIssue=true"
+        })
+        {
+            Assert.DoesNotContain(forbidden, article, StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    [Fact]
+    public void ProjectReleaseStoryMatchesCurrentCoverageMatricesAndFinalBlockers()
+    {
+        string article = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "project-release-story-and-boundaries.md"));
+        Assert.True(article.Length >= 12_000, "The project release story must remain a complete long-form article.");
+
+        string coverage = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "artifacts",
+            "interface-coverage",
+            "interface-coverage-summary.md"));
+        foreach (string marker in new[]
+        {
+            "Manifest API count: 3976",
+            "implemented=761, deferred-only=119",
+            "implemented=761, deferred-only=118",
+            "implemented=814, deferred-only=87"
+        })
+        {
+            Assert.Contains(marker, coverage, StringComparison.Ordinal);
+        }
+        foreach (string marker in new[]
+        {
+            "manifest API count：3976",
+            "761 implemented / 119 deferred-only",
+            "761 / 118",
+            "814 / 87",
+            "manifest/source 匹配不等于 100% 可用",
+            "TrtexecAlignmentStatus=parse-only",
+            "60 行：55 supported、5 个 YOLOX",
+            "GitHub full runtime package",
+            "NuGet small core/bridge package",
+            "New-Item -ItemType Directory -Force",
+            "blocked-real-proof-required"
+        })
+        {
+            Assert.Contains(marker, article, StringComparison.Ordinal);
+        }
+
+        JsonElement runtimePackages = ReadJsonRoot(Path.Combine(
+            RepositoryPaths.Root,
+            "artifacts",
+            "release-candidate",
+            "runtime-package-matrix.json"));
+        int windowsPackageCount = runtimePackages.EnumerateArray().Count(static item => item.GetProperty("platform").GetString() == "windows");
+        int linuxPackageCount = runtimePackages.EnumerateArray().Count(static item => item.GetProperty("platform").GetString() == "linux");
+        Assert.Contains($"当前有 {runtimePackages.GetArrayLength()} 个 runtime keys", article, StringComparison.Ordinal);
+        Assert.Contains($"{windowsPackageCount} 个 Windows", article, StringComparison.Ordinal);
+        Assert.Contains($"{linuxPackageCount} 个 Linux", article, StringComparison.Ordinal);
+
+        JsonElement fieldMap = ReadJsonRoot(Path.Combine(
+            RepositoryPaths.Root,
+            "applications",
+            "TensorRtExec",
+            "tensor-rt-exec-gui-cli-field-map.json"));
+        JsonElement gapList = ReadJsonRoot(Path.Combine(
+            RepositoryPaths.Root,
+            "applications",
+            "TensorRtExec",
+            "tensor-rt-exec-release-candidate-gap-list.json"));
+        Assert.Contains($"有 {fieldMap.GetProperty("fields").GetArrayLength()} 个字段", article, StringComparison.Ordinal);
+        Assert.Contains($"有 {gapList.GetProperty("items").GetArrayLength()} 个 item", article, StringComparison.Ordinal);
+
+        JsonElement publicationMatrix = ReadJsonRoot(Path.Combine(
+            RepositoryPaths.Root,
+            "artifacts",
+            "final-release",
+            "technical-article-publication-matrix.json"));
+        JsonElement selectedRoadmap = ReadJsonRoot(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "publishing",
+            "article-roadmap-30plus.json"));
+        Assert.Contains($"有 {publicationMatrix.GetProperty("articleCount").GetInt32()} 篇文章记录", article, StringComparison.Ordinal);
+        Assert.Contains($"有 {selectedRoadmap.GetProperty("articleCount").GetInt32()} 个精选 roadmap entries", article, StringComparison.Ordinal);
+
+        JsonElement freeze = ReadJsonRoot(Path.Combine(
+            RepositoryPaths.Root,
+            "artifacts",
+            "final-release",
+            "release-candidate-final-evidence-freeze.json"));
+        Assert.Equal(5, freeze.GetProperty("blockerCount").GetInt32());
+        Assert.False(freeze.GetProperty("performsPublish").GetBoolean());
+        Assert.False(freeze.GetProperty("canPublishPublicly").GetBoolean());
+        Assert.False(freeze.GetProperty("canCloseReleaseIssue").GetBoolean());
+        foreach (JsonElement blocker in freeze.GetProperty("oneScreenReleaseHoldChecklist").EnumerateArray())
+        {
+            Assert.Contains(blocker.GetProperty("id").GetString()!, article, StringComparison.Ordinal);
+        }
+
+        foreach (string forbidden in new[]
+        {
+            "canPublishPublicly=true",
+            "performsPublish=true",
+            "canCloseReleaseIssue=true",
+            "已完成公开发布",
+            "已经发布到 NuGet",
+            "已经发布到 GitHub Release"
+        })
+        {
+            Assert.DoesNotContain(forbidden, article, StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    [Fact]
     public void OwnerReleaseExecutionPackageArticleIsLinkedAndKeepsManualPublishBoundaries()
     {
         string docsIndex = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "index.md"));

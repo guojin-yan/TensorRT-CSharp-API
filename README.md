@@ -185,6 +185,8 @@ Use these front-door documents when evaluating the project:
 - Owner proof backlog: `docs/articles/zh-cn/release-owner-proof-backlog.md`
 - Non-substitute proof list: `docs/articles/zh-cn/release-proof-non-substitutes.md`
 - Article index and publishing order: `docs/articles/zh-cn/release-article-index-and-publishing-order.md`
+- External model evidence case study: `docs/articles/zh-cn/external-model-evidence-case-study.md`
+- Project capability and release-boundary story: `docs/articles/zh-cn/project-release-story-and-boundaries.md`
 - README frontpage checklist: `docs/articles/zh-cn/release-readme-frontpage-checklist.md`
 - Owner final action sequence: `docs/articles/zh-cn/release-final-owner-action-sequence.md`
 - Release issue close record validator: `eng/Test-ReleaseIssueCloseRecord.ps1`

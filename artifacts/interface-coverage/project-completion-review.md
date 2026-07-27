@@ -3539,6 +3539,35 @@ proof 或发布授权。
   post-publish verification 或 owner authorization，因此不改变 `canPublishPublicly=false`、
   `canCloseReleaseIssue=false` 或 release blocker 状态。
 
+## 2026-07-28 External Model Evidence And Project Release Story Closure
+
+本阶段完成技术文章路线图 80/81 的长文收口，把外部模型证据回填和项目能力/发布边界从短篇提纲扩展为可独立发布、可由仓库事实重新验证的完整教程。
+
+### 实现
+
+- `external-model-evidence-case-study.md` 扩为 550 行 / 15,226 字符，覆盖 acquisition、build-only、output review、`real-model-runtime`、`package-consumer-runtime` 和 post-publish 六层证据边界。
+- 外部模型文章绑定官方 YOLOX-S 与 YOLOv10n 的来源、许可证、SHA256、TensorRtExec/YoloVision 命令、运行 closure、owner pack 和严格 validator，并明确 E 盘资产隔离与 C 盘拒绝策略。
+- `project-release-story-and-boundaries.md` 扩为 611 行 / 15,423 字符，覆盖 manifest -> C ABI -> generated interop -> wrapper -> samples/tools -> release evidence 架构、三代 TensorRT coverage、TensorRtExec、YoloVision、双 package 路线、18 条 runtime matrix、文章矩阵和五个最终 blocker。
+- 项目文章直接引用 freeze blocker ID，并保持 `performsPublish=false`、`canPublishPublicly=false`、`canCloseReleaseIssue=false`。
+- 路线图 80/81 更新为“完整教程已收口”，根 README 增加两篇前台入口。
+- `TechnicalArticleRoadmapTests` 新增两项专项门禁，从权威 JSON/Markdown 动态核对文章长度、CLI/validator 名称、模型 identity、coverage、85 个 GUI/CLI fields、20 个 gap items、60/55/5 capability、18 个 runtime keys、103/44 篇文章和五个 blocker，并拒绝过期参数或发布完成声明。
+
+### Verification
+
+- 新增专项门禁：2/2 通过。
+- `TechnicalArticleRoadmapTests` + `PublishingPublicArticleTests`：79/79 通过。
+- 完整 `TensorRtSharp.sln` Debug build：0 warning / 0 error。首次并行验证因两个残留 build 同时写 `obj` 出现一次 `CS2012`，关闭 build server 后使用 `-m:1` 串行复跑通过；不归类为源码失败。
+- stale release claims audit：1118 files scanned / 0 findings。
+- `git diff --check` 通过，仅有 README 既有行尾转换提示；两篇文章未出现过期 CLI 参数或 `canPublishPublicly=true` 等错误声明。
+
+### C 盘与发布边界
+
+- `C:\Users\guoji\Downloads` 未发现本阶段新增 `.onnx`、`.engine`、`.plan`、`.nupkg` 等重资产。
+- Temp 未发现本项目命名的残留目录；扫描到的 DLL 位于 Visual Studio Setup 随机临时目录，来源与本阶段无关，未擅自删除。
+- 仓库内一次性 TestResults/TRX 已在记录结果后删除。
+- 未执行 push、GitHub Actions、workflow dispatch、NuGet/GitHub Packages/GitHub Release 发布或 issue close。
+- 本阶段只收口文章与 source-quality 门禁，不创建新的 package-consumer、Linux runner、post-publish 或 owner authorization proof，最终发布状态保持 `blocked-real-proof-required`。
+
 ## 2026-07-26 TensorRT Execution Context NVTX Verbosity Deferred Alias Closure
 
 本阶段将 `IExecutionContext::getNvtxVerbosity` 与 `IExecutionContext::setNvtxVerbosity`
