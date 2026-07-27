@@ -6,6 +6,54 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class YoloVisionDocumentationMatrixTests
 {
     [Fact]
+    public void YoloFamilyProfileGuideIsPublishableLongFormAndBindsEachTaskToEvidence()
+    {
+        string articlePath = Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "yolo-family-profile-and-postprocess-guide.md");
+        string article = File.ReadAllText(articlePath);
+
+        Assert.True(File.Exists(articlePath));
+        foreach (string marker in new[]
+        {
+            "## 全链路",
+            "E:\\TensorRtSharpAssets\\yolo-cases",
+            "## 六任务接入矩阵",
+            "## 每个任务的命令骨架",
+            "TensorRtExec build-only",
+            "samples/YoloVision/yolovision-task-output-contract.json",
+            "samples/assets/yolovision-assets.template.json",
+            "--task cls",
+            "--task seg",
+            "--task obb",
+            "--task pose",
+            "--task sem",
+            "Test-YoloVisionOutputReport.ps1",
+            "YoloVision Passed=True",
+            "sample-run evidence",
+            "package-consumer-runtime",
+            "blocked-by-cuda-driver",
+            "## 发布前检查清单"
+        })
+        {
+            Assert.Contains(marker, article, StringComparison.OrdinalIgnoreCase);
+        }
+
+        foreach (string task in new[] { "det", "cls", "seg", "obb", "pose", "sem" })
+        {
+            Assert.Contains("`" + task + "`", article, StringComparison.OrdinalIgnoreCase);
+        }
+
+        Assert.Contains("以下材料不得替代真实模型证明", article, StringComparison.Ordinal);
+        Assert.Contains("local feed", article, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("ProjectReference", article, StringComparison.Ordinal);
+        Assert.Contains("direct `.nupkg`", article, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void YoloVisionModelMatrixDocumentsFamiliesTasksAssetsAndProofBoundary()
     {
         string articlePath = Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "yolo-vision-model-matrix.md");

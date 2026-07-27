@@ -1,5 +1,29 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-27 YOLO Family Multi-Task Tutorial Closure
+
+本阶段在 TensorRT/CUDA deferred 审计确认没有 immediate-safe 候选后，转向用户明确要求的 YOLO
+宣传与案例收口。扩展 `yolo-family-profile-and-postprocess-guide.md`，把全系列配置底座变成
+可执行、可审计的多任务接入教程，不把规划矩阵写成 runtime proof。
+
+### 实现
+
+- 新增模型来源/许可证、E 盘 case workspace、ONNX/labels/input SHA256 和 derived artifact
+  目录约定，避免教程指导用户把大资产散落到 C 盘。
+- 新增 Mermaid 全链路：来源 -> hash -> TensorRtExec build-only -> YoloVision task/profile
+  -> decode/NMS -> JSON/SVG/log -> sample-run evidence -> owner review。
+- 新增 det/cls/seg/obb/pose/sem 六任务接入矩阵、profile/output metadata 合同和每任务命令骨架。
+- 新增 binding metadata 严格验证、任务专属检查、证据归档顺序、排障表和发布前 checklist。
+- 新增 `YoloFamilyProfileGuideIsPublishableLongFormAndBindsEachTaskToEvidence` 专项测试。
+
+### Verification
+
+- `YoloVisionDocumentationMatrixTests`：4/4 通过。
+- 教程继续明确 synthetic/build-only/sidecar/local feed/ProjectReference/direct nupkg
+  不是 real-model-runtime 或 package-consumer-runtime proof。
+- 未下载模型、ONNX、engine、TensorRT、CUDA、cuDNN 或 NuGet 到 C 盘；未执行 Actions、push
+  或发布。
+
 ## 2026-07-27 Source Build/C++ Bridge Guide And Stale Claims Closure
 
 本阶段完成源码构建与 C++ bridge 公开教程的长文收尾，并清理 release-facing 文档中的 stale claim
