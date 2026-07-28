@@ -345,6 +345,10 @@ internal static class GeneratedEntryPointNames
     public const string CudaIpcOpenEventHandleOwnerSafe = "jyppx_cuda_ipc_import_event_safe";
     public const string CudaIpcOpenMemHandleDeferred = "jyppx_cuda_ipc_open_mem_handle_deferred";
     public const string CudaIpcOpenMemHandleOwnerSafe = "jyppx_cuda_ipc_import_memory_safe";
+    public const string CudaKernelLaunchDestroyIdempotentSafe = "jyppx_cuda_kernel_launch_destroy_safe";
+    public const string CudaKernelLaunchQueryCopiedSafe = "jyppx_cuda_kernel_launch_query_safe";
+    public const string CudaKernelLaunchSynchronizeOwnerSafe = "jyppx_cuda_kernel_launch_synchronize_safe";
+    public const string CudaKernelLibraryLaunchTypedOwnerSafe = "jyppx_cuda_kernel_library_launch_typed_safe";
     public const string CudaKernelSetAttributeForDeviceDeferred = "jyppx_cuda_kernel_set_attribute_for_device_deferred";
     public const string CudaKernelSetAttributeForDeviceLibraryOwnerNameSafe = "jyppx_cuda_kernel_library_set_kernel_attribute_for_device_safe";
     public const string CudaLaunchCooperativeKernel = "jyppx_cuda_launch_cooperative_kernel";

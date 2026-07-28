@@ -1,9 +1,10 @@
 # TensorRtSharp4.0 完成情况审查
 
-## 2026-07-28 CUDA RTC Compile Owner And Managed Source Module Layout
+## 2026-07-28 CUDA RTC Owner-Bound Launch/Readback And Managed Source Module Layout
 
-本阶段完成 CUDA Runtime Compilation 第一阶段 owner-safe compile API，并把三个托管接口项目根目录中堆叠的
-公开 C# 文件按职责模块化。文件整理只改变物理路径，不改变 namespace、类型名、public API、native ABI 或对象生命周期。
+本阶段完成 CUDA Runtime Compilation compile owner 与 CUDA 12.9+ runtime-library owner-bound named-kernel
+launch/readback，并把三个托管接口项目根目录中堆叠的公开 C# 文件按职责模块化。文件整理只改变物理路径，
+不改变 namespace、类型名、public API、native ABI 或对象生命周期。
 
 ### CUDA RTC 实现
 
@@ -14,7 +15,12 @@
 - managed 新增 `CudaRtcCompiler`、`CudaRtcProgram`、immutable source/options/result/artifact；public surface 不暴露
   `IntPtr`、`UIntPtr`、`SafeHandle` 或 vendor program/kernel/function handle。
 - `samples/CudaRuntimeCompilation` 覆盖成功编译、intentional failure log、virtual header、lowered name、PTX hash
-  determinism、可用的 CUBIN/LTO IR 和可选 PTX load；package manifest 保持 bridge-only 不捆 NVRTC。
+  determinism、可用的 CUBIN/LTO IR、owner-bound typed vector-add、GPU readback 和 owner 提前释放；package
+  manifest 保持 bridge-only 不捆 NVRTC。
+- 新增 `CudaKernelLibrary.Launch(...)`、`CudaDim3`、`CudaKernelLaunchConfiguration`、`CudaKernelArgument` 与
+  `CudaKernelLaunch`；public API 只接受复制型标量和 owner-bound `CudaMemory`，borrowed `cudaKernel_t` 留在 bridge 内。
+- 新增 4 个 owner-bound launch ABI；native 以 completion event 记录 stream 完成，managed launch 通过
+  `DangerousAddRef` 持有 library、stream 和所有参与的 device memory，直到 synchronize/dispose。
 
 ### 托管源码模块化
 
@@ -30,9 +36,12 @@
 ### Verification
 
 - Windows CUDA 11.8/12.1/12.9/13.2 NVRTC capability 与真实 compile smoke 均完成；11.8/12.1/12.9 PTX
-  可由当前 CUDA 12.9 runtime library owner 加载，13.2 PTX 因当前 driver/runtime 不支持其 PTX version 只记 compile proof。
-- RTC native ABI：12/12 header declarations、12/12 PE exports、0 missing；RTC 专项测试 7/7。
-- binding generator 连续两次生成 3988 API records / 199 manifests，hash 确定性和 comparison/coverage exporter 通过。
+  由当前 CUDA 12.9 runtime library owner 加载、启动并读回 257 个 float，三版 output SHA256 为
+  `65dc411b0750ae9b6543bccb381f21537d69c11802db9bb45a427c2db16aa5d1`；13.2 因当前 driver/runtime 不支持其 PTX version
+  只记 compile-only/load-rejected proof。
+- RTC compile ABI：12/12 header declarations、12/12 PE exports；owner-bound launch ABI：4/4 declarations、4/4 PE exports，均 0 missing。
+- RTC 专项测试扩展为 10/10，包含 zero dimension、null/too-many arguments、embedded NUL、disposed memory 和 scalar metadata。
+- binding generator 连续两次生成 3992 API records / 200 manifests，hash 确定性和 comparison/coverage exporter 通过。
 - 模块结构测试 3/3；完整 `TensorRtSharp.sln` Debug build 覆盖全部目标框架，0 warning / 0 error。
 - `git diff --check` 通过；仅保留 Git 对既有 CRLF/LF 工作树规范的提示。
 - build server 已关闭，仓库 `TestResults` 与相关 build/test 进程均为 0；Downloads/用户 Temp 自本批开始后
@@ -40,10 +49,12 @@
 
 ### Proof Boundary
 
-- RTC compile、artifact hash 和 PTX load 都不是 kernel launch、GPU readback 或 correctness proof；当前样例和工件保持
-  `kernelLaunch=false`、`gpuReadback=false`、`correctnessProof=false`。
-- Linux NVRTC SONAME/symbol、owner-bound named-kernel launch、typed argument packing、full-runtime `cuda-rtc` 组件、
-  clean public package consumer 和 post-publish 仍未闭合。
+- `local-smoke.json` schema 3 显式记录前三版 `kernelLaunch=true`、`gpuReadback=true`、`correctnessProof=true` 和
+  `ownersDisposedBeforeSynchronize=true`；CUDA 13.2 明确记录 `loadSucceeded=false`、三个 runtime proof 字段为 false，诊断为
+  `cudaErrorUnsupportedPtxVersion`。
+- 本批证明是 Windows 本机 CUDA 12.9 bridge + local Toolkit/GPU 的 kernel runtime/readback；不等于 CUDA 11.8/12.1
+  native runtime API、Linux NVRTC SONAME/symbol、full-runtime `cuda-rtc` 组件、clean public package consumer 或 post-publish。
+- CUDA 11.8/12.1 的 unified Driver module/function owner、Linux runner、package consumer 和 post-publish 仍未闭合。
 - TRT-off `win-x64-dev` 与 TRT10/CUDA12.9 native build 仍被既有非 RTC TensorRT 源码错误阻断，未记作 RTC 失败，
   也未宣称这些组合通过。
 - 未 push、未触发 GitHub Actions/workflow dispatch、未执行 NuGet/GitHub 发布或 issue close。

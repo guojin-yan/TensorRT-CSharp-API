@@ -15,6 +15,8 @@ public sealed class CudaKernelLibrary : IDisposable
         _handle = handle;
     }
 
+    internal SafeCudaKernelLibraryHandle Handle => _handle;
+
     /// <summary>Loads a CUDA cubin, fatbin, or null-terminated PTX file. 加载 CUDA cubin、fatbin 或以 null 结尾的 PTX 文件。</summary>
     public static CudaKernelLibrary LoadFromFile(string path)
     {
@@ -112,6 +114,26 @@ public sealed class CudaKernelLibrary : IDisposable
         NativeCudaApi.SetKernelLibraryKernelAttributeForDevice(_handle, kernelName, attribute, value, deviceOrdinal);
     }
 
+    /// <summary>
+    /// Launches a named kernel with copied scalar arguments and owner-bound device-memory arguments.
+    /// 使用复制型标量参数和 owner-bound device-memory 参数启动 named kernel。
+    /// </summary>
+    /// <remarks>
+    /// The returned owner retains this library, the stream, and every device-memory allocation until disposal.
+    /// Dispose or synchronize the launch before reading results. 返回 owner 会租用 library、stream 与全部 device-memory allocation；读取结果前必须同步或释放 launch。
+    /// </remarks>
+    public CudaKernelLaunch Launch(
+        string kernelName,
+        CudaKernelLaunchConfiguration configuration,
+        CudaStream stream,
+        params CudaKernelArgument[] arguments)
+    {
+        ValidateName(kernelName, nameof(kernelName), "CUDA kernel name must not be null or empty.");
+        if (stream == null) throw new ArgumentNullException(nameof(stream));
+        if (arguments == null) throw new ArgumentNullException(nameof(arguments));
+        return CudaKernelLaunch.Create(_handle, kernelName, configuration, stream, arguments);
+    }
+
     /// <inheritdoc />
     public void Dispose()
     {
@@ -123,6 +145,10 @@ public sealed class CudaKernelLibrary : IDisposable
         if (string.IsNullOrEmpty(name))
         {
             throw new ArgumentException(message, parameterName);
+        }
+        if (name.IndexOf('\0') >= 0)
+        {
+            throw new ArgumentException("CUDA names must not contain embedded NUL characters.", parameterName);
         }
     }
 }

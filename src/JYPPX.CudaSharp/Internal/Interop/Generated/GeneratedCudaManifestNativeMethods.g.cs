@@ -995,6 +995,18 @@ internal static partial class GeneratedCudaManifestNativeMethods
     internal static extern BridgeStatusCode jyppx_cuda_ipc_import_memory_safe(byte[] token, UIntPtr token_size, UIntPtr allocation_size, out SafeCudaMemoryHandle out_memory);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_kernel_launch_destroy_safe(IntPtr launch);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_kernel_launch_query_safe(SafeCudaKernelLaunchHandle launch, out int out_completed);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_kernel_launch_synchronize_safe(SafeCudaKernelLaunchHandle launch);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_kernel_library_launch_typed_safe(IntPtr library, IntPtr kernel_name, NativeCudaDim3 grid_dim, NativeCudaDim3 block_dim, IntPtr arguments, UIntPtr argument_count, byte[] scalar_data, UIntPtr scalar_data_size, UIntPtr dynamic_shared_memory_bytes, IntPtr stream, out SafeCudaKernelLaunchHandle out_launch);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_cuda_kernel_set_attribute_for_device_deferred();
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]

@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using JYPPX.CudaSharp.Internal.Handles;
 
 namespace JYPPX.CudaSharp.Internal.Interop;
@@ -93,5 +94,60 @@ internal static partial class NativeCudaApi
             (int)attribute,
             value,
             deviceOrdinal));
+    }
+
+    public static SafeCudaKernelLaunchHandle LaunchKernelLibrary(
+        IntPtr library,
+        string kernelName,
+        CudaKernelLaunchConfiguration configuration,
+        NativeCudaKernelArgumentDescriptor[] arguments,
+        byte[] scalarData,
+        IntPtr stream)
+    {
+        using Utf8Interop.Utf8StringScope nameUtf8 = Utf8Interop.ToNativeString(kernelName);
+        GCHandle argumentPin = default;
+        bool argumentPinAllocated = false;
+        try
+        {
+            IntPtr argumentPointer = IntPtr.Zero;
+            if (arguments.Length != 0)
+            {
+                argumentPin = GCHandle.Alloc(arguments, GCHandleType.Pinned);
+                argumentPinAllocated = true;
+                argumentPointer = argumentPin.AddrOfPinnedObject();
+            }
+
+            CudaNativeStatus.ThrowIfFailed(NativeMethodsCuda.jyppx_cuda_kernel_library_launch_typed_safe(
+                library,
+                nameUtf8.Pointer,
+                configuration.GridDimensions.ToNative(),
+                configuration.BlockDimensions.ToNative(),
+                argumentPointer,
+                new UIntPtr((uint)arguments.Length),
+                scalarData,
+                new UIntPtr((uint)scalarData.Length),
+                new UIntPtr((uint)configuration.DynamicSharedMemoryBytes),
+                stream,
+                out SafeCudaKernelLaunchHandle launch));
+            return launch;
+        }
+        finally
+        {
+            if (argumentPinAllocated)
+            {
+                argumentPin.Free();
+            }
+        }
+    }
+
+    public static bool QueryKernelLaunch(SafeCudaKernelLaunchHandle launch)
+    {
+        CudaNativeStatus.ThrowIfFailed(NativeMethodsCuda.jyppx_cuda_kernel_launch_query_safe(launch, out int completed));
+        return completed != 0;
+    }
+
+    public static void SynchronizeKernelLaunch(SafeCudaKernelLaunchHandle launch)
+    {
+        CudaNativeStatus.ThrowIfFailed(NativeMethodsCuda.jyppx_cuda_kernel_launch_synchronize_safe(launch));
     }
 }

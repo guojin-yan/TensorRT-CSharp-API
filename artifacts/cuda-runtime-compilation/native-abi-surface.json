@@ -9,7 +9,7 @@
   "missingDeclarationCount": 0,
   "missingDeclarations": [],
   "bridge": "build-out/win-x64-trt11-cuda12-release/bin/Release/jyppxtrtbridge.dll",
-  "discoveredPeExportCount": 1794,
+  "discoveredPeExportCount": 1798,
   "matchedPeExportCount": 12,
   "missingPeExportCount": 0,
   "missingPeExports": [],

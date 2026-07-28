@@ -470,6 +470,17 @@ internal struct NativeCudaDim3
 }
 
 [StructLayout(LayoutKind.Sequential)]
+internal struct NativeCudaKernelArgumentDescriptor
+{
+    public int Kind;
+    public uint Reserved;
+    public UIntPtr ScalarOffset;
+    public UIntPtr ScalarSize;
+    public IntPtr Memory;
+    public UIntPtr MemoryOffset;
+}
+
+[StructLayout(LayoutKind.Sequential)]
 internal struct NativeCudaFuncAttributes
 {
     public UIntPtr SharedSizeBytes;

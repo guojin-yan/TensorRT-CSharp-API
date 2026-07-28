@@ -362,13 +362,13 @@ Runnable deployment samples are under `samples/`. Validation-oriented smoke runn
 Recent sample maturity updates:
 
 - `MultiStream` is a real CUDA multi-stream/event ordering sample and is included in the solution.
-- `CudaRuntimeCompilation` is an owner-safe NVRTC compile sample with copied PTX/CUBIN/LTO IR, failure logs, lowered names, determinism, and an optional local PTX load check. It does not claim kernel launch/readback proof yet.
+- `CudaRuntimeCompilation` is an owner-safe NVRTC compile plus CUDA 12.9+ named typed-kernel launch/readback sample covering copied PTX/CUBIN/LTO IR, failure logs, lowered names, determinism, early owner disposal, and per-value GPU correctness. CUDA 13.2 PTX load rejection, Linux, package-consumer, and post-publish evidence remain separate.
 - `DynamicShape` is a real TensorRT dynamic-shape/profile/binding sample and is included in the solution.
 - `InferenceBindings` is a real TensorRT inference-binding sample and is included in the solution.
 - `OnnxToEngine` is now a runnable common ONNX-to-engine example and is included in the solution.
 - `Classification` and `YoloVision` are runnable asset-dependent ONNX examples; users provide their own model, labels, and input-shape metadata.
 - `applications/TensorRtExec` is the user-facing ONNX-to-engine CLI/WinForms tool. It can create build/precheck reports for external ONNX assets, but real-model runtime proof still belongs to the relevant sample runner and package-consumer-runtime proof belongs to release proof records.
-- CUDA custom-kernel launch remains a roadmap item until safe public named-kernel launch and typed argument packing land; runtime compilation itself is available through `CudaRtcCompiler` and `CudaRtcProgram`.
+- CUDA 12.9+ custom-kernel launch is now available through owner-safe named-kernel and typed-argument `CudaKernelLibrary.Launch(...)`; CUDA 11.8/12.1 Driver ownership, Linux runtime, package-consumer, and post-publish proof remain roadmap items. Runtime compilation is available through `CudaRtcCompiler` and `CudaRtcProgram`.
 
 ## Runtime Packages
 

@@ -2606,6 +2606,7 @@ JYPPX_StatusCode jyppx_cuda_memory_free(JYPPX_CudaMemory* memory)
 #include "modules/memory/managed_memory_batch.inc"
 #include "modules/memory/managed_memory_location_v2.inc"
 #include "modules/deployment/kernel_library_metadata.inc"
+#include "modules/deployment/kernel_library_launch.inc"
 #include "modules/deployment/primary_execution_context.inc"
 #include "modules/deployment/ipc_export_tokens.inc"
 #include "modules/deployment/ipc_import_owner.inc"

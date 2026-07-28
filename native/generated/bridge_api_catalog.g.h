@@ -340,6 +340,10 @@
 #define JYPPX_API_CUDA_IPC_OPEN_EVENT_HANDLE_OWNER_SAFE "jyppx_cuda_ipc_import_event_safe" // module=cuda; line=common; ownership=caller-destroys; manualOverride=false
 #define JYPPX_API_CUDA_IPC_OPEN_MEM_HANDLE_DEFERRED "jyppx_cuda_ipc_open_mem_handle_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_IPC_OPEN_MEM_HANDLE_OWNER_SAFE "jyppx_cuda_ipc_import_memory_safe" // module=cuda; line=common; ownership=caller-destroys; manualOverride=false
+#define JYPPX_API_CUDA_KERNEL_LAUNCH_DESTROY_IDEMPOTENT_SAFE "jyppx_cuda_kernel_launch_destroy_safe" // module=cuda; line=common; ownership=callee-destroys; manualOverride=false
+#define JYPPX_API_CUDA_KERNEL_LAUNCH_QUERY_COPIED_SAFE "jyppx_cuda_kernel_launch_query_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_KERNEL_LAUNCH_SYNCHRONIZE_OWNER_SAFE "jyppx_cuda_kernel_launch_synchronize_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_KERNEL_LIBRARY_LAUNCH_TYPED_OWNER_SAFE "jyppx_cuda_kernel_library_launch_typed_safe" // module=cuda; line=common; ownership=caller-destroys; manualOverride=false
 #define JYPPX_API_CUDA_KERNEL_SET_ATTRIBUTE_FOR_DEVICE_DEFERRED "jyppx_cuda_kernel_set_attribute_for_device_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_KERNEL_SET_ATTRIBUTE_FOR_DEVICE_LIBRARY_OWNER_NAME_SAFE "jyppx_cuda_kernel_library_set_kernel_attribute_for_device_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_LAUNCH_COOPERATIVE_KERNEL "jyppx_cuda_launch_cooperative_kernel" // module=cuda; line=common; ownership=caller-owned; manualOverride=false

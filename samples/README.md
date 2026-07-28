@@ -16,7 +16,7 @@ That split keeps:
 | Directory | Purpose | Status |
 | --- | --- | --- |
 | `MultiStream` | CUDA multi-stream and cross-stream wait example | runnable |
-| `CudaRuntimeCompilation` | owner-safe NVRTC source/header/options/name-expression compile, copied PTX/CUBIN/LTO IR, failure log, determinism, and optional PTX load | runnable with a local CUDA Toolkit; launch/readback pending |
+| `CudaRuntimeCompilation` | owner-safe NVRTC compile, copied PTX/CUBIN/LTO IR, failure log, determinism, named typed-kernel launch, owner retention, and GPU readback | runnable with CUDA 12.9+ runtime bridge; CUDA 13.2 compile-only/load-rejected boundary is recorded |
 | `DynamicShape` | TensorRT dynamic-shape/profile/binding example | runnable |
 | `InferenceBindings` | TensorRtInferenceBindings host/device workflow example | runnable |
 | `OnnxToEngine` | user-facing ONNX to engine walkthrough with trtexec-like option parsing | runnable |
@@ -38,7 +38,7 @@ Recommended YoloVision documentation starts at `docs/articles/zh-cn/yolovision-s
 
 For the broader publishable article route, use `docs/articles/zh-cn/yolovision-series-roadmap.md`. That roadmap is the owner-facing checklist for YOLOv5/v6/v7/v8/v9/v10/v11/v26/custom and `det`/`cls`/`seg`/`obb`/`pose`/`sem`. It intentionally keeps TensorRtExec build reports, screenshots, templates, sidecars, local package-feed results, project-reference runs, and direct `.nupkg` runs out of runtime evidence promotion.
 
-CUDA runtime compilation is now executable through `CudaRuntimeCompilation`. Custom-kernel launch remains tracked in documentation until owner-bound named-kernel launch and typed argument packing exist. See [CUDA Kernel Wrapper Roadmap](../docs/articles/en/cuda-kernel-roadmap.md) and [CUDA Runtime Compilation Roadmap](../docs/articles/en/cuda-runtime-compilation-roadmap.md).
+CUDA runtime compilation and the CUDA 12.9+ owner-bound named-kernel launch/readback path are executable through `CudaRuntimeCompilation`. CUDA 11.8/12.1 Driver ownership, Linux runtime proof, package-consumer proof, and post-publish verification remain tracked separately. See [CUDA Kernel Wrapper Roadmap](../docs/articles/en/cuda-kernel-roadmap.md) and [CUDA Runtime Compilation Roadmap](../docs/articles/en/cuda-runtime-compilation-roadmap.md).
 
 ## Evidence Ladder For Asset-Dependent Samples
 

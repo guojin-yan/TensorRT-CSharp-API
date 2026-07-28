@@ -1,4 +1,5 @@
 using JYPPX.CudaSharp;
+using System.Security.Cryptography;
 
 const string sourceText = """
 #include "scale.cuh"
@@ -98,6 +99,15 @@ foreach (CudaRtcArtifact artifact in success.Artifacts)
 
 bool loadSucceeded = false;
 string loadDiagnostic = string.Empty;
+bool launchAttempted = false;
+bool launchSucceeded = false;
+bool gpuReadback = false;
+bool correctnessProof = false;
+bool completedBeforeSynchronize = false;
+bool ownersDisposedBeforeSynchronize = false;
+float maxAbsoluteError = 0;
+string outputSha256 = string.Empty;
+string launchDiagnostic = string.Empty;
 try
 {
     using CudaKernelLibrary library = CudaKernelLibrary.Load(ptx.ToArray());
@@ -106,15 +116,79 @@ try
     {
         loadDiagnostic = "PTX loaded, but vector_add was not found in the copied library inventory query.";
     }
+    else
+    {
+        const int elementCount = 257;
+        const int threadsPerBlock = 128;
+        float[] leftValues = Enumerable.Range(0, elementCount).Select(index => index * 0.25f).ToArray();
+        float[] rightValues = Enumerable.Range(0, elementCount).Select(index => 100.0f - index * 0.125f).ToArray();
+        using var left = new CudaMemory(elementCount * sizeof(float));
+        using var right = new CudaMemory(elementCount * sizeof(float));
+        using var output = new CudaMemory(elementCount * sizeof(float));
+        using var stream = new CudaStream();
+        left.CopyFrom(leftValues);
+        right.CopyFrom(rightValues);
+        output.Fill(0);
+
+        launchAttempted = true;
+        var launchConfiguration = new CudaKernelLaunchConfiguration(
+            new CudaDim3((uint)((elementCount + threadsPerBlock - 1) / threadsPerBlock)),
+            new CudaDim3(threadsPerBlock));
+        using CudaKernelLaunch launch = library.Launch(
+            "vector_add",
+            launchConfiguration,
+            stream,
+            CudaKernelArgument.FromDeviceMemory(left),
+            CudaKernelArgument.FromDeviceMemory(right),
+            CudaKernelArgument.FromDeviceMemory(output),
+            CudaKernelArgument.FromInt32(elementCount));
+        completedBeforeSynchronize = launch.IsCompleted;
+        library.Dispose();
+        stream.Dispose();
+        left.Dispose();
+        right.Dispose();
+        ownersDisposedBeforeSynchronize = true;
+        launch.Synchronize();
+        launchSucceeded = launch.IsCompleted;
+
+        float[] actual = output.ToSingleArray(elementCount);
+        gpuReadback = actual.Length == elementCount;
+        for (int index = 0; index < actual.Length; ++index)
+        {
+            float expected = (leftValues[index] + rightValues[index]) * 2.0f;
+            maxAbsoluteError = Math.Max(maxAbsoluteError, Math.Abs(actual[index] - expected));
+        }
+        correctnessProof = gpuReadback && maxAbsoluteError <= 1e-6f;
+        byte[] outputBytes = new byte[actual.Length * sizeof(float)];
+        Buffer.BlockCopy(actual, 0, outputBytes, 0, outputBytes.Length);
+        outputSha256 = Convert.ToHexString(SHA256.HashData(outputBytes)).ToLowerInvariant();
+    }
 }
 catch (CudaException exception)
 {
-    loadDiagnostic = exception.Message;
+    if (loadSucceeded)
+    {
+        launchDiagnostic = exception.Message;
+    }
+    else
+    {
+        loadDiagnostic = exception.Message;
+    }
 }
 Console.WriteLine($"load.attempted=True load.succeeded={loadSucceeded} classification=local-toolkit-compile-to-load");
 if (loadDiagnostic.Length != 0)
 {
     Console.WriteLine("load.diagnostic=" + loadDiagnostic.Replace(Environment.NewLine, " | "));
+}
+Console.WriteLine($"launch.attempted={launchAttempted} launch.succeeded={launchSucceeded} completedBeforeSynchronize={completedBeforeSynchronize} ownersDisposedBeforeSynchronize={ownersDisposedBeforeSynchronize} gpuReadback={gpuReadback} correctness={correctnessProof} maxAbsoluteError={maxAbsoluteError:G9} outputSha256={outputSha256}");
+if (launchDiagnostic.Length != 0)
+{
+    Console.WriteLine("launch.diagnostic=" + launchDiagnostic.Replace(Environment.NewLine, " | "));
+}
+if (loadSucceeded && (!launchSucceeded || !gpuReadback || !correctnessProof))
+{
+    Console.Error.WriteLine("A loadable RTC artifact did not complete owner-bound launch/readback correctness validation.");
+    return 9;
 }
 
 var brokenSource = new CudaRtcProgramSource(
@@ -127,5 +201,8 @@ if (failure.Success || failure.ResultCode != CudaRtcResultCode.Compilation || st
     return 5;
 }
 Console.WriteLine($"failure.success=False result={failure.ResultCode} logLength={failure.Log.Length}");
-Console.WriteLine("evidence.classification=local-toolkit-compile-to-load; kernel-launch=False; gpu-readback=False; correctness-proof=False");
+string evidenceClassification = correctnessProof
+    ? "local-toolkit-kernel-runtime-readback"
+    : loadSucceeded ? "local-toolkit-compile-to-load" : "local-toolkit-compile-only-load-rejected";
+Console.WriteLine($"evidence.classification={evidenceClassification}; kernel-launch={launchSucceeded}; gpu-readback={gpuReadback}; correctness-proof={correctnessProof}");
 return 0;

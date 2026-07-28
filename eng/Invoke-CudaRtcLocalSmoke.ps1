@@ -83,10 +83,27 @@ foreach ($toolkit in $toolkits) {
   $cubinLine = $lines | Where-Object { $_ -match '^artifact\.kind=Cubin ' } | Select-Object -First 1
   $ltoLine = $lines | Where-Object { $_ -match '^artifact\.kind=LtoIr ' } | Select-Object -First 1
   $loadLine = $lines | Where-Object { $_ -match '^load\.attempted=True ' } | Select-Object -First 1
+  $launchLine = $lines | Where-Object { $_ -match '^launch\.attempted=' } | Select-Object -First 1
   $failureLine = $lines | Where-Object { $_ -match '^failure\.success=False ' } | Select-Object -First 1
-  if ($capabilityVersion -ne $toolkit.version -or $null -eq $ptxHash -or $null -eq $cubinLine -or $null -eq $loadLine -or $null -eq $failureLine) {
+  if ($capabilityVersion -ne $toolkit.version -or $null -eq $ptxHash -or $null -eq $cubinLine -or $null -eq $loadLine -or $null -eq $launchLine -or $null -eq $failureLine) {
     throw "CUDA RTC sample output contract was incomplete for Toolkit $($toolkit.version)."
   }
+
+  $loadSucceeded = $loadLine -match 'load\.succeeded=True'
+  $launchSucceeded = $launchLine -match 'launch\.succeeded=True'
+  $gpuReadback = $launchLine -match 'gpuReadback=True'
+  $correctnessProof = $launchLine -match 'correctness=True'
+  $ownersDisposedBeforeSynchronize = $launchLine -match 'ownersDisposedBeforeSynchronize=True'
+  if ($loadSucceeded -and (-not $launchSucceeded -or -not $gpuReadback -or -not $correctnessProof)) {
+    throw "A loadable RTC artifact did not produce launch/readback correctness proof for Toolkit $($toolkit.version)."
+  }
+  if ($loadSucceeded -and -not $ownersDisposedBeforeSynchronize) {
+    throw "A loadable RTC artifact did not prove owner retention before synchronization for Toolkit $($toolkit.version)."
+  }
+  if (-not $loadSucceeded -and $launchLine -match 'launch\.attempted=True') {
+    throw "RTC launch was attempted without a loadable artifact for Toolkit $($toolkit.version)."
+  }
+  $outputSha256 = if ($launchLine -match 'outputSha256=([0-9a-f]{64})') { $Matches[1] } else { $null }
 
   $records.Add([ordered]@{
       toolkitVersion = $toolkit.version
@@ -99,25 +116,28 @@ foreach ($toolkit in $toolkits) {
       cubinCapturedForSm75 = $true
       ltoIrCaptured = $null -ne $ltoLine
       loadAttempted = $true
-      loadSucceeded = $loadLine -match 'load\.succeeded=True'
+      loadSucceeded = $loadSucceeded
       loadDiagnostic = Get-PrefixedValue -Lines $lines -Prefix 'load.diagnostic='
-      kernelLaunch = $false
-      gpuReadback = $false
-      correctnessProof = $false
-      evidenceClassification = if ($loadLine -match 'load\.succeeded=True') { 'local-toolkit-compile-to-load' } else { 'local-toolkit-compile-only-load-rejected' }
+      kernelLaunch = $launchSucceeded
+      gpuReadback = $gpuReadback
+      correctnessProof = $correctnessProof
+      ownersDisposedBeforeSynchronize = $ownersDisposedBeforeSynchronize
+      outputSha256 = $outputSha256
+      launchDiagnostic = Get-PrefixedValue -Lines $lines -Prefix 'launch.diagnostic='
+      evidenceClassification = if ($correctnessProof) { 'local-toolkit-kernel-runtime-readback' } elseif ($loadSucceeded) { 'local-toolkit-compile-to-load' } else { 'local-toolkit-compile-only-load-rejected' }
       transcriptSha256 = Get-TranscriptSha256 -Lines $lines
     })
 }
 
 $document = [ordered]@{
-  schemaVersion = 1
+  schemaVersion = 3
   recordKind = 'cuda-rtc-local-smoke'
   generatedLocalDate = '2026-07-28'
   bridgePath = $BridgePath.Substring($RepositoryRoot.TrimEnd('\').Length).TrimStart('\').Replace('\', '/')
   bridgeSha256 = (Get-FileHash -LiteralPath $BridgePath -Algorithm SHA256).Hash.ToLowerInvariant()
   records = @($records)
   performsPublish = $false
-  proofBoundary = 'Compile, copied artifacts, lowered names, failure logs, determinism, and optional local load are captured separately from launch/readback/correctness/package/public/post-publish proof.'
+  proofBoundary = 'Local Toolkit launch/readback correctness is recorded only when every output value is validated. It is separate from package consumer, public package, Linux, and post-publish proof.'
 }
 
 $directory = Split-Path -Parent $OutputPath

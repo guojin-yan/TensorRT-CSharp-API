@@ -41,7 +41,7 @@ JYPPX_StatusCode run_kernel_library_noexcept(const char* operation, TCallable&& 
     }
     catch (const std::bad_alloc&)
     {
-        return report_kernel_library_exception(operation, "native-allocation-failed", "The CUDA kernel library bridge could not allocate retained code or inventory storage.");
+        return report_kernel_library_exception(operation, "native-allocation-failed", "The CUDA kernel library bridge could not allocate retained code, inventory, or launch argument storage.");
     }
     catch (...)
     {

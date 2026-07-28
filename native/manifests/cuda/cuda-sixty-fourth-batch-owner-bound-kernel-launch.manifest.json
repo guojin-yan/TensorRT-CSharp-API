@@ -1,0 +1,62 @@
+{
+  "$schema": "../bridge-api.schema.json",
+  "module": "cuda",
+  "versionLine": "common",
+  "apis": [
+    {
+      "id": "cuda-kernel-library-launch-typed-owner-safe",
+      "entryPoint": "jyppx_cuda_kernel_library_launch_typed_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT && CUDART_VERSION >= 12090",
+      "parameters": [
+        { "name": "library", "type": "JYPPX_CudaKernelLibrary*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr", "ownership": "borrowed-call-only" },
+        { "name": "kernel_name", "type": "const char*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "grid_dim", "type": "JYPPX_CudaDim3", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "NativeCudaDim3" },
+        { "name": "block_dim", "type": "JYPPX_CudaDim3", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "NativeCudaDim3" },
+        { "name": "arguments", "type": "const JYPPX_CudaKernelArgumentDescriptor*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "argument_count", "type": "size_t", "direction": "in" },
+        { "name": "scalar_data", "type": "const uint8_t*", "direction": "in", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "scalar_data_size", "type": "size_t", "direction": "in" },
+        { "name": "dynamic_shared_memory_bytes", "type": "size_t", "direction": "in" },
+        { "name": "stream", "type": "JYPPX_CudaStream*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr", "ownership": "borrowed-call-only" },
+        { "name": "out_launch", "type": "JYPPX_CudaKernelLaunch**", "direction": "out", "ownership": "caller-destroys" }
+      ]
+    },
+    {
+      "id": "cuda-kernel-launch-query-copied-safe",
+      "entryPoint": "jyppx_cuda_kernel_launch_query_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT && CUDART_VERSION >= 12090",
+      "parameters": [
+        { "name": "launch", "type": "JYPPX_CudaKernelLaunch*", "direction": "in" },
+        { "name": "out_completed", "type": "JYPPX_Boolean*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "cuda-kernel-launch-synchronize-owner-safe",
+      "entryPoint": "jyppx_cuda_kernel_launch_synchronize_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT && CUDART_VERSION >= 12090",
+      "parameters": [
+        { "name": "launch", "type": "JYPPX_CudaKernelLaunch*", "direction": "in" }
+      ]
+    },
+    {
+      "id": "cuda-kernel-launch-destroy-idempotent-safe",
+      "entryPoint": "jyppx_cuda_kernel_launch_destroy_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "callee-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT && CUDART_VERSION >= 12090",
+      "parameters": [
+        { "name": "launch", "type": "JYPPX_CudaKernelLaunch*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr", "ownership": "callee-destroys" }
+      ]
+    }
+  ]
+}

@@ -1021,6 +1021,18 @@ JYPPX_C_API(BridgeStatusCode) jyppx_cuda_ipc_open_mem_handle_deferred(void);
 // generated from manifest id=cuda-ipc-open-mem-handle-owner-safe
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_ipc_import_memory_safe(const uint8_t* token, size_t token_size, size_t allocation_size, JYPPX_CudaMemory** out_memory);
 
+// generated from manifest id=cuda-kernel-launch-destroy-idempotent-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_kernel_launch_destroy_safe(JYPPX_CudaKernelLaunch* launch);
+
+// generated from manifest id=cuda-kernel-launch-query-copied-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_kernel_launch_query_safe(JYPPX_CudaKernelLaunch* launch, JYPPX_Boolean* out_completed);
+
+// generated from manifest id=cuda-kernel-launch-synchronize-owner-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_kernel_launch_synchronize_safe(JYPPX_CudaKernelLaunch* launch);
+
+// generated from manifest id=cuda-kernel-library-launch-typed-owner-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_kernel_library_launch_typed_safe(JYPPX_CudaKernelLibrary* library, const char* kernel_name, JYPPX_CudaDim3 grid_dim, JYPPX_CudaDim3 block_dim, const JYPPX_CudaKernelArgumentDescriptor* arguments, size_t argument_count, const uint8_t* scalar_data, size_t scalar_data_size, size_t dynamic_shared_memory_bytes, JYPPX_CudaStream* stream, JYPPX_CudaKernelLaunch** out_launch);
+
 // generated from manifest id=cuda-kernel-set-attribute-for-device-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_kernel_set_attribute_for_device_deferred(void);
 

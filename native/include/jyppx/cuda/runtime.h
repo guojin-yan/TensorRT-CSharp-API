@@ -552,6 +552,13 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_rtc_program_get_lowered_name_safe(JYPPX
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_rtc_program_destroy_safe(JYPPX_CudaRtcProgram* program);
 /* END CUDA SIXTY-THIRD BATCH RUNTIME COMPILATION OWNER */
 
+/* BEGIN CUDA SIXTY-FOURTH BATCH OWNER-BOUND TYPED KERNEL LAUNCH */
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_kernel_library_launch_typed_safe(JYPPX_CudaKernelLibrary* library, const char* kernel_name, JYPPX_CudaDim3 grid_dim, JYPPX_CudaDim3 block_dim, const JYPPX_CudaKernelArgumentDescriptor* arguments, size_t argument_count, const uint8_t* scalar_data, size_t scalar_data_size, size_t dynamic_shared_memory_bytes, JYPPX_CudaStream* stream, JYPPX_CudaKernelLaunch** out_launch);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_kernel_launch_query_safe(JYPPX_CudaKernelLaunch* launch, JYPPX_Boolean* out_completed);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_kernel_launch_synchronize_safe(JYPPX_CudaKernelLaunch* launch);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_kernel_launch_destroy_safe(JYPPX_CudaKernelLaunch* launch);
+/* END CUDA SIXTY-FOURTH BATCH OWNER-BOUND TYPED KERNEL LAUNCH */
+
 /* BEGIN CUDA FIFTY-SECOND BATCH PRIMARY EXECUTION CONTEXT */
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_primary_execution_context_get_safe(int32_t device, JYPPX_CudaExecutionContext** out_context);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_primary_execution_context_release_wrapper_safe(JYPPX_CudaExecutionContext* context);

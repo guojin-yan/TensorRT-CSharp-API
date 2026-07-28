@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "cuda-owner-bound-kernel-launch-native-abi-surface",
+  "generatedLocalDate": "2026-07-28",
+  "manifest": "native/manifests/cuda/cuda-sixty-fourth-batch-owner-bound-kernel-launch.manifest.json",
+  "header": "native/include/jyppx/cuda/runtime.h",
+  "manifestEntryPointCount": 4,
+  "declaredEntryPointCount": 4,
+  "missingDeclarationCount": 0,
+  "missingDeclarations": [],
+  "bridge": "build-out/win-x64-trt11-cuda12-release/bin/Release/jyppxtrtbridge.dll",
+  "discoveredPeExportCount": 1798,
+  "matchedPeExportCount": 4,
+  "missingPeExportCount": 0,
+  "missingPeExports": [],
+  "passed": true,
+  "performsPublish": false,
+  "proofBoundary": "This checks typed launch manifest/header/PE export parity only. Runtime correctness is recorded by the separate local smoke artifact."
+}

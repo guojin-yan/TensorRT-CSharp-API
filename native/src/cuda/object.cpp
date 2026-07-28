@@ -127,6 +127,11 @@ JYPPX_StatusCode validate_kernel_library(const JYPPX_CudaKernelLibrary* library,
     return validate_handle(reinterpret_cast<const KernelLibraryObject*>(library), ObjectKind::KernelLibrary, name);
 }
 
+JYPPX_StatusCode validate_kernel_launch(const JYPPX_CudaKernelLaunch* launch, const char* name)
+{
+    return validate_handle(reinterpret_cast<const KernelLaunchObject*>(launch), ObjectKind::KernelLaunch, name);
+}
+
 JYPPX_StatusCode validate_execution_context(const JYPPX_CudaExecutionContext* context, const char* name)
 {
     return validate_handle(reinterpret_cast<const ExecutionContextObject*>(context), ObjectKind::ExecutionContext, name);

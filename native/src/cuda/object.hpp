@@ -30,7 +30,8 @@ enum class ObjectKind : uint32_t
     ExecutionContext = 13,
     GraphConditionalHandle = 14,
     GraphConditionalNode = 15,
-    GraphMemoryAllocation = 16
+    GraphMemoryAllocation = 16,
+    KernelLaunch = 17
 };
 
 struct ObjectBase
@@ -213,6 +214,17 @@ struct KernelLibraryObject
     std::vector<uint8_t> retained_code;
 };
 
+struct KernelLaunchObject
+{
+    ObjectBase base;
+    bool completed;
+#if JYPPX_HAS_CUDA_TOOLKIT
+    cudaEvent_t completion_event;
+#else
+    void* completion_event;
+#endif
+};
+
 struct ExecutionContextObject
 {
     ObjectBase base;
@@ -243,6 +255,7 @@ JYPPX_StatusCode validate_mipmapped_array(const JYPPX_CudaMipmappedArray* array,
 JYPPX_StatusCode validate_texture_object(const JYPPX_CudaTextureObject* texture, const char* name);
 JYPPX_StatusCode validate_surface_object(const JYPPX_CudaSurfaceObject* surface, const char* name);
 JYPPX_StatusCode validate_kernel_library(const JYPPX_CudaKernelLibrary* library, const char* name);
+JYPPX_StatusCode validate_kernel_launch(const JYPPX_CudaKernelLaunch* launch, const char* name);
 JYPPX_StatusCode validate_execution_context(const JYPPX_CudaExecutionContext* context, const char* name);
 
 void set_cuda_error(const char* operation, int32_t error_code, const char* error_name, const char* error_message);

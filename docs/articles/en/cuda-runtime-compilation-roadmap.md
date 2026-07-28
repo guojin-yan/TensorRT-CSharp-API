@@ -2,9 +2,9 @@
 
 ## Goal and Current Boundary
 
-The project now ships the first owner-safe NVRTC compile stage so .NET callers can submit CUDA C++ source, headers, compile options, and name expressions and receive copied PTX, CUBIN, or LTO IR artifacts. Owner-safe kernel launch and readback remain the next stage.
+The project now ships an owner-safe NVRTC compile API and a CUDA 12.9+ runtime-library owner-bound launch/readback path. .NET callers can submit CUDA C++ source, headers, compile options, and name expressions, receive copied PTX, CUBIN, or LTO IR artifacts, and launch named kernels with typed arguments. A unified Driver module owner for CUDA 11.8/12.1, Linux runtime proof, and package-consumer proof remain future work.
 
-The repository already provides `CudaKernelLibrary.Load(byte[])`, copied library inventory, name-based queries, and kernel attribute updates. Its native owner retains a copy of input code and never exposes borrowed `cudaKernel_t` values through the public C# API. This CUDA Runtime library path requires CUDA Toolkit 12.9 or later. The existing raw `cudaLaunchKernel` entry point remains an internal/generated boundary and is not an acceptable public RTC launch API.
+The repository already provides `CudaKernelLibrary.Load(byte[])`, copied library inventory, name-based queries, kernel attribute updates, and an owner-safe `CudaKernelLibrary.Launch(...)` path. Its native owner retains a copy of input code and never exposes borrowed `cudaKernel_t` values through the public C# API. This runtime-library launch path requires CUDA Toolkit 12.9 or later. The existing raw `cudaLaunchKernel` entry point remains an internal/generated boundary and is not an acceptable public RTC launch API.
 
 NVRTC integration is larger than one P/Invoke. It covers compiler-program lifetime, variable-length log and artifact copying, reproducible source/options metadata, compiled-code module ownership, typed kernel arguments, optional dynamic dependencies, and runtime packaging.
 
@@ -19,7 +19,7 @@ The following installed toolkits were audited on 2026-07-28 without downloading 
 
 Both headers expose version/error APIs, program create/destroy, compile, program logs, PTX, CUBIN, LTO IR, name expressions, and lowered names. The CUDA 12.9 header still declares deprecated NVVM output; that output will not be the primary path of the new public API.
 
-Windows headers, import libraries, DLLs, builtins, and exports for CUDA 11.8, 12.1, 12.9, and 13.2 are now audited by `eng/Export-CudaRtcCapabilityMatrix.ps1`. No Linux `.so` asset was found on the audited E drive or under the Windows Toolkit roots, so Linux SONAME and symbol support remain explicitly unverified and are not inferred from Windows.
+Windows headers, import libraries, DLLs, builtins, and exports for CUDA 11.8, CUDA 12.1, CUDA 12.9, and CUDA 13.2 are now audited by `eng/Export-CudaRtcCapabilityMatrix.ps1`. No Linux `.so` asset was found on the audited E drive or under the Windows Toolkit roots, so Linux SONAME and symbol support remain explicitly unverified and are not inferred from Windows.
 
 ## Implemented Baseline (2026-07-28)
 
@@ -27,10 +27,10 @@ Windows headers, import libraries, DLLs, builtins, and exports for CUDA 11.8, 12
 - The ABI covers capability and dependency diagnostics, retained source/program names, virtual headers, name expressions, compile, logs, copied PTX/CUBIN/LTO IR, and copied lowered names. UTF-8, embedded NUL, duplicate, count, and byte limits are enforced, and C++ exceptions plus Windows SEH stay inside the bridge.
 - Managed code now exposes `CudaRtcCompiler`, `CudaRtcProgram`, `CudaRtcProgramSource`, `CudaRtcCompileOptions`, `CudaRtcCompilationResult`, and `CudaRtcArtifact` without public `IntPtr`, `SafeHandle`, or vendor program/kernel handles.
 - `samples/CudaRuntimeCompilation` exercises virtual headers, a template lowered name, PTX, `sm_75` CUBIN, LTO IR where supported, repeated PTX SHA256 determinism, and an intentional compiler-failure log.
-- All four local compilers complete the compile smoke. PTX from 11.8, 12.1, and 12.9 loads through the current CUDA 12.9 `CudaKernelLibrary`; 13.2 PTX is rejected by the current runtime/driver with `cudaErrorUnsupportedPtxVersion`, so 13.2 remains compile proof only.
-- Evidence is stored in `artifacts/cuda-runtime-compilation/capability-matrix.json` and `local-smoke.json`, with `kernelLaunch=false`, `gpuReadback=false`, and `correctnessProof=false` retained explicitly.
+- All four local compilers complete the compile smoke. PTX from 11.8, 12.1, and 12.9 loads through the current CUDA 12.9 `CudaKernelLibrary`, launches by name, and reads back 257 validated floats with the same output SHA256; 13.2 PTX is rejected by the current runtime/driver with `cudaErrorUnsupportedPtxVersion`, so 13.2 remains compile-only/load-rejected proof.
+- Evidence is stored in `artifacts/cuda-runtime-compilation/capability-matrix.json`, `local-smoke.json`, and `kernel-launch-native-abi-surface.json`. The first three records have `kernelLaunch=true`, `gpuReadback=true`, and `correctnessProof=true`; 13.2 explicitly retains all three as `false`. The sample also proves that disposing the library, stream, and input memory immediately after launch does not invalidate the completion owner.
 
-The remaining RTC work is owner-bound named-kernel launch, typed argument packing, GPU readback, Linux runtime proof, materialized full-runtime `cuda-rtc` components, clean package consumers, and post-publish verification. Compile/load success does not promote any of those lanes.
+The remaining RTC work is a unified Driver module/function owner for CUDA 11.8/12.1, Linux runtime proof, materialized full-runtime `cuda-rtc` components, clean package consumers, and post-publish verification. Local Windows 12.9 bridge launch/readback success does not promote those lanes.
 
 ## Design Invariants
 
@@ -42,9 +42,9 @@ The remaining RTC work is owner-bound named-kernel launch, typed argument packin
 6. NVRTC is an optional, diagnosable capability. A consumer that does not use RTC must not fail to load the core bridge solely because NVRTC is absent.
 7. Every artifact contains immutable copied bytes and source/options/header/compiler/target/output hashes. Artifacts remain valid after the native program owner is disposed.
 
-## Planned Managed Surface
+## Implemented Managed Surface
 
-The target surface is subject to public API review:
+The following high-level surface is implemented and covered by the public API gate:
 
 - `CudaRtcCompiler` for capability/version queries and one-shot compilation.
 - `CudaRtcProgram` for an explicit reusable `IDisposable` native owner.
@@ -52,6 +52,10 @@ The target surface is subject to public API review:
 - `CudaRtcCompileOptions` for immutable target and compiler options.
 - `CudaRtcCompilationResult` for status, full log, lowered names, versions, and artifacts.
 - `CudaRtcArtifact` and `CudaRtcArtifactKind` for copied PTX, CUBIN, and LTO IR payloads with lengths and SHA256 values.
+- `CudaKernelLibrary` for named owner-bound `Launch(...)`.
+- `CudaKernelLaunchConfiguration` and `CudaDim3` for non-zero grid/block and dynamic shared-memory configuration.
+- `CudaKernelArgument` for copied scalars or owner-bound `CudaMemory` plus a byte offset.
+- `CudaKernelLaunch` for completion ownership and leases over library, stream, and device memory.
 
 PTX, CUBIN, and LTO IR are option- and target-dependent. The API must represent an unavailable artifact explicitly. A PTX hash proves artifact identity, not kernel-output correctness.
 
@@ -75,16 +79,18 @@ PTX, CUBIN, and LTO IR are option- and target-dependent. The API must represent 
 - Copy logs, lowered names, and artifact bytes; validate UTF-8, embedded NULs, duplicate inputs, disposed owners, and bounded sizes.
 - Add bilingual XML documentation, API snapshots, dependency diagnostics, and deterministic artifact contracts.
 
-### D. Compile to Load to Launch
+### D. Compile to Load to Launch (Windows CUDA 12.9+ complete)
 
 - On CUDA 12.9/13.2, first verify that NVRTC PTX/CUBIN artifacts load through `CudaKernelLibrary.Load(byte[])`.
-- Add an owner-bound launch-by-name surface to `CudaKernelLibrary`; borrowed `cudaKernel_t` values must stay inside the bridge.
+- `CudaKernelLibrary.Launch(...)` now provides owner-bound launch by name; borrowed `cudaKernel_t` values stay inside the bridge, while typed scalar/device-memory arguments and completion events remain owner-bound.
 - CUDA 11.8/12.1 lack the current Runtime library API. Provide a unified CUDA Driver module/function owner or document a deliberate support limit; never fill the gap with raw function pointers.
 - Use typed argument packing and bridge-owned launch storage with explicit buffer, scalar, stream, and module lifetimes.
 
-### E. Samples and Runtime Proof
+### E. Samples and Runtime Proof (local Windows complete)
 
 Add `samples/CudaRuntimeCompilation` with a vector-add/elementwise compile-load-launch-readback check, an intentional compiler-error log check, a C++ name-expression/lowered-name check, and artifact metadata/hash export.
+
+The sample also releases the participating owners before synchronization and validates every readback value. Its classification remains local Toolkit runtime proof.
 
 Compile-only output, artifact hashes, synthetic kernels, and a local Toolkit are not clean consumer, public package, or post-publish proof.
 
@@ -97,6 +103,6 @@ Compile-only output, artifact hashes, synthetic kernels, and a local Toolkit are
 
 ## Evidence Ladder
 
-Header/library audit proves vendor surface only. Compile-only proves compiler ownership and output copying only. Artifact hashes prove identity only. Local compile-to-launch proves one host path only. Clean-package-consumer and post-publish checks remain separate evidence classes, and Owner approval is still required for final publication and issue closure.
+Header/library audit proves vendor surface only. Compile-only proves compiler ownership and output copying only. Artifact hashes prove identity only. Local compile-to-launch/readback proves one host Toolkit/GPU path only. Clean-package-consumer and post-publish checks remain separate evidence classes, and Owner approval is still required for final publication and issue closure.
 
 CUDA RTC becomes release-ready only after compile, load, launch, readback, clean consumer, cross-platform package, and post-publish evidence all close.

@@ -21,8 +21,25 @@ typedef struct JYPPX_CudaMipmappedArray JYPPX_CudaMipmappedArray;
 typedef struct JYPPX_CudaTextureObject JYPPX_CudaTextureObject;
 typedef struct JYPPX_CudaSurfaceObject JYPPX_CudaSurfaceObject;
 typedef struct JYPPX_CudaKernelLibrary JYPPX_CudaKernelLibrary;
+typedef struct JYPPX_CudaKernelLaunch JYPPX_CudaKernelLaunch;
 typedef struct JYPPX_CudaExecutionContext JYPPX_CudaExecutionContext;
 typedef struct JYPPX_CudaRtcProgram JYPPX_CudaRtcProgram;
+
+typedef enum JYPPX_CudaKernelArgumentKind
+{
+    JYPPX_CUDA_KERNEL_ARGUMENT_SCALAR = 1,
+    JYPPX_CUDA_KERNEL_ARGUMENT_DEVICE_MEMORY = 2
+} JYPPX_CudaKernelArgumentKind;
+
+typedef struct JYPPX_CudaKernelArgumentDescriptor
+{
+    int32_t kind;
+    uint32_t reserved;
+    size_t scalar_offset;
+    size_t scalar_size;
+    JYPPX_CudaMemory* memory;
+    size_t memory_offset;
+} JYPPX_CudaKernelArgumentDescriptor;
 
 typedef enum JYPPX_CudaRtcArtifactKind
 {

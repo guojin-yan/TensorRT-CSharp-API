@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using JYPPX.CudaSharp;
 using Xunit;
@@ -32,7 +33,12 @@ public sealed class CudaRuntimeCompilationOwnerTests
             typeof(CudaRtcCompileOptions),
             typeof(CudaRtcCompilationResult),
             typeof(CudaRtcArtifact),
-            typeof(CudaRtcCapability)
+            typeof(CudaRtcCapability),
+            typeof(CudaKernelLibrary),
+            typeof(CudaKernelLaunch),
+            typeof(CudaKernelArgument),
+            typeof(CudaKernelLaunchConfiguration),
+            typeof(CudaDim3)
         };
 
         foreach (Type type in rtcTypes)
@@ -70,15 +76,18 @@ public sealed class CudaRuntimeCompilationOwnerTests
     }
 
     [Fact]
-    public void SampleSeparatesCompileLoadFromKernelRuntimeProof()
+    public void SampleRunsOwnerBoundTypedKernelAndSeparatesPackageProof()
     {
         string sample = ReadSource("samples", "CudaRuntimeCompilation", "Program.cs");
         string readme = ReadSource("samples", "CudaRuntimeCompilation", "README.md");
         Assert.Contains("CudaRtcCompiler.Compile", sample, StringComparison.Ordinal);
         Assert.Contains("CudaKernelLibrary.Load", sample, StringComparison.Ordinal);
         Assert.Contains("CudaRtcResultCode.Compilation", sample, StringComparison.Ordinal);
-        Assert.Contains("kernel-launch=False", sample, StringComparison.Ordinal);
-        Assert.Contains("not kernel-runtime", readme, StringComparison.Ordinal);
+        Assert.Contains("CudaKernelArgument.FromDeviceMemory", sample, StringComparison.Ordinal);
+        Assert.Contains("CudaKernelArgument.FromInt32", sample, StringComparison.Ordinal);
+        Assert.Contains("ownersDisposedBeforeSynchronize", sample, StringComparison.Ordinal);
+        Assert.Contains("local-toolkit-kernel-runtime-readback", sample, StringComparison.Ordinal);
+        Assert.Contains("not package-consumer", readme, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -98,6 +107,7 @@ public sealed class CudaRuntimeCompilationOwnerTests
         Assert.False(root.GetProperty("loaderContract").GetProperty("coreBridgeStaticNvrtcLink").GetBoolean());
 
         using JsonDocument smoke = JsonDocument.Parse(ReadSource("artifacts", "cuda-runtime-compilation", "local-smoke.json"));
+        Assert.Equal(3, smoke.RootElement.GetProperty("schemaVersion").GetInt32());
         JsonElement[] records = smoke.RootElement.GetProperty("records").EnumerateArray().ToArray();
         Assert.Equal(4, records.Length);
         Assert.All(records, item =>
@@ -106,10 +116,21 @@ public sealed class CudaRuntimeCompilationOwnerTests
             Assert.True(item.GetProperty("compileFailureLogCaptured").GetBoolean());
             Assert.True(item.GetProperty("ptxDeterministic").GetBoolean());
             Assert.True(item.GetProperty("cubinCapturedForSm75").GetBoolean());
-            Assert.False(item.GetProperty("kernelLaunch").GetBoolean());
-            Assert.False(item.GetProperty("gpuReadback").GetBoolean());
-            Assert.False(item.GetProperty("correctnessProof").GetBoolean());
         });
+        Assert.All(records.Take(3), item =>
+        {
+            Assert.True(item.GetProperty("kernelLaunch").GetBoolean());
+            Assert.True(item.GetProperty("gpuReadback").GetBoolean());
+            Assert.True(item.GetProperty("correctnessProof").GetBoolean());
+            Assert.True(item.GetProperty("ownersDisposedBeforeSynchronize").GetBoolean());
+            Assert.Equal("local-toolkit-kernel-runtime-readback", item.GetProperty("evidenceClassification").GetString());
+            Assert.Matches("^[0-9a-f]{64}$", item.GetProperty("outputSha256").GetString());
+        });
+        Assert.Single(records.Take(3).Select(item => item.GetProperty("outputSha256").GetString()).Distinct(StringComparer.Ordinal));
+        Assert.False(records[3].GetProperty("kernelLaunch").GetBoolean());
+        Assert.False(records[3].GetProperty("gpuReadback").GetBoolean());
+        Assert.False(records[3].GetProperty("correctnessProof").GetBoolean());
+        Assert.False(records[3].GetProperty("ownersDisposedBeforeSynchronize").GetBoolean());
         Assert.True(records[2].GetProperty("loadSucceeded").GetBoolean());
         Assert.False(records[3].GetProperty("loadSucceeded").GetBoolean());
         Assert.Contains("cudaErrorUnsupportedPtxVersion", records[3].GetProperty("loadDiagnostic").GetString(), StringComparison.Ordinal);
@@ -145,6 +166,97 @@ public sealed class CudaRuntimeCompilationOwnerTests
         Assert.Equal(12, root.GetProperty("matchedPeExportCount").GetInt32());
         Assert.Equal(0, root.GetProperty("missingDeclarationCount").GetInt32());
         Assert.Equal(0, root.GetProperty("missingPeExportCount").GetInt32());
+
+        using JsonDocument launchAbi = JsonDocument.Parse(ReadSource("artifacts", "cuda-runtime-compilation", "kernel-launch-native-abi-surface.json"));
+        JsonElement launchRoot = launchAbi.RootElement;
+        Assert.True(launchRoot.GetProperty("passed").GetBoolean());
+        Assert.Equal(4, launchRoot.GetProperty("manifestEntryPointCount").GetInt32());
+        Assert.Equal(4, launchRoot.GetProperty("declaredEntryPointCount").GetInt32());
+        Assert.Equal(4, launchRoot.GetProperty("matchedPeExportCount").GetInt32());
+        Assert.Equal(0, launchRoot.GetProperty("missingDeclarationCount").GetInt32());
+        Assert.Equal(0, launchRoot.GetProperty("missingPeExportCount").GetInt32());
+    }
+
+    [Fact]
+    public void TypedKernelLaunchRetainsOwnersAndRejectsRawPointers()
+    {
+        string native = ReadSource("native", "src", "cuda", "modules", "deployment", "kernel_library_launch.inc");
+        string managed = ReadSource("src", "JYPPX.CudaSharp", "Kernels", "CudaKernelLaunch.cs");
+        string argument = ReadSource("src", "JYPPX.CudaSharp", "Kernels", "CudaKernelArgument.cs");
+        string manifest = ReadSource("native", "manifests", "cuda", "cuda-sixty-fourth-batch-owner-bound-kernel-launch.manifest.json");
+
+        Assert.Contains("cudaLibraryGetKernel", native, StringComparison.Ordinal);
+        Assert.Contains("cudaLaunchKernel", native, StringComparison.Ordinal);
+        Assert.Contains("cudaEventRecord", native, StringComparison.Ordinal);
+        Assert.Contains("cudaEventSynchronize", native, StringComparison.Ordinal);
+        Assert.Contains("JYPPX_CUDA_KERNEL_LAUNCH_GUARD", native, StringComparison.Ordinal);
+        Assert.Contains("SafeCudaHandleLease.Create", managed, StringComparison.Ordinal);
+        Assert.Contains("DangerousAddRef", ReadSource("src", "JYPPX.CudaSharp", "Internal", "Handles", "SafeCudaHandleLease.cs"), StringComparison.Ordinal);
+        Assert.Contains("FromDeviceMemory", argument, StringComparison.Ordinal);
+        Assert.DoesNotContain("public IntPtr", managed + argument, StringComparison.Ordinal);
+        Assert.Contains("borrowed-call-only", manifest, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TypedKernelLaunchValidatesManagedInputsBeforeNativeInterop()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => new CudaDim3(0));
+        Assert.Throws<ArgumentOutOfRangeException>(() => new CudaDim3(1, 0));
+        Assert.Throws<InvalidOperationException>(() => new CudaKernelLaunchConfiguration(default, new CudaDim3(1)));
+        Assert.Throws<ArgumentOutOfRangeException>(() => new CudaKernelLaunchConfiguration(new CudaDim3(1), new CudaDim3(1), -1));
+
+        CudaKernelLibrary library = (CudaKernelLibrary)RuntimeHelpers.GetUninitializedObject(typeof(CudaKernelLibrary));
+        CudaStream stream = (CudaStream)RuntimeHelpers.GetUninitializedObject(typeof(CudaStream));
+        var configuration = new CudaKernelLaunchConfiguration(new CudaDim3(1), new CudaDim3(32));
+        CudaKernelArgument scalar = CudaKernelArgument.FromInt32(1);
+
+        Assert.Throws<ArgumentException>(() => library.Launch("bad\0name", configuration, stream, scalar));
+        Assert.Throws<ArgumentNullException>(() => library.Launch("kernel", configuration, null!, scalar));
+        Assert.Throws<ArgumentNullException>(() => library.Launch("kernel", configuration, stream, null!));
+        Assert.Throws<ArgumentOutOfRangeException>(() => library.Launch(
+            "kernel",
+            configuration,
+            stream,
+            Enumerable.Repeat(scalar, 257).ToArray()));
+        Assert.Throws<ArgumentException>(() => library.Launch(
+            "kernel",
+            configuration,
+            stream,
+            new CudaKernelArgument[] { null! }));
+
+        Type handleType = typeof(CudaMemory).Assembly.GetType("JYPPX.CudaSharp.Internal.Handles.SafeCudaMemoryHandle", throwOnError: true)!;
+        using IDisposable closedHandle = (IDisposable)Activator.CreateInstance(handleType, nonPublic: true)!;
+        closedHandle.Dispose();
+        CudaMemory disposedMemory = (CudaMemory)RuntimeHelpers.GetUninitializedObject(typeof(CudaMemory));
+        typeof(CudaMemory).GetField("_handle", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(disposedMemory, closedHandle);
+        Assert.Throws<ObjectDisposedException>(() => CudaKernelArgument.FromDeviceMemory(disposedMemory));
+    }
+
+    [Fact]
+    public void TypedKernelScalarFactoriesExposeStableCopiedMetadata()
+    {
+        (CudaKernelArgument Argument, CudaKernelScalarType Type, int Size)[] cases =
+        {
+            (CudaKernelArgument.FromBoolean(true), CudaKernelScalarType.Boolean, 1),
+            (CudaKernelArgument.FromByte(byte.MaxValue), CudaKernelScalarType.Byte, 1),
+            (CudaKernelArgument.FromSByte(sbyte.MinValue), CudaKernelScalarType.SByte, 1),
+            (CudaKernelArgument.FromInt16(short.MinValue), CudaKernelScalarType.Int16, 2),
+            (CudaKernelArgument.FromUInt16(ushort.MaxValue), CudaKernelScalarType.UInt16, 2),
+            (CudaKernelArgument.FromInt32(int.MinValue), CudaKernelScalarType.Int32, 4),
+            (CudaKernelArgument.FromUInt32(uint.MaxValue), CudaKernelScalarType.UInt32, 4),
+            (CudaKernelArgument.FromInt64(long.MinValue), CudaKernelScalarType.Int64, 8),
+            (CudaKernelArgument.FromUInt64(ulong.MaxValue), CudaKernelScalarType.UInt64, 8),
+            (CudaKernelArgument.FromSingle(float.NaN), CudaKernelScalarType.Single, 4),
+            (CudaKernelArgument.FromDouble(double.PositiveInfinity), CudaKernelScalarType.Double, 8)
+        };
+
+        Assert.All(cases, item =>
+        {
+            Assert.Equal(CudaKernelArgumentKind.Scalar, item.Argument.Kind);
+            Assert.Equal(item.Type, item.Argument.ScalarType);
+            Assert.Equal(item.Size, item.Argument.ScalarSizeInBytes);
+            Assert.Equal(0, item.Argument.MemoryOffset);
+        });
     }
 
     private static IEnumerable<Type> GetExposedTypes(MemberInfo member)

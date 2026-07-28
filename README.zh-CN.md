@@ -361,13 +361,13 @@ cmake --build --preset win-x64-trt8-cuda12-release --parallel
 近期 sample 成熟度状态：
 
 - `MultiStream` 是真实 CUDA multi-stream/event ordering 示例，并已纳入 solution。
-- `CudaRuntimeCompilation` 是 owner-safe NVRTC 编译样例，覆盖复制型 PTX/CUBIN/LTO IR、失败日志、lowered name、确定性和可选本地 PTX load；当前不宣称 kernel launch/readback proof。
+- `CudaRuntimeCompilation` 是 owner-safe NVRTC 编译与 CUDA 12.9+ named typed-kernel launch/readback 样例，覆盖复制型 PTX/CUBIN/LTO IR、失败日志、lowered name、确定性、owner 提前释放和逐值 GPU correctness；CUDA 13.2 的 PTX load rejection、Linux、package consumer 与 post-publish 仍单独记录。
 - `DynamicShape` 是真实 TensorRT dynamic-shape/profile/binding 示例，并已纳入 solution。
 - `InferenceBindings` 是真实 TensorRT inference-binding 示例，并已纳入 solution。
 - `OnnxToEngine` 现在是可运行的常用 ONNX-to-engine 示例，并已纳入 solution。
 - `Classification` 和 `YoloVision` 是依赖用户自备 ONNX 模型、labels 和 input-shape metadata 的可运行示例。
 - `applications/TensorRtExec` 是面向用户的 ONNX-to-engine CLI/WinForms 工具。它可以为外部 ONNX 生成 build/precheck report，但真实模型 runtime proof 仍归具体 sample runner，package-consumer-runtime proof 仍归 release proof record。
-- CUDA custom-kernel launch 继续保留为路线图，等待安全的 named-kernel launch 与 typed argument packing；runtime compilation 本身已通过 `CudaRtcCompiler` / `CudaRtcProgram` 提供。
+- CUDA 12.9+ custom-kernel launch 已通过 `CudaKernelLibrary.Launch(...)` 提供 owner-safe named-kernel 与 typed arguments；CUDA 11.8/12.1 Driver module owner、Linux runtime、package consumer 和 post-publish proof 仍属于路线图。runtime compilation 通过 `CudaRtcCompiler` / `CudaRtcProgram` 提供。
 
 ## Runtime Packages
 

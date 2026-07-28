@@ -2,9 +2,9 @@
 
 ## 目标与当前边界
 
-本项目已经交付 CUDA Runtime Compilation（NVRTC）的第一阶段 owner-safe compile API，使 .NET 用户可以提交 CUDA C++ 源码、headers、编译选项和 name expressions，并获得复制到托管内存的 PTX、CUBIN 或 LTO IR 工件。owner-safe kernel launch/readback 仍是下一阶段目标。
+本项目已经交付 CUDA Runtime Compilation（NVRTC）的 owner-safe compile API 与 CUDA 12.9+ runtime-library owner-bound launch/readback，使 .NET 用户可以提交 CUDA C++ 源码、headers、编译选项和 name expressions，并获得复制到托管内存的 PTX、CUBIN 或 LTO IR 工件，再以 typed arguments 启动 named kernel。CUDA 11.8/12.1 的统一 Driver module owner、Linux 真机和包消费者证明仍是后续目标。
 
-当前仓库已经具备 `CudaKernelLibrary.Load(byte[])`、library inventory、按名称查询和 kernel attribute 设置能力，native owner 会复制输入 code，并且不会向 public C# API 暴露 borrowed `cudaKernel_t`。这套 runtime library owner 仅在 CUDA Toolkit 12.9 及以上可用。现有 raw `cudaLaunchKernel` entry point 仍是 internal/generated 边界，不能作为 public RTC 启动方案。
+当前仓库已经具备 `CudaKernelLibrary.Load(byte[])`、library inventory、按名称查询、kernel attribute 设置和 `CudaKernelLibrary.Launch(...)` owner-safe 启动能力，native owner 会复制输入 code，并且不会向 public C# API 暴露 borrowed `cudaKernel_t`。这套 runtime-library launch 仅在 CUDA Toolkit 12.9 及以上可用。现有 raw `cudaLaunchKernel` entry point 仍是 internal/generated 边界，不能作为 public RTC 启动方案。
 
 NVRTC 接入不是单个 P/Invoke。它同时涉及 compiler program 生命周期、可变长日志/工件复制、编译选项与源文件可追溯性、compiled code 的 module ownership、typed kernel arguments、跨 toolkit 动态依赖和包体策略。
 
@@ -19,7 +19,7 @@ NVRTC 接入不是单个 P/Invoke。它同时涉及 compiler program 生命周�
 
 两个 header 均提供 version/error、program create/destroy、compile、program log、PTX、CUBIN、LTO IR、name expression 和 lowered name API。CUDA 12.9 header 仍有 deprecated NVVM output 声明；新 public API 不以该 deprecated output 为主路径。
 
-CUDA 11.8、12.1、12.9、13.2 的 Windows header、import LIB、DLL、builtins 和 export 已由 `eng/Export-CudaRtcCapabilityMatrix.ps1` 实际审计。Linux `.so` 在本机 E 盘和 Windows Toolkit roots 中未找到，因此 Linux SONAME/symbol 仍保持未验证，不能从 Windows 结果外推。
+CUDA 11.8、CUDA 12.1、CUDA 12.9、CUDA 13.2 的 Windows header、import LIB、DLL、builtins 和 export 已由 `eng/Export-CudaRtcCapabilityMatrix.ps1` 实际审计。Linux `.so` 在本机 E 盘和 Windows Toolkit roots 中未找到，因此 Linux SONAME/symbol 仍保持未验证，不能从 Windows 结果外推。
 
 ## 2026-07-28 已实现基线
 
@@ -27,10 +27,10 @@ CUDA 11.8、12.1、12.9、13.2 的 Windows header、import LIB、DLL、builtins 
 - ABI 覆盖 capability、dependency diagnostic、source/program name、virtual header、name expression、compile、log、PTX/CUBIN/LTO IR 与 lowered-name 的 caller-buffer/count-copy；输入有 UTF-8、embedded NUL、重复值、数量和字节上限，C++ exception 与 Windows SEH 均在边界内收敛。
 - managed 新增 `CudaRtcCompiler`、`CudaRtcProgram`、`CudaRtcProgramSource`、`CudaRtcCompileOptions`、`CudaRtcCompilationResult` 与 `CudaRtcArtifact`；public surface 不暴露 `IntPtr`、`SafeHandle` 或 vendor program/kernel handle。
 - `samples/CudaRuntimeCompilation` 真实覆盖 virtual header、template lowered name、成功 PTX、`sm_75` CUBIN、可用版本的 LTO IR、重复 PTX SHA256 确定性和 intentional compile failure log。
-- 本机四版 compile 均成功；11.8/12.1/12.9 PTX 可由当前 CUDA 12.9 `CudaKernelLibrary` 加载，13.2 PTX 被当前 runtime/driver 以 `cudaErrorUnsupportedPtxVersion` 拒绝，因此 13.2 只记 compile proof。
-- 证据位于 `artifacts/cuda-runtime-compilation/capability-matrix.json` 与 `local-smoke.json`。所有记录均保持 `kernelLaunch=false`、`gpuReadback=false`、`correctnessProof=false`。
+- 本机四版 compile 均成功；11.8/12.1/12.9 PTX 可由当前 CUDA 12.9 `CudaKernelLibrary` 加载、按名称启动并读回 257 个 float，三版 output SHA256 一致；13.2 PTX 被当前 runtime/driver 以 `cudaErrorUnsupportedPtxVersion` 拒绝，因此 13.2 只记 compile-only/load-rejected proof。
+- 证据位于 `artifacts/cuda-runtime-compilation/capability-matrix.json`、`local-smoke.json` 与 `kernel-launch-native-abi-surface.json`。前三版记录为 `kernelLaunch=true`、`gpuReadback=true`、`correctnessProof=true`；13.2 明确保持三个值为 `false`。sample 还验证 launch 后提前释放 library、stream 和 input memory 后 owner 仍可同步和读回。
 
-尚未完成的 RTC 主项是 owner-bound named-kernel launch、typed argument packing、GPU readback、Linux 真机、full-runtime `cuda-rtc` 组件物化、clean package consumer 与 post-publish；这些项目未因 compile/load 成功而晋级。
+尚未完成的 RTC 主项是 CUDA 11.8/12.1 的统一 Driver module/function owner、Linux 真机、full-runtime `cuda-rtc` 组件物化、clean package consumer 与 post-publish；本地 Windows 12.9 bridge 的 launch/readback 成功不替代这些证明。
 
 ## 设计不变量
 
@@ -42,9 +42,9 @@ CUDA 11.8、12.1、12.9、13.2 的 Windows header、import LIB、DLL、builtins 
 6. NVRTC 必须是可诊断的可选能力。未使用 RTC 的 consumer 不应仅因机器缺少 NVRTC 而无法加载核心 bridge。
 7. 每个输出工件均为 immutable copied bytes，并带 source/options/header/compiler/target/output hashes；不能依赖 native program owner 存活。
 
-## 计划中的托管 API
+## 已实现的托管 API
 
-建议以以下高层类型为目标，最终命名应通过 public API review：
+当前已实现并通过 public API review 门禁的高层类型包括：
 
 - `CudaRtcCompiler`：能力探测、compiler version 和一次性 compile 入口。
 - `CudaRtcProgram`：明确 `IDisposable` 生命周期的可复用 native program owner。
@@ -52,6 +52,10 @@ CUDA 11.8、12.1、12.9、13.2 的 Windows header、import LIB、DLL、builtins 
 - `CudaRtcCompileOptions`：目标架构、language/optimization/debug flags 和原始受控 options 的 immutable snapshot。
 - `CudaRtcCompilationResult`：success/status、完整 log、lowered names、compiler/toolkit version 和 artifacts。
 - `CudaRtcArtifact` / `CudaRtcArtifactKind`：PTX、CUBIN、LTO IR 的 copied payload、长度与 SHA256。
+- `CudaKernelLibrary`：按名称加载和 owner-bound `Launch(...)`。
+- `CudaKernelLaunchConfiguration` / `CudaDim3`：非零 grid/block 与动态 shared-memory 配置。
+- `CudaKernelArgument`：复制型标量或 owner-bound `CudaMemory` + byte offset 参数。
+- `CudaKernelLaunch`：completion event owner，并在释放前租用 library、stream 和 device memory。
 
 PTX、CUBIN 和 LTO IR 是 option/target dependent outputs。API 必须显式表示 unavailable，而不是返回空数组并让调用者猜测。CUBIN 需要真实 `sm_XX` target，LTO IR 需要相应编译模式；PTX hash 只证明工件内容稳定，不证明 kernel 输出正确。
 
@@ -75,21 +79,22 @@ PTX、CUBIN 和 LTO IR 是 option/target dependent outputs。API 必须显式表
 - 复制所有 log、lowered names 与 artifact bytes；验证 UTF-8、embedded NUL、重复 options、重复 name expressions、disposed owner 和超大输入。
 - 增加 XML 双语文档、API surface snapshot、dependency diagnostics 和 deterministic artifact contract。
 
-### 阶段 D：Compile-to-load-to-launch
+### 阶段 D：Compile-to-load-to-launch（Windows CUDA 12.9+ 已完成）
 
 - CUDA 12.9/13.2 首先验证 NVRTC PTX/CUBIN 能否直接进入现有 `CudaKernelLibrary.Load(byte[])`，并以 library owner + kernel name 完成启动。
-- 现有 `CudaKernelLibrary` 尚无 owner-bound public launch；应增加 named-kernel launch owner，使 borrowed `cudaKernel_t` 永不越过 ABI。
+- `CudaKernelLibrary.Launch(...)` 已提供 named-kernel launch owner，使 borrowed `cudaKernel_t` 永不越过 ABI；typed scalar/device-memory arguments、grid/block 校验和 completion event 已纳入 owner 生命周期。
 - CUDA 11.8/12.1 不具备当前 runtime library API。若要维持完整支持矩阵，应设计统一的 CUDA Driver module/function owner，或明确限制；不得用裸 function pointer 补洞。
 - Kernel arguments 使用 typed packing 和 bridge-owned launch storage，明确 device buffer、scalar、stream 与 module 的生命周期，并验证 grid/block/shared-memory limits。
 
-### 阶段 E：Samples 与真实 smoke
+### 阶段 E：Samples 与真实 smoke（Windows 本机已完成）
 
-新增 `samples/CudaRuntimeCompilation`，至少覆盖：
+`samples/CudaRuntimeCompilation` 已覆盖：
 
 - vector add 或 elementwise kernel：compile、load、launch、synchronize、readback 和 expected-output comparison。
 - 故意编译失败：保留完整 compiler log 和失败分类。
 - C++ overloaded/template kernel：name expression 与 lowered name 闭环。
 - PTX 与可用 CUBIN/LTO IR 工件的 metadata/hash 导出。
+- launch 后提前释放参与 owner、同步 completion、GPU readback 和逐值 correctness comparison。
 
 compile-only smoke、artifact hash、synthetic kernel 和 local Toolkit 都不能替代 clean package-consumer/public package proof。
 
@@ -102,7 +107,7 @@ compile-only smoke、artifact hash、synthetic kernel 和 local Toolkit 都不�
 
 ## 验证矩阵与证据等级
 
-每批至少包括 manifest 生成幂等、managed build、native build、ABI/export parity、专项测试、compile-success、compile-failure-log 和 dependency-missing smoke。进入 launch 阶段后再增加真实 GPU readback。
+每批至少包括 manifest 生成幂等、managed build、native build、ABI/export parity、专项测试、compile-success、compile-failure-log 和 dependency-missing smoke。本批已增加真实 GPU launch/readback；其证据分类仍严格限定为 local Toolkit runtime，不升级为 package-consumer 或 post-publish proof。
 
 证据必须按以下层级记录：
 
