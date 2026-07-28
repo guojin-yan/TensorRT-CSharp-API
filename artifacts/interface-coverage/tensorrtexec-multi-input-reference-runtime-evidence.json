@@ -8,7 +8,8 @@
     "platform": "win-x64",
     "modelKind": "generated-onnx-add-sub",
     "modelSha256": "ce9b8010521f1b97d8b29967355fefd37520a410d2317fe5e9b98b567b850fa0",
-    "engineSha256": "0389a1ac3e0868bab24695af931e9caba68bd5ad7cbdcd91dacbb2aeafaf46b9"
+    "engineSha256": "20156133d6414368768f5bc7751f17a980de8121b40f8abf91e129fdbbde318c",
+    "engineSha256Scope": "Hash of the final retained engine artifact; TensorRT engine serialization may vary across rebuilds."
   },
   "inputs": [
     {
