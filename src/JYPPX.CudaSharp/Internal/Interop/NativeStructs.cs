@@ -524,3 +524,15 @@ internal struct NativeCudaRtcCapabilityInfo
     public int SupportsDeprecatedNvvm;
     public int SupportsNameExpressions;
 }
+
+[StructLayout(LayoutKind.Sequential)]
+internal struct NativeCudaDriverCapabilityInfo
+{
+    public int DependencyAvailable;
+    public int DriverVersion;
+    public int SupportsModuleLoad;
+    public int SupportsFunctionLookup;
+    public int SupportsTypedLaunch;
+    public int SupportsContextInterop;
+    public int SupportsCompletionEvents;
+}

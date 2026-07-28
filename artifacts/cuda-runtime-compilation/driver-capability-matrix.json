@@ -1,0 +1,562 @@
+﻿{
+    "schemaVersion":  1,
+    "recordKind":  "cuda-driver-vendor-capability-matrix",
+    "auditedLocalDate":  "2026-07-28",
+    "performsDownload":  false,
+    "performsPublish":  false,
+    "windows":  [
+                    {
+                        "toolkitVersion":  "11.8",
+                        "platform":  "windows",
+                        "architecture":  "x64",
+                        "evidenceState":  "local-header-import-lib-driver-export-verified",
+                        "headerRelativePath":  "include/cuda.h",
+                        "importLibraryRelativePath":  "lib/x64/cuda.lib",
+                        "driverLibraryPath":  "C:\\Windows\\System32\\nvcuda.dll",
+                        "driverLibrarySha256":  "5e37adf0e5457e15d2eb6ed820938fa3ac014e039622334d20ec74655f03f85a",
+                        "symbols":  {
+                                        "cuInit":  {
+                                                       "headerDeclared":  true,
+                                                       "importLibraryMember":  true,
+                                                       "driverExported":  true
+                                                   },
+                                        "cuDriverGetVersion":  {
+                                                                   "headerDeclared":  true,
+                                                                   "importLibraryMember":  true,
+                                                                   "driverExported":  true
+                                                               },
+                                        "cuGetErrorName":  {
+                                                               "headerDeclared":  true,
+                                                               "importLibraryMember":  true,
+                                                               "driverExported":  true
+                                                           },
+                                        "cuGetErrorString":  {
+                                                                 "headerDeclared":  true,
+                                                                 "importLibraryMember":  true,
+                                                                 "driverExported":  true
+                                                             },
+                                        "cuDeviceGet":  {
+                                                            "headerDeclared":  true,
+                                                            "importLibraryMember":  true,
+                                                            "driverExported":  true
+                                                        },
+                                        "cuDevicePrimaryCtxRetain":  {
+                                                                         "headerDeclared":  true,
+                                                                         "importLibraryMember":  true,
+                                                                         "driverExported":  true
+                                                                     },
+                                        "cuDevicePrimaryCtxRelease_v2":  {
+                                                                             "headerDeclared":  true,
+                                                                             "importLibraryMember":  true,
+                                                                             "driverExported":  true
+                                                                         },
+                                        "cuCtxPushCurrent_v2":  {
+                                                                    "headerDeclared":  true,
+                                                                    "importLibraryMember":  true,
+                                                                    "driverExported":  true
+                                                                },
+                                        "cuCtxPopCurrent_v2":  {
+                                                                   "headerDeclared":  true,
+                                                                   "importLibraryMember":  true,
+                                                                   "driverExported":  true
+                                                               },
+                                        "cuModuleLoadDataEx":  {
+                                                                   "headerDeclared":  true,
+                                                                   "importLibraryMember":  true,
+                                                                   "driverExported":  true
+                                                               },
+                                        "cuModuleUnload":  {
+                                                               "headerDeclared":  true,
+                                                               "importLibraryMember":  true,
+                                                               "driverExported":  true
+                                                           },
+                                        "cuModuleGetFunction":  {
+                                                                    "headerDeclared":  true,
+                                                                    "importLibraryMember":  true,
+                                                                    "driverExported":  true
+                                                                },
+                                        "cuLaunchKernel":  {
+                                                               "headerDeclared":  true,
+                                                               "importLibraryMember":  true,
+                                                               "driverExported":  true
+                                                           },
+                                        "cuStreamSynchronize":  {
+                                                                    "headerDeclared":  true,
+                                                                    "importLibraryMember":  true,
+                                                                    "driverExported":  true
+                                                                },
+                                        "cuEventCreate":  {
+                                                              "headerDeclared":  true,
+                                                              "importLibraryMember":  true,
+                                                              "driverExported":  true
+                                                          },
+                                        "cuEventRecord":  {
+                                                              "headerDeclared":  true,
+                                                              "importLibraryMember":  true,
+                                                              "driverExported":  true
+                                                          },
+                                        "cuEventQuery":  {
+                                                             "headerDeclared":  true,
+                                                             "importLibraryMember":  true,
+                                                             "driverExported":  true
+                                                         },
+                                        "cuEventSynchronize":  {
+                                                                   "headerDeclared":  true,
+                                                                   "importLibraryMember":  true,
+                                                                   "driverExported":  true
+                                                               },
+                                        "cuEventDestroy_v2":  {
+                                                                  "headerDeclared":  true,
+                                                                  "importLibraryMember":  true,
+                                                                  "driverExported":  true
+                                                              }
+                                    },
+                        "capabilities":  {
+                                             "moduleLoad":  true,
+                                             "functionLookup":  true,
+                                             "typedLaunch":  true,
+                                             "failureCleanupSynchronization":  true,
+                                             "contextInterop":  true,
+                                             "completionEvent":  true
+                                         }
+                    },
+                    {
+                        "toolkitVersion":  "12.1",
+                        "platform":  "windows",
+                        "architecture":  "x64",
+                        "evidenceState":  "local-header-import-lib-driver-export-verified",
+                        "headerRelativePath":  "include/cuda.h",
+                        "importLibraryRelativePath":  "lib/x64/cuda.lib",
+                        "driverLibraryPath":  "C:\\Windows\\System32\\nvcuda.dll",
+                        "driverLibrarySha256":  "5e37adf0e5457e15d2eb6ed820938fa3ac014e039622334d20ec74655f03f85a",
+                        "symbols":  {
+                                        "cuInit":  {
+                                                       "headerDeclared":  true,
+                                                       "importLibraryMember":  true,
+                                                       "driverExported":  true
+                                                   },
+                                        "cuDriverGetVersion":  {
+                                                                   "headerDeclared":  true,
+                                                                   "importLibraryMember":  true,
+                                                                   "driverExported":  true
+                                                               },
+                                        "cuGetErrorName":  {
+                                                               "headerDeclared":  true,
+                                                               "importLibraryMember":  true,
+                                                               "driverExported":  true
+                                                           },
+                                        "cuGetErrorString":  {
+                                                                 "headerDeclared":  true,
+                                                                 "importLibraryMember":  true,
+                                                                 "driverExported":  true
+                                                             },
+                                        "cuDeviceGet":  {
+                                                            "headerDeclared":  true,
+                                                            "importLibraryMember":  true,
+                                                            "driverExported":  true
+                                                        },
+                                        "cuDevicePrimaryCtxRetain":  {
+                                                                         "headerDeclared":  true,
+                                                                         "importLibraryMember":  true,
+                                                                         "driverExported":  true
+                                                                     },
+                                        "cuDevicePrimaryCtxRelease_v2":  {
+                                                                             "headerDeclared":  true,
+                                                                             "importLibraryMember":  true,
+                                                                             "driverExported":  true
+                                                                         },
+                                        "cuCtxPushCurrent_v2":  {
+                                                                    "headerDeclared":  true,
+                                                                    "importLibraryMember":  true,
+                                                                    "driverExported":  true
+                                                                },
+                                        "cuCtxPopCurrent_v2":  {
+                                                                   "headerDeclared":  true,
+                                                                   "importLibraryMember":  true,
+                                                                   "driverExported":  true
+                                                               },
+                                        "cuModuleLoadDataEx":  {
+                                                                   "headerDeclared":  true,
+                                                                   "importLibraryMember":  true,
+                                                                   "driverExported":  true
+                                                               },
+                                        "cuModuleUnload":  {
+                                                               "headerDeclared":  true,
+                                                               "importLibraryMember":  true,
+                                                               "driverExported":  true
+                                                           },
+                                        "cuModuleGetFunction":  {
+                                                                    "headerDeclared":  true,
+                                                                    "importLibraryMember":  true,
+                                                                    "driverExported":  true
+                                                                },
+                                        "cuLaunchKernel":  {
+                                                               "headerDeclared":  true,
+                                                               "importLibraryMember":  true,
+                                                               "driverExported":  true
+                                                           },
+                                        "cuStreamSynchronize":  {
+                                                                    "headerDeclared":  true,
+                                                                    "importLibraryMember":  true,
+                                                                    "driverExported":  true
+                                                                },
+                                        "cuEventCreate":  {
+                                                              "headerDeclared":  true,
+                                                              "importLibraryMember":  true,
+                                                              "driverExported":  true
+                                                          },
+                                        "cuEventRecord":  {
+                                                              "headerDeclared":  true,
+                                                              "importLibraryMember":  true,
+                                                              "driverExported":  true
+                                                          },
+                                        "cuEventQuery":  {
+                                                             "headerDeclared":  true,
+                                                             "importLibraryMember":  true,
+                                                             "driverExported":  true
+                                                         },
+                                        "cuEventSynchronize":  {
+                                                                   "headerDeclared":  true,
+                                                                   "importLibraryMember":  true,
+                                                                   "driverExported":  true
+                                                               },
+                                        "cuEventDestroy_v2":  {
+                                                                  "headerDeclared":  true,
+                                                                  "importLibraryMember":  true,
+                                                                  "driverExported":  true
+                                                              }
+                                    },
+                        "capabilities":  {
+                                             "moduleLoad":  true,
+                                             "functionLookup":  true,
+                                             "typedLaunch":  true,
+                                             "failureCleanupSynchronization":  true,
+                                             "contextInterop":  true,
+                                             "completionEvent":  true
+                                         }
+                    },
+                    {
+                        "toolkitVersion":  "12.9",
+                        "platform":  "windows",
+                        "architecture":  "x64",
+                        "evidenceState":  "local-header-import-lib-driver-export-verified",
+                        "headerRelativePath":  "include/cuda.h",
+                        "importLibraryRelativePath":  "lib/x64/cuda.lib",
+                        "driverLibraryPath":  "C:\\Windows\\System32\\nvcuda.dll",
+                        "driverLibrarySha256":  "5e37adf0e5457e15d2eb6ed820938fa3ac014e039622334d20ec74655f03f85a",
+                        "symbols":  {
+                                        "cuInit":  {
+                                                       "headerDeclared":  true,
+                                                       "importLibraryMember":  true,
+                                                       "driverExported":  true
+                                                   },
+                                        "cuDriverGetVersion":  {
+                                                                   "headerDeclared":  true,
+                                                                   "importLibraryMember":  true,
+                                                                   "driverExported":  true
+                                                               },
+                                        "cuGetErrorName":  {
+                                                               "headerDeclared":  true,
+                                                               "importLibraryMember":  true,
+                                                               "driverExported":  true
+                                                           },
+                                        "cuGetErrorString":  {
+                                                                 "headerDeclared":  true,
+                                                                 "importLibraryMember":  true,
+                                                                 "driverExported":  true
+                                                             },
+                                        "cuDeviceGet":  {
+                                                            "headerDeclared":  true,
+                                                            "importLibraryMember":  true,
+                                                            "driverExported":  true
+                                                        },
+                                        "cuDevicePrimaryCtxRetain":  {
+                                                                         "headerDeclared":  true,
+                                                                         "importLibraryMember":  true,
+                                                                         "driverExported":  true
+                                                                     },
+                                        "cuDevicePrimaryCtxRelease_v2":  {
+                                                                             "headerDeclared":  true,
+                                                                             "importLibraryMember":  true,
+                                                                             "driverExported":  true
+                                                                         },
+                                        "cuCtxPushCurrent_v2":  {
+                                                                    "headerDeclared":  true,
+                                                                    "importLibraryMember":  true,
+                                                                    "driverExported":  true
+                                                                },
+                                        "cuCtxPopCurrent_v2":  {
+                                                                   "headerDeclared":  true,
+                                                                   "importLibraryMember":  true,
+                                                                   "driverExported":  true
+                                                               },
+                                        "cuModuleLoadDataEx":  {
+                                                                   "headerDeclared":  true,
+                                                                   "importLibraryMember":  true,
+                                                                   "driverExported":  true
+                                                               },
+                                        "cuModuleUnload":  {
+                                                               "headerDeclared":  true,
+                                                               "importLibraryMember":  true,
+                                                               "driverExported":  true
+                                                           },
+                                        "cuModuleGetFunction":  {
+                                                                    "headerDeclared":  true,
+                                                                    "importLibraryMember":  true,
+                                                                    "driverExported":  true
+                                                                },
+                                        "cuLaunchKernel":  {
+                                                               "headerDeclared":  true,
+                                                               "importLibraryMember":  true,
+                                                               "driverExported":  true
+                                                           },
+                                        "cuStreamSynchronize":  {
+                                                                    "headerDeclared":  true,
+                                                                    "importLibraryMember":  true,
+                                                                    "driverExported":  true
+                                                                },
+                                        "cuEventCreate":  {
+                                                              "headerDeclared":  true,
+                                                              "importLibraryMember":  true,
+                                                              "driverExported":  true
+                                                          },
+                                        "cuEventRecord":  {
+                                                              "headerDeclared":  true,
+                                                              "importLibraryMember":  true,
+                                                              "driverExported":  true
+                                                          },
+                                        "cuEventQuery":  {
+                                                             "headerDeclared":  true,
+                                                             "importLibraryMember":  true,
+                                                             "driverExported":  true
+                                                         },
+                                        "cuEventSynchronize":  {
+                                                                   "headerDeclared":  true,
+                                                                   "importLibraryMember":  true,
+                                                                   "driverExported":  true
+                                                               },
+                                        "cuEventDestroy_v2":  {
+                                                                  "headerDeclared":  true,
+                                                                  "importLibraryMember":  true,
+                                                                  "driverExported":  true
+                                                              }
+                                    },
+                        "capabilities":  {
+                                             "moduleLoad":  true,
+                                             "functionLookup":  true,
+                                             "typedLaunch":  true,
+                                             "failureCleanupSynchronization":  true,
+                                             "contextInterop":  true,
+                                             "completionEvent":  true
+                                         }
+                    },
+                    {
+                        "toolkitVersion":  "13.2",
+                        "platform":  "windows",
+                        "architecture":  "x64",
+                        "evidenceState":  "local-header-import-lib-driver-export-verified",
+                        "headerRelativePath":  "include/cuda.h",
+                        "importLibraryRelativePath":  "lib/x64/cuda.lib",
+                        "driverLibraryPath":  "C:\\Windows\\System32\\nvcuda.dll",
+                        "driverLibrarySha256":  "5e37adf0e5457e15d2eb6ed820938fa3ac014e039622334d20ec74655f03f85a",
+                        "symbols":  {
+                                        "cuInit":  {
+                                                       "headerDeclared":  true,
+                                                       "importLibraryMember":  true,
+                                                       "driverExported":  true
+                                                   },
+                                        "cuDriverGetVersion":  {
+                                                                   "headerDeclared":  true,
+                                                                   "importLibraryMember":  true,
+                                                                   "driverExported":  true
+                                                               },
+                                        "cuGetErrorName":  {
+                                                               "headerDeclared":  true,
+                                                               "importLibraryMember":  true,
+                                                               "driverExported":  true
+                                                           },
+                                        "cuGetErrorString":  {
+                                                                 "headerDeclared":  true,
+                                                                 "importLibraryMember":  true,
+                                                                 "driverExported":  true
+                                                             },
+                                        "cuDeviceGet":  {
+                                                            "headerDeclared":  true,
+                                                            "importLibraryMember":  true,
+                                                            "driverExported":  true
+                                                        },
+                                        "cuDevicePrimaryCtxRetain":  {
+                                                                         "headerDeclared":  true,
+                                                                         "importLibraryMember":  true,
+                                                                         "driverExported":  true
+                                                                     },
+                                        "cuDevicePrimaryCtxRelease_v2":  {
+                                                                             "headerDeclared":  true,
+                                                                             "importLibraryMember":  true,
+                                                                             "driverExported":  true
+                                                                         },
+                                        "cuCtxPushCurrent_v2":  {
+                                                                    "headerDeclared":  true,
+                                                                    "importLibraryMember":  true,
+                                                                    "driverExported":  true
+                                                                },
+                                        "cuCtxPopCurrent_v2":  {
+                                                                   "headerDeclared":  true,
+                                                                   "importLibraryMember":  true,
+                                                                   "driverExported":  true
+                                                               },
+                                        "cuModuleLoadDataEx":  {
+                                                                   "headerDeclared":  true,
+                                                                   "importLibraryMember":  true,
+                                                                   "driverExported":  true
+                                                               },
+                                        "cuModuleUnload":  {
+                                                               "headerDeclared":  true,
+                                                               "importLibraryMember":  true,
+                                                               "driverExported":  true
+                                                           },
+                                        "cuModuleGetFunction":  {
+                                                                    "headerDeclared":  true,
+                                                                    "importLibraryMember":  true,
+                                                                    "driverExported":  true
+                                                                },
+                                        "cuLaunchKernel":  {
+                                                               "headerDeclared":  true,
+                                                               "importLibraryMember":  true,
+                                                               "driverExported":  true
+                                                           },
+                                        "cuStreamSynchronize":  {
+                                                                    "headerDeclared":  true,
+                                                                    "importLibraryMember":  true,
+                                                                    "driverExported":  true
+                                                                },
+                                        "cuEventCreate":  {
+                                                              "headerDeclared":  true,
+                                                              "importLibraryMember":  true,
+                                                              "driverExported":  true
+                                                          },
+                                        "cuEventRecord":  {
+                                                              "headerDeclared":  true,
+                                                              "importLibraryMember":  true,
+                                                              "driverExported":  true
+                                                          },
+                                        "cuEventQuery":  {
+                                                             "headerDeclared":  true,
+                                                             "importLibraryMember":  true,
+                                                             "driverExported":  true
+                                                         },
+                                        "cuEventSynchronize":  {
+                                                                   "headerDeclared":  true,
+                                                                   "importLibraryMember":  true,
+                                                                   "driverExported":  true
+                                                               },
+                                        "cuEventDestroy_v2":  {
+                                                                  "headerDeclared":  true,
+                                                                  "importLibraryMember":  true,
+                                                                  "driverExported":  true
+                                                              }
+                                    },
+                        "capabilities":  {
+                                             "moduleLoad":  true,
+                                             "functionLookup":  true,
+                                             "typedLaunch":  true,
+                                             "failureCleanupSynchronization":  true,
+                                             "contextInterop":  true,
+                                             "completionEvent":  true
+                                         }
+                    }
+                ],
+    "linux":  [
+                  {
+                      "toolkitVersion":  "11.8",
+                      "platform":  "linux",
+                      "architecture":  "x64",
+                      "evidenceState":  "unverified-local-assets-not-found",
+                      "localAssetSearchRoots":  [
+                                                    "E:/",
+                                                    "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA"
+                                                ],
+                      "libcudaAssets":  [
+
+                                        ],
+                      "soname":  null,
+                      "symbols":  null,
+                      "capabilities":  null,
+                      "boundary":  "No local Linux libcuda.so or package payload was found on the audited Windows host. Loader candidates are implementation probes, not SONAME proof."
+                  },
+                  {
+                      "toolkitVersion":  "12.1",
+                      "platform":  "linux",
+                      "architecture":  "x64",
+                      "evidenceState":  "unverified-local-assets-not-found",
+                      "localAssetSearchRoots":  [
+                                                    "E:/",
+                                                    "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA"
+                                                ],
+                      "libcudaAssets":  [
+
+                                        ],
+                      "soname":  null,
+                      "symbols":  null,
+                      "capabilities":  null,
+                      "boundary":  "No local Linux libcuda.so or package payload was found on the audited Windows host. Loader candidates are implementation probes, not SONAME proof."
+                  },
+                  {
+                      "toolkitVersion":  "12.9",
+                      "platform":  "linux",
+                      "architecture":  "x64",
+                      "evidenceState":  "unverified-local-assets-not-found",
+                      "localAssetSearchRoots":  [
+                                                    "E:/",
+                                                    "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA"
+                                                ],
+                      "libcudaAssets":  [
+
+                                        ],
+                      "soname":  null,
+                      "symbols":  null,
+                      "capabilities":  null,
+                      "boundary":  "No local Linux libcuda.so or package payload was found on the audited Windows host. Loader candidates are implementation probes, not SONAME proof."
+                  },
+                  {
+                      "toolkitVersion":  "13.2",
+                      "platform":  "linux",
+                      "architecture":  "x64",
+                      "evidenceState":  "unverified-local-assets-not-found",
+                      "localAssetSearchRoots":  [
+                                                    "E:/",
+                                                    "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA"
+                                                ],
+                      "libcudaAssets":  [
+
+                                        ],
+                      "soname":  null,
+                      "symbols":  null,
+                      "capabilities":  null,
+                      "boundary":  "No local Linux libcuda.so or package payload was found on the audited Windows host. Loader candidates are implementation probes, not SONAME proof."
+                  }
+              ],
+    "loaderContract":  {
+                           "dependencyMode":  "optional-dynamic",
+                           "exactOverrideEnvironmentVariable":  "JYPPX_CUDA_DRIVER_LIBRARY",
+                           "windowsCandidates":  [
+                                                     "nvcuda.dll"
+                                                 ],
+                           "linuxCandidates":  [
+                                                   "libcuda.so.1",
+                                                   "libcuda.so"
+                                               ],
+                           "coreBridgeStaticDriverLink":  false
+                       },
+    "ownerContract":  {
+                          "moduleRetainsPrimaryContext":  true,
+                          "borrowedFunctionStaysInsideBridge":  true,
+                          "launchRetainsManagedModuleStreamAndMemory":  true,
+                          "publicSurfaceExposesRawPointer":  false
+                      },
+    "proofBoundary":  {
+                          "vendorAuditIsRuntimeProof":  false,
+                          "localWindowsDriverIsLinuxProof":  false,
+                          "compileToLaunchRequiresSeparateGpuSmoke":  true
+                      }
+}

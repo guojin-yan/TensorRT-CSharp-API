@@ -1,0 +1,124 @@
+{
+  "$schema": "../bridge-api.schema.json",
+  "module": "cuda",
+  "versionLine": "common",
+  "apis": [
+    {
+      "id": "cuda-driver-query-capability-copied-safe",
+      "entryPoint": "jyppx_cuda_driver_query_capability_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_CUDA_DRIVER_OPTIONAL_DYNAMIC",
+      "parameters": [
+        { "name": "out_info", "type": "JYPPX_CudaDriverCapabilityInfo*", "direction": "out", "moduleManagedType": "out NativeCudaDriverCapabilityInfo" }
+      ]
+    },
+    {
+      "id": "cuda-driver-get-loaded-library-name-copied-safe",
+      "entryPoint": "jyppx_cuda_driver_get_loaded_library_name_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_CUDA_DRIVER_OPTIONAL_DYNAMIC",
+      "parameters": [
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "cuda-driver-get-dependency-diagnostic-copied-safe",
+      "entryPoint": "jyppx_cuda_driver_get_dependency_diagnostic_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_CUDA_DRIVER_OPTIONAL_DYNAMIC",
+      "parameters": [
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "cuda-driver-module-load-data-copy-owner-safe",
+      "entryPoint": "jyppx_cuda_driver_module_load_data_copy_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_CUDA_DRIVER_OPTIONAL_DYNAMIC",
+      "parameters": [
+        { "name": "code", "type": "const uint8_t*", "direction": "in", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "code_size", "type": "size_t", "direction": "in" },
+        { "name": "device", "type": "int32_t", "direction": "in" },
+        { "name": "out_module", "type": "JYPPX_CudaDriverModule**", "direction": "out", "ownership": "caller-destroys" }
+      ]
+    },
+    {
+      "id": "cuda-driver-module-launch-typed-owner-safe",
+      "entryPoint": "jyppx_cuda_driver_module_launch_typed_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_CUDA_DRIVER_OPTIONAL_DYNAMIC",
+      "parameters": [
+        { "name": "module", "type": "JYPPX_CudaDriverModule*", "direction": "in", "ownership": "borrowed-call-only" },
+        { "name": "kernel_name", "type": "const char*", "direction": "in" },
+        { "name": "grid_dim", "type": "JYPPX_CudaDim3", "direction": "in", "moduleManagedType": "NativeCudaDim3" },
+        { "name": "block_dim", "type": "JYPPX_CudaDim3", "direction": "in", "moduleManagedType": "NativeCudaDim3" },
+        { "name": "arguments", "type": "const JYPPX_CudaKernelArgumentDescriptor*", "direction": "in" },
+        { "name": "argument_count", "type": "size_t", "direction": "in" },
+        { "name": "scalar_data", "type": "const uint8_t*", "direction": "in", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "scalar_data_size", "type": "size_t", "direction": "in" },
+        { "name": "dynamic_shared_memory_bytes", "type": "size_t", "direction": "in" },
+        { "name": "stream", "type": "JYPPX_CudaStream*", "direction": "in", "ownership": "borrowed-call-only" },
+        { "name": "out_launch", "type": "JYPPX_CudaDriverKernelLaunch**", "direction": "out", "ownership": "caller-destroys" }
+      ]
+    },
+    {
+      "id": "cuda-driver-kernel-launch-query-copied-safe",
+      "entryPoint": "jyppx_cuda_driver_kernel_launch_query_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_CUDA_DRIVER_OPTIONAL_DYNAMIC",
+      "parameters": [
+        { "name": "launch", "type": "JYPPX_CudaDriverKernelLaunch*", "direction": "in" },
+        { "name": "out_completed", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "cuda-driver-kernel-launch-synchronize-owner-safe",
+      "entryPoint": "jyppx_cuda_driver_kernel_launch_synchronize_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_CUDA_DRIVER_OPTIONAL_DYNAMIC",
+      "parameters": [
+        { "name": "launch", "type": "JYPPX_CudaDriverKernelLaunch*", "direction": "in" }
+      ]
+    },
+    {
+      "id": "cuda-driver-kernel-launch-destroy-idempotent-safe",
+      "entryPoint": "jyppx_cuda_driver_kernel_launch_destroy_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "callee-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_CUDA_DRIVER_OPTIONAL_DYNAMIC",
+      "parameters": [
+        { "name": "launch", "type": "JYPPX_CudaDriverKernelLaunch*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr", "ownership": "callee-destroys" }
+      ]
+    },
+    {
+      "id": "cuda-driver-module-destroy-idempotent-safe",
+      "entryPoint": "jyppx_cuda_driver_module_destroy_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "callee-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_CUDA_DRIVER_OPTIONAL_DYNAMIC",
+      "parameters": [
+        { "name": "module", "type": "JYPPX_CudaDriverModule*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr", "ownership": "callee-destroys" }
+      ]
+    }
+  ]
+}

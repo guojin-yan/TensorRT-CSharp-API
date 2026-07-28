@@ -2,9 +2,9 @@
 
 ## Goal and Current Boundary
 
-The project now ships an owner-safe NVRTC compile API and a CUDA 12.9+ runtime-library owner-bound launch/readback path. .NET callers can submit CUDA C++ source, headers, compile options, and name expressions, receive copied PTX, CUBIN, or LTO IR artifacts, and launch named kernels with typed arguments. A unified Driver module owner for CUDA 11.8/12.1, Linux runtime proof, and package-consumer proof remain future work.
+The project now ships an owner-safe NVRTC compile API and two owner-bound launch/readback paths. .NET callers can submit CUDA C++ source, headers, compile options, and name expressions, receive copied PTX, CUBIN, or LTO IR artifacts, and launch named kernels with typed arguments through either the CUDA 12.9+ Runtime library or a dynamically loaded CUDA Driver module owner. Linux runtime proof and package-consumer proof remain future work.
 
-The repository already provides `CudaKernelLibrary.Load(byte[])`, copied library inventory, name-based queries, kernel attribute updates, and an owner-safe `CudaKernelLibrary.Launch(...)` path. Its native owner retains a copy of input code and never exposes borrowed `cudaKernel_t` values through the public C# API. This runtime-library launch path requires CUDA Toolkit 12.9 or later. The existing raw `cudaLaunchKernel` entry point remains an internal/generated boundary and is not an acceptable public RTC launch API.
+The repository provides `CudaKernelLibrary.Load(byte[])`, copied library inventory, name-based queries, kernel attribute updates, and an owner-safe `CudaKernelLibrary.Launch(...)` path. This Runtime-library path requires CUDA Toolkit 12.9 or later. `CudaDriverModule.Load(...)` and `Launch(...)` add a unified module path backed by dynamic `nvcuda.dll` / `libcuda.so.1` loading, a retained primary context, typed arguments, and a completion-event owner. Neither path exposes borrowed `cudaKernel_t`, `CUmodule`, or `CUfunction` values through the public C# API. The raw generated launch entry point remains internal.
 
 NVRTC integration is larger than one P/Invoke. It covers compiler-program lifetime, variable-length log and artifact copying, reproducible source/options metadata, compiled-code module ownership, typed kernel arguments, optional dynamic dependencies, and runtime packaging.
 
@@ -21,16 +21,19 @@ Both headers expose version/error APIs, program create/destroy, compile, program
 
 Windows headers, import libraries, DLLs, builtins, and exports for CUDA 11.8, CUDA 12.1, CUDA 12.9, and CUDA 13.2 are now audited by `eng/Export-CudaRtcCapabilityMatrix.ps1`. No Linux `.so` asset was found on the audited E drive or under the Windows Toolkit roots, so Linux SONAME and symbol support remain explicitly unverified and are not inferred from Windows.
 
+The matching `cuda.h` and `cuda.lib` Driver surface is audited by `eng/Export-CudaDriverCapabilityMatrix.ps1`, including context, module, launch, failure-cleanup stream synchronization, and event symbols. `driver.cpp` also compiles independently against all four installed header lines through the `jyppx_cuda_driver_compile_probe` target. These are vendor-surface and compile-compatibility proofs, not Linux or runtime proofs.
+
 ## Implemented Baseline (2026-07-28)
 
 - Native code now provides an optional dynamic loader and `JYPPX_CudaRtcProgram` owner. `JYPPX_NVRTC_LIBRARY` selects an exact library, while the core bridge has no static NVRTC link.
 - The ABI covers capability and dependency diagnostics, retained source/program names, virtual headers, name expressions, compile, logs, copied PTX/CUBIN/LTO IR, and copied lowered names. UTF-8, embedded NUL, duplicate, count, and byte limits are enforced, and C++ exceptions plus Windows SEH stay inside the bridge.
 - Managed code now exposes `CudaRtcCompiler`, `CudaRtcProgram`, `CudaRtcProgramSource`, `CudaRtcCompileOptions`, `CudaRtcCompilationResult`, and `CudaRtcArtifact` without public `IntPtr`, `SafeHandle`, or vendor program/kernel handles.
+- Native code now also provides an optional dynamic CUDA Driver loader, retained-primary-context `JYPPX_CudaDriverModule`, typed launch storage, and Driver event completion ownership through 9 ABI entry points. Managed code exposes `CudaDriver`, `CudaDriverModule`, and `CudaDriverKernelLaunch` without raw Driver handles.
 - `samples/CudaRuntimeCompilation` exercises virtual headers, a template lowered name, PTX, `sm_75` CUBIN, LTO IR where supported, repeated PTX SHA256 determinism, and an intentional compiler-failure log.
-- All four local compilers complete the compile smoke. PTX from 11.8, 12.1, and 12.9 loads through the current CUDA 12.9 `CudaKernelLibrary`, launches by name, and reads back 257 validated floats with the same output SHA256; 13.2 PTX is rejected by the current runtime/driver with `cudaErrorUnsupportedPtxVersion`, so 13.2 remains compile-only/load-rejected proof.
-- Evidence is stored in `artifacts/cuda-runtime-compilation/capability-matrix.json`, `local-smoke.json`, and `kernel-launch-native-abi-surface.json`. The first three records have `kernelLaunch=true`, `gpuReadback=true`, and `correctnessProof=true`; 13.2 explicitly retains all three as `false`. The sample also proves that disposing the library, stream, and input memory immediately after launch does not invalidate the completion owner.
+- All four local compilers complete the compile smoke. PTX from 11.8, 12.1, and 12.9 loads through both the current CUDA 12.9 `CudaKernelLibrary` and the current system Driver 12090, launches by name, and reads back 257 validated floats with the same output SHA256; 13.2 PTX is rejected with the corresponding unsupported-PTX-version diagnostic, so 13.2 remains compile-only/load-rejected proof.
+- Evidence is stored in `artifacts/cuda-runtime-compilation/capability-matrix.json`, `driver-capability-matrix.json`, `local-smoke.json`, `native-abi-surface.json`, `kernel-launch-native-abi-surface.json`, and `driver-native-abi-surface.json`. The first three smoke records have Runtime-library and Driver launch/readback/correctness/owner-retention fields set to true; 13.2 explicitly retains them as false.
 
-The remaining RTC work is a unified Driver module/function owner for CUDA 11.8/12.1, Linux runtime proof, materialized full-runtime `cuda-rtc` components, clean package consumers, and post-publish verification. Local Windows 12.9 bridge launch/readback success does not promote those lanes.
+The remaining RTC work is Linux runtime proof, materialized full-runtime `cuda-rtc` components, clean package consumers, and post-publish verification. Local Windows bridge/Driver launch/readback success does not promote those lanes.
 
 ## Design Invariants
 
@@ -56,6 +59,8 @@ The following high-level surface is implemented and covered by the public API ga
 - `CudaKernelLaunchConfiguration` and `CudaDim3` for non-zero grid/block and dynamic shared-memory configuration.
 - `CudaKernelArgument` for copied scalars or owner-bound `CudaMemory` plus a byte offset.
 - `CudaKernelLaunch` for completion ownership and leases over library, stream, and device memory.
+- `CudaDriver` for optional Driver capability and dependency diagnostics.
+- `CudaDriverModule` and `CudaDriverKernelLaunch` for copied module bytes, retained primary context, typed named-kernel launch, and completion ownership.
 
 PTX, CUBIN, and LTO IR are option- and target-dependent. The API must represent an unavailable artifact explicitly. A PTX hash proves artifact identity, not kernel-output correctness.
 
@@ -79,11 +84,11 @@ PTX, CUBIN, and LTO IR are option- and target-dependent. The API must represent 
 - Copy logs, lowered names, and artifact bytes; validate UTF-8, embedded NULs, duplicate inputs, disposed owners, and bounded sizes.
 - Add bilingual XML documentation, API snapshots, dependency diagnostics, and deterministic artifact contracts.
 
-### D. Compile to Load to Launch (Windows CUDA 12.9+ complete)
+### D. Compile to Load to Launch (local Windows complete)
 
 - On CUDA 12.9/13.2, first verify that NVRTC PTX/CUBIN artifacts load through `CudaKernelLibrary.Load(byte[])`.
 - `CudaKernelLibrary.Launch(...)` now provides owner-bound launch by name; borrowed `cudaKernel_t` values stay inside the bridge, while typed scalar/device-memory arguments and completion events remain owner-bound.
-- CUDA 11.8/12.1 lack the current Runtime library API. Provide a unified CUDA Driver module/function owner or document a deliberate support limit; never fill the gap with raw function pointers.
+- CUDA 11.8/12.1 lack the current Runtime library API. The dynamically loaded `CudaDriverModule` owner now provides the unified module/function path; borrowed functions stay inside the bridge and all module, context, stream, memory, and event lifetimes remain owner-bound.
 - Use typed argument packing and bridge-owned launch storage with explicit buffer, scalar, stream, and module lifetimes.
 
 ### E. Samples and Runtime Proof (local Windows complete)

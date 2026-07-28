@@ -141,6 +141,15 @@ internal static class GeneratedEntryPointNames
     public const string CudaDeviceSynchronize = "jyppx_cuda_device_synchronize";
     public const string CudaDeviceTrimGraphMemory = "jyppx_cuda_device_trim_graph_memory";
     public const string CudaDeviceUnregisterAsyncNotificationDeferred = "jyppx_cuda_device_unregister_async_notification_deferred";
+    public const string CudaDriverGetDependencyDiagnosticCopiedSafe = "jyppx_cuda_driver_get_dependency_diagnostic_safe";
+    public const string CudaDriverGetLoadedLibraryNameCopiedSafe = "jyppx_cuda_driver_get_loaded_library_name_safe";
+    public const string CudaDriverKernelLaunchDestroyIdempotentSafe = "jyppx_cuda_driver_kernel_launch_destroy_safe";
+    public const string CudaDriverKernelLaunchQueryCopiedSafe = "jyppx_cuda_driver_kernel_launch_query_safe";
+    public const string CudaDriverKernelLaunchSynchronizeOwnerSafe = "jyppx_cuda_driver_kernel_launch_synchronize_safe";
+    public const string CudaDriverModuleDestroyIdempotentSafe = "jyppx_cuda_driver_module_destroy_safe";
+    public const string CudaDriverModuleLaunchTypedOwnerSafe = "jyppx_cuda_driver_module_launch_typed_safe";
+    public const string CudaDriverModuleLoadDataCopyOwnerSafe = "jyppx_cuda_driver_module_load_data_copy_safe";
+    public const string CudaDriverQueryCapabilityCopiedSafe = "jyppx_cuda_driver_query_capability_safe";
     public const string CudaEventCreate = "jyppx_cuda_event_create";
     public const string CudaEventDestroy = "jyppx_cuda_event_destroy";
     public const string CudaEventElapsedTime = "jyppx_cuda_event_elapsed_time";

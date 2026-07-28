@@ -1,5 +1,45 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-28 CUDA Driver Module Owner
+
+本阶段在既有 NVRTC compile 与 CUDA 12.9+ Runtime-library launch 路径之外，完成动态 CUDA Driver module owner，
+为 CUDA 11.8/12.1 等没有 Runtime library API 的版本提供统一、pointer-free 的 named-kernel typed launch 路径。
+
+### 实现
+
+- `driver.cpp` 动态加载 `nvcuda.dll` / `libcuda.so.1`，支持 `JYPPX_CUDA_DRIVER_LIBRARY` 精确覆盖；核心 bridge
+  不静态链接 Driver import library。
+- native owner retain primary context，复制 module code，以 `cuModuleLoadDataEx` / `cuModuleUnload` 管理 module；
+  borrowed `CUfunction` 只在 bridge 内按名称查询，绝不穿过 C ABI。
+- typed launch 接受复制型 scalar 与 owner-bound device memory，使用 context push/pop、Driver event completion owner
+  和失败清理 `cuStreamSynchronize`；dynamic shared memory 在 `size_t` 转 `unsigned int` 前做原生 ABI 上限校验。
+- 9 个公开 C ABI 同时具有 C++ exception containment 与 Windows SEH guard；异常报告本身也做二次 catch，
+  completed-query 分支只执行一次 context pop。
+- managed 新增 `CudaDriver`、`CudaDriverCapability`、`CudaDriverModule`、`CudaDriverKernelLaunch` 及 internal SafeHandle/
+  interop；public surface 不暴露 `IntPtr`、`SafeHandle`、`CUmodule` 或 `CUfunction`。
+- CMake 新增 `jyppx_cuda_driver_compile_probe` OBJECT target，只编译 Driver translation unit，避免 TensorRT 兼容层
+  的既有错误阻断 CUDA Header-line 兼容性结论。
+
+### 验证
+
+- Windows CUDA 11.8/12.1/12.9/13.2 的 `cuda.h`、`cuda.lib` 与当前 `nvcuda.dll` 所需 symbols 全部审计通过；
+  `cuStreamSynchronize` 已纳入 capability matrix，Linux 保持 `unverified-local-assets-not-found`。
+- `driver.cpp` 分别在四版已安装 CUDA Header 下独立编译通过；CUDA 12.9 + TensorRT 11 完整 bridge 链接通过。
+- 当前系统 Driver 12090 下，11.8/12.1/12.9 NVRTC PTX 的 Driver load/launch/readback/correctness/owner-retention
+  全部为 true，三版 output SHA256 均为 `65dc411b0750ae9b6543bccb381f21537d69c11802db9bb45a427c2db16aa5d1`。
+  CUDA 13.2 PTX 以 `CUDA_ERROR_UNSUPPORTED_PTX_VERSION` 保持 load-rejected。
+- bindings 为 4001 API records / 201 manifests，幂等门禁通过；Driver ABI 9/9、Runtime launch ABI 4/4、
+  RTC ABI 12/12 declarations 与 PE exports 全部通过；RTC/Driver 专项测试 14/14。
+- CudaSharp 全 15 个目标框架 Release build 与完整 solution Debug build 均为 0 warning / 0 error；双语 XML 审计通过。
+
+### Proof Boundary
+
+- 四版独立 compile-probe 证明 `driver.cpp` 对本机 Header 的编译兼容性，不证明四套完整 TensorRT bridge 都可构建。
+- 11.8/12.1/12.9 运行结论是这些版本的 NVRTC PTX 在当前系统 Driver 12090 上的本机证明，不等于独立旧版
+  runtime-library bridge 或 package consumer 证明。
+- CUDA 13.2 launch、Linux Driver/RTC、full-runtime `cuda-rtc`、clean/public package consumer、post-publish 与
+  Owner authorization 仍未闭合；未 push、未触发 Actions、未发布或关闭 issue。
+
 ## 2026-07-28 CUDA RTC Owner-Bound Launch/Readback And Managed Source Module Layout
 
 本阶段完成 CUDA Runtime Compilation compile owner 与 CUDA 12.9+ runtime-library owner-bound named-kernel

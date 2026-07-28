@@ -132,6 +132,16 @@ JYPPX_StatusCode validate_kernel_launch(const JYPPX_CudaKernelLaunch* launch, co
     return validate_handle(reinterpret_cast<const KernelLaunchObject*>(launch), ObjectKind::KernelLaunch, name);
 }
 
+JYPPX_StatusCode validate_driver_module(const JYPPX_CudaDriverModule* module, const char* name)
+{
+    return validate_handle(reinterpret_cast<const DriverModuleObject*>(module), ObjectKind::DriverModule, name);
+}
+
+JYPPX_StatusCode validate_driver_kernel_launch(const JYPPX_CudaDriverKernelLaunch* launch, const char* name)
+{
+    return validate_handle(reinterpret_cast<const DriverKernelLaunchObject*>(launch), ObjectKind::DriverKernelLaunch, name);
+}
+
 JYPPX_StatusCode validate_execution_context(const JYPPX_CudaExecutionContext* context, const char* name)
 {
     return validate_handle(reinterpret_cast<const ExecutionContextObject*>(context), ObjectKind::ExecutionContext, name);

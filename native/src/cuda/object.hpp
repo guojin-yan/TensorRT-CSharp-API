@@ -31,7 +31,9 @@ enum class ObjectKind : uint32_t
     GraphConditionalHandle = 14,
     GraphConditionalNode = 15,
     GraphMemoryAllocation = 16,
-    KernelLaunch = 17
+    KernelLaunch = 17,
+    DriverModule = 18,
+    DriverKernelLaunch = 19
 };
 
 struct ObjectBase
@@ -225,6 +227,23 @@ struct KernelLaunchObject
 #endif
 };
 
+struct DriverModuleObject
+{
+    ObjectBase base;
+    void* context;
+    void* module;
+    int32_t device;
+    std::vector<uint8_t> retained_code;
+};
+
+struct DriverKernelLaunchObject
+{
+    ObjectBase base;
+    void* context;
+    void* event;
+    bool completed;
+};
+
 struct ExecutionContextObject
 {
     ObjectBase base;
@@ -256,6 +275,8 @@ JYPPX_StatusCode validate_texture_object(const JYPPX_CudaTextureObject* texture,
 JYPPX_StatusCode validate_surface_object(const JYPPX_CudaSurfaceObject* surface, const char* name);
 JYPPX_StatusCode validate_kernel_library(const JYPPX_CudaKernelLibrary* library, const char* name);
 JYPPX_StatusCode validate_kernel_launch(const JYPPX_CudaKernelLaunch* launch, const char* name);
+JYPPX_StatusCode validate_driver_module(const JYPPX_CudaDriverModule* module, const char* name);
+JYPPX_StatusCode validate_driver_kernel_launch(const JYPPX_CudaDriverKernelLaunch* launch, const char* name);
 JYPPX_StatusCode validate_execution_context(const JYPPX_CudaExecutionContext* context, const char* name);
 
 void set_cuda_error(const char* operation, int32_t error_code, const char* error_name, const char* error_message);

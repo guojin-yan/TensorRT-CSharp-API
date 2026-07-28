@@ -437,6 +437,7 @@ set(_jyppx_bridge_sources
   native/src/cuda/api.cpp
   native/src/cuda/object.cpp
   native/src/cuda/rtc.cpp
+  native/src/cuda/driver.cpp
   native/src/tensorrt/common/object.cpp
 )
 
@@ -575,6 +576,30 @@ target_compile_definitions(jyppxtrtbridge
   PUBLIC
     JYPPX_BRIDGE_LOGICAL_NAME="jyppxtrtbridge"
 )
+
+# Compile the Driver owner translation unit independently so CUDA header-line
+# compatibility can be proven even when an unrelated TensorRT surface blocks
+# the full bridge target.
+add_library(jyppx_cuda_driver_compile_probe OBJECT EXCLUDE_FROM_ALL
+  native/src/cuda/driver.cpp
+)
+target_include_directories(jyppx_cuda_driver_compile_probe
+  PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/native/include"
+)
+if(CUDAToolkit_FOUND)
+  target_include_directories(jyppx_cuda_driver_compile_probe PRIVATE "${CUDAToolkit_INCLUDE_DIRS}")
+endif()
+target_compile_definitions(jyppx_cuda_driver_compile_probe
+  PRIVATE
+    JYPPX_BRIDGE_BUILD=1
+    JYPPX_HAS_CUDA_TOOLKIT=${JYPPX_HAS_CUDA_TOOLKIT_VALUE}
+)
+if(MSVC)
+  target_compile_options(jyppx_cuda_driver_compile_probe PRIVATE /W4 /permissive-)
+else()
+  target_compile_options(jyppx_cuda_driver_compile_probe PRIVATE -Wall -Wextra -Wpedantic)
+endif()
 
 message(STATUS "JYPPX_ENABLE_TENSORRT_BINDINGS=${JYPPX_ENABLE_TENSORRT_BINDINGS}")
 message(STATUS "JYPPX_ENABLE_CUDA_BINDINGS=${JYPPX_ENABLE_CUDA_BINDINGS}")

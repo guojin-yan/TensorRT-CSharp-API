@@ -41,6 +41,14 @@ if (!capability.IsAvailable)
     return 2;
 }
 
+CudaDriverCapability driverCapability = CudaDriver.GetCapability();
+Console.WriteLine($"driver.capability.available={driverCapability.IsAvailable} version={driverCapability.DriverVersion} library={driverCapability.LoadedLibraryName} moduleLoad={driverCapability.SupportsModuleLoad} typedLaunch={driverCapability.SupportsTypedLaunch} contextInterop={driverCapability.SupportsContextInterop} completionEvents={driverCapability.SupportsCompletionEvents}");
+if (!driverCapability.IsAvailable)
+{
+    Console.Error.WriteLine(driverCapability.DependencyDiagnostic);
+    return 10;
+}
+
 CudaRtcCompilationResult success = CudaRtcCompiler.Compile(source, options);
 if (!success.Success)
 {
@@ -191,6 +199,93 @@ if (loadSucceeded && (!launchSucceeded || !gpuReadback || !correctnessProof))
     return 9;
 }
 
+bool driverLoadSucceeded = false;
+bool driverLaunchAttempted = false;
+bool driverLaunchSucceeded = false;
+bool driverGpuReadback = false;
+bool driverCorrectnessProof = false;
+bool driverCompletedBeforeSynchronize = false;
+bool driverOwnersDisposedBeforeSynchronize = false;
+float driverMaxAbsoluteError = 0;
+string driverOutputSha256 = string.Empty;
+string driverLoadDiagnostic = string.Empty;
+string driverLaunchDiagnostic = string.Empty;
+try
+{
+    using CudaDriverModule module = CudaDriverModule.Load(ptx.ToArray());
+    driverLoadSucceeded = true;
+    const int elementCount = 257;
+    const int threadsPerBlock = 128;
+    float[] leftValues = Enumerable.Range(0, elementCount).Select(index => index * 0.25f).ToArray();
+    float[] rightValues = Enumerable.Range(0, elementCount).Select(index => 100.0f - index * 0.125f).ToArray();
+    using var left = new CudaMemory(elementCount * sizeof(float));
+    using var right = new CudaMemory(elementCount * sizeof(float));
+    using var output = new CudaMemory(elementCount * sizeof(float));
+    using var stream = new CudaStream();
+    left.CopyFrom(leftValues);
+    right.CopyFrom(rightValues);
+    output.Fill(0);
+
+    driverLaunchAttempted = true;
+    var configuration = new CudaKernelLaunchConfiguration(
+        new CudaDim3((uint)((elementCount + threadsPerBlock - 1) / threadsPerBlock)),
+        new CudaDim3(threadsPerBlock));
+    using CudaDriverKernelLaunch launch = module.Launch(
+        "vector_add",
+        configuration,
+        stream,
+        CudaKernelArgument.FromDeviceMemory(left),
+        CudaKernelArgument.FromDeviceMemory(right),
+        CudaKernelArgument.FromDeviceMemory(output),
+        CudaKernelArgument.FromInt32(elementCount));
+    driverCompletedBeforeSynchronize = launch.IsCompleted;
+    module.Dispose();
+    stream.Dispose();
+    left.Dispose();
+    right.Dispose();
+    driverOwnersDisposedBeforeSynchronize = true;
+    launch.Synchronize();
+    driverLaunchSucceeded = launch.IsCompleted;
+
+    float[] actual = output.ToSingleArray(elementCount);
+    driverGpuReadback = actual.Length == elementCount;
+    for (int index = 0; index < actual.Length; ++index)
+    {
+        float expected = (leftValues[index] + rightValues[index]) * 2.0f;
+        driverMaxAbsoluteError = Math.Max(driverMaxAbsoluteError, Math.Abs(actual[index] - expected));
+    }
+    driverCorrectnessProof = driverGpuReadback && driverMaxAbsoluteError <= 1e-6f;
+    byte[] outputBytes = new byte[actual.Length * sizeof(float)];
+    Buffer.BlockCopy(actual, 0, outputBytes, 0, outputBytes.Length);
+    driverOutputSha256 = Convert.ToHexString(SHA256.HashData(outputBytes)).ToLowerInvariant();
+}
+catch (CudaException exception)
+{
+    if (driverLoadSucceeded)
+    {
+        driverLaunchDiagnostic = exception.Message;
+    }
+    else
+    {
+        driverLoadDiagnostic = exception.Message;
+    }
+}
+Console.WriteLine($"driver.load.attempted=True driver.load.succeeded={driverLoadSucceeded}");
+if (driverLoadDiagnostic.Length != 0)
+{
+    Console.WriteLine("driver.load.diagnostic=" + driverLoadDiagnostic.Replace(Environment.NewLine, " | "));
+}
+Console.WriteLine($"driver.launch.attempted={driverLaunchAttempted} driver.launch.succeeded={driverLaunchSucceeded} completedBeforeSynchronize={driverCompletedBeforeSynchronize} ownersDisposedBeforeSynchronize={driverOwnersDisposedBeforeSynchronize} gpuReadback={driverGpuReadback} correctness={driverCorrectnessProof} maxAbsoluteError={driverMaxAbsoluteError:G9} outputSha256={driverOutputSha256}");
+if (driverLaunchDiagnostic.Length != 0)
+{
+    Console.WriteLine("driver.launch.diagnostic=" + driverLaunchDiagnostic.Replace(Environment.NewLine, " | "));
+}
+if (driverLoadSucceeded && (!driverLaunchSucceeded || !driverGpuReadback || !driverCorrectnessProof))
+{
+    Console.Error.WriteLine("A loadable RTC artifact did not complete CUDA Driver owner-bound launch/readback correctness validation.");
+    return 11;
+}
+
 var brokenSource = new CudaRtcProgramSource(
     "extern \"C\" __global__ void intentionally_broken( {\n",
     "intentional-failure.cu");
@@ -205,4 +300,8 @@ string evidenceClassification = correctnessProof
     ? "local-toolkit-kernel-runtime-readback"
     : loadSucceeded ? "local-toolkit-compile-to-load" : "local-toolkit-compile-only-load-rejected";
 Console.WriteLine($"evidence.classification={evidenceClassification}; kernel-launch={launchSucceeded}; gpu-readback={gpuReadback}; correctness-proof={correctnessProof}");
+string driverEvidenceClassification = driverCorrectnessProof
+    ? "local-toolkit-driver-kernel-runtime-readback"
+    : driverLoadSucceeded ? "local-toolkit-driver-compile-to-load" : "local-toolkit-driver-compile-only-load-rejected";
+Console.WriteLine($"driver.evidence.classification={driverEvidenceClassification}; kernel-launch={driverLaunchSucceeded}; gpu-readback={driverGpuReadback}; correctness-proof={driverCorrectnessProof}");
 return 0;

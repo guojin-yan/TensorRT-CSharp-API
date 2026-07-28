@@ -559,6 +559,18 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_kernel_launch_synchronize_safe(JYPPX_Cu
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_kernel_launch_destroy_safe(JYPPX_CudaKernelLaunch* launch);
 /* END CUDA SIXTY-FOURTH BATCH OWNER-BOUND TYPED KERNEL LAUNCH */
 
+/* BEGIN CUDA SIXTY-FIFTH BATCH DRIVER MODULE OWNER */
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_driver_query_capability_safe(JYPPX_CudaDriverCapabilityInfo* out_info);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_driver_get_loaded_library_name_safe(char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_driver_get_dependency_diagnostic_safe(char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_driver_module_load_data_copy_safe(const uint8_t* code, size_t code_size, int32_t device, JYPPX_CudaDriverModule** out_module);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_driver_module_launch_typed_safe(JYPPX_CudaDriverModule* module, const char* kernel_name, JYPPX_CudaDim3 grid_dim, JYPPX_CudaDim3 block_dim, const JYPPX_CudaKernelArgumentDescriptor* arguments, size_t argument_count, const uint8_t* scalar_data, size_t scalar_data_size, size_t dynamic_shared_memory_bytes, JYPPX_CudaStream* stream, JYPPX_CudaDriverKernelLaunch** out_launch);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_driver_kernel_launch_query_safe(JYPPX_CudaDriverKernelLaunch* launch, JYPPX_Boolean* out_completed);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_driver_kernel_launch_synchronize_safe(JYPPX_CudaDriverKernelLaunch* launch);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_driver_kernel_launch_destroy_safe(JYPPX_CudaDriverKernelLaunch* launch);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_driver_module_destroy_safe(JYPPX_CudaDriverModule* module);
+/* END CUDA SIXTY-FIFTH BATCH DRIVER MODULE OWNER */
+
 /* BEGIN CUDA FIFTY-SECOND BATCH PRIMARY EXECUTION CONTEXT */
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_primary_execution_context_get_safe(int32_t device, JYPPX_CudaExecutionContext** out_context);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_primary_execution_context_release_wrapper_safe(JYPPX_CudaExecutionContext* context);

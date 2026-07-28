@@ -22,6 +22,8 @@ typedef struct JYPPX_CudaTextureObject JYPPX_CudaTextureObject;
 typedef struct JYPPX_CudaSurfaceObject JYPPX_CudaSurfaceObject;
 typedef struct JYPPX_CudaKernelLibrary JYPPX_CudaKernelLibrary;
 typedef struct JYPPX_CudaKernelLaunch JYPPX_CudaKernelLaunch;
+typedef struct JYPPX_CudaDriverModule JYPPX_CudaDriverModule;
+typedef struct JYPPX_CudaDriverKernelLaunch JYPPX_CudaDriverKernelLaunch;
 typedef struct JYPPX_CudaExecutionContext JYPPX_CudaExecutionContext;
 typedef struct JYPPX_CudaRtcProgram JYPPX_CudaRtcProgram;
 
@@ -59,6 +61,17 @@ typedef struct JYPPX_CudaRtcCapabilityInfo
     JYPPX_Boolean supports_deprecated_nvvm;
     JYPPX_Boolean supports_name_expressions;
 } JYPPX_CudaRtcCapabilityInfo;
+
+typedef struct JYPPX_CudaDriverCapabilityInfo
+{
+    JYPPX_Boolean dependency_available;
+    int32_t driver_version;
+    JYPPX_Boolean supports_module_load;
+    JYPPX_Boolean supports_function_lookup;
+    JYPPX_Boolean supports_typed_launch;
+    JYPPX_Boolean supports_context_interop;
+    JYPPX_Boolean supports_completion_events;
+} JYPPX_CudaDriverCapabilityInfo;
 
 typedef enum JYPPX_CudaMemcpyKind
 {

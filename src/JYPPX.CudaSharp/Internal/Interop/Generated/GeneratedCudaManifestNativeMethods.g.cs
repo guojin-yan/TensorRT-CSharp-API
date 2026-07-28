@@ -383,6 +383,33 @@ internal static partial class GeneratedCudaManifestNativeMethods
     internal static extern BridgeStatusCode jyppx_cuda_device_unregister_async_notification_deferred();
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_driver_get_dependency_diagnostic_safe(byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_driver_get_loaded_library_name_safe(byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_driver_kernel_launch_destroy_safe(IntPtr launch);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_driver_kernel_launch_query_safe(SafeCudaDriverKernelLaunchHandle launch, out int out_completed);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_driver_kernel_launch_synchronize_safe(SafeCudaDriverKernelLaunchHandle launch);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_driver_module_destroy_safe(IntPtr module);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_driver_module_launch_typed_safe(SafeCudaDriverModuleHandle module, IntPtr kernel_name, NativeCudaDim3 grid_dim, NativeCudaDim3 block_dim, IntPtr arguments, UIntPtr argument_count, byte[] scalar_data, UIntPtr scalar_data_size, UIntPtr dynamic_shared_memory_bytes, SafeCudaStreamHandle stream, out SafeCudaDriverKernelLaunchHandle out_launch);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_driver_module_load_data_copy_safe(byte[] code, UIntPtr code_size, int device, out SafeCudaDriverModuleHandle out_module);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_driver_query_capability_safe(out NativeCudaDriverCapabilityInfo out_info);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_cuda_event_create(uint flags, out SafeCudaEventHandle out_event);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]

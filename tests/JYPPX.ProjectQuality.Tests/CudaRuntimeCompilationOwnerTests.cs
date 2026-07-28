@@ -38,7 +38,11 @@ public sealed class CudaRuntimeCompilationOwnerTests
             typeof(CudaKernelLaunch),
             typeof(CudaKernelArgument),
             typeof(CudaKernelLaunchConfiguration),
-            typeof(CudaDim3)
+            typeof(CudaDim3),
+            typeof(CudaDriver),
+            typeof(CudaDriverCapability),
+            typeof(CudaDriverModule),
+            typeof(CudaDriverKernelLaunch)
         };
 
         foreach (Type type in rtcTypes)
@@ -86,6 +90,9 @@ public sealed class CudaRuntimeCompilationOwnerTests
         Assert.Contains("CudaKernelArgument.FromDeviceMemory", sample, StringComparison.Ordinal);
         Assert.Contains("CudaKernelArgument.FromInt32", sample, StringComparison.Ordinal);
         Assert.Contains("ownersDisposedBeforeSynchronize", sample, StringComparison.Ordinal);
+        Assert.Contains("CudaDriverModule.Load", sample, StringComparison.Ordinal);
+        Assert.Contains("CudaDriverKernelLaunch", sample, StringComparison.Ordinal);
+        Assert.Contains("local-toolkit-driver-kernel-runtime-readback", sample, StringComparison.Ordinal);
         Assert.Contains("local-toolkit-kernel-runtime-readback", sample, StringComparison.Ordinal);
         Assert.Contains("not package-consumer", readme, StringComparison.Ordinal);
     }
@@ -107,7 +114,7 @@ public sealed class CudaRuntimeCompilationOwnerTests
         Assert.False(root.GetProperty("loaderContract").GetProperty("coreBridgeStaticNvrtcLink").GetBoolean());
 
         using JsonDocument smoke = JsonDocument.Parse(ReadSource("artifacts", "cuda-runtime-compilation", "local-smoke.json"));
-        Assert.Equal(3, smoke.RootElement.GetProperty("schemaVersion").GetInt32());
+        Assert.Equal(4, smoke.RootElement.GetProperty("schemaVersion").GetInt32());
         JsonElement[] records = smoke.RootElement.GetProperty("records").EnumerateArray().ToArray();
         Assert.Equal(4, records.Length);
         Assert.All(records, item =>
@@ -131,6 +138,25 @@ public sealed class CudaRuntimeCompilationOwnerTests
         Assert.False(records[3].GetProperty("gpuReadback").GetBoolean());
         Assert.False(records[3].GetProperty("correctnessProof").GetBoolean());
         Assert.False(records[3].GetProperty("ownersDisposedBeforeSynchronize").GetBoolean());
+        Assert.All(records, item =>
+        {
+            Assert.True(item.GetProperty("driverCapabilityAvailable").GetBoolean());
+            Assert.True(item.GetProperty("driverVersion").GetInt32() > 0);
+        });
+        Assert.All(records.Take(3), item =>
+        {
+            Assert.True(item.GetProperty("driverLoadSucceeded").GetBoolean());
+            Assert.True(item.GetProperty("driverKernelLaunch").GetBoolean());
+            Assert.True(item.GetProperty("driverGpuReadback").GetBoolean());
+            Assert.True(item.GetProperty("driverCorrectnessProof").GetBoolean());
+            Assert.True(item.GetProperty("driverOwnersDisposedBeforeSynchronize").GetBoolean());
+            Assert.Equal(item.GetProperty("outputSha256").GetString(), item.GetProperty("driverOutputSha256").GetString());
+            Assert.Equal("local-toolkit-driver-kernel-runtime-readback", item.GetProperty("driverEvidenceClassification").GetString());
+        });
+        Assert.False(records[3].GetProperty("driverLoadSucceeded").GetBoolean());
+        Assert.False(records[3].GetProperty("driverKernelLaunch").GetBoolean());
+        Assert.False(records[3].GetProperty("driverCorrectnessProof").GetBoolean());
+        Assert.Contains("CUDA_ERROR_UNSUPPORTED_PTX_VERSION", records[3].GetProperty("driverLoadDiagnostic").GetString(), StringComparison.Ordinal);
         Assert.True(records[2].GetProperty("loadSucceeded").GetBoolean());
         Assert.False(records[3].GetProperty("loadSucceeded").GetBoolean());
         Assert.Contains("cudaErrorUnsupportedPtxVersion", records[3].GetProperty("loadDiagnostic").GetString(), StringComparison.Ordinal);
@@ -175,6 +201,15 @@ public sealed class CudaRuntimeCompilationOwnerTests
         Assert.Equal(4, launchRoot.GetProperty("matchedPeExportCount").GetInt32());
         Assert.Equal(0, launchRoot.GetProperty("missingDeclarationCount").GetInt32());
         Assert.Equal(0, launchRoot.GetProperty("missingPeExportCount").GetInt32());
+
+        using JsonDocument driverAbi = JsonDocument.Parse(ReadSource("artifacts", "cuda-runtime-compilation", "driver-native-abi-surface.json"));
+        JsonElement driverRoot = driverAbi.RootElement;
+        Assert.True(driverRoot.GetProperty("passed").GetBoolean());
+        Assert.Equal(9, driverRoot.GetProperty("manifestEntryPointCount").GetInt32());
+        Assert.Equal(9, driverRoot.GetProperty("declaredEntryPointCount").GetInt32());
+        Assert.Equal(9, driverRoot.GetProperty("matchedPeExportCount").GetInt32());
+        Assert.Equal(0, driverRoot.GetProperty("missingDeclarationCount").GetInt32());
+        Assert.Equal(0, driverRoot.GetProperty("missingPeExportCount").GetInt32());
     }
 
     [Fact]
@@ -257,6 +292,67 @@ public sealed class CudaRuntimeCompilationOwnerTests
             Assert.Equal(item.Size, item.Argument.ScalarSizeInBytes);
             Assert.Equal(0, item.Argument.MemoryOffset);
         });
+    }
+
+    [Fact]
+    public void DriverCapabilityMatrixKeepsDynamicLoaderAndLinuxBoundaries()
+    {
+        using JsonDocument matrix = JsonDocument.Parse(ReadSource("artifacts", "cuda-runtime-compilation", "driver-capability-matrix.json"));
+        JsonElement root = matrix.RootElement;
+        JsonElement[] windows = root.GetProperty("windows").EnumerateArray().ToArray();
+        JsonElement[] linux = root.GetProperty("linux").EnumerateArray().ToArray();
+        Assert.Equal(new[] { "11.8", "12.1", "12.9", "13.2" }, windows.Select(item => item.GetProperty("toolkitVersion").GetString()));
+        Assert.All(windows, item =>
+        {
+            Assert.Equal("local-header-import-lib-driver-export-verified", item.GetProperty("evidenceState").GetString());
+            JsonElement capabilities = item.GetProperty("capabilities");
+            Assert.True(capabilities.GetProperty("moduleLoad").GetBoolean());
+            Assert.True(capabilities.GetProperty("functionLookup").GetBoolean());
+            Assert.True(capabilities.GetProperty("typedLaunch").GetBoolean());
+            Assert.True(capabilities.GetProperty("failureCleanupSynchronization").GetBoolean());
+            Assert.True(capabilities.GetProperty("contextInterop").GetBoolean());
+            Assert.True(capabilities.GetProperty("completionEvent").GetBoolean());
+            Assert.True(item.GetProperty("symbols").GetProperty("cuStreamSynchronize").GetProperty("driverExported").GetBoolean());
+        });
+        Assert.All(linux, item => Assert.Equal("unverified-local-assets-not-found", item.GetProperty("evidenceState").GetString()));
+        JsonElement loader = root.GetProperty("loaderContract");
+        Assert.Equal("optional-dynamic", loader.GetProperty("dependencyMode").GetString());
+        Assert.Equal("JYPPX_CUDA_DRIVER_LIBRARY", loader.GetProperty("exactOverrideEnvironmentVariable").GetString());
+        Assert.False(loader.GetProperty("coreBridgeStaticDriverLink").GetBoolean());
+    }
+
+    [Fact]
+    public void DriverModuleOwnerRetainsContextAndKeepsBorrowedFunctionInsideBridge()
+    {
+        string native = ReadSource("native", "src", "cuda", "driver.cpp");
+        string cmake = ReadSource("CMakeLists.txt");
+        string managed = ReadSource("src", "JYPPX.CudaSharp", "Kernels", "CudaDriverKernelLaunch.cs") +
+            ReadSource("src", "JYPPX.CudaSharp", "Kernels", "CudaDriverModule.cs");
+        Assert.Contains("JYPPX_CUDA_DRIVER_LIBRARY", native, StringComparison.Ordinal);
+        Assert.Contains("LoadLibraryA", native, StringComparison.Ordinal);
+        Assert.Contains("dlopen", native, StringComparison.Ordinal);
+        Assert.Contains("cuDevicePrimaryCtxRetain", native, StringComparison.Ordinal);
+        Assert.Contains("cuDevicePrimaryCtxRelease", native, StringComparison.Ordinal);
+        Assert.Contains("cuCtxPushCurrent_v2", native, StringComparison.Ordinal);
+        Assert.Contains("cuModuleLoadDataEx", native, StringComparison.Ordinal);
+        Assert.Contains("cuModuleGetFunction", native, StringComparison.Ordinal);
+        Assert.Contains("cuLaunchKernel", native, StringComparison.Ordinal);
+        Assert.Contains("cuStreamSynchronize", native, StringComparison.Ordinal);
+        Assert.Contains("JYPPX_CUDA_DRIVER_GUARD", native, StringComparison.Ordinal);
+        Assert.Contains("std::numeric_limits<unsigned int>::max", native, StringComparison.Ordinal);
+        Assert.True(
+            native.IndexOf("owner->retained_code.assign", StringComparison.Ordinal) <
+            native.IndexOf("api.primary_ctx_retain", StringComparison.Ordinal));
+        Assert.Contains("SafeCudaHandleLease.Create", managed, StringComparison.Ordinal);
+        Assert.Contains("jyppx_cuda_driver_compile_probe", cmake, StringComparison.Ordinal);
+        Assert.DoesNotContain("CUDA::cuda_driver", cmake, StringComparison.Ordinal);
+        Assert.DoesNotContain("public IntPtr", managed, StringComparison.Ordinal);
+
+        Assert.Throws<ArgumentNullException>(() => CudaDriverModule.Load(null!));
+        Assert.Throws<ArgumentException>(() => CudaDriverModule.Load(Array.Empty<byte>()));
+        Assert.Throws<ArgumentOutOfRangeException>(() => CudaDriverModule.Load(new byte[] { 0 }, -1));
+        CudaDriverModule module = (CudaDriverModule)RuntimeHelpers.GetUninitializedObject(typeof(CudaDriverModule));
+        Assert.Throws<ArgumentException>(() => module.Launch("bad\0name", default, null!, Array.Empty<CudaKernelArgument>()));
     }
 
     private static IEnumerable<Type> GetExposedTypes(MemberInfo member)

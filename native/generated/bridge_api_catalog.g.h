@@ -136,6 +136,15 @@
 #define JYPPX_API_CUDA_DEVICE_SYNCHRONIZE "jyppx_cuda_device_synchronize" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_DEVICE_TRIM_GRAPH_MEMORY "jyppx_cuda_device_trim_graph_memory" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_DEVICE_UNREGISTER_ASYNC_NOTIFICATION_DEFERRED "jyppx_cuda_device_unregister_async_notification_deferred" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_DRIVER_GET_DEPENDENCY_DIAGNOSTIC_COPIED_SAFE "jyppx_cuda_driver_get_dependency_diagnostic_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_DRIVER_GET_LOADED_LIBRARY_NAME_COPIED_SAFE "jyppx_cuda_driver_get_loaded_library_name_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_DRIVER_KERNEL_LAUNCH_DESTROY_IDEMPOTENT_SAFE "jyppx_cuda_driver_kernel_launch_destroy_safe" // module=cuda; line=common; ownership=callee-destroys; manualOverride=false
+#define JYPPX_API_CUDA_DRIVER_KERNEL_LAUNCH_QUERY_COPIED_SAFE "jyppx_cuda_driver_kernel_launch_query_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_DRIVER_KERNEL_LAUNCH_SYNCHRONIZE_OWNER_SAFE "jyppx_cuda_driver_kernel_launch_synchronize_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_CUDA_DRIVER_MODULE_DESTROY_IDEMPOTENT_SAFE "jyppx_cuda_driver_module_destroy_safe" // module=cuda; line=common; ownership=callee-destroys; manualOverride=false
+#define JYPPX_API_CUDA_DRIVER_MODULE_LAUNCH_TYPED_OWNER_SAFE "jyppx_cuda_driver_module_launch_typed_safe" // module=cuda; line=common; ownership=caller-destroys; manualOverride=false
+#define JYPPX_API_CUDA_DRIVER_MODULE_LOAD_DATA_COPY_OWNER_SAFE "jyppx_cuda_driver_module_load_data_copy_safe" // module=cuda; line=common; ownership=caller-destroys; manualOverride=false
+#define JYPPX_API_CUDA_DRIVER_QUERY_CAPABILITY_COPIED_SAFE "jyppx_cuda_driver_query_capability_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_EVENT_CREATE "jyppx_cuda_event_create" // module=cuda; line=common; ownership=caller-destroys; manualOverride=false
 #define JYPPX_API_CUDA_EVENT_DESTROY "jyppx_cuda_event_destroy" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_EVENT_ELAPSED_TIME "jyppx_cuda_event_elapsed_time" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
