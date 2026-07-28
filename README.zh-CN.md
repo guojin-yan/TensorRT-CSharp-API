@@ -186,6 +186,7 @@ TensorRtSharp4.0 是面向生产部署的 TensorRT / CUDA .NET 桥接工程。
 - 不可替代 proof 清单：`docs/articles/zh-cn/release-proof-non-substitutes.md`
 - 文章索引与推荐发布顺序：`docs/articles/zh-cn/release-article-index-and-publishing-order.md`
 - 技术文章全量收口台账：`docs/articles/zh-cn/publishing/technical-article-closure-ledger.md`
+- 技术文章基础第一批审计（2-6、10、15-16、19）：`docs/articles/zh-cn/publishing/technical-article-foundations-first-batch-audit.md`
 - README 前台入口检查清单：`docs/articles/zh-cn/release-readme-frontpage-checklist.md`
 - Owner 最后一公里执行顺序：`docs/articles/zh-cn/release-final-owner-action-sequence.md`
 - Release issue close record 校验器：`eng/Test-ReleaseIssueCloseRecord.ps1`

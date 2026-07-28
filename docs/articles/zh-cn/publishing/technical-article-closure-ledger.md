@@ -5,13 +5,13 @@
 - record kind: `technical-article-closure-ledger`
 - ledger state: `content-closure-audited-release-frozen`
 - source roadmap: `docs/articles/zh-cn/technical-article-roadmap.md`
-- source roadmap SHA256: `f9b2fa2a8276cfdfa262bc5b8fb300599aaea7e3bf5766b5089ffec3f6fa45bc`
+- source roadmap SHA256: `439ec6e3e4de40a5f09080d186805896ddeb80ec589001bc600ca5871bf70c94`
 - article count: `103`
 - supplemental article count: `1`
-- content complete count: `80`
-- complete long-form count: `16`
+- content complete count: `89`
+- complete long-form count: `18`
 - canonical covered count: `10`
-- needs expansion count: `23`
+- needs expansion count: `14`
 - owner/runtime proof required count: `42`
 - external dependency required count: `56`
 - target forbidden marker count: `0`
@@ -32,24 +32,24 @@ Content closure, canonical mapping, article length, code-path references, and va
 | ID | Series | Title | Content state | Proof state | Canonical ID | Canonical article | Characters | Proof dependencies |
 |---:|---|---|---|---|---:|---|---:|---|
 | 1 | 项目总览 | TensorRtSharp4.0 是什么 | `complete-article` | `not-required-for-content-closure` | 1 | `docs/articles/zh-cn/blog-project-introduction.md` | 5170 | source-quality-only |
-| 2 | 项目总览 | 为什么不是简单 P/Invoke | `needs-expansion` | `not-required-for-content-closure` | 2 | `docs/articles/zh-cn/why-not-plain-pinvoke.md` | 2602 | source-quality-only |
-| 3 | 项目总览 | 从接口清零到 deferred 边界提升 | `needs-expansion` | `not-required-for-content-closure` | 3 | `docs/articles/zh-cn/interface-zero-to-deferred-boundary.md` | 3905 | source-quality-only |
-| 4 | 项目总览 | TRT8/TRT10/TRT11 跨版本策略 | `needs-expansion` | `not-required-for-content-closure` | 4 | `docs/articles/zh-cn/trt-cross-version-strategy.md` | 3040 | source-quality-only |
-| 5 | 安装部署 | Windows 本地开发环境准备 | `needs-expansion` | `not-required-for-content-closure` | 5 | `docs/articles/zh-cn/windows-local-dev-environment.md` | 3592 | source-quality-only |
-| 6 | 安装部署 | runtime package 和 split package 怎么选 | `needs-expansion` | `not-required-for-content-closure` | 6 | `docs/articles/zh-cn/runtime-package-selection.md` | 2922 | source-quality-only |
+| 2 | 项目总览 | 为什么不是简单 P/Invoke | `complete-article` | `not-required-for-content-closure` | 2 | `docs/articles/zh-cn/why-not-plain-pinvoke.md` | 8942 | source-quality-only |
+| 3 | 项目总览 | 从接口清零到 deferred 边界提升 | `complete-article` | `not-required-for-content-closure` | 3 | `docs/articles/zh-cn/interface-zero-to-deferred-boundary.md` | 9181 | source-quality-only |
+| 4 | 项目总览 | TRT8/TRT10/TRT11 跨版本策略 | `complete-article` | `not-required-for-content-closure` | 4 | `docs/articles/zh-cn/trt-cross-version-strategy.md` | 9925 | source-quality-only |
+| 5 | 安装部署 | Windows 本地开发环境准备 | `complete-article` | `not-required-for-content-closure` | 5 | `docs/articles/zh-cn/windows-local-dev-environment.md` | 9495 | source-quality-only |
+| 6 | 安装部署 | runtime package 和 split package 怎么选 | `complete-article` | `not-required-for-content-closure` | 6 | `docs/articles/zh-cn/runtime-package-selection.md` | 10071 | source-quality-only |
 | 7 | 安装部署 | NuGet 消费端验证全流程 | `complete-article` | `not-required-for-content-closure` | 7 | `docs/articles/zh-cn/nuget-package-consumer-validation-flow.md` | 5115 | source-quality-only |
 | 8 | 安装部署 | package readiness summary 怎么读 | `complete-article` | `not-required-for-content-closure` | 8 | `docs/articles/zh-cn/readiness-summary-guide.md` | 4578 | source-quality-only |
 | 9 | 安装部署 | CUDA error 35 与驱动兼容排查 | `complete-article` | `not-required-for-content-closure` | 9 | `docs/articles/zh-cn/cuda-error-35-troubleshooting.md` | 5240 | source-quality-only |
-| 10 | 接口体系 | TensorRT Builder/Runtime/Engine 对象模型 | `needs-expansion` | `not-required-for-content-closure` | 10 | `docs/articles/zh-cn/tensorrt-object-model.md` | 1031 | source-quality-only |
+| 10 | 接口体系 | TensorRT Builder/Runtime/Engine 对象模型 | `complete-article` | `not-required-for-content-closure` | 10 | `docs/articles/zh-cn/tensorrt-object-model.md` | 11230 | source-quality-only |
 | 11 | 接口体系 | ExecutionContext 与 inference binding | `complete-article` | `not-required-for-content-closure` | 11 | `docs/articles/zh-cn/inference-bindings-tutorial.md` | 5038 | source-quality-only |
 | 12 | 接口体系 | Dynamic Shape 与 Optimization Profile | `complete-article` | `not-required-for-content-closure` | 12 | `docs/articles/zh-cn/dynamic-shape-optimization-profile-tutorial.md` | 5874 | source-quality-only |
 | 13 | 接口体系 | ONNX Parser 到 Serialized Engine | `complete-article` | `not-required-for-content-closure` | 13 | `docs/articles/zh-cn/onnx-parser-to-serialized-engine-tutorial.md` | 4952 | source-quality-only |
 | 14 | 接口体系 | Plugin Inventory 只读 API | `complete-article` | `not-required-for-content-closure` | 14 | `docs/articles/zh-cn/plugin-inventory-readonly-api.md` | 8351 | source-quality-only |
-| 15 | 接口体系 | Plugin Serialization Paths | `needs-expansion` | `not-required-for-content-closure` | 15 | `docs/articles/zh-cn/plugin-serialization-paths.md` | 2304 | source-quality-only |
-| 16 | CUDA | CUDA memory wrapper 入门 | `needs-expansion` | `not-required-for-content-closure` | 16 | `docs/articles/zh-cn/cuda-memory-wrapper.md` | 1938 | source-quality-only |
+| 15 | 接口体系 | Plugin Serialization Paths | `complete-article` | `not-required-for-content-closure` | 15 | `docs/articles/zh-cn/plugin-serialization-paths.md` | 10641 | source-quality-only |
+| 16 | CUDA | CUDA memory wrapper 入门 | `complete-long-form` | `not-required-for-content-closure` | 16 | `docs/articles/zh-cn/cuda-memory-wrapper.md` | 12371 | source-quality-only |
 | 17 | CUDA | CUDA stream/event 与跨 stream 同步 | `complete-article` | `not-required-for-content-closure` | 17 | `docs/articles/zh-cn/cuda-stream-event-multistream-tutorial.md` | 4725 | source-quality-only |
 | 18 | CUDA | CUDA Graph 当前能力与边界 | `complete-article` | `not-required-for-content-closure` | 18 | `docs/articles/zh-cn/cuda-graph-capabilities-boundary.md` | 4711 | source-quality-only |
-| 19 | CUDA | CUDA memory range APIs | `needs-expansion` | `not-required-for-content-closure` | 19 | `docs/articles/zh-cn/cuda-memory-range-apis.md` | 697 | source-quality-only |
+| 19 | CUDA | CUDA memory range APIs | `complete-long-form` | `not-required-for-content-closure` | 19 | `docs/articles/zh-cn/cuda-memory-range-apis.md` | 12849 | source-quality-only |
 | 20 | 案例教程 | 最小 identity network 推理 | `complete-article` | `not-required-for-content-closure` | 20 | `docs/articles/zh-cn/inference-bindings-tutorial.md` | 5038 | source-quality-only |
 | 21 | 案例教程 | Dynamic batch 推理教程 | `complete-article` | `not-required-for-content-closure` | 21 | `docs/articles/zh-cn/dynamic-shape-optimization-profile-tutorial.md` | 5874 | source-quality-only |
 | 22 | 案例教程 | ONNX 转 TensorRT engine 教程 | `complete-article` | `not-required-for-content-closure` | 22 | `docs/articles/zh-cn/onnx-parser-to-serialized-engine-tutorial.md` | 4952 | source-quality-only |
@@ -122,7 +122,7 @@ Content closure, canonical mapping, article length, code-path references, and va
 | 89 | 宣发素材 | 项目对外介绍与发布边界素材包 | `complete-long-form` | `multiple-owner-or-runtime-proofs-required` | 89 | `docs/articles/zh-cn/project-release-story-and-boundaries.md` | 15423 | post-publish-verification, package-consumer-runtime |
 | 90 | Owner Backlog | Release Owner Proof Backlog | `complete-article` | `multiple-owner-or-runtime-proofs-required` | 90 | `docs/articles/zh-cn/release-owner-handoff.md` | 5719 | post-publish-verification, package-consumer-runtime, linux-runner-proof, real-model-runtime, owner-authorization |
 | 91 | 发布边界 | Release Proof 不可替代清单 | `complete-article` | `not-required-for-content-closure` | 91 | `docs/articles/zh-cn/release-proof-non-substitutes.md` | 5289 | source-quality-only |
-| 92 | 发布索引 | 发布文章索引与推荐发布顺序 | `complete-long-form` | `not-required-for-content-closure` | 92 | `docs/articles/zh-cn/technical-article-roadmap.md` | 33930 | source-quality-only |
+| 92 | 发布索引 | 发布文章索引与推荐发布顺序 | `complete-long-form` | `not-required-for-content-closure` | 92 | `docs/articles/zh-cn/technical-article-roadmap.md` | 34219 | source-quality-only |
 | 93 | README 门面 | README 前台入口检查清单 | `complete-operational-guide` | `package-consumer-owner-proof-required` | 93 | `docs/articles/zh-cn/release-readme-frontpage-checklist.md` | 3075 | package-consumer-runtime |
 | 94 | Owner 顺序 | Release Owner 最后一公里执行顺序 | `complete-article` | `multiple-owner-or-runtime-proofs-required` | 94 | `docs/articles/zh-cn/release-final-owner-action-sequence.md` | 10626 | post-publish-verification, package-consumer-runtime, linux-runner-proof, real-model-runtime, owner-authorization |
 | 95 | 最终总检 | README 前台与 Proof Boundary 最终审计 | `complete-operational-guide` | `multiple-owner-or-runtime-proofs-required` | 95 | `docs/articles/zh-cn/release-frontpage-and-proof-boundary-final-audit.md` | 4474 | post-publish-verification, package-consumer-runtime, real-model-runtime |

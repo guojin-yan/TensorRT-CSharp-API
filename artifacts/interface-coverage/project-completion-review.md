@@ -1,5 +1,54 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-28 Technical Article Foundations First Batch
+
+本阶段一次性完成技术文章路线图第一组 9 条（2-6、10、15-16、19）的正文扩写，围绕 stable C ABI、
+跨版本 manifest/guard、Windows 开发与 runtime package、TensorRT 对象模型、plugin serialization、
+CUDA memory wrapper/range API 建立可独立发布的完整教程。正文完成只代表 source-quality closure，
+不替代真实 runtime、package consumer、post-publish 或 owner authorization 证明。
+
+### 九篇正文收口
+
+- 9 篇文章由 22,031 字符扩为 94,705 字符，净增 72,674；当前包含 239 个标题、104 个代码块和
+  17 个 Mermaid 图，2 篇达到 `complete-long-form`，7 篇达到 `complete-article`。
+- native bridge 文章串联 C ABI、generated interop、safe handle、caller-buffer 与错误状态；接口清零文章
+  区分 coverage、ABI presence、implemented-with-deferred-history 和真实 runtime proof。
+- 跨版本与 Windows/runtime package 文章完整列明 TRT8/TRT10/TRT11、18 个 runtime key、6 个 Windows
+  runtime key、version guard、local manifest、E 盘工作区和 consumer validator。
+- 对象模型文章覆盖 logger、builder、runtime、engine、execution context 与 inference bindings 的所有权顺序；
+  plugin serialization 文章严格区分 build-time serialization list、plugin load/register、callback 和 deferred 边界。
+- CUDA 两篇文章覆盖 owner-safe memory/pinned memory/stream 生命周期、range copy/memset、offset/length 校验、
+  同步/异步语义、smoke 输出和错误分层；所有 proof promotion flag 均保持 false。
+
+### Audit、Ledger 与导航
+
+- 新增 `eng/Export-TechnicalArticleFoundationsFirstBatchAudit.ps1` 及稳定 JSON/Markdown 输出，核对 9/9
+  canonical article、必需 marker/anchor、92 个仓库引用、36 个 Markdown 链接和禁用声明。
+- 新增 `TechnicalArticleFoundationsFirstBatchTests`，动态验证 exporter 确定性、正文结构、链接/引用、
+  roadmap/closure ledger 投影和发布冻结字段。
+- closure ledger 从 80 complete / 23 needs expansion 推进到 89 / 14；完整长文从 16 增至 18，完整文章
+  从 44 增至 51，10 条操作指南和 10 条 canonical coverage 保持不变。
+- 路线图、README 中英文版、docs index/toc 已同步；剩余 14 条固定为 28-32、38-45、103，下一批一次处理。
+
+### Verification
+
+- 首批专项：4/4 通过；文章/ledger/roadmap/Publishing 集合：86/86 通过。
+- Plugin/CUDA/bridge/preflight 相关集合：33/33 通过；首批专项加精确 release docs compatibility：5/5 通过。
+- 两个 exporter 连续执行两轮，四个 JSON/Markdown 输出 SHA256 均保持一致；missing marker、anchor、
+  repository reference、Markdown link 和 forbidden finding 均为 0。
+- 完整 `TensorRtSharp.sln` Debug build：0 warning / 0 error；stale release claims：扫描 1124 个文件、0 findings。
+- `git diff --check` 通过；提交前关闭 build server，并复核仓库相关 `vstest`/`testhost`/`pwsh` 无残留。
+
+### C 盘与发布边界
+
+- Downloads/用户 Temp 今日无 TensorRT、TensorRtSharp、JYPPX、ONNX 或 engine 项目目录，仓库内
+  `TestResults` 为 0；唯一 100 MB 大文件是 3 月创建的 Excel `XLActiveUserTrace.etl`，明确保留。
+- 本次 build 产生的随机 Temp 目录 `1xpjukus.uuc` 仅含一个 0 字节 .NET 10.0.300 workload 临时 nupkg；
+  build-server shutdown 后已核对 Temp 根、绝对路径、reparse 属性和唯一文件并精确删除。
+- 未执行 push、GitHub Actions、workflow dispatch、NuGet/GitHub Packages/GitHub Release 发布或 issue close。
+- `performsPublish=false`、`canPublishPublicly=false`、`canCloseReleaseIssue=false`；42 条 owner/runtime proof
+  dependency 没有因文章完成而晋级。
+
 ## 2026-07-28 Technical Article Closure Ledger
 
 本阶段以 103 条技术文章路线图为整体建立可机器复算的 closure ledger，并集中收口 63-71/79 的

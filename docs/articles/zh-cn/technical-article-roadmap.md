@@ -66,31 +66,34 @@
 - `docs/articles/zh-cn/publishing/technical-article-closure-ledger.json`
 - `docs/articles/zh-cn/publishing/technical-article-closure-ledger.md`
 - exporter：`eng/Export-TechnicalArticleClosureLedger.ps1`
+- 第一批基础文章审计：`docs/articles/zh-cn/publishing/technical-article-foundations-first-batch-audit.json`
+- 第一批基础文章审计：`docs/articles/zh-cn/publishing/technical-article-foundations-first-batch-audit.md`
+- 第一批审计 exporter：`eng/Export-TechnicalArticleFoundationsFirstBatchAudit.ps1`
 
 矩阵中已废弃的旧检测专用样例名不得重新作为文章、样例或发布 proof 入口出现；统一入口是 `samples/YoloVision`。`applications/TensorRtExec` 与 `samples/OnnxToEngine` 可以产生 build/report/sidecar 证据，但不能替代 Classification/YoloVision 真实模型 runner，也不能替代 release proof record。
 
 | 编号 | 系列 | 标题 | 主要内容 | 样例/证据 | 资产要求 | 状态 |
 | ---: | --- | --- | --- | --- | --- | --- |
 | 1 | 项目总览 | TensorRtSharp4.0 是什么 | 项目定位、C# 到 TensorRT/CUDA bridge、适用人群、当前边界 | `docs/articles/zh-cn/project-overview.md`、`docs/articles/zh-cn/blog-project-introduction.md` | 无 | 博客长文初稿已补 |
-| 2 | 项目总览 | 为什么不是简单 P/Invoke | ABI 稳定、no-throw C ABI、对象生命周期、跨版本 guard | `docs/articles/zh-cn/why-not-plain-pinvoke.md` | 无 | 正文已起草 |
-| 3 | 项目总览 | 从接口清零到 deferred 边界提升 | 解释 manifest/source 覆盖和真实 API 可用性的区别 | `docs/articles/zh-cn/interface-zero-to-deferred-boundary.md` | 无 | 正文已起草 |
-| 4 | 项目总览 | TRT8/TRT10/TRT11 跨版本策略 | version guard、manifest、native 实现、托管路由一致性 | `docs/articles/zh-cn/trt-cross-version-strategy.md` | 无 | 正文已起草 |
-| 5 | 安装部署 | Windows 本地开发环境准备 | .NET、CMake、CUDA、TensorRT、cuDNN、development probing | `docs/articles/zh-cn/windows-local-dev-environment.md` | 本机 NVIDIA SDK | 正文已起草 |
-| 6 | 安装部署 | runtime package 和 split package 怎么选 | managed、bridge、cuda-cudnn、tensorrt、collection/full package | `docs/articles/zh-cn/runtime-package-selection.md` | 本地 nupkg | 正文已起草 |
+| 2 | 项目总览 | 为什么不是简单 P/Invoke | ABI 稳定、no-throw C ABI、对象生命周期、跨版本 guard | `docs/articles/zh-cn/why-not-plain-pinvoke.md` | 无 | 完整教程已收口 |
+| 3 | 项目总览 | 从接口清零到 deferred 边界提升 | 解释 manifest/source 覆盖和真实 API 可用性的区别 | `docs/articles/zh-cn/interface-zero-to-deferred-boundary.md` | 无 | 完整教程已收口 |
+| 4 | 项目总览 | TRT8/TRT10/TRT11 跨版本策略 | version guard、manifest、native 实现、托管路由一致性 | `docs/articles/zh-cn/trt-cross-version-strategy.md` | 无 | 完整教程已收口 |
+| 5 | 安装部署 | Windows 本地开发环境准备 | .NET、CMake、CUDA、TensorRT、cuDNN、development probing | `docs/articles/zh-cn/windows-local-dev-environment.md` | 本机 NVIDIA SDK | 完整教程已收口 |
+| 6 | 安装部署 | runtime package 和 split package 怎么选 | managed、bridge、cuda-cudnn、tensorrt、collection/full package | `docs/articles/zh-cn/runtime-package-selection.md` | 本地 nupkg | 完整教程已收口 |
 | 7 | 安装部署 | NuGet 消费端验证全流程 | restore/build/native asset copy、consumer report、signed output | `docs/articles/zh-cn/nuget-package-consumer-validation-flow.md`、`docs/articles/zh-cn/blog-package-consumer-evidence-chain.md` | 本地包源 | 博客长文初稿已补 |
 | 7.1 | 源码编译 | C++ 原生桥接源码编译总教程 | Visual Studio C++、CMake preset、TensorRT/CUDA/cuDNN roots、binding generator、native bridge、managed package consumer、GitHub full runtime 包、NuGet small core/bridge 包和非 proof 边界 | `docs/articles/zh-cn/tensorrtsharp-source-build-cpp-guide.md`、`docs/articles/zh-cn/source-build-windows-cpp-bridge.md`、`docs/articles/zh-cn/source-build-cmake-presets-and-bindings.md`、`docs/articles/zh-cn/nuget-github-dual-package-strategy.md` | 本机 NVIDIA SDK + C++ toolchain | 正文已起草 |
 | 8 | 安装部署 | package readiness summary 怎么读 | `Overall=ready`、split/full、vendor blockers、runtime smoke | `docs/articles/zh-cn/readiness-summary-guide.md` | 无 | 正文已起草 |
 | 9 | 安装部署 | CUDA error 35 与驱动兼容排查 | `blocked-by-cuda-driver`、driver/runtime mismatch、不是 API 缺口 | `docs/articles/zh-cn/cuda-error-35-troubleshooting.md` | 兼容/不兼容驱动对照 | 正文已起草 |
-| 10 | 接口体系 | TensorRT Builder/Runtime/Engine 对象模型 | logger、builder、config、network、runtime、engine、context | `docs/articles/zh-cn/tensorrt-object-model.md`、`smoke/TensorRtSmokeRunner` | 无 | 正文已起草 |
+| 10 | 接口体系 | TensorRT Builder/Runtime/Engine 对象模型 | logger、builder、config、network、runtime、engine、context | `docs/articles/zh-cn/tensorrt-object-model.md`、`smoke/TensorRtSmokeRunner` | 无 | 完整教程已收口 |
 | 11 | 接口体系 | ExecutionContext 与 inference binding | tensor address、shape inference、enqueue、readback | `docs/articles/zh-cn/inference-bindings-tutorial.md` | 无 | 正文已起草 |
 | 12 | 接口体系 | Dynamic Shape 与 Optimization Profile | min/opt/max、profile index、runtime shape | `docs/articles/zh-cn/dynamic-shape-optimization-profile-tutorial.md` | 无 | 正文已起草 |
 | 13 | 接口体系 | ONNX Parser 到 Serialized Engine | parser、profile、host memory、deserialize、round-trip | `docs/articles/zh-cn/onnx-parser-to-serialized-engine-tutorial.md` | 无 | 正文已起草 |
 | 14 | 接口体系 | Plugin Inventory 只读 API | creator count、name/version/namespace、lookup、只读边界 | `docs/articles/zh-cn/plugin-inventory-readonly-api.md`、`smoke/PluginRegistryInventorySmokeRunner` | 无 | 正文已起草 |
-| 15 | 接口体系 | Plugin Serialization Paths | runtime/plugin path 诊断、序列化部署路径 | `docs/articles/zh-cn/plugin-serialization-paths.md`、`smoke/PluginSerializationPathsSmokeRunner` | 无 | 正文已起草 |
-| 16 | CUDA | CUDA memory wrapper 入门 | device/pinned/managed/pitched memory、copy、error map | `docs/articles/zh-cn/cuda-memory-wrapper.md`、`smoke/CudaSmokeRunner` | CUDA runtime | 正文已起草 |
+| 15 | 接口体系 | Plugin Serialization Paths | runtime/plugin path 诊断、序列化部署路径 | `docs/articles/zh-cn/plugin-serialization-paths.md`、`smoke/PluginSerializationPathsSmokeRunner` | 无 | 完整教程已收口 |
+| 16 | CUDA | CUDA memory wrapper 入门 | device/pinned/managed/pitched memory、copy、error map | `docs/articles/zh-cn/cuda-memory-wrapper.md`、`smoke/CudaSmokeRunner` | CUDA runtime | 完整教程已收口 |
 | 17 | CUDA | CUDA stream/event 与跨 stream 同步 | non-blocking stream、event record/wait/synchronize | `docs/articles/zh-cn/cuda-stream-event-multistream-tutorial.md` | CUDA runtime | 正文已起草 |
 | 18 | CUDA | CUDA Graph 当前能力与边界 | graph node、debug dot、event/memcpy nodes、kernel attrs | `docs/articles/zh-cn/cuda-graph-capabilities-boundary.md`、`smoke/CudaGraphSmokeRunner` | CUDA runtime | 正文已起草 |
-| 19 | CUDA | CUDA memory range APIs | range attributes、advise、prefetch、accessed-by devices | `docs/articles/zh-cn/cuda-memory-range-apis.md`、`src/JYPPX.CudaSharp`、相关 tests | CUDA runtime | 正文已起草 |
+| 19 | CUDA | CUDA memory range APIs | range attributes、advise、prefetch、accessed-by devices | `docs/articles/zh-cn/cuda-memory-range-apis.md`、`src/JYPPX.CudaSharp`、相关 tests | CUDA runtime | 完整教程已收口 |
 | 20 | 案例教程 | 最小 identity network 推理 | 不依赖外部模型的端到端 inference | `docs/articles/zh-cn/inference-bindings-tutorial.md` | 无 | 正文已起草 |
 | 21 | 案例教程 | Dynamic batch 推理教程 | batch 1..4、profile 校验、输出一致性 | `docs/articles/zh-cn/dynamic-shape-optimization-profile-tutorial.md` | 无 | 正文已起草 |
 | 22 | 案例教程 | ONNX 转 TensorRT engine 教程 | 内置 identity ONNX、engine file round-trip | `docs/articles/zh-cn/onnx-parser-to-serialized-engine-tutorial.md` | 无 | 正文已起草 |

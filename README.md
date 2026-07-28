@@ -186,6 +186,7 @@ Use these front-door documents when evaluating the project:
 - Non-substitute proof list: `docs/articles/zh-cn/release-proof-non-substitutes.md`
 - Article index and publishing order: `docs/articles/zh-cn/release-article-index-and-publishing-order.md`
 - Technical article closure ledger: `docs/articles/zh-cn/publishing/technical-article-closure-ledger.md`
+- Technical article foundations first-batch audit (articles 2-6, 10, 15-16, 19): `docs/articles/zh-cn/publishing/technical-article-foundations-first-batch-audit.md`
 - External model evidence case study: `docs/articles/zh-cn/external-model-evidence-case-study.md`
 - Project capability and release-boundary story: `docs/articles/zh-cn/project-release-story-and-boundaries.md`
 - README frontpage checklist: `docs/articles/zh-cn/release-readme-frontpage-checklist.md`
