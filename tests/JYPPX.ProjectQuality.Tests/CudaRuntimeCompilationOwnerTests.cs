@@ -355,6 +355,71 @@ public sealed class CudaRuntimeCompilationOwnerTests
         Assert.Throws<ArgumentException>(() => module.Launch("bad\0name", default, null!, Array.Empty<CudaKernelArgument>()));
     }
 
+    [Fact]
+    public void BridgePackageConsumerUsesLocalOnlyPackageReferencesAndKeepsProofBoundaries()
+    {
+        string script = ReadSource("eng", "Test-CudaRtcBridgePackageConsumer.ps1");
+        Assert.Contains("consumer-workspaces\\crtc", script, StringComparison.Ordinal);
+        Assert.Contains("<PackageReference", script, StringComparison.Ordinal);
+        Assert.Contains("$projectText -notmatch '<ProjectReference'", script, StringComparison.Ordinal);
+        Assert.Contains("<clear />", script, StringComparison.Ordinal);
+        Assert.Contains("JYPPX_NATIVE_BRIDGE_PATH", script, StringComparison.Ordinal);
+        Assert.Contains("canPromotePublicPackageProof = $false", script, StringComparison.Ordinal);
+
+        using JsonDocument evidence = JsonDocument.Parse(ReadSource(
+            "artifacts", "cuda-runtime-compilation", "bridge-package-consumer.json"));
+        JsonElement root = evidence.RootElement;
+        Assert.Equal("local-feed-clean-package-consumer-candidate", root.GetProperty("proofClassification").GetString());
+        Assert.False(root.GetProperty("performsDownload").GetBoolean());
+        Assert.False(root.GetProperty("performsPublish").GetBoolean());
+        Assert.False(root.GetProperty("canPromotePublicPackageProof").GetBoolean());
+        Assert.False(root.GetProperty("canPromotePostPublishProof").GetBoolean());
+
+        JsonElement packages = root.GetProperty("packages");
+        Assert.False(packages.GetProperty("containsNvrtc").GetBoolean());
+        Assert.False(packages.GetProperty("containsNvrtcBuiltins").GetBoolean());
+        Assert.True(packages.GetProperty("bridge").GetProperty("containsOnlyBridgeNativeAsset").GetBoolean());
+        Assert.Equal(
+            packages.GetProperty("bridge").GetProperty("packageBridgeEntrySha256").GetString(),
+            packages.GetProperty("bridge").GetProperty("copiedBridgeSha256").GetString());
+
+        JsonElement consumer = root.GetProperty("consumer");
+        Assert.True(consumer.GetProperty("rootOutsideRepository").GetBoolean());
+        Assert.True(consumer.GetProperty("cleanWorkspaceCreated").GetBoolean());
+        Assert.True(consumer.GetProperty("usesPackageReferenceOnly").GetBoolean());
+        Assert.False(consumer.GetProperty("usesProjectReference").GetBoolean());
+        Assert.True(consumer.GetProperty("nugetSourcesCleared").GetBoolean());
+        Assert.True(consumer.GetProperty("localFeedOnly").GetBoolean());
+        Assert.False(consumer.GetProperty("nativeBridgeEnvironmentOverrideUsed").GetBoolean());
+        Assert.True(consumer.GetProperty("restoreSucceeded").GetBoolean());
+        Assert.True(consumer.GetProperty("buildSucceeded").GetBoolean());
+
+        JsonElement diagnostic = root.GetProperty("dependencyDiagnostic");
+        Assert.False(diagnostic.GetProperty("rtcAvailable").GetBoolean());
+        Assert.True(diagnostic.GetProperty("diagnosticPresent").GetBoolean());
+        Assert.True(diagnostic.GetProperty("driverAvailable").GetBoolean());
+        Assert.True(diagnostic.GetProperty("driverVersion").GetInt32() > 0);
+        Assert.False(string.IsNullOrWhiteSpace(diagnostic.GetProperty("driverLoadedLibrary").GetString()));
+
+        JsonElement runtime = root.GetProperty("runtime");
+        foreach (string property in new[]
+                 {
+                     "rtcAvailable", "driverAvailable", "compileSucceeded", "compileFailureDiagnosticCaptured",
+                     "runtimeLibraryLaunch", "runtimeLibraryReadback", "runtimeLibraryCorrectness",
+                     "runtimeLibraryOwnersReleasedBeforeSynchronize", "driverLaunch", "driverReadback",
+                     "driverCorrectness", "driverOwnersReleasedBeforeSynchronize", "outputHashesMatch"
+                 })
+        {
+            Assert.True(runtime.GetProperty(property).GetBoolean(), property);
+        }
+        Assert.Matches("^[0-9]+\\.[0-9]+$", runtime.GetProperty("rtcVersion").GetString());
+        Assert.True(runtime.GetProperty("driverVersion").GetInt32() > 0);
+        Assert.False(string.IsNullOrWhiteSpace(runtime.GetProperty("rtcLoadedLibrary").GetString()));
+        Assert.False(string.IsNullOrWhiteSpace(runtime.GetProperty("driverLoadedLibrary").GetString()));
+        Assert.Equal(runtime.GetProperty("runtimeOutputSha256").GetString(), runtime.GetProperty("driverOutputSha256").GetString());
+        Assert.Matches("^[0-9a-f]{64}$", runtime.GetProperty("runtimeOutputSha256").GetString());
+    }
+
     private static IEnumerable<Type> GetExposedTypes(MemberInfo member)
     {
         if (member is PropertyInfo property)

@@ -19,10 +19,12 @@ param(
   [string]$AdditionalPackageSourcePassword,
   [switch]$RunSmoke,
   [switch]$RunBridgeRuntimeSmoke,
+  [switch]$RunBridgeCudaRtcSmoke,
   [string]$TensorRtRoot,
   [string]$CudaRoot,
   [string]$CudnnRoot,
   [string]$BridgeRuntimeConsumerOutputRoot,
+  [string]$BridgeCudaRtcConsumerOutputRoot,
   [string[]]$SmokeRuntimePackageKey = @(),
   [switch]$SignConsumerOutput,
   [switch]$TrustConsumerSigningCertificate,
@@ -927,6 +929,35 @@ elseif (-not $SkipConsumerValidation.IsPresent -and $bridgeOnlySplitSet) {
     }
 
     Invoke-CheckedCommand -FilePath $powerShellCommand -ArgumentList $bridgeRuntimeConsumerArguments
+  }
+
+  if ($RunBridgeCudaRtcSmoke.IsPresent) {
+    $bridgeCudaRtcConsumerArguments = @(
+      '-NoProfile',
+      '-ExecutionPolicy',
+      'Bypass',
+      '-File',
+      (Join-Path $RepositoryRoot 'eng\Test-CudaRtcBridgePackageConsumer.ps1'),
+      '-SourceRuntimeKey',
+      $SourceRuntimeKey,
+      '-ManagedPackageVersion',
+      $resolvedVersion,
+      '-BridgePackageVersion',
+      $resolvedBridgePackageVersion,
+      '-ManagedPackageDirectory',
+      (Join-Path $RepositoryRoot 'artifacts\managed'),
+      '-BridgePackageDirectory',
+      $splitOutputDirectory,
+      '-RepositoryRoot',
+      $RepositoryRoot
+    )
+    if (-not [string]::IsNullOrWhiteSpace($CudaRoot)) {
+      $bridgeCudaRtcConsumerArguments += @('-CudaRoot', $CudaRoot)
+    }
+    if (-not [string]::IsNullOrWhiteSpace($BridgeCudaRtcConsumerOutputRoot)) {
+      $bridgeCudaRtcConsumerArguments += @('-OutputRoot', $BridgeCudaRtcConsumerOutputRoot)
+    }
+    Invoke-CheckedCommand -FilePath $powerShellCommand -ArgumentList $bridgeCudaRtcConsumerArguments
   }
 }
 elseif (-not $shouldPackMetaPackage) {

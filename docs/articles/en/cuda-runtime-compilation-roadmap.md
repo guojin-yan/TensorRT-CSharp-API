@@ -2,7 +2,7 @@
 
 ## Goal and Current Boundary
 
-The project now ships an owner-safe NVRTC compile API and two owner-bound launch/readback paths. .NET callers can submit CUDA C++ source, headers, compile options, and name expressions, receive copied PTX, CUBIN, or LTO IR artifacts, and launch named kernels with typed arguments through either the CUDA 12.9+ Runtime library or a dynamically loaded CUDA Driver module owner. Linux runtime proof and package-consumer proof remain future work.
+The project now ships an owner-safe NVRTC compile API and two owner-bound launch/readback paths. .NET callers can submit CUDA C++ source, headers, compile options, and name expressions, receive copied PTX, CUBIN, or LTO IR artifacts, and launch named kernels with typed arguments through either the CUDA 12.9+ Runtime library or a dynamically loaded CUDA Driver module owner. A repository-external, local-feed-only bridge-package consumer is verified on Windows; Linux, public-package, and post-publish proof remain future work.
 
 The repository provides `CudaKernelLibrary.Load(byte[])`, copied library inventory, name-based queries, kernel attribute updates, and an owner-safe `CudaKernelLibrary.Launch(...)` path. This Runtime-library path requires CUDA Toolkit 12.9 or later. `CudaDriverModule.Load(...)` and `Launch(...)` add a unified module path backed by dynamic `nvcuda.dll` / `libcuda.so.1` loading, a retained primary context, typed arguments, and a completion-event owner. Neither path exposes borrowed `cudaKernel_t`, `CUmodule`, or `CUfunction` values through the public C# API. The raw generated launch entry point remains internal.
 
@@ -31,9 +31,11 @@ The matching `cuda.h` and `cuda.lib` Driver surface is audited by `eng/Export-Cu
 - Native code now also provides an optional dynamic CUDA Driver loader, retained-primary-context `JYPPX_CudaDriverModule`, typed launch storage, and Driver event completion ownership through 9 ABI entry points. Managed code exposes `CudaDriver`, `CudaDriverModule`, and `CudaDriverKernelLaunch` without raw Driver handles.
 - `samples/CudaRuntimeCompilation` exercises virtual headers, a template lowered name, PTX, `sm_75` CUBIN, LTO IR where supported, repeated PTX SHA256 determinism, and an intentional compiler-failure log.
 - All four local compilers complete the compile smoke. PTX from 11.8, 12.1, and 12.9 loads through both the current CUDA 12.9 `CudaKernelLibrary` and the current system Driver 12090, launches by name, and reads back 257 validated floats with the same output SHA256; 13.2 PTX is rejected with the corresponding unsupported-PTX-version diagnostic, so 13.2 remains compile-only/load-rejected proof.
+- `eng/Test-CudaRtcBridgePackageConsumer.ps1` creates a repository-external consumer with a cleared, local-only NuGet source and only managed/bridge `PackageReference` entries. It verifies that the bridge package contains only `jyppxtrtbridge.dll`, copies the exact packaged bridge without `JYPPX_NATIVE_BRIDGE_PATH`, diagnoses missing NVRTC while Driver 12090 remains available, and then uses the installed NVRTC 12.9 library for compile, intentional-failure log capture, and Runtime-library/Driver launch/readback/correctness with matching output hashes.
 - Evidence is stored in `artifacts/cuda-runtime-compilation/capability-matrix.json`, `driver-capability-matrix.json`, `local-smoke.json`, `native-abi-surface.json`, `kernel-launch-native-abi-surface.json`, and `driver-native-abi-surface.json`. The first three smoke records have Runtime-library and Driver launch/readback/correctness/owner-retention fields set to true; 13.2 explicitly retains them as false.
+- The clean consumer record is stored in `artifacts/cuda-runtime-compilation/bridge-package-consumer.json` and `.md`. Its classification is `local-feed-clean-package-consumer-candidate`; it cannot promote public-package or post-publish proof.
 
-The remaining RTC work is Linux runtime proof, materialized full-runtime `cuda-rtc` components, clean package consumers, and post-publish verification. Local Windows bridge/Driver launch/readback success does not promote those lanes.
+The remaining RTC work is Linux runtime proof, materialized full-runtime `cuda-rtc` components, public-source clean consumers, and post-publish verification. Local Windows bridge/Driver launch/readback success and the local-feed package candidate do not promote those lanes.
 
 ## Design Invariants
 
@@ -104,10 +106,10 @@ Compile-only output, artifact hashes, synthetic kernels, and a local Toolkit are
 - The bridge-only NuGet package does not bundle NVRTC; callers install a matching CUDA Toolkit and receive focused dependency diagnostics.
 - Full GitHub runtime packages add `nvrtc` and the matching `nvrtc-builtins`, with Windows/Linux manifests, split-package roles, hashes, size checks, and redistribution review.
 - Validate Windows x64, Linux x64, and CUDA 11.8/12.1/12.9/13.2. Runtime-key declarations must match actual native dependencies and package assets.
-- A clean consumer must compile and launch without ProjectReference or development probing. Repeat the smoke against the public package after publishing.
+- The Windows CUDA 12.9 local-feed clean consumer now compiles and launches without `ProjectReference` or development probing. Repeat the same smoke against a public source after publishing; the current result must remain a local candidate.
 
 ## Evidence Ladder
 
-Header/library audit proves vendor surface only. Compile-only proves compiler ownership and output copying only. Artifact hashes prove identity only. Local compile-to-launch/readback proves one host Toolkit/GPU path only. Clean-package-consumer and post-publish checks remain separate evidence classes, and Owner approval is still required for final publication and issue closure.
+Header/library audit proves vendor surface only. Compile-only proves compiler ownership and output copying only. Artifact hashes prove identity only. Local compile-to-launch/readback proves one host Toolkit/GPU path only. The local-feed clean consumer proves repository-external `PackageReference` consumption of the current local package pair only. Public-source clean-consumer and post-publish checks remain separate evidence classes, and Owner approval is still required for final publication and issue closure.
 
 CUDA RTC becomes release-ready only after compile, load, launch, readback, clean consumer, cross-platform package, and post-publish evidence all close.

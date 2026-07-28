@@ -1,5 +1,45 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-28 CUDA RTC Bridge Package Clean Consumer
+
+本阶段把 bridge-only CUDA RTC 从仓库内样例推进到仓库外、本地 feed、纯 `PackageReference` consumer，验证当前
+managed/bridge 本地包可以独立 restore/build，并在不使用开发目录 bridge override 的情况下完成依赖负向诊断与真实 GPU
+双路径 correctness。证据分类保持 `local-feed-clean-package-consumer-candidate`。
+
+### 实现
+
+- 新增 `eng/Test-CudaRtcBridgePackageConsumer.ps1`，使用随机短 workspace token、独立 NuGet cache、独立
+  `DOTNET_CLI_HOME` 与 `<clear />` local-only feed；consumer 无 `ProjectReference`，仓库外路径由边界检查保护。
+- 脚本校验 managed 包包含当前 RTC surface，bridge 包唯一 native asset 为 `runtimes/win-x64/native/jyppxtrtbridge.dll`，
+  且 managed/bridge 包中均不存在 NVRTC 或 NVRTC builtins。
+- restore/build 后校验输出 bridge 与 nupkg entry SHA256 完全一致；负向运行清除 CUDA 搜索路径并指向不存在的 NVRTC，
+  确认 RTC unavailable、诊断非空，同时 CUDA Driver 12090 capability 保持可用。
+- 正向运行只指定用户 CUDA 12.9 Toolkit 的 NVRTC，完成成功 compile、intentional failure log、Runtime-library 与
+  Driver module 两条 named typed-kernel launch/readback/correctness，并验证参与 owner 提前释放及输出 hash 一致。
+- `Invoke-LocalSplitRuntimePackage.ps1` 新增 `-RunBridgeCudaRtcSmoke` 与独立 output-root 参数，可在 bridge-only pack 后
+  复用该验证，并分别传递 managed/bridge version pin。
+- 默认清理支持 PowerShell 5.1 超长 NuGet cache 路径：先执行常规删除，失败后仅在已验证 workspace 边界内使用
+  `\\?\` 扩展路径回退；默认不保留 consumer 的清理模式已真实复验。
+
+### Evidence And Verification
+
+- managed nupkg SHA256：`19b43a17c29b2891356de75f00ffd210355f58f74673c2d9e5435eafa9d22d9c`；bridge nupkg
+  SHA256：`79e997cd7b119c50a8faed8507b93fec5789d1e5087ffa1c8eeca19c645243a2`。
+- package bridge entry 与 consumer 输出 DLL SHA256 均为
+  `18493d0886b8434613c16d1dcfe3f5d134b95d60be5d463a674af65765311ba8`；两条 GPU 输出 SHA256 均为
+  `33ecc0d0bc61c99a77fd5d012819fe5e366c826593739fb24b5fc86cff90b64f`。
+- 结构化证据：`artifacts/cuda-runtime-compilation/bridge-package-consumer.json` / `.md`；包含包、consumer、依赖诊断、
+  NVRTC/Driver 版本与加载库、runtime flags 和四份日志 hash。
+- CUDA RTC 路线图专项 `15/15`；binding generator `4001 records / 201 manifests`；完整 solution Debug build 与
+  双语 XML 审计均为 `0 warning / 0 error`。
+
+### Proof Boundary
+
+- 当前只证明本机 Windows、local-only feed、当前本地 managed/bridge 包组合，不是 public-source clean consumer、
+  post-publish、Linux、CUDA 13.2 launch 或 Owner authorization proof。
+- bridge-only 包不捆 NVRTC/builtins；full-runtime `cuda-rtc` role 尚未物化，不得把本地 Toolkit 依赖描述为包内依赖。
+- 未 push、未触发 GitHub Actions，未执行 NuGet/GitHub Packages/Release 发布或 issue close。
+
 ## 2026-07-28 CUDA Driver Module Owner
 
 本阶段在既有 NVRTC compile 与 CUDA 12.9+ Runtime-library launch 路径之外，完成动态 CUDA Driver module owner，

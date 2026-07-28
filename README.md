@@ -362,13 +362,13 @@ Runnable deployment samples are under `samples/`. Validation-oriented smoke runn
 Recent sample maturity updates:
 
 - `MultiStream` is a real CUDA multi-stream/event ordering sample and is included in the solution.
-- `CudaRuntimeCompilation` is an owner-safe NVRTC compile plus dual Runtime-library/Driver-module named typed-kernel launch/readback sample covering copied PTX/CUBIN/LTO IR, failure logs, lowered names, determinism, early owner disposal, and per-value GPU correctness. CUDA 13.2 PTX load rejection, Linux, package-consumer, and post-publish evidence remain separate.
+- `CudaRuntimeCompilation` is an owner-safe NVRTC compile plus dual Runtime-library/Driver-module named typed-kernel launch/readback sample covering copied PTX/CUBIN/LTO IR, failure logs, lowered names, determinism, early owner disposal, and per-value GPU correctness. A repository-external local-feed consumer now verifies the same CUDA 12.9 paths from managed and bridge-only `PackageReference` packages; CUDA 13.2 PTX load rejection, Linux, public-package, and post-publish evidence remain separate.
 - `DynamicShape` is a real TensorRT dynamic-shape/profile/binding sample and is included in the solution.
 - `InferenceBindings` is a real TensorRT inference-binding sample and is included in the solution.
 - `OnnxToEngine` is now a runnable common ONNX-to-engine example and is included in the solution.
 - `Classification` and `YoloVision` are runnable asset-dependent ONNX examples; users provide their own model, labels, and input-shape metadata.
 - `applications/TensorRtExec` is the user-facing ONNX-to-engine CLI/WinForms tool. It can create build/precheck reports for external ONNX assets, but real-model runtime proof still belongs to the relevant sample runner and package-consumer-runtime proof belongs to release proof records.
-- Custom-kernel launch is available through owner-safe named-kernel and typed-argument APIs: `CudaKernelLibrary.Launch(...)` uses the CUDA 12.9+ Runtime library, while `CudaDriverModule.Launch(...)` dynamically loads the CUDA Driver for a unified module path. Local PTX launch/readback is verified for CUDA 11.8/12.1/12.9 artifacts on the current Driver 12090 host; CUDA 13.2 launch, Linux runtime, package-consumer, and post-publish proof remain roadmap items. Runtime compilation is available through `CudaRtcCompiler` and `CudaRtcProgram`.
+- Custom-kernel launch is available through owner-safe named-kernel and typed-argument APIs: `CudaKernelLibrary.Launch(...)` uses the CUDA 12.9+ Runtime library, while `CudaDriverModule.Launch(...)` dynamically loads the CUDA Driver for a unified module path. Local PTX launch/readback is verified for CUDA 11.8/12.1/12.9 artifacts on the current Driver 12090 host. The bridge-only package contains only `jyppxtrtbridge.dll`, not NVRTC or its builtins; the CUDA 12.9 clean local-feed consumer verifies missing-NVRTC diagnostics and dual-path correctness without `ProjectReference` or `JYPPX_NATIVE_BRIDGE_PATH`. This remains a local candidate, not public-package or post-publish proof.
 
 ## Runtime Packages
 

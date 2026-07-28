@@ -1,0 +1,100 @@
+﻿{
+    "schemaVersion":  1,
+    "recordKind":  "cuda-rtc-bridge-package-clean-consumer",
+    "generatedLocalDate":  "2026-07-28",
+    "sourceRuntimeKey":  "win-x64-trt11.0-cuda12.9-cudnn9.22",
+    "proofClassification":  "local-feed-clean-package-consumer-candidate",
+    "performsDownload":  false,
+    "performsPublish":  false,
+    "canPromotePublicPackageProof":  false,
+    "canPromotePostPublishProof":  false,
+    "packages":  {
+                     "managed":  {
+                                     "id":  "JYPPX.TensorRT.CSharp.API",
+                                     "version":  "4.0.0-rtc-local.20260728",
+                                     "sha256":  "19b43a17c29b2891356de75f00ffd210355f58f74673c2d9e5435eafa9d22d9c",
+                                     "path":  "E:\\GitSpace\\TensorRT-CSharp-API-4.0\\TensorRtSharp4.0\\artifacts\\managed\\JYPPX.TensorRT.CSharp.API.4.0.0-rtc-local.20260728.nupkg",
+                                     "containsCurrentCudaRtcSurface":  true
+                                 },
+                     "bridge":  {
+                                    "id":  "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.Bridge",
+                                    "version":  "4.0.0-rtc-local.20260728",
+                                    "sha256":  "79e997cd7b119c50a8faed8507b93fec5789d1e5087ffa1c8eeca19c645243a2",
+                                    "path":  "E:\\GitSpace\\TensorRT-CSharp-API-4.0\\TensorRtSharp4.0\\artifacts\\runtime-split-nupkg\\win-x64-trt11.0-cuda12.9-cudnn9.22\\JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.Bridge.4.0.0-rtc-local.20260728.nupkg",
+                                    "nativeEntries":  [
+                                                          "runtimes/win-x64/native/jyppxtrtbridge.dll"
+                                                      ],
+                                    "containsOnlyBridgeNativeAsset":  true,
+                                    "copiedBridgeSha256":  "18493d0886b8434613c16d1dcfe3f5d134b95d60be5d463a674af65765311ba8",
+                                    "packageBridgeEntrySha256":  "18493d0886b8434613c16d1dcfe3f5d134b95d60be5d463a674af65765311ba8"
+                                },
+                     "containsNvrtc":  false,
+                     "containsNvrtcBuiltins":  false,
+                     "nvrtcEntries":  [
+
+                                      ],
+                     "nvrtcBuiltinsEntries":  [
+
+                                              ]
+                 },
+    "consumer":  {
+                     "root":  "E:\\GitSpace\\TensorRT-CSharp-API-4.0\\consumer-workspaces\\crtc\\w-32edc437\\consumer",
+                     "rootOutsideRepository":  true,
+                     "cleanWorkspaceCreated":  true,
+                     "workspaceToken":  "w-32edc437",
+                     "targetFramework":  "net8.0",
+                     "runtimeIdentifier":  "win-x64",
+                     "usesPackageReferenceOnly":  true,
+                     "usesProjectReference":  false,
+                     "nugetSourcesCleared":  true,
+                     "localFeedOnly":  true,
+                     "restorePackagesPath":  "E:\\GitSpace\\TensorRT-CSharp-API-4.0\\consumer-workspaces\\crtc\\w-32edc437\\.packages",
+                     "nativeBridgeEnvironmentOverrideUsed":  false,
+                     "restoreSucceeded":  true,
+                     "buildSucceeded":  true,
+                     "projectSha256":  "fc8ad823f5aec0cb0fdc12298687d594c4be41aa103a7f80d6e1d5c27cb7cdbc",
+                     "programSha256":  "723d3ba821433dd9612421c7d2bcabee2682449644183658ba8e5bfc50e30378"
+                 },
+    "dependencyDiagnostic":  {
+                                 "isolatedPath":  true,
+                                 "cudaSearchPathRemoved":  true,
+                                 "rtcAvailable":  false,
+                                 "diagnosticPresent":  true,
+                                 "driverAvailable":  true,
+                                 "driverVersion":  12090,
+                                 "driverLoadedLibrary":  "nvcuda.dll",
+                                 "processExitCode":  0
+                             },
+    "runtime":  {
+                    "cudaRoot":  "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.9",
+                    "nvrtcLibrary":  "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.9\\bin\\nvrtc64_120_0.dll",
+                    "nvrtcLibrarySha256":  "69a3b8e00fdf6c64805bd369b037db91f1ac1fb25b3411676b434736df945249",
+                    "rtcAvailable":  true,
+                    "rtcVersion":  "12.9",
+                    "rtcLoadedLibrary":  "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.9\\bin\\nvrtc64_120_0.dll",
+                    "driverAvailable":  true,
+                    "driverVersion":  12090,
+                    "driverLoadedLibrary":  "nvcuda.dll",
+                    "compileSucceeded":  true,
+                    "compileFailureDiagnosticCaptured":  true,
+                    "runtimeLibraryLaunch":  true,
+                    "runtimeLibraryReadback":  true,
+                    "runtimeLibraryCorrectness":  true,
+                    "runtimeLibraryOwnersReleasedBeforeSynchronize":  true,
+                    "driverLaunch":  true,
+                    "driverReadback":  true,
+                    "driverCorrectness":  true,
+                    "driverOwnersReleasedBeforeSynchronize":  true,
+                    "outputHashesMatch":  true,
+                    "runtimeOutputSha256":  "33ecc0d0bc61c99a77fd5d012819fe5e366c826593739fb24b5fc86cff90b64f",
+                    "driverOutputSha256":  "33ecc0d0bc61c99a77fd5d012819fe5e366c826593739fb24b5fc86cff90b64f",
+                    "processExitCode":  0
+                },
+    "logs":  {
+                 "restoreSha256":  "b30044494ecc9184ebedb57c0e11ee1262d9fe6f0b9262e322410f1799d3b245",
+                 "buildSha256":  "bde1fd95afae280c9d252b98f5581574d7eeb4ed64e9d9061b6eb9da4050d1e4",
+                 "negativeSha256":  "be7ee66d3840c63b1458d5f5106b07b16099d92400b412c591fec5bbb0485f70",
+                 "positiveSha256":  "bdaf70d28ed608cd1c8f838a69fcb82c72991b2568ee419cd9c4e687e0c35817"
+             },
+    "proofBoundary":  "This proves a repository-external PackageReference consumer restored from a local-only feed, copied the packaged bridge, diagnosed absent NVRTC, and used a user-installed Toolkit for local compile and dual launch/readback. It is not public-package, post-publish, Linux, or Owner authorization proof."
+}

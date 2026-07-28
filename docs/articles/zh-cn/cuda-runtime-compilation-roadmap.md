@@ -2,7 +2,7 @@
 
 ## 目标与当前边界
 
-本项目已经交付 CUDA Runtime Compilation（NVRTC）的 owner-safe compile API 与两条 owner-bound launch/readback 路径，使 .NET 用户可以提交 CUDA C++ 源码、headers、编译选项和 name expressions，并获得复制到托管内存的 PTX、CUBIN 或 LTO IR 工件，再通过 CUDA 12.9+ Runtime library 或动态加载的 CUDA Driver module owner，以 typed arguments 启动 named kernel。Linux 真机和包消费者证明仍是后续目标。
+本项目已经交付 CUDA Runtime Compilation（NVRTC）的 owner-safe compile API 与两条 owner-bound launch/readback 路径，使 .NET 用户可以提交 CUDA C++ 源码、headers、编译选项和 name expressions，并获得复制到托管内存的 PTX、CUBIN 或 LTO IR 工件，再通过 CUDA 12.9+ Runtime library 或动态加载的 CUDA Driver module owner，以 typed arguments 启动 named kernel。Windows 仓库外、local-feed-only 的 bridge package consumer 已完成；Linux、public package 与 post-publish 证明仍是后续目标。
 
 当前仓库已经具备 `CudaKernelLibrary.Load(byte[])`、library inventory、按名称查询、kernel attribute 设置和 `CudaKernelLibrary.Launch(...)` owner-safe 启动能力；该 Runtime-library 路径仅在 CUDA Toolkit 12.9 及以上可用。`CudaDriverModule.Load(...)` / `Launch(...)` 新增动态 `nvcuda.dll` / `libcuda.so.1` loader、retained primary context、typed arguments 和 completion-event owner。两条路径都不会向 public C# API 暴露 borrowed `cudaKernel_t`、`CUmodule` 或 `CUfunction`。现有 raw launch entry point 仍是 internal/generated 边界。
 
@@ -31,9 +31,11 @@ CUDA 11.8、CUDA 12.1、CUDA 12.9、CUDA 13.2 的 Windows header、import LIB、
 - native 同时新增 optional dynamic CUDA Driver loader、retained-primary-context `JYPPX_CudaDriverModule`、typed launch storage 与 Driver event completion owner，共 9 个 ABI；managed 新增 `CudaDriver`、`CudaDriverModule` 与 `CudaDriverKernelLaunch`，不暴露 raw Driver handle。
 - `samples/CudaRuntimeCompilation` 真实覆盖 virtual header、template lowered name、成功 PTX、`sm_75` CUBIN、可用版本的 LTO IR、重复 PTX SHA256 确定性和 intentional compile failure log。
 - 本机四版 compile 均成功；11.8/12.1/12.9 PTX 可由当前 CUDA 12.9 `CudaKernelLibrary` 和系统 Driver 12090 两条路径加载、按名称启动并读回 257 个 float，三版 output SHA256 一致；13.2 PTX 被两条路径以对应 unsupported-PTX-version 诊断拒绝，因此只记 compile-only/load-rejected proof。
+- `eng/Test-CudaRtcBridgePackageConsumer.ps1` 会创建仓库外 consumer，清空远程 NuGet source，只引用 managed/bridge 两个 `PackageReference`。它验证 bridge 包只含 `jyppxtrtbridge.dll`，不依赖 `JYPPX_NATIVE_BRIDGE_PATH` 即可复制同 hash bridge；负向环境中 RTC 不可用但 Driver 12090 仍可用，正向再使用本机 NVRTC 12.9 完成 compile、intentional failure log 与 Runtime-library/Driver 双路径 launch/readback/correctness，且输出 hash 一致。
 - 证据位于 `artifacts/cuda-runtime-compilation/capability-matrix.json`、`driver-capability-matrix.json`、`local-smoke.json`、`native-abi-surface.json`、`kernel-launch-native-abi-surface.json` 与 `driver-native-abi-surface.json`。前三版 Runtime-library/Driver 的 launch/readback/correctness/owner-retention 均为 true；13.2 明确保持为 false。
+- clean consumer 证据位于 `artifacts/cuda-runtime-compilation/bridge-package-consumer.json` / `.md`，分类固定为 `local-feed-clean-package-consumer-candidate`，不能提升为 public-package 或 post-publish proof。
 
-尚未完成的 RTC 主项是 Linux 真机、full-runtime `cuda-rtc` 组件物化、clean package consumer 与 post-publish；本地 Windows bridge/Driver 的 launch/readback 成功不替代这些证明。
+尚未完成的 RTC 主项是 Linux 真机、full-runtime `cuda-rtc` 组件物化、公开来源 clean consumer 与 post-publish；本地 Windows bridge/Driver 的 launch/readback 和 local-feed package candidate 不替代这些证明。
 
 ## 设计不变量
 
@@ -108,7 +110,7 @@ compile-only smoke、artifact hash、synthetic kernel 和 local Toolkit 都不�
 - Bridge-only NuGet 不捆绑 NVRTC；consumer 自行安装匹配 CUDA Toolkit，并获得明确 dependency diagnostics。
 - GitHub full runtime 包按 runtime key 增加 `nvrtc` 与匹配的 `nvrtc-builtins`，同步 Windows/Linux manifests、split package roles、hash/size checks 和 redistribution review。
 - 验证 Windows x64、Linux x64、CUDA 11.8/12.1/12.9/13.2；每个 runtime key 的声明必须与实际 native dependencies 和 package assets 一致。
-- clean consumer 必须在无 ProjectReference、无开发 probing 的环境中完成 compile-to-launch；公开发布后还要重复 post-publish smoke。
+- Windows CUDA 12.9 local-feed clean consumer 已在无 `ProjectReference`、无开发 probing 下完成 compile-to-launch；公开发布后仍必须从公开 source 重跑同一 smoke，当前结果只能保留为本地 candidate。
 
 ## 验证矩阵与证据等级
 

@@ -13,6 +13,21 @@ The bridge-only package does not bundle NVRTC. Install a compatible CUDA Toolkit
 `JYPPX_NVRTC_LIBRARY` to an exact library path. The NVRTC builtins library must remain next to the
 selected compiler library.
 
+To exercise the packaged path from a repository-external, local-only NuGet consumer:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-CudaRtcBridgePackageConsumer.ps1 `
+  -SourceRuntimeKey win-x64-trt11.0-cuda12.9-cudnn9.22 `
+  -ManagedPackageVersion 4.0.0-rtc-local.20260728 `
+  -BridgePackageVersion 4.0.0-rtc-local.20260728 `
+  -KeepConsumerOutput
+```
+
+The consumer clears all remote NuGet sources, uses no `ProjectReference` or
+`JYPPX_NATIVE_BRIDGE_PATH`, checks that the bridge package excludes NVRTC and its builtins, and runs
+both a missing-NVRTC diagnostic and a CUDA 12.9 compile/launch/readback check. Its evidence remains a
+`local-feed-clean-package-consumer-candidate`, not public-package or post-publish proof.
+
 When the generated PTX can be loaded by the current CUDA runtime/driver, each path packs three
 owner-bound `CudaMemory` arguments (two inputs and one output) plus an `Int32` scalar, launches `vector_add`,
 synchronizes its completion owner, reads back 257 floats, and validates every value. The Runtime-library path
