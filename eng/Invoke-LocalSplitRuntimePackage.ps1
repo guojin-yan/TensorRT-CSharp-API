@@ -584,6 +584,19 @@ $requestedSplitRoles = @(Expand-KeyList -Values $SplitPackageRole | ForEach-Obje
 if ($requestedSplitRoles.Count -eq 0) {
   $requestedSplitRoles = @("all")
 }
+if ($requestedSplitRoles -contains "cuda-rtc") {
+  Invoke-CheckedCommand -FilePath $powerShellCommand -ArgumentList @(
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    (Join-Path $RepositoryRoot "eng\Test-CudaRtcFullRuntimePackagingPreflight.ps1"),
+    "-RepositoryRoot",
+    $RepositoryRoot,
+    "-RequireMaterializationReady"
+  )
+  throw "The cuda-rtc split role passed preflight but has no materialized package project. Materialize the manifest role before packing."
+}
 
 $allSplitPackages = @($splitManifest.packages | Where-Object { $_.sourceRuntimeKey -eq $SourceRuntimeKey })
 if ($allSplitPackages.Count -eq 0 -and $sourcePackage.platform -eq "linux") {
@@ -594,6 +607,9 @@ if ($allSplitPackages.Count -eq 0) {
 }
 
 $includeAllSplitRoles = $requestedSplitRoles -contains "all"
+if ($includeAllSplitRoles -and [string]$splitManifest.cudaRtcSplitRole.prototypeState -eq "planned-not-materialized") {
+  Write-Warning "SplitPackageRole 'all' excludes the planned cuda-rtc role because it is not materialized. Run Test-CudaRtcFullRuntimePackagingPreflight.ps1 before any explicit cuda-rtc pack request."
+}
 $shouldPackMetaPackage = $IncludeMetaPackage.IsPresent -or $includeAllSplitRoles -or ($requestedSplitRoles -contains "meta") -or ($requestedSplitRoles -contains "collection")
 
 if ($includeAllSplitRoles) {

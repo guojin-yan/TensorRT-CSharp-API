@@ -20,6 +20,7 @@ Current split strategy:
 - TensorRT 11 packages may split TensorRT further into `TensorRtRuntime` plus builder-resource packages such as `TensorRtBuilder.Sm75Sm86`, `TensorRtBuilder.Sm89Sm90`, and `TensorRtBuilder.Sm100Sm120Ptx` when a single TensorRT component would exceed release host limits
 - the original runtime package ID remains a lightweight collection package that references one `Bridge`, one `CudaCudnn`, and all required TensorRT component packages
 - `win-x64-trt11.0-cuda13.2-cudnn9.22` remains blocked on CUDA 13-capable runtime smoke before public-ready validation
+- `cuda-rtc` is a modeled but not materialized full-runtime role. Bridge packages never reference it. `-SplitPackageRole all` warns that the role is excluded, while an explicit `cuda-rtc` request runs the strict preflight and fails until all materialization blockers close.
 
 These packages still require:
 
@@ -38,6 +39,10 @@ Publication guidance:
 Examples:
 
 ```powershell
+# CUDA RTC full-runtime asset/approval preflight. This writes evidence only;
+# it does not copy assets, create a package, or publish.
+powershell -ExecutionPolicy Bypass -File .\eng\Test-CudaRtcFullRuntimePackagingPreflight.ps1
+
 # Full split package set for one runtime key.
 powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalSplitRuntimePackage.ps1 `
   -SourceRuntimeKey win-x64-trt11.0-cuda12.9-cudnn9.22 `
@@ -90,6 +95,8 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Invoke-LocalSplitRuntimePack
 powershell -ExecutionPolicy Bypass -File .\eng\Test-RuntimePackageReadiness.ps1 `
   -RuntimePackageKey win-x64-trt11.0-cuda13.2-cudnn9.22
 ```
+
+The current CUDA RTC preflight covers all 18 runtime keys. All four Windows Toolkit pairs match the declared path, size, and SHA256 values and have a local license-text file, but redistribution and package-host size review remain pending; all four Linux version lines remain unverified; and no `cuda-rtc` package project exists. These are four explicit blockers. A license file on disk is review input, not Owner approval or permission to redistribute.
 
 `eng/Test-BridgePackageConsumer.ps1` is the bridge package compile/dependency proof path. It restores the managed package plus the split `Bridge` package from local package sources, validates the `runtimes/<rid>/native/jyppxtrtbridge.dll` package layout, compiles a high-level wrapper surface probe for Plugin Inventory, managed callbacks, callback diagnostics, error-recorder snapshots, ErrorRecorder diagnostics design gate, Dimension Expression snapshot design gate, Runtime Deserialization boundary precheck, ONNX Parser diagnostic snapshot/summary, ONNX ParserRefitter diagnostic snapshot/summary, TensorRT deployment summary and config summary types, logger presence safe controls, allocator/debug-listener safe controls, allocator owner dry-run diagnostics, allocator owner native dry-run controls, allocator owner state ledger dry-run controls, allocator owner lifecycle snapshots, OutputBuffer ownership safety gate, profiler/progress safe controls, CUDA graph diagnostic summary types, and CUDA memory range APIs, and clears `JYPPX_NATIVE_BRIDGE_PATH`/development probing before running its diagnostic program. It may report `Skipped=True` when the local vendor TensorRT/CUDA/cuDNN DLL set is incomplete; that is package-layout, wrapper-surface, and dependency-diagnostic success, not proof that the full runtime can build or execute engines.
 

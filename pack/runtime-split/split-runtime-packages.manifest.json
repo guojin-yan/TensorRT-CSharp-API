@@ -12,6 +12,9 @@
     "windowsAssetSource": "pack/runtime/runtime-packages.manifest.json#cudaRtcPackaging.windowsAssetsByCudaVersion",
     "linuxEvidenceState": "unverified-local-assets-not-found",
     "redistributionApprovalState": "pending-owner-and-license-review",
+    "packagingPreflightScript": "eng/Test-CudaRtcFullRuntimePackagingPreflight.ps1",
+    "packagingPreflightEvidence": "artifacts/cuda-runtime-compilation/full-runtime-packaging-preflight.json",
+    "explicitPackRequestRequiresMaterializationReady": true,
     "proofBoundary": "A modeled split role is not a materialized package, clean consumer, public package, or post-publish proof."
   },
   "packages": [

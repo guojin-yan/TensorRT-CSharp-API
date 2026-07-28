@@ -1,0 +1,348 @@
+{
+    "schemaVersion":  1,
+    "recordKind":  "cuda-rtc-full-runtime-packaging-preflight",
+    "generatedLocalDate":  "2026-07-28",
+    "proofClassification":  "local-full-runtime-packaging-preflight",
+    "performsDownload":  false,
+    "performsAssetCopy":  false,
+    "performsPackaging":  false,
+    "performsPublish":  false,
+    "inputs":  {
+                   "runtimeManifest":  "pack/runtime/runtime-packages.manifest.json",
+                   "splitManifest":  "pack/runtime-split/split-runtime-packages.manifest.json",
+                   "capabilityMatrix":  "artifacts/cuda-runtime-compilation/capability-matrix.json",
+                   "localManifestPresent":  true,
+                   "localManifestPath":  "E:\\GitSpace\\TensorRT-CSharp-API-4.0\\TensorRtSharp4.0\\pack\\runtime\\runtime-packages.local.json"
+               },
+    "contract":  {
+                     "dependencyMode":  "optional-dynamic",
+                     "bridgeOnlyBundlesNvrtc":  false,
+                     "fullRuntimeBundleState":  "planned-pending-license-and-linux-proof",
+                     "splitRole":  "cuda-rtc",
+                     "splitRolePrototypeState":  "planned-not-materialized",
+                     "bridgePackagesReferenceRole":  false,
+                     "redistributionApprovalState":  "pending-owner-and-license-review",
+                     "packageHostSizeReviewState":  "pending-owner-channel-review"
+                 },
+    "windows":  [
+                    {
+                        "toolkitVersion":  "11.8",
+                        "runtimeKeys":  [
+                                            "win-x64-trt10.11-cuda11.8-cudnn8.9",
+                                            "win-x64-trt8.6-cuda11.8-cudnn8.9"
+                                        ],
+                        "toolkitRoot":  "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v11.8",
+                        "capabilityEvidenceState":  "local-header-import-lib-dll-export-verified",
+                        "expectedAssetPair":  [
+                                                  "bin/nvrtc64_112_0.dll",
+                                                  "bin/nvrtc-builtins64_118.dll"
+                                              ],
+                        "pairMatchesCapabilityMatrix":  true,
+                        "assets":  [
+                                       {
+                                           "kind":  "nvrtc",
+                                           "relativePath":  "bin/nvrtc64_112_0.dll",
+                                           "localPath":  "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v11.8\\bin\\nvrtc64_112_0.dll",
+                                           "exists":  true,
+                                           "expectedSizeBytes":  40629248,
+                                           "actualSizeBytes":  40629248,
+                                           "sizeMatches":  true,
+                                           "expectedSha256":  "7a1d6c894d9db5f043e7cca5ea328bc4f29c45aa7af3f0dd1bde1f31f02b41bd",
+                                           "actualSha256":  "7a1d6c894d9db5f043e7cca5ea328bc4f29c45aa7af3f0dd1bde1f31f02b41bd",
+                                           "hashMatches":  true,
+                                           "integrityReady":  true
+                                       },
+                                       {
+                                           "kind":  "nvrtc-builtins",
+                                           "relativePath":  "bin/nvrtc-builtins64_118.dll",
+                                           "localPath":  "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v11.8\\bin\\nvrtc-builtins64_118.dll",
+                                           "exists":  true,
+                                           "expectedSizeBytes":  7909888,
+                                           "actualSizeBytes":  7909888,
+                                           "sizeMatches":  true,
+                                           "expectedSha256":  "8642cd940445f0eb79ae73c04b3dfb8c8e61fc3aca191dc2239b28a9cb6964d8",
+                                           "actualSha256":  "8642cd940445f0eb79ae73c04b3dfb8c8e61fc3aca191dc2239b28a9cb6964d8",
+                                           "hashMatches":  true,
+                                           "integrityReady":  true
+                                       }
+                                   ],
+                        "assetPairSizeBytes":  48539136,
+                        "assetPairSizeMiB":  46.29,
+                        "assetIntegrityReady":  true,
+                        "licenseTextPresent":  true,
+                        "licensePath":  "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v11.8\\EULA.txt",
+                        "licenseSha256":  "b9ee12782ca117b887588d99ae1b8c24deb59105e05417fe28ffbd7a55896dd1",
+                        "redistributionApprovalState":  "pending-owner-and-license-review",
+                        "localAssetStagingReady":  true,
+                        "packageMaterializationReady":  false
+                    },
+                    {
+                        "toolkitVersion":  "12.1",
+                        "runtimeKeys":  [
+                                            "win-x64-trt8.6-cuda12.1-cudnn8.9"
+                                        ],
+                        "toolkitRoot":  "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.1",
+                        "capabilityEvidenceState":  "local-header-import-lib-dll-export-verified",
+                        "expectedAssetPair":  [
+                                                  "bin/nvrtc64_120_0.dll",
+                                                  "bin/nvrtc-builtins64_121.dll"
+                                              ],
+                        "pairMatchesCapabilityMatrix":  true,
+                        "assets":  [
+                                       {
+                                           "kind":  "nvrtc",
+                                           "relativePath":  "bin/nvrtc64_120_0.dll",
+                                           "localPath":  "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.1\\bin\\nvrtc64_120_0.dll",
+                                           "exists":  true,
+                                           "expectedSizeBytes":  42161152,
+                                           "actualSizeBytes":  42161152,
+                                           "sizeMatches":  true,
+                                           "expectedSha256":  "62b0975b7fe2940bfb367e257d734ef1a7cd512fcf3b53a5660082c742b244bb",
+                                           "actualSha256":  "62b0975b7fe2940bfb367e257d734ef1a7cd512fcf3b53a5660082c742b244bb",
+                                           "hashMatches":  true,
+                                           "integrityReady":  true
+                                       },
+                                       {
+                                           "kind":  "nvrtc-builtins",
+                                           "relativePath":  "bin/nvrtc-builtins64_121.dll",
+                                           "localPath":  "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.1\\bin\\nvrtc-builtins64_121.dll",
+                                           "exists":  true,
+                                           "expectedSizeBytes":  7001600,
+                                           "actualSizeBytes":  7001600,
+                                           "sizeMatches":  true,
+                                           "expectedSha256":  "0baa6563c0edfa4a36744f0d680398619b596d3167eeb0f29fa7d3f2ec5b6f18",
+                                           "actualSha256":  "0baa6563c0edfa4a36744f0d680398619b596d3167eeb0f29fa7d3f2ec5b6f18",
+                                           "hashMatches":  true,
+                                           "integrityReady":  true
+                                       }
+                                   ],
+                        "assetPairSizeBytes":  49162752,
+                        "assetPairSizeMiB":  46.89,
+                        "assetIntegrityReady":  true,
+                        "licenseTextPresent":  true,
+                        "licensePath":  "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.1\\EULA.txt",
+                        "licenseSha256":  "b9ee12782ca117b887588d99ae1b8c24deb59105e05417fe28ffbd7a55896dd1",
+                        "redistributionApprovalState":  "pending-owner-and-license-review",
+                        "localAssetStagingReady":  true,
+                        "packageMaterializationReady":  false
+                    },
+                    {
+                        "toolkitVersion":  "12.9",
+                        "runtimeKeys":  [
+                                            "win-x64-trt10.11-cuda12.9-cudnn9.22",
+                                            "win-x64-trt11.0-cuda12.9-cudnn9.22"
+                                        ],
+                        "toolkitRoot":  "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.9",
+                        "capabilityEvidenceState":  "local-header-import-lib-dll-export-verified",
+                        "expectedAssetPair":  [
+                                                  "bin/nvrtc64_120_0.dll",
+                                                  "bin/nvrtc-builtins64_129.dll"
+                                              ],
+                        "pairMatchesCapabilityMatrix":  true,
+                        "assets":  [
+                                       {
+                                           "kind":  "nvrtc",
+                                           "relativePath":  "bin/nvrtc64_120_0.dll",
+                                           "localPath":  "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.9\\bin\\nvrtc64_120_0.dll",
+                                           "exists":  true,
+                                           "expectedSizeBytes":  89833984,
+                                           "actualSizeBytes":  89833984,
+                                           "sizeMatches":  true,
+                                           "expectedSha256":  "69a3b8e00fdf6c64805bd369b037db91f1ac1fb25b3411676b434736df945249",
+                                           "actualSha256":  "69a3b8e00fdf6c64805bd369b037db91f1ac1fb25b3411676b434736df945249",
+                                           "hashMatches":  true,
+                                           "integrityReady":  true
+                                       },
+                                       {
+                                           "kind":  "nvrtc-builtins",
+                                           "relativePath":  "bin/nvrtc-builtins64_129.dll",
+                                           "localPath":  "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.9\\bin\\nvrtc-builtins64_129.dll",
+                                           "exists":  true,
+                                           "expectedSizeBytes":  7217664,
+                                           "actualSizeBytes":  7217664,
+                                           "sizeMatches":  true,
+                                           "expectedSha256":  "60c0705ef1bcef8de12f442b424e2edc649956611b8d04990ef17abb1df748a2",
+                                           "actualSha256":  "60c0705ef1bcef8de12f442b424e2edc649956611b8d04990ef17abb1df748a2",
+                                           "hashMatches":  true,
+                                           "integrityReady":  true
+                                       }
+                                   ],
+                        "assetPairSizeBytes":  97051648,
+                        "assetPairSizeMiB":  92.56,
+                        "assetIntegrityReady":  true,
+                        "licenseTextPresent":  true,
+                        "licensePath":  "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.9\\EULA.txt",
+                        "licenseSha256":  "213f2f1cc4bfecd53eb1579edc89d6e3a024ddd2f77413b69b40e2bf3c114d84",
+                        "redistributionApprovalState":  "pending-owner-and-license-review",
+                        "localAssetStagingReady":  true,
+                        "packageMaterializationReady":  false
+                    },
+                    {
+                        "toolkitVersion":  "13.2",
+                        "runtimeKeys":  [
+                                            "win-x64-trt11.0-cuda13.2-cudnn9.22"
+                                        ],
+                        "toolkitRoot":  "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v13.2",
+                        "capabilityEvidenceState":  "local-header-import-lib-dll-export-verified",
+                        "expectedAssetPair":  [
+                                                  "bin/x64/nvrtc64_130_0.dll",
+                                                  "bin/x64/nvrtc-builtins64_132.dll"
+                                              ],
+                        "pairMatchesCapabilityMatrix":  true,
+                        "assets":  [
+                                       {
+                                           "kind":  "nvrtc",
+                                           "relativePath":  "bin/x64/nvrtc64_130_0.dll",
+                                           "localPath":  "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v13.2\\bin\\x64\\nvrtc64_130_0.dll",
+                                           "exists":  true,
+                                           "expectedSizeBytes":  94861936,
+                                           "actualSizeBytes":  94861936,
+                                           "sizeMatches":  true,
+                                           "expectedSha256":  "d9adefe6df8a585ddbfabeab4a3a374d7601faf32d31316df933be71bcb14240",
+                                           "actualSha256":  "d9adefe6df8a585ddbfabeab4a3a374d7601faf32d31316df933be71bcb14240",
+                                           "hashMatches":  true,
+                                           "integrityReady":  true
+                                       },
+                                       {
+                                           "kind":  "nvrtc-builtins",
+                                           "relativePath":  "bin/x64/nvrtc-builtins64_132.dll",
+                                           "localPath":  "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v13.2\\bin\\x64\\nvrtc-builtins64_132.dll",
+                                           "exists":  true,
+                                           "expectedSizeBytes":  4535408,
+                                           "actualSizeBytes":  4535408,
+                                           "sizeMatches":  true,
+                                           "expectedSha256":  "b1a3f27ae868e40b2fd6b846bae9488478d735b35fe96baf5d1808ebde2ff12f",
+                                           "actualSha256":  "b1a3f27ae868e40b2fd6b846bae9488478d735b35fe96baf5d1808ebde2ff12f",
+                                           "hashMatches":  true,
+                                           "integrityReady":  true
+                                       }
+                                   ],
+                        "assetPairSizeBytes":  99397344,
+                        "assetPairSizeMiB":  94.79,
+                        "assetIntegrityReady":  true,
+                        "licenseTextPresent":  true,
+                        "licensePath":  "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v13.2\\EULA.txt",
+                        "licenseSha256":  "d56aa7762df57edd1a478cc47d85f804db40ed135b8270f4341c4a98a0796e90",
+                        "redistributionApprovalState":  "pending-owner-and-license-review",
+                        "localAssetStagingReady":  true,
+                        "packageMaterializationReady":  false
+                    }
+                ],
+    "linux":  [
+                  {
+                      "toolkitVersion":  "11.8",
+                      "runtimeKeys":  [
+                                          "linux-x64-ubuntu20.04-trt10.11-cuda11.8-cudnn8.9",
+                                          "linux-x64-ubuntu20.04-trt8.6-cuda11.8-cudnn8.9",
+                                          "linux-x64-ubuntu22.04-trt10.11-cuda11.8-cudnn8.9",
+                                          "linux-x64-ubuntu22.04-trt8.6-cuda11.8-cudnn8.9"
+                                      ],
+                      "expectedAssetPatterns":  [
+                                                    "targets/x86_64-linux/lib/libnvrtc.so*",
+                                                    "targets/x86_64-linux/lib/libnvrtc-builtins.so*",
+                                                    "lib64/libnvrtc.so*",
+                                                    "lib64/libnvrtc-builtins.so*"
+                                                ],
+                      "capabilityEvidenceState":  "unverified-local-assets-not-found",
+                      "localAssetCount":  0,
+                      "soname":  null,
+                      "assetsVerified":  false,
+                      "localAssetStagingReady":  false,
+                      "packageMaterializationReady":  false,
+                      "boundary":  "No local Linux .so or package payload was found on the audited Windows host. Loader candidates are implementation probes, not SONAME proof."
+                  },
+                  {
+                      "toolkitVersion":  "12.1",
+                      "runtimeKeys":  [
+                                          "linux-x64-ubuntu20.04-trt8.6-cuda12.1-cudnn8.9",
+                                          "linux-x64-ubuntu22.04-trt8.6-cuda12.1-cudnn8.9"
+                                      ],
+                      "expectedAssetPatterns":  [
+                                                    "targets/x86_64-linux/lib/libnvrtc.so*",
+                                                    "targets/x86_64-linux/lib/libnvrtc-builtins.so*",
+                                                    "lib64/libnvrtc.so*",
+                                                    "lib64/libnvrtc-builtins.so*"
+                                                ],
+                      "capabilityEvidenceState":  "unverified-local-assets-not-found",
+                      "localAssetCount":  0,
+                      "soname":  null,
+                      "assetsVerified":  false,
+                      "localAssetStagingReady":  false,
+                      "packageMaterializationReady":  false,
+                      "boundary":  "No local Linux .so or package payload was found on the audited Windows host. Loader candidates are implementation probes, not SONAME proof."
+                  },
+                  {
+                      "toolkitVersion":  "12.9",
+                      "runtimeKeys":  [
+                                          "linux-x64-ubuntu22.04-trt10.11-cuda12.9-cudnn9.22",
+                                          "linux-x64-ubuntu22.04-trt11.0-cuda12.9-cudnn9.22",
+                                          "linux-x64-ubuntu24.04-trt10.11-cuda12.9-cudnn9.22",
+                                          "linux-x64-ubuntu24.04-trt11.0-cuda12.9-cudnn9.22"
+                                      ],
+                      "expectedAssetPatterns":  [
+                                                    "targets/x86_64-linux/lib/libnvrtc.so*",
+                                                    "targets/x86_64-linux/lib/libnvrtc-builtins.so*",
+                                                    "lib64/libnvrtc.so*",
+                                                    "lib64/libnvrtc-builtins.so*"
+                                                ],
+                      "capabilityEvidenceState":  "unverified-local-assets-not-found",
+                      "localAssetCount":  0,
+                      "soname":  null,
+                      "assetsVerified":  false,
+                      "localAssetStagingReady":  false,
+                      "packageMaterializationReady":  false,
+                      "boundary":  "No local Linux .so or package payload was found on the audited Windows host. Loader candidates are implementation probes, not SONAME proof."
+                  },
+                  {
+                      "toolkitVersion":  "13.2",
+                      "runtimeKeys":  [
+                                          "linux-x64-ubuntu22.04-trt11.0-cuda13.2-cudnn9.22",
+                                          "linux-x64-ubuntu24.04-trt11.0-cuda13.2-cudnn9.22"
+                                      ],
+                      "expectedAssetPatterns":  [
+                                                    "targets/x86_64-linux/lib/libnvrtc.so*",
+                                                    "targets/x86_64-linux/lib/libnvrtc-builtins.so*",
+                                                    "lib64/libnvrtc.so*",
+                                                    "lib64/libnvrtc-builtins.so*"
+                                                ],
+                      "capabilityEvidenceState":  "unverified-local-assets-not-found",
+                      "localAssetCount":  0,
+                      "soname":  null,
+                      "assetsVerified":  false,
+                      "localAssetStagingReady":  false,
+                      "packageMaterializationReady":  false,
+                      "boundary":  "No local Linux .so or package payload was found on the audited Windows host. Loader candidates are implementation probes, not SONAME proof."
+                  }
+              ],
+    "summary":  {
+                    "runtimeKeyCount":  18,
+                    "windowsRuntimeKeyCount":  6,
+                    "linuxRuntimeKeyCount":  12,
+                    "windowsToolkitVersionCount":  4,
+                    "windowsAssetPairReadyCount":  4,
+                    "windowsLicenseTextPresentCount":  4,
+                    "windowsUniqueAssetBytes":  294150880,
+                    "windowsUniqueAssetMiB":  280.52,
+                    "windowsAssetStagingReady":  true,
+                    "linuxToolkitVersionCount":  4,
+                    "linuxAssetReadyCount":  0,
+                    "linuxAssetStagingReady":  false,
+                    "redistributionApproved":  false,
+                    "packageHostSizeReviewApproved":  false,
+                    "roleMaterialized":  false,
+                    "structuralFindingCount":  0,
+                    "materializationBlockerCount":  4,
+                    "canMaterializeFullRuntimeCudaRtcRole":  false,
+                    "canPublish":  false
+                },
+    "structuralFindings":  [
+
+                           ],
+    "materializationBlockers":  [
+                                    "redistribution-approval-pending",
+                                    "package-host-size-review-pending",
+                                    "linux-assets-unverified",
+                                    "cuda-rtc-role-not-materialized"
+                                ],
+    "proofBoundary":  "This preflight verifies local asset identity, manifest pairing, and license-text presence. It does not grant redistribution approval, materialize a package, prove Linux assets, publish anything, or promote public/post-publish proof."
+}

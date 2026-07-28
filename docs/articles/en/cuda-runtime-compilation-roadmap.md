@@ -34,6 +34,7 @@ The matching `cuda.h` and `cuda.lib` Driver surface is audited by `eng/Export-Cu
 - `eng/Test-CudaRtcBridgePackageConsumer.ps1` creates a repository-external consumer with a cleared, local-only NuGet source and only managed/bridge `PackageReference` entries. It verifies that the bridge package contains only `jyppxtrtbridge.dll`, copies the exact packaged bridge without `JYPPX_NATIVE_BRIDGE_PATH`, diagnoses missing NVRTC while Driver 12090 remains available, and then uses the installed NVRTC 12.9 library for compile, intentional-failure log capture, and Runtime-library/Driver launch/readback/correctness with matching output hashes.
 - Evidence is stored in `artifacts/cuda-runtime-compilation/capability-matrix.json`, `driver-capability-matrix.json`, `local-smoke.json`, `native-abi-surface.json`, `kernel-launch-native-abi-surface.json`, and `driver-native-abi-surface.json`. The first three smoke records have Runtime-library and Driver launch/readback/correctness/owner-retention fields set to true; 13.2 explicitly retains them as false.
 - The clean consumer record is stored in `artifacts/cuda-runtime-compilation/bridge-package-consumer.json` and `.md`. Its classification is `local-feed-clean-package-consumer-candidate`; it cannot promote public-package or post-publish proof.
+- `eng/Test-CudaRtcFullRuntimePackagingPreflight.ps1` now covers all 18 runtime keys without copying or packaging assets. The four Windows version lines match their manifest path, capability-matrix size, and SHA256 pairs and have local license text; Linux remains `0/4`, redistribution and package-host size review are pending, and the split role remains unmaterialized. The report therefore keeps `canMaterializeFullRuntimeCudaRtcRole=false` with four explicit blockers.
 
 The remaining RTC work is Linux runtime proof, materialized full-runtime `cuda-rtc` components, public-source clean consumers, and post-publish verification. Local Windows bridge/Driver launch/readback success and the local-feed package candidate do not promote those lanes.
 
@@ -105,6 +106,7 @@ Compile-only output, artifact hashes, synthetic kernels, and a local Toolkit are
 
 - The bridge-only NuGet package does not bundle NVRTC; callers install a matching CUDA Toolkit and receive focused dependency diagnostics.
 - Full GitHub runtime packages add `nvrtc` and the matching `nvrtc-builtins`, with Windows/Linux manifests, split-package roles, hashes, size checks, and redistribution review.
+- The local packaging preflight verifies Windows assets `4/4` and Linux assets `0/4`. It treats license-text presence as review input, never as redistribution approval. An explicit `cuda-rtc` split-pack request fails while any blocker remains.
 - Validate Windows x64, Linux x64, and CUDA 11.8/12.1/12.9/13.2. Runtime-key declarations must match actual native dependencies and package assets.
 - The Windows CUDA 12.9 local-feed clean consumer now compiles and launches without `ProjectReference` or development probing. Repeat the same smoke against a public source after publishing; the current result must remain a local candidate.
 

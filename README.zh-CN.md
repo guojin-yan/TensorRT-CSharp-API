@@ -543,6 +543,14 @@ cmake --build --preset win-x64-trt11-cuda13-release --parallel
 
 Windows 本地 root 不写入公开 runtime manifest。请使用 `pack/runtime/runtime-packages.local.json` 保存机器本地覆盖配置；可从 `pack/runtime/runtime-packages.local.example.json` 复制后修改。
 
+物化任何 full-runtime CUDA RTC 组件前先运行：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-CudaRtcFullRuntimePackagingPreflight.ps1
+```
+
+preflight 会按 capability matrix 的 size/SHA256 核对四版 Windows NVRTC/builtins pair，并记录 Toolkit license text 是否存在；license 文本存在不等于 redistribution 已批准，测得字节数也不等于 package host 已评审。当前 Windows 资产 `4/4` 就绪、Linux `0/4`、再分发与 package-host size review 均 pending，且 `cuda-rtc` role 未物化，因此显式 `-SplitPackageRole cuda-rtc` 仍会被阻断。
+
 托管 runtime loading 面向生产部署：
 
 - 常规探测检查 app base directory 和 `runtimes/<rid>/native`。

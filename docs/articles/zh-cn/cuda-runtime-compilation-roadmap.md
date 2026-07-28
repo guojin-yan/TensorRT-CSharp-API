@@ -34,6 +34,7 @@ CUDA 11.8、CUDA 12.1、CUDA 12.9、CUDA 13.2 的 Windows header、import LIB、
 - `eng/Test-CudaRtcBridgePackageConsumer.ps1` 会创建仓库外 consumer，清空远程 NuGet source，只引用 managed/bridge 两个 `PackageReference`。它验证 bridge 包只含 `jyppxtrtbridge.dll`，不依赖 `JYPPX_NATIVE_BRIDGE_PATH` 即可复制同 hash bridge；负向环境中 RTC 不可用但 Driver 12090 仍可用，正向再使用本机 NVRTC 12.9 完成 compile、intentional failure log 与 Runtime-library/Driver 双路径 launch/readback/correctness，且输出 hash 一致。
 - 证据位于 `artifacts/cuda-runtime-compilation/capability-matrix.json`、`driver-capability-matrix.json`、`local-smoke.json`、`native-abi-surface.json`、`kernel-launch-native-abi-surface.json` 与 `driver-native-abi-surface.json`。前三版 Runtime-library/Driver 的 launch/readback/correctness/owner-retention 均为 true；13.2 明确保持为 false。
 - clean consumer 证据位于 `artifacts/cuda-runtime-compilation/bridge-package-consumer.json` / `.md`，分类固定为 `local-feed-clean-package-consumer-candidate`，不能提升为 public-package 或 post-publish proof。
+- `eng/Test-CudaRtcFullRuntimePackagingPreflight.ps1` 已在不复制、不打包的前提下覆盖全部 18 个 runtime key。四版 Windows 的 manifest path、capability-matrix size/SHA256 pair 与本地文件一致且 license text 存在；Linux 仍为 `0/4`、redistribution 与 package-host size review 未批准、split role 未物化，因此报告保持 `canMaterializeFullRuntimeCudaRtcRole=false` 并列出四项明确 blocker。
 
 尚未完成的 RTC 主项是 Linux 真机、full-runtime `cuda-rtc` 组件物化、公开来源 clean consumer 与 post-publish；本地 Windows bridge/Driver 的 launch/readback 和 local-feed package candidate 不替代这些证明。
 
@@ -109,6 +110,7 @@ compile-only smoke、artifact hash、synthetic kernel 和 local Toolkit 都不�
 
 - Bridge-only NuGet 不捆绑 NVRTC；consumer 自行安装匹配 CUDA Toolkit，并获得明确 dependency diagnostics。
 - GitHub full runtime 包按 runtime key 增加 `nvrtc` 与匹配的 `nvrtc-builtins`，同步 Windows/Linux manifests、split package roles、hash/size checks 和 redistribution review。
+- 本地 packaging preflight 当前验证 Windows `4/4`、Linux `0/4`；license text 只作为复核输入，绝不等于再分发批准。任何 blocker 未关闭时，显式 `cuda-rtc` split pack 请求必须失败。
 - 验证 Windows x64、Linux x64、CUDA 11.8/12.1/12.9/13.2；每个 runtime key 的声明必须与实际 native dependencies 和 package assets 一致。
 - Windows CUDA 12.9 local-feed clean consumer 已在无 `ProjectReference`、无开发 probing 下完成 compile-to-launch；公开发布后仍必须从公开 source 重跑同一 smoke，当前结果只能保留为本地 candidate。
 

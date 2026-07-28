@@ -41,3 +41,5 @@ Latest local evidence:
 Machine-specific roots belong in `runtime-packages.local.json`, which is ignored by Git. Public package metadata belongs in `runtime-packages.manifest.json`.
 
 Start from `runtime-packages.local.example.json` for Windows or Linux runners. CUDA, cuDNN, and TensorRT binaries must be downloaded from official NVIDIA distributions and installed or unpacked on the self-hosted runner; the workflows resolve those roots and do not commit or fetch vendor binaries from Git.
+
+CUDA RTC is an optional dynamic dependency and is not part of bridge-only packages. Before any full-runtime RTC package is materialized, run `eng/Test-CudaRtcFullRuntimePackagingPreflight.ps1`. It cross-checks the public runtime manifest, split-role contract, capability matrix, local CUDA roots, NVRTC/builtins sizes and hashes, and license-text files. The default command writes a blocked-state report without copying or packing assets; `-RequireMaterializationReady` exits nonzero until platform asset proof, redistribution approval, and the split role are all complete.

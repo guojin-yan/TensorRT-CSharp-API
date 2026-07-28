@@ -629,6 +629,14 @@ Use one of the scripts below to inspect local TensorRT/CUDA/cuDNN roots:
 
 Windows local roots are intentionally not stored in the public runtime manifest. Use `pack/runtime/runtime-packages.local.json` for machine-specific root overrides; start from `pack/runtime/runtime-packages.local.example.json`.
 
+Before materializing any full-runtime CUDA RTC component, run:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-CudaRtcFullRuntimePackagingPreflight.ps1
+```
+
+The preflight checks the four modeled Windows NVRTC/builtins pairs against the capability-matrix size and SHA256 values and records available Toolkit license text. License-text presence is not redistribution approval, and measured bytes are not package-host approval. The current report has Windows assets ready `4/4`, Linux assets ready `0/4`, redistribution and package-host size review pending, and no materialized `cuda-rtc` role, so explicit `-SplitPackageRole cuda-rtc` packing remains blocked.
+
 Managed runtime loading is production-first:
 
 - normal probing checks the app base directory and `runtimes/<rid>/native`
@@ -659,7 +667,7 @@ dotnet docfx .\docs\docfx.json
 
 - NVIDIA binaries are intentionally not committed.
 - `third_party/` is only a local drop location.
-- Runtime packages are intended to ship the bridge together with matching TensorRT, CUDA, and cuDNN dynamic libraries only after redistribution and package-size review.
+- Runtime packages are intended to ship the bridge together with matching TensorRT, CUDA, cuDNN, and optional full-runtime NVRTC/builtins components only after redistribution, platform-asset, and package-size review.
 - Public hand-written C# wrappers should include useful XML documentation; generated APIs may use generated comments.
 
 - Public release owner execution package: `artifacts/final-release/public-release-owner-execution-package.json`

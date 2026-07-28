@@ -179,6 +179,102 @@ public sealed class CudaRuntimeCompilationOwnerTests
         Assert.False(role.GetProperty("bridgePackagesReferenceRole").GetBoolean());
         Assert.True(role.GetProperty("fullRuntimeCollectionsMayReferenceRole").GetBoolean());
         Assert.Equal("planned-not-materialized", role.GetProperty("prototypeState").GetString());
+        Assert.Equal("eng/Test-CudaRtcFullRuntimePackagingPreflight.ps1", role.GetProperty("packagingPreflightScript").GetString());
+        Assert.True(role.GetProperty("explicitPackRequestRequiresMaterializationReady").GetBoolean());
+        Assert.Equal(
+            "artifacts/cuda-runtime-compilation/full-runtime-packaging-preflight.json",
+            policy.GetProperty("packagingPreflightEvidence").GetString());
+        Assert.False(policy.GetProperty("licenseTextPresenceIsRedistributionApproval").GetBoolean());
+        Assert.True(policy.GetProperty("materializationRequiresRedistributionApproval").GetBoolean());
+        Assert.True(policy.GetProperty("materializationRequiresPackageHostSizeReview").GetBoolean());
+        Assert.True(policy.GetProperty("materializationRequiresPlatformAssetProof").GetBoolean());
+    }
+
+    [Fact]
+    public void FullRuntimeRtcPackagingPreflightVerifiesLocalAssetsAndKeepsMaterializationBlocked()
+    {
+        string preflight = ReadSource("eng", "Test-CudaRtcFullRuntimePackagingPreflight.ps1");
+        Assert.Contains("runtimeSizeBytes", preflight, StringComparison.Ordinal);
+        Assert.Contains("builtinsSha256", preflight, StringComparison.Ordinal);
+        Assert.Contains("licenseTextPresent", preflight, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("RequireMaterializationReady", preflight, StringComparison.Ordinal);
+        Assert.Contains("performsPackaging = $false", preflight, StringComparison.Ordinal);
+        Assert.Contains("performsPublish = $false", preflight, StringComparison.Ordinal);
+
+        string splitPack = ReadSource("eng", "Invoke-LocalSplitRuntimePackage.ps1");
+        Assert.Contains("$requestedSplitRoles -contains \"cuda-rtc\"", splitPack, StringComparison.Ordinal);
+        Assert.Contains("Test-CudaRtcFullRuntimePackagingPreflight.ps1", splitPack, StringComparison.Ordinal);
+        Assert.Contains("-RequireMaterializationReady", splitPack, StringComparison.Ordinal);
+        Assert.Contains("excludes the planned cuda-rtc role", splitPack, StringComparison.Ordinal);
+
+        using JsonDocument evidence = JsonDocument.Parse(ReadSource(
+            "artifacts", "cuda-runtime-compilation", "full-runtime-packaging-preflight.json"));
+        JsonElement root = evidence.RootElement;
+        Assert.Equal("local-full-runtime-packaging-preflight", root.GetProperty("proofClassification").GetString());
+        Assert.False(root.GetProperty("performsDownload").GetBoolean());
+        Assert.False(root.GetProperty("performsAssetCopy").GetBoolean());
+        Assert.False(root.GetProperty("performsPackaging").GetBoolean());
+        Assert.False(root.GetProperty("performsPublish").GetBoolean());
+
+        JsonElement summary = root.GetProperty("summary");
+        Assert.Equal(18, summary.GetProperty("runtimeKeyCount").GetInt32());
+        Assert.Equal(6, summary.GetProperty("windowsRuntimeKeyCount").GetInt32());
+        Assert.Equal(12, summary.GetProperty("linuxRuntimeKeyCount").GetInt32());
+        Assert.Equal(4, summary.GetProperty("windowsToolkitVersionCount").GetInt32());
+        Assert.Equal(4, summary.GetProperty("windowsAssetPairReadyCount").GetInt32());
+        Assert.Equal(4, summary.GetProperty("windowsLicenseTextPresentCount").GetInt32());
+        Assert.True(summary.GetProperty("windowsUniqueAssetBytes").GetInt64() > 0);
+        Assert.True(summary.GetProperty("windowsUniqueAssetMiB").GetDouble() > 0);
+        Assert.True(summary.GetProperty("windowsAssetStagingReady").GetBoolean());
+        Assert.Equal(4, summary.GetProperty("linuxToolkitVersionCount").GetInt32());
+        Assert.Equal(0, summary.GetProperty("linuxAssetReadyCount").GetInt32());
+        Assert.False(summary.GetProperty("linuxAssetStagingReady").GetBoolean());
+        Assert.False(summary.GetProperty("redistributionApproved").GetBoolean());
+        Assert.False(summary.GetProperty("packageHostSizeReviewApproved").GetBoolean());
+        Assert.False(summary.GetProperty("roleMaterialized").GetBoolean());
+        Assert.Equal(0, summary.GetProperty("structuralFindingCount").GetInt32());
+        Assert.Equal(4, summary.GetProperty("materializationBlockerCount").GetInt32());
+        Assert.False(summary.GetProperty("canMaterializeFullRuntimeCudaRtcRole").GetBoolean());
+        Assert.False(summary.GetProperty("canPublish").GetBoolean());
+
+        JsonElement[] windows = root.GetProperty("windows").EnumerateArray().ToArray();
+        Assert.Equal(
+            new[] { "11.8", "12.1", "12.9", "13.2" },
+            windows.Select(static item => item.GetProperty("toolkitVersion").GetString()!).ToArray());
+        Assert.All(windows, item =>
+        {
+            Assert.True(item.GetProperty("pairMatchesCapabilityMatrix").GetBoolean());
+            Assert.True(item.GetProperty("assetIntegrityReady").GetBoolean());
+            Assert.True(item.GetProperty("licenseTextPresent").GetBoolean());
+            Assert.True(item.GetProperty("localAssetStagingReady").GetBoolean());
+            Assert.False(item.GetProperty("packageMaterializationReady").GetBoolean());
+            JsonElement[] assets = item.GetProperty("assets").EnumerateArray().ToArray();
+            Assert.Equal(2, assets.Length);
+            Assert.All(assets, asset =>
+            {
+                Assert.True(asset.GetProperty("exists").GetBoolean());
+                Assert.True(asset.GetProperty("sizeMatches").GetBoolean());
+                Assert.True(asset.GetProperty("hashMatches").GetBoolean());
+                Assert.True(asset.GetProperty("integrityReady").GetBoolean());
+                Assert.Matches("^[0-9a-f]{64}$", asset.GetProperty("actualSha256").GetString());
+            });
+        });
+
+        Assert.All(root.GetProperty("linux").EnumerateArray(), item =>
+        {
+            Assert.Equal("unverified-local-assets-not-found", item.GetProperty("capabilityEvidenceState").GetString());
+            Assert.False(item.GetProperty("assetsVerified").GetBoolean());
+            Assert.False(item.GetProperty("packageMaterializationReady").GetBoolean());
+        });
+        Assert.Empty(root.GetProperty("structuralFindings").EnumerateArray());
+        string[] blockers = root.GetProperty("materializationBlockers").EnumerateArray().Select(static item => item.GetString()!).ToArray();
+        Assert.Equal(
+            new[]
+            {
+                "redistribution-approval-pending", "package-host-size-review-pending",
+                "linux-assets-unverified", "cuda-rtc-role-not-materialized"
+            },
+            blockers);
     }
 
     [Fact]

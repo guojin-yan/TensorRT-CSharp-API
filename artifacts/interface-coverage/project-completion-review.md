@@ -1,5 +1,44 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-28 CUDA RTC Full-Runtime Packaging Preflight
+
+本阶段没有直接物化或发布 `cuda-rtc` 包，而是把 runtime/split manifest 中的 planned role 升级为可执行、可复算的严格
+preflight。它区分本地资产 identity、license text 存在、Owner redistribution approval、Linux proof 和 package project
+物化，任一层缺失都不能进入打包。
+
+### 实现
+
+- 新增 `eng/Test-CudaRtcFullRuntimePackagingPreflight.ps1`，读取 public runtime manifest、split role、RTC capability
+  matrix 与 ignored local root override；不下载、不复制 asset、不 pack、不 publish。
+- Windows 按 CUDA 11.8/12.1/12.9/13.2 分组覆盖 6 个 runtime key，逐项核对 NVRTC 与 matching builtins 的
+  relative path、expected/actual size、expected/actual SHA256；同时记录 EULA/LICENSE path 与 SHA256。
+- Linux 按四版覆盖 12 个 runtime key，保持 capability matrix 的 `unverified-local-assets-not-found`、SONAME null 和
+  assets unverified，不从 Windows DLL 外推 `.so`。
+- runtime/split manifest 新增 preflight script/evidence、integrity source、license-text 非 approval、redistribution/platform
+  proof 必需等合同字段；bridge-only 继续不引用 `cuda-rtc`。
+- `Invoke-LocalSplitRuntimePackage.ps1` 对显式 `-SplitPackageRole cuda-rtc` 先执行
+  `-RequireMaterializationReady` 并失败；`all` 明确警告 planned role 尚未包含，避免静默声称完整 full runtime。
+- preflight 同时覆盖无 local override 的 clean-clone 路径：结构 finding 保持 0，Windows 资产转为 blocked report，
+  不在 PowerShell 5.1 空数组参数绑定阶段崩溃。
+
+### Evidence And Verification
+
+- 结构化证据：`artifacts/cuda-runtime-compilation/full-runtime-packaging-preflight.json` / `.md`，分类为
+  `local-full-runtime-packaging-preflight`。
+- runtime keys：18（Windows 6、Linux 12）；Windows Toolkit version 4，asset pair integrity ready `4/4`，license text
+  present `4/4`，四个唯一 pair 合计 `294150880 bytes / 280.52 MiB`；Linux asset ready `0/4`；structural findings 0。
+- 四项 blocker 固定为 `redistribution-approval-pending`、`package-host-size-review-pending`、
+  `linux-assets-unverified`、`cuda-rtc-role-not-materialized`；`canMaterializeFullRuntimeCudaRtcRole=false`、
+  `canPublish=false`。
+- `-RequireMaterializationReady` 与显式 split pack guard 均真实返回非零；无 local root 模式正常生成 blocked report；
+  CUDA RTC 专项扩展后为 `16/16`。
+
+### Proof Boundary
+
+- Windows asset integrity 与 EULA 文件存在不等于 Owner 已批准 NVIDIA runtime 再分发，也不等于 nupkg 已生成。
+- Linux 仍无真实 NVRTC/builtins `.so`、SONAME/symbol/package proof；当前不能物化跨平台 `cuda-rtc` role。
+- 本批未复制 NVIDIA asset、未 pack `cuda-rtc`、未 push、未触发 Actions，未执行任何远程发布或 issue close。
+
 ## 2026-07-28 CUDA RTC Bridge Package Clean Consumer
 
 本阶段把 bridge-only CUDA RTC 从仓库内样例推进到仓库外、本地 feed、纯 `PackageReference` consumer，验证当前
