@@ -1,0 +1,112 @@
+{
+  "schemaVersion": "deferred-readonly-candidate-evidence-map.v1",
+  "description": "Tracked linkage supplements for the ignored deferred readonly candidate artifact. The exporter merges these paths by candidateId and verifies all links without promoting runtime or release proof.",
+  "candidates": [
+    {
+      "candidateId": "plugin-field-metadata-001",
+      "additionalNativeSources": [
+        "native/src/tensorrt/v10/api.cpp",
+        "native/src/tensorrt/v11/api.cpp"
+      ],
+      "manifestSources": [
+        "native/manifests/tensorrt/v8/trt8-plugin-registry-inventory.manifest.json",
+        "native/manifests/tensorrt/v10/trt10-twenty-sixth-batch-plugin-registry-inventory.manifest.json",
+        "native/manifests/tensorrt/v11/trt11-twenty-sixth-batch-plugin-registry-inventory.manifest.json"
+      ]
+    },
+    {
+      "candidateId": "plugin-creator-identity-002",
+      "additionalNativeSources": [
+        "native/src/tensorrt/v10/api.cpp",
+        "native/src/tensorrt/v11/api.cpp"
+      ],
+      "manifestSources": [
+        "native/manifests/tensorrt/v8/trt8-plugin-registry-inventory.manifest.json",
+        "native/manifests/tensorrt/v10/trt10-twenty-sixth-batch-plugin-registry-inventory.manifest.json",
+        "native/manifests/tensorrt/v11/trt11-twenty-sixth-batch-plugin-registry-inventory.manifest.json"
+      ]
+    },
+    {
+      "candidateId": "plugin-creator-v3-metadata-design-003",
+      "additionalNativeSources": [
+        "native/src/tensorrt/v10/api.cpp",
+        "native/src/tensorrt/v11/api.cpp"
+      ],
+      "manifestSources": [
+        "native/manifests/tensorrt/v8/trt8-plugin-registry-inventory.manifest.json",
+        "native/manifests/tensorrt/v10/trt10-twenty-sixth-batch-plugin-registry-inventory.manifest.json",
+        "native/manifests/tensorrt/v11/trt11-twenty-sixth-batch-plugin-registry-inventory.manifest.json"
+      ]
+    },
+    {
+      "candidateId": "engine-layer-metadata-001",
+      "additionalManagedSources": [
+        "src/JYPPX.TensorRtSharp/TensorRtEngine.cs"
+      ],
+      "manifestSources": [
+        "native/manifests/tensorrt/v8/trt8-minimal.manifest.json",
+        "native/manifests/tensorrt/v10/trt10-minimal.manifest.json",
+        "native/manifests/tensorrt/v11/trt11-eleventh-batch.manifest.json"
+      ]
+    },
+    {
+      "candidateId": "engine-tensor-binding-002",
+      "additionalNativeSources": [
+        "native/src/tensorrt/v10/api.cpp",
+        "native/src/tensorrt/v11/api.cpp"
+      ],
+      "manifestSources": [
+        "native/manifests/tensorrt/v8/trt8-minimal.manifest.json",
+        "native/manifests/tensorrt/v10/trt10-minimal.manifest.json",
+        "native/manifests/tensorrt/v10/trt10-engine-profile-tensor-values-readonly.manifest.json",
+        "native/manifests/tensorrt/v11/trt11-deployment.manifest.json",
+        "native/manifests/tensorrt/v11/trt11-fifteenth-batch.manifest.json"
+      ]
+    },
+    {
+      "candidateId": "builder-config-readback-001",
+      "additionalNativeSources": [
+        "native/src/tensorrt/v11/api.cpp"
+      ],
+      "manifestSources": [
+        "native/manifests/tensorrt/v8/trt8-builder-config-scalar-controls.manifest.json",
+        "native/manifests/tensorrt/v8/trt8-builder-config-plugin-serialization-readonly.manifest.json",
+        "native/manifests/tensorrt/v8/trt8-minimal.manifest.json",
+        "native/manifests/tensorrt/v10/trt10-builder-config-scalar-controls.manifest.json",
+        "native/manifests/tensorrt/v10/trt10-runtime-serialization-plugin-paths.manifest.json",
+        "native/manifests/tensorrt/v10/trt10-minimal.manifest.json",
+        "native/manifests/tensorrt/v11/trt11-tenth-batch.manifest.json",
+        "native/manifests/tensorrt/v11/trt11-eleventh-batch.manifest.json",
+        "native/manifests/tensorrt/v11/trt11-deployment.manifest.json"
+      ]
+    },
+    {
+      "candidateId": "error-recorder-snapshot-001",
+      "manifestSources": [
+        "native/manifests/tensorrt/v8/trt8-owner-error-recorder-snapshot.manifest.json",
+        "native/manifests/tensorrt/v10/trt10-owner-error-recorder-snapshot.manifest.json",
+        "native/manifests/tensorrt/v11/trt11-owner-error-recorder-snapshot.manifest.json"
+      ]
+    },
+    {
+      "candidateId": "error-recorder-interface-info-design-002",
+      "manifestSources": [
+        "native/manifests/tensorrt/v8/trt8-owner-error-recorder-snapshot.manifest.json",
+        "native/manifests/tensorrt/v10/trt10-owner-scoped-versioned-interface-metadata.manifest.json",
+        "native/manifests/tensorrt/v10/trt10-owner-error-recorder-snapshot.manifest.json",
+        "native/manifests/tensorrt/v11/trt11-owner-scoped-versioned-interface-metadata.manifest.json",
+        "native/manifests/tensorrt/v11/trt11-owner-error-recorder-snapshot.manifest.json"
+      ]
+    },
+    {
+      "candidateId": "debug-listener-interface-info-design-004",
+      "additionalManagedSources": [
+        "src/JYPPX.TensorRtSharp/TensorRtDebugListenerCallbackOwner.cs"
+      ]
+    }
+  ],
+  "isRuntimeExecutionProof": false,
+  "canPromoteRuntimeProof": false,
+  "canPromoteReleaseProof": false,
+  "canDeleteDeferredRecords": false
+}

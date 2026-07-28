@@ -1,5 +1,39 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-28 Deferred Readonly Candidate Evidence Audit
+
+本阶段把 16 个 deferred readonly candidate 的手写 evidence 记录收口为可复算的 repository linkage audit。
+新增 `eng/Export-DeferredReadonlyCandidateEvidenceAudit.ps1` 和
+`DeferredReadonlyCandidateEvidenceAuditTests`，并新增受版本控制的
+`eng/deferred-readonly-candidate-evidence-map.json`，为已实现/安全替代候选补齐显式 `manifestSources` 与跨版本
+native 聚合源。exporter 会把该 map 与被 `artifacts/` 忽略的本地 candidate list 合并，避免干净工作区丢失链接证据。
+
+### Audit 结果
+
+- candidate：16；implemented/design-gate status：8。
+- evidence path：242 checked / 0 missing；manifest record：34 / 0 findings。
+- managed public surface：94 / 0 missing；forbidden public handle：0；总 findings：0。
+- plugin registry 的 TRT10/TRT11 宏生成 entry point 通过 `prefix-macro` linkage 识别；manifest `versionLine` 与路径一致。
+- 首轮发现并修复 6 个问题：跨版本 native 聚合源漏列、两个 managed public surface 漏列、三个 manifest-source link miss、
+  一条 ownership boundary 文案不完整。
+
+### Proof Boundary
+
+该 audit 只证明仓库内 candidate evidence 的路径、manifest、native symbol/linkage、托管入口和 ownership marker 彼此闭合，
+不证明 vendor runtime、clean package consumer、post-publish、Linux、real model 或 owner authorization。所有
+`isRuntimeExecutionProof`、`isPackageConsumerRuntimeProof`、`canPromoteRuntimeProof`、`canPromoteReleaseProof`、
+`canPublishPublicly`、`canCloseReleaseIssue`、`performsPublish` 均为 `false`；没有删除 deferred history。
+
+### Verification
+
+- `DeferredReadonlyCandidateEvidenceAuditTests`：2/2。
+- 相关只读候选/summary 专项：11/11；完整 `TensorRtSharp.sln` Debug build：0 warning / 0 error。
+- JSON/Markdown 连续导出 SHA256 稳定；audit findings：0；`git diff --check` 通过。
+- stale release claims 本轮扫描超过 120 秒超时，未计作通过；上一次已记录工件仍为 1130 files / 0 findings。
+- C 盘 Downloads 没有本批新增模型、engine、SDK、包或压缩重资产；Temp 没有本批重资产，只有完整 build 创建的
+  15 个空 `MSBuildTemp*` 目录。精确删除命令被本机策略阻止，未绕过策略，也未删除其他进程的 fixture/log。
+- 本阶段不 push、不触发 GitHub Actions、不发布 NuGet/GitHub Packages/GitHub Release、不关闭 issue。
+
 ## 2026-07-28 Release Blocker And Owner Proof Backlog
 
 本阶段不伪造外部 runtime 或发布证据，集中把 closure ledger 的 42 条未完成 proof 投影成可执行、可复算、
