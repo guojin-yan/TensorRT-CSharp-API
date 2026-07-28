@@ -1,0 +1,72 @@
+{
+  "schema": "jyppx-tensorrtexec-multi-input-reference-runtime-evidence.v1",
+  "capturedAtLocal": "2026-07-28",
+  "runtime": {
+    "tensorRtLine": 10,
+    "tensorRtVersion": "10.11.0",
+    "cudaToolkitVersion": "12.9",
+    "platform": "win-x64",
+    "modelKind": "generated-onnx-add-sub",
+    "modelSha256": "ce9b8010521f1b97d8b29967355fefd37520a410d2317fe5e9b98b567b850fa0",
+    "engineSha256": "0389a1ac3e0868bab24695af931e9caba68bd5ad7cbdcd91dacbb2aeafaf46b9"
+  },
+  "inputs": [
+    {
+      "tensorName": "left",
+      "shape": [2, 4],
+      "elementCount": 8,
+      "byteLength": 32,
+      "sha256": "cd524791e5b951e8fc0203fe66bd9ec1fa5858251ea2b60723a095d3a8744d0e",
+      "sourceClassification": "load-input-file"
+    },
+    {
+      "tensorName": "right",
+      "shape": [2, 4],
+      "elementCount": 8,
+      "byteLength": 32,
+      "sha256": "9d42cad41af4aaf3ae973e5a48d96f61e4708edc57bf7dd29a497ebd96f506cf",
+      "sourceClassification": "load-input-file"
+    }
+  ],
+  "validatedRun": {
+    "state": "external-onnx-reference-validated-runtime",
+    "success": true,
+    "inferenceRan": true,
+    "outputMatch": true,
+    "outputValidated": true,
+    "identityOutputMatch": false,
+    "inputTensorCount": 2,
+    "outputTensorCount": 2,
+    "referenceTensorComparisonCount": 2,
+    "referenceSourceClassification": "synthetic-generated",
+    "sumSha256": "753c7c5612f6382177cd7f9fb41a09feb66d2e8d35f907bae773bdf04a69f4a6",
+    "differenceSha256": "4d10993209349c871d397e5c781daff28392b8f1c77f7ea36f1a65399a4ade3b",
+    "combinedRawSha256": "05080c5591955c003b781dba0170ad3aca244e3033b89e81569a39abe305e2c5",
+    "outputArtifactSha256": "30b44af11b46590e515085bae4fdfaac06f6f28ea888b2448d55571bebfce002",
+    "reportSha256": "8049ab3165d5388273ac1bf0b5c8a2e5d7a85436daead7924ecbf02a0afcd99c",
+    "allMismatchCountsZero": true
+  },
+  "mismatchRun": {
+    "state": "load-engine-reference-validation-failed",
+    "success": false,
+    "inferenceRan": true,
+    "outputMatch": false,
+    "outputValidated": false,
+    "validationCompleted": true,
+    "validationPassed": false,
+    "tensorName": "difference",
+    "mismatchCount": 1,
+    "firstMismatchIndex": 7,
+    "maximumAbsoluteError": 0.25,
+    "outputArtifactSha256": "af567c1bbee91919270744f45af195390a41fd178154e306ab031ab92b1f7042",
+    "reportSha256": "bc81e6224c8e13b0f663f9d7fdb11296be6507cad3fbd1b80842c51ec80c6d31",
+    "diagnostic": "tensor-validation-failed:difference:1 value(s) exceeded tolerance or special-value policy; first mismatch index 7"
+  },
+  "verification": {
+    "targetedTestsPassed": 109,
+    "targetedTestsFailed": 0,
+    "smokeExitCode": 0
+  },
+  "classification": "synthetic-multi-input-multi-output-reference-runtime",
+  "proofBoundary": "Real TensorRT build, enqueue, readback, and all-output numerical comparison on a generated ONNX model. Synthetic input/reference evidence is not real-model-runtime, package-consumer-runtime, public-package, post-publish, Linux, Owner-accepted, or release proof."
+}

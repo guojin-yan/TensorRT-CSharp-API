@@ -17,7 +17,7 @@ public sealed class TensorRtExecMultiOutputArtifactContractTests
         JsonElement root = document.RootElement;
 
         Assert.Equal("tensor-rt-exec-runtime-output-artifact-contract", root.GetProperty("contractId").GetString());
-        Assert.Equal(1, root.GetProperty("formatVersion").GetInt32());
+        Assert.Equal(2, root.GetProperty("formatVersion").GetInt32());
         Assert.Equal("float32", root.GetProperty("supportedDataType").GetString());
         Assert.Equal(3, root.GetProperty("runtimeActivation").GetProperty("outputCaptureOptions").GetArrayLength());
         Assert.Equal("deterministic-generated", root.GetProperty("runtimeActivation").GetProperty("inputWithoutLoadInputs").GetString());
@@ -32,7 +32,7 @@ public sealed class TensorRtExecMultiOutputArtifactContractTests
             .EnumerateArray()
             .Select(static item => item.GetString()!)
             .ToArray();
-        foreach (string field in new[] { "OutputCaptureAvailable", "OutputValidated", "OutputTensorCount", "OutputTensors", "HasTensorOutputProof", "HasRawBindingProof" })
+        foreach (string field in new[] { "OutputCaptureAvailable", "OutputValidated", "InputTensorCount", "InputTensors", "ReferenceValidation", "OutputTensorCount", "OutputTensors", "HasTensorOutputProof", "HasRawBindingProof" })
         {
             Assert.Contains(field, requiredOutputFields);
         }
@@ -65,7 +65,7 @@ public sealed class TensorRtExecMultiOutputArtifactContractTests
         string fieldMap = Read("applications", "TensorRtExec", "tensor-rt-exec-gui-cli-field-map.json");
         string sampleMatrix = Read("samples", "OnnxToEngine", "trtexec-parity-matrix.json");
 
-        Assert.Contains("CreateOutputSummaries", service, StringComparison.Ordinal);
+        Assert.Contains("CreateRuntimeEvidence", service, StringComparison.Ordinal);
         Assert.Contains("options.RuntimeOptions.RequestsOutputCapture", service, StringComparison.Ordinal);
         Assert.Contains("InputSource={inputSource}", service, StringComparison.Ordinal);
         Assert.Contains("foreach (OnnxEngineRuntimeOutputArtifact output in outputArtifacts)", service, StringComparison.Ordinal);
@@ -77,12 +77,13 @@ public sealed class TensorRtExecMultiOutputArtifactContractTests
         Assert.Contains("public bool RequestsOutputCapture", runtimeOptions, StringComparison.Ordinal);
         Assert.Contains("implemented-bounded-multi-output-capture", capabilities, StringComparison.Ordinal);
         Assert.Contains("applied-bounded-output-capture", capabilities, StringComparison.Ordinal);
+        Assert.Contains("implemented-structured-reference-validation", capabilities, StringComparison.Ordinal);
 
         Assert.Contains("OutputCaptureAvailable=true", readme, StringComparison.Ordinal);
         Assert.Contains("OutputValidated=false", readme, StringComparison.Ordinal);
         Assert.Contains("<raw-path>.manifest.json", readme, StringComparison.Ordinal);
         Assert.Contains("implemented-bounded-multi-output-capture", featureMatrix, StringComparison.Ordinal);
-        Assert.Contains("implemented-pointer-free-binding-and-multi-output-artifacts", parityMatrix, StringComparison.Ordinal);
+        Assert.Contains("implemented-pointer-free-multi-input-binding-multi-output-artifacts-and-reference-validation", parityMatrix, StringComparison.Ordinal);
         Assert.Contains("implemented-bounded-multi-output-log", fieldMap, StringComparison.Ordinal);
         Assert.Contains("implemented-bounded-multi-output-raw-manifest", fieldMap, StringComparison.Ordinal);
         Assert.Contains("implemented-bounded-multi-output-json", fieldMap, StringComparison.Ordinal);

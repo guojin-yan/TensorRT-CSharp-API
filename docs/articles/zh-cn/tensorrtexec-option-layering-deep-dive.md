@@ -8,12 +8,12 @@
 
 | 来源 | 当前规模 | 回答的问题 | 不能证明 |
 | --- | ---: | --- | --- |
-| `TrtexecLikeOptionCapabilities` / `--help-json` | 32 entries | option group、alias、status、implementation class | 某次真实 build/runtime 已执行 |
-| `tensor-rt-exec-gui-cli-field-map.json` | 85 fields | CLI token 与 WinForms control 是否进入同一 command surface | GUI 行为等于 native TensorRT 行为 |
+| `TrtexecLikeOptionCapabilities` / `--help-json` | 33 entries | option group、alias、status、implementation class | 某次真实 build/runtime 已执行 |
+| `tensor-rt-exec-gui-cli-field-map.json` | 90 fields | CLI token 与 WinForms control 是否进入同一 command surface | GUI 行为等于 native TensorRT 行为 |
 | `tensor-rt-exec-trtexec-parity-matrix.json` | 分组 parity rows | 官方功能与当前 implementation/evidence gap | full trtexec parity 已完成 |
 | `tensor-rt-exec-release-candidate-gap-list.json` | 20 items | 剩余实现/owner proof 动作 | release 已批准 |
 
-当前 capability JSON 汇总为 32 entries、27 implemented/bounded、4 parse-or-diagnostic-only、1 blocked。数字描述 source-quality capability surface，不是 27 项 runtime proof。gap list 同样记录 0 runtime proof items、0 package-consumer runtime proof items。
+当前 capability JSON 汇总为 33 entries、28 implemented/bounded、4 parse-or-diagnostic-only、1 blocked。数字描述 source-quality capability surface，不是 28 项 runtime proof。GUI/CLI field map 为 90 fields；gap list 同样记录 0 runtime proof items、0 package-consumer runtime proof items。
 
 ## 数据流
 
@@ -69,8 +69,8 @@ dotnet run --project .\applications\TensorRtExec -- --capabilities-json
 
 ```text
 matrixState=source-quality-capability-surface
-entryCount=32
-implementedCount=27
+entryCount=33
+implementedCount=28
 parseOrDiagnosticOnlyCount=4
 blockedCount=1
 releaseFrozen=true

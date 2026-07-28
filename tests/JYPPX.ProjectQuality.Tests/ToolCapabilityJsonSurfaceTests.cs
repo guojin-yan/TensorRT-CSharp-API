@@ -26,11 +26,11 @@ public sealed class ToolCapabilityJsonSurfaceTests
         foreach (string marker in new[]
         {
             "## 先读四种事实来源",
-            "32 entries",
-            "27 implemented/bounded",
+            "33 entries",
+            "28 implemented/bounded",
             "4 parse-or-diagnostic-only",
             "1 blocked",
-            "85 fields",
+            "90 fields",
             "20 items",
             "E:\\TensorRtSharpAssets\\cases\\tensorrtexec-option-audit",
             "TrtexecLikeParser",
@@ -66,8 +66,8 @@ public sealed class ToolCapabilityJsonSurfaceTests
         }
 
         using JsonDocument capabilities = JsonDocument.Parse(TrtexecLikeOptionCapabilities.FormatJson("TensorRtExec"));
-        Assert.Equal(32, capabilities.RootElement.GetProperty("entryCount").GetInt32());
-        Assert.Equal(27, capabilities.RootElement.GetProperty("implementedCount").GetInt32());
+        Assert.Equal(33, capabilities.RootElement.GetProperty("entryCount").GetInt32());
+        Assert.Equal(28, capabilities.RootElement.GetProperty("implementedCount").GetInt32());
         Assert.Equal(4, capabilities.RootElement.GetProperty("parseOrDiagnosticOnlyCount").GetInt32());
         Assert.Equal(1, capabilities.RootElement.GetProperty("blockedCount").GetInt32());
 
@@ -76,7 +76,7 @@ public sealed class ToolCapabilityJsonSurfaceTests
             "applications",
             "TensorRtExec",
             "tensor-rt-exec-gui-cli-field-map.json")));
-        Assert.Equal(85, fieldMap.RootElement.GetProperty("fields").GetArrayLength());
+        Assert.Equal(90, fieldMap.RootElement.GetProperty("fields").GetArrayLength());
         Assert.Contains("not runtime proof", fieldMap.RootElement.GetProperty("proofBoundary").GetString(), StringComparison.Ordinal);
 
         using JsonDocument gapList = JsonDocument.Parse(File.ReadAllText(Path.Combine(

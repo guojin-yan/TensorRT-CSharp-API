@@ -203,14 +203,14 @@
     },
     {
       "id": "binding-metadata",
-      "officialTrtexecParity": "--loadInputs --dumpOutput --dumpRawBindingsToFile --exportOutput",
-      "currentStatus": "implemented-pointer-free-binding-and-multi-output-artifacts",
+      "officialTrtexecParity": "--loadInputs --dumpOutput --dumpRawBindingsToFile --exportOutput plus JYPPX structured reference validation",
+      "currentStatus": "implemented-pointer-free-multi-input-binding-multi-output-artifacts-and-reference-validation",
       "isRuntimeProof": false,
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": true,
       "winFormsSupported": true,
-      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/Artifacts/OnnxEngineRuntimeArtifactWriter.cs", "samples/YoloVision", "samples/YoloVision/yolovision-task-output-contract.json", "eng/Test-YoloVisionRealAssetCandidate.ps1", "eng/Test-YoloVisionRealAssetOwnerBackfillPack.ps1"],
-      "nextStep": "Retain multi-output previews, per-tensor hashes, deterministic raw offsets, and pointer-free bindingMetadata; owner must still supply expected output values, task roles, model/engine/input/log hashes, and review before promotion."
+      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/Artifacts/OnnxEngineRuntimeArtifactWriter.cs", "src/JYPPX.TensorRtSharp.Tools/Artifacts/OnnxEngineRuntimeValidationArtifacts.cs", "samples/YoloVision", "samples/YoloVision/yolovision-task-output-contract.json", "eng/Test-YoloVisionRealAssetCandidate.ps1", "eng/Test-YoloVisionRealAssetOwnerBackfillPack.ps1"],
+      "nextStep": "Retain engine-order input/output metadata, reference comparison diagnostics, per-tensor hashes, and deterministic raw offsets; owner must still supply reviewed real-model reference sources, model/engine/input/log hashes, task roles, and public consumer evidence before promotion."
     },
     {
       "id": "winforms-command-surface",

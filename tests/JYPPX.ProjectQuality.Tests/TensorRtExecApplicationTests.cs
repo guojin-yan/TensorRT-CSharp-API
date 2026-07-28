@@ -369,7 +369,8 @@ public sealed class TensorRtExecApplicationTests
         Assert.Contains("--profilingVerbosity <none|layer_names_only|detailed> --verbose", commandSource, StringComparison.Ordinal);
         Assert.Contains("--iterations <n> --warmUp <ms> --duration <sec> --streams <n> --infStreams <n> --useCudaGraph", commandSource, StringComparison.Ordinal);
         Assert.Contains("--noDataTransfers --useSpinWait --threads --avgRuns <n> --percentile <0..100> --sleepTime <ms> --idleTime <ms>", commandSource, StringComparison.Ordinal);
-        Assert.Contains("--loadInputs input:file --dumpOutput --dumpRawBindingsToFile <path>", commandSource, StringComparison.Ordinal);
+        Assert.Contains("--loadInputs input:file[,other:file] --dumpOutput --dumpRawBindingsToFile <path>", commandSource, StringComparison.Ordinal);
+        Assert.Contains("--referenceOutputs output:reference.json[,other:reference.json]", commandSource, StringComparison.Ordinal);
         Assert.Contains("--exportOutput <path> --exportTimes <path> --exportProfile <path> --saveProfile <path>", commandSource, StringComparison.Ordinal);
         Assert.Contains("--exportReport|--report <path.json|path.md>", commandSource, StringComparison.Ordinal);
         Assert.Contains("Input options:", commandSource, StringComparison.Ordinal);

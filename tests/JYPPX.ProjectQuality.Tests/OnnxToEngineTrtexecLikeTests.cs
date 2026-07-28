@@ -1841,10 +1841,13 @@ public sealed class OnnxToEngineTrtexecLikeTests
         Assert.Contains("TryRunGenericFloatEngineFromFile", service, StringComparison.Ordinal);
         Assert.Contains("load-engine-identity-runtime", service, StringComparison.Ordinal);
         Assert.Contains("load-engine-runtime-output-unverified", service, StringComparison.Ordinal);
-        Assert.Contains("external-onnx-runtime-output-unverified", service, StringComparison.Ordinal);
-        Assert.Contains("Generic bounded runtime supports exactly one input tensor", service, StringComparison.Ordinal);
+        Assert.Contains("private static string RuntimeState", service, StringComparison.Ordinal);
+        Assert.Contains("prefix + \"-runtime-output-unverified\"", service, StringComparison.Ordinal);
+        Assert.Contains("List<OnnxEngineRuntimeInput> runtimeInputs", service, StringComparison.Ordinal);
+        Assert.DoesNotContain("Generic bounded runtime supports exactly one input tensor", service, StringComparison.Ordinal);
         Assert.Contains("Generic bounded runtime supports float input tensors only", service, StringComparison.Ordinal);
         Assert.Contains("--loadInputs must include a mapping", service, StringComparison.Ordinal);
+        Assert.Contains("reference-validation-failed", service, StringComparison.Ordinal);
         Assert.Contains("runtime-output-captured-unverified", artifactWriter, StringComparison.Ordinal);
         Assert.Contains("not runtime proof, real-model proof, or package-consumer proof", artifactWriter, StringComparison.Ordinal);
     }

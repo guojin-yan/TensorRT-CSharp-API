@@ -268,13 +268,13 @@
     },
     {
       "id": "binding-metadata",
-      "trtexecOption": "--loadInputs --dumpOutput --dumpRawBindingsToFile --exportOutput",
-      "tensorRtExecStatus": "implemented-pointer-free-binding-and-multi-output-artifacts",
-      "entryPoints": ["RuntimeOptions", "OnnxEngineRuntimeOutputArtifact", "OnnxEngineRuntimeArtifactData.OutputTensors", "OnnxEngineRuntimeArtifactWriter", "YoloRuntimeOutputTensor", "OnnxSampleMultiOutputResult", "YoloVisionOutputReport.bindingMetadata", "TensorRtEngineBindingReport"],
-      "proofBoundary": "Generic bounded runtime captures every float output into bounded previews, per-tensor hashes, and deterministic raw offsets; YoloVision separately copies semantic binding roles without native pointers. Capture without a reference match is not output validation, real-model proof, or package-consumer proof.",
+      "trtexecOption": "--loadInputs --dumpOutput --dumpRawBindingsToFile --exportOutput plus JYPPX --referenceOutputs validation",
+      "tensorRtExecStatus": "implemented-pointer-free-multi-input-binding-multi-output-artifacts-and-reference-validation",
+      "entryPoints": ["RuntimeOptions", "OnnxEngineRuntimeInputArtifact", "OnnxEngineRuntimeOutputArtifact", "OnnxEngineReferenceTensorData", "OnnxEngineReferenceValidationArtifact", "OnnxEngineRuntimeArtifactData.InputTensors", "OnnxEngineRuntimeArtifactData.OutputTensors", "OnnxEngineRuntimeArtifactWriter", "YoloRuntimeOutputTensor", "OnnxSampleMultiOutputResult", "YoloVisionOutputReport.bindingMetadata", "TensorRtEngineBindingReport"],
+      "proofBoundary": "Generic bounded runtime binds every float input and captures every float output in engine order. OutputValidated requires every output to match a structured, hashed reference under explicit tolerance and special-value policies; synthetic references and YoloVision copied semantic roles remain distinct from real-model and package-consumer proof.",
       "isRuntimeProof": false,
-      "gap": "Generic output capture still supports one float input and float outputs, and real model expected values/semantic roles remain owner evidence.",
-      "nextStep": "Pair the multi-output JSON/raw manifest with YoloVision task contracts and owner-filled model, input, engine, expected output, log, and review hashes before any proof promotion."
+      "gap": "Generic multi-input/output float execution and structured validation are implemented, but owner-reviewed real-model references, task semantics, and public package-consumer evidence remain absent.",
+      "nextStep": "Pair structured reference JSON and comparison artifacts with YoloVision task contracts plus owner-filled model, input, engine, expected output, log, and review hashes before any proof promotion."
     },
     {
       "id": "package-consumer-runtime-proof-boundary",

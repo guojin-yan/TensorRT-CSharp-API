@@ -1,13 +1,25 @@
 {
   "contractId": "tensor-rt-exec-runtime-output-artifact-contract",
-  "formatVersion": 1,
+  "formatVersion": 2,
   "producer": "JYPPX.TensorRtSharp.Tools.OnnxEngineRuntimeArtifactWriter",
   "supportedDataType": "float32",
   "outputOrder": "TensorRtEngineBindingReport output order",
   "runtimeActivation": {
     "outputCaptureOptions": ["--dumpOutput", "--dumpRawBindingsToFile", "--exportOutput"],
+    "referenceValidationOptions": ["--referenceOutputs", "--referenceAbsTolerance", "--referenceRelTolerance", "--referenceNaNPolicy", "--referenceInfinityPolicy"],
     "inputWithoutLoadInputs": "deterministic-generated",
     "generatedInputProofBoundary": "synthetic input can trigger bounded capture but cannot validate model output"
+  },
+  "inputs": {
+    "order": "TensorRtEngineBindingReport input order",
+    "requiredFields": ["TensorName", "Shape", "ElementCount", "ByteLength", "Preview", "Sha256", "SourceClassification", "SourcePath"],
+    "sourceClassifications": ["deterministic-generated", "load-input-file", "no-data-transfers"]
+  },
+  "referenceValidation": {
+    "referenceFormat": "structured JSON with schemaVersion=1, tensorName, shape, values, and sourceClassification",
+    "allOutputsRequired": true,
+    "requiredFields": ["Requested", "Completed", "Passed", "AbsoluteTolerance", "RelativeTolerance", "NaNPolicy", "InfinityPolicy", "Diagnostics", "TensorComparisons"],
+    "requiredTensorComparisonFields": ["TensorName", "ReferencePath", "ReferenceSha256", "ReferenceSourceClassification", "ActualShape", "ReferenceShape", "ActualElementCount", "ReferenceElementCount", "ComparedElementCount", "MismatchCount", "FirstMismatchIndex", "MaximumAbsoluteError", "MaximumRelativeError", "Passed", "Diagnostic"]
   },
   "dumpOutput": {
     "maximumPreviewValuesPerTensor": 8,
@@ -15,7 +27,7 @@
   },
   "outputJson": {
     "artifactKind": "trtexec-like-output-summary",
-    "requiredFields": ["OutputCaptureAvailable", "OutputValidated", "OutputTensorCount", "OutputTensors", "HasTensorOutputProof", "HasRawBindingProof"],
+    "requiredFields": ["OutputCaptureAvailable", "OutputValidated", "InputTensorCount", "InputTensors", "ReferenceValidation", "OutputTensorCount", "OutputTensors", "HasTensorOutputProof", "HasRawBindingProof"],
     "requiredTensorFields": ["TensorName", "Shape", "ElementCount", "Preview", "ByteLength", "Sha256"]
   },
   "rawBindings": {
@@ -27,6 +39,9 @@
   },
   "proofInvariants": {
     "captureDoesNotImplyValidation": true,
+    "identityMatchDoesNotImplyReferenceValidation": true,
+    "allOutputReferencesMustPass": true,
+    "referenceHashAloneDoesNotImplyValidation": true,
     "unvalidatedOutputValidated": false,
     "unvalidatedHasTensorOutputProof": false,
     "unvalidatedHasRawBindingProof": false,

@@ -9,5 +9,6 @@
   <ItemGroup>
     <ProjectReference Include="..\\..\\src\\JYPPX.CudaSharp\\JYPPX.CudaSharp.csproj" />
     <ProjectReference Include="..\\..\\src\\JYPPX.TensorRtSharp\\JYPPX.TensorRtSharp.csproj" />
+    <ProjectReference Include="..\\..\\src\\JYPPX.TensorRtSharp.Tools\\JYPPX.TensorRtSharp.Tools.csproj" />
   </ItemGroup>
 </Project>

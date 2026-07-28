@@ -21,7 +21,12 @@ public sealed class TrtexecLikeRuntimeOptions
         string exportOutputPath,
         string exportTimesPath,
         string exportProfilePath,
-        string saveProfilePath)
+        string saveProfilePath,
+        string referenceOutputs = "",
+        float referenceAbsoluteTolerance = 0.0f,
+        float referenceRelativeTolerance = 0.0f,
+        TrtexecLikeReferenceNaNPolicy referenceNaNPolicy = TrtexecLikeReferenceNaNPolicy.Reject,
+        TrtexecLikeReferenceInfinityPolicy referenceInfinityPolicy = TrtexecLikeReferenceInfinityPolicy.Exact)
     {
         if (threads.HasValue && threads.Value <= 0)
         {
@@ -47,6 +52,14 @@ public sealed class TrtexecLikeRuntimeOptions
         {
             throw new ArgumentOutOfRangeException(nameof(infStreams), "Inference stream count must be positive.");
         }
+        if (!float.IsFinite(referenceAbsoluteTolerance) || referenceAbsoluteTolerance < 0.0f)
+        {
+            throw new ArgumentOutOfRangeException(nameof(referenceAbsoluteTolerance), "Reference absolute tolerance must be finite and non-negative.");
+        }
+        if (!float.IsFinite(referenceRelativeTolerance) || referenceRelativeTolerance < 0.0f)
+        {
+            throw new ArgumentOutOfRangeException(nameof(referenceRelativeTolerance), "Reference relative tolerance must be finite and non-negative.");
+        }
         NoDataTransfers = noDataTransfers;
         UseSpinWait = useSpinWait;
         Threads = threads;
@@ -62,6 +75,11 @@ public sealed class TrtexecLikeRuntimeOptions
         ExportTimesPath = exportTimesPath ?? string.Empty;
         ExportProfilePath = exportProfilePath ?? string.Empty;
         SaveProfilePath = saveProfilePath ?? string.Empty;
+        ReferenceOutputs = referenceOutputs ?? string.Empty;
+        ReferenceAbsoluteTolerance = referenceAbsoluteTolerance;
+        ReferenceRelativeTolerance = referenceRelativeTolerance;
+        ReferenceNaNPolicy = referenceNaNPolicy;
+        ReferenceInfinityPolicy = referenceInfinityPolicy;
     }
 
     public static TrtexecLikeRuntimeOptions Default { get; } = new TrtexecLikeRuntimeOptions(
@@ -114,10 +132,23 @@ public sealed class TrtexecLikeRuntimeOptions
 
     public string SaveProfilePath { get; }
 
+    public string ReferenceOutputs { get; }
+
+    public float ReferenceAbsoluteTolerance { get; }
+
+    public float ReferenceRelativeTolerance { get; }
+
+    public TrtexecLikeReferenceNaNPolicy ReferenceNaNPolicy { get; }
+
+    public TrtexecLikeReferenceInfinityPolicy ReferenceInfinityPolicy { get; }
+
+    public bool RequestsReferenceValidation => !string.IsNullOrWhiteSpace(ReferenceOutputs);
+
     public bool RequestsOutputCapture =>
         DumpOutput ||
         !string.IsNullOrWhiteSpace(DumpRawBindingsToFile) ||
-        !string.IsNullOrWhiteSpace(ExportOutputPath);
+        !string.IsNullOrWhiteSpace(ExportOutputPath) ||
+        RequestsReferenceValidation;
 
     public bool HasRuntimeDiagnostics =>
         NoDataTransfers ||
@@ -134,7 +165,8 @@ public sealed class TrtexecLikeRuntimeOptions
         !string.IsNullOrWhiteSpace(ExportOutputPath) ||
         !string.IsNullOrWhiteSpace(ExportTimesPath) ||
         !string.IsNullOrWhiteSpace(ExportProfilePath) ||
-        !string.IsNullOrWhiteSpace(SaveProfilePath);
+        !string.IsNullOrWhiteSpace(SaveProfilePath) ||
+        RequestsReferenceValidation;
 
     public IReadOnlyList<string> ToArgumentSegments()
     {
@@ -154,6 +186,14 @@ public sealed class TrtexecLikeRuntimeOptions
         Add(args, "--exportTimes", ExportTimesPath);
         Add(args, "--exportProfile", ExportProfilePath);
         Add(args, "--saveProfile", SaveProfilePath);
+        Add(args, "--referenceOutputs", ReferenceOutputs);
+        if (RequestsReferenceValidation)
+        {
+            Add(args, "--referenceAbsTolerance", ReferenceAbsoluteTolerance.ToString("R", CultureInfo.InvariantCulture));
+            Add(args, "--referenceRelTolerance", ReferenceRelativeTolerance.ToString("R", CultureInfo.InvariantCulture));
+            Add(args, "--referenceNaNPolicy", ReferenceNaNPolicy.ToString().ToLowerInvariant());
+            Add(args, "--referenceInfinityPolicy", ReferenceInfinityPolicy.ToString().ToLowerInvariant());
+        }
         return args;
     }
 
@@ -181,6 +221,14 @@ public sealed class TrtexecLikeRuntimeOptions
         AddDiagnostic(diagnostics, "ExportTimes", ExportTimesPath);
         AddDiagnostic(diagnostics, "ExportProfile", ExportProfilePath);
         AddDiagnostic(diagnostics, "SaveProfile", SaveProfilePath);
+        AddDiagnostic(diagnostics, "ReferenceOutputs", ReferenceOutputs);
+        if (RequestsReferenceValidation)
+        {
+            diagnostics.Add("ReferenceAbsTolerance=" + ReferenceAbsoluteTolerance.ToString("R", CultureInfo.InvariantCulture));
+            diagnostics.Add("ReferenceRelTolerance=" + ReferenceRelativeTolerance.ToString("R", CultureInfo.InvariantCulture));
+            diagnostics.Add("ReferenceNaNPolicy=" + ReferenceNaNPolicy.ToString().ToLowerInvariant());
+            diagnostics.Add("ReferenceInfinityPolicy=" + ReferenceInfinityPolicy.ToString().ToLowerInvariant());
+        }
         return diagnostics;
     }
 
@@ -242,4 +290,16 @@ public sealed class TrtexecLikeRuntimeOptions
     {
         return value.IndexOf(' ') >= 0 ? "\"" + value + "\"" : value;
     }
+}
+
+public enum TrtexecLikeReferenceNaNPolicy
+{
+    Reject = 0,
+    Equal = 1
+}
+
+public enum TrtexecLikeReferenceInfinityPolicy
+{
+    Exact = 0,
+    Reject = 1
 }

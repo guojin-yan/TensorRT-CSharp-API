@@ -49,7 +49,7 @@ dotnet run --project .\applications\TensorRtExec -- `
   --exportReport .\models\load-engine-report.md
 ```
 
-这条路径会先记录 engine 文件存在并进入 load-engine preflight。如果 engine 只有一个 float input、float outputs，且 shape 可以由 engine/profile 或 `--optShapes` 推断，工具会再执行 bounded enqueue/readback。identity engine 可以得到 `synthetic-input-runtime`；其他模型如果没有 reference output，会保留 `runtime-output-captured-unverified`，不能伪造成真实模型 proof。
+这条路径会先记录 engine 文件存在并进入 load-engine preflight。如果 engine 的所有 input/output 都是 float，且每个 input shape 可以由 engine/profile 或 `--optShapes` 推断，工具会按 engine 顺序绑定全部输入并执行 bounded enqueue/readback。identity engine 可以得到 `synthetic-input-runtime`；其他模型如果没有 reference output，会保留 `runtime-output-captured-unverified`，不能伪造成真实模型 proof。
 
 ## WinForms 入口
 

@@ -27,6 +27,8 @@ $requiredTopLevel = @(
     "DryRun",
     "InferenceRan",
     "OutputMatch",
+    "OutputValidated",
+    "IdentityOutputMatch",
     "NormalizedCommandLine",
     "NormalizedCommandSha256",
     "DeploymentOptions",

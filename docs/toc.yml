@@ -54,6 +54,8 @@
     href: articles/en/release-candidate-gate.md
   - name: Sample Runners
     href: articles/en/sample-runners.md
+  - name: TensorRtExec Multi-Input Reference Validation
+    href: articles/en/tensorrtexec-multi-input-reference-validation.md
 - name: Chinese
   items:
   - name: Project Overview
@@ -184,6 +186,8 @@
     href: articles/zh-cn/tensorrt-exec-trtexec-parity-matrix.md
   - name: TensorRtExec Runtime Controls
     href: articles/zh-cn/tensorrtexec-runtime-controls.md
+  - name: TensorRtExec Multi-Input Reference Validation
+    href: articles/zh-cn/tensorrtexec-multi-input-reference-validation.md
   - name: TensorRtExec Deployment Controls
     href: articles/zh-cn/tensorrtexec-deployment-controls.md
   - name: TensorRtExec IO 与 Layer Precision Policies

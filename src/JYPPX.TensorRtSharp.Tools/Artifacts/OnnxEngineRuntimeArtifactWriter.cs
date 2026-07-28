@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace JYPPX.TensorRtSharp.Tools;
 
@@ -40,15 +41,17 @@ public sealed class OnnxEngineRuntimeArtifactData
     }
 
     private OnnxEngineRuntimeArtifactData(
-        int inputElementCount,
-        IReadOnlyList<float> inputPreview,
+        IReadOnlyList<OnnxEngineRuntimeInputArtifact> inputTensors,
         IReadOnlyList<OnnxEngineRuntimeOutputArtifact> outputTensors,
+        OnnxEngineReferenceValidationArtifact referenceValidation,
         string executionSummary,
         IReadOnlyList<float>? timingSamplesMilliseconds)
     {
-        InputElementCount = inputElementCount;
-        InputPreview = inputPreview ?? Array.Empty<float>();
+        InputTensors = inputTensors?.ToArray() ?? Array.Empty<OnnxEngineRuntimeInputArtifact>();
+        InputElementCount = InputTensors.Sum(static input => input.ElementCount);
+        InputPreview = InputTensors.FirstOrDefault()?.Preview ?? Array.Empty<float>();
         OutputTensors = outputTensors?.ToArray() ?? Array.Empty<OnnxEngineRuntimeOutputArtifact>();
+        ReferenceValidation = referenceValidation ?? OnnxEngineReferenceValidationArtifact.NotRequested;
         ExecutionSummary = executionSummary ?? string.Empty;
         TimingSamplesMilliseconds = timingSamplesMilliseconds ?? Array.Empty<float>();
 
@@ -119,9 +122,36 @@ public sealed class OnnxEngineRuntimeArtifactData
         IReadOnlyList<float>? timingSamplesMilliseconds = null)
     {
         return new OnnxEngineRuntimeArtifactData(
-            inputElementCount,
-            Preview(inputValues),
+            inputElementCount <= 0
+                ? Array.Empty<OnnxEngineRuntimeInputArtifact>()
+                : new[]
+                {
+                    new OnnxEngineRuntimeInputArtifact(
+                        string.Empty,
+                        Array.Empty<int>(),
+                        inputElementCount,
+                        Preview(inputValues),
+                        ToBytes(inputValues),
+                        "legacy-unspecified",
+                        string.Empty)
+                },
             outputTensors,
+            OnnxEngineReferenceValidationArtifact.NotRequested,
+            executionSummary,
+            timingSamplesMilliseconds);
+    }
+
+    public static OnnxEngineRuntimeArtifactData CreateRuntimeEvidence(
+        IReadOnlyList<OnnxEngineRuntimeInputArtifact> inputTensors,
+        IReadOnlyList<OnnxEngineRuntimeOutputArtifact> outputTensors,
+        OnnxEngineReferenceValidationArtifact referenceValidation,
+        string executionSummary,
+        IReadOnlyList<float>? timingSamplesMilliseconds = null)
+    {
+        return new OnnxEngineRuntimeArtifactData(
+            inputTensors,
+            outputTensors,
+            referenceValidation,
             executionSummary,
             timingSamplesMilliseconds);
     }
@@ -143,6 +173,19 @@ public sealed class OnnxEngineRuntimeArtifactData
             timingSamplesMilliseconds ?? Array.Empty<float>());
     }
 
+    internal static OnnxEngineRuntimeArtifactData CreateBenchmarkOnly(
+        IReadOnlyList<OnnxEngineRuntimeInputArtifact> inputTensors,
+        string executionSummary,
+        IReadOnlyList<float>? timingSamplesMilliseconds = null)
+    {
+        return new OnnxEngineRuntimeArtifactData(
+            inputTensors,
+            Array.Empty<OnnxEngineRuntimeOutputArtifact>(),
+            OnnxEngineReferenceValidationArtifact.NotRequested,
+            executionSummary,
+            timingSamplesMilliseconds);
+    }
+
     public string TensorName { get; }
 
     public IReadOnlyList<int> Shape { get; }
@@ -161,7 +204,13 @@ public sealed class OnnxEngineRuntimeArtifactData
 
     public IReadOnlyList<float> TimingSamplesMilliseconds { get; }
 
+    public IReadOnlyList<OnnxEngineRuntimeInputArtifact> InputTensors { get; } = Array.Empty<OnnxEngineRuntimeInputArtifact>();
+
     public IReadOnlyList<OnnxEngineRuntimeOutputArtifact> OutputTensors { get; }
+
+    public OnnxEngineReferenceValidationArtifact ReferenceValidation { get; } = OnnxEngineReferenceValidationArtifact.NotRequested;
+
+    public bool OutputValidated => ReferenceValidation.Requested && ReferenceValidation.Completed && ReferenceValidation.Passed;
 
     public bool HasOutput => OutputTensors.Any(static output => output.ElementCount > 0 && output.Preview.Count > 0);
 
@@ -305,7 +354,11 @@ public sealed class OnnxEngineRuntimeOutputArtifact
 
 public static class OnnxEngineRuntimeArtifactWriter
 {
-    private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions { WriteIndented = true };
+    private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
+    {
+        WriteIndented = true,
+        NumberHandling = JsonNumberHandling.AllowNamedFloatingPointLiterals
+    };
 
     public static void WriteArtifacts(OnnxEngineBuildResult result, OnnxEngineRuntimeArtifactData? data = null)
     {
@@ -450,8 +503,22 @@ public static class OnnxEngineRuntimeArtifactWriter
             result.NormalizedCommandSha256,
             result.InferenceRan,
             result.OutputMatch,
+            result.IdentityOutputMatch,
             OutputCaptureAvailable = result.InferenceRan && data.HasOutput,
-            OutputValidated = result.OutputMatch,
+            OutputValidated = result.OutputValidated && data.OutputValidated,
+            ReferenceValidation = data.ReferenceValidation,
+            InputTensorCount = data.InputTensors.Count,
+            InputTensors = data.InputTensors.Select(static input => new
+            {
+                input.TensorName,
+                input.Shape,
+                input.ElementCount,
+                input.ByteLength,
+                input.Preview,
+                input.Sha256,
+                input.SourceClassification,
+                input.SourcePath
+            }),
             OutputTensorCount = data.OutputTensors.Count,
             OutputTensors = data.OutputTensors.Select(static output => new
             {
@@ -471,7 +538,9 @@ public static class OnnxEngineRuntimeArtifactWriter
             OutputComparisonSample = ReadFloatSample(data.RawOutputBytes, 64),
             OutputByteLength = data.RawOutputBytes.LongLength,
             OutputSha256 = ComputeSha256(data.RawOutputBytes),
-            Note = "Output artifact contains bounded previews and hashes for every captured output tensor; it intentionally avoids large tensor dumps. Capture is not validation, and hashes do not promote the proof classification."
+            Note = result.OutputValidated && data.OutputValidated
+                ? "Output artifact contains bounded previews and hashes for every captured output tensor plus completed all-output reference comparison. Reference hashes alone do not establish correctness or promote the model/package proof classification."
+                : "Output artifact contains bounded previews and hashes for every captured output tensor; it intentionally avoids large tensor dumps. Capture is not validation, and hashes do not promote the proof classification."
         };
     }
 
@@ -716,7 +785,8 @@ public static class OnnxEngineRuntimeArtifactWriter
             result.IsPackageConsumerRuntimeProof,
             result.NormalizedCommandSha256,
             RawBindingCaptureAvailable = true,
-            OutputValidated = result.OutputMatch,
+            OutputValidated = result.OutputValidated && data.OutputValidated,
+            ReferenceValidation = data.ReferenceValidation,
             RawBindingPath = Path.GetFullPath(path),
             RawBindingFormat = "contiguous IEEE 754 float32 tensors in engine output order",
             ByteOrder = BitConverter.IsLittleEndian ? "little-endian" : "big-endian",
@@ -826,6 +896,11 @@ public static class OnnxEngineRuntimeArtifactWriter
 
     private static string Boundary(OnnxEngineBuildResult result, OnnxEngineRuntimeArtifactData data, string artifactKind)
     {
+        if (result.InferenceRan && result.OutputValidated && data.OutputValidated && data.HasOutput)
+        {
+            return "runtime-reference-output-validated; every captured output matched a traceable structured reference under the recorded tolerances and special-value policies. Proof classification remains bounded by model and consumer evidence.";
+        }
+
         if (result.InferenceRan && result.OutputMatch && data.HasOutput)
         {
             if (!string.Equals(result.ModelSource, "embedded-dynamic-identity", StringComparison.Ordinal))

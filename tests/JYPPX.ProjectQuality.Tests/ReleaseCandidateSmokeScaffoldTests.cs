@@ -178,9 +178,10 @@ public sealed class ReleaseCandidateSmokeScaffoldTests
         Assert.Contains(entries, entry => entry.GetProperty("implementationClass").GetString() == "parse-only");
         Assert.Contains(entries, entry => entry.GetProperty("implementationClass").GetString() == "build-only" || entry.GetProperty("implementationClass").GetString() == "preflight-only");
         Assert.Contains(entries, entry => entry.GetProperty("option").GetString() == "--exportTimingCache" && entry.GetProperty("implementationClass").GetString() == "applied-build-cache-lifecycle");
-        Assert.Contains(entries, entry => entry.GetProperty("option").GetString() == "--loadInputs" && entry.GetProperty("implementationClass").GetString() == "applied-bounded-input-capture");
+        Assert.Contains(entries, entry => entry.GetProperty("option").GetString() == "--loadInputs" && entry.GetProperty("implementationClass").GetString() == "applied-engine-order-input-binding");
         Assert.Contains(entries, entry => entry.GetProperty("option").GetString() == "--dumpOutput" && entry.GetProperty("implementationClass").GetString() == "applied-bounded-output-capture");
         Assert.Contains(entries, entry => entry.GetProperty("option").GetString() == "--dumpRawBindingsToFile" && entry.GetProperty("implementationClass").GetString() == "applied-bounded-output-capture");
+        Assert.Contains(entries, entry => entry.GetProperty("option").GetString()!.Contains("--referenceOutputs", StringComparison.Ordinal) && entry.GetProperty("implementationClass").GetString() == "applied-name-shape-count-value-comparison");
     }
 
     [Fact]

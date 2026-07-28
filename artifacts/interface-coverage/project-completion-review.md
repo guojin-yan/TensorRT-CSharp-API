@@ -5032,3 +5032,24 @@ snapshot、readback artifact 字段、bounded runtime 分界和 proof promotion 
 - 本批没有 engine runtime proof、real-model-runtime proof、package-consumer-runtime proof、Linux runner proof、
   post-publish verification 或 owner authorization，因此不改变 `canPublishPublicly=false`、
   `canCloseReleaseIssue=false` 或 release blocker 状态。
+## 2026-07-28 TensorRtExec Multi-Input And Reference Output Validation
+
+本阶段将 generic bounded runtime 从单 float input 扩展为按 engine binding 顺序处理全部 float inputs，并新增 copied、
+pointer-free 的逐输入工件。`--loadInputs` 映射在提供时必须完整覆盖全部输入，缺失、重复和未知 tensor name fail closed；
+未提供时每个 input 使用独立确定性数据。
+
+新增 `--referenceOutputs`、absolute/relative tolerance、NaN/Infinity policy 与 `OnnxEngineReferenceTensorData` JSON
+合同。校验覆盖 mapping、文件、name、shape、count 和全部 values；工件记录 reference path/hash/source、逐 tensor mismatch、
+first mismatch 与最大误差。`IdentityOutputMatch` 与 `OutputValidated` 已拆分，只有全部 structured references 通过才设置后者。
+
+TRT10.11/CUDA12.9 真实 synthetic Add/Sub smoke 完成 2 inputs、2 outputs、build/serialize/deserialize/enqueue/readback，
+两个 output 的 16 个 float 值全部通过 reference；combined raw SHA256 为
+`05080c5591955c003b781dba0170ad3aca244e3033b89e81569a39abe305e2c5`。独立 load-engine 负例将
+`difference[7]` 修改 `0.25`，得到 1 个 mismatch、`OutputValidated=false` 与
+`load-engine-reference-validation-failed`。分类保持 synthetic runtime，不是 real-model、package-consumer、public package、
+post-publish、Linux、Owner accepted 或 release proof。
+
+定向合同、parser、artifact、TensorRtExec application、GUI/CLI、report schema、capability、公开文章、public material 与
+release scaffold 测试 `109/109` 通过；完整 `TensorRtSharp.sln` Debug build 为 `0 warning / 0 error`。GUI/CLI strict
+checklist 与真实 validated report strict validator 均为 0 blocker；public API compiler documentation 与双语审计均为
+0 finding；8 份本批 JSON 均可解析。

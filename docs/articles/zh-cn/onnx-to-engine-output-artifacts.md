@@ -13,6 +13,7 @@
 | timing cache | `--timingCacheFile` / `--exportTimingCache` | 成功构建时导入/导出 cache，并记录 `TimingCacheArtifact` 大小与 SHA256 | build-cache lifecycle evidence，不是 runtime proof |
 | output summary | `--exportOutput` | runtime 输出摘要 | 仅在真实 runtime 时有效 |
 | raw bindings | `--dumpRawBindingsToFile` | binding dump | 需要输入输出语义 |
+| reference validation | `--referenceOutputs` + tolerance/policy | 全部 output 的 name/shape/count/value 校验 | structured reference 全通过才设置 `OutputValidated` |
 | profile/times | `--exportProfile` / `--exportTimes` | timing/profile 数据 | 不自动等于 release proof |
 
 ## 报告字段
@@ -43,6 +44,10 @@ models/
 ```
 
 每个文件都应在 owner evidence 中记录 SHA256。没有 hash 的报告只能作为人工参考，不应作为可关闭 release issue 的证据。
+
+多输入与逐输出 reference JSON 的完整格式、tolerance 公式和 NaN/Infinity 策略见
+[TensorRtExec 多输入与 Reference Output 校验](tensorrtexec-multi-input-reference-validation.md)。reference hash 只证明文件 identity，
+不能替代实际数值比较。
 
 ## 边界说明
 

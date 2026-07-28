@@ -114,7 +114,9 @@ public static class TensorRtExecCommand
         System.Console.WriteLine("  --buildOnly --skipInference --dryRun|--previewOnly");
         System.Console.WriteLine("  --iterations <n> --warmUp <ms> --duration <sec> --streams <n> --infStreams <n> --useCudaGraph");
         System.Console.WriteLine("  --noDataTransfers --useSpinWait --threads --avgRuns <n> --percentile <0..100> --sleepTime <ms> --idleTime <ms>");
-        System.Console.WriteLine("  --loadInputs input:file --dumpOutput --dumpRawBindingsToFile <path>");
+        System.Console.WriteLine("  --loadInputs input:file[,other:file] --dumpOutput --dumpRawBindingsToFile <path>");
+        System.Console.WriteLine("  --referenceOutputs output:reference.json[,other:reference.json] --referenceAbsTolerance <n> --referenceRelTolerance <n>");
+        System.Console.WriteLine("  --referenceNaNPolicy <reject|equal> --referenceInfinityPolicy <exact|reject>");
         System.Console.WriteLine("  --exportOutput <path> --exportTimes <path> --exportProfile <path> --saveProfile <path> --exportTimingCache <path>");
         System.Console.WriteLine("Deployment options:");
         System.Console.WriteLine("  --device <ordinal>");

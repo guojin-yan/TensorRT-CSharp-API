@@ -87,6 +87,7 @@ Chinese articles:
 - [TensorRtExec Tool Getting Started](articles/zh-cn/tensorrtexec-tool-getting-started.md)
 - [TensorRtExec Trtexec Parity Matrix](articles/zh-cn/tensorrt-exec-trtexec-parity-matrix.md)
 - [TensorRtExec Runtime Controls](articles/zh-cn/tensorrtexec-runtime-controls.md)
+- [TensorRtExec Multi-Input Reference Validation](articles/zh-cn/tensorrtexec-multi-input-reference-validation.md)
 - [TensorRtExec Deployment Controls](articles/zh-cn/tensorrtexec-deployment-controls.md)
 - [TensorRtExec IO 与 Layer Precision Policies](articles/zh-cn/tensorrtexec-io-layer-precision-policies.md)
 - [OnnxToEngine TensorRtExec YoloVision Evidence Ladder](articles/zh-cn/onnxtoengine-tensorrtexec-yolovision-evidence-ladder.md)

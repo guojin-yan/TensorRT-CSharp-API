@@ -98,7 +98,12 @@ public sealed class TensorRtExecOptions
         string quantizationFlags = "",
         string weightStreamingBudget = "",
         string refitFromOnnxPath = "",
-        string saveRefittedEnginePath = "")
+        string saveRefittedEnginePath = "",
+        string referenceOutputs = "",
+        float referenceAbsoluteTolerance = 0.0f,
+        float referenceRelativeTolerance = 0.0f,
+        string referenceNaNPolicy = "reject",
+        string referenceInfinityPolicy = "exact")
     {
         List<string> args = new List<string>();
         Add(args, "--tensor-rt-line", string.IsNullOrWhiteSpace(tensorRtLine) ? "10" : tensorRtLine);
@@ -163,6 +168,14 @@ public sealed class TensorRtExecOptions
         Add(args, "--exportTimes", exportTimesPath);
         Add(args, "--exportProfile", exportProfilePath);
         Add(args, "--saveProfile", saveProfilePath);
+        Add(args, "--referenceOutputs", referenceOutputs);
+        if (!string.IsNullOrWhiteSpace(referenceOutputs))
+        {
+            Add(args, "--referenceAbsTolerance", referenceAbsoluteTolerance.ToString("R", CultureInfo.InvariantCulture));
+            Add(args, "--referenceRelTolerance", referenceRelativeTolerance.ToString("R", CultureInfo.InvariantCulture));
+            Add(args, "--referenceNaNPolicy", referenceNaNPolicy);
+            Add(args, "--referenceInfinityPolicy", referenceInfinityPolicy);
+        }
         if (plugins != null && plugins.Count > 0)
         {
             Add(args, "--plugins", string.Join(";", plugins));
@@ -339,6 +352,16 @@ public sealed class TensorRtExecOptions
     public TrtexecLikeRuntimeOptions RuntimeOptions => TrtexecOptions.RuntimeOptions;
 
     public int? InfStreams => TrtexecOptions.RuntimeOptions.InfStreams;
+
+    public string ReferenceOutputs => TrtexecOptions.RuntimeOptions.ReferenceOutputs;
+
+    public float ReferenceAbsoluteTolerance => TrtexecOptions.RuntimeOptions.ReferenceAbsoluteTolerance;
+
+    public float ReferenceRelativeTolerance => TrtexecOptions.RuntimeOptions.ReferenceRelativeTolerance;
+
+    public TrtexecLikeReferenceNaNPolicy ReferenceNaNPolicy => TrtexecOptions.RuntimeOptions.ReferenceNaNPolicy;
+
+    public TrtexecLikeReferenceInfinityPolicy ReferenceInfinityPolicy => TrtexecOptions.RuntimeOptions.ReferenceInfinityPolicy;
 
     public static TensorRtExecOptions Parse(string[] args)
     {

@@ -14,7 +14,7 @@ TensorRtExec 同时服务 CLI 和 WinForms。两种入口都应生成相同语�
 
 ## 实现路径
 
-1. 定义真实顶层字段：`Success`、`Skipped`、`State`、`TensorRtLine`、`ModelSource`、`EnginePath`、`NormalizedCommandLine`、`NormalizedCommandSha256`、`DeploymentOptions`、`RuntimeOptions`、`PreflightMetadata`、`LoadedEngineDiagnostics`、`WorkspaceBytes`、`OptionImplementationStatus`、`BenchmarkSummary`、`ProofClassification`、`EvidenceClassifications`、`BuildEvidenceOnly`、`IsRuntimeExecutionProof`、`ModelEvidence`、`EvidenceSidecarDiagnostics`、`Diagnostics`、`LogLines` 和 `ReportBoundary`。
+1. 定义真实顶层字段：`Success`、`Skipped`、`State`、`TensorRtLine`、`ModelSource`、`EnginePath`、`NormalizedCommandLine`、`NormalizedCommandSha256`、`DeploymentOptions`、`RuntimeOptions`、`PreflightMetadata`、`LoadedEngineDiagnostics`、`WorkspaceBytes`、`OutputMatch`、`OutputValidated`、`IdentityOutputMatch`、`OptionImplementationStatus`、`BenchmarkSummary`、`ProofClassification`、`EvidenceClassifications`、`BuildEvidenceOnly`、`IsRuntimeExecutionProof`、`ModelEvidence`、`EvidenceSidecarDiagnostics`、`Diagnostics`、`LogLines` 和 `ReportBoundary`。
 2. 为 `input` 锁定 ONNX path/hash、input names、shape profile 和 dynamic shape 字段。
 3. 为 `environment` 锁定 OS、RID、CUDA、TensorRT、cuDNN 和 runtime package 字段。
 4. 为 `boundary` 锁定 `isRuntimeProof=false`、`isBuildOnly` 和 forbidden substitute reason。

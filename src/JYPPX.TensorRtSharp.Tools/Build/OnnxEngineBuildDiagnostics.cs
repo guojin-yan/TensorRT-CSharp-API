@@ -50,6 +50,8 @@ public static class OnnxEngineBuildDiagnostics
             DryRun = string.Equals(result.ProofClassification, "precheck", StringComparison.Ordinal),
             result.InferenceRan,
             result.OutputMatch,
+            result.OutputValidated,
+            result.IdentityOutputMatch,
             result.ProfileIndex,
             result.ElapsedMilliseconds,
             result.SkipReason,
@@ -205,6 +207,8 @@ public static class OnnxEngineBuildDiagnostics
             $"Dry run: `{string.Equals(result.ProofClassification, "precheck", StringComparison.Ordinal)}`",
             $"Inference ran: `{result.InferenceRan}`",
             $"Output match: `{result.OutputMatch}`",
+            $"Reference output validated: `{result.OutputValidated}`",
+            $"Identity output match: `{result.IdentityOutputMatch}`",
             $"Profile index: `{result.ProfileIndex}`",
             $"Elapsed ms: `{result.ElapsedMilliseconds?.ToString("0.###") ?? ""}`",
             $"Skip reason: `{result.SkipReason}`",
@@ -439,6 +443,11 @@ public static class OnnxEngineBuildDiagnostics
         AddIf(options, "--separateProfileRun", result.NormalizedCommandLine.Contains("--separateProfileRun", StringComparison.Ordinal));
         AddIf(options, "--exportProfile", !string.IsNullOrWhiteSpace(runtimeOptions.ExportProfilePath));
         AddIf(options, "--saveProfile", !string.IsNullOrWhiteSpace(runtimeOptions.SaveProfilePath));
+        AddIf(options, "--referenceOutputs", runtimeOptions.RequestsReferenceValidation);
+        AddIf(options, "--referenceAbsTolerance", runtimeOptions.RequestsReferenceValidation);
+        AddIf(options, "--referenceRelTolerance", runtimeOptions.RequestsReferenceValidation);
+        AddIf(options, "--referenceNaNPolicy", runtimeOptions.RequestsReferenceValidation);
+        AddIf(options, "--referenceInfinityPolicy", runtimeOptions.RequestsReferenceValidation);
         AddIf(options, "--useCudaGraph", result.NormalizedCommandLine.Contains("--useCudaGraph", StringComparison.Ordinal));
         AddIf(options, "--fp16", HasNormalizedOption(result, "--fp16"));
         AddIf(options, "--int8", HasNormalizedOption(result, "--int8"));
@@ -509,6 +518,12 @@ public static class OnnxEngineBuildDiagnostics
         AddIf(options, "--dumpOutput", runtimeOptions.DumpOutput && outputReadbackAvailable);
         AddIf(options, "--exportOutput", !string.IsNullOrWhiteSpace(runtimeOptions.ExportOutputPath) && outputReadbackAvailable);
         AddIf(options, "--dumpRawBindingsToFile", !string.IsNullOrWhiteSpace(runtimeOptions.DumpRawBindingsToFile) && outputReadbackAvailable);
+        bool referenceValidationAttempted = result.LogLines.Any(static line => line.StartsWith("ReferenceOutputValidation Requested=True", StringComparison.Ordinal));
+        AddIf(options, "--referenceOutputs", runtimeOptions.RequestsReferenceValidation && referenceValidationAttempted);
+        AddIf(options, "--referenceAbsTolerance", runtimeOptions.RequestsReferenceValidation && referenceValidationAttempted);
+        AddIf(options, "--referenceRelTolerance", runtimeOptions.RequestsReferenceValidation && referenceValidationAttempted);
+        AddIf(options, "--referenceNaNPolicy", runtimeOptions.RequestsReferenceValidation && referenceValidationAttempted);
+        AddIf(options, "--referenceInfinityPolicy", runtimeOptions.RequestsReferenceValidation && referenceValidationAttempted);
         bool benchmarkExecuted = result.BenchmarkSummary.TimingSampleCount > 0;
         AddIf(options, "--iterations", benchmarkExecuted);
         AddIf(options, "--warmUp", benchmarkExecuted);
@@ -600,6 +615,12 @@ public static class OnnxEngineBuildDiagnostics
         AddIf(options, "--dumpOutput", runtimeOptions.DumpOutput && outputReadbackUnavailable);
         AddIf(options, "--dumpRawBindingsToFile", !string.IsNullOrWhiteSpace(runtimeOptions.DumpRawBindingsToFile) && outputReadbackUnavailable);
         AddIf(options, "--exportOutput", !string.IsNullOrWhiteSpace(runtimeOptions.ExportOutputPath) && outputReadbackUnavailable);
+        bool referenceValidationAttempted = result.LogLines.Any(static line => line.StartsWith("ReferenceOutputValidation Requested=True", StringComparison.Ordinal));
+        AddIf(options, "--referenceOutputs", runtimeOptions.RequestsReferenceValidation && !referenceValidationAttempted);
+        AddIf(options, "--referenceAbsTolerance", runtimeOptions.RequestsReferenceValidation && !referenceValidationAttempted);
+        AddIf(options, "--referenceRelTolerance", runtimeOptions.RequestsReferenceValidation && !referenceValidationAttempted);
+        AddIf(options, "--referenceNaNPolicy", runtimeOptions.RequestsReferenceValidation && !referenceValidationAttempted);
+        AddIf(options, "--referenceInfinityPolicy", runtimeOptions.RequestsReferenceValidation && !referenceValidationAttempted);
         AddIf(options, "--dumpLayerInfo", result.NormalizedCommandLine.Contains("--dumpLayerInfo", StringComparison.Ordinal));
         AddIf(options, "--dumpProfile", result.NormalizedCommandLine.Contains("--dumpProfile", StringComparison.Ordinal));
         AddIf(options, "--separateProfileRun", result.NormalizedCommandLine.Contains("--separateProfileRun", StringComparison.Ordinal));

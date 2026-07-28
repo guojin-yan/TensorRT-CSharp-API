@@ -40,7 +40,9 @@ public sealed class OnnxEngineBuildResult
         TensorRtBuilderConfigDeploymentSnapshot? builderConfigDeploymentSnapshot = null,
         OnnxEngineParserPreflightSnapshot? parserPreflightSnapshot = null,
         OnnxEngineRefitSnapshot? refitSnapshot = null,
-        OnnxEngineRefitPersistenceSnapshot? refitPersistenceSnapshot = null)
+        OnnxEngineRefitPersistenceSnapshot? refitPersistenceSnapshot = null,
+        bool outputValidated = false,
+        bool identityOutputMatch = false)
         : this(
             success,
             skipped,
@@ -71,7 +73,9 @@ public sealed class OnnxEngineBuildResult
             builderConfigDeploymentSnapshot,
             parserPreflightSnapshot,
             refitSnapshot,
-            refitPersistenceSnapshot)
+            refitPersistenceSnapshot,
+            outputValidated,
+            identityOutputMatch)
     {
     }
 
@@ -105,7 +109,9 @@ public sealed class OnnxEngineBuildResult
         TensorRtBuilderConfigDeploymentSnapshot? builderConfigDeploymentSnapshot = null,
         OnnxEngineParserPreflightSnapshot? parserPreflightSnapshot = null,
         OnnxEngineRefitSnapshot? refitSnapshot = null,
-        OnnxEngineRefitPersistenceSnapshot? refitPersistenceSnapshot = null)
+        OnnxEngineRefitPersistenceSnapshot? refitPersistenceSnapshot = null,
+        bool outputValidated = false,
+        bool identityOutputMatch = false)
     {
         Success = success;
         Skipped = skipped;
@@ -118,6 +124,8 @@ public sealed class OnnxEngineBuildResult
         EngineFileRoundTrip = engineFileRoundTrip;
         InferenceRan = inferenceRan;
         OutputMatch = outputMatch;
+        OutputValidated = outputValidated;
+        IdentityOutputMatch = identityOutputMatch;
         ProfileIndex = profileIndex;
         ElapsedMilliseconds = elapsedMilliseconds;
         SkipReason = skipReason ?? string.Empty;
@@ -160,6 +168,10 @@ public sealed class OnnxEngineBuildResult
     public bool InferenceRan { get; }
 
     public bool OutputMatch { get; }
+
+    public bool OutputValidated { get; }
+
+    public bool IdentityOutputMatch { get; }
 
     public int ProfileIndex { get; }
 

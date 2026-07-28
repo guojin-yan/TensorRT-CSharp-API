@@ -87,6 +87,11 @@ public sealed class MainForm : Form
     private readonly TextBox _idleTime = new TextBox();
     private readonly TextBox _infStreams = new TextBox();
     private readonly TextBox _loadInputs = new TextBox();
+    private readonly TextBox _referenceOutputs = new TextBox();
+    private readonly TextBox _referenceAbsoluteTolerance = new TextBox();
+    private readonly TextBox _referenceRelativeTolerance = new TextBox();
+    private readonly ComboBox _referenceNaNPolicy = new ComboBox();
+    private readonly ComboBox _referenceInfinityPolicy = new ComboBox();
     private readonly CheckBox _dumpOutput = new CheckBox();
     private readonly TextBox _dumpRawBindingsPath = new TextBox();
     private readonly TextBox _exportOutputPath = new TextBox();
@@ -108,7 +113,7 @@ public sealed class MainForm : Form
         {
             Dock = DockStyle.Fill,
             ColumnCount = 3,
-            RowCount = 49,
+            RowCount = 52,
             Padding = new Padding(12),
             AutoScroll = true
         };
@@ -233,10 +238,19 @@ public sealed class MainForm : Form
         AddLabeled(root, 39, "Avg/Percentile", CreateTextPair(_avgRuns, _percentile));
         AddLabeled(root, 40, "Sleep/Idle ms", CreateTextPair(_sleepTime, _idleTime));
         AddLabeled(root, 41, "Load Inputs", _loadInputs);
-        AddLabeled(root, 42, "Raw Bindings", _dumpRawBindingsPath);
-        AddLabeled(root, 43, "Output JSON", _exportOutputPath);
-        AddLabeled(root, 44, "Times/Profile", CreateTextPair(_exportTimesPath, _exportProfilePath));
-        AddLabeled(root, 45, "Save Profile", _saveProfilePath);
+        AddLabeled(root, 42, "Reference Outputs", _referenceOutputs);
+        AddLabeled(root, 43, "Abs/Rel Tolerance", CreateTextPair(_referenceAbsoluteTolerance, _referenceRelativeTolerance));
+        _referenceNaNPolicy.DropDownStyle = ComboBoxStyle.DropDownList;
+        _referenceNaNPolicy.Items.AddRange(new object[] { "reject", "equal" });
+        _referenceNaNPolicy.SelectedItem = "reject";
+        _referenceInfinityPolicy.DropDownStyle = ComboBoxStyle.DropDownList;
+        _referenceInfinityPolicy.Items.AddRange(new object[] { "exact", "reject" });
+        _referenceInfinityPolicy.SelectedItem = "exact";
+        AddLabeled(root, 44, "NaN/Infinity", CreateTextPair(_referenceNaNPolicy, _referenceInfinityPolicy));
+        AddLabeled(root, 45, "Raw Bindings", _dumpRawBindingsPath);
+        AddLabeled(root, 46, "Output JSON", _exportOutputPath);
+        AddLabeled(root, 47, "Times/Profile", CreateTextPair(_exportTimesPath, _exportProfilePath));
+        AddLabeled(root, 48, "Save Profile", _saveProfilePath);
 
         FlowLayoutPanel modePanel = new FlowLayoutPanel { Dock = DockStyle.Fill };
         ConfigureCheck(_buildOnly, "Build only");
@@ -245,28 +259,28 @@ public sealed class MainForm : Form
         _buildOnly.Checked = true;
         _skipInference.Checked = true;
         modePanel.Controls.AddRange(new Control[] { _buildOnly, _skipInference, _dryRun });
-        AddLabeled(root, 46, "Mode", modePanel);
+        AddLabeled(root, 49, "Mode", modePanel);
 
         Button previewButton = new Button { Text = "Preview", Dock = DockStyle.Fill, Height = 32 };
         previewButton.Click += OnPreview;
-        root.Controls.Add(previewButton, 2, 46);
+        root.Controls.Add(previewButton, 2, 49);
 
         _commandPreview.Dock = DockStyle.Fill;
         _commandPreview.ReadOnly = true;
         _commandPreview.WordWrap = false;
-        root.Controls.Add(_commandPreview, 0, 47);
+        root.Controls.Add(_commandPreview, 0, 50);
         root.SetColumnSpan(_commandPreview, 2);
 
         Button runButton = new Button { Text = "Run", Dock = DockStyle.Fill, Height = 32 };
         runButton.Click += OnRun;
-        root.Controls.Add(runButton, 2, 47);
+        root.Controls.Add(runButton, 2, 50);
 
         _log.Dock = DockStyle.Fill;
         _log.Multiline = true;
         _log.ScrollBars = ScrollBars.Both;
         _log.ReadOnly = true;
         _log.WordWrap = false;
-        root.Controls.Add(_log, 0, 48);
+        root.Controls.Add(_log, 0, 51);
         root.SetColumnSpan(_log, 3);
 
         _minShapes.PlaceholderText = "input:1x3x640x640";
@@ -300,6 +314,9 @@ public sealed class MainForm : Form
         _sleepTime.PlaceholderText = "0";
         _idleTime.PlaceholderText = "0";
         _loadInputs.PlaceholderText = "input:input.bin";
+        _referenceOutputs.PlaceholderText = "output:output.reference.json";
+        _referenceAbsoluteTolerance.Text = "0";
+        _referenceRelativeTolerance.Text = "0";
         _dumpRawBindingsPath.PlaceholderText = "bindings.raw";
         _exportOutputPath.PlaceholderText = "output.json";
         _exportTimesPath.PlaceholderText = "times.json";
@@ -322,7 +339,7 @@ public sealed class MainForm : Form
         input.Width = 84;
     }
 
-    private static FlowLayoutPanel CreateTextPair(TextBox first, TextBox second)
+    private static FlowLayoutPanel CreateTextPair(Control first, Control second)
     {
         first.Width = 180;
         second.Width = 180;
@@ -610,7 +627,12 @@ public sealed class MainForm : Form
             _quantizationFlags.SelectedItem?.ToString() ?? string.Empty,
             _weightStreamingBudget.Text,
             _refitFromOnnxPath.Text,
-            _saveRefittedEnginePath.Text);
+            _saveRefittedEnginePath.Text,
+            _referenceOutputs.Text,
+            ParseOptionalFloat(_referenceAbsoluteTolerance.Text) ?? 0.0f,
+            ParseOptionalFloat(_referenceRelativeTolerance.Text) ?? 0.0f,
+            _referenceNaNPolicy.SelectedItem?.ToString() ?? "reject",
+            _referenceInfinityPolicy.SelectedItem?.ToString() ?? "exact");
     }
 
     private static string[] ParsePlugins(string value)

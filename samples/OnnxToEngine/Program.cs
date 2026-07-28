@@ -192,7 +192,9 @@ internal static class Program
         Console.WriteLine("  Memory values accept MiB by default or suffixes such as 512MiB and 1GiB.");
         Console.WriteLine("  --iterations <n> --warmUp <ms> --duration <sec> --streams <n> --useCudaGraph");
         Console.WriteLine("  --noDataTransfers --useSpinWait --threads --avgRuns <n> --percentile <0..100>");
-        Console.WriteLine("  --loadInputs input:file --dumpOutput --dumpRawBindingsToFile <path> --exportOutput <path> --exportTimes <path> --exportProfile <path> --saveProfile <path>");
+        Console.WriteLine("  --loadInputs input:file[,other:file] --dumpOutput --dumpRawBindingsToFile <path> --exportOutput <path> --exportTimes <path> --exportProfile <path> --saveProfile <path>");
+        Console.WriteLine("  --referenceOutputs output:reference.json[,other:reference.json] --referenceAbsTolerance <n> --referenceRelTolerance <n>");
+        Console.WriteLine("  --referenceNaNPolicy <reject|equal> --referenceInfinityPolicy <exact|reject>");
         Console.WriteLine("  --safe --consistency --builderCache|--noBuilderCache");
         Console.WriteLine("  --buildOnly --skipInference --dryRun|--previewOnly --dumpLayerInfo --exportLayerInfo <path>");
         Console.WriteLine("  --exportReport|--report <path.json|path.md>");

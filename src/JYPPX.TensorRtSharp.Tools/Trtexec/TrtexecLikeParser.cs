@@ -215,7 +215,12 @@ public static class TrtexecLikeParser
             exportOutputPath: FullPathOrEmpty(GetValue(args, "--exportOutput", string.Empty)),
             exportTimesPath: FullPathOrEmpty(GetValue(args, "--exportTimes", string.Empty)),
             exportProfilePath: FullPathOrEmpty(GetValue(args, "--exportProfile", string.Empty)),
-            saveProfilePath: FullPathOrEmpty(GetValue(args, "--saveProfile", string.Empty)));
+            saveProfilePath: FullPathOrEmpty(GetValue(args, "--saveProfile", string.Empty)),
+            referenceOutputs: GetValue(args, "--referenceOutputs", string.Empty),
+            referenceAbsoluteTolerance: ParseOptionalRangeFloat(GetValue(args, "--referenceAbsTolerance", string.Empty), "--referenceAbsTolerance", 0.0f, float.MaxValue) ?? 0.0f,
+            referenceRelativeTolerance: ParseOptionalRangeFloat(GetValue(args, "--referenceRelTolerance", string.Empty), "--referenceRelTolerance", 0.0f, float.MaxValue) ?? 0.0f,
+            referenceNaNPolicy: ParseReferenceNaNPolicy(GetValue(args, "--referenceNaNPolicy", "reject")),
+            referenceInfinityPolicy: ParseReferenceInfinityPolicy(GetValue(args, "--referenceInfinityPolicy", "exact")));
 
         return new TrtexecLikeOptions(
             tensorRtLine,
@@ -460,6 +465,26 @@ public static class TrtexecLikeParser
         }
 
         return parsed;
+    }
+
+    private static TrtexecLikeReferenceNaNPolicy ParseReferenceNaNPolicy(string value)
+    {
+        return (value ?? string.Empty).Trim().ToLowerInvariant() switch
+        {
+            "reject" => TrtexecLikeReferenceNaNPolicy.Reject,
+            "equal" => TrtexecLikeReferenceNaNPolicy.Equal,
+            _ => throw new ArgumentException("--referenceNaNPolicy must be reject or equal.")
+        };
+    }
+
+    private static TrtexecLikeReferenceInfinityPolicy ParseReferenceInfinityPolicy(string value)
+    {
+        return (value ?? string.Empty).Trim().ToLowerInvariant() switch
+        {
+            "exact" => TrtexecLikeReferenceInfinityPolicy.Exact,
+            "reject" => TrtexecLikeReferenceInfinityPolicy.Reject,
+            _ => throw new ArgumentException("--referenceInfinityPolicy must be exact or reject.")
+        };
     }
 
     private static int ParseRangeInt(string value, string argumentName, int minInclusive, int maxInclusive)

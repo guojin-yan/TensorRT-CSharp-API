@@ -6,6 +6,8 @@ using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using JYPPX.CudaSharp;
 using JYPPX.Shared.Interop;
@@ -15,6 +17,12 @@ namespace JYPPX.TensorRtSharp.Tools;
 
 public sealed class OnnxEngineBuildService
 {
+    private static readonly JsonSerializerOptions ReferenceJsonOptions = new JsonSerializerOptions
+    {
+        PropertyNameCaseInsensitive = true,
+        NumberHandling = JsonNumberHandling.AllowNamedFloatingPointLiterals
+    };
+
     public OnnxEngineBuildResult Execute(OnnxEngineBuildOptions options)
     {
         if (options == null)
@@ -132,12 +140,18 @@ public sealed class OnnxEngineBuildService
 
             log.Add(runtimeExecution == null
                 ? "OnnxToEngine LoadEngine=ReadonlyDiagnostics Note=Engine is deserialized for metadata only; generic bounded runtime did not execute."
-                : $"OnnxToEngine LoadEngine=BoundedRuntime InferenceRan=True OutputMatch={runtimeExecution.OutputMatch}");
+                : $"OnnxToEngine LoadEngine=BoundedRuntime InferenceRan=True OutputMatch={runtimeExecution.OutputMatch} OutputValidated={runtimeExecution.OutputValidated}");
             OnnxEngineBuildResult loadResult = CreateResult(
-                success: true,
+                success: !options.RuntimeOptions.RequestsReferenceValidation || (runtimeExecution?.OutputValidated ?? false),
                 skipped: false,
                 state: runtimeExecution != null
-                    ? (runtimeExecution.OutputMatch ? "load-engine-identity-runtime" : "load-engine-runtime-output-unverified")
+                    ? (runtimeExecution.OutputValidated
+                        ? "load-engine-reference-validated-runtime"
+                        : runtimeExecution.IdentityOutputMatch && !options.RuntimeOptions.RequestsReferenceValidation
+                            ? "load-engine-identity-runtime"
+                            : options.RuntimeOptions.RequestsReferenceValidation
+                                ? "load-engine-reference-validation-failed"
+                                : "load-engine-runtime-output-unverified")
                     : (loadedEngineDiagnostics.Succeeded ? "load-engine-readonly-diagnostics" : "load-engine-preflight"),
                 options,
                 modelSource: options.LoadEnginePath,
@@ -155,7 +169,9 @@ public sealed class OnnxEngineBuildService
                 benchmarkSummary: runtimeExecution?.BenchmarkSummary,
                 preflightMetadata: preflightMetadata,
                 loadedEngineDiagnostics: loadedEngineDiagnostics,
-                timingCacheArtifact: CreateTimingCacheBoundaryArtifact(options, "not-applied-to-load-engine"));
+                timingCacheArtifact: CreateTimingCacheBoundaryArtifact(options, "not-applied-to-load-engine"),
+                outputValidated: runtimeExecution?.OutputValidated ?? false,
+                identityOutputMatch: runtimeExecution?.IdentityOutputMatch ?? false);
             OnnxEngineBuildDiagnostics.WriteReport(loadResult, options.ExportReportPath);
             OnnxEngineRuntimeArtifactWriter.WriteArtifacts(loadResult, runtimeExecution?.ArtifactData);
             return loadResult;
@@ -397,15 +413,15 @@ public sealed class OnnxEngineBuildService
                     }
                     log.Add(runtimeExecution == null
                         ? "OnnxToEngine ExternalOnnx=RuntimeSkipped Note=Generic bounded runtime could not be executed."
-                        : $"OnnxToEngine ExternalOnnx=BoundedRuntime InferenceRan=True OutputMatch={runtimeExecution.OutputMatch}");
+                        : $"OnnxToEngine ExternalOnnx=BoundedRuntime InferenceRan=True OutputMatch={runtimeExecution.OutputMatch} OutputValidated={runtimeExecution.OutputValidated}");
                     OnnxEngineBuildResult externalRuntime = CreateResult(
-                        success: true,
+                        success: !options.RuntimeOptions.RequestsReferenceValidation || (runtimeExecution?.OutputValidated ?? false),
                         skipped: false,
                         state: refitPersistenceSnapshot.Succeeded
-                            ? (runtimeExecution != null && runtimeExecution.OutputMatch ? "external-onnx-refit-reload-identity-runtime" : "external-onnx-refit-reload-runtime-output-unverified")
+                            ? RuntimeState(runtimeExecution, options, "external-onnx-refit-reload")
                             : refitSnapshot.Succeeded
-                            ? (runtimeExecution != null && runtimeExecution.OutputMatch ? "external-onnx-refit-identity-runtime" : "external-onnx-refit-runtime-output-unverified")
-                            : (runtimeExecution != null && runtimeExecution.OutputMatch ? "external-onnx-identity-runtime" : "external-onnx-runtime-output-unverified"),
+                            ? RuntimeState(runtimeExecution, options, "external-onnx-refit")
+                            : RuntimeState(runtimeExecution, options, "external-onnx"),
                         options,
                         modelSource,
                         enginePath,
@@ -429,7 +445,9 @@ public sealed class OnnxEngineBuildService
                         builderConfigDeploymentSnapshot: builderConfigDeploymentSnapshot,
                         parserPreflightSnapshot: parserPreflightSnapshot,
                         refitSnapshot: refitSnapshot,
-                        refitPersistenceSnapshot: refitPersistenceSnapshot);
+                        refitPersistenceSnapshot: refitPersistenceSnapshot,
+                        outputValidated: runtimeExecution?.OutputValidated ?? false,
+                        identityOutputMatch: runtimeExecution?.IdentityOutputMatch ?? false);
                     OnnxEngineBuildDiagnostics.WriteReport(externalRuntime, options.ExportReportPath);
                     OnnxEngineRuntimeArtifactWriter.WriteArtifacts(externalRuntime, runtimeExecution?.ArtifactData);
                     return externalRuntime;
@@ -442,7 +460,7 @@ public sealed class OnnxEngineBuildService
                     profileIndex,
                     log,
                     statePrefix: "Identity");
-                if (!options.RuntimeOptions.NoDataTransfers && !identityRuntimeExecution.OutputMatch)
+                if (!options.RuntimeOptions.NoDataTransfers && !identityRuntimeExecution.IdentityOutputMatch)
                 {
                     throw new InvalidOperationException("Embedded identity runtime output did not match the generated input values.");
                 }
@@ -452,9 +470,15 @@ public sealed class OnnxEngineBuildService
                 log.Add("OnnxToEngine Passed=True");
 
                 OnnxEngineBuildResult roundTrip = CreateResult(
-                    success: true,
+                    success: !options.RuntimeOptions.RequestsReferenceValidation || identityRuntimeExecution.OutputValidated,
                     skipped: false,
-                    state: options.RuntimeOptions.NoDataTransfers ? "identity-no-data-transfer-benchmark" : "identity-roundtrip",
+                    state: options.RuntimeOptions.NoDataTransfers
+                        ? "identity-no-data-transfer-benchmark"
+                        : identityRuntimeExecution.OutputValidated
+                            ? "identity-reference-validated-runtime"
+                            : options.RuntimeOptions.RequestsReferenceValidation
+                                ? "identity-reference-validation-failed"
+                                : "identity-roundtrip",
                     options,
                     modelSource,
                     enginePath,
@@ -471,7 +495,9 @@ public sealed class OnnxEngineBuildService
                     benchmarkSummary: identityRuntimeExecution.BenchmarkSummary,
                     timingCacheArtifact: timingCache.Artifact,
                     builderConfigDeploymentSnapshot: builderConfigDeploymentSnapshot,
-                    parserPreflightSnapshot: parserPreflightSnapshot);
+                    parserPreflightSnapshot: parserPreflightSnapshot,
+                    outputValidated: identityRuntimeExecution.OutputValidated,
+                    identityOutputMatch: identityRuntimeExecution.IdentityOutputMatch);
                 OnnxEngineBuildDiagnostics.WriteReport(roundTrip, options.ExportReportPath);
                 OnnxEngineRuntimeArtifactWriter.WriteArtifacts(roundTrip, identityRuntimeExecution.ArtifactData);
                 return roundTrip;
@@ -787,7 +813,9 @@ public sealed class OnnxEngineBuildService
         TensorRtBuilderConfigDeploymentSnapshot? builderConfigDeploymentSnapshot = null,
         OnnxEngineParserPreflightSnapshot? parserPreflightSnapshot = null,
         OnnxEngineRefitSnapshot? refitSnapshot = null,
-        OnnxEngineRefitPersistenceSnapshot? refitPersistenceSnapshot = null)
+        OnnxEngineRefitPersistenceSnapshot? refitPersistenceSnapshot = null,
+        bool outputValidated = false,
+        bool identityOutputMatch = false)
     {
         OnnxEngineCapabilityProbe capabilityProbe = ProbeCapabilities(options);
         logLines = AppendCapabilityProbeLog(logLines, capabilityProbe);
@@ -822,7 +850,31 @@ public sealed class OnnxEngineBuildService
             builderConfigDeploymentSnapshot: builderConfigDeploymentSnapshot,
             parserPreflightSnapshot: parserPreflightSnapshot,
             refitSnapshot: refitSnapshot,
-            refitPersistenceSnapshot: refitPersistenceSnapshot);
+            refitPersistenceSnapshot: refitPersistenceSnapshot,
+            outputValidated: outputValidated,
+            identityOutputMatch: identityOutputMatch);
+    }
+
+    private static string RuntimeState(
+        OnnxEngineRuntimeExecution? runtimeExecution,
+        OnnxEngineBuildOptions options,
+        string prefix)
+    {
+        if (runtimeExecution == null)
+        {
+            return prefix + "-runtime-unavailable";
+        }
+        if (runtimeExecution.OutputValidated)
+        {
+            return prefix + "-reference-validated-runtime";
+        }
+        if (options.RuntimeOptions.RequestsReferenceValidation)
+        {
+            return prefix + "-reference-validation-failed";
+        }
+        return runtimeExecution.IdentityOutputMatch
+            ? prefix + "-identity-runtime"
+            : prefix + "-runtime-output-unverified";
     }
 
     private static (TensorRtEngine Engine, OnnxEngineRefitPersistenceSnapshot Snapshot) PersistAndReloadRefittedEngine(
@@ -1437,6 +1489,11 @@ public sealed class OnnxEngineBuildService
         bool validateRefittableState = true)
     {
         ApplyEngineRuntimePolicies(engine, options, log, validateRefittableState);
+        if (options.RuntimeOptions.NoDataTransfers && options.RuntimeOptions.RequestsReferenceValidation)
+        {
+            throw new ArgumentException("--referenceOutputs cannot be used with --noDataTransfers because output readback is disabled.");
+        }
+
         int safeProfileIndex = Math.Max(0, profileIndex);
         int executionContextCount = options.RuntimeOptions.InfStreams ?? options.Streams;
         List<OnnxEngineBenchmarkWorker> workers = new List<OnnxEngineBenchmarkWorker>(executionContextCount);
@@ -1447,9 +1504,9 @@ public sealed class OnnxEngineBuildService
 
             IReadOnlyList<TensorRtEngineTensorBinding> inputs = firstWorker.Bindings.Report.GetInputs();
             IReadOnlyList<TensorRtEngineTensorBinding> outputs = firstWorker.Bindings.Report.GetOutputs();
-            if (inputs.Count != 1)
+            if (inputs.Count == 0)
             {
-                throw new NotSupportedException($"Generic bounded runtime supports exactly one input tensor. Engine input count: {inputs.Count}.");
+                throw new NotSupportedException("Generic bounded runtime requires at least one input tensor.");
             }
 
             if (outputs.Count == 0)
@@ -1457,10 +1514,12 @@ public sealed class OnnxEngineBuildService
                 throw new NotSupportedException("Generic bounded runtime requires at least one output tensor.");
             }
 
-            TensorRtEngineTensorBinding input = inputs[0];
-            if (input.DataType != TensorRtDataType.Float)
+            foreach (TensorRtEngineTensorBinding input in inputs)
             {
-                throw new NotSupportedException($"Generic bounded runtime supports float input tensors only. Input '{input.Name}' is {input.DataType}.");
+                if (input.DataType != TensorRtDataType.Float)
+                {
+                    throw new NotSupportedException($"Generic bounded runtime supports float input tensors only. Input '{input.Name}' is {input.DataType}.");
+                }
             }
 
             foreach (TensorRtEngineTensorBinding output in outputs)
@@ -1471,18 +1530,54 @@ public sealed class OnnxEngineBuildService
                 }
             }
 
-            TensorRtDims runtimeShape = ResolveRuntimeInputShape(input, options);
-            int inputElementCount = CountElements(runtimeShape);
-            float[] inputValues = options.RuntimeOptions.NoDataTransfers
-                ? Array.Empty<float>()
-                : CreateRuntimeInputValues(input.Name, inputElementCount, options.RuntimeOptions.LoadInputs);
-            bool setInputShape = ShouldSetInputShape(input, runtimeShape, options);
-            firstWorker.Configure(input, outputs, runtimeShape, inputValues, setInputShape, options.RuntimeOptions.NoDataTransfers);
+            Dictionary<string, string> inputFiles = ParseLoadInputs(options.RuntimeOptions.LoadInputs);
+            HashSet<string> engineInputNames = new HashSet<string>(inputs.Select(static input => input.Name), StringComparer.Ordinal);
+            string[] unknownInputMappings = inputFiles.Keys.Where(name => !engineInputNames.Contains(name)).OrderBy(static name => name, StringComparer.Ordinal).ToArray();
+            if (unknownInputMappings.Length > 0)
+            {
+                throw new ArgumentException("--loadInputs contains mappings for unknown input tensors: " + string.Join(", ", unknownInputMappings));
+            }
+
+            List<OnnxEngineRuntimeInput> runtimeInputs = new List<OnnxEngineRuntimeInput>(inputs.Count);
+            for (int inputIndex = 0; inputIndex < inputs.Count; inputIndex++)
+            {
+                TensorRtEngineTensorBinding input = inputs[inputIndex];
+                TensorRtDims runtimeShape = ResolveRuntimeInputShape(input, options);
+                int inputElementCount = CountElements(runtimeShape);
+                float[] inputValues = options.RuntimeOptions.NoDataTransfers
+                    ? Array.Empty<float>()
+                    : CreateRuntimeInputValues(input.Name, inputElementCount, inputFiles, inputIndex);
+                bool setInputShape = ShouldSetInputShape(input, runtimeShape, options);
+                string sourceClassification = options.RuntimeOptions.NoDataTransfers
+                    ? "no-data-transfers"
+                    : inputFiles.ContainsKey(input.Name)
+                        ? "load-input-file"
+                        : "deterministic-generated";
+                string sourcePath = inputFiles.TryGetValue(input.Name, out string? mappedPath) ? mappedPath : string.Empty;
+                OnnxEngineRuntimeInputArtifact inputArtifact = options.RuntimeOptions.NoDataTransfers
+                    ? new OnnxEngineRuntimeInputArtifact(
+                        input.Name,
+                        runtimeShape.Values,
+                        inputElementCount,
+                        Array.Empty<float>(),
+                        Array.Empty<byte>(),
+                        sourceClassification,
+                        sourcePath)
+                    : new OnnxEngineRuntimeInputArtifact(
+                        input.Name,
+                        runtimeShape.Values,
+                        inputValues,
+                        sourceClassification,
+                        sourcePath);
+                runtimeInputs.Add(new OnnxEngineRuntimeInput(input, runtimeShape, inputValues, setInputShape, inputArtifact));
+            }
+
+            firstWorker.Configure(runtimeInputs, outputs, options.RuntimeOptions.NoDataTransfers);
             for (int workerIndex = 1; workerIndex < executionContextCount; workerIndex++)
             {
                 OnnxEngineBenchmarkWorker worker = new OnnxEngineBenchmarkWorker(engine, safeProfileIndex, options.RuntimeOptions.UseSpinWait);
                 workers.Add(worker);
-                worker.Configure(input, outputs, runtimeShape, inputValues, setInputShape, options.RuntimeOptions.NoDataTransfers);
+                worker.Configure(runtimeInputs, outputs, options.RuntimeOptions.NoDataTransfers);
             }
 
             OnnxEngineBenchmarkRun benchmark = RunBoundedBenchmark(workers, options);
@@ -1519,9 +1614,16 @@ public sealed class OnnxEngineBuildService
 
             OnnxEngineRuntimeOutputTensor? primaryOutput = capturedOutputs.Count == 0 ? null : capturedOutputs[0];
             bool identityOutputMatch = primaryOutput != null &&
+                runtimeInputs.Count == 1 &&
                 capturedOutputs.Count == 1 &&
-                primaryOutput.Values.Length == inputValues.Length &&
-                ValuesEqual(inputValues, primaryOutput.Values);
+                primaryOutput.Values.Length == runtimeInputs[0].Values.Length &&
+                ValuesEqual(runtimeInputs[0].Values, primaryOutput.Values);
+            OnnxEngineReferenceValidationArtifact referenceValidation = ValidateReferenceOutputs(
+                capturedOutputs,
+                options.RuntimeOptions);
+            bool outputMatch = options.RuntimeOptions.RequestsReferenceValidation
+                ? referenceValidation.Completed && referenceValidation.Passed
+                : identityOutputMatch;
             string primaryOutputSummary = primaryOutput == null
                 ? "not-read-back"
                 : $"{primaryOutput.Name}:{FormatShape(primaryOutput.Shape)}";
@@ -1530,10 +1632,23 @@ public sealed class OnnxEngineBuildService
                 : string.IsNullOrWhiteSpace(options.RuntimeOptions.LoadInputs)
                     ? "deterministic-generated"
                     : "loadInputs";
-            log.Add($"{statePrefix}BoundedRuntime Attempted=True Succeeded=True Input={input.Name}:{runtimeShape} InputSource={inputSource} Outputs={capturedOutputs.Count} PrimaryOutput={primaryOutputSummary} ElapsedMs={elapsedMilliseconds:0.###} IdentityOutputMatch={identityOutputMatch} NoDataTransfers={options.RuntimeOptions.NoDataTransfers}");
+            log.Add($"{statePrefix}BoundedRuntime Attempted=True Succeeded=True Inputs={runtimeInputs.Count} InputSource={inputSource} Outputs={capturedOutputs.Count} PrimaryOutput={primaryOutputSummary} ElapsedMs={elapsedMilliseconds:0.###} IdentityOutputMatch={identityOutputMatch} ReferenceOutputValidated={referenceValidation.Completed && referenceValidation.Passed} NoDataTransfers={options.RuntimeOptions.NoDataTransfers}");
+            log.Add($"{statePrefix}BoundedRuntime InputTensors=" + string.Join("; ", runtimeInputs.Select(static item => $"{item.Binding.Name}:{FormatShape(item.Shape.Values)}:{item.Artifact.ElementCount}:{item.Artifact.SourceClassification}")));
             log.Add(options.RuntimeOptions.NoDataTransfers
                 ? $"{statePrefix}BoundedRuntime OutputReadback=False Reason=noDataTransfers"
                 : $"{statePrefix}BoundedRuntime OutputTensors=" + string.Join("; ", capturedOutputs.Select(static item => $"{item.Name}:{FormatShape(item.Shape)}:{item.Values.Length}")));
+            if (referenceValidation.Requested)
+            {
+                log.Add($"ReferenceOutputValidation Requested=True Completed={referenceValidation.Completed} Passed={referenceValidation.Passed} Tensors={referenceValidation.TensorComparisons.Count} AbsTolerance={referenceValidation.AbsoluteTolerance:R} RelTolerance={referenceValidation.RelativeTolerance:R} NaNPolicy={referenceValidation.NaNPolicy} InfinityPolicy={referenceValidation.InfinityPolicy}");
+                foreach (OnnxEngineReferenceTensorComparisonArtifact comparison in referenceValidation.TensorComparisons)
+                {
+                    log.Add($"ReferenceOutputTensor Tensor={comparison.TensorName} Passed={comparison.Passed} Compared={comparison.ComparedElementCount} Mismatches={comparison.MismatchCount} FirstMismatch={comparison.FirstMismatchIndex} MaxAbs={comparison.MaximumAbsoluteError:R} MaxRel={comparison.MaximumRelativeError:R} Diagnostic={comparison.Diagnostic}");
+                }
+                foreach (string diagnostic in referenceValidation.Diagnostics)
+                {
+                    log.Add("ReferenceOutputDiagnostic " + diagnostic);
+                }
+            }
             log.Add(
                 $"RuntimeBenchmark Contexts={workers.Count} MeasurementRounds={benchmark.MeasurementRoundsExecuted} " +
                 $"InferenceIterations={benchmark.TimingSamplesMilliseconds.Count} WarmUpIterations={benchmark.WarmUpIterationsExecuted} " +
@@ -1550,19 +1665,21 @@ public sealed class OnnxEngineBuildService
 
             OnnxEngineRuntimeArtifactData artifactData = options.RuntimeOptions.NoDataTransfers
                 ? OnnxEngineRuntimeArtifactData.CreateBenchmarkOnly(
-                    inputElementCount,
+                    runtimeInputs.Select(static input => input.Artifact).ToArray(),
                     benchmark.LastExecutionSummary.ToString(),
                     benchmark.TimingSamplesMilliseconds)
-                : OnnxEngineRuntimeArtifactData.CreateOutputSummaries(
-                    inputValues.Length,
-                    identityOutputMatch ? inputValues : Array.Empty<float>(),
+                : OnnxEngineRuntimeArtifactData.CreateRuntimeEvidence(
+                    runtimeInputs.Select(static input => input.Artifact).ToArray(),
                     outputArtifacts,
+                    referenceValidation,
                     benchmark.LastExecutionSummary.ToString(),
                     benchmark.TimingSamplesMilliseconds);
 
             return new OnnxEngineRuntimeExecution(
                 inferenceRan: true,
-                outputMatch: identityOutputMatch,
+                outputMatch,
+                identityOutputMatch,
+                outputValidated: referenceValidation.Completed && referenceValidation.Passed,
                 safeProfileIndex,
                 elapsedMilliseconds,
                 OnnxEngineBenchmarkSummary.CreateExecuted(
@@ -1965,15 +2082,18 @@ public sealed class OnnxEngineBuildService
             !ShapesEqual(input.EngineShape, runtimeShape);
     }
 
-    private static float[] CreateRuntimeInputValues(string inputName, int expectedCount, string loadInputs)
+    private static float[] CreateRuntimeInputValues(
+        string inputName,
+        int expectedCount,
+        IReadOnlyDictionary<string, string> inputs,
+        int inputIndex)
     {
-        Dictionary<string, string> inputs = ParseLoadInputs(loadInputs);
         if (inputs.Count == 0)
         {
             float[] generated = new float[expectedCount];
             for (int index = 0; index < generated.Length; index++)
             {
-                generated[index] = index + 0.5f;
+                generated[index] = checked(inputIndex * 1024 + index) + 0.5f;
             }
 
             return generated;
@@ -2010,7 +2130,10 @@ public sealed class OnnxEngineBuildService
                 throw new FileNotFoundException("Input tensor file was not found.", path);
             }
 
-            result[tensorName] = path;
+            if (!result.TryAdd(tensorName, path))
+            {
+                throw new ArgumentException($"--loadInputs contains a duplicate mapping for tensor '{tensorName}'.");
+            }
         }
 
         return result;
@@ -2050,6 +2173,271 @@ public sealed class OnnxEngineBuildService
         }
 
         return parsed;
+    }
+
+    private static OnnxEngineReferenceValidationArtifact ValidateReferenceOutputs(
+        IReadOnlyList<OnnxEngineRuntimeOutputTensor> outputs,
+        TrtexecLikeRuntimeOptions options)
+    {
+        if (!options.RequestsReferenceValidation)
+        {
+            return OnnxEngineReferenceValidationArtifact.NotRequested;
+        }
+
+        List<string> diagnostics = new List<string>();
+        Dictionary<string, string> mappings = ParseReferenceOutputMappings(options.ReferenceOutputs, diagnostics);
+        HashSet<string> outputNames = new HashSet<string>(outputs.Select(static output => output.Name), StringComparer.Ordinal);
+        foreach (string unknownName in mappings.Keys.Where(name => !outputNames.Contains(name)).OrderBy(static name => name, StringComparer.Ordinal))
+        {
+            diagnostics.Add($"unknown-output-mapping:{unknownName}");
+        }
+
+        List<OnnxEngineReferenceTensorComparisonArtifact> comparisons = new List<OnnxEngineReferenceTensorComparisonArtifact>(outputs.Count);
+        bool allComparable = diagnostics.Count == 0;
+        foreach (OnnxEngineRuntimeOutputTensor output in outputs)
+        {
+            if (!mappings.TryGetValue(output.Name, out string? referencePath))
+            {
+                diagnostics.Add($"missing-output-mapping:{output.Name}");
+                comparisons.Add(CreateUnavailableReferenceComparison(output, string.Empty, "reference mapping is missing"));
+                allComparable = false;
+                continue;
+            }
+
+            try
+            {
+                OnnxEngineReferenceTensorData reference = ReadReferenceTensor(referencePath);
+                OnnxEngineReferenceTensorComparisonArtifact comparison = CompareReferenceTensor(output, referencePath, reference, options, out bool comparable);
+                comparisons.Add(comparison);
+                allComparable &= comparable;
+                if (!comparison.Passed)
+                {
+                    diagnostics.Add($"tensor-validation-failed:{output.Name}:{comparison.Diagnostic}");
+                }
+            }
+            catch (Exception exception) when (exception is IOException || exception is UnauthorizedAccessException || exception is JsonException || exception is ArgumentException || exception is InvalidOperationException)
+            {
+                string diagnostic = SanitizeReferenceDiagnostic(exception.Message);
+                diagnostics.Add($"reference-read-failed:{output.Name}:{diagnostic}");
+                comparisons.Add(CreateUnavailableReferenceComparison(output, referencePath, diagnostic));
+                allComparable = false;
+            }
+        }
+
+        bool completed = allComparable && comparisons.Count == outputs.Count;
+        bool passed = completed && comparisons.All(static comparison => comparison.Passed);
+        return new OnnxEngineReferenceValidationArtifact(
+            requested: true,
+            completed,
+            passed,
+            options.ReferenceAbsoluteTolerance,
+            options.ReferenceRelativeTolerance,
+            options.ReferenceNaNPolicy.ToString().ToLowerInvariant(),
+            options.ReferenceInfinityPolicy.ToString().ToLowerInvariant(),
+            diagnostics,
+            comparisons);
+    }
+
+    private static Dictionary<string, string> ParseReferenceOutputMappings(string value, List<string> diagnostics)
+    {
+        Dictionary<string, string> mappings = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (string segment in (value ?? string.Empty).Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries))
+        {
+            int separator = segment.IndexOf(':');
+            if (separator <= 0 || separator == segment.Length - 1)
+            {
+                diagnostics.Add("invalid-reference-mapping:" + SanitizeReferenceDiagnostic(segment));
+                continue;
+            }
+
+            string tensorName = segment.Substring(0, separator).Trim();
+            string pathText = segment.Substring(separator + 1).Trim().Trim('"');
+            if (tensorName.Length == 0 || pathText.Length == 0)
+            {
+                diagnostics.Add("invalid-reference-mapping:" + SanitizeReferenceDiagnostic(segment));
+                continue;
+            }
+
+            string fullPath;
+            try
+            {
+                fullPath = Path.GetFullPath(pathText);
+            }
+            catch (Exception exception) when (exception is ArgumentException || exception is NotSupportedException)
+            {
+                diagnostics.Add($"invalid-reference-path:{tensorName}:{SanitizeReferenceDiagnostic(exception.Message)}");
+                continue;
+            }
+
+            if (!mappings.TryAdd(tensorName, fullPath))
+            {
+                diagnostics.Add("duplicate-reference-mapping:" + tensorName);
+            }
+        }
+
+        return mappings;
+    }
+
+    private static OnnxEngineReferenceTensorData ReadReferenceTensor(string path)
+    {
+        byte[] bytes = File.ReadAllBytes(path);
+        OnnxEngineReferenceTensorData? document = JsonSerializer.Deserialize<OnnxEngineReferenceTensorData>(bytes, ReferenceJsonOptions);
+        if (document == null)
+        {
+            throw new InvalidOperationException("Reference JSON document is empty.");
+        }
+        if (document.SchemaVersion != 1)
+        {
+            throw new ArgumentException("Reference JSON schemaVersion must be 1.");
+        }
+        if (string.IsNullOrWhiteSpace(document.TensorName))
+        {
+            throw new ArgumentException("Reference JSON tensorName is required.");
+        }
+        if (document.Shape.Count == 0 || document.Shape.Any(static value => value <= 0))
+        {
+            throw new ArgumentException("Reference JSON shape must contain positive dimensions.");
+        }
+        if (string.IsNullOrWhiteSpace(document.SourceClassification))
+        {
+            throw new ArgumentException("Reference JSON sourceClassification is required.");
+        }
+
+        document.FileSha256 = Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant();
+        return document;
+    }
+
+    private static OnnxEngineReferenceTensorComparisonArtifact CompareReferenceTensor(
+        OnnxEngineRuntimeOutputTensor output,
+        string referencePath,
+        OnnxEngineReferenceTensorData reference,
+        TrtexecLikeRuntimeOptions options,
+        out bool comparable)
+    {
+        string fullPath = Path.GetFullPath(referencePath);
+        if (!OnnxEngineReferenceTensorComparer.MetadataMatches(
+            output.Name,
+            output.Shape,
+            output.Values.Length,
+            reference,
+            out string metadataDiagnostic))
+        {
+            comparable = false;
+            return CreateReferenceMetadataMismatch(output, fullPath, reference, metadataDiagnostic);
+        }
+
+        comparable = true;
+        int mismatchCount = 0;
+        int firstMismatchIndex = -1;
+        float maximumAbsoluteError = 0.0f;
+        float maximumRelativeError = 0.0f;
+        for (int index = 0; index < output.Values.Length; index++)
+        {
+            float actual = output.Values[index];
+            float expected = reference.Values[index];
+            bool matches = ReferenceValuesMatch(actual, expected, options, out float absoluteError, out float relativeError);
+            maximumAbsoluteError = Math.Max(maximumAbsoluteError, absoluteError);
+            maximumRelativeError = Math.Max(maximumRelativeError, relativeError);
+            if (!matches)
+            {
+                mismatchCount++;
+                if (firstMismatchIndex < 0)
+                {
+                    firstMismatchIndex = index;
+                }
+            }
+        }
+
+        bool passed = mismatchCount == 0;
+        string diagnostic = passed
+            ? "all reference values matched"
+            : $"{mismatchCount} value(s) exceeded tolerance or special-value policy; first mismatch index {firstMismatchIndex}";
+        return new OnnxEngineReferenceTensorComparisonArtifact(
+            output.Name,
+            fullPath,
+            reference.FileSha256,
+            reference.SourceClassification,
+            output.Shape,
+            reference.Shape,
+            output.Values.Length,
+            reference.Values.Count,
+            output.Values.Length,
+            mismatchCount,
+            firstMismatchIndex,
+            maximumAbsoluteError,
+            maximumRelativeError,
+            passed,
+            diagnostic);
+    }
+
+    private static bool ReferenceValuesMatch(
+        float actual,
+        float expected,
+        TrtexecLikeRuntimeOptions options,
+        out float absoluteError,
+        out float relativeError)
+    {
+        return OnnxEngineReferenceValueComparer.Matches(
+            actual,
+            expected,
+            options.ReferenceAbsoluteTolerance,
+            options.ReferenceRelativeTolerance,
+            options.ReferenceNaNPolicy,
+            options.ReferenceInfinityPolicy,
+            out absoluteError,
+            out relativeError);
+    }
+
+    private static OnnxEngineReferenceTensorComparisonArtifact CreateReferenceMetadataMismatch(
+        OnnxEngineRuntimeOutputTensor output,
+        string referencePath,
+        OnnxEngineReferenceTensorData reference,
+        string diagnostic)
+    {
+        return new OnnxEngineReferenceTensorComparisonArtifact(
+            output.Name,
+            referencePath,
+            reference.FileSha256,
+            reference.SourceClassification,
+            output.Shape,
+            reference.Shape,
+            output.Values.Length,
+            reference.Values.Count,
+            0,
+            0,
+            -1,
+            0.0f,
+            0.0f,
+            passed: false,
+            diagnostic);
+    }
+
+    private static OnnxEngineReferenceTensorComparisonArtifact CreateUnavailableReferenceComparison(
+        OnnxEngineRuntimeOutputTensor output,
+        string referencePath,
+        string diagnostic)
+    {
+        return new OnnxEngineReferenceTensorComparisonArtifact(
+            output.Name,
+            referencePath,
+            string.Empty,
+            string.Empty,
+            output.Shape,
+            Array.Empty<int>(),
+            output.Values.Length,
+            0,
+            0,
+            0,
+            -1,
+            0.0f,
+            0.0f,
+            passed: false,
+            diagnostic);
+    }
+
+    private static string SanitizeReferenceDiagnostic(string value)
+    {
+        return (value ?? string.Empty).Replace('\r', ' ').Replace('\n', ' ').Trim();
     }
 
     private static int CountElements(TensorRtDims shape)
@@ -2105,7 +2493,9 @@ public sealed class OnnxEngineBuildService
 
         for (int index = 0; index < left.Count; index++)
         {
-            if (Math.Abs(left[index] - right[index]) > 1e-5f)
+            if (!float.IsFinite(left[index]) ||
+                !float.IsFinite(right[index]) ||
+                Math.Abs(left[index] - right[index]) > 1e-5f)
             {
                 return false;
             }
@@ -2183,25 +2573,28 @@ public sealed class OnnxEngineBuildService
         public TensorRtInferenceBindings Bindings { get; }
 
         public void Configure(
-            TensorRtEngineTensorBinding input,
+            IReadOnlyList<OnnxEngineRuntimeInput> inputs,
             IReadOnlyList<TensorRtEngineTensorBinding> outputs,
-            TensorRtDims runtimeShape,
-            float[] inputValues,
-            bool setInputShape,
             bool noDataTransfers)
         {
-            if (setInputShape)
+            foreach (OnnxEngineRuntimeInput input in inputs)
             {
-                Bindings.SetInputShape(input.Name, runtimeShape);
+                if (input.SetInputShape)
+                {
+                    Bindings.SetInputShape(input.Binding.Name, input.Shape);
+                }
             }
 
-            if (noDataTransfers)
+            foreach (OnnxEngineRuntimeInput input in inputs)
             {
-                Bindings.AllocateDeviceBuffer(input.Name, runtimeShape);
-            }
-            else
-            {
-                Bindings.CopyInputFromHost(input.Name, inputValues, runtimeShape);
+                if (noDataTransfers)
+                {
+                    Bindings.AllocateDeviceBuffer(input.Binding.Name, input.Shape);
+                }
+                else
+                {
+                    Bindings.CopyInputFromHost(input.Binding.Name, input.Values, input.Shape);
+                }
             }
 
             _ = Bindings.GetReadiness(runShapeInference: true);
@@ -2461,6 +2854,8 @@ public sealed class OnnxEngineBuildService
         public OnnxEngineRuntimeExecution(
             bool inferenceRan,
             bool outputMatch,
+            bool identityOutputMatch,
+            bool outputValidated,
             int profileIndex,
             float elapsedMilliseconds,
             OnnxEngineBenchmarkSummary benchmarkSummary,
@@ -2468,6 +2863,8 @@ public sealed class OnnxEngineBuildService
         {
             InferenceRan = inferenceRan;
             OutputMatch = outputMatch;
+            IdentityOutputMatch = identityOutputMatch;
+            OutputValidated = outputValidated;
             ProfileIndex = profileIndex;
             ElapsedMilliseconds = elapsedMilliseconds;
             BenchmarkSummary = benchmarkSummary ?? OnnxEngineBenchmarkSummary.Empty;
@@ -2478,6 +2875,10 @@ public sealed class OnnxEngineBuildService
 
         public bool OutputMatch { get; }
 
+        public bool IdentityOutputMatch { get; }
+
+        public bool OutputValidated { get; }
+
         public int ProfileIndex { get; }
 
         public float ElapsedMilliseconds { get; }
@@ -2485,6 +2886,33 @@ public sealed class OnnxEngineBuildService
         public OnnxEngineBenchmarkSummary BenchmarkSummary { get; }
 
         public OnnxEngineRuntimeArtifactData ArtifactData { get; }
+    }
+
+    private sealed class OnnxEngineRuntimeInput
+    {
+        public OnnxEngineRuntimeInput(
+            TensorRtEngineTensorBinding binding,
+            TensorRtDims shape,
+            float[] values,
+            bool setInputShape,
+            OnnxEngineRuntimeInputArtifact artifact)
+        {
+            Binding = binding ?? throw new ArgumentNullException(nameof(binding));
+            Shape = shape ?? throw new ArgumentNullException(nameof(shape));
+            Values = values ?? Array.Empty<float>();
+            SetInputShape = setInputShape;
+            Artifact = artifact ?? throw new ArgumentNullException(nameof(artifact));
+        }
+
+        public TensorRtEngineTensorBinding Binding { get; }
+
+        public TensorRtDims Shape { get; }
+
+        public float[] Values { get; }
+
+        public bool SetInputShape { get; }
+
+        public OnnxEngineRuntimeInputArtifact Artifact { get; }
     }
 
     private sealed class OnnxEngineRuntimeOutputTensor
@@ -2781,6 +3209,6 @@ public sealed class OnnxEngineBuildService
 
     private static string RuntimeOptionsLogLine(OnnxEngineBuildOptions options)
     {
-        return $"TrtexecRuntime Iterations={options.Iterations} WarmUpMs={options.WarmUpMilliseconds} DurationSeconds={options.DurationSeconds} Streams={options.Streams} InfStreams={options.RuntimeOptions.InfStreams?.ToString() ?? ""} NoDataTransfers={options.RuntimeOptions.NoDataTransfers} UseSpinWait={options.RuntimeOptions.UseSpinWait} Threads={options.RuntimeOptions.Threads?.ToString() ?? ""} AvgRuns={options.RuntimeOptions.AvgRuns?.ToString() ?? ""} Percentile={options.RuntimeOptions.Percentile?.ToString() ?? ""} IdleTimeMs={options.RuntimeOptions.IdleTimeMilliseconds?.ToString() ?? ""} SleepTimeMs={options.RuntimeOptions.SleepTimeMilliseconds?.ToString() ?? ""} DumpOutput={options.RuntimeOptions.DumpOutput} ExportTimes={options.RuntimeOptions.ExportTimesPath} ExportProfile={options.RuntimeOptions.ExportProfilePath}";
+        return $"TrtexecRuntime Iterations={options.Iterations} WarmUpMs={options.WarmUpMilliseconds} DurationSeconds={options.DurationSeconds} Streams={options.Streams} InfStreams={options.RuntimeOptions.InfStreams?.ToString() ?? ""} NoDataTransfers={options.RuntimeOptions.NoDataTransfers} UseSpinWait={options.RuntimeOptions.UseSpinWait} Threads={options.RuntimeOptions.Threads?.ToString() ?? ""} AvgRuns={options.RuntimeOptions.AvgRuns?.ToString() ?? ""} Percentile={options.RuntimeOptions.Percentile?.ToString() ?? ""} IdleTimeMs={options.RuntimeOptions.IdleTimeMilliseconds?.ToString() ?? ""} SleepTimeMs={options.RuntimeOptions.SleepTimeMilliseconds?.ToString() ?? ""} DumpOutput={options.RuntimeOptions.DumpOutput} ExportTimes={options.RuntimeOptions.ExportTimesPath} ExportProfile={options.RuntimeOptions.ExportProfilePath} ReferenceOutputs={options.RuntimeOptions.ReferenceOutputs} ReferenceAbsTolerance={options.RuntimeOptions.ReferenceAbsoluteTolerance:R} ReferenceRelTolerance={options.RuntimeOptions.ReferenceRelativeTolerance:R} ReferenceNaNPolicy={options.RuntimeOptions.ReferenceNaNPolicy} ReferenceInfinityPolicy={options.RuntimeOptions.ReferenceInfinityPolicy}";
     }
 }

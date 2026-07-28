@@ -2,9 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text.Json;
 using JYPPX.CudaSharp;
 using JYPPX.Shared.Interop;
 using JYPPX.TensorRtSharp;
+using JYPPX.TensorRtSharp.Tools;
 
 internal static class Program
 {
@@ -12,6 +15,12 @@ internal static class Program
     {
         TensorRtApiLine line = ResolveLine(JYPPX.SampleSupport.SampleCommandLine.GetStringArgument(args, "--tensor-rt-line", "10"));
         int batch = JYPPX.SampleSupport.SampleCommandLine.GetIntArgument(args, "--batch", 2);
+        if (JYPPX.SampleSupport.SampleCommandLine.HasSwitch(args, "--multi-input-reference"))
+        {
+            RunMultiInputReferenceSmoke(args, line, batch);
+            return;
+        }
+
         bool dependencyProbeOnly = JYPPX.SampleSupport.SampleCommandLine.HasSwitch(args, "--dependency-probe-only");
         if (batch < 1 || batch > 4)
         {
@@ -697,6 +706,190 @@ internal static class Program
         return $"Capability={capability} HardwareCompatibility={hardwareCompatibility} PreviewFeature={previewFeature}:{previewEnabled} RuntimePlatform={runtimePlatform} DeploymentSnapshot={deploymentSnapshot.PluginToSerializeCount}/{deploymentSnapshot.SerializedPluginSnapshot.Count}/{deploymentSnapshot.SerializedPluginSnapshot.PluginLibraryPaths.Count}/{deploymentSnapshot.Diagnostics.Count}";
     }
 
+    private static void RunMultiInputReferenceSmoke(string[] args, TensorRtApiLine line, int batch)
+    {
+        if (batch < 1 || batch > 4)
+        {
+            throw new ArgumentOutOfRangeException(nameof(batch), "Batch must be in the optimization profile range [1, 4].");
+        }
+
+        string requestedRoot = JYPPX.SampleSupport.SampleCommandLine.GetStringArgument(args, "--artifact-root", string.Empty);
+        string root = string.IsNullOrWhiteSpace(requestedRoot)
+            ? Path.Combine(Path.GetTempPath(), "jyppx-multi-input-reference-" + Guid.NewGuid().ToString("N"))
+            : Path.GetFullPath(requestedRoot);
+        Directory.CreateDirectory(root);
+
+        string modelPath = Path.Combine(root, "synthetic-add-sub.onnx");
+        string enginePath = Path.Combine(root, "synthetic-add-sub.plan");
+        string leftPath = Path.Combine(root, "left.input.bin");
+        string rightPath = Path.Combine(root, "right.input.bin");
+        string sumReferencePath = Path.Combine(root, "sum.reference.json");
+        string differenceReferencePath = Path.Combine(root, "difference.reference.json");
+        string mismatchReferencePath = Path.Combine(root, "difference.mismatch.reference.json");
+        string outputPath = Path.Combine(root, "validated-output.json");
+        string rawPath = Path.Combine(root, "validated-output.raw");
+        string reportPath = Path.Combine(root, "validated-report.json");
+        string timesPath = Path.Combine(root, "validated-times.json");
+        string failedOutputPath = Path.Combine(root, "mismatch-output.json");
+        string failedReportPath = Path.Combine(root, "mismatch-report.json");
+
+        int elementCount = checked(batch * 4);
+        float[] left = Enumerable.Range(0, elementCount).Select(static index => index + 0.25f).ToArray();
+        float[] right = Enumerable.Range(0, elementCount).Select(static index => (index + 1) * 2.0f).ToArray();
+        float[] sum = left.Zip(right, static (leftValue, rightValue) => leftValue + rightValue).ToArray();
+        float[] difference = left.Zip(right, static (leftValue, rightValue) => leftValue - rightValue).ToArray();
+        float[] mismatchedDifference = difference.ToArray();
+        mismatchedDifference[mismatchedDifference.Length - 1] += 0.25f;
+
+        File.WriteAllBytes(modelPath, OnnxIdentityModel.CreateDynamicMultiInputOutputModel());
+        WriteFloats(leftPath, left);
+        WriteFloats(rightPath, right);
+        WriteReference(sumReferencePath, "sum", batch, sum);
+        WriteReference(differenceReferencePath, "difference", batch, difference);
+        WriteReference(mismatchReferencePath, "difference", batch, mismatchedDifference);
+
+        string lineText = ((int)line).ToString(System.Globalization.CultureInfo.InvariantCulture);
+        string shapeProfile = $"left:{batch}x4,right:{batch}x4";
+        string inputMappings = $"left:{leftPath},right:{rightPath}";
+        string referenceMappings = $"sum:{sumReferencePath},difference:{differenceReferencePath}";
+        TrtexecLikeOptions successOptions = TrtexecLikeParser.Parse(new[]
+        {
+            "--tensor-rt-line", lineText,
+            "--onnx", modelPath,
+            "--saveEngine", enginePath,
+            "--minShapes", shapeProfile,
+            "--optShapes", shapeProfile,
+            "--maxShapes", shapeProfile,
+            "--loadInputs", inputMappings,
+            "--referenceOutputs", referenceMappings,
+            "--referenceAbsTolerance", "0",
+            "--referenceRelTolerance", "0",
+            "--referenceNaNPolicy", "reject",
+            "--referenceInfinityPolicy", "exact",
+            "--dumpOutput",
+            "--dumpRawBindingsToFile", rawPath,
+            "--exportOutput", outputPath,
+            "--exportTimes", timesPath,
+            "--exportReport", reportPath,
+            "--iterations", "2",
+            "--warmUp", "0",
+            "--duration", "0",
+            "--streams", "1"
+        });
+        OnnxEngineBuildResult success = new OnnxEngineBuildService().Execute(
+            OnnxEngineBuildOptions.FromTrtexecLikeOptions(successOptions));
+        foreach (string lineItem in success.LogLines)
+        {
+            Console.WriteLine(lineItem);
+        }
+        if (!success.Success || success.Skipped || !success.InferenceRan || !success.OutputValidated || success.IdentityOutputMatch)
+        {
+            throw new InvalidOperationException($"Validated multi-input smoke failed: State={success.State} Success={success.Success} Skipped={success.Skipped} InferenceRan={success.InferenceRan} OutputValidated={success.OutputValidated} IdentityOutputMatch={success.IdentityOutputMatch}");
+        }
+
+        string mismatchMappings = $"sum:{sumReferencePath},difference:{mismatchReferencePath}";
+        TrtexecLikeOptions mismatchOptions = TrtexecLikeParser.Parse(new[]
+        {
+            "--tensor-rt-line", lineText,
+            "--loadEngine", enginePath,
+            "--shapes", shapeProfile,
+            "--loadInputs", inputMappings,
+            "--referenceOutputs", mismatchMappings,
+            "--referenceAbsTolerance", "0",
+            "--referenceRelTolerance", "0",
+            "--exportOutput", failedOutputPath,
+            "--exportReport", failedReportPath,
+            "--iterations", "1",
+            "--warmUp", "0",
+            "--duration", "0",
+            "--streams", "1"
+        });
+        OnnxEngineBuildResult mismatch = new OnnxEngineBuildService().Execute(
+            OnnxEngineBuildOptions.FromTrtexecLikeOptions(mismatchOptions));
+        if (mismatch.Success || mismatch.Skipped || !mismatch.InferenceRan || mismatch.OutputValidated || !mismatch.State.Contains("reference-validation-failed", StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException($"Mismatch boundary was not preserved: State={mismatch.State} Success={mismatch.Success} Skipped={mismatch.Skipped} InferenceRan={mismatch.InferenceRan} OutputValidated={mismatch.OutputValidated}");
+        }
+
+        using JsonDocument outputDocument = JsonDocument.Parse(File.ReadAllText(outputPath));
+        using JsonDocument mismatchDocument = JsonDocument.Parse(File.ReadAllText(failedOutputPath));
+        JsonElement outputRoot = outputDocument.RootElement;
+        JsonElement mismatchRoot = mismatchDocument.RootElement;
+        if (outputRoot.GetProperty("InputTensorCount").GetInt32() != 2 ||
+            outputRoot.GetProperty("OutputTensorCount").GetInt32() != 2 ||
+            outputRoot.GetProperty("ReferenceValidation").GetProperty("TensorComparisons").GetArrayLength() != 2 ||
+            !outputRoot.GetProperty("OutputValidated").GetBoolean())
+        {
+            throw new InvalidOperationException("Validated output artifact does not contain the expected 2-input/2-output reference evidence.");
+        }
+        if (mismatchRoot.GetProperty("OutputValidated").GetBoolean() ||
+            mismatchRoot.GetProperty("ReferenceValidation").GetProperty("Passed").GetBoolean())
+        {
+            throw new InvalidOperationException("Mismatch output artifact incorrectly promoted reference validation.");
+        }
+
+        string summaryPath = Path.Combine(root, "multi-input-reference-smoke.json");
+        File.WriteAllText(summaryPath, JsonSerializer.Serialize(new
+        {
+            Schema = "jyppx-tensorrtexec-multi-input-reference-smoke.v1",
+            TensorRtLine = (int)line,
+            Batch = batch,
+            InputTensorCount = 2,
+            OutputTensorCount = 2,
+            ValidatedRun = new
+            {
+                success.State,
+                success.Success,
+                success.InferenceRan,
+                success.OutputMatch,
+                success.OutputValidated,
+                success.IdentityOutputMatch,
+                success.ProofClassification,
+                OutputSha256 = Sha256(outputPath),
+                RawSha256 = Sha256(rawPath),
+                ReportSha256 = Sha256(reportPath)
+            },
+            MismatchRun = new
+            {
+                mismatch.State,
+                mismatch.Success,
+                mismatch.InferenceRan,
+                mismatch.OutputMatch,
+                mismatch.OutputValidated,
+                mismatch.IdentityOutputMatch,
+                mismatch.ProofClassification,
+                OutputSha256 = Sha256(failedOutputPath),
+                ReportSha256 = Sha256(failedReportPath)
+            },
+            ReferenceSourceClassification = "synthetic-generated",
+            ProofBoundary = "real TensorRT build/enqueue/readback and all-output reference comparison on a generated model; synthetic runtime evidence only, not real-model, package-consumer, public-package, post-publish, or release proof"
+        }, new JsonSerializerOptions { WriteIndented = true }));
+        Console.WriteLine($"MultiInputReferenceSmoke Passed=True Root={root} Summary={summaryPath} ValidatedState={success.State} MismatchState={mismatch.State}");
+    }
+
+    private static void WriteFloats(string path, float[] values)
+    {
+        byte[] bytes = new byte[checked(values.Length * sizeof(float))];
+        Buffer.BlockCopy(values, 0, bytes, 0, bytes.Length);
+        File.WriteAllBytes(path, bytes);
+    }
+
+    private static void WriteReference(string path, string tensorName, int batch, float[] values)
+    {
+        OnnxEngineReferenceTensorData reference = new OnnxEngineReferenceTensorData(
+            1,
+            tensorName,
+            new[] { batch, 4 },
+            values,
+            "synthetic-generated");
+        File.WriteAllText(path, JsonSerializer.Serialize(reference, new JsonSerializerOptions { WriteIndented = true }));
+    }
+
+    private static string Sha256(string path)
+    {
+        return Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path))).ToLowerInvariant();
+    }
+
     internal static class OnnxIdentityModel
     {
         public static byte[] CreateDynamicBatchModel()
@@ -707,6 +900,40 @@ internal static class Program
             model.Message(7, CreateGraph());
             model.Message(8, CreateOpsetImport(13));
             return model.ToArray();
+        }
+
+        public static byte[] CreateDynamicMultiInputOutputModel()
+        {
+            ProtoWriter model = new ProtoWriter();
+            model.Int64(1, 8);
+            model.String(2, "JYPPX.TensorRtSharp");
+            model.Message(7, CreateMultiInputOutputGraph());
+            model.Message(8, CreateOpsetImport(13));
+            return model.ToArray();
+        }
+
+        private static byte[] CreateMultiInputOutputGraph()
+        {
+            ProtoWriter graph = new ProtoWriter();
+            graph.Message(1, CreateBinaryNode("add", "Add", "left", "right", "sum"));
+            graph.Message(1, CreateBinaryNode("subtract", "Sub", "left", "right", "difference"));
+            graph.String(2, "jyppx_dynamic_multi_input_output_graph");
+            graph.Message(11, CreateValueInfo("left"));
+            graph.Message(11, CreateValueInfo("right"));
+            graph.Message(12, CreateValueInfo("sum"));
+            graph.Message(12, CreateValueInfo("difference"));
+            return graph.ToArray();
+        }
+
+        private static byte[] CreateBinaryNode(string name, string operation, string left, string right, string output)
+        {
+            ProtoWriter node = new ProtoWriter();
+            node.String(1, left);
+            node.String(1, right);
+            node.String(2, output);
+            node.String(3, name);
+            node.String(4, operation);
+            return node.ToArray();
         }
 
         private static byte[] CreateGraph()

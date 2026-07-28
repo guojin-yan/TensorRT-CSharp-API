@@ -30,7 +30,7 @@ TensorRtExec 的价值是把 ONNX 解析、profile、precision、builder config 
 
 ## 图示建议
 
-当前 JSON schema 已对齐 `OnnxEngineBuildDiagnostics.ToJson` 的真实输出，而不是早期设想的 `input/environment/builder/result/boundary` 分层草案。顶层字段包括 `Success`、`State`、`TensorRtLine`、`NormalizedCommandLine`、`NormalizedCommandSha256`、`DeploymentOptions`、`RuntimeOptions`、`PreflightMetadata`、`LoadedEngineDiagnostics`、`WorkspaceBytes`、`OptionImplementationStatus`、`BenchmarkSummary`、`ProofClassification`、`EvidenceClassifications`、`BuildEvidenceOnly`、`IsRuntimeExecutionProof`、`IsRealModelRuntimeProof`、`IsPackageConsumerRuntimeProof`、`ModelEvidence`、`EvidenceSidecarDiagnostics`、`Diagnostics`、`LogLines` 和 `ReportBoundary`。
+当前 JSON schema 已对齐 `OnnxEngineBuildDiagnostics.ToJson` 的真实输出，而不是早期设想的 `input/environment/builder/result/boundary` 分层草案。顶层字段包括 `Success`、`State`、`TensorRtLine`、`NormalizedCommandLine`、`NormalizedCommandSha256`、`DeploymentOptions`、`RuntimeOptions`、`PreflightMetadata`、`LoadedEngineDiagnostics`、`WorkspaceBytes`、`OutputMatch`、`OutputValidated`、`IdentityOutputMatch`、`OptionImplementationStatus`、`BenchmarkSummary`、`ProofClassification`、`EvidenceClassifications`、`BuildEvidenceOnly`、`IsRuntimeExecutionProof`、`IsRealModelRuntimeProof`、`IsPackageConsumerRuntimeProof`、`ModelEvidence`、`EvidenceSidecarDiagnostics`、`Diagnostics`、`LogLines` 和 `ReportBoundary`。
 
 ## 边界说明
 
