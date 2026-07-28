@@ -31,6 +31,33 @@ public sealed class OnnxEngineRuntimeArtifactData
         ExecutionSummary = executionSummary ?? string.Empty;
         RawOutputBytes = rawOutputBytes ?? Array.Empty<byte>();
         TimingSamplesMilliseconds = timingSamplesMilliseconds ?? Array.Empty<float>();
+        OutputTensors = CreateLegacyOutputTensors(
+            TensorName,
+            Shape,
+            OutputElementCount,
+            OutputPreview,
+            RawOutputBytes);
+    }
+
+    private OnnxEngineRuntimeArtifactData(
+        int inputElementCount,
+        IReadOnlyList<float> inputPreview,
+        IReadOnlyList<OnnxEngineRuntimeOutputArtifact> outputTensors,
+        string executionSummary,
+        IReadOnlyList<float>? timingSamplesMilliseconds)
+    {
+        InputElementCount = inputElementCount;
+        InputPreview = inputPreview ?? Array.Empty<float>();
+        OutputTensors = outputTensors?.ToArray() ?? Array.Empty<OnnxEngineRuntimeOutputArtifact>();
+        ExecutionSummary = executionSummary ?? string.Empty;
+        TimingSamplesMilliseconds = timingSamplesMilliseconds ?? Array.Empty<float>();
+
+        OnnxEngineRuntimeOutputArtifact? primary = OutputTensors.FirstOrDefault();
+        TensorName = primary?.TensorName ?? string.Empty;
+        Shape = primary?.Shape ?? Array.Empty<int>();
+        OutputElementCount = primary?.ElementCount ?? 0;
+        OutputPreview = primary?.Preview ?? Array.Empty<float>();
+        RawOutputBytes = CombineRawOutputs(OutputTensors);
     }
 
     public static OnnxEngineRuntimeArtifactData Empty { get; } = new OnnxEngineRuntimeArtifactData(
@@ -84,6 +111,21 @@ public sealed class OnnxEngineRuntimeArtifactData
             timingSamplesMilliseconds ?? Array.Empty<float>());
     }
 
+    public static OnnxEngineRuntimeArtifactData CreateOutputSummaries(
+        int inputElementCount,
+        IReadOnlyList<float> inputValues,
+        IReadOnlyList<OnnxEngineRuntimeOutputArtifact> outputTensors,
+        string executionSummary,
+        IReadOnlyList<float>? timingSamplesMilliseconds = null)
+    {
+        return new OnnxEngineRuntimeArtifactData(
+            inputElementCount,
+            Preview(inputValues),
+            outputTensors,
+            executionSummary,
+            timingSamplesMilliseconds);
+    }
+
     internal static OnnxEngineRuntimeArtifactData CreateBenchmarkOnly(
         int inputElementCount,
         string executionSummary,
@@ -119,7 +161,9 @@ public sealed class OnnxEngineRuntimeArtifactData
 
     public IReadOnlyList<float> TimingSamplesMilliseconds { get; }
 
-    public bool HasOutput => OutputElementCount > 0 && OutputPreview.Count > 0;
+    public IReadOnlyList<OnnxEngineRuntimeOutputArtifact> OutputTensors { get; }
+
+    public bool HasOutput => OutputTensors.Any(static output => output.ElementCount > 0 && output.Preview.Count > 0);
 
     public bool HasRawOutput => RawOutputBytes.Length > 0;
 
@@ -144,6 +188,118 @@ public sealed class OnnxEngineRuntimeArtifactData
         byte[] bytes = new byte[checked(floats.Length * sizeof(float))];
         Buffer.BlockCopy(floats, 0, bytes, 0, bytes.Length);
         return bytes;
+    }
+
+    private static IReadOnlyList<OnnxEngineRuntimeOutputArtifact> CreateLegacyOutputTensors(
+        string tensorName,
+        IReadOnlyList<int> shape,
+        int outputElementCount,
+        IReadOnlyList<float> outputPreview,
+        byte[] rawOutputBytes)
+    {
+        if (outputElementCount <= 0 && (rawOutputBytes == null || rawOutputBytes.Length == 0))
+        {
+            return Array.Empty<OnnxEngineRuntimeOutputArtifact>();
+        }
+
+        return new[]
+        {
+            new OnnxEngineRuntimeOutputArtifact(
+                tensorName,
+                shape,
+                outputElementCount,
+                outputPreview,
+                rawOutputBytes)
+        };
+    }
+
+    private static byte[] CombineRawOutputs(IReadOnlyList<OnnxEngineRuntimeOutputArtifact> outputTensors)
+    {
+        int length = checked(outputTensors.Sum(static output => output.RawBytes.Length));
+        byte[] combined = new byte[length];
+        int offset = 0;
+        foreach (OnnxEngineRuntimeOutputArtifact output in outputTensors)
+        {
+            Buffer.BlockCopy(output.RawBytes, 0, combined, offset, output.RawBytes.Length);
+            offset += output.RawBytes.Length;
+        }
+
+        return combined;
+    }
+}
+
+public sealed class OnnxEngineRuntimeOutputArtifact
+{
+    public OnnxEngineRuntimeOutputArtifact(
+        string tensorName,
+        IReadOnlyList<int> shape,
+        IReadOnlyList<float> values)
+        : this(
+            tensorName,
+            shape,
+            values?.Count ?? 0,
+            CreatePreview(values),
+            ToBytes(values))
+    {
+    }
+
+    internal OnnxEngineRuntimeOutputArtifact(
+        string tensorName,
+        IReadOnlyList<int> shape,
+        int elementCount,
+        IReadOnlyList<float> preview,
+        byte[] rawBytes)
+    {
+        TensorName = tensorName ?? string.Empty;
+        Shape = shape?.ToArray() ?? Array.Empty<int>();
+        ElementCount = Math.Max(0, elementCount);
+        Preview = preview?.ToArray() ?? Array.Empty<float>();
+        RawBytes = rawBytes?.ToArray() ?? Array.Empty<byte>();
+        ByteLength = RawBytes.LongLength;
+        Sha256 = ComputeSha256(RawBytes);
+    }
+
+    public string TensorName { get; }
+
+    public IReadOnlyList<int> Shape { get; }
+
+    public int ElementCount { get; }
+
+    public IReadOnlyList<float> Preview { get; }
+
+    public long ByteLength { get; }
+
+    public string Sha256 { get; }
+
+    internal byte[] RawBytes { get; }
+
+    private static IReadOnlyList<float> CreatePreview(IReadOnlyList<float>? values)
+    {
+        return values == null ? Array.Empty<float>() : values.Take(8).ToArray();
+    }
+
+    private static byte[] ToBytes(IReadOnlyList<float>? values)
+    {
+        if (values == null || values.Count == 0)
+        {
+            return Array.Empty<byte>();
+        }
+
+        float[] floats = values.ToArray();
+        byte[] bytes = new byte[checked(floats.Length * sizeof(float))];
+        Buffer.BlockCopy(floats, 0, bytes, 0, bytes.Length);
+        return bytes;
+    }
+
+    private static string ComputeSha256(byte[] bytes)
+    {
+        if (bytes.Length == 0)
+        {
+            return string.Empty;
+        }
+
+        using SHA256 sha256 = SHA256.Create();
+        return Convert.ToHexString(sha256.ComputeHash(bytes)).ToLowerInvariant();
     }
 }
 
@@ -294,6 +450,18 @@ public static class OnnxEngineRuntimeArtifactWriter
             result.NormalizedCommandSha256,
             result.InferenceRan,
             result.OutputMatch,
+            OutputCaptureAvailable = result.InferenceRan && data.HasOutput,
+            OutputValidated = result.OutputMatch,
+            OutputTensorCount = data.OutputTensors.Count,
+            OutputTensors = data.OutputTensors.Select(static output => new
+            {
+                output.TensorName,
+                output.Shape,
+                output.ElementCount,
+                output.Preview,
+                output.ByteLength,
+                output.Sha256
+            }),
             TensorName = data.TensorName,
             Shape = data.Shape,
             data.InputElementCount,
@@ -303,7 +471,7 @@ public static class OnnxEngineRuntimeArtifactWriter
             OutputComparisonSample = ReadFloatSample(data.RawOutputBytes, 64),
             OutputByteLength = data.RawOutputBytes.LongLength,
             OutputSha256 = ComputeSha256(data.RawOutputBytes),
-            Note = "Output artifact is a bounded summary; it intentionally avoids large tensor dumps. The output hash is comparison evidence only and does not promote the proof classification."
+            Note = "Output artifact contains bounded previews and hashes for every captured output tensor; it intentionally avoids large tensor dumps. Capture is not validation, and hashes do not promote the proof classification."
         };
     }
 
@@ -487,9 +655,10 @@ public static class OnnxEngineRuntimeArtifactWriter
 
     private static void WriteRawBindingsOrBoundary(string path, OnnxEngineBuildResult result, OnnxEngineRuntimeArtifactData data)
     {
-        if (CanWriteRawBindings(result, data))
+        if (CanCaptureRawBindings(result, data))
         {
             WriteBytes(path, data.RawOutputBytes);
+            WriteJson(path + ".manifest.json", CreateRawBindingsManifest(path, result, data));
             return;
         }
 
@@ -518,6 +687,64 @@ public static class OnnxEngineRuntimeArtifactWriter
             result.NormalizedCommandSha256,
             RawBindingBytesWritten = 0
         });
+    }
+
+    private static object CreateRawBindingsManifest(string path, OnnxEngineBuildResult result, OnnxEngineRuntimeArtifactData data)
+    {
+        RuntimeArtifactProofBoundary proofBoundary = CreateProofBoundary(result, data, "raw-bindings");
+        IReadOnlyList<RawBindingSegment> segments = CreateRawBindingSegments(data.OutputTensors);
+        return new
+        {
+            ArtifactKind = "trtexec-like-raw-bindings-manifest",
+            ArtifactBoundary = proofBoundary.ArtifactProofBoundary,
+            proofBoundary.ArtifactProofBoundary,
+            proofBoundary.RuntimeProofClass,
+            proofBoundary.HasTensorOutputProof,
+            proofBoundary.HasRawBindingProof,
+            proofBoundary.IsBuildOnlyEvidence,
+            proofBoundary.IsDependencyProbeOnly,
+            proofBoundary.IsSyntheticRuntime,
+            proofBoundary.HasBenchmarkExecutionEvidence,
+            proofBoundary.ModelSource,
+            proofBoundary.EnginePath,
+            proofBoundary.PreflightMetadata,
+            result.State,
+            result.ProofClassification,
+            result.BuildEvidenceOnly,
+            result.IsRuntimeExecutionProof,
+            result.IsRealModelRuntimeProof,
+            result.IsPackageConsumerRuntimeProof,
+            result.NormalizedCommandSha256,
+            RawBindingCaptureAvailable = true,
+            OutputValidated = result.OutputMatch,
+            RawBindingPath = Path.GetFullPath(path),
+            RawBindingFormat = "contiguous IEEE 754 float32 tensors in engine output order",
+            ByteOrder = BitConverter.IsLittleEndian ? "little-endian" : "big-endian",
+            OutputTensorCount = segments.Count,
+            RawBindingBytesWritten = data.RawOutputBytes.LongLength,
+            RawBindingSha256 = ComputeSha256(data.RawOutputBytes),
+            Segments = segments
+        };
+    }
+
+    private static IReadOnlyList<RawBindingSegment> CreateRawBindingSegments(
+        IReadOnlyList<OnnxEngineRuntimeOutputArtifact> outputTensors)
+    {
+        List<RawBindingSegment> segments = new List<RawBindingSegment>(outputTensors.Count);
+        long offset = 0;
+        foreach (OnnxEngineRuntimeOutputArtifact output in outputTensors)
+        {
+            segments.Add(new RawBindingSegment(
+                output.TensorName,
+                output.Shape,
+                output.ElementCount,
+                offset,
+                output.ByteLength,
+                output.Sha256));
+            offset = checked(offset + output.ByteLength);
+        }
+
+        return segments;
     }
 
     private static string GetEngineReadbackArtifactPath(TrtexecLikeRuntimeOptions options)
@@ -575,12 +802,10 @@ public static class OnnxEngineRuntimeArtifactWriter
         return "readonly engine diagnostics did not provide a readback fingerprint and SHA256";
     }
 
-    private static bool CanWriteRawBindings(OnnxEngineBuildResult result, OnnxEngineRuntimeArtifactData data)
+    private static bool CanCaptureRawBindings(OnnxEngineBuildResult result, OnnxEngineRuntimeArtifactData data)
     {
         return result.InferenceRan &&
-            result.OutputMatch &&
-            data.HasRawOutput &&
-            string.Equals(result.ModelSource, "embedded-dynamic-identity", StringComparison.Ordinal);
+            data.HasRawOutput;
     }
 
     private static RuntimeArtifactProofBoundary CreateProofBoundary(OnnxEngineBuildResult result, OnnxEngineRuntimeArtifactData data, string artifactKind)
@@ -589,7 +814,7 @@ public static class OnnxEngineRuntimeArtifactWriter
             Boundary(result, data, artifactKind),
             result.ProofClassification,
             result.InferenceRan && result.OutputMatch && data.HasOutput,
-            CanWriteRawBindings(result, data),
+            CanCaptureRawBindings(result, data) && result.OutputMatch,
             result.BuildEvidenceOnly,
             string.Equals(result.ProofClassification, "dependency-probe-only", StringComparison.Ordinal),
             string.Equals(result.ProofClassification, "synthetic-input-runtime", StringComparison.Ordinal),
@@ -637,6 +862,37 @@ public static class OnnxEngineRuntimeArtifactWriter
         }
 
         return artifactKind + "-skipped; generic external model binding/output semantics are not inferred by this sample path.";
+    }
+
+    private sealed class RawBindingSegment
+    {
+        public RawBindingSegment(
+            string tensorName,
+            IReadOnlyList<int> shape,
+            int elementCount,
+            long byteOffset,
+            long byteLength,
+            string sha256)
+        {
+            TensorName = tensorName ?? string.Empty;
+            Shape = shape ?? Array.Empty<int>();
+            ElementCount = elementCount;
+            ByteOffset = byteOffset;
+            ByteLength = byteLength;
+            Sha256 = sha256 ?? string.Empty;
+        }
+
+        public string TensorName { get; }
+
+        public IReadOnlyList<int> Shape { get; }
+
+        public int ElementCount { get; }
+
+        public long ByteOffset { get; }
+
+        public long ByteLength { get; }
+
+        public string Sha256 { get; }
     }
 
     private static void WriteJson(string path, object value)

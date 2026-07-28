@@ -1402,7 +1402,8 @@ public sealed class OnnxEngineBuildService
     private static bool CanAttemptGenericExternalRuntime(OnnxEngineBuildOptions options)
     {
         return options.RuntimeOptions.NoDataTransfers ||
-            !string.IsNullOrWhiteSpace(options.RuntimeOptions.LoadInputs);
+            !string.IsNullOrWhiteSpace(options.RuntimeOptions.LoadInputs) ||
+            options.RuntimeOptions.RequestsOutputCapture;
     }
 
     private static OnnxEngineRuntimeExecution? TryRunGenericFloatEngineFromFile(
@@ -1500,6 +1501,22 @@ public sealed class OnnxEngineBuildService
                 }
             }
 
+            IReadOnlyList<OnnxEngineRuntimeOutputArtifact> outputArtifacts = capturedOutputs
+                .Select(static output => new OnnxEngineRuntimeOutputArtifact(output.Name, output.Shape, output.Values))
+                .ToArray();
+            if (options.RuntimeOptions.DumpOutput)
+            {
+                foreach (OnnxEngineRuntimeOutputArtifact output in outputArtifacts)
+                {
+                    string preview = string.Join(",", output.Preview.Select(static value =>
+                        value.ToString("R", System.Globalization.CultureInfo.InvariantCulture)));
+                    log.Add(
+                        $"{statePrefix}DumpOutput Tensor={output.TensorName} Shape={FormatShape(output.Shape)} " +
+                        $"Elements={output.ElementCount} Bytes={output.ByteLength} Sha256={output.Sha256} " +
+                        $"Preview=[{preview}] EvidenceBoundary=bounded-output-capture-not-reference-validation");
+                }
+            }
+
             OnnxEngineRuntimeOutputTensor? primaryOutput = capturedOutputs.Count == 0 ? null : capturedOutputs[0];
             bool identityOutputMatch = primaryOutput != null &&
                 capturedOutputs.Count == 1 &&
@@ -1508,7 +1525,12 @@ public sealed class OnnxEngineBuildService
             string primaryOutputSummary = primaryOutput == null
                 ? "not-read-back"
                 : $"{primaryOutput.Name}:{FormatShape(primaryOutput.Shape)}";
-            log.Add($"{statePrefix}BoundedRuntime Attempted=True Succeeded=True Input={input.Name}:{runtimeShape} Outputs={capturedOutputs.Count} PrimaryOutput={primaryOutputSummary} ElapsedMs={elapsedMilliseconds:0.###} IdentityOutputMatch={identityOutputMatch} NoDataTransfers={options.RuntimeOptions.NoDataTransfers}");
+            string inputSource = options.RuntimeOptions.NoDataTransfers
+                ? "no-data-transfers"
+                : string.IsNullOrWhiteSpace(options.RuntimeOptions.LoadInputs)
+                    ? "deterministic-generated"
+                    : "loadInputs";
+            log.Add($"{statePrefix}BoundedRuntime Attempted=True Succeeded=True Input={input.Name}:{runtimeShape} InputSource={inputSource} Outputs={capturedOutputs.Count} PrimaryOutput={primaryOutputSummary} ElapsedMs={elapsedMilliseconds:0.###} IdentityOutputMatch={identityOutputMatch} NoDataTransfers={options.RuntimeOptions.NoDataTransfers}");
             log.Add(options.RuntimeOptions.NoDataTransfers
                 ? $"{statePrefix}BoundedRuntime OutputReadback=False Reason=noDataTransfers"
                 : $"{statePrefix}BoundedRuntime OutputTensors=" + string.Join("; ", capturedOutputs.Select(static item => $"{item.Name}:{FormatShape(item.Shape)}:{item.Values.Length}")));
@@ -1531,19 +1553,10 @@ public sealed class OnnxEngineBuildService
                     inputElementCount,
                     benchmark.LastExecutionSummary.ToString(),
                     benchmark.TimingSamplesMilliseconds)
-                : identityOutputMatch
-                ? OnnxEngineRuntimeArtifactData.CreateIdentityOutput(
-                    primaryOutput!.Name,
-                    primaryOutput.Shape,
-                    inputValues,
-                    primaryOutput.Values,
-                    benchmark.LastExecutionSummary.ToString(),
-                    benchmark.TimingSamplesMilliseconds)
-                : OnnxEngineRuntimeArtifactData.CreateOutputSummary(
-                    primaryOutput!.Name,
-                    primaryOutput.Shape,
+                : OnnxEngineRuntimeArtifactData.CreateOutputSummaries(
                     inputValues.Length,
-                    primaryOutput.Values,
+                    identityOutputMatch ? inputValues : Array.Empty<float>(),
+                    outputArtifacts,
                     benchmark.LastExecutionSummary.ToString(),
                     benchmark.TimingSamplesMilliseconds);
 

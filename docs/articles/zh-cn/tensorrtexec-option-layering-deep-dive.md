@@ -8,12 +8,12 @@
 
 | 来源 | 当前规模 | 回答的问题 | 不能证明 |
 | --- | ---: | --- | --- |
-| `TrtexecLikeOptionCapabilities` / `--help-json` | 31 entries | option group、alias、status、implementation class | 某次真实 build/runtime 已执行 |
+| `TrtexecLikeOptionCapabilities` / `--help-json` | 32 entries | option group、alias、status、implementation class | 某次真实 build/runtime 已执行 |
 | `tensor-rt-exec-gui-cli-field-map.json` | 85 fields | CLI token 与 WinForms control 是否进入同一 command surface | GUI 行为等于 native TensorRT 行为 |
 | `tensor-rt-exec-trtexec-parity-matrix.json` | 分组 parity rows | 官方功能与当前 implementation/evidence gap | full trtexec parity 已完成 |
-| `tensor-rt-exec-release-candidate-gap-list.json` | 17 items | 剩余实现/owner proof 动作 | release 已批准 |
+| `tensor-rt-exec-release-candidate-gap-list.json` | 20 items | 剩余实现/owner proof 动作 | release 已批准 |
 
-当前 capability JSON 汇总为 31 entries、26 implemented/bounded、4 parse-or-diagnostic-only、1 blocked。数字描述 source-quality capability surface，不是 26 项 runtime proof。gap list 同样记录 0 runtime proof items、0 package-consumer runtime proof items。
+当前 capability JSON 汇总为 32 entries、27 implemented/bounded、4 parse-or-diagnostic-only、1 blocked。数字描述 source-quality capability surface，不是 27 项 runtime proof。gap list 同样记录 0 runtime proof items、0 package-consumer runtime proof items。
 
 ## 数据流
 
@@ -69,8 +69,8 @@ dotnet run --project .\applications\TensorRtExec -- --capabilities-json
 
 ```text
 matrixState=source-quality-capability-surface
-entryCount=31
-implementedCount=26
+entryCount=32
+implementedCount=27
 parseOrDiagnosticOnlyCount=4
 blockedCount=1
 releaseFrozen=true
@@ -79,7 +79,7 @@ canPromoteRuntimeProof=false
 
 每个 entry 都有 `option`、`aliases`、`group`、`status`、`implementationClass`、`proofBoundary`、`requiresOwnerEvidence=true`、`canPromoteRuntimeProof=false` 和 `canPromotePackageConsumerRuntime=false`。
 
-`--help-json` 本身是请求 capability document 的 meta switch，不在 31 个 trtexec-like option entries 中；测试会防止它被误计为官方 parity option。
+`--help-json` 本身是请求 capability document 的 meta switch，不在 32 个 trtexec-like option entries 中；测试会防止它被误计为官方 parity option。
 
 ## E 盘工作区
 
@@ -270,7 +270,7 @@ TRT11 已移除的 layer precision setter、TRT8 不支持的现代 packaging/re
 
 ## Gap List 怎么用
 
-当前 gap list 的 17 items 分为 10 implemented-or-report-ready、5 partial-or-diagnostic、1 release-proof-record-only，runtime/package-consumer proof items 均为 0。它是下一步安排，不是失败清单，也不是 release pass。
+当前 gap list 的 20 items 分为 17 implemented-or-report-ready、2 partial-or-diagnostic、1 release-proof-record-only，runtime/package-consumer proof items 均为 0。它是下一步安排，不是失败清单，也不是 release pass。
 
 对每个 item 依次问：
 

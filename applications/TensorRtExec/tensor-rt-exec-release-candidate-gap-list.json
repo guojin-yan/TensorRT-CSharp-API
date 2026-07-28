@@ -5,9 +5,9 @@
   "state": "release-candidate-gap-planning",
   "proofBoundary": "This gap list is planning evidence only. CLI reports, WinForms screenshots, dry-run output, build-only reports, templates, local feeds, ProjectReference, and direct .nupkg references are not package-consumer-runtime proof.",
   "summary": {
-    "totalItems": 17,
-    "implementedOrReportReady": 10,
-    "partialOrDiagnostic": 5,
+    "totalItems": 20,
+    "implementedOrReportReady": 17,
+    "partialOrDiagnostic": 2,
     "releaseProofRecordsOnly": 1,
     "runtimeProofItems": 0,
     "packageConsumerRuntimeProofItems": 0
@@ -204,13 +204,13 @@
     {
       "id": "binding-metadata",
       "officialTrtexecParity": "--loadInputs --dumpOutput --dumpRawBindingsToFile --exportOutput",
-      "currentStatus": "implemented-pointer-free-binding-report",
+      "currentStatus": "implemented-pointer-free-binding-and-multi-output-artifacts",
       "isRuntimeProof": false,
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": true,
       "winFormsSupported": true,
-      "nextImplementationPaths": ["samples/YoloVision", "samples/YoloVision/yolovision-task-output-contract.json", "eng/Test-YoloVisionRealAssetCandidate.ps1", "eng/Test-YoloVisionRealAssetOwnerBackfillPack.ps1"],
-      "nextStep": "Use bindingMetadata plus YoloVision real asset candidate packs to capture task-specific output roles, required metadata, hashes, and owner review; keep proof promotion external."
+      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/OnnxEngineRuntimeArtifactWriter.cs", "samples/YoloVision", "samples/YoloVision/yolovision-task-output-contract.json", "eng/Test-YoloVisionRealAssetCandidate.ps1", "eng/Test-YoloVisionRealAssetOwnerBackfillPack.ps1"],
+      "nextStep": "Retain multi-output previews, per-tensor hashes, deterministic raw offsets, and pointer-free bindingMetadata; owner must still supply expected output values, task roles, model/engine/input/log hashes, and review before promotion."
     },
     {
       "id": "winforms-command-surface",

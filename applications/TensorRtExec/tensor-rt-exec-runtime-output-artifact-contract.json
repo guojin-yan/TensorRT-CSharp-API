@@ -1,0 +1,38 @@
+{
+  "contractId": "tensor-rt-exec-runtime-output-artifact-contract",
+  "formatVersion": 1,
+  "producer": "JYPPX.TensorRtSharp.Tools.OnnxEngineRuntimeArtifactWriter",
+  "supportedDataType": "float32",
+  "outputOrder": "TensorRtEngineBindingReport output order",
+  "runtimeActivation": {
+    "outputCaptureOptions": ["--dumpOutput", "--dumpRawBindingsToFile", "--exportOutput"],
+    "inputWithoutLoadInputs": "deterministic-generated",
+    "generatedInputProofBoundary": "synthetic input can trigger bounded capture but cannot validate model output"
+  },
+  "dumpOutput": {
+    "maximumPreviewValuesPerTensor": 8,
+    "requiredFields": ["TensorName", "Shape", "ElementCount", "ByteLength", "Sha256", "Preview", "EvidenceBoundary"]
+  },
+  "outputJson": {
+    "artifactKind": "trtexec-like-output-summary",
+    "requiredFields": ["OutputCaptureAvailable", "OutputValidated", "OutputTensorCount", "OutputTensors", "HasTensorOutputProof", "HasRawBindingProof"],
+    "requiredTensorFields": ["TensorName", "Shape", "ElementCount", "Preview", "ByteLength", "Sha256"]
+  },
+  "rawBindings": {
+    "manifestSuffix": ".manifest.json",
+    "format": "contiguous IEEE 754 float32 tensors in engine output order",
+    "requiredFields": ["RawBindingCaptureAvailable", "OutputValidated", "RawBindingPath", "RawBindingFormat", "ByteOrder", "OutputTensorCount", "RawBindingBytesWritten", "RawBindingSha256", "Segments"],
+    "requiredSegmentFields": ["TensorName", "Shape", "ElementCount", "ByteOffset", "ByteLength", "Sha256"],
+    "offsetRule": "first offset is zero; each next offset equals the preceding offset plus byte length"
+  },
+  "proofInvariants": {
+    "captureDoesNotImplyValidation": true,
+    "unvalidatedOutputValidated": false,
+    "unvalidatedHasTensorOutputProof": false,
+    "unvalidatedHasRawBindingProof": false,
+    "unvalidatedBoundary": "runtime-output-captured-unverified",
+    "canPromoteRealModelRuntimeProof": false,
+    "canPromotePackageConsumerRuntimeProof": false,
+    "canPromoteReleaseProof": false
+  }
+}

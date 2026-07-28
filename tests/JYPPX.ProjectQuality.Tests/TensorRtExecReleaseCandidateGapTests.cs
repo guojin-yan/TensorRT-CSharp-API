@@ -44,7 +44,7 @@ public sealed class TensorRtExecReleaseCandidateGapTests
         Assert.Contains(items, static item => item.GetProperty("id").GetString() == "int8" && item.GetProperty("currentStatus").GetString() == "parse-report-only-calibration-boundary" && item.GetProperty("winFormsSupported").GetBoolean());
         Assert.Contains(items, static item => item.GetProperty("id").GetString() == "timing-cache" && item.GetProperty("currentStatus").GetString() == "implemented-build-cache-lifecycle" && item.GetProperty("winFormsSupported").GetBoolean());
         Assert.Contains(items, static item => item.GetProperty("id").GetString() == "plugin-library-boundary" && item.GetProperty("currentStatus").GetString() == "diagnostic-gui-cli" && item.GetProperty("winFormsSupported").GetBoolean());
-        Assert.Contains(items, static item => item.GetProperty("id").GetString() == "binding-metadata" && item.GetProperty("currentStatus").GetString() == "implemented-pointer-free-binding-report" && item.GetProperty("winFormsSupported").GetBoolean());
+        Assert.Contains(items, static item => item.GetProperty("id").GetString() == "binding-metadata" && item.GetProperty("currentStatus").GetString() == "implemented-pointer-free-binding-and-multi-output-artifacts" && item.GetProperty("winFormsSupported").GetBoolean());
         Assert.Contains(items, static item => item.GetProperty("id").GetString() == "winforms-command-surface" && item.GetProperty("currentStatus").GetString() == "checklist-backed-command-preview" && item.GetProperty("winFormsSupported").GetBoolean());
         Assert.Contains(items, static item =>
             item.GetProperty("id").GetString() == "package-consumer-runtime-proof-boundary" &&
@@ -68,7 +68,7 @@ public sealed class TensorRtExecReleaseCandidateGapTests
         Assert.Contains("implemented-readback-report", markdown, StringComparison.Ordinal);
         Assert.Contains("winforms-command-surface", markdown, StringComparison.Ordinal);
         Assert.Contains("checklist-backed-command-preview", markdown, StringComparison.Ordinal);
-        Assert.Contains("implemented-pointer-free-binding-report", markdown, StringComparison.Ordinal);
+        Assert.Contains("implemented-pointer-free-binding-and-multi-output-artifacts", markdown, StringComparison.Ordinal);
         Assert.Contains("samples/YoloVision/yolovision-task-output-contract.json", markdown, StringComparison.Ordinal);
 
         Assert.Contains("applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.json", article, StringComparison.Ordinal);

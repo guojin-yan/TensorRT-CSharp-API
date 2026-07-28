@@ -114,6 +114,11 @@ public sealed class TrtexecLikeRuntimeOptions
 
     public string SaveProfilePath { get; }
 
+    public bool RequestsOutputCapture =>
+        DumpOutput ||
+        !string.IsNullOrWhiteSpace(DumpRawBindingsToFile) ||
+        !string.IsNullOrWhiteSpace(ExportOutputPath);
+
     public bool HasRuntimeDiagnostics =>
         NoDataTransfers ||
         UseSpinWait ||

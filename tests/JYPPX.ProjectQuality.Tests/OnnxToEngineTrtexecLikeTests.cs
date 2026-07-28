@@ -239,6 +239,15 @@ public sealed class OnnxToEngineTrtexecLikeTests
     }
 
     [Fact]
+    public void OutputArtifactOptionsRequestBoundedOutputCaptureWithoutLoadInputs()
+    {
+        Assert.True(TrtexecLikeParser.Parse(new[] { "--dumpOutput" }).RuntimeOptions.RequestsOutputCapture);
+        Assert.True(TrtexecLikeParser.Parse(new[] { "--dumpRawBindingsToFile", "outputs.raw" }).RuntimeOptions.RequestsOutputCapture);
+        Assert.True(TrtexecLikeParser.Parse(new[] { "--exportOutput", "outputs.json" }).RuntimeOptions.RequestsOutputCapture);
+        Assert.False(TrtexecLikeParser.Parse(Array.Empty<string>()).RuntimeOptions.RequestsOutputCapture);
+    }
+
+    [Fact]
     public void WeightStreamingBudgetSupportsOfficialModesAndEnforcesDependencies()
     {
         TrtexecLikeOptions disabled = TrtexecLikeParser.Parse(new[]
@@ -623,7 +632,7 @@ public sealed class OnnxToEngineTrtexecLikeTests
     }
 
     [Fact]
-    public void RuntimeArtifactWriterCapturesUnverifiedRuntimeOutputWithoutRawBindingPromotion()
+    public void RuntimeArtifactWriterCapturesAllUnverifiedOutputsWithDeterministicRawManifestWithoutProofPromotion()
     {
         string artifactRoot = Path.Combine(Path.GetTempPath(), "jyppx-runtime-artifacts-" + Guid.NewGuid().ToString("N"));
         try
@@ -663,11 +672,14 @@ public sealed class OnnxToEngineTrtexecLikeTests
                 diagnostics: Array.Empty<string>(),
                 logLines: new[] { "LoadEngineBoundedRuntime Attempted=True Succeeded=True" },
                 runtimeOptions: runtimeOptions);
-            OnnxEngineRuntimeArtifactData artifactData = OnnxEngineRuntimeArtifactData.CreateOutputSummary(
-                "scores",
-                new[] { 1, 3 },
+            OnnxEngineRuntimeArtifactData artifactData = OnnxEngineRuntimeArtifactData.CreateOutputSummaries(
                 inputElementCount: 12,
-                outputValues: new[] { 0.1f, 0.2f, 0.3f },
+                inputValues: Array.Empty<float>(),
+                outputTensors: new[]
+                {
+                    new OnnxEngineRuntimeOutputArtifact("scores", new[] { 1, 3 }, new[] { 0.1f, 0.2f, 0.3f }),
+                    new OnnxEngineRuntimeOutputArtifact("boxes", new[] { 1, 2, 4 }, new[] { 1f, 2f, 3f, 4f, 5f, 6f, 7f, 8f })
+                },
                 executionSummary: "profile=0 bound=2 synchronized=False ready=True",
                 timingSamplesMilliseconds: new[] { 2.5f, 2.25f });
 
@@ -675,11 +687,16 @@ public sealed class OnnxToEngineTrtexecLikeTests
 
             string times = File.ReadAllText(Path.Combine(artifactRoot, "times.json"));
             string output = File.ReadAllText(Path.Combine(artifactRoot, "output.json"));
-            string rawBoundary = File.ReadAllText(Path.Combine(artifactRoot, "bindings.raw"));
+            string rawPath = Path.Combine(artifactRoot, "bindings.raw");
+            string rawManifestPath = rawPath + ".manifest.json";
+            byte[] raw = File.ReadAllBytes(rawPath);
+            string rawManifest = File.ReadAllText(rawManifestPath);
             using JsonDocument outputDocument = JsonDocument.Parse(output);
-            using JsonDocument rawDocument = JsonDocument.Parse(rawBoundary);
+            using JsonDocument rawDocument = JsonDocument.Parse(rawManifest);
             JsonElement outputRoot = outputDocument.RootElement;
             JsonElement rawRoot = rawDocument.RootElement;
+            JsonElement outputs = outputRoot.GetProperty("OutputTensors");
+            JsonElement segments = rawRoot.GetProperty("Segments");
 
             Assert.Contains("runtime-output-captured-unverified", times, StringComparison.Ordinal);
             Assert.Contains("\"InferenceRan\": true", output, StringComparison.Ordinal);
@@ -687,10 +704,45 @@ public sealed class OnnxToEngineTrtexecLikeTests
             Assert.Equal("build-only", outputRoot.GetProperty("RuntimeProofClass").GetString());
             Assert.False(outputRoot.GetProperty("HasTensorOutputProof").GetBoolean());
             Assert.False(outputRoot.GetProperty("HasRawBindingProof").GetBoolean());
+            Assert.True(outputRoot.GetProperty("OutputCaptureAvailable").GetBoolean());
+            Assert.False(outputRoot.GetProperty("OutputValidated").GetBoolean());
+            Assert.Equal(2, outputRoot.GetProperty("OutputTensorCount").GetInt32());
             Assert.Equal(12, outputRoot.GetProperty("InputElementCount").GetInt32());
             Assert.Equal(3, outputRoot.GetProperty("OutputElementCount").GetInt32());
-            Assert.Equal("trtexec-like-raw-bindings-skipped", rawRoot.GetProperty("ArtifactKind").GetString());
+            Assert.Equal(2, outputs.GetArrayLength());
+            Assert.Equal("scores", outputs[0].GetProperty("TensorName").GetString());
+            Assert.Equal(3 * sizeof(float), outputs[0].GetProperty("ByteLength").GetInt64());
+            Assert.Equal("boxes", outputs[1].GetProperty("TensorName").GetString());
+            Assert.Equal(8, outputs[1].GetProperty("ElementCount").GetInt32());
+            Assert.Equal("trtexec-like-raw-bindings-manifest", rawRoot.GetProperty("ArtifactKind").GetString());
+            Assert.True(rawRoot.GetProperty("RawBindingCaptureAvailable").GetBoolean());
+            Assert.False(rawRoot.GetProperty("OutputValidated").GetBoolean());
             Assert.False(rawRoot.GetProperty("HasRawBindingProof").GetBoolean());
+            Assert.Equal(2, rawRoot.GetProperty("OutputTensorCount").GetInt32());
+            Assert.Equal(0, segments[0].GetProperty("ByteOffset").GetInt64());
+            Assert.Equal(3 * sizeof(float), segments[1].GetProperty("ByteOffset").GetInt64());
+            Assert.Equal(11 * sizeof(float), raw.Length);
+            Assert.Equal(
+                Convert.ToHexString(SHA256.HashData(raw)).ToLowerInvariant(),
+                rawRoot.GetProperty("RawBindingSha256").GetString());
+
+            using JsonDocument reportDocument = JsonDocument.Parse(OnnxEngineBuildDiagnostics.ToJson(result));
+            JsonElement optionStatus = reportDocument.RootElement.GetProperty("OptionImplementationStatus");
+            string[] appliedOptions = optionStatus.GetProperty("AppliedOptions").EnumerateArray().Select(static item => item.GetString()!).ToArray();
+            string[] parseOnlyOptions = optionStatus.GetProperty("ParseOnlyOptions").EnumerateArray().Select(static item => item.GetString()!).ToArray();
+            Assert.Contains("--loadInputs", appliedOptions);
+            Assert.Contains("--dumpOutput", appliedOptions);
+            Assert.Contains("--dumpRawBindingsToFile", appliedOptions);
+            Assert.Contains("--exportOutput", appliedOptions);
+            Assert.DoesNotContain("--loadInputs", parseOnlyOptions);
+            Assert.DoesNotContain("--dumpOutput", parseOnlyOptions);
+            Assert.DoesNotContain("--dumpRawBindingsToFile", parseOnlyOptions);
+            Assert.DoesNotContain("--exportOutput", parseOnlyOptions);
+
+            string firstManifestSha256 = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(rawManifestPath)));
+            OnnxEngineRuntimeArtifactWriter.WriteArtifacts(result, artifactData);
+            Assert.Equal(raw, File.ReadAllBytes(rawPath));
+            Assert.Equal(firstManifestSha256, Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(rawManifestPath))));
         }
         finally
         {

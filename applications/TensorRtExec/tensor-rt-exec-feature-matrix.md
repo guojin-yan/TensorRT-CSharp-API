@@ -14,6 +14,7 @@
 | I/O format and layer precision policies | CLI, WinForms | implemented-build-readback-with-version-guards |
 | Timing and profiling options | CLI, WinForms | implemented-report |
 | Load-engine bounded runtime | CLI, WinForms | bounded-runtime-output |
+| Multi-output runtime artifacts | CLI, WinForms | implemented-bounded-multi-output-capture |
 | Layer/profile diagnostic switches | CLI, WinForms | implemented-inspector-readback |
 | Report alias compatibility | CLI | implemented-report |
 | FP8, best, refit dump, and debug tensor diagnostics | CLI, WinForms | parse-report-only |

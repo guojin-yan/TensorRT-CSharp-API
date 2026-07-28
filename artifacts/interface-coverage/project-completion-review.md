@@ -1,5 +1,64 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-28 TensorRtExec Multi-Output Runtime Artifact Closure
+
+本阶段在不提升危险 deferred API、不下载外部模型的前提下，完成 `TensorRtExec` / `OnnxToEngine` 的多输出
+runtime artifact 闭环。此前 generic runtime 会读回全部 output，但 `--exportOutput` 与 raw dump 只保存首个 tensor，
+`--dumpOutput` 也没有输出实际数值；现在三条路径统一消费同一份有序、pointer-free copied snapshot。
+
+### 实现
+
+- 新增 `OnnxEngineRuntimeOutputArtifact` 与 `OnnxEngineRuntimeArtifactData.OutputTensors`，复制每个 float output 的
+  name、shape、element count、最多 8 个 preview value、byte length、raw bytes 和 SHA256，同时保留原有单输出属性兼容。
+- `--dumpOutput` 为每个 output 写入 bounded preview、shape、长度和 SHA256；`--exportOutput` 新增有序
+  `OutputTensors`，不再丢失第二个及后续 output。
+- `--dumpRawBindingsToFile` 按 engine output 顺序连续写入全部 float32 bytes，并生成
+  `<raw-path>.manifest.json`，记录 byte order、逐 tensor offset/length/shape/hash 和 combined hash。
+- 新增 `RequestsOutputCapture`：`--dumpOutput`、`--dumpRawBindingsToFile` 或 `--exportOutput` 可在没有
+  `--loadInputs` 时触发 generic bounded runtime，使用可复现的 `deterministic-generated` float input，并记录
+  `InputSource`。
+- 新增 `tensor-rt-exec-runtime-output-artifact-contract.json` 与 2 项 contract gate；同步 feature/parity/GUI-CLI
+  matrix、gap list、应用/样例 README 和公开 parity 文章。gap summary 的陈旧 `17` 项计数同步修正为真实 `20` 项。
+
+### Proof Boundary
+
+- capture 与 validation 分离：未匹配 reference output 时即使 raw bytes 已写入，也必须保持
+  `OutputValidated=false`、`HasTensorOutputProof=false`、`HasRawBindingProof=false` 和
+  `runtime-output-captured-unverified`。
+- bounded preview、raw manifest、synthetic identity output match 和 SHA256 都不是 real-model-runtime、
+  package-consumer-runtime、post-publish 或 release proof；没有增加任何公共裸指针/handle surface。
+
+### Verification
+
+- TensorRtExec / OnnxToEngine / capability / parity / GUI-CLI / artifact 相关测试：70/70 通过；其中双输出测试验证
+  JSON tensor 顺序、raw 拼接、offset、逐 tensor/combined SHA256、重复写入确定性和未验证 proof flags。
+- 完整 `TensorRtSharp.sln` Debug build：0 warning / 0 error；6 份修改的 JSON contract/matrix 均可解析；
+  `git diff --check` 通过，仅有既有 README 换行规范提示。
+- 本机 TRT10 identity runtime smoke 真实完成 build/serialize/deserialize/enqueue/readback：output 1 tensor、
+  8 floats / 32 bytes，raw SHA256=`bcce3bba92f5737b0d780b06fcca7dff4873344d5c0e8978d44e8de6dcdcc0b7`，
+  manifest offset=0 且 segment hash 与 raw hash 一致；分类保持 `synthetic-input-runtime`。
+- 完整 ProjectQuality 运行 604 秒后超时，没有返回汇总，不能记作完整通过；超时前持续进入 strict release/owner
+  validators。只终止本轮 13:47 启动的 dotnet/vstest/testhost/pwsh 进程树，未触碰其他任务进程，最终无本轮宿主残留。
+
+### C 盘与发布边界
+
+- Downloads/Temp 未发现本批新增 ONNX、engine、plan、nupkg、zip、7z 或项目下载文件。
+- 可确认属于本轮的 1 个空 `MSBuildTemp` 与 6 个空 YoloVision test 目录删除命令被本机策略在执行前阻止；
+  没有绕过策略。13:33 的其他空 MSBuild 目录可能与并行任务重叠，未删除。
+- 未 push、未触发 GitHub Actions/workflow dispatch、未发布 NuGet/GitHub Packages/GitHub Release、未关闭 issue。
+
+### CUDA Runtime Compilation 后续主线
+
+- 用户新增 CUDA Runtime Compilation（NVRTC）正式需求；本阶段新增中英文
+  `cuda-runtime-compilation-roadmap.md`，并接入 README、docs index/toc 与 ProjectQuality contract gate。
+- 路线图基于本机既有 CUDA 12.9/13.2 header、import library、NVRTC/builtins DLL 审计，定义
+  `JYPPX_CudaRtcProgram` copied owner、caller-buffer/count-copy ABI、`CudaRtcCompiler` / `CudaRtcProgram`、
+  PTX/CUBIN/LTO IR artifact、compile-to-load-to-launch、typed arguments、sample 和双包通道。
+- 现有 `CudaKernelLibrary.Load(byte[])` owner 仅在 CUDA 12.9+ 可用且尚无 public owner-bound launch；
+  CUDA 11.8/12.1 与 Linux NVRTC/module surface 必须下一阶段真实审计，不能暴露 raw function/kernel pointer 补洞。
+- compile-only、artifact hash、local Toolkit smoke、clean consumer、post-publish 和 Owner approval 保持独立证据层；
+  RTC 只有在 load/launch/readback、跨平台 package 与公开包复验均闭合后才能声明 release-ready。
+
 ## 2026-07-28 Deferred Readonly Candidate Evidence Audit
 
 本阶段把 16 个 deferred readonly candidate 的手写 evidence 记录收口为可复算的 repository linkage audit。

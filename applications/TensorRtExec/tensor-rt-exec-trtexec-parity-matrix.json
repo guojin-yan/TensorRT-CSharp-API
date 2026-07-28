@@ -269,12 +269,12 @@
     {
       "id": "binding-metadata",
       "trtexecOption": "--loadInputs --dumpOutput --dumpRawBindingsToFile --exportOutput",
-      "tensorRtExecStatus": "implemented-pointer-free-binding-report",
-      "entryPoints": ["RuntimeOptions", "YoloRuntimeOutputTensor", "OnnxSampleMultiOutputResult", "YoloVisionOutputReport.bindingMetadata", "TensorRtEngineBindingReport"],
-      "proofBoundary": "YoloVision runtime reports copy TensorRtEngineBindingReport metadata and semantic output roles without native pointers; synthetic/bounded output remains non-proof and external ONNX correctness still requires real model evidence.",
+      "tensorRtExecStatus": "implemented-pointer-free-binding-and-multi-output-artifacts",
+      "entryPoints": ["RuntimeOptions", "OnnxEngineRuntimeOutputArtifact", "OnnxEngineRuntimeArtifactData.OutputTensors", "OnnxEngineRuntimeArtifactWriter", "YoloRuntimeOutputTensor", "OnnxSampleMultiOutputResult", "YoloVisionOutputReport.bindingMetadata", "TensorRtEngineBindingReport"],
+      "proofBoundary": "Generic bounded runtime captures every float output into bounded previews, per-tensor hashes, and deterministic raw offsets; YoloVision separately copies semantic binding roles without native pointers. Capture without a reference match is not output validation, real-model proof, or package-consumer proof.",
       "isRuntimeProof": false,
-      "gap": "Real model input/output tensor roles, hashes, and expected evidence lines must be owner-filled.",
-      "nextStep": "Align bindingMetadata with YoloVision task/output contracts and owner-filled model, input, engine, output, log, and review hashes."
+      "gap": "Generic output capture still supports one float input and float outputs, and real model expected values/semantic roles remain owner evidence.",
+      "nextStep": "Pair the multi-output JSON/raw manifest with YoloVision task contracts and owner-filled model, input, engine, expected output, log, and review hashes before any proof promotion."
     },
     {
       "id": "package-consumer-runtime-proof-boundary",

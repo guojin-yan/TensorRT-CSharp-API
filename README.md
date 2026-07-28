@@ -641,6 +641,8 @@ Managed runtime loading is production-first:
 - `docs/articles/en/getting-started.md`
 - `docs/articles/en/installation-layout.md`
 - `docs/articles/en/api-coverage-and-deferred-boundaries.md`
+- `docs/articles/en/cuda-runtime-compilation-roadmap.md`
+- `docs/articles/zh-cn/cuda-runtime-compilation-roadmap.md`
 - `docs/articles/en/sample-runners.md`
 - `docs/articles/en/runtime-packages.md`
 - `docs/articles/en/package-consumer-validation.md`

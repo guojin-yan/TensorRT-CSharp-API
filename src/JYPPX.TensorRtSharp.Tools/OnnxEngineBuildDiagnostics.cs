@@ -505,9 +505,10 @@ public static class OnnxEngineBuildDiagnostics
         AddIf(options, "--exportTimes", !string.IsNullOrWhiteSpace(runtimeOptions.ExportTimesPath));
         AddIf(options, "--exportProfile", !string.IsNullOrWhiteSpace(runtimeOptions.ExportProfilePath));
         bool outputReadbackAvailable = result.InferenceRan && !result.BenchmarkSummary.NoDataTransfersApplied;
+        AddIf(options, "--loadInputs", !string.IsNullOrWhiteSpace(runtimeOptions.LoadInputs) && result.InferenceRan);
         AddIf(options, "--dumpOutput", runtimeOptions.DumpOutput && outputReadbackAvailable);
         AddIf(options, "--exportOutput", !string.IsNullOrWhiteSpace(runtimeOptions.ExportOutputPath) && outputReadbackAvailable);
-        AddIf(options, "--dumpRawBindingsToFile", !string.IsNullOrWhiteSpace(runtimeOptions.DumpRawBindingsToFile) && outputReadbackAvailable && result.OutputMatch);
+        AddIf(options, "--dumpRawBindingsToFile", !string.IsNullOrWhiteSpace(runtimeOptions.DumpRawBindingsToFile) && outputReadbackAvailable);
         bool benchmarkExecuted = result.BenchmarkSummary.TimingSampleCount > 0;
         AddIf(options, "--iterations", benchmarkExecuted);
         AddIf(options, "--warmUp", benchmarkExecuted);
@@ -597,7 +598,7 @@ public static class OnnxEngineBuildDiagnostics
         AddIf(options, "--loadInputs", !string.IsNullOrWhiteSpace(runtimeOptions.LoadInputs) && !result.InferenceRan);
         bool outputReadbackUnavailable = !result.InferenceRan || result.BenchmarkSummary.NoDataTransfersApplied;
         AddIf(options, "--dumpOutput", runtimeOptions.DumpOutput && outputReadbackUnavailable);
-        AddIf(options, "--dumpRawBindingsToFile", !string.IsNullOrWhiteSpace(runtimeOptions.DumpRawBindingsToFile) && (outputReadbackUnavailable || !result.OutputMatch));
+        AddIf(options, "--dumpRawBindingsToFile", !string.IsNullOrWhiteSpace(runtimeOptions.DumpRawBindingsToFile) && outputReadbackUnavailable);
         AddIf(options, "--exportOutput", !string.IsNullOrWhiteSpace(runtimeOptions.ExportOutputPath) && outputReadbackUnavailable);
         AddIf(options, "--dumpLayerInfo", result.NormalizedCommandLine.Contains("--dumpLayerInfo", StringComparison.Ordinal));
         AddIf(options, "--dumpProfile", result.NormalizedCommandLine.Contains("--dumpProfile", StringComparison.Ordinal));

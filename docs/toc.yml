@@ -32,6 +32,8 @@
     href: articles/en/source-organization.md
   - name: CUDA Kernel Roadmap
     href: articles/en/cuda-kernel-roadmap.md
+  - name: CUDA Runtime Compilation Roadmap
+    href: articles/en/cuda-runtime-compilation-roadmap.md
   - name: CUDA IPC Export Tokens
     href: articles/en/cuda-ipc-export-token.md
   - name: CUDA Graph Memory Allocation Owner Safety
@@ -416,6 +418,8 @@
     href: articles/zh-cn/source-organization.md
   - name: CUDA Kernel Roadmap
     href: articles/zh-cn/cuda-kernel-roadmap.md
+  - name: CUDA Runtime Compilation Roadmap
+    href: articles/zh-cn/cuda-runtime-compilation-roadmap.md
   - name: Linux Runner Setup
     href: articles/zh-cn/linux-runner-setup.md
   - name: Local GitHub Actions Checks

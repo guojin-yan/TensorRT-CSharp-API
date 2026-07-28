@@ -25,7 +25,7 @@
 | Bounded Runtime | `--iterations`, `--streams`, `--infStreams`, `--threads`, `--useSpinWait`, `--useCudaGraph`, `--idleTime` | bounded scheduler behavior; not external model correctness or package proof |
 | Device-side Delay | `--sleepTime` | parse/report-only until a faithful launch-to-compute GPU mechanism exists; CPU sleep is not a substitute |
 | Safety/Cache Policy | `--safe`, `--consistency`, `--builderCache`, `--noBuilderCache` | parse/report-only intent |
-| Output Artifacts | `--loadInputs`, `--dumpOutput`, `--dumpRawBindingsToFile`, `--exportOutput`, `--exportTimes`, `--exportProfile`, `--saveProfile` | bounded artifacts only |
+| Output Artifacts | `--loadInputs`, `--dumpOutput`, `--dumpRawBindingsToFile`, `--exportOutput`, `--exportTimes`, `--exportProfile`, `--saveProfile` | bounded multi-output preview/JSON/raw+manifest capture; capture is not validation |
 | Mode | `--buildOnly`, `--skipInference`, `--dryRun` | not runtime proof |
 | Report | `--exportReport`, `--report`, `--evidenceSidecar` | report/sidecar only |
 
