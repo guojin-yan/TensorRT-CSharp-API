@@ -78,7 +78,7 @@ public sealed class DebugListenerNativeAttachEntryMinimalSafetyTests
         AssertNoRawPointerTypes(typeof(TensorRtDebugListenerNativeAttachEntryMinimalSafety));
         AssertNoRawPointerTypes(typeof(TensorRtDebugListenerNativeAttachEntryMinimalSafetyResult));
 
-        string source = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerNativeAttachEntryMinimalSafety.cs");
+        string source = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerNativeAttachEntryMinimalSafety.cs");
         Assert.DoesNotContain("public IntPtr", source);
         Assert.DoesNotContain("public UIntPtr", source);
         Assert.DoesNotContain("public nint", source);
@@ -87,7 +87,7 @@ public sealed class DebugListenerNativeAttachEntryMinimalSafetyTests
     [Fact]
     public void NativeSmokeReadinessDocsPackageAndDeferredRowsContainMinimalSafetyEvidence()
     {
-        string source = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerNativeAttachEntryMinimalSafety.cs");
+        string source = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerNativeAttachEntryMinimalSafety.cs");
         string nativeSource = ReadSource("native", "src", "tensorrt", "common", "debug_listener_native_attach_entry_minimal_safety.inc");
         string trt8Api = ReadSource("native", "src", "tensorrt", "v8", "api.cpp");
         string trt10Api = ReadSource("native", "src", "tensorrt", "v10", "api.cpp");

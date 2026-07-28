@@ -79,7 +79,7 @@ public sealed class DebugListenerNativeVTableInstallPreflightTests
         AssertNoRawPointerTypes(typeof(TensorRtDebugListenerNativeVTableInstallPreflight));
         AssertNoRawPointerTypes(typeof(TensorRtDebugListenerNativeVTableInstallPreflightResult));
 
-        string source = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerNativeVTableInstallPreflight.cs");
+        string source = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerNativeVTableInstallPreflight.cs");
         Assert.DoesNotContain("public IntPtr", source);
         Assert.DoesNotContain("public UIntPtr", source);
         Assert.DoesNotContain("public nint", source);
@@ -91,7 +91,7 @@ public sealed class DebugListenerNativeVTableInstallPreflightTests
     [Fact]
     public void SourceNativeSmokeReadinessPackageAndDocsContainInstallPreflightEvidenceButNotRuntimeProof()
     {
-        string source = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerNativeVTableInstallPreflight.cs");
+        string source = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerNativeVTableInstallPreflight.cs");
         string nativeSource = ReadSource("native", "src", "tensorrt", "common", "debug_listener_native_vtable_install_preflight.inc");
         string trt8Api = ReadSource("native", "src", "tensorrt", "v8", "api.cpp");
         string trt10Api = ReadSource("native", "src", "tensorrt", "v10", "api.cpp");

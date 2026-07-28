@@ -25,7 +25,7 @@ TensorRT 中很多对象由 native runtime 拥有，例如 plugin creator、fiel
 ## 代码与文件入口
 
 - `src/JYPPX.TensorRtSharp`：public API 主体。
-- `src/JYPPX.TensorRtSharp/TensorRtPluginRegistryInventory.cs`：pointer-free plugin inventory 示例。
+- `src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginRegistryInventory.cs`：pointer-free plugin inventory 示例。
 - `docs/articles/zh-cn/csharp-wrapper-lifetime-design.md`：生命周期设计。
 - `docs/articles/zh-cn/plugin-ownership-boundary.md`：plugin ownership 边界。
 - `tests/JYPPX.ProjectQuality.Tests`：public API 审计测试入口。

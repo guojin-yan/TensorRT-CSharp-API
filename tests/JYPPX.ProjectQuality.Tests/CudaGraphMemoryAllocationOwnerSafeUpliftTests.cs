@@ -29,8 +29,8 @@ public sealed class CudaGraphMemoryAllocationOwnerSafeUpliftTests
     [Fact]
     public void ManagedSurfaceIsTypedGraphBoundAndPointerFree()
     {
-        string allocation = ReadSource("src", "JYPPX.CudaSharp", "CudaGraphMemoryAllocation.cs");
-        string graph = ReadSource("src", "JYPPX.CudaSharp", "CudaGraph.cs");
+        string allocation = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphMemoryAllocation.cs");
+        string graph = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.cs");
         string publicSurface = allocation + graph;
 
         Assert.Contains("public sealed class CudaGraphMemoryAllocation : IDisposable", allocation, StringComparison.Ordinal);
@@ -51,8 +51,8 @@ public sealed class CudaGraphMemoryAllocationOwnerSafeUpliftTests
     [Fact]
     public void OwnerGuardsRejectCrossGraphSecondFreeAndEarlyGraphDispose()
     {
-        string allocation = ReadSource("src", "JYPPX.CudaSharp", "CudaGraphMemoryAllocation.cs");
-        string graph = ReadSource("src", "JYPPX.CudaSharp", "CudaGraph.cs");
+        string allocation = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphMemoryAllocation.cs");
+        string graph = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.cs");
         string native = ReadSource("native", "src", "cuda", "modules", "graph", "memory_allocation_owner.inc");
 
         Assert.Contains("belongs to a different CUDA graph", allocation, StringComparison.Ordinal);

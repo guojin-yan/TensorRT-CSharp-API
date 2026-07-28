@@ -94,10 +94,10 @@ public sealed class DeferredReadonlyDesignGateCandidateTests
             "IErrorRecorder::incRefCount",
             "IErrorRecorder::decRefCount");
 
-        AssertEvidenceContains(dimensionCandidate, "managedSources", "src/JYPPX.TensorRtSharp/TensorRtDimensionExpressionSnapshotDesignGate.cs");
+        AssertEvidenceContains(dimensionCandidate, "managedSources", "src/JYPPX.TensorRtSharp/Network/TensorRtDimensionExpressionSnapshotDesignGate.cs");
         AssertEvidenceContains(dimensionCandidate, "qualityTests", "tests/JYPPX.ProjectQuality.Tests/DeferredReadonlyDesignGateCandidateTests.cs");
-        AssertEvidenceContains(recorderCandidate, "managedSources", "src/JYPPX.TensorRtSharp/TensorRtErrorRecorderDiagnosticsDesignGate.cs");
-        AssertEvidenceContains(recorderCandidate, "managedSources", "src/JYPPX.TensorRtSharp/TensorRtErrorRecorderSnapshot.cs");
+        AssertEvidenceContains(recorderCandidate, "managedSources", "src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtErrorRecorderDiagnosticsDesignGate.cs");
+        AssertEvidenceContains(recorderCandidate, "managedSources", "src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtErrorRecorderSnapshot.cs");
         AssertEvidenceContains(recorderCandidate, "qualityTests", "tests/JYPPX.ProjectQuality.Tests/DeferredReadonlyDesignGateCandidateTests.cs");
 
         string dimensionOwnership = dimensionCandidate.GetProperty("implementationEvidence").GetProperty("ownershipBoundary").GetString() ?? string.Empty;

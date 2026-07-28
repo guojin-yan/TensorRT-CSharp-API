@@ -1,4 +1,19 @@
 {
+  "schemaVersion": 2,
+  "cudaRtcSplitRole": {
+    "role": "cuda-rtc",
+    "prototypeState": "planned-not-materialized",
+    "bridgePackagesReferenceRole": false,
+    "fullRuntimeCollectionsMayReferenceRole": true,
+    "requiredAssetPair": [
+      "nvrtc",
+      "matching-nvrtc-builtins"
+    ],
+    "windowsAssetSource": "pack/runtime/runtime-packages.manifest.json#cudaRtcPackaging.windowsAssetsByCudaVersion",
+    "linuxEvidenceState": "unverified-local-assets-not-found",
+    "redistributionApprovalState": "pending-owner-and-license-review",
+    "proofBoundary": "A modeled split role is not a materialized package, clean consumer, public package, or post-publish proof."
+  },
   "packages": [
     {
       "key": "win-x64-trt10.11-cuda11.8-cudnn8.9-bridge",

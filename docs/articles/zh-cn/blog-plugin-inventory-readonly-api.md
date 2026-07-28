@@ -30,7 +30,7 @@ flowchart LR
 对应文件：
 
 ```text
-src/JYPPX.TensorRtSharp/TensorRtPluginRegistryInventory.cs
+src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginRegistryInventory.cs
 smoke/PluginRegistryInventorySmokeRunner/Program.cs
 docs/articles/zh-cn/plugin-inventory-readonly-api.md
 ```
@@ -93,10 +93,10 @@ TRT8 主要保留 builder-owned registry 只读路径。TRT10/TRT11 可覆盖 gl
 
 ## Inventory 对象是什么
 
-`TensorRtPluginRegistryInventory` 定义在 `src/JYPPX.TensorRtSharp/TensorRtPluginRegistryInventory.cs`。它保存一次
+`TensorRtPluginRegistryInventory` 定义在 `src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginRegistryInventory.cs`。它保存一次
 复制得到的 creator 列表、recursive count、parent search、error recorder presence 和 source。runtime/builder helper 位于
-`src/JYPPX.TensorRtSharp/TensorRtRuntime.PluginRegistryInventory.cs`、
-`src/JYPPX.TensorRtSharp/TensorRtBuilder.PluginRegistryInventory.cs`。
+`src/JYPPX.TensorRtSharp/Runtime/TensorRtRuntime.PluginRegistryInventory.cs`、
+`src/JYPPX.TensorRtSharp/Builder/TensorRtBuilder.PluginRegistryInventory.cs`。
 
 ```mermaid
 sequenceDiagram

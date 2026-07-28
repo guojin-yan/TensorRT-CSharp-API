@@ -81,10 +81,10 @@ sequenceDiagram
   Note over App: snapshot survives owner disposal
 ```
 
-实现入口集中在 `src/JYPPX.TensorRtSharp/TensorRtErrorRecorderSnapshot.cs` 和各 owner 的 boundary partial，
-例如 `src/JYPPX.TensorRtSharp/TensorRtBuilder.Trt11BoundaryControls.cs`、
-`src/JYPPX.TensorRtSharp/TensorRtEngine.Trt11BoundaryControls.cs`。design-gate 状态由
-`src/JYPPX.TensorRtSharp/TensorRtErrorRecorderDiagnosticsDesignGate.cs` 表达，而不是由文章手工推断。
+实现入口集中在 `src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtErrorRecorderSnapshot.cs` 和各 owner 的 boundary partial，
+例如 `src/JYPPX.TensorRtSharp/Builder/TensorRtBuilder.Trt11BoundaryControls.cs`、
+`src/JYPPX.TensorRtSharp/Engine/TensorRtEngine.Trt11BoundaryControls.cs`。design-gate 状态由
+`src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtErrorRecorderDiagnosticsDesignGate.cs` 表达，而不是由文章手工推断。
 
 ## Snapshot 数据怎么读
 

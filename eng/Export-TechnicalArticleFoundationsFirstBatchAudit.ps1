@@ -148,11 +148,11 @@ $definitions = @(
     beforeCharacterCount = 1031
     requiredMarkers = @("TensorRtLogger", "TensorRtBuilder", "TensorRtRuntime", "TensorRtEngine", "TensorRtExecutionContext", "TensorRtInferenceBindings")
     requiredAnchors = @(
-      "src/JYPPX.TensorRtSharp/TensorRtBuilder.cs",
-      "src/JYPPX.TensorRtSharp/TensorRtRuntime.cs",
-      "src/JYPPX.TensorRtSharp/TensorRtEngine.cs",
-      "src/JYPPX.TensorRtSharp/TensorRtExecutionContext.cs",
-      "src/JYPPX.TensorRtSharp/TensorRtInferenceBindings.cs",
+      "src/JYPPX.TensorRtSharp/Builder/TensorRtBuilder.cs",
+      "src/JYPPX.TensorRtSharp/Runtime/TensorRtRuntime.cs",
+      "src/JYPPX.TensorRtSharp/Engine/TensorRtEngine.cs",
+      "src/JYPPX.TensorRtSharp/Execution/TensorRtExecutionContext.cs",
+      "src/JYPPX.TensorRtSharp/Inference/TensorRtInferenceBindings.cs",
       "samples/InferenceBindings/Program.cs"
     )
   },
@@ -164,8 +164,8 @@ $definitions = @(
     beforeCharacterCount = 2304
     requiredMarkers = @("SetPluginsToSerialize", "GetSerializedPluginSnapshot", "ClearPluginsToSerialize", "IPluginV2::serialize")
     requiredAnchors = @(
-      "src/JYPPX.TensorRtSharp/TensorRtBuilderConfig.Trt11PluginSerialization.cs",
-      "src/JYPPX.TensorRtSharp/TensorRtBuilderConfigSerializedPluginSnapshot.cs",
+      "src/JYPPX.TensorRtSharp/Builder/TensorRtBuilderConfig.Trt11PluginSerialization.cs",
+      "src/JYPPX.TensorRtSharp/Builder/TensorRtBuilderConfigSerializedPluginSnapshot.cs",
       "native/manifests/tensorrt/v10/trt10-runtime-serialization-plugin-paths.manifest.json",
       "smoke/PluginSerializationPathsSmokeRunner/Program.cs"
     )
@@ -178,8 +178,8 @@ $definitions = @(
     beforeCharacterCount = 1938
     requiredMarkers = @("CudaMemory", "CudaPinnedMemory", "CudaStream", "PinnedAsyncRoundTrip=True", "MultiStream")
     requiredAnchors = @(
-      "src/JYPPX.CudaSharp/CudaMemory.cs",
-      "src/JYPPX.CudaSharp/CudaPinnedMemory.cs",
+      "src/JYPPX.CudaSharp/Memory/CudaMemory.cs",
+      "src/JYPPX.CudaSharp/Memory/CudaPinnedMemory.cs",
       "src/JYPPX.CudaSharp/Internal/Handles/SafeCudaMemoryHandle.cs",
       "smoke/CudaSmokeRunner/Program.cs",
       "samples/MultiStream/Program.cs"
@@ -193,9 +193,9 @@ $definitions = @(
     beforeCharacterCount = 697
     requiredMarkers = @("CudaMemoryRangeAttribute", "GetRangeAccessedByDevices", "CudaMemoryLocation", "CudaManagedMemoryBatch", "CanPromoteRuntimeProof=false")
     requiredAnchors = @(
-      "src/JYPPX.CudaSharp/CudaMemoryRangeAttribute.cs",
-      "src/JYPPX.CudaSharp/CudaMemoryLocation.cs",
-      "src/JYPPX.CudaSharp/CudaManagedMemoryBatch.cs",
+      "src/JYPPX.CudaSharp/Memory/CudaMemoryRangeAttribute.cs",
+      "src/JYPPX.CudaSharp/Memory/CudaMemoryLocation.cs",
+      "src/JYPPX.CudaSharp/Memory/CudaManagedMemoryBatch.cs",
       "src/JYPPX.CudaSharp/Internal/Interop/Memory/NativeCudaApi.MemoryRange.cs",
       "native/manifests/cuda/cuda-forty-second-batch-memory-range-attributes.manifest.json"
     )

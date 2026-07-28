@@ -65,12 +65,12 @@ public sealed class DeferredCompatibilityDiagnosticsProofTests
     [Fact]
     public void CompatibilityDiagnosticsBatchHasExistingPointerFreeRoutesAndSmokeMarkers()
     {
-        string builderConfig = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilderConfig.Trt11RuntimeControls.cs");
-        string engine = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtEngine.cs");
+        string builderConfig = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.Trt11RuntimeControls.cs");
+        string engine = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.cs");
         string legacyInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.LegacyParserDiagnostics.cs");
-        string legacyWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtLegacyParserDiagnostics.cs");
-        string parser = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOnnxParser.cs");
-        string refitter = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOnnxParserRefitter.cs");
+        string legacyWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtLegacyParserDiagnostics.cs");
+        string parser = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParser.cs");
+        string refitter = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParserRefitter.cs");
         string parserInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.ParserRefitterDiagnostics.cs");
         string networkSmoke = ReadSource("smoke", "NetworkBuilderSmokeRunner", "Program.cs");
         string legacySmoke = ReadSource("smoke", "LegacyParserDiagnosticsSmokeRunner", "Program.cs");

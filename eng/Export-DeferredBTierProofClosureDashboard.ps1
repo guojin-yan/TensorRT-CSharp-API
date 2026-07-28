@@ -149,29 +149,29 @@ function Resolve-EvidenceFiles {
   $evidence.Add("tests/JYPPX.ProjectQuality.Tests")
 
   if ($designGroup -match "plugin") {
-    $evidence.Add("src/JYPPX.TensorRtSharp/TensorRtPluginRegistryInventory.cs")
+    $evidence.Add("src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginRegistryInventory.cs")
     $evidence.Add("smoke/PluginRegistryInventorySmokeRunner")
   }
   elseif ($className -match "Builder|BuilderConfig") {
-    $evidence.Add("src/JYPPX.TensorRtSharp/TensorRtBuilder.cs")
-    $evidence.Add("src/JYPPX.TensorRtSharp/TensorRtBuilderConfig.cs")
+    $evidence.Add("src/JYPPX.TensorRtSharp/Builder/TensorRtBuilder.cs")
+    $evidence.Add("src/JYPPX.TensorRtSharp/Builder/TensorRtBuilderConfig.cs")
   }
   elseif ($className -match "Runtime") {
-    $evidence.Add("src/JYPPX.TensorRtSharp/TensorRtRuntime.cs")
+    $evidence.Add("src/JYPPX.TensorRtSharp/Runtime/TensorRtRuntime.cs")
   }
   elseif ($className -match "Engine") {
-    $evidence.Add("src/JYPPX.TensorRtSharp/TensorRtEngine.cs")
+    $evidence.Add("src/JYPPX.TensorRtSharp/Engine/TensorRtEngine.cs")
   }
   elseif ($className -match "ExecutionContext") {
-    $evidence.Add("src/JYPPX.TensorRtSharp/TensorRtExecutionContext.cs")
+    $evidence.Add("src/JYPPX.TensorRtSharp/Execution/TensorRtExecutionContext.cs")
   }
   elseif ($className -match "Parser") {
-    $evidence.Add("src/JYPPX.TensorRtSharp/TensorRtOnnxParser.cs")
+    $evidence.Add("src/JYPPX.TensorRtSharp/Parsing/TensorRtOnnxParser.cs")
     $evidence.Add("samples/OnnxToEngine")
   }
 
-  if (-not [string]::IsNullOrWhiteSpace($methodName) -and (Test-FileContains -RelativePath "src/JYPPX.TensorRtSharp/TensorRtBuilder.cs" -Needle $methodName)) {
-    $evidence.Add("src/JYPPX.TensorRtSharp/TensorRtBuilder.cs#$methodName")
+  if (-not [string]::IsNullOrWhiteSpace($methodName) -and (Test-FileContains -RelativePath "src/JYPPX.TensorRtSharp/Builder/TensorRtBuilder.cs" -Needle $methodName)) {
+    $evidence.Add("src/JYPPX.TensorRtSharp/Builder/TensorRtBuilder.cs#$methodName")
   }
 
   return @($evidence | Select-Object -Unique)

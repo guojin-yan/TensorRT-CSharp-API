@@ -61,7 +61,7 @@ public sealed class DebugListenerProcessDebugTensorCallbackTrampolineTests
         AssertNoRawPointerTypes(typeof(TensorRtDebugListenerProcessDebugTensorCallbackTrampolineResult));
         AssertNoRawPointerTypes(typeof(TensorRtDebugTensorMetadataSnapshot));
 
-        string source = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerProcessDebugTensorCallbackTrampoline.cs");
+        string source = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerProcessDebugTensorCallbackTrampoline.cs");
         Assert.DoesNotContain("public IntPtr", source);
         Assert.DoesNotContain("public UIntPtr", source);
         Assert.DoesNotContain("public nint", source);
@@ -74,7 +74,7 @@ public sealed class DebugListenerProcessDebugTensorCallbackTrampolineTests
     [Fact]
     public void SourceNativeSmokeReadinessPackageAndDocsContainTrampolineEvidenceButNotRuntimeProof()
     {
-        string source = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerProcessDebugTensorCallbackTrampoline.cs");
+        string source = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerProcessDebugTensorCallbackTrampoline.cs");
         string nativeSource = ReadSource("native", "src", "tensorrt", "common", "debug_listener_process_debug_tensor_callback_trampoline.inc");
         string trt8Api = ReadSource("native", "src", "tensorrt", "v8", "api.cpp");
         string trt10Api = ReadSource("native", "src", "tensorrt", "v10", "api.cpp");

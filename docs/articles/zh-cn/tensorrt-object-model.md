@@ -75,9 +75,9 @@ logger 必须比这两个 borrower 活得久。把临时 logger 直接包装为�
 
 实现锚点：
 
-- `src/JYPPX.TensorRtSharp/TensorRtLogger.cs`
-- `src/JYPPX.TensorRtSharp/TensorRtBuilder.cs`
-- `src/JYPPX.TensorRtSharp/TensorRtRuntime.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtLogger.cs`
+- `src/JYPPX.TensorRtSharp/Builder/TensorRtBuilder.cs`
+- `src/JYPPX.TensorRtSharp/Runtime/TensorRtRuntime.cs`
 
 ## Builder：创建构建期对象
 

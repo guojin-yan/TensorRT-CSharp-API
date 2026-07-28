@@ -119,9 +119,9 @@ public sealed class CallbackAllocatorReadinessSnapshotTests
     [Fact]
     public void SmokeConsumerAndDocsExposeReadinessSnapshotBoundary()
     {
-        string readinessSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtCallbackAllocatorReadiness.cs");
-        string safeControlSummarySource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContextCallbackAllocatorSafeControlSummary.cs");
-        string executionContextDiagnostics = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs");
+        string readinessSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "MemoryAllocation", "TensorRtCallbackAllocatorReadiness.cs");
+        string safeControlSummarySource = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContextCallbackAllocatorSafeControlSummary.cs");
+        string executionContextDiagnostics = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs");
         string smokeProgram = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
         string bridgeConsumer = ReadSource("eng", "Test-BridgePackageConsumer.ps1");
         string boundaryGuide = ReadSource("docs", "articles", "zh-cn", "callback-allocator-boundary-guide.md");

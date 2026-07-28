@@ -59,9 +59,9 @@ public sealed class CudaTextureSurfaceObjectUpliftTests
     [Fact]
     public void ManagedObjectsRetainArraySafeHandleLeaseAndExposeOnlyTypedSnapshots()
     {
-        string texture = ReadSource("src", "JYPPX.CudaSharp", "CudaTextureObject.cs");
-        string surface = ReadSource("src", "JYPPX.CudaSharp", "CudaSurfaceObject.cs");
-        string types = ReadSource("src", "JYPPX.CudaSharp", "CudaTextureTypes.cs");
+        string texture = ReadSource("src", "JYPPX.CudaSharp", "Memory", "CudaTextureObject.cs");
+        string surface = ReadSource("src", "JYPPX.CudaSharp", "Memory", "CudaSurfaceObject.cs");
+        string types = ReadSource("src", "JYPPX.CudaSharp", "Memory", "CudaTextureTypes.cs");
         string textureHandle = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Handles", "SafeCudaTextureObjectHandle.cs");
         string surfaceHandle = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Handles", "SafeCudaSurfaceObjectHandle.cs");
         string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "Memory", "NativeCudaApi.TextureSurface.cs");

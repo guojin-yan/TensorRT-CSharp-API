@@ -1475,6 +1475,42 @@ internal static partial class GeneratedCudaManifestNativeMethods
     internal static extern BridgeStatusCode jyppx_cuda_query_runtime_info(out NativeCudaRuntimeInfo out_info);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_rtc_get_dependency_diagnostic_safe(byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_rtc_get_loaded_library_name_safe(byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_rtc_program_add_header_safe(SafeCudaRtcProgramHandle program, byte[] header_source, UIntPtr header_source_size, byte[] include_name, UIntPtr include_name_size);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_rtc_program_add_name_expression_safe(SafeCudaRtcProgramHandle program, byte[] expression, UIntPtr expression_size);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_rtc_program_compile_safe(SafeCudaRtcProgramHandle program, IntPtr options, uint option_count, out int out_compiler_result);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_rtc_program_copy_artifact_safe(SafeCudaRtcProgramHandle program, int artifact_kind, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_written_size);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_rtc_program_create_safe(byte[] source, UIntPtr source_size, byte[] program_name, UIntPtr program_name_size, out SafeCudaRtcProgramHandle out_program);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_rtc_program_destroy_safe(IntPtr program);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_rtc_program_get_log_safe(SafeCudaRtcProgramHandle program, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_rtc_program_get_lowered_name_safe(SafeCudaRtcProgramHandle program, uint expression_index, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_rtc_program_try_get_artifact_size_safe(SafeCudaRtcProgramHandle program, int artifact_kind, out int out_available, out UIntPtr out_size);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_rtc_query_capability_safe(out NativeCudaRtcCapabilityInfo out_info);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_cuda_set_device(int device);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]

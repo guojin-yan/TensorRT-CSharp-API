@@ -2,7 +2,7 @@
 
 ## 目标与当前边界
 
-本项目将增加 CUDA Runtime Compilation（NVRTC）支持，使 .NET 用户可以提交 CUDA C++ 源码、headers、编译选项和 name expressions，获得复制到托管内存的 PTX、CUBIN 或 LTO IR 工件，并在 owner-safe 的 CUDA kernel abstraction 中完成加载与启动。
+本项目已经交付 CUDA Runtime Compilation（NVRTC）的第一阶段 owner-safe compile API，使 .NET 用户可以提交 CUDA C++ 源码、headers、编译选项和 name expressions，并获得复制到托管内存的 PTX、CUBIN 或 LTO IR 工件。owner-safe kernel launch/readback 仍是下一阶段目标。
 
 当前仓库已经具备 `CudaKernelLibrary.Load(byte[])`、library inventory、按名称查询和 kernel attribute 设置能力，native owner 会复制输入 code，并且不会向 public C# API 暴露 borrowed `cudaKernel_t`。这套 runtime library owner 仅在 CUDA Toolkit 12.9 及以上可用。现有 raw `cudaLaunchKernel` entry point 仍是 internal/generated 边界，不能作为 public RTC 启动方案。
 
@@ -19,7 +19,18 @@ NVRTC 接入不是单个 P/Invoke。它同时涉及 compiler program 生命周�
 
 两个 header 均提供 version/error、program create/destroy、compile、program log、PTX、CUBIN、LTO IR、name expression 和 lowered name API。CUDA 12.9 header 仍有 deprecated NVVM output 声明；新 public API 不以该 deprecated output 为主路径。
 
-CUDA 11.8、12.1 和 Linux `.so` 名称/SONAME、header surface、import/link 行为仍必须在实现前逐项审计，不能从 12.9/13.2 结果外推。
+CUDA 11.8、12.1、12.9、13.2 的 Windows header、import LIB、DLL、builtins 和 export 已由 `eng/Export-CudaRtcCapabilityMatrix.ps1` 实际审计。Linux `.so` 在本机 E 盘和 Windows Toolkit roots 中未找到，因此 Linux SONAME/symbol 仍保持未验证，不能从 Windows 结果外推。
+
+## 2026-07-28 已实现基线
+
+- native 新增 optional dynamic loader 与 `JYPPX_CudaRtcProgram` owner；`JYPPX_NVRTC_LIBRARY` 可指定精确 library，核心 bridge 不静态链接 NVRTC。
+- ABI 覆盖 capability、dependency diagnostic、source/program name、virtual header、name expression、compile、log、PTX/CUBIN/LTO IR 与 lowered-name 的 caller-buffer/count-copy；输入有 UTF-8、embedded NUL、重复值、数量和字节上限，C++ exception 与 Windows SEH 均在边界内收敛。
+- managed 新增 `CudaRtcCompiler`、`CudaRtcProgram`、`CudaRtcProgramSource`、`CudaRtcCompileOptions`、`CudaRtcCompilationResult` 与 `CudaRtcArtifact`；public surface 不暴露 `IntPtr`、`SafeHandle` 或 vendor program/kernel handle。
+- `samples/CudaRuntimeCompilation` 真实覆盖 virtual header、template lowered name、成功 PTX、`sm_75` CUBIN、可用版本的 LTO IR、重复 PTX SHA256 确定性和 intentional compile failure log。
+- 本机四版 compile 均成功；11.8/12.1/12.9 PTX 可由当前 CUDA 12.9 `CudaKernelLibrary` 加载，13.2 PTX 被当前 runtime/driver 以 `cudaErrorUnsupportedPtxVersion` 拒绝，因此 13.2 只记 compile proof。
+- 证据位于 `artifacts/cuda-runtime-compilation/capability-matrix.json` 与 `local-smoke.json`。所有记录均保持 `kernelLaunch=false`、`gpuReadback=false`、`correctnessProof=false`。
+
+尚未完成的 RTC 主项是 owner-bound named-kernel launch、typed argument packing、GPU readback、Linux 真机、full-runtime `cuda-rtc` 组件物化、clean package consumer 与 post-publish；这些项目未因 compile/load 成功而晋级。
 
 ## 设计不变量
 

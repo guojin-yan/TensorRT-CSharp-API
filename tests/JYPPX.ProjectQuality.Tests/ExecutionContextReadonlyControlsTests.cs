@@ -7,11 +7,11 @@ public sealed class ExecutionContextReadonlyControlsTests
     [Fact]
     public void ManagedExecutionContextRuntimeDiagnosticSnapshotAggregatesSafeReadonlySignals()
     {
-        string runtimeDiagnostics = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs");
-        string deploymentBuilder = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContext.Trt11DeploymentSnapshot.cs");
-        string deploymentSnapshot = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContextDeploymentSnapshot.cs");
-        string snapshot = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContextRuntimeDiagnosticSnapshot.cs");
-        string callbackSnapshot = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContextCallbackStateSnapshot.cs");
+        string runtimeDiagnostics = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs");
+        string deploymentBuilder = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Trt11DeploymentSnapshot.cs");
+        string deploymentSnapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContextDeploymentSnapshot.cs");
+        string snapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContextRuntimeDiagnosticSnapshot.cs");
+        string callbackSnapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContextCallbackStateSnapshot.cs");
         string smoke = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
         string tensorRtSmoke = ReadSource("smoke", "TensorRtSmokeRunner", "Program.cs");
 
@@ -129,8 +129,8 @@ public sealed class ExecutionContextReadonlyControlsTests
     {
         string diagnosticsInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11Diagnostics.cs");
         string runtimeInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11RuntimeControls.cs");
-        string contextApi = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs");
-        string engineApi = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtEngine.Trt11RuntimeControls.cs");
+        string contextApi = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs");
+        string engineApi = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.Trt11RuntimeControls.cs");
         string smoke = ReadSource("smoke", "TensorRtSmokeRunner", "Program.cs");
 
         Assert.Contains("TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_execution_context_set_nvtx_verbosity", diagnosticsInterop);

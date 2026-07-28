@@ -70,11 +70,11 @@ public sealed class DebugListenerAttachBridgeVTableBatchTests
     [Fact]
     public void SourceNativeSmokeReadinessPackageAndDocsContainBatchEvidenceButNotRuntimeProof()
     {
-        string attachBridgeSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerNativeAttachBridgeShapeGate.cs");
-        string mappingSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerExceptionStatusMappingGate.cs");
-        string accountingSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerInFlightAccountingGate.cs");
-        string vtableSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerNativeNoThrowVTableScaffoldGate.cs");
-        string precheckSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerRuntimeProofPrecheck.cs");
+        string attachBridgeSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerNativeAttachBridgeShapeGate.cs");
+        string mappingSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerExceptionStatusMappingGate.cs");
+        string accountingSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerInFlightAccountingGate.cs");
+        string vtableSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerNativeNoThrowVTableScaffoldGate.cs");
+        string precheckSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerRuntimeProofPrecheck.cs");
         string nativeAttachBridge = ReadSource("native", "src", "tensorrt", "common", "debug_listener_native_attach_bridge_shape_gate.inc");
         string nativeMapping = ReadSource("native", "src", "tensorrt", "common", "debug_listener_exception_status_mapping_gate.inc");
         string nativeAccounting = ReadSource("native", "src", "tensorrt", "common", "debug_listener_inflight_accounting_gate.inc");

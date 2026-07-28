@@ -111,10 +111,10 @@ public sealed class RnnV2BorrowedStateDesignGateTests
     public void OwnerLeaseAndBorrowedTensorWrappersKeepNetworkLifetimeBound()
     {
         string lease = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Handles", "SafeTensorRtObjectHandleLease.cs");
-        string network = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtNetworkDefinition.cs");
-        string layer = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtLayer.cs");
-        string tensor = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtTensor.cs");
-        string rnn = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtLayer.Trt8RnnV2Diagnostics.cs");
+        string network = ReadSource("src", "JYPPX.TensorRtSharp", "Network", "TensorRtNetworkDefinition.cs");
+        string layer = ReadSource("src", "JYPPX.TensorRtSharp", "Layers", "TensorRtLayer.cs");
+        string tensor = ReadSource("src", "JYPPX.TensorRtSharp", "Network", "TensorRtTensor.cs");
+        string rnn = ReadSource("src", "JYPPX.TensorRtSharp", "Layers", "TensorRtLayer.Trt8RnnV2Diagnostics.cs");
 
         Assert.Contains("owner.DangerousAddRef(ref addedRef)", lease, StringComparison.Ordinal);
         Assert.Contains("_owner.DangerousRelease()", lease, StringComparison.Ordinal);

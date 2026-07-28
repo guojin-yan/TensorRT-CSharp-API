@@ -55,8 +55,8 @@ public sealed class LegacyParserReadonlyDiagnosticsUpliftTests
     {
         string interop = ReadSource(
             "src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.LegacyParserDiagnostics.cs");
-        string wrapper = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtLegacyParserDiagnostics.cs");
-        string snapshots = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtLegacyParserDiagnosticSnapshots.cs");
+        string wrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtLegacyParserDiagnostics.cs");
+        string snapshots = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtLegacyParserDiagnosticSnapshots.cs");
 
         Assert.Contains("EnsureLegacyParserLine(line)", interop, StringComparison.Ordinal);
         Assert.Contains("HaveSameDimensions(queriedShape, copiedShape)", interop, StringComparison.Ordinal);

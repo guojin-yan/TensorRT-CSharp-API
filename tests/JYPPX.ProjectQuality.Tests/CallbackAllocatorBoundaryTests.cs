@@ -281,7 +281,7 @@ public sealed class CallbackAllocatorBoundaryTests
     [Fact]
     public void AllocatorOwnerDryRunSkeletonAddsNativeDiagnosticOwnerButKeepsCallbacksDeferred()
     {
-        string ownerSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtAllocatorCallbackOwner.cs");
+        string ownerSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "MemoryAllocation", "TensorRtAllocatorCallbackOwner.cs");
         string smokeProgram = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
         string bridgeConsumer = ReadSource("eng", "Test-BridgePackageConsumer.ps1");
         string readiness = ReadSource("eng", "Test-RuntimePackageReadiness.ps1");
@@ -400,7 +400,7 @@ public sealed class CallbackAllocatorBoundaryTests
     [Fact]
     public void OutputAllocatorRuntimeGateCopiesDiagnosticsWithoutOpeningCallbacks()
     {
-        string gateSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOutputAllocatorRuntimeGate.cs");
+        string gateSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "MemoryAllocation", "TensorRtOutputAllocatorRuntimeGate.cs");
         string smokeProgram = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
         string readiness = ReadSource("eng", "Test-RuntimePackageReadiness.ps1");
         string gateDoc = ReadSource("docs", "articles", "zh-cn", "output-allocator-runtime-gate.md");
@@ -470,15 +470,15 @@ public sealed class CallbackAllocatorBoundaryTests
     {
         string publicSources = string.Join(
             Environment.NewLine,
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtRuntime.Trt11Controls.cs"),
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilder.Trt11BoundaryControls.cs"),
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilderConfig.Trt11Diagnostics.cs"),
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtEngine.Trt11BoundaryControls.cs"),
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtNetworkDefinition.Trt11BoundaryControls.cs"),
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContext.Trt11BoundaryControls.cs"),
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContext.Trt11Diagnostics.cs"),
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs"),
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtRefitter.Trt11Controls.cs"));
+            ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntime.Trt11Controls.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilder.Trt11BoundaryControls.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.Trt11Diagnostics.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.Trt11BoundaryControls.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Network", "TensorRtNetworkDefinition.Trt11BoundaryControls.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Trt11BoundaryControls.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Trt11Diagnostics.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Refit", "TensorRtRefitter.Trt11Controls.cs"));
 
         Assert.Contains("不会暴露 recorder 指针或接管其生命周期", publicSources);
         Assert.Contains("TryGetErrorRecorderSnapshot(out TensorRtErrorRecorderSnapshot snapshot)", publicSources);
@@ -503,8 +503,8 @@ public sealed class CallbackAllocatorBoundaryTests
         string header10 = ReadSource("native", "include", "jyppx", "tensorrt", "trt10.h");
         string header11 = ReadSource("native", "include", "jyppx", "tensorrt", "trt11.h");
         string types = ReadSource("native", "include", "jyppx", "tensorrt", "types.h");
-        string runtimeWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtRuntime.Trt11Controls.cs");
-        string snapshotWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtErrorRecorderSnapshot.cs");
+        string runtimeWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntime.Trt11Controls.cs");
+        string snapshotWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Monitoring", "TensorRtErrorRecorderSnapshot.cs");
         string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11RuntimeSerializationRefit.cs");
         string deferred8 = ReadTensorRtManifest("v8", "trt8-cross-version-seventh-batch-deferred-boundaries.manifest.json");
         string deferred10 = ReadTensorRtManifest("v10", "trt10-cross-version-sixth-batch-diagnostics-refitter-deferred.manifest.json");
@@ -556,8 +556,8 @@ public sealed class CallbackAllocatorBoundaryTests
         string commonBoundary = ReadSource("native", "src", "tensorrt", "common", "error_recorder_boundary_controls.inc");
         string trt11Boundary = ReadSource("native", "src", "tensorrt", "v11", "modules", "deployment", "boundary_controls.inc");
         string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11BoundaryControls.cs");
-        string engineWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtEngine.Trt11BoundaryControls.cs");
-        string contextWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContext.Trt11BoundaryControls.cs");
+        string engineWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.Trt11BoundaryControls.cs");
+        string contextWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Trt11BoundaryControls.cs");
 
         foreach (string manifest in new[] { manifest8, manifest10, manifest11 })
         {
@@ -621,9 +621,9 @@ public sealed class CallbackAllocatorBoundaryTests
         string commonBoundary = ReadSource("native", "src", "tensorrt", "common", "error_recorder_boundary_controls.inc");
         string trt11Boundary = ReadSource("native", "src", "tensorrt", "v11", "modules", "deployment", "boundary_controls.inc");
         string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11BoundaryControls.cs");
-        string builderWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilder.Trt11BoundaryControls.cs");
-        string networkWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtNetworkDefinition.Trt11BoundaryControls.cs");
-        string inspectorWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtEngineInspector.Trt11Diagnostics.cs");
+        string builderWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilder.Trt11BoundaryControls.cs");
+        string networkWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Network", "TensorRtNetworkDefinition.Trt11BoundaryControls.cs");
+        string inspectorWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngineInspector.Trt11Diagnostics.cs");
         string smoke = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
 
         foreach (string manifest in new[] { manifest8, manifest10, manifest11 })
@@ -680,7 +680,7 @@ public sealed class CallbackAllocatorBoundaryTests
         string trt11BoundaryControls = ReadSource("native", "src", "tensorrt", "v11", "modules", "deployment", "boundary_controls.inc");
         string managedStructs = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeStructs.cs");
         string mapper = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "BridgeInfoMapper.cs");
-        string snapshot = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtErrorRecorderSnapshot.cs");
+        string snapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Monitoring", "TensorRtErrorRecorderSnapshot.cs");
         string boundaryInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11BoundaryControls.cs");
         string runtimeRefitInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11RuntimeSerializationRefit.cs");
 
@@ -834,8 +834,8 @@ public sealed class CallbackAllocatorBoundaryTests
         string trt11RuntimeRefit = ReadSource("native", "src", "tensorrt", "v11", "modules", "deployment", "runtime_serialization_refit.inc");
         string builderInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11BoundaryControls.cs");
         string runtimeInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11RuntimeSerializationRefit.cs");
-        string builderWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilder.Trt11BoundaryControls.cs");
-        string runtimeWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtRuntime.Trt11Controls.cs");
+        string builderWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilder.Trt11BoundaryControls.cs");
+        string runtimeWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntime.Trt11Controls.cs");
         string smokeProgram = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
         string trt8Deferred = ReadTensorRtManifest("v8", "trt8-cross-version-seventh-batch-deferred-boundaries.manifest.json");
         string trt10Deferred = ReadTensorRtManifest("v10", "trt10-cross-version-fifth-batch-runtime-serialization-deferred.manifest.json");
@@ -905,7 +905,7 @@ public sealed class CallbackAllocatorBoundaryTests
         string trt10Api = ReadSource("native", "src", "tensorrt", "v10", "api.cpp");
         string trt11Api = ReadSource("native", "src", "tensorrt", "v11", "api.cpp");
         string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.CallbackInterfaceInfo.cs");
-        string wrapper = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs");
+        string wrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs");
         string smokeProgram = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
 
         foreach (string manifest in new[] { manifest10, manifest11 })
@@ -1052,8 +1052,8 @@ public sealed class CallbackAllocatorBoundaryTests
 
         Assert.Contains("runtime.ClearErrorRecorder();", program);
         Assert.Contains("runtime.GetDiagnosticSnapshot()", program);
-        string runtimeDiagnosticSnapshotSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtRuntimeDiagnosticSnapshot.cs");
-        string refitterDiagnosticSnapshotSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtRefitterDiagnosticSnapshot.cs");
+        string runtimeDiagnosticSnapshotSource = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntimeDiagnosticSnapshot.cs");
+        string refitterDiagnosticSnapshotSource = ReadSource("src", "JYPPX.TensorRtSharp", "Refit", "TensorRtRefitterDiagnosticSnapshot.cs");
         Assert.Contains("public sealed class TensorRtRuntimeDiagnosticSnapshot", runtimeDiagnosticSnapshotSource);
         Assert.Contains("public TensorRtRuntimeDiagnosticSummary ToSummary()", runtimeDiagnosticSnapshotSource);
         Assert.Contains("public sealed class TensorRtRuntimeDiagnosticSummary", runtimeDiagnosticSnapshotSource);
@@ -1113,8 +1113,8 @@ public sealed class CallbackAllocatorBoundaryTests
         string trt11Api = ReadSource("native", "src", "tensorrt", "v11", "api.cpp");
         string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.ExecutionContextCallbackState.cs");
         string nativeStructs = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeStructs.cs");
-        string wrapper = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs");
-        string snapshotWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContextCallbackStateSnapshot.cs");
+        string wrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs");
+        string snapshotWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContextCallbackStateSnapshot.cs");
         string smokeProgram = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
         string bridgeConsumer = ReadSource("eng", "Test-BridgePackageConsumer.ps1");
         string readiness = ReadSource("eng", "Test-RuntimePackageReadiness.ps1");

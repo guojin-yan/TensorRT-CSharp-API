@@ -91,7 +91,6 @@ public sealed class TrtexecEnginePackagingPolicyTests
         Assert.DoesNotContain("IntPtr", File.ReadAllText(Path.Combine(
             RepositoryPaths.Root,
             "src",
-            "JYPPX.TensorRtSharp.Tools",
-            "TrtexecLikeWeightStreamingBudget.cs")), StringComparison.Ordinal);
+            "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeWeightStreamingBudget.cs")), StringComparison.Ordinal);
     }
 }

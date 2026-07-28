@@ -159,9 +159,9 @@ public sealed class NativeVendorBoundaryGuardTests
         string boundaryInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11BoundaryControls.cs");
         string publicBoundaryWrappers = string.Join(
             Environment.NewLine,
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtEngine.Trt11BoundaryControls.cs"),
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContext.Trt11BoundaryControls.cs"),
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtNetworkDefinition.Trt11BoundaryControls.cs"));
+            ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.Trt11BoundaryControls.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Trt11BoundaryControls.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Network", "TensorRtNetworkDefinition.Trt11BoundaryControls.cs"));
 
         Assert.Contains("runtime_has_error_recorder_with_seh_guard", runtimeControls);
         Assert.Contains("runtime_get_error_recorder_snapshot_info_with_seh_guard", runtimeControls);

@@ -9,9 +9,9 @@ public sealed class RuntimeSerializationStreamIoTests
     [Fact]
     public void ManagedStreamSerializationApisCopyThroughManagedBuffers()
     {
-        string hostMemory = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtHostMemory.cs");
-        string hostMemoryMetadata = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtHostMemory.Trt11Metadata.cs");
-        string runtime = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtRuntime.cs");
+        string hostMemory = ReadSource("src", "JYPPX.TensorRtSharp", "Serialization", "TensorRtHostMemory.cs");
+        string hostMemoryMetadata = ReadSource("src", "JYPPX.TensorRtSharp", "Serialization", "TensorRtHostMemory.Trt11Metadata.cs");
+        string runtime = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntime.cs");
         string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.cs");
         string hostMemoryInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11FourteenthBatch.cs");
 

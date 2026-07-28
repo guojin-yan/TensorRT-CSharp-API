@@ -26,12 +26,12 @@ public sealed class DeferredBTier41To45ProofClosureTests
             Assert.NotEmpty(item.GetProperty("deferredHistoryManifestIds").EnumerateArray());
         }
 
-        string builderConfigApi = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilderConfig.Trt11RuntimeControls.cs");
-        string engineApi = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtEngine.cs");
-        string contextApi = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs");
-        string onnxParserApi = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOnnxParser.cs");
-        string parserRefitterApi = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOnnxParserRefitter.cs");
-        string parserRefitterSnapshot = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOnnxParserRefitterDiagnosticSnapshot.cs");
+        string builderConfigApi = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.Trt11RuntimeControls.cs");
+        string engineApi = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.cs");
+        string contextApi = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs");
+        string onnxParserApi = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParser.cs");
+        string parserRefitterApi = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParserRefitter.cs");
+        string parserRefitterSnapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParserRefitterDiagnosticSnapshot.cs");
         string interopRuntimeControls = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11RuntimeControls.cs");
         string interopDiagnostics = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11Diagnostics.cs");
         string interopParserRefitter = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.ParserRefitterDiagnostics.cs");

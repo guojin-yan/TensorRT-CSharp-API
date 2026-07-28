@@ -29,10 +29,10 @@ applications/TensorRtExec/Core/TensorRtExecService.cs
 applications/TensorRtExec/Core/TensorRtExecReport.cs
 applications/TensorRtExec/Console/TensorRtExecCommand.cs
 applications/TensorRtExec/WinForms/MainForm.cs
-src/JYPPX.TensorRtSharp.Tools/TrtexecLikeParser.cs
-src/JYPPX.TensorRtSharp.Tools/TrtexecLikeOptions.cs
-src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildService.cs
-src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildDiagnostics.cs
+src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeParser.cs
+src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeOptions.cs
+src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.cs
+src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildDiagnostics.cs
 ```
 
 ## 常见转换命令

@@ -38,8 +38,8 @@ logger、profiler、progress monitor 都从 native 进入 managed delegate，但
 | Profiler | execution context | layer profile 回调 | copied layer name/time、计数、最后异常 |
 | Progress monitor | builder config | build phase/step | copied event、continue/cancel、计数、最后异常 |
 
-public 类型位于 `src/JYPPX.TensorRtSharp/TensorRtLogger.cs`、`src/JYPPX.TensorRtSharp/TensorRtProfiler.cs` 和
-`src/JYPPX.TensorRtSharp/TensorRtProgressMonitor.cs`。native trampoline 分别位于
+public 类型位于 `src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtLogger.cs`、`src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtProfiler.cs` 和
+`src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtProgressMonitor.cs`。native trampoline 分别位于
 `src/JYPPX.TensorRtSharp/Internal/Interop/TensorRtLoggerCallback.cs`、
 `src/JYPPX.TensorRtSharp/Internal/Interop/TensorRtProfilerCallback.cs`、
 `src/JYPPX.TensorRtSharp/Internal/Interop/TensorRtProgressMonitorCallback.cs`。

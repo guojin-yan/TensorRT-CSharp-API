@@ -500,3 +500,16 @@ internal struct NativeCudaLaunchConfig
     public IntPtr Attributes;
     public uint AttributeCount;
 }
+
+[StructLayout(LayoutKind.Sequential)]
+internal struct NativeCudaRtcCapabilityInfo
+{
+    public int DependencyAvailable;
+    public int VersionMajor;
+    public int VersionMinor;
+    public int SupportsPtx;
+    public int SupportsCubin;
+    public int SupportsLtoIr;
+    public int SupportsDeprecatedNvvm;
+    public int SupportsNameExpressions;
+}

@@ -43,7 +43,7 @@
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": true,
       "winFormsSupported": true,
-      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp/TensorRtRuntime.cs", "applications/TensorRtExec"],
+      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp/Runtime/TensorRtRuntime.cs", "applications/TensorRtExec"],
       "nextStep": "Readonly diagnostics plus compatible-float bounded enqueue/readback are available. Keep model correctness and package-consumer-runtime proof gated behind expected outputs and explicit runtime proof records."
     },
     {
@@ -87,7 +87,7 @@
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": true,
       "winFormsSupported": true,
-      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp/TensorRtBuilderConfig.cs", "native/src/tensorrt"],
+      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp/Builder/TensorRtBuilderConfig.cs", "native/src/tensorrt"],
       "nextStep": "Workspace bytes and builder config readback are reported; keep model/runtime proof gated behind real execution logs."
     },
     {
@@ -98,7 +98,7 @@
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": true,
       "winFormsSupported": true,
-      "nextImplementationPaths": ["applications/TensorRtExec", "src/JYPPX.TensorRtSharp/TensorRtBuilderConfig.cs"],
+      "nextImplementationPaths": ["applications/TensorRtExec", "src/JYPPX.TensorRtSharp/Builder/TensorRtBuilderConfig.cs"],
       "nextStep": "Collect compatible-host TRT8/10/11 build logs with requested/readback timing iteration values; keep builder evidence separate from runtime and package-consumer proof."
     },
     {
@@ -109,7 +109,7 @@
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": true,
       "winFormsSupported": true,
-      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildService.cs", "src/JYPPX.TensorRtSharp/TensorRtEnums.cs", "applications/TensorRtExec"],
+      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.cs", "src/JYPPX.TensorRtSharp/Core/TensorRtEnums.cs", "applications/TensorRtExec"],
       "nextStep": "Keep sparsity force and TRT8 stronglyTyped parse-only; collect DLA-capable real-model evidence separately from builder readback."
     },
     {
@@ -121,7 +121,7 @@
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": true,
       "winFormsSupported": true,
-      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/TrtexecLikeWeightStreamingBudget.cs", "src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildService.cs", "applications/TensorRtExec", "samples/RefittedPlan.PackageConsumer", "eng/Test-TrtexecRefittedPlanPackageConsumer.ps1"],
+      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeWeightStreamingBudget.cs", "src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.cs", "applications/TensorRtExec", "samples/RefittedPlan.PackageConsumer", "eng/Test-TrtexecRefittedPlanPackageConsumer.ps1"],
       "nextStep": "Keep TRT8 guards and the TRT11 dependency boundary; retain TRT10 parser-load, engine-commit, persisted reload, baseline comparison, and local-feed PackageReference consumer evidence. External lean-runtime, public-feed and post-publish proof remain separate Owner work."
     },
     {
@@ -132,7 +132,7 @@
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": true,
       "winFormsSupported": true,
-      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/TrtexecLikeBuildPolicy.cs", "src/JYPPX.TensorRtSharp/TensorRtBuilderFlagMapper.cs", "applications/TensorRtExec"],
+      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeBuildPolicy.cs", "src/JYPPX.TensorRtSharp/Builder/TensorRtBuilderFlagMapper.cs", "applications/TensorRtExec"],
       "nextStep": "Retain TRT8/10 compatible-host set/readback evidence; keep TRT11 removed setters guarded and require model-specific layout/output evidence before promotion."
     },
     {
@@ -143,7 +143,7 @@
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": true,
       "winFormsSupported": true,
-      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildService.cs", "applications/TensorRtExec", "samples/OnnxToEngine"],
+      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.cs", "applications/TensorRtExec", "samples/OnnxToEngine"],
       "nextStep": "Retain scheduler runtime evidence separately from model correctness; keep --sleepTime parse-only until a faithful device-side launch-gap primitive exists."
     },
     {
@@ -165,7 +165,7 @@
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": true,
       "winFormsSupported": true,
-      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp/TensorRtPluginRegistryInventory.cs", "native/src/tensorrt/common/plugin_registry_inventory.inc"],
+      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginRegistryInventory.cs", "native/src/tensorrt/common/plugin_registry_inventory.inc"],
       "nextStep": "Keep register/deregister/load-library deferred; use copied inventory metadata and command-surface diagnostics only."
     },
     {
@@ -176,7 +176,7 @@
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": true,
       "winFormsSupported": true,
-      "nextImplementationPaths": ["applications/TensorRtExec", "src/JYPPX.TensorRtSharp/TensorRtEngineInspector.Trt11Diagnostics.cs"],
+      "nextImplementationPaths": ["applications/TensorRtExec", "src/JYPPX.TensorRtSharp/Engine/TensorRtEngineInspector.Trt11Diagnostics.cs"],
       "nextStep": "Require real enqueue logs and hashes before profile artifacts support runtime claims."
     },
     {
@@ -187,7 +187,7 @@
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": true,
       "winFormsSupported": true,
-      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp/TensorRtEngineInspector.Trt11Diagnostics.cs", "docs/articles/zh-cn/publishing"],
+      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp/Engine/TensorRtEngineInspector.Trt11Diagnostics.cs", "docs/articles/zh-cn/publishing"],
       "nextStep": "Capture compatible-host TRT8/10/11 copied inspector layer reports while keeping external ONNX semantics as owner-reviewed diagnostic metadata, not model correctness proof."
     },
     {
@@ -209,7 +209,7 @@
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": true,
       "winFormsSupported": true,
-      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/OnnxEngineRuntimeArtifactWriter.cs", "samples/YoloVision", "samples/YoloVision/yolovision-task-output-contract.json", "eng/Test-YoloVisionRealAssetCandidate.ps1", "eng/Test-YoloVisionRealAssetOwnerBackfillPack.ps1"],
+      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/Artifacts/OnnxEngineRuntimeArtifactWriter.cs", "samples/YoloVision", "samples/YoloVision/yolovision-task-output-contract.json", "eng/Test-YoloVisionRealAssetCandidate.ps1", "eng/Test-YoloVisionRealAssetOwnerBackfillPack.ps1"],
       "nextStep": "Retain multi-output previews, per-tensor hashes, deterministic raw offsets, and pointer-free bindingMetadata; owner must still supply expected output values, task roles, model/engine/input/log hashes, and review before promotion."
     },
     {

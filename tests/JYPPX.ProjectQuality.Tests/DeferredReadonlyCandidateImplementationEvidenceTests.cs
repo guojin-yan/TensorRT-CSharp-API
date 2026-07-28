@@ -24,10 +24,10 @@ public sealed class DeferredReadonlyCandidateImplementationEvidenceTests
         AssertEvidenceContains(identityCandidate, "publicSurface", "TensorRtPluginRegistryInventory.GetCreatorSummaries");
         AssertEvidenceContains(identityCandidate, "publicSurface", "TensorRtPluginRegistryInventory.TryFindCreator");
 
-        string inventoryModels = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtPluginRegistryInventory.cs");
-        string builderInventory = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilder.PluginRegistryInventory.cs");
-        string runtimeInventory = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtRuntime.PluginRegistryInventory.cs");
-        string environmentProbe = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtEnvironmentProbe.cs");
+        string inventoryModels = ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginRegistryInventory.cs");
+        string builderInventory = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilder.PluginRegistryInventory.cs");
+        string runtimeInventory = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntime.PluginRegistryInventory.cs");
+        string environmentProbe = ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.cs");
         string builderInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.PluginRegistryInventory.cs");
         string runtimeInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.RuntimePluginRegistryInventory.cs");
         string globalInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.GlobalRuntimePluginProbe.cs");

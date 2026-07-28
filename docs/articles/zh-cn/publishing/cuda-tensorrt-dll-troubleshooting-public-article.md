@@ -41,10 +41,10 @@ stdout/stderr log SHA256
 src/JYPPX.Shared/Interop/NativeBridgePathResolver.cs
 src/JYPPX.Shared/Interop/NativeBridgeLibraryLoader.cs
 src/JYPPX.Shared/BridgeConstants.cs
-src/JYPPX.CudaSharp/CudaEnvironmentProbe.cs
-src/JYPPX.TensorRtSharp/TensorRtEnvironmentProbe.cs
-src/JYPPX.TensorRtSharp.Tools/TensorRtToolSupport.cs
-src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildService.cs
+src/JYPPX.CudaSharp/Diagnostics/CudaEnvironmentProbe.cs
+src/JYPPX.TensorRtSharp/Diagnostics/TensorRtEnvironmentProbe.cs
+src/JYPPX.TensorRtSharp.Tools/Core/TensorRtToolSupport.cs
+src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.cs
 pack/runtime/runtime-packages.manifest.json
 pack/runtime-split/split-runtime-packages.manifest.json
 docs/articles/zh-cn/runtime-package-native-load-troubleshooting.md

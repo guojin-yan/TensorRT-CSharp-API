@@ -86,7 +86,7 @@ public sealed class StreamIoInterfaceInfoDesignGateTests
             "IStreamReaderV2::getAPILanguage",
             "IStreamWriter::getAPILanguage",
             "IVersionedInterface::getAPILanguage");
-        AssertEvidenceContains(candidate, "managedSources", "src/JYPPX.TensorRtSharp/TensorRtStreamIoInterfaceInfoDesignGate.cs");
+        AssertEvidenceContains(candidate, "managedSources", "src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtStreamIoInterfaceInfoDesignGate.cs");
         AssertEvidenceContains(candidate, "qualityTests", "tests/JYPPX.ProjectQuality.Tests/StreamIoInterfaceInfoDesignGateTests.cs");
         AssertEvidenceContains(candidate, "publicSurface", "TensorRtStreamIoInterfaceInfoDesignGate.EvaluateKnownSurface");
         AssertEvidenceContains(candidate, "publicSurface", "TensorRtStreamIoInterfaceInfoDesignGateResult.OwnerLifecycleRequirements");
@@ -104,7 +104,7 @@ public sealed class StreamIoInterfaceInfoDesignGateTests
     [Fact]
     public void StreamOwnerLedgerDocsRecordCallbackBlockers()
     {
-        string source = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtStreamIoInterfaceInfoDesignGate.cs");
+        string source = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Monitoring", "TensorRtStreamIoInterfaceInfoDesignGate.cs");
         string doc = ReadSource("docs", "articles", "zh-cn", "stream-io-interface-info-design-gate.md");
 
         Assert.Contains("ManagedOwnedStreamOwnerLedgerReady", source);

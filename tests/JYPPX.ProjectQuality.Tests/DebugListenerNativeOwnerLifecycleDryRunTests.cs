@@ -207,8 +207,8 @@ public sealed class DebugListenerNativeOwnerLifecycleDryRunTests
     [Fact]
     public void ReadinessSmokeAndDocsKeepNativeOwnerLifecycleDryRunSeparateFromRuntimeProof()
     {
-        string dryRunSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerNativeOwnerLifecycleDryRun.cs");
-        string precheckSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerRuntimeProofPrecheck.cs");
+        string dryRunSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerNativeOwnerLifecycleDryRun.cs");
+        string precheckSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerRuntimeProofPrecheck.cs");
         string smokeProgram = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
         string readiness = ReadSource("eng", "Test-RuntimePackageReadiness.ps1");
         string packageConsumer = ReadSource("eng", "Test-PackageConsumer.ps1");

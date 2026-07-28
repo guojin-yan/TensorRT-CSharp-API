@@ -3,6 +3,8 @@ obj/
 .vs/
 .vscode/
 artifacts/
+!src/JYPPX.TensorRtSharp.Tools/Artifacts/
+!src/JYPPX.TensorRtSharp.Tools/Artifacts/*.cs
 out/
 build-out/
 pack/runtime/*/assets/

@@ -36,7 +36,7 @@ public sealed class LoggerFinderMetadataDesignGateTests
         Assert.Equal("design-gate-ready-not-runtime-proof", candidate.GetProperty("implementationStatus").GetString());
         Assert.Equal("copied logger finder interface metadata snapshot", candidate.GetProperty("outputMode").GetString());
         AssertCandidateMethods(candidate, "ILoggerFinder::getInterfaceInfo");
-        AssertEvidenceContains(candidate, "managedSources", "src/JYPPX.TensorRtSharp/TensorRtLoggerFinderMetadataDesignGate.cs");
+        AssertEvidenceContains(candidate, "managedSources", "src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtLoggerFinderMetadataDesignGate.cs");
         AssertEvidenceContains(candidate, "qualityTests", "tests/JYPPX.ProjectQuality.Tests/LoggerFinderMetadataDesignGateTests.cs");
         AssertEvidenceContains(candidate, "publicSurface", "TensorRtLoggerFinderMetadataDesignGate.EvaluateKnownSurface");
 

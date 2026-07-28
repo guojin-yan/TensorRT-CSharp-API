@@ -41,7 +41,7 @@
     {
       "candidateId": "engine-layer-metadata-001",
       "additionalManagedSources": [
-        "src/JYPPX.TensorRtSharp/TensorRtEngine.cs"
+        "src/JYPPX.TensorRtSharp/Engine/TensorRtEngine.cs"
       ],
       "manifestSources": [
         "native/manifests/tensorrt/v8/trt8-minimal.manifest.json",
@@ -101,7 +101,7 @@
     {
       "candidateId": "debug-listener-interface-info-design-004",
       "additionalManagedSources": [
-        "src/JYPPX.TensorRtSharp/TensorRtDebugListenerCallbackOwner.cs"
+        "src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerCallbackOwner.cs"
       ]
     }
   ],

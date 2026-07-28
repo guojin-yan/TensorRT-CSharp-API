@@ -1501,6 +1501,42 @@ JYPPX_C_API(BridgeStatusCode) jyppx_cuda_primary_execution_context_release_wrapp
 // generated from manifest id=cuda-query-runtime-info
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_query_runtime_info(JYPPX_CudaRuntimeInfo* out_info);
 
+// generated from manifest id=cuda-rtc-get-dependency-diagnostic-copied-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_rtc_get_dependency_diagnostic_safe(char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+
+// generated from manifest id=cuda-rtc-get-loaded-library-name-copied-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_rtc_get_loaded_library_name_safe(char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+
+// generated from manifest id=cuda-rtc-program-add-header-retained-copy-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_rtc_program_add_header_safe(JYPPX_CudaRtcProgram* program, const uint8_t* header_source, size_t header_source_size, const uint8_t* include_name, size_t include_name_size);
+
+// generated from manifest id=cuda-rtc-program-add-name-expression-retained-copy-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_rtc_program_add_name_expression_safe(JYPPX_CudaRtcProgram* program, const uint8_t* expression, size_t expression_size);
+
+// generated from manifest id=cuda-rtc-program-compile-retained-options-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_rtc_program_compile_safe(JYPPX_CudaRtcProgram* program, const char** options, uint32_t option_count, int32_t* out_compiler_result);
+
+// generated from manifest id=cuda-rtc-program-copy-artifact-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_rtc_program_copy_artifact_safe(JYPPX_CudaRtcProgram* program, int32_t artifact_kind, uint8_t* output_buffer, size_t output_buffer_size, size_t* out_written_size);
+
+// generated from manifest id=cuda-rtc-program-create-retained-source-owner-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_rtc_program_create_safe(const uint8_t* source, size_t source_size, const uint8_t* program_name, size_t program_name_size, JYPPX_CudaRtcProgram** out_program);
+
+// generated from manifest id=cuda-rtc-program-destroy-idempotent-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_rtc_program_destroy_safe(JYPPX_CudaRtcProgram* program);
+
+// generated from manifest id=cuda-rtc-program-get-log-copied-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_rtc_program_get_log_safe(JYPPX_CudaRtcProgram* program, uint8_t* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+
+// generated from manifest id=cuda-rtc-program-get-lowered-name-copied-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_rtc_program_get_lowered_name_safe(JYPPX_CudaRtcProgram* program, uint32_t expression_index, uint8_t* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+
+// generated from manifest id=cuda-rtc-program-try-get-artifact-size-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_rtc_program_try_get_artifact_size_safe(JYPPX_CudaRtcProgram* program, int32_t artifact_kind, JYPPX_Boolean* out_available, size_t* out_size);
+
+// generated from manifest id=cuda-rtc-query-capability-copied-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_rtc_query_capability_safe(JYPPX_CudaRtcCapabilityInfo* out_info);
+
 // generated from manifest id=cuda-set-device
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_set_device(int32_t device);
 

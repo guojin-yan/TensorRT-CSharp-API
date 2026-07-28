@@ -1,0 +1,170 @@
+{
+  "$schema": "../bridge-api.schema.json",
+  "module": "cuda",
+  "versionLine": "common",
+  "apis": [
+    {
+      "id": "cuda-rtc-query-capability-copied-safe",
+      "entryPoint": "jyppx_cuda_rtc_query_capability_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_CUDA_RTC_OPTIONAL_DYNAMIC",
+      "parameters": [
+        { "name": "out_info", "type": "JYPPX_CudaRtcCapabilityInfo*", "direction": "out", "moduleManagedType": "out NativeCudaRtcCapabilityInfo" }
+      ]
+    },
+    {
+      "id": "cuda-rtc-get-loaded-library-name-copied-safe",
+      "entryPoint": "jyppx_cuda_rtc_get_loaded_library_name_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_CUDA_RTC_OPTIONAL_DYNAMIC",
+      "parameters": [
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "cuda-rtc-get-dependency-diagnostic-copied-safe",
+      "entryPoint": "jyppx_cuda_rtc_get_dependency_diagnostic_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_CUDA_RTC_OPTIONAL_DYNAMIC",
+      "parameters": [
+        { "name": "output_buffer", "type": "char*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "cuda-rtc-program-create-retained-source-owner-safe",
+      "entryPoint": "jyppx_cuda_rtc_program_create_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_CUDA_RTC_OPTIONAL_DYNAMIC",
+      "parameters": [
+        { "name": "source", "type": "const uint8_t*", "direction": "in", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "source_size", "type": "size_t", "direction": "in" },
+        { "name": "program_name", "type": "const uint8_t*", "direction": "in", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "program_name_size", "type": "size_t", "direction": "in" },
+        { "name": "out_program", "type": "JYPPX_CudaRtcProgram**", "direction": "out", "ownership": "caller-destroys" }
+      ]
+    },
+    {
+      "id": "cuda-rtc-program-add-header-retained-copy-safe",
+      "entryPoint": "jyppx_cuda_rtc_program_add_header_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_CUDA_RTC_OPTIONAL_DYNAMIC",
+      "parameters": [
+        { "name": "program", "type": "JYPPX_CudaRtcProgram*", "direction": "in" },
+        { "name": "header_source", "type": "const uint8_t*", "direction": "in", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "header_source_size", "type": "size_t", "direction": "in" },
+        { "name": "include_name", "type": "const uint8_t*", "direction": "in", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "include_name_size", "type": "size_t", "direction": "in" }
+      ]
+    },
+    {
+      "id": "cuda-rtc-program-add-name-expression-retained-copy-safe",
+      "entryPoint": "jyppx_cuda_rtc_program_add_name_expression_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_CUDA_RTC_OPTIONAL_DYNAMIC",
+      "parameters": [
+        { "name": "program", "type": "JYPPX_CudaRtcProgram*", "direction": "in" },
+        { "name": "expression", "type": "const uint8_t*", "direction": "in", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "expression_size", "type": "size_t", "direction": "in" }
+      ]
+    },
+    {
+      "id": "cuda-rtc-program-compile-retained-options-safe",
+      "entryPoint": "jyppx_cuda_rtc_program_compile_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_CUDA_RTC_OPTIONAL_DYNAMIC",
+      "parameters": [
+        { "name": "program", "type": "JYPPX_CudaRtcProgram*", "direction": "in" },
+        { "name": "options", "type": "const char**", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "option_count", "type": "uint32_t", "direction": "in" },
+        { "name": "out_compiler_result", "type": "int32_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "cuda-rtc-program-get-log-copied-safe",
+      "entryPoint": "jyppx_cuda_rtc_program_get_log_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_CUDA_RTC_OPTIONAL_DYNAMIC",
+      "parameters": [
+        { "name": "program", "type": "JYPPX_CudaRtcProgram*", "direction": "in" },
+        { "name": "output_buffer", "type": "uint8_t*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "cuda-rtc-program-try-get-artifact-size-safe",
+      "entryPoint": "jyppx_cuda_rtc_program_try_get_artifact_size_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_CUDA_RTC_OPTIONAL_DYNAMIC",
+      "parameters": [
+        { "name": "program", "type": "JYPPX_CudaRtcProgram*", "direction": "in" },
+        { "name": "artifact_kind", "type": "int32_t", "direction": "in" },
+        { "name": "out_available", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" },
+        { "name": "out_size", "type": "size_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "cuda-rtc-program-copy-artifact-safe",
+      "entryPoint": "jyppx_cuda_rtc_program_copy_artifact_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_CUDA_RTC_OPTIONAL_DYNAMIC",
+      "parameters": [
+        { "name": "program", "type": "JYPPX_CudaRtcProgram*", "direction": "in" },
+        { "name": "artifact_kind", "type": "int32_t", "direction": "in" },
+        { "name": "output_buffer", "type": "uint8_t*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in" },
+        { "name": "out_written_size", "type": "size_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "cuda-rtc-program-get-lowered-name-copied-safe",
+      "entryPoint": "jyppx_cuda_rtc_program_get_lowered_name_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_CUDA_RTC_OPTIONAL_DYNAMIC",
+      "parameters": [
+        { "name": "program", "type": "JYPPX_CudaRtcProgram*", "direction": "in" },
+        { "name": "expression_index", "type": "uint32_t", "direction": "in" },
+        { "name": "output_buffer", "type": "uint8_t*", "direction": "out", "managedType": "byte[]", "moduleManagedType": "byte[]" },
+        { "name": "output_buffer_size", "type": "size_t", "direction": "in" },
+        { "name": "out_required_size", "type": "size_t*", "direction": "out" }
+      ]
+    },
+    {
+      "id": "cuda-rtc-program-destroy-idempotent-safe",
+      "entryPoint": "jyppx_cuda_rtc_program_destroy_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_CUDA_RTC_OPTIONAL_DYNAMIC",
+      "parameters": [
+        { "name": "program", "type": "JYPPX_CudaRtcProgram*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" }
+      ]
+    }
+  ]
+}

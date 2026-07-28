@@ -9,8 +9,8 @@ public sealed class OnnxParserManagedInputTests
     [Fact]
     public void ManagedOnnxParserInputOverloadsCopyIntoManagedByteArrays()
     {
-        string parser = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOnnxParser.cs");
-        string modelSupport = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOnnxParser.ModelSupport.cs");
+        string parser = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParser.cs");
+        string modelSupport = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParser.ModelSupport.cs");
         string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.cs");
         string supportInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.OnnxParserSupport.cs");
 

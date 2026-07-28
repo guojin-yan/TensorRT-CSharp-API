@@ -59,7 +59,7 @@ public sealed class DebugListenerCallbackProofGapReportTests
         AssertNoRawPointerTypes(typeof(TensorRtDebugListenerCallbackProofGapReport));
         AssertNoRawPointerTypes(typeof(TensorRtDebugListenerCallbackProofGapReportResult));
 
-        string source = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerCallbackProofGapReport.cs");
+        string source = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerCallbackProofGapReport.cs");
         Assert.DoesNotContain("public IntPtr", source);
         Assert.DoesNotContain("public UIntPtr", source);
         Assert.DoesNotContain("public nint", source);
@@ -74,7 +74,7 @@ public sealed class DebugListenerCallbackProofGapReportTests
     [Fact]
     public void SourceSmokePackageReadinessAndDocsCarryGapReportNonProofMarkers()
     {
-        string source = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerCallbackProofGapReport.cs");
+        string source = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerCallbackProofGapReport.cs");
         string smoke = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
         string packageConsumer = ReadSource("eng", "Test-PackageConsumer.ps1");
         string bridgeConsumer = ReadSource("eng", "Test-BridgePackageConsumer.ps1");

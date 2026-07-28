@@ -103,7 +103,7 @@ public sealed class DebugListenerAttachDetachDesignGateTests
     [Fact]
     public void ReadinessSmokeAndDocsKeepGateSeparateFromRuntimeProof()
     {
-        string gateSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerAttachDetachDesignGate.cs");
+        string gateSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerAttachDetachDesignGate.cs");
         string smokeProgram = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
         string readiness = ReadSource("eng", "Test-RuntimePackageReadiness.ps1");
         string packageConsumer = ReadSource("eng", "Test-PackageConsumer.ps1");

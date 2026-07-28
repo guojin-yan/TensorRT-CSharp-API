@@ -1,0 +1,535 @@
+﻿{
+    "schemaVersion":  1,
+    "recordKind":  "cuda-rtc-vendor-capability-matrix",
+    "auditedLocalDate":  "2026-07-28",
+    "performsDownload":  false,
+    "performsPublish":  false,
+    "windows":  [
+                    {
+                        "toolkitVersion":  "11.8",
+                        "platform":  "windows",
+                        "architecture":  "x64",
+                        "evidenceState":  "local-header-import-lib-dll-export-verified",
+                        "headerRelativePath":  "include/nvrtc.h",
+                        "importLibraryRelativePath":  "lib/x64/nvrtc.lib",
+                        "runtimeRelativePath":  "bin/nvrtc64_112_0.dll",
+                        "runtimeSizeBytes":  40629248,
+                        "runtimeSha256":  "7a1d6c894d9db5f043e7cca5ea328bc4f29c45aa7af3f0dd1bde1f31f02b41bd",
+                        "builtinsRelativePath":  "bin/nvrtc-builtins64_118.dll",
+                        "builtinsSizeBytes":  7909888,
+                        "builtinsSha256":  "8642cd940445f0eb79ae73c04b3dfb8c8e61fc3aca191dc2239b28a9cb6964d8",
+                        "symbols":  {
+                                        "nvrtcVersion":  {
+                                                             "headerDeclared":  true,
+                                                             "importLibraryMember":  true,
+                                                             "runtimeExported":  true
+                                                         },
+                                        "nvrtcGetErrorString":  {
+                                                                    "headerDeclared":  true,
+                                                                    "importLibraryMember":  true,
+                                                                    "runtimeExported":  true
+                                                                },
+                                        "nvrtcCreateProgram":  {
+                                                                   "headerDeclared":  true,
+                                                                   "importLibraryMember":  true,
+                                                                   "runtimeExported":  true
+                                                               },
+                                        "nvrtcDestroyProgram":  {
+                                                                    "headerDeclared":  true,
+                                                                    "importLibraryMember":  true,
+                                                                    "runtimeExported":  true
+                                                                },
+                                        "nvrtcCompileProgram":  {
+                                                                    "headerDeclared":  true,
+                                                                    "importLibraryMember":  true,
+                                                                    "runtimeExported":  true
+                                                                },
+                                        "nvrtcGetProgramLogSize":  {
+                                                                       "headerDeclared":  true,
+                                                                       "importLibraryMember":  true,
+                                                                       "runtimeExported":  true
+                                                                   },
+                                        "nvrtcGetProgramLog":  {
+                                                                   "headerDeclared":  true,
+                                                                   "importLibraryMember":  true,
+                                                                   "runtimeExported":  true
+                                                               },
+                                        "nvrtcGetPTXSize":  {
+                                                                "headerDeclared":  true,
+                                                                "importLibraryMember":  true,
+                                                                "runtimeExported":  true
+                                                            },
+                                        "nvrtcGetPTX":  {
+                                                            "headerDeclared":  true,
+                                                            "importLibraryMember":  true,
+                                                            "runtimeExported":  true
+                                                        },
+                                        "nvrtcGetCUBINSize":  {
+                                                                  "headerDeclared":  true,
+                                                                  "importLibraryMember":  true,
+                                                                  "runtimeExported":  true
+                                                              },
+                                        "nvrtcGetCUBIN":  {
+                                                              "headerDeclared":  true,
+                                                              "importLibraryMember":  true,
+                                                              "runtimeExported":  true
+                                                          },
+                                        "nvrtcGetLTOIRSize":  {
+                                                                  "headerDeclared":  false,
+                                                                  "importLibraryMember":  false,
+                                                                  "runtimeExported":  false
+                                                              },
+                                        "nvrtcGetLTOIR":  {
+                                                              "headerDeclared":  false,
+                                                              "importLibraryMember":  false,
+                                                              "runtimeExported":  false
+                                                          },
+                                        "nvrtcGetNVVMSize":  {
+                                                                 "headerDeclared":  true,
+                                                                 "importLibraryMember":  true,
+                                                                 "runtimeExported":  true
+                                                             },
+                                        "nvrtcGetNVVM":  {
+                                                             "headerDeclared":  true,
+                                                             "importLibraryMember":  true,
+                                                             "runtimeExported":  true
+                                                         },
+                                        "nvrtcAddNameExpression":  {
+                                                                       "headerDeclared":  true,
+                                                                       "importLibraryMember":  true,
+                                                                       "runtimeExported":  true
+                                                                   },
+                                        "nvrtcGetLoweredName":  {
+                                                                    "headerDeclared":  true,
+                                                                    "importLibraryMember":  true,
+                                                                    "runtimeExported":  true
+                                                                }
+                                    },
+                        "capabilities":  {
+                                             "compileLog":  true,
+                                             "ptx":  true,
+                                             "cubin":  true,
+                                             "ltoIr":  false,
+                                             "deprecatedNvvm":  true,
+                                             "nameExpressions":  true
+                                         }
+                    },
+                    {
+                        "toolkitVersion":  "12.1",
+                        "platform":  "windows",
+                        "architecture":  "x64",
+                        "evidenceState":  "local-header-import-lib-dll-export-verified",
+                        "headerRelativePath":  "include/nvrtc.h",
+                        "importLibraryRelativePath":  "lib/x64/nvrtc.lib",
+                        "runtimeRelativePath":  "bin/nvrtc64_120_0.dll",
+                        "runtimeSizeBytes":  42161152,
+                        "runtimeSha256":  "62b0975b7fe2940bfb367e257d734ef1a7cd512fcf3b53a5660082c742b244bb",
+                        "builtinsRelativePath":  "bin/nvrtc-builtins64_121.dll",
+                        "builtinsSizeBytes":  7001600,
+                        "builtinsSha256":  "0baa6563c0edfa4a36744f0d680398619b596d3167eeb0f29fa7d3f2ec5b6f18",
+                        "symbols":  {
+                                        "nvrtcVersion":  {
+                                                             "headerDeclared":  true,
+                                                             "importLibraryMember":  true,
+                                                             "runtimeExported":  true
+                                                         },
+                                        "nvrtcGetErrorString":  {
+                                                                    "headerDeclared":  true,
+                                                                    "importLibraryMember":  true,
+                                                                    "runtimeExported":  true
+                                                                },
+                                        "nvrtcCreateProgram":  {
+                                                                   "headerDeclared":  true,
+                                                                   "importLibraryMember":  true,
+                                                                   "runtimeExported":  true
+                                                               },
+                                        "nvrtcDestroyProgram":  {
+                                                                    "headerDeclared":  true,
+                                                                    "importLibraryMember":  true,
+                                                                    "runtimeExported":  true
+                                                                },
+                                        "nvrtcCompileProgram":  {
+                                                                    "headerDeclared":  true,
+                                                                    "importLibraryMember":  true,
+                                                                    "runtimeExported":  true
+                                                                },
+                                        "nvrtcGetProgramLogSize":  {
+                                                                       "headerDeclared":  true,
+                                                                       "importLibraryMember":  true,
+                                                                       "runtimeExported":  true
+                                                                   },
+                                        "nvrtcGetProgramLog":  {
+                                                                   "headerDeclared":  true,
+                                                                   "importLibraryMember":  true,
+                                                                   "runtimeExported":  true
+                                                               },
+                                        "nvrtcGetPTXSize":  {
+                                                                "headerDeclared":  true,
+                                                                "importLibraryMember":  true,
+                                                                "runtimeExported":  true
+                                                            },
+                                        "nvrtcGetPTX":  {
+                                                            "headerDeclared":  true,
+                                                            "importLibraryMember":  true,
+                                                            "runtimeExported":  true
+                                                        },
+                                        "nvrtcGetCUBINSize":  {
+                                                                  "headerDeclared":  true,
+                                                                  "importLibraryMember":  true,
+                                                                  "runtimeExported":  true
+                                                              },
+                                        "nvrtcGetCUBIN":  {
+                                                              "headerDeclared":  true,
+                                                              "importLibraryMember":  true,
+                                                              "runtimeExported":  true
+                                                          },
+                                        "nvrtcGetLTOIRSize":  {
+                                                                  "headerDeclared":  true,
+                                                                  "importLibraryMember":  true,
+                                                                  "runtimeExported":  true
+                                                              },
+                                        "nvrtcGetLTOIR":  {
+                                                              "headerDeclared":  true,
+                                                              "importLibraryMember":  true,
+                                                              "runtimeExported":  true
+                                                          },
+                                        "nvrtcGetNVVMSize":  {
+                                                                 "headerDeclared":  true,
+                                                                 "importLibraryMember":  true,
+                                                                 "runtimeExported":  true
+                                                             },
+                                        "nvrtcGetNVVM":  {
+                                                             "headerDeclared":  true,
+                                                             "importLibraryMember":  true,
+                                                             "runtimeExported":  true
+                                                         },
+                                        "nvrtcAddNameExpression":  {
+                                                                       "headerDeclared":  true,
+                                                                       "importLibraryMember":  true,
+                                                                       "runtimeExported":  true
+                                                                   },
+                                        "nvrtcGetLoweredName":  {
+                                                                    "headerDeclared":  true,
+                                                                    "importLibraryMember":  true,
+                                                                    "runtimeExported":  true
+                                                                }
+                                    },
+                        "capabilities":  {
+                                             "compileLog":  true,
+                                             "ptx":  true,
+                                             "cubin":  true,
+                                             "ltoIr":  true,
+                                             "deprecatedNvvm":  true,
+                                             "nameExpressions":  true
+                                         }
+                    },
+                    {
+                        "toolkitVersion":  "12.9",
+                        "platform":  "windows",
+                        "architecture":  "x64",
+                        "evidenceState":  "local-header-import-lib-dll-export-verified",
+                        "headerRelativePath":  "include/nvrtc.h",
+                        "importLibraryRelativePath":  "lib/x64/nvrtc.lib",
+                        "runtimeRelativePath":  "bin/nvrtc64_120_0.dll",
+                        "runtimeSizeBytes":  89833984,
+                        "runtimeSha256":  "69a3b8e00fdf6c64805bd369b037db91f1ac1fb25b3411676b434736df945249",
+                        "builtinsRelativePath":  "bin/nvrtc-builtins64_129.dll",
+                        "builtinsSizeBytes":  7217664,
+                        "builtinsSha256":  "60c0705ef1bcef8de12f442b424e2edc649956611b8d04990ef17abb1df748a2",
+                        "symbols":  {
+                                        "nvrtcVersion":  {
+                                                             "headerDeclared":  true,
+                                                             "importLibraryMember":  true,
+                                                             "runtimeExported":  true
+                                                         },
+                                        "nvrtcGetErrorString":  {
+                                                                    "headerDeclared":  true,
+                                                                    "importLibraryMember":  true,
+                                                                    "runtimeExported":  true
+                                                                },
+                                        "nvrtcCreateProgram":  {
+                                                                   "headerDeclared":  true,
+                                                                   "importLibraryMember":  true,
+                                                                   "runtimeExported":  true
+                                                               },
+                                        "nvrtcDestroyProgram":  {
+                                                                    "headerDeclared":  true,
+                                                                    "importLibraryMember":  true,
+                                                                    "runtimeExported":  true
+                                                                },
+                                        "nvrtcCompileProgram":  {
+                                                                    "headerDeclared":  true,
+                                                                    "importLibraryMember":  true,
+                                                                    "runtimeExported":  true
+                                                                },
+                                        "nvrtcGetProgramLogSize":  {
+                                                                       "headerDeclared":  true,
+                                                                       "importLibraryMember":  true,
+                                                                       "runtimeExported":  true
+                                                                   },
+                                        "nvrtcGetProgramLog":  {
+                                                                   "headerDeclared":  true,
+                                                                   "importLibraryMember":  true,
+                                                                   "runtimeExported":  true
+                                                               },
+                                        "nvrtcGetPTXSize":  {
+                                                                "headerDeclared":  true,
+                                                                "importLibraryMember":  true,
+                                                                "runtimeExported":  true
+                                                            },
+                                        "nvrtcGetPTX":  {
+                                                            "headerDeclared":  true,
+                                                            "importLibraryMember":  true,
+                                                            "runtimeExported":  true
+                                                        },
+                                        "nvrtcGetCUBINSize":  {
+                                                                  "headerDeclared":  true,
+                                                                  "importLibraryMember":  true,
+                                                                  "runtimeExported":  true
+                                                              },
+                                        "nvrtcGetCUBIN":  {
+                                                              "headerDeclared":  true,
+                                                              "importLibraryMember":  true,
+                                                              "runtimeExported":  true
+                                                          },
+                                        "nvrtcGetLTOIRSize":  {
+                                                                  "headerDeclared":  true,
+                                                                  "importLibraryMember":  true,
+                                                                  "runtimeExported":  true
+                                                              },
+                                        "nvrtcGetLTOIR":  {
+                                                              "headerDeclared":  true,
+                                                              "importLibraryMember":  true,
+                                                              "runtimeExported":  true
+                                                          },
+                                        "nvrtcGetNVVMSize":  {
+                                                                 "headerDeclared":  true,
+                                                                 "importLibraryMember":  true,
+                                                                 "runtimeExported":  true
+                                                             },
+                                        "nvrtcGetNVVM":  {
+                                                             "headerDeclared":  true,
+                                                             "importLibraryMember":  true,
+                                                             "runtimeExported":  true
+                                                         },
+                                        "nvrtcAddNameExpression":  {
+                                                                       "headerDeclared":  true,
+                                                                       "importLibraryMember":  true,
+                                                                       "runtimeExported":  true
+                                                                   },
+                                        "nvrtcGetLoweredName":  {
+                                                                    "headerDeclared":  true,
+                                                                    "importLibraryMember":  true,
+                                                                    "runtimeExported":  true
+                                                                }
+                                    },
+                        "capabilities":  {
+                                             "compileLog":  true,
+                                             "ptx":  true,
+                                             "cubin":  true,
+                                             "ltoIr":  true,
+                                             "deprecatedNvvm":  true,
+                                             "nameExpressions":  true
+                                         }
+                    },
+                    {
+                        "toolkitVersion":  "13.2",
+                        "platform":  "windows",
+                        "architecture":  "x64",
+                        "evidenceState":  "local-header-import-lib-dll-export-verified",
+                        "headerRelativePath":  "include/nvrtc.h",
+                        "importLibraryRelativePath":  "lib/x64/nvrtc.lib",
+                        "runtimeRelativePath":  "bin/x64/nvrtc64_130_0.dll",
+                        "runtimeSizeBytes":  94861936,
+                        "runtimeSha256":  "d9adefe6df8a585ddbfabeab4a3a374d7601faf32d31316df933be71bcb14240",
+                        "builtinsRelativePath":  "bin/x64/nvrtc-builtins64_132.dll",
+                        "builtinsSizeBytes":  4535408,
+                        "builtinsSha256":  "b1a3f27ae868e40b2fd6b846bae9488478d735b35fe96baf5d1808ebde2ff12f",
+                        "symbols":  {
+                                        "nvrtcVersion":  {
+                                                             "headerDeclared":  true,
+                                                             "importLibraryMember":  true,
+                                                             "runtimeExported":  true
+                                                         },
+                                        "nvrtcGetErrorString":  {
+                                                                    "headerDeclared":  true,
+                                                                    "importLibraryMember":  true,
+                                                                    "runtimeExported":  true
+                                                                },
+                                        "nvrtcCreateProgram":  {
+                                                                   "headerDeclared":  true,
+                                                                   "importLibraryMember":  true,
+                                                                   "runtimeExported":  true
+                                                               },
+                                        "nvrtcDestroyProgram":  {
+                                                                    "headerDeclared":  true,
+                                                                    "importLibraryMember":  true,
+                                                                    "runtimeExported":  true
+                                                                },
+                                        "nvrtcCompileProgram":  {
+                                                                    "headerDeclared":  true,
+                                                                    "importLibraryMember":  true,
+                                                                    "runtimeExported":  true
+                                                                },
+                                        "nvrtcGetProgramLogSize":  {
+                                                                       "headerDeclared":  true,
+                                                                       "importLibraryMember":  true,
+                                                                       "runtimeExported":  true
+                                                                   },
+                                        "nvrtcGetProgramLog":  {
+                                                                   "headerDeclared":  true,
+                                                                   "importLibraryMember":  true,
+                                                                   "runtimeExported":  true
+                                                               },
+                                        "nvrtcGetPTXSize":  {
+                                                                "headerDeclared":  true,
+                                                                "importLibraryMember":  true,
+                                                                "runtimeExported":  true
+                                                            },
+                                        "nvrtcGetPTX":  {
+                                                            "headerDeclared":  true,
+                                                            "importLibraryMember":  true,
+                                                            "runtimeExported":  true
+                                                        },
+                                        "nvrtcGetCUBINSize":  {
+                                                                  "headerDeclared":  true,
+                                                                  "importLibraryMember":  true,
+                                                                  "runtimeExported":  true
+                                                              },
+                                        "nvrtcGetCUBIN":  {
+                                                              "headerDeclared":  true,
+                                                              "importLibraryMember":  true,
+                                                              "runtimeExported":  true
+                                                          },
+                                        "nvrtcGetLTOIRSize":  {
+                                                                  "headerDeclared":  true,
+                                                                  "importLibraryMember":  true,
+                                                                  "runtimeExported":  true
+                                                              },
+                                        "nvrtcGetLTOIR":  {
+                                                              "headerDeclared":  true,
+                                                              "importLibraryMember":  true,
+                                                              "runtimeExported":  true
+                                                          },
+                                        "nvrtcGetNVVMSize":  {
+                                                                 "headerDeclared":  false,
+                                                                 "importLibraryMember":  false,
+                                                                 "runtimeExported":  false
+                                                             },
+                                        "nvrtcGetNVVM":  {
+                                                             "headerDeclared":  false,
+                                                             "importLibraryMember":  false,
+                                                             "runtimeExported":  false
+                                                         },
+                                        "nvrtcAddNameExpression":  {
+                                                                       "headerDeclared":  true,
+                                                                       "importLibraryMember":  true,
+                                                                       "runtimeExported":  true
+                                                                   },
+                                        "nvrtcGetLoweredName":  {
+                                                                    "headerDeclared":  true,
+                                                                    "importLibraryMember":  true,
+                                                                    "runtimeExported":  true
+                                                                }
+                                    },
+                        "capabilities":  {
+                                             "compileLog":  true,
+                                             "ptx":  true,
+                                             "cubin":  true,
+                                             "ltoIr":  true,
+                                             "deprecatedNvvm":  false,
+                                             "nameExpressions":  true
+                                         }
+                    }
+                ],
+    "linux":  [
+                  {
+                      "toolkitVersion":  "11.8",
+                      "platform":  "linux",
+                      "architecture":  "x64",
+                      "evidenceState":  "unverified-local-assets-not-found",
+                      "localAssetSearchRoots":  [
+                                                    "E:/",
+                                                    "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA"
+                                                ],
+                      "localLibNvrtcAssetCount":  0,
+                      "soname":  null,
+                      "symbols":  null,
+                      "capabilities":  null,
+                      "boundary":  "No local Linux .so or package payload was found on the audited Windows host. Loader candidates are implementation probes, not SONAME proof."
+                  },
+                  {
+                      "toolkitVersion":  "12.1",
+                      "platform":  "linux",
+                      "architecture":  "x64",
+                      "evidenceState":  "unverified-local-assets-not-found",
+                      "localAssetSearchRoots":  [
+                                                    "E:/",
+                                                    "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA"
+                                                ],
+                      "localLibNvrtcAssetCount":  0,
+                      "soname":  null,
+                      "symbols":  null,
+                      "capabilities":  null,
+                      "boundary":  "No local Linux .so or package payload was found on the audited Windows host. Loader candidates are implementation probes, not SONAME proof."
+                  },
+                  {
+                      "toolkitVersion":  "12.9",
+                      "platform":  "linux",
+                      "architecture":  "x64",
+                      "evidenceState":  "unverified-local-assets-not-found",
+                      "localAssetSearchRoots":  [
+                                                    "E:/",
+                                                    "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA"
+                                                ],
+                      "localLibNvrtcAssetCount":  0,
+                      "soname":  null,
+                      "symbols":  null,
+                      "capabilities":  null,
+                      "boundary":  "No local Linux .so or package payload was found on the audited Windows host. Loader candidates are implementation probes, not SONAME proof."
+                  },
+                  {
+                      "toolkitVersion":  "13.2",
+                      "platform":  "linux",
+                      "architecture":  "x64",
+                      "evidenceState":  "unverified-local-assets-not-found",
+                      "localAssetSearchRoots":  [
+                                                    "E:/",
+                                                    "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA"
+                                                ],
+                      "localLibNvrtcAssetCount":  0,
+                      "soname":  null,
+                      "symbols":  null,
+                      "capabilities":  null,
+                      "boundary":  "No local Linux .so or package payload was found on the audited Windows host. Loader candidates are implementation probes, not SONAME proof."
+                  }
+              ],
+    "loaderContract":  {
+                           "dependencyMode":  "optional-dynamic",
+                           "exactOverrideEnvironmentVariable":  "JYPPX_NVRTC_LIBRARY",
+                           "windowsCandidates":  [
+                                                     "nvrtc64_130_0.dll",
+                                                     "nvrtc64_120_0.dll",
+                                                     "nvrtc64_112_0.dll"
+                                                 ],
+                           "linuxCandidates":  [
+                                                   "libnvrtc.so",
+                                                   "libnvrtc.so.13",
+                                                   "libnvrtc.so.12",
+                                                   "libnvrtc.so.11.2"
+                                               ],
+                           "coreBridgeStaticNvrtcLink":  false
+                       },
+    "packagingContract":  {
+                              "bridgeOnlyBundlesNvrtc":  false,
+                              "bridgeOnlyConsumerInstallsToolkit":  true,
+                              "fullRuntimeRequiresNvrtcAndMatchingBuiltins":  true,
+                              "redistributionApprovalState":  "pending-owner-and-license-review"
+                          },
+    "proofBoundary":  {
+                          "vendorAuditIsRuntimeProof":  false,
+                          "compileOnlyIsKernelRuntimeProof":  false,
+                          "artifactHashIsCorrectnessProof":  false,
+                          "localWindowsIsLinuxProof":  false
+                      }
+}

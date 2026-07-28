@@ -182,9 +182,9 @@ public sealed class RuntimeDeserializationBoundaryPrecheckTests
     [Fact]
     public void ManagedDeserializeSurfaceCopiesCallerBuffersAndKeepsDirectRowsDeferred()
     {
-        string precheckSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtRuntimeDeserializationBoundaryPrecheck.cs");
-        string diagnosticsSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtRuntimeDeserializationDependencyDiagnostics.cs");
-        string runtimeSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtRuntime.cs");
+        string precheckSource = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntimeDeserializationBoundaryPrecheck.cs");
+        string diagnosticsSource = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntimeDeserializationDependencyDiagnostics.cs");
+        string runtimeSource = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntime.cs");
         string nativeBridgeApi = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.cs");
         string smokeProgram = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
         string designDoc = ReadSource("docs", "articles", "zh-cn", "runtime-deserialization-boundary-precheck.md");

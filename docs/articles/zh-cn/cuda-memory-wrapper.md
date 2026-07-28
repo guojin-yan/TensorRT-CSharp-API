@@ -39,7 +39,7 @@ flowchart TD
 
 ## CudaMemory 的 Owner 模型
 
-`CudaMemory` 实现位于 `src/JYPPX.CudaSharp/CudaMemory.cs`。构造函数验证 size 大于 0，通过 native bridge
+`CudaMemory` 实现位于 `src/JYPPX.CudaSharp/Memory/CudaMemory.cs`。构造函数验证 size 大于 0，通过 native bridge
 分配 device memory，并将内部 `SafeCudaMemoryHandle` 保存在对象内。public 属性只公开：
 
 - `SizeInBytes`
@@ -245,7 +245,7 @@ Portable/mapped 能力依赖设备和 runtime。创建前读取 device attribute
 当应用已有 unmanaged/固定 host region 时，可使用 `CudaRegisteredHostMemory` 管理 `cudaHostRegister` 生命周期。
 注册对象必须比所有异步 copy 活得久，解除注册前同步相关 stream。不要注册 GC 可移动数组后丢失 pin owner。
 
-相关 overload 位于 `src/JYPPX.CudaSharp/CudaMemory.RegisteredHost.cs`。
+相关 overload 位于 `src/JYPPX.CudaSharp/Memory/CudaMemory.RegisteredHost.cs`。
 
 ## Pitched、Array 与二维数据
 

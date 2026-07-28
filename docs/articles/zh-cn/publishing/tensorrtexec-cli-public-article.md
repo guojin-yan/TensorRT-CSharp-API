@@ -37,12 +37,12 @@ applications/TensorRtExec/tensor-rt-exec-report.schema.json
 共享工具层：
 
 ```text
-src/JYPPX.TensorRtSharp.Tools/TrtexecLikeParser.cs
-src/JYPPX.TensorRtSharp.Tools/TrtexecLikeOptions.cs
-src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildOptions.cs
-src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildService.cs
-src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildDiagnostics.cs
-src/JYPPX.TensorRtSharp.Tools/OnnxEngineRuntimeArtifactWriter.cs
+src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeParser.cs
+src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeOptions.cs
+src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildOptions.cs
+src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.cs
+src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildDiagnostics.cs
+src/JYPPX.TensorRtSharp.Tools/Artifacts/OnnxEngineRuntimeArtifactWriter.cs
 ```
 
 `TensorRtExecCommand` 负责 CLI parse、执行和 console summary；`TensorRtExecOptions` 负责把 trtexec-like 参数归一化为应用配置；`TensorRtExecService` 调用共享 build/report 服务；`TensorRtExecReport` 是面向 CLI/WinForms 的报告摘要；`MainForm` 使用同一套 options/service，避免 GUI 和 CLI 语义漂移。

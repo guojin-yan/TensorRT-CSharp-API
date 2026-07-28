@@ -58,8 +58,8 @@ public sealed class PluginCreatorV3MetadataDesignGateTests
             "IVersionedInterface::getInterfaceInfo");
 
         AssertEvidenceContains(candidate, "nativeSources", "native/src/tensorrt/common/plugin_registry_inventory.inc");
-        AssertEvidenceContains(candidate, "managedSources", "src/JYPPX.TensorRtSharp/TensorRtPluginRegistryInventory.cs");
-        AssertEvidenceContains(candidate, "managedSources", "src/JYPPX.TensorRtSharp/TensorRtPluginCreatorV3MetadataDesignGate.cs");
+        AssertEvidenceContains(candidate, "managedSources", "src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginRegistryInventory.cs");
+        AssertEvidenceContains(candidate, "managedSources", "src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginCreatorV3MetadataDesignGate.cs");
         AssertEvidenceContains(candidate, "qualityTests", "tests/JYPPX.ProjectQuality.Tests/PluginCreatorV3MetadataDesignGateTests.cs");
         AssertEvidenceContains(candidate, "publicSurface", "TensorRtPluginCreatorV3MetadataDesignGate.EvaluateKnownSurface");
 

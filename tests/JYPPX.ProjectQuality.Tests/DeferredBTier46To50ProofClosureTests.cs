@@ -44,11 +44,11 @@ public sealed class DeferredBTier46To50ProofClosureTests
     {
         string wrappers = string.Join(
             '\n',
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilderConfig.Trt11RuntimeControls.cs"),
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtEngine.cs"),
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs"),
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOnnxParser.cs"),
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOnnxParserRefitter.cs"));
+            ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.Trt11RuntimeControls.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParser.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParserRefitter.cs"));
         string article = ReadSource("docs", "articles", "zh-cn", "deferred-btier-46-50-proof-closure.md");
         string toc = ReadSource("docs", "toc.yml");
 

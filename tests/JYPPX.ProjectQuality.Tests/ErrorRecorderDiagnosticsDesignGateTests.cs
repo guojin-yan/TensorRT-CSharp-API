@@ -108,10 +108,10 @@ public sealed class ErrorRecorderDiagnosticsDesignGateTests
     [Fact]
     public void DocsSmokeAndCoverageKeepDirectRecorderRowsDeferred()
     {
-        string gateSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtErrorRecorderDiagnosticsDesignGate.cs");
-        string snapshotSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtErrorRecorderSnapshot.cs");
-        string runtimeWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtRuntime.Trt11Controls.cs");
-        string refitterWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtRefitter.Trt11Controls.cs");
+        string gateSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Monitoring", "TensorRtErrorRecorderDiagnosticsDesignGate.cs");
+        string snapshotSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Monitoring", "TensorRtErrorRecorderSnapshot.cs");
+        string runtimeWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntime.Trt11Controls.cs");
+        string refitterWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Refit", "TensorRtRefitter.Trt11Controls.cs");
         string smokeProgram = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
         string designDoc = ReadSource("docs", "articles", "zh-cn", "error-recorder-diagnostics-design-gate.md");
         string snapshotDoc = ReadSource("docs", "articles", "zh-cn", "error-recorder-snapshot-guide.md");

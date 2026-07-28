@@ -45,9 +45,9 @@ public sealed class CudaGraphNodeIdentityBoundaryTests
     [Fact]
     public void ManagedCudaGraphNodeIdentityApiUsesValueTokensAndDoesNotExposeNativePointers()
     {
-        string graph = ReadSource("src", "JYPPX.CudaSharp", "CudaGraph.cs");
-        string graphExec = ReadSource("src", "JYPPX.CudaSharp", "CudaGraphExec.cs");
-        string graphNode = ReadSource("src", "JYPPX.CudaSharp", "CudaGraphNode.cs");
+        string graph = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.cs");
+        string graphExec = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphExec.cs");
+        string graphNode = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphNode.cs");
         string interopGraph = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "Graph", "NativeCudaApi.Graph.cs");
         string interopIdentity = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "Graph", "NativeCudaApi.GraphMemory.cs");
 

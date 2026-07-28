@@ -28,21 +28,21 @@ public sealed class EngineBuilderReadonlyCandidateImplementationEvidenceTests
         AssertEvidenceContains(builderConfigCandidate, "publicSurface", "TensorRtBuilderConfig.GetDeploymentSnapshot");
         AssertEvidenceContains(builderConfigCandidate, "publicSurface", "TensorRtBuilderConfig.SerializedPluginPathCountCompatibility");
 
-        string engineApi = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtEngine.cs");
-        string engineProfileApi = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtEngine.Trt11FifteenthBatch.cs");
-        string engineBindingReport = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtEngineBindingReport.cs");
-        string engineTensorBinding = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtEngineTensorBinding.cs");
-        string engineDeploymentSnapshot = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtEngineDeploymentSnapshot.cs");
-        string engineInspector = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtEngineInspector.cs") +
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtEngineInspector.Trt11Diagnostics.cs");
-        string layerTensorMetadata = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtLayer.Trt11LayerTensorMetadata.cs");
-        string layerTensorMetadataModel = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtLayerTensorMetadata.cs");
-        string builderConfigApi = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilderConfig.cs") +
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilderConfig.Trt11RuntimeControls.cs") +
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilderConfig.Trt11Diagnostics.cs") +
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilderConfig.Trt11DeploymentSnapshot.cs");
-        string builderConfigSnapshot = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilderConfigDeploymentSnapshot.cs");
-        string builderConfigSerializedPluginSnapshot = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilderConfigSerializedPluginSnapshot.cs");
+        string engineApi = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.cs");
+        string engineProfileApi = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.Trt11FifteenthBatch.cs");
+        string engineBindingReport = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngineBindingReport.cs");
+        string engineTensorBinding = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngineTensorBinding.cs");
+        string engineDeploymentSnapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngineDeploymentSnapshot.cs");
+        string engineInspector = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngineInspector.cs") +
+            ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngineInspector.Trt11Diagnostics.cs");
+        string layerTensorMetadata = ReadSource("src", "JYPPX.TensorRtSharp", "Layers", "TensorRtLayer.Trt11LayerTensorMetadata.cs");
+        string layerTensorMetadataModel = ReadSource("src", "JYPPX.TensorRtSharp", "Layers", "TensorRtLayerTensorMetadata.cs");
+        string builderConfigApi = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.cs") +
+            ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.Trt11RuntimeControls.cs") +
+            ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.Trt11Diagnostics.cs") +
+            ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.Trt11DeploymentSnapshot.cs");
+        string builderConfigSnapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfigDeploymentSnapshot.cs");
+        string builderConfigSerializedPluginSnapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfigSerializedPluginSnapshot.cs");
 
         Assert.Contains("public TensorRtEngineTensorBinding GetTensorBinding", engineApi);
         Assert.Contains("public TensorRtEngineBindingReport GetBindingReport", engineApi);

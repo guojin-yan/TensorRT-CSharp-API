@@ -212,14 +212,14 @@
       ],
       "missingMarkers": [],
       "requiredAnchors": [
-        "src/JYPPX.TensorRtSharp/TensorRtRefitter.cs",
-        "src/JYPPX.TensorRtSharp/TensorRtRefitWeightsBuffer.cs",
+        "src/JYPPX.TensorRtSharp/Refit/TensorRtRefitter.cs",
+        "src/JYPPX.TensorRtSharp/Refit/TensorRtRefitWeightsBuffer.cs",
         "smoke/RefitWeightsSmokeRunner/Program.cs"
       ],
       "missingAnchors": [],
       "repositoryReferences": [
         "smoke/RefitWeightsSmokeRunner",
-        "src/JYPPX.TensorRtSharp/TensorRtRefitter.cs",
+        "src/JYPPX.TensorRtSharp/Refit/TensorRtRefitter.cs",
         "smoke/RefitWeightsSmokeRunner/Program.cs",
         "eng/Test-PackageConsumer.ps1"
       ],
@@ -262,7 +262,7 @@
       ],
       "missingMarkers": [],
       "requiredAnchors": [
-        "src/JYPPX.TensorRtSharp/TensorRtNetworkDefinition.Trt11ModernLayers.cs",
+        "src/JYPPX.TensorRtSharp/Network/TensorRtNetworkDefinition.Trt11ModernLayers.cs",
         "native/manifests/tensorrt/v11/trt11-seventeenth-batch-dims64.manifest.json",
         "smoke/NetworkTrt11ModernLayersSmokeRunner/Program.cs",
         "smoke/NetworkTrt11ModernLayerMetadataRunner/Program.cs"
@@ -270,15 +270,15 @@
       "missingAnchors": [],
       "repositoryReferences": [
         "smoke/NetworkTrt11ModernLayersSmokeRunner",
-        "src/JYPPX.TensorRtSharp/TensorRtNetworkDefinition.Trt11ModernLayers.cs",
-        "src/JYPPX.TensorRtSharp/TensorRtNetworkDefinition.Trt11AdvancedLayers.cs",
-        "src/JYPPX.TensorRtSharp/TensorRtNetworkDefinition.Trt11Attention.cs",
+        "src/JYPPX.TensorRtSharp/Network/TensorRtNetworkDefinition.Trt11ModernLayers.cs",
+        "src/JYPPX.TensorRtSharp/Network/TensorRtNetworkDefinition.Trt11AdvancedLayers.cs",
+        "src/JYPPX.TensorRtSharp/Network/TensorRtNetworkDefinition.Trt11Attention.cs",
         "smoke/NetworkTrt11ModernLayersSmokeRunner/Program.cs",
         "smoke/NetworkTrt11ModernLayerMetadataRunner/Program.cs",
-        "src/JYPPX.TensorRtSharp/TensorRtDims64.cs",
-        "src/JYPPX.TensorRtSharp/TensorRtLayer.Trt11Dims64.cs",
+        "src/JYPPX.TensorRtSharp/Core/TensorRtDims64.cs",
+        "src/JYPPX.TensorRtSharp/Layers/TensorRtLayer.Trt11Dims64.cs",
         "native/manifests/tensorrt/v11/trt11-seventeenth-batch-dims64.manifest.json",
-        "src/JYPPX.TensorRtSharp/TensorRtAttention.cs",
+        "src/JYPPX.TensorRtSharp/Layers/TensorRtAttention.cs",
         "native/manifests/tensorrt/v11/trt11-thirty-sixth-batch-attention.manifest.json"
       ],
       "missingRepositoryReferences": [],
@@ -384,16 +384,16 @@
       ],
       "missingMarkers": [],
       "requiredAnchors": [
-        "src/JYPPX.TensorRtSharp/TensorRtErrorRecorderSnapshot.cs",
-        "src/JYPPX.TensorRtSharp/TensorRtErrorRecorderDiagnosticsDesignGate.cs",
+        "src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtErrorRecorderSnapshot.cs",
+        "src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtErrorRecorderDiagnosticsDesignGate.cs",
         "smoke/CallbackAllocatorSafeControlsSmokeRunner/Program.cs"
       ],
       "missingAnchors": [],
       "repositoryReferences": [
-        "src/JYPPX.TensorRtSharp/TensorRtErrorRecorderSnapshot.cs",
-        "src/JYPPX.TensorRtSharp/TensorRtBuilder.Trt11BoundaryControls.cs",
-        "src/JYPPX.TensorRtSharp/TensorRtEngine.Trt11BoundaryControls.cs",
-        "src/JYPPX.TensorRtSharp/TensorRtErrorRecorderDiagnosticsDesignGate.cs"
+        "src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtErrorRecorderSnapshot.cs",
+        "src/JYPPX.TensorRtSharp/Builder/TensorRtBuilder.Trt11BoundaryControls.cs",
+        "src/JYPPX.TensorRtSharp/Engine/TensorRtEngine.Trt11BoundaryControls.cs",
+        "src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtErrorRecorderDiagnosticsDesignGate.cs"
       ],
       "missingRepositoryReferences": [],
       "markdownLinks": [
@@ -434,18 +434,18 @@
       ],
       "missingMarkers": [],
       "requiredAnchors": [
-        "src/JYPPX.TensorRtSharp/TensorRtLogger.cs",
-        "src/JYPPX.TensorRtSharp/TensorRtProfiler.cs",
-        "src/JYPPX.TensorRtSharp/TensorRtProgressMonitor.cs",
+        "src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtLogger.cs",
+        "src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtProfiler.cs",
+        "src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtProgressMonitor.cs",
         "smoke/ManagedLoggerCallbackSmokeRunner/Program.cs",
         "smoke/ManagedProfilerCallbackSmokeRunner/Program.cs",
         "smoke/ManagedProgressMonitorSmokeRunner/Program.cs"
       ],
       "missingAnchors": [],
       "repositoryReferences": [
-        "src/JYPPX.TensorRtSharp/TensorRtLogger.cs",
-        "src/JYPPX.TensorRtSharp/TensorRtProfiler.cs",
-        "src/JYPPX.TensorRtSharp/TensorRtProgressMonitor.cs",
+        "src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtLogger.cs",
+        "src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtProfiler.cs",
+        "src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtProgressMonitor.cs",
         "src/JYPPX.TensorRtSharp/Internal/Interop/TensorRtLoggerCallback.cs",
         "src/JYPPX.TensorRtSharp/Internal/Interop/TensorRtProfilerCallback.cs",
         "src/JYPPX.TensorRtSharp/Internal/Interop/TensorRtProgressMonitorCallback.cs",
@@ -492,15 +492,15 @@
       ],
       "missingMarkers": [],
       "requiredAnchors": [
-        "src/JYPPX.TensorRtSharp/TensorRtOptimizationProfile.cs",
-        "src/JYPPX.TensorRtSharp/TensorRtInferenceBindings.cs",
+        "src/JYPPX.TensorRtSharp/Profiles/TensorRtOptimizationProfile.cs",
+        "src/JYPPX.TensorRtSharp/Inference/TensorRtInferenceBindings.cs",
         "samples/DynamicShape/Program.cs"
       ],
       "missingAnchors": [],
       "repositoryReferences": [
         "samples/DynamicShape",
-        "src/JYPPX.TensorRtSharp/TensorRtOptimizationProfile.cs",
-        "src/JYPPX.TensorRtSharp/TensorRtInferenceBindings.cs"
+        "src/JYPPX.TensorRtSharp/Profiles/TensorRtOptimizationProfile.cs",
+        "src/JYPPX.TensorRtSharp/Inference/TensorRtInferenceBindings.cs"
       ],
       "missingRepositoryReferences": [],
       "markdownLinks": [
@@ -541,14 +541,14 @@
       ],
       "missingMarkers": [],
       "requiredAnchors": [
-        "src/JYPPX.TensorRtSharp/TensorRtInferenceBindings.cs",
+        "src/JYPPX.TensorRtSharp/Inference/TensorRtInferenceBindings.cs",
         "samples/InferenceBindings/Program.cs",
         "samples/InferenceBindings/README.md"
       ],
       "missingAnchors": [],
       "repositoryReferences": [
         "samples/InferenceBindings",
-        "src/JYPPX.TensorRtSharp/TensorRtInferenceBindings.cs",
+        "src/JYPPX.TensorRtSharp/Inference/TensorRtInferenceBindings.cs",
         "eng/Test-PackageConsumer.ps1"
       ],
       "missingRepositoryReferences": [],
@@ -592,18 +592,18 @@
       "requiredAnchors": [
         "samples/OnnxToEngine/Program.cs",
         "samples/OnnxToEngine/trtexec-parity-matrix.json",
-        "src/JYPPX.TensorRtSharp.Tools/TrtexecLikeParser.cs",
-        "src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildService.cs"
+        "src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeParser.cs",
+        "src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.cs"
       ],
       "missingAnchors": [],
       "repositoryReferences": [
         "samples/OnnxToEngine",
         "samples/Classification",
         "samples/YoloVision",
-        "src/JYPPX.TensorRtSharp.Tools/TrtexecLikeParser.cs",
-        "src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildService.cs",
+        "src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeParser.cs",
+        "src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.cs",
         "samples/OnnxToEngine/trtexec-parity-matrix.json",
-        "src/JYPPX.TensorRtSharp.Tools/OnnxIdentityModel.cs"
+        "src/JYPPX.TensorRtSharp.Tools/Runtime/OnnxIdentityModel.cs"
       ],
       "missingRepositoryReferences": [],
       "markdownLinks": [
@@ -645,16 +645,16 @@
       "missingMarkers": [],
       "requiredAnchors": [
         "samples/MultiStream/Program.cs",
-        "src/JYPPX.CudaSharp/CudaStream.cs",
-        "src/JYPPX.CudaSharp/CudaEvent.cs"
+        "src/JYPPX.CudaSharp/Streams/CudaStream.cs",
+        "src/JYPPX.CudaSharp/Events/CudaEvent.cs"
       ],
       "missingAnchors": [],
       "repositoryReferences": [
         "samples/MultiStream",
-        "src/JYPPX.CudaSharp/CudaStream.cs",
-        "src/JYPPX.CudaSharp/CudaEvent.cs",
-        "src/JYPPX.CudaSharp/CudaMemory.cs",
-        "src/JYPPX.CudaSharp/CudaPinnedMemory.cs"
+        "src/JYPPX.CudaSharp/Streams/CudaStream.cs",
+        "src/JYPPX.CudaSharp/Events/CudaEvent.cs",
+        "src/JYPPX.CudaSharp/Memory/CudaMemory.cs",
+        "src/JYPPX.CudaSharp/Memory/CudaPinnedMemory.cs"
       ],
       "missingRepositoryReferences": [],
       "markdownLinks": [
@@ -695,16 +695,16 @@
       ],
       "missingMarkers": [],
       "requiredAnchors": [
-        "src/JYPPX.TensorRtSharp/TensorRtPluginRegistryInventory.cs",
-        "src/JYPPX.TensorRtSharp/TensorRtRuntime.PluginRegistryInventory.cs",
-        "src/JYPPX.TensorRtSharp/TensorRtBuilder.PluginRegistryInventory.cs",
+        "src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginRegistryInventory.cs",
+        "src/JYPPX.TensorRtSharp/Runtime/TensorRtRuntime.PluginRegistryInventory.cs",
+        "src/JYPPX.TensorRtSharp/Builder/TensorRtBuilder.PluginRegistryInventory.cs",
         "smoke/PluginRegistryInventorySmokeRunner/Program.cs"
       ],
       "missingAnchors": [],
       "repositoryReferences": [
-        "src/JYPPX.TensorRtSharp/TensorRtPluginRegistryInventory.cs",
-        "src/JYPPX.TensorRtSharp/TensorRtRuntime.PluginRegistryInventory.cs",
-        "src/JYPPX.TensorRtSharp/TensorRtBuilder.PluginRegistryInventory.cs"
+        "src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginRegistryInventory.cs",
+        "src/JYPPX.TensorRtSharp/Runtime/TensorRtRuntime.PluginRegistryInventory.cs",
+        "src/JYPPX.TensorRtSharp/Builder/TensorRtBuilder.PluginRegistryInventory.cs"
       ],
       "missingRepositoryReferences": [],
       "markdownLinks": [
@@ -745,19 +745,19 @@
       ],
       "missingMarkers": [],
       "requiredAnchors": [
-        "src/JYPPX.CudaSharp/CudaMemory.cs",
-        "src/JYPPX.CudaSharp/CudaPinnedMemory.cs",
-        "src/JYPPX.CudaSharp/CudaManagedMemoryBatch.cs",
+        "src/JYPPX.CudaSharp/Memory/CudaMemory.cs",
+        "src/JYPPX.CudaSharp/Memory/CudaPinnedMemory.cs",
+        "src/JYPPX.CudaSharp/Memory/CudaManagedMemoryBatch.cs",
         "smoke/CudaSmokeRunner/Program.cs"
       ],
       "missingAnchors": [],
       "repositoryReferences": [
-        "src/JYPPX.CudaSharp/CudaMemory.cs",
-        "src/JYPPX.CudaSharp/CudaPinnedMemory.cs",
-        "src/JYPPX.CudaSharp/CudaManagedMemory.cs",
-        "src/JYPPX.CudaSharp/CudaPitchedMemory.cs",
+        "src/JYPPX.CudaSharp/Memory/CudaMemory.cs",
+        "src/JYPPX.CudaSharp/Memory/CudaPinnedMemory.cs",
+        "src/JYPPX.CudaSharp/Memory/CudaManagedMemory.cs",
+        "src/JYPPX.CudaSharp/Memory/CudaPitchedMemory.cs",
         "smoke/CudaSmokeRunner/Program.cs",
-        "src/JYPPX.CudaSharp/CudaManagedMemoryBatch.cs",
+        "src/JYPPX.CudaSharp/Memory/CudaManagedMemoryBatch.cs",
         "samples/MultiStream/Program.cs"
       ],
       "missingRepositoryReferences": [],
@@ -800,8 +800,8 @@
       ],
       "missingMarkers": [],
       "requiredAnchors": [
-        "src/JYPPX.CudaSharp/CudaStreamCaptureToGraphSession.cs",
-        "src/JYPPX.CudaSharp/CudaStream.cs",
+        "src/JYPPX.CudaSharp/Streams/CudaStreamCaptureToGraphSession.cs",
+        "src/JYPPX.CudaSharp/Streams/CudaStream.cs",
         "native/manifests/cuda/cuda-fifty-seventh-batch-stream-capture-to-graph.manifest.json",
         "artifacts/interface-coverage/cuda-stream-capture-to-graph-candidate-audit.md",
         "smoke/CudaGraphSmokeRunner/Program.cs"
@@ -809,8 +809,8 @@
       "missingAnchors": [],
       "repositoryReferences": [
         "artifacts/interface-coverage/cuda-stream-capture-to-graph-candidate-audit.md",
-        "src/JYPPX.CudaSharp/CudaStream.cs",
-        "src/JYPPX.CudaSharp/CudaStreamCaptureToGraphSession.cs",
+        "src/JYPPX.CudaSharp/Streams/CudaStream.cs",
+        "src/JYPPX.CudaSharp/Streams/CudaStreamCaptureToGraphSession.cs",
         "native/manifests/cuda/cuda-fifty-seventh-batch-stream-capture-to-graph.manifest.json",
         "native/manifests/cuda/cuda-thirty-fifth-batch-stream-device-boundaries.manifest.json",
         "eng/Export-InterfaceCoverageMatrix.ps1"

@@ -279,7 +279,7 @@ Owner 最短执行面以 `owner-release-execution-package` 的 `oneScreenRelease
 
 第五批正文继续补上 schema、validator 和 owner checklist 路径：`docs/articles/zh-cn/yolovision-output-json-schema-guide.md`、`docs/articles/zh-cn/yolovision-real-asset-record-template-guide.md`、`docs/articles/zh-cn/yolovision-owner-asset-evidence-guide.md`、`docs/articles/zh-cn/yolovision-golden-output-validation-guide.md`、`docs/articles/zh-cn/tensorrtexec-report-json-schema-snapshot.md`、`docs/articles/zh-cn/tensorrtexec-report-proof-boundary.md`、`docs/articles/zh-cn/onnx-to-engine-trtexec-proof-boundary.md`、`docs/articles/zh-cn/callback-allocator-listener-readonly-safety-gates.md`、`docs/articles/zh-cn/tensorrtexec-gui-cli-field-map.md`、`docs/articles/zh-cn/runtime-package-minimal-smoke-commands.md`、`docs/articles/zh-cn/runtime-package-native-load-troubleshooting.md`、`docs/articles/zh-cn/plugin-inventory-field-metadata-smoke-guide.md`、`docs/articles/zh-cn/deferred-next-readonly-candidate-list.md`、`docs/articles/zh-cn/csharp-public-api-handle-exposure-audit.md`、`docs/articles/zh-cn/release-proof-strict-validator-playbook.md`、`docs/articles/zh-cn/release-proof-owner-input-dashboard.md`、`docs/articles/zh-cn/release-proof-sample-article-closure.md`、`docs/articles/zh-cn/public-release-owner-final-checklist.md`。它们仍是文档、validator guidance 和采用路径，不是 runtime proof、public package proof、post-publish proof、package push 或 release close approval。
 
-发布前总检矩阵已经机器可读化：`samples/YoloVision/yolo-model-matrix.json`、`samples/OnnxToEngine/trtexec-parity-matrix.json`、`applications/TensorRtExec/tensor-rt-exec-feature-matrix.json`、`artifacts/interface-coverage/release-api-readiness-audit.json`、`artifacts/final-release/release-proof-owner-input-dashboard.json`、`artifacts/final-release/owner-proof-execution-checklist.json`、`artifacts/final-release/post-publish-clean-consumer-owner-input.template.json`、`artifacts/final-release/yolovision-owner-asset-evidence.template.json`、`artifacts/final-release/yolovision-owner-asset-evidence.example.json` 和 `docs/articles/zh-cn/publishing/article-roadmap-30plus.json`。
+发布前总检矩阵已经机器可读化：`samples/YoloVision/yolo-model-matrix.json`、`samples/OnnxToEngine/trtexec-parity-matrix.json`、`applications/TensorRtExec/tensor-rt-exec-feature-matrix.json`、`artifacts/cuda-runtime-compilation/capability-matrix.json`、`artifacts/cuda-runtime-compilation/local-smoke.json`、`artifacts/interface-coverage/release-api-readiness-audit.json`、`artifacts/final-release/release-proof-owner-input-dashboard.json`、`artifacts/final-release/owner-proof-execution-checklist.json`、`artifacts/final-release/post-publish-clean-consumer-owner-input.template.json`、`artifacts/final-release/yolovision-owner-asset-evidence.template.json`、`artifacts/final-release/yolovision-owner-asset-evidence.example.json` 和 `docs/articles/zh-cn/publishing/article-roadmap-30plus.json`。
 
 Owner 执行指南继续新增：`docs/articles/zh-cn/owner-proof-execution-checklist.md`、`docs/articles/zh-cn/post-publish-clean-consumer-owner-input-guide.md` 和 `docs/articles/zh-cn/yolovision-owner-asset-evidence-example.md`。这些仍是 owner 输入指导和示例，不是 runtime proof、public package proof、post-publish proof、package push 或 release close approval。
 
@@ -361,12 +361,13 @@ cmake --build --preset win-x64-trt8-cuda12-release --parallel
 近期 sample 成熟度状态：
 
 - `MultiStream` 是真实 CUDA multi-stream/event ordering 示例，并已纳入 solution。
+- `CudaRuntimeCompilation` 是 owner-safe NVRTC 编译样例，覆盖复制型 PTX/CUBIN/LTO IR、失败日志、lowered name、确定性和可选本地 PTX load；当前不宣称 kernel launch/readback proof。
 - `DynamicShape` 是真实 TensorRT dynamic-shape/profile/binding 示例，并已纳入 solution。
 - `InferenceBindings` 是真实 TensorRT inference-binding 示例，并已纳入 solution。
 - `OnnxToEngine` 现在是可运行的常用 ONNX-to-engine 示例，并已纳入 solution。
 - `Classification` 和 `YoloVision` 是依赖用户自备 ONNX 模型、labels 和 input-shape metadata 的可运行示例。
 - `applications/TensorRtExec` 是面向用户的 ONNX-to-engine CLI/WinForms 工具。它可以为外部 ONNX 生成 build/precheck report，但真实模型 runtime proof 仍归具体 sample runner，package-consumer-runtime proof 仍归 release proof record。
-- CUDA custom-kernel preprocessing 先保留为文档路线图，等待安全的公开 `CudaModule` / `CudaKernel` wrapper 后再加入 samples。
+- CUDA custom-kernel launch 继续保留为路线图，等待安全的 named-kernel launch 与 typed argument packing；runtime compilation 本身已通过 `CudaRtcCompiler` / `CudaRtcProgram` 提供。
 
 ## Runtime Packages
 

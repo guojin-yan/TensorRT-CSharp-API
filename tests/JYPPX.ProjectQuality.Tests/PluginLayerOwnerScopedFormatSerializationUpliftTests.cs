@@ -88,7 +88,7 @@ public sealed class PluginLayerOwnerScopedFormatSerializationUpliftTests
     public void ManagedSurfaceIsTypedPointerFreeAndOwnerBound()
     {
         string model = ReadSource(
-            "src", "JYPPX.TensorRtSharp", "TensorRtPluginLayerOwnerScopedQuerySnapshots.cs");
+            "src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginLayerOwnerScopedQuerySnapshots.cs");
         string interop = ReadSource(
             "src", "JYPPX.TensorRtSharp", "Internal", "Interop",
             "NativeBridgeApi.PluginLayerOwnerScopedQuerySnapshots.cs");

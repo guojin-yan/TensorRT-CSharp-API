@@ -7,7 +7,7 @@ public sealed class ErrorRecorderSnapshotSummaryTests
     [Fact]
     public void ErrorRecorderSnapshotExposesPointerFreeSummary()
     {
-        string snapshot = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtErrorRecorderSnapshot.cs");
+        string snapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Monitoring", "TensorRtErrorRecorderSnapshot.cs");
 
         Assert.Contains("public TensorRtErrorRecorderSummary ToSummary()", snapshot);
         Assert.Contains("public sealed class TensorRtErrorRecorderSummary", snapshot);
@@ -37,7 +37,7 @@ public sealed class ErrorRecorderSnapshotSummaryTests
     public void ExistingReadonlyDiagnosticsCandidateStillTargetsCopiedSnapshots()
     {
         string candidate = ReadSource("artifacts", "interface-coverage", "deferred-readonly-candidate-list.json");
-        string designGate = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtErrorRecorderDiagnosticsDesignGate.cs");
+        string designGate = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Monitoring", "TensorRtErrorRecorderDiagnosticsDesignGate.cs");
 
         Assert.Contains("TensorRtErrorRecorderSnapshot", candidate);
         Assert.Contains("direct IErrorRecorder ref-count ownership remains deferred by design", designGate);

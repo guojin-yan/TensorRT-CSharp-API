@@ -39,7 +39,7 @@ public sealed class ManagedProfilerCallbackBoundaryTests
         string trt11InterfaceManifest = ReadSource("native", "manifests", "tensorrt", "v11", "trt11-callback-interface-info.manifest.json");
         string nativeSource = ReadSource("native", "src", "tensorrt", "v11", "api.cpp");
         string interopSource = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.CallbackInterfaceInfo.cs");
-        string profilerSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtProfiler.cs");
+        string profilerSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Monitoring", "TensorRtProfiler.cs");
 
         Assert.DoesNotContain("trt10-profiler-get-interface-info", trt10InterfaceManifest);
         Assert.Contains("trt11-profiler-get-interface-info", trt11InterfaceManifest);
@@ -65,7 +65,7 @@ public sealed class ManagedProfilerCallbackBoundaryTests
         Assert.DoesNotContain("public IntPtr", profilerSource);
         Assert.DoesNotContain("public nint", profilerSource);
 
-        string snapshotSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtProfilerInterfaceMetadataSnapshot.cs");
+        string snapshotSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Monitoring", "TensorRtProfilerInterfaceMetadataSnapshot.cs");
         Assert.Contains("public readonly struct TensorRtProfilerInterfaceMetadataSnapshot", snapshotSource);
         Assert.Contains("public bool IsRuntimeProof => false", snapshotSource);
         Assert.DoesNotContain("public IntPtr", snapshotSource);
@@ -75,10 +75,10 @@ public sealed class ManagedProfilerCallbackBoundaryTests
     [Fact]
     public void ManagedProfilerPublicApiOwnsCallbackStateWithoutExposingNativePointers()
     {
-        string profilerSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtProfiler.cs");
-        string contextSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContext.cs");
-        string profileSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContext.Profile.cs");
-        string diagnosticsSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs");
+        string profilerSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Monitoring", "TensorRtProfiler.cs");
+        string contextSource = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.cs");
+        string profileSource = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Profile.cs");
+        string diagnosticsSource = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs");
 
         Assert.Contains("public delegate void TensorRtProfilerHandler", profilerSource);
         Assert.Contains("public sealed class TensorRtProfiler", profilerSource);
@@ -104,7 +104,7 @@ public sealed class ManagedProfilerCallbackBoundaryTests
     [Fact]
     public void ExecutionContextDisposeKeepsBorrowedProfilerAliveThroughNativeContextRelease()
     {
-        string contextSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContext.cs");
+        string contextSource = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.cs");
 
         int clearIndex = contextSource.IndexOf("TryClearProfilerForDispose();", StringComparison.Ordinal);
         int disposeIndex = contextSource.IndexOf("_handle.Dispose();", StringComparison.Ordinal);

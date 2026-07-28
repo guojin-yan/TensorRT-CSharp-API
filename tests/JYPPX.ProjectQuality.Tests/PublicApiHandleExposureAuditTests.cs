@@ -64,8 +64,7 @@ public sealed class PublicApiHandleExposureAuditTests
         string inventoryWrapper = File.ReadAllText(Path.Combine(
             RepositoryPaths.Root,
             "src",
-            "JYPPX.TensorRtSharp",
-            "TensorRtPluginRegistryInventory.cs"));
+            "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginRegistryInventory.cs"));
 
         Assert.Contains("不暴露裸 `IntPtr`", article, StringComparison.Ordinal);
         Assert.Contains("pointer-free", inventoryArticle, StringComparison.OrdinalIgnoreCase);

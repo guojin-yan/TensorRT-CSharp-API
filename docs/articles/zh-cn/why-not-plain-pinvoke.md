@@ -97,7 +97,7 @@ TensorRT line。直接让 AccessViolation 或 EntryPointNotFound 冒到用户代
 
 `IDisposable` 只有在 ownership 已明确时才有意义。以 builder 为例，`TensorRtBuilder` 创建 native
 builder，但 TensorRT 借用 logger。wrapper 因此保存 `_loggerKeepAlive`，在创建时登记 borrower，
-释放 builder 后再解除借用。相关实现位于 `src/JYPPX.TensorRtSharp/TensorRtBuilder.cs`。
+释放 builder 后再解除借用。相关实现位于 `src/JYPPX.TensorRtSharp/Builder/TensorRtBuilder.cs`。
 
 native 对象本身由内部 `SafeTensorRtObjectHandle` 持有，释放时统一调用
 `jyppx_trt_object_destroy`。这个 safe handle 位于

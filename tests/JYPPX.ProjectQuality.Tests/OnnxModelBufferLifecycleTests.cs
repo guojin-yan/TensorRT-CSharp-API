@@ -64,8 +64,8 @@ public sealed class OnnxModelBufferLifecycleTests
     [Fact]
     public void ManagedOnnxModelBufferWrappersOwnInitializerLifetime()
     {
-        string parser = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOnnxParser.cs");
-        string refitter = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOnnxParserRefitter.cs");
+        string parser = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParser.cs");
+        string refitter = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParserRefitter.cs");
         string pinSet = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "TensorRtPinnedInitializerSet.cs");
         string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.OnnxModelBuffer.cs");
 

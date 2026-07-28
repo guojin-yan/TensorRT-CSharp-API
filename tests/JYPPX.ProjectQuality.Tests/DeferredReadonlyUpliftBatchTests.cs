@@ -38,7 +38,7 @@ public sealed class DeferredReadonlyUpliftBatchTests
         Assert.False(summary.CanDeleteDeferredRecord);
         Assert.Contains("CopiedSubgraphs=2", summary.ToString(), StringComparison.Ordinal);
 
-        string source = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOnnxModelSupportReport.cs");
+        string source = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxModelSupportReport.cs");
         Assert.Contains("public TensorRtOnnxModelSupportSummary ToSummary()", source);
         Assert.Contains("public sealed class TensorRtOnnxModelSupportSummary", source);
         Assert.Contains("does not expose parser-owned tensor pointers", source);
@@ -66,11 +66,11 @@ public sealed class DeferredReadonlyUpliftBatchTests
         Assert.Equal("implemented-safe-alternative-design-gate-not-runtime-proof", pluginV3.GetProperty("implementationStatus").GetString());
         Assert.Equal("design-gate-ready-with-safe-snapshot-alternative", errorInterface.GetProperty("implementationStatus").GetString());
 
-        string parserSupport = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOnnxParser.ModelSupport.cs");
-        string parserDiagnostics = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOnnxParserDiagnosticSnapshot.cs");
-        string parserReport = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOnnxModelSupportReport.cs");
-        string errorRecorder = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtErrorRecorderSnapshot.cs");
-        string pluginGate = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtPluginCreatorV3MetadataDesignGate.cs");
+        string parserSupport = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParser.ModelSupport.cs");
+        string parserDiagnostics = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParserDiagnosticSnapshot.cs");
+        string parserReport = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxModelSupportReport.cs");
+        string errorRecorder = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Monitoring", "TensorRtErrorRecorderSnapshot.cs");
+        string pluginGate = ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginCreatorV3MetadataDesignGate.cs");
         string onnxSmoke = ReadSource("smoke", "OnnxToEngineSmokeRunner", "Program.cs");
         string pluginSmoke = ReadSource("smoke", "PluginRegistryInventorySmokeRunner", "Program.cs");
         string callbackSmoke = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
@@ -124,15 +124,15 @@ public sealed class DeferredReadonlyUpliftBatchTests
 
         string[] sourceFiles =
         {
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOnnxParserDiagnosticSnapshot.cs"),
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOnnxParserRefitterDiagnosticSnapshot.cs"),
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOnnxModelSupportReport.cs"),
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtErrorRecorderSnapshot.cs"),
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtRuntimeDiagnosticSnapshot.cs"),
-            ReadSource("src", "JYPPX.CudaSharp", "CudaMemoryRangeAttribute.cs"),
-            ReadSource("src", "JYPPX.CudaSharp", "CudaDeviceGraphMemoryInfo.cs"),
-            ReadSource("src", "JYPPX.CudaSharp", "CudaGraphDiagnosticSnapshot.cs"),
-            ReadSource("src", "JYPPX.CudaSharp", "CudaGraphExecDiagnosticSnapshot.cs")
+            ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParserDiagnosticSnapshot.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParserRefitterDiagnosticSnapshot.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxModelSupportReport.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Monitoring", "TensorRtErrorRecorderSnapshot.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntimeDiagnosticSnapshot.cs"),
+            ReadSource("src", "JYPPX.CudaSharp", "Memory", "CudaMemoryRangeAttribute.cs"),
+            ReadSource("src", "JYPPX.CudaSharp", "Devices", "CudaDeviceGraphMemoryInfo.cs"),
+            ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphDiagnosticSnapshot.cs"),
+            ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphExecDiagnosticSnapshot.cs")
         };
 
         foreach (string source in sourceFiles)

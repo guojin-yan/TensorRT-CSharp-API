@@ -155,8 +155,8 @@ public sealed class DebugListenerNativeNoThrowDestructorTests
     [Fact]
     public void SourceSmokeAndDocsKeepNativeNoThrowDestructorSeparateFromRuntimeProof()
     {
-        string destructorSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerNativeNoThrowDestructor.cs");
-        string precheckSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerRuntimeProofPrecheck.cs");
+        string destructorSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerNativeNoThrowDestructor.cs");
+        string precheckSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerRuntimeProofPrecheck.cs");
         string smokeProgram = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
         string nativeDestructor = ReadSource("native", "src", "tensorrt", "common", "debug_listener_native_nothrow_destructor.inc");
         string trt8 = ReadSource("native", "src", "tensorrt", "v8", "api.cpp");

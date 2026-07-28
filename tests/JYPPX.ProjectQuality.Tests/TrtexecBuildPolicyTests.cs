@@ -75,18 +75,15 @@ public sealed class TrtexecBuildPolicyTests
         string service = File.ReadAllText(Path.Combine(
             RepositoryPaths.Root,
             "src",
-            "JYPPX.TensorRtSharp.Tools",
-            "OnnxEngineBuildService.cs"));
+            "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildService.cs"));
         string policy = File.ReadAllText(Path.Combine(
             RepositoryPaths.Root,
             "src",
-            "JYPPX.TensorRtSharp.Tools",
-            "TrtexecLikeBuildPolicy.cs"));
+            "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeBuildPolicy.cs"));
         string diagnostics = File.ReadAllText(Path.Combine(
             RepositoryPaths.Root,
             "src",
-            "JYPPX.TensorRtSharp.Tools",
-            "OnnxEngineBuildDiagnostics.cs"));
+            "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildDiagnostics.cs"));
 
         Assert.Contains("TrtexecLikeBuildPolicy.Apply(config, network, options.DeploymentOptions, log)", service, StringComparison.Ordinal);
         Assert.Contains("tensor.AllowedFormats = spec.Formats", policy, StringComparison.Ordinal);
@@ -124,18 +121,15 @@ public sealed class TrtexecBuildPolicyTests
         string service = File.ReadAllText(Path.Combine(
             RepositoryPaths.Root,
             "src",
-            "JYPPX.TensorRtSharp.Tools",
-            "OnnxEngineBuildService.cs"));
+            "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildService.cs"));
         string diagnostics = File.ReadAllText(Path.Combine(
             RepositoryPaths.Root,
             "src",
-            "JYPPX.TensorRtSharp.Tools",
-            "OnnxEngineBuildDiagnostics.cs"));
+            "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildDiagnostics.cs"));
         string parser = File.ReadAllText(Path.Combine(
             RepositoryPaths.Root,
             "src",
-            "JYPPX.TensorRtSharp.Tools",
-            "TrtexecLikeParser.cs"));
+            "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeParser.cs"));
 
         Assert.Contains("ApplyEnginePackagingOptions(config, options, log)", service, StringComparison.Ordinal);
         Assert.Contains("TensorRtBuilderFlag.VersionCompatible", service, StringComparison.Ordinal);

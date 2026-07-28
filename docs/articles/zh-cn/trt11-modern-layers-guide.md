@@ -33,9 +33,9 @@ TRT11 文章不能把版本专属能力写成所有 TensorRT 版本通用能力�
 ## 为什么 modern layer 必须单独成篇
 
 TensorRT 的 major line 不只是 DLL 名变化，layer factory、shape 宽度、metadata 和可选硬件能力也会变化。
-TensorRtSharp4.0 将 TRT11 专属入口放在 `src/JYPPX.TensorRtSharp/TensorRtNetworkDefinition.Trt11ModernLayers.cs`、
-`src/JYPPX.TensorRtSharp/TensorRtNetworkDefinition.Trt11AdvancedLayers.cs`、
-`src/JYPPX.TensorRtSharp/TensorRtNetworkDefinition.Trt11Attention.cs` 等 partial wrapper 中，再通过 line guard
+TensorRtSharp4.0 将 TRT11 专属入口放在 `src/JYPPX.TensorRtSharp/Network/TensorRtNetworkDefinition.Trt11ModernLayers.cs`、
+`src/JYPPX.TensorRtSharp/Network/TensorRtNetworkDefinition.Trt11AdvancedLayers.cs`、
+`src/JYPPX.TensorRtSharp/Network/TensorRtNetworkDefinition.Trt11Attention.cs` 等 partial wrapper 中，再通过 line guard
 进入 v11 native adapter。这样 public API 仍是强类型对象，但错误 line 会在调用边界被拒绝。
 
 ```mermaid
@@ -91,8 +91,8 @@ network.MarkOutput(output);
 
 ## Dims64 与 copied metadata
 
-TRT11 的 64 位维度通道由 `src/JYPPX.TensorRtSharp/TensorRtDims64.cs`、
-`src/JYPPX.TensorRtSharp/TensorRtLayer.Trt11Dims64.cs` 和
+TRT11 的 64 位维度通道由 `src/JYPPX.TensorRtSharp/Core/TensorRtDims64.cs`、
+`src/JYPPX.TensorRtSharp/Layers/TensorRtLayer.Trt11Dims64.cs` 和
 `native/manifests/tensorrt/v11/trt11-seventeenth-batch-dims64.manifest.json` 对齐。metadata runner 对每个必需 probe
 输出 `Shape64=` 与 `Ext64=`，并要求 `Dims64Evidence` 数量与创建成功数一致。
 
@@ -102,7 +102,7 @@ TRT11 的 64 位维度通道由 `src/JYPPX.TensorRtSharp/TensorRtDims64.cs`、
 
 ## Attention 与可选能力
 
-Attention v2 的强类型入口位于 `src/JYPPX.TensorRtSharp/TensorRtAttention.cs`，ABI 描述位于
+Attention v2 的强类型入口位于 `src/JYPPX.TensorRtSharp/Layers/TensorRtAttention.cs`，ABI 描述位于
 `native/manifests/tensorrt/v11/trt11-thirty-sixth-batch-attention.manifest.json`。query/key/value 的 rank、head
 布局、normalization 和 causal mask 都是模型契约，不能因为 layer 创建成功就假设任意 transformer 可运行。
 

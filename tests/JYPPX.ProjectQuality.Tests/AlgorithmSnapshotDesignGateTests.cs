@@ -79,7 +79,7 @@ public sealed class AlgorithmSnapshotDesignGateTests
 
         AssertEvidenceContains(candidate, "nativeSources", "native/src/tensorrt/v8/modules/deferred/cross_version_tenth_batch_other_deferred.inc");
         AssertEvidenceContains(candidate, "nativeSources", "native/src/tensorrt/v10/modules/deferred/cross_version_other_deferred.inc");
-        AssertEvidenceContains(candidate, "managedSources", "src/JYPPX.TensorRtSharp/TensorRtAlgorithmSnapshotDesignGate.cs");
+        AssertEvidenceContains(candidate, "managedSources", "src/JYPPX.TensorRtSharp/Callbacks/Core/TensorRtAlgorithmSnapshotDesignGate.cs");
         AssertEvidenceContains(candidate, "qualityTests", "tests/JYPPX.ProjectQuality.Tests/AlgorithmSnapshotDesignGateTests.cs");
         AssertEvidenceContains(candidate, "publicSurface", "TensorRtAlgorithmSnapshotDesignGate.EvaluateKnownSurface");
 

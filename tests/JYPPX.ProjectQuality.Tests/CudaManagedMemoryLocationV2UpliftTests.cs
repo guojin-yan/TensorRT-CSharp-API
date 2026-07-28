@@ -43,8 +43,8 @@ public sealed class CudaManagedMemoryLocationV2UpliftTests
     [Fact]
     public void ManagedSurfaceIsStronglyTypedOwnerBoundAndPointerFree()
     {
-        string location = ReadSource("src", "JYPPX.CudaSharp", "CudaMemoryLocation.cs");
-        string managedMemory = ReadSource("src", "JYPPX.CudaSharp", "CudaManagedMemory.cs");
+        string location = ReadSource("src", "JYPPX.CudaSharp", "Memory", "CudaMemoryLocation.cs");
+        string managedMemory = ReadSource("src", "JYPPX.CudaSharp", "Memory", "CudaManagedMemory.cs");
         string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "Memory", "NativeCudaApi.MemoryRange.cs");
         string publicSurface = location + managedMemory;
 

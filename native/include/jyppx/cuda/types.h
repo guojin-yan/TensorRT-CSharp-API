@@ -22,6 +22,26 @@ typedef struct JYPPX_CudaTextureObject JYPPX_CudaTextureObject;
 typedef struct JYPPX_CudaSurfaceObject JYPPX_CudaSurfaceObject;
 typedef struct JYPPX_CudaKernelLibrary JYPPX_CudaKernelLibrary;
 typedef struct JYPPX_CudaExecutionContext JYPPX_CudaExecutionContext;
+typedef struct JYPPX_CudaRtcProgram JYPPX_CudaRtcProgram;
+
+typedef enum JYPPX_CudaRtcArtifactKind
+{
+    JYPPX_CUDA_RTC_ARTIFACT_PTX = 1,
+    JYPPX_CUDA_RTC_ARTIFACT_CUBIN = 2,
+    JYPPX_CUDA_RTC_ARTIFACT_LTO_IR = 3
+} JYPPX_CudaRtcArtifactKind;
+
+typedef struct JYPPX_CudaRtcCapabilityInfo
+{
+    JYPPX_Boolean dependency_available;
+    int32_t version_major;
+    int32_t version_minor;
+    JYPPX_Boolean supports_ptx;
+    JYPPX_Boolean supports_cubin;
+    JYPPX_Boolean supports_lto_ir;
+    JYPPX_Boolean supports_deprecated_nvvm;
+    JYPPX_Boolean supports_name_expressions;
+} JYPPX_CudaRtcCapabilityInfo;
 
 typedef enum JYPPX_CudaMemcpyKind
 {

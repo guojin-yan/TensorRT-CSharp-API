@@ -28,18 +28,32 @@ Windows API 完整化阶段已经把源码模块化作为质量门禁，而不�
 
 TensorRT 高层 wrapper 也开始按 layer feature 拆分：
 
-- `src/JYPPX.TensorRtSharp/TensorRtNetworkDefinition.Deconvolution.cs`
-- `src/JYPPX.TensorRtSharp/TensorRtNetworkDefinition.Lrn.cs`
-- `src/JYPPX.TensorRtSharp/TensorRtNetworkDefinition.Quantization.cs`
-- `src/JYPPX.TensorRtSharp/TensorRtLayer.Deconvolution.cs`
-- `src/JYPPX.TensorRtSharp/TensorRtLayer.Lrn.cs`
-- `src/JYPPX.TensorRtSharp/TensorRtLayer.Quantization.cs`
+- `src/JYPPX.TensorRtSharp/Network/TensorRtNetworkDefinition.Deconvolution.cs`
+- `src/JYPPX.TensorRtSharp/Network/TensorRtNetworkDefinition.Lrn.cs`
+- `src/JYPPX.TensorRtSharp/Network/TensorRtNetworkDefinition.Quantization.cs`
+- `src/JYPPX.TensorRtSharp/Layers/TensorRtLayer.Deconvolution.cs`
+- `src/JYPPX.TensorRtSharp/Layers/TensorRtLayer.Lrn.cs`
+- `src/JYPPX.TensorRtSharp/Layers/TensorRtLayer.Quantization.cs`
 
 生成文件继续保留在各自 `Generated` 文件夹下，不手工拆分。若需要调整生成文件布局，必须通过 generator 本身完成，并通过生成器确定性门禁。
+
+## 托管公开 API 目录
+
+公开 API 文件按职责放入模块目录，文件移动不改变现有 namespace、类型名或 public API。SDK 风格项目会递归编译这些目录，因此项目文件不需要维护逐文件 `Compile` 清单。
+
+| 项目 | 模块目录 |
+| --- | --- |
+| `JYPPX.CudaSharp` | `Core`、`Devices`、`Diagnostics`、`Events`、`Graphs`、`IPC`、`Kernels`、`Memory`、`RuntimeCompilation`、`Streams` |
+| `JYPPX.TensorRtSharp` | `Builder`、`ControlFlow`、`Core`、`Diagnostics`、`Engine`、`Execution`、`Inference`、`Layers`、`Network`、`Parsing`、`Plugins`、`Profiles`、`Refit`、`Runtime`、`Serialization` |
+| `JYPPX.TensorRtSharp/Callbacks` | `Core`、`Debugging`、`MemoryAllocation`、`Monitoring` |
+| `JYPPX.TensorRtSharp.Tools` | `Artifacts`、`Build`、`Core`、`Runtime`、`Trtexec` |
+
+当前整理覆盖三个项目原根目录中的 294 个 `.cs` 文件。`ManagedSourceModuleLayoutTests` 会验证项目根目录不再堆放公开 API 源文件，并检查所有约定模块至少包含一个源码文件。
 
 ## 规则
 
 - 模块化时不得改名 C ABI 导出入口。
 - 不得为了移动代码改变 manifest 语义。
 - 不得在源码整理过程中向普通 C# 用户暴露裸 `IntPtr`。
+- 新增公开 API 时应选择已有职责模块；只有形成独立职责边界时才增加新目录。
 - 每次拆分后都必须回归原生构建、托管构建和 binding generator 确定性验证。

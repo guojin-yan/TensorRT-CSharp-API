@@ -54,8 +54,8 @@ public sealed class CudaKernelLibraryMetadataUpliftTests
     [Fact]
     public void ManagedOwnerExposesOnlyCopiedMetadataAndNamedExistence()
     {
-        string library = ReadSource("src", "JYPPX.CudaSharp", "CudaKernelLibrary.cs");
-        string snapshot = ReadSource("src", "JYPPX.CudaSharp", "CudaKernelLibraryInventorySnapshot.cs");
+        string library = ReadSource("src", "JYPPX.CudaSharp", "Kernels", "CudaKernelLibrary.cs");
+        string snapshot = ReadSource("src", "JYPPX.CudaSharp", "Kernels", "CudaKernelLibraryInventorySnapshot.cs");
         string handle = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Handles", "SafeCudaKernelLibraryHandle.cs");
         string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "NativeCudaApi.KernelLibrary.cs");
         string publicSurface = library + snapshot;

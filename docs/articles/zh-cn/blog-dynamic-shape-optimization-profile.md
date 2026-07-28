@@ -78,8 +78,8 @@ DynamicShape Passed=True
 3. builder config 接收 profile，并把它编进 serialized engine。
 4. execution context 在 enqueue 前接收本次 runtime shape。
 
-public wrapper 分别位于 `src/JYPPX.TensorRtSharp/TensorRtOptimizationProfile.cs` 和
-`src/JYPPX.TensorRtSharp/TensorRtInferenceBindings.cs`。profile shape range 是 copied value，context shape 的设置则受
+public wrapper 分别位于 `src/JYPPX.TensorRtSharp/Profiles/TensorRtOptimizationProfile.cs` 和
+`src/JYPPX.TensorRtSharp/Inference/TensorRtInferenceBindings.cs`。profile shape range 是 copied value，context shape 的设置则受
 engine tensor name 与 active profile 约束。
 
 ```mermaid

@@ -75,10 +75,10 @@ public sealed class ReleaseReadinessSmokeClosureTests
     public void TrtexecParityMatrixIsBackedByParserAndApplicationSurfaces()
     {
         using JsonDocument parity = ReadJson("samples", "OnnxToEngine", "trtexec-parity-matrix.json");
-        string parser = ReadText("src", "JYPPX.TensorRtSharp.Tools", "TrtexecLikeParser.cs");
-        string options = ReadText("src", "JYPPX.TensorRtSharp.Tools", "TrtexecLikeOptions.cs");
-        string deploymentOptions = ReadText("src", "JYPPX.TensorRtSharp.Tools", "TrtexecLikeDeploymentOptions.cs");
-        string runtimeOptions = ReadText("src", "JYPPX.TensorRtSharp.Tools", "TrtexecLikeRuntimeOptions.cs");
+        string parser = ReadText("src", "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeParser.cs");
+        string options = ReadText("src", "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeOptions.cs");
+        string deploymentOptions = ReadText("src", "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeDeploymentOptions.cs");
+        string runtimeOptions = ReadText("src", "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeRuntimeOptions.cs");
         string appOptions = ReadText("applications", "TensorRtExec", "Core", "TensorRtExecOptions.cs");
         string appService = ReadText("applications", "TensorRtExec", "Core", "TensorRtExecService.cs");
         string appCommand = ReadText("applications", "TensorRtExec", "Console", "TensorRtExecCommand.cs");

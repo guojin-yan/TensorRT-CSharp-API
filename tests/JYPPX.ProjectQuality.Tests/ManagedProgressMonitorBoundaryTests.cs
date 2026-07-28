@@ -33,8 +33,8 @@ public sealed class ManagedProgressMonitorBoundaryTests
         string trt10NativeSource = ReadSource("native", "src", "tensorrt", "v10", "api.cpp");
         string trt11NativeSource = ReadSource("native", "src", "tensorrt", "v11", "api.cpp");
         string interopSource = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.CallbackInterfaceInfo.cs");
-        string monitorSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtProgressMonitor.cs");
-        string interfaceInfoSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtInterfaceInfo.cs");
+        string monitorSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Monitoring", "TensorRtProgressMonitor.cs");
+        string interfaceInfoSource = ReadSource("src", "JYPPX.TensorRtSharp", "Core", "TensorRtInterfaceInfo.cs");
 
         Assert.Contains("trt10-progress-monitor-get-interface-info", trt10InterfaceManifest);
         Assert.Contains("trt11-progress-monitor-get-interface-info", trt11InterfaceManifest);
@@ -69,9 +69,9 @@ public sealed class ManagedProgressMonitorBoundaryTests
     [Fact]
     public void ManagedProgressMonitorPublicApiOwnsCallbackStateWithoutExposingNativePointers()
     {
-        string monitorSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtProgressMonitor.cs");
-        string configSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilderConfig.cs");
-        string diagnosticsSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilderConfig.Trt11Diagnostics.cs");
+        string monitorSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Monitoring", "TensorRtProgressMonitor.cs");
+        string configSource = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.cs");
+        string diagnosticsSource = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.Trt11Diagnostics.cs");
 
         Assert.Contains("public delegate bool TensorRtProgressMonitorHandler", monitorSource);
         Assert.Contains("public sealed class TensorRtProgressMonitor", monitorSource);
@@ -93,7 +93,7 @@ public sealed class ManagedProgressMonitorBoundaryTests
     [Fact]
     public void BuilderConfigDisposeKeepsBorrowedProgressMonitorAliveThroughNativeConfigRelease()
     {
-        string configSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilderConfig.cs");
+        string configSource = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.cs");
 
         int clearIndex = configSource.IndexOf("TryClearProgressMonitorForDispose();", StringComparison.Ordinal);
         int disposeIndex = configSource.IndexOf("_handle.Dispose();", StringComparison.Ordinal);

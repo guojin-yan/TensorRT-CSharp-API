@@ -61,11 +61,11 @@ public sealed class SafeLifecycleShapeSerializationMetadataUpliftTests
     [Fact]
     public void ManagedSurfaceIsOwnerBoundAndPointerFree()
     {
-        string builder = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilder.Trt11BuildOutputs.cs");
-        string config = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilderConfig.Trt11PluginSerialization.cs") +
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilderConfig.Trt11Diagnostics.cs");
-        string context = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContext.cs");
-        string metadata = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtErrorCodeMetadata.cs");
+        string builder = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilder.Trt11BuildOutputs.cs");
+        string config = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.Trt11PluginSerialization.cs") +
+            ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.Trt11Diagnostics.cs");
+        string context = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.cs");
+        string metadata = ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtErrorCodeMetadata.cs");
         string publicSurface = builder + config + context + metadata;
 
         Assert.Contains("public TensorRtEngine BuildEngineWithConfig", builder);

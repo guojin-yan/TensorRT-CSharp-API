@@ -66,8 +66,8 @@ public sealed class CudaGraphEventNodeBoundaryTests
     [Fact]
     public void ManagedCudaGraphEventNodeApiUsesCudaEventOwners()
     {
-        string graph = ReadSource("src", "JYPPX.CudaSharp", "CudaGraph.cs");
-        string graphExec = ReadSource("src", "JYPPX.CudaSharp", "CudaGraphExec.cs");
+        string graph = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.cs");
+        string graphExec = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphExec.cs");
         string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "Graph", "NativeCudaApi.Graph.cs");
 
         Assert.Contains("AddEventRecordNode(CudaEvent eventHandle)", graph);

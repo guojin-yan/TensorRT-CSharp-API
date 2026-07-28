@@ -49,7 +49,7 @@ public sealed class ReleaseCandidateArticleBodyQualityTests
             ("onnx-to-engine-quickstart.md", new[] { "samples/OnnxToEngine", "applications/TensorRtExec", "samples/YoloVision", "samples/Classification" }),
             ("tensorrtexec-cli-parameter-map.md", new[] { "applications/TensorRtExec", "src/JYPPX.TensorRtSharp.Tools", "samples/OnnxToEngine/trtexec-parity-matrix.json", "artifacts/user-acceptance/trtexec-option-coverage.md" }),
             ("yolovision-sample-overview.md", new[] { "samples/YoloVision", "samples/assets/yolovision-assets.template.json", "artifacts/user-acceptance/sample-run-evidence-record.yolovision.template.json", "applications/TensorRtExec" }),
-            ("plugin-inventory-readonly-api.md", new[] { "smoke/PluginRegistryInventorySmokeRunner", "src/JYPPX.TensorRtSharp/TensorRtPluginRegistryInventory.cs", "native/src/tensorrt/common/plugin_registry_inventory.inc", "artifacts/interface-coverage/tensorrt-interface-comparison.csv" })
+            ("plugin-inventory-readonly-api.md", new[] { "smoke/PluginRegistryInventorySmokeRunner", "src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginRegistryInventory.cs", "native/src/tensorrt/common/plugin_registry_inventory.inc", "artifacts/interface-coverage/tensorrt-interface-comparison.csv" })
         };
 
         foreach ((string articleFile, string[] requiredPaths) in expectations)

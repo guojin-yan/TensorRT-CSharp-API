@@ -7,7 +7,7 @@ public sealed class OnnxConfigSnapshotSummaryTests
     [Fact]
     public void OnnxConfigExposesPointerFreeSnapshotAndSummary()
     {
-        string source = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOnnxConfig.cs");
+        string source = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxConfig.cs");
 
         Assert.Contains("public TensorRtOnnxConfigSnapshot ToSnapshot()", source);
         Assert.Contains("public sealed class TensorRtOnnxConfigSnapshot", source);
@@ -27,7 +27,7 @@ public sealed class OnnxConfigSnapshotSummaryTests
     public void OnnxConfigSnapshotUsesCopiedStringBridge()
     {
         string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.OnnxConfig.cs");
-        string source = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOnnxConfig.cs");
+        string source = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxConfig.cs");
 
         Assert.Contains("ReadOnnxConfigString", interop);
         Assert.Contains("byte[] buffer = new byte[checked((int)required)];", interop);
@@ -66,7 +66,7 @@ public sealed class OnnxConfigSnapshotSummaryTests
     [Fact]
     public void OnnxConfigSummaryDoesNotPromoteUnsafeOwnerApis()
     {
-        string source = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOnnxConfig.cs");
+        string source = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxConfig.cs");
         string comparison = ReadSource("artifacts", "interface-coverage", "tensorrt-interface-comparison.csv");
 
         Assert.DoesNotContain("IOnnxConfig*", source);

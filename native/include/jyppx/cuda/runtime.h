@@ -537,6 +537,21 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_kernel_library_contains_unified_functio
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_kernel_library_set_kernel_attribute_for_device_safe(JYPPX_CudaKernelLibrary* library, const char* kernel_name, int32_t attribute, int32_t value, int32_t device);
 /* END CUDA FIFTY-FIRST BATCH KERNEL LIBRARY METADATA */
 
+/* BEGIN CUDA SIXTY-THIRD BATCH RUNTIME COMPILATION OWNER */
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_rtc_query_capability_safe(JYPPX_CudaRtcCapabilityInfo* out_info);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_rtc_get_loaded_library_name_safe(char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_rtc_get_dependency_diagnostic_safe(char* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_rtc_program_create_safe(const uint8_t* source, size_t source_size, const uint8_t* program_name, size_t program_name_size, JYPPX_CudaRtcProgram** out_program);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_rtc_program_add_header_safe(JYPPX_CudaRtcProgram* program, const uint8_t* header_source, size_t header_source_size, const uint8_t* include_name, size_t include_name_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_rtc_program_add_name_expression_safe(JYPPX_CudaRtcProgram* program, const uint8_t* expression, size_t expression_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_rtc_program_compile_safe(JYPPX_CudaRtcProgram* program, const char** options, uint32_t option_count, int32_t* out_compiler_result);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_rtc_program_get_log_safe(JYPPX_CudaRtcProgram* program, uint8_t* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_rtc_program_try_get_artifact_size_safe(JYPPX_CudaRtcProgram* program, int32_t artifact_kind, JYPPX_Boolean* out_available, size_t* out_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_rtc_program_copy_artifact_safe(JYPPX_CudaRtcProgram* program, int32_t artifact_kind, uint8_t* output_buffer, size_t output_buffer_size, size_t* out_written_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_rtc_program_get_lowered_name_safe(JYPPX_CudaRtcProgram* program, uint32_t expression_index, uint8_t* output_buffer, size_t output_buffer_size, size_t* out_required_size);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_rtc_program_destroy_safe(JYPPX_CudaRtcProgram* program);
+/* END CUDA SIXTY-THIRD BATCH RUNTIME COMPILATION OWNER */
+
 /* BEGIN CUDA FIFTY-SECOND BATCH PRIMARY EXECUTION CONTEXT */
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_primary_execution_context_get_safe(int32_t device, JYPPX_CudaExecutionContext** out_context);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_primary_execution_context_release_wrapper_safe(JYPPX_CudaExecutionContext* context);

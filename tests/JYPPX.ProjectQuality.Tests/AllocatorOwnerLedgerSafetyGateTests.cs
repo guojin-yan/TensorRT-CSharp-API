@@ -82,8 +82,8 @@ public sealed class AllocatorOwnerLedgerSafetyGateTests
     [Fact]
     public void SafetyGateSourceDocsSmokeAndReadinessKeepProofBoundary()
     {
-        string source = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtAllocatorLedgerSafetyGate.cs");
-        string ownerSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtAllocatorCallbackOwner.cs");
+        string source = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "MemoryAllocation", "TensorRtAllocatorLedgerSafetyGate.cs");
+        string ownerSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "MemoryAllocation", "TensorRtAllocatorCallbackOwner.cs");
         string smokeProgram = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
         string gateDoc = ReadSource("docs", "articles", "zh-cn", "allocator-owner-ledger-safety-gate.md");
         string callbackDesign = ReadSource("docs", "articles", "zh-cn", "allocator-callback-owner-design.md");

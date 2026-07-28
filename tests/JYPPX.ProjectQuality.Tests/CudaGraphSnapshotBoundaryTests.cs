@@ -8,18 +8,18 @@ public sealed class CudaGraphSnapshotBoundaryTests
     [Fact]
     public void ManagedCudaGraphSnapshotsExposeCopiedScalarsOnly()
     {
-        string graph = ReadSource("src", "JYPPX.CudaSharp", "CudaGraph.cs");
-        string graphExec = ReadSource("src", "JYPPX.CudaSharp", "CudaGraphExec.cs");
-        string device = ReadSource("src", "JYPPX.CudaSharp", "CudaDevice.cs");
-        string graphSnapshot = ReadSource("src", "JYPPX.CudaSharp", "CudaGraphTopologySnapshot.cs");
-        string nodeSnapshot = ReadSource("src", "JYPPX.CudaSharp", "CudaGraphNodeTopologySnapshot.cs");
-        string execNodeSnapshot = ReadSource("src", "JYPPX.CudaSharp", "CudaGraphExecNodeStateSnapshot.cs");
-        string nodeListSnapshot = ReadSource("src", "JYPPX.CudaSharp", "CudaGraphNodeSnapshot.cs");
-        string adjacentNodeSnapshot = ReadSource("src", "JYPPX.CudaSharp", "CudaGraphAdjacentNodeSnapshot.cs");
-        string edgeSnapshot = ReadSource("src", "JYPPX.CudaSharp", "CudaGraphEdgeSnapshot.cs");
-        string diagnosticSnapshot = ReadSource("src", "JYPPX.CudaSharp", "CudaGraphDiagnosticSnapshot.cs");
-        string execDiagnosticSnapshot = ReadSource("src", "JYPPX.CudaSharp", "CudaGraphExecDiagnosticSnapshot.cs");
-        string deviceGraphMemoryInfo = ReadSource("src", "JYPPX.CudaSharp", "CudaDeviceGraphMemoryInfo.cs");
+        string graph = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.cs");
+        string graphExec = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphExec.cs");
+        string device = ReadSource("src", "JYPPX.CudaSharp", "Devices", "CudaDevice.cs");
+        string graphSnapshot = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphTopologySnapshot.cs");
+        string nodeSnapshot = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphNodeTopologySnapshot.cs");
+        string execNodeSnapshot = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphExecNodeStateSnapshot.cs");
+        string nodeListSnapshot = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphNodeSnapshot.cs");
+        string adjacentNodeSnapshot = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphAdjacentNodeSnapshot.cs");
+        string edgeSnapshot = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphEdgeSnapshot.cs");
+        string diagnosticSnapshot = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphDiagnosticSnapshot.cs");
+        string execDiagnosticSnapshot = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphExecDiagnosticSnapshot.cs");
+        string deviceGraphMemoryInfo = ReadSource("src", "JYPPX.CudaSharp", "Devices", "CudaDeviceGraphMemoryInfo.cs");
 
         Assert.Contains("public CudaGraphTopologySnapshot GetTopologySnapshot()", graph);
         Assert.Contains("public static CudaGraphNodeTopologySnapshot GetNodeTopologySnapshot(CudaGraphNode node)", graph);
@@ -117,8 +117,8 @@ public sealed class CudaGraphSnapshotBoundaryTests
     [Fact]
     public void SnapshotHelpersReuseExistingSafeBridgeQueries()
     {
-        string graph = ReadSource("src", "JYPPX.CudaSharp", "CudaGraph.cs");
-        string graphExec = ReadSource("src", "JYPPX.CudaSharp", "CudaGraphExec.cs");
+        string graph = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.cs");
+        string graphExec = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphExec.cs");
         string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "Graph", "NativeCudaApi.Graph.cs");
 
         Assert.Contains("GetEdgeWithEdgeDataCount()", graph);

@@ -38,9 +38,9 @@ flowchart LR
 
 实现位于：
 
-- `src/JYPPX.TensorRtSharp/TensorRtBuilderConfig.Trt11PluginSerialization.cs`
-- `src/JYPPX.TensorRtSharp/TensorRtBuilderConfig.Trt11Diagnostics.cs`
-- `src/JYPPX.TensorRtSharp/TensorRtBuilderConfigSerializedPluginSnapshot.cs`
+- `src/JYPPX.TensorRtSharp/Builder/TensorRtBuilderConfig.Trt11PluginSerialization.cs`
+- `src/JYPPX.TensorRtSharp/Builder/TensorRtBuilderConfig.Trt11Diagnostics.cs`
+- `src/JYPPX.TensorRtSharp/Builder/TensorRtBuilderConfigSerializedPluginSnapshot.cs`
 
 虽然 partial 文件名保留了历史来源，这组 public API 已按 line route 覆盖 TRT8/10/11：
 

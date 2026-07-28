@@ -179,7 +179,7 @@ public sealed class TechnicalArticleFoundationsFirstBatchTests
     public void ObjectPluginAndCudaArticlesTrackWrappersSmokesAndNavigation()
     {
         string objectArticle = ReadSource("docs", "articles", "zh-cn", "tensorrt-object-model.md");
-        string inferenceBindings = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtInferenceBindings.cs");
+        string inferenceBindings = ReadSource("src", "JYPPX.TensorRtSharp", "Inference", "TensorRtInferenceBindings.cs");
         string sample = ReadSource("samples", "InferenceBindings", "Program.cs");
         foreach (string marker in new[]
         {
@@ -192,8 +192,8 @@ public sealed class TechnicalArticleFoundationsFirstBatchTests
         }
 
         string pluginArticle = ReadSource("docs", "articles", "zh-cn", "plugin-serialization-paths.md");
-        string pluginControl = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilderConfig.Trt11PluginSerialization.cs");
-        string pluginDiagnostics = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilderConfig.Trt11Diagnostics.cs");
+        string pluginControl = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.Trt11PluginSerialization.cs");
+        string pluginDiagnostics = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.Trt11Diagnostics.cs");
         string pluginSmoke = ReadSource("smoke", "PluginSerializationPathsSmokeRunner", "Program.cs");
         foreach (string marker in new[] { "SetPluginsToSerialize", "GetPluginsToSerialize", "GetSerializedPluginSnapshot", "ClearPluginsToSerialize" })
         {
@@ -206,8 +206,8 @@ public sealed class TechnicalArticleFoundationsFirstBatchTests
 
         string cudaWrapper = ReadSource("docs", "articles", "zh-cn", "cuda-memory-wrapper.md");
         string cudaRange = ReadSource("docs", "articles", "zh-cn", "cuda-memory-range-apis.md");
-        string cudaMemory = ReadSource("src", "JYPPX.CudaSharp", "CudaMemory.cs");
-        string cudaBatch = ReadSource("src", "JYPPX.CudaSharp", "CudaManagedMemoryBatch.cs");
+        string cudaMemory = ReadSource("src", "JYPPX.CudaSharp", "Memory", "CudaMemory.cs");
+        string cudaBatch = ReadSource("src", "JYPPX.CudaSharp", "Memory", "CudaManagedMemoryBatch.cs");
         string cudaSmoke = ReadSource("smoke", "CudaSmokeRunner", "Program.cs");
         foreach (string marker in new[] { "GetRangeAttribute", "GetRangeAttributes", "GetRangeAccessedByDevices", "GetRangeDiagnosticSummary" })
         {

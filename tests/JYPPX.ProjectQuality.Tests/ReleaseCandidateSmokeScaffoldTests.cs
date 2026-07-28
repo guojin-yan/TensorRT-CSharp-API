@@ -75,7 +75,7 @@ public sealed class ReleaseCandidateSmokeScaffoldTests
         string coverage = ReadText("artifacts", "user-acceptance", "trtexec-option-coverage.md");
         string parityJson = ReadText("samples", "OnnxToEngine", "trtexec-parity-matrix.json");
         string parityMarkdown = ReadText("samples", "OnnxToEngine", "trtexec-parity-matrix.md");
-        string parser = ReadText("src", "JYPPX.TensorRtSharp.Tools", "TrtexecLikeParser.cs");
+        string parser = ReadText("src", "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeParser.cs");
         string onnxTests = ReadText("tests", "JYPPX.ProjectQuality.Tests", "OnnxToEngineTrtexecLikeTests.cs");
         string appTests = ReadText("tests", "JYPPX.ProjectQuality.Tests", "TensorRtExecApplicationTests.cs");
 

@@ -52,7 +52,7 @@
 - TRT8 deferred source：`native/src/tensorrt/v8/modules/deferred/cross_version_tenth_batch_other_deferred.inc`
 - TRT10 deferred source：`native/src/tensorrt/v10/modules/deferred/cross_version_other_deferred.inc`
 - comparison matrix：`artifacts/interface-coverage/tensorrt-interface-comparison.csv`
-- design gate：`src/JYPPX.TensorRtSharp/TensorRtAlgorithmSnapshotDesignGate.cs`
+- design gate：`src/JYPPX.TensorRtSharp/Callbacks/Core/TensorRtAlgorithmSnapshotDesignGate.cs`
 - quality：`tests/JYPPX.ProjectQuality.Tests/AlgorithmSnapshotDesignGateTests.cs`
 
 ## 不可晋级项

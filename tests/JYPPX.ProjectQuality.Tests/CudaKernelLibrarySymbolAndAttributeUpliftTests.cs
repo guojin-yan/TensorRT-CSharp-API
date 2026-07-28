@@ -45,8 +45,8 @@ public sealed class CudaKernelLibrarySymbolAndAttributeUpliftTests
     [Fact]
     public void ManagedSurfaceIsOwnerBoundCopiedAndPointerFree()
     {
-        string library = ReadSource("src", "JYPPX.CudaSharp", "CudaKernelLibrary.cs");
-        string attribute = ReadSource("src", "JYPPX.CudaSharp", "CudaKernelAttribute.cs");
+        string library = ReadSource("src", "JYPPX.CudaSharp", "Kernels", "CudaKernelLibrary.cs");
+        string attribute = ReadSource("src", "JYPPX.CudaSharp", "Kernels", "CudaKernelAttribute.cs");
         string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "NativeCudaApi.KernelLibrary.cs");
         string publicSurface = library + attribute;
 

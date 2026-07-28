@@ -51,7 +51,7 @@ public sealed class CudaManagedMemoryBatchOwnerSafeUpliftTests
     [Fact]
     public void ManagedSurfaceIsTypedOwnerBoundAndPointerFree()
     {
-        string surface = ReadSource("src", "JYPPX.CudaSharp", "CudaManagedMemoryBatch.cs");
+        string surface = ReadSource("src", "JYPPX.CudaSharp", "Memory", "CudaManagedMemoryBatch.cs");
         string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "Memory", "NativeCudaApi.ManagedMemoryBatch.cs");
         string nativeStructs = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "NativeStructs.cs");
 

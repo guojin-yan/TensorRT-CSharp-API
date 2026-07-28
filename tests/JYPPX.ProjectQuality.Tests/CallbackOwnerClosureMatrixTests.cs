@@ -68,7 +68,7 @@ public sealed class CallbackOwnerClosureMatrixTests
         AssertNoRawPointerTypes(typeof(TensorRtCallbackOwnerClosureMatrixResult));
         AssertNoRawPointerTypes(typeof(TensorRtCallbackOwnerClosureMatrixRow));
 
-        string source = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtCallbackOwnerClosureMatrix.cs");
+        string source = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Core", "TensorRtCallbackOwnerClosureMatrix.cs");
         Assert.DoesNotContain("public IntPtr", source);
         Assert.DoesNotContain("public UIntPtr", source);
         Assert.DoesNotContain("public nint", source);
@@ -81,7 +81,7 @@ public sealed class CallbackOwnerClosureMatrixTests
     [Fact]
     public void SmokeAndDocsExposeClosureMatrixBoundary()
     {
-        string source = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtCallbackOwnerClosureMatrix.cs");
+        string source = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Core", "TensorRtCallbackOwnerClosureMatrix.cs");
         string smoke = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
         string smokeReadme = ReadSource("smoke", "README.md");
         string doc = ReadSource("docs", "articles", "zh-cn", "callback-owner-closure-matrix.md");

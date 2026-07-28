@@ -46,17 +46,17 @@ public sealed class CudaOwnerScopedGraphDiagnosticsUpliftTests
     [Fact]
     public void ManagedSurfaceUsesOwnersCopiedSnapshotsAndTypedModes()
     {
-        string graph = ReadSource("src", "JYPPX.CudaSharp", "CudaGraph.cs");
-        string graphExec = ReadSource("src", "JYPPX.CudaSharp", "CudaGraphExec.cs");
-        string stream = ReadSource("src", "JYPPX.CudaSharp", "CudaStream.cs");
-        string captureInfo = ReadSource("src", "JYPPX.CudaSharp", "CudaStreamCaptureInfo.cs");
-        string flags = ReadSource("src", "JYPPX.CudaSharp", "CudaFlags.cs");
+        string graph = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.cs");
+        string graphExec = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphExec.cs");
+        string stream = ReadSource("src", "JYPPX.CudaSharp", "Streams", "CudaStream.cs");
+        string captureInfo = ReadSource("src", "JYPPX.CudaSharp", "Streams", "CudaStreamCaptureInfo.cs");
+        string flags = ReadSource("src", "JYPPX.CudaSharp", "Core", "CudaFlags.cs");
         string publicSurface = graph + graphExec + stream + captureInfo + flags +
-            ReadSource("src", "JYPPX.CudaSharp", "CudaGraphKernelNodeParametersSnapshot.cs") +
-            ReadSource("src", "JYPPX.CudaSharp", "CudaGraphHostNodeParametersSnapshot.cs") +
-            ReadSource("src", "JYPPX.CudaSharp", "CudaGraphMemoryAllocationNodeSnapshot.cs") +
-            ReadSource("src", "JYPPX.CudaSharp", "CudaGraphMemoryFreeNodeSnapshot.cs") +
-            ReadSource("src", "JYPPX.CudaSharp", "CudaGraphExternalSemaphoreNodeSnapshot.cs");
+            ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphKernelNodeParametersSnapshot.cs") +
+            ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphHostNodeParametersSnapshot.cs") +
+            ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphMemoryAllocationNodeSnapshot.cs") +
+            ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphMemoryFreeNodeSnapshot.cs") +
+            ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphExternalSemaphoreNodeSnapshot.cs");
 
         Assert.Contains("public CudaGraphNode AddMemsetNode(CudaMemory destination", graph, StringComparison.Ordinal);
         Assert.Contains("public void RemoveNode(CudaGraphNode node)", graph, StringComparison.Ordinal);

@@ -12,8 +12,8 @@ public sealed class CudaGraphKernelAttributeBoundaryTests
         string header = ReadSource("native", "include", "jyppx", "cuda", "runtime.h");
         string types = ReadSource("native", "include", "jyppx", "cuda", "types.h");
         string nativeSource = ReadSource("native", "src", "cuda", "modules", "graph", "node_topology.inc");
-        string graph = ReadSource("src", "JYPPX.CudaSharp", "CudaGraph.cs");
-        string value = ReadSource("src", "JYPPX.CudaSharp", "CudaGraphKernelNodeAttributeValue.cs");
+        string graph = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.cs");
+        string value = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphKernelNodeAttributeValue.cs");
         string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "Graph", "NativeCudaApi.Graph.cs");
         string nativeStructs = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "NativeStructs.cs");
         string coverageScript = ReadSource("eng", "Export-InterfaceCoverageMatrix.ps1");

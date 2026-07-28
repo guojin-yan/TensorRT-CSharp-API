@@ -144,7 +144,7 @@ public sealed class OutputAllocatorRuntimeProofPrecheckTests
     [Fact]
     public void ReadinessSmokeAndDocsKeepPrecheckSeparateFromRuntimeProof()
     {
-        string precheckSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOutputAllocatorRuntimeProofPrecheck.cs");
+        string precheckSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "MemoryAllocation", "TensorRtOutputAllocatorRuntimeProofPrecheck.cs");
         string smokeProgram = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
         string readiness = ReadSource("eng", "Test-RuntimePackageReadiness.ps1");
         string packageConsumer = ReadSource("eng", "Test-PackageConsumer.ps1");

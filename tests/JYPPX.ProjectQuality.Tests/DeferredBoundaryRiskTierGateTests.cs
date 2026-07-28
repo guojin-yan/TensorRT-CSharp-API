@@ -105,17 +105,17 @@ public sealed class DeferredBoundaryRiskTierGateTests
     [Fact]
     public void CurrentSafeWrappersStayPointerFreeAndDoNotClaimRuntimeProof()
     {
-        string allocatorOwner = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtAllocatorCallbackOwner.cs");
-        string outputAllocatorOwner = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOutputAllocatorCallbackOwner.cs");
-        string callbackSnapshot = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContextCallbackStateSnapshot.cs");
-        string engineSnapshot = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtEngine.Trt11BoundaryControls.cs");
-        string contextSnapshot = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContext.Trt11BoundaryControls.cs");
+        string allocatorOwner = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "MemoryAllocation", "TensorRtAllocatorCallbackOwner.cs");
+        string outputAllocatorOwner = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "MemoryAllocation", "TensorRtOutputAllocatorCallbackOwner.cs");
+        string callbackSnapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContextCallbackStateSnapshot.cs");
+        string engineSnapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.Trt11BoundaryControls.cs");
+        string contextSnapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Trt11BoundaryControls.cs");
         string combined = allocatorOwner + outputAllocatorOwner + callbackSnapshot + engineSnapshot + contextSnapshot;
 
         Assert.Contains("public TensorRtAllocatorNativeDryRunResult RunNativeDryRunDiagnostic", allocatorOwner);
         Assert.Contains("public TensorRtAllocatorOwnerStateDryRunResult RunNativeStateLedgerDryRunDiagnostic", allocatorOwner);
-        Assert.Contains("public TensorRtExecutionContextCallbackStateSnapshot GetCallbackStateSnapshot", ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs"));
-        Assert.Contains("public TensorRtExecutionContextCallbackStateSnapshot ClearCallbackState", ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs"));
+        Assert.Contains("public TensorRtExecutionContextCallbackStateSnapshot GetCallbackStateSnapshot", ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs"));
+        Assert.Contains("public TensorRtExecutionContextCallbackStateSnapshot ClearCallbackState", ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs"));
         Assert.Contains("public bool RealCallbackRuntime => false", outputAllocatorOwner);
         Assert.Contains("public bool IsRealCallbackRuntimeProof => false", outputAllocatorOwner);
         Assert.Contains("public bool DevicePointerExposed", allocatorOwner);

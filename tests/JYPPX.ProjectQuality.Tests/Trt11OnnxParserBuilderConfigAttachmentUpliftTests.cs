@@ -45,8 +45,8 @@ public sealed class Trt11OnnxParserBuilderConfigAttachmentUpliftTests
     [Fact]
     public void ManagedAttachmentRetainsAcceptedConfigAndDisposesParserBeforeLease()
     {
-        string attachment = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOnnxParser.BuilderConfig.cs");
-        string parser = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOnnxParser.cs");
+        string attachment = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParser.BuilderConfig.cs");
+        string parser = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParser.cs");
         string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.OnnxParserBuilderConfig.cs");
 
         Assert.Contains("SafeTensorRtObjectHandleLease.Create(config.Handle)", attachment, StringComparison.Ordinal);
@@ -78,7 +78,7 @@ public sealed class Trt11OnnxParserBuilderConfigAttachmentUpliftTests
         Assert.Equal(1u << 3, (uint)TensorRtOnnxParserFlags.EnablePluginOverride);
         Assert.Equal(1u << 4, (uint)TensorRtOnnxParserFlags.AdjustForDla);
 
-        string parser = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOnnxParser.cs");
+        string parser = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParser.cs");
         Assert.Contains("Line != TensorRtApiLine.TensorRt11 && (flags & trt11OnlyFlags) != 0", parser, StringComparison.Ordinal);
         Assert.Contains("Line != TensorRtApiLine.TensorRt11 && flag >= TensorRtOnnxParserFlag.ReportCapabilityDla", parser, StringComparison.Ordinal);
     }
@@ -87,7 +87,7 @@ public sealed class Trt11OnnxParserBuilderConfigAttachmentUpliftTests
     public void SmokeToolsAndPackageConsumerCompileTheDeploymentWorkflow()
     {
         string smoke = ReadSource("smoke", "OnnxToEngineSmokeRunner", "Program.cs");
-        string tools = ReadSource("src", "JYPPX.TensorRtSharp.Tools", "OnnxEngineBuildService.cs");
+        string tools = ReadSource("src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildService.cs");
         string consumer = ReadSource("eng", "Test-BridgePackageConsumer.ps1");
 
         Assert.Contains("parser.SetBuilderConfig(config)", smoke, StringComparison.Ordinal);

@@ -138,7 +138,7 @@ $articles = Add-OrReplaceArticle $articles (New-RoadmapArticle `
     -VisualAssets @("Graph event node ownership 图") `
     -Status "ready" `
     -TargetPath "docs/articles/zh-cn/publishing/cuda-graph-event-node-borrowed-handle-安全边界.md" `
-    -SourceArtifacts @("docs/articles/zh-cn/cuda-graph-borrowed-handle-safety-gate.md", "src/JYPPX.CudaSharp/CudaGraph.cs", "smoke/CudaGraphSmokeRunner/Program.cs"))
+    -SourceArtifacts @("docs/articles/zh-cn/cuda-graph-borrowed-handle-safety-gate.md", "src/JYPPX.CudaSharp/Graphs/CudaGraph.cs", "smoke/CudaGraphSmokeRunner/Program.cs"))
 
 $articles = Add-OrReplaceArticle $articles (New-RoadmapArticle `
     -Id 39 `
@@ -170,11 +170,11 @@ $articles = Add-OrReplaceArticle $articles (New-RoadmapArticle `
     -Audience "模型转换维护者、发布负责人" `
     -Type "发布证据说明" `
     -Outline @("parser error count", "copied diagnostic text", "used VC plugin library summary", "readiness wrapper group boundary") `
-    -SampleOrCodePath "src/JYPPX.TensorRtSharp/TensorRtOnnxParserDiagnosticSnapshot.cs" `
+    -SampleOrCodePath "src/JYPPX.TensorRtSharp/Parsing/TensorRtOnnxParserDiagnosticSnapshot.cs" `
     -VisualAssets @("parser/refitter diagnostic evidence ladder 图") `
     -Status "ready" `
     -TargetPath "docs/articles/zh-cn/publishing/onnx-parser-parserrefitter-诊断-copied-diagnostics-release-gate.md" `
-    -SourceArtifacts @("src/JYPPX.TensorRtSharp/TensorRtOnnxParserDiagnosticSnapshot.cs", "eng/Test-BridgePackageConsumer.ps1", "eng/Test-RuntimePackageReadiness.ps1"))
+    -SourceArtifacts @("src/JYPPX.TensorRtSharp/Parsing/TensorRtOnnxParserDiagnosticSnapshot.cs", "eng/Test-BridgePackageConsumer.ps1", "eng/Test-RuntimePackageReadiness.ps1"))
 
 $articles = Add-OrReplaceArticle $articles (New-RoadmapArticle `
     -Id 42 `
@@ -186,7 +186,7 @@ $articles = Add-OrReplaceArticle $articles (New-RoadmapArticle `
     -VisualAssets @("stream-to-existing-graph session 生命周期图") `
     -Status "ready" `
     -TargetPath "docs/articles/zh-cn/publishing/cuda-stream-capture-to-graph-owner-safe-session.md" `
-    -SourceArtifacts @("artifacts/interface-coverage/cuda-stream-capture-to-graph-candidate-audit.md", "src/JYPPX.CudaSharp/CudaStreamCaptureToGraphSession.cs", "smoke/CudaGraphSmokeRunner/Program.cs"))
+    -SourceArtifacts @("artifacts/interface-coverage/cuda-stream-capture-to-graph-candidate-audit.md", "src/JYPPX.CudaSharp/Streams/CudaStreamCaptureToGraphSession.cs", "smoke/CudaGraphSmokeRunner/Program.cs"))
 
 $enhancedArticles = New-Object System.Collections.Generic.List[object]
 

@@ -1,5 +1,53 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-28 CUDA RTC Compile Owner And Managed Source Module Layout
+
+本阶段完成 CUDA Runtime Compilation 第一阶段 owner-safe compile API，并把三个托管接口项目根目录中堆叠的
+公开 C# 文件按职责模块化。文件整理只改变物理路径，不改变 namespace、类型名、public API、native ABI 或对象生命周期。
+
+### CUDA RTC 实现
+
+- 新增 optional dynamic NVRTC loader 与 `JYPPX_CudaRtcProgram` owner；核心 bridge 不静态链接 NVRTC，
+  `JYPPX_NVRTC_LIBRARY` 可指定精确依赖，缺失依赖返回可诊断 capability/diagnostic。
+- 12 个 ABI 覆盖 program/source/header/name-expression、compile、log、PTX/CUBIN/LTO IR、lowered name 与幂等 destroy；
+  caller-buffer/count-copy 有 UTF-8、embedded NUL、重复值、数量、容量和溢出校验，异常与 Windows SEH 不跨 ABI。
+- managed 新增 `CudaRtcCompiler`、`CudaRtcProgram`、immutable source/options/result/artifact；public surface 不暴露
+  `IntPtr`、`UIntPtr`、`SafeHandle` 或 vendor program/kernel/function handle。
+- `samples/CudaRuntimeCompilation` 覆盖成功编译、intentional failure log、virtual header、lowered name、PTX hash
+  determinism、可用的 CUBIN/LTO IR 和可选 PTX load；package manifest 保持 bridge-only 不捆 NVRTC。
+
+### 托管源码模块化
+
+- `JYPPX.CudaSharp` 的 83 个根目录文件归入 10 个模块：Core、Devices、Diagnostics、Events、Graphs、IPC、
+  Kernels、Memory、RuntimeCompilation、Streams。
+- `JYPPX.TensorRtSharp` 的 189 个根目录文件归入 Builder、Runtime、Engine、Execution、Inference、Network、
+  Layers、Parsing、Refit、Plugins、Profiles、Serialization、ControlFlow、Diagnostics、Core 与 Callbacks；Callbacks
+  再分为 Core、Debugging、MemoryAllocation、Monitoring。
+- `JYPPX.TensorRtSharp.Tools` 的 22 个根目录文件归入 Artifacts、Build、Core、Runtime、Trtexec。
+- 机械同步 1077 处测试、脚本、文档和结构化工件源码路径；反向扫描 294 个旧路径映射为 0 残留。
+- 新增 `ManagedSourceModuleLayoutTests`，要求三个项目根目录 `.cs` 为 0，并验证所有约定模块包含源码文件。
+
+### Verification
+
+- Windows CUDA 11.8/12.1/12.9/13.2 NVRTC capability 与真实 compile smoke 均完成；11.8/12.1/12.9 PTX
+  可由当前 CUDA 12.9 runtime library owner 加载，13.2 PTX 因当前 driver/runtime 不支持其 PTX version 只记 compile proof。
+- RTC native ABI：12/12 header declarations、12/12 PE exports、0 missing；RTC 专项测试 7/7。
+- binding generator 连续两次生成 3988 API records / 199 manifests，hash 确定性和 comparison/coverage exporter 通过。
+- 模块结构测试 3/3；完整 `TensorRtSharp.sln` Debug build 覆盖全部目标框架，0 warning / 0 error。
+- `git diff --check` 通过；仅保留 Git 对既有 CRLF/LF 工作树规范的提示。
+- build server 已关闭，仓库 `TestResults` 与相关 build/test 进程均为 0；Downloads/用户 Temp 自本批开始后
+  未发现 TensorRtSharp/JYPPX/CUDA/TensorRT/NVRTC、ONNX、engine、plan、nupkg 或压缩重资产。
+
+### Proof Boundary
+
+- RTC compile、artifact hash 和 PTX load 都不是 kernel launch、GPU readback 或 correctness proof；当前样例和工件保持
+  `kernelLaunch=false`、`gpuReadback=false`、`correctnessProof=false`。
+- Linux NVRTC SONAME/symbol、owner-bound named-kernel launch、typed argument packing、full-runtime `cuda-rtc` 组件、
+  clean public package consumer 和 post-publish 仍未闭合。
+- TRT-off `win-x64-dev` 与 TRT10/CUDA12.9 native build 仍被既有非 RTC TensorRT 源码错误阻断，未记作 RTC 失败，
+  也未宣称这些组合通过。
+- 未 push、未触发 GitHub Actions/workflow dispatch、未执行 NuGet/GitHub 发布或 issue close。
+
 ## 2026-07-28 TensorRtExec Multi-Output Runtime Artifact Closure
 
 本阶段在不提升危险 deferred API、不下载外部模型的前提下，完成 `TensorRtExec` / `OnnxToEngine` 的多输出
@@ -536,7 +584,7 @@ SVG、case pack 和 validator，不新增 native ownership 风险，也不把示
 
 ### 实现
 
-- 新增 `src/JYPPX.TensorRtSharp.Tools/TrtexecLikeOptionCapabilities.cs`，输出 `trtexec-like-option-capabilities.v1` JSON，覆盖 31 个 trtexec-like option capability rows。
+- 新增 `src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeOptionCapabilities.cs`，输出 `trtexec-like-option-capabilities.v1` JSON，覆盖 31 个 trtexec-like option capability rows。
 - `applications/TensorRtExec` 和 `samples/OnnxToEngine` 增加 `--help-json` / `--capabilities-json`，离线输出 option group、alias、implementation class、parse/report-only 或 blocked 状态、`releaseFrozen=true` 和 `canPromoteRuntimeProof=false`。
 - `samples/YoloVision` 增加 `--self-test-capabilities`，离线验证 60 个 family/task rows、55 个 supported rows、5 个 YOLOX unsupported rows 和 `IsRuntimeProof=False` 边界。
 - 更新 `applications/TensorRtExec/README.md`、`samples/OnnxToEngine/README.md`、`samples/YoloVision/README.md` 与外层 plan/diary/prompt。

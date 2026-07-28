@@ -11,8 +11,8 @@ public sealed class CudaGraphNodeParamsBoundaryTests
         string deferredManifest = ReadSource("native", "manifests", "cuda", "cuda-thirty-seventh-batch-graph-boundaries.manifest.json");
         string header = ReadSource("native", "include", "jyppx", "cuda", "runtime.h");
         string nativeSource = ReadSource("native", "src", "cuda", "modules", "graph", "node_topology.inc");
-        string graph = ReadSource("src", "JYPPX.CudaSharp", "CudaGraph.cs");
-        string parameters = ReadSource("src", "JYPPX.CudaSharp", "CudaGraphMemsetNodeParameters.cs");
+        string graph = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.cs");
+        string parameters = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphMemsetNodeParameters.cs");
         string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "Graph", "NativeCudaApi.Graph.cs");
         string smoke = ReadSource("smoke", "CudaGraphSmokeRunner", "Program.cs");
         string coverageScript = ReadSource("eng", "Export-InterfaceCoverageMatrix.ps1");
@@ -52,9 +52,9 @@ public sealed class CudaGraphNodeParamsBoundaryTests
     [Fact]
     public void CudaGraphNodeParamsDescriptorIsPointerFreeAndCoversHighValueNodeKinds()
     {
-        string graph = ReadSource("src", "JYPPX.CudaSharp", "CudaGraph.cs");
-        string descriptor = ReadSource("src", "JYPPX.CudaSharp", "CudaGraphNodeParamsDescriptor.cs");
-        string descriptorKind = ReadSource("src", "JYPPX.CudaSharp", "CudaGraphNodeParamsDescriptorKind.cs");
+        string graph = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.cs");
+        string descriptor = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphNodeParamsDescriptor.cs");
+        string descriptorKind = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphNodeParamsDescriptorKind.cs");
         string smoke = ReadSource("smoke", "CudaGraphSmokeRunner", "Program.cs");
 
         Assert.Contains("GetNodeParamsDescriptor(CudaGraphNode node)", graph);

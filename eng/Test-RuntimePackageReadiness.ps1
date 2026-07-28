@@ -1464,8 +1464,8 @@ function New-ErrorRecorderDiagnosticsDesignGateEvidence {
     -Marker "error-recorder-diagnostics-design-gate" `
     -ReadyStatus "design-gate-ready" `
     -EvidenceRelativePaths @(
-      "src\JYPPX.TensorRtSharp\TensorRtErrorRecorderDiagnosticsDesignGate.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtErrorRecorderSnapshot.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Monitoring\TensorRtErrorRecorderDiagnosticsDesignGate.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Monitoring\TensorRtErrorRecorderSnapshot.cs",
       "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs",
       "docs\articles\zh-cn\error-recorder-diagnostics-design-gate.md",
       "docs\articles\zh-cn\error-recorder-snapshot-guide.md",
@@ -1526,7 +1526,7 @@ function New-DimensionExpressionSnapshotDesignGateEvidence {
     -Marker "dimension-expression-snapshot-design-gate" `
     -ReadyStatus "design-gate-ready" `
     -EvidenceRelativePaths @(
-      "src\JYPPX.TensorRtSharp\TensorRtDimensionExpressionSnapshotDesignGate.cs",
+      "src\JYPPX.TensorRtSharp\Network\TensorRtDimensionExpressionSnapshotDesignGate.cs",
       "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs",
       "docs\articles\zh-cn\dimension-expression-snapshot-design-gate.md",
       "docs\articles\zh-cn\deferred-manual-design-groups.md",
@@ -1594,8 +1594,8 @@ function New-CalibratorMetadataDesignGateEvidence {
     -Marker "calibrator-metadata-design-gate" `
     -ReadyStatus "design-gate-ready" `
     -EvidenceRelativePaths @(
-      "src\JYPPX.TensorRtSharp\TensorRtCalibratorMetadataDesignGate.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtBuilderConfig.cs",
+      "src\JYPPX.TensorRtSharp\Builder\TensorRtCalibratorMetadataDesignGate.cs",
+      "src\JYPPX.TensorRtSharp\Builder\TensorRtBuilderConfig.cs",
       "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs",
       "docs\articles\zh-cn\calibrator-metadata-design-gate.md",
       "docs\articles\zh-cn\deferred-manual-design-groups.md",
@@ -1669,8 +1669,8 @@ function New-RuntimeDeserializationBoundaryPrecheckEvidence {
     -ReadyStatus "precheck-ready" `
     -RuntimeEvidenceKind "runtime-precheck" `
     -EvidenceRelativePaths @(
-      "src\JYPPX.TensorRtSharp\TensorRtRuntimeDeserializationBoundaryPrecheck.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtRuntime.cs",
+      "src\JYPPX.TensorRtSharp\Runtime\TensorRtRuntimeDeserializationBoundaryPrecheck.cs",
+      "src\JYPPX.TensorRtSharp\Runtime\TensorRtRuntime.cs",
       "src\JYPPX.TensorRtSharp\Internal\Interop\NativeBridgeApi.cs",
       "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs",
       "docs\articles\zh-cn\runtime-deserialization-boundary-precheck.md",
@@ -1812,8 +1812,8 @@ function New-RuntimeDeserializationDependencyDiagnosticsEvidence {
     -ReadyStatus "dependency-diagnostics-ready" `
     -RuntimeEvidenceKind "dependency-diagnostics" `
     -EvidenceRelativePaths @(
-      "src\JYPPX.TensorRtSharp\TensorRtRuntimeDeserializationDependencyDiagnostics.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtRuntimeDeserializationBoundaryPrecheck.cs",
+      "src\JYPPX.TensorRtSharp\Runtime\TensorRtRuntimeDeserializationDependencyDiagnostics.cs",
+      "src\JYPPX.TensorRtSharp\Runtime\TensorRtRuntimeDeserializationBoundaryPrecheck.cs",
       "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs",
       "docs\articles\zh-cn\runtime-deserialization-dependency-diagnostics.md",
       "docs\articles\zh-cn\runtime-deserialization-boundary-precheck.md",
@@ -2222,7 +2222,7 @@ function New-RealCallbackRuntimeEvidence {
 }
 
 function New-AllocatorOwnerInternalRuntimePrototypeEvidence {
-  $ownerRelativePath = "src\JYPPX.TensorRtSharp\TensorRtAllocatorCallbackOwner.cs"
+  $ownerRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\MemoryAllocation\TensorRtAllocatorCallbackOwner.cs"
   $smokeRelativePath = "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs"
   $callbackDesignRelativePath = "docs\articles\zh-cn\allocator-callback-owner-design.md"
   $gateRelativePath = "docs\articles\zh-cn\real-callback-trampoline-gate.md"
@@ -2345,8 +2345,8 @@ function New-AllocatorOwnerInternalRuntimePrototypeEvidence {
 }
 
 function New-AllocatorOwnerLedgerSafetyGateEvidence {
-  $gateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtAllocatorLedgerSafetyGate.cs"
-  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtAllocatorCallbackOwner.cs"
+  $gateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\MemoryAllocation\TensorRtAllocatorLedgerSafetyGate.cs"
+  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\MemoryAllocation\TensorRtAllocatorCallbackOwner.cs"
   $smokeRelativePath = "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs"
   $gateDocRelativePath = "docs\articles\zh-cn\allocator-owner-ledger-safety-gate.md"
   $callbackDesignRelativePath = "docs\articles\zh-cn\allocator-callback-owner-design.md"
@@ -2483,7 +2483,7 @@ function New-AllocatorOwnerLedgerSafetyGateEvidence {
 }
 
 function New-OutputAllocatorInternalRuntimeGateEvidence {
-  $gateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtOutputAllocatorRuntimeGate.cs"
+  $gateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\MemoryAllocation\TensorRtOutputAllocatorRuntimeGate.cs"
   $smokeRelativePath = "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs"
   $gateDocRelativePath = "docs\articles\zh-cn\output-allocator-runtime-gate.md"
   $callbackGateRelativePath = "docs\articles\zh-cn\real-callback-trampoline-gate.md"
@@ -2601,9 +2601,9 @@ function New-OutputAllocatorInternalRuntimeGateEvidence {
 }
 
 function New-OutputAllocatorCallbackOwnerDesignEvidence {
-  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtOutputAllocatorCallbackOwner.cs"
-  $gateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtOutputAllocatorRuntimeGate.cs"
-  $allocatorOwnerSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtAllocatorCallbackOwner.cs"
+  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\MemoryAllocation\TensorRtOutputAllocatorCallbackOwner.cs"
+  $gateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\MemoryAllocation\TensorRtOutputAllocatorRuntimeGate.cs"
+  $allocatorOwnerSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\MemoryAllocation\TensorRtAllocatorCallbackOwner.cs"
   $smokeRelativePath = "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs"
   $designDocRelativePath = "docs\articles\zh-cn\output-allocator-callback-owner-design.md"
   $gateDocRelativePath = "docs\articles\zh-cn\output-allocator-runtime-gate.md"
@@ -2725,9 +2725,9 @@ function New-OutputAllocatorCallbackOwnerDesignEvidence {
 }
 
 function New-OutputAllocatorAttachDetachDesignGateEvidence {
-  $gateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtOutputAllocatorAttachDetachDesignGate.cs"
-  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtOutputAllocatorCallbackOwner.cs"
-  $contextSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs"
+  $gateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\MemoryAllocation\TensorRtOutputAllocatorAttachDetachDesignGate.cs"
+  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\MemoryAllocation\TensorRtOutputAllocatorCallbackOwner.cs"
+  $contextSourceRelativePath = "src\JYPPX.TensorRtSharp\Execution\TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs"
   $smokeRelativePath = "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs"
   $designDocRelativePath = "docs\articles\zh-cn\output-allocator-attach-detach-design-gate.md"
   $callbackDesignRelativePath = "docs\articles\zh-cn\output-allocator-callback-owner-design.md"
@@ -2855,10 +2855,10 @@ function New-OutputAllocatorAttachDetachDesignGateEvidence {
 }
 
 function New-OutputBufferOwnershipSafetyGateEvidence {
-  $ownershipGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtOutputBufferOwnershipSafetyGate.cs"
-  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtOutputAllocatorRuntimeProofPrecheck.cs"
-  $attachDetachGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtOutputAllocatorAttachDetachDesignGate.cs"
-  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtOutputAllocatorCallbackOwner.cs"
+  $ownershipGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\MemoryAllocation\TensorRtOutputBufferOwnershipSafetyGate.cs"
+  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\MemoryAllocation\TensorRtOutputAllocatorRuntimeProofPrecheck.cs"
+  $attachDetachGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\MemoryAllocation\TensorRtOutputAllocatorAttachDetachDesignGate.cs"
+  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\MemoryAllocation\TensorRtOutputAllocatorCallbackOwner.cs"
   $smokeRelativePath = "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs"
   $ownershipGateDocRelativePath = "docs\articles\zh-cn\output-buffer-ownership-safety-gate.md"
   $precheckDocRelativePath = "docs\articles\zh-cn\output-allocator-runtime-proof-precheck.md"
@@ -2995,11 +2995,11 @@ function New-OutputBufferOwnershipSafetyGateEvidence {
 }
 
 function New-OutputAllocatorRuntimeProofPrecheckEvidence {
-  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtOutputAllocatorRuntimeProofPrecheck.cs"
-  $attachDetachGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtOutputAllocatorAttachDetachDesignGate.cs"
-  $ownershipGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtOutputBufferOwnershipSafetyGate.cs"
-  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtOutputAllocatorCallbackOwner.cs"
-  $gateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtOutputAllocatorRuntimeGate.cs"
+  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\MemoryAllocation\TensorRtOutputAllocatorRuntimeProofPrecheck.cs"
+  $attachDetachGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\MemoryAllocation\TensorRtOutputAllocatorAttachDetachDesignGate.cs"
+  $ownershipGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\MemoryAllocation\TensorRtOutputBufferOwnershipSafetyGate.cs"
+  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\MemoryAllocation\TensorRtOutputAllocatorCallbackOwner.cs"
+  $gateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\MemoryAllocation\TensorRtOutputAllocatorRuntimeGate.cs"
   $smokeRelativePath = "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs"
   $precheckDocRelativePath = "docs\articles\zh-cn\output-allocator-runtime-proof-precheck.md"
   $attachDetachGateDocRelativePath = "docs\articles\zh-cn\output-allocator-attach-detach-design-gate.md"
@@ -3152,7 +3152,7 @@ function New-OutputAllocatorRuntimeProofPrecheckEvidence {
 }
 
 function New-DebugListenerCallbackOwnerDesignEvidence {
-  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerCallbackOwner.cs"
+  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerCallbackOwner.cs"
   $smokeRelativePath = "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs"
   $designDocRelativePath = "docs\articles\zh-cn\debug-listener-callback-owner-design.md"
   $callbackGateRelativePath = "docs\articles\zh-cn\real-callback-trampoline-gate.md"
@@ -3270,9 +3270,9 @@ function New-DebugListenerCallbackOwnerDesignEvidence {
 }
 
 function New-DebugListenerAttachDetachDesignGateEvidence {
-  $gateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerAttachDetachDesignGate.cs"
-  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerCallbackOwner.cs"
-  $contextSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs"
+  $gateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerAttachDetachDesignGate.cs"
+  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerCallbackOwner.cs"
+  $contextSourceRelativePath = "src\JYPPX.TensorRtSharp\Execution\TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs"
   $smokeRelativePath = "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs"
   $designDocRelativePath = "docs\articles\zh-cn\debug-listener-attach-detach-design-gate.md"
   $callbackDesignRelativePath = "docs\articles\zh-cn\debug-listener-callback-owner-design.md"
@@ -3393,10 +3393,10 @@ function New-DebugListenerAttachDetachDesignGateEvidence {
 }
 
 function New-DebugListenerBorrowedTensorSafetyGateEvidence {
-  $borrowedTensorSafetyGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerBorrowedTensorSafetyGate.cs"
-  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerRuntimeProofPrecheck.cs"
-  $attachDetachGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerAttachDetachDesignGate.cs"
-  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerCallbackOwner.cs"
+  $borrowedTensorSafetyGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerBorrowedTensorSafetyGate.cs"
+  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRuntimeProofPrecheck.cs"
+  $attachDetachGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerAttachDetachDesignGate.cs"
+  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerCallbackOwner.cs"
   $smokeRelativePath = "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs"
   $borrowedTensorSafetyGateDocRelativePath = "docs\articles\zh-cn\debug-listener-borrowed-tensor-safety-gate.md"
   $precheckDocRelativePath = "docs\articles\zh-cn\debug-listener-runtime-proof-precheck.md"
@@ -3530,23 +3530,23 @@ function New-DebugListenerBorrowedTensorSafetyGateEvidence {
 }
 
 function New-DebugListenerRuntimeProofPrecheckEvidence {
-  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerRuntimeProofPrecheck.cs"
-  $attachDetachGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerAttachDetachDesignGate.cs"
-  $borrowedTensorSafetyGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerBorrowedTensorSafetyGate.cs"
-  $attachVTableSafetyGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerAttachVTableSafetyGate.cs"
-  $nativeAttachNoThrowPreflightSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeAttachNoThrowPreflight.cs"
-  $nativeOwnerAddressDesignGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeOwnerAddressDesignGate.cs"
-  $nativeNoThrowVTableDesignGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeNoThrowVTableDesignGate.cs"
-  $nativeAttachEntryDesignGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeAttachEntryDesignGate.cs"
-  $nativeDetachBeforeReleaseDesignGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeDetachBeforeReleaseDesignGate.cs"
-  $nativeOwnerStableIdentitySourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeOwnerStableIdentity.cs"
-  $nativeOwnerNonCopyableStorageSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeOwnerNonCopyableStorage.cs"
-  $nativeNoThrowDestructorSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeNoThrowDestructor.cs"
-  $nativeOwnerLifecycleGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeOwnerLifecycleGate.cs"
-  $nativeAttachBridgeShapeGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeAttachBridgeShapeGate.cs"
-  $exceptionStatusMappingGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerExceptionStatusMappingGate.cs"
-  $inFlightAccountingGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerInFlightAccountingGate.cs"
-  $nativeNoThrowVTableScaffoldGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeNoThrowVTableScaffoldGate.cs"
+  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRuntimeProofPrecheck.cs"
+  $attachDetachGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerAttachDetachDesignGate.cs"
+  $borrowedTensorSafetyGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerBorrowedTensorSafetyGate.cs"
+  $attachVTableSafetyGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerAttachVTableSafetyGate.cs"
+  $nativeAttachNoThrowPreflightSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeAttachNoThrowPreflight.cs"
+  $nativeOwnerAddressDesignGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeOwnerAddressDesignGate.cs"
+  $nativeNoThrowVTableDesignGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeNoThrowVTableDesignGate.cs"
+  $nativeAttachEntryDesignGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeAttachEntryDesignGate.cs"
+  $nativeDetachBeforeReleaseDesignGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeDetachBeforeReleaseDesignGate.cs"
+  $nativeOwnerStableIdentitySourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeOwnerStableIdentity.cs"
+  $nativeOwnerNonCopyableStorageSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeOwnerNonCopyableStorage.cs"
+  $nativeNoThrowDestructorSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeNoThrowDestructor.cs"
+  $nativeOwnerLifecycleGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeOwnerLifecycleGate.cs"
+  $nativeAttachBridgeShapeGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeAttachBridgeShapeGate.cs"
+  $exceptionStatusMappingGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerExceptionStatusMappingGate.cs"
+  $inFlightAccountingGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerInFlightAccountingGate.cs"
+  $nativeNoThrowVTableScaffoldGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeNoThrowVTableScaffoldGate.cs"
   $nativeOwnerNonCopyableStorageScaffoldRelativePath = "native\src\tensorrt\common\debug_listener_native_owner_noncopyable_storage.inc"
   $nativeNoThrowDestructorScaffoldRelativePath = "native\src\tensorrt\common\debug_listener_native_nothrow_destructor.inc"
   $nativeOwnerLifecycleGateScaffoldRelativePath = "native\src\tensorrt\common\debug_listener_native_owner_lifecycle_gate.inc"
@@ -3557,7 +3557,7 @@ function New-DebugListenerRuntimeProofPrecheckEvidence {
   $nativeTrt8RelativePath = "native\src\tensorrt\v8\api.cpp"
   $nativeTrt10RelativePath = "native\src\tensorrt\v10\api.cpp"
   $nativeTrt11RelativePath = "native\src\tensorrt\v11\api.cpp"
-  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerCallbackOwner.cs"
+  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerCallbackOwner.cs"
   $smokeRelativePath = "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs"
   $precheckDocRelativePath = "docs\articles\zh-cn\debug-listener-runtime-proof-precheck.md"
   $attachDetachGateDocRelativePath = "docs\articles\zh-cn\debug-listener-attach-detach-design-gate.md"
@@ -3850,8 +3850,8 @@ function New-DebugListenerRuntimeProofPrecheckEvidence {
 }
 
 function New-DebugListenerRuntimeProofAttemptPreflightEvidence {
-  $preflightSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerRuntimeProofAttemptPreflight.cs"
-  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerRuntimeProofPrecheck.cs"
+  $preflightSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRuntimeProofAttemptPreflight.cs"
+  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRuntimeProofPrecheck.cs"
   $smokeRelativePath = "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs"
   $preflightDocRelativePath = "docs\articles\zh-cn\debug-listener-real-callback-runtime-proof-preflight.md"
   $precheckDocRelativePath = "docs\articles\zh-cn\debug-listener-runtime-proof-precheck.md"
@@ -3992,11 +3992,11 @@ function New-DebugListenerRuntimeProofAttemptPreflightEvidence {
 }
 
 function New-DebugListenerAttachVTableSafetyGateEvidence {
-  $attachVTableSafetyGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerAttachVTableSafetyGate.cs"
-  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerRuntimeProofPrecheck.cs"
-  $attachDetachGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerAttachDetachDesignGate.cs"
-  $borrowedTensorSafetyGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerBorrowedTensorSafetyGate.cs"
-  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerCallbackOwner.cs"
+  $attachVTableSafetyGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerAttachVTableSafetyGate.cs"
+  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRuntimeProofPrecheck.cs"
+  $attachDetachGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerAttachDetachDesignGate.cs"
+  $borrowedTensorSafetyGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerBorrowedTensorSafetyGate.cs"
+  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerCallbackOwner.cs"
   $smokeRelativePath = "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs"
   $attachVTableSafetyGateDocRelativePath = "docs\articles\zh-cn\debug-listener-attach-vtable-safety-gate.md"
   $precheckDocRelativePath = "docs\articles\zh-cn\debug-listener-runtime-proof-precheck.md"
@@ -4133,12 +4133,12 @@ function New-DebugListenerAttachVTableSafetyGateEvidence {
 }
 
 function New-DebugListenerNativeAttachNoThrowPreflightEvidence {
-  $preflightSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeAttachNoThrowPreflight.cs"
-  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerRuntimeProofPrecheck.cs"
-  $attachVTableSafetyGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerAttachVTableSafetyGate.cs"
-  $attachDetachGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerAttachDetachDesignGate.cs"
-  $borrowedTensorSafetyGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerBorrowedTensorSafetyGate.cs"
-  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerCallbackOwner.cs"
+  $preflightSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeAttachNoThrowPreflight.cs"
+  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRuntimeProofPrecheck.cs"
+  $attachVTableSafetyGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerAttachVTableSafetyGate.cs"
+  $attachDetachGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerAttachDetachDesignGate.cs"
+  $borrowedTensorSafetyGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerBorrowedTensorSafetyGate.cs"
+  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerCallbackOwner.cs"
   $smokeRelativePath = "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs"
   $preflightDocRelativePath = "docs\articles\zh-cn\debug-listener-native-attach-nothrow-preflight.md"
   $precheckDocRelativePath = "docs\articles\zh-cn\debug-listener-runtime-proof-precheck.md"
@@ -4285,13 +4285,13 @@ function New-DebugListenerNativeAttachNoThrowPreflightEvidence {
 }
 
 function New-DebugListenerNativeOwnerAddressDesignGateEvidence {
-  $ownerAddressGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeOwnerAddressDesignGate.cs"
-  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerRuntimeProofPrecheck.cs"
-  $preflightSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeAttachNoThrowPreflight.cs"
-  $attachVTableSafetyGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerAttachVTableSafetyGate.cs"
-  $borrowedTensorSafetyGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerBorrowedTensorSafetyGate.cs"
-  $attachDetachGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerAttachDetachDesignGate.cs"
-  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerCallbackOwner.cs"
+  $ownerAddressGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeOwnerAddressDesignGate.cs"
+  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRuntimeProofPrecheck.cs"
+  $preflightSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeAttachNoThrowPreflight.cs"
+  $attachVTableSafetyGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerAttachVTableSafetyGate.cs"
+  $borrowedTensorSafetyGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerBorrowedTensorSafetyGate.cs"
+  $attachDetachGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerAttachDetachDesignGate.cs"
+  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerCallbackOwner.cs"
   $smokeRelativePath = "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs"
   $ownerAddressGateDocRelativePath = "docs\articles\zh-cn\debug-listener-native-owner-address-design-gate.md"
   $precheckDocRelativePath = "docs\articles\zh-cn\debug-listener-runtime-proof-precheck.md"
@@ -4446,14 +4446,14 @@ function New-DebugListenerNativeOwnerAddressDesignGateEvidence {
 }
 
 function New-DebugListenerNativeNoThrowVTableDesignGateEvidence {
-  $noThrowVTableGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeNoThrowVTableDesignGate.cs"
-  $ownerAddressGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeOwnerAddressDesignGate.cs"
-  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerRuntimeProofPrecheck.cs"
-  $preflightSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeAttachNoThrowPreflight.cs"
-  $attachVTableSafetyGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerAttachVTableSafetyGate.cs"
-  $borrowedTensorSafetyGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerBorrowedTensorSafetyGate.cs"
-  $attachDetachGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerAttachDetachDesignGate.cs"
-  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerCallbackOwner.cs"
+  $noThrowVTableGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeNoThrowVTableDesignGate.cs"
+  $ownerAddressGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeOwnerAddressDesignGate.cs"
+  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRuntimeProofPrecheck.cs"
+  $preflightSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeAttachNoThrowPreflight.cs"
+  $attachVTableSafetyGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerAttachVTableSafetyGate.cs"
+  $borrowedTensorSafetyGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerBorrowedTensorSafetyGate.cs"
+  $attachDetachGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerAttachDetachDesignGate.cs"
+  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerCallbackOwner.cs"
   $smokeRelativePath = "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs"
   $noThrowVTableGateDocRelativePath = "docs\articles\zh-cn\debug-listener-native-nothrow-vtable-design-gate.md"
   $ownerAddressGateDocRelativePath = "docs\articles\zh-cn\debug-listener-native-owner-address-design-gate.md"
@@ -4607,15 +4607,15 @@ function New-DebugListenerNativeNoThrowVTableDesignGateEvidence {
 }
 
 function New-DebugListenerNativeAttachEntryDesignGateEvidence {
-  $attachEntryGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeAttachEntryDesignGate.cs"
-  $noThrowVTableGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeNoThrowVTableDesignGate.cs"
-  $ownerAddressGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeOwnerAddressDesignGate.cs"
-  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerRuntimeProofPrecheck.cs"
-  $preflightSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeAttachNoThrowPreflight.cs"
-  $attachVTableSafetyGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerAttachVTableSafetyGate.cs"
-  $borrowedTensorSafetyGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerBorrowedTensorSafetyGate.cs"
-  $attachDetachGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerAttachDetachDesignGate.cs"
-  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerCallbackOwner.cs"
+  $attachEntryGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeAttachEntryDesignGate.cs"
+  $noThrowVTableGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeNoThrowVTableDesignGate.cs"
+  $ownerAddressGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeOwnerAddressDesignGate.cs"
+  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRuntimeProofPrecheck.cs"
+  $preflightSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeAttachNoThrowPreflight.cs"
+  $attachVTableSafetyGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerAttachVTableSafetyGate.cs"
+  $borrowedTensorSafetyGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerBorrowedTensorSafetyGate.cs"
+  $attachDetachGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerAttachDetachDesignGate.cs"
+  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerCallbackOwner.cs"
   $smokeRelativePath = "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs"
   $attachEntryGateDocRelativePath = "docs\articles\zh-cn\debug-listener-native-attach-entry-design-gate.md"
   $noThrowVTableGateDocRelativePath = "docs\articles\zh-cn\debug-listener-native-nothrow-vtable-design-gate.md"
@@ -4767,12 +4767,12 @@ function New-DebugListenerNativeAttachEntryDesignGateEvidence {
 }
 
 function New-DebugListenerNativeDetachBeforeReleaseDesignGateEvidence {
-  $detachGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeDetachBeforeReleaseDesignGate.cs"
-  $attachEntryGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeAttachEntryDesignGate.cs"
-  $noThrowVTableGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeNoThrowVTableDesignGate.cs"
-  $ownerAddressGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeOwnerAddressDesignGate.cs"
-  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerRuntimeProofPrecheck.cs"
-  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerCallbackOwner.cs"
+  $detachGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeDetachBeforeReleaseDesignGate.cs"
+  $attachEntryGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeAttachEntryDesignGate.cs"
+  $noThrowVTableGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeNoThrowVTableDesignGate.cs"
+  $ownerAddressGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeOwnerAddressDesignGate.cs"
+  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRuntimeProofPrecheck.cs"
+  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerCallbackOwner.cs"
   $smokeRelativePath = "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs"
   $detachGateDocRelativePath = "docs\articles\zh-cn\debug-listener-native-detach-before-release-design-gate.md"
   $attachEntryGateDocRelativePath = "docs\articles\zh-cn\debug-listener-native-attach-entry-design-gate.md"
@@ -4926,10 +4926,10 @@ function New-DebugListenerNativeDetachBeforeReleaseDesignGateEvidence {
 }
 
 function New-DebugListenerNativeOwnerLifecycleDryRunEvidence {
-  $dryRunSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeOwnerLifecycleDryRun.cs"
-  $detachGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeDetachBeforeReleaseDesignGate.cs"
-  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerRuntimeProofPrecheck.cs"
-  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerCallbackOwner.cs"
+  $dryRunSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeOwnerLifecycleDryRun.cs"
+  $detachGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeDetachBeforeReleaseDesignGate.cs"
+  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRuntimeProofPrecheck.cs"
+  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerCallbackOwner.cs"
   $smokeRelativePath = "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs"
   $dryRunDocRelativePath = "docs\articles\zh-cn\debug-listener-native-owner-lifecycle-dry-run.md"
   $detachGateDocRelativePath = "docs\articles\zh-cn\debug-listener-native-detach-before-release-design-gate.md"
@@ -5089,10 +5089,10 @@ function New-DebugListenerNativeOwnerLifecycleDryRunEvidence {
 }
 
 function New-DebugListenerNativeAttachEntryRuntimeScaffoldEvidence {
-  $scaffoldSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeAttachEntryRuntimeScaffold.cs"
-  $dryRunSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeOwnerLifecycleDryRun.cs"
-  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerRuntimeProofPrecheck.cs"
-  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerCallbackOwner.cs"
+  $scaffoldSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeAttachEntryRuntimeScaffold.cs"
+  $dryRunSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeOwnerLifecycleDryRun.cs"
+  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRuntimeProofPrecheck.cs"
+  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerCallbackOwner.cs"
   $smokeRelativePath = "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs"
   $scaffoldDocRelativePath = "docs\articles\zh-cn\debug-listener-native-attach-entry-runtime-scaffold.md"
   $dryRunDocRelativePath = "docs\articles\zh-cn\debug-listener-native-owner-lifecycle-dry-run.md"
@@ -5239,10 +5239,10 @@ function New-DebugListenerNativeAttachEntryRuntimeScaffoldEvidence {
 }
 
 function New-DebugListenerNativeAttachEntryMinimalSafetyEvidence {
-  $minimalSafetySourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeAttachEntryMinimalSafety.cs"
-  $scaffoldSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeAttachEntryRuntimeScaffold.cs"
-  $lifecycleGateSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeOwnerLifecycleGate.cs"
-  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerRuntimeProofPrecheck.cs"
+  $minimalSafetySourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeAttachEntryMinimalSafety.cs"
+  $scaffoldSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeAttachEntryRuntimeScaffold.cs"
+  $lifecycleGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeOwnerLifecycleGate.cs"
+  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRuntimeProofPrecheck.cs"
   $nativeMinimalSafetyRelativePath = "native\src\tensorrt\common\debug_listener_native_attach_entry_minimal_safety.inc"
   $nativeTrt8RelativePath = "native\src\tensorrt\v8\api.cpp"
   $nativeTrt10RelativePath = "native\src\tensorrt\v10\api.cpp"
@@ -5410,10 +5410,10 @@ function New-DebugListenerNativeAttachEntryMinimalSafetyEvidence {
 }
 
 function New-DebugListenerNativeOwnerStableIdentityEvidence {
-  $identitySourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeOwnerStableIdentity.cs"
-  $scaffoldSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeAttachEntryRuntimeScaffold.cs"
-  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerRuntimeProofPrecheck.cs"
-  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerCallbackOwner.cs"
+  $identitySourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeOwnerStableIdentity.cs"
+  $scaffoldSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeAttachEntryRuntimeScaffold.cs"
+  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRuntimeProofPrecheck.cs"
+  $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerCallbackOwner.cs"
   $smokeRelativePath = "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs"
   $identityDocRelativePath = "docs\articles\zh-cn\debug-listener-native-owner-stable-identity.md"
   $scaffoldDocRelativePath = "docs\articles\zh-cn\debug-listener-native-attach-entry-runtime-scaffold.md"
@@ -5559,9 +5559,9 @@ function New-DebugListenerNativeOwnerStableIdentityEvidence {
 }
 
 function New-DebugListenerNativeOwnerNonCopyableStorageEvidence {
-  $storageSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeOwnerNonCopyableStorage.cs"
-  $stableIdentitySourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeOwnerStableIdentity.cs"
-  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerRuntimeProofPrecheck.cs"
+  $storageSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeOwnerNonCopyableStorage.cs"
+  $stableIdentitySourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeOwnerStableIdentity.cs"
+  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRuntimeProofPrecheck.cs"
   $nativeStorageScaffoldRelativePath = "native\src\tensorrt\common\debug_listener_native_owner_noncopyable_storage.inc"
   $nativeTrt8RelativePath = "native\src\tensorrt\v8\api.cpp"
   $nativeTrt10RelativePath = "native\src\tensorrt\v10\api.cpp"
@@ -5725,9 +5725,9 @@ function New-DebugListenerNativeOwnerNonCopyableStorageEvidence {
 }
 
 function New-DebugListenerNativeNoThrowDestructorEvidence {
-  $destructorSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeNoThrowDestructor.cs"
-  $storageSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeOwnerNonCopyableStorage.cs"
-  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerRuntimeProofPrecheck.cs"
+  $destructorSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeNoThrowDestructor.cs"
+  $storageSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeOwnerNonCopyableStorage.cs"
+  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRuntimeProofPrecheck.cs"
   $nativeDestructorScaffoldRelativePath = "native\src\tensorrt\common\debug_listener_native_nothrow_destructor.inc"
   $nativeStorageScaffoldRelativePath = "native\src\tensorrt\common\debug_listener_native_owner_noncopyable_storage.inc"
   $nativeTrt8RelativePath = "native\src\tensorrt\v8\api.cpp"
@@ -5896,10 +5896,10 @@ function New-DebugListenerNativeNoThrowDestructorEvidence {
 }
 
 function New-DebugListenerNativeOwnerLifecycleGateEvidence {
-  $lifecycleSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeOwnerLifecycleGate.cs"
-  $destructorSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeNoThrowDestructor.cs"
-  $storageSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeOwnerNonCopyableStorage.cs"
-  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\TensorRtDebugListenerRuntimeProofPrecheck.cs"
+  $lifecycleSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeOwnerLifecycleGate.cs"
+  $destructorSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeNoThrowDestructor.cs"
+  $storageSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeOwnerNonCopyableStorage.cs"
+  $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRuntimeProofPrecheck.cs"
   $nativeLifecycleScaffoldRelativePath = "native\src\tensorrt\common\debug_listener_native_owner_lifecycle_gate.inc"
   $nativeDestructorScaffoldRelativePath = "native\src\tensorrt\common\debug_listener_native_nothrow_destructor.inc"
   $nativeStorageScaffoldRelativePath = "native\src\tensorrt\common\debug_listener_native_owner_noncopyable_storage.inc"
@@ -6099,7 +6099,7 @@ function Get-CallbackDeferredEvidenceRows {
 function New-CallbackOwnerClosureMatrixEvidence {
   $comparisonRelativePath = "artifacts\interface-coverage\tensorrt-interface-comparison.csv"
   $relativePaths = @(
-    "src\JYPPX.TensorRtSharp\TensorRtCallbackOwnerClosureMatrix.cs",
+    "src\JYPPX.TensorRtSharp\Callbacks\Core\TensorRtCallbackOwnerClosureMatrix.cs",
     "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs",
     "smoke\README.md",
     "docs\articles\zh-cn\callback-owner-closure-matrix.md",
@@ -6373,9 +6373,9 @@ function New-DebugListenerNativeAttachBridgeShapeGateEvidence {
     -ReadyStatus "attach-bridge-shape-gate-ready" `
     -Source "source-smoke-docs-native-scaffold" `
     -EvidenceRelativePaths @(
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeAttachBridgeShapeGate.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeOwnerLifecycleGate.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerRuntimeProofPrecheck.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeAttachBridgeShapeGate.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeOwnerLifecycleGate.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRuntimeProofPrecheck.cs",
       "native\src\tensorrt\common\debug_listener_native_attach_bridge_shape_gate.inc",
       "native\src\tensorrt\common\debug_listener_native_owner_lifecycle_gate.inc",
       "native\src\tensorrt\v8\api.cpp",
@@ -6443,9 +6443,9 @@ function New-DebugListenerExceptionStatusMappingGateEvidence {
     -ReadyStatus "exception-status-gate-ready" `
     -Source "source-smoke-docs-native-scaffold" `
     -EvidenceRelativePaths @(
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerExceptionStatusMappingGate.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeAttachBridgeShapeGate.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerRuntimeProofPrecheck.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerExceptionStatusMappingGate.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeAttachBridgeShapeGate.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRuntimeProofPrecheck.cs",
       "native\src\tensorrt\common\debug_listener_exception_status_mapping_gate.inc",
       "native\src\tensorrt\common\debug_listener_native_attach_bridge_shape_gate.inc",
       "native\src\tensorrt\v8\api.cpp",
@@ -6513,9 +6513,9 @@ function New-DebugListenerInFlightAccountingGateEvidence {
     -ReadyStatus "inflight-accounting-gate-ready" `
     -Source "source-smoke-docs-native-scaffold" `
     -EvidenceRelativePaths @(
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerInFlightAccountingGate.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerExceptionStatusMappingGate.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerRuntimeProofPrecheck.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerInFlightAccountingGate.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerExceptionStatusMappingGate.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRuntimeProofPrecheck.cs",
       "native\src\tensorrt\common\debug_listener_inflight_accounting_gate.inc",
       "native\src\tensorrt\common\debug_listener_exception_status_mapping_gate.inc",
       "native\src\tensorrt\v8\api.cpp",
@@ -6591,11 +6591,11 @@ function New-DebugListenerNativeNoThrowVTableScaffoldGateEvidence {
     -ReadyStatus "vtable-scaffold-gate-ready" `
     -Source "source-smoke-docs-native-scaffold" `
     -EvidenceRelativePaths @(
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeNoThrowVTableScaffoldGate.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeAttachBridgeShapeGate.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerExceptionStatusMappingGate.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerInFlightAccountingGate.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerRuntimeProofPrecheck.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeNoThrowVTableScaffoldGate.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeAttachBridgeShapeGate.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerExceptionStatusMappingGate.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerInFlightAccountingGate.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRuntimeProofPrecheck.cs",
       "native\src\tensorrt\common\debug_listener_native_nothrow_vtable_scaffold_gate.inc",
       "native\src\tensorrt\common\debug_listener_native_attach_bridge_shape_gate.inc",
       "native\src\tensorrt\common\debug_listener_exception_status_mapping_gate.inc",
@@ -6691,9 +6691,9 @@ function New-DebugListenerNoThrowVTableCallbackStubEvidence {
     -ReadyStatus "callback-stub-gate-ready" `
     -Source "source-smoke-docs-native-stub" `
     -EvidenceRelativePaths @(
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNoThrowVTableCallbackStub.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeAttachEntryMinimalSafety.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeNoThrowVTableScaffoldGate.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNoThrowVTableCallbackStub.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeAttachEntryMinimalSafety.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeNoThrowVTableScaffoldGate.cs",
       "native\src\tensorrt\common\debug_listener_nothrow_vtable_callback_stub.inc",
       "native\src\tensorrt\common\debug_listener_native_attach_entry_minimal_safety.inc",
       "native\src\tensorrt\common\debug_listener_native_nothrow_vtable_scaffold_gate.inc",
@@ -6787,9 +6787,9 @@ function New-DebugListenerBorrowedDebugTensorMetadataRuntimeGateEvidence {
     -ReadyStatus "borrowed-debug-tensor-metadata-gate-ready" `
     -Source "source-smoke-docs-native-metadata-gate" `
     -EvidenceRelativePaths @(
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerBorrowedDebugTensorMetadataRuntimeGate.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerBorrowedTensorSafetyGate.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNoThrowVTableCallbackStub.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerBorrowedDebugTensorMetadataRuntimeGate.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerBorrowedTensorSafetyGate.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNoThrowVTableCallbackStub.cs",
       "native\src\tensorrt\common\debug_listener_borrowed_debug_tensor_metadata_runtime_gate.inc",
       "native\src\tensorrt\common\debug_listener_nothrow_vtable_callback_stub.inc",
       "native\src\tensorrt\v8\api.cpp",
@@ -6897,11 +6897,11 @@ function New-DebugListenerNativeVTableInstallPreflightEvidence {
     -ReadyStatus "native-vtable-install-preflight-ready" `
     -Source "source-smoke-docs-native-vtable-install-preflight" `
     -EvidenceRelativePaths @(
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeVTableInstallPreflight.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeOwnerLifecycleGate.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeAttachBridgeShapeGate.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeNoThrowVTableScaffoldGate.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerBorrowedDebugTensorMetadataRuntimeGate.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeVTableInstallPreflight.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeOwnerLifecycleGate.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeAttachBridgeShapeGate.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeNoThrowVTableScaffoldGate.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerBorrowedDebugTensorMetadataRuntimeGate.cs",
       "native\src\tensorrt\common\debug_listener_native_vtable_install_preflight.inc",
       "native\src\tensorrt\common\debug_listener_native_owner_lifecycle_gate.inc",
       "native\src\tensorrt\common\debug_listener_native_attach_bridge_shape_gate.inc",
@@ -7015,12 +7015,12 @@ function New-DebugListenerNativeOwnerVTableInstallExperimentEvidence {
     -ReadyStatus "native-owner-vtable-install-experiment-ready" `
     -Source "source-smoke-docs-native-owner-vtable-install-experiment" `
     -EvidenceRelativePaths @(
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeOwnerVTableInstallExperiment.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeVTableInstallPreflight.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeOwnerLifecycleGate.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeAttachBridgeShapeGate.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeNoThrowVTableScaffoldGate.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerBorrowedDebugTensorMetadataRuntimeGate.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeOwnerVTableInstallExperiment.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeVTableInstallPreflight.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeOwnerLifecycleGate.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeAttachBridgeShapeGate.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeNoThrowVTableScaffoldGate.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerBorrowedDebugTensorMetadataRuntimeGate.cs",
       "native\src\tensorrt\common\debug_listener_native_owner_vtable_install_experiment.inc",
       "native\src\tensorrt\common\debug_listener_native_vtable_install_preflight.inc",
       "native\src\tensorrt\v8\api.cpp",
@@ -7143,9 +7143,9 @@ function New-DebugListenerRealNonNullAttachRuntimeSmokeEvidence {
     -ReadyStatus "runtime-smoke-ready" `
     -Source "source-smoke-docs-real-non-null-attach-runtime-smoke" `
     -EvidenceRelativePaths @(
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerRealNonNullAttachRuntimeSmoke.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerRuntimeProofAttemptPreflight.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNativeOwnerVTableInstallExperiment.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRealNonNullAttachRuntimeSmoke.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRuntimeProofAttemptPreflight.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeOwnerVTableInstallExperiment.cs",
       "native\src\tensorrt\common\debug_listener_real_non_null_attach_runtime_smoke.inc",
       "native\src\tensorrt\v8\api.cpp",
       "native\src\tensorrt\v10\api.cpp",
@@ -7293,10 +7293,10 @@ function New-DebugListenerProcessDebugTensorCallbackTrampolineEvidence {
     -ReadyStatus "callback-trampoline-shape-ready" `
     -Source "source-smoke-docs-callback-trampoline-shape" `
     -EvidenceRelativePaths @(
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerProcessDebugTensorCallbackTrampoline.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerNoThrowVTableCallbackStub.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerBorrowedDebugTensorMetadataRuntimeGate.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerRealNonNullAttachRuntimeSmoke.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerProcessDebugTensorCallbackTrampoline.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNoThrowVTableCallbackStub.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerBorrowedDebugTensorMetadataRuntimeGate.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRealNonNullAttachRuntimeSmoke.cs",
       "native\src\tensorrt\common\debug_listener_process_debug_tensor_callback_trampoline.inc",
       "native\src\tensorrt\common\debug_listener_nothrow_vtable_callback_stub.inc",
       "native\src\tensorrt\common\debug_listener_borrowed_debug_tensor_metadata_runtime_gate.inc",
@@ -7430,9 +7430,9 @@ function New-DebugListenerRealCallbackRuntimeProofEvidence {
     -ReadyStatus "real-callback-runtime-proof-gate-ready" `
     -Source "source-smoke-docs-real-callback-runtime-proof-gate" `
     -EvidenceRelativePaths @(
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerRealCallbackRuntimeProof.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerRealNonNullAttachRuntimeSmoke.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerProcessDebugTensorCallbackTrampoline.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRealCallbackRuntimeProof.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRealNonNullAttachRuntimeSmoke.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerProcessDebugTensorCallbackTrampoline.cs",
       "native\src\tensorrt\common\debug_listener_real_callback_runtime_proof.inc",
       "native\src\tensorrt\common\debug_listener_real_non_null_attach_runtime_smoke.inc",
       "native\src\tensorrt\common\debug_listener_process_debug_tensor_callback_trampoline.inc",
@@ -7551,11 +7551,11 @@ function New-DebugListenerCallbackProofGapReportEvidence {
     -ReadyStatus "proof-gap-report-ready" `
     -Source "source-smoke-docs-package-readiness-proof-gap-report" `
     -EvidenceRelativePaths @(
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerCallbackProofGapReport.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerRuntimeProofAttemptPreflight.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerRealNonNullAttachRuntimeSmoke.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerProcessDebugTensorCallbackTrampoline.cs",
-      "src\JYPPX.TensorRtSharp\TensorRtDebugListenerRealCallbackRuntimeProof.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerCallbackProofGapReport.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRuntimeProofAttemptPreflight.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRealNonNullAttachRuntimeSmoke.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerProcessDebugTensorCallbackTrampoline.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRealCallbackRuntimeProof.cs",
       "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs",
       "smoke\README.md",
       "docs\articles\zh-cn\debug-listener-callback-proof-gap-report.md",
@@ -8950,7 +8950,7 @@ foreach ($key in $keys) {
   }
 
   if ([string]$debugListenerCallbackProofGapReportEvidence.status -ne "proof-gap-report-ready" -or [bool]$debugListenerCallbackProofGapReportEvidence.isRealCallbackRuntimeProof -or [string]$debugListenerCallbackProofGapReportEvidence.runtimeEvidenceKind -ne "proof-gap-report") {
-    $readinessBlockers.Add((New-ReadinessBlocker -Category "debug-listener-callback-proof-gap-report" -Status ([string]$debugListenerCallbackProofGapReportEvidence.status) -Detail "DebugListener callback proof gap report must be complete, machine-readable, classified as proof-gap-report, and non-proof until full package consumer invocation evidence exists." -NextAction "Refresh DebugListener callback proof gap report source/smoke/docs/package/readiness markers, then rerun package/readiness validation." -SuggestedCommand "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-RuntimePackageReadiness.ps1" -EvidencePath "src\JYPPX.TensorRtSharp\TensorRtDebugListenerCallbackProofGapReport.cs"))
+    $readinessBlockers.Add((New-ReadinessBlocker -Category "debug-listener-callback-proof-gap-report" -Status ([string]$debugListenerCallbackProofGapReportEvidence.status) -Detail "DebugListener callback proof gap report must be complete, machine-readable, classified as proof-gap-report, and non-proof until full package consumer invocation evidence exists." -NextAction "Refresh DebugListener callback proof gap report source/smoke/docs/package/readiness markers, then rerun package/readiness validation." -SuggestedCommand "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-RuntimePackageReadiness.ps1" -EvidencePath "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerCallbackProofGapReport.cs"))
   }
 
   $readinessBlockerRows = @($readinessBlockers.ToArray())

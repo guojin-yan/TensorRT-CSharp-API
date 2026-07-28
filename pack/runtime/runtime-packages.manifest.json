@@ -1,5 +1,37 @@
 {
   "schemaVersion": 3,
+  "cudaRtcPackaging": {
+    "dependencyMode": "optional-dynamic",
+    "bridgeOnlyBundlesNvrtc": false,
+    "fullRuntimeBundleState": "planned-pending-license-and-linux-proof",
+    "windowsAssetsByCudaVersion": {
+      "11.8": [
+        "bin\\nvrtc64_112_0.dll",
+        "bin\\nvrtc-builtins64_118.dll"
+      ],
+      "12.1": [
+        "bin\\nvrtc64_120_0.dll",
+        "bin\\nvrtc-builtins64_121.dll"
+      ],
+      "12.9": [
+        "bin\\nvrtc64_120_0.dll",
+        "bin\\nvrtc-builtins64_129.dll"
+      ],
+      "13.2": [
+        "bin\\x64\\nvrtc64_130_0.dll",
+        "bin\\x64\\nvrtc-builtins64_132.dll"
+      ]
+    },
+    "linuxAssetPatterns": [
+      "targets/x86_64-linux/lib/libnvrtc.so*",
+      "targets/x86_64-linux/lib/libnvrtc-builtins.so*",
+      "lib64/libnvrtc.so*",
+      "lib64/libnvrtc-builtins.so*"
+    ],
+    "linuxEvidenceState": "unverified-local-assets-not-found",
+    "redistributionApprovalState": "pending-owner-and-license-review",
+    "capabilityMatrix": "artifacts/cuda-runtime-compilation/capability-matrix.json"
+  },
   "packages": [
     {
       "key": "win-x64-trt8.6-cuda11.8-cudnn8.9",

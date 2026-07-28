@@ -40,9 +40,9 @@ public sealed class RuntimeSerializationPluginPathsTests
     {
         string diagnostics = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11Diagnostics.cs");
         string fourteenthBatch = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11FourteenthBatch.cs");
-        string publicDiagnostics = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilderConfig.Trt11Diagnostics.cs");
-        string publicSerialization = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilderConfig.Trt11PluginSerialization.cs");
-        string snapshot = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilderConfigSerializedPluginSnapshot.cs");
+        string publicDiagnostics = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.Trt11Diagnostics.cs");
+        string publicSerialization = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.Trt11PluginSerialization.cs");
+        string snapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfigSerializedPluginSnapshot.cs");
 
         Assert.Contains("TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_config_clear_plugins_to_serialize", diagnostics);
         Assert.Contains("TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_builder_config_get_nb_plugins_to_serialize", diagnostics);

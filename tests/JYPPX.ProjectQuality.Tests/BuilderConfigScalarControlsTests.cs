@@ -144,10 +144,10 @@ public sealed class BuilderConfigScalarControlsTests
         string runtimeInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11RuntimeControls.cs");
         string coreInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.cs");
         string diagnosticsInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11Diagnostics.cs");
-        string builderApi = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilder.Trt11BoundaryControls.cs");
-        string builderConfigApi = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilderConfig.cs") +
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilderConfig.Trt11RuntimeControls.cs") +
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilderConfig.Trt11Diagnostics.cs");
+        string builderApi = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilder.Trt11BoundaryControls.cs");
+        string builderConfigApi = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.cs") +
+            ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.Trt11RuntimeControls.cs") +
+            ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.Trt11Diagnostics.cs");
 
         Assert.Contains("jyppx_trt8_builder_get_max_threads", boundaryInterop);
         Assert.Contains("jyppx_trt10_builder_get_max_threads", boundaryInterop);
@@ -202,7 +202,7 @@ public sealed class BuilderConfigScalarControlsTests
         Assert.DoesNotContain("public IntPtr", builderApi + builderConfigApi);
         Assert.DoesNotContain("public nint", builderApi + builderConfigApi);
 
-        string enums = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtEnums.cs");
+        string enums = ReadSource("src", "JYPPX.TensorRtSharp", "Core", "TensorRtEnums.cs");
         Assert.Contains("public enum TensorRtQuantizationFlag", enums);
         Assert.Contains("public enum TensorRtQuantizationFlags : uint", enums);
     }
@@ -250,7 +250,7 @@ public sealed class BuilderConfigScalarControlsTests
         Assert.Contains("Int8Calibrator:", program);
         Assert.Contains("LayerDla=", program);
 
-        string snapshot = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilderConfigDeploymentSnapshot.cs");
+        string snapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfigDeploymentSnapshot.cs");
         Assert.Contains("public TensorRtBuilderConfigSerializedPluginSnapshot SerializedPluginSnapshot", snapshot);
         Assert.Contains("plugins={SerializedPluginSnapshot.Count}/{SerializedPluginSnapshot.PluginLibraryPaths.Count}", snapshot);
     }

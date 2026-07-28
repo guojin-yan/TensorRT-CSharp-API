@@ -71,8 +71,8 @@ $definitions = @(
     beforeCharacterCount = 3173
     requiredMarkers = @("GetAllEntries", "SetWeights", "RefitCudaEngine", "OutputChanged=True")
     requiredAnchors = @(
-      "src/JYPPX.TensorRtSharp/TensorRtRefitter.cs",
-      "src/JYPPX.TensorRtSharp/TensorRtRefitWeightsBuffer.cs",
+      "src/JYPPX.TensorRtSharp/Refit/TensorRtRefitter.cs",
+      "src/JYPPX.TensorRtSharp/Refit/TensorRtRefitWeightsBuffer.cs",
       "smoke/RefitWeightsSmokeRunner/Program.cs"
     )
   },
@@ -84,7 +84,7 @@ $definitions = @(
     beforeCharacterCount = 736
     requiredMarkers = @("AddSqueeze", "TensorRtDims64", "Dims64Evidence", "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11")
     requiredAnchors = @(
-      "src/JYPPX.TensorRtSharp/TensorRtNetworkDefinition.Trt11ModernLayers.cs",
+      "src/JYPPX.TensorRtSharp/Network/TensorRtNetworkDefinition.Trt11ModernLayers.cs",
       "native/manifests/tensorrt/v11/trt11-seventeenth-batch-dims64.manifest.json",
       "smoke/NetworkTrt11ModernLayersSmokeRunner/Program.cs",
       "smoke/NetworkTrt11ModernLayerMetadataRunner/Program.cs"
@@ -112,8 +112,8 @@ $definitions = @(
     beforeCharacterCount = 3213
     requiredMarkers = @("TryGetErrorRecorderSnapshot", "CopiedDiagnosticsReady=True", "DirectRecorderOwnershipDeferred=True", "incRefCount")
     requiredAnchors = @(
-      "src/JYPPX.TensorRtSharp/TensorRtErrorRecorderSnapshot.cs",
-      "src/JYPPX.TensorRtSharp/TensorRtErrorRecorderDiagnosticsDesignGate.cs",
+      "src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtErrorRecorderSnapshot.cs",
+      "src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtErrorRecorderDiagnosticsDesignGate.cs",
       "smoke/CallbackAllocatorSafeControlsSmokeRunner/Program.cs"
     )
   },
@@ -125,9 +125,9 @@ $definitions = @(
     beforeCharacterCount = 689
     requiredMarkers = @("EmitDiagnostic", "CallbackInvocationCount", "ManagedProgressMonitorAttach", "InvocationCount>0")
     requiredAnchors = @(
-      "src/JYPPX.TensorRtSharp/TensorRtLogger.cs",
-      "src/JYPPX.TensorRtSharp/TensorRtProfiler.cs",
-      "src/JYPPX.TensorRtSharp/TensorRtProgressMonitor.cs",
+      "src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtLogger.cs",
+      "src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtProfiler.cs",
+      "src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtProgressMonitor.cs",
       "smoke/ManagedLoggerCallbackSmokeRunner/Program.cs",
       "smoke/ManagedProfilerCallbackSmokeRunner/Program.cs",
       "smoke/ManagedProgressMonitorSmokeRunner/Program.cs"
@@ -141,8 +141,8 @@ $definitions = @(
     beforeCharacterCount = 2191
     requiredMarkers = @("SetShape", "SetInputShape", "GetReadiness", "DynamicShape Passed=True")
     requiredAnchors = @(
-      "src/JYPPX.TensorRtSharp/TensorRtOptimizationProfile.cs",
-      "src/JYPPX.TensorRtSharp/TensorRtInferenceBindings.cs",
+      "src/JYPPX.TensorRtSharp/Profiles/TensorRtOptimizationProfile.cs",
+      "src/JYPPX.TensorRtSharp/Inference/TensorRtInferenceBindings.cs",
       "samples/DynamicShape/Program.cs"
     )
   },
@@ -154,7 +154,7 @@ $definitions = @(
     beforeCharacterCount = 2156
     requiredMarkers = @("CopyInputFromHost", "AllocateDeviceBuffer", "BindAll", "InferenceBindings Passed=True")
     requiredAnchors = @(
-      "src/JYPPX.TensorRtSharp/TensorRtInferenceBindings.cs",
+      "src/JYPPX.TensorRtSharp/Inference/TensorRtInferenceBindings.cs",
       "samples/InferenceBindings/Program.cs",
       "samples/InferenceBindings/README.md"
     )
@@ -169,8 +169,8 @@ $definitions = @(
     requiredAnchors = @(
       "samples/OnnxToEngine/Program.cs",
       "samples/OnnxToEngine/trtexec-parity-matrix.json",
-      "src/JYPPX.TensorRtSharp.Tools/TrtexecLikeParser.cs",
-      "src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildService.cs"
+      "src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeParser.cs",
+      "src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.cs"
     )
   },
   [ordered]@{
@@ -182,8 +182,8 @@ $definitions = @(
     requiredMarkers = @("IndependentStreams=True", "CrossStreamWait=True", "CudaStreamCreationFlags.NonBlocking", "WaitFor")
     requiredAnchors = @(
       "samples/MultiStream/Program.cs",
-      "src/JYPPX.CudaSharp/CudaStream.cs",
-      "src/JYPPX.CudaSharp/CudaEvent.cs"
+      "src/JYPPX.CudaSharp/Streams/CudaStream.cs",
+      "src/JYPPX.CudaSharp/Events/CudaEvent.cs"
     )
   },
   [ordered]@{
@@ -194,9 +194,9 @@ $definitions = @(
     beforeCharacterCount = 2881
     requiredMarkers = @("TryGetPluginRegistryInventory", "FindCreator", "CreatorFieldCollection", "IPluginCreator*")
     requiredAnchors = @(
-      "src/JYPPX.TensorRtSharp/TensorRtPluginRegistryInventory.cs",
-      "src/JYPPX.TensorRtSharp/TensorRtRuntime.PluginRegistryInventory.cs",
-      "src/JYPPX.TensorRtSharp/TensorRtBuilder.PluginRegistryInventory.cs",
+      "src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginRegistryInventory.cs",
+      "src/JYPPX.TensorRtSharp/Runtime/TensorRtRuntime.PluginRegistryInventory.cs",
+      "src/JYPPX.TensorRtSharp/Builder/TensorRtBuilder.PluginRegistryInventory.cs",
       "smoke/PluginRegistryInventorySmokeRunner/Program.cs"
     )
   },
@@ -208,9 +208,9 @@ $definitions = @(
     beforeCharacterCount = 2569
     requiredMarkers = @("CudaPinnedMemory", "PinnedAsyncRoundTrip=True", "CudaManagedMemoryBatch", "IGpuAllocator")
     requiredAnchors = @(
-      "src/JYPPX.CudaSharp/CudaMemory.cs",
-      "src/JYPPX.CudaSharp/CudaPinnedMemory.cs",
-      "src/JYPPX.CudaSharp/CudaManagedMemoryBatch.cs",
+      "src/JYPPX.CudaSharp/Memory/CudaMemory.cs",
+      "src/JYPPX.CudaSharp/Memory/CudaPinnedMemory.cs",
+      "src/JYPPX.CudaSharp/Memory/CudaManagedMemoryBatch.cs",
       "smoke/CudaSmokeRunner/Program.cs"
     )
   },
@@ -222,8 +222,8 @@ $definitions = @(
     beforeCharacterCount = 1929
     requiredMarkers = @("CudaStreamCaptureToGraphSession", "CUDART_VERSION >= 12030", "implemented-with-deferred-history", "ToGraph=True")
     requiredAnchors = @(
-      "src/JYPPX.CudaSharp/CudaStreamCaptureToGraphSession.cs",
-      "src/JYPPX.CudaSharp/CudaStream.cs",
+      "src/JYPPX.CudaSharp/Streams/CudaStreamCaptureToGraphSession.cs",
+      "src/JYPPX.CudaSharp/Streams/CudaStream.cs",
       "native/manifests/cuda/cuda-fifty-seventh-batch-stream-capture-to-graph.manifest.json",
       "artifacts/interface-coverage/cuda-stream-capture-to-graph-candidate-audit.md",
       "smoke/CudaGraphSmokeRunner/Program.cs"

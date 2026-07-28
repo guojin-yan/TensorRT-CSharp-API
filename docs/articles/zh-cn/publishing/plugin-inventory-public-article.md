@@ -8,14 +8,14 @@ Plugin inventory 是 TensorRtSharp4.0 里用来排查 TensorRT 插件环境的�
 
 - 想检查目标机器 TensorRT plugin registry 是否可见的 .NET 使用者。
 - 需要比较 TRT8、TRT10、TRT11 builder/global/runtime/capability registry 差异的维护者。
-- 想理解 `src/JYPPX.TensorRtSharp/TensorRtPluginRegistryInventory.cs` 与 native plugin registry inventory bridge 的发布候选能力边界的人。
+- 想理解 `src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginRegistryInventory.cs` 与 native plugin registry inventory bridge 的发布候选能力边界的人。
 - 正在为公开包准备 local feed package consumer、direct `.nupkg` install、clean external consumer 与 post-publish verification 分层证据的发布负责人。
 
 ## 关键路径
 
-- 高层模型：`src/JYPPX.TensorRtSharp/TensorRtPluginRegistryInventory.cs`。
-- Builder-owned registry：`src/JYPPX.TensorRtSharp/TensorRtBuilder.PluginRegistryInventory.cs`。
-- Runtime-local registry：`src/JYPPX.TensorRtSharp/TensorRtRuntime.PluginRegistryInventory.cs`。
+- 高层模型：`src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginRegistryInventory.cs`。
+- Builder-owned registry：`src/JYPPX.TensorRtSharp/Builder/TensorRtBuilder.PluginRegistryInventory.cs`。
+- Runtime-local registry：`src/JYPPX.TensorRtSharp/Runtime/TensorRtRuntime.PluginRegistryInventory.cs`。
 - 环境级 global/capability registry：`src/JYPPX.TensorRtSharp/TensorRtEnvironmentProbe.PluginRegistryInventory.cs`。
 - Native bridge：`native/src/tensorrt/common/plugin_registry_inventory.inc`。
 - Managed interop：`src/JYPPX.TensorRtSharp/Internal/Interop/NativeBridgeApi.PluginRegistryInventory.cs` 与 `src/JYPPX.TensorRtSharp/Internal/Interop/NativeBridgeApi.RuntimePluginRegistryInventory.cs`。

@@ -111,7 +111,7 @@ public sealed class OutputAllocatorCallbackOwnerDesignTests
     [Fact]
     public void ReadinessSmokeAndDocsKeepDesignGateSeparateFromRuntimeProof()
     {
-        string ownerSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOutputAllocatorCallbackOwner.cs");
+        string ownerSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "MemoryAllocation", "TensorRtOutputAllocatorCallbackOwner.cs");
         string smokeProgram = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
         string readiness = ReadSource("eng", "Test-RuntimePackageReadiness.ps1");
         string designDoc = ReadSource("docs", "articles", "zh-cn", "output-allocator-callback-owner-design.md");

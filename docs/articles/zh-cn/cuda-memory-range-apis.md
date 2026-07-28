@@ -33,11 +33,11 @@ allocation 对 managed range 查询可能由 CUDA 返回错误；教程应使用
 
 ## 权威实现路径
 
-- Public allocation/control：`src/JYPPX.CudaSharp/CudaMemory.cs`
-- Managed memory V2：`src/JYPPX.CudaSharp/CudaManagedMemory.cs`
-- Attribute/snapshot：`src/JYPPX.CudaSharp/CudaMemoryRangeAttribute.cs`
-- Strongly typed location：`src/JYPPX.CudaSharp/CudaMemoryLocation.cs`
-- CUDA 13 batch owner：`src/JYPPX.CudaSharp/CudaManagedMemoryBatch.cs`
+- Public allocation/control：`src/JYPPX.CudaSharp/Memory/CudaMemory.cs`
+- Managed memory V2：`src/JYPPX.CudaSharp/Memory/CudaManagedMemory.cs`
+- Attribute/snapshot：`src/JYPPX.CudaSharp/Memory/CudaMemoryRangeAttribute.cs`
+- Strongly typed location：`src/JYPPX.CudaSharp/Memory/CudaMemoryLocation.cs`
+- CUDA 13 batch owner：`src/JYPPX.CudaSharp/Memory/CudaManagedMemoryBatch.cs`
 - Interop：`src/JYPPX.CudaSharp/Internal/Interop/Memory/NativeCudaApi.MemoryRange.cs`
 
 对应 manifest：

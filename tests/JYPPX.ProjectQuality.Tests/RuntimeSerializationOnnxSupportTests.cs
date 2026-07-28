@@ -13,9 +13,9 @@ public sealed class RuntimeSerializationOnnxSupportTests
         string manifest11 = ReadSource("native", "manifests", "tensorrt", "v11", "trt11-twenty-ninth-batch-onnx-parser-support.manifest.json");
         string source = ReadSource("native", "src", "tensorrt", "common", "onnx_parser_support.inc");
         string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.OnnxParserSupport.cs");
-        string wrapper = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOnnxParser.ModelSupport.cs");
-        string snapshot = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOnnxParserDiagnosticSnapshot.cs");
-        string modelSupportReport = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOnnxModelSupportReport.cs");
+        string wrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParser.ModelSupport.cs");
+        string snapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParserDiagnosticSnapshot.cs");
+        string modelSupportReport = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxModelSupportReport.cs");
 
         AssertOnnxSupportManifest(manifest10, "10");
         AssertOnnxSupportManifest(manifest11, "11");
@@ -83,9 +83,9 @@ public sealed class RuntimeSerializationOnnxSupportTests
         string header11 = ReadSource("native", "include", "jyppx", "tensorrt", "trt11.h");
         string source = ReadSource("native", "src", "tensorrt", "v11", "modules", "deployment", "runtime_serialization_refit.inc");
         string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11RuntimeSerializationRefit.cs");
-        string serializationConfig = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtSerializationConfig.cs");
-        string runtimeConfig = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtRuntimeConfig.cs");
-        string engine = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtEngine.Trt11Serialization.cs");
+        string serializationConfig = ReadSource("src", "JYPPX.TensorRtSharp", "Serialization", "TensorRtSerializationConfig.cs");
+        string runtimeConfig = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntimeConfig.cs");
+        string engine = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.Trt11Serialization.cs");
 
         Assert.Contains("trt10-engine-create-serialization-config", manifest10);
         Assert.Contains("trt10-engine-serialize-with-config", manifest10);
@@ -143,7 +143,7 @@ public sealed class RuntimeSerializationOnnxSupportTests
         string header10 = ReadSource("native", "include", "jyppx", "tensorrt", "trt10.h");
         string api10 = ReadSource("native", "src", "tensorrt", "v10", "api.cpp");
         string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11RuntimeControls.cs");
-        string engine = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtEngine.Trt11RuntimeControls.cs");
+        string engine = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.Trt11RuntimeControls.cs");
         string smoke = ReadSource("smoke", "TensorRtSmokeRunner", "Program.cs");
 
         Assert.Contains("trt10-engine-get-minimum-weight-streaming-budget", manifest10);
@@ -186,7 +186,7 @@ public sealed class RuntimeSerializationOnnxSupportTests
         Assert.Contains("TensorRtOnnxParserDiagnosticSnapshot parserDiagnosticSnapshot = parser.GetDiagnosticSnapshot();", program);
         Assert.Contains("TensorRtOnnxParserDiagnosticSummary parserDiagnosticSummary = parserDiagnosticSnapshot.ToSummary();", program);
         Assert.Contains("LayerOutputIdentity=", program);
-        Assert.Contains("CreateSerializationConfig", ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtEngine.Trt11Serialization.cs"));
+        Assert.Contains("CreateSerializationConfig", ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.Trt11Serialization.cs"));
         Assert.Contains("SerializationConfigSummary=", ReadSource("smoke", "TensorRtSmokeRunner", "Program.cs"));
         Assert.Contains("RuntimeConfigSummary=", ReadSource("smoke", "TensorRtSmokeRunner", "Program.cs"));
     }

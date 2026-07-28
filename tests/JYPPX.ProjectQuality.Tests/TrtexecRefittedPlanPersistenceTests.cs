@@ -11,9 +11,9 @@ public sealed class TrtexecRefittedPlanPersistenceTests
     [Fact]
     public void PersistenceImplementationDisposesOriginalBeforeIndependentReload()
     {
-        string service = ReadSource("src", "JYPPX.TensorRtSharp.Tools", "OnnxEngineBuildService.cs");
-        string snapshot = ReadSource("src", "JYPPX.TensorRtSharp.Tools", "OnnxEngineRefitPersistenceSnapshot.cs");
-        string diagnostics = ReadSource("src", "JYPPX.TensorRtSharp.Tools", "OnnxEngineBuildDiagnostics.cs");
+        string service = ReadSource("src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildService.cs");
+        string snapshot = ReadSource("src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineRefitPersistenceSnapshot.cs");
+        string diagnostics = ReadSource("src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildDiagnostics.cs");
         string schema = ReadSource("applications", "TensorRtExec", "tensor-rt-exec-report.schema.json");
         string form = ReadSource("applications", "TensorRtExec", "WinForms", "MainForm.cs");
 

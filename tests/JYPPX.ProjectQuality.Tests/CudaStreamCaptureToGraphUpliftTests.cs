@@ -26,9 +26,9 @@ public sealed class CudaStreamCaptureToGraphUpliftTests
     [Fact]
     public void ManagedSurfacePinsOwnersAndDoesNotExposeNativePointers()
     {
-        string stream = ReadSource("src", "JYPPX.CudaSharp", "CudaStream.cs");
-        string graph = ReadSource("src", "JYPPX.CudaSharp", "CudaGraph.cs");
-        string session = ReadSource("src", "JYPPX.CudaSharp", "CudaStreamCaptureToGraphSession.cs");
+        string stream = ReadSource("src", "JYPPX.CudaSharp", "Streams", "CudaStream.cs");
+        string graph = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.cs");
+        string session = ReadSource("src", "JYPPX.CudaSharp", "Streams", "CudaStreamCaptureToGraphSession.cs");
         string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "Graph", "NativeCudaApi.StreamCaptureVariants.cs");
         string smoke = ReadSource("smoke", "CudaGraphSmokeRunner", "Program.cs");
 

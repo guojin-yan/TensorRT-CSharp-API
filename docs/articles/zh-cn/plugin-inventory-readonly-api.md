@@ -62,8 +62,8 @@ dotnet run --project .\smoke\PluginRegistryInventorySmokeRunner\PluginRegistryIn
 相关实现路径：
 
 - `smoke/PluginRegistryInventorySmokeRunner`
-- `src/JYPPX.TensorRtSharp/TensorRtPluginRegistryInventory.cs`
-- `src/JYPPX.TensorRtSharp/TensorRtRuntime.PluginRegistryInventory.cs`
+- `src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginRegistryInventory.cs`
+- `src/JYPPX.TensorRtSharp/Runtime/TensorRtRuntime.PluginRegistryInventory.cs`
 - `native/src/tensorrt/common/plugin_registry_inventory.inc`
 - `artifacts/interface-coverage/tensorrt-interface-comparison.csv`
 
@@ -185,8 +185,8 @@ TRT10/TRT11 的 plugin registry 能力对部署很关键：很多 ONNX 或自定
 
 ### 代码与文件入口
 
-- `src/JYPPX.TensorRtSharp/TensorRtPluginRegistryInventory.cs`
-- `src/JYPPX.TensorRtSharp/TensorRtRuntime.PluginRegistryInventory.cs`
+- `src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginRegistryInventory.cs`
+- `src/JYPPX.TensorRtSharp/Runtime/TensorRtRuntime.PluginRegistryInventory.cs`
 - `native/src/tensorrt/common/plugin_registry_inventory.inc`
 - `tests/JYPPX.ProjectQuality.Tests/PluginRegistryInventoryTests.cs`
 

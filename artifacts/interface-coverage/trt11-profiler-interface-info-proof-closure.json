@@ -29,8 +29,8 @@
   "sourceEvidence": [
     "native/manifests/tensorrt/v11/trt11-callback-interface-info.manifest.json",
     "native/src/tensorrt/v11/api.cpp",
-    "src/JYPPX.TensorRtSharp/TensorRtProfiler.cs",
-    "src/JYPPX.TensorRtSharp/TensorRtProfilerInterfaceMetadataSnapshot.cs",
+    "src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtProfiler.cs",
+    "src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtProfilerInterfaceMetadataSnapshot.cs",
     "smoke/ManagedProfilerCallbackSmokeRunner/Program.cs",
     "tests/JYPPX.ProjectQuality.Tests/ManagedProfilerCallbackBoundaryTests.cs",
     "tests/JYPPX.ProjectQuality.Tests/DeferredProfilerInterfaceProofClosureTests.cs"

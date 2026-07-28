@@ -84,8 +84,8 @@ Memory wrapper ready 不等于 allocator callback proof ready。`IGpuAllocator`�
 | `CudaManagedMemory` | unified | 是，但有迁移 | 原型、诊断、memory advice |
 | `CudaPitchedMemory` | device pitched | 否 | 2D/3D 行对齐数据 |
 
-对应实现位于 `src/JYPPX.CudaSharp/CudaMemory.cs`、`src/JYPPX.CudaSharp/CudaPinnedMemory.cs`、
-`src/JYPPX.CudaSharp/CudaManagedMemory.cs`、`src/JYPPX.CudaSharp/CudaPitchedMemory.cs`。所有类型都应作为
+对应实现位于 `src/JYPPX.CudaSharp/Memory/CudaMemory.cs`、`src/JYPPX.CudaSharp/Memory/CudaPinnedMemory.cs`、
+`src/JYPPX.CudaSharp/Memory/CudaManagedMemory.cs`、`src/JYPPX.CudaSharp/Memory/CudaPitchedMemory.cs`。所有类型都应作为
 owner 使用，异步操作完成前不能 dispose。
 
 ```mermaid
@@ -143,7 +143,7 @@ dotnet .\smoke\CudaSmokeRunner\bin\Debug\net8.0\CudaSmokeRunner.dll `
 ## Managed memory 不是自动更快
 
 managed memory 让 host/device 共享地址空间，但页面迁移、prefetch、advice 和多 GPU 访问仍需显式理解。
-`src/JYPPX.CudaSharp/CudaManagedMemoryBatch.cs` 提供 batch prefetch/discard 组织，range diagnostics 可读取 location、
+`src/JYPPX.CudaSharp/Memory/CudaManagedMemoryBatch.cs` 提供 batch prefetch/discard 组织，range diagnostics 可读取 location、
 read-mostly、preferred location 和 accessed-by devices。查询成功是 copied diagnostics，不是性能证明。
 
 实际场景应记录：allocation size、device、prefetch stream、access pattern、同步点与测量方法。不要仅因代码更短就替换

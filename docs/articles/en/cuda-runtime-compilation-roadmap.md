@@ -2,7 +2,7 @@
 
 ## Goal and Current Boundary
 
-The project will add CUDA Runtime Compilation (NVRTC) support so .NET callers can submit CUDA C++ source, headers, compile options, and name expressions; receive copied PTX, CUBIN, or LTO IR artifacts; and load and launch those artifacts through an owner-safe CUDA kernel abstraction.
+The project now ships the first owner-safe NVRTC compile stage so .NET callers can submit CUDA C++ source, headers, compile options, and name expressions and receive copied PTX, CUBIN, or LTO IR artifacts. Owner-safe kernel launch and readback remain the next stage.
 
 The repository already provides `CudaKernelLibrary.Load(byte[])`, copied library inventory, name-based queries, and kernel attribute updates. Its native owner retains a copy of input code and never exposes borrowed `cudaKernel_t` values through the public C# API. This CUDA Runtime library path requires CUDA Toolkit 12.9 or later. The existing raw `cudaLaunchKernel` entry point remains an internal/generated boundary and is not an acceptable public RTC launch API.
 
@@ -19,7 +19,18 @@ The following installed toolkits were audited on 2026-07-28 without downloading 
 
 Both headers expose version/error APIs, program create/destroy, compile, program logs, PTX, CUBIN, LTO IR, name expressions, and lowered names. The CUDA 12.9 header still declares deprecated NVVM output; that output will not be the primary path of the new public API.
 
-CUDA 11.8, CUDA 12.1, and Linux `.so` names, SONAMEs, symbols, and link behavior must be audited before implementation. They must not be inferred from the 12.9/13.2 result.
+Windows headers, import libraries, DLLs, builtins, and exports for CUDA 11.8, 12.1, 12.9, and 13.2 are now audited by `eng/Export-CudaRtcCapabilityMatrix.ps1`. No Linux `.so` asset was found on the audited E drive or under the Windows Toolkit roots, so Linux SONAME and symbol support remain explicitly unverified and are not inferred from Windows.
+
+## Implemented Baseline (2026-07-28)
+
+- Native code now provides an optional dynamic loader and `JYPPX_CudaRtcProgram` owner. `JYPPX_NVRTC_LIBRARY` selects an exact library, while the core bridge has no static NVRTC link.
+- The ABI covers capability and dependency diagnostics, retained source/program names, virtual headers, name expressions, compile, logs, copied PTX/CUBIN/LTO IR, and copied lowered names. UTF-8, embedded NUL, duplicate, count, and byte limits are enforced, and C++ exceptions plus Windows SEH stay inside the bridge.
+- Managed code now exposes `CudaRtcCompiler`, `CudaRtcProgram`, `CudaRtcProgramSource`, `CudaRtcCompileOptions`, `CudaRtcCompilationResult`, and `CudaRtcArtifact` without public `IntPtr`, `SafeHandle`, or vendor program/kernel handles.
+- `samples/CudaRuntimeCompilation` exercises virtual headers, a template lowered name, PTX, `sm_75` CUBIN, LTO IR where supported, repeated PTX SHA256 determinism, and an intentional compiler-failure log.
+- All four local compilers complete the compile smoke. PTX from 11.8, 12.1, and 12.9 loads through the current CUDA 12.9 `CudaKernelLibrary`; 13.2 PTX is rejected by the current runtime/driver with `cudaErrorUnsupportedPtxVersion`, so 13.2 remains compile proof only.
+- Evidence is stored in `artifacts/cuda-runtime-compilation/capability-matrix.json` and `local-smoke.json`, with `kernelLaunch=false`, `gpuReadback=false`, and `correctnessProof=false` retained explicitly.
+
+The remaining RTC work is owner-bound named-kernel launch, typed argument packing, GPU readback, Linux runtime proof, materialized full-runtime `cuda-rtc` components, clean package consumers, and post-publish verification. Compile/load success does not promote any of those lanes.
 
 ## Design Invariants
 

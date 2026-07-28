@@ -115,7 +115,7 @@ build-only、dry-run、template、local feed、ProjectReference、direct `.nupkg
 
 Refit 不是在原 network 上继续编辑，而是围绕已经构建好的 engine 创建一个短生命周期 refitter。
 `TensorRtEngine` 必须比 `TensorRtRefitter` 活得更久，新权重缓冲区至少覆盖 `SetWeights` 调用，执行上下文则应在
-refit 完成后重新用于校验。仓库把这条顺序写进 `src/JYPPX.TensorRtSharp/TensorRtRefitter.cs` 和
+refit 完成后重新用于校验。仓库把这条顺序写进 `src/JYPPX.TensorRtSharp/Refit/TensorRtRefitter.cs` 和
 `smoke/RefitWeightsSmokeRunner/Program.cs`，用户无需保存原生 refitter 指针。
 
 ```mermaid

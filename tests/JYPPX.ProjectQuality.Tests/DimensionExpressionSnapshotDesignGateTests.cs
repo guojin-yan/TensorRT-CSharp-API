@@ -121,7 +121,7 @@ public sealed class DimensionExpressionSnapshotDesignGateTests
     [Fact]
     public void DocsSmokeReadinessAndCoverageKeepDirectRowsDeferred()
     {
-        string gateSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDimensionExpressionSnapshotDesignGate.cs");
+        string gateSource = ReadSource("src", "JYPPX.TensorRtSharp", "Network", "TensorRtDimensionExpressionSnapshotDesignGate.cs");
         string smokeProgram = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
         string designDoc = ReadSource("docs", "articles", "zh-cn", "dimension-expression-snapshot-design-gate.md");
         string manualGroups = ReadSource("docs", "articles", "zh-cn", "deferred-manual-design-groups.md");

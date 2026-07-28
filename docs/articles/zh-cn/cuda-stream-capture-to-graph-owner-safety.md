@@ -76,7 +76,7 @@ flowchart LR
 
 ## Begin 的异常回滚
 
-`src/JYPPX.CudaSharp/CudaStream.cs` 中的 `BeginCaptureToGraph` 先增加 stream capture-use count，再增加 graph count，
+`src/JYPPX.CudaSharp/Streams/CudaStream.cs` 中的 `BeginCaptureToGraph` 先增加 stream capture-use count，再增加 graph count，
 最后调用 native begin。任一步失败都会按相反顺序回滚已经增加的 count。成功后 session 同时保存两个强引用，使 GC 也无法
 在 capture 期间回收 wrapper。
 
@@ -97,7 +97,7 @@ stream 或 graph 的 `Dispose()` 在 active count 非零时抛出，避免 nativ
 
 ## Session 的幂等 End
 
-`src/JYPPX.CudaSharp/CudaStreamCaptureToGraphSession.cs` 用 lifecycle lock 和 `_ended` 实现幂等：
+`src/JYPPX.CudaSharp/Streams/CudaStreamCaptureToGraphSession.cs` 用 lifecycle lock 和 `_ended` 实现幂等：
 
 ```csharp
 public void End()

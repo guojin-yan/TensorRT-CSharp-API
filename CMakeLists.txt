@@ -436,6 +436,7 @@ set(_jyppx_bridge_sources
   native/src/common/runtime_info.cpp
   native/src/cuda/api.cpp
   native/src/cuda/object.cpp
+  native/src/cuda/rtc.cpp
   native/src/tensorrt/common/object.cpp
 )
 
@@ -473,6 +474,10 @@ if(CUDAToolkit_FOUND)
   endif()
   target_include_directories(jyppxtrtbridge PRIVATE "${CUDAToolkit_INCLUDE_DIRS}")
   target_link_libraries(jyppxtrtbridge PRIVATE CUDA::cudart)
+endif()
+
+if(UNIX)
+  target_link_libraries(jyppxtrtbridge PRIVATE ${CMAKE_DL_LIBS})
 endif()
 
 if(TensorRT_FOUND)

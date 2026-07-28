@@ -71,9 +71,9 @@ public sealed partial class Trt8CapabilityRegistryAndLegacySetterUpliftTests
     public void ManagedSurfaceIsPointerFreeAndEnqueueV2SynchronizesBeforeReturning()
     {
         string nativeBridge = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.SynchronousInference.cs");
-        string executionContext = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContext.SynchronousInference.cs");
-        string bindings = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtInferenceBindings.cs");
-        string environment = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtEnvironmentProbe.cs");
+        string executionContext = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.SynchronousInference.cs");
+        string bindings = ReadSource("src", "JYPPX.TensorRtSharp", "Inference", "TensorRtInferenceBindings.cs");
+        string environment = ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.cs");
 
         Assert.Contains("TensorRtApiLine.TensorRt8", nativeBridge, StringComparison.Ordinal);
         Assert.Contains("TensorRtApiLine.TensorRt10", nativeBridge, StringComparison.Ordinal);

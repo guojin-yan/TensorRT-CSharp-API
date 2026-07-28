@@ -103,7 +103,7 @@ public sealed class OnnxConfigLifecycleCoverageConvergenceTests
     [Fact]
     public void ManagedLifecycleAndPackageConsumerRemainPointerFree()
     {
-        string wrapper = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOnnxConfig.cs");
+        string wrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxConfig.cs");
         string safeHandle = ReadSource(
             "src", "JYPPX.TensorRtSharp", "Internal", "Handles", "SafeTensorRtObjectHandle.cs");
         string consumer = ReadSource("eng", "Test-BridgePackageConsumer.ps1");

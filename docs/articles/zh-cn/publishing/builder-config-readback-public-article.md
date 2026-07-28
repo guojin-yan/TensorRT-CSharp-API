@@ -13,11 +13,11 @@ TensorRT engine 的构建参数很多：workspace、memory pool、profiling verb
 
 ## 关键路径
 
-- 高层配置：`src/JYPPX.TensorRtSharp/TensorRtBuilderConfig.cs`。
-- TRT11 diagnostics：`src/JYPPX.TensorRtSharp/TensorRtBuilderConfig.Trt11Diagnostics.cs`。
-- trtexec 风格参数：`src/JYPPX.TensorRtSharp.Tools/TrtexecLikeDeploymentOptions.cs`。
-- 构建应用点：`src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildService.cs`。
-- 构建报告：`src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildDiagnostics.cs`。
+- 高层配置：`src/JYPPX.TensorRtSharp/Builder/TensorRtBuilderConfig.cs`。
+- TRT11 diagnostics：`src/JYPPX.TensorRtSharp/Builder/TensorRtBuilderConfig.Trt11Diagnostics.cs`。
+- trtexec 风格参数：`src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeDeploymentOptions.cs`。
+- 构建应用点：`src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.cs`。
+- 构建报告：`src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildDiagnostics.cs`。
 - TensorRtExec gap list：`applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.json`。
 
 ## 为什么要 Readback

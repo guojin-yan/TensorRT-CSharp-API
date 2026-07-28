@@ -251,14 +251,14 @@
         "name/version/namespace",
         "field metadata"
       ],
-      "sampleOrCodePath": "src/JYPPX.TensorRtSharp/TensorRtPluginRegistryInventory.cs",
+      "sampleOrCodePath": "src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginRegistryInventory.cs",
       "visualAssets": [
         "Plugin 查询流程图"
       ],
       "status": "needs smoke",
       "targetPath": "docs/articles/zh-cn/publishing/plugin-registry-inventory-只读-api-使用指南.md",
       "sourceArtifacts": [
-        "src/JYPPX.TensorRtSharp/TensorRtPluginRegistryInventory.cs"
+        "src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginRegistryInventory.cs"
       ],
       "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
       "mustAvoidClaims": [
@@ -1208,7 +1208,7 @@
       "targetPath": "docs/articles/zh-cn/publishing/cuda-graph-event-node-borrowed-handle-安全边界.md",
       "sourceArtifacts": [
         "docs/articles/zh-cn/cuda-graph-borrowed-handle-safety-gate.md",
-        "src/JYPPX.CudaSharp/CudaGraph.cs",
+        "src/JYPPX.CudaSharp/Graphs/CudaGraph.cs",
         "smoke/CudaGraphSmokeRunner/Program.cs"
       ],
       "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
@@ -1299,14 +1299,14 @@
         "used VC plugin library summary",
         "readiness wrapper group boundary"
       ],
-      "sampleOrCodePath": "src/JYPPX.TensorRtSharp/TensorRtOnnxParserDiagnosticSnapshot.cs",
+      "sampleOrCodePath": "src/JYPPX.TensorRtSharp/Parsing/TensorRtOnnxParserDiagnosticSnapshot.cs",
       "visualAssets": [
         "parser/refitter diagnostic evidence ladder 图"
       ],
       "status": "ready",
       "targetPath": "docs/articles/zh-cn/publishing/onnx-parser-parserrefitter-诊断-copied-diagnostics-release-gate.md",
       "sourceArtifacts": [
-        "src/JYPPX.TensorRtSharp/TensorRtOnnxParserDiagnosticSnapshot.cs",
+        "src/JYPPX.TensorRtSharp/Parsing/TensorRtOnnxParserDiagnosticSnapshot.cs",
         "eng/Test-BridgePackageConsumer.ps1",
         "eng/Test-RuntimePackageReadiness.ps1"
       ],
@@ -1341,7 +1341,7 @@
       "targetPath": "docs/articles/zh-cn/publishing/cuda-stream-capture-to-graph-owner-safe-session.md",
       "sourceArtifacts": [
         "artifacts/interface-coverage/cuda-stream-capture-to-graph-candidate-audit.md",
-        "src/JYPPX.CudaSharp/CudaStreamCaptureToGraphSession.cs",
+        "src/JYPPX.CudaSharp/Streams/CudaStreamCaptureToGraphSession.cs",
         "smoke/CudaGraphSmokeRunner/Program.cs"
       ],
       "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",

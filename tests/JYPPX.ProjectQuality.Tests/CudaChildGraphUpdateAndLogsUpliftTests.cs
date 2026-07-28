@@ -44,13 +44,13 @@ public sealed class CudaChildGraphUpdateAndLogsUpliftTests
     [Fact]
     public void ManagedSurfaceUsesSnapshotsTypedCursorsAndManagedOwners()
     {
-        string graph = ReadSource("src", "JYPPX.CudaSharp", "CudaGraph.cs");
-        string graphExec = ReadSource("src", "JYPPX.CudaSharp", "CudaGraphExec.cs");
-        string childSnapshot = ReadSource("src", "JYPPX.CudaSharp", "CudaGraphChildSnapshot.cs");
-        string updateSnapshot = ReadSource("src", "JYPPX.CudaSharp", "CudaGraphExecUpdateSnapshot.cs");
-        string cursor = ReadSource("src", "JYPPX.CudaSharp", "CudaLogCursor.cs");
-        string logSnapshot = ReadSource("src", "JYPPX.CudaSharp", "CudaLogSnapshot.cs");
-        string runtimeLogs = ReadSource("src", "JYPPX.CudaSharp", "CudaRuntimeLogs.cs");
+        string graph = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.cs");
+        string graphExec = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphExec.cs");
+        string childSnapshot = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphChildSnapshot.cs");
+        string updateSnapshot = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphExecUpdateSnapshot.cs");
+        string cursor = ReadSource("src", "JYPPX.CudaSharp", "Diagnostics", "CudaLogCursor.cs");
+        string logSnapshot = ReadSource("src", "JYPPX.CudaSharp", "Diagnostics", "CudaLogSnapshot.cs");
+        string runtimeLogs = ReadSource("src", "JYPPX.CudaSharp", "Diagnostics", "CudaRuntimeLogs.cs");
         string publicSurface = graph + graphExec + childSnapshot + updateSnapshot + cursor + logSnapshot + runtimeLogs;
 
         Assert.Contains("public CudaGraphNode AddChildGraphNode(CudaGraph childGraph)", graph, StringComparison.Ordinal);

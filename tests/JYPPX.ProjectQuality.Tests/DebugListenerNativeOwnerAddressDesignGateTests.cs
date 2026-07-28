@@ -193,8 +193,8 @@ public sealed class DebugListenerNativeOwnerAddressDesignGateTests
     [Fact]
     public void ReadinessSmokeAndDocsKeepNativeOwnerAddressGateSeparateFromRuntimeProof()
     {
-        string gateSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerNativeOwnerAddressDesignGate.cs");
-        string precheckSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerRuntimeProofPrecheck.cs");
+        string gateSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerNativeOwnerAddressDesignGate.cs");
+        string precheckSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerRuntimeProofPrecheck.cs");
         string smokeProgram = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
         string readiness = ReadSource("eng", "Test-RuntimePackageReadiness.ps1");
         string packageConsumer = ReadSource("eng", "Test-PackageConsumer.ps1");

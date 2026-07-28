@@ -13,10 +13,10 @@ Engine Inspector 是 TensorRtSharp4.0 里非常适合排障和文章展示的一
 
 ## 关键路径
 
-- 高层入口：`src/JYPPX.TensorRtSharp/TensorRtEngineInspector.Trt11Diagnostics.cs`。
-- loaded engine 诊断模型：`src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildResult.cs`。
-- engine readback artifact：`src/JYPPX.TensorRtSharp.Tools/OnnxEngineRuntimeArtifactWriter.cs`。
-- 工具投影：`src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildDiagnostics.cs`。
+- 高层入口：`src/JYPPX.TensorRtSharp/Engine/TensorRtEngineInspector.Trt11Diagnostics.cs`。
+- loaded engine 诊断模型：`src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildResult.cs`。
+- engine readback artifact：`src/JYPPX.TensorRtSharp.Tools/Artifacts/OnnxEngineRuntimeArtifactWriter.cs`。
+- 工具投影：`src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildDiagnostics.cs`。
 - TensorRtExec 报告：`applications/TensorRtExec/Core/TensorRtExecReport.cs`。
 - CLI/GUI 输出：`applications/TensorRtExec/Console/TensorRtExecCommand.cs` 和 `applications/TensorRtExec/WinForms/MainForm.cs`。
 - parity matrix：`applications/TensorRtExec/tensor-rt-exec-trtexec-parity-matrix.json`。

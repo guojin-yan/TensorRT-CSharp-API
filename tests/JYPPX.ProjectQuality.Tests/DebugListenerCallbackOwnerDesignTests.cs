@@ -139,7 +139,7 @@ public sealed class DebugListenerCallbackOwnerDesignTests
     [Fact]
     public void ReadinessSmokeAndDocsKeepDesignGateSeparateFromRuntimeProof()
     {
-        string ownerSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerCallbackOwner.cs");
+        string ownerSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerCallbackOwner.cs");
         string smokeProgram = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
         string readiness = ReadSource("eng", "Test-RuntimePackageReadiness.ps1");
         string packageConsumer = ReadSource("eng", "Test-PackageConsumer.ps1");

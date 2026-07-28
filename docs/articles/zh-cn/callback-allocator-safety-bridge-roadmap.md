@@ -106,25 +106,25 @@ public nint DebugTensor { get; }
 
 ### Pointer-free aggregation
 
-- `src/JYPPX.TensorRtSharp/TensorRtCallbackAllocatorReadiness.cs`
-- `src/JYPPX.TensorRtSharp/TensorRtExecutionContextCallbackAllocatorSafeControlSummary.cs`
-- `src/JYPPX.TensorRtSharp/TensorRtCallbackOwnerClosureMatrix.cs`
-- `src/JYPPX.TensorRtSharp/TensorRtExecutionContext.Readiness.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtCallbackAllocatorReadiness.cs`
+- `src/JYPPX.TensorRtSharp/Execution/TensorRtExecutionContextCallbackAllocatorSafeControlSummary.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Core/TensorRtCallbackOwnerClosureMatrix.cs`
+- `src/JYPPX.TensorRtSharp/Execution/TensorRtExecutionContext.Readiness.cs`
 
 ### Owner and precheck
 
-- `src/JYPPX.TensorRtSharp/TensorRtAllocatorCallbackOwner.cs`
-- `src/JYPPX.TensorRtSharp/TensorRtAllocatorLedgerSafetyGate.cs`
-- `src/JYPPX.TensorRtSharp/TensorRtOutputAllocatorCallbackOwner.cs`
-- `src/JYPPX.TensorRtSharp/TensorRtOutputAllocatorRuntimeProofPrecheck.cs`
-- `src/JYPPX.TensorRtSharp/TensorRtDebugListenerCallbackOwner.cs`
-- `src/JYPPX.TensorRtSharp/TensorRtDebugListenerCallbackProofGapReport.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtAllocatorCallbackOwner.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtAllocatorLedgerSafetyGate.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtOutputAllocatorCallbackOwner.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeProofPrecheck.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerCallbackOwner.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerCallbackProofGapReport.cs`
 
 ### DebugListener native/runtime scaffolding
 
-- `src/JYPPX.TensorRtSharp/TensorRtDebugListenerProcessDebugTensorCallbackTrampoline.cs`
-- `src/JYPPX.TensorRtSharp/TensorRtDebugListenerNoThrowVTableCallbackStub.cs`
-- `src/JYPPX.TensorRtSharp/TensorRtDebugListenerRealCallbackRuntimeProof.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerProcessDebugTensorCallbackTrampoline.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerNoThrowVTableCallbackStub.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerRealCallbackRuntimeProof.cs`
 
 ### Smoke and proof pack
 

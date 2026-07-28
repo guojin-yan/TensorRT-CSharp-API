@@ -44,7 +44,7 @@ public sealed class AllocatorInterfaceInfoDesignGateTests
             "IGpuAllocator::getInterfaceInfo",
             "IGpuAsyncAllocator::getInterfaceInfo",
             "IOutputAllocator::getInterfaceInfo");
-        AssertEvidenceContains(candidate, "managedSources", "src/JYPPX.TensorRtSharp/TensorRtAllocatorInterfaceInfoDesignGate.cs");
+        AssertEvidenceContains(candidate, "managedSources", "src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtAllocatorInterfaceInfoDesignGate.cs");
         AssertEvidenceContains(candidate, "qualityTests", "tests/JYPPX.ProjectQuality.Tests/AllocatorInterfaceInfoDesignGateTests.cs");
         AssertEvidenceContains(candidate, "publicSurface", "TensorRtAllocatorInterfaceInfoDesignGate.EvaluateKnownSurface");
 

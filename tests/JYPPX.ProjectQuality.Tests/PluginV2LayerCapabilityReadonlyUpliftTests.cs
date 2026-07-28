@@ -133,7 +133,7 @@ public sealed class PluginV2LayerCapabilityReadonlyUpliftTests
     [Fact]
     public void ManagedApiIsOwnerBoundAndPointerFree()
     {
-        string metadata = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtPluginV2LayerMetadata.cs");
+        string metadata = ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginV2LayerMetadata.cs");
         string interop = ReadSource(
             "src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.PluginV2LayerMetadata.cs");
         string publicSurface = metadata + interop;

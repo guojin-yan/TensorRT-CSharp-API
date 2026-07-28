@@ -59,10 +59,10 @@ public sealed class VersionedInterfaceApiLanguageReadonlyUpliftTests
     public void ManagedApiLanguageWrappersExposeEnumAndNoRawPointers()
     {
         string interopSource = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.CallbackInterfaceInfo.cs");
-        string interfaceInfoSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtInterfaceInfo.cs");
-        string loggerSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtLogger.cs");
-        string profilerSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtProfiler.cs");
-        string monitorSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtProgressMonitor.cs");
+        string interfaceInfoSource = ReadSource("src", "JYPPX.TensorRtSharp", "Core", "TensorRtInterfaceInfo.cs");
+        string loggerSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Monitoring", "TensorRtLogger.cs");
+        string profilerSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Monitoring", "TensorRtProfiler.cs");
+        string monitorSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Monitoring", "TensorRtProgressMonitor.cs");
 
         Assert.Contains("public enum TensorRtApiLanguage", interfaceInfoSource);
         Assert.Contains("Unknown = -1", interfaceInfoSource);

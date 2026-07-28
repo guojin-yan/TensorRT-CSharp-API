@@ -104,7 +104,7 @@ public sealed class OutputAllocatorAttachDetachDesignGateTests
     [Fact]
     public void ReadinessSmokeAndDocsKeepGateSeparateFromRuntimeProof()
     {
-        string gateSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOutputAllocatorAttachDetachDesignGate.cs");
+        string gateSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "MemoryAllocation", "TensorRtOutputAllocatorAttachDetachDesignGate.cs");
         string smokeProgram = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
         string readiness = ReadSource("eng", "Test-RuntimePackageReadiness.ps1");
         string packageConsumer = ReadSource("eng", "Test-PackageConsumer.ps1");

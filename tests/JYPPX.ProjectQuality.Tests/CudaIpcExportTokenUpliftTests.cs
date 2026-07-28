@@ -33,9 +33,9 @@ public sealed class CudaIpcExportTokenUpliftTests
     [Fact]
     public void ManagedSurfaceIsImmutableAndPointerFree()
     {
-        string token = ReadSource("src", "JYPPX.CudaSharp", "CudaIpcExportToken.cs");
-        string cudaEvent = ReadSource("src", "JYPPX.CudaSharp", "CudaEvent.cs");
-        string memory = ReadSource("src", "JYPPX.CudaSharp", "CudaMemory.cs");
+        string token = ReadSource("src", "JYPPX.CudaSharp", "IPC", "CudaIpcExportToken.cs");
+        string cudaEvent = ReadSource("src", "JYPPX.CudaSharp", "Events", "CudaEvent.cs");
+        string memory = ReadSource("src", "JYPPX.CudaSharp", "Memory", "CudaMemory.cs");
         string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "NativeCudaApi.IpcExports.cs");
         string publicSurface = token + cudaEvent + memory;
 

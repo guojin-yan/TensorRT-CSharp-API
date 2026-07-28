@@ -116,7 +116,7 @@ public sealed class PluginV3LayerMetadataReadonlyUpliftTests
     [Fact]
     public void ManagedApiRequiresNetworkOwnerLeaseAndExposesPointerFreeSnapshots()
     {
-        string metadata = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtPluginV3LayerMetadata.cs");
+        string metadata = ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginV3LayerMetadata.cs");
         string interop = ReadSource(
             "src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.PluginV3LayerMetadata.cs");
 

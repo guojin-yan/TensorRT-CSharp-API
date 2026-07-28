@@ -166,8 +166,8 @@ public sealed class DebugListenerNativeOwnerNonCopyableStorageTests
     [Fact]
     public void SourceSmokeAndDocsKeepNativeOwnerNonCopyableStorageSeparateFromRuntimeProof()
     {
-        string storageSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerNativeOwnerNonCopyableStorage.cs");
-        string precheckSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerRuntimeProofPrecheck.cs");
+        string storageSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerNativeOwnerNonCopyableStorage.cs");
+        string precheckSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerRuntimeProofPrecheck.cs");
         string smokeProgram = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
         string nativeStorage = ReadSource("native", "src", "tensorrt", "common", "debug_listener_native_owner_noncopyable_storage.inc");
         string trt8 = ReadSource("native", "src", "tensorrt", "v8", "api.cpp");

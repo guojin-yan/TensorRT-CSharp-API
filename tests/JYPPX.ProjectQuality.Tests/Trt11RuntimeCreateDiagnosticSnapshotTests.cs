@@ -13,8 +13,8 @@ public sealed class Trt11RuntimeCreateDiagnosticSnapshotTests
         string nativeStructs = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeStructs.cs");
         string nativeMethods = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeMethodsTensorRt.cs");
         string bridgeApi = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.cs");
-        string environmentProbe = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtEnvironmentProbe.cs");
-        string snapshot = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtRuntimeCreateDiagnosticSnapshot.cs");
+        string environmentProbe = ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.cs");
+        string snapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntimeCreateDiagnosticSnapshot.cs");
         string runtimeConsumer = ReadSource("eng", "Test-BridgePackageRuntimeConsumer.ps1");
 
         Assert.Contains("JYPPX_TensorRtRuntimeCreateDiagnosticInfo", nativeTypes);

@@ -46,8 +46,8 @@ public sealed class RefitterEngineInspectorDiagnosticsTests
     [Fact]
     public void ManagedRefitterWrapperExposesManagedValuesAndVersionGuardedRoutes()
     {
-        string wrapper = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtRefitter.cs") +
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtRefitter.Trt11Controls.cs");
+        string wrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Refit", "TensorRtRefitter.cs") +
+            ReadSource("src", "JYPPX.TensorRtSharp", "Refit", "TensorRtRefitter.Trt11Controls.cs");
         string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11RuntimeSerializationRefit.cs");
 
         Assert.Contains("public int MaxThreads", wrapper);
@@ -88,8 +88,8 @@ public sealed class RefitterEngineInspectorDiagnosticsTests
         string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.cs") +
             ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11Diagnostics.cs") +
             ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11FifteenthBatch.cs");
-        string wrapper = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtEngineInspector.cs") +
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtEngineInspector.Trt11Diagnostics.cs");
+        string wrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngineInspector.cs") +
+            ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngineInspector.Trt11Diagnostics.cs");
 
         foreach (string manifest in new[] { manifest8, manifest10, manifest11Deployment })
         {
@@ -157,7 +157,7 @@ public sealed class RefitterEngineInspectorDiagnosticsTests
         Assert.Contains("RefitWeightsSmokeRunner", smokeReadme);
         Assert.Contains("RefitWeightsSmokeRunner.csproj", solution);
         Assert.Contains("ProbeRefitterDiagnostics(refitter)", program);
-        Assert.Contains("RefitterDiagnosticSnapshot", ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtRefitterDiagnosticSnapshot.cs"));
+        Assert.Contains("RefitterDiagnosticSnapshot", ReadSource("src", "JYPPX.TensorRtSharp", "Refit", "TensorRtRefitterDiagnosticSnapshot.cs"));
         Assert.Contains("refitter.GetDiagnosticSnapshot()", ReadSource("smoke", "OnnxToEngineSmokeRunner", "Program.cs"));
         Assert.Contains("ProbeParserRefitterControls(refitter, logger)", ReadSource("smoke", "OnnxToEngineSmokeRunner", "Program.cs"));
         Assert.Contains("TensorRtOnnxParserRefitterDiagnosticSnapshot snapshot = parserRefitter.GetDiagnosticSnapshot();", ReadSource("smoke", "OnnxToEngineSmokeRunner", "Program.cs"));

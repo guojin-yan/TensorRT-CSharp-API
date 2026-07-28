@@ -28,8 +28,8 @@ public sealed class DeferredProfilerInterfaceProofClosureTests
         string native = ReadSource("native", "src", "tensorrt", "v11", "api.cpp");
         string deferred = ReadSource("native", "src", "tensorrt", "v11", "modules", "deferred", "twenty_third_batch_deferred.inc");
         string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.CallbackInterfaceInfo.cs");
-        string profiler = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtProfiler.cs");
-        string snapshot = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtProfilerInterfaceMetadataSnapshot.cs");
+        string profiler = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Monitoring", "TensorRtProfiler.cs");
+        string snapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Monitoring", "TensorRtProfilerInterfaceMetadataSnapshot.cs");
 
         Assert.Contains("trt11-profiler-get-interface-info", manifest, StringComparison.Ordinal);
         Assert.Contains("trt11-profiler-get-api-language", manifest, StringComparison.Ordinal);

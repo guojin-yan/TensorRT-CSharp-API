@@ -55,10 +55,10 @@ public sealed class TensorRtExecMultiOutputArtifactContractTests
     [Fact]
     public void RuntimeOutputArtifactImplementationAndMatricesStayAlignedWithTheContract()
     {
-        string writer = Read("src", "JYPPX.TensorRtSharp.Tools", "OnnxEngineRuntimeArtifactWriter.cs");
-        string service = Read("src", "JYPPX.TensorRtSharp.Tools", "OnnxEngineBuildService.cs");
-        string runtimeOptions = Read("src", "JYPPX.TensorRtSharp.Tools", "TrtexecLikeRuntimeOptions.cs");
-        string capabilities = Read("src", "JYPPX.TensorRtSharp.Tools", "TrtexecLikeOptionCapabilities.cs");
+        string writer = Read("src", "JYPPX.TensorRtSharp.Tools", "Artifacts", "OnnxEngineRuntimeArtifactWriter.cs");
+        string service = Read("src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildService.cs");
+        string runtimeOptions = Read("src", "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeRuntimeOptions.cs");
+        string capabilities = Read("src", "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeOptionCapabilities.cs");
         string readme = Read("applications", "TensorRtExec", "README.md");
         string featureMatrix = Read("applications", "TensorRtExec", "tensor-rt-exec-feature-matrix.json");
         string parityMatrix = Read("applications", "TensorRtExec", "tensor-rt-exec-trtexec-parity-matrix.json");

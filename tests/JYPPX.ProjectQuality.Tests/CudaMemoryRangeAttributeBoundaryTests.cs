@@ -46,8 +46,8 @@ public sealed class CudaMemoryRangeAttributeBoundaryTests
     [Fact]
     public void ManagedCudaMemoryRangeAttributeApiDoesNotExposeNativePointers()
     {
-        string publicTypes = ReadSource("src", "JYPPX.CudaSharp", "CudaMemoryRangeAttribute.cs");
-        string cudaMemory = ReadSource("src", "JYPPX.CudaSharp", "CudaMemory.cs");
+        string publicTypes = ReadSource("src", "JYPPX.CudaSharp", "Memory", "CudaMemoryRangeAttribute.cs");
+        string cudaMemory = ReadSource("src", "JYPPX.CudaSharp", "Memory", "CudaMemory.cs");
         string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "Memory", "NativeCudaApi.MemoryRange.cs");
         string nativeStructs = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "NativeStructs.cs");
 

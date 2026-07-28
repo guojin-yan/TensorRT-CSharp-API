@@ -95,7 +95,7 @@ public sealed class TechnicalArticleFoundationsSecondBatchTests
 
         string refit = ReadSource("docs", "articles", "zh-cn", "blog-refit-weights-guide.md");
         Assert.Contains("GetAllEntries", refit, StringComparison.Ordinal);
-        Assert.Contains("RefitCudaEngine", ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtRefitter.cs"), StringComparison.Ordinal);
+        Assert.Contains("RefitCudaEngine", ReadSource("src", "JYPPX.TensorRtSharp", "Refit", "TensorRtRefitter.cs"), StringComparison.Ordinal);
 
         string modern = ReadSource("docs", "articles", "zh-cn", "trt11-modern-layers-guide.md");
         Assert.Contains("Dims64Evidence", modern, StringComparison.Ordinal);

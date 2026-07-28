@@ -31,7 +31,7 @@ public sealed class CudaSetValidDevicesBoundaryTests
     [Fact]
     public void ManagedCudaSetValidDevicesCopiesManagedArrayAndAvoidsPublicPointerExposure()
     {
-        string deviceApi = ReadSource("src", "JYPPX.CudaSharp", "CudaDevice.cs");
+        string deviceApi = ReadSource("src", "JYPPX.CudaSharp", "Devices", "CudaDevice.cs");
         string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "NativeCudaApi.Deployment.cs");
 
         Assert.Contains("public static void SetValidDevices(IReadOnlyList<int> ordinals)", deviceApi);

@@ -182,8 +182,8 @@ public sealed class DebugListenerNativeOwnerLifecycleGateTests
     [Fact]
     public void SourceSmokeDocsAndReadinessKeepNativeOwnerLifecycleGateSeparateFromRuntimeProof()
     {
-        string lifecycleSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerNativeOwnerLifecycleGate.cs");
-        string precheckSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerRuntimeProofPrecheck.cs");
+        string lifecycleSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerNativeOwnerLifecycleGate.cs");
+        string precheckSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerRuntimeProofPrecheck.cs");
         string smokeProgram = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
         string readiness = ReadSource("eng", "Test-RuntimePackageReadiness.ps1");
         string packageConsumer = ReadSource("eng", "Test-PackageConsumer.ps1");

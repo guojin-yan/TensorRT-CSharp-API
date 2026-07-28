@@ -165,8 +165,8 @@ public sealed class DebugListenerNativeAttachEntryDesignGateTests
     [Fact]
     public void ReadinessSmokeAndDocsKeepNativeAttachEntryGateSeparateFromRuntimeProof()
     {
-        string gateSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerNativeAttachEntryDesignGate.cs");
-        string precheckSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerRuntimeProofPrecheck.cs");
+        string gateSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerNativeAttachEntryDesignGate.cs");
+        string precheckSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerRuntimeProofPrecheck.cs");
         string smokeProgram = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
         string readiness = ReadSource("eng", "Test-RuntimePackageReadiness.ps1");
         string packageConsumer = ReadSource("eng", "Test-PackageConsumer.ps1");

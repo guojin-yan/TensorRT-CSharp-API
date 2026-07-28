@@ -73,13 +73,11 @@ public sealed class TensorRtExecBoundedBenchmarkSchedulerTests
         string service = File.ReadAllText(Path.Combine(
             RepositoryPaths.Root,
             "src",
-            "JYPPX.TensorRtSharp.Tools",
-            "OnnxEngineBuildService.cs"));
+            "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildService.cs"));
         string artifactWriter = File.ReadAllText(Path.Combine(
             RepositoryPaths.Root,
             "src",
-            "JYPPX.TensorRtSharp.Tools",
-            "OnnxEngineRuntimeArtifactWriter.cs"));
+            "JYPPX.TensorRtSharp.Tools", "Artifacts", "OnnxEngineRuntimeArtifactWriter.cs"));
 
         Assert.Contains("executionContextCount = options.RuntimeOptions.InfStreams ?? options.Streams", service, StringComparison.Ordinal);
         Assert.Contains("new OnnxEngineBenchmarkWorker(engine, safeProfileIndex, options.RuntimeOptions.UseSpinWait)", service, StringComparison.Ordinal);

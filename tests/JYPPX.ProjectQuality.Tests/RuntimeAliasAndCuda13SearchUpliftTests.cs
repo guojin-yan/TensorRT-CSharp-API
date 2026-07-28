@@ -58,8 +58,8 @@ public sealed class RuntimeAliasAndCuda13SearchUpliftTests
     [Fact]
     public void RuntimeDeserializationPublicSurfaceRemainsPointerFree()
     {
-        string precheck = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtRuntimeDeserializationBoundaryPrecheck.cs");
-        string runtime = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtRuntime.cs");
+        string precheck = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntimeDeserializationBoundaryPrecheck.cs");
+        string runtime = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntime.cs");
 
         Assert.Contains("DirectDeserializeCudaEngineRowsDeferred => false", precheck);
         Assert.Contains("DirectDeserializeCudaEngineRowsImplemented => SafeDeserializeBridgeReady", precheck);

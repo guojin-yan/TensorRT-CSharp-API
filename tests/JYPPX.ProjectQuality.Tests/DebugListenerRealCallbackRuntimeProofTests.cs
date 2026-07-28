@@ -76,7 +76,7 @@ public sealed class DebugListenerRealCallbackRuntimeProofTests
         AssertNoRawPointerTypes(typeof(TensorRtDebugListenerRealCallbackRuntimeProof));
         AssertNoRawPointerTypes(typeof(TensorRtDebugListenerRealCallbackRuntimeProofResult));
 
-        string source = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerRealCallbackRuntimeProof.cs");
+        string source = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerRealCallbackRuntimeProof.cs");
         Assert.DoesNotContain("public IntPtr", source);
         Assert.DoesNotContain("public UIntPtr", source);
         Assert.DoesNotContain("public nint", source);
@@ -90,7 +90,7 @@ public sealed class DebugListenerRealCallbackRuntimeProofTests
     [Fact]
     public void SourceNativeSmokeReadinessPackageAndDocsContainProofGateEvidenceButNotRuntimeProof()
     {
-        string source = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerRealCallbackRuntimeProof.cs");
+        string source = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerRealCallbackRuntimeProof.cs");
         string nativeSource = ReadSource("native", "src", "tensorrt", "common", "debug_listener_real_callback_runtime_proof.inc");
         string trt8Api = ReadSource("native", "src", "tensorrt", "v8", "api.cpp");
         string trt10Api = ReadSource("native", "src", "tensorrt", "v10", "api.cpp");

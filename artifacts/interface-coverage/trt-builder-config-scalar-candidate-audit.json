@@ -43,7 +43,7 @@
   ],
   "managedRoute": [
     "src/JYPPX.TensorRtSharp/Internal/Interop/NativeBridgeApi.cs",
-    "src/JYPPX.TensorRtSharp/TensorRtBuilderConfig.cs",
+    "src/JYPPX.TensorRtSharp/Builder/TensorRtBuilderConfig.cs",
     "src/JYPPX.TensorRtSharp/Internal/Interop/Generated/GeneratedTensorRtManifestNativeMethods.g.cs"
   ],
   "verification": [

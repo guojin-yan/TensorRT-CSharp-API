@@ -58,9 +58,9 @@ public sealed class CudaGraphBorrowedHandleSafetyGateTests
     [Fact]
     public void ManagedGraphSurfaceDoesNotExposeBorrowedNativeHandlesPublicly()
     {
-        string graph = ReadSource("src", "JYPPX.CudaSharp", "CudaGraph.cs");
-        string graphExec = ReadSource("src", "JYPPX.CudaSharp", "CudaGraphExec.cs");
-        string graphNode = ReadSource("src", "JYPPX.CudaSharp", "CudaGraphNode.cs");
+        string graph = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.cs");
+        string graphExec = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphExec.cs");
+        string graphNode = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphNode.cs");
         string publicSurface = graph + graphExec + graphNode;
 
         Assert.DoesNotContain("public IntPtr", publicSurface);

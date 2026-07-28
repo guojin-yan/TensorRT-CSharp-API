@@ -71,7 +71,7 @@ InferenceBindings Passed=True
 
 ## `TensorRtInferenceBindings` 管什么
 
-高层对象位于 `src/JYPPX.TensorRtSharp/TensorRtInferenceBindings.cs`。它不拥有 engine 或 context，但拥有由它创建的
+高层对象位于 `src/JYPPX.TensorRtSharp/Inference/TensorRtInferenceBindings.cs`。它不拥有 engine 或 context，但拥有由它创建的
 device buffer，并把 tensor name、shape、buffer、address 与报告组织在一起。生命周期应保持：engine/context 先创建，
 bindings 在二者仍存活时使用并先释放，最后再释放 context/engine/logger。
 

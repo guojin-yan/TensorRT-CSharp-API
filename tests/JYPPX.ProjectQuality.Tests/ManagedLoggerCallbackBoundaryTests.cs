@@ -30,7 +30,7 @@ public sealed class ManagedLoggerCallbackBoundaryTests
         string trt11InterfaceManifest = ReadSource("native", "manifests", "tensorrt", "v11", "trt11-callback-interface-info.manifest.json");
         string nativeSource = ReadSource("native", "src", "tensorrt", "v11", "api.cpp");
         string interopSource = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.CallbackInterfaceInfo.cs");
-        string loggerSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtLogger.cs");
+        string loggerSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Monitoring", "TensorRtLogger.cs");
 
         Assert.DoesNotContain("trt10-logger-get-interface-info", trt10InterfaceManifest);
         Assert.Contains("trt11-logger-get-interface-info", trt11InterfaceManifest);
@@ -58,11 +58,11 @@ public sealed class ManagedLoggerCallbackBoundaryTests
     [Fact]
     public void ManagedLoggerPublicApiOwnsCallbackStateWithoutExposingNativePointers()
     {
-        string loggerSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtLogger.cs");
-        string runtimeSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtRuntime.cs");
-        string builderSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilder.cs");
-        string parserSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOnnxParser.cs");
-        string refitterSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtRefitter.cs");
+        string loggerSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Monitoring", "TensorRtLogger.cs");
+        string runtimeSource = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntime.cs");
+        string builderSource = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilder.cs");
+        string parserSource = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParser.cs");
+        string refitterSource = ReadSource("src", "JYPPX.TensorRtSharp", "Refit", "TensorRtRefitter.cs");
 
         Assert.Contains("public delegate void TensorRtLogHandler", loggerSource);
         Assert.Contains("public TensorRtLogger(TensorRtApiLine line, TensorRtLogHandler handler", loggerSource);
@@ -102,11 +102,11 @@ public sealed class ManagedLoggerCallbackBoundaryTests
     [Fact]
     public void ManagedLoggerBorrowersAttachBeforeNativeCallsAndDetachOnDispose()
     {
-        string engineSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtEngine.cs");
-        string refitterSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtRefitter.cs");
-        string runtimeSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtRuntime.cs");
-        string builderSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilder.cs");
-        string parserSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOnnxParser.cs");
+        string engineSource = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.cs");
+        string refitterSource = ReadSource("src", "JYPPX.TensorRtSharp", "Refit", "TensorRtRefitter.cs");
+        string runtimeSource = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntime.cs");
+        string builderSource = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilder.cs");
+        string parserSource = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParser.cs");
 
         Assert.Contains("logger.AttachBorrower(Line);", engineSource);
         Assert.Contains("NativeBridgeApi.CreateRefitter(Line, _handle, logger.Handle)", engineSource);

@@ -61,7 +61,7 @@ public sealed class DebugListenerRealCallbackRuntimeProofPreflightBatchTests
         AssertNoRawPointerTypes(typeof(TensorRtDebugListenerRuntimeProofAttemptPreflight));
         AssertNoRawPointerTypes(typeof(TensorRtDebugListenerRuntimeProofAttemptPreflightResult));
 
-        string source = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerRuntimeProofAttemptPreflight.cs");
+        string source = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerRuntimeProofAttemptPreflight.cs");
         Assert.DoesNotContain("public IntPtr", source);
         Assert.DoesNotContain("public UIntPtr", source);
         Assert.DoesNotContain("public nint", source);
@@ -97,7 +97,7 @@ public sealed class DebugListenerRealCallbackRuntimeProofPreflightBatchTests
     [Fact]
     public void ReadinessDocsSmokePackageAndDeferredRowsContainPreflightEvidence()
     {
-        string source = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerRuntimeProofAttemptPreflight.cs");
+        string source = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerRuntimeProofAttemptPreflight.cs");
         string smoke = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
         string readiness = ReadSource("eng", "Test-RuntimePackageReadiness.ps1");
         string bridgeConsumer = ReadSource("eng", "Test-BridgePackageConsumer.ps1");

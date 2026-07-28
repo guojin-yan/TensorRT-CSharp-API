@@ -94,7 +94,7 @@ public sealed class DebugListenerBorrowedDebugTensorMetadataRuntimeGateTests
         AssertNoRawPointerTypes(typeof(TensorRtDebugListenerBorrowedDebugTensorMetadataRuntimeGate));
         AssertNoRawPointerTypes(typeof(TensorRtDebugListenerBorrowedDebugTensorMetadataRuntimeGateResult));
 
-        string source = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerBorrowedDebugTensorMetadataRuntimeGate.cs");
+        string source = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerBorrowedDebugTensorMetadataRuntimeGate.cs");
         Assert.DoesNotContain("public IntPtr", source);
         Assert.DoesNotContain("public UIntPtr", source);
         Assert.DoesNotContain("public nint", source);
@@ -106,7 +106,7 @@ public sealed class DebugListenerBorrowedDebugTensorMetadataRuntimeGateTests
     [Fact]
     public void SourceNativeSmokeReadinessPackageAndDocsContainMetadataGateEvidenceButNotRuntimeProof()
     {
-        string source = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerBorrowedDebugTensorMetadataRuntimeGate.cs");
+        string source = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerBorrowedDebugTensorMetadataRuntimeGate.cs");
         string nativeSource = ReadSource("native", "src", "tensorrt", "common", "debug_listener_borrowed_debug_tensor_metadata_runtime_gate.inc");
         string trt8Api = ReadSource("native", "src", "tensorrt", "v8", "api.cpp");
         string trt10Api = ReadSource("native", "src", "tensorrt", "v10", "api.cpp");

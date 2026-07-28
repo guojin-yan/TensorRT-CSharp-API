@@ -26,18 +26,18 @@ public sealed class ReadonlyDiagnosticsCandidateImplementationEvidenceTests
         AssertEvidenceContains(dependencyCandidate, "publicSurface", "TensorRtRuntimeDeserializationDependencyDiagnostics.EvaluateKnownSurface");
         AssertEvidenceContains(dependencyCandidate, "publicSurface", "TensorRtDependencyProbeReport");
 
-        string errorRecorderSnapshot = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtErrorRecorderSnapshot.cs");
-        string runtimeControls = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtRuntime.Trt11Controls.cs");
-        string refitterControls = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtRefitter.Trt11Controls.cs");
-        string engineControls = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtEngine.Trt11BoundaryControls.cs");
-        string contextControls = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContext.Trt11BoundaryControls.cs");
-        string runtimeSnapshot = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtRuntimeDiagnosticSnapshot.cs");
+        string errorRecorderSnapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Monitoring", "TensorRtErrorRecorderSnapshot.cs");
+        string runtimeControls = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntime.Trt11Controls.cs");
+        string refitterControls = ReadSource("src", "JYPPX.TensorRtSharp", "Refit", "TensorRtRefitter.Trt11Controls.cs");
+        string engineControls = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.Trt11BoundaryControls.cs");
+        string contextControls = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Trt11BoundaryControls.cs");
+        string runtimeSnapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntimeDiagnosticSnapshot.cs");
         string bridgeInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11BoundaryControls.cs") +
             ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11RuntimeSerializationRefit.cs");
-        string dependencyProbe = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtEnvironmentProbe.cs") +
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDependencyProbeReport.cs");
-        string dependencyDiagnostics = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtRuntimeDeserializationDependencyDiagnostics.cs") +
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtRuntimeDeserializationBoundaryPrecheck.cs");
+        string dependencyProbe = ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.cs") +
+            ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtDependencyProbeReport.cs");
+        string dependencyDiagnostics = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntimeDeserializationDependencyDiagnostics.cs") +
+            ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntimeDeserializationBoundaryPrecheck.cs");
 
         Assert.Contains("public sealed class TensorRtErrorRecorderSnapshot", errorRecorderSnapshot);
         Assert.Contains("public sealed class TensorRtErrorRecord", errorRecorderSnapshot);

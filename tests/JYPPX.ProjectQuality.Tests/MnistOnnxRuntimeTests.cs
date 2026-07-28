@@ -55,8 +55,8 @@ public sealed class MnistOnnxRuntimeTests
     {
         string root = RepositoryPaths.Root;
         string program = File.ReadAllText(Path.Combine(root, "samples", "OnnxToEngine", "Program.cs"));
-        string service = File.ReadAllText(Path.Combine(root, "src", "JYPPX.TensorRtSharp.Tools", "MnistOnnxRuntime.cs"));
-        string genericService = File.ReadAllText(Path.Combine(root, "src", "JYPPX.TensorRtSharp.Tools", "OnnxEngineBuildService.cs"));
+        string service = File.ReadAllText(Path.Combine(root, "src", "JYPPX.TensorRtSharp.Tools", "Runtime", "MnistOnnxRuntime.cs"));
+        string genericService = File.ReadAllText(Path.Combine(root, "src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildService.cs"));
 
         Assert.Contains("SampleCommandLine.HasSwitch(args, \"--mnist\")", program, StringComparison.Ordinal);
         Assert.Contains("\"real-model-runtime\"", service, StringComparison.Ordinal);

@@ -114,8 +114,8 @@ public sealed class DebugListenerBorrowedTensorSafetyGateTests
     [Fact]
     public void ReadinessSmokeAndDocsKeepGateSeparateFromRuntimeProof()
     {
-        string gateSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerBorrowedTensorSafetyGate.cs");
-        string precheckSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerRuntimeProofPrecheck.cs");
+        string gateSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerBorrowedTensorSafetyGate.cs");
+        string precheckSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerRuntimeProofPrecheck.cs");
         string smokeProgram = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
         string readiness = ReadSource("eng", "Test-RuntimePackageReadiness.ps1");
         string packageConsumer = ReadSource("eng", "Test-PackageConsumer.ps1");

@@ -85,9 +85,9 @@ public sealed class ExecutionContextAuxiliaryStreamParityTests
     public void ManagedSafeHandleLeaseSpansAssignmentUntilClearOrContextTeardown()
     {
         string lease = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Handles", "TensorRtAuxiliaryStreamHandleLease.cs");
-        string controls = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContext.Trt11DeploymentControls.cs");
-        string clear = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs");
-        string context = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContext.cs");
+        string controls = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Trt11DeploymentControls.cs");
+        string clear = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs");
+        string context = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.cs");
 
         Assert.Contains("handle.DangerousAddRef(ref addedRef)", lease, StringComparison.Ordinal);
         Assert.Contains("handles[i].DangerousRelease()", lease, StringComparison.Ordinal);
@@ -112,9 +112,9 @@ public sealed class ExecutionContextAuxiliaryStreamParityTests
     [Fact]
     public void PublicSnapshotAndWrappersRemainPointerFree()
     {
-        string snapshot = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtAuxiliaryStreamAssignmentSnapshot.cs");
-        string controls = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContext.Trt11DeploymentControls.cs");
-        string clear = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs");
+        string snapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtAuxiliaryStreamAssignmentSnapshot.cs");
+        string controls = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Trt11DeploymentControls.cs");
+        string clear = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs");
 
         Assert.Contains("public void SetAuxStreams", controls, StringComparison.Ordinal);
         Assert.Contains("public TensorRtAuxiliaryStreamAssignmentSnapshot GetAuxiliaryStreamAssignmentSnapshot()", controls, StringComparison.Ordinal);

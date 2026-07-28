@@ -61,8 +61,8 @@ public sealed class OnnxParserLayerOutputMetadataUpliftTests
             "src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Generated", "GeneratedTensorRtManifestNativeMethods.g.cs");
         string interop = ReadSource(
             "src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.OnnxParserLayerOutputMetadata.cs");
-        string wrapper = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOnnxParser.ModelSupport.cs");
-        string snapshot = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtOnnxLayerOutputTensorMetadata.cs");
+        string wrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParser.ModelSupport.cs");
+        string snapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxLayerOutputTensorMetadata.cs");
 
         Assert.Contains("jyppx_trt10_onnx_parser_get_layer_output_tensor_metadata", generated, StringComparison.Ordinal);
         Assert.Contains("jyppx_trt11_onnx_parser_get_layer_output_tensor_metadata", generated, StringComparison.Ordinal);

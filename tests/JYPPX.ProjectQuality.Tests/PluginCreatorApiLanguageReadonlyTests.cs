@@ -73,8 +73,8 @@ public sealed class PluginCreatorApiLanguageReadonlyTests
     [Fact]
     public void ManagedSnapshotsExposeEnumAndKeepRawPointersOutOfPublicApi()
     {
-        string inventoryModels = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtPluginRegistryInventory.cs");
-        string builderInventory = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtBuilder.PluginRegistryInventory.cs");
+        string inventoryModels = ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginRegistryInventory.cs");
+        string builderInventory = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilder.PluginRegistryInventory.cs");
         string builderInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.PluginRegistryInventory.cs");
         string globalInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.GlobalRuntimePluginProbe.cs");
         string capabilityInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.BuilderCapabilityPluginRegistry.cs");
@@ -97,8 +97,8 @@ public sealed class PluginCreatorApiLanguageReadonlyTests
             Environment.NewLine,
             inventoryModels,
             builderInventory,
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtRuntime.PluginRegistryInventory.cs"),
-            ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtEnvironmentProbe.cs"));
+            ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntime.PluginRegistryInventory.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.cs"));
         Assert.DoesNotContain("public IntPtr", publicSources);
         Assert.DoesNotContain("public nint", publicSources);
     }
@@ -133,7 +133,7 @@ public sealed class PluginCreatorApiLanguageReadonlyTests
     public void StreamReaderAndWriterCallbackOwnershipRemainsDeferred()
     {
         string comparison = ReadSource("artifacts", "interface-coverage", "tensorrt-interface-comparison.csv");
-        string streamGate = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtStreamIoInterfaceInfoDesignGate.cs");
+        string streamGate = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Monitoring", "TensorRtStreamIoInterfaceInfoDesignGate.cs");
         string streamGateTests = ReadSource("tests", "JYPPX.ProjectQuality.Tests", "StreamIoInterfaceInfoDesignGateTests.cs");
 
         Assert.Contains("IStreamReader::getInterfaceInfo", comparison);

@@ -30,9 +30,9 @@ public sealed class CudaChooseDeviceBoundaryTests
     [Fact]
     public void ManagedCudaChooseDeviceUsesTypedRequirementsWithoutPointerExposure()
     {
-        string requirements = ReadSource("src", "JYPPX.CudaSharp", "CudaDeviceSelectionRequirements.cs");
+        string requirements = ReadSource("src", "JYPPX.CudaSharp", "Devices", "CudaDeviceSelectionRequirements.cs");
         string structs = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "NativeStructs.cs");
-        string deviceApi = ReadSource("src", "JYPPX.CudaSharp", "CudaDevice.cs");
+        string deviceApi = ReadSource("src", "JYPPX.CudaSharp", "Devices", "CudaDevice.cs");
         string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "NativeCudaApi.Deployment.cs");
 
         Assert.Contains("public sealed class CudaDeviceSelectionRequirements", requirements);

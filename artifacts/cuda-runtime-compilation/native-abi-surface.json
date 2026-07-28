@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "cuda-rtc-native-abi-surface",
+  "generatedLocalDate": "2026-07-28",
+  "manifest": "native/manifests/cuda/cuda-sixty-third-batch-runtime-compilation-owner.manifest.json",
+  "header": "native/include/jyppx/cuda/runtime.h",
+  "manifestEntryPointCount": 12,
+  "declaredEntryPointCount": 12,
+  "missingDeclarationCount": 0,
+  "missingDeclarations": [],
+  "bridge": "build-out/win-x64-trt11-cuda12-release/bin/Release/jyppxtrtbridge.dll",
+  "discoveredPeExportCount": 1794,
+  "matchedPeExportCount": 12,
+  "missingPeExportCount": 0,
+  "missingPeExports": [],
+  "passed": true,
+  "performsPublish": false,
+  "proofBoundary": "This checks RTC manifest/header/PE export parity only. It is not compiler, kernel runtime, package, Linux, or post-publish proof."
+}

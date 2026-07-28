@@ -40,9 +40,9 @@ public sealed class CudaStreamCaptureVariantsUpliftTests
     [Fact]
     public void ManagedSurfaceUsesScalarSnapshotAndCopiedEdgeDataWithoutNativeHandles()
     {
-        string stream = ReadSource("src", "JYPPX.CudaSharp", "CudaStream.cs");
-        string scalar = ReadSource("src", "JYPPX.CudaSharp", "CudaStreamCaptureScalarInfo.cs");
-        string edgeData = ReadSource("src", "JYPPX.CudaSharp", "CudaGraphEdgeData.cs");
+        string stream = ReadSource("src", "JYPPX.CudaSharp", "Streams", "CudaStream.cs");
+        string scalar = ReadSource("src", "JYPPX.CudaSharp", "Streams", "CudaStreamCaptureScalarInfo.cs");
+        string edgeData = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphEdgeData.cs");
         string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "Graph", "NativeCudaApi.StreamCaptureVariants.cs");
         string smoke = ReadSource("smoke", "CudaGraphSmokeRunner", "Program.cs");
         string publicSurface = stream + scalar + edgeData;

@@ -170,8 +170,8 @@ public sealed class DebugListenerNativeOwnerStableIdentityTests
     [Fact]
     public void ReadinessSmokeAndDocsKeepNativeOwnerStableIdentitySeparateFromRuntimeProof()
     {
-        string identitySource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerNativeOwnerStableIdentity.cs");
-        string precheckSource = ReadSource("src", "JYPPX.TensorRtSharp", "TensorRtDebugListenerRuntimeProofPrecheck.cs");
+        string identitySource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerNativeOwnerStableIdentity.cs");
+        string precheckSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerRuntimeProofPrecheck.cs");
         string smokeProgram = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
         string readiness = ReadSource("eng", "Test-RuntimePackageReadiness.ps1");
         string packageConsumer = ReadSource("eng", "Test-PackageConsumer.ps1");

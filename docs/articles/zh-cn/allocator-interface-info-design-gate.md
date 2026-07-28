@@ -14,8 +14,8 @@
 
 ## 当前证据
 
-- 设计门：`src/JYPPX.TensorRtSharp/TensorRtAllocatorInterfaceInfoDesignGate.cs`
-- 相关门：`src/JYPPX.TensorRtSharp/TensorRtOutputAllocatorAttachDetachDesignGate.cs`
+- 设计门：`src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtAllocatorInterfaceInfoDesignGate.cs`
+- 相关门：`src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtOutputAllocatorAttachDetachDesignGate.cs`
 - 测试：`tests/JYPPX.ProjectQuality.Tests/AllocatorInterfaceInfoDesignGateTests.cs`
 - 机器清单：`artifacts/interface-coverage/deferred-readonly-candidate-list.json`
 

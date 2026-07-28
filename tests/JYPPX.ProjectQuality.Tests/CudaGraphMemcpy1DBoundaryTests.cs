@@ -12,9 +12,9 @@ public sealed class CudaGraphMemcpy1DBoundaryTests
         string officialDeferredManifest = ReadSource("native", "manifests", "cuda", "cuda-twenty-third-batch-deferred-coverage.manifest.json");
         string header = ReadSource("native", "include", "jyppx", "cuda", "runtime.h");
         string nativeSource = ReadSource("native", "src", "cuda", "modules", "graph", "node_topology.inc");
-        string graph = ReadSource("src", "JYPPX.CudaSharp", "CudaGraph.cs");
-        string graphExec = ReadSource("src", "JYPPX.CudaSharp", "CudaGraphExec.cs");
-        string parameters = ReadSource("src", "JYPPX.CudaSharp", "CudaGraphMemcpyNodeParameters.cs");
+        string graph = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.cs");
+        string graphExec = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphExec.cs");
+        string parameters = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphMemcpyNodeParameters.cs");
         string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "Graph", "NativeCudaApi.Graph.cs");
         string smoke = ReadSource("smoke", "CudaGraphSmokeRunner", "Program.cs");
         string coverageScript = ReadSource("eng", "Export-InterfaceCoverageMatrix.ps1");
@@ -54,7 +54,7 @@ public sealed class CudaGraphMemcpy1DBoundaryTests
         Assert.Contains("SetGraphExecMemcpyNodeParametersDeviceToHost", interop);
         Assert.Contains("public readonly struct CudaGraphMemcpyNodeParameters", parameters);
         Assert.Contains("diagnostic numeric values", parameters);
-        Assert.Contains("public enum CudaMemcpyKind", ReadSource("src", "JYPPX.CudaSharp", "CudaMemcpyKind.cs"));
+        Assert.Contains("public enum CudaMemcpyKind", ReadSource("src", "JYPPX.CudaSharp", "Memory", "CudaMemcpyKind.cs"));
         Assert.DoesNotContain("public IntPtr", graph + graphExec + parameters);
         Assert.DoesNotContain("public nint", graph + graphExec + parameters);
 

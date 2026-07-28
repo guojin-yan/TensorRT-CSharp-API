@@ -85,8 +85,7 @@ public sealed class PluginV2LayerMetadataReadonlyUpliftTests
     {
         string metadata = ReadSource(
             "src",
-            "JYPPX.TensorRtSharp",
-            "TensorRtPluginV2LayerMetadata.cs");
+            "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginV2LayerMetadata.cs");
         string interop = ReadSource(
             "src",
             "JYPPX.TensorRtSharp",
@@ -131,12 +130,10 @@ public sealed class PluginV2LayerMetadataReadonlyUpliftTests
             "trt8_plugin_registry_inventory.inc");
         string model = ReadSource(
             "src",
-            "JYPPX.TensorRtSharp",
-            "TensorRtPluginRegistryInventory.cs");
+            "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginRegistryInventory.cs");
         string builder = ReadSource(
             "src",
-            "JYPPX.TensorRtSharp",
-            "TensorRtBuilder.PluginRegistryInventory.cs");
+            "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilder.PluginRegistryInventory.cs");
         string runtimeInterop = ReadSource(
             "src",
             "JYPPX.TensorRtSharp",

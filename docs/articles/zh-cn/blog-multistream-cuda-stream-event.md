@@ -88,9 +88,9 @@ MultiStream=Skipped Reason=...
 
 ## Stream、Event 与 Memory 的 owner 关系
 
-`CudaStream` 和 `CudaEvent` 分别位于 `src/JYPPX.CudaSharp/CudaStream.cs`、
-`src/JYPPX.CudaSharp/CudaEvent.cs`；device/pinned owner 位于 `src/JYPPX.CudaSharp/CudaMemory.cs` 与
-`src/JYPPX.CudaSharp/CudaPinnedMemory.cs`。异步操作排队后，相关 stream、event、device memory 和 pinned host memory
+`CudaStream` 和 `CudaEvent` 分别位于 `src/JYPPX.CudaSharp/Streams/CudaStream.cs`、
+`src/JYPPX.CudaSharp/Events/CudaEvent.cs`；device/pinned owner 位于 `src/JYPPX.CudaSharp/Memory/CudaMemory.cs` 与
+`src/JYPPX.CudaSharp/Memory/CudaPinnedMemory.cs`。异步操作排队后，相关 stream、event、device memory 和 pinned host memory
 都必须保持存活，直到 event/stream 表明工作完成。
 
 ```mermaid
