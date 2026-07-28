@@ -414,3 +414,31 @@ Memory wrapper ready 不等于 allocator callback proof ready。`CudaMemory` own
 - [CUDA Stream/Event 多流教程](cuda-stream-event-multistream-tutorial.md)
 - [MultiStream 样例](../../../samples/MultiStream/README.md)
 - [TensorRT Inference Bindings](inference-bindings-tutorial.md)
+
+## 第二批正文门禁
+
+### 解决问题
+
+本文解决的是 CUDA memory allocation、byte range、host/device copy、pinned async、stream ordering 和释放顺序的组合错误，
+而不是把任意 CUDA 指针包装成一个看似简单的 `IntPtr`。
+
+### 核心思路
+
+核心思路是先确定 owner 与 memory kind，再确定同步或异步传输，最后用 event/stream 和 copied diagnostics 证明状态；
+`CudaMemory`、`CudaPinnedMemory`、`CudaManagedMemory` 与 `CudaPitchedMemory` 的生命周期不能互相替代。
+
+### 操作路径
+
+先运行 `smoke/CudaSmokeRunner` 的 dependency probe 和 round-trip，再根据数据形状选择 memory wrapper，最后把 owner-safe
+device buffer 交给 `TensorRtInferenceBindings`。外部模型或 package consumer 需要另存 engine、输入输出和环境证据。
+
+### 边界说明
+
+build-only、dry-run、template、local feed、ProjectReference、direct `.nupkg`、TensorRtExec report、YoloVision matrix、
+OnnxToEngine report、readonly diagnostics 都不是 CUDA runtime proof，也不能替代 allocator callback proof 或 post-publish proof。
+这些状态必须与 `source smoke`、`blocked-by-cuda-driver` 和真实 runtime invocation 分开记录。
+
+### 下一步
+
+下一步将 memory wrapper 与 dynamic shape、InferenceBindings、MultiStream 和真实模型输入 buffer 组合验证；若进入
+`IGpuAllocator`、`IGpuAsyncAllocator` 或 `IOutputAllocator`，必须建立独立 owner ledger、no-throw callback 和 shutdown gate。

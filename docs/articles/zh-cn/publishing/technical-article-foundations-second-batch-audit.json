@@ -1,0 +1,832 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "technical-article-foundations-second-batch-audit",
+  "auditState": "content-expanded-source-quality-audited",
+  "sourceClosureLedger": "docs/articles/zh-cn/publishing/technical-article-closure-ledger.json",
+  "sourceClosureLedgerSha256": "ae363af82d22af4edaf41bc223628f0977ceb152e28fec32493f14757af0ea3c",
+  "roadmapEntryIds": [
+    28,
+    29,
+    30,
+    31,
+    32,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    103
+  ],
+  "roadmapEntryCount": 14,
+  "uniqueCanonicalArticleCount": 12,
+  "sharedCanonicalMappingCount": 2,
+  "missingRoadmapEntryIds": [],
+  "duplicateRoadmapEntryIds": [],
+  "roadmapStatusCompleteCount": 14,
+  "baselineRoadmapContentCompleteCount": 89,
+  "baselineRoadmapNeedsExpansionCount": 14,
+  "expectedPostExpansionContentCompleteCount": 103,
+  "expectedPostExpansionNeedsExpansionCount": 0,
+  "batchCanonicalContentCompleteCount": 12,
+  "completeLongFormCount": 0,
+  "completeArticleCount": 12,
+  "totalBeforeCharacterCount": 26946,
+  "totalCurrentCharacterCount": 86306,
+  "totalCharacterGrowth": 59360,
+  "totalHeadingCount": 187,
+  "totalCodeBlockCount": 80,
+  "totalMermaidDiagramCount": 21,
+  "repositoryReferenceCount": 78,
+  "markdownLinkCount": 37,
+  "missingMarkerCount": 0,
+  "missingAnchorCount": 0,
+  "missingRepositoryReferenceCount": 0,
+  "missingMarkdownLinkCount": 0,
+  "forbiddenFindingCount": 0,
+  "contentAndProofStateAreIndependent": true,
+  "performsPublish": false,
+  "canPublishPublicly": false,
+  "canCloseReleaseIssue": false,
+  "isRuntimeExecutionProof": false,
+  "isPackageConsumerRuntimeProof": false,
+  "isPostPublishProof": false,
+  "proofBoundary": "This audit proves the final fourteen roadmap entries, twelve unique canonical article bodies, shared canonical mappings, required repository anchors, markers, and link resolution only. It is not runtime execution proof, package-consumer runtime proof, post-publish proof, publish approval, or release-close approval.",
+  "sharedCanonicalMappings": [
+    {
+      "canonicalArticlePath": "docs/articles/zh-cn/blog-refit-weights-guide.md",
+      "roadmapEntryIds": [
+        28,
+        44
+      ]
+    },
+    {
+      "canonicalArticlePath": "docs/articles/zh-cn/blog-network-layer-coverage-guide.md",
+      "roadmapEntryIds": [
+        30,
+        45
+      ]
+    }
+  ],
+  "roadmapEntries": [
+    {
+      "articleId": 28,
+      "canonicalArticlePath": "docs/articles/zh-cn/blog-refit-weights-guide.md",
+      "primaryArticleId": 28,
+      "sharesCanonicalArticle": true,
+      "contentState": "complete-article",
+      "contentComplete": true
+    },
+    {
+      "articleId": 29,
+      "canonicalArticlePath": "docs/articles/zh-cn/trt11-modern-layers-guide.md",
+      "primaryArticleId": 29,
+      "sharesCanonicalArticle": false,
+      "contentState": "complete-article",
+      "contentComplete": true
+    },
+    {
+      "articleId": 30,
+      "canonicalArticlePath": "docs/articles/zh-cn/blog-network-layer-coverage-guide.md",
+      "primaryArticleId": 30,
+      "sharesCanonicalArticle": true,
+      "contentState": "complete-article",
+      "contentComplete": true
+    },
+    {
+      "articleId": 31,
+      "canonicalArticlePath": "docs/articles/zh-cn/error-recorder-diagnostics-design-gate.md",
+      "primaryArticleId": 31,
+      "sharesCanonicalArticle": false,
+      "contentState": "complete-article",
+      "contentComplete": true
+    },
+    {
+      "articleId": 32,
+      "canonicalArticlePath": "docs/articles/zh-cn/managed-logger-profiler-progress-monitor.md",
+      "primaryArticleId": 32,
+      "sharesCanonicalArticle": false,
+      "contentState": "complete-article",
+      "contentComplete": true
+    },
+    {
+      "articleId": 38,
+      "canonicalArticlePath": "docs/articles/zh-cn/blog-dynamic-shape-optimization-profile.md",
+      "primaryArticleId": 38,
+      "sharesCanonicalArticle": false,
+      "contentState": "complete-article",
+      "contentComplete": true
+    },
+    {
+      "articleId": 39,
+      "canonicalArticlePath": "docs/articles/zh-cn/blog-inference-bindings-identity-network.md",
+      "primaryArticleId": 39,
+      "sharesCanonicalArticle": false,
+      "contentState": "complete-article",
+      "contentComplete": true
+    },
+    {
+      "articleId": 40,
+      "canonicalArticlePath": "docs/articles/zh-cn/blog-onnx-parser-engine-roundtrip.md",
+      "primaryArticleId": 40,
+      "sharesCanonicalArticle": false,
+      "contentState": "complete-article",
+      "contentComplete": true
+    },
+    {
+      "articleId": 41,
+      "canonicalArticlePath": "docs/articles/zh-cn/blog-multistream-cuda-stream-event.md",
+      "primaryArticleId": 41,
+      "sharesCanonicalArticle": false,
+      "contentState": "complete-article",
+      "contentComplete": true
+    },
+    {
+      "articleId": 42,
+      "canonicalArticlePath": "docs/articles/zh-cn/blog-plugin-inventory-readonly-api.md",
+      "primaryArticleId": 42,
+      "sharesCanonicalArticle": false,
+      "contentState": "complete-article",
+      "contentComplete": true
+    },
+    {
+      "articleId": 43,
+      "canonicalArticlePath": "docs/articles/zh-cn/blog-cuda-memory-wrapper.md",
+      "primaryArticleId": 43,
+      "sharesCanonicalArticle": false,
+      "contentState": "complete-article",
+      "contentComplete": true
+    },
+    {
+      "articleId": 44,
+      "canonicalArticlePath": "docs/articles/zh-cn/blog-refit-weights-guide.md",
+      "primaryArticleId": 28,
+      "sharesCanonicalArticle": true,
+      "contentState": "complete-article",
+      "contentComplete": true
+    },
+    {
+      "articleId": 45,
+      "canonicalArticlePath": "docs/articles/zh-cn/blog-network-layer-coverage-guide.md",
+      "primaryArticleId": 30,
+      "sharesCanonicalArticle": true,
+      "contentState": "complete-article",
+      "contentComplete": true
+    },
+    {
+      "articleId": 103,
+      "canonicalArticlePath": "docs/articles/zh-cn/cuda-stream-capture-to-graph-owner-safety.md",
+      "primaryArticleId": 103,
+      "sharesCanonicalArticle": false,
+      "contentState": "complete-article",
+      "contentComplete": true
+    }
+  ],
+  "canonicalArticles": [
+    {
+      "primaryArticleId": 28,
+      "roadmapEntryIds": [
+        28,
+        44
+      ],
+      "title": "Refit weights 使用场景与博客版",
+      "canonicalArticlePath": "docs/articles/zh-cn/blog-refit-weights-guide.md",
+      "canonicalArticleExists": true,
+      "beforeLineCount": 112,
+      "beforeCharacterCount": 3173,
+      "currentLineCount": 227,
+      "currentCharacterCount": 7570,
+      "characterGrowth": 4397,
+      "headingCount": 22,
+      "codeBlockCount": 9,
+      "mermaidDiagramCount": 2,
+      "contentState": "complete-article",
+      "contentComplete": true,
+      "requiredMarkers": [
+        "GetAllEntries",
+        "SetWeights",
+        "RefitCudaEngine",
+        "OutputChanged=True"
+      ],
+      "missingMarkers": [],
+      "requiredAnchors": [
+        "src/JYPPX.TensorRtSharp/TensorRtRefitter.cs",
+        "src/JYPPX.TensorRtSharp/TensorRtRefitWeightsBuffer.cs",
+        "smoke/RefitWeightsSmokeRunner/Program.cs"
+      ],
+      "missingAnchors": [],
+      "repositoryReferences": [
+        "smoke/RefitWeightsSmokeRunner",
+        "src/JYPPX.TensorRtSharp/TensorRtRefitter.cs",
+        "smoke/RefitWeightsSmokeRunner/Program.cs",
+        "eng/Test-PackageConsumer.ps1"
+      ],
+      "missingRepositoryReferences": [],
+      "markdownLinks": [
+        "refit-weights-guide.md",
+        "tensorrt-object-model.md",
+        "package-consumer-runtime-proof-playbook.md"
+      ],
+      "missingMarkdownLinks": [],
+      "forbiddenFindings": [],
+      "proofState": "not-required-for-content-closure",
+      "performsPublish": false,
+      "canPublishPublicly": false,
+      "canCloseReleaseIssue": false
+    },
+    {
+      "primaryArticleId": 29,
+      "roadmapEntryIds": [
+        29
+      ],
+      "title": "TensorRT 11 modern layers",
+      "canonicalArticlePath": "docs/articles/zh-cn/trt11-modern-layers-guide.md",
+      "canonicalArticleExists": true,
+      "beforeLineCount": 31,
+      "beforeCharacterCount": 736,
+      "currentLineCount": 159,
+      "currentCharacterCount": 6385,
+      "characterGrowth": 5649,
+      "headingCount": 14,
+      "codeBlockCount": 4,
+      "mermaidDiagramCount": 1,
+      "contentState": "complete-article",
+      "contentComplete": true,
+      "requiredMarkers": [
+        "AddSqueeze",
+        "TensorRtDims64",
+        "Dims64Evidence",
+        "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 11"
+      ],
+      "missingMarkers": [],
+      "requiredAnchors": [
+        "src/JYPPX.TensorRtSharp/TensorRtNetworkDefinition.Trt11ModernLayers.cs",
+        "native/manifests/tensorrt/v11/trt11-seventeenth-batch-dims64.manifest.json",
+        "smoke/NetworkTrt11ModernLayersSmokeRunner/Program.cs",
+        "smoke/NetworkTrt11ModernLayerMetadataRunner/Program.cs"
+      ],
+      "missingAnchors": [],
+      "repositoryReferences": [
+        "smoke/NetworkTrt11ModernLayersSmokeRunner",
+        "src/JYPPX.TensorRtSharp/TensorRtNetworkDefinition.Trt11ModernLayers.cs",
+        "src/JYPPX.TensorRtSharp/TensorRtNetworkDefinition.Trt11AdvancedLayers.cs",
+        "src/JYPPX.TensorRtSharp/TensorRtNetworkDefinition.Trt11Attention.cs",
+        "smoke/NetworkTrt11ModernLayersSmokeRunner/Program.cs",
+        "smoke/NetworkTrt11ModernLayerMetadataRunner/Program.cs",
+        "src/JYPPX.TensorRtSharp/TensorRtDims64.cs",
+        "src/JYPPX.TensorRtSharp/TensorRtLayer.Trt11Dims64.cs",
+        "native/manifests/tensorrt/v11/trt11-seventeenth-batch-dims64.manifest.json",
+        "src/JYPPX.TensorRtSharp/TensorRtAttention.cs",
+        "native/manifests/tensorrt/v11/trt11-thirty-sixth-batch-attention.manifest.json"
+      ],
+      "missingRepositoryReferences": [],
+      "markdownLinks": [
+        "trt-cross-version-strategy.md",
+        "blog-network-layer-coverage-guide.md",
+        "troubleshooting-index.md"
+      ],
+      "missingMarkdownLinks": [],
+      "forbiddenFindings": [],
+      "proofState": "not-required-for-content-closure",
+      "performsPublish": false,
+      "canPublishPublicly": false,
+      "canCloseReleaseIssue": false
+    },
+    {
+      "primaryArticleId": 30,
+      "roadmapEntryIds": [
+        30,
+        45
+      ],
+      "title": "Network layer coverage 导览与博客版",
+      "canonicalArticlePath": "docs/articles/zh-cn/blog-network-layer-coverage-guide.md",
+      "canonicalArticleExists": true,
+      "beforeLineCount": 78,
+      "beforeCharacterCount": 2684,
+      "currentLineCount": 221,
+      "currentCharacterCount": 7918,
+      "characterGrowth": 5234,
+      "headingCount": 15,
+      "codeBlockCount": 6,
+      "mermaidDiagramCount": 2,
+      "contentState": "complete-article",
+      "contentComplete": true,
+      "requiredMarkers": [
+        "NetworkConvolutionScaleSmokeRunner",
+        "OutputValidated",
+        "TensorRtDims64",
+        "real model + clean consumer proof"
+      ],
+      "missingMarkers": [],
+      "requiredAnchors": [
+        "artifacts/interface-coverage/tensorrt-interface-coverage.csv",
+        "smoke/NetworkConvolutionScaleSmokeRunner",
+        "smoke/NetworkTrt11ModernLayersSmokeRunner",
+        "smoke/NetworkTrt11AdvancedLayersSmokeRunner"
+      ],
+      "missingAnchors": [],
+      "repositoryReferences": [
+        "native/manifests",
+        "native/src/tensorrt",
+        "src/JYPPX.TensorRtSharp",
+        "smoke/Network*SmokeRunner",
+        "artifacts/interface-coverage/tensorrt-interface-coverage.csv",
+        "smoke/NetworkConvolutionScaleSmokeRunner",
+        "smoke/NetworkActivationPoolingResizeSmokeRunner",
+        "smoke/NetworkConcatSliceSmokeRunner",
+        "smoke/NetworkSoftmaxTopKSmokeRunner",
+        "smoke/NetworkMatrixFillSelectSmokeRunner",
+        "smoke/NetworkQuantizeDequantizeSmokeRunner",
+        "smoke/NetworkShapeOpsSmokeRunner",
+        "smoke/NetworkDeconvolutionSmokeRunner",
+        "smoke/NetworkLrnSmokeRunner",
+        "smoke/NetworkTrt11ModernLayersSmokeRunner",
+        "smoke/NetworkTrt11AdvancedLayersSmokeRunner"
+      ],
+      "missingRepositoryReferences": [],
+      "markdownLinks": [
+        "interface-zero-to-deferred-boundary.md",
+        "trt11-modern-layers-guide.md",
+        "yolovision-real-asset-walkthrough.md"
+      ],
+      "missingMarkdownLinks": [],
+      "forbiddenFindings": [],
+      "proofState": "not-required-for-content-closure",
+      "performsPublish": false,
+      "canPublishPublicly": false,
+      "canCloseReleaseIssue": false
+    },
+    {
+      "primaryArticleId": 31,
+      "roadmapEntryIds": [
+        31
+      ],
+      "title": "ErrorRecorder snapshot 与诊断",
+      "canonicalArticlePath": "docs/articles/zh-cn/error-recorder-diagnostics-design-gate.md",
+      "canonicalArticleExists": true,
+      "beforeLineCount": 61,
+      "beforeCharacterCount": 3213,
+      "currentLineCount": 187,
+      "currentCharacterCount": 8288,
+      "characterGrowth": 5075,
+      "headingCount": 12,
+      "codeBlockCount": 3,
+      "mermaidDiagramCount": 1,
+      "contentState": "complete-article",
+      "contentComplete": true,
+      "requiredMarkers": [
+        "TryGetErrorRecorderSnapshot",
+        "CopiedDiagnosticsReady=True",
+        "DirectRecorderOwnershipDeferred=True",
+        "incRefCount"
+      ],
+      "missingMarkers": [],
+      "requiredAnchors": [
+        "src/JYPPX.TensorRtSharp/TensorRtErrorRecorderSnapshot.cs",
+        "src/JYPPX.TensorRtSharp/TensorRtErrorRecorderDiagnosticsDesignGate.cs",
+        "smoke/CallbackAllocatorSafeControlsSmokeRunner/Program.cs"
+      ],
+      "missingAnchors": [],
+      "repositoryReferences": [
+        "src/JYPPX.TensorRtSharp/TensorRtErrorRecorderSnapshot.cs",
+        "src/JYPPX.TensorRtSharp/TensorRtBuilder.Trt11BoundaryControls.cs",
+        "src/JYPPX.TensorRtSharp/TensorRtEngine.Trt11BoundaryControls.cs",
+        "src/JYPPX.TensorRtSharp/TensorRtErrorRecorderDiagnosticsDesignGate.cs"
+      ],
+      "missingRepositoryReferences": [],
+      "markdownLinks": [
+        "error-recorder-snapshot-guide.md",
+        "callback-allocator-safety-bridge-roadmap.md",
+        "troubleshooting-index.md"
+      ],
+      "missingMarkdownLinks": [],
+      "forbiddenFindings": [],
+      "proofState": "not-required-for-content-closure",
+      "performsPublish": false,
+      "canPublishPublicly": false,
+      "canCloseReleaseIssue": false
+    },
+    {
+      "primaryArticleId": 32,
+      "roadmapEntryIds": [
+        32
+      ],
+      "title": "Managed logger/profiler/progress monitor",
+      "canonicalArticlePath": "docs/articles/zh-cn/managed-logger-profiler-progress-monitor.md",
+      "canonicalArticleExists": true,
+      "beforeLineCount": 29,
+      "beforeCharacterCount": 689,
+      "currentLineCount": 190,
+      "currentCharacterCount": 7313,
+      "characterGrowth": 6624,
+      "headingCount": 15,
+      "codeBlockCount": 5,
+      "mermaidDiagramCount": 1,
+      "contentState": "complete-article",
+      "contentComplete": true,
+      "requiredMarkers": [
+        "EmitDiagnostic",
+        "CallbackInvocationCount",
+        "ManagedProgressMonitorAttach",
+        "InvocationCount>0"
+      ],
+      "missingMarkers": [],
+      "requiredAnchors": [
+        "src/JYPPX.TensorRtSharp/TensorRtLogger.cs",
+        "src/JYPPX.TensorRtSharp/TensorRtProfiler.cs",
+        "src/JYPPX.TensorRtSharp/TensorRtProgressMonitor.cs",
+        "smoke/ManagedLoggerCallbackSmokeRunner/Program.cs",
+        "smoke/ManagedProfilerCallbackSmokeRunner/Program.cs",
+        "smoke/ManagedProgressMonitorSmokeRunner/Program.cs"
+      ],
+      "missingAnchors": [],
+      "repositoryReferences": [
+        "src/JYPPX.TensorRtSharp/TensorRtLogger.cs",
+        "src/JYPPX.TensorRtSharp/TensorRtProfiler.cs",
+        "src/JYPPX.TensorRtSharp/TensorRtProgressMonitor.cs",
+        "src/JYPPX.TensorRtSharp/Internal/Interop/TensorRtLoggerCallback.cs",
+        "src/JYPPX.TensorRtSharp/Internal/Interop/TensorRtProfilerCallback.cs",
+        "src/JYPPX.TensorRtSharp/Internal/Interop/TensorRtProgressMonitorCallback.cs",
+        "smoke/ManagedLoggerCallbackSmokeRunner/Program.cs",
+        "smoke/ManagedProfilerCallbackSmokeRunner/Program.cs",
+        "smoke/ManagedProgressMonitorSmokeRunner/Program.cs"
+      ],
+      "missingRepositoryReferences": [],
+      "markdownLinks": [
+        "callback-allocator-safety-bridge-roadmap.md",
+        "real-callback-runtime-evidence-schema.md",
+        "error-recorder-diagnostics-design-gate.md"
+      ],
+      "missingMarkdownLinks": [],
+      "forbiddenFindings": [],
+      "proofState": "not-required-for-content-closure",
+      "performsPublish": false,
+      "canPublishPublicly": false,
+      "canCloseReleaseIssue": false
+    },
+    {
+      "primaryArticleId": 38,
+      "roadmapEntryIds": [
+        38
+      ],
+      "title": "Dynamic Shape 博客版",
+      "canonicalArticlePath": "docs/articles/zh-cn/blog-dynamic-shape-optimization-profile.md",
+      "canonicalArticleExists": true,
+      "beforeLineCount": 70,
+      "beforeCharacterCount": 2191,
+      "currentLineCount": 188,
+      "currentCharacterCount": 6406,
+      "characterGrowth": 4215,
+      "headingCount": 13,
+      "codeBlockCount": 8,
+      "mermaidDiagramCount": 2,
+      "contentState": "complete-article",
+      "contentComplete": true,
+      "requiredMarkers": [
+        "SetShape",
+        "SetInputShape",
+        "GetReadiness",
+        "DynamicShape Passed=True"
+      ],
+      "missingMarkers": [],
+      "requiredAnchors": [
+        "src/JYPPX.TensorRtSharp/TensorRtOptimizationProfile.cs",
+        "src/JYPPX.TensorRtSharp/TensorRtInferenceBindings.cs",
+        "samples/DynamicShape/Program.cs"
+      ],
+      "missingAnchors": [],
+      "repositoryReferences": [
+        "samples/DynamicShape",
+        "src/JYPPX.TensorRtSharp/TensorRtOptimizationProfile.cs",
+        "src/JYPPX.TensorRtSharp/TensorRtInferenceBindings.cs"
+      ],
+      "missingRepositoryReferences": [],
+      "markdownLinks": [
+        "dynamic-shape-optimization-profile-tutorial.md",
+        "blog-inference-bindings-identity-network.md",
+        "blog-onnx-parser-engine-roundtrip.md"
+      ],
+      "missingMarkdownLinks": [],
+      "forbiddenFindings": [],
+      "proofState": "not-required-for-content-closure",
+      "performsPublish": false,
+      "canPublishPublicly": false,
+      "canCloseReleaseIssue": false
+    },
+    {
+      "primaryArticleId": 39,
+      "roadmapEntryIds": [
+        39
+      ],
+      "title": "InferenceBindings Identity Network 博客版",
+      "canonicalArticlePath": "docs/articles/zh-cn/blog-inference-bindings-identity-network.md",
+      "canonicalArticleExists": true,
+      "beforeLineCount": 70,
+      "beforeCharacterCount": 2156,
+      "currentLineCount": 202,
+      "currentCharacterCount": 7060,
+      "characterGrowth": 4904,
+      "headingCount": 15,
+      "codeBlockCount": 9,
+      "mermaidDiagramCount": 2,
+      "contentState": "complete-article",
+      "contentComplete": true,
+      "requiredMarkers": [
+        "CopyInputFromHost",
+        "AllocateDeviceBuffer",
+        "BindAll",
+        "InferenceBindings Passed=True"
+      ],
+      "missingMarkers": [],
+      "requiredAnchors": [
+        "src/JYPPX.TensorRtSharp/TensorRtInferenceBindings.cs",
+        "samples/InferenceBindings/Program.cs",
+        "samples/InferenceBindings/README.md"
+      ],
+      "missingAnchors": [],
+      "repositoryReferences": [
+        "samples/InferenceBindings",
+        "src/JYPPX.TensorRtSharp/TensorRtInferenceBindings.cs",
+        "eng/Test-PackageConsumer.ps1"
+      ],
+      "missingRepositoryReferences": [],
+      "markdownLinks": [
+        "inference-bindings-tutorial.md",
+        "blog-dynamic-shape-optimization-profile.md",
+        "blog-cuda-memory-wrapper.md"
+      ],
+      "missingMarkdownLinks": [],
+      "forbiddenFindings": [],
+      "proofState": "not-required-for-content-closure",
+      "performsPublish": false,
+      "canPublishPublicly": false,
+      "canCloseReleaseIssue": false
+    },
+    {
+      "primaryArticleId": 40,
+      "roadmapEntryIds": [
+        40
+      ],
+      "title": "ONNX Parser Engine RoundTrip 博客版",
+      "canonicalArticlePath": "docs/articles/zh-cn/blog-onnx-parser-engine-roundtrip.md",
+      "canonicalArticleExists": true,
+      "beforeLineCount": 71,
+      "beforeCharacterCount": 2026,
+      "currentLineCount": 191,
+      "currentCharacterCount": 6574,
+      "characterGrowth": 4548,
+      "headingCount": 16,
+      "codeBlockCount": 7,
+      "mermaidDiagramCount": 2,
+      "contentState": "complete-article",
+      "contentComplete": true,
+      "requiredMarkers": [
+        "--previewOnly",
+        "--buildOnly",
+        "EngineFileRoundTrip=True",
+        "OutputMatch=True"
+      ],
+      "missingMarkers": [],
+      "requiredAnchors": [
+        "samples/OnnxToEngine/Program.cs",
+        "samples/OnnxToEngine/trtexec-parity-matrix.json",
+        "src/JYPPX.TensorRtSharp.Tools/TrtexecLikeParser.cs",
+        "src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildService.cs"
+      ],
+      "missingAnchors": [],
+      "repositoryReferences": [
+        "samples/OnnxToEngine",
+        "samples/Classification",
+        "samples/YoloVision",
+        "src/JYPPX.TensorRtSharp.Tools/TrtexecLikeParser.cs",
+        "src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildService.cs",
+        "samples/OnnxToEngine/trtexec-parity-matrix.json",
+        "src/JYPPX.TensorRtSharp.Tools/OnnxIdentityModel.cs"
+      ],
+      "missingRepositoryReferences": [],
+      "markdownLinks": [
+        "onnx-parser-to-serialized-engine-tutorial.md",
+        "onnx-to-engine-trtexec-conversion-guide.md",
+        "blog-inference-bindings-identity-network.md"
+      ],
+      "missingMarkdownLinks": [],
+      "forbiddenFindings": [],
+      "proofState": "not-required-for-content-closure",
+      "performsPublish": false,
+      "canPublishPublicly": false,
+      "canCloseReleaseIssue": false
+    },
+    {
+      "primaryArticleId": 41,
+      "roadmapEntryIds": [
+        41
+      ],
+      "title": "MultiStream CUDA Stream/Event 博客版",
+      "canonicalArticlePath": "docs/articles/zh-cn/blog-multistream-cuda-stream-event.md",
+      "canonicalArticleExists": true,
+      "beforeLineCount": 87,
+      "beforeCharacterCount": 2699,
+      "currentLineCount": 191,
+      "currentCharacterCount": 6237,
+      "characterGrowth": 3538,
+      "headingCount": 16,
+      "codeBlockCount": 8,
+      "mermaidDiagramCount": 2,
+      "contentState": "complete-article",
+      "contentComplete": true,
+      "requiredMarkers": [
+        "IndependentStreams=True",
+        "CrossStreamWait=True",
+        "CudaStreamCreationFlags.NonBlocking",
+        "WaitFor"
+      ],
+      "missingMarkers": [],
+      "requiredAnchors": [
+        "samples/MultiStream/Program.cs",
+        "src/JYPPX.CudaSharp/CudaStream.cs",
+        "src/JYPPX.CudaSharp/CudaEvent.cs"
+      ],
+      "missingAnchors": [],
+      "repositoryReferences": [
+        "samples/MultiStream",
+        "src/JYPPX.CudaSharp/CudaStream.cs",
+        "src/JYPPX.CudaSharp/CudaEvent.cs",
+        "src/JYPPX.CudaSharp/CudaMemory.cs",
+        "src/JYPPX.CudaSharp/CudaPinnedMemory.cs"
+      ],
+      "missingRepositoryReferences": [],
+      "markdownLinks": [
+        "cuda-stream-event-multistream-tutorial.md",
+        "blog-inference-bindings-identity-network.md",
+        "cuda-graph-capabilities-boundary.md"
+      ],
+      "missingMarkdownLinks": [],
+      "forbiddenFindings": [],
+      "proofState": "not-required-for-content-closure",
+      "performsPublish": false,
+      "canPublishPublicly": false,
+      "canCloseReleaseIssue": false
+    },
+    {
+      "primaryArticleId": 42,
+      "roadmapEntryIds": [
+        42
+      ],
+      "title": "Plugin Inventory 只读 API 博客版",
+      "canonicalArticlePath": "docs/articles/zh-cn/blog-plugin-inventory-readonly-api.md",
+      "canonicalArticleExists": true,
+      "beforeLineCount": 92,
+      "beforeCharacterCount": 2881,
+      "currentLineCount": 213,
+      "currentCharacterCount": 7253,
+      "characterGrowth": 4372,
+      "headingCount": 16,
+      "codeBlockCount": 8,
+      "mermaidDiagramCount": 2,
+      "contentState": "complete-article",
+      "contentComplete": true,
+      "requiredMarkers": [
+        "TryGetPluginRegistryInventory",
+        "FindCreator",
+        "CreatorFieldCollection",
+        "IPluginCreator*"
+      ],
+      "missingMarkers": [],
+      "requiredAnchors": [
+        "src/JYPPX.TensorRtSharp/TensorRtPluginRegistryInventory.cs",
+        "src/JYPPX.TensorRtSharp/TensorRtRuntime.PluginRegistryInventory.cs",
+        "src/JYPPX.TensorRtSharp/TensorRtBuilder.PluginRegistryInventory.cs",
+        "smoke/PluginRegistryInventorySmokeRunner/Program.cs"
+      ],
+      "missingAnchors": [],
+      "repositoryReferences": [
+        "src/JYPPX.TensorRtSharp/TensorRtPluginRegistryInventory.cs",
+        "src/JYPPX.TensorRtSharp/TensorRtRuntime.PluginRegistryInventory.cs",
+        "src/JYPPX.TensorRtSharp/TensorRtBuilder.PluginRegistryInventory.cs"
+      ],
+      "missingRepositoryReferences": [],
+      "markdownLinks": [
+        "plugin-inventory-readonly-api.md",
+        "plugin-serialization-paths.md",
+        "callback-allocator-safety-bridge-roadmap.md"
+      ],
+      "missingMarkdownLinks": [],
+      "forbiddenFindings": [],
+      "proofState": "not-required-for-content-closure",
+      "performsPublish": false,
+      "canPublishPublicly": false,
+      "canCloseReleaseIssue": false
+    },
+    {
+      "primaryArticleId": 43,
+      "roadmapEntryIds": [
+        43
+      ],
+      "title": "CUDA Memory Wrapper 博客版",
+      "canonicalArticlePath": "docs/articles/zh-cn/blog-cuda-memory-wrapper.md",
+      "canonicalArticleExists": true,
+      "beforeLineCount": 76,
+      "beforeCharacterCount": 2569,
+      "currentLineCount": 190,
+      "currentCharacterCount": 6903,
+      "characterGrowth": 4334,
+      "headingCount": 17,
+      "codeBlockCount": 7,
+      "mermaidDiagramCount": 2,
+      "contentState": "complete-article",
+      "contentComplete": true,
+      "requiredMarkers": [
+        "CudaPinnedMemory",
+        "PinnedAsyncRoundTrip=True",
+        "CudaManagedMemoryBatch",
+        "IGpuAllocator"
+      ],
+      "missingMarkers": [],
+      "requiredAnchors": [
+        "src/JYPPX.CudaSharp/CudaMemory.cs",
+        "src/JYPPX.CudaSharp/CudaPinnedMemory.cs",
+        "src/JYPPX.CudaSharp/CudaManagedMemoryBatch.cs",
+        "smoke/CudaSmokeRunner/Program.cs"
+      ],
+      "missingAnchors": [],
+      "repositoryReferences": [
+        "src/JYPPX.CudaSharp/CudaMemory.cs",
+        "src/JYPPX.CudaSharp/CudaPinnedMemory.cs",
+        "src/JYPPX.CudaSharp/CudaManagedMemory.cs",
+        "src/JYPPX.CudaSharp/CudaPitchedMemory.cs",
+        "smoke/CudaSmokeRunner/Program.cs",
+        "src/JYPPX.CudaSharp/CudaManagedMemoryBatch.cs",
+        "samples/MultiStream/Program.cs"
+      ],
+      "missingRepositoryReferences": [],
+      "markdownLinks": [
+        "cuda-memory-wrapper.md",
+        "cuda-memory-range-apis.md",
+        "blog-multistream-cuda-stream-event.md",
+        "blog-inference-bindings-identity-network.md"
+      ],
+      "missingMarkdownLinks": [],
+      "forbiddenFindings": [],
+      "proofState": "not-required-for-content-closure",
+      "performsPublish": false,
+      "canPublishPublicly": false,
+      "canCloseReleaseIssue": false
+    },
+    {
+      "primaryArticleId": 103,
+      "roadmapEntryIds": [
+        103
+      ],
+      "title": "Stream Capture To Graph owner-safe session",
+      "canonicalArticlePath": "docs/articles/zh-cn/cuda-stream-capture-to-graph-owner-safety.md",
+      "canonicalArticleExists": true,
+      "beforeLineCount": 56,
+      "beforeCharacterCount": 1929,
+      "currentLineCount": 246,
+      "currentCharacterCount": 8399,
+      "characterGrowth": 6470,
+      "headingCount": 16,
+      "codeBlockCount": 6,
+      "mermaidDiagramCount": 2,
+      "contentState": "complete-article",
+      "contentComplete": true,
+      "requiredMarkers": [
+        "CudaStreamCaptureToGraphSession",
+        "CUDART_VERSION >= 12030",
+        "implemented-with-deferred-history",
+        "ToGraph=True"
+      ],
+      "missingMarkers": [],
+      "requiredAnchors": [
+        "src/JYPPX.CudaSharp/CudaStreamCaptureToGraphSession.cs",
+        "src/JYPPX.CudaSharp/CudaStream.cs",
+        "native/manifests/cuda/cuda-fifty-seventh-batch-stream-capture-to-graph.manifest.json",
+        "artifacts/interface-coverage/cuda-stream-capture-to-graph-candidate-audit.md",
+        "smoke/CudaGraphSmokeRunner/Program.cs"
+      ],
+      "missingAnchors": [],
+      "repositoryReferences": [
+        "artifacts/interface-coverage/cuda-stream-capture-to-graph-candidate-audit.md",
+        "src/JYPPX.CudaSharp/CudaStream.cs",
+        "src/JYPPX.CudaSharp/CudaStreamCaptureToGraphSession.cs",
+        "native/manifests/cuda/cuda-fifty-seventh-batch-stream-capture-to-graph.manifest.json",
+        "native/manifests/cuda/cuda-thirty-fifth-batch-stream-device-boundaries.manifest.json",
+        "eng/Export-InterfaceCoverageMatrix.ps1"
+      ],
+      "missingRepositoryReferences": [],
+      "markdownLinks": [
+        "cuda-graph-capabilities-boundary.md",
+        "cuda-stream-event-multistream-tutorial.md",
+        "interface-zero-to-deferred-boundary.md"
+      ],
+      "missingMarkdownLinks": [],
+      "forbiddenFindings": [],
+      "proofState": "not-required-for-content-closure",
+      "performsPublish": false,
+      "canPublishPublicly": false,
+      "canCloseReleaseIssue": false
+    }
+  ]
+}

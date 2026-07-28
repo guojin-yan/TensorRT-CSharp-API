@@ -85,3 +85,106 @@ MultiStream=Skipped Reason=...
 ## CTA
 
 如果你准备把图像预处理和 TensorRT enqueue 做成异步流水线，建议先跑通 `MultiStream`，再接着跑 `InferenceBindings`。前者确认 stream/event，后者确认 execution context binding 和 enqueue。
+
+## Stream、Event 与 Memory 的 owner 关系
+
+`CudaStream` 和 `CudaEvent` 分别位于 `src/JYPPX.CudaSharp/CudaStream.cs`、
+`src/JYPPX.CudaSharp/CudaEvent.cs`；device/pinned owner 位于 `src/JYPPX.CudaSharp/CudaMemory.cs` 与
+`src/JYPPX.CudaSharp/CudaPinnedMemory.cs`。异步操作排队后，相关 stream、event、device memory 和 pinned host memory
+都必须保持存活，直到 event/stream 表明工作完成。
+
+```mermaid
+sequenceDiagram
+  participant A as streamA
+  participant E as orderingEvent
+  participant B as streamB
+  participant D as deviceA
+  participant H as pinnedHost
+  A->>D: FillAsync(0x33)
+  A->>E: Record()
+  B->>E: WaitFor()
+  B->>D: CopyToAsync(H)
+  B->>B: Synchronize()
+  H-->>B: all bytes == 0x33
+```
+
+`WaitFor` 把 event 之前的 producer 工作排在 consumer copy 之前，但不会阻塞 host。最后的 `streamB.Synchronize()`
+才让 host 安全检查 pinned memory。
+
+## 为什么两段测试缺一不可
+
+第一段分别在 streamA/streamB 上 fill、copy、record、event synchronize，验证两套 owner 没有串数据。
+第二段复用 deviceA，故意让 streamB 消费 streamA 的结果，验证跨 stream dependency。只有前者通过，可能只是两条独立队列；
+只有后者通过，也无法排除某条 stream 基础 copy 路径未覆盖。
+
+```csharp
+deviceA.FillAsync(0x33, ByteCount, streamA);
+orderingEvent.Record(streamA);
+streamB.WaitFor(orderingEvent);
+deviceA.CopyToAsync(orderedHost, ByteCount, streamB);
+streamB.Synchronize();
+```
+
+不要在 `Record` 前 dispose event，也不要在 consumer 完成前回收 device/pinned owner。
+
+## E 盘日志与重复运行
+
+```powershell
+$repo = "E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0"
+$case = "E:\TensorRtSharpAssets\cases\cuda-multistream"
+New-Item -ItemType Directory -Force -Path "$case\logs" | Out-Null
+Set-Location $repo
+
+dotnet build .\samples\MultiStream\MultiStream.csproj -c Debug --no-restore --nologo
+$env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "1"
+1..3 | ForEach-Object {
+  dotnet .\samples\MultiStream\bin\Debug\net8.0\MultiStream.dll `
+    2>&1 | Tee-Object "$case\logs\run-$_.log"
+  if ($LASTEXITCODE -ne 0) { throw "MultiStream run $_ failed" }
+}
+```
+
+重复运行用于发现释放顺序和偶发 ordering 问题，但三次本地 synthetic smoke 仍不等于 clean package runtime proof。
+
+## `StreamIds` 只是诊断增强
+
+某些 CUDA runtime 支持查询 stream id，样例通过 `TryGetStreamId` 输出值；若该查询不支持，核心 fill/copy/event 仍可能
+正常。验收应以 `IndependentStreams`、`CrossStreamWait` 和最终 byte comparison 为主，不把 stream id 可用性作为所有
+CUDA line 的硬要求。
+
+## 放进 TensorRT pipeline 时
+
+推荐把阶段和 event 明确命名：
+
+1. copy stream：pinned host 到 input device。
+2. preprocess stream：CUDA kernel 生成模型输入。
+3. inference stream：等待 preprocess event 后调用 context enqueue。
+4. postprocess stream：等待 inference event，再读取/处理 output。
+5. readback stream：必要时复制结果到 pinned host。
+
+每个 execution context 的并发规则必须遵循 TensorRT 契约，不能让多个 stream 无保护地同时修改同一个 context。buffer
+复用也要等待上一轮 consumer 完成。
+
+## 排障表
+
+| 现象 | 检查 |
+| --- | --- |
+| `IndependentStreams=False` | fill byte count、pinned buffer、各自 event |
+| `CrossStreamWait=False` | event record 顺序、wait 所在 stream、最终 synchronize |
+| invalid resource handle | owner 是否提前 dispose、runtime 是否一致 |
+| host 数据偶发错误 | pinned memory 生命周期、遗漏同步、并发复用 |
+| `Skipped=True` | device count、driver/runtime、bridge search path |
+
+默认 stream 与 non-blocking stream 的隐式同步规则容易掩盖错误。本文样例明确使用
+`CudaStreamCreationFlags.NonBlocking`，让 ordering 只由 event 表达。
+
+## Evidence 与边界
+
+合格日志应含 build info、device count、stream flags、byte count、两类 boolean、退出码和原始诊断。若迁移到 TensorRT，
+还要附 engine/input/output hash、binding readiness 和 context enqueue 结果。
+
+本文不证明完整异步推理服务、CUDA Graph、allocator callback 或 package consumer runtime。保持
+`performsPublish=false`、`canPublishPublicly=false`、`canCloseReleaseIssue=false`。
+
+继续阅读：[CUDA Stream/Event 详细教程](cuda-stream-event-multistream-tutorial.md)、
+[InferenceBindings 博客版](blog-inference-bindings-identity-network.md) 与 [CUDA Graph 边界](cuda-graph-capabilities-boundary.md)。

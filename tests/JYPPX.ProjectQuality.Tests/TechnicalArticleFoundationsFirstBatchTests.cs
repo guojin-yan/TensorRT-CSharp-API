@@ -240,13 +240,12 @@ public sealed class TechnicalArticleFoundationsFirstBatchTests
         }
 
         JsonElement ledger = ReadJsonRoot(SourcePath("docs", "articles", "zh-cn", "publishing", "technical-article-closure-ledger.json"));
-        Assert.Equal(89, ledger.GetProperty("contentCompleteCount").GetInt32());
-        Assert.Equal(14, ledger.GetProperty("needsExpansionCount").GetInt32());
-        Assert.Equal(
-            new[] { 28, 29, 30, 31, 32, 38, 39, 40, 41, 42, 43, 44, 45, 103 },
+        Assert.True(ledger.GetProperty("contentCompleteCount").GetInt32() >= 89);
+        Assert.Equal(0, ledger.GetProperty("needsExpansionCount").GetInt32());
+        Assert.Empty(
             ledger.GetProperty("articles").EnumerateArray()
-                .Where(static item => item.GetProperty("contentState").GetString() == "needs-expansion")
-                .Select(static item => item.GetProperty("articleId").GetInt32()));
+                .Where(static item => new[] { 2, 3, 4, 5, 6, 10, 15, 16, 19 }.Contains(item.GetProperty("articleId").GetInt32()))
+                .Where(static item => item.GetProperty("contentState").GetString() == "needs-expansion"));
     }
 
     private static JsonElement ReadJsonRoot(string path)

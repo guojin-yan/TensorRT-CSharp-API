@@ -1,5 +1,47 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-28 Technical Article Foundations Final Batch
+
+本阶段一次性收口 technical article roadmap 剩余 14 条（28-32、38-45、103）。其中 28/44 和 30/45
+分别共享 canonical article，因此实际扩写 12 篇唯一正文；共享关系在 Second-Batch audit 中显式核对，
+没有复制正文或伪造新的 canonical mapping。正文完成只代表 source-quality closure，不替代真实 runtime、
+package consumer、callback、Linux、real-model、post-publish 或 owner authorization 证明。
+
+### 12 篇唯一正文与路线图收口
+
+- 扩写 `blog-refit-weights-guide.md`、`trt11-modern-layers-guide.md`、
+  `blog-network-layer-coverage-guide.md`、`error-recorder-diagnostics-design-gate.md`、
+  `managed-logger-profiler-progress-monitor.md`、`blog-dynamic-shape-optimization-profile.md`、
+  `blog-inference-bindings-identity-network.md`、`blog-onnx-parser-engine-roundtrip.md`、
+  `blog-multistream-cuda-stream-event.md`、`blog-plugin-inventory-readonly-api.md`、
+  `blog-cuda-memory-wrapper.md` 和 `cuda-stream-capture-to-graph-owner-safety.md`。
+- 每篇补齐问题背景、Mermaid 架构图、真实仓库路径、关键代码解释、E 盘命令、输出解读、排障、
+  ownership/version guard、proof boundary 和后续阅读；TRT11 Dims64/可选能力、managed callback
+  invocation 边界、plugin metadata-only 复制和 CUDA stream capture owner safety 均保持原有冻结约束。
+- 新增 `Export-TechnicalArticleFoundationsSecondBatchAudit.ps1`、JSON/Markdown audit 和
+  `TechnicalArticleFoundationsSecondBatchTests`；审计按 14 个 roadmap entry / 12 个 unique canonical 分开计数。
+
+### Ledger、质量门与导航
+
+- closure ledger 重新导出为 103/103 `contentComplete`、0 `needsExpansion`；外部 proof dependency
+  仍为 42 条 owner/runtime proof required，内容完成没有反向晋级 proof 状态。
+- Second-Batch audit：14/14 roadmap entries、12/12 unique canonical、missing reference/link/forbidden
+  全为 0；28/44、30/45 共享映射均被显式记录。closure ledger、First-Batch audit、Second-Batch audit
+  连续两次运行 SHA256 均保持一致。
+- 本批专项测试 7/7 通过；完整 `TensorRtSharp.sln` Debug build 0 warning / 0 error；stale release
+  claims audit 扫描 1127 个文件、0 findings；`git diff --check` 通过。
+- 全量 `dotnet test` 的一次复核被既有 final release evidence exporter 测试在 180 秒内拖住，未将该次
+  超时计作通过；本批新增/修改文章专项测试独立通过，超时测试树已精确终止，未终止其他会话进程。
+
+### C 盘与发布边界
+
+- `C:\Users\guoji\Downloads` 今日无新增项目文件；用户 Temp 今日命中的是 Excel 跟踪文件和系统/第三方
+  下载日志，不是本批生成物。没有发现 TensorRT、CUDA、cuDNN、ONNX、model、engine、plan、SDK、nupkg、
+  zip 或 7z 等本批重资产，因此没有删除不明归属的 C 盘文件。
+- 本批 exporter、build 和测试的正式输出均位于 E 盘仓库；未向 C 盘下载模型、engine、SDK、包或其他重资产。
+- 未执行 push、GitHub Actions、workflow dispatch、NuGet/GitHub Packages/GitHub Release 发布或 issue close。
+  `performsPublish=false`、`canPublishPublicly=false`、`canCloseReleaseIssue=false` 保持不变。
+
 ## 2026-07-28 Technical Article Foundations First Batch
 
 本阶段一次性完成技术文章路线图第一组 9 条（2-6、10、15-16、19）的正文扩写，围绕 stable C ABI、

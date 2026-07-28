@@ -4,9 +4,9 @@
 
 - Audit state: `content-expanded-source-quality-audited`
 - Articles: 9/9; batch content complete: 9/9
-- Before/current characters: 22031 / 94705; growth: 72674
+- Before/current characters: 22031 / 95775; growth: 73744
 - Complete long-form/article: 2 / 7
-- Headings/code blocks/Mermaid diagrams: 239 / 104 / 17
+- Headings/code blocks/Mermaid diagrams: 245 / 104 / 17
 - Missing markers/anchors/repository references/Markdown links: 0 / 0 / 0 / 0
 - Forbidden findings: 0
 - Expected roadmap delta after closure-ledger export: content complete 80 -> 89; needs expansion 23 -> 14
@@ -22,7 +22,7 @@
 | 6 | `docs/articles/zh-cn/runtime-package-selection.md` | 2922 | 10071 | 7149 | `complete-article` | 29 | 12 | 2 | 5 | 4 | 0 |
 | 10 | `docs/articles/zh-cn/tensorrt-object-model.md` | 1031 | 11230 | 10199 | `complete-article` | 30 | 17 | 2 | 4 | 4 | 0 |
 | 15 | `docs/articles/zh-cn/plugin-serialization-paths.md` | 2304 | 10641 | 8337 | `complete-article` | 25 | 8 | 2 | 11 | 4 | 0 |
-| 16 | `docs/articles/zh-cn/cuda-memory-wrapper.md` | 1938 | 12371 | 10433 | `complete-long-form` | 33 | 18 | 2 | 4 | 4 | 0 |
+| 16 | `docs/articles/zh-cn/cuda-memory-wrapper.md` | 1938 | 13441 | 11503 | `complete-long-form` | 39 | 18 | 2 | 5 | 4 | 0 |
 | 19 | `docs/articles/zh-cn/cuda-memory-range-apis.md` | 697 | 12849 | 12152 | `complete-long-form` | 29 | 16 | 2 | 12 | 4 | 0 |
 
 ## Shared Acceptance Rules

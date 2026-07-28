@@ -5,13 +5,13 @@
 - record kind: `technical-article-closure-ledger`
 - ledger state: `content-closure-audited-release-frozen`
 - source roadmap: `docs/articles/zh-cn/technical-article-roadmap.md`
-- source roadmap SHA256: `439ec6e3e4de40a5f09080d186805896ddeb80ec589001bc600ca5871bf70c94`
+- source roadmap SHA256: `3b49db0a8d60eaa42b2f81c45b4dd45046c13face3770275a2076ba9f49ded61`
 - article count: `103`
 - supplemental article count: `1`
-- content complete count: `89`
+- content complete count: `103`
 - complete long-form count: `18`
 - canonical covered count: `10`
-- needs expansion count: `14`
+- needs expansion count: `0`
 - owner/runtime proof required count: `42`
 - external dependency required count: `56`
 - target forbidden marker count: `0`
@@ -46,7 +46,7 @@ Content closure, canonical mapping, article length, code-path references, and va
 | 13 | 接口体系 | ONNX Parser 到 Serialized Engine | `complete-article` | `not-required-for-content-closure` | 13 | `docs/articles/zh-cn/onnx-parser-to-serialized-engine-tutorial.md` | 4952 | source-quality-only |
 | 14 | 接口体系 | Plugin Inventory 只读 API | `complete-article` | `not-required-for-content-closure` | 14 | `docs/articles/zh-cn/plugin-inventory-readonly-api.md` | 8351 | source-quality-only |
 | 15 | 接口体系 | Plugin Serialization Paths | `complete-article` | `not-required-for-content-closure` | 15 | `docs/articles/zh-cn/plugin-serialization-paths.md` | 10641 | source-quality-only |
-| 16 | CUDA | CUDA memory wrapper 入门 | `complete-long-form` | `not-required-for-content-closure` | 16 | `docs/articles/zh-cn/cuda-memory-wrapper.md` | 12371 | source-quality-only |
+| 16 | CUDA | CUDA memory wrapper 入门 | `complete-long-form` | `not-required-for-content-closure` | 16 | `docs/articles/zh-cn/cuda-memory-wrapper.md` | 13441 | source-quality-only |
 | 17 | CUDA | CUDA stream/event 与跨 stream 同步 | `complete-article` | `not-required-for-content-closure` | 17 | `docs/articles/zh-cn/cuda-stream-event-multistream-tutorial.md` | 4725 | source-quality-only |
 | 18 | CUDA | CUDA Graph 当前能力与边界 | `complete-article` | `not-required-for-content-closure` | 18 | `docs/articles/zh-cn/cuda-graph-capabilities-boundary.md` | 4711 | source-quality-only |
 | 19 | CUDA | CUDA memory range APIs | `complete-long-form` | `not-required-for-content-closure` | 19 | `docs/articles/zh-cn/cuda-memory-range-apis.md` | 12849 | source-quality-only |
@@ -58,24 +58,24 @@ Content closure, canonical mapping, article length, code-path references, and va
 | 25 | 案例教程 | YOLO 检测部署教程 | `canonical-covered` | `external-model-asset-required-not-runtime-proof` | 74 | `docs/articles/zh-cn/yolovision-detection-tutorial.md` | 13930 | external-model-asset |
 | 26 | 案例教程 | YOLO 输出布局排查 | `canonical-covered` | `external-model-asset-required-not-runtime-proof` | 74 | `docs/articles/zh-cn/yolovision-detection-tutorial.md` | 13930 | external-model-asset |
 | 27 | 案例教程 | 多 stream 预处理管线雏形 | `complete-article` | `not-required-for-content-closure` | 27 | `docs/articles/zh-cn/cuda-stream-event-multistream-tutorial.md` | 4725 | source-quality-only |
-| 28 | 案例教程 | Refit weights 使用场景 | `needs-expansion` | `not-required-for-content-closure` | 28 | `docs/articles/zh-cn/blog-refit-weights-guide.md` | 3173 | source-quality-only |
-| 29 | 高级主题 | TensorRT 11 modern layers | `needs-expansion` | `not-required-for-content-closure` | 29 | `docs/articles/zh-cn/trt11-modern-layers-guide.md` | 736 | source-quality-only |
-| 30 | 高级主题 | Network layer coverage 导览 | `needs-expansion` | `not-required-for-content-closure` | 30 | `docs/articles/zh-cn/blog-network-layer-coverage-guide.md` | 2684 | source-quality-only |
-| 31 | 高级主题 | ErrorRecorder snapshot 与诊断 | `needs-expansion` | `not-required-for-content-closure` | 31 | `docs/articles/zh-cn/error-recorder-diagnostics-design-gate.md` | 3213 | source-quality-only |
-| 32 | 高级主题 | Managed logger/profiler/progress monitor | `needs-expansion` | `not-required-for-content-closure` | 32 | `docs/articles/zh-cn/managed-logger-profiler-progress-monitor.md` | 689 | source-quality-only |
+| 28 | 案例教程 | Refit weights 使用场景 | `complete-article` | `not-required-for-content-closure` | 28 | `docs/articles/zh-cn/blog-refit-weights-guide.md` | 7570 | source-quality-only |
+| 29 | 高级主题 | TensorRT 11 modern layers | `complete-article` | `not-required-for-content-closure` | 29 | `docs/articles/zh-cn/trt11-modern-layers-guide.md` | 6385 | source-quality-only |
+| 30 | 高级主题 | Network layer coverage 导览 | `complete-article` | `not-required-for-content-closure` | 30 | `docs/articles/zh-cn/blog-network-layer-coverage-guide.md` | 7918 | source-quality-only |
+| 31 | 高级主题 | ErrorRecorder snapshot 与诊断 | `complete-article` | `not-required-for-content-closure` | 31 | `docs/articles/zh-cn/error-recorder-diagnostics-design-gate.md` | 8288 | source-quality-only |
+| 32 | 高级主题 | Managed logger/profiler/progress monitor | `complete-article` | `not-required-for-content-closure` | 32 | `docs/articles/zh-cn/managed-logger-profiler-progress-monitor.md` | 7313 | source-quality-only |
 | 33 | 边界专题 | Allocator owner ledger safety gate | `complete-operational-guide` | `not-required-for-content-closure` | 33 | `docs/articles/zh-cn/allocator-owner-ledger-safety-gate.md` | 3409 | source-quality-only |
 | 34 | 边界专题 | OutputAllocator 与 DebugListener 当前边界 | `canonical-covered` | `callback-runtime-proof-required` | 79 | `docs/articles/zh-cn/callback-allocator-safety-bridge-roadmap.md` | 19526 | real-callback-runtime |
 | 35 | 边界专题 | Real callback runtime proof 准入条件 | `complete-long-form` | `callback-runtime-proof-required` | 35 | `docs/articles/zh-cn/real-callback-runtime-evidence-schema.md` | 37912 | real-callback-runtime |
 | 36 | 发布排障 | 常见问题排查总表 | `complete-operational-guide` | `not-required-for-content-closure` | 36 | `docs/articles/zh-cn/troubleshooting-index.md` | 4450 | source-quality-only |
 | 37 | 发布证据 | Linux Runner Evidence 回填指南 | `complete-article` | `linux-runner-proof-required` | 37 | `docs/articles/zh-cn/blog-linux-runner-evidence-guide.md` | 5798 | linux-runner-proof |
-| 38 | 样例博客 | Dynamic Shape 博客版 | `needs-expansion` | `not-required-for-content-closure` | 38 | `docs/articles/zh-cn/blog-dynamic-shape-optimization-profile.md` | 2191 | source-quality-only |
-| 39 | 样例博客 | InferenceBindings Identity Network 博客版 | `needs-expansion` | `not-required-for-content-closure` | 39 | `docs/articles/zh-cn/blog-inference-bindings-identity-network.md` | 2156 | source-quality-only |
-| 40 | 样例博客 | ONNX Parser Engine RoundTrip 博客版 | `needs-expansion` | `not-required-for-content-closure` | 40 | `docs/articles/zh-cn/blog-onnx-parser-engine-roundtrip.md` | 2026 | source-quality-only |
-| 41 | 样例博客 | MultiStream CUDA Stream/Event 博客版 | `needs-expansion` | `not-required-for-content-closure` | 41 | `docs/articles/zh-cn/blog-multistream-cuda-stream-event.md` | 2699 | source-quality-only |
-| 42 | 接口博客 | Plugin Inventory 只读 API 博客版 | `needs-expansion` | `not-required-for-content-closure` | 42 | `docs/articles/zh-cn/blog-plugin-inventory-readonly-api.md` | 2881 | source-quality-only |
-| 43 | CUDA 博客 | CUDA Memory Wrapper 博客版 | `needs-expansion` | `not-required-for-content-closure` | 43 | `docs/articles/zh-cn/blog-cuda-memory-wrapper.md` | 2569 | source-quality-only |
-| 44 | 高级博客 | Refit Weights 博客版 | `needs-expansion` | `not-required-for-content-closure` | 44 | `docs/articles/zh-cn/blog-refit-weights-guide.md` | 3173 | source-quality-only |
-| 45 | 覆盖博客 | Network Layer Coverage 博客版 | `needs-expansion` | `not-required-for-content-closure` | 45 | `docs/articles/zh-cn/blog-network-layer-coverage-guide.md` | 2684 | source-quality-only |
+| 38 | 样例博客 | Dynamic Shape 博客版 | `complete-article` | `not-required-for-content-closure` | 38 | `docs/articles/zh-cn/blog-dynamic-shape-optimization-profile.md` | 6406 | source-quality-only |
+| 39 | 样例博客 | InferenceBindings Identity Network 博客版 | `complete-article` | `not-required-for-content-closure` | 39 | `docs/articles/zh-cn/blog-inference-bindings-identity-network.md` | 7060 | source-quality-only |
+| 40 | 样例博客 | ONNX Parser Engine RoundTrip 博客版 | `complete-article` | `not-required-for-content-closure` | 40 | `docs/articles/zh-cn/blog-onnx-parser-engine-roundtrip.md` | 6574 | source-quality-only |
+| 41 | 样例博客 | MultiStream CUDA Stream/Event 博客版 | `complete-article` | `not-required-for-content-closure` | 41 | `docs/articles/zh-cn/blog-multistream-cuda-stream-event.md` | 6237 | source-quality-only |
+| 42 | 接口博客 | Plugin Inventory 只读 API 博客版 | `complete-article` | `not-required-for-content-closure` | 42 | `docs/articles/zh-cn/blog-plugin-inventory-readonly-api.md` | 7253 | source-quality-only |
+| 43 | CUDA 博客 | CUDA Memory Wrapper 博客版 | `complete-article` | `not-required-for-content-closure` | 43 | `docs/articles/zh-cn/blog-cuda-memory-wrapper.md` | 6903 | source-quality-only |
+| 44 | 高级博客 | Refit Weights 博客版 | `complete-article` | `not-required-for-content-closure` | 44 | `docs/articles/zh-cn/blog-refit-weights-guide.md` | 7570 | source-quality-only |
+| 45 | 覆盖博客 | Network Layer Coverage 博客版 | `complete-article` | `not-required-for-content-closure` | 45 | `docs/articles/zh-cn/blog-network-layer-coverage-guide.md` | 7918 | source-quality-only |
 | 46 | 应用教程 | TensorRtExec 工具入门 | `complete-article` | `external-model-asset-required-not-runtime-proof` | 46 | `docs/articles/zh-cn/tensorrtexec-tool-getting-started.md` | 5479 | external-model-asset |
 | 47 | 样例教程 | YOLO 全系列配置底座 | `complete-article` | `external-model-asset-required-not-runtime-proof` | 47 | `docs/articles/zh-cn/yolo-family-profile-and-postprocess-guide.md` | 10837 | external-model-asset |
 | 48 | 案例教程 | YoloVision 真实资产接入 | `complete-article` | `real-model-owner-assets-required` | 48 | `docs/articles/zh-cn/yolovision-real-asset-walkthrough.md` | 8392 | real-model-runtime |
@@ -122,7 +122,7 @@ Content closure, canonical mapping, article length, code-path references, and va
 | 89 | 宣发素材 | 项目对外介绍与发布边界素材包 | `complete-long-form` | `multiple-owner-or-runtime-proofs-required` | 89 | `docs/articles/zh-cn/project-release-story-and-boundaries.md` | 15423 | post-publish-verification, package-consumer-runtime |
 | 90 | Owner Backlog | Release Owner Proof Backlog | `complete-article` | `multiple-owner-or-runtime-proofs-required` | 90 | `docs/articles/zh-cn/release-owner-handoff.md` | 5719 | post-publish-verification, package-consumer-runtime, linux-runner-proof, real-model-runtime, owner-authorization |
 | 91 | 发布边界 | Release Proof 不可替代清单 | `complete-article` | `not-required-for-content-closure` | 91 | `docs/articles/zh-cn/release-proof-non-substitutes.md` | 5289 | source-quality-only |
-| 92 | 发布索引 | 发布文章索引与推荐发布顺序 | `complete-long-form` | `not-required-for-content-closure` | 92 | `docs/articles/zh-cn/technical-article-roadmap.md` | 34219 | source-quality-only |
+| 92 | 发布索引 | 发布文章索引与推荐发布顺序 | `complete-long-form` | `not-required-for-content-closure` | 92 | `docs/articles/zh-cn/technical-article-roadmap.md` | 34239 | source-quality-only |
 | 93 | README 门面 | README 前台入口检查清单 | `complete-operational-guide` | `package-consumer-owner-proof-required` | 93 | `docs/articles/zh-cn/release-readme-frontpage-checklist.md` | 3075 | package-consumer-runtime |
 | 94 | Owner 顺序 | Release Owner 最后一公里执行顺序 | `complete-article` | `multiple-owner-or-runtime-proofs-required` | 94 | `docs/articles/zh-cn/release-final-owner-action-sequence.md` | 10626 | post-publish-verification, package-consumer-runtime, linux-runner-proof, real-model-runtime, owner-authorization |
 | 95 | 最终总检 | README 前台与 Proof Boundary 最终审计 | `complete-operational-guide` | `multiple-owner-or-runtime-proofs-required` | 95 | `docs/articles/zh-cn/release-frontpage-and-proof-boundary-final-audit.md` | 4474 | post-publish-verification, package-consumer-runtime, real-model-runtime |
@@ -133,4 +133,4 @@ Content closure, canonical mapping, article length, code-path references, and va
 | 100 | Owner 清单 | Release Owner Action Checklist Final Hold | `complete-article` | `multiple-owner-or-runtime-proofs-required` | 100 | `docs/articles/zh-cn/release-owner-action-checklist-final-hold.md` | 10829 | post-publish-verification, package-consumer-runtime, linux-runner-proof, real-model-runtime, owner-authorization |
 | 101 | 最终巡检 | Release Hold Final Inspection | `complete-article` | `not-required-for-content-closure` | 101 | `docs/articles/zh-cn/release-hold-final-inspection.md` | 7282 | source-quality-only |
 | 102 | Release close | Release Issue Close Record 最终关闭门禁 | `complete-article` | `post-publish-owner-proof-required` | 102 | `docs/articles/zh-cn/release-final-owner-action-sequence.md` | 10626 | post-publish-verification |
-| 103 | CUDA 安全边界 | Stream Capture To Graph 的 owner-safe session | `needs-expansion` | `not-required-for-content-closure` | 103 | `docs/articles/zh-cn/cuda-stream-capture-to-graph-owner-safety.md` | 1929 | source-quality-only |
+| 103 | CUDA 安全边界 | Stream Capture To Graph 的 owner-safe session | `complete-article` | `not-required-for-content-closure` | 103 | `docs/articles/zh-cn/cuda-stream-capture-to-graph-owner-safety.md` | 8399 | source-quality-only |
