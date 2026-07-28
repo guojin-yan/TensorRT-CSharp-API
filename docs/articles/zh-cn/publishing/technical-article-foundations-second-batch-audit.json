@@ -3,7 +3,7 @@
   "recordKind": "technical-article-foundations-second-batch-audit",
   "auditState": "content-expanded-source-quality-audited",
   "sourceClosureLedger": "docs/articles/zh-cn/publishing/technical-article-closure-ledger.json",
-  "sourceClosureLedgerSha256": "ae363af82d22af4edaf41bc223628f0977ceb152e28fec32493f14757af0ea3c",
+  "sourceClosureLedgerSha256": "37657b07b96ef43d8d8f2d748da065f61f2271ef1876acf1c4dfad067299c2e3",
   "roadmapEntryIds": [
     28,
     29,

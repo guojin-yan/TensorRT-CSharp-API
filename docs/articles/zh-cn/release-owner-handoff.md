@@ -18,6 +18,12 @@
 6. 阅读 `docs/articles/zh-cn/stale-claim-prepublish-audit.md`，避免在 README、博客、release note 或 issue 中写出越级宣传。
 7. 使用 `artifacts/final-release/owner-action-required.md` 作为执行清单，逐项补齐缺口。
 
+机器可复算的文章 proof 台账位于 `docs/articles/zh-cn/publishing/technical-article-proof-backlog.md`，
+对应 JSON 是 `docs/articles/zh-cn/publishing/technical-article-proof-backlog.json`。它把 closure ledger
+中的 42 篇未完成 proof 文章投影到 callback、Linux、owner authorization、package consumer、post-publish
+和 real-model 六条 lane，并列出真实输入、首条 handoff 命令、严格 validator、期望工件和不可替代项。
+该台账是 owner backlog，不是 runtime proof，也不会提升任何 promotion flag。
+
 `owner-release-execution-package` 的一屏 Release Hold 清单只收敛 owner 操作入口，不能替代 owner authorization、`package-consumer-runtime`、Linux runner proof、`real-model-runtime` 或 `post-publish verification` 的真实记录；在真实 proof 缺失时，`canCloseReleaseIssue=false` 必须保持不变。
 
 ## 当前可接受的真实 Proof

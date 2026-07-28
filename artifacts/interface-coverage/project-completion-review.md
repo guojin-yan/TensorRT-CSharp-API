@@ -1,5 +1,30 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-28 Release Blocker And Owner Proof Backlog
+
+本阶段不伪造外部 runtime 或发布证据，集中把 closure ledger 的 42 条未完成 proof 投影成可执行、可复算、
+可交接的单一 backlog。新增 `eng/Export-TechnicalArticleProofBacklog.ps1` 和
+`TechnicalArticleProofBacklogTests`，输出 `docs/articles/zh-cn/publishing/technical-article-proof-backlog.json`
+与 Markdown 台账，并将入口接入 README、docs index、toc 和 [Release Owner Handoff](../../docs/articles/zh-cn/release-owner-handoff.md)。
+
+### Backlog Projection
+
+- 文章 proof rows：42；proof lane 关系：89；唯一 lane：6。
+- lane 分布：callback-runtime 4、linux-runner 9、owner-authorization 7、package-consumer-runtime 21、
+  post-publish-verification 20、real-model-runtime 28；多 lane 文章按关系计数，不重复虚构文章。
+- 每条 lane/文章保留当前 blocker、真实输入、首条 handoff 命令、严格 validator、期望工件和不可替代项；
+  模板、draft、runbook、local feed、ProjectReference、direct nupkg、build-only、dependency probe、
+  `Skipped=True`、blocked-by-cuda-driver 和 synthetic runtime 均不会提升 proof。
+- 当前 `blockedArticleCount=42`、`readyArticleCount=0`；`canPromoteRuntimeProof=false`、
+  `canPublishPublicly=false`、`canCloseReleaseIssue=false`、`performsPublish=false`。
+
+### Verification
+
+- backlog 专项：2/2；与 closure ledger、first/second batch audit 合并的文章专项：12/12。
+- 完整 `TensorRtSharp.sln` Debug build：0 warning / 0 error。
+- backlog JSON/Markdown 连续导出 SHA256 稳定；stale release claims：1130 files scanned / 0 findings。
+- `TestResults` 无残留；未触发发布、未 push、未使用 GitHub Actions，也未向 C 盘下载重资产。
+
 ## 2026-07-28 Technical Article Foundations Final Batch
 
 本阶段一次性收口 technical article roadmap 剩余 14 条（28-32、38-45、103）。其中 28/44 和 30/45

@@ -127,6 +127,7 @@ Chinese articles:
 - [Technical Article Closure Ledger](articles/zh-cn/publishing/technical-article-closure-ledger.md)
 - [Technical Article Foundations First Batch Audit](articles/zh-cn/publishing/technical-article-foundations-first-batch-audit.md)
 - [Technical Article Foundations Second Batch Audit](articles/zh-cn/publishing/technical-article-foundations-second-batch-audit.md)
+- [Technical Article Proof Backlog](articles/zh-cn/publishing/technical-article-proof-backlog.md)
 - [Blog Package Consumer Evidence Chain](articles/zh-cn/blog-package-consumer-evidence-chain.md)
 - [Runtime Package Selection](articles/zh-cn/runtime-package-selection.md)
 - [Runtime Package Matrix Reading Guide](articles/zh-cn/runtime-package-matrix-reading-guide.md)
