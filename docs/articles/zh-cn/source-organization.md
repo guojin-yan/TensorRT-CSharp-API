@@ -60,8 +60,8 @@ TensorRT 高层 wrapper 也开始按 layer feature 拆分：
   allocation-strategy、deployment metadata、Dims64、diagnostics 与 allocator/event presence controls。
 - `Internal/Interop/Inference`：同步 execute/enqueue 操作；`Weights`：复制型 layer-weight metadata。
 - `Internal/Interop/Layers`：quantization、attention、fill-int64、兼容/部署型 layer attributes、Dims64、tensor metadata、
-  transformer 与 RNNv2 操作；`Network`：network boundary controls、部署型 network layer 创建、tensor/network Dims64、
-  debug/shape diagnostics、refittable-weight 标记与 safe network-v2 操作。
+  transformer 与 RNNv2 操作；`Network`：core definition input/output/name/flags、network boundary controls、部署型 network
+  layer 创建、tensor/network Dims64、debug/shape diagnostics、refittable-weight 标记与 safe network-v2 操作。
 - `Internal/Interop/Parsing`：global ONNX parser version、parser lifecycle/input/diagnostics/flags、legacy parser diagnostics、
   ONNX config/model buffer/support、builder-config attachment、layer-output metadata、weight-descriptor parsing、
   parser-refitter diagnostics 与共用复制字符串 helper。
@@ -112,6 +112,9 @@ Network/Tensor/Layer name helper 在其消费方法迁移前继续保留根文�
 跨版本 line-binding delegate、私有 bindings class 与版本路由已移入 helper-only Runtime partial；六个 environment-probe
 操作及 minimal build-chain helper 已移入 Diagnostics。生成的 bindings/helper 仍消费同一 partial 私有类型，按原顺序
 重组后必须恢复拆分前根文件 blob。
+根文件的 Network definition core 已移入 `Network/NativeBridgeApi.NetworkCore.cs`，包含 input/output ownership、layer
+lookup、name/flags metadata 与专属 name getter。Layer creation 从 `AddIdentityLayer` 开始，留待后续按 feature 拆分；
+Tensor/Layer name 与 optional-weight helper 也继续随当前消费方法保留。
 
 生成文件继续保留在各自 `Generated` 文件夹下，不手工拆分。若需要调整生成文件布局，必须通过 generator 本身完成，并通过生成器确定性门禁。
 

@@ -71,8 +71,8 @@ Hand-written TensorRT partial interop now starts following the same responsibili
   allocation-strategy, deployment metadata, Dims64, diagnostics, and allocator/event presence controls.
 - `Internal/Interop/Inference` contains synchronous execute/enqueue operations; `Weights` contains copied layer-weight metadata.
 - `Internal/Interop/Layers` contains quantization, attention, fill-int64, compatibility/deployment layer attributes, Dims64,
-  tensor metadata, transformer, and RNNv2 operations; `Network` contains network boundary controls, deployment network-layer
-  creation, tensor/network Dims64, debug/shape diagnostics, refittable-weight markers, and safe network-v2 operations.
+  tensor metadata, transformer, and RNNv2 operations; `Network` contains core definition input/output/name/flags, boundary controls,
+  deployment network-layer creation, tensor/network Dims64, debug/shape diagnostics, refittable-weight markers, and safe network-v2 operations.
 - `Internal/Interop/Parsing` contains the global ONNX parser version, parser lifecycle/input/diagnostics/flags, legacy parser
   diagnostics, ONNX config/model-buffer/support, builder-config attachment, layer-output metadata, weight-descriptor parsing,
   parser-refitter diagnostics, and shared copied-string helpers.
@@ -125,6 +125,9 @@ Network/Tensor/Layer name helpers remain in the root until their consuming metho
 Cross-version line-binding delegates, the private bindings class, and version routing move from the root into a helper-only Runtime
 partial; six environment-probe operations and their minimal build-chain helpers move into Diagnostics. Generated bindings/helpers
 continue consuming the same private partial type, and original-order recombination must reproduce the prior root blob.
+The root Network definition core moves to `Network/NativeBridgeApi.NetworkCore.cs`, including input/output ownership, layer lookup,
+name/flags metadata, and its private name getter. Layer creation begins with `AddIdentityLayer` and remains in the root for later
+feature splits; Tensor/Layer name and optional-weight helpers likewise remain with their current consumers.
 
 Generated files remain under their `Generated` folders and should not be manually split. Generator output layout changes must happen in the generator itself and must pass the deterministic generator gate.
 

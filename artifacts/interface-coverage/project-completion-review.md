@@ -5939,3 +5939,34 @@ helper-only partial；六个 `Try*` probe 与两个执行 helper 只服务 envir
   post-publish、Owner acceptance 或 release proof。
 - C 盘 Downloads 顶层本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
 - 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 TensorRT Root Network Definition Core Partial Split
+
+本阶段从根 `NativeBridgeApi.cs` 提取基础 Network definition core，包括 input/output ownership、layer lookup、network
+name、creation flags 与 implicit-batch metadata。`GetNetworkNameNative` 只由 core name getter 使用，因此随 Network
+移动；`AddIdentityLayer` 起始的 layer feature、Tensor/Layer name helper 与 optional-weight helper 保留待后续小批拆分。
+本批没有改动 SafeHandle 返回、Dims 转换、UTF-8 allocator、版本分支、entrypoint 或异常文案。
+
+### 实现与门禁
+
+- `Network/NativeBridgeApi.NetworkCore.cs`：263 行、14 个 input/output/layer/name/flags 方法与 1 个专属 UTF-8 name
+  getter helper。
+- 根 `NativeBridgeApi.cs` 从 3,649 行降至 3,396 行；布局门禁固定 14 方法和 helper 归属，禁止回流，并明确
+  `AddIdentityLayer`、Tensor/Layer name helper 与 optional-weight helper 仍留根文件。
+- 按 `root prefix + Network core + root middle + Network name helper + root suffix` 原顺序重组后的 Git blob 为
+  `c9a2593a94949f9321c1783952011ca54dbe593a`，与拆分前 HEAD 根文件完全一致。
+
+### 验证与边界
+
+- 首次 layout、BuilderConfig scalar、safe lifecycle 与 readonly candidate 定向集合 `57/58`；唯一失败是上一批尾部
+  门禁仍要求 `GetNetworkNameNative` 留在根文件。删除该过期正向断言、由新 Network gate 接管后，同一集合最终
+  `58/58` 通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- ignored deferred candidate artifact 仍引用存在的根文件，无需迁移；evidence 保持 247 条引用、137 个唯一路径、
+  0 缺失，该 ignored 文件未强制提交。
+- `git diff --check` 通过；Generated/native/manifest/ABI 未修改，未运行完整 ProjectQuality，也未运行依赖本机缺失
+  `pwsh` 的 B-tier 聚合测试。
+- partial 拆分不是 network/runtime correctness、owner/lifetime、ABI/export、Linux、package consumer、public package、
+  post-publish、Owner acceptance 或 release proof。
+- C 盘 Downloads 顶层本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
+- 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。

@@ -107,6 +107,7 @@ public sealed class ManagedSourceModuleLayoutTests
                 "NativeBridgeApi.DeploymentNetworkLayers.cs",
                 "NativeBridgeApi.Dims64NetworkTensor.cs",
                 "NativeBridgeApi.NetworkBoundaryControls.cs",
+                "NativeBridgeApi.NetworkCore.cs",
                 "NativeBridgeApi.NetworkDiagnostics.cs",
                 "NativeBridgeApi.Trt11SafeNetworkV2.cs"
             }
@@ -839,7 +840,6 @@ public sealed class ManagedSourceModuleLayoutTests
         Assert.DoesNotContain("GetEngineInformationNative", rootSource, StringComparison.Ordinal);
         Assert.DoesNotContain("GetEngineIOTensorNameNative", rootSource, StringComparison.Ordinal);
         Assert.Contains("private static int GetSingleBitFlagIndex(", rootSource, StringComparison.Ordinal);
-        Assert.Contains("private static BridgeStatusCode GetNetworkNameNative(", rootSource, StringComparison.Ordinal);
         Assert.Contains("private static BridgeStatusCode GetTensorNameNative(", rootSource, StringComparison.Ordinal);
         Assert.Contains("private static BridgeStatusCode GetLayerNameNative(", rootSource, StringComparison.Ordinal);
     }
@@ -895,6 +895,56 @@ public sealed class ManagedSourceModuleLayoutTests
         Assert.DoesNotContain("private static TensorRtLineBindings GetBindings(", rootSource, StringComparison.Ordinal);
         Assert.DoesNotContain("private static bool TryRunTrtMinimalBuildChain(", rootSource, StringComparison.Ordinal);
         Assert.DoesNotContain("private static bool TryBuildSerializedNetworkOnly(", rootSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TensorRtRootNetworkCoreIsSplitIntoNetworkModule()
+    {
+        string interopDirectory = Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.TensorRtSharp",
+            "Internal",
+            "Interop");
+        string rootSource = File.ReadAllText(Path.Combine(interopDirectory, "NativeBridgeApi.cs"));
+        string[] rootMethods = EnumeratePublicStaticMethodNames(rootSource);
+        string networkSource = File.ReadAllText(Path.Combine(
+            interopDirectory,
+            "Network",
+            "NativeBridgeApi.NetworkCore.cs"));
+        string[] networkMethods = EnumeratePublicStaticMethodNames(networkSource);
+
+        Assert.Equal(
+            new[]
+            {
+                "AddNetworkInput",
+                "MarkNetworkOutput",
+                "UnmarkNetworkOutput",
+                "GetNetworkInputCount",
+                "GetNetworkOutputCount",
+                "GetNetworkLayerCount",
+                "GetNetworkLayer",
+                "GetNetworkName",
+                "SetNetworkName",
+                "GetNetworkFlags",
+                "HasImplicitBatchDimension",
+                "GetNetworkFlag",
+                "GetNetworkInput",
+                "GetNetworkOutput"
+            },
+            networkMethods);
+        Assert.Contains("private static BridgeStatusCode GetNetworkNameNative(", networkSource, StringComparison.Ordinal);
+
+        foreach (string method in networkMethods)
+        {
+            Assert.DoesNotContain(method, rootMethods);
+        }
+
+        Assert.DoesNotContain("GetNetworkNameNative", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static SafeTensorRtObjectHandle AddIdentityLayer(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("private static BridgeStatusCode GetTensorNameNative(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("private static BridgeStatusCode GetLayerNameNative(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("private static TensorRtWeights.PinnedScope? PinOptionalWeights(", rootSource, StringComparison.Ordinal);
     }
 
     private static string[] EnumerateModuleFiles(string projectDirectory, string module)
