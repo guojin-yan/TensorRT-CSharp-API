@@ -5307,6 +5307,33 @@ owner 生命周期、interop 声明或 C ABI。
 - C 盘 Downloads/用户 Temp 顶层当日重资产与本批关键词命中为 0，项目相关 build/test 进程残留为 0。
 - 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
 
+## 2026-07-29 CUDA Managed Interop Feature Module Closure
+
+本阶段继续整理 `JYPPX.CudaSharp/Internal/Interop` 的手写 partial API，将 8 份职责明确的文件与公开 owner feature area
+对齐。Generated 文件、namespace、partial type、method、P/Invoke/entrypoint、owner 行为与 public API 均未改变。
+
+### 实现与门禁
+
+- `Devices`：device-resource snapshot 与 primary execution-context 操作。
+- `Diagnostics`：copied runtime log 操作；`Drivers`：optional Driver capability/module/typed launch 操作。
+- `IPC`：owner-safe export/import token 操作；`Kernels`：Runtime kernel-library owner/launch 操作。
+- `RuntimeCompilation`：optional NVRTC program capability/create/compile/artifact/lowered-name 操作。
+- 精确 interop 布局门禁固定六个 feature module 的 8 份文件，并检查它们不再回流 interop 根目录；六处源码路径测试和
+  中英文 source-organization 已同步。
+- `NativeCudaApi.Deployment.cs` 仍保留根目录，因为它横跨 error、PCI、stream/event、pinned memory、atomic capability
+  与 device selection；需要另立拆文件批次，不能错误归入 `Devices`。
+
+### 验证与边界
+
+- layout、device context/resource、IPC、kernel library 与 CUDA RTC owner 定向集合：`61/61` 通过。
+- `JYPPX.CudaSharp` 全目标框架 Debug build：`0 warning / 0 error`。
+- 完整 `TensorRtSharp.sln` Debug build：`0 warning / 0 error`。
+- 8 组新旧 Git blob hash 完全一致；未修改 Generated、manifest、native 或 ABI，因此未重跑 generator/native/export parity。
+- 未运行完整 ProjectQuality；本批不是 ABI/export、CUDA kernel correctness、Linux、package consumer、public package、
+  post-publish、Owner acceptance 或 release proof。
+- C 盘 Downloads/用户 Temp 顶层当日重资产与本批关键词命中为 0，项目相关 build/test 进程残留为 0。
+- 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
+
 ## 2026-07-29 TensorRT Tools Refit Managed Module Closure
 
 本阶段将 `JYPPX.TensorRtSharp.Tools/Build` 中两份纯 refit evidence model 归入独立 `Refit` 模块，使 build orchestration

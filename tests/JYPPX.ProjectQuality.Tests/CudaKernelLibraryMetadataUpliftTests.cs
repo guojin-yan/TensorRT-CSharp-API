@@ -57,7 +57,7 @@ public sealed class CudaKernelLibraryMetadataUpliftTests
         string library = ReadSource("src", "JYPPX.CudaSharp", "Kernels", "CudaKernelLibrary.cs");
         string snapshot = ReadSource("src", "JYPPX.CudaSharp", "Kernels", "CudaKernelLibraryInventorySnapshot.cs");
         string handle = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Handles", "SafeCudaKernelLibraryHandle.cs");
-        string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "NativeCudaApi.KernelLibrary.cs");
+        string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "Kernels", "NativeCudaApi.KernelLibrary.cs");
         string publicSurface = library + snapshot;
 
         Assert.Contains("public sealed class CudaKernelLibrary : IDisposable", library, StringComparison.Ordinal);

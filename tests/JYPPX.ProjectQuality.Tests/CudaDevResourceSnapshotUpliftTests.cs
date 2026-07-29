@@ -58,7 +58,7 @@ public sealed class CudaDevResourceSnapshotUpliftTests
         string device = ReadSource("src", "JYPPX.CudaSharp", "Devices", "CudaDevice.cs");
         string stream = ReadSource("src", "JYPPX.CudaSharp", "Streams", "CudaStream.cs");
         string context = ReadSource("src", "JYPPX.CudaSharp", "Devices", "CudaPrimaryExecutionContext.cs");
-        string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "NativeCudaApi.DeviceResources.cs");
+        string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "Devices", "NativeCudaApi.DeviceResources.cs");
         string publicSurface = snapshot + device + stream + context;
 
         Assert.Contains("public readonly struct CudaDevResourceSnapshot", snapshot, StringComparison.Ordinal);

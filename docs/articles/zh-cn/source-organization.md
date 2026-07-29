@@ -26,6 +26,17 @@ Windows API 完整化阶段已经把源码模块化作为质量门禁，而不�
 
 - `src/JYPPX.CudaSharp/Internal/Interop/Memory/NativeCudaApi.PitchedMemory.cs`
 
+其余手写 CUDA partial interop 也按公开 owner 的 feature area 归类：
+
+- `Internal/Interop/Devices`：device resource 与 primary execution-context 操作。
+- `Internal/Interop/Diagnostics`：复制型 runtime logs。
+- `Internal/Interop/Drivers`：可选 Driver capability、module 与 typed launch 操作。
+- `Internal/Interop/IPC`：owner-safe export/import token 操作。
+- `Internal/Interop/Kernels`：Runtime kernel-library owner 与 launch 操作。
+- `Internal/Interop/RuntimeCompilation`：可选 NVRTC program 操作。
+
+`NativeCudaApi.Deployment.cs` 仍保留在 interop 根目录，因为它同时跨越 error、PCI、stream/event、pinned-memory、atomic capability 与 device selection；应在单独的行为拆分批次中处理，不能错误归入某一个 feature。
+
 TensorRT 高层 wrapper 也开始按 layer feature 拆分：
 
 - `src/JYPPX.TensorRtSharp/Network/TensorRtNetworkDefinition.Deconvolution.cs`

@@ -4,6 +4,16 @@ namespace JYPPX.ProjectQuality.Tests;
 
 public sealed class ManagedSourceModuleLayoutTests
 {
+    public static TheoryData<string, string[]> CudaInteropFeatureModules => new()
+    {
+        { "Devices", new[] { "NativeCudaApi.DeviceResources.cs", "NativeCudaApi.ExecutionContext.cs" } },
+        { "Diagnostics", new[] { "NativeCudaApi.Logs.cs" } },
+        { "Drivers", new[] { "NativeCudaApi.Driver.cs" } },
+        { "IPC", new[] { "NativeCudaApi.IpcExports.cs", "NativeCudaApi.IpcImports.cs" } },
+        { "Kernels", new[] { "NativeCudaApi.KernelLibrary.cs" } },
+        { "RuntimeCompilation", new[] { "NativeCudaApi.Rtc.cs" } }
+    };
+
     public static TheoryData<string, string[]> ProjectModules => new()
     {
         {
@@ -99,6 +109,21 @@ public sealed class ManagedSourceModuleLayoutTests
 
         string buildDirectory = Path.Combine(toolsProjectDirectory, "Build");
         Assert.All(refitFiles, file => Assert.False(File.Exists(Path.Combine(buildDirectory, file))));
+    }
+
+    [Theory]
+    [MemberData(nameof(CudaInteropFeatureModules))]
+    public void CudaInteropFilesAreGroupedIntoFeatureModules(string module, string[] expectedFiles)
+    {
+        string interopDirectory = Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.CudaSharp",
+            "Internal",
+            "Interop");
+
+        Assert.Equal(expectedFiles, EnumerateModuleFiles(interopDirectory, module));
+        Assert.All(expectedFiles, file => Assert.False(File.Exists(Path.Combine(interopDirectory, file))));
     }
 
     private static string[] EnumerateModuleFiles(string projectDirectory, string module)

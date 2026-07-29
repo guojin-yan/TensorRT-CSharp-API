@@ -47,7 +47,7 @@ public sealed class CudaKernelLibrarySymbolAndAttributeUpliftTests
     {
         string library = ReadSource("src", "JYPPX.CudaSharp", "Kernels", "CudaKernelLibrary.cs");
         string attribute = ReadSource("src", "JYPPX.CudaSharp", "Kernels", "CudaKernelAttribute.cs");
-        string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "NativeCudaApi.KernelLibrary.cs");
+        string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "Kernels", "NativeCudaApi.KernelLibrary.cs");
         string publicSurface = library + attribute;
 
         Assert.Contains("public bool TryGetGlobalSymbolSize(string name, out ulong sizeInBytes)", library, StringComparison.Ordinal);

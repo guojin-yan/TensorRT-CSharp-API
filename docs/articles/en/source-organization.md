@@ -35,6 +35,17 @@ The first managed splits are CUDA pitched-memory, async-memory, and registered-h
 - `src/JYPPX.CudaSharp/Memory/CudaMemory.RegisteredHost.cs`
 - `src/JYPPX.CudaSharp/Memory/CudaRegisteredHostMemory.cs`
 
+Additional hand-written CUDA partial interop files follow the same feature directories as their public owners:
+
+- `Internal/Interop/Devices` for device-resource and primary execution-context operations.
+- `Internal/Interop/Diagnostics` for copied runtime logs.
+- `Internal/Interop/Drivers` for optional Driver capability, module, and typed launch operations.
+- `Internal/Interop/IPC` for owner-safe export/import token operations.
+- `Internal/Interop/Kernels` for Runtime kernel-library ownership and launch operations.
+- `Internal/Interop/RuntimeCompilation` for optional NVRTC program operations.
+
+`NativeCudaApi.Deployment.cs` remains at the interop root because it currently spans error, PCI, stream/event, pinned-memory, atomic-capability, and device-selection operations. It must be split by behavior in a separate batch instead of being mislabeled as one feature.
+
 TensorRT high-level wrappers are also being split by layer feature area:
 
 - `src/JYPPX.TensorRtSharp/Network/TensorRtNetworkDefinition.Deconvolution.cs`
