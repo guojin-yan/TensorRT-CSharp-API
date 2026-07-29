@@ -43,12 +43,14 @@ TensorRT 高层 wrapper 也开始按 layer feature 拆分：
 
 | 项目 | 模块目录 |
 | --- | --- |
-| `JYPPX.CudaSharp` | `Core`、`Devices`、`Diagnostics`、`Events`、`Graphs`、`IPC`、`Kernels`、`Memory`、`RuntimeCompilation`、`Streams` |
+| `JYPPX.CudaSharp` | `Core`、`Devices`、`Diagnostics`、`Drivers`、`Events`、`Graphs`、`IPC`、`Kernels`、`Memory`、`RuntimeCompilation`、`Streams` |
 | `JYPPX.TensorRtSharp` | `Builder`、`ControlFlow`、`Core`、`Diagnostics`、`Engine`、`Execution`、`Inference`、`Layers`、`Network`、`Parsing`、`Plugins`、`Profiles`、`Refit`、`Runtime`、`Serialization` |
 | `JYPPX.TensorRtSharp/Callbacks` | `Core`、`Debugging`、`MemoryAllocation`、`Monitoring` |
 | `JYPPX.TensorRtSharp.Tools` | `Artifacts`、`Build`、`Core`、`Runtime`、`Trtexec` |
 
 当前整理覆盖三个项目原根目录中的 294 个 `.cs` 文件。`ManagedSourceModuleLayoutTests` 会验证项目根目录不再堆放公开 API 源文件，并检查所有约定模块至少包含一个源码文件。
+
+CUDA Driver capability 入口、复制型 module owner 和 typed launch owner 统一放入 `JYPPX.CudaSharp/Drivers`。`Kernels` 则继续负责 CUDA Runtime kernel-library owner，以及 typed argument/configuration 值对象。
 
 ## 规则
 

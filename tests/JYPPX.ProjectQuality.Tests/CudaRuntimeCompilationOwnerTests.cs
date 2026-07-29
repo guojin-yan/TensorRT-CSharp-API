@@ -422,8 +422,8 @@ public sealed class CudaRuntimeCompilationOwnerTests
     {
         string native = ReadSource("native", "src", "cuda", "driver.cpp");
         string cmake = ReadSource("CMakeLists.txt");
-        string managed = ReadSource("src", "JYPPX.CudaSharp", "Kernels", "CudaDriverKernelLaunch.cs") +
-            ReadSource("src", "JYPPX.CudaSharp", "Kernels", "CudaDriverModule.cs");
+        string managed = ReadSource("src", "JYPPX.CudaSharp", "Drivers", "CudaDriverKernelLaunch.cs") +
+            ReadSource("src", "JYPPX.CudaSharp", "Drivers", "CudaDriverModule.cs");
         Assert.Contains("JYPPX_CUDA_DRIVER_LIBRARY", native, StringComparison.Ordinal);
         Assert.Contains("LoadLibraryA", native, StringComparison.Ordinal);
         Assert.Contains("dlopen", native, StringComparison.Ordinal);

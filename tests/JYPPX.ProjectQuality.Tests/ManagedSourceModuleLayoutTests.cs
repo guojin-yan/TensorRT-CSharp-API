@@ -10,7 +10,7 @@ public sealed class ManagedSourceModuleLayoutTests
             "JYPPX.CudaSharp",
             new[]
             {
-                "Core", "Devices", "Diagnostics", "Events", "Graphs", "IPC", "Kernels",
+                "Core", "Devices", "Diagnostics", "Drivers", "Events", "Graphs", "IPC", "Kernels",
                 "Memory", "RuntimeCompilation", "Streams"
             }
         },
@@ -44,5 +44,23 @@ public sealed class ManagedSourceModuleLayoutTests
             Assert.True(Directory.Exists(moduleDirectory), $"Missing managed source module: {project}/{module}");
             Assert.NotEmpty(Directory.EnumerateFiles(moduleDirectory, "*.cs", SearchOption.TopDirectoryOnly));
         }
+    }
+
+    [Fact]
+    public void CudaDriverOwnersAreGroupedInDriversModule()
+    {
+        string cudaProjectDirectory = Path.Combine(RepositoryPaths.Root, "src", "JYPPX.CudaSharp");
+        string driversDirectory = Path.Combine(cudaProjectDirectory, "Drivers");
+        string[] driverFiles = Directory.EnumerateFiles(driversDirectory, "*.cs", SearchOption.TopDirectoryOnly)
+            .Select(path => Path.GetFileName(path)!)
+            .OrderBy(name => name, StringComparer.Ordinal)
+            .ToArray();
+
+        Assert.Equal(
+            new[] { "CudaDriver.cs", "CudaDriverKernelLaunch.cs", "CudaDriverModule.cs" },
+            driverFiles);
+        Assert.False(File.Exists(Path.Combine(cudaProjectDirectory, "Core", "CudaDriver.cs")));
+        Assert.False(File.Exists(Path.Combine(cudaProjectDirectory, "Kernels", "CudaDriverKernelLaunch.cs")));
+        Assert.False(File.Exists(Path.Combine(cudaProjectDirectory, "Kernels", "CudaDriverModule.cs")));
     }
 }

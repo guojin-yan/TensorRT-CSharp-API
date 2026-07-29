@@ -5254,3 +5254,30 @@ reference 或 Owner golden。
 - Owner 仍需提供可审查 model/labels/image/license/hash、独立 provider reference、reference source classification
   及 golden/redistribution decision；在此之前所有 promotion/publication flags 保持 false。
 - 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 CUDA Driver Managed Source Module Closure
+
+本阶段继续收口托管公开 API 的目录职责，把 CUDA Driver capability、module owner 与 typed launch owner 从通用
+`Core`/`Kernels` 目录统一归入独立 `Drivers` 模块。该变更仅调整源码组织，不改变 namespace、类型名、public API、
+owner 生命周期、interop 声明或 C ABI。
+
+### 实现与门禁
+
+- `CudaDriver.cs` 从 `Core` 移至 `Drivers`；`CudaDriverModule.cs` 与 `CudaDriverKernelLaunch.cs` 从 `Kernels` 移至
+  `Drivers`。`Kernels` 继续负责 CUDA Runtime kernel library、argument 与 launch configuration。
+- `ManagedSourceModuleLayoutTests` 将 `Drivers` 纳入 `JYPPX.CudaSharp` 约定模块，并固定当前三份 Driver owner 文件的
+  职责集合，同时拒绝旧 `Core`/`Kernels` 路径回流。
+- CUDA RTC owner 测试的源码审计路径和中英文 source-organization 文档已同步更新。
+
+### 验证与边界
+
+- layout、CUDA RTC owner 与 roadmap 定向 ProjectQuality 集合：`20/20` 通过。
+- `JYPPX.CudaSharp` 全目标框架 Debug build：`0 warning / 0 error`。
+- 完整 `TensorRtSharp.sln` Debug build：`0 warning / 0 error`。
+- 本批未修改 native、manifest 或 generated bindings，因此未重跑 native/ABI/export/generator；也未运行会长时间挂起的
+  完整 ProjectQuality 全集，不将定向结果表述为全量通过。
+- 文件重定位不是 CUDA kernel correctness、Linux、package consumer、public package、post-publish、Owner accepted 或
+  release proof；所有相关 promotion 边界保持不变。
+- C 盘 Downloads/用户 Temp 顶层当日重资产与本批关键词命中为 0，项目相关 build/test 进程残留为 0；用户 Temp
+  递归枚举在 30 秒超时，因此不把该项表述为完整递归审计。
+- 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
