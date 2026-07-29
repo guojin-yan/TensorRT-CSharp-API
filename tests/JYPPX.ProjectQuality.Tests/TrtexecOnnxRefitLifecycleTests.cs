@@ -53,7 +53,8 @@ public sealed class TrtexecOnnxRefitLifecycleTests
     [Fact]
     public void ApplicationCommitsRefitterBeforeAnyExecutionContextAndReportsCopiedSnapshot()
     {
-        string service = ReadSource("src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildService.cs");
+        string service = ReadSource(
+            "src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildService.Refit.cs");
         string snapshot = ReadSource("src", "JYPPX.TensorRtSharp.Tools", "Refit", "OnnxEngineRefitSnapshot.cs");
         string diagnostics = ReadSource("src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildDiagnostics.cs");
         string artifactWriter = ReadSource("src", "JYPPX.TensorRtSharp.Tools", "Artifacts", "OnnxEngineRuntimeArtifactWriter.cs");

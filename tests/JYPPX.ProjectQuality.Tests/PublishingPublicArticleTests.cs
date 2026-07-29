@@ -1351,7 +1351,8 @@ public sealed class PublishingPublicArticleTests
             "TensorRtBuilderConfig.cs",
             "TensorRtBuilderConfig.Trt11Diagnostics.cs",
             "TrtexecLikeDeploymentOptions.cs",
-            "OnnxEngineBuildService.cs",
+            "OnnxEngineBuildService.DeploymentConfiguration.cs",
+            "OnnxEngineBuildService.Diagnostics.cs",
             "OnnxEngineBuildDiagnostics.cs",
             "tensor-rt-exec-release-candidate-gap-list.json",
             "TrtexecMemoryPool",
@@ -1724,7 +1725,8 @@ public sealed class PublishingPublicArticleTests
         foreach (string marker in new[]
         {
             "TensorRtEngineInspector.Trt11Diagnostics.cs",
-            "OnnxEngineBuildResult.cs",
+            "OnnxLoadedEngineDiagnostics.cs",
+            "OnnxEngineBuildService.Diagnostics.cs",
             "OnnxEngineRuntimeArtifactWriter.cs",
             "OnnxEngineBuildDiagnostics.cs",
             "TensorRtExecReport.cs",

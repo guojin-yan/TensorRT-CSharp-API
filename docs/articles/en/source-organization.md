@@ -135,6 +135,15 @@ live in four feature partials, while the independent `CudaOwnedMemoryPool` owner
 The layout gate recomposes the pre-split Git blobs `379fd60f08beca36711507a6c83a2192d20b6562` and
 `7028220b628b3d2af9c3f007dda75ec4ff2f5fd3`.
 
+The Tools ONNX engine build service is organized by build stage as well. `Build/OnnxEngineBuildService.cs` is reduced from
+3,214 lines to a 540-line selected-device thread, dry-run, and build-orchestration core. Builder configuration, timing cache,
+result creation, refit, diagnostics, runtime execution, benchmarking, runtime inputs, reference validation, and deployment
+configuration live in ten feature partials; private lease, worker, and runtime-state types follow their owning features.
+The former 970-line `Build/OnnxEngineBuildResult.cs` is reduced to a 304-line primary result. Timing-cache artifact, capability
+probe, loaded-engine diagnostics, preflight metadata, model evidence, and benchmark summary are six independent public type
+files. The layout gate recomposes the pre-split Git blobs `31f2c170c9c74b7278b4bc266eca76405dc33067` and
+`97f6e992fe582513fcf77b10ce05de4de32af1a5`.
+
 Hand-written TensorRT partial interop now starts following the same responsibility modules:
 
 - `Internal/Interop/Builder` contains builder creation/capabilities, serialized build outputs, builder boundary controls,

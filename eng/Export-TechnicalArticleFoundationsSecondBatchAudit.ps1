@@ -174,7 +174,9 @@ $definitions = @(
       "samples/OnnxToEngine/Program.cs",
       "samples/OnnxToEngine/trtexec-parity-matrix.json",
       "src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeParser.cs",
-      "src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.cs"
+      "src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.cs",
+      "src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.DeploymentConfiguration.cs",
+      "src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.RuntimeExecution.cs"
     )
   },
   [ordered]@{

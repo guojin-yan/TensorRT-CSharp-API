@@ -87,7 +87,9 @@ public sealed class Trt11OnnxParserBuilderConfigAttachmentUpliftTests
     public void SmokeToolsAndPackageConsumerCompileTheDeploymentWorkflow()
     {
         string smoke = ReadSource("smoke", "OnnxToEngineSmokeRunner", "Program.cs");
-        string tools = ReadSource("src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildService.cs");
+        string tools =
+            ReadSource("src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildService.cs") +
+            ReadSource("src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildService.DeploymentConfiguration.cs");
         string consumer = ReadSource("eng", "Test-BridgePackageConsumer.ps1");
 
         Assert.Contains("parser.SetBuilderConfig(config)", smoke, StringComparison.Ordinal);

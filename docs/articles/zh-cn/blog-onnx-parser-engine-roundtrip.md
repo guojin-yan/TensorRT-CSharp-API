@@ -81,9 +81,11 @@ OnnxToEngine Passed=True
 | 内置 identity 默认路径 | 进程内生成 | 是 | 是 | synthetic runtime smoke |
 | 模型特定 runtime | 是 | 是/加载 | 是 | model runtime candidate |
 
-option parsing 由 `src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeParser.cs` 负责，实际 build/runtime 投影位于
-`src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.cs`。`samples/OnnxToEngine/trtexec-parity-matrix.json` 记录
-每个参数是 applied、diagnostic 还是 parse-only；不能只因 CLI 接受参数就声称与官方 trtexec 行为等价。
+option parsing 由 `src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeParser.cs` 负责；build orchestration 位于
+`src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.cs`，deployment 与 runtime 投影分别位于
+`OnnxEngineBuildService.DeploymentConfiguration.cs`、`OnnxEngineBuildService.RuntimeExecution.cs`。
+`samples/OnnxToEngine/trtexec-parity-matrix.json` 记录每个参数是 applied、diagnostic 还是 parse-only；不能只因 CLI
+接受参数就声称与官方 trtexec 行为等价。
 
 ```mermaid
 flowchart TB

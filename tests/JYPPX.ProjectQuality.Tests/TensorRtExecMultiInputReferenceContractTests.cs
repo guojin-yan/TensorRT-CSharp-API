@@ -223,12 +223,15 @@ public sealed class TensorRtExecMultiInputReferenceContractTests
     [Fact]
     public void GenericRuntimeSourceDoesNotRetainSingleInputRestriction()
     {
-        string service = File.ReadAllText(Path.Combine(
-            RepositoryPaths.Root,
-            "src",
-            "JYPPX.TensorRtSharp.Tools",
-            "Build",
-            "OnnxEngineBuildService.cs"));
+        string service = string.Concat(
+            File.ReadAllText(Path.Combine(
+                RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildService.RuntimeExecution.cs")),
+            File.ReadAllText(Path.Combine(
+                RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildService.RuntimeInputs.cs")),
+            File.ReadAllText(Path.Combine(
+                RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildService.Benchmarking.cs")),
+            File.ReadAllText(Path.Combine(
+                RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildService.ReferenceValidation.cs")));
 
         Assert.DoesNotContain("supports exactly one input tensor", service, StringComparison.Ordinal);
         Assert.Contains("List<OnnxEngineRuntimeInput> runtimeInputs", service, StringComparison.Ordinal);

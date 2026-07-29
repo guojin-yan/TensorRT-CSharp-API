@@ -6579,3 +6579,41 @@ public enum 数值、device context/P2P/error 状态语义或 proof 分类。
   consumer、public package、post-publish、Owner acceptance 或 release proof。
 - 进程审计识别出其他工作区的 PowerShell/dotnet 任务并原样保留；8 份 publishing 用户变更未触碰、未暂存；
   未 push、未触发 GitHub Actions、未执行远程发布操作。
+
+## 2026-07-30 ONNX Engine Build Service And Result Source Split
+
+本阶段继续整理 `JYPPX.TensorRtSharp.Tools` 的 ONNX engine build domain，将构建配置、缓存、refit、诊断、runtime、
+benchmark、输入与 reference validation 从单一超大 service 中分离，并把 build result 文件中混放的独立 copied
+evidence/summary 类型移入专用文件。public API、selected-device thread、worker lifetime、proof classification 与执行顺序不变。
+
+### 实现与门禁
+
+- `OnnxEngineBuildService.cs` 从 3,214 行降至 540 行，仅保留 `Execute`、selected-device thread 与 `ExecuteCore`
+  build orchestration；BuilderConfiguration、TimingCache、ResultCreation、Refit、Diagnostics、RuntimeExecution、
+  Benchmarking、RuntimeInputs、ReferenceValidation、DeploymentConfiguration 进入十份 partial。
+- timing-cache lease、benchmark worker/run/warm-up state 与 runtime input/output state 跟随各自 feature；
+  `ReferenceJsonOptions` 随 reference tensor 读取和比较逻辑移动，不再留在 orchestration core。
+- `OnnxEngineBuildResult.cs` 从 970 行降至 304 行主 result；`OnnxEngineTimingCacheArtifact`、
+  `OnnxEngineCapabilityProbe`、`OnnxLoadedEngineDiagnostics`、`OnnxEnginePreflightMetadata`、
+  `OnnxEngineBuildModelEvidence` 与 `OnnxEngineBenchmarkSummary` 六个独立 public 类型各自成文件。
+- `ManagedOnnxEngineBuildLayoutTests` 固定 11 份 service core/feature 的精确 method 与 nested-type owner、七个 result
+  type 文件的精确 public property 集合、文档/exporter owner marker，并按原顺序重组两份拆分前源码。
+- 拆分前 Git blob 为 `31f2c170c9c74b7278b4bc266eca76405dc33067`、
+  `97f6e992fe582513fcf77b10ce05de4de32af1a5`；normalized SHA-256 保持
+  `433cd0e3ffdf2da39f8bb345eb96d39423885e5046119edb11b9f11c5bc4d4cb` 与
+  `683fd2ce1579286a222cd61842b754b7731b94bf6b30440da4bfb653cd2dbc2b`。
+- 九个直接读取旧 service core 的能力测试类改读实际 feature 或明确的 core+feature 组合；ONNX roundtrip 博客、
+  builder-config/engine-inspector 文章、foundations exporter 与双语 source-organization 同步到真实 owner。
+
+### 验证与边界
+
+- 新布局/重组/文档 marker 门禁：`22/22` 通过；受影响的既有 build/runtime/refit/benchmark 消费门禁：`80/80`
+  通过；两篇 publishing 文章专项：`2/2` 通过；全部 managed 源码布局门禁合并集合：`254/254` 通过。
+- `JYPPX.TensorRtSharp.Tools` 与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- ignored deferred candidate evidence 保持 260 条引用、147 个唯一路径、0 缺失；22 份 ignored JSON 均可解析，
+  ignored 文件未强制提交。
+- 本机仍无仓库认可的 `pwsh`，因此未运行 foundations exporter 与 B-tier 聚合测试；未把源码 marker 门禁冒充 exporter pass。
+- Generated/native/manifest/ABI 改动为 0；进程审计保留其他工作区的 PowerShell/dotnet 任务。
+- source/type relocation 不构成 TensorRT/CUDA runtime、real model、Linux、package consumer、public package、
+  post-publish、Owner acceptance 或 release proof。
+- 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行远程发布操作。

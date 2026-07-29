@@ -118,10 +118,15 @@ public sealed class TrtexecBuildPolicyTests
     [Fact]
     public void EnginePackagingAndWeightStreamingUseTypedReadbackBeforeContextCreation()
     {
-        string service = File.ReadAllText(Path.Combine(
-            RepositoryPaths.Root,
-            "src",
-            "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildService.cs"));
+        string service = string.Concat(
+            File.ReadAllText(Path.Combine(
+                RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildService.cs")),
+            File.ReadAllText(Path.Combine(
+                RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildService.DeploymentConfiguration.cs")),
+            File.ReadAllText(Path.Combine(
+                RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildService.RuntimeExecution.cs")),
+            File.ReadAllText(Path.Combine(
+                RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildService.Benchmarking.cs")));
         string diagnostics = File.ReadAllText(Path.Combine(
             RepositoryPaths.Root,
             "src",

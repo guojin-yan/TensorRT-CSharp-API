@@ -118,6 +118,14 @@ synchronization/event 和 capture lifecycle 进入 5 份 feature partial。`Memo
 `CudaOwnedMemoryPool` 与两个 pool enum 各自移入专用文件。布局门禁可重组拆分前 Git blob
 `379fd60f08beca36711507a6c83a2192d20b6562` 与 `7028220b628b3d2af9c3f007dda75ec4ff2f5fd3`。
 
+Tools 的 ONNX engine 构建服务也按构建阶段归类。`Build/OnnxEngineBuildService.cs` 从 3,214 行降为 540 行
+selected-device thread、dry-run/build orchestration core；builder configuration、timing cache、result creation、refit、
+diagnostics、runtime execution、benchmarking、runtime inputs、reference validation 与 deployment configuration 进入
+10 份 feature partial，private lease/worker/runtime state type 跟随各自 feature。原 970 行
+`Build/OnnxEngineBuildResult.cs` 降为 304 行主 result；timing-cache artifact、capability probe、loaded-engine diagnostics、
+preflight metadata、model evidence 与 benchmark summary 六个独立 public 类型各自成文件。布局门禁可重组拆分前 Git blob
+`31f2c170c9c74b7278b4bc266eca76405dc33067` 与 `97f6e992fe582513fcf77b10ce05de4de32af1a5`。
+
 手写 TensorRT partial interop 也开始按相同职责模块归类：
 
 - `Internal/Interop/Builder`：builder creation/capabilities、serialized build outputs、builder boundary controls、

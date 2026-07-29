@@ -70,10 +70,15 @@ public sealed class TensorRtExecBoundedBenchmarkSchedulerTests
     [Fact]
     public void SchedulerUsesIndependentOwnersAndMinimumIterationDurationContract()
     {
-        string service = File.ReadAllText(Path.Combine(
-            RepositoryPaths.Root,
-            "src",
-            "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildService.cs"));
+        string service = string.Concat(
+            File.ReadAllText(Path.Combine(
+                RepositoryPaths.Root,
+                "src",
+                "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildService.RuntimeExecution.cs")),
+            File.ReadAllText(Path.Combine(
+                RepositoryPaths.Root,
+                "src",
+                "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildService.Benchmarking.cs")));
         string artifactWriter = File.ReadAllText(Path.Combine(
             RepositoryPaths.Root,
             "src",
