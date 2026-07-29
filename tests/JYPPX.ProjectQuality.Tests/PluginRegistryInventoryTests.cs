@@ -27,7 +27,7 @@ public sealed class PluginRegistryInventoryTests
     [Fact]
     public void GlobalLookupCopiesCreatorMetadataIntoManagedSnapshot()
     {
-        string interopSource = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.GlobalRuntimePluginProbe.cs");
+        string interopSource = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Plugins", "NativeBridgeApi.GlobalPluginRegistry.cs");
         string environmentProbe = ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.cs");
         string smokeProgram = ReadSource("smoke", "PluginRegistryInventorySmokeRunner", "Program.cs");
         string nativeSource = ReadSource("native", "src", "tensorrt", "common", "global_runtime_plugin_probe.inc");
@@ -39,7 +39,7 @@ public sealed class PluginRegistryInventoryTests
         string lookupMethod = ExtractBetween(
             interopSource,
             "public static bool TryGetGlobalPluginCreator",
-            "public static int GetGlobalInferLibVersion");
+            "public static bool GlobalPluginRegistryExists");
 
         Assert.Contains("GetGlobalLookupPluginCreatorInterfaceKind", lookupMethod);
         Assert.Contains("GetGlobalLookupPluginCreatorFieldCount", lookupMethod);

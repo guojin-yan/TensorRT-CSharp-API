@@ -100,6 +100,7 @@ public sealed class ManagedSourceModuleLayoutTests
             "Parsing",
             new[]
             {
+                "NativeBridgeApi.GlobalOnnxParserVersion.cs",
                 "NativeBridgeApi.LegacyParserDiagnostics.cs",
                 "NativeBridgeApi.OnnxConfig.cs",
                 "NativeBridgeApi.OnnxModelBuffer.cs",
@@ -114,6 +115,7 @@ public sealed class ManagedSourceModuleLayoutTests
             new[]
             {
                 "NativeBridgeApi.BuilderCapabilityPluginRegistry.cs",
+                "NativeBridgeApi.GlobalPluginRegistry.cs",
                 "NativeBridgeApi.PluginLayerOwnerScopedQuerySnapshots.cs",
                 "NativeBridgeApi.PluginRegistryInventory.cs",
                 "NativeBridgeApi.PluginV2LayerMetadata.cs",
@@ -130,7 +132,14 @@ public sealed class ManagedSourceModuleLayoutTests
                 "NativeBridgeApi.RefitterDeploymentMetadata.cs"
             }
         },
-        { "Runtime", new[] { "NativeBridgeApi.RuntimeDeploymentControls.cs" } },
+        {
+            "Runtime",
+            new[]
+            {
+                "NativeBridgeApi.GlobalRuntimeVersion.cs",
+                "NativeBridgeApi.RuntimeDeploymentControls.cs"
+            }
+        },
         { "Serialization", new[] { "NativeBridgeApi.EngineSerialization.cs" } },
         { "Weights", new[] { "NativeBridgeApi.LayerWeightsInfo.cs" } }
     };
@@ -472,6 +481,32 @@ public sealed class ManagedSourceModuleLayoutTests
         Assert.False(File.Exists(Path.Combine(
             interopDirectory,
             "NativeBridgeApi.Trt11Diagnostics.cs")));
+    }
+
+    [Fact]
+    public void TensorRtGlobalRuntimePluginProbeInteropIsSplitByBehavior()
+    {
+        string interopDirectory = Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.TensorRtSharp",
+            "Internal",
+            "Interop");
+        string[] runtimeMethods = ReadInteropMethodNames(interopDirectory, "Runtime", "NativeBridgeApi.GlobalRuntimeVersion.cs");
+        string[] parsingMethods = ReadInteropMethodNames(interopDirectory, "Parsing", "NativeBridgeApi.GlobalOnnxParserVersion.cs");
+        string[] pluginMethods = ReadInteropMethodNames(interopDirectory, "Plugins", "NativeBridgeApi.GlobalPluginRegistry.cs");
+        string sharedSource = File.ReadAllText(Path.Combine(interopDirectory, "NativeBridgeApi.GlobalProbeShared.cs"));
+
+        Assert.Equal(7, runtimeMethods.Length);
+        Assert.DoesNotContain(runtimeMethods, method => method.Contains("Plugin", StringComparison.Ordinal));
+        Assert.Equal(new[] { "GetGlobalOnnxParserVersion" }, parsingMethods);
+        Assert.Equal(8, pluginMethods.Length);
+        Assert.All(pluginMethods, method => Assert.Contains("GlobalPlugin", method, StringComparison.Ordinal));
+        Assert.Empty(EnumeratePublicStaticMethodNames(sharedSource));
+        Assert.Contains("private static BridgeProbeException UnsupportedGlobalRuntimeProbeLine()", sharedSource, StringComparison.Ordinal);
+        Assert.False(File.Exists(Path.Combine(
+            interopDirectory,
+            "NativeBridgeApi.GlobalRuntimePluginProbe.cs")));
     }
 
     private static string[] EnumerateModuleFiles(string projectDirectory, string module)

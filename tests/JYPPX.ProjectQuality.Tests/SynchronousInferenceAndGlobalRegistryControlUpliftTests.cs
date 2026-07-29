@@ -89,7 +89,7 @@ public sealed partial class Trt8CapabilityRegistryAndLegacySetterUpliftTests
         Assert.Contains("public static void SetGlobalPluginRegistryParentSearchEnabled", environment, StringComparison.Ordinal);
         Assert.Contains("public static bool TrySetGlobalPluginRegistryParentSearchEnabled", environment, StringComparison.Ordinal);
         Assert.Contains("parent-search readback mismatch", environment, StringComparison.Ordinal);
-        string globalRegistryInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.GlobalRuntimePluginProbe.cs");
+        string globalRegistryInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Plugins", "NativeBridgeApi.GlobalPluginRegistry.cs");
         Assert.Contains("IsOptionalTrt8GlobalCreatorFieldFailure", globalRegistryInterop, StringComparison.Ordinal);
         Assert.Contains("int? recursiveCreatorCount = line == TensorRtApiLine.TensorRt8", globalRegistryInterop, StringComparison.Ordinal);
         Assert.Contains("? null\n            : GetGlobalPluginRegistryRecursiveCreatorCount(line);", globalRegistryInterop.Replace("\r\n", "\n"), StringComparison.Ordinal);

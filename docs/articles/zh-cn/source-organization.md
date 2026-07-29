@@ -60,15 +60,16 @@ TensorRT 高层 wrapper 也开始按 layer feature 拆分：
 - `Internal/Interop/Layers`：quantization、attention、fill-int64、兼容/部署型 layer attributes、Dims64、tensor metadata、
   transformer 与 RNNv2 操作；`Network`：部署型 network layer 创建、tensor/network Dims64、debug/shape diagnostics、
   refittable-weight 标记与 safe network-v2 操作。
-- `Internal/Interop/Parsing`：legacy parser diagnostics、ONNX config/model buffer/support、builder-config attachment、
-  layer-output metadata 与 parser-refitter diagnostics。
-- `Internal/Interop/Plugins`：builder capability/runtime registry inventories，以及复制型 V2/V3 layer metadata/query snapshot。
+- `Internal/Interop/Parsing`：global ONNX parser version、legacy parser diagnostics、ONNX config/model buffer/support、
+  builder-config attachment、layer-output metadata 与 parser-refitter diagnostics。
+- `Internal/Interop/Plugins`：global/builder/runtime registry inventories，以及复制型 V2/V3 layer metadata/query snapshot。
 - `Internal/Interop/Profiles`：optimization-profile Dims64 shape 查询。
-- `Internal/Interop/Runtime`：runtime deployment controls 与复制型 diagnostics；`Serialization`：engine serialization 与
-  serialization-config flags；`Refit`：async refit、weights/dynamic-range、entry metadata 与 refitter diagnostics。
+- `Internal/Interop/Runtime`：global runtime version/logger probes、runtime deployment controls 与复制型 diagnostics；
+  `Serialization`：engine serialization 与 serialization-config flags；`Refit`：async refit、weights/dynamic-range、
+  entry metadata 与 refitter diagnostics。
 
-`NativeBridgeApi.GlobalRuntimePluginProbe.cs` 仍保留在 interop 根目录，因为它混合了 global runtime version、logger、
-ONNX parser version 与 plugin-registry 操作；应在单独的行为拆分批次中处理，不能标记为纯 plugin 文件。
+`NativeBridgeApi.GlobalProbeShared.cs` 仅为拆分后的 global Runtime、Parsing、Plugins partial 保存共用的 unsupported-line
+异常 helper，因此继续保留在 interop 根目录；它不包含公开方法。
 
 `NativeBridgeApi.SafeDeferredUplift.cs` 也继续保留根目录，因为它混合 plugin initialization 与 ONNX weight-descriptor
 parsing。callback 文件归类不等于 callback trampoline、lifetime 或 runtime proof。
@@ -86,6 +87,8 @@ parsing。callback 文件归类不等于 callback trampoline、lifetime 或 runt
 必须恢复拆分前 Git blob。
 原 `Trt11Diagnostics` 已拆入 `Builder`、`Network`、`Engine` 与 `Execution`；四部分按原片段顺序重组后必须恢复
 拆分前 Git blob。
+原 `GlobalRuntimePluginProbe` 已拆入 `Runtime`、`Parsing`、`Plugins` 与仅含 helper 的根目录 Shared partial；四部分
+按原片段顺序重组后必须恢复拆分前 Git blob。
 
 生成文件继续保留在各自 `Generated` 文件夹下，不手工拆分。若需要调整生成文件布局，必须通过 generator 本身完成，并通过生成器确定性门禁。
 

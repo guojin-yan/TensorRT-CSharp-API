@@ -5661,3 +5661,34 @@ namespace、partial type、方法签名/方法体、P/Invoke entrypoint、版本
   Owner acceptance 或 release proof。
 - C 盘 Downloads 顶层当日本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
 - 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 TensorRT Global Runtime Plugin Probe Behavior Split
+
+本阶段将 788 行 `NativeBridgeApi.GlobalRuntimePluginProbe.cs` 按行为拆入 Runtime、Parsing、Plugins 与 helper-only
+Shared partial。原文件的 runtime version/logger、ONNX parser version 与 global plugin registry 片段交错；本批按原
+八段边界机械提取，没有改动方法签名/方法体、版本分支、entrypoint、异常文案、UTF-8 转换或 copied snapshot 逻辑。
+
+### 实现与门禁
+
+- `Runtime/NativeBridgeApi.GlobalRuntimeVersion.cs`：148 行、7 个 composite/infer-lib version 与 global logger 方法。
+- `Parsing/NativeBridgeApi.GlobalOnnxParserVersion.cs`：32 行、1 个 global ONNX parser version 方法。
+- `Plugins/NativeBridgeApi.GlobalPluginRegistry.cs`：618 行、8 个公开 inventory/lookup/registry 方法与 17 个私有
+  creator/field helper；TRT8 optional field failure helper 随 Plugins 移动。
+- `NativeBridgeApi.GlobalProbeShared.cs`：17 行、0 个公开方法，只保存 1 个跨三类行为共用的 unsupported-line helper。
+- 布局门禁固定 7/1/8/0 公开方法数量、行为命名边界、Shared helper-only 约束和旧根文件禁止回流；5 个插件源码合同
+  已改为读取 Plugins owner 文件。
+- 四文件按原八段顺序重组后的 Git blob 为 `ecb073f64a8dbe0b0f9248275e6ce32e9ba99531`，与 HEAD 原文件完全一致。
+
+### 验证与边界
+
+- 首次定向集合 `55/56`：唯一失败是 plugin lookup 测试仍以拆分前紧邻的 runtime 方法作为字符串截取终点；改为
+  Plugins 文件中的下一公开方法后，同一集合最终 `56/56` 通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- ignored deferred candidate artifact 的 3 条 global plugin registry 路径已在本机迁移；243 条 evidence 引用、
+  133 个唯一路径缺失为 0，且该文件未强制提交。
+- `git diff --check` 通过；Generated/native/manifest/ABI 未修改，未运行完整 ProjectQuality，也未运行依赖本机缺失
+  `pwsh` 的兼容主机 exporter 测试。
+- behavior split 不是 ABI/export、TensorRT runtime、Linux、package consumer、public package、post-publish、
+  Owner acceptance 或 release proof。
+- C 盘 Downloads 顶层当日本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
+- 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。

@@ -71,15 +71,16 @@ Hand-written TensorRT partial interop now starts following the same responsibili
 - `Internal/Interop/Layers` contains quantization, attention, fill-int64, compatibility/deployment layer attributes, Dims64,
   tensor metadata, transformer, and RNNv2 operations; `Network` contains deployment network-layer creation, tensor/network
   Dims64, debug/shape diagnostics, refittable-weight markers, and safe network-v2 operations.
-- `Internal/Interop/Parsing` contains legacy parser diagnostics, ONNX config/model-buffer/support, builder-config attachment,
-  layer-output metadata, and parser-refitter diagnostics.
-- `Internal/Interop/Plugins` contains builder capability/runtime registry inventories and copied V2/V3 layer metadata/query snapshots.
+- `Internal/Interop/Parsing` contains the global ONNX parser version, legacy parser diagnostics, ONNX config/model-buffer/support,
+  builder-config attachment, layer-output metadata, and parser-refitter diagnostics.
+- `Internal/Interop/Plugins` contains global/builder/runtime registry inventories and copied V2/V3 layer metadata/query snapshots.
 - `Internal/Interop/Profiles` contains optimization-profile Dims64 shape queries.
-- `Internal/Interop/Runtime` contains runtime deployment controls and copied diagnostics; `Serialization` contains engine
-  serialization and serialization-config flags; `Refit` contains async refit, weights/dynamic-range, entry metadata, and
-  refitter diagnostics.
+- `Internal/Interop/Runtime` contains global runtime version/logger probes, runtime deployment controls, and copied diagnostics;
+  `Serialization` contains engine serialization and serialization-config flags; `Refit` contains async refit,
+  weights/dynamic-range, entry metadata, and refitter diagnostics.
 
-`NativeBridgeApi.GlobalRuntimePluginProbe.cs` remains at the interop root because it mixes global runtime version, logger, ONNX parser version, and plugin-registry operations. It requires a separate behavioral split instead of being labeled as a pure plugin file.
+`NativeBridgeApi.GlobalProbeShared.cs` remains at the interop root only for the common unsupported-line exception helper used by
+the split global Runtime, Parsing, and Plugins partials; it contains no public method.
 
 `NativeBridgeApi.SafeDeferredUplift.cs` also remains at the root because it combines plugin initialization with ONNX weight-descriptor parsing. Callback file placement is not callback trampoline, lifetime, or runtime proof.
 
@@ -97,6 +98,8 @@ The former `Trt11RuntimeControls` is split by contiguous owner sections across `
 in original segment order must reproduce the pre-split Git blob.
 The former `Trt11Diagnostics` is split across `Builder`, `Network`, `Engine`, and `Execution`; recombination in original segment
 order must reproduce the pre-split Git blob.
+The former `GlobalRuntimePluginProbe` is split across `Runtime`, `Parsing`, `Plugins`, and a helper-only root Shared partial;
+recombination in original segment order must reproduce the pre-split Git blob.
 
 Generated files remain under their `Generated` folders and should not be manually split. Generator output layout changes must happen in the generator itself and must pass the deterministic generator gate.
 

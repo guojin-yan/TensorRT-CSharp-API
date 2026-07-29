@@ -6,19 +6,6 @@ namespace JYPPX.TensorRtSharp.Internal.Interop;
 
 internal static partial class NativeBridgeApi
 {
-    public static TensorRtGlobalRuntimeVersion GetGlobalRuntimeVersion(TensorRtApiLine line)
-    {
-        return new TensorRtGlobalRuntimeVersion(
-            line,
-            GetGlobalInferLibVersion(line),
-            GetGlobalInferLibMajorVersion(line),
-            GetGlobalInferLibMinorVersion(line),
-            GetGlobalInferLibPatchVersion(line),
-            GetGlobalInferLibBuildVersion(line),
-            GetGlobalOnnxParserVersion(line),
-            GlobalHasLogger(line));
-    }
-
     public static TensorRtPluginRegistryInventory GetGlobalPluginRegistryInventory(TensorRtApiLine line)
     {
         return GetGlobalPluginRegistryInventory(line, includeCreatorFields: true);
@@ -203,155 +190,6 @@ internal static partial class NativeBridgeApi
             apiLanguage,
             fields);
         return true;
-    }
-
-    public static int GetGlobalInferLibVersion(TensorRtApiLine line)
-    {
-        int value;
-        BridgeStatusCode status;
-        switch (line)
-        {
-            case TensorRtApiLine.TensorRt8:
-                status = NativeMethodsTensorRt.jyppx_trt8_global_get_infer_lib_version(out value);
-                break;
-            case TensorRtApiLine.TensorRt10:
-                status = NativeMethodsTensorRt.jyppx_trt10_global_get_infer_lib_version(out value);
-                break;
-            case TensorRtApiLine.TensorRt11:
-                status = NativeMethodsTensorRt.jyppx_trt11_global_get_infer_lib_version(out value);
-                break;
-            default:
-                throw UnsupportedGlobalRuntimeProbeLine();
-        }
-
-        NativeStatus.ThrowIfFailed(status);
-        return value;
-    }
-
-    public static int GetGlobalInferLibMajorVersion(TensorRtApiLine line)
-    {
-        int value;
-        BridgeStatusCode status;
-        switch (line)
-        {
-            case TensorRtApiLine.TensorRt10:
-                status = NativeMethodsTensorRt.jyppx_trt10_global_get_infer_lib_major_version(out value);
-                break;
-            case TensorRtApiLine.TensorRt11:
-                status = NativeMethodsTensorRt.jyppx_trt11_global_get_infer_lib_major_version(out value);
-                break;
-            default:
-                throw UnsupportedGlobalRuntimeProbeLine();
-        }
-
-        NativeStatus.ThrowIfFailed(status);
-        return value;
-    }
-
-    public static int GetGlobalInferLibMinorVersion(TensorRtApiLine line)
-    {
-        int value;
-        BridgeStatusCode status;
-        switch (line)
-        {
-            case TensorRtApiLine.TensorRt10:
-                status = NativeMethodsTensorRt.jyppx_trt10_global_get_infer_lib_minor_version(out value);
-                break;
-            case TensorRtApiLine.TensorRt11:
-                status = NativeMethodsTensorRt.jyppx_trt11_global_get_infer_lib_minor_version(out value);
-                break;
-            default:
-                throw UnsupportedGlobalRuntimeProbeLine();
-        }
-
-        NativeStatus.ThrowIfFailed(status);
-        return value;
-    }
-
-    public static int GetGlobalInferLibPatchVersion(TensorRtApiLine line)
-    {
-        int value;
-        BridgeStatusCode status;
-        switch (line)
-        {
-            case TensorRtApiLine.TensorRt10:
-                status = NativeMethodsTensorRt.jyppx_trt10_global_get_infer_lib_patch_version(out value);
-                break;
-            case TensorRtApiLine.TensorRt11:
-                status = NativeMethodsTensorRt.jyppx_trt11_global_get_infer_lib_patch_version(out value);
-                break;
-            default:
-                throw UnsupportedGlobalRuntimeProbeLine();
-        }
-
-        NativeStatus.ThrowIfFailed(status);
-        return value;
-    }
-
-    public static int GetGlobalInferLibBuildVersion(TensorRtApiLine line)
-    {
-        int value;
-        BridgeStatusCode status;
-        switch (line)
-        {
-            case TensorRtApiLine.TensorRt10:
-                status = NativeMethodsTensorRt.jyppx_trt10_global_get_infer_lib_build_version(out value);
-                break;
-            case TensorRtApiLine.TensorRt11:
-                status = NativeMethodsTensorRt.jyppx_trt11_global_get_infer_lib_build_version(out value);
-                break;
-            default:
-                throw UnsupportedGlobalRuntimeProbeLine();
-        }
-
-        NativeStatus.ThrowIfFailed(status);
-        return value;
-    }
-
-    public static int GetGlobalOnnxParserVersion(TensorRtApiLine line)
-    {
-        int value;
-        BridgeStatusCode status;
-        switch (line)
-        {
-            case TensorRtApiLine.TensorRt8:
-                status = NativeMethodsTensorRt.jyppx_trt8_global_get_onnx_parser_version(out value);
-                break;
-            case TensorRtApiLine.TensorRt10:
-                status = NativeMethodsTensorRt.jyppx_trt10_global_get_onnx_parser_version(out value);
-                break;
-            case TensorRtApiLine.TensorRt11:
-                status = NativeMethodsTensorRt.jyppx_trt11_global_get_onnx_parser_version(out value);
-                break;
-            default:
-                throw UnsupportedGlobalRuntimeProbeLine();
-        }
-
-        NativeStatus.ThrowIfFailed(status);
-        return value;
-    }
-
-    public static bool GlobalHasLogger(TensorRtApiLine line)
-    {
-        int hasLogger;
-        BridgeStatusCode status;
-        switch (line)
-        {
-            case TensorRtApiLine.TensorRt8:
-                status = NativeMethodsTensorRt.jyppx_trt8_global_has_logger(out hasLogger);
-                break;
-            case TensorRtApiLine.TensorRt10:
-                status = NativeMethodsTensorRt.jyppx_trt10_global_has_logger(out hasLogger);
-                break;
-            case TensorRtApiLine.TensorRt11:
-                status = NativeMethodsTensorRt.jyppx_trt11_global_has_logger(out hasLogger);
-                break;
-            default:
-                throw UnsupportedGlobalRuntimeProbeLine();
-        }
-
-        NativeStatus.ThrowIfFailed(status);
-        return hasLogger != 0;
     }
 
     public static bool GlobalPluginRegistryExists(TensorRtApiLine line)
@@ -767,14 +605,6 @@ internal static partial class NativeBridgeApi
         fieldType = (TensorRtPluginFieldType)typeValue;
         length = lengthValue;
         hasData = hasDataValue != 0;
-    }
-
-    private static BridgeProbeException UnsupportedGlobalRuntimeProbeLine()
-    {
-        return new BridgeProbeException(
-            BridgeStatusCode.NotSupported,
-            BridgeErrorCategory.TensorRt,
-            "Global TensorRT runtime and plugin registry probes are exposed by this bridge for TensorRT 8, 10, and 11.");
     }
 
     private static bool IsOptionalTrt8GlobalCreatorFieldFailure(TensorRtApiLine line, BridgeProbeException exception)
