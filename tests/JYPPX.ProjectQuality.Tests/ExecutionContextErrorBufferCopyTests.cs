@@ -14,7 +14,7 @@ public sealed class ExecutionContextErrorBufferCopyTests
         string header11 = ReadSource("native", "include", "jyppx", "tensorrt", "trt11.h");
         string native8 = ReadSource("native", "src", "tensorrt", "v8", "api.cpp");
         string generated = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Generated", "NativeMethodsTensorRt.Generated.g.cs");
-        string bridge = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.DeploymentMetadata.cs");
+        string bridge = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Execution", "NativeBridgeApi.ExecutionContextDeploymentMetadata.cs");
         string wrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs");
 
         Assert.Contains("trt8-execution-context-get-error-buffer-copy-deferred", manifest, StringComparison.Ordinal);

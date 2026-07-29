@@ -128,7 +128,10 @@ public sealed class EngineAndRnnReadonlyDiagnosticsTests
         string engineProfileValuesSnapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngineProfileTensorValuesSnapshot.cs");
         string engineDeploymentSnapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngineDeploymentSnapshot.cs");
         string engineProfileValuesInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11FifteenthBatch.cs");
-        string deploymentInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.DeploymentMetadata.cs");
+        string deploymentInterop =
+            ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Engine", "NativeBridgeApi.EngineDeploymentMetadata.cs") +
+            ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Execution", "NativeBridgeApi.ExecutionContextDeploymentMetadata.cs") +
+            ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.DeploymentMetadataShared.cs");
         string builderConfigApi = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.Trt11Diagnostics.cs");
         string layerApi = ReadSource("src", "JYPPX.TensorRtSharp", "Layers", "TensorRtLayer.Trt8RnnV2Diagnostics.cs");
         string tensorApi = ReadSource("src", "JYPPX.TensorRtSharp", "Network", "TensorRtTensor.cs");

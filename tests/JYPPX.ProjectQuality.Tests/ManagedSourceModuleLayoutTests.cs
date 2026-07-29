@@ -39,7 +39,15 @@ public sealed class ManagedSourceModuleLayoutTests
                 "NativeBridgeApi.Trt11BuildProbe.cs"
             }
         },
-        { "Execution", new[] { "NativeBridgeApi.ExecutionContextCreation.cs" } },
+        { "Engine", new[] { "NativeBridgeApi.EngineDeploymentMetadata.cs" } },
+        {
+            "Execution",
+            new[]
+            {
+                "NativeBridgeApi.ExecutionContextCreation.cs",
+                "NativeBridgeApi.ExecutionContextDeploymentMetadata.cs"
+            }
+        },
         { "Inference", new[] { "NativeBridgeApi.SynchronousInference.cs" } },
         { "Interfaces", new[] { "NativeBridgeApi.OwnerScopedVersionedInterfaceMetadata.cs" } },
         {
@@ -47,6 +55,7 @@ public sealed class ManagedSourceModuleLayoutTests
             new[]
             {
                 "NativeBridgeApi.DeploymentLayerAttributes.cs",
+                "NativeBridgeApi.LayerDeploymentMetadata.cs",
                 "NativeBridgeApi.Quantization.cs",
                 "NativeBridgeApi.ThirtyThirdBatchLayerAttributes.cs",
                 "NativeBridgeApi.Trt11Attention.cs",
@@ -89,7 +98,14 @@ public sealed class ManagedSourceModuleLayoutTests
                 "NativeBridgeApi.RuntimePluginRegistryInventory.cs"
             }
         },
-        { "Refit", new[] { "NativeBridgeApi.RefitterControls.cs" } },
+        {
+            "Refit",
+            new[]
+            {
+                "NativeBridgeApi.RefitterControls.cs",
+                "NativeBridgeApi.RefitterDeploymentMetadata.cs"
+            }
+        },
         { "Runtime", new[] { "NativeBridgeApi.RuntimeDeploymentControls.cs" } },
         { "Serialization", new[] { "NativeBridgeApi.EngineSerialization.cs" } },
         { "Weights", new[] { "NativeBridgeApi.LayerWeightsInfo.cs" } }
@@ -296,6 +312,49 @@ public sealed class ManagedSourceModuleLayoutTests
         Assert.False(File.Exists(Path.Combine(
             interopDirectory,
             "NativeBridgeApi.Trt11RuntimeSerializationRefit.cs")));
+    }
+
+    [Fact]
+    public void TensorRtDeploymentMetadataInteropIsSplitByOwner()
+    {
+        string interopDirectory = Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.TensorRtSharp",
+            "Internal",
+            "Interop");
+        string[] engineMethods = ReadInteropMethodNames(interopDirectory, "Engine", "NativeBridgeApi.EngineDeploymentMetadata.cs");
+        string[] executionMethods = ReadInteropMethodNames(interopDirectory, "Execution", "NativeBridgeApi.ExecutionContextDeploymentMetadata.cs");
+        string[] layerMethods = ReadInteropMethodNames(interopDirectory, "Layers", "NativeBridgeApi.LayerDeploymentMetadata.cs");
+        string[] refitMethods = ReadInteropMethodNames(interopDirectory, "Refit", "NativeBridgeApi.RefitterDeploymentMetadata.cs");
+        string[] sharedMethods = EnumeratePublicStaticMethodNames(File.ReadAllText(Path.Combine(
+            interopDirectory,
+            "NativeBridgeApi.DeploymentMetadataShared.cs")));
+
+        Assert.Equal(22, engineMethods.Length);
+        Assert.All(
+            engineMethods,
+            method => Assert.True(
+                method.Contains("Engine", StringComparison.Ordinal) || method == "CreateRefitter",
+                $"Engine deployment interop contains a non-engine method: {method}"));
+        Assert.Equal(28, executionMethods.Length);
+        Assert.All(
+            executionMethods,
+            method => Assert.True(
+                method.Contains("ExecutionContext", StringComparison.Ordinal) ||
+                method.StartsWith("AllInput", StringComparison.Ordinal),
+                $"Execution deployment interop contains a non-context method: {method}"));
+        Assert.Equal(74, layerMethods.Length);
+        Assert.DoesNotContain(layerMethods, method =>
+            method.Contains("Engine", StringComparison.Ordinal) ||
+            method.Contains("ExecutionContext", StringComparison.Ordinal) ||
+            method.Contains("Refitter", StringComparison.Ordinal));
+        Assert.Equal(6, refitMethods.Length);
+        Assert.All(refitMethods, method => Assert.Contains("Refit", method, StringComparison.Ordinal));
+        Assert.Empty(sharedMethods);
+        Assert.False(File.Exists(Path.Combine(
+            interopDirectory,
+            "NativeBridgeApi.DeploymentMetadata.cs")));
     }
 
     private static string[] EnumerateModuleFiles(string projectDirectory, string module)

@@ -63,7 +63,8 @@ Hand-written TensorRT partial interop now starts following the same responsibili
   progress-monitor delegate signatures.
 - `Internal/Interop/Diagnostics` contains copied error-code metadata and TRT11 build probes used only by the environment probe;
   `Internal/Interop/Interfaces` contains owner-scoped versioned-interface metadata copies.
-- `Internal/Interop/Execution` contains execution-context/runtime-config creation and allocation-strategy operations.
+- `Internal/Interop/Engine` contains copied engine/tensor/profile metadata; `Execution` contains execution-context/runtime-config
+  creation, allocation-strategy, and context deployment-metadata operations.
 - `Internal/Interop/Inference` contains synchronous execute/enqueue operations; `Weights` contains copied layer-weight metadata.
 - `Internal/Interop/Layers` contains quantization, attention, fill-int64, compatibility/deployment layer attributes, tensor
   metadata, transformer, and RNNv2 operations; `Network` contains deployment network-layer creation, refittable-weight markers,
@@ -72,7 +73,8 @@ Hand-written TensorRT partial interop now starts following the same responsibili
   layer-output metadata, and parser-refitter diagnostics.
 - `Internal/Interop/Plugins` contains builder capability/runtime registry inventories and copied V2/V3 layer metadata/query snapshots.
 - `Internal/Interop/Runtime` contains runtime deployment controls and copied diagnostics; `Serialization` contains engine
-  serialization and serialization-config flags; `Refit` contains async refit, weights/dynamic-range, and refitter diagnostics.
+  serialization and serialization-config flags; `Refit` contains async refit, weights/dynamic-range, entry metadata, and
+  refitter diagnostics.
 
 `NativeBridgeApi.GlobalRuntimePluginProbe.cs` remains at the interop root because it mixes global runtime version, logger, ONNX parser version, and plugin-registry operations. It requires a separate behavioral split instead of being labeled as a pure plugin file.
 
@@ -83,6 +85,8 @@ The former `Trt11DeploymentAdditions` is split by method owner into `Network/Nat
 `Layers/NativeBridgeApi.DeploymentLayerAttributes.cs`; recombining both parts must reproduce the pre-split Git blob.
 The former `Trt11RuntimeSerializationRefit` is also split across `Runtime`, `Serialization`, `Execution`, and `Refit`; recombining
 the four files in original segment order must reproduce the pre-split Git blob.
+The former `DeploymentMetadata` is split across `Engine`, `Execution`, `Layers`, and `Refit`; only delegates and cross-owner private
+helpers remain in the root `NativeBridgeApi.DeploymentMetadataShared.cs`, and recombination must reproduce the pre-split Git blob.
 
 Generated files remain under their `Generated` folders and should not be manually split. Generator output layout changes must happen in the generator itself and must pass the deterministic generator gate.
 

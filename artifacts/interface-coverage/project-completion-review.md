@@ -5535,3 +5535,34 @@ namespace、partial type、方法签名/方法体、P/Invoke entrypoint、版本
   post-publish、Owner acceptance 或 release proof。
 - C 盘 Downloads 顶层当日本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
 - 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 TensorRT Deployment Metadata Owner Partial Split
+
+本阶段将 1478 行 `NativeBridgeApi.DeploymentMetadata.cs` 拆为 Engine、Refit、Execution、Layers 与 Shared 五份 partial。
+所有 delegate 和跨 owner private helper 统一保留在根目录 Shared 文件；公共方法按原 owner 区段机械提取，没有复制 helper，
+也没有改动方法签名/方法体、entrypoint、版本守卫或异常文案。
+
+### 实现与门禁
+
+- `NativeBridgeApi.DeploymentMetadataShared.cs`：482 行、0 个 public static 方法，保存 25 个 delegate 与跨 owner helper。
+- `Engine/NativeBridgeApi.EngineDeploymentMetadata.cs`：197 行、22 个 engine/tensor/profile metadata 方法。
+- `Refit/NativeBridgeApi.RefitterDeploymentMetadata.cs`：106 行、6 个 refitter entry/weights/refit 方法。
+- `Execution/NativeBridgeApi.ExecutionContextDeploymentMetadata.cs`：362 行、28 个 context shape/debug/profile/memory 方法。
+- `Layers/NativeBridgeApi.LayerDeploymentMetadata.cs`：383 行、74 个 classic layer attribute 方法。
+- 方法级布局门禁固定 22/6/28/74/0 数量与 owner 规则，并拒绝旧根文件回流；三处源码合同分别改为读取实际需要的
+  owner 文件，B-tier 聚合合同显式读取五份完整源码，旧消费路径为 0。
+- 五文件按原七段顺序重组后的 Git blob 为 `6ef1d699b455403ee73ccbdc7a50b860d0f5934e`，与 HEAD 原文件一致。
+
+### 验证与边界
+
+- 首次扩展集合 `41/42`：唯一失败是 B-tier 测试在进入源码断言前无法启动本机不存在的 `pwsh`；未使用 Windows
+  PowerShell 5.1 替代。
+- 排除该 PS7 环境项后，layout、execution-context error-buffer、engine/RNN diagnostics 与 readonly evidence 定向集合
+  `41/41` 通过；五个新源码路径均存在，旧消费路径为 0。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- ignored deferred candidate artifact 的 engine metadata 路径已在本机校准，全 evidence 路径缺失保持 0；该文件未强制提交。
+- `git diff --check` 通过；Generated/native/manifest/ABI 未修改，未运行完整 ProjectQuality。
+- partial 拆分不是 ABI/export、TensorRT runtime、Linux、package consumer、public package、post-publish、
+  Owner acceptance 或 release proof。
+- C 盘 Downloads 顶层当日本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
+- 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
