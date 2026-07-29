@@ -119,6 +119,14 @@ synchronization/error diagnostics live in seven feature partials. The former 912
 numeric values, and XML documentation remain unchanged. The layout gate recomposes the pre-split Git blobs
 `df16e51427f82c9b99fa867819015539dd65ac0c` and `dca1aa594002506ce47bd247f47141201af6591d`.
 
+Pitched and CUDA-array memory owners are split by transfer dimensionality while retaining validation in their owner cores.
+`Memory/CudaPitchedMemory.cs` is reduced from 678 lines to a 181-line allocation/metadata, shared pitch/extent/pinned-buffer
+validation, and disposal core; fill, 2D transfers, 3D transfers, and array conversion live in four feature partials.
+`Memory/CudaArray.cs` is reduced from 609 lines to a 208-line allocation/metadata, memory-requirement-independent shared
+validation, and disposal core; copied requirements/sparse diagnostics, 1D/2D/3D transfers, and array conversion live in five
+feature partials. The layout gate recomposes the pre-split Git blobs `e30004cce7cc55c7b62e19478de913d68be3c591` and
+`6de4bc82180a8539e3b6d6fa610c485c042d043e`.
+
 Hand-written TensorRT partial interop now starts following the same responsibility modules:
 
 - `Internal/Interop/Builder` contains builder creation/capabilities, serialized build outputs, builder boundary controls,

@@ -6513,3 +6513,34 @@ public enum 数值、device context/P2P/error 状态语义或 proof 分类。
 - type/source relocation 不构成 device initialization、P2P、graph memory、runtime correctness、real model、Linux、
   package consumer、public package、post-publish、Owner acceptance 或 release proof。
 - 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行远程发布操作。
+
+## 2026-07-29 CUDA Pitched Memory And Array Owner Split
+
+本阶段把 `CudaPitchedMemory` 与 `CudaArray` 两个大 owner wrapper 按 transfer dimensionality 与 diagnostics 分类，
+保持 SafeHandle、descriptor/extent/flags、pitch/byteCount checked arithmetic、pinned host lifetime 与 Dispose 边界不变。
+
+### 实现与门禁
+
+- `CudaPitchedMemory.cs` 从 678 行降至 181 行，仅保留 allocation/metadata、Allocate3D、Dispose 与共享
+  pitch/2D/3D extent/pinned-buffer validation；fill、2D transfer、3D transfer、array conversion 进入四份 partial。
+- `CudaArray.cs` 从 609 行降至 208 行，仅保留 allocation/metadata、Create3D、Info/ChannelDescriptor、Dispose 与共享
+  stream/byteCount/2D/3D/pinned validation；requirements/sparse diagnostics、1D/2D/3D transfer、array conversion
+  进入五份 partial。
+- `ManagedCudaArrayPitchedLayoutTests` 固定 9 份 feature partial 的精确重载集合、两个 core 的 metadata/helper owner，
+  并规范化重组两份原源码。
+- 拆分前 Git blob 为 `e30004cce7cc55c7b62e19478de913d68be3c591`、
+  `6de4bc82180a8539e3b6d6fa610c485c042d043e`；normalized SHA-256 保持
+  `92238c1fb314ca978e09318573ff60c8413f172f7d505d23a6c26e5551147221` 与
+  `98814300efb40ed16dc9b95482eb875a3af4f4dfb63085167b0e6b637557e2bf`。
+- 现有 tests/docs/eng/artifacts 没有直接读取这两个旧大文件的质量门禁；memory owner 教程补充 Pitched 2D/3D
+  partial 的真实路径，publishing 用户产物继续保留未触碰。
+
+### 验证与边界
+
+- 新布局/重组门禁：`13/13` 通过；全部 managed 源码布局门禁合并集合：`217/217` 通过；memory wrapper 文章
+  authoritative marker：`1/1` 通过。
+- `JYPPX.CudaSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- Generated/native/manifest/ABI 改动为 0；本机仍无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合测试。
+- owner source split 不构成 2D/3D CUDA runtime、pinned async completion、real model、Linux、package consumer、
+  public package、post-publish、Owner acceptance 或 release proof。
+- 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行远程发布操作。

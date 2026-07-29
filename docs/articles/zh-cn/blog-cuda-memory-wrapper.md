@@ -86,8 +86,10 @@ Memory wrapper ready 不等于 allocator callback proof ready。`IGpuAllocator`�
 
 owner 核心与同步/异步传输实现分别位于 `src/JYPPX.CudaSharp/Memory/CudaMemory.cs`、
 `src/JYPPX.CudaSharp/Memory/CudaMemory.HostTransfers.cs`、`src/JYPPX.CudaSharp/Memory/CudaMemory.DeviceTransfers.cs`；
-其余 owner 位于 `src/JYPPX.CudaSharp/Memory/CudaPinnedMemory.cs`、`src/JYPPX.CudaSharp/Memory/CudaManagedMemory.cs`、
-`src/JYPPX.CudaSharp/Memory/CudaPitchedMemory.cs`。所有类型都应作为 owner 使用，异步操作完成前不能 dispose。
+其余 owner 位于 `src/JYPPX.CudaSharp/Memory/CudaPinnedMemory.cs`、`src/JYPPX.CudaSharp/Memory/CudaManagedMemory.cs`；
+pitched owner core 与传输实现位于 `src/JYPPX.CudaSharp/Memory/CudaPitchedMemory.cs`、
+`src/JYPPX.CudaSharp/Memory/CudaPitchedMemory.Transfers2D.cs`、`src/JYPPX.CudaSharp/Memory/CudaPitchedMemory.Transfers3D.cs`。
+所有类型都应作为 owner 使用，异步操作完成前不能 dispose。
 
 ```mermaid
 sequenceDiagram

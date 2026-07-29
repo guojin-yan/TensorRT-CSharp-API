@@ -104,6 +104,13 @@ peer capabilities、memory pools、cache/RDMA、synchronization/error diagnostic
 enum 名称、底层类型、数值与 XML 注释保持不变。布局门禁可重组拆分前 Git blob
 `df16e51427f82c9b99fa867819015539dd65ac0c` 与 `dca1aa594002506ce47bd247f47141201af6591d`。
 
+Pitched 与 CUDA array memory owner 也已按传输维度拆分，同时把共享校验保留在 owner core。
+`Memory/CudaPitchedMemory.cs` 从 678 行降为 181 行 allocation/metadata、共享 pitch/extent/pinned-buffer validation 与
+Dispose core；fill、2D transfer、3D transfer、array conversion 进入 4 份 feature partial。`Memory/CudaArray.cs` 从
+609 行降为 208 行 allocation/metadata、共享 validation 与 Dispose core；复制型 requirements/sparse diagnostics、
+1D/2D/3D transfer、array conversion 进入 5 份 feature partial。布局门禁可重组拆分前 Git blob
+`e30004cce7cc55c7b62e19478de913d68be3c591` 与 `6de4bc82180a8539e3b6d6fa610c485c042d043e`。
+
 手写 TensorRT partial interop 也开始按相同职责模块归类：
 
 - `Internal/Interop/Builder`：builder creation/capabilities、serialized build outputs、builder boundary controls、
