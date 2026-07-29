@@ -51,7 +51,8 @@ public sealed class CudaOwnerScopedGraphDiagnosticsUpliftTests
             ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.TopologyDiagnostics.cs") +
             ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.NodeInspection.cs");
         string graphExec = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphExec.cs");
-        string stream = ReadSource("src", "JYPPX.CudaSharp", "Streams", "CudaStream.cs");
+        string stream = ReadSource(
+            "src", "JYPPX.CudaSharp", "Streams", "CudaStream.CaptureDependencies.cs");
         string captureInfo = ReadSource("src", "JYPPX.CudaSharp", "Streams", "CudaStreamCaptureInfo.cs");
         string flags =
             ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphNodeType.cs") +

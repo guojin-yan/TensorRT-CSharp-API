@@ -40,19 +40,22 @@ public sealed class CudaStreamCaptureVariantsUpliftTests
     [Fact]
     public void ManagedSurfaceUsesScalarSnapshotAndCopiedEdgeDataWithoutNativeHandles()
     {
-        string stream = ReadSource("src", "JYPPX.CudaSharp", "Streams", "CudaStream.cs");
+        string captureDiagnostics = ReadSource(
+            "src", "JYPPX.CudaSharp", "Streams", "CudaStream.CaptureDiagnostics.cs");
+        string captureDependencies = ReadSource(
+            "src", "JYPPX.CudaSharp", "Streams", "CudaStream.CaptureDependencies.cs");
         string scalar = ReadSource("src", "JYPPX.CudaSharp", "Streams", "CudaStreamCaptureScalarInfo.cs");
         string edgeData = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphEdgeData.cs");
         string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "Graph", "NativeCudaApi.StreamCaptureVariants.cs");
         string smoke = ReadSource("smoke", "CudaGraphSmokeRunner", "Program.cs");
-        string publicSurface = stream + scalar + edgeData;
+        string publicSurface = captureDiagnostics + captureDependencies + scalar + edgeData;
 
-        Assert.Contains("public CudaStreamCaptureScalarInfo GetCaptureInfoPtzs()", stream, StringComparison.Ordinal);
-        Assert.Contains("public bool TryGetCaptureInfoPtzs", stream, StringComparison.Ordinal);
-        Assert.Contains("public void UpdateCaptureDependenciesPtzs", stream, StringComparison.Ordinal);
-        Assert.Contains("public void UpdateCaptureDependenciesV2", stream, StringComparison.Ordinal);
+        Assert.Contains("public CudaStreamCaptureScalarInfo GetCaptureInfoPtzs()", captureDiagnostics, StringComparison.Ordinal);
+        Assert.Contains("public bool TryGetCaptureInfoPtzs", captureDiagnostics, StringComparison.Ordinal);
+        Assert.Contains("public void UpdateCaptureDependenciesPtzs", captureDependencies, StringComparison.Ordinal);
+        Assert.Contains("public void UpdateCaptureDependenciesV2", captureDependencies, StringComparison.Ordinal);
         Assert.Contains("public readonly struct CudaStreamCaptureScalarInfo", scalar, StringComparison.Ordinal);
-        Assert.Contains("CudaGraphNodeDependency", stream + interop, StringComparison.Ordinal);
+        Assert.Contains("CudaGraphNodeDependency", captureDependencies + interop, StringComparison.Ordinal);
         Assert.Contains("GCHandle.Alloc(edgeData, GCHandleType.Pinned)", interop, StringComparison.Ordinal);
         Assert.Contains("ProbeStreamCaptureVariants", smoke, StringComparison.Ordinal);
         Assert.Contains("PtzsUpdate", smoke, StringComparison.Ordinal);

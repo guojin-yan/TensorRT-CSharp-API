@@ -26,15 +26,17 @@ public sealed class CudaStreamCaptureToGraphUpliftTests
     [Fact]
     public void ManagedSurfacePinsOwnersAndDoesNotExposeNativePointers()
     {
-        string stream = ReadSource("src", "JYPPX.CudaSharp", "Streams", "CudaStream.cs");
+        string streamCore = ReadSource("src", "JYPPX.CudaSharp", "Streams", "CudaStream.cs");
+        string captureLifecycle = ReadSource(
+            "src", "JYPPX.CudaSharp", "Streams", "CudaStream.CaptureLifecycle.cs");
         string graph = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.cs");
         string session = ReadSource("src", "JYPPX.CudaSharp", "Streams", "CudaStreamCaptureToGraphSession.cs");
         string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "Graph", "NativeCudaApi.StreamCaptureVariants.cs");
         string smoke = ReadSource("smoke", "CudaGraphSmokeRunner", "Program.cs");
 
-        Assert.Contains("BeginCaptureToGraph", stream, StringComparison.Ordinal);
-        Assert.Contains("EnterCaptureToGraphSession", stream + graph, StringComparison.Ordinal);
-        Assert.Contains("cannot be disposed while a stream-to-graph capture session is active", stream + graph, StringComparison.Ordinal);
+        Assert.Contains("BeginCaptureToGraph", captureLifecycle, StringComparison.Ordinal);
+        Assert.Contains("EnterCaptureToGraphSession", streamCore + captureLifecycle + graph, StringComparison.Ordinal);
+        Assert.Contains("cannot be disposed while a stream-to-graph capture session is active", streamCore + graph, StringComparison.Ordinal);
         Assert.Contains("public sealed class CudaStreamCaptureToGraphSession", session, StringComparison.Ordinal);
         Assert.Contains("public CudaGraph Graph", session, StringComparison.Ordinal);
         Assert.Contains("EndStreamCaptureIntoGraph", session + interop, StringComparison.Ordinal);

@@ -111,6 +111,13 @@ Dispose core；fill、2D transfer、3D transfer、array conversion 进入 4 份 
 1D/2D/3D transfer、array conversion 进入 5 份 feature partial。布局门禁可重组拆分前 Git blob
 `e30004cce7cc55c7b62e19478de913d68be3c591` 与 `6de4bc82180a8539e3b6d6fa610c485c042d043e`。
 
+CUDA stream 与 memory-pool owner 也按调用阶段和职责边界拆分。`Streams/CudaStream.cs` 从 439 行降为 126 行
+handle/property、capture owner-count 与 Dispose core；一般 diagnostics、capture diagnostics、capture dependencies、
+synchronization/event 和 capture lifecycle 进入 5 份 feature partial。`Memory/CudaMemoryPool.cs` 从 372 行降为
+31 行 handle/value core；factory、allocation、access 与 attributes 进入 4 份 feature partial，独立 owner
+`CudaOwnedMemoryPool` 与两个 pool enum 各自移入专用文件。布局门禁可重组拆分前 Git blob
+`379fd60f08beca36711507a6c83a2192d20b6562` 与 `7028220b628b3d2af9c3f007dda75ec4ff2f5fd3`。
+
 手写 TensorRT partial interop 也开始按相同职责模块归类：
 
 - `Internal/Interop/Builder`：builder creation/capabilities、serialized build outputs、builder boundary controls、

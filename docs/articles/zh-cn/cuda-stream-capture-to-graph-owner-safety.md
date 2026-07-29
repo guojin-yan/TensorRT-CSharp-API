@@ -76,9 +76,10 @@ flowchart LR
 
 ## Begin 的异常回滚
 
-`src/JYPPX.CudaSharp/Streams/CudaStream.cs` 中的 `BeginCaptureToGraph` 先增加 stream capture-use count，再增加 graph count，
-最后调用 native begin。任一步失败都会按相反顺序回滚已经增加的 count。成功后 session 同时保存两个强引用，使 GC 也无法
-在 capture 期间回收 wrapper。
+`src/JYPPX.CudaSharp/Streams/CudaStream.CaptureLifecycle.cs` 中的 `BeginCaptureToGraph` 先调用
+`src/JYPPX.CudaSharp/Streams/CudaStream.cs` core 中的 owner-count helper 增加 stream capture-use count，再增加 graph count，
+最后调用 native begin。任一步失败都会按相反顺序回滚已经增加的 count。stream 的 owner count 与 Dispose 保护仍保留在
+core 中。成功后 session 同时保存两个强引用，使 GC 也无法在 capture 期间回收 wrapper。
 
 ```mermaid
 stateDiagram-v2

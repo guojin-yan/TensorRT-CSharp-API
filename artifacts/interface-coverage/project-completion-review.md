@@ -6544,3 +6544,38 @@ public enum 数值、device context/P2P/error 状态语义或 proof 分类。
 - owner source split 不构成 2D/3D CUDA runtime、pinned async completion、real model、Linux、package consumer、
   public package、post-publish、Owner acceptance 或 release proof。
 - 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行远程发布操作。
+
+## 2026-07-29 CUDA Stream And Memory Pool Owner Split
+
+本阶段继续整理 `JYPPX.CudaSharp` 高层 stream 与 memory-pool owner，将 diagnostics、capture、同步、分配、访问和
+属性操作移入可直接定位的 feature 文件，同时保持 SafeHandle、capture owner count、pool value/owned 语义与 Dispose
+边界不变。
+
+### 实现与门禁
+
+- `CudaStream.cs` 从 439 行降至 126 行，仅保留 handle/property、capture-to-graph owner count、Dispose 与内部
+  Enter/Exit helper；一般 diagnostics、capture diagnostics、capture dependencies、synchronization/event 与 capture
+  lifecycle 进入五份 partial。
+- `CudaMemoryPool.cs` 从 372 行降至 31 行，仅保留 pool handle/value core；factory、allocation、access 与 attributes
+  进入四份 partial，独立 `CudaOwnedMemoryPool` owner 和两个 pool enum 分别移入专用文件。
+- `ManagedCudaStreamMemoryPoolLayoutTests` 固定两个 core 与九份 feature partial 的精确成员集合、capture owner
+  lifecycle、owned-pool Dispose/helper 与 enum type owner，并规范化重组两份原源码。
+- 拆分前 Git blob 为 `379fd60f08beca36711507a6c83a2192d20b6562`、
+  `7028220b628b3d2af9c3f007dda75ec4ff2f5fd3`；normalized SHA-256 保持
+  `8b6117416cd402dc7bbed964431822652be7ef19fe61a94c7e3924b8f780fd52` 与
+  `df79524f844e67591ee942abdca0a9a8ce996cbcc32729695dcc7754722f707e`。
+- 四份直接读取旧 Stream core 的质量测试改读 CaptureDiagnostics、CaptureDependencies、CaptureLifecycle 或明确的
+  core+feature 组合；stream-capture audit、两篇 CUDA 文章与双语 source-organization 同步到真实 owner。
+
+### 验证与边界
+
+- 新布局/重组门禁：`15/15` 通过；四组 CUDA 消费门禁：`18/18` 通过；两者合并聚焦集合：`33/33` 通过；
+  全部 managed 源码布局门禁合并集合：`232/232` 通过。
+- `JYPPX.CudaSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- ignored deferred candidate evidence 保持 260 条引用、147 个唯一路径、0 缺失；22 份 ignored JSON 均可解析，
+  ignored 文件未强制提交。
+- Generated/native/manifest/ABI 改动为 0；本机仍无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合测试。
+- owner/source relocation 不构成 CUDA runtime、stream capture、async pool allocation、real model、Linux、package
+  consumer、public package、post-publish、Owner acceptance 或 release proof。
+- 进程审计识别出其他工作区的 PowerShell/dotnet 任务并原样保留；8 份 publishing 用户变更未触碰、未暂存；
+  未 push、未触发 GitHub Actions、未执行远程发布操作。

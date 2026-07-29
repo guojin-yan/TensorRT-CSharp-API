@@ -127,6 +127,14 @@ validation, and disposal core; copied requirements/sparse diagnostics, 1D/2D/3D 
 feature partials. The layout gate recomposes the pre-split Git blobs `e30004cce7cc55c7b62e19478de913d68be3c591` and
 `6de4bc82180a8539e3b6d6fa610c485c042d043e`.
 
+The CUDA stream and memory-pool owners are split by call stage and responsibility as well. `Streams/CudaStream.cs` is reduced
+from 439 lines to a 126-line handle/property, capture owner-count, and disposal core; general diagnostics, capture diagnostics,
+capture dependencies, synchronization/event operations, and capture lifecycle live in five feature partials.
+`Memory/CudaMemoryPool.cs` is reduced from 372 lines to a 31-line handle/value core; factories, allocation, access, and attributes
+live in four feature partials, while the independent `CudaOwnedMemoryPool` owner and two pool enums move to dedicated files.
+The layout gate recomposes the pre-split Git blobs `379fd60f08beca36711507a6c83a2192d20b6562` and
+`7028220b628b3d2af9c3f007dda75ec4ff2f5fd3`.
+
 Hand-written TensorRT partial interop now starts following the same responsibility modules:
 
 - `Internal/Interop/Builder` contains builder creation/capabilities, serialized build outputs, builder boundary controls,

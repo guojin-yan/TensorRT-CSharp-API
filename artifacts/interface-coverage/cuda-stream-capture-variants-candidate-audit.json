@@ -35,7 +35,8 @@
     "CUDA 13.2 does not expose these 12.x-only entry points through this bridge."
   ],
   "managedRoute": [
-    "src/JYPPX.CudaSharp/Streams/CudaStream.cs",
+    "src/JYPPX.CudaSharp/Streams/CudaStream.CaptureDiagnostics.cs",
+    "src/JYPPX.CudaSharp/Streams/CudaStream.CaptureDependencies.cs",
     "src/JYPPX.CudaSharp/Streams/CudaStreamCaptureScalarInfo.cs",
     "src/JYPPX.CudaSharp/Internal/Interop/Graph/NativeCudaApi.StreamCaptureVariants.cs"
   ],
