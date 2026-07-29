@@ -92,9 +92,12 @@ public sealed class ManagedSourceModuleLayoutTests
                 "NativeBridgeApi.Deconvolution.cs",
                 "NativeBridgeApi.DeploymentLayerAttributes.cs",
                 "NativeBridgeApi.Dims64LayerMetadata.cs",
+                "NativeBridgeApi.ElementWise.cs",
                 "NativeBridgeApi.IdentityAndConstant.cs",
                 "NativeBridgeApi.LayerDeploymentMetadata.cs",
+                "NativeBridgeApi.MatrixMultiply.cs",
                 "NativeBridgeApi.OptionalWeightsShared.cs",
+                "NativeBridgeApi.Padding.cs",
                 "NativeBridgeApi.Quantization.cs",
                 "NativeBridgeApi.Scale.cs",
                 "NativeBridgeApi.ThirtyThirdBatchLayerAttributes.cs",
@@ -946,7 +949,7 @@ public sealed class ManagedSourceModuleLayoutTests
         }
 
         Assert.DoesNotContain("GetNetworkNameNative", rootSource, StringComparison.Ordinal);
-        Assert.Contains("public static SafeTensorRtObjectHandle AddPaddingLayer(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static SafeTensorRtObjectHandle AddShuffleLayer(", rootSource, StringComparison.Ordinal);
         Assert.Contains("private static BridgeStatusCode GetTensorNameNative(", rootSource, StringComparison.Ordinal);
         Assert.Contains("private static BridgeStatusCode GetLayerNameNative(", rootSource, StringComparison.Ordinal);
     }
@@ -1016,7 +1019,45 @@ public sealed class ManagedSourceModuleLayoutTests
         Assert.DoesNotContain("PinOptionalWeights", rootSource, StringComparison.Ordinal);
         Assert.DoesNotContain("GetScaleWeightsDataType", rootSource, StringComparison.Ordinal);
         Assert.DoesNotContain("ValidateOptionalWeightsDataType", rootSource, StringComparison.Ordinal);
-        Assert.Contains("public static SafeTensorRtObjectHandle AddPaddingLayer(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static SafeTensorRtObjectHandle AddShuffleLayer(", rootSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TensorRtRootBasicLayerOperationsAreSplitByFeature()
+    {
+        string interopDirectory = Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.TensorRtSharp",
+            "Internal",
+            "Interop");
+        string rootSource = File.ReadAllText(Path.Combine(interopDirectory, "NativeBridgeApi.cs"));
+        string[] rootMethods = EnumeratePublicStaticMethodNames(rootSource);
+        string[] paddingMethods = ReadInteropMethodNames(
+            interopDirectory,
+            "Layers",
+            "NativeBridgeApi.Padding.cs");
+        string[] elementWiseMethods = ReadInteropMethodNames(
+            interopDirectory,
+            "Layers",
+            "NativeBridgeApi.ElementWise.cs");
+        string[] matrixMultiplyMethods = ReadInteropMethodNames(
+            interopDirectory,
+            "Layers",
+            "NativeBridgeApi.MatrixMultiply.cs");
+
+        Assert.Equal(new[] { "AddPaddingLayer" }, paddingMethods);
+        Assert.Equal(new[] { "AddElementWiseLayer" }, elementWiseMethods);
+        Assert.Equal(
+            new[] { "AddMatrixMultiplyLayer", "SetMatrixMultiplyOperation", "GetMatrixMultiplyOperation" },
+            matrixMultiplyMethods);
+
+        foreach (string method in paddingMethods.Concat(elementWiseMethods).Concat(matrixMultiplyMethods))
+        {
+            Assert.DoesNotContain(method, rootMethods);
+        }
+
+        Assert.Contains("public static SafeTensorRtObjectHandle AddShuffleLayer(", rootSource, StringComparison.Ordinal);
     }
 
     private static string[] EnumerateModuleFiles(string projectDirectory, string module)
