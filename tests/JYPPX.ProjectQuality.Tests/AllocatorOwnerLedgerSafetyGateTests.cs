@@ -163,7 +163,7 @@ public sealed class AllocatorOwnerLedgerSafetyGateTests
     {
         string root = FindRepositoryRoot();
         string path = Path.Combine(new[] { root }.Concat(pathParts).ToArray());
-        return File.ReadAllText(path);
+        return RepositorySourceReader.Read(path);
     }
 
     private static string FindRepositoryRoot()

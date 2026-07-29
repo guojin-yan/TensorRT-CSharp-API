@@ -170,6 +170,16 @@ parsing live in six feature partials, while IO-format and layer-rule models are 
 recomposes the pre-split Git blobs `d55d835f5dd934975af9a302391415e49030a14d` and
 `ef5b4bf488124bb1d37090cbf5cf1b75cf345dfb`.
 
+Callback proof orchestration and allocator diagnostics are split without weakening their non-proof boundaries. The former
+1,774-line `Callbacks/Debugging/TensorRtDebugListenerRuntimeProofPrecheck.cs` is reduced to a 379-line final evaluation core;
+design prerequisites, native attach design, owner lifecycle, runtime scaffold, and final runtime gates live in five partials,
+and the copied precheck result has its own file. The former 1,163-line
+`Callbacks/MemoryAllocation/TensorRtAllocatorCallbackOwner.cs` is reduced to a 120-line state/constructor/property core;
+lifecycle, managed dry-run, native dry-run, state ledger, internal prototype, and native result mapping live in six partials,
+while request/result/snapshot/delegate models are dedicated files. Layout gates recompose the pre-split Git blobs
+`c33e5795a35e4ef04836486ac0fb64552f608681` and `7c71b544fe40b1a4f5c77b42b3900e1ce62f899c` and retain all 16
+precheck overload signatures and allocator release ordering.
+
 TensorRT public enums are no longer collected in the 2,456-line `Core/TensorRtEnums.cs`. Its 64 enums are distributed across
 15 module files for shared Core tensor values, Network, Parsing, Execution, Serialization, Engine, Runtime, Builder, Profiles,
 ControlFlow, and the Layers RNN, operation, resize, metadata, and attention domains. Single-value/flags pairs remain together;

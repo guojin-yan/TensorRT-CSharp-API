@@ -113,12 +113,26 @@ public nint DebugTensor { get; }
 
 ### Owner and precheck
 
-- `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtAllocatorCallbackOwner.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtAllocatorCallbackOwner.cs`：只保留 owner state、constructor 与 properties。
+- `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtAllocatorCallbackOwner.Lifecycle.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtAllocatorCallbackOwner.ManagedDryRun.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtAllocatorCallbackOwner.NativeDryRun.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtAllocatorCallbackOwner.StateLedger.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtAllocatorCallbackOwner.InternalPrototype.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtAllocatorCallbackOwner.ResultMapping.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtAllocatorDryRunRequest.cs` 与同目录的 result/snapshot/delegate model 文件。
 - `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtAllocatorLedgerSafetyGate.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtOutputAllocatorCallbackOwner.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeProofPrecheck.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerCallbackOwner.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerCallbackProofGapReport.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerRuntimeProofPrecheck.cs` 与其
+  `DesignPrerequisites`、`NativeAttachDesign`、`OwnerLifecycle`、`RuntimeScaffold`、`FinalRuntimeGates` partial。
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerRuntimeProofPrecheckResult.cs`
+
+这些文件只做职责归类。16 个 `Evaluate` overload、`Dispose -> callback drain -> GCHandle/delegate release` 顺序、
+pointer-free marker 和 real-runtime non-proof 分类均保持不变；源码 evidence consumer 必须读取完整文件集，不能再把 core
+单文件当作完整实现。
 
 ### DebugListener native/runtime scaffolding
 

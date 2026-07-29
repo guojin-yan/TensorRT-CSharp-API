@@ -149,6 +149,15 @@ orchestration core；parsing、IO formats、precision constraints、layer polici
 进入 6 份 feature partial，IO-format 与 layer-rule model 成为独立 internal 类型。布局门禁可重组拆分前 Git blob
 `d55d835f5dd934975af9a302391415e49030a14d` 与 `ef5b4bf488124bb1d37090cbf5cf1b75cf345dfb`。
 
+callback proof 编排与 allocator diagnostics 也在不放宽 non-proof 边界的前提下完成拆分。原 1,774 行
+`Callbacks/Debugging/TensorRtDebugListenerRuntimeProofPrecheck.cs` 降为 379 行最终 evaluation core；design prerequisite、
+native attach design、owner lifecycle、runtime scaffold 与 final runtime gate 进入 5 份 partial，复制型 precheck result
+独立成文件。原 1,163 行 `Callbacks/MemoryAllocation/TensorRtAllocatorCallbackOwner.cs` 降为 120 行
+state/constructor/property core；lifecycle、managed dry-run、native dry-run、state ledger、internal prototype 与 native result
+mapping 进入 6 份 partial，request/result/snapshot/delegate model 各自成文件。布局门禁可重组拆分前 Git blob
+`c33e5795a35e4ef04836486ac0fb64552f608681` 与 `7c71b544fe40b1a4f5c77b42b3900e1ce62f899c`，并固定全部
+16 个 precheck overload 签名及 allocator release 顺序。
+
 TensorRT 的 public enum 也不再集中在 2,456 行的 `Core/TensorRtEnums.cs`。其中 64 个 enum 按 Core tensor 基础类型、
 Network、Parsing、Execution、Serialization、Engine、Runtime、Builder、Profiles、ControlFlow，以及 Layers 下的
 RNN、operation、resize、metadata、attention 分入 15 个模块文件；单值/flags 配对保持同文件，名称、underlying type、

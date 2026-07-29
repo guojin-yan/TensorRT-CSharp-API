@@ -290,7 +290,7 @@ public sealed class CallbackAllocatorBoundaryTests
         Assert.Contains("public readonly struct TensorRtAllocatorDryRunRequest", ownerSource);
         Assert.Contains("public readonly struct TensorRtAllocatorDryRunResult", ownerSource);
         Assert.Contains("public delegate TensorRtAllocatorDryRunResult TensorRtAllocatorDryRunHandler", ownerSource);
-        Assert.Contains("public sealed class TensorRtAllocatorCallbackOwner", ownerSource);
+        Assert.Contains("public sealed partial class TensorRtAllocatorCallbackOwner", ownerSource);
         Assert.Contains("GCHandle.Alloc(_callbackState)", ownerSource);
         Assert.Contains("keeps managed callback state alive", ownerSource);
         Assert.Contains("public bool IsAttached => false", ownerSource);
@@ -1221,6 +1221,6 @@ public sealed class CallbackAllocatorBoundaryTests
     private static string ReadSource(params string[] pathParts)
     {
         string path = Path.Combine(new[] { RepositoryPaths.Root }.Concat(pathParts).ToArray());
-        return File.ReadAllText(path);
+        return RepositorySourceReader.Read(path);
     }
 }

@@ -246,7 +246,7 @@ public sealed class DebugListenerRuntimeProofPrecheckTests
         string smokeReadme = ReadSource("smoke", "README.md");
         string comparison = ReadSource("artifacts", "interface-coverage", "tensorrt-interface-comparison.csv");
 
-        Assert.Contains("public static class TensorRtDebugListenerRuntimeProofPrecheck", precheckSource);
+        Assert.Contains("public static partial class TensorRtDebugListenerRuntimeProofPrecheck", precheckSource);
         Assert.Contains("public readonly struct TensorRtDebugListenerRuntimeProofPrecheckResult", precheckSource);
         Assert.Contains("RuntimeEvidenceKind => \"runtime-gate\"", precheckSource);
         Assert.Contains("RealCallbackRuntime => false", precheckSource);
@@ -617,6 +617,6 @@ public sealed class DebugListenerRuntimeProofPrecheckTests
     private static string ReadSource(params string[] pathParts)
     {
         string path = Path.Combine(new[] { RepositoryPaths.Root }.Concat(pathParts).ToArray());
-        return File.ReadAllText(path);
+        return RepositorySourceReader.Read(path);
     }
 }

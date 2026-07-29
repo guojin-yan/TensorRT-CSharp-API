@@ -6761,3 +6761,46 @@ tactic、memory pool、IO format、precision、layer policy、rule validation �
 - source/model relocation 不构成新的 TensorRT/CUDA runtime、real model、Linux、package consumer、public package、
   post-publish、Owner acceptance 或 release proof。
 - 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行远程发布操作。
+
+## 2026-07-30 DebugListener Precheck And Allocator Callback Owner Source Split
+
+本阶段继续整理 `JYPPX.TensorRtSharp/Callbacks`，将 DebugListener runtime-proof prerequisite chain 与 allocator
+callback owner 的 copied model、生命周期、dry-run、ledger 和 internal prototype 从两个大文件中分离。全部 public/internal
+签名、诊断文本、proof classification、GCHandle/delegate keep-alive 与释放顺序保持不变。
+
+### 实现与门禁
+
+- `TensorRtDebugListenerRuntimeProofPrecheck.cs` 从 1,774 行降为 379 行最终 evaluation core；前 15 个 overload 按
+  DesignPrerequisites、NativeAttachDesign、OwnerLifecycle、RuntimeScaffold、FinalRuntimeGates 进入五份 partial，最终
+  19-parameter gate 保留在 core，`TensorRtDebugListenerRuntimeProofPrecheckResult` 独立成文件。
+- `TensorRtAllocatorCallbackOwner.cs` 从 1,163 行降为 120 行 state/constructor/property core；Lifecycle、ManagedDryRun、
+  NativeDryRun、StateLedger、InternalPrototype、ResultMapping 进入六份 partial。
+- allocator request、managed/native/state result、snapshot、delegate 与 internal prototype result 七个 top-level 类型各自成文件；
+  `Dispose`、callback drain、runtime delegate GCHandle、callback state GCHandle、release hook 与 `GC.KeepAlive` 顺序逐字不变。
+- `ManagedCallbackPrecheckAllocatorLayoutTests` 固定 16 个 `Evaluate` overload 的完整 prerequisite type prefix、allocator
+  method/property/type owner、delegate owner、两份旧源码的规范化重组 SHA，以及 readiness/test source-set 枚举。
+- 拆分前 Git blob 为 `c33e5795a35e4ef04836486ac0fb64552f608681`、
+  `7c71b544fe40b1a4f5c77b42b3900e1ce62f899c`；normalized SHA-256 保持
+  `d7ede0aca1090be578050e43b80e1ed737189f415f9c1663465457e3bd7cc67c` 与
+  `7b1556a06acdf5dce2fff5af49852df5f7490ec8201fba083abbfa548ce1b993`。
+- 18 个直接读取旧聚合文件的测试类统一改读真实 core/partial/model 组合；`Test-RuntimePackageReadiness.ps1` 的
+  28 个 evidence 聚合点统一经 `Get-EvidenceSourceText` 展开两套实际文件，PowerShell UTF-8 source parse 为 0 error。
+- callback/allocator 路线图与双语 source-organization 同步；文档明确 core 单文件不再代表完整实现，也不改变
+  pointer-free readiness 与 real callback runtime proof 的边界。
+
+### 验证与边界
+
+- 新 overload/owner/property/重组/evidence 组合门禁：`23/23` 通过；DebugListener、allocator、deferred boundary
+  直接消费聚焦集合：`145/145` 通过；callback readiness/closure 聚合：`6/6` 通过；全部 managed layout 合并集合：
+  `359/359` 通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- 额外 article 测试切片实际为 `52/55`：两个失败来自本机不存在仓库认可的 `pwsh`，另一个来自既有 release story
+  仍断言旧 `Manifest API count: 3976`；未将该切片或 exporter 宣称通过，也未生成新的 exporter evidence。
+- ignored deferred candidate evidence 保持 `260` 条引用、`147` 个唯一路径、`0` 缺失；其中引用的 `22` 份 JSON
+  全部可解析，ignored 文件未强制提交。
+- Generated/native/manifest/ABI 改动为 0；`git diff --check` 通过，readiness 脚本未运行。
+- 进程审计快照只发现当前审计 PowerShell；Downloads 与用户 Temp 顶层近三小时没有本批 TensorRT/JYPPX/CUDA/
+  NVRTC/ONNX/engine/nupkg 重资产匹配项，未终止、删除或借用其他工作区进程。
+- source/type relocation 不构成新的 callback runtime、TensorRT/CUDA runtime、real model、Linux、package consumer、
+  public package、post-publish、Owner acceptance 或 release proof。
+- 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行远程发布操作。

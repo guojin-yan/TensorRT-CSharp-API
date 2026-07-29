@@ -22,6 +22,53 @@ $OutputEncoding = $utf8
 
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 
+function Get-EvidenceSourceText {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$Path
+  )
+
+  $sourceFileNames = switch -Exact ([System.IO.Path]::GetFileName($Path)) {
+    "TensorRtDebugListenerRuntimeProofPrecheck.cs" {
+      @(
+        "TensorRtDebugListenerRuntimeProofPrecheck.cs",
+        "TensorRtDebugListenerRuntimeProofPrecheck.DesignPrerequisites.cs",
+        "TensorRtDebugListenerRuntimeProofPrecheck.NativeAttachDesign.cs",
+        "TensorRtDebugListenerRuntimeProofPrecheck.OwnerLifecycle.cs",
+        "TensorRtDebugListenerRuntimeProofPrecheck.RuntimeScaffold.cs",
+        "TensorRtDebugListenerRuntimeProofPrecheck.FinalRuntimeGates.cs",
+        "TensorRtDebugListenerRuntimeProofPrecheckResult.cs")
+      break
+    }
+    "TensorRtAllocatorCallbackOwner.cs" {
+      @(
+        "TensorRtAllocatorCallbackOwner.cs",
+        "TensorRtAllocatorCallbackOwner.Lifecycle.cs",
+        "TensorRtAllocatorCallbackOwner.ManagedDryRun.cs",
+        "TensorRtAllocatorCallbackOwner.NativeDryRun.cs",
+        "TensorRtAllocatorCallbackOwner.StateLedger.cs",
+        "TensorRtAllocatorCallbackOwner.InternalPrototype.cs",
+        "TensorRtAllocatorCallbackOwner.ResultMapping.cs",
+        "TensorRtAllocatorDryRunRequest.cs",
+        "TensorRtAllocatorDryRunResult.cs",
+        "TensorRtAllocatorDryRunHandler.cs",
+        "TensorRtAllocatorNativeDryRunResult.cs",
+        "TensorRtAllocatorOwnerStateDryRunResult.cs",
+        "TensorRtAllocatorCallbackOwnerSnapshot.cs",
+        "TensorRtAllocatorInternalRuntimePrototypeResult.cs")
+      break
+    }
+    default {
+      return Get-Content -LiteralPath $Path -Raw -Encoding utf8
+    }
+  }
+
+  $directory = Split-Path -Parent $Path
+  return (@($sourceFileNames | ForEach-Object {
+    Get-Content -LiteralPath (Join-Path $directory $_) -Raw -Encoding utf8
+  }) -join "`n")
+}
+
 function Expand-KeyList {
   param(
     [string[]]$Values
@@ -1387,7 +1434,7 @@ function New-DeferredReadOnlyDesignGateEvidence {
 
   $combined = ""
   foreach ($path in @($evidencePaths)) {
-    $combined += (Get-Content -LiteralPath $path -Raw -Encoding utf8) + "`n"
+    $combined += (Get-EvidenceSourceText -Path $path) + "`n"
   }
 
   $missingMarkers = New-Object System.Collections.Generic.List[string]
@@ -2301,7 +2348,7 @@ function New-AllocatorOwnerInternalRuntimePrototypeEvidence {
 
   $combined = ""
   foreach ($path in @($evidencePaths)) {
-    $combined += (Get-Content -LiteralPath $path -Raw -Encoding utf8) + "`n"
+    $combined += (Get-EvidenceSourceText -Path $path) + "`n"
   }
 
   $missingMarkers = New-Object System.Collections.Generic.List[string]
@@ -2437,7 +2484,7 @@ function New-AllocatorOwnerLedgerSafetyGateEvidence {
 
   $combined = ""
   foreach ($path in @($evidencePaths)) {
-    $combined += (Get-Content -LiteralPath $path -Raw -Encoding utf8) + "`n"
+    $combined += (Get-EvidenceSourceText -Path $path) + "`n"
   }
 
   $missingMarkers = New-Object System.Collections.Generic.List[string]
@@ -2557,7 +2604,7 @@ function New-OutputAllocatorInternalRuntimeGateEvidence {
 
   $combined = ""
   foreach ($path in @($evidencePaths)) {
-    $combined += (Get-Content -LiteralPath $path -Raw -Encoding utf8) + "`n"
+    $combined += (Get-EvidenceSourceText -Path $path) + "`n"
   }
 
   $missingMarkers = New-Object System.Collections.Generic.List[string]
@@ -2681,7 +2728,7 @@ function New-OutputAllocatorCallbackOwnerDesignEvidence {
 
   $combined = ""
   foreach ($path in @($evidencePaths)) {
-    $combined += (Get-Content -LiteralPath $path -Raw -Encoding utf8) + "`n"
+    $combined += (Get-EvidenceSourceText -Path $path) + "`n"
   }
 
   $missingMarkers = New-Object System.Collections.Generic.List[string]
@@ -2811,7 +2858,7 @@ function New-OutputAllocatorAttachDetachDesignGateEvidence {
 
   $combined = ""
   foreach ($path in @($evidencePaths)) {
-    $combined += (Get-Content -LiteralPath $path -Raw -Encoding utf8) + "`n"
+    $combined += (Get-EvidenceSourceText -Path $path) + "`n"
   }
 
   $missingMarkers = New-Object System.Collections.Generic.List[string]
@@ -2949,7 +2996,7 @@ function New-OutputBufferOwnershipSafetyGateEvidence {
 
   $combined = ""
   foreach ($path in @($evidencePaths)) {
-    $combined += (Get-Content -LiteralPath $path -Raw -Encoding utf8) + "`n"
+    $combined += (Get-EvidenceSourceText -Path $path) + "`n"
   }
 
   $missingMarkers = New-Object System.Collections.Generic.List[string]
@@ -3106,7 +3153,7 @@ function New-OutputAllocatorRuntimeProofPrecheckEvidence {
 
   $combined = ""
   foreach ($path in @($evidencePaths)) {
-    $combined += (Get-Content -LiteralPath $path -Raw -Encoding utf8) + "`n"
+    $combined += (Get-EvidenceSourceText -Path $path) + "`n"
   }
 
   $missingMarkers = New-Object System.Collections.Generic.List[string]
@@ -3226,7 +3273,7 @@ function New-DebugListenerCallbackOwnerDesignEvidence {
 
   $combined = ""
   foreach ($path in @($evidencePaths)) {
-    $combined += (Get-Content -LiteralPath $path -Raw -Encoding utf8) + "`n"
+    $combined += (Get-EvidenceSourceText -Path $path) + "`n"
   }
 
   $missingMarkers = New-Object System.Collections.Generic.List[string]
@@ -3349,7 +3396,7 @@ function New-DebugListenerAttachDetachDesignGateEvidence {
 
   $combined = ""
   foreach ($path in @($evidencePaths)) {
-    $combined += (Get-Content -LiteralPath $path -Raw -Encoding utf8) + "`n"
+    $combined += (Get-EvidenceSourceText -Path $path) + "`n"
   }
 
   $missingMarkers = New-Object System.Collections.Generic.List[string]
@@ -3484,7 +3531,7 @@ function New-DebugListenerBorrowedTensorSafetyGateEvidence {
 
   $combined = ""
   foreach ($path in @($evidencePaths)) {
-    $combined += (Get-Content -LiteralPath $path -Raw -Encoding utf8) + "`n"
+    $combined += (Get-EvidenceSourceText -Path $path) + "`n"
   }
 
   $missingMarkers = New-Object System.Collections.Generic.List[string]
@@ -3804,7 +3851,7 @@ function New-DebugListenerRuntimeProofPrecheckEvidence {
 
   $combined = ""
   foreach ($path in @($evidencePaths)) {
-    $combined += (Get-Content -LiteralPath $path -Raw -Encoding utf8) + "`n"
+    $combined += (Get-EvidenceSourceText -Path $path) + "`n"
   }
 
   $missingMarkers = New-Object System.Collections.Generic.List[string]
@@ -3942,7 +3989,7 @@ function New-DebugListenerRuntimeProofAttemptPreflightEvidence {
 
   $combined = ""
   foreach ($path in @($evidencePaths)) {
-    $combined += (Get-Content -LiteralPath $path -Raw -Encoding utf8) + "`n"
+    $combined += (Get-EvidenceSourceText -Path $path) + "`n"
   }
 
   $missingMarkers = New-Object System.Collections.Generic.List[string]
@@ -4087,7 +4134,7 @@ function New-DebugListenerAttachVTableSafetyGateEvidence {
 
   $combined = ""
   foreach ($path in @($evidencePaths)) {
-    $combined += (Get-Content -LiteralPath $path -Raw -Encoding utf8) + "`n"
+    $combined += (Get-EvidenceSourceText -Path $path) + "`n"
   }
 
   $missingMarkers = New-Object System.Collections.Generic.List[string]
@@ -4238,7 +4285,7 @@ function New-DebugListenerNativeAttachNoThrowPreflightEvidence {
 
   $combined = ""
   foreach ($path in @($evidencePaths)) {
-    $combined += (Get-Content -LiteralPath $path -Raw -Encoding utf8) + "`n"
+    $combined += (Get-EvidenceSourceText -Path $path) + "`n"
   }
 
   $missingMarkers = New-Object System.Collections.Generic.List[string]
@@ -4399,7 +4446,7 @@ function New-DebugListenerNativeOwnerAddressDesignGateEvidence {
 
   $combined = ""
   foreach ($path in @($evidencePaths)) {
-    $combined += (Get-Content -LiteralPath $path -Raw -Encoding utf8) + "`n"
+    $combined += (Get-EvidenceSourceText -Path $path) + "`n"
   }
 
   $missingMarkers = New-Object System.Collections.Generic.List[string]
@@ -4560,7 +4607,7 @@ function New-DebugListenerNativeNoThrowVTableDesignGateEvidence {
 
   $combined = ""
   foreach ($path in @($evidencePaths)) {
-    $combined += (Get-Content -LiteralPath $path -Raw -Encoding utf8) + "`n"
+    $combined += (Get-EvidenceSourceText -Path $path) + "`n"
   }
 
   $missingMarkers = New-Object System.Collections.Generic.List[string]
@@ -4720,7 +4767,7 @@ function New-DebugListenerNativeAttachEntryDesignGateEvidence {
 
   $combined = ""
   foreach ($path in @($evidencePaths)) {
-    $combined += (Get-Content -LiteralPath $path -Raw -Encoding utf8) + "`n"
+    $combined += (Get-EvidenceSourceText -Path $path) + "`n"
   }
 
   $missingMarkers = New-Object System.Collections.Generic.List[string]
@@ -4879,7 +4926,7 @@ function New-DebugListenerNativeDetachBeforeReleaseDesignGateEvidence {
 
   $combined = ""
   foreach ($path in @($evidencePaths)) {
-    $combined += (Get-Content -LiteralPath $path -Raw -Encoding utf8) + "`n"
+    $combined += (Get-EvidenceSourceText -Path $path) + "`n"
   }
 
   $missingMarkers = New-Object System.Collections.Generic.List[string]
@@ -5042,7 +5089,7 @@ function New-DebugListenerNativeOwnerLifecycleDryRunEvidence {
 
   $combined = ""
   foreach ($path in @($evidencePaths)) {
-    $combined += (Get-Content -LiteralPath $path -Raw -Encoding utf8) + "`n"
+    $combined += (Get-EvidenceSourceText -Path $path) + "`n"
   }
 
   $missingMarkers = New-Object System.Collections.Generic.List[string]
@@ -5192,7 +5239,7 @@ function New-DebugListenerNativeAttachEntryRuntimeScaffoldEvidence {
 
   $combined = ""
   foreach ($path in @($evidencePaths)) {
-    $combined += (Get-Content -LiteralPath $path -Raw -Encoding utf8) + "`n"
+    $combined += (Get-EvidenceSourceText -Path $path) + "`n"
   }
 
   $missingMarkers = New-Object System.Collections.Generic.List[string]
@@ -5359,7 +5406,7 @@ function New-DebugListenerNativeAttachEntryMinimalSafetyEvidence {
 
   $combined = ""
   foreach ($path in @($evidencePaths)) {
-    $combined += (Get-Content -LiteralPath $path -Raw -Encoding utf8) + "`n"
+    $combined += (Get-EvidenceSourceText -Path $path) + "`n"
   }
 
   $missingMarkers = New-Object System.Collections.Generic.List[string]
@@ -5511,7 +5558,7 @@ function New-DebugListenerNativeOwnerStableIdentityEvidence {
 
   $combined = ""
   foreach ($path in @($evidencePaths)) {
-    $combined += (Get-Content -LiteralPath $path -Raw -Encoding utf8) + "`n"
+    $combined += (Get-EvidenceSourceText -Path $path) + "`n"
   }
 
   $missingMarkers = New-Object System.Collections.Generic.List[string]
@@ -5677,7 +5724,7 @@ function New-DebugListenerNativeOwnerNonCopyableStorageEvidence {
 
   $combined = ""
   foreach ($path in @($evidencePaths)) {
-    $combined += (Get-Content -LiteralPath $path -Raw -Encoding utf8) + "`n"
+    $combined += (Get-EvidenceSourceText -Path $path) + "`n"
   }
 
   $missingMarkers = New-Object System.Collections.Generic.List[string]
@@ -5848,7 +5895,7 @@ function New-DebugListenerNativeNoThrowDestructorEvidence {
 
   $combined = ""
   foreach ($path in @($evidencePaths)) {
-    $combined += (Get-Content -LiteralPath $path -Raw -Encoding utf8) + "`n"
+    $combined += (Get-EvidenceSourceText -Path $path) + "`n"
   }
 
   $missingMarkers = New-Object System.Collections.Generic.List[string]
@@ -6035,7 +6082,7 @@ function New-DebugListenerNativeOwnerLifecycleGateEvidence {
 
   $combined = ""
   foreach ($path in @($evidencePaths)) {
-    $combined += (Get-Content -LiteralPath $path -Raw -Encoding utf8) + "`n"
+    $combined += (Get-EvidenceSourceText -Path $path) + "`n"
   }
 
   $missingMarkers = New-Object System.Collections.Generic.List[string]
@@ -6177,7 +6224,7 @@ function New-CallbackOwnerClosureMatrixEvidence {
 
   $combined = ""
   foreach ($path in @($evidencePaths)) {
-    $combined += (Get-Content -LiteralPath $path -Raw -Encoding utf8) + "`n"
+    $combined += (Get-EvidenceSourceText -Path $path) + "`n"
   }
 
   $missingMarkers = New-Object System.Collections.Generic.List[string]
@@ -6287,7 +6334,7 @@ function New-SourceVisibleDebugListenerGateEvidence {
 
   $combined = ""
   foreach ($path in @($evidencePaths)) {
-    $combined += (Get-Content -LiteralPath $path -Raw -Encoding utf8) + "`n"
+    $combined += (Get-EvidenceSourceText -Path $path) + "`n"
   }
 
   $missingMarkers = New-Object System.Collections.Generic.List[string]
