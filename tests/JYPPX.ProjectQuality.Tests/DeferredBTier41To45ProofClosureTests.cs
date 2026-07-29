@@ -34,7 +34,7 @@ public sealed class DeferredBTier41To45ProofClosureTests
         string parserRefitterSnapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParserRefitterDiagnosticSnapshot.cs");
         string interopRuntimeControls = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11RuntimeControls.cs");
         string interopDiagnostics = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11Diagnostics.cs");
-        string interopParserRefitter = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.ParserRefitterDiagnostics.cs");
+        string interopParserRefitter = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Parsing", "NativeBridgeApi.ParserRefitterDiagnostics.cs");
         string managedSurface = string.Join('\n', builderConfigApi, engineApi, contextApi, onnxParserApi, parserRefitterApi, parserRefitterSnapshot);
 
         Assert.Contains("public TensorRtTilingOptimizationLevel GetTilingOptimizationLevel()", builderConfigApi);

@@ -75,10 +75,10 @@ public sealed class PluginCreatorApiLanguageReadonlyTests
     {
         string inventoryModels = ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginRegistryInventory.cs");
         string builderInventory = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilder.PluginRegistryInventory.cs");
-        string builderInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.PluginRegistryInventory.cs");
+        string builderInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Plugins", "NativeBridgeApi.PluginRegistryInventory.cs");
         string globalInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.GlobalRuntimePluginProbe.cs");
-        string capabilityInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.BuilderCapabilityPluginRegistry.cs");
-        string runtimeInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.RuntimePluginRegistryInventory.cs");
+        string capabilityInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Plugins", "NativeBridgeApi.BuilderCapabilityPluginRegistry.cs");
+        string runtimeInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Plugins", "NativeBridgeApi.RuntimePluginRegistryInventory.cs");
         string smoke = ReadSource("smoke", "PluginRegistryInventorySmokeRunner", "Program.cs");
 
         Assert.Contains("public TensorRtApiLanguage ApiLanguage { get; }", inventoryModels);

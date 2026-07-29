@@ -47,7 +47,7 @@ public sealed class Trt11OnnxParserBuilderConfigAttachmentUpliftTests
     {
         string attachment = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParser.BuilderConfig.cs");
         string parser = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParser.cs");
-        string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.OnnxParserBuilderConfig.cs");
+        string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Parsing", "NativeBridgeApi.OnnxParserBuilderConfig.cs");
 
         Assert.Contains("SafeTensorRtObjectHandleLease.Create(config.Handle)", attachment, StringComparison.Ordinal);
         Assert.Contains("if (!NativeBridgeApi.SetOnnxParserBuilderConfig", attachment, StringComparison.Ordinal);

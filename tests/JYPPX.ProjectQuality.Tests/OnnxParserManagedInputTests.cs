@@ -12,7 +12,7 @@ public sealed class OnnxParserManagedInputTests
         string parser = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParser.cs");
         string modelSupport = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParser.ModelSupport.cs");
         string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.cs");
-        string supportInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.OnnxParserSupport.cs");
+        string supportInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Parsing", "NativeBridgeApi.OnnxParserSupport.cs");
 
         Assert.Contains("public bool Parse(ArraySegment<byte> modelData, string? modelPath = null)", parser);
         Assert.Contains("public bool Parse(ReadOnlySpan<byte> modelData, string? modelPath = null)", parser);

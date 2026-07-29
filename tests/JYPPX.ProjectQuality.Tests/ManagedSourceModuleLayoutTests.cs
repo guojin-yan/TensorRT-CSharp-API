@@ -14,6 +14,35 @@ public sealed class ManagedSourceModuleLayoutTests
         { "RuntimeCompilation", new[] { "NativeCudaApi.Rtc.cs" } }
     };
 
+    public static TheoryData<string, string[]> TensorRtInteropFeatureModules => new()
+    {
+        {
+            "Parsing",
+            new[]
+            {
+                "NativeBridgeApi.LegacyParserDiagnostics.cs",
+                "NativeBridgeApi.OnnxConfig.cs",
+                "NativeBridgeApi.OnnxModelBuffer.cs",
+                "NativeBridgeApi.OnnxParserBuilderConfig.cs",
+                "NativeBridgeApi.OnnxParserLayerOutputMetadata.cs",
+                "NativeBridgeApi.OnnxParserSupport.cs",
+                "NativeBridgeApi.ParserRefitterDiagnostics.cs"
+            }
+        },
+        {
+            "Plugins",
+            new[]
+            {
+                "NativeBridgeApi.BuilderCapabilityPluginRegistry.cs",
+                "NativeBridgeApi.PluginLayerOwnerScopedQuerySnapshots.cs",
+                "NativeBridgeApi.PluginRegistryInventory.cs",
+                "NativeBridgeApi.PluginV2LayerMetadata.cs",
+                "NativeBridgeApi.PluginV3LayerMetadata.cs",
+                "NativeBridgeApi.RuntimePluginRegistryInventory.cs"
+            }
+        }
+    };
+
     public static TheoryData<string, string[]> ProjectModules => new()
     {
         {
@@ -119,6 +148,21 @@ public sealed class ManagedSourceModuleLayoutTests
             RepositoryPaths.Root,
             "src",
             "JYPPX.CudaSharp",
+            "Internal",
+            "Interop");
+
+        Assert.Equal(expectedFiles, EnumerateModuleFiles(interopDirectory, module));
+        Assert.All(expectedFiles, file => Assert.False(File.Exists(Path.Combine(interopDirectory, file))));
+    }
+
+    [Theory]
+    [MemberData(nameof(TensorRtInteropFeatureModules))]
+    public void TensorRtInteropFilesAreGroupedIntoFeatureModules(string module, string[] expectedFiles)
+    {
+        string interopDirectory = Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.TensorRtSharp",
             "Internal",
             "Interop");
 

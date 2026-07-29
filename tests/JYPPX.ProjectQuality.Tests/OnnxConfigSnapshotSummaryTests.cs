@@ -26,7 +26,7 @@ public sealed class OnnxConfigSnapshotSummaryTests
     [Fact]
     public void OnnxConfigSnapshotUsesCopiedStringBridge()
     {
-        string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.OnnxConfig.cs");
+        string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Parsing", "NativeBridgeApi.OnnxConfig.cs");
         string source = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxConfig.cs");
 
         Assert.Contains("ReadOnnxConfigString", interop);

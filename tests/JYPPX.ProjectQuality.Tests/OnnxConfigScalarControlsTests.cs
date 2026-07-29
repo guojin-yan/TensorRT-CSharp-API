@@ -145,7 +145,7 @@ public sealed class OnnxConfigScalarControlsTests
     [Fact]
     public void ManagedOnnxConfigWrapperRoutesAllTensorRtLinesWithoutExposingBorrowedPointers()
     {
-        string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.OnnxConfig.cs");
+        string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Parsing", "NativeBridgeApi.OnnxConfig.cs");
         string wrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxConfig.cs");
         string generated = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Generated", "NativeMethodsTensorRt.Generated.g.cs");
 

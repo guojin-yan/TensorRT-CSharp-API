@@ -118,7 +118,7 @@ public sealed class PluginV3LayerMetadataReadonlyUpliftTests
     {
         string metadata = ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginV3LayerMetadata.cs");
         string interop = ReadSource(
-            "src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.PluginV3LayerMetadata.cs");
+            "src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Plugins", "NativeBridgeApi.PluginV3LayerMetadata.cs");
 
         Assert.Contains("public sealed class TensorRtPluginV3LayerMetadata", metadata);
         Assert.Contains("public TensorRtPluginV3LayerMetadata GetPluginV3Metadata()", metadata);

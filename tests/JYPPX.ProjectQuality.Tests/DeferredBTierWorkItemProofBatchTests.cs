@@ -73,8 +73,8 @@ public sealed class DeferredBTierWorkItemProofBatchTests
             ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.DeploymentMetadata.cs"),
             ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11BoundaryControls.cs"),
             ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11RuntimeControls.cs"),
-            ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.OnnxParserSupport.cs"),
-            ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.ParserRefitterDiagnostics.cs"));
+            ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Parsing", "NativeBridgeApi.OnnxParserSupport.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Parsing", "NativeBridgeApi.ParserRefitterDiagnostics.cs"));
         string projectQualityTests = ReadSources("tests", "JYPPX.ProjectQuality.Tests", "*.cs");
         string manualDesignGroups = ReadSource("docs", "articles", "zh-cn", "deferred-manual-design-groups.md");
         string latestClosureArticle = ReadSource("docs", "articles", "zh-cn", "deferred-btier-46-50-proof-closure.md");

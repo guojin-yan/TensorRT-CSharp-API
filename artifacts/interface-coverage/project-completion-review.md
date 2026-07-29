@@ -5307,6 +5307,36 @@ owner 生命周期、interop 声明或 C ABI。
 - C 盘 Downloads/用户 Temp 顶层当日重资产与本批关键词命中为 0，项目相关 build/test 进程残留为 0。
 - 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
 
+## 2026-07-29 TensorRT Parsing And Plugins Managed Interop Module Closure
+
+本阶段将 TensorRtSharp 手写 interop 中 13 份单一职责 partial API 归入 `Parsing` 与 `Plugins`。Generated、namespace、
+partial type、method、P/Invoke/entrypoint、owner 行为与 public API 均未改变。
+
+### 实现与门禁
+
+- `Parsing` 包含 legacy parser diagnostics、ONNX config/model buffer/support、builder-config attachment、layer-output
+  metadata 与 parser-refitter diagnostics，共 7 份文件。
+- `Plugins` 包含 builder capability/runtime registry inventory、V2/V3 layer metadata 与 owner-scoped query snapshot，
+  共 6 份文件。
+- 精确 internal interop 布局门禁固定两个模块的 13 份文件并拒绝根目录回流；所有 ProjectQuality `ReadSource` 路径和
+  中英文 source-organization 已同步。
+- `NativeBridgeApi.GlobalRuntimePluginProbe.cs` 保留根目录，因为它混合 runtime version、logger、ONNX parser version
+  与 plugin registry；需要单独拆文件，不能标记为纯 plugin。
+- 修正两项既有测试漂移：versioned parser-refitter alias 断言对齐 exporter 当前三条真实 alias；plugin field copy
+  断言改为验证 `TensorRtPluginFieldInfo` 构造，不再锁死 `fields`/`fieldList` 局部变量名。
+
+### 验证与边界
+
+- 首次扩展集合 `120/123`：两项既有过时断言失败，修正后均通过；另一项 B-tier exporter 测试因本机无 `pwsh`
+  无法启动。未用 Windows PowerShell 5.1 替代 PS7。
+- 排除该 PS7 环境项后，可执行的 layout、parser、plugin、ABI-contract 定向集合：`122/122` 通过。
+- `JYPPX.TensorRtSharp` 全目标框架 Debug build：`0 warning / 0 error`；完整 solution build：`0 warning / 0 error`。
+- 13 组新旧 Git blob hash 完全一致；Generated/native/manifest/ABI 未修改，未重跑 generator/native/export parity。
+- 未运行完整 ProjectQuality；本批不是 ABI/export、parser/plugin runtime、Linux、package consumer、public package、
+  post-publish、Owner acceptance 或 release proof。
+- C 盘 Downloads/用户 Temp 顶层当日重资产与本批关键词命中为 0，项目相关 build/test 进程残留为 0。
+- 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
+
 ## 2026-07-29 CUDA Managed Interop Feature Module Closure
 
 本阶段继续整理 `JYPPX.CudaSharp/Internal/Interop` 的手写 partial API，将 8 份职责明确的文件与公开 owner feature area

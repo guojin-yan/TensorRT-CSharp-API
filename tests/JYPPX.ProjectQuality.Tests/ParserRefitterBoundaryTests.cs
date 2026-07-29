@@ -70,7 +70,7 @@ public sealed class ParserRefitterBoundaryTests
     {
         string wrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParserRefitter.cs");
         string snapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParserRefitterDiagnosticSnapshot.cs");
-        string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.ParserRefitterDiagnostics.cs");
+        string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Parsing", "NativeBridgeApi.ParserRefitterDiagnostics.cs");
         string refitter = ReadSource("src", "JYPPX.TensorRtSharp", "Refit", "TensorRtRefitter.cs");
 
         Assert.Contains("public sealed class TensorRtOnnxParserRefitter : IDisposable", wrapper);

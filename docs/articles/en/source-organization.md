@@ -56,6 +56,14 @@ TensorRT high-level wrappers are also being split by layer feature area:
 - `src/JYPPX.TensorRtSharp/Layers/TensorRtLayer.Quantization.cs`
 - `src/JYPPX.TensorRtSharp/Execution/TensorRtExecutionContext.Profile.cs`
 
+Hand-written TensorRT partial interop now starts following the same responsibility modules:
+
+- `Internal/Interop/Parsing` contains legacy parser diagnostics, ONNX config/model-buffer/support, builder-config attachment,
+  layer-output metadata, and parser-refitter diagnostics.
+- `Internal/Interop/Plugins` contains builder capability/runtime registry inventories and copied V2/V3 layer metadata/query snapshots.
+
+`NativeBridgeApi.GlobalRuntimePluginProbe.cs` remains at the interop root because it mixes global runtime version, logger, ONNX parser version, and plugin-registry operations. It requires a separate behavioral split instead of being labeled as a pure plugin file.
+
 Generated files remain under their `Generated` folders and should not be manually split. Generator output layout changes must happen in the generator itself and must pass the deterministic generator gate.
 
 ## Managed public API layout

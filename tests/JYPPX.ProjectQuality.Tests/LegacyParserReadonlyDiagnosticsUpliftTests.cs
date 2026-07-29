@@ -54,7 +54,7 @@ public sealed class LegacyParserReadonlyDiagnosticsUpliftTests
     public void ManagedSurfaceIsPointerFreeVersionGuardedAndReturnsIndependentCopies()
     {
         string interop = ReadSource(
-            "src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.LegacyParserDiagnostics.cs");
+            "src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Parsing", "NativeBridgeApi.LegacyParserDiagnostics.cs");
         string wrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtLegacyParserDiagnostics.cs");
         string snapshots = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtLegacyParserDiagnosticSnapshots.cs");
 

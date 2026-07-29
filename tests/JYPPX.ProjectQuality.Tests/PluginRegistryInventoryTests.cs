@@ -7,7 +7,7 @@ public sealed class PluginRegistryInventoryTests
     [Fact]
     public void BuilderCapabilityInventoryCopiesCreatorFieldsByDefaultAndSupportsIdentityOnlySnapshots()
     {
-        string source = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.BuilderCapabilityPluginRegistry.cs");
+        string source = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Plugins", "NativeBridgeApi.BuilderCapabilityPluginRegistry.cs");
         string inventoryMethod = ExtractBetween(
             source,
             "public static TensorRtPluginRegistryInventory GetBuilderCapabilityPluginRegistryInventory",
@@ -72,7 +72,7 @@ public sealed class PluginRegistryInventoryTests
     [Fact]
     public void BuilderOwnedLookupCopiesCreatorMetadataIntoManagedSnapshot()
     {
-        string interopSource = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.PluginRegistryInventory.cs");
+        string interopSource = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Plugins", "NativeBridgeApi.PluginRegistryInventory.cs");
         string builderSource = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilder.PluginRegistryInventory.cs");
         string smokeProgram = ReadSource("smoke", "PluginRegistryInventorySmokeRunner", "Program.cs");
         string nativeSource = ReadSource("native", "src", "tensorrt", "common", "plugin_registry_inventory.inc");
@@ -122,7 +122,7 @@ public sealed class PluginRegistryInventoryTests
         string header8 = ReadSource("native", "include", "jyppx", "tensorrt", "trt8.h");
         string manifest8 = ReadSource("native", "manifests", "tensorrt", "v8", "trt8-plugin-registry-inventory.manifest.json");
         string deferred8 = ReadTensorRtManifest("v8", "trt8-cross-version-eleventh-batch-plugin-deferred.manifest.json");
-        string interopSource = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.PluginRegistryInventory.cs");
+        string interopSource = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Plugins", "NativeBridgeApi.PluginRegistryInventory.cs");
         string builderSource = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilder.PluginRegistryInventory.cs");
         string smokeProgram = ReadSource("smoke", "PluginRegistryInventorySmokeRunner", "Program.cs");
 
@@ -181,7 +181,7 @@ public sealed class PluginRegistryInventoryTests
     [Fact]
     public void RuntimeLocalInventoryCopiesCreatorMetadataWithoutExposingNativePointers()
     {
-        string interopSource = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.RuntimePluginRegistryInventory.cs");
+        string interopSource = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Plugins", "NativeBridgeApi.RuntimePluginRegistryInventory.cs");
         string runtimeSource = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntime.PluginRegistryInventory.cs");
         string inventoryModels = ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginRegistryInventory.cs");
         string smokeProgram = ReadSource("smoke", "PluginRegistryInventorySmokeRunner", "Program.cs");

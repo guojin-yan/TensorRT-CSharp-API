@@ -50,7 +50,7 @@ public sealed class TensorRtNativeAbiSurfaceParityTests
         string header = ReadSource("native", "include", "jyppx", "tensorrt", "trt10.h");
         string source = ReadSource("native", "src", "tensorrt", "common", "plugin_registry_inventory.inc");
         string api = ReadSource("native", "src", "tensorrt", "v10", "api.cpp");
-        string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.PluginRegistryInventory.cs");
+        string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Plugins", "NativeBridgeApi.PluginRegistryInventory.cs");
 
         Assert.Contains("JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_builder_plugin_registry_exists", header, StringComparison.Ordinal);
         Assert.Contains("JYPPX_TRT_PLUGIN_FN(builder_plugin_registry_exists)", source, StringComparison.Ordinal);

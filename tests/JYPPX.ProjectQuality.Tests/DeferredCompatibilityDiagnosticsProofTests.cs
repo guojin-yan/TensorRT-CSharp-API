@@ -19,7 +19,7 @@ public sealed class DeferredCompatibilityDiagnosticsProofTests
         Assert.Contains("\"IBuilderConfig::setTilingOptimizationLevel\" = @(\"id:*builder-config-set-tiling-optimization-level-deferred\")", script);
         Assert.Contains("\"ICudaEngine::hasImplicitBatchDimension\" = @(\"id:*cuda-engine-has-implicit-batch-dimension-deferred\")", script);
         Assert.Contains("\"IParser::getError\" = @(\"id:*parser-refitter-get-error-deferred\")", script);
-        Assert.Contains("\"IParserRefitter::getError\" = @(\"id:*parser-refitter-get-error-deferred\")", script);
+        Assert.Contains("\"IParserRefitter::getError\" = @(\"id:*parser-refitter-get-error\", \"id:*parser-refitter-get-error-count\", \"id:*parser-refitter-get-error-deferred\")", script);
 
         foreach (string marker in new[]
         {
@@ -67,11 +67,11 @@ public sealed class DeferredCompatibilityDiagnosticsProofTests
     {
         string builderConfig = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.Trt11RuntimeControls.cs");
         string engine = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.cs");
-        string legacyInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.LegacyParserDiagnostics.cs");
+        string legacyInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Parsing", "NativeBridgeApi.LegacyParserDiagnostics.cs");
         string legacyWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtLegacyParserDiagnostics.cs");
         string parser = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParser.cs");
         string refitter = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParserRefitter.cs");
-        string parserInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.ParserRefitterDiagnostics.cs");
+        string parserInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Parsing", "NativeBridgeApi.ParserRefitterDiagnostics.cs");
         string networkSmoke = ReadSource("smoke", "NetworkBuilderSmokeRunner", "Program.cs");
         string legacySmoke = ReadSource("smoke", "LegacyParserDiagnosticsSmokeRunner", "Program.cs");
         string onnxSmoke = ReadSource("smoke", "OnnxToEngineSmokeRunner", "Program.cs");

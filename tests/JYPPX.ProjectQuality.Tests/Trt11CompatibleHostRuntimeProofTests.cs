@@ -9,7 +9,7 @@ public sealed class Trt11CompatibleHostRuntimeProofTests
     {
         string environment = ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.cs");
         string globalInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.GlobalRuntimePluginProbe.cs");
-        string capabilityInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.BuilderCapabilityPluginRegistry.cs");
+        string capabilityInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Plugins", "NativeBridgeApi.BuilderCapabilityPluginRegistry.cs");
 
         Assert.Contains("GetGlobalPluginRegistryInventory(line, includeCreatorFields: true)", environment, StringComparison.Ordinal);
         Assert.Contains("TryGetGlobalPluginRegistryInventory(line, includeCreatorFields: true", environment, StringComparison.Ordinal);

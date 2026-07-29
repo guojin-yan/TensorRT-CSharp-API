@@ -91,6 +91,7 @@ public sealed class PluginV2LayerMetadataReadonlyUpliftTests
             "JYPPX.TensorRtSharp",
             "Internal",
             "Interop",
+            "Plugins",
             "NativeBridgeApi.PluginV2LayerMetadata.cs");
 
         Assert.Contains("public sealed class TensorRtPluginV2LayerMetadata", metadata);
@@ -139,6 +140,7 @@ public sealed class PluginV2LayerMetadataReadonlyUpliftTests
             "JYPPX.TensorRtSharp",
             "Internal",
             "Interop",
+            "Plugins",
             "NativeBridgeApi.RuntimePluginRegistryInventory.cs");
 
         Assert.Contains("trt8-builder-plugin-creator-get-tensor-rt-version", manifest);

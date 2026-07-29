@@ -90,7 +90,7 @@ public sealed class PluginLayerOwnerScopedFormatSerializationUpliftTests
         string model = ReadSource(
             "src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginLayerOwnerScopedQuerySnapshots.cs");
         string interop = ReadSource(
-            "src", "JYPPX.TensorRtSharp", "Internal", "Interop",
+            "src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Plugins",
             "NativeBridgeApi.PluginLayerOwnerScopedQuerySnapshots.cs");
         string publicSurface = model + interop;
 

@@ -47,7 +47,7 @@ public sealed partial class Trt8CapabilityRegistryAndLegacySetterUpliftTests
     [Fact]
     public void ManagedSurfacePreservesVersionDifferencesAndOwnerBoundTensorSetters()
     {
-        string capability = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.BuilderCapabilityPluginRegistry.cs");
+        string capability = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Plugins", "NativeBridgeApi.BuilderCapabilityPluginRegistry.cs");
         string environment = ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.cs");
         string builder = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilder.Trt11BoundaryControls.cs");
         string config = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.cs");

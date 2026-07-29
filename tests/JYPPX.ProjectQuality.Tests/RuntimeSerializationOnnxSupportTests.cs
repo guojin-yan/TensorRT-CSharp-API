@@ -12,7 +12,7 @@ public sealed class RuntimeSerializationOnnxSupportTests
         string manifest10 = ReadSource("native", "manifests", "tensorrt", "v10", "trt10-twenty-ninth-batch-onnx-parser-support.manifest.json");
         string manifest11 = ReadSource("native", "manifests", "tensorrt", "v11", "trt11-twenty-ninth-batch-onnx-parser-support.manifest.json");
         string source = ReadSource("native", "src", "tensorrt", "common", "onnx_parser_support.inc");
-        string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.OnnxParserSupport.cs");
+        string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Parsing", "NativeBridgeApi.OnnxParserSupport.cs");
         string wrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParser.ModelSupport.cs");
         string snapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParserDiagnosticSnapshot.cs");
         string modelSupportReport = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxModelSupportReport.cs");

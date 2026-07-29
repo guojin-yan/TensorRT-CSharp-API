@@ -67,7 +67,7 @@ public sealed class OnnxModelBufferLifecycleTests
         string parser = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParser.cs");
         string refitter = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParserRefitter.cs");
         string pinSet = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "TensorRtPinnedInitializerSet.cs");
-        string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.OnnxModelBuffer.cs");
+        string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Parsing", "NativeBridgeApi.OnnxModelBuffer.cs");
 
         Assert.Contains("private readonly TensorRtPinnedInitializerSet _initializerPins", parser);
         Assert.Contains("public bool LoadModelProto(byte[] modelData, string? modelPath = null)", parser);

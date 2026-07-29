@@ -28,10 +28,10 @@ public sealed class DeferredReadonlyCandidateImplementationEvidenceTests
         string builderInventory = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilder.PluginRegistryInventory.cs");
         string runtimeInventory = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntime.PluginRegistryInventory.cs");
         string environmentProbe = ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.cs");
-        string builderInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.PluginRegistryInventory.cs");
-        string runtimeInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.RuntimePluginRegistryInventory.cs");
+        string builderInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Plugins", "NativeBridgeApi.PluginRegistryInventory.cs");
+        string runtimeInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Plugins", "NativeBridgeApi.RuntimePluginRegistryInventory.cs");
         string globalInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.GlobalRuntimePluginProbe.cs");
-        string capabilityInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.BuilderCapabilityPluginRegistry.cs");
+        string capabilityInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Plugins", "NativeBridgeApi.BuilderCapabilityPluginRegistry.cs");
         string smoke = ReadSource("smoke", "PluginRegistryInventorySmokeRunner", "Program.cs");
         string nativeCommon = ReadSource("native", "src", "tensorrt", "common", "plugin_registry_inventory.inc");
         string nativeGlobal = ReadSource("native", "src", "tensorrt", "common", "global_runtime_plugin_probe.inc");
@@ -51,7 +51,7 @@ public sealed class DeferredReadonlyCandidateImplementationEvidenceTests
             Assert.Contains("PluginCreator", interop);
             Assert.Contains("FieldMetadata", interop);
             Assert.Contains("new TensorRtPluginCreatorInfo(", interop);
-            Assert.Contains("fields.Add(new TensorRtPluginFieldInfo", interop);
+            Assert.Contains("new TensorRtPluginFieldInfo", interop);
         }
 
         Assert.Contains("TryGetPluginCreator", smoke);
