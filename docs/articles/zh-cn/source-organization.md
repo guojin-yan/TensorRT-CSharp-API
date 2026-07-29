@@ -172,6 +172,12 @@ dry-run 分为 242 行 evaluator 与 324 行 result；原 552 行 process-debug-
 `d88595940fa19e538438cf46a3eb942652284f0c` 与 `4eb5dd0f741855ca19ae29ff07a76f6558a008d7`，并固定
 owner lifecycle readiness、callback status、pointer non-exposure 和 real-runtime promotion 条件。
 
+DebugListener lifecycle gate 与 no-throw callback stub 继续采用 evaluator/result owner 边界。原 509 行 lifecycle gate
+分为 181 行 evaluator 与 333 行 result；原 493 行 callback stub 分为 207 行 evaluator 与 291 行 result。布局门禁
+可重组拆分前 Git blob `56e5514b6eba4c4af339d61ca29e1856dce2375e` 与
+`b44c97b554058ae331a3cf5eab861f56ba35094a`，并固定 lifecycle readiness、callback metadata/status、pointer
+non-exposure、native-vtable disabled 与 deferred-row 语义。
+
 OutputAllocator diagnostics 继续按 public design owner 与 internal managed runtime gate 分层。原 637 行
 `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` 降为 38 行 state/constructor core；entries、snapshots、
 lifecycle、shared invocation、trampoline/state 与 formatting 进入 6 份 partial，request/result 类型各自成文件。原 503 行

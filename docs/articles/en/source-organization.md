@@ -196,6 +196,12 @@ result. The layout gate recomposes the pre-split Git blobs `d88595940fa19e538438
 `4eb5dd0f741855ca19ae29ff07a76f6558a008d7`, preserving owner-lifecycle readiness, callback status, pointer
 non-exposure, and real-runtime promotion conditions.
 
+The DebugListener lifecycle gate and no-throw callback stub now use the same evaluator/result ownership boundary. The
+former 509-line lifecycle gate is split into a 181-line evaluator and a 333-line result; the former 493-line callback stub
+is split into a 207-line evaluator and a 291-line result. The layout gate recomposes the pre-split Git blobs
+`56e5514b6eba4c4af339d61ca29e1856dce2375e` and `b44c97b554058ae331a3cf5eab861f56ba35094a`, preserving
+lifecycle readiness, callback metadata/status, pointer non-exposure, native-vtable disabled behavior, and deferred rows.
+
 OutputAllocator diagnostics are split across the public design owner and its internal managed runtime gate. The former
 637-line `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` is reduced to a 38-line state/constructor core;
 entries, snapshots, lifecycle, shared invocation, trampoline/state, and formatting live in six partials, with request/result

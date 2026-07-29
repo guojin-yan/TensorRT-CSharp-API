@@ -53,6 +53,18 @@ function Get-EvidenceSourceText {
         "TensorRtDebugListenerProcessDebugTensorCallbackTrampolineResult.cs")
       break
     }
+    "TensorRtDebugListenerNativeOwnerLifecycleGate.cs" {
+      @(
+        "TensorRtDebugListenerNativeOwnerLifecycleGate.cs",
+        "TensorRtDebugListenerNativeOwnerLifecycleGateResult.cs")
+      break
+    }
+    "TensorRtDebugListenerNoThrowVTableCallbackStub.cs" {
+      @(
+        "TensorRtDebugListenerNoThrowVTableCallbackStub.cs",
+        "TensorRtDebugListenerNoThrowVTableCallbackStubResult.cs")
+      break
+    }
     "TensorRtAllocatorCallbackOwner.cs" {
       @(
         "TensorRtAllocatorCallbackOwner.cs",

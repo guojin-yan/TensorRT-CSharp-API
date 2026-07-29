@@ -15,6 +15,10 @@
 - `TensorRtDebugListenerNativeOwnerLifecycleGateResult`
 - `Evaluate`
 
+evaluator 位于 `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerNativeOwnerLifecycleGate.cs`，
+只读 result model 位于同目录的 `TensorRtDebugListenerNativeOwnerLifecycleGateResult.cs`。完整 gate evidence consumer
+必须读取两份源码，不能把 evaluator 单文件当作完整实现。
+
 native scaffold：
 
 - `native/src/tensorrt/common/debug_listener_native_owner_lifecycle_gate.inc`

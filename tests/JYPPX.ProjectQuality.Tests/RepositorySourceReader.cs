@@ -28,6 +28,16 @@ internal static class RepositorySourceReader
                 "TensorRtDebugTensorMetadataSnapshot.cs",
                 "TensorRtDebugListenerProcessDebugTensorCallbackTrampolineResult.cs"
             ],
+            ["TensorRtDebugListenerNativeOwnerLifecycleGate.cs"] =
+            [
+                "TensorRtDebugListenerNativeOwnerLifecycleGate.cs",
+                "TensorRtDebugListenerNativeOwnerLifecycleGateResult.cs"
+            ],
+            ["TensorRtDebugListenerNoThrowVTableCallbackStub.cs"] =
+            [
+                "TensorRtDebugListenerNoThrowVTableCallbackStub.cs",
+                "TensorRtDebugListenerNoThrowVTableCallbackStubResult.cs"
+            ],
             ["TensorRtAllocatorCallbackOwner.cs"] =
             [
                 "TensorRtAllocatorCallbackOwner.cs",
