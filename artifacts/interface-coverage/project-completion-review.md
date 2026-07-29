@@ -6968,3 +6968,42 @@ diagnostic emission、borrower lifecycle、callback trampoline/state 与 UTF-8 d
 - source/type relocation、copied metadata 与 design gate 不构成新的 real callback/stream runtime、TensorRT/CUDA runtime、
   real model、Linux、package consumer、public package、post-publish、Owner acceptance 或 release proof。
 - 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行远程发布操作。
+
+## 2026-07-30 Error Recorder Snapshot And Logger Finder Gate Source Split
+
+本阶段完成 `JYPPX.TensorRtSharp/Callbacks/Monitoring` 最后两个多顶层公开类型文件的归类：ErrorRecorder 的 record、
+snapshot 与 summary model 各自成文件，LoggerFinder metadata design gate 的 result model 从 evaluator 分离。copied
+snapshot 映射、pointer non-exposure、blocker 顺序与 non-proof 分类保持不变。
+
+### 实现与门禁
+
+- 原 270 行 `TensorRtErrorRecorderSnapshot.cs` 分为 49 行 `TensorRtErrorRecord.cs`、123 行 snapshot 与 106 行
+  `TensorRtErrorRecorderSummary.cs`；每个顶层公开 model 只由同名文件拥有。
+- snapshot 的两个 internal constructor、负 `ErrorCount` 钳制、空 records 处理、首条记录选择、`ToSummary` 字段映射、
+  copied-record count 比较与 pointer-free non-proof property 保持原样。
+- 原 232 行 `TensorRtLoggerFinderMetadataDesignGate.cs` 分为 85 行 evaluator 与 152 行 result；TensorRT 11 line mapping、
+  blocker 添加顺序和文本、candidate interface/method、deferred rows 与 callback pointer non-exposure 保持原样。
+- `ManagedMonitoringErrorRecorderLoggerFinderSourceLayoutTests` 固定五个文件的精确 top-level type、constructor、method、
+  public property、readiness/test source-set、五个直接源码消费测试、文档 owner marker，并重组两份拆分前源码。
+- 拆分前 Git blob 为 `1dadb6ce8429d5191a05ab874665b071b5b8c609` 与
+  `6429d9a087012cd4c3f063ff76e645b29077806a`；normalized SHA-256 保持
+  `c10dbac254bc930f907db63f2c5816e9e4474aeee7c9043a18db45fb28a32a14` 与
+  `4c841669b7e1366a7917e0e6f842a30dfbe71832b019ffdb6d051b760064f7f4`。
+- ErrorRecorder 的五个直接源码消费测试统一通过 `RepositorySourceReader` 读取三文件组合；readiness 与 test reader
+  显式展开 ErrorRecorder 和 LoggerFinder 两套 source-set；两份 design-gate 文档与双语 source-organization 同步。
+
+### 验证与边界
+
+- 新 type/constructor/method/property/source-set/doc/重组门禁：`10/10` 通过；ErrorRecorder、LoggerFinder、candidate、
+  上一批 Monitoring layout 聚焦集合：`67/67` 通过；全部 managed layout：`451/451` 通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`；
+  RuntimePackageReadiness UTF-8 source parse 为 `0 error`，两套新增 source-set 为 `0` 缺失。
+- 本机无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合，也未生成或刷新 publishing/exporter evidence。
+- ignored deferred candidate evidence 保持 `260` 条引用、`147` 个唯一路径、`0` 缺失；其中引用的 `22` 份 JSON
+  全部可解析，ignored 文件未强制提交。
+- Generated/native/manifest/ABI 改动为 0；`git diff --check` 通过。
+- 进程审计快照未发现引用本工作区的其他进程；Downloads 与用户 Temp 顶层近三小时没有本批 TensorRT/JYPPX/CUDA/
+  NVRTC/ONNX/engine/nupkg 重资产匹配项，未终止、删除或借用其他工作区进程。
+- source/type relocation 与 design gate 不构成新的 real callback runtime、TensorRT/CUDA runtime、real model、Linux、
+  package consumer、public package、post-publish、Owner acceptance 或 release proof。
+- 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行远程发布操作。

@@ -108,10 +108,21 @@ internal static class RepositorySourceReader
                 "TensorRtProgressMonitorDiagnosticResult.cs",
                 "TensorRtProgressMonitorHandler.cs"
             ],
+            ["TensorRtErrorRecorderSnapshot.cs"] =
+            [
+                "TensorRtErrorRecord.cs",
+                "TensorRtErrorRecorderSnapshot.cs",
+                "TensorRtErrorRecorderSummary.cs"
+            ],
             ["TensorRtErrorRecorderDiagnosticsDesignGate.cs"] =
             [
                 "TensorRtErrorRecorderDiagnosticsDesignGate.cs",
                 "TensorRtErrorRecorderDiagnosticsDesignGateResult.cs"
+            ],
+            ["TensorRtLoggerFinderMetadataDesignGate.cs"] =
+            [
+                "TensorRtLoggerFinderMetadataDesignGate.cs",
+                "TensorRtLoggerFinderMetadataDesignGateResult.cs"
             ],
             ["TensorRtStreamIoInterfaceInfoDesignGate.cs"] =
             [

@@ -139,10 +139,23 @@ function Get-EvidenceSourceText {
         "TensorRtProgressMonitorHandler.cs")
       break
     }
+    "TensorRtErrorRecorderSnapshot.cs" {
+      @(
+        "TensorRtErrorRecord.cs",
+        "TensorRtErrorRecorderSnapshot.cs",
+        "TensorRtErrorRecorderSummary.cs")
+      break
+    }
     "TensorRtErrorRecorderDiagnosticsDesignGate.cs" {
       @(
         "TensorRtErrorRecorderDiagnosticsDesignGate.cs",
         "TensorRtErrorRecorderDiagnosticsDesignGateResult.cs")
+      break
+    }
+    "TensorRtLoggerFinderMetadataDesignGate.cs" {
+      @(
+        "TensorRtLoggerFinderMetadataDesignGate.cs",
+        "TensorRtLoggerFinderMetadataDesignGateResult.cs")
       break
     }
     "TensorRtStreamIoInterfaceInfoDesignGate.cs" {

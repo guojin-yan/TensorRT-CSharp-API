@@ -81,7 +81,8 @@ sequenceDiagram
   Note over App: snapshot survives owner disposal
 ```
 
-实现入口集中在 `src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtErrorRecorderSnapshot.cs` 和各 owner 的 boundary partial，
+复制模型分别位于 `src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtErrorRecord.cs`、
+`TensorRtErrorRecorderSnapshot.cs` 与 `TensorRtErrorRecorderSummary.cs`，owner 读取入口位于各自 boundary partial，
 例如 `src/JYPPX.TensorRtSharp/Builder/TensorRtBuilder.Trt11BoundaryControls.cs`、
 `src/JYPPX.TensorRtSharp/Engine/TensorRtEngine.Trt11BoundaryControls.cs`。design-gate 状态由
 `src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtErrorRecorderDiagnosticsDesignGate.cs` evaluator 与

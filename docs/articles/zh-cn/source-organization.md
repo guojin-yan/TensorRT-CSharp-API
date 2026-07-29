@@ -190,6 +190,12 @@ diagnostics 与 Stream IO interface-info design gate 分别降为 164 行和 103
 `61894aedb6a7cf5784f08d53645545bf644ddbd9` 与 `6e4622a90f33bed569ad54c1fc79eac5bd4a3f7b`；callback
 continue/cancel、释放顺序、prerequisite diagnostic、pointer non-exposure 与 non-proof 分类均保持不变。
 
+Monitoring 的顶层公开 model/gate 类型也各自拥有同名文件。原 270 行 `TensorRtErrorRecorderSnapshot.cs` 中的
+`TensorRtErrorRecord`、snapshot 与 summary 分为 49/123/106 行三个文件；原 232 行 LoggerFinder metadata gate
+分为 85 行 evaluator 与 152 行 result。布局门禁可重组拆分前 Git blob
+`1dadb6ce8429d5191a05ab874665b071b5b8c609` 与 `6429d9a087012cd4c3f063ff76e645b29077806a`，并固定
+summary 字段映射、blocker 顺序、pointer non-exposure 与 non-proof 分类。
+
 TensorRT 的 public enum 也不再集中在 2,456 行的 `Core/TensorRtEnums.cs`。其中 64 个 enum 按 Core tensor 基础类型、
 Network、Parsing、Execution、Serialization、Engine、Runtime、Builder、Profiles、ControlFlow，以及 Layers 下的
 RNN、operation、resize、metadata、attention 分入 15 个模块文件；单值/flags 配对保持同文件，名称、underlying type、

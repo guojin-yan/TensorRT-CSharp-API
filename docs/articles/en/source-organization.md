@@ -216,6 +216,13 @@ evaluators, with their result structs in dedicated files. Layout gates recompose
 `6e4622a90f33bed569ad54c1fc79eac5bd4a3f7b`; callback continue/cancel, release ordering, prerequisite diagnostics,
 pointer non-exposure, and non-proof classification remain unchanged.
 
+Monitoring top-level public model and gate types now also have dedicated namesake files. The former 270-line
+`TensorRtErrorRecorderSnapshot.cs` is split into 49/123/106-line `TensorRtErrorRecord`, snapshot, and summary files; the
+former 232-line LoggerFinder metadata gate is split into an 85-line evaluator and a 152-line result. The layout gate
+recomposes the pre-split Git blobs `1dadb6ce8429d5191a05ab874665b071b5b8c609` and
+`6429d9a087012cd4c3f063ff76e645b29077806a`, preserving summary field mapping, blocker order, pointer non-exposure,
+and non-proof classification.
+
 TensorRT public enums are no longer collected in the 2,456-line `Core/TensorRtEnums.cs`. Its 64 enums are distributed across
 15 module files for shared Core tensor values, Network, Parsing, Execution, Serialization, Engine, Runtime, Builder, Profiles,
 ControlFlow, and the Layers RNN, operation, resize, metadata, and attention domains. Single-value/flags pairs remain together;
