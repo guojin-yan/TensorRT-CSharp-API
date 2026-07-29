@@ -82,6 +82,29 @@ function Get-EvidenceSourceText {
         "TensorRtCallbackOwnerClosureMatrixResult.cs")
       break
     }
+    "TensorRtOutputAllocatorRuntimeGate.cs" {
+      @(
+        "TensorRtOutputAllocatorRuntimeGate.cs",
+        "TensorRtOutputAllocatorRuntimeGate.Entries.cs",
+        "TensorRtOutputAllocatorRuntimeGate.Snapshots.cs",
+        "TensorRtOutputAllocatorRuntimeGate.Lifecycle.cs",
+        "TensorRtOutputAllocatorRuntimeGate.Invocation.cs",
+        "TensorRtOutputAllocatorRuntimeGate.Trampoline.cs",
+        "TensorRtOutputAllocatorRuntimeGate.Formatting.cs",
+        "TensorRtOutputAllocatorRuntimeGateRequest.cs",
+        "TensorRtOutputAllocatorRuntimeGateResult.cs")
+      break
+    }
+    "TensorRtOutputAllocatorCallbackOwner.cs" {
+      @(
+        "TensorRtOutputAllocatorCallbackOwner.cs",
+        "TensorRtOutputAllocatorCallbackOwner.DesignDiagnostic.cs",
+        "TensorRtOutputAllocatorCallbackOwner.Snapshots.cs",
+        "TensorRtOutputAllocatorCallbackOwner.Lifecycle.cs",
+        "TensorRtOutputAllocatorCallbackRequest.cs",
+        "TensorRtOutputAllocatorCallbackOwnerSnapshot.cs")
+      break
+    }
     default {
       return Get-Content -LiteralPath $Path -Raw -Encoding utf8
     }

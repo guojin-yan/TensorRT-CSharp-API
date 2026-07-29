@@ -121,7 +121,7 @@ public sealed class OutputAllocatorCallbackOwnerDesignTests
         string smokeReadme = ReadSource("smoke", "README.md");
         string comparison = ReadSource("artifacts", "interface-coverage", "tensorrt-interface-comparison.csv");
 
-        Assert.Contains("public sealed class TensorRtOutputAllocatorCallbackOwner", ownerSource);
+        Assert.Contains("public sealed partial class TensorRtOutputAllocatorCallbackOwner", ownerSource);
         Assert.Contains("public readonly struct TensorRtOutputAllocatorCallbackOwnerSnapshot", ownerSource);
         Assert.Contains("public TensorRtOutputAllocatorCallbackOwnerSnapshot RunDesignDiagnostic", ownerSource);
         Assert.Contains("RuntimeEvidenceKind => \"not-present\"", ownerSource);
@@ -165,6 +165,6 @@ public sealed class OutputAllocatorCallbackOwnerDesignTests
     private static string ReadSource(params string[] pathParts)
     {
         string path = Path.Combine(new[] { RepositoryPaths.Root }.Concat(pathParts).ToArray());
-        return File.ReadAllText(path);
+        return RepositorySourceReader.Read(path);
     }
 }

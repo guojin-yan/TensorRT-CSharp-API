@@ -6844,3 +6844,43 @@ row construction、blocker aggregation 与 result model 从两个大文件中分
 - source/type relocation 不构成新的 callback runtime、TensorRT/CUDA runtime、real model、Linux、package consumer、
   public package、post-publish、Owner acceptance 或 release proof。
 - 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行远程发布操作。
+
+## 2026-07-30 OutputAllocator Runtime Gate And Callback Owner Source Split
+
+本阶段继续整理 `JYPPX.TensorRtSharp/Callbacks/MemoryAllocation`，将 OutputAllocator runtime gate 的 entry、snapshot、
+lifecycle、invocation、trampoline/state 与 formatting，以及 public callback owner 的 design diagnostic、snapshot mapping 和
+lifecycle 从两个大文件中分离。device/output buffer pointer non-exposure、异常状态映射与 proof/deferred 分类保持不变。
+
+### 实现与门禁
+
+- `TensorRtOutputAllocatorRuntimeGate.cs` 从 637 行降为 38 行 gate state/constructor/property core；Entries、Snapshots、
+  Lifecycle、Invocation、Trampoline、Formatting 进入六份 partial，request 与 result model 各自成文件。
+- `TensorRtOutputAllocatorCallbackOwner.cs` 从 503 行降为 58 行 owner state/constructor/property core；DesignDiagnostic、
+  Snapshots、Lifecycle 进入三份 partial，public callback request 与 owner snapshot model 各自成文件。
+- runtime callback delegate GCHandle 继续先于 callback-state GCHandle 释放；public owner 继续先 Dispose runtime gate，
+  再 Dispose native ledger owner；active callback drain、release hook 与 `GC.KeepAlive` 顺序保持不变。
+- notifyShape/reallocateOutput entry、shared invocation、native ledger result mapping、shape copy、exception-to-status 与
+  device/output buffer pointer non-exposure 均保留原有行为。
+- `ManagedOutputAllocatorSourceLayoutTests` 固定 runtime/owner partial 方法归属、四个 model 的精确 public property、
+  nested `CallbackState`/delegate owner、readiness/test source-set 枚举，并按原顺序重组两份拆分前源码。
+- 拆分前 Git blob 为 `b26930b226288afb17459e77e02fc6b8c8c1b686`、
+  `a9bbaccad3401f179b86fde1e3af224a321b6eae`；normalized SHA-256 保持
+  `6b3d38562983381a143a55aee63dfafbcf2844e7d4afa8c68d69c02d4301c8c0` 与
+  `c856a61e9c679746f125e321cd488879b84edfa8c2bf56fd065019f48ed248a6`。
+- 直接读取旧聚合文件的测试改读真实 core/partial/model 组合；`Test-RuntimePackageReadiness.ps1` 与测试 reader 都显式
+  展开两套 source set；callback/allocator 路线图和双语 source-organization 同步。
+
+### 验证与边界
+
+- 新 method/property/nested-owner/重组/evidence 组合门禁：`19/19` 通过；OutputAllocator 聚焦集合：`56/56` 通过；
+  全部 managed layout 合并集合：`398/398` 通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`；
+  RuntimePackageReadiness UTF-8 source parse 为 `0 error`，但因本机无仓库认可的 `pwsh` 未运行 exporter。
+- ignored deferred candidate evidence 保持 `260` 条引用、`147` 个唯一路径、`0` 缺失；其中引用的 `22` 份 JSON
+  全部可解析，ignored 文件未强制提交。
+- Generated/native/manifest/ABI 改动为 0；`git diff --check` 通过。
+- 进程审计快照只发现当前审计 PowerShell；Downloads 与用户 Temp 顶层近三小时没有本批 TensorRT/JYPPX/CUDA/
+  NVRTC/ONNX/engine/nupkg 重资产匹配项，未终止、删除或借用其他工作区进程。
+- source/type relocation、runtime/design gate 与 pointer-free dry-run 不构成新的 real TensorRT callback runtime、
+  TensorRT/CUDA runtime、real model、Linux、package consumer、public package、post-publish、Owner acceptance 或 release proof。
+- 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行远程发布操作。

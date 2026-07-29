@@ -413,7 +413,7 @@ public sealed class CallbackAllocatorBoundaryTests
         string smokeReadme = ReadSource("smoke", "README.md");
         string comparison = ReadSource("artifacts", "interface-coverage", "tensorrt-interface-comparison.csv");
 
-        Assert.Contains("internal sealed class TensorRtOutputAllocatorRuntimeGate", gateSource);
+        Assert.Contains("internal sealed partial class TensorRtOutputAllocatorRuntimeGate", gateSource);
         Assert.Contains("internal readonly struct TensorRtOutputAllocatorRuntimeGateRequest", gateSource);
         Assert.Contains("internal readonly struct TensorRtOutputAllocatorRuntimeGateResult", gateSource);
         Assert.Contains("RunInternalNotifyShapeRuntimeGate", gateSource);

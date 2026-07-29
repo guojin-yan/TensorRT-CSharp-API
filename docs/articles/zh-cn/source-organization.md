@@ -166,6 +166,14 @@ Evaluate core；allocator rows、output/debug rows、stream IO、row constructio
 row/result model 独立成文件。布局门禁可重组拆分前 Git blob `f5ed356884eb6aa4b5721501a77e3a299ebdd771` 与
 `d36f22e8cf3040f169885637ce5be7801551bbf0`，同时固定 callback drain/release 顺序和全部 5 个 family row。
 
+OutputAllocator diagnostics 继续按 public design owner 与 internal managed runtime gate 分层。原 637 行
+`Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` 降为 38 行 state/constructor core；entries、snapshots、
+lifecycle、shared invocation、trampoline/state 与 formatting 进入 6 份 partial，request/result 类型各自成文件。原 503 行
+`TensorRtOutputAllocatorCallbackOwner.cs` 降为 58 行 state/constructor/property core；design diagnostic、snapshot、
+lifecycle 进入 3 份 partial，public request/snapshot model 各自成文件。布局门禁可重组拆分前 Git blob
+`b26930b226288afb17459e77e02fc6b8c8c1b686` 与 `a9bbaccad3401f179b86fde1e3af224a321b6eae`，同时固定两份
+GCHandle 的释放顺序和 runtime-gate-before-native-ledger Dispose 顺序。
+
 TensorRT 的 public enum 也不再集中在 2,456 行的 `Core/TensorRtEnums.cs`。其中 64 个 enum 按 Core tensor 基础类型、
 Network、Parsing、Execution、Serialization、Engine、Runtime、Builder、Profiles、ControlFlow，以及 Layers 下的
 RNN、operation、resize、metadata、attention 分入 15 个模块文件；单值/flags 配对保持同文件，名称、underlying type、

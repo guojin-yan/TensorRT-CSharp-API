@@ -128,7 +128,14 @@ public nint DebugTensor { get; }
 - `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtAllocatorCallbackOwner.ResultMapping.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtAllocatorDryRunRequest.cs` 与同目录的 result/snapshot/delegate model 文件。
 - `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtAllocatorLedgerSafetyGate.cs`
-- `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtOutputAllocatorCallbackOwner.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtOutputAllocatorCallbackOwner.cs`：只保留 owner state、constructor 与 properties。
+- `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtOutputAllocatorCallbackOwner.DesignDiagnostic.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtOutputAllocatorCallbackOwner.Snapshots.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtOutputAllocatorCallbackOwner.Lifecycle.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtOutputAllocatorCallbackRequest.cs` 与
+  `TensorRtOutputAllocatorCallbackOwnerSnapshot.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` 与其 `Entries`、`Snapshots`、
+  `Lifecycle`、`Invocation`、`Trampoline`、`Formatting` partial 及 internal request/result model。
 - `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeProofPrecheck.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerCallbackOwner.cs`：只保留 owner state、constructor 与 properties。
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerCallbackOwner.DesignDiagnostic.cs`
@@ -146,6 +153,9 @@ public nint DebugTensor { get; }
 这些文件只做职责归类。16 个 precheck `Evaluate` overload、closure matrix 的 5 个 family row 顺序、
 `Dispose -> callback drain -> GCHandle/delegate release` 顺序、pointer-free marker 和 real-runtime non-proof 分类均保持不变；
 源码 evidence consumer 必须读取完整文件集，不能再把 core 单文件当作完整实现。
+
+OutputAllocator 的 synthetic notify/reallocate runtime gate 与 native ledger dry-run 仍只是 design evidence；拆分不会把它们
+升级为 TensorRT 已调用 `IOutputAllocator::notifyShape` / `reallocateOutput` 的 runtime proof，也不会解除对应 deferred rows。
 
 ### DebugListener native/runtime scaffolding
 

@@ -189,6 +189,15 @@ rows, stream IO, row construction, and blocker aggregation live in five partials
 The layout gate recomposes the pre-split Git blobs `f5ed356884eb6aa4b5721501a77e3a299ebdd771` and
 `d36f22e8cf3040f169885637ce5be7801551bbf0`, retaining callback drain/release order and all five family rows.
 
+OutputAllocator diagnostics are split across the public design owner and its internal managed runtime gate. The former
+637-line `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` is reduced to a 38-line state/constructor core;
+entries, snapshots, lifecycle, shared invocation, trampoline/state, and formatting live in six partials, with request/result
+types in dedicated files. The former 503-line `TensorRtOutputAllocatorCallbackOwner.cs` is reduced to a 58-line
+state/constructor/property core; design diagnostic, snapshot, and lifecycle logic live in three partials, while the public
+request and snapshot models have dedicated files. The layout gate recomposes the pre-split Git blobs
+`b26930b226288afb17459e77e02fc6b8c8c1b686` and `a9bbaccad3401f179b86fde1e3af224a321b6eae`, retaining both
+GCHandle release order and runtime-gate-before-native-ledger disposal.
+
 TensorRT public enums are no longer collected in the 2,456-line `Core/TensorRtEnums.cs`. Its 64 enums are distributed across
 15 module files for shared Core tensor values, Network, Parsing, Execution, Serialization, Engine, Runtime, Builder, Profiles,
 ControlFlow, and the Layers RNN, operation, resize, metadata, and attention domains. Single-value/flags pairs remain together;
