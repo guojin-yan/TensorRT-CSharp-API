@@ -17,6 +17,17 @@ internal static class RepositorySourceReader
                 "TensorRtDebugListenerRuntimeProofPrecheck.FinalRuntimeGates.cs",
                 "TensorRtDebugListenerRuntimeProofPrecheckResult.cs"
             ],
+            ["TensorRtDebugListenerNativeOwnerLifecycleDryRun.cs"] =
+            [
+                "TensorRtDebugListenerNativeOwnerLifecycleDryRun.cs",
+                "TensorRtDebugListenerNativeOwnerLifecycleDryRunResult.cs"
+            ],
+            ["TensorRtDebugListenerProcessDebugTensorCallbackTrampoline.cs"] =
+            [
+                "TensorRtDebugListenerProcessDebugTensorCallbackTrampoline.cs",
+                "TensorRtDebugTensorMetadataSnapshot.cs",
+                "TensorRtDebugListenerProcessDebugTensorCallbackTrampolineResult.cs"
+            ],
             ["TensorRtAllocatorCallbackOwner.cs"] =
             [
                 "TensorRtAllocatorCallbackOwner.cs",

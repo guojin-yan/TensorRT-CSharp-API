@@ -189,6 +189,13 @@ rows, stream IO, row construction, and blocker aggregation live in five partials
 The layout gate recomposes the pre-split Git blobs `f5ed356884eb6aa4b5721501a77e3a299ebdd771` and
 `d36f22e8cf3040f169885637ce5be7801551bbf0`, retaining callback drain/release order and all five family rows.
 
+DebugListener native lifecycle and trampoline diagnostic models now have dedicated namesake files. The former 561-line
+native-owner lifecycle dry-run is split into a 242-line evaluator and a 324-line result; the former 552-line
+process-debug-tensor trampoline is split into a 247-line evaluator, a 67-line copied metadata snapshot, and a 244-line
+result. The layout gate recomposes the pre-split Git blobs `d88595940fa19e538438cf46a3eb942652284f0c` and
+`4eb5dd0f741855ca19ae29ff07a76f6558a008d7`, preserving owner-lifecycle readiness, callback status, pointer
+non-exposure, and real-runtime promotion conditions.
+
 OutputAllocator diagnostics are split across the public design owner and its internal managed runtime gate. The former
 637-line `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` is reduced to a 38-line state/constructor core;
 entries, snapshots, lifecycle, shared invocation, trampoline/state, and formatting live in six partials, with request/result

@@ -15,6 +15,10 @@
 - `TensorRtDebugListenerNativeOwnerLifecycleDryRunResult`
 - `Evaluate`
 
+evaluator 位于 `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerNativeOwnerLifecycleDryRun.cs`，
+只读 result model 位于同目录的 `TensorRtDebugListenerNativeOwnerLifecycleDryRunResult.cs`。两者共同构成完整 dry-run
+源码边界，单独读取 evaluator 不代表完整证据实现。
+
 该 dry-run 只复制 owner design、attach/detach、borrowed tensor、attach/vtable、native attach/no-throw、owner address、no-throw vtable、attach entry 和 detach-before-release gate 的结果。public API 不暴露 raw `IntPtr` / `nint`、native owner pointer、debug tensor pointer、debug tensor data pointer 或任何 borrowed pointer。
 
 ## 当前能证明什么

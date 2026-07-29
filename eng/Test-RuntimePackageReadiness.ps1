@@ -40,6 +40,19 @@ function Get-EvidenceSourceText {
         "TensorRtDebugListenerRuntimeProofPrecheckResult.cs")
       break
     }
+    "TensorRtDebugListenerNativeOwnerLifecycleDryRun.cs" {
+      @(
+        "TensorRtDebugListenerNativeOwnerLifecycleDryRun.cs",
+        "TensorRtDebugListenerNativeOwnerLifecycleDryRunResult.cs")
+      break
+    }
+    "TensorRtDebugListenerProcessDebugTensorCallbackTrampoline.cs" {
+      @(
+        "TensorRtDebugListenerProcessDebugTensorCallbackTrampoline.cs",
+        "TensorRtDebugTensorMetadataSnapshot.cs",
+        "TensorRtDebugListenerProcessDebugTensorCallbackTrampolineResult.cs")
+      break
+    }
     "TensorRtAllocatorCallbackOwner.cs" {
       @(
         "TensorRtAllocatorCallbackOwner.cs",

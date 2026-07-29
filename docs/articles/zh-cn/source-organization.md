@@ -166,6 +166,12 @@ Evaluate core；allocator rows、output/debug rows、stream IO、row constructio
 row/result model 独立成文件。布局门禁可重组拆分前 Git blob `f5ed356884eb6aa4b5721501a77e3a299ebdd771` 与
 `d36f22e8cf3040f169885637ce5be7801551bbf0`，同时固定 callback drain/release 顺序和全部 5 个 family row。
 
+DebugListener native lifecycle/trampoline 的公开诊断模型也各自拥有同名文件。原 561 行 native-owner lifecycle
+dry-run 分为 242 行 evaluator 与 324 行 result；原 552 行 process-debug-tensor trampoline 分为 247 行 evaluator、
+67 行 copied metadata snapshot 与 244 行 result。布局门禁可重组拆分前 Git blob
+`d88595940fa19e538438cf46a3eb942652284f0c` 与 `4eb5dd0f741855ca19ae29ff07a76f6558a008d7`，并固定
+owner lifecycle readiness、callback status、pointer non-exposure 和 real-runtime promotion 条件。
+
 OutputAllocator diagnostics 继续按 public design owner 与 internal managed runtime gate 分层。原 637 行
 `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` 降为 38 行 state/constructor core；entries、snapshots、
 lifecycle、shared invocation、trampoline/state 与 formatting 进入 6 份 partial，request/result 类型各自成文件。原 503 行
