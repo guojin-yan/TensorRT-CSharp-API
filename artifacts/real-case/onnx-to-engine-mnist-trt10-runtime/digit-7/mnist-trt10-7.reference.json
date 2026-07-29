@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "tensorName": "Plus214_Output_0",
+  "shape": [1, 10],
+  "values": [
+    -8.87737,
+    -0.53205216,
+    6.5321803,
+    5.07005,
+    -2.0175266,
+    -9.982035,
+    -13.183621,
+    18.706125,
+    4.649188,
+    -6.741148
+  ],
+  "sourceClassification": "repository-mnist-runtime-output-derived-unreviewed"
+}

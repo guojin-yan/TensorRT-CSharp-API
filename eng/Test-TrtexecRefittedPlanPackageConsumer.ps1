@@ -6,6 +6,7 @@ param(
   [string]$BridgePackageDirectory,
   [string]$SourcePlanPath,
   [string]$SourceInputPath,
+  [string]$SourceReferencePath,
   [string]$ExpectedPlanSha256 = "5594817d8b152a9478a57ae73ec2a8ed19e8c9e0794b448b89bcd738d99441eb",
   [string]$ExpectedInputSha256 = "81f2cd7784dca5c8f02a9887ae89a6a3582880a27d2eba95a53f845c63187564",
   [string]$ExpectedOutputSha256 = "6f5771d6c5b056406c190a59e725cf9bb13c1f148c1ef06f99ed8acfb11b9041",
@@ -275,6 +276,11 @@ if ([string]::IsNullOrWhiteSpace($SourceInputPath)) {
 }
 else { $SourceInputPath = [IO.Path]::GetFullPath($SourceInputPath) }
 
+if ([string]::IsNullOrWhiteSpace($SourceReferencePath)) {
+  $SourceReferencePath = Join-Path $RepositoryRoot "artifacts\real-case\onnx-to-engine-mnist-trt10-runtime\digit-7\mnist-trt10-7.reference.json"
+}
+else { $SourceReferencePath = [IO.Path]::GetFullPath($SourceReferencePath) }
+
 if ([string]::IsNullOrWhiteSpace($OutputRoot)) {
   $OutputRoot = Join-Path (Split-Path -Parent $RepositoryRoot) ".package-consumer-work"
 }
@@ -295,7 +301,7 @@ elseif (-not [IO.Path]::IsPathRooted($CompactOutputDirectory)) {
   $CompactOutputDirectory = [IO.Path]::GetFullPath((Join-Path $RepositoryRoot $CompactOutputDirectory))
 }
 
-foreach ($requiredFile in @($SourcePlanPath, $SourceInputPath)) {
+foreach ($requiredFile in @($SourcePlanPath, $SourceInputPath, $SourceReferencePath)) {
   if (-not (Test-Path -LiteralPath $requiredFile -PathType Leaf)) { throw "Required artifact is missing: $requiredFile" }
 }
 
@@ -304,6 +310,16 @@ $ExpectedInputSha256 = $ExpectedInputSha256.ToLowerInvariant()
 $ExpectedOutputSha256 = $ExpectedOutputSha256.ToLowerInvariant()
 $sourcePlanSha256 = Get-Sha256 -Path $SourcePlanPath
 $sourceInputSha256 = Get-Sha256 -Path $SourceInputPath
+$sourceReferenceSha256 = Get-Sha256 -Path $SourceReferencePath
+$sourceReference = Get-Content -LiteralPath $SourceReferencePath -Raw -Encoding utf8 | ConvertFrom-Json -Depth 20
+if ([int]$sourceReference.schemaVersion -ne 1 -or
+    [string]::IsNullOrWhiteSpace([string]$sourceReference.tensorName) -or
+    @($sourceReference.shape).Count -eq 0 -or
+    @($sourceReference.shape | Where-Object { [int]$_ -le 0 }).Count -gt 0 -or
+    @($sourceReference.values).Count -eq 0 -or
+    [string]::IsNullOrWhiteSpace([string]$sourceReference.sourceClassification)) {
+  throw "Structured MNIST reference is malformed: schemaVersion/name/positive shape/values/sourceClassification are required."
+}
 if ($sourcePlanSha256 -ne $ExpectedPlanSha256) {
   throw "Persisted plan SHA256 mismatch. Expected=$ExpectedPlanSha256 Actual=$sourcePlanSha256"
 }
@@ -339,11 +355,13 @@ $restorePackagesPath = Join-Path $consumerRoot ".nuget\packages"
 $assetDirectory = Join-Path $consumerRoot "input"
 $planCopyPath = Join-Path $assetDirectory "refitted.plan"
 $inputCopyPath = Join-Path $assetDirectory "input-f32.bin"
+$referenceCopyPath = Join-Path $assetDirectory "output-reference.json"
 $outputCopyPath = Join-Path $consumerRoot "output\logits-f32.bin"
 New-Item -ItemType Directory -Path $assetDirectory -Force | Out-Null
 Copy-Item -LiteralPath $programSourcePath -Destination $programPath
 Copy-Item -LiteralPath $SourcePlanPath -Destination $planCopyPath
 Copy-Item -LiteralPath $SourceInputPath -Destination $inputCopyPath
+Copy-Item -LiteralPath $SourceReferencePath -Destination $referenceCopyPath
 
 $project = Get-Content -LiteralPath $projectTemplatePath -Raw -Encoding utf8
 $project = $project.Replace("__TARGET_FRAMEWORK__", $TargetFramework)
@@ -418,7 +436,7 @@ try {
     throw "Bridge asset was not copied to the consumer output: $bridgeFileName"
   }
 
-  $commandLine = "dotnet run --project `"$projectPath`" -c Release --no-build -- `"$planCopyPath`" `"$inputCopyPath`" `"$outputCopyPath`" $ExpectedOutputSha256"
+  $commandLine = "dotnet run --project `"$projectPath`" -c Release --no-build -- `"$planCopyPath`" `"$inputCopyPath`" `"$outputCopyPath`" $ExpectedOutputSha256 `"$referenceCopyPath`" 0.0001 0.0001 reject exact"
   $previousPath = $env:PATH
   $previousBridgePath = $env:JYPPX_NATIVE_BRIDGE_PATH
   $previousDevelopmentProbing = $env:JYPPX_ENABLE_DEVELOPMENT_PROBING
@@ -429,7 +447,7 @@ try {
     Push-Location $consumerRoot
     try {
       & dotnet run --project $projectPath -c Release --no-build -- `
-        $planCopyPath $inputCopyPath $outputCopyPath $ExpectedOutputSha256 `
+        $planCopyPath $inputCopyPath $outputCopyPath $ExpectedOutputSha256 $referenceCopyPath 0.0001 0.0001 reject exact `
         1> $runtimeStdoutPath 2> $runtimeStderrPath
       $runtimeExitCode = $LASTEXITCODE
     }
@@ -451,6 +469,8 @@ try {
   $runtimePassed = $runtimeExitCode -eq 0 -and
     (Get-MarkerValue -Lines $stdoutLines -Prefix "PackageConsumerRuntime=") -eq "Passed" -and
     (Get-MarkerValue -Lines $stdoutLines -Prefix "OutputExactMatch=") -eq "True" -and
+    (Get-MarkerValue -Lines $stdoutLines -Prefix "ReferenceValidationCompleted=") -eq "True" -and
+    (Get-MarkerValue -Lines $stdoutLines -Prefix "ReferenceValidationPassed=") -eq "True" -and
     (Get-MarkerValue -Lines $stdoutLines -Prefix "OwnerScopeExited=") -eq "True" -and
     $outputSha256 -eq $ExpectedOutputSha256
 
@@ -523,6 +543,19 @@ try {
       inputLengthBytes = (Get-Item -LiteralPath $inputCopyPath).Length
       sourceInputSha256 = $sourceInputSha256
       copiedInputSha256 = Get-Sha256 -Path $inputCopyPath
+      sourceReferencePath = $SourceReferencePath
+      copiedReferencePath = $referenceCopyPath
+      referenceCopyPathDistinct = -not [string]::Equals($SourceReferencePath, $referenceCopyPath, [StringComparison]::OrdinalIgnoreCase)
+      sourceReferenceSha256 = $sourceReferenceSha256
+      copiedReferenceSha256 = Get-Sha256 -Path $referenceCopyPath
+      referenceTensorName = [string]$sourceReference.tensorName
+      referenceShape = @($sourceReference.shape | ForEach-Object { [int]$_ })
+      referenceElementCount = @($sourceReference.values).Count
+      referenceSourceClassification = [string]$sourceReference.sourceClassification
+      referenceAbsoluteTolerance = 0.0001
+      referenceRelativeTolerance = 0.0001
+      referenceNaNPolicy = "reject"
+      referenceInfinityPolicy = "exact"
       outputPath = $outputCopyPath
       outputLengthBytes = (Get-Item -LiteralPath $outputCopyPath).Length
       outputSha256 = $outputSha256
@@ -561,6 +594,13 @@ try {
       enqueueCompleted = (Get-MarkerValue -Lines $stdoutLines -Prefix "EnqueueCompleted=") -eq "True"
       ownerScopeExited = (Get-MarkerValue -Lines $stdoutLines -Prefix "OwnerScopeExited=") -eq "True"
       outputExactMatch = (Get-MarkerValue -Lines $stdoutLines -Prefix "OutputExactMatch=") -eq "True"
+      referenceValidationCompleted = (Get-MarkerValue -Lines $stdoutLines -Prefix "ReferenceValidationCompleted=") -eq "True"
+      referenceValidationPassed = (Get-MarkerValue -Lines $stdoutLines -Prefix "ReferenceValidationPassed=") -eq "True"
+      referenceComparedElementCount = ConvertTo-Int32 (Get-MarkerValue -Lines $stdoutLines -Prefix "ReferenceComparedElementCount=")
+      referenceMismatchCount = ConvertTo-Int32 (Get-MarkerValue -Lines $stdoutLines -Prefix "ReferenceMismatchCount=")
+      referenceFirstMismatchIndex = ConvertTo-Int32 (Get-MarkerValue -Lines $stdoutLines -Prefix "ReferenceFirstMismatchIndex=")
+      referenceMaximumAbsoluteError = Get-MarkerValue -Lines $stdoutLines -Prefix "ReferenceMaximumAbsoluteError="
+      referenceMaximumRelativeError = Get-MarkerValue -Lines $stdoutLines -Prefix "ReferenceMaximumRelativeError="
       predictedIndex = ConvertTo-Int32 (Get-MarkerValue -Lines $stdoutLines -Prefix "PredictedIndex=")
     }
     host = [ordered]@{
@@ -580,7 +620,7 @@ try {
       canPublishPublicly = $false
       canCloseReleaseIssue = $false
       performsPublish = $false
-      statement = "This proves a copied full-weight refitted plan can be restored and executed by a PackageReference-only consumer from declared local feeds on one compatible host. It is not public-feed, post-publish, model-accuracy, or release-close proof."
+      statement = "This proves a copied full-weight refitted plan can be restored and executed by a PackageReference-only consumer from declared local feeds on one compatible host, with the recorded structured reference comparison. The reference is an unreviewed same-runtime MNIST regression baseline, so this is not independent model-accuracy, Owner-approved golden output, public-feed, post-publish, or release-close proof."
     }
   }
 }
@@ -672,13 +712,25 @@ $compactEvidence = [ordered]@{
     inputLengthBytes = $rawEvidence.artifacts.inputLengthBytes
     sourceInputSha256 = $sourceInputSha256
     copiedInputSha256 = $rawEvidence.artifacts.copiedInputSha256
+    sourceReference = Get-RelativePath -Root $RepositoryRoot -Path $SourceReferencePath
+    referenceCopyPathDistinct = $rawEvidence.artifacts.referenceCopyPathDistinct
+    sourceReferenceSha256 = $sourceReferenceSha256
+    copiedReferenceSha256 = $rawEvidence.artifacts.copiedReferenceSha256
+    referenceTensorName = $rawEvidence.artifacts.referenceTensorName
+    referenceShape = @($rawEvidence.artifacts.referenceShape)
+    referenceElementCount = $rawEvidence.artifacts.referenceElementCount
+    referenceSourceClassification = $rawEvidence.artifacts.referenceSourceClassification
+    referenceAbsoluteTolerance = $rawEvidence.artifacts.referenceAbsoluteTolerance
+    referenceRelativeTolerance = $rawEvidence.artifacts.referenceRelativeTolerance
+    referenceNaNPolicy = $rawEvidence.artifacts.referenceNaNPolicy
+    referenceInfinityPolicy = $rawEvidence.artifacts.referenceInfinityPolicy
     outputLengthBytes = $rawEvidence.artifacts.outputLengthBytes
     outputSha256 = $rawEvidence.artifacts.outputSha256
     expectedOutputSha256 = $ExpectedOutputSha256
     outputExactMatch = $rawEvidence.artifacts.outputExactMatch
   }
   execution = [ordered]@{
-    commandShape = "dotnet run --project <consumer-project> -c Release --no-build -- <copied-plan> <copied-input> <raw-output> <expected-output-sha256>"
+    commandShape = "dotnet run --project <consumer-project> -c Release --no-build -- <copied-plan> <copied-input> <raw-output> <expected-output-sha256> <copied-reference-json> <abs-tolerance> <rel-tolerance> <nan-policy> <infinity-policy>"
     restoreExitCode = $rawEvidence.execution.restoreExitCode
     buildExitCode = $rawEvidence.execution.buildExitCode
     runtimeExitCode = $rawEvidence.execution.runtimeExitCode
@@ -714,8 +766,8 @@ $compactLines = @(
   "- ProjectReference / manual assembly load: ``False / False``",
   "- restore/build/runtime: ``0/0/0``",
   "- plan SHA256: ``$($compactEvidence.artifacts.copiedPlanSha256)``",
-  "- output SHA256: ``$($compactEvidence.artifacts.outputSha256)``",
-  "- enqueue / owner scope / workspace cleanup: ``True / True / $workspaceRemoved``",
+  "- output/reference SHA256: ``$($compactEvidence.artifacts.outputSha256)`` / ``$($compactEvidence.artifacts.copiedReferenceSha256)``",
+  "- enqueue / reference / owner scope / workspace cleanup: ``True / $($compactEvidence.runtime.referenceValidationPassed) / True / $workspaceRemoved``",
   "- public package proof / publish / release close: ``False / False / False``",
   "",
   $compactEvidence.proofBoundary.statement

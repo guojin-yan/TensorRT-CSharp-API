@@ -283,6 +283,35 @@ function New-MnistCase {
     -Result $result
 }
 
+function New-MnistReferenceValidationSummary {
+  $path = "artifacts\interface-coverage\tensorrtexec-mnist-reference-validation-evidence.json"
+  $fullPath = Resolve-RepositoryPath $path
+  if (-not (Test-Path -LiteralPath $fullPath -PathType Leaf)) {
+    return [pscustomobject][ordered]@{
+      state = "not-captured"
+      evidenceClassification = "not-captured"
+      sourceTreeBuildPassed = $false
+      loadEnginePassed = $false
+      localPackageConsumerReferencePassed = $false
+      ownerReviewedGolden = $false
+      canPromoteRealModelRuntime = $false
+      proofBoundary = "MNIST structured-reference evidence is absent."
+    }
+  }
+
+  $evidence = Read-JsonFile $path
+  return [pscustomobject][ordered]@{
+    state = [string]$evidence.state
+    evidenceClassification = [string]$evidence.evidenceClassification
+    sourceTreeBuildPassed = [bool]$evidence.sourceTreeBuild.outputValidated
+    loadEnginePassed = [bool]$evidence.independentLoadEngine.outputValidated
+    localPackageConsumerReferencePassed = [bool]$evidence.localPackageConsumer.referenceValidationPassed
+    ownerReviewedGolden = [bool]$evidence.reference.ownerReviewedGolden
+    canPromoteRealModelRuntime = [bool]$evidence.ownerReview.canPromoteRealModelRuntime
+    proofBoundary = [string]$evidence.proofBoundary.statement
+  }
+}
+
 function New-Trt8MnistBlockedCase {
   param(
     [Parameter(Mandatory = $true)][string]$Id,
@@ -448,6 +477,7 @@ $blockedCases = @($cases | Where-Object state -like "blocked-*")
 $syntheticCases = @($cases | Where-Object proofClassification -eq "synthetic-input-runtime")
 $realModelCases = @($cases | Where-Object proofClassification -eq "real-model-runtime")
 $packageConsumerCases = @($cases | Where-Object isPackageConsumerRuntimeProof)
+$mnistReferenceValidation = New-MnistReferenceValidationSummary
 
 $gpuName = ""
 $driverVersion = ""
@@ -476,6 +506,7 @@ $matrix = [pscustomobject][ordered]@{
   syntheticRuntimeCaseCount = $syntheticCases.Count
   realModelRuntimeCaseCount = $realModelCases.Count
   packageConsumerRuntimeCaseCount = $packageConsumerCases.Count
+  mnistReferenceValidation = $mnistReferenceValidation
   tensorRtLines = @(8, 10, 11)
   host = [pscustomobject][ordered]@{
     os = [Environment]::OSVersion.VersionString
@@ -494,7 +525,7 @@ $matrix = [pscustomobject][ordered]@{
   performsPublish = $false
   canPublishPublicly = $false
   canCloseReleaseIssue = $false
-  boundary = "This matrix proves only the recorded source-tree version/runtime cases. Blocked dependency probes are not runtime proof. synthetic-input-runtime is not real-model-runtime. Neither source-tree classification is package-consumer-runtime or post-publish verification."
+  boundary = "This matrix proves only the recorded source-tree version/runtime cases. Blocked dependency probes are not runtime proof. synthetic-input-runtime is not real-model-runtime. The MNIST structured-reference summary is an owner-review-required same-runtime regression candidate, not an independent golden-output or package/public-release promotion. Neither source-tree classification is package-consumer-runtime or post-publish verification."
 }
 
 $jsonPath = Join-Path $OutputDirectory "multi-version-runtime-evidence-matrix.json"
@@ -513,6 +544,7 @@ $lines.Add("- 环境阻塞：``$($matrix.blockedCaseCount)``")
 $lines.Add("- synthetic runtime：``$($matrix.syntheticRuntimeCaseCount)``")
 $lines.Add("- real-model runtime：``$($matrix.realModelRuntimeCaseCount)``")
 $lines.Add("- package-consumer runtime：``$($matrix.packageConsumerRuntimeCaseCount)``")
+$lines.Add("- MNIST structured reference：``$($matrix.mnistReferenceValidation.state)`` / source-tree ``$($matrix.mnistReferenceValidation.sourceTreeBuildPassed)`` / load-engine ``$($matrix.mnistReferenceValidation.loadEnginePassed)`` / local consumer ``$($matrix.mnistReferenceValidation.localPackageConsumerReferencePassed)`` / owner golden ``$($matrix.mnistReferenceValidation.ownerReviewedGolden)``")
 $lines.Add("- canPublishPublicly：``$($matrix.canPublishPublicly)``")
 $lines.Add("- canCloseReleaseIssue：``$($matrix.canCloseReleaseIssue)``")
 $lines.Add("")

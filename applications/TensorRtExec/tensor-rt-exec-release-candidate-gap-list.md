@@ -29,7 +29,7 @@
 | profiling | implemented-report | 是 | 是 | 真实 enqueue log 后才能晋级 |
 | layer-dump | implemented-inspector-readback | 是 | 是 | 真实 build/load-engine 会复制 inspector layer text 并可导出文件；仍是 diagnostic metadata |
 | verbose-logging | implemented-report | 是 | 是 | hash owner stdout/stderr/log |
-| binding-metadata | implemented-pointer-free-binding-and-multi-output-artifacts | 是 | 是 | generic runtime 捕获全部 float output 的 bounded preview/逐 tensor hash/raw offset manifest；YoloVision 复制语义 binding metadata；仍需 expected output 与 owner 证据 |
+| binding-metadata | implemented-pointer-free-multi-input-binding-multi-output-artifacts-and-reference-validation | 是 | 是 | generic runtime 按 engine 顺序绑定多个 float inputs、捕获全部 float outputs，并记录 reference comparison、逐 tensor hash 与 raw offset manifest；仍需 Owner 复核的真实模型 reference source 与公开 consumer 证据 |
 | winforms-command-surface | checklist-backed-command-preview | 否 | 是 | 继续用 GUI/CLI 字段映射和命令预览锁定非 proof 边界 |
 | package-consumer-runtime-proof-boundary | local-refitted-plan-package-consumer-runtime-public-proof-owner-action-required | 否 | 否 | 本地 file-feed PackageReference consumer 已完成；公开 feed、post-publish 与 release proof 仍等待 Owner |
 

@@ -3405,7 +3405,7 @@
 #define JYPPX_API_TRT8_EXECUTION_CONTEXT_GET_DEBUG_SYNC "jyppx_trt8_execution_context_get_debug_sync" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_EXECUTION_CONTEXT_GET_DEVICE_MEMORY_SIZE "jyppx_trt8_execution_context_get_device_memory_size" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_EXECUTION_CONTEXT_GET_ENQUEUE_EMITS_PROFILE "jyppx_trt8_execution_context_get_enqueue_emits_profile" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
-#define JYPPX_API_TRT8_EXECUTION_CONTEXT_GET_ERROR_BUFFER_COPY "jyppx_trt8_execution_context_get_error_buffer_copy" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=true
+#define JYPPX_API_TRT8_EXECUTION_CONTEXT_GET_ERROR_BUFFER_COPY_DEFERRED "jyppx_trt8_execution_context_get_error_buffer_copy" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT8_EXECUTION_CONTEXT_GET_ERROR_BUFFER_DEFERRED "jyppx_trt8_execution_context_get_error_buffer_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_EXECUTION_CONTEXT_GET_ERROR_RECORDER_DEFERRED "jyppx_trt8_execution_context_get_error_recorder_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_EXECUTION_CONTEXT_GET_MAX_OUTPUT_SIZE "jyppx_trt8_execution_context_get_max_output_size" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false

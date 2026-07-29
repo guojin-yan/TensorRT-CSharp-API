@@ -479,7 +479,7 @@ internal static partial class NativeBridgeApi
             throw new BridgeProbeException(
                 BridgeStatusCode.NotSupported,
                 BridgeErrorCategory.TensorRt,
-                "IExecutionContext::getErrorBuffer is available through this bridge for TensorRT 8 only; TensorRT 10 and TensorRT 11 do not expose this legacy vendor query.");
+                "IExecutionContext::getErrorBuffer is unavailable on the standard nvinfer1::IExecutionContext vendor type supported by this bridge; the compatibility API remains diagnostic-only.");
         }
 
         return ReadUtf8Buffer(

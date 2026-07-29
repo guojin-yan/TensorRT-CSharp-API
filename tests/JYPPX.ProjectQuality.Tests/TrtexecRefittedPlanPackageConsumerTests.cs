@@ -18,7 +18,7 @@ public sealed class TrtexecRefittedPlanPackageConsumerTests
             "RefittedPlan.PackageConsumer",
             "RefittedPlan.PackageConsumer.csproj.template");
 
-        int runCall = program.IndexOf("RunPersistedPlan(planPath, outputPath, inputValues, expectedOutputSha256)", StringComparison.Ordinal);
+        int runCall = program.IndexOf("RunPersistedPlan(", StringComparison.Ordinal);
         int ownerExit = program.IndexOf("OwnerScopeExited=True", runCall, StringComparison.Ordinal);
         int runtime = program.IndexOf("using TensorRtRuntime runtime", StringComparison.Ordinal);
         int deserialize = program.IndexOf("runtime.DeserializeFromFile(planPath)", runtime, StringComparison.Ordinal);
@@ -34,6 +34,9 @@ public sealed class TrtexecRefittedPlanPackageConsumerTests
         Assert.Contains("PackageReferenceOnly=True", program, StringComparison.Ordinal);
         Assert.Contains("ManualManagedAssemblyLoad=False", program, StringComparison.Ordinal);
         Assert.Contains("OutputExactMatch=", program, StringComparison.Ordinal);
+        Assert.Contains("ReadReference", program, StringComparison.Ordinal);
+        Assert.Contains("ValidateReference", program, StringComparison.Ordinal);
+        Assert.Contains("ReferenceValidationPassed=", program, StringComparison.Ordinal);
         Assert.DoesNotContain("Assembly.LoadFrom", program, StringComparison.Ordinal);
         Assert.DoesNotContain("Assembly.LoadFile", program, StringComparison.Ordinal);
         Assert.DoesNotContain("JYPPX_NATIVE_BRIDGE_PATH", program, StringComparison.Ordinal);
@@ -55,6 +58,8 @@ public sealed class TrtexecRefittedPlanPackageConsumerTests
         Assert.Contains("$restorePackagesPath", runner, StringComparison.Ordinal);
         Assert.Contains("Copy-Item -LiteralPath $SourcePlanPath", runner, StringComparison.Ordinal);
         Assert.Contains("Copy-Item -LiteralPath $SourceInputPath", runner, StringComparison.Ordinal);
+        Assert.Contains("Copy-Item -LiteralPath $SourceReferencePath", runner, StringComparison.Ordinal);
+        Assert.Contains("ReferenceValidationPassed=", runner, StringComparison.Ordinal);
         Assert.Contains("$env:JYPPX_NATIVE_BRIDGE_PATH = $null", runner, StringComparison.Ordinal);
         Assert.Contains("$env:JYPPX_ENABLE_DEVELOPMENT_PROBING = $null", runner, StringComparison.Ordinal);
         Assert.Contains("Remove-SafeConsumerDirectory", runner, StringComparison.Ordinal);
@@ -97,10 +102,27 @@ public sealed class TrtexecRefittedPlanPackageConsumerTests
         Assert.Equal(
             priorTrt10.GetProperty("baselineOutputSha256").GetString(),
             artifacts.GetProperty("outputSha256").GetString());
+        Assert.Equal(
+            "artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/mnist-trt10-7.reference.json",
+            artifacts.GetProperty("sourceReference").GetString());
+        Assert.True(artifacts.GetProperty("referenceCopyPathDistinct").GetBoolean());
+        Assert.Equal(
+            artifacts.GetProperty("sourceReferenceSha256").GetString(),
+            artifacts.GetProperty("copiedReferenceSha256").GetString());
+        Assert.Equal("Plus214_Output_0", artifacts.GetProperty("referenceTensorName").GetString());
+        Assert.Equal(10, artifacts.GetProperty("referenceElementCount").GetInt32());
+        Assert.Equal(
+            "repository-mnist-runtime-output-derived-unreviewed",
+            artifacts.GetProperty("referenceSourceClassification").GetString());
         Assert.True(artifacts.GetProperty("outputExactMatch").GetBoolean());
         Assert.True(runtime.GetProperty("bindingsReadyForEnqueue").GetBoolean());
         Assert.True(runtime.GetProperty("enqueueCompleted").GetBoolean());
         Assert.True(runtime.GetProperty("ownerScopeExited").GetBoolean());
+        Assert.True(runtime.GetProperty("referenceValidationCompleted").GetBoolean());
+        Assert.True(runtime.GetProperty("referenceValidationPassed").GetBoolean());
+        Assert.Equal(10, runtime.GetProperty("referenceComparedElementCount").GetInt32());
+        Assert.Equal(0, runtime.GetProperty("referenceMismatchCount").GetInt32());
+        Assert.Equal(-1, runtime.GetProperty("referenceFirstMismatchIndex").GetInt32());
         Assert.Equal(7, runtime.GetProperty("predictedIndex").GetInt32());
         Assert.True(root.GetProperty("proofBoundary").GetProperty("isLocalPackageConsumerRuntimeProof").GetBoolean());
         Assert.False(root.GetProperty("proofBoundary").GetProperty("isPackageConsumerRuntimeProof").GetBoolean());

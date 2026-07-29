@@ -3410,7 +3410,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt8ExecutionContextGetDebugSync = "jyppx_trt8_execution_context_get_debug_sync";
     public const string Trt8ExecutionContextGetDeviceMemorySize = "jyppx_trt8_execution_context_get_device_memory_size";
     public const string Trt8ExecutionContextGetEnqueueEmitsProfile = "jyppx_trt8_execution_context_get_enqueue_emits_profile";
-    public const string Trt8ExecutionContextGetErrorBufferCopy = "jyppx_trt8_execution_context_get_error_buffer_copy";
+    public const string Trt8ExecutionContextGetErrorBufferCopyDeferred = "jyppx_trt8_execution_context_get_error_buffer_copy";
     public const string Trt8ExecutionContextGetErrorBufferDeferred = "jyppx_trt8_execution_context_get_error_buffer_deferred";
     public const string Trt8ExecutionContextGetErrorRecorderDeferred = "jyppx_trt8_execution_context_get_error_recorder_deferred";
     public const string Trt8ExecutionContextGetMaxOutputSize = "jyppx_trt8_execution_context_get_max_output_size";

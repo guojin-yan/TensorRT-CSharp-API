@@ -99,7 +99,8 @@ public sealed class TensorRtExecBoundedBenchmarkSchedulerTests
         Assert.Contains("Stream.BeginCapture(CudaStreamCaptureMode.ThreadLocal)", service, StringComparison.Ordinal);
         Assert.Contains("graphExec = graph.Instantiate()", service, StringComparison.Ordinal);
         Assert.Contains("_cudaGraphExec.Launch(Stream)", service, StringComparison.Ordinal);
-        Assert.Contains("Bindings.AllocateDeviceBuffer(input.Name, runtimeShape)", service, StringComparison.Ordinal);
+        Assert.Contains("Bindings.AllocateDeviceBuffer(input.Binding.Name, input.Shape)", service, StringComparison.Ordinal);
+        Assert.Contains("Bindings.CopyInputFromHost(input.Binding.Name, input.Values, input.Shape)", service, StringComparison.Ordinal);
         Assert.Contains("if (!options.RuntimeOptions.NoDataTransfers)", service, StringComparison.Ordinal);
         Assert.Contains("CreateBenchmarkOnly", service, StringComparison.Ordinal);
         Assert.Contains("OnnxEngineBenchmarkSummary.CreateExecuted", service, StringComparison.Ordinal);

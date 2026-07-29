@@ -412,7 +412,7 @@ function Find-ExplicitTensorRtInterfaceAliasApis {
     "ICudaEngine::destroy" = @("id:*trt-object-destroy", "id:*cuda-engine-destroy-deferred")
     "IExecutionContext::destroy" = @("id:*trt-object-destroy", "id:*execution-context-destroy-deferred")
     "IExecutionContext::setAuxStreams" = @("id:*execution-context-set-aux-streams")
-    "IExecutionContext::getErrorBuffer" = @("id:*execution-context-get-error-buffer-copy")
+    "IExecutionContext::getErrorBuffer" = @("id:*execution-context-get-error-buffer-copy-deferred")
     "IBuilder::buildEngineWithConfig" = @("id:*builder-build-engine-with-config-owner-safe", "id:*builder-build-engine-with-config", "id:*builder-build-engine-with-config-deferred")
     "IGpuAllocator::free" = @("id:*gpu-allocator-free*")
     "IAlgorithm::getTimingMSec" = @("id:*algorithm-get-timing-msec*")
@@ -670,6 +670,7 @@ function Find-MatchedManifestApis {
     "IExecutionContext::executeV2",
     "IExecutionContext::enqueueV2",
     "IExecutionContext::setAuxStreams",
+    "IExecutionContext::getErrorBuffer",
     "IExecutionContext::setErrorRecorder",
     "INetworkDefinition::getErrorRecorder",
     "INetworkDefinition::setErrorRecorder",

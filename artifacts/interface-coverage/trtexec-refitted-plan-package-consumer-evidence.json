@@ -1,6 +1,6 @@
 {
   "schemaVersion": "trtexec-refitted-plan-package-consumer-evidence.v1",
-  "generatedDate": "2026-07-22",
+  "generatedDate": "2026-07-28",
   "state": "local-package-consumer-refitted-plan-runtime-passed",
   "evidenceClassification": "local-package-consumer-refitted-plan-runtime",
   "sourceRuntimeKey": "win-x64-trt10.11-cuda12.9-cudnn9.22",
@@ -17,15 +17,15 @@
   "packages": {
     "managed": {
       "id": "JYPPX.TensorRT.CSharp.API",
-      "version": "4.0.0",
-      "length": 14805837,
-      "sha256": "9afd8486da2094027fc73bc222e61df277e406d295559c136637b5824b6125da"
+      "version": "4.0.0-rtc-local.20260728",
+      "length": 15163042,
+      "sha256": "19b43a17c29b2891356de75f00ffd210355f58f74673c2d9e5435eafa9d22d9c"
     },
     "bridge": {
       "id": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge",
       "version": "4.0.0",
-      "length": 351091,
-      "sha256": "24dfbdb294de81b418f9e72aaa1c265968a2f8d2b2706cd7bd39b623ffb6829d"
+      "length": 352573,
+      "sha256": "d40bdd02a9a5011ac9b663b7e02f2b3d498e752c42c38a40cb34d61d9225b6b5"
     }
   },
   "consumer": {
@@ -36,8 +36,8 @@
     "managedAssemblyOutsideSourceTree": true,
     "managedAssemblyUnderConsumerRoot": true,
     "bridgeUnderConsumerRoot": true,
-    "projectSha256": "cdcd409783018b1ffeafeb5408e34b5ee301e18d6f0f71b13fff2529a4c84a41",
-    "programSha256": "21d77cd5b5fe7be6e8d00dbfcadf2b95c4398c54c2840438eb6ff644467338c0"
+    "projectSha256": "255c1cb97347c89aa8e79ee9b153f6665ecc9b7b5721f2ab645c91e4e89949f2",
+    "programSha256": "baaef703d683b15c1b2894bf7f6ea5592b7af0815e0ce4d55347966e0a4c8983"
   },
   "artifacts": {
     "sourcePlan": "artifacts/real-case/trtexec-refitted-plan-persistence/mnist-refitted-persisted.plan",
@@ -50,20 +50,35 @@
     "inputLengthBytes": 3136,
     "sourceInputSha256": "81f2cd7784dca5c8f02a9887ae89a6a3582880a27d2eba95a53f845c63187564",
     "copiedInputSha256": "81f2cd7784dca5c8f02a9887ae89a6a3582880a27d2eba95a53f845c63187564",
+    "sourceReference": "artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/mnist-trt10-7.reference.json",
+    "referenceCopyPathDistinct": true,
+    "sourceReferenceSha256": "07969a96f76f9dc69a777770ca581df64ad9cb2d1ea320f97bdfbb7cc697beef",
+    "copiedReferenceSha256": "07969a96f76f9dc69a777770ca581df64ad9cb2d1ea320f97bdfbb7cc697beef",
+    "referenceTensorName": "Plus214_Output_0",
+    "referenceShape": [
+      1,
+      10
+    ],
+    "referenceElementCount": 10,
+    "referenceSourceClassification": "repository-mnist-runtime-output-derived-unreviewed",
+    "referenceAbsoluteTolerance": 0.0001,
+    "referenceRelativeTolerance": 0.0001,
+    "referenceNaNPolicy": "reject",
+    "referenceInfinityPolicy": "exact",
     "outputLengthBytes": 40,
     "outputSha256": "6f5771d6c5b056406c190a59e725cf9bb13c1f148c1ef06f99ed8acfb11b9041",
     "expectedOutputSha256": "6f5771d6c5b056406c190a59e725cf9bb13c1f148c1ef06f99ed8acfb11b9041",
     "outputExactMatch": true
   },
   "execution": {
-    "commandShape": "dotnet run --project <consumer-project> -c Release --no-build -- <copied-plan> <copied-input> <raw-output> <expected-output-sha256>",
+    "commandShape": "dotnet run --project <consumer-project> -c Release --no-build -- <copied-plan> <copied-input> <raw-output> <expected-output-sha256> <copied-reference-json> <abs-tolerance> <rel-tolerance> <nan-policy> <infinity-policy>",
     "restoreExitCode": 0,
     "buildExitCode": 0,
     "runtimeExitCode": 0,
     "runtimePassed": true,
-    "stdoutSha256": "8d08a45c975c757cb69083627f46452df33829db54f1bdfdfd674579cbf05b72",
+    "stdoutSha256": "d5802dd3df24367ea23becb41575ef668fb24518abe055ca584c6399c8be59b1",
     "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "combinedSha256": "8d08a45c975c757cb69083627f46452df33829db54f1bdfdfd674579cbf05b72"
+    "combinedSha256": "d5802dd3df24367ea23becb41575ef668fb24518abe055ca584c6399c8be59b1"
   },
   "runtime": {
     "environment": "TRT=10.11.0 CUDA=12.9 TensorRtAvailable=True CudaAvailable=True",
@@ -81,6 +96,13 @@
     "enqueueCompleted": true,
     "ownerScopeExited": true,
     "outputExactMatch": true,
+    "referenceValidationCompleted": true,
+    "referenceValidationPassed": true,
+    "referenceComparedElementCount": 10,
+    "referenceMismatchCount": 0,
+    "referenceFirstMismatchIndex": -1,
+    "referenceMaximumAbsoluteError": "0",
+    "referenceMaximumRelativeError": "0",
     "predictedIndex": 7
   },
   "host": {
@@ -95,8 +117,8 @@
     {
       "role": "bridge-package-output",
       "name": "jyppxtrtbridge.dll",
-      "length": 1064960,
-      "sha256": "42f69f3d639e032fa3836fc7f552e4b665ffd073d52dc83ce630a4f04c87cc83"
+      "length": 1068544,
+      "sha256": "932267e9fab93cac36d80ea6c186e26e2dd159ce199f75e3b8805176165d8916"
     },
     {
       "role": "tensor-rt-runtime",
@@ -124,6 +146,6 @@
     "canPublishPublicly": false,
     "canCloseReleaseIssue": false,
     "performsPublish": false,
-    "statement": "This proves a copied full-weight refitted plan can be restored and executed by a PackageReference-only consumer from declared local feeds on one compatible host. It is not public-feed, post-publish, model-accuracy, or release-close proof."
+    "statement": "This proves a copied full-weight refitted plan can be restored and executed by a PackageReference-only consumer from declared local feeds on one compatible host, with the recorded structured reference comparison. The reference is an unreviewed same-runtime MNIST regression baseline, so this is not independent model-accuracy, Owner-approved golden output, public-feed, post-publish, or release-close proof."
   }
 }

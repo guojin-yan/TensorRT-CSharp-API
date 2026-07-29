@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "jyppx-mnist-reference-sidecar.v1",
+  "caseId": "trt10-mnist-digit-7-reference-validation",
+  "modelSource": "TensorRT 10.11 data/mnist README identifies mnist.onnx as retrieved from ONNX Model Zoo vision/classification/mnist.",
+  "modelSha256": "2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf",
+  "modelLicense": "owner-review-required: the local TensorRT MNIST sample README directs use terms to the TensorRT SLA; this observation is not repository redistribution or golden-reference approval.",
+  "inputAssetName": "7.pgm preprocessed as float32 by 1-pixel/255",
+  "inputAssetSha256": "81f2cd7784dca5c8f02a9887ae89a6a3582880a27d2eba95a53f845c63187564",
+  "sourceInputFileSha256": "880e75f93fe00ab6f5c4e8ab00ff695c61e7e30bdf0d967ff8b34de1f5a94634",
+  "referenceArtifact": {
+    "path": "artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/mnist-trt10-7.reference.json",
+    "sha256": "07969a96f76f9dc69a777770ca581df64ad9cb2d1ea320f97bdfbb7cc697beef",
+    "sourceOutputArtifact": "artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/mnist-trt10-7-output.json",
+    "sourceOutputSha256": "37b234e2f4cd8583699238822e8ebdc419c6dd43bcd71a87e8590e9e5e1d9f3e",
+    "derivation": "The 10 float32 logits were copied from the recorded source-tree TensorRT MNIST output for digit 7. This is a same-runtime regression reference, not an independent ONNX Runtime golden output."
+  },
+  "ownerReview": {
+    "status": "not-provided",
+    "reviewer": "",
+    "reviewedAtUtc": "",
+    "acceptedAsGoldenReference": false,
+    "acceptedForRepositoryRedistribution": false
+  },
+  "proofClassification": "real-model-reference-candidate-owner-review-required",
+  "canPromoteRealModelRuntime": false,
+  "canPromotePackageConsumerRuntime": false,
+  "canPublishPublicly": false,
+  "canCloseReleaseIssue": false,
+  "stdoutSummary": "",
+  "stderrSummary": "",
+  "proofBoundary": "The model and input are existing local TensorRT sample assets. The reference is derived from a prior TensorRT output, so it verifies structured-reference plumbing and regression consistency only. It cannot independently establish numerical correctness, owner-approved golden output, repository redistribution rights, package-consumer-runtime, public-package, post-publish, or release proof."
+}

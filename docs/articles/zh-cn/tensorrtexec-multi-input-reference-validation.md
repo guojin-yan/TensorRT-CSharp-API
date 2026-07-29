@@ -54,3 +54,21 @@ reference SHA256 或单个 tensor 通过都不能替代全输出数值校验。
 本仓库的 TRT10/CUDA12.9 smoke 使用生成的 Add/Sub ONNX 完成双输入、双输出真实 enqueue/readback；随后把
 `difference[7]` reference 修改 `0.25`，结果正确进入 `load-engine-reference-validation-failed`。该证据仍是 synthetic
 runtime，不是 real-model、package-consumer、public package、post-publish 或 release proof。
+
+## MNIST Reference 候选
+
+仓库本机另以 TensorRT 10.11/CUDA 12.9 的既有 MNIST digit-7 资产验证了同一合同。模型随 TensorRT
+`data/mnist` 提供，其 README 标记来源为 ONNX Model Zoo；输入为 `7.pgm` 经 `1-pixel/255` 预处理后的
+`Input3` float32 tensor。reference 仅包含 `Plus214_Output_0` 的 `[1,10]` 十个 logits，文件的
+`sourceClassification` 固定为 `repository-mnist-runtime-output-derived-unreviewed`。
+
+该 reference 从先前 TensorRT 输出复制而来，因此它用于回归一致性，不能作为独立 ONNX Runtime golden output。source-tree
+build 和独立 `--loadEngine` 都得到 `OutputValidated=true`、10/10 比较、0 mismatch，最大绝对/相对误差分别为
+`9.536743e-07` / `1.3443339e-06`，使用 `1e-4` 的 absolute/relative tolerance。隔离的本地
+`PackageReference` consumer 同样比较该 reference，并由 strict evidence validator 记录 53 项通过。
+
+紧凑记录位于
+`artifacts/interface-coverage/tensorrtexec-mnist-reference-validation-evidence.json`。它保留 model/input/reference/
+engine/output/report/package hashes，也明确记录 TensorRT sample 条款仅是许可审查输入，Owner 尚未批准仓库再分发或
+golden reference。因而该记录是 existing-real-model 的 structured-reference regression candidate，不是独立数值正确性、
+Owner accepted real-model、public-package、post-publish 或 release proof。

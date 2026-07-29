@@ -966,7 +966,7 @@
   href: articles/zh-cn/plugin-inventory-field-metadata-smoke-guide.md
 - name: Deferred Next Readonly Candidate List
   href: articles/zh-cn/deferred-next-readonly-candidate-list.md
-- name: TRT8 Execution Context Error Buffer Copy Proof
+- name: TRT8 Execution Context Error Buffer Deferred Diagnostic
   href: articles/zh-cn/trt8-execution-context-error-buffer-copy-proof.md
 - name: Deferred B-tier 46-51 Proof Closure
   href: articles/zh-cn/deferred-btier-46-50-proof-closure.md

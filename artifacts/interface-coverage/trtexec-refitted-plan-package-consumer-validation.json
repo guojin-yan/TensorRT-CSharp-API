@@ -1,8 +1,8 @@
 {
   "schemaVersion": "trtexec-refitted-plan-package-consumer-validation.v1",
   "strict": true,
-  "checkCount": 46,
-  "passedCount": 46,
+  "checkCount": 53,
+  "passedCount": 53,
   "failureCount": 0,
   "checks": [
     {
@@ -73,7 +73,7 @@
     {
       "id": "package-hashes",
       "passed": true,
-      "actual": "9afd8486da2094027fc73bc222e61df277e406d295559c136637b5824b6125da/24dfbdb294de81b418f9e72aaa1c265968a2f8d2b2706cd7bd39b623ffb6829d"
+      "actual": "19b43a17c29b2891356de75f00ffd210355f58f74673c2d9e5435eafa9d22d9c/d40bdd02a9a5011ac9b663b7e02f2b3d498e752c42c38a40cb34d61d9225b6b5"
     },
     {
       "id": "consumer-outside-repository",
@@ -103,12 +103,12 @@
     {
       "id": "consumer-source-hashes",
       "passed": true,
-      "actual": "cdcd409783018b1ffeafeb5408e34b5ee301e18d6f0f71b13fff2529a4c84a41/21d77cd5b5fe7be6e8d00dbfcadf2b95c4398c54c2840438eb6ff644467338c0"
+      "actual": "255c1cb97347c89aa8e79ee9b153f6665ecc9b7b5721f2ab645c91e4e89949f2/baaef703d683b15c1b2894bf7f6ea5592b7af0815e0ce4d55347966e0a4c8983"
     },
     {
       "id": "relative-source-artifacts",
       "passed": true,
-      "actual": "artifacts/real-case/trtexec-refitted-plan-persistence/mnist-refitted-persisted.plan/artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/mnist-trt10-7-input-f32.bin"
+      "actual": "artifacts/real-case/trtexec-refitted-plan-persistence/mnist-refitted-persisted.plan/artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/mnist-trt10-7-input-f32.bin/artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/mnist-trt10-7.reference.json"
     },
     {
       "id": "plan-copy-distinct",
@@ -134,6 +134,26 @@
       "id": "input-copy-hash",
       "passed": true,
       "actual": "3136/81f2cd7784dca5c8f02a9887ae89a6a3582880a27d2eba95a53f845c63187564"
+    },
+    {
+      "id": "reference-copy-distinct",
+      "passed": true,
+      "actual": "True"
+    },
+    {
+      "id": "reference-copy-hash",
+      "passed": true,
+      "actual": "07969a96f76f9dc69a777770ca581df64ad9cb2d1ea320f97bdfbb7cc697beef/07969a96f76f9dc69a777770ca581df64ad9cb2d1ea320f97bdfbb7cc697beef"
+    },
+    {
+      "id": "reference-contract",
+      "passed": true,
+      "actual": "Plus214_Output_0/1,10/10/repository-mnist-runtime-output-derived-unreviewed"
+    },
+    {
+      "id": "reference-policy",
+      "passed": true,
+      "actual": "0.0001/0.0001/reject/exact"
     },
     {
       "id": "output-length",
@@ -163,12 +183,12 @@
     {
       "id": "execution-log-hashes",
       "passed": true,
-      "actual": "8d08a45c975c757cb69083627f46452df33829db54f1bdfdfd674579cbf05b72/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855/8d08a45c975c757cb69083627f46452df33829db54f1bdfdfd674579cbf05b72"
+      "actual": "d5802dd3df24367ea23becb41575ef668fb24518abe055ca584c6399c8be59b1/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855/d5802dd3df24367ea23becb41575ef668fb24518abe055ca584c6399c8be59b1"
     },
     {
       "id": "command-shape",
       "passed": true,
-      "actual": "dotnet run --project <consumer-project> -c Release --no-build -- <copied-plan> <copied-input> <raw-output> <expected-output-sha256>"
+      "actual": "dotnet run --project <consumer-project> -c Release --no-build -- <copied-plan> <copied-input> <raw-output> <expected-output-sha256> <copied-reference-json> <abs-tolerance> <rel-tolerance> <nan-policy> <infinity-policy>"
     },
     {
       "id": "full-weight-refittable-fact",
@@ -194,6 +214,16 @@
       "id": "enqueue-gates",
       "passed": true,
       "actual": "True/True/True/True"
+    },
+    {
+      "id": "reference-validation-gates",
+      "passed": true,
+      "actual": "True/True/10/0/-1"
+    },
+    {
+      "id": "reference-validation-errors",
+      "passed": true,
+      "actual": "0/0"
     },
     {
       "id": "mnist-output-index",
@@ -229,6 +259,11 @@
       "id": "no-release-side-effect",
       "passed": true,
       "actual": "False/False/False"
+    },
+    {
+      "id": "unreviewed-reference-boundary",
+      "passed": true,
+      "actual": "This proves a copied full-weight refitted plan can be restored and executed by a PackageReference-only consumer from declared local feeds on one compatible host, with the recorded structured reference comparison. The reference is an unreviewed same-runtime MNIST regression baseline, so this is not independent model-accuracy, Owner-approved golden output, public-feed, post-publish, or release-close proof."
     },
     {
       "id": "compact-evidence-path-free",

@@ -8303,21 +8303,13 @@ JYPPX_StatusCode jyppx_trt8_execution_context_get_error_buffer_copy(
         return status;
     }
 
-#if JYPPX_HAS_TENSORRT
-    nvinfer1::IExecutionContext* context_payload = nullptr;
-    status = get_context_payload_ext(context, &context_payload, "execution context error buffer query");
-    if (status != JYPPX_STATUS_OK)
-    {
-        return status;
-    }
-
-    return copy_string_to_buffer(context_payload->getErrorBuffer(), output_buffer, output_buffer_size, out_required_size);
-#else
+    *out_required_size = 0;
     (void)context;
     (void)output_buffer;
     (void)output_buffer_size;
-    return jyppx::tensorrt::report_vendor_missing(kLine, "execution context error buffer query");
-#endif
+    return jyppx::tensorrt::report_not_implemented(
+        kLine,
+        "IExecutionContext::getErrorBuffer (unavailable on the standard nvinfer1::IExecutionContext vendor type supported by this bridge; the compatibility ABI remains deferred)");
 }
 
 JYPPX_StatusCode jyppx_trt8_execution_context_get_optimization_profile(JYPPX_TensorRtExecutionContext* context, int32_t* out_profile_index)

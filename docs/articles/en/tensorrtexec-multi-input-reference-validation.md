@@ -51,3 +51,21 @@ a reference SHA256, or a single passing output are not all-output numerical corr
 The repository TRT10/CUDA12.9 smoke builds and runs a generated two-input/two-output Add/Sub ONNX model, then changes only
 `difference[7]` by `0.25` and verifies the `load-engine-reference-validation-failed` result. This is synthetic runtime evidence,
 not real-model, package-consumer, public-package, post-publish, or release proof.
+
+## MNIST Reference Candidate
+
+The local repository also applies the same contract to the existing TensorRT 10.11/CUDA 12.9 MNIST digit-7 assets. The model
+is supplied under TensorRT `data/mnist`, whose README identifies ONNX Model Zoo as its source. The input is the `7.pgm`
+asset preprocessed as the `Input3` float32 tensor with `1-pixel/255`. The reference contains the ten `[1,10]`
+`Plus214_Output_0` logits and declares `repository-mnist-runtime-output-derived-unreviewed` as its source classification.
+
+This reference was copied from a prior TensorRT output, so it is a regression-consistency input rather than an independent ONNX
+Runtime golden output. Both the source-tree build and independent `--loadEngine` paths recorded `OutputValidated=true`, 10/10
+comparisons, and zero mismatches, with maximum absolute/relative errors of `9.536743e-07` / `1.3443339e-06` under `1e-4`
+tolerances. The isolated local `PackageReference` consumer compares the same reference and the strict evidence validator records
+53 passing checks.
+
+`artifacts/interface-coverage/tensorrtexec-mnist-reference-validation-evidence.json` preserves model/input/reference/engine/
+output/report/package hashes. It also states that the TensorRT sample terms are license-review input only and that no Owner has
+approved repository redistribution or this reference as golden. The record is therefore an existing-real-model structured-reference
+regression candidate, not independent numerical correctness, Owner-accepted real-model, public-package, post-publish, or release proof.

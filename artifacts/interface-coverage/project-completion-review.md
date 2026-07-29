@@ -5053,3 +5053,81 @@ post-publish、Linux、Owner accepted 或 release proof。
 release scaffold 测试 `109/109` 通过；完整 `TensorRtSharp.sln` Debug build 为 `0 warning / 0 error`。GUI/CLI strict
 checklist 与真实 validated report strict validator 均为 0 blocker；public API compiler documentation 与双语审计均为
 0 finding；8 份本批 JSON 均可解析。
+
+## 2026-07-28 TensorRtExec MNIST Structured Reference Regression Candidate
+
+本阶段把仓库已有 TensorRT MNIST digit-7 真模型接入 structured reference-output 合同，同时不把同一运行时派生的
+reference 伪装成独立 golden output 或 Owner 认可的真实模型证明。
+
+### 实现与证据
+
+- 新增 `mnist-trt10-7.reference.json`，固定 `Plus214_Output_0` 的 `[1,10]` logits、`schemaVersion=1` 和
+  `repository-mnist-runtime-output-derived-unreviewed` 来源分类；sidecar 同时记录 ONNX Model Zoo 来源说明、model/input/
+  source-output hashes、TensorRT sample license 审查状态和空缺的 Owner review。
+- TRT10.11/CUDA12.9 source-tree build 后输出 `external-onnx-reference-validated-runtime`，独立 `--loadEngine` 输出
+  `load-engine-reference-validated-runtime`；两条路径均为 10/10 比较、0 mismatch、`OutputValidated=true`，最大绝对/
+  相对误差为 `9.536743e-07` / `1.3443339e-06`，使用 `1e-4` absolute/relative tolerance。
+- `samples/RefittedPlan.PackageConsumer` 增加独立 structured reference parser/comparer，验证 schema/name/shape/count、
+  tolerance、NaN/Infinity policy 和全部值；现有 local-only feed consumer 仍保留 raw SHA256 精确比较。真实 run 的
+  reference comparison 为 10/10、0 mismatch，strict validator 为 `53/53`。
+- 新增 `tensorrtexec-mnist-reference-validation-evidence.json` 与 strict validator；要求本机 runtime artifacts 时为
+  `44/44`，交叉检查 reference/sidecar、build/load engine/output/report/raw hashes、package consumer evidence 和
+  许可/Owner/proof flags。
+
+### Proof Boundary
+
+- 模型 README 只能说明 TensorRT 样例指向 ONNX Model Zoo，样例 license 文本只能作为 Owner 审查输入；当前没有
+  仓库再分发批准，也没有独立 ONNX Runtime reference 或 Owner golden-output 接受记录。
+- generic 工具报告保持 `synthetic-input-runtime` 的受限分类；紧凑记录单独标为
+  `real-model-reference-candidate-runtime`，两者均不能升级为 independent numerical correctness、Owner accepted
+  real-model、public package、post-publish 或 release-close proof。
+- 本阶段未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release 操作或 issue close。
+
+## 2026-07-29 MNIST Reference Consumer And Cross-Version ABI Closure
+
+本阶段完成 MNIST structured reference、隔离本地 PackageReference consumer 与多版本 evidence matrix 的最终验证，
+并纠正一次由 vendor header 类型误判造成的 `IExecutionContext::getErrorBuffer` 虚假实现声明。
+
+### `getErrorBuffer` 事实纠正
+
+- `native/src/tensorrt/v8/api.cpp` 参与 TRT8 与 TRT10 bridge 编译；两套实际 vendor headers 上的标准
+  `nvinfer1::IExecutionContext` 都没有 `getErrorBuffer()`。不能把 `NvInferSafeRuntime.h` 中安全运行时类型的同名接口
+  直接映射到标准 execution-context owner。
+- 保留 `jyppx_trt8_execution_context_get_error_buffer_copy` C ABI 与托管 `TryGetErrorBuffer` 兼容面，但 native 入口
+  不再访问 vendor 对象或 borrowed pointer：清零 required size 后无条件返回明确的 `NotImplemented` deferred diagnostic。
+- manifest ID 改为 `trt8-execution-context-get-error-buffer-copy-deferred`；旧 deferred history 继续保留。
+  coverage 中两个 TRT8 CUDA 变体的 `IExecutionContext::getErrorBuffer` 均恢复为 `deferred-only`，不再声称
+  `implemented-with-deferred-history`。
+- 若未来接入 TensorRT safe runtime，必须新增独立 safe execution-context owner/lifetime/runtime proof，不能复用标准
+  context 指针或只靠 header 同名方法晋级。
+
+### 生成、native 与 ABI 验证
+
+- binding generator 两次幂等通过：`201 manifests / 4001 API records`。
+- 当前本机 coverage：TRT8 `760 implemented / 120 deferred-only`、TRT10 `761 / 118`、TRT11 `814 / 87`。
+- `win-x64-trt8-cuda11-release` 与 `win-x64-trt10-cuda11-release` 均成功重建 DLL；保留既有 C4127/C4244
+  compiler warnings，不将 native build 记为 zero-warning。
+- ABI declaration parity：TRT8 `994/994`、TRT10 `1087/1087`、TRT11 `1234/1234`；新重建 TRT8/CUDA11
+  与 TRT10/CUDA11 bridge 的 PE export missing 均为 `0`。
+
+### Evidence 与测试
+
+- MNIST strict validator 使用 PowerShell 7 和 `-RequireRuntimeArtifacts`：`44/44`；local package-consumer strict
+  validator：`53/53`。Windows PowerShell 5.1 不支持脚本使用的 `ConvertFrom-Json -Depth`，该次调用失败，不计入通过结果。
+- `ExecutionContextErrorBufferCopyTests`、multi-version matrix、MNIST evidence、package-consumer 四类窄集合：`11/11`。
+- 扩展 TensorRtExec/trtexec 集合首次为 `122/124`，暴露 b5390b5 多输入/reference 重构后两处过期结构断言；同步
+  release gap Markdown/status 和 benchmark worker 的 `input.Binding.Name + input.Shape` 断言后，局部 `5/5`、扩展集合
+  `124/124` 通过。
+- 完整 `TensorRtSharp.sln` Debug build：`0 warning / 0 error`。本阶段没有运行完整 ProjectQuality 全集，因此不声明
+  全量 ProjectQuality 通过。
+
+### Proof 与发布边界
+
+- source-tree build、独立 load-engine 与 local-only PackageReference consumer 的 reference comparison 均通过，但
+  reference 仍是 `repository-mnist-runtime-output-derived-unreviewed`，不是独立 ONNX Runtime golden 或 Owner accepted output。
+- local feed、真实本机 GPU、ABI/export parity 和 retained runtime artifacts 都不是 public package、post-publish、Linux
+  runner 或 release-close proof。
+- C 盘 `Downloads`/用户 Temp 的本批关键词审计无命中；隔离 consumer workspace 已删除。系统与用户目录两套
+  `dotnet build-server shutdown` 均已执行，并精确终止本轮 CMake 留下的 orphan MSBuild node；最终 build/test/compiler
+  进程残留为 `0`。
+- 本阶段未 push、未触发 GitHub Actions，未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。

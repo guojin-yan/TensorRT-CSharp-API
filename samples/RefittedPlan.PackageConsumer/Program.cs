@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using JYPPX.CudaSharp;
 using JYPPX.Shared.Interop;
 using JYPPX.TensorRtSharp;
@@ -12,10 +14,10 @@ internal static class Program
     {
         try
         {
-            if (args.Length != 4)
+            if (args.Length != 9)
             {
                 Console.Error.WriteLine(
-                    "Usage: RefittedPlan.PackageConsumer <plan> <float-input> <raw-output> <expected-output-sha256>");
+                    "Usage: RefittedPlan.PackageConsumer <plan> <float-input> <raw-output> <expected-output-sha256> <reference-json> <abs-tolerance> <rel-tolerance> <nan-policy> <infinity-policy>");
                 return 2;
             }
 
@@ -23,6 +25,11 @@ internal static class Program
             string inputPath = Path.GetFullPath(args[1]);
             string outputPath = Path.GetFullPath(args[2]);
             string expectedOutputSha256 = args[3].Trim().ToLowerInvariant();
+            string referencePath = Path.GetFullPath(args[4]);
+            float absoluteTolerance = ParseTolerance(args[5], "absolute");
+            float relativeTolerance = ParseTolerance(args[6], "relative");
+            string nanPolicy = ParseNaNPolicy(args[7]);
+            string infinityPolicy = ParseInfinityPolicy(args[8]);
             if (!File.Exists(planPath))
             {
                 throw new FileNotFoundException("Persisted refitted plan was not found.", planPath);
@@ -32,6 +39,8 @@ internal static class Program
             {
                 throw new FileNotFoundException("Float input artifact was not found.", inputPath);
             }
+
+            ReferenceTensor reference = ReadReference(referencePath);
 
             byte[] inputBytes = File.ReadAllBytes(inputPath);
             if (inputBytes.Length == 0 || inputBytes.Length % sizeof(float) != 0)
@@ -51,6 +60,15 @@ internal static class Program
             Console.WriteLine("PlanLengthBytes=" + new FileInfo(planPath).Length);
             Console.WriteLine("InputSha256=" + ComputeSha256(inputBytes));
             Console.WriteLine("InputLengthBytes=" + inputBytes.LongLength);
+            Console.WriteLine("ReferenceSha256=" + ComputeFileSha256(referencePath));
+            Console.WriteLine("ReferenceSourceClassification=" + reference.SourceClassification);
+            Console.WriteLine("ReferenceTensor=" + reference.TensorName);
+            Console.WriteLine("ReferenceShape=" + FormatShape(reference.Shape));
+            Console.WriteLine("ReferenceElementCount=" + reference.Values.Length);
+            Console.WriteLine("ReferenceAbsTolerance=" + absoluteTolerance.ToString("R", System.Globalization.CultureInfo.InvariantCulture));
+            Console.WriteLine("ReferenceRelTolerance=" + relativeTolerance.ToString("R", System.Globalization.CultureInfo.InvariantCulture));
+            Console.WriteLine("ReferenceNaNPolicy=" + nanPolicy);
+            Console.WriteLine("ReferenceInfinityPolicy=" + infinityPolicy);
 
             TensorRtEnvironmentSnapshot environment = TensorRtEnvironmentProbe.GetCurrent();
             Console.WriteLine(
@@ -59,7 +77,16 @@ internal static class Program
                 " TensorRtAvailable=" + environment.RuntimeInfo.TensorRtAvailable +
                 " CudaAvailable=" + environment.RuntimeInfo.CudaToolkitAvailable);
 
-            RunPersistedPlan(planPath, outputPath, inputValues, expectedOutputSha256);
+            RunPersistedPlan(
+                planPath,
+                outputPath,
+                inputValues,
+                expectedOutputSha256,
+                reference,
+                absoluteTolerance,
+                relativeTolerance,
+                nanPolicy,
+                infinityPolicy);
 
             Console.WriteLine("OwnerScopeExited=True");
             Console.WriteLine("PackageConsumerRuntime=Passed");
@@ -77,7 +104,12 @@ internal static class Program
         string planPath,
         string outputPath,
         float[] inputValues,
-        string expectedOutputSha256)
+        string expectedOutputSha256,
+        ReferenceTensor reference,
+        float absoluteTolerance,
+        float relativeTolerance,
+        string nanPolicy,
+        string infinityPolicy)
     {
         using TensorRtLogger logger = new TensorRtLogger(TensorRtApiLine.TensorRt10);
         using TensorRtRuntime runtime = new TensorRtRuntime(logger);
@@ -133,6 +165,15 @@ internal static class Program
         string outputSha256 = ComputeSha256(outputBytes);
         int predictedIndex = ArgMax(outputValues);
         bool exactMatch = string.Equals(outputSha256, expectedOutputSha256, StringComparison.OrdinalIgnoreCase);
+        ReferenceValidationResult referenceValidation = ValidateReference(
+            output.Name,
+            outputShape,
+            outputValues,
+            reference,
+            absoluteTolerance,
+            relativeTolerance,
+            nanPolicy,
+            infinityPolicy);
 
         Console.WriteLine("EngineRefittable=" + engine.IsRefittable);
         Console.WriteLine("EngineIOTensorCount=" + engine.IOTensorCount);
@@ -151,12 +192,178 @@ internal static class Program
         Console.WriteLine("OutputSha256=" + outputSha256);
         Console.WriteLine("PredictedIndex=" + predictedIndex);
         Console.WriteLine("OutputExactMatch=" + exactMatch);
+        Console.WriteLine("ReferenceValidationCompleted=True");
+        Console.WriteLine("ReferenceValidationPassed=" + referenceValidation.Passed);
+        Console.WriteLine("ReferenceComparedElementCount=" + referenceValidation.ComparedElementCount);
+        Console.WriteLine("ReferenceMismatchCount=" + referenceValidation.MismatchCount);
+        Console.WriteLine("ReferenceFirstMismatchIndex=" + referenceValidation.FirstMismatchIndex);
+        Console.WriteLine("ReferenceMaximumAbsoluteError=" + referenceValidation.MaximumAbsoluteError.ToString("R", System.Globalization.CultureInfo.InvariantCulture));
+        Console.WriteLine("ReferenceMaximumRelativeError=" + referenceValidation.MaximumRelativeError.ToString("R", System.Globalization.CultureInfo.InvariantCulture));
 
         if (!exactMatch)
         {
             throw new InvalidDataException(
                 $"Output SHA256 mismatch. Expected={expectedOutputSha256} Actual={outputSha256}.");
         }
+
+        if (!referenceValidation.Passed)
+        {
+            throw new InvalidDataException(
+                $"Reference validation failed. Mismatches={referenceValidation.MismatchCount} FirstMismatch={referenceValidation.FirstMismatchIndex} " +
+                $"MaxAbs={referenceValidation.MaximumAbsoluteError:R} MaxRel={referenceValidation.MaximumRelativeError:R}.");
+        }
+    }
+
+    private static ReferenceTensor ReadReference(string path)
+    {
+        if (!File.Exists(path))
+        {
+            throw new FileNotFoundException("Structured reference JSON was not found.", path);
+        }
+
+        ReferenceTensor? reference = JsonSerializer.Deserialize<ReferenceTensor>(
+            File.ReadAllBytes(path),
+            new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                NumberHandling = JsonNumberHandling.AllowNamedFloatingPointLiterals
+            });
+        if (reference == null || reference.SchemaVersion != 1 || string.IsNullOrWhiteSpace(reference.TensorName) ||
+            reference.Shape == null || reference.Shape.Length == 0 || reference.Shape.Any(static value => value <= 0) ||
+            reference.Values == null || string.IsNullOrWhiteSpace(reference.SourceClassification))
+        {
+            throw new InvalidDataException("Structured reference JSON must contain schemaVersion=1, tensorName, positive shape, values, and sourceClassification.");
+        }
+
+        return reference;
+    }
+
+    private static ReferenceValidationResult ValidateReference(
+        string outputTensorName,
+        TensorRtDims outputShape,
+        float[] outputValues,
+        ReferenceTensor reference,
+        float absoluteTolerance,
+        float relativeTolerance,
+        string nanPolicy,
+        string infinityPolicy)
+    {
+        if (!string.Equals(outputTensorName, reference.TensorName, StringComparison.Ordinal))
+        {
+            throw new InvalidDataException($"Reference tensor name mismatch. Actual={outputTensorName} Expected={reference.TensorName}.");
+        }
+
+        if (!outputShape.Values.SequenceEqual(reference.Shape))
+        {
+            throw new InvalidDataException(
+                $"Reference shape mismatch. Actual={FormatShape(outputShape)} Expected={FormatShape(reference.Shape)}.");
+        }
+
+        if (outputValues.Length != reference.Values.Length)
+        {
+            throw new InvalidDataException(
+                $"Reference element count mismatch. Actual={outputValues.Length} Expected={reference.Values.Length}.");
+        }
+
+        int mismatchCount = 0;
+        int firstMismatchIndex = -1;
+        float maximumAbsoluteError = 0.0f;
+        float maximumRelativeError = 0.0f;
+        for (int index = 0; index < outputValues.Length; index++)
+        {
+            bool matches = ReferenceValuesMatch(
+                outputValues[index],
+                reference.Values[index],
+                absoluteTolerance,
+                relativeTolerance,
+                nanPolicy,
+                infinityPolicy,
+                out float absoluteError,
+                out float relativeError);
+            maximumAbsoluteError = Math.Max(maximumAbsoluteError, absoluteError);
+            maximumRelativeError = Math.Max(maximumRelativeError, relativeError);
+            if (!matches)
+            {
+                mismatchCount++;
+                if (firstMismatchIndex < 0)
+                {
+                    firstMismatchIndex = index;
+                }
+            }
+        }
+
+        return new ReferenceValidationResult(
+            mismatchCount == 0,
+            outputValues.Length,
+            mismatchCount,
+            firstMismatchIndex,
+            maximumAbsoluteError,
+            maximumRelativeError);
+    }
+
+    private static bool ReferenceValuesMatch(
+        float actual,
+        float expected,
+        float absoluteTolerance,
+        float relativeTolerance,
+        string nanPolicy,
+        string infinityPolicy,
+        out float absoluteError,
+        out float relativeError)
+    {
+        if (float.IsNaN(actual) || float.IsNaN(expected))
+        {
+            bool bothNaN = float.IsNaN(actual) && float.IsNaN(expected);
+            absoluteError = bothNaN ? 0.0f : float.MaxValue;
+            relativeError = absoluteError;
+            return bothNaN && string.Equals(nanPolicy, "equal", StringComparison.Ordinal);
+        }
+
+        if (float.IsInfinity(actual) || float.IsInfinity(expected))
+        {
+            bool exact = actual.Equals(expected);
+            absoluteError = exact ? 0.0f : float.MaxValue;
+            relativeError = absoluteError;
+            return exact && string.Equals(infinityPolicy, "exact", StringComparison.Ordinal);
+        }
+
+        absoluteError = Math.Abs(actual - expected);
+        float scale = Math.Max(Math.Abs(actual), Math.Abs(expected));
+        relativeError = scale == 0.0f ? absoluteError : absoluteError / scale;
+        return absoluteError <= absoluteTolerance || absoluteError <= relativeTolerance * scale;
+    }
+
+    private static float ParseTolerance(string value, string name)
+    {
+        if (!float.TryParse(value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float parsed) ||
+            !float.IsFinite(parsed) || parsed < 0.0f)
+        {
+            throw new ArgumentException($"Reference {name} tolerance must be finite and non-negative.", name);
+        }
+
+        return parsed;
+    }
+
+    private static string ParseNaNPolicy(string value)
+    {
+        if (string.Equals(value, "reject", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(value, "equal", StringComparison.OrdinalIgnoreCase))
+        {
+            return value.ToLowerInvariant();
+        }
+
+        throw new ArgumentException("Reference NaN policy must be reject or equal.", nameof(value));
+    }
+
+    private static string ParseInfinityPolicy(string value)
+    {
+        if (string.Equals(value, "exact", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(value, "reject", StringComparison.OrdinalIgnoreCase))
+        {
+            return value.ToLowerInvariant();
+        }
+
+        throw new ArgumentException("Reference infinity policy must be exact or reject.", nameof(value));
     }
 
     private static TensorRtEngineTensorBinding Single(
@@ -233,6 +440,11 @@ internal static class Program
         return "[" + string.Join(",", shape.Values) + "]";
     }
 
+    private static string FormatShape(int[] shape)
+    {
+        return "[" + string.Join(",", shape) + "]";
+    }
+
     private static string ComputeFileSha256(string path)
     {
         using FileStream stream = File.OpenRead(path);
@@ -242,5 +454,49 @@ internal static class Program
     private static string ComputeSha256(byte[] bytes)
     {
         return Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant();
+    }
+
+    private sealed class ReferenceTensor
+    {
+        public int SchemaVersion { get; set; }
+
+        public string TensorName { get; set; } = string.Empty;
+
+        public int[] Shape { get; set; } = Array.Empty<int>();
+
+        public float[] Values { get; set; } = Array.Empty<float>();
+
+        public string SourceClassification { get; set; } = string.Empty;
+    }
+
+    private sealed class ReferenceValidationResult
+    {
+        public ReferenceValidationResult(
+            bool passed,
+            int comparedElementCount,
+            int mismatchCount,
+            int firstMismatchIndex,
+            float maximumAbsoluteError,
+            float maximumRelativeError)
+        {
+            Passed = passed;
+            ComparedElementCount = comparedElementCount;
+            MismatchCount = mismatchCount;
+            FirstMismatchIndex = firstMismatchIndex;
+            MaximumAbsoluteError = maximumAbsoluteError;
+            MaximumRelativeError = maximumRelativeError;
+        }
+
+        public bool Passed { get; }
+
+        public int ComparedElementCount { get; }
+
+        public int MismatchCount { get; }
+
+        public int FirstMismatchIndex { get; }
+
+        public float MaximumAbsoluteError { get; }
+
+        public float MaximumRelativeError { get; }
     }
 }

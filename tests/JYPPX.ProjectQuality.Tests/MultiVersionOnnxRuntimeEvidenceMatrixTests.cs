@@ -40,6 +40,14 @@ public sealed class MultiVersionOnnxRuntimeEvidenceMatrixTests
         Assert.Equal(4, root.GetProperty("syntheticRuntimeCaseCount").GetInt32());
         Assert.Equal(11, root.GetProperty("realModelRuntimeCaseCount").GetInt32());
         Assert.Equal(0, root.GetProperty("packageConsumerRuntimeCaseCount").GetInt32());
+        JsonElement mnistReference = root.GetProperty("mnistReferenceValidation");
+        Assert.Equal("mnist-reference-regression-runtime-passed-owner-review-required", mnistReference.GetProperty("state").GetString());
+        Assert.Equal("real-model-reference-candidate-runtime", mnistReference.GetProperty("evidenceClassification").GetString());
+        Assert.True(mnistReference.GetProperty("sourceTreeBuildPassed").GetBoolean());
+        Assert.True(mnistReference.GetProperty("loadEnginePassed").GetBoolean());
+        Assert.True(mnistReference.GetProperty("localPackageConsumerReferencePassed").GetBoolean());
+        Assert.False(mnistReference.GetProperty("ownerReviewedGolden").GetBoolean());
+        Assert.False(mnistReference.GetProperty("canPromoteRealModelRuntime").GetBoolean());
         Assert.False(root.GetProperty("performsPublish").GetBoolean());
         Assert.False(root.GetProperty("canPublishPublicly").GetBoolean());
         Assert.False(root.GetProperty("canCloseReleaseIssue").GetBoolean());
@@ -149,6 +157,7 @@ public sealed class MultiVersionOnnxRuntimeEvidenceMatrixTests
         Assert.Contains("trt10-cuda11-mnist-digit-7", markdown, StringComparison.Ordinal);
         Assert.Contains("blocked-by-runtime-assets-missing", markdown, StringComparison.Ordinal);
         Assert.Contains("package-consumer runtime：`0`", markdown, StringComparison.Ordinal);
+        Assert.Contains("MNIST structured reference：`mnist-reference-regression-runtime-passed-owner-review-required`", markdown, StringComparison.Ordinal);
         Assert.DoesNotContain("canPublishPublicly：`True`", markdown, StringComparison.Ordinal);
         Assert.DoesNotContain("canCloseReleaseIssue：`True`", markdown, StringComparison.Ordinal);
     }

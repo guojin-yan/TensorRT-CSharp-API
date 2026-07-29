@@ -4,7 +4,7 @@
   "versionLine": "8",
   "apis": [
     {
-      "id": "trt8-execution-context-get-error-buffer-copy",
+      "id": "trt8-execution-context-get-error-buffer-copy-deferred",
       "entryPoint": "jyppx_trt8_execution_context_get_error_buffer_copy",
       "returnType": "BridgeStatusCode",
       "ownership": "caller-owned",

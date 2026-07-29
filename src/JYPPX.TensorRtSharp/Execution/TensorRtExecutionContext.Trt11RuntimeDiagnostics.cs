@@ -10,16 +10,17 @@ namespace JYPPX.TensorRtSharp;
 public sealed partial class TensorRtExecutionContext
 {
     /// <summary>
-    /// Tries to copy the TensorRT 8 execution-context error buffer into managed memory.
-    /// 尝试将 TensorRT 8 execution context 的 error buffer 复制到托管内存。
+    /// Probes the retained execution-context error-buffer compatibility API.
+    /// 探测保留的 execution context error-buffer 兼容 API。
     /// </summary>
     /// <param name="errorBuffer">The copied error text, or an empty string when unavailable. / 复制出的错误文本；不可用时为空字符串。</param>
-    /// <returns><see langword="true"/> when the vendor query succeeded. / vendor 查询成功时返回 <see langword="true"/>。</returns>
+    /// <returns><see langword="false"/> for the currently supported standard TensorRT execution-context types. / 对当前支持的标准 TensorRT execution context 类型返回 <see langword="false"/>。</returns>
     /// <remarks>
-    /// TensorRT 8 exposes this legacy query as a borrowed <c>const char*</c>. The bridge copies it during the native call
-    /// and never exposes or retains the vendor-owned pointer. TensorRT 10 and 11 report controlled unsupported diagnostics.
-    /// TensorRT 8 的 vendor API 返回 borrowed <c>const char*</c>；bridge 仅在 native 调用期间复制内容，不暴露或保留 vendor 指针。
-    /// TensorRT 10 和 11 会返回受控的不支持诊断。
+    /// The standard <c>nvinfer1::IExecutionContext</c> type used by this bridge does not expose the safe-runtime
+    /// <c>getErrorBuffer</c> query in the supported vendor headers. The ABI and managed method remain available only
+    /// to return a controlled deferred diagnostic; no borrowed vendor pointer is accessed or exposed.
+    /// 本 bridge 使用的标准 <c>nvinfer1::IExecutionContext</c> 类型在已支持 vendor headers 中不提供 safe-runtime
+    /// <c>getErrorBuffer</c> 查询。ABI 与托管方法仅保留用于返回受控 deferred 诊断，不访问或暴露 vendor borrowed pointer。
     /// </remarks>
     public bool TryGetErrorBuffer(out string errorBuffer)
     {
@@ -27,12 +28,12 @@ public sealed partial class TensorRtExecutionContext
     }
 
     /// <summary>
-    /// Tries to copy the TensorRT 8 execution-context error buffer and returns a diagnostic.
-    /// 尝试复制 TensorRT 8 execution context 的 error buffer，并返回诊断信息。
+    /// Probes the retained execution-context error-buffer compatibility API and returns its diagnostic.
+    /// 探测保留的 execution context error-buffer 兼容 API，并返回诊断信息。
     /// </summary>
     /// <param name="errorBuffer">The copied error text, or an empty string when unavailable. / 复制出的错误文本；不可用时为空字符串。</param>
     /// <param name="diagnostic">A short diagnostic string describing success or failure. / 描述成功或失败原因的简短诊断。</param>
-    /// <returns><see langword="true"/> when the vendor query succeeded. / vendor 查询成功时返回 <see langword="true"/>。</returns>
+    /// <returns><see langword="false"/> while the vendor query remains deferred. / vendor 查询保持 deferred 时返回 <see langword="false"/>。</returns>
     public bool TryGetErrorBuffer(out string errorBuffer, out string diagnostic)
     {
         try
