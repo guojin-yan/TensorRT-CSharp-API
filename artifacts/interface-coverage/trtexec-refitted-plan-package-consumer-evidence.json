@@ -1,6 +1,6 @@
 {
   "schemaVersion": "trtexec-refitted-plan-package-consumer-evidence.v1",
-  "generatedDate": "2026-07-28",
+  "generatedDate": "2026-07-29",
   "state": "local-package-consumer-refitted-plan-runtime-passed",
   "evidenceClassification": "local-package-consumer-refitted-plan-runtime",
   "sourceRuntimeKey": "win-x64-trt10.11-cuda12.9-cudnn9.22",
@@ -37,7 +37,7 @@
     "managedAssemblyUnderConsumerRoot": true,
     "bridgeUnderConsumerRoot": true,
     "projectSha256": "255c1cb97347c89aa8e79ee9b153f6665ecc9b7b5721f2ab645c91e4e89949f2",
-    "programSha256": "baaef703d683b15c1b2894bf7f6ea5592b7af0815e0ce4d55347966e0a4c8983"
+    "programSha256": "f32d639441bcdf435b14b745ec5f2b95c70d154c3860713dd9c21eedfc053236"
   },
   "artifacts": {
     "sourcePlan": "artifacts/real-case/trtexec-refitted-plan-persistence/mnist-refitted-persisted.plan",
@@ -76,9 +76,9 @@
     "buildExitCode": 0,
     "runtimeExitCode": 0,
     "runtimePassed": true,
-    "stdoutSha256": "d5802dd3df24367ea23becb41575ef668fb24518abe055ca584c6399c8be59b1",
+    "stdoutSha256": "a23ca751d6b98e144ab9b16600ad8efefd2e855d9283c756757cc12164ed26ae",
     "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "combinedSha256": "d5802dd3df24367ea23becb41575ef668fb24518abe055ca584c6399c8be59b1"
+    "combinedSha256": "a23ca751d6b98e144ab9b16600ad8efefd2e855d9283c756757cc12164ed26ae"
   },
   "runtime": {
     "environment": "TRT=10.11.0 CUDA=12.9 TensorRtAvailable=True CudaAvailable=True",

@@ -46,6 +46,16 @@ public sealed class MultiVersionOnnxRuntimeEvidenceMatrixTests
         Assert.True(mnistReference.GetProperty("sourceTreeBuildPassed").GetBoolean());
         Assert.True(mnistReference.GetProperty("loadEnginePassed").GetBoolean());
         Assert.True(mnistReference.GetProperty("localPackageConsumerReferencePassed").GetBoolean());
+        Assert.Equal("independent-onnxruntime-cpu-reference-runtime-passed-owner-review-required", mnistReference.GetProperty("independentFrameworkState").GetString());
+        Assert.Equal("independent-framework-reference-candidate-runtime", mnistReference.GetProperty("independentFrameworkClassification").GetString());
+        Assert.Equal("CPUExecutionProvider", mnistReference.GetProperty("independentFrameworkProvider").GetString());
+        Assert.True(mnistReference.GetProperty("independentFrameworkProviderValidated").GetBoolean());
+        Assert.True(mnistReference.GetProperty("independentFrameworkDeterministic").GetBoolean());
+        Assert.True(mnistReference.GetProperty("independentFrameworkTensorRtComparisonPassed").GetBoolean());
+        Assert.Equal("controlled-reference-negative-runtime-passed", mnistReference.GetProperty("negativeRuntimeState").GetString());
+        Assert.Equal(5, mnistReference.GetProperty("negativeRuntimeCaseCount").GetInt32());
+        Assert.Equal(5, mnistReference.GetProperty("sourceTreeFailClosedCount").GetInt32());
+        Assert.Equal(5, mnistReference.GetProperty("localPackageConsumerFailClosedCount").GetInt32());
         Assert.False(mnistReference.GetProperty("ownerReviewedGolden").GetBoolean());
         Assert.False(mnistReference.GetProperty("canPromoteRealModelRuntime").GetBoolean());
         Assert.False(root.GetProperty("performsPublish").GetBoolean());
@@ -158,6 +168,8 @@ public sealed class MultiVersionOnnxRuntimeEvidenceMatrixTests
         Assert.Contains("blocked-by-runtime-assets-missing", markdown, StringComparison.Ordinal);
         Assert.Contains("package-consumer runtime：`0`", markdown, StringComparison.Ordinal);
         Assert.Contains("MNIST structured reference：`mnist-reference-regression-runtime-passed-owner-review-required`", markdown, StringComparison.Ordinal);
+        Assert.Contains("MNIST independent ORT CPU reference：`independent-onnxruntime-cpu-reference-runtime-passed-owner-review-required`", markdown, StringComparison.Ordinal);
+        Assert.Contains("MNIST controlled negative runtime：`controlled-reference-negative-runtime-passed`", markdown, StringComparison.Ordinal);
         Assert.DoesNotContain("canPublishPublicly：`True`", markdown, StringComparison.Ordinal);
         Assert.DoesNotContain("canCloseReleaseIssue：`True`", markdown, StringComparison.Ordinal);
     }

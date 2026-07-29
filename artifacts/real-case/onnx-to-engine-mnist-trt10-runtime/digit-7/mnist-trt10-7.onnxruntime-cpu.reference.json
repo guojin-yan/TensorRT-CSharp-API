@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "tensorName": "Plus214_Output_0",
+  "shape": [
+    1,
+    10
+  ],
+  "values": [
+    -8.877369,
+    -0.53205186,
+    6.5321836,
+    5.070051,
+    -2.0175269,
+    -9.982029,
+    -13.183623,
+    18.70613,
+    4.6491876,
+    -6.7411466
+  ],
+  "sourceClassification": "onnxruntime-cpu-1.23.2-derived-unreviewed"
+}

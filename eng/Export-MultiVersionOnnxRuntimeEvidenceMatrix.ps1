@@ -286,6 +286,10 @@ function New-MnistCase {
 function New-MnistReferenceValidationSummary {
   $path = "artifacts\interface-coverage\tensorrtexec-mnist-reference-validation-evidence.json"
   $fullPath = Resolve-RepositoryPath $path
+  $independentPath = "artifacts\interface-coverage\tensorrtexec-mnist-onnxruntime-reference-evidence.json"
+  $independentFullPath = Resolve-RepositoryPath $independentPath
+  $negativePath = "artifacts\interface-coverage\tensorrtexec-mnist-reference-negative-runtime-evidence.json"
+  $negativeFullPath = Resolve-RepositoryPath $negativePath
   if (-not (Test-Path -LiteralPath $fullPath -PathType Leaf)) {
     return [pscustomobject][ordered]@{
       state = "not-captured"
@@ -293,6 +297,16 @@ function New-MnistReferenceValidationSummary {
       sourceTreeBuildPassed = $false
       loadEnginePassed = $false
       localPackageConsumerReferencePassed = $false
+      independentFrameworkState = "not-captured"
+      independentFrameworkClassification = "not-captured"
+      independentFrameworkProvider = ""
+      independentFrameworkProviderValidated = $false
+      independentFrameworkDeterministic = $false
+      independentFrameworkTensorRtComparisonPassed = $false
+      negativeRuntimeState = "not-captured"
+      negativeRuntimeCaseCount = 0
+      sourceTreeFailClosedCount = 0
+      localPackageConsumerFailClosedCount = 0
       ownerReviewedGolden = $false
       canPromoteRealModelRuntime = $false
       proofBoundary = "MNIST structured-reference evidence is absent."
@@ -300,15 +314,27 @@ function New-MnistReferenceValidationSummary {
   }
 
   $evidence = Read-JsonFile $path
+  $independent = if (Test-Path -LiteralPath $independentFullPath -PathType Leaf) { Read-JsonFile $independentPath } else { $null }
+  $negative = if (Test-Path -LiteralPath $negativeFullPath -PathType Leaf) { Read-JsonFile $negativePath } else { $null }
   return [pscustomobject][ordered]@{
     state = [string]$evidence.state
     evidenceClassification = [string]$evidence.evidenceClassification
     sourceTreeBuildPassed = [bool]$evidence.sourceTreeBuild.outputValidated
     loadEnginePassed = [bool]$evidence.independentLoadEngine.outputValidated
     localPackageConsumerReferencePassed = [bool]$evidence.localPackageConsumer.referenceValidationPassed
+    independentFrameworkState = if ($null -eq $independent) { "not-captured" } else { [string]$independent.state }
+    independentFrameworkClassification = if ($null -eq $independent) { "not-captured" } else { [string]$independent.evidenceClassification }
+    independentFrameworkProvider = if ($null -eq $independent) { "" } else { [string]$independent.runtime.requestedProvider }
+    independentFrameworkProviderValidated = if ($null -eq $independent) { $false } else { [bool]$independent.runtime.providerValidated }
+    independentFrameworkDeterministic = if ($null -eq $independent) { $false } else { [bool]$independent.reference.deterministicOutput }
+    independentFrameworkTensorRtComparisonPassed = if ($null -eq $independent) { $false } else { [bool]$independent.tensorRtComparison.passed }
+    negativeRuntimeState = if ($null -eq $negative) { "not-captured" } else { [string]$negative.state }
+    negativeRuntimeCaseCount = if ($null -eq $negative) { 0 } else { [int]$negative.caseCount }
+    sourceTreeFailClosedCount = if ($null -eq $negative) { 0 } else { [int]$negative.sourceTreeFailClosedCount }
+    localPackageConsumerFailClosedCount = if ($null -eq $negative) { 0 } else { [int]$negative.localPackageConsumerFailClosedCount }
     ownerReviewedGolden = [bool]$evidence.reference.ownerReviewedGolden
     canPromoteRealModelRuntime = [bool]$evidence.ownerReview.canPromoteRealModelRuntime
-    proofBoundary = [string]$evidence.proofBoundary.statement
+    proofBoundary = "The same-runtime TensorRT reference, independent ONNX Runtime CPU candidate, and controlled negative cases are separate evidence layers. Independent execution and fail-closed validation do not provide Owner golden acceptance, repository redistribution approval, public-package proof, post-publish proof, or release closure."
   }
 }
 
@@ -525,7 +551,7 @@ $matrix = [pscustomobject][ordered]@{
   performsPublish = $false
   canPublishPublicly = $false
   canCloseReleaseIssue = $false
-  boundary = "This matrix proves only the recorded source-tree version/runtime cases. Blocked dependency probes are not runtime proof. synthetic-input-runtime is not real-model-runtime. The MNIST structured-reference summary is an owner-review-required same-runtime regression candidate, not an independent golden-output or package/public-release promotion. Neither source-tree classification is package-consumer-runtime or post-publish verification."
+  boundary = "This matrix proves only the recorded source-tree version/runtime cases. Blocked dependency probes are not runtime proof. synthetic-input-runtime is not real-model-runtime. The MNIST summary separately records a same-runtime TensorRT regression reference, an independent ONNX Runtime CPU candidate, and controlled fail-closed negative runs. Independent execution is not Owner golden acceptance, and local PackageReference evidence is not public-package or post-publish proof."
 }
 
 $jsonPath = Join-Path $OutputDirectory "multi-version-runtime-evidence-matrix.json"
@@ -545,6 +571,8 @@ $lines.Add("- synthetic runtime：``$($matrix.syntheticRuntimeCaseCount)``")
 $lines.Add("- real-model runtime：``$($matrix.realModelRuntimeCaseCount)``")
 $lines.Add("- package-consumer runtime：``$($matrix.packageConsumerRuntimeCaseCount)``")
 $lines.Add("- MNIST structured reference：``$($matrix.mnistReferenceValidation.state)`` / source-tree ``$($matrix.mnistReferenceValidation.sourceTreeBuildPassed)`` / load-engine ``$($matrix.mnistReferenceValidation.loadEnginePassed)`` / local consumer ``$($matrix.mnistReferenceValidation.localPackageConsumerReferencePassed)`` / owner golden ``$($matrix.mnistReferenceValidation.ownerReviewedGolden)``")
+$lines.Add("- MNIST independent ORT CPU reference：``$($matrix.mnistReferenceValidation.independentFrameworkState)`` / provider ``$($matrix.mnistReferenceValidation.independentFrameworkProvider)`` / profile verified ``$($matrix.mnistReferenceValidation.independentFrameworkProviderValidated)`` / deterministic ``$($matrix.mnistReferenceValidation.independentFrameworkDeterministic)`` / TensorRT comparison ``$($matrix.mnistReferenceValidation.independentFrameworkTensorRtComparisonPassed)``")
+$lines.Add("- MNIST controlled negative runtime：``$($matrix.mnistReferenceValidation.negativeRuntimeState)`` / cases ``$($matrix.mnistReferenceValidation.negativeRuntimeCaseCount)`` / source-tree fail closed ``$($matrix.mnistReferenceValidation.sourceTreeFailClosedCount)`` / local consumer fail closed ``$($matrix.mnistReferenceValidation.localPackageConsumerFailClosedCount)``")
 $lines.Add("- canPublishPublicly：``$($matrix.canPublishPublicly)``")
 $lines.Add("- canCloseReleaseIssue：``$($matrix.canCloseReleaseIssue)``")
 $lines.Add("")

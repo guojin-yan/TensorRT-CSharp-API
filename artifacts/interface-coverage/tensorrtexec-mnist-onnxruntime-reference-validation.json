@@ -1,0 +1,265 @@
+{
+  "schemaVersion": "tensorrtexec-mnist-onnxruntime-reference-validation.v1",
+  "strict": true,
+  "runtimeArtifactChecksRequired": true,
+  "checkCount": 51,
+  "passedCount": 51,
+  "failureCount": 0,
+  "checks": [
+    {
+      "id": "schema",
+      "passed": true,
+      "actual": "tensorrtexec-mnist-onnxruntime-reference-evidence.v1"
+    },
+    {
+      "id": "state",
+      "passed": true,
+      "actual": "independent-onnxruntime-cpu-reference-runtime-passed-owner-review-required"
+    },
+    {
+      "id": "classification",
+      "passed": true,
+      "actual": "independent-framework-reference-candidate-runtime"
+    },
+    {
+      "id": "runtime-identity",
+      "passed": true,
+      "actual": "ONNX Runtime/1.23.2/CPUExecutionProvider"
+    },
+    {
+      "id": "provider-available",
+      "passed": true,
+      "actual": "AzureExecutionProvider,CPUExecutionProvider"
+    },
+    {
+      "id": "provider-profile-only-cpu",
+      "passed": true,
+      "actual": "True/CPUExecutionProvider"
+    },
+    {
+      "id": "runtime-repository-commit",
+      "passed": true,
+      "actual": "a83fc4d58cb48eb68890dd689f94f28288cf2278"
+    },
+    {
+      "id": "package-count",
+      "passed": true,
+      "actual": "4"
+    },
+    {
+      "id": "package-inventory",
+      "passed": true,
+      "actual": "microsoft.ml.onnxruntime,microsoft.ml.onnxruntime.managed,system.memory,system.numerics.tensors"
+    },
+    {
+      "id": "package-versions",
+      "passed": true,
+      "actual": "microsoft.ml.onnxruntime/1.23.2;microsoft.ml.onnxruntime.managed/1.23.2;system.numerics.tensors/9.0.0;system.memory/4.5.5"
+    },
+    {
+      "id": "package-hashes",
+      "passed": true,
+      "actual": "25fe172f7fcdf34f2b5b02c8b997f6b88abc282956849d4af4335af23d0c4e4a,6e29d09318b9ec1a3207fd97fe0dfebfcccec15b936c85bdff2f6c8080e91836,b750243c36002a62b28b1ac5d3fbc284ad340ba1494cc36aca110611a0b1f959,10f43da352a29fb2b3188e4edd4dcf5100194c8b526e4f61fe2e2b5623775a22"
+    },
+    {
+      "id": "runtime-binary-hashes",
+      "passed": true,
+      "actual": "4c6985df4aa2f810ba8a2b37c3c791e619d8fe126954a6bd28cffd3f4adeba95/dec964ab1ee36cc9b0ae247d13b376627992fc57dec0454354017ab8fd84f1ea"
+    },
+    {
+      "id": "model-contract",
+      "passed": true,
+      "actual": "2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf/False"
+    },
+    {
+      "id": "model-source-boundary",
+      "passed": true,
+      "actual": "b80c70931e11b2edc517bcd081cfdbafa222f2c860819ee0806f4eaed472a475/696b89fdf1046390156bd3eea37b75c7bfee320a699cb6cbb78b754d7b3f7057"
+    },
+    {
+      "id": "input-contract",
+      "passed": true,
+      "actual": "81f2cd7784dca5c8f02a9887ae89a6a3582880a27d2eba95a53f845c63187564/Input3/1,1,28,28"
+    },
+    {
+      "id": "reference-identity",
+      "passed": true,
+      "actual": "1babfa81c0d277a3d483fdc6288285b26008ba5b382868272f1e2187338bd571/Plus214_Output_0/1,10"
+    },
+    {
+      "id": "reference-source-boundary",
+      "passed": true,
+      "actual": "onnxruntime-cpu-1.23.2-derived-unreviewed/True/7"
+    },
+    {
+      "id": "reference-artifact-hashes",
+      "passed": true,
+      "actual": "9d624fa545260fd80e01573071159264506c3981f8b015553b59a4647b06fdb0/a20932857fb2d51f5f0b79daa211140fce631b3f67787b69e0a23f33c8817d75"
+    },
+    {
+      "id": "comparison-reference",
+      "passed": true,
+      "actual": "07969a96f76f9dc69a777770ca581df64ad9cb2d1ea320f97bdfbb7cc697beef"
+    },
+    {
+      "id": "comparison-result",
+      "passed": true,
+      "actual": "True/10/0/-1"
+    },
+    {
+      "id": "comparison-errors",
+      "passed": true,
+      "actual": "5.722046E-06/5.7323444E-07/0.0001/0.0001"
+    },
+    {
+      "id": "offline-restore-boundary",
+      "passed": true,
+      "actual": "True/True/True/True"
+    },
+    {
+      "id": "workspace-cleanup",
+      "passed": true,
+      "actual": "False/True"
+    },
+    {
+      "id": "process-exits",
+      "passed": true,
+      "actual": "0/0/0"
+    },
+    {
+      "id": "source-and-log-hashes",
+      "passed": true,
+      "actual": "e0eeb924bd08b1ac206abd29d0f1eedec8532e6af9e9865ef80d1a5956ec8ba9/672b9d166d6618e3760ac7b4fda5c6064591f8ae6975872e580587b66557d09f/18825de054c07d0627e840b37f5f3e8ad8517d21bf89fdab4d6cd2560ba8a124/8b8575a48da5984dd76dc5904b066fe5f187195dc4f0a6410f7116b0d986a427"
+    },
+    {
+      "id": "relative-runtime-artifact-paths",
+      "passed": true,
+      "actual": "relative-only"
+    },
+    {
+      "id": "owner-review-open",
+      "passed": true,
+      "actual": "not-provided/False/False/False"
+    },
+    {
+      "id": "independent-execution-boundary",
+      "passed": true,
+      "actual": "True/True/False"
+    },
+    {
+      "id": "no-release-promotion",
+      "passed": true,
+      "actual": "False/False/False/False/False"
+    },
+    {
+      "id": "proof-statement",
+      "passed": true,
+      "actual": "Two deterministic ONNX Runtime CPU runs and CPUExecutionProvider profiling provide an execution path independent from TensorRT. Owner review for model/license/redistribution/reference acceptance remains absent, so this is an independent-framework reference candidate, not accepted real-model, public-package, post-publish, or release proof."
+    },
+    {
+      "id": "path-free-compact-evidence",
+      "passed": true,
+      "actual": "absolute-windows-path-present=False"
+    },
+    {
+      "id": "reference-file-contract",
+      "passed": true,
+      "actual": "1/Plus214_Output_0/1,10/10/onnxruntime-cpu-1.23.2-derived-unreviewed"
+    },
+    {
+      "id": "sidecar-contract",
+      "passed": true,
+      "actual": "tensorrtexec-mnist-onnxruntime-reference-sidecar.v1/independent-onnxruntime-cpu-reference-candidate-owner-review-required/1.23.2/CPUExecutionProvider"
+    },
+    {
+      "id": "sidecar-cross-check",
+      "passed": true,
+      "actual": "1babfa81c0d277a3d483fdc6288285b26008ba5b382868272f1e2187338bd571/a20932857fb2d51f5f0b79daa211140fce631b3f67787b69e0a23f33c8817d75/07969a96f76f9dc69a777770ca581df64ad9cb2d1ea320f97bdfbb7cc697beef/True"
+    },
+    {
+      "id": "reference-file-hash",
+      "passed": true,
+      "actual": "artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/mnist-trt10-7.onnxruntime-cpu.reference.json/1babfa81c0d277a3d483fdc6288285b26008ba5b382868272f1e2187338bd571"
+    },
+    {
+      "id": "sidecar-file-hash",
+      "passed": true,
+      "actual": "artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/mnist-trt10-7.onnxruntime-cpu.reference.sidecar.json/9d624fa545260fd80e01573071159264506c3981f8b015553b59a4647b06fdb0"
+    },
+    {
+      "id": "prior-mnist-cross-check",
+      "passed": true,
+      "actual": "2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf/81f2cd7784dca5c8f02a9887ae89a6a3582880a27d2eba95a53f845c63187564/07969a96f76f9dc69a777770ca581df64ad9cb2d1ea320f97bdfbb7cc697beef"
+    },
+    {
+      "id": "model-file-hash",
+      "passed": true,
+      "actual": "third_party/nvidia/TensorRT-10.11.0.33-cuda 12.9/data/mnist/mnist.onnx/2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf"
+    },
+    {
+      "id": "model-source-readme-hash",
+      "passed": true,
+      "actual": "third_party/nvidia/TensorRT-10.11.0.33-cuda 12.9/data/mnist/README.md/b80c70931e11b2edc517bcd081cfdbafa222f2c860819ee0806f4eaed472a475"
+    },
+    {
+      "id": "model-license-readme-hash",
+      "passed": true,
+      "actual": "third_party/nvidia/TensorRT-10.11.0.33-cuda 12.9/samples/sampleOnnxMNIST/README.md/696b89fdf1046390156bd3eea37b75c7bfee320a699cb6cbb78b754d7b3f7057"
+    },
+    {
+      "id": "input-file-hash",
+      "passed": true,
+      "actual": "artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/mnist-trt10-7-input-f32.bin/81f2cd7784dca5c8f02a9887ae89a6a3582880a27d2eba95a53f845c63187564"
+    },
+    {
+      "id": "tensorrt-reference-file-hash",
+      "passed": true,
+      "actual": "artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/mnist-trt10-7.reference.json/07969a96f76f9dc69a777770ca581df64ad9cb2d1ea320f97bdfbb7cc697beef"
+    },
+    {
+      "id": "raw-output-file-hash",
+      "passed": true,
+      "actual": "artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/onnxruntime-cpu-reference/mnist-onnxruntime-cpu-output.raw/a20932857fb2d51f5f0b79daa211140fce631b3f67787b69e0a23f33c8817d75"
+    },
+    {
+      "id": "stdout-file-hash",
+      "passed": true,
+      "actual": "artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/onnxruntime-cpu-reference/mnist-onnxruntime-cpu.stdout.log/01d18529254ee04035183e6e19f2e860e064e069e4750357c2177c1b8b05b0cb"
+    },
+    {
+      "id": "stderr-file-hash",
+      "passed": true,
+      "actual": "artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/onnxruntime-cpu-reference/mnist-onnxruntime-cpu.stderr.log/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "run-report-file-hash",
+      "passed": true,
+      "actual": "artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/onnxruntime-cpu-reference/mnist-onnxruntime-cpu-run-report.json/18825de054c07d0627e840b37f5f3e8ad8517d21bf89fdab4d6cd2560ba8a124"
+    },
+    {
+      "id": "profile-file-hash",
+      "passed": true,
+      "actual": "artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/onnxruntime-cpu-reference/onnxruntime_profile__2026-07-29_10-02-09.json/8b8575a48da5984dd76dc5904b066fe5f187195dc4f0a6410f7116b0d986a427"
+    },
+    {
+      "id": "cached-package-microsoft.ml.onnxruntime",
+      "passed": true,
+      "actual": "1.23.2/25fe172f7fcdf34f2b5b02c8b997f6b88abc282956849d4af4335af23d0c4e4a"
+    },
+    {
+      "id": "cached-package-microsoft.ml.onnxruntime.managed",
+      "passed": true,
+      "actual": "1.23.2/6e29d09318b9ec1a3207fd97fe0dfebfcccec15b936c85bdff2f6c8080e91836"
+    },
+    {
+      "id": "cached-package-system.numerics.tensors",
+      "passed": true,
+      "actual": "9.0.0/b750243c36002a62b28b1ac5d3fbc284ad340ba1494cc36aca110611a0b1f959"
+    },
+    {
+      "id": "cached-package-system.memory",
+      "passed": true,
+      "actual": "4.5.5/10f43da352a29fb2b3188e4edd4dcf5100194c8b526e4f61fe2e2b5623775a22"
+    }
+  ]
+}

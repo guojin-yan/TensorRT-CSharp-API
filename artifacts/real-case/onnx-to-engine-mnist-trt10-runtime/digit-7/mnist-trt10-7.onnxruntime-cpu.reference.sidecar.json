@@ -1,0 +1,91 @@
+{
+  "schemaVersion": "tensorrtexec-mnist-onnxruntime-reference-sidecar.v1",
+  "state": "independent-onnxruntime-cpu-reference-candidate-owner-review-required",
+  "sourceClassification": "onnxruntime-cpu-1.23.2-derived-unreviewed",
+  "onnxRuntime": {
+    "version": "1.23.2",
+    "requestedProvider": "CPUExecutionProvider",
+    "profileProviders": [
+      "CPUExecutionProvider"
+    ],
+    "repositoryCommit": "a83fc4d58cb48eb68890dd689f94f28288cf2278",
+    "packageCacheSourceMetadata": "https://api.nuget.org/v3/index.json",
+    "packages": [
+      {
+        "id": "microsoft.ml.onnxruntime",
+        "version": "1.23.2",
+        "length": 123371574,
+        "sha256": "25fe172f7fcdf34f2b5b02c8b997f6b88abc282956849d4af4335af23d0c4e4a"
+      },
+      {
+        "id": "microsoft.ml.onnxruntime.managed",
+        "version": "1.23.2",
+        "length": 998602,
+        "sha256": "6e29d09318b9ec1a3207fd97fe0dfebfcccec15b936c85bdff2f6c8080e91836"
+      },
+      {
+        "id": "system.numerics.tensors",
+        "version": "9.0.0",
+        "length": 453618,
+        "sha256": "b750243c36002a62b28b1ac5d3fbc284ad340ba1494cc36aca110611a0b1f959"
+      },
+      {
+        "id": "system.memory",
+        "version": "4.5.5",
+        "length": 208978,
+        "sha256": "10f43da352a29fb2b3188e4edd4dcf5100194c8b526e4f61fe2e2b5623775a22"
+      }
+    ],
+    "managedAssemblySha256": "4c6985df4aa2f810ba8a2b37c3c791e619d8fe126954a6bd28cffd3f4adeba95",
+    "nativeLibrarySha256": "dec964ab1ee36cc9b0ae247d13b376627992fc57dec0454354017ab8fd84f1ea"
+  },
+  "model": {
+    "sha256": "2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf",
+    "ownerRedistributionApproved": false
+  },
+  "input": {
+    "sha256": "81f2cd7784dca5c8f02a9887ae89a6a3582880a27d2eba95a53f845c63187564",
+    "elementCount": 784
+  },
+  "output": {
+    "referenceSha256": "1babfa81c0d277a3d483fdc6288285b26008ba5b382868272f1e2187338bd571",
+    "rawSha256": "a20932857fb2d51f5f0b79daa211140fce631b3f67787b69e0a23f33c8817d75",
+    "deterministic": true,
+    "predictedIndex": 7
+  },
+  "tensorRtComparison": {
+    "referenceSha256": "07969a96f76f9dc69a777770ca581df64ad9cb2d1ea320f97bdfbb7cc697beef",
+    "comparedElementCount": 10,
+    "mismatchCount": 0,
+    "firstMismatchIndex": -1,
+    "maximumAbsoluteError": 5.722046E-06,
+    "maximumRelativeError": 5.7323444E-07,
+    "passed": true
+  },
+  "profiling": {
+    "sha256": "8b8575a48da5984dd76dc5904b066fe5f187195dc4f0a6410f7116b0d986a427",
+    "providers": [
+      "CPUExecutionProvider"
+    ]
+  },
+  "execution": {
+    "remoteSourcesCleared": true,
+    "sourcePackageCacheReadOnly": true,
+    "isolatedRestoreCache": true,
+    "workspaceOnSystemDrive": false,
+    "restoreExitCode": 0,
+    "buildExitCode": 0,
+    "runtimeExitCode": 0,
+    "projectSha256": "e0eeb924bd08b1ac206abd29d0f1eedec8532e6af9e9865ef80d1a5956ec8ba9",
+    "programSha256": "672b9d166d6618e3760ac7b4fda5c6064591f8ae6975872e580587b66557d09f",
+    "stdoutSha256": "01d18529254ee04035183e6e19f2e860e064e069e4750357c2177c1b8b05b0cb",
+    "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "ownerReview": {
+    "status": "not-provided",
+    "acceptedAsGoldenReference": false,
+    "acceptedForRepositoryRedistribution": false,
+    "canPromoteRealModelRuntime": false
+  },
+  "proofBoundary": "CPUExecutionProvider profiling proves execution independent from TensorRT, but the model, input, reference, license, and redistribution remain unreviewed Owner inputs; this is not public-package, post-publish, or release proof."
+}

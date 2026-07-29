@@ -59,13 +59,39 @@ is supplied under TensorRT `data/mnist`, whose README identifies ONNX Model Zoo 
 asset preprocessed as the `Input3` float32 tensor with `1-pixel/255`. The reference contains the ten `[1,10]`
 `Plus214_Output_0` logits and declares `repository-mnist-runtime-output-derived-unreviewed` as its source classification.
 
-This reference was copied from a prior TensorRT output, so it is a regression-consistency input rather than an independent ONNX
-Runtime golden output. Both the source-tree build and independent `--loadEngine` paths recorded `OutputValidated=true`, 10/10
-comparisons, and zero mismatches, with maximum absolute/relative errors of `9.536743e-07` / `1.3443339e-06` under `1e-4`
-tolerances. The isolated local `PackageReference` consumer compares the same reference and the strict evidence validator records
-53 passing checks.
+The same-runtime reference was copied from a prior TensorRT output, so it remains a regression-consistency input. Both the
+source-tree build and independent `--loadEngine` paths recorded `OutputValidated=true`, 10/10 comparisons, and zero mismatches,
+with maximum absolute/relative errors of `9.536743e-07` / `1.3443339e-06` under `1e-4` tolerances. The isolated local
+`PackageReference` consumer compares the same reference, and the strict evidence validator records 53 passing checks. This layer
+is retained in `artifacts/interface-coverage/tensorrtexec-mnist-reference-validation-evidence.json`.
 
-`artifacts/interface-coverage/tensorrtexec-mnist-reference-validation-evidence.json` preserves model/input/reference/engine/
-output/report/package hashes. It also states that the TensorRT sample terms are license-review input only and that no Owner has
-approved repository redistribution or this reference as golden. The record is therefore an existing-real-model structured-reference
-regression candidate, not independent numerical correctness, Owner-accepted real-model, public-package, post-publish, or release proof.
+## Independent ONNX Runtime CPU Candidate
+
+An isolated producer also runs the same ONNX model and input with ONNX Runtime `1.23.2` and an explicit
+`CPUExecutionProvider`. The runner copies four already-cached `.nupkg` files into a temporary E-drive feed, clears every remote
+source in `NuGet.Config`, and keeps its restore cache and `DOTNET_CLI_HOME` in the isolated E-drive workspace. ONNX Runtime is not
+added to the main solution. Two ORT executions produced byte-identical float32 output with raw SHA256
+`a20932857fb2d51f5f0b79daa211140fce631b3f67787b69e0a23f33c8817d75` and predicted digit 7. The profiling trace contains only
+`CPUExecutionProvider`, proving an execution path independent from TensorRT.
+
+The ORT reference is classified as `onnxruntime-cpu-1.23.2-derived-unreviewed` and has SHA256
+`1babfa81c0d277a3d483fdc6288285b26008ba5b382868272f1e2187338bd571`. Its comparison against the retained TensorRT logits covers
+10/10 values with zero mismatches; maximum absolute/relative errors are `5.722046e-06` / `5.7323444e-07`, both within `1e-4`
+tolerances. The compact evidence and validation summary use the `tensorrtexec-mnist-onnxruntime-reference-*` files under
+`artifacts/interface-coverage`; the capture-host validator passes 51/51 when raw/profile/log artifacts are required. A clean clone
+needs only the checked-in reference, sidecar, compact evidence, and validation summary.
+
+## Controlled Negative Runtime
+
+Five malformed variants are derived from the independent ORT candidate: tensor-name mismatch, shape mismatch, value-count
+mismatch, NaN under the reject policy, and infinity under the reject policy. Each variant runs through both the source-tree CLI
+and an isolated local-feed `PackageReference` consumer, for ten real TensorRT enqueue/readback executions. Both paths first capture
+the same raw output SHA256 and then exit nonzero with `OutputValidated=false`; the consumer also records
+`OwnerScopeExited=true`. The three metadata cases end with `Completed=false`, while the two special-value cases end with
+`Completed=true`, one mismatch, and first mismatch index 0. The strict validator passes 72/72 checks.
+
+These evidence layers remain distinct: the same-runtime reference is a regression baseline, the ORT CPU output is an independent
+framework candidate, and the malformed variants prove fail-closed validation only. TensorRT sample terms remain license-review
+input, and no Owner has approved repository redistribution of the model/input/reference or accepted the ORT candidate as golden.
+Local feeds, CPU profiling, real GPU enqueue, and hashes are not public-package, post-publish, Owner-accepted real-model, or release
+proof.

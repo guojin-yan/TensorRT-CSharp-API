@@ -62,13 +62,36 @@ runtime，不是 real-model、package-consumer、public package、post-publish �
 `Input3` float32 tensor。reference 仅包含 `Plus214_Output_0` 的 `[1,10]` 十个 logits，文件的
 `sourceClassification` 固定为 `repository-mnist-runtime-output-derived-unreviewed`。
 
-该 reference 从先前 TensorRT 输出复制而来，因此它用于回归一致性，不能作为独立 ONNX Runtime golden output。source-tree
-build 和独立 `--loadEngine` 都得到 `OutputValidated=true`、10/10 比较、0 mismatch，最大绝对/相对误差分别为
+同运行时 reference 从先前 TensorRT 输出复制而来，因此它只用于回归一致性。source-tree build 和独立
+`--loadEngine` 都得到 `OutputValidated=true`、10/10 比较、0 mismatch，最大绝对/相对误差分别为
 `9.536743e-07` / `1.3443339e-06`，使用 `1e-4` 的 absolute/relative tolerance。隔离的本地
-`PackageReference` consumer 同样比较该 reference，并由 strict evidence validator 记录 53 项通过。
+`PackageReference` consumer 同样比较该 reference，并由 strict evidence validator 记录 53 项通过。该层记录位于
+`artifacts/interface-coverage/tensorrtexec-mnist-reference-validation-evidence.json`。
 
-紧凑记录位于
-`artifacts/interface-coverage/tensorrtexec-mnist-reference-validation-evidence.json`。它保留 model/input/reference/
-engine/output/report/package hashes，也明确记录 TensorRT sample 条款仅是许可审查输入，Owner 尚未批准仓库再分发或
-golden reference。因而该记录是 existing-real-model 的 structured-reference regression candidate，不是独立数值正确性、
-Owner accepted real-model、public-package、post-publish 或 release proof。
+## 独立 ONNX Runtime CPU 候选
+
+隔离 producer 另使用 ONNX Runtime `1.23.2` 的 `CPUExecutionProvider` 执行相同 ONNX 和输入。runner 只从本机已有
+NuGet cache 复制四个 `.nupkg` 到 E 盘临时 feed，`NuGet.Config` 清空全部远程源，restore cache 与 `DOTNET_CLI_HOME`
+也位于 E 盘隔离 workspace；主 solution 不增加 ONNX Runtime 依赖。两次 ORT 输出的 float32 bytes 完全一致，raw SHA256
+为 `a20932857fb2d51f5f0b79daa211140fce631b3f67787b69e0a23f33c8817d75`，预测 digit 7。profiling trace 中只出现
+`CPUExecutionProvider`，因此执行路径独立于 TensorRT。
+
+ORT reference 使用 `onnxruntime-cpu-1.23.2-derived-unreviewed` 分类，SHA256 为
+`1babfa81c0d277a3d483fdc6288285b26008ba5b382868272f1e2187338bd571`。它与保留的 TensorRT logits 进行 10/10 比较，
+0 mismatch，最大绝对/相对误差为 `5.722046e-06` / `5.7323444e-07`，均在 `1e-4` tolerance 内。compact evidence 与
+strict validator 分别位于 `tensorrtexec-mnist-onnxruntime-reference-evidence.json` 和对应 validation 文件；要求本机
+raw/profile/log 时为 51/51。clean clone 只保留 reference、sidecar、compact evidence 和 validation summary，不要求被
+忽略的重运行工件。
+
+## 受控负向运行
+
+独立 ORT reference 还派生五个受控畸形副本：tensor name mismatch、shape mismatch、value count mismatch、NaN/reject
+和 Infinity/reject。每个副本都在 source-tree CLI 与隔离 local-feed `PackageReference` consumer 上运行，共 10 次真实
+TensorRT enqueue/readback。两条路径都先得到相同 raw output SHA256，再以非零退出码结束且
+`OutputValidated=false`；consumer 还记录 `OwnerScopeExited=true`。元数据三例为 `Completed=false`，两个特殊值例为
+`Completed=true`、1 mismatch、first mismatch 0。严格 validator 为 72/72。
+
+这三层记录必须分开解释：同运行时 reference 是回归基线；ORT CPU 是独立框架候选；受控负例只证明 fail-closed。
+TensorRT sample 条款仍只是许可审查输入，Owner 尚未批准模型/输入/reference 的仓库再分发，也未接受 ORT 候选为
+golden reference。本地 feed、CPU profiling、真实 GPU enqueue 与 reference hash 均不是 public-package、post-publish、
+Owner accepted real-model 或 release proof。

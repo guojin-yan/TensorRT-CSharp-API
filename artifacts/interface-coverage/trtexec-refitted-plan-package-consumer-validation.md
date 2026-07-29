@@ -26,7 +26,7 @@
 | `consumer-workspace-removed` | `True` | `True/False` |
 | `managed-assembly-isolated` | `True` | `True/True` |
 | `bridge-isolated` | `True` | `True` |
-| `consumer-source-hashes` | `True` | `255c1cb97347c89aa8e79ee9b153f6665ecc9b7b5721f2ab645c91e4e89949f2/baaef703d683b15c1b2894bf7f6ea5592b7af0815e0ce4d55347966e0a4c8983` |
+| `consumer-source-hashes` | `True` | `255c1cb97347c89aa8e79ee9b153f6665ecc9b7b5721f2ab645c91e4e89949f2/f32d639441bcdf435b14b745ec5f2b95c70d154c3860713dd9c21eedfc053236` |
 | `relative-source-artifacts` | `True` | `artifacts/real-case/trtexec-refitted-plan-persistence/mnist-refitted-persisted.plan/artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/mnist-trt10-7-input-f32.bin/artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/mnist-trt10-7.reference.json` |
 | `plan-copy-distinct` | `True` | `True` |
 | `plan-length-cross-check` | `True` | `408876` |
@@ -42,7 +42,7 @@
 | `output-exact-match` | `True` | `True` |
 | `process-exits` | `True` | `0/0/0` |
 | `runtime-passed` | `True` | `True` |
-| `execution-log-hashes` | `True` | `d5802dd3df24367ea23becb41575ef668fb24518abe055ca584c6399c8be59b1/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855/d5802dd3df24367ea23becb41575ef668fb24518abe055ca584c6399c8be59b1` |
+| `execution-log-hashes` | `True` | `a23ca751d6b98e144ab9b16600ad8efefd2e855d9283c756757cc12164ed26ae/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855/a23ca751d6b98e144ab9b16600ad8efefd2e855d9283c756757cc12164ed26ae` |
 | `command-shape` | `True` | `dotnet run --project <consumer-project> -c Release --no-build -- <copied-plan> <copied-input> <raw-output> <expected-output-sha256> <copied-reference-json> <abs-tolerance> <rel-tolerance> <nan-policy> <infinity-policy>` |
 | `full-weight-refittable-fact` | `True` | `False` |
 | `engine-metadata` | `True` | `2/5/1` |

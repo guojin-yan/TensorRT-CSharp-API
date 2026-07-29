@@ -1,0 +1,370 @@
+{
+  "schemaVersion": "tensorrtexec-mnist-reference-negative-runtime-validation.v1",
+  "strict": true,
+  "runtimeArtifactChecksRequired": true,
+  "checkCount": 72,
+  "passedCount": 72,
+  "failureCount": 0,
+  "checks": [
+    {
+      "id": "schema",
+      "passed": true,
+      "actual": "tensorrtexec-mnist-reference-negative-runtime-evidence.v1"
+    },
+    {
+      "id": "state",
+      "passed": true,
+      "actual": "controlled-reference-negative-runtime-passed"
+    },
+    {
+      "id": "classification",
+      "passed": true,
+      "actual": "controlled-negative-runtime"
+    },
+    {
+      "id": "runtime-key",
+      "passed": true,
+      "actual": "win-x64-trt10.11-cuda12.9-cudnn9.22/10"
+    },
+    {
+      "id": "build-processes",
+      "passed": true,
+      "actual": "0/0/0"
+    },
+    {
+      "id": "base-reference",
+      "passed": true,
+      "actual": "1babfa81c0d277a3d483fdc6288285b26008ba5b382868272f1e2187338bd571/onnxruntime-cpu-1.23.2-derived-unreviewed/False"
+    },
+    {
+      "id": "engine-input-hashes",
+      "passed": true,
+      "actual": "14044b5d345a68bebe7b01c3a48ce10c1665bde40088fbbfd61ae236f1221a89/81f2cd7784dca5c8f02a9887ae89a6a3582880a27d2eba95a53f845c63187564"
+    },
+    {
+      "id": "consumer-isolation",
+      "passed": true,
+      "actual": "True/False/True/True/False/True"
+    },
+    {
+      "id": "consumer-package-contract",
+      "passed": true,
+      "actual": "JYPPX.TensorRT.CSharp.API/4.0.0-rtc-local.20260728/JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge/4.0.0"
+    },
+    {
+      "id": "case-count",
+      "passed": true,
+      "actual": "5/5"
+    },
+    {
+      "id": "case-ids",
+      "passed": true,
+      "actual": "name-mismatch,shape-mismatch,value-count-mismatch,nan-reject,infinity-reject"
+    },
+    {
+      "id": "fail-closed-counts",
+      "passed": true,
+      "actual": "5/5"
+    },
+    {
+      "id": "path-free-compact-evidence",
+      "passed": true,
+      "actual": "absolute-windows-path-present=False"
+    },
+    {
+      "id": "base-reference-file-hash",
+      "passed": true,
+      "actual": "artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/mnist-trt10-7.onnxruntime-cpu.reference.json/1babfa81c0d277a3d483fdc6288285b26008ba5b382868272f1e2187338bd571"
+    },
+    {
+      "id": "name-mismatch-source-execution",
+      "passed": true,
+      "actual": "2/True/True/False"
+    },
+    {
+      "id": "name-mismatch-source-validation",
+      "passed": true,
+      "actual": "False/False/0/0/-1"
+    },
+    {
+      "id": "name-mismatch-source-hashes",
+      "passed": true,
+      "actual": "0202efd6a92fbb38f066b9d392de290b5fe5e61d07604da6561b9f22441b61d5/f9614e8c7a1c2b5ee521ac0f3c312cbb7a5e3eef61817a91a615f387b8d2f2ac"
+    },
+    {
+      "id": "name-mismatch-consumer-execution",
+      "passed": true,
+      "actual": "1/True/True/False"
+    },
+    {
+      "id": "name-mismatch-consumer-validation",
+      "passed": true,
+      "actual": "False/False/0/0/-1"
+    },
+    {
+      "id": "name-mismatch-consumer-hashes",
+      "passed": true,
+      "actual": "0202efd6a92fbb38f066b9d392de290b5fe5e61d07604da6561b9f22441b61d5/f9614e8c7a1c2b5ee521ac0f3c312cbb7a5e3eef61817a91a615f387b8d2f2ac"
+    },
+    {
+      "id": "name-mismatch-diagnostic",
+      "passed": true,
+      "actual": "reference tensorName does not match engine output name/reference tensorName does not match engine output name; actual=Plus214_Output_0; expected=Wrong_Output_0"
+    },
+    {
+      "id": "name-mismatch-runtime-files",
+      "passed": true,
+      "actual": ""
+    },
+    {
+      "id": "name-mismatch-runtime-file-hashes",
+      "passed": true,
+      "actual": "all-recorded-hashes-match"
+    },
+    {
+      "id": "name-mismatch-source-runtime-contract",
+      "passed": true,
+      "actual": "False/True/False/True/False"
+    },
+    {
+      "id": "name-mismatch-consumer-runtime-contract",
+      "passed": true,
+      "actual": "package-reference/enqueue/fail-closed/owner-exit"
+    },
+    {
+      "id": "shape-mismatch-source-execution",
+      "passed": true,
+      "actual": "2/True/True/False"
+    },
+    {
+      "id": "shape-mismatch-source-validation",
+      "passed": true,
+      "actual": "False/False/0/0/-1"
+    },
+    {
+      "id": "shape-mismatch-source-hashes",
+      "passed": true,
+      "actual": "0202efd6a92fbb38f066b9d392de290b5fe5e61d07604da6561b9f22441b61d5/3aea37791dc16e63c77bcadc5183d45b6203387367a79f14ea0ec8cddc7315fa"
+    },
+    {
+      "id": "shape-mismatch-consumer-execution",
+      "passed": true,
+      "actual": "1/True/True/False"
+    },
+    {
+      "id": "shape-mismatch-consumer-validation",
+      "passed": true,
+      "actual": "False/False/0/0/-1"
+    },
+    {
+      "id": "shape-mismatch-consumer-hashes",
+      "passed": true,
+      "actual": "0202efd6a92fbb38f066b9d392de290b5fe5e61d07604da6561b9f22441b61d5/3aea37791dc16e63c77bcadc5183d45b6203387367a79f14ea0ec8cddc7315fa"
+    },
+    {
+      "id": "shape-mismatch-diagnostic",
+      "passed": true,
+      "actual": "reference shape does not match runtime output shape/reference shape does not match runtime output shape; actual=[1,10]; expected=[1,2,5]"
+    },
+    {
+      "id": "shape-mismatch-runtime-files",
+      "passed": true,
+      "actual": ""
+    },
+    {
+      "id": "shape-mismatch-runtime-file-hashes",
+      "passed": true,
+      "actual": "all-recorded-hashes-match"
+    },
+    {
+      "id": "shape-mismatch-source-runtime-contract",
+      "passed": true,
+      "actual": "False/True/False/True/False"
+    },
+    {
+      "id": "shape-mismatch-consumer-runtime-contract",
+      "passed": true,
+      "actual": "package-reference/enqueue/fail-closed/owner-exit"
+    },
+    {
+      "id": "value-count-mismatch-source-execution",
+      "passed": true,
+      "actual": "2/True/True/False"
+    },
+    {
+      "id": "value-count-mismatch-source-validation",
+      "passed": true,
+      "actual": "False/False/0/0/-1"
+    },
+    {
+      "id": "value-count-mismatch-source-hashes",
+      "passed": true,
+      "actual": "0202efd6a92fbb38f066b9d392de290b5fe5e61d07604da6561b9f22441b61d5/9ca5337e678c5941a8ed3cb88dde96ca0f44c8abf97ac35c487785c425e81ae8"
+    },
+    {
+      "id": "value-count-mismatch-consumer-execution",
+      "passed": true,
+      "actual": "1/True/True/False"
+    },
+    {
+      "id": "value-count-mismatch-consumer-validation",
+      "passed": true,
+      "actual": "False/False/0/0/-1"
+    },
+    {
+      "id": "value-count-mismatch-consumer-hashes",
+      "passed": true,
+      "actual": "0202efd6a92fbb38f066b9d392de290b5fe5e61d07604da6561b9f22441b61d5/9ca5337e678c5941a8ed3cb88dde96ca0f44c8abf97ac35c487785c425e81ae8"
+    },
+    {
+      "id": "value-count-mismatch-diagnostic",
+      "passed": true,
+      "actual": "reference value count does not match runtime output element count/reference value count does not match runtime output element count; actual=10; expected=9"
+    },
+    {
+      "id": "value-count-mismatch-runtime-files",
+      "passed": true,
+      "actual": ""
+    },
+    {
+      "id": "value-count-mismatch-runtime-file-hashes",
+      "passed": true,
+      "actual": "all-recorded-hashes-match"
+    },
+    {
+      "id": "value-count-mismatch-source-runtime-contract",
+      "passed": true,
+      "actual": "False/True/False/True/False"
+    },
+    {
+      "id": "value-count-mismatch-consumer-runtime-contract",
+      "passed": true,
+      "actual": "package-reference/enqueue/fail-closed/owner-exit"
+    },
+    {
+      "id": "nan-reject-source-execution",
+      "passed": true,
+      "actual": "2/True/True/False"
+    },
+    {
+      "id": "nan-reject-source-validation",
+      "passed": true,
+      "actual": "True/False/10/1/0"
+    },
+    {
+      "id": "nan-reject-source-hashes",
+      "passed": true,
+      "actual": "0202efd6a92fbb38f066b9d392de290b5fe5e61d07604da6561b9f22441b61d5/37a1c28eda29c01c43912301f57a89e22031ae07de6420e0a134f67e294dfd8d"
+    },
+    {
+      "id": "nan-reject-consumer-execution",
+      "passed": true,
+      "actual": "1/True/True/False"
+    },
+    {
+      "id": "nan-reject-consumer-validation",
+      "passed": true,
+      "actual": "True/False/10/1/0"
+    },
+    {
+      "id": "nan-reject-consumer-hashes",
+      "passed": true,
+      "actual": "0202efd6a92fbb38f066b9d392de290b5fe5e61d07604da6561b9f22441b61d5/37a1c28eda29c01c43912301f57a89e22031ae07de6420e0a134f67e294dfd8d"
+    },
+    {
+      "id": "nan-reject-diagnostic",
+      "passed": true,
+      "actual": "1 value(s) exceeded tolerance or special-value policy; first mismatch index 0/1 value(s) exceeded tolerance or special-value policy; first mismatch index 0"
+    },
+    {
+      "id": "nan-reject-runtime-files",
+      "passed": true,
+      "actual": ""
+    },
+    {
+      "id": "nan-reject-runtime-file-hashes",
+      "passed": true,
+      "actual": "all-recorded-hashes-match"
+    },
+    {
+      "id": "nan-reject-source-runtime-contract",
+      "passed": true,
+      "actual": "False/True/False/True/False"
+    },
+    {
+      "id": "nan-reject-consumer-runtime-contract",
+      "passed": true,
+      "actual": "package-reference/enqueue/fail-closed/owner-exit"
+    },
+    {
+      "id": "infinity-reject-source-execution",
+      "passed": true,
+      "actual": "2/True/True/False"
+    },
+    {
+      "id": "infinity-reject-source-validation",
+      "passed": true,
+      "actual": "True/False/10/1/0"
+    },
+    {
+      "id": "infinity-reject-source-hashes",
+      "passed": true,
+      "actual": "0202efd6a92fbb38f066b9d392de290b5fe5e61d07604da6561b9f22441b61d5/6b3bd2f292bb21ab2764c8698a3d1c60c960aa9d9b67457aa413457da51e5000"
+    },
+    {
+      "id": "infinity-reject-consumer-execution",
+      "passed": true,
+      "actual": "1/True/True/False"
+    },
+    {
+      "id": "infinity-reject-consumer-validation",
+      "passed": true,
+      "actual": "True/False/10/1/0"
+    },
+    {
+      "id": "infinity-reject-consumer-hashes",
+      "passed": true,
+      "actual": "0202efd6a92fbb38f066b9d392de290b5fe5e61d07604da6561b9f22441b61d5/6b3bd2f292bb21ab2764c8698a3d1c60c960aa9d9b67457aa413457da51e5000"
+    },
+    {
+      "id": "infinity-reject-diagnostic",
+      "passed": true,
+      "actual": "1 value(s) exceeded tolerance or special-value policy; first mismatch index 0/1 value(s) exceeded tolerance or special-value policy; first mismatch index 0"
+    },
+    {
+      "id": "infinity-reject-runtime-files",
+      "passed": true,
+      "actual": ""
+    },
+    {
+      "id": "infinity-reject-runtime-file-hashes",
+      "passed": true,
+      "actual": "all-recorded-hashes-match"
+    },
+    {
+      "id": "infinity-reject-source-runtime-contract",
+      "passed": true,
+      "actual": "False/True/False/True/False"
+    },
+    {
+      "id": "infinity-reject-consumer-runtime-contract",
+      "passed": true,
+      "actual": "package-reference/enqueue/fail-closed/owner-exit"
+    },
+    {
+      "id": "proof-runtime-boundary",
+      "passed": true,
+      "actual": "True/True/True"
+    },
+    {
+      "id": "proof-promotion-boundary",
+      "passed": true,
+      "actual": "False/False/False/False/False"
+    },
+    {
+      "id": "proof-statement",
+      "passed": true,
+      "actual": "Controlled malformed references prove source-tree and isolated local PackageReference consumers fail closed only after real TensorRT enqueue and output readback. They do not promote the unreviewed ONNX Runtime reference to an Owner golden, public-package, post-publish, or release proof."
+    }
+  ]
+}

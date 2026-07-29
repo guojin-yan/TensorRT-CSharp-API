@@ -5131,3 +5131,49 @@ reference 伪装成独立 golden output 或 Owner 认可的真实模型证明。
   `dotnet build-server shutdown` 均已执行，并精确终止本轮 CMake 留下的 orphan MSBuild node；最终 build/test/compiler
   进程残留为 `0`。
 - 本阶段未 push、未触发 GitHub Actions，未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 Independent ONNX Runtime Reference And Fail-Closed Negative Runtime
+
+本阶段为 TensorRtExec MNIST structured reference 增加真正独立于 TensorRT 执行的 ONNX Runtime CPU 候选，并将
+name/shape/value-count/NaN/Infinity 五类受控负例贯通 source-tree CLI 与隔离 local PackageReference consumer。
+
+### 独立 ORT CPU 证据
+
+- 隔离 producer 使用 ONNX Runtime `1.23.2`、显式 `CPUExecutionProvider` 和单线程顺序执行；profiling trace 仅包含
+  CPU provider。两次运行的 float32 bytes 完全一致，raw SHA256 为
+  `a20932857fb2d51f5f0b79daa211140fce631b3f67787b69e0a23f33c8817d75`，预测 digit 7。
+- runner 不下载包，只复制本机 NuGet cache 中已有的四个 `.nupkg` 到 E 盘临时 feed，清空远程源并使用隔离 restore
+  cache；主 solution 不增加 ONNX Runtime 依赖，workspace 已删除。
+- 新 reference 分类为 `onnxruntime-cpu-1.23.2-derived-unreviewed`，SHA256 为
+  `1babfa81c0d277a3d483fdc6288285b26008ba5b382868272f1e2187338bd571`。与旧 TensorRT reference 比较 10/10、
+  0 mismatch，最大绝对/相对误差 `5.722046e-06` / `5.7323444e-07`，在 `1e-4` tolerance 内。
+- ORT strict validator 在要求 raw/profile/log 时为 `51/51`。clean clone 只依赖检入的 reference、sidecar、compact
+  evidence 和 validation summary，不要求本机重运行工件。
+
+### 受控负向运行
+
+- 新增五类 reference：tensor name mismatch、shape mismatch、value count mismatch、NaN/reject、Infinity/reject。
+- source-tree CLI 与隔离 local-feed PackageReference consumer 各执行五次，共 10 次真实 TensorRT enqueue/readback。
+  source-tree 均以退出码 2、consumer 均以退出码 1 fail closed；两边均记录 `OutputValidated=false`，raw output SHA256
+  仍为 `0202efd6a92fbb38f066b9d392de290b5fe5e61d07604da6561b9f22441b61d5`。
+- consumer 的 metadata mismatch 改为返回不可比较的 validation result，确保先记录 enqueue/output/diagnostic，再非零
+  退出；owner scope 在退出前已释放并记录 `OwnerScopeExited=true`。metadata 三例为 `Completed=false`，特殊值两例为
+  `Completed=true`、1 mismatch、first mismatch 0。
+- 负向 strict validator 为 `72/72`；multi-version matrix 保留原 19 cases / 15 passed / 4 blocked，同时新增 ORT CPU
+  candidate 与 5/5 + 5/5 fail-closed 摘要，不重复增加版本案例计数。
+
+### Proof 与发布边界
+
+- ORT CPU profile 证明执行路径独立于 TensorRT，但 Owner 尚未接受它为 golden，也未批准 model/input/reference 的仓库
+  再分发；`independent-framework-reference-candidate-runtime` 不能晋级为 Owner accepted real-model proof。
+- 受控畸形 reference 只证明真实 enqueue/readback 后 fail closed；本地 PackageReference feed 不是 public package proof。
+- 本阶段未 push、未触发 GitHub Actions，未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
+
+### 最终验证
+
+- ORT / same-runtime / negative / local consumer strict validators：`51/51`、`44/44`、`72/72`、`53/53`。
+- TensorRtExec、trtexec、OnnxToEngine parity、multi-version matrix 与 publishing article 扩展定向集合：`155/155`。
+- 完整 `TensorRtSharp.sln` Debug build：`0 warning / 0 error`。
+- ORT、negative 与正向 package consumer 的 E 盘隔离 workspace 均已删除；本批未运行完整 ProjectQuality 全集。
+- C 盘 Downloads/用户 Temp 本批关键词与当日 `.onnx/.engine/.plan/.nupkg` 命中均为 0；dotnet build server 已关闭，
+  最终相关 build/test/compiler 进程残留为 0。

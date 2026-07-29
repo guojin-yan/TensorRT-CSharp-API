@@ -77,7 +77,7 @@ internal static class Program
                 " TensorRtAvailable=" + environment.RuntimeInfo.TensorRtAvailable +
                 " CudaAvailable=" + environment.RuntimeInfo.CudaToolkitAvailable);
 
-            RunPersistedPlan(
+            bool outputValidated = RunPersistedPlan(
                 planPath,
                 outputPath,
                 inputValues,
@@ -89,6 +89,12 @@ internal static class Program
                 infinityPolicy);
 
             Console.WriteLine("OwnerScopeExited=True");
+            if (!outputValidated)
+            {
+                Console.Error.WriteLine("PackageConsumerRuntime=Failed");
+                return 1;
+            }
+
             Console.WriteLine("PackageConsumerRuntime=Passed");
             return 0;
         }
@@ -100,7 +106,7 @@ internal static class Program
         }
     }
 
-    private static void RunPersistedPlan(
+    private static bool RunPersistedPlan(
         string planPath,
         string outputPath,
         float[] inputValues,
@@ -192,13 +198,15 @@ internal static class Program
         Console.WriteLine("OutputSha256=" + outputSha256);
         Console.WriteLine("PredictedIndex=" + predictedIndex);
         Console.WriteLine("OutputExactMatch=" + exactMatch);
-        Console.WriteLine("ReferenceValidationCompleted=True");
+        Console.WriteLine("ReferenceValidationCompleted=" + referenceValidation.Completed);
         Console.WriteLine("ReferenceValidationPassed=" + referenceValidation.Passed);
+        Console.WriteLine("OutputValidated=" + (referenceValidation.Completed && referenceValidation.Passed));
         Console.WriteLine("ReferenceComparedElementCount=" + referenceValidation.ComparedElementCount);
         Console.WriteLine("ReferenceMismatchCount=" + referenceValidation.MismatchCount);
         Console.WriteLine("ReferenceFirstMismatchIndex=" + referenceValidation.FirstMismatchIndex);
         Console.WriteLine("ReferenceMaximumAbsoluteError=" + referenceValidation.MaximumAbsoluteError.ToString("R", System.Globalization.CultureInfo.InvariantCulture));
         Console.WriteLine("ReferenceMaximumRelativeError=" + referenceValidation.MaximumRelativeError.ToString("R", System.Globalization.CultureInfo.InvariantCulture));
+        Console.WriteLine("ReferenceDiagnostic=" + referenceValidation.Diagnostic);
 
         if (!exactMatch)
         {
@@ -208,10 +216,10 @@ internal static class Program
 
         if (!referenceValidation.Passed)
         {
-            throw new InvalidDataException(
-                $"Reference validation failed. Mismatches={referenceValidation.MismatchCount} FirstMismatch={referenceValidation.FirstMismatchIndex} " +
-                $"MaxAbs={referenceValidation.MaximumAbsoluteError:R} MaxRel={referenceValidation.MaximumRelativeError:R}.");
+            return false;
         }
+
+        return true;
     }
 
     private static ReferenceTensor ReadReference(string path)
@@ -250,19 +258,20 @@ internal static class Program
     {
         if (!string.Equals(outputTensorName, reference.TensorName, StringComparison.Ordinal))
         {
-            throw new InvalidDataException($"Reference tensor name mismatch. Actual={outputTensorName} Expected={reference.TensorName}.");
+            return ReferenceValidationResult.MetadataMismatch(
+                $"reference tensorName does not match engine output name; actual={outputTensorName}; expected={reference.TensorName}");
         }
 
         if (!outputShape.Values.SequenceEqual(reference.Shape))
         {
-            throw new InvalidDataException(
-                $"Reference shape mismatch. Actual={FormatShape(outputShape)} Expected={FormatShape(reference.Shape)}.");
+            return ReferenceValidationResult.MetadataMismatch(
+                $"reference shape does not match runtime output shape; actual={FormatShape(outputShape)}; expected={FormatShape(reference.Shape)}");
         }
 
         if (outputValues.Length != reference.Values.Length)
         {
-            throw new InvalidDataException(
-                $"Reference element count mismatch. Actual={outputValues.Length} Expected={reference.Values.Length}.");
+            return ReferenceValidationResult.MetadataMismatch(
+                $"reference value count does not match runtime output element count; actual={outputValues.Length}; expected={reference.Values.Length}");
         }
 
         int mismatchCount = 0;
@@ -293,12 +302,16 @@ internal static class Program
         }
 
         return new ReferenceValidationResult(
-            mismatchCount == 0,
-            outputValues.Length,
+            completed: true,
+            passed: mismatchCount == 0,
+            comparedElementCount: outputValues.Length,
             mismatchCount,
             firstMismatchIndex,
             maximumAbsoluteError,
-            maximumRelativeError);
+            maximumRelativeError,
+            diagnostic: mismatchCount == 0
+                ? "all reference values matched"
+                : $"{mismatchCount} value(s) exceeded tolerance or special-value policy; first mismatch index {firstMismatchIndex}");
     }
 
     private static bool ReferenceValuesMatch(
@@ -472,20 +485,39 @@ internal static class Program
     private sealed class ReferenceValidationResult
     {
         public ReferenceValidationResult(
+            bool completed,
             bool passed,
             int comparedElementCount,
             int mismatchCount,
             int firstMismatchIndex,
             float maximumAbsoluteError,
-            float maximumRelativeError)
+            float maximumRelativeError,
+            string diagnostic)
         {
+            Completed = completed;
             Passed = passed;
             ComparedElementCount = comparedElementCount;
             MismatchCount = mismatchCount;
             FirstMismatchIndex = firstMismatchIndex;
             MaximumAbsoluteError = maximumAbsoluteError;
             MaximumRelativeError = maximumRelativeError;
+            Diagnostic = diagnostic ?? string.Empty;
         }
+
+        public static ReferenceValidationResult MetadataMismatch(string diagnostic)
+        {
+            return new ReferenceValidationResult(
+                completed: false,
+                passed: false,
+                comparedElementCount: 0,
+                mismatchCount: 0,
+                firstMismatchIndex: -1,
+                maximumAbsoluteError: 0.0f,
+                maximumRelativeError: 0.0f,
+                diagnostic);
+        }
+
+        public bool Completed { get; }
 
         public bool Passed { get; }
 
@@ -498,5 +530,7 @@ internal static class Program
         public float MaximumAbsoluteError { get; }
 
         public float MaximumRelativeError { get; }
+
+        public string Diagnostic { get; }
     }
 }
