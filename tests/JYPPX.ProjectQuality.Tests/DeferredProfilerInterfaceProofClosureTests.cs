@@ -44,5 +44,5 @@ public sealed class DeferredProfilerInterfaceProofClosureTests
     }
 
     private static string ReadSource(params string[] pathParts) =>
-        File.ReadAllText(System.IO.Path.Combine(new[] { RepositoryPaths.Root }.Concat(pathParts).ToArray()));
+        RepositorySourceReader.Read(System.IO.Path.Combine(new[] { RepositoryPaths.Root }.Concat(pathParts).ToArray()));
 }

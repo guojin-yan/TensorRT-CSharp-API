@@ -6884,3 +6884,44 @@ lifecycle 从两个大文件中分离。device/output buffer pointer non-exposur
 - source/type relocation、runtime/design gate 与 pointer-free dry-run 不构成新的 real TensorRT callback runtime、
   TensorRT/CUDA runtime、real model、Linux、package consumer、public package、post-publish、Owner acceptance 或 release proof。
 - 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行远程发布操作。
+
+## 2026-07-30 Logger And Profiler Callback Owner Source Split
+
+本阶段继续整理 `JYPPX.TensorRtSharp/Callbacks/Monitoring`，将 Logger/Profiler 的 copied interface metadata、
+diagnostic emission、borrower lifecycle、callback trampoline/state 与 UTF-8 decoding 从两个大 owner 文件中分离。
+所有 public API、attachment count、异常状态映射、delegate keep-alive 与 GCHandle 释放顺序保持不变。
+
+### 实现与门禁
+
+- `TensorRtLogger.cs` 从 489 行降为 125 行 state/constructor/basic-property core；InterfaceMetadata、Diagnostics、
+  Lifecycle、Trampoline 进入四份 partial，`TensorRtLogSeverity` 与 `TensorRtLogHandler` 各自成文件。
+- `TensorRtProfiler.cs` 从 461 行降为 104 行 state/constructor/basic-property core；InterfaceMetadata、Diagnostics、
+  Lifecycle、Trampoline 进入四份 partial，`TensorRtProfilerHandler` 独立成文件。
+- 两个 owner 的 finalizer/Dispose、borrower attach/detach、deferred native handle release、`GC.KeepAlive`、callback-state
+  GCHandle free、异常吞吐与 `InvalidState` 返回顺序保持原样；nested `CallbackState` 继续与 trampoline 同文件。
+- `ManagedMonitoringCallbackSourceLayoutTests` 固定十份 core/partial 的精确方法与属性归属、三个 top-level
+  enum/delegate owner、nested state/native delegate 字段 owner、readiness/test source-set 和五个消费测试 reader，
+  并按原顺序重组两份拆分前源码。
+- 拆分前 Git blob 为 `f0b481c27e249872e2819f80964739d41500b10e`、
+  `ddf7c33de5699bcb0647aa1267d3c35205bccb60`；normalized SHA-256 保持
+  `a6b7e894ab16a55d041d9c91c9f3a9ba4273486fdc6cda4d2e808dc760859d27` 与
+  `5f0bf52a3879ae779b747d21c52bfd7b93c0c66ae62aabe435a219916dae33d0`。
+- Logger/Profiler、profiler proof closure、API-language 与 B-tier 消费测试统一改读完整 source-set；Monitoring 教程、
+  object-model 锚点与双语 source-organization 同步。
+
+### 验证与边界
+
+- 新 method/property/type/nested-owner/重组/evidence 门禁：`21/21` 通过；Logger/Profiler、proof-closure、
+  API-language、布局与文章消费聚焦集合：`99/99` 通过；全部 managed layout 合并集合：`419/419` 通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`；
+  RuntimePackageReadiness UTF-8 source parse 为 `0 error`。
+- 本机无仓库认可的 `pwsh`，因此未运行 `DeferredBTierWorkItemProofBatchTests` 内的 exporter 链，也未将其结构迁移
+  宣称为 B-tier/exporter 通过；未生成或刷新 publishing/exporter evidence。
+- ignored deferred candidate evidence 保持 `260` 条引用、`147` 个唯一路径、`0` 缺失；其中引用的 `22` 份 JSON
+  全部可解析，ignored 文件未强制提交。
+- Generated/native/manifest/ABI 改动为 0；`git diff --check` 通过。
+- 进程审计快照只发现当前审计 PowerShell；Downloads 与用户 Temp 顶层近三小时没有本批 TensorRT/JYPPX/CUDA/
+  NVRTC/ONNX/engine/nupkg 重资产匹配项，未终止、删除或借用其他工作区进程。
+- source/type relocation、copied metadata 与 diagnostic smoke 不构成新的 real logger/profiler callback runtime、
+  TensorRT/CUDA runtime、real model、Linux、package consumer、public package、post-publish、Owner acceptance 或 release proof。
+- 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行远程发布操作。

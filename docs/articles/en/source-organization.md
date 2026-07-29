@@ -198,6 +198,15 @@ request and snapshot models have dedicated files. The layout gate recomposes the
 `b26930b226288afb17459e77e02fc6b8c8c1b686` and `a9bbaccad3401f179b86fde1e3af224a321b6eae`, retaining both
 GCHandle release order and runtime-gate-before-native-ledger disposal.
 
+Monitoring callback owners now use the same feature layout. The former 489-line `Callbacks/Monitoring/TensorRtLogger.cs`
+is reduced to a 125-line state/constructor/basic-property core, and the former 461-line `TensorRtProfiler.cs` is reduced to
+a 104-line core. Copied interface metadata, diagnostic emission, borrower lifecycle, and callback trampoline/state live in
+four partials per owner; `TensorRtLogSeverity`, `TensorRtLogHandler`, and `TensorRtProfilerHandler` have dedicated files.
+The layout gate recomposes the pre-split Git blobs `f0b481c27e249872e2819f80964739d41500b10e` and
+`ddf7c33de5699bcb0647aa1267d3c35205bccb60`, preserving deferred handle release, delegate keep-alive, callback-state
+GCHandle release, and exception-to-status behavior. Source relocation does not promote copied metadata or diagnostic smoke
+to real logger/profiler callback runtime proof.
+
 TensorRT public enums are no longer collected in the 2,456-line `Core/TensorRtEnums.cs`. Its 64 enums are distributed across
 15 module files for shared Core tensor values, Network, Parsing, Execution, Serialization, Engine, Runtime, Builder, Profiles,
 ControlFlow, and the Layers RNN, operation, resize, metadata, and attention domains. Single-value/flags pairs remain together;

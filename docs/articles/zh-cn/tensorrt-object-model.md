@@ -76,6 +76,12 @@ logger 必须比这两个 borrower 活得久。把临时 logger 直接包装为�
 实现锚点：
 
 - `src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtLogger.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtLogger.InterfaceMetadata.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtLogger.Diagnostics.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtLogger.Lifecycle.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtLogger.Trampoline.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtLogSeverity.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtLogHandler.cs`
 - `src/JYPPX.TensorRtSharp/Builder/TensorRtBuilder.cs`
 - `src/JYPPX.TensorRtSharp/Runtime/TensorRtRuntime.cs`
 

@@ -76,6 +76,25 @@ internal static class RepositorySourceReader
                 "TensorRtOutputAllocatorCallbackOwner.Lifecycle.cs",
                 "TensorRtOutputAllocatorCallbackRequest.cs",
                 "TensorRtOutputAllocatorCallbackOwnerSnapshot.cs"
+            ],
+            ["TensorRtLogger.cs"] =
+            [
+                "TensorRtLogger.cs",
+                "TensorRtLogger.InterfaceMetadata.cs",
+                "TensorRtLogger.Diagnostics.cs",
+                "TensorRtLogger.Lifecycle.cs",
+                "TensorRtLogger.Trampoline.cs",
+                "TensorRtLogSeverity.cs",
+                "TensorRtLogHandler.cs"
+            ],
+            ["TensorRtProfiler.cs"] =
+            [
+                "TensorRtProfiler.cs",
+                "TensorRtProfiler.InterfaceMetadata.cs",
+                "TensorRtProfiler.Diagnostics.cs",
+                "TensorRtProfiler.Lifecycle.cs",
+                "TensorRtProfiler.Trampoline.cs",
+                "TensorRtProfilerHandler.cs"
             ]
         };
 

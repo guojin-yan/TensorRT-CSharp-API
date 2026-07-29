@@ -81,7 +81,7 @@ public sealed class ManagedProfilerCallbackBoundaryTests
         string diagnosticsSource = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs");
 
         Assert.Contains("public delegate void TensorRtProfilerHandler", profilerSource);
-        Assert.Contains("public sealed class TensorRtProfiler", profilerSource);
+        Assert.Contains("public sealed partial class TensorRtProfiler", profilerSource);
         Assert.Contains("GCHandle.Alloc(_callbackState)", profilerSource);
         Assert.Contains("~TensorRtProfiler()", profilerSource);
         Assert.Contains("AttachBorrower", profilerSource);
@@ -177,7 +177,7 @@ public sealed class ManagedProfilerCallbackBoundaryTests
     private static string ReadSource(params string[] pathParts)
     {
         string path = Path.Combine(new[] { RepositoryPaths.Root }.Concat(pathParts).ToArray());
-        return File.ReadAllText(path);
+        return RepositorySourceReader.Read(path);
     }
 
     private static void AssertProfilerHeaderDeclarations(string line)

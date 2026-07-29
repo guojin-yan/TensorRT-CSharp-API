@@ -105,6 +105,27 @@ function Get-EvidenceSourceText {
         "TensorRtOutputAllocatorCallbackOwnerSnapshot.cs")
       break
     }
+    "TensorRtLogger.cs" {
+      @(
+        "TensorRtLogger.cs",
+        "TensorRtLogger.InterfaceMetadata.cs",
+        "TensorRtLogger.Diagnostics.cs",
+        "TensorRtLogger.Lifecycle.cs",
+        "TensorRtLogger.Trampoline.cs",
+        "TensorRtLogSeverity.cs",
+        "TensorRtLogHandler.cs")
+      break
+    }
+    "TensorRtProfiler.cs" {
+      @(
+        "TensorRtProfiler.cs",
+        "TensorRtProfiler.InterfaceMetadata.cs",
+        "TensorRtProfiler.Diagnostics.cs",
+        "TensorRtProfiler.Lifecycle.cs",
+        "TensorRtProfiler.Trampoline.cs",
+        "TensorRtProfilerHandler.cs")
+      break
+    }
     default {
       return Get-Content -LiteralPath $Path -Raw -Encoding utf8
     }

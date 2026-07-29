@@ -174,6 +174,14 @@ lifecycle 进入 3 份 partial，public request/snapshot model 各自成文件�
 `b26930b226288afb17459e77e02fc6b8c8c1b686` 与 `a9bbaccad3401f179b86fde1e3af224a321b6eae`，同时固定两份
 GCHandle 的释放顺序和 runtime-gate-before-native-ledger Dispose 顺序。
 
+Monitoring callback owner 也采用相同的 feature 布局。原 489 行 `Callbacks/Monitoring/TensorRtLogger.cs` 降为
+125 行 state/constructor/basic-property core，原 461 行 `TensorRtProfiler.cs` 降为 104 行 core。copied interface
+metadata、diagnostic emission、borrower lifecycle 与 callback trampoline/state 分别进入每个 owner 的 4 份 partial；
+`TensorRtLogSeverity`、`TensorRtLogHandler` 与 `TensorRtProfilerHandler` 各自成文件。布局门禁可重组拆分前 Git blob
+`f0b481c27e249872e2819f80964739d41500b10e` 与 `ddf7c33de5699bcb0647aa1267d3c35205bccb60`，并保持 deferred
+handle release、delegate keep-alive、callback-state GCHandle 释放和 exception-to-status 行为。源码归类不会把 copied
+metadata 或 diagnostic smoke 提升为 real logger/profiler callback runtime proof。
+
 TensorRT 的 public enum 也不再集中在 2,456 行的 `Core/TensorRtEnums.cs`。其中 64 个 enum 按 Core tensor 基础类型、
 Network、Parsing、Execution、Serialization、Engine、Runtime、Builder、Profiles、ControlFlow，以及 Layers 下的
 RNN、operation、resize、metadata、attention 分入 15 个模块文件；单值/flags 配对保持同文件，名称、underlying type、
