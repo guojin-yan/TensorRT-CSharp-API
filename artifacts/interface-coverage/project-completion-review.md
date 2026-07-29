@@ -5692,3 +5692,30 @@ Shared partial。原文件的 runtime version/logger、ONNX parser version 与 g
   Owner acceptance 或 release proof。
 - C 盘 Downloads 顶层当日本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
 - 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 TensorRT Safe Deferred Uplift Behavior Split
+
+本阶段将 75 行 `NativeBridgeApi.SafeDeferredUplift.cs` 按行为拆入 Plugins 与 Parsing。原文件只包含彼此独立的
+plugin initialization 和 ONNX weight-descriptor parsing 两个方法，没有共享 delegate/private helper；本批只移动
+完整方法块，没有改动 logger/parser owner 校验、UTF-8 namespace、pinned byte[] 生命周期、版本分支或异常文案。
+
+### 实现与门禁
+
+- `Plugins/NativeBridgeApi.PluginInitialization.cs`：33 行、1 个 `InitializeLibNvInferPlugins` 方法，保留有效 logger
+  要求及 TRT8/10/11 分支。
+- `Parsing/NativeBridgeApi.OnnxWeightDescriptorParsing.cs`：52 行、1 个 `ParseOnnxWithWeightDescriptors` 方法，保留
+  null/empty model 校验、`GCHandle` finally 释放及 TRT11 removed-by-vendor guard。
+- 布局门禁固定两个文件各自唯一的方法并拒绝旧根文件回流；唯一硬编码源码合同改为拼接实际 Plugins/Parsing 文件。
+- 两文件按原片段顺序重组后的 Git blob 为 `7051679f0e12a8e152e803dc5e8f14b1958d9561`，与 HEAD 原文件完全一致。
+
+### 验证与边界
+
+- 首次定向集合 `50/51`：唯一失败是 Plugins 预期文件数组未保持字典序；调整门禁顺序后，同一集合最终
+  `51/51` 通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- ignored deferred candidate artifact 不引用原文件，无需迁移；243 条 evidence 引用、133 个唯一路径缺失保持 0。
+- `git diff --check` 通过；Generated/native/manifest/ABI 未修改，未运行完整 ProjectQuality。
+- behavior split 不会提升任何 deferred API，也不是 plugin/parser lifetime、ABI/export、TensorRT runtime、Linux、
+  package consumer、public package、post-publish、Owner acceptance 或 release proof。
+- C 盘 Downloads 顶层当日本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
+- 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。

@@ -61,8 +61,9 @@ TensorRT 高层 wrapper 也开始按 layer feature 拆分：
   transformer 与 RNNv2 操作；`Network`：部署型 network layer 创建、tensor/network Dims64、debug/shape diagnostics、
   refittable-weight 标记与 safe network-v2 操作。
 - `Internal/Interop/Parsing`：global ONNX parser version、legacy parser diagnostics、ONNX config/model buffer/support、
-  builder-config attachment、layer-output metadata 与 parser-refitter diagnostics。
-- `Internal/Interop/Plugins`：global/builder/runtime registry inventories，以及复制型 V2/V3 layer metadata/query snapshot。
+  builder-config attachment、layer-output metadata、weight-descriptor parsing 与 parser-refitter diagnostics。
+- `Internal/Interop/Plugins`：plugin initialization、global/builder/runtime registry inventories，以及复制型 V2/V3 layer
+  metadata/query snapshot。
 - `Internal/Interop/Profiles`：optimization-profile Dims64 shape 查询。
 - `Internal/Interop/Runtime`：global runtime version/logger probes、runtime deployment controls 与复制型 diagnostics；
   `Serialization`：engine serialization 与 serialization-config flags；`Refit`：async refit、weights/dynamic-range、
@@ -70,9 +71,6 @@ TensorRT 高层 wrapper 也开始按 layer feature 拆分：
 
 `NativeBridgeApi.GlobalProbeShared.cs` 仅为拆分后的 global Runtime、Parsing、Plugins partial 保存共用的 unsupported-line
 异常 helper，因此继续保留在 interop 根目录；它不包含公开方法。
-
-`NativeBridgeApi.SafeDeferredUplift.cs` 也继续保留根目录，因为它混合 plugin initialization 与 ONNX weight-descriptor
-parsing。callback 文件归类不等于 callback trampoline、lifetime 或 runtime proof。
 
 只有当 version-prefixed 文件的方法集合仍跨 owner/feature 且需要单独行为拆分时才保留根目录；不会仅依据文件名前缀分类。
 原 `Trt11DeploymentAdditions` 已按方法 owner 拆为 `Network/NativeBridgeApi.DeploymentNetworkLayers.cs` 与
@@ -89,6 +87,8 @@ parsing。callback 文件归类不等于 callback trampoline、lifetime 或 runt
 拆分前 Git blob。
 原 `GlobalRuntimePluginProbe` 已拆入 `Runtime`、`Parsing`、`Plugins` 与仅含 helper 的根目录 Shared partial；四部分
 按原片段顺序重组后必须恢复拆分前 Git blob。
+原 `SafeDeferredUplift` 已拆入 `Plugins` 与 `Parsing`；两部分按原片段顺序重组后必须恢复拆分前 Git blob。文件归类
+不会改变既有 deferred 历史，也不等于 plugin/parser runtime 与 lifetime proof。
 
 生成文件继续保留在各自 `Generated` 文件夹下，不手工拆分。若需要调整生成文件布局，必须通过 generator 本身完成，并通过生成器确定性门禁。
 

@@ -107,6 +107,7 @@ public sealed class ManagedSourceModuleLayoutTests
                 "NativeBridgeApi.OnnxParserBuilderConfig.cs",
                 "NativeBridgeApi.OnnxParserLayerOutputMetadata.cs",
                 "NativeBridgeApi.OnnxParserSupport.cs",
+                "NativeBridgeApi.OnnxWeightDescriptorParsing.cs",
                 "NativeBridgeApi.ParserRefitterDiagnostics.cs"
             }
         },
@@ -116,6 +117,7 @@ public sealed class ManagedSourceModuleLayoutTests
             {
                 "NativeBridgeApi.BuilderCapabilityPluginRegistry.cs",
                 "NativeBridgeApi.GlobalPluginRegistry.cs",
+                "NativeBridgeApi.PluginInitialization.cs",
                 "NativeBridgeApi.PluginLayerOwnerScopedQuerySnapshots.cs",
                 "NativeBridgeApi.PluginRegistryInventory.cs",
                 "NativeBridgeApi.PluginV2LayerMetadata.cs",
@@ -507,6 +509,25 @@ public sealed class ManagedSourceModuleLayoutTests
         Assert.False(File.Exists(Path.Combine(
             interopDirectory,
             "NativeBridgeApi.GlobalRuntimePluginProbe.cs")));
+    }
+
+    [Fact]
+    public void TensorRtSafeDeferredUpliftInteropIsSplitByBehavior()
+    {
+        string interopDirectory = Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.TensorRtSharp",
+            "Internal",
+            "Interop");
+        string[] pluginMethods = ReadInteropMethodNames(interopDirectory, "Plugins", "NativeBridgeApi.PluginInitialization.cs");
+        string[] parsingMethods = ReadInteropMethodNames(interopDirectory, "Parsing", "NativeBridgeApi.OnnxWeightDescriptorParsing.cs");
+
+        Assert.Equal(new[] { "InitializeLibNvInferPlugins" }, pluginMethods);
+        Assert.Equal(new[] { "ParseOnnxWithWeightDescriptors" }, parsingMethods);
+        Assert.False(File.Exists(Path.Combine(
+            interopDirectory,
+            "NativeBridgeApi.SafeDeferredUplift.cs")));
     }
 
     private static string[] EnumerateModuleFiles(string projectDirectory, string module)
