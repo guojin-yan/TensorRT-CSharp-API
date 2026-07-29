@@ -55,13 +55,14 @@ public sealed class MnistOnnxRuntimeTests
     {
         string root = RepositoryPaths.Root;
         string program = File.ReadAllText(Path.Combine(root, "samples", "OnnxToEngine", "Program.cs"));
-        string service = File.ReadAllText(Path.Combine(root, "src", "JYPPX.TensorRtSharp.Tools", "Runtime", "MnistOnnxRuntime.cs"));
+        string result = File.ReadAllText(Path.Combine(
+            root, "src", "JYPPX.TensorRtSharp.Tools", "Runtime", "MnistOnnxRuntimeResult.cs"));
         string genericService = File.ReadAllText(Path.Combine(
             root, "src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildService.cs"));
 
         Assert.Contains("SampleCommandLine.HasSwitch(args, \"--mnist\")", program, StringComparison.Ordinal);
-        Assert.Contains("\"real-model-runtime\"", service, StringComparison.Ordinal);
-        Assert.Contains("IsPackageConsumerRuntimeProof => false", service, StringComparison.Ordinal);
+        Assert.Contains("\"real-model-runtime\"", result, StringComparison.Ordinal);
+        Assert.Contains("IsPackageConsumerRuntimeProof => false", result, StringComparison.Ordinal);
         Assert.Contains("Generic external-model inference requires explicit binding/output semantics.", genericService, StringComparison.Ordinal);
     }
 }

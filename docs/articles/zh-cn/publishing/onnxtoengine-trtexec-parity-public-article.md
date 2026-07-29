@@ -30,6 +30,10 @@ applications/TensorRtExec/Core/TensorRtExecReport.cs
 applications/TensorRtExec/Console/TensorRtExecCommand.cs
 applications/TensorRtExec/WinForms/MainForm.cs
 src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeParser.cs
+src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeParser.Arguments.cs
+src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeParser.ScalarParsing.cs
+src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeParser.BuildOptionValues.cs
+src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeParser.MemoryUnits.cs
 src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeOptions.cs
 src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.cs
 src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildDiagnostics.Json.cs

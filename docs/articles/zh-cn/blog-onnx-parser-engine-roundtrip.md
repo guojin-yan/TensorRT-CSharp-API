@@ -81,7 +81,10 @@ OnnxToEngine Passed=True
 | 内置 identity 默认路径 | 进程内生成 | 是 | 是 | synthetic runtime smoke |
 | 模型特定 runtime | 是 | 是/加载 | 是 | model runtime candidate |
 
-option parsing 由 `src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeParser.cs` 负责；build orchestration 位于
+option parsing 的主编排位于 `src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeParser.cs`；argument collection、
+scalar parsing、build option value normalization 与 memory unit parsing 分别位于
+`TrtexecLikeParser.Arguments.cs`、`TrtexecLikeParser.ScalarParsing.cs`、
+`TrtexecLikeParser.BuildOptionValues.cs`、`TrtexecLikeParser.MemoryUnits.cs`。build orchestration 位于
 `src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.cs`，deployment 与 runtime 投影分别位于
 `OnnxEngineBuildService.DeploymentConfiguration.cs`、`OnnxEngineBuildService.RuntimeExecution.cs`。
 `samples/OnnxToEngine/trtexec-parity-matrix.json` 记录每个参数是 applied、diagnostic 还是 parse-only；不能只因 CLI

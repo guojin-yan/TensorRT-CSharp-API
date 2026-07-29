@@ -153,6 +153,14 @@ live in four feature partials, with option-status and report-boundary records in
 the pre-split Git blobs `5269b4685e87d8eb0e65b337499963b12de71aaa` and
 `c7c832f862d8c3d4bff2b93666e9f842b24cdd91`.
 
+The Tools model-specific MNIST runtime and trtexec-like parser are modularized without changing their command or proof
+semantics. The former 932-line `Runtime/MnistOnnxRuntime.cs` is removed: options, PGM image/reader, classification,
+environment, result, and diagnostics now have dedicated files, while execution, artifact hashing, tensor/shape handling,
+and option validation live in four `MnistOnnxRuntimeService` partials. The 731-line `Trtexec/TrtexecLikeParser.cs` is reduced
+to a 262-line Parse orchestration core; argument collection, scalar/reference parsing, build-option values, and memory units
+live in four feature partials. The layout gate recomposes the pre-split Git blobs
+`116ff0707028cd234819b023f6b2b5e0ff3cbb43` and `3c94e7b5fe1ed741b722f71eb10f2888f76567b7`.
+
 TensorRT public enums are no longer collected in the 2,456-line `Core/TensorRtEnums.cs`. Its 64 enums are distributed across
 15 module files for shared Core tensor values, Network, Parsing, Execution, Serialization, Engine, Runtime, Builder, Profiles,
 ControlFlow, and the Layers RNN, operation, resize, metadata, and attention domains. Single-value/flags pairs remain together;

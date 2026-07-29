@@ -134,6 +134,13 @@ Markdown、option implementation status 与 report proof boundary 进入 4 份 f
 record 各自成文件。布局门禁可重组拆分前 Git blob `5269b4685e87d8eb0e65b337499963b12de71aaa` 与
 `c7c832f862d8c3d4bff2b93666e9f842b24cdd91`。
 
+Tools 的模型特定 MNIST runtime 与 trtexec-like parser 也在不改变命令和 proof 语义的前提下完成模块化。原 932 行
+`Runtime/MnistOnnxRuntime.cs` 已删除；options、PGM image/reader、classification、environment、result 与 diagnostics
+各自成文件，execution、artifact hash、tensor/shape 与 option validation 进入 4 份 `MnistOnnxRuntimeService` partial。
+原 731 行 `Trtexec/TrtexecLikeParser.cs` 降为 262 行 Parse orchestration core；argument collection、
+scalar/reference parsing、build-option values 与 memory units 进入 4 份 feature partial。布局门禁可重组拆分前 Git blob
+`116ff0707028cd234819b023f6b2b5e0ff3cbb43` 与 `3c94e7b5fe1ed741b722f71eb10f2888f76567b7`。
+
 TensorRT 的 public enum 也不再集中在 2,456 行的 `Core/TensorRtEnums.cs`。其中 64 个 enum 按 Core tensor 基础类型、
 Network、Parsing、Execution、Serialization、Engine、Runtime、Builder、Profiles、ControlFlow，以及 Layers 下的
 RNN、operation、resize、metadata、attention 分入 15 个模块文件；单值/flags 配对保持同文件，名称、underlying type、

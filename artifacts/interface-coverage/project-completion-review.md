@@ -6685,3 +6685,42 @@ public API、JSON/Markdown 字段、artifact bytes/hash、文件写入顺序与 
 - source/model relocation 不构成 TensorRT/CUDA runtime、real model、Linux、package consumer、public package、
   post-publish、Owner acceptance 或 release proof。
 - 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行远程发布操作。
+
+## 2026-07-30 MNIST Runtime And Trtexec Parser Source Split
+
+本阶段继续整理 `JYPPX.TensorRtSharp.Tools` 的模型特定 runtime 与 CLI parser，将 MNIST options/model/result、
+PGM preprocessing、classification、environment、diagnostics、service helper，以及 trtexec argument/scalar/build/memory
+解析从两个大文件中分离。public API、参数优先级、异常文本、bytes/hash、runtime 执行顺序与 proof classification 不变。
+
+### 实现与门禁
+
+- 原 932 行 `Runtime/MnistOnnxRuntime.cs` 已删除；`MnistOnnxRuntimeOptions`、`MnistPgmImage`、`MnistPgmReader`、
+  `MnistClassification`、`MnistOutputClassifier`、`MnistRuntimeEnvironment`、`MnistOnnxRuntimeResult` 与
+  `MnistOnnxRuntimeDiagnostics` 各自成文件。
+- `MnistOnnxRuntimeService.cs` 为 202 行 execution core；artifact/hash、tensor/shape 与 option validation 进入
+  Artifacts、Tensors、Validation 三份 partial，service 最大文件不再承载跨职责 helper。
+- `TrtexecLikeParser.cs` 从 731 行降至 262 行 Parse orchestration core；Arguments、ScalarParsing、
+  BuildOptionValues、MemoryUnits 四份 partial 分别承载参数集合、数值/reference policy、build 值归一化与 checked
+  memory unit parsing。
+- `ManagedMnistRuntimeParserLayoutTests` 固定 17 个 MNIST/parser 文件的精确 method owner、五个 model 文件的精确
+  public property 集合、旧 MNIST 聚合文件删除，并按原顺序重组两份拆分前源码。
+- 拆分前 Git blob 为 `116ff0707028cd234819b023f6b2b5e0ff3cbb43`、
+  `3c94e7b5fe1ed741b722f71eb10f2888f76567b7`；normalized SHA-256 保持
+  `bd8b5e607b5f966dc6be455adc2ecf6794db86669f1d9597dcd6a7c3a9998ff5` 与
+  `333c37056b216785710d0e32ee431b24e8d4261ad8acd9694a222b7bd2ae940e`。
+- MNIST 直接消费测试改读 result owner；ONNX roundtrip 博客、三篇 publishing 文章、
+  PublishingPublicArticleTests 与双语 source-organization 同步到真实 parser/runtime owner。
+
+### 验证与边界
+
+- 新布局/owner/property/重组门禁：`23/23` 通过；布局加受影响 MNIST/parser/application/article 消费聚焦集合：
+  `133/133` 通过；全部 managed 源码布局门禁合并集合：`314/314` 通过。
+- `JYPPX.TensorRtSharp.Tools` 与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- ignored deferred candidate evidence 保持 260 条引用、147 个唯一路径、0 缺失；当前 92 份 ignored JSON 均可解析，
+  ignored 文件未强制提交。
+- Generated/native/manifest/ABI 改动为 0，`git diff --check` 通过；本机仍无仓库认可的 `pwsh`，未运行
+  exporter/B-tier 聚合测试。
+- 进程审计保留其他父进程启动的 PowerShell 与 MSBuild node-reuse 任务，未终止、删除或借用其他工作区进程。
+- source/type relocation 不构成新的 TensorRT/CUDA runtime、real model、Linux、package consumer、public package、
+  post-publish、Owner acceptance 或 release proof。
+- 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行远程发布操作。

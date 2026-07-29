@@ -38,6 +38,10 @@ applications/TensorRtExec/tensor-rt-exec-report.schema.json
 
 ```text
 src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeParser.cs
+src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeParser.Arguments.cs
+src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeParser.ScalarParsing.cs
+src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeParser.BuildOptionValues.cs
+src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeParser.MemoryUnits.cs
 src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeOptions.cs
 src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildOptions.cs
 src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.cs

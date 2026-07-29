@@ -14,13 +14,16 @@ ONNX 到 TensorRT engine 的转换是 TensorRtSharp4.0 最容易被用户感知�
 ## 关键路径
 
 - 样例入口：`samples/OnnxToEngine/Program.cs`。
-- 共享参数解析：`src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeParser.cs`。
+- 共享参数解析：`src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeParser.cs`、`TrtexecLikeParser.Arguments.cs`、
+  `TrtexecLikeParser.ScalarParsing.cs`、`TrtexecLikeParser.BuildOptionValues.cs`、`TrtexecLikeParser.MemoryUnits.cs`。
 - 参数模型：`src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeOptions.cs`、`OnnxEngineBuildOptions.cs`。
 - 构建服务：`src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.cs`。
 - 构建结果：`src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildResult.cs`。
 - JSON/Markdown 诊断投影：`src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildDiagnostics.Json.cs`、`OnnxEngineBuildDiagnostics.Markdown.cs`。
 - report writer：`src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildReportWriter.cs`。
 - evidence sidecar：`src/JYPPX.TensorRtSharp.Tools/Artifacts/OnnxEngineBuildEvidenceSidecar.cs`。
+- MNIST 模型 runtime：`src/JYPPX.TensorRtSharp.Tools/Runtime/MnistOnnxRuntimeService.cs`、
+  `MnistOnnxRuntimeService.Tensors.cs`、`MnistOnnxRuntimeResult.cs`、`MnistOnnxRuntimeDiagnostics.cs`。
 - TensorRtExec CLI/GUI：`applications/TensorRtExec/Console/TensorRtExecCommand.cs`、`applications/TensorRtExec/WinForms/MainForm.cs`。
 - parity/gap 证据：`applications/TensorRtExec/tensor-rt-exec-trtexec-parity-matrix.json`、`applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.json`。
 - YoloVision 案例包：`samples/assets/yolovision-article-case-pack.json`、`samples/assets/yolovision-family-task-real-asset-roadmap.json`。
