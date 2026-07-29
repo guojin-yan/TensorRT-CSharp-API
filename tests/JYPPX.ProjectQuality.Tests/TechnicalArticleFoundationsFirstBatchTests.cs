@@ -179,7 +179,13 @@ public sealed class TechnicalArticleFoundationsFirstBatchTests
     public void ObjectPluginAndCudaArticlesTrackWrappersSmokesAndNavigation()
     {
         string objectArticle = ReadSource("docs", "articles", "zh-cn", "tensorrt-object-model.md");
-        string inferenceBindings = ReadSource("src", "JYPPX.TensorRtSharp", "Inference", "TensorRtInferenceBindings.cs");
+        string inferenceBindings = string.Join(
+            '\n',
+            ReadSource("src", "JYPPX.TensorRtSharp", "Inference", "TensorRtInferenceBindings.TensorGeometry.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Inference", "TensorRtInferenceBindings.Buffers.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Inference", "TensorRtInferenceBindings.HostTransfers.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Inference", "TensorRtInferenceBindings.AddressBinding.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Inference", "TensorRtInferenceBindings.Execution.cs"));
         string sample = ReadSource("samples", "InferenceBindings", "Program.cs");
         foreach (string marker in new[]
         {

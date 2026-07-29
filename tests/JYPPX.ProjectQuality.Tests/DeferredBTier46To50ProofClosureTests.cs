@@ -48,7 +48,7 @@ public sealed class DeferredBTier46To50ProofClosureTests
             ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.cs"),
             ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs"),
             ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParser.Diagnostics.cs"),
-            ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParserRefitter.cs"));
+            ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParserRefitter.Diagnostics.cs"));
         string article = ReadSource("docs", "articles", "zh-cn", "deferred-btier-46-50-proof-closure.md");
         string toc = ReadSource("docs", "toc.yml");
 

@@ -70,7 +70,7 @@ public sealed class DeferredCompatibilityDiagnosticsProofTests
         string legacyInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Parsing", "NativeBridgeApi.LegacyParserDiagnostics.cs");
         string legacyWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtLegacyParserDiagnostics.cs");
         string parser = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParser.Diagnostics.cs");
-        string refitter = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParserRefitter.cs");
+        string refitter = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParserRefitter.Diagnostics.cs");
         string parserInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Parsing", "NativeBridgeApi.ParserRefitterDiagnostics.cs");
         string networkSmoke = ReadSource("smoke", "NetworkBuilderSmokeRunner", "Program.cs");
         string legacySmoke = ReadSource("smoke", "LegacyParserDiagnosticsSmokeRunner", "Program.cs");

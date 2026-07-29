@@ -68,12 +68,15 @@ public sealed class ParserRefitterBoundaryTests
     [Fact]
     public void ManagedWrapperUsesSafeHandleAndCopiedValueObjects()
     {
-        string wrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParserRefitter.cs");
+        string wrapper = string.Join(
+            '\n',
+            ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParserRefitter.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParserRefitter.Diagnostics.cs"));
         string snapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParserRefitterDiagnosticSnapshot.cs");
         string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Parsing", "NativeBridgeApi.ParserRefitterDiagnostics.cs");
         string refitter = ReadSource("src", "JYPPX.TensorRtSharp", "Refit", "TensorRtRefitter.cs");
 
-        Assert.Contains("public sealed class TensorRtOnnxParserRefitter : IDisposable", wrapper);
+        Assert.Contains("public sealed partial class TensorRtOnnxParserRefitter : IDisposable", wrapper);
         Assert.Contains("private readonly SafeTensorRtObjectHandle _handle;", wrapper);
         Assert.Contains("public int ErrorCount", wrapper);
         Assert.Contains("public TensorRtParserErrorInfo GetError", wrapper);

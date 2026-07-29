@@ -153,6 +153,8 @@ $definitions = @(
       "src/JYPPX.TensorRtSharp/Engine/TensorRtEngine.cs",
       "src/JYPPX.TensorRtSharp/Execution/TensorRtExecutionContext.cs",
       "src/JYPPX.TensorRtSharp/Inference/TensorRtInferenceBindings.cs",
+      "src/JYPPX.TensorRtSharp/Inference/TensorRtInferenceBindings.Buffers.cs",
+      "src/JYPPX.TensorRtSharp/Inference/TensorRtInferenceBindings.Execution.cs",
       "samples/InferenceBindings/Program.cs"
     )
   },

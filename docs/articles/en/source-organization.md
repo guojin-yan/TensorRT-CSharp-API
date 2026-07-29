@@ -84,6 +84,15 @@ and disposal core; 20 shape/address/device-memory/event/enqueue methods live in 
 the pre-split Git blobs `592ce09c4da5fb4f7a376800cd5a6b309a22481b` and
 `1614e46a4b0175ff9889302f977a0520be404b29`.
 
+ParserRefitter and high-level InferenceBindings are split by call stage as well. `Parsing/TensorRtOnnxParserRefitter.cs` is now
+a 114-line native-owner, refitter/logger borrower lifetime, initializer-pin lifetime, shared model segment/stream copy, and
+disposal core; 21 refit/model-proto/initializer/diagnostic methods live in four feature partials.
+`Inference/TensorRtInferenceBindings.cs` is now a 124-line engine/context reference, buffer owner, shared tensor lookup/report
+refresh, disposal, and disposed-state core; 14 geometry/buffer/host-transfer/address-binding/execution/diagnostic methods live
+in six feature partials. Feature-specific size-estimation, buffer-replacement, and readiness helpers stay with their owners.
+The layout gate recomposes the pre-split Git blobs `07975ca6274fb64fcce06ca6e967515f07aa734c` and
+`6257b4c8ad3c0f8c4ec349208e8583b670359d0a`.
+
 Hand-written TensorRT partial interop now starts following the same responsibility modules:
 
 - `Internal/Interop/Builder` contains builder creation/capabilities, serialized build outputs, builder boundary controls,

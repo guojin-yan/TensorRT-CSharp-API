@@ -73,6 +73,14 @@ BuilderConfig 与 ExecutionContext 的通用 wrapper 也已拆分，且不与既
 20 个 shape/address/device-memory/event/enqueue 方法进入 5 份 feature partial。布局门禁可重组拆分前 Git blob
 `592ce09c4da5fb4f7a376800cd5a6b309a22481b` 与 `1614e46a4b0175ff9889302f977a0520be404b29`。
 
+ParserRefitter 与高层 InferenceBindings 也按调用阶段拆分。`Parsing/TensorRtOnnxParserRefitter.cs` 现为 114 行
+native owner、refitter/logger borrower lifetime、initializer pin lifetime、共享 model segment/stream copy helper 与 Dispose core；
+21 个 refit/model-proto/initializer/diagnostic 方法进入 4 份 feature partial。`Inference/TensorRtInferenceBindings.cs`
+现为 124 行 engine/context 引用、buffer owner、共享 tensor lookup/report refresh、Dispose 与 disposed-state core；
+14 个 geometry/buffer/host-transfer/address-binding/execution/diagnostic 方法进入 6 份 feature partial，feature 专属的
+size estimation、buffer replacement 与 readiness helper 跟随各自 owner。布局门禁可重组拆分前 Git blob
+`07975ca6274fb64fcce06ca6e967515f07aa734c` 与 `6257b4c8ad3c0f8c4ec349208e8583b670359d0a`。
+
 手写 TensorRT partial interop 也开始按相同职责模块归类：
 
 - `Internal/Interop/Builder`：builder creation/capabilities、serialized build outputs、builder boundary controls、

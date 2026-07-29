@@ -6364,3 +6364,42 @@ progress-monitor、profiler、aux-stream 与 layer-validation 生命周期 helpe
   表述为 runtime correctness、package consumer、public package、post-publish、Owner acceptance 或 release proof。
 - 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages
   发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 TensorRT ParserRefitter And InferenceBindings Managed Wrapper Split
+
+本阶段继续按调用阶段收口高层 managed wrapper，将 ParserRefitter 的 model/initializer/diagnostic 路径与
+InferenceBindings 的 geometry/buffer/address/execution 路径分离，同时保持 owner、buffer 与 Dispose 边界不变。
+
+### 实现与门禁
+
+- `TensorRtOnnxParserRefitter.cs` 从 460 行降至 114 行；21 个 refit/model-proto/initializer/diagnostic 方法进入
+  Refitting、ModelLoading、Initializers、Diagnostics 四份 partial。
+- ParserRefitter core 继续持有 native SafeHandle、refitter/logger borrower、initializer pin lifetime、Dispose 与被
+  多个 input feature 共用的 model segment/stream copy helper；diagnostic summary helper 随 Diagnostics 移动。
+- `TensorRtInferenceBindings.cs` 从 588 行降至 124 行；14 个 tensor geometry、buffer ownership、host transfer、
+  address binding、execution 与 diagnostic 方法进入 6 份 partial。
+- InferenceBindings 的 `GetTensor` 与 `RefreshReport` 被多个 feature 共用，因此与 engine/context/buffer owner、Dispose
+  和 disposed-state 留在 core；size estimation、buffer replacement 与 readiness helper 分别随 feature owner 移动。
+- `ManagedParserRefitterInferenceFeatureLayoutTests` 固定 10 份 partial 的精确方法/重载集合、两个 core 的 owner/helper
+  归属，并处理 diagnostics/model-loading 与多个 helper 的非连续原片段重组。
+- 拆分前 Git blob 为 `07975ca6274fb64fcce06ca6e967515f07aa734c`、
+  `6257b4c8ad3c0f8c4ec349208e8583b670359d0a`；normalized SHA-256 保持
+  `f4b7d422744849ead2bebc899000f495a2c27d96c120922228ff81451c4b88b6` 与
+  `021eb1ba7d4f1bd632a9f142adb99806ceb96c99e7895df0b1ced3125590a753`。
+- 8 份直接读取旧 core 的质量测试改读真实 feature 或完整 partial 集合；两份 technical-article exporter anchor
+  与两篇 InferenceBindings 教程同步到新 owner 文件。
+
+### 验证与边界
+
+- 新增 layout/recomposition 门禁：`14/14` 通过；包含前三批 wrapper layout、managed module layout、parser-refitter、
+  inference execution、model buffer 与文章 source marker 的可归因扩展集合：`160/160` 通过。
+- 更宽的探索性集合实际为 `163 passed / 4 failed / 167 total`：其中 3 项因本机缺失 `pwsh` 无法启动 exporter，
+  另 1 项为既有文章基线缺少 `4001` marker；未将该集合宣称为通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- ignored deferred candidate evidence 保持 248 条引用、140 个唯一路径、0 缺失；ignored 文件未强制提交。
+- 本批无自有 JSON 改动；Generated/native/manifest/ABI 改动为 0，`git diff --check` 通过。
+- build 结束后复核并清理本批遗留编译进程，dotnet/MSBuild/VBCSCompiler/testhost 残留为 0。
+- source split 不构成 runtime correctness、real model、Linux、package consumer、public package、post-publish、
+  Owner acceptance 或 release proof。
+- 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages
+  发布、Release/tag/issue 远程操作。

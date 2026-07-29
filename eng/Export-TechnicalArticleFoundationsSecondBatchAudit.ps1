@@ -142,7 +142,8 @@ $definitions = @(
     requiredMarkers = @("SetShape", "SetInputShape", "GetReadiness", "DynamicShape Passed=True")
     requiredAnchors = @(
       "src/JYPPX.TensorRtSharp/Profiles/TensorRtOptimizationProfile.cs",
-      "src/JYPPX.TensorRtSharp/Inference/TensorRtInferenceBindings.cs",
+      "src/JYPPX.TensorRtSharp/Inference/TensorRtInferenceBindings.TensorGeometry.cs",
+      "src/JYPPX.TensorRtSharp/Inference/TensorRtInferenceBindings.Execution.cs",
       "samples/DynamicShape/Program.cs"
     )
   },
@@ -154,7 +155,10 @@ $definitions = @(
     beforeCharacterCount = 2156
     requiredMarkers = @("CopyInputFromHost", "AllocateDeviceBuffer", "BindAll", "InferenceBindings Passed=True")
     requiredAnchors = @(
-      "src/JYPPX.TensorRtSharp/Inference/TensorRtInferenceBindings.cs",
+      "src/JYPPX.TensorRtSharp/Inference/TensorRtInferenceBindings.Buffers.cs",
+      "src/JYPPX.TensorRtSharp/Inference/TensorRtInferenceBindings.HostTransfers.cs",
+      "src/JYPPX.TensorRtSharp/Inference/TensorRtInferenceBindings.AddressBinding.cs",
+      "src/JYPPX.TensorRtSharp/Inference/TensorRtInferenceBindings.Execution.cs",
       "samples/InferenceBindings/Program.cs",
       "samples/InferenceBindings/README.md"
     )
