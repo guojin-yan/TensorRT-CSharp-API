@@ -65,7 +65,7 @@ public sealed class DeferredBTierWorkItemProofBatchTests
             ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.Trt11RuntimeControls.cs"),
             ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.cs"),
             ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.cs"),
-            ReadSource("src", "JYPPX.TensorRtSharp", "Layers", "TensorRtLayer.cs"),
+            ReadSources("src", "JYPPX.TensorRtSharp", "Layers", "TensorRtLayer*.cs"),
             ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Monitoring", "TensorRtProfiler.cs"),
             ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParser.cs"),
             ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParserRefitter.cs"),

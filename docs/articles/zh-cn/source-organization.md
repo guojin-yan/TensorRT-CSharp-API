@@ -46,6 +46,16 @@ TensorRT 高层 wrapper 也开始按 layer feature 拆分：
 - `src/JYPPX.TensorRtSharp/Layers/TensorRtLayer.Lrn.cs`
 - `src/JYPPX.TensorRtSharp/Layers/TensorRtLayer.Quantization.cs`
 
+剩余两份高层大 wrapper 现已沿用同一 feature 边界。`Layers/TensorRtLayer.cs` 只保留构造、通用 layer metadata、
+owner lease、output index 校验、释放与共享 Dims 校验；Shuffle、MatrixMultiply、Reduce、SoftMax、Unary、TopK、
+Gather、ElementWise、Activation、Pooling、Convolution、Scale、Padding、Resize、Concatenation、Slice、Fill 的
+118 个方法进入 17 份 feature partial。`Network/TensorRtNetworkDefinition.cs` 只保留 input/output/layer ownership、
+output mark/unmark、释放与共享 tensor 校验；对应 21 个 `Add*` 方法进入 21 份 feature partial。
+`ManagedWrapperFeatureLayoutTests` 固定每份文件的精确方法集合，并按原顺序重组规范化源码；拆分前两份 Git blob
+分别为 `faa5fa87fb24247a86f9d166073cf3858bad9ac2` 与 `933e7b253ecfefa00034da2544912b6e20c353ae`。
+这次仅整理源码，不改变 public 签名、SafeHandle/owner-lease 行为、line 路由、校验顺序、native entrypoint、
+generated binding、manifest 或 ABI 证据。
+
 手写 TensorRT partial interop 也开始按相同职责模块归类：
 
 - `Internal/Interop/Builder`：builder creation/capabilities、serialized build outputs、builder boundary controls、

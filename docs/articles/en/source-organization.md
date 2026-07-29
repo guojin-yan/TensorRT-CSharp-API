@@ -56,6 +56,16 @@ TensorRT high-level wrappers are also being split by layer feature area:
 - `src/JYPPX.TensorRtSharp/Layers/TensorRtLayer.Quantization.cs`
 - `src/JYPPX.TensorRtSharp/Execution/TensorRtExecutionContext.Profile.cs`
 
+The two remaining monolithic high-level wrappers now follow the same feature boundary. `Layers/TensorRtLayer.cs` retains
+construction, general layer metadata, owner leases, output-index validation, disposal, and the shared Dims validator; 118
+Shuffle/MatrixMultiply/Reduce/SoftMax/Unary/TopK/Gather/ElementWise/Activation/Pooling/Convolution/Scale/Padding/Resize/
+Concatenation/Slice/Fill methods live in 17 feature partials. `Network/TensorRtNetworkDefinition.cs` retains input/output/layer
+ownership, output marking, disposal, and shared tensor validation; 21 corresponding `Add*` methods live in 21 feature partials.
+`ManagedWrapperFeatureLayoutTests` fixes each exact method set and recomposes the normalized pre-split sources whose Git blobs
+are `faa5fa87fb24247a86f9d166073cf3858bad9ac2` and `933e7b253ecfefa00034da2544912b6e20c353ae`.
+This source-only split does not change public signatures, SafeHandle/owner-lease behavior, line routing, validation order, native
+entrypoints, generated bindings, manifests, or ABI evidence.
+
 Hand-written TensorRT partial interop now starts following the same responsibility modules:
 
 - `Internal/Interop/Builder` contains builder creation/capabilities, serialized build outputs, builder boundary controls,

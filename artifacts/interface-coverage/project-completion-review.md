@@ -5255,6 +5255,7 @@ reference 或 Owner golden。
   及 golden/redistribution decision；在此之前所有 promotion/publication flags 保持 false。
 - 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
 
+
 ## 2026-07-29 CUDA Driver Managed Source Module Closure
 
 本阶段继续收口托管公开 API 的目录职责，把 CUDA Driver capability、module owner 与 typed launch owner 从通用
@@ -6263,3 +6264,35 @@ static 实现；所有方法体、数组 pin/finally、版本路由、entrypoint
   Owner acceptance 或 release proof。
 - C 盘 Downloads 顶层本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
 - 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 TensorRT Managed Wrapper Feature Partial Split
+
+本阶段将 `TensorRtLayer.cs` 与 `TensorRtNetworkDefinition.cs` 的连续高层 feature API 拆入职责明确的 partial，
+不修改 public 签名、参数校验、TensorRT API line、SafeHandle/owner lease、native entrypoint 或异常文案。
+
+### 实现与门禁
+
+- `TensorRtLayer.cs` 从 1,371 行降至 173 行，只保留构造、通用 metadata、owner lease、output index 校验、
+  共享 Dims 校验与释放；118 个方法进入 Shuffle 到 Fill 的 17 份 feature partial。
+- `TensorRtNetworkDefinition.cs` 从 755 行降至 211 行，只保留 input/output/layer ownership、mark/unmark output、
+  共享 tensor 校验与释放；21 个 `Add*` 方法进入 Identity 到 Fill 的 21 份 feature partial。
+- `ManagedWrapperFeatureLayoutTests` 固定 38 份新 partial 的精确方法集合、两个 core 的 helper/lifetime 归属，
+  并按原顺序重组规范化源码。
+- 拆分前 Layer/Network Git blob 分别为 `faa5fa87fb24247a86f9d166073cf3858bad9ac2` 与
+  `933e7b253ecfefa00034da2544912b6e20c353ae`；重组后的 normalized SHA-256 分别保持
+  `a87256e88735c3896b4c75227e108191b5ae85a20a035af08bc3fa55442c1f4f` 与
+  `ac973a03e4580ddaed35c5d83e5d23a84dd981b46b475b323fe9c30a87e5accc`。
+- B-tier focused managed evidence 改为读取 `TensorRtLayer*.cs`；RNNv2 owner-lifetime 测试继续读取 core，
+  因其消费的 owner lease/helper 仍由 core 真实持有。
+
+### 验证与边界
+
+- wrapper layout/recomposition、managed layout、safe lifecycle、BuilderConfig、runtime deserialization/stream IO、
+  TRT11 runtime diagnostic 与 RNNv2 owner lease 定向集合：`124/124` 通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- ignored deferred candidate artifact 无旧大文件 feature 路径需要迁移；evidence 保持 247 条引用、137 个唯一路径、
+  0 缺失，该 ignored 文件未强制提交。
+- Generated/native/manifest/ABI 未修改；未运行依赖本机缺失 `pwsh` 的 B-tier 聚合测试，也未把 source split
+  表述为 runtime correctness、package consumer、public package、post-publish、Owner acceptance 或 release proof。
+- 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages
+  发布、Release/tag/issue 远程操作。
