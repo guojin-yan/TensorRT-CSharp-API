@@ -6648,3 +6648,40 @@ API owner 归档，同时保持 namespace、名称、underlying type、数值、
 - enum/source relocation 不构成 TensorRT runtime、real model、Linux、package consumer、public package、post-publish、
   Owner acceptance 或 release proof。
 - 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行远程发布操作。
+
+## 2026-07-30 ONNX Runtime Artifact And Build Diagnostics Source Split
+
+本阶段继续整理 `JYPPX.TensorRtSharp.Tools` 的 runtime artifact 与 build report 输出层，将结构化输出、profile、
+engine readback、raw binding、proof boundary、JSON/Markdown projection 和 option status 从两个大文件中分离。
+public API、JSON/Markdown 字段、artifact bytes/hash、文件写入顺序与 proof classification 保持不变。
+
+### 实现与门禁
+
+- `OnnxEngineRuntimeArtifactWriter.cs` 从 1,052 行降至 85 行 dispatch/hash core；Times、Output、Profile、
+  EngineReadback、RawBindings、ProofBoundary 与 FileIO 进入七份 partial。
+- `OnnxEngineRuntimeArtifactData` 与 `OnnxEngineRuntimeOutputArtifact` 成为独立 public model 文件；raw binding segment
+  与 runtime proof boundary nested type 继续跟随各自 feature owner。
+- `OnnxEngineBuildDiagnostics.cs` 从 776 行降至 37 行 report format dispatch core；Json、Markdown、OptionStatus、
+  ReportBoundary 进入四份 partial，build option implementation status 与 report boundary 成为独立 public model 文件。
+- `ManagedOnnxEngineArtifactDiagnosticsLayoutTests` 固定两个 core/十一份 feature partial 的精确 method/nested-type
+  owner、四个 model 的精确 public property 集合，并按原顺序重组两份拆分前源码。
+- 拆分前 Git blob 为 `5269b4685e87d8eb0e65b337499963b12de71aaa`、
+  `c7c832f862d8c3d4bff2b93666e9f842b24cdd91`；normalized SHA-256 保持
+  `ef0a5dbcb12d1924a2c764fc30c8997adc704f165053e8c11cd9a74ec525a5a7` 与
+  `149fad1b78428b823b8f4f14424491e66ea215e4885175ae6886b49e3fcb7329`。
+- 八个直接读取旧 writer/diagnostics core 的能力测试类改读实际 feature 或明确组合；六篇 publishing 文章、
+  PublishingPublicArticleTests 与双语 source-organization 同步到真实 owner。
+
+### 验证与边界
+
+- 新布局/重组门禁：`19/19` 通过；布局加受影响 build/runtime/refit/benchmark/article 消费聚焦集合：`127/127`
+  通过；全部 managed 源码布局门禁合并集合：`291/291` 通过。
+- `JYPPX.TensorRtSharp.Tools` 与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- ignored deferred candidate evidence 保持 260 条引用、147 个唯一路径、0 缺失；当前 92 份 ignored JSON 均可解析，
+  ignored 文件未强制提交。
+- Generated/native/manifest/ABI 改动为 0，`git diff --check` 通过；本机仍无仓库认可的 `pwsh`，未运行
+  exporter/B-tier 聚合测试。
+- 进程审计保留其他父进程启动的 PowerShell 与 MSBuild node-reuse 任务，未终止、删除或借用其他工作区进程。
+- source/model relocation 不构成 TensorRT/CUDA runtime、real model、Linux、package consumer、public package、
+  post-publish、Owner acceptance 或 release proof。
+- 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行远程发布操作。

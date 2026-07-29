@@ -16,7 +16,7 @@ public sealed class TrtexecRefittedPlanPersistenceTests
             ReadSource("src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildService.Refit.cs") +
             ReadSource("src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildService.RuntimeExecution.cs");
         string snapshot = ReadSource("src", "JYPPX.TensorRtSharp.Tools", "Refit", "OnnxEngineRefitPersistenceSnapshot.cs");
-        string diagnostics = ReadSource("src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildDiagnostics.cs");
+        string diagnostics = ReadSource("src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildDiagnostics.Markdown.cs");
         string schema = ReadSource("applications", "TensorRtExec", "tensor-rt-exec-report.schema.json");
         string form = ReadSource("applications", "TensorRtExec", "WinForms", "MainForm.cs");
 

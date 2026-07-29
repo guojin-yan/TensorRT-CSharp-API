@@ -56,8 +56,8 @@ public sealed class TrtexecOnnxRefitLifecycleTests
         string service = ReadSource(
             "src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildService.Refit.cs");
         string snapshot = ReadSource("src", "JYPPX.TensorRtSharp.Tools", "Refit", "OnnxEngineRefitSnapshot.cs");
-        string diagnostics = ReadSource("src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildDiagnostics.cs");
-        string artifactWriter = ReadSource("src", "JYPPX.TensorRtSharp.Tools", "Artifacts", "OnnxEngineRuntimeArtifactWriter.cs");
+        string diagnostics = ReadSource("src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildDiagnostics.Markdown.cs");
+        string artifactWriter = ReadSource("src", "JYPPX.TensorRtSharp.Tools", "Artifacts", "OnnxEngineRuntimeArtifactWriter.Output.cs");
         string schema = ReadSource("applications", "TensorRtExec", "tensor-rt-exec-report.schema.json");
         string form = ReadSource("applications", "TensorRtExec", "WinForms", "MainForm.cs");
 

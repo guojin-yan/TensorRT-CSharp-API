@@ -126,6 +126,14 @@ diagnostics、runtime execution、benchmarking、runtime inputs、reference vali
 preflight metadata、model evidence 与 benchmark summary 六个独立 public 类型各自成文件。布局门禁可重组拆分前 Git blob
 `31f2c170c9c74b7278b4bc266eca76405dc33067` 与 `97f6e992fe582513fcf77b10ce05de4de32af1a5`。
 
+ONNX runtime artifact 与 build report 投影继续按输出职责拆分。原 1,052 行
+`Artifacts/OnnxEngineRuntimeArtifactWriter.cs` 降为 85 行 dispatch/hash core；times、结构化 output、benchmark profile、
+engine readback、raw bindings、proof boundary 与 file I/O 进入 7 份 feature partial，runtime artifact data 与 output record
+成为独立 public 类型。原 776 行 `Build/OnnxEngineBuildDiagnostics.cs` 降为 37 行 report format dispatch core；JSON、
+Markdown、option implementation status 与 report proof boundary 进入 4 份 feature partial，option status 与 report boundary
+record 各自成文件。布局门禁可重组拆分前 Git blob `5269b4685e87d8eb0e65b337499963b12de71aaa` 与
+`c7c832f862d8c3d4bff2b93666e9f842b24cdd91`。
+
 TensorRT 的 public enum 也不再集中在 2,456 行的 `Core/TensorRtEnums.cs`。其中 64 个 enum 按 Core tensor 基础类型、
 Network、Parsing、Execution、Serialization、Engine、Runtime、Builder、Profiles、ControlFlow，以及 Layers 下的
 RNN、operation、resize、metadata、attention 分入 15 个模块文件；单值/flags 配对保持同文件，名称、underlying type、

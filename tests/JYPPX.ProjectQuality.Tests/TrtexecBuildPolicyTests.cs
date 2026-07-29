@@ -83,7 +83,7 @@ public sealed class TrtexecBuildPolicyTests
         string diagnostics = File.ReadAllText(Path.Combine(
             RepositoryPaths.Root,
             "src",
-            "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildDiagnostics.cs"));
+            "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildDiagnostics.OptionStatus.cs"));
 
         Assert.Contains("TrtexecLikeBuildPolicy.Apply(config, network, options.DeploymentOptions, log)", service, StringComparison.Ordinal);
         Assert.Contains("tensor.AllowedFormats = spec.Formats", policy, StringComparison.Ordinal);
@@ -130,7 +130,7 @@ public sealed class TrtexecBuildPolicyTests
         string diagnostics = File.ReadAllText(Path.Combine(
             RepositoryPaths.Root,
             "src",
-            "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildDiagnostics.cs"));
+            "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildDiagnostics.OptionStatus.cs"));
         string parser = File.ReadAllText(Path.Combine(
             RepositoryPaths.Root,
             "src",

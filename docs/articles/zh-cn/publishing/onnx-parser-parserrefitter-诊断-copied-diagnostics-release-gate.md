@@ -20,7 +20,7 @@ ONNX 转换失败时，真正有价值的不是把 native parser 指针暴露给
 - ParserRefitter wrapper：`src/JYPPX.TensorRtSharp/TensorRtOnnxParserRefitter.cs`。
 - ParserRefitter snapshot：`src/JYPPX.TensorRtSharp/TensorRtOnnxParserRefitterDiagnosticSnapshot.cs`。
 - ParserRefitter native interop：`src/JYPPX.TensorRtSharp/Internal/Interop/NativeBridgeApi.ParserRefitterDiagnostics.cs`。
-- TensorRtExec report projection：`src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildDiagnostics.cs`。
+- TensorRtExec report projection：`src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildDiagnostics.Json.cs`、`OnnxEngineBuildDiagnostics.Markdown.cs`。
 - Parser preflight model：`src/JYPPX.TensorRtSharp.Tools/OnnxEngineParserPreflightSnapshot.cs`。
 - Build service capture：`src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildService.cs`。
 - Consumer/package gates：`eng/Test-BridgePackageConsumer.ps1`、`eng/Test-RuntimePackageReadiness.ps1`、`eng/Test-ReleaseQualityGate.ps1`。

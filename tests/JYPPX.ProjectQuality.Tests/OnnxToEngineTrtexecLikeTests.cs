@@ -1024,7 +1024,7 @@ public sealed class OnnxToEngineTrtexecLikeTests
     public void DeploymentPoliciesUseTypedSetReadbackAndExplicitVersionGuards()
     {
         string service = ReadBuildService("Core", "DeploymentConfiguration");
-        string diagnostics = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildDiagnostics.cs"));
+        string diagnostics = ReadBuildDiagnostics("OptionStatus");
         string enums = File.ReadAllText(Path.Combine(
             RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp", "Network", "TensorRtNetworkEnums.cs"));
 
@@ -1134,7 +1134,7 @@ public sealed class OnnxToEngineTrtexecLikeTests
     public void MemoryPoolOptionsUseTypedBuilderSetAndReadbackOnlyDuringBuild()
     {
         string service = ReadBuildService("Core", "DeploymentConfiguration");
-        string diagnostics = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildDiagnostics.cs"));
+        string diagnostics = ReadBuildDiagnostics("OptionStatus");
         string deployment = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeDeploymentOptions.cs"));
 
         Assert.Contains("memoryPool.ToTensorRtMemoryPoolType()", service, StringComparison.Ordinal);
@@ -1151,7 +1151,7 @@ public sealed class OnnxToEngineTrtexecLikeTests
     {
         string service = ReadBuildService("Core", "DeploymentConfiguration");
         string options = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildOptions.cs"));
-        string diagnostics = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildDiagnostics.cs"));
+        string diagnostics = ReadBuildDiagnostics("OptionStatus");
 
         Assert.Contains("config.SetAverageTimingIterations(requestedIterations)", service, StringComparison.Ordinal);
         Assert.Contains("config.GetAverageTimingIterations()", service, StringComparison.Ordinal);
@@ -1173,7 +1173,7 @@ public sealed class OnnxToEngineTrtexecLikeTests
     {
         string service = ReadBuildService("Diagnostics");
         string options = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildOptions.cs"));
-        string diagnostics = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildDiagnostics.cs"));
+        string diagnostics = ReadBuildDiagnostics("OptionStatus");
 
         Assert.Contains("TryCollectLayerInformationFromSerializedEngine", service, StringComparison.Ordinal);
         Assert.Contains("inspector.GetLayerInformation(index, TensorRtLayerInformationFormat.Oneline)", service, StringComparison.Ordinal);
@@ -1842,7 +1842,7 @@ public sealed class OnnxToEngineTrtexecLikeTests
             "RuntimeExecution",
             "RuntimeInputs",
             "ReferenceValidation");
-        string artifactWriter = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Artifacts", "OnnxEngineRuntimeArtifactWriter.cs"));
+        string artifactWriter = ReadRuntimeArtifactWriter("ProofBoundary");
 
         Assert.Contains("TryRunGenericFloatEngineFromFile", service, StringComparison.Ordinal);
         Assert.Contains("load-engine-identity-runtime", service, StringComparison.Ordinal);
@@ -1873,7 +1873,7 @@ public sealed class OnnxToEngineTrtexecLikeTests
         string program = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "OnnxToEngine", "Program.cs"));
         string toolsProject = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "JYPPX.TensorRtSharp.Tools.csproj"));
         string service = ReadBuildService("Core");
-        string diagnostics = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildDiagnostics.cs"));
+        string diagnostics = ReadBuildDiagnostics("Json", "Markdown");
         string project = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "OnnxToEngine", "OnnxToEngine.csproj"));
 
         Assert.Contains("new OnnxEngineBuildService().Execute", program, StringComparison.Ordinal);
@@ -1990,5 +1990,29 @@ public sealed class OnnxToEngineTrtexecLikeTests
             feature == "Core"
                 ? "OnnxEngineBuildService.cs"
                 : $"OnnxEngineBuildService.{feature}.cs"))));
+    }
+
+    private static string ReadBuildDiagnostics(params string[] features)
+    {
+        return string.Concat(features.Select(feature => File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.TensorRtSharp.Tools",
+            "Build",
+            feature == "Core"
+                ? "OnnxEngineBuildDiagnostics.cs"
+                : $"OnnxEngineBuildDiagnostics.{feature}.cs"))));
+    }
+
+    private static string ReadRuntimeArtifactWriter(params string[] features)
+    {
+        return string.Concat(features.Select(feature => File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.TensorRtSharp.Tools",
+            "Artifacts",
+            feature == "Core"
+                ? "OnnxEngineRuntimeArtifactWriter.cs"
+                : $"OnnxEngineRuntimeArtifactWriter.{feature}.cs"))));
     }
 }

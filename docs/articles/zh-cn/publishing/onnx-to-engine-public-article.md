@@ -18,7 +18,7 @@ ONNX 到 TensorRT engine 的转换是 TensorRtSharp4.0 最容易被用户感知�
 - 参数模型：`src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeOptions.cs`、`OnnxEngineBuildOptions.cs`。
 - 构建服务：`src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.cs`。
 - 构建结果：`src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildResult.cs`。
-- 诊断投影：`src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildDiagnostics.cs`。
+- JSON/Markdown 诊断投影：`src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildDiagnostics.Json.cs`、`OnnxEngineBuildDiagnostics.Markdown.cs`。
 - report writer：`src/JYPPX.TensorRtSharp.Tools/OnnxEngineBuildReportWriter.cs`。
 - evidence sidecar：`src/JYPPX.TensorRtSharp.Tools/Artifacts/OnnxEngineBuildEvidenceSidecar.cs`。
 - TensorRtExec CLI/GUI：`applications/TensorRtExec/Console/TensorRtExecCommand.cs`、`applications/TensorRtExec/WinForms/MainForm.cs`。

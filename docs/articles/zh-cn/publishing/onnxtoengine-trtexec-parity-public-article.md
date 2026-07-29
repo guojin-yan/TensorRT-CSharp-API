@@ -32,7 +32,9 @@ applications/TensorRtExec/WinForms/MainForm.cs
 src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeParser.cs
 src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeOptions.cs
 src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.cs
-src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildDiagnostics.cs
+src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildDiagnostics.Json.cs
+src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildDiagnostics.Markdown.cs
+src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildDiagnostics.OptionStatus.cs
 ```
 
 ## 常见转换命令

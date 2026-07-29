@@ -144,6 +144,15 @@ probe, loaded-engine diagnostics, preflight metadata, model evidence, and benchm
 files. The layout gate recomposes the pre-split Git blobs `31f2c170c9c74b7278b4bc266eca76405dc33067` and
 `97f6e992fe582513fcf77b10ce05de4de32af1a5`.
 
+ONNX runtime artifacts and build-report projections are separated by output responsibility. The former 1,052-line
+`Artifacts/OnnxEngineRuntimeArtifactWriter.cs` is reduced to an 85-line dispatch and hashing core; times, structured output,
+benchmark profile, engine readback, raw bindings, proof boundaries, and file I/O live in seven feature partials, while runtime
+artifact data and output records are independent public types. The former 776-line `Build/OnnxEngineBuildDiagnostics.cs` is
+reduced to a 37-line report-format dispatch core; JSON, Markdown, option implementation status, and report proof boundaries
+live in four feature partials, with option-status and report-boundary records in dedicated files. The layout gate recomposes
+the pre-split Git blobs `5269b4685e87d8eb0e65b337499963b12de71aaa` and
+`c7c832f862d8c3d4bff2b93666e9f842b24cdd91`.
+
 TensorRT public enums are no longer collected in the 2,456-line `Core/TensorRtEnums.cs`. Its 64 enums are distributed across
 15 module files for shared Core tensor values, Network, Parsing, Execution, Serialization, Engine, Runtime, Builder, Profiles,
 ControlFlow, and the Layers RNN, operation, resize, metadata, and attention domains. Single-value/flags pairs remain together;

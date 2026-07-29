@@ -41,8 +41,14 @@ src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeParser.cs
 src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeOptions.cs
 src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildOptions.cs
 src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.cs
-src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildDiagnostics.cs
-src/JYPPX.TensorRtSharp.Tools/Artifacts/OnnxEngineRuntimeArtifactWriter.cs
+src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildDiagnostics.Json.cs
+src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildDiagnostics.Markdown.cs
+src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildDiagnostics.OptionStatus.cs
+src/JYPPX.TensorRtSharp.Tools/Artifacts/OnnxEngineRuntimeArtifactWriter.Output.cs
+src/JYPPX.TensorRtSharp.Tools/Artifacts/OnnxEngineRuntimeArtifactWriter.Profile.cs
+src/JYPPX.TensorRtSharp.Tools/Artifacts/OnnxEngineRuntimeArtifactWriter.EngineReadback.cs
+src/JYPPX.TensorRtSharp.Tools/Artifacts/OnnxEngineRuntimeArtifactWriter.RawBindings.cs
+src/JYPPX.TensorRtSharp.Tools/Artifacts/OnnxEngineRuntimeArtifactWriter.ProofBoundary.cs
 ```
 
 `TensorRtExecCommand` 负责 CLI parse、执行和 console summary；`TensorRtExecOptions` 负责把 trtexec-like 参数归一化为应用配置；`TensorRtExecService` 调用共享 build/report 服务；`TensorRtExecReport` 是面向 CLI/WinForms 的报告摘要；`MainForm` 使用同一套 options/service，避免 GUI 和 CLI 语义漂移。

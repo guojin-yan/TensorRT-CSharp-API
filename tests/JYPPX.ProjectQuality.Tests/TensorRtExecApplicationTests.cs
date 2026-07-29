@@ -44,6 +44,8 @@ public sealed class TensorRtExecApplicationTests
         string optionsSource = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "TensorRtExec", "Core", "TensorRtExecOptions.cs"));
         string toolsOptionsSource = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeOptions.cs"));
         string toolsParserSource = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeParser.cs"));
+        string diagnosticsJson = ReadBuildDiagnostics("Json");
+        string diagnosticsMarkdown = ReadBuildDiagnostics("Markdown");
 
         Assert.Contains("public string ToArgumentLine()", optionsSource, StringComparison.Ordinal);
         Assert.Contains("TrtexecLikeOptions", optionsSource, StringComparison.Ordinal);
@@ -84,10 +86,10 @@ public sealed class TensorRtExecApplicationTests
         Assert.Contains("BuilderConfigDeploymentSnapshotState", File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "TensorRtExec", "Core", "TensorRtExecReport.cs")), StringComparison.Ordinal);
         Assert.Contains("DeploymentOptions", toolsOptionsSource, StringComparison.Ordinal);
         Assert.Contains("RuntimeOptions", toolsOptionsSource, StringComparison.Ordinal);
-        Assert.Contains("PreflightMetadata", File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildDiagnostics.cs")), StringComparison.Ordinal);
-        Assert.Contains("LoadedEngineDiagnostics", File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildDiagnostics.cs")), StringComparison.Ordinal);
-        Assert.Contains("Loaded engine readback fingerprint", File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildDiagnostics.cs")), StringComparison.Ordinal);
-        Assert.Contains("Loaded engine readback SHA256", File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildDiagnostics.cs")), StringComparison.Ordinal);
+        Assert.Contains("PreflightMetadata", diagnosticsJson, StringComparison.Ordinal);
+        Assert.Contains("LoadedEngineDiagnostics", diagnosticsJson, StringComparison.Ordinal);
+        Assert.Contains("Loaded engine readback fingerprint", diagnosticsMarkdown, StringComparison.Ordinal);
+        Assert.Contains("Loaded engine readback SHA256", diagnosticsMarkdown, StringComparison.Ordinal);
         Assert.Contains("\"--exportLayerInfo\"", optionsSource, StringComparison.Ordinal);
         Assert.Contains("\"--exportReport\"", toolsOptionsSource, StringComparison.Ordinal);
         Assert.Contains("\"--report\"", toolsParserSource, StringComparison.Ordinal);
@@ -306,7 +308,7 @@ public sealed class TensorRtExecApplicationTests
         string parityMatrix = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "TensorRtExec", "tensor-rt-exec-trtexec-parity-matrix.json"));
         string guiCliExporter = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Export-TensorRtExecGuiCliParityChecklist.ps1"));
         string guiCliValidator = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Test-TensorRtExecGuiCliParityChecklist.ps1"));
-        string diagnostics = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildDiagnostics.cs"));
+        string diagnostics = ReadBuildDiagnostics("OptionStatus");
         string combined = readme + featureMatrix + parityMatrix + guiCliExporter + guiCliValidator + diagnostics;
 
         foreach (string marker in new[]
@@ -341,7 +343,7 @@ public sealed class TensorRtExecApplicationTests
         string serviceSource = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "TensorRtExec", "Core", "TensorRtExecService.cs"));
         string commandSource = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "TensorRtExec", "Console", "TensorRtExecCommand.cs"));
         string formSource = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "TensorRtExec", "WinForms", "MainForm.cs"));
-        string diagnosticsSource = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildDiagnostics.cs"));
+        string diagnosticsSource = ReadBuildDiagnostics("Json", "Markdown");
 
         Assert.Contains("new OnnxEngineBuildService().Execute", serviceSource, StringComparison.Ordinal);
         Assert.Contains("OnnxEngineBuildOptions.FromTrtexecLikeOptions(options.TrtexecOptions)", serviceSource, StringComparison.Ordinal);
@@ -570,5 +572,15 @@ public sealed class TensorRtExecApplicationTests
 
         Assert.DoesNotContain("samples/YoloDet", combined, StringComparison.Ordinal);
         Assert.DoesNotContain("YoloDet.csproj", combined, StringComparison.Ordinal);
+    }
+
+    private static string ReadBuildDiagnostics(params string[] features)
+    {
+        return string.Concat(features.Select(feature => File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.TensorRtSharp.Tools",
+            "Build",
+            $"OnnxEngineBuildDiagnostics.{feature}.cs"))));
     }
 }
