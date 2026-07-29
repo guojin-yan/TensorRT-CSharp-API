@@ -70,7 +70,7 @@ public sealed partial class Trt8CapabilityRegistryAndLegacySetterUpliftTests
     [Fact]
     public void ManagedSurfaceIsPointerFreeAndEnqueueV2SynchronizesBeforeReturning()
     {
-        string nativeBridge = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.SynchronousInference.cs");
+        string nativeBridge = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Inference", "NativeBridgeApi.SynchronousInference.cs");
         string executionContext = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.SynchronousInference.cs");
         string bindings = ReadSource("src", "JYPPX.TensorRtSharp", "Inference", "TensorRtInferenceBindings.cs");
         string environment = ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.cs");

@@ -48,10 +48,14 @@ TensorRT 高层 wrapper 也开始按 layer feature 拆分：
 
 手写 TensorRT partial interop 也开始按相同职责模块归类：
 
+- `Internal/Interop/Builder`：timing-cache 操作；`ControlFlow`：loop/conditional 操作。
 - `Internal/Interop/Callbacks`：allocator dry-run、callback interface/state 复制，以及 logger/profiler/progress-monitor
   delegate 签名。
 - `Internal/Interop/Diagnostics`：复制型 error-code metadata；`Internal/Interop/Interfaces`：owner-scoped
   versioned-interface metadata 复制。
+- `Internal/Interop/Inference`：同步 execute/enqueue 操作；`Weights`：复制型 layer-weight metadata。
+- `Internal/Interop/Layers`：quantization、attention、fill-int64、tensor metadata、transformer 与 RNNv2 操作；
+  `Network`：safe network-v2 layer 创建操作。
 - `Internal/Interop/Parsing`：legacy parser diagnostics、ONNX config/model buffer/support、builder-config attachment、
   layer-output metadata 与 parser-refitter diagnostics。
 - `Internal/Interop/Plugins`：builder capability/runtime registry inventories，以及复制型 V2/V3 layer metadata/query snapshot。
@@ -61,6 +65,9 @@ ONNX parser version 与 plugin-registry 操作；应在单独的行为拆分批�
 
 `NativeBridgeApi.SafeDeferredUplift.cs` 也继续保留根目录，因为它混合 plugin initialization 与 ONNX weight-descriptor
 parsing。callback 文件归类不等于 callback trampoline、lifetime 或 runtime proof。
+
+当 version-prefixed 文件的方法集合跨越 builder、engine、execution-context、network 与 layer owner 时，仍保留根目录。
+`Trt11Diagnostics`、`Trt11Dims64` 与 `Trt11RuntimeControls` 不会仅依据文件名前缀分类。
 
 生成文件继续保留在各自 `Generated` 文件夹下，不手工拆分。若需要调整生成文件布局，必须通过 generator 本身完成，并通过生成器确定性门禁。
 

@@ -16,6 +16,7 @@ public sealed class ManagedSourceModuleLayoutTests
 
     public static TheoryData<string, string[]> TensorRtInteropFeatureModules => new()
     {
+        { "Builder", new[] { "NativeBridgeApi.Trt11TimingCache.cs" } },
         {
             "Callbacks",
             new[]
@@ -28,8 +29,23 @@ public sealed class ManagedSourceModuleLayoutTests
                 "TensorRtProgressMonitorCallback.cs"
             }
         },
+        { "ControlFlow", new[] { "NativeBridgeApi.Trt11ControlFlow.cs" } },
         { "Diagnostics", new[] { "NativeBridgeApi.ErrorCodeMetadata.cs" } },
+        { "Inference", new[] { "NativeBridgeApi.SynchronousInference.cs" } },
         { "Interfaces", new[] { "NativeBridgeApi.OwnerScopedVersionedInterfaceMetadata.cs" } },
+        {
+            "Layers",
+            new[]
+            {
+                "NativeBridgeApi.Quantization.cs",
+                "NativeBridgeApi.Trt11Attention.cs",
+                "NativeBridgeApi.Trt11FillInt64.cs",
+                "NativeBridgeApi.Trt11LayerTensorMetadata.cs",
+                "NativeBridgeApi.Trt11TransformerMetadata.cs",
+                "NativeBridgeApi.Trt8RnnV2Diagnostics.cs"
+            }
+        },
+        { "Network", new[] { "NativeBridgeApi.Trt11SafeNetworkV2.cs" } },
         {
             "Parsing",
             new[]
@@ -54,7 +70,8 @@ public sealed class ManagedSourceModuleLayoutTests
                 "NativeBridgeApi.PluginV3LayerMetadata.cs",
                 "NativeBridgeApi.RuntimePluginRegistryInventory.cs"
             }
-        }
+        },
+        { "Weights", new[] { "NativeBridgeApi.LayerWeightsInfo.cs" } }
     };
 
     public static TheoryData<string, string[]> ProjectModules => new()

@@ -5412,3 +5412,34 @@ partial type、method、P/Invoke/entrypoint、owner 行为与 public API 均未�
   public package、post-publish、Owner acceptance 或 release proof。
 - C 盘 Downloads/用户 Temp 顶层当日重资产与本批关键词命中为 0，项目相关 build/test 进程残留为 0。
 - 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 TensorRT Feature Partial Managed Interop Module Closure
+
+本阶段继续整理 `JYPPX.TensorRtSharp/Internal/Interop` 的手写 partial API，将 11 份职责单一的文件归入
+`Builder`、`ControlFlow`、`Inference`、`Layers`、`Network` 与 `Weights`。所有文件均为纯目录移动；namespace、
+partial type、method、P/Invoke/entrypoint、owner 行为与 public API 均未改变。
+
+### 实现与门禁
+
+- `Builder` 包含 timing-cache 操作；`ControlFlow` 包含 loop/conditional 操作。
+- `Inference` 包含同步 execute/enqueue 操作；`Weights` 包含复制型 layer-weight metadata。
+- `Layers` 包含 quantization、attention、fill-int64、tensor metadata、transformer 与 RNNv2 操作，共 6 份文件。
+- `Network` 包含 safe network-v2 layer 创建操作。
+- 精确 internal interop 布局门禁固定六个模块的 11 份文件；RNN 与 synchronous inference 的源码路径合同已同步，
+  旧根路径引用扫描为 0，中英文 source-organization 已补齐模块职责。
+- `Trt11Diagnostics`、`Trt11Dims64`、`Trt11RuntimeControls`、`Trt11RuntimeSerializationRefit`、
+  `GlobalRuntimePluginProbe`、`SafeDeferredUplift` 与 `DeploymentMetadata` 继续保留根目录，因为其方法集合跨 owner 或
+  feature；不能仅按 `Trt11` 文件名前缀机械分类。
+
+### 验证与边界
+
+- layout、engine/RNN readonly diagnostics、synchronous inference、RNN borrowed-state design 与 inference binding fallback
+  定向集合：`35/35` 通过。
+- `JYPPX.TensorRtSharp` 全目标框架 Debug build：`0 warning / 0 error`。
+- 完整 `TensorRtSharp.sln` Debug build：`0 warning / 0 error`。
+- 11 组唯一新旧 Git blob hash 完全一致；`git diff --check` 通过，Generated/native/manifest/ABI 未修改。
+- 未运行完整 ProjectQuality；本批不是 ABI/export、TensorRT runtime、Linux、package consumer、public package、
+  post-publish、Owner acceptance 或 release proof。
+- C 盘 Downloads 顶层当日本批相关文件为 0，用户 Temp 顶层本批关键词命中为 0，项目相关 build/test 进程残留为 0；
+  Downloads 中既存的历史 CUDA/TensorRT 安装包与运行时包未改动。
+- 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。

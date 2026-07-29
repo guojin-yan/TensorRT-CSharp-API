@@ -58,10 +58,14 @@ TensorRT high-level wrappers are also being split by layer feature area:
 
 Hand-written TensorRT partial interop now starts following the same responsibility modules:
 
+- `Internal/Interop/Builder` contains timing-cache operations; `ControlFlow` contains loop/conditional operations.
 - `Internal/Interop/Callbacks` contains allocator dry-run controls, callback interface/state copies, and logger/profiler/
   progress-monitor delegate signatures.
 - `Internal/Interop/Diagnostics` contains copied error-code metadata; `Internal/Interop/Interfaces` contains owner-scoped
   versioned-interface metadata copies.
+- `Internal/Interop/Inference` contains synchronous execute/enqueue operations; `Weights` contains copied layer-weight metadata.
+- `Internal/Interop/Layers` contains quantization, attention, fill-int64, tensor metadata, transformer, and RNNv2 operations;
+  `Network` contains safe network-v2 layer creation operations.
 - `Internal/Interop/Parsing` contains legacy parser diagnostics, ONNX config/model-buffer/support, builder-config attachment,
   layer-output metadata, and parser-refitter diagnostics.
 - `Internal/Interop/Plugins` contains builder capability/runtime registry inventories and copied V2/V3 layer metadata/query snapshots.
@@ -69,6 +73,8 @@ Hand-written TensorRT partial interop now starts following the same responsibili
 `NativeBridgeApi.GlobalRuntimePluginProbe.cs` remains at the interop root because it mixes global runtime version, logger, ONNX parser version, and plugin-registry operations. It requires a separate behavioral split instead of being labeled as a pure plugin file.
 
 `NativeBridgeApi.SafeDeferredUplift.cs` also remains at the root because it combines plugin initialization with ONNX weight-descriptor parsing. Callback file placement is not callback trampoline, lifetime, or runtime proof.
+
+Version-prefixed files remain at the root when their method set crosses builder, engine, execution-context, network, and layer owners. In particular, `Trt11Diagnostics`, `Trt11Dims64`, and `Trt11RuntimeControls` are not classified by filename alone.
 
 Generated files remain under their `Generated` folders and should not be manually split. Generator output layout changes must happen in the generator itself and must pass the deterministic generator gate.
 
