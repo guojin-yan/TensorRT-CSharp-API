@@ -5874,3 +5874,37 @@ support 本身边界清晰；通用复制字符串 delegate/helper 已被 parser
   public package、post-publish、Owner acceptance 或 release proof。
 - C 盘 Downloads 顶层本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
 - 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 TensorRT Root Tail Engine Execution Owner Partial Split
+
+本阶段将根 `NativeBridgeApi.cs` 尾部连续的 EngineInspector、ExecutionContext、HostMemory 与 Engine metadata 方法按
+真实 owner 拆入 Engine、Execution、Serialization。后置 helper 审计确认 engine-information 与 engine IO-tensor-name
+getter 各只服务一个新 owner；BuilderConfig bit-flag 以及 Network/Tensor/Layer name helper 仍服务根文件方法，因此保留
+原位，没有制造模糊 Shared 文件或复制实现。
+
+### 实现与门禁
+
+- `Engine/NativeBridgeApi.EngineInspectorCore.cs`：92 行、3 个 inspector create/context/information 方法与 1 个专属
+  copied-string getter helper。
+- `Execution/NativeBridgeApi.ExecutionContextBindingsAndEnqueue.cs`：122 行、6 个 shape/binding/address/enqueue 方法。
+- `Serialization/NativeBridgeApi.HostMemoryBuffer.cs`：59 行、2 个 size/copy 方法，保留 byte-count 完整性校验。
+- `Engine/NativeBridgeApi.EngineCoreMetadata.cs`：281 行、14 个 IO tensor/device-memory/profile/debug metadata 方法与
+  1 个 IO-tensor-name getter helper。
+- 根 `NativeBridgeApi.cs` 从 4,393 行降至 3,878 行；布局门禁固定 3/6/2/14 方法分布、两个 owner helper 归属，并确认
+  尚未迁移的 bit-flag 与 Network/Tensor/Layer name helper 继续存在根文件。Inspector 与 HostMemory 源码合同已切到实际文件。
+- 按 `root prefix + Inspector + Execution + HostMemory + Engine + Inspector helper + root bit helper + Engine helper + root suffix`
+  原顺序重组后的 Git blob 为 `3a5a8c67e9debdc35dc4164112cfd500cfdd3c9d`，与拆分前 HEAD 根文件完全一致。
+
+### 验证与边界
+
+- layout、engine-inspector、serialization stream、engine/RNN readonly、safe lifecycle 与 execution aux-stream 定向集合：
+  `68/68` 一次通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- ignored deferred candidate artifact 仍引用存在的根文件，无需迁移；evidence 保持 247 条引用、137 个唯一路径、
+  0 缺失，该 ignored 文件未强制提交。
+- `git diff --check` 通过；Generated/native/manifest/ABI 未修改，未运行完整 ProjectQuality，也未运行依赖本机缺失
+  `pwsh` 的 B-tier 聚合测试。
+- partial 拆分不是 engine/context/host-memory lifetime 或 runtime correctness，也不是 ABI/export、Linux、package
+  consumer、public package、post-publish、Owner acceptance 或 release proof。
+- C 盘 Downloads 顶层本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
+- 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。

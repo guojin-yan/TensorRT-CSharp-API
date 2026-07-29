@@ -57,7 +57,9 @@ public sealed class ManagedSourceModuleLayoutTests
             {
                 "NativeBridgeApi.Dims64EngineMetadata.cs",
                 "NativeBridgeApi.EngineBoundaryControls.cs",
+                "NativeBridgeApi.EngineCoreMetadata.cs",
                 "NativeBridgeApi.EngineDeploymentMetadata.cs",
+                "NativeBridgeApi.EngineInspectorCore.cs",
                 "NativeBridgeApi.EngineInspectorDiagnostics.cs",
                 "NativeBridgeApi.EngineInspectorErrorRecorder.cs",
                 "NativeBridgeApi.EngineProfileTensorValues.cs",
@@ -70,6 +72,7 @@ public sealed class ManagedSourceModuleLayoutTests
             {
                 "NativeBridgeApi.Dims64ExecutionContext.cs",
                 "NativeBridgeApi.ExecutionContextAddressAndAuxStreams.cs",
+                "NativeBridgeApi.ExecutionContextBindingsAndEnqueue.cs",
                 "NativeBridgeApi.ExecutionContextBoundaryControls.cs",
                 "NativeBridgeApi.ExecutionContextCreation.cs",
                 "NativeBridgeApi.ExecutionContextDeploymentMetadata.cs",
@@ -169,6 +172,7 @@ public sealed class ManagedSourceModuleLayoutTests
             new[]
             {
                 "NativeBridgeApi.EngineSerialization.cs",
+                "NativeBridgeApi.HostMemoryBuffer.cs",
                 "NativeBridgeApi.HostMemoryMetadata.cs"
             }
         },
@@ -756,6 +760,86 @@ public sealed class ManagedSourceModuleLayoutTests
         Assert.DoesNotContain("ParserErrorStringGetter", rootSource, StringComparison.Ordinal);
         Assert.DoesNotContain("ReadOnnxParserErrorString", rootSource, StringComparison.Ordinal);
         Assert.DoesNotContain("ReadParserErrorString", rootSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TensorRtRootTailInteropIsSplitByOwnerAndFeature()
+    {
+        string interopDirectory = Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.TensorRtSharp",
+            "Internal",
+            "Interop");
+        string rootSource = File.ReadAllText(Path.Combine(interopDirectory, "NativeBridgeApi.cs"));
+        string[] rootMethods = EnumeratePublicStaticMethodNames(rootSource);
+        string inspectorSource = File.ReadAllText(Path.Combine(
+            interopDirectory,
+            "Engine",
+            "NativeBridgeApi.EngineInspectorCore.cs"));
+        string[] inspectorMethods = EnumeratePublicStaticMethodNames(inspectorSource);
+        string[] executionMethods = ReadInteropMethodNames(
+            interopDirectory,
+            "Execution",
+            "NativeBridgeApi.ExecutionContextBindingsAndEnqueue.cs");
+        string[] hostMemoryMethods = ReadInteropMethodNames(
+            interopDirectory,
+            "Serialization",
+            "NativeBridgeApi.HostMemoryBuffer.cs");
+        string engineSource = File.ReadAllText(Path.Combine(
+            interopDirectory,
+            "Engine",
+            "NativeBridgeApi.EngineCoreMetadata.cs"));
+        string[] engineMethods = EnumeratePublicStaticMethodNames(engineSource);
+
+        Assert.Equal(
+            new[] { "CreateEngineInspector", "SetEngineInspectorExecutionContext", "GetEngineInformation" },
+            inspectorMethods);
+        Assert.Equal(
+            new[]
+            {
+                "SetInputShape",
+                "SetBindingDimensions",
+                "SetTensorAddress",
+                "SetInputTensorAddress",
+                "SetOutputTensorAddress",
+                "EnqueueAsync"
+            },
+            executionMethods);
+        Assert.Equal(new[] { "GetHostMemorySize", "CopyHostMemoryToArray" }, hostMemoryMethods);
+        Assert.Equal(
+            new[]
+            {
+                "GetEngineIOTensorCount",
+                "GetEngineIOTensorInfo",
+                "GetEngineDeviceMemorySize",
+                "GetEngineDeviceMemorySizeForProfile",
+                "GetEngineDeviceMemorySizeV2",
+                "GetEngineDeviceMemorySizeForProfileV2",
+                "GetEngineAuxiliaryStreamCount",
+                "IsEngineDebugTensor",
+                "GetEngineOptimizationProfileCount",
+                "GetEngineIOTensorName",
+                "GetEngineTensorIndex",
+                "GetEngineTensorDataType",
+                "GetEngineTensorShape",
+                "GetEngineTensorIOMode"
+            },
+            engineMethods);
+        Assert.Contains("private static BridgeStatusCode GetEngineInformationNative(", inspectorSource, StringComparison.Ordinal);
+        Assert.Contains("private static BridgeStatusCode GetEngineIOTensorNameNative(", engineSource, StringComparison.Ordinal);
+
+        foreach (string method in inspectorMethods.Concat(executionMethods).Concat(hostMemoryMethods).Concat(engineMethods))
+        {
+            Assert.DoesNotContain(method, rootMethods);
+        }
+
+        Assert.DoesNotContain("GetEngineInformationNative", rootSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("GetEngineIOTensorNameNative", rootSource, StringComparison.Ordinal);
+        Assert.Contains("private static int GetSingleBitFlagIndex(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("private static BridgeStatusCode GetNetworkNameNative(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("private static BridgeStatusCode GetTensorNameNative(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("private static BridgeStatusCode GetLayerNameNative(", rootSource, StringComparison.Ordinal);
     }
 
     private static string[] EnumerateModuleFiles(string projectDirectory, string module)

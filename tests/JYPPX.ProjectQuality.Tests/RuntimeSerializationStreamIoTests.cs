@@ -13,6 +13,7 @@ public sealed class RuntimeSerializationStreamIoTests
         string hostMemoryMetadata = ReadSource("src", "JYPPX.TensorRtSharp", "Serialization", "TensorRtHostMemory.Trt11Metadata.cs");
         string runtime = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntime.cs");
         string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.cs");
+        string hostMemoryBufferInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Serialization", "NativeBridgeApi.HostMemoryBuffer.cs");
         string hostMemoryInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Serialization", "NativeBridgeApi.HostMemoryMetadata.cs");
 
         Assert.Contains("public void CopyTo(Stream destination)", hostMemory);
@@ -34,6 +35,9 @@ public sealed class RuntimeSerializationStreamIoTests
         Assert.Contains("return Deserialize(copy.ToArray());", runtime);
         Assert.Contains("GCHandle pinned = GCHandle.Alloc(engineData, GCHandleType.Pinned);", interop);
         Assert.Contains("pinned.Free();", interop);
+        Assert.Contains("public static ulong GetHostMemorySize", hostMemoryBufferInterop);
+        Assert.Contains("public static byte[] CopyHostMemoryToArray", hostMemoryBufferInterop);
+        Assert.Contains("bytesWritten.ToUInt64() != size", hostMemoryBufferInterop);
         Assert.Contains("public static TensorRtDataType GetHostMemoryDataType", hostMemoryInterop);
         Assert.Contains("TensorRtApiLine.TensorRt8 => NativeMethodsTensorRt.jyppx_trt8_host_memory_get_type", hostMemoryInterop);
         Assert.Contains("TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_host_memory_get_type", hostMemoryInterop);

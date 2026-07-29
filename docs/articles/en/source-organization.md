@@ -64,9 +64,9 @@ Hand-written TensorRT partial interop now starts following the same responsibili
   progress-monitor delegate signatures.
 - `Internal/Interop/Diagnostics` contains copied error-code metadata and TRT11 build probes used only by the environment probe;
   `Internal/Interop/Interfaces` contains owner-scoped versioned-interface metadata copies.
-- `Internal/Interop/Engine` contains engine/inspector boundary controls, copied engine/tensor/profile metadata and values, Dims64,
-  engine-inspector diagnostics/error-recorder controls, and weight-streaming/stat runtime controls; `Execution` contains
-  execution-context address/aux-stream controls, boundary controls, copied engine metadata, runtime-config creation,
+- `Internal/Interop/Engine` contains core/deployment engine metadata, inspector lifecycle/information/boundary/diagnostics,
+  copied tensor/profile values, Dims64, error-recorder controls, and weight-streaming/stat runtime controls; `Execution` contains
+  execution-context binding/address/enqueue/aux-stream controls, boundary controls, copied engine metadata, runtime-config creation,
   allocation-strategy, deployment metadata, Dims64, diagnostics, and allocator/event presence controls.
 - `Internal/Interop/Inference` contains synchronous execute/enqueue operations; `Weights` contains copied layer-weight metadata.
 - `Internal/Interop/Layers` contains quantization, attention, fill-int64, compatibility/deployment layer attributes, Dims64,
@@ -79,7 +79,7 @@ Hand-written TensorRT partial interop now starts following the same responsibili
   metadata/query snapshots.
 - `Internal/Interop/Profiles` contains optimization-profile Dims64 and shape-value queries.
 - `Internal/Interop/Runtime` contains global runtime version/logger probes, runtime deployment controls, and copied diagnostics;
-- `Serialization` contains engine serialization, serialization-config flags, and host-memory metadata; `Refit` contains async refit,
+- `Serialization` contains engine serialization, serialization-config flags, and host-memory buffer/metadata; `Refit` contains async refit,
   weights/dynamic-range, entry metadata, and refitter diagnostics.
 
 `NativeBridgeApi.GlobalProbeShared.cs` remains at the interop root only for the common unsupported-line exception helper used by
@@ -117,6 +117,9 @@ reproduce the pre-split root Git blob.
 The root ONNX parser core is split into Parsing lifecycle/input, diagnostics, flags/operator-support, and helper-only string-read
 partials. The parser-specific diagnostic helper moves with diagnostics, while the delegate and copied-string allocator remain
 shared by parser, parser-refitter, and support features; recombination in original segment order must reproduce the prior root blob.
+The root tail owner block is split into Engine inspector core, ExecutionContext binding/enqueue, Serialization host-memory buffer,
+and Engine core metadata partials. Engine-information and IO-tensor-name getters move with their owners; BuilderConfig bit-flag and
+Network/Tensor/Layer name helpers remain in the root until their consuming methods move. Original-order recombination remains required.
 
 Generated files remain under their `Generated` folders and should not be manually split. Generator output layout changes must happen in the generator itself and must pass the deterministic generator gate.
 

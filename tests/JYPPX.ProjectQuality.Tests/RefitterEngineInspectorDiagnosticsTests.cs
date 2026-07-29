@@ -85,7 +85,7 @@ public sealed class RefitterEngineInspectorDiagnosticsTests
         string source10 = ReadSource("native", "src", "tensorrt", "v10", "modules", "parser", "parser_inspector.inc");
         string source11 = ReadSource("native", "src", "tensorrt", "v11", "modules", "deployment", "diagnostics.inc");
         string errorRecorderBoundary = ReadSource("native", "src", "tensorrt", "common", "error_recorder_boundary_controls.inc");
-        string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.cs") +
+        string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Engine", "NativeBridgeApi.EngineInspectorCore.cs") +
             ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Engine", "NativeBridgeApi.EngineInspectorDiagnostics.cs") +
             ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Engine", "NativeBridgeApi.EngineInspectorErrorRecorder.cs");
         string wrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngineInspector.cs") +
