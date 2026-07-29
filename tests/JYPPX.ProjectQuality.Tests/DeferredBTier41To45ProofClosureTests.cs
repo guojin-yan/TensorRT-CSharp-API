@@ -53,7 +53,7 @@ public sealed class DeferredBTier41To45ProofClosureTests
 
         Assert.Contains("public TensorRtParserErrorInfo GetError(int index)", onnxParserApi);
         Assert.Contains("public IReadOnlyList<TensorRtOnnxParserDiagnostic> GetDiagnostics()", onnxParserApi);
-        Assert.Contains("ReadOnnxParserErrorString(line, parser, index", ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.cs"));
+        Assert.Contains("ReadOnnxParserErrorString(line, parser, index", ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Parsing", "NativeBridgeApi.OnnxParserDiagnostics.cs"));
 
         Assert.Contains("public TensorRtParserErrorInfo GetError(int index)", parserRefitterApi);
         Assert.Contains("public TensorRtOnnxParserRefitterDiagnosticSnapshot GetDiagnosticSnapshot()", parserRefitterApi);

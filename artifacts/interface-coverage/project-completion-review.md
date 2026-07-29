@@ -5840,3 +5840,37 @@ timing-cache lifecycle 片段移入 Builder。该片段只有 create/set/seriali
   public package、post-publish、Owner acceptance 或 release proof。
 - C 盘 Downloads 顶层本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
 - 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 TensorRT Root ONNX Parser Core Partial Split
+
+本阶段继续对根 `NativeBridgeApi.cs` 做可重组的 owner/feature 瘦身，将顶部 1 行 parser string delegate 与原根文件
+中连续 409 行 ONNX parser core 拆入四个 Parsing partial。parser core 的生命周期/输入、错误诊断、flags/operator
+support 本身边界清晰；通用复制字符串 delegate/helper 已被 parser、parser-refitter 与 parser support 共同使用，因此
+显式归入 helper-only Shared partial，没有复制实现或改变 allocator 生命周期。
+
+### 实现与门禁
+
+- `Parsing/NativeBridgeApi.OnnxParserLifecycleAndInput.cs`：105 行、3 个 create/file/memory parse 方法，保留 byte[]
+  pinning 与 `finally` 释放。
+- `Parsing/NativeBridgeApi.OnnxParserDiagnostics.cs`：205 行、5 个 error/diagnostic/local-stack/clear 方法与 1 个
+  parser 专属 variable-string selector helper。
+- `Parsing/NativeBridgeApi.OnnxParserFlagsAndOperatorSupport.cs`：99 行、6 个 flags 与 operator-support 方法。
+- `Parsing/NativeBridgeApi.ParserStringReadShared.cs`：40 行、0 个公开方法，只保存 1 个 delegate 与 1 个跨 Parsing
+  copied-string allocator/helper。
+- 根 `NativeBridgeApi.cs` 从 4,803 行降至 4,393 行；布局门禁固定 3/5/6/0 方法分布、helper-only Shared 约束和
+  delegate/helper 禁止回流根文件；ONNX input 与 B-tier diagnostics 源码合同改读实际 feature 文件。
+- 按 `root header + Shared delegate + root prefix + lifecycle + diagnostics part 1 + flags + diagnostics helper + Shared helper +
+  root suffix` 原顺序重组后的 Git blob 为 `78f8f0e43aec19b6c6c28c92487d00e1f1570f1e`，与拆分前 HEAD 根文件完全一致。
+
+### 验证与边界
+
+- layout、ONNX managed input、B-tier 41-45、parser-refitter、ONNX support 与 engine-inspector 定向集合：`61/61` 一次通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- ignored deferred candidate artifact 仍引用存在的根文件，无需迁移；evidence 保持 247 条引用、137 个唯一路径、
+  0 缺失，该 ignored 文件未强制提交。
+- `git diff --check` 通过；Generated/native/manifest/ABI 未修改，未运行完整 ProjectQuality，也未运行依赖本机缺失
+  `pwsh` 的 B-tier 聚合测试。
+- partial 拆分不是 parser lifetime/runtime correctness、owner/lifetime、ABI/export、Linux、package consumer、
+  public package、post-publish、Owner acceptance 或 release proof。
+- C 盘 Downloads 顶层本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
+- 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。

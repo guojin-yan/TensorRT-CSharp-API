@@ -116,10 +116,14 @@ public sealed class ManagedSourceModuleLayoutTests
                 "NativeBridgeApi.OnnxConfig.cs",
                 "NativeBridgeApi.OnnxModelBuffer.cs",
                 "NativeBridgeApi.OnnxParserBuilderConfig.cs",
+                "NativeBridgeApi.OnnxParserDiagnostics.cs",
+                "NativeBridgeApi.OnnxParserFlagsAndOperatorSupport.cs",
                 "NativeBridgeApi.OnnxParserLayerOutputMetadata.cs",
+                "NativeBridgeApi.OnnxParserLifecycleAndInput.cs",
                 "NativeBridgeApi.OnnxParserSupport.cs",
                 "NativeBridgeApi.OnnxWeightDescriptorParsing.cs",
-                "NativeBridgeApi.ParserRefitterDiagnostics.cs"
+                "NativeBridgeApi.ParserRefitterDiagnostics.cs",
+                "NativeBridgeApi.ParserStringReadShared.cs"
             }
         },
         {
@@ -684,6 +688,74 @@ public sealed class ManagedSourceModuleLayoutTests
         Assert.DoesNotContain("CreateTimingCache", rootMethods);
         Assert.DoesNotContain("SetTimingCache", rootMethods);
         Assert.DoesNotContain("SerializeTimingCache", rootMethods);
+    }
+
+    [Fact]
+    public void TensorRtRootOnnxParserCoreIsSplitIntoParsingFeatures()
+    {
+        string interopDirectory = Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.TensorRtSharp",
+            "Internal",
+            "Interop");
+        string rootSource = File.ReadAllText(Path.Combine(interopDirectory, "NativeBridgeApi.cs"));
+        string[] rootMethods = EnumeratePublicStaticMethodNames(rootSource);
+        string[] lifecycleMethods = ReadInteropMethodNames(
+            interopDirectory,
+            "Parsing",
+            "NativeBridgeApi.OnnxParserLifecycleAndInput.cs");
+        string diagnosticsSource = File.ReadAllText(Path.Combine(
+            interopDirectory,
+            "Parsing",
+            "NativeBridgeApi.OnnxParserDiagnostics.cs"));
+        string[] diagnosticsMethods = EnumeratePublicStaticMethodNames(diagnosticsSource);
+        string[] flagsMethods = ReadInteropMethodNames(
+            interopDirectory,
+            "Parsing",
+            "NativeBridgeApi.OnnxParserFlagsAndOperatorSupport.cs");
+        string sharedSource = File.ReadAllText(Path.Combine(
+            interopDirectory,
+            "Parsing",
+            "NativeBridgeApi.ParserStringReadShared.cs"));
+
+        Assert.Equal(
+            new[] { "CreateOnnxParser", "ParseOnnxFromFile", "ParseOnnxFromMemory" },
+            lifecycleMethods);
+        Assert.Equal(
+            new[]
+            {
+                "GetOnnxParserErrorCount",
+                "GetOnnxParserError",
+                "GetOnnxParserDiagnostic",
+                "GetOnnxParserLocalFunctionStack",
+                "ClearOnnxParserErrors"
+            },
+            diagnosticsMethods);
+        Assert.Equal(
+            new[]
+            {
+                "GetOnnxParserFlags",
+                "SetOnnxParserFlags",
+                "GetOnnxParserFlag",
+                "SetOnnxParserFlag",
+                "ClearOnnxParserFlag",
+                "OnnxParserSupportsOperator"
+            },
+            flagsMethods);
+        Assert.Contains("private static string ReadOnnxParserErrorString(", diagnosticsSource, StringComparison.Ordinal);
+        Assert.Contains("private delegate BridgeStatusCode ParserErrorStringGetter(", sharedSource, StringComparison.Ordinal);
+        Assert.Contains("private static string ReadParserErrorString(", sharedSource, StringComparison.Ordinal);
+        Assert.Empty(EnumeratePublicStaticMethodNames(sharedSource));
+
+        foreach (string method in lifecycleMethods.Concat(diagnosticsMethods).Concat(flagsMethods))
+        {
+            Assert.DoesNotContain(method, rootMethods);
+        }
+
+        Assert.DoesNotContain("ParserErrorStringGetter", rootSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("ReadOnnxParserErrorString", rootSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("ReadParserErrorString", rootSource, StringComparison.Ordinal);
     }
 
     private static string[] EnumerateModuleFiles(string projectDirectory, string module)

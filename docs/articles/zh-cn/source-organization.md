@@ -62,8 +62,9 @@ TensorRT 高层 wrapper 也开始按 layer feature 拆分：
 - `Internal/Interop/Layers`：quantization、attention、fill-int64、兼容/部署型 layer attributes、Dims64、tensor metadata、
   transformer 与 RNNv2 操作；`Network`：network boundary controls、部署型 network layer 创建、tensor/network Dims64、
   debug/shape diagnostics、refittable-weight 标记与 safe network-v2 操作。
-- `Internal/Interop/Parsing`：global ONNX parser version、legacy parser diagnostics、ONNX config/model buffer/support、
-  builder-config attachment、layer-output metadata、weight-descriptor parsing 与 parser-refitter diagnostics。
+- `Internal/Interop/Parsing`：global ONNX parser version、parser lifecycle/input/diagnostics/flags、legacy parser diagnostics、
+  ONNX config/model buffer/support、builder-config attachment、layer-output metadata、weight-descriptor parsing、
+  parser-refitter diagnostics 与共用复制字符串 helper。
 - `Internal/Interop/Plugins`：plugin initialization、global/builder/runtime registry inventories，以及复制型 V2/V3 layer
   metadata/query snapshot。
 - `Internal/Interop/Profiles`：optimization-profile Dims64 与 shape-value 查询。
@@ -101,6 +102,9 @@ TensorRT 高层 wrapper 也开始按 layer feature 拆分：
 方法移动，三部分按原片段顺序重组后必须恢复拆分前 Git blob。
 根 `NativeBridgeApi.cs` 开始按小批 owner/feature 区段持续瘦身：跨版本 timing-cache create/set/serialize 片段已移入
 `Builder/NativeBridgeApi.TimingCacheLifecycle.cs`，将该片段插回原位置后必须恢复拆分前的根文件 Git blob。
+根文件的 ONNX parser core 已拆为 Parsing lifecycle/input、diagnostics、flags/operator-support 与仅含字符串读取 helper
+的 Shared partial。parser 专属 diagnostic helper 随 diagnostics 移动，delegate 与复制字符串 allocator 继续由 parser、
+parser-refitter、support 共用；按原片段顺序重组后必须恢复拆分前的根文件 Git blob。
 
 生成文件继续保留在各自 `Generated` 文件夹下，不手工拆分。若需要调整生成文件布局，必须通过 generator 本身完成，并通过生成器确定性门禁。
 

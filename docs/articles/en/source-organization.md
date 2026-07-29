@@ -72,8 +72,9 @@ Hand-written TensorRT partial interop now starts following the same responsibili
 - `Internal/Interop/Layers` contains quantization, attention, fill-int64, compatibility/deployment layer attributes, Dims64,
   tensor metadata, transformer, and RNNv2 operations; `Network` contains network boundary controls, deployment network-layer
   creation, tensor/network Dims64, debug/shape diagnostics, refittable-weight markers, and safe network-v2 operations.
-- `Internal/Interop/Parsing` contains the global ONNX parser version, legacy parser diagnostics, ONNX config/model-buffer/support,
-  builder-config attachment, layer-output metadata, weight-descriptor parsing, and parser-refitter diagnostics.
+- `Internal/Interop/Parsing` contains the global ONNX parser version, parser lifecycle/input/diagnostics/flags, legacy parser
+  diagnostics, ONNX config/model-buffer/support, builder-config attachment, layer-output metadata, weight-descriptor parsing,
+  parser-refitter diagnostics, and shared copied-string helpers.
 - `Internal/Interop/Plugins` contains plugin initialization, global/builder/runtime registry inventories, and copied V2/V3 layer
   metadata/query snapshots.
 - `Internal/Interop/Profiles` contains optimization-profile Dims64 and shape-value queries.
@@ -113,6 +114,9 @@ with the Engine profile methods, and recombination must reproduce the pre-split 
 The root `NativeBridgeApi.cs` is now reduced in small owner/feature batches: its cross-version timing-cache create/set/serialize
 segment moves to `Builder/NativeBridgeApi.TimingCacheLifecycle.cs`, and reinserting that segment at its original position must
 reproduce the pre-split root Git blob.
+The root ONNX parser core is split into Parsing lifecycle/input, diagnostics, flags/operator-support, and helper-only string-read
+partials. The parser-specific diagnostic helper moves with diagnostics, while the delegate and copied-string allocator remain
+shared by parser, parser-refitter, and support features; recombination in original segment order must reproduce the prior root blob.
 
 Generated files remain under their `Generated` folders and should not be manually split. Generator output layout changes must happen in the generator itself and must pass the deterministic generator gate.
 
