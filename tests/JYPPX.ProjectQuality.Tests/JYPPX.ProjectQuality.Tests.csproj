@@ -17,6 +17,7 @@
     <ProjectReference Include="..\\..\\src\\JYPPX.TensorRtSharp\\JYPPX.TensorRtSharp.csproj" />
     <ProjectReference Include="..\\..\\src\\JYPPX.TensorRtSharp.Tools\\JYPPX.TensorRtSharp.Tools.csproj" />
     <ProjectReference Include="..\\..\\samples\\OnnxToEngine\\OnnxToEngine.csproj" />
+    <ProjectReference Include="..\\..\\samples\\Classification\\Classification.csproj" />
     <ProjectReference Include="..\\..\\samples\\YoloVision\\YoloVision.csproj" />
   </ItemGroup>
 </Project>

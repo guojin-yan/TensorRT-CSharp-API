@@ -17,7 +17,7 @@ public sealed class CrossTaskReferenceProvenanceTests
 
         Assert.Contains("Rows=7 Ready=0 OwnerActionRequired=7", exporterOutput, StringComparison.Ordinal);
         Assert.Contains("MnistReferenceReusableForMatrixTasks=False", exporterOutput, StringComparison.Ordinal);
-        Assert.Contains("CrossTaskReferenceProvenanceValidation=93/93", validatorOutput, StringComparison.Ordinal);
+        Assert.Contains("CrossTaskReferenceProvenanceValidation=94/94", validatorOutput, StringComparison.Ordinal);
 
         using JsonDocument validation = ReadJson(
             "artifacts",
@@ -25,8 +25,8 @@ public sealed class CrossTaskReferenceProvenanceTests
             "cross-task-reference-provenance-validation.json");
         Assert.Equal("cross-task-reference-provenance-validation.v1", validation.RootElement.GetProperty("schemaVersion").GetString());
         Assert.True(validation.RootElement.GetProperty("strict").GetBoolean());
-        Assert.Equal(93, validation.RootElement.GetProperty("checkCount").GetInt32());
-        Assert.Equal(93, validation.RootElement.GetProperty("passedCount").GetInt32());
+        Assert.Equal(94, validation.RootElement.GetProperty("checkCount").GetInt32());
+        Assert.Equal(94, validation.RootElement.GetProperty("passedCount").GetInt32());
         Assert.Equal(0, validation.RootElement.GetProperty("failureCount").GetInt32());
     }
 
@@ -85,6 +85,9 @@ public sealed class CrossTaskReferenceProvenanceTests
         });
 
         JsonElement classification = Assert.Single(rows, static item => item.GetProperty("id").GetString() == "classification");
+        Assert.Equal("implemented-managed-contract-owner-assets-required", classification.GetProperty("runtimeContractState").GetString());
+        Assert.Equal(4, classification.GetProperty("runtimeContractArtifacts").GetArrayLength());
+        Assert.False(classification.GetProperty("runtimeContractIsRuntimeProof").GetBoolean());
         string[] missingClassification = classification.GetProperty("taskSemanticChecks").EnumerateArray()
             .Where(static item => !item.GetProperty("ready").GetBoolean())
             .Select(static item => item.GetProperty("id").GetString()!)

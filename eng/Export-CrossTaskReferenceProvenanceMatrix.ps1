@@ -169,6 +169,14 @@ $rows.Add([pscustomobject][ordered]@{
   readyFieldCount = $classificationReady
   requiredFieldCount = $classificationTotal
   missingFieldCount = $classificationTotal - $classificationReady
+  runtimeContractState = "implemented-managed-contract-owner-assets-required"
+  runtimeContractArtifacts = @(
+    "samples/Classification/ClassificationImagePreprocessor.cs",
+    "samples/Classification/ClassificationOutputArtifacts.cs",
+    "samples/Classification/classification-reference.schema.json",
+    "samples/Classification/classification-output.schema.json"
+  )
+  runtimeContractIsRuntimeProof = $false
   independentReferenceState = "not-captured-for-classification"
   referenceReuseEligible = $false
   ownerReviewedGolden = $false
@@ -303,10 +311,11 @@ $lines.Add("- rows: ``$($matrix.rowCount)``")
 $lines.Add("- ready rows: ``$($matrix.readyRowCount)``")
 $lines.Add("- owner action required rows: ``$($matrix.ownerActionRequiredRowCount)``")
 $lines.Add("")
-$lines.Add("| Row | Sample | Task | Ready / Required | Missing | Independent reference | Owner golden |")
-$lines.Add("| --- | --- | --- | ---: | ---: | --- | --- |")
+$lines.Add("| Row | Sample | Task | Runtime contract | Ready / Required | Missing | Independent reference | Owner golden |")
+$lines.Add("| --- | --- | --- | --- | ---: | ---: | --- | --- |")
 foreach ($row in $rows) {
-  $lines.Add("| ``$($row.id)`` | $($row.sample) | ``$($row.task)`` | $($row.readyFieldCount) / $($row.requiredFieldCount) | $($row.missingFieldCount) | ``$($row.independentReferenceState)`` | ``$($row.ownerReviewedGolden)`` |")
+  $runtimeContract = if ($row.PSObject.Properties["runtimeContractState"]) { [string]$row.runtimeContractState } else { "not-audited-in-this-batch" }
+  $lines.Add("| ``$($row.id)`` | $($row.sample) | ``$($row.task)`` | ``$runtimeContract`` | $($row.readyFieldCount) / $($row.requiredFieldCount) | $($row.missingFieldCount) | ``$($row.independentReferenceState)`` | ``$($row.ownerReviewedGolden)`` |")
 }
 $lines.Add("")
 $lines.Add("## Independent Candidates")

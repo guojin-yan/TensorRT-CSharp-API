@@ -5213,3 +5213,44 @@ preprocess/postprocess/output semantics，不允许通过复用 MNIST reference 
 - 所有 `canPromoteRealModelRuntime`、`canPromotePackageConsumerRuntime`、`canPublishPublicly`、`canCloseReleaseIssue`
   继续保持 false。
 - C 盘 Downloads/用户 Temp 的本批关键词与当日重资产命中均为 0；dotnet build server 已关闭，最终相关进程为 0。
+
+## 2026-07-29 Classification Real Input And Reference Artifact Closure
+
+本阶段补齐 generic Classification 的托管真实图片输入、可审计输出 JSON 与 task-specific structured reference
+comparison。它解决了“将图片原始 bytes 当作 tensor”的歧义，但未提供分类模型、许可资产、独立 framework
+reference 或 Owner golden。
+
+### 实现
+
+- 抽取 `JYPPX.SampleSupport.SampleRgbImageDecoder`，供 Classification 与 YoloVision 共用；支持 P3/P6 PPM/PNM 和
+  uncompressed 24/32-bit BMP，覆盖 CRLF P6 头、max-value、截断与不支持格式的 fail-closed 行为。
+- Classification 新增 `--image`、`--preprocessed-output`、stretch 与 shorter-side-center-crop、NCHW/NHWC、RGB/BGR、
+  scale/mean/std 和稳定的 preprocessing contract SHA256。raw `--input` 仍仅表示一元素一字节的归一化 tensor，
+  `--input-data` 表示调用方已经预处理的 float32/text tensor。
+- 输入 fingerprint 现在基于实际送入 TensorRT 的 float32 值，而非 external raw/text 源文件 bytes；外部预处理的
+  reference comparison 必须显式提供合法小写 `--preprocess-contract-sha256`。
+- 新增 raw/softmax 输出、稳定的 score-first/index-second Top-K、`classification-output.v1` 报告、
+  `classification-reference.schema.json` 与 `classification-output.schema.json`。reference 验证严格检查
+  name/shape/value count/value kind 与 model/input/preprocess/output/labels/task semantics 六个 SHA256 fingerprint，
+  并覆盖 absolute/relative tolerance、NaN reject/equal、Infinity exact/reject 和 UTF-8 BOM。
+- metadata mismatch 返回 `Completed=false`；value mismatch 返回 `Completed=true, Passed=false` 且进程以 1 退出。
+  所有 report boundary flags 继续是 false。
+- cross-task matrix 为 Classification 行新增 `implemented-managed-contract-owner-assets-required`，列出四个运行时
+  合同文件，同时仍保持 `7 rows / 0 ready / 7 owner-action-required`；strict validator 从 `93/93` 增至 `94/94`。
+
+### 验证
+
+- Classification/YoloVision/CrossTask/output-schema 定向 ProjectQuality 集合：`63/63` 通过。
+- `Export-CrossTaskReferenceProvenanceMatrix.ps1` 后 strict validator：`94/94`；matrix 保持 0 ready、7 owner action required。
+- 完整 `TensorRtSharp.sln` Debug build：`0 warning / 0 error`。
+- 完整 `JYPPX.ProjectQuality.Tests` 两次均在 604 秒内没有完成最终汇总；已精确终止两棵遗留 testhost 进程树，
+  因此不将其表述为全量通过。
+
+### Proof Boundary
+
+- 本批的 BMP/PPM decoder、preprocessing tensor、output JSON、reference schema、hash 或 managed tests 都不是
+  real-model-runtime、independent-framework golden、Owner accepted golden、package-consumer、public package、
+  post-publish、Linux runner 或 release-close proof。
+- Owner 仍需提供可审查 model/labels/image/license/hash、独立 provider reference、reference source classification
+  及 golden/redistribution decision；在此之前所有 promotion/publication flags 保持 false。
+- 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。

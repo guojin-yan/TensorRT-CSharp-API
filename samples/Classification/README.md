@@ -2,7 +2,7 @@
 
 This sample runs a user-provided single-input float ONNX classifier through TensorRT and prints Top-K scores.
 
-The repository does not bundle model, label, or image assets because those files have separate licensing and size constraints. The sample uses a synthetic input tensor by default, so it validates the deployment pipeline. Replace the input generation with your own preprocessing when you wire it into an application.
+The repository does not bundle model, label, or image assets because those files have separate licensing and size constraints. The sample uses a synthetic input tensor by default, so it validates the deployment pipeline only.
 
 ```powershell
 dotnet run --project .\samples\Classification -- `
@@ -12,6 +12,29 @@ dotnet run --project .\samples\Classification -- `
   --tensor-rt-line 10 `
   --top-k 5
 ```
+
+For a real BMP or PPM image, use the built-in resize/crop and normalization path:
+
+```powershell
+dotnet run --project .\samples\Classification -- `
+  --model .\models\classifier.onnx `
+  --labels .\models\labels.txt `
+  --image .\models\input.ppm `
+  --preprocessed-output .\artifacts\classification\input-f32.bin `
+  --input-shape 1x3x224x224 `
+  --image-resize shorter-side-center-crop `
+  --resize-shorter-side 256 `
+  --tensor-layout NCHW `
+  --color-order RGB `
+  --scale 0.0039215689 `
+  --mean 0.485,0.456,0.406 `
+  --std 0.229,0.224,0.225 `
+  --score-transform softmax `
+  --top-k 5 `
+  --output-json .\artifacts\classification\output.json
+```
+
+`--image` accepts uncompressed 24/32-bit BMP and P3/P6 PPM/PNM files. `--input <path>` is different: it reads exactly one raw byte per tensor element and normalizes each byte to `[0,1]`. `--input-data <path>` reads an already-preprocessed float32 binary or text tensor. Externally preprocessed JPG/PNG inputs must therefore be decoded by the caller and passed with `--input-data`.
 
 For dynamic classifiers, provide profile bounds:
 
@@ -84,9 +107,30 @@ profile unless model/input/preprocess/output/labels/task-semantics fingerprints 
 provenance and redistribution. Synthetic input, raw output hashes, same-runtime references, and local package feeds do not satisfy
 that gate.
 
+## Output And Reference JSON
+
+Use `--output-json <path>` to write a `classification-output.v1` report containing the input/preprocessing fingerprints, raw and transformed output values, stable Top-K predictions, runtime summary, optional reference comparison, and explicit non-proof boundary. Its schema is `samples/Classification/classification-output.schema.json`.
+
+Use `--reference-output <path>` with `--reference-abs`, `--reference-rel`, `--reference-nan-policy reject|equal`, and `--reference-infinity-policy exact|reject` to compare the selected raw-logit or softmax output. The reference format is described by `samples/Classification/classification-reference.schema.json` and requires all six lowercase SHA256 fingerprints:
+
+- `modelSha256`
+- `inputTensorSha256`
+- `preprocessContractSha256`
+- `outputTensorContractSha256`
+- `labelsSha256`
+- `taskSemanticsSha256`
+
+For `--image`, the preprocessing contract hash is generated from resize/crop, layout, color order, scale, mean/std, and interpolation settings. For `--input` or `--input-data`, a reference comparison also requires the caller to supply the exact `--preprocess-contract-sha256`; the runner does not infer preprocessing semantics from tensor bytes.
+
+Metadata mismatches stop comparison with `Completed=false`. Value mismatches complete comparison with `Completed=true, Passed=false`, and the process returns exit code 1. A passing comparison remains a task-specific candidate: `boundary.ownerReviewedGolden`, `isPackageConsumerRuntimeProof`, `isPublicPackageProof`, `isPostPublishProof`, `canPublishPublicly`, and `canCloseReleaseIssue` all remain `false` until their separate Owner and public-package evidence exists.
+
 ## Evidence Lines
 
 - `Classification TensorRtLine=...`
 - `Input=... Output=...`
+- `ImagePreprocess Source=... TensorSha256=...`
+- `ScoreTransform=... ValueKind=... OutputSha256=...`
 - `TopK Index=... Label=... Score=...`
+- `ClassificationReference Requested=True Completed=... Passed=...`
+- `OutputJson=...`
 - `Classification Passed=True`

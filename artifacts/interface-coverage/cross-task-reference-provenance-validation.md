@@ -1,8 +1,8 @@
 # Cross-Task Reference Provenance Validation
 
 - strict: `True`
-- checks: `93`
-- passed: `93`
+- checks: `94`
+- passed: `94`
 - failed: `0`
 
 | Check | Passed | Actual |
@@ -27,7 +27,7 @@
 | `source-roles` | `True` | classification-manifest,yolovision-task-contract,yolovision-owner-input-template,independent-reference-candidate |
 | `source-classification-manifest-hash` | `True` | samples/assets/classification-assets.template.json/880f939d4f64c0fadd95b849dca2a05e5eaf73ff702208a3272c79cdbc692cae |
 | `source-yolovision-task-contract-hash` | `True` | samples/YoloVision/yolovision-task-output-contract.json/b3f3b32a46f003269ba1b55c5ded9cac25e491a81baf662dfd6a126b49104df6 |
-| `source-yolovision-owner-input-template-hash` | `True` | artifacts/user-acceptance/yolovision-real-asset-owner-proof-input.template.json/b2b48e7143c146f6b7f7ac2d4cbb8d39d8fea1c0f234a3ba450d86cc71108a42 |
+| `source-yolovision-owner-input-template-hash` | `True` | artifacts/user-acceptance/yolovision-real-asset-owner-proof-input.template.json/43ffda8ddc805fcf71d6c9d232b3702afba458d256e20334afdba1b62d8977f7 |
 | `source-independent-reference-candidate-hash` | `True` | artifacts/interface-coverage/tensorrtexec-mnist-onnxruntime-reference-evidence.json/3de54437688df1e2d04995f4bbe86a2d3b69dfd834a6b5022a4cf4a40f9e3d5d |
 | `classification-field-counts` | `True` | 6/26/20 |
 | `classification-common-fields` | `True` | count=15/duplicates=0 |
@@ -91,6 +91,7 @@
 | `yolo-sem-proof-classification` | `True` | template-only/owner-action-required |
 | `yolo-sem-boundary` | `True` | Semantic segmentation references require class-axis/argmax, map layout, palette, void-class, resize, and inverse-transform semantics. |
 | `yolo-sem-yolo-contract-link` | `True` | inputShape,semanticOutput,classCount,mapWidth,mapHeight,argmaxRule |
+| `classification-runtime-contract` | `True` | implemented-managed-contract-owner-assets-required/artifacts=4/exists=True/runtimeProof=False/reference=not-captured-for-classification/ownerGolden=False |
 | `candidate-count` | `True` | 1 |
 | `candidate-identity` | `True` | mnist-onnxruntime-cpu-1.23.2/mnist-classification/independent-framework-reference-candidate-runtime |
 | `candidate-provider` | `True` | ONNX Runtime/1.23.2/CPUExecutionProvider/True/True |

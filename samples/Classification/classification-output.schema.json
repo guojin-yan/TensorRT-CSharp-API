@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jyppx.github.io/TensorRtSharp/schemas/classification-output.schema.json",
+  "title": "Classification output schema",
+  "description": "Machine-readable Classification preprocessing and runtime output report. This is diagnostic/adoption evidence, not Owner-accepted golden, package-consumer, public-package, post-publish, or release proof.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "task", "success", "inferenceRan", "outputCaptured", "outputValidated", "proofClassification", "model", "labels", "input", "output", "runtime", "referenceValidation", "boundary"],
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "classification-output.v1" },
+    "task": { "type": "string", "const": "classification" },
+    "success": { "type": "boolean" },
+    "inferenceRan": { "type": "boolean", "const": true },
+    "outputCaptured": { "type": "boolean", "const": true },
+    "outputValidated": { "type": "boolean" },
+    "proofClassification": { "type": "string", "minLength": 1 },
+    "model": { "type": "object", "additionalProperties": false, "required": ["path", "sha256"], "properties": { "path": { "type": "string" }, "sha256": { "type": "string", "pattern": "^$|^[a-f0-9]{64}$" } } },
+    "labels": { "type": "object", "additionalProperties": false, "required": ["path", "sha256", "count"], "properties": { "path": { "type": "string" }, "sha256": { "type": "string", "pattern": "^$|^[a-f0-9]{64}$" }, "count": { "type": "integer", "minimum": 0 } } },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceKind", "tensorName", "shape", "tensorSha256", "preprocessContractSha256"],
+      "properties": {
+        "sourceKind": { "type": "string", "enum": ["preprocessed-image-tensor", "external-tensor", "synthetic-pattern"] },
+        "tensorName": { "type": "string", "minLength": 1 },
+        "shape": { "type": "array", "minItems": 1, "items": { "type": "integer", "minimum": 1 } },
+        "tensorSha256": { "type": "string", "pattern": "^$|^[a-f0-9]{64}$" },
+        "preprocessContractSha256": { "type": "string", "pattern": "^$|^[a-f0-9]{64}$" },
+        "image": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "required": ["sourcePath", "sourceSha256", "sourceWidth", "sourceHeight", "tensorPath", "targetWidth", "targetHeight", "resizeMode", "resizeShorterSide", "resizedWidth", "resizedHeight", "cropX", "cropY", "tensorLayout", "colorOrder", "scale", "mean", "standardDeviation"],
+          "properties": {
+            "sourcePath": { "type": "string" }, "sourceSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }, "sourceWidth": { "type": "integer", "minimum": 1 }, "sourceHeight": { "type": "integer", "minimum": 1 }, "tensorPath": { "type": "string" }, "targetWidth": { "type": "integer", "minimum": 1 }, "targetHeight": { "type": "integer", "minimum": 1 }, "resizeMode": { "type": "string", "enum": ["stretch", "shorter-side-center-crop"] }, "resizeShorterSide": { "type": "integer", "minimum": 1 }, "resizedWidth": { "type": "integer", "minimum": 1 }, "resizedHeight": { "type": "integer", "minimum": 1 }, "cropX": { "type": "integer", "minimum": 0 }, "cropY": { "type": "integer", "minimum": 0 }, "tensorLayout": { "type": "string", "enum": ["NCHW", "NHWC"] }, "colorOrder": { "type": "string", "enum": ["RGB", "BGR"] }, "scale": { "type": "number" }, "mean": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "type": "number" } }, "standardDeviation": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "type": "number" } }
+          }
+        }
+      }
+    },
+    "output": {
+      "type": "object", "additionalProperties": false,
+      "required": ["tensorName", "shape", "elementCount", "valueKind", "rawValues", "rawSha256", "values", "valueSha256", "outputTensorContractSha256", "taskSemanticsSha256", "topK"],
+      "properties": {
+        "tensorName": { "type": "string", "minLength": 1 }, "shape": { "type": "array", "minItems": 1, "items": { "type": "integer", "minimum": 1 } }, "elementCount": { "type": "integer", "minimum": 1 }, "valueKind": { "type": "string", "enum": ["logits", "probabilities"] }, "rawValues": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/floatValue" } }, "rawSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }, "values": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/floatValue" } }, "valueSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }, "outputTensorContractSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }, "taskSemanticsSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }, "topK": { "type": "array", "items": { "$ref": "#/$defs/prediction" } }
+      }
+    },
+    "runtime": { "type": "object", "additionalProperties": false, "required": ["tensorRtLine", "profileIndex", "engineDeviceMemoryBytes", "elapsedMilliseconds", "executionSummary"], "properties": { "tensorRtLine": { "type": "integer" }, "profileIndex": { "type": "integer", "minimum": 0 }, "engineDeviceMemoryBytes": { "type": "integer", "minimum": 0 }, "elapsedMilliseconds": { "type": "number", "minimum": 0 }, "executionSummary": { "type": "string" } } },
+    "referenceValidation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requested", "completed", "passed", "referencePath", "referenceSha256", "sourceClassification", "comparedElementCount", "mismatchCount", "firstMismatchIndex", "maximumAbsoluteError", "maximumRelativeError", "absoluteTolerance", "relativeTolerance", "nanPolicy", "infinityPolicy", "diagnostic"],
+      "properties": {
+        "requested": { "type": "boolean" },
+        "completed": { "type": "boolean" },
+        "passed": { "type": "boolean" },
+        "referencePath": { "type": "string" },
+        "referenceSha256": { "type": "string", "pattern": "^$|^[a-f0-9]{64}$" },
+        "sourceClassification": { "type": "string" },
+        "comparedElementCount": { "type": "integer", "minimum": 0 },
+        "mismatchCount": { "type": "integer", "minimum": 0 },
+        "firstMismatchIndex": { "type": "integer", "minimum": -1 },
+        "maximumAbsoluteError": { "$ref": "#/$defs/floatValue" },
+        "maximumRelativeError": { "$ref": "#/$defs/floatValue" },
+        "absoluteTolerance": { "type": "number", "minimum": 0 },
+        "relativeTolerance": { "type": "number", "minimum": 0 },
+        "nanPolicy": { "type": "string", "enum": ["reject", "equal"] },
+        "infinityPolicy": { "type": "string", "enum": ["exact", "reject"] },
+        "diagnostic": { "type": "string" }
+      }
+    },
+    "boundary": { "type": "object", "additionalProperties": false, "required": ["isIndependentFrameworkGolden", "ownerReviewedGolden", "repositoryRedistributionApproved", "isPackageConsumerRuntimeProof", "isPublicPackageProof", "isPostPublishProof", "canPublishPublicly", "canCloseReleaseIssue", "statement"], "properties": { "isIndependentFrameworkGolden": { "type": "boolean", "const": false }, "ownerReviewedGolden": { "type": "boolean", "const": false }, "repositoryRedistributionApproved": { "type": "boolean", "const": false }, "isPackageConsumerRuntimeProof": { "type": "boolean", "const": false }, "isPublicPackageProof": { "type": "boolean", "const": false }, "isPostPublishProof": { "type": "boolean", "const": false }, "canPublishPublicly": { "type": "boolean", "const": false }, "canCloseReleaseIssue": { "type": "boolean", "const": false }, "statement": { "type": "string", "minLength": 1 } } }
+  },
+  "$defs": {
+    "floatValue": { "oneOf": [{ "type": "number" }, { "type": "string", "enum": ["NaN", "Infinity", "-Infinity"] }] },
+    "prediction": { "type": "object", "additionalProperties": false, "required": ["index", "label", "score"], "properties": { "index": { "type": "integer", "minimum": 0 }, "label": { "type": "string" }, "score": { "$ref": "#/$defs/floatValue" } } }
+  }
+}

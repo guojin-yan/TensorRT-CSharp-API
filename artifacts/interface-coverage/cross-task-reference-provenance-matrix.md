@@ -5,15 +5,15 @@
 - ready rows: `0`
 - owner action required rows: `7`
 
-| Row | Sample | Task | Ready / Required | Missing | Independent reference | Owner golden |
-| --- | --- | --- | ---: | ---: | --- | --- |
-| `classification` | Classification | `classification` | 6 / 26 | 20 | `not-captured-for-classification` | `False` |
-| `yolo-det` | YoloVision | `det` | 5 / 25 | 20 | `not-captured-for-det` | `False` |
-| `yolo-cls` | YoloVision | `cls` | 5 / 22 | 17 | `not-captured-for-cls` | `False` |
-| `yolo-seg` | YoloVision | `seg` | 10 / 24 | 14 | `not-captured-for-seg` | `False` |
-| `yolo-obb` | YoloVision | `obb` | 4 / 22 | 18 | `not-captured-for-obb` | `False` |
-| `yolo-pose` | YoloVision | `pose` | 5 / 23 | 18 | `not-captured-for-pose` | `False` |
-| `yolo-sem` | YoloVision | `sem` | 5 / 23 | 18 | `not-captured-for-sem` | `False` |
+| Row | Sample | Task | Runtime contract | Ready / Required | Missing | Independent reference | Owner golden |
+| --- | --- | --- | --- | ---: | ---: | --- | --- |
+| `classification` | Classification | `classification` | `implemented-managed-contract-owner-assets-required` | 6 / 26 | 20 | `not-captured-for-classification` | `False` |
+| `yolo-det` | YoloVision | `det` | `not-audited-in-this-batch` | 5 / 25 | 20 | `not-captured-for-det` | `False` |
+| `yolo-cls` | YoloVision | `cls` | `not-audited-in-this-batch` | 5 / 22 | 17 | `not-captured-for-cls` | `False` |
+| `yolo-seg` | YoloVision | `seg` | `not-audited-in-this-batch` | 10 / 24 | 14 | `not-captured-for-seg` | `False` |
+| `yolo-obb` | YoloVision | `obb` | `not-audited-in-this-batch` | 4 / 22 | 18 | `not-captured-for-obb` | `False` |
+| `yolo-pose` | YoloVision | `pose` | `not-audited-in-this-batch` | 5 / 23 | 18 | `not-captured-for-pose` | `False` |
+| `yolo-sem` | YoloVision | `sem` | `not-audited-in-this-batch` | 5 / 23 | 18 | `not-captured-for-sem` | `False` |
 
 ## Independent Candidates
 

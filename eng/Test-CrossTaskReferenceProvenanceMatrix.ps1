@@ -106,6 +106,11 @@ foreach ($row in $rows) {
   }
 }
 
+$classificationRow = @($rows | Where-Object id -eq "classification")[0]
+$runtimeContractArtifacts = @($classificationRow.runtimeContractArtifacts)
+$runtimeContractArtifactsExist = @($runtimeContractArtifacts | Where-Object { -not (Test-Path -LiteralPath (Resolve-RepositoryPath ([string]$_)) -PathType Leaf) }).Count -eq 0
+Add-Check "classification-runtime-contract" ($classificationRow.runtimeContractState -eq "implemented-managed-contract-owner-assets-required" -and $runtimeContractArtifacts.Count -eq 4 -and $runtimeContractArtifactsExist -and -not [bool]$classificationRow.runtimeContractIsRuntimeProof -and $classificationRow.independentReferenceState -eq "not-captured-for-classification" -and -not [bool]$classificationRow.ownerReviewedGolden) "$($classificationRow.runtimeContractState)/artifacts=$($runtimeContractArtifacts.Count)/exists=$runtimeContractArtifactsExist/runtimeProof=$($classificationRow.runtimeContractIsRuntimeProof)/reference=$($classificationRow.independentReferenceState)/ownerGolden=$($classificationRow.ownerReviewedGolden)"
+
 $candidates = @($matrix.independentReferenceCandidates)
 Add-Check "candidate-count" ($candidates.Count -eq 1) "$($candidates.Count)"
 if ($candidates.Count -eq 1) {

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jyppx.github.io/TensorRtSharp/schemas/classification-reference.schema.json",
+  "title": "Classification reference output schema",
+  "description": "Task-specific Classification reference values and provenance. A valid document is comparison input only and is not an Owner-accepted golden or runtime proof.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "tensorName", "shape", "values", "valueKind", "modelSha256", "inputTensorSha256", "preprocessContractSha256", "outputTensorContractSha256", "labelsSha256", "taskSemanticsSha256", "sourceClassification"],
+  "properties": {
+    "schemaVersion": { "type": "integer", "const": 1 },
+    "tensorName": { "type": "string", "minLength": 1 },
+    "shape": { "type": "array", "minItems": 1, "items": { "type": "integer", "minimum": 1 } },
+    "values": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/floatValue" } },
+    "valueKind": { "type": "string", "enum": ["logits", "probabilities"] },
+    "modelSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "inputTensorSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "preprocessContractSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "outputTensorContractSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "labelsSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "taskSemanticsSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceClassification": { "type": "string", "minLength": 1 }
+  },
+  "$defs": {
+    "floatValue": {
+      "oneOf": [
+        { "type": "number" },
+        { "type": "string", "enum": ["NaN", "Infinity", "-Infinity"] }
+      ]
+    }
+  }
+}

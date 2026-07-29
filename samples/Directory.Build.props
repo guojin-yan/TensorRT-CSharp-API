@@ -8,5 +8,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)JYPPX.SampleSupport\TensorRtOnnxSample.cs"
              Link="JYPPX.SampleSupport\TensorRtOnnxSample.cs"
              Condition="'$(JYPPXIncludeTensorRtOnnxSampleSupport)' == 'true'" />
+    <Compile Include="$(MSBuildThisFileDirectory)JYPPX.SampleSupport\SampleRgbImage.cs"
+             Link="JYPPX.SampleSupport\SampleRgbImage.cs"
+             Condition="'$(JYPPXIncludeTensorRtOnnxSampleSupport)' == 'true'" />
   </ItemGroup>
 </Project>

@@ -1,7 +1,7 @@
 using System;
-using System.Globalization;
 using System.IO;
 using System.Security.Cryptography;
+using JYPPX.SampleSupport;
 
 namespace YoloVisionSample;
 
@@ -149,7 +149,7 @@ public static class YoloImagePreprocessor
             throw new ArgumentException("YoloVision image preprocessing currently supports 3-channel tensors only.");
         }
 
-        RgbImage image = DecodeRgbImage(fullImagePath);
+        SampleRgbImage image = SampleRgbImageDecoder.Decode(fullImagePath);
         bool letterbox = options.PreserveAspectRatio && !string.Equals(options.ResizeMode, "stretch", StringComparison.OrdinalIgnoreCase);
         ResizePlan plan = CreateResizePlan(image.Width, image.Height, targetWidth, targetHeight, letterbox, letterboxAlignment);
         byte[] targetPixels = ResizeToTarget(image, plan, DefaultLetterboxFill);
@@ -189,136 +189,6 @@ public static class YoloImagePreprocessor
             DefaultLetterboxFill);
     }
 
-    private static RgbImage DecodeRgbImage(string path)
-    {
-        string extension = Path.GetExtension(path);
-        if (string.Equals(extension, ".ppm", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(extension, ".pnm", StringComparison.OrdinalIgnoreCase))
-        {
-            return DecodePpm(path);
-        }
-
-        if (string.Equals(extension, ".bmp", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(extension, ".dib", StringComparison.OrdinalIgnoreCase))
-        {
-            return DecodeBmp(path);
-        }
-
-        throw new NotSupportedException("YoloVision --image currently decodes uncompressed .bmp and .ppm/.pnm files. Use --input-data for externally preprocessed JPG/PNG assets.");
-    }
-
-    private static RgbImage DecodeBmp(string path)
-    {
-        byte[] bytes = File.ReadAllBytes(path);
-        if (bytes.Length < 54 || bytes[0] != (byte)'B' || bytes[1] != (byte)'M')
-        {
-            throw new ArgumentException("BMP image is not a valid Windows bitmap file.");
-        }
-
-        int pixelOffset = ReadInt32LittleEndian(bytes, 10);
-        int dibSize = ReadInt32LittleEndian(bytes, 14);
-        if (dibSize < 40 || bytes.Length < 14 + dibSize)
-        {
-            throw new ArgumentException("BMP image uses an unsupported DIB header.");
-        }
-
-        int width = ReadInt32LittleEndian(bytes, 18);
-        int signedHeight = ReadInt32LittleEndian(bytes, 22);
-        short planes = ReadInt16LittleEndian(bytes, 26);
-        short bitsPerPixel = ReadInt16LittleEndian(bytes, 28);
-        int compression = ReadInt32LittleEndian(bytes, 30);
-        if (width <= 0 || signedHeight == 0 || planes != 1 || compression != 0 || (bitsPerPixel != 24 && bitsPerPixel != 32))
-        {
-            throw new ArgumentException("BMP decoder supports only uncompressed 24-bit or 32-bit RGB bitmaps.");
-        }
-
-        int height = Math.Abs(signedHeight);
-        bool topDown = signedHeight < 0;
-        int rowStride = ((width * bitsPerPixel + 31) / 32) * 4;
-        if (pixelOffset < 0 || pixelOffset + rowStride * height > bytes.Length)
-        {
-            throw new ArgumentException("BMP pixel data is truncated.");
-        }
-
-        byte[] rgb = new byte[width * height * 3];
-        int bytesPerPixel = bitsPerPixel / 8;
-        for (int y = 0; y < height; y++)
-        {
-            int sourceY = topDown ? y : height - 1 - y;
-            int sourceRow = pixelOffset + sourceY * rowStride;
-            for (int x = 0; x < width; x++)
-            {
-                int sourceIndex = sourceRow + x * bytesPerPixel;
-                int targetIndex = (y * width + x) * 3;
-                rgb[targetIndex] = bytes[sourceIndex + 2];
-                rgb[targetIndex + 1] = bytes[sourceIndex + 1];
-                rgb[targetIndex + 2] = bytes[sourceIndex];
-            }
-        }
-
-        return new RgbImage(width, height, rgb);
-    }
-
-    private static RgbImage DecodePpm(string path)
-    {
-        byte[] bytes = File.ReadAllBytes(path);
-        PpmReader reader = new PpmReader(bytes);
-        string magic = reader.ReadToken();
-        bool binary = string.Equals(magic, "P6", StringComparison.Ordinal);
-        bool ascii = string.Equals(magic, "P3", StringComparison.Ordinal);
-        if (!binary && !ascii)
-        {
-            throw new ArgumentException("PPM decoder supports P6 binary and P3 ASCII images only.");
-        }
-
-        int width = reader.ReadPositiveInt("PPM width");
-        int height = reader.ReadPositiveInt("PPM height");
-        int maxValue = reader.ReadPositiveInt("PPM max value");
-        if (maxValue <= 0 || maxValue > 255)
-        {
-            throw new ArgumentException("PPM decoder supports max value in the range 1..255.");
-        }
-
-        byte[] rgb = new byte[width * height * 3];
-        if (binary)
-        {
-            reader.SkipSingleWhitespace();
-            if (reader.Position + rgb.Length > bytes.Length)
-            {
-                throw new ArgumentException("PPM pixel data is truncated.");
-            }
-
-            Array.Copy(bytes, reader.Position, rgb, 0, rgb.Length);
-            if (maxValue != 255)
-            {
-                ScalePpmValues(rgb, maxValue);
-            }
-        }
-        else
-        {
-            for (int index = 0; index < rgb.Length; index++)
-            {
-                int value = reader.ReadNonNegativeInt("PPM channel");
-                if (value > maxValue)
-                {
-                    throw new ArgumentException("PPM channel value exceeds max value.");
-                }
-
-                rgb[index] = (byte)MathF.Round(value * 255.0f / maxValue);
-            }
-        }
-
-        return new RgbImage(width, height, rgb);
-    }
-
-    private static void ScalePpmValues(byte[] rgb, int maxValue)
-    {
-        for (int index = 0; index < rgb.Length; index++)
-        {
-            rgb[index] = (byte)MathF.Round(rgb[index] * 255.0f / maxValue);
-        }
-    }
-
     private static ResizePlan CreateResizePlan(int sourceWidth, int sourceHeight, int targetWidth, int targetHeight, bool letterbox, string letterboxAlignment)
     {
         if (!letterbox)
@@ -335,7 +205,7 @@ public static class YoloImagePreprocessor
         return new ResizePlan(targetWidth, targetHeight, resizedWidth, resizedHeight, padX, padY, scale, scale);
     }
 
-    private static byte[] ResizeToTarget(RgbImage image, ResizePlan plan, byte fillValue)
+    private static byte[] ResizeToTarget(SampleRgbImage image, ResizePlan plan, byte fillValue)
     {
         int targetWidth = plan.TargetWidth;
         int targetHeight = plan.TargetHeight;
@@ -488,32 +358,6 @@ public static class YoloImagePreprocessor
         return Convert.ToHexString(SHA256.HashData(stream)).ToLowerInvariant();
     }
 
-    private static int ReadInt32LittleEndian(byte[] bytes, int offset)
-    {
-        return bytes[offset] | (bytes[offset + 1] << 8) | (bytes[offset + 2] << 16) | (bytes[offset + 3] << 24);
-    }
-
-    private static short ReadInt16LittleEndian(byte[] bytes, int offset)
-    {
-        return (short)(bytes[offset] | (bytes[offset + 1] << 8));
-    }
-
-    private readonly struct RgbImage
-    {
-        public RgbImage(int width, int height, byte[] pixels)
-        {
-            Width = width;
-            Height = height;
-            Pixels = pixels;
-        }
-
-        public int Width { get; }
-
-        public int Height { get; }
-
-        public byte[] Pixels { get; }
-    }
-
     private readonly struct ResizePlan
     {
         public ResizePlan(int targetWidth, int targetHeight, int resizedWidth, int resizedHeight, int padX, int padY, float resizeScaleX, float resizeScaleY)
@@ -545,87 +389,4 @@ public static class YoloImagePreprocessor
         public float ResizeScaleY { get; }
     }
 
-    private sealed class PpmReader
-    {
-        private readonly byte[] _bytes;
-
-        public PpmReader(byte[] bytes)
-        {
-            _bytes = bytes;
-        }
-
-        public int Position { get; private set; }
-
-        public string ReadToken()
-        {
-            SkipWhitespaceAndComments();
-            int start = Position;
-            while (Position < _bytes.Length && !char.IsWhiteSpace((char)_bytes[Position]))
-            {
-                Position++;
-            }
-
-            if (Position == start)
-            {
-                throw new ArgumentException("Unexpected end of PPM header.");
-            }
-
-            return System.Text.Encoding.ASCII.GetString(_bytes, start, Position - start);
-        }
-
-        public int ReadPositiveInt(string name)
-        {
-            int value = ReadNonNegativeInt(name);
-            if (value <= 0)
-            {
-                throw new ArgumentException($"{name} must be positive.");
-            }
-
-            return value;
-        }
-
-        public int ReadNonNegativeInt(string name)
-        {
-            string token = ReadToken();
-            if (!int.TryParse(token, NumberStyles.Integer, CultureInfo.InvariantCulture, out int value) || value < 0)
-            {
-                throw new ArgumentException($"{name} must be a non-negative integer.");
-            }
-
-            return value;
-        }
-
-        public void SkipSingleWhitespace()
-        {
-            if (Position < _bytes.Length && char.IsWhiteSpace((char)_bytes[Position]))
-            {
-                Position++;
-            }
-        }
-
-        private void SkipWhitespaceAndComments()
-        {
-            while (Position < _bytes.Length)
-            {
-                byte current = _bytes[Position];
-                if (char.IsWhiteSpace((char)current))
-                {
-                    Position++;
-                    continue;
-                }
-
-                if (current == (byte)'#')
-                {
-                    while (Position < _bytes.Length && _bytes[Position] != (byte)'\n')
-                    {
-                        Position++;
-                    }
-
-                    continue;
-                }
-
-                break;
-            }
-        }
-    }
 }
