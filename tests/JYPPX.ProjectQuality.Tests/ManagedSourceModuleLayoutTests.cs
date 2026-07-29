@@ -99,6 +99,7 @@ public sealed class ManagedSourceModuleLayoutTests
                 "NativeBridgeApi.OptionalWeightsShared.cs",
                 "NativeBridgeApi.Padding.cs",
                 "NativeBridgeApi.Quantization.cs",
+                "NativeBridgeApi.Reduce.cs",
                 "NativeBridgeApi.Scale.cs",
                 "NativeBridgeApi.Shuffle.cs",
                 "NativeBridgeApi.ThirtyThirdBatchLayerAttributes.cs",
@@ -950,7 +951,7 @@ public sealed class ManagedSourceModuleLayoutTests
         }
 
         Assert.DoesNotContain("GetNetworkNameNative", rootSource, StringComparison.Ordinal);
-        Assert.Contains("public static SafeTensorRtObjectHandle AddReduceLayer(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static SafeTensorRtObjectHandle AddSoftMaxLayer(", rootSource, StringComparison.Ordinal);
         Assert.Contains("private static BridgeStatusCode GetTensorNameNative(", rootSource, StringComparison.Ordinal);
         Assert.Contains("private static BridgeStatusCode GetLayerNameNative(", rootSource, StringComparison.Ordinal);
     }
@@ -1020,7 +1021,7 @@ public sealed class ManagedSourceModuleLayoutTests
         Assert.DoesNotContain("PinOptionalWeights", rootSource, StringComparison.Ordinal);
         Assert.DoesNotContain("GetScaleWeightsDataType", rootSource, StringComparison.Ordinal);
         Assert.DoesNotContain("ValidateOptionalWeightsDataType", rootSource, StringComparison.Ordinal);
-        Assert.Contains("public static SafeTensorRtObjectHandle AddReduceLayer(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static SafeTensorRtObjectHandle AddSoftMaxLayer(", rootSource, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -1058,7 +1059,7 @@ public sealed class ManagedSourceModuleLayoutTests
             Assert.DoesNotContain(method, rootMethods);
         }
 
-        Assert.Contains("public static SafeTensorRtObjectHandle AddReduceLayer(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static SafeTensorRtObjectHandle AddSoftMaxLayer(", rootSource, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -1097,7 +1098,41 @@ public sealed class ManagedSourceModuleLayoutTests
             Assert.DoesNotContain(method, rootMethods);
         }
 
-        Assert.Contains("public static SafeTensorRtObjectHandle AddReduceLayer(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static SafeTensorRtObjectHandle AddSoftMaxLayer(", rootSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TensorRtRootReduceFeatureIsSplitIntoLayersModule()
+    {
+        string interopDirectory = Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.TensorRtSharp",
+            "Internal",
+            "Interop");
+        string rootSource = File.ReadAllText(Path.Combine(interopDirectory, "NativeBridgeApi.cs"));
+        string[] rootMethods = EnumeratePublicStaticMethodNames(rootSource);
+        string[] reduceMethods = ReadInteropMethodNames(
+            interopDirectory,
+            "Layers",
+            "NativeBridgeApi.Reduce.cs");
+
+        Assert.Equal(
+            new[]
+            {
+                "AddReduceLayer",
+                "GetReduceOperation",
+                "GetReduceAxes",
+                "GetReduceKeepDimensions"
+            },
+            reduceMethods);
+
+        foreach (string method in reduceMethods)
+        {
+            Assert.DoesNotContain(method, rootMethods);
+        }
+
+        Assert.Contains("public static SafeTensorRtObjectHandle AddSoftMaxLayer(", rootSource, StringComparison.Ordinal);
     }
 
     private static string[] EnumerateModuleFiles(string projectDirectory, string module)
