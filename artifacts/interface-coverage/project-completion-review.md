@@ -5177,3 +5177,39 @@ name/shape/value-count/NaN/Infinity 五类受控负例贯通 source-tree CLI 与
 - ORT、negative 与正向 package consumer 的 E 盘隔离 workspace 均已删除；本批未运行完整 ProjectQuality 全集。
 - C 盘 Downloads/用户 Temp 本批关键词与当日 `.onnx/.engine/.plan/.nupkg` 命中均为 0；dotnet build server 已关闭，
   最终相关 build/test/compiler 进程残留为 0。
+
+## 2026-07-29 Cross-Task Reference Provenance Contract
+
+本阶段把 Classification 与 YoloVision 的 independent-reference 准入字段收敛为一个机器可读合同，同时保持任务专属
+preprocess/postprocess/output semantics，不允许通过复用 MNIST reference 或通用 output hash 消除真实缺口。
+
+### 合同与矩阵
+
+- 新增 `samples/assets/cross-task-reference-provenance-contract.json`。公共层覆盖 asset identity、tensor contract、
+  execution identity、reference identity、comparison policy 与 Owner decision；复用要求 model/input/preprocess/output/
+  labels/task-semantics 六个 SHA256 fingerprint 全部存在且完全一致。
+- 任务层包含 7 个 profile：generic Classification，以及 YoloVision det/cls/seg/obb/pose/sem。Classification 固定
+  resize/crop/color/scale/mean/std、raw logits/probabilities、score transform、labels、Top-K/argmax；六类 YOLO 分别固定
+  box/NMS、class score、mask composition、angle、keypoint、semantic-map 语义。
+- exporter 交叉读取 Classification manifest、Yolo task contract、六任务 Owner input template 与 MNIST ORT compact
+  evidence。当前矩阵为 7 rows / 0 ready / 7 owner-action-required；每行保留 ready/required/missing 字段与确切缺口。
+- MNIST ORT candidate 明确 `eligibleTaskIds=[mnist]`，对 7 个矩阵 task 全部 ineligible；其 model/input/preprocess/
+  output/labels/task semantics 不匹配，且 Owner golden/redistribution 仍为 false。
+
+### 验证与文档
+
+- `Test-CrossTaskReferenceProvenanceMatrix.ps1 -Strict` 校验合同结构、四个源文件 hash、字段集合、任务隔离、candidate
+  provenance 与全部 promotion flags：`93/93`。
+- 新增 4 项 ProjectQuality 门禁并实际执行 exporter/validator；Classification/YoloVision 资产、schema、Owner template、
+  candidate validator 与 publishing article 扩展集合：`65/65`。
+- Classification、YoloVision、samples/assets README 与两篇中文资产文章已同步 reuse fingerprint 和任务语义边界。
+- 完整 `TensorRtSharp.sln` Debug build：`0 warning / 0 error`；本批未运行完整 ProjectQuality 全集。
+
+### Proof 边界
+
+- readiness matrix 是缺口审计，不生成 reference、不批准 license、不接受 Owner golden，也不证明 real-model runtime。
+- independent framework candidate 不是 Owner golden；local PackageReference 不是 public package；hash match 不能绕过任务
+  semantics 或 redistribution decision。
+- 所有 `canPromoteRealModelRuntime`、`canPromotePackageConsumerRuntime`、`canPublishPublicly`、`canCloseReleaseIssue`
+  继续保持 false。
+- C 盘 Downloads/用户 Temp 的本批关键词与当日重资产命中均为 0；dotnet build server 已关闭，最终相关进程为 0。

@@ -125,6 +125,17 @@ When a runtime run reaches `YoloVisionOutputReport`, the JSON now includes optio
 
 The machine-readable task/output contract is `samples/YoloVision/yolovision-task-output-contract.json`. It keeps task names, output roles, required metadata, TensorRtExec profile hints, article entrypoints, and promotion boundaries in one place so docs, owner asset packs, and validators do not drift. The contract is still planning evidence only: it is not `real-model-runtime` proof, not `package-consumer-runtime` proof, and not a replacement for owner-filled run logs and hashes.
 
+The cross-task provenance contract is `samples/assets/cross-task-reference-provenance-contract.json`. It keeps common
+model/input/labels/tensor/provider/reference/comparison/Owner fields separate from the semantics required by `det`, `cls`, `seg`,
+`obb`, `pose`, and `sem`. Detection needs box/score/objectness/NMS/coordinate rules; segmentation needs coefficient/prototype/mask
+composition and inverse transforms; OBB needs angle/layout/rotated NMS; pose needs keypoint/skeleton rules; semantic segmentation
+needs class-axis/argmax/palette/void-class rules. YoloVision `cls` is also distinct from the generic Classification sample.
+
+`eng/Export-CrossTaskReferenceProvenanceMatrix.ps1` projects the current templates into a seven-row readiness matrix, and
+`eng/Test-CrossTaskReferenceProvenanceMatrix.ps1 -Strict` checks source hashes, exact task fields, reuse fingerprints, and all
+promotion flags. The retained MNIST ONNX Runtime CPU candidate is eligible only for its MNIST task. It cannot be borrowed as a
+YoloVision golden output because its model, input, preprocessing, output tensors, labels, and task semantics do not match.
+
 For the shared classification and semantic-segmentation workflow, including E-drive asset isolation, output-layout decisions, Top-K versus pixel argmax, build/preflight/runtime commands, report validation, and proof boundaries, see `docs/articles/zh-cn/yolovision-classification-semantic-tutorial.md`.
 
 For instance segmentation, see `docs/articles/zh-cn/yolovision-segmentation-tutorial.md`. The managed multi-output path preserves detection source indices, composes embedded coefficients with `[P,H,W]` / `[1,P,H,W]` prototypes, applies a stable sigmoid, accepts `--mask-threshold`, reports active versus total prototype-grid pixels, and emits a bounded probability-mask SVG preview. The opt-in `--mask-spatial-transform` path additionally requires `--image` and `--mask-coordinate-space model-input|normalized`; it uses the exact preprocessing metadata for bilinear source-image resize-back and optional half-open detection-box crop. It never infers coordinates from an external tensor, and owner validation of exporter-specific mask alignment remains required.

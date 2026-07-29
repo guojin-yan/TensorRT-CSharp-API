@@ -1,0 +1,212 @@
+{
+  "schemaVersion": "cross-task-reference-provenance-contract.v1",
+  "recordKind": "cross-task-reference-provenance-contract",
+  "contractState": "owner-review-required",
+  "commonSections": [
+    {
+      "id": "assetIdentity",
+      "requiredFields": [
+        "modelSource",
+        "modelLicense",
+        "modelSha256",
+        "inputSource",
+        "inputLicense",
+        "inputSha256"
+      ]
+    },
+    {
+      "id": "tensorContract",
+      "requiredFields": [
+        "inputTensorNames",
+        "inputShapes",
+        "inputDataTypes",
+        "outputTensorNames",
+        "outputShapes",
+        "outputDataTypes"
+      ]
+    },
+    {
+      "id": "executionIdentity",
+      "requiredFields": [
+        "framework",
+        "frameworkVersion",
+        "provider",
+        "commandSha256",
+        "hostIdentity"
+      ]
+    },
+    {
+      "id": "referenceIdentity",
+      "requiredFields": [
+        "referencePath",
+        "referenceSha256",
+        "sourceClassification",
+        "deterministicOutput"
+      ]
+    },
+    {
+      "id": "comparisonPolicy",
+      "requiredFields": [
+        "absoluteTolerance",
+        "relativeTolerance",
+        "nanPolicy",
+        "infinityPolicy",
+        "tensorNameShapeCountMatch"
+      ]
+    },
+    {
+      "id": "ownerDecision",
+      "requiredFields": [
+        "reviewer",
+        "reviewedAtUtc",
+        "goldenAcceptanceDecision",
+        "redistributionDecision"
+      ]
+    }
+  ],
+  "taskProfiles": [
+    {
+      "id": "classification",
+      "sample": "Classification",
+      "task": "classification",
+      "requiredAssetRoles": ["model", "labels", "input-image", "preprocessed-input"],
+      "requiredSemanticFields": [
+        "imageResizePolicy",
+        "imageCropPolicy",
+        "colorOrder",
+        "scale",
+        "mean",
+        "std",
+        "outputValueKind",
+        "scoreTransform",
+        "labelMappingSha256",
+        "topK",
+        "argmaxRule"
+      ],
+      "boundary": "Generic Classification top-k output cannot reuse MNIST logits or YoloVision classification semantics unless every reuse fingerprint and Owner decision matches."
+    },
+    {
+      "id": "yolo-det",
+      "sample": "YoloVision",
+      "task": "det",
+      "requiredAssetRoles": ["model", "labels", "input-image", "preprocessed-input"],
+      "requiredSemanticFields": [
+        "imagePreprocessContract",
+        "outputLayout",
+        "boxFormat",
+        "scoreRule",
+        "hasObjectness",
+        "nmsMode",
+        "scoreThreshold",
+        "iouThreshold",
+        "coordinateSpace",
+        "sourceImageInversePolicy"
+      ],
+      "boundary": "Detection references require exporter-specific box, score, NMS, and coordinate-transform semantics."
+    },
+    {
+      "id": "yolo-cls",
+      "sample": "YoloVision",
+      "task": "cls",
+      "requiredAssetRoles": ["model", "labels", "input-image", "preprocessed-input"],
+      "requiredSemanticFields": [
+        "imagePreprocessContract",
+        "classCount",
+        "labelMappingSha256",
+        "classScoreField",
+        "softmaxApplied",
+        "topK",
+        "argmaxRule"
+      ],
+      "boundary": "YoloVision classification remains distinct from the generic Classification sample and requires its own exporter, labels, and score semantics."
+    },
+    {
+      "id": "yolo-seg",
+      "sample": "YoloVision",
+      "task": "seg",
+      "requiredAssetRoles": ["model", "labels", "input-image", "preprocessed-input"],
+      "requiredSemanticFields": [
+        "imagePreprocessContract",
+        "outputRoleMap",
+        "maskCoefficientCount",
+        "prototypeShape",
+        "maskResizePolicy",
+        "maskThreshold",
+        "maskValueKind",
+        "maskSpatialTransform",
+        "maskCropToDetection"
+      ],
+      "boundary": "Segmentation references require boxes, coefficients, prototypes, mask composition, crop, resize, and inverse-transform semantics."
+    },
+    {
+      "id": "yolo-obb",
+      "sample": "YoloVision",
+      "task": "obb",
+      "requiredAssetRoles": ["model", "labels", "input-image", "preprocessed-input"],
+      "requiredSemanticFields": [
+        "imagePreprocessContract",
+        "boxFormat",
+        "angleUnit",
+        "angleRange",
+        "rotatedBoxLayout",
+        "coordinateSpace",
+        "rotatedNmsMode"
+      ],
+      "boundary": "OBB references require angle units/range, rotated-box layout, coordinate mapping, and rotated NMS semantics."
+    },
+    {
+      "id": "yolo-pose",
+      "sample": "YoloVision",
+      "task": "pose",
+      "requiredAssetRoles": ["model", "labels", "input-image", "preprocessed-input"],
+      "requiredSemanticFields": [
+        "imagePreprocessContract",
+        "keypointCount",
+        "keypointStride",
+        "coordinateLayout",
+        "keypointLayout",
+        "keypointScoreField",
+        "skeletonMap",
+        "sourceImageInversePolicy"
+      ],
+      "boundary": "Pose references require keypoint count/stride/layout, score fields, skeleton identity, and inverse-coordinate semantics."
+    },
+    {
+      "id": "yolo-sem",
+      "sample": "YoloVision",
+      "task": "sem",
+      "requiredAssetRoles": ["model", "labels", "input-image", "preprocessed-input"],
+      "requiredSemanticFields": [
+        "imagePreprocessContract",
+        "semanticOutputRole",
+        "semanticMapShape",
+        "classMapLayout",
+        "argmaxRule",
+        "paletteSha256",
+        "voidClassPolicy",
+        "sourceImageInversePolicy"
+      ],
+      "boundary": "Semantic segmentation references require class-axis/argmax, map layout, palette, void-class, resize, and inverse-transform semantics."
+    }
+  ],
+  "reuseFingerprintFields": [
+    "modelSha256",
+    "inputTensorSha256",
+    "preprocessContractSha256",
+    "outputTensorContractSha256",
+    "labelsSha256",
+    "taskSemanticsSha256"
+  ],
+  "reuseRules": [
+    "Every reuse fingerprint must be a non-empty 64-character SHA256 and must match exactly.",
+    "The source reference must be deterministic and generated by the recorded independent framework/provider.",
+    "The Owner must separately accept golden provenance and repository redistribution for the target task.",
+    "A same-runtime reference, synthetic output, local feed, ProjectReference, direct nupkg, build-only report, or hash-only record cannot substitute an independent reference."
+  ],
+  "promotionBoundary": {
+    "independentFrameworkCandidateIsOwnerGolden": false,
+    "localPackageConsumerIsPublicPackageProof": false,
+    "canPublishPublicly": false,
+    "canCloseReleaseIssue": false
+  }
+}

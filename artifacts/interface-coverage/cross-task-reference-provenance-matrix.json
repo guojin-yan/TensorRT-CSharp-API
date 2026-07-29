@@ -1,0 +1,1262 @@
+{
+  "schemaVersion": "cross-task-reference-provenance-matrix.v1",
+  "generatedDate": "2026-07-29",
+  "state": "owner-action-required",
+  "contract": {
+    "path": "samples/assets/cross-task-reference-provenance-contract.json",
+    "sha256": "1c48e81bbb066dd1b79a48037e92fc9cb64c6dadd7b6b3a5a4456ca9be9ad925",
+    "schemaVersion": "cross-task-reference-provenance-contract.v1"
+  },
+  "sources": [
+    {
+      "role": "classification-manifest",
+      "path": "samples/assets/classification-assets.template.json",
+      "sha256": "880f939d4f64c0fadd95b849dca2a05e5eaf73ff702208a3272c79cdbc692cae"
+    },
+    {
+      "role": "yolovision-task-contract",
+      "path": "samples/YoloVision/yolovision-task-output-contract.json",
+      "sha256": "b3f3b32a46f003269ba1b55c5ded9cac25e491a81baf662dfd6a126b49104df6"
+    },
+    {
+      "role": "yolovision-owner-input-template",
+      "path": "artifacts/user-acceptance/yolovision-real-asset-owner-proof-input.template.json",
+      "sha256": "b2b48e7143c146f6b7f7ac2d4cbb8d39d8fea1c0f234a3ba450d86cc71108a42"
+    },
+    {
+      "role": "independent-reference-candidate",
+      "path": "artifacts/interface-coverage/tensorrtexec-mnist-onnxruntime-reference-evidence.json",
+      "sha256": "3de54437688df1e2d04995f4bbe86a2d3b69dfd834a6b5022a4cf4a40f9e3d5d"
+    }
+  ],
+  "rowCount": 7,
+  "readyRowCount": 0,
+  "ownerActionRequiredRowCount": 7,
+  "rows": [
+    {
+      "id": "classification",
+      "sample": "Classification",
+      "task": "classification",
+      "sourceState": "candidate-not-downloaded",
+      "proofClassification": "template-only",
+      "commonFieldChecks": [
+        {
+          "id": "modelSource",
+          "ready": true,
+          "source": "classification.model.sourceUrl",
+          "valueState": "recorded"
+        },
+        {
+          "id": "modelLicense",
+          "ready": false,
+          "source": "classification.model.license",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "modelSha256",
+          "ready": false,
+          "source": "classification.model.sha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "labelsSource",
+          "ready": false,
+          "source": "classification.labels.sourceUrl",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "labelsLicense",
+          "ready": false,
+          "source": "classification.labels.license",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "labelsSha256",
+          "ready": false,
+          "source": "classification.labels.sha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "inputSource",
+          "ready": false,
+          "source": "classification.input.sourceUrl",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "inputLicense",
+          "ready": false,
+          "source": "classification.input.license",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "inputSha256",
+          "ready": false,
+          "source": "classification.input.sha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "inputTensorName",
+          "ready": false,
+          "source": "classification.tensor.inputName",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "inputShape",
+          "ready": true,
+          "source": "classification.tensor.inputShape",
+          "valueState": "recorded"
+        },
+        {
+          "id": "outputTensorName",
+          "ready": false,
+          "source": "classification.tensor.outputName",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "outputShape",
+          "ready": true,
+          "source": "classification.tensor.outputShape",
+          "valueState": "recorded"
+        },
+        {
+          "id": "independentReference",
+          "ready": false,
+          "source": "classification.evidence.independentReference",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "ownerGoldenDecision",
+          "ready": false,
+          "source": "classification.ownerReview.goldenAcceptanceDecision",
+          "valueState": "owner-action-required"
+        }
+      ],
+      "taskSemanticChecks": [
+        {
+          "id": "imageResizePolicy",
+          "ready": false,
+          "source": "classification.taskSemantics.imageResizePolicy",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "imageCropPolicy",
+          "ready": false,
+          "source": "classification.taskSemantics.imageCropPolicy",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "colorOrder",
+          "ready": true,
+          "source": "classification.taskSemantics.colorOrder",
+          "valueState": "recorded"
+        },
+        {
+          "id": "scale",
+          "ready": true,
+          "source": "classification.taskSemantics.scale",
+          "valueState": "recorded"
+        },
+        {
+          "id": "mean",
+          "ready": false,
+          "source": "classification.taskSemantics.mean",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "std",
+          "ready": false,
+          "source": "classification.taskSemantics.std",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "outputValueKind",
+          "ready": false,
+          "source": "classification.taskSemantics.outputValueKind",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "scoreTransform",
+          "ready": false,
+          "source": "classification.taskSemantics.scoreTransform",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "labelMappingSha256",
+          "ready": false,
+          "source": "classification.taskSemantics.labelMappingSha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "topK",
+          "ready": true,
+          "source": "classification.taskSemantics.topK",
+          "valueState": "recorded"
+        },
+        {
+          "id": "argmaxRule",
+          "ready": false,
+          "source": "classification.taskSemantics.argmaxRule",
+          "valueState": "owner-action-required"
+        }
+      ],
+      "readyFieldCount": 6,
+      "requiredFieldCount": 26,
+      "missingFieldCount": 20,
+      "independentReferenceState": "not-captured-for-classification",
+      "referenceReuseEligible": false,
+      "ownerReviewedGolden": false,
+      "canPromoteRealModelRuntime": false,
+      "canPromotePackageConsumerRuntime": false,
+      "boundary": "Generic Classification top-k output cannot reuse MNIST logits or YoloVision classification semantics unless every reuse fingerprint and Owner decision matches."
+    },
+    {
+      "id": "yolo-det",
+      "sample": "YoloVision",
+      "task": "det",
+      "caseId": "yolov8n-det",
+      "sourceState": "owner-action-required",
+      "proofClassification": "template-only",
+      "contractRequiredMetadata": [
+        "inputShape",
+        "outputLayout",
+        "classCount",
+        "boxFormat",
+        "scoreRule",
+        "nmsMode"
+      ],
+      "commonFieldChecks": [
+        {
+          "id": "modelSource",
+          "ready": false,
+          "source": "yolov8n-det.model.sourceUrl",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "modelLicense",
+          "ready": false,
+          "source": "yolov8n-det.model.license",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "modelSha256",
+          "ready": false,
+          "source": "yolov8n-det.model.sha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "labelsPath",
+          "ready": true,
+          "source": "yolov8n-det.labels.path",
+          "valueState": "recorded"
+        },
+        {
+          "id": "labelsLicense",
+          "ready": false,
+          "source": "yolov8n-det.labels.license",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "labelsSha256",
+          "ready": false,
+          "source": "yolov8n-det.labels.sha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "inputImagePath",
+          "ready": true,
+          "source": "yolov8n-det.input.imagePath",
+          "valueState": "recorded"
+        },
+        {
+          "id": "inputImageLicense",
+          "ready": false,
+          "source": "yolov8n-det.input.imageLicense",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "inputImageSha256",
+          "ready": false,
+          "source": "yolov8n-det.input.imageSha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "preprocessedTensorPath",
+          "ready": true,
+          "source": "yolov8n-det.input.preprocessedTensorPath",
+          "valueState": "recorded"
+        },
+        {
+          "id": "preprocessedTensorSha256",
+          "ready": false,
+          "source": "yolov8n-det.input.preprocessedTensorSha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "inputShape",
+          "ready": true,
+          "source": "yolov8n-det.input.inputShape",
+          "valueState": "recorded"
+        },
+        {
+          "id": "outputJsonSha256",
+          "ready": false,
+          "source": "yolov8n-det.yoloVision.outputJsonSha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "runLogSha256",
+          "ready": false,
+          "source": "yolov8n-det.yoloVision.runLogSha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "ownerGoldenDecision",
+          "ready": false,
+          "source": "yolov8n-det.ownerReview.acceptanceDecision",
+          "valueState": "owner-action-required"
+        }
+      ],
+      "taskSemanticChecks": [
+        {
+          "id": "imagePreprocessContract",
+          "ready": false,
+          "source": "yolov8n-det.taskSemantics.imagePreprocessContract",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "outputLayout",
+          "ready": false,
+          "source": "yolov8n-det.taskSemantics.outputLayout",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "boxFormat",
+          "ready": false,
+          "source": "yolov8n-det.taskSemantics.boxFormat",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "scoreRule",
+          "ready": false,
+          "source": "yolov8n-det.taskSemantics.scoreRule",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "hasObjectness",
+          "ready": false,
+          "source": "yolov8n-det.taskSemantics.hasObjectness",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "nmsMode",
+          "ready": true,
+          "source": "yolov8n-det.taskSemantics.nmsMode",
+          "valueState": "recorded"
+        },
+        {
+          "id": "scoreThreshold",
+          "ready": false,
+          "source": "yolov8n-det.taskSemantics.scoreThreshold",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "iouThreshold",
+          "ready": false,
+          "source": "yolov8n-det.taskSemantics.iouThreshold",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "coordinateSpace",
+          "ready": false,
+          "source": "yolov8n-det.taskSemantics.coordinateSpace",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "sourceImageInversePolicy",
+          "ready": false,
+          "source": "yolov8n-det.taskSemantics.sourceImageInversePolicy",
+          "valueState": "owner-action-required"
+        }
+      ],
+      "readyFieldCount": 5,
+      "requiredFieldCount": 25,
+      "missingFieldCount": 20,
+      "independentReferenceState": "not-captured-for-det",
+      "referenceReuseEligible": false,
+      "ownerReviewedGolden": false,
+      "canPromoteRealModelRuntime": false,
+      "canPromotePackageConsumerRuntime": false,
+      "boundary": "Detection references require exporter-specific box, score, NMS, and coordinate-transform semantics."
+    },
+    {
+      "id": "yolo-cls",
+      "sample": "YoloVision",
+      "task": "cls",
+      "caseId": "yolov8n-cls",
+      "sourceState": "owner-action-required",
+      "proofClassification": "template-only",
+      "contractRequiredMetadata": [
+        "inputShape",
+        "classificationOutput",
+        "classCount",
+        "labelsPath",
+        "topK"
+      ],
+      "commonFieldChecks": [
+        {
+          "id": "modelSource",
+          "ready": false,
+          "source": "yolov8n-cls.model.sourceUrl",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "modelLicense",
+          "ready": false,
+          "source": "yolov8n-cls.model.license",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "modelSha256",
+          "ready": false,
+          "source": "yolov8n-cls.model.sha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "labelsPath",
+          "ready": true,
+          "source": "yolov8n-cls.labels.path",
+          "valueState": "recorded"
+        },
+        {
+          "id": "labelsLicense",
+          "ready": false,
+          "source": "yolov8n-cls.labels.license",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "labelsSha256",
+          "ready": false,
+          "source": "yolov8n-cls.labels.sha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "inputImagePath",
+          "ready": true,
+          "source": "yolov8n-cls.input.imagePath",
+          "valueState": "recorded"
+        },
+        {
+          "id": "inputImageLicense",
+          "ready": false,
+          "source": "yolov8n-cls.input.imageLicense",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "inputImageSha256",
+          "ready": false,
+          "source": "yolov8n-cls.input.imageSha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "preprocessedTensorPath",
+          "ready": true,
+          "source": "yolov8n-cls.input.preprocessedTensorPath",
+          "valueState": "recorded"
+        },
+        {
+          "id": "preprocessedTensorSha256",
+          "ready": false,
+          "source": "yolov8n-cls.input.preprocessedTensorSha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "inputShape",
+          "ready": true,
+          "source": "yolov8n-cls.input.inputShape",
+          "valueState": "recorded"
+        },
+        {
+          "id": "outputJsonSha256",
+          "ready": false,
+          "source": "yolov8n-cls.yoloVision.outputJsonSha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "runLogSha256",
+          "ready": false,
+          "source": "yolov8n-cls.yoloVision.runLogSha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "ownerGoldenDecision",
+          "ready": false,
+          "source": "yolov8n-cls.ownerReview.acceptanceDecision",
+          "valueState": "owner-action-required"
+        }
+      ],
+      "taskSemanticChecks": [
+        {
+          "id": "imagePreprocessContract",
+          "ready": false,
+          "source": "yolov8n-cls.taskSemantics.imagePreprocessContract",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "classCount",
+          "ready": false,
+          "source": "yolov8n-cls.taskSemantics.classCount",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "labelMappingSha256",
+          "ready": false,
+          "source": "yolov8n-cls.taskSemantics.labelMappingSha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "classScoreField",
+          "ready": false,
+          "source": "yolov8n-cls.taskSemantics.classScoreField",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "softmaxApplied",
+          "ready": false,
+          "source": "yolov8n-cls.taskSemantics.softmaxApplied",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "topK",
+          "ready": true,
+          "source": "yolov8n-cls.taskSemantics.topK",
+          "valueState": "recorded"
+        },
+        {
+          "id": "argmaxRule",
+          "ready": false,
+          "source": "yolov8n-cls.taskSemantics.argmaxRule",
+          "valueState": "owner-action-required"
+        }
+      ],
+      "readyFieldCount": 5,
+      "requiredFieldCount": 22,
+      "missingFieldCount": 17,
+      "independentReferenceState": "not-captured-for-cls",
+      "referenceReuseEligible": false,
+      "ownerReviewedGolden": false,
+      "canPromoteRealModelRuntime": false,
+      "canPromotePackageConsumerRuntime": false,
+      "boundary": "YoloVision classification remains distinct from the generic Classification sample and requires its own exporter, labels, and score semantics."
+    },
+    {
+      "id": "yolo-seg",
+      "sample": "YoloVision",
+      "task": "seg",
+      "caseId": "yolov8n-seg",
+      "sourceState": "owner-action-required",
+      "proofClassification": "template-only",
+      "contractRequiredMetadata": [
+        "inputShape",
+        "outputRoleMap",
+        "classCount",
+        "maskCoefficientCount",
+        "prototypeShape",
+        "maskResizePolicy"
+      ],
+      "commonFieldChecks": [
+        {
+          "id": "modelSource",
+          "ready": false,
+          "source": "yolov8n-seg.model.sourceUrl",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "modelLicense",
+          "ready": false,
+          "source": "yolov8n-seg.model.license",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "modelSha256",
+          "ready": false,
+          "source": "yolov8n-seg.model.sha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "labelsPath",
+          "ready": true,
+          "source": "yolov8n-seg.labels.path",
+          "valueState": "recorded"
+        },
+        {
+          "id": "labelsLicense",
+          "ready": false,
+          "source": "yolov8n-seg.labels.license",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "labelsSha256",
+          "ready": false,
+          "source": "yolov8n-seg.labels.sha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "inputImagePath",
+          "ready": true,
+          "source": "yolov8n-seg.input.imagePath",
+          "valueState": "recorded"
+        },
+        {
+          "id": "inputImageLicense",
+          "ready": false,
+          "source": "yolov8n-seg.input.imageLicense",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "inputImageSha256",
+          "ready": false,
+          "source": "yolov8n-seg.input.imageSha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "preprocessedTensorPath",
+          "ready": true,
+          "source": "yolov8n-seg.input.preprocessedTensorPath",
+          "valueState": "recorded"
+        },
+        {
+          "id": "preprocessedTensorSha256",
+          "ready": false,
+          "source": "yolov8n-seg.input.preprocessedTensorSha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "inputShape",
+          "ready": true,
+          "source": "yolov8n-seg.input.inputShape",
+          "valueState": "recorded"
+        },
+        {
+          "id": "outputJsonSha256",
+          "ready": false,
+          "source": "yolov8n-seg.yoloVision.outputJsonSha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "runLogSha256",
+          "ready": false,
+          "source": "yolov8n-seg.yoloVision.runLogSha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "ownerGoldenDecision",
+          "ready": false,
+          "source": "yolov8n-seg.ownerReview.acceptanceDecision",
+          "valueState": "owner-action-required"
+        }
+      ],
+      "taskSemanticChecks": [
+        {
+          "id": "imagePreprocessContract",
+          "ready": false,
+          "source": "yolov8n-seg.taskSemantics.imagePreprocessContract",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "outputRoleMap",
+          "ready": true,
+          "source": "yolov8n-seg.taskSemantics.outputRoleMap",
+          "valueState": "recorded"
+        },
+        {
+          "id": "maskCoefficientCount",
+          "ready": true,
+          "source": "yolov8n-seg.taskSemantics.maskCoefficientCount",
+          "valueState": "recorded"
+        },
+        {
+          "id": "prototypeShape",
+          "ready": false,
+          "source": "yolov8n-seg.taskSemantics.prototypeShape",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "maskResizePolicy",
+          "ready": false,
+          "source": "yolov8n-seg.taskSemantics.maskResizePolicy",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "maskThreshold",
+          "ready": true,
+          "source": "yolov8n-seg.taskSemantics.maskThreshold",
+          "valueState": "recorded"
+        },
+        {
+          "id": "maskValueKind",
+          "ready": true,
+          "source": "yolov8n-seg.taskSemantics.maskValueKind",
+          "valueState": "recorded"
+        },
+        {
+          "id": "maskSpatialTransform",
+          "ready": true,
+          "source": "yolov8n-seg.taskSemantics.maskSpatialTransform",
+          "valueState": "recorded"
+        },
+        {
+          "id": "maskCropToDetection",
+          "ready": true,
+          "source": "yolov8n-seg.taskSemantics.maskCropToDetection",
+          "valueState": "recorded"
+        }
+      ],
+      "readyFieldCount": 10,
+      "requiredFieldCount": 24,
+      "missingFieldCount": 14,
+      "independentReferenceState": "not-captured-for-seg",
+      "referenceReuseEligible": false,
+      "ownerReviewedGolden": false,
+      "canPromoteRealModelRuntime": false,
+      "canPromotePackageConsumerRuntime": false,
+      "boundary": "Segmentation references require boxes, coefficients, prototypes, mask composition, crop, resize, and inverse-transform semantics."
+    },
+    {
+      "id": "yolo-obb",
+      "sample": "YoloVision",
+      "task": "obb",
+      "caseId": "yolov8n-obb",
+      "sourceState": "owner-action-required",
+      "proofClassification": "template-only",
+      "contractRequiredMetadata": [
+        "inputShape",
+        "outputRoleMap",
+        "classCount",
+        "angleOutput",
+        "angleUnit",
+        "boxFormat"
+      ],
+      "commonFieldChecks": [
+        {
+          "id": "modelSource",
+          "ready": false,
+          "source": "yolov8n-obb.model.sourceUrl",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "modelLicense",
+          "ready": false,
+          "source": "yolov8n-obb.model.license",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "modelSha256",
+          "ready": false,
+          "source": "yolov8n-obb.model.sha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "labelsPath",
+          "ready": true,
+          "source": "yolov8n-obb.labels.path",
+          "valueState": "recorded"
+        },
+        {
+          "id": "labelsLicense",
+          "ready": false,
+          "source": "yolov8n-obb.labels.license",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "labelsSha256",
+          "ready": false,
+          "source": "yolov8n-obb.labels.sha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "inputImagePath",
+          "ready": true,
+          "source": "yolov8n-obb.input.imagePath",
+          "valueState": "recorded"
+        },
+        {
+          "id": "inputImageLicense",
+          "ready": false,
+          "source": "yolov8n-obb.input.imageLicense",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "inputImageSha256",
+          "ready": false,
+          "source": "yolov8n-obb.input.imageSha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "preprocessedTensorPath",
+          "ready": true,
+          "source": "yolov8n-obb.input.preprocessedTensorPath",
+          "valueState": "recorded"
+        },
+        {
+          "id": "preprocessedTensorSha256",
+          "ready": false,
+          "source": "yolov8n-obb.input.preprocessedTensorSha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "inputShape",
+          "ready": true,
+          "source": "yolov8n-obb.input.inputShape",
+          "valueState": "recorded"
+        },
+        {
+          "id": "outputJsonSha256",
+          "ready": false,
+          "source": "yolov8n-obb.yoloVision.outputJsonSha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "runLogSha256",
+          "ready": false,
+          "source": "yolov8n-obb.yoloVision.runLogSha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "ownerGoldenDecision",
+          "ready": false,
+          "source": "yolov8n-obb.ownerReview.acceptanceDecision",
+          "valueState": "owner-action-required"
+        }
+      ],
+      "taskSemanticChecks": [
+        {
+          "id": "imagePreprocessContract",
+          "ready": false,
+          "source": "yolov8n-obb.taskSemantics.imagePreprocessContract",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "boxFormat",
+          "ready": false,
+          "source": "yolov8n-obb.taskSemantics.boxFormat",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "angleUnit",
+          "ready": false,
+          "source": "yolov8n-obb.taskSemantics.angleUnit",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "angleRange",
+          "ready": false,
+          "source": "yolov8n-obb.taskSemantics.angleRange",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "rotatedBoxLayout",
+          "ready": false,
+          "source": "yolov8n-obb.taskSemantics.rotatedBoxLayout",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "coordinateSpace",
+          "ready": false,
+          "source": "yolov8n-obb.taskSemantics.coordinateSpace",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "rotatedNmsMode",
+          "ready": false,
+          "source": "yolov8n-obb.taskSemantics.rotatedNmsMode",
+          "valueState": "owner-action-required"
+        }
+      ],
+      "readyFieldCount": 4,
+      "requiredFieldCount": 22,
+      "missingFieldCount": 18,
+      "independentReferenceState": "not-captured-for-obb",
+      "referenceReuseEligible": false,
+      "ownerReviewedGolden": false,
+      "canPromoteRealModelRuntime": false,
+      "canPromotePackageConsumerRuntime": false,
+      "boundary": "OBB references require angle units/range, rotated-box layout, coordinate mapping, and rotated NMS semantics."
+    },
+    {
+      "id": "yolo-pose",
+      "sample": "YoloVision",
+      "task": "pose",
+      "caseId": "yolov8n-pose",
+      "sourceState": "owner-action-required",
+      "proofClassification": "template-only",
+      "contractRequiredMetadata": [
+        "inputShape",
+        "outputRoleMap",
+        "classCount",
+        "keypointCount",
+        "keypointStride",
+        "coordinateLayout"
+      ],
+      "commonFieldChecks": [
+        {
+          "id": "modelSource",
+          "ready": false,
+          "source": "yolov8n-pose.model.sourceUrl",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "modelLicense",
+          "ready": false,
+          "source": "yolov8n-pose.model.license",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "modelSha256",
+          "ready": false,
+          "source": "yolov8n-pose.model.sha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "labelsPath",
+          "ready": true,
+          "source": "yolov8n-pose.labels.path",
+          "valueState": "recorded"
+        },
+        {
+          "id": "labelsLicense",
+          "ready": false,
+          "source": "yolov8n-pose.labels.license",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "labelsSha256",
+          "ready": false,
+          "source": "yolov8n-pose.labels.sha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "inputImagePath",
+          "ready": true,
+          "source": "yolov8n-pose.input.imagePath",
+          "valueState": "recorded"
+        },
+        {
+          "id": "inputImageLicense",
+          "ready": false,
+          "source": "yolov8n-pose.input.imageLicense",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "inputImageSha256",
+          "ready": false,
+          "source": "yolov8n-pose.input.imageSha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "preprocessedTensorPath",
+          "ready": true,
+          "source": "yolov8n-pose.input.preprocessedTensorPath",
+          "valueState": "recorded"
+        },
+        {
+          "id": "preprocessedTensorSha256",
+          "ready": false,
+          "source": "yolov8n-pose.input.preprocessedTensorSha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "inputShape",
+          "ready": true,
+          "source": "yolov8n-pose.input.inputShape",
+          "valueState": "recorded"
+        },
+        {
+          "id": "outputJsonSha256",
+          "ready": false,
+          "source": "yolov8n-pose.yoloVision.outputJsonSha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "runLogSha256",
+          "ready": false,
+          "source": "yolov8n-pose.yoloVision.runLogSha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "ownerGoldenDecision",
+          "ready": false,
+          "source": "yolov8n-pose.ownerReview.acceptanceDecision",
+          "valueState": "owner-action-required"
+        }
+      ],
+      "taskSemanticChecks": [
+        {
+          "id": "imagePreprocessContract",
+          "ready": false,
+          "source": "yolov8n-pose.taskSemantics.imagePreprocessContract",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "keypointCount",
+          "ready": true,
+          "source": "yolov8n-pose.taskSemantics.keypointCount",
+          "valueState": "recorded"
+        },
+        {
+          "id": "keypointStride",
+          "ready": false,
+          "source": "yolov8n-pose.taskSemantics.keypointStride",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "coordinateLayout",
+          "ready": false,
+          "source": "yolov8n-pose.taskSemantics.coordinateLayout",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "keypointLayout",
+          "ready": false,
+          "source": "yolov8n-pose.taskSemantics.keypointLayout",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "keypointScoreField",
+          "ready": false,
+          "source": "yolov8n-pose.taskSemantics.keypointScoreField",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "skeletonMap",
+          "ready": false,
+          "source": "yolov8n-pose.taskSemantics.skeletonMap",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "sourceImageInversePolicy",
+          "ready": false,
+          "source": "yolov8n-pose.taskSemantics.sourceImageInversePolicy",
+          "valueState": "owner-action-required"
+        }
+      ],
+      "readyFieldCount": 5,
+      "requiredFieldCount": 23,
+      "missingFieldCount": 18,
+      "independentReferenceState": "not-captured-for-pose",
+      "referenceReuseEligible": false,
+      "ownerReviewedGolden": false,
+      "canPromoteRealModelRuntime": false,
+      "canPromotePackageConsumerRuntime": false,
+      "boundary": "Pose references require keypoint count/stride/layout, score fields, skeleton identity, and inverse-coordinate semantics."
+    },
+    {
+      "id": "yolo-sem",
+      "sample": "YoloVision",
+      "task": "sem",
+      "caseId": "yolov8n-sem",
+      "sourceState": "owner-action-required",
+      "proofClassification": "template-only",
+      "contractRequiredMetadata": [
+        "inputShape",
+        "semanticOutput",
+        "classCount",
+        "mapWidth",
+        "mapHeight",
+        "argmaxRule"
+      ],
+      "commonFieldChecks": [
+        {
+          "id": "modelSource",
+          "ready": false,
+          "source": "yolov8n-sem.model.sourceUrl",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "modelLicense",
+          "ready": false,
+          "source": "yolov8n-sem.model.license",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "modelSha256",
+          "ready": false,
+          "source": "yolov8n-sem.model.sha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "labelsPath",
+          "ready": true,
+          "source": "yolov8n-sem.labels.path",
+          "valueState": "recorded"
+        },
+        {
+          "id": "labelsLicense",
+          "ready": false,
+          "source": "yolov8n-sem.labels.license",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "labelsSha256",
+          "ready": false,
+          "source": "yolov8n-sem.labels.sha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "inputImagePath",
+          "ready": true,
+          "source": "yolov8n-sem.input.imagePath",
+          "valueState": "recorded"
+        },
+        {
+          "id": "inputImageLicense",
+          "ready": false,
+          "source": "yolov8n-sem.input.imageLicense",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "inputImageSha256",
+          "ready": false,
+          "source": "yolov8n-sem.input.imageSha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "preprocessedTensorPath",
+          "ready": true,
+          "source": "yolov8n-sem.input.preprocessedTensorPath",
+          "valueState": "recorded"
+        },
+        {
+          "id": "preprocessedTensorSha256",
+          "ready": false,
+          "source": "yolov8n-sem.input.preprocessedTensorSha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "inputShape",
+          "ready": true,
+          "source": "yolov8n-sem.input.inputShape",
+          "valueState": "recorded"
+        },
+        {
+          "id": "outputJsonSha256",
+          "ready": false,
+          "source": "yolov8n-sem.yoloVision.outputJsonSha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "runLogSha256",
+          "ready": false,
+          "source": "yolov8n-sem.yoloVision.runLogSha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "ownerGoldenDecision",
+          "ready": false,
+          "source": "yolov8n-sem.ownerReview.acceptanceDecision",
+          "valueState": "owner-action-required"
+        }
+      ],
+      "taskSemanticChecks": [
+        {
+          "id": "imagePreprocessContract",
+          "ready": false,
+          "source": "yolov8n-sem.taskSemantics.imagePreprocessContract",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "semanticOutputRole",
+          "ready": true,
+          "source": "yolov8n-sem.taskSemantics.semanticOutputRole",
+          "valueState": "recorded"
+        },
+        {
+          "id": "semanticMapShape",
+          "ready": false,
+          "source": "yolov8n-sem.taskSemantics.semanticMapShape",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "classMapLayout",
+          "ready": false,
+          "source": "yolov8n-sem.taskSemantics.classMapLayout",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "argmaxRule",
+          "ready": false,
+          "source": "yolov8n-sem.taskSemantics.argmaxRule",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "paletteSha256",
+          "ready": false,
+          "source": "yolov8n-sem.taskSemantics.paletteSha256",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "voidClassPolicy",
+          "ready": false,
+          "source": "yolov8n-sem.taskSemantics.voidClassPolicy",
+          "valueState": "owner-action-required"
+        },
+        {
+          "id": "sourceImageInversePolicy",
+          "ready": false,
+          "source": "yolov8n-sem.taskSemantics.sourceImageInversePolicy",
+          "valueState": "owner-action-required"
+        }
+      ],
+      "readyFieldCount": 5,
+      "requiredFieldCount": 23,
+      "missingFieldCount": 18,
+      "independentReferenceState": "not-captured-for-sem",
+      "referenceReuseEligible": false,
+      "ownerReviewedGolden": false,
+      "canPromoteRealModelRuntime": false,
+      "canPromotePackageConsumerRuntime": false,
+      "boundary": "Semantic segmentation references require class-axis/argmax, map layout, palette, void-class, resize, and inverse-transform semantics."
+    }
+  ],
+  "independentReferenceCandidates": [
+    {
+      "id": "mnist-onnxruntime-cpu-1.23.2",
+      "task": "mnist-classification",
+      "state": "independent-onnxruntime-cpu-reference-runtime-passed-owner-review-required",
+      "evidenceClassification": "independent-framework-reference-candidate-runtime",
+      "framework": "ONNX Runtime",
+      "version": "1.23.2",
+      "provider": "CPUExecutionProvider",
+      "providerValidated": true,
+      "deterministicOutput": true,
+      "modelSha256": "2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf",
+      "inputTensorSha256": "81f2cd7784dca5c8f02a9887ae89a6a3582880a27d2eba95a53f845c63187564",
+      "referenceSha256": "1babfa81c0d277a3d483fdc6288285b26008ba5b382868272f1e2187338bd571",
+      "eligibleTaskIds": [
+        "mnist"
+      ],
+      "ineligibleMatrixTaskIds": [
+        "classification",
+        "yolo-det",
+        "yolo-cls",
+        "yolo-seg",
+        "yolo-obb",
+        "yolo-pose",
+        "yolo-sem"
+      ],
+      "allReuseFingerprintsRecorded": false,
+      "ownerReviewedGolden": false,
+      "repositoryRedistributionApproved": false,
+      "canReuseForAnyMatrixTask": false,
+      "reason": "The MNIST model/input/preprocess/output/labels/task semantics do not match the generic Classification sample or any YoloVision task profile."
+    }
+  ],
+  "proofBoundary": {
+    "crossTaskReferenceReuseProved": false,
+    "ownerReviewedGoldenAvailable": false,
+    "publicPackageProof": false,
+    "postPublishProof": false,
+    "canPublishPublicly": false,
+    "canCloseReleaseIssue": false,
+    "statement": "This matrix audits provenance readiness and task semantics. It does not create reference output, approve licenses, accept an Owner golden, prove public-package consumption, or provide post-publish/release proof."
+  }
+}

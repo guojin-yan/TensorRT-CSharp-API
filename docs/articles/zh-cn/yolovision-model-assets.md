@@ -43,3 +43,16 @@ dotnet run --project .\samples\YoloVision -- `
 - 检测输出或 `Detections=0` 的命令日志。
 
 如果使用 synthetic input，输出只能作为 pipeline evidence，不能作为真实检测质量证据。
+
+## 六任务 reference 语义
+
+`samples/assets/cross-task-reference-provenance-contract.json` 不把 YOLO 输出简化为一个通用 hash。`det` 必须固定 box/
+score/objectness/NMS/coordinate 规则；`cls` 必须固定 class score、softmax、labels 和 Top-K；`seg` 必须固定 boxes、mask
+coefficients、prototypes、composition/crop/resize/inverse transform；`obb` 必须固定 angle unit/range、rotated layout 和 NMS；
+`pose` 必须固定 keypoint count/stride/layout/score/skeleton；`sem` 必须固定 class-axis、argmax、map layout、palette、void
+class 和 resize/inverse transform。
+
+因此 det/cls/seg/obb/pose/sem 的 reference 不能互相替代，通用 Classification 与 YoloVision `cls` 也不是同一 profile。
+即使 raw tensor SHA256 相同，只要 model/input/preprocess/output/labels/task-semantics 任一 fingerprint 不同，就不能跨任务
+复用。当前 7 行 readiness matrix 的 ready row 为 0，所有 promotion flags 保持 false；这准确反映 Owner 资产与语义输入
+仍缺失，不应通过填模板或借用 MNIST reference 消除。

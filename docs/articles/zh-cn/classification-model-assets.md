@@ -54,3 +54,22 @@ dotnet run --project .\samples\Classification -- `
 - 是否使用真实图片预处理。
 
 如果当前只使用 synthetic input，只能说明 pipeline 可以跑通，不能说明模型精度或图片分类结果正确。
+
+## Reference provenance
+
+`samples/assets/cross-task-reference-provenance-contract.json` 把 independent reference 的准入条件拆成公共 provenance 与
+任务语义两层。Classification 除 model/labels/image/tensor/provider/reference/comparison/Owner 字段外，还必须记录 resize、
+crop、RGB/BGR、scale、mean/std、输出是 raw logits 还是 probabilities、score transform、label mapping SHA256、Top-K 和
+argmax rule。
+
+已有 MNIST ONNX Runtime CPU reference 不能直接作为本样例的 golden：它的模型、输入、预处理、输出 tensor、labels 和
+任务语义均不同。跨任务复用只有在 `modelSha256`、`inputTensorSha256`、`preprocessContractSha256`、
+`outputTensorContractSha256`、`labelsSha256`、`taskSemanticsSha256` 六项全部存在且完全一致，并获得 Owner golden/
+redistribution 决定后才允许。使用下面的命令查看当前真实缺口：
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-CrossTaskReferenceProvenanceMatrix.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-CrossTaskReferenceProvenanceMatrix.ps1 -Strict
+```
+
+矩阵为 `owner-action-required` 不是 validator 失败；它表示模板结构成立，但尚无可晋级 reference。

@@ -65,6 +65,25 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-SampleAssetManifest.ps1
 
 Use `artifacts/user-acceptance/sample-run-evidence-record.classification.template.json` as the owner-facing place for the real runner log path, `sampleRunLogSha256`, `stdoutSummary`, `stderrSummary`, and `canPromoteRealModelRuntime=false/true` decision. The sidecar enriches TensorRtExec/OnnxToEngine reports. The sample run evidence record connects the real `Classification` runner log to the asset manifest. Neither one can promote a build-only report to `package-consumer-runtime`.
 
+## Reference Provenance Contract
+
+The cross-task contract is `samples/assets/cross-task-reference-provenance-contract.json`. A Classification reference must record
+the exact model, labels, input image, preprocessed tensor, input/output tensor contract, independent framework/provider, comparison
+policy, and Owner decision. Its task semantics must also identify resize, crop, RGB/BGR order, scale, mean/std, whether outputs are
+raw logits or probabilities, the score transform, label mapping SHA256, Top-K, and argmax rule.
+
+Run the current-readiness audit with:
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-CrossTaskReferenceProvenanceMatrix.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-CrossTaskReferenceProvenanceMatrix.ps1 -Strict
+```
+
+The generic Classification sample and YoloVision `cls` task are separate profiles. A MNIST reference cannot be reused for either
+profile unless model/input/preprocess/output/labels/task-semantics fingerprints all match and an Owner separately accepts golden
+provenance and redistribution. Synthetic input, raw output hashes, same-runtime references, and local package feeds do not satisfy
+that gate.
+
 ## Evidence Lines
 
 - `Classification TensorRtLine=...`

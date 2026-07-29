@@ -1,0 +1,474 @@
+{
+  "schemaVersion": "cross-task-reference-provenance-validation.v1",
+  "strict": true,
+  "checkCount": 93,
+  "passedCount": 93,
+  "failureCount": 0,
+  "checks": [
+    {
+      "id": "matrix-schema",
+      "passed": true,
+      "actual": "cross-task-reference-provenance-matrix.v1"
+    },
+    {
+      "id": "matrix-state",
+      "passed": true,
+      "actual": "owner-action-required"
+    },
+    {
+      "id": "matrix-counts",
+      "passed": true,
+      "actual": "7/0/7/7"
+    },
+    {
+      "id": "matrix-row-order",
+      "passed": true,
+      "actual": "classification,yolo-det,yolo-cls,yolo-seg,yolo-obb,yolo-pose,yolo-sem"
+    },
+    {
+      "id": "matrix-task-order",
+      "passed": true,
+      "actual": "classification,det,cls,seg,obb,pose,sem"
+    },
+    {
+      "id": "matrix-path-free",
+      "passed": true,
+      "actual": "absolute-windows-path-present=False"
+    },
+    {
+      "id": "contract-schema",
+      "passed": true,
+      "actual": "cross-task-reference-provenance-contract.v1/cross-task-reference-provenance-contract"
+    },
+    {
+      "id": "contract-state",
+      "passed": true,
+      "actual": "owner-review-required"
+    },
+    {
+      "id": "contract-common-sections",
+      "passed": true,
+      "actual": "assetIdentity,tensorContract,executionIdentity,referenceIdentity,comparisonPolicy,ownerDecision"
+    },
+    {
+      "id": "contract-common-fields",
+      "passed": true,
+      "actual": "empty-sections=0"
+    },
+    {
+      "id": "contract-task-profiles",
+      "passed": true,
+      "actual": "classification,yolo-det,yolo-cls,yolo-seg,yolo-obb,yolo-pose,yolo-sem"
+    },
+    {
+      "id": "contract-task-semantics",
+      "passed": true,
+      "actual": "invalid-profiles=0"
+    },
+    {
+      "id": "contract-reuse-fingerprints",
+      "passed": true,
+      "actual": "modelSha256,inputTensorSha256,preprocessContractSha256,outputTensorContractSha256,labelsSha256,taskSemanticsSha256"
+    },
+    {
+      "id": "contract-reuse-rules",
+      "passed": true,
+      "actual": "count=4"
+    },
+    {
+      "id": "contract-promotion-boundary",
+      "passed": true,
+      "actual": "False/False/False/False"
+    },
+    {
+      "id": "matrix-contract-cross-check",
+      "passed": true,
+      "actual": "samples/assets/cross-task-reference-provenance-contract.json/1c48e81bbb066dd1b79a48037e92fc9cb64c6dadd7b6b3a5a4456ca9be9ad925/cross-task-reference-provenance-contract.v1"
+    },
+    {
+      "id": "source-count",
+      "passed": true,
+      "actual": "4"
+    },
+    {
+      "id": "source-roles",
+      "passed": true,
+      "actual": "classification-manifest,yolovision-task-contract,yolovision-owner-input-template,independent-reference-candidate"
+    },
+    {
+      "id": "source-classification-manifest-hash",
+      "passed": true,
+      "actual": "samples/assets/classification-assets.template.json/880f939d4f64c0fadd95b849dca2a05e5eaf73ff702208a3272c79cdbc692cae"
+    },
+    {
+      "id": "source-yolovision-task-contract-hash",
+      "passed": true,
+      "actual": "samples/YoloVision/yolovision-task-output-contract.json/b3f3b32a46f003269ba1b55c5ded9cac25e491a81baf662dfd6a126b49104df6"
+    },
+    {
+      "id": "source-yolovision-owner-input-template-hash",
+      "passed": true,
+      "actual": "artifacts/user-acceptance/yolovision-real-asset-owner-proof-input.template.json/b2b48e7143c146f6b7f7ac2d4cbb8d39d8fea1c0f234a3ba450d86cc71108a42"
+    },
+    {
+      "id": "source-independent-reference-candidate-hash",
+      "passed": true,
+      "actual": "artifacts/interface-coverage/tensorrtexec-mnist-onnxruntime-reference-evidence.json/3de54437688df1e2d04995f4bbe86a2d3b69dfd834a6b5022a4cf4a40f9e3d5d"
+    },
+    {
+      "id": "classification-field-counts",
+      "passed": true,
+      "actual": "6/26/20"
+    },
+    {
+      "id": "classification-common-fields",
+      "passed": true,
+      "actual": "count=15/duplicates=0"
+    },
+    {
+      "id": "classification-semantic-fields",
+      "passed": true,
+      "actual": "imageResizePolicy,imageCropPolicy,colorOrder,scale,mean,std,outputValueKind,scoreTransform,labelMappingSha256,topK,argmaxRule"
+    },
+    {
+      "id": "classification-field-state-contract",
+      "passed": true,
+      "actual": "invalid=0"
+    },
+    {
+      "id": "classification-reference-state",
+      "passed": true,
+      "actual": "not-captured-for-classification/False"
+    },
+    {
+      "id": "classification-promotion-boundary",
+      "passed": true,
+      "actual": "False/False/False"
+    },
+    {
+      "id": "classification-proof-classification",
+      "passed": true,
+      "actual": "template-only/candidate-not-downloaded"
+    },
+    {
+      "id": "classification-boundary",
+      "passed": true,
+      "actual": "Generic Classification top-k output cannot reuse MNIST logits or YoloVision classification semantics unless every reuse fingerprint and Owner decision matches."
+    },
+    {
+      "id": "yolo-det-field-counts",
+      "passed": true,
+      "actual": "5/25/20"
+    },
+    {
+      "id": "yolo-det-common-fields",
+      "passed": true,
+      "actual": "count=15/duplicates=0"
+    },
+    {
+      "id": "yolo-det-semantic-fields",
+      "passed": true,
+      "actual": "imagePreprocessContract,outputLayout,boxFormat,scoreRule,hasObjectness,nmsMode,scoreThreshold,iouThreshold,coordinateSpace,sourceImageInversePolicy"
+    },
+    {
+      "id": "yolo-det-field-state-contract",
+      "passed": true,
+      "actual": "invalid=0"
+    },
+    {
+      "id": "yolo-det-reference-state",
+      "passed": true,
+      "actual": "not-captured-for-det/False"
+    },
+    {
+      "id": "yolo-det-promotion-boundary",
+      "passed": true,
+      "actual": "False/False/False"
+    },
+    {
+      "id": "yolo-det-proof-classification",
+      "passed": true,
+      "actual": "template-only/owner-action-required"
+    },
+    {
+      "id": "yolo-det-boundary",
+      "passed": true,
+      "actual": "Detection references require exporter-specific box, score, NMS, and coordinate-transform semantics."
+    },
+    {
+      "id": "yolo-det-yolo-contract-link",
+      "passed": true,
+      "actual": "inputShape,outputLayout,classCount,boxFormat,scoreRule,nmsMode"
+    },
+    {
+      "id": "yolo-cls-field-counts",
+      "passed": true,
+      "actual": "5/22/17"
+    },
+    {
+      "id": "yolo-cls-common-fields",
+      "passed": true,
+      "actual": "count=15/duplicates=0"
+    },
+    {
+      "id": "yolo-cls-semantic-fields",
+      "passed": true,
+      "actual": "imagePreprocessContract,classCount,labelMappingSha256,classScoreField,softmaxApplied,topK,argmaxRule"
+    },
+    {
+      "id": "yolo-cls-field-state-contract",
+      "passed": true,
+      "actual": "invalid=0"
+    },
+    {
+      "id": "yolo-cls-reference-state",
+      "passed": true,
+      "actual": "not-captured-for-cls/False"
+    },
+    {
+      "id": "yolo-cls-promotion-boundary",
+      "passed": true,
+      "actual": "False/False/False"
+    },
+    {
+      "id": "yolo-cls-proof-classification",
+      "passed": true,
+      "actual": "template-only/owner-action-required"
+    },
+    {
+      "id": "yolo-cls-boundary",
+      "passed": true,
+      "actual": "YoloVision classification remains distinct from the generic Classification sample and requires its own exporter, labels, and score semantics."
+    },
+    {
+      "id": "yolo-cls-yolo-contract-link",
+      "passed": true,
+      "actual": "inputShape,classificationOutput,classCount,labelsPath,topK"
+    },
+    {
+      "id": "yolo-seg-field-counts",
+      "passed": true,
+      "actual": "10/24/14"
+    },
+    {
+      "id": "yolo-seg-common-fields",
+      "passed": true,
+      "actual": "count=15/duplicates=0"
+    },
+    {
+      "id": "yolo-seg-semantic-fields",
+      "passed": true,
+      "actual": "imagePreprocessContract,outputRoleMap,maskCoefficientCount,prototypeShape,maskResizePolicy,maskThreshold,maskValueKind,maskSpatialTransform,maskCropToDetection"
+    },
+    {
+      "id": "yolo-seg-field-state-contract",
+      "passed": true,
+      "actual": "invalid=0"
+    },
+    {
+      "id": "yolo-seg-reference-state",
+      "passed": true,
+      "actual": "not-captured-for-seg/False"
+    },
+    {
+      "id": "yolo-seg-promotion-boundary",
+      "passed": true,
+      "actual": "False/False/False"
+    },
+    {
+      "id": "yolo-seg-proof-classification",
+      "passed": true,
+      "actual": "template-only/owner-action-required"
+    },
+    {
+      "id": "yolo-seg-boundary",
+      "passed": true,
+      "actual": "Segmentation references require boxes, coefficients, prototypes, mask composition, crop, resize, and inverse-transform semantics."
+    },
+    {
+      "id": "yolo-seg-yolo-contract-link",
+      "passed": true,
+      "actual": "inputShape,outputRoleMap,classCount,maskCoefficientCount,prototypeShape,maskResizePolicy"
+    },
+    {
+      "id": "yolo-obb-field-counts",
+      "passed": true,
+      "actual": "4/22/18"
+    },
+    {
+      "id": "yolo-obb-common-fields",
+      "passed": true,
+      "actual": "count=15/duplicates=0"
+    },
+    {
+      "id": "yolo-obb-semantic-fields",
+      "passed": true,
+      "actual": "imagePreprocessContract,boxFormat,angleUnit,angleRange,rotatedBoxLayout,coordinateSpace,rotatedNmsMode"
+    },
+    {
+      "id": "yolo-obb-field-state-contract",
+      "passed": true,
+      "actual": "invalid=0"
+    },
+    {
+      "id": "yolo-obb-reference-state",
+      "passed": true,
+      "actual": "not-captured-for-obb/False"
+    },
+    {
+      "id": "yolo-obb-promotion-boundary",
+      "passed": true,
+      "actual": "False/False/False"
+    },
+    {
+      "id": "yolo-obb-proof-classification",
+      "passed": true,
+      "actual": "template-only/owner-action-required"
+    },
+    {
+      "id": "yolo-obb-boundary",
+      "passed": true,
+      "actual": "OBB references require angle units/range, rotated-box layout, coordinate mapping, and rotated NMS semantics."
+    },
+    {
+      "id": "yolo-obb-yolo-contract-link",
+      "passed": true,
+      "actual": "inputShape,outputRoleMap,classCount,angleOutput,angleUnit,boxFormat"
+    },
+    {
+      "id": "yolo-pose-field-counts",
+      "passed": true,
+      "actual": "5/23/18"
+    },
+    {
+      "id": "yolo-pose-common-fields",
+      "passed": true,
+      "actual": "count=15/duplicates=0"
+    },
+    {
+      "id": "yolo-pose-semantic-fields",
+      "passed": true,
+      "actual": "imagePreprocessContract,keypointCount,keypointStride,coordinateLayout,keypointLayout,keypointScoreField,skeletonMap,sourceImageInversePolicy"
+    },
+    {
+      "id": "yolo-pose-field-state-contract",
+      "passed": true,
+      "actual": "invalid=0"
+    },
+    {
+      "id": "yolo-pose-reference-state",
+      "passed": true,
+      "actual": "not-captured-for-pose/False"
+    },
+    {
+      "id": "yolo-pose-promotion-boundary",
+      "passed": true,
+      "actual": "False/False/False"
+    },
+    {
+      "id": "yolo-pose-proof-classification",
+      "passed": true,
+      "actual": "template-only/owner-action-required"
+    },
+    {
+      "id": "yolo-pose-boundary",
+      "passed": true,
+      "actual": "Pose references require keypoint count/stride/layout, score fields, skeleton identity, and inverse-coordinate semantics."
+    },
+    {
+      "id": "yolo-pose-yolo-contract-link",
+      "passed": true,
+      "actual": "inputShape,outputRoleMap,classCount,keypointCount,keypointStride,coordinateLayout"
+    },
+    {
+      "id": "yolo-sem-field-counts",
+      "passed": true,
+      "actual": "5/23/18"
+    },
+    {
+      "id": "yolo-sem-common-fields",
+      "passed": true,
+      "actual": "count=15/duplicates=0"
+    },
+    {
+      "id": "yolo-sem-semantic-fields",
+      "passed": true,
+      "actual": "imagePreprocessContract,semanticOutputRole,semanticMapShape,classMapLayout,argmaxRule,paletteSha256,voidClassPolicy,sourceImageInversePolicy"
+    },
+    {
+      "id": "yolo-sem-field-state-contract",
+      "passed": true,
+      "actual": "invalid=0"
+    },
+    {
+      "id": "yolo-sem-reference-state",
+      "passed": true,
+      "actual": "not-captured-for-sem/False"
+    },
+    {
+      "id": "yolo-sem-promotion-boundary",
+      "passed": true,
+      "actual": "False/False/False"
+    },
+    {
+      "id": "yolo-sem-proof-classification",
+      "passed": true,
+      "actual": "template-only/owner-action-required"
+    },
+    {
+      "id": "yolo-sem-boundary",
+      "passed": true,
+      "actual": "Semantic segmentation references require class-axis/argmax, map layout, palette, void-class, resize, and inverse-transform semantics."
+    },
+    {
+      "id": "yolo-sem-yolo-contract-link",
+      "passed": true,
+      "actual": "inputShape,semanticOutput,classCount,mapWidth,mapHeight,argmaxRule"
+    },
+    {
+      "id": "candidate-count",
+      "passed": true,
+      "actual": "1"
+    },
+    {
+      "id": "candidate-identity",
+      "passed": true,
+      "actual": "mnist-onnxruntime-cpu-1.23.2/mnist-classification/independent-framework-reference-candidate-runtime"
+    },
+    {
+      "id": "candidate-provider",
+      "passed": true,
+      "actual": "ONNX Runtime/1.23.2/CPUExecutionProvider/True/True"
+    },
+    {
+      "id": "candidate-hashes",
+      "passed": true,
+      "actual": "2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf/81f2cd7784dca5c8f02a9887ae89a6a3582880a27d2eba95a53f845c63187564/1babfa81c0d277a3d483fdc6288285b26008ba5b382868272f1e2187338bd571"
+    },
+    {
+      "id": "candidate-task-isolation",
+      "passed": true,
+      "actual": "mnist/classification,yolo-det,yolo-cls,yolo-seg,yolo-obb,yolo-pose,yolo-sem/False"
+    },
+    {
+      "id": "candidate-owner-boundary",
+      "passed": true,
+      "actual": "False/False/False"
+    },
+    {
+      "id": "candidate-reason",
+      "passed": true,
+      "actual": "The MNIST model/input/preprocess/output/labels/task semantics do not match the generic Classification sample or any YoloVision task profile."
+    },
+    {
+      "id": "matrix-proof-boundary",
+      "passed": true,
+      "actual": "False/False/False/False/False/False"
+    },
+    {
+      "id": "matrix-proof-statement",
+      "passed": true,
+      "actual": "This matrix audits provenance readiness and task semantics. It does not create reference output, approve licenses, accept an Owner golden, prove public-package consumption, or provide post-publish/release proof."
+    }
+  ]
+}
