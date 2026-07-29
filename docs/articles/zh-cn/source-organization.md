@@ -63,9 +63,10 @@ TensorRT 高层 wrapper 也开始按 layer feature 拆分：
   softmax、unary、TopK、gather feature、
   activation、pooling、LRN feature、共用 optional-weight helper、quantization、attention、fill-int64、
   resize、concatenation、slice feature、兼容/部署型 layer attributes、Dims64、tensor metadata、
-  shape、select、fill feature、transformer 与 RNNv2 操作；
+  shape、select、fill feature、core layer metadata、transformer 与 RNNv2 操作；
   `Network`：core definition input/output/name/flags、network boundary controls、部署型 network
-  layer 创建、tensor/network Dims64、debug/shape diagnostics、refittable-weight 标记与 safe network-v2 操作。
+  layer 创建、core tensor name/type/shape/range metadata、tensor/network Dims64、debug/shape diagnostics、
+  refittable-weight 标记与 safe network-v2 操作。
 - `Internal/Interop/Parsing`：global ONNX parser version、parser lifecycle/input/diagnostics/flags、legacy parser diagnostics、
   ONNX config/model buffer/support、builder-config attachment、layer-output metadata、weight-descriptor parsing、
   parser-refitter diagnostics 与共用复制字符串 helper。
@@ -111,14 +112,14 @@ TensorRT 高层 wrapper 也开始按 layer feature 拆分：
 的 Shared partial。parser 专属 diagnostic helper 随 diagnostics 移动，delegate 与复制字符串 allocator 继续由 parser、
 parser-refitter、support 共用；按原片段顺序重组后必须恢复拆分前的根文件 Git blob。
 根文件尾部 owner 区段已拆为 Engine inspector core、ExecutionContext binding/enqueue、Serialization host-memory buffer 与
-Engine core metadata partial。engine-information 与 IO-tensor-name getter helper 随 owner 移动；BuilderConfig bit-flag 及
-Network/Tensor/Layer name helper 在其消费方法迁移前继续保留根文件，且仍要求按原顺序重组。
+Engine core metadata partial。engine-information 与 IO-tensor-name getter helper 随 owner 移动。BuilderConfig bit-flag helper
+继续留在根文件；Tensor/Layer name helper 随后与 core owner partial 一起移动，且仍要求按原顺序重组。
 跨版本 line-binding delegate、私有 bindings class 与版本路由已移入 helper-only Runtime partial；六个 environment-probe
 操作及 minimal build-chain helper 已移入 Diagnostics。生成的 bindings/helper 仍消费同一 partial 私有类型，按原顺序
 重组后必须恢复拆分前根文件 blob。
 根文件的 Network definition core 已移入 `Network/NativeBridgeApi.NetworkCore.cs`，包含 input/output ownership、layer
-lookup、name/flags metadata 与专属 name getter。Layer creation 从 `AddIdentityLayer` 开始，留待后续按 feature 拆分；
-Tensor/Layer name 与 optional-weight helper 也继续随当前消费方法保留。
+lookup、name/flags metadata 与专属 name getter。Layer creation 最初留在根文件等待按 feature 拆分；optional-weight helper
+继续随 weighted-layer 消费方法保留。
 Identity/constant、convolution、deconvolution、scale creation 已分别移入 Layers feature partial。Scale 保留仅供自身使用
 的 data-type selector；convolution/deconvolution/scale 共用的 pin/validation helper 进入 helper-only Layers Shared partial。
 重组时必须保持原 helper 顺序。
@@ -130,6 +131,10 @@ SoftMax、unary、TopK、gather creation/attributes 已移入四个独立的无 
 creation/attributes 已移入另外三个独立的无 helper partial。Resize、concatenation、slice creation/attributes 已移入
 另外三个无 helper partial，resize 的数组 pinning 留在 feature 文件内。Shape、select、fill creation/attributes 已移入
 三个无 helper feature partial；根文件随后从 `GetLayerOutput` 进入通用 Layer metadata 区段。
+通用 Layer metadata 已连同 `MapLayerType` 和专属 name getter 移入 `Layers/NativeBridgeApi.LayerCoreMetadata.cs`；通用
+Tensor metadata 与专属 name getter 移入 `Network/NativeBridgeApi.TensorCoreMetadata.cs`。BuilderConfig bit-flag helper
+继续留在根文件，因此重组顺序保持为 `root prefix + Layer body + Tensor body + bit-flag helper + Tensor name helper +
+Layer name helper + root close`。
 
 生成文件继续保留在各自 `Generated` 文件夹下，不手工拆分。若需要调整生成文件布局，必须通过 generator 本身完成，并通过生成器确定性门禁。
 

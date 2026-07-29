@@ -98,6 +98,7 @@ public sealed class ManagedSourceModuleLayoutTests
                 "NativeBridgeApi.Fill.cs",
                 "NativeBridgeApi.Gather.cs",
                 "NativeBridgeApi.IdentityAndConstant.cs",
+                "NativeBridgeApi.LayerCoreMetadata.cs",
                 "NativeBridgeApi.LayerDeploymentMetadata.cs",
                 "NativeBridgeApi.Lrn.cs",
                 "NativeBridgeApi.MatrixMultiply.cs",
@@ -132,6 +133,7 @@ public sealed class ManagedSourceModuleLayoutTests
                 "NativeBridgeApi.NetworkBoundaryControls.cs",
                 "NativeBridgeApi.NetworkCore.cs",
                 "NativeBridgeApi.NetworkDiagnostics.cs",
+                "NativeBridgeApi.TensorCoreMetadata.cs",
                 "NativeBridgeApi.Trt11SafeNetworkV2.cs"
             }
         },
@@ -863,8 +865,8 @@ public sealed class ManagedSourceModuleLayoutTests
         Assert.DoesNotContain("GetEngineInformationNative", rootSource, StringComparison.Ordinal);
         Assert.DoesNotContain("GetEngineIOTensorNameNative", rootSource, StringComparison.Ordinal);
         Assert.Contains("private static int GetSingleBitFlagIndex(", rootSource, StringComparison.Ordinal);
-        Assert.Contains("private static BridgeStatusCode GetTensorNameNative(", rootSource, StringComparison.Ordinal);
-        Assert.Contains("private static BridgeStatusCode GetLayerNameNative(", rootSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("GetTensorNameNative", rootSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("GetLayerNameNative", rootSource, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -964,9 +966,9 @@ public sealed class ManagedSourceModuleLayoutTests
         }
 
         Assert.DoesNotContain("GetNetworkNameNative", rootSource, StringComparison.Ordinal);
-        Assert.Contains("public static SafeTensorRtObjectHandle GetLayerOutput(", rootSource, StringComparison.Ordinal);
-        Assert.Contains("private static BridgeStatusCode GetTensorNameNative(", rootSource, StringComparison.Ordinal);
-        Assert.Contains("private static BridgeStatusCode GetLayerNameNative(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static TensorRtTacticSources GetTacticSources(", rootSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("GetTensorNameNative", rootSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("GetLayerNameNative", rootSource, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -1034,7 +1036,7 @@ public sealed class ManagedSourceModuleLayoutTests
         Assert.DoesNotContain("PinOptionalWeights", rootSource, StringComparison.Ordinal);
         Assert.DoesNotContain("GetScaleWeightsDataType", rootSource, StringComparison.Ordinal);
         Assert.DoesNotContain("ValidateOptionalWeightsDataType", rootSource, StringComparison.Ordinal);
-        Assert.Contains("public static SafeTensorRtObjectHandle GetLayerOutput(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static TensorRtTacticSources GetTacticSources(", rootSource, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -1072,7 +1074,7 @@ public sealed class ManagedSourceModuleLayoutTests
             Assert.DoesNotContain(method, rootMethods);
         }
 
-        Assert.Contains("public static SafeTensorRtObjectHandle GetLayerOutput(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static TensorRtTacticSources GetTacticSources(", rootSource, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -1111,7 +1113,7 @@ public sealed class ManagedSourceModuleLayoutTests
             Assert.DoesNotContain(method, rootMethods);
         }
 
-        Assert.Contains("public static SafeTensorRtObjectHandle GetLayerOutput(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static TensorRtTacticSources GetTacticSources(", rootSource, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -1145,7 +1147,7 @@ public sealed class ManagedSourceModuleLayoutTests
             Assert.DoesNotContain(method, rootMethods);
         }
 
-        Assert.Contains("public static SafeTensorRtObjectHandle GetLayerOutput(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static TensorRtTacticSources GetTacticSources(", rootSource, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -1174,7 +1176,7 @@ public sealed class ManagedSourceModuleLayoutTests
             Assert.DoesNotContain(method, rootMethods);
         }
 
-        Assert.Contains("public static SafeTensorRtObjectHandle GetLayerOutput(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static TensorRtTacticSources GetTacticSources(", rootSource, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -1226,7 +1228,7 @@ public sealed class ManagedSourceModuleLayoutTests
             Assert.DoesNotContain(method, rootMethods);
         }
 
-        Assert.Contains("public static SafeTensorRtObjectHandle GetLayerOutput(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static TensorRtTacticSources GetTacticSources(", rootSource, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -1279,7 +1281,7 @@ public sealed class ManagedSourceModuleLayoutTests
             Assert.DoesNotContain(method, rootMethods);
         }
 
-        Assert.Contains("public static SafeTensorRtObjectHandle GetLayerOutput(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static TensorRtTacticSources GetTacticSources(", rootSource, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -1319,7 +1321,93 @@ public sealed class ManagedSourceModuleLayoutTests
             Assert.DoesNotContain(method, rootMethods);
         }
 
-        Assert.Contains("public static SafeTensorRtObjectHandle GetLayerOutput(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static TensorRtTacticSources GetTacticSources(", rootSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TensorRtRootLayerAndTensorMetadataAreSplitByOwner()
+    {
+        string interopDirectory = Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.TensorRtSharp",
+            "Internal",
+            "Interop");
+        string rootSource = File.ReadAllText(Path.Combine(interopDirectory, "NativeBridgeApi.cs"));
+        string[] rootMethods = EnumeratePublicStaticMethodNames(rootSource);
+        string layerSource = File.ReadAllText(Path.Combine(
+            interopDirectory,
+            "Layers",
+            "NativeBridgeApi.LayerCoreMetadata.cs"));
+        string[] layerMethods = EnumeratePublicStaticMethodNames(layerSource);
+        string tensorSource = File.ReadAllText(Path.Combine(
+            interopDirectory,
+            "Network",
+            "NativeBridgeApi.TensorCoreMetadata.cs"));
+        string[] tensorMethods = EnumeratePublicStaticMethodNames(tensorSource);
+
+        Assert.Equal(
+            new[]
+            {
+                "GetLayerOutput",
+                "GetLayerInput",
+                "GetLayerInputCount",
+                "GetLayerOutputCount",
+                "GetLayerType",
+                "GetLayerName",
+                "SetLayerName",
+                "SetLayerPrecision",
+                "GetLayerPrecision",
+                "IsLayerPrecisionSet",
+                "ResetLayerPrecision",
+                "SetLayerOutputType",
+                "GetLayerOutputType",
+                "IsLayerOutputTypeSet",
+                "ResetLayerOutputType"
+            },
+            layerMethods);
+        Assert.Equal(
+            new[]
+            {
+                "GetTensorName",
+                "SetTensorName",
+                "GetTensorDataType",
+                "GetTensorShape",
+                "SetTensorShape",
+                "SetTensorDataType",
+                "GetTensorLocation",
+                "SetTensorLocation",
+                "GetTensorAllowedFormats",
+                "SetTensorAllowedFormats",
+                "IsTensorShapeTensor",
+                "IsTensorExecutionTensor",
+                "GetTensorBroadcastAcrossBatch",
+                "SetTensorBroadcastAcrossBatch",
+                "GetTensorDimensionName",
+                "SetTensorDimensionName",
+                "ClearTensorDimensionName",
+                "SetTensorDynamicRange",
+                "IsTensorDynamicRangeSet",
+                "GetTensorDynamicRangeMin",
+                "GetTensorDynamicRangeMax",
+                "ResetTensorDynamicRange"
+            },
+            tensorMethods);
+
+        Assert.Contains("private static TensorRtLayerType MapLayerType(", layerSource, StringComparison.Ordinal);
+        Assert.Contains("private static BridgeStatusCode GetLayerNameNative(", layerSource, StringComparison.Ordinal);
+        Assert.Contains("private static BridgeStatusCode GetTensorNameNative(", tensorSource, StringComparison.Ordinal);
+
+        foreach (string method in layerMethods.Concat(tensorMethods))
+        {
+            Assert.DoesNotContain(method, rootMethods);
+        }
+
+        Assert.DoesNotContain("MapLayerType", rootSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("GetLayerNameNative", rootSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("GetTensorNameNative", rootSource, StringComparison.Ordinal);
+        Assert.Contains("private static int GetSingleBitFlagIndex(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static TensorRtTacticSources GetTacticSources(", rootSource, StringComparison.Ordinal);
     }
 
     private static string[] EnumerateModuleFiles(string projectDirectory, string module)

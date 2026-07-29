@@ -6202,3 +6202,31 @@ Dims 转换均随完整方法块移动，TRT8/10/11 分支、entrypoint、SafeHa
   post-publish、Owner acceptance 或 release proof。
 - C 盘 Downloads 顶层本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
 - 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 TensorRT Root Layer And Tensor Metadata Owner Split
+
+本阶段将根 `NativeBridgeApi.cs` 中通用 Layer 与 Tensor metadata 按 owner 拆入 Layers 与 Network。初始提示词将 Tensor
+段记为 367 行；消费审计确认后 16 行实际为 BuilderConfig 使用的 `GetSingleBitFlagIndex`，因此真实 Tensor 主体为
+351 行，该 helper 继续留根。Layer/Tensor name helper 位于根尾，分别随消费 owner 非连续迁移。
+
+### 实现与门禁
+
+- `Layers/NativeBridgeApi.LayerCoreMetadata.cs`：332 行、15 个公开方法、`MapLayerType` 与专属 name getter。
+- `Network/NativeBridgeApi.TensorCoreMetadata.cs`：377 行、22 个公开方法与专属 name getter。
+- 根 `NativeBridgeApi.cs` 从 1,844 行降至 1,155 行；37 个 owner 方法与 3 个专属 helper 禁止回流，BuilderConfig
+  bit-flag helper 固定留根，历史下一边界门禁回到仍存在的 `GetTacticSources`。
+- 按 `root prefix + Layer body + Tensor body + bit-flag helper + Tensor name helper + Layer name helper + root close`
+  重组后的 Git blob 为 `efaa13a8f6352354866248651ae24c56c523d6f2`，与拆分前 HEAD 根文件完全一致。
+
+### 验证与边界
+
+- layout、safe lifecycle 与 BuilderConfig scalar 定向集合：`65/65` 通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- ignored deferred candidate artifact 的根路径仍由 BuilderConfig scalar controls 真实消费，无需迁移；evidence 保持
+  247 条引用、137 个唯一路径、0 缺失，该 ignored 文件未强制提交。
+- `git diff --check` 通过；Generated/native/manifest/ABI 未修改，未运行完整 ProjectQuality，也未运行依赖本机缺失
+  `pwsh` 的 B-tier 聚合测试。
+- owner 拆分不是 Layer/Tensor runtime correctness、ABI/export、Linux、package consumer、public package、post-publish、
+  Owner acceptance 或 release proof。
+- C 盘 Downloads 顶层本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
+- 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。

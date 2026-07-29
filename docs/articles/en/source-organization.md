@@ -74,9 +74,10 @@ Hand-written TensorRT partial interop now starts following the same responsibili
   softmax, unary, TopK, and gather features,
   activation, pooling, and LRN features, shared optional-weight helpers, quantization, attention, fill-int64,
   resize, concatenation, and slice features, compatibility/deployment layer attributes, Dims64,
-  shape, select, and fill features, tensor metadata, transformer, and RNNv2
+  shape, select, and fill features, core layer metadata, tensor metadata, transformer, and RNNv2
   operations; `Network` contains core definition input/output/name/flags, boundary controls,
-  deployment network-layer creation, tensor/network Dims64, debug/shape diagnostics, refittable-weight markers, and safe network-v2 operations.
+  deployment network-layer creation, core tensor name/type/shape/range metadata, tensor/network Dims64, debug/shape diagnostics,
+  refittable-weight markers, and safe network-v2 operations.
 - `Internal/Interop/Parsing` contains the global ONNX parser version, parser lifecycle/input/diagnostics/flags, legacy parser
   diagnostics, ONNX config/model-buffer/support, builder-config attachment, layer-output metadata, weight-descriptor parsing,
   parser-refitter diagnostics, and shared copied-string helpers.
@@ -124,14 +125,14 @@ The root ONNX parser core is split into Parsing lifecycle/input, diagnostics, fl
 partials. The parser-specific diagnostic helper moves with diagnostics, while the delegate and copied-string allocator remain
 shared by parser, parser-refitter, and support features; recombination in original segment order must reproduce the prior root blob.
 The root tail owner block is split into Engine inspector core, ExecutionContext binding/enqueue, Serialization host-memory buffer,
-and Engine core metadata partials. Engine-information and IO-tensor-name getters move with their owners; BuilderConfig bit-flag and
-Network/Tensor/Layer name helpers remain in the root until their consuming methods move. Original-order recombination remains required.
+and Engine core metadata partials. Engine-information and IO-tensor-name getters move with their owners. The BuilderConfig bit-flag
+helper remains in the root; Tensor/Layer name helpers move later with their core owner partials. Original-order recombination remains required.
 Cross-version line-binding delegates, the private bindings class, and version routing move from the root into a helper-only Runtime
 partial; six environment-probe operations and their minimal build-chain helpers move into Diagnostics. Generated bindings/helpers
 continue consuming the same private partial type, and original-order recombination must reproduce the prior root blob.
 The root Network definition core moves to `Network/NativeBridgeApi.NetworkCore.cs`, including input/output ownership, layer lookup,
-name/flags metadata, and its private name getter. Layer creation begins with `AddIdentityLayer` and remains in the root for later
-feature splits; Tensor/Layer name and optional-weight helpers likewise remain with their current consumers.
+name/flags metadata, and its private name getter. Layer creation initially remains in the root for later feature splits; optional-weight
+helpers likewise remain with their weighted-layer consumers.
 Identity/constant, convolution, deconvolution, and scale creation now move into separate Layers feature partials. Scale keeps its
 single-feature data-type selector; pin/validation helpers shared by convolution, deconvolution, and scale move into a helper-only
 Layers Shared partial, with recombination preserving original helper order.
@@ -144,6 +145,10 @@ LRN creation/attributes move into three more independent helper-free partials. R
 move into three additional helper-free partials; resize keeps its array pinning inside the feature file. Shape, select, and fill
 creation/attributes move into three final helper-free feature partials before the root enters general Layer metadata at
 `GetLayerOutput`.
+General Layer metadata moves into `Layers/NativeBridgeApi.LayerCoreMetadata.cs` with `MapLayerType` and its private name getter;
+general Tensor metadata moves into `Network/NativeBridgeApi.TensorCoreMetadata.cs` with its private name getter. The BuilderConfig
+bit-flag helper remains in the root, so recombination preserves `root prefix + Layer body + Tensor body + bit-flag helper + Tensor
+name helper + Layer name helper + root close` order.
 
 Generated files remain under their `Generated` folders and should not be manually split. Generator output layout changes must happen in the generator itself and must pass the deterministic generator gate.
 
