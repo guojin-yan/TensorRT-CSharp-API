@@ -64,10 +64,10 @@ Hand-written TensorRT partial interop now starts following the same responsibili
   progress-monitor delegate signatures.
 - `Internal/Interop/Diagnostics` contains copied error-code metadata and TRT11 build probes used only by the environment probe;
   `Internal/Interop/Interfaces` contains owner-scoped versioned-interface metadata copies.
-- `Internal/Interop/Engine` contains engine/inspector boundary controls, copied engine/tensor/profile metadata, Dims64,
-  engine-inspector diagnostics, and weight-streaming/stat runtime controls; `Execution` contains execution-context address/
-  aux-stream controls, boundary controls, runtime-config creation, allocation-strategy, deployment metadata, Dims64,
-  diagnostics, and allocator/event presence controls.
+- `Internal/Interop/Engine` contains engine/inspector boundary controls, copied engine/tensor/profile metadata and values, Dims64,
+  engine-inspector diagnostics/error-recorder controls, and weight-streaming/stat runtime controls; `Execution` contains
+  execution-context address/aux-stream controls, boundary controls, copied engine metadata, runtime-config creation,
+  allocation-strategy, deployment metadata, Dims64, diagnostics, and allocator/event presence controls.
 - `Internal/Interop/Inference` contains synchronous execute/enqueue operations; `Weights` contains copied layer-weight metadata.
 - `Internal/Interop/Layers` contains quantization, attention, fill-int64, compatibility/deployment layer attributes, Dims64,
   tensor metadata, transformer, and RNNv2 operations; `Network` contains network boundary controls, deployment network-layer
@@ -108,6 +108,8 @@ The former `Trt11BoundaryControls` is split across `Builder`, `Engine`, `Executi
 partial; recombination in original segment order must reproduce the pre-split Git blob.
 The former `Trt11FourteenthBatch` is split across two `Builder` feature files plus `Serialization`, `Profiles`, and `Execution`;
 the serialized-network result struct moves with the Builder build-output methods, and recombination must reproduce the pre-split Git blob.
+The former `Trt11FifteenthBatch` is split across two `Engine` feature files and `Execution`; profile-value validation helpers move
+with the Engine profile methods, and recombination must reproduce the pre-split Git blob.
 
 Generated files remain under their `Generated` folders and should not be manually split. Generator output layout changes must happen in the generator itself and must pass the deterministic generator gate.
 

@@ -58,6 +58,8 @@ public sealed class ManagedSourceModuleLayoutTests
                 "NativeBridgeApi.EngineBoundaryControls.cs",
                 "NativeBridgeApi.EngineDeploymentMetadata.cs",
                 "NativeBridgeApi.EngineInspectorDiagnostics.cs",
+                "NativeBridgeApi.EngineInspectorErrorRecorder.cs",
+                "NativeBridgeApi.EngineProfileTensorValues.cs",
                 "NativeBridgeApi.EngineRuntimeControls.cs"
             }
         },
@@ -71,6 +73,7 @@ public sealed class ManagedSourceModuleLayoutTests
                 "NativeBridgeApi.ExecutionContextCreation.cs",
                 "NativeBridgeApi.ExecutionContextDeploymentMetadata.cs",
                 "NativeBridgeApi.ExecutionContextDiagnostics.cs",
+                "NativeBridgeApi.ExecutionContextEngineMetadata.cs",
                 "NativeBridgeApi.ExecutionContextRuntimeControls.cs"
             }
         },
@@ -622,6 +625,40 @@ public sealed class ManagedSourceModuleLayoutTests
         Assert.False(File.Exists(Path.Combine(
             interopDirectory,
             "NativeBridgeApi.Trt11FourteenthBatch.cs")));
+    }
+
+    [Fact]
+    public void TensorRtFifteenthBatchInteropIsSplitByOwnerAndFeature()
+    {
+        string interopDirectory = Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.TensorRtSharp",
+            "Internal",
+            "Interop");
+        string engineProfileSource = File.ReadAllText(Path.Combine(interopDirectory, "Engine", "NativeBridgeApi.EngineProfileTensorValues.cs"));
+        string[] engineProfileMethods = EnumeratePublicStaticMethodNames(engineProfileSource);
+        string[] inspectorMethods = ReadInteropMethodNames(interopDirectory, "Engine", "NativeBridgeApi.EngineInspectorErrorRecorder.cs");
+        string[] executionMethods = ReadInteropMethodNames(interopDirectory, "Execution", "NativeBridgeApi.ExecutionContextEngineMetadata.cs");
+
+        Assert.Equal(new[] { "GetEngineProfileTensorValues", "GetEngineProfileTensorValuesV2" }, engineProfileMethods);
+        Assert.Contains("private static void ValidateProfileTensorValuesInput(", engineProfileSource, StringComparison.Ordinal);
+        Assert.Contains("private static void EnsureTensorRt10(", engineProfileSource, StringComparison.Ordinal);
+        Assert.Equal(new[] { "ClearEngineInspectorErrorRecorder" }, inspectorMethods);
+        Assert.Equal(
+            new[]
+            {
+                "GetExecutionContextInputConsumedEventAddressValue",
+                "GetExecutionContextRuntimeConfigAllocationStrategy",
+                "GetExecutionContextEngineName",
+                "GetExecutionContextEngineIOTensorCount",
+                "GetExecutionContextEngineLayerCount",
+                "GetExecutionContextEngineOptimizationProfileCount"
+            },
+            executionMethods);
+        Assert.False(File.Exists(Path.Combine(
+            interopDirectory,
+            "NativeBridgeApi.Trt11FifteenthBatch.cs")));
     }
 
     private static string[] EnumerateModuleFiles(string projectDirectory, string module)

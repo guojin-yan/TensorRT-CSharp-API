@@ -127,7 +127,7 @@ public sealed class EngineAndRnnReadonlyDiagnosticsTests
         string engineProfileValuesApi = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.Trt11FifteenthBatch.cs");
         string engineProfileValuesSnapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngineProfileTensorValuesSnapshot.cs");
         string engineDeploymentSnapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngineDeploymentSnapshot.cs");
-        string engineProfileValuesInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11FifteenthBatch.cs");
+        string engineProfileValuesInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Engine", "NativeBridgeApi.EngineProfileTensorValues.cs");
         string deploymentInterop =
             ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Engine", "NativeBridgeApi.EngineDeploymentMetadata.cs") +
             ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Execution", "NativeBridgeApi.ExecutionContextDeploymentMetadata.cs") +

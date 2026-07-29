@@ -5781,3 +5781,34 @@ plugin serialization 与 ExecutionContext address/aux-stream 方法连续交错�
   post-publish、Owner acceptance 或 release proof。
 - C 盘 Downloads 顶层当日本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
 - 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 TensorRT Fifteenth Batch Engine And Execution Metadata Split
+
+本阶段将 161 行 `NativeBridgeApi.Trt11FifteenthBatch.cs` 按 owner/feature 拆入两个 Engine 文件与一个 Execution
+文件。原文件包含 engine profile tensor values、engine-inspector error-recorder control 与 execution-context engine
+metadata 三段连续职责；本批只移动完整方法块及其专属 helper，没有改动签名/方法体、版本守卫、entrypoint、
+UTF-8/GCHandle 生命周期、SafeHandle 参数、返回值或异常文案。
+
+### 实现与门禁
+
+- `Engine/NativeBridgeApi.EngineProfileTensorValues.cs`：102 行、2 个 profile tensor value 方法与 2 个专属
+  validation/version helper。
+- `Engine/NativeBridgeApi.EngineInspectorErrorRecorder.cs`：22 行、1 个 inspector error-recorder clear 方法。
+- `Execution/NativeBridgeApi.ExecutionContextEngineMetadata.cs`：57 行、6 个 context event/runtime-config/engine metadata
+  方法。
+- 布局门禁固定 2/1/6 方法集合、2 个 helper 归属和旧根文件禁止回流；两个 readonly diagnostics 源码合同已切到
+  实际 Engine 文件。
+- 三文件按原片段顺序重组后的 Git blob 为 `cc9f64caaf277a1b922d6ad0868f532f0508ad20`，与 HEAD 原文件完全一致。
+
+### 验证与边界
+
+- layout、engine/RNN readonly、engine-inspector 与 readonly candidate evidence 定向集合：`54/54` 一次通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- ignored deferred candidate artifact 已在本机将 profile tensor evidence 迁移到实际 Engine 文件；evidence 为 247 条引用、
+  137 个唯一路径、0 缺失，该 ignored 文件未强制提交。
+- `git diff --check` 通过；Generated/native/manifest/ABI 未修改，未运行完整 ProjectQuality，也未运行依赖本机缺失
+  `pwsh` 的 B-tier 聚合测试。
+- partial 拆分不是 owner/lifetime、ABI/export、TensorRT runtime、Linux、package consumer、public package、
+  post-publish、Owner acceptance 或 release proof。
+- C 盘 Downloads 顶层本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
+- 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
