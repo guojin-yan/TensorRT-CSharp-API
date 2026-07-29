@@ -132,7 +132,7 @@
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": true,
       "winFormsSupported": true,
-      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeBuildPolicy.cs", "src/JYPPX.TensorRtSharp/Builder/TensorRtBuilderFlagMapper.cs", "applications/TensorRtExec"],
+      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeBuildPolicy.IoFormats.cs", "src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeBuildPolicy.Precision.cs", "src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeBuildPolicy.Layers.cs", "src/JYPPX.TensorRtSharp/Builder/TensorRtBuilderFlagMapper.cs", "applications/TensorRtExec"],
       "nextStep": "Retain TRT8/10 compatible-host set/readback evidence; keep TRT11 removed setters guarded and require model-specific layout/output evidence before promotion."
     },
     {

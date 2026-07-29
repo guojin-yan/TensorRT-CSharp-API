@@ -161,6 +161,15 @@ to a 262-line Parse orchestration core; argument collection, scalar/reference pa
 live in four feature partials. The layout gate recomposes the pre-split Git blobs
 `116ff0707028cd234819b023f6b2b5e0ff3cbb43` and `3c94e7b5fe1ed741b722f71eb10f2888f76567b7`.
 
+Trtexec deployment projections and build policies now follow the same ownership rule. The 644-line
+`Trtexec/TrtexecLikeDeploymentOptions.cs` is reduced to a 225-line constructor/default/property core; argument projection,
+diagnostics, tactic-source resolution, memory-pool projection, and shared formatting live in five partials, and
+`TrtexecLikeMemoryPoolSize` has its own file. The 568-line `TrtexecLikeBuildPolicy.cs` is reduced to a 93-line normalization
+and Apply orchestration core; parsing, IO formats, precision constraints, layer policies, rule validation, and data-type/format
+parsing live in six feature partials, while IO-format and layer-rule models are independent internal types. The layout gate
+recomposes the pre-split Git blobs `d55d835f5dd934975af9a302391415e49030a14d` and
+`ef5b4bf488124bb1d37090cbf5cf1b75cf345dfb`.
+
 TensorRT public enums are no longer collected in the 2,456-line `Core/TensorRtEnums.cs`. Its 64 enums are distributed across
 15 module files for shared Core tensor values, Network, Parsing, Execution, Serialization, Engine, Runtime, Builder, Profiles,
 ControlFlow, and the Layers RNN, operation, resize, metadata, and attention domains. Single-value/flags pairs remain together;

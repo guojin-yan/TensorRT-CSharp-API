@@ -15,7 +15,9 @@ TensorRT engine 的构建参数很多：workspace、memory pool、profiling verb
 
 - 高层配置：`src/JYPPX.TensorRtSharp/Builder/TensorRtBuilderConfig.cs`。
 - TRT11 diagnostics：`src/JYPPX.TensorRtSharp/Builder/TensorRtBuilderConfig.Trt11Diagnostics.cs`。
-- trtexec 风格参数：`src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeDeploymentOptions.cs`。
+- trtexec 风格参数：`src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeDeploymentOptions.cs`、
+  `TrtexecLikeDeploymentOptions.Arguments.cs`、`TrtexecLikeDeploymentOptions.Diagnostics.cs`、
+  `TrtexecLikeDeploymentOptions.Tactics.cs`、`TrtexecLikeMemoryPoolSize.cs`。
 - 构建应用点：`src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.DeploymentConfiguration.cs`。
 - copied deployment snapshot：`src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.Diagnostics.cs`。
 - 构建选项状态投影：`src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildDiagnostics.OptionStatus.cs`。

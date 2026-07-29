@@ -6724,3 +6724,40 @@ PGM preprocessing、classification、environment、diagnostics、service helper�
 - source/type relocation 不构成新的 TensorRT/CUDA runtime、real model、Linux、package consumer、public package、
   post-publish、Owner acceptance 或 release proof。
 - 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行远程发布操作。
+
+## 2026-07-30 Trtexec Deployment Options And Build Policy Source Split
+
+本阶段继续整理 `JYPPX.TensorRtSharp.Tools/Trtexec` 的 deployment projection 与 build policy，将 argument、diagnostics、
+tactic、memory pool、IO format、precision、layer policy、rule validation 与 data type parsing 从两个大文件中分离。
+参数顺序、quoted argument、diagnostic 文本、version guard、policy precedence、wildcard 与 fail-closed 行为不变。
+
+### 实现与门禁
+
+- `TrtexecLikeDeploymentOptions.cs` 从 644 行降至 225 行 constructor/default/property core；Arguments、Diagnostics、
+  Tactics、MemoryPools、ProjectionHelpers 进入五份 partial，`TrtexecLikeMemoryPoolSize` 独立成文件。
+- tactic-source XML 文档随 `ResolveTacticSources` 进入 Tactics owner，未在 diagnostics 文件留下悬空文档。
+- `TrtexecLikeBuildPolicy.cs` 从 568 行降至 93 行 normalization/Apply orchestration core；Parsing、IoFormats、
+  Precision、Layers、Rules、DataTypes 进入六份 partial。
+- `TrtexecLikeIoFormatSpec` 与 `TrtexecLikeLayerTypeRule` 两个 internal model 各自成文件。
+- `ManagedTrtexecDeploymentBuildPolicyLayoutTests` 固定 16 个 deployment/policy 文件的精确 method owner、四个 model/core
+  的精确 public property 集合，并按原顺序重组两份拆分前源码。
+- 拆分前 Git blob 为 `d55d835f5dd934975af9a302391415e49030a14d`、
+  `ef5b4bf488124bb1d37090cbf5cf1b75cf345dfb`；normalized SHA-256 保持
+  `cd3154c7ed1bc1fc75023dead6f623b460378ed25898766c7f4bbebf50432e43` 与
+  `68f57328142b52c81d08a6c15f6f7165e55fef7b1da39e5d101fb9c6646c3468`。
+- memory-pool、build-policy、release-readiness 消费测试改读真实 owner；builder-config publishing 文章、gap list、
+  PublishingPublicArticleTests 与双语 source-organization 同步。
+
+### 验证与边界
+
+- 新布局/owner/property/重组门禁：`22/22` 通过；布局加受影响 deployment/policy/article/gap 消费聚焦集合：
+  `115/115` 通过；全部 managed 源码布局门禁合并集合：`336/336` 通过。
+- `JYPPX.TensorRtSharp.Tools` 与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- ignored deferred candidate evidence 保持 260 条引用、147 个唯一路径、0 缺失；当前 92 份 ignored JSON 均可解析，
+  ignored 文件未强制提交。
+- Generated/native/manifest/ABI 改动为 0，`git diff --check` 通过；本机仍无仓库认可的 `pwsh`，未运行
+  exporter/B-tier 聚合测试。
+- 进程审计保留其他父进程启动的 PowerShell 与 MSBuild node-reuse 任务，未终止、删除或借用其他工作区进程。
+- source/model relocation 不构成新的 TensorRT/CUDA runtime、real model、Linux、package consumer、public package、
+  post-publish、Owner acceptance 或 release proof。
+- 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行远程发布操作。

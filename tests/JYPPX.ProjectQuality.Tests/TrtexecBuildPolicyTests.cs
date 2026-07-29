@@ -76,10 +76,21 @@ public sealed class TrtexecBuildPolicyTests
             RepositoryPaths.Root,
             "src",
             "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildService.cs"));
-        string policy = File.ReadAllText(Path.Combine(
-            RepositoryPaths.Root,
-            "src",
-            "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeBuildPolicy.cs"));
+        string policy = string.Concat(
+            File.ReadAllText(Path.Combine(
+                RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeBuildPolicy.cs")),
+            File.ReadAllText(Path.Combine(
+                RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeBuildPolicy.Parsing.cs")),
+            File.ReadAllText(Path.Combine(
+                RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeBuildPolicy.IoFormats.cs")),
+            File.ReadAllText(Path.Combine(
+                RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeBuildPolicy.Precision.cs")),
+            File.ReadAllText(Path.Combine(
+                RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeBuildPolicy.Layers.cs")),
+            File.ReadAllText(Path.Combine(
+                RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeBuildPolicy.Rules.cs")),
+            File.ReadAllText(Path.Combine(
+                RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeBuildPolicy.DataTypes.cs")));
         string diagnostics = File.ReadAllText(Path.Combine(
             RepositoryPaths.Root,
             "src",

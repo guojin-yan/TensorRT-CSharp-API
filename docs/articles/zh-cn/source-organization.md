@@ -141,6 +141,14 @@ Tools 的模型特定 MNIST runtime 与 trtexec-like parser 也在不改变命�
 scalar/reference parsing、build-option values 与 memory units 进入 4 份 feature partial。布局门禁可重组拆分前 Git blob
 `116ff0707028cd234819b023f6b2b5e0ff3cbb43` 与 `3c94e7b5fe1ed741b722f71eb10f2888f76567b7`。
 
+trtexec deployment 投影与 build policy 继续遵循同一 owner 规则。原 644 行
+`Trtexec/TrtexecLikeDeploymentOptions.cs` 降为 225 行 constructor/default/property core；argument projection、
+diagnostics、tactic-source resolution、memory-pool projection 与共享 formatting 进入 5 份 partial，
+`TrtexecLikeMemoryPoolSize` 独立成文件。原 568 行 `TrtexecLikeBuildPolicy.cs` 降为 93 行 normalization/Apply
+orchestration core；parsing、IO formats、precision constraints、layer policies、rule validation、data-type/format parsing
+进入 6 份 feature partial，IO-format 与 layer-rule model 成为独立 internal 类型。布局门禁可重组拆分前 Git blob
+`d55d835f5dd934975af9a302391415e49030a14d` 与 `ef5b4bf488124bb1d37090cbf5cf1b75cf345dfb`。
+
 TensorRT 的 public enum 也不再集中在 2,456 行的 `Core/TensorRtEnums.cs`。其中 64 个 enum 按 Core tensor 基础类型、
 Network、Parsing、Execution、Serialization、Engine、Runtime、Builder、Profiles、ControlFlow，以及 Layers 下的
 RNN、operation、resize、metadata、attention 分入 15 个模块文件；单值/flags 配对保持同文件，名称、underlying type、

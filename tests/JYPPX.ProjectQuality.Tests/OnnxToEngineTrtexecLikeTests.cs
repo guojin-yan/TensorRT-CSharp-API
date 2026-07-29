@@ -1135,7 +1135,8 @@ public sealed class OnnxToEngineTrtexecLikeTests
     {
         string service = ReadBuildService("Core", "DeploymentConfiguration");
         string diagnostics = ReadBuildDiagnostics("OptionStatus");
-        string deployment = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeDeploymentOptions.cs"));
+        string deployment = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeMemoryPoolSize.cs"));
 
         Assert.Contains("memoryPool.ToTensorRtMemoryPoolType()", service, StringComparison.Ordinal);
         Assert.Contains("config.SetMemoryPoolLimit(pool, memoryPool.SizeBytes)", service, StringComparison.Ordinal);

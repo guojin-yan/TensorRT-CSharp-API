@@ -77,7 +77,10 @@ public sealed class ReleaseReadinessSmokeClosureTests
         using JsonDocument parity = ReadJson("samples", "OnnxToEngine", "trtexec-parity-matrix.json");
         string parser = ReadText("src", "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeParser.cs");
         string options = ReadText("src", "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeOptions.cs");
-        string deploymentOptions = ReadText("src", "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeDeploymentOptions.cs");
+        string deploymentOptions = string.Concat(
+            ReadText("src", "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeDeploymentOptions.cs"),
+            ReadText("src", "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeDeploymentOptions.Arguments.cs"),
+            ReadText("src", "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeDeploymentOptions.Diagnostics.cs"));
         string runtimeOptions = ReadText("src", "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeRuntimeOptions.cs");
         string appOptions = ReadText("applications", "TensorRtExec", "Core", "TensorRtExecOptions.cs");
         string appService = ReadText("applications", "TensorRtExec", "Core", "TensorRtExecService.cs");
