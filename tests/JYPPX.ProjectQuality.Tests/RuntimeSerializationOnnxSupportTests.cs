@@ -82,7 +82,9 @@ public sealed class RuntimeSerializationOnnxSupportTests
         string header10 = ReadSource("native", "include", "jyppx", "tensorrt", "trt10.h");
         string header11 = ReadSource("native", "include", "jyppx", "tensorrt", "trt11.h");
         string source = ReadSource("native", "src", "tensorrt", "v11", "modules", "deployment", "runtime_serialization_refit.inc");
-        string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11RuntimeSerializationRefit.cs");
+        string interop =
+            ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Serialization", "NativeBridgeApi.EngineSerialization.cs") +
+            ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Execution", "NativeBridgeApi.ExecutionContextCreation.cs");
         string serializationConfig = ReadSource("src", "JYPPX.TensorRtSharp", "Serialization", "TensorRtSerializationConfig.cs");
         string runtimeConfig = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntimeConfig.cs");
         string engine = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.Trt11Serialization.cs");

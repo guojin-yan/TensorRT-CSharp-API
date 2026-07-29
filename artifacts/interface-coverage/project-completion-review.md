@@ -5499,3 +5499,39 @@ namespace、partial type、方法签名/方法体、P/Invoke entrypoint、版本
   Owner acceptance 或 release proof。
 - C 盘 Downloads 顶层当日本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
 - 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 TensorRT Runtime Serialization Refit Partial Split And Evidence Path Closure
+
+本阶段将 776 行 `NativeBridgeApi.Trt11RuntimeSerializationRefit.cs` 按 owner 拆入 `Runtime`、`Serialization`、
+`Execution` 与 `Refit`。原文件中 serialization 与 execution/runtime-config 方法交错，本批按原始片段边界机械提取，
+没有改动方法签名/方法体、版本分支、异常文案、entrypoint 或 helper 行为。
+
+### 实现与门禁
+
+- `Runtime/NativeBridgeApi.RuntimeDeploymentControls.cs`：264 行、17 个 runtime control/copied diagnostic 方法。
+- `Serialization/NativeBridgeApi.EngineSerialization.cs`：126 行、8 个 engine serialization/config-flag 方法。
+- `Execution/NativeBridgeApi.ExecutionContextCreation.cs`：70 行、5 个 context/runtime-config 创建与 allocation-strategy 方法。
+- `Refit/NativeBridgeApi.RefitterControls.cs`：352 行、23 个 async refit、weights/dynamic-range 与 copied diagnostic 方法。
+- 方法级布局门禁固定 17/8/5/23 数量和 owner 命名规则，并拒绝旧根文件回流；6 处硬编码源码合同已按断言职责读取
+  对应新文件，旧消费路径扫描为 0。
+- 四文件按原交错片段顺序重组后的 Git blob 为 `1acfd88f713d5bbf7b22ea990a29246fc1b023fd`，与 HEAD 原文件一致。
+
+### Evidence 路径校准
+
+- 首次定向集合为 `58/59`，唯一失败来自本机忽略 artifact `deferred-readonly-candidate-list.json` 中的旧 managedSources
+  路径，而非代码断言失败。
+- 审计发现 69 条失效路径、48 个唯一旧路径；47 个可按文件名唯一映射，复合 interop 条目映射为 Runtime 与 Refit 两条。
+- 本机 artifact 完成 69 条原位替换后，所有候选的 native/managed/smoke/quality evidence 路径缺失为 0；该 artifact
+  受 `.gitignore` 管理且从未受 Git 跟踪，本批没有用 `git add -f` 改变其版本控制边界。
+- 新增通用 ProjectQuality 门禁，遍历所有带 `implementationEvidence` 的候选和证据桶，防止后续目录移动留下断链。
+
+### 验证与边界
+
+- 受影响 layout、callback/runtime diagnostics、readonly evidence、runtime serialization 与 refitter diagnostics 集合：
+  最终 `60/60` 通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- `git diff --check` 通过；Generated/native/manifest/ABI 未修改，未运行完整 ProjectQuality。
+- partial 拆分与 evidence path consistency 不是 ABI/export、TensorRT runtime、Linux、package consumer、public package、
+  post-publish、Owner acceptance 或 release proof。
+- C 盘 Downloads 顶层当日本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
+- 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。

@@ -33,7 +33,8 @@ public sealed class ReadonlyDiagnosticsCandidateImplementationEvidenceTests
         string contextControls = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Trt11BoundaryControls.cs");
         string runtimeSnapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntimeDiagnosticSnapshot.cs");
         string bridgeInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11BoundaryControls.cs") +
-            ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11RuntimeSerializationRefit.cs");
+            ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Runtime", "NativeBridgeApi.RuntimeDeploymentControls.cs") +
+            ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Refit", "NativeBridgeApi.RefitterControls.cs");
         string dependencyProbe = ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.cs") +
             ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtDependencyProbeReport.cs");
         string dependencyDiagnostics = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntimeDeserializationDependencyDiagnostics.cs") +
@@ -120,6 +121,46 @@ public sealed class ReadonlyDiagnosticsCandidateImplementationEvidenceTests
         Assert.Contains("PublicGateSurfaceDoesNotExposeRawRecorderPointersOrOwnershipControls", errorRecorderTests);
         Assert.Contains("RuntimeDeserializationDependencyDiagnostics", dependencyTests);
         Assert.Contains("New-RuntimeDeserializationDependencyDiagnosticsEvidence", packageReadinessTests);
+    }
+
+    [Fact]
+    public void AllImplementationEvidencePathsResolveAfterManagedSourceReorganization()
+    {
+        string candidatePath = Path.Combine(
+            RepositoryPaths.Root,
+            "artifacts",
+            "interface-coverage",
+            "deferred-readonly-candidate-list.json");
+        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(candidatePath));
+
+        foreach (JsonProperty group in document.RootElement.GetProperty("groups").EnumerateObject())
+        {
+            foreach (JsonElement candidate in group.Value.EnumerateArray())
+            {
+                if (!candidate.TryGetProperty("implementationEvidence", out JsonElement evidence))
+                {
+                    continue;
+                }
+
+                string candidateId = candidate.GetProperty("candidateId").GetString() ?? string.Empty;
+                foreach (string bucket in new[] { "nativeSources", "managedSources", "smokeSources", "qualityTests" })
+                {
+                    if (!evidence.TryGetProperty(bucket, out JsonElement paths))
+                    {
+                        continue;
+                    }
+
+                    foreach (JsonElement item in paths.EnumerateArray())
+                    {
+                        string path = item.GetString() ?? string.Empty;
+                        Assert.False(string.IsNullOrWhiteSpace(path));
+                        Assert.True(
+                            File.Exists(Path.Combine(RepositoryPaths.Root, path)),
+                            $"{candidateId}:{bucket}:{path}");
+                    }
+                }
+            }
+        }
     }
 
     private static JsonElement FindCandidate(JsonElement groups, string candidateId)

@@ -39,6 +39,7 @@ public sealed class ManagedSourceModuleLayoutTests
                 "NativeBridgeApi.Trt11BuildProbe.cs"
             }
         },
+        { "Execution", new[] { "NativeBridgeApi.ExecutionContextCreation.cs" } },
         { "Inference", new[] { "NativeBridgeApi.SynchronousInference.cs" } },
         { "Interfaces", new[] { "NativeBridgeApi.OwnerScopedVersionedInterfaceMetadata.cs" } },
         {
@@ -88,6 +89,9 @@ public sealed class ManagedSourceModuleLayoutTests
                 "NativeBridgeApi.RuntimePluginRegistryInventory.cs"
             }
         },
+        { "Refit", new[] { "NativeBridgeApi.RefitterControls.cs" } },
+        { "Runtime", new[] { "NativeBridgeApi.RuntimeDeploymentControls.cs" } },
+        { "Serialization", new[] { "NativeBridgeApi.EngineSerialization.cs" } },
         { "Weights", new[] { "NativeBridgeApi.LayerWeightsInfo.cs" } }
     };
 
@@ -254,6 +258,46 @@ public sealed class ManagedSourceModuleLayoutTests
             "NativeBridgeApi.Trt11DeploymentAdditions.cs")));
     }
 
+    [Fact]
+    public void TensorRtRuntimeSerializationRefitInteropIsSplitByOwner()
+    {
+        string interopDirectory = Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.TensorRtSharp",
+            "Internal",
+            "Interop");
+        string[] runtimeMethods = ReadInteropMethodNames(interopDirectory, "Runtime", "NativeBridgeApi.RuntimeDeploymentControls.cs");
+        string[] serializationMethods = ReadInteropMethodNames(interopDirectory, "Serialization", "NativeBridgeApi.EngineSerialization.cs");
+        string[] executionMethods = ReadInteropMethodNames(interopDirectory, "Execution", "NativeBridgeApi.ExecutionContextCreation.cs");
+        string[] refitMethods = ReadInteropMethodNames(interopDirectory, "Refit", "NativeBridgeApi.RefitterControls.cs");
+
+        Assert.Equal(17, runtimeMethods.Length);
+        Assert.All(runtimeMethods, method => Assert.Contains("Runtime", method, StringComparison.Ordinal));
+        Assert.Equal(8, serializationMethods.Length);
+        Assert.All(
+            serializationMethods,
+            method => Assert.True(
+                method.StartsWith("Serialize", StringComparison.Ordinal) ||
+                method.Contains("Serialization", StringComparison.Ordinal),
+                $"Serialization interop contains a non-serialization method: {method}"));
+        Assert.Equal(
+            new[]
+            {
+                "CreateRuntimeConfig",
+                "CreateExecutionContext",
+                "CreateExecutionContext",
+                "SetRuntimeConfigAllocationStrategy",
+                "GetRuntimeConfigAllocationStrategy"
+            },
+            executionMethods);
+        Assert.Equal(23, refitMethods.Length);
+        Assert.All(refitMethods, method => Assert.Contains("Refit", method, StringComparison.Ordinal));
+        Assert.False(File.Exists(Path.Combine(
+            interopDirectory,
+            "NativeBridgeApi.Trt11RuntimeSerializationRefit.cs")));
+    }
+
     private static string[] EnumerateModuleFiles(string projectDirectory, string module)
     {
         return Directory.EnumerateFiles(
@@ -272,5 +316,16 @@ public sealed class ManagedSourceModuleLayoutTests
                 @"public\s+static\s+[^\s]+\s+(?<name>[A-Za-z_][A-Za-z0-9_]*)\s*\(")
             .Select(match => match.Groups["name"].Value)
             .ToArray();
+    }
+
+    private static string[] ReadInteropMethodNames(
+        string interopDirectory,
+        string module,
+        string fileName)
+    {
+        return EnumeratePublicStaticMethodNames(File.ReadAllText(Path.Combine(
+            interopDirectory,
+            module,
+            fileName)));
     }
 }

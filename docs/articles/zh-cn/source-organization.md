@@ -53,12 +53,15 @@ TensorRT 高层 wrapper 也开始按 layer feature 拆分：
   delegate 签名。
 - `Internal/Interop/Diagnostics`：复制型 error-code metadata 与仅由 environment probe 使用的 TRT11 build probes；
   `Internal/Interop/Interfaces`：owner-scoped versioned-interface metadata 复制。
+- `Internal/Interop/Execution`：execution-context/runtime-config 创建与 allocation-strategy 操作。
 - `Internal/Interop/Inference`：同步 execute/enqueue 操作；`Weights`：复制型 layer-weight metadata。
 - `Internal/Interop/Layers`：quantization、attention、fill-int64、兼容/部署型 layer attributes、tensor metadata、
   transformer 与 RNNv2 操作；`Network`：部署型 network layer 创建、refittable-weight 标记与 safe network-v2 操作。
 - `Internal/Interop/Parsing`：legacy parser diagnostics、ONNX config/model buffer/support、builder-config attachment、
   layer-output metadata 与 parser-refitter diagnostics。
 - `Internal/Interop/Plugins`：builder capability/runtime registry inventories，以及复制型 V2/V3 layer metadata/query snapshot。
+- `Internal/Interop/Runtime`：runtime deployment controls 与复制型 diagnostics；`Serialization`：engine serialization 与
+  serialization-config flags；`Refit`：async refit、weights/dynamic-range 与 refitter diagnostics。
 
 `NativeBridgeApi.GlobalRuntimePluginProbe.cs` 仍保留在 interop 根目录，因为它混合了 global runtime version、logger、
 ONNX parser version 与 plugin-registry 操作；应在单独的行为拆分批次中处理，不能标记为纯 plugin 文件。
@@ -70,6 +73,8 @@ parsing。callback 文件归类不等于 callback trampoline、lifetime 或 runt
 `Trt11Diagnostics`、`Trt11Dims64` 与 `Trt11RuntimeControls` 不会仅依据文件名前缀分类。
 原 `Trt11DeploymentAdditions` 已按方法 owner 拆为 `Network/NativeBridgeApi.DeploymentNetworkLayers.cs` 与
 `Layers/NativeBridgeApi.DeploymentLayerAttributes.cs`；两部分重组后的 Git blob 必须与拆分前原文件一致。
+原 `Trt11RuntimeSerializationRefit` 也已拆入 `Runtime`、`Serialization`、`Execution` 与 `Refit`；四部分按原片段顺序
+重组后必须恢复拆分前 Git blob。
 
 生成文件继续保留在各自 `Generated` 文件夹下，不手工拆分。若需要调整生成文件布局，必须通过 generator 本身完成，并通过生成器确定性门禁。
 

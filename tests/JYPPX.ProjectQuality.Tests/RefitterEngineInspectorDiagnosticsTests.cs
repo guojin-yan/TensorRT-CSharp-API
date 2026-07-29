@@ -48,7 +48,7 @@ public sealed class RefitterEngineInspectorDiagnosticsTests
     {
         string wrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Refit", "TensorRtRefitter.cs") +
             ReadSource("src", "JYPPX.TensorRtSharp", "Refit", "TensorRtRefitter.Trt11Controls.cs");
-        string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11RuntimeSerializationRefit.cs");
+        string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Refit", "NativeBridgeApi.RefitterControls.cs");
 
         Assert.Contains("public int MaxThreads", wrapper);
         Assert.Contains("public bool HasErrorRecorder", wrapper);
