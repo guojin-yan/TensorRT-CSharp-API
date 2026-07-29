@@ -39,11 +39,19 @@ public sealed class ManagedSourceModuleLayoutTests
                 "NativeBridgeApi.Trt11BuildProbe.cs"
             }
         },
-        { "Engine", new[] { "NativeBridgeApi.EngineDeploymentMetadata.cs" } },
+        {
+            "Engine",
+            new[]
+            {
+                "NativeBridgeApi.Dims64EngineMetadata.cs",
+                "NativeBridgeApi.EngineDeploymentMetadata.cs"
+            }
+        },
         {
             "Execution",
             new[]
             {
+                "NativeBridgeApi.Dims64ExecutionContext.cs",
                 "NativeBridgeApi.ExecutionContextCreation.cs",
                 "NativeBridgeApi.ExecutionContextDeploymentMetadata.cs"
             }
@@ -55,6 +63,7 @@ public sealed class ManagedSourceModuleLayoutTests
             new[]
             {
                 "NativeBridgeApi.DeploymentLayerAttributes.cs",
+                "NativeBridgeApi.Dims64LayerMetadata.cs",
                 "NativeBridgeApi.LayerDeploymentMetadata.cs",
                 "NativeBridgeApi.Quantization.cs",
                 "NativeBridgeApi.ThirtyThirdBatchLayerAttributes.cs",
@@ -70,6 +79,7 @@ public sealed class ManagedSourceModuleLayoutTests
             new[]
             {
                 "NativeBridgeApi.DeploymentNetworkLayers.cs",
+                "NativeBridgeApi.Dims64NetworkTensor.cs",
                 "NativeBridgeApi.Trt11SafeNetworkV2.cs"
             }
         },
@@ -98,6 +108,7 @@ public sealed class ManagedSourceModuleLayoutTests
                 "NativeBridgeApi.RuntimePluginRegistryInventory.cs"
             }
         },
+        { "Profiles", new[] { "NativeBridgeApi.Dims64OptimizationProfile.cs" } },
         {
             "Refit",
             new[]
@@ -355,6 +366,48 @@ public sealed class ManagedSourceModuleLayoutTests
         Assert.False(File.Exists(Path.Combine(
             interopDirectory,
             "NativeBridgeApi.DeploymentMetadata.cs")));
+    }
+
+    [Fact]
+    public void TensorRtDims64InteropIsSplitByOwner()
+    {
+        string interopDirectory = Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.TensorRtSharp",
+            "Internal",
+            "Interop");
+        string[] networkMethods = ReadInteropMethodNames(interopDirectory, "Network", "NativeBridgeApi.Dims64NetworkTensor.cs");
+        string[] engineMethods = ReadInteropMethodNames(interopDirectory, "Engine", "NativeBridgeApi.Dims64EngineMetadata.cs");
+        string[] executionMethods = ReadInteropMethodNames(interopDirectory, "Execution", "NativeBridgeApi.Dims64ExecutionContext.cs");
+        string[] profileMethods = ReadInteropMethodNames(interopDirectory, "Profiles", "NativeBridgeApi.Dims64OptimizationProfile.cs");
+        string[] layerMethods = ReadInteropMethodNames(interopDirectory, "Layers", "NativeBridgeApi.Dims64LayerMetadata.cs");
+
+        Assert.Equal(6, networkMethods.Length);
+        Assert.All(
+            networkMethods,
+            method => Assert.True(
+                method.StartsWith("GetTensor", StringComparison.Ordinal) ||
+                method.Contains("Network", StringComparison.Ordinal),
+                $"Network Dims64 interop contains a non-network/tensor method: {method}"));
+        Assert.Equal(4, engineMethods.Length);
+        Assert.All(engineMethods, method => Assert.Contains("Engine", method, StringComparison.Ordinal));
+        Assert.Equal(4, executionMethods.Length);
+        Assert.All(executionMethods, method => Assert.Contains("ExecutionContext", method, StringComparison.Ordinal));
+        Assert.Equal(2, profileMethods.Length);
+        Assert.All(profileMethods, method => Assert.Contains("OptimizationProfile", method, StringComparison.Ordinal));
+        Assert.Equal(27, layerMethods.Length);
+        Assert.DoesNotContain(layerMethods, method =>
+            method.Contains("Engine", StringComparison.Ordinal) ||
+            method.Contains("ExecutionContext", StringComparison.Ordinal) ||
+            method.Contains("Network", StringComparison.Ordinal) ||
+            method.Contains("OptimizationProfile", StringComparison.Ordinal));
+        Assert.All(
+            networkMethods.Concat(engineMethods).Concat(executionMethods).Concat(profileMethods).Concat(layerMethods),
+            method => Assert.EndsWith("64", method, StringComparison.Ordinal));
+        Assert.False(File.Exists(Path.Combine(
+            interopDirectory,
+            "NativeBridgeApi.Trt11Dims64.cs")));
     }
 
     private static string[] EnumerateModuleFiles(string projectDirectory, string module)

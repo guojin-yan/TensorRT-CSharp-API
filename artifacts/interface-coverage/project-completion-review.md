@@ -5566,3 +5566,31 @@ namespace、partial type、方法签名/方法体、P/Invoke entrypoint、版本
   Owner acceptance 或 release proof。
 - C 盘 Downloads 顶层当日本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
 - 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 TensorRT Dims64 Owner Partial Split
+
+本阶段将 273 行 `NativeBridgeApi.Trt11Dims64.cs` 按 owner 拆入 Network、Engine、Execution、Profiles 与 Layers。
+三个 layer getter delegate 和三个私有 helper 只服务 layer 方法，因此随 Layers 文件移动，不需要新增 Shared partial。
+所有方法签名/方法体、entrypoint、版本守卫与异常行为保持不变。
+
+### 实现与门禁
+
+- `Network/NativeBridgeApi.Dims64NetworkTensor.cs`：57 行、6 个 tensor/network shape 与 extent 方法。
+- `Engine/NativeBridgeApi.Dims64EngineMetadata.cs`：49 行、4 个 engine tensor/profile shape 方法。
+- `Execution/NativeBridgeApi.Dims64ExecutionContext.cs`：49 行、4 个 context shape/stride 方法。
+- `Profiles/NativeBridgeApi.Dims64OptimizationProfile.cs`：29 行、2 个 optimization-profile shape 方法。
+- `Layers/NativeBridgeApi.Dims64LayerMetadata.cs`：125 行、27 个 layer slot/feature Dims64 方法及专属 delegate/helper。
+- 方法级布局门禁固定 6/4/4/2/27 数量、`*64` 后缀与 owner 排斥规则，并拒绝旧根文件回流。
+- 五文件按原七段顺序重组后的 Git blob 为 `4d686dae4a948d978328c0d0e9da98d452f4adb9`，与 HEAD 原文件一致；
+  旧文件名仅保留在负向门禁中，不存在源码、文档或 evidence 消费路径。
+
+### 验证与边界
+
+- layout 与 parser layer-output metadata 定向集合：`39/39` 通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- ignored deferred candidate artifact 的全 evidence 路径缺失保持 0；本批无需更新该 artifact。
+- `git diff --check` 通过；Generated/native/manifest/ABI 未修改，未运行完整 ProjectQuality。
+- Dims64 partial 拆分不是 ABI/export、TensorRT runtime、Linux、package consumer、public package、post-publish、
+  Owner acceptance 或 release proof。
+- C 盘 Downloads 顶层当日本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
+- 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。

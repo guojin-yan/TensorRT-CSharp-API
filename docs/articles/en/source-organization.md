@@ -63,15 +63,16 @@ Hand-written TensorRT partial interop now starts following the same responsibili
   progress-monitor delegate signatures.
 - `Internal/Interop/Diagnostics` contains copied error-code metadata and TRT11 build probes used only by the environment probe;
   `Internal/Interop/Interfaces` contains owner-scoped versioned-interface metadata copies.
-- `Internal/Interop/Engine` contains copied engine/tensor/profile metadata; `Execution` contains execution-context/runtime-config
-  creation, allocation-strategy, and context deployment-metadata operations.
+- `Internal/Interop/Engine` contains copied engine/tensor/profile metadata and Dims64 queries; `Execution` contains
+  execution-context/runtime-config creation, allocation-strategy, context deployment metadata, and Dims64 queries.
 - `Internal/Interop/Inference` contains synchronous execute/enqueue operations; `Weights` contains copied layer-weight metadata.
-- `Internal/Interop/Layers` contains quantization, attention, fill-int64, compatibility/deployment layer attributes, tensor
-  metadata, transformer, and RNNv2 operations; `Network` contains deployment network-layer creation, refittable-weight markers,
-  and safe network-v2 operations.
+- `Internal/Interop/Layers` contains quantization, attention, fill-int64, compatibility/deployment layer attributes, Dims64,
+  tensor metadata, transformer, and RNNv2 operations; `Network` contains deployment network-layer creation, tensor/network
+  Dims64, refittable-weight markers, and safe network-v2 operations.
 - `Internal/Interop/Parsing` contains legacy parser diagnostics, ONNX config/model-buffer/support, builder-config attachment,
   layer-output metadata, and parser-refitter diagnostics.
 - `Internal/Interop/Plugins` contains builder capability/runtime registry inventories and copied V2/V3 layer metadata/query snapshots.
+- `Internal/Interop/Profiles` contains optimization-profile Dims64 shape queries.
 - `Internal/Interop/Runtime` contains runtime deployment controls and copied diagnostics; `Serialization` contains engine
   serialization and serialization-config flags; `Refit` contains async refit, weights/dynamic-range, entry metadata, and
   refitter diagnostics.
@@ -80,13 +81,15 @@ Hand-written TensorRT partial interop now starts following the same responsibili
 
 `NativeBridgeApi.SafeDeferredUplift.cs` also remains at the root because it combines plugin initialization with ONNX weight-descriptor parsing. Callback file placement is not callback trampoline, lifetime, or runtime proof.
 
-Version-prefixed files remain at the root when their method set crosses builder, engine, execution-context, network, and layer owners. In particular, `Trt11Diagnostics`, `Trt11Dims64`, and `Trt11RuntimeControls` are not classified by filename alone.
+Version-prefixed files remain at the root when their method set crosses builder, engine, execution-context, network, and layer owners. In particular, `Trt11Diagnostics` and `Trt11RuntimeControls` are not classified by filename alone.
 The former `Trt11DeploymentAdditions` is split by method owner into `Network/NativeBridgeApi.DeploymentNetworkLayers.cs` and
 `Layers/NativeBridgeApi.DeploymentLayerAttributes.cs`; recombining both parts must reproduce the pre-split Git blob.
 The former `Trt11RuntimeSerializationRefit` is also split across `Runtime`, `Serialization`, `Execution`, and `Refit`; recombining
 the four files in original segment order must reproduce the pre-split Git blob.
 The former `DeploymentMetadata` is split across `Engine`, `Execution`, `Layers`, and `Refit`; only delegates and cross-owner private
 helpers remain in the root `NativeBridgeApi.DeploymentMetadataShared.cs`, and recombination must reproduce the pre-split Git blob.
+The former `Trt11Dims64` is split across `Network`, `Engine`, `Execution`, `Profiles`, and `Layers`; layer getter delegates/helpers
+move with `Layers`, and recombination in original segment order must reproduce the pre-split Git blob.
 
 Generated files remain under their `Generated` folders and should not be manually split. Generator output layout changes must happen in the generator itself and must pass the deterministic generator gate.
 
