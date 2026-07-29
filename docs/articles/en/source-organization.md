@@ -58,8 +58,8 @@ TensorRT high-level wrappers are also being split by layer feature area:
 
 Hand-written TensorRT partial interop now starts following the same responsibility modules:
 
-- `Internal/Interop/Builder` contains build outputs, builder boundary controls, timing-cache, builder-config diagnostics,
-  plugin serialization, and runtime controls; `ControlFlow` contains loop/conditional operations.
+- `Internal/Interop/Builder` contains build outputs, builder boundary controls, timing-cache lifecycle/TRT11 controls,
+  builder-config diagnostics, plugin serialization, and runtime controls; `ControlFlow` contains loop/conditional operations.
 - `Internal/Interop/Callbacks` contains allocator dry-run controls, callback interface/state copies, and logger/profiler/
   progress-monitor delegate signatures.
 - `Internal/Interop/Diagnostics` contains copied error-code metadata and TRT11 build probes used only by the environment probe;
@@ -110,6 +110,9 @@ The former `Trt11FourteenthBatch` is split across two `Builder` feature files pl
 the serialized-network result struct moves with the Builder build-output methods, and recombination must reproduce the pre-split Git blob.
 The former `Trt11FifteenthBatch` is split across two `Engine` feature files and `Execution`; profile-value validation helpers move
 with the Engine profile methods, and recombination must reproduce the pre-split Git blob.
+The root `NativeBridgeApi.cs` is now reduced in small owner/feature batches: its cross-version timing-cache create/set/serialize
+segment moves to `Builder/NativeBridgeApi.TimingCacheLifecycle.cs`, and reinserting that segment at its original position must
+reproduce the pre-split root Git blob.
 
 Generated files remain under their `Generated` folders and should not be manually split. Generator output layout changes must happen in the generator itself and must pass the deterministic generator gate.
 

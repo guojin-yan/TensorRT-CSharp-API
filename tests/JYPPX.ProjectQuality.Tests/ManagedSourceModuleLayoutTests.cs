@@ -26,6 +26,7 @@ public sealed class ManagedSourceModuleLayoutTests
                 "NativeBridgeApi.BuilderConfigDiagnostics.cs",
                 "NativeBridgeApi.BuilderConfigPluginSerialization.cs",
                 "NativeBridgeApi.BuilderConfigRuntimeControls.cs",
+                "NativeBridgeApi.TimingCacheLifecycle.cs",
                 "NativeBridgeApi.Trt11TimingCache.cs"
             }
         },
@@ -659,6 +660,30 @@ public sealed class ManagedSourceModuleLayoutTests
         Assert.False(File.Exists(Path.Combine(
             interopDirectory,
             "NativeBridgeApi.Trt11FifteenthBatch.cs")));
+    }
+
+    [Fact]
+    public void TensorRtRootTimingCacheLifecycleIsSplitIntoBuilderModule()
+    {
+        string interopDirectory = Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.TensorRtSharp",
+            "Internal",
+            "Interop");
+        string rootSource = File.ReadAllText(Path.Combine(interopDirectory, "NativeBridgeApi.cs"));
+        string[] rootMethods = EnumeratePublicStaticMethodNames(rootSource);
+        string[] timingCacheMethods = ReadInteropMethodNames(
+            interopDirectory,
+            "Builder",
+            "NativeBridgeApi.TimingCacheLifecycle.cs");
+
+        Assert.Equal(
+            new[] { "CreateTimingCache", "SetTimingCache", "SerializeTimingCache" },
+            timingCacheMethods);
+        Assert.DoesNotContain("CreateTimingCache", rootMethods);
+        Assert.DoesNotContain("SetTimingCache", rootMethods);
+        Assert.DoesNotContain("SerializeTimingCache", rootMethods);
     }
 
     private static string[] EnumerateModuleFiles(string projectDirectory, string module)

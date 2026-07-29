@@ -48,8 +48,8 @@ TensorRT 高层 wrapper 也开始按 layer feature 拆分：
 
 手写 TensorRT partial interop 也开始按相同职责模块归类：
 
-- `Internal/Interop/Builder`：build outputs、builder boundary controls、timing-cache、builder-config diagnostics、
-  plugin serialization 与 runtime controls；`ControlFlow`：loop/conditional 操作。
+- `Internal/Interop/Builder`：build outputs、builder boundary controls、timing-cache lifecycle/TRT11 controls、
+  builder-config diagnostics、plugin serialization 与 runtime controls；`ControlFlow`：loop/conditional 操作。
 - `Internal/Interop/Callbacks`：allocator dry-run、callback interface/state 复制，以及 logger/profiler/progress-monitor
   delegate 签名。
 - `Internal/Interop/Diagnostics`：复制型 error-code metadata 与仅由 environment probe 使用的 TRT11 build probes；
@@ -99,6 +99,8 @@ TensorRT 高层 wrapper 也开始按 layer feature 拆分：
 结果 struct 随 Builder build-output 方法移动，五部分按原片段顺序重组后必须恢复拆分前 Git blob。
 原 `Trt11FifteenthBatch` 已拆入两个 `Engine` feature 文件与 `Execution`；profile-value validation helper 随 Engine profile
 方法移动，三部分按原片段顺序重组后必须恢复拆分前 Git blob。
+根 `NativeBridgeApi.cs` 开始按小批 owner/feature 区段持续瘦身：跨版本 timing-cache create/set/serialize 片段已移入
+`Builder/NativeBridgeApi.TimingCacheLifecycle.cs`，将该片段插回原位置后必须恢复拆分前的根文件 Git blob。
 
 生成文件继续保留在各自 `Generated` 文件夹下，不手工拆分。若需要调整生成文件布局，必须通过 generator 本身完成，并通过生成器确定性门禁。
 

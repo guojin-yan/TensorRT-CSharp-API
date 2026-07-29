@@ -5812,3 +5812,31 @@ UTF-8/GCHandle 生命周期、SafeHandle 参数、返回值或异常文案。
   post-publish、Owner acceptance 或 release proof。
 - C 盘 Downloads 顶层本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
 - 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 TensorRT Root Timing Cache Lifecycle Partial Split
+
+本阶段开始对 4,882 行根 `NativeBridgeApi.cs` 做小批、可重组的 owner/feature 瘦身，先将其中连续 79 行的跨版本
+timing-cache lifecycle 片段移入 Builder。该片段只有 create/set/serialize 三个公开方法，没有专属跨段 helper；本批
+没有改动签名/方法体、TRT8/10/11 分支、entrypoint、GCHandle finally 释放、返回值或异常文案。
+
+### 实现与门禁
+
+- `Builder/NativeBridgeApi.TimingCacheLifecycle.cs`：89 行，其中 79 行为原始方法片段，包含 `CreateTimingCache`、
+  `SetTimingCache`、`SerializeTimingCache`。
+- 根 `NativeBridgeApi.cs` 从 4,882 行降至 4,803 行；布局门禁固定三个方法只归属 Builder lifecycle partial，并禁止
+  方法体回流根文件。
+- 将 79 行片段插回根文件原第 3546 行位置后，重组 Git blob 为
+  `ffd4c81df9d553a1a24575539130576566662206`，与拆分前 HEAD 根文件完全一致。
+
+### 验证与边界
+
+- layout、BuilderConfig scalar 与 runtime serialization stream 定向集合：`49/49` 一次通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- ignored deferred candidate artifact 仍引用存在的根文件，无需迁移；evidence 保持 247 条引用、137 个唯一路径、
+  0 缺失，该 ignored 文件未强制提交。
+- `git diff --check` 通过；Generated/native/manifest/ABI 未修改，未运行完整 ProjectQuality，也未运行依赖本机缺失
+  `pwsh` 的 B-tier 聚合测试。
+- partial 拆分不是 timing-cache runtime correctness、owner/lifetime、ABI/export、Linux、package consumer、
+  public package、post-publish、Owner acceptance 或 release proof。
+- C 盘 Downloads 顶层本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
+- 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
