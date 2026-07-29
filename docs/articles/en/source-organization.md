@@ -62,7 +62,8 @@ Hand-written TensorRT partial interop now starts following the same responsibili
   builder-config diagnostics, plugin serialization, and runtime controls; `ControlFlow` contains loop/conditional operations.
 - `Internal/Interop/Callbacks` contains allocator dry-run controls, callback interface/state copies, and logger/profiler/
   progress-monitor delegate signatures.
-- `Internal/Interop/Diagnostics` contains copied error-code metadata and TRT11 build probes used only by the environment probe;
+- `Internal/Interop/Diagnostics` contains copied error-code metadata plus cross-version/TRT11 build-chain probes used only by
+  the environment probe;
   `Internal/Interop/Interfaces` contains owner-scoped versioned-interface metadata copies.
 - `Internal/Interop/Engine` contains core/deployment engine metadata, inspector lifecycle/information/boundary/diagnostics,
   copied tensor/profile values, Dims64, error-recorder controls, and weight-streaming/stat runtime controls; `Execution` contains
@@ -78,7 +79,8 @@ Hand-written TensorRT partial interop now starts following the same responsibili
 - `Internal/Interop/Plugins` contains plugin initialization, global/builder/runtime registry inventories, and copied V2/V3 layer
   metadata/query snapshots.
 - `Internal/Interop/Profiles` contains optimization-profile Dims64 and shape-value queries.
-- `Internal/Interop/Runtime` contains global runtime version/logger probes, runtime deployment controls, and copied diagnostics;
+- `Internal/Interop/Runtime` contains cross-version line-binding helpers, global runtime version/logger probes, runtime deployment
+  controls, and copied diagnostics;
 - `Serialization` contains engine serialization, serialization-config flags, and host-memory buffer/metadata; `Refit` contains async refit,
   weights/dynamic-range, entry metadata, and refitter diagnostics.
 
@@ -120,6 +122,9 @@ shared by parser, parser-refitter, and support features; recombination in origin
 The root tail owner block is split into Engine inspector core, ExecutionContext binding/enqueue, Serialization host-memory buffer,
 and Engine core metadata partials. Engine-information and IO-tensor-name getters move with their owners; BuilderConfig bit-flag and
 Network/Tensor/Layer name helpers remain in the root until their consuming methods move. Original-order recombination remains required.
+Cross-version line-binding delegates, the private bindings class, and version routing move from the root into a helper-only Runtime
+partial; six environment-probe operations and their minimal build-chain helpers move into Diagnostics. Generated bindings/helpers
+continue consuming the same private partial type, and original-order recombination must reproduce the prior root blob.
 
 Generated files remain under their `Generated` folders and should not be manually split. Generator output layout changes must happen in the generator itself and must pass the deterministic generator gate.
 

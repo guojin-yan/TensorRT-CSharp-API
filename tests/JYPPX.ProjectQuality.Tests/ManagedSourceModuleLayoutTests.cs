@@ -47,6 +47,7 @@ public sealed class ManagedSourceModuleLayoutTests
             "Diagnostics",
             new[]
             {
+                "NativeBridgeApi.BuildChainProbe.cs",
                 "NativeBridgeApi.ErrorCodeMetadata.cs",
                 "NativeBridgeApi.Trt11BuildProbe.cs"
             }
@@ -163,6 +164,7 @@ public sealed class ManagedSourceModuleLayoutTests
             "Runtime",
             new[]
             {
+                "NativeBridgeApi.CrossVersionLineBindings.cs",
                 "NativeBridgeApi.GlobalRuntimeVersion.cs",
                 "NativeBridgeApi.RuntimeDeploymentControls.cs"
             }
@@ -840,6 +842,59 @@ public sealed class ManagedSourceModuleLayoutTests
         Assert.Contains("private static BridgeStatusCode GetNetworkNameNative(", rootSource, StringComparison.Ordinal);
         Assert.Contains("private static BridgeStatusCode GetTensorNameNative(", rootSource, StringComparison.Ordinal);
         Assert.Contains("private static BridgeStatusCode GetLayerNameNative(", rootSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TensorRtRootBuildChainProbeAndBindingsAreSplitByBehavior()
+    {
+        string interopDirectory = Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.TensorRtSharp",
+            "Internal",
+            "Interop");
+        string rootSource = File.ReadAllText(Path.Combine(interopDirectory, "NativeBridgeApi.cs"));
+        string[] rootMethods = EnumeratePublicStaticMethodNames(rootSource);
+        string probeSource = File.ReadAllText(Path.Combine(
+            interopDirectory,
+            "Diagnostics",
+            "NativeBridgeApi.BuildChainProbe.cs"));
+        string[] probeMethods = EnumeratePublicStaticMethodNames(probeSource);
+        string bindingsSource = File.ReadAllText(Path.Combine(
+            interopDirectory,
+            "Runtime",
+            "NativeBridgeApi.CrossVersionLineBindings.cs"));
+
+        Assert.Equal(
+            new[]
+            {
+                "TryCreateRuntime",
+                "TryCreateBuilder",
+                "TryRunTrt10MinimalBuildChain",
+                "TryBuildTrt10SerializedNetworkOnly",
+                "TryRunTrt8MinimalBuildChain",
+                "TryBuildTrt8SerializedNetworkOnly"
+            },
+            probeMethods);
+        Assert.Contains("private static bool TryRunTrtMinimalBuildChain(", probeSource, StringComparison.Ordinal);
+        Assert.Contains("private static bool TryBuildSerializedNetworkOnly(", probeSource, StringComparison.Ordinal);
+        Assert.Empty(EnumeratePublicStaticMethodNames(bindingsSource));
+        Assert.Equal(9, Regex.Matches(bindingsSource, @"private delegate BridgeStatusCode ").Count);
+        Assert.Contains("private sealed class TensorRtLineBindings", bindingsSource, StringComparison.Ordinal);
+        Assert.Contains("private static TensorRtLineBindings GetBindings(", bindingsSource, StringComparison.Ordinal);
+        Assert.Contains("private static bool IsBridgeBuiltForTensorRt11(", bindingsSource, StringComparison.Ordinal);
+
+        foreach (string method in probeMethods)
+        {
+            Assert.DoesNotContain(method, rootMethods);
+        }
+
+        Assert.DoesNotContain("private delegate BridgeStatusCode QueryAdapterInfoDelegate", rootSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("private delegate BridgeStatusCode LoggerCreateDelegate", rootSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("private sealed class TensorRtLineBindings", rootSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("private static TensorRtLineBindings GetBindings(", rootSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("private static bool TryRunTrtMinimalBuildChain(", rootSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("private static bool TryBuildSerializedNetworkOnly(", rootSource, StringComparison.Ordinal);
     }
 
     private static string[] EnumerateModuleFiles(string projectDirectory, string module)

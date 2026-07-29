@@ -52,7 +52,7 @@ TensorRT 高层 wrapper 也开始按 layer feature 拆分：
   builder-config diagnostics、plugin serialization 与 runtime controls；`ControlFlow`：loop/conditional 操作。
 - `Internal/Interop/Callbacks`：allocator dry-run、callback interface/state 复制，以及 logger/profiler/progress-monitor
   delegate 签名。
-- `Internal/Interop/Diagnostics`：复制型 error-code metadata 与仅由 environment probe 使用的 TRT11 build probes；
+- `Internal/Interop/Diagnostics`：复制型 error-code metadata 与仅由 environment probe 使用的跨版本/TRT11 build-chain probes；
   `Internal/Interop/Interfaces`：owner-scoped versioned-interface metadata 复制。
 - `Internal/Interop/Engine`：core/deployment engine metadata、inspector lifecycle/information/boundary/diagnostics、
   tensor/profile copied values、Dims64、error-recorder controls 与 weight-streaming/stat runtime controls；`Execution`：
@@ -68,7 +68,8 @@ TensorRT 高层 wrapper 也开始按 layer feature 拆分：
 - `Internal/Interop/Plugins`：plugin initialization、global/builder/runtime registry inventories，以及复制型 V2/V3 layer
   metadata/query snapshot。
 - `Internal/Interop/Profiles`：optimization-profile Dims64 与 shape-value 查询。
-- `Internal/Interop/Runtime`：global runtime version/logger probes、runtime deployment controls 与复制型 diagnostics；
+- `Internal/Interop/Runtime`：跨版本 line-binding helper、global runtime version/logger probes、runtime deployment controls
+  与复制型 diagnostics；
   `Serialization`：engine serialization、serialization-config flags 与 host-memory buffer/metadata；`Refit`：async refit、weights/dynamic-range、
   entry metadata 与 refitter diagnostics。
 
@@ -108,6 +109,9 @@ parser-refitter、support 共用；按原片段顺序重组后必须恢复拆分
 根文件尾部 owner 区段已拆为 Engine inspector core、ExecutionContext binding/enqueue、Serialization host-memory buffer 与
 Engine core metadata partial。engine-information 与 IO-tensor-name getter helper 随 owner 移动；BuilderConfig bit-flag 及
 Network/Tensor/Layer name helper 在其消费方法迁移前继续保留根文件，且仍要求按原顺序重组。
+跨版本 line-binding delegate、私有 bindings class 与版本路由已移入 helper-only Runtime partial；六个 environment-probe
+操作及 minimal build-chain helper 已移入 Diagnostics。生成的 bindings/helper 仍消费同一 partial 私有类型，按原顺序
+重组后必须恢复拆分前根文件 blob。
 
 生成文件继续保留在各自 `Generated` 文件夹下，不手工拆分。若需要调整生成文件布局，必须通过 generator 本身完成，并通过生成器确定性门禁。
 

@@ -5908,3 +5908,34 @@ getter 各只服务一个新 owner；BuilderConfig bit-flag 以及 Network/Tenso
   consumer、public package、post-publish、Owner acceptance 或 release proof。
 - C 盘 Downloads 顶层本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
 - 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 TensorRT Root Cross Version Bindings And Build Chain Probe Split
+
+本阶段将根 `NativeBridgeApi.cs` 中的跨版本 line bindings 与 environment build-chain probe 按“共享路由”与“诊断行为”
+拆开。`TensorRtLineBindings` 同时被根 core 方法、生成 bindings/helper 和 TRT11 build probe 使用，因此归入 Runtime
+helper-only partial；六个 `Try*` probe 与两个执行 helper 只服务 environment diagnostics，因此归入 Diagnostics。
+没有修改生成文件、路由条件、SafeHandle using 链、失败 fallback 文案或 build/deserialization/context 创建顺序。
+
+### 实现与门禁
+
+- `Runtime/NativeBridgeApi.CrossVersionLineBindings.cs`：81 行、0 个公开方法，保存 9 个 delegate、私有
+  `TensorRtLineBindings` class、`GetBindings` 与 TRT11 bridge-build 判定。
+- `Diagnostics/NativeBridgeApi.BuildChainProbe.cs`：167 行、6 个公开 runtime/builder/TRT8/10 build-chain probes 与
+  2 个私有 minimal-build/serialized-build helper；既有 TRT11 probe 继续调用同一 helper。
+- 根 `NativeBridgeApi.cs` 从 3,878 行降至 3,649 行；布局门禁固定 6/0 方法分布、9 delegate、helper-only Runtime
+  约束，并禁止 bindings class/helper 与 build-chain helper 定义回流根文件。
+- 按 `root header + bindings first delegates + root prefix + probe public + bindings body + probe helpers + root suffix`
+  原顺序重组后的 Git blob 为 `bbd2f2227ad3b3eeca69bf0099d023a0ff8b7b5a`，与拆分前 HEAD 根文件完全一致。
+
+### 验证与边界
+
+- layout、TRT11 runtime-create diagnostic 与 runtime deserialization precheck 定向集合：`51/51` 一次通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- ignored deferred candidate artifact 仍引用存在的根文件，无需迁移；evidence 保持 247 条引用、137 个唯一路径、
+  0 缺失，该 ignored 文件未强制提交。
+- `git diff --check` 通过；Generated/native/manifest/ABI 未修改，未运行完整 ProjectQuality，也未运行依赖本机缺失
+  `pwsh` 的 B-tier 聚合测试。
+- partial 拆分不是 build/runtime correctness、owner/lifetime、ABI/export、Linux、package consumer、public package、
+  post-publish、Owner acceptance 或 release proof。
+- C 盘 Downloads 顶层本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
+- 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
