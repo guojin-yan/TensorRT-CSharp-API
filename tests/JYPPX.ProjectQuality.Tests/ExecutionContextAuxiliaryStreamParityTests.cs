@@ -62,7 +62,7 @@ public sealed class ExecutionContextAuxiliaryStreamParityTests
         string header10 = ReadSource("native", "include", "jyppx", "tensorrt", "trt10.h");
         string header11 = ReadSource("native", "include", "jyppx", "tensorrt", "trt11.h");
         string generated = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Generated", "NativeMethodsTensorRt.Generated.g.cs");
-        string setInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11FourteenthBatch.cs");
+        string setInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Execution", "NativeBridgeApi.ExecutionContextAddressAndAuxStreams.cs");
         string clearInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Execution", "NativeBridgeApi.ExecutionContextDiagnostics.cs");
 
         foreach ((string header, string line) in new[] { (header8, "8"), (header10, "10"), (header11, "11") })

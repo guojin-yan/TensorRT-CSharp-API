@@ -22,7 +22,9 @@ public sealed class ManagedSourceModuleLayoutTests
             new[]
             {
                 "NativeBridgeApi.BuilderBoundaryControls.cs",
+                "NativeBridgeApi.BuilderBuildOutputs.cs",
                 "NativeBridgeApi.BuilderConfigDiagnostics.cs",
+                "NativeBridgeApi.BuilderConfigPluginSerialization.cs",
                 "NativeBridgeApi.BuilderConfigRuntimeControls.cs",
                 "NativeBridgeApi.Trt11TimingCache.cs"
             }
@@ -64,6 +66,7 @@ public sealed class ManagedSourceModuleLayoutTests
             new[]
             {
                 "NativeBridgeApi.Dims64ExecutionContext.cs",
+                "NativeBridgeApi.ExecutionContextAddressAndAuxStreams.cs",
                 "NativeBridgeApi.ExecutionContextBoundaryControls.cs",
                 "NativeBridgeApi.ExecutionContextCreation.cs",
                 "NativeBridgeApi.ExecutionContextDeploymentMetadata.cs",
@@ -129,7 +132,14 @@ public sealed class ManagedSourceModuleLayoutTests
                 "NativeBridgeApi.RuntimePluginRegistryInventory.cs"
             }
         },
-        { "Profiles", new[] { "NativeBridgeApi.Dims64OptimizationProfile.cs" } },
+        {
+            "Profiles",
+            new[]
+            {
+                "NativeBridgeApi.Dims64OptimizationProfile.cs",
+                "NativeBridgeApi.OptimizationProfileShapeValues.cs"
+            }
+        },
         {
             "Refit",
             new[]
@@ -146,7 +156,14 @@ public sealed class ManagedSourceModuleLayoutTests
                 "NativeBridgeApi.RuntimeDeploymentControls.cs"
             }
         },
-        { "Serialization", new[] { "NativeBridgeApi.EngineSerialization.cs" } },
+        {
+            "Serialization",
+            new[]
+            {
+                "NativeBridgeApi.EngineSerialization.cs",
+                "NativeBridgeApi.HostMemoryMetadata.cs"
+            }
+        },
         { "Weights", new[] { "NativeBridgeApi.LayerWeightsInfo.cs" } }
     };
 
@@ -566,6 +583,45 @@ public sealed class ManagedSourceModuleLayoutTests
         Assert.False(File.Exists(Path.Combine(
             interopDirectory,
             "NativeBridgeApi.Trt11BoundaryControls.cs")));
+    }
+
+    [Fact]
+    public void TensorRtFourteenthBatchInteropIsSplitByOwnerAndFeature()
+    {
+        string interopDirectory = Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.TensorRtSharp",
+            "Internal",
+            "Interop");
+        string builderBuildSource = File.ReadAllText(Path.Combine(interopDirectory, "Builder", "NativeBridgeApi.BuilderBuildOutputs.cs"));
+        string[] builderBuildMethods = EnumeratePublicStaticMethodNames(builderBuildSource);
+        string[] builderConfigMethods = ReadInteropMethodNames(interopDirectory, "Builder", "NativeBridgeApi.BuilderConfigPluginSerialization.cs");
+        string[] hostMemoryMethods = ReadInteropMethodNames(interopDirectory, "Serialization", "NativeBridgeApi.HostMemoryMetadata.cs");
+        string[] profileMethods = ReadInteropMethodNames(interopDirectory, "Profiles", "NativeBridgeApi.OptimizationProfileShapeValues.cs");
+        string[] executionMethods = ReadInteropMethodNames(interopDirectory, "Execution", "NativeBridgeApi.ExecutionContextAddressAndAuxStreams.cs");
+
+        Assert.Equal(new[] { "BuildEngineWithConfig", "BuildSerializedNetworkWithKernelText" }, builderBuildMethods);
+        Assert.Contains("internal readonly struct NativeTensorRtSerializedNetworkWithKernelText", builderBuildSource, StringComparison.Ordinal);
+        Assert.Equal(new[] { "ClearBuilderConfigFlag", "SetBuilderConfigPluginsToSerialize" }, builderConfigMethods);
+        Assert.Equal(new[] { "GetHostMemoryDataType" }, hostMemoryMethods);
+        Assert.Equal(
+            new[] { "SetOptimizationProfileShapeValuesV2", "GetOptimizationProfileShapeValueCountV2", "GetOptimizationProfileShapeValuesV2" },
+            profileMethods);
+        Assert.Equal(
+            new[]
+            {
+                "ClearExecutionContextTensorAddress",
+                "ClearExecutionContextInputTensorAddress",
+                "ClearExecutionContextOutputTensorAddress",
+                "ClearExecutionContextDeviceMemory",
+                "ClearExecutionContextInputConsumedEvent",
+                "SetExecutionContextAuxStreams"
+            },
+            executionMethods);
+        Assert.False(File.Exists(Path.Combine(
+            interopDirectory,
+            "NativeBridgeApi.Trt11FourteenthBatch.cs")));
     }
 
     private static string[] EnumerateModuleFiles(string projectDirectory, string module)

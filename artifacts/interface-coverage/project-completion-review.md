@@ -5751,3 +5751,33 @@ helper-only Shared partial。EngineInspector 与 Network 的方法在原文件�
   post-publish、Owner acceptance 或 release proof。
 - C 盘 Downloads 顶层当日本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
 - 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 TensorRT Fourteenth Batch Owner And Feature Partial Split
+
+本阶段将 341 行 `NativeBridgeApi.Trt11FourteenthBatch.cs` 按 owner/feature 拆入两个 Builder 文件以及 Serialization、
+Profiles、Execution。原文件的 Builder build、host-memory metadata、optimization-profile shape values、BuilderConfig
+plugin serialization 与 ExecutionContext address/aux-stream 方法连续交错；本批只移动完整区段，没有改动签名/方法体、
+版本守卫、entrypoint、UTF-8/GCHandle 生命周期、SafeHandle 返回值或异常文案。
+
+### 实现与门禁
+
+- `Builder/NativeBridgeApi.BuilderBuildOutputs.cs`：61 行、2 个 build 方法；顶层
+  `NativeTensorRtSerializedNetworkWithKernelText` struct 随唯一使用它的 Builder build-output 方法移动。
+- `Builder/NativeBridgeApi.BuilderConfigPluginSerialization.cs`：85 行、2 个 flag/plugin serialization 方法。
+- `Serialization/NativeBridgeApi.HostMemoryMetadata.cs`：26 行、1 个 host-memory data-type 方法。
+- `Profiles/NativeBridgeApi.OptimizationProfileShapeValues.cs`：112 行、3 个 shape-value V2 set/count/copy 方法。
+- `Execution/NativeBridgeApi.ExecutionContextAddressAndAuxStreams.cs`：105 行、6 个 address/device-memory/event/aux-stream
+  方法与 1 个 Execution 专属私有 helper。
+- 布局门禁固定 2/2/1/3/6 方法集合、struct 归属和旧根文件禁止回流；3 个硬编码源码合同已切到实际 owner 文件。
+- 五文件按原区段顺序重组后的 Git blob 为 `32ad72873f1c5051fd7b31132acec548c08737a2`，与 HEAD 原文件完全一致。
+
+### 验证与边界
+
+- layout、execution aux-stream、plugin serialization 与 host-memory stream 定向集合：`56/56` 一次通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- ignored deferred candidate artifact 不引用原文件，无需迁移；evidence 维持 247 条引用、137 个唯一路径、0 缺失。
+- `git diff --check` 通过；Generated/native/manifest/ABI 未修改，未运行完整 ProjectQuality。
+- partial 拆分不是 owner/lifetime、ABI/export、TensorRT runtime、Linux、package consumer、public package、
+  post-publish、Owner acceptance 或 release proof。
+- C 盘 Downloads 顶层当日本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
+- 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。

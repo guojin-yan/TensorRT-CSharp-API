@@ -39,7 +39,7 @@ public sealed class RuntimeSerializationPluginPathsTests
     public void ManagedPluginSerializationPathsAreAvailableAcrossAllSupportedLines()
     {
         string diagnostics = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Builder", "NativeBridgeApi.BuilderConfigDiagnostics.cs");
-        string fourteenthBatch = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11FourteenthBatch.cs");
+        string fourteenthBatch = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Builder", "NativeBridgeApi.BuilderConfigPluginSerialization.cs");
         string publicDiagnostics = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.Trt11Diagnostics.cs");
         string publicSerialization = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.Trt11PluginSerialization.cs");
         string snapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfigSerializedPluginSnapshot.cs");

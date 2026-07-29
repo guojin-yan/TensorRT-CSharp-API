@@ -58,16 +58,16 @@ TensorRT high-level wrappers are also being split by layer feature area:
 
 Hand-written TensorRT partial interop now starts following the same responsibility modules:
 
-- `Internal/Interop/Builder` contains builder boundary controls, timing-cache, builder-config diagnostics, and runtime controls;
-  `ControlFlow` contains loop/conditional operations.
+- `Internal/Interop/Builder` contains build outputs, builder boundary controls, timing-cache, builder-config diagnostics,
+  plugin serialization, and runtime controls; `ControlFlow` contains loop/conditional operations.
 - `Internal/Interop/Callbacks` contains allocator dry-run controls, callback interface/state copies, and logger/profiler/
   progress-monitor delegate signatures.
 - `Internal/Interop/Diagnostics` contains copied error-code metadata and TRT11 build probes used only by the environment probe;
   `Internal/Interop/Interfaces` contains owner-scoped versioned-interface metadata copies.
 - `Internal/Interop/Engine` contains engine/inspector boundary controls, copied engine/tensor/profile metadata, Dims64,
-  engine-inspector diagnostics, and weight-streaming/stat runtime controls; `Execution` contains execution-context boundary
-  controls, runtime-config creation, allocation-strategy, deployment metadata, Dims64, diagnostics, and allocator/event
-  presence controls.
+  engine-inspector diagnostics, and weight-streaming/stat runtime controls; `Execution` contains execution-context address/
+  aux-stream controls, boundary controls, runtime-config creation, allocation-strategy, deployment metadata, Dims64,
+  diagnostics, and allocator/event presence controls.
 - `Internal/Interop/Inference` contains synchronous execute/enqueue operations; `Weights` contains copied layer-weight metadata.
 - `Internal/Interop/Layers` contains quantization, attention, fill-int64, compatibility/deployment layer attributes, Dims64,
   tensor metadata, transformer, and RNNv2 operations; `Network` contains network boundary controls, deployment network-layer
@@ -76,9 +76,9 @@ Hand-written TensorRT partial interop now starts following the same responsibili
   builder-config attachment, layer-output metadata, weight-descriptor parsing, and parser-refitter diagnostics.
 - `Internal/Interop/Plugins` contains plugin initialization, global/builder/runtime registry inventories, and copied V2/V3 layer
   metadata/query snapshots.
-- `Internal/Interop/Profiles` contains optimization-profile Dims64 shape queries.
+- `Internal/Interop/Profiles` contains optimization-profile Dims64 and shape-value queries.
 - `Internal/Interop/Runtime` contains global runtime version/logger probes, runtime deployment controls, and copied diagnostics;
-  `Serialization` contains engine serialization and serialization-config flags; `Refit` contains async refit,
+- `Serialization` contains engine serialization, serialization-config flags, and host-memory metadata; `Refit` contains async refit,
   weights/dynamic-range, entry metadata, and refitter diagnostics.
 
 `NativeBridgeApi.GlobalProbeShared.cs` remains at the interop root only for the common unsupported-line exception helper used by
@@ -106,6 +106,8 @@ The former `SafeDeferredUplift` is split across `Plugins` and `Parsing`; recombi
 the pre-split Git blob. File placement does not change its deferred history or prove plugin/parser runtime and lifetime behavior.
 The former `Trt11BoundaryControls` is split across `Builder`, `Engine`, `Execution`, `Network`, and a helper-only root Shared
 partial; recombination in original segment order must reproduce the pre-split Git blob.
+The former `Trt11FourteenthBatch` is split across two `Builder` feature files plus `Serialization`, `Profiles`, and `Execution`;
+the serialized-network result struct moves with the Builder build-output methods, and recombination must reproduce the pre-split Git blob.
 
 Generated files remain under their `Generated` folders and should not be manually split. Generator output layout changes must happen in the generator itself and must pass the deterministic generator gate.
 
