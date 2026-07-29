@@ -126,7 +126,11 @@ public sealed class CalibratorMetadataDesignGateTests
     public void DocsSmokeReadinessAndCoverageKeepDirectCalibratorRowsDeferred()
     {
         string gateSource = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtCalibratorMetadataDesignGate.cs");
-        string builderConfig = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.cs");
+        string builderConfig = ReadSource(
+            "src",
+            "JYPPX.TensorRtSharp",
+            "Builder",
+            "TensorRtBuilderConfig.CompatibilityPresence.cs");
         string smokeProgram = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
         string readiness = ReadSource("eng", "Test-RuntimePackageReadiness.ps1");
         string releaseEvidence = ReadSource("eng", "Export-ReleaseEvidenceBundle.ps1");

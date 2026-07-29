@@ -38,6 +38,8 @@ public sealed class EngineBuilderReadonlyCandidateImplementationEvidenceTests
         string layerTensorMetadata = ReadSource("src", "JYPPX.TensorRtSharp", "Layers", "TensorRtLayer.Trt11LayerTensorMetadata.cs");
         string layerTensorMetadataModel = ReadSource("src", "JYPPX.TensorRtSharp", "Layers", "TensorRtLayerTensorMetadata.cs");
         string builderConfigApi = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.cs") +
+            ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.MemoryPools.cs") +
+            ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.ScalarControls.cs") +
             ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.Trt11RuntimeControls.cs") +
             ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.Trt11Diagnostics.cs") +
             ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.Trt11DeploymentSnapshot.cs");

@@ -6331,3 +6331,36 @@ logger/config/initializer lifetime、Dispose 与跨 feature 共享校验固定�
   表述为 runtime correctness、package consumer、public package、post-publish、Owner acceptance 或 release proof。
 - 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages
   发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 TensorRT BuilderConfig And ExecutionContext Managed Wrapper Split
+
+本阶段将 BuilderConfig 与 ExecutionContext 通用 wrapper 按功能拆分，同时保留被既有 TRT11 partial 共用的
+progress-monitor、profiler、aux-stream 与 layer-validation 生命周期 helper。
+
+### 实现与门禁
+
+- `TensorRtBuilderConfig.cs` 从 583 行降至 102 行；34 个 profile/flag/compatibility/layer-device/memory-pool/
+  scalar/tactic/timing-cache 方法与 7 个 feature 属性进入 8 份 partial。
+- `ValidateLayer` 仍被 `Trt11Diagnostics` 消费，disposed-state 与 progress-monitor helper 也跨 partial 使用，
+  因此与 handle、Dispose 一起留在 BuilderConfig core。
+- `TensorRtExecutionContext.cs` 从 410 行降至 176 行；20 个 shape/address/device-memory/event/enqueue 方法进入
+  5 份 partial。Profiler 与 auxiliary-stream cleanup helper 继续留 core。
+- `ManagedBuilderExecutionFeatureLayoutTests` 固定 13 份 partial 的方法/属性归属、两个 core 的共享 helper，
+  并重组非连续 Shapes/Addresses 片段。拆分前 Git blob 为
+  `592ce09c4da5fb4f7a376800cd5a6b309a22481b`、`1614e46a4b0175ff9889302f977a0520be404b29`；
+  normalized SHA-256 保持 `180b5e504f28a7203115392d21386f44bfe6951e49cc88bc3be883db0f080d52` 与
+  `0f6e52115efb010129148b9a731d30d8f6aa65ea263bb82922b8c62f6381f856`。
+- Builder scalar audit、TensorRtExec gap list 与 7 份直接消费旧 core 的测试已改读实际 feature；B-tier dashboard
+  改用 Builder/Execution 模块级 owner 路径。
+
+### 验证与边界
+
+- 三组 managed wrapper layout/recomposition、managed module layout、safe lifecycle、BuilderConfig、runtime IO、
+  Engine/Parser、callback lifetime 与 TensorRtExec gap 定向集合：`227/227` 通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- ignored builder readback 的重复 core 证据已展开为 `MemoryPools`、`ScalarControls` 与
+  `CompatibilityPresence`；evidence 现为 248 条引用、140 个唯一路径、0 缺失，ignored 文件未强制提交。
+- Generated/native/manifest/ABI 未修改；未运行依赖本机缺失 `pwsh` 的 B-tier 聚合测试，也未把 source split
+  表述为 runtime correctness、package consumer、public package、post-publish、Owner acceptance 或 release proof。
+- 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages
+  发布、Release/tag/issue 远程操作。

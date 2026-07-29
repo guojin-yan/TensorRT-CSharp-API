@@ -65,6 +65,14 @@ Parser flag 校验与 model segment/stream copy helper 被多个 partial 共同�
 `ManagedEngineParserFeatureLayoutTests` 固定方法/helper 归属，并重组拆分前 Git blob
 `fd6907a9e03eab3b6f9a1b5820eea9e6e1e82ea9` 与 `d8e3f135b71f9b2fd893146776da7d538db5d020`。
 
+BuilderConfig 与 ExecutionContext 的通用 wrapper 也已拆分，且不与既有 TRT11 partial 重叠。
+`Builder/TensorRtBuilderConfig.cs` 现为 102 行 handle、progress-monitor lifetime、共享校验与 Dispose core；
+34 个 profile/flag/compatibility/layer-device/memory-pool/scalar/tactic/timing-cache 方法和 7 个 feature 属性进入
+8 份 partial。`ValidateLayer`、disposed-state 与 progress-monitor helper 仍被既有 diagnostics partial 消费，因此留 core。
+`Execution/TensorRtExecutionContext.cs` 现为 176 行 metadata、profiler/aux-stream lifetime、cleanup 与 Dispose core；
+20 个 shape/address/device-memory/event/enqueue 方法进入 5 份 feature partial。布局门禁可重组拆分前 Git blob
+`592ce09c4da5fb4f7a376800cd5a6b309a22481b` 与 `1614e46a4b0175ff9889302f977a0520be404b29`。
+
 手写 TensorRT partial interop 也开始按相同职责模块归类：
 
 - `Internal/Interop/Builder`：builder creation/capabilities、serialized build outputs、builder boundary controls、

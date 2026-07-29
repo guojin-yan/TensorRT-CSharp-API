@@ -75,6 +75,15 @@ partials. Parser flag validation and model segment/stream copy helpers remain in
 `ManagedEngineParserFeatureLayoutTests` fixes method/helper ownership and recomposes the pre-split Git blobs
 `fd6907a9e03eab3b6f9a1b5820eea9e6e1e82ea9` and `d8e3f135b71f9b2fd893146776da7d538db5d020`.
 
+BuilderConfig and ExecutionContext common wrappers are split without overlapping their existing TRT11 partials.
+`Builder/TensorRtBuilderConfig.cs` is a 102-line handle, progress-monitor lifetime, shared validation, and disposal core;
+34 profile/flag/compatibility/layer-device/memory-pool/scalar/tactic/timing-cache methods plus seven feature properties live
+in eight partials. `ValidateLayer`, disposed-state, and progress-monitor helpers remain in core because existing diagnostics
+partials consume them. `Execution/TensorRtExecutionContext.cs` is a 176-line metadata, profiler/aux-stream lifetime, cleanup,
+and disposal core; 20 shape/address/device-memory/event/enqueue methods live in five feature partials. The layout gate recomposes
+the pre-split Git blobs `592ce09c4da5fb4f7a376800cd5a6b309a22481b` and
+`1614e46a4b0175ff9889302f977a0520be404b29`.
+
 Hand-written TensorRT partial interop now starts following the same responsibility modules:
 
 - `Internal/Interop/Builder` contains builder creation/capabilities, serialized build outputs, builder boundary controls,

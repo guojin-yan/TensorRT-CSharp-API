@@ -146,6 +146,8 @@ public sealed class BuilderConfigScalarControlsTests
         string diagnosticsInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Builder", "NativeBridgeApi.BuilderConfigDiagnostics.cs");
         string builderApi = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilder.Trt11BoundaryControls.cs");
         string builderConfigApi = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.cs") +
+            ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.CompatibilityPresence.cs") +
+            ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.ScalarControls.cs") +
             ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.Trt11RuntimeControls.cs") +
             ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.Trt11Diagnostics.cs");
 

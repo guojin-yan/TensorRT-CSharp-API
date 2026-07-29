@@ -61,9 +61,9 @@ public sealed class DeferredBTierWorkItemProofBatchTests
         string focusedManagedApi = string.Join(
             Environment.NewLine,
             ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilder.Trt11BoundaryControls.cs"),
-            ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.cs"),
+            ReadSources("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig*.cs"),
             ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.Trt11RuntimeControls.cs"),
-            ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.cs"),
+            ReadSources("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext*.cs"),
             ReadSources("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine*.cs"),
             ReadSources("src", "JYPPX.TensorRtSharp", "Layers", "TensorRtLayer*.cs"),
             ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Monitoring", "TensorRtProfiler.cs"),

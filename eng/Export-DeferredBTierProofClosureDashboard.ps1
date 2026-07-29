@@ -154,7 +154,7 @@ function Resolve-EvidenceFiles {
   }
   elseif ($className -match "Builder|BuilderConfig") {
     $evidence.Add("src/JYPPX.TensorRtSharp/Builder/TensorRtBuilder.cs")
-    $evidence.Add("src/JYPPX.TensorRtSharp/Builder/TensorRtBuilderConfig.cs")
+    $evidence.Add("src/JYPPX.TensorRtSharp/Builder")
   }
   elseif ($className -match "Runtime") {
     $evidence.Add("src/JYPPX.TensorRtSharp/Runtime/TensorRtRuntime.cs")
@@ -163,7 +163,7 @@ function Resolve-EvidenceFiles {
     $evidence.Add("src/JYPPX.TensorRtSharp/Engine")
   }
   elseif ($className -match "ExecutionContext") {
-    $evidence.Add("src/JYPPX.TensorRtSharp/Execution/TensorRtExecutionContext.cs")
+    $evidence.Add("src/JYPPX.TensorRtSharp/Execution")
   }
   elseif ($className -match "Parser") {
     $evidence.Add("src/JYPPX.TensorRtSharp/Parsing")

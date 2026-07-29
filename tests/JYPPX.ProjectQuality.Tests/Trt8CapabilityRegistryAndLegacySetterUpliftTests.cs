@@ -50,7 +50,7 @@ public sealed partial class Trt8CapabilityRegistryAndLegacySetterUpliftTests
         string capability = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Plugins", "NativeBridgeApi.BuilderCapabilityPluginRegistry.cs");
         string environment = ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.cs");
         string builder = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilder.Trt11BoundaryControls.cs");
-        string config = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.cs");
+        string config = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.ScalarControls.cs");
         string rnn = ReadSource("src", "JYPPX.TensorRtSharp", "Layers", "TensorRtLayer.Trt8RnnV2Diagnostics.cs");
 
         Assert.Contains("TensorRtApiLine.TensorRt8", capability, StringComparison.Ordinal);

@@ -125,7 +125,7 @@ public sealed class EngineAndRnnReadonlyDiagnosticsTests
         string engineApi =
             ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.cs") +
             ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.TensorMetadata.cs");
-        string contextApi = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.cs");
+        string contextApi = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Shapes.cs");
         string engineProfileValuesApi = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.Trt11FifteenthBatch.cs");
         string engineProfileValuesSnapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngineProfileTensorValuesSnapshot.cs");
         string engineDeploymentSnapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngineDeploymentSnapshot.cs");

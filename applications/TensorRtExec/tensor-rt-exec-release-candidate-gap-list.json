@@ -87,7 +87,7 @@
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": true,
       "winFormsSupported": true,
-      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp/Builder/TensorRtBuilderConfig.cs", "native/src/tensorrt"],
+      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp/Builder/TensorRtBuilderConfig.MemoryPools.cs", "native/src/tensorrt"],
       "nextStep": "Workspace bytes and builder config readback are reported; keep model/runtime proof gated behind real execution logs."
     },
     {
@@ -98,7 +98,7 @@
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": true,
       "winFormsSupported": true,
-      "nextImplementationPaths": ["applications/TensorRtExec", "src/JYPPX.TensorRtSharp/Builder/TensorRtBuilderConfig.cs"],
+      "nextImplementationPaths": ["applications/TensorRtExec", "src/JYPPX.TensorRtSharp/Builder/TensorRtBuilderConfig.ScalarControls.cs"],
       "nextStep": "Collect compatible-host TRT8/10/11 build logs with requested/readback timing iteration values; keep builder evidence separate from runtime and package-consumer proof."
     },
     {
