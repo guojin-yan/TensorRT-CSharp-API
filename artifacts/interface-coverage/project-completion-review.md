@@ -6804,3 +6804,43 @@ callback owner 的 copied model、生命周期、dry-run、ledger 和 internal p
 - source/type relocation 不构成新的 callback runtime、TensorRT/CUDA runtime、real model、Linux、package consumer、
   public package、post-publish、Owner acceptance 或 release proof。
 - 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行远程发布操作。
+
+## 2026-07-30 DebugListener Callback Owner And Closure Matrix Source Split
+
+本阶段继续整理 callback owner 与 pointer-free closure aggregation，将 DebugListener copied request/snapshot、design
+diagnostic、snapshot mapping、lifecycle、trampoline/state、shape formatting，以及 closure matrix 的五个 family row、统一
+row construction、blocker aggregation 与 result model 从两个大文件中分离。所有行为和 non-proof 分类保持不变。
+
+### 实现与门禁
+
+- `TensorRtDebugListenerCallbackOwner.cs` 从 841 行降为 68 行 owner state/constructor/property core；DesignDiagnostic、
+  Snapshots、Lifecycle、Trampoline、ShapeFormatting 进入五份 partial，request 与 snapshot model 各自成文件。
+- `TensorRtDebugListenerDesignGateCallback` 与 nested `CallbackState` 共同留在 Trampoline owner；`Dispose`、active gate
+  drain、delegate GCHandle、callback-state GCHandle、release hook 与 `GC.KeepAlive` 顺序逐字不变。
+- `TensorRtCallbackOwnerClosureMatrix.cs` 从 648 行降为 47 行 Evaluate core；Allocators、OutputDebug、StreamIo、
+  RowConstruction、Blockers 进入五份 partial，row 与 result model 各自成文件。
+- matrix 的 `GpuAllocator -> GpuAsyncAllocator -> OutputAllocator -> DebugListener -> StreamReaderWriter` 行顺序、
+  15 个 closure column、source blocker 去重、deferred-row-required 与 package-consumer proof 计算均保持不变。
+- `ManagedCallbackOwnerClosureLayoutTests` 固定 12 份 partial/core 的方法归属、四个 model 的精确 public property、
+  nested state/delegate owner、readiness/test source-set 枚举，并按原顺序重组两份拆分前源码。
+- 拆分前 Git blob 为 `f5ed356884eb6aa4b5721501a77e3a299ebdd771`、
+  `d36f22e8cf3040f169885637ce5be7801551bbf0`；normalized SHA-256 保持
+  `d1ce0f25a783b7a251312d376d3f171412e9777ae1868de434b14b926d30595e` 与
+  `85a441af723e7f924ec5d3534d61353b56553465e17efb349fac56b79e36869f`。
+- 两个直接读取旧聚合文件的测试改读真实八文件组合；`Test-RuntimePackageReadiness.ps1` 与测试 reader 都显式
+  展开两套 source set；callback/allocator 路线图和双语 source-organization 同步。
+
+### 验证与边界
+
+- 新 method/property/nested-owner/重组/evidence 组合门禁：`20/20` 通过；owner、closure、readiness 与前批布局
+  聚焦集合：`54/54` 通过；全部 managed layout 合并集合：`379/379` 通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`；
+  RuntimePackageReadiness UTF-8 source parse 为 `0 error`，但因本机无仓库认可的 `pwsh` 未运行 exporter。
+- ignored deferred candidate evidence 保持 `260` 条引用、`147` 个唯一路径、`0` 缺失；其中引用的 `22` 份 JSON
+  全部可解析，ignored 文件未强制提交。
+- Generated/native/manifest/ABI 改动为 0；`git diff --check` 通过。
+- 进程审计快照只发现当前审计 PowerShell；Downloads 与用户 Temp 顶层近三小时没有本批 TensorRT/JYPPX/CUDA/
+  NVRTC/ONNX/engine/nupkg 重资产匹配项，未终止、删除或借用其他工作区进程。
+- source/type relocation 不构成新的 callback runtime、TensorRT/CUDA runtime、real model、Linux、package consumer、
+  public package、post-publish、Owner acceptance 或 release proof。
+- 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行远程发布操作。

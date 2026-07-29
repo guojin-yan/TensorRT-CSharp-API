@@ -180,6 +180,15 @@ while request/result/snapshot/delegate models are dedicated files. Layout gates 
 `c33e5795a35e4ef04836486ac0fb64552f608681` and `7c71b544fe40b1a4f5c77b42b3900e1ce62f899c` and retain all 16
 precheck overload signatures and allocator release ordering.
 
+The callback owner and family closure matrix now follow those same boundaries. The former 841-line
+`Callbacks/Debugging/TensorRtDebugListenerCallbackOwner.cs` is reduced to a 68-line owner-state, constructor, and property
+core; design diagnostics, snapshot mapping, lifecycle release, callback trampoline/state, and shape formatting live in five
+partials, while request and snapshot models have dedicated files. The former 648-line
+`Callbacks/Core/TensorRtCallbackOwnerClosureMatrix.cs` is reduced to a 47-line Evaluate core; allocator rows, output/debug
+rows, stream IO, row construction, and blocker aggregation live in five partials, with row and result models in separate files.
+The layout gate recomposes the pre-split Git blobs `f5ed356884eb6aa4b5721501a77e3a299ebdd771` and
+`d36f22e8cf3040f169885637ce5be7801551bbf0`, retaining callback drain/release order and all five family rows.
+
 TensorRT public enums are no longer collected in the 2,456-line `Core/TensorRtEnums.cs`. Its 64 enums are distributed across
 15 module files for shared Core tensor values, Network, Parsing, Execution, Serialization, Engine, Runtime, Builder, Profiles,
 ControlFlow, and the Layers RNN, operation, resize, metadata, and attention domains. Single-value/flags pairs remain together;

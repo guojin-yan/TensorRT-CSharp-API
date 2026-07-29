@@ -158,6 +158,14 @@ mapping 进入 6 份 partial，request/result/snapshot/delegate model 各自成�
 `c33e5795a35e4ef04836486ac0fb64552f608681` 与 `7c71b544fe40b1a4f5c77b42b3900e1ce62f899c`，并固定全部
 16 个 precheck overload 签名及 allocator release 顺序。
 
+callback owner 与 family closure matrix 继续遵循相同边界。原 841 行
+`Callbacks/Debugging/TensorRtDebugListenerCallbackOwner.cs` 降为 68 行 owner-state/constructor/property core；
+design diagnostic、snapshot mapping、lifecycle release、callback trampoline/state 与 shape formatting 进入 5 份 partial，
+request 和 snapshot model 各自成文件。原 648 行 `Callbacks/Core/TensorRtCallbackOwnerClosureMatrix.cs` 降为 47 行
+Evaluate core；allocator rows、output/debug rows、stream IO、row construction 与 blocker aggregation 进入 5 份 partial，
+row/result model 独立成文件。布局门禁可重组拆分前 Git blob `f5ed356884eb6aa4b5721501a77e3a299ebdd771` 与
+`d36f22e8cf3040f169885637ce5be7801551bbf0`，同时固定 callback drain/release 顺序和全部 5 个 family row。
+
 TensorRT 的 public enum 也不再集中在 2,456 行的 `Core/TensorRtEnums.cs`。其中 64 个 enum 按 Core tensor 基础类型、
 Network、Parsing、Execution、Serialization、Engine、Runtime、Builder、Profiles、ControlFlow，以及 Layers 下的
 RNN、operation、resize、metadata、attention 分入 15 个模块文件；单值/flags 配对保持同文件，名称、underlying type、

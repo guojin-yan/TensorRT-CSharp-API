@@ -152,7 +152,7 @@ public sealed class DebugListenerCallbackOwnerDesignTests
         string smokeReadme = ReadSource("smoke", "README.md");
         string comparison = ReadSource("artifacts", "interface-coverage", "tensorrt-interface-comparison.csv");
 
-        Assert.Contains("public sealed class TensorRtDebugListenerCallbackOwner", ownerSource);
+        Assert.Contains("public sealed partial class TensorRtDebugListenerCallbackOwner", ownerSource);
         Assert.Contains("public readonly struct TensorRtDebugListenerCallbackOwnerSnapshot", ownerSource);
         Assert.Contains("public TensorRtDebugListenerCallbackOwnerSnapshot RunDesignDiagnostic", ownerSource);
         Assert.Contains("RuntimeEvidenceKind => \"not-present\"", ownerSource);
@@ -205,6 +205,6 @@ public sealed class DebugListenerCallbackOwnerDesignTests
     private static string ReadSource(params string[] pathParts)
     {
         string path = Path.Combine(new[] { RepositoryPaths.Root }.Concat(pathParts).ToArray());
-        return File.ReadAllText(path);
+        return RepositorySourceReader.Read(path);
     }
 }

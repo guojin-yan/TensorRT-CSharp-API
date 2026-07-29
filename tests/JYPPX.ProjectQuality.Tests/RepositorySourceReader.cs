@@ -33,6 +33,28 @@ internal static class RepositorySourceReader
                 "TensorRtAllocatorOwnerStateDryRunResult.cs",
                 "TensorRtAllocatorCallbackOwnerSnapshot.cs",
                 "TensorRtAllocatorInternalRuntimePrototypeResult.cs"
+            ],
+            ["TensorRtDebugListenerCallbackOwner.cs"] =
+            [
+                "TensorRtDebugListenerCallbackOwner.cs",
+                "TensorRtDebugListenerCallbackOwner.DesignDiagnostic.cs",
+                "TensorRtDebugListenerCallbackOwner.Snapshots.cs",
+                "TensorRtDebugListenerCallbackOwner.Lifecycle.cs",
+                "TensorRtDebugListenerCallbackOwner.Trampoline.cs",
+                "TensorRtDebugListenerCallbackOwner.ShapeFormatting.cs",
+                "TensorRtDebugListenerCallbackRequest.cs",
+                "TensorRtDebugListenerCallbackOwnerSnapshot.cs"
+            ],
+            ["TensorRtCallbackOwnerClosureMatrix.cs"] =
+            [
+                "TensorRtCallbackOwnerClosureMatrix.cs",
+                "TensorRtCallbackOwnerClosureMatrix.Allocators.cs",
+                "TensorRtCallbackOwnerClosureMatrix.OutputDebug.cs",
+                "TensorRtCallbackOwnerClosureMatrix.StreamIo.cs",
+                "TensorRtCallbackOwnerClosureMatrix.RowConstruction.cs",
+                "TensorRtCallbackOwnerClosureMatrix.Blockers.cs",
+                "TensorRtCallbackOwnerClosureMatrixRow.cs",
+                "TensorRtCallbackOwnerClosureMatrixResult.cs"
             ]
         };
 

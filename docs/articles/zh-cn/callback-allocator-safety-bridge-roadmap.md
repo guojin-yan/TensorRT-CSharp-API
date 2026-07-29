@@ -108,7 +108,13 @@ public nint DebugTensor { get; }
 
 - `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtCallbackAllocatorReadiness.cs`
 - `src/JYPPX.TensorRtSharp/Execution/TensorRtExecutionContextCallbackAllocatorSafeControlSummary.cs`
-- `src/JYPPX.TensorRtSharp/Callbacks/Core/TensorRtCallbackOwnerClosureMatrix.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Core/TensorRtCallbackOwnerClosureMatrix.cs`：只保留五个 family 的 Evaluate 顺序。
+- `src/JYPPX.TensorRtSharp/Callbacks/Core/TensorRtCallbackOwnerClosureMatrix.Allocators.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Core/TensorRtCallbackOwnerClosureMatrix.OutputDebug.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Core/TensorRtCallbackOwnerClosureMatrix.StreamIo.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Core/TensorRtCallbackOwnerClosureMatrix.RowConstruction.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Core/TensorRtCallbackOwnerClosureMatrix.Blockers.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Core/TensorRtCallbackOwnerClosureMatrixRow.cs` 与 `TensorRtCallbackOwnerClosureMatrixResult.cs`
 - `src/JYPPX.TensorRtSharp/Execution/TensorRtExecutionContext.Readiness.cs`
 
 ### Owner and precheck
@@ -124,15 +130,22 @@ public nint DebugTensor { get; }
 - `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtAllocatorLedgerSafetyGate.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtOutputAllocatorCallbackOwner.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeProofPrecheck.cs`
-- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerCallbackOwner.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerCallbackOwner.cs`：只保留 owner state、constructor 与 properties。
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerCallbackOwner.DesignDiagnostic.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerCallbackOwner.Snapshots.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerCallbackOwner.Lifecycle.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerCallbackOwner.Trampoline.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerCallbackOwner.ShapeFormatting.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerCallbackRequest.cs` 与
+  `TensorRtDebugListenerCallbackOwnerSnapshot.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerCallbackProofGapReport.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerRuntimeProofPrecheck.cs` 与其
   `DesignPrerequisites`、`NativeAttachDesign`、`OwnerLifecycle`、`RuntimeScaffold`、`FinalRuntimeGates` partial。
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerRuntimeProofPrecheckResult.cs`
 
-这些文件只做职责归类。16 个 `Evaluate` overload、`Dispose -> callback drain -> GCHandle/delegate release` 顺序、
-pointer-free marker 和 real-runtime non-proof 分类均保持不变；源码 evidence consumer 必须读取完整文件集，不能再把 core
-单文件当作完整实现。
+这些文件只做职责归类。16 个 precheck `Evaluate` overload、closure matrix 的 5 个 family row 顺序、
+`Dispose -> callback drain -> GCHandle/delegate release` 顺序、pointer-free marker 和 real-runtime non-proof 分类均保持不变；
+源码 evidence consumer 必须读取完整文件集，不能再把 core 单文件当作完整实现。
 
 ### DebugListener native/runtime scaffolding
 
