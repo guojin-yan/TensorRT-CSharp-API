@@ -190,6 +190,12 @@ DebugListener native-owner vtable install experiment 与 owner-address design ga
 `8a674a2138328c217902c6c94080dd789c73bd23`，并固定 install guard/rollback、stable owner address、lifecycle/vtable
 readiness、pointer non-exposure 与 runtime-proof blocker。
 
+DebugListener real callback runtime proof 与 borrowed debug tensor metadata runtime gate 的 result 也已归入同名文件。
+原 456 行 proof 分为 245 行 evaluator 与 216 行 result；原 447 行 metadata gate 分为 199 行 evaluator 与 253 行
+result。布局门禁可重组拆分前 Git blob `d37bcef3b9dc04e7f2ffc39776e9c069d062877e` 与
+`8b9572ae4e081e820bc7ffe18c4fe257bf57cf03`，并固定 opt-in/full-consumer promotion、invocation/detach/rollback、
+copied metadata、borrowed lifetime、pointer non-exposure 与 deferred-row 语义。
+
 OutputAllocator diagnostics 继续按 public design owner 与 internal managed runtime gate 分层。原 637 行
 `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` 降为 38 行 state/constructor core；entries、snapshots、
 lifecycle、shared invocation、trampoline/state 与 formatting 进入 6 份 partial，request/result 类型各自成文件。原 503 行

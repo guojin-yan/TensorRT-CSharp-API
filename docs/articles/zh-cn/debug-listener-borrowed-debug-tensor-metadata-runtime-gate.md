@@ -9,6 +9,10 @@
 
 `debug-listener-borrowed-debug-tensor-metadata-runtime-gate` 消费 `debug-listener-borrowed-tensor-safety-gate` 和 `debug-listener-nothrow-vtable-callback-stub`。它把 DebugListener owner snapshot 中的 tensor name、data type、location、rank/shape、`isInput`、`isOutput`、`isShapeTensor`、`isExecutionTensor` 固定为 copied metadata evidence。
 
+源码 owner 已按职责拆分：evaluation 与 metadata blocker 构造位于
+`TensorRtDebugListenerBorrowedDebugTensorMetadataRuntimeGate.cs`，pointer-free report 位于
+`TensorRtDebugListenerBorrowedDebugTensorMetadataRuntimeGateResult.cs`。readiness 与源码测试必须组合读取这两个文件。
+
 公开 API：
 
 - `TensorRtDebugListenerBorrowedDebugTensorMetadataRuntimeGate`

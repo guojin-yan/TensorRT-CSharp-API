@@ -214,6 +214,13 @@ namesake files. The former 459-line experiment is split into a 243-line evaluato
 pre-split Git blobs `f8cf4862f4fe9149e2210de18b2360473f7c4061` and `8a674a2138328c217902c6c94080dd789c73bd23`,
 preserving install guards/rollback, stable owner addresses, lifecycle/vtable readiness, pointer non-exposure, and proof blockers.
 
+The DebugListener real callback runtime proof and borrowed debug tensor metadata runtime gate results now also have
+dedicated namesake files. The former 456-line proof is split into a 245-line evaluator and a 216-line result; the former
+447-line metadata gate is split into a 199-line evaluator and a 253-line result. The layout gate recomposes the pre-split
+Git blobs `d37bcef3b9dc04e7f2ffc39776e9c069d062877e` and `8b9572ae4e081e820bc7ffe18c4fe257bf57cf03`, preserving
+opt-in/full-consumer promotion, invocation/detach/rollback state, copied metadata, borrowed lifetimes, pointer
+non-exposure, and deferred rows.
+
 OutputAllocator diagnostics are split across the public design owner and its internal managed runtime gate. The former
 637-line `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` is reduced to a 38-line state/constructor core;
 entries, snapshots, lifecycle, shared invocation, trampoline/state, and formatting live in six partials, with request/result

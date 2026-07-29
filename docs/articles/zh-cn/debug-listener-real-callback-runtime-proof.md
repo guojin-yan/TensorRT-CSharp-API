@@ -9,6 +9,10 @@
 
 该 gate 本身仍然是 not proof。它不默认启用 `setDebugListener(non-null)`，不安装 native `IDebugListener` vtable，不伪造 TensorRT 调用 `IDebugListener::processDebugTensor`。只有 full package consumer 真实输出 `real-callback-runtime` 且 `InvocationCount>0` 时，它才允许 `IsRealCallbackRuntimeProof=True`。
 
+源码 owner 已按职责拆分：evaluation 与 blocker 构造位于
+`TensorRtDebugListenerRealCallbackRuntimeProof.cs`，pointer-free report 位于
+`TensorRtDebugListenerRealCallbackRuntimeProofResult.cs`。readiness 与源码测试必须组合读取这两个文件。
+
 ## Public Surface
 
 - `TensorRtDebugListenerRealCallbackRuntimeProof`

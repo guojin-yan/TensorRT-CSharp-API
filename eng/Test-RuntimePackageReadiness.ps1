@@ -89,6 +89,18 @@ function Get-EvidenceSourceText {
         "TensorRtDebugListenerNativeOwnerAddressDesignGateResult.cs")
       break
     }
+    "TensorRtDebugListenerRealCallbackRuntimeProof.cs" {
+      @(
+        "TensorRtDebugListenerRealCallbackRuntimeProof.cs",
+        "TensorRtDebugListenerRealCallbackRuntimeProofResult.cs")
+      break
+    }
+    "TensorRtDebugListenerBorrowedDebugTensorMetadataRuntimeGate.cs" {
+      @(
+        "TensorRtDebugListenerBorrowedDebugTensorMetadataRuntimeGate.cs",
+        "TensorRtDebugListenerBorrowedDebugTensorMetadataRuntimeGateResult.cs")
+      break
+    }
     "TensorRtAllocatorCallbackOwner.cs" {
       @(
         "TensorRtAllocatorCallbackOwner.cs",
