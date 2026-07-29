@@ -98,6 +98,16 @@ internal static class RepositorySourceReader
                 "TensorRtDebugListenerNativeAttachEntryMinimalSafety.cs",
                 "TensorRtDebugListenerNativeAttachEntryMinimalSafetyResult.cs"
             ],
+            ["TensorRtDebugListenerNativeAttachEntryRuntimeScaffold.cs"] =
+            [
+                "TensorRtDebugListenerNativeAttachEntryRuntimeScaffold.cs",
+                "TensorRtDebugListenerNativeAttachEntryRuntimeScaffoldResult.cs"
+            ],
+            ["TensorRtDebugListenerAttachVTableSafetyGate.cs"] =
+            [
+                "TensorRtDebugListenerAttachVTableSafetyGate.cs",
+                "TensorRtDebugListenerAttachVTableSafetyGateResult.cs"
+            ],
             ["TensorRtAllocatorCallbackOwner.cs"] =
             [
                 "TensorRtAllocatorCallbackOwner.cs",

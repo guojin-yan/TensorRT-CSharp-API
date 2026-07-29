@@ -137,6 +137,18 @@ function Get-EvidenceSourceText {
         "TensorRtDebugListenerNativeAttachEntryMinimalSafetyResult.cs")
       break
     }
+    "TensorRtDebugListenerNativeAttachEntryRuntimeScaffold.cs" {
+      @(
+        "TensorRtDebugListenerNativeAttachEntryRuntimeScaffold.cs",
+        "TensorRtDebugListenerNativeAttachEntryRuntimeScaffoldResult.cs")
+      break
+    }
+    "TensorRtDebugListenerAttachVTableSafetyGate.cs" {
+      @(
+        "TensorRtDebugListenerAttachVTableSafetyGate.cs",
+        "TensorRtDebugListenerAttachVTableSafetyGateResult.cs")
+      break
+    }
     "TensorRtAllocatorCallbackOwner.cs" {
       @(
         "TensorRtAllocatorCallbackOwner.cs",

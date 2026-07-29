@@ -164,6 +164,10 @@ OutputAllocator 的 synthetic notify/reallocate runtime gate 与 native ledger d
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerNativeNoThrowVTableDesignGateResult.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerNativeAttachEntryMinimalSafety.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerNativeAttachEntryMinimalSafetyResult.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerNativeAttachEntryRuntimeScaffold.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerNativeAttachEntryRuntimeScaffoldResult.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerAttachVTableSafetyGate.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerAttachVTableSafetyGateResult.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerNativeAttachEntryDesignGate.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerNativeAttachEntryDesignGateResult.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerNativeOwnerAddressDesignGate.cs`

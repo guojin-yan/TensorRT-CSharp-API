@@ -9,6 +9,10 @@
 
 `debug-listener-native-attach-entry-runtime-scaffold` 位于 [DebugListener Native Owner Lifecycle Dry-Run](debug-listener-native-owner-lifecycle-dry-run.md) 和 [DebugListener Native Owner Stable Identity](debug-listener-native-owner-stable-identity.md) 之间。它只记录 native attach entry 的参数形状、TRT10/TRT11 version guard、C ABI no-throw/status mapping 预期和 ownership diagnostics。
 
+源码 owner 已按职责拆分：evaluation 与 blocker 构造位于
+`TensorRtDebugListenerNativeAttachEntryRuntimeScaffold.cs`，pointer-free report 位于
+`TensorRtDebugListenerNativeAttachEntryRuntimeScaffoldResult.cs`。readiness 与源码测试必须组合读取这两个文件。
+
 公开 API：
 
 - `TensorRtDebugListenerNativeAttachEntryRuntimeScaffold`

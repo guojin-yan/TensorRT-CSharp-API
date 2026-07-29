@@ -214,6 +214,12 @@ DebugListener native no-throw vtable design gate 与 attach-entry minimal safety
 `9876179f69f535a40996b02fab0db6450971ff47`，并固定 vtable no-throw/version/ownership、line-specific attach/detach、
 owner lifecycle、borrowed lifetime、pointer non-exposure 与 runtime-proof blocker。
 
+DebugListener native attach-entry runtime scaffold 与 attach-vtable safety gate 的 result 也已归入同名文件。原
+362 行 runtime scaffold 分为 178 行 evaluator 与 189 行 result；原 357 行 safety gate 分为 166 行 evaluator 与
+196 行 result。布局门禁可重组拆分前 Git blob `d90e00c816e24dc0854388c5f4562b8d55c53ab8` 与
+`6db7a67044b1972e1cb52fe4f291fa89946bae44`，并固定 line-specific attach/detach、version/no-throw/ownership、
+owner lifecycle、vtable/keep-alive、borrowed lifetime、pointer non-exposure 与 runtime-proof blocker。
+
 OutputAllocator diagnostics 继续按 public design owner 与 internal managed runtime gate 分层。原 637 行
 `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` 降为 38 行 state/constructor core；entries、snapshots、
 lifecycle、shared invocation、trampoline/state 与 formatting 进入 6 份 partial，request/result 类型各自成文件。原 503 行

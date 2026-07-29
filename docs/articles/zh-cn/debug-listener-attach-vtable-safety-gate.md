@@ -9,6 +9,10 @@
 
 `debug-listener-attach-vtable-safety-gate` 位于 `debug-listener-attach-detach-design-gate` 和 `debug-listener-runtime-proof-precheck` 之间。它把 DebugListener 真正 attach 之前最危险的 native vtable 边界拆成可诊断字段，避免把 copied owner 证据、`setDebugListener(nullptr)` 清理能力或 borrowed tensor safety gate 误当成真实 callback runtime。
 
+源码 owner 已按职责拆分：evaluation 与 blocker 构造位于
+`TensorRtDebugListenerAttachVTableSafetyGate.cs`，pointer-free report 位于
+`TensorRtDebugListenerAttachVTableSafetyGateResult.cs`。readiness 与源码测试必须组合读取这两个文件。
+
 公开 API：
 
 - `TensorRtDebugListenerAttachVTableSafetyGate`
