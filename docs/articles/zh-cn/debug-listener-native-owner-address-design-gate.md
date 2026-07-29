@@ -15,6 +15,10 @@
 - `TensorRtDebugListenerNativeOwnerAddressDesignGateResult`
 - `Evaluate`
 
+evaluator 位于 `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerNativeOwnerAddressDesignGate.cs`，
+只读 result model 位于同目录的 `TensorRtDebugListenerNativeOwnerAddressDesignGateResult.cs`。完整 design-gate
+consumer 必须读取两份源码。
+
 该 gate 只消费 copied `TensorRtDebugListenerCallbackOwnerSnapshot`、`TensorRtDebugListenerAttachDetachDesignGateResult`、`TensorRtDebugListenerBorrowedTensorSafetyGateResult`、`TensorRtDebugListenerAttachVTableSafetyGateResult` 和 `TensorRtDebugListenerNativeAttachNoThrowPreflightResult`。public API 不暴露 raw `IntPtr` / `nint`、native listener owner pointer、debug tensor pointer、debug tensor data pointer 或任何 borrowed pointer。
 
 ## 当前能证明什么

@@ -184,6 +184,12 @@ preflight 分为 235 行 evaluator 与 249 行 result；原 465 行 detach gate 
 `2e2d856b62c3e5998ea9b53c297cbc800a92dffb`，并固定 install version/no-throw/ownership guard、detach/release/
 in-flight/unpin ordering、pointer non-exposure 与 proof blocker 语义。
 
+DebugListener native-owner vtable install experiment 与 owner-address design gate 的 result 也已归入同名文件。
+原 459 行 experiment 分为 243 行 evaluator 与 221 行 result；原 456 行 owner-address gate 分为 235 行 evaluator
+与 226 行 result。布局门禁可重组拆分前 Git blob `f8cf4862f4fe9149e2210de18b2360473f7c4061` 与
+`8a674a2138328c217902c6c94080dd789c73bd23`，并固定 install guard/rollback、stable owner address、lifecycle/vtable
+readiness、pointer non-exposure 与 runtime-proof blocker。
+
 OutputAllocator diagnostics 继续按 public design owner 与 internal managed runtime gate 分层。原 637 行
 `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` 降为 38 行 state/constructor core；entries、snapshots、
 lifecycle、shared invocation、trampoline/state 与 formatting 进入 6 份 partial，request/result 类型各自成文件。原 503 行

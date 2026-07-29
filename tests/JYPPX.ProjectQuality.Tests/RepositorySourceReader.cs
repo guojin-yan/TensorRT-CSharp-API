@@ -48,6 +48,16 @@ internal static class RepositorySourceReader
                 "TensorRtDebugListenerNativeDetachBeforeReleaseDesignGate.cs",
                 "TensorRtDebugListenerNativeDetachBeforeReleaseDesignGateResult.cs"
             ],
+            ["TensorRtDebugListenerNativeOwnerVTableInstallExperiment.cs"] =
+            [
+                "TensorRtDebugListenerNativeOwnerVTableInstallExperiment.cs",
+                "TensorRtDebugListenerNativeOwnerVTableInstallExperimentResult.cs"
+            ],
+            ["TensorRtDebugListenerNativeOwnerAddressDesignGate.cs"] =
+            [
+                "TensorRtDebugListenerNativeOwnerAddressDesignGate.cs",
+                "TensorRtDebugListenerNativeOwnerAddressDesignGateResult.cs"
+            ],
             ["TensorRtAllocatorCallbackOwner.cs"] =
             [
                 "TensorRtAllocatorCallbackOwner.cs",

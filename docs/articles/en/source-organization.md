@@ -208,6 +208,12 @@ detach gate is split into a 217-line evaluator and a 253-line result. The layout
 `b7ed72fd9a5a604fe86f7b84972610615117ad8c` and `2e2d856b62c3e5998ea9b53c297cbc800a92dffb`, preserving
 install version/no-throw/ownership guards, detach/release/in-flight/unpin ordering, pointer non-exposure, and proof blockers.
 
+The DebugListener native-owner vtable install experiment and owner-address design gate results now live in dedicated
+namesake files. The former 459-line experiment is split into a 243-line evaluator and a 221-line result; the former
+456-line owner-address gate is split into a 235-line evaluator and a 226-line result. The layout gate recomposes the
+pre-split Git blobs `f8cf4862f4fe9149e2210de18b2360473f7c4061` and `8a674a2138328c217902c6c94080dd789c73bd23`,
+preserving install guards/rollback, stable owner addresses, lifecycle/vtable readiness, pointer non-exposure, and proof blockers.
+
 OutputAllocator diagnostics are split across the public design owner and its internal managed runtime gate. The former
 637-line `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` is reduced to a 38-line state/constructor core;
 entries, snapshots, lifecycle, shared invocation, trampoline/state, and formatting live in six partials, with request/result

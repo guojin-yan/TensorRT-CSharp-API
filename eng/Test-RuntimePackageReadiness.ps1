@@ -77,6 +77,18 @@ function Get-EvidenceSourceText {
         "TensorRtDebugListenerNativeDetachBeforeReleaseDesignGateResult.cs")
       break
     }
+    "TensorRtDebugListenerNativeOwnerVTableInstallExperiment.cs" {
+      @(
+        "TensorRtDebugListenerNativeOwnerVTableInstallExperiment.cs",
+        "TensorRtDebugListenerNativeOwnerVTableInstallExperimentResult.cs")
+      break
+    }
+    "TensorRtDebugListenerNativeOwnerAddressDesignGate.cs" {
+      @(
+        "TensorRtDebugListenerNativeOwnerAddressDesignGate.cs",
+        "TensorRtDebugListenerNativeOwnerAddressDesignGateResult.cs")
+      break
+    }
     "TensorRtAllocatorCallbackOwner.cs" {
       @(
         "TensorRtAllocatorCallbackOwner.cs",

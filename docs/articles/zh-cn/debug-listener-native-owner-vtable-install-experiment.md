@@ -11,6 +11,10 @@
 - `TensorRtDebugListenerNativeOwnerVTableInstallExperiment`
 - `TensorRtDebugListenerNativeOwnerVTableInstallExperimentResult`
 
+evaluator 位于 `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerNativeOwnerVTableInstallExperiment.cs`，
+只读 result model 位于同目录的 `TensorRtDebugListenerNativeOwnerVTableInstallExperimentResult.cs`。完整 experiment
+evidence consumer 必须读取两份源码。
+
 关键字段：
 
 - `ExperimentShapeReady`
