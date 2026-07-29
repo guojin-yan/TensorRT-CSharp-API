@@ -40,7 +40,7 @@ public sealed class ReadonlyDiagnosticsCandidateImplementationEvidenceTests
             ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.OwnerErrorRecorderSnapshotShared.cs") +
             ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Runtime", "NativeBridgeApi.RuntimeDeploymentControls.cs") +
             ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Refit", "NativeBridgeApi.RefitterControls.cs");
-        string dependencyProbe = ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.cs") +
+        string dependencyProbe = ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.DependencyProbes.cs") +
             ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtDependencyProbeReport.cs");
         string dependencyDiagnostics = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntimeDeserializationDependencyDiagnostics.cs") +
             ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntimeDeserializationBoundaryPrecheck.cs");

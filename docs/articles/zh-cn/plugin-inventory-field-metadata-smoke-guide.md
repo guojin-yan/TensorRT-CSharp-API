@@ -24,7 +24,9 @@ Plugin inventory 属于 deferred readonly API 提升中较安全的区域：它�
 
 ## 代码与文件入口
 
-- `src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginRegistryInventory.cs`：高层只读 inventory。
+- `src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginRegistryInventory.cs`：高层只读 inventory 聚合。
+- `src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginCreatorInfo.cs` 与 `TensorRtPluginFieldInfo.cs`：复制型 creator/field metadata。
+- `src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginRegistryInventoryDiagnostics.cs`：pointer-free inventory 诊断。
 - `src/JYPPX.TensorRtSharp/Builder/TensorRtBuilder.PluginRegistryInventory.cs`：builder 侧入口。
 - `native/src/tensorrt/common`：跨版本 native adapter。
 - `native/src/tensorrt/v10` 与 `native/src/tensorrt/v11`：版本实现。

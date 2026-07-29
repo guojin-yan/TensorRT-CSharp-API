@@ -7,7 +7,10 @@ public sealed class Trt11CompatibleHostRuntimeProofTests
     [Fact]
     public void PluginInventoryFieldPolicyPreservesDefaultsAndFlowsThroughPublicCopiedSnapshots()
     {
-        string environment = ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.cs");
+        string environment = string.Join(
+            '\n',
+            ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.GlobalPluginRegistry.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.BuilderPluginRegistry.cs"));
         string globalInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Plugins", "NativeBridgeApi.GlobalPluginRegistry.cs");
         string capabilityInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Plugins", "NativeBridgeApi.BuilderCapabilityPluginRegistry.cs");
 

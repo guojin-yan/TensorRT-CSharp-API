@@ -73,7 +73,7 @@ public sealed partial class Trt8CapabilityRegistryAndLegacySetterUpliftTests
         string nativeBridge = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Inference", "NativeBridgeApi.SynchronousInference.cs");
         string executionContext = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.SynchronousInference.cs");
         string bindings = ReadSource("src", "JYPPX.TensorRtSharp", "Inference", "TensorRtInferenceBindings.Execution.cs");
-        string environment = ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.cs");
+        string environment = ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.GlobalPluginRegistry.cs");
 
         Assert.Contains("TensorRtApiLine.TensorRt8", nativeBridge, StringComparison.Ordinal);
         Assert.Contains("TensorRtApiLine.TensorRt10", nativeBridge, StringComparison.Ordinal);

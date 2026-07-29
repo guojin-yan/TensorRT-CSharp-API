@@ -61,10 +61,11 @@ public sealed class PublicApiHandleExposureAuditTests
             "zh-cn",
             "plugin-inventory-field-metadata-smoke-guide.md"));
 
-        string inventoryWrapper = File.ReadAllText(Path.Combine(
-            RepositoryPaths.Root,
-            "src",
-            "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginRegistryInventory.cs"));
+        string inventoryWrapper = string.Join(
+            '\n',
+            File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginRegistryInventory.cs")),
+            File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginCreatorInfo.cs")),
+            File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginFieldInfo.cs")));
 
         Assert.Contains("不暴露裸 `IntPtr`", article, StringComparison.Ordinal);
         Assert.Contains("pointer-free", inventoryArticle, StringComparison.OrdinalIgnoreCase);

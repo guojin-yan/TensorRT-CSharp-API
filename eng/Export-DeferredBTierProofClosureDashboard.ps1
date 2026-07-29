@@ -150,6 +150,9 @@ function Resolve-EvidenceFiles {
 
   if ($designGroup -match "plugin") {
     $evidence.Add("src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginRegistryInventory.cs")
+    $evidence.Add("src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginCreatorInfo.cs")
+    $evidence.Add("src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginFieldInfo.cs")
+    $evidence.Add("src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginRegistryInventoryDiagnostics.cs")
     $evidence.Add("smoke/PluginRegistryInventorySmokeRunner")
   }
   elseif ($className -match "Builder|BuilderConfig") {

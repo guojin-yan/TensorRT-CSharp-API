@@ -81,6 +81,13 @@ native owner、refitter/logger borrower lifetime、initializer pin lifetime、�
 size estimation、buffer replacement 与 readiness helper 跟随各自 owner。布局门禁可重组拆分前 Git blob
 `07975ca6274fb64fcce06ca6e967515f07aa734c` 与 `6257b4c8ad3c0f8c4ec349208e8583b670359d0a`。
 
+环境探测与 plugin inventory 也已消除单文件多职责。`Diagnostics/TensorRtEnvironmentProbe.cs` 从 1,497 行降为
+62 行跨 feature 异常分类、诊断格式化与 stage helper core；43 个公开静态入口进入 PluginInitialization、
+RuntimeMetadata、GlobalPluginRegistry、BuilderPluginRegistry、DependencyProbes、ObjectCreation、BuildChains 七份 partial。
+`Plugins/TensorRtPluginRegistryInventory.cs` 只保留主 inventory 聚合类；两个 enum、field/creator copied metadata、
+creator/field summary 与 inventory diagnostics 分别进入 6 份独立文件。布局门禁可重组拆分前 Git blob
+`bcd1301777f81d9de32625b4c7be952de3126d92` 与 `c39d9ec853987f50f452b0dfebc2658120aa95d2`。
+
 手写 TensorRT partial interop 也开始按相同职责模块归类：
 
 - `Internal/Interop/Builder`：builder creation/capabilities、serialized build outputs、builder boundary controls、

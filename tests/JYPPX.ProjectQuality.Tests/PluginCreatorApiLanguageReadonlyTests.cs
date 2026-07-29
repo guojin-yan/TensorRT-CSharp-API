@@ -73,7 +73,11 @@ public sealed class PluginCreatorApiLanguageReadonlyTests
     [Fact]
     public void ManagedSnapshotsExposeEnumAndKeepRawPointersOutOfPublicApi()
     {
-        string inventoryModels = ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginRegistryInventory.cs");
+        string inventoryModels = string.Join(
+            '\n',
+            ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginRegistryInventory.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginCreatorInfo.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginCreatorSummary.cs"));
         string builderInventory = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilder.PluginRegistryInventory.cs");
         string builderInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Plugins", "NativeBridgeApi.PluginRegistryInventory.cs");
         string globalInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Plugins", "NativeBridgeApi.GlobalPluginRegistry.cs");
@@ -98,7 +102,8 @@ public sealed class PluginCreatorApiLanguageReadonlyTests
             inventoryModels,
             builderInventory,
             ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntime.PluginRegistryInventory.cs"),
-            ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.cs"));
+            ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.GlobalPluginRegistry.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.BuilderPluginRegistry.cs"));
         Assert.DoesNotContain("public IntPtr", publicSources);
         Assert.DoesNotContain("public nint", publicSources);
     }

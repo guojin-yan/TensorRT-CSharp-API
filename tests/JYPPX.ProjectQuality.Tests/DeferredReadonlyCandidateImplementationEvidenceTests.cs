@@ -24,10 +24,19 @@ public sealed class DeferredReadonlyCandidateImplementationEvidenceTests
         AssertEvidenceContains(identityCandidate, "publicSurface", "TensorRtPluginRegistryInventory.GetCreatorSummaries");
         AssertEvidenceContains(identityCandidate, "publicSurface", "TensorRtPluginRegistryInventory.TryFindCreator");
 
-        string inventoryModels = ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginRegistryInventory.cs");
+        string inventoryModels = string.Join(
+            '\n',
+            ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginRegistryInventory.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginCreatorInfo.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginCreatorSummary.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginFieldSummary.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginRegistryInventoryDiagnostics.cs"));
         string builderInventory = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilder.PluginRegistryInventory.cs");
         string runtimeInventory = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntime.PluginRegistryInventory.cs");
-        string environmentProbe = ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.cs");
+        string environmentProbe = string.Join(
+            '\n',
+            ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.GlobalPluginRegistry.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.BuilderPluginRegistry.cs"));
         string builderInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Plugins", "NativeBridgeApi.PluginRegistryInventory.cs");
         string runtimeInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Plugins", "NativeBridgeApi.RuntimePluginRegistryInventory.cs");
         string globalInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Plugins", "NativeBridgeApi.GlobalPluginRegistry.cs");

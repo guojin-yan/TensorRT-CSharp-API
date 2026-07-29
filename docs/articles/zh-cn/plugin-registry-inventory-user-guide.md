@@ -22,7 +22,8 @@ Plugin registry 常见误区是把 native creator 指针暴露给 public API。�
 
 ## 代码与文件入口
 
-- `src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginRegistryInventory.cs`：高层只读 wrapper。
+- `src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginRegistryInventory.cs`：高层只读聚合 wrapper。
+- `src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginCreatorInfo.cs`、`TensorRtPluginFieldInfo.cs`：复制型 metadata owner。
 - `native/src/tensorrt/common`：跨版本 native adapter。
 - `native/src/tensorrt/v10` 与 `native/src/tensorrt/v11`：版本特定实现。
 - `native/manifests/tensorrt/v10` 与 `native/manifests/tensorrt/v11`：manifest 声明。

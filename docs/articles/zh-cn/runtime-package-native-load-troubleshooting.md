@@ -26,7 +26,7 @@ Windows 和 Linux 的 native library resolution 规则不同。Windows 依赖 DL
 - `docs/articles/zh-cn/runtime-package-minimal-smoke-commands.md`：最小 smoke 命令。
 - `docs/articles/zh-cn/runtime-package-selection.md`：runtime package 选择。
 - `docs/articles/zh-cn/runtime-package-matrix.md`：版本矩阵。
-- `src/JYPPX.TensorRtSharp/Diagnostics/TensorRtEnvironmentProbe.cs`：环境探测入口。
+- `src/JYPPX.TensorRtSharp/Diagnostics/TensorRtEnvironmentProbe.DependencyProbes.cs`：native dependency 与 staged runtime 探测入口。
 
 ## 图示建议
 

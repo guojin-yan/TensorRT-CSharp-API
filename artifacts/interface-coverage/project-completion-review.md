@@ -6403,3 +6403,39 @@ InferenceBindings 的 geometry/buffer/address/execution 路径分离，同时保
   Owner acceptance 或 release proof。
 - 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages
   发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 TensorRT EnvironmentProbe And Plugin Inventory Source Split
+
+本阶段继续整理高层 C# 诊断与复制型 plugin metadata，将超大的静态环境探测类按能力域拆分，并把一个文件中的
+多个独立 public copied model 类型分离到各自源码文件，不改变 namespace、public 签名或 proof 分类。
+
+### 实现与门禁
+
+- `TensorRtEnvironmentProbe.cs` 从 1,497 行降至 61 行，只保留跨 feature 的 probe exception 分类、诊断格式化与
+  generic stage helper；43 个公开静态入口进入 PluginInitialization、RuntimeMetadata、GlobalPluginRegistry、
+  BuilderPluginRegistry、DependencyProbes、ObjectCreation、BuildChains 七份 partial。
+- `TensorRtPluginRegistryInventory.cs` 从 887 行降至 294 行，仅保留主 inventory 聚合类；两个 enum 进入
+  `TensorRtPluginRegistryTypes.cs`，field/creator info、creator/field summary 与 inventory diagnostics 进入另外五份文件。
+- `ManagedEnvironmentPluginInventoryLayoutTests` 固定 7 份 EnvironmentProbe partial 的精确方法/重载集合、共享 helper
+  core、7 个 plugin 类型文件的精确 top-level type 集合，并规范化重组两份原源码。
+- 拆分前 Git blob 为 `bcd1301777f81d9de32625b4c7be952de3126d92`、
+  `c39d9ec853987f50f452b0dfebc2658120aa95d2`；normalized SHA-256 保持
+  `532720104c57a6316bf47b7a2c1e83eacaa8749fe4515a5ea83a4aeecff210a2` 与
+  `2af6a19673875d36b0c0143f9c25343a3a1c989e89e5eb346562f4f766dedd93`。
+- 12 份直接读取旧大文件的质量测试改读具体 feature/type owner；两份 exporter 与 runtime/plugin 教程补充真实路径。
+
+### 验证与边界
+
+- 新增 layout/recomposition 门禁：`18/18` 通过；合并前四批 wrapper layout、managed module layout 与本批消费测试的
+  扩展定向集合：`214/214` 通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- ignored deferred candidate evidence 校准为 260 条引用、147 个唯一路径、0 缺失；JSON 可解析，ignored 文件未强制提交。
+- Generated/native/manifest/ABI 改动为 0，`git diff --check` 通过；本机仍缺少 `pwsh`，未运行相关 exporter/B-tier 聚合测试。
+- source split 与 copied metadata 文件归类不构成 plugin load/register/create/enqueue runtime proof，也不构成 Linux、
+  package consumer、public package、post-publish 或 Owner acceptance proof。
+- solution build 留下的 14 个 node-reuse 子进程已按父进程与启动时间确认并终止，build/test 进程残留为 0。
+- Temp 顶层命中既有 `WrapPlugin.dll.log.logdat`；其创建时间早于本批且来源不明确，因此保留未删除。Downloads 顶层本批关键词命中为 0。
+- 最终进程表中的 `codex-powershell-7-tool` 与 MSBuild 命令行指向另一个 `OpenCV-CSharp-API` 工作区，属于并行任务；
+  不计入 TensorRT 本批残留，也未再终止或删除其工具目录。
+- 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages
+  发布、Release/tag/issue 远程操作。

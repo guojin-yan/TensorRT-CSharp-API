@@ -43,7 +43,7 @@ public sealed class TrtSafeDeferredUpliftTests
         string bridge =
             ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Plugins", "NativeBridgeApi.PluginInitialization.cs") +
             ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Parsing", "NativeBridgeApi.OnnxWeightDescriptorParsing.cs");
-        string probe = ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.cs");
+        string probe = ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.PluginInitialization.cs");
         string parser = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParser.ModelParsing.cs");
         string coverage = ReadSource("eng", "Export-InterfaceCoverageMatrix.ps1");
         string cmake = ReadSource("CMakeLists.txt");

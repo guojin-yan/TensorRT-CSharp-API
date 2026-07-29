@@ -7,8 +7,15 @@ public sealed class PluginInventorySourceOnlySmokeTests
     [Fact]
     public void PublicInventorySurfaceCopiesMetadataAndKeepsPluginCreatorPointersPrivate()
     {
-        string inventoryModels = ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginRegistryInventory.cs");
-        string environmentProbe = ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.cs");
+        string inventoryModels = string.Join(
+            '\n',
+            ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginRegistryInventory.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginCreatorInfo.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginCreatorSummary.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginFieldInfo.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginFieldSummary.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginRegistryInventoryDiagnostics.cs"));
+        string environmentProbe = ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.GlobalPluginRegistry.cs");
         string builderInventory = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilder.PluginRegistryInventory.cs");
         string runtimeInventory = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntime.PluginRegistryInventory.cs");
         string smokeProgram = ReadSource("smoke", "PluginRegistryInventorySmokeRunner", "Program.cs");
@@ -135,7 +142,10 @@ public sealed class PluginInventorySourceOnlySmokeTests
         string trt11CoverageDeferred = ReadSource("native", "manifests", "tensorrt", "v11", "trt11-twenty-third-batch-deferred-coverage.manifest.json");
         string builderInventory = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilder.PluginRegistryInventory.cs");
         string runtimeInventory = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntime.PluginRegistryInventory.cs");
-        string environmentProbe = ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.cs");
+        string environmentProbe = string.Join(
+            '\n',
+            ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.GlobalPluginRegistry.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.BuilderPluginRegistry.cs"));
         string smokeProgram = ReadSource("smoke", "PluginRegistryInventorySmokeRunner", "Program.cs");
         string allDeferred = string.Join(Environment.NewLine, trt8PluginDeferred, trt10PluginDeferred, trt11PluginDeferred, trt11CoverageDeferred);
 

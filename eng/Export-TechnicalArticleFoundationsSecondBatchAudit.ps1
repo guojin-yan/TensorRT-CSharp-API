@@ -199,6 +199,9 @@ $definitions = @(
     requiredMarkers = @("TryGetPluginRegistryInventory", "FindCreator", "CreatorFieldCollection", "IPluginCreator*")
     requiredAnchors = @(
       "src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginRegistryInventory.cs",
+      "src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginCreatorInfo.cs",
+      "src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginFieldInfo.cs",
+      "src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginRegistryInventoryDiagnostics.cs",
       "src/JYPPX.TensorRtSharp/Runtime/TensorRtRuntime.PluginRegistryInventory.cs",
       "src/JYPPX.TensorRtSharp/Builder/TensorRtBuilder.PluginRegistryInventory.cs",
       "smoke/PluginRegistryInventorySmokeRunner/Program.cs"

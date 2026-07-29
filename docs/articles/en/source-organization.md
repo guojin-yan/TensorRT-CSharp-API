@@ -93,6 +93,14 @@ in six feature partials. Feature-specific size-estimation, buffer-replacement, a
 The layout gate recomposes the pre-split Git blobs `07975ca6274fb64fcce06ca6e967515f07aa734c` and
 `6257b4c8ad3c0f8c4ec349208e8583b670359d0a`.
 
+Environment probing and plugin inventory no longer combine unrelated responsibilities in one file.
+`Diagnostics/TensorRtEnvironmentProbe.cs` is reduced from 1,497 lines to a 62-line core for cross-feature exception
+classification, diagnostic formatting, and stage helpers; 43 public static entry points live in seven feature partials.
+`Plugins/TensorRtPluginRegistryInventory.cs` retains only the aggregate inventory type, while two enums, copied field/creator
+metadata, creator/field summaries, and inventory diagnostics live in six dedicated files. The layout gate recomposes the
+pre-split Git blobs `bcd1301777f81d9de32625b4c7be952de3126d92` and
+`c39d9ec853987f50f452b0dfebc2658120aa95d2`.
+
 Hand-written TensorRT partial interop now starts following the same responsibility modules:
 
 - `Internal/Interop/Builder` contains builder creation/capabilities, serialized build outputs, builder boundary controls,

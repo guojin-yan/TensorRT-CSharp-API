@@ -129,9 +129,10 @@ public sealed class PluginV2LayerMetadataReadonlyUpliftTests
             "modules",
             "plugin",
             "trt8_plugin_registry_inventory.inc");
-        string model = ReadSource(
-            "src",
-            "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginRegistryInventory.cs");
+        string model = string.Join(
+            '\n',
+            ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginCreatorInfo.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginCreatorSummary.cs"));
         string builder = ReadSource(
             "src",
             "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilder.PluginRegistryInventory.cs");

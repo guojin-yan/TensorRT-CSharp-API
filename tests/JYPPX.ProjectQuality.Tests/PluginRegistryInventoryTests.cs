@@ -28,7 +28,7 @@ public sealed class PluginRegistryInventoryTests
     public void GlobalLookupCopiesCreatorMetadataIntoManagedSnapshot()
     {
         string interopSource = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Plugins", "NativeBridgeApi.GlobalPluginRegistry.cs");
-        string environmentProbe = ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.cs");
+        string environmentProbe = ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.GlobalPluginRegistry.cs");
         string smokeProgram = ReadSource("smoke", "PluginRegistryInventorySmokeRunner", "Program.cs");
         string nativeSource = ReadSource("native", "src", "tensorrt", "common", "global_runtime_plugin_probe.inc");
         string header10 = ReadSource("native", "include", "jyppx", "tensorrt", "trt10.h");
@@ -183,7 +183,12 @@ public sealed class PluginRegistryInventoryTests
     {
         string interopSource = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Plugins", "NativeBridgeApi.RuntimePluginRegistryInventory.cs");
         string runtimeSource = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntime.PluginRegistryInventory.cs");
-        string inventoryModels = ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginRegistryInventory.cs");
+        string inventoryModels = string.Join(
+            '\n',
+            ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginRegistryTypes.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginRegistryInventory.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginCreatorInfo.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginFieldInfo.cs"));
         string smokeProgram = ReadSource("smoke", "PluginRegistryInventorySmokeRunner", "Program.cs");
         string nativeSource = ReadSource("native", "src", "tensorrt", "common", "plugin_registry_inventory.inc");
         string native8 = ReadSource("native", "src", "tensorrt", "v8", "modules", "plugin", "trt8_plugin_registry_inventory.inc");
@@ -306,8 +311,18 @@ public sealed class PluginRegistryInventoryTests
     [Fact]
     public void PublicPluginInventoryApiUsesCopiedValueObjectsInsteadOfNativeCreatorPointers()
     {
-        string environmentProbe = ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.cs");
-        string inventoryModels = ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginRegistryInventory.cs");
+        string environmentProbe = string.Join(
+            '\n',
+            ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.GlobalPluginRegistry.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.BuilderPluginRegistry.cs"));
+        string inventoryModels = string.Join(
+            '\n',
+            ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginRegistryInventory.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginCreatorInfo.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginCreatorSummary.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginFieldInfo.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginFieldSummary.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginRegistryInventoryDiagnostics.cs"));
         string builderInventory = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilder.PluginRegistryInventory.cs");
         string runtimeInventory = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntime.PluginRegistryInventory.cs");
         string bridgePackageConsumer = ReadSource("eng", "Test-BridgePackageConsumer.ps1");
@@ -504,10 +519,20 @@ public sealed class PluginRegistryInventoryTests
         string native8 = ReadSource("native", "src", "tensorrt", "v8", "modules", "deferred", "cross_version_eleventh_batch_plugin_deferred.inc");
         string coverageExport = ReadSource("eng", "Export-InterfaceCoverageMatrix.ps1");
         string comparison = ReadSource("artifacts", "interface-coverage", "tensorrt-interface-comparison.csv");
-        string inventoryModels = ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginRegistryInventory.cs");
+        string inventoryModels = string.Join(
+            '\n',
+            ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginRegistryInventory.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginCreatorInfo.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginCreatorSummary.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginFieldInfo.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginFieldSummary.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Plugins", "TensorRtPluginRegistryInventoryDiagnostics.cs"));
         string builderInventory = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilder.PluginRegistryInventory.cs");
         string runtimeInventory = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntime.PluginRegistryInventory.cs");
-        string environmentProbe = ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.cs");
+        string environmentProbe = string.Join(
+            '\n',
+            ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.GlobalPluginRegistry.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Diagnostics", "TensorRtEnvironmentProbe.BuilderPluginRegistry.cs"));
 
         Assert.Contains("trt8-plugin-registry-get-plugin-creator-list-deferred", trt8PluginDeferred);
         Assert.Contains("trt10-plugin-registry-get-plugin-creator-list-deferred", trt10PluginDeferred);
