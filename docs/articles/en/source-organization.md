@@ -235,6 +235,13 @@ pre-split Git blobs `5e672392bcdf68e4a4a2130644320388d3c9864c` and `3a6eca7d81dd
 gap order/category/owner action, attach/detach mappings, lifecycle/vtable prerequisites, pointer non-exposure, and
 deferred rows.
 
+The DebugListener native no-throw vtable design gate and attach-entry minimal safety results now also have dedicated
+namesake files. The former 388-line vtable gate is split into a 177-line evaluator and a 216-line result; the former
+376-line minimal safety gate is split into a 185-line evaluator and a 196-line result. The layout gate recomposes the
+pre-split Git blobs `068e7a4e18b400445bdb897a95dfabd2f120e875` and `9876179f69f535a40996b02fab0db6450971ff47`, preserving
+vtable no-throw/version/ownership checks, line-specific attach/detach entries, owner lifecycle, borrowed lifetimes,
+pointer non-exposure, and runtime-proof blockers.
+
 OutputAllocator diagnostics are split across the public design owner and its internal managed runtime gate. The former
 637-line `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` is reduced to a 38-line state/constructor core;
 entries, snapshots, lifecycle, shared invocation, trampoline/state, and formatting live in six partials, with request/result

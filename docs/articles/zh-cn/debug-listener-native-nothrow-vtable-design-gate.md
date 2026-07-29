@@ -9,6 +9,10 @@
 
 `debug-listener-native-nothrow-vtable-design-gate` 位于 [DebugListener Native Owner Address Design Gate](debug-listener-native-owner-address-design-gate.md) 和 [DebugListener Native Attach Entry Design Gate](debug-listener-native-attach-entry-design-gate.md) 之间。它不创建 native `IDebugListener` owner，不安装 vtable，不调用 `setDebugListener(non-null)`，也不触发 `IDebugListener::processDebugTensor`；它只把 no-throw native destructor、no-throw vtable、exception-to-status mapping、callback exception capture、callback status mapping 和 callback in-flight accounting 固定为可审计字段。
 
+源码 owner 已按职责拆分：evaluation 与 blocker 构造位于
+`TensorRtDebugListenerNativeNoThrowVTableDesignGate.cs`，pointer-free report 位于
+`TensorRtDebugListenerNativeNoThrowVTableDesignGateResult.cs`。readiness 与源码测试必须组合读取这两个文件。
+
 公开 API：
 
 - `TensorRtDebugListenerNativeNoThrowVTableDesignGate`

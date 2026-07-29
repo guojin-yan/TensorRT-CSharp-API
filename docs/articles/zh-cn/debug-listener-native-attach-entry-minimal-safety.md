@@ -9,6 +9,10 @@
 
 `debug-listener-native-attach-entry-minimal-safety` 位于 [DebugListener Native Attach Entry Runtime Scaffold](debug-listener-native-attach-entry-runtime-scaffold.md) 之后。它把 TRT10/TRT11 attach entry 的参数形状、version guard、no-throw 边界、ownership diagnostics 和 native source-visible scaffold 合成一个 pointer-free 结果。
 
+源码 owner 已按职责拆分：evaluation 与 native attach blocker 构造位于
+`TensorRtDebugListenerNativeAttachEntryMinimalSafety.cs`，pointer-free report 位于
+`TensorRtDebugListenerNativeAttachEntryMinimalSafetyResult.cs`。readiness 与源码测试必须组合读取这两个文件。
+
 公开 API：
 
 - `TensorRtDebugListenerNativeAttachEntryMinimalSafety`

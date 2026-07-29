@@ -7297,3 +7297,44 @@ deferred-row 语义保持不变。
 - source/type relocation 与 proof-gap/attach-entry design gate 不构成新的 real callback runtime、TensorRT/CUDA
   runtime、real model、Linux、package consumer、public package、post-publish、Owner acceptance 或 release proof。
 - 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行远程发布操作。
+
+## 2026-07-30 DebugListener No-Throw VTable Gate And Attach Entry Minimal Safety Result Split
+
+本阶段继续整理 `JYPPX.TensorRtSharp/Callbacks/Debugging`，将 native no-throw vtable design gate 与 native
+attach-entry minimal safety 的 result model 从 evaluator 分离。vtable safety、attach-entry shape、pointer
+non-exposure 与 runtime-proof blocker 语义保持不变。
+
+### 实现与门禁
+
+- 原 388 行 `TensorRtDebugListenerNativeNoThrowVTableDesignGate.cs` 分为 177 行 evaluator 与 216 行 result；
+  evaluator 只保留两个 Evaluate overload 与 blocker helper。
+- 原 376 行 `TensorRtDebugListenerNativeAttachEntryMinimalSafety.cs` 分为 185 行 evaluator 与 196 行 result；
+  evaluator 只保留三个 Evaluate overload、native attach blocked reason 与 blocker helper。
+- vtable shape/no-throw/version/ownership、owner address、exception/status mapping、in-flight accounting 与 lifecycle
+  prerequisite 保持原样。
+- line-specific attach/detach entry、minimal safety、borrowed tensor/data lifetime、callback keep-alive、pointer
+  non-exposure 与 runtime-proof blocker 保持原样。
+- `ManagedDebugListenerNoThrowVTableMinimalSafetySourceLayoutTests` 固定四个文件的精确 top-level type、constructor、
+  method、public property、pointer-free surface、readiness/test source-set、两个消费测试和文档 marker，并重组原源码。
+- 拆分前 Git blob 为 `068e7a4e18b400445bdb897a95dfabd2f120e875` 与
+  `9876179f69f535a40996b02fab0db6450971ff47`；normalized SHA-256 保持
+  `101d1d5077485fd67afdeb75b5ca011ab7f2b2650aa6bcdb5fe906f808633532` 与
+  `54fb0c554b02f6572ec07a792e1172ddc073bd85bdef1b0b567abe266ea0f4d6`。
+- readiness 与 test reader 显式展开两套 source-set；minimal-safety 直接消费测试改读组合；两份专题文档、
+  callback safety roadmap 与双语 source-organization 同步真实 result owner。
+
+### 验证与边界
+
+- 新 type/constructor/method/property/pointer/source-set/doc/重组门禁：`13/13` 通过；全部 DebugListener 聚焦集合：
+  `207/207` 通过；全部 managed layout：`559/559` 通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`；
+  RuntimePackageReadiness UTF-8 ParseInput 为 `0 error`，两套新增 source-set 为 `0` 缺失。
+- 本机无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合，也未生成或刷新 publishing/exporter evidence。
+- ignored deferred candidate evidence 保持 `260` 条引用、`147` 个唯一路径、`0` 缺失；其中引用的 `22` 份 JSON
+  全部可解析，ignored 文件未强制提交。
+- Generated/native/manifest/ABI 改动为 0；`git diff --check` 通过。
+- 进程审计快照未发现引用本工作区的其他进程；Downloads 与用户 Temp 顶层近三小时没有本批 TensorRT/JYPPX/CUDA/
+  NVRTC/ONNX/engine/nupkg 重资产匹配项，未终止、删除或借用其他工作区进程。
+- source/type relocation 与 no-throw-vtable/minimal-safety gate 不构成新的 real callback runtime、TensorRT/CUDA
+  runtime、real model、Linux、package consumer、public package、post-publish、Owner acceptance 或 release proof。
+- 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行远程发布操作。

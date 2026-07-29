@@ -208,6 +208,12 @@ proof-gap report 分为 159 行 evaluator 与 260 行 sealed result；原 408 �
 `3a6eca7d81dd5091ce60f67cd70ec5d6637cdb46`，并固定 gap 顺序/category/owner action、attach/detach mapping、
 lifecycle/vtable prerequisite、pointer non-exposure 与 deferred-row 语义。
 
+DebugListener native no-throw vtable design gate 与 attach-entry minimal safety 的 result 也已归入同名文件。原
+388 行 vtable gate 分为 177 行 evaluator 与 216 行 result；原 376 行 minimal safety 分为 185 行 evaluator 与
+196 行 result。布局门禁可重组拆分前 Git blob `068e7a4e18b400445bdb897a95dfabd2f120e875` 与
+`9876179f69f535a40996b02fab0db6450971ff47`，并固定 vtable no-throw/version/ownership、line-specific attach/detach、
+owner lifecycle、borrowed lifetime、pointer non-exposure 与 runtime-proof blocker。
+
 OutputAllocator diagnostics 继续按 public design owner 与 internal managed runtime gate 分层。原 637 行
 `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` 降为 38 行 state/constructor core；entries、snapshots、
 lifecycle、shared invocation、trampoline/state 与 formatting 进入 6 份 partial，request/result 类型各自成文件。原 503 行
