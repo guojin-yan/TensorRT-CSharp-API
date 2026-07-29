@@ -5627,3 +5627,37 @@ namespace、partial type、方法签名/方法体、P/Invoke entrypoint、版本
   Owner acceptance 或 release proof。
 - C 盘 Downloads 顶层当日本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
 - 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 TensorRT Diagnostics Owner Partial Split
+
+本阶段将 422 行 `NativeBridgeApi.Trt11Diagnostics.cs` 按真实 owner 拆入 Builder、Network、Engine 与 Execution。
+原文件的四个职责区段连续且没有共享 delegate/private helper；本批只移动完整方法块，没有改动方法签名/方法体、
+版本分支、entrypoint、异常文案、UTF-8 buffer 读取或地址诊断的整数转换。
+
+### 实现与门禁
+
+- `Builder/NativeBridgeApi.BuilderConfigDiagnostics.cs`：116 行、9 个 reset、timing-cache/DLA、plugin serialization 与
+  progress-monitor 方法。
+- `Network/NativeBridgeApi.NetworkDiagnostics.cs`：95 行、7 个 debug tensor、unfused debug 与 shape-output 方法。
+- `Engine/NativeBridgeApi.EngineInspectorDiagnostics.cs`：50 行、4 个 layer information、execution-context 与
+  error-recorder presence 方法。
+- `Execution/NativeBridgeApi.ExecutionContextDiagnostics.cs`：188 行、15 个 address diagnostic、allocator/debug-listener/
+  profiler/runtime-config/NVTX/aux-stream/unfused-debug 方法。
+- 方法级布局门禁固定 9/7/4/15 数量和 BuilderConfig/Network/EngineInspector/ExecutionContext 命名边界，并拒绝旧根文件回流；
+  7 处受影响源码合同已改为只读取实际 owner 文件，旧文件名只保留在负向门禁中。
+- 四文件按原 Builder、Network、Engine、Execution 片段顺序重组后的 Git blob 为
+  `89f756495b67e847d11dab8569dd26aa0e8229d2`，与 HEAD 原文件完全一致。
+
+### 验证与边界
+
+- layout、BuilderConfig scalar/B-tier、engine/RNN readonly、execution-context aux-stream/readonly、engine-inspector 与
+  plugin serialization 定向集合：`71/71` 通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- ignored deferred candidate artifact 已在本机迁移 Builder diagnostics 路径；243 条 evidence 引用、133 个唯一路径
+  缺失为 0，且该文件未强制提交。
+- `git diff --check` 通过；Generated/native/manifest/ABI 未修改，未运行完整 ProjectQuality，也未运行依赖本机缺失
+  `pwsh` 的 B-tier 聚合测试。
+- partial 拆分不是 ABI/export、TensorRT runtime、Linux、package consumer、public package、post-publish、
+  Owner acceptance 或 release proof。
+- C 盘 Downloads 顶层当日本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
+- 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。

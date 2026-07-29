@@ -58,18 +58,19 @@ TensorRT high-level wrappers are also being split by layer feature area:
 
 Hand-written TensorRT partial interop now starts following the same responsibility modules:
 
-- `Internal/Interop/Builder` contains timing-cache and builder-config runtime controls; `ControlFlow` contains loop/conditional operations.
+- `Internal/Interop/Builder` contains timing-cache, builder-config diagnostics, and runtime controls; `ControlFlow` contains
+  loop/conditional operations.
 - `Internal/Interop/Callbacks` contains allocator dry-run controls, callback interface/state copies, and logger/profiler/
   progress-monitor delegate signatures.
 - `Internal/Interop/Diagnostics` contains copied error-code metadata and TRT11 build probes used only by the environment probe;
   `Internal/Interop/Interfaces` contains owner-scoped versioned-interface metadata copies.
-- `Internal/Interop/Engine` contains copied engine/tensor/profile metadata, Dims64, and weight-streaming/stat runtime controls;
-  `Execution` contains execution-context/runtime-config creation, allocation-strategy, deployment metadata, Dims64, and
-  allocator/event presence controls.
+- `Internal/Interop/Engine` contains copied engine/tensor/profile metadata, Dims64, engine-inspector diagnostics, and
+  weight-streaming/stat runtime controls; `Execution` contains execution-context/runtime-config creation, allocation-strategy,
+  deployment metadata, Dims64, diagnostics, and allocator/event presence controls.
 - `Internal/Interop/Inference` contains synchronous execute/enqueue operations; `Weights` contains copied layer-weight metadata.
 - `Internal/Interop/Layers` contains quantization, attention, fill-int64, compatibility/deployment layer attributes, Dims64,
   tensor metadata, transformer, and RNNv2 operations; `Network` contains deployment network-layer creation, tensor/network
-  Dims64, refittable-weight markers, and safe network-v2 operations.
+  Dims64, debug/shape diagnostics, refittable-weight markers, and safe network-v2 operations.
 - `Internal/Interop/Parsing` contains legacy parser diagnostics, ONNX config/model-buffer/support, builder-config attachment,
   layer-output metadata, and parser-refitter diagnostics.
 - `Internal/Interop/Plugins` contains builder capability/runtime registry inventories and copied V2/V3 layer metadata/query snapshots.
@@ -82,7 +83,8 @@ Hand-written TensorRT partial interop now starts following the same responsibili
 
 `NativeBridgeApi.SafeDeferredUplift.cs` also remains at the root because it combines plugin initialization with ONNX weight-descriptor parsing. Callback file placement is not callback trampoline, lifetime, or runtime proof.
 
-Version-prefixed files remain at the root when their method set crosses builder, engine, execution-context, network, and layer owners. In particular, `Trt11Diagnostics` is not classified by filename alone.
+Version-prefixed files remain at the root only when their method set still crosses owners or features and requires a separate
+behavioral split; they are not classified by filename alone.
 The former `Trt11DeploymentAdditions` is split by method owner into `Network/NativeBridgeApi.DeploymentNetworkLayers.cs` and
 `Layers/NativeBridgeApi.DeploymentLayerAttributes.cs`; recombining both parts must reproduce the pre-split Git blob.
 The former `Trt11RuntimeSerializationRefit` is also split across `Runtime`, `Serialization`, `Execution`, and `Refit`; recombining
@@ -93,6 +95,8 @@ The former `Trt11Dims64` is split across `Network`, `Engine`, `Execution`, `Prof
 move with `Layers`, and recombination in original segment order must reproduce the pre-split Git blob.
 The former `Trt11RuntimeControls` is split by contiguous owner sections across `Engine`, `Execution`, and `Builder`; recombination
 in original segment order must reproduce the pre-split Git blob.
+The former `Trt11Diagnostics` is split across `Builder`, `Network`, `Engine`, and `Execution`; recombination in original segment
+order must reproduce the pre-split Git blob.
 
 Generated files remain under their `Generated` folders and should not be manually split. Generator output layout changes must happen in the generator itself and must pass the deterministic generator gate.
 

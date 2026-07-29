@@ -35,7 +35,7 @@ public sealed class DeferredBTier41To45ProofClosureTests
         string interopRuntimeControls =
             ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Builder", "NativeBridgeApi.BuilderConfigRuntimeControls.cs") +
             ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Engine", "NativeBridgeApi.EngineRuntimeControls.cs");
-        string interopDiagnostics = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11Diagnostics.cs");
+        string interopDiagnostics = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Execution", "NativeBridgeApi.ExecutionContextDiagnostics.cs");
         string interopParserRefitter = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Parsing", "NativeBridgeApi.ParserRefitterDiagnostics.cs");
         string managedSurface = string.Join('\n', builderConfigApi, engineApi, contextApi, onnxParserApi, parserRefitterApi, parserRefitterSnapshot);
 

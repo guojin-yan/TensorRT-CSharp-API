@@ -120,7 +120,7 @@ public sealed class EngineAndRnnReadonlyDiagnosticsTests
     public void ManagedInteropAndPublicApiExposeCompatibilityQueriesWithoutRawPointers()
     {
         string runtimeInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Engine", "NativeBridgeApi.EngineRuntimeControls.cs");
-        string diagnosticsInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11Diagnostics.cs");
+        string diagnosticsInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Builder", "NativeBridgeApi.BuilderConfigDiagnostics.cs");
         string rnnInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Layers", "NativeBridgeApi.Trt8RnnV2Diagnostics.cs");
         string engineApi = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.cs");
         string contextApi = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.cs");
