@@ -6476,3 +6476,40 @@ allocation/transfer/range 操作从两个超大文件拆到可定位的 feature 
   Owner acceptance 或 release proof。
 - 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages
   发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 CUDA Device And Module Enum Source Split
+
+本阶段继续清理 `JYPPX.CudaSharp` 的跨职责大文件，将 device-wide static helper 按调用域拆开，并把原
+`Core/CudaFlags.cs` 中混合的 stream/event/memory/device/array/graph enum 移入实际模块目录，不改变 namespace、
+public enum 数值、device context/P2P/error 状态语义或 proof 分类。
+
+### 实现与门禁
+
+- `CudaDevice.cs` 从 793 行降至 144 行，仅保留 runtime/driver version、device count/current、Set/Use、基础 info 与
+  property snapshot；graph resource、runtime configuration、initialization/selection、peer capability、memory pool、
+  cache/RDMA、synchronization/error diagnostics 进入七份 partial。
+- `CopyDeviceOrdinals` 随 InitializationSelection 移动，`CopyAtomicOperations` 随 PeerCapabilities 移动；core 不再保留
+  仅由单一 feature 消费的 helper。
+- 原 912 行 `Core/CudaFlags.cs` 已删除；24 个 public enum 按 Streams、Events、Memory、Devices、Graphs 归入
+  `CudaStreamFlags.cs`、`CudaEventFlags.cs`、`CudaHostMemoryFlags.cs`、`CudaMemoryAdvice.cs`、
+  `CudaDeviceExecutionEnums.cs`、`CudaPeerAccessEnums.cs`、`CudaArrayFlags.cs`、`CudaGpuDirectRdmaEnums.cs`、
+  `CudaGraphNodeType.cs`、`CudaManagedMemoryAttachmentFlags.cs` 十份文件。
+- `ManagedCudaDeviceFlagsLayoutTests` 固定 7 份 Device partial 加 core 的精确方法/属性集合、两个 helper owner、
+  10 个 enum 文件的精确 top-level type 集合，并按原交错顺序重组两份源码。
+- 拆分前 Git blob 为 `df16e51427f82c9b99fa867819015539dd65ac0c`、
+  `dca1aa594002506ce47bd247f47141201af6591d`；normalized SHA-256 保持
+  `d864d0cf8626bb59b75b7c5a2b30013ab3652afa0f0e2b5d5ee9b57960b7436d` 与
+  `ec815281a28b92d8320d644a89ccc54b6e23d901de39bd353cbf22a766fa9d43`。
+- 8 份直接读取旧 Device/Flags 文件的质量测试改读真实 feature/type owner；双语 source-organization 同步。
+
+### 验证与边界
+
+- 新布局/重组门禁：`22/22` 通过；相关 Device/enum 消费集合：`52/52` 通过；全部 managed 源码布局门禁合并集合：
+  `204/204` 通过。
+- `JYPPX.CudaSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- tracked/ignored 搜索未发现旧 `CudaFlags.cs` 或错误 Device core owner 路径；deferred candidate evidence 路径校准
+  继续保持 260 条引用、147 个唯一路径、0 缺失。
+- Generated/native/manifest/ABI 改动为 0；本机仍无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合测试。
+- type/source relocation 不构成 device initialization、P2P、graph memory、runtime correctness、real model、Linux、
+  package consumer、public package、post-publish、Owner acceptance 或 release proof。
+- 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行远程发布操作。

@@ -13,7 +13,8 @@ public sealed class CudaGraphSnapshotBoundaryTests
             ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.NodeInspection.cs") +
             ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.NodeRelations.cs");
         string graphExec = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphExec.cs");
-        string device = ReadSource("src", "JYPPX.CudaSharp", "Devices", "CudaDevice.cs");
+        string device = ReadSource(
+            "src", "JYPPX.CudaSharp", "Devices", "CudaDevice.GraphResources.cs");
         string graphSnapshot = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphTopologySnapshot.cs");
         string nodeSnapshot = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphNodeTopologySnapshot.cs");
         string execNodeSnapshot = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphExecNodeStateSnapshot.cs");

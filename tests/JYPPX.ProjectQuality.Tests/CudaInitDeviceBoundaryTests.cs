@@ -31,7 +31,8 @@ public sealed class CudaInitDeviceBoundaryTests
     [Fact]
     public void ManagedCudaInitDeviceUsesFlagsAndDoesNotExposeNativeHandles()
     {
-        string deviceApi = ReadSource("src", "JYPPX.CudaSharp", "Devices", "CudaDevice.cs");
+        string deviceApi = ReadSource(
+            "src", "JYPPX.CudaSharp", "Devices", "CudaDevice.InitializationSelection.cs");
         string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "NativeCudaApi.Deployment.cs");
         string smoke = ReadSource("smoke", "CudaSmokeRunner", "Program.cs");
 

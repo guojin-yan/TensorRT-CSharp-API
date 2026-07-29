@@ -32,7 +32,8 @@ public sealed class CudaChooseDeviceBoundaryTests
     {
         string requirements = ReadSource("src", "JYPPX.CudaSharp", "Devices", "CudaDeviceSelectionRequirements.cs");
         string structs = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "NativeStructs.cs");
-        string deviceApi = ReadSource("src", "JYPPX.CudaSharp", "Devices", "CudaDevice.cs");
+        string deviceApi = ReadSource(
+            "src", "JYPPX.CudaSharp", "Devices", "CudaDevice.InitializationSelection.cs");
         string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "NativeCudaApi.Deployment.cs");
 
         Assert.Contains("public sealed class CudaDeviceSelectionRequirements", requirements);

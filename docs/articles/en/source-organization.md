@@ -111,6 +111,14 @@ and array conversion live in nine feature partials alongside the existing regist
 the pre-split Git blobs `5b7e06e4e59d6961c9c848f88d1f9ace6a9c0450` and
 `1d2085d8ffc527cfd280c2ba68836d14bb2c6334`.
 
+Device-wide CUDA helpers and cross-module enums are no longer collected in two broad files either.
+`Devices/CudaDevice.cs` is reduced from 793 lines to a 144-line runtime/driver/device identity and property-snapshot core;
+graph resources, runtime configuration, initialization/selection, peer capabilities, memory pools, cache/RDMA, and
+synchronization/error diagnostics live in seven feature partials. The former 912-line `Core/CudaFlags.cs` is removed: its
+24 public enums now live in ten Streams, Events, Memory, Devices, and Graphs module files. Enum names, underlying types,
+numeric values, and XML documentation remain unchanged. The layout gate recomposes the pre-split Git blobs
+`df16e51427f82c9b99fa867819015539dd65ac0c` and `dca1aa594002506ce47bd247f47141201af6591d`.
+
 Hand-written TensorRT partial interop now starts following the same responsibility modules:
 
 - `Internal/Interop/Builder` contains builder creation/capabilities, serialized build outputs, builder boundary controls,

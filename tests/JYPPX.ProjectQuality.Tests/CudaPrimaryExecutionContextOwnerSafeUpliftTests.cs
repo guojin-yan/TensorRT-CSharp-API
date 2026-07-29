@@ -60,7 +60,8 @@ public sealed class CudaPrimaryExecutionContextOwnerSafeUpliftTests
     public void ManagedSurfaceIsOwnerSafeAndPointerFree()
     {
         string context = ReadSource("src", "JYPPX.CudaSharp", "Devices", "CudaPrimaryExecutionContext.cs");
-        string device = ReadSource("src", "JYPPX.CudaSharp", "Devices", "CudaDevice.cs");
+        string device = ReadSource(
+            "src", "JYPPX.CudaSharp", "Devices", "CudaDevice.InitializationSelection.cs");
         string handle = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Handles", "SafeCudaExecutionContextHandle.cs");
         string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "Devices", "NativeCudaApi.ExecutionContext.cs");
         string publicSurface = context + device;

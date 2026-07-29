@@ -55,7 +55,8 @@ public sealed class CudaDevResourceSnapshotUpliftTests
     public void ManagedSnapshotIsTypedValueOnlyAndDoesNotExposeVendorPointers()
     {
         string snapshot = ReadSource("src", "JYPPX.CudaSharp", "Devices", "CudaDevResourceSnapshot.cs");
-        string device = ReadSource("src", "JYPPX.CudaSharp", "Devices", "CudaDevice.cs");
+        string device = ReadSource(
+            "src", "JYPPX.CudaSharp", "Devices", "CudaDevice.GraphResources.cs");
         string stream = ReadSource("src", "JYPPX.CudaSharp", "Streams", "CudaStream.cs");
         string context = ReadSource("src", "JYPPX.CudaSharp", "Devices", "CudaPrimaryExecutionContext.cs");
         string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "Devices", "NativeCudaApi.DeviceResources.cs");

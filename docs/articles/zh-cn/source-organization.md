@@ -97,6 +97,13 @@ transfer、async free 与 array conversion 进入 9 份 feature partial，并继
 可重组拆分前 Git blob `5b7e06e4e59d6961c9c848f88d1f9ace6a9c0450` 与
 `1d2085d8ffc527cfd280c2ba68836d14bb2c6334`。
 
+CUDA device 级 helper 与跨模块 enum 也不再集中在两个宽泛文件中。`Devices/CudaDevice.cs` 从 793 行降为 144 行
+runtime/driver/device identity 与 property snapshot core；graph resources、runtime configuration、initialization/selection、
+peer capabilities、memory pools、cache/RDMA、synchronization/error diagnostics 进入 7 份 feature partial。原 912 行
+`Core/CudaFlags.cs` 已删除，其中 24 个 public enum 进入 Streams、Events、Memory、Devices、Graphs 下 10 个模块文件；
+enum 名称、底层类型、数值与 XML 注释保持不变。布局门禁可重组拆分前 Git blob
+`df16e51427f82c9b99fa867819015539dd65ac0c` 与 `dca1aa594002506ce47bd247f47141201af6591d`。
+
 手写 TensorRT partial interop 也开始按相同职责模块归类：
 
 - `Internal/Interop/Builder`：builder creation/capabilities、serialized build outputs、builder boundary controls、

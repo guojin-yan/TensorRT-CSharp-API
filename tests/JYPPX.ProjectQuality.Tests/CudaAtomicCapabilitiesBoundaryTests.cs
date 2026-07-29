@@ -31,8 +31,9 @@ public sealed class CudaAtomicCapabilitiesBoundaryTests
     [Fact]
     public void ManagedCudaAtomicCapabilityApiUsesTypedEnumsAndPinnedArrays()
     {
-        string flags = ReadSource("src", "JYPPX.CudaSharp", "Core", "CudaFlags.cs");
-        string deviceApi = ReadSource("src", "JYPPX.CudaSharp", "Devices", "CudaDevice.cs");
+        string flags = ReadSource("src", "JYPPX.CudaSharp", "Devices", "CudaPeerAccessEnums.cs");
+        string deviceApi = ReadSource(
+            "src", "JYPPX.CudaSharp", "Devices", "CudaDevice.PeerCapabilities.cs");
         string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "NativeCudaApi.Deployment.cs");
 
         Assert.Contains("public enum CudaAtomicOperation", flags);
