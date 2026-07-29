@@ -93,6 +93,7 @@ public sealed class ManagedSourceModuleLayoutTests
                 "NativeBridgeApi.DeploymentLayerAttributes.cs",
                 "NativeBridgeApi.Dims64LayerMetadata.cs",
                 "NativeBridgeApi.ElementWise.cs",
+                "NativeBridgeApi.Gather.cs",
                 "NativeBridgeApi.IdentityAndConstant.cs",
                 "NativeBridgeApi.LayerDeploymentMetadata.cs",
                 "NativeBridgeApi.MatrixMultiply.cs",
@@ -102,12 +103,15 @@ public sealed class ManagedSourceModuleLayoutTests
                 "NativeBridgeApi.Reduce.cs",
                 "NativeBridgeApi.Scale.cs",
                 "NativeBridgeApi.Shuffle.cs",
+                "NativeBridgeApi.SoftMax.cs",
                 "NativeBridgeApi.ThirtyThirdBatchLayerAttributes.cs",
+                "NativeBridgeApi.TopK.cs",
                 "NativeBridgeApi.Trt11Attention.cs",
                 "NativeBridgeApi.Trt11FillInt64.cs",
                 "NativeBridgeApi.Trt11LayerTensorMetadata.cs",
                 "NativeBridgeApi.Trt11TransformerMetadata.cs",
-                "NativeBridgeApi.Trt8RnnV2Diagnostics.cs"
+                "NativeBridgeApi.Trt8RnnV2Diagnostics.cs",
+                "NativeBridgeApi.Unary.cs"
             }
         },
         {
@@ -951,7 +955,7 @@ public sealed class ManagedSourceModuleLayoutTests
         }
 
         Assert.DoesNotContain("GetNetworkNameNative", rootSource, StringComparison.Ordinal);
-        Assert.Contains("public static SafeTensorRtObjectHandle AddSoftMaxLayer(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static SafeTensorRtObjectHandle AddActivationLayer(", rootSource, StringComparison.Ordinal);
         Assert.Contains("private static BridgeStatusCode GetTensorNameNative(", rootSource, StringComparison.Ordinal);
         Assert.Contains("private static BridgeStatusCode GetLayerNameNative(", rootSource, StringComparison.Ordinal);
     }
@@ -1021,7 +1025,7 @@ public sealed class ManagedSourceModuleLayoutTests
         Assert.DoesNotContain("PinOptionalWeights", rootSource, StringComparison.Ordinal);
         Assert.DoesNotContain("GetScaleWeightsDataType", rootSource, StringComparison.Ordinal);
         Assert.DoesNotContain("ValidateOptionalWeightsDataType", rootSource, StringComparison.Ordinal);
-        Assert.Contains("public static SafeTensorRtObjectHandle AddSoftMaxLayer(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static SafeTensorRtObjectHandle AddActivationLayer(", rootSource, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -1059,7 +1063,7 @@ public sealed class ManagedSourceModuleLayoutTests
             Assert.DoesNotContain(method, rootMethods);
         }
 
-        Assert.Contains("public static SafeTensorRtObjectHandle AddSoftMaxLayer(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static SafeTensorRtObjectHandle AddActivationLayer(", rootSource, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -1098,7 +1102,7 @@ public sealed class ManagedSourceModuleLayoutTests
             Assert.DoesNotContain(method, rootMethods);
         }
 
-        Assert.Contains("public static SafeTensorRtObjectHandle AddSoftMaxLayer(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static SafeTensorRtObjectHandle AddActivationLayer(", rootSource, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -1132,7 +1136,36 @@ public sealed class ManagedSourceModuleLayoutTests
             Assert.DoesNotContain(method, rootMethods);
         }
 
-        Assert.Contains("public static SafeTensorRtObjectHandle AddSoftMaxLayer(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static SafeTensorRtObjectHandle AddActivationLayer(", rootSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TensorRtRootSimpleSelectionLayerFeaturesAreSplitByFeature()
+    {
+        string interopDirectory = Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.TensorRtSharp",
+            "Internal",
+            "Interop");
+        string rootSource = File.ReadAllText(Path.Combine(interopDirectory, "NativeBridgeApi.cs"));
+        string[] rootMethods = EnumeratePublicStaticMethodNames(rootSource);
+        string[] softMaxMethods = ReadInteropMethodNames(interopDirectory, "Layers", "NativeBridgeApi.SoftMax.cs");
+        string[] unaryMethods = ReadInteropMethodNames(interopDirectory, "Layers", "NativeBridgeApi.Unary.cs");
+        string[] topKMethods = ReadInteropMethodNames(interopDirectory, "Layers", "NativeBridgeApi.TopK.cs");
+        string[] gatherMethods = ReadInteropMethodNames(interopDirectory, "Layers", "NativeBridgeApi.Gather.cs");
+
+        Assert.Equal(new[] { "AddSoftMaxLayer", "SetSoftMaxAxes", "GetSoftMaxAxes" }, softMaxMethods);
+        Assert.Equal(new[] { "AddUnaryLayer", "GetUnaryOperation" }, unaryMethods);
+        Assert.Equal(new[] { "AddTopKLayer", "GetTopKOperation", "GetTopKValue", "GetTopKAxes" }, topKMethods);
+        Assert.Equal(new[] { "AddGatherLayer", "GetGatherAxis" }, gatherMethods);
+
+        foreach (string method in softMaxMethods.Concat(unaryMethods).Concat(topKMethods).Concat(gatherMethods))
+        {
+            Assert.DoesNotContain(method, rootMethods);
+        }
+
+        Assert.Contains("public static SafeTensorRtObjectHandle AddActivationLayer(", rootSource, StringComparison.Ordinal);
     }
 
     private static string[] EnumerateModuleFiles(string projectDirectory, string module)

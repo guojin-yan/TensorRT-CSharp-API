@@ -70,7 +70,8 @@ Hand-written TensorRT partial interop now starts following the same responsibili
   execution-context binding/address/enqueue/aux-stream controls, boundary controls, copied engine metadata, runtime-config creation,
   allocation-strategy, deployment metadata, Dims64, diagnostics, and allocator/event presence controls.
 - `Internal/Interop/Inference` contains synchronous execute/enqueue operations; `Weights` contains copied layer-weight metadata.
-- `Internal/Interop/Layers` contains identity/constant/convolution/deconvolution/scale/padding/element-wise/matrix-multiply/shuffle/reduce features,
+- `Internal/Interop/Layers` contains identity/constant/convolution/deconvolution/scale/padding/element-wise/matrix-multiply/shuffle/reduce,
+  softmax, unary, TopK, and gather features,
   shared optional-weight helpers, quantization, attention, fill-int64, compatibility/deployment layer attributes, Dims64,
   tensor metadata, transformer, and RNNv2
   operations; `Network` contains core definition input/output/name/flags, boundary controls,
@@ -136,7 +137,9 @@ Layers Shared partial, with recombination preserving original helper order.
 Padding, element-wise, and matrix-multiply creation/attributes move into three additional Layers feature partials. These blocks
 have no private helper. Shuffle creation, reshape/transpose attributes, and zero-placeholder controls move into a fourth partial;
 that block also has no private helper, and direct original-order recombination remains required. Reduce creation and readonly
-operation/axes/keep-dimensions attributes move into another helper-free partial; the next root feature begins at `AddSoftMaxLayer`.
+operation/axes/keep-dimensions attributes move into another helper-free partial.
+SoftMax, unary, TopK, and gather creation/attributes move into four independent helper-free partials; the next root feature begins
+at `AddActivationLayer`.
 
 Generated files remain under their `Generated` folders and should not be manually split. Generator output layout changes must happen in the generator itself and must pass the deterministic generator gate.
 
