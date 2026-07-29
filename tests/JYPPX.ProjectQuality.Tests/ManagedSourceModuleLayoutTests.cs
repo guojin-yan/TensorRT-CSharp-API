@@ -88,10 +88,15 @@ public sealed class ManagedSourceModuleLayoutTests
             "Layers",
             new[]
             {
+                "NativeBridgeApi.Convolution.cs",
+                "NativeBridgeApi.Deconvolution.cs",
                 "NativeBridgeApi.DeploymentLayerAttributes.cs",
                 "NativeBridgeApi.Dims64LayerMetadata.cs",
+                "NativeBridgeApi.IdentityAndConstant.cs",
                 "NativeBridgeApi.LayerDeploymentMetadata.cs",
+                "NativeBridgeApi.OptionalWeightsShared.cs",
                 "NativeBridgeApi.Quantization.cs",
+                "NativeBridgeApi.Scale.cs",
                 "NativeBridgeApi.ThirtyThirdBatchLayerAttributes.cs",
                 "NativeBridgeApi.Trt11Attention.cs",
                 "NativeBridgeApi.Trt11FillInt64.cs",
@@ -941,10 +946,77 @@ public sealed class ManagedSourceModuleLayoutTests
         }
 
         Assert.DoesNotContain("GetNetworkNameNative", rootSource, StringComparison.Ordinal);
-        Assert.Contains("public static SafeTensorRtObjectHandle AddIdentityLayer(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static SafeTensorRtObjectHandle AddPaddingLayer(", rootSource, StringComparison.Ordinal);
         Assert.Contains("private static BridgeStatusCode GetTensorNameNative(", rootSource, StringComparison.Ordinal);
         Assert.Contains("private static BridgeStatusCode GetLayerNameNative(", rootSource, StringComparison.Ordinal);
-        Assert.Contains("private static TensorRtWeights.PinnedScope? PinOptionalWeights(", rootSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TensorRtRootWeightedLayerCreationIsSplitByFeature()
+    {
+        string interopDirectory = Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.TensorRtSharp",
+            "Internal",
+            "Interop");
+        string rootSource = File.ReadAllText(Path.Combine(interopDirectory, "NativeBridgeApi.cs"));
+        string[] rootMethods = EnumeratePublicStaticMethodNames(rootSource);
+        string[] identityMethods = ReadInteropMethodNames(
+            interopDirectory,
+            "Layers",
+            "NativeBridgeApi.IdentityAndConstant.cs");
+        string convolutionSource = File.ReadAllText(Path.Combine(
+            interopDirectory,
+            "Layers",
+            "NativeBridgeApi.Convolution.cs"));
+        string[] convolutionMethods = EnumeratePublicStaticMethodNames(convolutionSource);
+        string deconvolutionSource = File.ReadAllText(Path.Combine(
+            interopDirectory,
+            "Layers",
+            "NativeBridgeApi.Deconvolution.cs"));
+        string[] deconvolutionMethods = EnumeratePublicStaticMethodNames(deconvolutionSource);
+        string scaleSource = File.ReadAllText(Path.Combine(
+            interopDirectory,
+            "Layers",
+            "NativeBridgeApi.Scale.cs"));
+        string[] scaleMethods = EnumeratePublicStaticMethodNames(scaleSource);
+        string sharedSource = File.ReadAllText(Path.Combine(
+            interopDirectory,
+            "Layers",
+            "NativeBridgeApi.OptionalWeightsShared.cs"));
+
+        Assert.Equal(new[] { "AddIdentityLayer", "AddConstantLayer" }, identityMethods);
+        Assert.Equal(new[] { "AddConvolutionLayer" }, convolutionMethods);
+        Assert.Equal(new[] { "AddDeconvolutionLayer" }, deconvolutionMethods);
+        Assert.Equal(new[] { "AddScaleLayer" }, scaleMethods);
+        Assert.Contains("using TensorRtWeights.PinnedScope kernelPinned = kernelWeights.Pin();", convolutionSource, StringComparison.Ordinal);
+        Assert.Contains("biasPinned?.Dispose();", convolutionSource, StringComparison.Ordinal);
+        Assert.Contains("using TensorRtWeights.PinnedScope kernelPinned = kernelWeights.Pin();", deconvolutionSource, StringComparison.Ordinal);
+        Assert.Contains("biasPinned?.Dispose();", deconvolutionSource, StringComparison.Ordinal);
+        Assert.Contains("private static TensorRtDataType GetScaleWeightsDataType(", scaleSource, StringComparison.Ordinal);
+        Assert.True(
+            scaleSource.IndexOf("powerPinned?.Dispose();", StringComparison.Ordinal) <
+            scaleSource.IndexOf("scalePinned?.Dispose();", StringComparison.Ordinal));
+        Assert.True(
+            scaleSource.IndexOf("scalePinned?.Dispose();", StringComparison.Ordinal) <
+            scaleSource.IndexOf("shiftPinned?.Dispose();", StringComparison.Ordinal));
+        Assert.Empty(EnumeratePublicStaticMethodNames(sharedSource));
+        Assert.Contains("private static TensorRtWeights.PinnedScope? PinOptionalWeights(", sharedSource, StringComparison.Ordinal);
+        Assert.Contains("private static void ValidateOptionalWeightsDataType(", sharedSource, StringComparison.Ordinal);
+        Assert.Contains("return weights.Pin();", sharedSource, StringComparison.Ordinal);
+        Assert.Contains("weights.DataType != expected", sharedSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("GetScaleWeightsDataType", sharedSource, StringComparison.Ordinal);
+
+        foreach (string method in identityMethods.Concat(convolutionMethods).Concat(deconvolutionMethods).Concat(scaleMethods))
+        {
+            Assert.DoesNotContain(method, rootMethods);
+        }
+
+        Assert.DoesNotContain("PinOptionalWeights", rootSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("GetScaleWeightsDataType", rootSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("ValidateOptionalWeightsDataType", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static SafeTensorRtObjectHandle AddPaddingLayer(", rootSource, StringComparison.Ordinal);
     }
 
     private static string[] EnumerateModuleFiles(string projectDirectory, string module)

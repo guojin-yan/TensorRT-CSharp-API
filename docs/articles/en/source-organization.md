@@ -70,8 +70,9 @@ Hand-written TensorRT partial interop now starts following the same responsibili
   execution-context binding/address/enqueue/aux-stream controls, boundary controls, copied engine metadata, runtime-config creation,
   allocation-strategy, deployment metadata, Dims64, diagnostics, and allocator/event presence controls.
 - `Internal/Interop/Inference` contains synchronous execute/enqueue operations; `Weights` contains copied layer-weight metadata.
-- `Internal/Interop/Layers` contains quantization, attention, fill-int64, compatibility/deployment layer attributes, Dims64,
-  tensor metadata, transformer, and RNNv2 operations; `Network` contains core definition input/output/name/flags, boundary controls,
+- `Internal/Interop/Layers` contains identity/constant/convolution/deconvolution/scale creation, shared optional-weight helpers,
+  quantization, attention, fill-int64, compatibility/deployment layer attributes, Dims64, tensor metadata, transformer, and RNNv2
+  operations; `Network` contains core definition input/output/name/flags, boundary controls,
   deployment network-layer creation, tensor/network Dims64, debug/shape diagnostics, refittable-weight markers, and safe network-v2 operations.
 - `Internal/Interop/Parsing` contains the global ONNX parser version, parser lifecycle/input/diagnostics/flags, legacy parser
   diagnostics, ONNX config/model-buffer/support, builder-config attachment, layer-output metadata, weight-descriptor parsing,
@@ -128,6 +129,9 @@ continue consuming the same private partial type, and original-order recombinati
 The root Network definition core moves to `Network/NativeBridgeApi.NetworkCore.cs`, including input/output ownership, layer lookup,
 name/flags metadata, and its private name getter. Layer creation begins with `AddIdentityLayer` and remains in the root for later
 feature splits; Tensor/Layer name and optional-weight helpers likewise remain with their current consumers.
+Identity/constant, convolution, deconvolution, and scale creation now move into separate Layers feature partials. Scale keeps its
+single-feature data-type selector; pin/validation helpers shared by convolution, deconvolution, and scale move into a helper-only
+Layers Shared partial. The next root layer boundary is `AddPaddingLayer`, and recombination must preserve original helper order.
 
 Generated files remain under their `Generated` folders and should not be manually split. Generator output layout changes must happen in the generator itself and must pass the deterministic generator gate.
 

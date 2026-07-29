@@ -59,8 +59,9 @@ TensorRT 高层 wrapper 也开始按 layer feature 拆分：
   execution-context binding/address/enqueue/aux-stream controls、boundary controls、copied engine metadata、runtime-config 创建、
   allocation-strategy、deployment metadata、Dims64、diagnostics 与 allocator/event presence controls。
 - `Internal/Interop/Inference`：同步 execute/enqueue 操作；`Weights`：复制型 layer-weight metadata。
-- `Internal/Interop/Layers`：quantization、attention、fill-int64、兼容/部署型 layer attributes、Dims64、tensor metadata、
-  transformer 与 RNNv2 操作；`Network`：core definition input/output/name/flags、network boundary controls、部署型 network
+- `Internal/Interop/Layers`：identity/constant/convolution/deconvolution/scale creation、共用 optional-weight helper、
+  quantization、attention、fill-int64、兼容/部署型 layer attributes、Dims64、tensor metadata、transformer 与 RNNv2 操作；
+  `Network`：core definition input/output/name/flags、network boundary controls、部署型 network
   layer 创建、tensor/network Dims64、debug/shape diagnostics、refittable-weight 标记与 safe network-v2 操作。
 - `Internal/Interop/Parsing`：global ONNX parser version、parser lifecycle/input/diagnostics/flags、legacy parser diagnostics、
   ONNX config/model buffer/support、builder-config attachment、layer-output metadata、weight-descriptor parsing、
@@ -115,6 +116,9 @@ Network/Tensor/Layer name helper 在其消费方法迁移前继续保留根文�
 根文件的 Network definition core 已移入 `Network/NativeBridgeApi.NetworkCore.cs`，包含 input/output ownership、layer
 lookup、name/flags metadata 与专属 name getter。Layer creation 从 `AddIdentityLayer` 开始，留待后续按 feature 拆分；
 Tensor/Layer name 与 optional-weight helper 也继续随当前消费方法保留。
+Identity/constant、convolution、deconvolution、scale creation 已分别移入 Layers feature partial。Scale 保留仅供自身使用
+的 data-type selector；convolution/deconvolution/scale 共用的 pin/validation helper 进入 helper-only Layers Shared partial。
+根文件下一段 layer 边界为 `AddPaddingLayer`，重组时必须保持原 helper 顺序。
 
 生成文件继续保留在各自 `Generated` 文件夹下，不手工拆分。若需要调整生成文件布局，必须通过 generator 本身完成，并通过生成器确定性门禁。
 

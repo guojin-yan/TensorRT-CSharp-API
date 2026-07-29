@@ -5970,3 +5970,35 @@ name、creation flags 与 implicit-batch metadata。`GetNetworkNameNative` 只�
   post-publish、Owner acceptance 或 release proof。
 - C 盘 Downloads 顶层本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
 - 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 TensorRT Root Weighted Layer Creation Feature Split
+
+本阶段将根 `NativeBridgeApi.cs` 中连续的 Identity/Constant、Convolution、Deconvolution、Scale layer creation 按 feature
+拆入 Layers。helper 调用关系显示 pin 与 data-type validation 被 convolution/deconvolution/scale 共用，进入 helper-only
+Shared；data-type selector 只被 scale 使用，随 Scale 文件移动。所有方法体、TRT8/10/11 分支、entrypoint、weights
+pinning、`finally` 释放顺序、SafeHandle 返回与异常文案保持不变。
+
+### 实现与门禁
+
+- `Layers/NativeBridgeApi.IdentityAndConstant.cs`：51 行、2 个 identity/constant 方法。
+- `Layers/NativeBridgeApi.Convolution.cs` 与 `Deconvolution.cs`：各 62 行、各 1 个 weighted creation 方法。
+- `Layers/NativeBridgeApi.Scale.cs`：69 行、1 个 scale creation 方法与 1 个专属 data-type selector。
+- `Layers/NativeBridgeApi.OptionalWeightsShared.cs`：29 行、0 个公开方法，只保存共用 pin 与 data-type validation helper。
+- 根 `NativeBridgeApi.cs` 从 3,396 行降至 3,166 行；布局门禁固定 2/1/1/1/0 方法分布、helper-only Shared、kernel/bias
+  pin/dispose 与 Scale power→scale→shift 逆序释放，并将下一根边界推进到 `AddPaddingLayer`。
+- 按 `root prefix + Identity + Convolution + Deconvolution + Scale body + root middle + Shared pin + Scale selector +
+  Shared validation + root close` 原顺序重组后的 Git blob 为 `b20082518f87fd16449b41149c8dc35591f1ddd0`，与拆分前
+  HEAD 根文件完全一致。
+
+### 验证与边界
+
+- layout、safe lifecycle 与 BuilderConfig scalar 定向集合：`57/57` 一次通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- ignored deferred candidate artifact 仍引用存在的根文件，无需迁移；evidence 保持 247 条引用、137 个唯一路径、
+  0 缺失，该 ignored 文件未强制提交。
+- `git diff --check` 通过；Generated/native/manifest/ABI 未修改，未运行完整 ProjectQuality，也未运行依赖本机缺失
+  `pwsh` 的 B-tier 聚合测试。
+- partial 拆分不是 layer/weights runtime correctness、weights lifetime、ABI/export、Linux、package consumer、
+  public package、post-publish、Owner acceptance 或 release proof。
+- C 盘 Downloads 顶层本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
+- 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
