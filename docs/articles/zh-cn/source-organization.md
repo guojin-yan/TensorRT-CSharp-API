@@ -46,13 +46,15 @@ TensorRT 高层 wrapper 也开始按 layer feature 拆分：
 | `JYPPX.CudaSharp` | `Core`、`Devices`、`Diagnostics`、`Drivers`、`Events`、`Graphs`、`IPC`、`Kernels`、`Memory`、`RuntimeCompilation`、`Streams` |
 | `JYPPX.TensorRtSharp` | `Builder`、`ControlFlow`、`Core`、`Diagnostics`、`Engine`、`Execution`、`Inference`、`Interfaces`、`Layers`、`Network`、`Parsing`、`Plugins`、`Profiles`、`Refit`、`Runtime`、`Serialization`、`Weights` |
 | `JYPPX.TensorRtSharp/Callbacks` | `Core`、`Debugging`、`MemoryAllocation`、`Monitoring` |
-| `JYPPX.TensorRtSharp.Tools` | `Artifacts`、`Build`、`Core`、`Runtime`、`Trtexec` |
+| `JYPPX.TensorRtSharp.Tools` | `Artifacts`、`Build`、`Core`、`Refit`、`Runtime`、`Trtexec` |
 
 当前整理覆盖三个项目原根目录中的 294 个 `.cs` 文件。`ManagedSourceModuleLayoutTests` 会验证项目根目录不再堆放公开 API 源文件，并检查所有约定模块至少包含一个源码文件。
 
 CUDA Driver capability 入口、复制型 module owner 和 typed launch owner 统一放入 `JYPPX.CudaSharp/Drivers`。`Kernels` 则继续负责 CUDA Runtime kernel-library owner，以及 typed argument/configuration 值对象。
 
 TensorRT 复制型 versioned-interface metadata 与 owner-scoped metadata query 统一放入 `JYPPX.TensorRtSharp/Interfaces`。托管 weights payload、复制型 weights metadata 与 refit weights role 放入 `JYPPX.TensorRtSharp/Weights`；`Core` 只保留共享异常、维度、枚举与库信息。
+
+ONNX stripped-plan refit 生命周期与持久化 plan 重载 snapshot 统一放入 `JYPPX.TensorRtSharp.Tools/Refit`。`Build` 模块继续负责 build options、service、diagnostics 与 result，并消费这些复制型证据模型。
 
 ## 规则
 

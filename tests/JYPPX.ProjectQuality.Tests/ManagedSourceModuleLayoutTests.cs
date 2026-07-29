@@ -26,7 +26,7 @@ public sealed class ManagedSourceModuleLayoutTests
         },
         {
             "JYPPX.TensorRtSharp.Tools",
-            new[] { "Artifacts", "Build", "Core", "Runtime", "Trtexec" }
+            new[] { "Artifacts", "Build", "Core", "Refit", "Runtime", "Trtexec" }
         }
     };
 
@@ -83,6 +83,22 @@ public sealed class ManagedSourceModuleLayoutTests
         string coreDirectory = Path.Combine(tensorRtProjectDirectory, "Core");
         Assert.All(interfaceFiles, file => Assert.False(File.Exists(Path.Combine(coreDirectory, file))));
         Assert.All(weightsFiles, file => Assert.False(File.Exists(Path.Combine(coreDirectory, file))));
+    }
+
+    [Fact]
+    public void TensorRtToolsRefitSnapshotsHaveDedicatedModule()
+    {
+        string toolsProjectDirectory = Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools");
+        string[] refitFiles =
+        {
+            "OnnxEngineRefitPersistenceSnapshot.cs",
+            "OnnxEngineRefitSnapshot.cs"
+        };
+
+        Assert.Equal(refitFiles, EnumerateModuleFiles(toolsProjectDirectory, "Refit"));
+
+        string buildDirectory = Path.Combine(toolsProjectDirectory, "Build");
+        Assert.All(refitFiles, file => Assert.False(File.Exists(Path.Combine(buildDirectory, file))));
     }
 
     private static string[] EnumerateModuleFiles(string projectDirectory, string module)

@@ -5306,3 +5306,26 @@ owner 生命周期、interop 声明或 C ABI。
   public package、post-publish、Owner acceptance 或 release proof。
 - C 盘 Downloads/用户 Temp 顶层当日重资产与本批关键词命中为 0，项目相关 build/test 进程残留为 0。
 - 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 TensorRT Tools Refit Managed Module Closure
+
+本阶段将 `JYPPX.TensorRtSharp.Tools/Build` 中两份纯 refit evidence model 归入独立 `Refit` 模块，使 build orchestration
+与 refit lifecycle/persistence snapshot 的源码职责分开。文件内容、namespace、类型名、public API 与消费关系不变。
+
+### 实现与门禁
+
+- `OnnxEngineRefitSnapshot.cs` 与 `OnnxEngineRefitPersistenceSnapshot.cs` 从 `Build` 纯移动到 `Refit`。
+- `Build` 继续保留 build profile/report/shape、options、service、diagnostics、result 与 parser preflight；它通过同一
+  `JYPPX.TensorRtSharp.Tools` namespace 消费 refit snapshot，不需要项目文件或调用点修改。
+- 布局测试精确固定 `Refit` 的两份文件并拒绝旧 `Build` 路径；两条源码合同和中英文组织文档已同步。
+
+### 验证与边界
+
+- layout、ONNX refit lifecycle 与 refitted-plan persistence 定向集合：`11/11` 通过。
+- `JYPPX.TensorRtSharp.Tools` Debug build：`0 warning / 0 error`。
+- 完整 `TensorRtSharp.sln` Debug build：`0 warning / 0 error`。
+- 两组新旧 Git blob hash 完全一致；未修改 refit 实现、native、manifest、generated bindings 或 ABI。
+- 未运行完整 ProjectQuality；本批不是 refit runtime、persisted engine correctness、Linux、package consumer、
+  public package、post-publish、Owner acceptance 或 release proof。
+- C 盘 Downloads/用户 Temp 顶层当日重资产与本批关键词命中为 0，项目相关 build/test 进程残留为 0。
+- 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
