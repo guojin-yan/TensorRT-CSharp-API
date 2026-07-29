@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Xunit;
 
 namespace JYPPX.ProjectQuality.Tests;
@@ -44,6 +45,7 @@ public sealed class ManagedSourceModuleLayoutTests
             "Layers",
             new[]
             {
+                "NativeBridgeApi.DeploymentLayerAttributes.cs",
                 "NativeBridgeApi.Quantization.cs",
                 "NativeBridgeApi.ThirtyThirdBatchLayerAttributes.cs",
                 "NativeBridgeApi.Trt11Attention.cs",
@@ -53,7 +55,14 @@ public sealed class ManagedSourceModuleLayoutTests
                 "NativeBridgeApi.Trt8RnnV2Diagnostics.cs"
             }
         },
-        { "Network", new[] { "NativeBridgeApi.Trt11SafeNetworkV2.cs" } },
+        {
+            "Network",
+            new[]
+            {
+                "NativeBridgeApi.DeploymentNetworkLayers.cs",
+                "NativeBridgeApi.Trt11SafeNetworkV2.cs"
+            }
+        },
         {
             "Parsing",
             new[]
@@ -209,6 +218,42 @@ public sealed class ManagedSourceModuleLayoutTests
         Assert.All(expectedFiles, file => Assert.False(File.Exists(Path.Combine(interopDirectory, file))));
     }
 
+    [Fact]
+    public void TensorRtDeploymentInteropIsSplitByNetworkAndLayerOwner()
+    {
+        string interopDirectory = Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.TensorRtSharp",
+            "Internal",
+            "Interop");
+        string networkSource = File.ReadAllText(Path.Combine(
+            interopDirectory,
+            "Network",
+            "NativeBridgeApi.DeploymentNetworkLayers.cs"));
+        string layerSource = File.ReadAllText(Path.Combine(
+            interopDirectory,
+            "Layers",
+            "NativeBridgeApi.DeploymentLayerAttributes.cs"));
+
+        string[] networkMethods = EnumeratePublicStaticMethodNames(networkSource);
+        string[] layerMethods = EnumeratePublicStaticMethodNames(layerSource);
+
+        Assert.Equal(20, networkMethods.Length);
+        Assert.All(
+            networkMethods,
+            method => Assert.True(
+                method.StartsWith("Add", StringComparison.Ordinal) ||
+                method is "MarkWeightsRefittable" or "UnmarkWeightsRefittable" or
+                    "AreWeightsMarkedRefittable" or "SetWeightsName",
+                $"Network interop contains a layer-attribute method: {method}"));
+        Assert.Equal(66, layerMethods.Length);
+        Assert.DoesNotContain(layerMethods, method => method.StartsWith("Add", StringComparison.Ordinal));
+        Assert.False(File.Exists(Path.Combine(
+            interopDirectory,
+            "NativeBridgeApi.Trt11DeploymentAdditions.cs")));
+    }
+
     private static string[] EnumerateModuleFiles(string projectDirectory, string module)
     {
         return Directory.EnumerateFiles(
@@ -217,6 +262,15 @@ public sealed class ManagedSourceModuleLayoutTests
                 SearchOption.TopDirectoryOnly)
             .Select(path => Path.GetFileName(path)!)
             .OrderBy(name => name, StringComparer.Ordinal)
+            .ToArray();
+    }
+
+    private static string[] EnumeratePublicStaticMethodNames(string source)
+    {
+        return Regex.Matches(
+                source,
+                @"public\s+static\s+[^\s]+\s+(?<name>[A-Za-z_][A-Za-z0-9_]*)\s*\(")
+            .Select(match => match.Groups["name"].Value)
             .ToArray();
     }
 }

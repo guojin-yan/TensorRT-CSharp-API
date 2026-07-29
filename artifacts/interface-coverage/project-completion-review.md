@@ -5472,3 +5472,30 @@ partial type、method、P/Invoke/entrypoint、owner 行为与 public API 均未�
   post-publish、Owner acceptance 或 release proof。
 - C 盘 Downloads 顶层当日本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
 - 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 TensorRT Deployment Additions Partial Split
+
+本阶段将历史 `NativeBridgeApi.Trt11DeploymentAdditions.cs` 按方法 owner 拆为 Network 与 Layers 两份 partial 文件，
+不再让 network layer 创建和 layer attribute getter/setter 共存于 interop 根目录。拆分仅移动原有连续代码块，未改动
+namespace、partial type、方法签名/方法体、P/Invoke entrypoint、版本守卫、异常文案或 helper 行为。
+
+### 实现与门禁
+
+- `Network/NativeBridgeApi.DeploymentNetworkLayers.cs` 为 454 行，包含 20 个 public static 方法：16 个 `Add*Layer`
+  创建入口，以及 refittable-weight 的 mark/unmark/query/name 四个 network 操作。
+- `Layers/NativeBridgeApi.DeploymentLayerAttributes.cs` 为 506 行，包含 66 个 public static layer attribute 方法，覆盖
+  gather/scatter/one-hot/cumulative/assertion/grid-sample/normalization/dynamic-quantize/NMS/einsum/reverse-sequence 等职责；
+  其中 `Add*Layer` 方法为 0。
+- `ManagedSourceModuleLayoutTests` 同时固定两份新文件的目录、20/66 方法数量和 owner 命名边界，并拒绝旧根文件回流。
+- 两份新文件按原第 454 行边界重组后的 Git blob 为 `4230870fb121047b18c894a8935156c431db1825`，与 HEAD 中
+  拆分前原文件完全一致；旧文件名仅保留在“文件必须不存在”的负向门禁中。
+
+### 验证与边界
+
+- layout 与 deployment owner 方法集合定向测试：`24/24` 通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- `git diff --check` 通过；Generated/native/manifest/ABI 未修改，未运行完整 ProjectQuality。
+- partial 文件拆分不是 ABI/export、TensorRT runtime、Linux、package consumer、public package、post-publish、
+  Owner acceptance 或 release proof。
+- C 盘 Downloads 顶层当日本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
+- 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。

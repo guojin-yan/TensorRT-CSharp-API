@@ -65,8 +65,8 @@ Hand-written TensorRT partial interop now starts following the same responsibili
   `Internal/Interop/Interfaces` contains owner-scoped versioned-interface metadata copies.
 - `Internal/Interop/Inference` contains synchronous execute/enqueue operations; `Weights` contains copied layer-weight metadata.
 - `Internal/Interop/Layers` contains quantization, attention, fill-int64, compatibility/deployment layer attributes, tensor
-  metadata, transformer, and RNNv2 operations;
-  `Network` contains safe network-v2 layer creation operations.
+  metadata, transformer, and RNNv2 operations; `Network` contains deployment network-layer creation, refittable-weight markers,
+  and safe network-v2 operations.
 - `Internal/Interop/Parsing` contains legacy parser diagnostics, ONNX config/model-buffer/support, builder-config attachment,
   layer-output metadata, and parser-refitter diagnostics.
 - `Internal/Interop/Plugins` contains builder capability/runtime registry inventories and copied V2/V3 layer metadata/query snapshots.
@@ -76,7 +76,8 @@ Hand-written TensorRT partial interop now starts following the same responsibili
 `NativeBridgeApi.SafeDeferredUplift.cs` also remains at the root because it combines plugin initialization with ONNX weight-descriptor parsing. Callback file placement is not callback trampoline, lifetime, or runtime proof.
 
 Version-prefixed files remain at the root when their method set crosses builder, engine, execution-context, network, and layer owners. In particular, `Trt11Diagnostics`, `Trt11Dims64`, and `Trt11RuntimeControls` are not classified by filename alone.
-`Trt11DeploymentAdditions` still combines network layer creation with layer-attribute operations and awaits a separate partial-file split.
+The former `Trt11DeploymentAdditions` is split by method owner into `Network/NativeBridgeApi.DeploymentNetworkLayers.cs` and
+`Layers/NativeBridgeApi.DeploymentLayerAttributes.cs`; recombining both parts must reproduce the pre-split Git blob.
 
 Generated files remain under their `Generated` folders and should not be manually split. Generator output layout changes must happen in the generator itself and must pass the deterministic generator gate.
 
