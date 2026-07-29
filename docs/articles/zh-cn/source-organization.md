@@ -182,6 +182,14 @@ metadata、diagnostic emission、borrower lifecycle 与 callback trampoline/stat
 handle release、delegate keep-alive、callback-state GCHandle 释放和 exception-to-status 行为。源码归类不会把 copied
 metadata 或 diagnostic smoke 提升为 real logger/profiler callback runtime proof。
 
+Monitoring 剩余复合文件也按相同 ownership 边界归类。原 576 行
+`Callbacks/Monitoring/TensorRtProgressMonitor.cs` 降为 112 行 core；interface metadata、diagnostic emission、lifecycle 与
+trampoline/state 进入 4 份 partial，event kind/event/diagnostic result/handler 各自成文件。原 377 行 ErrorRecorder
+diagnostics 与 Stream IO interface-info design gate 分别降为 164 行和 103 行 evaluator，result struct 各自成文件。
+布局门禁可重组拆分前 Git blob `96a830dfd38c8a2a5b6ccf50acada1ee0ff7902e`、
+`61894aedb6a7cf5784f08d53645545bf644ddbd9` 与 `6e4622a90f33bed569ad54c1fc79eac5bd4a3f7b`；callback
+continue/cancel、释放顺序、prerequisite diagnostic、pointer non-exposure 与 non-proof 分类均保持不变。
+
 TensorRT 的 public enum 也不再集中在 2,456 行的 `Core/TensorRtEnums.cs`。其中 64 个 enum 按 Core tensor 基础类型、
 Network、Parsing、Execution、Serialization、Engine、Runtime、Builder、Profiles、ControlFlow，以及 Layers 下的
 RNN、operation、resize、metadata、attention 分入 15 个模块文件；单值/flags 配对保持同文件，名称、underlying type、

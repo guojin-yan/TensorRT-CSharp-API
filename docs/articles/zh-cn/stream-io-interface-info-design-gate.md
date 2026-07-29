@@ -28,7 +28,8 @@
 
 ## 当前证据
 
-- 设计门：`src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtStreamIoInterfaceInfoDesignGate.cs`
+- 设计门 evaluator：`src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtStreamIoInterfaceInfoDesignGate.cs`
+- 设计门 result：`src/JYPPX.TensorRtSharp/Callbacks/Monitoring/TensorRtStreamIoInterfaceInfoDesignGateResult.cs`
 - 测试：`tests/JYPPX.ProjectQuality.Tests/StreamIoInterfaceInfoDesignGateTests.cs`
 - 机器清单：`artifacts/interface-coverage/deferred-readonly-candidate-list.json`
 

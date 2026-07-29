@@ -207,6 +207,15 @@ The layout gate recomposes the pre-split Git blobs `f0b481c27e249872e2819f809647
 GCHandle release, and exception-to-status behavior. Source relocation does not promote copied metadata or diagnostic smoke
 to real logger/profiler callback runtime proof.
 
+The remaining Monitoring composites now follow the same ownership boundaries. The former 576-line
+`Callbacks/Monitoring/TensorRtProgressMonitor.cs` is reduced to a 112-line core; interface metadata, diagnostic emission,
+lifecycle, and trampoline/state live in four partials, while event kind/event/diagnostic result/handler each have dedicated
+files. The 377-line ErrorRecorder diagnostics and Stream IO interface-info design gates are reduced to 164-line and 103-line
+evaluators, with their result structs in dedicated files. Layout gates recompose the pre-split Git blobs
+`96a830dfd38c8a2a5b6ccf50acada1ee0ff7902e`, `61894aedb6a7cf5784f08d53645545bf644ddbd9`, and
+`6e4622a90f33bed569ad54c1fc79eac5bd4a3f7b`; callback continue/cancel, release ordering, prerequisite diagnostics,
+pointer non-exposure, and non-proof classification remain unchanged.
+
 TensorRT public enums are no longer collected in the 2,456-line `Core/TensorRtEnums.cs`. Its 64 enums are distributed across
 15 module files for shared Core tensor values, Network, Parsing, Execution, Serialization, Engine, Runtime, Builder, Profiles,
 ControlFlow, and the Layers RNN, operation, resize, metadata, and attention domains. Single-value/flags pairs remain together;

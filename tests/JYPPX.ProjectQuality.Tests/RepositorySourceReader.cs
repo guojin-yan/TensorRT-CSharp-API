@@ -95,6 +95,28 @@ internal static class RepositorySourceReader
                 "TensorRtProfiler.Lifecycle.cs",
                 "TensorRtProfiler.Trampoline.cs",
                 "TensorRtProfilerHandler.cs"
+            ],
+            ["TensorRtProgressMonitor.cs"] =
+            [
+                "TensorRtProgressMonitor.cs",
+                "TensorRtProgressMonitor.InterfaceMetadata.cs",
+                "TensorRtProgressMonitor.Diagnostics.cs",
+                "TensorRtProgressMonitor.Lifecycle.cs",
+                "TensorRtProgressMonitor.Trampoline.cs",
+                "TensorRtProgressMonitorEventKind.cs",
+                "TensorRtProgressMonitorEvent.cs",
+                "TensorRtProgressMonitorDiagnosticResult.cs",
+                "TensorRtProgressMonitorHandler.cs"
+            ],
+            ["TensorRtErrorRecorderDiagnosticsDesignGate.cs"] =
+            [
+                "TensorRtErrorRecorderDiagnosticsDesignGate.cs",
+                "TensorRtErrorRecorderDiagnosticsDesignGateResult.cs"
+            ],
+            ["TensorRtStreamIoInterfaceInfoDesignGate.cs"] =
+            [
+                "TensorRtStreamIoInterfaceInfoDesignGate.cs",
+                "TensorRtStreamIoInterfaceInfoDesignGateResult.cs"
             ]
         };
 

@@ -126,6 +126,31 @@ function Get-EvidenceSourceText {
         "TensorRtProfilerHandler.cs")
       break
     }
+    "TensorRtProgressMonitor.cs" {
+      @(
+        "TensorRtProgressMonitor.cs",
+        "TensorRtProgressMonitor.InterfaceMetadata.cs",
+        "TensorRtProgressMonitor.Diagnostics.cs",
+        "TensorRtProgressMonitor.Lifecycle.cs",
+        "TensorRtProgressMonitor.Trampoline.cs",
+        "TensorRtProgressMonitorEventKind.cs",
+        "TensorRtProgressMonitorEvent.cs",
+        "TensorRtProgressMonitorDiagnosticResult.cs",
+        "TensorRtProgressMonitorHandler.cs")
+      break
+    }
+    "TensorRtErrorRecorderDiagnosticsDesignGate.cs" {
+      @(
+        "TensorRtErrorRecorderDiagnosticsDesignGate.cs",
+        "TensorRtErrorRecorderDiagnosticsDesignGateResult.cs")
+      break
+    }
+    "TensorRtStreamIoInterfaceInfoDesignGate.cs" {
+      @(
+        "TensorRtStreamIoInterfaceInfoDesignGate.cs",
+        "TensorRtStreamIoInterfaceInfoDesignGateResult.cs")
+      break
+    }
     default {
       return Get-Content -LiteralPath $Path -Raw -Encoding utf8
     }

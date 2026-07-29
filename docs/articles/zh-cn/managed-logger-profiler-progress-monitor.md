@@ -42,7 +42,8 @@ Logger public 类型位于 `TensorRtLogger.cs` core、`TensorRtLogger.InterfaceM
 `TensorRtLogger.Lifecycle.cs`、`TensorRtLogger.Trampoline.cs`、`TensorRtLogSeverity.cs` 与 `TensorRtLogHandler.cs`；Profiler
 public 类型位于 `TensorRtProfiler.cs` core、同名 InterfaceMetadata/Diagnostics/Lifecycle/Trampoline partial 与
 `TensorRtProfilerHandler.cs`。这些文件都在 `src/JYPPX.TensorRtSharp/Callbacks/Monitoring`，单独读取 core 不代表完整实现；
-`TensorRtProgressMonitor.cs` 仍位于同一目录。native trampoline 分别位于
+ProgressMonitor public 类型位于 `TensorRtProgressMonitor.cs` core、同名 InterfaceMetadata/Diagnostics/Lifecycle/Trampoline
+partial，以及独立的 EventKind/Event/DiagnosticResult/Handler 文件；单独读取 core 同样不代表完整实现。native trampoline 分别位于
 `src/JYPPX.TensorRtSharp/Internal/Interop/TensorRtLoggerCallback.cs`、
 `src/JYPPX.TensorRtSharp/Internal/Interop/TensorRtProfilerCallback.cs`、
 `src/JYPPX.TensorRtSharp/Internal/Interop/TensorRtProgressMonitorCallback.cs`。

@@ -6925,3 +6925,46 @@ diagnostic emission、borrower lifecycle、callback trampoline/state 与 UTF-8 d
 - source/type relocation、copied metadata 与 diagnostic smoke 不构成新的 real logger/profiler callback runtime、
   TensorRT/CUDA runtime、real model、Linux、package consumer、public package、post-publish、Owner acceptance 或 release proof。
 - 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行远程发布操作。
+
+## 2026-07-30 ProgressMonitor And Monitoring Design Gate Source Split
+
+本阶段完成 `JYPPX.TensorRtSharp/Callbacks/Monitoring` 剩余三个明显复合文件的归类：ProgressMonitor callback owner
+按 owner feature 拆分，ErrorRecorder diagnostics 与 Stream IO interface-info design gate 的 result model 从 evaluator 分离。
+所有 public API、callback continue/cancel、生命周期、prerequisite 诊断与 non-proof 分类保持不变。
+
+### 实现与门禁
+
+- `TensorRtProgressMonitor.cs` 从 576 行降为 112 行 state/constructor/basic-property core；InterfaceMetadata、
+  Diagnostics、Lifecycle、Trampoline 进入四份 partial，EventKind、Event、DiagnosticResult、Handler 各自成文件。
+- ProgressMonitor finalizer/Dispose、borrower attach/detach、deferred native handle release、`GC.KeepAlive`、callback-state
+  GCHandle free、exception-to-status 与异常时 `shouldContinue = 1` 的顺序保持原样；nested `CallbackState` 留在 Trampoline。
+- `TensorRtErrorRecorderDiagnosticsDesignGate.cs` 从 377 行降为 164 行 evaluator，
+  `TensorRtErrorRecorderDiagnosticsDesignGateResult` 独立成文件。
+- `TensorRtStreamIoInterfaceInfoDesignGate.cs` 从 377 行降为 103 行 evaluator，
+  `TensorRtStreamIoInterfaceInfoDesignGateResult` 独立成文件。
+- `ManagedMonitoringProgressDesignGateSourceLayoutTests` 固定 ProgressMonitor core/partial 方法与属性归属、四个 top-level
+  type、nested state/native delegate 字段 owner、两个 evaluator/result 的精确方法与 property、readiness/test source-set
+  和六个消费测试 reader，并按原顺序重组三份拆分前源码。
+- 拆分前 Git blob 为 `96a830dfd38c8a2a5b6ccf50acada1ee0ff7902e`、
+  `61894aedb6a7cf5784f08d53645545bf644ddbd9`、`6e4622a90f33bed569ad54c1fc79eac5bd4a3f7b`；normalized SHA-256 保持
+  `615988b4c7c65a15d2ee74815a44d5c0d0d59d58d9f5036e9694ffee70ebe73c`、
+  `5fe4fcc308b043ae5d16c50c03544de40d6e03152203a0858bc66aed59927d3e`、
+  `ce954216836edd26581e33434f8597fb2696fe57a32964cfe171125bca824714`。
+- ProgressMonitor/API-language、ErrorRecorder、StreamIo 与 deferred candidate 消费测试统一改读完整 source-set；
+  Monitoring、两个 design-gate 文档与双语 source-organization 同步。
+
+### 验证与边界
+
+- 新 method/property/type/nested-owner/重组/evidence 门禁：`22/22` 通过；ProgressMonitor、API-language、
+  ErrorRecorder、StreamIo、candidate、布局与文章消费聚焦集合：`107/107` 通过；全部 managed layout：`441/441` 通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`；
+  RuntimePackageReadiness UTF-8 source parse 为 `0 error`，三套 source-set 为 `0` 缺失。
+- 本机无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合，也未生成或刷新 publishing/exporter evidence。
+- ignored deferred candidate evidence 保持 `260` 条引用、`147` 个唯一路径、`0` 缺失；其中引用的 `22` 份 JSON
+  全部可解析，ignored 文件未强制提交。
+- Generated/native/manifest/ABI 改动为 0；`git diff --check` 通过。
+- 进程审计快照只发现当前审计 PowerShell；Downloads 与用户 Temp 顶层近三小时没有本批 TensorRT/JYPPX/CUDA/
+  NVRTC/ONNX/engine/nupkg 重资产匹配项，未终止、删除或借用其他工作区进程。
+- source/type relocation、copied metadata 与 design gate 不构成新的 real callback/stream runtime、TensorRT/CUDA runtime、
+  real model、Linux、package consumer、public package、post-publish、Owner acceptance 或 release proof。
+- 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行远程发布操作。

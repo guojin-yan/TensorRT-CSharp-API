@@ -74,7 +74,7 @@ public sealed class ManagedProgressMonitorBoundaryTests
         string diagnosticsSource = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.Trt11Diagnostics.cs");
 
         Assert.Contains("public delegate bool TensorRtProgressMonitorHandler", monitorSource);
-        Assert.Contains("public sealed class TensorRtProgressMonitor", monitorSource);
+        Assert.Contains("public sealed partial class TensorRtProgressMonitor", monitorSource);
         Assert.Contains("GCHandle.Alloc(_callbackState)", monitorSource);
         Assert.Contains("~TensorRtProgressMonitor()", monitorSource);
         Assert.Contains("AttachBorrower", monitorSource);
@@ -153,6 +153,6 @@ public sealed class ManagedProgressMonitorBoundaryTests
     private static string ReadSource(params string[] pathParts)
     {
         string path = Path.Combine(new[] { RepositoryPaths.Root }.Concat(pathParts).ToArray());
-        return File.ReadAllText(path);
+        return RepositorySourceReader.Read(path);
     }
 }
