@@ -159,6 +159,10 @@ OutputAllocator 的 synthetic notify/reallocate runtime gate 与 native ledger d
 
 ### DebugListener native/runtime scaffolding
 
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerNativeDetachBeforeReleaseDesignGate.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerNativeDetachBeforeReleaseDesignGateResult.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerNativeVTableInstallPreflight.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerNativeVTableInstallPreflightResult.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerProcessDebugTensorCallbackTrampoline.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugTensorMetadataSnapshot.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerProcessDebugTensorCallbackTrampolineResult.cs`

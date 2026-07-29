@@ -202,6 +202,12 @@ is split into a 207-line evaluator and a 291-line result. The layout gate recomp
 `56e5514b6eba4c4af339d61ca29e1856dce2375e` and `b44c97b554058ae331a3cf5eab861f56ba35094a`, preserving
 lifecycle readiness, callback metadata/status, pointer non-exposure, native-vtable disabled behavior, and deferred rows.
 
+The DebugListener vtable install preflight and detach-before-release design gate results now also live in dedicated
+namesake files. The former 479-line preflight is split into a 235-line evaluator and a 249-line result; the former 465-line
+detach gate is split into a 217-line evaluator and a 253-line result. The layout gate recomposes the pre-split Git blobs
+`b7ed72fd9a5a604fe86f7b84972610615117ad8c` and `2e2d856b62c3e5998ea9b53c297cbc800a92dffb`, preserving
+install version/no-throw/ownership guards, detach/release/in-flight/unpin ordering, pointer non-exposure, and proof blockers.
+
 OutputAllocator diagnostics are split across the public design owner and its internal managed runtime gate. The former
 637-line `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` is reduced to a 38-line state/constructor core;
 entries, snapshots, lifecycle, shared invocation, trampoline/state, and formatting live in six partials, with request/result

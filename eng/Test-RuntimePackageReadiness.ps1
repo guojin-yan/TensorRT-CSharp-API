@@ -65,6 +65,18 @@ function Get-EvidenceSourceText {
         "TensorRtDebugListenerNoThrowVTableCallbackStubResult.cs")
       break
     }
+    "TensorRtDebugListenerNativeVTableInstallPreflight.cs" {
+      @(
+        "TensorRtDebugListenerNativeVTableInstallPreflight.cs",
+        "TensorRtDebugListenerNativeVTableInstallPreflightResult.cs")
+      break
+    }
+    "TensorRtDebugListenerNativeDetachBeforeReleaseDesignGate.cs" {
+      @(
+        "TensorRtDebugListenerNativeDetachBeforeReleaseDesignGate.cs",
+        "TensorRtDebugListenerNativeDetachBeforeReleaseDesignGateResult.cs")
+      break
+    }
     "TensorRtAllocatorCallbackOwner.cs" {
       @(
         "TensorRtAllocatorCallbackOwner.cs",

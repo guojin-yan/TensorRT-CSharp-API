@@ -38,6 +38,16 @@ internal static class RepositorySourceReader
                 "TensorRtDebugListenerNoThrowVTableCallbackStub.cs",
                 "TensorRtDebugListenerNoThrowVTableCallbackStubResult.cs"
             ],
+            ["TensorRtDebugListenerNativeVTableInstallPreflight.cs"] =
+            [
+                "TensorRtDebugListenerNativeVTableInstallPreflight.cs",
+                "TensorRtDebugListenerNativeVTableInstallPreflightResult.cs"
+            ],
+            ["TensorRtDebugListenerNativeDetachBeforeReleaseDesignGate.cs"] =
+            [
+                "TensorRtDebugListenerNativeDetachBeforeReleaseDesignGate.cs",
+                "TensorRtDebugListenerNativeDetachBeforeReleaseDesignGateResult.cs"
+            ],
             ["TensorRtAllocatorCallbackOwner.cs"] =
             [
                 "TensorRtAllocatorCallbackOwner.cs",

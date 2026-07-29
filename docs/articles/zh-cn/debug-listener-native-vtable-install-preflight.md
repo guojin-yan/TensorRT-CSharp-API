@@ -11,6 +11,10 @@
 - `TensorRtDebugListenerNativeVTableInstallPreflight`
 - `TensorRtDebugListenerNativeVTableInstallPreflightResult`
 
+evaluator 位于 `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerNativeVTableInstallPreflight.cs`，
+只读 result model 位于同目录的 `TensorRtDebugListenerNativeVTableInstallPreflightResult.cs`。完整 preflight evidence
+consumer 必须读取两份源码。
+
 关键字段：
 
 - `NativeVTableInstallPreflightReady`

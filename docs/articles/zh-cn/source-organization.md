@@ -178,6 +178,12 @@ DebugListener lifecycle gate 与 no-throw callback stub 继续采用 evaluator/r
 `b44c97b554058ae331a3cf5eab861f56ba35094a`，并固定 lifecycle readiness、callback metadata/status、pointer
 non-exposure、native-vtable disabled 与 deferred-row 语义。
 
+DebugListener vtable install preflight 与 detach-before-release design gate 的 result 也已归入同名文件。原 479 行
+preflight 分为 235 行 evaluator 与 249 行 result；原 465 行 detach gate 分为 217 行 evaluator 与 253 行 result。
+布局门禁可重组拆分前 Git blob `b7ed72fd9a5a604fe86f7b84972610615117ad8c` 与
+`2e2d856b62c3e5998ea9b53c297cbc800a92dffb`，并固定 install version/no-throw/ownership guard、detach/release/
+in-flight/unpin ordering、pointer non-exposure 与 proof blocker 语义。
+
 OutputAllocator diagnostics 继续按 public design owner 与 internal managed runtime gate 分层。原 637 行
 `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` 降为 38 行 state/constructor core；entries、snapshots、
 lifecycle、shared invocation、trampoline/state 与 formatting 进入 6 份 partial，request/result 类型各自成文件。原 503 行
