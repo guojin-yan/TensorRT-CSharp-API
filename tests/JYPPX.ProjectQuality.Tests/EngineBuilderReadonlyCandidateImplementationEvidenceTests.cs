@@ -28,7 +28,7 @@ public sealed class EngineBuilderReadonlyCandidateImplementationEvidenceTests
         AssertEvidenceContains(builderConfigCandidate, "publicSurface", "TensorRtBuilderConfig.GetDeploymentSnapshot");
         AssertEvidenceContains(builderConfigCandidate, "publicSurface", "TensorRtBuilderConfig.SerializedPluginPathCountCompatibility");
 
-        string engineApi = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.cs");
+        string engineApi = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.BindingReports.cs");
         string engineProfileApi = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.Trt11FifteenthBatch.cs");
         string engineBindingReport = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngineBindingReport.cs");
         string engineTensorBinding = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngineTensorBinding.cs");

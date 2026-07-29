@@ -56,6 +56,15 @@ output mark/unmark、释放与共享 tensor 校验；对应 21 个 `Add*` 方法
 这次仅整理源码，不改变 public 签名、SafeHandle/owner-lease 行为、line 路由、校验顺序、native entrypoint、
 generated binding、manifest 或 ABI 证据。
 
+通用 Engine 与 ONNX Parser wrapper 也沿用同一模式。`Engine/TensorRtEngine.cs` 现为 124 行 handle、标量属性与
+Dispose core；36 个 tensor/profile metadata、binding report、execution-context、refit 与 inspection 方法进入 5 份
+feature partial，两个 binding-report 私有 helper 随 `TensorRtEngine.BindingReports.cs` 迁移。
+`Parsing/TensorRtOnnxParser.cs` 现为 198 行构造、logger/config/initializer lifetime、标量属性、Dispose 与共享校验
+core；32 个 model parsing/loading、TryParse、diagnostics、operator-support 与 flags 方法进入 6 份 feature partial。
+Parser flag 校验与 model segment/stream copy helper 被多个 partial 共同消费，因此继续留在 core。
+`ManagedEngineParserFeatureLayoutTests` 固定方法/helper 归属，并重组拆分前 Git blob
+`fd6907a9e03eab3b6f9a1b5820eea9e6e1e82ea9` 与 `d8e3f135b71f9b2fd893146776da7d538db5d020`。
+
 手写 TensorRT partial interop 也开始按相同职责模块归类：
 
 - `Internal/Interop/Builder`：builder creation/capabilities、serialized build outputs、builder boundary controls、

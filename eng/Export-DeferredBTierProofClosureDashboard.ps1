@@ -160,13 +160,13 @@ function Resolve-EvidenceFiles {
     $evidence.Add("src/JYPPX.TensorRtSharp/Runtime/TensorRtRuntime.cs")
   }
   elseif ($className -match "Engine") {
-    $evidence.Add("src/JYPPX.TensorRtSharp/Engine/TensorRtEngine.cs")
+    $evidence.Add("src/JYPPX.TensorRtSharp/Engine")
   }
   elseif ($className -match "ExecutionContext") {
     $evidence.Add("src/JYPPX.TensorRtSharp/Execution/TensorRtExecutionContext.cs")
   }
   elseif ($className -match "Parser") {
-    $evidence.Add("src/JYPPX.TensorRtSharp/Parsing/TensorRtOnnxParser.cs")
+    $evidence.Add("src/JYPPX.TensorRtSharp/Parsing")
     $evidence.Add("samples/OnnxToEngine")
   }
 

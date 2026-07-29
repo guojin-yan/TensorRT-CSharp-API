@@ -66,6 +66,15 @@ are `faa5fa87fb24247a86f9d166073cf3858bad9ac2` and `933e7b253ecfefa00034da254491
 This source-only split does not change public signatures, SafeHandle/owner-lease behavior, line routing, validation order, native
 entrypoints, generated bindings, manifests, or ABI evidence.
 
+The common Engine and ONNX Parser wrappers now use the same pattern. `Engine/TensorRtEngine.cs` is a 124-line handle,
+scalar-property, and disposal core; 36 tensor/profile metadata, binding-report, execution-context, refit, and inspection methods
+live in five feature partials. The two private binding-report helpers move with `TensorRtEngine.BindingReports.cs`.
+`Parsing/TensorRtOnnxParser.cs` is a 198-line constructor, logger/config/initializer lifetime, scalar-property, disposal, and
+shared-validation core; 32 model parsing/loading, TryParse, diagnostic, operator-support, and flag methods live in six feature
+partials. Parser flag validation and model segment/stream copy helpers remain in core because multiple partials consume them.
+`ManagedEngineParserFeatureLayoutTests` fixes method/helper ownership and recomposes the pre-split Git blobs
+`fd6907a9e03eab3b6f9a1b5820eea9e6e1e82ea9` and `d8e3f135b71f9b2fd893146776da7d538db5d020`.
+
 Hand-written TensorRT partial interop now starts following the same responsibility modules:
 
 - `Internal/Interop/Builder` contains builder creation/capabilities, serialized build outputs, builder boundary controls,

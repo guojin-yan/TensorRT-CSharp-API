@@ -29,7 +29,7 @@ public sealed class DeferredBTier41To45ProofClosureTests
         string builderConfigApi = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderConfig.Trt11RuntimeControls.cs");
         string engineApi = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.cs");
         string contextApi = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs");
-        string onnxParserApi = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParser.cs");
+        string onnxParserApi = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParser.Diagnostics.cs");
         string parserRefitterApi = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParserRefitter.cs");
         string parserRefitterSnapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Parsing", "TensorRtOnnxParserRefitterDiagnosticSnapshot.cs");
         string interopRuntimeControls =

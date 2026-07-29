@@ -6296,3 +6296,38 @@ static 实现；所有方法体、数组 pin/finally、版本路由、entrypoint
   表述为 runtime correctness、package consumer、public package、post-publish、Owner acceptance 或 release proof。
 - 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages
   发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 TensorRT Engine And Parser Managed Wrapper Split
+
+本阶段继续收口高层 managed wrapper，将通用 Engine 与 ONNX Parser 按实际 feature 拆分，同时把 native handle、
+logger/config/initializer lifetime、Dispose 与跨 feature 共享校验固定在 core。
+
+### 实现与门禁
+
+- `TensorRtEngine.cs` 从 659 行降至 124 行；36 个 tensor/profile metadata、binding report、
+  execution-context creation、refit 与 inspection 方法进入 5 份 feature partial。
+- `TensorRtEngine.BindingReports.cs` 同时接管 `CreateBindingReport` 与 `TryGetProfileShape` 两个私有 helper；
+  Engine core 仅保留 handle、通用标量属性与 Dispose。
+- `TensorRtOnnxParser.cs` 从 685 行降至 198 行；32 个 model parsing/loading、TryParse、diagnostics、
+  operator-support 与 flags 方法进入 6 份 feature partial。
+- Parser core 继续持有 logger/config/initializer ownership、Dispose、flags validation 与 model segment/stream copy
+  helper；这些 helper 均存在跨 partial 消费，未错误归入单一 feature。
+- `ManagedEngineParserFeatureLayoutTests` 固定 11 份 partial 的精确方法/重载集合、helper/core 归属与非连续片段
+  重组。拆分前 Git blob 为 `fd6907a9e03eab3b6f9a1b5820eea9e6e1e82ea9`、
+  `d8e3f135b71f9b2fd893146776da7d538db5d020`；normalized SHA-256 分别保持
+  `2f96a53b0b3c0f5032b0108d684c8a6377e02d6d59923a24ad74ec953334dab3` 与
+  `3bce180397b2eb158c2fe1a6c79d16807d77e9eb3ba0ef8d169247b9a0f7897e`。
+
+### 验证与边界
+
+- managed wrapper/layout/recomposition、safe lifecycle、BuilderConfig、runtime IO、Engine/RNN readonly、
+  parser input/model-buffer/diagnostics/flags 与 logger borrower 定向集合：`174/174` 通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- 10 份直接读取旧 wrapper 的质量测试已改读真实 core/feature owner；B-tier dashboard 改为模块级 owner 路径，
+  tracked evidence map 与 ignored candidate artifact 分别改指 `Inspection` / `BindingReports`。
+- ignored evidence 保持 247 条引用，唯一路径因两个重复 core 路径被拆成两个实际 owner 而从 137 增至 138，
+  缺失保持 0；ignored 文件未强制提交。
+- Generated/native/manifest/ABI 未修改；未运行依赖本机缺失 `pwsh` 的 B-tier 聚合测试，也未把 source split
+  表述为 runtime correctness、package consumer、public package、post-publish、Owner acceptance 或 release proof。
+- 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages
+  发布、Release/tag/issue 远程操作。

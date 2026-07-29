@@ -41,7 +41,7 @@
     {
       "candidateId": "engine-layer-metadata-001",
       "additionalManagedSources": [
-        "src/JYPPX.TensorRtSharp/Engine/TensorRtEngine.cs"
+        "src/JYPPX.TensorRtSharp/Engine/TensorRtEngine.Inspection.cs"
       ],
       "manifestSources": [
         "native/manifests/tensorrt/v8/trt8-minimal.manifest.json",

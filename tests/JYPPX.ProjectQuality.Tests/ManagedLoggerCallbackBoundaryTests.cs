@@ -102,7 +102,7 @@ public sealed class ManagedLoggerCallbackBoundaryTests
     [Fact]
     public void ManagedLoggerBorrowersAttachBeforeNativeCallsAndDetachOnDispose()
     {
-        string engineSource = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.cs");
+        string engineSource = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.Refit.cs");
         string refitterSource = ReadSource("src", "JYPPX.TensorRtSharp", "Refit", "TensorRtRefitter.cs");
         string runtimeSource = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntime.cs");
         string builderSource = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilder.cs");
