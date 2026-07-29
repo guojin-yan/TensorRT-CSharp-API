@@ -89,6 +89,7 @@ public sealed class ManagedSourceModuleLayoutTests
             new[]
             {
                 "NativeBridgeApi.Activation.cs",
+                "NativeBridgeApi.Concatenation.cs",
                 "NativeBridgeApi.Convolution.cs",
                 "NativeBridgeApi.Deconvolution.cs",
                 "NativeBridgeApi.DeploymentLayerAttributes.cs",
@@ -104,8 +105,10 @@ public sealed class ManagedSourceModuleLayoutTests
                 "NativeBridgeApi.Pooling.cs",
                 "NativeBridgeApi.Quantization.cs",
                 "NativeBridgeApi.Reduce.cs",
+                "NativeBridgeApi.Resize.cs",
                 "NativeBridgeApi.Scale.cs",
                 "NativeBridgeApi.Shuffle.cs",
+                "NativeBridgeApi.Slice.cs",
                 "NativeBridgeApi.SoftMax.cs",
                 "NativeBridgeApi.ThirtyThirdBatchLayerAttributes.cs",
                 "NativeBridgeApi.TopK.cs",
@@ -958,7 +961,7 @@ public sealed class ManagedSourceModuleLayoutTests
         }
 
         Assert.DoesNotContain("GetNetworkNameNative", rootSource, StringComparison.Ordinal);
-        Assert.Contains("public static SafeTensorRtObjectHandle AddResizeLayer(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static SafeTensorRtObjectHandle AddShapeLayer(", rootSource, StringComparison.Ordinal);
         Assert.Contains("private static BridgeStatusCode GetTensorNameNative(", rootSource, StringComparison.Ordinal);
         Assert.Contains("private static BridgeStatusCode GetLayerNameNative(", rootSource, StringComparison.Ordinal);
     }
@@ -1028,7 +1031,7 @@ public sealed class ManagedSourceModuleLayoutTests
         Assert.DoesNotContain("PinOptionalWeights", rootSource, StringComparison.Ordinal);
         Assert.DoesNotContain("GetScaleWeightsDataType", rootSource, StringComparison.Ordinal);
         Assert.DoesNotContain("ValidateOptionalWeightsDataType", rootSource, StringComparison.Ordinal);
-        Assert.Contains("public static SafeTensorRtObjectHandle AddResizeLayer(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static SafeTensorRtObjectHandle AddShapeLayer(", rootSource, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -1066,7 +1069,7 @@ public sealed class ManagedSourceModuleLayoutTests
             Assert.DoesNotContain(method, rootMethods);
         }
 
-        Assert.Contains("public static SafeTensorRtObjectHandle AddResizeLayer(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static SafeTensorRtObjectHandle AddShapeLayer(", rootSource, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -1105,7 +1108,7 @@ public sealed class ManagedSourceModuleLayoutTests
             Assert.DoesNotContain(method, rootMethods);
         }
 
-        Assert.Contains("public static SafeTensorRtObjectHandle AddResizeLayer(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static SafeTensorRtObjectHandle AddShapeLayer(", rootSource, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -1139,7 +1142,7 @@ public sealed class ManagedSourceModuleLayoutTests
             Assert.DoesNotContain(method, rootMethods);
         }
 
-        Assert.Contains("public static SafeTensorRtObjectHandle AddResizeLayer(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static SafeTensorRtObjectHandle AddShapeLayer(", rootSource, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -1168,7 +1171,7 @@ public sealed class ManagedSourceModuleLayoutTests
             Assert.DoesNotContain(method, rootMethods);
         }
 
-        Assert.Contains("public static SafeTensorRtObjectHandle AddResizeLayer(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static SafeTensorRtObjectHandle AddShapeLayer(", rootSource, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -1220,7 +1223,60 @@ public sealed class ManagedSourceModuleLayoutTests
             Assert.DoesNotContain(method, rootMethods);
         }
 
-        Assert.Contains("public static SafeTensorRtObjectHandle AddResizeLayer(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static SafeTensorRtObjectHandle AddShapeLayer(", rootSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TensorRtRootResizeConcatenationAndSliceFeaturesAreSplitByFeature()
+    {
+        string interopDirectory = Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.TensorRtSharp",
+            "Internal",
+            "Interop");
+        string rootSource = File.ReadAllText(Path.Combine(interopDirectory, "NativeBridgeApi.cs"));
+        string[] rootMethods = EnumeratePublicStaticMethodNames(rootSource);
+        string[] resizeMethods = ReadInteropMethodNames(interopDirectory, "Layers", "NativeBridgeApi.Resize.cs");
+        string[] concatenationMethods = ReadInteropMethodNames(interopDirectory, "Layers", "NativeBridgeApi.Concatenation.cs");
+        string[] sliceMethods = ReadInteropMethodNames(interopDirectory, "Layers", "NativeBridgeApi.Slice.cs");
+
+        Assert.Equal(
+            new[]
+            {
+                "AddResizeLayer",
+                "SetResizeOutputDimensions",
+                "GetResizeOutputDimensions",
+                "SetResizeMode",
+                "GetResizeMode",
+                "SetResizeScales",
+                "GetResizeScales"
+            },
+            resizeMethods);
+        Assert.Equal(
+            new[] { "AddConcatenationLayer", "SetConcatenationAxis", "GetConcatenationAxis" },
+            concatenationMethods);
+        Assert.Equal(
+            new[]
+            {
+                "AddSliceLayer",
+                "SetSliceStart",
+                "GetSliceStart",
+                "SetSliceSize",
+                "GetSliceSize",
+                "SetSliceStride",
+                "GetSliceStride",
+                "SetSliceMode",
+                "GetSliceMode"
+            },
+            sliceMethods);
+
+        foreach (string method in resizeMethods.Concat(concatenationMethods).Concat(sliceMethods))
+        {
+            Assert.DoesNotContain(method, rootMethods);
+        }
+
+        Assert.Contains("public static SafeTensorRtObjectHandle AddShapeLayer(", rootSource, StringComparison.Ordinal);
     }
 
     private static string[] EnumerateModuleFiles(string projectDirectory, string module)
