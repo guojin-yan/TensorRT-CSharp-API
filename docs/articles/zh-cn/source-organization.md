@@ -202,6 +202,12 @@ result。布局门禁可重组拆分前 Git blob `8c8a5eac71686750dc6bec5507f87e
 `90e290140a474ce02168e67f7c3ef1eb6489c7d8`，并固定 attach/vtable/callback prerequisite、opt-in/full-consumer guard、
 attempt/detach/rollback、counter、pointer non-exposure 与 real-runtime promotion 语义。
 
+DebugListener callback proof-gap report 与 native attach-entry design gate 的 result 也已归入同名文件。原 414 行
+proof-gap report 分为 159 行 evaluator 与 260 行 sealed result；原 408 行 attach-entry gate 分为 195 行 evaluator 与
+218 行 result。布局门禁可重组拆分前 Git blob `5e672392bcdf68e4a4a2130644320388d3c9864c` 与
+`3a6eca7d81dd5091ce60f67cd70ec5d6637cdb46`，并固定 gap 顺序/category/owner action、attach/detach mapping、
+lifecycle/vtable prerequisite、pointer non-exposure 与 deferred-row 语义。
+
 OutputAllocator diagnostics 继续按 public design owner 与 internal managed runtime gate 分层。原 637 行
 `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` 降为 38 行 state/constructor core；entries、snapshots、
 lifecycle、shared invocation、trampoline/state 与 formatting 进入 6 份 partial，request/result 类型各自成文件。原 503 行

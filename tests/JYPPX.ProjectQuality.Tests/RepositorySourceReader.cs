@@ -78,6 +78,16 @@ internal static class RepositorySourceReader
                 "TensorRtDebugListenerRealNonNullAttachRuntimeSmoke.cs",
                 "TensorRtDebugListenerRealNonNullAttachRuntimeSmokeResult.cs"
             ],
+            ["TensorRtDebugListenerCallbackProofGapReport.cs"] =
+            [
+                "TensorRtDebugListenerCallbackProofGapReport.cs",
+                "TensorRtDebugListenerCallbackProofGapReportResult.cs"
+            ],
+            ["TensorRtDebugListenerNativeAttachEntryDesignGate.cs"] =
+            [
+                "TensorRtDebugListenerNativeAttachEntryDesignGate.cs",
+                "TensorRtDebugListenerNativeAttachEntryDesignGateResult.cs"
+            ],
             ["TensorRtAllocatorCallbackOwner.cs"] =
             [
                 "TensorRtAllocatorCallbackOwner.cs",

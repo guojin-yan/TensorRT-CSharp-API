@@ -228,6 +228,13 @@ smoke is split into a 221-line evaluator and a 215-line result. The layout gate 
 attach/vtable/callback prerequisites, opt-in/full-consumer guards, attempt/detach/rollback state, counters, pointer
 non-exposure, and real-runtime promotion semantics.
 
+The DebugListener callback proof-gap report and native attach-entry design gate results now also have dedicated namesake
+files. The former 414-line proof-gap report is split into a 159-line evaluator and a 260-line sealed result; the former
+408-line attach-entry gate is split into a 195-line evaluator and a 218-line result. The layout gate recomposes the
+pre-split Git blobs `5e672392bcdf68e4a4a2130644320388d3c9864c` and `3a6eca7d81dd5091ce60f67cd70ec5d6637cdb46`, preserving
+gap order/category/owner action, attach/detach mappings, lifecycle/vtable prerequisites, pointer non-exposure, and
+deferred rows.
+
 OutputAllocator diagnostics are split across the public design owner and its internal managed runtime gate. The former
 637-line `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` is reduced to a 38-line state/constructor core;
 entries, snapshots, lifecycle, shared invocation, trampoline/state, and formatting live in six partials, with request/result

@@ -146,6 +146,7 @@ public nint DebugTensor { get; }
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerCallbackRequest.cs` 与
   `TensorRtDebugListenerCallbackOwnerSnapshot.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerCallbackProofGapReport.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerCallbackProofGapReportResult.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerRuntimeProofPrecheck.cs` 与其
   `DesignPrerequisites`、`NativeAttachDesign`、`OwnerLifecycle`、`RuntimeScaffold`、`FinalRuntimeGates` partial。
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerRuntimeProofPrecheckResult.cs`
@@ -159,6 +160,8 @@ OutputAllocator 的 synthetic notify/reallocate runtime gate 与 native ledger d
 
 ### DebugListener native/runtime scaffolding
 
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerNativeAttachEntryDesignGate.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerNativeAttachEntryDesignGateResult.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerNativeOwnerAddressDesignGate.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerNativeOwnerAddressDesignGateResult.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerNativeOwnerVTableInstallExperiment.cs`

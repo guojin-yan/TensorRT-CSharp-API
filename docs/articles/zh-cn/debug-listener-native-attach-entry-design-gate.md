@@ -9,6 +9,10 @@
 
 `debug-listener-native-attach-entry-design-gate` 位于 [DebugListener Native No-Throw VTable Design Gate](debug-listener-native-nothrow-vtable-design-gate.md) 和 [DebugListener Native Detach-Before-Release Design Gate](debug-listener-native-detach-before-release-design-gate.md) 之间。它不创建 native `IDebugListener` owner，不安装 vtable，不调用 `setDebugListener(non-null)`，也不触发 `IDebugListener::processDebugTensor`；它只把 native attach entry 进入真实实现前必须解决的边界条件固定为可审计字段。
 
+源码 owner 已按职责拆分：evaluation 与 blocker 构造位于
+`TensorRtDebugListenerNativeAttachEntryDesignGate.cs`，pointer-free report 位于
+`TensorRtDebugListenerNativeAttachEntryDesignGateResult.cs`。readiness 与源码测试必须组合读取这两个文件。
+
 公开 API：
 
 - `TensorRtDebugListenerNativeAttachEntryDesignGate`

@@ -113,6 +113,18 @@ function Get-EvidenceSourceText {
         "TensorRtDebugListenerRealNonNullAttachRuntimeSmokeResult.cs")
       break
     }
+    "TensorRtDebugListenerCallbackProofGapReport.cs" {
+      @(
+        "TensorRtDebugListenerCallbackProofGapReport.cs",
+        "TensorRtDebugListenerCallbackProofGapReportResult.cs")
+      break
+    }
+    "TensorRtDebugListenerNativeAttachEntryDesignGate.cs" {
+      @(
+        "TensorRtDebugListenerNativeAttachEntryDesignGate.cs",
+        "TensorRtDebugListenerNativeAttachEntryDesignGateResult.cs")
+      break
+    }
     "TensorRtAllocatorCallbackOwner.cs" {
       @(
         "TensorRtAllocatorCallbackOwner.cs",

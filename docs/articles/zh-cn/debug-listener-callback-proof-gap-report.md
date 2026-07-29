@@ -9,6 +9,10 @@
 
 它不能替代真实 TensorRT callback runtime proof。该报告不启用 `setDebugListener(non-null)`，不安装 native `IDebugListener` vtable，不调用 TensorRT，不暴露 raw pointer，也不把 `callback-owner-closure-matrix`、`runtime-smoke-skipped`、`real-callback-runtime-blocked` 或 `attempted-no-invocation` 提升为 proof。
 
+源码 owner 已按职责拆分：proof gap 聚合位于 `TensorRtDebugListenerCallbackProofGapReport.cs`，sealed report、
+blocker category 与 next-owner-action 映射位于 `TensorRtDebugListenerCallbackProofGapReportResult.cs`。readiness 与
+源码测试必须组合读取这两个文件。
+
 ## Public Surface
 
 - `TensorRtDebugListenerCallbackProofGapReport`
