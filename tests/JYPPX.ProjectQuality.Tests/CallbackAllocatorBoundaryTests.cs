@@ -904,7 +904,7 @@ public sealed class CallbackAllocatorBoundaryTests
         string nativeSource = ReadSource("native", "src", "tensorrt", "common", "execution_context_callback_interface_info.inc");
         string trt10Api = ReadSource("native", "src", "tensorrt", "v10", "api.cpp");
         string trt11Api = ReadSource("native", "src", "tensorrt", "v11", "api.cpp");
-        string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.CallbackInterfaceInfo.cs");
+        string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Callbacks", "NativeBridgeApi.CallbackInterfaceInfo.cs");
         string wrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs");
         string smokeProgram = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
 
@@ -1111,7 +1111,7 @@ public sealed class CallbackAllocatorBoundaryTests
         string trt8Api = ReadSource("native", "src", "tensorrt", "v8", "api.cpp");
         string trt10Api = ReadSource("native", "src", "tensorrt", "v10", "api.cpp");
         string trt11Api = ReadSource("native", "src", "tensorrt", "v11", "api.cpp");
-        string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.ExecutionContextCallbackState.cs");
+        string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Callbacks", "NativeBridgeApi.ExecutionContextCallbackState.cs");
         string nativeStructs = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeStructs.cs");
         string wrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs");
         string snapshotWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContextCallbackStateSnapshot.cs");

@@ -58,7 +58,7 @@ public sealed class VersionedInterfaceApiLanguageReadonlyUpliftTests
     [Fact]
     public void ManagedApiLanguageWrappersExposeEnumAndNoRawPointers()
     {
-        string interopSource = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.CallbackInterfaceInfo.cs");
+        string interopSource = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Callbacks", "NativeBridgeApi.CallbackInterfaceInfo.cs");
         string interfaceInfoSource = ReadSource("src", "JYPPX.TensorRtSharp", "Interfaces", "TensorRtInterfaceInfo.cs");
         string loggerSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Monitoring", "TensorRtLogger.cs");
         string profilerSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Monitoring", "TensorRtProfiler.cs");

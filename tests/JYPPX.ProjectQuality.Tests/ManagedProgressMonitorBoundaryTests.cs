@@ -32,7 +32,7 @@ public sealed class ManagedProgressMonitorBoundaryTests
         string trt11InterfaceManifest = ReadSource("native", "manifests", "tensorrt", "v11", "trt11-callback-interface-info.manifest.json");
         string trt10NativeSource = ReadSource("native", "src", "tensorrt", "v10", "api.cpp");
         string trt11NativeSource = ReadSource("native", "src", "tensorrt", "v11", "api.cpp");
-        string interopSource = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.CallbackInterfaceInfo.cs");
+        string interopSource = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Callbacks", "NativeBridgeApi.CallbackInterfaceInfo.cs");
         string monitorSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Monitoring", "TensorRtProgressMonitor.cs");
         string interfaceInfoSource = ReadSource("src", "JYPPX.TensorRtSharp", "Interfaces", "TensorRtInterfaceInfo.cs");
 

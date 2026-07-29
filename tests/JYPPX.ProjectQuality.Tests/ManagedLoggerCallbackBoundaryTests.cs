@@ -29,7 +29,7 @@ public sealed class ManagedLoggerCallbackBoundaryTests
         string trt10InterfaceManifest = ReadSource("native", "manifests", "tensorrt", "v10", "trt10-callback-interface-info.manifest.json");
         string trt11InterfaceManifest = ReadSource("native", "manifests", "tensorrt", "v11", "trt11-callback-interface-info.manifest.json");
         string nativeSource = ReadSource("native", "src", "tensorrt", "v11", "api.cpp");
-        string interopSource = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.CallbackInterfaceInfo.cs");
+        string interopSource = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Callbacks", "NativeBridgeApi.CallbackInterfaceInfo.cs");
         string loggerSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Monitoring", "TensorRtLogger.cs");
 
         Assert.DoesNotContain("trt10-logger-get-interface-info", trt10InterfaceManifest);

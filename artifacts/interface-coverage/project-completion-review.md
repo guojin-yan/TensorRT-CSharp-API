@@ -5307,6 +5307,32 @@ owner 生命周期、interop 声明或 C ABI。
 - C 盘 Downloads/用户 Temp 顶层当日重资产与本批关键词命中为 0，项目相关 build/test 进程残留为 0。
 - 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
 
+## 2026-07-29 TensorRT Callback Interface Diagnostics Managed Interop Module Closure
+
+本阶段继续整理 TensorRtSharp 手写 interop，将 callback、owner-scoped interface metadata 与 error-code diagnostics
+共 8 份单一职责文件归入对应模块。Generated、namespace、partial type、delegate signature、entrypoint、owner 行为与
+public API 均未改变。
+
+### 实现与门禁
+
+- `Callbacks` 包含 allocator dry-run、callback interface/state copied operations，以及 logger/profiler/progress-monitor
+  三种 unmanaged delegate signature，共 6 份文件。
+- `Interfaces` 包含 owner-scoped versioned-interface metadata copy；`Diagnostics` 包含 error-code metadata bound。
+- 精确 internal layout 门禁固定三个模块的 8 份文件并拒绝根目录回流；所有源码路径合同和中英文文档已同步。
+- `SafeDeferredUplift.cs` 保留根目录，因为它混合 plugin initialization 与 ONNX weight-descriptor parsing；
+  `GlobalRuntimePluginProbe.cs` 的跨职责边界也保持不变。
+
+### 验证与边界
+
+- layout、callback allocator/interface/state、logger/profiler/progress-monitor 与 owner-scoped metadata 定向集合：
+  `67/67` 通过。
+- `JYPPX.TensorRtSharp` 全目标框架 Debug build：`0 warning / 0 error`；完整 solution build：`0 warning / 0 error`。
+- 8 组新旧 Git blob hash 完全一致；Generated/native/manifest/ABI 未修改，未重跑 generator/native/export parity。
+- 未运行完整 ProjectQuality；前批已确认的 `pwsh` 缺失边界保持。本批不是 callback native invocation、trampoline、
+  in-flight accounting、detach-before-release、lifetime、Linux、package 或发布 proof。
+- C 盘 Downloads/用户 Temp 顶层当日重资产与本批关键词命中为 0，项目相关 build/test 进程残留为 0。
+- 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
+
 ## 2026-07-29 TensorRT Parsing And Plugins Managed Interop Module Closure
 
 本阶段将 TensorRtSharp 手写 interop 中 13 份单一职责 partial API 归入 `Parsing` 与 `Plugins`。Generated、namespace、

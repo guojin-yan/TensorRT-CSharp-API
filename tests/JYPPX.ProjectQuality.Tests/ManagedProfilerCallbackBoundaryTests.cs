@@ -38,7 +38,7 @@ public sealed class ManagedProfilerCallbackBoundaryTests
         string trt10InterfaceManifest = ReadSource("native", "manifests", "tensorrt", "v10", "trt10-callback-interface-info.manifest.json");
         string trt11InterfaceManifest = ReadSource("native", "manifests", "tensorrt", "v11", "trt11-callback-interface-info.manifest.json");
         string nativeSource = ReadSource("native", "src", "tensorrt", "v11", "api.cpp");
-        string interopSource = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.CallbackInterfaceInfo.cs");
+        string interopSource = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Callbacks", "NativeBridgeApi.CallbackInterfaceInfo.cs");
         string profilerSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Monitoring", "TensorRtProfiler.cs");
 
         Assert.DoesNotContain("trt10-profiler-get-interface-info", trt10InterfaceManifest);

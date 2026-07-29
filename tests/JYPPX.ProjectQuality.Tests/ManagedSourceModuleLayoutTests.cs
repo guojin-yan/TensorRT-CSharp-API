@@ -17,6 +17,20 @@ public sealed class ManagedSourceModuleLayoutTests
     public static TheoryData<string, string[]> TensorRtInteropFeatureModules => new()
     {
         {
+            "Callbacks",
+            new[]
+            {
+                "NativeBridgeApi.AllocatorOwnerDryRun.cs",
+                "NativeBridgeApi.CallbackInterfaceInfo.cs",
+                "NativeBridgeApi.ExecutionContextCallbackState.cs",
+                "TensorRtLoggerCallback.cs",
+                "TensorRtProfilerCallback.cs",
+                "TensorRtProgressMonitorCallback.cs"
+            }
+        },
+        { "Diagnostics", new[] { "NativeBridgeApi.ErrorCodeMetadata.cs" } },
+        { "Interfaces", new[] { "NativeBridgeApi.OwnerScopedVersionedInterfaceMetadata.cs" } },
+        {
             "Parsing",
             new[]
             {

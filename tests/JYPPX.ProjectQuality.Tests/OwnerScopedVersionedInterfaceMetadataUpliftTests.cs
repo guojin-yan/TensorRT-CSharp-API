@@ -71,7 +71,7 @@ public sealed class OwnerScopedVersionedInterfaceMetadataUpliftTests
     {
         string model = ReadSource("src", "JYPPX.TensorRtSharp", "Interfaces", "TensorRtVersionedInterfaceMetadata.cs");
         string surface = ReadSource("src", "JYPPX.TensorRtSharp", "Interfaces", "TensorRtOwnerScopedVersionedInterfaceMetadata.cs");
-        string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.OwnerScopedVersionedInterfaceMetadata.cs");
+        string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Interfaces", "NativeBridgeApi.OwnerScopedVersionedInterfaceMetadata.cs");
 
         Assert.Contains("public sealed class TensorRtVersionedInterfaceMetadata", model, StringComparison.Ordinal);
         Assert.Contains("public TensorRtInterfaceInfo InterfaceInfo", model, StringComparison.Ordinal);
