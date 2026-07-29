@@ -76,7 +76,9 @@ public sealed class DeferredBTierWorkItemProofBatchTests
             ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Layers", "NativeBridgeApi.LayerDeploymentMetadata.cs"),
             ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Refit", "NativeBridgeApi.RefitterDeploymentMetadata.cs"),
             ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11BoundaryControls.cs"),
-            ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11RuntimeControls.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Builder", "NativeBridgeApi.BuilderConfigRuntimeControls.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Engine", "NativeBridgeApi.EngineRuntimeControls.cs"),
+            ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Execution", "NativeBridgeApi.ExecutionContextRuntimeControls.cs"),
             ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Parsing", "NativeBridgeApi.OnnxParserSupport.cs"),
             ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Parsing", "NativeBridgeApi.ParserRefitterDiagnostics.cs"));
         string projectQualityTests = ReadSources("tests", "JYPPX.ProjectQuality.Tests", "*.cs");

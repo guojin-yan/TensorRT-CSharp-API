@@ -17,7 +17,14 @@ public sealed class ManagedSourceModuleLayoutTests
 
     public static TheoryData<string, string[]> TensorRtInteropFeatureModules => new()
     {
-        { "Builder", new[] { "NativeBridgeApi.Trt11TimingCache.cs" } },
+        {
+            "Builder",
+            new[]
+            {
+                "NativeBridgeApi.BuilderConfigRuntimeControls.cs",
+                "NativeBridgeApi.Trt11TimingCache.cs"
+            }
+        },
         {
             "Callbacks",
             new[]
@@ -44,7 +51,8 @@ public sealed class ManagedSourceModuleLayoutTests
             new[]
             {
                 "NativeBridgeApi.Dims64EngineMetadata.cs",
-                "NativeBridgeApi.EngineDeploymentMetadata.cs"
+                "NativeBridgeApi.EngineDeploymentMetadata.cs",
+                "NativeBridgeApi.EngineRuntimeControls.cs"
             }
         },
         {
@@ -53,7 +61,8 @@ public sealed class ManagedSourceModuleLayoutTests
             {
                 "NativeBridgeApi.Dims64ExecutionContext.cs",
                 "NativeBridgeApi.ExecutionContextCreation.cs",
-                "NativeBridgeApi.ExecutionContextDeploymentMetadata.cs"
+                "NativeBridgeApi.ExecutionContextDeploymentMetadata.cs",
+                "NativeBridgeApi.ExecutionContextRuntimeControls.cs"
             }
         },
         { "Inference", new[] { "NativeBridgeApi.SynchronousInference.cs" } },
@@ -408,6 +417,30 @@ public sealed class ManagedSourceModuleLayoutTests
         Assert.False(File.Exists(Path.Combine(
             interopDirectory,
             "NativeBridgeApi.Trt11Dims64.cs")));
+    }
+
+    [Fact]
+    public void TensorRtRuntimeControlsInteropIsSplitByOwner()
+    {
+        string interopDirectory = Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.TensorRtSharp",
+            "Internal",
+            "Interop");
+        string[] builderMethods = ReadInteropMethodNames(interopDirectory, "Builder", "NativeBridgeApi.BuilderConfigRuntimeControls.cs");
+        string[] engineMethods = ReadInteropMethodNames(interopDirectory, "Engine", "NativeBridgeApi.EngineRuntimeControls.cs");
+        string[] executionMethods = ReadInteropMethodNames(interopDirectory, "Execution", "NativeBridgeApi.ExecutionContextRuntimeControls.cs");
+
+        Assert.Equal(19, builderMethods.Length);
+        Assert.All(builderMethods, method => Assert.Contains("BuilderConfig", method, StringComparison.Ordinal));
+        Assert.Equal(9, engineMethods.Length);
+        Assert.All(engineMethods, method => Assert.Contains("Engine", method, StringComparison.Ordinal));
+        Assert.Equal(4, executionMethods.Length);
+        Assert.All(executionMethods, method => Assert.Contains("ExecutionContext", method, StringComparison.Ordinal));
+        Assert.False(File.Exists(Path.Combine(
+            interopDirectory,
+            "NativeBridgeApi.Trt11RuntimeControls.cs")));
     }
 
     private static string[] EnumerateModuleFiles(string projectDirectory, string module)

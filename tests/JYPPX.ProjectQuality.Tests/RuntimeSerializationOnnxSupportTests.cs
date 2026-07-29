@@ -144,7 +144,7 @@ public sealed class RuntimeSerializationOnnxSupportTests
         string deferred10 = ReadSource("native", "manifests", "tensorrt", "v10", "trt10-twenty-third-batch-deferred-coverage.manifest.json");
         string header10 = ReadSource("native", "include", "jyppx", "tensorrt", "trt10.h");
         string api10 = ReadSource("native", "src", "tensorrt", "v10", "api.cpp");
-        string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11RuntimeControls.cs");
+        string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Engine", "NativeBridgeApi.EngineRuntimeControls.cs");
         string engine = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.Trt11RuntimeControls.cs");
         string smoke = ReadSource("smoke", "TensorRtSmokeRunner", "Program.cs");
 

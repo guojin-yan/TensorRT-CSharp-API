@@ -128,7 +128,7 @@ public sealed class ExecutionContextReadonlyControlsTests
     public void ManagedInteropAndPublicApiRouteNvtxAndEngineHardwareAcrossTensorRt8_10_11()
     {
         string diagnosticsInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11Diagnostics.cs");
-        string runtimeInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11RuntimeControls.cs");
+        string runtimeInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Engine", "NativeBridgeApi.EngineRuntimeControls.cs");
         string contextApi = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs");
         string engineApi = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.Trt11RuntimeControls.cs");
         string smoke = ReadSource("smoke", "TensorRtSmokeRunner", "Program.cs");

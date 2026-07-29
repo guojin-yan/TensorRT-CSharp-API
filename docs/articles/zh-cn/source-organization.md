@@ -48,13 +48,14 @@ TensorRT 高层 wrapper 也开始按 layer feature 拆分：
 
 手写 TensorRT partial interop 也开始按相同职责模块归类：
 
-- `Internal/Interop/Builder`：timing-cache 操作；`ControlFlow`：loop/conditional 操作。
+- `Internal/Interop/Builder`：timing-cache 与 builder-config runtime controls；`ControlFlow`：loop/conditional 操作。
 - `Internal/Interop/Callbacks`：allocator dry-run、callback interface/state 复制，以及 logger/profiler/progress-monitor
   delegate 签名。
 - `Internal/Interop/Diagnostics`：复制型 error-code metadata 与仅由 environment probe 使用的 TRT11 build probes；
   `Internal/Interop/Interfaces`：owner-scoped versioned-interface metadata 复制。
-- `Internal/Interop/Engine`：engine/tensor/profile copied metadata 与 Dims64 查询；`Execution`：execution-context/runtime-config
-  创建、allocation-strategy、context deployment metadata 与 Dims64 查询。
+- `Internal/Interop/Engine`：engine/tensor/profile copied metadata、Dims64 与 weight-streaming/stat runtime controls；
+  `Execution`：execution-context/runtime-config 创建、allocation-strategy、deployment metadata、Dims64 与 allocator/event
+  presence controls。
 - `Internal/Interop/Inference`：同步 execute/enqueue 操作；`Weights`：复制型 layer-weight metadata。
 - `Internal/Interop/Layers`：quantization、attention、fill-int64、兼容/部署型 layer attributes、Dims64、tensor metadata、
   transformer 与 RNNv2 操作；`Network`：部署型 network layer 创建、tensor/network Dims64、refittable-weight 标记与
@@ -73,7 +74,7 @@ ONNX parser version 与 plugin-registry 操作；应在单独的行为拆分批�
 parsing。callback 文件归类不等于 callback trampoline、lifetime 或 runtime proof。
 
 当 version-prefixed 文件的方法集合跨越 builder、engine、execution-context、network 与 layer owner 时，仍保留根目录。
-`Trt11Diagnostics` 与 `Trt11RuntimeControls` 不会仅依据文件名前缀分类。
+`Trt11Diagnostics` 不会仅依据文件名前缀分类。
 原 `Trt11DeploymentAdditions` 已按方法 owner 拆为 `Network/NativeBridgeApi.DeploymentNetworkLayers.cs` 与
 `Layers/NativeBridgeApi.DeploymentLayerAttributes.cs`；两部分重组后的 Git blob 必须与拆分前原文件一致。
 原 `Trt11RuntimeSerializationRefit` 也已拆入 `Runtime`、`Serialization`、`Execution` 与 `Refit`；四部分按原片段顺序
@@ -82,6 +83,8 @@ parsing。callback 文件归类不等于 callback trampoline、lifetime 或 runt
 根目录 `NativeBridgeApi.DeploymentMetadataShared.cs`，五部分按原片段顺序重组后必须恢复拆分前 Git blob。
 原 `Trt11Dims64` 已拆入 `Network`、`Engine`、`Execution`、`Profiles` 与 `Layers`；layer getter delegate/helper 随
 `Layers` 移动，五部分按原片段顺序重组后必须恢复拆分前 Git blob。
+原 `Trt11RuntimeControls` 已按连续 owner 区段拆入 `Engine`、`Execution` 与 `Builder`；三部分按原片段顺序重组后
+必须恢复拆分前 Git blob。
 
 生成文件继续保留在各自 `Generated` 文件夹下，不手工拆分。若需要调整生成文件布局，必须通过 generator 本身完成，并通过生成器确定性门禁。
 

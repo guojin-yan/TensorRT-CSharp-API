@@ -5594,3 +5594,36 @@ namespace、partial type、方法签名/方法体、P/Invoke entrypoint、版本
   Owner acceptance 或 release proof。
 - C 盘 Downloads 顶层当日本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
 - 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 TensorRT Runtime Controls Owner Partial Split
+
+本阶段将 404 行 `NativeBridgeApi.Trt11RuntimeControls.cs` 按真实 owner 拆入 Engine、Execution 与 Builder。
+原文件由 Engine、Execution、Builder 三个连续职责区段组成；本批只移动完整方法块，没有改动方法签名/方法体、
+版本分支、entrypoint、异常文案、UTF-8 转换或返回值处理。
+
+### 实现与门禁
+
+- `Engine/NativeBridgeApi.EngineRuntimeControls.cs`：123 行、9 个 weight-streaming、engine stat、hardware compatibility
+  与 implicit-batch compatibility 方法。
+- `Execution/NativeBridgeApi.ExecutionContextRuntimeControls.cs`：57 行、4 个 input-consumed event、output tensor address、
+  output allocator 与 temporary-storage allocator presence 方法。
+- `Builder/NativeBridgeApi.BuilderConfigRuntimeControls.cs`：242 行、19 个 flags、device/DLA、tiling、max tactics、
+  quantization flags 与 remote auto-tuning 方法。
+- 方法级布局门禁固定 19/9/4 数量和 BuilderConfig/Engine/ExecutionContext owner 命名边界，并拒绝旧根文件回流；
+  7 处受影响源码合同已改为读取实际 owner 文件，旧 interop 消费路径为 0。
+- 三文件按原 `Builder header + Engine + Execution + Builder body` 片段顺序重组后的 Git blob 为
+  `896499a3ed2ee5ec9bb3fab8a962e2b6306ab9cc`，与 HEAD 原文件完全一致。
+
+### 验证与边界
+
+- layout、runtime serialization、execution-context readonly、engine/RNN diagnostics、B-tier 41-45、BuilderConfig scalar
+  与 readonly evidence 定向集合：`59/59` 通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- ignored deferred candidate artifact 已在本机迁移 Builder interop 路径；243 条 evidence 引用、133 个唯一路径缺失为 0，
+  且该文件未强制提交。
+- `git diff --check` 通过；Generated/native/manifest/ABI 未修改，未运行完整 ProjectQuality，也未运行依赖本机缺失
+  `pwsh` 的 B-tier 聚合测试。
+- partial 拆分不是 ABI/export、TensorRT runtime、Linux、package consumer、public package、post-publish、
+  Owner acceptance 或 release proof。
+- C 盘 Downloads 顶层当日本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
+- 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。

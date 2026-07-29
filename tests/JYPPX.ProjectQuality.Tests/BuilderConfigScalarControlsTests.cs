@@ -141,7 +141,7 @@ public sealed class BuilderConfigScalarControlsTests
     public void ManagedInteropAndPublicApiRouteScalarControlsAcrossTensorRt8_10_11()
     {
         string boundaryInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11BoundaryControls.cs");
-        string runtimeInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11RuntimeControls.cs");
+        string runtimeInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Builder", "NativeBridgeApi.BuilderConfigRuntimeControls.cs");
         string coreInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.cs");
         string diagnosticsInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11Diagnostics.cs");
         string builderApi = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilder.Trt11BoundaryControls.cs");
