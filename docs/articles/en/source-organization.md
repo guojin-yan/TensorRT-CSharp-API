@@ -70,7 +70,7 @@ Hand-written TensorRT partial interop now starts following the same responsibili
   execution-context binding/address/enqueue/aux-stream controls, boundary controls, copied engine metadata, runtime-config creation,
   allocation-strategy, deployment metadata, Dims64, diagnostics, and allocator/event presence controls.
 - `Internal/Interop/Inference` contains synchronous execute/enqueue operations; `Weights` contains copied layer-weight metadata.
-- `Internal/Interop/Layers` contains identity/constant/convolution/deconvolution/scale/padding/element-wise/matrix-multiply features,
+- `Internal/Interop/Layers` contains identity/constant/convolution/deconvolution/scale/padding/element-wise/matrix-multiply/shuffle features,
   shared optional-weight helpers, quantization, attention, fill-int64, compatibility/deployment layer attributes, Dims64,
   tensor metadata, transformer, and RNNv2
   operations; `Network` contains core definition input/output/name/flags, boundary controls,
@@ -134,7 +134,9 @@ Identity/constant, convolution, deconvolution, and scale creation now move into 
 single-feature data-type selector; pin/validation helpers shared by convolution, deconvolution, and scale move into a helper-only
 Layers Shared partial, with recombination preserving original helper order.
 Padding, element-wise, and matrix-multiply creation/attributes move into three additional Layers feature partials. These blocks
-have no private helper; the next root feature begins at `AddShuffleLayer`, and direct original-order recombination remains required.
+have no private helper. Shuffle creation, reshape/transpose attributes, and zero-placeholder controls move into a fourth partial;
+that block also has no private helper. The next root feature begins at `AddReduceLayer`, and direct original-order recombination
+remains required.
 
 Generated files remain under their `Generated` folders and should not be manually split. Generator output layout changes must happen in the generator itself and must pass the deterministic generator gate.
 

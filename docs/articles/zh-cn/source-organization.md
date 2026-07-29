@@ -59,7 +59,7 @@ TensorRT 高层 wrapper 也开始按 layer feature 拆分：
   execution-context binding/address/enqueue/aux-stream controls、boundary controls、copied engine metadata、runtime-config 创建、
   allocation-strategy、deployment metadata、Dims64、diagnostics 与 allocator/event presence controls。
 - `Internal/Interop/Inference`：同步 execute/enqueue 操作；`Weights`：复制型 layer-weight metadata。
-- `Internal/Interop/Layers`：identity/constant/convolution/deconvolution/scale/padding/element-wise/matrix-multiply feature、
+- `Internal/Interop/Layers`：identity/constant/convolution/deconvolution/scale/padding/element-wise/matrix-multiply/shuffle feature、
   共用 optional-weight helper、quantization、attention、fill-int64、兼容/部署型 layer attributes、Dims64、tensor metadata、
   transformer 与 RNNv2 操作；
   `Network`：core definition input/output/name/flags、network boundary controls、部署型 network
@@ -121,7 +121,8 @@ Identity/constant、convolution、deconvolution、scale creation 已分别移入
 的 data-type selector；convolution/deconvolution/scale 共用的 pin/validation helper 进入 helper-only Layers Shared partial。
 重组时必须保持原 helper 顺序。
 Padding、element-wise、matrix-multiply creation/attributes 已移入三个独立 Layers feature partial，且这些区段没有私有
-helper。根文件下一 feature 从 `AddShuffleLayer` 开始，仍要求按原顺序直接重组。
+helper。Shuffle creation、reshape/transpose attributes 与 zero-placeholder controls 已移入第四个 partial，该区段同样没有
+私有 helper。根文件下一 feature 从 `AddReduceLayer` 开始，仍要求按原顺序直接重组。
 
 生成文件继续保留在各自 `Generated` 文件夹下，不手工拆分。若需要调整生成文件布局，必须通过 generator 本身完成，并通过生成器确定性门禁。
 
