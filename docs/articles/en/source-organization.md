@@ -221,6 +221,13 @@ Git blobs `d37bcef3b9dc04e7f2ffc39776e9c069d062877e` and `8b9572ae4e081e820bc7ff
 opt-in/full-consumer promotion, invocation/detach/rollback state, copied metadata, borrowed lifetimes, pointer
 non-exposure, and deferred rows.
 
+The DebugListener runtime-proof attempt preflight and real non-null attach runtime smoke results now also have dedicated
+namesake files. The former 435-line preflight is split into a 217-line evaluator and a 223-line result; the former 431-line
+smoke is split into a 221-line evaluator and a 215-line result. The layout gate recomposes the pre-split Git blobs
+`8c8a5eac71686750dc6bec5507f87e0baf1a08e2` and `90e290140a474ce02168e67f7c3ef1eb6489c7d8`, preserving
+attach/vtable/callback prerequisites, opt-in/full-consumer guards, attempt/detach/rollback state, counters, pointer
+non-exposure, and real-runtime promotion semantics.
+
 OutputAllocator diagnostics are split across the public design owner and its internal managed runtime gate. The former
 637-line `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` is reduced to a 38-line state/constructor core;
 entries, snapshots, lifecycle, shared invocation, trampoline/state, and formatting live in six partials, with request/result

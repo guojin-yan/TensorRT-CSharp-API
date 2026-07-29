@@ -286,6 +286,6 @@ public sealed class DebugListenerRealNonNullAttachRuntimeSmokeTests
     private static string ReadSource(params string[] pathParts)
     {
         string path = Path.Combine(new[] { RepositoryPaths.Root }.Concat(pathParts).ToArray());
-        return File.ReadAllText(path);
+        return RepositorySourceReader.Read(path);
     }
 }

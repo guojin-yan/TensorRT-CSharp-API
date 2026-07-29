@@ -11,6 +11,10 @@
 
 当前答案仍然是否定的。该 preflight 不调用 TensorRT，不启用 `setDebugListener(non-null)`，不安装 native vtable，不调用 `IDebugListener::processDebugTensor`，也不把任何 gate/scaffold/precheck evidence 提升为 `real-callback-runtime`。
 
+源码 owner 已按职责拆分：evaluation 与三类 blocked reason 构造位于
+`TensorRtDebugListenerRuntimeProofAttemptPreflight.cs`，pointer-free report 位于
+`TensorRtDebugListenerRuntimeProofAttemptPreflightResult.cs`。readiness 与源码测试必须组合读取这两个文件。
+
 ## Public API
 
 - `TensorRtDebugListenerRuntimeProofAttemptPreflight`

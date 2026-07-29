@@ -196,6 +196,12 @@ result。布局门禁可重组拆分前 Git blob `d37bcef3b9dc04e7f2ffc39776e9c0
 `8b9572ae4e081e820bc7ffe18c4fe257bf57cf03`，并固定 opt-in/full-consumer promotion、invocation/detach/rollback、
 copied metadata、borrowed lifetime、pointer non-exposure 与 deferred-row 语义。
 
+DebugListener runtime-proof attempt preflight 与 real non-null attach runtime smoke 的 result 也已归入同名文件。
+原 435 行 preflight 分为 217 行 evaluator 与 223 行 result；原 431 行 smoke 分为 221 行 evaluator 与 215 行
+result。布局门禁可重组拆分前 Git blob `8c8a5eac71686750dc6bec5507f87e0baf1a08e2` 与
+`90e290140a474ce02168e67f7c3ef1eb6489c7d8`，并固定 attach/vtable/callback prerequisite、opt-in/full-consumer guard、
+attempt/detach/rollback、counter、pointer non-exposure 与 real-runtime promotion 语义。
+
 OutputAllocator diagnostics 继续按 public design owner 与 internal managed runtime gate 分层。原 637 行
 `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` 降为 38 行 state/constructor core；entries、snapshots、
 lifecycle、shared invocation、trampoline/state 与 formatting 进入 6 份 partial，request/result 类型各自成文件。原 503 行

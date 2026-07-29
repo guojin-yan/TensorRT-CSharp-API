@@ -172,6 +172,10 @@ OutputAllocator 的 synthetic notify/reallocate runtime gate 与 native ledger d
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerProcessDebugTensorCallbackTrampolineResult.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerNoThrowVTableCallbackStub.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerNoThrowVTableCallbackStubResult.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerRuntimeProofAttemptPreflight.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerRuntimeProofAttemptPreflightResult.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerRealNonNullAttachRuntimeSmoke.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerRealNonNullAttachRuntimeSmokeResult.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerRealCallbackRuntimeProof.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerRealCallbackRuntimeProofResult.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerBorrowedDebugTensorMetadataRuntimeGate.cs`

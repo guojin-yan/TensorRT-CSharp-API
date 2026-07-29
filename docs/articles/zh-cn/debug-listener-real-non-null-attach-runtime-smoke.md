@@ -9,6 +9,10 @@
 
 该对象当前不安装 native `IDebugListener` vtable，不启用默认 non-null attach，不调用 `IDebugListener::processDebugTensor`，也不暴露 native owner、vtable、debug tensor 或 data pointer。
 
+源码 owner 已按职责拆分：evaluation 与 diagnostic/blocker 构造位于
+`TensorRtDebugListenerRealNonNullAttachRuntimeSmoke.cs`，pointer-free report 位于
+`TensorRtDebugListenerRealNonNullAttachRuntimeSmokeResult.cs`。readiness 与源码测试必须组合读取这两个文件。
+
 ## Public Surface
 
 - `TensorRtDebugListenerRealNonNullAttachRuntimeSmoke`

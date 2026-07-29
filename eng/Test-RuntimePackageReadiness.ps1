@@ -101,6 +101,18 @@ function Get-EvidenceSourceText {
         "TensorRtDebugListenerBorrowedDebugTensorMetadataRuntimeGateResult.cs")
       break
     }
+    "TensorRtDebugListenerRuntimeProofAttemptPreflight.cs" {
+      @(
+        "TensorRtDebugListenerRuntimeProofAttemptPreflight.cs",
+        "TensorRtDebugListenerRuntimeProofAttemptPreflightResult.cs")
+      break
+    }
+    "TensorRtDebugListenerRealNonNullAttachRuntimeSmoke.cs" {
+      @(
+        "TensorRtDebugListenerRealNonNullAttachRuntimeSmoke.cs",
+        "TensorRtDebugListenerRealNonNullAttachRuntimeSmokeResult.cs")
+      break
+    }
     "TensorRtAllocatorCallbackOwner.cs" {
       @(
         "TensorRtAllocatorCallbackOwner.cs",
