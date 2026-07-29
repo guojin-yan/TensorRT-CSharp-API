@@ -88,6 +88,7 @@ public sealed class ManagedSourceModuleLayoutTests
             "Layers",
             new[]
             {
+                "NativeBridgeApi.Activation.cs",
                 "NativeBridgeApi.Convolution.cs",
                 "NativeBridgeApi.Deconvolution.cs",
                 "NativeBridgeApi.DeploymentLayerAttributes.cs",
@@ -96,9 +97,11 @@ public sealed class ManagedSourceModuleLayoutTests
                 "NativeBridgeApi.Gather.cs",
                 "NativeBridgeApi.IdentityAndConstant.cs",
                 "NativeBridgeApi.LayerDeploymentMetadata.cs",
+                "NativeBridgeApi.Lrn.cs",
                 "NativeBridgeApi.MatrixMultiply.cs",
                 "NativeBridgeApi.OptionalWeightsShared.cs",
                 "NativeBridgeApi.Padding.cs",
+                "NativeBridgeApi.Pooling.cs",
                 "NativeBridgeApi.Quantization.cs",
                 "NativeBridgeApi.Reduce.cs",
                 "NativeBridgeApi.Scale.cs",
@@ -955,7 +958,7 @@ public sealed class ManagedSourceModuleLayoutTests
         }
 
         Assert.DoesNotContain("GetNetworkNameNative", rootSource, StringComparison.Ordinal);
-        Assert.Contains("public static SafeTensorRtObjectHandle AddActivationLayer(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static SafeTensorRtObjectHandle AddResizeLayer(", rootSource, StringComparison.Ordinal);
         Assert.Contains("private static BridgeStatusCode GetTensorNameNative(", rootSource, StringComparison.Ordinal);
         Assert.Contains("private static BridgeStatusCode GetLayerNameNative(", rootSource, StringComparison.Ordinal);
     }
@@ -1025,7 +1028,7 @@ public sealed class ManagedSourceModuleLayoutTests
         Assert.DoesNotContain("PinOptionalWeights", rootSource, StringComparison.Ordinal);
         Assert.DoesNotContain("GetScaleWeightsDataType", rootSource, StringComparison.Ordinal);
         Assert.DoesNotContain("ValidateOptionalWeightsDataType", rootSource, StringComparison.Ordinal);
-        Assert.Contains("public static SafeTensorRtObjectHandle AddActivationLayer(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static SafeTensorRtObjectHandle AddResizeLayer(", rootSource, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -1063,7 +1066,7 @@ public sealed class ManagedSourceModuleLayoutTests
             Assert.DoesNotContain(method, rootMethods);
         }
 
-        Assert.Contains("public static SafeTensorRtObjectHandle AddActivationLayer(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static SafeTensorRtObjectHandle AddResizeLayer(", rootSource, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -1102,7 +1105,7 @@ public sealed class ManagedSourceModuleLayoutTests
             Assert.DoesNotContain(method, rootMethods);
         }
 
-        Assert.Contains("public static SafeTensorRtObjectHandle AddActivationLayer(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static SafeTensorRtObjectHandle AddResizeLayer(", rootSource, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -1136,7 +1139,7 @@ public sealed class ManagedSourceModuleLayoutTests
             Assert.DoesNotContain(method, rootMethods);
         }
 
-        Assert.Contains("public static SafeTensorRtObjectHandle AddActivationLayer(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static SafeTensorRtObjectHandle AddResizeLayer(", rootSource, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -1165,7 +1168,59 @@ public sealed class ManagedSourceModuleLayoutTests
             Assert.DoesNotContain(method, rootMethods);
         }
 
-        Assert.Contains("public static SafeTensorRtObjectHandle AddActivationLayer(", rootSource, StringComparison.Ordinal);
+        Assert.Contains("public static SafeTensorRtObjectHandle AddResizeLayer(", rootSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TensorRtRootActivationPoolingAndLrnFeaturesAreSplitByFeature()
+    {
+        string interopDirectory = Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.TensorRtSharp",
+            "Internal",
+            "Interop");
+        string rootSource = File.ReadAllText(Path.Combine(interopDirectory, "NativeBridgeApi.cs"));
+        string[] rootMethods = EnumeratePublicStaticMethodNames(rootSource);
+        string[] activationMethods = ReadInteropMethodNames(interopDirectory, "Layers", "NativeBridgeApi.Activation.cs");
+        string[] poolingMethods = ReadInteropMethodNames(interopDirectory, "Layers", "NativeBridgeApi.Pooling.cs");
+        string[] lrnMethods = ReadInteropMethodNames(interopDirectory, "Layers", "NativeBridgeApi.Lrn.cs");
+
+        Assert.Equal(new[] { "AddActivationLayer", "GetActivationType" }, activationMethods);
+        Assert.Equal(
+            new[]
+            {
+                "AddPoolingLayer",
+                "GetPoolingType",
+                "SetPoolingWindowSize",
+                "GetPoolingWindowSize",
+                "SetPoolingStride",
+                "GetPoolingStride",
+                "SetPoolingPadding",
+                "GetPoolingPadding"
+            },
+            poolingMethods);
+        Assert.Equal(
+            new[]
+            {
+                "AddLrnLayer",
+                "GetLrnWindowSize",
+                "SetLrnWindowSize",
+                "GetLrnAlpha",
+                "SetLrnAlpha",
+                "GetLrnBeta",
+                "SetLrnBeta",
+                "GetLrnK",
+                "SetLrnK"
+            },
+            lrnMethods);
+
+        foreach (string method in activationMethods.Concat(poolingMethods).Concat(lrnMethods))
+        {
+            Assert.DoesNotContain(method, rootMethods);
+        }
+
+        Assert.Contains("public static SafeTensorRtObjectHandle AddResizeLayer(", rootSource, StringComparison.Ordinal);
     }
 
     private static string[] EnumerateModuleFiles(string projectDirectory, string module)

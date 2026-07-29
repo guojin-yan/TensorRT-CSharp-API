@@ -72,7 +72,8 @@ Hand-written TensorRT partial interop now starts following the same responsibili
 - `Internal/Interop/Inference` contains synchronous execute/enqueue operations; `Weights` contains copied layer-weight metadata.
 - `Internal/Interop/Layers` contains identity/constant/convolution/deconvolution/scale/padding/element-wise/matrix-multiply/shuffle/reduce,
   softmax, unary, TopK, and gather features,
-  shared optional-weight helpers, quantization, attention, fill-int64, compatibility/deployment layer attributes, Dims64,
+  activation, pooling, and LRN features, shared optional-weight helpers, quantization, attention, fill-int64,
+  compatibility/deployment layer attributes, Dims64,
   tensor metadata, transformer, and RNNv2
   operations; `Network` contains core definition input/output/name/flags, boundary controls,
   deployment network-layer creation, tensor/network Dims64, debug/shape diagnostics, refittable-weight markers, and safe network-v2 operations.
@@ -138,8 +139,9 @@ Padding, element-wise, and matrix-multiply creation/attributes move into three a
 have no private helper. Shuffle creation, reshape/transpose attributes, and zero-placeholder controls move into a fourth partial;
 that block also has no private helper, and direct original-order recombination remains required. Reduce creation and readonly
 operation/axes/keep-dimensions attributes move into another helper-free partial.
-SoftMax, unary, TopK, and gather creation/attributes move into four independent helper-free partials; the next root feature begins
-at `AddActivationLayer`.
+SoftMax, unary, TopK, and gather creation/attributes move into four independent helper-free partials. Activation, pooling, and
+LRN creation/attributes move into three more independent helper-free partials;
+the next root feature begins at `AddResizeLayer`.
 
 Generated files remain under their `Generated` folders and should not be manually split. Generator output layout changes must happen in the generator itself and must pass the deterministic generator gate.
 

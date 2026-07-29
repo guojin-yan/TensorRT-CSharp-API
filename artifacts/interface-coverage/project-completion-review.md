@@ -6115,3 +6115,32 @@ Layers partial。四个区段均无私有 helper；所有方法体、TRT8/10/11 
   post-publish、Owner acceptance 或 release proof。
 - C 盘 Downloads 顶层本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
 - 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 TensorRT Root Activation Pooling LRN Feature Split
+
+本阶段将根 `NativeBridgeApi.cs` 中连续的 Activation、Pooling、LRN creation/attributes 按 feature 移入三份 Layers
+partial。三个区段均无私有 helper；所有方法体、TRT8/10/11 分支、entrypoint、Dims/枚举/标量转换、SafeHandle
+返回与异常文案保持不变。
+
+### 实现与门禁
+
+- `Layers/NativeBridgeApi.Activation.cs`：39 行、2 个 creation/type 方法。
+- `Layers/NativeBridgeApi.Pooling.cs`：147 行、8 个 creation/type/window/stride/padding 方法。
+- `Layers/NativeBridgeApi.Lrn.cs`：136 行、9 个 creation/window/alpha/beta/k 方法。
+- 根 `NativeBridgeApi.cs` 从 2,685 行降至 2,390 行；布局门禁固定 2/8/9 方法分布、禁止定义回流，并将下一根
+  feature 边界推进到 `AddResizeLayer`。
+- 按 `root prefix + Activation + Pooling + LRN + root suffix` 原顺序重组后的 Git blob 为
+  `940ec83e927ddf79d60c116735b3303b4a625fca`，与拆分前 HEAD 根文件完全一致。
+
+### 验证与边界
+
+- layout、safe lifecycle 与 BuilderConfig scalar 定向集合：`62/62` 通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- ignored deferred candidate artifact 仍引用存在的根文件，无需迁移；evidence 保持 247 条引用、137 个唯一路径、
+  0 缺失，该 ignored 文件未强制提交。
+- `git diff --check` 通过；Generated/native/manifest/ABI 未修改，未运行完整 ProjectQuality，也未运行依赖本机缺失
+  `pwsh` 的 B-tier 聚合测试。
+- partial 拆分不是 layer runtime correctness、owner/lifetime、ABI/export、Linux、package consumer、public package、
+  post-publish、Owner acceptance 或 release proof。
+- C 盘 Downloads 顶层本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
+- 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
