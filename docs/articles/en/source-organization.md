@@ -144,6 +144,12 @@ probe, loaded-engine diagnostics, preflight metadata, model evidence, and benchm
 files. The layout gate recomposes the pre-split Git blobs `31f2c170c9c74b7278b4bc266eca76405dc33067` and
 `97f6e992fe582513fcf77b10ce05de4de32af1a5`.
 
+TensorRT public enums are no longer collected in the 2,456-line `Core/TensorRtEnums.cs`. Its 64 enums are distributed across
+15 module files for shared Core tensor values, Network, Parsing, Execution, Serialization, Engine, Runtime, Builder, Profiles,
+ControlFlow, and the Layers RNN, operation, resize, metadata, and attention domains. Single-value/flags pairs remain together;
+names, underlying types, values, `Flags`, and XML documentation are unchanged. The layout gate recomposes the pre-split Git
+blob `861460b834d7d415fc0497f6c5b05fecaba03707` in its original declaration order.
+
 Hand-written TensorRT partial interop now starts following the same responsibility modules:
 
 - `Internal/Interop/Builder` contains builder creation/capabilities, serialized build outputs, builder boundary controls,

@@ -6617,3 +6617,34 @@ evidence/summary 类型移入专用文件。public API、selected-device thread�
 - source/type relocation 不构成 TensorRT/CUDA runtime、real model、Linux、package consumer、public package、
   post-publish、Owner acceptance 或 release proof。
 - 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行远程发布操作。
+
+## 2026-07-30 TensorRT Public Enum Module Split
+
+本阶段移除 `JYPPX.TensorRtSharp/Core/TensorRtEnums.cs` 这一跨模块聚合文件，将其中 64 个 public enum 按实际
+API owner 归档，同时保持 namespace、名称、underlying type、数值、`Flags` 属性与 XML 文档逐字不变。
+
+### 实现与门禁
+
+- 三个跨 owner tensor 基础类型 `TensorRtDataType`、`TensorRtIOMode`、`TensorRtTensorLocation` 进入
+  `Core/TensorRtTensorCoreEnums.cs`；Core 不再承载 builder/layer/parser/runtime 专属 enum。
+- Network、Parsing、Execution、Serialization、Engine、Runtime、Builder、Profiles、ControlFlow 分别获得模块 enum 文件；
+  32 个 layer enum 进一步按 RNN、operation、resize、metadata、attention 分成五个文件，没有形成新的 layer 聚合大文件。
+- Serialization、TensorFormat、Quantization、BuilderFlag 等单值/flags 配对保持同文件；八个显式 `uint` enum 与
+  八个 `[Flags]` enum 的集合保持不变。
+- `ManagedTensorRtEnumModuleLayoutTests` 固定 15 个模块文件的精确 type/Flags owner、64 个类型唯一性、显式
+  underlying type 集合，并按原声明顺序重组拆分前源码。
+- 拆分前 Git blob 为 `861460b834d7d415fc0497f6c5b05fecaba03707`；normalized SHA-256 保持
+  `f369f7a9d557889dee633d8e7c39de77231c9c61ca45a5b35476d95d8e429dff`。
+- Builder scalar、trtexec deployment、Engine/RNN diagnostics 三个直接读取旧聚合文件的测试类已迁移到
+  Builder、Network、Layers/RNN 的真实 owner；双语 source-organization 已同步。
+
+### 验证与边界
+
+- 新 enum owner/value/Flags/重组门禁：`18/18` 通过；受影响消费门禁：`49/49` 通过；合并聚焦集合：`67/67`
+  通过；全部 managed 源码布局门禁合并集合：`272/272` 通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- ignored deferred candidate evidence 保持 260 条引用、147 个唯一路径、0 缺失；ignored 文件未强制提交。
+- Generated/native/manifest/ABI 改动为 0；本机仍无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合测试。
+- enum/source relocation 不构成 TensorRT runtime、real model、Linux、package consumer、public package、post-publish、
+  Owner acceptance 或 release proof。
+- 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行远程发布操作。

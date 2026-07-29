@@ -204,7 +204,7 @@ public sealed class BuilderConfigScalarControlsTests
         Assert.DoesNotContain("public IntPtr", builderApi + builderConfigApi);
         Assert.DoesNotContain("public nint", builderApi + builderConfigApi);
 
-        string enums = ReadSource("src", "JYPPX.TensorRtSharp", "Core", "TensorRtEnums.cs");
+        string enums = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilderEnums.cs");
         Assert.Contains("public enum TensorRtQuantizationFlag", enums);
         Assert.Contains("public enum TensorRtQuantizationFlags : uint", enums);
     }

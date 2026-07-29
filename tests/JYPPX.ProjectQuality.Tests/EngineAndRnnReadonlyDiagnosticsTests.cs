@@ -139,7 +139,7 @@ public sealed class EngineAndRnnReadonlyDiagnosticsTests
         string tensorApi = ReadSource("src", "JYPPX.TensorRtSharp", "Network", "TensorRtTensor.cs");
         string snapshotApi = ReadSource("src", "JYPPX.TensorRtSharp", "Layers", "TensorRtRnnV2GateWeightsSnapshot.cs");
         string ownerLease = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Handles", "SafeTensorRtObjectHandleLease.cs");
-        string enums = ReadSource("src", "JYPPX.TensorRtSharp", "Core", "TensorRtEnums.cs");
+        string enums = ReadSource("src", "JYPPX.TensorRtSharp", "Layers", "TensorRtRnnEnums.cs");
         string smoke = ReadSource("smoke", "NetworkBuilderSmokeRunner", "Program.cs");
         string tensorRtSmoke = ReadSource("smoke", "TensorRtSmokeRunner", "Program.cs");
 

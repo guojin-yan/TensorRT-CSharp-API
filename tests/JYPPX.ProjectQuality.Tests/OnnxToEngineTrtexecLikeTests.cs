@@ -1025,7 +1025,8 @@ public sealed class OnnxToEngineTrtexecLikeTests
     {
         string service = ReadBuildService("Core", "DeploymentConfiguration");
         string diagnostics = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Build", "OnnxEngineBuildDiagnostics.cs"));
-        string enums = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp", "Core", "TensorRtEnums.cs"));
+        string enums = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp", "Network", "TensorRtNetworkEnums.cs"));
 
         Assert.Contains("CudaDevice.SetCurrent(requestedDevice)", service, StringComparison.Ordinal);
         Assert.Contains("CudaDevice.Current", service, StringComparison.Ordinal);

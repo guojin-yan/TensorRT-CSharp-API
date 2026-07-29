@@ -126,6 +126,12 @@ diagnostics、runtime execution、benchmarking、runtime inputs、reference vali
 preflight metadata、model evidence 与 benchmark summary 六个独立 public 类型各自成文件。布局门禁可重组拆分前 Git blob
 `31f2c170c9c74b7278b4bc266eca76405dc33067` 与 `97f6e992fe582513fcf77b10ce05de4de32af1a5`。
 
+TensorRT 的 public enum 也不再集中在 2,456 行的 `Core/TensorRtEnums.cs`。其中 64 个 enum 按 Core tensor 基础类型、
+Network、Parsing、Execution、Serialization、Engine、Runtime、Builder、Profiles、ControlFlow，以及 Layers 下的
+RNN、operation、resize、metadata、attention 分入 15 个模块文件；单值/flags 配对保持同文件，名称、underlying type、
+数值、`Flags` 与 XML 文档不变。布局门禁可按原顺序重组拆分前 Git blob
+`861460b834d7d415fc0497f6c5b05fecaba03707`。
+
 手写 TensorRT partial interop 也开始按相同职责模块归类：
 
 - `Internal/Interop/Builder`：builder creation/capabilities、serialized build outputs、builder boundary controls、
