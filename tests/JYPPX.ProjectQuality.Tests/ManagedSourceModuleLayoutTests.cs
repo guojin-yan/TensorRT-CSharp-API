@@ -30,7 +30,14 @@ public sealed class ManagedSourceModuleLayoutTests
             }
         },
         { "ControlFlow", new[] { "NativeBridgeApi.Trt11ControlFlow.cs" } },
-        { "Diagnostics", new[] { "NativeBridgeApi.ErrorCodeMetadata.cs" } },
+        {
+            "Diagnostics",
+            new[]
+            {
+                "NativeBridgeApi.ErrorCodeMetadata.cs",
+                "NativeBridgeApi.Trt11BuildProbe.cs"
+            }
+        },
         { "Inference", new[] { "NativeBridgeApi.SynchronousInference.cs" } },
         { "Interfaces", new[] { "NativeBridgeApi.OwnerScopedVersionedInterfaceMetadata.cs" } },
         {
@@ -38,6 +45,7 @@ public sealed class ManagedSourceModuleLayoutTests
             new[]
             {
                 "NativeBridgeApi.Quantization.cs",
+                "NativeBridgeApi.ThirtyThirdBatchLayerAttributes.cs",
                 "NativeBridgeApi.Trt11Attention.cs",
                 "NativeBridgeApi.Trt11FillInt64.cs",
                 "NativeBridgeApi.Trt11LayerTensorMetadata.cs",

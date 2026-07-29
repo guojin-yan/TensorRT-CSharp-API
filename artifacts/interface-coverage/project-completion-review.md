@@ -5443,3 +5443,32 @@ partial type、method、P/Invoke/entrypoint、owner 行为与 public API 均未�
 - C 盘 Downloads 顶层当日本批相关文件为 0，用户 Temp 顶层本批关键词命中为 0，项目相关 build/test 进程残留为 0；
   Downloads 中既存的历史 CUDA/TensorRT 安装包与运行时包未改动。
 - 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 TensorRT Layer Attributes And Build Probe Managed Interop Module Closure
+
+本阶段继续清理 TensorRT interop 根目录，将单一 layer-owner 的兼容/部署属性操作归入 `Layers`，并将仅由
+`TensorRtEnvironmentProbe` 调用的两条 TRT11 build-probe 入口归入 `Diagnostics`。两份文件内容均保持不变；后者只将
+含混的 `NativeBridgeApi.Trt11.cs` 文件名明确为 `NativeBridgeApi.Trt11BuildProbe.cs`。
+
+### 实现与门禁
+
+- `Layers/NativeBridgeApi.ThirtyThirdBatchLayerAttributes.cs` 包含 convolution/deconvolution padding、slice axes、
+  normalization compute precision、resize align-corners、TopK indices type 与 dequantize block-shape 操作，共 14 个
+  public static 方法，全部接收 layer owner。
+- `Diagnostics/NativeBridgeApi.Trt11BuildProbe.cs` 只包含 minimal build chain 与 serialized-network-only 两条诊断 probe；
+  仓库内调用点仅位于 `TensorRtEnvironmentProbe`。
+- 精确布局门禁将这两份文件固定到 `Layers` 与 `Diagnostics`，旧根路径引用扫描为 0；中英文
+  source-organization 同步记录职责和剩余跨 owner 文件边界。
+- `Trt11DeploymentAdditions` 仍保留根目录，因为它同时包含 network layer 创建和 layer attribute 操作，需要单独拆分。
+
+### 验证与边界
+
+- 首次扩展集合 `29/30`：唯一失败是 PS7 专用测试无法启动本机不存在的 `pwsh`，没有代码断言失败，也未用 Windows
+  PowerShell 5.1 替代。
+- 排除该 PS7 环境项后，layout、TRT11 compatible-host 与 runtime-create diagnostics 定向集合：`29/29` 通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- 两组新旧 Git blob hash 完全一致；`git diff --check` 通过，Generated/native/manifest/ABI 未修改。
+- 未运行完整 ProjectQuality；本批不是 ABI/export、TensorRT runtime、Linux、package consumer、public package、
+  post-publish、Owner acceptance 或 release proof。
+- C 盘 Downloads 顶层当日本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
+- 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。

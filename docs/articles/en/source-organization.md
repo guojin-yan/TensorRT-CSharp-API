@@ -61,10 +61,11 @@ Hand-written TensorRT partial interop now starts following the same responsibili
 - `Internal/Interop/Builder` contains timing-cache operations; `ControlFlow` contains loop/conditional operations.
 - `Internal/Interop/Callbacks` contains allocator dry-run controls, callback interface/state copies, and logger/profiler/
   progress-monitor delegate signatures.
-- `Internal/Interop/Diagnostics` contains copied error-code metadata; `Internal/Interop/Interfaces` contains owner-scoped
-  versioned-interface metadata copies.
+- `Internal/Interop/Diagnostics` contains copied error-code metadata and TRT11 build probes used only by the environment probe;
+  `Internal/Interop/Interfaces` contains owner-scoped versioned-interface metadata copies.
 - `Internal/Interop/Inference` contains synchronous execute/enqueue operations; `Weights` contains copied layer-weight metadata.
-- `Internal/Interop/Layers` contains quantization, attention, fill-int64, tensor metadata, transformer, and RNNv2 operations;
+- `Internal/Interop/Layers` contains quantization, attention, fill-int64, compatibility/deployment layer attributes, tensor
+  metadata, transformer, and RNNv2 operations;
   `Network` contains safe network-v2 layer creation operations.
 - `Internal/Interop/Parsing` contains legacy parser diagnostics, ONNX config/model-buffer/support, builder-config attachment,
   layer-output metadata, and parser-refitter diagnostics.
@@ -75,6 +76,7 @@ Hand-written TensorRT partial interop now starts following the same responsibili
 `NativeBridgeApi.SafeDeferredUplift.cs` also remains at the root because it combines plugin initialization with ONNX weight-descriptor parsing. Callback file placement is not callback trampoline, lifetime, or runtime proof.
 
 Version-prefixed files remain at the root when their method set crosses builder, engine, execution-context, network, and layer owners. In particular, `Trt11Diagnostics`, `Trt11Dims64`, and `Trt11RuntimeControls` are not classified by filename alone.
+`Trt11DeploymentAdditions` still combines network layer creation with layer-attribute operations and awaits a separate partial-file split.
 
 Generated files remain under their `Generated` folders and should not be manually split. Generator output layout changes must happen in the generator itself and must pass the deterministic generator gate.
 
