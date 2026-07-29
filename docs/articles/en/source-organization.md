@@ -74,7 +74,7 @@ Hand-written TensorRT partial interop now starts following the same responsibili
   softmax, unary, TopK, and gather features,
   activation, pooling, and LRN features, shared optional-weight helpers, quantization, attention, fill-int64,
   resize, concatenation, and slice features, compatibility/deployment layer attributes, Dims64,
-  tensor metadata, transformer, and RNNv2
+  shape, select, and fill features, tensor metadata, transformer, and RNNv2
   operations; `Network` contains core definition input/output/name/flags, boundary controls,
   deployment network-layer creation, tensor/network Dims64, debug/shape diagnostics, refittable-weight markers, and safe network-v2 operations.
 - `Internal/Interop/Parsing` contains the global ONNX parser version, parser lifecycle/input/diagnostics/flags, legacy parser
@@ -141,8 +141,9 @@ that block also has no private helper, and direct original-order recombination r
 operation/axes/keep-dimensions attributes move into another helper-free partial.
 SoftMax, unary, TopK, and gather creation/attributes move into four independent helper-free partials. Activation, pooling, and
 LRN creation/attributes move into three more independent helper-free partials. Resize, concatenation, and slice creation/attributes
-move into three additional helper-free partials; resize keeps its array pinning inside the feature file. The next root feature
-begins at `AddShapeLayer`.
+move into three additional helper-free partials; resize keeps its array pinning inside the feature file. Shape, select, and fill
+creation/attributes move into three final helper-free feature partials before the root enters general Layer metadata at
+`GetLayerOutput`.
 
 Generated files remain under their `Generated` folders and should not be manually split. Generator output layout changes must happen in the generator itself and must pass the deterministic generator gate.
 

@@ -6173,3 +6173,32 @@ Dims 转换均随完整方法块移动，TRT8/10/11 分支、entrypoint、SafeHa
   post-publish、Owner acceptance 或 release proof。
 - C 盘 Downloads 顶层本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
 - 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 TensorRT Root Shape Select Fill Feature Split
+
+本阶段将根 `NativeBridgeApi.cs` 中连续的 Shape、Select、Fill creation/attributes 按 feature 移入三份 Layers partial。
+三个区段均无私有 helper；Fill 的 Dims/operation/alpha/beta 转换、TRT8/10/11 分支、entrypoint、SafeHandle 返回与
+异常文案均保持不变，并在 `GetLayerOutput` 前停止，不带走通用 Layer metadata。
+
+### 实现与门禁
+
+- `Layers/NativeBridgeApi.Shape.cs`：24 行、1 个 creation 方法。
+- `Layers/NativeBridgeApi.Select.cs`：29 行、1 个 creation 方法。
+- `Layers/NativeBridgeApi.Fill.cs`：148 行、9 个 creation/dimensions/operation/alpha/beta 方法。
+- 根 `NativeBridgeApi.cs` 从 2,018 行降至 1,844 行；布局门禁固定 1/1/9 方法分布、禁止定义回流，并将下一根边界
+  推进到 `GetLayerOutput` 通用 Layer metadata。
+- 按 `root prefix + Shape + Select + Fill + root suffix` 原顺序重组后的 Git blob 为
+  `8527b3a51f62533af746f11f38a1a7b3264632ef`，与拆分前 HEAD 根文件完全一致。
+
+### 验证与边界
+
+- layout、safe lifecycle 与 BuilderConfig scalar 定向集合：`64/64` 通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- ignored deferred candidate artifact 仍引用存在的根文件，无需迁移；evidence 保持 247 条引用、137 个唯一路径、
+  0 缺失，该 ignored 文件未强制提交。
+- `git diff --check` 通过；Generated/native/manifest/ABI 未修改，未运行完整 ProjectQuality，也未运行依赖本机缺失
+  `pwsh` 的 B-tier 聚合测试。
+- partial 拆分不是 layer runtime correctness、owner/lifetime、ABI/export、Linux、package consumer、public package、
+  post-publish、Owner acceptance 或 release proof。
+- C 盘 Downloads 顶层本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
+- 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。

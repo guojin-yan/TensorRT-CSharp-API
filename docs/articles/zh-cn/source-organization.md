@@ -63,7 +63,7 @@ TensorRT 高层 wrapper 也开始按 layer feature 拆分：
   softmax、unary、TopK、gather feature、
   activation、pooling、LRN feature、共用 optional-weight helper、quantization、attention、fill-int64、
   resize、concatenation、slice feature、兼容/部署型 layer attributes、Dims64、tensor metadata、
-  transformer 与 RNNv2 操作；
+  shape、select、fill feature、transformer 与 RNNv2 操作；
   `Network`：core definition input/output/name/flags、network boundary controls、部署型 network
   layer 创建、tensor/network Dims64、debug/shape diagnostics、refittable-weight 标记与 safe network-v2 操作。
 - `Internal/Interop/Parsing`：global ONNX parser version、parser lifecycle/input/diagnostics/flags、legacy parser diagnostics、
@@ -128,7 +128,8 @@ helper。Shuffle creation、reshape/transpose attributes 与 zero-placeholder co
 另一个无 helper 的 partial。
 SoftMax、unary、TopK、gather creation/attributes 已移入四个独立的无 helper partial。Activation、pooling、LRN
 creation/attributes 已移入另外三个独立的无 helper partial。Resize、concatenation、slice creation/attributes 已移入
-另外三个无 helper partial，resize 的数组 pinning 留在 feature 文件内；根文件下一 feature 从 `AddShapeLayer` 开始。
+另外三个无 helper partial，resize 的数组 pinning 留在 feature 文件内。Shape、select、fill creation/attributes 已移入
+三个无 helper feature partial；根文件随后从 `GetLayerOutput` 进入通用 Layer metadata 区段。
 
 生成文件继续保留在各自 `Generated` 文件夹下，不手工拆分。若需要调整生成文件布局，必须通过 generator 本身完成，并通过生成器确定性门禁。
 
