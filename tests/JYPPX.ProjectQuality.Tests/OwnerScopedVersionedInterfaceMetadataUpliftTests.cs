@@ -69,8 +69,8 @@ public sealed class OwnerScopedVersionedInterfaceMetadataUpliftTests
     [Fact]
     public void ManagedSurfaceIsTypedPointerFreeAndPreservesVersionGuards()
     {
-        string model = ReadSource("src", "JYPPX.TensorRtSharp", "Core", "TensorRtVersionedInterfaceMetadata.cs");
-        string surface = ReadSource("src", "JYPPX.TensorRtSharp", "Core", "TensorRtOwnerScopedVersionedInterfaceMetadata.cs");
+        string model = ReadSource("src", "JYPPX.TensorRtSharp", "Interfaces", "TensorRtVersionedInterfaceMetadata.cs");
+        string surface = ReadSource("src", "JYPPX.TensorRtSharp", "Interfaces", "TensorRtOwnerScopedVersionedInterfaceMetadata.cs");
         string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.OwnerScopedVersionedInterfaceMetadata.cs");
 
         Assert.Contains("public sealed class TensorRtVersionedInterfaceMetadata", model, StringComparison.Ordinal);

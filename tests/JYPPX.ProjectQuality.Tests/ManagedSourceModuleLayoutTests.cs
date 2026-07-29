@@ -20,8 +20,8 @@ public sealed class ManagedSourceModuleLayoutTests
             {
                 "Builder", "Callbacks/Core", "Callbacks/Debugging", "Callbacks/MemoryAllocation",
                 "Callbacks/Monitoring", "ControlFlow", "Core", "Diagnostics", "Engine", "Execution",
-                "Inference", "Layers", "Network", "Parsing", "Plugins", "Profiles", "Refit", "Runtime",
-                "Serialization"
+                "Inference", "Interfaces", "Layers", "Network", "Parsing", "Plugins", "Profiles", "Refit",
+                "Runtime", "Serialization", "Weights"
             }
         },
         {
@@ -50,11 +50,7 @@ public sealed class ManagedSourceModuleLayoutTests
     public void CudaDriverOwnersAreGroupedInDriversModule()
     {
         string cudaProjectDirectory = Path.Combine(RepositoryPaths.Root, "src", "JYPPX.CudaSharp");
-        string driversDirectory = Path.Combine(cudaProjectDirectory, "Drivers");
-        string[] driverFiles = Directory.EnumerateFiles(driversDirectory, "*.cs", SearchOption.TopDirectoryOnly)
-            .Select(path => Path.GetFileName(path)!)
-            .OrderBy(name => name, StringComparer.Ordinal)
-            .ToArray();
+        string[] driverFiles = EnumerateModuleFiles(cudaProjectDirectory, "Drivers");
 
         Assert.Equal(
             new[] { "CudaDriver.cs", "CudaDriverKernelLaunch.cs", "CudaDriverModule.cs" },
@@ -62,5 +58,41 @@ public sealed class ManagedSourceModuleLayoutTests
         Assert.False(File.Exists(Path.Combine(cudaProjectDirectory, "Core", "CudaDriver.cs")));
         Assert.False(File.Exists(Path.Combine(cudaProjectDirectory, "Kernels", "CudaDriverKernelLaunch.cs")));
         Assert.False(File.Exists(Path.Combine(cudaProjectDirectory, "Kernels", "CudaDriverModule.cs")));
+    }
+
+    [Fact]
+    public void TensorRtInterfacesAndWeightsAreGroupedByResponsibility()
+    {
+        string tensorRtProjectDirectory = Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp");
+        string[] interfaceFiles =
+        {
+            "TensorRtInterfaceInfo.cs",
+            "TensorRtOwnerScopedVersionedInterfaceMetadata.cs",
+            "TensorRtVersionedInterfaceMetadata.cs"
+        };
+        string[] weightsFiles =
+        {
+            "TensorRtWeights.cs",
+            "TensorRtWeightsInfo.cs",
+            "TensorRtWeightsRole.cs"
+        };
+
+        Assert.Equal(interfaceFiles, EnumerateModuleFiles(tensorRtProjectDirectory, "Interfaces"));
+        Assert.Equal(weightsFiles, EnumerateModuleFiles(tensorRtProjectDirectory, "Weights"));
+
+        string coreDirectory = Path.Combine(tensorRtProjectDirectory, "Core");
+        Assert.All(interfaceFiles, file => Assert.False(File.Exists(Path.Combine(coreDirectory, file))));
+        Assert.All(weightsFiles, file => Assert.False(File.Exists(Path.Combine(coreDirectory, file))));
+    }
+
+    private static string[] EnumerateModuleFiles(string projectDirectory, string module)
+    {
+        return Directory.EnumerateFiles(
+                Path.Combine(projectDirectory, module),
+                "*.cs",
+                SearchOption.TopDirectoryOnly)
+            .Select(path => Path.GetFileName(path)!)
+            .OrderBy(name => name, StringComparer.Ordinal)
+            .ToArray();
     }
 }

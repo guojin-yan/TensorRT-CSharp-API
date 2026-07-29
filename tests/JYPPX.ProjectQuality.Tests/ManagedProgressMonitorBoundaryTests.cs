@@ -34,7 +34,7 @@ public sealed class ManagedProgressMonitorBoundaryTests
         string trt11NativeSource = ReadSource("native", "src", "tensorrt", "v11", "api.cpp");
         string interopSource = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.CallbackInterfaceInfo.cs");
         string monitorSource = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Monitoring", "TensorRtProgressMonitor.cs");
-        string interfaceInfoSource = ReadSource("src", "JYPPX.TensorRtSharp", "Core", "TensorRtInterfaceInfo.cs");
+        string interfaceInfoSource = ReadSource("src", "JYPPX.TensorRtSharp", "Interfaces", "TensorRtInterfaceInfo.cs");
 
         Assert.Contains("trt10-progress-monitor-get-interface-info", trt10InterfaceManifest);
         Assert.Contains("trt11-progress-monitor-get-interface-info", trt11InterfaceManifest);

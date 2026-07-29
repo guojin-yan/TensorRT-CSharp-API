@@ -5281,3 +5281,28 @@ owner 生命周期、interop 声明或 C ABI。
 - C 盘 Downloads/用户 Temp 顶层当日重资产与本批关键词命中为 0，项目相关 build/test 进程残留为 0；用户 Temp
   递归枚举在 30 秒超时，因此不把该项表述为完整递归审计。
 - 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 TensorRT Interfaces And Weights Managed Module Closure
+
+本阶段继续拆分 `JYPPX.TensorRtSharp/Core` 中的跨职责公开 API，将版本化 interface metadata 与 weights 类型归入
+独立模块。六份文件均为逐字节纯移动，namespace、类型名、public surface、partial owner surface 与行为不变。
+
+### 实现与门禁
+
+- `Interfaces` 包含 `TensorRtInterfaceInfo`、`TensorRtVersionedInterfaceMetadata` 与 owner-scoped metadata query/surface；
+  它们共同负责 copied、pointer-free 的版本化接口信息。
+- `Weights` 包含托管 immutable weights payload、复制型 weights metadata 与 refit weights role。
+- `Core` 由 12 份文件收敛为 6 份，只保留共享异常、dims、enums 与 `TensorRtSharpInfo`。
+- 布局测试精确固定两个新模块各三份文件，并拒绝它们回流 `Core`；三处版本化接口源码路径合同已同步到新目录。
+- 中英文 source-organization 模块表和职责说明已同步更新。
+
+### 验证与边界
+
+- layout、progress-monitor boundary、owner-scoped versioned metadata 与 API-language readonly 定向集合：`22/22` 通过。
+- `JYPPX.TensorRtSharp` 全目标框架 Debug build：`0 warning / 0 error`。
+- 完整 `TensorRtSharp.sln` Debug build：`0 warning / 0 error`。
+- 六组新旧文件 Git blob hash 完全一致；本批未修改 native、manifest、generated bindings 或 ABI。
+- 未运行完整 ProjectQuality 全集；源码目录归类不是 runtime correctness、Linux、real model、package consumer、
+  public package、post-publish、Owner acceptance 或 release proof。
+- C 盘 Downloads/用户 Temp 顶层当日重资产与本批关键词命中为 0，项目相关 build/test 进程残留为 0。
+- 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
