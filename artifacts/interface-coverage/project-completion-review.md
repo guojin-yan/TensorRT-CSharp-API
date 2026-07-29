@@ -6230,3 +6230,36 @@ Dims 转换均随完整方法块移动，TRT8/10/11 分支、entrypoint、SafeHa
   Owner acceptance 或 release proof。
 - C 盘 Downloads 顶层本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
 - 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 TensorRT Root Remaining Owner Final Split
+
+本阶段将根 `NativeBridgeApi.cs` 剩余 1,142 行实现按 adapter、callback、runtime、builder、network、serialization、
+execution、profile 与 BuilderConfig owner/feature 全部迁出。根文件保留 13 行 partial 声明 shell，不含 public/private
+static 实现；所有方法体、数组 pin/finally、版本路由、entrypoint、SafeHandle 返回与异常文案保持不变。
+
+### 实现与门禁
+
+- Runtime：`AdapterInfo.cs` 14 行/1 方法，`RuntimeCreation.cs` 51 行/2 方法。
+- Callbacks：`ManagedDiagnostics.cs` 127 行/7 方法。
+- Builder：`BuilderCore.cs` 85 行/6 方法，`SerializedNetworkBuild.cs` 21 行/1 方法，
+  `BuilderConfigCore.cs` 567 行/38 方法并接管 bit-flag helper。
+- Network：`NetworkCreation.cs` 17 行/1 方法；Serialization：`EngineDeserialization.cs` 65 行/2 方法。
+- Execution：`ExecutionContextCore.cs` 32 行/2 方法；Profiles：`OptimizationProfileCore.cs` 258 行/9 方法。
+- 布局门禁固定 `1/7/2/6/1/1/2/2/9/38` 方法分布，并要求根 shell 无任何 static 实现。
+- 十个主体按原顺序插回 13 行 shell 后的 Git blob 为 `c95369e9723bf92c2f0100133c4756710598c3b3`，与拆分前
+  HEAD 根文件完全一致。
+
+### 验证与边界
+
+- layout、safe lifecycle、BuilderConfig、runtime deserialization/stream IO 与 TRT11 runtime diagnostic 定向集合：
+  `76/76` 通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- ignored deferred candidate artifact 的 root evidence 已本机迁移到 `BuilderConfigCore.cs`；evidence 仍为 247 条引用、
+  137 个唯一路径、0 缺失，该 ignored 文件未强制提交。
+- 非 publishing 技术文档与 4 份硬编码测试合同已改读真实 owner 文件；8 份 publishing 用户变更未触碰。
+- `git diff --check` 通过；Generated/native/manifest/ABI 未修改，未运行完整 ProjectQuality，也未运行依赖本机缺失
+  `pwsh` 的 B-tier 聚合测试。
+- partial 收口不是 runtime correctness、ABI/export、Linux、package consumer、public package、post-publish、
+  Owner acceptance 或 release proof。
+- C 盘 Downloads 顶层本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
+- 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。

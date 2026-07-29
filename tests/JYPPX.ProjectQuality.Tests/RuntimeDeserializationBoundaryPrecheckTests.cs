@@ -185,7 +185,7 @@ public sealed class RuntimeDeserializationBoundaryPrecheckTests
         string precheckSource = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntimeDeserializationBoundaryPrecheck.cs");
         string diagnosticsSource = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntimeDeserializationDependencyDiagnostics.cs");
         string runtimeSource = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntime.cs");
-        string nativeBridgeApi = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.cs");
+        string nativeBridgeApi = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Serialization", "NativeBridgeApi.EngineDeserialization.cs");
         string smokeProgram = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
         string designDoc = ReadSource("docs", "articles", "zh-cn", "runtime-deserialization-boundary-precheck.md");
         string diagnosticsDoc = ReadSource("docs", "articles", "zh-cn", "runtime-deserialization-dependency-diagnostics.md");

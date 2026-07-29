@@ -53,7 +53,7 @@ flowchart LR
 | C ABI 声明 | `native/include/jyppx/tensorrt/trt8.h`、`trt10.h`、`trt11.h` | 稳定导出形状与版本隔离 |
 | native 实现 | `native/src/tensorrt/v8/api.cpp`、`v10/api.cpp`、`v11/api.cpp` | vendor 调用、guard、异常收敛 |
 | generated interop | `src/JYPPX.Shared/Generated/GeneratedNativeMethods.g.cs` | P/Invoke 声明和 entry point 一致性 |
-| 托管路由 | `src/JYPPX.TensorRtSharp/Internal/Interop/NativeBridgeApi.cs` | 选择 API line、检查 status、复制输出 |
+| 托管路由 | `src/JYPPX.TensorRtSharp/Internal/Interop/*/NativeBridgeApi.*.cs` | 按 owner 选择 API line、检查 status、复制输出 |
 | public wrapper | `src/JYPPX.TensorRtSharp` 与 `src/JYPPX.CudaSharp` | 生命周期、参数校验、易用对象模型 |
 
 manifest 不是文档备注。`eng/Generate-Bindings.ps1` 会把它转换为 native catalog、entry point 常量和

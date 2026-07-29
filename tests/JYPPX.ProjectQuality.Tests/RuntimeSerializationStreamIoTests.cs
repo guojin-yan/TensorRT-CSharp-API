@@ -12,7 +12,7 @@ public sealed class RuntimeSerializationStreamIoTests
         string hostMemory = ReadSource("src", "JYPPX.TensorRtSharp", "Serialization", "TensorRtHostMemory.cs");
         string hostMemoryMetadata = ReadSource("src", "JYPPX.TensorRtSharp", "Serialization", "TensorRtHostMemory.Trt11Metadata.cs");
         string runtime = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntime.cs");
-        string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.cs");
+        string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Serialization", "NativeBridgeApi.EngineDeserialization.cs");
         string hostMemoryBufferInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Serialization", "NativeBridgeApi.HostMemoryBuffer.cs");
         string hostMemoryInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Serialization", "NativeBridgeApi.HostMemoryMetadata.cs");
 

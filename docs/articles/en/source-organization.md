@@ -58,16 +58,17 @@ TensorRT high-level wrappers are also being split by layer feature area:
 
 Hand-written TensorRT partial interop now starts following the same responsibility modules:
 
-- `Internal/Interop/Builder` contains build outputs, builder boundary controls, timing-cache lifecycle/TRT11 controls,
-  builder-config diagnostics, plugin serialization, and runtime controls; `ControlFlow` contains loop/conditional operations.
-- `Internal/Interop/Callbacks` contains allocator dry-run controls, callback interface/state copies, and logger/profiler/
-  progress-monitor delegate signatures.
+- `Internal/Interop/Builder` contains builder creation/capabilities, serialized build outputs, builder boundary controls,
+  timing-cache lifecycle/TRT11 controls, builder-config core/scalar controls, diagnostics, plugin serialization, and runtime controls;
+  `ControlFlow` contains loop/conditional operations.
+- `Internal/Interop/Callbacks` contains allocator dry-run controls, callback interface/state copies, logger/profiler/progress-monitor
+  delegate signatures, and managed callback diagnostics.
 - `Internal/Interop/Diagnostics` contains copied error-code metadata plus cross-version/TRT11 build-chain probes used only by
   the environment probe;
   `Internal/Interop/Interfaces` contains owner-scoped versioned-interface metadata copies.
 - `Internal/Interop/Engine` contains core/deployment engine metadata, inspector lifecycle/information/boundary/diagnostics,
   copied tensor/profile values, Dims64, error-recorder controls, and weight-streaming/stat runtime controls; `Execution` contains
-  execution-context binding/address/enqueue/aux-stream controls, boundary controls, copied engine metadata, runtime-config creation,
+  execution-context core creation, binding/address/enqueue/aux-stream controls, boundary controls, copied engine metadata, runtime-config creation,
   allocation-strategy, deployment metadata, Dims64, diagnostics, and allocator/event presence controls.
 - `Internal/Interop/Inference` contains synchronous execute/enqueue operations; `Weights` contains copied layer-weight metadata.
 - `Internal/Interop/Layers` contains identity/constant/convolution/deconvolution/scale/padding/element-wise/matrix-multiply/shuffle/reduce,
@@ -83,10 +84,10 @@ Hand-written TensorRT partial interop now starts following the same responsibili
   parser-refitter diagnostics, and shared copied-string helpers.
 - `Internal/Interop/Plugins` contains plugin initialization, global/builder/runtime registry inventories, and copied V2/V3 layer
   metadata/query snapshots.
-- `Internal/Interop/Profiles` contains optimization-profile Dims64 and shape-value queries.
-- `Internal/Interop/Runtime` contains cross-version line-binding helpers, global runtime version/logger probes, runtime deployment
-  controls, and copied diagnostics;
-- `Serialization` contains engine serialization, serialization-config flags, and host-memory buffer/metadata; `Refit` contains async refit,
+- `Internal/Interop/Profiles` contains optimization-profile core creation/shape controls, Dims64, and shape-value queries.
+- `Internal/Interop/Runtime` contains adapter information, runtime creation diagnostics, cross-version line-binding helpers,
+  global runtime version/logger probes, runtime deployment controls, and copied diagnostics;
+- `Serialization` contains engine deserialization/serialization, serialization-config flags, and host-memory buffer/metadata; `Refit` contains async refit,
   weights/dynamic-range, entry metadata, and refitter diagnostics.
 
 `NativeBridgeApi.GlobalProbeShared.cs` remains at the interop root only for the common unsupported-line exception helper used by
@@ -126,7 +127,7 @@ partials. The parser-specific diagnostic helper moves with diagnostics, while th
 shared by parser, parser-refitter, and support features; recombination in original segment order must reproduce the prior root blob.
 The root tail owner block is split into Engine inspector core, ExecutionContext binding/enqueue, Serialization host-memory buffer,
 and Engine core metadata partials. Engine-information and IO-tensor-name getters move with their owners. The BuilderConfig bit-flag
-helper remains in the root; Tensor/Layer name helpers move later with their core owner partials. Original-order recombination remains required.
+helper initially remains in the root; Tensor/Layer name helpers move later with their core owner partials. Original-order recombination remains required.
 Cross-version line-binding delegates, the private bindings class, and version routing move from the root into a helper-only Runtime
 partial; six environment-probe operations and their minimal build-chain helpers move into Diagnostics. Generated bindings/helpers
 continue consuming the same private partial type, and original-order recombination must reproduce the prior root blob.
@@ -146,9 +147,11 @@ move into three additional helper-free partials; resize keeps its array pinning 
 creation/attributes move into three final helper-free feature partials before the root enters general Layer metadata at
 `GetLayerOutput`.
 General Layer metadata moves into `Layers/NativeBridgeApi.LayerCoreMetadata.cs` with `MapLayerType` and its private name getter;
-general Tensor metadata moves into `Network/NativeBridgeApi.TensorCoreMetadata.cs` with its private name getter. The BuilderConfig
-bit-flag helper remains in the root, so recombination preserves `root prefix + Layer body + Tensor body + bit-flag helper + Tensor
-name helper + Layer name helper + root close` order.
+general Tensor metadata moves into `Network/NativeBridgeApi.TensorCoreMetadata.cs` with its private name getter.
+The remaining adapter/callback/runtime/builder/network/serialization/execution/profile/config implementation moves into ten owner
+partials, including `Builder/NativeBridgeApi.BuilderConfigCore.cs` with the bit-flag helper. Root `NativeBridgeApi.cs` is now a
+13-line declaration shell with no public or private static implementation. Recombining the ten bodies between that shell's header
+and close brace reproduces the prior root blob.
 
 Generated files remain under their `Generated` folders and should not be manually split. Generator output layout changes must happen in the generator itself and must pass the deterministic generator gate.
 

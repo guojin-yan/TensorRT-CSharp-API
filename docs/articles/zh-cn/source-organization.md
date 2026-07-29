@@ -48,15 +48,16 @@ TensorRT 高层 wrapper 也开始按 layer feature 拆分：
 
 手写 TensorRT partial interop 也开始按相同职责模块归类：
 
-- `Internal/Interop/Builder`：build outputs、builder boundary controls、timing-cache lifecycle/TRT11 controls、
-  builder-config diagnostics、plugin serialization 与 runtime controls；`ControlFlow`：loop/conditional 操作。
-- `Internal/Interop/Callbacks`：allocator dry-run、callback interface/state 复制，以及 logger/profiler/progress-monitor
-  delegate 签名。
+- `Internal/Interop/Builder`：builder creation/capabilities、serialized build outputs、builder boundary controls、
+  timing-cache lifecycle/TRT11 controls、builder-config core/scalar controls、diagnostics、plugin serialization 与 runtime controls；
+  `ControlFlow`：loop/conditional 操作。
+- `Internal/Interop/Callbacks`：allocator dry-run、callback interface/state 复制、logger/profiler/progress-monitor delegate
+  签名与 managed callback diagnostics。
 - `Internal/Interop/Diagnostics`：复制型 error-code metadata 与仅由 environment probe 使用的跨版本/TRT11 build-chain probes；
   `Internal/Interop/Interfaces`：owner-scoped versioned-interface metadata 复制。
 - `Internal/Interop/Engine`：core/deployment engine metadata、inspector lifecycle/information/boundary/diagnostics、
   tensor/profile copied values、Dims64、error-recorder controls 与 weight-streaming/stat runtime controls；`Execution`：
-  execution-context binding/address/enqueue/aux-stream controls、boundary controls、copied engine metadata、runtime-config 创建、
+  execution-context core creation、binding/address/enqueue/aux-stream controls、boundary controls、copied engine metadata、runtime-config 创建、
   allocation-strategy、deployment metadata、Dims64、diagnostics 与 allocator/event presence controls。
 - `Internal/Interop/Inference`：同步 execute/enqueue 操作；`Weights`：复制型 layer-weight metadata。
 - `Internal/Interop/Layers`：identity/constant/convolution/deconvolution/scale/padding/element-wise/matrix-multiply/shuffle/reduce、
@@ -72,10 +73,10 @@ TensorRT 高层 wrapper 也开始按 layer feature 拆分：
   parser-refitter diagnostics 与共用复制字符串 helper。
 - `Internal/Interop/Plugins`：plugin initialization、global/builder/runtime registry inventories，以及复制型 V2/V3 layer
   metadata/query snapshot。
-- `Internal/Interop/Profiles`：optimization-profile Dims64 与 shape-value 查询。
-- `Internal/Interop/Runtime`：跨版本 line-binding helper、global runtime version/logger probes、runtime deployment controls
-  与复制型 diagnostics；
-  `Serialization`：engine serialization、serialization-config flags 与 host-memory buffer/metadata；`Refit`：async refit、weights/dynamic-range、
+- `Internal/Interop/Profiles`：optimization-profile core creation/shape controls、Dims64 与 shape-value 查询。
+- `Internal/Interop/Runtime`：adapter information、runtime creation diagnostics、跨版本 line-binding helper、
+  global runtime version/logger probes、runtime deployment controls 与复制型 diagnostics；
+  `Serialization`：engine deserialization/serialization、serialization-config flags 与 host-memory buffer/metadata；`Refit`：async refit、weights/dynamic-range、
   entry metadata 与 refitter diagnostics。
 
 `NativeBridgeApi.GlobalProbeShared.cs` 仅为拆分后的 global Runtime、Parsing、Plugins partial 保存共用的 unsupported-line
@@ -113,7 +114,7 @@ TensorRT 高层 wrapper 也开始按 layer feature 拆分：
 parser-refitter、support 共用；按原片段顺序重组后必须恢复拆分前的根文件 Git blob。
 根文件尾部 owner 区段已拆为 Engine inspector core、ExecutionContext binding/enqueue、Serialization host-memory buffer 与
 Engine core metadata partial。engine-information 与 IO-tensor-name getter helper 随 owner 移动。BuilderConfig bit-flag helper
-继续留在根文件；Tensor/Layer name helper 随后与 core owner partial 一起移动，且仍要求按原顺序重组。
+最初继续留在根文件；Tensor/Layer name helper 随后与 core owner partial 一起移动，且仍要求按原顺序重组。
 跨版本 line-binding delegate、私有 bindings class 与版本路由已移入 helper-only Runtime partial；六个 environment-probe
 操作及 minimal build-chain helper 已移入 Diagnostics。生成的 bindings/helper 仍消费同一 partial 私有类型，按原顺序
 重组后必须恢复拆分前根文件 blob。
@@ -132,9 +133,10 @@ creation/attributes 已移入另外三个独立的无 helper partial。Resize、
 另外三个无 helper partial，resize 的数组 pinning 留在 feature 文件内。Shape、select、fill creation/attributes 已移入
 三个无 helper feature partial；根文件随后从 `GetLayerOutput` 进入通用 Layer metadata 区段。
 通用 Layer metadata 已连同 `MapLayerType` 和专属 name getter 移入 `Layers/NativeBridgeApi.LayerCoreMetadata.cs`；通用
-Tensor metadata 与专属 name getter 移入 `Network/NativeBridgeApi.TensorCoreMetadata.cs`。BuilderConfig bit-flag helper
-继续留在根文件，因此重组顺序保持为 `root prefix + Layer body + Tensor body + bit-flag helper + Tensor name helper +
-Layer name helper + root close`。
+Tensor metadata 与专属 name getter 移入 `Network/NativeBridgeApi.TensorCoreMetadata.cs`。
+剩余 adapter/callback/runtime/builder/network/serialization/execution/profile/config 实现已移入十份 owner partial，其中
+`Builder/NativeBridgeApi.BuilderConfigCore.cs` 接管 bit-flag helper。根 `NativeBridgeApi.cs` 现为 13 行声明 shell，不含
+public/private static 实现；将十个主体插回 shell header 与 close brace 之间即可恢复拆分前 root blob。
 
 生成文件继续保留在各自 `Generated` 文件夹下，不手工拆分。若需要调整生成文件布局，必须通过 generator 本身完成，并通过生成器确定性门禁。
 

@@ -168,7 +168,9 @@ generated entry points 和 `NativeBridgeApi` line switch 共同保证路由。�
 
 - `src/JYPPX.TensorRtSharp/Internal/Interop/Generated/NativeMethodsTensorRt.Generated.g.cs`
 - `src/JYPPX.TensorRtSharp/Internal/Interop/Generated/NativeBridgeApi.TensorRtBindings.Generated.g.cs`
-- `src/JYPPX.TensorRtSharp/Internal/Interop/NativeBridgeApi.cs`
+- `src/JYPPX.TensorRtSharp/Internal/Interop/Runtime/NativeBridgeApi.CrossVersionLineBindings.cs`
+- `src/JYPPX.TensorRtSharp/Internal/Interop/Runtime/NativeBridgeApi.RuntimeCreation.cs`
+- `src/JYPPX.TensorRtSharp/Internal/Interop/Builder/NativeBridgeApi.BuilderConfigCore.cs`
 - `src/JYPPX.Shared/Generated/GeneratedEntryPointNames.g.cs`
 
 维护者不应在业务 wrapper 中直接写 DLL 文件名或 entry point 字符串。manifest 和 generator 是唯一的

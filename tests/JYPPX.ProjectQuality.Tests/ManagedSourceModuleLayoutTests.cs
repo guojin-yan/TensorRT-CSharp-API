@@ -23,9 +23,12 @@ public sealed class ManagedSourceModuleLayoutTests
             {
                 "NativeBridgeApi.BuilderBoundaryControls.cs",
                 "NativeBridgeApi.BuilderBuildOutputs.cs",
+                "NativeBridgeApi.BuilderConfigCore.cs",
                 "NativeBridgeApi.BuilderConfigDiagnostics.cs",
                 "NativeBridgeApi.BuilderConfigPluginSerialization.cs",
                 "NativeBridgeApi.BuilderConfigRuntimeControls.cs",
+                "NativeBridgeApi.BuilderCore.cs",
+                "NativeBridgeApi.SerializedNetworkBuild.cs",
                 "NativeBridgeApi.TimingCacheLifecycle.cs",
                 "NativeBridgeApi.Trt11TimingCache.cs"
             }
@@ -37,6 +40,7 @@ public sealed class ManagedSourceModuleLayoutTests
                 "NativeBridgeApi.AllocatorOwnerDryRun.cs",
                 "NativeBridgeApi.CallbackInterfaceInfo.cs",
                 "NativeBridgeApi.ExecutionContextCallbackState.cs",
+                "NativeBridgeApi.ManagedDiagnostics.cs",
                 "TensorRtLoggerCallback.cs",
                 "TensorRtProfilerCallback.cs",
                 "TensorRtProgressMonitorCallback.cs"
@@ -75,6 +79,7 @@ public sealed class ManagedSourceModuleLayoutTests
                 "NativeBridgeApi.ExecutionContextAddressAndAuxStreams.cs",
                 "NativeBridgeApi.ExecutionContextBindingsAndEnqueue.cs",
                 "NativeBridgeApi.ExecutionContextBoundaryControls.cs",
+                "NativeBridgeApi.ExecutionContextCore.cs",
                 "NativeBridgeApi.ExecutionContextCreation.cs",
                 "NativeBridgeApi.ExecutionContextDeploymentMetadata.cs",
                 "NativeBridgeApi.ExecutionContextDiagnostics.cs",
@@ -132,6 +137,7 @@ public sealed class ManagedSourceModuleLayoutTests
                 "NativeBridgeApi.Dims64NetworkTensor.cs",
                 "NativeBridgeApi.NetworkBoundaryControls.cs",
                 "NativeBridgeApi.NetworkCore.cs",
+                "NativeBridgeApi.NetworkCreation.cs",
                 "NativeBridgeApi.NetworkDiagnostics.cs",
                 "NativeBridgeApi.TensorCoreMetadata.cs",
                 "NativeBridgeApi.Trt11SafeNetworkV2.cs"
@@ -175,6 +181,7 @@ public sealed class ManagedSourceModuleLayoutTests
             new[]
             {
                 "NativeBridgeApi.Dims64OptimizationProfile.cs",
+                "NativeBridgeApi.OptimizationProfileCore.cs",
                 "NativeBridgeApi.OptimizationProfileShapeValues.cs"
             }
         },
@@ -190,8 +197,10 @@ public sealed class ManagedSourceModuleLayoutTests
             "Runtime",
             new[]
             {
+                "NativeBridgeApi.AdapterInfo.cs",
                 "NativeBridgeApi.CrossVersionLineBindings.cs",
                 "NativeBridgeApi.GlobalRuntimeVersion.cs",
+                "NativeBridgeApi.RuntimeCreation.cs",
                 "NativeBridgeApi.RuntimeDeploymentControls.cs"
             }
         },
@@ -199,6 +208,7 @@ public sealed class ManagedSourceModuleLayoutTests
             "Serialization",
             new[]
             {
+                "NativeBridgeApi.EngineDeserialization.cs",
                 "NativeBridgeApi.EngineSerialization.cs",
                 "NativeBridgeApi.HostMemoryBuffer.cs",
                 "NativeBridgeApi.HostMemoryMetadata.cs"
@@ -864,7 +874,7 @@ public sealed class ManagedSourceModuleLayoutTests
 
         Assert.DoesNotContain("GetEngineInformationNative", rootSource, StringComparison.Ordinal);
         Assert.DoesNotContain("GetEngineIOTensorNameNative", rootSource, StringComparison.Ordinal);
-        Assert.Contains("private static int GetSingleBitFlagIndex(", rootSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("GetSingleBitFlagIndex", rootSource, StringComparison.Ordinal);
         Assert.DoesNotContain("GetTensorNameNative", rootSource, StringComparison.Ordinal);
         Assert.DoesNotContain("GetLayerNameNative", rootSource, StringComparison.Ordinal);
     }
@@ -966,7 +976,7 @@ public sealed class ManagedSourceModuleLayoutTests
         }
 
         Assert.DoesNotContain("GetNetworkNameNative", rootSource, StringComparison.Ordinal);
-        Assert.Contains("public static TensorRtTacticSources GetTacticSources(", rootSource, StringComparison.Ordinal);
+        Assert.Empty(rootMethods);
         Assert.DoesNotContain("GetTensorNameNative", rootSource, StringComparison.Ordinal);
         Assert.DoesNotContain("GetLayerNameNative", rootSource, StringComparison.Ordinal);
     }
@@ -1036,7 +1046,7 @@ public sealed class ManagedSourceModuleLayoutTests
         Assert.DoesNotContain("PinOptionalWeights", rootSource, StringComparison.Ordinal);
         Assert.DoesNotContain("GetScaleWeightsDataType", rootSource, StringComparison.Ordinal);
         Assert.DoesNotContain("ValidateOptionalWeightsDataType", rootSource, StringComparison.Ordinal);
-        Assert.Contains("public static TensorRtTacticSources GetTacticSources(", rootSource, StringComparison.Ordinal);
+        Assert.Empty(rootMethods);
     }
 
     [Fact]
@@ -1074,7 +1084,7 @@ public sealed class ManagedSourceModuleLayoutTests
             Assert.DoesNotContain(method, rootMethods);
         }
 
-        Assert.Contains("public static TensorRtTacticSources GetTacticSources(", rootSource, StringComparison.Ordinal);
+        Assert.Empty(rootMethods);
     }
 
     [Fact]
@@ -1113,7 +1123,7 @@ public sealed class ManagedSourceModuleLayoutTests
             Assert.DoesNotContain(method, rootMethods);
         }
 
-        Assert.Contains("public static TensorRtTacticSources GetTacticSources(", rootSource, StringComparison.Ordinal);
+        Assert.Empty(rootMethods);
     }
 
     [Fact]
@@ -1147,7 +1157,7 @@ public sealed class ManagedSourceModuleLayoutTests
             Assert.DoesNotContain(method, rootMethods);
         }
 
-        Assert.Contains("public static TensorRtTacticSources GetTacticSources(", rootSource, StringComparison.Ordinal);
+        Assert.Empty(rootMethods);
     }
 
     [Fact]
@@ -1176,7 +1186,7 @@ public sealed class ManagedSourceModuleLayoutTests
             Assert.DoesNotContain(method, rootMethods);
         }
 
-        Assert.Contains("public static TensorRtTacticSources GetTacticSources(", rootSource, StringComparison.Ordinal);
+        Assert.Empty(rootMethods);
     }
 
     [Fact]
@@ -1228,7 +1238,7 @@ public sealed class ManagedSourceModuleLayoutTests
             Assert.DoesNotContain(method, rootMethods);
         }
 
-        Assert.Contains("public static TensorRtTacticSources GetTacticSources(", rootSource, StringComparison.Ordinal);
+        Assert.Empty(rootMethods);
     }
 
     [Fact]
@@ -1281,7 +1291,7 @@ public sealed class ManagedSourceModuleLayoutTests
             Assert.DoesNotContain(method, rootMethods);
         }
 
-        Assert.Contains("public static TensorRtTacticSources GetTacticSources(", rootSource, StringComparison.Ordinal);
+        Assert.Empty(rootMethods);
     }
 
     [Fact]
@@ -1321,7 +1331,7 @@ public sealed class ManagedSourceModuleLayoutTests
             Assert.DoesNotContain(method, rootMethods);
         }
 
-        Assert.Contains("public static TensorRtTacticSources GetTacticSources(", rootSource, StringComparison.Ordinal);
+        Assert.Empty(rootMethods);
     }
 
     [Fact]
@@ -1406,8 +1416,129 @@ public sealed class ManagedSourceModuleLayoutTests
         Assert.DoesNotContain("MapLayerType", rootSource, StringComparison.Ordinal);
         Assert.DoesNotContain("GetLayerNameNative", rootSource, StringComparison.Ordinal);
         Assert.DoesNotContain("GetTensorNameNative", rootSource, StringComparison.Ordinal);
-        Assert.Contains("private static int GetSingleBitFlagIndex(", rootSource, StringComparison.Ordinal);
-        Assert.Contains("public static TensorRtTacticSources GetTacticSources(", rootSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("GetSingleBitFlagIndex", rootSource, StringComparison.Ordinal);
+        Assert.Empty(rootMethods);
+    }
+
+    [Fact]
+    public void TensorRtRootRemainingImplementationIsSplitByOwner()
+    {
+        string interopDirectory = Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.TensorRtSharp",
+            "Internal",
+            "Interop");
+        string rootSource = File.ReadAllText(Path.Combine(interopDirectory, "NativeBridgeApi.cs"));
+        string[] rootMethods = EnumeratePublicStaticMethodNames(rootSource);
+        string[] adapterMethods = ReadInteropMethodNames(interopDirectory, "Runtime", "NativeBridgeApi.AdapterInfo.cs");
+        string[] callbackMethods = ReadInteropMethodNames(interopDirectory, "Callbacks", "NativeBridgeApi.ManagedDiagnostics.cs");
+        string[] runtimeMethods = ReadInteropMethodNames(interopDirectory, "Runtime", "NativeBridgeApi.RuntimeCreation.cs");
+        string[] builderMethods = ReadInteropMethodNames(interopDirectory, "Builder", "NativeBridgeApi.BuilderCore.cs");
+        string[] networkMethods = ReadInteropMethodNames(interopDirectory, "Network", "NativeBridgeApi.NetworkCreation.cs");
+        string[] buildMethods = ReadInteropMethodNames(interopDirectory, "Builder", "NativeBridgeApi.SerializedNetworkBuild.cs");
+        string[] deserializationMethods = ReadInteropMethodNames(interopDirectory, "Serialization", "NativeBridgeApi.EngineDeserialization.cs");
+        string[] executionMethods = ReadInteropMethodNames(interopDirectory, "Execution", "NativeBridgeApi.ExecutionContextCore.cs");
+        string[] profileMethods = ReadInteropMethodNames(interopDirectory, "Profiles", "NativeBridgeApi.OptimizationProfileCore.cs");
+        string builderConfigSource = File.ReadAllText(Path.Combine(
+            interopDirectory,
+            "Builder",
+            "NativeBridgeApi.BuilderConfigCore.cs"));
+        string[] builderConfigMethods = EnumeratePublicStaticMethodNames(builderConfigSource);
+
+        Assert.Equal(new[] { "GetAdapterInfo" }, adapterMethods);
+        Assert.Equal(
+            new[]
+            {
+                "CreateLogger",
+                "CreateLogger",
+                "EmitLoggerDiagnostic",
+                "CreateProfiler",
+                "EmitProfilerDiagnostic",
+                "CreateProgressMonitor",
+                "EmitProgressMonitorDiagnostic"
+            },
+            callbackMethods);
+        Assert.Equal(new[] { "CreateRuntime", "GetRuntimeCreateDiagnostic" }, runtimeMethods);
+        Assert.Equal(
+            new[]
+            {
+                "CreateBuilder",
+                "BuilderPlatformHasFastFp16",
+                "BuilderPlatformHasFastInt8",
+                "BuilderPlatformHasTf32",
+                "GetBuilderDlaCoreCount",
+                "CreateBuilderConfig"
+            },
+            builderMethods);
+        Assert.Equal(new[] { "CreateNetwork" }, networkMethods);
+        Assert.Equal(new[] { "BuildSerializedNetwork" }, buildMethods);
+        Assert.Equal(new[] { "DeserializeHostMemory", "DeserializeEngineData" }, deserializationMethods);
+        Assert.Equal(
+            new[] { "CreateExecutionContext", "CreateExecutionContextWithoutDeviceMemory" },
+            executionMethods);
+        Assert.Equal(
+            new[]
+            {
+                "CreateOptimizationProfile",
+                "SetOptimizationProfileShape",
+                "GetOptimizationProfileShape",
+                "SetOptimizationProfileShapeValues",
+                "GetOptimizationProfileShapeValueCount",
+                "GetOptimizationProfileShapeValues",
+                "SetOptimizationProfileExtraMemoryTarget",
+                "GetOptimizationProfileExtraMemoryTarget",
+                "IsOptimizationProfileValid"
+            },
+            profileMethods);
+        Assert.Equal(
+            new[]
+            {
+                "AddOptimizationProfile",
+                "SetBuilderConfigProfileStream",
+                "IsBuilderConfigProfileStreamSet",
+                "GetBuilderConfigOptimizationProfileCount",
+                "SetBuilderConfigCalibrationProfile",
+                "HasBuilderConfigCalibrationProfile",
+                "HasBuilderConfigAlgorithmSelectorCompatibility",
+                "HasBuilderConfigInt8CalibratorCompatibility",
+                "SetBuilderConfigFlag",
+                "GetBuilderConfigFlag",
+                "SetBuilderConfigEngineCapability",
+                "GetBuilderConfigEngineCapability",
+                "SetBuilderConfigPreviewFeature",
+                "GetBuilderConfigPreviewFeature",
+                "SetBuilderConfigHardwareCompatibilityLevel",
+                "GetBuilderConfigHardwareCompatibilityLevel",
+                "SetBuilderConfigRuntimePlatform",
+                "GetBuilderConfigRuntimePlatform",
+                "SetLayerDeviceType",
+                "GetLayerDeviceType",
+                "IsLayerDeviceTypeSet",
+                "ResetLayerDeviceType",
+                "SetMemoryPoolLimit",
+                "GetMemoryPoolLimit",
+                "SetBuilderOptimizationLevel",
+                "GetBuilderOptimizationLevel",
+                "SetProfilingVerbosity",
+                "GetProfilingVerbosity",
+                "SetMaxAuxStreams",
+                "GetMaxAuxStreams",
+                "SetAverageTimingIterations",
+                "GetAverageTimingIterations",
+                "GetMaxWorkspaceSizeCompatibility",
+                "SetMaxWorkspaceSizeCompatibility",
+                "GetMinTimingIterationsCompatibility",
+                "SetMinTimingIterationsCompatibility",
+                "SetTacticSources",
+                "GetTacticSources"
+            },
+            builderConfigMethods);
+
+        Assert.Contains("private static int GetSingleBitFlagIndex(", builderConfigSource, StringComparison.Ordinal);
+        Assert.Empty(rootMethods);
+        Assert.DoesNotContain("public static", rootSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("private static", rootSource, StringComparison.Ordinal);
     }
 
     private static string[] EnumerateModuleFiles(string projectDirectory, string module)
