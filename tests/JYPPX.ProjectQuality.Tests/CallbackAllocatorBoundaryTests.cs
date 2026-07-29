@@ -555,7 +555,9 @@ public sealed class CallbackAllocatorBoundaryTests
         string header11 = ReadSource("native", "include", "jyppx", "tensorrt", "trt11.h");
         string commonBoundary = ReadSource("native", "src", "tensorrt", "common", "error_recorder_boundary_controls.inc");
         string trt11Boundary = ReadSource("native", "src", "tensorrt", "v11", "modules", "deployment", "boundary_controls.inc");
-        string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11BoundaryControls.cs");
+        string interop =
+            ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Engine", "NativeBridgeApi.EngineBoundaryControls.cs") +
+            ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Execution", "NativeBridgeApi.ExecutionContextBoundaryControls.cs");
         string engineWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.Trt11BoundaryControls.cs");
         string contextWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Execution", "TensorRtExecutionContext.Trt11BoundaryControls.cs");
 
@@ -620,7 +622,11 @@ public sealed class CallbackAllocatorBoundaryTests
         string header11 = ReadSource("native", "include", "jyppx", "tensorrt", "trt11.h");
         string commonBoundary = ReadSource("native", "src", "tensorrt", "common", "error_recorder_boundary_controls.inc");
         string trt11Boundary = ReadSource("native", "src", "tensorrt", "v11", "modules", "deployment", "boundary_controls.inc");
-        string interop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11BoundaryControls.cs");
+        string interop =
+            ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Builder", "NativeBridgeApi.BuilderBoundaryControls.cs") +
+            ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Network", "NativeBridgeApi.NetworkBoundaryControls.cs") +
+            ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Engine", "NativeBridgeApi.EngineBoundaryControls.cs") +
+            ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.OwnerErrorRecorderSnapshotShared.cs");
         string builderWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilder.Trt11BoundaryControls.cs");
         string networkWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Network", "TensorRtNetworkDefinition.Trt11BoundaryControls.cs");
         string inspectorWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngineInspector.Trt11Diagnostics.cs");
@@ -681,7 +687,12 @@ public sealed class CallbackAllocatorBoundaryTests
         string managedStructs = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeStructs.cs");
         string mapper = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "BridgeInfoMapper.cs");
         string snapshot = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Monitoring", "TensorRtErrorRecorderSnapshot.cs");
-        string boundaryInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11BoundaryControls.cs");
+        string boundaryInterop =
+            ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Builder", "NativeBridgeApi.BuilderBoundaryControls.cs") +
+            ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Engine", "NativeBridgeApi.EngineBoundaryControls.cs") +
+            ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Execution", "NativeBridgeApi.ExecutionContextBoundaryControls.cs") +
+            ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Network", "NativeBridgeApi.NetworkBoundaryControls.cs") +
+            ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.OwnerErrorRecorderSnapshotShared.cs");
         string runtimeRefitInterop =
             ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Runtime", "NativeBridgeApi.RuntimeDeploymentControls.cs") +
             ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Refit", "NativeBridgeApi.RefitterControls.cs");
@@ -834,7 +845,7 @@ public sealed class CallbackAllocatorBoundaryTests
         string runtimeControls = ReadSource("native", "src", "tensorrt", "common", "runtime_controls.inc");
         string trt11BoundaryControls = ReadSource("native", "src", "tensorrt", "v11", "modules", "deployment", "boundary_controls.inc");
         string trt11RuntimeRefit = ReadSource("native", "src", "tensorrt", "v11", "modules", "deployment", "runtime_serialization_refit.inc");
-        string builderInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11BoundaryControls.cs");
+        string builderInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Builder", "NativeBridgeApi.BuilderBoundaryControls.cs");
         string runtimeInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Runtime", "NativeBridgeApi.RuntimeDeploymentControls.cs");
         string builderWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Builder", "TensorRtBuilder.Trt11BoundaryControls.cs");
         string runtimeWrapper = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntime.Trt11Controls.cs");

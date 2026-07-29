@@ -156,7 +156,12 @@ public sealed class NativeVendorBoundaryGuardTests
         string trt10Manifest = ReadSource("native", "manifests", "tensorrt", "v10", "trt10-engine-network-context-error-recorder-controls.manifest.json");
         string trt11Diagnostics = ReadSource("native", "src", "tensorrt", "v11", "modules", "deployment", "diagnostics.inc");
         string trt11BoundaryControls = ReadSource("native", "src", "tensorrt", "v11", "modules", "deployment", "boundary_controls.inc");
-        string boundaryInterop = ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.Trt11BoundaryControls.cs");
+        string boundaryInterop =
+            ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Builder", "NativeBridgeApi.BuilderBoundaryControls.cs") +
+            ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Engine", "NativeBridgeApi.EngineBoundaryControls.cs") +
+            ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Execution", "NativeBridgeApi.ExecutionContextBoundaryControls.cs") +
+            ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "Network", "NativeBridgeApi.NetworkBoundaryControls.cs") +
+            ReadSource("src", "JYPPX.TensorRtSharp", "Internal", "Interop", "NativeBridgeApi.OwnerErrorRecorderSnapshotShared.cs");
         string publicBoundaryWrappers = string.Join(
             Environment.NewLine,
             ReadSource("src", "JYPPX.TensorRtSharp", "Engine", "TensorRtEngine.Trt11BoundaryControls.cs"),

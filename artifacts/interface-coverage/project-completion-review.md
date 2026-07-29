@@ -5719,3 +5719,35 @@ plugin initialization 和 ONNX weight-descriptor parsing 两个方法，没有�
   package consumer、public package、post-publish、Owner acceptance 或 release proof。
 - C 盘 Downloads 顶层当日本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
 - 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 TensorRT Boundary Controls Owner Partial Split
+
+本阶段将 441 行 `NativeBridgeApi.Trt11BoundaryControls.cs` 按 owner 拆入 Builder、Engine、Execution、Network 与
+helper-only Shared partial。EngineInspector 与 Network 的方法在原文件中存在第二段交错，本批按原七段边界机械提取，
+没有改动方法签名/方法体、版本分支、entrypoint、异常文案、UTF-8 buffer 或 copied error-recorder snapshot 逻辑。
+
+### 实现与门禁
+
+- `Builder/NativeBridgeApi.BuilderBoundaryControls.cs`：178 行、12 个 builder compatibility/callback/error-recorder/
+  network-support 方法。
+- `Engine/NativeBridgeApi.EngineBoundaryControls.cs`：114 行、5 个 engine/inspector error-recorder 与 aliased-input 方法。
+- `Execution/NativeBridgeApi.ExecutionContextBoundaryControls.cs`：74 行、3 个 execution-context error-recorder 方法。
+- `Network/NativeBridgeApi.NetworkBoundaryControls.cs`：88 行、5 个 network error-recorder、remove-tensor 与 TopK V2 方法。
+- `NativeBridgeApi.OwnerErrorRecorderSnapshotShared.cs`：31 行、0 个公开方法，只保存 1 个跨 owner copied snapshot mapper。
+- 布局门禁固定 12/5/3/5/0 公开方法数量、`IsNetworkSupported`/`AddTopKV2Layer` 的历史命名例外、Shared helper-only
+  约束和旧根文件禁止回流；8 处测试源码合同已按断言职责读取 owner 文件或显式聚合五份文件。
+- 五文件按原七段顺序重组后的 Git blob 为 `7df064d599c044c32479aeecfe29e75957388374`，与 HEAD 原文件完全一致。
+
+### 验证与边界
+
+- 首次定向集合 `70/71`：唯一失败是 Network 命名门禁未允许历史 `AddTopKV2Layer`；将其固定为唯一显式例外后，
+  同一集合最终 `71/71` 通过。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- ignored deferred candidate artifact 的复合 boundary path 已在本机展开为五条 owner/Shared 路径；evidence 现为
+  247 条引用、137 个唯一路径、0 缺失，且该文件未强制提交。
+- `git diff --check` 通过；Generated/native/manifest/ABI 未修改，未运行完整 ProjectQuality，也未运行依赖本机缺失
+  `pwsh` 的 B-tier 聚合测试。
+- partial 拆分不是 owner/lifetime、ABI/export、TensorRT runtime、Linux、package consumer、public package、
+  post-publish、Owner acceptance 或 release proof。
+- C 盘 Downloads 顶层当日本批相关文件、用户 Temp 顶层本批关键词与项目相关 build/test 进程残留均为 0。
+- 未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages 发布、Release/tag/issue 远程操作。

@@ -21,6 +21,7 @@ public sealed class ManagedSourceModuleLayoutTests
             "Builder",
             new[]
             {
+                "NativeBridgeApi.BuilderBoundaryControls.cs",
                 "NativeBridgeApi.BuilderConfigDiagnostics.cs",
                 "NativeBridgeApi.BuilderConfigRuntimeControls.cs",
                 "NativeBridgeApi.Trt11TimingCache.cs"
@@ -52,6 +53,7 @@ public sealed class ManagedSourceModuleLayoutTests
             new[]
             {
                 "NativeBridgeApi.Dims64EngineMetadata.cs",
+                "NativeBridgeApi.EngineBoundaryControls.cs",
                 "NativeBridgeApi.EngineDeploymentMetadata.cs",
                 "NativeBridgeApi.EngineInspectorDiagnostics.cs",
                 "NativeBridgeApi.EngineRuntimeControls.cs"
@@ -62,6 +64,7 @@ public sealed class ManagedSourceModuleLayoutTests
             new[]
             {
                 "NativeBridgeApi.Dims64ExecutionContext.cs",
+                "NativeBridgeApi.ExecutionContextBoundaryControls.cs",
                 "NativeBridgeApi.ExecutionContextCreation.cs",
                 "NativeBridgeApi.ExecutionContextDeploymentMetadata.cs",
                 "NativeBridgeApi.ExecutionContextDiagnostics.cs",
@@ -92,6 +95,7 @@ public sealed class ManagedSourceModuleLayoutTests
             {
                 "NativeBridgeApi.DeploymentNetworkLayers.cs",
                 "NativeBridgeApi.Dims64NetworkTensor.cs",
+                "NativeBridgeApi.NetworkBoundaryControls.cs",
                 "NativeBridgeApi.NetworkDiagnostics.cs",
                 "NativeBridgeApi.Trt11SafeNetworkV2.cs"
             }
@@ -528,6 +532,40 @@ public sealed class ManagedSourceModuleLayoutTests
         Assert.False(File.Exists(Path.Combine(
             interopDirectory,
             "NativeBridgeApi.SafeDeferredUplift.cs")));
+    }
+
+    [Fact]
+    public void TensorRtBoundaryControlsInteropIsSplitByOwner()
+    {
+        string interopDirectory = Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.TensorRtSharp",
+            "Internal",
+            "Interop");
+        string[] builderMethods = ReadInteropMethodNames(interopDirectory, "Builder", "NativeBridgeApi.BuilderBoundaryControls.cs");
+        string[] engineMethods = ReadInteropMethodNames(interopDirectory, "Engine", "NativeBridgeApi.EngineBoundaryControls.cs");
+        string[] executionMethods = ReadInteropMethodNames(interopDirectory, "Execution", "NativeBridgeApi.ExecutionContextBoundaryControls.cs");
+        string[] networkMethods = ReadInteropMethodNames(interopDirectory, "Network", "NativeBridgeApi.NetworkBoundaryControls.cs");
+        string sharedSource = File.ReadAllText(Path.Combine(interopDirectory, "NativeBridgeApi.OwnerErrorRecorderSnapshotShared.cs"));
+
+        Assert.Equal(12, builderMethods.Length);
+        Assert.All(builderMethods, method => Assert.True(
+            method.Contains("Builder", StringComparison.Ordinal) || method == "IsNetworkSupported",
+            $"Builder boundary interop contains a non-builder method: {method}"));
+        Assert.Equal(5, engineMethods.Length);
+        Assert.All(engineMethods, method => Assert.Contains("Engine", method, StringComparison.Ordinal));
+        Assert.Equal(3, executionMethods.Length);
+        Assert.All(executionMethods, method => Assert.Contains("ExecutionContext", method, StringComparison.Ordinal));
+        Assert.Equal(5, networkMethods.Length);
+        Assert.All(networkMethods, method => Assert.True(
+            method.Contains("Network", StringComparison.Ordinal) || method == "AddTopKV2Layer",
+            $"Network boundary interop contains a non-network method: {method}"));
+        Assert.Empty(EnumeratePublicStaticMethodNames(sharedSource));
+        Assert.Contains("private static TensorRtErrorRecorderSnapshot ReadOwnerErrorRecorderSnapshot(", sharedSource, StringComparison.Ordinal);
+        Assert.False(File.Exists(Path.Combine(
+            interopDirectory,
+            "NativeBridgeApi.Trt11BoundaryControls.cs")));
     }
 
     private static string[] EnumerateModuleFiles(string projectDirectory, string module)

@@ -58,19 +58,20 @@ TensorRT high-level wrappers are also being split by layer feature area:
 
 Hand-written TensorRT partial interop now starts following the same responsibility modules:
 
-- `Internal/Interop/Builder` contains timing-cache, builder-config diagnostics, and runtime controls; `ControlFlow` contains
-  loop/conditional operations.
+- `Internal/Interop/Builder` contains builder boundary controls, timing-cache, builder-config diagnostics, and runtime controls;
+  `ControlFlow` contains loop/conditional operations.
 - `Internal/Interop/Callbacks` contains allocator dry-run controls, callback interface/state copies, and logger/profiler/
   progress-monitor delegate signatures.
 - `Internal/Interop/Diagnostics` contains copied error-code metadata and TRT11 build probes used only by the environment probe;
   `Internal/Interop/Interfaces` contains owner-scoped versioned-interface metadata copies.
-- `Internal/Interop/Engine` contains copied engine/tensor/profile metadata, Dims64, engine-inspector diagnostics, and
-  weight-streaming/stat runtime controls; `Execution` contains execution-context/runtime-config creation, allocation-strategy,
-  deployment metadata, Dims64, diagnostics, and allocator/event presence controls.
+- `Internal/Interop/Engine` contains engine/inspector boundary controls, copied engine/tensor/profile metadata, Dims64,
+  engine-inspector diagnostics, and weight-streaming/stat runtime controls; `Execution` contains execution-context boundary
+  controls, runtime-config creation, allocation-strategy, deployment metadata, Dims64, diagnostics, and allocator/event
+  presence controls.
 - `Internal/Interop/Inference` contains synchronous execute/enqueue operations; `Weights` contains copied layer-weight metadata.
 - `Internal/Interop/Layers` contains quantization, attention, fill-int64, compatibility/deployment layer attributes, Dims64,
-  tensor metadata, transformer, and RNNv2 operations; `Network` contains deployment network-layer creation, tensor/network
-  Dims64, debug/shape diagnostics, refittable-weight markers, and safe network-v2 operations.
+  tensor metadata, transformer, and RNNv2 operations; `Network` contains network boundary controls, deployment network-layer
+  creation, tensor/network Dims64, debug/shape diagnostics, refittable-weight markers, and safe network-v2 operations.
 - `Internal/Interop/Parsing` contains the global ONNX parser version, legacy parser diagnostics, ONNX config/model-buffer/support,
   builder-config attachment, layer-output metadata, weight-descriptor parsing, and parser-refitter diagnostics.
 - `Internal/Interop/Plugins` contains plugin initialization, global/builder/runtime registry inventories, and copied V2/V3 layer
@@ -82,6 +83,8 @@ Hand-written TensorRT partial interop now starts following the same responsibili
 
 `NativeBridgeApi.GlobalProbeShared.cs` remains at the interop root only for the common unsupported-line exception helper used by
 the split global Runtime, Parsing, and Plugins partials; it contains no public method.
+`NativeBridgeApi.OwnerErrorRecorderSnapshotShared.cs` remains at the root only for the copied error-recorder snapshot mapper used
+by Builder, EngineInspector, Execution, and Network owners; it contains no public method.
 
 Version-prefixed files remain at the root only when their method set still crosses owners or features and requires a separate
 behavioral split; they are not classified by filename alone.
@@ -101,6 +104,8 @@ The former `GlobalRuntimePluginProbe` is split across `Runtime`, `Parsing`, `Plu
 recombination in original segment order must reproduce the pre-split Git blob.
 The former `SafeDeferredUplift` is split across `Plugins` and `Parsing`; recombination in original segment order must reproduce
 the pre-split Git blob. File placement does not change its deferred history or prove plugin/parser runtime and lifetime behavior.
+The former `Trt11BoundaryControls` is split across `Builder`, `Engine`, `Execution`, `Network`, and a helper-only root Shared
+partial; recombination in original segment order must reproduce the pre-split Git blob.
 
 Generated files remain under their `Generated` folders and should not be manually split. Generator output layout changes must happen in the generator itself and must pass the deterministic generator gate.
 
