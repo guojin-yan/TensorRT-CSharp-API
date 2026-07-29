@@ -49,7 +49,10 @@ public sealed class CudaConditionalGraphUpliftTests
     [Fact]
     public void ManagedSurfaceUsesOwnerWrappersAndDoesNotExposeNativePointers()
     {
-        string graph = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.cs");
+        string graph =
+            ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.cs") +
+            ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.ConditionalHandles.cs") +
+            ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.GraphComposition.cs");
         string handle = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphConditionalHandle.cs");
         string node = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphConditionalNode.cs");
         string types = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphConditionalTypes.cs");

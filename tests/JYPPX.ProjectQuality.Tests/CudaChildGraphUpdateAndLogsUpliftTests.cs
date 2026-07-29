@@ -44,7 +44,10 @@ public sealed class CudaChildGraphUpdateAndLogsUpliftTests
     [Fact]
     public void ManagedSurfaceUsesSnapshotsTypedCursorsAndManagedOwners()
     {
-        string graph = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.cs");
+        string graph =
+            ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.GraphComposition.cs") +
+            ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.NodeInspection.cs") +
+            ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.Instantiation.cs");
         string graphExec = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphExec.cs");
         string childSnapshot = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphChildSnapshot.cs");
         string updateSnapshot = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphExecUpdateSnapshot.cs");

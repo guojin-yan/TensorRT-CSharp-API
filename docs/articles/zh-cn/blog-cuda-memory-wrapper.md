@@ -84,9 +84,10 @@ Memory wrapper ready 不等于 allocator callback proof ready。`IGpuAllocator`�
 | `CudaManagedMemory` | unified | 是，但有迁移 | 原型、诊断、memory advice |
 | `CudaPitchedMemory` | device pitched | 否 | 2D/3D 行对齐数据 |
 
-对应实现位于 `src/JYPPX.CudaSharp/Memory/CudaMemory.cs`、`src/JYPPX.CudaSharp/Memory/CudaPinnedMemory.cs`、
-`src/JYPPX.CudaSharp/Memory/CudaManagedMemory.cs`、`src/JYPPX.CudaSharp/Memory/CudaPitchedMemory.cs`。所有类型都应作为
-owner 使用，异步操作完成前不能 dispose。
+owner 核心与同步/异步传输实现分别位于 `src/JYPPX.CudaSharp/Memory/CudaMemory.cs`、
+`src/JYPPX.CudaSharp/Memory/CudaMemory.HostTransfers.cs`、`src/JYPPX.CudaSharp/Memory/CudaMemory.DeviceTransfers.cs`；
+其余 owner 位于 `src/JYPPX.CudaSharp/Memory/CudaPinnedMemory.cs`、`src/JYPPX.CudaSharp/Memory/CudaManagedMemory.cs`、
+`src/JYPPX.CudaSharp/Memory/CudaPitchedMemory.cs`。所有类型都应作为 owner 使用，异步操作完成前不能 dispose。
 
 ```mermaid
 sequenceDiagram

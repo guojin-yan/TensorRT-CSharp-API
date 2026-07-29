@@ -58,7 +58,16 @@ public sealed class CudaGraphBorrowedHandleSafetyGateTests
     [Fact]
     public void ManagedGraphSurfaceDoesNotExposeBorrowedNativeHandlesPublicly()
     {
-        string graph = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.cs");
+        string graph =
+            ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.cs") +
+            ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.ConditionalHandles.cs") +
+            ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.GraphComposition.cs") +
+            ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.NodeCreation.cs") +
+            ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.TopologyDiagnostics.cs") +
+            ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.NodeInspection.cs") +
+            ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.NodeMutation.cs") +
+            ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.NodeRelations.cs") +
+            ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.Instantiation.cs");
         string graphExec = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphExec.cs");
         string graphNode = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphNode.cs");
         string publicSurface = graph + graphExec + graphNode;

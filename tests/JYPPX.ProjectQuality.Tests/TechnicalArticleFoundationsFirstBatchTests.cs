@@ -212,7 +212,8 @@ public sealed class TechnicalArticleFoundationsFirstBatchTests
 
         string cudaWrapper = ReadSource("docs", "articles", "zh-cn", "cuda-memory-wrapper.md");
         string cudaRange = ReadSource("docs", "articles", "zh-cn", "cuda-memory-range-apis.md");
-        string cudaMemory = ReadSource("src", "JYPPX.CudaSharp", "Memory", "CudaMemory.cs");
+        string cudaMemory = ReadSource(
+            "src", "JYPPX.CudaSharp", "Memory", "CudaMemory.RangeDiagnostics.cs");
         string cudaBatch = ReadSource("src", "JYPPX.CudaSharp", "Memory", "CudaManagedMemoryBatch.cs");
         string cudaSmoke = ReadSource("smoke", "CudaSmokeRunner", "Program.cs");
         foreach (string marker in new[] { "GetRangeAttribute", "GetRangeAttributes", "GetRangeAccessedByDevices", "GetRangeDiagnosticSummary" })

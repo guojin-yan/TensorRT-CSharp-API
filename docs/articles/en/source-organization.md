@@ -101,6 +101,16 @@ metadata, creator/field summaries, and inventory diagnostics live in six dedicat
 pre-split Git blobs `bcd1301777f81d9de32625b4c7be952de3126d92` and
 `c39d9ec853987f50f452b0dfebc2658120aa95d2`.
 
+The high-level CUDA graph and device-memory wrappers follow the same feature ownership rule.
+`Graphs/CudaGraph.cs` is reduced from 1,630 lines to a 206-line graph-handle, capture/conditional/allocation owner-lifetime,
+shared-validation, and disposal core. Conditional handles, graph composition, node creation, topology diagnostics, node
+inspection, node mutation, node relations, and instantiation live in eight feature partials.
+`Memory/CudaMemory.cs` is reduced from 951 lines to a 114-line allocation-handle, IPC-import metadata, shared range validation,
+and disposal core. IPC, range diagnostics, async allocation, fill, prefetch/advice, host transfers, device transfers, async free,
+and array conversion live in nine feature partials alongside the existing registered-host partial. The layout gate recomposes
+the pre-split Git blobs `5b7e06e4e59d6961c9c848f88d1f9ace6a9c0450` and
+`1d2085d8ffc527cfd280c2ba68836d14bb2c6334`.
+
 Hand-written TensorRT partial interop now starts following the same responsibility modules:
 
 - `Internal/Interop/Builder` contains builder creation/capabilities, serialized build outputs, builder boundary controls,

@@ -12,7 +12,11 @@ public sealed class CudaGraphMemcpy1DBoundaryTests
         string officialDeferredManifest = ReadSource("native", "manifests", "cuda", "cuda-twenty-third-batch-deferred-coverage.manifest.json");
         string header = ReadSource("native", "include", "jyppx", "cuda", "runtime.h");
         string nativeSource = ReadSource("native", "src", "cuda", "modules", "graph", "node_topology.inc");
-        string graph = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.cs");
+        string graph =
+            ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.cs") +
+            ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.NodeCreation.cs") +
+            ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.NodeInspection.cs") +
+            ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.NodeMutation.cs");
         string graphExec = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphExec.cs");
         string parameters = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphMemcpyNodeParameters.cs");
         string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "Graph", "NativeCudaApi.Graph.cs");

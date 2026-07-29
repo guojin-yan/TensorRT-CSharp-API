@@ -1208,7 +1208,7 @@
       "targetPath": "docs/articles/zh-cn/publishing/cuda-graph-event-node-borrowed-handle-安全边界.md",
       "sourceArtifacts": [
         "docs/articles/zh-cn/cuda-graph-borrowed-handle-safety-gate.md",
-        "src/JYPPX.CudaSharp/Graphs/CudaGraph.cs",
+        "src/JYPPX.CudaSharp/Graphs/CudaGraph.NodeMutation.cs",
         "smoke/CudaGraphSmokeRunner/Program.cs"
       ],
       "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",

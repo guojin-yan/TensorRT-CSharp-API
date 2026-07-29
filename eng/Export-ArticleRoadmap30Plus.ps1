@@ -138,7 +138,7 @@ $articles = Add-OrReplaceArticle $articles (New-RoadmapArticle `
     -VisualAssets @("Graph event node ownership 图") `
     -Status "ready" `
     -TargetPath "docs/articles/zh-cn/publishing/cuda-graph-event-node-borrowed-handle-安全边界.md" `
-    -SourceArtifacts @("docs/articles/zh-cn/cuda-graph-borrowed-handle-safety-gate.md", "src/JYPPX.CudaSharp/Graphs/CudaGraph.cs", "smoke/CudaGraphSmokeRunner/Program.cs"))
+    -SourceArtifacts @("docs/articles/zh-cn/cuda-graph-borrowed-handle-safety-gate.md", "src/JYPPX.CudaSharp/Graphs/CudaGraph.NodeMutation.cs", "smoke/CudaGraphSmokeRunner/Program.cs"))
 
 $articles = Add-OrReplaceArticle $articles (New-RoadmapArticle `
     -Id 39 `

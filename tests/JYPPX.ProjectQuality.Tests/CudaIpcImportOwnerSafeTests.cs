@@ -48,7 +48,9 @@ public sealed class CudaIpcImportOwnerSafeTests
     public void ManagedImportSurfaceIsPointerFreeAndCarriesExactSize()
     {
         string token = ReadSource("src", "JYPPX.CudaSharp", "IPC", "CudaIpcExportToken.cs");
-        string memory = ReadSource("src", "JYPPX.CudaSharp", "Memory", "CudaMemory.cs");
+        string memory =
+            ReadSource("src", "JYPPX.CudaSharp", "Memory", "CudaMemory.cs") +
+            ReadSource("src", "JYPPX.CudaSharp", "Memory", "CudaMemory.Ipc.cs");
         string cudaEvent = ReadSource("src", "JYPPX.CudaSharp", "Events", "CudaEvent.cs");
         string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "IPC", "NativeCudaApi.IpcImports.cs");
         string safeHandle = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Handles", "SafeCudaMemoryHandle.cs");

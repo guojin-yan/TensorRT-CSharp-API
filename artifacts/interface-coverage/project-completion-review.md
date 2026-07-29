@@ -6439,3 +6439,40 @@ InferenceBindings 的 geometry/buffer/address/execution 路径分离，同时保
   不计入 TensorRT 本批残留，也未再终止或删除其工具目录。
 - 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages
   发布、Release/tag/issue 远程操作。
+
+## 2026-07-29 CUDA Graph And Memory Managed Wrapper Split
+
+本阶段继续整理 `JYPPX.CudaSharp` 高层 owner wrapper，将 graph node/topology/diagnostics 与 device-memory
+allocation/transfer/range 操作从两个超大文件拆到可定位的 feature partial，同时保持 public API、SafeHandle、owner
+计数、registered-host 扩展与 Dispose 语义不变。
+
+### 实现与门禁
+
+- `CudaGraph.cs` 从 1,630 行降至 206 行，只保留 graph handle、Create、capture/conditional/allocation owner 计数、
+  跨 feature validation、Dispose 与 disposed-state；公开能力进入 ConditionalHandles、GraphComposition、NodeCreation、
+  TopologyDiagnostics、NodeInspection、NodeMutation、NodeRelations、Instantiation 八份 partial。
+- `CudaMemory.cs` 从 951 行降至 114 行，只保留 allocation handle、构造、size/IPC-import metadata、Dispose、range/advice
+  validation 与同步 allocation helper；公开能力进入 Ipc、RangeDiagnostics、AsyncAllocation、Fill、PrefetchAdvice、
+  HostTransfers、DeviceTransfers、AsyncFree、ArrayConversion 九份 partial，既有 RegisteredHost partial 保持不变。
+- `ManagedCudaGraphMemoryFeatureLayoutTests` 固定 17 份 partial 的精确公开方法/重载集合、两个 core 的 owner/helper
+  归属，并规范化重组两份拆分前源码。
+- 拆分前 Git blob 为 `5b7e06e4e59d6961c9c848f88d1f9ace6a9c0450`、
+  `1d2085d8ffc527cfd280c2ba68836d14bb2c6334`；normalized SHA-256 保持
+  `be9ccd67654b6797e7aeab63bf8baddf23a6cd8381eb03e4733f139dc76ab377` 与
+  `3036e5c57cac5684c816a317b905580b3aa6ed0960c6f7f460144ab882f24760`。
+- 19 份直接读取旧 core 的质量测试改读实际 feature 或明确的 core+feature 组合；memory 教程、Graph Event roadmap
+  source artifact 与双语 source-organization 已同步到真实 owner。
+
+### 验证与边界
+
+- 新布局/重组门禁：`21/21` 通过；相关 CUDA 能力与文章消费集合：`91/91` 通过；全部 managed 源码布局门禁
+  合并集合：`182/182` 通过。
+- `JYPPX.CudaSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`。
+- ignored deferred candidate evidence 保持 260 条引用、147 个唯一路径、0 缺失；JSON 可解析且未强制提交。
+- 本机仍缺少仓库认可的 `pwsh`，未运行相关 exporter/roadmap/B-tier 聚合测试；探索性 technical-article 集合中的
+  既有 `4001` marker 不一致也未伪装为本批通过。
+- Generated/native/manifest/ABI 改动为 0，`git diff --check` 通过；进程审计未清理或终止其他工作区进程。
+- source split 不构成 CUDA runtime correctness、real model、Linux、package consumer、public package、post-publish、
+  Owner acceptance 或 release proof。
+- 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行 NuGet/GitHub Packages
+  发布、Release/tag/issue 远程操作。

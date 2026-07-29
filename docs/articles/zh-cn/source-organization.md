@@ -88,6 +88,15 @@ RuntimeMetadata、GlobalPluginRegistry、BuilderPluginRegistry、DependencyProbe
 creator/field summary 与 inventory diagnostics 分别进入 6 份独立文件。布局门禁可重组拆分前 Git blob
 `bcd1301777f81d9de32625b4c7be952de3126d92` 与 `c39d9ec853987f50f452b0dfebc2658120aa95d2`。
 
+CUDA 高层 graph 与 device-memory wrapper 也按相同的 feature owner 规则归类。`Graphs/CudaGraph.cs` 从 1,630 行降为
+206 行 graph handle、capture/conditional/allocation owner 生命周期、共享校验与 Dispose core；conditional handle、
+graph composition、node creation、topology diagnostics、node inspection、node mutation、node relations 与 instantiation
+进入 8 份 feature partial。`Memory/CudaMemory.cs` 从 951 行降为 114 行 allocation handle、IPC import metadata、共享
+range 校验与 Dispose core；IPC、range diagnostics、async allocation、fill、prefetch/advice、host transfer、device
+transfer、async free 与 array conversion 进入 9 份 feature partial，并继续保留既有 registered-host partial。布局门禁
+可重组拆分前 Git blob `5b7e06e4e59d6961c9c848f88d1f9ace6a9c0450` 与
+`1d2085d8ffc527cfd280c2ba68836d14bb2c6334`。
+
 手写 TensorRT partial interop 也开始按相同职责模块归类：
 
 - `Internal/Interop/Builder`：builder creation/capabilities、serialized build outputs、builder boundary controls、

@@ -27,7 +27,8 @@ public sealed class CudaGraphDebugDotBoundaryTests
     [Fact]
     public void ManagedCudaGraphDebugDotWrapperUsesStringPathAndValueFlags()
     {
-        string graph = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.cs");
+        string graph = ReadSource(
+            "src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.TopologyDiagnostics.cs");
         string flags = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphDebugDotFlags.cs");
         string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "Graph", "NativeCudaApi.Graph.cs");
         string utf8 = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "Utf8Interop.cs");

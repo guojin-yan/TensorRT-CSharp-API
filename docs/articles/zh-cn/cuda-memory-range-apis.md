@@ -33,7 +33,9 @@ allocation 对 managed range 查询可能由 CUDA 返回错误；教程应使用
 
 ## 权威实现路径
 
-- Public allocation/control：`src/JYPPX.CudaSharp/Memory/CudaMemory.cs`
+- Allocation/lifetime core：`src/JYPPX.CudaSharp/Memory/CudaMemory.cs`
+- Range diagnostics：`src/JYPPX.CudaSharp/Memory/CudaMemory.RangeDiagnostics.cs`
+- Prefetch/advice：`src/JYPPX.CudaSharp/Memory/CudaMemory.PrefetchAdvice.cs`
 - Managed memory V2：`src/JYPPX.CudaSharp/Memory/CudaManagedMemory.cs`
 - Attribute/snapshot：`src/JYPPX.CudaSharp/Memory/CudaMemoryRangeAttribute.cs`
 - Strongly typed location：`src/JYPPX.CudaSharp/Memory/CudaMemoryLocation.cs`

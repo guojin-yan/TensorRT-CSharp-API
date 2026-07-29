@@ -39,8 +39,9 @@ flowchart TD
 
 ## CudaMemory 的 Owner 模型
 
-`CudaMemory` 实现位于 `src/JYPPX.CudaSharp/Memory/CudaMemory.cs`。构造函数验证 size 大于 0，通过 native bridge
-分配 device memory，并将内部 `SafeCudaMemoryHandle` 保存在对象内。public 属性只公开：
+`CudaMemory` 的 owner 生命周期核心位于 `src/JYPPX.CudaSharp/Memory/CudaMemory.cs`，fill、host/device transfer
+分别位于同目录的 `CudaMemory.Fill.cs`、`CudaMemory.HostTransfers.cs` 与 `CudaMemory.DeviceTransfers.cs`。构造函数验证
+size 大于 0，通过 native bridge 分配 device memory，并将内部 `SafeCudaMemoryHandle` 保存在对象内。public 属性只公开：
 
 - `SizeInBytes`
 - `IsIpcImported`

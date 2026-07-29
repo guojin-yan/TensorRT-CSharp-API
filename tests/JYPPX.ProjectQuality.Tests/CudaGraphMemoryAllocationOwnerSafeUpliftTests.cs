@@ -30,7 +30,9 @@ public sealed class CudaGraphMemoryAllocationOwnerSafeUpliftTests
     public void ManagedSurfaceIsTypedGraphBoundAndPointerFree()
     {
         string allocation = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphMemoryAllocation.cs");
-        string graph = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.cs");
+        string graph =
+            ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.cs") +
+            ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.NodeCreation.cs");
         string publicSurface = allocation + graph;
 
         Assert.Contains("public sealed class CudaGraphMemoryAllocation : IDisposable", allocation, StringComparison.Ordinal);

@@ -46,7 +46,9 @@ public sealed class CudaGraphEdgeDataBoundaryTests
     public void ManagedCudaGraphEdgeDataApiDoesNotExposeNativePointers()
     {
         string edgeData = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphEdgeData.cs");
-        string graph = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.cs");
+        string graph =
+            ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.TopologyDiagnostics.cs") +
+            ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraph.NodeRelations.cs");
         string graphEdge = ReadSource("src", "JYPPX.CudaSharp", "Graphs", "CudaGraphEdge.cs");
         string interop = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "Graph", "NativeCudaApi.Graph.cs");
         string structs = ReadSource("src", "JYPPX.CudaSharp", "Internal", "Interop", "NativeStructs.cs");
